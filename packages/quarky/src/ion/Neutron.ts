@@ -1,5 +1,5 @@
 import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
-import { shouldIonize } from "./AtomicIon";
+import { maybeIonize, shouldIonize } from "./AtomicIon";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { ionize } from "../ionized/ionize";
 import { Traceable } from "../debug/Traceable";
@@ -57,7 +57,7 @@ export function createAtomicNeutron(
       },
       set: value => {
          // __DEV__traceMethodCall(capsuleName, $ion, 'state')
-         return state = shouldIonize(value, ionized) ? ionize(value) : value
+         return state = maybeIonize(value, ionized)
       }
    })
 

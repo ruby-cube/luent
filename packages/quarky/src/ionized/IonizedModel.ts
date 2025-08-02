@@ -306,8 +306,6 @@ export function createIonizedModel(
       }
    }
 
-   console.log('model state', state.current)
-
    const proxyProto = Object.create(null) // state keys and ion access keys
    const initializedProperties = { [QUARK]: true } as AnyObject
 
@@ -320,7 +318,7 @@ export function createIonizedModel(
 
       initializedProperties[stateKey] = true;
 
-      console.log('stateKey', stateKey)
+      console.trace('stateKey', stateKey)
       console.log('ionKey', ionKey)
       console.log('yes object', target)
       console.log(Object.getPrototypeOf(target).constructor)
@@ -404,9 +402,11 @@ export function createIonizedModel(
                                  modelQuark,
                                  propertyDescriptor
                               )
-                              return pion()
+                              const value = pion()
+                              console.log('pion value', pion)
+                              return value;
                            }
-                           return _value
+                           return maybeIonize(_value)
                         },
                         set(value) {
                            _value = value;
@@ -455,6 +455,7 @@ export function createIonizedModel(
    const ionizedModel = new Proxy(proxyProto, {
 
       get(proxyProto, key, receiver) {
+         console.log('get', key)
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          if (key in initializedProperties) {
             return proxyProto[key]
@@ -481,7 +482,6 @@ export function createIonizedModel(
       },
 
       has(proxyProto, key) {
-         console.log('HAS proxy key', key)
          // getActiveTracker()?.track(asAtomicOp(ionizedModel, '[[in]]', key)) //TODO: trigger [[in]] when property is added or property is deleted
          //TODO: need to figure out how to deal with ion access keys
          return key in proxyProto || (key in initialTarget)
@@ -524,6 +524,10 @@ export function createIonizedModel(
          if (isTracking())
             trackParticle(asAtomicOp(ionizedModel, INTERNAL_OP, 'ownKeys')) //TODO: trigger when any new property is added or deleted
          return Reflect.ownKeys(state.getActiveTarget())
+      },
+
+      getPrototypeOf(target){
+         return Reflect.getPrototypeOf(target)
       },
 
       setPrototypeOf(target, proto) {

@@ -105,7 +105,7 @@ export function trackParticle(atom: Particle) {
  * @returns 
  */
 export function isTracking() {
-   console.trace('isTracking?', getActiveTracker())
+   console.log('isTracking?', getActiveTracker())
    return !!getActiveTracker()
 }
 

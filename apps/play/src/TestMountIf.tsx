@@ -5,6 +5,7 @@ import { AnyObject } from "@rue/types";
 
 
 export function MountIf() {
+
    const $count = ion(0, {
       increment() {
          $count.state = $count() + 1
@@ -52,7 +53,7 @@ export function MountIf() {
       }
    })
 
-   watch($color, ()=>{
+   watch($color, () => {
       debug.traceAsyncPath()
    })
 

@@ -1,6 +1,5 @@
 import { component } from "@rue/lumo"
 import { ion, ionicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
-import { hasQuark, QUARK } from "../../../packages/quarky/src/Quark"
 
 //TODO:
 // [x] private this access in methods and typing

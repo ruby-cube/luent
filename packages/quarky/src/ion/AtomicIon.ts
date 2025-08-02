@@ -46,8 +46,8 @@ export type $AtomicIonState =
  * */
 export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
-export function shouldIonize(newValue: unknown, ionized: boolean): newValue is AnyObject {
-   return isObject(newValue) && Boolean(ionized);
+export function maybeIonize(newValue: unknown, ionized: boolean) {
+   return isObject(newValue) && ionized ? ionize(newValue) : newValue;
 }
 
 export const IONIZED = true
@@ -179,9 +179,9 @@ export function createAtomicIon(
       if (__DEV__) emitSignal();
       trackParticle(quark)
       if (isLazyUpdate()) {
-         return state.pending;
+         return maybeIonize(state.pending, ionized);
       }
-      return state.current;
+      return maybeIonize(state.current, ionized);
    }
    //  as $AtomicIonState
 
@@ -282,7 +282,9 @@ export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
 }
 
 
+
 export function setState(this: AtomicIonQuark, value: unknown) {
+   console.log('setState', value)
    const state = this.state
 
    const oldState = isLazyUpdate() ? state.pending : state.current;
@@ -290,7 +292,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    if (value === oldState) {
       return value;
    }
-   const newState = shouldIonize(value, this.ionized) ? ionize(value) : value //TODO: this should be an assertion rather than auto-transform, right?
+   const newState = maybeIonize(value, this.ionized)
 
    const update = initUpdate()
 
