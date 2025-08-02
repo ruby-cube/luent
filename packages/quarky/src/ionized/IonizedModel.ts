@@ -481,6 +481,7 @@ export function createIonizedModel(
       },
 
       has(proxyProto, key) {
+         console.log('HAS proxy key', key)
          // getActiveTracker()?.track(asAtomicOp(ionizedModel, '[[in]]', key)) //TODO: trigger [[in]] when property is added or property is deleted
          //TODO: need to figure out how to deal with ion access keys
          return key in proxyProto || (key in initialTarget)
@@ -665,7 +666,7 @@ function initializePion(
    console.log('&&& initializePion')
    console.log('&&& key', key)
    console.log('&&& ionKey', ionKey)
-   const ion = createAtomicIon(new PionState(state, key, quark.clone), undefined, true)
+   const ion = createAtomicIon(new PionState(state, key, quark.clone), undefined, true, quark)
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
       configurable: propertyDescriptor.configurable,

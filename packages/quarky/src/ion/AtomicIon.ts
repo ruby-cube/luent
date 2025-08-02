@@ -11,9 +11,7 @@ import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
 import { $activeUpdate, getActiveUpdate, isLazyUpdate, Update, initUpdate } from "../effect-cycle/ReactivitySystem";
-import { IonizedModel } from "../ionized/IonizedModel";
 import { IonizedModelQuark } from "../ionized/IonizedModelQuark";
-import { stat } from "fs";
 import { trackParticle } from "../compound/Compound";
 
 export const NULL = Symbol('null')
@@ -30,6 +28,7 @@ export type $AtomicIonState =
          // pState: any | typeof NULL,
          ionized: boolean,
          asTraceable: Traceable,
+         modelQuark: IonizedModelQuark | undefined
          // asPion: undefined | {
          //    models: undefined | IonizedModelQuark[]
          //    addModel(quark: IonizedModelQuark): void
@@ -108,7 +107,7 @@ export class IonState implements State {
 export type ModelState = {
    pending: AnyObject | typeof NULL
    current: AnyObject
-   getActiveTarget: ()=>AnyObject
+   getActiveTarget: () => AnyObject
 }
 
 export class PionState implements State {
@@ -174,8 +173,9 @@ export function createAtomicIon(
    state: State,
    props?: Methods,
    ionized: boolean = false,
+   modelQuark?: IonizedModelQuark
 ) {
-   function $state ()  {
+   function $state() {
       if (__DEV__) emitSignal();
       trackParticle(quark)
       if (isLazyUpdate()) {
@@ -197,6 +197,7 @@ export function createAtomicIon(
       asTraceable: new Traceable(),
       trigger,
       asWatchedAtom: undefined,
+      modelQuark
 
       // asPion: isPion ? {
       //    models: undefined,
@@ -283,25 +284,25 @@ export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
 
 export function setState(this: AtomicIonQuark, value: unknown) {
    const state = this.state
-   
+
    const oldState = isLazyUpdate() ? state.pending : state.current;
-   
+
    if (value === oldState) {
       return value;
    }
    const newState = shouldIonize(value, this.ionized) ? ionize(value) : value //TODO: this should be an assertion rather than auto-transform, right?
-   
+
    const update = initUpdate()
-   
+
    if (update.lazy && state.canPend) {
       state.pending = newState
-      
+
       update.queue(() => {
          state.commitChange()
          state.recordChange(newState, oldState)
          this.pendingUpdate = null;
       })
-      
+
       if (this.pendingUpdate && this.pendingUpdate !== update) {
          this.pendingUpdate.cancel()
       }
@@ -328,6 +329,16 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    this.pendingUpdate = update
 
    this.trigger()
+
+   if (this.modelQuark) {
+      console.log('$$$ modelQuark!', this.modelQuark)
+      const quark = this.modelQuark
+      quark.pendingUpdate = update;
+      update.queue(() => {
+         quark.pendingUpdate = null;
+      })
+      quark.trigger();
+   }
 
    // if (quark.asPion?.models) {
    //    const models = quark.asPion.models;

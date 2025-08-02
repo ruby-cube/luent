@@ -1,5 +1,6 @@
 import { component } from "@rue/lumo"
-import { ion, ionicTask, ionize } from "@rue/quarky"
+import { ion, ionicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
+import { hasQuark, QUARK } from "../../../packages/quarky/src/Quark"
 
 //TODO:
 // [x] private this access in methods and typing
@@ -33,10 +34,14 @@ export function TestMutableCounter() {
       decrement() {
          this.value--
       },
-      logSuper(){
+      logSuper() {
          console.log('super')
          return 'olay!'
       }
+   })
+
+   watch(count, () => {
+      console.log('&&&& count model changed', count.value)
    })
 
 
@@ -51,9 +56,9 @@ export function TestMutableCounter() {
       count.value--
    }
 
-   ionicTask(()=>{
-      console.log('running ionic task', count.value)
-   })
+   // ionicTask(()=>{
+   //    console.log('running ionic task', count.value)
+   // })
 
    return component(
       <>
@@ -88,7 +93,7 @@ export function TestEncapsulatedCounter() {
          this.value--
          return 'for'
       },
-      logSuper(){
+      logSuper() {
          console.log('super')
          return 'olay!'
       }

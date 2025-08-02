@@ -297,6 +297,7 @@ export function storeSnapshot(modelQuark: IonizedModelQuark, clone?: AnyObject) 
 
 export function isIonizedModel(value: any): value is IonizedModel {
    if (!isObject(value)) return false;
+   console.trace('@@@', quarkOf(value) instanceof IonizedModelQuark, hasQuark(value))
    return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
 }
 

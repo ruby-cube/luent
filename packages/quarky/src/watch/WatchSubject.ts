@@ -122,6 +122,7 @@ class IonizedModelSubject extends Compound implements WatchSubject {
    constructor(
       private model: IonizedModel,
    ) {
+      console.log('watched model :)')
       super()
       const modelQuark = quarkOf(model)
       this.atoms.push(modelQuark)
@@ -134,6 +135,7 @@ class IonizedModelSubject extends Compound implements WatchSubject {
 
    linkEffect(effect: Effect) {
       this.forEachAtom(atom => {
+         console.log('watched model', atom)
          linkEffectToAtom(atom, effect)
       })
    }
