@@ -17,6 +17,7 @@ import { isInert } from "./inert";
 import { initUpdate, isLazyUpdate, updateStack } from "../effect-cycle/ReactivitySystem";
 import { AtomicIonQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
 import { isTracking, trackParticle } from "../compound/Compound";
+import { isIntegerKey } from "./IonizedArray";
 
 export function $atomicPion(
    model: IonizedModel,
@@ -326,15 +327,19 @@ export function createIonizedModel(
       do {
          const propertyDescriptor = Object.getOwnPropertyDescriptor(target, stateKey)
          if (propertyDescriptor) {
+            console.log('>>> propertyDescriptor')
             if (propertyDescriptor.get || propertyDescriptor.set) {
+               console.log('>>> getter')
                //TODO: check if there's a special config for tracking and triggering
                // else no special treatment
                Object.defineProperty(proxyProto, stateKey, propertyDescriptor)
                return true;
             }
             else {
+               console.log('>>> value')
                const value = propertyDescriptor.value
                if (isIon(value)) {
+                      console.log('>>> absorbed ion')
                   const $key = ionKey ?? toIonKey(key, initialTarget)
                   if ($key) initializedProperties[$key] = true;
                   initializeAbsorbedIon(
@@ -346,6 +351,7 @@ export function createIonizedModel(
                   return true;
                }
                else if (isFunction(value)) {
+                   console.log('>>> method')
                   if (op === SET) {
                      // TODO: if setting method before it's initialized
                      return propertyDescriptor.writable ?? false;
@@ -372,7 +378,9 @@ export function createIonizedModel(
                   return propertyDescriptor.writable ?? false
                }
                else if (!isProto && propertyDescriptor.writable) {
+                   console.log('>>> writable property')
                   if (isTracking()) {
+                     console.log('>>> tracking', key)
                      const $key = ionKey ?? toIonKey(key, initialTarget)
                      if ($key) initializedProperties[$key] = true;
                      initializePion(
@@ -386,12 +394,14 @@ export function createIonizedModel(
                      return true;
                   }
                   else {
+                      console.log('>>> no tracking', key)
                      let _value = propertyDescriptor.value;
                      Object.defineProperty(proxyProto, stateKey, {
                         enumerable: propertyDescriptor.enumerable,
                         configurable: propertyDescriptor.configurable,
                         get() {
                            if (isTracking()) {
+                               console.log('>>> tracking after initialized', key)
                               const $key = ionKey ?? toIonKey(key, initialTarget)
                               if ($key) initializedProperties[$key] = true;
                               const pion = initializePion(
@@ -406,6 +416,7 @@ export function createIonizedModel(
                               console.log('pion value', pion)
                               return value;
                            }
+                           console.log('>>> no tracking after initialized', key)
                            return maybeIonize(_value)
                         },
                         set(value) {
@@ -437,6 +448,7 @@ export function createIonizedModel(
                   }
                }
                else { // static property
+                  console.log(">>> static property")
                   Object.defineProperty(proxyProto, key, propertyDescriptor)
                   return false;
                }
@@ -455,7 +467,7 @@ export function createIonizedModel(
    const ionizedModel = new Proxy(proxyProto, {
 
       get(proxyProto, key, receiver) {
-         console.log('get', key)
+         if (typeof key === 'string' && isIntegerKey(key)) console.trace('get', key)
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          if (key in initializedProperties) {
             return proxyProto[key]
@@ -975,13 +987,13 @@ function useMutatingOp(
    config: TriggeringOpDef
 ) {
    const fnName = typeof opKey === 'string' ? 'ionic_' + opKey : 'ionic_mutating_op'
-   const { shouldTrigger, triggers: getTriggers, input = noTransform, output: transformOutput = noTransform, op = state.current[opKey] } = config
+   const { this: useModel, shouldTrigger, triggers: getTriggers, input = noTransform, output: transformOutput = noTransform, op = state.current[opKey] } = config
    const quark = quarkOf(model)
 
    const o = {
       [fnName](...args: any) {
          const _args = input(args)
-         const target = state.getActiveTarget()
+         const target = useModel ? model : state.getActiveTarget()
          const preop = config.preop?.(target, _args)
 
          const output = transformOutput(op.apply(target, _args), model); // perform mutation

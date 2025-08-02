@@ -198,7 +198,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 // console.log(obj)
 
-const app = createApp(MountIf)
+const app = createApp(List)
 
 app.mount('#app')
 

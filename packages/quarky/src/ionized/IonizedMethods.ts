@@ -1,12 +1,13 @@
 import { AnyObject } from "@rue/types"
 import { debug } from "@rue/utils"
-import { IonizedModel , $atomicPion} from "./IonizedModel"
+import { IonizedModel, $atomicPion } from "./IonizedModel"
 import { AtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp"
 import { quarkOf } from "../Quark"
 import { ionize, toRaw } from "./ionize"
 import { ionizedArray, ionizedIterable } from "./IonizedArray"
 import { IonizedModelQuark } from "./IonizedModelQuark"
 import { initUpdate, Update } from "../effect-cycle/ReactivitySystem"
+import { ModelState } from "../ion/AtomicIon"
 
 export type Constructor = new (...args: any[]) => any
 
@@ -24,6 +25,7 @@ export type TriggeringOpDef = {
    op?: Function,
    input?: (input: any[]) => any[],
    preop?: GetPreopData
+   this?: true
    shouldTrigger?: (preopData: any) => boolean
    triggers: (model: IonizedModel, args: any[], preopData: any) => (() => void)[]
    output?: (output: any, model: IonizedModel) => any,

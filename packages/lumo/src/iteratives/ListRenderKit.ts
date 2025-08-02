@@ -16,7 +16,7 @@ import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
 import { queueInternalRender, PRERENDER, watchForRender } from "../render-cycle";
-import { detachedCall } from "../../../quarky/src/compound/Compound";
+import { Compound, detachedCall, popTracker, pushTracker } from "../../../quarky/src/compound/Compound";
 
 
 type Index = number
@@ -191,6 +191,7 @@ export class ListRenderKit {
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
+
          const $index = ion(() => $list().indexOf(item))
          // const $index = ion(i)
          $currentIndex = $index;

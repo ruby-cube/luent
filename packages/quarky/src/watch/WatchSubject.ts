@@ -10,7 +10,7 @@ import { $currentOrNextCycle } from "../effect-cycle/ReactivitySystem";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { IonicCompound } from "../ionic/IonicCompound";
-import { Compound, detachedCall, isParticle, Particle, popTracker, pushTracker, } from "../compound/Compound";
+import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../compound/Compound";
 import { isAtomicIon } from "../ion/AtomicIon";
 
 export function isWatchSubject(value: AnyObject): value is WatchSubject {
@@ -142,22 +142,30 @@ class IonizedModelSubject extends Compound implements WatchSubject {
 
    trackAbsorbedIons() {
       pushTracker(this)
-      const target = this.model.rawTarget;
-      for (const key in target) {
-         const value = target[key]
-         if (!isIon(value)) continue;
+      trackPions(this.model)
+      popTracker()
+   }
+}
+
+function trackPions(model: IonizedModel) {
+   const compound = getActiveTracker()
+   if (!compound) throw new Error('must call trackPions within trackers')
+   const target = quarkOf(model).rawTarget;
+   for (const key in target) {
+      const value = target[key]
+      if (isIon(value)) {
          if (isWatchableEntity(value)) {
-            this.track(quarkOf(value))
+            compound.track(quarkOf(value))
          }
          else {
             //TODO: collect the absorbed ions of derivations and memoized ions
          }
       }
-      popTracker()
+      else {
+         model[key]; // initialize pion via access within tracking context
+      }
    }
 }
-
-
 
 
 
@@ -194,8 +202,11 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       // this.atoms = compound ? compound.atoms.length ? compound.atoms : (quark.inert = true, [])
       //    : !quark.inert && isWatchable(quark) ? [quark] : []
 
-      if (isWatchableEntity(value)) {
-         this.valueAtom = quarkOf(value) //TODO: need to add valueAtom to watchedAtoms
+      if (isIonizedModel(value)) {
+         this.valueAtom = quarkOf(value)
+         pushTracker(this)
+         trackPions(value)
+         popTracker()
       }
       return value;
    }

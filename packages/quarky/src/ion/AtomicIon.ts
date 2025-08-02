@@ -173,13 +173,13 @@ export function createAtomicIon(
    state: State,
    props?: Methods,
    ionized: boolean = false,
-   modelQuark?: IonizedModelQuark
+   modelQuark?: IonizedModelQuark //TODO: inertSchema
 ) {
    function $state() {
       if (__DEV__) emitSignal();
       trackParticle(quark)
       if (isLazyUpdate()) {
-         return maybeIonize(state.pending, ionized);
+         return maybeIonize(state.pending, ionized); //TODO: inertSchema
       }
       return maybeIonize(state.current, ionized);
    }

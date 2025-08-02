@@ -196,16 +196,16 @@ export function List(
    Array.from(toRaw(selected))
 
    function moveSelectedItems(index: number) {
-      update(() =>
+      // update(() =>
          moveUniqueItems(selected, list, index)
-      ,{lazy: 100})
+      // ,{lazy: 100})
    }
 
    function removeItem(index: number) {
-      update(()=>{
+      // update(()=>{
          selected.delete(list[index])
          list.remove(index);
-      }, {lazy: 100})
+      // }, {lazy: 100})
    }
 
    return component(
@@ -281,5 +281,6 @@ class Selected extends Set<any> {
 }
 
 function responsive(fn: ()=>unknown){
+   return fn()
    return update(fn, {lazy: 100})
 }

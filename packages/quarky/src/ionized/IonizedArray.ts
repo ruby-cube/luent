@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { $atomicOp } from "./AtomicOp";
-import { IonizedModel, maybeIonize, $atomicPion} from "./IonizedModel";
+import { IonizedModel, maybeIonize, $atomicPion } from "./IonizedModel";
 import { TriggeringOpDef, trigger, IonizedMethodsDef } from "./IonizedMethods";
 import { quarkOf } from "../Quark";
 import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'
@@ -211,32 +211,33 @@ type Ans = IsIonizable<Frogs>
 const arrayLengthMutatingOp: TriggeringOpDef = {
    preop: (target) => ({ target, prevLength: target.length }),
    shouldTrigger: ({ target, prevLength }) => target.length !== prevLength, // only for length mutating ops 
-   triggers: (model, args, { prevLength, target }) => (
-      triggerObservedIndices(model, prevLength, target.length), [
-         trigger(model),
-         trigger(model, '[[get]]', 'length'),
-      ])
+   // triggers: (model, args, { prevLength, target }) => (
+   //    triggerObservedIndices(model, prevLength, target.length), [
+   //       trigger(model),
+   //       trigger(model, '[[get]]', 'length'),
+   //    ])
+   triggers: (model, args, { prevLength, target }) => []
 }
 
 
 //TODO: these need to be specialized to the different methods...
-function triggerObservedIndices(model: IonizedModel, prevLength: number, newLength: number) {
-   const pions = quarkOf(model).pions
-   if (pions && prevLength < newLength) {
-      for (const [indexKey] of pions) {
-         if (!isIntegerKey(indexKey)) continue;
-         const index = parseInt(<string>indexKey)
-         if (index >= newLength) {
-            $atomicPion(model, indexKey)?.trigger()
-            $atomicOp(model, 'at', index)?.trigger()
-         }
-      }
-   }
-}
+// function triggerObservedIndices(model: IonizedModel, prevLength: number, newLength: number) {
+//    const pions = quarkOf(model).pions
+//    if (pions && prevLength < newLength) {
+//       for (const [indexKey] of pions) {
+//          if (!isIntegerKey(indexKey)) continue;
+//          const index = parseInt(<string>indexKey)
+//          if (index >= newLength) {
+//             $atomicPion(model, indexKey)?.trigger()
+//             $atomicOp(model, 'at', index)?.trigger()
+//          }
+//       }
+//    }
+// }
 
-function $indexIon(model: IonizedModel, index: PropertyKey){
-   return quarkOf(model).$[index]
-}
+// function $indexIon(model: IonizedModel, index: PropertyKey){
+//    return quarkOf(model).$[index]
+// }
 
 export const ionizedArray: IonizedMethodsDef = {
    at: {
@@ -296,65 +297,75 @@ export const ionizedArray: IonizedMethodsDef = {
    push: {
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: (model, _, { prevLength }) => [
-         trigger(model),
-         trigger(model, '[[get]]', 'length'),
-         trigger(model, '[[get]]', (prevLength).toString()),
-      ],
+      triggers: () => [],
+      this: true,
+      // triggers: (model, _, { prevLength }) => [
+      //    trigger(model),
+      //    trigger(model, '[[get]]', 'length'),
+      //    trigger(model, '[[get]]', (prevLength).toString()),
+      // ],
       revert(model, { preopData: { prevLength }, args }) {
          model.splice(prevLength, args.length)
       }
    },
 
    pop: {
+      this: true,
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: (model, _, { prevLength }) => [
-         trigger(model, '[[get]]', (prevLength - 1).toString()),
-         trigger(model, 'at', - 1),
-         trigger(model),
-         trigger(model, '[[get]]', 'length'),
-      ],
+      triggers: () => [],
+      // triggers: (model, _, { prevLength }) => [
+      //    trigger(model, '[[get]]', (prevLength - 1).toString()),
+      //    trigger(model, 'at', - 1),
+      //    trigger(model),
+      //    trigger(model, '[[get]]', 'length'),
+      // ],
       revert: (model, { output }) => {
          model.push(output)
       }
    },
 
    unshift: {
+      this: true,
       input: ([value]) => [toRaw(value)],
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: (model) => [
-         trigger(model),
-         trigger(model, '[[get]]', 'length'),
-         //TODO: trigger Observed Indices
-      ],
+      triggers: () => [],
+      // triggers: (model) => [
+      //    trigger(model),
+      //    trigger(model, '[[get]]', 'length'),
+      //    //TODO: trigger Observed Indices
+      // ],
       revert(model, { args }) {
          model.splice(0, args.length)
       }
    },
 
    shift: {
+      this: true,
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: (model) => [
-         trigger(model),
-         trigger(model, '[[get]]', 'length'),
-         //TODO: trigger Observed Indices
-      ],
+      triggers: () => [],
+      // triggers: (model) => [
+      //    trigger(model),
+      //    trigger(model, '[[get]]', 'length'),
+      //    //TODO: trigger Observed Indices
+      // ],
       revert(model, { output }) {
          model.unshift(output)
       }
    },
 
    splice: {
+      this: true,
       input: ([start, deleteCount, ...args]) => [start, deleteCount, ...deionizeArgs(args)],
       output: ionize,
-      triggers: (model) => [
-         trigger(model),
-         trigger(model, '[[get]]', 'length'),
-         //TODO: trigger Observed Indices
-      ],
+      triggers: () => [],
+      // triggers: (model) => [
+      //    trigger(model),
+      //    trigger(model, '[[get]]', 'length'),
+      //    //TODO: trigger Observed Indices
+      // ],
       revert(model, { output, args }) {
          const start = args[0];
          const numItems = args.length - 2;
@@ -363,71 +374,79 @@ export const ionizedArray: IonizedMethodsDef = {
    },
 
    copyWithin: {
+      this: true,
       preop: fillOrCopyWithinPreop,
-      triggers: triggerModel,
+      triggers: () => [],
+      // triggers: triggerModel,
       revert: fillOrCopyWithinRevert
    },
 
    fill: {
+      this: true,
       input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
       preop: fillOrCopyWithinPreop,
-      triggers: triggerModel,
+      // triggers: triggerModel,
+      triggers: () => [],
       revert: fillOrCopyWithinRevert
    },
 
    reverse: {
-      triggers: triggerModel,
+      this: true,
+      triggers: () => [],
+      // triggers: triggerModel,
       revert(model) {
          model.reverse()
       }
    },
 
    sort: {
+      this: true,
       preop(model) {
          return model.slice()
       },
-      triggers: triggerModel,
+      // triggers: triggerModel,
+      triggers: () => [],
       revert(model, { preopData: snapshot }) {
          for (let i = 0; i < model.length; i++) {
             model[i] = snapshot[i]
          }
       }
-   },
-   '[[set]]': {
-      triggers: (model, [key, value]) => [
-         trigger(model),
-         isIntegerKey(key) ? trigger(model, 'at', key) : trigger(model, '[[get]]', key)
-         //TODO: length should trigger observed indices
-
-         // afterSet(ionizedModel, quark, key, newValue, oldValue) {
-         //    if (isIntegerKey(key)) {
-         //       $atomicOp(ionizedModel, 'at', key)?.trigger()
-         //       return;
-         //    }
-
-         //    if (key !== 'length') {
-         //       return;
-         //    }
-
-         //    const pions = quark.pions
-         //    if (!pions) {
-         //       return;
-         //    }
-
-         //    for (const [indexKey] of pions) {
-         //       if (!isIntegerKey(indexKey)) continue;
-         //       const index = parseInt(<string>indexKey)
-         //       if (index >= newValue) {
-         //          $atomicPion(ionizedModel, indexKey)?.trigger()
-         //          $atomicOp(ionizedModel, 'at', index)?.trigger()
-         //       }
-         //       if (index > oldValue) {
-         //          $atomicOp(ionizedModel, 'at', index)?.trigger()
-         //       }
-         //    }
-         // }
-      ]
    }
+   // '[[set]]': {
+   //    triggers: (model, [key, value]) => [
+   //       trigger(model),
+   //       isIntegerKey(key) ? trigger(model, 'at', key) : trigger(model, '[[get]]', key)
+   //       //TODO: length should trigger observed indices
+
+   //       // afterSet(ionizedModel, quark, key, newValue, oldValue) {
+   //       //    if (isIntegerKey(key)) {
+   //       //       $atomicOp(ionizedModel, 'at', key)?.trigger()
+   //       //       return;
+   //       //    }
+
+   //       //    if (key !== 'length') {
+   //       //       return;
+   //       //    }
+
+   //       //    const pions = quark.pions
+   //       //    if (!pions) {
+   //       //       return;
+   //       //    }
+
+   //       //    for (const [indexKey] of pions) {
+   //       //       if (!isIntegerKey(indexKey)) continue;
+   //       //       const index = parseInt(<string>indexKey)
+   //       //       if (index >= newValue) {
+   //       //          $atomicPion(ionizedModel, indexKey)?.trigger()
+   //       //          $atomicOp(ionizedModel, 'at', index)?.trigger()
+   //       //       }
+   //       //       if (index > oldValue) {
+   //       //          $atomicOp(ionizedModel, 'at', index)?.trigger()
+   //       //       }
+   //       //    }
+   //       // }
+   //    ]
+   // }
 }
 
 function triggerModel(model: IonizedModel) { return [trigger(model)] }
