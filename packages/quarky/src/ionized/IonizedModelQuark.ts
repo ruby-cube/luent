@@ -1,17 +1,17 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { IonizedModel } from "./IonizedModel"
-import { trigger, WatchedAtom } from "../watch/WatchedAtom"
-import { Quark, QuarkOf } from "../Quark"
+import { isWatchableEntity, trigger, WatchedAtom } from "../watch/WatchedAtom"
+import { Quark, quarkOf, QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
-import { isIonizedModel, isIonKey, toRaw } from "./ionize"
 import { Update } from "../effect-cycle/ReactivitySystem"
 import { Ion, isIon } from "../ion/Ion"
 import { ModelState, NULL } from "../ion/AtomicIon"
+import { Compound, popTracker, pushTracker } from "../compound/Compound"
 
 
 

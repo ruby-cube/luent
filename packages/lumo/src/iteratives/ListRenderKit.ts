@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, toValue, untrackedCall, Ion, detachedCall, toIon, queueTask } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __DEV__checkIfTracked, toValue, Ion, toIon, queueTask } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -16,6 +16,7 @@ import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
 import { queueInternalRender, PRERENDER, watchForRender } from "../render-cycle";
+import { detachedCall } from "../../../quarky/src/compound/Compound";
 
 
 type Index = number
@@ -115,7 +116,7 @@ export class ListRenderKit {
    ) {
       const data = this.data
       const getUID = this.getUID
-      if (__DEV__) __devCheckIfTracked()
+      if (__DEV__) __DEV__checkIfTracked()
 
       // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 

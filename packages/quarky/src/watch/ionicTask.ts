@@ -1,7 +1,7 @@
 import { SustainedListenerOptions } from "@rue/flask";
 import { EffectOptions, setUpWatcher, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
-import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
+import { createIonicEffect, IonicTask } from "../ionic/x_IonicEffect";
 import { IonicTaskSubject } from "./WatchSubject";
 import { Phase } from "../effect-cycle/EffectCycle";
 
@@ -14,13 +14,24 @@ type IonicTaskOptions = {
 export function ionicTask(task: IonicTask, options?: IonicTaskOptions) {
    const opts = {
       ...options ?? {},
-      eager: true
+      eager: false // false because we manually call it via tracked call
    } as EffectOptions
    const retrack = opts.retrack === undefined ? true : opts.retrack
 
-   const wrappedEffect = createIonicEffect(task, retrack)
+   let initial = true;
+
+   function wrappedEffect() {
+      try {
+         task(initial)
+      }
+      finally {
+         initial = false;
+      }
+   }
 
    const watchSubject = new IonicTaskSubject(wrappedEffect, retrack)
+
+   watchSubject.trackedCall()
 
    return setUpWatcher(
       watchSubject,

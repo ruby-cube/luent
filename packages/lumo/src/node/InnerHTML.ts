@@ -1,4 +1,4 @@
-import { isIon, __devCheckIfTracked, watch, Ion, toValue } from "@rue/quarky";
+import { isIon, __DEV__checkIfTracked, watch, Ion, toValue } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 import { JSXNode } from "./makeNode";
 import { MaybeIon } from "../component/Input";

@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import { ion, ionize } from "@rue/quarky"
+import { ion, ionicTask, ionize } from "@rue/quarky"
 
 //TODO:
 // [x] private this access in methods and typing
@@ -42,7 +42,7 @@ export function TestMutableCounter() {
 
    console.log('is it in count', 'increment' in count)
 
-   // const $doubleCount = ion(() => count.value * 2)
+   const $doubleCount = ion(() => count.value * 2)
 
    function increment() {
       count.value++
@@ -51,11 +51,15 @@ export function TestMutableCounter() {
       count.value--
    }
 
+   ionicTask(()=>{
+      console.log('running ionic task', count.value)
+   })
+
    return component(
       <>
          <h3>encapsulated model with methods</h3>
-         <div>{function $drv999(){console.log('derv'); return count.value}}</div>
-         {/* <div>{$doubleCount}</div> */}
+         <div>{(count.value)}</div>
+         <div>{$doubleCount}</div>
          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
          <p>these should work</p>
          <button on:click={count.increment}>increment</button>

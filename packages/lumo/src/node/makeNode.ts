@@ -1,4 +1,4 @@
-import { __devCheckIfTracked, __devCheckIfNotTracked, Ion, isIon } from "../../../quarky/src";
+import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon } from "../../../quarky/src";
 import { Component, ComponentSetup, DOMNode } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, makeComponent } from "../component/makeComponent";

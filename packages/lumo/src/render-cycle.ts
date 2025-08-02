@@ -1,8 +1,7 @@
-import { Flask, getActiveFlask, getFlask } from "@rue/flask"
+import { Flask, getFlask } from "@rue/flask"
 import {  watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $activeUpdate,  } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
-import { asWatchSubject, IonSubject, isQuarkyIon } from "../../quarky/src/watch/WatchSubject"
-import { createWatchedDerivation } from "../../quarky/src/ionic/WatchedDerivation"
+import { IonSubject } from "../../quarky/src/watch/WatchSubject"
 
 export const {
    SYNC,
@@ -159,7 +158,7 @@ export const $postrender = createAwaitableHook(atPostrender)
  * @returns 
  */
 export function watchForRender(ion: Ion, render: (previous: unknown) => void, flask: Flask, eager: boolean = false) {
-   const subject = new IonSubject(isQuarkyIon(ion) ? ion : createWatchedDerivation(ion, true))
+   const subject = new IonSubject(ion)
 
    let prevState = subject.trackedCall()
 

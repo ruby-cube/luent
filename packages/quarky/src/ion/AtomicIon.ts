@@ -10,11 +10,11 @@ import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
-import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
 import { $activeUpdate, getActiveUpdate, isLazyUpdate, Update, initUpdate } from "../effect-cycle/ReactivitySystem";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { IonizedModelQuark } from "../ionized/IonizedModelQuark";
 import { stat } from "fs";
+import { trackParticle } from "../compound/Compound";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -177,7 +177,7 @@ export function createAtomicIon(
 ) {
    function $state ()  {
       if (__DEV__) emitSignal();
-      trackAtom(quark)
+      trackParticle(quark)
       if (isLazyUpdate()) {
          return state.pending;
       }

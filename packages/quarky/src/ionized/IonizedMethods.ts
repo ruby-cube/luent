@@ -1,14 +1,12 @@
 import { AnyObject } from "@rue/types"
 import { debug } from "@rue/utils"
-import { IonizedModel } from "./IonizedModel"
-import { $atomicPion } from "./Pion"
+import { IonizedModel , $atomicPion} from "./IonizedModel"
 import { AtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp"
 import { quarkOf } from "../Quark"
 import { ionize, toRaw } from "./ionize"
 import { ionizedArray, ionizedIterable } from "./IonizedArray"
 import { IonizedModelQuark } from "./IonizedModelQuark"
 import { initUpdate, Update } from "../effect-cycle/ReactivitySystem"
-import { AtomicPionQuark } from "../ion/x_AtomicPion"
 
 export type Constructor = new (...args: any[]) => any
 

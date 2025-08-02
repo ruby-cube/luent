@@ -4,7 +4,7 @@ import {  isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { quarkOf, hasQuark, QUARK, Quark } from "../Quark";
-import { detachedCall, untrackedCall } from "../ionic/IonicCompound";
+import { detachedCall } from "../compound/Compound";
 import { Compound, CompoundMorph, isCompound } from "../compound/Compound";
 import { isIonizedModel } from "../ionized/ionize";
 import { IonizedModel } from "../ionized/IonizedModel";

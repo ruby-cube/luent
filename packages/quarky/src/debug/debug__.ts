@@ -1,6 +1,5 @@
-import { AtomicIon, ionize, isAtomicIon, SYNC, watch } from "@rue/quarky"
+import { ionize, isAtomicIon, MutableIon, SYNC, watch } from "@rue/quarky"
 import { AtomicOp } from "../ionized/AtomicOp";
-import { isAtomicPionQuark } from "../ion/x_AtomicPion";
 import { quarkOf, hasQuark } from "../Quark";
 import { getTrace } from "../../../flask/debug";
 
@@ -13,7 +12,7 @@ import { getTrace } from "../../../flask/debug";
 type MultiWatchSubjectValues<T> = { [K in keyof T]: T[K] extends (...args: any[]) => infer R ? R : T[K] }
 
 
-type Atom = (AtomicIon | AtomicOp | PropIon) & { asTraceableAtom?: TraceableAtom }
+type Atom = (MutableIon<unknown | AtomicOp | PropIon) & { asTraceableAtom?: TraceableAtom }
 
 class TraceableAtom {
    triggers: undefined | TriggerEvent[]

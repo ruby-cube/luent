@@ -7,7 +7,7 @@
 
 
 import { component } from "@rue/lumo"
-import { ion, ionize } from "@rue/quarky"
+import { ion, ionicTask, ionize } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
@@ -34,7 +34,7 @@ export function CounterApp() {
 
 
 function TestIonize() {
-   const obj = ionize({message:'hi'})
+   const obj = ionize({ message: 'hi' })
 
    function changeMessage() {
       console.log('message', obj.message)
@@ -77,7 +77,7 @@ export function TestCount() {
    const $active = ion(true)
 
    const $doubleCount = () => {
-      if ($active()){
+      if ($active()) {
          return $count() * 2
       }
       return 'sorry'
@@ -91,6 +91,10 @@ export function TestCount() {
       $count.state--
    }
 
+   ionicTask(() => {
+      console.log('running ionic task', $count())
+   })
+
    return component(
       <>
          <h3>mutable ion</h3>
@@ -101,7 +105,7 @@ export function TestCount() {
          <p>these should work</p>
          <button on:click={increment}>increment</button>
          <button on:click={decrement}>decrement</button>
-         <button on:click={e=>$active.state = !$active()}>toggle active</button>
+         <button on:click={e => $active.state = !$active()}>toggle active</button>
       </>
    )
 }
@@ -398,7 +402,7 @@ export function TestCounterModel() {
       }
    })
 
-   const $doubleCount = ion(()=>counter.count * 2)
+   const $doubleCount = ion(() => counter.count * 2)
 
    // watch(counter, ({ state }) => {
    //    console.log('changed', state)

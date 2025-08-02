@@ -1,8 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel, toRaw, Ionized, ionize, IonizeBy, MaybeIonized, ToRaw, } from "./ionize";
+import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { $atomicOp } from "./AtomicOp";
-import { IonizedModel, maybeIonize, } from "./IonizedModel";
-import { $atomicPion } from "./Pion";
+import { IonizedModel, maybeIonize, $atomicPion} from "./IonizedModel";
 import { TriggeringOpDef, trigger, IonizedMethodsDef } from "./IonizedMethods";
 import { quarkOf } from "../Quark";
 import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'

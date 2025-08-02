@@ -1,7 +1,6 @@
 //@ts-nocheck
 import { component, NodeRef } from "@rue/lumo"
 import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@rue/quarky"
-import { asPion } from "../../../packages/quarky/src/ion/x_AtomicPion"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/X_$setup"
 import { AnyObject } from "@rue/types"
 import { toIonicProps } from "../../../packages/lumo/src/component/X_normalizeProps"

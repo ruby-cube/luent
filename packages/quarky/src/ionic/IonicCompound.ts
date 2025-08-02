@@ -1,146 +1,29 @@
-import { isFunction } from "@rue/utils";
-import { Compound, CompoundMorph } from "../compound/Compound";
-import { NULL } from "../ion/AtomicIon";
-import { isIonizedModel } from "../ionized/ionize";
-import { quarkOf } from "../Quark";
-import { Watchable } from "../watch/WatchedAtom";
-import { ManagedDerivation } from "./DerivationIon";
+import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "../compound/Compound";
 
-const trackerStack: (IonicCompound | null)[] = []
-
-function pushTracker(tracker: IonicCompound | null) {
-   trackerStack.push(tracker)
-}
-
-function popTracker() {
-   return trackerStack.pop()
-}
-
-let pauseTracking = false
-
-export function getActiveTracker() {
-   if (pauseTracking) return undefined;
-   return trackerStack.at(-1)
-}
-
-// export function getActiveTracker() {
-//    if (pauseTracking) return undefined;
-//    return {
-//       track(atom: unknown){
-//          for (const tracker of trackerStack){
-
-//          }
-//       }
-//    }
-// }
-
-export function getActiveTrackers() {
-   if (pauseTracking) return undefined;
-   return trackerStack
-}
-
-// export function track(atom: any){
-
-// }
-
-
-export function isTrackedContext() {
-   return Boolean(getActiveTracker())
-}
-
-/**
- * Pauses tracking for all of a function's call, even if there are nested memoized ion trackers in the call.
- * Contrasts with detachedCall, which still allows nested trackers to track.
- * @param fn 
- * @returns 
- */
-export function untrackedCall(fn: Function) {
-   pauseTracking = true;
-   try {
-      return fn();
-   }
-   finally {
-      pauseTracking = false;
-   }
-}
-
-/**
- * For memoized ions, which are both particles and compounds to be called within watch and not be tracked by the outer tracking context.
- * @param fn 
- * @returns 
- */
-export function detachedCall<T extends ((...args: any[]) => any)>(fn: T): ReturnType<T> {
-   pushTracker(null)
-   try {
-      return fn();
-   }
-   finally {
-      popTracker()
-   }
-}
-
-export function trackAtom(atom: Watchable) {
-   let i = trackerStack.length;
-   while (i--) {
-      const compound = trackerStack[i]
-      console.log('trackAtom', compound)
-      if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
-      compound.track(atom)
-   }
-}
-
-/**
- * Use trackMemoized to collect/forward the atoms of a memoized compound if the memoized compound is not stale
- * If stale, simply retrack and track atoms as normal
- * @param derivation 
- */
-export function trackMemoized(ion: ManagedDerivation) {
-   let i = trackerStack.length;
-   while (i--) {
-      const compound = trackerStack[i]
-      if (!compound) return; // due to detached call (for nested ionicTasks)
-      const atoms = ion.asCompound?.atoms
-      if (atoms)
-         for (const atom of atoms) {
-            compound.track(atom)
-         }
-   }
-}
 
 
 export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
-   entity: any;
-   pState: unknown = NULL
-   // stale: boolean = false;
 
-   // atoms: Set<Watchable> = new Set()
-
-   // track(atom: Watchable) {
-   //    this.atoms.add(atom)
-   //    return atom
-   // }
-
-   trackedCall(fn: () => any) {
-      // this.untrackAtoms()
+   trackCall(fn: () => any) {
       pushTracker(this);
       try {
          const value = fn();
-         if (isIonizedModel(value)) trackAtom(quarkOf(value))
+         // if (isIonizedModel(value)) trackParticle(quarkOf(value)) //TODO: not sure if I need this here or only in watched subject
          return value;
       }
       finally {
          popTracker();
-         if (__DEV__ && this.atoms.size === 0) {
-            // console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
+         if (__DEV__ && this.atoms.length === 0) {
+            console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
          }
       }
    }
 
-   retrackedCall(fn: () => any) {
+   retrackCall(fn: () => any) {
       this.untrackAtoms()
-      return this.trackedCall(fn)
+      return this.trackCall(fn)
    }
 
    // untrackAtoms() {
@@ -148,11 +31,11 @@ export class IonicCompound extends Compound {
    // }
 }
 
-export function __devCheckIfTracked() {
-   if (isTrackedContext()) console.warn(`RESEARCH: This is currently a tracked context. May need to use untrackedCall`)
+export function __DEV__checkIfTracked() {
+   if (getActiveTracker()) console.warn(`RESEARCH: This is currently a tracked context. May need to use untrackedCall`)
 }
-export function __devCheckIfNotTracked() {
-   if (!isTrackedContext()) console.warn(`RESEARCH: This is currently not a tracked context. untrackedCall may be extraneous`)
+export function __DEV__checkIfNotTracked() {
+   if (!getActiveTracker()) console.warn(`RESEARCH: This is currently not a tracked context. untrackedCall may be extraneous`)
 }
 
 

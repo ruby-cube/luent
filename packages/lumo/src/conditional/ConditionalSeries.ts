@@ -1,4 +1,4 @@
-import { __devCheckIfTracked, Ion } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { MaybeIon } from "../component/Input";
 
@@ -47,8 +47,8 @@ export class ConditionalSeries {
    }
 
    evaluateConditions() {
-      // if (__DEV__) __devCheckIfNotTracked()
-      if (__DEV__) __devCheckIfTracked()
+      // if (__DEV__) __DEV__checkIfNotTracked()
+      if (__DEV__) __DEV__checkIfTracked()
       const conditions = this.conditions
       for (let i = 0; i < conditions.length; i++) {
          const $condition = conditions[i]

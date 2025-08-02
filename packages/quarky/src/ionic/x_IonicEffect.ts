@@ -15,9 +15,10 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
    let fn = initialize;
    let initial = true;
    let state: unknown;
+
    function effect() {
       try {
-         return state = fn(initial)
+         fn(initial)
       }
       finally {
          initial = false;

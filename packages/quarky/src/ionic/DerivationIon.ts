@@ -1,4 +1,4 @@
-import { getActiveTracker, IonicCompound, IonicCompoundMorph, trackMemoized } from "./IonicCompound";
+import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, QuarkOf, Quark } from "../Quark";
@@ -7,11 +7,11 @@ import { emitSignal } from "../debug/debug";
 import { asWatchedAtom } from "../watch/WatchedAtom";
 import { Ion } from "../ion/Ion";
 import { Traceable } from "../debug/Traceable";
-import { debug } from "@rue/utils";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { NULL } from "../ion/AtomicIon";
 import { isLazyUpdate, initUpdate, $activeUpdate } from "../effect-cycle/ReactivitySystem";
+import {  trackParticle } from "../compound/Compound";
 
 
 
@@ -36,13 +36,31 @@ export type $DerivedState = Ion & Capsule & {
       staleMarker: Effect | undefined
    }
    & Quark<typeof DERIVATION_ION, $DerivedState>
-   & IonicCompoundMorph
+}
+
+class ManagedDerivation extends IonicCompound {
+   inert: boolean = false
+   state: unknown | undefined
+   stale: boolean = false
+   pStale: boolean | undefined
+   pState: unknown | typeof NULL = NULL
+   staleMarker: Effect | undefined
+   quarkType = DERIVATION_ION
+   asTraceable = new Traceable()
+
+   constructor(
+      public derivation: (prev?: unknown) => unknown,
+      public entity: $DerivedState
+
+   ) {
+      super()
+   }
 }
 
 /** 
  * INTERNAL 
  * */
-export type ManagedDerivation = QuarkOf<$DerivedState>
+// export type ManagedDerivation = QuarkOf<$DerivedState>
 
 export const DERIVATION_ION = Symbol('Derivation Ion')
 
@@ -59,13 +77,13 @@ export function createManagedDerivation(
    const creationFlask = getActiveFlask()
 
    let fn = initialize
-   const $derived = () => fn()
+   const $derived = (() => fn()) as $DerivedState
 
    function initialize() {
-      const compound = ion.asCompound;
-      const value = compound.trackedCall(derivation)
+      const compound = ion
+      const value = compound.trackCall(derivation)
       const atoms = compound.atoms
-      if (atoms.size === 0) {
+      if (atoms.length === 0) {
          fn = getState
          ion.inert = true;
          // no reactivity, no memoization
@@ -121,7 +139,7 @@ export function createManagedDerivation(
       //TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
       const stale = isLazyUpdate() ? ion.pStale : ion.stale;
-      if (!stale || !retrack) trackMemoized(ion)
+      if (!stale || !retrack) trackParticle(ion)
 
       const prevState = isLazyUpdate() && ion.pState !== NULL ? ion.pState : ion.state
 
@@ -163,21 +181,9 @@ export function createManagedDerivation(
       return ion.state = derivation(ion.state)
    }
 
-   const ion: ManagedDerivation = quark ?? {
-      inert: false,
-      stale: false,
-      state: undefined,
-      pState: NULL,
-      pStale: undefined,
-      derivation,
-      staleMarker: undefined,
-      entity: $derived,
-      quarkType: DERIVATION_ION,
-      asCompound: new IonicCompound(),
-      asTraceable: new Traceable()
-   }
+   const ion: ManagedDerivation = quark ?? new ManagedDerivation(derivation, $derived)
 
-   ion.asCompound.entity = ion;
+   // ion.asCompound.entity = ion;
 
    $derived[QUARK] = ion
    // $derived.labelName = undefined
@@ -193,18 +199,17 @@ export function createManagedDerivation(
 
 function retrackedCall(ion: ManagedDerivation) {
    const { derivation, staleMarker } = ion
-   const compound = ion.asCompound
+   const compound = ion
    staleMarker!.unlink()
-   const value = compound.retrackedCall(() => derivation(ion.state))
+   const value = compound.retrackCall(() => derivation(ion.state))
    linkAtoms(compound, staleMarker!)
    return value;
 }
 
 function linkAtoms(compound: IonicCompound, effect: Effect) {
-   const atoms = compound.atoms;
-   for (const atom of atoms) {
+   compound.forEachAtom(atom => {
       effect.link(asWatchedAtom(atom))
-   }
+   })
 }
 
 // function unlinkAtoms(compound: IonicCompound, effect: Effect) {

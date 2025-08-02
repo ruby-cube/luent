@@ -1,4 +1,4 @@
-import { isIon, __devCheckIfTracked, watch, Ion, toValue, $activeUpdate } from "@rue/quarky";
+import { isIon, __DEV__checkIfTracked, watch, Ion, toValue, $activeUpdate } from "@rue/quarky";
 import { INTERNAL_RENDER, PRERENDER, queueInternalRender, watchForRender } from "../render-cycle";
 import { getActiveFlask, getFlask } from "@rue/flask";
 
@@ -28,7 +28,7 @@ function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
 
 export function createTextNode(value: Ion | any) {
    //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
-   if (__DEV__) __devCheckIfTracked()
+   if (__DEV__) __DEV__checkIfTracked()
    const text = toString(toValue(value))
    return document.createTextNode(text);
 }
