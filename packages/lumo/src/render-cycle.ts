@@ -1,7 +1,8 @@
 import { Flask, getFlask } from "@rue/flask"
-import {  watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $activeUpdate,  } from "@rue/quarky"
+import { watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, $currentOrNextCycle, Phase, scheduleEagerEffect, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 import { IonSubject } from "../../quarky/src/watch/WatchSubject"
+import { dir } from "console"
 
 export const {
    SYNC,
@@ -164,22 +165,48 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
 
    if (subject.inert) return;
 
+   let dirty = false;
+   let paused = false;
+
    const effect = new Effect(() => {
+      if (paused) {
+         dirty = true;
+         return;
+      }
+      dirty = false;
+      _render()
+   }, PRERENDER)
+
+   function _render() {
       const newState = subject.trackedCall()
       render(prevState)
       prevState = newState;
-   }, PRERENDER)
+   }
 
-   subject.linkEffect(effect, eager)
+   if (eager) {
+      scheduleEagerEffect(_render, PRERENDER)
+   }
 
-   flask.onDiscard(/* listener.stop */() => effect.destroy());
-   flask.onDemount(/* listener.pause */() => effect.unlink());
-   flask.onRemount(/* listener.resume */() => subject.linkEffect(effect, true));
+   subject.linkEffect(effect)
+
+   flask.onDiscard(/* listener.stop */() => {
+      effect.destroy()
+   });
+   flask.onDemount(/* listener.pause */() => {
+      paused = true;
+      effect.unlink()
+   });
+   flask.onRemount(/* listener.resume */() => {
+      paused = false;
+      if (dirty) {
+         effect.run?.()
+      }
+      subject.linkEffect(effect)
+   });
 }
 
 
 export const RUN_EAGERLY = true;
-
 
 
 

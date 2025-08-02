@@ -1,9 +1,10 @@
-import { SustainedListenerOptions } from "@rue/flask";
-import { EffectOptions, setUpWatcher, WatchDebugOptions } from "./watch";
+import { $listen, SustainedListenerOptions } from "@rue/flask";
+import { delayedTask, EffectOptions, getPhase, scheduleEagerEffect, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
-import { createIonicEffect, IonicTask } from "../ionic/x_IonicEffect";
+import {  IonicTask } from "../ionic/x_IonicEffect";
 import { IonicTaskSubject } from "./WatchSubject";
-import { Phase } from "../effect-cycle/EffectCycle";
+import { Phase, SYNC } from "../effect-cycle/EffectCycle";
+import { createOneoff, Effect } from "../effect-cycle/EffectQueue";
 
 type IonicTaskOptions = {
    phase?: Phase;
@@ -12,15 +13,13 @@ type IonicTaskOptions = {
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
 export function ionicTask(task: IonicTask, options?: IonicTaskOptions) {
-   const opts = {
-      ...options ?? {},
-      eager: false // false because we manually call it via tracked call
-   } as EffectOptions
-   const retrack = opts.retrack === undefined ? true : opts.retrack
+
+   const retrack = options?.retrack === undefined ? true : options.retrack
 
    let initial = true;
 
-   function wrappedEffect() {
+   let wrappedEffect = () => {
+      console.trace('running effect!!!!')
       try {
          task(initial)
       }
@@ -29,13 +28,43 @@ export function ionicTask(task: IonicTask, options?: IonicTaskOptions) {
       }
    }
 
-   const watchSubject = new IonicTaskSubject(wrappedEffect, retrack)
+   
+   const subject = new IonicTaskSubject(wrappedEffect, retrack)
 
-   watchSubject.trackedCall()
+   let phase = getPhase(options)
 
-   return setUpWatcher(
-      watchSubject,
-      wrappedEffect,
-      opts,
-   )
+   wrappedEffect = phase === 'postrender' ? delayedTask(wrappedEffect) : wrappedEffect;
+   phase = phase === 'postrender' ? 3 : phase;
+
+   // TODO: options.preserve means non-pausable watcher
+   // const preserve = options?.preserve
+
+
+   return $listen(wrappedEffect, options || {}, {
+      enroll(_task) {
+         const effect = new Effect(_task, phase)
+         scheduleEagerEffect(delayedTask(() => {
+            subject.trackedCall()
+            subject.linkEffect(effect)
+         }), phase)
+         return effect;
+      },
+      remove(effect: Effect) {
+         effect.destroy()
+      }
+   });
 }
+
+type Task = () => void
+
+// export function setUpIonicTask(
+//    subject: WatchSubject,
+//    task: Task,
+//    options: EffectOptions,
+// ) {
+
+// }
+
+
+
+

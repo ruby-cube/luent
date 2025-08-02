@@ -91,11 +91,11 @@ class Multisubject implements WatchSubject {
       return values;
    }
 
-   linkEffect(effect: Effect, eager: boolean): void {
+   linkEffect(effect: Effect): void {
       const subjects = this.subjects;
       for (const subject of subjects) {
          if (!isWatchSubject(subject)) continue;
-         subject.linkEffect(effect, eager)
+         subject.linkEffect(effect)
       }
    }
 }
@@ -107,7 +107,7 @@ export function isGetter(value: unknown): value is () => any {
 export interface WatchSubject {
    inert: boolean,
    trackedCall: () => unknown
-   linkEffect(effect: Effect, eager: boolean): void
+   linkEffect(effect: Effect): void
 }
 
 
@@ -132,9 +132,9 @@ class IonizedModelSubject extends Compound implements WatchSubject {
       return this.model
    }
 
-   linkEffect(effect: Effect, eager: boolean) {
+   linkEffect(effect: Effect) {
       this.forEachAtom(atom => {
-         linkEffectToAtom(atom, effect, eager)
+         linkEffectToAtom(atom, effect)
       })
    }
 
@@ -216,12 +216,12 @@ export class IonSubject extends IonicCompound implements WatchSubject {
 
    private effect!: Effect;
 
-   linkEffect(effect: Effect, eager: boolean = false) {
+   linkEffect(effect: Effect) {
       this.effect = effect;
       this.forEachAtom(atom => {
-         linkEffectToAtom(atom, effect, eager)
+         linkEffectToAtom(atom, effect)
       })
-      linkEffectToAtom(this.valueAtom, effect, eager)
+      linkEffectToAtom(this.valueAtom, effect)
    }
 
    private relinkValue(
@@ -259,15 +259,9 @@ export class IonSubject extends IonicCompound implements WatchSubject {
 //    }
 // }
 
-function linkEffectToAtom(atom: Watchable | undefined, effect: Effect, eager: boolean = false) {
+function linkEffectToAtom(atom: Watchable | undefined, effect: Effect) {
    if (!atom) return;
    effect.link(asWatchedAtom(atom))
-   if (eager) {
-      $currentOrNextCycle().scheduleEffect(effect)
-      if (effect.phase === SYNC) {
-         $currentOrNextCycle().runEffects(SYNC)
-      }
-   }
 }
 
 // function toWatchedAtoms(atoms: Set<Watchable>) {
@@ -296,8 +290,7 @@ export class IonicTaskSubject extends IonicCompound implements WatchSubject {
    trackedCall() {
       if (this.initialized) return this.retrackedCall()
       this.initialized = true;
-      const ionicEffect = this.ionicEffect
-      detachedCall(() => this.trackCall(ionicEffect))
+      detachedCall(() => this.trackCall(this.ionicEffect))
    }
 
    effect!: Effect
@@ -313,12 +306,11 @@ export class IonicTaskSubject extends IonicCompound implements WatchSubject {
       })
    }
 
-   linkEffect(effect: Effect, eager: boolean): void {
-      console.log('ionic task eager', eager, this.atoms)
+   linkEffect(effect: Effect): void {
       this.effect = effect;
       this.forEachAtom(atom => {
          console.log('ionic task atom', atom)
-         linkEffectToAtom(atom, effect, eager)
+         linkEffectToAtom(atom, effect)
       })
    }
 }

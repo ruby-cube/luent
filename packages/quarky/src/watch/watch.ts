@@ -2,8 +2,8 @@ import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask"
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
-import { Effect } from "../effect-cycle/EffectQueue";
-import { getDefaultPhase } from "../effect-cycle/ReactivitySystem";
+import { createOneoff, Effect } from "../effect-cycle/EffectQueue";
+import { $currentOrNextCycle, getDefaultPhase } from "../effect-cycle/ReactivitySystem";
 import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
@@ -138,9 +138,18 @@ export function getPhase(options: undefined | EffectOptions) {
    return options?.phase ?? getDefaultPhase()
 }
 
+export function delayedTask(task: Task) {
+   function delayed() { //TODO: need to cancel with action
+      const id = requestIdleCallback(task, { timeout: 18 })
+      // $action().onCancel(()=>cancelIdleCallback(id))
+   }
+   if (__DEV__) delayed.__DEV__fn = task;
+   return delayed;
+}
+
 export function setUpWatcher(
    subject: WatchSubject,
-   effect: Task,
+   task: Task,
    options: EffectOptions,
 ) {
    let phase = options.phase = getPhase(options)
@@ -148,24 +157,17 @@ export function setUpWatcher(
    // TODO: options.preserve means non-pausable watcher
    const preserve = options.preserve
 
-   if (phase === 'postrender') {
-      const _effect = effect
-      function delayed() { //TODO: need to cancel with action
-         const id = requestIdleCallback(_effect, { timeout: 18 })
-         // $action().onCancel(()=>cancelIdleCallback(id))
-      }
-      if (__DEV__) delayed.__DEV__fn = effect;
-      effect = delayed;
-      phase = 3 //INTERNAL_POSTRENDER
-   }
-   else if (phase === 0){
+   task = phase === 'postrender' ? delayedTask(task) : task;
+   phase = phase === 'postrender' ? 3 : phase;
 
+   if (eager) {
+      scheduleEagerEffect(task, phase)
    }
-   
-   return $listen(effect, options || {}, {
-      enroll(task) {
-         const effect = new Effect(task, phase)
-         subject.linkEffect(effect, eager)
+
+   return $listen(task, options || {}, {
+      enroll(_task) {
+         const effect = new Effect(_task, phase)
+         subject.linkEffect(effect)
          return effect;
       },
       remove(effect: Effect) {
@@ -174,6 +176,14 @@ export function setUpWatcher(
    });
 }
 
+
+export function scheduleEagerEffect(task: Task, phase: Phase) {
+   const eagerEffect = createOneoff(task, phase)
+   $currentOrNextCycle().scheduleEffect(eagerEffect)
+   if (eagerEffect.phase === SYNC) {
+      $currentOrNextCycle().runEffects(SYNC)
+   }
+}
 
 
 
