@@ -5,7 +5,7 @@ import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { MutableCapsule } from "../capsule/Capsule";
-import { trigger, Watchable } from "../watch/WatchedAtom";
+import { trigger, Watchable, WatchedAtom } from "../watch/WatchedAtom";
 import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
@@ -21,22 +21,23 @@ export type $AtomicIonState =
    // & MutableCapsule
    // & MutableEntity
    & {
-      [QUARK]: {
-         props: AnyObject | undefined;
-         state: State,
-         // state: any,
-         // pState: any | typeof NULL,
-         ionized: boolean,
-         asTraceable: Traceable,
-         modelQuark: IonizedModelQuark | undefined
-         // asPion: undefined | {
-         //    models: undefined | IonizedModelQuark[]
-         //    addModel(quark: IonizedModelQuark): void
-         //    setPionState(quark: IonizedModelQuark, value: any): void
-         // }
-      }
-      & Quark<typeof ATOMIC_ION, $AtomicIonState>
-      & Watchable
+      [QUARK]: AtomicQuark
+      // {
+      //    props: AnyObject | undefined;
+      //    state: State,
+      //    // state: any,
+      //    // pState: any | typeof NULL,
+      //    ionized: boolean,
+      //    asTraceable: Traceable,
+      //    modelQuark: IonizedModelQuark | undefined
+      //    // asPion: undefined | {
+      //    //    models: undefined | IonizedModelQuark[]
+      //    //    addModel(quark: IonizedModelQuark): void
+      //    //    setPionState(quark: IonizedModelQuark, value: any): void
+      //    // }
+      // }
+      // & Quark<typeof ATOMIC_ION, $AtomicIonState>
+      // & Watchable
    }
 
 
@@ -67,7 +68,9 @@ export class IonState implements State {
 
    constructor(
       public current: unknown
-   ) { }
+   ) {
+
+   }
 
    private _pending: unknown | typeof NULL = NULL
 
@@ -165,57 +168,39 @@ export class PionState implements State {
    }
 }
 
+export class AtomicQuark implements Watchable, Quark {
 
-
+   constructor(
+      public state: State,
+      public ionized: boolean,
+      public modelQuark?: IonizedModelQuark
+   ) {
+   }
+   pendingUpdate: null | Update = null
+   entity: $AtomicIonState | undefined
+   quarkType = ATOMIC_ION
+   asTraceable = new Traceable()
+   trigger = trigger
+   asWatchedAtom: undefined | WatchedAtom
+}
 
 /** INTERNAL */
 export function createAtomicIon(
-   state: State,
-   props?: Methods,
-   ionized: boolean = false,
-   modelQuark?: IonizedModelQuark //TODO: inertSchema
+   quark: AtomicQuark,
+   props?: AnyObject
 ) {
-   function $state() {
-      if (__DEV__) emitSignal();
-      trackParticle(quark)
-      if (isLazyUpdate()) {
-         return maybeIonize(state.pending, ionized); //TODO: inertSchema
-      }
-      return maybeIonize(state.current, ionized);
-   }
-   //  as $AtomicIonState
 
-
-   const quark: AtomicIonQuark = {
-      state,
-      // pState: NULL,
-      pendingUpdate: null,
-      ionized,
-      props,
-      entity: $state as $AtomicIonState,
-      quarkType: ATOMIC_ION,
-      asTraceable: new Traceable(),
-      trigger,
-      asWatchedAtom: undefined,
-      modelQuark
-
-      // asPion: isPion ? {
-      //    models: undefined,
-      //    setPionState(modelQuark: IonizedModelQuark, value: any) {
-      //       this.addModel(modelQuark);
-      //       setState(quark, value) //TODO: need to incorporate setters
-      //    },
-      //    addModel(quark: IonizedModelQuark) {
-      //       const models = this.models ?? (this.models = [])
-      //       if (models.indexOf(quark) === -1) {
-      //          models.push(quark)
-      //       }
-      //    }
-      // } : undefined
-   }
-
+   // function $state() {
+   //    if (__DEV__) emitSignal();
+   //    trackParticle(quark)
+   //    if (isLazyUpdate()) {
+   //       return maybeIonize(quark.state.pending, quark.ionized); //TODO: inertSchema
+   //    }
+   //    return maybeIonize(quark.state.current, quark.ionized);
+   // }
+   const $state = getState.bind(quark) as $AtomicIonState
    $state[QUARK] = quark
-
+   quark.entity = $state as $AtomicIonState
 
    if (props) {
       if ('state' in props) {
@@ -241,7 +226,6 @@ export function createAtomicIon(
          get: $state,
          set: setState.bind(quark)
       })
-
    }
 
    return $state
@@ -281,9 +265,16 @@ export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
    return value instanceof Object && 'quarkType' in value && value.quarkType === ATOMIC_ION
 }
 
+function getState(this: AtomicQuark) {
+   if (__DEV__) emitSignal();
+   trackParticle(this)
+   if (isLazyUpdate()) {
+      return maybeIonize(this.state.pending, this.ionized); //TODO: inertSchema
+   }
+   return maybeIonize(this.state.current, this.ionized);
+}
 
-
-export function setState(this: AtomicIonQuark, value: unknown) {
+export function setState(this: AtomicQuark, value: unknown) {
    console.log('setState', value)
    const state = this.state
 
@@ -295,6 +286,8 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    const newState = maybeIonize(value, this.ionized)
 
    const update = initUpdate()
+   const modelQuark = this.modelQuark
+   const pendingUpdate = this.pendingUpdate ?? modelQuark?.pendingUpdate
 
    if (update.lazy && state.canPend) {
       state.pending = newState
@@ -305,18 +298,19 @@ export function setState(this: AtomicIonQuark, value: unknown) {
          this.pendingUpdate = null;
       })
 
-      if (this.pendingUpdate && this.pendingUpdate !== update) {
-         this.pendingUpdate.cancel()
+      if (pendingUpdate && pendingUpdate !== update) {
+         pendingUpdate.cancel()
+         state.cancelChange()
       }
    }
    else {
       if (update.lazy && !state.canPend) update.lazy = false
       console.log('$$$ set state', value)
 
-      if (this.pendingUpdate && this.pendingUpdate !== update) {
-         this.pendingUpdate.cancel()
-         state.cancelChange
-         this.pendingUpdate = null;
+      if (pendingUpdate && pendingUpdate !== update) {
+         pendingUpdate.cancel()
+         state.cancelChange()
+         // this.pendingUpdate = null;
       }
 
       state.current = newState;
@@ -332,14 +326,13 @@ export function setState(this: AtomicIonQuark, value: unknown) {
 
    this.trigger()
 
-   if (this.modelQuark) {
+   if (modelQuark && modelQuark.pendingUpdate !== update) {
       console.log('$$$ modelQuark!', this.modelQuark)
-      const quark = this.modelQuark
-      quark.pendingUpdate = update;
+      modelQuark.pendingUpdate = update;
       update.queue(() => {
-         quark.pendingUpdate = null;
+         modelQuark.pendingUpdate = null;
       })
-      quark.trigger();
+      modelQuark.trigger();
    }
 
    // if (quark.asPion?.models) {

@@ -53,6 +53,7 @@ import { TestSyncEffects } from './demos/TestSyncEffects';
 import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 import { TestTrackableOps } from './TestTrackableOps';
 import { SimpleCounter } from './SimpleCounter';
+import { TestNormalizeToRenderFunction } from './TestNormalizeToRenderFunction';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -198,7 +199,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 // console.log(obj)
 
-const app = createApp(List)
+const app = createApp(TestCount)
 
 app.mount('#app')
 

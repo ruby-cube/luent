@@ -1,12 +1,13 @@
 import { debug, isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
 import { createManagedDerivation } from "../ionic/DerivationIon";
-import { createAtomicIon, IONIZED, IonState } from "./AtomicIon";
+import { AtomicQuark, createAtomicIon, IONIZED, IonState } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
 import { Inert, IsInert } from "../ionized/inert";
 import { initializeSnapshots } from "../ionized/TimeTraveler";
+import { hasQuark, QUARK } from "../Quark";
 
 /* API */
 export type Ion<T = unknown> = () => T
@@ -29,8 +30,18 @@ type PickMethods = (...args: string[]) => ReinConfig
 type ReinConfig = { capsule: AnyObject, selectedMethods: string[] }
 
 export function isIon(value: unknown): value is Ion {
-   return isFunction(value) && /^\$[a-z]/.test(value.name) && value.length === 0
+   return isFunction(value) && QUARK in value
+   // /^\$[a-z]/.test(value.name) && 
+   // value.length === 0
 }
+
+export function $_derivation_ion(fn: () => unknown) {
+   //@ts-expect-error
+   fn[QUARK] = true;
+   return fn
+}
+
+window.$_derivation_ion = $_derivation_ion;
 
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
@@ -192,7 +203,7 @@ function asIon(
    }
 
    if (isIon(initialState)) return initialState
-   return initializeSnapshots(createAtomicIon(new IonState(ionized ? maybeIonize(initialState) : initialState), props, ionized)) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(new AtomicQuark(new IonState(ionized ? maybeIonize(initialState) : initialState), ionized), props)) // TODO: add inert mark map
 }
 
 

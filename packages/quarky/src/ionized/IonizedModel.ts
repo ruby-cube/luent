@@ -15,7 +15,7 @@ import { isWatchable, Watchable } from "../watch/WatchedAtom";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef } from "./IonizedMethods";
 import { isInert } from "./inert";
 import { initUpdate, isLazyUpdate, updateStack } from "../effect-cycle/ReactivitySystem";
-import { AtomicIonQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
+import { AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
 import { isTracking, trackParticle } from "../compound/Compound";
 import { isIntegerKey } from "./IonizedArray";
 
@@ -259,6 +259,7 @@ const KEY_IN_OP = "[[in]]"
 
 
 function initializeState(initialData: AnyObject) {
+   //TODO: should we do a structured clone instead using Object.getGetOwnProperties?
    // - turn absorbed ions into getters
    // - delete ion keys
    for (const key in initialData) {
@@ -339,7 +340,7 @@ export function createIonizedModel(
                console.log('>>> value')
                const value = propertyDescriptor.value
                if (isIon(value)) {
-                      console.log('>>> absorbed ion')
+                  console.log('>>> absorbed ion')
                   const $key = ionKey ?? toIonKey(key, initialTarget)
                   if ($key) initializedProperties[$key] = true;
                   initializeAbsorbedIon(
@@ -351,7 +352,7 @@ export function createIonizedModel(
                   return true;
                }
                else if (isFunction(value)) {
-                   console.log('>>> method')
+                  console.log('>>> method')
                   if (op === SET) {
                      // TODO: if setting method before it's initialized
                      return propertyDescriptor.writable ?? false;
@@ -378,7 +379,7 @@ export function createIonizedModel(
                   return propertyDescriptor.writable ?? false
                }
                else if (!isProto && propertyDescriptor.writable) {
-                   console.log('>>> writable property')
+                  console.log('>>> writable property')
                   if (isTracking()) {
                      console.log('>>> tracking', key)
                      const $key = ionKey ?? toIonKey(key, initialTarget)
@@ -394,14 +395,14 @@ export function createIonizedModel(
                      return true;
                   }
                   else {
-                      console.log('>>> no tracking', key)
+                     console.log('>>> no tracking', key)
                      let _value = propertyDescriptor.value;
                      Object.defineProperty(proxyProto, stateKey, {
                         enumerable: propertyDescriptor.enumerable,
                         configurable: propertyDescriptor.configurable,
                         get() {
                            if (isTracking()) {
-                               console.log('>>> tracking after initialized', key)
+                              console.log('>>> tracking after initialized', key)
                               const $key = ionKey ?? toIonKey(key, initialTarget)
                               if ($key) initializedProperties[$key] = true;
                               const pion = initializePion(
@@ -538,7 +539,7 @@ export function createIonizedModel(
          return Reflect.ownKeys(state.getActiveTarget())
       },
 
-      getPrototypeOf(target){
+      getPrototypeOf(target) {
          return Reflect.getPrototypeOf(target)
       },
 
@@ -621,7 +622,7 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion,
    Object.defineProperty(proxyProto, key, {
       enumerable: true,
       get: value,
-      set: hasQuark(value) ? setState.bind(quarkOf(value) as AtomicIonQuark) : undefined
+      set: 'state' in value ? Object.getOwnPropertyDescriptor(value, 'state')?.set : undefined
    })
    if (ionKey) {
       // ion access
@@ -682,12 +683,12 @@ function initializePion(
    console.log('&&& initializePion')
    console.log('&&& key', key)
    console.log('&&& ionKey', ionKey)
-   const ion = createAtomicIon(new PionState(state, key, quark.clone), undefined, true, quark)
+   const ion = createAtomicIon(new AtomicQuark(new PionState(state, key, quark.clone), true, quark))
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
       configurable: propertyDescriptor.configurable,
       get: ion,
-      set: setState.bind(quarkOf(ion))
+      set: Object.getOwnPropertyDescriptor(ion, 'state')!.set
    })
    if (ionKey) {
       Object.defineProperty(proxyProto, ionKey, {

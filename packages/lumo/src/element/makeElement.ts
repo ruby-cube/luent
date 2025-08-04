@@ -1,5 +1,5 @@
 import { DOMNode, Slot } from "../component/Component";
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation_ion } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, JSXNode, StyleInput, RawJSXNode } from "../node/makeNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -184,7 +184,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const ion = attributes['mu:checked'];
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
-   attributes.checked = function $drv() { return ion() === radioValue };
+   attributes.checked = $_derivation_ion(()=>  ion() === radioValue);
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }

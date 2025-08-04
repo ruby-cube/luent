@@ -308,7 +308,7 @@ function transformTemplateCallExpressions(path) {
 
 
 function normalizeSlotToRenderFunction(paths) { // returns jsxExpressionContainer with arrowFunctionExpression
-   if (slotIsRenderFunction(paths)) return paths[0]; //TODO: still need to transform return of renderfunction if is derivation 
+   if (slotIsRenderFunction(paths)) return paths[0].node; //TODO: still need to transform return of renderfunction if is derivation 
    return transformChildrenToRenderFunction(paths)
 }
 
@@ -380,8 +380,8 @@ function slotIsRenderFunction(paths) {
    const child = paths[0].node;
    if (!t.isJSXExpressionContainer(child)) return false;
    const expression = child.expression
-   if (t.isArrowFunctionExpression(expression)
-      || t.isFunctionExpression(expression) && !expression.id.name.startsWith('$drv'))
+   if (t.isArrowFunctionExpression(expression))
+      // || t.isFunctionExpression(expression) && !expression.id.name.startsWith('$drv'))
       return true;
    return false;
 }
@@ -466,14 +466,18 @@ function transformTemplateArgToRenderFunction(path) {
 
 let derivationCount = 0;
 
+//TODO: import $_derivation_ion
 function toDerivationFunction(node) {
-   return t.functionExpression(
-      t.identifier('$drv' + ++derivationCount),
-      [], // No parameters
-      t.blockStatement([
-         t.returnStatement(node) // Return the original expression
-      ])
-   )
+   return t.callExpression(t.identifier('$_derivation_ion'), [t.arrowFunctionExpression([], t.blockStatement([
+      t.returnStatement(node) // Return the original expression
+   ]))])
+   // return t.functionExpression(
+   //    t.identifier('$drv' + ++derivationCount),
+   //    [], // No parameters
+   //    t.blockStatement([
+   //       t.returnStatement(node) // Return the original expression
+   //    ])
+   // )
 }
 
 

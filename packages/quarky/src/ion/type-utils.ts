@@ -14,30 +14,30 @@ import { ion, Ion, isIon, MutableIon } from "./Ion";
 //   return value != null;
 // }
 
-const $target = ion(null as { hi: 'hi' } | null, {
-   other() {
+// const $target = ion(null as { hi: 'hi' } | null, {
+//    other() {
 
-   }
-})
+//    }
+// })
 
-const $frog = null as (typeof $target | null)
-// as Ion<number | null>
+// const $frog = null as (typeof $target | null)
+// // as Ion<number | null>
 
-if (isNonNull($frog)) {
-   $frog().hi
-}
+// if (isNonNull($frog)) {
+//    $frog().hi
+// }
 
-if (isNonNull($target)) {
-   $target().hi
-}
+// if (isNonNull($target)) {
+//    $target().hi
+// }
 
-if (isNullish($frog)) {
-   $frog().hi
-}
+// if (isNullish($frog)) {
+//    $frog().hi
+// }
 
-if (isNullish($target)) {
-   $target().hi
-}
+// if (isNullish($target)) {
+//    $target().hi
+// }
 
 
 // export function isNonNull<T>(value: Ion<T>): value is Ion<Exclude<T, null | undefined>>{

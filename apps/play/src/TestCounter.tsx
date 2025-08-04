@@ -76,12 +76,12 @@ export function TestCount() {
 
    const $active = ion(true)
 
-   const $doubleCount = () => {
+   const $doubleCount = ion(() => {
       if ($active()) {
          return $count() * 2
       }
       return 'sorry'
-   }
+   })
 
    function increment() {
       $count.state++
@@ -101,6 +101,7 @@ export function TestCount() {
          <div>{$count}</div>
          <div>{$active}</div>
          <div>{$doubleCount}</div>
+         <div>{($count() * 2)}</div>
          <hr></hr>
          <p>these should work</p>
          <button on:click={increment}>increment</button>

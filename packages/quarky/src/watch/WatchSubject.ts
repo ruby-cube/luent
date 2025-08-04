@@ -153,6 +153,7 @@ function trackPions(model: IonizedModel) {
    const target = quarkOf(model).rawTarget;
    for (const key in target) {
       const value = target[key]
+      //TODO: what about methods?
       if (isIon(value)) {
          if (isWatchableEntity(value)) {
             compound.track(quarkOf(value))

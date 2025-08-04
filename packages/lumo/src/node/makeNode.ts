@@ -27,7 +27,7 @@ import { DynamicKit } from "../dynamic/DynamicKit";
 // }
 
 declare global {
-   function Slot<T>(input: {children: RawJSXNode} & {provide?: Provided} & AnyObject): T
+   function Slot<T>(input: { children: RawJSXNode } & { provide?: Provided } & AnyObject): T
 }
 
 export type RawJSXNode =
@@ -130,9 +130,9 @@ export function wrapWithActivationType(type: ActivationType, Slot: RenderSlot, p
    }
 }
 
-// TODO: how to distinguish render function from derived getter 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | JSXNode) {
-   if (slot instanceof Function && !isIon(slot)) { // distinguishes derivation functions from render functions
+   if (isIon(slot)) return () => slot;
+   if (slot instanceof Function) { // distinguishes derivation functions from render functions
       return slot as (...args: any[]) => JSXNode;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')

@@ -1,5 +1,4 @@
-import { AnyObject } from "@rue/types";
-import { isObject } from "@rue/utils";
+import { isFunction, isObject } from "@rue/utils";
 
 export const QUARK = Symbol('quark')
 
@@ -18,7 +17,7 @@ export type HasQuark<T = Quark> = { [QUARK]: T }
 // }
 
 export function hasQuark(value: unknown): value is { [QUARK]: Quark } {
-   return isObject(value)  && QUARK in value;
+   return (isObject(value) || isFunction(value))  && QUARK in value;
 }
 
 export function quarkOf<T extends { [QUARK]: Quark }>(obj: T): T[typeof QUARK] {
