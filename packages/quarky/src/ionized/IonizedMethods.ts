@@ -1,13 +1,7 @@
 import { AnyObject } from "@rue/types"
 import { debug } from "@rue/utils"
-import { IonizedModel, $atomicPion } from "./IonizedModel"
-import { AtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp"
-import { quarkOf } from "../Quark"
-import { ionize, toRaw } from "./ionize"
+import { IonizedModel, $atomicPion, TriggerableModel } from "./IonizedModel"
 import { ionizedArray, ionizedIterable } from "./IonizedArray"
-import { IonizedModelQuark } from "./IonizedModelQuark"
-import { initUpdate, Update } from "../effect-cycle/ReactivitySystem"
-import { ModelState } from "../ion/AtomicIon"
 
 export type Constructor = new (...args: any[]) => any
 
@@ -27,7 +21,7 @@ export type TriggeringOpDef = {
    preop?: GetPreopData
    this?: true
    shouldTrigger?: (preopData: any) => boolean
-   triggers: (model: IonizedModel, args: any[], preopData: any) => (() => void)[]
+   triggers?: (model: TriggerableModel, args: any[], preopData: any) => void
    output?: (output: any, model: IonizedModel) => any,
    revert?: Revert,
 }
@@ -41,34 +35,34 @@ export type IonizedMethodsDef = {
    [key: PropertyKey]: IonizableMethodDef
 }
 
-export const triggeringPropertySetOp: TriggeringOpDef = {
-   op: function set(this: AnyObject, key: PropertyKey, value: unknown) { this[key] = value },
-   input: ([key, value]) => [key, toRaw(value)],
-   preop: (target, [key, value]) => ({
-      key,
-      oldState: target[key],
-      newState: value
-   }),
-   shouldTrigger: ({ oldState, newState }) => oldState !== newState, // should both be raw objects
-   triggers: (model, [key]) => [
-      trigger(model),
-      trigger(model, '[[get]]', key as PropertyKey)
-   ],
-   // output: (o) => maybeIonize(o), //TODO: this is tricky if encapsulation is involved ... you need to pass the parent quark to know what kind of ionization to do
-   revert: (model, { preopData: { key, oldState } }) => {
-      model[key] = oldState //QUESTION: When reverting, should we revert on the ionized model or the raw target?
-   }
-}
+// export const triggeringPropertySetOp: TriggeringOpDef = {
+//    op: function set(this: AnyObject, key: PropertyKey, value: unknown) { this[key] = value },
+//    input: ([key, value]) => [key, toRaw(value)],
+//    preop: (target, [key, value]) => ({
+//       key,
+//       oldState: target[key],
+//       newState: value
+//    }),
+//    shouldTrigger: ({ oldState, newState }) => oldState !== newState, // should both be raw objects
+//    triggers: (model, [key]) => [
+//       trigger(model),
+//       trigger(model, '[[get]]', key as PropertyKey)
+//    ],
+//    // output: (o) => maybeIonize(o), //TODO: this is tricky if encapsulation is involved ... you need to pass the parent quark to know what kind of ionization to do
+//    revert: (model, { preopData: { key, oldState } }) => {
+//       model[key] = oldState //QUESTION: When reverting, should we revert on the ionized model or the raw target?
+//    }
+// }
 
 const ionizedMethodsMap = new Map([
-   [Object as Constructor, { '[[set]]': triggeringPropertySetOp } as IonizedMethodsDef | undefined],
+   // [Object as Constructor, { '[[set]]': triggeringPropertySetOp } as IonizedMethodsDef | undefined],
    [Array, ionizedArray],
    [[].values().constructor, ionizedIterable]
 ])
 
-export function isIonizable(constructor: Constructor) {
-   return ionizedMethodsMap.has(constructor);
-}
+// export function isIonizable(constructor: Constructor) {
+//    return ionizedMethodsMap.has(constructor);
+// }
 
 
 
@@ -93,7 +87,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
    const existingDef = ionizedMethodsMap.get(constructor)
    if (existingDef && def) debug.warn(`Overriding existing Ionized Methods defintion for ${constructor.name}`)
    if (existingDef) return;
-   ionizedMethodsMap.set(constructor, def)
+   if (def) ionizedMethodsMap.set(constructor, def)
 }
 
 /**
@@ -106,77 +100,77 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
  *    ]
  * }
  *  */
-export function triggerAll(model: IonizedModel, op: PropertyKey): () => void {
-   return function triggerAllOps(this: { update: Update }) {
-      const ops = getAtomicOps(model, op)
-      if (ops)
-         for (const [_, op] of ops) {
-            prepPendingUpdate(op, this.update)
-            op.trigger()
-         }
-   }
-}
+// export function triggerAll(model: IonizedModel, op: PropertyKey): () => void {
+//    return function triggerAllOps(this: { update: Update }) {
+//       const ops = getAtomicOps(model, op)
+//       if (ops)
+//          for (const [_, op] of ops) {
+//             prepPendingUpdate(op, this.update)
+//             op.trigger()
+//          }
+//    }
+// }
 
-export function trigger(model: IonizedModel): () => void
-export function trigger(model: IonizedModel, op: '[[get]]', entryKey: PropertyKey): () => void
-export function trigger(model: IonizedModel, op: PropertyKey, entryKey: any): () => void
-export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entryKey?: any): () => void {
-   if (op === '[[get]]') {
-      if (!entryKey) throw new Error('must provide property key to trigger [[get]] op')
-      return function triggerPion(this: { update: Update }) {
-         const pion = $atomicPion(model, entryKey)
-         if (pion) {
-            prepPendingUpdate(pion, this.update)
-            pion.trigger()
-         }
-      }
-   }
-   else if (op) {
-      return function triggerOp(this: { update: Update }) {
-         const atomicOp = $atomicOp(model, op, entryKey)
-         if (atomicOp) {
-            prepPendingUpdate(atomicOp, this.update)
-            atomicOp.trigger()
-         }
-      }
-   }
-   return function triggerModel(this: { update: Update }) {
-      const quark = quarkOf(model)
-      prepPendingUpdate(quark, this.update)
-      quark.trigger()
-   }
-}
-
-
+// export function trigger(model: IonizedModel): () => void
+// export function trigger(model: IonizedModel, op: '[[get]]', entryKey: PropertyKey): () => void
+// export function trigger(model: IonizedModel, op: PropertyKey, entryKey: any): () => void
+// export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entryKey?: any): () => void {
+//    if (op === '[[get]]') {
+//       if (!entryKey) throw new Error('must provide property key to trigger [[get]] op')
+//       return function triggerPion(this: { update: Update }) {
+//          const pion = $atomicPion(model, entryKey)
+//          if (pion) {
+//             prepPendingUpdate(pion, this.update)
+//             pion.trigger()
+//          }
+//       }
+//    }
+//    else if (op) {
+//       return function triggerOp(this: { update: Update }) {
+//          const atomicOp = $atomicOp(model, op, entryKey)
+//          if (atomicOp) {
+//             prepPendingUpdate(atomicOp, this.update)
+//             atomicOp.trigger()
+//          }
+//       }
+//    }
+//    return function triggerModel(this: { update: Update }) {
+//       const quark = quarkOf(model)
+//       prepPendingUpdate(quark, this.update)
+//       quark.trigger()
+//    }
+// }
 
 
-function prepPendingUpdate(op: AtomicOp | AtomicPionQuark | IonizedModelQuark, update: Update) {
-   // if (update.lazy) {
-   //    this.pState = state;
 
-   //    update.queue(() => {
-   //       this.state = this.pState;
-   //       this.pState = NULL
-   //       this.pendingUpdate = null;
-   //    })
 
-   //    if (this.pendingUpdate && this.pendingUpdate !== update) {
-   //       this.pendingUpdate.cancel()
-   //    }
-   // }
-   // else {
-   if (op.pendingUpdate && op.pendingUpdate !== update) {
-      console.trace('cancelling', op, update)
-      op.pendingUpdate.cancel()
-      op.pendingUpdate = null;
-      // pion.pState = NULL;
-   }
-   // pion.state = state;
-   // }
-   op.pendingUpdate = update
-   console.trace('set pending update')
-   update.queue(() => {
-      console.log('mutate model update done')
-      op.pendingUpdate = null
-   })
-}
+// function prepPendingUpdate(op: AtomicQuark | ModelQuark, update: Update) {
+//    // if (update.lazy) {
+//    //    this.pState = state;
+
+//    //    update.queue(() => {
+//    //       this.state = this.pState;
+//    //       this.pState = NULL
+//    //       this.pendingUpdate = null;
+//    //    })
+
+//    //    if (this.pendingUpdate && this.pendingUpdate !== update) {
+//    //       this.pendingUpdate.cancel()
+//    //    }
+//    // }
+//    // else {
+//    if (op.pendingUpdate && op.pendingUpdate !== update) {
+//       console.trace('cancelling', op, update)
+//       op.pendingUpdate.cancel()
+//       op.pendingUpdate = null;
+//       // pion.pState = NULL;
+//    }
+//    // pion.state = state;
+//    // }
+//    op.pendingUpdate = update
+//    console.trace('set pending update')
+//    update.queue(() => {
+//       console.log('mutate model update done')
+//       op.pendingUpdate = null
+//    })
+// }

@@ -103,11 +103,11 @@ export function installIonicSet() {
          input: ([value]) => [toRaw(value)],
          preop: (target, [value]) => ({ prevSize: target.size, target, value }),
          shouldTrigger: isNotSameSize,
-         triggers: (model, [value]) => [
-            trigger(model),
-            trigger(model, '[[get]]', 'size'),
-            trigger(model, 'has', value)
-         ],
+         triggers: (model, [value]) => {
+            model.trigger();
+            model.triggerOp('[[get]]', 'size');
+            model.triggerOp('has', value)
+         },
          revert(model, { preopData: { value } }) {
             model.delete(value)
          }
@@ -119,11 +119,11 @@ export function installIonicSet() {
 
          shouldTrigger: isNotSameSize,
 
-         triggers: (model) => [
-            triggerAll(model, 'has'),
-            trigger(model, '[[get]]', 'size'),
-            trigger(model)
-         ],
+         triggers: (model) => {
+            model.triggerAllOps('has');
+            model.triggerOp('[[get]]', 'size');
+            model.trigger()
+         },
 
          revert(model, { preopData: { entries } }) {
             for (const value of entries) {
@@ -140,11 +140,11 @@ export function installIonicSet() {
             prevSize: target.size
          }),
          shouldTrigger: isNotSameSize,
-         triggers: (model, [value]) => [
-            trigger(model),
-            trigger(model, 'has', value),
-            trigger(model, '[[get]]', 'size')
-         ],
+         triggers: (model, [value]) => {
+            model.trigger(),
+            model.triggerOp('has', value),
+            model.triggerOp('[[get]]', 'size')
+         },
          revert(ionizedModel, { preopData: { value } }) {
             ionizedModel.add(value)
          }
@@ -304,7 +304,7 @@ export function isNotSameSize({ prevSize, target }: { prevSize: number, target: 
 
 // export function useDeleteOp(
 //    ionizedModel: IonizedModel,
-//    modelQuark: IonizedModelQuark,
+//    modelQuark: ModelQuark,
 //    target: AnyObject,
 //    getPreopData: GetPreopData
 // ) {
@@ -343,7 +343,7 @@ export function isNotSameSize({ prevSize, target }: { prevSize: number, target: 
 
 // export function useClearOp(
 //    ionizedModel: IonizedModel,
-//    modelQuark: IonizedModelQuark,
+//    modelQuark: ModelQuark,
 //    target: AnyObject,
 //    getPreopData: GetPreopData
 // ) {

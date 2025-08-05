@@ -5,12 +5,12 @@ import { isWatchableEntity, trigger, WatchedAtom } from "../watch/WatchedAtom"
 import { Quark, quarkOf, QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
-import { AtomicOp, TrackedOps } from "./AtomicOp"
+import { TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
 import { Update } from "../effect-cycle/ReactivitySystem"
 import { Ion, isIon } from "../ion/Ion"
-import { ModelState, NULL } from "../ion/AtomicIon"
+import { AtomicIonQuark, AtomicQuark, ModelState, NULL } from "../ion/AtomicIon"
 import { Compound, popTracker, pushTracker } from "../compound/Compound"
 
 
@@ -23,7 +23,7 @@ import { Compound, popTracker, pushTracker } from "../compound/Compound"
 
 
 
-// type IonizedModelQuark = Quark<IonizedModel>
+// type ModelQuark = Quark<IonizedModel>
 // & Watchable
 // & CapsuleQuark
 // & ParticleMorph
@@ -69,9 +69,9 @@ function getCloner(entity: object): CloneFn {
    }
 }
 
-export class IonizedModelQuark implements QuarkOf<IonizedModel> {
+export class ModelQuark implements QuarkOf<IonizedModel> {
    quarkType = IONIZED_MODEL
-   asTraceable: Traceable
+   __DEV__asTraceable: Traceable
    clone: ((entity: AnyObject) => AnyObject) | undefined
 
    constructor(
@@ -85,7 +85,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
 
       // this.$ = Object.create(this.rawTarget)
-      this.asTraceable = new Traceable()
+      this.__DEV__asTraceable = new Traceable()
       // this.watch = () => {
       //    this.trackAbsorbedIons() //FIX: find where to put this
       //    return watch.call(this)
@@ -135,19 +135,22 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    trigger = trigger
 
-   pions: Map<PropertyKey, Quark | TrackedOps> = new Map()
 
-   registerPion(key: PropertyKey, pion: Quark) {
-      this.pions.set(key, pion)
+   pions: Record<PropertyKey, AtomicIonQuark | TrackedOps> = {}
+
+   // pions: Map<PropertyKey, Quark | TrackedOps> = new Map()
+
+   registerPion(key: PropertyKey, pion: AtomicIonQuark) {
+      this.pions[key] = pion
    }
 
-   registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicOp) {
-      const ops = this.pions.get(key) ?? new Map();
+   registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicQuark) {
+      const ops = this.pions[key] ?? new Map();
       if (!(ops instanceof Map)) {
          debug.error(`${String(key)} is not an op`)
          return;
       }
-      this.pions.set(key, ops);
+      this.pions[key] = ops;
       ops.set(entryKey, atomicOp)
    }
 
@@ -202,7 +205,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
 // export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
 
-// export class MetaIonicCollection<T extends Collection = Collection> extends IonizedModelQuark<T> {
+// export class MetaIonicCollection<T extends Collection = Collection> extends ModelQuark<T> {
 //     constructor(rawTarget: T, methods: AnyObject = {}) {
 //         super(rawTarget, methods)
 //     }

@@ -46,7 +46,7 @@ class ManagedDerivation extends IonicCompound {
    pState: unknown | typeof NULL = NULL
    staleMarker: Effect | undefined
    quarkType = DERIVATION_ION
-   asTraceable = new Traceable()
+   __DEV__asTraceable = new Traceable()
 
    constructor(
       public derivation: (prev?: unknown) => unknown,

@@ -11,7 +11,7 @@ export const trackModel = (model: IonizedModel) => {
    trackParticle(quarkOf(model))
 }
 export const trackOp = (model: IonizedModel, op: PropertyKey, args: unknown[]) => {
-   trackParticle(asAtomicOp(model, op, args![0]))
+   trackParticle(asAtomicOp(quarkOf(model), op, args![0]))
 }
 
 

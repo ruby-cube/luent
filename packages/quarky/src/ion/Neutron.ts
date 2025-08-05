@@ -41,9 +41,8 @@ export function createAtomicNeutron(
       state,
       ionized,
       inert: true,
-      entity: $ion,
       quarkType: INERT_ION,
-      asTraceable: new Traceable()
+      __DEV__asTraceable: new Traceable()
    }
 
    $ion[QUARK] = ion

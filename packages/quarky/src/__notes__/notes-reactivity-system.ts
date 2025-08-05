@@ -110,7 +110,7 @@ type MemoizedIon = MemoizedDerivation & QuarkyEntity<MemoizedIonQuark>
 
 type IonicEffect = () => void/* TODO: */ & QuarkyEntity<IonicEffectQuark>
 
-type IonizedModel = QuarkyEntity<IonizedModelQuark>
+type IonizedModel = QuarkyEntity<ModelQuark>
 
 
 type IonicWatchEffect = IonicCompound & WatchEffect
@@ -121,7 +121,7 @@ function triggerIonicEffect(this: IonicWatchEffect) {
 
 
 
-type IonizedModelQuark = IonicCompound & Quark<IonizedModel>
+type ModelQuark = IonicCompound & Quark<IonizedModel>
 
 
 

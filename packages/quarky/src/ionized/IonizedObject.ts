@@ -18,7 +18,7 @@ export function isIonicObject(value: any): value is IonizedModel {
 //     methods: AnyObject | undefined
 // ) {
 //     const boundMethodMap: Map<string | symbol, Function> = new Map()
-//     const modelQuark = new IonizedModelQuark(target, methods)
+//     const modelQuark = new ModelQuark(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal();

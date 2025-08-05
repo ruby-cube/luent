@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { IsIonized, isIonizedModel, withInertItems } from "./ionize";
 import { isFunction } from "@rue/utils";
-import { InertCollectionType } from "./IonizedModelQuark";
+import { InertCollectionType } from "./ModelQuark";
 import { getIonizedModel } from "./IonizedModel";
 
 const inertObjects: WeakSet<AnyObject> = new WeakSet()

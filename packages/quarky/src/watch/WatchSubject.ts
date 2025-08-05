@@ -11,7 +11,7 @@ import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { IonicCompound } from "../ionic/IonicCompound";
 import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../compound/Compound";
-import { isAtomicIon } from "../ion/AtomicIon";
+import { isAtomic } from "../ion/AtomicIon";
 
 export function isWatchSubject(value: AnyObject): value is WatchSubject {
    if ('inert' in value) return !value.inert;
@@ -186,7 +186,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       private ion: Ion,
    ) {
       super()
-      this.retrack = !isAtomicIon(ion)
+      this.retrack = !isAtomic(ion)
    }
 
    private initialized = false;

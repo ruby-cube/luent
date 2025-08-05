@@ -4,7 +4,7 @@ export const QUARK = Symbol('quark')
 
 export type Quark<Q extends string | symbol = string | symbol, T = any> = {
    quarkType: string | symbol,
-   entity: T
+   // entity: T
 }
 
 export type QuarkOf<T extends { [QUARK]: Quark }> = T extends { [QUARK]: infer Q } ? Q : never

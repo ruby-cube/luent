@@ -1,4 +1,4 @@
-import { ionize, isAtomicIon, MutableIon, SYNC, watch } from "@rue/quarky"
+import { ionize, isAtomic, MutableIon, SYNC, watch } from "@rue/quarky"
 import { AtomicOp } from "../ionized/AtomicOp";
 import { quarkOf, hasQuark } from "../Quark";
 import { getTrace } from "../../../flask/debug";
@@ -22,7 +22,7 @@ class TraceableAtom {
    }
 }
 
-function asTraceable(atom: Atom) {
+function __DEV__asTraceable(atom: Atom) {
    if (atom.asTraceableAtom) return atom.asTraceableAtom!;
    const traceableAtom = atom.asTraceableAtom = new TraceableAtom(atom)
    return traceableAtom
@@ -40,7 +40,7 @@ export function traceTriggers<T>(subject: T) {
    if (!__DEV__) return;
    watch(subject, () => {
       const atom = getTriggeredAtoms($thisEffect()!)[0] as Atom //TODO: type casting is temporary
-      const traceableAtom = asTraceable(atom)
+      const traceableAtom = __DEV__asTraceable(atom)
       traceableAtom.__addTrigger({
          trace: traceTrigger(),
          newState: hasQuark(atom) ? quarkOf(atom).state : atom.state, //TODO:
@@ -73,7 +73,7 @@ function __logTriggeredAtom(atom: Atom) {
    watch(triggeredAtoms, () => {
       for (const atom of triggeredAtoms) {
          //FIX: atom.__DEV__logTrace
-         if (isAtomicIon(atom)) logAtomicIonTrace(atom)
+         if (isAtomic(atom)) logAtomicIonTrace(atom)
          else if (isAtomicPionQuark(quarkOf(atom))) logPropTrace(atom);
          else if (isTrackedOp(atom)) logTrackedOpTrace(atom)
          else throw new Error('Invalid atom')

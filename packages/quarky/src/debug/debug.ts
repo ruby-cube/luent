@@ -1,5 +1,5 @@
 import { isFunction, isObject } from "@rue/utils";
-import { isAtomicIon } from "../ion/AtomicIon";
+import { isAtomic } from "../ion/AtomicIon";
 import {  isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
@@ -89,11 +89,11 @@ export type TraceableSubject = {
    // labelName?: string
 }
 
-// export type TraceableQuark = { asTraceable?: Traceable; }
+// export type TraceableQuark = { __DEV__asTraceable?: Traceable; }
 
 
-export function asTraceable(subject: TraceableSubject): Traceable {
-   const traceable = quarkOf(subject).asTraceable
+export function __DEV__asTraceable(subject: TraceableSubject): Traceable {
+   const traceable = quarkOf(subject).__DEV__asTraceable
    if (!traceable) throw new Error('Subject is not traceable')
    return traceable;
 }
@@ -132,18 +132,18 @@ function _logAtoms(atoms: Set<Watchable>) {
 
 
 function logAtom(atom: TraceableQuark) {
-   debug.log('•', atom.asTraceable.origin)
+   debug.log('•', atom.__DEV__asTraceable.origin)
 }
 
 
 
 // export function __DEV__traceMethodCall(type: string, subject: TraceableSubject, key: PropertyKey) {
-//    const traceable = asTraceable(subject);
+//    const traceable = __DEV__asTraceable(subject);
 //    if (traceable.traceTriggers.has(key)) __DEV__trace(type, subject.labelName, traceable.origin!, key)
 // }
 
 // function __DEV__traceFunctionCall(subject: Function & TraceableSubject) {
-//    const traceable = asTraceable(subject);
+//    const traceable = __DEV__asTraceable(subject);
 //    __DEV__trace('Function', subject.labelName, traceable.origin!)
 // }
 
@@ -176,7 +176,7 @@ function logAtom(atom: TraceableQuark) {
 //          throw new Error('invalid subject. To trace a function call use traceCall()')
 //       traceMemberTriggers(subject, key)
 //    }
-//    else if (isAtomicIon(subject)) traceIonTriggers(subject)
+//    else if (isAtomic(subject)) traceIonTriggers(subject)
 //    else if (isDerivationFunction(subject) || isDerivedIon(subject)) traceDerivationTriggers(subject)
 //    else throw new Error('invalid subject. To trace a function call use traceCall()')
 // }
@@ -203,7 +203,7 @@ function logAtom(atom: TraceableQuark) {
 // }
 
 // function traceIonTriggers(subject: AtomicIon) {
-//    asTraceable(subject).traceTriggers!.add('state');
+//    __DEV__asTraceable(subject).traceTriggers!.add('state');
 // }
 
 // function traceDerivationTriggers(subject: () => any) {
@@ -211,7 +211,7 @@ function logAtom(atom: TraceableQuark) {
 // }
 
 export type TraceableQuark = {
-   asTraceable: Traceable
+   __DEV__asTraceable: Traceable
 } & Quark
 
 // function isTraceable(subject: AnyObject): subject is TraceableSubject {
@@ -219,7 +219,7 @@ export type TraceableQuark = {
 // }
 
 // function traceMemberTriggers(subject: TraceableSubject, key: PropertyKey) {
-//    asTraceable(subject).traceTriggers!.add(key);
+//    __DEV__asTraceable(subject).traceTriggers!.add(key);
 // }
 
 
@@ -238,7 +238,7 @@ export type TraceableQuark = {
 
 // function createTraceableObject(target: Object) {
 //    const meta = {
-//       asTraceable: new Traceable()
+//       __DEV__asTraceable: new Traceable()
 //    }
 //    const wrappedMethods: AnyObject = {}
 
@@ -291,7 +291,7 @@ export type TraceableQuark = {
 //    }
 //    //@ts-expect-error
 //    traceableFn[QUARK] = {
-//       asTraceable: traceable
+//       __DEV__asTraceable: traceable
 //    }
 //    traceableFn.__DEV__label = __DEV__label
 //    return traceableFn;

@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { $atomicOp } from "./AtomicOp";
 import { IonizedModel, maybeIonize, $atomicPion } from "./IonizedModel";
-import { TriggeringOpDef, trigger, IonizedMethodsDef } from "./IonizedMethods";
+import { TriggeringOpDef, IonizedMethodsDef } from "./IonizedMethods";
 import { quarkOf } from "../Quark";
 import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'
 
@@ -297,7 +297,7 @@ export const ionizedArray: IonizedMethodsDef = {
    push: {
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: () => [],
+      // triggers: () => [],
       this: true,
       // triggers: (model, _, { prevLength }) => [
       //    trigger(model),
@@ -313,7 +313,7 @@ export const ionizedArray: IonizedMethodsDef = {
       this: true,
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: () => [],
+      // triggers: () => [],
       // triggers: (model, _, { prevLength }) => [
       //    trigger(model, '[[get]]', (prevLength - 1).toString()),
       //    trigger(model, 'at', - 1),
@@ -330,7 +330,7 @@ export const ionizedArray: IonizedMethodsDef = {
       input: ([value]) => [toRaw(value)],
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: () => [],
+      // triggers: () => [],
       // triggers: (model) => [
       //    trigger(model),
       //    trigger(model, '[[get]]', 'length'),
@@ -345,7 +345,7 @@ export const ionizedArray: IonizedMethodsDef = {
       this: true,
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: () => [],
+      // triggers: () => [],
       // triggers: (model) => [
       //    trigger(model),
       //    trigger(model, '[[get]]', 'length'),
@@ -360,7 +360,7 @@ export const ionizedArray: IonizedMethodsDef = {
       this: true,
       input: ([start, deleteCount, ...args]) => [start, deleteCount, ...deionizeArgs(args)],
       output: ionize,
-      triggers: () => [],
+      // triggers: () => [],
       // triggers: (model) => [
       //    trigger(model),
       //    trigger(model, '[[get]]', 'length'),
@@ -376,7 +376,7 @@ export const ionizedArray: IonizedMethodsDef = {
    copyWithin: {
       this: true,
       preop: fillOrCopyWithinPreop,
-      triggers: () => [],
+      // triggers: () => [],
       // triggers: triggerModel,
       revert: fillOrCopyWithinRevert
    },
@@ -386,13 +386,13 @@ export const ionizedArray: IonizedMethodsDef = {
       input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
       preop: fillOrCopyWithinPreop,
       // triggers: triggerModel,
-      triggers: () => [],
+      // triggers: () => [],
       revert: fillOrCopyWithinRevert
    },
 
    reverse: {
       this: true,
-      triggers: () => [],
+      // triggers: () => [],
       // triggers: triggerModel,
       revert(model) {
          model.reverse()
@@ -405,7 +405,7 @@ export const ionizedArray: IonizedMethodsDef = {
          return model.slice()
       },
       // triggers: triggerModel,
-      triggers: () => [],
+      // triggers: () => [],
       revert(model, { preopData: snapshot }) {
          for (let i = 0; i < model.length; i++) {
             model[i] = snapshot[i]
@@ -449,7 +449,7 @@ export const ionizedArray: IonizedMethodsDef = {
    // }
 }
 
-function triggerModel(model: IonizedModel) { return [trigger(model)] }
+// function triggerModel(model: IonizedModel) { return [trigger(model)] }
 
 // isEntryKey(model, key) {
 //    return !!(model instanceof Array && isIntegerKey(key))
@@ -459,7 +459,7 @@ function triggerModel(model: IonizedModel) { return [trigger(model)] }
 //    opName: string,
 //    deionizeArgs?: (args: any[]) => any[]
 // ) {
-//    return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
+//    return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
 //       const fn = target[opName]
 //       return useMutatingArrayOp(
 //          ionizedModel,
@@ -477,7 +477,7 @@ function triggerModel(model: IonizedModel) { return [trigger(model)] }
 
 // function useMutatingArrayOp(
 //    model: IonizedModel,
-//    modelQuark: IonizedModelQuark,
+//    modelQuark: ModelQuark,
 //    target: any[],
 //    key: string,
 //    fn: Function,
@@ -519,7 +519,7 @@ function triggerModel(model: IonizedModel) { return [trigger(model)] }
 //    }
 // }
 
-// function createPopMethod(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
+// function createPopMethod(target: AnyObject, ionizedModel: IonizedModel, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
 //    const performOp = useMutatingArrayOp(
 //       ionizedModel,
 //       quark,

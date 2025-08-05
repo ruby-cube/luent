@@ -221,6 +221,6 @@
 // //     date: [is(Date, String, Number), isAntelop, undefined],
 // //     dateB: [is(Date), or(() => new Date())],
 // //     dateB: [isDefined, or(() => new Date())],
-// //     address: [is(Address), not(isAtomicIon, is(Map))],
+// //     address: [is(Address), not(isAtomic, is(Map))],
 // //     message: isAny
 // // }, { all: toIon })) {

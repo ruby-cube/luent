@@ -1,6 +1,6 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { debug, isObject } from "@rue/utils";
-import { InertCollection, InertCollectionType, IonizedModelQuark } from "./IonizedModelQuark";
+import { InertCollection, InertCollectionType, ModelQuark } from "./ModelQuark";
 import { BasicInertItemCollection, Inert, IsInert, isInert } from "./inert";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { createIonizedModel, getIonizedModel, IonizedModel } from "./IonizedModel";
@@ -291,13 +291,13 @@ export { _withInertItems as withInertItems }
 
 // type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
-export function storeSnapshot(modelQuark: IonizedModelQuark, clone?: AnyObject) {
+export function storeSnapshot(modelQuark: ModelQuark, clone?: AnyObject) {
    // timeTraveler.takeSnapshot(toRaw(modelQuark), $effectCycle().count, clone)
 }
 
 export function isIonizedModel(value: any): value is IonizedModel {
    if (!isObject(value)) return false;
-   return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
+   return hasQuark(value) && quarkOf(value) instanceof ModelQuark;
 }
 
 export function ionizeModel(target: object, markMap: MarkMap | InertCollectionType | undefined) {
@@ -315,7 +315,7 @@ export function isIonKey(key: PropertyKey): key is string {
 
 
 export function toRaw<T>(target: T): ToRaw<T> {
-   if (target instanceof IonizedModelQuark) {
+   if (target instanceof ModelQuark) {
       return target.rawTarget as ToRaw<T>;
    }
    if (isIonizedModel(target)) {

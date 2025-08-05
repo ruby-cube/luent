@@ -1,18 +1,19 @@
 import { Ion } from "../ion/Ion"
 import { Quark, quarkOf } from "../Quark"
 import { IonizedModel } from "./IonizedModel"
-import { IonizedModelQuark } from "./IonizedModelQuark"
+import { ModelQuark } from "./ModelQuark"
 import { debug } from "@rue/utils"
 import { AnyObject } from "@rue/types"
+import { PionState } from "../ion/AtomicIon"
 
 // export type PionQuark = Quark<string | symbol, $AtomicPionState | $DerivedPionState>
 
-export function asPionQuark(
+function asPionQuark(
    model: IonizedModel,
    key: PropertyKey,
 ) {
-   const pionQuark = quarkOf(model).pions.get(key) ?? createPionQuark(model, key)
-   if (pionQuark instanceof AtomicPionQuark || pionQuark instanceof DerivationPionQuark)
+   const pionQuark = quarkOf(model).pions[key] ?? new AtomicPionQuark(new PionState())
+   if (pionQuark instanceof AtomicPionQuark)
       return pionQuark;
    debug.error(`[INVALID KEY] ${String(key)} is not a pion`)
 }
@@ -21,11 +22,11 @@ function createPionQuark(model: IonizedModel, key: PropertyKey) {
    const quark = quarkOf(model)
    const derivation = getPropertyGetter(quark, key)
    const pion = derivation ? new DerivationPionQuark(model, key, derivation) : new AtomicPionQuark(model, key)
-   quark.pions.set(key, pion)
+   quark.registerPion(key, pion)
    return pion
 }
 
-function getPropertyGetter(modelQuark: IonizedModelQuark, key: PropertyKey) {
+function getPropertyGetter(modelQuark: ModelQuark, key: PropertyKey) {
    let rawTarget = modelQuark.rawTarget
    while (rawTarget.constructor !== Object) {
       const propertyDescriptor = Object.getOwnPropertyDescriptor(rawTarget, key)

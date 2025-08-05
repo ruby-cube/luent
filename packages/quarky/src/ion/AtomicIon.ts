@@ -11,7 +11,7 @@ import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
 import { $activeUpdate, getActiveUpdate, isLazyUpdate, Update, initUpdate } from "../effect-cycle/ReactivitySystem";
-import { IonizedModelQuark } from "../ionized/IonizedModelQuark";
+import { ModelQuark } from "../ionized/ModelQuark";
 import { trackParticle } from "../compound/Compound";
 
 export const NULL = Symbol('null')
@@ -28,12 +28,12 @@ export type $AtomicIonState =
       //    // state: any,
       //    // pState: any | typeof NULL,
       //    ionized: boolean,
-      //    asTraceable: Traceable,
-      //    modelQuark: IonizedModelQuark | undefined
+      //    __DEV__asTraceable: Traceable,
+      //    modelQuark: ModelQuark | undefined
       //    // asPion: undefined | {
-      //    //    models: undefined | IonizedModelQuark[]
-      //    //    addModel(quark: IonizedModelQuark): void
-      //    //    setPionState(quark: IonizedModelQuark, value: any): void
+      //    //    models: undefined | ModelQuark[]
+      //    //    addModel(quark: ModelQuark): void
+      //    //    setPionState(quark: ModelQuark, value: any): void
       //    // }
       // }
       // & Quark<typeof ATOMIC_ION, $AtomicIonState>
@@ -45,7 +45,7 @@ export type $AtomicIonState =
  * INTERNAL 
  * For reactive ions only.
  * */
-export type AtomicIonQuark = QuarkOf<$AtomicIonState>
+// export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
 export function maybeIonize(newValue: unknown, ionized: boolean) {
    return isObject(newValue) && ionized ? ionize(newValue) : newValue;
@@ -168,39 +168,49 @@ export class PionState implements State {
    }
 }
 
+/**
+ * Quark for atomic ion, pion, and atomic get op
+*/
 export class AtomicQuark implements Watchable, Quark {
-
-   constructor(
-      public state: State,
-      public ionized: boolean,
-      public modelQuark?: IonizedModelQuark
-   ) {
-   }
    pendingUpdate: null | Update = null
-   entity: $AtomicIonState | undefined
-   quarkType = ATOMIC_ION
-   asTraceable = new Traceable()
+   quarkType = ATOMIC
    trigger = trigger
    asWatchedAtom: undefined | WatchedAtom
 }
 
+// export class AtomicPionQuark extends AtomicQuark {
+
+//    constructor(
+//       public state: State,
+//       public ionized: boolean,
+//       public modelQuark: ModelQuark,
+//    ) {
+//       super()
+//       this.__DEV__asTraceable = modelQuark.__DEV__asTraceable;
+//    }
+
+//    __DEV__asTraceable: Traceable;
+// }
+
+export class AtomicIonQuark extends AtomicQuark {
+   constructor(
+      public state: State,
+      public ionized: boolean,
+      public modelQuark?: ModelQuark,
+   ) {
+      super()
+      this.__DEV__asTraceable = modelQuark?.__DEV__asTraceable ?? new Traceable()
+   }
+   __DEV__asTraceable: Traceable;
+}
+
 /** INTERNAL */
 export function createAtomicIon(
-   quark: AtomicQuark,
+   quark: AtomicIonQuark,
    props?: AnyObject
 ) {
-
-   // function $state() {
-   //    if (__DEV__) emitSignal();
-   //    trackParticle(quark)
-   //    if (isLazyUpdate()) {
-   //       return maybeIonize(quark.state.pending, quark.ionized); //TODO: inertSchema
-   //    }
-   //    return maybeIonize(quark.state.current, quark.ionized);
-   // }
    const $state = getState.bind(quark) as $AtomicIonState
    $state[QUARK] = quark
-   quark.entity = $state as $AtomicIonState
 
    if (props) {
       if ('state' in props) {
@@ -252,20 +262,20 @@ function attachCapsuleMethods(ion: Ion & AnyObject, props: AnyObject) {
    // }
 }
 
-const ATOMIC_ION = Symbol('atomic ion')
+const ATOMIC = Symbol('atomic')
 
 /**
  * INTERNAL
  */
-export function isAtomicIon(value: unknown): value is $AtomicIonState {
-   return hasQuark(value) && quarkOf(<$AtomicIonState>value).quarkType === ATOMIC_ION
+export function isAtomic(value: unknown): value is $AtomicIonState {
+   return hasQuark(value) && quarkOf(<$AtomicIonState>value).quarkType === ATOMIC
 }
 
-export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
-   return value instanceof Object && 'quarkType' in value && value.quarkType === ATOMIC_ION
+export function isAtomicQuark(value: unknown): value is AtomicIonQuark {
+   return value instanceof Object && 'quarkType' in value && value.quarkType === ATOMIC
 }
 
-function getState(this: AtomicQuark) {
+function getState(this: AtomicIonQuark) {
    if (__DEV__) emitSignal();
    trackParticle(this)
    if (isLazyUpdate()) {
@@ -274,7 +284,7 @@ function getState(this: AtomicQuark) {
    return maybeIonize(this.state.current, this.ionized);
 }
 
-export function setState(this: AtomicQuark, value: unknown) {
+export function setState(this: AtomicIonQuark, value: unknown) {
    console.log('setState', value)
    const state = this.state
 

@@ -99,12 +99,12 @@ export function installIonicMap() {
             prevState: target.get(key),
          }),
          shouldTrigger: ({ prevState, key, target }) => prevState !== target.get(key),
-         triggers: (ionized, [key], { prevSize, target }) => [
-            trigger(ionized),
-            trigger(ionized, 'has', key),
-            trigger(ionized, 'get', key),
-            prevSize !== target.size ? trigger(ionized, '[[get]]', 'size') : noop,
-         ],
+         triggers: (model, [key], { prevSize, target }) => {
+            model.trigger();
+            model.triggerOp('has', key);
+            model.triggerOp('get', key);
+            if (prevSize !== target.size) model.triggerOp('[[get]]', 'size'); //TODO: should 'size' be an op or property if it is a getter?
+         },
          revert(ionized, data) {
             ionized.delete(data.args[0])
          }
@@ -117,12 +117,12 @@ export function installIonicMap() {
 
          shouldTrigger: isNotSameSize,
 
-         triggers: (model) => [
-            triggerAll(model, 'get'),
-            triggerAll(model, 'has'),
-            trigger(model, '[[get]]', 'size'),
-            trigger(model)
-         ],
+         triggers: (model) => {
+            model.triggerAllOps('get');
+            model.triggerAllOps('has');
+            model.triggerOp('[[get]]', 'size');
+            model.trigger()
+         },
 
          revert(ionizedModel, { preopData: { entries } }) {
             for (const [key, value] of entries) {
@@ -141,12 +141,12 @@ export function installIonicMap() {
             prevSize: target.size
          }),
          shouldTrigger: isNotSameSize,
-         triggers: (model, [key]) => [
-            trigger(model),
-            trigger(model, 'has', key),
-            trigger(model, 'get', key),
-            trigger(model, '[[get]]', 'size')
-         ],
+         triggers: (model, [key]) => {
+            model.trigger();
+            model.triggerOp('has', key);
+            model.triggerOp('get', key);
+            model.triggerOp('[[get]]', 'size')
+         },
          revert(ionizedModel, { preopData: { key, value } }) {
             ionizedModel.set(key, value)
          }

@@ -74,11 +74,11 @@ export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays
 class MetaReadonlyObject {
    asReadonly?: AnyObject
    asReined?: AnyObject
-   asTraceable?: Traceable
+   __DEV__asTraceable?: Traceable
    constructor(
       public rawTarget: AnyObject
    ) {
-      if (__DEV__) this.asTraceable = new Traceable()
+      if (__DEV__) this.__DEV__asTraceable = new Traceable()
    }
 }
 
