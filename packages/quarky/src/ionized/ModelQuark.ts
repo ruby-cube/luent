@@ -51,36 +51,20 @@ export type InertCollectionType = (typeof InertCollection)[keyof typeof InertCol
 
 const IONIZED_MODEL = 'ionized model' as const
 
-type CloneFn = (entity: any) => any
 
-function getCloner(entity: object): CloneFn {
-   //TODO: get cloner from data structure configs
-   if (entity instanceof Array) return (entity: any[]) => {
-      return Object.assign([], entity)
-   }
-   if (entity instanceof Set) return (entity: Set<any>) => {
-      return Object.assign(new Set(entity), entity)
-   }
-   if (entity instanceof Map) return (entity: Map<any, any>) => {
-      return Object.assign(new Map(entity), entity)
-   }
-   return (entity: object) => {
-      return Object.create(Object.getPrototypeOf(entity), Object.getOwnPropertyDescriptors(entity))
-   }
-}
+
 
 export class ModelQuark implements QuarkOf<IonizedModel> {
    quarkType = IONIZED_MODEL
    __DEV__asTraceable: Traceable
-   clone: ((entity: AnyObject) => AnyObject) | undefined
 
    constructor(
       public entity: IonizedModel,
       public rawTarget: AnyObject, //initialData
-      public state: ModelState
+      public state: ModelState,
+      public clone: ((obj: AnyObject)=>AnyObject) | undefined
       // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
-      this.clone = getCloner(rawTarget)
 
 
 

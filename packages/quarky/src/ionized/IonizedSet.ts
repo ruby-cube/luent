@@ -1,6 +1,6 @@
 import { toRaw } from "./ionize";
 import { getIonizedModel, GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
-import { enlistIonizedMethods, trigger, triggerAll, TriggeringOpDef } from "./IonizedMethods";
+import { enlistIonizedMethods } from "./IonizedMethods";
 import { deleteOp, hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackOp } from "./OpDefinitions";
 
 // declare global {
@@ -148,6 +148,9 @@ export function installIonicSet() {
          revert(ionizedModel, { preopData: { value } }) {
             ionizedModel.add(value)
          }
+      },
+      size: {
+         track: trackOp
       }
       // }
    })
