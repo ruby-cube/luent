@@ -8,7 +8,6 @@ export type Constructor = new (...args: any[]) => any
 //TODO: if you don't provide a clone method, you cannot update lazily
 
 export type TrackableOpDef = {
-   // trackable ops
    op?: Function,
    input?: (input: any[]) => any[],
    output?: (output: any, model: IonizedModel) => any,
@@ -26,7 +25,7 @@ export type TriggeringOpDef = {
    revert?: Revert,
 }
 
-type IonizableMethodDef = TrackableOpDef | TriggeringOpDef
+type IonizableMethodDef = TrackableOpDef | TriggeringOpDef | {get?: TrackableOpDef, set?: TriggeringOpDef}
 
 export type GetPreopData = (target: AnyObject, args: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
@@ -105,7 +104,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //       const ops = getAtomicOps(model, op)
 //       if (ops)
 //          for (const [_, op] of ops) {
-//             prepPendingUpdate(op, this.update)
+//             initModelUpdate(op, this.update)
 //             op.trigger()
 //          }
 //    }
@@ -120,7 +119,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //       return function triggerPion(this: { update: Update }) {
 //          const pion = $atomicPion(model, entryKey)
 //          if (pion) {
-//             prepPendingUpdate(pion, this.update)
+//             initModelUpdate(pion, this.update)
 //             pion.trigger()
 //          }
 //       }
@@ -129,14 +128,14 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //       return function triggerOp(this: { update: Update }) {
 //          const atomicOp = $atomicOp(model, op, entryKey)
 //          if (atomicOp) {
-//             prepPendingUpdate(atomicOp, this.update)
+//             initModelUpdate(atomicOp, this.update)
 //             atomicOp.trigger()
 //          }
 //       }
 //    }
 //    return function triggerModel(this: { update: Update }) {
 //       const quark = quarkOf(model)
-//       prepPendingUpdate(quark, this.update)
+//       initModelUpdate(quark, this.update)
 //       quark.trigger()
 //    }
 // }
@@ -144,7 +143,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 
 
 
-// function prepPendingUpdate(op: AtomicQuark | ModelQuark, update: Update) {
+// function initModelUpdate(op: AtomicQuark | ModelQuark, update: Update) {
 //    // if (update.lazy) {
 //    //    this.pState = state;
 

@@ -7,8 +7,8 @@ import { Update } from "../effect-cycle/ReactivitySystem";
 
 export type Watchable = {
    asWatchedAtom: WatchedAtom | undefined;
-   pendingUpdate: Update |  null;
-   trigger: () => void
+   pendingUpdate: Update | null;
+   trigger: (update: Update) => void
 }
 
 /**
@@ -19,10 +19,21 @@ export type Watchable = {
  * @param preopData 
  */
 export function trigger(
-   this: Watchable
+   this: Watchable,
+   update: Update
 ) {
-   if (!this.pendingUpdate) throw Error('no pending update')
-   this.asWatchedAtom?.triggerEffects(this.pendingUpdate)
+   const pendingUpdate = this.pendingUpdate
+   if (pendingUpdate && pendingUpdate !== update) {
+      pendingUpdate.cancel()
+   }
+   this.pendingUpdate = update
+   update.queue(() => {
+      this.pendingUpdate = null;
+   })
+   update.onCancel(() => {
+      this.pendingUpdate = null;
+   })
+   this.asWatchedAtom?.triggerEffects(update)
 }
 
 export function isWatchable(value: unknown): value is Watchable & Quark {
@@ -95,7 +106,6 @@ export class WatchedAtom {
    // }
 
    triggerEffects(update: Update) { // the surrounding effect when original trigger happened
-      console.log('triggerEffects')
       const phases = this.phases
       const cycle = update.cycle
       for (const phase of phases) {

@@ -14,10 +14,11 @@ import { isWatchable, Watchable } from "../watch/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef } from "./IonizedMethods";
 import { isInert } from "./inert";
-import { initUpdate, isLazyUpdate, Update, updateStack } from "../effect-cycle/ReactivitySystem";
+import { initUpdate, isLazyUpdate, popUpdate, pushUpdate, Update } from "../effect-cycle/ReactivitySystem";
 import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
 import { isTracking, trackParticle } from "../compound/Compound";
 import { isIntegerKey } from "./IonizedArray";
+import { trackOp } from "./OpDefinitions";
 
 export function $atomicPion(
    modelQuark: ModelQuark,
@@ -163,7 +164,7 @@ export function useTrackableOp(
       if (__DEV__) emitSignal();
       const _args = input(args);
       track(ionized, opKey, _args)
-      return output(fn.apply(transformThis(state.getActiveTarget(), _args), _args), ionized)
+      return output(fn.apply(transformThis(state.active, _args), _args), ionized)
    }
 }
 
@@ -261,34 +262,35 @@ const INTERNAL_OP = "[[INTERNAL]]"
 const KEY_IN_OP = "[[in]]"
 
 
-function initializeState(initialData: AnyObject) {
-   //TODO: should we do a structured clone instead using Object.getGetOwnProperties?
-   // - turn absorbed ions into getters
-   // - delete ion keys
-   for (const key in initialData) {
-      if (isIonKey(key)) {
-         const value = initialData[key]
-         if (isIon(value)) {
-            const stateKey = key.slice(1)
-            Object.defineProperty(initialData, stateKey, {
-               enumerable: true,
-               get: value
-            })
-            delete initialData[key];
-         }
-      }
-      else {
-         const value = initialData[key]
-         if (isIon(value)) {
-            Object.defineProperty(initialData, key, {
-               enumerable: true,
-               get: value
-            })
-         }
-      }
-   }
-   return initialData;
-}
+
+// function initializeState(initialData: AnyObject) {
+//    //TODO: should we do a structured clone instead using Object.getGetOwnProperties?
+//    // - turn absorbed ions into getters
+//    // - delete ion keys
+//    for (const key in initialData) {
+//       if (isIonKey(key)) {
+//          const value = initialData[key]
+//          if (isIon(value)) {
+//             const stateKey = key.slice(1)
+//             Object.defineProperty(initialData, stateKey, {
+//                enumerable: true,
+//                get: value
+//             })
+//             delete initialData[key];
+//          }
+//       }
+//       else {
+//          const value = initialData[key]
+//          if (isIon(value)) {
+//             Object.defineProperty(initialData, key, {
+//                enumerable: true,
+//                get: value
+//             })
+//          }
+//       }
+//    }
+//    return initialData;
+// }
 
 const GET = 0 as const;
 const SET = 1 as const;
@@ -320,59 +322,63 @@ function getIonizedConfig(target: AnyObject) {
    }
 }
 
+function toIonKey(key: ProxyKey, target: AnyObject) {
+   if (!isIonKey(key)) return undefined;
+   if (key in target && !isIon(target[key])) return undefined;
+   return key;
+}
+
 //TODO:
 // - I really need to think through if property changes should trigger the whole model
 // - adding and deleting properties
 export function createIonizedModel(
-   initialTarget: object,
+   initialTarget: AnyObject,
    inertSchema: AnyObject | undefined,
 ) {
 
    const { clone, isAbsorbedIon } = getIonizedConfig(initialTarget)
 
-   const state = {
-      current: initialTarget,
-      pending: NULL as typeof NULL | AnyObject,
-      getActiveTarget() {
-         return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
-      }
-   }
+   const state = new ModelState(initialTarget, clone)
 
    const proxyProto = Object.create(null) // state keys and ion access keys
-   // const initializedProperties = { [QUARK]: true } as AnyObject
 
-   function initializeProperty(proxyProto: AnyObject, key: ProxyKey, op: typeof GET | typeof SET = GET): boolean {
+   function initializeProperty(proxyProto: AnyObject, key: ProxyKey, op: typeof GET | typeof SET = GET, value: unknown = undefined): boolean {
       let target = initialTarget
 
-      const _isIonKey = isIonKey(key);
-      let stateKey = _isIonKey ? key in target ? key : key.slice(1) : key;
-      let ionKey = _isIonKey ? key : toIonKey(key, target);
+      const ionKey = toIonKey(key, target);
+      const stateKey = ionKey ? ionKey.slice(1) : key;
 
-      let originalKey = stateKey in initialTarget ? stateKey : ionKey && ionKey in initialTarget ? ionKey : undefined;
-      if (!originalKey && op === GET) return false;
+      let originalKey = key in target ? key : stateKey in target ? stateKey : undefined
       if (!originalKey) {
-         //TODO: new property;
-         // initializedProperties[key]
-         return true;
+         if (op === SET) {
+            if (isAbsorbedIon(value, key)) {
+               //TODO: absorbed ion
+               return true;
+            }
+            else if (isFunction(value)) {
+               //TODO: method
+               return true;
+            }
+            else {
+               initializePion(proxyProto, stateKey, ionKey, state, modelQuark, { configurable: true, enumerable: true })
+               return true;
+            }
+         }
+         return false;
       }
+
 
       // initializedProperties[stateKey] = true;
 
-      console.trace('stateKey', stateKey)
-      console.log('ionKey', ionKey)
-      console.log('yes object', target)
-      console.log(Object.getPrototypeOf(target).constructor)
       let isProto = false; // prototypes do not hold any state, only getters and methods
       do {
          const propertyDescriptor = Object.getOwnPropertyDescriptor(target, originalKey)
          if (propertyDescriptor) {
-            console.log('>>> propertyDescriptor')
             if (propertyDescriptor.get || propertyDescriptor.set) {
-               console.log('>>> getter')
-               const config = getIonizedMethodDef(initialTarget, 'size')
-               if (config) {
-                  propertyDescriptor.get = 'track' in config && propertyDescriptor.get ? useTrackableOp(propertyDescriptor.get, state, ionizedModel, '[[get]]', config) : propertyDescriptor.get
-                  propertyDescriptor.set = 'triggers' in config && propertyDescriptor.set ? useMutatingOp(propertyDescriptor.set, state, ionizedModel, '[[set]]', config) : propertyDescriptor.set
+               const opDef = getIonizedMethodDef(initialTarget, originalKey)
+               if (opDef) {
+                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useTrackableOp(propertyDescriptor.get, state, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
+                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useMutatingOp(propertyDescriptor.set, state, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
                   Object.defineProperty(proxyProto, stateKey, propertyDescriptor)
                   return !!propertyDescriptor.set;
                }
@@ -380,26 +386,22 @@ export function createIonizedModel(
                return true;
             }
             else {
-               console.log('>>> value')
                const value = propertyDescriptor.value
                if (isAbsorbedIon(value, key)) {
-                  console.log('>>> absorbed ion')
-                  const $key = ionKey ?? toIonKey(key, initialTarget)
                   initializeAbsorbedIon(
                      proxyProto,
                      stateKey,
                      value,
-                     $key
+                     ionKey
                   )
                   return true;
                }
                else if (isFunction(value)) {
-                  console.log('>>> method')
                   if (op === SET) {
                      // TODO: if setting method before it's initialized
                      return propertyDescriptor.writable ?? false;
                   }
-                  const methodDef = getIonizedMethodDef(initialTarget, key)
+                  const methodDef = getIonizedMethodDef(initialTarget, key) as TrackableOpDef | TriggeringOpDef
                   if (methodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
                      bindNativeMethod(
                         proxyProto,
@@ -422,14 +424,7 @@ export function createIonizedModel(
                   return propertyDescriptor.writable ?? false
                }
                else if (!isProto && propertyDescriptor.writable) {
-                  console.log('>>> writable property')
-                  if (isTracking()) {
-                     console.log('>>> tracking', key)
-                     // Case: ion access, ion already initialized (must retreive ion)
-                     // Case: ion access, ion not initialized
-                     // Case: state access, ion not initialized (initialize ion only)
-
-                     // if (ionKey) initializedProperties[ionKey] = true;
+                  if (isTracking() || ionKey) {
                      initializePion(
                         proxyProto,
                         stateKey,
@@ -441,60 +436,33 @@ export function createIonizedModel(
                      return true;
                   }
                   else {
-                     console.log('>>> no tracking', key)
+                     // State access, no tracking
                      let _value = propertyDescriptor.value;
                      Object.defineProperty(proxyProto, stateKey, {
+                        configurable: true,
                         enumerable: propertyDescriptor.enumerable,
-                        configurable: propertyDescriptor.configurable,
                         get() {
                            if (isTracking()) {
-                              console.log('>>> tracking after initialized', key)
-                              const $key = ionKey ?? toIonKey(key, initialTarget)
-                              // if ($key) initializedProperties[$key] = true;
                               const pion = initializePion(
                                  proxyProto,
                                  stateKey,
-                                 $key,
+                                 ionKey,
                                  state,
                                  modelQuark,
                                  propertyDescriptor
                               )
-                              const value = pion()
-                              console.log('pion value', pion)
-                              return value;
+                              return pion();
                            }
-                           console.log('>>> no tracking after initialized', key)
                            return maybeIonize(_value)
                         },
-                        set(value) {
-                           _value = value;
+                        set(v) {
+                           _value = v
                         }
                      })
-                     const $key = ionKey ?? toIonKey(key, initialTarget)
-                     if ($key)
-                        Object.defineProperty(proxyProto, $key, {
-                           enumerable: propertyDescriptor.enumerable,
-                           configurable: propertyDescriptor.configurable,
-                           get() {
-                              // if (ionKey) initializedProperties[ionKey] = true;
-                              return initializePion(
-                                 proxyProto,
-                                 stateKey,
-                                 $key,
-                                 state,
-                                 modelQuark,
-                                 propertyDescriptor
-                              )
-                           },
-                           set(value) {
-                              _value = value;
-                           }
-                        })
                      return true;
                   }
                }
                else { // static property
-                  console.log(">>> static property")
                   Object.defineProperty(proxyProto, key, propertyDescriptor)
                   return false;
                }
@@ -509,7 +477,6 @@ export function createIonizedModel(
    const ionizedModel = new Proxy(proxyProto, {
 
       get(proxyProto, key, receiver) {
-         if (typeof key === 'string' && isIntegerKey(key)) console.trace('get', key)
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          if (key in proxyProto) {
             return proxyProto[key]
@@ -536,51 +503,54 @@ export function createIonizedModel(
       },
 
       has(proxyProto, key) {
-         // getActiveTracker()?.track(asAtomicOp(ionizedModel, '[[in]]', key)) //TODO: trigger [[in]] when property is added or property is deleted
+         modelQuark.trackOp('[[in]]', key)
          //TODO: need to figure out how to deal with ion access keys
          return key in proxyProto || (key in initialTarget)
       },
 
       getOwnPropertyDescriptor(target, key) {
          //TODO: track
-         return Reflect.getOwnPropertyDescriptor(target, key)
+         return Reflect.getOwnPropertyDescriptor(target, key) //TODO: adjust key for absorbed ion
       },
 
       defineProperty(target: AnyObject, key, attributes) {
-         const success = Reflect.defineProperty(target, key, attributes)
+         const success = Reflect.defineProperty(state.active, key, attributes)
          if (!success) return false;
+         const update = initModelUpdate(modelQuark)
          if (!(key in target)) {
-            triggerKeysChange(modelQuark, key)
+            triggerKeysChange(modelQuark, key, update)
          }
          else if (target[key] !== attributes.value) {
-            getPionQuark(target, key)?.trigger()
+            getPionQuark(target, key)?.trigger(update)
          }
-         modelQuark.trigger()
+         modelQuark.trigger(update)
          //TODO: record mutation?
          return true;
       },
 
       deleteProperty(target: AnyObject, key) {
          const pionQuark = getPionQuark(target, key)
-         const success = delete target[key]
+         const success = Reflect.deleteProperty(state.active, key)
          if (!success) return false;
-         pionQuark?.trigger()
+         
+         const update =initModelUpdate(modelQuark)
+
+         pionQuark?.trigger(update)
          if (key in target) {
-            triggerKeysChange(modelQuark, key)
+            triggerKeysChange(modelQuark, key, update)
          }
-         modelQuark.trigger()
+         modelQuark.trigger(update)
          //TODO: record mutation?
          return true;
       },
 
       ownKeys() {
-         if (isTracking())
-            trackParticle(asAtomicOp(modelQuark, INTERNAL_OP, 'ownKeys')) //TODO: trigger when any new property is added or deleted
-         return Reflect.ownKeys(state.getActiveTarget())
+         modelQuark.trackOp(INTERNAL_OP, 'ownKeys') //TODO: trigger when any new property is added or deleted
+         return Reflect.ownKeys(state.active)
       },
 
       getPrototypeOf(target) {
-         return Reflect.getPrototypeOf(target)
+         return Reflect.getPrototypeOf(initialTarget)
       },
 
       setPrototypeOf(target, proto) {
@@ -589,13 +559,14 @@ export function createIonizedModel(
       },
 
       isExtensible(target) {
-         trackParticle(asAtomicOp(modelQuark, INTERNAL_OP, 'isExtensible'))
-         return Reflect.isExtensible(initialTarget)
+         modelQuark.trackOp(INTERNAL_OP, 'isExtensible')
+         return Reflect.isExtensible(state.active)
       },
 
       preventExtensions(target) {
-         $atomicOp(modelQuark, INTERNAL_OP, 'isExtensible')?.trigger()
-         return Reflect.preventExtensions(initialTarget)
+         const update = initModelUpdate(modelQuark)
+         $atomicOp(modelQuark, INTERNAL_OP, 'isExtensible')?.trigger(update)
+         return Reflect.preventExtensions(state.active)
       },
 
    }) as unknown as IonizedModel
@@ -613,9 +584,9 @@ export function createIonizedModel(
 
 export type ProxyPropertyMap = Record<ProxyKey, (() => any) | undefined>
 
-function triggerKeysChange(quark: ModelQuark, key: ProxyKey) {
-   $atomicOp(quark, INTERNAL_OP, 'ownKeys')?.trigger()
-   $atomicOp(quark, KEY_IN_OP, key)?.trigger()
+function triggerKeysChange(quark: ModelQuark, key: ProxyKey, update: Update) {
+   $atomicOp(quark, INTERNAL_OP, 'ownKeys')?.trigger(update)
+   $atomicOp(quark, KEY_IN_OP, key)?.trigger(update)
    //QUESTION: shoule this trigger the whole model? I don't think so?
 }
 
@@ -676,12 +647,12 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion,
 // TODO:
 // [] ionize objects
 
-function toIonKey(key: ProxyKey, initialTarget: AnyObject) {
-   if (typeof key !== 'string') return;
-   const ionKey = '$' + key
-   if (ionKey in initialTarget && !isIon(initialTarget[ionKey])) return;
-   return ionKey;
-}
+// function toIonKey(key: ProxyKey, initialTarget: AnyObject) {
+//    if (typeof key !== 'string') return;
+//    const ionKey = '$' + key
+//    if (ionKey in initialTarget && !isIon(initialTarget[ionKey])) return;
+//    return ionKey;
+// }
 
 // array integer properties should not absorb ions
 
@@ -716,26 +687,49 @@ function getPionQuark(proxyProto: ProxyPropertyMap, key: ProxyKey) {
    return undefined;
 }
 
+/**
+ * Case: ion access, ion already initialized (must retreive ion)
+ * Case: ion access, ion not initialized
+ * Case: state access, ion not initialized (initialize state access only)
+ * 
+ * @param proxyProto 
+ * @param key 
+ * @param ionKey 
+ * @param state 
+ * @param quark 
+ * @param propertyDescriptor 
+ * @returns 
+ */
 function initializePion(
    proxyProto: ProxyPropertyMap,
-   key: ProxyKey,
+   stateKey: ProxyKey,
    ionKey: string | undefined,
    state: ModelState,
    quark: ModelQuark,
    propertyDescriptor: PropertyDescriptor
 ) {
-   console.log('&&& initializePion')
-   console.log('&&& key', key)
-   console.log('&&& ionKey', ionKey)
-   const ion = getPion(proxyProto, key) ?? createPion(proxyProto, key, state, quark, propertyDescriptor)
    if (ionKey) {
-      Object.defineProperty(proxyProto, ionKey, {
-         enumerable: false,
-         configurable: propertyDescriptor.configurable,
-         value: ion,
-         writable: false
-      })
+      return initializePionAccess(proxyProto, stateKey, ionKey, state, quark, propertyDescriptor)
+   } else {
+      return createPion(proxyProto, stateKey, state, quark, propertyDescriptor)
    }
+}
+
+function initializePionAccess(
+   proxyProto: ProxyPropertyMap,
+   stateKey: ProxyKey,
+   ionKey: string,
+   state: ModelState,
+   quark: ModelQuark,
+   propertyDescriptor: PropertyDescriptor
+) {
+   const ion = getPion(proxyProto, stateKey) ?? createPion(proxyProto, stateKey, state, quark, propertyDescriptor)
+   Object.defineProperty(proxyProto, ionKey, {
+      enumerable: false,
+      configurable: propertyDescriptor.configurable,
+      value: ion,
+      writable: false
+   })
    return ion;
 }
 
@@ -746,12 +740,12 @@ function createPion(
    quark: ModelQuark,
    propertyDescriptor: PropertyDescriptor
 ) {
-   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key, quark.clone), true, quark))
+   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), true, quark))
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
       configurable: propertyDescriptor.configurable,
       get: ion,
-      set: Object.getOwnPropertyDescriptor(ion, 'state')!.set
+      set: Object.getOwnPropertyDescriptor(ion, 'state')!.set //NOTE: equivalent performance to storing setter on quark
    })
    return ion
 }
@@ -933,21 +927,21 @@ export function isMethod(value: any): value is Function {
 
 
 
-export function accessMethod(
-   target: AnyObject,
-   proxy: IonizedModel,
-   receiver: AnyObject,
-   key: ProxyKey,
-   boundMethodMap: Map<ProxyKey, Function>,
-   method?: Function
-) {
-   return getBoundMethod(
-      proxy,
-      key,
-      boundMethodMap,
-      method
-   )
-}
+// export function accessMethod(
+//    target: AnyObject,
+//    proxy: IonizedModel,
+//    receiver: AnyObject,
+//    key: ProxyKey,
+//    boundMethodMap: Map<ProxyKey, Function>,
+//    method?: Function
+// ) {
+//    return getBoundMethod(
+//       proxy,
+//       key,
+//       boundMethodMap,
+//       method
+//    )
+// }
 
 //FIX: figure out where to call traceableMethodWrap
 // function getBoundMethod(
@@ -1048,30 +1042,37 @@ function useMutatingOp(
    const o = {
       [fnName](...args: any) {
          const _args = input(args)
-         const target = useModel ? model : state.getActiveTarget()
+         const target = useModel ? model : state.active
          const preop = config.preop?.(target, _args)
 
-         const output = transformOutput(op.apply(target, _args), model); // perform mutation
+         const update = initModelUpdate(quark)
 
-         if (shouldTrigger && !shouldTrigger(preop)) return output;
+         let output: any;
+         try {
+            pushUpdate(update)
+            output = transformOutput(op.apply(target, _args), model); // perform mutation
+         }
+         finally {
+            popUpdate()
+            if (shouldTrigger && !shouldTrigger(preop)) return output;
 
-         storeSnapshot(quark)
+            // storeSnapshot(quark)
 
-         const update = initUpdate()
+            // recordMutation(quark.asMutable, new Mutation(
+            //    model,
+            //    opKey,
+            //    _args,
+            //    output,
+            //    preop
+            // ))
 
-         recordMutation(quark.asMutable, new Mutation(
-            model,
-            opKey,
-            _args,
-            output,
-            preop
-         ))
+            trigger?.(new TriggerableModel(quark, update), _args, preop);
 
-         trigger?.(new TriggerableModel(quark, update), _args, preop);
+            // runSyncEffects()
 
-         // runSyncEffects()
+            return output;
+         }
 
-         return output;
       }
    }
    return o[fnName]
@@ -1087,68 +1088,45 @@ export class TriggerableModel {
    }
 
    trigger() {
-      const quark = this.quark;
-      prepPendingUpdate(quark, this.update)
-      quark.trigger()
+      this.quark.trigger(this.update) //TODO: only trigger if watched? but what about preventing overlapping mutations?
    }
 
    // triggerProperty(key: PropertyKey) {
    //    const pion = $atomicPion(this.quark, key)
    //    if (pion) {
-   //       prepPendingUpdate(pion, this.update)
+   //       initModelUpdate(pion, this.update)
    //       pion.trigger()
    //    }
    // }
 
    triggerOp(op: PropertyKey, entryKey: unknown) {
-      const atomicOp = $atomicOp(this.quark, op, entryKey)
-      if (atomicOp) {
-         prepPendingUpdate(atomicOp, this.update)
-         atomicOp.trigger()
-      }
+         $atomicOp(this.quark, op, entryKey)?.trigger(this.update)
    }
 
    triggerAllOps(op: PropertyKey) {
       const ops = getAtomicOps(this.quark, op)
       if (ops)
          for (const [_, op] of ops) {
-            prepPendingUpdate(op, this.update)
-            op.trigger()
+            op.trigger(this.update)
          }
    }
 }
 
 
 
-function prepPendingUpdate(op: AtomicQuark | ModelQuark, update: Update) {
-   // if (update.lazy) {
-   //    this.pState = state;
+function initModelUpdate(quark: ModelQuark) {
+   const update = initUpdate()
+   const state = quark.state
 
-   //    update.queue(() => {
-   //       this.state = this.pState;
-   //       this.pState = NULL
-   //       this.pendingUpdate = null;
-   //    })
-
-   //    if (this.pendingUpdate && this.pendingUpdate !== update) {
-   //       this.pendingUpdate.cancel()
-   //    }
-   // }
-   // else {
-   if (op.pendingUpdate && op.pendingUpdate !== update) { // cancel modelQuark.pendingUpdate?
-      console.trace('cancelling', op, update)
-      op.pendingUpdate.cancel()
-      op.pendingUpdate = null;
-      // pion.pState = NULL;
-   }
-   // pion.state = state;
-   // }
-   op.pendingUpdate = update
-   console.trace('set pending update')
    update.queue(() => {
-      console.log('mutate model update done')
-      op.pendingUpdate = null
+      state.commitChange()
    })
+
+   update.onCancel(() => {
+      state.cancelChange()
+   })
+
+   return update;
 }
 
 // if (op === '[[get]]') {
@@ -1156,7 +1134,7 @@ function prepPendingUpdate(op: AtomicQuark | ModelQuark, update: Update) {
 //    return function triggerPion(this: { update: Update }) {
 //       const pion = $atomicPion(model, entryKey)
 //       if (pion) {
-//          prepPendingUpdate(pion, this.update)
+//          initModelUpdate(pion, this.update)
 //          pion.trigger()
 //       }
 //    }
@@ -1165,14 +1143,14 @@ function prepPendingUpdate(op: AtomicQuark | ModelQuark, update: Update) {
 //    return function triggerOp(this: { update: Update }) {
 //       const atomicOp = $atomicOp(model, op, entryKey)
 //       if (atomicOp) {
-//          prepPendingUpdate(atomicOp, this.update)
+//          initModelUpdate(atomicOp, this.update)
 //          atomicOp.trigger()
 //       }
 //    }
 // }
 // return function triggerModel(this: { update: Update }) {
 //    const quark = quarkOf(model)
-//    prepPendingUpdate(quark, this.update)
+//    initModelUpdate(quark, this.update)
 //    quark.trigger()
 // }
 
@@ -1207,52 +1185,52 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 }
 
 
-export function reactiveSetter(
-   model: IonizedModel,
-   initialTarget: AnyObject,
-   key: string | symbol,
-   value: unknown,
-   setOp: (key: ProxyKey, value: any) => void,
-   proxyProto: ProxyPropertyMap
-) {
-   if (isIonKey(key)) {
-      //TODO:
-   }
-   else {
-      //TODO: new property
-      const ion = proxyProto[key] ?? (proxyProto[key] = createPion(model, initialTarget, key, initialTarget[key]))
+// export function reactiveSetter(
+//    model: IonizedModel,
+//    initialTarget: AnyObject,
+//    key: string | symbol,
+//    value: unknown,
+//    setOp: (key: ProxyKey, value: any) => void,
+//    proxyProto: ProxyPropertyMap
+// ) {
+//    if (isIonKey(key)) {
+//       //TODO:
+//    }
+//    else {
+//       //TODO: new property
+//       const ion = proxyProto[key] ?? (proxyProto[key] = createPion(model, initialTarget, key, initialTarget[key]))
 
-      // set ion
-      if (hasQuark(ion) && 'state' in ion) {
-         const ionQuark = quarkOf(ion) as AtomicIonQuark
-         ionQuark.asPion!.setPionState(quarkOf(model), value)
-         // ionQuark.addModel(quarkOf(model)) 
-         // ion.state = value; //TODO: deionize?
-         return true;
-      }
-      else {
-         return false;
-      }
+//       // set ion
+//       if (hasQuark(ion) && 'state' in ion) {
+//          const ionQuark = quarkOf(ion) as AtomicIonQuark
+//          ionQuark.asPion!.setPionState(quarkOf(model), value)
+//          // ionQuark.addModel(quarkOf(model)) 
+//          // ion.state = value; //TODO: deionize?
+//          return true;
+//       }
+//       else {
+//          return false;
+//       }
 
-   }
+//    }
 
-   const quark = quarkOf(model)
+//    const quark = quarkOf(model)
 
-   if (quark.isNewProperty(key)) {
-      quark.registerNewProperty(key)
-      setOp(key, value)
-      return true;
-   }
+//    if (quark.isNewProperty(key)) {
+//       quark.registerNewProperty(key)
+//       setOp(key, value)
+//       return true;
+//    }
 
-   // const oldState = target[key]; //TODO: make sure key is correct for absorbed ions
+//    // const oldState = target[key]; //TODO: make sure key is correct for absorbed ions
 
-   // if (isIon(oldState)) {
-   //    return setAbsorbedIonState(model, key, oldState, value) // we let absorbed ion to decide whether to ionize value or not
-   // }
+//    // if (isIon(oldState)) {
+//    //    return setAbsorbedIonState(model, key, oldState, value) // we let absorbed ion to decide whether to ionize value or not
+//    // }
 
-   // setOp(key, value)
-   // return true;
-}
+//    // setOp(key, value)
+//    // return true;
+// }
 
 
 // PARTICLE

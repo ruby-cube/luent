@@ -37,10 +37,11 @@ export function isIon(value: unknown): value is Ion {
 
 export function $_derivation_ion(fn: () => unknown) {
    //@ts-expect-error
-   fn[QUARK] = true;
+   fn[QUARK] = {inert: false};
    return fn
 }
 
+//@ts-expect-error
 window.$_derivation_ion = $_derivation_ion;
 
 

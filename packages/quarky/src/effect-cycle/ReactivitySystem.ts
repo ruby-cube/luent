@@ -477,7 +477,15 @@ export class Update {
 //    return $priority();
 // }
 
-export const updateStack: Update[] = [];
+const updateStack: Update[] = [];
+
+export function pushUpdate(update: Update){
+   return updateStack.push(update)
+}
+
+export function popUpdate(){
+   return updateStack.pop()
+}
 
 export function getActiveUpdate() {
    return updateStack.at(-1)
@@ -495,8 +503,8 @@ export function initUpdate(timeMargin: number = 0, lazy: boolean = false) {
 
 // const updatePriority = updateManager.updatePriorities[timeMargin] ?? updateManager.addUpdatePriority(timeMargin)
 // const queue = updatePriority.queue;
-
-export function update<T>(fn: () => T, options?: { timeMargin?: number, lazy?: number }): Promise<T> {
+//TODO: return type should be based on options--whether it's lazy
+export function update<T, OPT>(fn: () => T, options?: { timeMargin?: number, lazy?: number }): Promise<T> | T {
    // const update =  new Update(timeMargin, getFlask());
    const timeMargin = options?.lazy ?? options?.timeMargin ?? 100;
    const update = initUpdate(timeMargin, !!(options?.lazy)) //FIX: because Interval wraps context, the loading update is passed down

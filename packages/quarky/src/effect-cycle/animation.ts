@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@rue/flask";
-import { Update, updateStack } from "./ReactivitySystem";
+import { popUpdate, pushUpdate, Update } from "./ReactivitySystem";
 
 // let forAnimation = false;
 // export function $forAnimation() {
@@ -30,11 +30,11 @@ export function ThrottledHover() {
             hoverID = null;
             const update = new Update(16.7, flask)
             try {
-               updateStack.push(update)
+               pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
             }
             finally {
-               updateStack.pop()
+               popUpdate()
             }
             // })
          })
@@ -52,11 +52,11 @@ export function ThrottledHover() {
             unhoverID = null;
             const update = new Update(16.7, flask)
             try {
-               updateStack.push(update)
+               pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
             }
             finally {
-               updateStack.pop()
+               popUpdate()
             }
             // })
          })
@@ -81,11 +81,11 @@ export function SharedThrottledUpdate() {
                frameID = null;
                const update = new Update(16.7, flask)
                try {
-                  updateStack.push(update)
+                  pushUpdate(update)
                   fn(); // Execute the original function with its context and arguments
                }
                finally {
-                  updateStack.pop()
+                  popUpdate()
                }
             })
          })
@@ -109,11 +109,11 @@ export function ThrottlePointer(fn: Function) {
             frameID = null;
             const update = new Update(16.7, flask)
             try {
-               updateStack.push(update)
+               pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
             }
             finally {
-               updateStack.pop()
+               popUpdate()
             }
       })
       // Otherwise, the function call is ignored (throttled)
@@ -135,11 +135,11 @@ export function ThrottledUpdate(fn: Function) {
             frameID = null;
             const update = new Update(16.7, flask)
             try {
-               updateStack.push(update)
+               pushUpdate(update)
                fn(); // Execute the original function with its context and arguments
             }
             finally {
-               updateStack.pop()
+               popUpdate()
             }
          })
       })
@@ -197,11 +197,11 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
       setImmediate(() => {
          try {
             const update = new Update(16.7, flask)
-            updateStack.push(update)
+            pushUpdate(update)
             prepFrame(time)
          }
          finally {
-            updateStack.pop()
+            popUpdate()
          }
       })
    }

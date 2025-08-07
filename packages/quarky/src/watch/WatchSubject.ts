@@ -122,7 +122,6 @@ class IonizedModelSubject extends Compound implements WatchSubject {
    constructor(
       private model: IonizedModel,
    ) {
-      console.log('watched model :)')
       super()
       const modelQuark = quarkOf(model)
       this.atoms.push(modelQuark)
@@ -135,7 +134,6 @@ class IonizedModelSubject extends Compound implements WatchSubject {
 
    linkEffect(effect: Effect) {
       this.forEachAtom(atom => {
-         console.log('watched model', atom)
          linkEffectToAtom(atom, effect)
       })
    }
@@ -151,7 +149,8 @@ function trackPions(model: IonizedModel) {
    const compound = getActiveTracker()
    if (!compound) throw new Error('must call trackPions within trackers')
    const target = quarkOf(model).rawTarget;
-   for (const key in target) {
+   const keys = Reflect.ownKeys(target)
+   for (const key of keys) {
       const value = target[key]
       //TODO: what about methods?
       if (isIon(value)) {
@@ -323,7 +322,6 @@ export class IonicTaskSubject extends IonicCompound implements WatchSubject {
    linkEffect(effect: Effect): void {
       this.effect = effect;
       this.forEachAtom(atom => {
-         console.log('ionic task atom', atom)
          linkEffectToAtom(atom, effect)
       })
    }

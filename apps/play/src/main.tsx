@@ -2,7 +2,7 @@
 // // console.log(jsx)
 // // import { App } from './App';
 import './style.css'
-import './demos/SierpinskiTriangles.css'
+// import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -199,7 +199,7 @@ import { TestNormalizeToRenderFunction } from './TestNormalizeToRenderFunction';
 
 // console.log(obj)
 
-const app = createApp(TestCount)
+const app = createApp(List)
 
 app.mount('#app')
 

@@ -6,7 +6,7 @@ import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
 import { NodePod, removeDOMNodes } from "./node/NodePod";
 import { Flask } from "@rue/flask";
 import { MU, muIonsStack } from "./component/Input";
-import { Ion, Update, updateStack } from "@rue/quarky";
+import { Ion, popUpdate, pushUpdate, Update } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
 import { processJSXOutput } from "./node/setUpNodeEntities";
 import { mountNodeEntities } from "./node/mountNodeKits";
@@ -53,7 +53,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
                }
             }
             const update = new Update(1000, flask)
-            updateStack.push(update)
+            pushUpdate(update)
             setComponentAttributes(attributes)
             muIonsStack.push(muIons)
             pushCommons(appCommons)
@@ -65,8 +65,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             finally {
                setComponentAttributes(undefined)
                muIonsStack.pop()
-               updateStack.pop()
-               console.log('update stack', updateStack)
+               popUpdate()
                // if (remountable) markMountPhase()
                // component.setUp(root, nodePod)
                // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?

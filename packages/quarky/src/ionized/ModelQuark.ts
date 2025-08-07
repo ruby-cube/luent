@@ -1,17 +1,16 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { IonizedModel } from "./IonizedModel"
-import { isWatchableEntity, trigger, WatchedAtom } from "../watch/WatchedAtom"
-import { Quark, quarkOf, QuarkOf } from "../Quark"
+import { trigger, WatchedAtom } from "../watch/WatchedAtom"
+import {  QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
-import { TrackedOps } from "./AtomicOp"
+import { asAtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
 import { Update } from "../effect-cycle/ReactivitySystem"
-import { Ion, isIon } from "../ion/Ion"
 import { AtomicIonQuark, AtomicQuark, ModelState, NULL } from "../ion/AtomicIon"
-import { Compound, popTracker, pushTracker } from "../compound/Compound"
+import { trackParticle } from "../compound/Compound"
 
 
 
@@ -126,16 +125,22 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
 
    registerPion(key: PropertyKey, pion: AtomicIonQuark) {
       this.pions[key] = pion
+      return pion;
+   }
+
+   trackOp(opKey: PropertyKey, entryKey: unknown){
+      trackParticle(this.registerOp(opKey, entryKey, asAtomicOp(this, opKey, entryKey)))
    }
 
    registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicQuark) {
       const ops = this.pions[key] ?? new Map();
       if (!(ops instanceof Map)) {
          debug.error(`${String(key)} is not an op`)
-         return;
+         return atomicOp;
       }
       this.pions[key] = ops;
       ops.set(entryKey, atomicOp)
+      return atomicOp;
    }
 
    // unregisterPion(key: PropertyKey){
@@ -171,7 +176,7 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
          const initialized = true;
          const configs = getIonizedMethodDef(this.rawTarget, op);
          if (configs)
-            for (const config of configs) {
+            for (const config of configs) { //FIX:
                const mutatingOps = config.mutatingOps
                if (mutatingOps && op in mutatingOps) {
                   const mutatingOp = mutatingOps[op]

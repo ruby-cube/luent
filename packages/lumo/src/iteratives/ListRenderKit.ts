@@ -17,6 +17,7 @@ import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
 import { queueInternalRender, PRERENDER, watchForRender } from "../render-cycle";
 import { Compound, detachedCall, popTracker, pushTracker } from "../../../quarky/src/compound/Compound";
+import { quarkOf } from "../../../quarky/src/Quark";
 
 
 type Index = number
@@ -130,7 +131,7 @@ export class ListRenderKit {
 
 
       function createClone(subject: AnyObject, state: AnyObject) {
-         return isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
+         return isIonizedModel(state) ? shallowClone(quarkOf(state).state.current) : undefined
          // return isIon(subject) && isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
       }
 
@@ -154,7 +155,7 @@ export class ListRenderKit {
          const _prevState = clone ?? toRaw(previous)
          clone = createClone(data, current)
          // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
-         const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
+         const { indicesToRemove, insertAndMoveKit, noChange } = diff(isIonizedModel(current)? quarkOf(current).state.current : current, _prevState, getUID)
          if (noChange) { //TODO: should we use hasChanged function in watch options instead?
             console.log('no list change', current, _prevState)
             return;

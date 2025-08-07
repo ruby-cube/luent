@@ -216,7 +216,7 @@ const arrayLengthMutatingOp: TriggeringOpDef = {
    //       trigger(model),
    //       trigger(model, '[[get]]', 'length'),
    //    ])
-   triggers: (model, args, { prevLength, target }) => []
+   // triggers: (model, args, { prevLength, target }) => []
 }
 
 
@@ -568,6 +568,7 @@ function deionizeArgs(args: any[]) {
 
 
 export function isIntegerKey(key: unknown) {
+   if (typeof key === 'symbol') return false;
    const keyAsNumber = Number(key);
    if (isNaN(keyAsNumber)) return false;
    if (Number.isInteger(keyAsNumber)) return true

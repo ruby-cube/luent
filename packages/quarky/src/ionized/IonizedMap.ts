@@ -1,6 +1,6 @@
 import { toRaw } from "./ionize";
 import { isNotSameSize } from "./IonizedSet";
-import { enlistIonizedMethods, trigger, triggerAll } from "./IonizedMethods";
+import { enlistIonizedMethods } from "./IonizedMethods";
 import { deleteOp, hasMaybeIonized, trackableIterative, trackableOp, trackableOpWithCallback, trackOp } from "./OpDefinitions";
 import { noop } from "@rue/utils";
 import { getIonizedModel, maybeIonize } from "./IonizedModel";
@@ -151,7 +151,9 @@ export function installIonicMap() {
             ionizedModel.set(key, value)
          }
       },
-
+      size: {
+         get: { track: trackOp }
+      }
    })
 }
 

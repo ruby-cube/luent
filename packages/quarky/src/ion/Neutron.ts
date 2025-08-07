@@ -69,6 +69,7 @@ export function createAtomicNeutron(
 
 
 export function isInertIon(value: unknown): value is { [QUARK]: { inert: true } } {
+   console.log('isInertIon?', value)
    if (!hasQuark(value)) return false;
    const quark = quarkOf(value)
    return 'inert' in quark && quark.inert === true;

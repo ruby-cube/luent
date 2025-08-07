@@ -150,7 +150,7 @@ export function installIonicSet() {
          }
       },
       size: {
-         track: trackOp
+         get: { track: trackOp }
       }
       // }
    })

@@ -3,15 +3,14 @@ import { ionize, toRaw } from "./ionize"
 import { TrackableOpDef } from "./IonizedMethods"
 import { getIonizedModel, IonizedModel, maybeIonize } from "./IonizedModel"
 import { quarkOf } from "../Quark"
-import { asAtomicOp } from "./AtomicOp"
 import { trackParticle } from "../compound/Compound"
 
 const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)
 export const trackModel = (model: IonizedModel) => {
    trackParticle(quarkOf(model))
 }
-export const trackOp = (model: IonizedModel, op: PropertyKey, args: unknown[]) => {
-   trackParticle(asAtomicOp(quarkOf(model), op, args![0]))
+export function trackOp(model: IonizedModel, op: PropertyKey, args: unknown[]) {
+   quarkOf(model).trackOp(op, args![0])
 }
 
 
@@ -43,9 +42,9 @@ export function hasMaybeIonized(
    return fail;
 }
 
-   export function deleteOp(this: Set<unknown> | Map<unknown, unknown>, key: unknown) {
-      const deleteOp = this.delete.bind(this)
-      return hasMaybeIonized(key, this as Set<unknown>, {
+export function deleteOp(this: Set<unknown> | Map<unknown, unknown>, key: unknown) {
+   const deleteOp = this.delete.bind(this)
+   return hasMaybeIonized(key, this as Set<unknown>, {
       passRaw: deleteOp,
       passIonized: deleteOp,
       fail: false

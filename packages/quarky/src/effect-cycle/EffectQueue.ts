@@ -2,7 +2,7 @@ import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { EffectCycle, Phase, SYNC } from "./EffectCycle";
 import { $_wrap_with_context } from "@rue/flask";
-import { updateStack } from "./ReactivitySystem";
+import { popUpdate, pushUpdate } from "./ReactivitySystem";
 
 const PRERENDER = 0 //QUESTION: Should EffectCycle and EffectQueue belong to Lumo also??
 
@@ -206,11 +206,11 @@ export class PhaseQueue {
                   requestIdleCallback(() => {
                      let _promise;
                      try {
-                        updateStack.push(cycle.update)
+                        pushUpdate(cycle.update)
                         _promise = effect.run?.();
                      }
                      finally {
-                        updateStack.pop()
+                        popUpdate()
                         if (_promise instanceof Promise) _promise.then(resolve)
                         else resolve(undefined)
                         cycle.prerenderCount--
