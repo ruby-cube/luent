@@ -7,13 +7,13 @@ export function TestIfElse(){
    return component(
       <>
       <button on:click={e=>$active.state = !$active()}>toggle</button>
-      {If($active, 'create',
+      {If($active, 'show',
          <div>hey</div>
       )}
-      {ElseIf($ready, 'create',
+      {/* {ElseIf($ready, 'create',
          <div>ho</div>
-      )}
-      {Else('create',
+      )} */}
+      {Else('show',
          <div>hi</div>
       )}
       </>

@@ -9,7 +9,7 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask, getFlask } from "@rue/flask";
-import { queueInternalRender, PRERENDER, RENDER, SYNC, watchForRender } from "../render-cycle";
+import {  queueInternalRender, PRERENDER, RENDER, SYNC, watchForRender } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
@@ -20,7 +20,9 @@ import { ConditionalSeriesKit, toRenderTransient, wrapToPreserve } from "../dyna
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
 //TODO: rename TransitionNode to ???
-
+// function queueInternalRender(fn){
+//    fn()
+// }
 
 function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, $condition?: Ion<Booleanny>): DynamicConditionalRenderKit {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
@@ -171,7 +173,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let prevIncomingNodes: TransitionNode[];
 
       // set up watcher for updates
-      watchForRender($activeIndex, function updateConditional({current: activeIndex, previous: prevIndex}) {
+      watchForRender($activeIndex, function updateConditional({ current: activeIndex, previous: prevIndex }) {
          console.log('update conditional?', activeIndex, prevIndex)
 
          if (prevIndex === activeIndex) {
@@ -389,6 +391,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          flask.emitDiscard() //
 
          queueInternalRender(() => {
+             console.log('qIR: removeDOMNodes')
             // remove from 
             removeDOMNodes(pod)
             pod.clear() //
@@ -422,16 +425,21 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      this.render(kit, parent, fragment)
-      nodePod.activate()
+      queueInternalRender(()=>{
+         this.render(kit, parent, fragment)
+         nodePod.activate()
+      }, this.outerFlask)
+      
       if (isInitialMount)
-         queueInternalRender(() =>
+         queueInternalRender(() => {
+       console.log('qIR: emitInitialMount')
             flask.emitInitialMount()
-            , this.outerFlask)
+         }, this.outerFlask)
       else
-         queueInternalRender(() =>
+         queueInternalRender(() => {
+      console.log('qIR: emitRemount')
             flask.emitRemount() // remount preserved watchers etc.
-            , this.outerFlask)
+         }, this.outerFlask)
    }
 }
 
@@ -451,6 +459,7 @@ export function mountConditional(
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
    queueInternalRender(() => {
+      console.log('qIR: mountDOMNodes')
       mountDOMNodes(pod, parent, _fragment)
    }, flask)
 }

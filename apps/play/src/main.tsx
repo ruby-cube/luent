@@ -210,7 +210,7 @@ import { TestIfElse } from './demos/TestIfElse';
 
 
 
-const app = createApp(TestIfElse)
+const app = createApp(MountIf)
 
 app.mount('#app')
 
