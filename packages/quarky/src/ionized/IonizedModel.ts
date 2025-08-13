@@ -335,6 +335,7 @@ export function createIonizedModel(
    initialTarget: AnyObject,
    inertSchema: AnyObject | undefined,
 ) {
+   console.trace('create ionized model', initialTarget)
 
    const { clone, isAbsorbedIon } = getIonizedConfig(initialTarget)
 
@@ -350,6 +351,7 @@ export function createIonizedModel(
 
       let originalKey = key in target ? key : stateKey in target ? stateKey : undefined
       if (!originalKey) {
+         console.log('not original', key)
          if (op === SET) {
             if (isAbsorbedIon(value, key)) {
                //TODO: absorbed ion
@@ -474,9 +476,9 @@ export function createIonizedModel(
       return false;
    }
 
-   const ionizedModel = new Proxy(proxyProto, {
+   const ionizedModel = new Proxy(initialTarget, {
 
-      get(proxyProto, key, receiver) {
+      get(target, key, receiver) {
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          if (key in proxyProto) {
             return proxyProto[key]
@@ -488,7 +490,8 @@ export function createIonizedModel(
          return proxyProto[key]
       },
 
-      set(proxyProto, key, value) {
+      set(target, key, value) {
+         console.log('>>> set', key, value)
          if (key in proxyProto) {
             proxyProto[key] = value;
             return true;
@@ -502,7 +505,8 @@ export function createIonizedModel(
          return writable;
       },
 
-      has(proxyProto, key) {
+      has(target, key) {
+         if (key === QUARK) return true;
          modelQuark.trackOp('[[in]]', key)
          //TODO: need to figure out how to deal with ion access keys
          return key in proxyProto || (key in initialTarget)
@@ -510,7 +514,7 @@ export function createIonizedModel(
 
       getOwnPropertyDescriptor(target, key) {
          //TODO: track
-         return Reflect.getOwnPropertyDescriptor(target, key) //TODO: adjust key for absorbed ion
+         return Object.getOwnPropertyDescriptor(target, key) //TODO: adjust key for absorbed ion
       },
 
       defineProperty(target: AnyObject, key, attributes) {
@@ -529,14 +533,15 @@ export function createIonizedModel(
       },
 
       deleteProperty(target: AnyObject, key) {
-         const pionQuark = getPionQuark(target, key)
+         console.log(">>> delete", key)
+         const pionQuark = getPionQuark(proxyProto, key)
          const success = Reflect.deleteProperty(state.active, key)
          if (!success) return false;
-         
-         const update =initModelUpdate(modelQuark)
+
+         const update = initModelUpdate(modelQuark)
 
          pionQuark?.trigger(update)
-         if (key in target) {
+         if (key in proxyProto) {
             triggerKeysChange(modelQuark, key, update)
          }
          modelQuark.trigger(update)
@@ -550,7 +555,7 @@ export function createIonizedModel(
       },
 
       getPrototypeOf(target) {
-         return Reflect.getPrototypeOf(initialTarget)
+         return Reflect.getPrototypeOf(target)
       },
 
       setPrototypeOf(target, proto) {
@@ -1100,7 +1105,7 @@ export class TriggerableModel {
    // }
 
    triggerOp(op: PropertyKey, entryKey: unknown) {
-         $atomicOp(this.quark, op, entryKey)?.trigger(this.update)
+      $atomicOp(this.quark, op, entryKey)?.trigger(this.update)
    }
 
    triggerAllOps(op: PropertyKey) {

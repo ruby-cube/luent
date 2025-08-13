@@ -129,6 +129,7 @@ class IonizedModelSubject extends Compound implements WatchSubject {
    }
 
    trackedCall() {
+      //TODO: retrack pions??
       return this.model
    }
 
@@ -214,17 +215,33 @@ export class IonSubject extends IonicCompound implements WatchSubject {
    private retrackedCall() {
       const retrack = this.retrack;
       if (retrack) {
-         this.effect.unlink()
+         this.effect.unlinkAtoms()
          const value = detachedCall(() => this.retrackCall(this.ion))
+         if (isIonizedModel(value)) { 
+            pushTracker(this)
+            trackPions(value)
+            popTracker()
+         }
+         console.log(">>> retracking atoms", this.atoms)
          this.forEachAtom(atom => {
             linkEffectToAtom(atom, this.effect)
          })
          this.relinkValue(value)
          return value;
       }
-      const value = this.ion()
-      this.relinkValue(value)
-      return value;
+      else {
+         const value = this.ion()
+         if (isIonizedModel(value)) {
+            pushTracker(this)
+            trackPions(value)
+            popTracker()
+         }
+         this.forEachAtom(atom => {
+            linkEffectToAtom(atom, this.effect)
+         })
+         this.relinkValue(value)
+         return value;
+      }
    }
 
    private effect!: Effect;
@@ -243,18 +260,14 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       const prevAtom = this.valueAtom;
       const atom = this.valueAtom = isWatchableEntity(value) ? quarkOf(value) : undefined
 
-      if (atom === prevAtom)
-         return;
-
-      // relink effects
       if (prevAtom) {
-         this.effect.unlink()
+         this.effect.unlink(asWatchedAtom(prevAtom))
       }
+      
       if (atom) {
-         asWatchedAtom(atom).link(this.effect)
+         this.effect.link(asWatchedAtom(atom))
       }
    }
-
 
 }
 
@@ -312,7 +325,7 @@ export class IonicTaskSubject extends IonicCompound implements WatchSubject {
       if (!this.retrack) return this.ionicEffect()
       const ionicEffect = this.ionicEffect
       const effect = this.effect
-      effect.unlink()
+      effect.unlinkAtoms()
       detachedCall(() => this.retrackCall(ionicEffect))
       this.forEachAtom(atom => {
          linkEffectToAtom(atom, effect)

@@ -2,7 +2,7 @@ import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { EffectCycle, Phase, SYNC } from "./EffectCycle";
 import { $_wrap_with_context } from "@rue/flask";
-import { popUpdate, pushUpdate } from "./ReactivitySystem";
+import { $activeUpdate, popUpdate, pushUpdate } from "./ReactivitySystem";
 
 const PRERENDER = 0 //QUESTION: Should EffectCycle and EffectQueue belong to Lumo also??
 
@@ -34,6 +34,7 @@ type TaskFn = (...args: any[]) => unknown
 // }
 
 export class Effect {
+   running = false
    constructor(
       public run: TaskFn | null,
       public phase: Phase
@@ -49,20 +50,27 @@ export class Effect {
 
    link(atom: WatchedAtom) {
       if (this.isLinked(atom)) return;
+      if (this["~updateList"]) console.trace("&&* linking updateList effect", atom)
       atom.link(this)
-      this.active = true;
       this.atoms.add(atom);
    }
 
    destroy() {
+      if (this["~updateList"]) console.trace("&&* destroying updateList effect", atom)
       this.run = null;
-      this.unlink()
+      this.unlinkAtoms()
    }
 
-   unlink() {
-      this.active = false;
-      if (this.requeued) console.warn('unlinking requeued effect')
-      if (this.queued) console.warn('unlinking queued effect')
+   unlink(atom: WatchedAtom) {
+      if (!this.isLinked(atom)) return;
+      if (this["~updateList"]) console.trace("&&* unlinking updateList effect", atom)
+      this.requeued = false; //QUESTION: not sure if this is necessary
+      this.atoms.delete(atom)
+   }
+
+   //FIX: unlinking needs to remove effect from the atom's phase queue
+   unlinkAtoms() {
+      if (this["~updateList"]) console.trace("&&* unlinking updateList effect from atoms", this)
       this.requeued = false;
       // this.queued = false;
       this.atoms.clear()
@@ -85,7 +93,6 @@ export function createOneoff(fn: () => void, phase: Phase) {
       effect.destroy()
    }
    effect.run = oneoff
-   effect.active = true;
 
    if (__DEV__) oneoff.__DEV__fn = fn;
 
@@ -120,15 +127,16 @@ let effectStackCount = 0;
 
 
 export class PhaseQueue {
-   effects: Effect[] = []
-   nextEffects: Effect[] | undefined
+   effects: Effect[] | undefined;
+   nextEffects: Effect[] = []
 
-   runningEffects: boolean = false;
+   // runningEffects: boolean = false;
 
    retained: Set<Effect> = new Set() // for sync effects
 
    constructor(
       private phase: Phase,
+      private atom?: WatchedAtom
    ) {
 
    }
@@ -173,16 +181,22 @@ export class PhaseQueue {
    // }
 
    runEffects(cycle: EffectCycle, completed: Set<Effect> | undefined) {
-      this.runningEffects = true;
+      // this.runningEffects = true;
       const promises: Promise<unknown>[] = []
-      const effects = this.effects
+      const effects = this.nextEffects
+      this.nextEffects = []
       const sync = this.phase === SYNC
       const pre = this.phase === PRERENDER
-      const retained = sync ? this.retained : new Set()
       for (const effect of effects) {
-         if (!effect.run
-            || completed?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
+         if (
+            !effect.run
+            || this.atom && !effect.isLinked(this.atom) // weeds out effects that have been unlinked due to retracking
          ) {
+            continue;
+         }
+         // prevent repeats within queue (but not across extended queues and phases)
+         if (completed?.has(effect)) {
+            this.retain(effect)
             continue;
          }
          // // stops infinite loops
@@ -230,10 +244,7 @@ export class PhaseQueue {
          finally {
             effectStackCount--
             completed?.add(effect)
-            if (retained.has(effect))
-               continue;
             this.retain(effect)
-            retained.add(effect)
          }
       }
 
@@ -241,17 +252,15 @@ export class PhaseQueue {
          return;
       }
 
-      this.runningEffects = false;
-      this.effects = this.nextEffects ?? []
-      this.nextEffects = undefined
+      this.effects = undefined
       this.retained.clear()
       return !sync && promises.length ? Promise.allSettled(promises) : undefined;
    }
 
    retain(effect: Effect) {
-      if (!effect.run) return;
-      const retainedEffects = this.nextEffects ?? (this.nextEffects = [])
-      retainedEffects.push(effect)
+      if (this.retained.has(effect) || !effect.run || this.atom && !effect.isLinked(this.atom)) return;
+      this.nextEffects.push(effect)
+      this.retained.add(effect)
    }
 
    /**
@@ -259,13 +268,7 @@ export class PhaseQueue {
    * @param effect 
    */
    queue(effect: Effect) {
-      if (this.runningEffects) {
-         const nestedEffects = this.nextEffects ?? (this.nextEffects = [])
-         nestedEffects.push(effect)
-      }
-      else {
-         this.effects.push(effect)
-      }
+      this.nextEffects.push(effect)
    }
 
    requeued: boolean = false;
@@ -360,7 +363,7 @@ export class EffectQueue {
 
    private taskQueue: PhaseQueue | undefined; //TODO: need to run
 
-   constructor(private phase: Phase) { }
+   constructor(public cycle: EffectCycle, private phase: Phase) { }
 
    scheduleEffect(task: Effect) {
       const taskQueue = this.taskQueue ?? (this.taskQueue = new PhaseQueue(this.phase))

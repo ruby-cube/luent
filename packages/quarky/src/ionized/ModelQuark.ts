@@ -5,7 +5,7 @@ import { trigger, WatchedAtom } from "../watch/WatchedAtom"
 import {  QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
-import { asAtomicOp, TrackedOps } from "./AtomicOp"
+import { $atomicOp, asAtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
 import { Update } from "../effect-cycle/ReactivitySystem"
@@ -129,7 +129,8 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
    }
 
    trackOp(opKey: PropertyKey, entryKey: unknown){
-      trackParticle(this.registerOp(opKey, entryKey, asAtomicOp(this, opKey, entryKey)))
+      // console.log("&&& tracking op", this.pions)
+      trackParticle( asAtomicOp(this, opKey, entryKey))
    }
 
    registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicQuark) {

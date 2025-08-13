@@ -26,12 +26,16 @@ export function TodoMVC() {
 
    const filters = {
       all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => todos.filter(todo => !todo.completed),
+      active: (todos: Ionized<Todo[]>) => {
+         // console.log('filter', todos, todos.filter)
+         return todos.filter(todo => !todo.completed)
+      },
       completed: (todos: Ionized<Todo[]>) => todos.filter(todo => todo.completed)
    }
 
    // get state
-   const $todos = ion.ionize((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
+   // const $todos = ion.ionize((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
+   const $todos = ion.ionize([] as Todo[])
    const $view = ion('all' as keyof typeof filters)
    const $editedTodo = ion(null as Todo | null)
 

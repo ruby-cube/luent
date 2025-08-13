@@ -3,6 +3,7 @@ import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { Effect, PhaseQueue } from "../effect-cycle/EffectQueue";
 import { hasQuark, Quark, QUARK } from "../Quark";
 import { Update } from "../effect-cycle/ReactivitySystem";
+import { watch } from "fs";
 
 
 export type Watchable = {
@@ -23,7 +24,9 @@ export function trigger(
    update: Update
 ) {
    const pendingUpdate = this.pendingUpdate
+   if (pendingUpdate === update) return;
    if (pendingUpdate && pendingUpdate !== update) {
+      console.log('>>> CANCEL', pendingUpdate)
       pendingUpdate.cancel()
    }
    this.pendingUpdate = update
@@ -44,7 +47,7 @@ export function isWatchableEntity(value: unknown): value is { [QUARK]: Watchable
 }
 
 export function asWatchedAtom(watchable: Watchable) {
-   return watchable.asWatchedAtom ?? (watchable.asWatchedAtom = new WatchedAtom())
+   return watchable.asWatchedAtom ?? (watchable.asWatchedAtom = new WatchedAtom(watchable))
 }
 
 // export function unwatch(this: Watchable) {
@@ -54,7 +57,10 @@ export function asWatchedAtom(watchable: Watchable) {
 export class WatchedAtom {
 
    constructor(
-   ) { }
+      public entity: Watchable
+   ) { 
+
+   }
 
    private effects: Map<Phase, PhaseQueue> = new Map()
 
@@ -63,7 +69,7 @@ export class WatchedAtom {
 
    private initializePhase(phase: Phase) {
       this.phases.push(phase)
-      const queue: PhaseQueue = new PhaseQueue(phase)
+      const queue: PhaseQueue = new PhaseQueue(phase, this)
       this.effects.set(phase, queue);
       return queue
    }

@@ -74,7 +74,7 @@ export class EffectCycle {
    // effectStack: Set<Effect> = new Set()
 
    private initializeQueue(phase: Phase) {
-      const queue: EffectQueue = new EffectQueue(phase)
+      const queue: EffectQueue = new EffectQueue(this, phase)
       this.effects.set(phase, queue);
       return queue
    }
@@ -117,11 +117,16 @@ export class EffectCycle {
 
    subphase: 'effects' | 'microtasks' = 'effects'
 
+   runningEffects: boolean = false;
+
    runEffects(phase: Phase) {
       // this.currentPhase = phase;
       // this.subphase = 'effects'
       const queue = this.effects.get(phase);
-      return queue?.runEffects(this)
+      this.runningEffects = true
+      const promise = queue?.runEffects(this)
+      this.runningEffects = false
+      return promise
       // this.subphase = 'microtasks'
    }
 

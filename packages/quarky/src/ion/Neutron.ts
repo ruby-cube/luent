@@ -1,5 +1,5 @@
 import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
-import { maybeIonize, shouldIonize } from "./AtomicIon";
+import { maybeIonize } from "./AtomicIon";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { ionize } from "../ionized/ionize";
 import { Traceable } from "../debug/Traceable";

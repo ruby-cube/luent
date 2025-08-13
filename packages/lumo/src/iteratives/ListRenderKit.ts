@@ -142,6 +142,8 @@ export class ListRenderKit {
       const dynamicPod = this.dynamicPod
       const $list = this.$list
 
+      $list["~list"] = true
+
       watchForRender(this.$list, (previous) => { // typecast as one of the options so that typescript won't complain
          // if (recording && state === previous){
          //    recording.stop()

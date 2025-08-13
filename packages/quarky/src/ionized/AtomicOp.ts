@@ -40,8 +40,8 @@ export function asAtomicOp(
    op: PropertyKey,
    key: any
 ): AtomicQuark {
-   if (__DEV__) return $atomicOp(quark, op, key) ?? __DEV__createAtomicOp(quark, op, key)
-   return $atomicOp(quark, op, key) ?? new AtomicQuark()
+   if (__DEV__) return $atomicOp(quark, op, key) ?? quark.registerOp(op, key, __DEV__createAtomicOp(quark, op, key))
+   return $atomicOp(quark, op, key) ?? quark.registerOp(op, key, new AtomicQuark())
 }
 
 function __DEV__createAtomicOp(

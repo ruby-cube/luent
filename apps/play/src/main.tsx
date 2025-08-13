@@ -32,7 +32,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
-import { ion, ionize, isIonizedModel } from '@rue/quarky';
+import { ion, ionize, isAtomic, isIonizedModel, neutron } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
 import { TestAnimationController } from './demos/animation-controller';
 import { CounterModelApp } from './TestCounterModel';
@@ -198,6 +198,16 @@ import { TestNormalizeToRenderFunction } from './TestNormalizeToRenderFunction';
 // }
 
 // console.log(obj)
+// function Appo(){
+//    const list = ionize([1])
+//    list.push(4)
+//    const sList = JSON.stringify(list)
+   
+//    console.log(sList)
+//    return component(<>hi</>)
+// }
+
+
 
 const app = createApp(List)
 

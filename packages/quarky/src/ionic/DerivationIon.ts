@@ -200,7 +200,7 @@ export function createManagedDerivation(
 function retrackedCall(ion: ManagedDerivation) {
    const { derivation, staleMarker } = ion
    const compound = ion
-   staleMarker!.unlink()
+   staleMarker!.unlinkAtoms()
    const value = compound.retrackCall(() => derivation(ion.state))
    linkAtoms(compound, staleMarker!)
    return value;

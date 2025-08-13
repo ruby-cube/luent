@@ -163,12 +163,15 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
 
    let prevState = subject.trackedCall()
 
-   if (subject.inert) return;
+   if (subject.inert) {
+      return;
+   }
 
    let dirty = false;
    let paused = false;
 
    const effect = new Effect(() => {
+      console.log('>>> watchForRender Effect', prevState, subject)
       if (paused) {
          dirty = true;
          return;
@@ -176,6 +179,8 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
       dirty = false;
       _render()
    }, PRERENDER)
+
+   if (ion["~list"]) effect["~updateList"] = true;
 
    function _render() {
       const newState = subject.trackedCall()
@@ -194,7 +199,7 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
    });
    flask.onDemount(/* listener.pause */() => {
       paused = true;
-      effect.unlink()
+      effect.unlinkAtoms()
    });
    flask.onRemount(/* listener.resume */() => {
       paused = false;

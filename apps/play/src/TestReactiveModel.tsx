@@ -101,7 +101,9 @@ class ItemList extends Array<Item> {
    }
 
    remove(index: number) {
+      console.log('being remove ==============', index)
       this.splice(index, 1);
+      console.log('end remove ==============', index)
    }
 
    changeContent(index: number) {
@@ -202,10 +204,8 @@ export function List(
    }
 
    function removeItem(index: number) {
-      update(()=>{
          selected.delete(list[index])
          list.remove(index);
-      }, {timeMargin: 100})
    }
 
    return component(
@@ -281,6 +281,6 @@ class Selected extends Set<any> {
 }
 
 function responsive(fn: ()=>unknown){
-   // return fn()
-   return update(fn, {timeMargin: 100})
+   return fn()
+   // return update(fn, {timeMargin: 100})
 }
