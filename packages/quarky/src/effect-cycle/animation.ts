@@ -20,7 +20,6 @@ export function ThrottledHover() {
    let unhoverID: number | null = null
 
    return [function Hover(fn: <T>(e: T)=>void) {
-      const flask = getFlask()
 
       return function hover<T>(e: T) {
          if (unhoverID !== null) cancelAnimationFrame(unhoverID)
@@ -28,7 +27,7 @@ export function ThrottledHover() {
          hoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             hoverID = null;
-            const update = new Update(16.7, flask)
+            const update = new Update(16.7)
             try {
                pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
@@ -42,7 +41,6 @@ export function ThrottledHover() {
       };
    },
    function Unhover(fn: <T>(e: T)=>void) {
-      const flask = getFlask()
 
       return function unhover<T>(e: T) {
          if (unhoverID !== null) cancelAnimationFrame(unhoverID)
@@ -50,7 +48,7 @@ export function ThrottledHover() {
          unhoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             unhoverID = null;
-            const update = new Update(16.7, flask)
+            const update = new Update(16.7)
             try {
                pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
@@ -72,14 +70,13 @@ export function SharedThrottledUpdate() {
    let frameID: number | null = null
 
    return function Throttled(fn: Function) {
-      const flask = getFlask()
 
       return function throttled() {
          if (frameID !== null) return;
          frameID = requestAnimationFrame(() => {
             setImmediate(() => {
                frameID = null;
-               const update = new Update(16.7, flask)
+               const update = new Update(16.7)
                try {
                   pushUpdate(update)
                   fn(); // Execute the original function with its context and arguments
@@ -101,13 +98,12 @@ export function SharedThrottledUpdate() {
  */
 export function ThrottlePointer(fn: Function) {
    let frameID: number | null = null
-   const flask = getFlask()
 
    return function throttled(e: MouseEvent) {
       if (frameID !== null) cancelAnimationFrame(frameID)
       frameID = requestAnimationFrame(() => {
             frameID = null;
-            const update = new Update(16.7, flask)
+            const update = new Update(16.7)
             try {
                pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
@@ -126,14 +122,13 @@ export function ThrottlePointer(fn: Function) {
  */
 export function ThrottledUpdate(fn: Function) {
    let frameID: number | null = null
-   const flask = getFlask()
 
    return function throttled() {
       if (frameID !== null) return;
       frameID = requestAnimationFrame(() => {
          setImmediate(() => {
             frameID = null;
-            const update = new Update(16.7, flask)
+            const update = new Update(16.7)
             try {
                pushUpdate(update)
                fn(); // Execute the original function with its context and arguments
@@ -190,13 +185,12 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
 
    let nextFrame: undefined | number = undefined
    let stopped = true;
-   const flask = getFlask()
    const context = $_snap_context()
 
    function renderFrame(time: DOMHighResTimeStamp) {
       setImmediate(() => {
          try {
-            const update = new Update(16.7, flask)
+            const update = new Update(16.7)
             pushUpdate(update)
             prepFrame(time)
          }

@@ -1,6 +1,7 @@
-import { component, Else, For, If, ref } from "@rue/lumo"
+import { component, Else, For, If} from "@rue/lumo"
 import { ion, ionicTask } from "@rue/quarky"
 import { $postrender} from "../../../../packages/lumo/src/render-cycle"
+import { $_run_with_, $_snap_context } from "@rue/flask"
 
 type Commit = {
    commit: {
@@ -28,16 +29,18 @@ export function View() {
    const $commits = ion([] as Commit[])
 
 
+   // const context = $_snap_context()
+
    ionicTask(async (initial) => {
       if (!initial) $commits.state = []
       const response = await fetch(`${API_URL}${$currentBranch()}`)
       $commits.state = await response.json()
    })
 
-   ionicTask(async () => {
-      await $postrender()
-      console.log('postlude logging', $currentBranch())
-   })
+   // ionicTask(async () => {
+   //    await $postrender()
+   //    console.log('postlude logging', $currentBranch())
+   // })
 
 
    // @click: e => $currentBranch.state = branch <--- begins render cycle

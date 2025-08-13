@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
+import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -10,13 +10,13 @@
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { View } from './demos/vue-data-fetching';
 import { TodoMVC } from './demos/todo-mvc';
 import { CRUDApp, SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
 import { PolygonApp } from './demos/polygon-app';
-import { TrafficLight } from './demos/traffic-lights';
 
+import { TrafficLight } from './demos/traffic-lights';
+import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp, createGlobalCommons, fromTag, NodeRef} from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
@@ -56,6 +56,9 @@ import { TestTrackableOps } from './TestTrackableOps';
 import { SimpleCounter } from './SimpleCounter';
 import { TestNormalizeToRenderFunction } from './TestNormalizeToRenderFunction';
 import { TestIfElse } from './demos/TestIfElse';
+import { TestIonicTask } from './TestIonicTask';
+import { TestFiniteIon } from './TestFiniteIon';
+import { TestJSON } from './TestJSON';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -79,7 +82,7 @@ import { TestIfElse } from './demos/TestIfElse';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TestIfElse)
+const app = createApp(PolygonApp)
 
 app.mount('#app')
 

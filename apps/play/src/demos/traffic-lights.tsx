@@ -10,6 +10,7 @@ import {
 //  - clear timeout
 
 export function TrafficLight() {
+   
    const $power = FiniteIon({
       on: {
          switch: () => "off",
@@ -26,18 +27,18 @@ export function TrafficLight() {
 
    const $state = FiniteIon({
       on: { switch: () => "sleep" },
-      sleep: { switch: () => "awake" },
       awake: { switch: () => "sleep" },
+      sleep: { switch: () => "awake" },
    });
 
    const $trafficLight = FiniteIon({
       red: {
-         "on:enter": () => console.log("@@% entering red"),
+         // "on:enter": () => console.log("@@% entering red"),
          "after:enter": transitionAfter(2000, () => "yellow"),
          change: () => "yellow",
       },
       yellow: {
-         "on:exit": () => console.log("@@% exiting yellow"),
+         // "on:exit": () => console.log("@@% exiting yellow"),
          "after:enter": transitionAfter(2000, () => "green"),
          change: () => "green",
       },
@@ -65,7 +66,7 @@ export function TrafficLight() {
       });
 
    function $LightOpacity(color: string) {
-      return function $o() {
+      return ion(() => {
          return $power.is("on") && !$state.is("sleep")
             ? $power.is("x:broken")
                ? 0
@@ -73,13 +74,13 @@ export function TrafficLight() {
                   ? 1
                   : 0.3
             : 0.15;
-      };
+      });
    }
 
    function $BtnOpacity(isActive: () => boolean = () => !$power.is("x:broken")) {
-      return function $o() {
+      return ion(() => {
          return $power.is("x:broken") ? 0.5 : isActive() ? 1 : 0.5;
-      };
+      });
    }
 
    return component(
@@ -99,10 +100,22 @@ export function TrafficLight() {
             ></div>
          </div>
          <button
-            on:click={(e) => $trafficLight.apply("change")}
-            style={{ opacity: $BtnOpacity($trafficLight.isActive) }}
+            on:click={(e) => $power.apply("switch")}
+            style={{ opacity: $BtnOpacity() }}
+         >
+            {($power.is("on") ? "turn off" : "turn on")}
+         </button>
+         <button
+            on:click={(e) => { if ($state.is('sleep')) $state.apply('switch'); $trafficLight.apply("change") }}
+            style={{ opacity: $BtnOpacity($state.isActive) }}
          >
             change
+         </button>
+         <button
+            on:click={(e) => $state.apply("switch")}
+            style={{ opacity: $BtnOpacity($state.isActive) }}
+         >
+            {($state.is("sleep") ? "awaken" : "sleep")}
          </button>
          <button
             on:click={(e) => $power.apply("break")}
@@ -110,19 +123,7 @@ export function TrafficLight() {
          >
             break
          </button>
-         <button
-            on:click={(e) => $power.apply("switch")}
-            style={{ opacity: $BtnOpacity() }}
-         >
-            {$power.is("on") ? "turn off" : "turn on"}
-         </button>
-         <button
-            on:click={(e) => $state.apply("switch")}
-            style={{ opacity: $BtnOpacity($state.isActive) }}
-         >
-            {$state.is("sleep") ? "awaken" : "sleep"}
-         </button>
-         
+
          {Style`
             *,
             *::before,

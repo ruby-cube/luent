@@ -391,8 +391,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          flask.emitDiscard() //
 
          queueInternalRender(() => {
-            console.log('qIR: removeDOMNodes')
-            // remove from 
             removeDOMNodes(pod)
             pod.clear() //
          }, this.outerFlask)
@@ -426,9 +424,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       this.render(kit, parent, fragment)
-      
+
       queueInternalRender(() => {
-         nodePod.activate()
+         nodePod.activate() // needs to be queued since deactivation is also queued
          if (isInitialMount)
             flask.emitInitialMount()
          else

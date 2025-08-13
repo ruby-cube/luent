@@ -1,4 +1,4 @@
-import { DOMNode, Slot } from "../component/Component";
+import { DOMNode } from "../component/Component";
 import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation_ion } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, JSXNode, StyleInput, RawJSXNode } from "../node/makeNode";
@@ -16,7 +16,8 @@ import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
-import { queueInternalRender, RUN_EAGERLY, watchForRender } from "../render-cycle";
+import { INTERNAL_RENDER, queueInternalRender, RUN_EAGERLY, watchForRender } from "../render-cycle";
+import { RenderSlot } from "../component/fromTag";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -25,7 +26,7 @@ export type HTMLTag = keyof HTMLElementTagNameMap
 
 export function makeElement(
    tagName: string,
-   Slot: Slot | undefined,
+   Slot: RenderSlot | undefined,
    config: ElementConfig,
    $index: Ion<number> | undefined
 ): DOMNode {
@@ -73,11 +74,15 @@ export function makeElement(
          const flattenedOutput = flattenJSXOutput(rawOutput)
          if (isInnerHTMLKit(rawOutput[0])) {
             const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
-            mountInnerHTML(innerHTML, domNode)
+            queueInternalRender(() => {
+               mountInnerHTML(innerHTML, domNode)
+            }, getFlask())
          }
          else {
             const nodeEntities = setUpNodeEntities(flattenedOutput, domNode, new NodePod())
-            mountNodeEntities(nodeEntities, domNode)
+            queueInternalRender(() => {
+               mountNodeEntities(nodeEntities, domNode)
+            }, getFlask())
          }
       }, xml_ns)
    }
@@ -147,7 +152,7 @@ function isMutableIon(ion: unknown): ion is MutableIon<any> {
    return isIon(ion) && (('state' in ion) || ('set' in ion))
 }
 
-function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
+function bindView(element: Element, Slot: RenderSlot | undefined, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    switch (element.tagName) {
       case 'INPUT':
          bindInput(<HTMLInputElement>element, attributes)
@@ -184,7 +189,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const ion = attributes['mu:checked'];
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
-   attributes.checked = $_derivation_ion(()=>  ion() === radioValue);
+   attributes.checked = $_derivation_ion(() => ion() === radioValue);
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
@@ -226,7 +231,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
-   const flask = getActiveFlask()
+   const flask = getFlask()
    watchForRender(ion, () => {
       queueInternalRender(() => {
          element.value = toString(ion())
@@ -244,7 +249,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
 }
 
 
-function bindTextarea(element: Element, Slot: Slot | undefined) {
+function bindTextarea(element: Element, Slot: RenderSlot | undefined) {
    if (!Slot || !isFunction(Slot)) return;
    const nodeEntities = Slot();
    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
@@ -306,9 +311,9 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
-         watchForRender(value, () => {
+         watchForRender(value, ({ current }) => {
             queueInternalRender(() => {
-               setAttribute(node, _key, value())
+               setAttribute(node, _key, current)
             }, flask)
          }, flask, RUN_EAGERLY)
       }
@@ -521,7 +526,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watchForRender(entry, ({previous}/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+         watchForRender(entry, ({ previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             queueInternalRender(() => {
                const current = entry()
                if (previous) removePreviousClasses(previous, classList)
@@ -581,7 +586,7 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
    for (const key in entry) {
       const value = entry[key]
       if (isIon(value)) {
-         watchForRender(value, ({previous}) => {
+         watchForRender(value, ({ previous }) => {
             queueInternalRender(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
@@ -639,9 +644,11 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
 
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
-            watchForRender(value, () => {
+            console.log(key, value)
+            watchForRender(value, ({ current }) => {
+               console.log('value:', key, current)
                queueInternalRender(() => {
-                  assignStyleProperty(style, toStylePropertyName(key), value())
+                  assignStyleProperty(style, toStylePropertyName(key), current)
                }, flask)
             }, flask, RUN_EAGERLY)
          }

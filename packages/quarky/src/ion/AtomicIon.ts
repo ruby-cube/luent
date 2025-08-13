@@ -309,6 +309,7 @@ export function isAtomicQuark(value: unknown): value is AtomicIonQuark {
 function getState(this: AtomicIonQuark) {
    if (__DEV__) emitSignal();
    trackParticle(this)
+   if (this.modelQuark) trackParticle(this.modelQuark)
    if (isLazyUpdate()) {
       return maybeIonize(this.state.pending, this.ionized); //TODO: inertSchema
    }
@@ -347,6 +348,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    // trigger effects
    this.trigger(update)
    this.modelQuark?.trigger(update);
+   if (this.modelQuark) console.log('trigger modelQuark of pion', this.state.key)
 
    return state;
 }

@@ -1,5 +1,5 @@
 import { component, For, fromTag, Style, } from "@rue/lumo"
-import { Ion, ion, ionize, Ionized } from "@rue/quarky"
+import { Ion, ion, ionize, Ionized, update } from "@rue/quarky"
 
 type Stat = {
    label: string,
@@ -36,7 +36,7 @@ export function PolygonApp() {
    }
    return component(
       <>
-         <svg width="200" height="200">
+       <svg width="200" height="200">
             <PolyGraph stats={stats}></PolyGraph>
          </svg >
 
@@ -55,6 +55,8 @@ export function PolygonApp() {
          </form>
 
          <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
+
+  
 
          {Style`
          polygon {

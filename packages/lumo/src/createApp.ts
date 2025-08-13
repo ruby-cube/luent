@@ -52,7 +52,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
                   return muIons?.has(ion)
                }
             }
-            const update = new Update(1000, flask)
+            const update = new Update(1000)
             pushUpdate(update)
             setComponentAttributes(attributes)
             muIonsStack.push(muIons)

@@ -1,5 +1,6 @@
-import { debug, isFunction } from "@rue/utils";
+import { debug } from "@rue/utils";
 import { ion } from "./Ion";
+import { QUARK } from "../Quark";
 
 
 // trafficLight.is('on') // reactive
@@ -169,7 +170,7 @@ export type FiniteIon<M extends Methods = {}> = {
    onFinalState: (task: () => void) => void
    activate: (initializer: () => string) => { nest: (config: { [key: string]: Nested[] }) => Nested }
    deactivate: () => void
-   isActive: ()=>boolean
+   isActive: () => boolean
    init: (initializer: Initializer) => Nested & { nest: (config: { [key: string]: Nested[] }) => Nested }
 } & M
 
@@ -205,46 +206,24 @@ export function FiniteIon<M extends Methods>(states: FiniteStates, methods?: M):
 
    let activated = false;
 
-   const $state = new Proxy($currentState, {
-      get(target, key) {
-         return stateMachine[key as keyof typeof stateMachine] ?? (methods && methods[key])
-      },
+   const $state = (() => $currentState()) as unknown as FiniteIon<M>
 
-      set(target, key) {
-         return false;
-      },
+   // }) as unknown as FiniteIon
+   //@ts-expect-error
+   $state[QUARK] = { inert: false }
+   $state.is = is
+   $state.apply = apply
+   $state.on = on
+   $state.can = can
+   $state.onFinalState = onFinalState
+   $state.activate = activate
+   $state.deactivate = deactivate
+   $state.init = init
+   $state.isActive = () => $currentState() !== undefined;
 
-      has(target, key) {
-         return key in stateMachine || Boolean(methods && key in methods)
-      },
-
-      getPrototypeOf(target) {
-         return Reflect.getPrototypeOf(target);
-      },
-
-
-   }) as unknown as FiniteIon
-
-   const stateMachine = {
-      length: 0,
-      name: '$finiton',
-      is,
-      apply,
-      on,
-      can,
-      onFinalState,
-      activate,
-      deactivate,
-      init,
-      isActive(){
-         return $state() !== undefined;
-      }
-   }
+   //TODO: attach methods
 
    let _nestedStates: NestedStates;
-
-
-
 
    function init(initializer: Initializer) {
       return {
@@ -256,7 +235,7 @@ export function FiniteIon<M extends Methods>(states: FiniteStates, methods?: M):
                return;
             }
             _nestedStates = nestedStates
-            updateNestedStates(initializer(undefined), 'activate')
+            // updateNestedStates(initializer(undefined), 'activate') //TODO: should not activate if not activated
 
             return {
                finiton: $state,

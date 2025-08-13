@@ -90,7 +90,6 @@ export class EffectCycleManager {
 
 export function schedulePhase(cycle: EffectCycle, { index, schedule, next, phases }: CyclePhase) {
    schedule(() => {
-      console.log('running phase: ', index)
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
       updateStack.push(cycle.update)
@@ -388,7 +387,6 @@ export function getCurrentPhase() {
 export class Update {
    constructor(
       public timeMargin: number = 0,
-      private flask: Flask,
       public lazy: boolean = false
    ) {
    }
@@ -400,7 +398,7 @@ export class Update {
    queue(commitUpdate: () => void) {
       const effect = createOneoff(commitUpdate, UPDATE_PHASE)
       this.cycle.scheduleEffect(effect)
-      // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy()))
+      // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) //TODO: Make sure we don't need this line
       this.commits.push(effect)
    }
 
@@ -498,14 +496,13 @@ export function $activeUpdate() {
 }
 
 export function initUpdate(timeMargin: number = 0, lazy: boolean = false) {
-   return getActiveUpdate() ?? new Update(timeMargin, getFlask(), lazy);
+   return getActiveUpdate() ?? new Update(timeMargin, lazy);
 }
 
 // const updatePriority = updateManager.updatePriorities[timeMargin] ?? updateManager.addUpdatePriority(timeMargin)
 // const queue = updatePriority.queue;
 //TODO: return type should be based on options--whether it's lazy
 export function update<T, OPT>(fn: () => T, options?: { timeMargin?: number, lazy?: number }): Promise<T> | T {
-   // const update =  new Update(timeMargin, getFlask());
    const timeMargin = options?.lazy ?? options?.timeMargin ?? 100;
    const update = initUpdate(timeMargin, !!(options?.lazy)) //FIX: because Interval wraps context, the loading update is passed down
    console.log('update is lazy?', update.lazy)

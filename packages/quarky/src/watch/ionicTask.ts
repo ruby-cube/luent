@@ -19,7 +19,6 @@ export function ionicTask(task: IonicTask, options?: IonicTaskOptions) {
    let initial = true;
 
    let wrappedEffect = () => {
-      console.trace('running effect!!!!')
       try {
          task(initial)
       }
