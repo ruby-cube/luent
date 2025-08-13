@@ -289,7 +289,7 @@ button + button {
 
 type Circle = { cx: number, cy: number, r: number }
 
-function CircleApp() {
+export function CircleApp() {
    const history = ionize([[]] as Circle[][])
    const $index = ion(0)
    const $circles = ion.ionize([] as Circle[])

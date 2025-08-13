@@ -1,6 +1,5 @@
 import { component, Else, For, fromTag, If, Style } from "@rue/lumo"
-import { ion, ionize } from "@rue/quarky"
-
+import { Ion, ion, ionize } from "@rue/quarky"
 
 const COLS = 5
 const ROWS = 20
@@ -11,6 +10,7 @@ const cells = ionize(
    )
 )
 console.log('cells', cells)
+console.log('cellsb', cells[0])
 
 function evalCell(exp: string) {
    if (!exp.startsWith('=')) {
@@ -68,7 +68,8 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For(cells[0], (item, $row) => //TODO: allow numbers as input for For()
+               {For(cells[0], (item, $row) => (//TODO: allow numbers as input for For()
+               console.log('row', $row()),
                   <tr>
                      <th>{$row}</th>
                      {For(cols, (item, $col) =>
@@ -77,7 +78,7 @@ export function CellsApp() {
                         </td>
                      )}
                   </tr>
-               )}
+               ))}
             </tbody>
          </table >
          {Style`
@@ -128,17 +129,17 @@ function Cell({ $column, $row } = fromTag<{
 
    return component(
       <>
-         <div class="cell" title={cells[$column()][$row()]} on:click={e => $editing.state = true}>
+         <div class="cell" title={(cells[$column()][$row()])} on:click={e => $editing.state = true}>
             {If($editing,
                <input
-                  value={cells[$column()][$row()]}
+                  value={(cells[$column()][$row()])}
                   on:change={update}
                   on:blur={update}
                   at:mounted={el => el.focus()}
                />
             )}
             {Else(
-               <span>{evalCell(cells[$column()][$row()])}</span>
+               <span>{(evalCell(cells[$column()][$row()]))}</span>
             )}
          </div >
 

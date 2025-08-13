@@ -11,10 +11,10 @@ import './style.css'
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { TodoMVC } from './demos/todo-mvc';
-import { CRUDApp, SevenGUIs } from './demos/7-guis';
+import { CircleApp, CRUDApp, SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
-import { PolygonApp } from './demos/polygon-app';
 
+import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
@@ -82,7 +82,7 @@ import { TestJSON } from './TestJSON';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(PolygonApp)
+const app = createApp(List)
 
 app.mount('#app')
 

@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __DEV__checkIfTracked, toValue, Ion, toIon, queueTask } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __DEV__checkIfTracked, toValue, Ion, toIon, queueTask, MutableIon } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -40,14 +40,14 @@ export function setCurrentIndex($index: Ion<number> | undefined) {
 function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, item: any, $index: Ion<number>, parent: Element, nodePod: NodePod) {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // QUESTION: Should this be outside of the render function??
    list.transitions.set($index, transitionNodes)
-   const data = toIon(list.data);
+   // const data = toIon(list.data);
 
-   const $i = ion(() => data()?.indexOf(toRaw(item)))
+   // const $i = ion(() => data()?.indexOf(toRaw(item)))
    try {
       pushList(list)
       const nodeEntities = setUpNodeEntities(normalizeToArray(
          createCommons({
-            Slot: () => renderItem(item, $i),
+            Slot: () => renderItem(item, $index),
             provide: [REGISTER_TRANSITION_NODE(registerTransitionNode)]
          })
       ), parent, nodePod)
@@ -72,18 +72,20 @@ export class ListRenderKit {
    ) {
       this.$list = toIon(data) as unknown as Ion<Array<any>>
       const listContext = $_snap_context()
+      this.outerFlask = getFlask()
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
          const context = { ...listContext }
-         if (flask) context[FLASK]  = flask
-         if (__DEV__) context[TRACE]  = this.__DEV__asyncPath!
+         if (flask) context[FLASK] = flask
+         if (__DEV__) context[TRACE] = this.__DEV__asyncPath!
          $_run_with_(context, () => {
             const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
-            mountNodeEntities(nodeEntities, parent, fragment);
+            // queueInternalRender(() => {
+               mountNodeEntities(nodeEntities, parent, fragment);
+            // }, this.outerFlask)
          })
       }
 
       if (__DEV__) this.__DEV__asyncPath = __DEV__buildAsyncPath()
-      this.outerFlask = getFlask()
    }
 
    beforeUpdateTasks: Set<Function> = new Set()
@@ -102,7 +104,7 @@ export class ListRenderKit {
    }
 
    dynamicPod: DynamicPod = new NodePod()
-   // indices: AtomicIon<number>[] = [];
+   indices: MutableIon<number>[] = [];
 
    _transitions?: Map<Ion<number>, TransitionNode[]>
    get transitions() {
@@ -144,7 +146,7 @@ export class ListRenderKit {
 
       $list["~list"] = true
 
-      watchForRender(this.$list, ({previous}) => { // typecast as one of the options so that typescript won't complain
+      watchForRender(this.$list, ({ previous }) => { // typecast as one of the options so that typescript won't complain
          // if (recording && state === previous){
          //    recording.stop()
          //    console.log('updating list via MUTATIONS')
@@ -158,7 +160,7 @@ export class ListRenderKit {
          console.log('_prevState', _prevState, previous)
          clone = createClone(data, current)
          // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
-         const { indicesToRemove, insertAndMoveKit, noChange } = diff(isIonizedModel(current)? quarkOf(current).state.current : current, _prevState, getUID)
+         const { indicesToRemove, insertAndMoveKit, noChange } = diff(isIonizedModel(current) ? quarkOf(current).state.current : current, _prevState, getUID)
          if (noChange) { //TODO: should we use hasChanged function in watch options instead?
             console.log('no list change', current, _prevState)
             return;
@@ -188,7 +190,6 @@ export class ListRenderKit {
       const data = toValue(this.data);
 
       const list = data instanceof Array ? data : data as unknown as Array<any> //TODO: need to implement for sets, maps, and objects
-      const $list = this.$list
       const listKit = this;
       const dynamicPod = this.dynamicPod!;
       // const $list = this.$list;
@@ -196,19 +197,19 @@ export class ListRenderKit {
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
 
-         const $index = ion(() => $list().indexOf(item))
-         // const $index = ion(i)
-         $currentIndex = $index;
-         // this.indices.push($index)
+         // const $index = ion(() => $list().indexOf(item))
+         const $index = ion(i)
+         setCurrentIndex($index)
+         this.indices.push($index)
 
          const nodePod = new NodePod()
          dynamicPod.push(nodePod)
 
          const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
          listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-         queueInternalRender(()=>
+         queueInternalRender(() =>
             flask.emitInitialMount()
-         , this.outerFlask)
+            , this.outerFlask)
          flaskMap.set(nodePod, flask)
       }
    }
@@ -240,7 +241,7 @@ export class ListRenderKit {
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
 
-      // const newIndices: AtomicIon<number>[] = [];
+      const newIndices: MutableIon<number>[] = [];
       const toFromIndices: [number, number][] = []
 
       for (let i = 0; i < newUArray.length; i++) {
@@ -254,9 +255,9 @@ export class ListRenderKit {
 
          if (!_isNewItem) {
             // update $index.state
-            // const $index = this.indices[oldIndex];
-            // newIndices.push($index);
-            // $index.state = i
+            const $index = this.indices[oldIndex];
+            newIndices.push($index);
+            $index.state = i
 
             // to update refs
             toFromIndices.push([i, oldIndex]);
@@ -278,15 +279,16 @@ export class ListRenderKit {
             // const item = getOriginalItem(uItem, newUArray)
             const $list = this.$list
             const item = $list()[i]
-            const $index = ion(() => $list()?.indexOf(item)) //TODO: this should be 
+            const $index = ion(i) //TODO: this should be 
+            newIndices.push($index) 
 
             setCurrentIndex($index); // to retreive config
 
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             this.renderItem(item, $index, parent, nodePod, fragment, flask)
-             queueInternalRender(()=>
+            queueInternalRender(() =>
                flask.emitInitialMount()
-             , this.outerFlask)
+               , this.outerFlask)
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask) // store for removal
          }
@@ -298,7 +300,7 @@ export class ListRenderKit {
             }, this.outerFlask)
          }
       }
-      // this.indices = newIndices;
+      this.indices = newIndices;
 
       // queue nodePod removal
       const indicesAndRemoveCount: [Index, Count][] = [];
@@ -336,7 +338,7 @@ export class ListRenderKit {
          }
          this.castUpdated(toFromIndices)
       }, this.outerFlask)
-      
+
 
    }
 }
