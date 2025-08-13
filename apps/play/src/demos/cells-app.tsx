@@ -1,6 +1,5 @@
-import { component, Else, For, fromTag, If, Ion } from "@rue/lumo"
+import { component, Else, For, fromTag, If, Style } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
-import { Style } from "../../../../packages/lumo/src/component/Style"
 
 
 const COLS = 5

@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -10,6 +10,13 @@ import './style.css'
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
+import { View } from './demos/vue-data-fetching';
+import { TodoMVC } from './demos/todo-mvc';
+import { CRUDApp, SevenGUIs } from './demos/7-guis';
+import { CellsApp } from './demos/cells-app';
+import { PolygonApp } from './demos/polygon-app';
+import { TrafficLight } from './demos/traffic-lights';
+
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp, createGlobalCommons, fromTag, NodeRef} from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
@@ -17,19 +24,13 @@ import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
 import { MarkdownApp } from './demos/markdown-app/markdown-app';
-import { View } from './demos/vue-data-fetching';
 import { TabApp } from './demos/markdown-app/TestTabs';
 import { TreeApp } from './demos/tree-view';
 import { SortableTableApp } from './demos/sortable-table';
-import { TodoMVC } from './demos/todo-mvc';
 import { TestEffectCycle } from './TestEffectCycle';
 import { TestShow } from './TestShow';
 import { TestSetHas } from './TestSetHas';
 import { TestCustomRadioSelection } from './TestSelected';
-import { SevenGUIs } from './demos/7-guis';
-import { CellsApp } from './demos/cells-app';
-import { PolygonApp } from './demos/polygon-app';
-import { TrafficLight } from './demos/traffic-lights';
 import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
 import { ion, ionize, isAtomic, isIonizedModel, neutron } from '@rue/quarky';
@@ -78,41 +79,11 @@ import { TestIfElse } from './demos/TestIfElse';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-// export const [
-//    SYNC,
-//    BATCHED
-// ] = useReactivity()
+const app = createApp(TestIfElse)
+
+app.mount('#app')
 
 
-
-// const $count = ion(0, {
-//    increment() {
-//       $count.state++
-//    },
-//    decrement() {
-//       $count.state--
-//    }
-// })
-
-// const $doubleCount = ion(() => $count() * 2)
-
-// watch(() => {
-//    console.trace()
-//    console.log('+++++++++++++++++')
-//    console.log('double count is now', $doubleCount())
-//    console.log('count is', $count())
-//    console.log('+++++++++++++++++')
-// }, { phase: SYNC })
-
-// function doStuff() {
-//    $count.increment()
-//    $count.decrement()
-//    // $count.increment()
-// }
-
-// window.$count = $count
-// window.$doubleCount = $doubleCount
-// window.doStuff = doStuff
 
 
 // const rootContext = createGlobalCommons()
@@ -210,9 +181,7 @@ import { TestIfElse } from './demos/TestIfElse';
 
 
 
-const app = createApp(MountIf)
 
-app.mount('#app')
 
 // insertText(text: 'hi, position: 9)
 // 

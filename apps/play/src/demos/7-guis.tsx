@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { For, If } from "@rue/lumo"
+import { For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
 import { $$, ion, ionize, ions, SYNC, watch } from "@rue/quarky"
 
@@ -189,7 +189,7 @@ function css(str: TemplateStringsArray) {
 }
 
 //FIX: selected state disappears after clicking update
-function CRUDApp() {
+export function CRUDApp() {
 
    const names = ionize(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
    const $selected = ion('')

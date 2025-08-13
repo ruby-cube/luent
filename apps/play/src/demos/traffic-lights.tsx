@@ -1,7 +1,7 @@
 import { component, Style } from "@rue/lumo";
 import {
    ANY_STATE,
-   finiton,
+   FiniteIon,
    ion,
    withTimeout as transitionAfter,
 } from "@rue/quarky";
@@ -10,7 +10,7 @@ import {
 //  - clear timeout
 
 export function TrafficLight() {
-   const $power = finiton({
+   const $power = FiniteIon({
       on: {
          switch: () => "off",
       },
@@ -24,13 +24,13 @@ export function TrafficLight() {
       },
    });
 
-   const $state = finiton({
+   const $state = FiniteIon({
       on: { switch: () => "sleep" },
       sleep: { switch: () => "awake" },
       awake: { switch: () => "sleep" },
    });
 
-   const $trafficLight = finiton({
+   const $trafficLight = FiniteIon({
       red: {
          "on:enter": () => console.log("@@% entering red"),
          "after:enter": transitionAfter(2000, () => "yellow"),

@@ -9,7 +9,7 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask, getFlask } from "@rue/flask";
-import {  queueInternalRender, PRERENDER, RENDER, SYNC, watchForRender } from "../render-cycle";
+import { queueInternalRender, PRERENDER, RENDER, SYNC, watchForRender } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
@@ -391,7 +391,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          flask.emitDiscard() //
 
          queueInternalRender(() => {
-             console.log('qIR: removeDOMNodes')
+            console.log('qIR: removeDOMNodes')
             // remove from 
             removeDOMNodes(pod)
             pod.clear() //
@@ -425,21 +425,16 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      queueInternalRender(()=>{
-         this.render(kit, parent, fragment)
-         nodePod.activate()
-      }, this.outerFlask)
+      this.render(kit, parent, fragment)
       
-      if (isInitialMount)
-         queueInternalRender(() => {
-       console.log('qIR: emitInitialMount')
+      queueInternalRender(() => {
+         nodePod.activate()
+         if (isInitialMount)
             flask.emitInitialMount()
-         }, this.outerFlask)
-      else
-         queueInternalRender(() => {
-      console.log('qIR: emitRemount')
+         else
             flask.emitRemount() // remount preserved watchers etc.
-         }, this.outerFlask)
+      }, this.outerFlask)
+
    }
 }
 
