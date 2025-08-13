@@ -103,7 +103,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       if (__DEV__) this.context[TRACE] = this.__DEV__asyncPath
 
-      this.activeIndex = this.evaluateConditions()
       // populate dynamic node pod
       // 'create' kits share a single node pod
       // This way, we can mount 'create' efficiently without having 
@@ -129,8 +128,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          }
       }
    }
-
-   activeIndex: number;
 
    mount( // the initial mount after setup
       parent: Element,
@@ -161,7 +158,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       parent: Element,
       // outerNodePod: NodePod,
    ) {
-      const $conditions = this.getConditionsIon()
+      const $activeIndex = this.$ActiveIndex()
 
       const phasicNode = this.phasicNode
       const series = this;
@@ -174,11 +171,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let prevIncomingNodes: TransitionNode[];
 
       // set up watcher for updates
-      watchForRender($conditions, function updateConditional() {
-         console.log('update conditional?')
+      watchForRender($activeIndex, function updateConditional({current: activeIndex, previous: prevIndex}) {
+         console.log('update conditional?', activeIndex, prevIndex)
 
-         const prevIndex = series.activeIndex!;
-         const activeIndex = series.evaluateConditions();
          if (prevIndex === activeIndex) {
             return;
          }
@@ -350,7 +345,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       //     series.deactivateConditional()
 
       //     // (2)
-      //     const activeIndex = series.evaluateConditions();
+      //     const activeIndex = series.$activeIndex();
 
       //     // (3)
       //     pushDynamicNode(outerFlask!)

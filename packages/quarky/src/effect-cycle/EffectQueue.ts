@@ -1,7 +1,6 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { EffectCycle, Phase, SYNC } from "./EffectCycle";
-import { $_wrap_with_context } from "@rue/flask";
 import { $activeUpdate, popUpdate, pushUpdate } from "./ReactivitySystem";
 
 const PRERENDER = 0 //QUESTION: Should EffectCycle and EffectQueue belong to Lumo also??
@@ -50,27 +49,23 @@ export class Effect {
 
    link(atom: WatchedAtom) {
       if (this.isLinked(atom)) return;
-      if (this["~updateList"]) console.trace("&&* linking updateList effect", atom)
       atom.link(this)
       this.atoms.add(atom);
    }
 
    destroy() {
-      if (this["~updateList"]) console.trace("&&* destroying updateList effect", atom)
       this.run = null;
       this.unlinkAtoms()
    }
 
    unlink(atom: WatchedAtom) {
       if (!this.isLinked(atom)) return;
-      if (this["~updateList"]) console.trace("&&* unlinking updateList effect", atom)
       this.requeued = false; //QUESTION: not sure if this is necessary
       this.atoms.delete(atom)
    }
 
    //FIX: unlinking needs to remove effect from the atom's phase queue
    unlinkAtoms() {
-      if (this["~updateList"]) console.trace("&&* unlinking updateList effect from atoms", this)
       this.requeued = false;
       // this.queued = false;
       this.atoms.clear()

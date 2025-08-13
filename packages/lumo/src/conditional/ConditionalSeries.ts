@@ -10,7 +10,7 @@ interface ConditionalKit {
 export class ConditionalSeries {
    conditions: Ion<Booleanny>[] = [];
    prevActiveIndex?: number = undefined;
-   activeIndex?: number = undefined;
+   activeIndex!: number;
    statements: (ConditionalKit | undefined)[]
 
    constructor(
@@ -46,33 +46,33 @@ export class ConditionalSeries {
       this.statements.push(kit);
    }
 
-   evaluateConditions() {
-      // if (__DEV__) __DEV__checkIfNotTracked()
-      if (__DEV__) __DEV__checkIfTracked()
-      const conditions = this.conditions
-      for (let i = 0; i < conditions.length; i++) {
-         const $condition = conditions[i]
-         if ($condition()) {
-            this.prevActiveIndex = this.activeIndex;
-            this.activeIndex = i;
-            return i;
+   $ActiveIndex() {
+      return () => {
+         const conditions = this.conditions
+         for (let i = 0; i < conditions.length; i++) {
+            const $condition = conditions[i]
+            if ($condition()) {
+               this.prevActiveIndex = this.activeIndex;
+               this.activeIndex = i;
+               return i;
+            }
          }
+         this.prevActiveIndex = this.activeIndex;
+         this.activeIndex = conditions.length;
+         return conditions.length;
       }
-      this.prevActiveIndex = this.activeIndex;
-      this.activeIndex = conditions.length;
-      return conditions.length;
    }
 
-   getConditionsIon() {
-      const conditions = this.conditions
-      return () => {
-         const values: boolean[] = [];
-         for (const $condition of conditions) {
-            values.push(Boolean($condition()));
-         }
-         return values;
-      } // $(() => [$conditionA(), $conditionB(), ...])
-   } // must retrack in case any of its conditions require retracking
+   // getConditionsIon() {
+   //    const conditions = this.conditions
+   //    return () => {
+   //       const values: boolean[] = [];
+   //       for (const $condition of conditions) {
+   //          values.push(Boolean($condition()));
+   //       }
+   //       return values;
+   //    } // $(() => [$conditionA(), $conditionB(), ...])
+   // } // must retrack in case any of its conditions require retracking
 }
 
 

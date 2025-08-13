@@ -54,6 +54,7 @@ import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 import { TestTrackableOps } from './TestTrackableOps';
 import { SimpleCounter } from './SimpleCounter';
 import { TestNormalizeToRenderFunction } from './TestNormalizeToRenderFunction';
+import { TestIfElse } from './demos/TestIfElse';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -209,7 +210,7 @@ import { TestNormalizeToRenderFunction } from './TestNormalizeToRenderFunction';
 
 
 
-const app = createApp(List)
+const app = createApp(TestIfElse)
 
 app.mount('#app')
 

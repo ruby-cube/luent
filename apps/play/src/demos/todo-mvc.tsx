@@ -35,7 +35,11 @@ export function TodoMVC() {
 
    // get state
    // const $todos = ion.ionize((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
-   const $todos = ion.ionize([] as Todo[])
+   const $todos = ion.ionize([{
+            id: Date.now(),
+            title: 'firts',
+            completed: false
+         }] as Todo[])
    const $view = ion('all' as keyof typeof filters)
    const $editedTodo = ion(null as Todo | null)
 

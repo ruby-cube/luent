@@ -198,7 +198,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       this.initialized = true;
       const ion = this.ion;
       const quark = hasQuark(ion) ? quarkOf(ion) : undefined
-      const value = isParticle(quark) ? this.atoms.push(quark) : detachedCall(() => this.trackCall(ion))
+      const value = isParticle(quark) ? (this.atoms.push(quark), detachedCall(ion)) : detachedCall(() => this.trackCall(ion))
 
       // this.atoms = compound ? compound.atoms.length ? compound.atoms : (quark.inert = true, [])
       //    : !quark.inert && isWatchable(quark) ? [quark] : []
@@ -263,7 +263,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       if (prevAtom) {
          this.effect.unlink(asWatchedAtom(prevAtom))
       }
-      
+
       if (atom) {
          this.effect.link(asWatchedAtom(atom))
       }

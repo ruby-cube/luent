@@ -158,7 +158,7 @@ export const $postrender = createAwaitableHook(atPostrender)
  * @param eager 
  * @returns 
  */
-export function watchForRender(ion: Ion, render: (previous: unknown) => void, flask: Flask, eager: boolean = false) {
+export function watchForRender<T>(ion: Ion<T>, render: (state: {current: T, previous: T}) => void, flask: Flask, eager: boolean = false) {
    const subject = new IonSubject(ion)
 
    let prevState = subject.trackedCall()
@@ -171,7 +171,6 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
    let paused = false;
 
    const effect = new Effect(() => {
-      console.log('>>> watchForRender Effect', prevState, subject)
       if (paused) {
          dirty = true;
          return;
@@ -184,7 +183,7 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
 
    function _render() {
       const newState = subject.trackedCall()
-      render(prevState)
+      render({current: newState, previous: prevState})
       prevState = newState;
    }
 

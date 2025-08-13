@@ -2,6 +2,7 @@
 import { component, Else, For, fromTag, If } from '@rue/lumo'
 import { Ion, ion, ionize, watch } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
+import "/src/demos/sortable-table.css"
 
 
 export function SortableTableApp() {
@@ -24,7 +25,7 @@ export function SortableTableApp() {
             columns={gridColumns}
             filterKey={$searchQuery}>
          </SortableTable >
-         <o--link href='/src/demos/sortable-table.css' rel='stylesheet' />
+         {/* <o--link href='/src/demos/sortable-table.css' rel='stylesheet' /> */}
       </>
    )
 }

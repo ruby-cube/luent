@@ -521,7 +521,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watchForRender(entry, (previous/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+         watchForRender(entry, ({previous}/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             queueInternalRender(() => {
                const current = entry()
                if (previous) removePreviousClasses(previous, classList)
@@ -581,7 +581,7 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
    for (const key in entry) {
       const value = entry[key]
       if (isIon(value)) {
-         watchForRender(value, (previous) => {
+         watchForRender(value, ({previous}) => {
             queueInternalRender(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
