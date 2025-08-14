@@ -2,7 +2,7 @@ import { component } from "@rue/lumo";
 import { ionize } from "@rue/quarky";
 
 export function TestJSON() {
-   const array = ionize([])
+   const array = ionize([]as number[])
 
    return component(
       <>
