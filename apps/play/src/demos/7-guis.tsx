@@ -1,7 +1,9 @@
-//@ts-nocheck
-import { For, If, Style } from "@rue/lumo"
+
+import { atMounted, For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
 import { $$, ion, ionize, ions, SYNC, watch } from "@rue/quarky"
+import { quarkOf } from "../../../../packages/quarky/src/Quark"
+import { getFlask } from "@rue/flask"
 
 export function SevenGUIs() {
    return component(
@@ -169,7 +171,7 @@ function TimerApp() {
 
          <button on:click={reset}>Reset</button>
 
-            {Style`
+         {Style`
                   .elapsed-container {
                      width: 300px;
                      background-color: red;
@@ -196,21 +198,31 @@ export function CRUDApp() {
    const $prefix = ion('')
    const $first = ion('')
    const $last = ion('')
-   const $fullName = () => `${$last()}, ${$first()}`
+   const $fullName = () => `${$last()}, ${$first()}` //FIX: this can easily be mistaken for an ion.
 
    watch($selected, ({ current }) => {
       [$last.state, $first.state] = current.split(', ')
    }, { phase: SYNC })
 
-   const $filteredNames = ion(() =>
-      names.filter((n) =>
+   // watch(names, () => { //TODO: this is a stand-in to initialize pions for .filter. Figure out why .filter is not initializing pions
+   //    console.log('names updated')
+   // })
+   const proxyProto = quarkOf(names).proxyProto
+   // console.log('before', Object.getOwnPropertyDescriptors(proxyProto))
+   console.log('before', proxyProto)
+
+   const $filteredNames = ion(() => {
+      const res = names.filter((n) =>
          n.toLowerCase().startsWith($prefix().toLowerCase())
       )
-   )
+      console.log('!!!after filter', quarkOf(names))
+      return res;
+   })
+
 
    function create() {
       if (hasValidInput()) {
-         const fullName = $selected()
+         const fullName = $fullName()
          if (!names.includes(fullName)) {
             names.push(fullName)
             $first.state = $last.state = ''
@@ -218,9 +230,15 @@ export function CRUDApp() {
       }
    }
 
+   //   if (hasValidInput() && selected.value) {
+   //     const i = names.indexOf(selected.value)
+   //     names[i] = selected.value = `${last.value}, ${first.value}`
+   //   }
+
    function update() {
       if (hasValidInput() && $selected()) {
          const i = names.indexOf($selected())
+         console.log('index', i)
          names[i] = $selected.state = $fullName()
       }
    }
@@ -229,7 +247,10 @@ export function CRUDApp() {
       if ($selected()) {
          const i = names.indexOf($selected())
          names.splice(i, 1)
-         $selected.state = $first.state = $last.state = ''
+         $selected.state = ''
+         console.log('delete first', $first())
+         console.log('delete last', $last())
+         console.log('delete selected', $selected())
       }
    }
 
@@ -237,6 +258,10 @@ export function CRUDApp() {
       return $first().trim() && $last().trim()
    }
 
+   atMounted(() => {
+      console.log('after', quarkOf(names).proxyProto)
+      console.log('after', Object.getOwnPropertyDescriptors(quarkOf(names).proxyProto))
+   })
 
 
    return component(
@@ -257,7 +282,11 @@ export function CRUDApp() {
             <button on:click={update} > Update</button >
             <button on:click={del} > Delete</button >
          </div >
-            {Style`
+
+         {For($filteredNames, name =>
+            <div>{name}</div>
+         )}
+         {Style`
    * {
       font-size: inherit;
    }
@@ -377,7 +406,7 @@ export function CircleApp() {
                />
             </div>
          )}
-            {Style`
+         {Style`
 body {
    margin: 0;
    overflow: hidden;

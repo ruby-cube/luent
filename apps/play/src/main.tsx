@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -11,7 +11,7 @@ import './style.css'
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { TodoMVC } from './demos/todo-mvc';
-import { CircleApp, CRUDApp, SevenGUIs } from './demos/7-guis';
+import { CRUDApp, SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
 
 import { PolygonApp } from './demos/polygon-app';
@@ -82,7 +82,7 @@ import { TestJSON } from './TestJSON';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(List)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 

@@ -139,6 +139,8 @@ export function List(
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
+   const $filteredList = ion(()=>list.filter(i=>true))
+      console.log('filtered', $filteredList())
 
    const values = list.values()
    for (const value of values) {
@@ -239,6 +241,20 @@ export function List(
          ))}
 
          <button on:click={e => responsive(()=>selected.clear())}>clear</button>
+                  <hr></hr>
+
+         {For($filteredList, (item, $index)=>
+            <div
+               style={{
+                  backgroundColor: randomColor.get(),
+               }}>
+
+               <li>
+                  {item.$content}
+               </li>
+               <p>{$index}</p>
+            </div>
+         )}
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >

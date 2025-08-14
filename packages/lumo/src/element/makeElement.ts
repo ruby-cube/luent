@@ -489,7 +489,7 @@ function isNumberValue(attribute: string) {
 }
 
 function toString(value: any) {
-   return value.toString(); //TODO: make sure it works with any value
+   return value?.toString() ?? ""; //TODO: make sure it works with any value
 }
 
 //TODO: figure out how to incorporate options into inline events

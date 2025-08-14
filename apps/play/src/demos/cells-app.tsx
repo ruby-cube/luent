@@ -1,5 +1,5 @@
 import { component, Else, For, fromTag, If, Style } from "@rue/lumo"
-import { Ion, ion, ionize } from "@rue/quarky"
+import { ion, ionize } from "@rue/quarky"
 
 const COLS = 5
 const ROWS = 20
@@ -9,8 +9,6 @@ const cells = ionize(
       Array.from(Array(ROWS).keys()).map((i) => '')
    )
 )
-console.log('cells', cells)
-console.log('cellsb', cells[0])
 
 function evalCell(exp: string) {
    if (!exp.startsWith('=')) {
@@ -40,21 +38,6 @@ function getCellValue(c: number, r: number) {
 
 export function CellsApp() {
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
-   console.log('cols', cols)
-
-   function Through(...args: any[]) {
-      return [] as any
-   }
-
-   function Across(...args: any[]) {
-      return [] as any
-   }
-
-   function Thru(...args: any[]) {
-      return [] as any
-   }
-
-
 
    return component(
       <>
@@ -68,78 +51,79 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For(cells[0], (item, $row) => (//TODO: allow numbers as input for For()
-               console.log('row', $row()),
+               {For([...cells[0]], (_, row) => (//TODO: allow numbers as input for For()
                   <tr>
-                     <th>{$row}</th>
-                     {For(cols, (item, $col) =>
+                     <th>{row}</th>
+                     {For(cols, (_, col) =>
                         <td>
-                           <Cell row={$row} column={$col}></Cell>
+                           <Cell row={row} column={col}></Cell>
                         </td>
                      )}
                   </tr>
                ))}
             </tbody>
          </table >
+         
          {Style`
-         body {
-            margin: 0;
- }
+            body {
+               margin: 0;
+            }
 
-         table {
-            border - collapse: collapse;
-         table-layout: fixed;
-         width: 100%;
- }
+            table {
+               border - collapse: collapse;
+               table-layout: fixed;
+               width: 100%;
+            }
 
-         th {
-            background - color: #eee;
- }
+            th {
+               background - color: #eee;
+            }
 
-         tr:first-of-type th {
-            width: 100px;
- }
+            tr:first-of-type th {
+               width: 100px;
+            }
 
-         tr:first-of-type th:first-of-type {
-            width: 25px;
- }
+            tr:first-of-type th:first-of-type {
+               width: 25px;
+            }
 
-         td {
-            border: 1px solid #ccc;
-         height: 1.5em;
-         overflow: hidden;
- }
+            td {
+               border: 1px solid #ccc;
+               height: 1.5em;
+               overflow: hidden;
+            }
          `}
       </>
    )
 }
 
 
-function Cell({ $column, $row } = fromTag<{
-   column: Ion<number>,
-   row: Ion<number>
+function Cell({ column, row } = fromTag<{
+   column: number,
+   row: number
 }>()) {
 
    const $editing = ion(false)
 
    function update(e: any) {
       $editing.state = false
-      cells[$column()][$row()] = e.target.value.trim()
+      cells[column][row] = e.target.value.trim()
    }
+
 
    return component(
       <>
-         <div class="cell" title={(cells[$column()][$row()])} on:click={e => $editing.state = true}>
+         <div class="cell" title={cells[column][row]} on:click={e => { console.log('set editing'); $editing.state = true }}>
             {If($editing,
                <input
-                  value={(cells[$column()][$row()])}
+                  value={cells[column][row]}
                   on:change={update}
                   on:blur={update}
                   at:mounted={el => el.focus()}
                />
             )}
             {Else(
-               <span>{(evalCell(cells[$column()][$row()]))}</span>
+               <span>{evalCell(cells[column][row])}</span>
             )}
          </div >
 

@@ -12,13 +12,12 @@ import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { isWatchable, Watchable } from "../watch/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
-import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef } from "./IonizedMethods";
+import { getIonizedMethodDef, MutatingOpDef, TrackableOpDef, OpType, initModelUpdate, useIonicOp } from "./IonizedMethods";
 import { isInert } from "./inert";
 import { initUpdate, isLazyUpdate, popUpdate, pushUpdate, Update } from "../effect-cycle/ReactivitySystem";
 import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
 import { isTracking, trackParticle } from "../compound/Compound";
 import { isIntegerKey } from "./IonizedArray";
-import { trackOp } from "./OpDefinitions";
 
 export function $atomicPion(
    modelQuark: ModelQuark,
@@ -148,25 +147,6 @@ export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 
 
 
-// a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
-export function useTrackableOp(
-   method: Function,
-   state: ModelState,
-   ionized: IonizedModel,
-   opKey: ProxyKey,
-   config: TrackableOpDef,
-) {
-   const { op, track, input = noTransform, output = noTransform, this: transformThis = noTransform } = config
-
-   const fn = op ?? method
-
-   return function trackableOp(...args: any[]) {
-      if (__DEV__) emitSignal();
-      const _args = input(args);
-      track(ionized, opKey, _args)
-      return output(fn.apply(transformThis(state.active, _args), _args), ionized)
-   }
-}
 
 // function asTrackable(tracked: [IonizedModel] | [IonizedModel, ProxyKey, any[]]) {
 //    const [model, op, input] = tracked;
@@ -181,9 +161,7 @@ export function useTrackableOp(
 
 
 
-function noTransform(value: any) {
-   return value;
-}
+
 
 // a `trackable op` is a method like 'filter' that tracks the entire ionic model as a watch subject rather than a specific entry or property
 // and also receives a callback that receives property values of the model
@@ -295,7 +273,7 @@ const KEY_IN_OP = "[[in]]"
 const GET = 0 as const;
 const SET = 1 as const;
 
-type ProxyKey = string | symbol
+export type ProxyKey = string | symbol
 type CloneFn = (entity: any) => any
 function getCloner(entity: object): CloneFn {
    //TODO: get cloner from data structure configs
@@ -335,13 +313,13 @@ export function createIonizedModel(
    initialTarget: AnyObject,
    inertSchema: AnyObject | undefined,
 ) {
-   console.trace('create ionized model', initialTarget)
 
    const { clone, isAbsorbedIon } = getIonizedConfig(initialTarget)
 
    const state = new ModelState(initialTarget, clone)
 
    const proxyProto = Object.create(null) // state keys and ion access keys
+   proxyProto.constructor = initialTarget.constructor
 
    function initializeProperty(proxyProto: AnyObject, key: ProxyKey, op: typeof GET | typeof SET = GET, value: unknown = undefined): boolean {
       let target = initialTarget
@@ -379,8 +357,8 @@ export function createIonizedModel(
             if (propertyDescriptor.get || propertyDescriptor.set) {
                const opDef = getIonizedMethodDef(initialTarget, originalKey)
                if (opDef) {
-                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useTrackableOp(propertyDescriptor.get, state, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
-                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useMutatingOp(propertyDescriptor.set, state, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
+                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[OpType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
+                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[OpType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
                   Object.defineProperty(proxyProto, stateKey, propertyDescriptor)
                   return !!propertyDescriptor.set;
                }
@@ -403,7 +381,8 @@ export function createIonizedModel(
                      // TODO: if setting method before it's initialized
                      return propertyDescriptor.writable ?? false;
                   }
-                  const methodDef = getIonizedMethodDef(initialTarget, key) as TrackableOpDef | TriggeringOpDef
+                  const methodDef = getIonizedMethodDef(initialTarget, key) as TrackableOpDef | MutatingOpDef
+                  console.log(key, methodDef)
                   if (methodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
                      bindNativeMethod(
                         proxyProto,
@@ -479,6 +458,7 @@ export function createIonizedModel(
    const ionizedModel = new Proxy(initialTarget, {
 
       get(target, key, receiver) {
+         console.log('get', key)
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          if (key in proxyProto) {
             return proxyProto[key]
@@ -576,7 +556,7 @@ export function createIonizedModel(
 
    }) as unknown as IonizedModel
 
-   const modelQuark = new ModelQuark(ionizedModel, initialTarget, state, clone)
+   const modelQuark = new ModelQuark(ionizedModel, initialTarget, state, clone, proxyProto)
    proxyProto[QUARK] = modelQuark
 
    // const setOp = useMutatingOp(initialTarget, ionizedModel, '[[set]]', triggeringPropertySetOp)
@@ -752,6 +732,7 @@ function createPion(
       get: ion,
       set: Object.getOwnPropertyDescriptor(ion, 'state')!.set //NOTE: equivalent performance to storing setter on quark
    })
+   console.trace('create pion', key, proxyProto)
    return ion
 }
 
@@ -1003,136 +984,27 @@ function bindNativeMethod(
    proxyProto: ProxyPropertyMap,
    key: string | symbol,
    propertyDescriptor: PropertyDescriptor,
-   config: TrackableOpDef | TriggeringOpDef,
+   config: TrackableOpDef | MutatingOpDef,
    state: ModelState,
    initialTarget: AnyObject,
    ionizedModel: IonizedModel,
 ) {
-   if ('track' in config) {
-      propertyDescriptor.value = useTrackableOp(
-         initialTarget[key],
-         state,
-         ionizedModel,
-         key,
-         config
-      )
-      Object.defineProperty(proxyProto, key, propertyDescriptor)
-   }
-   else {
-      propertyDescriptor.value = useMutatingOp(
-         initialTarget[key],
-         state,
-         ionizedModel,
-         key,
-         config
-      )
-      Object.defineProperty(proxyProto, key,
-         propertyDescriptor
-      )
-   }
-}
-
-
-function useMutatingOp(
-   method: Function,
-   state: ModelState,
-   model: IonizedModel,
-   opKey: ProxyKey,
-   config: TriggeringOpDef
-) {
-   const fnName = typeof opKey === 'string' ? 'ionic_' + opKey : 'ionic_mutating_op'
-   const { this: useModel, shouldTrigger, triggers: trigger, input = noTransform, output: transformOutput = noTransform, op = method } = config
-   const quark = quarkOf(model)
-
-   const o = {
-      [fnName](...args: any) {
-         const _args = input(args)
-         const target = useModel ? model : state.active
-         const preop = config.preop?.(target, _args)
-
-         const update = initModelUpdate(quark)
-
-         let output: any;
-         try {
-            pushUpdate(update)
-            output = transformOutput(op.apply(target, _args), model); // perform mutation
-         }
-         finally {
-            popUpdate()
-            if (shouldTrigger && !shouldTrigger(preop)) return output;
-
-            // storeSnapshot(quark)
-
-            // recordMutation(quark.asMutable, new Mutation(
-            //    model,
-            //    opKey,
-            //    _args,
-            //    output,
-            //    preop
-            // ))
-
-            trigger?.(new TriggerableModel(quark, update), _args, preop);
-
-            // runSyncEffects()
-
-            return output;
-         }
-
-      }
-   }
-   return o[fnName]
-}
-
-export class TriggerableModel {
-
-   constructor(
-      private quark: ModelQuark,
-      private update: Update
-   ) {
-
-   }
-
-   trigger() {
-      this.quark.trigger(this.update) //TODO: only trigger if watched? but what about preventing overlapping mutations?
-   }
-
-   // triggerProperty(key: PropertyKey) {
-   //    const pion = $atomicPion(this.quark, key)
-   //    if (pion) {
-   //       initModelUpdate(pion, this.update)
-   //       pion.trigger()
-   //    }
-   // }
-
-   triggerOp(op: PropertyKey, entryKey: unknown) {
-      $atomicOp(this.quark, op, entryKey)?.trigger(this.update)
-   }
-
-   triggerAllOps(op: PropertyKey) {
-      const ops = getAtomicOps(this.quark, op)
-      if (ops)
-         for (const [_, op] of ops) {
-            op.trigger(this.update)
-         }
-   }
+   console.log('config.type', config.type, key)
+   propertyDescriptor.value = useIonicOp[config.type](
+      initialTarget[key],
+      config.privateState ? state : { active: ionizedModel },
+      ionizedModel,
+      key,
+      config
+   )
+   Object.defineProperty(proxyProto, key, propertyDescriptor)
 }
 
 
 
-function initModelUpdate(quark: ModelQuark) {
-   const update = initUpdate()
-   const state = quark.state
 
-   update.queue(() => {
-      state.commitChange()
-   })
 
-   update.onCancel(() => {
-      state.cancelChange()
-   })
 
-   return update;
-}
 
 // if (op === '[[get]]') {
 //    if (!entryKey) throw new Error('must provide property key to trigger [[get]] op')

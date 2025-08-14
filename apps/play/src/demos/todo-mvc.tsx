@@ -1,5 +1,5 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { ion, ionicTask, ionize, Ionized, isIon, isIonizedModel, toRaw } from "@rue/quarky"
+import { watch, ion, ionicTask, ionize, Ionized, isIon, isIonizedModel, toRaw } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 
 
@@ -34,15 +34,17 @@ export function TodoMVC() {
    }
 
    // get state
-   // const $todos = ion.ionize((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
-   const $todos = ion.ionize([] as Todo[])
+   const $todos = ion.ionize((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
+   // const $todos = ion.ionize([] as Todo[])
    const $view = ion('all' as keyof typeof filters)
    const $editedTodo = ion(null as Todo | null)
 
-   // derive state
-   const $filteredTodos = () => (filters[$view()]($todos()))
+   watch($todos, ()=>{})
 
-   const $remaining = () => (filters.active($todos()).length)
+   // derive state
+   const $filteredTodos = ion(() => (filters[$view()]($todos())))
+
+   const $remaining = ion(() => (filters.active($todos()).length))
 
    // handle routing
    window.addEventListener('hashchange', onHashChange)

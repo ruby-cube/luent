@@ -1,8 +1,5 @@
 import { toRaw } from "./ionize";
-import { isNotSameSize } from "./IonizedSet";
-import { enlistIonizedMethods } from "./IonizedMethods";
-import { deleteOp, hasMaybeIonized, trackableIterative, trackableOp, trackableOpWithCallback, trackOp } from "./OpDefinitions";
-import { noop } from "@rue/utils";
+import { enlistIonizedMethods, OpType,  trackableOp, trackOp, useDeleteOp, useHasOp  } from "./IonizedMethods";
 import { getIonizedModel, maybeIonize } from "./IonizedModel";
 
 // declare global {
@@ -32,78 +29,61 @@ import { getIonizedModel, maybeIonize } from "./IonizedModel";
 // Trackable keys is about tracking the property
 // trackable ops is about tracking the get op or the whole ionic model (depending on the type of operation)
 
-const trackableMapGetOps = {
-   get: true, // value = get(key)  //NOTE: trackable ops
-   has: true, // boolean = has(key) //NOTE: trackable ops
-   // set: true,
-   // delete: true,
-   // clear: true,
-   // forEach: true,
-   // entries: true, // newEntriesIterator = entries()
-   // keys: true, // newIterable = keys()
-   // values: true, // newIterable = values()
-   // size: true,
-}
+const hasOp = useHasOp((target, rawKey, ionizedKey) => {
+   target.set(rawKey, target.get(ionizedKey))
+   target.delete(ionizedKey)
+})
+
 
 export function installIonicMap() {
    enlistIonizedMethods(Map, {
       has: {
+         type: OpType.TRACKABLE,
+         privateState: true,
          input: ([key]) => [toRaw(key)],
-         op: function has(this: Map<unknown, unknown>, key: unknown) {
-            return hasMaybeIonized(key, this, {
-               passRaw: () => true,
-               passIonized: (key, rawKey?) => {
-                  const value = this.get(key)
-                  this.delete(key)
-                  this.set(rawKey, value)
-                  return true;
-               },
-               fail: false
-            })
-         }
-         ,
+         op: hasOp,
          track: trackOp,
       },
       get: {
+         type: OpType.TRACKABLE,
+           privateState: true,
          input: ([key]) => [toRaw(key)],
+         output: maybeIonize,
          op: function get(this: Map<unknown, unknown>, key: unknown) {
-            return hasMaybeIonized(key, this, {
-               passRaw: (key) => this.get(key),
-               passIonized: (ionized, rawKey) => {
-                  const value = this.get(ionized);
-                  this.delete(ionized);
-                  this.set(rawKey, value);
-                  return value;
-               },
-               fail: undefined
-            })
+            const has = hasOp.apply(this, [key])
+            if (has) return this.get(getIonizedModel(key))
+            return undefined
          },
          track: trackOp,
-         output: maybeIonize
       },
-      [Symbol.iterator]: trackableOpWithCallback,
-      forEach: trackableIterative,
+      [Symbol.iterator]: trackableOp,
+      forEach: trackableOp,
       keys: trackableOp,
       values: trackableOp,
       entries: trackableOp,
+
+      // Mutating
       set: {
+         type: OpType.MUTATING,
+           privateState: true,
          op: function set(this: Map<unknown, unknown>, key: unknown, value: unknown) {
             const ionizedKey = getIonizedModel(key);
             if (ionizedKey) this.delete(ionizedKey);
-            return this.set(key, value)
+            return this.set(key, value) //TODO: we need
          },
          input: ([key, value]) => [toRaw(key), toRaw(value)],
          preop: (target, [key, value]) => ({
             target,
             key,
             prevState: target.get(key),
+            prevSize: target.size
          }),
-         shouldTrigger: ({ prevState, key, target }) => prevState !== target.get(key),
-         triggers: (model, [key], { prevSize, target }) => {
+         trigger: (model, { prevSize, prevState, target, key }) => {
+            if (prevState !== target.get(key)) return;
             model.trigger();
             model.triggerOp('has', key);
             model.triggerOp('get', key);
-            if (prevSize !== target.size) model.triggerOp('[[get]]', 'size'); //TODO: should 'size' be an op or property if it is a getter?
+            if (prevSize !== target.size) model.triggerOp('[[get]]', 'size');
          },
          revert(ionized, data) {
             ionized.delete(data.args[0])
@@ -111,13 +91,14 @@ export function installIonicMap() {
       },
 
       clear: {
+         type: OpType.MUTATING,
+           privateState: true,
          preop(target) {
             return { entries: Array.from(<Map<any, any>>target), prevSize: target.size, target }
          },
 
-         shouldTrigger: isNotSameSize,
-
-         triggers: (model) => {
+         trigger: (model, { prevSize, target }) => {
+            if (prevSize === target.size) return;
             model.triggerAllOps('get');
             model.triggerAllOps('has');
             model.triggerOp('[[get]]', 'size');
@@ -132,16 +113,18 @@ export function installIonicMap() {
       },
 
       delete: {
+         type: OpType.MUTATING,
+           privateState: true,
          input: ([key]) => [toRaw(key)],
-         op: deleteOp,
+         op: useDeleteOp(hasOp),
          preop: (target, [key]) => ({
             target,
             key,
             value: target.get(key),
             prevSize: target.size
          }),
-         shouldTrigger: isNotSameSize,
-         triggers: (model, [key]) => {
+         trigger: (model, { prevSize, target, key }) => {
+            if (prevSize === target.size) return;
             model.trigger();
             model.triggerOp('has', key);
             model.triggerOp('get', key);
@@ -152,7 +135,11 @@ export function installIonicMap() {
          }
       },
       size: {
-         get: { track: trackOp }
+         get: {
+            type: OpType.TRACKABLE,
+              privateState: true,
+            track: trackOp
+         }
       }
    })
 }

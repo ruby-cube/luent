@@ -61,7 +61,8 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
       public entity: IonizedModel,
       public rawTarget: AnyObject, //initialData
       public state: ModelState,
-      public clone: ((obj: AnyObject)=>AnyObject) | undefined
+      public clone: ((obj: AnyObject)=>AnyObject) | undefined,
+      public proxyProto: AnyObject //DEV only
       // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
 

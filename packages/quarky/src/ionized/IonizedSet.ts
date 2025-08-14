@@ -1,7 +1,6 @@
 import { toRaw } from "./ionize";
-import { getIonizedModel, GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
-import { enlistIonizedMethods } from "./IonizedMethods";
-import { deleteOp, hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackOp } from "./OpDefinitions";
+import { getIonizedModel } from "./IonizedModel";
+import { enlistIonizedMethods, OpType, trackableCreativeOp, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonizedMethods";
 
 // declare global {
 //    interface Set<T> {
@@ -60,41 +59,38 @@ import { deleteOp, hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArg
 //    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
 // }
 
-
+const hasOp = useHasOp((target, ionizedKey, rawKey) => {
+   target.delete(ionizedKey)
+   target.add(rawKey)
+})
 
 export function installIonicSet() {
    enlistIonizedMethods(Set, {
-      // trackableOps: {
       has: {
+         type: OpType.TRACKABLE,
+           privateState: true,
          input: ([key]) => [toRaw(key)],
-         op: function has(this: Set<unknown>, key: unknown) {
-            return hasMaybeIonized(key, this, {
-               passRaw: () => true,
-               passIonized: (key, rawKey?) => {
-                  this.delete(key)
-                  this.add(rawKey)
-                  return true;
-               },
-               fail: false
-            })
-         }
-         ,
+         op: hasOp,
          track: trackOp,
       },
-      [Symbol.iterator]: trackableOpWithCallback,
-      forEach: trackableIterative,
+      [Symbol.iterator]: trackableOp,
+      forEach: trackableOp,
       keys: trackableOp,
       values: trackableOp,
       entries: trackableOp,
-      difference: trackableCreativeOpWithArgs, // newSet = difference(otherSet) 
-      union: trackableCreativeOpWithArgs,
-      intersection: trackableCreativeOpWithArgs,
-      symmetricDifference: trackableCreativeOpWithArgs,
+      difference: trackableCreativeOp, // newSet = difference(otherSet) 
+      union: trackableCreativeOp,
+      intersection: trackableCreativeOp,
+      symmetricDifference: trackableCreativeOp,
 
-      isSubsetOf: trackableCheckOp, // boolean = isSubsetOf(otherSet)
-      isSupersetOf: trackableCheckOp, // boolean = isSupersetOf(otherSet)
-      isDisjointFrom: trackableCheckOp, // boolean = isDisjointFrom(otherSet)
+      isSubsetOf: trackableOp, // boolean = isSubsetOf(otherSet)
+      isSupersetOf: trackableOp, // boolean = isSupersetOf(otherSet)
+      isDisjointFrom: trackableOp, // boolean = isDisjointFrom(otherSet)
+
+      // mutating
       add: {
+         type: OpType.MUTATING,
+           privateState: true,
          op: function add(this: Set<unknown>, value: unknown) {
             const ionizedKey = getIonizedModel(value);
             if (ionizedKey) this.delete(ionizedKey);
@@ -102,8 +98,8 @@ export function installIonicSet() {
          },
          input: ([value]) => [toRaw(value)],
          preop: (target, [value]) => ({ prevSize: target.size, target, value }),
-         shouldTrigger: isNotSameSize,
-         triggers: (model, [value]) => {
+         trigger: (model, { prevSize, target, value }) => {
+            if (prevSize === target.size) return;
             model.trigger();
             model.triggerOp('[[get]]', 'size');
             model.triggerOp('has', value)
@@ -113,13 +109,14 @@ export function installIonicSet() {
          }
       },
       clear: {
+         type: OpType.MUTATING,
+           privateState: true,
          preop(target) {
             return { entries: Array.from(<Set<any>>target), prevSize: target.size, target }
          },
 
-         shouldTrigger: isNotSameSize,
-
-         triggers: (model) => {
+         trigger: (model, { prevSize, target }) => {
+            if (prevSize === target.size) return;
             model.triggerAllOps('has');
             model.triggerOp('[[get]]', 'size');
             model.trigger()
@@ -132,33 +129,37 @@ export function installIonicSet() {
          }
       },
       delete: {
+         type: OpType.MUTATING,
+           privateState: true,
          input: ([value]) => [toRaw(value)],
-         op: deleteOp,
+         op: useDeleteOp(hasOp),
          preop: (target, [value]) => ({
             target,
             value,
             prevSize: target.size
          }),
-         shouldTrigger: isNotSameSize,
-         triggers: (model, [value]) => {
+         trigger: (model, { prevSize, target, value }) => {
+            if (prevSize === target.size) return;
             model.trigger(),
-            model.triggerOp('has', value),
-            model.triggerOp('[[get]]', 'size')
+               model.triggerOp('has', value),
+               model.triggerOp('[[get]]', 'size')
          },
          revert(ionizedModel, { preopData: { value } }) {
             ionizedModel.add(value)
          }
       },
       size: {
-         get: { track: trackOp }
+         get: {
+            type: OpType.TRACKABLE,
+              privateState: true,
+            track: trackOp
+         }
       }
       // }
    })
 }
 
-export function isNotSameSize({ prevSize, target }: { prevSize: number, target: { size: number } }) {
-   return prevSize !== target.size
-}
+
 
 
 // export function createIonicSet(

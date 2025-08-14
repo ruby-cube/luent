@@ -45,18 +45,18 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
    // nodePod.push(element) // serves as an indicator to append instead of prepend for dynamic updates
 
    const nodeEntities = processJSXOutput(render(), element, nodePod)
+   atUnmount(() => {
+      removeDOMNodes(nodePod)
+   })
+   atMounted((initial) => {
+      if (initial) return;
+      mountNodeEntities(nodeEntities, element)
+   })
    return {
       type: 'portal',
       nodePod,
       mount(parent: Element, fragment: DocumentFragment | undefined) {
          mountNodeEntities(nodeEntities, element)
-         atUnmount(() => {
-            removeDOMNodes(nodePod)
-         })
-         atMounted((initial) => {
-            if (initial) return;
-            mountNodeEntities(nodeEntities, element)
-         })
       }
    };
 

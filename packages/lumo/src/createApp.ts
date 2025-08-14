@@ -63,6 +63,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
                mountNodeEntities(processJSXOutput(App(), appRoot, nodePod), appRoot)
             }
             finally {
+               flask.emitInitialMount()
                setComponentAttributes(undefined)
                muIonsStack.pop()
                popUpdate()
