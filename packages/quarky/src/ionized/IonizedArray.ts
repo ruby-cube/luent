@@ -1,7 +1,9 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { IonizedModel, maybeIonize, $atomicPion } from "./IonizedModel";
-import { MutatingOpDef, IonizedMethodsDef, TrackableOpDef, OpType, trackModel, enlistIonizedMethods, Constructor } from "./IonizedMethods";
+import { MutatingOpDef, IonizedMethodsDef, TrackableOpDef, OpType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
+import { trackParticle } from "../compound/Compound";
+import { AtomicIonQuark } from "../ion/AtomicIon";
 
 declare global {
    interface Array<T> {
@@ -226,7 +228,7 @@ enlistIonizedMethods(Array,
          output: maybeIonize
       },
 
-      // [Symbol.iterator]: trackableOp, // decoy
+      [Symbol.iterator]: trackableOp, // decoy
 
       toReversed: creativeOp, // newArray = toReversed()
       flat: creativeOp, // newArray = flat(depth?)
@@ -245,7 +247,7 @@ enlistIonizedMethods(Array,
 
       // forEach: trackableOp,//forEach(callbackFn, thisArg?)
 
-      // keys: trackableOp,  // newIterable = keys() //TODO: this does not need to track the entire model, just [[ownKeys]]
+      keys: trackableOp,  // newIterable = keys() //TODO: this does not need to track the entire model, just [[ownKeys]]
       // entries: trackableOp, // newEntriesIterator = entries()
       // values: trackableOp, // newIterable = values()
 
@@ -395,6 +397,11 @@ enlistIonizedMethods(Array,
             for (let i = 0; i < model.length; i++) {
                model[i] = snapshot[i]
             }
+         }
+      },
+      length: {
+         getterTask() {
+            trackParticle(this.modelQuark!)
          }
       }
       // '[[set]]': {

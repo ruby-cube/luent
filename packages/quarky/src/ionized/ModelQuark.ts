@@ -7,7 +7,7 @@ import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
 import { $atomicOp, asAtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
-import { getIonizedMethodDef } from "./IonizedMethods"
+import { getIonizedMemberDef } from "./IonizedMethods"
 import { Update } from "../effect-cycle/ReactivitySystem"
 import { AtomicIonQuark, AtomicQuark, ModelState, NULL } from "../ion/AtomicIon"
 import { trackParticle } from "../compound/Compound"
@@ -176,7 +176,7 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
       const op = mutation.op
       this.reversionOps.get(op)?.(mutation) || (this.reversionOps.set(op, (mutation: Mutation) => {
          const initialized = true;
-         const configs = getIonizedMethodDef(this.rawTarget, op);
+         const configs = getIonizedMemberDef(this.rawTarget, op);
          if (configs)
             for (const config of configs) { //FIX:
                const mutatingOps = config.mutatingOps

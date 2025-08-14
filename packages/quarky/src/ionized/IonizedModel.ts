@@ -12,7 +12,7 @@ import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { isWatchable, Watchable } from "../watch/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
-import { getIonizedMethodDef, MutatingOpDef, TrackableOpDef, OpType, initModelUpdate, useIonicOp } from "./IonizedMethods";
+import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, OpType, initModelUpdate, useIonicOp } from "./IonizedMethods";
 import { isInert } from "./inert";
 import { initUpdate, isLazyUpdate, popUpdate, pushUpdate, Update } from "../effect-cycle/ReactivitySystem";
 import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
@@ -355,7 +355,7 @@ export function createIonizedModel(
          const propertyDescriptor = Object.getOwnPropertyDescriptor(target, originalKey)
          if (propertyDescriptor) {
             if (propertyDescriptor.get || propertyDescriptor.set) {
-               const opDef = getIonizedMethodDef(initialTarget, originalKey)
+               const opDef = getIonizedMemberDef(initialTarget, originalKey)
                if (opDef) {
                   propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[OpType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
                   propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[OpType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
@@ -381,7 +381,7 @@ export function createIonizedModel(
                      // TODO: if setting method before it's initialized
                      return propertyDescriptor.writable ?? false;
                   }
-                  const methodDef = getIonizedMethodDef(initialTarget, key) as TrackableOpDef | MutatingOpDef
+                  const methodDef = getIonizedMemberDef(initialTarget, key) as TrackableOpDef | MutatingOpDef
                   console.log(key, methodDef)
                   if (methodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
                      bindNativeMethod(
@@ -586,7 +586,7 @@ function triggerKeysChange(quark: ModelQuark, key: ProxyKey, update: Update) {
 //    // if (methods && key in methods) {
 //    //    return bindMethod(methods[key], key, ionizedModel, proxyProto)
 //    // }
-//    const nativeMethodDef = getIonizedMethodDef(target, key)
+//    const nativeMethodDef = getIonizedMemberDef(target, key)
 //    if (nativeMethodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
 //       return bindNativeMethod(
 //          nativeMethodDef,
@@ -725,7 +725,8 @@ function createPion(
    quark: ModelQuark,
    propertyDescriptor: PropertyDescriptor
 ) {
-   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), true, quark))
+   const propDef = getIonizedMemberDef(state.active, key)
+   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), true, quark, propDef?.getterTask, propDef?.setterTask))
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
       configurable: propertyDescriptor.configurable,

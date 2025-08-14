@@ -8,6 +8,7 @@ import { $atomicOp, getAtomicOps } from "./AtomicOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
 import { trackParticle } from "../compound/Compound"
+import { AtomicIonQuark } from "../ion/AtomicIon"
 
 export type Constructor = new (...args: any[]) => any
 
@@ -172,7 +173,12 @@ export type MutatingOpDef = {
    revert?: Revert,
 } & OpTransforms
 
-type IonizableMethodDef = TrackableOpDef | MutatingOpDef | { get?: TrackableOpDef, set?: MutatingOpDef }
+export type PropertyDef = {
+   getterTask?: (this: AtomicIonQuark)=>void
+   setterTask?: (this: AtomicIonQuark)=>void
+}
+
+type IonizableMethodDef = TrackableOpDef | MutatingOpDef | { get?: TrackableOpDef, set?: MutatingOpDef } | PropertyDef
 
 export type GetPreopData = (target: AnyObject, args: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
@@ -208,7 +214,7 @@ const ionizedMethodsMap = new Map()
 
 
 
-export function getIonizedMethodDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
+export function getIonizedMemberDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
    let constructor = target.constructor as Constructor
    let _target = target;
    while (constructor !== Object) {

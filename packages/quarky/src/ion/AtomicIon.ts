@@ -228,6 +228,8 @@ export class AtomicIonQuark extends AtomicQuark {
       public state: IState,
       public ionized: boolean,
       public modelQuark?: ModelQuark,
+      public getterTask?: () => void,
+      public setterTask?: () => void
    ) {
       super()
       this.__DEV__asTraceable = modelQuark?.__DEV__asTraceable ?? new Traceable()
@@ -310,7 +312,8 @@ function getState(this: AtomicIonQuark) {
    if (__DEV__) emitSignal();
    // if (this.state.key)console.log('track', this.state.key)
    trackParticle(this)
-   if (this.modelQuark) trackParticle(this.modelQuark)
+   this.getterTask?.()
+   // if (this.state.key === 'length' && this.modelQuark) trackParticle(this.modelQuark)
    if (isLazyUpdate()) {
       return maybeIonize(this.state.pending, this.ionized); //TODO: inertSchema
    }
@@ -350,7 +353,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    this.trigger(update)
    this.modelQuark?.trigger(update);
    // if (this.modelQuark) 
-      // console.trace('trigger modelQuark of pion?', this.state.key)
+   // console.trace('trigger modelQuark of pion?', this.state.key)
 
    return state;
 }
