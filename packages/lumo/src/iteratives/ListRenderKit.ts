@@ -15,7 +15,7 @@ import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
-import { queueInternalRender, PRERENDER, watchForRender } from "../render-cycle";
+import { queueInternalRender, PRERENDER, watchToRender } from "../render-cycle";
 import { Compound, detachedCall, popTracker, pushTracker } from "../../../quarky/src/compound/Compound";
 import { quarkOf } from "../../../quarky/src/Quark";
 
@@ -146,7 +146,7 @@ export class ListRenderKit {
 
       $list["~list"] = true
 
-      watchForRender(this.$list, ({ previous }) => { // typecast as one of the options so that typescript won't complain
+      watchToRender(this.$list, ({ previous }) => { // typecast as one of the options so that typescript won't complain
          // if (recording && state === previous){
          //    recording.stop()
          //    console.log('updating list via MUTATIONS')

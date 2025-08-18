@@ -3,7 +3,6 @@ import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { Effect, PhaseQueue } from "../effect-cycle/EffectQueue";
 import { hasQuark, Quark, QUARK } from "../Quark";
 import { Update } from "../effect-cycle/ReactivitySystem";
-import { watch } from "fs";
 
 
 export type Watchable = {

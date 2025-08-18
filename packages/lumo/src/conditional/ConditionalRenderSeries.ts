@@ -9,7 +9,7 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask, getFlask } from "@rue/flask";
-import { queueInternalRender, PRERENDER, RENDER, SYNC, watchForRender } from "../render-cycle";
+import { queueInternalRender, PRERENDER, RENDER, SYNC, watchToRender } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
@@ -173,7 +173,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let prevIncomingNodes: TransitionNode[];
 
       // set up watcher for updates
-      watchForRender($activeIndex, function updateConditional({ current: activeIndex, previous: prevIndex }) {
+      watchToRender($activeIndex, function updateConditional({ current: activeIndex, previous: prevIndex }) {
          console.log('update conditional?', activeIndex, prevIndex)
 
          if (prevIndex === activeIndex) {

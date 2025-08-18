@@ -104,7 +104,8 @@ function getRandomMovement() {
    const index = Math.random() * (movements.length - 1)
    return movements[Math.floor(index)]
 }
-// no repeats
+
+// no consecutive repeats
 let prev = ""
 
 function getNextMovement() {
@@ -116,6 +117,7 @@ function getNextMovement() {
 
 
 let count = 0;
+
 function reSpacebar(e) {
    if (e.code !== 'Space') return;
    

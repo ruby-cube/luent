@@ -12,6 +12,7 @@ import { component, Slot } from "../component/Component";
 import { Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 import { CommonsKey } from "../commons/CommonsKey";
+import { RenderSlot } from "../component/fromTag";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 
@@ -39,7 +40,7 @@ export type PhasicNode = {
 
 export function renderPhasicNode(
    $div: NodeRef<'div'>,
-   Slot: () => JSXNode,
+   Slot: RenderSlot,
    transitionNode: TransitionNode,
    $disable: false | undefined | Ion<boolean>
 ) {

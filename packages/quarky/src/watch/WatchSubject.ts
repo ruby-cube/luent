@@ -6,8 +6,6 @@ import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom }
 import { isFunction, isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel, toRaw } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
-import { $currentOrNextCycle } from "../effect-cycle/ReactivitySystem";
-import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { IonicCompound } from "../ionic/IonicCompound";
 import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../compound/Compound";
@@ -30,24 +28,23 @@ export function multisubject<S extends unknown[]>(...subject: S) {
 // watch collection
 // watch properties -- must specify which properties to watch in multi subject: absorbed ions and derivation ions
 
-export function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjects, retrack?: boolean): WatchSubject | AnyObject {
-   return isMultiSubject(subject) ? new Multisubject(subject) //TODO:
-      : asSingleWatchSubject(subject, retrack)
+export function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjects, retrack: boolean, once: boolean): WatchSubject | AnyObject {
+   return isMultiSubject(subject) ? new Multisubject(subject, retrack, once)
+      : asSingleWatchSubject(subject, retrack, once)
 }
 
-function asSingleWatchSubject(subject: Ionized<object> | Ion<any> | AnyObject, retrack?: boolean) {
+function asSingleWatchSubject(subject: Ionized<object> | Ion<any> | AnyObject, retrack: boolean, once: boolean) {
+   //TODO: do not retrack if effect runs once
    return isIonizedModel(subject) ? new IonizedModelSubject(subject)
       : isFunction(subject) ? new IonSubject(subject)
          // : isGetter(subject) ? new IonSubject(createWatchedDerivation(subject, !!retrack))
          : isObject(subject) ? subject  //non-ionized object
-            : invalidSubject
+            : {}
 }
 
 function isMultiSubject(subject: AnyObject): subject is WatchSubjects {
    return MULTISUBJECT in subject;
 }
-
-const invalidSubject = {}
 
 
 
@@ -56,10 +53,10 @@ class Multisubject implements WatchSubject {
    private values: unknown[] = []
    inert: boolean = false;
 
-   constructor(multisubject: WatchSubjects) {
+   constructor(multisubject: WatchSubjects, retrack: boolean, once: boolean) {
       const subjects = this.subjects;
       for (const subject of multisubject) {
-         const watchSubject = asSingleWatchSubject(subject)
+         const watchSubject = asSingleWatchSubject(subject, retrack, once)
          subjects.push(watchSubject)
       }
    }

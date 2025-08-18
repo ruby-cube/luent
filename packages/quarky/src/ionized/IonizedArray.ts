@@ -3,12 +3,12 @@ import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { IonizedModel, maybeIonize, $atomicPion } from "./IonizedModel";
 import { MutatingOpDef, IonizedMethodsDef, TrackableOpDef, OpType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
 import { trackParticle } from "../compound/Compound";
-import { AtomicIonQuark } from "../ion/AtomicIon";
+
 
 declare global {
    interface Array<T> {
-      values<H>(): IonizeBy<H, ArrayIterator<ToRaw<T>>>;
-      entries<H>(): IonizeBy<H, ArrayIterator<ToRaw<T>>>;
+      values<H>(): ArrayIterator<IonizeBy<H, T>>;
+      entries<H>(): ArrayIterator<IonizeBy<H, T>>;
 
       at<H>(index: number): IonizeBy<H, T> | undefined;
       concat<H>(...items: (IonizeBy<H, T> | IonizeBy<H, T>[])[]): IonizeBy<H, ToRaw<T>[]>;
@@ -33,12 +33,12 @@ declare global {
          this: H,
          callback: (this: O, value: IonizeBy<H, T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
          thisArg?: O
-      ): IonizeBy<H, ToRaw<T>[]>;
+      ): IonizeBy<H, T>[];
       filter<H, O>(
          this: H,
          predicate: (this: H, value: IonizeBy<H, T>, index: number, array: H) => boolean,
          thisArg?: O
-      ): IonizeBy<H, ToRaw<T>[]>;
+      ): IonizeBy<H, T>[];
       find<H, O>(
          this: H,
          predicate: (this: O, value: IonizeBy<H, T>, index: number, array: H) => boolean,
@@ -57,9 +57,12 @@ declare global {
       ): IonizeBy<H, U>;
 
       // // Methods introduced in ES2023
-      toSorted<H>(compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, ToRaw<T>[]>;
-      toReversed<H>(): IonizeBy<H, ToRaw<T>[]>;
-      with<H>(index: number, value: IonizeBy<H, T>): IonizeBy<H, ToRaw<T>[]>;
+      toSorted<H>(compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, T>[];
+      toReversed<H>(): IonizeBy<H, T>[];
+      with<H>(index: number, value: IonizeBy<H, T>): IonizeBy<H, T>[];
+
+      //flat //TODO:
+      //flatMap
 
       [Symbol.iterator]<H>(): IonizeBy<H, IterableIterator<ToRaw<T>>>;
       ionizable: 'Array'
@@ -97,72 +100,7 @@ declare global {
 
 type IsIonizable<T> = T extends Ionizables[keyof Ionizables] ? true : false
 
-type Ans = IsIonizable<Frogs>
 
-// declare global {
-//    interface Array<T> {
-//       '~$methods'?: {
-//          // Accessor methods
-//          at(index: number): MaybeIonized<T> | undefined;
-//          concat(...items: (T | T[])[]): MaybeIonized<T>[];
-//          slice(start?: number, end?: number): MaybeIonized<T>[];
-
-//          // Mutator methods
-//          copyWithin(target: number, start: number, end?: number): MaybeIonized<T>[];
-//          fill(value: T, start?: number, end?: number): MaybeIonized<T>[];
-//          pop(): MaybeIonized<T> | undefined;
-//          push(...items: MaybeIonized<T>[]): number;
-//          reverse(): MaybeIonized<T>[];
-//          shift(): MaybeIonized<T> | undefined;
-//          sort(compareFn?: (a: T, b: T) => number): MaybeIonized<T>[];
-//          splice(start: number, deleteCount?: number, ...items: T[]): MaybeIonized<T>[];
-//          splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): MaybeIonized<T[], H>;
-
-//          forEach<H, O>(
-//             this: H,
-//             callback: (this: O, value: T, index: number, array: H) => void,
-//             thisArg?: O
-//           ): void;
-//          map<U, H, O>(
-//             this: H,
-//             callback: (this: O, value: MaybeIonized<T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
-//             thisArg?: O
-//          ): U[];
-//          filter<H, O>(
-//             this: H,
-//             predicate: (this: O, value: MaybeIonized<T>, index: number, array: H) => boolean,
-//             thisArg?: O
-//          ): MaybeIonized<T>[];
-//          find<H, O>(
-//             this: H,
-//             predicate: (this: O,value: MaybeIonized<T>, index: number, array: H) => boolean,
-//             thisArg?: O
-//          ): MaybeIonized<T> | undefined;
-
-//          reduce<U, H>(
-//             this: H,
-//             callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
-//             initialValue: U
-//          ): U;
-//          reduceRight<U, H>(
-//             this: H,
-//             callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
-//             initialValue: U
-//          ): U;
-
-//          // Methods introduced in ES2023
-//          toSorted(compareFn?: (a: MaybeIonized<T>, b: MaybeIonized<T>) => number): MaybeIonized<T>[];
-//          toReversed(): MaybeIonized<T>[];
-//          with(index: number, value: T): MaybeIonized<T>[];
-
-//          [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
-//       }
-//    }
-// }
-
-// const dogs = ionize([{ name: 'lo' }])
-
-// const jim = dogs.at(0)
 
 // How should these behave?
 
@@ -230,15 +168,15 @@ enlistIonizedMethods(Array,
 
       [Symbol.iterator]: trackableOp, // decoy
 
-      toReversed: creativeOp, // newArray = toReversed()
-      flat: creativeOp, // newArray = flat(depth?)
+      // toReversed: creativeOp, // newArray = toReversed()
+      // flat: creativeOp, // newArray = flat(depth?)
       // toSorted: trackableOp, // newArray = toSorted(compareFn?)
-      flatMap: creativeOp, // newArray = flatMap(callbackFn, thisArg?)
-      map: creativeOp, // newArray = map(callbackFn, thisArg?)
-      filter: creativeOp, // newArray = filter(callbackFn, thisArg?)
+      // flatMap: creativeOp, // newArray = flatMap(callbackFn, thisArg?)
+      // map: creativeOp, // newArray = map(callbackFn, thisArg?)
+      // filter: creativeOp, // newArray = filter(callbackFn, thisArg?)
 
       concat: creativeOp, // newArray = concat(arrayB, arrayC, ...)
-      with: creativeOp, // newArray = arrayInstance.with(index, value)
+      // with: creativeOp, // newArray = arrayInstance.with(index, value)
 
       // reduce: trackableOp, // result = reduce(callbackFn, initialValue?)
       // reduceRight: trackableOp, // result = reduceRight(callbackFn, initialValue?)

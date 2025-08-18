@@ -103,7 +103,7 @@ export function View() {
                ))}
             </ul >
          )}
-         <o--link href="src/demos/vue-data-fetching.css" rel="stylesheet"/>
+         <head:link href="src/demos/vue-data-fetching.css" rel="stylesheet"/>
       </div>
    )
 }

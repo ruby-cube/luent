@@ -83,7 +83,7 @@ export function MarkdownApp(
             <div class='output'>{{ innerHTML: $output }}</div>
             {/* <textarea>{$markdown}</textarea> */}
          </div>
-         <o--link href='/src/demos/markdown-app/markdown-app.css' rel='stylesheet' />
+         <head:link href='/src/demos/markdown-app/markdown-app.css' rel='stylesheet' />
       </>
    )
 }

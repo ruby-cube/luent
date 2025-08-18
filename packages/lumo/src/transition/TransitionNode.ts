@@ -1,4 +1,3 @@
-import { JSXNode } from "../node/makeNode";
 import { renderPhasicNode, TransitionConfig } from "./PhasicNode";
 import { createTransitionStyleSheet, getTransitionStylesheet, TransitionClasses, TransitionFunction, TransitionKit } from "./defineTransition";
 import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimation";
@@ -7,6 +6,7 @@ import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 import { NodeRef } from "../node/NodeRef";
+import { fromTag, RenderSlot } from "../component/fromTag";
 
 export type TransitionHook = {
    phase: 'in' | 'out'
@@ -20,7 +20,8 @@ export type TransitionNodeInput = {
    'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
    onStart?: (hook: TransitionHook) => void;
    onEnd?: (hook: TransitionHook) => void;
-   disable?: boolean | Ion<boolean>
+   disable?: boolean | Ion<boolean>;
+   Slot: RenderSlot
 }
 
 type TransitDelta = {
@@ -51,13 +52,21 @@ const defaultFade: TransitionClasses = {
    transitionClass: 'transition-default-fade'
 }
 
+export function Transition(input = fromTag<TransitionNodeInput & {Slot: RenderSlot}>()){
+   return createTransitionNode('Transition', input)
+}
+export function Transit(input = fromTag<TransitionNodeInput & {Slot: RenderSlot}>()){
+   return createTransitionNode('Transit', input)
+}
 
-export function createTransitionNode(
-   type: 'ooo-transition' | 'ooo-transit',
-   Slot: (() => JSXNode),
+
+
+
+function createTransitionNode(
+   type: 'Transition' | 'Transit',
    input: TransitionNodeInput
 ) {
-   const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "load:with": inputLoad, onEnd, onStart, disable } = input;
+   const { Slot, 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "load:with": inputLoad, onEnd, onStart, disable } = input;
    if (disable === true) {
       return isFunction(Slot) ? Slot() : Slot
    }
@@ -99,7 +108,7 @@ export function createTransitionNode(
          controller = new AbortController()
 
          if (transition_in) {
-            if (type === 'ooo-transit') {
+            if (type === 'Transit') {
                node.classList.add(...enterFromClasses!);
                node.classList.add(transition_in);
             }
@@ -270,7 +279,7 @@ export function createTransitionNode(
                         node.classList.remove(transition_out);
                         node.classList.remove(...exitClasses!);
 
-                        if (type === 'ooo-transition' && transition_in) {
+                        if (type === 'Transition' && transition_in) {
                            node.classList.add(...enterFromClasses!);
                            node.classList.add(transition_in);
                         }
@@ -339,7 +348,7 @@ export function createTransitionNode(
                node.classList.remove(transition_out);
                node.classList.remove(...exitClasses!);
 
-               if (type === 'ooo-transition' && transition_in) {
+               if (type === 'Transition' && transition_in) {
                   node.classList.add(...enterFromClasses!);
                   node.classList.add(transition_in);
                }
@@ -379,7 +388,7 @@ export function createTransitionNode(
       const node = div.node
    }
 
-   const renderNode = type === 'ooo-transit' ? renderTransitNode : renderPhasicNode
+   const renderNode = type === 'Transit' ? renderTransitNode : renderPhasicNode
 
    return renderNode(
       div,

@@ -154,14 +154,14 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | 
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'ooo-transit' | 'ooo-transition' | 'o-mount' | 'o-show',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'head:link' | 'o-mount' | 'o-show',
    Slot: undefined | (() => JSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | Component | JSX.Element | undefined {
 
    switch (nodeType) {
 
-      case 'o--link':
+      case 'head:link':
          return Portal('head', () =>
             makeElement('link', undefined, <ElementConfig>config, undefined)
          )
@@ -174,16 +174,11 @@ export function makeNode(
          if (!Slot) throw new Error(`Extraneous <o-mount>`)
          return wrapWithActivationType('mount', Slot, config.provide)
 
-      case 'ooo-transit':
-      case 'ooo-transition':
-         if (!Slot) throw new Error(`Extraneous transition node`)
-         return createTransitionNode(nodeType, Slot, <TransitionNodeInput>config)
-
       default:
          if (typeof nodeType === 'string') {
             return makeElement(
                nodeType,
-               <[string] | (() => JSXNode[])>Slot,
+               Slot,
                <ElementConfig>config,
                getCurrentIndex()
             )

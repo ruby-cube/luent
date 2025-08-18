@@ -158,7 +158,7 @@ export const $postrender = createAwaitableHook(atPostrender)
  * @param eager 
  * @returns 
  */
-export function watchForRender<T>(ion: Ion<T>, render: (state: {current: T, previous: T}) => void, flask: Flask, eager: boolean = false) {
+export function watchToRender<T>(ion: Ion<T>, render: (state: {current: T, previous: T}) => void, flask: Flask, eager: boolean = false) {
    const subject = new IonSubject(ion)
 
    let prevState = subject.trackedCall()
@@ -167,19 +167,17 @@ export function watchForRender<T>(ion: Ion<T>, render: (state: {current: T, prev
       return;
    }
 
-   let dirty = false;
+   let stale = false;
    let paused = false;
 
    const effect = new Effect(() => {
       if (paused) {
-         dirty = true;
+         stale = true;
          return;
       }
-      dirty = false;
+      stale = false;
       _render()
    }, PRERENDER)
-
-   if (ion["~list"]) effect["~updateList"] = true;
 
    function _render() {
       const newState = subject.trackedCall()
@@ -202,13 +200,12 @@ export function watchForRender<T>(ion: Ion<T>, render: (state: {current: T, prev
    });
    flask.onRemount(/* listener.resume */() => {
       paused = false;
-      if (dirty) {
+      if (stale) {
          effect.run?.()
       }
       subject.linkEffect(effect)
    });
 }
-
 
 export const RUN_EAGERLY = true;
 

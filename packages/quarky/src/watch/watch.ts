@@ -89,7 +89,7 @@ export function watch<
 
    options.retrack = options.retrack ?? true;
 
-   const watchSubject = asWatchSubject(subject, options.retrack)
+   const watchSubject = asWatchSubject(subject, options.retrack, Boolean(options.once))
    if (options?.traceTriggers) {
       //TODO:
    }

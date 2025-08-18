@@ -38,11 +38,11 @@ export function TestMorphic() {
 
          </o--portal>
 
-         <ooo-transition>
+         <Transition>
             {If($active,
                <p>hey</p>
             )}
-         </ooo-transition>
+         </Transition>
 
          <o--client hydrate>
             <button on:click={() => morph('hi')}>change to hi</button>

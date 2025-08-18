@@ -2,7 +2,7 @@ import { getCommons } from "../commons/commons-stack";
 import { MaybeIon } from "../component/Input";
 import { JSXNode, normalizeToRenderFunction, RawJSXNode } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { Ion, IonizeBy, Ionized, isInert, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonized, toValue } from "@rue/quarky";
+import { Ion, IonizeBy, isInertIon, isIon, IsIonized, isIonizedModel, toValue } from "@rue/quarky";
 
 
 export type RenderItem<L> =

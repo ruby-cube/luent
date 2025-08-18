@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
+import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -82,7 +82,7 @@ import { TestJSON } from './TestJSON';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TodoMVC)
+const app = createApp(MountIf)
 
 app.mount('#app')
 
@@ -235,7 +235,7 @@ app.mount('#app')
 //     const $doubleCount = $(() => $count() * 2)
 //     let prevDoubleCount = $doubleCount;
 //     dynamicNode.mount(() => {
-//         watchForRender($doubleCount, function $stubbornHandler() {
+//         watchToRender($doubleCount, function $stubbornHandler() {
 //             console.log("tada")
 //             destroyDerivedSignal(prevDoubleCount)
 //             prevDoubleCount = null;

@@ -1,6 +1,5 @@
 import { TransitionNode } from "./TransitionNode";
 import { NodeRef } from "../node/NodeRef";
-import { JSXNode } from "../node/makeNode";
 import { makeElement } from "../element/makeElement";
 import { fromCommons } from "../commons/provide";
 import { Ion } from "@rue/quarky";
@@ -8,10 +7,11 @@ import { component } from "../component/Component";
 import { Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 import { CommonsKey } from "../commons/CommonsKey";
+import { RenderSlot } from "../component/fromTag";
 
 export function renderTransitNode(
    $div: NodeRef<'div'>,
-   Slot: () => JSXNode,
+   Slot: RenderSlot,
    transitionNode: TransitionNode,
    $disable: false | undefined | Ion<boolean>
 ) {

@@ -2587,7 +2587,7 @@ declare global {
          'i--i': {}; //comments
          'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
-         'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
+         'head:link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          'o-show': { children: ConditionalRenderKit[]; };
          'o-mount': { children: ConditionalRenderKit[]; };
          // 'Slot': {Slot: any}
@@ -2595,8 +2595,8 @@ declare global {
          // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
          // 'o--try': TryNodeInput & { children: Lumo.Slot };
 
-         'ooo-transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
-         'ooo-transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
+         // 'ooo-transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         // 'ooo-transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
          'o--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
       }
 
