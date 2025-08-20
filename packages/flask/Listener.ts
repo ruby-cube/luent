@@ -234,16 +234,19 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
       }
    }
 
+   const pausableTask = (args: any[]) => {
+      if (paused) {
+         dirty = true;
+         return;
+      }
+      dirty = false;
+      return callback(...args)
+   }
+
 
    const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
       run: (...args: any[]) => {
          if (!effect.run) return;
-         if (paused) {
-            dirty = true;
-            return;
-         }
-         dirty = false;
-
          return runCallback(args)
       }
    }
@@ -252,14 +255,14 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
    const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
    const context = $_snap_context()
    let scene: Flask;
-   
+
    function runCallback(args: any[]) {
       if (scene) scene.emitDiscard()
       scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if stale right?
       const _context = { ...context }
       _context[FLASK] = scene
       _context[TRACE] = config.__DEV__asyncPath ?? ""
-      $_run_with_(_context, () => effect.run?.(...args))
+      $_run_with_(_context, () => pausableTask(args))
    }
 
    const returnVal: any = enroll(effect.run!);

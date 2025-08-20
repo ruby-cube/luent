@@ -1,8 +1,7 @@
 import { isObject, __DEV__unwrap } from "@rue/utils";
-import { Phase, SYNC } from "../effect-cycle/EffectCycle";
-import { Effect, PhaseQueue } from "../effect-cycle/EffectQueue";
+import { Phase, SYNC, Update } from "./UpdateCycle";
+import { Effect, PhaseQueue } from "./EffectQueue";
 import { hasQuark, Quark, QUARK } from "../Quark";
-import { Update } from "../effect-cycle/ReactivitySystem";
 
 
 export type Watchable = {
@@ -24,17 +23,21 @@ export function trigger(
 ) {
    const pendingUpdate = this.pendingUpdate
    if (pendingUpdate === update) return;
+
    if (pendingUpdate && pendingUpdate !== update) {
-      console.log('>>> CANCEL', pendingUpdate)
       pendingUpdate.cancel()
    }
+
    this.pendingUpdate = update
-   update.queue(() => {
+
+   update.onComplete(() => {
       this.pendingUpdate = null;
    })
+
    update.onCancel(() => {
       this.pendingUpdate = null;
    })
+
    this.asWatchedAtom?.triggerEffects(update)
 }
 

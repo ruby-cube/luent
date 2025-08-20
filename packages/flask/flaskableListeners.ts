@@ -27,14 +27,15 @@ export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cle
 
 
 export function $listen<
-   E extends EnrollFunction
+E extends EnrollFunction,
+P extends boolean
 >(
    callback: Callback,
    options: SustainedListenerOptions,
    config: {
       enroll: E,
       remove: RemoveFunction<E>,
-      pausable?: boolean
+      pausable?: P
    }
 ) {
    const { enroll, remove, pausable = false } = config;
@@ -47,7 +48,7 @@ export function $listen<
       remove,
       options,
       __DEV__asyncPath: __DEV__buildAsyncPath()
-   })
+   }) as P extends true ? PausableListener : Listener
 }
 
 

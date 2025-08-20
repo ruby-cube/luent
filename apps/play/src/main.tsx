@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -18,7 +18,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp, createGlobalCommons, fromTag, NodeRef} from '@rue/lumo';
+import { component, createApp, createGlobalCommons, fromTag, NodeRef } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -33,7 +33,7 @@ import { TestSetHas } from './TestSetHas';
 import { TestCustomRadioSelection } from './TestSelected';
 import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
-import { ion, ionize, isAtomic, isIonizedModel, neutron } from '@rue/quarky';
+import { ion, ionize, isAtomic, isIonizedModel, neutron, watch } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
 import { TestAnimationController } from './demos/animation-controller';
 import { CounterModelApp } from './TestCounterModel';
@@ -76,17 +76,25 @@ import { TestJSON } from './TestJSON';
 // import { TestDerived } from './testDerivedIon';
 // import { OverrideMethods } from './TestOverrideMethods';
 // import { queueTask } from '@rue/thread';
-// import { EffectCycle } from '@rue/quarky';
+// import { UpdateCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(MountIf)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 
+const frog = ionize({ name: 'sir robin' })
 
+watch(frog.$name, ({ current: name }) => {
+   console.log('name:', name)
+})
+
+document.addEventListener('click', () => {
+   frog.name = 'kermit'
+})
 
 
 // const rootContext = createGlobalCommons()
@@ -177,7 +185,7 @@ app.mount('#app')
 //    const list = ionize([1])
 //    list.push(4)
 //    const sList = JSON.stringify(list)
-   
+
 //    console.log(sList)
 //    return component(<>hi</>)
 // }

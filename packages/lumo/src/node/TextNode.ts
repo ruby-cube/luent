@@ -1,4 +1,4 @@
-import { isIon, __DEV__checkIfTracked, watch, Ion, toValue, $activeUpdate } from "@rue/quarky";
+import { isIon, __DEV__checkIfTracked, watch, Ion, toValue } from "@rue/quarky";
 import { INTERNAL_RENDER, PRERENDER, queueInternalRender, watchToRender } from "../render-cycle";
 import { getActiveFlask, getFlask } from "@rue/flask";
 

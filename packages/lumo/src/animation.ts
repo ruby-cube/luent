@@ -1,5 +1,5 @@
-import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@rue/flask";
-import { popUpdate, pushUpdate, Update } from "./ReactivitySystem";
+import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
+import { createUpdate, pushUpdate, popUpdate} from "@rue/quarky";
 
 // let forAnimation = false;
 // export function $forAnimation() {
@@ -27,7 +27,7 @@ export function ThrottledHover() {
          hoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             hoverID = null;
-            const update = new Update(16.7)
+            const update = createUpdate(16.7)
             try {
                pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
@@ -48,7 +48,7 @@ export function ThrottledHover() {
          unhoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             unhoverID = null;
-            const update = new Update(16.7)
+            const update = createUpdate(16.7)
             try {
                pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
@@ -76,7 +76,7 @@ export function SharedThrottledUpdate() {
          frameID = requestAnimationFrame(() => {
             setImmediate(() => {
                frameID = null;
-               const update = new Update(16.7)
+               const update = createUpdate(16.7)
                try {
                   pushUpdate(update)
                   fn(); // Execute the original function with its context and arguments
@@ -103,7 +103,7 @@ export function ThrottlePointer(fn: Function) {
       if (frameID !== null) cancelAnimationFrame(frameID)
       frameID = requestAnimationFrame(() => {
             frameID = null;
-            const update = new Update(16.7)
+            const update = createUpdate(16.7)
             try {
                pushUpdate(update)
                fn(e); // Execute the original function with its context and arguments
@@ -128,7 +128,7 @@ export function ThrottledUpdate(fn: Function) {
       frameID = requestAnimationFrame(() => {
          setImmediate(() => {
             frameID = null;
-            const update = new Update(16.7)
+            const update = createUpdate(16.7)
             try {
                pushUpdate(update)
                fn(); // Execute the original function with its context and arguments
@@ -190,7 +190,7 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
    function renderFrame(time: DOMHighResTimeStamp) {
       setImmediate(() => {
          try {
-            const update = new Update(16.7)
+            const update = createUpdate(16.7)
             pushUpdate(update)
             prepFrame(time)
          }

@@ -1,7 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { isFunction } from "@rue/utils";
 import { isIon } from "../ion/Ion";
-// import { getUpdateCycleCount } from "../ReactivitySystem";
 import { ionize, isIonKey, toRaw } from "./ionize";
 import { getIonizedModel } from "./IonizedModel";
 

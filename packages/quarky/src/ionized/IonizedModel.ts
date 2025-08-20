@@ -10,14 +10,14 @@ import { __DEV__trace } from "../debug/debug";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
-import { isWatchable, Watchable } from "../watch/WatchedAtom";
+import { isWatchable, Watchable } from "../reactivity/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, OpType, initModelUpdate, useIonicOp } from "./IonizedMethods";
 import { isInert } from "./inert";
-import { initUpdate, isLazyUpdate, popUpdate, pushUpdate, Update } from "../effect-cycle/ReactivitySystem";
 import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
 import { isTracking, trackParticle } from "../compound/Compound";
 import { isIntegerKey } from "./IonizedArray";
+import { Update } from "../reactivity/UpdateCycle";
 
 export function $atomicPion(
    modelQuark: ModelQuark,

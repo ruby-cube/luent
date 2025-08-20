@@ -1,4 +1,4 @@
-import { WatchedAtom } from "../quarky/src/watch/WatchedAtom";
+import { WatchedAtom } from "../quarky/src/reactivity/WatchedAtom";
 
 export class EffectVine {
    private head: EffectLink | undefined

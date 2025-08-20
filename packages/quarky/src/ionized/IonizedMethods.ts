@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonizedModel, ProxyKey } from "./IonizedModel"
 import { quarkOf } from "../Quark"
-import { initUpdate, popUpdate, pushUpdate, Update } from "../effect-cycle/ReactivitySystem"
+import { initUpdate, popUpdate, pushUpdate} from "../reactivity/UpdateCycle"
 import { ModelQuark } from "./ModelQuark"
 import { $atomicOp, getAtomicOps } from "./AtomicOp"
 import { emitSignal } from "../debug/debug"
@@ -58,7 +58,7 @@ export function initModelUpdate(quark: ModelQuark) {
    const update = initUpdate()
    const state = quark.state
 
-   update.queue(() => {
+   update.onComplete(() => {
       state.commitChange()
    })
 
@@ -298,7 +298,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //    // if (update.lazy) {
 //    //    this.pState = state;
 
-//    //    update.queue(() => {
+//    //    update.onComplete(() => {
 //    //       this.state = this.pState;
 //    //       this.pState = NULL
 //    //       this.pendingUpdate = null;
@@ -319,7 +319,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //    // }
 //    op.pendingUpdate = update
 //    console.trace('set pending update')
-//    update.queue(() => {
+//    update.onComplete(() => {
 //       console.log('mutate model update done')
 //       op.pendingUpdate = null
 //    })

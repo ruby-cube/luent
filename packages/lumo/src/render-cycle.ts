@@ -1,19 +1,27 @@
 import { Flask, getFlask } from "@rue/flask"
-import { watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, $currentOrNextCycle, Phase, scheduleEagerEffect, } from "@rue/quarky"
+import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
-import { IonSubject } from "../../quarky/src/watch/WatchSubject"
-import { dir } from "console"
 
 export const {
    SYNC,
    PRERENDER,
    INTERNAL_RENDER,
    RENDER,
-   INTERNAL_POSTRENDER
-} = useReactivitySystem()
+   INTERNAL_POSTRENDER,
+   POSTCYCLE: POSTRENDER
+} = configureUpdateCycle({
+   phases: [
+      { name: 'PRERENDER', scheduler: queueMicrotask, canLaze: true },
+      { name: 'INTERNAL_RENDER', scheduler: queueMicrotask },
+      { name: 'RENDER', scheduler: queueMicrotask },
+      { name: 'INTERNAL_POSTRENDER', scheduler: queueMicrotask }
+   ],
+   defaultPhase: 'POSTCYCLE'
+})
 
 
-export const POSTRENDER = 'postrender'
+
+
 
 
 // export const onPrerender = createEffectCycleHook(PRERENDER)
@@ -22,7 +30,7 @@ export const POSTRENDER = 'postrender'
 // export const onPostrender = createEffectCycleHook(INTERNAL_POSTRENDER)
 
 
-export const atPrerender = createEffectCycleScheduler(PRERENDER)
+export const atPrerender = useUpdateCycleScheduler(PRERENDER)
 
 
 export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
@@ -37,9 +45,9 @@ export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: need
 // }
 
 
-// export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
-export const atRender = createEffectCycleScheduler(RENDER)
-export const atPostrender = createEffectCycleScheduler(INTERNAL_POSTRENDER)
+// export const queueInternalRender = useUpdateCycleScheduler(INTERNAL_RENDER)
+export const atRender = useUpdateCycleScheduler(RENDER)
+export const atPostrender = useUpdateCycleScheduler(INTERNAL_POSTRENDER)
 
 
 //QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
@@ -158,7 +166,7 @@ export const $postrender = createAwaitableHook(atPostrender)
  * @param eager 
  * @returns 
  */
-export function watchToRender<T>(ion: Ion<T>, render: (state: {current: T, previous: T}) => void, flask: Flask, eager: boolean = false) {
+export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T }) => void, flask: Flask, eager: boolean = false) {
    const subject = new IonSubject(ion)
 
    let prevState = subject.trackedCall()
@@ -181,7 +189,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: {current: T, previ
 
    function _render() {
       const newState = subject.trackedCall()
-      render({current: newState, previous: prevState})
+      render({ current: newState, previous: prevState })
       prevState = newState;
    }
 

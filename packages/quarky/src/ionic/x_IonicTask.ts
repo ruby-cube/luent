@@ -1,6 +1,6 @@
 import { debug, isFunction, noop } from "@rue/utils";
 import { triggerEffects } from "../compound/Compound";
-import { WatchedAtom } from "../watch/WatchedAtom";
+import { WatchedAtom } from "../reactivity/WatchedAtom";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 /**

@@ -1,4 +1,4 @@
-import { Watchable } from "../watch/WatchedAtom"
+import { Watchable } from "../reactivity/WatchedAtom"
 import { isObject } from "@rue/utils"
 
 const trackerStack: (Compound | null)[] = []

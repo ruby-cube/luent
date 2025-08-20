@@ -1,5 +1,5 @@
 import { ion } from "../ion/Ion";
-import { watch } from "../watch/watch";
+import { watch } from "../reactivity/watch";
 
 /* 
 What are the expected behaviors

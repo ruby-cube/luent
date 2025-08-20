@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { Effect } from "../effect-cycle/EffectQueue"
+import { Effect } from "./EffectQueue"
 import { IonizedModel } from "../ionized/IonizedModel"
 import { hasQuark, QUARK, Quark, quarkOf } from "../Quark"
 import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom } from "./WatchedAtom"

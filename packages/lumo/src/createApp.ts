@@ -6,7 +6,7 @@ import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
 import { NodePod, removeDOMNodes } from "./node/NodePod";
 import { Flask } from "@rue/flask";
 import { MU, muIonsStack } from "./component/Input";
-import { Ion, popUpdate, pushUpdate, Update } from "@rue/quarky";
+import { createUpdate, Ion, pushUpdate, popUpdate } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
 import { processJSXOutput } from "./node/setUpNodeEntities";
 import { mountNodeEntities } from "./node/mountNodeKits";
@@ -52,7 +52,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
                   return muIons?.has(ion)
                }
             }
-            const update = new Update(1000)
+            const update = createUpdate(1000)
             pushUpdate(update)
             setComponentAttributes(attributes)
             muIonsStack.push(muIons)

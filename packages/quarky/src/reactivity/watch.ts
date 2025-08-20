@@ -1,9 +1,8 @@
 import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
-import { Phase, SYNC } from "../effect-cycle/EffectCycle";
-import { createOneoff, Effect } from "../effect-cycle/EffectQueue";
-import { $currentOrNextCycle, getDefaultPhase } from "../effect-cycle/ReactivitySystem";
+import { Phase, SYNC, $currentCycle, getDefaultPhase, getAdjustedPhase, maybePostcycleTask } from "./UpdateCycle";
+import { createOneoff, Effect } from "./EffectQueue";
 import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
@@ -135,30 +134,25 @@ export function watch<
 type Task = () => void
 
 export function getPhase(options: undefined | EffectOptions) {
-   return options?.phase ?? getDefaultPhase()
+   const phase = options?.phase ?? getDefaultPhase()
+   return getAdjustedPhase(phase)
 }
 
-export function delayedTask(task: Task) {
-   function delayed() { //TODO: need to cancel with action
-      const id = requestIdleCallback(task, { timeout: 18 })
-      // $action().onCancel(()=>cancelIdleCallback(id))
-   }
-   if (__DEV__) delayed.__DEV__fn = task;
-   return delayed;
-}
+
+
+
 
 export function setUpWatcher(
    subject: WatchSubject,
    task: Task,
    options: EffectOptions,
 ) {
-   let phase = options.phase = getPhase(options)
+   const phase = options.phase = getPhase(options)
    const eager = options.eager ?? false;
    // TODO: options.preserve means non-pausable watcher
    const preserve = options.preserve
 
-   task = phase === 'postrender' ? delayedTask(task) : task;
-   phase = phase === 'postrender' ? 3 : phase;
+   task = maybePostcycleTask(task, phase)
 
    if (eager) {
       scheduleEagerEffect(task, phase)
@@ -172,16 +166,17 @@ export function setUpWatcher(
       },
       remove(effect: Effect) {
          effect.destroy()
-      }
+      },
+      pausable: true
    });
 }
 
 
 export function scheduleEagerEffect(task: Task, phase: Phase) {
    const eagerEffect = createOneoff(task, phase)
-   $currentOrNextCycle().scheduleEffect(eagerEffect)
+   $currentCycle().scheduleEffect(eagerEffect)
    if (eagerEffect.phase === SYNC) {
-      $currentOrNextCycle().runEffects(SYNC)
+      $currentCycle().runEffects(SYNC)
    }
 }
 

@@ -4,13 +4,12 @@ import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, QuarkOf, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { emitSignal } from "../debug/debug";
-import { asWatchedAtom } from "../watch/WatchedAtom";
+import { asWatchedAtom } from "../reactivity/WatchedAtom";
 import { Ion } from "../ion/Ion";
 import { Traceable } from "../debug/Traceable";
-import { Effect } from "../effect-cycle/EffectQueue";
-import { SYNC } from "../effect-cycle/EffectCycle";
+import { Effect } from "../reactivity/EffectQueue";
+import { SYNC, isLazyUpdate, $activeUpdate } from "../reactivity/UpdateCycle";
 import { NULL } from "../ion/AtomicIon";
-import { isLazyUpdate, initUpdate, $activeUpdate } from "../effect-cycle/ReactivitySystem";
 import {  trackParticle } from "../compound/Compound";
 
 
@@ -112,7 +111,7 @@ export function createManagedDerivation(
             ion.pStale = false;
             const update = $activeUpdate()
             if (ion.pStale) {
-               update.queue(() => {
+               update.onComplete(() => {
                   ion.state = value;
                   ion.stale = true;
 
@@ -154,7 +153,7 @@ export function createManagedDerivation(
          // window.__DEV__log.push('lazy update ' + value)
          const update = $activeUpdate()
          if (stale) {
-            update.queue(() => {
+            update.onComplete(() => {
                ion.state = ion.pState;
                ion.stale = ion.pStale!;
 

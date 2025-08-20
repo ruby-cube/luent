@@ -3,8 +3,8 @@ import { toError } from "@rue/utils";
 import { Mutation, MutableEntity, asMutable } from "../Mutable";
 import { AsyncState } from "@rue/flask";
 import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
-import { EffectCycle } from "../effect-cycle/EffectCycle";
-import { getEffectCycleManager } from "../effect-cycle/ReactivitySystem";
+import { UpdateCycle } from "../reactivity/UpdateCycle";
+// import { getEffectCycleManager } from "../reactivity/ReactiveSystem";
 
 // responsive 
 
@@ -108,7 +108,7 @@ class InternalAction {
       this.cancelTasks = undefined; //releases reference to quark
    }
 
-   _effectCycle = EffectCycle
+   _effectCycle = UpdateCycle
 
    get effectCycle() {
       if (!this.done) throw new Error("Cannot access effect cycle until action is done")

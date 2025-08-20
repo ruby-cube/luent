@@ -1,6 +1,6 @@
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { hasQuark, Quark, QUARK, quarkOf } from "../Quark";
-import { $activeUpdate, isLazyUpdate } from "../effect-cycle/ReactivitySystem";
+import { $activeUpdate, isLazyUpdate } from "../reactivity/ReactiveSystem";
 import { NULL } from "../ion/AtomicIon";
 
 /**
@@ -49,7 +49,7 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
       if (isLazyUpdate()) {
          quark.pState = value;
          const update = $activeUpdate()
-         update.queue(() => {
+         update.onComplete(() => {
             quark.state = value;
             quark.pState = NULL;
          })
@@ -67,7 +67,7 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
       if (isLazyUpdate()) {
          quark.pState = value;
          const update = $activeUpdate()
-         update.queue(() => {
+         update.onComplete(() => {
             quark.state = value;
             quark.pState = NULL;
          })

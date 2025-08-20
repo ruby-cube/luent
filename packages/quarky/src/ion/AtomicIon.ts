@@ -4,15 +4,14 @@ import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
-import { MutableCapsule } from "../capsule/Capsule";
-import { trigger, Watchable, WatchedAtom } from "../watch/WatchedAtom";
-import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "../Mutable";
+import { trigger, Watchable, WatchedAtom } from "../reactivity/WatchedAtom";
+import { Mutable } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
-import { debug, isObject } from "@rue/utils";
-import { Ion, Methods, MutableIon } from "./Ion";
-import { $activeUpdate, getActiveUpdate, isLazyUpdate, Update, initUpdate } from "../effect-cycle/ReactivitySystem";
+import {  isObject } from "@rue/utils";
+import { Ion, MutableIon } from "./Ion";
 import { ModelQuark } from "../ionized/ModelQuark";
 import { trackParticle } from "../compound/Compound";
+import { Update , isLazyUpdate, initUpdate} from "../reactivity/UpdateCycle";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -333,7 +332,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    const update = initUpdate()
 
    // queue change/record mutation
-   update.queue(() => {
+   update.onComplete(() => {
       state.commitChange()
    })
 
