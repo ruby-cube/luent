@@ -71,7 +71,7 @@ function createTransitionNode(
       return isFunction(Slot) ? Slot() : Slot
    }
 
-   const div = NodeRef('div')
+   const $div = NodeRef('div')
 
    //TODO: init with
 
@@ -102,7 +102,8 @@ function createTransitionNode(
             endTransition();
             return;
          }
-         const node = div.node!
+         const node = $div()
+         if (!node) return;
 
          if (onStart) onStart({ phase: 'in' })
          controller = new AbortController()
@@ -119,9 +120,9 @@ function createTransitionNode(
 
                   // unpause
                   // if (paused) { //FIX:
-                  //     div.style.removeProperty('animation-play-state')
+                  //     node.style.removeProperty('animation-play-state')
                   //     for (const prop of transitionInProperties) {
-                  //         div.style.removeProperty(prop)
+                  //         node.style.removeProperty(prop)
                   //     }
                   // }
                   requestAnimationFrame(() => {
@@ -165,13 +166,13 @@ function createTransitionNode(
       },
 
       getDimsAndPosition() {
-         const node = div.node;
+         const node = $div();
          if (!node) throw Error('missing div')
          return node.getBoundingClientRect();
       },
 
       prepOutgoingNode(initialPosition: DOMRect) {
-         const node = div.node;
+       const node = $div();
          if (!node) throw Error('missing div')
          node.style.position = 'absolute'
          node.style.top = '0px'
@@ -190,7 +191,7 @@ function createTransitionNode(
       },
 
       transport(delta: TransitDelta) {
-         const node = div.node;
+  const node = $div();
          if (!node) throw Error('missing div')
          return node.animate([
             { transform: `translate(${delta.x}px, ${delta.y}px) scale(${delta.scaleX}, ${delta.scaleY})` },
@@ -202,7 +203,7 @@ function createTransitionNode(
       },
 
       morph(initialPosition: DOMRect, finalPosition: DOMRect) {
-         const node = div.node;
+          const node = $div();
          if (!node) throw Error('missing div')
          return node.animate([
             { width: initialPosition.width + 'px', height: initialPosition.height + 'px' },
@@ -214,7 +215,7 @@ function createTransitionNode(
       },
 
       transportOut(delta: TransitDelta, initialPosition: DOMRect, finalPosition: DOMRect) {
-         const node = div.node;
+          const node = $div();
          if (!node) throw Error('missing div')
          return node.animate([{
             transform: `translate(${initialPosition.x}px, ${initialPosition.y}px) scale(1, 1)`,
@@ -233,7 +234,7 @@ function createTransitionNode(
       // READ finalPosition
 
       transportIn(delta: TransitDelta) {
-         const node = div.node;
+          const node = $div();
          if (!node) throw Error('missing div')
          return node.animate([
             {
@@ -257,7 +258,7 @@ function createTransitionNode(
             endTransition();
             return;
          }
-         const node = div.node;
+         const node = $div();
          if (!node) throw Error('missing div')
          controller = new AbortController();
 
@@ -324,7 +325,7 @@ function createTransitionNode(
       animatingOut: false,
 
       cancel(direction: 'in' | 'out') {
-         const node = div.node!
+         const node = $div()!
          controller.abort();
          if (direction === 'in') {
             //complete
@@ -365,9 +366,9 @@ function createTransitionNode(
          //     //TODO: requires A LOT more information to compute transitional state...
          //     const transitionalState = computeTransitionalState(transitionIn.duration, new Date().getTime() - transitionStartTime, 0, -100, '')
 
-         //     div.style.setProperty('transform', `translateX(${transitionalState}px)`);
+         //     node.style.setProperty('transform', `translateX(${transitionalState}px)`);
          // }
-         // if (animate_in) div.style.setProperty('animation-play-state', 'pause')
+         // if (animate_in) node.style.setProperty('animation-play-state', 'pause')
          paused = true;
       }
    }
@@ -375,7 +376,7 @@ function createTransitionNode(
    let paused = false;
 
    function unpause(transitionProperties: AnyObject) {
-      const node = div.node!
+      const node = $div()!
       node.style.removeProperty('animation-play-state')
       if (transitionInProperties) {
          for (const key in transitionProperties) {
@@ -385,13 +386,13 @@ function createTransitionNode(
    }
 
    function quickFade() {
-      const node = div.node
+     const node = $div()!
    }
 
    const renderNode = type === 'Transit' ? renderTransitNode : renderPhasicNode
 
    return renderNode(
-      div,
+      $div,
       Slot,
       transitionNode,
       disable

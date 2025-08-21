@@ -1,16 +1,14 @@
 import { Commons as createCommons } from "../commons/Commons";
 import { makeElement } from "../element/makeElement";
-import { JSXNode } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
 import { fromCommons } from "../commons/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
-import { NodeRef } from "../node/NodeRef";
+import { $Node, NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
 import type { Commons } from "../commons/commons-stack";
 import { Ion } from "@rue/quarky";
-import { component, Slot } from "../component/Component";
-import { Else, If } from "../conditional/If";
-import { isFunction } from "@rue/utils";
+import { component } from "../component/Component";
+import { createIfSeries, Else, If } from "../conditional/If";
 import { CommonsKey } from "../commons/CommonsKey";
 import { RenderSlot } from "../component/fromTag";
 
@@ -21,7 +19,7 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 // export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
 
-const GET_PHASIC_NODE = CommonsKey<()=>TransitionNode|null>('GET_PHASIC_NODE')
+const GET_PHASIC_NODE = CommonsKey<() => TransitionNode | null>('GET_PHASIC_NODE')
 
 // declare module '@rue/lumo' {
 //     interface CommonsKeyMap {
@@ -39,25 +37,25 @@ export type PhasicNode = {
 
 
 export function renderPhasicNode(
-   $div: NodeRef<'div'>,
+   $div: $Node<'div'>,
    Slot: RenderSlot,
    transitionNode: TransitionNode,
    $disable: false | undefined | Ion<boolean>
 ) {
    if ($disable) {
-      const output = isFunction(Slot) ? Slot() : Slot
-      return component([
+      const output = Slot()
+      return component(createIfSeries([
          If($disable, () =>
             output
          ),
          Else(() => {
             return createPhasicNode(
                $div,
-               output,
+               () => output,
                transitionNode
             )
          })
-      ])
+      ]))
    }
    return createPhasicNode(
       $div,
@@ -67,8 +65,8 @@ export function renderPhasicNode(
 }
 
 function createPhasicNode(
-   $div: NodeRef<'div'>,
-   Slot: Slot,
+   $div: $Node<'div'>,
+   Slot: RenderSlot,
    transitionNode: TransitionNode,
 ) {
    let phasicNode: null | TransitionNode = transitionNode

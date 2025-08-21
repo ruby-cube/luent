@@ -6,7 +6,7 @@
 
 import { component, FromTag, NodeRef, Slot } from "@rue/lumo";
 import { MorphicNode as Polymorph } from "../../../../packages/lumo/src/conditional/Polymorph";
-import { finiton, ion } from "@rue/quarky";
+import { FiniteIon, finiton, ion } from "@rue/quarky";
 
 // data
 type User = {
@@ -91,7 +91,7 @@ export function FBApp() {
    watchDB((data) => {
       data.newMessages
    })
-   const mainContent = NodeRef($Main)
+   const $mainContent = NodeRef($Main)
 
    const $unseenCount = ion(0, {
       increment(count: number = 1) {
@@ -102,7 +102,7 @@ export function FBApp() {
       }
    })
 
-   const $chatPopup = finiton({
+   const $chatPopup = FiniteIon({
       'closed': {
          open: () => 'opened'
       },

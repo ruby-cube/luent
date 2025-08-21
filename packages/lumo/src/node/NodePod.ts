@@ -1,6 +1,6 @@
 import { Glass } from "@rue/types";
 import { DOMNode } from "../component/Component";
-import { NodeRef } from "./NodeRef";
+import { $Node, NodeRef } from "./NodeRef";
 
 // Node Pods represent groups of nodes created by `For` and `If`.
 // 
@@ -48,7 +48,7 @@ export type DynamicPod = NodePod
 export class NodePod extends Array<AnyNode> {
    index?: number;
    pod?: NodePod;
-   refs: NodeRef[] = [];
+   refs: $Node[] = [];
 
    constructor(
       public active: boolean = true

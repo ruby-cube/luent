@@ -8,7 +8,7 @@ import * as CSS from "csstype";
 // import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import * as Quarky from "@rue/quarky";
-import { NodeRef } from "../../src/node/NodeRef";
+import { $Node } from "../../src/node/NodeRef";
 import { COMPONENT_ATTRIBUTES, CommonsKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../../src/boundaries/Portal";
@@ -189,7 +189,7 @@ declare namespace React {
        *
        * @see {@link https://react.dev/learn/referencing-values-with-refs#refs-and-the-dom React Docs}
        */
-      ref?: Lumo.NodeRef | Lumo.NodesRef | undefined;
+      ref?: Lumo.$Node | Lumo.$Nodes | undefined;
    }
 
    /**
@@ -465,7 +465,7 @@ declare namespace React {
       persist(): void;
       timeStamp: number;
       type: string;
-      targets(...args: (string | NodeRef)[]): boolean // Lumo edit
+      targets(...args: (string | $Node)[]): boolean // Lumo edit
    }
 
    /**
@@ -2549,7 +2549,7 @@ declare global {
 
       //$$$
       interface IntrinsicAttributes extends React.Attributes {
-         ref?: NodeRef //#LUMO-EDIT
+         ref?: $Node | $Nodes //#LUMO-EDIT
          // children?: Lumo.InferSlot
       }
       interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }

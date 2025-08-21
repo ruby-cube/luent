@@ -1,6 +1,7 @@
-import { NodeRef } from "../node/NodeRef";
+import { isFunction } from "@rue/utils";
+import { $Node } from "../node/NodeRef";
 
-export function target(...args: [...(string | ((x: HTMLElement) => boolean) | NodeRef)[]]) {
+export function target(...args: [...(string | ((x: HTMLElement) => boolean) | $Node)[]]) {
    const e = args.pop() as object
    if (!e || !('target' in e)) throw new Error('JSX transform failed to add event object to target() call')
    const targ = e.target

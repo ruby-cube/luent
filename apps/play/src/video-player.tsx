@@ -1,13 +1,13 @@
-import { component, Else, FromTag, If, NodeRef, } from "@rue/lumo";
-import { FiniteIon, ion, isIon } from "@rue/quarky";
-import { isFunction } from "@rue/utils";
-import { Style } from "../../../packages/lumo/src/component/Style";
+import { component, Else, FromTag, If, NodeRef, Style } from "@rue/lumo";
+import { FiniteIon, Ion, ion } from "@rue/quarky";
+import './reset.css'
 
 
 export function VideoPlayer() {
-   const videoRef = NodeRef('video')
 
-   const $videoPlayer = FiniteIon({
+   const $video = NodeRef('video')
+
+   const $player = FiniteIon({
       'loading': {
          init: () => 'x:ready',
          error: () => 'x:failure'
@@ -31,23 +31,22 @@ export function VideoPlayer() {
 
    let duration = 0
 
-   $videoPlayer.on('init', () => { duration = videoRef.node?.duration ?? 0 })
+   $player.on('init', () => { duration = $video()?.duration ?? 0 })
 
-   console.log('@% isIon', isIon($videoPlayer))
-   console.log('@% isFunction', isFunction($videoPlayer))
-   console.log('@% name', $videoPlayer.name)
-
-   $track.on('play', () => videoRef.node?.play())
-   $track.on('pause', () => videoRef.node?.pause())
-   $track.on('end', () => {
-      if (!videoRef.node) return;
-      $elapsedTime.state = videoRef.node.currentTime = 0;
-      // setTimeout(()=>$track.apply('play'), 1);
-      console.log('@% on end')
+   $track.on('play', () => {
+      const video = $video()
+      if (!video) return;
+      if ($track.is('ended')) $elapsedTime.state = video.currentTime = 0;
+      $video()?.play()
    })
+   $track.on('pause', () => $video()?.pause())
+   // $track.on('end', () => {
+   //    const video = $video()
+   //    if (!video) return;
+   //    $elapsedTime.state = video.currentTime = 0;
+   // })
 
    const $elapsedTime = ion(0);
-
 
    function updateTime(currentTime: number) {
       if (!$track.is('playing')) return;
@@ -59,7 +58,7 @@ export function VideoPlayer() {
       'muted': { toggle: () => 'on' }
    })
 
-   $videoPlayer.activate(() => 'loading')
+   $player.activate(() => 'loading')
       .nest({
          'x:ready': [
             $track.init(() => 'paused'),
@@ -67,78 +66,42 @@ export function VideoPlayer() {
          ]
       })
 
-   console.log('@% LOADING')
-
-   // watch(() => $track.is('playing'), ({ current, previous }) => {
-   //    console.log('@% track is playing changed', current, previous)
-   //    // console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
-   // })
-
-   // watch($track, (e) => {
-   //    console.log('@% $track changed', e, $track())
-   //    // console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
-   // })
-
-   function endVideo() {
-      console.log("@@@ EVENT: End video")
-      // console.log('@% end video phase:', getCurrentEffectCycle()?.currentPhase)
-      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
-      $track.apply('end')
-   }
-
-   function pauseVideo() {
-      console.log("@@@ EVENT: click pause video")
-      // console.log('@% pause video phase:', getCurrentEffectCycle()?.currentPhase)
-      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
-      $track.apply('pause')
-   }
-
-   function playVideo() {
-      console.log("@@@ EVENT: click play video")
-      // console.log('@% play video phase:', getCurrentEffectCycle()?.currentPhase)
-      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
-      $track.apply('play')
-   }
-
-   function initVideo() {
-      console.log("@@@ EVENT: init video")
-      // console.log('@% init video phase:', getCurrentEffectCycle()?.currentPhase)
-      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
-      $videoPlayer.apply('init')
-   }
-
-   function updateTimeo() {
-      if (!videoRef.node) return;
-      console.log("@@@ EVENT: UPDATE TIME")
-      // console.log('@% time video phase:', getCurrentEffectCycle()?.currentPhase)
-      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
-      updateTime(videoRef.node.currentTime)
-   }
-
    return component(
       <>
-         <video
-            ref={videoRef}
-            on:canplay={initVideo}
-            on:timeupdate={updateTimeo}
-            on:ended={endVideo}
-            on:error={e => $videoPlayer.apply('error')}
-         >
-            <source src="/src/video-player-dance.mp4" type="video/mp4" />
-         </video>
-         <p>{($track.is('playing'))}</p>
-         {If(($videoPlayer.is('x:ready')), (console.log('@% refresh'),
-            <>
-               <ElapsedBar elapsed={$elapsedTime} duration={duration} />
-               <Timer elapsed={$elapsedTime} duration={duration} />
-               {If(($track.is('playing')),
-                  <button on:click={pauseVideo}>Pause</button>
-               )}
-               {Else(
-                  <button on:click={playVideo}>Play</button>
-               )}
-            </>
-         ))}
+         <div class='container'>
+            <video
+               ref={$video}
+               on:canplay={e => $player.apply('init')}
+               on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
+               on:ended={e => $track.apply('end')}
+               on:error={e => $player.apply('error')}
+            >
+               <source src="/src/video-player-dance.mp4" type="video/mp4" />
+            </video>
+            {If(($player.is('x:ready')),
+               <>
+                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is('paused'))} />
+                  <button on:click={e => $track.apply($track.is('playing') ? 'pause' : 'play')}>
+                     {If(($track.is('playing')),
+                        '‖'
+                     )}
+                     {Else(
+                        '►'
+                     )}
+                  </button>
+                  {/* <o-show>
+                     {If(($track.is('playing')),
+                        <button on:click={e => $track.apply('pause')}>Pause</button>
+                     )}
+                     {Else(
+                        <button on:click={e => $track.apply('play')}>Play</button>
+                     )}
+                  </o-show> */}
+                  <Timer elapsed={$elapsedTime} duration={duration} />
+               </>
+            )}
+         </div>
+
          {Style`
             html {
               font-size: 18px;
@@ -154,10 +117,12 @@ export function VideoPlayer() {
               padding: 0.25rem 0.5rem;
               border: none;
               cursor: pointer;
+              width: 2rem;
+              border-radius: 5px;
             }
 
             .container {
-              max-width: 600px;
+              max-width: 480px;
               margin: 0 auto;
             }
 
@@ -165,8 +130,8 @@ export function VideoPlayer() {
               width: 100%;
               height: 5px;
             }
+
             .elapsed-bar {
-              transition: width 0.5 ease;
               height: 5px;
               background-color: #629460;
             }
@@ -180,42 +145,36 @@ export function VideoPlayer() {
    )
 }
 
-// const $ = {
-//    elapsed: 0 as number | Ion<number>
-// }
 
-// if (isIon($.elapsed)) {
-//    $.elapsed()
-// }
-// if (typeof $.elapsed === 'number') {
-//    $.elapsed
-// }
-
-function ElapsedBar(input : FromTag<{
-   elapsed: number,
-   duration: number
+function ElapsedBar(input: FromTag<{
+   elapsed: Ion<number>,
+   duration: number,
+   paused: Ion<boolean>
 }>) {
-   const { $elapsed, duration } = input
+   const { $elapsed, duration, $paused } = input
 
    return component(
       <div class="elapsed">
          <div
             class="elapsed-bar"
-            style={{ width: (`${percentage(duration, $elapsed())}%`) }}
+            style={{
+               width: (`${percentage(duration, $elapsed())}%`),
+               transition: ($elapsed() === 0 || $paused() ? undefined : 'width .5s ease')
+            }}
          />
       </div>
    )
 };
 
-function Timer(input : FromTag<{
-   elapsed: number,
+function Timer(input: FromTag<{
+   elapsed: Ion<number>,
    duration: number
 }>) {
    const { $elapsed, duration } = input
 
    return component(
       <span class="timer">
-         {(asTime($elapsed()))} of {asTime(duration)}
+         {(asTime($elapsed()))} / {asTime(duration)}
       </span>
    )
 };

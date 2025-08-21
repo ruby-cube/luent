@@ -9,7 +9,7 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "./attributes";
 import { flattenJSXOutput, MutableKit, setUpNodeEntities } from "../node/setUpNodeEntities";
-import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } from "../node/NodeRef";
+import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
 import { MaybeIon } from "../component/Input";
@@ -45,7 +45,7 @@ export function makeElement(
    if (ref) {
       if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
       if (isNodesRef(ref)) {
-         initializeListRef(<NodesRef>ref, domNode, $index!)
+         initializeListRef(ref, domNode, $index!)
       }
       else {
          initializeRef(ref, domNode)

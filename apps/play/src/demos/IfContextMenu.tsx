@@ -1,5 +1,5 @@
 import { component, For, If, listen, NodeRef, Portal, Style } from "@rue/lumo"
-import { finiton, ion, watch } from "@rue/quarky"
+import { FiniteIon, ion, watch } from "@rue/quarky"
 
 //FIX: 
 // [] conditional rendering with <o--portal>
@@ -43,9 +43,9 @@ export function Sidebar() {
 }
 
 function IfContextMenu() {
-   const container = NodeRef('div')
+   const $container = NodeRef('div')
 
-   const $menu = finiton({
+   const $menu = FiniteIon({
       'opened': {
          close: () => 'closed'
       },
@@ -78,7 +78,7 @@ function IfContextMenu() {
          <o--portal to='body'>
             <div>
                {If(($menu.is('opened')),
-                  <div ref={container} at:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
+                  <div ref={$container} at:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
                      menu item 1
                      -
                      menu item 2
@@ -96,7 +96,7 @@ function IfContextMenu() {
 
 
 function IfContextMenuB() {
-   const container = NodeRef('div')
+   const $container = NodeRef('div')
 
    const $open = ion(false)
 
@@ -112,7 +112,7 @@ function IfContextMenuB() {
       if (!open) return
       let menuClicked = false;
       listen(document, 'click', e => menuClicked || close(), { once: true })
-      listen(container.node!, 'click', e => {
+      listen($container()!, 'click', e => {
          menuClicked = true
          console.log('menu clicked')
          close()
@@ -140,7 +140,7 @@ function IfContextMenuB() {
 }
 
 function IfContextMenuC() {
-   const container = NodeRef('div')
+   const $container = NodeRef('div')
 
    const $open = ion(false)
 
@@ -172,7 +172,7 @@ function IfContextMenuC() {
       <div>
          {If($open,
             <o--portal to='body'>
-               <div ref={container} at:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
+               <div ref={$container} at:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
                   <p>
                      menu item 1
                   </p>

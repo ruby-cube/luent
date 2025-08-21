@@ -1,8 +1,8 @@
-import { component, If, JSXNode, measureLayout, NodeRef, atMounted, Portal, RawJSXNode, RenderFunction, RenderSlot, FromTag } from '@rue/lumo';
-import { Ion, ion, isNonNull, watch } from '@rue/quarky';
+import { component, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
+import { ion } from '@rue/quarky';
 
 
-export function TestTooltipApp() {
+export function TestTooltip() {
 
    return component(
       <div>
@@ -63,12 +63,13 @@ export function ButtonWithTooltip({ Slot }: FromTag<{
    return component(
       <>
          <button
-            on:pointerenter={e => { $targetRect.state = e.target.getBoundingClientRect() }}
+            on:pointerenter={e => { $targetRect.state = e.currentTarget.getBoundingClientRect() }}
             on:pointerleave={e => { $targetRect.state = null }}
          >
             {Slot.Default()}
          </button>
-         {If($targetRect, v =>
+
+         {If($targetRect, v => // slightly more type-safe version of ! (non-null assertion)
             <Tooltip targetRect={v($targetRect)()}>
                {Slot.Tooltip()}
             </Tooltip>
@@ -81,7 +82,6 @@ export function ButtonWithTooltip({ Slot }: FromTag<{
 type Rect = { left: number, top: number, bottom: number }
 
 
-
 // 1) WRITE: mount tooltip in wrong position
 // 2) READ: measure tooltip height (FORCED LAYOUT)
 // 3) set tooltip height 
@@ -89,10 +89,9 @@ type Rect = { left: number, top: number, bottom: number }
 // 5) BROWSER LAYOUT
 // 6) BROWSER PAINT
 
-// There is inherently layout thrashing here. It's not preventable.
-// What we can do is prevent a LOOP of layout thrashing if this had to happen in a loop
-// 
-
+// NOTE: There is inherently layout thrashing here. It's not 100% preventable.
+// What we can do is prevent a LOOP of layout thrashing by batching layout measuring with measureLayout
+// Not super necessary in this case because it's highly unlikely more than one tooltip will be generated at a time
 
 export function Tooltip(input: FromTag<{
    Slot: RenderSlot
@@ -100,17 +99,18 @@ export function Tooltip(input: FromTag<{
 }>) {
    const { Slot, targetRect } = input
 
-   const div = NodeRef('div')
+   const $div = NodeRef('div')
    const $height = ion(undefined as number | undefined)
 
    atMounted(async () => {
-      const divNode = div.node;
-      if (!divNode) return;
-      const height = await measureLayout(() => divNode.getBoundingClientRect().height)
+      const div = $div();
+      if (!div) return;
+      const height = await measureLayout(() => div.getBoundingClientRect().height) // prevents looped layout thrashing
       $height.state = height;
    })
 
    const shiftX = targetRect.left
+
    const $shiftY = ion(() => {
       const height = $height()
       if (height === undefined) return 0;
@@ -136,16 +136,3 @@ export function Tooltip(input: FromTag<{
       )
    )
 }
-
-
-
-
-
-// function Portal({ Slot, to } : FromTag<{
-//    Slot: any,
-//    to: string
-// }>) {
-//    return component(
-//       Slot()
-//    )
-// }

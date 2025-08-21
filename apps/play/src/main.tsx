@@ -48,7 +48,7 @@ import { getPublicTrace } from '../../../packages/flask/debug';
 import { TestPolymorph } from './TestPolymorph';
 import { TestTry } from './API-exploration/TestTry';
 import { TestAwait } from './TestAwait';
-import { TestTooltipApp } from './TestTooltipLayoutThrash';
+import { TestTooltip } from './TestTooltipLayoutThrash';
 import { TriangleDemo } from './demos/SierpinskiTriangles';
 import { TestSyncEffects } from './demos/TestSyncEffects';
 import { TestEffectCyclePhases } from './TestEffectCyclePhases';
@@ -82,7 +82,7 @@ import { TestJSON } from './TestJSON';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TestTooltipApp)
+const app = createApp(VideoPlayer)
 
 app.mount('#app')
 

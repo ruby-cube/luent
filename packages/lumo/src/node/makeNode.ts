@@ -2,10 +2,9 @@ import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon } from "../
 import { Component, ComponentSetup, DOMNode } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, makeComponent } from "../component/makeComponent";
-import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
+import {  $Node, $Nodes } from "./NodeRef";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
-import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { MaybeIon } from "../component/Input";
@@ -87,7 +86,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 // attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-   ref?: NodeRef<T> | NodesRef<T>,
+   ref?: $Node<T> | $Nodes<T>,
    provide?: Provided
 }
 

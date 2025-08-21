@@ -1,12 +1,23 @@
-import { $thisView, component, If, NodeRef, NodeRef } from "@rue/lumo";
+import { $thisView, component, If, NodeRef } from "@rue/lumo";
 import { ion, ionize, isIonizedModel, queueTask, watch } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionized/inert";
 
 class AnimationAnimator {
-   constructor(canvas) {
+   canvas: HTMLCanvasElement;
+   ctx: CanvasRenderingContext2D | null;
+   squareSize: number;
+   startX: number;
+   endX: number;
+   y: number;
+   animationDuration: number;
+   startTime: null | number;
+   animationFrame: null | number;
+   elapsed: number;
+   pauseTime: null | number;
+   isPlaying: boolean;
+   constructor(canvas: HTMLCanvasElement) {
       this.canvas = inert(canvas);
       this.ctx = inert(canvas.getContext('2d'));
-      console.log('ctx', this.ctx)
       this.squareSize = 50;
       this.startX = 0;
       this.endX = canvas.width - this.squareSize;
@@ -19,16 +30,16 @@ class AnimationAnimator {
       this.isPlaying = false;
    }
 
-   draw(currentX) {
+   draw(currentX: number) {
       // Clear canvas
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx!.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
       // Draw square
-      this.ctx.fillStyle = '#3498db';
-      this.ctx.fillRect(currentX, this.y, this.squareSize, this.squareSize);
+      this.ctx!.fillStyle = '#3498db';
+      this.ctx!.fillRect(currentX, this.y, this.squareSize, this.squareSize);
    }
 
-   animate(currentTime) {
+   animate(currentTime: number) {
       if (!this.startTime) {
          this.startTime = currentTime - this.elapsed;
       }
@@ -87,7 +98,7 @@ class AnimationAnimator {
       this.isPlaying = false;
    }
 
-   goToTime(timeMs) {
+   goToTime(timeMs: number) {
       // Stop any running animation
       this.stop();
 
@@ -108,7 +119,7 @@ class AnimationAnimator {
 
 export function TestAnimationController() {
 
-   const canvas = NodeRef('canvas')
+   const $canvas = NodeRef('canvas')
 
    // const $animation = ion(() => $canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
 
@@ -164,7 +175,7 @@ export function TestAnimationController() {
    return component(
       <>
          <div style="display: flex; flex-direction: column; align-items: flex-start">
-            <canvas ref={canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>
+            <canvas ref={$canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>
             {/* {If($canvas, ({ $elapsed, $isPlaying, playPause, updateTime, play } = AnimationKit()) => (queueTask(() => play()), */}
             {/* {If($canvas, (o = initAnimation($canvas())) => */}
             {/* <> */}

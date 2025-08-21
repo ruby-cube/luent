@@ -6,7 +6,7 @@ import { component, FromTag, NodeRef, atMounted, atUnmount } from '@rue/lumo'
 export function MarkdownApp(
    input : FromTag<{
       'mu:markdown'?: Ion<string>
-   }>()
+   }>
 ) {
 
    const { $markdown = ion('# Hello World') } = input
@@ -20,7 +20,7 @@ export function MarkdownApp(
    //    $markdown.state = e.target.value
    // }
 
-   const textArea = NodeRef('textarea')
+   const $textArea = NodeRef('textarea')
 
    const caretRange = ionize({
       selectionStart: undefined as undefined | number,
@@ -29,20 +29,20 @@ export function MarkdownApp(
 
    atUnmount((final) => {
       if (final) return;
-      const textAreaNode = textArea.node!
-      const isActive = document.activeElement !== textAreaNode
-      caretRange.selectionStart = isActive ? textAreaNode.selectionStart : undefined
-      caretRange.selectionEnd = isActive ? textAreaNode.selectionEnd : undefined
+      const textArea = $textArea()!
+      const isActive = document.activeElement !== textArea
+      caretRange.selectionStart = isActive ? textArea.selectionStart : undefined
+      caretRange.selectionEnd = isActive ? textArea.selectionEnd : undefined
    })
 
    atMounted((initial) => {
       if (initial) return;
-      const textAreaNode = textArea.node!
+      const textArea = $textArea()!
       const { selectionEnd, selectionStart } = caretRange
       if (selectionStart === undefined) return;
-      textAreaNode.focus();
-      textAreaNode.selectionStart = selectionStart
-      textAreaNode.selectionEnd = selectionEnd!
+      textArea.focus();
+      textArea.selectionStart = selectionStart
+      textArea.selectionEnd = selectionEnd!
    })
 
    const $count = ion(0, {
@@ -78,7 +78,7 @@ export function MarkdownApp(
          <div>local state: {$doubleCount}</div>
          <button on:click={e => $count.increment()}>increment</button>
          <div class='editor'>
-            <textarea class='input' ref={textArea}>{{ mu: $markdown }}</textarea>
+            <textarea class='input' ref={$textArea}>{{ mu: $markdown }}</textarea>
             {/* <div class='output'>{$output}</div> */}
             <div class='output'>{{ innerHTML: $output }}</div>
             {/* <textarea>{$markdown}</textarea> */}

@@ -1,32 +1,32 @@
 import { TransitionNode } from "./TransitionNode";
-import { NodeRef } from "../node/NodeRef";
+import { $Node } from "../node/NodeRef";
 import { makeElement } from "../element/makeElement";
 import { fromCommons } from "../commons/provide";
 import { Ion } from "@rue/quarky";
 import { component } from "../component/Component";
-import { Else, If } from "../conditional/If";
+import { createIfSeries, Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 import { CommonsKey } from "../commons/CommonsKey";
 import { RenderSlot } from "../component/fromTag";
 
 export function renderTransitNode(
-   $div: NodeRef<'div'>,
+   $div: $Node<'div'>,
    Slot: RenderSlot,
    transitionNode: TransitionNode,
    $disable: false | undefined | Ion<boolean>
 ) {
    if ($disable) {
-      const output = isFunction(Slot) ? Slot() : Slot
+      const output = isFunction(Slot) ? Slot() : Slot //QUESTION: is it necessary to call Slot here? Can we call it within conditional blocks?
       return component(
-         [
+         createIfSeries([
             If($disable, () =>
                output
             ),
             Else(() => {
                registerTransitionNode(transitionNode)
-               return makeElement('div', output, { ref: $div }, undefined)
+               return makeElement('div', () => output, { ref: $div }, undefined)
             })
-         ]
+         ])
       )
    }
    registerTransitionNode(transitionNode)

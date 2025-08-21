@@ -29,13 +29,13 @@ export function SortableTableApp() {
    )
 }
 
-
-function SortableTable(input : FromTag<{
+type SortableTableInput = FromTag<{
    data: any[],
    columns: string[],
    filterKey: Ion<string>
-}>) {
-   const { columns, data, $filterKey } = input
+}>
+
+function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
 
    const $sortKey = ion('')
    const sortOrders = ionize(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
@@ -45,6 +45,8 @@ function SortableTable(input : FromTag<{
    const $filteredData = ion(() => {
       let filteredData = data;
       let filterKey = $filterKey()
+      const key = $sortKey()
+
       if (filterKey) {
          filterKey = filterKey.toLowerCase()
          filteredData = filteredData.filter((row) => {
@@ -53,9 +55,8 @@ function SortableTable(input : FromTag<{
             })
          })
       }
-      const key = $sortKey()
+
       if (key) {
-         console.log('sorting')
          const order = sortOrders[key]
          filteredData = filteredData.slice().sort((a, b) => {
             a = a[key]
@@ -63,13 +64,9 @@ function SortableTable(input : FromTag<{
             return (a === b ? 0 : a > b ? 1 : -1) * order
          })
       }
-      console.log('data', data)
+
       return filteredData
    })
-
-   // window.$filteredData = $filteredData;
-
-
 
    function sortBy(key: string) {
       $sortKey.state = key
@@ -80,18 +77,9 @@ function SortableTable(input : FromTag<{
       return str.charAt(0).toUpperCase() + str.slice(1)
    }
 
-   watch($filteredData, ({ current }) => {
-      console.log('$filteredData', current)
-   })
-
-   watch(input.$filterKey, ({ current }) => {
-      console.log('$filterKey', current)
-   })
-
    return component(
       <>
          {If(($filteredData().length),
-            // <p>yes</p>
             <table>
                <thead>
                   <tr>
