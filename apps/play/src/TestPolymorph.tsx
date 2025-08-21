@@ -1,4 +1,4 @@
-import { component, For, fromApp, fromCommons, fromGlobal, fromTag, provideAppwide, provideGlobal } from "@rue/lumo";
+import { component, For, fromApp, fromCommons, fromGlobal, FromTag, provideAppwide, provideGlobal } from "@rue/lumo";
 import { Morphable, Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
 import { ion } from "@rue/quarky";
 
@@ -140,9 +140,9 @@ function Missing() {
 
 
 
-function File(input = fromTag<{
+function File(input : FromTag<{
    file: { name: string }
-}>()) {
+}>) {
    const { file } = input
 
 

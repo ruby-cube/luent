@@ -95,7 +95,7 @@ export function MountIf() {
 }
 
 
-// function Child(input = fromTag({
+// function Child(input : FromTag({
 //    'm:frogWell': Ion<string>,
 //    'dog-sled': Ion<string>,
 //    Slot: v<string>('?'),
@@ -108,7 +108,7 @@ export function MountIf() {
 //    )
 // }
 
-// function CounterButton(input = fromTag({
+// function CounterButton(input : FromTag({
 //    // Slot: v<() => any>,
 //    '$:increment': v<() => void>
 // })) {

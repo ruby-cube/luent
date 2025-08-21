@@ -21,9 +21,9 @@ import { component } from '@rue/lumo'
 //    )
 // }
 
-function Album(input = fromTag<{
+function Album(input : FromTag<{
    resolve: ResolveSuspense
-}>()) {
+}>) {
    const { resolve } = input
 
    const $album = fromCloud(ALBUM, {
@@ -242,7 +242,7 @@ const MARKDOWN_FILES = defineDBSync(() => {
 })
 
 
-function App(input = fromTag()) {
+function App(input : FromTag()) {
    const $files = fromCloud(MARKDOWN_FILES, [])
 
    const $openedFiles = ion(() => $files().filter((file) => file.opened))

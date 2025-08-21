@@ -1,5 +1,5 @@
 
-import { component, Else, For, fromTag, If } from '@rue/lumo'
+import { component, Else, For, FromTag, If } from '@rue/lumo'
 import { Ion, ion, ionize, watch } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 
@@ -24,17 +24,17 @@ export function SortableTableApp() {
             columns={gridColumns}
             filterKey={$searchQuery}>
          </SortableTable >
-         <head:link href='/src/demos/sortable-table.css' rel='stylesheet' />
+         <o--link href='/src/demos/sortable-table.css' rel='stylesheet' />
       </>
    )
 }
 
 
-function SortableTable(input = fromTag<{
+function SortableTable(input : FromTag<{
    data: any[],
    columns: string[],
    filterKey: Ion<string>
-}>()) {
+}>) {
    const { columns, data, $filterKey } = input
 
    const $sortKey = ion('')

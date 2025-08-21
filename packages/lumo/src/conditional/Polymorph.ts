@@ -6,7 +6,7 @@ import { Commons, NodeCommons, Provided, callWithCommons } from "../commons/Comm
 import { NodeEntity } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
-import { fromTag } from "../component/fromTag";
+import { FromTag } from "../component/fromTag";
 import { ion, Ion, isIon, MutableIon, toValue, watch } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
@@ -46,11 +46,11 @@ type RenderFunction = ((...args: [never] | [any]) => RawJSXNode)
 export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
    const switchMap = new Map(entries)
 
-   function $Polymorph(input = fromTag<{
+   function $Polymorph(input : FromTag<{
       as: Morphable | PolymorphKey, //TODO: fromTag needs to deal with mixed ion or not ion type
       with?: Object,
       provide?: Provided
-   }>()): Component {
+   }>): Component {
       const { as: activeKey, provide, with: inputObj } = input
 
       if (!isIon(activeKey)) {

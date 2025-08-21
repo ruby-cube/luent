@@ -1,5 +1,5 @@
 
-import { component, fromTag, If, JSXNode, prep, v } from "@rue/lumo";
+import { component, If, JSXNode, FromTag, } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 // - [ ]  transform slot to render function for:
@@ -225,11 +225,10 @@ function ParentG2() {
    )
 }
 
-function Child(input = fromTag<{
+function Child(input: FromTag<{
    Slot: (o?: any) => JSXNode,
    something: string
-}>()) {
-
+}>) {
    const { Slot } = input
 
    return component(

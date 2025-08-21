@@ -1,4 +1,4 @@
-import { component, Else, fromTag, If, NodeRef, } from "@rue/lumo";
+import { component, Else, FromTag, If, NodeRef, } from "@rue/lumo";
 import { FiniteIon, ion, isIon } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 import { Style } from "../../../packages/lumo/src/component/Style";
@@ -191,10 +191,10 @@ export function VideoPlayer() {
 //    $.elapsed
 // }
 
-function ElapsedBar(input = fromTag<{
+function ElapsedBar(input : FromTag<{
    elapsed: number,
    duration: number
-}>()) {
+}>) {
    const { $elapsed, duration } = input
 
    return component(
@@ -207,10 +207,10 @@ function ElapsedBar(input = fromTag<{
    )
 };
 
-function Timer(input = fromTag<{
+function Timer(input : FromTag<{
    elapsed: number,
    duration: number
-}>()) {
+}>) {
    const { $elapsed, duration } = input
 
    return component(

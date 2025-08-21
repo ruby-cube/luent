@@ -1,4 +1,4 @@
-import { component, fromTag, atUnmount } from "@rue/lumo";
+import { component, FromTag, atUnmount } from "@rue/lumo";
 import { Animation, Interval, ion, update, ThrottledHover, ionize } from "@rue/quarky";
 
 //TODO:
@@ -111,7 +111,7 @@ export function TriangleDemo() {
    );
 };
 
-function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
+function Triangle({ x, y, s, $seconds } : FromTag<any>) {
    if (s <= TARGET) {
       return component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET} text={$seconds} />
@@ -150,7 +150,7 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
 };
 
 
-function Dot({ x, y, s, $text } = fromTag<any>()) {
+function Dot({ x, y, s, $text } : FromTag<any>) {
    const $hover = ion(false)
 
    const [Hover, Unhover] = ThrottledHover()

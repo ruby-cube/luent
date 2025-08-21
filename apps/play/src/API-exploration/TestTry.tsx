@@ -1,4 +1,4 @@
-import { Catch, component, createTryCatch, fromTag, Try } from "@rue/lumo";
+import { Catch, component, createTryCatch, FromTag, Try } from "@rue/lumo";
 
 export function TestTry() {
    console.log('running TestTry')
@@ -25,9 +25,9 @@ function Child() {
    )
 }
 
-function ErrorMessage({ message } = fromTag<{
+function ErrorMessage({ message } : FromTag<{
    message: string
-}>()) {
+}>) {
    return component(
       <div>{message}</div>
    )

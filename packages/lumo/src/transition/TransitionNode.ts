@@ -6,7 +6,7 @@ import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 import { NodeRef } from "../node/NodeRef";
-import { fromTag, RenderSlot } from "../component/fromTag";
+import { RenderSlot, FromTag } from "../component/fromTag";
 
 export type TransitionHook = {
    phase: 'in' | 'out'
@@ -52,10 +52,10 @@ const defaultFade: TransitionClasses = {
    transitionClass: 'transition-default-fade'
 }
 
-export function Transition(input = fromTag<TransitionNodeInput & {Slot: RenderSlot}>()){
+export function Transition(input: FromTag<TransitionNodeInput & {Slot: RenderSlot}>){
    return createTransitionNode('Transition', input)
 }
-export function Transit(input = fromTag<TransitionNodeInput & {Slot: RenderSlot}>()){
+export function Transit(input : FromTag<TransitionNodeInput & {Slot: RenderSlot}>){
    return createTransitionNode('Transit', input)
 }
 

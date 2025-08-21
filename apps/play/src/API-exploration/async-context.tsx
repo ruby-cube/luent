@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { component, fromTag, listen } from "@rue/lumo";
+import { component, FromTag, listen } from "@rue/lumo";
 
 
-function App(input = fromTag()) {
+function App(input : FromTag()) {
 
    context.atMounted(() => {
 

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { CommonsKey, component, For, fromCommons, fromTag, If, NodeRef } from "@rue/lumo";
+import { CommonsKey, component, For, fromCommons, FromTag, If, NodeRef } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -163,9 +163,9 @@ function LoadingApp() { //Stand in until I fix createApp
 // }
 
 
-function App(input = fromTag<{
+function App(input : FromTag<{
    files: Ionized<File[]>
-}>()) {
+}>) {
 
    const { files } = input;
 
@@ -290,12 +290,12 @@ const TABS_KIT = CommonsKey<TabManager>('TABS_KIT')
 // const CLOSE_FILE = CommonsKey(v<TabManager['closeFile']>)
 // const FOCUS_FILE = CommonsKey(v<TabManager['focusFile']>)
 
-export function List(input = fromTag<{
+export function List(input : FromTag<{
 		apple?: string,
 		peach?: number,
 		pear?: object,
 		plum: Ion<string>
-}>()) {
+}>) {
 		const { 
 				$plum,
 				$apple = fromCommons($APPLE), 
@@ -314,9 +314,9 @@ const PEAR = CommonsKey<MaybeIon<string>>('PEAR')
 
 
 
-function Sidebar(input = fromTag<{
+function Sidebar(input : FromTag<{
    files: Ionized<File[]> //TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
-}>()) {
+}>) {
    const { files } = input
    const { addFile } = fromCommons(FILES_KIT);
 
@@ -330,10 +330,10 @@ function Sidebar(input = fromTag<{
    )
 }
 
-function SidebarFile(input = fromTag<{
+function SidebarFile(input : FromTag<{
    file: Ionized<File>,
    index: Ion<number>
-}>()) {
+}>) {
    const { $index, file } = input
    const menu = NodeRef(IfContextMenu)
 
@@ -352,7 +352,7 @@ function SidebarFile(input = fromTag<{
 
 
 
-// function Tabs(input = fromTag({
+// function Tabs(input : FromTag({
 //    files: Ion<File[]>,
 // })) {
 //    const { $files } = input
@@ -372,11 +372,11 @@ function SidebarFile(input = fromTag<{
 
 
 
-function Tab(input = fromTag<{
+function Tab(input : FromTag<{
    index?: Ion<number>,
    file: Ionized<File>,
    tabManager?: TabManager,
-}>()) {
+}>) {
    const { file, tabManager = fromCommons(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 

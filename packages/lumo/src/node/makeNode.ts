@@ -11,7 +11,7 @@ import { InnerHTMLKit } from "./InnerHTML";
 import { MaybeIon } from "../component/Input";
 import { Commons, Provided, callWithCommons } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
-import { fromTag, RenderSlot } from "../component/fromTag";
+import { FromTag, RenderSlot } from "../component/fromTag";
 import { getClosestCommons } from "../commons/commons-stack";
 import { PolymorphKit } from "../conditional/Polymorph";
 import { DynamicKit } from "../dynamic/DynamicKit";
@@ -154,14 +154,14 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | 
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'head:link' | 'o-mount' | 'o-show',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'o-mount' | 'o-show',
    Slot: undefined | (() => JSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | Component | JSX.Element | undefined {
 
    switch (nodeType) {
 
-      case 'head:link':
+      case 'o--link':
          return Portal('head', () =>
             makeElement('link', undefined, <ElementConfig>config, undefined)
          )

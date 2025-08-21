@@ -1,6 +1,5 @@
 import { Component, ComponentSetup } from "./component/Component";
 import { AnyObject } from "@rue/types";
-import { setComponentAttributes } from "./component/makeComponent";
 import { AppCommons, createAppCommons } from "./commons/provide";
 import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
 import { NodePod, removeDOMNodes } from "./node/NodePod";
@@ -10,6 +9,7 @@ import { createUpdate, Ion, pushUpdate, popUpdate } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
 import { processJSXOutput } from "./node/setUpNodeEntities";
 import { mountNodeEntities } from "./node/mountNodeKits";
+import { toInput } from "./component/fromTag";
 
 let appRoot: Element;
 
@@ -54,17 +54,17 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             }
             const update = createUpdate(1000)
             pushUpdate(update)
-            setComponentAttributes(attributes)
+            // setComponentAttributes(attributes)
             muIonsStack.push(muIons)
             pushCommons(appCommons)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
-            setComponentAttributes(config?.setup || {})
+            // setComponentAttributes(config?.setup || {})
             try {
-               mountNodeEntities(processJSXOutput(App(), appRoot, nodePod), appRoot)
+               mountNodeEntities(processJSXOutput(App(toInput(attributes)), appRoot, nodePod), appRoot)
             }
             finally {
                flask.emitInitialMount()
-               setComponentAttributes(undefined)
+               // setComponentAttributes(undefined)
                muIonsStack.pop()
                popUpdate()
                // if (remountable) markMountPhase()

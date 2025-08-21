@@ -184,7 +184,7 @@ export function TodoMVC() {
             {/* {Else(undefined)} */}
          </section >
 
-         <head:link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
+         <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)
 }
 

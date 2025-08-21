@@ -3,7 +3,7 @@ import { Commons as CommonsType, getClosestCommons, popCommons, pushCommons } fr
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
 import { CommonsEntryKey, toCommonsKey } from "./CommonsKey";
-import { fromTag, RenderSlot } from "../component/fromTag";
+import { FromTag, RenderSlot } from "../component/fromTag";
 
 export interface NodeCommons {
    entries: Map<string, unknown>;
@@ -17,11 +17,12 @@ export type Provided = [CommonsEntryKey | string, any][]
 
 //API
 
-export function Commons(input = fromTag<{
-   provide: Provided,
-   Slot: RenderSlot
-}>()) {
-   const { Slot, provide } = input
+export function Commons(
+   { Slot, provide }: FromTag<{
+      provide: Provided,
+      Slot: RenderSlot
+   }>
+) {
    if (!Slot) debug.warn(`Extraneous <Commons>`)
    return callWithCommons(Slot, provide)
 }

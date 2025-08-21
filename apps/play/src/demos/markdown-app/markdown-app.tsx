@@ -1,10 +1,10 @@
 import { marked } from 'marked'
 import { Ion, ion, ionize, watch } from '@rue/quarky'
-import { component, fromTag, NodeRef, atMounted, atUnmount } from '@rue/lumo'
+import { component, FromTag, NodeRef, atMounted, atUnmount } from '@rue/lumo'
 
 
 export function MarkdownApp(
-   input = fromTag<{
+   input : FromTag<{
       'mu:markdown'?: Ion<string>
    }>()
 ) {
@@ -83,7 +83,7 @@ export function MarkdownApp(
             <div class='output'>{{ innerHTML: $output }}</div>
             {/* <textarea>{$markdown}</textarea> */}
          </div>
-         <head:link href='/src/demos/markdown-app/markdown-app.css' rel='stylesheet' />
+         <o--link href='/src/demos/markdown-app/markdown-app.css' rel='stylesheet' />
       </>
    )
 }

@@ -1,4 +1,4 @@
-import { component, fromTag, If, Else, For } from "@rue/lumo";
+import { component, FromTag, If, Else, For } from "@rue/lumo";
 import { ion, ionize, Ionized } from "@rue/quarky";
 
 
@@ -41,7 +41,7 @@ export function TreeApp() {
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItem item={treeItem}></TreeItem>
          </ul>
-         <head:link href='/src/demos/tree-view.css' rel='stylesheet' />
+         <o--link href='/src/demos/tree-view.css' rel='stylesheet' />
       </>
 
    )
@@ -135,11 +135,11 @@ function createTreeItem(data: ItemData): TreeItem {
 
 const textarea = document.createElement('textarea')
 
-function TreeItemView(input = fromTag<{
+function TreeItemView(input : FromTag<{
    item: Ionized<TreeItem>,
    // list: v<string[]>,
    // 'on:click': v<(e: { pen: string }) => void>('?')
-}>()) {
+}>) {
    const { item } = input
 
    // item.children

@@ -1,4 +1,4 @@
-import { component, For, fromTag, Style, } from "@rue/lumo"
+import { component, For, FromTag, Style, } from "@rue/lumo"
 import { Ion, ion, ionize, Ionized, update } from "@rue/quarky"
 
 type Stat = {
@@ -116,11 +116,11 @@ label {
 //  }
 
 
-function AxisLabel(input = fromTag<{
+function AxisLabel(input : FromTag<{
    stat: Ionized<Stat>,
    index: Ion<number>,
    total: Ion<number>
-}>()) {
+}>) {
    const { $index, stat, $total } = input
 
    const $point = ion(() =>
@@ -134,9 +134,9 @@ function AxisLabel(input = fromTag<{
 }
 
 
-function PolyGraph({ stats } = fromTag<{
+function PolyGraph({ stats } : FromTag<{
    stats: Ionized<Stat[]>
-}>()) {
+}>) {
 
    const $points = ion(() => {
       const total = stats.length

@@ -3,6 +3,7 @@ import { ComponentConfig, JSXNode } from "../node/makeNode";
 import { AnyObject } from "@rue/types";
 import { Ion, neutron } from "@rue/quarky";
 import { assertMutableIon, MU, muIonsStack } from "./Input";
+import { toInput } from "./fromTag";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -27,15 +28,15 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 
 
 
-let componentAttributes: AnyObject | undefined
+// let componentAttributes: AnyObject | undefined
 
-export function getComponentAttributes() {
-   return componentAttributes;
-}
+// export function getComponentAttributes() {
+//    return componentAttributes;
+// }
 
-export function setComponentAttributes(attributes: AnyObject | undefined) {
-   componentAttributes = attributes
-}
+// export function setComponentAttributes(attributes: AnyObject | undefined) {
+//    componentAttributes = attributes
+// }
 
 export function makeComponent(
    Component: ComponentSetup,
@@ -52,12 +53,12 @@ export function makeComponent(
          return muIons?.has(ion)
       }
    }
-   setComponentAttributes(attributes)
+   // setComponentAttributes(attributes)
    muIonsStack.push(muIons)
-   const output = Component()
+   const output = Component(toInput(attributes))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
-   setComponentAttributes(undefined);
+   // setComponentAttributes(undefined);
    muIonsStack.pop()
    if (config.ref) exposeComponent(output.exposed ?? {}, config.ref, $index)
    return output

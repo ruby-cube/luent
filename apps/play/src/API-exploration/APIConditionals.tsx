@@ -101,7 +101,7 @@ export function TestCounterModel() {
    )
 }
 
-import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, FromTag, v, target, prep, Ion } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 

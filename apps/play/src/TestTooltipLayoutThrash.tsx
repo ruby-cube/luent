@@ -1,4 +1,4 @@
-import { component, Else, For, fromTag, If, JSXNode, measureLayout, NodeRef, atMounted, Portal, RawJSXNode, RenderFunction, RenderSlot } from '@rue/lumo';
+import { component, If, JSXNode, measureLayout, NodeRef, atMounted, Portal, RawJSXNode, RenderFunction, RenderSlot, FromTag } from '@rue/lumo';
 import { Ion, ion, isNonNull, watch } from '@rue/quarky';
 
 
@@ -6,50 +6,12 @@ export function TestTooltipApp() {
 
    return component(
       <div>
-         {/* <ButtonWithTooltip>
-            {{
-               buttonText: () => 'Hover over me (tooltip below)',
-               tooltip: () =>
-                  <div>
-                     This tooltip does not fit above the button.
-                     <br />
-                     This is why it's displayed below instead!
-                  </div>
-            }}
-         </ButtonWithTooltip>
-         <div style={{ height: '100px' }} />
-         <ButtonWithTooltip>
-            {{
-               buttonText: () => 'Hover over me (tooltip below)',
-               tooltip: () =>
-                  <div>
-                     This tooltip does not fit above the button.
-                     <br />
-                     This is why it's displayed below instead!
-                  </div>
-            }}
-         </ButtonWithTooltip>
-
-
-         <div style={{ height: '100px' }} />
-         <ButtonWithTooltip>
-            {{
-               buttonText: () => 'Hover over me (tooltip below)',
-               tooltip: () =>
-                  <div>
-                     This tooltip does not fit above the button.
-                     <br />
-                     This is why it's displayed below instead!
-                  </div>
-            }}
-         </ButtonWithTooltip> */}
-
          <ButtonWithTooltip>
             <Slot>
                Hover over me (tooltip below)
             </Slot>
 
-            <Slot Tooltip provide={[]}>
+            <Slot Tooltip>
                <div>
                   This tooltip does not fit above the button.
                   <br />
@@ -58,39 +20,56 @@ export function TestTooltipApp() {
             </Slot>
          </ButtonWithTooltip>
 
-         <div style={{ height: '50px' }} />
+         <div style={{ height: '100px' }} />
+
+         <ButtonWithTooltip>
+            <Slot>
+               Hover over me (tooltip above)
+            </Slot>
+
+            <Slot Tooltip>
+               <div>
+                  This tooltip fits above the button.
+               </div>
+            </Slot>
+         </ButtonWithTooltip>
+
+         <div style={{ height: '100px' }} ></div>
+
+         <ButtonWithTooltip>
+            <Slot>
+               Hover over me (tooltip above)
+            </Slot>
+
+            <Slot Tooltip>
+               <div>
+                  This tooltip fits above the button.
+               </div>
+            </Slot>
+         </ButtonWithTooltip>
       </div>
    );
 }
 
-type NodeRef<T> = T | undefined
 
-export function ButtonWithTooltip(input = fromTag<{
+export function ButtonWithTooltip({ Slot }: FromTag<{
    Slot: {
       Default: RenderSlot,
       Tooltip: RenderSlot
    }
-}>()) {
-   const { Slot } = input
+}>) {
    const $targetRect = ion(null as Rect | null)
-
-   const button = NodeRef('button')
-
-   if (isNonNull($targetRect)){
-      
-   }
 
    return component(
       <>
          <button
-            ref={button}
-            on:pointerenter={e => { if (button.node) $targetRect.state = button.node.getBoundingClientRect() }}
+            on:pointerenter={e => { $targetRect.state = e.target.getBoundingClientRect() }}
             on:pointerleave={e => { $targetRect.state = null }}
          >
             {Slot.Default()}
          </button>
          {If($targetRect, v =>
-            <Tooltip targetRect={v($targetRect)}>
+            <Tooltip targetRect={v($targetRect)()}>
                {Slot.Tooltip()}
             </Tooltip>
          )}
@@ -115,10 +94,12 @@ type Rect = { left: number, top: number, bottom: number }
 // 
 
 
-export function Tooltip({ Slot, targetRect } = fromTag<{
+export function Tooltip(input: FromTag<{
    Slot: RenderSlot
-   targetRect: Ion<Rect>
-}>()) {
+   targetRect: Rect
+}>) {
+   const { Slot, targetRect } = input
+
    const div = NodeRef('div')
    const $height = ion(undefined as number | undefined)
 
@@ -160,10 +141,10 @@ export function Tooltip({ Slot, targetRect } = fromTag<{
 
 
 
-// function Portal({ Slot, to } = fromTag<{
+// function Portal({ Slot, to } : FromTag<{
 //    Slot: any,
 //    to: string
-// }>()) {
+// }>) {
 //    return component(
 //       Slot()
 //    )

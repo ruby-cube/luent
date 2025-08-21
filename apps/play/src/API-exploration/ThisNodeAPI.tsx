@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, fromTag, v } from "@rue/lumo"
+import { component, FromTag, v } from "@rue/lumo"
 import { Ion, ion, watch } from "@rue/quarky"
 import { DynamicNode } from "../../../../packages/lumo/src/flask/ViewFlask";
 
@@ -12,7 +12,7 @@ import { DynamicNode } from "../../../../packages/lumo/src/flask/ViewFlask";
 function $thisNode() { return {} as ThisNode }
 
 function TestingStuff(
-   input = fromTag<{
+   input : FromTag<{
       frog: Frog
    }>()
 ) {

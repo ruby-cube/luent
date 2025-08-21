@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, fromTag } from "@rue/lumo";
+import { component, FromTag } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 
@@ -16,7 +16,7 @@ function Parent() {
    )
 }
 
-function Child({ $count } = fromTag<{ count: number }>()) {
+function Child({ $count } : FromTag<{ count: number }>) {
 
    const $doubleCount = ion(() => )
 

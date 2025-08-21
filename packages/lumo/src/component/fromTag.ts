@@ -1,6 +1,5 @@
 import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToIntersection } from "@rue/types";
 import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, MutableIon, neutron, toIon, toValue, } from "@rue/quarky";
-import { getComponentAttributes } from "./makeComponent";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { assertMutableIon, MU, getActiveMuIons } from "./Input";
 import { JSXNode, RawJSXNode } from "../node/makeNode";
@@ -91,14 +90,13 @@ type HasMu<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C
 
 
 
-//API
-export function fromTag<C>(): TagInput<C> {
-   // C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject {
-   const attributes = getComponentAttributes()
-   if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
-   return toInput(attributes) as TagInput<C>
-   // return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject
-}
+// export function fromTag<C>(): FromTag<C> {
+//    // C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject {
+//    const attributes = getComponentAttributes()
+//    if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
+//    return toInput(attributes) as FromTag<C>
+//    // return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject
+// }
 
 function assertFunction(value: unknown) {
    if (!isFunction(value) || isIon(value)) throw new Error('Event handler must be a function')
@@ -117,7 +115,7 @@ function assertFunction(value: unknown) {
 //    return muIons
 // }
 
-function toInput(attributes: AnyObject) {
+export function toInput(attributes: AnyObject) {
    function emit(event: string, eventObject: object) {
       const handler = attributes['on:' + event]
       if (!handler) return;
@@ -240,7 +238,7 @@ type ToMuIon<T> = ExcludePrimitives<T> extends { state: any } ? T
 
 
 //TODO: only allow 'mu:' for ions
-type TagInput<D> =
+export type FromTag<D> =
    StaticInput<D>
    & ReadonlyIonInput<D>
    & MutableIonInput<D>

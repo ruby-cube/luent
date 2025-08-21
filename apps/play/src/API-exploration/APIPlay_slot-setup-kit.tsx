@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, fromTag } from "@rue/lumo";
+import { component, FromTag } from "@rue/lumo";
 
 function ColumnB() {
 
@@ -31,9 +31,9 @@ function ColumnB() {
 // Slot<{ dog: string }, '?'> === optional render function
 // Slot<{ dog: string }, '?'>('?') === optional render function
 
-function SomeComponent(input = fromTag<{
+function SomeComponent(input : FromTag<{
    Slot: Slot
-}>()) {
+}>) {
    return component(
       ''
    )

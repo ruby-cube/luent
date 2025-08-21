@@ -1,4 +1,4 @@
-import { component, SuspenseIon, fromTag, Else, If } from "@rue/lumo";
+import { component, SuspenseIon, Else, If, FromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import { ion, Ion } from "@rue/quarky";
 
@@ -82,7 +82,7 @@ function ChildB() {
    )
 }
 
-function Child({ $name } = fromTag<{ name: string }>()) {
+function Child({ $name }: FromTag<{ name: string }>) {
    const $kermit = fetchData()
 
    return component(
@@ -94,7 +94,7 @@ function Child({ $name } = fromTag<{ name: string }>()) {
    )
 }
 
-function GrandChild({ $name } = fromTag<{ name: string }>()) {
+function GrandChild({ $name }: FromTag<{ name: string }>) {
    const $robin = fetchNestedData($name, {
       awaited: 'load'
    })
@@ -125,7 +125,7 @@ function Loading() {
    )
 }
 
-function ErrorView({ $error } = fromTag<{ error: Ion<Error> }>()) {
+function ErrorView({ $error }: FromTag<{ error: Ion<Error> }>) {
    console.log('render error view')
    return component(
       <>

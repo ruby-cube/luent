@@ -18,7 +18,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp, createGlobalCommons, fromTag, NodeRef } from '@rue/lumo';
+import { component, createApp } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -82,19 +82,19 @@ import { TestJSON } from './TestJSON';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TodoMVC)
+const app = createApp(TestTooltipApp)
 
 app.mount('#app')
 
-const frog = ionize({ name: 'sir robin' })
+// const frog = ionize({ name: 'sir robin' })
 
-watch(frog.$name, ({ current: name }) => {
-   console.log('name:', name)
-})
+// watch(frog.$name, ({ current: name }) => {
+//    console.log('name:', name)
+// })
 
-document.addEventListener('click', () => {
-   frog.name = 'kermit'
-})
+// document.addEventListener('click', () => {
+//    frog.name = 'kermit'
+// })
 
 
 // const rootContext = createGlobalCommons()

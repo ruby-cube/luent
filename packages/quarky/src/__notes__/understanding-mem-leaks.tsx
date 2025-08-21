@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Flask, getActiveFlask } from "@rue/flask"
-import { fromTag, Ion } from "@rue/lumo"
+import { FromTag, Ion } from "@rue/lumo"
 
 function Parent() {
    const $count = ion(0)
@@ -19,9 +19,9 @@ function Parent() {
 
 function Child({
    $count
-} = fromTag<{
+} : FromTag<{
    count: Ion
-}>()) {
+}>) {
    const $doubleCount = ion(() => $count() * 2)
    return component({
       $doubleCount

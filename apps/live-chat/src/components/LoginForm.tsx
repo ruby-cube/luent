@@ -1,13 +1,13 @@
 import { ion } from '@rue/quarky'
 import { LoginKit } from '../composables/useLoginKit'
-import { component, fromTag, HandleEvent } from '@rue/lumo'
+import { component, HandleEvent, FromTag } from '@rue/lumo'
 
 type Som = HandleEvent
 export function LoginForm({
    emit
-} = fromTag<{
+} : FromTag<{
    'on:login': HandleEvent
-}>()) {
+}>) {
 
    const $email = ion('')
    const $password = ion('')

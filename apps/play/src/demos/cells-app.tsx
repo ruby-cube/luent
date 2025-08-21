@@ -1,4 +1,4 @@
-import { component, Else, For, fromTag, If, Style } from "@rue/lumo"
+import { component, Else, For, FromTag, If, Style } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
 
 const COLS = 5
@@ -98,10 +98,10 @@ export function CellsApp() {
 }
 
 
-function Cell({ column, row } = fromTag<{
+function Cell({ column, row } : FromTag<{
    column: number,
    row: number
-}>()) {
+}>) {
 
    const $editing = ion(false)
 
