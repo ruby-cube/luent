@@ -121,7 +121,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             showKits.push(kit);
             dynamicPod.push(kit.nodePod = new NodePod())
          }
-         else if (kit.type === 'mount') {
+         else if (kit.type === 'remount') {
             dynamicPod.push(kit.nodePod = new NodePod(false))
             kit.renderConditional = wrapToPreserve(kit.renderConditional)
          }
@@ -398,7 +398,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             pod.clear() //
          }, this.outerFlask)
       }
-      else if (activationType === 'mount') {
+      else if (activationType === 'remount') {
          const flask = kit.flask
          flask?.emitDemount() //
          queueInternalRender(() => {

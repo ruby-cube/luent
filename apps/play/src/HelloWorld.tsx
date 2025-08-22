@@ -142,22 +142,22 @@ export function IonAccess() {
 
    return component(
       <>
-         {If($x() > 10, 'mount',
+         {If($x() > 10, 'remount',
             <p>{$x} is greater than 10</p>
          )}
-         {ElseIf(5 > $x(), 'mount',
+         {ElseIf(5 > $x(), 'remount',
             <p>{$x} is less than 5</p>
          )}
-         {Else('mount',
+         {Else('remount',
             <p>{$x} is between 5 and 10</p>
          )}
-         {$$series(If($x() > 10, 'mount',
+         {$$series(If($x() > 10, 'remount',
             <p>{$x} is greater than 10</p>
          ),
-            ElseIf(5 > $x(), 'mount',
+            ElseIf(5 > $x(), 'remount',
                <p>{$x} is less than 5</p>
             ),
-            Else('mount',
+            Else('remount',
                <p>{$x} is between 5 and 10</p>
             ))}
       </>
@@ -172,9 +172,10 @@ function SvelteA() {
    //@ts-ignore
    const $x = ion(7)
    let $s: any;
+
    return component(
       <>
-         <o-mount>
+         <remount-demount>
             {If($x() > 10,
                $x
             )}
@@ -187,7 +188,7 @@ function SvelteA() {
             {Else(
                <p>{$x} is between 5 and 10</p>
             )}
-         </o-mount>
+         </remount-demount>
          <div>
             {$ > $x() + 10}
          </div>

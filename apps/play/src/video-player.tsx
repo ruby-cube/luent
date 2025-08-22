@@ -39,12 +39,8 @@ export function VideoPlayer() {
       if ($track.is('ended')) $elapsedTime.state = video.currentTime = 0;
       $video()?.play()
    })
+
    $track.on('pause', () => $video()?.pause())
-   // $track.on('end', () => {
-   //    const video = $video()
-   //    if (!video) return;
-   //    $elapsedTime.state = video.currentTime = 0;
-   // })
 
    const $elapsedTime = ion(0);
 
@@ -78,25 +74,18 @@ export function VideoPlayer() {
             >
                <source src="/src/video-player-dance.mp4" type="video/mp4" />
             </video>
+            
             {If(($player.is('x:ready')),
                <>
                   <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is('paused'))} />
-                  {/* <button on:click={e => $track.apply($track.is('playing') ? 'pause' : 'play')}>
-                     {If(($track.is('playing')),
-                        '‖'
-                     )}
-                     {Else(
-                        '►'
-                     )}
-                  </button> */}
-                  {/* <o-show> */}
+                  <remount-demount>
                      {If(($track.is('playing')),
                         <button on:click={e => $track.apply('pause')}>‖</button>
                      )}
                      {Else(
                         <button on:click={e => $track.apply('play')}>►</button>
                      )}
-                  {/* </o-show> */}
+                  </remount-demount>
                   <Timer elapsed={$elapsedTime} duration={duration} />
                </>
             )}
@@ -158,8 +147,8 @@ function ElapsedBar(input: FromTag<{
          <div
             class="elapsed-bar"
             style={{
-               width: (`${percentage(duration, $elapsed())}%`),
-               transition: ($elapsed() === 0 || $paused() ? undefined : 'width .5s ease')
+               width: ($elapsed() === 0 ? `0%` : $paused() ? `${percentage(duration, $elapsed())}%` : `100%`),
+               transition: ($elapsed() === 0 || $paused() ? undefined : `width ${duration - $elapsed()}s linear`)
             }}
          />
       </div>

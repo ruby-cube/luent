@@ -153,7 +153,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | 
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'o-mount' | 'o-show',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-demount' | 'show-hide',
    Slot: undefined | (() => JSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | Component | JSX.Element | undefined {
@@ -165,13 +165,13 @@ export function makeNode(
             makeElement('link', undefined, <ElementConfig>config, undefined)
          )
 
-      case 'o-show':
-         if (!Slot) throw new Error(`Extraneous <o-show>`)
+      case 'show-hide':
+         if (!Slot) throw new Error(`Extraneous <show-hide>`)
          return wrapWithActivationType('show', Slot, config.provide)
 
-      case 'o-mount':
-         if (!Slot) throw new Error(`Extraneous <o-mount>`)
-         return wrapWithActivationType('mount', Slot, config.provide)
+      case 'remount-demount':
+         if (!Slot) throw new Error(`Extraneous <remount-demount>`)
+         return wrapWithActivationType('remount', Slot, config.provide)
 
       default:
          if (typeof nodeType === 'string') {

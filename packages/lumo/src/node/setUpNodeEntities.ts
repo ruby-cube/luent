@@ -72,7 +72,7 @@ export function setUpNodeEntities(
    return nodeEntities;
 }
 
-// function closeConditionalSeries(conditionalArray: ConditionalRenderKit[], swap: 'mount' | 'display' | 'instance' | undefined, parent: Element, nodeVine: NodePod, nodeKits: NodeEntity[]) {
+// function closeConditionalSeries(conditionalArray: ConditionalRenderKit[], swap: 'remount' | 'display' | 'instance' | undefined, parent: Element, nodeVine: NodePod, nodeKits: NodeEntity[]) {
 //    const series = createConditionalSeries(conditionalArray, swap)
 //    conditionalArray = null
 //    swap = undefined;

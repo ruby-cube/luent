@@ -181,17 +181,17 @@ function TreeItemView(input : FromTag<{
                <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
          </div>
-         {/* {If($isFolder, 'create', If($isOpen, 'mount',
+         {If($isFolder, If($isOpen, 'remount',
             <ul>
                {For(item.children!, m => m, item => (
                   <TreeItem item={item}></TreeItem>
                ))}
                <li class='add' on:click={e => item.addChild()}>+</li>
             </ul>
-         ))} */}
-         {If($isFolder, 'create',()=>(console.log('*** render contents'),
+         ))}
+         {/* {If($isFolder, 'create', () => (console.log('*** render contents'),
             <>
-               {If($isOpen, 'mount', ()=>(console.log('*** render nested'),
+               {If($isOpen, 'remount', () => (console.log('*** render nested'),
                   <ul>
                      {For(item.children!, m => m, item => (
                         <TreeItem item={item}></TreeItem>
@@ -200,7 +200,7 @@ function TreeItemView(input : FromTag<{
                   </ul>
                ))}
             </>
-         ))}
+         ))} */}
       </li>
    )
 }

@@ -9,7 +9,7 @@ import { ConditionalKit, ConditionalRenderSeries } from "./ConditionalRenderSeri
 //    currentNodePodIndex = index ?? undefined;
 // }
 
-export type ActivationType = 'show' | 'create' | 'mount'
+export type ActivationType = 'show' | 'create' | 'remount'
 
 type RenderConditional = (v: <T>(value: T) => NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>>:T>) => RawJSXNode
 

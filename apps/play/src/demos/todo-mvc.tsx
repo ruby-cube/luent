@@ -174,7 +174,7 @@ export function TodoMVC() {
                      </li >
                   </ul >
 
-                  {If(($todos().length > $remaining()), 'mount',
+                  {If(($todos().length > $remaining()), 'remount',
                      <button class="clear-completed" on:click={removeCompleted} >
                         Clear completed
                      </button >
