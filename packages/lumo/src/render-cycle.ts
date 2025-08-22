@@ -1,5 +1,5 @@
 import { Flask, getFlask } from "@rue/flask"
-import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, } from "@rue/quarky"
+import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, getCurrentPhase, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 
 export const {
@@ -34,6 +34,10 @@ export const atPrerender = useUpdateCycleScheduler(PRERENDER)
 
 
 export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
+   if (getCurrentPhase() === INTERNAL_RENDER) {
+      fn()
+      return;
+   }
    const effect = createOneoff(fn, INTERNAL_RENDER)
    $activeUpdate().cycle.scheduleEffect(effect)
    flask.onDiscard(() => effect.destroy())

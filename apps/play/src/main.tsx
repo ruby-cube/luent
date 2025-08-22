@@ -59,6 +59,7 @@ import { TestIfElse } from './demos/TestIfElse';
 import { TestIonicTask } from './TestIonicTask';
 import { TestFiniteIon } from './TestFiniteIon';
 import { TestJSON } from './TestJSON';
+import { TestNestedConditional } from './TestNestedConditional';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';

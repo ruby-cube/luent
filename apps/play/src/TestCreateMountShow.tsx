@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { If, component, Else, ElseIf } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
@@ -47,8 +46,8 @@ export function TestDerivedConditional() {
          <div>{$count}</div>
          <div>{($count() + 1)}</div>
          <div>{$doubleCount}</div>
-         <button on:click={$count.increment}>+</button>
-         <button on:click={$count.decrement}>-</button>
+         <button on:click={e => $count.increment()}>+</button>
+         <button on:click={e => $count.decrement()}>-</button>
 
          {If(($doubleCount() > 3), 'create',
             <p>(0) doublecount is greater than 3!</p>

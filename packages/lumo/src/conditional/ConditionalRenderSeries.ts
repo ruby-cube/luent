@@ -369,7 +369,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       $_run_with_(context, () => {
          const nodeEntities = kit.renderConditional(parent, kit.nodePod)
+
+
          mountConditional(parent, kit.nodePod, nodeEntities, this.outerFlask, fragment);
+
       })
    }
 
@@ -423,7 +426,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      
+
       queueInternalRender(() => {
          this.render(kit, parent, fragment)
          nodePod.activate() // needs to be queued since deactivation is also queued
@@ -432,7 +435,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          else
             flask.emitRemount() // remount preserved watchers etc.
       }, this.outerFlask)
-
    }
 }
 
@@ -449,7 +451,9 @@ export function mountConditional(
    fragment?: DocumentFragment
 ) {
    const _fragment = fragment || new DocumentFragment();
+
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
+
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
    queueInternalRender(() => {
       console.log('qIR: mountDOMNodes')

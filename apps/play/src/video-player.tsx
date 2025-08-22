@@ -81,22 +81,22 @@ export function VideoPlayer() {
             {If(($player.is('x:ready')),
                <>
                   <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is('paused'))} />
-                  <button on:click={e => $track.apply($track.is('playing') ? 'pause' : 'play')}>
+                  {/* <button on:click={e => $track.apply($track.is('playing') ? 'pause' : 'play')}>
                      {If(($track.is('playing')),
                         '‖'
                      )}
                      {Else(
                         '►'
                      )}
-                  </button>
-                  {/* <o-show>
+                  </button> */}
+                  {/* <o-show> */}
                      {If(($track.is('playing')),
-                        <button on:click={e => $track.apply('pause')}>Pause</button>
+                        <button on:click={e => $track.apply('pause')}>‖</button>
                      )}
                      {Else(
-                        <button on:click={e => $track.apply('play')}>Play</button>
+                        <button on:click={e => $track.apply('play')}>►</button>
                      )}
-                  </o-show> */}
+                  {/* </o-show> */}
                   <Timer elapsed={$elapsedTime} duration={duration} />
                </>
             )}

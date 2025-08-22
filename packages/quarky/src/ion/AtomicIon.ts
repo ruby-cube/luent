@@ -262,6 +262,7 @@ export function createAtomicIon(
          })
          Object.defineProperties($state, Object.getOwnPropertyDescriptors(props))
       }
+
    }
    else {
       Object.defineProperty($state, 'state', {
