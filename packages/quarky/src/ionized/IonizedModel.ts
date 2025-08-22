@@ -278,6 +278,7 @@ type CloneFn = (entity: any) => any
 function getCloner(entity: object): CloneFn {
    //TODO: get cloner from data structure configs
    if (entity instanceof Array) return (entity: any[]) => {
+      console.log('&&& cloning array')
       return Object.assign([], entity)
    }
    if (entity instanceof Set) return (entity: Set<any>) => {
@@ -458,7 +459,7 @@ export function createIonizedModel(
    const ionizedModel = new Proxy(initialTarget, {
 
       get(target, key, receiver) {
-         console.log('get', key)
+         if (key === 'length') console.log('get', key, state.current.length)
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          if (key in proxyProto) {
             return proxyProto[key]
@@ -472,6 +473,7 @@ export function createIonizedModel(
 
       set(target, key, value) {
          console.log('>>> set', key, value)
+         if (key === 'length') console.log('state', state.current.length)
          if (key in proxyProto) {
             proxyProto[key] = value;
             return true;

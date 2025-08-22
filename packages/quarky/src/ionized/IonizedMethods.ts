@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonizedModel, ProxyKey } from "./IonizedModel"
 import { quarkOf } from "../Quark"
-import { initUpdate, popUpdate, pushUpdate} from "../reactivity/UpdateCycle"
+import { initUpdate, popUpdate, pushUpdate, Update} from "../reactivity/UpdateCycle"
 import { ModelQuark } from "./ModelQuark"
 import { $atomicOp, getAtomicOps } from "./AtomicOp"
 import { emitSignal } from "../debug/debug"
@@ -85,6 +85,7 @@ function useMutatingOp(
    const o = {
       [opKey](...args: any) {
          const target = state.active;
+
          const _args = transformInput(args)
          const preop = config.preop?.(target, _args)
 
@@ -133,6 +134,7 @@ class TriggerableModel {
    }
 
    // triggerProperty(key: PropertyKey) {
+   //    Object.getOwnPropertyDescriptor(this.quark.proxyProto, key)
    //    const pion = $atomicPion(this.quark, key)
    //    if (pion) {
    //       initModelUpdate(pion, this.update)

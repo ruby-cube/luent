@@ -77,7 +77,11 @@ type MaybeIonizeProperty<K, T> =
    : T extends object ? Ionized<T>
    : T
 
-export type MaybeIonize<T> = IsIonized<T> extends true ? T : T extends Function ? T : IsInert<T> extends true ? T : T extends object ? Ionized<T> : T
+export type MaybeIonize<T> = IsIonized<T> extends true ? T
+   : T extends Function ? T
+   // : IsInert<T> extends true ? T & { inerton: true }
+   : T extends object ? Ionized<T>
+   : T
 
 // type IsCollection<T> = T extends EnrolledCollections[keyof EnrolledCollections] ? true : false
 
@@ -95,9 +99,10 @@ type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args:
  * Wrap the return of a method of an ionizable class with this type helper in order to 
  * propagate any deep ionization that has been defined in the class's enlistIonizedMethods config
  */
-export type IonizeBy<H, T> = IsIonized<H> extends true ? MaybeIonize<T> : T
+export type IonizeBy<H, T> = IsIonized<H> extends true ?
+   MaybeIonize<T> : T
 
-export type MaybeIonized<T> = ToRaw<T> | Ionized<T>
+export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T
 // T extends Ionized<infer O> ? O | T : T | Ionized<T>
 
 // export function ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<T, M> : Ionized<T> {

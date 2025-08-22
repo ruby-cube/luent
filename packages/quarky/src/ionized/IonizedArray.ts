@@ -7,21 +7,21 @@ import { trackParticle } from "../compound/Compound";
 
 declare global {
    interface Array<T> {
-      values<H>(): ArrayIterator<IonizeBy<H, T>>;
-      entries<H>(): ArrayIterator<IonizeBy<H, T>>;
+      values<H>(this: H): ArrayIterator<IonizeBy<H, T>>;
+      entries<H>(this: H): ArrayIterator<IonizeBy<H, T>>;
 
-      at<H>(index: number): IonizeBy<H, T> | undefined;
-      concat<H>(...items: (IonizeBy<H, T> | IonizeBy<H, T>[])[]): IonizeBy<H, ToRaw<T>[]>;
-      slice<H>(start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
+      at<H>(this: H, index: number): IonizeBy<H, T> | undefined;
+      concat<H>(this: H, ...items: (IonizeBy<H, T> | IonizeBy<H, T>[])[]): IonizeBy<H, ToRaw<T>[]>;
+      slice<H>(this: H, start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
 
       // // Mutator methods
-      copyWithin<H>(target: number, start: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
-      fill<H>(value: IonizeBy<H, T>, start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
-      pop<H>(): IonizeBy<H, T> | undefined;
-      push<H>(...items: IonizeBy<H, T>[]): number;
-      reverse<H>(): IonizeBy<H, ToRaw<T>[]>;
-      shift<H>(): IonizeBy<H, T> | undefined;
-      sort<H>(compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, ToRaw<T>[]>;
+      copyWithin<H>(this: H, target: number, start: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
+      fill<H>(this: H, value: IonizeBy<H, T>, start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
+      pop<H>(this: H): IonizeBy<H, T> | undefined;
+      push<H>(this: H, ...items: IonizeBy<H, T>[]): number;
+      reverse<H>(this: H): IonizeBy<H, ToRaw<T>[]>;
+      shift<H>(this: H): IonizeBy<H, T> | undefined;
+      sort<H>(this: H, compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, ToRaw<T>[]>;
       splice<H>(this: H, start: number, deleteCount?: number, ...items: IonizeBy<H, T>[]): IonizeBy<H, ToRaw<T>[]>;
 
       forEach<H, O>(
@@ -57,9 +57,9 @@ declare global {
       ): IonizeBy<H, U>;
 
       // // Methods introduced in ES2023
-      toSorted<H>(compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, T>[];
-      toReversed<H>(): IonizeBy<H, T>[];
-      with<H>(index: number, value: IonizeBy<H, T>): IonizeBy<H, T>[];
+      toSorted<H>(this: H, compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, T>[];
+      toReversed<H>(this: H): IonizeBy<H, T>[];
+      with<H>(this: H, index: number, value: IonizeBy<H, T>): IonizeBy<H, T>[];
 
       //flat //TODO:
       //flatMap
@@ -222,12 +222,9 @@ enlistIonizedMethods(Array,
       push: {
          type: OpType.MUTATING,
          preop: arrayLengthMutatingOp.preop,
-         // shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-         // triggers: () => [],
-         // triggers: (model, _, { prevLength }) => [
-         //    trigger(model),
-         //    trigger(model, '[[get]]', 'length'),
-         //    trigger(model, '[[get]]', (prevLength).toString()),
+         // trigger: (model, { prevLength }) => [
+         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
+         //    // model.triggerPion(prevLength.toString()),
          // ],
          revert(model, { preopData: { prevLength }, args }) {
             model.splice(prevLength, args.length)
@@ -239,11 +236,10 @@ enlistIonizedMethods(Array,
          preop: arrayLengthMutatingOp.preop,
          // shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
          // triggers: () => [],
-         // triggers: (model, _, { prevLength }) => [
-         //    trigger(model, '[[get]]', (prevLength - 1).toString()),
-         //    trigger(model, 'at', - 1),
-         //    trigger(model),
-         //    trigger(model, '[[get]]', 'length'),
+         // trigger: (model, { prevLength }) => [
+         //    // model.triggerOp('[[get]]', (prevLength - 1).toString()),
+         //    // model.triggerOp('at', - 1),
+         //    model.triggerOp('[[get]]', 'length'),
          // ],
          revert: (model, { output }) => {
             model.push(output)
@@ -252,14 +248,9 @@ enlistIonizedMethods(Array,
 
       unshift: {
          type: OpType.MUTATING,
-         // input: ([value]) => [toRaw(value)],
          preop: arrayLengthMutatingOp.preop,
-         // shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-         // triggers: () => [],
-         // triggers: (model) => [
-         //    trigger(model),
-         //    trigger(model, '[[get]]', 'length'),
-         //    //TODO: trigger Observed Indices
+         // trigger: (model) => [
+         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
          // ],
          revert(model, { args }) {
             model.splice(0, args.length)
@@ -269,12 +260,8 @@ enlistIonizedMethods(Array,
       shift: {
          type: OpType.MUTATING,
          preop: arrayLengthMutatingOp.preop,
-         // shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-         // triggers: () => [],
-         // triggers: (model) => [
-         //    trigger(model),
-         //    trigger(model, '[[get]]', 'length'),
-         //    //TODO: trigger Observed Indices
+         // trigger: (model) => [
+         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
          // ],
          revert(model, { output }) {
             model.unshift(output)
@@ -285,11 +272,9 @@ enlistIonizedMethods(Array,
          type: OpType.MUTATING,
          // input: ([start, deleteCount, ...args]) => [start, deleteCount, ...deionizeArgs(args)],
          output: ionize,
-         // triggers: () => [],
-         // triggers: (model) => [
-         //    trigger(model),
-         //    trigger(model, '[[get]]', 'length'),
-         //    //TODO: trigger Observed Indices
+         preop: arrayLengthMutatingOp.preop,
+         // trigger: (model, { prevLength }) => [
+         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
          // ],
          revert(model, { output, args }) {
             const start = args[0];

@@ -1,6 +1,7 @@
 import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, ionize, toRaw, update } from "@rue/quarky";
+import './style.css'
 
 
 const randomColor = useRandomColorGenerator()
@@ -136,8 +137,7 @@ export function List(
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
-   const $filteredList = ion(()=>list.filter(i=>true))
-      console.log('filtered', $filteredList())
+   const $listClone = ion(() => list.slice())
 
    const values = list.values()
    for (const value of values) {
@@ -163,12 +163,12 @@ export function List(
 
    function toggleSelect(item: typeof list[number]) {
       // update(() => {
-         if (selected.has(item)) {
-            selected.delete(item)
-         }
-         else {
-            selected.add(item)
-         }
+      if (selected.has(item)) {
+         selected.delete(item)
+      }
+      else {
+         selected.add(item)
+      }
       // }, { lazy: 100 })
    }
 
@@ -199,12 +199,12 @@ export function List(
    function moveSelectedItems(index: number) {
       update(() =>
          moveUniqueItems(selected, list, index)
-      ,{timeMargin: 100})
+         , { timeMargin: 100 })
    }
 
    function removeItem(index: number) {
-         selected.delete(list[index])
-         list.remove(index);
+      selected.delete(list[index])
+      list.remove(index);
    }
 
    return component(
@@ -214,7 +214,7 @@ export function List(
             insert!
          </div>
 
-         {For(list, m => m.id, (item, $index) => (console.log('rendering', item, item.content, $index()),
+         {For(list, m => m.id, (item, $index) => (
             <div on:click={e => !target('style.cursor:pointer') && toggleSelect(item)}
                style={{
                   backgroundColor: randomColor.get(),
@@ -224,11 +224,11 @@ export function List(
                   X
                </p>
 
-               <li on:click={e => responsive(()=>list.changeContent($index()))}>
+               <li on:click={e => responsive(() => list.changeContent($index()))}>
                   {item.$content}
                </li>
                <p>{$index}</p>
-               <div on:click={e => responsive(()=>list.insert($index() + 1))} style="background-color: gray; cursor: pointer">
+               <div on:click={e => responsive(() => list.insert($index() + 1))} style="background-color: gray; cursor: pointer">
                   insert
                </div>
                <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
@@ -237,10 +237,10 @@ export function List(
             </div>
          ))}
 
-         <button on:click={e => responsive(()=>selected.clear())}>clear</button>
-                  <hr></hr>
+         <button on:click={e => responsive(() => selected.clear())}>clear</button>
+         <hr></hr>
 
-         {For($filteredList, (item, $index)=>
+         {For($listClone, (item, $index) =>
             <div
                style={{
                   backgroundColor: randomColor.get(),
@@ -293,7 +293,7 @@ class Selected extends Set<any> {
    }
 }
 
-function responsive(fn: ()=>unknown){
+function responsive(fn: () => unknown) {
    return fn()
    // return update(fn, {timeMargin: 100})
 }

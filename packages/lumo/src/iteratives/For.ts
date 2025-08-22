@@ -2,21 +2,22 @@ import { getCommons } from "../commons/commons-stack";
 import { MaybeIon } from "../component/Input";
 import { JSXNode, normalizeToRenderFunction, RawJSXNode } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { Ion, IonizeBy, isInertIon, isIon, IsIonized, isIonizedModel, toValue } from "@rue/quarky";
+import { Ion, IonizeBy, Ionized, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toValue } from "@rue/quarky";
 
 
 export type RenderItem<L> =
-   L extends Ion<infer D> ? D extends Collection<infer I> ? (item: IonizeBy<D, I>, $i: Ion<number>) => JSXNode : 'frog'
-   : IsIonized<L> extends true ? L extends { [key: number]: infer I } ? (item: I, $i: Ion<number>) => JSXNode : 'frog' //TODO: Sets and maps?
-   : L extends Collection<infer I> ? (item: IonizeBy<L, I>, $i: Ion<number>) => JSXNode
-   : (item: any, $i: Ion<number>) => JSXNode
+   L extends Ion<infer D> ? D extends Collection<infer I> ? (item: IonizeBy<D, I>, $i: Ion<number>) => RawJSXNode : 'frog'
+   : IsIonized<L> extends true ? L extends { [key: number]: infer I } ? (item: MaybeIonize<I>, $i: Ion<number>) => RawJSXNode : 'frog' //TODO: Sets and maps?
+   : L extends Collection<infer I> ? (item: IonizeBy<L, I>, $i: Ion<number>) => RawJSXNode
+   : (item: any, $i: Ion<number>) => RawJSXNode
 // L extends Collection<infer I> | Ion<Collection<infer I>> ? ((item: I) => JSXNode) | ((item: I, $index: AtomicIon<number>) => JSXNode)
 // : L extends Collection<infer I> ? ((item: I) => JSXNode) | ((item: I, index: number) => JSXNode)
 // : never
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | Ionized<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
 export type ListData<T = any> = MaybeIon<Collection<T>>
 export type UniqueItem = any;
-export type Collection<T> = MaybeIon<T[]> | MaybeIon<Set<T>> | MaybeIon<Map<T>> //TODO: add maps
+export type Collection<T> = MaybeIon<T[]> 
+// | MaybeIon<Set<T>> | MaybeIon<Map<T>> //TODO: add maps
 
 
 //TODO: account for list ion having undefined state

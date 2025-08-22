@@ -58,6 +58,7 @@ interface IState {
    current: unknown
    pending: unknown
    active: unknown
+   previous: unknown
    commitChange(): void
    cancelChange(): void
    // recordChange(newState: unknown, oldState: unknown): void
@@ -73,6 +74,10 @@ export class State<T> implements IState {
 
    get active() {
       return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
+   }
+
+   get previous() {
+      return this.active
    }
 
    protected _pending: T | typeof NULL = NULL
@@ -146,10 +151,17 @@ export class PionState implements IState {
       private modelState: ModelState<AnyObject>,
       public key: PropertyKey,
    ) {
+      this._previous = this.current
    }
 
    get active() {
       return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
+   }
+
+   private _previous: unknown
+
+   get previous(){
+      return this._previous
    }
 
    get current() {
@@ -158,6 +170,7 @@ export class PionState implements IState {
 
    set current(value: unknown) {
       this.modelState.current[this.key] = value
+      this._previous = value;
    }
 
    get pending() {
@@ -321,9 +334,10 @@ function getState(this: AtomicIonQuark) {
 }
 
 export function setState(this: AtomicIonQuark, value: unknown) {
+   // if (this.state.key === 'length') console.log('setting length')
    const state = this.state
 
-   const oldState = state.active;
+   const oldState = state.previous;
    const newState = maybeIonize(value, this.ionized)
 
    if (newState === oldState) {
