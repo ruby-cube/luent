@@ -9,7 +9,7 @@ var indexMap = function(list: any[]) {
     return map
   }
   
-  export var longestCommonSubstring = function(seq1: any[], seq2: any[]) {
+  export var longestCommonSubstring = function(seq1: any[], seq2: any[]): {indexOf: (item: unknown)=>number} {
     var result = {startString1:0, startString2:0, length:0}
     var indexMapBefore = indexMap(seq1)
     var previousOverlap: any[] = []
@@ -28,7 +28,7 @@ var indexMap = function(list: any[]) {
       })
       previousOverlap = overlap
     })
-    return getSubsequence(seq1, result.startString1, result.length)
+    return getSubsequence(seq1, result.startString1, result.length) as {indexOf: (item: unknown)=>number}
   }
 
 

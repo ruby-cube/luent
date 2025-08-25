@@ -342,7 +342,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
 
    // console.log('#$% oldstate', oldState)
    // console.log('#$% newState', newState)
-   // if (newState === oldState) {
+   // if (newState === oldState) { //NOTE: we cannot do this if we are cloning arrays--the new array needs to be updated with all changes
    //    return newState;
    // }
 

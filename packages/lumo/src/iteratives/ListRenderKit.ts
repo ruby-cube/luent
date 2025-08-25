@@ -144,8 +144,6 @@ export class ListRenderKit {
       const dynamicPod = this.dynamicPod
       const $list = this.$list
 
-      $list["~list"] = true
-
       watchToRender(this.$list, ({ previous }) => { // typecast as one of the options so that typescript won't complain
          // if (recording && state === previous){
          //    recording.stop()
@@ -192,12 +190,9 @@ export class ListRenderKit {
       const list = data instanceof Array ? data : data as unknown as Array<any> //TODO: need to implement for sets, maps, and objects
       const listKit = this;
       const dynamicPod = this.dynamicPod!;
-      // const $list = this.$list;
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
-
-         // const $index = ion(() => $list().indexOf(item))
          const $index = ion(i)
          setCurrentIndex($index)
          this.indices.push($index)
@@ -231,10 +226,9 @@ export class ListRenderKit {
       insertAndMoveKit: InsertAndMoveKit,
       parent: Element,
    ) {
-      const { isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
-      const flask = this.outerFlask
+      const { isNewItem, hasMoved, isRemoved, getOldIndex, newArray, oldArray } = insertAndMoveKit;
       const dynamicPod = this.dynamicPod!
-      if (dynamicPod.length !== oldUArray.length)
+      if (dynamicPod.length !== oldArray.length)
          throw new Error("dynamicPod and data length are mismatched")
 
       const indicesAndNodePods: [number, NodePod[]][] = []
@@ -244,11 +238,12 @@ export class ListRenderKit {
       const newIndices: MutableIon<number>[] = [];
       const toFromIndices: [number, number][] = []
 
-      for (let i = 0; i < newUArray.length; i++) {
-         const uItem = newUArray[i];
-         const _isNewItem = isNewItem(uItem);
-         const itemHasMoved = hasMoved(uItem);
-         const oldIndex = oldUArray.indexOf(uItem)
+      for (let i = 0; i < newArray.length; i++) {
+         const item = newArray[i];
+         const _isNewItem = isNewItem(item);
+         const itemHasMoved = hasMoved(item);
+         const oldIndex = getOldIndex(item)
+
          const nodePod = _isNewItem ? new NodePod()
             : itemHasMoved ? (dynamicPod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
                : null;
@@ -275,10 +270,7 @@ export class ListRenderKit {
             indicesAndFragments.push([i, fragment]) // queue fragment for mounting
          }
 
-         if (isNewItem(uItem)) {
-            // const item = getOriginalItem(uItem, newUArray)
-            const $list = this.$list
-            const item = $list()[i]
+         if (isNewItem(item)) {
             const $index = ion(i) //TODO: this should be 
             newIndices.push($index) 
 
@@ -292,7 +284,7 @@ export class ListRenderKit {
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask) // store for removal
          }
-         else if (hasMoved(uItem)) {
+         else if (hasMoved(item)) {
             // move node to fragment (DOM will auto-remove node from DOM)
             const frag = fragment; // must pass reference since fragment is reassigned across the loop
             queueInternalRender(() => {
@@ -305,9 +297,9 @@ export class ListRenderKit {
       // queue nodePod removal
       const indicesAndRemoveCount: [Index, Count][] = [];
       let j = 0;
-      while (j < oldUArray.length) {
-         const id = oldUArray[j];
-         if (isRemoved(id) || hasMoved(id)) {
+      while (j < oldArray.length) {
+         const item = oldArray[j];
+         if (isRemoved(item) || hasMoved(item)) {
             const prevEntry = indicesAndRemoveCount.at(-1);
             if (prevEntry && prevEntry[0] + 1 === j) {
                prevEntry[1]++; // increment count
@@ -338,8 +330,6 @@ export class ListRenderKit {
          }
          this.castUpdated(toFromIndices)
       }, this.outerFlask)
-
-
    }
 }
 

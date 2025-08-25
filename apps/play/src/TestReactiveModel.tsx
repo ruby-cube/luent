@@ -110,6 +110,13 @@ class ItemList extends Array<Item> {
    }
 }
 
+class Selected<T> extends Set<T> {
+   toggle(item: T) {
+      if (this.has(item)) this.delete(item)
+      this.add(item)
+   }
+}
+
 export function List(
 
 ) {
@@ -159,18 +166,18 @@ export function List(
 
 
 
-   const selected = ionize(new Set() as Set<Item>)
+   const selected = ionize(new Selected<Item>())
 
-   function toggleSelect(item: typeof list[number]) {
-      // update(() => {
-      if (selected.has(item)) {
-         selected.delete(item)
-      }
-      else {
-         selected.add(item)
-      }
-      // }, { lazy: 100 })
-   }
+   // function toggleSelect(item: typeof list[number]) {
+   //    // update(() => {
+   //    if (selected.has(item)) {
+   //       selected.delete(item)
+   //    }
+   //    else {
+   //       selected.add(item)
+   //    }
+   //    // }, { lazy: 100 })
+   // }
 
    // const selectedB = new IonizedSet(list, {
    //    toggle(item: typeof list[number]) {
@@ -215,7 +222,7 @@ export function List(
          </div>
 
          {For(list, m => m.id, (item, $index) => (
-            <div on:click={e => !target('style.cursor:pointer') && toggleSelect(item)}
+            <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
                style={{
                   backgroundColor: randomColor.get(),
                   outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
@@ -286,12 +293,7 @@ export function List(
 }
 
 
-class Selected extends Set<any> {
-   toggle(item: any) {
-      if (this.has(item)) this.delete(item)
-      this.add(item)
-   }
-}
+
 
 function responsive(fn: () => unknown) {
    // return fn()
