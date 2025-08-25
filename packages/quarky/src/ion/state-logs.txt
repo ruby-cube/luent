@@ -1,0 +1,61 @@
+#$% setting 0
+AtomicIon.ts:343 #$% oldstate Proxy(Object) {id: 0, content: 'frog'}
+AtomicIon.ts:344 #$% newState Proxy(Object) {id: 1, content: 'robin'}
+
+AtomicIon.ts:337 #$% setting 1
+AtomicIon.ts:343 #$% oldstate {id: 1, content: 'robin'}
+AtomicIon.ts:344 #$% newState Proxy(Object) {id: 2, content: 'fly'}
+
+AtomicIon.ts:337 #$% setting 2
+AtomicIon.ts:343 #$% oldstate {id: 2, content: 'fly'}
+AtomicIon.ts:344 #$% newState Proxy(Object) {id: 4, content: '87.12703256915431'}
+AtomicIon.ts:337 #$% setting 3
+AtomicIon.ts:343 #$% oldstate Proxy(Object) {id: 4, content: '87.12703256915431'}
+AtomicIon.ts:344 #$% newState Proxy(Object) {id: 3, content: 'swamp'}
+AtomicIon.ts:337 #$% setting length
+AtomicIon.ts:343 #$% oldstate 5
+AtomicIon.ts:344 #$% newState 4
+
+AtomicIon.ts:337 #$% setting 4
+AtomicIon.ts:343 #$% oldstate undefined
+AtomicIon.ts:344 #$% newState Proxy(Object) {id: 3, content: 'swamp'}
+
+AtomicIon.ts:337 #$% setting 3
+AtomicIon.ts:343 #$% oldstate Proxy(Object) {id: 3, content: 'swamp'}
+AtomicIon.ts:344 #$% newState Proxy(Object) {id: 0, content: 'frog'}
+
+AtomicIon.ts:337 #$% setting length
+AtomicIon.ts:343 #$% oldstate 5
+AtomicIon.ts:344 #$% newState 5
+
+
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 1
+AtomicIon.ts:344 #$% newState 0
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 2
+AtomicIon.ts:344 #$% newState 1
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 3
+AtomicIon.ts:344 #$% newState 2
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 0
+AtomicIon.ts:344 #$% newState 3
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 4
+AtomicIon.ts:344 #$% newState 4
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 1
+AtomicIon.ts:344 #$% newState 0
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 2
+AtomicIon.ts:344 #$% newState 1
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 3
+AtomicIon.ts:344 #$% newState 2
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 0
+AtomicIon.ts:344 #$% newState 3
+AtomicIon.ts:337 #$% setting undefined
+AtomicIon.ts:343 #$% oldstate 4
+AtomicIon.ts:344 #$% newState 4

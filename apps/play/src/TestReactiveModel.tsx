@@ -294,6 +294,6 @@ class Selected extends Set<any> {
 }
 
 function responsive(fn: () => unknown) {
-   return fn()
-   // return update(fn, {timeMargin: 100})
+   // return fn()
+   return update(fn, {timeMargin: 100})
 }

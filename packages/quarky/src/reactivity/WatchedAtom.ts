@@ -21,24 +21,24 @@ export function trigger(
    this: Watchable,
    update: Update
 ) {
-   console.log('trigger?', this)
-   const pendingUpdate = this.pendingUpdate
-   if (pendingUpdate === update) return;
-   console.log('trigger', this)
+   // console.log('trigger?', this)
+   // const pendingUpdate = this.pendingUpdate
+   // if (pendingUpdate === update) return;
+   // console.log('trigger', this)
 
-   if (pendingUpdate && pendingUpdate !== update) {
-      pendingUpdate.cancel()
-   }
+   // if (pendingUpdate && pendingUpdate !== update) {
+   //    pendingUpdate.cancel()
+   // }
 
-   this.pendingUpdate = update
+   // this.pendingUpdate = update
 
-   update.onComplete(() => {
-      this.pendingUpdate = null;
-   })
+   // update.onComplete(() => {
+   //    this.pendingUpdate = null;
+   // })
 
-   update.onCancel(() => {
-      this.pendingUpdate = null;
-   })
+   // update.onCancel(() => {
+   //    this.pendingUpdate = null;
+   // })
 
    this.asWatchedAtom?.triggerEffects(update)
 }

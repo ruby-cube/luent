@@ -69,16 +69,21 @@ export class State<T> implements IState {
    constructor(
       public current: T
    ) {
-
+      this.previous = current;
    }
 
    get active() {
       return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
    }
 
-   get previous() {
-      return this.active
-   }
+   previous: unknown
+   // get previous() {
+   //    return this.active
+   // }
+
+   // set previous(value: unknown){
+
+   // }
 
    protected _pending: T | typeof NULL = NULL
 
@@ -151,18 +156,14 @@ export class PionState implements IState {
       private modelState: ModelState<AnyObject>,
       public key: PropertyKey,
    ) {
-      this._previous = this.current
+      this.previous = this.current
    }
 
    get active() {
       return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
    }
 
-   private _previous: unknown
-
-   get previous(){
-      return this._previous
-   }
+   previous: unknown
 
    get current() {
       return this.modelState.current[this.key]
@@ -170,7 +171,6 @@ export class PionState implements IState {
 
    set current(value: unknown) {
       this.modelState.current[this.key] = value
-      this._previous = value;
    }
 
    get pending() {
@@ -334,34 +334,54 @@ function getState(this: AtomicIonQuark) {
 }
 
 export function setState(this: AtomicIonQuark, value: unknown) {
-   // if (this.state.key === 'length') console.log('setting length')
+   // console.log('#$% setting', this.state.key)
    const state = this.state
 
-   const oldState = state.previous;
+   // const oldState = state.previous;
    const newState = maybeIonize(value, this.ionized)
 
-   if (newState === oldState) {
-      return newState;
-   }
+   // console.log('#$% oldstate', oldState)
+   // console.log('#$% newState', newState)
+   // if (newState === oldState) {
+   //    return newState;
+   // }
 
    const update = initUpdate()
+      // set state
+   if (update.lazy) {
+      state.pending = newState
+      // state.previous = newState
+   }
+   else {
+      state.current = newState;
+      // state.previous = newState
+   }
 
-   // queue change/record mutation
+   const pendingUpdate = this.pendingUpdate
+   if (pendingUpdate === update) return state;
+
+   if (pendingUpdate && pendingUpdate !== update) {
+      pendingUpdate.cancel()
+   }
+
+   this.pendingUpdate = update
+
    update.onComplete(() => {
       state.commitChange()
+      this.pendingUpdate = null;
    })
 
    update.onCancel(() => {
       state.cancelChange()
+      this.pendingUpdate = null;
    })
 
-   // set state
-   if (update.lazy) {
-      state.pending = newState
-   }
-   else {
-      state.current = newState;
-   }
+   // queue change/record mutation
+   // update.onComplete(() => {
+   // })
+   
+   // update.onCancel(() => {
+   // })
 
    // trigger effects
    this.trigger(update)
