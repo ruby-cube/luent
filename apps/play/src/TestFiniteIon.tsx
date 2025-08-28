@@ -11,6 +11,7 @@ export function TestFiniteIon() {
    const $excited = ion(()=>{
       return $color() + '!'
    })
+
    return component(
       <div>
          {$excited}

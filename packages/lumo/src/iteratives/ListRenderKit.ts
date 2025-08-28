@@ -144,6 +144,8 @@ export class ListRenderKit {
       const dynamicPod = this.dynamicPod
       const $list = this.$list
 
+      let oldMap: Map<unknown, number> | undefined
+
       watchToRender(this.$list, ({ previous }) => { // typecast as one of the options so that typescript won't complain
          // if (recording && state === previous){
          //    recording.stop()
@@ -158,11 +160,12 @@ export class ListRenderKit {
          console.log('_prevState', _prevState, previous)
          clone = createClone(data, current)
          // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
-         const { indicesToRemove, insertAndMoveKit, noChange } = diff(isIonizedModel(current) ? quarkOf(current).state.current : current, _prevState, getUID)
+         const { indicesToRemove, insertAndMoveKit, noChange, newMap } = diff(isIonizedModel(current) ? quarkOf(current).state.current : current, _prevState, getUID, oldMap)
          if (noChange) { //TODO: should we use hasChanged function in watch options instead?
             console.log('no list change', current, _prevState)
             return;
          }
+         oldMap = newMap;
          if (dynamicPod!.length !== _prevState.length)
             throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
          this.castBeforeUpdate();

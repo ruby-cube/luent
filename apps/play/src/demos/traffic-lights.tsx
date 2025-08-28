@@ -1,16 +1,11 @@
 import { component, Style } from "@rue/lumo";
 import {
-   ANY_STATE,
    FiniteIon,
    ion,
-   withTimeout as transitionAfter,
 } from "@rue/quarky";
 
-// click before timeout
-//  - clear timeout
-
 export function TrafficLight() {
-   
+
    const $power = FiniteIon({
       on: {
          switch: () => "off",
@@ -20,7 +15,7 @@ export function TrafficLight() {
       },
       "x:broken": {},
 
-      [ANY_STATE]: {
+      'any': {
          break: () => "x:broken",
       },
    });
@@ -33,17 +28,15 @@ export function TrafficLight() {
 
    const $trafficLight = FiniteIon({
       red: {
-         // "on:enter": () => console.log("@@% entering red"),
-         "after:enter": transitionAfter(2000, () => "yellow"),
+         "after:2000": () => "yellow",
          change: () => "yellow",
       },
       yellow: {
-         // "on:exit": () => console.log("@@% exiting yellow"),
-         "after:enter": transitionAfter(2000, () => "green"),
+         "after:2000": () => "green",
          change: () => "green",
       },
       green: {
-         "after:enter": transitionAfter(2000, () => "red"),
+         "after:2000": () => "red",
          change: () => "red",
       },
    });
@@ -65,7 +58,7 @@ export function TrafficLight() {
          ],
       });
 
-   function $LightOpacity(color: string) {
+   function $LightOpacity(color: ReturnType<typeof $trafficLight>) {
       return ion(() => {
          return $power.is("on") && !$state.is("sleep")
             ? $power.is("x:broken")
@@ -106,7 +99,7 @@ export function TrafficLight() {
             {($power.is("on") ? "turn off" : "turn on")}
          </button>
          <button
-            on:click={(e) => { if ($state.is('sleep')) $state.apply('switch'); $trafficLight.apply("change") }}
+            on:click={(e) => { if ($state.is('sleep')) $state.apply("switch"); $trafficLight.apply("change") }}
             style={{ opacity: $BtnOpacity($state.isActive) }}
          >
             change

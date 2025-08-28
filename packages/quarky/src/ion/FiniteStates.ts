@@ -144,31 +144,41 @@ import { QUARK } from "../Quark";
 //    $power.terminalize() //FIX: only when all nested finitons are terminalized and 
 // )
 
-export const ANY_STATE = Symbol('any_state')
+export const ANY_STATE = "any"
+type _FiniteStates = {[key: string]: any}
 
-type FiniteStates = { [key: string]: StateDefinition } & {
-   [ANY_STATE]?: StateDefinition
+type FiniteStates<S extends _FiniteStates = _FiniteStates> = { [key: string]: StateDefinition<S> } & {
+   [ANY_STATE]?: StateDefinition<S>
 }
 
-type Transition = () => string | undefined | false | null | void
+type Transition<S extends _FiniteStates = _FiniteStates> = () => State<S> | undefined | false | null | void
+
+
+
+type A = keyof ({ a: boolean } | { b: boolean })
 
 
 //TODO: should on:enter apply to intitial state?
-type StateDefinition = {
+type StateDefinition<S extends _FiniteStates = _FiniteStates> = {
    'on:enter'?: (this: FiniteIon) => void
    'on:exit'?: (this: FiniteIon) => void
-   'after:enter'?: Transition
-} & { [key: string | symbol]: Transition }
+   'after:enter'?: Transition<S>
+} & { [key: string | symbol]: Transition<S> }
+
+type AllKeys<T> = T extends T ? keyof T : never;
+
+type State<S extends _FiniteStates> = Exclude<keyof S, typeof ANY_STATE>
+type TransitionKey<S extends _FiniteStates> = AllKeys<S[keyof S]>
 
 
-export type FiniteIon<M extends Methods = {}> = {
-   (): string
-   is: (state: string) => boolean
-   on: (transition: string, task: () => void) => void
-   apply: (transition: string) => void
-   can: (transition: string) => boolean
+export type FiniteIon<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = {
+   (): State<S>
+   is: (state: State<S>) => boolean
+   on: (transition: TransitionKey<S>, task: () => void) => void
+   apply: (transition: TransitionKey<S>) => void
+   can: (transition: TransitionKey<S>) => boolean
    onFinalState: (task: () => void) => void
-   activate: (initializer: () => string) => { nest: (config: { [key: string]: Nested[] }) => Nested }
+   activate: (initializer: () => State<S>) => { nest: (config: { [key: string]: Nested[] }) => Nested }
    deactivate: () => void
    isActive: () => boolean
    init: (initializer: Initializer) => Nested & { nest: (config: { [key: string]: Nested[] }) => Nested }
@@ -201,12 +211,12 @@ export function withTimeout(ms: number, transition: Transition) {
    return transition;
 }
 
-export function FiniteIon<M extends Methods>(states: FiniteStates, methods?: M): FiniteIon<M> {
+export function FiniteIon<S extends FiniteStates, M extends Methods>(states: S, methods?: M): FiniteIon<S, M> {
    const $currentState = ion(undefined as undefined | string);
 
    let activated = false;
 
-   const $state = (() => $currentState()) as unknown as FiniteIon<M>
+   const $state = (() => $currentState()) as unknown as FiniteIon
 
    // }) as unknown as FiniteIon
    //@ts-expect-error
@@ -405,7 +415,7 @@ export function FiniteIon<M extends Methods>(states: FiniteStates, methods?: M):
       }, transition.timeout ?? 0)
    }
 
-   return $state as FiniteIon<M>
+   return $state as FiniteIon
 }
 
 
@@ -413,10 +423,19 @@ export function FiniteIon<M extends Methods>(states: FiniteStates, methods?: M):
 
 
 function extractHooks(state: StateDefinition) {
+
    return {
       onEnter: state['on:enter'],
       onExit: state['on:exit'],
-      afterEnter: state['after:enter']
+      afterEnter: extractTimedTransition(state)
+   }
+}
+
+function extractTimedTransition(state: StateDefinition){
+   for (const key in state){
+      if (key.startsWith("after:")){
+         return withTimeout(parseInt(key.slice(6)), state[key])
+      }
    }
 }
 

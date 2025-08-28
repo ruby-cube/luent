@@ -5,13 +5,13 @@ import { UniqueItem } from "./For";
 
 
 // TODO: implementation for sets, objects, and maps
-export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) =i=>i) {
+export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) =i=>i, prevMap: Map<unknown, number> | undefined) {
    // const [newArr, oldArr] = makeItemsUnique(newArray, oldArray, getUID);
 
    if (areShallowEqualArrays(newArray, oldArray, getUID)) return { noChange: true };
 
-   const newSet = toUIDSet(newArray, getUID);
-   const oldMap = toUIDMap(oldArray, getUID);
+   const newMap = toUIDMap(newArray, getUID);
+   const oldMap = prevMap ?? toUIDMap(oldArray, getUID);
    const newArrCommonItems = [];
    const oldArrCommonItems = [];
    const newItems = new Set();
@@ -31,7 +31,7 @@ export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[]
    let j = 0;
    while (j < oldArray.length) {
       const id = getUID(oldArray[j]);
-      if (newSet.has(id)) oldArrCommonItems.push(id);
+      if (newMap.has(id)) oldArrCommonItems.push(id);
       else {
          indicesToRemove.push(j)
       }
@@ -46,7 +46,7 @@ export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[]
       insertAndMoveKit: {
          isNewItem: (item: any) => newItems.has(getUID(item)),
          hasMoved: (item: any) => lcs.indexOf(getUID(item)) === -1, //TODO: make o(1)
-         isRemoved: (item: any) => !newSet.has(getUID(item)),
+         isRemoved: (item: any) => !newMap.has(getUID(item)),
          newArray,
          oldArray,
          getOldIndex(item: any){
@@ -54,6 +54,7 @@ export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[]
          }
       },
       indicesToRemove,
+      newMap
    }
 }
 
