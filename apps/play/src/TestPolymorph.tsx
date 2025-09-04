@@ -1,6 +1,6 @@
-import { component, For, fromApp, fromCommons, fromGlobal, FromTag, provideAppwide, provideGlobal } from "@rue/lumo";
+import { component, For, fromApp, fromCommons, fromGlobal, FromTag, If, provideAppwide, provideGlobal } from "@rue/lumo";
 import { Morphable, Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
-import { ion } from "@rue/quarky";
+import { ion, isIon } from "@rue/quarky";
 import "./style.css"
 
 type File = { name: string }
@@ -63,9 +63,9 @@ export function TestPolymorph() {
    // - get state based on route input values (may require fetching data)
    // - 
 
-   const $main = $Main.morphable(toPolymorphKey(window.location.pathname, $Main))
+   // const $main = $Main.morphable('/home')
+   const $main = $Main.Morphable(toPolymorphKey(window.location.pathname, $Main))
    // history.replaceState({ page: 'home' }, '', '/home')
-
 
 
    window.addEventListener('popstate', (e) => {
@@ -78,21 +78,26 @@ export function TestPolymorph() {
       console.log('hashchange', e)
    })
 
+   function routeTo(key: string, state?: { input: object }) {
+      $main.as(key, state?.input)
+      history.pushState(state ?? {}, "", key)
+   }
+
    return component(
       <>
          <div>
             {/* <$Main as={'peas'}></$Main> */}
             <$Main as={$main}></$Main>
          </div>
-         <button on:click={e => { $main.as('/home'); history.pushState({}, "", '/home') }}>Home</button>
-         <button on:click={e => { $main.as('/happy'); history.pushState({}, "", '/happy') }}>Happy</button>
-         <button on:click={e => { $main.as('/peas'); history.pushState({}, "", '/peas') }}>Two Peas</button>
+         <button on:click={e => routeTo('/home')}>Home</button>
+         <button on:click={e => routeTo('/happy')}>Happy</button>
+         <button on:click={e => routeTo('/peas')}>Two Peas</button>
          {/* <button on:click={e => $main.as('happy')}>Happy</button>
          <button on:click={e => $main.as('peas')}>Two Peas</button> */}
          {For(files, file =>
             <>
-               <button on:click={e => { $main.as('/file', file); history.pushState({ input: file }, "", '/file') }}>{file.name}</button>
-               <button on:click={e => $main.discard('/file', file)}>[X]</button>
+               <button on:click={e => routeTo('/file', { input: file })}>{file.name}</button>
+               <button on:click={e => { $main.discard('/file', file); routeTo('/home') }}>[X]</button>
             </>
          )}
       </>
@@ -141,12 +146,10 @@ function Missing() {
 
 
 
-function File(input : FromTag<{
+function File(input: FromTag<{
    file: { name: string }
 }>) {
    const { file } = input
-
-
 
    return component(
       <>

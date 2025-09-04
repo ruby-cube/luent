@@ -334,7 +334,7 @@ function getState(this: AtomicIonQuark) {
 }
 
 export function setState(this: AtomicIonQuark, value: unknown) {
-   // console.log('#$% setting', this.state.key)
+
    const state = this.state
 
    // const oldState = state.previous;

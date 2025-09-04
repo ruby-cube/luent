@@ -101,6 +101,7 @@ export class Update {
    cycle: UpdateCycle;
 
    onComplete(commitUpdate: () => void) {
+      commitUpdate.__DEVName = 'commitUpdate'
       const effect = createOneoff(commitUpdate, this.cycle.phases.length - 1)
       this.cycle.scheduleEffect(effect)
       // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) //TODO: Make sure we don't need this line

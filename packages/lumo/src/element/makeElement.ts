@@ -74,15 +74,15 @@ export function makeElement(
          const flattenedOutput = flattenJSXOutput(rawOutput)
          if (isInnerHTMLKit(rawOutput[0])) {
             const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
-            queueInternalRender(() => {
+            // queueInternalRender(() => {
                mountInnerHTML(innerHTML, domNode)
-            }, getFlask())
+            // }, getFlask())
          }
          else {
             const nodeEntities = setUpNodeEntities(flattenedOutput, domNode, new NodePod())
-            queueInternalRender(() => {
+            // queueInternalRender(() => {
                mountNodeEntities(nodeEntities, domNode)
-            }, getFlask())
+            // }, getFlask())
          }
       }, xml_ns)
    }
@@ -646,7 +646,6 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          if (isIon(value)) {
             console.log(key, value)
             watchToRender(value, ({ current }) => {
-               console.log('value:', key, current)
                queueInternalRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), current)
                }, flask)

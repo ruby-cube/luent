@@ -83,7 +83,7 @@ import { TestNestedConditional } from './TestNestedConditional';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TrafficLight)
+const app = createApp(TestPolymorph)
 
 app.mount('#app')
 

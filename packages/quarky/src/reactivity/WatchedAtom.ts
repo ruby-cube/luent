@@ -39,7 +39,6 @@ export function trigger(
    // update.onCancel(() => {
    //    this.pendingUpdate = null;
    // })
-
    this.asWatchedAtom?.triggerEffects(update)
 }
 
@@ -116,6 +115,7 @@ export class WatchedAtom {
    // }
 
    triggerEffects(update: Update) { // the surrounding effect when original trigger happened
+
       const phases = this.phases
       const cycle = update.cycle
       for (const phase of phases) {

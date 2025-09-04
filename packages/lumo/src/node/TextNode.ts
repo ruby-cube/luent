@@ -35,7 +35,7 @@ export function createTextNode(value: Ion | any) {
 
 
 function toString(value: any) {
-   if (value === undefined) return '';
+   if (value == null) return '';
    if (value instanceof Object) return JSON.stringify(value);
    return value.toString(); //TODO: make sure it works with any value
 }

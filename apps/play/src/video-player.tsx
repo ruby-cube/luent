@@ -1,4 +1,4 @@
-import { component, Else, FromTag, If, NodeRef, Style } from "@rue/lumo";
+import { component, Else, EventHandler, FromTag, If, NodeRef, Style } from "@rue/lumo";
 import { FiniteIon, Ion, ion } from "@rue/quarky";
 import './reset.css'
 
@@ -31,7 +31,9 @@ export function VideoPlayer() {
 
    let duration = 0
 
-   $player.on('init', () => { duration = $video()?.duration ?? 0 })
+   $player.on('init', () => {
+      duration = $video()?.duration ?? 0
+   })
 
    $track.on('play', () => {
       const video = $video()
@@ -40,13 +42,27 @@ export function VideoPlayer() {
       $video()?.play()
    })
 
-   $track.on('pause', () => $video()?.pause())
+   $track.on('pause', () => {
+      $video()?.pause()
+   })
 
    const $elapsedTime = ion(0);
 
    function updateTime(currentTime: number) {
-      if (!$track.is('playing')) return;
       $elapsedTime.state = currentTime;
+   }
+
+   function reClickElapsedBar(e: { currentTarget: (EventTarget & HTMLDivElement) | null } & MouseEvent) {
+      const rect = e.currentTarget!.getBoundingClientRect()
+      setTime(rect.width, e.clientX - rect.left)
+   }
+
+   function setTime(width: number, x: number) {
+      const video = $video()!
+      const time = video.currentTime = video.duration * x / width
+      $track.apply('pause')
+      $elapsedTime.state = time
+      setTimeout(() => $track.apply('play'), 0)
    }
 
    const $sound = FiniteIon({
@@ -74,10 +90,12 @@ export function VideoPlayer() {
             >
                <source src="/src/video-player-dance.mp4" type="video/mp4" />
             </video>
-            
+
             {If(($player.is('x:ready')),
                <>
-                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is('paused'))} />
+                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is('paused'))}
+                     on:click={reClickElapsedBar}
+                  />
                   <remount-demount>
                      {If(($track.is('playing')),
                         <button on:click={e => $track.apply('pause')}>‖</button>
@@ -94,6 +112,8 @@ export function VideoPlayer() {
          {Style`
             html {
               font-size: 18px;
+              background-color: black;
+              color: white;
             }
 
             video {
@@ -117,7 +137,7 @@ export function VideoPlayer() {
 
             .elapsed {
               width: 100%;
-              height: 5px;
+              height: 10px;
             }
 
             .elapsed-bar {
@@ -139,11 +159,14 @@ function ElapsedBar(input: FromTag<{
    elapsed: Ion<number>,
    duration: number,
    paused: Ion<boolean>
+   'on:click': MouseEvent
 }>) {
-   const { $elapsed, duration, $paused } = input
+   const { $elapsed, duration, $paused, emit } = input
 
    return component(
-      <div class="elapsed">
+      <div class="elapsed"
+         on:click={e => (console.log('click', emit('click', e)))}
+      >
          <div
             class="elapsed-bar"
             style={{
@@ -154,6 +177,8 @@ function ElapsedBar(input: FromTag<{
       </div>
    )
 };
+
+
 
 function Timer(input: FromTag<{
    elapsed: Ion<number>,

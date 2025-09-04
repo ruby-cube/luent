@@ -174,12 +174,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       // set up watcher for updates
       watchToRender($activeIndex, function updateConditional({ current: activeIndex, previous: prevIndex }) {
-         console.log('update conditional?', activeIndex, prevIndex)
 
          if (prevIndex === activeIndex) {
             return;
          }
-         console.log('update conditional, yes')
 
          const outgoingNodes = series.statements[prevIndex]?.transitionNodes ?? []
          const incomingNodes = series.statements[activeIndex]?.transitionNodes ?? []
@@ -369,10 +367,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       $_run_with_(context, () => {
          const nodeEntities = kit.renderConditional(parent, kit.nodePod)
-
-
          mountConditional(parent, kit.nodePod, nodeEntities, this.outerFlask, fragment);
-
       })
    }
 
@@ -453,10 +448,10 @@ export function mountConditional(
    const _fragment = fragment || new DocumentFragment();
 
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
-
+   console.log('mount domnodes to fragment')
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
    queueInternalRender(() => {
-      console.log('qIR: mountDOMNodes')
+      console.log('mounting domnodes')
       mountDOMNodes(pod, parent, _fragment)
    }, flask)
 }

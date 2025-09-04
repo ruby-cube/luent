@@ -12,8 +12,8 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
-import { RenderTransient, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
-import {  PRERENDER } from "../render-cycle";
+import { toRenderTransient } from "../dynamic/DynamicKit";
+import { PRERENDER, queueInternalRender, watchToRender } from "../render-cycle";
 
 
 
@@ -46,15 +46,14 @@ type RenderFunction = ((...args: [never] | [any]) => RawJSXNode)
 export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
    const switchMap = new Map(entries)
 
-   function $Polymorph(input : FromTag<{
-      as: Morphable | PolymorphKey, //TODO: fromTag needs to deal with mixed ion or not ion type
+   function $Polymorph(input: FromTag<{
+      as: Morphable | PolymorphKey, //TODO: fromTag needs to handle mixed ion or not-ion type.
       with?: Object,
       provide?: Provided
    }>): Component {
-      const { as: activeKey, provide, with: inputObj } = input
-
+      const { _raw_: { as: activeKey }, provide, with: inputObj } = input
       if (!isIon(activeKey)) {
-         if (!switchMap.has(activeKey)) {
+         if (!switchMap.has($activeKey)) {
             return { exposed: undefined, jsxNodes: [] };
          }
          return {
@@ -72,19 +71,17 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
    $Polymorph.has = function has(key: PolymorphKey) {
       return switchMap.has(key);
    }
-   $Polymorph.morphable = function morphable(key: PolymorphKey | null, input?: Object): Morphable {
-      const morphable = ion(input ? [key, input] : key, {
+   $Polymorph.Morphable = function Morphable(initialKey: PolymorphKey | null, input?: Object): Morphable {
+      const morphable = ion(input ? [initialKey, input] : initialKey, {
          as(key: PolymorphKey | null, input?: Object) {
-            if (key === null) {
-               this.state = null
-               return;
-            }
             if (input) {
-               if (Array.isArray(this.state) && this.state[0] === key && this.state[1] === input) return;
+               if (Array.isArray(this.state) && this.state[0] === key && this.state[1] === input)
+                  return;
                this.state = [key, input]
                return;
             }
             if (this.state === key) return;
+            console.trace('as', key)
             this.state = key
             return;
          },
@@ -145,8 +142,6 @@ function createDynamicRenderKit(render: RenderFunction): DynamicRenderKit {
 }
 
 
-
-
 type VariantMap = Map<Object, DynamicRenderKit> & { render: RenderFunction }
 
 export class PolymorphKit {
@@ -170,8 +165,10 @@ export class PolymorphKit {
    ) {
       const $activeKey = this.$activeKey
       const morphable = this
+      console.log('*** set up morphable', $activeKey)
 
-      watch($activeKey, function updateMorphicComponent({ current: key, previous }) {
+      watchToRender($activeKey, function updateMorphicComponent({ current: key, previous }) {
+         console.log('update polymorph', key, previous)
          // remove previous
          if (previous)
             morphable.deactivateConditional(previous)
@@ -180,7 +177,7 @@ export class PolymorphKit {
          if (key)
             morphable.activateConditional(key, parent)
 
-      }, { phase: PRERENDER })
+      }, this.outerFlask)
       return this;
    }
 
@@ -198,12 +195,16 @@ export class PolymorphKit {
       context[FLASK] = kit.flask;
 
       $_run_with_(context, () => {
-         const nodeEntities = kit.cached ?? (kit.cached = kit.renderConditional(parent, kit.nodePod!, kit.input))
-         mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
+         const nodeEntities = 
+         // kit.cached ?? (kit.cached = //TODO: allow choice between remount and create
+            kit.renderConditional(parent, kit.nodePod!, kit.input)
+         // )
+         mountConditional(parent, kit.nodePod!, nodeEntities, this.outerFlask, fragment);
       })
    }
 
    deactivateConditional(id: PolymorphKey | [PolymorphKey, Object]) {
+      console.log('deactivate conditional', id)
       const key = Array.isArray(id) ? id[0] : id
       const input = Array.isArray(id) ? id[1] : undefined
       const kitOrMap = this.switchMap.get(key) as DynamicRenderKit
@@ -213,7 +214,10 @@ export class PolymorphKit {
       const flask = kit.flask
 
       flask?.emitDemount()
-      removeDOMNodes(kit.nodePod!); //TODO: how do I manage this 
+      // removeDOMNodes(kit.nodePod!); //TODO: how do I manage this 
+      // queueInternalRender(() => {
+         removeDOMNodes(kit.nodePod!);
+      // }, this.outerFlask)
    }
 
    activateConditional(id: PolymorphKey | [PolymorphKey, Object], parent: Element, fragment?: DocumentFragment) {
@@ -229,18 +233,28 @@ export class PolymorphKit {
          if (__DEV__) console.error('dynamic render kit missing')
          return;
       }
+      console.log('activate conditional', id)
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view' }))
       kit.input = input;
 
-      this.render(kit, parent, fragment)
-      if (isInitialMount)
-         //  queueInternalRender(()=>
-         flask.emitInitialMount()
-      // , this.outerFlask)
-      else
-         // queueInternalRender(()=>
-         flask.emitRemount()
-      // , this.outerFlask) // remount preserved watchers etc.
+      // queueInternalRender(() => {
+         console.log('rendering', key)
+         this.render(kit, parent, fragment)
+         kit.nodePod!.activate() // needs to be queued since deactivation is also queued
+         if (isInitialMount)
+            flask.emitInitialMount()
+         else
+            flask.emitRemount() // remount preserved watchers etc.
+      // }, this.outerFlask)
+      // this.render(kit, parent, fragment)
+      // if (isInitialMount)
+      //    //  queueInternalRender(()=>
+      //    flask.emitInitialMount()
+      // // , this.outerFlask)
+      // else
+      //    // queueInternalRender(()=>
+      //    flask.emitRemount()
+      // // , this.outerFlask) // remount preserved watchers etc.
    }
 
    discard(key: PolymorphKey, input?: Object) {

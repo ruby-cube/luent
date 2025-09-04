@@ -162,7 +162,6 @@ type A = keyof ({ a: boolean } | { b: boolean })
 type StateDefinition<S extends _FiniteStates = _FiniteStates> = {
    'on:enter'?: (this: FiniteIon) => void
    'on:exit'?: (this: FiniteIon) => void
-   'after:enter'?: Transition<S>
 } & { [key: string | symbol]: Transition<S> }
 
 type AllKeys<T> = T extends T ? keyof T : never;

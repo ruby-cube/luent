@@ -219,7 +219,6 @@ export class IonSubject extends IonicCompound implements WatchSubject {
             trackPions(value)
             popTracker()
          }
-         console.log(">>> retracking atoms", this.atoms)
          this.forEachAtom(atom => {
             linkEffectToAtom(atom, this.effect)
          })

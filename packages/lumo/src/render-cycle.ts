@@ -1,6 +1,7 @@
 import { Flask, getFlask } from "@rue/flask"
 import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, getCurrentPhase, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
+import { __DEV__getTrace, getInternalTrace, traceAsyncPath } from "../../flask/debug"
 
 export const {
    SYNC,
@@ -38,6 +39,9 @@ export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: need
       fn()
       return;
    }
+   console.log('current phase', getCurrentPhase())
+      fn.__DEVName = 'queueInternalRender'
+      fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)
    $activeUpdate().cycle.scheduleEffect(effect)
    flask.onDiscard(() => effect.destroy())

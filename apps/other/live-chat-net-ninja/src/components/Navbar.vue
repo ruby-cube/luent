@@ -39,7 +39,7 @@ export default {
     font-size: 16px;
     color: #444;
   }
-  nav p.email {
+  nav p.detail {
     font-size: 14px;
     color: #999;
   }
