@@ -2,6 +2,8 @@ import { component, FromTag } from "@rue/lumo";
 import { Navbar } from "./Navbar";
 import { Ion } from "@rue/quarky";
 import { User } from '../commons/keys'
+import { ChatWindow } from "./ChatWindow";
+import { MessageForm } from "./MessageForm";
 
 export function Chatroom(input: FromTag<{
    user: Ion<User>
@@ -12,9 +14,8 @@ export function Chatroom(input: FromTag<{
       <>
          <div class="container">
             <Navbar user={$user} />
-            Chatroom
-            {/* <ChatWindow />
-            <NewChatForm /> */}
+            <ChatWindow />
+            <MessageForm user={$user()}/>
          </div>
       </>
    )

@@ -33,7 +33,7 @@ declare global {
          this: H,
          callback: (this: O, value: IonizeBy<H, T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
          thisArg?: O
-      ): IonizeBy<H, T>[];
+      ): IonizeBy<H, U>[];
       filter<H, O>(
          this: H,
          predicate: (this: H, value: IonizeBy<H, T>, index: number, array: H) => boolean,

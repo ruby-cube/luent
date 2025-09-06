@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot } from "firebase/firestore";
 import { User } from "../commons/keys";
-import { fromGlobal, provideGlobal } from "@rue/lumo";
+import { atUnmount, fromGlobal, provideGlobal } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need
@@ -89,6 +89,7 @@ export function logOut() {
 
 export function onLoggedIn(task: (user: User | null) => void) {
    const auth = fromGlobal('auth') as Auth
+
    return onAuthStateChanged(auth, async (user) => {
       if (user) {
          if (pendingLogin) {
@@ -105,4 +106,50 @@ export function onLoggedOut(task: () => void) {
    return onAuthStateChanged(auth, (user) => {
       if (!user) task()
    })
+}
+
+export function postChatMessage(message: { name: string, text: string }) {
+   const db = fromGlobal('db') as Firestore
+
+   return addDoc(collection(db, 'messages'), { ...message, createdAt: Timestamp.fromDate(new Date()) })
+      .then(() => (
+         { error: null }
+      ))
+      .catch((err: Error) => (
+         { error: err.message }
+      ))
+}
+
+type Message = {
+   id: string,
+   name: string,
+   text: string,
+   createdAt: Timestamp
+}
+
+export function getChatMessages() {
+   const db = fromGlobal('db') as Firestore
+
+   const $messages = ion([] as Message[])
+   const $error = ion(null as null | string)
+
+   const unsub = onSnapshot(query(collection(db, 'messages'), orderBy('createdAt')), (snap) => {
+      $messages.state = snap.docs.map(message => ({
+         ...message.data() as Message,
+         id: message.id
+      }))
+      $error.state = null
+   }, err => {
+      $error.state = err.message
+   })
+
+   atUnmount((final) => {
+      if (!final) return;
+      unsub()
+   })
+
+   return {
+      $messages,
+      $error
+   }
 }

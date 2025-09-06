@@ -75,13 +75,13 @@ export function makeElement(
          if (isInnerHTMLKit(rawOutput[0])) {
             const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
             // queueInternalRender(() => {
-               mountInnerHTML(innerHTML, domNode)
+            mountInnerHTML(innerHTML, domNode)
             // }, getFlask())
          }
          else {
             const nodeEntities = setUpNodeEntities(flattenedOutput, domNode, new NodePod())
             // queueInternalRender(() => {
-               mountNodeEntities(nodeEntities, domNode)
+            mountNodeEntities(nodeEntities, domNode)
             // }, getFlask())
          }
       }, xml_ns)
@@ -255,6 +255,12 @@ function bindTextarea(element: Element, Slot: RenderSlot | undefined) {
    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
    if (!isObjectLiteral(kit) && !('mu' in kit)) return;
    const ion = kit.mu;
+   const flask = getFlask()
+   watchToRender(ion, () => {
+      queueInternalRender(() => {
+         element.value = toString(ion())
+      }, flask)
+   }, flask, RUN_EAGERLY)
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }

@@ -6,6 +6,8 @@ import { WelcomeView } from "./components/WelcomeView";
 import { Chatroom } from "./components/Chatroom";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
 
+//TODO: Figure out how to provide user
+
 export function ChatApp() {
    const $connected = initDatabaseConnection();
    const $user = ion(null as User | null)
