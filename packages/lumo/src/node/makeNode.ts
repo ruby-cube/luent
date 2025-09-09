@@ -38,8 +38,9 @@ export type RawJSXNode =
    | DynamicKit
    | Component
    | InnerHTMLKit
-   | undefined
    | PortalKit
+   | null
+   | undefined
 // | MutableKit
 
 export type JSXNode =

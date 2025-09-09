@@ -258,12 +258,18 @@ export class NodePod extends Array<AnyNode> {
 //    // }
 // }
 
+let shouldDebug = false;
+
+export function startDebugger(){
+   shouldDebug = true;
+}
+
 export function mountDOMNodes(
    // prevNode: Element | null | undefined
    pod: NodePod
    ,
    parent: Element, fragment: DocumentFragment) {
-      
+   if (shouldDebug) debugger;
    const prevNode = pod.prevNode
 
    if (prevNode && prevNode === parent) {

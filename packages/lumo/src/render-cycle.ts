@@ -39,7 +39,6 @@ export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: need
       fn()
       return;
    }
-   console.log('current phase', getCurrentPhase())
       fn.__DEVName = 'queueInternalRender'
       fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)

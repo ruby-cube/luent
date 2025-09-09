@@ -163,7 +163,7 @@ function bindView(element: Element, Slot: RenderSlot | undefined, attributes: { 
          return Slot;
 
       case 'TEXTAREA':
-         return bindTextarea(<HTMLTextAreaElement>element, Slot);
+         return bindTextInput(<HTMLTextAreaElement>element, attributes);
 
       default:
          return Slot;
@@ -197,7 +197,8 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
       setUpInputListener(element, ion)
    }
 }
-function bindTextInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
+
+function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
@@ -650,7 +651,6 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
 
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
-            console.log(key, value)
             watchToRender(value, ({ current }) => {
                queueInternalRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), current)

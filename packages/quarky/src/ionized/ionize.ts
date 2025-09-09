@@ -99,7 +99,7 @@ type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args:
  * Wrap the return of a method of an ionizable class with this type helper in order to 
  * propagate any deep ionization that has been defined in the class's enlistIonizedMethods config
  */
-export type IonizeBy<H, T> = IsIonized<H> extends true ?
+export type IonizeBy<H, T> = IsIonized<H> extends true ? 
    MaybeIonize<T> : T
 
 export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T

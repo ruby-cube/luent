@@ -81,7 +81,6 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
                return;
             }
             if (this.state === key) return;
-            console.trace('as', key)
             this.state = key
             return;
          },
@@ -165,10 +164,8 @@ export class PolymorphKit {
    ) {
       const $activeKey = this.$activeKey
       const morphable = this
-      console.log('*** set up morphable', $activeKey)
 
       watchToRender($activeKey, function updateMorphicComponent({ current: key, previous }) {
-         console.log('update polymorph', key, previous)
          // remove previous
          if (previous)
             morphable.deactivateConditional(previous)
@@ -204,7 +201,6 @@ export class PolymorphKit {
    }
 
    deactivateConditional(id: PolymorphKey | [PolymorphKey, Object]) {
-      console.log('deactivate conditional', id)
       const key = Array.isArray(id) ? id[0] : id
       const input = Array.isArray(id) ? id[1] : undefined
       const kitOrMap = this.switchMap.get(key) as DynamicRenderKit
@@ -233,12 +229,10 @@ export class PolymorphKit {
          if (__DEV__) console.error('dynamic render kit missing')
          return;
       }
-      console.log('activate conditional', id)
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view' }))
       kit.input = input;
 
       // queueInternalRender(() => {
-         console.log('rendering', key)
          this.render(kit, parent, fragment)
          kit.nodePod!.activate() // needs to be queued since deactivation is also queued
          if (isInitialMount)

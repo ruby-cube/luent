@@ -1,16 +1,17 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
-import { areShallowEqualArrays } from "../../../quarky/src";
+import { areShallowEqualArrays, isIonizedModel } from "../../../quarky/src";
 import { UniqueItem } from "./For";
+import { quarkOf } from "../../../quarky/src/Quark";
 
 
 // TODO: implementation for sets, objects, and maps
 export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) =i=>i, prevMap: Map<unknown, number> | undefined) {
    // const [newArr, oldArr] = makeItemsUnique(newArray, oldArray, getUID);
+   const rawNewArray = isIonizedModel(newArray) ? quarkOf(newArray).state.current as any[] : newArray
+   if (areShallowEqualArrays(rawNewArray, oldArray, getUID)) return { noChange: true };
 
-   if (areShallowEqualArrays(newArray, oldArray, getUID)) return { noChange: true };
-
-   const newMap = toUIDMap(newArray, getUID);
+   const newMap = toUIDMap(rawNewArray, getUID);
    const oldMap = prevMap ?? toUIDMap(oldArray, getUID);
    const newArrCommonItems = [];
    const oldArrCommonItems = [];
@@ -20,8 +21,8 @@ export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[]
 
    // find items to insert
    let i = 0;
-   while (i < newArray.length) {
-      const id = getUID(newArray[i]);
+   while (i < rawNewArray.length) {
+      const id = getUID(rawNewArray[i]);
       if (oldMap.has(id)) newArrCommonItems.push(id);
       else newItems.add(id)
       i++;

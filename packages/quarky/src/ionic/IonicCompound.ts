@@ -15,10 +15,10 @@ export class IonicCompound extends Compound {
       }
       finally {
          popTracker();
-         if (__DEV__ && this.atoms.length === 0) {
-            console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
-            console.trace()
-         }
+         // if (__DEV__ && this.atoms.length === 0) {
+         //    console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
+         //    console.trace()
+         // }
       }
    }
 

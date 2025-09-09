@@ -186,7 +186,7 @@ type TagAttributes<D> =
    & MaybeIonAttributes<D>
    & MutableIonAttributes<D>
    & TagEvents<D>
-   & OpInput<D>
+   & OpAttribute<D>
    & TagSlot<D>
    & (D extends { provide: infer P } ? P : {})
 // [] mu ---> {mu:name: MutableIon<string>}
@@ -259,6 +259,9 @@ type MuIon<I> = ExcludePrimitives<I> extends { state: any } ? I
 
 type OpInput<D> = {
    [K in keyof D as K extends `can:${infer F}` ? F : never]: D[K]
+}
+type OpAttribute<D> = {
+   [K in keyof D as K extends `can:${string}` ? K : never]: D[K]
 }
 
 type StaticInput<D> = {

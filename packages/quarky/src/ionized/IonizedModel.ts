@@ -278,7 +278,6 @@ type CloneFn = (entity: any) => any
 function getCloner(entity: object): CloneFn {
    //TODO: get cloner from data structure configs
    if (entity instanceof Array) return (entity: any[]) => {
-      console.log('&&& cloning array')
       return Object.assign([], entity)
    }
    if (entity instanceof Set) return (entity: Set<any>) => {
@@ -330,7 +329,6 @@ export function createIonizedModel(
 
       let originalKey = key in target ? key : stateKey in target ? stateKey : undefined
       if (!originalKey) {
-         console.log('not original', key)
          if (op === SET) {
             if (isAbsorbedIon(value, key)) {
                //TODO: absorbed ion
@@ -383,7 +381,6 @@ export function createIonizedModel(
                      return propertyDescriptor.writable ?? false;
                   }
                   const methodDef = getIonizedMemberDef(initialTarget, key) as TrackableOpDef | MutatingOpDef
-                  console.log(key, methodDef)
                   if (methodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
                      bindNativeMethod(
                         proxyProto,
@@ -459,7 +456,6 @@ export function createIonizedModel(
    const ionizedModel = new Proxy(initialTarget, {
 
       get(target, key, receiver) {
-         if (key === 'length') console.log('get', key, state.current.length)
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          if (key in proxyProto) {
             return proxyProto[key]
@@ -472,8 +468,6 @@ export function createIonizedModel(
       },
 
       set(target, key, value) {
-         console.log('>>> set', key, value)
-         if (key === 'length') console.log('state', state.current.length)
          if (key in proxyProto) {
             proxyProto[key] = value;
             return true;
@@ -515,7 +509,6 @@ export function createIonizedModel(
       },
 
       deleteProperty(target: AnyObject, key) {
-         console.log(">>> delete", key)
          const pionQuark = getPionQuark(proxyProto, key)
          const success = Reflect.deleteProperty(state.active, key)
          if (!success) return false;
@@ -735,7 +728,6 @@ function createPion(
       get: ion,
       set: Object.getOwnPropertyDescriptor(ion, 'state')!.set //NOTE: equivalent performance to storing setter on quark
    })
-   console.trace('create pion', key, proxyProto)
    return ion
 }
 
@@ -992,7 +984,6 @@ function bindNativeMethod(
    initialTarget: AnyObject,
    ionizedModel: IonizedModel,
 ) {
-   console.log('config.type', config.type, key)
    propertyDescriptor.value = useIonicOp[config.type](
       initialTarget[key],
       config.privateState ? state : { active: ionizedModel },

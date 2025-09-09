@@ -221,12 +221,10 @@ export function getIonizedMemberDef(target: AnyObject, methodKey: PropertyKey) {
    let _target = target;
    while (constructor !== Object) {
       if (Object.hasOwn(target, methodKey)) {
-         console.log('A')
          return ionizedMethodsMap.get(constructor)?.[methodKey]
       }
       const def = ionizedMethodsMap.get(constructor)?.[methodKey]
       if (def) {
-         console.log('B', constructor)
          return def;
       }
       _target = Object.getPrototypeOf(_target)

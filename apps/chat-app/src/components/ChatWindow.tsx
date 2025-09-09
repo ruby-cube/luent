@@ -41,7 +41,7 @@ export function ChatWindow(input: FromTag<{
                         <span class="author" style={{ color: (message.author === user.name ? 'green' : 'black') }}>{message.author}</span>
                         <span class="message">{message.text}</span>
                      </div>
-                     {If(message.$error, 'show',
+                     {If(message.$error,
                         <>
                            <div class='error'>{message.error?.message}</div>
                            <button

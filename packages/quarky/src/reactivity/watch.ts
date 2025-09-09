@@ -94,14 +94,12 @@ export function watch<
    }
 
    if (!isWatchSubject(watchSubject)) { // plain object
-      console.log('inert watcher a')
       return InertWatcher()
    }
 
    let prevState = watchSubject.trackedCall(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
    if (watchSubject.inert) {
-      console.log('inert watcher b')
       return InertWatcher()
    }
 

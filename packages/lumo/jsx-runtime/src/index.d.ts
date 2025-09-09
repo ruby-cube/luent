@@ -665,7 +665,7 @@ declare namespace React {
 
    //$$$
    interface _DOMAttributes<T> {
-      children?: Lumo.JSXNode | undefined;
+      children?: Lumo.JSXNode | undefined | null;
    }
 
    type LifecycleTask<T> = (element: T)=> void
@@ -1921,7 +1921,8 @@ declare namespace React {
       value?: string | readonly string[] | number | undefined;
       wrap?: string | undefined;
 
-      onChange?: ChangeEventHandler<T> | undefined;
+      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
+      'on:change'?: ChangeEventHandler<T> | undefined;
    }
 
    interface TdHTMLAttributes<T> extends HTMLAttributes<T> {

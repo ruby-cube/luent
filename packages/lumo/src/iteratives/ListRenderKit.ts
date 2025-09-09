@@ -157,14 +157,14 @@ export class ListRenderKit {
          const current = $list()
          console.log('updating list?')
          const _prevState = clone ?? toRaw(previous)
-         console.log('_prevState', _prevState, previous)
          clone = createClone(data, current)
          // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
-         const { indicesToRemove, insertAndMoveKit, noChange, newMap } = diff(isIonizedModel(current) ? quarkOf(current).state.current : current, _prevState, getUID, oldMap)
+         const { indicesToRemove, insertAndMoveKit, noChange, newMap } = diff(current, _prevState, getUID, oldMap)
          if (noChange) { //TODO: should we use hasChanged function in watch options instead?
             console.log('no list change', current, _prevState)
             return;
          }
+         console.log('LIST CHANGED')
          oldMap = newMap;
          if (dynamicPod!.length !== _prevState.length)
             throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
@@ -189,6 +189,8 @@ export class ListRenderKit {
       fragment?: DocumentFragment
    ) {
       const data = toValue(this.data);
+
+      console.log('list data', data, isIonizedModel(data))
 
       const list = data instanceof Array ? data : data as unknown as Array<any> //TODO: need to implement for sets, maps, and objects
       const listKit = this;
@@ -274,6 +276,7 @@ export class ListRenderKit {
          }
 
          if (isNewItem(item)) {
+            console.log('new item!!!', item)
             const $index = ion(i) //TODO: this should be 
             newIndices.push($index) 
 

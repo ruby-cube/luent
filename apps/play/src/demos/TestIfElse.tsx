@@ -4,18 +4,19 @@ import { ion } from "@rue/quarky";
 export function TestIfElse(){
    const $active = ion(true)
    const $ready = ion(true)
+
    return component(
       <>
       <button on:click={e=>$active.state = !$active()}>toggle</button>
-      {If($active, 'show',
+      {If($active,
          <div>hey</div>
       )}
       {/* {ElseIf($ready, 'create',
          <div>ho</div>
       )} */}
-      {Else('show',
+      {/* {Else('show',
          <div>hi</div>
-      )}
+      )} */}
       </>
    )
 }

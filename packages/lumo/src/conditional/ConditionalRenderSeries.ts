@@ -100,9 +100,15 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       statements: ConditionalKit[],
       activationType: ActivationType = 'create'
    ) {
+      if (statements.at(-1)?.statementType !== 'else') statements.push({
+         statementType: "else",
+         renderConditional: () => "",
+         type: activationType,
+         $condition: undefined
+      })
+      
       const kits = toDynamicConditionalKits(statements)
       super(kits);
-
       if (__DEV__) this.context[TRACE] = this.__DEV__asyncPath
 
       // populate dynamic node pod
@@ -114,7 +120,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let showKits: DynamicConditionalRenderKit[] | undefined
 
       for (const kit of kits) {
-         if (!kit) return;
+         if (!kit) continue;
          if (!kit.type) kit.type = activationType;
          if (kit.type === 'show') {
             showKits = showKits || (showKits = this.showKits = [])
@@ -129,6 +135,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             kit.nodePod = sharedPod || (sharedPod = new NodePod(false), dynamicPod.push(sharedPod), sharedPod)
          }
       }
+
+      console.log('$$$ pod', this.dynamicPod)
    }
 
    mount( // the initial mount after setup
@@ -451,7 +459,7 @@ export function mountConditional(
    console.log('mount domnodes to fragment')
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
    queueInternalRender(() => {
-      console.log('mounting domnodes')
+      console.log('mount domnodes to DOM')
       mountDOMNodes(pod, parent, _fragment)
    }, flask)
 }
