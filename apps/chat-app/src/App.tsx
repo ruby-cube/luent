@@ -8,6 +8,10 @@ import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/data
 
 //TODO: Figure out how to provide user
 
+// [ ] tabs to open chat window while logged in
+// [ ] new messages notification
+// [ ] optimistic updates
+
 export function ChatApp() {
    const $connected = initDatabaseConnection();
    const $user = ion(null as User | null)
@@ -28,7 +32,7 @@ export function ChatApp() {
             routeTo('/')
             return;
          }
-         return <Chatroom user={$user as Ion<User>}></Chatroom> //TODO: non-null assertion
+         return <Chatroom user={$user()!}></Chatroom> //TODO: non-null assertion
       }],
    ])
 
