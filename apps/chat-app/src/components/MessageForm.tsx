@@ -16,6 +16,7 @@ export function MessageForm(input: FromTag<{
    // const $error = ion(null as string | null)
 
    async function reKeydown(e: KeyboardEvent & any) {
+      console.log('*** reKeydown')
       if (e.key !== 'Enter') {
          // if ($error()) $error.state = null;
          return;

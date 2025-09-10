@@ -1,9 +1,8 @@
 import { component, FromTag, startDebugger } from "@rue/lumo";
-import { Navbar } from "./Navbar";
 import { User } from '../commons/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";
-import { ChatMessagesKit } from "../database/database";
+import { ChatKit } from "../database/database";
 
 
 
@@ -12,13 +11,12 @@ export function Chatroom(input: FromTag<{
 }>) {
    const { user } = input
 
-   const {$error, $messages, postChatMessage} = ChatMessagesKit()
+   const chatKit = ChatKit()
 
    return component(
       <div class="container">
-         <Navbar user={user} />
-         <ChatWindow error={$error} messages={$messages} user={user} />
-         <MessageForm user={user} can:postMessage={postChatMessage} />
+         <ChatWindow user={user} chat={chatKit} />
+         <MessageForm user={user} can:postMessage={chatKit.postChatMessage} />
          <button on:click={startDebugger}>debug</button>
       </div>
    )

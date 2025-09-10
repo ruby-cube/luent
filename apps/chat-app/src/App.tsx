@@ -5,6 +5,7 @@ import { User } from "./commons/keys";
 import { WelcomeView } from "./components/WelcomeView";
 import { Chatroom } from "./components/Chatroom";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
+import { FriendApp } from "./components/FriendApp";
 
 //TODO: Figure out how to provide user
 
@@ -12,7 +13,7 @@ import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/data
 // [ ] new messages notification
 // [ ] optimistic updates
 
-export function ChatApp() {
+export function FriendlyChatApp() {
    const $connected = initDatabaseConnection();
    const $user = ion(null as User | null)
    let initialLoad = true;
@@ -21,24 +22,24 @@ export function ChatApp() {
       ['/', () => {
          const user = $user()
          if (user) {
-            routeTo('/chat')
+            routeTo('/app')
             return;
          }
          return <WelcomeView initialLoad={initialLoad}></WelcomeView>
       }],
-      ['/chat', () => {
+      ['/app', () => {
          const user = $user()
          if (!user) {
             routeTo('/')
             return;
          }
-         return <Chatroom user={$user()!}></Chatroom> //TODO: non-null assertion
+         return <FriendApp user={user}></FriendApp> //TODO: non-null assertion
       }],
    ])
 
    onLoggedIn(user => {
       $user.state = user
-      routeTo('/chat')
+      routeTo('/app')
       initialLoad = false
    })
 

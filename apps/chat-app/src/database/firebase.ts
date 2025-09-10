@@ -2,8 +2,8 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
 import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc } from "firebase/firestore";
 import { User } from "../commons/keys";
-import { atUnmount, fromGlobal, provideGlobal } from "@rue/lumo";
-import { ion, ionize } from "@rue/quarky";
+import { atUnmount, fromGlobal, PRERENDER, provideGlobal } from "@rue/lumo";
+import { ion, ionize, SYNC, watch } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -136,18 +136,46 @@ type MessageError = {
    message: string;
    pending: boolean
    retry(): void
+   cancel(): void
 }
 
 
+export type ChatKit = ReturnType<typeof ChatKit>
 
-
-export function ChatMessagesKit() {
+export function ChatKit() {
    const db = fromGlobal('db') as Firestore
 
    const unsavedMessages = ionize([] as Message[])
    const unsavedSet = new Set<string>()
 
    const $messages = ion.ionize([] as Message[])
+   const $errorCount = ion(0)
+
+   function atMessagePosted(task: () => void) {
+      watch(unsavedMessages.$length, (e) => {
+         if (e.current === 0) return;
+         if (e.current < e.previous) return;
+         task()
+      }, { phase: PRERENDER })
+   }
+
+   function atMessageReceived(task: () => void) {
+      let prevLength = $messages().length;
+
+      watch($messages, (e) => {
+         if (prevLength === $messages().length) return;
+         prevLength = $messages().length
+         if (e.current === e.previous) {
+            return;
+         }
+         console.log('event', e)
+         task()
+      }, { phase: PRERENDER })
+   }
+
+   function atErrorReceived(task: () => void) {
+      watch($errorCount, task, { phase: PRERENDER })
+   }
 
    const $error = ion(null as null | string)
    const messagesQuery = query(collection(db, 'messages'), orderBy('createdAt'))
@@ -179,7 +207,7 @@ export function ChatMessagesKit() {
             while (j--) {
                const savedMsg = messages[j]
                if (unsaved.createdAt.toMillis() > savedMsg.createdAt.toMillis()) {
-                  messages.splice(j+1, 0, unsaved)
+                  messages.splice(j + 1, 0, unsaved)
                   break;
                }
             }
@@ -200,7 +228,7 @@ export function ChatMessagesKit() {
    async function postChatMessage(message: Message) {
       const newMessageRef = doc(collection(db, 'messages'))
       const newMessage = ionize({
-         ...message, 
+         ...message,
          id: newMessageRef.id
       })
 
@@ -213,37 +241,45 @@ export function ChatMessagesKit() {
       function post() {
          const rando = Math.random()
 
-         // if (rando < .5) {
-         //    setTimeout(() => {
-         //       newMessage.error = ionize({
-         //          message: 'bad connection',
-         //          pending: false,
-         //          retry() {
-         //             this.pending = true;
-         //             post()
-         //          }
-         //       })
-         //    }, 200)
-         //    return;
-         // }
-
-
-         return setDoc(newMessageRef, {
-            text: message.text,
-            author: message.author,
-            createdAt: message.createdAt
-         })
-            // .then(() => {
-            //    console.log('setDoc resolved')
-            //    unsavedMessages.splice(unsavedMessages.findIndex(msg => msg.id === message.id), 1)
-            // })
-            .catch((err: Error) => {
+         if (rando < .25) {
+            setTimeout(() => {
                newMessage.error = ionize({
                   message: 'bad connection',
                   pending: false,
                   retry() {
                      this.pending = true;
                      post()
+                  },
+                  cancel() {
+                     const messages = $messages()
+                     unsavedMessages.splice(unsavedMessages.indexOf(newMessage), 1)
+                     messages.splice(messages.indexOf(newMessage), 1)
+                     unsavedSet.delete(newMessageRef.id)
+                  }
+               })
+               $errorCount.state++
+            }, 200)
+            return;
+         }
+
+         return setDoc(newMessageRef, {
+            text: message.text,
+            author: message.author,
+            createdAt: message.createdAt
+         })
+            .catch((err: Error) => {
+               newMessage.error = ionize({
+                  message: err.message,
+                  pending: false,
+                  retry() {
+                     this.pending = true;
+                     post()
+                  },
+                  cancel() {
+                     const messages = $messages()
+                     unsavedMessages.splice(unsavedMessages.indexOf(newMessage), 1)
+                     messages.splice(messages.indexOf(newMessage), 1)
+                     unsavedSet.delete(newMessageRef.id)
                   }
                })
             })
@@ -253,7 +289,9 @@ export function ChatMessagesKit() {
    return {
       postChatMessage,
       $messages,
-      unsavedMessages,
-      $error
+      $error,
+      atMessagePosted,
+      atErrorReceived,
+      atMessageReceived
    }
 }

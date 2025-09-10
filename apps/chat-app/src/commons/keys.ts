@@ -3,7 +3,8 @@ import { Ion } from "@rue/quarky";
 
 export type User = {
    name: string,
-   email: string
+   email: string,
+   lastSeenMessageID?: string
 }
 
-export const $USER = CommonsKey<Ion<User | null>>('user')
+export const USER = CommonsKey<User>('user')
