@@ -1,9 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
-import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc } from "firebase/firestore";
-import { User } from "../commons/keys";
-import { atUnmount, fromGlobal, PRERENDER, provideGlobal } from "@rue/lumo";
-import { ion, ionize, SYNC, watch } from "@rue/quarky";
+import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { atUnmount, fromGlobal, POSTRENDER, PRERENDER, provideGlobal } from "@rue/lumo";
+import { ion, ionize, Ionized, SYNC, watch } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -36,6 +35,59 @@ export function initDatabaseConnection() {
    return $connected
 }
 
+type UserData = {
+   id: string
+   lastSeenMessageID: string | null
+}
+
+function createUserData(id: string, db = fromGlobal('db') as Firestore) {
+   return setDoc(doc(db, "users", id), {
+      lastSeenMessageID: null
+   });
+}
+
+function getUserData(id: string, db = fromGlobal('db') as Firestore) {
+   return getDoc(doc(db, 'users', id))
+}
+
+function updateUserData(id: string, data: Partial<UserData>, db = fromGlobal('db') as Firestore) {
+   return updateDoc(doc(db, 'users', id), data) as unknown as Promise<UserData> //FIX:
+}
+
+export class User {
+
+   constructor(
+      readonly id: string,
+      public name: string,
+      public email: string,
+   ) {
+      const db = fromGlobal('db') as Firestore
+      getUserData(id, db).then((userData) => {
+         this.userData = ionize(userData.data() as { lastSeenMessageID: string | null })
+
+         watch(this.userData.$lastSeenMessageID, ({ current: lastSeenMessageID }) => {
+            updateUserData(id, { lastSeenMessageID }, db)
+         })
+      }).catch(err => {
+         console.error('Error while getting user data', err)
+      })
+   }
+
+   private userData: Ionized<{ lastSeenMessageID: string | null }> | undefined
+
+   get lastSeenMessageID() {
+      //TODO: throw error if no userData?
+      return this.userData!.lastSeenMessageID
+   }
+
+   set lastSeenMessageID(id: string | null) {
+      //TODO: throw error if no userData?
+      this.userData!.lastSeenMessageID = id
+   }
+}
+
+
+
 let pendingLogin: Promise<{ error: string | null }> | null = null
 
 export function signUp(email: string, password: string, username: string) {
@@ -43,7 +95,12 @@ export function signUp(email: string, password: string, username: string) {
 
    return pendingLogin = createUserWithEmailAndPassword(auth, email, password)
       .then(async ({ user }) => {
-         await updateProfile(user, { displayName: username })
+
+         await Promise.all([
+            updateProfile(user, { displayName: username }),
+            createUserData(user.uid)
+         ]) //TODO: Catch errors?
+
          return {
             // user,
             error: null
@@ -87,18 +144,23 @@ export function logOut() {
       ))
 }
 
+
 export function onLoggedIn(task: (user: User | null) => void) {
    const auth = fromGlobal('auth') as Auth
+   const db = fromGlobal('db') as Firestore
 
-   const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
+   const unsub = onAuthStateChanged(auth, async (authorizedUser) => {
+      if (authorizedUser) {
          if (pendingLogin) {
             await pendingLogin;
          }
-         if (__DEV__ && (!user.displayName || !user.email)) throw new Error('display name or email missing')
-         task({ name: user.displayName!, email: user.email! })
+         if (__DEV__ && (!authorizedUser.displayName || !authorizedUser.email)) throw new Error('display name or email missing')
+
+         const user = new User(authorizedUser.uid, authorizedUser.displayName!, authorizedUser.email!)
+         task(user)
       }
    })
+
    atUnmount(final => {
       if (!final) return
       unsub()

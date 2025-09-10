@@ -1,6 +1,6 @@
 import { component, If, Style } from "@rue/lumo";
 import { Router } from "./router";
-import { Ion, ion } from "@rue/quarky";
+import { Ion, ion, Ionized } from "@rue/quarky";
 import { User } from "./commons/keys";
 import { WelcomeView } from "./components/WelcomeView";
 import { Chatroom } from "./components/Chatroom";
@@ -22,22 +22,27 @@ export function FriendlyChatApp() {
       ['/', () => {
          const user = $user()
          if (user) {
+            console.log('oh user!')
             routeTo('/app')
             return;
          }
+         console.log('render welcome')
          return <WelcomeView initialLoad={initialLoad}></WelcomeView>
       }],
       ['/app', () => {
          const user = $user()
          if (!user) {
+            console.log('no user...')
             routeTo('/')
             return;
          }
+         console.log('render app')
          return <FriendApp user={user}></FriendApp> //TODO: non-null assertion
       }],
    ])
 
    onLoggedIn(user => {
+      console.log('on logged in', user)
       $user.state = user
       routeTo('/app')
       initialLoad = false

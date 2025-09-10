@@ -207,14 +207,12 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    });
    flask.onDemount(/* listener.pause */() => {
       paused = true;
-      effect.unlinkAtoms()
    });
    flask.onRemount(/* listener.resume */() => {
       paused = false;
       if (stale) {
          effect.run?.()
       }
-      subject.linkEffect(effect)
    });
 }
 

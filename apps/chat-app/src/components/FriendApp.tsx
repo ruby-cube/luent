@@ -3,6 +3,7 @@ import { Commons, component, FromTag, Polymorph } from "@rue/lumo";
 import { USER, User } from "../commons/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";
+import { Ionized } from "@rue/quarky";
 
 export function FriendApp(input: FromTag<{
    user: User

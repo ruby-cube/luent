@@ -1,5 +1,5 @@
 import { atMounted, queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask } from "@rue/lumo";
-import { ion, ThrottlePointer, watch } from "@rue/quarky";
+import { ion, Ionized } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
@@ -21,6 +21,7 @@ export function ChatWindow(input: FromTag<{
 
    const $messagesNode = NodeRef('div')
 
+   const $newMessageMarker = ion(undefined as undefined | HTMLDivElement)
    const $hasUnseenMessages = ion(false)
 
    const $smoothScroll = ion(false)
@@ -29,7 +30,7 @@ export function ChatWindow(input: FromTag<{
       if (initial) return;
       $smoothScroll.state = false;
       queuePostrenderTask(() => {
-         scrollToBottom()
+         scrollToNew()
          queuePostrenderTask(() => {
             $smoothScroll.state = true;
          })
@@ -65,20 +66,42 @@ export function ChatWindow(input: FromTag<{
       return node && Math.abs(node.scrollTop - (node.scrollHeight - node.clientHeight)) < 2
    }
 
+   function scrollToNew() {
+      const node = $messagesNode()
+      if (!node) {
+         return;
+      }
+      const newMessageMarker = $newMessageMarker()
+      if (!newMessageMarker) {
+         scrollToBottom()
+         return;
+      }
+
+      node.scrollTop = newMessageMarker.offsetTop
+   }
+
    function scrollToBottom() {
       const node = $messagesNode()
       if (!node) {
          return;
       }
       node.scrollTop = node.scrollHeight
-      user.lastSeenMessageID = $messages().at(-1)?.id
    }
 
-   const reScroll = ThrottlePointer((e: any) => {
+   const reScrollend = (e: any) => {
       if (isScrolledToBottom()) {
          $hasUnseenMessages.state = false;
       }
-   })
+
+      user.lastSeenMessageID = findLastSeenMessage()?.id ?? user.lastSeenMessageID
+   }
+
+   function findLastSeenMessage() {
+      if (isScrolledToBottom())
+         return $messages().at(-1)
+   }
+
+
 
    return component(
       <div class='chat-window'>
@@ -86,33 +109,37 @@ export function ChatWindow(input: FromTag<{
             <div class='error'>{$error}</div>
          )}
          {Else(
-            <div class='messages' ref={$messagesNode} on:scroll={reScroll} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
+            <div class='messages' ref={$messagesNode} on:scrollend={reScrollend} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
                {For($messages, m => m.id, (message) => (
                   <>
-                     <div class='single' style={{ opacity: (message.error === null ? 1 : .5) }}>
-                        <span class="created-at">{formatDistanceToNow(message.createdAt.toDate())}</span>
-                        <span class="author" style={{ color: (message.author === user.name ? 'green' : 'black') }}>{message.author}</span>
-                        <span class="message">{message.text}</span>
+                     <div>
+                        <div class='single' style={{ opacity: (message.error === null ? 1 : .5) }}>
+                           <span class="created-at">{formatDistanceToNow(message.createdAt.toDate())}</span>
+                           <span class="author" style={{ color: (message.author === user.name ? 'green' : 'black') }}>{message.author}</span>
+                           <span class="message">{message.text}</span>
+                        </div>
+                        {If(message.$error,
+                           <>
+                              <div class='error'>{message.error?.message}</div>
+                              <button
+                                 on:click={e => (!message.error?.pending && message.error!.retry())}
+                                 style={{ opacity: (message.error?.pending ? .5 : 1) }}
+                              >
+                                 retry
+                              </button>
+                              <button
+                                 on:click={e => (!message.error?.pending && message.error!.cancel())}
+                                 style={{ opacity: (message.error?.pending ? .5 : 1) }}
+                              >
+                                 cancel
+                              </button>
+                           </>
+                        )}
                      </div>
-                     {If(message.$error,
-                        <>
-                           <div class='error'>{message.error?.message}</div>
-                           <button
-                              on:click={e => (!message.error?.pending && message.error!.retry())}
-                              style={{ opacity: (message.error?.pending ? .5 : 1) }}
-                           >
-                              retry
-                           </button>
-                           <button
-                              on:click={e => (!message.error?.pending && message.error!.cancel())}
-                              style={{ opacity: (message.error?.pending ? .5 : 1) }}
-                           >
-                              cancel
-                           </button>
-                        </>
-                     )}
                      {If((user.lastSeenMessageID === message.id && $messages().at(-1) !== message),
-                        <div>--- new messages ---</div>
+                        <div at:mounted={node => message.id === user.lastSeenMessageID && ($newMessageMarker.state = node)}>
+                           --- new messages ---
+                        </div>
                      )}
                   </>
                ))}

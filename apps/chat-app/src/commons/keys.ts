@@ -1,10 +1,12 @@
 import { CommonsKey } from "@rue/lumo";
-import { Ion } from "@rue/quarky";
+import { Ionized } from "@rue/quarky";
+
 
 export type User = {
+   id: string,
    name: string,
    email: string,
-   lastSeenMessageID?: string
+   lastSeenMessageID: string | null
 }
 
 export const USER = CommonsKey<User>('user')
