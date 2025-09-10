@@ -13,7 +13,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { toRenderTransient } from "../dynamic/DynamicKit";
-import { PRERENDER, queueInternalRender, watchToRender } from "../render-cycle";
+import { queueInternalRender, watchToRender } from "../render-cycle";
 
 
 
@@ -43,7 +43,7 @@ function registerPolymorph($activeKey: Morphable, polymorph: PolymorphKit) {
 type RenderFunction = ((...args: [never] | [any]) => RawJSXNode)
 
 
-export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
+export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: { preserve: true }) {
    const switchMap = new Map(entries)
 
    function $Polymorph(input: FromTag<{
@@ -62,7 +62,7 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
          }
       }
 
-      const polymorphKit = new PolymorphKit(switchMap, activeKey as Morphable)
+      const polymorphKit = new PolymorphKit(switchMap, activeKey as Morphable, options?.preserve)
       registerPolymorph(activeKey as Morphable, polymorphKit)
 
       return { exposed: undefined, jsxNodes: [polymorphKit] };
@@ -156,6 +156,7 @@ export class PolymorphKit {
    constructor(
       public switchMap: Map<PolymorphKey, RenderFunction | DynamicRenderKit | VariantMap>,
       public $activeKey: Morphable,
+      public preserve: boolean = false
    ) {
    }
 
@@ -184,6 +185,8 @@ export class PolymorphKit {
    ) {
       const activeKey = this.$activeKey()
       if (!activeKey) return;
+      console.log("$$$ mount polymorph to parent", parent)
+      console.log("$$$ mount polymorph to fragment", fragment)
       this.activateConditional(activeKey, parent, fragment)
    }
 
@@ -192,10 +195,10 @@ export class PolymorphKit {
       context[FLASK] = kit.flask;
 
       $_run_with_(context, () => {
-         const nodeEntities = 
-         // kit.cached ?? (kit.cached = //TODO: allow choice between remount and create
-            kit.renderConditional(parent, kit.nodePod!, kit.input)
-         // )
+         const nodeEntities = this.preserve ?
+            kit.cached ?? (kit.cached = //TODO: allow choice between remount and create
+               kit.renderConditional(parent, kit.nodePod!, kit.input)
+            ) : kit.renderConditional(parent, kit.nodePod!, kit.input)
          mountConditional(parent, kit.nodePod!, nodeEntities, this.outerFlask, fragment);
       })
    }
@@ -212,7 +215,7 @@ export class PolymorphKit {
       flask?.emitDemount()
       // removeDOMNodes(kit.nodePod!); //TODO: how do I manage this 
       // queueInternalRender(() => {
-         removeDOMNodes(kit.nodePod!);
+      removeDOMNodes(kit.nodePod!);
       // }, this.outerFlask)
    }
 
@@ -232,14 +235,14 @@ export class PolymorphKit {
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view' }))
       kit.input = input;
 
-      // queueInternalRender(() => {
-         this.render(kit, parent, fragment)
-         kit.nodePod!.activate() // needs to be queued since deactivation is also queued
-         if (isInitialMount)
-            flask.emitInitialMount()
-         else
-            flask.emitRemount() // remount preserved watchers etc.
-      // }, this.outerFlask)
+      queueInternalRender(() => {
+      this.render(kit, parent, fragment)
+      kit.nodePod!.activate() // needs to be queued since deactivation is also queued
+      if (isInitialMount)
+         flask.emitInitialMount()
+      else
+         flask.emitRemount() // remount preserved watchers etc.
+      }, this.outerFlask)
       // this.render(kit, parent, fragment)
       // if (isInitialMount)
       //    //  queueInternalRender(()=>

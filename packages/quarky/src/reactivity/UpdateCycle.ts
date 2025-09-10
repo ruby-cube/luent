@@ -260,11 +260,12 @@ export const queueTask = setImmediate;
  */
 export function useUpdateCycleScheduler(phase: Phase) {
    return (task: () => void, options?: SchedulerOptions) => {
-      const update = $activeUpdate()
+      const cycle = $currentCycle()
       return $schedule(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(task) {
             const effect = new Effect(task, phase)
-            update.cycle.scheduleEffect(effect)
+            cycle.scheduleEffect(effect)
+            
             return effect;
          },
          remove(effect: Effect) {
@@ -322,7 +323,7 @@ export function maybePostcycleTask(task: Task, phase: Phase) {
    return phase === phases.length ? postcycleTask(task) : task;
 }
 
-function postcycleTask(task: Task) {
+export function postcycleTask(task: Task) {
    function delayed() { //TODO: need to cancel with action
       const id = requestIdleCallback(task, { timeout: 18 })
       // $action().onCancel(()=>cancelIdleCallback(id))

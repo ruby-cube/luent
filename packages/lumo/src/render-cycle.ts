@@ -1,5 +1,5 @@
 import { Flask, getFlask } from "@rue/flask"
-import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, getCurrentPhase, } from "@rue/quarky"
+import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, getCurrentPhase, postcycleTask, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 import { __DEV__getTrace, getInternalTrace, traceAsyncPath } from "../../flask/debug"
 
@@ -31,7 +31,7 @@ export const {
 // export const onPostrender = createEffectCycleHook(INTERNAL_POSTRENDER)
 
 
-export const atPrerender = useUpdateCycleScheduler(PRERENDER)
+export const queuePrerenderTask = useUpdateCycleScheduler(PRERENDER)
 
 
 export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
@@ -53,16 +53,12 @@ export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: need
 
 
 // export const queueInternalRender = useUpdateCycleScheduler(INTERNAL_RENDER)
-export const atRender = useUpdateCycleScheduler(RENDER)
-export const atPostrender = useUpdateCycleScheduler(INTERNAL_POSTRENDER)
+export const queueRenderTask = useUpdateCycleScheduler(RENDER)
+export const queueInternalPostrenderTask = useUpdateCycleScheduler(INTERNAL_POSTRENDER)
+export const queuePostrenderTask = (task: ()=>void)=>{
+   queueInternalPostrenderTask(postcycleTask(task))
+}
 
-
-//QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
-export const $postevent = createAwaitableHook(atPrerender)
-export const $internalrender = createAwaitableHook((fn: () => void) => queueInternalRender(fn, getFlask()))
-export const $renderphase = createAwaitableHook(atRender)
-export const $postrender = createAwaitableHook(atPostrender)
-// export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
 
 //NOTE: there may be multiple effect cycles per event
 // queueEffect (onPrerender)

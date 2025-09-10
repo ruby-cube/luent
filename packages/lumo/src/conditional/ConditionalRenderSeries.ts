@@ -106,7 +106,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          type: activationType,
          $condition: undefined
       })
-      
+
       const kits = toDynamicConditionalKits(statements)
       super(kits);
       if (__DEV__) this.context[TRACE] = this.__DEV__asyncPath
@@ -136,7 +136,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          }
       }
 
-      console.log('$$$ pod', this.dynamicPod)
    }
 
    mount( // the initial mount after setup
@@ -456,10 +455,10 @@ export function mountConditional(
    const _fragment = fragment || new DocumentFragment();
 
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
-   console.log('mount domnodes to fragment')
+   // console.trace('$$$ mount domnodes to fragment')
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
    queueInternalRender(() => {
-      console.log('mount domnodes to DOM')
+      // console.log('$$$ mount domnodes to DOM')
       mountDOMNodes(pod, parent, _fragment)
    }, flask)
 }

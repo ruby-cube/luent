@@ -1,5 +1,4 @@
 import { debug } from "@rue/utils";
-import { $renderphase } from "../render-cycle";
 import { getFlask } from "@rue/flask";
 
 type LifecycleTask = (element: Element, initialOrFinal: boolean) => void;
@@ -10,8 +9,8 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
       const task = hooks[key]
       switch (key) {
          case 'at:mounted':
-            flask.onInitialMount(async () => { await $renderphase(); task(node, true) })
-            flask.onRemount(async () => { await $renderphase(); task(node, true) })
+            flask.onInitialMount(async () => { task(node, true) })
+            flask.onRemount(async () => { task(node, true) })
             break;
          case 'at:unmount':
             flask.onDemount(() => task(node, false))

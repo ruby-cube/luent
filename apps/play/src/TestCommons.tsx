@@ -8,7 +8,7 @@ export function TestCommons() {
    return component(
       <>
          <h1>Something</h1>
-         <Commons provide={[['message', $message]]}>
+         <Commons provide={[['$message', $message]]}>
             <Child></Child>
          </Commons>
          <input value={$message} on:input={e => $message.state = e.target.value}></input>

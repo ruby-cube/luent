@@ -511,6 +511,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
                node.addEventListener(key, cb, options);
             },
             remove: (cb) => {
+               console.trace('^^^ removing inline event listener', handler)
                node.removeEventListener(key, cb, options);
             }
          })

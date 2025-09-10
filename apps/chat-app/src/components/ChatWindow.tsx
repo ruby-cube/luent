@@ -1,5 +1,5 @@
 import { atMounted, queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask } from "@rue/lumo";
-import { ion, Ion, Ionized, multisubject, ThrottlePointer, watch } from "@rue/quarky";
+import { ion, ThrottlePointer, watch } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
@@ -118,12 +118,14 @@ export function ChatWindow(input: FromTag<{
                ))}
             </div>
          )}
-         {If($hasUnseenMessages,
-            <div>
-               New messages below!
-               <button on:click={scrollToBottom}>⌄</button>
-            </div>
-         )}
+         <div>
+            {If($hasUnseenMessages, 'show', //FIX: without the outer div, the if series affects message form
+               <div>
+                  New messages below!
+                  <button on:click={scrollToBottom}>⌄</button>
+               </div>
+            )}
+         </div>
       </div>
    )
 }
