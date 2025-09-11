@@ -456,7 +456,11 @@ export function mountConditional(
 
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    // console.trace('$$$ mount domnodes to fragment')
-   if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
+   if (fragment) {
+      console.log('&&& mounted to fragment')
+      return; // no need to mount to DOM yet since fragment originates higher up
+   }
+   
    queueInternalRender(() => {
       // console.log('$$$ mount domnodes to DOM')
       mountDOMNodes(pod, parent, _fragment)

@@ -1,9 +1,9 @@
 //@ts--nocheck
-import { Commons, component, FromTag, Polymorph } from "@rue/lumo";
+import { Commons, component, FromTag, If, Polymorph } from "@rue/lumo";
 import { USER, User } from "../commons/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";
-import { Ionized } from "@rue/quarky";
+import { ion, Ion } from "@rue/quarky";
 
 export function FriendApp(input: FromTag<{
    user: User
@@ -21,6 +21,8 @@ export function FriendApp(input: FromTag<{
 
    const $openedApp = $App.Morphable('home')
 
+   const $active = ion(true)
+
    return component(
       <Commons provide={[USER(user)]}>
          <div>
@@ -28,7 +30,21 @@ export function FriendApp(input: FromTag<{
                <button on:click={() => $openedApp.as('chat')}>Chat</button>
             </Navbar>
             <$App as={$openedApp}></$App>
+            {/* <Testing active={$active}></Testing> */}
          </div>
       </Commons>
+   )
+}
+
+function Testing({ $active }: FromTag<{ 
+   active: Ion<boolean> 
+}>) {
+
+   return component(
+      <>
+         {If($active,
+            <div>hi</div>
+         )}
+      </>
    )
 }

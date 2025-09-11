@@ -87,6 +87,7 @@ export function TestPolymorph() {
       <>
          <div>
             {/* <$Main as={'peas'}></$Main> */}
+            <div>up above</div>
             <$Main as={$main}></$Main>
          </div>
          <button on:click={e => routeTo('/home')}>Home</button>

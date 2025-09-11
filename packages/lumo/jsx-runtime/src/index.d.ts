@@ -775,6 +775,7 @@ declare namespace React {
 
       // UI Events
       'on:scroll'?: UIEventHandler<T>;
+      'on:scrollend'?: UIEventHandler<T>;
 
       // Wheel Events
       'on:wheel'?: WheelEventHandler<T>;

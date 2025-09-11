@@ -71,6 +71,7 @@ const htmlEvents = new Set([
   "on:load",
   "on:resize",
   "on:scroll",
+  "on:scrollend",
   "on:wheel",
   
   // Touch Events

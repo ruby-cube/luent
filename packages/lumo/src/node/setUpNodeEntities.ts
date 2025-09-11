@@ -134,6 +134,7 @@ export function setUpNodeEntity(
       return jsxNode;
    }
    if (isDynamicKit(jsxNode)) {
+      console.log('dynamic kit', jsxNode)
       nodePod.push(jsxNode.dynamicPod)
       return jsxNode.setUp(parent);
    }
