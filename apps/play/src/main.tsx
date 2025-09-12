@@ -60,6 +60,7 @@ import { TestIonicTask } from './TestIonicTask';
 import { TestFiniteIon } from './TestFiniteIon';
 import { TestJSON } from './TestJSON';
 import { TestNestedConditional } from './TestNestedConditional';
+import { DebugLeakyFlask } from './DebugLeakyFlask';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -83,7 +84,7 @@ import { TestNestedConditional } from './TestNestedConditional';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TestPolymorph)
+const app = createApp(DebugLeakyFlask)
 
 app.mount('#app')
 

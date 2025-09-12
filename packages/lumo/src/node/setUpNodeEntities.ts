@@ -3,7 +3,7 @@ import { Component, DOMNode, isComponentKit } from "../component/Component";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { MatchCaseKit } from "../conditional/MatchCaseKit";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
-import { getGroupActivationType, JSXNode, RawJSXNode } from "./makeNode";
+import { getGroupActivationType, JSXNode, RawJSXNode } from "./makeJSXNode";
 import { createTextNode, setUpTextNode } from "./TextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./InnerHTML";
 import { NodePod } from "./NodePod";
@@ -134,7 +134,6 @@ export function setUpNodeEntity(
       return jsxNode;
    }
    if (isDynamicKit(jsxNode)) {
-      console.log('dynamic kit', jsxNode)
       nodePod.push(jsxNode.dynamicPod)
       return jsxNode.setUp(parent);
    }

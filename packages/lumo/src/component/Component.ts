@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { JSXNode, RawJSXNode } from "../node/makeNode";
+import { JSXNode, RawJSXNode } from "../node/makeJSXNode";
 import { Ion, toValue } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
 import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";

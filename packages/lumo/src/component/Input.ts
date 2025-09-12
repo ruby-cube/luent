@@ -3,7 +3,7 @@
 // does not have higher order generics, this is not currently possible. Must manually type them all.
 
 import { Ion, isIon, MutableIon } from "@rue/quarky";
-import { AsyncState } from "@rue/flask";
+// import { AsyncState } from "@rue/flask";
 
 export type HandleEvent<E = {}> = keyof E extends never ? (() => void)|((event: E) => void) : (event: E) => void
 
@@ -11,7 +11,7 @@ export const MU_IONS = 'mu_ions'
 
 export const MU = Symbol('mu')
 
-export const [getActiveMuIons, muIonsStack] = AsyncState<Set<Ion>>(MU_IONS)
+// export const [getActiveMuIons, muIonsStack] = AsyncState<Set<Ion>>(MU_IONS)
 
 export function assertMutableIon(value: unknown): asserts value is MutableIon<unknown> {
    if (!isIon(value) || !('state' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion')

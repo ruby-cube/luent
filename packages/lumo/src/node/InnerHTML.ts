@@ -1,8 +1,8 @@
 import { isIon, __DEV__checkIfTracked, watch, Ion, toValue } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
-import { JSXNode } from "./makeNode";
+import { JSXNode } from "./makeJSXNode";
 import { MaybeIon } from "../component/Input";
-import { INTERNAL_RENDER, PRERENDER, queueInternalRender, watchToRender } from "../render-cycle";
+import { INTERNAL_RENDER, PRERENDER, queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { getFlask } from "@rue/flask";
 
 
@@ -23,7 +23,7 @@ export function mountInnerHTML(htmlString: MaybeIon<any>, parent: Element) {
 function keepInnerHTMLUpdated(htmlString: Ion<any>, parentNode: Element) {
    const flask = getFlask()
    watchToRender(htmlString, ({ current }) => {
-      queueInternalRender(() => {
+      queueInternalRenderTask(() => {
          parentNode.innerHTML = toString(current);
       }, flask)
    }, flask);

@@ -6,13 +6,13 @@
 // - derived signal with memo
 
 
-import { component } from "@rue/lumo"
-import { ion, ionicTask, ionize } from "@rue/quarky"
+import { component, FromTag } from "@rue/lumo"
+import { Ion, ion, ionicTask, ionize } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
       <>
-         <TestCount></TestCount>
+         <TestCount mu:apple={$apple}></TestCount>
          {/* <hr></hr> */}
          <TestThisCount></TestThisCount>
          <hr></hr>
@@ -69,8 +69,13 @@ function TestIon() {
    )
 }
 
+type TestCountInput = FromTag<{
+   'mu?:apple': Ion<string>
+}>
 
-export function TestCount() {
+export function TestCount({ $apple, mu }: TestCountInput) {
+
+   if (mu($apple)) $apple.state = "i"
 
    const $count = ion(0)
 

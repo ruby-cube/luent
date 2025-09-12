@@ -2,7 +2,7 @@ import { AsyncState } from "../../../flask/context/AsyncContext";
 import { NodeCommons } from "./Commons";
 import { AppCommons } from "./provide";
 
-export type Commons = NodeCommons | AppCommons
+export type CommonsNode = NodeCommons | AppCommons
 
 // manage commons stack
 // let currentContext: Commons | undefined;
@@ -17,7 +17,7 @@ export type Commons = NodeCommons | AppCommons
 // must be wrapped with its commons with push and pop for when they run asynchronously
 // However, it must NOT push and pop commons for its initial render.
 
-export function pushCommons(commons: Commons | undefined) {
+export function pushCommons(commons: CommonsNode | undefined) {
    if (!commons) throw new Error(`Provider is undefined`)
    // previousContext = currentContext;
    // currentContext = commons;
@@ -38,7 +38,7 @@ export function getCommons() {
 
 export const COMMONS = 'commons'
 
-export const [getClosestCommons, commonsStack] = AsyncState<Commons>(COMMONS)
+export const [getClosestCommons, commonsStack] = AsyncState<CommonsNode>(COMMONS)
 
 
 

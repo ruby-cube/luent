@@ -52,18 +52,23 @@ export class ThisFlask {
    //    return this.flask.onInitialMount;
    // }
 
-   // get onRemount() {
-   //    return this.flask.onRemount
-   // }
+   atRemounted(task: () => void) {
+      return this.flask.onRemount(task)
+   }
 
+   
    atMounted(task: (initial: boolean) => void) {
       this.flask.onInitialMount(() => task(true))
       this.flask.onRemount(() => task(false))
    }
-
+   
    atUnmount(task: (final: boolean) => void) {
       this.flask.onDemount(() => task(false))
       this.flask.onDiscard(() => task(true))
+   }
+
+   atDemount(task: () => void) {
+      return this.flask.onDemount(task)
    }
 
    // get onDemount() {

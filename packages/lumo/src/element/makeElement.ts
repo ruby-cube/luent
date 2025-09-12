@@ -1,7 +1,7 @@
 import { DOMNode } from "../component/Component";
 import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation_ion } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
-import { ClassInput, ElementConfig, makeNode, JSXNode, StyleInput, RawJSXNode } from "../node/makeNode";
+import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { isHydrating } from "../hydration/hydration";
@@ -16,7 +16,7 @@ import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
-import { INTERNAL_RENDER, queueInternalRender, RUN_EAGERLY, watchToRender } from "../render-cycle";
+import { INTERNAL_RENDER, queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../render-cycle";
 import { RenderSlot } from "../component/fromTag";
 
 
@@ -74,13 +74,13 @@ export function makeElement(
          const flattenedOutput = flattenJSXOutput(rawOutput)
          if (isInnerHTMLKit(rawOutput[0])) {
             const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
-            // queueInternalRender(() => {
+            // queueInternalRenderTask(() => {
             mountInnerHTML(innerHTML, domNode)
             // }, getFlask())
          }
          else {
             const nodeEntities = setUpNodeEntities(flattenedOutput, domNode, new NodePod())
-            // queueInternalRender(() => {
+            // queueInternalRenderTask(() => {
             mountNodeEntities(nodeEntities, domNode)
             // }, getFlask())
          }
@@ -234,7 +234,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    const ion = attributes['mu:value'];
    const flask = getFlask()
    watchToRender(ion, () => {
-      queueInternalRender(() => {
+      queueInternalRenderTask(() => {
          element.value = toString(ion())
       }, flask)
    }, flask, RUN_EAGERLY)
@@ -258,7 +258,7 @@ function bindTextarea(element: Element, Slot: RenderSlot | undefined) {
    const ion = kit.mu;
    const flask = getFlask()
    watchToRender(ion, () => {
-      queueInternalRender(() => {
+      queueInternalRenderTask(() => {
          element.value = toString(ion())
       }, flask)
    }, flask, RUN_EAGERLY)
@@ -319,7 +319,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
          watchToRender(value, ({ current }) => {
-            queueInternalRender(() => {
+            queueInternalRenderTask(() => {
                setAttribute(node, _key, current)
             }, flask)
          }, flask, RUN_EAGERLY)
@@ -535,7 +535,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
    for (const entry of classes) {
       if (isIon(entry)) {
          watchToRender(entry, ({ previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
-            queueInternalRender(() => {
+            queueInternalRenderTask(() => {
                const current = entry()
                if (previous) removePreviousClasses(previous, classList)
                if (current) addClasses(current, classList, flask)
@@ -595,7 +595,7 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       const value = entry[key]
       if (isIon(value)) {
          watchToRender(value, ({ previous }) => {
-            queueInternalRender(() => {
+            queueInternalRenderTask(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
             }, flask)
@@ -635,7 +635,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    for (const entry of styles) {
       if (isIon(entry)) {
          watchToRender(entry, ({ current }) => {
-            queueInternalRender(() => {
+            queueInternalRenderTask(() => {
                setUpStyleEntry(style, current, flask);
             }, flask)
          }, flask, RUN_EAGERLY)
@@ -653,7 +653,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
             watchToRender(value, ({ current }) => {
-               queueInternalRender(() => {
+               queueInternalRenderTask(() => {
                   assignStyleProperty(style, toStylePropertyName(key), current)
                }, flask)
             }, flask, RUN_EAGERLY)

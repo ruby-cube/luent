@@ -60,8 +60,8 @@ export class User {
       readonly id: string,
       public name: string,
       public email: string,
+      db: Firestore
    ) {
-      const db = fromGlobal('db') as Firestore
       getUserData(id, db).then((userData) => {
          this.userData = ionize(userData.data() as { lastSeenMessageID: string | null })
 
@@ -156,7 +156,7 @@ export function onLoggedIn(task: (user: User | null) => void) {
          }
          if (__DEV__ && (!authorizedUser.displayName || !authorizedUser.email)) throw new Error('display name or email missing')
 
-         const user = new User(authorizedUser.uid, authorizedUser.displayName!, authorizedUser.email!)
+         const user = new User(authorizedUser.uid, authorizedUser.displayName!, authorizedUser.email!, db)
          task(user)
       }
    })

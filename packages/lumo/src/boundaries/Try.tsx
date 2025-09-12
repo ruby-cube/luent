@@ -1,4 +1,4 @@
-import { RawJSXNode, RenderFunction } from "../node/makeNode";
+import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 
 export function Try(render: RenderFunction | RawJSXNode) {
    return render;

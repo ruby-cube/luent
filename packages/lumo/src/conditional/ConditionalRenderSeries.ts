@@ -9,29 +9,34 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask, getFlask } from "@rue/flask";
-import { queueInternalRender, PRERENDER, RENDER, SYNC, watchToRender } from "../render-cycle";
+import { queueInternalRenderTask, PRERENDER, RENDER, SYNC, watchToRender } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
+import { RenderFunction, withGroupActivationReset } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { MaybeIon } from "../component/Input";
 import { ConditionalSeriesKit, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
+import { createCommonsNode } from "../commons/Commons";
+import { COMMONS } from "../commons/commons-stack";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
 //TODO: rename TransitionNode to ???
-// function queueInternalRender(fn){
+// function queueInternalRenderTask(fn){
 //    fn()
 // }
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, $condition?: Ion<Booleanny>): DynamicConditionalRenderKit {
-   const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition?: Ion<Booleanny>): DynamicConditionalRenderKit {
+   const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() //TODO:
+
+   const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
+
 
    return {
       nodePod: undefined as unknown as NodePod,
       flask: undefined as Flask | undefined,
       statementType: statementType as 'if' | 'elseIf' | 'else',
-      renderConditional: toRenderTransient(render, [REGISTER_TRANSITION_NODE(registerTransitionNode)]),
+      renderConditional: toRenderTransient(render, context, commons),
       type: activationType,
       transitionNodes,
       $condition
@@ -40,12 +45,12 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
    }
 }
 
-function toDynamicConditionalKits(kits: ConditionalKit[]): DynamicConditionalRenderKit[] {
+function toDynamicConditionalKits(kits: ConditionalKit[], context: ContextSnapshot): DynamicConditionalRenderKit[] {
    const dynamicKits = []
    for (const kit of kits) {
       if (!kit) continue;
       const { $condition, renderConditional, statementType, type } = kit
-      dynamicKits.push(createDynamicConditionalKit(statementType, type, renderConditional, $condition))
+      dynamicKits.push(createDynamicConditionalKit(statementType, type, renderConditional, context, $condition))
    }
    return dynamicKits;
 }
@@ -86,12 +91,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    declare statements: (DynamicConditionalRenderKit | undefined)[];
 
    // store contextual state
-   context: ContextSnapshot = $_snap_context()
+   context: ContextSnapshot;
    outerFlask: Flask = getFlask()
    phasicNode: TransitionNode | null = getPhasicNode()
 
    dynamicPod: DynamicPod = new NodePod()
-   __DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
 
    /* We render all show statements eagerly to prevent buggy rendering */
    showKits: DynamicConditionalRenderKit[] | undefined
@@ -106,10 +110,13 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          type: activationType,
          $condition: undefined
       })
+      const context = $_snap_context()
+      console.log('context', context)
+      const kits = toDynamicConditionalKits(statements, { ...context })
 
-      const kits = toDynamicConditionalKits(statements)
       super(kits);
-      if (__DEV__) this.context[TRACE] = this.__DEV__asyncPath
+
+      this.context = context;
 
       // populate dynamic node pod
       // 'create' kits share a single node pod
@@ -370,11 +377,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    private render(kit: DynamicConditionalRenderKit, parent: Element, fragment?: DocumentFragment) {
       const context = { ...this.context };
       const flask = kit.flask
-      if (flask) context[FLASK] = flask; //NOTE: flask is optional b/c/ show kits don't need flask
 
       $_run_with_(context, () => {
          const nodeEntities = kit.renderConditional(parent, kit.nodePod)
          mountConditional(parent, kit.nodePod, nodeEntities, this.outerFlask, fragment);
+      }, {
+         [FLASK]: flask
       })
    }
 
@@ -384,7 +392,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const pod = kit.nodePod!
       const activationType = kit.type
       if (activationType === 'show') {
-         queueInternalRender(() => {
+         queueInternalRenderTask(() => {
             // preserve dynamic node and node pod
             hideDOMNodes(pod);
          }, this.outerFlask)
@@ -395,7 +403,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          kit.flask = undefined; // 
          flask.emitDiscard() //
 
-         queueInternalRender(() => {
+         queueInternalRenderTask(() => {
             removeDOMNodes(pod)
             pod.clear() //
          }, this.outerFlask)
@@ -403,7 +411,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       else if (activationType === 'remount') {
          const flask = kit.flask
          flask?.emitDemount() //
-         queueInternalRender(() => {
+         queueInternalRenderTask(() => {
             removeDOMNodes(pod);
          }, this.outerFlask)
       }
@@ -418,18 +426,18 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       if (!kit) return;
       const activationType = kit.type
       const nodePod = kit.nodePod
+      const isInitialMount = kit.flask === undefined
 
-      if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
-         queueInternalRender(() => {
+      if (activationType === 'show' && !isInitialMount) { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
+         queueInternalRenderTask(() => {
             showDOMNodes(nodePod)
          }, this.outerFlask)
          return;
       }
 
-      const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
 
-      queueInternalRender(() => {
+      queueInternalRenderTask(() => {
          this.render(kit, parent, fragment)
          nodePod.activate() // needs to be queued since deactivation is also queued
          if (isInitialMount)
@@ -455,13 +463,11 @@ export function mountConditional(
    const _fragment = fragment || new DocumentFragment();
 
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
-   // console.trace('$$$ mount domnodes to fragment')
    if (fragment) {
-      console.log('&&& mounted to fragment')
       return; // no need to mount to DOM yet since fragment originates higher up
    }
-   
-   queueInternalRender(() => {
+
+   queueInternalRenderTask(() => {
       // console.log('$$$ mount domnodes to DOM')
       mountDOMNodes(pod, parent, _fragment)
    }, flask)

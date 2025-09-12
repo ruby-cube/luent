@@ -119,7 +119,7 @@ export function RoboCard(input : FromTag<{
 
    // const $swamp = fromCommons(SWAMP)
 
-   // const $swamp = fromCommons(MU_(SWAMP))
+   // const $swamp = fromCommons(MU(SWAMP))
 
 
    // function updateEmail() {

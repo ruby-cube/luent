@@ -2,7 +2,7 @@ import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToInterse
 import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, MutableIon, neutron, toIon, toValue, } from "@rue/quarky";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { assertMutableIon, MU, getActiveMuIons } from "./Input";
-import { JSXNode, RawJSXNode } from "../node/makeNode";
+import { JSXNode, RawJSXNode } from "../node/makeJSXNode";
 
 // two types of component input
 // - commons input
@@ -123,15 +123,18 @@ export function toInput(attributes: AnyObject) {
       return handler(eventObject)
    }
 
-   const muIons = getActiveMuIons()
-   if (!muIons) throw new Error('muIons missing')
+   const muIons = new Set()
+
+   function isMutableIon(value: unknown) {
+      return muIons.has(value); //TODO: what about fromCommons?
+   }
 
    return new Proxy(attributes, {
       get(target, key) {
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return emit;
          if (key === '_raw_') return { ...attributes };
-         if (key === 'mu') return target[MU];
+         if (key === 'mu') return isMutableIon;
          if (key === 'Slot') return target.children // TODO: Is this correct??
          if (isIonKey(key)) {
             const ionKeyToAttributeKey = (key: string) => key.slice(1)
@@ -150,8 +153,8 @@ export function toInput(attributes: AnyObject) {
             const muIonKey = 'mu:' + attributeKey
             if (muIonKey in target) {
                const value = target[muIonKey]
-               muIons.add(value)
                assertMutableIon(value)
+               muIons.add(value)
                return value;
             }
             return undefined; // optional

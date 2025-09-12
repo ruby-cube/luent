@@ -1,5 +1,5 @@
 import { unnestComponent } from "../component/Component";
-import { Commons as CommonsType, getClosestCommons, popCommons, pushCommons } from "./commons-stack";
+import { CommonsNode, getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
 import { CommonsEntryKey, toCommonsKey } from "./CommonsKey";
@@ -24,14 +24,12 @@ export function Commons(
    }>
 ) {
    if (!Slot) debug.warn(`Extraneous <Commons>`)
-   return callWithCommons(Slot, provide)
+   return callWithCommons(Slot, createCommonsNode(provide))
 }
 
-
-export function callWithCommons(
-   Slot: RenderSlot,
+export function createCommonsNode(
    provide: Provided,
-   parentCommons: CommonsType | undefined = getClosestCommons(),
+   parentCommons: CommonsNode | undefined = getClosestCommons(),
 ) {
    if (!parentCommons) {
       debug.traceAsyncPath()
@@ -45,6 +43,15 @@ export function callWithCommons(
       global: parentCommons?.global,
       muIons
    }
+   return commons;
+}
+
+
+export function callWithCommons(
+   Slot: RenderSlot,
+   commons: CommonsNode
+) {
+
    pushCommons(commons)
    const nodeEntities = Slot()
    popCommons()
@@ -54,8 +61,9 @@ export function callWithCommons(
 export function wrapWithCommons(
    Slot: RenderSlot,
    provide: Provided) {
+   const commons = createCommonsNode(provide)
    return (arg: any) => {
-      return callWithCommons(() => Slot(arg), provide)
+      return callWithCommons(() => Slot(arg), commons)
    }
 }
 

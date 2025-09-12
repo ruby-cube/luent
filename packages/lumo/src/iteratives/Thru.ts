@@ -1,5 +1,5 @@
 import { ion, Ion, toIon, toValue } from "@rue/quarky"
-import { JSXNode } from "../node/makeNode"
+import { JSXNode } from "../node/makeJSXNode"
 import { MaybeIon } from "../component/Input"
 import { NodePod } from "../node/NodePod"
 

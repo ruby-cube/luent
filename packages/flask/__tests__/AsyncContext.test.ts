@@ -17,7 +17,7 @@ describe('async context', () => {
 
       function renderWithoutApple() {
          const apple = getActiveApple()
-         expect(apple).toBe(undefined)
+         expect(apple).toBeFalsy()
       }
 
       renderWithoutApple()
@@ -40,14 +40,14 @@ describe('async context', () => {
 
       function renderWithFruit() {
          const context = $_snap_context()
-         expect(context.get(APPLE)).toBe(appleValue)
-         expect(context.get(PEACH)).toBe(peachValue)
+         expect(context[APPLE]).toBe(appleValue)
+         expect(context[PEACH]).toBe(peachValue)
       }
 
       function renderWithoutFruit() {
          const context = $_snap_context()
-         expect(context.get(APPLE)).toBe(undefined)
-         expect(context.get(PEACH)).toBe(undefined)
+         expect(context[APPLE]).toBeFalsy()
+         expect(context[PEACH]).toBeFalsy()
       }
 
       renderWithoutFruit()
@@ -74,14 +74,14 @@ describe('async context', () => {
 
       function renderWithFruit() {
          context = $_snap_context()
-         expect(context.get(APPLE)).toBe(appleValue)
-         expect(context.get(PEACH)).toBe(peachValue)
+         expect(context[APPLE]).toBe(appleValue)
+         expect(context[PEACH]).toBe(peachValue)
       }
 
       function renderWithoutFruit() {
          const context = $_snap_context()
-         expect(context.get(APPLE)).toBe(undefined)
-         expect(context.get(PEACH)).toBe(undefined)
+         expect(context[APPLE]).toBeFalsy()
+         expect(context[PEACH]).toBeFalsy()
       }
 
       function renderAsyncWithFruit() {
@@ -117,18 +117,19 @@ describe('async context', () => {
       const appleValue = ':)'
       const peachValue = '<3'
       const thumbValue = ';]'
-      let context: any;
+
+      let context: any
 
       function renderWithFruit() {
          context = $_snap_context()
-         expect(context.get(APPLE)).toBe(appleValue)
-         expect(context.get(PEACH)).toBe(peachValue)
+         expect(context[APPLE]).toBe(appleValue)
+         expect(context[PEACH]).toBe(peachValue)
       }
 
       function renderWithoutFruit() {
          const context = $_snap_context()
-         expect(context.get(APPLE)).toBe(undefined)
-         expect(context.get(PEACH)).toBe(undefined)
+         expect(context[APPLE]).toBeFalsy()
+         expect(context[PEACH]).toBeFalsy()
       }
 
       function renderAsyncWithFruit() {
@@ -138,10 +139,11 @@ describe('async context', () => {
          expect(apple).toBe(appleValue)
          expect(peach).toBe(peachValue)
          expect(thumb).toBe(thumbValue)
+
          const context = $_snap_context()
-         expect(context.get(APPLE)).toBe(appleValue)
-         expect(context.get(PEACH)).toBe(peachValue)
-         expect(context.get(THUMB)).toBe(thumbValue)
+         expect(context[APPLE]).toBe(appleValue)
+         expect(context[PEACH]).toBe(peachValue)
+         expect(context[THUMB]).toBe(thumbValue)
       }
 
       renderWithoutFruit()
@@ -154,15 +156,16 @@ describe('async context', () => {
 
       context[THUMB]= thumbValue
       $_run_with_(context, renderAsyncWithFruit)
+
       const outsideApple = getActiveApple()
       const outsidePeach = getActivePeach()
       const outsideThumb = getActiveThumb()
-      expect(outsideApple).toBe(undefined)
-      expect(outsidePeach).toBe(undefined)
-      expect(outsideThumb).toBe(undefined)
+      expect(outsideApple).toBeFalsy()
+      expect(outsidePeach).toBeFalsy()
+      expect(outsideThumb).toBeFalsy()
    })
 
-   test('AsyncState nesting', () => {
+   test('AsyncState synchronous nesting', () => {
 
       const APPLE = 'apple'
 
@@ -203,7 +206,7 @@ describe('async context', () => {
 
       function renderWithoutApple() {
          const apple = getActiveApple()
-         expect(apple).toBe(undefined)
+         expect(apple).toBeFalsy()
       }
 
       renderWithoutApple()
@@ -213,7 +216,7 @@ describe('async context', () => {
       renderWithoutApple()
    })
 
-   test('AsyncState nesting with context', () => {
+   test('AsyncState synchronous nesting with context', () => {
 
       const APPLE = 'apple'
 
@@ -225,7 +228,7 @@ describe('async context', () => {
 
       function renderWithAppleRoot() {
          const context = $_snap_context()
-         const apple = context.get(APPLE)
+         const apple = context[APPLE]
          expect(apple).toBe(appleValueA)
 
          appleStack.push(appleValueB)
@@ -233,13 +236,13 @@ describe('async context', () => {
          appleStack.pop()
 
          const context2 = $_snap_context()
-         const apple2 = context2.get(APPLE)
+         const apple2 = context2[APPLE]
          expect(apple2).toBe(appleValueA)
 
       }
       function renderWithAppleParent() {
          const context = $_snap_context()
-         const apple = context.get(APPLE)
+         const apple = context[APPLE]
          expect(apple).toBe(appleValueB)
 
          appleStack.push(appleValueC)
@@ -247,20 +250,20 @@ describe('async context', () => {
          appleStack.pop()
 
          const context2 = $_snap_context()
-         const apple2 = context2.get(APPLE)
+         const apple2 = context2[APPLE]
          expect(apple2).toBe(appleValueB)
       }
 
       function renderWithAppleChild() {
          const context = $_snap_context()
-         const apple = context.get(APPLE)
+         const apple = context[APPLE]
          expect(apple).toBe(appleValueC)
       }
 
       function renderWithoutApple() {
          const context = $_snap_context()
-         const apple = context.get(APPLE)
-         expect(apple).toBe(undefined)
+         const apple = context[APPLE]
+         expect(apple).toBeFalsy()
       }
 
       renderWithoutApple()
@@ -271,7 +274,7 @@ describe('async context', () => {
    })
 
 
-   test('AsyncState nesting with context, $run_with, add to', () => {
+   test.only('AsyncState nesting with context, $run_with, add to', () => {
 
       const APPLE = 'apple'
       const BUBBLE = 'bubble'
@@ -285,7 +288,7 @@ describe('async context', () => {
 
       function renderWithAppleRoot() {
          const context = $_snap_context()
-         const apple = context.get(APPLE)
+         const apple = context[APPLE]
          expect(apple).toBe(appleValueA)
 
          appleStack.push(appleValueB)
@@ -293,13 +296,13 @@ describe('async context', () => {
          appleStack.pop()
 
          const context2 = $_snap_context()
-         const apple2 = context2.get(APPLE)
+         const apple2 = context2[APPLE]
          expect(apple2).toBe(appleValueA)
 
       }
       function renderWithAppleParent() {
          const context = $_snap_context()
-         const apple = context.get(APPLE)
+         const apple = context[APPLE]
          expect(apple).toBe(appleValueB)
 
          appleStack.push(appleValueC)
@@ -307,7 +310,7 @@ describe('async context', () => {
          appleStack.pop()
 
          const context2 = $_snap_context()
-         const apple2 = context2.get(APPLE)
+         const apple2 = context2[APPLE]
          expect(apple2).toBe(appleValueB)
       }
 
@@ -315,23 +318,23 @@ describe('async context', () => {
 
       function renderWithAppleChild() {
          childContext = $_snap_context()
-         const apple = childContext.get(APPLE)
+         const apple = childContext[APPLE]
          expect(apple).toBe(appleValueC)
       }
 
       function renderWithoutApple() {
          const context = $_snap_context()
-         const apple = context.get(APPLE)
-         expect(apple).toBe(undefined)
+         const apple = context[APPLE]
+         expect(apple).toBeFalsy()
       }
 
       const bubbleValue = 'ooo'
 
       function renderAsync(){
          childContext = $_snap_context()
-         const apple = childContext.get(APPLE)
+         const apple = childContext[APPLE]
          expect(apple).toBe(appleValueC)
-         const bubble = childContext.get(BUBBLE)
+         const bubble = childContext[BUBBLE]
          expect(bubble).toBe(bubbleValue)
       }
 
@@ -344,4 +347,5 @@ describe('async context', () => {
       childContext[BUBBLE]= bubbleValue
       $_run_with_(childContext, renderAsync)
    })
+
 })

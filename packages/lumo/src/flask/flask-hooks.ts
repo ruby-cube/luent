@@ -34,6 +34,14 @@ export function atUnmount(task: (final: boolean) => void) {
    $thisFlask().atUnmount(task);
 }
 
+export function onRemounted(task: () => void) {
+   $thisFlask().atRemounted(task);
+}
+
+export function onDemount(task: () => void) {
+   $thisFlask().atDemount(task);
+}
+
 // export function onDemount(task: () => void) {
 //    $thisFlask().onDemount(task);
 // }

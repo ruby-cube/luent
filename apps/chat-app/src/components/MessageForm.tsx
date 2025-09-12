@@ -5,20 +5,20 @@ import './message-form.css'
 import { Timestamp } from "firebase/firestore";
 import { Message } from "../database/database";
 
-
-export function MessageForm(input: FromTag<{
+type MessageFormInput = FromTag<{
    user: User,
    'can:postMessage': (message: Message) => void
-}>) {
-   const { user, postMessage } = input
+}>
+
+export function MessageForm({
+   user,
+   postMessage
+}: MessageFormInput) {
 
    const $message = ion('')
-   // const $error = ion(null as string | null)
 
    async function reKeydown(e: KeyboardEvent & any) {
-      console.log('*** reKeydown')
       if (e.key !== 'Enter') {
-         // if ($error()) $error.state = null;
          return;
       }
       e.preventDefault();
@@ -32,18 +32,6 @@ export function MessageForm(input: FromTag<{
       })
 
       $message.state = ''
-
-      // const response = await postChatMessage({
-      //    name: user.name,
-      //    text: $message()
-      // })
-
-      // if (response.error) {
-      //    $error.state = response.error
-      // }
-      // else {
-      //    $message.state = ''
-      // }
    }
 
    return component(
@@ -53,9 +41,6 @@ export function MessageForm(input: FromTag<{
             on:keydown={reKeydown}
             mu:value={$message}
          ></textarea>
-         {/* {If($error,
-            <div class='error'>{$error}</div>
-         )} */}
       </form>
    )
 }

@@ -1,6 +1,6 @@
 import { getCommons } from "../commons/commons-stack";
 import { MaybeIon } from "../component/Input";
-import { JSXNode, normalizeToRenderFunction, RawJSXNode } from "../node/makeNode";
+import { JSXNode, normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListRenderKit } from "./ListRenderKit";
 import { Ion, IonizeBy, Ionized, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toValue } from "@rue/quarky";
 

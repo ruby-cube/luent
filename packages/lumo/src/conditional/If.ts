@@ -1,4 +1,4 @@
-import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, withGroupActivationReset } from "../node/makeNode";
+import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, withGroupActivationReset } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { Ion, isInertIon, isIon, toValue } from "@rue/quarky";
 import { ConditionalKit, ConditionalRenderSeries } from "./ConditionalRenderSeries";

@@ -8,7 +8,7 @@ import { AnyObject, Booleanny } from "@rue/types";
 import { Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { MaybeIon } from "../component/Input";
-import { Commons, Provided, callWithCommons } from "../commons/Commons";
+import { Commons, Provided, callWithCommons, createCommonsNode } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
 import { FromTag, RenderSlot } from "../component/fromTag";
 import { getClosestCommons } from "../commons/commons-stack";
@@ -22,7 +22,7 @@ import { DynamicKit } from "../dynamic/DynamicKit";
 // export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpiler should compile children to function
 //    console.log("JSX!!!")
 //    const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
-//    return makeNode(tag, _children, config || {})
+//    return makeJSXNode(tag, _children, config || {})
 // }
 
 declare global {
@@ -116,12 +116,12 @@ export function withGroupActivationReset(Slot: RenderSlot) {
    }
 }
 
-export function wrapWithActivationType(type: ActivationType, Slot: RenderSlot, provide: Provided | undefined) {
+export function callWithActivationType(type: ActivationType, Slot: RenderSlot, provide: Provided | undefined) {
    outerGroupActivationType = groupActivationType
    groupActivationType = type;
    try {
       if (provide)
-         return callWithCommons(Slot, provide)
+         return callWithCommons(Slot, createCommonsNode(provide))
       return Slot()
    }
    finally {
@@ -139,21 +139,11 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | 
    return () => slot;
 }
 
-// function wrapWithContext(slot: Function) {
-//    const outerContext = getCommons()
-//    return () => {
-//       pushCommons(outerContext)
-//       try {
-//          return slot()
-//       } finally {
-//          popCommons()
-//       }
-//    }
-// }
+
 
 type SVGTag = keyof SVGElementTagNameMap
 
-export function makeNode(
+export function makeJSXNode(
    nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-demount' | 'show-hide',
    Slot: undefined | (() => JSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
@@ -168,11 +158,11 @@ export function makeNode(
 
       case 'show-hide':
          if (!Slot) throw new Error(`Extraneous <show-hide>`)
-         return wrapWithActivationType('show', Slot, config.provide)
+         return callWithActivationType('show', Slot, config.provide)
 
       case 'remount-demount':
          if (!Slot) throw new Error(`Extraneous <remount-demount>`)
-         return wrapWithActivationType('remount', Slot, config.provide)
+         return callWithActivationType('remount', Slot, config.provide)
 
       default:
          if (typeof nodeType === 'string') {

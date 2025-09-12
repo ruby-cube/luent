@@ -34,25 +34,25 @@ export const {
 export const queuePrerenderTask = useUpdateCycleScheduler(PRERENDER)
 
 
-export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
+export function queueInternalRenderTask(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
    if (getCurrentPhase() === INTERNAL_RENDER) {
       fn()
       return;
    }
-      fn.__DEVName = 'queueInternalRender'
+      fn.__DEVName = 'queueInternalRenderTask'
       fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)
    $activeUpdate().cycle.scheduleEffect(effect)
    flask.onDiscard(() => effect.destroy())
 }
 
-// export const queueInternalRender = (fn: Function) => {
+// export const queueInternalRenderTask = (fn: Function) => {
 //    console.log('running internal render'),
 //    fn()
 // }
 
 
-// export const queueInternalRender = useUpdateCycleScheduler(INTERNAL_RENDER)
+// export const queueInternalRenderTask = useUpdateCycleScheduler(INTERNAL_RENDER)
 export const queueRenderTask = useUpdateCycleScheduler(RENDER)
 export const queueInternalPostrenderTask = useUpdateCycleScheduler(INTERNAL_POSTRENDER)
 export const queuePostrenderTask = (task: ()=>void)=>{

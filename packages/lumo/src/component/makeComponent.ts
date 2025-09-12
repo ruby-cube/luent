@@ -1,8 +1,6 @@
 import { Component, ComponentSetup, exposeComponent } from "./Component";
-import { ComponentConfig, JSXNode } from "../node/makeNode";
-import { AnyObject } from "@rue/types";
+import { ComponentConfig, JSXNode } from "../node/makeJSXNode";
 import { Ion, neutron } from "@rue/quarky";
-import { assertMutableIon, MU, muIonsStack } from "./Input";
 import { toInput } from "./fromTag";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
@@ -41,26 +39,15 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 export function makeComponent(
    Component: ComponentSetup,
    Slot: InferSlot | undefined,
-   config: ComponentConfig,
+   tag: ComponentConfig,
    $index: Ion<number> | undefined
 ): Component {
    //TODO: component flask lifecycle hooks
-   const muIons: Set<Ion> = new Set()
-   const attributes = {
-      ...config,
-      Slot,
-      [MU](ion: Ion) {
-         return muIons?.has(ion)
-      }
-   }
-   // setComponentAttributes(attributes)
-   muIonsStack.push(muIons)
-   const output = Component(toInput(attributes))
+   tag.Slot = Slot;
+   const output = Component(toInput(tag))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
-   // setComponentAttributes(undefined);
-   muIonsStack.pop()
-   if (config.ref) exposeComponent(output.exposed ?? {}, config.ref, $index)
+   if (tag.ref) exposeComponent(output.exposed ?? {}, tag.ref, $index)
    return output
 }
 

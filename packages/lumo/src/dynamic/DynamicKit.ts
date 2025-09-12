@@ -1,12 +1,12 @@
 import { isObject } from "@rue/utils";
-import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
-import {  NodeEntity, processJSXOutput } from "../node/setUpNodeEntities";
+import { RenderFunction, withGroupActivationReset } from "../node/makeJSXNode";
+import { NodeEntity, processJSXOutput } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod } from "../node/NodePod";
-import { getClosestCommons } from "../commons/commons-stack";
-import { Provided, callWithCommons } from "../commons/Commons";
-import { Flask } from "@rue/flask";
+import { COMMONS, CommonsNode } from "../commons/commons-stack";
+import { $_run_with_, ContextSnapshot, Flask } from "@rue/flask";
 import { TransitionNode } from "../transition/TransitionNode";
 import { AnyObject } from "@rue/types";
+import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
 
 
@@ -14,11 +14,10 @@ import { AnyObject } from "@rue/types";
 
 export type RenderTransient = (parent: Element, nodePod: NodePod) => NodeEntity[]
 
-export function toRenderTransient(renderConditional: RenderFunction, provide: Provided): RenderTransient {
-   const parentCommons = getClosestCommons()
-   if (!parentCommons) throw new Error('commons missing')
+export function toRenderTransient(renderConditional: RenderFunction, context: ContextSnapshot, commons: CommonsNode): RenderTransient {
+   const __DEV__trace = __DEV__ ? __DEV__buildAsyncPath(): ''
    return (parent: Element, nodePod: NodePod, input?: Object) =>
-      processJSXOutput(callWithCommons(() => withGroupActivationReset(() => renderConditional(input)), provide, parentCommons), parent, nodePod)
+      processJSXOutput($_run_with_(context, () => withGroupActivationReset(() => renderConditional(input)), { [COMMONS]: commons, [TRACE]: __DEV__trace }), parent, nodePod)
 }
 
 export interface DynamicKit {

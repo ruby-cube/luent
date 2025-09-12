@@ -1,92 +1,129 @@
-export type ContextSnapshot = Record<Key, any>
+import { AnyObject } from "@rue/types"
+
+export type ContextSnapshot = Record<Key, StackNode<any> | undefined>
+
 type Key = string | symbol
+
 class AsyncContextStack {
 
    stacks: Record<Key, Stack> = {}
 
    stackKeys: Key[] = []
-   activeNodes: ContextSnapshot = {}
+   current: StackNode<ContextSnapshot> | undefined = { value: {}, prev: undefined }
 
    push(context: ContextSnapshot) {
-      this.activeNodes = context //QUESTION: clone the context here? is that necessary
-      const stacks = this.stacks;
-      const keys = this.stackKeys;
-      for (const key of keys) {
-         const stack = stacks[key]
-         const node = context[key]
-         if (stack) stack.push(node)
-      }
+      this.current = { value: context, prev: this.current }
+      // this.activeNodes = context //QUESTION: clone the context here? is that necessary
+      // const stacks = this.stacks;
+      // const keys = this.stackKeys;
+      // for (const key of keys) {
+      //    const stack = stacks[key]
+      //    const node = context[key]
+      //    if (stack && node) stack.push(node.value)
+      // }
    }
 
    pop() {
-      const stacks = this.stacks;
-      const keys = this.stackKeys;
-      for (const key in keys) {
-         const stack = stacks[key]
-         if (stack) stack.pop()
-      }
+      if (this.current) this.current = this.current.prev
+      // const stacks = this.stacks;
+      // const keys = this.stackKeys;
+      // for (const key of keys) {
+      //    const stack = stacks[key]
+      //    if (stack) stack.pop()
+      // }
    }
 }
 
 export function $_snap_context() {
-   return { ...asyncContextStack.activeNodes }
+   const snapshot: ContextSnapshot = {}
+   const keys = asyncContextStack.stackKeys;
+   const currentContext = asyncContextStack.current;
+   if (!currentContext) return snapshot;
+   for (const key of keys) {
+      snapshot[key] = currentContext.value[key]
+   }
+   return snapshot
 }
 
 export const asyncContextStack = new AsyncContextStack()
 
+
 export type Stack<T = any> = {
-   pop(): void;
-   push(node: T): void;
+   push(node: T, context?: ContextSnapshot): void;
+   pop(context?: ContextSnapshot): T | undefined;
 }
 
-type GetContextualState<T> = () => T | undefined
-// type SetContextualState<T> = (state: T) => void
+interface StackNode<T> {
+   value: T;
+   prev: StackNode<T> | undefined;
+}
 
+export function getCurrentContext() {
+   const contextNode = asyncContextStack.current
+   if (!contextNode) {
+      if (__DEV__) throw Error('No context :( This should never happen')
+      return;
+   }
+   return contextNode.value
+}
 
-export function AsyncState<T>(name: Key): [GetContextualState<T>, Stack<T>] {
+export function AsyncState<T>(name: Key) {
    asyncContextStack.stackKeys.push(name)
 
-   const _stack: T[] = [];
-
-   function push(node: T) {
-      _stack.push(node)
-      if (_stack.length) {
-         asyncContextStack.activeNodes[name] = node
-      }
+   function push(value: T, context = getCurrentContext()) {
+      if (!context) return;
+      context[name] = { value, prev: context[name] }
    }
-   const stack = {
-      _stack,
-      get length() {
-         return _stack.length;
-      },
-      push,
-      pop() {
-         if (name === 'current effect' && _stack.length === 1) console.trace('!!popping')
-         const item = _stack.pop();
-         if (_stack.length)
-            asyncContextStack.activeNodes[name] = _stack.at(-1)
-         else
-            asyncContextStack.activeNodes[name] = null
-         return item;
+
+   function pop(context = getCurrentContext()): T | undefined {
+      if (!context) return;
+      const current = context[name]
+      if (current) {
+         const value = current.value;
+         context[name] = current.prev
+         return value
       }
+      return undefined;
+   }
+
+   const stack = {
+      push,
+      pop,
+      // getCurrentNode(context: ContextSnapshot | undefined){
+      //    return context?.[name]
+      // }
    }
 
    asyncContextStack.stacks[name] = stack
 
    return [
-      function getCurrentState() {
-         return _stack.at(-1)
+      function getCurrentState(context = getCurrentContext()) {
+         if (!context) return;
+         return context[name]?.value
       },
       stack
-   ];
+   ] as const;
 }
 
 
-export function $_run_with_(context: ContextSnapshot, fn: Function) {
+export function $_run_with_(context: ContextSnapshot, fn: Function, obj?: AnyObject) {
+   const stacks = obj ? [] as Stack[] : undefined
    try {
       asyncContextStack.push(context);
+      if (stacks && obj) {
+         for (const key in obj) {
+            const stack = asyncContextStack.stacks[key]
+            if (!stack) continue;
+            stack.push(obj[key], context)
+            stacks.push(stack)
+         }
+      }
       return fn();
    } finally {
+      if (stacks)
+         for (const stack of stacks) {
+            stack.pop(context)
+         }
       asyncContextStack.pop()
    }
 }
@@ -97,3 +134,8 @@ export function $_wrap_with_context(fn: Function) {
       $_run_with_(context, fn)
    }
 }
+
+
+
+//API
+

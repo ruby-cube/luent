@@ -3,8 +3,8 @@ import { AnyObject } from "@rue/types";
 import { AppCommons, createAppCommons } from "./commons/provide";
 import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
 import { NodePod, removeDOMNodes } from "./node/NodePod";
-import { Flask } from "@rue/flask";
-import { MU, muIonsStack } from "./component/Input";
+import { $_run_with_, Flask, flaskStack } from "@rue/flask";
+import { MU } from "./component/Input";
 import { createUpdate, Ion, pushUpdate, popUpdate } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
 import { processJSXOutput } from "./node/setUpNodeEntities";
@@ -44,36 +44,31 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
 
          let component: Component = { exposed: undefined, jsxNodes: [] }
          // (2) attach developer's root component to root element
-         flask.containCall(function mountRootComponent() {
-            const muIons: Set<Ion> = new Set()
+         // flask.containCall(function mountRootComponent() {
+
             const attributes = {
                ...config?.setup || {},
-               [MU](ion: Ion) {
-                  return muIons?.has(ion)
-               }
             }
             const update = createUpdate(1000)
-            pushUpdate(update)
-            // setComponentAttributes(attributes)
-            muIonsStack.push(muIons)
-            pushCommons(appCommons)
-            // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
-            // setComponentAttributes(config?.setup || {})
-            try {
-               mountNodeEntities(processJSXOutput(App(toInput(attributes)), appRoot, nodePod), appRoot)
-            }
-            finally {
-               flask.emitInitialMount()
-               // setComponentAttributes(undefined)
-               muIonsStack.pop()
-               popUpdate()
-               // if (remountable) markMountPhase()
-               // component.setUp(root, nodePod)
-               // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
-               // if (remountable) unmarkMountPhase()
-               popCommons() // for sibling components to access parent, must be set AFTER `component()`
-            }
-         })
+               flaskStack.push(flask)
+               pushUpdate(update)
+               pushCommons(appCommons)
+     
+               try {
+                  mountNodeEntities(processJSXOutput(App(toInput(attributes)), appRoot, nodePod), appRoot)
+               }
+               finally {
+                  flask.emitInitialMount()
+                  // setComponentAttributes(undefined)
+                  flaskStack.pop()
+                  popUpdate()
+                  // if (remountable) markMountPhase()
+                  // component.setUp(root, nodePod)
+                  // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
+                  // if (remountable) unmarkMountPhase()
+                  popCommons() // for sibling components to access parent, must be set AFTER `component()`
+               }
+         // })
 
       },
 

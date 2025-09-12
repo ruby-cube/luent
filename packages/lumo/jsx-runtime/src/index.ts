@@ -1,6 +1,6 @@
-import { ComponentSetup, HTMLTag, makeNode, normalizeToRenderFunction, RenderSlot, Commons, RawJSXNode } from "@rue/lumo";
+import { ComponentSetup, HTMLTag, makeJSXNode, normalizeToRenderFunction, RenderSlot, Commons, RawJSXNode } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
-import { isFunction, isObjectLiteral, normalizeToArray } from "@rue/utils";
+import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 
 // without custom jsx compiler
 // - nodeEntity | nodeEntity[]
@@ -16,17 +16,10 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Rend
    if (nodeType === Commons) {
       return Commons({Slot: config.children, provide: config.provide} as any)
    }
-   if (isFunction(nodeType) && nodeType !== Fragment) {
-      return makeNode(
-         nodeType,
-         Slot,
-         config
-      );
-   }
    if (nodeType === Fragment) {
       return normalizeToArray(config.children)
    }
-   return makeNode(
+   return makeJSXNode(
       nodeType,
       Slot,
       config

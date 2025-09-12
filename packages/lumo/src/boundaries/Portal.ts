@@ -1,4 +1,4 @@
-import { JSXNode, RawJSXNode, RenderFunction } from "../node/makeNode";
+import { JSXNode, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { isFunction, isObject } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { NodeEntity, processJSXOutput } from "../node/setUpNodeEntities";

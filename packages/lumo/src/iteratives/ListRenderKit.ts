@@ -11,11 +11,11 @@ import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
 import { FLASK, Flask, getFlask } from "@rue/flask";
-import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
+import { $_run_with_, $_snap_context, wrap } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
-import { queueInternalRender, PRERENDER, watchToRender } from "../render-cycle";
+import { queueInternalRenderTask, PRERENDER, watchToRender } from "../render-cycle";
 import { Compound, detachedCall, popTracker, pushTracker } from "../../../quarky/src/compound/Compound";
 import { quarkOf } from "../../../quarky/src/Quark";
 
@@ -37,6 +37,7 @@ export function setCurrentIndex($index: Ion<number> | undefined) {
    $currentIndex = $index;
 }
 
+//TODO:
 function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, item: any, $index: Ion<number>, parent: Element, nodePod: NodePod) {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // QUESTION: Should this be outside of the render function??
    list.transitions.set($index, transitionNodes)
@@ -75,14 +76,12 @@ export class ListRenderKit {
       this.outerFlask = getFlask()
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
          const context = { ...listContext }
-         if (flask) context[FLASK] = flask
-         if (__DEV__) context[TRACE] = this.__DEV__asyncPath!
          $_run_with_(context, () => {
-            const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
-            // queueInternalRender(() => {
-               mountNodeEntities(nodeEntities, parent, fragment);
+            const nodeEntities = renderItem(item, $index)
+            // queueInternalRenderTask(() => {
+            mountNodeEntities(nodeEntities, parent, fragment);
             // }, this.outerFlask)
-         })
+         }, { [FLASK]: flask, [TRACE]: this.__DEV__asyncPath })
       }
 
       if (__DEV__) this.__DEV__asyncPath = __DEV__buildAsyncPath()
@@ -207,7 +206,7 @@ export class ListRenderKit {
 
          const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
          listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-         queueInternalRender(() =>
+         queueInternalRenderTask(() =>
             flask.emitInitialMount()
             , this.outerFlask)
          flaskMap.set(nodePod, flask)
@@ -220,7 +219,7 @@ export class ListRenderKit {
          const nodePod = this.dynamicPod[index] as NodePod;
          const flask = flaskMap.get(nodePod)
          flask?.emitDiscard()
-         queueInternalRender(() => {
+         queueInternalRenderTask(() => {
             removeDOMNodes(nodePod)
          }, this.outerFlask)
       }
@@ -276,15 +275,14 @@ export class ListRenderKit {
          }
 
          if (isNewItem(item)) {
-            console.log('new item!!!', item)
             const $index = ion(i) //TODO: this should be 
-            newIndices.push($index) 
+            newIndices.push($index)
 
             setCurrentIndex($index); // to retreive config
 
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             this.renderItem(item, $index, parent, nodePod, fragment, flask)
-            queueInternalRender(() =>
+            queueInternalRenderTask(() =>
                flask.emitInitialMount()
                , this.outerFlask)
             setCurrentIndex(undefined)
@@ -293,7 +291,7 @@ export class ListRenderKit {
          else if (hasMoved(item)) {
             // move node to fragment (DOM will auto-remove node from DOM)
             const frag = fragment; // must pass reference since fragment is reassigned across the loop
-            queueInternalRender(() => {
+            queueInternalRenderTask(() => {
                transferNodes(frag, nodePod);
             }, this.outerFlask)
          }
@@ -330,7 +328,7 @@ export class ListRenderKit {
       }
 
       // (3) insert nodes into DOM
-      queueInternalRender(() => {
+      queueInternalRenderTask(() => {
          for (const [index, fragment] of indicesAndFragments) {
             mountDOMNodes(dynamicPod[index] as NodePod, parent, fragment)
          }

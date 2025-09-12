@@ -1,9 +1,10 @@
 import { $listen, Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
-import { $_run_with_, $_snap_context, asyncContextStack, ContextSnapshot } from "./context/AsyncContext";
+import { $_run_with_, $_snap_context, asyncContextStack, ContextSnapshot, } from "./context/AsyncContext";
 import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { TRACE } from "./debug";
 import { noop, __DEV__unwrap } from "@rue/utils";
+import { AnyObject } from "@rue/types";
 
 type A = { [K in keyof AbortSignal]: AbortSignal[K] }['removeEventListener']
 
@@ -113,10 +114,7 @@ export function makeScheduler<E extends (wrappedCB: Callback) => void | Callback
    const context = $_snap_context()
 
    function runCallback(args: any[]) {
-      const _context = { ...context }
-      _context[FLASK] = enclosingFlask
-      _context[TRACE] = config.__DEV__asyncPath ?? ""
-      $_run_with_(_context, () => callback(...args))
+      $_run_with_(context, () => callback(...args), { [FLASK]: enclosingFlask, [TRACE]: config.__DEV__asyncPath ?? "" })
    }
 
    const until = options?.until
@@ -177,10 +175,10 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    function runCallback(args: any[]) {
       if (scene) scene.emitDiscard()
       scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true })
-      const _context = { ...context }
-      _context[FLASK] = scene
-      _context[TRACE] = config.__DEV__asyncPath ?? ""
-      $_run_with_(_context, () => callback(...args))
+      $_run_with_(context, () => callback(...args), {
+         [FLASK]: scene,
+         [TRACE]: config.__DEV__asyncPath ?? ""
+      })
    }
 
    const until = options?.until
@@ -259,10 +257,11 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
    function runCallback(args: any[]) {
       if (scene) scene.emitDiscard()
       scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if stale right?
-      const _context = { ...context }
-      _context[FLASK] = scene
-      _context[TRACE] = config.__DEV__asyncPath ?? ""
-      $_run_with_(_context, () => pausableTask(args))
+
+      $_run_with_(context, () => pausableTask(args), {
+         [FLASK]: scene,
+         [TRACE]: config.__DEV__asyncPath ?? ""
+      })
    }
 
    const returnVal: any = enroll(effect.run!);
@@ -348,14 +347,16 @@ function wrapTask(callback: Callback, config: {
    const { context, enclosingFlask, stop } = config;
 
    function wrapped(...args: any[]) {
-      context[FLASK] = enclosingFlask
-      context[TRACE] = config.__DEV__asyncPath ?? ""
-      $_run_with_(context, () => callback(...args))
+      $_run_with_(context, () => callback(...args), {
+         [FLASK]: enclosingFlask,
+         [TRACE]: config.__DEV__asyncPath ?? ""
+      })
       stop()
    }
    if (__DEV__) wrapped.__DEV__fn = __DEV__unwrap(callback)
    return wrapped
 }
+
 
 
 // [] schedulers do not need a flask--they can just use the outer flask

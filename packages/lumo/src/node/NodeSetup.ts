@@ -1,7 +1,7 @@
 import { ComponentSetup } from "../component/Component";
 import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../iteratives/For";
-import { ComponentConfig, ElementConfig } from "./makeNode";
+import { ComponentConfig, ElementConfig } from "./makeJSXNode";
 import {  Ion, ion } from "@rue/quarky";
 
 

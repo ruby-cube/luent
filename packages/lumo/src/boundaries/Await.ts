@@ -9,7 +9,7 @@
 // )}
 
 import { Ion, ion, watch } from "@rue/quarky";
-import { RawJSXNode, RenderFunction } from "../node/makeNode";
+import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { normalizeToArray, toError } from "@rue/utils";

@@ -1,4 +1,4 @@
-import { atMounted, queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask } from "@rue/lumo";
+import { atMounted, queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask,  onDemount, onRemounted } from "@rue/lumo";
 import { ion, Ionized } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -24,17 +24,13 @@ export function ChatWindow(input: FromTag<{
    const $newMessageMarker = ion(null as null | HTMLDivElement)
    const $hasUnseenMessages = ion(false)
    const $notifyNewMessages = ion(false)
-
    const $smoothScroll = ion(false)
 
-   atMounted((initial) => {
-      console.log('*** remount')
-      if (initial) return;
+   onRemounted(() => {
       $smoothScroll.state = false;
       $notifyNewMessages.state = false;
 
       queuePostrenderTask(() => {
-         console.log('*** scroll to new')
          scrollToNew()
          queuePostrenderTask(() => {
             $smoothScroll.state = true;
@@ -42,12 +38,22 @@ export function ChatWindow(input: FromTag<{
       })
    })
 
-   atUnmount(() => {
+   // atRemounted(async () => {
+   //    $smoothScroll.state = false;
+   //    $notifyNewMessages.state = false;
+
+   //    await __postrender__()
+   //    scrollToNew()
+
+   //    await __postrender__()
+   //    $smoothScroll.state = true;
+   // })
+
+   onDemount(() => {
       if (!$hasUnseenMessages()) $newMessageMarker.state = null
    })
 
    atMessagePosted(() => {
-      console.log('*** message posted')
       $hasUnseenMessages.state = false;
       $newMessageMarker.state = null
       queueRenderTask(scrollToBottom)
@@ -60,13 +66,10 @@ export function ChatWindow(input: FromTag<{
    })
 
    atMessageReceived(() => {
-      console.log('*** message received')
       if (isScrolledToBottom()) {
-         console.log('scrolled to bottom')
          queueRenderTask(scrollToBottom)
       }
       else {
-         console.log('has unseen messages', $hasUnseenMessages())
          $hasUnseenMessages.state = true;
       }
 
@@ -85,20 +88,15 @@ export function ChatWindow(input: FromTag<{
       const newMessageMarker = $newMessageMarker()
       if (!node || isScrolledToBottom()) return false;
       if (!newMessageMarker) return true;
-      console.log('node.scrollTop', node.scrollTop)
-      console.log('newMessageMarker.offsetTop', newMessageMarker.offsetTop)
       return newMessageMarker.offsetTop - node.scrollTop > 516
    }
 
    function scrollToNew() {
-      console.log('*** scrollToNew')
       const node = $messagesNode()
       if (!node) {
          return;
       }
       const newMessageMarker = $newMessageMarker()
-      // console.log('*** newMessageMarker', newMessageMarker)
-      // console.log('*** lastseen', user.lastSeenMessageID)
       if (!newMessageMarker) {
          scrollToBottom()
          return;
@@ -115,13 +113,11 @@ export function ChatWindow(input: FromTag<{
       node.scrollTop = node.scrollHeight
    }
 
-   const reScrollend = (e: any) => {
-      console.log('*** scroll end')
+   function reScrollend(e: any) {
       if (isScrolledToBottom()) {
          $hasUnseenMessages.state = false;
       }
       if (isScrolledAboveNewMessages()) {
-         console.log('*** is above new messages')
          $notifyNewMessages.state = true;
       }
       else {
@@ -137,7 +133,6 @@ export function ChatWindow(input: FromTag<{
 
 
    function $ShowNewMessageMarker(message: Message) {
-
       return ion(() => {
          const lastMessage = $messages().at(-1)
          const newMessageMarker = $newMessageMarker()
@@ -187,49 +182,12 @@ export function ChatWindow(input: FromTag<{
                ))}
             </div>
          )}
-         <div>
-            {If(($hasUnseenMessages() && $notifyNewMessages()), 'show', //FIX: without the outer div, the if series affects message form
-               <div>
-                  New messages below!
-                  <button on:click={scrollToBottom}>⌄</button>
-               </div>
-            )}
-         </div>
+         {If(($hasUnseenMessages() && $notifyNewMessages()), //FIX: without the outer div, the if series affects message form
+            <div>
+               New messages below!
+               <button on:click={scrollToBottom}>⌄</button>
+            </div>
+         )}
       </div>
    )
 }
-
-// *** remount
-// firebase.ts:233 event StateChangeEvent {previous: Proxy(Array), current: Proxy(Array), eager: false}
-// ChatWindow.tsx:54 *** message received
-// ChatWindow.tsx:60 has unseen messages
-// ListRenderKit.ts:158 updating list?
-// ListRenderKit.ts:167 LIST CHANGED
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {createdAt: _Timestamp, text: 'C', author: 'peach', id: '1mkmUlU7wXqF967JEk6I', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {createdAt: _Timestamp, author: 'peach', text: 'D', id: 'uQ0Y5jCW0GqbQLY2ndBZ', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {text: 'E', author: 'peach', createdAt: _Timestamp, id: 'NOJEKzjHyhx6XXQpN6kn', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {createdAt: _Timestamp, text: 'F', author: 'peach', id: '0sjsEdFo9tPow7AZAHnd', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {text: 'J', createdAt: _Timestamp, author: 'peach', id: 'hKs76BtDeYX1TGVsvJdk', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {author: 'peach', text: 'I', createdAt: _Timestamp, id: 'A5vqkLMbruF9etNkGLqt', error: null}
-
-// ChatWindow.tsx:75 *** scrollToNew
-// ChatWindow.tsx:81 *** newMessageMarker undefined
-// ChatWindow.tsx:82 *** lastseen FNXcL5eZpSPgb9PxdjdH
-// ChatWindow.tsx:100 *** scroll end
-
-// *** remount
-// firebase.ts:233 event StateChangeEvent {previous: Proxy(Array), current: Proxy(Array), eager: false}
-// ChatWindow.tsx:54 *** message received
-// ChatWindow.tsx:60 has unseen messages
-// ListRenderKit.ts:158 updating list?
-// ListRenderKit.ts:167 LIST CHANGED
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {createdAt: _Timestamp, text: 'P', author: 'peach', id: 'MgQABnKS3sRL9cxv7SGA', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {text: 'Q', createdAt: _Timestamp, author: 'peach', id: 'Oah0yDoS9qntQ4ZDJOpG', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {text: 'R', createdAt: _Timestamp, author: 'peach', id: '3Gxzd88pdCjoOFnHhMHO', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {text: 'T', author: 'peach', createdAt: _Timestamp, id: 'onZQWsrxXyzO55H1c3Xc', error: null}
-// ListRenderKit.ts:279 new item!!! Proxy(Object) {author: 'peach', createdAt: _Timestamp, text: 'U', id: 'IYisEHJpxiZRSfIPF5Hk', error: null}
-// ChatWindow.tsx:34 *** scroll to new
-// ChatWindow.tsx:75 *** scrollToNew
-// ChatWindow.tsx:81 *** newMessageMarker undefined
-// ChatWindow.tsx:82 *** lastseen iYUhEHPUmRdsTm4Ock7W
-// ChatWindow.tsx:100 *** scroll end

@@ -271,19 +271,14 @@ export function mountDOMNodes(
    parent: Element, fragment: DocumentFragment) {
    if (shouldDebug) debugger;
    const prevNode = pod.prevNode
-   console.log('&&& pod', pod)
-   console.log('&&& get prevNode', prevNode)
    
    if (prevNode && prevNode === parent) {
-      console.log('&&& append to parent', prevNode)
       parent.append(fragment) //for teleport
    }
    else if (prevNode) {
-      console.log('&&& after prevNode', prevNode)
       prevNode.after(fragment)
    }
    else {
-      console.log('&&& prepend to parent', prevNode)
       parent.prepend(fragment)
    }
 }
