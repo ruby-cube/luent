@@ -19,6 +19,7 @@ export function mountNodeEntities(
    parent: Element,
    fragment?: DocumentFragment
 ) {
+   console.log('nodeEntities', nodeEntities)
    for (const nodeEntity of nodeEntities) {
       mountNodeEntity(nodeEntity, parent, fragment)
    }

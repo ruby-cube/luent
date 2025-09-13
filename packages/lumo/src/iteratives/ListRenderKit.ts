@@ -77,7 +77,7 @@ export class ListRenderKit {
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
          const context = { ...listContext }
          $_run_with_(context, () => {
-            const nodeEntities = renderItem(item, $index)
+            const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
             // queueInternalRenderTask(() => {
             mountNodeEntities(nodeEntities, parent, fragment);
             // }, this.outerFlask)
@@ -282,9 +282,9 @@ export class ListRenderKit {
 
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             this.renderItem(item, $index, parent, nodePod, fragment, flask)
-            queueInternalRenderTask(() =>
+            queueInternalRenderTask(() => {
                flask.emitInitialMount()
-               , this.outerFlask)
+            }, this.outerFlask)
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask) // store for removal
          }

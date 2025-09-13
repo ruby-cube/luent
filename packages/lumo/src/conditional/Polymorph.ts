@@ -168,7 +168,6 @@ export class PolymorphKit {
    ) {
       const nodePod = this.sharedNodePod = preserve ? undefined : new NodePod()
       if (nodePod) this.dynamicPod.push(nodePod)
-      console.log('polymorph context', this.context)
    }
 
    setUp(

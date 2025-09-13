@@ -1,5 +1,6 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
 import { Animation, Interval, ion, update, ThrottledHover, ionize } from "@rue/quarky";
+import './SierpinskiTriangles.css'
 
 //TODO:
 // - time warning for lazy update
