@@ -10,7 +10,7 @@ import { Ion } from "@rue/quarky";
 import { component } from "../component/Component";
 import { createIfSeries, Else, If } from "../conditional/If";
 import { CommonsKey } from "../commons/CommonsKey";
-import { RenderSlot } from "../component/fromTag";
+import { RenderSlot } from "../component/Input";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 

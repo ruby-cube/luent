@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fromApp, fromCommons, createGlobalCommons, fromGlobal } from '../provide';
-import { component } from '../../component/Component';
+import { component, makeComponent } from '../../component/Component';
 import { createApp } from '../../createApp';
-import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { Commons, createCommons } from '../Commons';

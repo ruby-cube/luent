@@ -5,7 +5,7 @@ import { Ion } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeEntity } from "../node/setUpNodeEntities";
-import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
+import { DynamicPod, mountFragment, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { FLASK, Flask, getFlask } from "@rue/flask";
@@ -468,7 +468,7 @@ export function mountConditional(
 
    queueInternalRenderTask(() => {
       // console.log('$$$ mount domnodes to DOM')
-      mountDOMNodes(pod, parent, _fragment)
+      mountFragment(pod, parent, _fragment)
    }, flask)
 }
 

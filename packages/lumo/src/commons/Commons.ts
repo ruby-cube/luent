@@ -3,7 +3,7 @@ import { CommonsNode, getClosestCommons, popCommons, pushCommons } from "./commo
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
 import { CommonsEntryKey, toCommonsKey } from "./CommonsKey";
-import { FromTag, RenderSlot } from "../component/fromTag";
+import { FromTag, RenderSlot } from "../component/Input";
 
 export interface NodeCommons {
    entries: Map<string, unknown>;

@@ -2,7 +2,7 @@
 import { NodeRef, component, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, ion, ionize } from "../../../packages/quarky/src";
-import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
+import { lazyLoadComponent } from "../../../packages/lumo/src/component/LazyComponent";
 import { ElseIf } from "../../../packages/lumo/src/conditional/If";
 import { AnyObject } from "@rue/types";
 

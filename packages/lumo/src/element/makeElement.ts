@@ -12,12 +12,11 @@ import { flattenJSXOutput, MutableKit, setUpNodeEntities } from "../node/setUpNo
 import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
-import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
 import { INTERNAL_RENDER, queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../render-cycle";
-import { RenderSlot } from "../component/fromTag";
+import { RenderSlot, MaybeIon } from "../component/Input";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

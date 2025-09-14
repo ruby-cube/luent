@@ -7,7 +7,7 @@ import { component } from "../component/Component";
 import { createIfSeries, Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 import { CommonsKey } from "../commons/CommonsKey";
-import { RenderSlot } from "../component/fromTag";
+import { RenderSlot } from "../component/Input";
 
 export function renderTransitNode(
    $div: $Node<'div'>,

@@ -1,16 +1,14 @@
 import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon } from "../../../quarky/src";
-import { Component, ComponentSetup, DOMNode } from "../component/Component";
+import { Component, ComponentSetup, DOMNode, InferSlot, makeComponent  } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
-import { InferSlot, makeComponent } from "../component/makeComponent";
 import {  $Node, $Nodes } from "./NodeRef";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
-import { MaybeIon } from "../component/Input";
 import { Commons, Provided, callWithCommons, createCommonsNode } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
-import { FromTag, RenderSlot } from "../component/fromTag";
+import { MaybeIon, RenderSlot } from "../component/Input";
 import { getClosestCommons } from "../commons/commons-stack";
 import { PolymorphKit } from "../conditional/Polymorph";
 import { DynamicKit } from "../dynamic/DynamicKit";

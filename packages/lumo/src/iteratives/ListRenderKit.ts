@@ -9,7 +9,7 @@ import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
+import { DynamicPod, mountFragment, NodePod, removeDOMNodes } from "../node/NodePod";
 import { FLASK, Flask, getFlask } from "@rue/flask";
 import { $_run_with_, $_snap_context, wrap } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -330,7 +330,7 @@ export class ListRenderKit {
       // (3) insert nodes into DOM
       queueInternalRenderTask(() => {
          for (const [index, fragment] of indicesAndFragments) {
-            mountDOMNodes(dynamicPod[index] as NodePod, parent, fragment)
+            mountFragment(dynamicPod[index] as NodePod, parent, fragment)
          }
          this.castUpdated(toFromIndices)
       }, this.outerFlask)

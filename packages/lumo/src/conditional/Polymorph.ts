@@ -6,7 +6,7 @@ import { Commons, createCommonsNode, NodeCommons, Provided } from "../commons/Co
 import { NodeEntity } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
-import { FromTag } from "../component/fromTag";
+import { FromTag } from "../component/Input";
 import { ion, Ion, isIon, MutableIon, toValue, watch } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";

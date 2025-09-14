@@ -173,9 +173,11 @@ function SvelteA() {
    const $x = ion(7)
    let $s: any;
 
+   const discard = DiscardRemountable()
+
    return component(
       <>
-         <remount-demount>
+         <remount-demount can:discard={discard}>
             {If($x() > 10,
                $x
             )}
@@ -196,6 +198,69 @@ function SvelteA() {
    )
 }
 
+function SvelteA() {
+   //@ts-ignore
+   const $x = ion(7)
+   let $s: any;
+
+   const discard = DiscardRemountable()
+
+   return component(
+      <>
+         <RemountDemount can:discard={discard}>
+            {If($x() > 10,
+               $x
+            )}
+            {ElseIf(5 > $x(),
+               <>{$x} is less than 5</>
+            )}
+            {ElseIf($x,
+               <p>{$x} is less than 5</p>
+            )}
+            {Else(
+               <p>{$x} is between 5 and 10</p>
+            )}
+         </RemountDemount>
+         <div>
+            {$ > $x() + 10}
+         </div>
+      </>
+   )
+}
+
+function SvelteA() {
+   //@ts-ignore
+   const $x = ion(7)
+   let $s: any;
+
+   const discard = DiscardRemountable()
+
+   return component(
+      <>
+         {If($x() > 10,
+            $x
+         )}
+         {ElseIf(5 > $x(),
+            <Remount>
+               <div>{$x} is less than 5</div>
+            </Remount>
+         )}
+         {ElseIf($x,
+            <Show>
+               <p>{$x} is less than 5</p>
+            </Show>
+         )}
+         {Else(
+            <Create>
+               <p>{$x} is between 5 and 10</p>
+            </Create>
+         )}
+         <div>
+            {$ > $x() + 10}
+         </div>
+      </>
+   )
+}
 
 function SvelteA() {
    //@ts-ignore
@@ -298,7 +363,7 @@ function ColumnB() {
    )
 }
 
-function SomeComponent(input : FromTag<{ name: string }>) {
+function SomeComponent(input: FromTag<{ name: string }>) {
    return component(
       <></>
    )
@@ -311,19 +376,19 @@ const comp = Component;
 const compo = Component;
 const cm$ = Component;
 const $cm = Component;
-const att : FromTag
-const $input : FromTag
-const fromJSX : FromTag
-const inputType : FromTag
-const attrs : FromTag
-const attributes : FromTag
-const attris : FromTag
-const attribs : FromTag
-const $attributes : FromTag
+const att: FromTag
+const $input: FromTag
+const fromJSX: FromTag
+const inputType: FromTag
+const attrs: FromTag
+const attributes: FromTag
+const attris: FromTag
+const attribs: FromTag
+const $attributes: FromTag
 
 
 function ColumnBlock(
-   input : FromTag<{
+   input: FromTag<{
       name: string
    }>()
 ) {
@@ -388,7 +453,7 @@ function MouseKit() {
    }
 }
 
-function Comp(input : FromTag<{
+function Comp(input: FromTag<{
    value: Ion<{}>
 }>) {
 

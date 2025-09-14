@@ -1,17 +1,14 @@
 import { AnyObject } from "@rue/types";
-import { JSXNode, RawJSXNode } from "../node/makeJSXNode";
+import { ComponentConfig, JSXNode, RawJSXNode } from "../node/makeJSXNode";
 import { Ion, toValue } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
 import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
+import { toInput } from "./Input";
 
 
 
-export type DOMNode = CharacterData | Element
-// export type Props = {
-//     [key: string]: any;
-//     Slot?: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
-// }
-
+export type DOMNode = { remove: () => void }
+export type DOMRoot = { after(...nodes: (Node | string)[]): void, append(...nodes: (Node | string)[]): void } & DOMNode
 
 
 // export type Slot = JSXNode
@@ -44,13 +41,7 @@ export function component<T extends AnyObject | undefined = AnyObject | undefine
 }
 
 
-export function exposeComponent(
-   publicComponent: AnyObject,
-   ref: $Node,
-   $index: Ion<number> | undefined
-) {
-   initializeComponentRef(ref, publicComponent || {}, $index)
-}
+
 
 
 
@@ -91,11 +82,34 @@ export function isComponentKit(entity: unknown): entity is Component {
    return isObject(entity) && 'exposed' in entity && 'jsxNodes' in entity
 }
 
-// function normalizeToFragmentArray(entity: any) { // distinguish conditional series from 
-//    if (entity instanceof ConditionalRenderKit) return [[entity]];
-//    if (entity instanceof Array) { // check if conditional series
-//       if (entity[0] instanceof ConditionalRenderKit) return [entity];
-//       return entity;
-//    }
-//    return normalizeToArray(entity);
-// }
+
+
+export type InferSlot<T extends ComponentSetup = ComponentSetup> =
+   T extends (setup?: infer P) => any ?
+   P extends { Slot: infer S } ?
+   S
+   : undefined
+   : undefined
+
+export type SetupWithSlot = {
+   Slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
+}
+
+export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
+   (setup?: P) => JSXNode
+
+
+export function makeComponent(
+   Component: ComponentSetup,
+   Slot: InferSlot | undefined,
+   tag: ComponentConfig,
+   $index: Ion<number> | undefined
+): Component {
+   //TODO: component flask lifecycle hooks
+   tag.Slot = Slot;
+   const output = Component(toInput(tag))
+   if (output instanceof Promise)
+      throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
+   if (tag.ref) initializeComponentRef(tag.ref, output.exposed ?? {}, $index)
+   return output
+}

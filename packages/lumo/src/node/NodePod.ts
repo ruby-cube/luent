@@ -264,7 +264,7 @@ export function startDebugger(){
    shouldDebug = true;
 }
 
-export function mountDOMNodes(
+export function mountFragment(
    // prevNode: Element | null | undefined
    pod: NodePod
    ,

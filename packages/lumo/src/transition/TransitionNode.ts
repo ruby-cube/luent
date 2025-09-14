@@ -6,7 +6,7 @@ import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 import { NodeRef } from "../node/NodeRef";
-import { RenderSlot, FromTag } from "../component/fromTag";
+import { RenderSlot, FromTag } from "../component/Input";
 
 export type TransitionHook = {
    phase: 'in' | 'out'
