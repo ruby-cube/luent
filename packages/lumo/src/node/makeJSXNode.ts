@@ -1,7 +1,7 @@
 import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon } from "../../../quarky/src";
-import { Component, ComponentSetup, DOMNode, InferSlot, makeComponent  } from "../component/Component";
+import { Component, ComponentSetup, DOMNode, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
-import {  $Node, $Nodes } from "./NodeRef";
+import { $Node, $Nodes } from "./NodeRef";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
@@ -11,7 +11,8 @@ import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { getClosestCommons } from "../commons/commons-stack";
 import { PolymorphKit } from "../conditional/Polymorph";
-import { DynamicKit } from "../dynamic/DynamicKit";
+import { DynamicKit } from "./DynamicKit";
+import { Create, markActivationType, Remount, Show } from "../conditional/IfSeries";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -41,13 +42,13 @@ export type RawJSXNode =
    | undefined
 // | MutableKit
 
-export type JSXNode =
-   | JSX.Element
-   | DOMNode
-   | string
-   | Ion
-   | DynamicKit
-   | PortalKit
+// export type JSXNode =
+//    | JSX.Element
+//    | DOMNode
+//    | string
+//    | Ion
+//    | DynamicKit
+//    | PortalKit
 
 
 
@@ -102,11 +103,11 @@ export function getGroupActivationType() {
 
 
 
-export function withGroupActivationReset(Slot: RenderSlot) {
+export function runWithGroupActivationReset(render: RenderSlot, input: Object | undefined) {
    outerGroupActivationType = groupActivationType
    groupActivationType = undefined;
    try {
-      return Slot()
+      return render(input)
    }
    finally {
       groupActivationType = outerGroupActivationType;
@@ -142,8 +143,8 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | 
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-demount' | 'show-hide',
-   Slot: undefined | (() => JSXNode[]) | InferSlot,
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-demount' | 'show-hide' | any,
+   Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | Component | JSX.Element | undefined {
 
@@ -152,16 +153,28 @@ export function makeJSXNode(
       case 'o--link':
          return Portal('head', () =>
             makeElement('link', undefined, <ElementConfig>config, undefined)
-         )
+         );
 
       case 'show-hide':
          if (!Slot) throw new Error(`Extraneous <show-hide>`)
-         return callWithActivationType('show', Slot, config.provide)
+         return callWithActivationType('show', Slot, config.provide);
 
       case 'remount-demount':
          if (!Slot) throw new Error(`Extraneous <remount-demount>`)
-         return callWithActivationType('remount', Slot, config.provide)
+         return callWithActivationType('remount', Slot, config.provide);
 
+      case Create:
+         if (!Slot) throw new Error(`<Create> must have children`)
+         return markActivationType('create', Slot);
+
+      case Show:
+         if (!Slot) throw new Error(`<Show> must have children`)
+         return markActivationType('show', Slot);
+
+      case Remount:
+         if (!Slot) throw new Error(`<Remount> must have children`)
+         return markActivationType('remount', Slot, 'discard' in config ? config.discard : undefined);
+      
       default:
          if (typeof nodeType === 'string') {
             return makeElement(

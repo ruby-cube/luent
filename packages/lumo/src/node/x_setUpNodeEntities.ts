@@ -1,17 +1,17 @@
 import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 import { Component, DOMNode, isComponentKit } from "../component/Component";
-import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
-import { MatchCaseKit } from "../conditional/MatchCaseKit";
+import { ConditionalRenderSeries } from "../conditional/x_ConditionalRenderSeries";
+import { MatchCaseKit } from "../conditional/MatchCase";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { getGroupActivationType, JSXNode, RawJSXNode } from "./makeJSXNode";
 import { createTextNode, setUpTextNode } from "./TextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./InnerHTML";
-import { NodePod } from "./NodePod";
+import { NodePod } from "./x_NodePod";
 import { AnyObject } from "@rue/types";
 import { PolymorphKit } from "../conditional/Polymorph";
 import { ActivationType } from "../conditional/If";
 import { jsx } from "@rue/jsx-runtime";
-import { DynamicKit, isDynamicKit } from "../dynamic/DynamicKit";
+import { DynamicKit, isDynamicKit } from "./DynamicKit";
 import { isPortal } from "../boundaries/Portal";
 
 // [ ] validate and apply swap tag
@@ -124,28 +124,28 @@ export function setUpNodeEntities(
 
 
 
-export function setUpNodeEntity(
-   jsxNode: Exclude<JSXNode, InnerHTMLKit | Component>,
-   parent: Element,
-   nodePod: NodePod,
-) {
-   if (jsxNode instanceof Element) { // Element type from Web API
-      nodePod.push(jsxNode)
-      return jsxNode;
-   }
-   if (isDynamicKit(jsxNode)) {
-      nodePod.push(jsxNode.dynamicPod)
-      return jsxNode.setUp(parent);
-   }
-   if (isPortal(jsxNode)){
-      return jsxNode;
-   }
-   const textNode = createTextNode(jsxNode)
-   setUpTextNode(jsxNode, textNode)
-   nodePod.push(textNode)
-   return textNode
-}
+// export function setUpNodeEntity(
+//    jsxNode: Exclude<JSXNode, InnerHTMLKit | Component>,
+//    parent: Element,
+//    nodePod: NodePod,
+// ) {
+//    if (jsxNode instanceof Element) { // Element type from Web API
+//       nodePod.push(jsxNode)
+//       return jsxNode;
+//    }
+//    if (isDynamicKit(jsxNode)) {
+//       nodePod.push(jsxNode.dynamicPod)
+//       return jsxNode.setUp(parent);
+//    }
+//    if (isPortal(jsxNode)){
+//       return jsxNode;
+//    }
+//    const textNode = createTextNode(jsxNode)
+//    setUpTextNode(jsxNode, textNode)
+//    nodePod.push(textNode)
+//    return textNode
+// }
 
-export function processJSXOutput(output: RawJSXNode, parent: Element, nodePod: NodePod) {
-   return setUpNodeEntities(flattenJSXOutput(normalizeToArray(output)), parent, nodePod)
-}
+// export function processJSXOutput(output: RawJSXNode, parent: Element, nodePod: NodePod) {
+//    return setUpNodeEntities(flattenJSXOutput(normalizeToArray(output)), parent, nodePod)
+// }

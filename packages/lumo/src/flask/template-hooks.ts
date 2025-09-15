@@ -13,7 +13,7 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
             flask.onRemount(async () => { task(node, true) })
             break;
          case 'at:unmount':
-            flask.onDemount(() => task(node, false))
+            flask.atDemount(() => task(node, false))
             flask.onDiscard(() => task(node, true))
             break;
          default:

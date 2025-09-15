@@ -1,6 +1,6 @@
 import { wrapWithCommons } from './commons/Commons'
 
-export * from './node/NodePod' 
+export * from './node/x_NodePod' 
 export * from './node/NodeRef' 
 export * from './node/NodeSetup' 
 export * from './component/Component' 

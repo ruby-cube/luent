@@ -1,4 +1,4 @@
-import { atMounted, queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask,  onDemount, onRemounted } from "@rue/lumo";
+import { atMounted, queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask,  atDemount, atRemounted } from "@rue/lumo";
 import { ion, Ionized } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -26,7 +26,7 @@ export function ChatWindow(input: FromTag<{
    const $notifyNewMessages = ion(false)
    const $smoothScroll = ion(false)
 
-   onRemounted(() => {
+   atRemounted(() => {
       $smoothScroll.state = false;
       $notifyNewMessages.state = false;
 
@@ -49,7 +49,7 @@ export function ChatWindow(input: FromTag<{
    //    $smoothScroll.state = true;
    // })
 
-   onDemount(() => {
+   atDemount(() => {
       if (!$hasUnseenMessages()) $newMessageMarker.state = null
    })
 

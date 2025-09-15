@@ -668,7 +668,7 @@ declare namespace React {
       children?: Lumo.JSXNode | undefined | null;
    }
 
-   type LifecycleTask<T> = (element: T)=> void
+   type LifecycleTask<T> = (element: T) => void
 
    interface LumoHooks<T> {
       'at:mounted'?: LifecycleTask<T>
@@ -1295,7 +1295,7 @@ declare namespace React {
        * Specify that a standard HTML element should behave like a defined custom built-in element
        * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is}
        */
- 
+
       // added
       scrolltop?: number | undefined;
       scrollleft?: number | undefined;
@@ -1720,8 +1720,8 @@ declare namespace React {
       value?: string | readonly string[] | number | undefined;
       width?: number | string | undefined;
 
-      'mu:value'?: Quarky.AtomicIon<any, { state: any; }> | Quarky.Ion<any, {set: (value: any)=>unknown}>
-      'mu:checked'?: Quarky.AtomicIon<Booleanny, { state: Booleanny; }> | Quarky.Ion<Booleanny, {set: (value: Booleanny)=>unknown}>
+      'mu:value'?: Quarky.AtomicIon<any, { state: any; }> | Quarky.Ion<any, { set: (value: any) => unknown }>
+      'mu:checked'?: Quarky.AtomicIon<Booleanny, { state: Booleanny; }> | Quarky.Ion<Booleanny, { set: (value: Booleanny) => unknown }>
    }
 
 
@@ -1875,7 +1875,7 @@ declare namespace React {
       size?: number | undefined;
       value?: string | readonly string[] | number | undefined;
       'on:change'?: ChangeEventHandler<T> | undefined;
-      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
+      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, { set: (value: string) => unknown }>
    }
 
    interface SourceHTMLAttributes<T> extends HTMLAttributes<T> {
@@ -1922,7 +1922,7 @@ declare namespace React {
       value?: string | readonly string[] | number | undefined;
       wrap?: string | undefined;
 
-      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
+      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, { set: (value: string) => unknown }>
       'on:change'?: ChangeEventHandler<T> | undefined;
    }
 
@@ -2562,9 +2562,9 @@ declare global {
 
       type StyleInput = Lumo.MaybeIon<string | Falsey> | Lumo.MaybeIon<{ [K in keyof Partial<CSSProperties>]: Lumo.MaybeIon<CSSProperties[K]> }>
 
-      type ClassInput = Lumo.MaybeIon<{[key: string]: Lumo.MaybeIon<Booleanny>}>
+      type ClassInput = Lumo.MaybeIon<{ [key: string]: Lumo.MaybeIon<Booleanny> }>
 
-      type MaybeIonAttributes<T> = {[K in keyof T]: T[K] extends Object ? {[P in keyof T[K]]: T[K][P] extends Function | undefined ? T[K][P] : Lumo.MaybeIon<T[K][P]>}: T[K]}
+      type MaybeIonAttributes<T> = { [K in keyof T]: T[K] extends Object ? { [P in keyof T[K]]: T[K][P] extends Function | undefined ? T[K][P] : Lumo.MaybeIon<T[K][P]> } : T[K] }
 
       type IntrinsicElements = {
          [K in keyof JSX._IntrinsicElements]: MaybeIonAttributes<JSX._IntrinsicElements>[K] & {
@@ -2587,11 +2587,11 @@ declare global {
 
       interface LumoElements {
          'i--i': {}; //comments
-         'o--portal': PortalNodeInput & { children: Lumo.Slot }
+         // 'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          'show-hide': { children: ConditionalRenderKit[]; };
-         'remount-demount': { children: ConditionalRenderKit[]; };
+         'remount-demount': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
          // 'Slot': {Slot: any}
 
          // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
@@ -2602,7 +2602,7 @@ declare global {
          'o--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
       }
 
-    
+
 
       interface _IntrinsicElements {
          // HTML

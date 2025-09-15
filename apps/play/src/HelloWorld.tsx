@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Component, Else, ElseIf, For, If, provideAppwide } from "@rue/lumo";
 import { Ion, ion, ionize } from "@rue/quarky";
 import { inert } from "../../../packages/quarky/src/ionized/inert";

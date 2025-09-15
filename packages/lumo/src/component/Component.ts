@@ -7,9 +7,6 @@ import { toInput } from "./Input";
 
 
 
-export type DOMNode = { remove: () => void }
-export type DOMRoot = { after(...nodes: (Node | string)[]): void, append(...nodes: (Node | string)[]): void } & DOMNode
-
 
 // export type Slot = JSXNode
 export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component

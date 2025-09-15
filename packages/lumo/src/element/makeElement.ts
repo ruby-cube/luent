@@ -3,23 +3,36 @@ import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
-import { mountNodeEntities } from "../node/mountNodeKits";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "./attributes";
-import { flattenJSXOutput, MutableKit, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { MutableKit, setUpNodeEntities } from "../node/x_setUpNodeEntities";
 import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
-import { NodePod } from "../node/NodePod";
+import { NodePod } from "../node/x_NodePod";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
-import { INTERNAL_RENDER, queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../render-cycle";
+import { queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../render-cycle";
 import { RenderSlot, MaybeIon } from "../component/Input";
+import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
+
+// function makeElement(tag, Slot) {
+//    const element = document.createElement(tag)
+
+//    const nodes = Slot() as (VineNode & (NodeKit | DynamicNodeKit) | DOMNode)[]
+
+
+
+// mountDOMNodes(nodes, element)
+
+//    return element;
+// }
+
 
 
 
@@ -69,29 +82,21 @@ export function makeElement(
    if (_Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
-         const rawOutput = normalizeToArray(toOutput(_Slot))
-         const flattenedOutput = flattenJSXOutput(rawOutput)
-         if (isInnerHTMLKit(rawOutput[0])) {
-            const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
-            // queueInternalRenderTask(() => {
+         const rawOutput = _Slot()
+         const nodes = processJSXOutput(normalizeToArray(rawOutput))
+
+         if (isInnerHTMLKit(rawOutput)) {
+            const innerHTML = setUpInnerHTML(rawOutput, domNode)
             mountInnerHTML(innerHTML, domNode)
-            // }, getFlask())
          }
          else {
-            const nodeEntities = setUpNodeEntities(flattenedOutput, domNode, new NodePod())
-            // queueInternalRenderTask(() => {
-            mountNodeEntities(nodeEntities, domNode)
-            // }, getFlask())
+            setUpNodeVine(nodes, domNode)
+            mountDOMNodes(nodes, domNode)
          }
       }, xml_ns)
    }
    return domNode;
 }
-
-function toOutput(value: unknown) {
-   return isFunction(value) ? value() : value;
-}
-
 
 
 
@@ -249,26 +254,26 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
 }
 
 
-function bindTextarea(element: Element, Slot: RenderSlot | undefined) {
-   if (!Slot || !isFunction(Slot)) return;
-   const nodeEntities = Slot();
-   const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
-   if (!isObjectLiteral(kit) && !('mu' in kit)) return;
-   const ion = kit.mu;
-   const flask = getFlask()
-   watchToRender(ion, () => {
-      queueInternalRenderTask(() => {
-         element.value = toString(ion())
-      }, flask)
-   }, flask, RUN_EAGERLY)
-   if (!isMutableIon(ion)) {
-      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
-   }
-   else {
-      setUpInputListener(element, ion)
-   }
-   return ion;
-}
+// function bindTextarea(element: Element, Slot: RenderSlot | undefined) {
+//    if (!Slot || !isFunction(Slot)) return;
+//    const nodeEntities = Slot();
+//    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
+//    if (!isObjectLiteral(kit) && !('mu' in kit)) return;
+//    const ion = kit.mu;
+//    const flask = getFlask()
+//    watchToRender(ion, () => {
+//       queueInternalRenderTask(() => {
+//          element.value = toString(ion())
+//       }, flask)
+//    }, flask, RUN_EAGERLY)
+//    if (!isMutableIon(ion)) {
+//       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
+//    }
+//    else {
+//       setUpInputListener(element, ion)
+//    }
+//    return ion;
+// }
 
 function setUpCheckboxInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {

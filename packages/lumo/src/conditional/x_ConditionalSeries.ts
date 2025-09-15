@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, Ion } from "@rue/quarky";
+import { __DEV__checkIfTracked, ion, Ion } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { MaybeIon } from "../component/Input";
 
@@ -8,21 +8,36 @@ interface ConditionalKit {
 }
 
 export class ConditionalSeries {
-   conditions: Ion<Booleanny>[] = [];
-   prevActiveIndex?: number = undefined;
-   activeIndex!: number;
-   statements: (ConditionalKit | undefined)[]
+
+   $activeIndex: Ion<number>
 
    constructor(
       statements: ConditionalKit[],
-      makeElseKit?: () => ConditionalKit
+      // makeElseKit?: () => ConditionalKit
    ) {
-      this.statements = statements;
+
+      const conditions = this.getConditions(statements)
+      // if (noElseBlock(statements)) {
+      //    this.addKit(makeElseKit?.())
+      // }
+      this.$activeIndex = ion(() => {
+         for (let i = 0; i < conditions.length; i++) {
+            const $condition = conditions[i]
+            if ($condition()) {
+               return i;
+            }
+         }
+         return conditions.length;
+      })
+   }
+
+   getConditions(statements: ConditionalKit[]) {
+      const conditions: Ion<Booleanny>[] = []
       for (let i = 0; i < statements.length; i++) {
          const kit = statements[i]
          const $condition = kit.$condition
          if ($condition) {
-            this.conditions.push($condition)
+            conditions.push($condition)
          }
          if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
             if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
@@ -37,42 +52,12 @@ export class ConditionalSeries {
             else continue;
          }
       }
-      if (noElseBlock(statements)) {
-         this.addKit(makeElseKit?.())
-      }
+      return conditions
    }
 
-   addKit(kit: ConditionalKit | undefined) {
-      this.statements.push(kit);
-   }
-
-   $ActiveIndex() {
-      return () => {
-         const conditions = this.conditions
-         for (let i = 0; i < conditions.length; i++) {
-            const $condition = conditions[i]
-            if ($condition()) {
-               this.prevActiveIndex = this.activeIndex;
-               this.activeIndex = i;
-               return i;
-            }
-         }
-         this.prevActiveIndex = this.activeIndex;
-         this.activeIndex = conditions.length;
-         return conditions.length;
-      }
-   }
-
-   // getConditionsIon() {
-   //    const conditions = this.conditions
-   //    return () => {
-   //       const values: boolean[] = [];
-   //       for (const $condition of conditions) {
-   //          values.push(Boolean($condition()));
-   //       }
-   //       return values;
-   //    } // $(() => [$conditionA(), $conditionB(), ...])
-   // } // must retrack in case any of its conditions require retracking
+   // private addKit(kit: ConditionalKit | undefined) {
+   //    this.statements.push(kit);
+   // }
 }
 
 

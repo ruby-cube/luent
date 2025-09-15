@@ -37,7 +37,7 @@ function MessageForm(this: ThisView, {
 
 
 
-   this.onRemounted(() => {
+   this.atRemounted(() => {
 
    })
 

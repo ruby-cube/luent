@@ -63,16 +63,16 @@ export class ThisFlask {
    }
    
    atUnmount(task: (final: boolean) => void) {
-      this.flask.onDemount(() => task(false))
+      this.flask.atDemount(() => task(false))
       this.flask.onDiscard(() => task(true))
    }
 
    atDemount(task: () => void) {
-      return this.flask.onDemount(task)
+      return this.flask.atDemount(task)
    }
 
-   // get onDemount() {
-   //    return this.flask.onDemount
+   // get atDemount() {
+   //    return this.flask.atDemount
    // }
 
    // get onDiscard() {
@@ -101,7 +101,7 @@ export class Flask {
       this.creationScopeID = creationScope ? genUID() : outer?.creationScopeID ?? "0"
 
       // Bind to this, to allow easy passing into hooks
-      Object.defineProperty(this, 'onDemount', {
+      Object.defineProperty(this, 'atDemount', {
          value: (task: Task) => on(LifecycleHook.DEMOUNT, this, task),
          writable: false
       })
@@ -134,7 +134,7 @@ export class Flask {
 
       if (outer) {
          const remountListener = outer.onRemount(this.emitRemount)
-         const unmountListener = outer.onDemount(this.emitDemount)
+         const unmountListener = outer.atDemount(this.emitDemount)
          const discardListener = outer.onDiscard(this.emitDiscard)
          this.onDiscard(() => {
             remountListener.stop()
@@ -171,7 +171,7 @@ export class Flask {
 
    emitDemount!: () => void
 
-   onDemount!: (task: Task, options?: SustainedListenerOptions) => PausableListener
+   atDemount!: (task: Task, options?: SustainedListenerOptions) => PausableListener
 
    emitRemount!: () => void
 

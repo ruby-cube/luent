@@ -1,11 +1,10 @@
-import { mountNodeEntities } from "../node/mountNodeKits";
-import { ConditionalSeries } from "./ConditionalSeries";
+import { ConditionalSeries } from "./x_ConditionalSeries";
 import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { Ion } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
-import { NodeEntity } from "../node/setUpNodeEntities";
-import { DynamicPod, mountFragment, NodePod, removeDOMNodes } from "../node/NodePod";
+import { NodeEntity } from "../node/x_setUpNodeEntities";
+import { DynamicPod, mountFragment, NodePod, removeDOMNodes } from "../node/x_NodePod";
 import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { FLASK, Flask, getFlask } from "@rue/flask";
@@ -15,7 +14,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { MaybeIon } from "../component/Input";
-import { toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
+import { toRenderTransient, wrapToPreserve } from "../node/DynamicKit";
 import { createCommonsNode } from "../commons/Commons";
 
 //TODO: rename 'phasic node' to 'transition node'
@@ -48,8 +47,8 @@ function toDynamicConditionalKits(kits: ConditionalKit[], context: ContextSnapsh
    const dynamicKits = []
    for (const kit of kits) {
       if (!kit) continue;
-      const { $condition, renderConditional, statementType, type } = kit
-      dynamicKits.push(createDynamicConditionalKit(statementType, type, renderConditional, context, $condition))
+      const { $condition, render, statementType, type } = kit
+      dynamicKits.push(createDynamicConditionalKit(statementType, type, render, context, $condition))
    }
    return dynamicKits;
 }
@@ -59,9 +58,10 @@ function toDynamicConditionalKits(kits: ConditionalKit[], context: ContextSnapsh
 
 export type ConditionalKit = {
    statementType: "if" | "elseIf" | "else";
-   renderConditional: RenderFunction;
+   render: RenderFunction;
    type: ActivationType | undefined;
    $condition: MaybeIon<Booleanny>
+   discard: (()=>void) | undefined
 }
 
 export type DynamicConditionalRenderKit = {
@@ -154,7 +154,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          hideDOMNodes(showKit.nodePod)
       })
 
-      this.activateConditional(this.activeIndex, parent, fragment)
+      this.activateConditional(this.$activeIndex(), parent, fragment)
    }
 
 

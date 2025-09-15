@@ -2,11 +2,11 @@ import { Component, ComponentSetup } from "./component/Component";
 import { AnyObject } from "@rue/types";
 import { AppCommons, createAppCommons } from "./commons/provide";
 import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
-import { NodePod, removeDOMNodes } from "./node/NodePod";
+import { NodePod, removeDOMNodes } from "./node/x_NodePod";
 import { $_run_with_, Flask, flaskStack } from "@rue/flask";
 import { createUpdate, Ion, pushUpdate, popUpdate } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
-import { processJSXOutput } from "./node/setUpNodeEntities";
+import { processJSXOutput } from "./node/x_setUpNodeEntities";
 import { mountNodeEntities } from "./node/mountNodeKits";
 import { toInput } from "./component/Input";
 

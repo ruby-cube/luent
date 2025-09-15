@@ -1,33 +1,29 @@
-import { isIon, __DEV__checkIfTracked, watch, Ion, toValue } from "@rue/quarky";
+import { isIon, __DEV__checkIfTracked, Ion, toValue } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
-import { JSXNode } from "./makeJSXNode";
+import { RawJSXNode } from "./makeJSXNode";
 import { MaybeIon } from "../component/Input";
-import { INTERNAL_RENDER, PRERENDER, queueInternalRenderTask, watchToRender } from "../render-cycle";
-import { getFlask } from "@rue/flask";
+import { queueInternalRenderTask, watchToRender } from "../render-cycle";
+import { DOMElement, DOMParent } from "./VineNode";
 
 
 
-export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: Element) {
+export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
    //  nodePod.appendStaticNode(textNode) //QUESTION: do we need to append innerHTML to nodePod??, we don't have to worry about siblings, so idon't think so
    const htmlString = kit.innerHTML;
    if (isIon(htmlString)) {
-      keepInnerHTMLUpdated(htmlString, parentNode)
+      watchToRender(htmlString, ({ current, flask }) => {
+         queueInternalRenderTask(() => {
+            parentNode.innerHTML = toString(current);
+         }, flask)
+      });
    }
    return htmlString;
 }
 
-export function mountInnerHTML(htmlString: MaybeIon<any>, parent: Element) {
+export function mountInnerHTML(htmlString: MaybeIon<any>, parent: DOMParent) {
    parent.innerHTML = toString(toValue(htmlString))
 }
 
-function keepInnerHTMLUpdated(htmlString: Ion<any>, parentNode: Element) {
-   const flask = getFlask()
-   watchToRender(htmlString, ({ current }) => {
-      queueInternalRenderTask(() => {
-         parentNode.innerHTML = toString(current);
-      }, flask)
-   }, flask);
-}
 
 
 
@@ -37,6 +33,6 @@ function toString(value: any) {
 }
 
 export type InnerHTMLKit = { innerHTML: MaybeIon<string> }
-export function isInnerHTMLKit(nodeEntity: JSXNode): nodeEntity is InnerHTMLKit {
+export function isInnerHTMLKit(nodeEntity: RawJSXNode): nodeEntity is InnerHTMLKit {
    return isObjectLiteral(nodeEntity) && 'innerHTML' in nodeEntity
 }

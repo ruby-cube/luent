@@ -5,11 +5,11 @@ import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Commons } from "../commons/commons-stack";
-import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeEntity, setUpNodeEntities } from "../node/x_setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { DynamicPod, mountFragment, NodePod, removeDOMNodes } from "../node/NodePod";
+import { DynamicPod, mountFragment, NodePod, removeDOMNodes } from "../node/x_NodePod";
 import { FLASK, Flask, getFlask } from "@rue/flask";
 import { $_run_with_, $_snap_context, wrap } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -291,9 +291,7 @@ export class ListRenderKit {
          else if (hasMoved(item)) {
             // move node to fragment (DOM will auto-remove node from DOM)
             const frag = fragment; // must pass reference since fragment is reassigned across the loop
-            queueInternalRenderTask(() => {
-               transferNodes(frag, nodePod);
-            }, this.outerFlask)
+               transferNodes(fragment, nodePod);
          }
       }
       this.indices = newIndices;

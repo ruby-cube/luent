@@ -1,9 +1,9 @@
-import { JSXNode, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { isFunction, isObject } from "@rue/utils";
-import { mountNodeEntities } from "../node/mountNodeKits";
-import { NodeEntity, processJSXOutput } from "../node/setUpNodeEntities";
-import { NodePod, removeDOMNodes } from "../node/NodePod";
-import { atMounted, atUnmount } from "../flask/flask-hooks";
+import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
+import { isFunction, isObject, normalizeToArray } from "@rue/utils";
+import { atMounted, atUnmount, atRemounted } from "../flask/flask-hooks";
+import { queueInternalRenderTask } from "../render-cycle";
+import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput } from "../node/VineNode";
+import { getFlask } from "@rue/flask";
 
 export type MorphConfig = {}
 
@@ -35,34 +35,34 @@ type SelectorString = string
 //    return undefined;
 // }
 
-export type PortalKit = { nodePod: NodePod, type: 'portal', mount: (parent: Element, fragment: DocumentFragment | undefined)=>void }
 
 export function Portal(container: SelectorString | Element, render: RenderFunction | RawJSXNode) {
    if (!(isFunction(render))) throw new Error('Compiler failed to turn JSX into render function')
+
    const element = typeof container === "string" ? document.querySelector(container) : container;
    if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
-   const nodePod = new NodePod(); //TODO: do I append to outer node pod?? how does this work?
-   // nodePod.push(element) // serves as an indicator to append instead of prepend for dynamic updates
 
-   const nodeEntities = processJSXOutput(render(), element, nodePod)
-   atUnmount(() => {
-      removeDOMNodes(nodePod)
-   })
-   atMounted((initial) => {
-      if (initial) return;
-      mountNodeEntities(nodeEntities, element)
-   })
-   return {
-      type: 'portal',
-      nodePod,
-      mount(parent: Element, fragment: DocumentFragment | undefined) {
-         mountNodeEntities(nodeEntities, element)
-      }
-   };
+   const flask = getFlask()
+   const nodes = processJSXOutput(normalizeToArray(render()))
 
+   setUpNodeVine(nodes, element)
+
+   queueInternalRenderTask(() => {
+      mountDOMNodes(nodes, element)
+   }, flask)
+
+   atUnmount((final) => {
+      queueInternalRenderTask(() => {
+         removeDOMNodes(nodes)
+      }, flask)
+   })
+
+   atRemounted(() => {
+      mountDOMNodes(nodes, element)
+   })
 }
 
-export function isPortal(value: unknown) {
-   return isObject(value) && 'type' in value && value.type === 'portal'
-}
+// export function isPortal(value: unknown) {
+//    return isObject(value) && 'type' in value && value.type === 'portal'
+// }
 

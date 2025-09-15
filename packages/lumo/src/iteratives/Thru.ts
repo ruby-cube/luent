@@ -1,7 +1,7 @@
 import { ion, Ion, toIon, toValue } from "@rue/quarky"
 import { JSXNode } from "../node/makeJSXNode"
 import { MaybeIon } from "../component/Input"
-import { NodePod } from "../node/NodePod"
+import { NodePod } from "../node/x_NodePod"
 
 type RenderEntry<S> = S extends MaybeIon<infer I> ?
    I extends number ? (entry: number, index: number) => JSXNode

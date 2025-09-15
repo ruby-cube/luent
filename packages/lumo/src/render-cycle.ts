@@ -169,7 +169,7 @@ export const queuePostrenderTask = (task: ()=>void)=>{
  * @param eager 
  * @returns 
  */
-export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T }) => void, flask: Flask, eager: boolean = false) {
+export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask }) => void, flask: Flask = getFlask(), eager: boolean = false) {
    const subject = new IonSubject(ion)
 
    let prevState = subject.trackedCall()
@@ -192,7 +192,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
 
    function _render() {
       const newState = subject.trackedCall()
-      render({ current: newState, previous: prevState })
+      render({ current: newState, previous: prevState, flask: Flask })
       prevState = newState;
    }
 
@@ -205,7 +205,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    flask.onDiscard(/* listener.stop */() => {
       effect.destroy()
    });
-   flask.onDemount(/* listener.pause */() => {
+   flask.atDemount(/* listener.pause */() => {
       paused = true;
    });
    flask.onRemount(/* listener.resume */() => {
