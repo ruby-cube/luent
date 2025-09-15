@@ -1,18 +1,16 @@
 import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon } from "../../../quarky/src";
-import { Component, ComponentSetup, DOMNode, InferSlot, makeComponent } from "../component/Component";
+import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { $Node, $Nodes } from "./NodeRef";
-import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
+import { getCurrentIndex } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
-import { Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
+import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
-import { Commons, Provided, callWithCommons, createCommonsNode } from "../commons/Commons";
+import { Provided, callWithCommons, createCommonsNode } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
-import { getClosestCommons } from "../commons/commons-stack";
-import { PolymorphKit } from "../conditional/Polymorph";
-import { DynamicKit } from "./DynamicKit";
 import { Create, markActivationType, Remount, Show } from "../conditional/IfSeries";
+import { DOMNode, NodeKit } from "./VineNode";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -34,10 +32,9 @@ export type RawJSXNode =
    | DOMNode
    | string
    | Ion
-   | DynamicKit
+   | NodeKit
    | Component
    | InnerHTMLKit
-   | PortalKit
    | null
    | undefined
 // | MutableKit
@@ -129,10 +126,10 @@ export function callWithActivationType(type: ActivationType, Slot: RenderSlot, p
    }
 }
 
-export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | JSXNode) {
+export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode) | RawJSXNode) {
    if (isIon(slot)) return () => slot;
    if (slot instanceof Function) { // distinguishes derivation functions from render functions
-      return slot as (...args: any[]) => JSXNode;
+      return slot as (...args: any[]) => RawJSXNode;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
    return () => slot;
@@ -146,7 +143,7 @@ export function makeJSXNode(
    nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-demount' | 'show-hide' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
-): DOMNode | Component | JSX.Element | undefined {
+): RawJSXNode | void {
 
    switch (nodeType) {
 
