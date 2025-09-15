@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
-import { DOMNode, DOMParent, DynamicNodeKit, DynamicPodKit, forEachNode, JSXNode, mountDOMNodes, mountFragment, removeDOMNodes, VineNode } from "../node/VineNode"
+import { DOMNode, DOMParent, DynamicNodeKit, DynamicPodKit, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
 import { ion, Ion } from "@rue/quarky";
@@ -11,7 +11,7 @@ import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
 import { createCommonsNode } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { isObjectLiteral } from "@rue/utils";
+import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 
 
 export type ConditionalKit = {
@@ -218,7 +218,7 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
       for (let i = 0; i < kits.length; i++) {
          const kit = kits[i]
          if (kit.type !== 'show') continue;
-         const nodes = kit.nodes = kit.render(this.outerFlask);
+         const nodes = kit.nodes = processJSXOutput(kit.render(this.outerFlask));
          hideDOMNodes(nodes)
          this.showKitNodes!.push(...nodes)
       }
@@ -271,7 +271,7 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
          return;
       }
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      kit.nodes = this.nodes = kit.type === 'remount' ? (kit.cache ?? (kit.cache = kit.render(flask))) : kit.render(flask);
+      kit.nodes = this.nodes = kit.type === 'remount' ? (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask)))) : processJSXOutput(kit.render(flask));
       this.mount(kit.nodes, fragment ?? this.parent)
 
       queueInternalRenderTask(() => { //TODO: this needs to be called after app is mounted for initial mount...
