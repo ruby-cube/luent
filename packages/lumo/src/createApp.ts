@@ -7,7 +7,7 @@ import { $_run_with_, Flask, flaskStack } from "@rue/flask";
 import { createUpdate, Ion, pushUpdate, popUpdate } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
 import { processJSXOutput } from "./node/x_setUpNodeEntities";
-import { mountNodeEntities } from "./node/mountNodeKits";
+import { mountNodeEntities } from "./node/x_mountNodeKits";
 import { toInput } from "./component/Input";
 
 let appRoot: Element;

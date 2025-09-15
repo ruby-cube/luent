@@ -1,13 +1,12 @@
-import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
+import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { DOMNode, DOMParent, DynamicNodeKit, DynamicPodKit, forEachNode, JSXNode, mountDOMNodes, mountFragment, removeDOMNodes, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
 import { ion, Ion } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
-import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { toAsyncRenderConditional } from "../node/DynamicKit";
-import { COMMONS } from "../commons/commons-stack";
+import { RawJSXNode, RenderFunction, runWithGroupActivationReset } from "../node/makeJSXNode";
+import { COMMONS, CommonsNode } from "../commons/commons-stack";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
 import { createCommonsNode } from "../commons/Commons";
@@ -47,7 +46,7 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ou
       prevShowStates: undefined,
       flask: undefined,
       statementType: statementType as 'if' | 'elseIf' | 'else',
-      render: toAsyncRenderConditional(render, outerFlask, context, {
+      render: toAsyncRenderConditional(render, context, {
          [FLASK]: undefined,
          [COMMONS]: commons,
          [TRACE]: __DEV__ ? __DEV__buildAsyncPath() : ''
@@ -294,7 +293,14 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
    }
 }
 
+export type AsyncRenderConditional = (flask: Flask, input?: Object) => RawJSXNode[]
 
+export function toAsyncRenderConditional(render: RenderFunction, context: ContextSnapshot, newContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRenderConditional {
+   return (flask: Flask, input?: Object) => {
+      newContext[FLASK] = flask
+      return $_run_with_(context, () => runWithGroupActivationReset(render, input), newContext)
+   }
+}
 
 
 // function makeList() {

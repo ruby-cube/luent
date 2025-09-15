@@ -1,4 +1,3 @@
-import { DOMNode } from "../component/Component";
 import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation_ion } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
@@ -16,7 +15,7 @@ import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace,
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
 import { queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../render-cycle";
 import { RenderSlot, MaybeIon } from "../component/Input";
-import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
+import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

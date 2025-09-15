@@ -4,7 +4,7 @@ import { ConditionalRenderSeries } from "../conditional/x_ConditionalRenderSerie
 import { MatchCaseKit } from "../conditional/MatchCase";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { getGroupActivationType, JSXNode, RawJSXNode } from "./makeJSXNode";
-import { createTextNode, setUpTextNode } from "./TextNode";
+import { createTextNode, setUpTextNode } from "./x_TextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./InnerHTML";
 import { NodePod } from "./x_NodePod";
 import { AnyObject } from "@rue/types";

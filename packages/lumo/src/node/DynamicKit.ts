@@ -5,17 +5,11 @@ import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { TransitionNode } from "../transition/TransitionNode";
 import { AnyObject } from "@rue/types";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
+import { DynamicKit } from "./VineNode";
 
 
 
-export type AsyncRenderConditional = (flask: Flask, input?: Object) => RawJSXNode[]
 
-export function toAsyncRenderConditional(render: RenderFunction, outerFlask: Flask, context: ContextSnapshot, newContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRenderConditional {
-   return (flask: Flask, input?: Object) => {
-      newContext[FLASK] = flask
-      return $_run_with_(context, () => runWithGroupActivationReset(render, input), newContext)
-   }
-}
 
 
 // export interface DynamicKit {
@@ -35,18 +29,13 @@ export function toAsyncRenderConditional(render: RenderFunction, outerFlask: Fla
 //    return isObject(value) && 'dynamicPod' in value && 'setUp' in value;
 // }
 
-type ConditionalKit = {
-   nodePod: NodePod;
-   flask: Flask | undefined;
-   renderConditional: (parent: Element, nodePod: NodePod) => any[];
-   transitionNodes: TransitionNode[];
-}
 
-export interface ConditionalSeriesKit extends DynamicKit {
-   render(kit: ConditionalKit & AnyObject, parent: Element, fragment?: DocumentFragment): void
-   deactivateConditional(id: any): void
-   activateConditional(id: any, parent: Element, fragment?: DocumentFragment): void
-}
+
+// export interface ConditionalSeriesKit extends DynamicKit {
+//    render(kit: ConditionalKit & AnyObject, parent: Element, fragment?: DocumentFragment): void
+//    deactivateConditional(id: any): void
+//    activateConditional(id: any, parent: Element, fragment?: DocumentFragment): void
+// }
 
 // export function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeEntity[]) {
 //    let nodeEntities: NodeEntity[];
