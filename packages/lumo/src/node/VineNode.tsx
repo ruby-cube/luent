@@ -1,6 +1,6 @@
 import { FLASK, Flask, getFlask } from "@rue/flask";
 import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
-import { debug } from "@rue/utils";
+import { debug, isObject } from "@rue/utils";
 import { __DEV__checkIfTracked, Ion, isIon, toValue, watch } from "@rue/quarky";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { isComponentKit } from "../component/Component";
@@ -110,8 +110,8 @@ export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent) {
    }
 }
 
-function isNodeKit(node: JSXNode): node is NodeKit {
-   return 'mount' in node
+function isNodeKit(node: RawJSXNode): node is NodeKit {
+   return isObject(node) && 'mount' in node
 }
 
 function isDynamicKit(node: JSXNode): node is DynamicKit {

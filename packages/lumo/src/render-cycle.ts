@@ -192,7 +192,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
 
    function _render() {
       const newState = subject.trackedCall()
-      render({ current: newState, previous: prevState, flask: Flask })
+      render({ current: newState, previous: prevState, flask })
       prevState = newState;
    }
 
