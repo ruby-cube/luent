@@ -60,6 +60,7 @@ import { TestFiniteIon } from './TestFiniteIon';
 import { TestJSON } from './TestJSON';
 import { TestNestedConditional } from './TestNestedConditional';
 import { DebugLeakyFlask } from './DebugLeakyFlask';
+import { TestVineNodes } from './TestVineNodes';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -83,7 +84,7 @@ import { DebugLeakyFlask } from './DebugLeakyFlask';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(VideoPlayer)
+const app = createApp(TestIfElse)
 
 app.mount('#app')
 

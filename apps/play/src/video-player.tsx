@@ -1,48 +1,48 @@
 import { component, Else, EventHandler, FromTag, If, NodeRef, Style } from "@rue/lumo";
 import { FiniteIon, Ion, ion } from "@rue/quarky";
-import './reset.css'
+import "./reset.css"
 
 
 export function VideoPlayer() {
 
-   const $video = NodeRef('video')
+   const $video = NodeRef("video")
 
    const $player = FiniteIon({
-      'loading': {
-         init: () => 'x:ready',
-         error: () => 'x:failure'
+      "loading": {
+         init: () => "x:ready",
+         error: () => "x:failure"
       },
-      'x:ready': {},
-      'x:failure': {}
+      "x:ready": {},
+      "x:failure": {}
    })
 
    const $track = FiniteIon({
-      'paused': {
-         play: () => 'playing'
+      "paused": {
+         play: () => "playing"
       },
-      'playing': {
-         pause: () => 'paused',
-         end: () => 'ended'
+      "playing": {
+         pause: () => "paused",
+         end: () => "ended"
       },
-      'ended': {
-         play: () => 'playing'
+      "ended": {
+         play: () => "playing"
       }
    })
 
    let duration = 0
 
-   $player.on('init', () => {
+   $player.on("init", () => {
       duration = $video()?.duration ?? 0
    })
 
-   $track.on('play', () => {
+   $track.on("play", () => {
       const video = $video()
       if (!video) return;
-      if ($track.is('ended')) $elapsedTime.state = video.currentTime = 0;
+      if ($track.is("ended")) $elapsedTime.state = video.currentTime = 0;
       $video()?.play()
    })
 
-   $track.on('pause', () => {
+   $track.on("pause", () => {
       $video()?.pause()
    })
 
@@ -60,52 +60,53 @@ export function VideoPlayer() {
    function setTime(width: number, x: number) {
       const video = $video()!
       const time = video.currentTime = video.duration * x / width
-      $track.apply('pause')
+      const state = $track()
+      if (state === "playing") $track.apply("pause")
       $elapsedTime.state = time
-      setTimeout(() => $track.apply('play'), 0)
+      if (state === "playing") setTimeout(() => $track.apply("play"), 0)
    }
 
    const $sound = FiniteIon({
-      'on': { toggle: () => 'muted' },
-      'muted': { toggle: () => 'on' }
+      "on": { toggle: () => "muted" },
+      "muted": { toggle: () => "on" }
    })
 
-   $player.activate(() => 'loading')
+   $player.activate(() => "loading")
       .nest({
-         'x:ready': [
-            $track.init(() => 'paused'),
-            $sound.init(() => 'on')
+         "x:ready": [
+            $track.init(() => "paused"),
+            $sound.init(() => "on")
          ]
       })
 
    return component(
       <>
-         <div class='container'>
+         <div class="container">
             <video
                ref={$video}
-               on:canplay={e => $player.apply('init')}
+               on:canplay={e => $player.apply("init")}
                on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
-               on:ended={e => $track.apply('end')}
-               on:error={e => $player.apply('error')}
+               on:ended={e => $track.apply("end")}
+               on:error={e => $player.apply("error")}
             >
                <source src="/src/video-player-dance.mp4" type="video/mp4" />
             </video>
 
-            {If(($player.is('x:ready')),
-               <>
-                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is('paused'))}
+            {If(($player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
+               <div>
+                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is("paused"))}
                      on:click={reClickElapsedBar}
                   />
-                  <remount-demount>
-                     {If(($track.is('playing')),
-                        <button on:click={e => $track.apply('pause')}>‖</button>
-                     )}
-                     {Else(
-                        <button on:click={e => $track.apply('play')}>►</button>
-                     )}
-                  </remount-demount>
+                  {/* <remount-demount> */}
+                  {If(($track.is("playing")),
+                     <button on:click={e => $track.apply("pause")}>‖</button>
+                  )}
+                  {Else(
+                     <button on:click={e => $track.apply("play")}>►</button>
+                  )}
+                  {/* </remount-demount> */}
                   <Timer elapsed={$elapsedTime} duration={duration} />
-               </>
+               </div>
             )}
          </div>
 
@@ -159,13 +160,13 @@ function ElapsedBar(input: FromTag<{
    elapsed: Ion<number>,
    duration: number,
    paused: Ion<boolean>
-   'on:click': MouseEvent
+   "on:click": MouseEvent
 }>) {
    const { $elapsed, duration, $paused, emit } = input
 
    return component(
       <div class="elapsed"
-         on:click={e => (console.log('click', emit('click', e)))}
+         on:click={e => (console.log("click", emit("click", e)))}
       >
          <div
             class="elapsed-bar"

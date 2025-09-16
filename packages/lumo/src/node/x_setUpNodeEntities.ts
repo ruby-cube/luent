@@ -11,7 +11,7 @@ import { AnyObject } from "@rue/types";
 import { PolymorphKit } from "../conditional/Polymorph";
 import { ActivationType } from "../conditional/If";
 import { jsx } from "@rue/jsx-runtime";
-import { DynamicKit, isDynamicKit } from "./DynamicKit";
+import { DynamicKit, isDynamicKit } from "./x_DynamicKit";
 import { isPortal } from "../boundaries/Portal";
 
 // [ ] validate and apply swap tag

@@ -40,7 +40,13 @@ export function $_snap_context() {
    const currentContext = asyncContextStack.current;
    if (!currentContext) return snapshot;
    for (const key of keys) {
-      snapshot[key] = currentContext.value[key]
+      const stackNode = currentContext.value[key] //QUESTION: do I need to clone the stack node or can I just reference it?
+      if (!stackNode) continue
+      
+      snapshot[key] = {
+         prev: stackNode.prev,
+         value: stackNode.value
+      }
    }
    return snapshot
 }

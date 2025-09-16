@@ -73,9 +73,7 @@ type TestCountInput = FromTag<{
    'mu?:apple': Ion<string>
 }>
 
-export function TestCount({ $apple, mu }: TestCountInput) {
-
-   if (mu($apple)) $apple.state = "i"
+export function TestCount() {
 
    const $count = ion(0)
 

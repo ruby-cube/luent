@@ -12,7 +12,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
-import { toRenderTransient } from "../node/DynamicKit";
+import { toRenderTransient } from "../node/x_DynamicKit";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { COMMONS, getClosestCommons } from "../commons/commons-stack";
 

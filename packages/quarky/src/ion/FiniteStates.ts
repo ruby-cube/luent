@@ -166,8 +166,8 @@ type StateDefinition<S extends _FiniteStates = _FiniteStates> = {
 
 type AllKeys<T> = T extends T ? keyof T : never;
 
-type State<S extends _FiniteStates> = Exclude<keyof S, typeof ANY_STATE>
-type TransitionKey<S extends _FiniteStates> = AllKeys<S[keyof S]>
+type State<S extends _FiniteStates> = Exclude<keyof S, typeof ANY_STATE | number>
+type TransitionKey<S extends _FiniteStates> = Exclude<AllKeys<S[keyof S]>, number | symbol>
 
 
 export type FiniteIon<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = {
@@ -359,7 +359,7 @@ export function FiniteIon<S extends FiniteStates, M extends Methods>(states: S, 
       const prevStateID = $currentState.state;
       const state = states[prevStateID ?? '']
 
-      const getNextState = typeof transition === 'string' ? (state[transition] ?? states[ANY_STATE as any][transition]) : transition;
+      const getNextState = typeof transition === 'string' ? (state[transition] ?? states[ANY_STATE as any]?.[transition]) : transition;
       if (!getNextState) return;
 
       const nextStateID = getNextState();

@@ -1,5 +1,4 @@
 import { ConditionalSeries } from "./x_ConditionalSeries";
-import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { Ion } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
@@ -14,7 +13,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { MaybeIon } from "../component/Input";
-import { toRenderTransient, wrapToPreserve } from "../node/DynamicKit";
+import { toRenderTransient, wrapToPreserve } from "../node/x_DynamicKit";
 import { createCommonsNode } from "../commons/Commons";
 
 //TODO: rename 'phasic node' to 'transition node'

@@ -100,6 +100,8 @@ export class Flask {
       this.type = type;
       this.creationScopeID = creationScope ? genUID() : outer?.creationScopeID ?? "0"
 
+      console.log('creating flask', {type: this.type, id: this.creationScopeID, outer: this.outer?.creationScopeID})
+
       // Bind to this, to allow easy passing into hooks
       Object.defineProperty(this, 'atDemount', {
          value: (task: Task) => on(LifecycleHook.DEMOUNT, this, task),
@@ -123,6 +125,7 @@ export class Flask {
       })
       Object.defineProperty(this, 'emitDiscard', {
          value: () => {
+            console.log('emitting discard', {type: this.type, id: this.creationScopeID, outer: this.outer?.creationScopeID})
             this.emit(LifecycleHook.DISCARD)
             this.tasks.delete(LifecycleHook.INITIAL_MOUNT);
             this.tasks.delete(LifecycleHook.REMOUNT);

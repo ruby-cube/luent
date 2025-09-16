@@ -1,6 +1,6 @@
 import { FLASK, Flask, getFlask } from "@rue/flask";
 import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
-import { debug, isObject } from "@rue/utils";
+import { debug, isObject, normalizeToArray } from "@rue/utils";
 import { __DEV__checkIfTracked, Ion, isIon, toValue, watch } from "@rue/quarky";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { isComponentKit } from "../component/Component";
@@ -48,7 +48,7 @@ export class VineNode {
 }
 
 export interface NodeKit extends VineNode {
-   mount(nodes: JSXNode[], root: DOMParent | DocumentFragment): void
+   mount(root: DOMParent | DocumentFragment): void
 }
 
 export interface DynamicPodKit extends NodeKit {
@@ -58,7 +58,7 @@ export interface DynamicPodKit extends NodeKit {
    phasicNode?: TransitionNode | null
 }
 
-export interface DynamicKit extends VineNode {
+export interface DynamicKit extends NodeKit {
    setUp(): void
 }
 
@@ -66,20 +66,22 @@ export interface DynamicNodeKit extends NodeKit {
    unmount(nodes: JSXNode[]): void
 }
 
-
+export function processJSXOutput(rawJSX: RawJSXNode) {
+   return _processJSXOutput(normalizeToArray(rawJSX))
+}
 
 /**
  * - spread arrays and components into root array
  * - get rid of undefined
  * @param jsxNodes 
  */
-export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
+function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
    for (const node of jsxNodes) {
       if (node instanceof Array) {
-         processJSXOutput(node, flattened)
+         _processJSXOutput(node, flattened)
       }
       else if (isComponentKit(node)) {
-         processJSXOutput(node.jsxNodes, flattened)
+         _processJSXOutput(node.jsxNodes, flattened)
       }
       else if (isIon(node)) {
          flattened.push(new DynamicTextNode(node))
@@ -90,6 +92,9 @@ export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = 
       else if (isNodeKit(node)) {
          flattened.push(node)
       }
+      else if (node instanceof Element) {
+         flattened.push(node)
+      }
       else {
          flattened.push(createTextNode(node))
       }
@@ -98,16 +103,18 @@ export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = 
 }
 
 
-export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent) {
-   let preceding = null
+export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent, preceding: JSXNode | null = null) {
    for (const node of nodes) {
       if (isNodeKit(node)) {
          node.parent = parent
          node.preceding = preceding
-         if (isDynamicKit(node)) node.setUp()
+         if (node.nodes){
+            setUpNodeVine(node.nodes, parent, preceding)
+         }
       }
       preceding = node
    }
+   return nodes;
 }
 
 function isNodeKit(node: RawJSXNode): node is NodeKit {
@@ -137,6 +144,10 @@ class DynamicTextNode extends VineNode implements DynamicKit {
          }, flask)
       });
    }
+
+   mount(root: DOMParent | DocumentFragment) {
+      root.appendChild(this.nodes![0] as unknown as Node)
+   }
 }
 
 function createTextNode(value: unknown) {
@@ -153,8 +164,12 @@ function toString(value: any) {
 
 
 export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | null | undefined, parent: DOMParent | null | undefined) {
-   if (preceding && preceding !== parent)
+   if (preceding && preceding !== parent) {
+      console.log('preceding', preceding)
+      console.log('fragment', [...fragment.childNodes])
+      console.log('parent', parent)
       preceding.after(fragment)
+   }
    else
       parent?.append(fragment)
 }
@@ -162,7 +177,6 @@ export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | n
 export type DOMParent = { appendChild(node: Node): Node, innerHTML: string, append: (...nodes: (Node | string)[]) => void } & DOMNode
 
 export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragment) {
-
    for (const node of nodes) {
       if (node instanceof Node) { // Node type from Web API
          root.appendChild(node)
@@ -175,15 +189,10 @@ export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragme
          mountInnerHTML(node.innerHTML, root)
       }
       else if (isNodeKit(node)) {
-         const nodes = node.nodes
-         if (!nodes) {
-            console.error('nodes are missing')
-            continue;
-         }
-         node.mount(nodes, root)
+         node.mount(root)
       }
       else {
-         debug.error('[[INVALID INPUT]] Invalid node entity')
+         debug.error('[[INVALID INPUT]] Invalid node entity', node)
       }
    }
 }

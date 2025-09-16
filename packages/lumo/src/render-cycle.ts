@@ -1,5 +1,5 @@
-import { Flask, getFlask } from "@rue/flask"
-import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, getCurrentPhase, postcycleTask, } from "@rue/quarky"
+import { Flask, getActiveFlask, getFlask } from "@rue/flask"
+import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, getCurrentPhase, postcycleTask, watch, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 import { __DEV__getTrace, getInternalTrace, traceAsyncPath } from "../../flask/debug"
 
@@ -42,8 +42,13 @@ export function queueInternalRenderTask(fn: () => void, flask: Flask) { //TODO: 
       fn.__DEVName = 'queueInternalRenderTask'
       fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)
+   console.log('schedule qIR', fn)
    $activeUpdate().cycle.scheduleEffect(effect)
-   flask.onDiscard(() => effect.destroy())
+
+   // flask.onDiscard(() => { //TODO: need a better solution to this
+   //    console.log('!!!!!!OHHH NOOOOOO')
+   //    effect.destroy()
+   // })
 }
 
 // export const queueInternalRenderTask = (fn: Function) => {
@@ -170,6 +175,8 @@ export const queuePostrenderTask = (task: ()=>void)=>{
  * @returns 
  */
 export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask }) => void, flask: Flask = getFlask(), eager: boolean = false) {
+   watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRERENDER, eager})
+   return;
    const subject = new IonSubject(ion)
 
    let prevState = subject.trackedCall()

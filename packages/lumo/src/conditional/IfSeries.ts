@@ -1,5 +1,5 @@
-import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
-import { DOMNode, DOMParent, DynamicNodeKit, DynamicPodKit, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode"
+import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@rue/flask";
+import { DOMNode, DOMParent, DynamicNodeKit, DynamicPodKit, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
 import { ion, Ion } from "@rue/quarky";
@@ -182,10 +182,12 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
          return conditions.length;
       })
 
-      this.renderShowKits(kits)
+      this.activateConditional(this.kits[this.$activeIndex()], true)
 
-      this.activateConditional(kits[this.$activeIndex()])
-
+      watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex }) => {
+         this.deactivateConditional(this.kits[prevIndex]);
+         this.activateConditional(this.kits[activeIndex])
+      })
    }
 
    getConditions(statements: DynamicConditionalRenderKit[]) {
@@ -215,10 +217,13 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
    showKitNodes: JSXNode[] | null = []
 
    renderShowKits(kits: DynamicConditionalRenderKit[]) {
+      let preceding = this.preceding
       for (let i = 0; i < kits.length; i++) {
          const kit = kits[i]
          if (kit.type !== 'show') continue;
          const nodes = kit.nodes = processJSXOutput(kit.render(this.outerFlask));
+         if (i === 0) preceding = this.preceding = nodes.at(-1)
+         else preceding = nodes.at(-1)
          hideDOMNodes(nodes)
          this.showKitNodes!.push(...nodes)
       }
@@ -227,35 +232,29 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
 
    phasicNode?: TransitionNode | null | undefined;
 
-   setUp() {
-      watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex }) => {
-         this.deactivateConditional(this.kits[prevIndex]);
-         this.activateConditional(this.kits[activeIndex])
-      })
-   }
+   // setUp(parent: DOMParent, preceding: JSXNode | null) {
+   //    // this.renderShowKits(this.kits)
+   //    setUpNodeVine(this.nodes!, parent, preceding)
+   //    this.parent = parent;
+   //    this.preceding = preceding
+   // }
 
-   mount(nodes: JSXNode[], root: DOMParent | DocumentFragment | null | undefined): void {
+   activeType?: ActivationType
+
+   mount(root: DOMParent | DocumentFragment | null | undefined): void {
       if (!root) {
-         if (__DEV__) console.error('root missing')
+         if (__DEV__) console.error('root missing', root, this.nodes, this)
          return;
       }
+
       if (this.showKitNodes) {
-         mountDOMNodes(nodes, root)
-         const firstNode = nodes[0]
-         if (firstNode instanceof VineNode) {
-            firstNode.preceding = this.preceding;
-         }
-         this.preceding = nodes.at(-1)
+         mountDOMNodes(this.showKitNodes, this.parent!)
          this.showKitNodes = null
       }
 
-      mountDOMNodes(nodes, root)
+      if (!this.nodes || this.activeType === 'show') return;
 
-      if (root instanceof DocumentFragment) {
-         queueInternalRenderTask(() => {
-            mountFragment(root, this.precedingLeaf, this.parent)
-         }, this.outerFlask)
-      }
+      mountDOMNodes(this.nodes, root)
    }
 
    unmount(nodes: JSXNode[]) {
@@ -264,22 +263,40 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
       }, this.outerFlask)
    }
 
-   activateConditional(kit: DynamicConditionalRenderKit, fragment?: DocumentFragment) {
-      if (kit.type === 'show') {
+   activateConditional(kit: DynamicConditionalRenderKit | undefined, initialLoad: boolean = false) {
+      if (!kit) return;
+      const activeType = this.activeType = kit.type
+      if (activeType === 'show') {
          if (!kit.nodes) return;
-         showDOMNodes(kit.nodes)
+         showDOMNodes(this.nodes = kit.nodes)
          return;
       }
-      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      kit.nodes = this.nodes = kit.type === 'remount' ? (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask)))) : processJSXOutput(kit.render(flask));
-      this.mount(kit.nodes, fragment ?? this.parent)
 
-      queueInternalRenderTask(() => { //TODO: this needs to be called after app is mounted for initial mount...
-         flask.emitInitialMount()
-      }, this.outerFlask)
+      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: activeType === "create" }))
+      kit.nodes = this.nodes =
+         activeType === 'remount' ?
+            (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask))))
+            : processJSXOutput(kit.render(flask));
+
+      if (initialLoad) {
+         queueInternalRenderTask(() => { //TODO: this needs to be called after app is mounted for initial mount...
+            flask.emitInitialMount()
+         }, this.outerFlask)
+      }
+      else {
+         setUpNodeVine(this.nodes, this.parent!, this.preceding)
+         const fragment = new DocumentFragment()
+         this.mount(fragment)
+         queueInternalRenderTask(() => {
+            mountFragment(fragment, this.precedingLeaf, this.parent)
+            kit.type === 'create' ? flask.emitInitialMount() : flask.emitRemount()
+         }, this.outerFlask)
+      }
+
    }
 
-   deactivateConditional(kit: DynamicConditionalRenderKit) {
+   deactivateConditional(kit: DynamicConditionalRenderKit | undefined) {
+      if (!kit) return;
       const prevNodes = kit.nodes;
       if (!prevNodes) return;
       if (kit.type === 'show') {
@@ -287,7 +304,12 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
          return;
       }
       kit.nodes = null;
-      kit.flask!.emitDiscard()
+
+      if (kit.type === 'create') {
+         kit.flask!.emitDiscard()
+         kit.flask = undefined
+      }
+      else kit.flask!.emitDemount()
       this.unmount(prevNodes)
       return kit;
    }
@@ -295,10 +317,10 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
 
 export type AsyncRenderConditional = (flask: Flask, input?: Object) => RawJSXNode[]
 
-export function toAsyncRenderConditional(render: RenderFunction, context: ContextSnapshot, newContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRenderConditional {
+export function toAsyncRenderConditional(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRenderConditional {
    return (flask: Flask, input?: Object) => {
-      newContext[FLASK] = flask
-      return $_run_with_(context, () => runWithGroupActivationReset(render, input), newContext)
+      nestedContext[FLASK] = flask
+      return $_run_with_(context, () => runWithGroupActivationReset(render, input), nestedContext)
    }
 }
 

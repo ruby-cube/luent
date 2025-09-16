@@ -1,14 +1,14 @@
 import { Component, ComponentSetup } from "./component/Component";
 import { AnyObject } from "@rue/types";
 import { AppCommons, createAppCommons } from "./commons/provide";
-import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
-import { NodePod, removeDOMNodes } from "./node/x_NodePod";
-import { $_run_with_, Flask, flaskStack } from "@rue/flask";
+import {  popCommons, pushCommons } from "./commons/commons-stack";
+import { Flask, flaskStack } from "@rue/flask";
 import { createUpdate, Ion, pushUpdate, popUpdate } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
-import { processJSXOutput } from "./node/x_setUpNodeEntities";
-import { mountNodeEntities } from "./node/x_mountNodeKits";
 import { toInput } from "./component/Input";
+import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
+import { normalizeToArray } from "@rue/utils";
+import { queueInternalRenderTask } from "./render-cycle";
 
 let appRoot: Element;
 
@@ -31,11 +31,11 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
 
    // (1) instantiate developer's root component
    const appCommons = createAppCommons(config?.provide, config?.globalCommons)
-   const nodePod = new NodePod()
    const remountable = config?.remountable
    const flask = new Flask({ type: 'view' });
 
    return {
+      nodes: undefined as JSXNode[] | undefined,
       mount(element: string | HTMLElement | SVGAElement) {
          const root = typeof element === 'string' ? document.querySelector(element) : element;
          if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
@@ -45,28 +45,31 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
          // (2) attach developer's root component to root element
          // flask.containCall(function mountRootComponent() {
 
-            const attributes = {
-               ...config?.setup || {},
-            }
-            const update = createUpdate(1000)
-               flaskStack.push(flask)
-               pushUpdate(update)
-               pushCommons(appCommons)
-     
-               try {
-                  mountNodeEntities(processJSXOutput(App(toInput(attributes)), appRoot, nodePod), appRoot)
-               }
-               finally {
-                  flask.emitInitialMount()
-                  // setComponentAttributes(undefined)
-                  flaskStack.pop()
-                  popUpdate()
-                  // if (remountable) markMountPhase()
-                  // component.setUp(root, nodePod)
-                  // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
-                  // if (remountable) unmarkMountPhase()
-                  popCommons() // for sibling components to access parent, must be set AFTER `component()`
-               }
+         const attributes = {
+            ...config?.setup || {},
+         }
+         const update = createUpdate(1000)
+         flaskStack.push(flask)
+         pushUpdate(update)
+         pushCommons(appCommons)
+         let nodes: JSXNode[]
+         try {
+            nodes = this.nodes = processJSXOutput(App(toInput(attributes)))
+            setUpNodeVine(nodes, appRoot)
+            queueInternalRenderTask(() => {
+               mountDOMNodes(nodes, appRoot)
+               flask.emitInitialMount()
+            }, flask)
+         }
+         finally {
+            flaskStack.pop()
+            popUpdate()
+            // if (remountable) markMountPhase()
+            // component.setUp(root, nodePod)
+            // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
+            // if (remountable) unmarkMountPhase()
+            popCommons() // for sibling components to access parent, must be set AFTER `component()`
+         }
          // })
 
       },
@@ -76,7 +79,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             if (__DEV__) throw new Error('App cannot be unmounted. Did you mean to call `discard`? To enable unmount and remount, set `remountable` to true in config.')
             return;
          }
-         removeDOMNodes(nodePod);
+         if (this.nodes) removeDOMNodes(this.nodes);
       },
 
       discard() {
