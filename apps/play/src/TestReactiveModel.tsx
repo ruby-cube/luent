@@ -1,4 +1,4 @@
-import { component,For, target } from "@rue/lumo";
+import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, ionize, toRaw, update } from "@rue/quarky";
 import './style.css'
@@ -112,8 +112,12 @@ class ItemList extends Array<Item> {
 
 class Selected<T> extends Set<T> {
    toggle(item: T) {
-      if (this.has(item)) this.delete(item)
-      this.add(item)
+      if (this.has(item)) {
+         this.delete(item)
+      }
+      else {
+         this.add(item)
+      }
    }
 }
 
@@ -296,6 +300,6 @@ export function List(
 
 
 function responsive(fn: () => unknown) {
-   // return fn()
-   return update(fn, {timeMargin: 100})
+   return fn()
+   // return update(fn, {timeMargin: 100})
 }

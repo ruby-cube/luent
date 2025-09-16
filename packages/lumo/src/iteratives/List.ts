@@ -28,11 +28,6 @@ export class ListKit extends VineNode {
 
    prevItems: Map<UID, ListItemKit> = new Map()
 
-   // private diff(newList: unknown[], oldList: unknown[], getUID: (item: unknown) => UID): { lcsStart: { newIndex: number, oldIndex: number }, lcsLength: number } {
-   //    // TODO:
-   //    return {}
-   // }
-
    private render(list: unknown[], renderItem: RenderItem<unknown>) {
       const nodes: JSXNode[] = []
 
@@ -147,9 +142,7 @@ export class ListKit extends VineNode {
                if (!fragment) {
                   fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
                }
-
                mountDOMNodes(kit.nodes!, fragment)
-
                kit.hasMoved = null;
             }
             else {

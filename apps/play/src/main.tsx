@@ -17,7 +17,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp } from '@rue/lumo';
+import { component, createApp, PRERENDER } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -32,7 +32,7 @@ import { TestSetHas } from './TestSetHas';
 import { TestCustomRadioSelection } from './TestSelected';
 import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
-import { ion, ionize, isAtomic, isIonizedModel, neutron, watch } from '@rue/quarky';
+import { ion, ionize, isAtomic, isIonizedModel, neutron, SYNC, watch } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
 import { TestAnimationController } from './demos/animation-controller';
 import { CounterModelApp } from './TestCounterModel';
@@ -84,6 +84,9 @@ import { For } from '../../../packages/lumo/src/iteratives/For';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
+
+
+
 
 const app = createApp(List)
 
