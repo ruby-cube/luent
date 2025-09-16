@@ -34,7 +34,7 @@ export const {
 export const queuePrerenderTask = useUpdateCycleScheduler(PRERENDER)
 
 
-export function queueInternalRenderTask(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
+export function queueInternalRenderTask(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
    if (getCurrentPhase() === INTERNAL_RENDER) {
       fn()
       return;
@@ -42,10 +42,10 @@ export function queueInternalRenderTask(fn: () => void, flask: Flask) { //TODO: 
       fn.__DEVName = 'queueInternalRenderTask'
       fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)
-   console.log('schedule qIR', fn)
+   // console.log('schedule qIR', fn)
    $activeUpdate().cycle.scheduleEffect(effect)
 
-   // flask.onDiscard(() => { //TODO: need a better solution to this
+   // getFlask().onDiscard(() => { //TODO: need a better solution to this
    //    console.log('!!!!!!OHHH NOOOOOO')
    //    effect.destroy()
    // })
@@ -175,8 +175,8 @@ export const queuePostrenderTask = (task: ()=>void)=>{
  * @returns 
  */
 export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask }) => void, flask: Flask = getFlask(), eager: boolean = false) {
-   watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRERENDER, eager})
-   return;
+   // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRERENDER, eager})
+   // return;
    const subject = new IonSubject(ion)
 
    let prevState = subject.trackedCall()

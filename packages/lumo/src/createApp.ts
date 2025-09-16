@@ -56,6 +56,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
          try {
             nodes = this.nodes = processJSXOutput(App(toInput(attributes)))
             setUpNodeVine(nodes, appRoot)
+            
             queueInternalRenderTask(() => {
                mountDOMNodes(nodes, appRoot)
                flask.emitInitialMount()

@@ -1,7 +1,7 @@
-import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderConditional, runWithGroupActivationReset } from "../node/makeJSXNode";
+import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, runWithGroupActivationReset, RenderFunction } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { Ion, isInertIon, isIon, toValue } from "@rue/quarky";
-import { isActivationKit, ConditionalKit, ConditionalSeriesKit, toDynamicConditionalKits } from "./IfSeries";
+import { ConditionalKit, ConditionalSeriesKit, toDynamicConditionalKits } from "./IfSeries";
 import { getFlask } from "@rue/flask";
 
 // let currentNodePodIndex: number | undefined = undefined
@@ -10,9 +10,9 @@ import { getFlask } from "@rue/flask";
 //    currentNodePodIndex = index ?? undefined;
 // }
 
-export type ActivationType = 'show' | 'create' | 'remount'
+export type ActivationType = 'create' | 'remount'
 
-type RenderConditional = (v: <T>(value: T) => NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>> : T>) => RawJSXNode
+export type RenderConditional = (v: <T>(value: T) => NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>> : T>) => RawJSXNode
 
 
 
@@ -66,11 +66,11 @@ function getParams(typeOrRenderConditional: RawJSXNode | RenderConditional | Act
    return [_renderConditional, activationType] as const
 }
 
-export function createConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderConditional, $condition?: Ion<Booleanny> | Booleanny, discard?: (() => void) | undefined) {
+export function createConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderConditional, $condition?: Ion<Booleanny> | Booleanny, discard?: (() => void) | undefined): ConditionalKit {
 
    return {
       statementType: statementType as 'if' | 'elseIf' | 'else',
-      render,
+      render: render as RenderFunction,
       type: activationType,
       discard,
       $condition
@@ -80,9 +80,8 @@ export function createConditionalKit(statementType: "if" | "elseIf" | "else", ac
 export function createIfSeries(kits: ConditionalKit[]) {
    const condition = kits[0].$condition
    if (!isIon(condition) || isInertIon(condition)) return renderStaticConditional(kits)
-      const flask = getFlask()
-    const dynamicKits = toDynamicConditionalKits(kits, flask, getGroupActivationType())
-   return new ConditionalSeriesKit(dynamicKits, flask)
+    const dynamicKits = toDynamicConditionalKits(kits, getGroupActivationType())
+   return new ConditionalSeriesKit(dynamicKits, getFlask())
 }
 
 

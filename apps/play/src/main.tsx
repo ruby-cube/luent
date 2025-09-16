@@ -84,7 +84,7 @@ import { TestVineNodes } from './TestVineNodes';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TestIfElse)
+const app = createApp(VideoPlayer)
 
 app.mount('#app')
 

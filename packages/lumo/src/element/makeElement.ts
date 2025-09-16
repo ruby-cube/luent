@@ -49,7 +49,6 @@ export function makeElement(
    const domNode = isHydrating() ? getElement()
       : XML_NS ? createNSElement(tagName, XML_NS)
          : document.createElement(tagName)
-   console.log('element', domNode)
 
    if (ref) {
       if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")

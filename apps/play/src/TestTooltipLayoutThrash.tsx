@@ -105,7 +105,9 @@ export function Tooltip(input: FromTag<{
    atMounted(async () => {
       const div = $div();
       if (!div) return;
-      const height = await measureLayout(() => div.getBoundingClientRect().height) // prevents looped layout thrashing
+      const height = await measureLayout(() =>
+         div.getBoundingClientRect().height
+      ) // prevents looped layout thrashing
       $height.state = height;
    })
 

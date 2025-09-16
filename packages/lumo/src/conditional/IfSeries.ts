@@ -11,7 +11,7 @@ import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
 import { createCommonsNode } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { isObjectLiteral, normalizeToArray } from "@rue/utils";
+import { isObjectLiteral } from "@rue/utils";
 
 
 export type ConditionalKit = {
@@ -22,13 +22,14 @@ export type ConditionalKit = {
    discard: (() => void) | undefined
 }
 
+
 export type DynamicConditionalRenderKit = {
    nodes: (JSXNode[]) | null
-   prevShowStates: any[] | undefined
    flask: Flask | undefined;
    statementType: "if" | "elseIf" | "else";
    type: ActivationType | undefined;
-   render: (flask: Flask, input?: Object) => RawJSXNode[];
+   render: AsyncRenderConditional;
+   // render: (flask: Flask, input?: Object) => RawJSXNode[];
    transitionNodes: TransitionNode[];
    $condition: Ion<Booleanny> | undefined
    cache: JSXNode[] | undefined;
@@ -36,14 +37,13 @@ export type DynamicConditionalRenderKit = {
 
 
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", outerFlask: Flask, activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition?: Ion<Booleanny>): DynamicConditionalRenderKit {
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition?: Ion<Booleanny>): DynamicConditionalRenderKit {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() //TODO:
 
    const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
 
    return {
       nodes: null,
-      prevShowStates: undefined,
       flask: undefined,
       statementType: statementType as 'if' | 'elseIf' | 'else',
       render: toAsyncRenderConditional(render, context, {
@@ -58,13 +58,13 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ou
    }
 }
 
-export function toDynamicConditionalKits(kits: ConditionalKit[], flask: Flask, activationType: ActivationType = 'create'): DynamicConditionalRenderKit[] {
+export function toDynamicConditionalKits(kits: ConditionalKit[], activationType: ActivationType = 'create'): DynamicConditionalRenderKit[] {
    const context = $_snap_context()
    const dynamicKits = []
    for (const kit of kits) {
       if (!kit) continue;
       const { $condition, render, statementType, type = activationType } = kit
-      dynamicKits.push(createDynamicConditionalKit(statementType, flask, type, render, context, $condition))
+      dynamicKits.push(createDynamicConditionalKit(statementType, type, render, context, $condition))
    }
    return dynamicKits;
 }
@@ -134,13 +134,6 @@ export function Create(input: FromTag<{
    return markActivationType('create', Slot)
 }
 
-export function Show(input: FromTag<{
-   Slot: RenderSlot
-
-}>) {
-   const { Slot } = input;
-   return markActivationType('show', Slot)
-}
 
 type ActivationKit = {
    activationType: ActivationType;
@@ -214,30 +207,23 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
       return conditions
    }
 
-   showKitNodes: JSXNode[] | null = []
+   // showKitNodes: JSXNode[] | null = []
 
-   renderShowKits(kits: DynamicConditionalRenderKit[]) {
-      let preceding = this.preceding
-      for (let i = 0; i < kits.length; i++) {
-         const kit = kits[i]
-         if (kit.type !== 'show') continue;
-         const nodes = kit.nodes = processJSXOutput(kit.render(this.outerFlask));
-         if (i === 0) preceding = this.preceding = nodes.at(-1)
-         else preceding = nodes.at(-1)
-         hideDOMNodes(nodes)
-         this.showKitNodes!.push(...nodes)
-      }
-      if (!this.showKitNodes!.length) this.showKitNodes = null;
-   }
+   // renderShowKits(kits: DynamicConditionalRenderKit[]) {
+   //    let preceding = this.preceding
+   //    for (let i = 0; i < kits.length; i++) {
+   //       const kit = kits[i]
+   //       if (kit.type !== 'show') continue;
+   //       const nodes = kit.nodes = processJSXOutput(kit.render(this.outerFlask));
+   //       if (i === 0) preceding = this.preceding = nodes.at(-1)
+   //       else preceding = nodes.at(-1)
+   //       hideDOMNodes(nodes)
+   //       this.showKitNodes!.push(...nodes)
+   //    }
+   //    if (!this.showKitNodes!.length) this.showKitNodes = null;
+   // }
 
    phasicNode?: TransitionNode | null | undefined;
-
-   // setUp(parent: DOMParent, preceding: JSXNode | null) {
-   //    // this.renderShowKits(this.kits)
-   //    setUpNodeVine(this.nodes!, parent, preceding)
-   //    this.parent = parent;
-   //    this.preceding = preceding
-   // }
 
    activeType?: ActivationType
 
@@ -247,12 +233,7 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
          return;
       }
 
-      if (this.showKitNodes) {
-         mountDOMNodes(this.showKitNodes, this.parent!)
-         this.showKitNodes = null
-      }
-
-      if (!this.nodes || this.activeType === 'show') return;
+      if (!this.nodes) return;
 
       mountDOMNodes(this.nodes, root)
    }
@@ -260,17 +241,12 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
    unmount(nodes: JSXNode[]) {
       queueInternalRenderTask(() => {
          removeDOMNodes(nodes)
-      }, this.outerFlask)
+      })
    }
 
    activateConditional(kit: DynamicConditionalRenderKit | undefined, initialLoad: boolean = false) {
       if (!kit) return;
       const activeType = this.activeType = kit.type
-      if (activeType === 'show') {
-         if (!kit.nodes) return;
-         showDOMNodes(this.nodes = kit.nodes)
-         return;
-      }
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: activeType === "create" }))
       kit.nodes = this.nodes =
@@ -281,7 +257,7 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
       if (initialLoad) {
          queueInternalRenderTask(() => { //TODO: this needs to be called after app is mounted for initial mount...
             flask.emitInitialMount()
-         }, this.outerFlask)
+         })
       }
       else {
          setUpNodeVine(this.nodes, this.parent!, this.preceding)
@@ -290,7 +266,7 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
          queueInternalRenderTask(() => {
             mountFragment(fragment, this.precedingLeaf, this.parent)
             kit.type === 'create' ? flask.emitInitialMount() : flask.emitRemount()
-         }, this.outerFlask)
+         })
       }
 
    }
@@ -299,10 +275,7 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
       if (!kit) return;
       const prevNodes = kit.nodes;
       if (!prevNodes) return;
-      if (kit.type === 'show') {
-         hideDOMNodes(prevNodes)
-         return;
-      }
+
       kit.nodes = null;
 
       if (kit.type === 'create') {
@@ -315,7 +288,7 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
    }
 }
 
-export type AsyncRenderConditional = (flask: Flask, input?: Object) => RawJSXNode[]
+export type AsyncRenderConditional = (flask: Flask, input?: Object) => RawJSXNode
 
 export function toAsyncRenderConditional(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRenderConditional {
    return (flask: Flask, input?: Object) => {

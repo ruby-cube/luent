@@ -7,7 +7,7 @@ import { isComponentKit } from "../component/Component";
 import { RawJSXNode } from "./makeJSXNode";
 import { TransitionNode } from "../transition/TransitionNode";
 
-export type JSXNode = DOMNode | VineNode | DynamicKit
+export type JSXNode = DOMNode | VineNode
 
 export interface DOMNode {
    remove: () => void
@@ -52,14 +52,8 @@ export interface NodeKit extends VineNode {
 }
 
 export interface DynamicPodKit extends NodeKit {
-   outerFlask: Flask
-   setUp(): void
-
+   // outerFlask: Flask
    phasicNode?: TransitionNode | null
-}
-
-export interface DynamicKit extends NodeKit {
-   setUp(): void
 }
 
 export interface DynamicNodeKit extends NodeKit {
@@ -121,12 +115,8 @@ function isNodeKit(node: RawJSXNode): node is NodeKit {
    return isObject(node) && 'mount' in node
 }
 
-function isDynamicKit(node: JSXNode): node is DynamicKit {
-   return 'setUp' in node
-}
 
-
-class DynamicTextNode extends VineNode implements DynamicKit {
+class DynamicTextNode extends VineNode {
 
    private node
 
@@ -135,13 +125,10 @@ class DynamicTextNode extends VineNode implements DynamicKit {
       if (__DEV__) __DEV__checkIfTracked()
       const textNode = this.node = createTextNode($text())
       this.nodes = [textNode]
-   }
-
-   setUp(): void {
       watchToRender(this.$text, ({ current, flask }) => {
          queueInternalRenderTask(() => {
             this.node.data = toString(current);
-         }, flask)
+         })
       });
    }
 
@@ -165,9 +152,6 @@ function toString(value: any) {
 
 export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | null | undefined, parent: DOMParent | null | undefined) {
    if (preceding && preceding !== parent) {
-      console.log('preceding', preceding)
-      console.log('fragment', [...fragment.childNodes])
-      console.log('parent', parent)
       preceding.after(fragment)
    }
    else
@@ -200,23 +184,6 @@ export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragme
 
 export function removeDOMNodes(nodes: JSXNode[]) {
    forEachNode(nodes, (node) => node.remove())
-
-   // let i = nodes.length
-   // while (i--) {
-   //    const node = nodes[i]
-   //    if ('remove' in node) {
-   //       node.remove()
-   //    }
-   //    else if ('nodes' in node) {
-   //       const nodes = node.nodes
-   //       if (nodes) {
-   //          removeDOMNodes(nodes)
-   //       }
-   //    }
-   //    else {
-   //       debug.error('[[INVALID INPUT]] Invalid node entity')
-   //    }
-   // }
 }
 
 export function forEachNode(nodes: JSXNode[], task: (node: DOMNode) => void) {
