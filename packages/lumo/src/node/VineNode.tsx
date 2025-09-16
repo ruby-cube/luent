@@ -1,11 +1,12 @@
-import { FLASK, Flask, getFlask } from "@rue/flask";
 import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 import { debug, isObject, normalizeToArray } from "@rue/utils";
 import { __DEV__checkIfTracked, Ion, isIon, toValue, watch } from "@rue/quarky";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { isComponentKit } from "../component/Component";
-import { RawJSXNode } from "./makeJSXNode";
-import { TransitionNode } from "../transition/TransitionNode";
+import { RawJSXNode, RenderFunction } from "./makeJSXNode";
+import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
+import { COMMONS, CommonsNode } from "../commons/commons-stack";
+import { TRACE } from "../../../flask/debug";
 
 export type JSXNode = DOMNode | VineNode
 
@@ -47,18 +48,18 @@ export class VineNode {
    }
 }
 
-export interface NodeKit extends VineNode {
-   mount(root: DOMParent | DocumentFragment): void
-}
+// export interface NodeKit extends VineNode {
+//    mount(root: DOMParent | DocumentFragment): void
+// }
 
-export interface DynamicPodKit extends NodeKit {
-   // outerFlask: Flask
-   phasicNode?: TransitionNode | null
-}
+// export interface DynamicPodKit extends NodeKit {
+//    // outerFlask: Flask
+//    phasicNode?: TransitionNode | null
+// }
 
-export interface DynamicNodeKit extends NodeKit {
-   unmount(nodes: JSXNode[]): void
-}
+// export interface DynamicNodeKit extends NodeKit {
+//    // unmount(nodes: JSXNode[]): void
+// }
 
 export function processJSXOutput(rawJSX: RawJSXNode) {
    return _processJSXOutput(normalizeToArray(rawJSX))
@@ -83,7 +84,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
       else if (node == null || node === '') {
          continue;
       }
-      else if (isNodeKit(node)) {
+      else if (node instanceof VineNode) {
          flattened.push(node)
       }
       else if (node instanceof Element) {
@@ -99,7 +100,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
 
 export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent, preceding: JSXNode | null = null) {
    for (const node of nodes) {
-      if (isNodeKit(node)) {
+      if (node instanceof VineNode) {
          node.parent = parent
          node.preceding = preceding
          if (node.nodes){
@@ -111,9 +112,9 @@ export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent, preceding: JS
    return nodes;
 }
 
-function isNodeKit(node: RawJSXNode): node is NodeKit {
-   return isObject(node) && 'mount' in node
-}
+// function isNodeKit(node: RawJSXNode): node is NodeKit {
+//    return isObject(node) && 'mount' in node
+// }
 
 
 class DynamicTextNode extends VineNode {
@@ -165,15 +166,16 @@ export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragme
       if (node instanceof Node) { // Node type from Web API
          root.appendChild(node)
       }
-      else if (isInnerHTMLKit(node)) {
-         if (root instanceof DocumentFragment) {
-            if (__DEV__) console.error('Cannot append innerHTML to document fragment')
-            return;
-         }
-         mountInnerHTML(node.innerHTML, root)
-      }
-      else if (isNodeKit(node)) {
-         node.mount(root)
+      // else if (isInnerHTMLKit(node)) {
+      //    if (root instanceof DocumentFragment) {
+      //       if (__DEV__) console.error('Cannot append innerHTML to document fragment')
+      //       return;
+      //    }
+      //    mountInnerHTML(node.innerHTML, root)
+      // }
+      else if (node instanceof VineNode) {
+         if (!node.nodes) continue;
+         mountDOMNodes(node.nodes, root)
       }
       else {
          debug.error('[[INVALID INPUT]] Invalid node entity', node)
@@ -207,4 +209,13 @@ export function forEachNode(nodes: JSXNode[], task: (node: DOMNode) => void) {
 
 function isDOMNode(node: unknown): node is DOMNode & Node {
    return node instanceof Node;
+}
+
+export type AsyncRender = (flask: Flask, input?: Object) => RawJSXNode
+
+export function toAsyncRender(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRenderConditional {
+   return (flask: Flask, input?: Object) => {
+      nestedContext[FLASK] = flask
+      return $_run_with_(context, () => render(input), nestedContext)
+   }
 }

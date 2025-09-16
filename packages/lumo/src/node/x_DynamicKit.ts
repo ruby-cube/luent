@@ -31,7 +31,7 @@ import { DynamicKit } from "./VineNode";
 
 
 
-// export interface ConditionalSeriesKit extends DynamicKit {
+// export interface IfElseKit extends DynamicKit {
 //    render(kit: ConditionalKit & AnyObject, parent: Element, fragment?: DocumentFragment): void
 //    deactivateConditional(id: any): void
 //    activateConditional(id: any, parent: Element, fragment?: DocumentFragment): void

@@ -1,4 +1,4 @@
-import { component, For, target } from "@rue/lumo";
+import { component,For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, ionize, toRaw, update } from "@rue/quarky";
 import './style.css'
@@ -247,7 +247,7 @@ export function List(
          <button on:click={e => responsive(() => selected.clear())}>clear</button>
          <hr></hr>
 
-         {For($listClone, (item, $index) =>
+         {/* {For($listClone, (item, $index) =>
             <div
                style={{
                   backgroundColor: randomColor.get(),
@@ -258,7 +258,7 @@ export function List(
                </li>
                <p>{$index}</p>
             </div>
-         )}
+         )} */}
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >

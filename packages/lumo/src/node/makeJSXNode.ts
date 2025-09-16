@@ -9,8 +9,8 @@ import { InnerHTMLKit } from "./InnerHTML";
 import { Provided, callWithCommons, createCommonsNode } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
-import { Create, markActivationType, Remount } from "../conditional/IfSeries";
-import { DOMNode, NodeKit } from "./VineNode";
+import { Create, markActivationType, Remount } from "../conditional/IfElse";
+import { DOMNode, VineNode } from "./VineNode";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -32,7 +32,7 @@ export type RawJSXNode =
    | DOMNode
    | string
    | Ion
-   | NodeKit
+   | VineNode
    | Component
    | InnerHTMLKit
    | null

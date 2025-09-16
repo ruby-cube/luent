@@ -61,6 +61,7 @@ import { TestJSON } from './TestJSON';
 import { TestNestedConditional } from './TestNestedConditional';
 import { DebugLeakyFlask } from './DebugLeakyFlask';
 import { TestVineNodes } from './TestVineNodes';
+import { For } from '../../../packages/lumo/src/iteratives/For';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -84,9 +85,24 @@ import { TestVineNodes } from './TestVineNodes';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-const app = createApp(TestIfElse)
+const app = createApp(List)
 
 app.mount('#app')
+
+// function TestSimpleList() {
+//    const $list = ion(['apples', 'peaches', 'pears', 'plums'])
+
+//    return component(
+//       <div>
+//          {For($list, (item, $index) => (
+//             <>
+//                <div>{$index()} {item}</div>
+//                <div>--</div>
+//             </>
+//          ))}
+//       </div>
+//    )
+// }
 
 // const frog = ionize({ name: 'sir robin' })
 

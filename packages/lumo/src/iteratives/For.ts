@@ -1,8 +1,11 @@
+import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { getCommons } from "../commons/commons-stack";
 import { MaybeIon } from "../component/Input";
-import { JSXNode, normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
+import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
+import { ListItemKit, ListKit, toAsyncRenderItem } from "./List";
 import { ListRenderKit } from "./ListRenderKit";
-import { Ion, IonizeBy, Ionized, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toValue } from "@rue/quarky";
+import { Ion, IonizeBy, Ionized, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toIon, toValue } from "@rue/quarky";
+import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
 
 export type RenderItem<L> =
@@ -16,7 +19,7 @@ export type RenderItem<L> =
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | Ionized<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
 export type ListData<T = any> = MaybeIon<Collection<T>>
 export type UniqueItem = any;
-export type Collection<T> = MaybeIon<T[]> 
+export type Collection<T> = MaybeIon<T[]>
 // | MaybeIon<Set<T>> | MaybeIon<Map<T>> //TODO: add maps
 
 
@@ -31,9 +34,12 @@ export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> |
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
    if (isIon(data) || isIonizedModel(data) || isInertIon(data) && isIonizedModel(toValue(data)))
-      return new ListRenderKit(_render, data, getUID, getCommons())
+      // return new ListRenderKit(_render, data, getUID, getCommons())
+      return new ListKit(toIon(data), toAsyncRenderItem(_render), getUID ?? ((i: any) => i), getFlask())
    return renderStaticList(data, _render)
 }
+
+
 
 
 

@@ -1,7 +1,7 @@
 import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, resetGroupActivationType } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { Ion, isInertIon, isIon, toValue } from "@rue/quarky";
-import { ConditionalKit, ConditionalSeriesKit, renderShowHideSeries, toDynamicConditionalKits } from "./IfSeries";
+import { ConditionalKit, IfElseKit, renderShowHideSeries, toDynamicConditionalKits } from "./IfElse";
 import { getFlask } from "@rue/flask";
 
 // let currentNodePodIndex: number | undefined = undefined
@@ -86,7 +86,7 @@ export function createIfSeries(kits: ConditionalKit[]) {
       return renderShowHideSeries(kits)
    }
     const dynamicKits = toDynamicConditionalKits(kits, activationType)
-   return new ConditionalSeriesKit(dynamicKits, getFlask())
+   return new IfElseKit(dynamicKits, getFlask())
 }
 
 
