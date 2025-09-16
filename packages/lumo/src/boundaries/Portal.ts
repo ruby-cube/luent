@@ -42,25 +42,25 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
    const element = typeof container === "string" ? document.querySelector(container) : container;
    if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
 
-   const flask = getFlask().outer
-   
-   const nodes = processJSXOutput(render(), element)
+   const nodes = processJSXOutput(render())
+
+   setUpNodeVine(nodes, element)
 
    queueInternalRenderTask(() => {
       mountDOMNodes(nodes, element)
-   }, flask)
+   })
 
    atUnmount((final) => {
-      console.log('unmount portal!')
       queueInternalRenderTask(() => {
-         console.log('unmount portal REMOVE!', nodes)
          removeDOMNodes(nodes)
-      }, flask)
+      })
    })
 
    atRemounted(() => {
       mountDOMNodes(nodes, element)
    })
+
+   return null;
 }
 
 // export function isPortal(value: unknown) {

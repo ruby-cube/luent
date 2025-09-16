@@ -9,7 +9,7 @@ import { InnerHTMLKit } from "./InnerHTML";
 import { Provided, callWithCommons, createCommonsNode } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
-import { Create, markActivationType, Remount, Show } from "../conditional/IfSeries";
+import { Create, markActivationType, Remount } from "../conditional/IfSeries";
 import { DOMNode, NodeKit } from "./VineNode";
 
 // export function Fragment() {
@@ -90,29 +90,34 @@ type NodeSetup<T extends HTMLTag | ComponentSetup> = {
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
+   type GroupActivationType = ActivationType | 'show'
 
-let groupActivationType: ActivationType | undefined = undefined
-let outerGroupActivationType: ActivationType | undefined = undefined
+let groupActivationType: GroupActivationType | undefined = undefined
+let outerGroupActivationType: GroupActivationType | undefined = undefined
 
 export function getGroupActivationType() {
    return groupActivationType
 }
 
-
-
-export function runWithGroupActivationReset(render: RenderSlot, input: Object | undefined) {
-   outerGroupActivationType = groupActivationType
-   groupActivationType = undefined;
-   try {
-      return render(input)
-   }
-   finally {
-      groupActivationType = outerGroupActivationType;
-      outerGroupActivationType = undefined
-   }
+export function resetGroupActivationType(){
+   groupActivationType = undefined
 }
 
-export function callWithActivationType(type: ActivationType, Slot: RenderSlot, provide: Provided | undefined) {
+
+
+// export function runWithGroupActivationReset(render: RenderSlot, input: Object | undefined) {
+//    outerGroupActivationType = groupActivationType
+//    groupActivationType = undefined;
+//    try {
+//       return render(input)
+//    }
+//    finally {
+//       groupActivationType = outerGroupActivationType;
+//       outerGroupActivationType = undefined
+//    }
+// }
+
+export function callWithActivationType(type: GroupActivationType, Slot: RenderSlot, provide: Provided | undefined) {
    outerGroupActivationType = groupActivationType
    groupActivationType = type;
    try {
@@ -140,7 +145,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-demount' | 'show-hide' | any,
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-remount' | 'show-hide' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -156,17 +161,13 @@ export function makeJSXNode(
          if (!Slot) throw new Error(`Extraneous <show-hide>`)
          return callWithActivationType('show', Slot, config.provide);
 
-      case 'remount-demount':
-         if (!Slot) throw new Error(`Extraneous <remount-demount>`)
+      case 'mount-remount':
+         if (!Slot) throw new Error(`Extraneous <mount-remount>`)
          return callWithActivationType('remount', Slot, config.provide);
 
       case Create:
          if (!Slot) throw new Error(`<Create> must have children`)
          return markActivationType('create', Slot);
-
-      case Show:
-         if (!Slot) throw new Error(`<Show> must have children`)
-         return markActivationType('show', Slot);
 
       case Remount:
          if (!Slot) throw new Error(`<Remount> must have children`)

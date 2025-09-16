@@ -1,7 +1,7 @@
-import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, runWithGroupActivationReset, RenderFunction } from "../node/makeJSXNode";
+import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, resetGroupActivationType } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { Ion, isInertIon, isIon, toValue } from "@rue/quarky";
-import { ConditionalKit, ConditionalSeriesKit, toDynamicConditionalKits } from "./IfSeries";
+import { ConditionalKit, ConditionalSeriesKit, renderShowHideSeries, toDynamicConditionalKits } from "./IfSeries";
 import { getFlask } from "@rue/flask";
 
 // let currentNodePodIndex: number | undefined = undefined
@@ -72,7 +72,7 @@ export function createConditionalKit(statementType: "if" | "elseIf" | "else", ac
       statementType: statementType as 'if' | 'elseIf' | 'else',
       render: render as RenderFunction,
       type: activationType,
-      discard,
+      // discard,
       $condition
    }
 }
@@ -80,7 +80,12 @@ export function createConditionalKit(statementType: "if" | "elseIf" | "else", ac
 export function createIfSeries(kits: ConditionalKit[]) {
    const condition = kits[0].$condition
    if (!isIon(condition) || isInertIon(condition)) return renderStaticConditional(kits)
-    const dynamicKits = toDynamicConditionalKits(kits, getGroupActivationType())
+      const activationType = getGroupActivationType()
+      resetGroupActivationType()
+   if (activationType === 'show') {
+      return renderShowHideSeries(kits)
+   }
+    const dynamicKits = toDynamicConditionalKits(kits, activationType)
    return new ConditionalSeriesKit(dynamicKits, getFlask())
 }
 

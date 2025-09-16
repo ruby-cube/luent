@@ -5,7 +5,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { ion, Ion } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
-import { RawJSXNode, RenderFunction, runWithGroupActivationReset } from "../node/makeJSXNode";
+import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../commons/commons-stack";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
@@ -19,17 +19,17 @@ export type ConditionalKit = {
    render: RenderFunction;
    type: ActivationType | undefined;
    $condition: MaybeIon<Booleanny>
-   discard: (() => void) | undefined
+   // discard: (() => void) | undefined
 }
 
 
 export type DynamicConditionalRenderKit = {
+   // discard: (() => void) | undefined
    nodes: (JSXNode[]) | null
    flask: Flask | undefined;
    statementType: "if" | "elseIf" | "else";
    type: ActivationType | undefined;
    render: AsyncRenderConditional;
-   // render: (flask: Flask, input?: Object) => RawJSXNode[];
    transitionNodes: TransitionNode[];
    $condition: Ion<Booleanny> | undefined
    cache: JSXNode[] | undefined;
@@ -117,6 +117,40 @@ export function showDOMNodes(nodes: JSXNode[]) {
    })
 }
 
+export function renderShowHideSeries(kits: ConditionalKit[]) {
+   const flask = getFlask()
+   const $activeIndex = $ActiveIndex(getConditions(kits))
+   const seriesNodes: RawJSXNode[] = []
+
+   for (let i = 0; i < kits.length; i++) {
+      const kit = kits[i]
+      const nodes = processJSXOutput(kit.render(flask));
+      if ($activeIndex() === i) {
+         showDOMNodes(nodes)
+      }
+      else {
+         hideDOMNodes(nodes)
+      }
+
+      seriesNodes.push(nodes)
+
+      watchToRender(ion(() => $activeIndex() === i), ({ current: isActive, previous: wasActive }) => {
+         if (isActive) {
+            queueInternalRenderTask(() => {
+               showDOMNodes(nodes)
+            })
+         }
+         else if (wasActive) {
+            queueInternalRenderTask(() => {
+               hideDOMNodes(nodes)
+            })
+         }
+      })
+   }
+
+   return seriesNodes
+}
+
 export function Remount(input: FromTag<{
    'can:discard'?: () => void,
    Slot: RenderSlot
@@ -163,17 +197,8 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
       public outerFlask: Flask
    ) {
       super()
-      const conditions = this.getConditions(kits)
 
-      this.$activeIndex = ion(() => {
-         for (let i = 0; i < conditions.length; i++) {
-            const $condition = conditions[i]
-            if ($condition()) {
-               return i;
-            }
-         }
-         return conditions.length;
-      })
+      this.$activeIndex = $ActiveIndex(getConditions(kits))
 
       this.activateConditional(this.kits[this.$activeIndex()], true)
 
@@ -181,30 +206,6 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
          this.deactivateConditional(this.kits[prevIndex]);
          this.activateConditional(this.kits[activeIndex])
       })
-   }
-
-   getConditions(statements: DynamicConditionalRenderKit[]) {
-      const conditions: Ion<Booleanny>[] = []
-      for (let i = 0; i < statements.length; i++) {
-         const kit = statements[i]
-         const $condition = kit.$condition
-         if ($condition) {
-            conditions.push($condition)
-         }
-         if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
-            if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
-            else continue;
-         }
-         if (!('statementType' in kit)) {
-            if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
-            else continue;
-         }
-         if (i !== statements.length - 1 && kit.statementType === 'else') {
-            if (__DEV__) throw new Error("Else must be the very last statement of a conditional series");
-            else continue;
-         }
-      }
-      return conditions
    }
 
    // showKitNodes: JSXNode[] | null = []
@@ -288,12 +289,54 @@ export class ConditionalSeriesKit extends VineNode implements DynamicPodKit, Dyn
    }
 }
 
+export type ConditionalStatement = {
+   statementType: "if" | "elseIf" | "else";
+   type: ActivationType | undefined;
+   $condition: MaybeIon<Booleanny>
+}
+
+function getConditions(statements: ConditionalStatement[]) {
+   const conditions: Ion<Booleanny>[] = []
+   for (let i = 0; i < statements.length; i++) {
+      const kit = statements[i]
+      const $condition = kit.$condition
+      if ($condition) {
+         conditions.push($condition)
+      }
+      if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
+         if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
+         else continue;
+      }
+      if (!('statementType' in kit)) {
+         if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
+         else continue;
+      }
+      if (i !== statements.length - 1 && kit.statementType === 'else') {
+         if (__DEV__) throw new Error("Else must be the very last statement of a conditional series");
+         else continue;
+      }
+   }
+   return conditions
+}
+
+function $ActiveIndex(conditions: Ion<Booleanny>[]) {
+   return ion(() => {
+      for (let i = 0; i < conditions.length; i++) {
+         const $condition = conditions[i]
+         if ($condition()) {
+            return i;
+         }
+      }
+      return conditions.length;
+   })
+}
+
 export type AsyncRenderConditional = (flask: Flask, input?: Object) => RawJSXNode
 
 export function toAsyncRenderConditional(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRenderConditional {
    return (flask: Flask, input?: Object) => {
       nestedContext[FLASK] = flask
-      return $_run_with_(context, () => runWithGroupActivationReset(render, input), nestedContext)
+      return $_run_with_(context, () => render(input), nestedContext)
    }
 }
 
