@@ -62,6 +62,7 @@ import { TestNestedConditional } from './TestNestedConditional';
 import { DebugLeakyFlask } from './DebugLeakyFlask';
 import { TestVineNodes } from './TestVineNodes';
 import { For } from '../../../packages/lumo/src/iteratives/For';
+import { FriendlyChatApp } from '../../chat-app/src/App';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';

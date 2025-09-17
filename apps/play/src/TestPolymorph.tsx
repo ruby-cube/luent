@@ -42,7 +42,7 @@ export function TestPolymorph() {
       ['/file', (file: File) =>
          <File file={file} />
       ]
-   ])
+   ], {preserve: true})
 
    const pathMap = {
       '/': '/home',

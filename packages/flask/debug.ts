@@ -11,6 +11,7 @@ export function __DEV__getTrace() {
 }
 
 export function __DEV__buildAsyncPath() {
+   if (true) return;
    const currentTrace = getAsyncPath?.()
    const trace = __DEV__getTrace()
    return (trace ? trace + '\n' : '') + (currentTrace ? '    at async ' + currentTrace?.slice(3) : '')

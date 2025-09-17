@@ -1,4 +1,4 @@
-import { component, fromCommons, FromTag, startDebugger } from "@rue/lumo";
+import { component, fromCommons, FromTag } from "@rue/lumo";
 import { USER, User } from '../commons/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";
@@ -18,7 +18,7 @@ export function Chatroom(input: FromTag<{
       <div class="container">
          <ChatWindow user={user} chat={chatKit} />
          <MessageForm user={user} can:postMessage={chatKit.postChatMessage} />
-         <button on:click={startDebugger}>debug</button>
+         {/* <button on:click={startDebugger}>debug</button> */}
       </div>
    )
 }

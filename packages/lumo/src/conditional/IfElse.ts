@@ -36,7 +36,6 @@ export type DynamicConditionalRenderKit = {
 }
 
 
-
 function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition?: Ion<Booleanny>): DynamicConditionalRenderKit {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() //TODO:
 
@@ -69,126 +68,6 @@ export function toDynamicConditionalKits(kits: ConditionalKit[], activationType:
    return dynamicKits;
 }
 
-
-
-
-//TODO: render show kits as static with watchers
-
-
-
-
-const showIfMap: WeakMap<DOMNode, string> = new WeakMap()
-
-export function hideDOMNodes(nodes: JSXNode[]) {
-   forEachNode(nodes, node => {
-      if (node instanceof CharacterData) { // TextNode
-         showIfMap.set(node, node.data)
-         node.data = ""
-      }
-      else if (node instanceof HTMLElement || node instanceof SVGAElement || node instanceof MathMLElement) {
-         showIfMap.set(node, node.style.display)
-         node.style.display = 'none'
-      }
-      else if (__DEV__) {
-         console.warn(`Unhandled node type ${node}`)
-      }
-   })
-}
-
-export function showDOMNodes(nodes: JSXNode[]) {
-   forEachNode(nodes, node => {
-      if (node instanceof CharacterData) {
-         const text = showIfMap.get(node)
-         if (text === undefined) throw new Error("previous text info missing")
-         node.data = text;
-      }
-      else if (node instanceof HTMLElement || node instanceof SVGAElement || node instanceof MathMLElement) {
-         const display = showIfMap.get(node)
-         if (display === undefined) {
-            node.style.removeProperty('display');
-         }
-         else {
-            node.style.display = display
-         }
-      }
-      else {
-         console.warn(`Unhandled node type ${node}`)
-      }
-   })
-}
-
-export function renderShowHideSeries(kits: ConditionalKit[]) {
-   const flask = getFlask()
-   const $activeIndex = $ActiveIndex(getConditions(kits))
-   const seriesNodes: RawJSXNode[] = []
-
-   for (let i = 0; i < kits.length; i++) {
-      const kit = kits[i]
-      const nodes = processJSXOutput(kit.render(flask));
-      if ($activeIndex() === i) {
-         showDOMNodes(nodes)
-      }
-      else {
-         hideDOMNodes(nodes)
-      }
-
-      seriesNodes.push(nodes)
-
-      watchToRender(ion(() => $activeIndex() === i), ({ current: isActive, previous: wasActive }) => {
-         if (isActive) {
-            queueInternalRenderTask(() => {
-               showDOMNodes(nodes)
-            })
-         }
-         else if (wasActive) {
-            queueInternalRenderTask(() => {
-               hideDOMNodes(nodes)
-            })
-         }
-      })
-   }
-
-   return seriesNodes
-}
-
-export function Remount(input: FromTag<{
-   'can:discard'?: () => void,
-   Slot: RenderSlot
-
-}>) {
-   const { discard, Slot } = input;
-   return markActivationType('remount', Slot, discard)
-}
-
-export function Create(input: FromTag<{
-   Slot: RenderSlot
-
-}>) {
-   const { Slot } = input;
-   return markActivationType('create', Slot)
-}
-
-
-type ActivationKit = {
-   activationType: ActivationType;
-   render: RenderFunction;
-   discard: (() => void) | undefined;
-}
-
-export function markActivationType(activationType: ActivationType, render: RenderFunction, discard?: (() => void) | undefined) {
-   return {
-      activationType,
-      render,
-      discard
-   }
-}
-
-export function isActivationKit(value: unknown): value is ActivationKit {
-   return isObjectLiteral(value) && 'activationType' in value
-}
-
-
-
 export class IfElseKit extends VineNode {
    private $activeIndex: Ion<number>
 
@@ -204,7 +83,8 @@ export class IfElseKit extends VineNode {
             kit.flask!.emitInitialMount()
       })
 
-      watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex }) => {
+      watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
+         if (activeIndex === prevIndex) return;
          this.deactivateConditional(this.kits[prevIndex]);
 
          this.activateConditional(this.kits[activeIndex], (kit) => {
@@ -213,7 +93,7 @@ export class IfElseKit extends VineNode {
             mountDOMNodes(kit.nodes!, fragment)
             queueInternalRenderTask(() => {
                mountFragment(fragment, this.precedingLeaf, this.parent)
-            })
+            }, flask)
             kit.type === 'create' ? kit.flask!.emitInitialMount(): kit.flask!.emitRemount()
          })
       })
@@ -221,26 +101,14 @@ export class IfElseKit extends VineNode {
 
    phasicNode?: TransitionNode | null | undefined;
 
-   activeType?: ActivationType
-
-   // mount(root: DOMParent | DocumentFragment | null | undefined): void {
-   //    if (!root) {
-   //       if (__DEV__) console.error('root missing', root, this.nodes, this)
-   //       return;
-   //    }
-
-   //    if (!this.nodes) return;
-
-   //    mountDOMNodes(this.nodes, root)
-   // }
+   // activeType?: ActivationType
 
    activateConditional(kit: DynamicConditionalRenderKit | undefined, emitActivated: (kit: DynamicConditionalRenderKit) => void) {
       if (!kit) return;
-      const activeType = this.activeType = kit.type
 
-      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: activeType === "create" }))
+      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
-         activeType === 'remount' ?
+         kit.type === 'remount' ?
             (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask))))
             : processJSXOutput(kit.render(flask));
 
@@ -251,7 +119,7 @@ export class IfElseKit extends VineNode {
       if (!kit) return;
       const prevNodes = kit.nodes;
       if (!prevNodes) return;
-
+      console.log('deactivating', this.kits, kit)
       kit.nodes = null;
 
       if (kit.type === 'create') {
@@ -314,3 +182,115 @@ function $ActiveIndex(conditions: Ion<Booleanny>[]) {
 
 
 
+
+
+const showIfMap: WeakMap<DOMNode, string> = new WeakMap()
+
+export function hideDOMNodes(nodes: JSXNode[]) {
+   forEachNode(nodes, node => {
+      if (node instanceof CharacterData) { // TextNode
+         showIfMap.set(node, node.data)
+         node.data = ""
+      }
+      else if (node instanceof HTMLElement || node instanceof SVGAElement || node instanceof MathMLElement) {
+         showIfMap.set(node, node.style.display)
+         node.style.display = 'none'
+      }
+      else if (__DEV__) {
+         console.warn(`Unhandled node type ${node}`)
+      }
+   })
+}
+
+export function showDOMNodes(nodes: JSXNode[]) {
+   forEachNode(nodes, node => {
+      if (node instanceof CharacterData) {
+         const text = showIfMap.get(node)
+         if (text === undefined) throw new Error("previous text info missing")
+         node.data = text;
+      }
+      else if (node instanceof HTMLElement || node instanceof SVGAElement || node instanceof MathMLElement) {
+         const display = showIfMap.get(node)
+         if (display === undefined) {
+            node.style.removeProperty('display');
+         }
+         else {
+            node.style.display = display
+         }
+      }
+      else {
+         console.warn(`Unhandled node type ${node}`)
+      }
+   })
+}
+
+export function renderShowHideSeries(kits: ConditionalKit[]) {
+   const flask = getFlask()
+   const $activeIndex = $ActiveIndex(getConditions(kits))
+   const seriesNodes: RawJSXNode[] = []
+
+   for (let i = 0; i < kits.length; i++) {
+      const kit = kits[i]
+      const nodes = processJSXOutput(kit.render(flask));
+      if ($activeIndex() === i) {
+         showDOMNodes(nodes)
+      }
+      else {
+         hideDOMNodes(nodes)
+      }
+
+      seriesNodes.push(nodes)
+
+      watchToRender(ion(() => $activeIndex() === i), ({ current: isActive, previous: wasActive, flask }) => {
+         if (isActive === wasActive) return;
+         if (isActive) {
+            queueInternalRenderTask(() => {
+               showDOMNodes(nodes)
+            }, flask)
+         }
+         else if (wasActive) {
+            queueInternalRenderTask(() => {
+               hideDOMNodes(nodes)
+            }, flask)
+         }
+      })
+   }
+
+   return seriesNodes
+}
+
+export function Remount(input: FromTag<{
+   'can:discard'?: () => void,
+   Slot: RenderSlot
+
+}>) {
+   const { discard, Slot } = input;
+   return markActivationType('remount', Slot, discard)
+}
+
+export function Create(input: FromTag<{
+   Slot: RenderSlot
+
+}>) {
+   const { Slot } = input;
+   return markActivationType('create', Slot)
+}
+
+
+type ActivationKit = {
+   activationType: ActivationType;
+   render: RenderFunction;
+   discard: (() => void) | undefined;
+}
+
+export function markActivationType(activationType: ActivationType, render: RenderFunction, discard?: (() => void) | undefined) {
+   return {
+      activationType,
+      render,
+      discard
+   }
+}
+
+export function isActivationKit(value: unknown): value is ActivationKit {
+   return isObjectLiteral(value) && 'activationType' in value
+}

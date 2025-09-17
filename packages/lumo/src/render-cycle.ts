@@ -34,18 +34,18 @@ export const {
 export const queuePrerenderTask = useUpdateCycleScheduler(PRERENDER)
 
 
-export function queueInternalRenderTask(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
+export function queueInternalRenderTask(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
    if (getCurrentPhase() === INTERNAL_RENDER) {
       fn()
       return;
    }
-      fn.__DEVName = 'queueInternalRenderTask'
-      fn.__DEVTrace = getInternalTrace('internal render')
+   fn.__DEVName = 'queueInternalRenderTask'
+   fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)
    // console.log('schedule qIR', fn)
    $activeUpdate().cycle.scheduleEffect(effect)
 
-   // getFlask().onDiscard(() => { //TODO: need a better solution to this
+   // flask?.onDiscard(() => { //TODO: need a better solution to this
    //    console.log('!!!!!!OHHH NOOOOOO')
    //    effect.destroy()
    // })
@@ -60,7 +60,7 @@ export function queueInternalRenderTask(fn: () => void) { //TODO: needs to be ab
 // export const queueInternalRenderTask = useUpdateCycleScheduler(INTERNAL_RENDER)
 export const queueRenderTask = useUpdateCycleScheduler(RENDER)
 export const queueInternalPostrenderTask = useUpdateCycleScheduler(INTERNAL_POSTRENDER)
-export const queuePostrenderTask = (task: ()=>void)=>{
+export const queuePostrenderTask = (task: () => void) => {
    queueInternalPostrenderTask(postcycleTask(task))
 }
 

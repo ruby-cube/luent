@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, ion, update, ThrottledHover, ionize } from "@rue/quarky";
+import { Animation, Interval, ion, update, ThrottledHover, ionize, $_derivation_ion } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 //TODO:
@@ -29,10 +29,10 @@ function doAction(fn: Function) {
 
 export function TriangleDemo() {
    const $elapsed = ion(0)
-   // const $seconds = ion(0)
-   const time = ionize({
-      seconds: 0
-   })
+   const $seconds = ion(0)
+   // const time = ionize({
+   //    seconds: 0
+   // })
 
    const $scale = ion(() => {
       const e = ($elapsed() / 1000) % 10;
@@ -40,12 +40,12 @@ export function TriangleDemo() {
    })
    const start = Date.now()
 
-   const secondsInterval = Interval(() => {
-      update(() => (time.seconds = (time.seconds % 10) + 1), { lazy: 1000 })
-   }, 1000).start();
    // const secondsInterval = Interval(() => {
-   //    update(() => ($seconds.state = ($seconds() % 10) + 1), { lazy: 1000 })
+   //    update(() => (time.seconds = (time.seconds % 10) + 1), { lazy: 1000 })
    // }, 1000).start();
+   const secondsInterval = Interval(() => {
+      update(() => ($seconds.state = ($seconds() % 10) + 1), { lazy: 1000 })
+   }, 1000).start();
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    const animation = Animation(() => {
@@ -76,7 +76,7 @@ export function TriangleDemo() {
    function reset() {
       secondsInterval.stop()
       update(() => {
-         time.seconds = 0
+         $seconds.state = 0
       }, { lazy: 1000 }) //TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsInterval.start()
    }
@@ -101,11 +101,11 @@ export function TriangleDemo() {
             <div
                class="container"
                style={{
-                  transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
+                  // transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
                }}
             >
                {/* <div>{$seconds}</div> */}
-               <Triangle x={0} y={0} s={1000} seconds={time.$seconds} />
+               <Triangle x={0} y={0} s={1000} seconds={$seconds} />
             </div>
          </div>
       </>
@@ -157,6 +157,8 @@ function Dot({ x, y, s, $text } : FromTag<any>) {
    const [Hover, Unhover] = ThrottledHover()
    // const Throttled = (fn: Function)=>fn
 
+   // const hover = () => $hover.state = true
+   // const unhover = () => $hover.state = false
    const hover = Hover(() => $hover.state = true)
    const unhover = Unhover(() => $hover.state = false)
 
@@ -171,11 +173,12 @@ function Dot({ x, y, s, $text } : FromTag<any>) {
             top: y + "px",
             "border-radius": s / 2 + "px",
             "line-height": s + "px",
-            background: ($hover() ? "#ff0" : "#61dafb")
+            background:  "#61dafb"
+            // background: ($hover() ? "#ff0" : "#61dafb")
          }}
          on:mouseenter={hover}
          on:mouseleave={unhover}
-      >{($hover() ? "**" + $text() + "**" : $text())}</div>
+      >{$_derivation_ion(()=>$hover() ? "**" + $text() + "**" : $text())}</div>
    );
 };
 

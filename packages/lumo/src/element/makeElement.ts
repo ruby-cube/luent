@@ -233,10 +233,11 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
       return;
    const ion = attributes['mu:value'];
    const flask = getFlask()
-   watchToRender(ion, () => {
+   watchToRender(ion, ({current, previous}) => {
+      if (current === previous) return;
       queueInternalRenderTask(() => {
-         element.value = toString(ion())
-      })
+         element.value = toString(current)
+      }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
@@ -318,7 +319,8 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
-         watchToRender(value, ({ current }) => {
+         watchToRender(value, ({ current, previous }) => {
+            if (current === previous) return;
             queueInternalRenderTask(() => {
                setAttribute(node, _key, current)
             }, flask)
@@ -534,9 +536,9 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watchToRender(entry, ({ previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+         watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+            if (current === previous) return;
             queueInternalRenderTask(() => {
-               const current = entry()
                if (previous) removePreviousClasses(previous, classList)
                if (current) addClasses(current, classList, flask)
             }, flask)
@@ -594,9 +596,10 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
    for (const key in entry) {
       const value = entry[key]
       if (isIon(value)) {
-         watchToRender(value, ({ previous }) => {
+         watchToRender(value, ({ current, previous }) => {
+            if (current === previous) return
             queueInternalRenderTask(() => {
-               if (value()) classList.add(key)
+               if (current) classList.add(key)
                else if (previous) classList.remove(key)
             }, flask)
          }, flask, RUN_EAGERLY)
@@ -634,7 +637,8 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watchToRender(entry, ({ current }) => {
+         watchToRender(entry, ({ current, previous }) => {
+            // if (current === previous) return;
             queueInternalRenderTask(() => {
                setUpStyleEntry(style, current, flask);
             }, flask)
@@ -652,7 +656,8 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
 
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
-            watchToRender(value, ({ current }) => {
+            watchToRender(value, ({ current, previous }) => {
+               // if (current === previous) return;
                queueInternalRenderTask(() => {
                   assignStyleProperty(style, toStylePropertyName(key), current)
                }, flask)

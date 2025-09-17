@@ -1,5 +1,5 @@
-import { atMounted, queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask,  atDemount, atRemounted } from "@rue/lumo";
-import { ion, Ionized } from "@rue/quarky";
+import { queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
+import { ion } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
@@ -18,7 +18,7 @@ export function ChatWindow(input: FromTag<{
    chat: ChatKit;
 }>) {
    const { user, chat: { $messages, atMessagePosted, atMessageReceived, atErrorReceived, $error } } = input
-
+   console.log('ChatWindow()')
    const $messagesNode = NodeRef('div')
 
    const $newMessageMarker = ion(null as null | HTMLDivElement)
@@ -34,6 +34,7 @@ export function ChatWindow(input: FromTag<{
          scrollToNew()
          queuePostrenderTask(() => {
             $smoothScroll.state = true;
+            console.log('A smooth true')
          })
       })
    })
@@ -56,18 +57,19 @@ export function ChatWindow(input: FromTag<{
    atMessagePosted(() => {
       $hasUnseenMessages.state = false;
       $newMessageMarker.state = null
-      queueRenderTask(scrollToBottom)
+      scrollToBottom()
    })
 
    atErrorReceived(() => {
       if (isScrolledToBottom()) {
-         queueRenderTask(scrollToBottom)
+         scrollToBottom()
       }
    })
 
    atMessageReceived(() => {
+      console.log('??? message received! smooth?', $smoothScroll())
       if (isScrolledToBottom()) {
-         queueRenderTask(scrollToBottom)
+         scrollToBottom()
       }
       else {
          $hasUnseenMessages.state = true;
@@ -75,6 +77,7 @@ export function ChatWindow(input: FromTag<{
 
       queuePostrenderTask(() => {
          $smoothScroll.state = true;
+         console.log('B smooth true')
       })
    })
 
@@ -110,7 +113,9 @@ export function ChatWindow(input: FromTag<{
       if (!node) {
          return;
       }
-      node.scrollTop = node.scrollHeight
+      queueRenderTask(() => {
+         node.scrollTop = node.scrollHeight
+      })
    }
 
    function reScrollend(e: any) {

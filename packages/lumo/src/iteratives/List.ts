@@ -160,7 +160,7 @@ export class ListKit extends VineNode {
                mountFragment(fragment, precedingLeaf, this.parent)
             }
          }
-      })
+      }, this.flask)
 
       this.prevItems = currentItems
       return kits;

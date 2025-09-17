@@ -126,16 +126,18 @@ class DynamicTextNode extends VineNode {
       if (__DEV__) __DEV__checkIfTracked()
       const textNode = this.node = createTextNode($text())
       this.nodes = [textNode]
-      watchToRender(this.$text, ({ current, flask }) => {
+
+      watchToRender(this.$text, ({ current, previous, flask }) => {
+         // if (current === previous) return;
          queueInternalRenderTask(() => {
-            this.node.data = toString(current);
-         })
+            textNode.data = toString(current);
+         }, flask)
       });
    }
 
-   mount(root: DOMParent | DocumentFragment) {
-      root.appendChild(this.nodes![0] as unknown as Node)
-   }
+   // mount(root: DOMParent | DocumentFragment) {
+   //    root.appendChild(this.nodes![0] as unknown as Node)
+   // }
 }
 
 function createTextNode(value: unknown) {

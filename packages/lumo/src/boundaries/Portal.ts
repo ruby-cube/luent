@@ -48,12 +48,12 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
 
    queueInternalRenderTask(() => {
       mountDOMNodes(nodes, element)
-   })
+   }, getFlask())
 
    atUnmount((final) => {
       queueInternalRenderTask(() => {
          removeDOMNodes(nodes)
-      })
+      }, getFlask())
    })
 
    atRemounted(() => {

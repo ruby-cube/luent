@@ -31,6 +31,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
 
    // (1) instantiate developer's root component
    const appCommons = createAppCommons(config?.provide, config?.globalCommons)
+   console.trace('appCommons', appCommons, config)
    const remountable = config?.remountable
    const flask = new Flask({ type: 'view' });
 
@@ -59,7 +60,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             
             queueInternalRenderTask(() => {
                mountDOMNodes(nodes, appRoot)
-            })
+            }, flask)
             
             flask.emitInitialMount()
          }

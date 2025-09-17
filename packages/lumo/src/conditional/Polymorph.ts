@@ -1,20 +1,17 @@
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { Component, unnestComponent } from "../component/Component";
-import { JSXNode, RawJSXNode } from "../node/makeJSXNode";
-import { mountConditional } from "./x_ConditionalRenderSeries";
+import { RawJSXNode } from "../node/makeJSXNode";
 import { Commons, createCommonsNode, NodeCommons, Provided } from "../commons/Commons";
-import { NodeEntity } from "../node/x_setUpNodeEntities";
-import { DynamicPod, NodePod, removeDOMNodes } from "../node/x_NodePod";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { FromTag } from "../component/Input";
 import { ion, Ion, isIon, MutableIon, toValue, watch } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
-import { __DEV__buildAsyncPath } from "../../../flask/debug";
-import { toRenderTransient } from "../node/x_DynamicKit";
+import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { COMMONS, getClosestCommons } from "../commons/commons-stack";
+import { AsyncRender, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode";
 
 
 
@@ -112,104 +109,120 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: {
 }
 
 type DynamicRenderKit = {
-   nodePod: NodePod | undefined;
+   nodes: (JSXNode[]) | null
    flask: Flask | undefined;
-   renderConditional: (parent: Element, nodePod: NodePod, input: Object | undefined) => NodeEntity[]
+   render: AsyncRender;
+   type: 'create' | 'remount';
    transitionNodes: TransitionNode[] | undefined;
-   cached: NodeEntity[] | undefined;
-   input: Object | undefined;
-   inputRequired: boolean
+   cache: JSXNode[] | undefined;
 }
 
-function createDynamicRenderKitOrMap(render: RenderFunction, input: Object | undefined, nodePod: NodePod, context: ContextSnapshot): DynamicRenderKit | VariantMap {
+type PolymorphRenderKit = {
+   input: Object | undefined;
+   inputRequired: boolean
+} & DynamicRenderKit
+
+function createDynamicRenderKitOrMap(render: RenderFunction, input: Object | undefined, context: ContextSnapshot): PolymorphRenderKit | VariantMap {
    if (input) {
-      const map = new Map([[input, createDynamicRenderKit(render, nodePod, context)]]) as VariantMap
+      const map = new Map([[input, createDynamicRenderKit(render, context)]]) as VariantMap
       map.render = render;
       return map;
    }
-   return createDynamicRenderKit(render, nodePod, context)
+   return createDynamicRenderKit(render, context)
 }
 
-function createDynamicRenderKit(render: RenderFunction, nodePod: NodePod, context: ContextSnapshot): DynamicRenderKit {
+function createDynamicRenderKit(render: RenderFunction, context: ContextSnapshot): PolymorphRenderKit {
    console.log('^^^ context', context)
 
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)], getClosestCommons(context))
 
    return {
-      nodePod,
       flask: undefined as Flask | undefined,
-      renderConditional: toRenderTransient(render, context, commons),
+      render: toAsyncRender(render, context, { [FLASK]: undefined, [COMMONS]: commons, [TRACE]: __DEV__ ? __DEV__buildAsyncPath() : '' }),
       transitionNodes,
-      cached: undefined,
+      cache: undefined,
+      type: 'create',
       input: undefined,
       inputRequired: render.length !== 0
    }
 }
 
 
-type VariantMap = Map<Object, DynamicRenderKit> & { render: RenderFunction }
+type VariantMap = Map<Object, PolymorphRenderKit> & { render: RenderFunction }
 
-export class PolymorphKit {
+export class PolymorphKit extends VineNode {
    // store contextual state
    context: ContextSnapshot = $_snap_context()
    outerFlask: Flask = getFlask()
    phasicNode?: TransitionNode | null = getPhasicNode()
 
    // setup essentials
-   dynamicPod: DynamicPod = new NodePod()
-   sharedNodePod: NodePod | undefined
+   // dynamicPod: DynamicPod = new NodePod()
+   // sharedNodePod: NodePod | undefined
    __DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
 
    constructor(
-      public switchMap: Map<PolymorphKey, RenderFunction | DynamicRenderKit | VariantMap>,
+      public switchMap: Map<PolymorphKey, RenderFunction | PolymorphRenderKit | VariantMap>,
       public $activeKey: Morphable,
       public preserve: boolean = false
    ) {
-      const nodePod = this.sharedNodePod = preserve ? undefined : new NodePod()
-      if (nodePod) this.dynamicPod.push(nodePod)
-   }
+      super()
+      this.activateConditional($activeKey(), (kit) => {
+         kit.flask!.emitInitialMount()
+      })
 
-   setUp(
-      parent: Element
-   ) {
-      const $activeKey = this.$activeKey
-      const morphable = this
-
-      watchToRender($activeKey, function updateMorphicComponent({ current: key, previous }) {
+      watchToRender($activeKey, ({ current: key, previous, flask }) => {
+         if (key == previous) return;
          // remove previous
          if (previous)
-            morphable.deactivateConditional(previous)
+            this.deactivateConditional(previous)
 
          // render new morph
          if (key)
-            morphable.activateConditional(key, parent)
-
-      }, this.outerFlask)
-      return this;
-   }
-
-   mount(
-      parent: Element,
-      fragment?: DocumentFragment
-   ) {
-      const activeKey = this.$activeKey()
-      if (!activeKey) return;
-      this.activateConditional(activeKey, parent, fragment)
-   }
-
-   render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {
-      const context = this.context;
-
-      $_run_with_(context, () => {
-         const nodeEntities = this.preserve ?
-            kit.cached ?? (kit.cached = //TODO: allow choice between remount and create
-               kit.renderConditional(parent, kit.nodePod!, kit.input)
-            ) : kit.renderConditional(parent, kit.nodePod!, kit.input)
-         mountConditional(parent, kit.nodePod!, nodeEntities, this.outerFlask, fragment);
-      }, {
-         [FLASK]: kit.flask
+            this.activateConditional(key, (kit) => {
+               setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
+               const fragment = new DocumentFragment()
+               mountDOMNodes(kit.nodes!, fragment)
+               queueInternalRenderTask(() => {
+                  mountFragment(fragment, this.precedingLeaf, this.parent)
+               }, flask)
+               kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
+            })
       })
+   }
+
+   // render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {
+   //    const context = this.context;
+
+   //    $_run_with_(context, () => {
+   //       const nodeEntities = this.preserve ?
+   //          kit.cache ?? (kit.cache = //TODO: allow choice between remount and create
+   //             kit.renderConditional(parent, kit.nodePod!, kit.input)
+   //          ) : kit.renderConditional(parent, kit.nodePod!, kit.input)
+   //       mountConditional(parent, kit.nodePod!, nodeEntities, this.outerFlask, fragment);
+   //    }, {
+   //       [FLASK]: kit.flask
+   //    })
+   // }
+
+   activateConditional(id: PolymorphKey | [PolymorphKey, Object], emitActivated: (kit: PolymorphRenderKit) => void) {
+
+      const kit = this.toKit(id)
+      if (!kit) {
+         if (__DEV__) console.error('dynamic render kit missing')
+         return;
+      }
+
+      console.log('>>> kit.type', kit.type)
+
+      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
+      kit.nodes = this.nodes =
+         kit.type === 'remount' ?
+            (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask))))
+            : processJSXOutput(kit.render(flask));
+
+      emitActivated(kit)
    }
 
    deactivateConditional(id: PolymorphKey | [PolymorphKey, Object]) {
@@ -219,58 +232,24 @@ export class PolymorphKit {
       if (!kitOrMap) return;
       const kit = (kitOrMap instanceof Map ? kitOrMap.get(input) : kitOrMap) as DynamicRenderKit
       if (!kit) return;
-      const flask = kit.flask
 
-      flask?.emitDemount()
-      // removeDOMNodes(kit.nodePod!); //TODO: how do I manage this 
-      // queueInternalRenderTask(() => {
-      removeDOMNodes(kit.nodePod!);
-      if (!this.preserve) kit.nodePod!.clear()
-      // }, this.outerFlask)
-   }
+      const prevNodes = kit.nodes;
+      if (!prevNodes) return;
 
-   private getNodePod() {
-      if (this.sharedNodePod) return this.sharedNodePod;
-      const nodePod = new NodePod()
-      this.dynamicPod.push(nodePod)
-      return nodePod
-   }
+      kit.nodes = null;
 
-   activateConditional(id: PolymorphKey | [PolymorphKey, Object], parent: Element, fragment?: DocumentFragment) {
-      const key = Array.isArray(id) ? id[0] : id
-      const input = Array.isArray(id) ? id[1] : undefined
-      const kitOrRenderfunctionOrMap = this.switchMap.get(key)
-      if (!kitOrRenderfunctionOrMap) return;
-      const isInitialMount = isFunction(kitOrRenderfunctionOrMap)
-      const kitOrMap = isFunction(kitOrRenderfunctionOrMap) ? createDynamicRenderKitOrMap(kitOrRenderfunctionOrMap, input, this.getNodePod(), { ...this.context }) : kitOrRenderfunctionOrMap
-      if (isInitialMount) this.switchMap.set(key, kitOrMap)
-      const kit = toKit(kitOrMap, input)
-      if (!kit) {
-         if (__DEV__) console.error('dynamic render kit missing')
-         return;
+      if (kit.type === 'create') {
+         kit.flask!.emitDiscard()
+         kit.flask = undefined
       }
-      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view' }))
-      kit.input = input;
+      else kit.flask!.emitDemount()
 
       queueInternalRenderTask(() => {
-         this.render(kit, parent, fragment)
-         kit.nodePod!.activate() // needs to be queued since deactivation is also queued
-         if (isInitialMount)
-            flask.emitInitialMount()
-         else
-            flask.emitRemount() // remount preserved watchers etc.
-      }, this.outerFlask)
-
-      // this.render(kit, parent, fragment)
-      // if (isInitialMount)
-      //    //  queueInternalRenderTask(()=>
-      //    flask.emitInitialMount()
-      // // , this.outerFlask)
-      // else
-      //    // queueInternalRenderTask(()=>
-      //    flask.emitRemount()
-      // // , this.outerFlask) // remount preserved watchers etc.
+         removeDOMNodes(prevNodes)
+      })
+      return kit;
    }
+
 
    discard(key: PolymorphKey, input?: Object) {
       if (this.isActiveKey(key, input)) {
@@ -286,8 +265,8 @@ export class PolymorphKit {
       if (input && kitOrMap instanceof Map) {
          kitOrMap.delete(input)
       }
-      if ('cached' in kitOrMap) {
-         kitOrMap.cached = undefined;
+      if ('cache' in kitOrMap) {
+         kitOrMap.cache = undefined;
       }
    }
 
@@ -299,22 +278,41 @@ export class PolymorphKit {
       }
       return activeKey === key
    }
-}
 
+   toKit(id: PolymorphKey | [PolymorphKey, Object]): PolymorphRenderKit | undefined {
+      const key = Array.isArray(id) ? id[0] : id
+      const input = Array.isArray(id) ? id[1] : undefined
+      const kitOrRenderfunctionOrMap = this.switchMap.get(key)
+      if (!kitOrRenderfunctionOrMap) return;
 
-function toKit(arg: DynamicRenderKit | VariantMap, input: undefined | Object): DynamicRenderKit | undefined {
-   if (arg instanceof Map) {
-      if (input) {
-         const kit = arg.get(input)
-         if (kit) return kit;
-         const newKit = createDynamicRenderKit(arg.render)
-         arg.set(input, newKit)
-         return newKit;
+      const isInitialMount = isFunction(kitOrRenderfunctionOrMap)
+      const kitOrMap = isFunction(kitOrRenderfunctionOrMap) ? createDynamicRenderKitOrMap(kitOrRenderfunctionOrMap, input, { ...this.context }) : kitOrRenderfunctionOrMap
+      if (isInitialMount) this.switchMap.set(key, kitOrMap)
+
+      if (kitOrMap instanceof Map) {
+         if (input) {
+            const kit = kitOrMap.get(input)
+            if (kit) {
+               if (this.preserve) kit.type = 'remount'
+               kit.input = input
+               return kit;
+            }
+            const newKit = createDynamicRenderKit(kitOrMap.render, this.context)
+            kitOrMap.set(input, newKit)
+            if (this.preserve) newKit.type = 'remount'
+            newKit.input = input
+            return newKit;
+
+         }
+         else console.error('Input object required with this polymorph key. Call .as() with key and input object')
       }
-      else console.error('Input object required with this polymorph key. Call .as() with key and input object')
-   }
-   else {
-      return arg;
+      else {
+         if (this.preserve) kitOrMap.type = 'remount'
+         kitOrMap.input = input
+         return kitOrMap;
+      }
    }
 }
+
+
 

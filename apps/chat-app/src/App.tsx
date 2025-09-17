@@ -1,4 +1,4 @@
-import { component, If, Style } from "@rue/lumo";
+import { component, fromGlobal, If, Style } from "@rue/lumo";
 import { Router } from "./router";
 import { Ion, ion, Ionized } from "@rue/quarky";
 import { User } from "./commons/keys";
@@ -6,6 +6,7 @@ import { WelcomeView } from "./components/WelcomeView";
 import { Chatroom } from "./components/Chatroom";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
 import { FriendApp } from "./components/FriendApp";
+import { getClosestCommons } from "../../../packages/lumo/src/commons/commons-stack";
 
 //TODO: Figure out how to provide user
 
@@ -14,6 +15,7 @@ import { FriendApp } from "./components/FriendApp";
 // [ ] optimistic updates
 
 export function FriendlyChatApp() {
+   console.log('running friendly chat app', getClosestCommons())
    const $connected = initDatabaseConnection();
    const $user = ion(null as User | null)
    let initialLoad = true;

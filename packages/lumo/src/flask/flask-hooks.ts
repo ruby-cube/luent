@@ -21,6 +21,8 @@ import { queueRenderTask } from "../render-cycle";
 
 
 export function atMounted(task: (initial: boolean) => void) {
+   // getFlask().onInitialMount(() => { queueRenderTask(() => task(true)) });
+   // getFlask().onRemount(() => { queueRenderTask(() => task(false)) });
    getFlask().onInitialMount(() => { queueRenderTask(() => task(true)) });
    getFlask().onRemount(() => { queueRenderTask(() => task(false)) });
 }
