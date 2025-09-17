@@ -18,7 +18,6 @@ export class ListKit extends VineNode {
       public flask: Flask
    ) {
       super()
-
       this.nodes = this.render($list(), renderItem);
 
       watchToRender($list, ({ current: newList }) => {
@@ -44,8 +43,9 @@ export class ListKit extends VineNode {
    }
 
    private rerender(list: unknown[], renderItem: RenderItem<unknown>) {
+      const prevItems = this.prevItems;
       const prevKits = this.nodes! as ListItemKit[];
-      const kits: ListItemKit[] = this.nodes = []
+      const kits: ListItemKit[] = []
       const currentItems = new Map()
       let hasNewItems = false
       let hasMovedItems = false
@@ -66,7 +66,7 @@ export class ListKit extends VineNode {
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
          const uid = this.getUID(item)
-         let kit = this.prevItems.get(uid)
+         let kit = prevItems.get(uid)
 
          // existing item
          if (kit) {
@@ -103,62 +103,64 @@ export class ListKit extends VineNode {
       console.log('$$$@ lcsLength', lcsLength)
       console.log('$$$@ sequences', sequences)
 
-      // remove DOMNodes
-      let i = prevKits.length;
-      while (i--) {
-         const kit = prevKits[i]
-         const uid = this.getUID(kit.item)
-         if (!currentItems.has(uid)) {
-            removeDOMNodes(kit.nodes!)
-            kit.nodes = undefined;
-            kit.flask.emitDiscard()
+      queueInternalRenderTask(() => {
+         //TODO: Can we make this call more efficient??
+         // remove DOMNodes
+         let i = prevKits.length;
+         while (i--) {
+            const kit = prevKits[i]
+            const uid = this.getUID(kit.item)
+            if (!currentItems.has(uid)) {
+               const prevNodes = kit.nodes!
+               removeDOMNodes(prevNodes)
+               kit.nodes = undefined;
+               kit.flask.emitDiscard()
+            }
+            else if (hasMoved(kit)) {
+               const prevNodes = kit.nodes!
+               removeDOMNodes(prevNodes)
+               kit.hasMoved = true;
+               hasMovedItems = true;
+            }
          }
-         else if (hasMoved(kit)) {
-            removeDOMNodes(kit.nodes!)
-            kit.hasMoved = true;
-            hasMovedItems = true;
+
+         function hasMoved(kit: ListItemKit) {
+            if (inLongestSeq(kit.$index())) return false;
+            // TODO: check if sequence is in correct order relative to lcs and other seqs
+            return true
          }
-      }
 
-      function hasMoved(kit: ListItemKit) {
-         if (inLongestSeq(kit.$index())) return false;
-         // TODO: check if sequence is in correct order relative to lcs and other seqs
-         return true
-      }
+         function inLongestSeq(index: number) {
+            return index >= lcsStart && index < lcsLength
+         }
 
-      function inLongestSeq(index: number) {
-         return index >= lcsStart && index < lcsLength
-      }
+         const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
 
-      const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
+         // mount to fragment
+         if (hasNewItems || hasMovedItems) {
+            let fragment: DocumentFragment | null = null
 
-      // mount to fragment
-      if (hasNewItems || hasMovedItems) {
-         let fragment: DocumentFragment | null = null
-
-         for (let i = 0; i < kits.length; i++) {
-            const kit = kits[i]
-            if (!this.prevItems.has(kit) || kit.hasMoved) {
-               if (!fragment) {
-                  fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
+            for (let i = 0; i < kits.length; i++) {
+               const kit = kits[i]
+               if (!prevItems.has(kit) || kit.hasMoved) {
+                  if (!fragment) {
+                     fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
+                  }
+                  mountDOMNodes(kit.nodes!, fragment)
+                  kit.hasMoved = null;
                }
-               mountDOMNodes(kit.nodes!, fragment)
-               kit.hasMoved = null;
-            }
-            else {
-               fragment = null
+               else {
+                  fragment = null
+               }
             }
          }
-      }
 
-      if (fragments.length) {
-         queueInternalRenderTask(() => {
+         if (fragments.length) {
             for (const { fragment, precedingLeaf } of fragments) {
-               if (precedingLeaf)
-                  mountFragment(fragment, precedingLeaf, this.parent)
+               mountFragment(fragment, precedingLeaf, this.parent)
             }
-         })
-      }
+         }
+      })
 
       this.prevItems = currentItems
       return kits;
@@ -187,10 +189,7 @@ export class ListItemKit extends VineNode {
       super()
       const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
       this.nodes = processJSXOutput(this.render(item, ion(() => $index())))
-
-      queueInternalRenderTask(() => {
-         flask.emitInitialMount()
-      })
+      flask.emitInitialMount()
    }
 
    // mount() {

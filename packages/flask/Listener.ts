@@ -309,7 +309,7 @@ const noopable = {
 
 function bindListenerToFlask(listener: PausableListener, flask: Flask, until: any | null) {
    const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
-   const { stop: stopPausing } = flask.atDemount(listener.pause);
+   const { stop: stopPausing } = flask.onDemount(listener.pause);
    const { stop: stopResuming } = flask.onRemount(listener.resume);
 
    return function unbind() {

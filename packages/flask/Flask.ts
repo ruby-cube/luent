@@ -6,7 +6,7 @@ export const FLASK = 'flask'
 
 export const [getActiveFlask, flaskStack] = AsyncState<Flask>(FLASK)
 
-export function getFlask() {
+export function getFlask(): Flask {
    const flask = getActiveFlask()
    if (!flask) throw new Error('No flask found. Must call within the scope of a flask')
    return flask;
@@ -56,23 +56,23 @@ export class ThisFlask {
       return this.flask.onRemount(task)
    }
 
-   
+
    atMounted(task: (initial: boolean) => void) {
       this.flask.onInitialMount(() => task(true))
       this.flask.onRemount(() => task(false))
    }
-   
+
    atUnmount(task: (final: boolean) => void) {
-      this.flask.atDemount(() => task(false))
+      this.flask.onDemount(() => task(false))
       this.flask.onDiscard(() => task(true))
    }
 
    atDemount(task: () => void) {
-      return this.flask.atDemount(task)
+      return this.flask.onDemount(task)
    }
 
-   // get atDemount() {
-   //    return this.flask.atDemount
+   // get onDemount() {
+   //    return this.flask.onDemount
    // }
 
    // get onDiscard() {
@@ -100,45 +100,11 @@ export class Flask {
       this.type = type;
       this.creationScopeID = creationScope ? genUID() : outer?.creationScopeID ?? "0"
 
-      // console.log('creating flask', {type: this.type, id: this.creationScopeID, outer: this.outer?.creationScopeID})
-
-      // Bind to this, to allow easy passing into hooks
-      Object.defineProperty(this, 'atDemount', {
-         value: (task: Task) => on(LifecycleHook.DEMOUNT, this, task),
-         writable: false
-      })
-      Object.defineProperty(this, 'onRemount', {
-         value: (task: Task) => on(LifecycleHook.REMOUNT, this, task),
-         writable: false
-      })
-      Object.defineProperty(this, 'onDiscard', {
-         value: (task: Task) => on(LifecycleHook.DISCARD, this, task),
-         writable: false
-      })
-      Object.defineProperty(this, 'emitDemount', {
-         value: () => this.emit(LifecycleHook.DEMOUNT),
-         writable: false
-      })
-      Object.defineProperty(this, 'emitRemount', {
-         value: () => this.emit(LifecycleHook.REMOUNT),
-         writable: false
-      })
-      Object.defineProperty(this, 'emitDiscard', {
-         value: () => {
-            // console.log('emitting discard', {type: this.type, id: this.creationScopeID, outer: this.outer?.creationScopeID})
-            this.emit(LifecycleHook.DISCARD)
-            this.tasks.delete(LifecycleHook.INITIAL_MOUNT);
-            this.tasks.delete(LifecycleHook.REMOUNT);
-            this.tasks.delete(LifecycleHook.DEMOUNT);
-            this.tasks.delete(LifecycleHook.DISCARD);
-         },
-         writable: false
-      })
 
       if (outer) {
-         const remountListener = outer.onRemount(this.emitRemount)
-         const unmountListener = outer.atDemount(this.emitDemount)
-         const discardListener = outer.onDiscard(this.emitDiscard)
+         const remountListener = outer.onRemount(() => this.emitRemount())
+         const unmountListener = outer.onDemount(() => this.emitDemount())
+         const discardListener = outer.onDiscard(() => this.emitDiscard())
          this.onDiscard(() => {
             remountListener.stop()
             unmountListener.stop()
@@ -169,20 +135,45 @@ export class Flask {
    }
 
    onInitialMount(task: Task) {
-      return on(LifecycleHook.INITIAL_MOUNT, this, task)
+      return this.on(LifecycleHook.INITIAL_MOUNT, task)
    }
 
-   emitDemount!: () => void
+   emitDemount() {
+      this.emit(LifecycleHook.DEMOUNT)
+   }
 
-   atDemount!: (task: Task, options?: SustainedListenerOptions) => PausableListener
+   onDemount(task: Task) {
+      return this.on(LifecycleHook.DEMOUNT, task)
+   }
 
-   emitRemount!: () => void
+   emitRemount() {
+      this.emit(LifecycleHook.REMOUNT)
+   }
 
-   onRemount!: (task: Task, options?: SustainedListenerOptions) => PausableListener
+   onRemount(task: Task) {
+      return this.on(LifecycleHook.REMOUNT, task)
+   }
+   onDiscard(task: Task) {
+      return this.on(LifecycleHook.DISCARD, task)
+   }
 
-   onDiscard!: (task: Task) => PausableListener
+   private on(hookName: LifecycleHook, task: Task) {
+      const tasks = this.tasks
+      tasks.addToSet(task, hookName)
+      return {
+         stop() {
+            tasks.deleteFromSet(task, hookName)
+         }
+      }
+   }
 
-   emitDiscard!: () => void
+   emitDiscard() {
+      this.emit(LifecycleHook.DISCARD)
+      this.tasks.delete(LifecycleHook.INITIAL_MOUNT);
+      this.tasks.delete(LifecycleHook.REMOUNT);
+      this.tasks.delete(LifecycleHook.DEMOUNT);
+      this.tasks.delete(LifecycleHook.DISCARD);
+   }
 
    containCall(fn: () => any) {
       try {
@@ -220,13 +211,3 @@ export class Flask {
 //       }
 //    });
 // }
-
-function on(hookName: LifecycleHook, flask: Flask, task: () => void) {
-   const tasks = flask.tasks
-   tasks.addToSet(task, hookName)
-   return {
-      stop() {
-         tasks.deleteFromSet(task, hookName)
-      }
-   }
-}

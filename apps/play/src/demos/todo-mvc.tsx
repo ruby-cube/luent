@@ -149,33 +149,32 @@ export function TodoMVC() {
                   ))}
                </ul>
             </section >
-            {If(($todos().length), "show",
-               <footer class="footer">
-                  <span class="todo-count">
-                     <strong>{$remaining}</strong>
-                     <span>{($remaining() === 1 ? ' item' : ' items')} left</span>
-                  </span>
+            <show-hide>
+               {If(($todos().length),
+                  <footer class="footer">
+                     <span class="todo-count">
+                        <strong>{$remaining}</strong>
+                        <span>{($remaining() === 1 ? ' item' : ' items')} left</span>
+                     </span>
 
-                  <ul class="filters">
-                     <li>
-                        <a href="#/all" class={{ 'selected': ($view() === 'all') }}>All</a>
-                     </li>
-                     <li>
-                        <a href="#/active" class={{ 'selected': ($view() === 'active') }}>Active</a>
-                     </li>
-                     <li>
-                        <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
-                     </li >
-                  </ul >
+                     <ul class="filters">
+                        <li>
+                           <a href="#/all" class={{ 'selected': ($view() === 'all') }}>All</a>
+                        </li>
+                        <li>
+                           <a href="#/active" class={{ 'selected': ($view() === 'active') }}>Active</a>
+                        </li>
+                        <li>
+                           <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
+                        </li >
+                     </ul >
 
-                  {If(($todos().length > $remaining()), 'remount',
-                     <button class="clear-completed" on:click={removeCompleted} >
+                     <button class="clear-completed" on:click={removeCompleted} style={{ display: ($todos().length > $remaining() ? undefined : 'none') }}>
                         Clear completed
                      </button >
-                  )}
-               </footer >
-            )}
-            {/* {Else(undefined)} */}
+                  </footer >
+               )}
+            </show-hide>
          </section >
 
          <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />

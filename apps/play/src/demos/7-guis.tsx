@@ -1,7 +1,7 @@
 
 import { atMounted, For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
-import { $$, ion, ionize, ions, SYNC, watch } from "@rue/quarky"
+import { $$, ion, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
 import { quarkOf } from "../../../../packages/quarky/src/Quark"
 import { getFlask } from "@rue/flask"
 
@@ -322,7 +322,7 @@ export function CircleApp() {
    const history = ionize([[]] as Circle[][])
    const $index = ion(0)
    const $circles = ion.ionize([] as Circle[])
-   const $selected = ion(undefined as undefined | null | Circle)
+   const $selected = ion.ionize(undefined as undefined | null | Circle)
    const $adjusting = ion(false)
 
    function reClick({ clientX: x, clientY: y }: MouseEvent) {
@@ -333,11 +333,11 @@ export function CircleApp() {
          return
       }
 
-      $selected.state = [...$circles()].reverse().find(({ cx, cy, r }) => {
+      $selected.state = ionize([...$circles()].reverse().find(({ cx, cy, r }) => {
          const dx = cx - x
          const dy = cy - y
          return Math.sqrt(dx * dx + dy * dy) <= r
-      })
+      }))
 
       if (!$selected()) {
          $circles().push({
@@ -349,7 +349,7 @@ export function CircleApp() {
       }
    }
 
-   function adjust(circle: Circle) {
+   function adjust(circle: Ionized<Circle>) {
       $selected.state = circle
       $adjusting.state = true
    }
@@ -361,11 +361,11 @@ export function CircleApp() {
    }
 
    function undo() {
-      $circles.state = clone(history[--$index.state])
+      $circles.state = ionize(clone(history[--$index.state]))
    }
 
    function redo() {
-      $circles.state = clone(history[++$index.state])
+      $circles.state = ionize(clone(history[++$index.state]))
    }
 
    function clone(circles: Circle[]) {

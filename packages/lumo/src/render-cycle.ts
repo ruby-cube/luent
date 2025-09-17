@@ -212,7 +212,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    flask.onDiscard(/* listener.stop */() => {
       effect.destroy()
    });
-   flask.atDemount(/* listener.pause */() => {
+   flask.onDemount(/* listener.pause */() => {
       paused = true;
    });
    flask.onRemount(/* listener.resume */() => {

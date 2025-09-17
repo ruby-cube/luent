@@ -1,4 +1,5 @@
-import { $thisFlask } from "@rue/flask";
+import { getFlask } from "@rue/flask";
+import { queueRenderTask } from "../render-cycle";
 
 
 //TODO: API
@@ -18,34 +19,21 @@ import { $thisFlask } from "@rue/flask";
 
 
 
-// export function onInitialMount(task: () => void) {
-//    $thisFlask().onInitialMount(task);
-// }
-
-// export function onRemount(task: () => void) {
-//    $thisFlask().onRemount(task);
-// }
 
 export function atMounted(task: (initial: boolean) => void) {
-   $thisFlask().atMounted(task);
+   getFlask().onInitialMount(() => { queueRenderTask(() => task(true)) });
+   getFlask().onRemount(() => { queueRenderTask(() => task(false)) });
 }
 
 export function atUnmount(task: (final: boolean) => void) {
-   $thisFlask().atUnmount(task);
+   getFlask().onDiscard(() => task(true));
+   getFlask().onDemount(() => task(false));
 }
 
 export function atRemounted(task: () => void) {
-   $thisFlask().atRemounted(task);
+   getFlask().onRemount(() => { queueRenderTask(task) });
 }
 
 export function atDemount(task: () => void) {
-   $thisFlask().atDemount(task);
+   getFlask().onDemount(task);
 }
-
-// export function atDemount(task: () => void) {
-//    $thisFlask().atDemount(task);
-// }
-
-// export function onDiscard(task: () => void) {
-//    $thisFlask().onDiscard(task);
-// }

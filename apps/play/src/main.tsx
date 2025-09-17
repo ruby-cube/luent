@@ -10,7 +10,7 @@
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { TodoMVC } from './demos/todo-mvc';
-import { CRUDApp, SevenGUIs } from './demos/7-guis';
+import { CircleApp, CRUDApp, SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
 
 import { PolygonApp } from './demos/polygon-app';
@@ -88,7 +88,7 @@ import { For } from '../../../packages/lumo/src/iteratives/For';
 
 
 
-const app = createApp(List)
+const app = createApp(TriangleDemo)
 
 app.mount('#app')
 

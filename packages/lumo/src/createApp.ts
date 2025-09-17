@@ -59,8 +59,9 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             
             queueInternalRenderTask(() => {
                mountDOMNodes(nodes, appRoot)
-               flask.emitInitialMount()
-            }, flask)
+            })
+            
+            flask.emitInitialMount()
          }
          finally {
             flaskStack.pop()

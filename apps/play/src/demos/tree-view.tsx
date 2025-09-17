@@ -135,7 +135,7 @@ function createTreeItem(data: ItemData): TreeItem {
 
 const textarea = document.createElement('textarea')
 
-function TreeItemView(input : FromTag<{
+function TreeItemView(input: FromTag<{
    item: Ionized<TreeItem>,
    // list: v<string[]>,
    // 'on:click': v<(e: { pen: string }) => void>('?')
@@ -181,14 +181,18 @@ function TreeItemView(input : FromTag<{
                <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
          </div>
-         {If($isFolder, If($isOpen, 'remount',
-            <ul>
-               {For(item.children!, m => m, item => (
-                  <TreeItem item={item}></TreeItem>
-               ))}
-               <li class='add' on:click={e => item.addChild()}>+</li>
-            </ul>
-         ))}
+         {If($isFolder,
+            <>
+               {If($isOpen, 'remount',
+                  <ul>
+                     {For(item.children!, m => m, item => (
+                        <TreeItem item={item}></TreeItem>
+                     ))}
+                     <li class='add' on:click={e => item.addChild()}>+</li>
+                  </ul>
+               )}
+            </>
+         )}
          {/* {If($isFolder, 'create', () => (console.log('*** render contents'),
             <>
                {If($isOpen, 'remount', () => (console.log('*** render nested'),

@@ -1,7 +1,8 @@
 import { debug } from "@rue/utils";
 import { getFlask } from "@rue/flask";
+import { queueRenderTask } from "../render-cycle";
 
-type LifecycleTask = (element: Element, initialOrFinal: boolean) => void;
+type LifecycleTask = (element: Element, initialOrFinal?: boolean) => void;
 
 export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask }) {
    const flask = getFlask()
@@ -9,12 +10,21 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
       const task = hooks[key]
       switch (key) {
          case 'at:mounted':
-            flask.onInitialMount(async () => { task(node, true) })
-            flask.onRemount(async () => { task(node, true) })
+            flask.onInitialMount(async () => { queueRenderTask(()=>task(node, true)) })
+            flask.onRemount(async () => { queueRenderTask(()=>task(node, false))})
             break;
+
          case 'at:unmount':
-            flask.atDemount(() => task(node, false))
+            flask.onDemount(() => task(node, false))
             flask.onDiscard(() => task(node, true))
+            break;
+
+         case 'at:remounted':
+            flask.onRemount(async () => { queueRenderTask(()=>task(node))})
+            break;
+
+         case 'at:demount':
+            flask.onDemount(() => task(node))
             break;
          default:
             debug.error('invalid inline hook')

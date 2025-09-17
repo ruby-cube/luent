@@ -78,10 +78,10 @@ export function makeElement(
    if (_Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
-         const rawOutput = _Slot()
+         const rawOutput = normalizeToArray(_Slot())
 
-         if (isInnerHTMLKit(rawOutput)) {
-            const innerHTML = setUpInnerHTML(rawOutput, domNode)
+         if (isInnerHTMLKit(rawOutput[0])) {
+            const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
             mountInnerHTML(innerHTML, domNode)
          }
          else {
@@ -236,7 +236,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    watchToRender(ion, () => {
       queueInternalRenderTask(() => {
          element.value = toString(ion())
-      }, flask)
+      })
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {

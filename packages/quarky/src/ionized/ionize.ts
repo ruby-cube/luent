@@ -306,7 +306,8 @@ export function isIonizedModel(value: any): value is IonizedModel {
 }
 
 export function ionizeModel(target: object, markMap: MarkMap | InertCollectionType | undefined) {
-   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
+   if (!isObject(target)) return target;
+      // throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (markMap) debug.warn(`CASE RESEARCH: Target is ${isIonizedModel(target) ? 'ionized model' : isIon(target) ? 'ion' : 'inert'}. Cannot extend using ionize()`)
       return target

@@ -201,9 +201,7 @@ export class IfElseKit extends VineNode {
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
-         queueInternalRenderTask(() => { //TODO: this needs to be called after app is mounted for initial mount...
             kit.flask!.emitInitialMount()
-         })
       })
 
       watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex }) => {
@@ -215,8 +213,8 @@ export class IfElseKit extends VineNode {
             mountDOMNodes(kit.nodes!, fragment)
             queueInternalRenderTask(() => {
                mountFragment(fragment, this.precedingLeaf, this.parent)
-               kit.type === 'create' ? kit.flask!.emitInitialMount(): kit.flask!.emitRemount()
             })
+            kit.type === 'create' ? kit.flask!.emitInitialMount(): kit.flask!.emitRemount()
          })
       })
    }
