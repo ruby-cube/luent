@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { DerivedIon, ion, ionize, isIon, watch, watchEffect } from "@rue/quarky";
+import { DerivedIon, ion, ionic, ionize, isIon, watch, watchEffect } from "@rue/quarky";
 import { asPion } from "../../../packages/quarky/src/ion/x_AtomicPion";
 
 export function TestSelectiveTracking() {
@@ -22,7 +22,7 @@ export function TestSelectiveTracking() {
         }
     })
 
-    const $doubleCount = ion(() => $count() * 2)
+    const $doubleCount = ion(() =>$count() * 2)
 
     const $frog = ionize({
         name: 'kermit'

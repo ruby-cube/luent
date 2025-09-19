@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, ion, update, ThrottledHover, ionize, $_derivation_ion } from "@rue/quarky";
+import { Animation, Interval, ion, update, ThrottledHover, ionize, $_derivation_ion, ionic } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 //TODO:
@@ -30,9 +30,6 @@ function doAction(fn: Function) {
 export function TriangleDemo() {
    const $elapsed = ion(0)
    const $seconds = ion(0)
-   // const time = ionize({
-   //    seconds: 0
-   // })
 
    const $scale = ion(() => {
       const e = ($elapsed() / 1000) % 10;
@@ -40,9 +37,6 @@ export function TriangleDemo() {
    })
    const start = Date.now()
 
-   // const secondsInterval = Interval(() => {
-   //    update(() => (time.seconds = (time.seconds % 10) + 1), { lazy: 1000 })
-   // }, 1000).start();
    const secondsInterval = Interval(() => {
       update(() => ($seconds.state = ($seconds() % 10) + 1), { lazy: 1000 })
    }, 1000).start();
@@ -101,10 +95,9 @@ export function TriangleDemo() {
             <div
                class="container"
                style={{
-                  // transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
+                  transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
                }}
             >
-               {/* <div>{$seconds}</div> */}
                <Triangle x={0} y={0} s={1000} seconds={$seconds} />
             </div>
          </div>
@@ -112,7 +105,7 @@ export function TriangleDemo() {
    );
 };
 
-function Triangle({ x, y, s, $seconds } : FromTag<any>) {
+function Triangle({ x, y, s, $seconds }: FromTag<any>) {
    if (s <= TARGET) {
       return component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET} text={$seconds} />
@@ -151,7 +144,7 @@ function Triangle({ x, y, s, $seconds } : FromTag<any>) {
 };
 
 
-function Dot({ x, y, s, $text } : FromTag<any>) {
+function Dot({ x, y, s, $text }: FromTag<any>) {
    const $hover = ion(false)
 
    const [Hover, Unhover] = ThrottledHover()
@@ -173,12 +166,11 @@ function Dot({ x, y, s, $text } : FromTag<any>) {
             top: y + "px",
             "border-radius": s / 2 + "px",
             "line-height": s + "px",
-            background:  "#61dafb"
-            // background: ($hover() ? "#ff0" : "#61dafb")
+            background: ($hover() ? "#ff0" : "#61dafb")
          }}
          on:mouseenter={hover}
          on:mouseleave={unhover}
-      >{$_derivation_ion(()=>$hover() ? "**" + $text() + "**" : $text())}</div>
+      >{($hover() ? "**" + $text() + "**" : $text())}</div>
    );
 };
 

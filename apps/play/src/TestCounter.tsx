@@ -7,7 +7,7 @@
 
 
 import { component, FromTag } from "@rue/lumo"
-import { Ion, ion, ionicTask, ionize } from "@rue/quarky"
+import { Ion, ion, ionic, ionicTask, ionize } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
@@ -79,7 +79,7 @@ export function TestCount() {
 
    const $active = ion(true)
 
-   const $doubleCount = ion(() => {
+   const $doubleCount = ion(() =>{
       if ($active()) {
          return $count() * 2
       }
@@ -126,7 +126,7 @@ export function TestThisCount() {
       }
    })
 
-   const $doubleCount = ion(() => $count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
 
    function increment() {
       $count.state++
@@ -167,7 +167,7 @@ export function TestThisCount() {
 //       }
 //    })
 
-//    const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.state++
@@ -208,7 +208,7 @@ export function TestThisCount() {
 //       }
 //    }))
 
-//    const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.state++
@@ -247,7 +247,7 @@ export function TestThisCount() {
 //       }
 //    }))
 
-//    const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.state++
@@ -289,7 +289,7 @@ export function TestThisCount() {
 //    console.log('increment in coutn', 'increment' in $count)
 //    console.log('decrement in coutn', 'decrement' in $count)
 
-//    const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.state++
@@ -330,7 +330,7 @@ export function TestThisCount() {
 //       }
 //    }), false, ['increment'])
 
-//    const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.state++
@@ -368,7 +368,7 @@ export function TestThisCount() {
 //       }
 //    }), true, [])
 
-//    const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.state++
@@ -406,7 +406,7 @@ export function TestCounterModel() {
       }
    })
 
-   const $doubleCount = ion(() => counter.count * 2)
+   const $doubleCount = ion(() =>counter.count * 2)
 
    // watch(counter, ({ state }) => {
    //    console.log('changed', state)

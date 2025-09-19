@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { ion, ionicTask } from "@rue/quarky";
+import { ion, ionic, ionicTask } from "@rue/quarky";
 
 export function TestIonicTask() {
 
@@ -12,7 +12,7 @@ export function TestIonicTask() {
       }
    })
 
-   const $doubleCount = ion(() => $count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
 
    ionicTask(() => {
       console.log('count:', $count())

@@ -89,7 +89,7 @@ import { FriendlyChatApp } from '../../chat-app/src/App';
 
 
 
-const app = createApp(TriangleDemo)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 

@@ -18,7 +18,7 @@ function Parent() {
 
 function Child({ $count } : FromTag<{ count: number }>) {
 
-   const $doubleCount = ion(() => )
+   const $doubleCount = ion(() =>)
 
       return component(
       <>

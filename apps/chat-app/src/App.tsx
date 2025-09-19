@@ -14,8 +14,7 @@ import { getClosestCommons } from "../../../packages/lumo/src/commons/commons-st
 // [ ] new messages notification
 // [ ] optimistic updates
 
-export function FriendlyChatApp() {
-   console.log('running friendly chat app', getClosestCommons())
+export function FriendSite() {
    const $connected = initDatabaseConnection();
    const $user = ion(null as User | null)
    let initialLoad = true;
@@ -24,27 +23,22 @@ export function FriendlyChatApp() {
       ['/', () => {
          const user = $user()
          if (user) {
-            console.log('oh user!')
             routeTo('/app')
             return;
          }
-         console.log('render welcome')
          return <WelcomeView initialLoad={initialLoad}></WelcomeView>
       }],
       ['/app', () => {
          const user = $user()
          if (!user) {
-            console.log('no user...')
             routeTo('/')
             return;
          }
-         console.log('render app')
          return <FriendApp user={user}></FriendApp> //TODO: non-null assertion
       }],
    ])
 
    onLoggedIn(user => {
-      console.log('on logged in', user)
       $user.state = user
       routeTo('/app')
       initialLoad = false

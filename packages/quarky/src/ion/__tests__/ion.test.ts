@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ion } from '../ion';
+import { ion, ionic } from '../ion';
 import { MetaIon } from '../AtomicIon';
 import { DERIVED_ION } from '../../ionic/x_PionCapsule';
 import exp from 'constants';
@@ -69,7 +69,7 @@ describe('ion function', () => {
       it('should create a ReactiveDerivedIon when given a function', () => {
         const $count = ion(1)
 
-        const $doubleCount = ion(() => $count() * 2);
+        const $doubleCount = ion(() =>$count() * 2);
         expect(typeof $doubleCount).toBe('function');
         expect(isFunction($doubleCount)).toBe(false)
         expect($doubleCount()).toBe(2);
@@ -80,7 +80,7 @@ describe('ion function', () => {
 
       it('should create a derived ion that tracks dependencies correctly', () => {
         const depIon = ion(1);
-        const derivedIon = ion(() => depIon() + 10);
+        const derivedIon = ion(() =>depIon() + 10);
         depIon.value = 2;  // update dependency
 
         expect(derivedIon()).toBe(12);

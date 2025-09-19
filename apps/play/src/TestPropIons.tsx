@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { ion, ionize } from "@rue/quarky";
+import { ion, ionic, ionize } from "@rue/quarky";
 
 export function TestPropIons() {
    const frog = ionize({
@@ -14,7 +14,7 @@ export function TestPropIons() {
       }
    })
 
-   const $frogName = ion(() => frog.name, {
+   const $frogName = ion(() =>frog.name, {
       set: frog.setName
    })
 

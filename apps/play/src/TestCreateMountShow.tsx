@@ -1,5 +1,5 @@
 import { If, component, Else, ElseIf } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { ion, ionic } from "@rue/quarky";
 
 export function TestDerivedConditional() {
    const $count = ion(0, {
@@ -11,7 +11,7 @@ export function TestDerivedConditional() {
       }
 
    })
-   const $doubleCount = ion(() => $count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
 
    const $aActive = ion(true, {
       toggle() {

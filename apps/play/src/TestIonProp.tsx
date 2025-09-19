@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { ion, ionize, watch } from "@rue/quarky";
+import { ion, ionic, ionize, watch } from "@rue/quarky";
 
 
 export function TestIonProp() {
@@ -49,7 +49,7 @@ export function TestIonProp() {
     })
     const $lastName = ion('The Frog')
 
-    const $fullName = ion(() => $firstName() + " " + $lastName(), {
+    const $fullName = ion(() =>$firstName() + " " + $lastName(), {
         set(name: string) {
             const splitName = name.split(" ");
             $firstName.state = splitName[0]

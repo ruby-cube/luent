@@ -1,6 +1,6 @@
 import { createApp, createGlobalCommons } from "@rue/lumo";
-import { FriendlyChatApp } from "./App";
+import { FriendSite } from "./App";
 import './assets/main.css'
 
 
-createApp(FriendlyChatApp, { globalCommons: createGlobalCommons() }).mount('#app')
+createApp(FriendSite, { globalCommons: createGlobalCommons() }).mount('#app')

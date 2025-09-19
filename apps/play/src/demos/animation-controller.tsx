@@ -1,5 +1,5 @@
 import { $thisView, component, If, NodeRef } from "@rue/lumo";
-import { ion, ionize, isIonizedModel, queueTask, watch } from "@rue/quarky";
+import { ion, ionic, ionize, isIonizedModel, queueTask, watch } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionized/inert";
 
 class AnimationAnimator {
@@ -121,10 +121,10 @@ export function TestAnimationController() {
 
    const $canvas = NodeRef('canvas')
 
-   // const $animation = ion(() => $canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
+   // const $animation = ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
 
-   const $elapsed = ion(() => $animation()?.$elapsed() ?? 0)
-   const $isPlaying = ion(() => $animation()?.$isPlaying() ?? false)
+   const $elapsed = ion(() =>$animation()?.$elapsed() ?? 0)
+   const $isPlaying = ion(() =>$animation()?.$isPlaying() ?? false)
    const $animation = ion(undefined)
 
    function playPause() {

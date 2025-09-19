@@ -22,7 +22,7 @@ function Child({
 } : FromTag<{
    count: Ion
 }>) {
-   const $doubleCount = ion(() => $count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
    return component({
       $doubleCount
    },

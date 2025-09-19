@@ -12,7 +12,7 @@ export function TestEffectCycle() {
       }
    })
 
-   const $doubleCount = ion(() => $count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
 
    watch($doubleCount, () => {
       console.log("&% watch $doubleCount 0")

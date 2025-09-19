@@ -1,6 +1,6 @@
 import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, ionize, toRaw, update } from "@rue/quarky";
+import { ion, ionic, ionize, toRaw, update } from "@rue/quarky";
 import './style.css'
 
 
@@ -148,7 +148,7 @@ export function List(
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
-   const $listClone = ion(() => list.slice())
+   const $listClone = ion(() =>list.slice())
 
    const values = list.values()
    for (const value of values) {

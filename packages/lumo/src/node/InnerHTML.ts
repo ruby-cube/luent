@@ -11,10 +11,9 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
    //  nodePod.appendStaticNode(textNode) //QUESTION: do we need to append innerHTML to nodePod??, we don't have to worry about siblings, so idon't think so
    const htmlString = kit.innerHTML;
    if (isIon(htmlString)) {
-      watchToRender(htmlString, ({ current, previous, flask }) => {
-         if (current === previous) return;
+      watchToRender(htmlString, ({ flask }) => {
          queueInternalRenderTask(() => {
-            parentNode.innerHTML = toString(current);
+            parentNode.innerHTML = toString(htmlString());
          }, flask)
       });
    }

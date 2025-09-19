@@ -1,5 +1,5 @@
 import { component, For, FromTag, Style, } from "@rue/lumo"
-import { Ion, ion, ionize, Ionized, update } from "@rue/quarky"
+import { Ion, ion, ionic, ionize, Ionized, update } from "@rue/quarky"
 
 type Stat = {
    label: string,
@@ -36,7 +36,7 @@ export function PolygonApp() {
    }
    return component(
       <>
-       <svg width="200" height="200">
+         <svg width="200" height="200">
             <PolyGraph stats={stats}></PolyGraph>
          </svg >
 
@@ -55,8 +55,6 @@ export function PolygonApp() {
          </form>
 
          <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
-
-  
 
          {Style`
          polygon {
@@ -116,7 +114,7 @@ label {
 //  }
 
 
-function AxisLabel(input : FromTag<{
+function AxisLabel(input: FromTag<{
    stat: Ionized<Stat>,
    index: Ion<number>,
    total: Ion<number>
@@ -134,11 +132,11 @@ function AxisLabel(input : FromTag<{
 }
 
 
-function PolyGraph({ stats } : FromTag<{
+function PolyGraph({ stats }: FromTag<{
    stats: Ionized<Stat[]>
 }>) {
 
-   const $points = ion(() => {
+   const $points = ion(() =>{
       const total = stats.length
       return stats
          .map((stat, i) => {

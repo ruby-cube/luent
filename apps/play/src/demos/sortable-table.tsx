@@ -1,6 +1,6 @@
 
 import { component, Else, For, FromTag, If } from '@rue/lumo'
-import { Ion, ion, ionize, watch } from '@rue/quarky'
+import { Ion, ion, ionic, ionize, watch } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 
 
@@ -42,7 +42,7 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
 
    console.log('sort orders', sortOrders)
 
-   const $filteredData = ion(() => {
+   const $filteredData = ion(() =>{
       let filteredData = data;
       let filterKey = $filterKey()
       const key = $sortKey()

@@ -236,7 +236,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    watchToRender(ion, ({current, previous}) => {
       if (current === previous) return;
       queueInternalRenderTask(() => {
-         element.value = toString(current)
+         element.value = toString(ion())
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
@@ -322,7 +322,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
          watchToRender(value, ({ current, previous }) => {
             if (current === previous) return;
             queueInternalRenderTask(() => {
-               setAttribute(node, _key, current)
+               setAttribute(node, _key, value())
             }, flask)
          }, flask, RUN_EAGERLY)
       }
@@ -540,7 +540,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
             if (current === previous) return;
             queueInternalRenderTask(() => {
                if (previous) removePreviousClasses(previous, classList)
-               if (current) addClasses(current, classList, flask)
+               if (entry()) addClasses(entry(), classList, flask)
             }, flask)
          }, flask, RUN_EAGERLY)
       }
@@ -597,9 +597,9 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       const value = entry[key]
       if (isIon(value)) {
          watchToRender(value, ({ current, previous }) => {
-            if (current === previous) return
+            // if (current === previous) return
             queueInternalRenderTask(() => {
-               if (current) classList.add(key)
+               if (value()) classList.add(key)
                else if (previous) classList.remove(key)
             }, flask)
          }, flask, RUN_EAGERLY)
@@ -640,7 +640,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
             queueInternalRenderTask(() => {
-               setUpStyleEntry(style, current, flask);
+               setUpStyleEntry(style, entry(), flask);
             }, flask)
          }, flask, RUN_EAGERLY)
       }
@@ -659,7 +659,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
             watchToRender(value, ({ current, previous }) => {
                // if (current === previous) return;
                queueInternalRenderTask(() => {
-                  assignStyleProperty(style, toStylePropertyName(key), current)
+                  assignStyleProperty(style, toStylePropertyName(key), value())
                }, flask)
             }, flask, RUN_EAGERLY)
          }

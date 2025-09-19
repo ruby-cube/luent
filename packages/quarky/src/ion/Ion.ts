@@ -83,7 +83,7 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [At
  * ##### DERIVATION ION:
  * 
  * ```
- * const $doubleCount = ion(() => $count() * 2)
+ * const $doubleCount = ion(() =>$count() * 2)
  * ```
  * 
  * 
@@ -207,7 +207,7 @@ function asIon(
    return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new IonState(ionized ? maybeIonize(initialState) : initialState), ionized), props)) // TODO: add inert mark map
 }
 
-
+export const ionic = ion
 
 
 // isIon // any sort of ion
@@ -226,7 +226,7 @@ function asIon(
 
 // const $count = ion(0)
 
-// const $doublecount = ion(() => {if (isIon($count)) return $count() * 2}, {
+// const $doublecount = ion(() =>{if (isIon($count)) return $count() * 2}, {
 //    doSomething(){}
 // })
 

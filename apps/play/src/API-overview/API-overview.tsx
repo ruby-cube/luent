@@ -1,0 +1,446 @@
+//@ts-nocheck
+// COMPONENTS
+
+import { component, POSTRENDER, PRERENDER } from "@rue/lumo"
+import { ion, ionize } from "@rue/quarky"
+import { sub } from "date-fns"
+
+export function App() {
+
+   return component(
+      <>
+         <h1>My Counter App</h1>
+         <Counter></Counter>
+      </>
+   )
+}
+
+export function Counter() {
+   const $count = ion(0)
+
+   return component(
+      <div>
+         <p>{$count}</p>
+         <button on:click={e => $count.state++}>increment</button>
+         <button on:click={e => $count.state--}>decrement</button>
+      </div>
+   )
+}
+
+
+// REACTIVITY
+
+// ION: Reactive State
+
+export function Counter() {
+   const $count = ion(0)
+
+   console.log('count is', $count())
+
+   function reset() {
+      $count.state = 0
+   }
+
+   return component(
+      <div>
+         <p>{$count}</p>
+         <button on:click={e => $count.state++}>increment</button>
+         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={reset}>reset</button>
+      </div>
+   )
+}
+
+// ION WITH METHODS
+
+export function Counter() {
+   const $count = ion(0, {
+      increment() {
+         this.state++
+      },
+      decrement() {
+         this.state--
+      }
+   })
+
+   return component(
+      <div>
+         <p>{$count}</p>
+         <button on:click={e => $count.increment()}>increment</button>
+         <button on:click={e => $count.decrement()}>decrement</button>
+      </div>
+   )
+}
+
+// DERIVATION ION
+
+export function DoubleCounter() {
+   const $count = ion(0)
+   const $doubleCount = ion(() => $count() * 2)
+
+   return component(
+      <div>
+         <p>{$doubleCount}</p>
+         <button on:click={e => $count.state++}>increment</button>
+         <button on:click={e => $count.state--}>decrement</button>
+      </div>
+   )
+}
+
+// DERIVATION SHORTHAND IN THE TEMPLATE
+
+export function DoubleCounter() {
+   const $count = ion(0)
+
+   return component(
+      <div>
+         <p>{($count() * 2)}</p>
+         <button on:click={e => $count.state++}>increment</button>
+         <button on:click={e => $count.state--}>decrement</button>
+      </div>
+   )
+}
+
+// DERIVATIONS WITH METHODS
+const $firstName = ion('')
+const $lastName = ion('')
+
+const $fullName = ion(() => $firstName() + ' ' + $lastName(), {
+   set state(name: string) {
+      [$firstName.state, $lastName.state] = name.split(' ')
+   },
+   toCaps() {
+      $firstName.state = $firstName().toUpperCase()
+      $lastName.state = $lastName().toUpperCase()
+   }
+})
+
+function makeAnonymous() {
+   $fullName.state = 'John Doe'
+}
+
+
+// STATIC VALUES IN THE TEMPLATE
+
+export function Counter() {
+   const $count = ion(0)
+
+   return component(
+      <div>
+         <p>{$count}</p>
+         <button on:click={e => $count.state++}>increment</button>
+         <button on:click={e => $count.state--}>decrement</button>
+         <p>initial: {$count()}</p>
+      </div>
+   )
+}
+
+export function Counter() {
+   const $count = ion(0)
+
+   return component(
+      <div>
+         <p>{$count}</p>
+         <button on:click={e => $count.state++}>increment</button>
+         <button on:click={e => $count.state--}>decrement</button>
+         <p>{'initial:' + $count()}</p>
+      </div>
+   )
+}
+
+
+// Ionized Objects: Objects with Reactive properties and methods
+
+// with object literals
+function ScoreBoard({ a, b }) {
+   const playerA = ionize({
+      name: a,
+      points: 0
+   })
+
+   const playerB = ionize({
+      name: a,
+      points: 0
+   })
+
+   return component(
+      <div>
+         <h3>Scores</h3>
+         <hr></hr>
+         <p>{playerA.name}: {(playerA.points)}</p>
+         <button on:click={e => playerA.points++}>+</button>
+         <p>{playerB.name}: {(playerB.points)}</p>
+         <button on:click={e => playerA.points++}>+</button>
+      </div>
+   )
+}
+
+// with classes
+
+class Player {
+   constructor(
+      public name: string
+   ) { }
+
+   points = 0
+
+   addPoint() {
+      this.points++
+   }
+}
+
+const player = ionize(new Player())
+
+// using derivation shorthand to display reactive properties
+
+function ScoreBoard({ a, b }) {
+   const playerA = ionize({
+      name: a,
+      points: 0
+   })
+
+   const playerB = ionize({
+      name: a,
+      points: 0
+   })
+
+   return component(
+      <div>
+         <h3>Scores</h3>
+         <hr></hr>
+         <p>{playerA.name}: {(playerA.points)}</p>
+         <button on:click={e => playerA.points++}>+</button>
+         <p>{playerB.name}: {(playerB.points)}</p>
+         <button on:click={e => playerA.points++}>+</button>
+      </div>
+   )
+}
+
+
+// using derivation shorthand with reactive ops
+
+function FruitBasket({ $selectedFruit, fruitStore }) {
+   const fruits = ionize(new Set())
+
+   function addRandomFruit() {
+      const fruit = fruitStore.getRandomFruit()
+      fruits.add(fruit)
+   }
+
+   return component(
+      <div>
+         {$selectedFruit()} {(fruits.has($selectedFruit()) ? '✅' : '❌')}
+         <button on:click={addRandomFruit}>add random fruit</button>
+      </div>
+   )
+}
+
+// EFFECTS
+
+// watch ions
+
+export function Counter() {
+   const $count = ion(0)
+
+   watch($count, () => {
+      console.log('count is now', $count())
+   })
+
+   return component(
+      <div>
+         <p>{$count}</p>
+         <button on:click={e => $count.state++}>increment</button>
+         <button on:click={e => $count.state--}>decrement</button>
+      </div>
+   )
+}
+
+// state change event object
+watch($count, ({ current, previous }) => {
+   console.log('count is now', current)
+   console.log('count was', previous)
+})
+
+// clean up hook
+watch($count, () => {
+   const timeout = setTimeout(() => {
+      console.log('timed out!')
+   }, 1000)
+
+   atCleanup(() => clearTimeout(timeout))
+})
+
+// ionic task
+ionicTask(() => {
+   console.log('card number:', $cardNumber())
+   console.log('card suit:', $cardSuit())
+}) // default poster render
+
+// Effect Cycle Phases
+watch($count, ({ current, previous }) => {
+   console.log('count:', current)
+}, { phase: SYNC })
+
+watch($count, ({ current, previous }) => {
+   doStateChanges(current)
+}, { phase: PRERENDER })
+
+watch($count, ({ current, previous }) => {
+   manipulateDOM(current)
+}, { phase: RENDER })
+
+watch($count, ({ current, previous }) => {
+   updateDatabase(current)
+}, { phase: POSTRENDER })
+
+
+watch($count, () => {
+   console.log('pre-render phase')
+
+   await __render___()
+   console.log('render phase')
+
+   await __postrender___()
+   console.log('postrender phase')
+})
+
+
+
+// BONUS REACTIVITY FEATURES
+
+// ion access (experimental)
+
+function ScoreBoard({ a, b }) {
+   const playerA = ionize(new Player(a))
+   const playerB = ionize(new Player(b))
+
+   return component(
+      <div>
+         <p>{playerA.name}: {playerA.$points}</p>
+         <button on:click={e => playerA.addPoint()}>+</button>
+         <p>{playerB.name}: {playerB.$points}</p>
+         <button on:click={e => playerA.addPoint()}>+</button>
+      </div>
+   )
+}
+
+// absorbed ions
+
+const $username = ion('John Doe')
+
+const player = ionize({
+   name: $username,
+   points: 0
+})
+
+player.name === 'John Doe' // true
+
+$username.state = 'Bubby';
+
+player.name === 'Bubby' // true
+
+watch(player.$name, () => {
+   console.log('player name changed!')
+})
+
+
+// deep reactivity
+
+
+// selective reactivity
+
+
+// DYNAMIC RENDERING
+
+// IF series
+export function PlayingCard({ $number, $suit, faceup = false, $cardBack }) {
+   const $faceup = ion(faceup)
+
+   return component(
+      <div on:click={e => $faceup.state = !$faceup()}>
+         {If($faceup,
+            <CardFace number={$number} suit={$suit}></CardFace>
+         )}
+         {Else(
+            <CardBack design={$cardBack}></CardBack>
+         )}
+      </div>
+   )
+}
+
+// Match series
+export function WeirdDice({ $number }) {
+
+   return component(
+      <div>
+         {Match($number)}
+         {Case(1,
+            <div>1</div>
+         )}
+         {Case(2,
+            <div>II</div>
+         )}
+         {Case(3,
+            <>
+               <div>•</div>
+               <div>•</div>
+               <div>•</div>
+            </>
+         )}
+         {Case(4,
+            <div>....</div>
+         )}
+         {Case(5,
+            <div>V</div>
+         )}
+         {Case(6,
+            <div>:::</div>
+         )}
+         {Default(
+            <div>out of bounds</div>
+         )}
+      </div>
+   )
+}
+
+
+// LIST RENDERING
+
+
+export function TodoList() {
+   let id = 0
+   const todos = ionize([], { for: 'id' })
+   const $input = ion('')
+
+   function remove(index: number) {
+      todos.splice(index, 1)
+   }
+
+   function add(todo) {
+      todos.push(ionize(todo))
+   }
+
+   function submitTodo(e) {
+      e.preventDefault()
+      add({ id: ++id, text: $input() })
+      $input.state = ""
+   }
+
+   return component(
+      <div>
+         <ul>
+            {For(todos, (todo, $index) =>
+               <li >
+                  <p>
+                     {todo.$text}
+                     <button on:click={e => remove($index())}>x</button>
+                  </p>
+               </li>
+            )}
+         </ul>
+         <form on:submit={submitTodo}>
+            <input mu:value={$input}></input>
+         </form>
+      </div>
+   )
+}

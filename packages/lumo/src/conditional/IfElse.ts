@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFl
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { ion, Ion } from "@rue/quarky";
+import { $_derivation_ion, ion, Ion, ionic } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
@@ -169,7 +169,7 @@ function getConditions(statements: ConditionalStatement[]) {
 }
 
 function $ActiveIndex(conditions: Ion<Booleanny>[]) {
-   return ion(() => {
+   return ion(() =>{
       for (let i = 0; i < conditions.length; i++) {
          const $condition = conditions[i]
          if ($condition()) {
@@ -241,9 +241,11 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 
       seriesNodes.push(nodes)
 
-      watchToRender(ion(() => $activeIndex() === i), ({ current: isActive, previous: wasActive, flask }) => {
+      const $match = ion(() =>$activeIndex() === i)
+
+      watchToRender($match, ({ current: isActive, previous: wasActive, flask }) => {
          if (isActive === wasActive) return;
-         if (isActive) {
+         if ($match()) {
             queueInternalRenderTask(() => {
                showDOMNodes(nodes)
             }, flask)

@@ -127,10 +127,13 @@ class DynamicTextNode extends VineNode {
       const textNode = this.node = createTextNode($text())
       this.nodes = [textNode]
 
-      watchToRender(this.$text, ({ current, previous, flask }) => {
+      watchToRender($text, ({ current, previous, flask }) => {
          // if (current === previous) return;
          queueInternalRenderTask(() => {
-            textNode.data = toString(current);
+            textNode.data = toString($text()); 
+            //NOTE: We call the ion instead of using the current value passed in because, 
+            // the time between PRERENDER and PAINT is long enough that the value may have changed already in cases of animation
+            // Passing in current can cause weird lags as seen in the Sierpinski Triangle
          }, flask)
       });
    }

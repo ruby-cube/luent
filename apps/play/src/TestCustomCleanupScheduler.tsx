@@ -216,7 +216,7 @@ export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC 
 
    const priceNum = ion(0);
 
-   const price = ion(() => '$' + priceNum)
+   const price = ion(() =>'$' + priceNum)
 
    const priceCurrency = asCurrency(priceNum, 'USD')
 

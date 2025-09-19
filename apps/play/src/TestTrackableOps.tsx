@@ -1,9 +1,9 @@
 import { component, For } from "@rue/lumo";
-import { ion, ionize } from "@rue/quarky";
+import { ion, ionic, ionize } from "@rue/quarky";
 
 export function TestTrackableOps() {
    const list = ionize([{ count: 0 }, { count: 11 }])
-   const $filteredList = ion(() => list.filter(item => item.count > 10))
+   const $filteredList = ion(() =>list.filter(item => item.count > 10))
    const $length = ion(()=>$filteredList().length)
 
 console.log(list.filter(item => item.count > 10))

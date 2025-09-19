@@ -20,7 +20,7 @@ export class ConditionalSeries {
       // if (noElseBlock(statements)) {
       //    this.addKit(makeElseKit?.())
       // }
-      this.$activeIndex = ion(() => {
+      this.$activeIndex = ion(() =>{
          for (let i = 0; i < conditions.length; i++) {
             const $condition = conditions[i]
             if ($condition()) {

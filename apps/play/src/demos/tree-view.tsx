@@ -159,7 +159,7 @@ function TreeItemView(input: FromTag<{
       }
    })
 
-   const $isFolder = ion(() => !!item.children?.length)
+   const $isFolder = ion(() =>!!item.children?.length)
 
    function changeType() {
       if (!$isFolder()) {

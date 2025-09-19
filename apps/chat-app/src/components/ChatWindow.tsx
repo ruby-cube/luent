@@ -1,5 +1,5 @@
 import { queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
@@ -178,11 +178,11 @@ export function ChatWindow(input: FromTag<{
                            </>
                         )}
                      </div>
-                     {If($ShowNewMessageMarker(message), () => (console.log('rendering marker'),
+                     {If($ShowNewMessageMarker(message),
                         <div at:mounted={node => (console.log('*** DIV MOUNTED'), message.id === user.lastSeenMessageID && ($newMessageMarker.state = node))} data-messageID={message.id}>
                            --- new messages ---
                         </div>
-                     ))}
+                     )}
                   </>
                ))}
             </div>

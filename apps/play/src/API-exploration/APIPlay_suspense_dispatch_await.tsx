@@ -223,7 +223,7 @@ function LoadingApp() {
 const MARKDOWN_FILES = defineDBSync(() => {
    const $data = dispatch({ get: '...' }, [])
 
-   const $files = ion(() => ionize($data().map(file => new File(file.id, file.markdown)),
+   const $files = ion(() =>ionize($data().map(file => new File(file.id, file.markdown)),
       {
          remove(index: number) {
             files.splice(index, 1);
@@ -245,7 +245,7 @@ const MARKDOWN_FILES = defineDBSync(() => {
 function App(input : FromTag()) {
    const $files = fromCloud(MARKDOWN_FILES, [])
 
-   const $openedFiles = ion(() => $files().filter((file) => file.opened))
+   const $openedFiles = ion(() =>$files().filter((file) => file.opened))
 
    const $MainView = Polymorph({
       'home':

@@ -12,7 +12,7 @@ export function MarkdownApp(
    const { $markdown = ion('# Hello World') } = input
    // const $markdown = ion('Hello World')
 
-   const $output = ion(() => (marked($markdown())))
+   const $output = ion(() =>(marked($markdown())))
 
 
    // const update = (e: any) => {
@@ -53,7 +53,7 @@ export function MarkdownApp(
 
 
 
-   const $doubleCount = ion(() => $count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
 
    // watch($count, e => {
    //    console.log(e.newState)

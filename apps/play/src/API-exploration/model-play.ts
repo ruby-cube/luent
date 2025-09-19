@@ -1,7 +1,7 @@
 // normalize data
 // model factory receives data
 
-import { ion, ionize } from "@rue/quarky"
+import { ion, ionic, ionize } from "@rue/quarky"
 import { inert } from "../../../../packages/quarky/src/ionized/inert"
 import { asPion } from "../../../../packages/quarky/src/ion/x_AtomicPion"
 
@@ -29,7 +29,7 @@ const $frogWithGetter = ionize({
 })
 
 const $frogWithDerived = ionize({
-    name: ion(() => $asFroggy.name)
+    name: ion(() =>$asFroggy.name)
 })
 
 const $frogWithPropIon = ionize({

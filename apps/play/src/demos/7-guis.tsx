@@ -1,7 +1,7 @@
 
 import { atMounted, For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
-import { $$, ion, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
+import { $$, ion, ionic, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
 import { quarkOf } from "../../../../packages/quarky/src/Quark"
 import { getFlask } from "@rue/flask"
 
@@ -24,7 +24,7 @@ export function SevenGUIs() {
 //FIX:
 function TemperatureApp() {
    const $c = ion(0)
-   const $f = ion(() => $c() * (9 / 5 + 32),
+   const $f = ion(() =>$c() * (9 / 5 + 32),
       {
          // set state(v: number) {
          //    $c.state = (v - 32) * (5 / 9)
@@ -57,7 +57,7 @@ function FlightBooker() {
    const $departureDate = ion(dateToString(new Date()))
    const $returnDate = ion($departureDate())
 
-   const $isReturn = ion(() => $flightType() === 'return flight')
+   const $isReturn = ion(() =>$flightType() === 'return flight')
 
    const $canBook = ion(() =>
       !$isReturn() ||
@@ -211,7 +211,7 @@ export function CRUDApp() {
    // console.log('before', Object.getOwnPropertyDescriptors(proxyProto))
    console.log('before', proxyProto)
 
-   const $filteredNames = ion(() => {
+   const $filteredNames = ion(() =>{
       const res = names.filter((n) =>
          n.toLowerCase().startsWith($prefix().toLowerCase())
       )

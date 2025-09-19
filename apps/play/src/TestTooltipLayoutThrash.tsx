@@ -1,5 +1,5 @@
 import { component, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
-import { ion } from '@rue/quarky';
+import { ion, ionic } from '@rue/quarky';
 
 
 export function TestTooltip() {
@@ -113,7 +113,7 @@ export function Tooltip(input: FromTag<{
 
    const shiftX = targetRect.left
 
-   const $shiftY = ion(() => {
+   const $shiftY = ion(() =>{
       const height = $height()
       if (height === undefined) return 0;
       const y = targetRect.top - height;

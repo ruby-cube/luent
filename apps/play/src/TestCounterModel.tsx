@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import { ion, ionicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
+import { ion, ionic, ionicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
 
 //TODO:
 // [x] private this access in methods and typing
@@ -46,7 +46,7 @@ export function TestMutableCounter() {
 
    console.log('is it in count', 'increment' in count)
 
-   const $doubleCount = ion(() => count.value * 2)
+   const $doubleCount = ion(() =>count.value * 2)
 
    function increment() {
       count.value++
@@ -100,7 +100,7 @@ export function TestEncapsulatedCounter() {
 
    console.log('is it in count', 'increment' in count)
 
-   const $doubleCount = ion(() => count.value * 2)
+   const $doubleCount = ion(() =>count.value * 2)
 
    function increment() {
       count.value++
