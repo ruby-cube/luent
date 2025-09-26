@@ -6,7 +6,7 @@
 
 import { component, FromTag, NodeRef, Slot } from "@rue/lumo";
 import { MorphicNode as Polymorph } from "../../../../packages/lumo/src/conditional/Polymorph";
-import { FiniteIon, finiton, ion } from "@rue/quarky";
+import { FiniteState, finiton, ion } from "@rue/quarky";
 
 // data
 type User = {
@@ -102,7 +102,7 @@ export function FBApp() {
       }
    })
 
-   const $chatPopup = FiniteIon({
+   const $chatPopup = FiniteState({
       'closed': {
          open: () => 'opened'
       },

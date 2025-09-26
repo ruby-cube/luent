@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation_ion } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -189,7 +189,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const ion = attributes['mu:checked'];
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
-   attributes.checked = $_derivation_ion(() => ion() === radioValue);
+   attributes.checked = $_derivation(() => ion() === radioValue);
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
@@ -204,6 +204,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    const ion = attributes['mu:value'];
    delete attributes['mu:value'];
    attributes.value = ion;
+   console.log('bindTextInput, value', ion)
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
@@ -234,7 +235,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    const ion = attributes['mu:value'];
    const flask = getFlask()
    watchToRender(ion, ({current, previous}) => {
-      if (current === previous) return;
+      // if (current === previous) return;
       queueInternalRenderTask(() => {
          element.value = toString(ion())
       }, flask)
@@ -287,14 +288,13 @@ function setUpInputListener(element: Element, ion: { state: any } | { set: (valu
 function updateIonWithInput(ion: { state: any } | { set: (value: any) => any }, e: Event, key: string = 'value') {
    if (isManagedDerivation(ion) && 'set' in ion) {
       ion.set(
-         //@ts-expect-error
-         e.target[key]
+         e.currentTarget?.[key]
       )
    }
    else if ('state' in ion) {
       ion.state =
          //@ts-expect-error
-         e.target[key];
+         e.currentTarget?.[key];
    }
    else {
       throw new Error('invalid two-way binding')
@@ -320,7 +320,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
          watchToRender(value, ({ current, previous }) => {
-            if (current === previous) return;
+            // if (current === previous) return;
             queueInternalRenderTask(() => {
                setAttribute(node, _key, value())
             }, flask)
@@ -537,7 +537,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
    for (const entry of classes) {
       if (isIon(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
-            if (current === previous) return;
+            // if (current === previous) return;
             queueInternalRenderTask(() => {
                if (previous) removePreviousClasses(previous, classList)
                if (entry()) addClasses(entry(), classList, flask)

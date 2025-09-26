@@ -1,7 +1,7 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { debug, isObject } from "@rue/utils";
 import { InertCollection, InertCollectionType, ModelQuark } from "./ModelQuark";
-import { BasicInertItemCollection, Inert, IsInert, isInert } from "./inert";
+import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { createIonizedModel, getIonizedModel, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
@@ -99,7 +99,7 @@ type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args:
  * Wrap the return of a method of an ionizable class with this type helper in order to 
  * propagate any deep ionization that has been defined in the class's enlistIonizedMethods config
  */
-export type IonizeBy<H, T> = IsIonized<H> extends true ? 
+export type IonizeBy<H, T> = IsIonized<H> extends true ?
    MaybeIonize<T> : T
 
 export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T
@@ -198,20 +198,20 @@ function getExistingIonizedModel(target: object, markMap?: object) {
    return existing
 }
 
-export function ionize<T, MARKS>(target: T & object, markMap?: MARKS & MarkMap): MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> {
+export function ionize<T, MARKS>(target: T & object, options?: IonizeOptions): MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> {
    //TODO: store stack trace
-   return <unknown>getExistingIonizedModel(target, markMap) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> ??
-      <unknown>ionizeModel(target, markMap) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>>
+   return <unknown>getExistingIonizedModel(target, options) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> ??
+      <unknown>ionizeModel(target, options) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>>
 }
 
 
-function _withInertItems<T, M>(target: T & object): M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>> {
-   return ionizeModel(target, InertCollection.ITEMS) as M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>>
-}
+// function _withInertItems<T, M>(target: T & object): M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>> {
+//    return ionizeModel(target, InertCollection.ITEMS) as M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>>
+// }
 
-_withInertItems['~markItemsInert'] = true as const
+// _withInertItems['~markItemsInert'] = true as const
 
-export { _withInertItems as withInertItems }
+// export { _withInertItems as withInertItems }
 
 //TODO:
 // export function withInertKeys<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<M>>, M> : Ionized<ToRawItems<T>> {
@@ -305,14 +305,15 @@ export function isIonizedModel(value: any): value is IonizedModel {
    return hasQuark(value) && quarkOf(value) instanceof ModelQuark;
 }
 
-export function ionizeModel(target: object, markMap: MarkMap | InertCollectionType | undefined) {
+
+export function ionizeModel(target: object, options: IonizeOptions) {
    if (!isObject(target)) return target;
-      // throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
+   // throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
-      if (markMap) debug.warn(`CASE RESEARCH: Target is ${isIonizedModel(target) ? 'ionized model' : isIon(target) ? 'ion' : 'inert'}. Cannot extend using ionize()`)
+      if (options) debug.warn(`CASE RESEARCH: Target is ${isIonizedModel(target) ? 'ionized model' : isIon(target) ? 'ion' : 'inert'}. Cannot extend using ionize()`)
       return target
    }
-   return createIonizedModel(target, markMap)
+   return createIonizedModel(target, options)
 }
 
 export function isIonKey(key: PropertyKey): key is string {

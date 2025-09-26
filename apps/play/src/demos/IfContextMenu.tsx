@@ -1,5 +1,5 @@
 import { component, For, If, listen, NodeRef, Portal, Style } from "@rue/lumo"
-import { FiniteIon, ion, watch } from "@rue/quarky"
+import { FiniteState, ion, watch } from "@rue/quarky"
 
 //FIX: 
 // [] conditional rendering with <o--portal>
@@ -45,7 +45,7 @@ export function Sidebar() {
 function IfContextMenu() {
    const $container = NodeRef('div')
 
-   const $menu = FiniteIon({
+   const $menu = FiniteState({
       'opened': {
          close: () => 'closed'
       },

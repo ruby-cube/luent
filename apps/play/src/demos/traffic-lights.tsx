@@ -1,13 +1,13 @@
 import { component, Style } from "@rue/lumo";
 import {
-   FiniteIon,
+   FiniteState,
    ion,
    ionic,
 } from "@rue/quarky";
 
 export function TrafficLight() {
 
-   const $power = FiniteIon({
+   const $power = FiniteState({
       on: {
          switch: () => "off",
       },
@@ -21,13 +21,13 @@ export function TrafficLight() {
       },
    });
 
-   const $state = FiniteIon({
+   const $state = FiniteState({
       on: { switch: () => "sleep" },
       awake: { switch: () => "sleep" },
       sleep: { switch: () => "awake" },
    });
 
-   const $trafficLight = FiniteIon({
+   const $trafficLight = FiniteState({
       red: {
          "after:2000": () => "yellow",
          change: () => "yellow",

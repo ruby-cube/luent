@@ -1,48 +1,65 @@
 import { component, Else, EventHandler, FromTag, If, NodeRef, Style } from "@rue/lumo";
-import { FiniteIon, Ion, ion } from "@rue/quarky";
+import { FiniteState, Ion, ion, ionize } from "@rue/quarky";
 import "./reset.css"
 
+const $count = ion(0)
+
+const obj = {
+   $count,
+   frog: ion(0)
+}
+
+const _$frog = ion(0)
+
+const obj2 = {
+   get frog() {
+      return _$frog()
+   },
+   set frog(v) {
+      _$frog.state = v
+   }
+}
 
 export function VideoPlayer() {
 
    const $video = NodeRef("video")
 
-   const $player = FiniteIon({
-      "loading": {
-         init: () => "x:ready",
-         error: () => "x:failure"
+   const player = FiniteState({
+      "isLoading": {
+         init: () => "x:isReady",
+         error: () => "x:hasFailed"
       },
-      "x:ready": {},
-      "x:failure": {}
+      "x:isReady": {},
+      "x:hasFailed": {}
    })
 
-   const $track = FiniteIon({
-      "paused": {
-         play: () => "playing"
+   const track = FiniteState({
+      "isPaused": {
+         play: () => "isPlaying"
       },
-      "playing": {
-         pause: () => "paused",
-         end: () => "ended"
+      "isPlaying": {
+         pause: () => "isPaused",
+         end: () => "hasEnded"
       },
-      "ended": {
-         play: () => "playing"
+      "hasEnded": {
+         play: () => "isPlaying"
       }
    })
 
    let duration = 0
 
-   $player.on("init", () => {
+   player.on("init", () => {
       duration = $video()?.duration ?? 0
    })
 
-   $track.on("play", () => {
+   track.on("play", () => {
       const video = $video()
       if (!video) return;
-      if ($track.is("ended")) $elapsedTime.state = video.currentTime = 0;
+      if (track.is("ended")) $elapsedTime.state = video.currentTime = 0;
       $video()?.play()
    })
 
-   $track.on("pause", () => {
+   track.on("pause", () => {
       $video()?.pause()
    })
 
@@ -60,49 +77,80 @@ export function VideoPlayer() {
    function setTime(width: number, x: number) {
       const video = $video()!
       const time = video.currentTime = video.duration * x / width
-      const state = $track()
-      if (state === "playing") $track.apply("pause")
+      if (track.is('playing')) {
+         track.apply("pause")
+         setTimeout(() => track.apply("play"), 0)
+      }
       $elapsedTime.state = time
-      if (state === "playing") setTimeout(() => $track.apply("play"), 0)
    }
 
-   const $sound = FiniteIon({
-      "on": { toggle: () => "muted" },
-      "muted": { toggle: () => "on" }
+   const sound = FiniteState({
+      "isOn": { toggle: () => "isMuted" },
+      "isMuted": { toggle: () => "isOn" }
    })
 
-   $player.activate(() => "loading")
+   player.activate(() => "isLoading")
       .nest({
-         "x:ready": [
-            $track.init(() => "paused"),
-            $sound.init(() => "on")
+         "x:isReady": [
+            track.init(() => "isPaused"),
+            sound.init(() => "isOn")
          ]
       })
+
+   const videoPlayer = ionize({
+      player
+   })
+   // {
+   //    init() {
+   //       player.apply('init')
+   //    },
+   //    end() {
+   //       track.apply('end')
+   //    },
+   //    play() {
+   //       track.apply('play')
+   //    },
+   //    pause() {
+   //       track.apply('pause')
+   //    },
+   //    errorOut() {
+   //       player.apply('error')
+   //    },
+   //    isReady() {
+   //       player.is('x:ready')
+   //    },
+   //    isPaused() {
+   //       track.is('paused')
+   //    },
+   //    isPlaying() {
+   //       track.is('playing')
+   //    },
+   // }
 
    return component(
       <>
          <div class="container">
             <video
                ref={$video}
-               on:canplay={e => $player.apply("init")}
+               on:canplay={e => player.apply("init")}
                on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
-               on:ended={e => $track.apply("end")}
-               on:error={e => $player.apply("error")}
+               on:ended={e => track.apply("end")}
+               on:error={e => player.apply("error")}
             >
                <source src="/src/video-player-dance.mp4" type="video/mp4" />
             </video>
 
-            {If(($player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
+            {If((player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
                <div>
-                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={($track.is("paused"))}
+                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={(track.is("paused"))}
                      on:click={reClickElapsedBar}
                   />
                   <mount-remount>
-                     {If(($track.is("playing")),
-                        <button on:click={e => $track.apply("pause")}>‖</button>
+                     {If((track.is("playing")),
+                        <button on:click={e => track.apply("pause")}>‖</button>
                      )}
                      {Else(
-                        <button on:click={e => $track.apply("play")}>►</button>
+                        <button on:click={e => track.apply("play")}>►</button>
                      )}
                   </mount-remount>
                   <Timer elapsed={$elapsedTime} duration={duration} />

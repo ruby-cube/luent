@@ -5,6 +5,47 @@ import { component, POSTRENDER, PRERENDER } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
 import { sub } from "date-fns"
 
+
+const $count = ion(0)
+
+const $doubleCount = ion(() => $count * 2)
+
+const fullname = ionize({
+   state: ($count * 2),
+   increment() {
+      $count++
+   },
+   decrement() {
+      $count--
+   }
+})
+
+function fetchUser($id) {
+   return Suspense(async () => {
+      const res = await fetch(`http://${$userId}`)
+      return res.json()
+   })
+}
+
+
+
+const videoPlayer = FiniteState({
+   'playing': { pause: () => 'paused' },
+   'paused': { play: () => 'playing' }
+})
+
+const door = Suspense(fetchDoor)
+
+const $userId = ion('')
+
+const user = Suspense(async () => {
+   const res = await fetchUser($userId)
+   return res.json()
+})
+
+
+
+
 export function App() {
 
    return component(
@@ -27,6 +68,27 @@ export function Counter() {
    )
 }
 
+export function Counter() {
+
+   const count = ionize({
+      value: 0,
+      increment() {
+         $$: this.value++
+      },
+      decrement() {
+         $$: this.value--
+      }
+   })
+
+   return component(
+      <div>
+         <p>{(count)}</p>
+         <button on:click={e => { count.increment() }}>increment</button>
+         <button on:click={e => { count.decrement() }}>decrement</button>
+      </div>
+   )
+}
+
 
 // REACTIVITY
 
@@ -42,6 +104,10 @@ export function Counter() {
 
    return component(
       <div>
+         <p>{(fullname.$)}</p>
+
+         <p>{(fullname.value)}</p>
+
          <p>{($count)}</p>
          <button on:click={e => { $$: $count++ }}>increment</button>
          <button on:click={e => { $$: $count-- }}>decrement</button>

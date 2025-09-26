@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, ion, update, ThrottledHover, ionize, $_derivation_ion, ionic } from "@rue/quarky";
+import { Animation, Interval, ion, update, ThrottledHover, ionize, $_derivation, ionic } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 //TODO:

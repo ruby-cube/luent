@@ -6,6 +6,7 @@ let t; //TODO: import from @babel/types
 export default function lumoPreTransform({ types }) {
    console.log('lumo pre transform')
    t = types;
+
    return {
       name: "lumo-pre-transform",
       visitor: {
@@ -25,6 +26,11 @@ export default function lumoPreTransform({ types }) {
          //       }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
          //    }
          // },
+         Identifier: {
+            enter(path) {
+               transformIdentifier(path)
+            }
+         },
          CallExpression: {
             enter(path) {
                transformTemplateCallExpressions(path)
@@ -48,6 +54,75 @@ export default function lumoPreTransform({ types }) {
          }
       }
    };
+}
+
+function isStateRefName(str) {
+   return str.startsWith('$')
+}
+
+function isAssignee(path) {
+   return t.isVariableDeclarator(path.parent) && path.node === path.parent.id
+}
+
+function isFunctionName(path) {
+   return t.isFunctionDeclaration(path.parent) && path.node === path.parent.id
+}
+
+function isCallee(path) {
+   return t.isCallExpression(path.parent) && path.node === path.parent.callee
+}
+
+function isReassignee(path) {
+   return (t.isAssignmentExpression(path.parent) && path.node === path.parent.left) || t.isUpdateExpression(path.parent) && path.node === path.parent.argument
+}
+
+function isInMemberExpression(path) {
+   return t.isMemberExpression(path.parent)
+}
+
+function isPropertyKey(path) {
+   return t.isObjectProperty(path.parent) && path.node === path.parent.key
+}
+
+function isDestructuredAlias(path) {
+   return t.isObjectPattern(path.parentPath.parent) && path.node === path.parent.value
+}
+
+function isInImportDeclaration(path) {
+   return t.isImportDeclaration(path.parentPath.parent)
+}
+
+function isParameter(path) {
+   return t.isArrowFunctionExpression(path.parent) || t.isFunctionDeclaration(path.parent) || t.isClassMethod(path.parent) || path.parent.type === 'TSParameterProperty'
+}
+
+function transformIdentifier(path) {
+   if (!isStateRefName(path.node.name)
+      || isParenthesized(path.node)
+      || isAssignee(path)
+      || isPropertyKey(path)
+      || isDestructuredAlias(path)
+      || isCallee(path)
+      || isFunctionName(path)
+      || isParameter(path)
+      || isInImportDeclaration(path)
+      || isInMemberExpression(path)) {
+      return;
+   }
+   if (isReassignee(path)) {
+      transformReassignee(path)
+      return;
+   }
+   transformStateRef(path)
+}
+
+function transformReassignee(path) {
+   path.replaceWith(t.memberExpression(t.identifier(path.node.name), t.identifier('state')))
+   //TODO: what if it's ambiguous?
+}
+
+function transformStateRef(path) {
+   path.replaceWith(t.callExpression(path.node, []))
 }
 
 const conditionalStatements = {
@@ -331,6 +406,7 @@ function transformJSXChildren(childrenPath) {
 }
 
 function transformIfDerivationExpression(path) {
+   console.log('DERIVATION?', path.node)
    if (isDerivationShorthand(path)) {
       // transformLiterals(path.get('right'))
       path.replaceWith(toDerivationFunction(path.node))
@@ -466,9 +542,9 @@ function transformTemplateArgToRenderFunction(path) {
 
 let derivationCount = 0;
 
-//TODO: import $_derivation_ion
+//TODO: import $_derivation
 function toDerivationFunction(node) {
-   return t.callExpression(t.identifier('$_derivation_ion'), [t.arrowFunctionExpression([], t.blockStatement([
+   return t.callExpression(t.identifier('$_derivation'), [t.arrowFunctionExpression([], t.blockStatement([
       t.returnStatement(node) // Return the original expression
    ]))])
    // return t.functionExpression(

@@ -38,7 +38,7 @@ import { QUARK } from "../Quark";
 // })
 
 
-// const $trafficLight = FiniteIon('red', {
+// const $trafficLight = FiniteState('red', {
 //    'red': {
 //       // 'on:enter': $ => { this.onTimeout(500, () => $.change()) },
 //       'after:500': () => 'green',
@@ -160,8 +160,8 @@ type A = keyof ({ a: boolean } | { b: boolean })
 
 //TODO: should on:enter apply to intitial state?
 type StateDefinition<S extends _FiniteStates = _FiniteStates> = {
-   'on:enter'?: (this: FiniteIon) => void
-   'on:exit'?: (this: FiniteIon) => void
+   'on:enter'?: (this: FiniteState) => void
+   'on:exit'?: (this: FiniteState) => void
 } & { [key: string | symbol]: Transition<S> }
 
 type AllKeys<T> = T extends T ? keyof T : never;
@@ -170,7 +170,7 @@ type State<S extends _FiniteStates> = Exclude<keyof S, typeof ANY_STATE | number
 type TransitionKey<S extends _FiniteStates> = Exclude<AllKeys<S[keyof S]>, number | symbol>
 
 
-export type FiniteIon<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = {
+export type FiniteState<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = {
    (): State<S>
    is: (state: State<S>) => boolean
    on: (transition: TransitionKey<S>, task: () => void) => void
@@ -184,7 +184,7 @@ export type FiniteIon<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M
 } & M
 
 type Nested = {
-   finiton: FiniteIon,
+   finiton: FiniteState,
    initializer: Initializer,
 }
 
@@ -196,8 +196,8 @@ type Methods = { [key: string | symbol]: (...args: unknown[]) => unknown }
 type TransitionEvent = { state: string | undefined, prevState: string | undefined }
 
 type Hooks = {
-   onEnter: ((this: FiniteIon) => void) | undefined;
-   onExit: ((this: FiniteIon) => void) | undefined;
+   onEnter: ((this: FiniteState) => void) | undefined;
+   onExit: ((this: FiniteState) => void) | undefined;
    afterEnter: Transition | undefined
 }
 
@@ -210,14 +210,14 @@ export function withTimeout(ms: number, transition: Transition) {
    return transition;
 }
 
-export function FiniteIon<S extends FiniteStates, M extends Methods>(states: S, methods?: M): FiniteIon<S, M> {
+export function FiniteState<S extends FiniteStates, M extends Methods>(states: S, methods?: M): FiniteState<S, M> {
    const $currentState = ion(undefined as undefined | string);
 
    let activated = false;
 
-   const $state = (() => $currentState()) as unknown as FiniteIon
+   const $state = (() => $currentState()) as unknown as FiniteState
 
-   // }) as unknown as FiniteIon
+   // }) as unknown as FiniteState
    //@ts-expect-error
    $state[QUARK] = { inert: false }
    $state.is = is
@@ -414,7 +414,7 @@ export function FiniteIon<S extends FiniteStates, M extends Methods>(states: S, 
       }, transition.timeout ?? 0)
    }
 
-   return $state as FiniteIon
+   return $state as FiniteState
 }
 
 

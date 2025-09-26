@@ -59,17 +59,17 @@ import { isObject } from "@rue/utils"
 // }
 
 
-function ionizedDecoy(target: AnyObject) {
-   return new Proxy(target, {
-      get(target, key) {
-         return maybeIonize(target[key])
-      },
-      set(target, key, value) {
-         target[key] = toRaw(value)
-         return true;
-      }
-   })
-}
+// function ionizedDecoy(target: AnyObject) {
+//    return new Proxy(target, {
+//       get(target, key) {
+//          return maybeIonize(target[key])
+//       },
+//       set(target, key, value) {
+//          target[key] = toRaw(value)
+//          return true;
+//       }
+//    })
+// }
 
 function rawDecoy(target: AnyObject) {
    return new Proxy(target, {

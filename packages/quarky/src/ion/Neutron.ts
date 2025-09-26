@@ -1,9 +1,9 @@
 import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
-import { maybeIonize } from "./AtomicIon";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { ionize } from "../ionized/ionize";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
+import { maybeIonize } from "../ionized/IonizedModel";
 
 
 export function neutron<T, M>(initialState: T, props?: M & object): MutableIon<T> & M {

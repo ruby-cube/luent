@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel, isIonKey, toRaw } from "./ionize";
+import { Ionized, isIonizedModel, isIonKey, toRaw } from "./ionize";
 import { __DEV__asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
@@ -13,7 +13,7 @@ import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { isWatchable, Watchable } from "../reactivity/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, OpType, initModelUpdate, useIonicOp } from "./IonizedMethods";
-import { isInert } from "./inert";
+import { inert, isInert } from "./inert";
 import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
 import { isTracking, trackParticle } from "../compound/Compound";
 import { isIntegerKey } from "./IonizedArray";
@@ -306,12 +306,19 @@ function toIonKey(key: ProxyKey, target: AnyObject) {
    return key;
 }
 
+type MarkMap = { [key: PropertyKey]: typeof inert | MarkMap }
+
+export type IonizeOptions = { mark?: MarkMap, idKey?: string }
+
+export const EACH = Symbol('each')
+
+
 //TODO:
 // - I really need to think through if property changes should trigger the whole model
 // - adding and deleting properties
 export function createIonizedModel(
    initialTarget: AnyObject,
-   inertSchema: AnyObject | undefined,
+   options: IonizeOptions,
 ) {
 
    const { clone, isAbsorbedIon } = getIonizedConfig(initialTarget)
@@ -428,11 +435,12 @@ export function createIonizedModel(
                                  ionKey,
                                  state,
                                  modelQuark,
-                                 propertyDescriptor
+                                 propertyDescriptor,
+                                 options?.mark?.[isIntegerKey(stateKey) ? EACH : stateKey]
                               )
                               return pion();
                            }
-                           return maybeIonize(_value)
+                           return maybeIonize(_value, true, options?.mark?.[isIntegerKey(stateKey) ? EACH : stateKey])
                         },
                         set(v) {
                            _value = v
@@ -606,6 +614,17 @@ function triggerKeysChange(quark: ModelQuark, key: ProxyKey, update: Update) {
 //    )
 // }
 
+function isInertMark(mark: typeof inert | MarkMap | undefined): mark is typeof inert {
+   return mark === inert
+}
+
+export function maybeIonize<T>(value: T, ionized: boolean, mark: typeof inert | MarkMap | undefined): T extends AnyObject ? Ionized<T> : T {
+   if (isIonizedModel(value) || !ionized || !isObject(value) || isInert(value) || isInertMark(mark)) {
+      if (mark === inert) inert(value);
+      return value as T extends AnyObject ? Ionized<T> : T;
+   }
+   return (ionizedModels.get(value) ?? createIonizedModel(value, { mark })) as T extends AnyObject ? Ionized<T> : T
+}
 
 
 function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion, ionKey: ProxyKey | undefined) {
@@ -686,12 +705,13 @@ function initializePion(
    ionKey: string | undefined,
    state: ModelState,
    quark: ModelQuark,
-   propertyDescriptor: PropertyDescriptor
+   propertyDescriptor: PropertyDescriptor,
+   mark: typeof inert | MarkMap | undefined
 ) {
    if (ionKey) {
-      return initializePionAccess(proxyProto, stateKey, ionKey, state, quark, propertyDescriptor)
+      return initializePionAccess(proxyProto, stateKey, ionKey, state, quark, propertyDescriptor, mark)
    } else {
-      return createPion(proxyProto, stateKey, state, quark, propertyDescriptor)
+      return createPion(proxyProto, stateKey, state, quark, propertyDescriptor, mark)
    }
 }
 
@@ -701,9 +721,10 @@ function initializePionAccess(
    ionKey: string,
    state: ModelState,
    quark: ModelQuark,
-   propertyDescriptor: PropertyDescriptor
+   propertyDescriptor: PropertyDescriptor,
+   mark: typeof inert | MarkMap | undefined
 ) {
-   const ion = getPion(proxyProto, stateKey) ?? createPion(proxyProto, stateKey, state, quark, propertyDescriptor)
+   const ion = getPion(proxyProto, stateKey) ?? createPion(proxyProto, stateKey, state, quark, propertyDescriptor, mark)
    Object.defineProperty(proxyProto, ionKey, {
       enumerable: false,
       configurable: propertyDescriptor.configurable,
@@ -718,10 +739,11 @@ function createPion(
    key: ProxyKey,
    state: ModelState,
    quark: ModelQuark,
-   propertyDescriptor: PropertyDescriptor
+   propertyDescriptor: PropertyDescriptor,
+   mark: typeof inert | MarkMap | undefined
 ) {
    const propDef = getIonizedMemberDef(state.active, key)
-   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), true, quark, propDef?.getterTask, propDef?.setterTask))
+   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), true, mark, quark, propDef?.getterTask, propDef?.setterTask))
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
       configurable: propertyDescriptor.configurable,
@@ -893,13 +915,7 @@ export function getIonizedModel(value: unknown) {
 
 
 
-export function maybeIonize(value: any) {
-   if (!isObject(value) || isInert(value)) {
-      return value;
-   }
-   if (isIonizedModel(value)) return value;
-   return ionizedModels.get(value) ?? createIonizedModel(value)
-}
+
 
 
 export function isMethod(value: any): value is Function {

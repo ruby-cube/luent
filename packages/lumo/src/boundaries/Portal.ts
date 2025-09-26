@@ -45,15 +45,16 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
    const nodes = processJSXOutput(render())
 
    setUpNodeVine(nodes, element)
+   const flask = getFlask()
 
    queueInternalRenderTask(() => {
       mountDOMNodes(nodes, element)
-   }, getFlask())
+   }, flask)
 
    atUnmount((final) => {
       queueInternalRenderTask(() => {
          removeDOMNodes(nodes)
-      }, getFlask())
+      }, flask)
    })
 
    atRemounted(() => {

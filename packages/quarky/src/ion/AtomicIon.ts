@@ -1,5 +1,5 @@
 import { emitSignal } from "../debug/debug";
-import { ionize, Ionized, isIonizedModel } from "../ionized/ionize";
+import { ionize, Ionized, isIonizedModel, MarkMap } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
@@ -7,11 +7,13 @@ import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { trigger, Watchable, WatchedAtom } from "../reactivity/WatchedAtom";
 import { Mutable } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
-import {  isObject } from "@rue/utils";
+import { isObject } from "@rue/utils";
 import { Ion, MutableIon } from "./Ion";
 import { ModelQuark } from "../ionized/ModelQuark";
 import { trackParticle } from "../compound/Compound";
-import { Update , isLazyUpdate, initUpdate} from "../reactivity/UpdateCycle";
+import { Update, isLazyUpdate, initUpdate } from "../reactivity/UpdateCycle";
+import { inert, isInert } from "../ionized/inert";
+import { maybeIonize } from "../ionized/IonizedModel";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -40,16 +42,6 @@ export type $AtomicIonState =
    }
 
 
-/** 
- * INTERNAL 
- * For reactive ions only.
- * */
-// export type AtomicIonQuark = QuarkOf<$AtomicIonState>
-
-export function maybeIonize<T>(value: T, ionized: boolean): T extends AnyObject ? Ionized<T> : T {
-   if (isIonizedModel(value)) return value as T extends AnyObject ? Ionized<T> : T;
-   return (isObject(value) && ionized ? ionize(value) : value) as T extends AnyObject ? Ionized<T> : T
-}
 
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
@@ -239,6 +231,7 @@ export class AtomicIonQuark extends AtomicQuark {
    constructor(
       public state: IState,
       public ionized: boolean,
+      public mark?: typeof inert | MarkMap | undefined,
       public modelQuark?: ModelQuark,
       public getterTask?: () => void,
       public setterTask?: () => void
@@ -256,6 +249,8 @@ export function createAtomicIon(
 ) {
    const $state = getState.bind(quark) as $AtomicIonState
    $state[QUARK] = quark
+   //@ts-expect-error
+   $state.displayName = 'getState'
 
    if (props) {
       if ('state' in props) {
@@ -328,9 +323,9 @@ function getState(this: AtomicIonQuark) {
    this.getterTask?.()
    // if (this.state.key === 'length' && this.modelQuark) trackParticle(this.modelQuark)
    if (isLazyUpdate()) {
-      return maybeIonize(this.state.pending, this.ionized); //TODO: inertSchema
+      return maybeIonize(this.state.pending, this.ionized, this.mark); //TODO: inertSchema
    }
-   return maybeIonize(this.state.current, this.ionized);
+   return maybeIonize(this.state.current, this.ionized, this.mark);
 }
 
 export function setState(this: AtomicIonQuark, value: unknown) {
@@ -338,7 +333,8 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    const state = this.state
 
    // const oldState = state.previous;
-   const newState = maybeIonize(value, this.ionized)
+   const newState = value
+   // maybeIonize(value, this.ionized)
 
    // console.log('#$% oldstate', oldState)
    // console.log('#$% newState', newState)
@@ -347,7 +343,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    // }
 
    const update = initUpdate()
-      // set state
+   // set state
    if (update.lazy) {
       state.pending = newState
       // state.previous = newState
@@ -379,7 +375,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    // queue change/record mutation
    // update.onComplete(() => {
    // })
-   
+
    // update.onCancel(() => {
    // })
 

@@ -2,12 +2,12 @@ import { debug, isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
 import { createManagedDerivation } from "../ionic/DerivationIon";
 import { AtomicIonQuark, AtomicQuark, createAtomicIon, IONIZED, IonState } from "./AtomicIon";
-import { maybeIonize } from "../ionized/IonizedModel";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
 import { Inert, IsInert } from "../ionized/inert";
 import { initializeSnapshots } from "../ionized/TimeTraveler";
 import { hasQuark, QUARK } from "../Quark";
+import { IonizeOptions, maybeIonize } from "../ionized/IonizedModel";
 
 /* API */
 export type Ion<T = unknown> = () => T
@@ -35,15 +35,39 @@ export function isIon(value: unknown): value is Ion {
    // value.length === 0
 }
 
-export function $_derivation_ion(fn: () => unknown) {
+export function $_derivation(fn: () => unknown) {
    //@ts-expect-error
-   fn[QUARK] = {inert: false};
+   fn[QUARK] = { inert: false };
+   //@ts-expect-error
+   fn.displayName = 'getState'
    return fn
 }
 
 //@ts-expect-error
-window.$_derivation_ion = $_derivation_ion;
+window.$_derivation = $_derivation;
 
+//@ts-expect-error
+window.$_value = $_value;
+
+function $_value(value: any) {
+   return $_is_ref(value) ? value() : value;
+}
+
+//@ts-expect-error
+window.$_is_mutable = $_is_mutable;
+
+function $_is_mutable(value: Function) {
+   return 'state' in value
+}
+
+//@ts-expect-error
+window.$_is_ref = $_is_ref;
+
+function $_is_ref(value: AnyObject) {
+   return isFunction(value) &&
+      //@ts-expect-error
+      value.displayName === 'getState'
+}
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
    return (isIon(value) ? value : neutron(value)) as T extends Ion ? T : Ion<T>
@@ -106,7 +130,7 @@ export function ion<
    T,
    M
 >(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { state: T }>): AsIon<T, M> {
-   return asIon(initialState, false, props) as AsIon<T, M>
+   return asIon(initialState, false, undefined, props) as AsIon<T, M>
 }
 
 
@@ -125,13 +149,11 @@ ion.ionize = createIonizedIon
 // createMutableIonizedIon.mu = createDeepMutableIonizedIon
 
 
-
-
 function createIonizedIon<
    T,
    M
->(initialState: T, methods?: M & Methods): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> {
-   return asIon(initialState, IONIZED, methods) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> //TODO: add inert marks
+>(initialState: T, options?: IonizeOptions & { set?: Function, get?: Function }): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> { //TODO: inert marks
+   return asIon(initialState, IONIZED, options) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> //TODO: add inert marks
 }
 
 // function createDeepMutableIonizedIon<
@@ -197,6 +219,7 @@ function createIonizedIon<
 function asIon(
    initialState: unknown | (() => unknown),
    ionized: boolean,
+   options?: IonizeOptions,
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
@@ -204,7 +227,7 @@ function asIon(
    }
 
    if (isIon(initialState)) return initialState
-   return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new IonState(ionized ? maybeIonize(initialState) : initialState), ionized), props)) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new IonState(initialState), ionized, options?.mark), props)) // TODO: add inert mark map
 }
 
 export const ionic = ion

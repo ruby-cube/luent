@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFl
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { $_derivation_ion, ion, Ion, ionic } from "@rue/quarky";
+import { $_derivation, ion, Ion, ionic } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";

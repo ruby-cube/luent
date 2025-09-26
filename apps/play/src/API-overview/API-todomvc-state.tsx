@@ -24,14 +24,14 @@ export function TodoMVC() {
    }
 
    // get state
-   let $todos: Ionized<Inert<Todo>[]> = ion.ionize([], { mark: { [EACH]: inert }, idKey: 'id' })
-   let $view: keyof typeof filters = ion('all')
-   let $editedTodo: Todo | null = ion(null)
+   let todos: Ionized<Inert<Todo>[]> = ion.ionize([], { mark: { [EACH]: inert }, idKey: 'id' })
+   let view: keyof typeof filters = ion('all')
+   let editedTodo: Todo | null = ion(null)
 
    // derived state
-   const $filteredTodos = ion(() => filters[$view]($todos))
+   const $filteredTodos = ion(() => filters[view.value](todos.value))
 
-   const $remaining = ion(() => filters.active($todos).length)
+   const remaining = ion(() => filters.active(todos.value).length)
 
    // handle routing
    window.addEventListener('hashchange', onHashChange)
@@ -39,17 +39,17 @@ export function TodoMVC() {
 
    // persist state
    ionicTask(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify($todos))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos.value))
    })
 
    function toggleAll(e: RadioInputEvent) {
-      $todos.forEach(todo => { todo.completed = e.target.checked })
+      todos.value.forEach(todo => { todo.completed = e.target.checked })
    }
 
    function addTodo(e: InputEvent) {
       const value = e.target.value.trim()
       if (value) {
-         $todos.push({
+         todos.value.push({
             id: Date.now(),
             title: value,
             completed: false
@@ -59,40 +59,40 @@ export function TodoMVC() {
    }
 
    function removeTodo(todo: Ionized<Todo>) {
-      const index = $todos.indexOf(todo)
-      $todos.splice(index, 1)
+      const index = todos.value.indexOf(todo)
+      todos.value.splice(index, 1)
    }
 
    let beforeEditCache = ''
    function editTodo(todo: Todo) {
       beforeEditCache = todo.title
-      $editedTodo = todo
+      editedTodo.value = todo
    }
 
    function cancelEdit(todo: Ionized<Todo>) {
-      $editedTodo = null
+      editedTodo.value = null
       todo.title = beforeEditCache
    }
 
    function doneEdit(todo: Ionized<Todo>) {
-      if ($editedTodo) {
-         $editedTodo = null
+      if (editedTodo.value) {
+         editedTodo.value = null
          todo.title = todo.title.trim()
          if (!todo.title) removeTodo(todo)
       }
    }
 
    function removeCompleted() {
-      $todos = filters.active($todos)
+      todos.value.value = filters.active(todos.value)
    }
 
    function onHashChange() {
       const route = window.location.hash.replace(/#\/?/, '') as keyof typeof filters
       if (filters[route]) {
-         $view = route
+         view.value = route
       } else {
          window.location.hash = ''
-         $view = 'all'
+         view.value = 'all'
       }
    }
 
@@ -113,25 +113,25 @@ export function TodoMVC() {
                   id="toggle-all"
                   class="toggle-all"
                   type="checkbox"
-                  checked={($remaining === 0)}
+                  checked={(remaining.value === 0)}
                   on:change={toggleAll}
                />
                <label for="toggle-all">Mark all as complete</label>
                <ul class="todo-list">
-                  {For(($filteredTodos), (todo) => {
-                     const $isEditing = (todo === $editedTodo);
+                  {For(filteredTodos.value, (todo) => {
+                     let isEditing = (todo === editedTodo.value);
 
-                     <li class={["todo", { completed: (todo.completed), editing: ($isEditing) }]}>
+                     <li class={["todo", { completed: (todo.completed), editing: isEditing }]}>
                         <div class="view">
                            <input class="toggle" type="checkbox" mu:checked={(todo.completed)} />
                            <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
                            <button class="destroy" on:click={e => removeTodo(todo)}></button>
                         </div>
-                        {If(($isEditing),
+                        {If(isEditing,
                            <input
                               class="edit"
                               type="text"
-                              mu:value={(todo.title)}
+                              mu:value={todo.title}
                               at:mounted={node => node.focus()}
                               on:blur={e => doneEdit(todo)}
                               on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
@@ -141,25 +141,25 @@ export function TodoMVC() {
                   })}
                </ul>
             </section >
-            <footer show-if={($todos.length)} class="footer">
+            <footer show-if={todos.value.length} class="footer">
                <span class="todo-count">
-                  <strong>{($remaining)}</strong>
-                  <span>{($remaining === 1 ? ' item' : ' items')} left</span>
+                  <strong>{remaining}</strong>
+                  <span>{(remaining.value === 1 ? ' item' : ' items')} left</span>
                </span>
 
                <ul class="filters">
                   <li>
-                     <a href="#/all" class={{ 'selected': ($view === 'all') }}>All</a>
+                     <a href="#/all" class={{ 'selected': (view.value === 'all') }}>All</a>
                   </li>
                   <li>
-                     <a href="#/active" class={{ 'selected': ($view === 'active') }}>Active</a>
+                     <a href="#/active" class={{ 'selected': (view.value === 'active') }}>Active</a>
                   </li>
                   <li>
-                     <a href="#/completed" class={{ 'selected': ($view === 'completed') }}>Completed</a>
+                     <a href="#/completed" class={{ 'selected': (view.value === 'completed') }}>Completed</a>
                   </li>
                </ul>
 
-               <button class="clear-completed" on:click={removeCompleted} style={{ display: ($todos.length > $remaining ? undefined : 'none') }}>
+               <button class="clear-completed" on:click={removeCompleted} style={{ display: (todos.value.length > remaining.value ? undefined : 'none') }}>
                   Clear completed
                </button>
             </footer>

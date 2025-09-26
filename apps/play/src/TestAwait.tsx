@@ -2,6 +2,9 @@ import { component, SuspenseIon, Else, If, FromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import { ion, Ion } from "@rue/quarky";
 
+
+
+
 function fetchData(options: { awaited: true }) {
    return SuspenseIon(undefined,
       new Promise((resolve, reject) => {

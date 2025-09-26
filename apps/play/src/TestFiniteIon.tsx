@@ -1,8 +1,8 @@
 import { component } from "@rue/lumo";
-import { FiniteIon, ion } from "@rue/quarky";
+import { FiniteState, ion } from "@rue/quarky";
 
 export function TestFiniteIon() {
-   const $color = FiniteIon({
+   const $color = FiniteState({
       red: { change: () => 'blue' },
       blue: { change: () => 'red' },
    })

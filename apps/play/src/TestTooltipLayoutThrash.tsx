@@ -63,14 +63,14 @@ export function ButtonWithTooltip({ Slot }: FromTag<{
    return component(
       <>
          <button
-            on:pointerenter={e => { $targetRect.state = e.currentTarget.getBoundingClientRect() }}
-            on:pointerleave={e => { $targetRect.state = null }}
+            on:pointerenter={e => { $targetRect = e.currentTarget.getBoundingClientRect() }}
+            on:pointerleave={e => { $targetRect = null }}
          >
             {Slot.Default()}
          </button>
 
-         {If($targetRect, v => // slightly more type-safe version of ! (non-null assertion)
-            <Tooltip targetRect={v($targetRect)()}>
+         {If(($targetRect), v => // slightly more type-safe version of ! (non-null assertion)
+            <Tooltip targetRect={$targetRect}>
                {Slot.Tooltip()}
             </Tooltip>
          )}
@@ -103,20 +103,19 @@ export function Tooltip(input: FromTag<{
    const $height = ion(undefined as number | undefined)
 
    atMounted(async () => {
-      const div = $div();
-      if (!div) return;
+      // const div = $div();
+      if (!$div) return;
       const height = await measureLayout(() =>
-         div.getBoundingClientRect().height
+         $div.getBoundingClientRect().height
       ) // prevents looped layout thrashing
-      $height.state = height;
+      $height = height;
    })
 
    const shiftX = targetRect.left
 
    const $shiftY = ion(() =>{
-      const height = $height()
-      if (height === undefined) return 0;
-      const y = targetRect.top - height;
+      if ($height === undefined) return 0;
+      const y = targetRect.top - $height;
       return y < 0 ? targetRect.bottom : y;
    })
 
@@ -128,7 +127,7 @@ export function Tooltip(input: FromTag<{
                pointerEvents: 'none',
                left: 0,
                top: 0,
-               transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
+               transform: (`translate3d(${shiftX}px, ${$shiftY}px, 0)`)
             }}
          >
             <div ref={$div} class="tooltip">
