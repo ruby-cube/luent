@@ -4,13 +4,13 @@ import { finiton, ion, watch } from "@rue/quarky";
 export function TestNested() {
    const $isActive = ion(true, {
       toggle() {
-         $isActive.state = !$isActive()
+         $isActive.value = !$isActive()
       }
    })
 
    const $isHappy = ion(true, {
       toggle() {
-         $isHappy.state = !$isHappy()
+         $isHappy.value = !$isHappy()
       }
    })
 
@@ -77,7 +77,7 @@ export function TestNestedB() {
 
    const $hasColor = ion(true, {
       toggle() {
-         $hasColor.state = !$hasColor()
+         $hasColor.value = !$hasColor()
       }
    })
 

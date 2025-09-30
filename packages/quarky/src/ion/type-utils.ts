@@ -52,22 +52,22 @@ type NonNullableInner<T> =
    T extends Ion<infer V> ? Ion<NonNullable<V>> : Exclude<T, null | undefined>;
 
 // Overload: Signal case
-export function isNonNull<T, M>(value: Ion<T> & M | null | undefined): value is Ion<NonNullable<T>> & M;
+// export function isNonNull<T, M>(value: Ion<T> & M | null | undefined): value is Ion<NonNullable<T>> & M;
 
-// Overload: Non-signal case
-export function isNonNull<T>(value: T): value is Exclude<T, null | undefined>;
+// // Overload: Non-signal case
+// export function isNonNull<T>(value: T): value is Exclude<T, null | undefined>;
 
-export function isNonNull(value: unknown): boolean {
-   if (isIon(value)) return value() != null;
-   return value != null;
-}
+// export function isNonNull(value: unknown): boolean {
+//    if (isIon(value)) return value() != null;
+//    return value != null;
+// }
 
-export function isNullish<T, M>(value: Ion<T | null | undefined> & M): value is Ion<null | undefined> & M;
+// export function isNullish<T, M>(value: Ion<T | null | undefined> & M): value is Ion<null | undefined> & M;
 
-// Overload: Non-signal case
-export function isNullish<T>(value: T | null | undefined): value is null | undefined;
+// // Overload: Non-signal case
+// export function isNullish<T>(value: T | null | undefined): value is null | undefined;
 
-export function isNullish(value: unknown): boolean {
-   if (isIon(value)) return value() != null;
-   return value != null;
-}
+// export function isNullish(value: unknown): boolean {
+//    if (isIon(value)) return value() != null;
+//    return value != null;
+// }

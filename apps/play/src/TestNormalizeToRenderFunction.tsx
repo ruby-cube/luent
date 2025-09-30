@@ -14,7 +14,7 @@ export function TestNormalizeToRenderFunction(){
       <Child>{$active}</Child>
       {If(true, <div>{$msg}</div>)}
       {If(true, $msg)}
-      <button on:click={e=>$msg.state='bye world'}>clivk</button>
+      <button on:click={e=>$msg.value='bye world'}>clivk</button>
       </>
    )
 }

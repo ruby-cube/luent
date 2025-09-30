@@ -95,10 +95,10 @@ export function FBApp() {
 
    const $unseenCount = ion(0, {
       increment(count: number = 1) {
-         this.state = $unseenCount() + count
+         this.value = $unseenCount() + count
       },
       decrement(count: number = 1) {
-         this.state = $unseenCount() - count
+         this.value = $unseenCount() - count
       }
    })
 

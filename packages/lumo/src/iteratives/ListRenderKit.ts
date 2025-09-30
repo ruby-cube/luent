@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __DEV__checkIfTracked, toValue, Ion, toIon, queueTask, MutableIon } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __DEV__checkIfTracked, toValue, Ion, toIon, queueTask, MutableIon, isGetter } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -124,7 +124,7 @@ export class ListRenderKit {
 
       // set up watcher for updates
       // const effectCycle = getCurrentEffectCylce();
-      const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
+      const _data = isGetter(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
       let clone = createClone(data, _data)
       // let clone = isIon(data) && isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined
       //TODO: figure out typing for Set, Map, Object vs Array
@@ -253,10 +253,10 @@ export class ListRenderKit {
                : null;
 
          if (!_isNewItem) {
-            // update $index.state
+            // update $index.value
             const $index = this.indices[oldIndex];
             newIndices.push($index);
-            $index.state = i
+            $index.value = i
 
             // to update refs
             toFromIndices.push([i, oldIndex]);

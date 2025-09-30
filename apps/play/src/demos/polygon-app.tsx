@@ -24,7 +24,7 @@ export function PolygonApp() {
          label: $newLabel(),
          value: 100
       }))
-      $newLabel.state = ''
+      $newLabel.value = ''
    }
 
    function remove(stat: Ionized<Stat>) {

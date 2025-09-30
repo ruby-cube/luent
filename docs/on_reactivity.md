@@ -51,7 +51,7 @@ function createRef(initialState) {
 
    const setter = (value) => state = value;
 
-   Object.defineProperty(getter, 'state', {
+   Object.defineProperty(getter, 'value', {
       get: getter,
       set: setter,
    })
@@ -70,15 +70,15 @@ function createIon(initialState) {
 
    const getter = () => {
       track(atom)
-      return atom.state
+      return atom.value
    };
 
    const setter = (value) => {
       trigger(atom)
-      atom.state = value
+      atom.value = value
    };
 
-   Object.defineProperty(getter, 'state', {
+   Object.defineProperty(getter, 'value', {
       get: getter,
       set: setter,
    })

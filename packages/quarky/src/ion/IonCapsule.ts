@@ -8,7 +8,7 @@ export function defineIonCapsule<
 T,
 M
 >(stateDefinition: T & StateDef<unknown>, methods: M & Methods & ThisType<M & (T extends StateDef<unknown> ? T : {})>): AsMutableIon<T, M>(){
-// const [stateKey, initialState] = methods ? getStateKeyAndInitialState(initialStateDefinition as AnyObject) : ['state', initialStateDefinition]
+// const [stateKey, initialState] = methods ? getStateKeyAndInitialState(initialStateDefinition as AnyObject) : ['value', initialStateDefinition]
 }
 
 function getStateKeyAndInitialState(initialStateDefinition: AnyObject) {

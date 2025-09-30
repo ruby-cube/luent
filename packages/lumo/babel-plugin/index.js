@@ -26,11 +26,18 @@ export default function lumoPreTransform({ types }) {
          //       }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
          //    }
          // },
-         Identifier: {
-            enter(path) {
-               transformIdentifier(path)
-            }
-         },
+         // Identifier: {
+         //    enter(path) {
+         //       if (path.visited || path.node.created) return;
+         //       transformIdentifier(path)
+         //       path.visited = true;
+         //    }
+         // },
+         // VariableDeclarator: {
+         //    enter(path) {
+         //       transformIfDerivationShorthand(path.get('init'))
+         //    }
+         // },
          CallExpression: {
             enter(path) {
                transformTemplateCallExpressions(path)
@@ -56,74 +63,6 @@ export default function lumoPreTransform({ types }) {
    };
 }
 
-function isStateRefName(str) {
-   return str.startsWith('$')
-}
-
-function isAssignee(path) {
-   return t.isVariableDeclarator(path.parent) && path.node === path.parent.id
-}
-
-function isFunctionName(path) {
-   return t.isFunctionDeclaration(path.parent) && path.node === path.parent.id
-}
-
-function isCallee(path) {
-   return t.isCallExpression(path.parent) && path.node === path.parent.callee
-}
-
-function isReassignee(path) {
-   return (t.isAssignmentExpression(path.parent) && path.node === path.parent.left) || t.isUpdateExpression(path.parent) && path.node === path.parent.argument
-}
-
-function isInMemberExpression(path) {
-   return t.isMemberExpression(path.parent)
-}
-
-function isPropertyKey(path) {
-   return t.isObjectProperty(path.parent) && path.node === path.parent.key
-}
-
-function isDestructuredAlias(path) {
-   return t.isObjectPattern(path.parentPath.parent) && path.node === path.parent.value
-}
-
-function isInImportDeclaration(path) {
-   return t.isImportDeclaration(path.parentPath.parent)
-}
-
-function isParameter(path) {
-   return t.isArrowFunctionExpression(path.parent) || t.isFunctionDeclaration(path.parent) || t.isClassMethod(path.parent) || path.parent.type === 'TSParameterProperty'
-}
-
-function transformIdentifier(path) {
-   if (!isStateRefName(path.node.name)
-      || isParenthesized(path.node)
-      || isAssignee(path)
-      || isPropertyKey(path)
-      || isDestructuredAlias(path)
-      || isCallee(path)
-      || isFunctionName(path)
-      || isParameter(path)
-      || isInImportDeclaration(path)
-      || isInMemberExpression(path)) {
-      return;
-   }
-   if (isReassignee(path)) {
-      transformReassignee(path)
-      return;
-   }
-   transformStateRef(path)
-}
-
-function transformReassignee(path) {
-   path.replaceWith(t.memberExpression(t.identifier(path.node.name), t.identifier('state')))
-   //TODO: what if it's ambiguous?
-}
-
-function transformStateRef(path) {
-   path.replaceWith(t.callExpression(path.node, []))
-}
 
 const conditionalStatements = {
    If: true,
@@ -399,13 +338,14 @@ function transformJSXChildren(childrenPath) {
    for (let i = 0; i < childrenPath.length; i++) {
       const child = childrenPath[i]
       if (t.isJSXExpressionContainer(child.node) && !t.isJSXEmptyExpression(child.node.expression)) {
-         transformIfDerivationExpression(child.get('expression'))
+         transformIfDerivationShorthand(child.get('expression'))
       }
    }
    return childrenPath;
 }
 
-function transformIfDerivationExpression(path) {
+function transformIfDerivationShorthand(path) {
+   if (!path || !path.node) return;
    console.log('DERIVATION?', path.node)
    if (isDerivationShorthand(path)) {
       // transformLiterals(path.get('right'))
@@ -441,7 +381,7 @@ function transformLiterals(path) {
 
 function isDerivationShorthand(path) {
    const node = path.node;
-   return isParenthesized(node);
+   return isParenthesized(node) && !t.isIdentifier(node);
    // if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && t.isExpression(node.right)) {
    //    return true;
    // }
@@ -506,7 +446,7 @@ function transformConditionalJSX(path) {
 }
 
 function transformIfCall(path) {
-   transformIfDerivationExpression(path.get('arguments.0'))
+   transformIfDerivationShorthand(path.get('arguments.0'))
    transformConditionalJSX(path)
 
 }
@@ -589,7 +529,7 @@ function transformJSXAttributes(jsxElementPath) {
 
       }
       else if (namespaceName !== 'on' && namespaceName !== 'm') {
-         transformIfDerivationExpression(attribute.get('value.expression'))
+         transformIfDerivationShorthand(attribute.get('value.expression'))
       }
    }
 }
@@ -755,7 +695,7 @@ function transformArrayElements(paths) {
          transformArrayElements(element.get(`elements`))
       }
       else {
-         transformIfDerivationExpression(element)
+         transformIfDerivationShorthand(element)
       }
    }
 }
@@ -772,7 +712,7 @@ function transformObjectProperties(paths) {
          transformArrayElements(value.get('elements'))
       }
       else {
-         transformIfDerivationExpression(value)
+         transformIfDerivationShorthand(value)
       }
    }
 }

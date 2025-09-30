@@ -21,8 +21,8 @@ export function Counter() {
    return component(
       <div>
          <p>{$count}</p>
-         <button on:click={e => $count.state++}>increment</button>
-         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={e => $count.value++}>increment</button>
+         <button on:click={e => $count.value--}>decrement</button>
       </div>
    )
 }
@@ -38,14 +38,14 @@ export function Counter() {
    console.log('count is', $count())
 
    function reset() {
-      $count.state = 0
+      $count.value = 0
    }
 
    return component(
       <div>
          <p>{$count}</p>
-         <button on:click={e => $count.state++}>increment</button>
-         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={e => $count.value++}>increment</button>
+         <button on:click={e => $count.value--}>decrement</button>
          <button on:click={reset}>reset</button>
       </div>
    )
@@ -56,10 +56,10 @@ export function Counter() {
 export function Counter() {
    const $count = ion(0, {
       increment() {
-         this.state++
+         this.value++
       },
       decrement() {
-         this.state--
+         this.value--
       }
    })
 
@@ -81,8 +81,8 @@ export function DoubleCounter() {
    return component(
       <div>
          <p>{$doubleCount}</p>
-         <button on:click={e => $count.state++}>increment</button>
-         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={e => $count.value++}>increment</button>
+         <button on:click={e => $count.value--}>decrement</button>
       </div>
    )
 }
@@ -95,8 +95,8 @@ export function DoubleCounter() {
    return component(
       <div>
          <p>{($count() * 2)}</p>
-         <button on:click={e => $count.state++}>increment</button>
-         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={e => $count.value++}>increment</button>
+         <button on:click={e => $count.value--}>decrement</button>
       </div>
    )
 }
@@ -107,16 +107,16 @@ const $lastName = ion('')
 
 const $fullName = ion(() => $firstName() + ' ' + $lastName(), {
    set state(name: string) {
-      [$firstName.state, $lastName.state] = name.split(' ')
+      [$firstName.value, $lastName.value] = name.split(' ')
    },
    toCaps() {
-      $firstName.state = $firstName().toUpperCase()
-      $lastName.state = $lastName().toUpperCase()
+      $firstName.value = $firstName().toUpperCase()
+      $lastName.value = $lastName().toUpperCase()
    }
 })
 
 function makeAnonymous() {
-   $fullName.state = 'John Doe'
+   $fullName.value = 'John Doe'
 }
 
 
@@ -128,8 +128,8 @@ export function Counter() {
    return component(
       <div>
          <p>{$count}</p>
-         <button on:click={e => $count.state++}>increment</button>
-         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={e => $count.value++}>increment</button>
+         <button on:click={e => $count.value--}>decrement</button>
          <p>initial: {$count()}</p>
       </div>
    )
@@ -141,8 +141,8 @@ export function Counter() {
    return component(
       <div>
          <p>{$count}</p>
-         <button on:click={e => $count.state++}>increment</button>
-         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={e => $count.value++}>increment</button>
+         <button on:click={e => $count.value--}>decrement</button>
          <p>{'initial:' + $count()}</p>
       </div>
    )
@@ -249,8 +249,8 @@ export function Counter() {
    return component(
       <div>
          <p>{$count}</p>
-         <button on:click={e => $count.state++}>increment</button>
-         <button on:click={e => $count.state--}>decrement</button>
+         <button on:click={e => $count.value++}>increment</button>
+         <button on:click={e => $count.value--}>decrement</button>
       </div>
    )
 }
@@ -335,7 +335,7 @@ const player = ionize({
 
 player.name === 'John Doe' // true
 
-$username.state = 'Bubby';
+$username.value = 'Bubby';
 
 player.name === 'Bubby' // true
 
@@ -357,7 +357,7 @@ export function PlayingCard({ $number, $suit, faceup = false, $cardBack }) {
    const $faceup = ion(faceup)
 
    return component(
-      <div on:click={e => $faceup.state = !$faceup()}>
+      <div on:click={e => $faceup.value = !$faceup()}>
          {If($faceup,
             <CardFace number={$number} suit={$suit}></CardFace>
          )}
@@ -423,7 +423,7 @@ export function TodoList() {
    function submitTodo(e) {
       e.preventDefault()
       add({ id: ++id, text: $input() })
-      $input.state = ""
+      $input.value = ""
    }
 
    return component(

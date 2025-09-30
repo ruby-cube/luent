@@ -205,7 +205,7 @@ export function SomeChild() {
       
             ionicTask(() => {
                const res = await fetch(`files/${$id()}`)
-               res.json().then(v => $state.state = v)
+               res.json().then(v => $state.value = v)
             })
       
             return $state
@@ -244,7 +244,7 @@ export function SomeChild() {
                return createSuspenseIon($file => {
                   const api = `/${$userID()}/${$fileID()}`
                   const cached = files.get(api)
-                  if (cached) $file.state = cached; // or let browser cache it!
+                  if (cached) $file.value = cached; // or let browser cache it!
                   else fetch(api)
                      .then(response => response.json())
                      .then(value => {

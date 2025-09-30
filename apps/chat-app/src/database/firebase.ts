@@ -28,7 +28,7 @@ export function initDatabaseConnection() {
    const $connected = ion(false)
 
    const unsubscribe = onAuthStateChanged(auth, () => {
-      $connected.state = true
+      $connected.value = true
       unsubscribe()
    })
 
@@ -276,10 +276,10 @@ export function ChatKit() {
          }
       }
 
-      $messages.state = ionize(messages)
-      $error.state = null
+      $messages.value = ionize(messages)
+      $error.value = null
    }, err => {
-      $error.state = err.message
+      $error.value = err.message
    })
 
    atUnmount((final) => {
@@ -319,7 +319,7 @@ export function ChatKit() {
                      unsavedSet.delete(newMessageRef.id)
                   }
                })
-               $errorCount.state++
+               $errorCount.value++
             }, 200)
             return;
          }

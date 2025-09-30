@@ -246,7 +246,7 @@ export const RUN_EAGERLY = true;
 //    }
 
 //    const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${w($todoID)}`)
-//    $data.state = await response.json()
+//    $data.value = await response.json()
 // })
 
 

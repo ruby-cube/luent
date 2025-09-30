@@ -4,7 +4,7 @@ import { RawJSXNode } from "../node/makeJSXNode";
 import { Commons, createCommonsNode, NodeCommons, Provided } from "../commons/Commons";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { FromTag } from "../component/Input";
-import { ion, Ion, isIon, MutableIon, toValue, watch } from "@rue/quarky";
+import { ion, Ion, isGetter, isIon, MutableIon, toValue, watch } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
@@ -50,8 +50,8 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: {
       provide?: Provided
    }>): Component {
       const { _raw_: { as: activeKey }, provide, with: inputObj } = input
-      if (!isIon(activeKey)) {
-         if (!switchMap.has($activeKey)) {
+      if (!isGetter(activeKey)) {
+         if (!switchMap.has(activeKey)) {
             return { exposed: undefined, jsxNodes: [] };
          }
          return {
@@ -76,13 +76,13 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: {
       const morphable = ion(input ? [initialKey, input] : initialKey, {
          as(key: PolymorphKey | null, input?: Object) {
             if (input) {
-               if (Array.isArray(this.state) && this.state[0] === key && this.state[1] === input)
+               if (Array.isArray(this.value) && this.value[0] === key && this.value[1] === input)
                   return;
-               this.state = [key, input]
+               this.value = [key, input]
                return;
             }
-            if (this.state === key) return;
-            this.state = key
+            if (this.value === key) return;
+            this.value = key
             return;
          },
          discard(key: PolymorphKey, input?: Object) {
@@ -257,7 +257,7 @@ export class PolymorphKit extends VineNode {
          // but how would anyone know whether the update were synchronous or batched?
          // we want state manipulation to be synchronous but then schedule the rendering...
          // but synchronous calls can end up with extraneous effects
-         this.deactivateConditional(this.$activeKey.state!)
+         this.deactivateConditional(this.$activeKey.value!)
          this.$activeKey.as(null)
       }
       const kitOrMap = this.switchMap.get(key)
@@ -271,7 +271,7 @@ export class PolymorphKit extends VineNode {
    }
 
    isActiveKey(key: PolymorphKey, input?: Object) {
-      const activeKey = this.$activeKey.state
+      const activeKey = this.$activeKey.value
       if (activeKey === null) return;
       if (activeKey instanceof Array) {
          return activeKey[0] === key && activeKey[1] === input

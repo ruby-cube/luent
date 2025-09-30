@@ -1,23 +1,90 @@
+
 //@ts-nocheck
 // COMPONENTS
 
 import { component, POSTRENDER, PRERENDER } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
-import { sub } from "date-fns"
+import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
+
+// [ ] ions with methods
+// [ ] inert map
+// [ ] ion typing
+// [ ] mutable derivations
+// [ ] writable derivations
+// [ ] method traps, getter and setter traps
+
+// component Counter() {
+
+//    get count = Ion(0, {
+//       increment() {
+//          this.value++
+//       },
+//       decrement() {
+//          this.value--
+//       }
+//    })
+
+//    get doubleCount = Ion(() => count * 2)
 
 
-const $count = ion(0)
 
-const $doubleCount = ion(() => $count * 2)
+//    return (
+//       <div>
+// 	       <div>{@count}</div>
+// 	       <div>{@(count * 2)}</div>
+// 	       <button on:click={e => @count.increment()}>increment</button>
+// 	       <button on:click={e => @count.decrement()}>decrement</button>
+// 	       <hr/>
+// 	       <div>{store.@count}</div>
+// 	       <button on:click={e => decrement(@count)}>decrement</button>
+//       </div>
+//    )
+// }
+
+
+// function decrement(@count: Ion<number, { decrement(): void }>) {
+//    @count.decrement()
+// }
+
+
+const $count = ion(0, {
+   '@ get': () => console.log('getting value')
+})
+
+const $doubleCount = ionic(() => $count() * 2)
+
+const $doubleCount = ionic({
+   get: () => $count() * 2,
+   set: (num: number) => $count.value = num / 2
+})
+
+const $doubleCount = ionic({
+   value: undefined,
+   get: ()
+})
+
+const $firstName = ion('')
+const $lastName = ion('')
 
 const fullname = ionize({
-   state: ($count * 2),
+   get value() {
+      return $firstName() + ' ' + $lastName()
+   },
+   set value(name: string) {
+      [$firstName.value, $lastName.value] = name.split(' ')
+   }
+})
+
+const count = ion.withMethods({
+   value: 0,
    increment() {
-      $count++
+
    },
    decrement() {
-      $count--
-   }
+
+   },
+   '@ get value'() { console.log('getting value') },
+   '@ set value'() { console.log('setting value') },
 })
 
 function fetchUser($id) {
@@ -62,6 +129,9 @@ export function Counter() {
    return component(
       <div>
          <p>{($count)}</p>
+         {If($count), () => {
+            <div>hi</div>
+         }}
          <button on:click={e => { $$: $count++ }}>increment</button>
          <button on:click={e => { $$: $count-- }}>decrement</button>
       </div>

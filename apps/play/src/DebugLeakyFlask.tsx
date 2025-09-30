@@ -15,7 +15,7 @@ export function DebugLeakyFlask() {
       <>
          {If($ready,
             <>
-               <button on:click={e => $active.state = !$active()}>change</button>
+               <button on:click={e => $active.value = !$active()}>change</button>
                <div>
                   {If($active, 'create',
                      <div>hi!</div>

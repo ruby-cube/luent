@@ -17,14 +17,14 @@ export function WelcomeView(input: FromTag<{
                <>
                   <h2>Sign up</h2>
                   <SignupForm></SignupForm>
-                  <p>Already registered? <span on:click={e => $initialLoad.state = false}>Log in</span> instead</p>
+                  <p>Already registered? <span on:click={e => $initialLoad.value = false}>Log in</span> instead</p>
                </>
             )}
             {Else(
                <>
                   <h2>Log in</h2>
                   <LoginForm></LoginForm>
-                  <p>No account yet? <span on:click={e => $initialLoad.state = true}>Sign up</span> instead</p>
+                  <p>No account yet? <span on:click={e => $initialLoad.value = true}>Sign up</span> instead</p>
                </>
             )}
          </div>

@@ -1,5 +1,5 @@
 import { component, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
-import { ion, ionic } from '@rue/quarky';
+import { Ion, ion, ionic, MutableIon } from '@rue/quarky';
 
 
 export function TestTooltip() {
@@ -51,26 +51,27 @@ export function TestTooltip() {
    );
 }
 
-
-export function ButtonWithTooltip({ Slot }: FromTag<{
+type ButtonWithTooltipInput = FromTag<{
    Slot: {
       Default: RenderSlot,
       Tooltip: RenderSlot
    }
-}>) {
+}>
+
+export function ButtonWithTooltip({ Slot }: ButtonWithTooltipInput) {
    const $targetRect = ion(null as Rect | null)
 
    return component(
       <>
          <button
-            on:pointerenter={e => { $targetRect = e.currentTarget.getBoundingClientRect() }}
-            on:pointerleave={e => { $targetRect = null }}
+            on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
+            on:pointerleave={e => { $targetRect.value = null }}
          >
             {Slot.Default()}
          </button>
 
-         {If(($targetRect), v => // slightly more type-safe version of ! (non-null assertion)
-            <Tooltip targetRect={$targetRect}>
+         {If($targetRect, $targetRect =>
+            <Tooltip targetRect={$targetRect()}>
                {Slot.Tooltip()}
             </Tooltip>
          )}
@@ -99,23 +100,22 @@ export function Tooltip(input: FromTag<{
 }>) {
    const { Slot, targetRect } = input
 
-   const $div = NodeRef('div')
+   const $div = NodeRef('div');
    const $height = ion(undefined as number | undefined)
 
    atMounted(async () => {
-      // const div = $div();
-      if (!$div) return;
       const height = await measureLayout(() =>
-         $div.getBoundingClientRect().height
+         $div()?.getBoundingClientRect().height
       ) // prevents looped layout thrashing
-      $height = height;
+      if (height != null) $height.value = height;
    })
 
    const shiftX = targetRect.left
 
-   const $shiftY = ion(() =>{
-      if ($height === undefined) return 0;
-      const y = targetRect.top - $height;
+   const $shiftY = ion(() => {
+      const height = $height()
+      if (height === undefined) return 0;
+      const y = targetRect.top - height;
       return y < 0 ? targetRect.bottom : y;
    })
 
@@ -127,7 +127,7 @@ export function Tooltip(input: FromTag<{
                pointerEvents: 'none',
                left: 0,
                top: 0,
-               transform: (`translate3d(${shiftX}px, ${$shiftY}px, 0)`)
+               transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
             }}
          >
             <div ref={$div} class="tooltip">

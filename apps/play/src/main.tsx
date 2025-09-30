@@ -87,7 +87,7 @@ import { For } from '../../../packages/lumo/src/iteratives/For';
 
 
 
-const app = createApp(TestTooltip)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 

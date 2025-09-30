@@ -14,7 +14,7 @@ export function IonAccess() {
 
    const $x = ion(7, {
       increment() {
-         $x.state = $x() + 1
+         $x.value = $x() + 1
       },
       as() {
 
@@ -440,7 +440,7 @@ function J(input: { for: any, Slot: any, params: any }) {
       <>
          <Commons provide={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
             <input value={mu($msg, 'set', '+trace')}></input> // auto-readonly unless marked with m: .. then it's reined
-            <input value={$msg} on:input={e => { $msg.state = e.target.value }}></input> // auto-readonly unless marked with m: .. then it's reined
+            <input value={$msg} on:input={e => { $msg.value = e.target.value }}></input> // auto-readonly unless marked with m: .. then it's reined
          </Commons>
       </>
    )

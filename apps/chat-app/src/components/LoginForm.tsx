@@ -13,7 +13,7 @@ export function LoginForm() {
       e.preventDefault();
       const response = await logIn($email(), $password())
       if (response.error)
-         $error.state = response.error
+         $error.value = response.error
    }
 
    return component(

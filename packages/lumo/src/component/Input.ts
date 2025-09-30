@@ -1,7 +1,7 @@
 import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToIntersection } from "@rue/types";
 import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, MutableIon, neutron, toIon, toValue, } from "@rue/quarky";
 import { debug, isFunction, isObject } from "@rue/utils";
-import { JSXNode, RawJSXNode } from "../node/makeJSXNode";
+import { RawJSXNode } from "../node/makeJSXNode";
 
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.
@@ -15,7 +15,7 @@ export const MU = Symbol('mu')
 // export const [getActiveMuIons, muIonsStack] = AsyncState<Set<Ion>>(MU_IONS)
 
 export function assertMutableIon(value: unknown): asserts value is MutableIon<unknown> {
-   if (!isIon(value) || !('state' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion')
+   if (!isIon(value) || !('value' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion')
 }
 
 
@@ -197,7 +197,7 @@ export function toInput(attributes: AnyObject) {
          }
          if (key in target) {
             const value = target[key]
-            if (isFunction(value) && !isIon(value))
+            if (isFunction(value) && value.length !== 0)
                debug.error('To pass a function as component input, prefix attribute with `can:`')
             return toValue(target[key])
          }
@@ -262,7 +262,7 @@ type MutableIonAttributes<D> = {
 }
 
 
-type ToMuIon<T> = ExcludePrimitives<T> extends { state: any } ? T
+type ToMuIon<T> = ExcludePrimitives<T> extends { value: any } ? T
    : keyof IonMethods<T> extends never ?
    T extends Ion<infer S> ? MutableIon<S/* MaybeMarkInert<S> */> : never
    : T extends Ion<infer S> ? MutableIon<S/* MaybeMarkInert<S> */> & IonMethods<T> : never
@@ -287,8 +287,8 @@ type WithMu<D> = HasMu<D> extends true ? {
    mu: <I extends { "~mu:": true; }>(ion: I) => ion is MuIon<I>
 } : {}
 
-type MuIon<I> = ExcludePrimitives<I> extends { state: any } ? I
-   : ExcludePrimitives<I> & { state: ExcludePrimitives<I> extends Ion<infer S> ? S : never } | OnlyPrimitives<I>
+type MuIon<I> = ExcludePrimitives<I> extends { value: any } ? I
+   : ExcludePrimitives<I> & { value: ExcludePrimitives<I> extends Ion<infer S> ? S : never } | OnlyPrimitives<I>
 
 type OpInput<D> = {
    [K in keyof D as K extends `can:${infer F}` ? F : never]: D[K]
@@ -345,14 +345,14 @@ type NonlocalIon<T> =
    T
    : T extends Ion<infer S> ? Ion<S/* MaybeMarkInert<S> */> & IonMethods<T> : never
 
-type IonMethods<T> = Omit<T, keyof Function | 'state'>
+type IonMethods<T> = Omit<T, keyof Function | 'value'>
 
 type AnsG = NonlocalIon<ExcludePrimitives<Ion<Frog[]>>>
 
 
 
 
-// type NonlocalIon<T> = { [K in keyof T as K extends 'state' ? never : K]: T[K] }
+// type NonlocalIon<T> = { [K in keyof T as K extends 'value' ? never : K]: T[K] }
 type Frog = { name: string }
 class Robot {
    isRobot: true = true
@@ -453,7 +453,7 @@ export type RenderSlot<T = {}> = (input?: T) => RawJSXNode
 // const something = null as unknown as AnsB
 // something.$name.changeName()
 // //@ts-expect-error
-// something.$name.state = 'hi'
+// something.$name.value = 'hi'
 // something.$nameB
 // something.$nameC
 // something.$frogA

@@ -32,9 +32,9 @@ export function View() {
    // const context = $_snap_context()
 
    ionicTask(async (initial) => {
-      if (!initial) $commits.state = []
+      if (!initial) $commits.value = []
       const response = await fetch(`${API_URL}${$currentBranch()}`)
-      $commits.state = await response.json()
+      $commits.value = await response.json()
    })
 
    // ionicTask(async () => {
@@ -43,8 +43,8 @@ export function View() {
    // })
 
 
-   // @click: e => $currentBranch.state = branch <--- begins render cycle
-   // ..prelude: fetch new commits; set $commits.state = []
+   // @click: e => $currentBranch.value = branch <--- begins render cycle
+   // ..prelude: fetch new commits; set $commits.value = []
    // ..render: update $currentBranch text, radio buttons; clear $commits
    // ..postlude: --
    // ----
@@ -56,7 +56,7 @@ export function View() {
 
    // If the network is fast enough, this could happen in one render cycle:
    //
-   // @click: e => $currentBranch.state = branch <--- begins render cycle
+   // @click: e => $currentBranch.value = branch <--- begins render cycle
    // ..prelude: fetch new commits
    // @fetch-response: convert response to json
    // @json-response: set $commits <-- begins render cycle

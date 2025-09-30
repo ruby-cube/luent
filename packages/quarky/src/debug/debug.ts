@@ -203,7 +203,7 @@ function logAtom(atom: TraceableQuark) {
 // }
 
 // function traceIonTriggers(subject: AtomicIon) {
-//    __DEV__asTraceable(subject).traceTriggers!.add('state');
+//    __DEV__asTraceable(subject).traceTriggers!.add('value');
 // }
 
 // function traceDerivationTriggers(subject: () => any) {

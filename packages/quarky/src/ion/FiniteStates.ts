@@ -269,7 +269,7 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
    function activate(initializer: (prevState: string | undefined) => string) {
       if (activated) return;
       activated = true;
-      const state = $currentState.state = initializer(prevState);
+      const state = $currentState.value = initializer(prevState);
       runEnterHooks(state, getHooks(ANY_STATE))
       return {
          nest: (nestedStates: { [key: string]: Nested[] }) => {
@@ -287,9 +287,9 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
       if (!activated) return;
       activated = false;
       if (timeout) clearTimeout(timeout);
-      const prevStateID = prevState = $currentState.state
+      const prevStateID = prevState = $currentState.value
       runExitHooks(prevStateID!, getHooks(ANY_STATE))
-      $currentState.state = undefined;
+      $currentState.value = undefined;
    }
 
    function is(state: string) {
@@ -312,7 +312,7 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
       const transitionEvent = applyTransition(transition)
       if (transitionEvent) {
          runTransitionTasks(transition, transitionEvent)
-         if (isTerminal(transitionEvent.state)) {
+         if (isTerminal(transitionEvent.value)) {
             finalized = true;
             runFinalTasks()
          }
@@ -352,11 +352,11 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
    }
 
    function can(transition: string) {
-      return Boolean(states[$currentState.state ?? ''][transition])
+      return Boolean(states[$currentState.value ?? ''][transition])
    }
 
    function applyTransition(transition: string | Transition) {
-      const prevStateID = $currentState.state;
+      const prevStateID = $currentState.value;
       const state = states[prevStateID ?? '']
 
       const getNextState = typeof transition === 'string' ? (state[transition] ?? states[ANY_STATE as any]?.[transition]) : transition;
@@ -372,7 +372,7 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
          runExitHooks(prevStateID, anyStateHooks) //TODO: should I pass the next state to the exit hook?
       }
 
-      $currentState.state = nextStateID;
+      $currentState.value = nextStateID;
 
       runEnterHooks(nextStateID, anyStateHooks) //TODO: should I pass the prev state to the enter hook?
 
@@ -408,7 +408,7 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => {
          const transitionEvent = applyTransition(transition)
-         if (transitionEvent && isTerminal(transitionEvent.state)) {
+         if (transitionEvent && isTerminal(transitionEvent.value)) {
             runFinalTasks()
          }
       }, transition.timeout ?? 0)

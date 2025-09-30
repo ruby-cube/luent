@@ -7,7 +7,7 @@
 
 //TODO:
 // [] fromCommons type is broken 
-// [] AtomicIon type is broken, the state def feels like a hassle... maybe just use this.state? or maybe just use $unseenCount.state++? or .value++? or something else?
+// [] AtomicIon type is broken, the state def feels like a hassle... maybe just use this.value? or maybe just use $unseenCount.value++? or .value++? or something else?
 // [] defineIonCapsule should use this.count++, for ion(), use $count.value++ ... it should be .value
 // [] writing up input type definitions feel like a hassle
 // [] instead of readonly as the default, encapsulate as the default. That makes more sense--if you pass an object, you shouldn't expect methods to disappear.
@@ -46,30 +46,30 @@ export function FBApp() {
 
    const $unseenCount = ion(0, {
       increment() {
-         this.state++
+         this.value++
       },
       decrement() {
-         this.state--
+         this.value--
       },
    })
 
    const $chatPopupOpen = ion(false)
 
    function toggleChatPopup() {
-      $chatPopupOpen.state = !$chatPopupOpen.state
+      $chatPopupOpen.value = !$chatPopupOpen.value
    }
 
    const $chatViewOpen = ion(false)
 
    function toggleChatView() {
-      $chatViewOpen.state = !$chatViewOpen.state
+      $chatViewOpen.value = !$chatViewOpen.value
    }
 
    const $newMessage = ion('')
 
    function receiveNewMessage() {
       messages.push(new Message($newMessage()))
-      $newMessage.state = ''
+      $newMessage.value = ''
       $unseenCount.increment()
    }
 
@@ -99,7 +99,7 @@ export function FBApp() {
          </div>
          <input
             mu:value={$newMessage}
-            on:input={e => $newMessage.state = e.target.value}
+            on:input={e => $newMessage.value = e.target.value}
             on:keydown={e => e.code === 'Enter' && receiveNewMessage()}
          ></input>
          <button on:click={e => receiveNewMessage()}>receive new message</button>

@@ -31,7 +31,7 @@ export function MessageForm({
          error: undefined
       })
 
-      $message.state = ''
+      $message.value = ''
    }
 
    return component(

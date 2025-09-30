@@ -5,7 +5,7 @@ import { asAtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { ModelQuark } from "./ModelQuark";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
-import { Ion, isIon } from "../ion/Ion";
+import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { Capsule } from "../capsule/Capsule";
@@ -19,14 +19,14 @@ import { isTracking, trackParticle } from "../compound/Compound";
 import { isIntegerKey } from "./IonizedArray";
 import { Update } from "../reactivity/UpdateCycle";
 
-export function $atomicPion(
-   modelQuark: ModelQuark,
-   key: PropertyKey,
-) {
-   const pion = modelQuark.pions[key]
-   if (pion instanceof Map) throw new Error(`${key.toString()} is not a pion`)
-   return pion;
-}
+// export function $atomicPion(
+//    modelQuark: ModelQuark,
+//    key: PropertyKey,
+// ) {
+//    const pion = modelQuark.pions[key]
+//    if (pion instanceof Map) throw new Error(`${key.toString()} is not a pion`)
+//    return pion;
+// }
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -300,11 +300,7 @@ function getIonizedConfig(target: AnyObject) {
    }
 }
 
-function toIonKey(key: ProxyKey, target: AnyObject) {
-   if (!isIonKey(key)) return undefined;
-   if (key in target && !isIon(target[key])) return undefined;
-   return key;
-}
+
 
 type MarkMap = { [key: PropertyKey]: typeof inert | MarkMap }
 
@@ -331,10 +327,10 @@ export function createIonizedModel(
    function initializeProperty(proxyProto: AnyObject, key: ProxyKey, op: typeof GET | typeof SET = GET, value: unknown = undefined): boolean {
       let target = initialTarget
 
-      const ionKey = toIonKey(key, target);
-      const stateKey = ionKey ? ionKey.slice(1) : key;
+      // const ionKey = toIonKey(key, target);
+      // const stateKey = ionKey ? ionKey.slice(1) : key;
 
-      let originalKey = key in target ? key : stateKey in target ? stateKey : undefined
+      let originalKey = key in target ? key : undefined
       if (!originalKey) {
          if (op === SET) {
             if (isAbsorbedIon(value, key)) {
@@ -346,7 +342,7 @@ export function createIonizedModel(
                return true;
             }
             else {
-               initializePion(proxyProto, stateKey, ionKey, state, modelQuark, { configurable: true, enumerable: true })
+               createPion(proxyProto, key, state, modelQuark, { configurable: true, enumerable: true }, options?.mark?.[isIntegerKey(key) ? EACH : key])
                return true;
             }
          }
@@ -365,10 +361,10 @@ export function createIonizedModel(
                if (opDef) {
                   propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[OpType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
                   propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[OpType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
-                  Object.defineProperty(proxyProto, stateKey, propertyDescriptor)
+                  Object.defineProperty(proxyProto, key, propertyDescriptor)
                   return !!propertyDescriptor.set;
                }
-               Object.defineProperty(proxyProto, stateKey, propertyDescriptor)
+               Object.defineProperty(proxyProto, key, propertyDescriptor)
                return true;
             }
             else {
@@ -376,9 +372,8 @@ export function createIonizedModel(
                if (isAbsorbedIon(value, key)) {
                   initializeAbsorbedIon(
                      proxyProto,
-                     stateKey,
-                     value,
-                     ionKey
+                     key,
+                     value
                   )
                   return true;
                }
@@ -410,37 +405,36 @@ export function createIonizedModel(
                   return propertyDescriptor.writable ?? false
                }
                else if (!isProto && propertyDescriptor.writable) {
-                  if (isTracking() || ionKey) {
-                     initializePion(
+                  if (isTracking()) {
+                     createPion(
                         proxyProto,
-                        stateKey,
-                        ionKey,
+                        key,
                         state,
                         modelQuark,
-                        propertyDescriptor
+                        propertyDescriptor,
+                        options?.mark?.[isIntegerKey(key) ? EACH : key]
                      )
                      return true;
                   }
                   else {
                      // State access, no tracking
                      let _value = propertyDescriptor.value;
-                     Object.defineProperty(proxyProto, stateKey, {
+                     Object.defineProperty(proxyProto, key, {
                         configurable: true,
                         enumerable: propertyDescriptor.enumerable,
                         get() {
                            if (isTracking()) {
-                              const pion = initializePion(
+                              const pion = createPion(
                                  proxyProto,
-                                 stateKey,
-                                 ionKey,
+                                 key,
                                  state,
                                  modelQuark,
                                  propertyDescriptor,
-                                 options?.mark?.[isIntegerKey(stateKey) ? EACH : stateKey]
+                                 options?.mark?.[isIntegerKey(key) ? EACH : key]
                               )
                               return pion();
                            }
-                           return maybeIonize(_value, true, options?.mark?.[isIntegerKey(stateKey) ? EACH : stateKey])
+                           return maybeIonize(_value, true, options?.mark?.[isIntegerKey(key) ? EACH : key])
                         },
                         set(v) {
                            _value = v
@@ -627,20 +621,20 @@ export function maybeIonize<T>(value: T, ionized: boolean, mark: typeof inert | 
 }
 
 
-function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion, ionKey: ProxyKey | undefined) {
+function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion) {
    // absorbed ion
    Object.defineProperty(proxyProto, key, {
       enumerable: true,
       get: value,
-      set: 'state' in value ? Object.getOwnPropertyDescriptor(value, 'state')?.set : undefined
+      set: 'value' in value ? Object.getOwnPropertyDescriptor(value, 'value')?.set : undefined
    })
-   if (ionKey) {
-      // ion access
-      Object.defineProperty(proxyProto, ionKey, {
-         enumerable: false,
-         value
-      })
-   }
+   // if (ionKey) {
+   //    // ion access
+   //    Object.defineProperty(proxyProto, ionKey, {
+   //       enumerable: false,
+   //       value
+   //    })
+   // }
 }
 
 // TODO:
@@ -673,6 +667,24 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion,
 // [] method
 //  
 
+
+type ExposeIons<T extends AnyObject> = { [K in keyof T]: T[K] extends Function ? never : MutableIon<T[K]> }
+
+export function $<T>(value: T): T extends Ionized<infer O> ? ExposeIons<O> : undefined {
+   if (!isIonizedModel(value)) return undefined as T extends Ionized<infer O> ? ExposeIons<O> : undefined;
+   const modelQuark = quarkOf(value);
+   return modelQuark.pions ?? (modelQuark.pions = createPionsProxy(modelQuark.proxyProto, value))
+}
+
+function createPionsProxy(proxyProto: AnyObject, model: IonizedModel) {
+   return new Proxy(proxyProto, {
+      get(target, key) {
+         return getPion(target, key) ?? (model[key], getPion(target, key))
+      }
+   })
+}
+
+
 function getPion(proxyProto: ProxyPropertyMap, key: ProxyKey) {
    const getter = Object.getOwnPropertyDescriptor(proxyProto, key)?.get
    if (!getter) return undefined;
@@ -686,53 +698,47 @@ function getPionQuark(proxyProto: ProxyPropertyMap, key: ProxyKey) {
    return undefined;
 }
 
-/**
- * Case: ion access, ion already initialized (must retreive ion)
- * Case: ion access, ion not initialized
- * Case: state access, ion not initialized (initialize state access only)
- * 
- * @param proxyProto 
- * @param key 
- * @param ionKey 
- * @param state 
- * @param quark 
- * @param propertyDescriptor 
- * @returns 
- */
-function initializePion(
-   proxyProto: ProxyPropertyMap,
-   stateKey: ProxyKey,
-   ionKey: string | undefined,
-   state: ModelState,
-   quark: ModelQuark,
-   propertyDescriptor: PropertyDescriptor,
-   mark: typeof inert | MarkMap | undefined
-) {
-   if (ionKey) {
-      return initializePionAccess(proxyProto, stateKey, ionKey, state, quark, propertyDescriptor, mark)
-   } else {
-      return createPion(proxyProto, stateKey, state, quark, propertyDescriptor, mark)
-   }
-}
+// /**
+//  * Case: ion access, ion already initialized (must retreive ion)
+//  * Case: ion access, ion not initialized
+//  * Case: state access, ion not initialized (initialize state access only)
+//  * 
+//  * @param proxyProto 
+//  * @param key 
+//  * @param ionKey 
+//  * @param state 
+//  * @param quark 
+//  * @param propertyDescriptor 
+//  * @returns 
+//  */
+// function initializePion(
+//    proxyProto: ProxyPropertyMap,
+//    stateKey: ProxyKey,
+//    state: ModelState,
+//    quark: ModelQuark,
+//    propertyDescriptor: PropertyDescriptor,
+//    mark: typeof inert | MarkMap | undefined
+// ) {
+//    // if (ionKey) {
+//    //    return initializePionAccess(proxyProto, stateKey, ionKey, state, quark, propertyDescriptor, mark)
+//    // } else {
+//       return createPion(proxyProto, stateKey, state, quark, propertyDescriptor, mark)
+//    // }
+// }
 
-function initializePionAccess(
-   proxyProto: ProxyPropertyMap,
-   stateKey: ProxyKey,
-   ionKey: string,
-   state: ModelState,
-   quark: ModelQuark,
-   propertyDescriptor: PropertyDescriptor,
-   mark: typeof inert | MarkMap | undefined
-) {
-   const ion = getPion(proxyProto, stateKey) ?? createPion(proxyProto, stateKey, state, quark, propertyDescriptor, mark)
-   Object.defineProperty(proxyProto, ionKey, {
-      enumerable: false,
-      configurable: propertyDescriptor.configurable,
-      value: ion,
-      writable: false
-   })
-   return ion;
-}
+
+// function initializePionAccess(
+//    proxyProto: ProxyPropertyMap,
+//    key: ProxyKey,
+//    state: ModelState,
+//    quark: ModelQuark,
+//    propertyDescriptor: PropertyDescriptor,
+//    mark: typeof inert | MarkMap | undefined
+// ) {
+//    const ion = getPion(proxyProto, key) ?? createPion(proxyProto, key, state, quark, propertyDescriptor, mark)
+
+//    return ion;
+// }
 
 function createPion(
    proxyProto: ProxyPropertyMap,
@@ -748,7 +754,7 @@ function createPion(
       enumerable: propertyDescriptor.enumerable,
       configurable: propertyDescriptor.configurable,
       get: ion,
-      set: Object.getOwnPropertyDescriptor(ion, 'state')!.set //NOTE: equivalent performance to storing setter on quark
+      set: Object.getOwnPropertyDescriptor(ion, 'value')!.set //NOTE: equivalent performance to storing setter on quark
    })
    return ion
 }
@@ -1088,7 +1094,7 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 //       const ion = proxyProto[key] ?? (proxyProto[key] = createPion(model, initialTarget, key, initialTarget[key]))
 
 //       // set ion
-//       if (hasQuark(ion) && 'state' in ion) {
+//       if (hasQuark(ion) && 'value' in ion) {
 //          const ionQuark = quarkOf(ion) as AtomicIonQuark
 //          ionQuark.asPion!.setPionState(quarkOf(model), value)
 //          // ionQuark.addModel(quarkOf(model)) 
@@ -1146,7 +1152,7 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 
 // export function setAbsorbedIonState(model: IonizedModel, key: ProxyKey, ion: Ion, value: unknown) {
 //    // const oldState = ion()
-//    if (hasQuark(ion) && 'state' in ion) {
+//    if (hasQuark(ion) && 'value' in ion) {
 //       try {
 //          ion.state = value;
 //       }

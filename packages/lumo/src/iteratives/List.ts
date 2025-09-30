@@ -70,7 +70,7 @@ export class ListKit extends VineNode {
 
          // existing item
          if (kit) {
-            kit.$index.state = i
+            kit.$index.value = i
             if (kit.preceding !== preceding || i === 0) {
                updateLCS(sequences.at(-1))
                sequences.push({ start: i, length: 1 })

@@ -71,7 +71,7 @@ export function TestPolymorph() {
    window.addEventListener('popstate', (e) => {
       console.log('popstate', e)
       console.log('history', window.location.pathname)
-      $main.as(window.location.pathname, e.state?.input)
+      $main.as(window.location.pathname, e.value?.input)
    })
 
    window.addEventListener('hashchange', (e) => {

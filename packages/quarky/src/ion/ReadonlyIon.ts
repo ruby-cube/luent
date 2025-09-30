@@ -4,7 +4,7 @@ import { quarkOf, QUARK } from "../Quark";
 import { AtomicIon, isIon } from "./ion";
 
 type $WritableIon = (() => unknown) & {
-   state: unknown;
+   value: unknown;
 } & MutableCapsule
 
 export function createReadonlyIon($ion: $WritableIon) {
@@ -17,5 +17,5 @@ export function createReadonlyIon($ion: $WritableIon) {
 }
 
 export function isWritableIon(value: any): value is AtomicIon {
-   return isIon(value) && 'state' in value;
+   return isIon(value) && 'value' in value;
 }

@@ -5,7 +5,7 @@ import { ion, ionic, ionize, watch } from "@rue/quarky";
 export function TestIonProp() {
     const $count = ion(0, {
         increment() {
-            $count.state = $count() + 1
+            $count.value = $count() + 1
         }
     })
 
@@ -44,7 +44,7 @@ export function TestIonProp() {
 
     const $firstName = ion('Kermit', {
         set(name: string) {
-            $firstName.state = name
+            $firstName.value = name
         }
     })
     const $lastName = ion('The Frog')
@@ -52,8 +52,8 @@ export function TestIonProp() {
     const $fullName = ion(() =>$firstName() + " " + $lastName(), {
         set(name: string) {
             const splitName = name.split(" ");
-            $firstName.state = splitName[0]
-            $lastName.state = splitName[1]
+            $firstName.value = splitName[0]
+            $lastName.value = splitName[1]
             return name;
         }
     })

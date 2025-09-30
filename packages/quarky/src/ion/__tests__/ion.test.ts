@@ -24,7 +24,7 @@ describe('ion function', () => {
     it('should attach methods to the ion when methods are provided', () => {
         const $count = ion(5, {
             double() {
-                $count.state = $count() * 2
+                $count.value = $count() * 2
             }
         });
 
@@ -36,11 +36,11 @@ describe('ion function', () => {
     it('should throw an error if .value is read', () => {
         const $count = ion(5, {
             double() {
-                $count.state = $count() * 2
+                $count.value = $count() * 2
             }
         });
 
-        expect(()=>$count.state).toThrowError();
+        expect(()=>$count.value).toThrowError();
         expect($count[QUARK]).toBeInstanceOf(MetaIon);
     });
  
@@ -48,21 +48,21 @@ describe('ion function', () => {
    //  it('should replace `as` method with `_as` if provided with `as` method', () => {
    //      const $count = ion(15, {
    //          as(value: number){
-   //              $count.state = value;
+   //              $count.value = value;
    //          },
    //          double() {
-   //              $count.state = $count() * 2
+   //              $count.value = $count() * 2
    //          }
    //      });
 
    //      const newValue = 25;
-   //      $count.state = newValue;
+   //      $count.value = newValue;
    //      expect($count()).toBe(newValue);
 
    //      $count.double()
    //      expect($count()).toBe(50);
 
-   //      $count.state = 2
+   //      $count.value = 2
    //      expect($count()).toBe(2);
    //  });
 
@@ -73,7 +73,7 @@ describe('ion function', () => {
         expect(typeof $doubleCount).toBe('function');
         expect(isFunction($doubleCount)).toBe(false)
         expect($doubleCount()).toBe(2);
-        $count.state = 4
+        $count.value = 4
         expect($doubleCount()).toBe(8);
         expect($doubleCount[QUARK].type).toBe(DERIVED_ION);
       });

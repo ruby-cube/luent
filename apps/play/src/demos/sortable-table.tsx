@@ -69,7 +69,7 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
    })
 
    function sortBy(key: string) {
-      $sortKey.state = key
+      $sortKey.value = key
       sortOrders[key] *= -1
    }
 

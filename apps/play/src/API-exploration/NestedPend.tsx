@@ -31,7 +31,7 @@ export function NestedPend() {
             <h1>Hello World</h1>
             <PendingListBlock></PendingListBlock>
             <p>{$count}</p>
-            <button on:click={() => $count.state = $count() + 1}>click</button>
+            <button on:click={() => $count.value = $count() + 1}>click</button>
          </>
    )
 }
@@ -57,7 +57,7 @@ function TextArea() {
 
    pend(
       simFetchC("pomp")
-   ).then(word => $word.state = word)
+   ).then(word => $word.value = word)
 
    return (
       <div>
@@ -73,7 +73,7 @@ function ItemBlockA() {
    const $word = ion("not ready")
 
    pend(simFetch("calico"))
-      .then(word => $word.state = word)
+      .then(word => $word.value = word)
 
    return (
       <div>{$word}</div>
@@ -84,7 +84,7 @@ function ItemBlockB() {
    const $word = ion("not ready")
 
    pend(simLongFetch("basset"))
-      .then(word => $word.state = word)
+      .then(word => $word.value = word)
 
    return (
       <div>{$word}</div>
@@ -95,7 +95,7 @@ function ItemBlockC() {
    const $word = ion("not ready")
 
    pend(simFetchB("cerulean"))
-      .then(word => $word.state = word)
+      .then(word => $word.value = word)
 
    return (
       <div>{$word}</div>
@@ -106,7 +106,7 @@ function ItemBlockD() {
    const $word = ion("not ready")
 
    pend(simLongFetchB("tilted"))
-      .then(word => $word.state = word)
+      .then(word => $word.value = word)
 
    return (
       <div>{$word}</div>

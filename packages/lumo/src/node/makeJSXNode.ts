@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon } from "../../../quarky/src";
+import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon, isGetter } from "../../../quarky/src";
 import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { $Node, $Nodes } from "./NodeRef";
@@ -75,6 +75,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 {
    class?: ClassInput | ClassInput[],
    style?: StyleInput | StyleInput[],
+   'show-if'?: Ion<Booleanny>
    // attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 

@@ -8,13 +8,14 @@ import { Inert, IsInert } from "../ionized/inert";
 import { initializeSnapshots } from "../ionized/TimeTraveler";
 import { hasQuark, QUARK } from "../Quark";
 import { IonizeOptions, maybeIonize } from "../ionized/IonizedModel";
+import { isGetter } from "../reactivity/WatchSubject";
 
 /* API */
 export type Ion<T = unknown> = () => T
 
 type MaybeInert<T = unknown> = IsIonized<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
-export type MutableIon<T> = Ion<T> & { state: T }
+export type MutableIon<T> = Ion<T> & { value: T }
 
 
 // NOTE: deprecating NonVoid because extending generic as NonVoid causes type-narrowing
@@ -30,7 +31,9 @@ type PickMethods = (...args: string[]) => ReinConfig
 type ReinConfig = { capsule: AnyObject, selectedMethods: string[] }
 
 export function isIon(value: unknown): value is Ion {
-   return isFunction(value) && QUARK in value
+   return isFunction(value) && 
+   // value.length === 0
+   QUARK in value
    // /^\$[a-z]/.test(value.name) && 
    // value.length === 0
 }
@@ -57,7 +60,7 @@ function $_value(value: any) {
 window.$_is_mutable = $_is_mutable;
 
 function $_is_mutable(value: Function) {
-   return 'state' in value
+   return 'value' in value
 }
 
 //@ts-expect-error
@@ -70,11 +73,11 @@ function $_is_ref(value: AnyObject) {
 }
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-   return (isIon(value) ? value : neutron(value)) as T extends Ion ? T : Ion<T>
+   return (isGetter(value) ? value : neutron(value)) as T extends Ion ? T : Ion<T> //QUESTION: Why neutron and not just a getter?
 }
 
 export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
-   return isFunction(maybeFn) ? maybeFn() : maybeFn as T extends () => infer R ? R : T;
+   return isFunction(maybeFn) && maybeFn.length === 0 ? maybeFn() : maybeFn as T extends () => infer R ? R : T;
 }
 
 
@@ -125,14 +128,21 @@ export function ion<
 export function ion<
    T,
    M
->(initialState: T, props?: M & ThisType<M & { state: T }>): AsIon<T, M>
+>(initialState: T, props?: M & ThisType<M & { value: T }>): AsIon<T, M>
 export function ion<
    T,
    M
->(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { state: T }>): AsIon<T, M> {
+>(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { value: T }>): AsIon<T, M> {
    return asIon(initialState, false, undefined, props) as AsIon<T, M>
 }
 
+export const Ion = ion
+export const makeIon = ion
+export const createIon = ion
+
+Ion.Ionized = createIonizedIon
+makeIon.Ionized = createIonizedIon
+createIon.Ionized = createIonizedIon
 
 // function createIonizedIon<
 //    T extends Record<string, unknown>,
@@ -143,6 +153,7 @@ export function ion<
 
 // type State<D> = [D] extends [StateDef<infer T>] ? T : D
 
+ion.Ionized = createIonizedIon
 ion.ionize = createIonizedIon
 // ion.mu = createMutableIon
 // createMutableIon.ionize = createMutableIonizedIon
@@ -265,7 +276,7 @@ export const ionic = ion
 //    toggler() { }
 // })
 
-// $actived.state = true
+// $actived.value = true
 
 // function som<T>(value: T): T {
 //    return null as T;

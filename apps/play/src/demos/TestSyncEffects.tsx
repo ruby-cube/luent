@@ -7,7 +7,7 @@ export function TestSyncEffects() {
    const $count = ion(0, {
       increment() {
          console.log('start increment')
-         this.state++;
+         this.value++;
          console.log('end increment')
       }
    })
@@ -25,13 +25,13 @@ export function TestSyncEffects() {
 
    watch($count, () => {
       console.log('$$$ --start effect increment')
-      $count2.state = $count() + 1;
+      $count2.value = $count() + 1;
       console.log('--end effect increment')
    }, { phase: SYNC })
 
    // watch($count2, () => {
    //    console.log('$$$ --start effect2 increment')
-   //    $count.state = $count2() + 1;
+   //    $count.value = $count2() + 1;
    //    console.log('--end effect2 increment')
    // }, { phase: SYNC })
 

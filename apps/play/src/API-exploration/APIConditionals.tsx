@@ -113,10 +113,10 @@ export function MountIf() {
    const $count = ion(0,
       {
          increment() {
-            this.state++
+            this.value++
          },
          update(value) {
-            return this.state = value
+            return this.value = value
          }
       })
 
@@ -135,19 +135,19 @@ export function MountIf() {
 
    const $active = ion(true, {
       toggle() {
-         this.state = !this.state
+         this.value = !this.value
       }
    })
 
    const $ready = ion(true, {
       toggle() {
-         $ready.state = !$ready()
+         $ready.value = !$ready()
       }
    })
 
    const $isMobile = ion(false, {
       toggle() {
-         $isMobile.state = !$isMobile()
+         $isMobile.value = !$isMobile()
       }
    })
 
@@ -161,9 +161,9 @@ export function MountIf() {
    const $color = ion('lim', {
       change() {
          if ($color() === 'lim')
-            $color.state = 'blu'
+            $color.value = 'blu'
          else
-            $color.state = 'lim'
+            $color.value = 'lim'
       }
    })
    //NOTE: if ooo-transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition

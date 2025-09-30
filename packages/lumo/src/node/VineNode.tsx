@@ -1,6 +1,6 @@
 import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 import { debug, isObject, normalizeToArray } from "@rue/utils";
-import { __DEV__checkIfTracked, Ion, isIon, toValue, watch } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, isGetter, isIon, toValue, watch } from "@rue/quarky";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
@@ -78,7 +78,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
       else if (isComponentKit(node)) {
          _processJSXOutput(node.jsxNodes, flattened)
       }
-      else if (isIon(node)) {
+      else if (isGetter(node)) {
          flattened.push(new DynamicTextNode(node))
       }
       else if (node == null || node === '') {

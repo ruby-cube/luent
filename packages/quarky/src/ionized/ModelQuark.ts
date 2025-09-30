@@ -67,7 +67,6 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
    ) {
 
 
-
       // this.$ = Object.create(this.rawTarget)
       this.__DEV__asTraceable = new Traceable()
       // this.watch = () => {
@@ -120,14 +119,16 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
    trigger = trigger
 
 
-   pions: Record<PropertyKey, AtomicIonQuark | TrackedOps> = {}
+   trackedOps: Record<PropertyKey, AtomicIonQuark | TrackedOps> = {}
 
    // pions: Map<PropertyKey, Quark | TrackedOps> = new Map()
 
-   registerPion(key: PropertyKey, pion: AtomicIonQuark) {
-      this.pions[key] = pion
-      return pion;
-   }
+   // registerPion(key: PropertyKey, pion: AtomicIonQuark) {
+   //    this.trackedOps[key] = pion
+   //    return pion;
+   // }
+
+   pions: undefined | AnyObject = undefined
 
    trackOp(opKey: PropertyKey, entryKey: unknown){
       // console.log("&&& tracking op", this.pions)
@@ -135,12 +136,12 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
    }
 
    registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicQuark) {
-      const ops = this.pions[key] ?? new Map();
+      const ops = this.trackedOps[key] ?? new Map();
       if (!(ops instanceof Map)) {
          debug.error(`${String(key)} is not an op`)
          return atomicOp;
       }
-      this.pions[key] = ops;
+      this.trackedOps[key] = ops;
       ops.set(entryKey, atomicOp)
       return atomicOp;
    }

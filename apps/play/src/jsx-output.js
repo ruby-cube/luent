@@ -4,7 +4,7 @@ import { ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quar
 export function MountIf() {
    const $count = ion(0, {
       increment() {
-         $count.state = $count() + 1;
+         $count.value = $count() + 1;
       }
    });
    const list = ionize({
@@ -15,17 +15,17 @@ export function MountIf() {
    });
    const $active = ion(false, {
       toggle() {
-         $active.state = !$active();
+         $active.value = !$active();
       }
    });
    const $ready = ion(false, {
       toggle() {
-         $ready.state = !$ready();
+         $ready.value = !$ready();
       }
    });
    const $isMobile = ion(false, {
       toggle() {
-         $isMobile.state = !$isMobile();
+         $isMobile.value = !$isMobile();
       }
    });
    const todos = ionize([{
@@ -35,9 +35,9 @@ export function MountIf() {
    const $color = ion("lim", {
       change() {
          if ($color() === "lim")
-            $color.state = "blu";
+            $color.value = "blu";
          else
-            $color.state = "lim";
+            $color.value = "lim";
       }
    });
    return component(

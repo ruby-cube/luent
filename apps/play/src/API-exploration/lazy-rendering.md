@@ -67,7 +67,7 @@ Also, actions are not stateful. They are procedures.
 // const [lazyRender, cancelLazyRender] = useLazyRender()
 // const $pending = ion(false)
 
-// lazyRender(() => $count.state++, { $pending, limit: 1000 }) // wraps in an action
+// lazyRender(() => $count.value++, { $pending, limit: 1000 }) // wraps in an action
 
 // const [textAction, textInsertion, textDeletion] = useAsyncActions({ exclusive: true })
 
@@ -219,7 +219,7 @@ const adding10ToCount = useAction()
 function handleClick(){
    
    doAction(() => {
-      $count.state = $count() + 10
+      $count.value = $count() + 10
    }, {
       action: adding10ToCount
    })

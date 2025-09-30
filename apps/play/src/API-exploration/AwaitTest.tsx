@@ -35,7 +35,7 @@ export function MainSite() {
             <$ListBlock></$ListBlock>
             <$TextArea></$TextArea>
             <p>{$count}</p>
-            <button on:click={() => $count.state = $count() + 1}>click</button>
+            <button on:click={() => $count.value = $count() + 1}>click</button>
         </>
     )
 }
@@ -61,7 +61,7 @@ function TextArea() {
 
 
     pend(simFetchC("pomp"))
-        .then(word => $word.state = word)
+        .then(word => $word.value = word)
 
     return component({
         $word
@@ -79,7 +79,7 @@ function ItemBlockA() {
     const $word = ion("not ready")
 
     pend(simFetch("calico"))
-        .then(word => $word.state = word)
+        .then(word => $word.value = word)
 
     return component(
         <div>{$word}</div>
@@ -96,7 +96,7 @@ function ItemBlockB() {
 
     pend(fetch("basset"))
         .then(word =>
-            $word.state = word
+            $word.value = word
         )
         .catch(err =>
             console.log(err)
@@ -105,14 +105,14 @@ function ItemBlockB() {
     pend([
         fetch('a'),
         fetch('b')
-    ]).then(([a, b]) => $word.state = a))
+    ]).then(([a, b]) => $word.value = a))
 
     run(async () => {
         try {
             const word = await pend(
                 fetch('basset')
             )
-            $word.state = word
+            $word.value = word
         }
         catch (error) {
             console.log(error)
@@ -128,7 +128,7 @@ function ItemBlockC() {
     const $word = ion("not ready")
 
     pend(simFetchB("cerulean"))
-        .then(word => $word.state = word)
+        .then(word => $word.value = word)
 
     return component(
         <div>{$word}</div>
@@ -139,7 +139,7 @@ function ItemBlockD() {
     const $word = ion("not ready")
 
     pend(simLongFetchB("tilted"))              // [promise]
-        .then(word => $word.state = word)
+        .then(word => $word.value = word)
 
     return component(
         <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect pend call and wrap component in promise) 

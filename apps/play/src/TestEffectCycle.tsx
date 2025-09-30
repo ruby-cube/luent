@@ -5,10 +5,10 @@ import { RENDER } from "../../../packages/lumo/src/render-cycle";
 export function TestEffectCycle() {
    const $count = ion(0, {
       increment() {
-         $count.state++
+         $count.value++
       },
       decrement() {
-         $count.state--
+         $count.value--
       }
    })
 

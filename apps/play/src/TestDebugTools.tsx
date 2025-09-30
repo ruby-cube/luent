@@ -16,10 +16,10 @@ export function TestDebugApp() {
    const $count = ion(0,
       {
          increment() {
-            this.state++
+            this.value++
          },
          decrement() {
-            this.state--
+            this.value--
          }
       })
 
@@ -45,7 +45,7 @@ export function TestDebugApp() {
    })
 
    function setSame() {
-      $count.state = $count.state;
+      $count.value = $count.value;
    }
 
    // debug.traceCalls(setSame)

@@ -29,7 +29,7 @@ function Album(input : FromTag<{
    const $album = fromCloud(ALBUM, {
       suspense: resolve,
       catch(err) {
-         $album.state = 'default'
+         $album.value = 'default'
       }
    })
    const $albumB = fromCloud(ALBUMB, { suspense: resolve }) // will resolve in parallel
@@ -55,9 +55,9 @@ export default function MarkdownEditor() {
 
    return (
       <>
-         <textarea value={$markdown} onChange={e => $markdown.state = e.target.value} />
+         <textarea value={$markdown} onChange={e => $markdown.value = e.target.value} />
          <label>
-            <input type="checkbox" checked={$showPreview} onChange={e => $showPreview.state = e.target.checked} />
+            <input type="checkbox" checked={$showPreview} onChange={e => $showPreview.value = e.target.checked} />
             Show preview
          </label>
          <hr />
@@ -91,9 +91,9 @@ export default function MarkdownEditor() {
 
    return (
       <>
-         <textarea value={$markdown} onChange={e => $markdown.state = e.target.value} />
+         <textarea value={$markdown} onChange={e => $markdown.value = e.target.value} />
          <label>
-            <input type="checkbox" checked={$showPreview} onChange={e => $showPreview.state = e.target.checked} />
+            <input type="checkbox" checked={$showPreview} onChange={e => $showPreview.value = e.target.checked} />
             Show preview
          </label>
          <hr />
@@ -130,9 +130,9 @@ export default function MarkdownEditor() {
 
    return (
       <>
-         <textarea value={$markdown} onChange={e => $markdown.state = e.target.value} />
+         <textarea value={$markdown} onChange={e => $markdown.value = e.target.value} />
          <label>
-            <input type="checkbox" checked={$showPreview} onChange={e => $showPreview.state = e.target.checked} />
+            <input type="checkbox" checked={$showPreview} onChange={e => $showPreview.value = e.target.checked} />
             Show preview
          </label>
          <hr />

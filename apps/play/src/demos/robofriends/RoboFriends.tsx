@@ -123,7 +123,7 @@ export function RoboCard(input : FromTag<{
 
 
    // function updateEmail() {
-   //    if (mu($email)) $email.state = new Email()
+   //    if (mu($email)) $email.value = new Email()
    // }
 
 

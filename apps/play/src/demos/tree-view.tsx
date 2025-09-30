@@ -155,7 +155,7 @@ function TreeItemView(input: FromTag<{
 
    const $isOpen = ion(!!item.children?.length, {
       toggle() {
-         $isOpen.state = !$isOpen.state
+         $isOpen.value = !$isOpen.value
       }
    })
 
@@ -164,7 +164,7 @@ function TreeItemView(input: FromTag<{
    function changeType() {
       if (!$isFolder()) {
          item.addChild()
-         $isOpen.state = true
+         $isOpen.value = true
       }
    }
 

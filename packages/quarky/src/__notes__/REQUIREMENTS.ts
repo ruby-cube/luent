@@ -21,8 +21,8 @@ const $count = ion(0)
  */
 watch($message, ({ current: msg }) => {
    if (msg.endsWith("!")) {
-      $message.state = msg.slice(-1) // we do not expect this to cause effect to rerun. 
-      $count.state++ // we expect this to cause effects elsewhere to run. But what if the effects have already run? 
+      $message.value = msg.slice(-1) // we do not expect this to cause effect to rerun. 
+      $count.value++ // we expect this to cause effects elsewhere to run. But what if the effects have already run? 
       // Should we schedule a new effect? Yes I think so... or place the burden on the developer to schedule effects carefully
    }
 })
@@ -57,7 +57,7 @@ const $active = ion(false)
 watch($message, ({ current: msg }) => {
    watch($active, () => {
       if (msg.endsWith("!")) {
-         $message.state = msg.slice(-1) // This should cause an animation, like nesting request animation frame
+         $message.value = msg.slice(-1) // This should cause an animation, like nesting request animation frame
       }
    }, { cycle: "next" })
 })

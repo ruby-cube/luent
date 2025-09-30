@@ -299,7 +299,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //    //    this.pState = state;
 
 //    //    update.onComplete(() => {
-//    //       this.state = this.pState;
+//    //       this.value = this.pState;
 //    //       this.pState = NULL
 //    //       this.pendingUpdate = null;
 //    //    })
@@ -315,7 +315,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //       op.pendingUpdate = null;
 //       // pion.pState = NULL;
 //    }
-//    // pion.state = state;
+//    // pion.value = state;
 //    // }
 //    op.pendingUpdate = update
 //    console.trace('set pending update')

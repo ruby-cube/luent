@@ -48,7 +48,7 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
       render: toAsyncRender(render, context, {
          [FLASK]: undefined,
          [COMMONS]: commons,
-         [TRACE]: __DEV__ ? __DEV__buildAsyncPath() : ''
+         [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }),
       type: activationType,
       transitionNodes,
@@ -80,7 +80,7 @@ export class IfElseKit extends VineNode {
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
-            kit.flask!.emitInitialMount()
+         kit.flask!.emitInitialMount()
       })
 
       watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
@@ -94,7 +94,7 @@ export class IfElseKit extends VineNode {
             queueInternalRenderTask(() => {
                mountFragment(fragment, this.precedingLeaf, this.parent)
             }, flask)
-            kit.type === 'create' ? kit.flask!.emitInitialMount(): kit.flask!.emitRemount()
+            kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
          })
       })
    }
@@ -109,8 +109,8 @@ export class IfElseKit extends VineNode {
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
          kit.type === 'remount' ?
-            (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask))))
-            : processJSXOutput(kit.render(flask));
+            (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
+            : processJSXOutput(kit.render(flask, kit.$condition));
 
       emitActivated(kit)
    }
@@ -130,7 +130,7 @@ export class IfElseKit extends VineNode {
 
       queueInternalRenderTask(() => {
          removeDOMNodes(prevNodes)
-      })
+      }, this.outerFlask)
       return kit;
    }
 }
@@ -169,7 +169,7 @@ function getConditions(statements: ConditionalStatement[]) {
 }
 
 function $ActiveIndex(conditions: Ion<Booleanny>[]) {
-   return ion(() =>{
+   return ion(() => {
       for (let i = 0; i < conditions.length; i++) {
          const $condition = conditions[i]
          if ($condition()) {
@@ -224,6 +224,8 @@ export function showDOMNodes(nodes: JSXNode[]) {
    })
 }
 
+
+
 export function renderShowHideSeries(kits: ConditionalKit[]) {
    const flask = getFlask()
    const $activeIndex = $ActiveIndex(getConditions(kits))
@@ -231,7 +233,7 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 
    for (let i = 0; i < kits.length; i++) {
       const kit = kits[i]
-      const nodes = processJSXOutput(kit.render(flask));
+      const nodes = processJSXOutput(kit.render(kit.$condition));
       if ($activeIndex() === i) {
          showDOMNodes(nodes)
       }
@@ -241,7 +243,7 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 
       seriesNodes.push(nodes)
 
-      const $match = ion(() =>$activeIndex() === i)
+      const $match = ion(() => $activeIndex() === i)
 
       watchToRender($match, ({ current: isActive, previous: wasActive, flask }) => {
          if (isActive === wasActive) return;

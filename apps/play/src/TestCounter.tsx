@@ -54,10 +54,10 @@ function TestIon() {
    const $message = ion('hi')
 
    function changeMessage() {
-      console.log('message', $message.state)
+      console.log('message', $message.value)
       console.log('message (call)', $message())
-      $message.state = 'bye'
-      console.log('new message', $message.state)
+      $message.value = 'bye'
+      console.log('new message', $message.value)
       console.log('new message (call)', $message())
    }
 
@@ -87,11 +87,11 @@ export function TestCount() {
    })
 
    function increment() {
-      $count.state++
+      $count.value++
    }
 
    function decrement() {
-      $count.state--
+      $count.value--
    }
 
    ionicTask(() => {
@@ -109,7 +109,7 @@ export function TestCount() {
          <p>these should work</p>
          <button on:click={increment}>increment</button>
          <button on:click={decrement}>decrement</button>
-         <button on:click={e => $active.state = !$active()}>toggle active</button>
+         <button on:click={e => $active.value = !$active()}>toggle active</button>
       </>
    )
 }
@@ -119,20 +119,20 @@ export function TestThisCount() {
    const $count = ion(0, {
       increment() {
          console.log('increment', this)
-         this.state++
+         this.value++
       },
       decrement() {
-         this.state--
+         this.value--
       }
    })
 
    const $doubleCount = ion(() =>$count() * 2)
 
    function increment() {
-      $count.state++
+      $count.value++
    }
    function decrement() {
-      $count.state--
+      $count.value--
    }
 
    return component(
@@ -170,10 +170,10 @@ export function TestThisCount() {
 //    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
-//       $count.state++
+//       $count.value++
 //    }
 //    function decrement() {
-//       $count.state--
+//       $count.value--
 //    }
 
 //    return component(
@@ -211,10 +211,10 @@ export function TestThisCount() {
 //    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
-//       $count.state++
+//       $count.value++
 //    }
 //    function decrement() {
-//       $count.state--
+//       $count.value--
 //    }
 
 //    return component(
@@ -240,20 +240,20 @@ export function TestThisCount() {
 //    const $count = asReadonlyIon(ion(0, {
 //       increment() {
 //          console.log('increment', this)
-//          this.state++
+//          this.value++
 //       },
 //       decrement() {
-//          this.state--
+//          this.value--
 //       }
 //    }))
 
 //    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
-//       $count.state++
+//       $count.value++
 //    }
 //    function decrement() {
-//       $count.state--
+//       $count.value--
 //    }
 
 //    return component(
@@ -279,10 +279,10 @@ export function TestThisCount() {
 //    const $count = asReinedIon(ion(0, {
 //       increment() {
 //          console.log('**increment', this)
-//          this.state++
+//          this.value++
 //       },
 //       decrement() {
-//          this.state--
+//          this.value--
 //       }
 //    }), true, ['increment'])
 
@@ -292,10 +292,10 @@ export function TestThisCount() {
 //    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
-//       $count.state++
+//       $count.value++
 //    }
 //    function decrement() {
-//       $count.state--
+//       $count.value--
 //    }
 
 //    return component(
@@ -333,10 +333,10 @@ export function TestThisCount() {
 //    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
-//       $count.state++
+//       $count.value++
 //    }
 //    function decrement() {
-//       $count.state--
+//       $count.value--
 //    }
 
 //    return component(
@@ -361,20 +361,20 @@ export function TestThisCount() {
 //    const $count = asReinedIon(ion(0, {
 //       increment() {
 //          console.log('increment', this)
-//          this.state++
+//          this.value++
 //       },
 //       decrement() {
-//          this.state--
+//          this.value--
 //       }
 //    }), true, [])
 
 //    const $doubleCount = ion(() =>$count() * 2)
 
 //    function increment() {
-//       $count.state++
+//       $count.value++
 //    }
 //    function decrement() {
-//       $count.state--
+//       $count.value--
 //    }
 
 //    return component(

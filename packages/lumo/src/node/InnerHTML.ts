@@ -1,4 +1,4 @@
-import { isIon, __DEV__checkIfTracked, Ion, toValue } from "@rue/quarky";
+import { isIon, __DEV__checkIfTracked, Ion, toValue, isGetter } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 import { RawJSXNode } from "./makeJSXNode";
 import { MaybeIon } from "../component/Input";
@@ -10,7 +10,7 @@ import { DOMElement, DOMParent } from "./VineNode";
 export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
    //  nodePod.appendStaticNode(textNode) //QUESTION: do we need to append innerHTML to nodePod??, we don't have to worry about siblings, so idon't think so
    const htmlString = kit.innerHTML;
-   if (isIon(htmlString)) {
+   if (isGetter(htmlString)) {
       watchToRender(htmlString, ({ flask }) => {
          queueInternalRenderTask(() => {
             parentNode.innerHTML = toString(htmlString());

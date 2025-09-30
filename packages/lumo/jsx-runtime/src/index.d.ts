@@ -1720,8 +1720,8 @@ declare namespace React {
       value?: string | readonly string[] | number | undefined;
       width?: number | string | undefined;
 
-      'mu:value'?: Quarky.AtomicIon<any, { state: any; }> | Quarky.Ion<any, { set: (value: any) => unknown }>
-      'mu:checked'?: Quarky.AtomicIon<Booleanny, { state: Booleanny; }> | Quarky.Ion<Booleanny, { set: (value: Booleanny) => unknown }>
+      'mu:value'?: Quarky.AtomicIon<any, { value: any; }> | Quarky.Ion<any, { set: (value: any) => unknown }>
+      'mu:checked'?: Quarky.AtomicIon<Booleanny, { value: Booleanny; }> | Quarky.Ion<Booleanny, { set: (value: Booleanny) => unknown }>
    }
 
 

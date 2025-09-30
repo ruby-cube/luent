@@ -8,12 +8,12 @@ export function TabApp() {
    // const data = ionize({ id: 0, markdown: '# Sunny Day' })
    const $active = ion(true, {
       toggle() {
-         $active.state = !$active()
+         $active.value = !$active()
       }
    })
    const $open = ion(true, {
       toggle() {
-         $open.state = !$open()
+         $open.value = !$open()
       }
    })
    const $markdown = ion('# Something Special')
@@ -214,7 +214,7 @@ function App(input : FromTag<{
 
    const $activeFile = ion(undefined as File | undefined, {
       as(file: File) {
-         prevActiveFile = $activeFile.state;
+         prevActiveFile = $activeFile.value;
          $activeFile = file;
       }
    })

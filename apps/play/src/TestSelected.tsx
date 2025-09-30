@@ -6,7 +6,7 @@ export function TestCustomRadioSelection() {
    const $selectedItem = ion(undefined as number | undefined)
 
    function selectItem(item: number) {
-      $selectedItem.state = item;
+      $selectedItem.value = item;
    }
 
    return component(

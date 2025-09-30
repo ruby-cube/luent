@@ -16,7 +16,7 @@ export function neutron<T, M>(initialState: T, props?: M & object): MutableIon<T
 export type $AtomicNeutronState = MutableIon<unknown> & Capsule & {
    [QUARK]: {
       inert: true;
-      state: any,
+      value: any,
       ionized: boolean, //TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
    } & Quark<typeof INERT_ION, $AtomicNeutronState>
 }
@@ -31,14 +31,14 @@ const INERT_ION = Symbol('atomic neutron')
 
 /** INTERNAL */
 export function createAtomicNeutron(
-   state: any,
+   value: any,
    methods?: object,
    ionized: boolean = false
 ) {
-   const $ion = (() => ion.state) as $AtomicNeutronState
+   const $ion = (() => ion.value) as $AtomicNeutronState
 
    const ion: NeutronQuark = {
-      state,
+      value,
       ionized,
       inert: true,
       quarkType: INERT_ION,
@@ -50,12 +50,12 @@ export function createAtomicNeutron(
 
    const capsuleName = 'Neutron'
 
-   Object.defineProperty($ion, 'state', {
+   Object.defineProperty($ion, 'value', {
       get() {
-         return ion.state;
+         return ion.value;
       },
       set: value => {
-         // __DEV__traceMethodCall(capsuleName, $ion, 'state')
+         // __DEV__traceMethodCall(capsuleName, $ion, 'value')
          return state = maybeIonize(value, ionized)
       }
    })

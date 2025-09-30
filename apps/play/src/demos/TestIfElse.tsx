@@ -10,8 +10,8 @@ export function TestIfElse() {
 
    return component(
       <div>
-         <button on:click={e => $active.state = !$active()}>toggle</button>
-         <button on:click={e => $ready.state = !$ready()}>toggle</button>
+         <button on:click={e => $active.value = !$active()}>toggle</button>
+         <button on:click={e => $ready.value = !$ready()}>toggle</button>
          <show-hide>
             {If($active,
                <div>

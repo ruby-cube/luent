@@ -38,19 +38,19 @@ export function TriangleDemo() {
    const start = Date.now()
 
    const secondsInterval = Interval(() => {
-      update(() => ($seconds.state = ($seconds() % 10) + 1), { lazy: 1000 })
+      update(() => ($seconds.value = ($seconds() % 10) + 1), { lazy: 1000 })
    }, 1000).start();
-   // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
+   // t = setInterval(() => startTransition(() => $seconds.value = ($seconds() % 10) + 1), 1000);
 
    const animation = Animation(() => {
-      $elapsed.state = Date.now() - start;
+      $elapsed.value = Date.now() - start;
    }).start()
 
    // const $x = ion(0)
    // const $y = ion(0)
    // listen(document, 'mousemove', ThrottlePointer((e: MouseEvent) => {
-   //    $x.state = e.clientX;
-   //    $y.state = e.clientY;
+   //    $x.value = e.clientX;
+   //    $y.value = e.clientY;
    // }))
 
    atUnmount(() => {
@@ -70,7 +70,7 @@ export function TriangleDemo() {
    function reset() {
       secondsInterval.stop()
       update(() => {
-         $seconds.state = 0
+         $seconds.value = 0
       }, { lazy: 1000 }) //TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsInterval.start()
    }
@@ -123,7 +123,7 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
    //       // Artificially long execution time.
    //       while (performance.now() < e) { }
    //    })
-   //    $slow.state = $seconds()
+   //    $slow.value = $seconds()
    // }, { phase: PRERENDER }) // phase doesn't really matter since await makes this into a separate task
 
 
@@ -150,10 +150,10 @@ function Dot({ x, y, s, $text }: FromTag<any>) {
    const [Hover, Unhover] = ThrottledHover()
    // const Throttled = (fn: Function)=>fn
 
-   // const hover = () => $hover.state = true
-   // const unhover = () => $hover.state = false
-   const hover = Hover(() => $hover.state = true)
-   const unhover = Unhover(() => $hover.state = false)
+   // const hover = () => $hover.value = true
+   // const unhover = () => $hover.value = false
+   const hover = Hover(() => $hover.value = true)
+   const unhover = Unhover(() => $hover.value = false)
 
 
    return component(

@@ -91,7 +91,7 @@ export function getAtomicOps(
    quark: ModelQuark,
    op: PropertyKey
 ) {
-   const atomicOps = quark.pions[op]
+   const atomicOps = quark.trackedOps[op]
    if (!(atomicOps instanceof Map)) return undefined;
    return atomicOps;
 }

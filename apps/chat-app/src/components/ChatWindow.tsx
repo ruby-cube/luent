@@ -27,36 +27,36 @@ export function ChatWindow(input: FromTag<{
    const $smoothScroll = ion(false)
 
    atRemounted(() => {
-      $smoothScroll.state = false;
-      $notifyNewMessages.state = false;
+      $smoothScroll.value = false;
+      $notifyNewMessages.value = false;
 
       queuePostrenderTask(() => {
          scrollToNew()
          queuePostrenderTask(() => {
-            $smoothScroll.state = true;
+            $smoothScroll.value = true;
             console.log('A smooth true')
          })
       })
    })
 
    // atRemounted(async () => {
-   //    $smoothScroll.state = false;
-   //    $notifyNewMessages.state = false;
+   //    $smoothScroll.value = false;
+   //    $notifyNewMessages.value = false;
 
    //    await __postrender__()
    //    scrollToNew()
 
    //    await __postrender__()
-   //    $smoothScroll.state = true;
+   //    $smoothScroll.value = true;
    // })
 
    atDemount(() => {
-      if (!$hasUnseenMessages()) $newMessageMarker.state = null
+      if (!$hasUnseenMessages()) $newMessageMarker.value = null
    })
 
    atMessagePosted(() => {
-      $hasUnseenMessages.state = false;
-      $newMessageMarker.state = null
+      $hasUnseenMessages.value = false;
+      $newMessageMarker.value = null
       scrollToBottom()
    })
 
@@ -72,11 +72,11 @@ export function ChatWindow(input: FromTag<{
          scrollToBottom()
       }
       else {
-         $hasUnseenMessages.state = true;
+         $hasUnseenMessages.value = true;
       }
 
       queuePostrenderTask(() => {
-         $smoothScroll.state = true;
+         $smoothScroll.value = true;
          console.log('B smooth true')
       })
    })
@@ -120,13 +120,13 @@ export function ChatWindow(input: FromTag<{
 
    function reScrollend(e: any) {
       if (isScrolledToBottom()) {
-         $hasUnseenMessages.state = false;
+         $hasUnseenMessages.value = false;
       }
       if (isScrolledAboveNewMessages()) {
-         $notifyNewMessages.state = true;
+         $notifyNewMessages.value = true;
       }
       else {
-         $notifyNewMessages.state = false;
+         $notifyNewMessages.value = false;
       }
       user.lastSeenMessageID = findLastSeenMessage()?.id ?? user.lastSeenMessageID
    }
@@ -179,7 +179,7 @@ export function ChatWindow(input: FromTag<{
                         )}
                      </div>
                      {If($ShowNewMessageMarker(message),
-                        <div at:mounted={node => (console.log('*** DIV MOUNTED'), message.id === user.lastSeenMessageID && ($newMessageMarker.state = node))} data-messageID={message.id}>
+                        <div at:mounted={node => (console.log('*** DIV MOUNTED'), message.id === user.lastSeenMessageID && ($newMessageMarker.value = node))} data-messageID={message.id}>
                            --- new messages ---
                         </div>
                      )}

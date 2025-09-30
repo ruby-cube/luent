@@ -8,7 +8,7 @@ export function TestDerived() {
 
    const $count = ion(0, {
       increment() {
-         $count.state = $count() + 1
+         $count.value = $count() + 1
       }
    });
 

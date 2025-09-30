@@ -95,7 +95,7 @@ console.log(roFrogPrinceA === roFrogPrinceB)
 // ION
 const $count = ion(0, {
    increment() {
-      $count.state++
+      $count.value++
    }
 })
 
@@ -103,7 +103,7 @@ console.log('')
 console.log('# ion')
 
 const $roCount = asNonlocalReadonly($count)
-$roCount.state = 10
+$roCount.value = 10
 
 try {
    const $roCount = asNonlocalReadonly($count)

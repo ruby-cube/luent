@@ -106,14 +106,14 @@ function Cell({ column, row } : FromTag<{
    const $editing = ion(false)
 
    function update(e: any) {
-      $editing.state = false
+      $editing.value = false
       cells[column][row] = e.target.value.trim()
    }
 
 
    return component(
       <>
-         <div class="cell" title={cells[column][row]} on:click={e => { console.log('set editing'); $editing.state = true }}>
+         <div class="cell" title={cells[column][row]} on:click={e => { console.log('set editing'); $editing.value = true }}>
             {If($editing,
                <input
                   value={cells[column][row]}

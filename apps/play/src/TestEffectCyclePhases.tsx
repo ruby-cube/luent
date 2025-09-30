@@ -6,13 +6,13 @@ export function TestEffectCyclePhases() {
 
    const $frog = ion('sir robin', {
       sing() {
-         this.state += '!'
+         this.value += '!'
       }
    })
 
    const $frogB = ion('kermit', {
       sing() {
-         this.state += '!'
+         this.value += '!'
       }
    })
 
@@ -20,7 +20,7 @@ export function TestEffectCyclePhases() {
       frog: $frog
    }, {
       change() {
-         this.state = {
+         this.value = {
             frog: $frogB
          }
       }

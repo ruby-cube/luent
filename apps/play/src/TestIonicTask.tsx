@@ -5,10 +5,10 @@ export function TestIonicTask() {
 
    const $count = ion(0, {
       increment() {
-         this.state++
+         this.value++
       },
       decrement() {
-         this.state--
+         this.value--
       }
    })
 

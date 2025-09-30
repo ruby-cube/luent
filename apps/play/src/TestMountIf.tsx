@@ -8,7 +8,7 @@ export function MountIf() {
 
    const $count = ion(0, {
       increment() {
-         $count.state = $count() + 1
+         $count.value = $count() + 1
       }
    })
 
@@ -21,19 +21,19 @@ export function MountIf() {
 
    const $active = ion(true, {
       toggle() {
-         $active.state = !$active()
+         $active.value = !$active()
       }
    })
 
    const $ready = ion(false, {
       toggle() {
-         $ready.state = !$ready()
+         $ready.value = !$ready()
       }
    })
 
    const $isMobile = ion(false, {
       toggle() {
-         $isMobile.state = !$isMobile()
+         $isMobile.value = !$isMobile()
       }
    })
 
@@ -47,9 +47,9 @@ export function MountIf() {
    const $color = ion('lim', {
       change() {
          if ($color() === 'lim')
-            $color.state = 'blu'
+            $color.value = 'blu'
          else
-            $color.state = 'lim'
+            $color.value = 'lim'
       }
    })
 
@@ -216,12 +216,12 @@ function ArticleBlock(setup: {
 //         console.log("destroyd")
 //     })
 
-//     $count.state = 1)
+//     $count.value = 1)
 
 //     return component(
 //         <>
 //             <div ref={$countDiv}>{$count}</div>
-//             <button on:click-this-$button-v={[$count.state = $count() + 1), stopPropagation]} ref={$button}>increment</button >
+//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} ref={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

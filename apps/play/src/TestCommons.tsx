@@ -11,7 +11,7 @@ export function TestCommons() {
          <Commons provide={[['$message', $message]]}>
             <Child></Child>
          </Commons>
-         <input value={$message} on:input={e => $message.state = e.target.value}></input>
+         <input value={$message} on:input={e => $message.value = e.target.value}></input>
       </>
    )
 }
@@ -21,7 +21,7 @@ function Child() {
 
    const $count = ion(0, {
       increment() {
-         $count.state++
+         $count.value++
       }
    })
 

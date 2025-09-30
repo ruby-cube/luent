@@ -14,7 +14,7 @@ export * from "./reactivity/WatchSubject" //TODO: limit exports to public api
 export * from "../../lumo/src/animation" //TODO: limit exports to public api
 export * from "./reactivity/EffectQueue" //TODO: limit exports to public api
 export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
-export * from "./ionized/ionize" //TODO: limit exports to public api
+export * from "./ionized/IonizedModel" //TODO: limit exports to public api
 export * from "./ionized/inert" //TODO: limit exports to public api
 export * from "./__notes__/areEqual" //TODO: limit exports to public api
 // export * from "./capsule/Readonly" //TODO: limit exports to public api

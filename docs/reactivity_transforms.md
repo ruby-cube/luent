@@ -75,7 +75,7 @@ doSomething(asGet(($count)))
 function doSomething($count: Ion<number>){
    assertGetter($count)
 
-   $count.state 
+   $count.value 
 }
 
 const $countB = (obj.count)
@@ -175,7 +175,7 @@ $count = 0
 
 ($_is_ref($count) ? 
 
-$_is_mutable($count)? $count.state = 0 : throw new TypeError('Assignment to immutable ref.')
+$_is_mutable($count)? $count.value = 0 : throw new TypeError('Assignment to immutable ref.')
 
 : $count = 0) // if ambiguous
 

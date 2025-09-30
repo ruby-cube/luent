@@ -17,8 +17,8 @@ export function TestNestedConditionalB() {
 
    return component(
       <div>
-         <button on:click={e=>$ready.state = !$ready()}>toggle ready</button>
-         <button on:click={e=>$open.state = !$open()}>toggle open</button>
+         <button on:click={e=>$ready.value = !$ready()}>toggle ready</button>
+         <button on:click={e=>$open.value = !$open()}>toggle open</button>
          {If($ready,
             <div>
                <div>(1) ready</div>
@@ -40,8 +40,8 @@ export function TestNestedConditional() {
 
    return component(
       <div>
-         <button on:click={e=>$ready.state = !$ready()}>toggle ready</button>
-         <button on:click={e=>$open.state = !$open()}>toggle open</button>
+         <button on:click={e=>$ready.value = !$ready()}>toggle ready</button>
+         <button on:click={e=>$open.value = !$open()}>toggle open</button>
          {If($ready,
             <>
                <div>(1) ready</div>

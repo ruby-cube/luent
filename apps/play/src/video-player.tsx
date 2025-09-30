@@ -16,7 +16,7 @@ const obj2 = {
       return _$frog()
    },
    set frog(v) {
-      _$frog.state = v
+      _$frog.value = v
    }
 }
 
@@ -55,7 +55,7 @@ export function VideoPlayer() {
    track.on("play", () => {
       const video = $video()
       if (!video) return;
-      if (track.is("ended")) $elapsedTime.state = video.currentTime = 0;
+      if (track.is("ended")) $elapsedTime.value = video.currentTime = 0;
       $video()?.play()
    })
 
@@ -66,7 +66,7 @@ export function VideoPlayer() {
    const $elapsedTime = ion(0);
 
    function updateTime(currentTime: number) {
-      $elapsedTime.state = currentTime;
+      $elapsedTime.value = currentTime;
    }
 
    function reClickElapsedBar(e: { currentTarget: (EventTarget & HTMLDivElement) | null } & MouseEvent) {
@@ -81,7 +81,7 @@ export function VideoPlayer() {
          track.apply("pause")
          setTimeout(() => track.apply("play"), 0)
       }
-      $elapsedTime.state = time
+      $elapsedTime.value = time
    }
 
    const sound = FiniteState({

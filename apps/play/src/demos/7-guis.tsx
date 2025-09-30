@@ -27,20 +27,20 @@ function TemperatureApp() {
    const $f = ion(() =>$c() * (9 / 5 + 32),
       {
          // set state(v: number) {
-         //    $c.state = (v - 32) * (5 / 9)
+         //    $c.value = (v - 32) * (5 / 9)
          // },
          set(v: number) {
-            $c.state = (v - 32) * (5 / 9)
+            $c.value = (v - 32) * (5 / 9)
          }
       })
 
    function setC(e, v = +e.target!.value) {
-      $c.state = v
+      $c.value = v
    }
 
    function setF(e, v = +e.target!.value) {
       $f.set(v)
-      // $f.state = v
+      // $f.value = v
    }
 
    return component(
@@ -134,7 +134,7 @@ function TimerApp() {
    let handle: number;
 
    const update = () => {
-      $elapsed.state = performance.now() - lastTime
+      $elapsed.value = performance.now() - lastTime
       if ($elapsed() >= $duration()) {
          cancelAnimationFrame(handle)
       } else {
@@ -143,7 +143,7 @@ function TimerApp() {
    }
 
    const reset = () => {
-      $elapsed.state = 0
+      $elapsed.value = 0
       lastTime = performance.now()
       update()
    }
@@ -201,7 +201,7 @@ export function CRUDApp() {
    const $fullName = () => `${$last()}, ${$first()}` //FIX: this can easily be mistaken for an ion.
 
    watch($selected, ({ current }) => {
-      [$last.state, $first.state] = current.split(', ')
+      [$last.value, $first.value] = current.split(', ')
    }, { phase: SYNC })
 
    // watch(names, () => { //TODO: this is a stand-in to initialize pions for .filter. Figure out why .filter is not initializing pions
@@ -225,7 +225,7 @@ export function CRUDApp() {
          const fullName = $fullName()
          if (!names.includes(fullName)) {
             names.push(fullName)
-            $first.state = $last.state = ''
+            $first.value = $last.value = ''
          }
       }
    }
@@ -239,7 +239,7 @@ export function CRUDApp() {
       if (hasValidInput() && $selected()) {
          const i = names.indexOf($selected())
          console.log('index', i)
-         names[i] = $selected.state = $fullName()
+         names[i] = $selected.value = $fullName()
       }
    }
 
@@ -247,7 +247,7 @@ export function CRUDApp() {
       if ($selected()) {
          const i = names.indexOf($selected())
          names.splice(i, 1)
-         $selected.state = ''
+         $selected.value = ''
          console.log('delete first', $first())
          console.log('delete last', $last())
          console.log('delete selected', $selected())
@@ -327,13 +327,13 @@ export function CircleApp() {
 
    function reClick({ clientX: x, clientY: y }: MouseEvent) {
       if ($adjusting()) {
-         $adjusting.state = false
-         $selected.state = null
+         $adjusting.value = false
+         $selected.value = null
          push()
          return
       }
 
-      $selected.state = ionize([...$circles()].reverse().find(({ cx, cy, r }) => {
+      $selected.value = ionize([...$circles()].reverse().find(({ cx, cy, r }) => {
          const dx = cx - x
          const dy = cy - y
          return Math.sqrt(dx * dx + dy * dy) <= r
@@ -350,22 +350,22 @@ export function CircleApp() {
    }
 
    function adjust(circle: Ionized<Circle>) {
-      $selected.state = circle
-      $adjusting.state = true
+      $selected.value = circle
+      $adjusting.value = true
    }
 
    function push() {
-      history.length = ++$index.state
+      history.length = ++$index.value
       history.push(clone($circles()))
       // console.log(toRaw(history))
    }
 
    function undo() {
-      $circles.state = ionize(clone(history[--$index.state]))
+      $circles.value = ionize(clone(history[--$index.value]))
    }
 
    function redo() {
-      $circles.state = ionize(clone(history[++$index.state]))
+      $circles.value = ionize(clone(history[++$index.value]))
    }
 
    function clone(circles: Circle[]) {
@@ -386,7 +386,7 @@ export function CircleApp() {
                   cy={circle.cy}
                   r={circle.$r}
                   fill={(circle === $selected() ? '#ccc' : '#fff')}
-                  on:click={e => $selected.state = circle}
+                  on:click={e => $selected.value = circle}
                   on:contextmenu={e => (e.preventDefault(), adjust(circle))}
                ></circle>)
             )}

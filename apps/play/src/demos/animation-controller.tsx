@@ -146,7 +146,7 @@ export function TestAnimationController() {
 
    function initAnimation(canvas) {
       console.log('on mount')
-      const animation = $animation.state = ionize(new AnimationAnimator(canvas.ref))
+      const animation = $animation.value = ionize(new AnimationAnimator(canvas.ref))
 
       // debug.traceTriggers('# animation', animation, { canvas: true })
 

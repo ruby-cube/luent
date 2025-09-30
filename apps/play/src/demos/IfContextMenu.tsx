@@ -101,11 +101,11 @@ function IfContextMenuB() {
    const $open = ion(false)
 
    function open() {
-      $open.state = true
+      $open.value = true
    }
 
    function close() {
-      $open.state = false
+      $open.value = false
    }
 
    watch($open, ({ current: open }) => {
@@ -145,11 +145,11 @@ function IfContextMenuC() {
    const $open = ion(false)
 
    function open() {
-      $open.state = true
+      $open.value = true
    }
 
    function close() {
-      $open.state = false
+      $open.value = false
    }
 
    function initMenu(menuNode: HTMLElement) {

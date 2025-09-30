@@ -4,7 +4,7 @@ import { MaybeIon } from "../component/Input";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListItemKit, ListKit, toAsyncRenderItem } from "./List";
 import { ListRenderKit } from "./ListRenderKit";
-import { Ion, IonizeBy, Ionized, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toIon, toValue } from "@rue/quarky";
+import { Ion, IonizeBy, Ionized, isGetter, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toIon, toValue } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
 
@@ -33,7 +33,7 @@ export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> |
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
-   if (isIon(data) || isIonizedModel(data) || isInertIon(data) && isIonizedModel(toValue(data)))
+   if (isGetter(data) || isIonizedModel(data) || isIonizedModel(toValue(data)))
       // return new ListRenderKit(_render, data, getUID, getCommons())
       return new ListKit(toIon(data), toAsyncRenderItem(_render), getUID ?? ((i: any) => i), getFlask())
    return renderStaticList(data, _render)

@@ -7,14 +7,14 @@ const todos = [{
 }]
 
 // updating nested property
-$todos.state = set($todos(), 1, 'description').to('clean floor')
+$todos.value = set($todos(), 1, 'description').to('clean floor')
 
-$todos.state = $todos().set(1, 'description').to('clean floor')
+$todos.value = $todos().set(1, 'description').to('clean floor')
 
 $todos()[1].description = 'clean floor'
 
 //
-$todos.state = [
+$todos.value = [
    ...$todos(),
    {
       id: genId(),
@@ -23,7 +23,7 @@ $todos.state = [
    }
 ]
 
-$todos.state = $todos()
+$todos.value = $todos()
    .append({
       id: genId(),
       description: 'new todo',

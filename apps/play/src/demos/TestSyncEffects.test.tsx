@@ -13,7 +13,7 @@ describe('infinite loop prevention', () => {
       const $count = ion(0, {
          increment() {
             console.log('===start increment')
-            this.state++;
+            this.value++;
             console.log('===end increment')
          }
       })
@@ -22,7 +22,7 @@ describe('infinite loop prevention', () => {
 
       watch($count, () => {
          console.log('--start effect increment')
-         $something.state = 'frog' + $count()
+         $something.value = 'frog' + $count()
          callMeOnceA()
          console.log('--end effect increment')
       }, {
@@ -66,7 +66,7 @@ describe('infinite loop prevention', () => {
       const $count = ion(0, {
          increment() {
             console.log('===start increment')
-            this.state++;
+            this.value++;
             console.log('===end increment')
          }
       })
@@ -80,7 +80,7 @@ describe('infinite loop prevention', () => {
 
       watch($count, () => {
          console.log('--start effect increment')
-         $count.state = $count() + 1;
+         $count.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, {
@@ -122,7 +122,7 @@ describe('infinite loop prevention', () => {
       const $count = ion(0, {
          increment() {
             console.log('>>>start increment')
-            this.state++;
+            this.value++;
             console.log('>>>end increment')
          }
       })
@@ -131,7 +131,7 @@ describe('infinite loop prevention', () => {
 
       watch($count, () => {
          console.log('--start effect increment')
-         $count2.state = $count() + 1;
+         $count2.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, {
@@ -140,7 +140,7 @@ describe('infinite loop prevention', () => {
 
       watch($count2, () => {
          console.log('--start effect2 increment')
-         $count.state = $count2() + 1;
+         $count.value = $count2() + 1;
          callMeOnceB()
          console.log('--end effect2 increment')
       }, {
@@ -178,7 +178,7 @@ describe('infinite loop prevention', () => {
       const $count = ion(0, {
          increment() {
             console.log('>>>start increment')
-            this.state++;
+            this.value++;
             console.log('>>>end increment')
          }
       })
@@ -194,7 +194,7 @@ describe('infinite loop prevention', () => {
 
       watch($count, () => {
          console.log('--start effect increment')
-         $count2.state = $count() + 1;
+         $count2.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, {
@@ -203,7 +203,7 @@ describe('infinite loop prevention', () => {
 
       watch($count2, () => {
          console.log('--start effect2 increment')
-         $count.state = $count2() + 1;
+         $count.value = $count2() + 1;
          callMeOnceB()
          console.log('--end effect2 increment')
       }, {
@@ -242,14 +242,14 @@ describe('infinite loop prevention', () => {
       const $count = ion(0, {
          increment() {
             console.log('start increment')
-            this.state++;
+            this.value++;
             console.log('end increment')
          }
       })
 
       watch($count, () => {
          console.log('--start effect increment')
-         $count.state = $count() + 1;
+         $count.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, { phase: PRERENDER })
@@ -318,7 +318,7 @@ describe('infinite loop prevention', () => {
       const $count = ion(0, {
          increment() {
             console.log('start increment')
-            this.state++;
+            this.value++;
             console.log('end increment')
          }
       })
@@ -331,7 +331,7 @@ describe('infinite loop prevention', () => {
 
       watch($count, () => {
          console.log('--start effect increment')
-         $count.state = $count() + 1;
+         $count.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, { phase: PRERENDER })
@@ -406,7 +406,7 @@ describe('infinite loop prevention', () => {
       const $count = ion(0, {
          increment() {
             console.log('>>>start increment')
-            this.state++;
+            this.value++;
             console.log('>>>end increment')
          }
       })
@@ -415,14 +415,14 @@ describe('infinite loop prevention', () => {
 
       watch($count, () => {
          console.log('--start effect increment')
-         $count2.state = $count() + 1;
+         $count2.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, { phase: PRERENDER })
 
       watch($count2, () => {
          console.log('--start effect2 increment')
-         $count.state = $count2() + 1;
+         $count.value = $count2() + 1;
          callMeOnceB()
          console.log('--end effect2 increment')
       }, { phase: PRERENDER })

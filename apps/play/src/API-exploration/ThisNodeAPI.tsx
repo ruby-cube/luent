@@ -24,7 +24,7 @@ function TestingStuff(
    const $songBird = ion('')
 
    onDismantle(() => {
-      $songBird.state = fromCoop(_song_bird_)
+      $songBird.value = fromCoop(_song_bird_)
 
    })
 

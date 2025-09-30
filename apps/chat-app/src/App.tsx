@@ -39,14 +39,14 @@ export function FriendSite() {
    ])
 
    onLoggedIn(user => {
-      $user.state = user
+      $user.value = user
       routeTo('/app')
       initialLoad = false
    })
 
    onLoggedOut(() => {
       routeTo('/')
-      $user.state = null
+      $user.value = null
    })
 
    return component(

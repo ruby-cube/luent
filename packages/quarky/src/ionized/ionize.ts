@@ -1,5 +1,5 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
-import { debug, isObject } from "@rue/utils";
+import { debug, isFunction, isObject } from "@rue/utils";
 import { InertCollection, InertCollectionType, ModelQuark } from "./ModelQuark";
 import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
@@ -48,10 +48,12 @@ export const MARK = Symbol('marked')
 /**
  * Ionized deeply
  */
-export type Ionized<T extends object> =
-   Properties<T>
-   & InvertProperties<T, ReadonlyKeys<T>>
-   & { '~ionized': true }
+export type Ionized<T extends object> = Properties<T> & { '~ionized'?: true }
+
+
+// Properties<T>
+// & InvertProperties<T, ReadonlyKeys<T>>
+// & { '~ionized': true }
 
 type Properties<T> = {
    [K in keyof T]: MaybeIonizeProperty<K, T[K]>
@@ -66,7 +68,7 @@ type InvertProperties<T, ROKeys> = {
 
 type IsAbsorbedIon<K, T> = K extends `$${string}` ? T extends Ion ? true : false : false
 type IsMethod<K, T> = K extends `$${string}` ? T extends Ion ? false : false : T extends Function ? true : false
-export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized': true } ? true : false
+export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized'?: true } ? true : false
 // T extends Ion ? false : false : T extends Function ? true : false
 
 type MaybeIonizeProperty<K, T> =
@@ -309,7 +311,7 @@ export function isIonizedModel(value: any): value is IonizedModel {
 export function ionizeModel(target: object, options: IonizeOptions) {
    if (!isObject(target)) return target;
    // throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
-   if (isIonizedModel(target) || isIon(target) || isInert(target)) {
+   if (isIonizedModel(target) || isFunction(target) || isInert(target)) {
       if (options) debug.warn(`CASE RESEARCH: Target is ${isIonizedModel(target) ? 'ionized model' : isIon(target) ? 'ion' : 'inert'}. Cannot extend using ionize()`)
       return target
    }

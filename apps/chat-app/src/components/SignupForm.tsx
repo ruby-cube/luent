@@ -13,7 +13,7 @@ export function SignupForm() {
       e.preventDefault();
       const response = await signUp($email(), $password(), $username())
       if (response.error)
-         $error.state = response.error
+         $error.value = response.error
    }
 
    return component(

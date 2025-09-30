@@ -4,10 +4,10 @@ import { ion, ionic } from "@rue/quarky";
 export function TestDerivedConditional() {
    const $count = ion(0, {
       increment() {
-         this.state++
+         this.value++
       },
       decrement() {
-         this.state--
+         this.value--
       }
 
    })
@@ -15,27 +15,27 @@ export function TestDerivedConditional() {
 
    const $aActive = ion(true, {
       toggle() {
-         $aActive.state = !$aActive.state
+         $aActive.value = !$aActive.value
       }
    })
 
    const $bActive = ion(true, {
       toggle() {
-         $bActive.state = !$bActive.state
+         $bActive.value = !$bActive.value
       }
    })
 
 
    const $cActive = ion(false, {
       toggle() {
-         $cActive.state = !$cActive.state
+         $cActive.value = !$cActive.value
       }
    })
 
 
    const $dActive = ion(false, {
       toggle() {
-         $dActive.state = !$dActive.state
+         $dActive.value = !$dActive.value
       }
    })
 

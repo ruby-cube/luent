@@ -105,7 +105,7 @@ export class State<T> implements IState {
    //    // recordMutation(this.asMutable, new Mutation(
    //    //    this, //TODO: figure out what to pass here
    //    //    '[[set]]',
-   //    //    ['state', newState], //TODO: should the key be 'current' ?
+   //    //    ['value', newState], //TODO: should the key be 'current' ?
    //    //    newState,
    //    //    oldState
    //    // ))
@@ -253,9 +253,9 @@ export function createAtomicIon(
    $state.displayName = 'getState'
 
    if (props) {
-      if ('state' in props) {
+      if ('value' in props) {
          //TODO: need to incorporate setters
-         // Object.defineProperty(props, 'state', {
+         // Object.defineProperty(props, 'value', {
          //    get: $state,
          //    set: (value: unknown) => {
          //       setState.apply(quark, [value])
@@ -264,7 +264,7 @@ export function createAtomicIon(
          // Object.defineProperties($state, Object.getOwnPropertyDescriptors(props))
       }
       else {
-         Object.defineProperty($state, 'state', {
+         Object.defineProperty($state, 'value', {
             get: $state,
             set: setState.bind(quark)
          })
@@ -273,7 +273,7 @@ export function createAtomicIon(
 
    }
    else {
-      Object.defineProperty($state, 'state', {
+      Object.defineProperty($state, 'value', {
          get: $state,
          set: setState.bind(quark)
       })

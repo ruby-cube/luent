@@ -66,33 +66,33 @@ export function TodoMVC() {
    let beforeEditCache = ''
    function editTodo(todo: Todo) {
       beforeEditCache = todo.title
-      $editedTodo.state = todo
+      $editedTodo.value = todo
    }
 
    function cancelEdit(todo: Ionized<Todo>) {
-      $editedTodo.state = null
+      $editedTodo.value = null
       todo.title = beforeEditCache
    }
 
    function doneEdit(todo: Ionized<Todo>) {
       if ($editedTodo()) {
-         $editedTodo.state = null
+         $editedTodo.value = null
          todo.title = todo.title.trim()
          if (!todo.title) removeTodo(todo)
       }
    }
 
    function removeCompleted() {
-      $todos.state = filters.active($todos())
+      $todos.value = filters.active($todos())
    }
 
    function onHashChange() {
       const route = window.location.hash.replace(/#\/?/, '') as keyof typeof filters
       if (filters[route]) {
-         $view.state = route
+         $view.value = route
       } else {
          window.location.hash = ''
-         $view.state = 'all'
+         $view.value = 'all'
       }
    }
 

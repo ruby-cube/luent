@@ -4,7 +4,7 @@ import { ion } from "@rue/quarky";
 export function TestShow() {
    const $active = ion(false, {
       toggle() {
-         $active.state = !$active.state
+         $active.value = !$active.value
       }
    })
 

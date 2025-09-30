@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -39,7 +39,7 @@ export function makeElement(
    config: ElementConfig,
    $index: Ion<number> | undefined
 ): DOMNode {
-   const { class: classes, style: styles, ref, ...other } = config;
+   const { class: classes, style: styles, 'show-if': showIf, ref, ...other } = config;
 
    const { attributes, events, hooks } = analyzeAttributes(other)
 
@@ -49,7 +49,6 @@ export function makeElement(
    const domNode = isHydrating() ? getElement()
       : XML_NS ? createNSElement(tagName, XML_NS)
          : document.createElement(tagName)
-
    if (ref) {
       if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
       if (isNodesRef(ref)) {
@@ -62,10 +61,11 @@ export function makeElement(
 
    if (classes) setUpClasses(domNode, normalizeToArray(classes))
    if (styles) setUpStyles(domNode, normalizeToArray(styles))
+   if (showIf) setUpConditionalDisplay(domNode, showIf)
    setUpEvents(domNode, events);
    setUpHooks(domNode, hooks)
 
-   const _Slot = bindView(domNode, Slot, attributes)
+   bindView(domNode, attributes)
    setUpAttributes(domNode, attributes);
    //  if (dynamicAttributes)
    //      setUpDynamicAttributes(
@@ -75,10 +75,10 @@ export function makeElement(
    //      );
 
 
-   if (_Slot) {
+   if (Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
-         const rawOutput = normalizeToArray(_Slot())
+         const rawOutput = normalizeToArray(Slot())
 
          if (isInnerHTMLKit(rawOutput[0])) {
             const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
@@ -149,28 +149,23 @@ function analyzeAttributes(entries: AnyObject) {
 }
 
 function isMutableIon(ion: unknown): ion is MutableIon<any> {
-   return isIon(ion) && (('state' in ion) || ('set' in ion))
+   return isIon(ion) && 'value' in ion
 }
 
-function bindView(element: Element, Slot: RenderSlot | undefined, attributes: { [key: string]: MaybeIon<any> }) {
+function bindView(element: Element, attributes: { [key: string]: MaybeIon<any> }) {
    switch (element.tagName) {
       case 'INPUT':
          bindInput(<HTMLInputElement>element, attributes)
-         return Slot;
 
       case 'SELECT':
          bindSelect(<HTMLSelectElement>element, attributes)
-         return Slot;
 
       case 'TEXTAREA':
          return bindTextInput(<HTMLTextAreaElement>element, attributes);
-
-      default:
-         return Slot;
    }
 }
 
-function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
+function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string]: MaybeIon<any> }) {
    if (!('mu:checked' in attributes))
       return;
    const ion = attributes['mu:checked'];
@@ -183,7 +178,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
       setUpInputListener(element, ion, 'checked')
    }
 }
-function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
+function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: MaybeIon<any> }) {
    if (!('mu:checked' in attributes))
       return;
    const ion = attributes['mu:checked'];
@@ -198,7 +193,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    }
 }
 
-function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
+function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attributes: { [key: string]: MaybeIon<any> }) {
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
@@ -213,7 +208,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    }
 }
 
-function bindInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
+function bindInput(element: HTMLInputElement, attributes: { [key: string]: MaybeIon<any> }) {
    switch (attributes.type) {
       case 'radio':
          bindRadioInput(element, attributes)
@@ -229,12 +224,12 @@ function bindInput(element: HTMLInputElement, attributes: { [key: string]: Mutab
    }
 }
 
-function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
+function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: MaybeIon<any> }) {
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
    const flask = getFlask()
-   watchToRender(ion, ({current, previous}) => {
+   watchToRender(ion, ({ current, previous }) => {
       // if (current === previous) return;
       queueInternalRenderTask(() => {
          element.value = toString(ion())
@@ -273,26 +268,26 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
 //    return ion;
 // }
 
-function setUpCheckboxInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }) {
+function setUpCheckboxInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {
       updateIonWithInput(ion, e, 'checked')
    })
 }
 
-function setUpInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }, key: string = 'value') {
+function setUpInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }, key: string = 'value') {
    element.addEventListener('input', e => {
       updateIonWithInput(ion, e, key)
    })
 }
 
-function updateIonWithInput(ion: { state: any } | { set: (value: any) => any }, e: Event, key: string = 'value') {
+function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, e: Event, key: string = 'value') {
    if (isManagedDerivation(ion) && 'set' in ion) {
       ion.set(
          e.currentTarget?.[key]
       )
    }
-   else if ('state' in ion) {
-      ion.state =
+   else if ('value' in ion) {
+      ion.value =
          //@ts-expect-error
          e.currentTarget?.[key];
    }
@@ -318,7 +313,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
-      if (isIon(value)) {
+      if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
             queueInternalRenderTask(() => {
@@ -535,7 +530,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
    const classList = node.classList
 
    for (const entry of classes) {
-      if (isIon(entry)) {
+      if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             // if (current === previous) return;
             queueInternalRenderTask(() => {
@@ -595,7 +590,7 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
 function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList, flask: Flask) {
    for (const key in entry) {
       const value = entry[key]
-      if (isIon(value)) {
+      if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return
             queueInternalRenderTask(() => {
@@ -631,12 +626,33 @@ function setUpClassesFromString(classString: string, classList: DOMTokenList) {
 //       }
 //    }
 // }
+function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
+   let display = node.style.display
+   watchToRender($show, ({ flask }) => {
+      if ($show()) {
+         queueInternalRenderTask(() => {
+            if (display === undefined) {
+               node.style.removeProperty('display');
+            }
+            else {
+               node.style.display = display
+            }
+         }, flask)
+      }
+      else {
+         display = node.style.display
+         queueInternalRenderTask(() => {
+            node.style.display = 'none'
+         }, flask)
+      }
+   })
+}
 
 function setUpStyles(node: Element, styles: StyleInput[]) {
    const flask = getFlask()
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
-      if (isIon(entry)) {
+      if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
             queueInternalRenderTask(() => {
@@ -655,7 +671,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
       for (const key in entry) {
 
          const value = entry[key] as MaybeIon<string | number | Falsey>;
-         if (isIon(value)) {
+         if (isGetter(value)) {
             watchToRender(value, ({ current, previous }) => {
                // if (current === previous) return;
                queueInternalRenderTask(() => {

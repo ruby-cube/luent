@@ -17,7 +17,7 @@ export function MarkdownApp(
 
    // const update = (e: any) => {
    //    //@ts-expect-error
-   //    $markdown.state = e.target.value
+   //    $markdown.value = e.target.value
    // }
 
    const $textArea = NodeRef('textarea')
@@ -47,7 +47,7 @@ export function MarkdownApp(
 
    const $count = ion(0, {
       increment() {
-         $count.state++
+         $count.value++
       }
    })
 

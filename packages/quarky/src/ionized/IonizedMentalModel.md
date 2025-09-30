@@ -25,9 +25,9 @@ $list()[0]
 
 const $swamp = ion.ionize({ logCreature: new Frog() })
 
-console.log($swamp.$.state)
+console.log($swamp.$.value)
 
-const swamp = $swamp.$.state = { logCreature: new Frog() } // will swamp be ionized or raw?
+const swamp = $swamp.$.value = { logCreature: new Frog() } // will swamp be ionized or raw?
 
 $swamp().$.logCreature = new Frog()
 
@@ -38,7 +38,7 @@ list.$.push(new Frog())
 
 
 
-swamp.$.logCreature = new Frog()  // also swamp.$logCreature.$.state = new Frog() 
+swamp.$.logCreature = new Frog()  // also swamp.$logCreature.$.value = new Frog() 
 
 const frog = swamp.logCreature // ionized
 

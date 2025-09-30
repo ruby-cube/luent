@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
-import { IonizedModel, maybeIonize, $atomicPion } from "./IonizedModel";
+import { IonizedModel, maybeIonize } from "./IonizedModel";
 import { MutatingOpDef, IonizedMethodsDef, TrackableOpDef, OpType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
 import { trackParticle } from "../compound/Compound";
 

@@ -43,7 +43,7 @@ export function TestAwait() {
 
    return component(
       <>
-         <button on:click={e => $name.state = $name() + '!'}>click</button>
+         <button on:click={e => $name.value = $name() + '!'}>click</button>
          <p>{($brave()?.name)}</p>
          <h1>Untitled Goose Game</h1>
          {/* {Await($brave,

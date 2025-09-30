@@ -105,8 +105,8 @@ export function createAwaitSeries(
    let timeoutID: any;
    if (timeout) {
       timeoutID = setTimeout(() => {
-         $error.state = new Error("Timed out");
-         $pending.state = false
+         $error.value = new Error("Timed out");
+         $pending.value = false
       }, timeout)
    }
 
@@ -139,12 +139,12 @@ export function createAwaitSeries(
             allPromises
                .then(() => {
                   clearTimeout(timeoutID)
-                  $pending.state = false
+                  $pending.value = false
                })
                .catch(err => {
                   if (renderError === undefined) throw toError(err);
-                  $error.state = toError(err);
-                  $pending.state = false
+                  $error.value = toError(err);
+                  $pending.value = false
                })
 
             let promiseCount = 0;
@@ -152,7 +152,7 @@ export function createAwaitSeries(
             for (const $promise of $promises) {
                watch($promise, ({ current: promise }) => {
                   if (promise === null) {
-                     // if (promiseCount === 1) $pending.state = false;
+                     // if (promiseCount === 1) $pending.value = false;
                      // promiseCount--
                      return;
                   }
@@ -160,12 +160,12 @@ export function createAwaitSeries(
                   if ($pending() === true) {
                      clearTimeout(timeoutID)
                   }
-                  $pending.state = true;
+                  $pending.value = true;
 
                   if (timeout) {
                      timeoutID = setTimeout(() => {
-                        $error.state = new Error("Timed out");
-                        $pending.state = false
+                        $error.value = new Error("Timed out");
+                        $pending.value = false
                      }, timeout)
                   }
 
@@ -174,12 +174,12 @@ export function createAwaitSeries(
                         clearTimeout(timeoutID)
                         promiseCount--
                         if (promiseCount === 0)
-                           $pending.state = false
+                           $pending.value = false
                      })
                      .catch(err => {
                         if (renderError === undefined) throw toError(err);
-                        $error.state = toError(err);
-                        $pending.state = false
+                        $error.value = toError(err);
+                        $pending.value = false
                      })
                }, {phase: PRERENDER})
             }

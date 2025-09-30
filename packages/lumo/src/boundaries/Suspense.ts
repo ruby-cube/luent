@@ -1,4 +1,4 @@
-import { toError } from "@rue/utils";
+import { isFunction, toError } from "@rue/utils";
 import { ion, __addDevName, ionicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
 import { SYNC } from "../render-cycle";
@@ -50,11 +50,11 @@ export function assertResolved<T>(ion: SuspenseIon<T>): asserts ion is Resolved<
 }
 
 export function isResolved<T>(ion: SuspenseIon<T>): ion is Resolved<T> {
-   return !(ion.state instanceof Promise || ion.state instanceof Error)
+   return !(ion.value instanceof Promise || ion.value instanceof Error)
 }
 
 export function isPending(ion: SuspenseIon<unknown>) {
-   return ion.state instanceof Promise;
+   return ion.value instanceof Promise;
 }
 
 type SuspenseIonOptions = {
@@ -78,7 +78,7 @@ export function SuspenseIon<
 
       input
          .then(value => {
-            $ion.state = value;
+            $ion.value = value;
             $ion.loading = false;
          })
          .catch(err => {
@@ -99,16 +99,16 @@ export function SuspenseIon<
    })
 
    ionicTask(() => {
-      const promise = $promise.state = input($ion as SuspenseIon<T>);
+      const promise = $promise.value = input($ion as SuspenseIon<T>);
 
       promise
          .then(value => {
-            $ion.state = value
-            $promise.state = null;
+            $ion.value = value
+            $promise.value = null;
          })
          .catch(err => {
             $ion.error = toError(err)
-            $promise.state = null;
+            $promise.value = null;
             throw err;
          })
    }, { phase: SYNC })
@@ -129,6 +129,6 @@ export function asSuspenseIon<T>(value: SuspenseIon<T> | Promise<T>, options: { 
 }
 
 function isSuspenseIon(value: unknown): value is SuspenseIon<unknown> {
-   return isIon(value) && SUSPENSE_ION in value;
+   return isFunction(value) && SUSPENSE_ION in value;
 }
 
