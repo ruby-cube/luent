@@ -15,7 +15,7 @@ import { isWatchable, Watchable } from "../reactivity/WatchedAtom";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, OpType, initModelUpdate, useIonicOp } from "./IonizedMethods";
 import { inert, isInert } from "./inert";
 import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
-import { isTracking, trackParticle } from "../compound/Compound";
+import { isTracking, popTracker, pushTracker, trackParticle } from "../compound/Compound";
 import { isIntegerKey } from "./IonizedArray";
 import { Update } from "../reactivity/UpdateCycle";
 
@@ -679,7 +679,7 @@ export function $<T>(value: T): T extends Ionized<infer O> ? ExposeIons<O> : und
 function createPionsProxy(proxyProto: AnyObject, model: IonizedModel) {
    return new Proxy(proxyProto, {
       get(target, key) {
-         return getPion(target, key) ?? (model[key], getPion(target, key))
+            return getPion(target, key) ?? (model[key], getPion(target, key))
       }
    })
 }
@@ -689,7 +689,7 @@ function getPion(proxyProto: ProxyPropertyMap, key: ProxyKey) {
    const getter = Object.getOwnPropertyDescriptor(proxyProto, key)?.get
    if (!getter) return undefined;
    if (QUARK in getter) return getter as $AtomicIonState;
-   return undefined;
+   return undefined
 }
 
 function getPionQuark(proxyProto: ProxyPropertyMap, key: ProxyKey) {

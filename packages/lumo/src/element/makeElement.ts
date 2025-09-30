@@ -184,7 +184,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const ion = attributes['mu:checked'];
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
-   attributes.checked = $_derivation(() => ion() === radioValue);
+   attributes.checked = () => ion() === radioValue;
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }

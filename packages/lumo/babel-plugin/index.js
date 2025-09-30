@@ -484,6 +484,9 @@ let derivationCount = 0;
 
 //TODO: import $_derivation
 function toDerivationFunction(node) {
+   // return t.arrowFunctionExpression([], t.blockStatement([
+   //    t.returnStatement(node) // Return the original expression
+   // ]))
    return t.callExpression(t.identifier('$_derivation'), [t.arrowFunctionExpression([], t.blockStatement([
       t.returnStatement(node) // Return the original expression
    ]))])

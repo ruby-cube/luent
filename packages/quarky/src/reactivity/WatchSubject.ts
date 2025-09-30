@@ -97,9 +97,10 @@ class Multisubject implements WatchSubject {
    }
 }
 
-export function isGetter(value: unknown): value is () => any {
-   return value instanceof Function && value.length === 0;
-}
+// export function isGetter(value: unknown): value is () => any {
+//    return value instanceof Function && value.length === 0;
+// }
+export const isGetter = isIon
 
 export interface WatchSubject {
    inert: boolean,

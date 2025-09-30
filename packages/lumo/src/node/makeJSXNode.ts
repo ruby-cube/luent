@@ -133,7 +133,7 @@ export function callWithActivationType(type: GroupActivationType, Slot: RenderSl
 }
 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode) | RawJSXNode) {
-   if (isIon(slot)) return () => slot;
+   if (isIon(slot)) return () => slot; //FIX: need to differentiate getter from render function
    if (slot instanceof Function) { // distinguishes derivation functions from render functions
       return slot as (...args: any[]) => RawJSXNode;
    }
