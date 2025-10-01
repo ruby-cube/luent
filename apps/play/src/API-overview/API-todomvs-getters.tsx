@@ -24,7 +24,7 @@ export function TodoMVC() {
    }
 
    // get state
-   let $todos: Ionized<Inert<Todo>[]> = ion.ionize([], { mark: { [EACH]: inert }, idKey: 'id' })
+   let $todos: Ionized<Inert<Todo>[]> = ion.ionize([], { mark: { [EACH]: inert } })
    let $view: keyof typeof filters = ion('all')
    let $editedTodo: Todo | null = ion(null)
 

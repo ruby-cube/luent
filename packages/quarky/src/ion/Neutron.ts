@@ -56,7 +56,7 @@ export function createAtomicNeutron(
       },
       set: value => {
          // __DEV__traceMethodCall(capsuleName, $ion, 'value')
-         return state = maybeIonize(value, ionized)
+         return state = ionized ? maybeIonize(value) : value
       }
    })
 

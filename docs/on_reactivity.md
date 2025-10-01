@@ -10,32 +10,6 @@
 ## A Unifying Reactive Primitive
 What we need is an abstraction for reactive entities with connotations of reactivity, composability, and statefulness. Those things are called ions.
 
-```ts
-let count = (ion({
-
-}))
-
-const obj3 = ionize({
-   count: (count)
-})
-
-
-function CounterApp(input: FromTag<{
-   count: Ion<number>,
-   id: number
-}>) {
-   const { id } = input
-
-   increment(
-      (count), 
-      (id)
-   )
-}
-
-```
-
-
-
 
 ## The Dual Nature of Stateful References
 

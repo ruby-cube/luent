@@ -1,5 +1,5 @@
 import { toRaw } from "./ionize";
-import { enlistIonizedMethods, OpType,  trackableOp, trackOp, useDeleteOp, useHasOp  } from "./IonizedMethods";
+import { enlistIonizedMethods, MemberType, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonizedMethods";
 import { getIonizedModel, maybeIonize } from "./IonizedModel";
 
 // declare global {
@@ -38,15 +38,15 @@ const hasOp = useHasOp((target, rawKey, ionizedKey) => {
 export function installIonicMap() {
    enlistIonizedMethods(Map, {
       has: {
-         type: OpType.TRACKABLE,
+         type: MemberType.TRACKABLE,
          privateState: true,
          input: ([key]) => [toRaw(key)],
          op: hasOp,
          track: trackOp,
       },
       get: {
-         type: OpType.TRACKABLE,
-           privateState: true,
+         type: MemberType.TRACKABLE,
+         privateState: true,
          input: ([key]) => [toRaw(key)],
          output: maybeIonize,
          op: function get(this: Map<unknown, unknown>, key: unknown) {
@@ -64,8 +64,8 @@ export function installIonicMap() {
 
       // Mutating
       set: {
-         type: OpType.MUTATING,
-           privateState: true,
+         type: MemberType.MUTATING,
+         privateState: true,
          op: function set(this: Map<unknown, unknown>, key: unknown, value: unknown) {
             const ionizedKey = getIonizedModel(key);
             if (ionizedKey) this.delete(ionizedKey);
@@ -91,8 +91,8 @@ export function installIonicMap() {
       },
 
       clear: {
-         type: OpType.MUTATING,
-           privateState: true,
+         type: MemberType.MUTATING,
+         privateState: true,
          preop(target) {
             return { entries: Array.from(<Map<any, any>>target), prevSize: target.size, target }
          },
@@ -113,8 +113,8 @@ export function installIonicMap() {
       },
 
       delete: {
-         type: OpType.MUTATING,
-           privateState: true,
+         type: MemberType.MUTATING,
+         privateState: true,
          input: ([key]) => [toRaw(key)],
          op: useDeleteOp(hasOp),
          preop: (target, [key]) => ({
@@ -136,8 +136,8 @@ export function installIonicMap() {
       },
       size: {
          get: {
-            type: OpType.TRACKABLE,
-              privateState: true,
+            type: MemberType.TRACKABLE,
+            privateState: true,
             track: trackOp
          }
       }

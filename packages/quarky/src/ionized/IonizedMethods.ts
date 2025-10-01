@@ -14,9 +14,10 @@ export type Constructor = new (...args: any[]) => any
 
 //TODO: if you don't provide a clone method, you cannot update lazily
 
-export const OpType = {
+export const MemberType = {
    TRACKABLE: 0,
    MUTATING: 1,
+   PROPERTY: 3
 } as const
 
 type CreateOp = (method: Function, target: AnyObject, ionized: IonizedModel, opKey: ProxyKey, config: OpTransforms) =>
@@ -24,8 +25,8 @@ type CreateOp = (method: Function, target: AnyObject, ionized: IonizedModel, opK
 
 
 export const useIonicOp = {
-   [OpType.TRACKABLE]: useTrackableOp as CreateOp,
-   [OpType.MUTATING]: useMutatingOp as CreateOp,
+   [MemberType.TRACKABLE]: useTrackableOp as CreateOp,
+   [MemberType.MUTATING]: useMutatingOp as CreateOp,
 }
 
 // a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
@@ -162,13 +163,13 @@ type OpTransforms = {
 }
 
 export type TrackableOpDef = {
-   type: typeof OpType.TRACKABLE,
+   type: typeof MemberType.TRACKABLE,
    privateState?: true,
    track?: (model: IonizedModel, op: PropertyKey, input: any[]) => void
 } & OpTransforms
 
 export type MutatingOpDef = {
-   type: typeof OpType.MUTATING,
+   type: typeof MemberType.MUTATING,
    privateState?: true,
    preop?: GetPreopData
    trigger?: (model: TriggerableModel, preopData: any) => void
@@ -176,8 +177,9 @@ export type MutatingOpDef = {
 } & OpTransforms
 
 export type PropertyDef = {
-   getterTask?: (this: AtomicIonQuark)=>void
-   setterTask?: (this: AtomicIonQuark)=>void
+   type: typeof MemberType.PROPERTY
+   track?: (this: AtomicIonQuark)=>void
+   trigger?: (this: AtomicIonQuark)=>void
 }
 
 type IonizableMethodDef = TrackableOpDef | MutatingOpDef | { get?: TrackableOpDef, set?: MutatingOpDef } | PropertyDef
@@ -400,14 +402,14 @@ export function useDeleteOp(hasOp: HasOp) {
  * For methods that produce a new version of the original data structure, eg. array.toReversed()
  */
 export const trackableCreativeOp: TrackableOpDef = {
-   type: OpType.TRACKABLE,
+   type: MemberType.TRACKABLE,
      privateState: true,
    track: trackModel,
    output: (o) => ionize(o)
 }
 
 export const trackableOp: TrackableOpDef = {
-   type: OpType.TRACKABLE,
+   type: MemberType.TRACKABLE,
      privateState: true,
    track: trackModel
 }

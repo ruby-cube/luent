@@ -2,7 +2,7 @@ import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { IonizedModel } from "./IonizedModel"
 import { trigger, WatchedAtom } from "../reactivity/WatchedAtom"
-import {  QuarkOf } from "../Quark"
+import { QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
 import { $atomicOp, asAtomicOp, TrackedOps } from "./AtomicOp"
@@ -61,8 +61,8 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
       public entity: IonizedModel,
       public rawTarget: AnyObject, //initialData
       public state: ModelState,
-      public clone: ((obj: AnyObject)=>AnyObject) | undefined,
-      public proxyProto: AnyObject //DEV only
+      public clone: ((obj: AnyObject) => AnyObject) | undefined,
+      public proxyProto: AnyObject, //DEV only
       // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
 
@@ -117,22 +117,14 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
    // $: Record<PropertyKey, Ion | TrackedOps>;
 
    trigger = trigger
-
+   
+   pions: undefined | AnyObject = undefined
 
    trackedOps: Record<PropertyKey, AtomicIonQuark | TrackedOps> = {}
 
-   // pions: Map<PropertyKey, Quark | TrackedOps> = new Map()
-
-   // registerPion(key: PropertyKey, pion: AtomicIonQuark) {
-   //    this.trackedOps[key] = pion
-   //    return pion;
-   // }
-
-   pions: undefined | AnyObject = undefined
-
-   trackOp(opKey: PropertyKey, entryKey: unknown){
+   trackOp(opKey: PropertyKey, entryKey: unknown) {
       // console.log("&&& tracking op", this.pions)
-      trackParticle( asAtomicOp(this, opKey, entryKey))
+      trackParticle(asAtomicOp(this, opKey, entryKey))
    }
 
    registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicQuark) {

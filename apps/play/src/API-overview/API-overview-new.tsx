@@ -4,6 +4,7 @@
 
 import { component, POSTRENDER, PRERENDER } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
+import { time } from "console";
 import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 
 // [ ] ions with methods
@@ -13,7 +14,7 @@ import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 // [ ] writable derivations
 // [ ] method traps, getter and setter traps
 
-// component Counter() {
+// function Counter() {
 
 //    get count = Ion(0, {
 //       increment() {
@@ -25,8 +26,6 @@ import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 //    })
 
 //    get doubleCount = Ion(() => count * 2)
-
-
 
 //    return (
 //       <div>
@@ -46,49 +45,68 @@ import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 //    @count.decrement()
 // }
 
+let timeout;
 
-const $count = ion(0, {
-   '@ get': () => console.log('getting value')
-})
-
-const $doubleCount = ionic(() => $count() * 2)
-
-const $doubleCount = ionic({
-   get: () => $count() * 2,
-   set: (num: number) => $count.value = num / 2
-})
-
-const $doubleCount = ionic({
-   value: undefined,
-   get: ()
-})
-
-const $firstName = ion('')
-const $lastName = ion('')
-
-const fullname = ionize({
-   get value() {
-      return $firstName() + ' ' + $lastName()
-   },
-   set value(name: string) {
-      [$firstName.value, $lastName.value] = name.split(' ')
-   }
-})
-
-const count = ion.withMethods({
-   value: 0,
+const count = Ion(0, {
    increment() {
 
    },
    decrement() {
 
    },
-   '@ get value'() { console.log('getting value') },
-   '@ set value'() { console.log('setting value') },
+   get value() {
+      return this.value
+   },
+   set value(num) {
+      if (timeout) return false;
+      timeout = setTimeout(() => {
+         timeout = undefined;
+      }, 1000)
+      this.value = num
+      return true;
+   }
 })
 
+// writable derivation
+const $doubleCount = Ion(() => $count() * 2, {
+   set value(num: number) {
+      $count.value = num
+   }
+})
+
+// overwritable derivation
+const $doubleCount = Ion(() => $count() * 2, {
+   set value(num: number) {
+      this.value = num
+   }
+})
+
+const list = Ionize([], {
+   __DEV__debug: {
+      push() { console.trace() },
+      frog: { bequeath() { console.trace() } }
+   }
+})
+
+
+debug.logAtoms($doubleCount)
+
+// const $firstName = ion('')
+// const $lastName = ion('')
+
+// const fullname = ionize({
+//    get value() {
+//       return $firstName() + ' ' + $lastName()
+//    },
+//    set value(name: string) {
+//       [$firstName.value, $lastName.value] = name.split(' ')
+//    }
+// })
+
+
+
 function fetchUser($id) {
-   return Suspense(async () => {
+   return SuspenseIon(async () => {
       const res = await fetch(`http://${$userId}`)
       return res.json()
    })
@@ -101,11 +119,11 @@ const videoPlayer = FiniteState({
    'paused': { play: () => 'playing' }
 })
 
-const door = Suspense(fetchDoor)
+const $door = SuspenseIon(fetchDoor)
 
 const $userId = ion('')
 
-const user = Suspense(async () => {
+const $user = SuspenseIon(async () => {
    const res = await fetchUser($userId)
    return res.json()
 })

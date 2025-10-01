@@ -1,5 +1,5 @@
 import { emitSignal } from "../debug/debug";
-import { ionize, Ionized, isIonizedModel, MarkMap } from "../ionized/ionize";
+import { InertMark, ionize, Ionized, isIonizedModel } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
@@ -13,7 +13,7 @@ import { ModelQuark } from "../ionized/ModelQuark";
 import { trackParticle } from "../compound/Compound";
 import { Update, isLazyUpdate, initUpdate } from "../reactivity/UpdateCycle";
 import { inert, isInert } from "../ionized/inert";
-import { maybeIonize } from "../ionized/IonizedModel";
+import { maybeIonize, MarkMap } from "../ionized/IonizedModel";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -22,7 +22,7 @@ export type $AtomicIonState =
    // & MutableCapsule
    // & MutableEntity
    & {
-      [QUARK]: AtomicQuark
+      [QUARK]: AtomicIonQuark
       // {
       //    props: AnyObject | undefined;
       //    state: State,
@@ -203,9 +203,7 @@ export class PionState implements IState {
    // }
 }
 
-/**
- * Quark for atomic ion, pion, and atomic get op
-*/
+
 export class AtomicQuark implements Watchable, Quark {
    pendingUpdate: null | Update = null
    quarkType = ATOMIC
@@ -213,38 +211,51 @@ export class AtomicQuark implements Watchable, Quark {
    asWatchedAtom: undefined | WatchedAtom
 }
 
-// export class AtomicPionQuark extends AtomicQuark {
+/**
+ * Quark for atomic ion, pion, and atomic get op
+*/
 
-//    constructor(
-//       public state: State,
-//       public ionized: boolean,
-//       public modelQuark: ModelQuark,
-//    ) {
-//       super()
-//       this.__DEV__asTraceable = modelQuark.__DEV__asTraceable;
-//    }
-
-//    __DEV__asTraceable: Traceable;
-// }
 
 export class AtomicIonQuark extends AtomicQuark {
+   track = () => trackParticle(this)
+
    constructor(
       public state: IState,
-      public ionized: boolean,
-      public mark?: typeof inert | MarkMap | undefined,
       public modelQuark?: ModelQuark,
-      public getterTask?: () => void,
-      public setterTask?: () => void
+      public customTrack?: () => void,
+      public customTrigger?: () => void
    ) {
       super()
       this.__DEV__asTraceable = modelQuark?.__DEV__asTraceable ?? new Traceable()
+      if (customTrigger || modelQuark) this.trigger = (update: Update) => {
+         trigger.apply(this, [update])
+         modelQuark?.trigger(update)
+         customTrigger?.()
+      }
+      if (customTrack) this.track = () => {
+         trackParticle(this)
+         customTrack.apply(this)
+      }
    }
    __DEV__asTraceable: Traceable;
+
+   transformGet?: (value: unknown) => unknown
+   transformSet?: (value: unknown, fail: typeof FAIL) => unknown | typeof FAIL
 }
+
+// const debugg = {
+//    on($state: Ion, key: string, task: () => void) {
+//       if (key === 'get') {
+//          quarkOf($state as $AtomicIonState).getterTasks.push()
+//       }
+//    }
+// }
 
 /** INTERNAL */
 export function createAtomicIon(
    quark: AtomicIonQuark,
+   ionized: boolean,
+   mark?: InertMark | MarkMap | undefined,
    props?: AnyObject
 ) {
    const $state = getState.bind(quark) as $AtomicIonState
@@ -253,55 +264,39 @@ export function createAtomicIon(
    $state.displayName = 'getState'
 
    if (props) {
-      if ('value' in props) {
-         //TODO: need to incorporate setters
-         // Object.defineProperty(props, 'value', {
-         //    get: $state,
-         //    set: (value: unknown) => {
-         //       setState.apply(quark, [value])
-         //    }
-         // })
-         // Object.defineProperties($state, Object.getOwnPropertyDescriptors(props))
+      const descriptors = Object.getOwnPropertyDescriptors(props)
+      const onGet = descriptors.value?.get
+      const onSet = descriptors.value?.set as (value: unknown) => boolean
+      if (onGet) {
+         quark.transformGet = ionized ? (value: unknown) => {
+            return onGet.apply({ value: maybeIonize(value, mark) })
+         } : (value) => onGet.apply({ value })
       }
-      else {
-         Object.defineProperty($state, 'value', {
-            get: $state,
-            set: setState.bind(quark)
-         })
-         Object.defineProperties($state, Object.getOwnPropertyDescriptors(props))
+      if (onSet) {
+         quark.transformSet = (value: unknown, fail: typeof FAIL) => {
+            const state = { value: $state() }
+            const success = onSet.apply(state, [value])
+            if (success === false) return fail;
+            return state.value;
+         }
       }
+      delete descriptors.value
+      Object.defineProperties($state, descriptors)
+   }
+   else if (ionized) {
+      quark.transformGet = (value: unknown) => {
+         return maybeIonize(value, mark)
+      }
+   }
 
-   }
-   else {
-      Object.defineProperty($state, 'value', {
-         get: $state,
-         set: setState.bind(quark)
-      })
-   }
+   Object.defineProperty($state, 'value', {
+      get: $state,
+      set: setState.bind(quark)
+   })
 
    return $state
 }
 
-function attachCapsuleMethods(ion: Ion & AnyObject, props: AnyObject) {
-   Object.defineProperties(ion, Object.getOwnPropertyDescriptors(props))
-   // if (selectedMethods)
-   //    for (const key in methods) {
-   //       if (selectedMethods.has(key)){
-   //          if (parentMethods && !parentMethods.has(key)) {
-   //             ion[key] = useBlockedMethod(key)
-   //             selectedMethods.delete(key)
-   //          }
-   //          else {
-   //             ion[key] = methods[key].bind(thisIon)
-   //          }
-   //       }
-   //       else ion[key] = useBlockedMethod(key)
-   //    }
-   // else
-   // for (const key in methods) {
-   //    ion[key] = methods[key].bind(thisIon)
-   // }
-}
 
 const ATOMIC = Symbol('atomic')
 
@@ -318,39 +313,32 @@ export function isAtomicQuark(value: unknown): value is AtomicIonQuark {
 
 function getState(this: AtomicIonQuark) {
    if (__DEV__) emitSignal();
-   // if (this.state.key)console.log('track', this.state.key)
-   trackParticle(this)
-   this.getterTask?.()
-   // if (this.state.key === 'length' && this.modelQuark) trackParticle(this.modelQuark)
-   if (isLazyUpdate()) {
-      return maybeIonize(this.state.pending, this.ionized, this.mark); //TODO: inertSchema
-   }
-   return maybeIonize(this.state.current, this.ionized, this.mark);
+   this.track()
+   const state = isLazyUpdate() ? this.state.pending : this.state.current
+   return this.transformGet ? this.transformGet(state) : state;
 }
 
-export function setState(this: AtomicIonQuark, value: unknown) {
+const FAIL = Symbol('fail')
 
-   const state = this.state
+export function setState(this: AtomicIonQuark, value: unknown) {
+   const newState = this.transformSet ? this.transformSet(value, FAIL) : value;
+   if (newState === FAIL) return;
 
    // const oldState = state.previous;
-   const newState = value
-   // maybeIonize(value, this.ionized)
-
-   // console.log('#$% oldstate', oldState)
-   // console.log('#$% newState', newState)
    // if (newState === oldState) { //NOTE: we cannot do this if we are cloning arrays--the new array needs to be updated with all changes
    //    return newState;
    // }
 
+   const state = this.state
+
    const update = initUpdate()
+
    // set state
    if (update.lazy) {
       state.pending = newState
-      // state.previous = newState
    }
    else {
       state.current = newState;
-      // state.previous = newState
    }
 
    const pendingUpdate = this.pendingUpdate
@@ -382,8 +370,6 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    // trigger effects
    this.trigger(update)
    this.modelQuark?.trigger(update);
-   // if (this.modelQuark) 
-   // console.trace('trigger modelQuark of pion?', this.state.key)
 
    return state;
 }

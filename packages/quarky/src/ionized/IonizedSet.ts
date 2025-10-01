@@ -1,6 +1,6 @@
 import { toRaw } from "./ionize";
 import { getIonizedModel } from "./IonizedModel";
-import { enlistIonizedMethods, OpType, trackableCreativeOp, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonizedMethods";
+import { enlistIonizedMethods, MemberType, trackableCreativeOp, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonizedMethods";
 
 // declare global {
 //    interface Set<T> {
@@ -67,7 +67,7 @@ const hasOp = useHasOp((target, ionizedKey, rawKey) => {
 export function installIonicSet() {
    enlistIonizedMethods(Set, {
       has: {
-         type: OpType.TRACKABLE,
+         type: MemberType.TRACKABLE,
            privateState: true,
          input: ([key]) => [toRaw(key)],
          op: hasOp,
@@ -89,7 +89,7 @@ export function installIonicSet() {
 
       // mutating
       add: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
            privateState: true,
          op: function add(this: Set<unknown>, value: unknown) {
             const ionizedKey = getIonizedModel(value);
@@ -109,7 +109,7 @@ export function installIonicSet() {
          }
       },
       clear: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
            privateState: true,
          preop(target) {
             return { entries: Array.from(<Set<any>>target), prevSize: target.size, target }
@@ -129,7 +129,7 @@ export function installIonicSet() {
          }
       },
       delete: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
            privateState: true,
          input: ([value]) => [toRaw(value)],
          op: useDeleteOp(hasOp),
@@ -150,7 +150,7 @@ export function installIonicSet() {
       },
       size: {
          get: {
-            type: OpType.TRACKABLE,
+            type: MemberType.TRACKABLE,
               privateState: true,
             track: trackOp
          }

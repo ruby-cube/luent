@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { Ionized, isIonizedModel, isIonKey, toRaw } from "./ionize";
+import { InertMark, Ionized, isIonizedModel, isIonKey, toRaw } from "./ionize";
 import { __DEV__asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
@@ -12,7 +12,7 @@ import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { isWatchable, Watchable } from "../reactivity/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
-import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, OpType, initModelUpdate, useIonicOp } from "./IonizedMethods";
+import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp } from "./IonizedMethods";
 import { inert, isInert } from "./inert";
 import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
 import { isTracking, popTracker, pushTracker, trackParticle } from "../compound/Compound";
@@ -302,9 +302,9 @@ function getIonizedConfig(target: AnyObject) {
 
 
 
-type MarkMap = { [key: PropertyKey]: typeof inert | MarkMap }
+export type MarkMap = { [key: PropertyKey]: InertMark | MarkMap }
 
-export type IonizeOptions = { mark?: MarkMap, idKey?: string }
+export type IonizeOptions = { mark?: MarkMap }
 
 export const EACH = Symbol('each')
 
@@ -359,8 +359,8 @@ export function createIonizedModel(
             if (propertyDescriptor.get || propertyDescriptor.set) {
                const opDef = getIonizedMemberDef(initialTarget, originalKey)
                if (opDef) {
-                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[OpType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
-                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[OpType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
+                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[MemberType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
+                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[MemberType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
                   Object.defineProperty(proxyProto, key, propertyDescriptor)
                   return !!propertyDescriptor.set;
                }
@@ -434,7 +434,7 @@ export function createIonizedModel(
                               )
                               return pion();
                            }
-                           return maybeIonize(_value, true, options?.mark?.[isIntegerKey(key) ? EACH : key])
+                           return maybeIonize(_value, options?.mark?.[isIntegerKey(key) ? EACH : key])
                         },
                         set(v) {
                            _value = v
@@ -608,12 +608,12 @@ function triggerKeysChange(quark: ModelQuark, key: ProxyKey, update: Update) {
 //    )
 // }
 
-function isInertMark(mark: typeof inert | MarkMap | undefined): mark is typeof inert {
+function isInertMark(mark: InertMark | MarkMap | undefined): mark is InertMark {
    return mark === inert
 }
 
-export function maybeIonize<T>(value: T, ionized: boolean, mark: typeof inert | MarkMap | undefined): T extends AnyObject ? Ionized<T> : T {
-   if (isIonizedModel(value) || !ionized || !isObject(value) || isInert(value) || isInertMark(mark)) {
+export function maybeIonize<T>(value: T, mark: InertMark | MarkMap | undefined): T extends AnyObject ? Ionized<T> : T {
+   if (isIonizedModel(value) || !isObject(value) || isInert(value) || isInertMark(mark)) {
       if (mark === inert) inert(value);
       return value as T extends AnyObject ? Ionized<T> : T;
    }
@@ -679,7 +679,7 @@ export function $<T>(value: T): T extends Ionized<infer O> ? ExposeIons<O> : und
 function createPionsProxy(proxyProto: AnyObject, model: IonizedModel) {
    return new Proxy(proxyProto, {
       get(target, key) {
-            return getPion(target, key) ?? (model[key], getPion(target, key))
+         return getPion(target, key) ?? (model[key], getPion(target, key))
       }
    })
 }
@@ -717,7 +717,7 @@ function getPionQuark(proxyProto: ProxyPropertyMap, key: ProxyKey) {
 //    state: ModelState,
 //    quark: ModelQuark,
 //    propertyDescriptor: PropertyDescriptor,
-//    mark: typeof inert | MarkMap | undefined
+//    mark: InertMark | MarkMap | undefined
 // ) {
 //    // if (ionKey) {
 //    //    return initializePionAccess(proxyProto, stateKey, ionKey, state, quark, propertyDescriptor, mark)
@@ -733,7 +733,7 @@ function getPionQuark(proxyProto: ProxyPropertyMap, key: ProxyKey) {
 //    state: ModelState,
 //    quark: ModelQuark,
 //    propertyDescriptor: PropertyDescriptor,
-//    mark: typeof inert | MarkMap | undefined
+//    mark: InertMark | MarkMap | undefined
 // ) {
 //    const ion = getPion(proxyProto, key) ?? createPion(proxyProto, key, state, quark, propertyDescriptor, mark)
 
@@ -744,12 +744,12 @@ function createPion(
    proxyProto: ProxyPropertyMap,
    key: ProxyKey,
    state: ModelState,
-   quark: ModelQuark,
+   modelQuark: ModelQuark,
    propertyDescriptor: PropertyDescriptor,
-   mark: typeof inert | MarkMap | undefined
+   mark: InertMark | MarkMap | undefined
 ) {
    const propDef = getIonizedMemberDef(state.active, key)
-   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), true, mark, quark, propDef?.getterTask, propDef?.setterTask))
+   const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), modelQuark, propDef?.track, propDef?.trigger), true, mark)
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
       configurable: propertyDescriptor.configurable,

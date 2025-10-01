@@ -153,11 +153,11 @@ export type ToRawItems<T> = any[] extends T ? T extends Array<infer I> ? ToRaw<I
 type Proto = { [key: string]: (...args: any[]) => any }
 
 export type InertMark = { '~markInert': true }
-export type IonizeWithInertItems = { '~markItemsInert': true }
+// export type IonizeWithInertItems = { '~markItemsInert': true }
 
-export type MarkMap = {
-   [key: PropertyKey]: MarkMap | InertMark | IonizeWithInertItems
-}
+// export type MarkMap = {
+//    [key: PropertyKey]: MarkMap | InertMark | IonizeWithInertItems
+// }
 
 type Mark<T, MK> = MK extends undefined ? T : {
    [K in keyof T]:
@@ -283,7 +283,7 @@ export function ionize<T, MARKS>(target: T & object, options?: IonizeOptions): M
 
 // export function ionizeWithMarks<
 //    T extends AnyObject,
-//    M extends { [K in keyof Partial<T>]: 'public' | typeof inert }
+//    M extends { [K in keyof Partial<T>]: 'public' | InertMark }
 // >(target: T, marks: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<Marked<T, M>> {
 //    const publicMethods: AnyObject = {};
 //    const inertProps: AnyObject = {}
@@ -296,7 +296,7 @@ export function ionize<T, MARKS>(target: T & object, options?: IonizeOptions): M
 //    return ionize(target, undefined, publicMethods)
 // }
 
-// type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
+// type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | InertMark }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends InertMark ? T[K] & Inert : T[K] } //TODO: Mark public
 
 export function storeSnapshot(modelQuark: ModelQuark, clone?: AnyObject) {
    // timeTraveler.takeSnapshot(toRaw(modelQuark), $effectCycle().count, clone)

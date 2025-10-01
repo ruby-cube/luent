@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { IonizedModel, maybeIonize } from "./IonizedModel";
-import { MutatingOpDef, IonizedMethodsDef, TrackableOpDef, OpType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
+import { MutatingOpDef, IonizedMethodsDef, TrackableOpDef, MemberType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
 import { trackParticle } from "../compound/Compound";
 
 
@@ -142,7 +142,7 @@ type IsIonizable<T> = T extends Ionizables[keyof Ionizables] ? true : false
 // todos.indexOf(todo)
 
 // const indexOp: TrackableOpDef = {
-//    type: OpType.TRACKABLE,
+//    type: MemberType.TRACKABLE,
 //    // input: (args: any[]) => [toRaw(args[0]), args[1]]
 // }
 
@@ -154,14 +154,14 @@ const arrayLengthMutatingOp: Omit<MutatingOpDef, 'type'> = {
 }
 
 const creativeOp: TrackableOpDef = {
-   type: OpType.TRACKABLE,
+   type: MemberType.TRACKABLE,
    output: ionize
 }
 
 enlistIonizedMethods(Array,
    {
       at: {
-         type: OpType.TRACKABLE,
+         type: MemberType.TRACKABLE,
          // track: trackOp,
          output: maybeIonize
       },
@@ -212,7 +212,7 @@ enlistIonizedMethods(Array,
       toSpliced: creativeOp,
       // newArray = toSpliced(start?, delete[Count?, item1, item2, /* …, */ itemN)
       // {
-      //    type: OpType.TRACKABLE,
+      //    type: MemberType.TRACKABLE,
       //    input: (args) => args.map((item, index) => index < 2 ? item : toRaw(item)),
       //    // track: trackModel,
       //    output: maybeIonize,
@@ -220,7 +220,7 @@ enlistIonizedMethods(Array,
 
       // MUTATING
       push: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          preop: arrayLengthMutatingOp.preop,
          // trigger: (model, { prevLength }) => [
          //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
@@ -232,7 +232,7 @@ enlistIonizedMethods(Array,
       },
 
       pop: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          preop: arrayLengthMutatingOp.preop,
          // shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
          // triggers: () => [],
@@ -247,7 +247,7 @@ enlistIonizedMethods(Array,
       },
 
       unshift: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          preop: arrayLengthMutatingOp.preop,
          // trigger: (model) => [
          //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
@@ -258,7 +258,7 @@ enlistIonizedMethods(Array,
       },
 
       shift: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          preop: arrayLengthMutatingOp.preop,
          // trigger: (model) => [
          //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
@@ -269,7 +269,7 @@ enlistIonizedMethods(Array,
       },
 
       splice: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          // input: ([start, deleteCount, ...args]) => [start, deleteCount, ...deionizeArgs(args)],
          output: ionize,
          preop: arrayLengthMutatingOp.preop,
@@ -284,7 +284,7 @@ enlistIonizedMethods(Array,
       },
 
       copyWithin: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          preop: fillOrCopyWithinPreop,
          // triggers: () => [],
          // triggers: triggerModel,
@@ -292,7 +292,7 @@ enlistIonizedMethods(Array,
       },
 
       fill: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          // input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
          preop: fillOrCopyWithinPreop,
          // triggers: triggerModel,
@@ -301,7 +301,7 @@ enlistIonizedMethods(Array,
       },
 
       reverse: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          // triggers: () => [],
          // triggers: triggerModel,
          revert(model) {
@@ -310,7 +310,7 @@ enlistIonizedMethods(Array,
       },
 
       sort: {
-         type: OpType.MUTATING,
+         type: MemberType.MUTATING,
          preop(model) {
             return model.slice()
          },
@@ -323,7 +323,8 @@ enlistIonizedMethods(Array,
          }
       },
       length: {
-         getterTask() {
+         type: MemberType.PROPERTY,
+         track() {
             trackParticle(this.modelQuark!)
          }
       }
@@ -501,7 +502,7 @@ export function isIonizedArray(target: any): target is IonizedModel {
 enlistIonizedMethods([].values().constructor as Constructor, {
    next: {
       privateState: true,
-      type: OpType.TRACKABLE,
+      type: MemberType.TRACKABLE,
       output: maybeIonize,
       track: trackModel
    }

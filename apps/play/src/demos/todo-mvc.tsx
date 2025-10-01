@@ -2,6 +2,7 @@ import { component, For, If, Else } from "@rue/lumo"
 import { watch, ion, ionicTask, ionize, Ionized, Ion, $, makeIon, createIon } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
+import { isTracking } from "../../../../packages/quarky/src/compound/Compound"
 
 // entity.name.type.tsx
 // meta.type.annotation.tsx
@@ -102,8 +103,13 @@ export function TodoMVC() {
    const STORAGE_KEY = 'vue-todomvc'
 
    // get state
-   const $todos = Ion.Ionized((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[]) //TODO: idKey
-   const $view = Ion('all' as keyof typeof filters)
+   const $todos = Ion.Ionized((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
+   const $view = Ion('all' as keyof typeof filters, {
+      set value(value: keyof typeof filters) {
+         console.trace('set $view!', $view(), value)
+         this.value = value;
+      }
+   })
    const $editedTodo = Ion(null as Todo | null)
 
    // derived state
@@ -205,7 +211,7 @@ export function TodoMVC() {
                />
                <label for="toggle-all">Mark all as complete</label>
                <ul class="todo-list">
-                  {For($filteredTodos, m => m.id, (todo) => {
+                  {For($filteredTodos, o => o.id, (todo) => {
                      const $isEditing = Ion(() => todo === $editedTodo());
                      return (
                         <li class={["todo", { completed: (todo.completed), editing: $isEditing }]}>

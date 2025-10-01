@@ -6,6 +6,8 @@ import { ListItemKit, ListKit, toAsyncRenderItem } from "./List";
 import { ListRenderKit } from "./ListRenderKit";
 import { Ion, IonizeBy, Ionized, isGetter, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toIon, toValue } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
+import { hasQuark, quarkOf } from "../../../quarky/src/Quark";
+import { AnyObject } from "@rue/types";
 
 
 export type RenderItem<L> =
@@ -27,15 +29,16 @@ export type Collection<T> = MaybeIon<T[]>
 //TODO: Ionized item depending on if data is reactive
 //TODO: $index: number | AtomicIon<number> based on whether list data is reactive
 // export function For<L extends any[]>(data: L, render: ((item: L extends (infer I)[]? I : never, $index: Ion<number>)=>JSXNode) | JSXNode): ListRenderKit {
-export function For<L extends ListData>(data: L, render: RenderItem<L>): ListRenderKit
-export function For<L extends ListData>(data: L, getUID: L extends Collection<infer T> ? (item: T) => unknown : (item: any) => unknown, render: RenderItem<L>): ListRenderKit | undefined | RawJSXNode
-export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> | (L extends Collection<infer T> ? (item: T) => unknown : never), render?: RenderItem<L>): ListRenderKit | undefined | RawJSXNode {
+export function For<L extends ListData>(data: L, render: RenderItem<L>): ListRenderKit | undefined | RawJSXNode 
+   export function For<L extends ListData>(data: L, getUID: L extends Collection<infer T> ? (item: T) => unknown : (item: any) => unknown, render: RenderItem<L>): ListRenderKit | undefined | RawJSXNode
+   export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> | (L extends Collection<infer T> ? (item: T) => unknown : never), render?: RenderItem<L>): ListRenderKit | undefined | RawJSXNode {
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
-   if (isGetter(data) || isIonizedModel(data) || isIonizedModel(toValue(data)))
-      // return new ListRenderKit(_render, data, getUID, getCommons())
-      return new ListKit(toIon(data), toAsyncRenderItem(_render), getUID ?? ((i: any) => i), getFlask())
+   // const _render = normalizeToRenderFunction(render) as RenderItem<any[]>;
+   if (isGetter(data) || isIonizedModel(data) || isIonizedModel(toValue(data))) {
+      return new ListKit(toIon(data), toAsyncRenderItem(_render), getUID, getFlask())
+   }
    return renderStaticList(data, _render)
 }
 
