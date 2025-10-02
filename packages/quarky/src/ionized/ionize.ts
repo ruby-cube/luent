@@ -3,7 +3,7 @@ import { debug, isFunction, isObject } from "@rue/utils";
 import { InertCollection, InertCollectionType, ModelQuark } from "./ModelQuark";
 import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
-import { createIonizedModel, getIonizedModel, IonizedModel } from "./IonizedModel";
+import { createIonizedModel, getIonizedModel, IonizedModel, IonizeOptions } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 
 
@@ -203,7 +203,7 @@ function getExistingIonizedModel(target: object, markMap?: object) {
 export const Ionized = ionize
 export const $$ = ionize
 
-export function ionize<T, MARKS>(target: T & object, options?: IonizeOptions): MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> {
+export function ionize<T extends object, MARKS>(target: T & ThisType<Ionized<T>>, options?: IonizeOptions): MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> {
    //TODO: store stack trace
    return <unknown>getExistingIonizedModel(target, options) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> ??
       <unknown>ionizeModel(target, options) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>>

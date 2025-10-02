@@ -238,7 +238,7 @@ export const RUN_EAGERLY = true;
 // const $todoID = ion('kldk')
 // const $data = ion()
 
-// initIonicTask(async w => {
+// queueIonicTask(async w => {
 //    await postlude()
 
 //    if (w($active)) {
@@ -297,7 +297,7 @@ export const RUN_EAGERLY = true;
 //    petsEl.focus()
 // })
 
-// initIonicTask((w, initial) => {
+// queueIonicTask((w, initial) => {
 
 // }, { phase: RENDER })
 

@@ -23,7 +23,7 @@ type IonicTaskOptions = {
    retrack?: boolean; // defaults to true
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
-export function initIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
 
    const retrack = options?.retrack === undefined ? true : options.retrack
 

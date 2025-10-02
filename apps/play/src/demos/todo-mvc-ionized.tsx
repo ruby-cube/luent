@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { component, For, If, Else, FromTag, listen } from "@rue/lumo"
+import { component, For, If, Else, FromTag } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
@@ -101,144 +100,137 @@ type RadioInputEvent = { target: { checked: boolean } }
 // }
 type FilterKeys = 'all' | 'active' | 'completed'
 
-
-class IonizedTodoApp {
-
-   filter: FilterKeys = 'all'
-
-   constructor(
-      public todos: Todo[],
-   ) {
-      console.log(todos)
-      return Ionized(this)
-   }
-
-   filters = {
-      all: (todos: Todo[]) => todos,
-      active: (todos: Todo[]) => Ionized(todos.filter(todo => !todo.completed)),
-      completed: (todos: Todo[]) => Ionized(todos.filter(todo => todo.completed))
-   }
-
-   get filteredTodos() {
-      return this.filters[this.filter](this.todos)
-   }
-
-   get remaining() {
-      return this.filters.active(this.todos).length
-   }
-
-   addTodo(title: string) {
-      // const item = Ionized()
-
-      this.todos.push({
-         id: Date.now(),
-         title,
-         completed: false
-      })
-
-      // const lastItem = this.todos.pop()
-
-      // this.todos.push(lastItem) // FIX: should update list rendering
-
-      // console.log('IDENTITY?', item === lastItem) //FIX: Identity hazard
-   }
-
-   removeTodo(todo: Todo) {
-      this.todos = Ionized(this.todos.filter(item => item !== todo))
-   }
-
-   removeCompleted() {
-      this.todos = this.filters.active(this.todos)
-   }
-
-   toggleAll(completed: boolean) {
-      this.todos.forEach((todo) => (todo.completed = completed))
-   }
-}
-
-
-function TodoStorageKit() {
-
-   const STORAGE_KEY = 'vue-todomvc'
-
-   function getTodos() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
-   }
-
-   function storeTodos(todos: Todo[]) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-   }
-
-   return { getTodos, storeTodos }
-}
-
-
 export function TodoMVC() {
 
-   // # init and persist state
-   const { getTodos, storeTodos } = TodoStorageKit()
+   const app = Ionized({
 
-   const app = new IonizedTodoApp(getTodos())
-   app.todos
-   app.filter
-   app.filters
-   app.filteredTodos
+      todos: getTodos(),
+      view: 'all' as FilterKeys,
 
-   // console.log('filtered todos', $(app).filteredTodos)
+      filters: {
+         all: (todos: Todo[]) => todos,
+         active: (todos: Todo[]) => Ionized(todos.filter(todo => !todo.completed)),
+         completed: (todos: Todo[]) => Ionized(todos.filter(todo => todo.completed))
+      },
 
-   queueIonicTask(() => {
-      storeTodos(app.todos)
+      get filteredTodos() {
+         return this.filters[this.view](this.todos)
+      },
+
+      get remaining() {
+         return this.filters.active(this.todos).length
+      },
+
+      addTodo(title: string) {
+         this.todos.push({
+            id: Date.now(),
+            title,
+            completed: false
+         })
+      },
+
+      removeTodo(todo: Ionized<Todo>) {
+         const index = this.todos.indexOf(todo)
+         this.todos.splice(index, 1)
+      },
+
+      removeCompleted() {
+         this.todos = this.filters.active(this.todos)
+      },
+
+      toggleAll(e: RadioInputEvent) {
+         this.todos.forEach((todo) => (todo.completed = e.target.checked))
+      }
    })
 
 
    // # handle routing
+
    window.addEventListener('hashchange', onHashChange)
    onHashChange()
 
    function onHashChange() {
       const route = window.location.hash.replace(/#\/?/, '') as FilterKeys
       if (app.filters[route]) {
-         app.filter = route
+         app.view = route
       } else {
          window.location.hash = ''
-         app.filter = 'all'
+         app.view = 'all'
       }
    }
+
+
+   // # persist state
+
+   function getTodos(): Todo[] {
+      const STORAGE_KEY = 'vue-todomvc'
+
+      queueIonicTask(() => {
+         localStorage.setItem(STORAGE_KEY, JSON.stringify(app.todos))
+      })
+
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
+   }
+
+
+   // # todos methods
+
+   const ToggleAllButton = () => (
+      <>
+         <input
+            id="toggle-all"
+            class="toggle-all"
+            type="checkbox"
+            checked={($remaining() === 0)}
+            on:change={toggleAll}
+         />
+         <label for="toggle-all">Mark all as complete</label>
+      </>
+   )
+
+
+   // # remaining todos
+
+   const RemainingCount = () => (
+      <span class="todo-count">
+         <strong>{$remaining}</strong>
+         <span>{($remaining() === 1 ? ' item' : ' items')} left</span>
+      </span>
+   )
 
 
    return component(
       <>
          <section class="todoapp">
             <header class="header">
-               <h1>Class: Todos</h1>
-               <TodoInput can:addTodo={app.addTodo.bind(app)}></TodoInput>
+               <h1>Todos</h1>
+               <TodoInput can:addTodo={addTodo}></TodoInput>
             </header>
             <section class="main">
-               <ToggleAll can:toggleAll={app.toggleAll.bind(app)} ctx={app}></ToggleAll>
-               <TodoList todos={(app.filteredTodos)} can:removeTodo={app.removeTodo.bind(app)}></TodoList>
+               {ToggleAllButton()}
+               <TodoList todos={$filteredTodos} can:removeTodo={removeTodo}></TodoList>
             </section>
-            <footer show-if={(app.todos.length)} class="footer">
-               <Remaining count={(app.remaining)}></Remaining>
+            <footer show-if={$todoCount} class="footer">
+               {RemainingCount()}
                <ul class="filters">
                   <li>
-                     <a href="#/all" class={{ 'selected': (app.filter === 'all') }}>All</a>
+                     <a href="#/all" class={{ 'selected': ($view() === 'all') }}>All</a>
                   </li>
                   <li>
-                     <a href="#/active" class={{ 'selected': (app.filter === 'active') }}>Active</a>
+                     <a href="#/active" class={{ 'selected': ($view() === 'active') }}>Active</a>
                   </li>
                   <li>
-                     <a href="#/completed" class={{ 'selected': (app.filter === 'completed') }}>Completed</a>
+                     <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={app.removeCompleted.bind(app)}>
+               <button show-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
                   Clear completed
                </button>
             </footer>
          </section>
 
          <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
-      </>
-   )
+      </>)
 }
 
 {/* <style>
@@ -298,7 +290,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
 
    return component(
       <ul class="todo-list">
-         {For($todos, o => o.id, (todo, $index) => {
+         {For($todos, o => o.id, (todo) => {
             const $isEditing = Ion(() => todo === $editedTodo());
 
             return (
@@ -326,31 +318,3 @@ function TodoList({ $todos, removeTodo }: FromTag<{
 }
 
 
-function ToggleAll({ toggleAll, ctx }: FromTag<{
-   'can:toggleAll': TodoApp['toggleAll']
-   ctx: Ionized<{ remaining: TodoApp['remaining'] }>
-}>) {
-
-   return component(
-      <>
-         <input
-            id="toggle-all"
-            class="toggle-all"
-            type="checkbox"
-            checked={(ctx.remaining === 0)}
-            on:change={e => toggleAll(e.target.checked)}
-         />
-         <label for="toggle-all">Mark all as complete</label>
-      </>
-   )
-}
-
-function Remaining({ $count }: FromTag<{ count: Ion<number> }>) {
-
-   return component(
-      <span class="todo-count">
-         <strong>{$count}</strong>
-         <span>{($count() === 1 ? ' item' : ' items')} left</span>
-      </span>
-   )
-}

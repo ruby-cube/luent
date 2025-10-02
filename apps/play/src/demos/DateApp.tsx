@@ -1,5 +1,5 @@
 import { atUnmount, component } from "@rue/lumo";
-import { initIonicTask, Ion, Ionized, SYNC, watch } from "@rue/quarky";
+import { queueIonicTask, Ion, Ionized, SYNC, watch } from "@rue/quarky";
 
 export function DateApp() {
 

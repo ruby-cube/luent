@@ -88,7 +88,7 @@ import { installIonizedDate } from '../../../packages/quarky/src/ionized/Ionized
 
 
 installIonizedDate()
-const app = createApp(TestIonicTask)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 

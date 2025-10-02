@@ -203,7 +203,7 @@ export function SomeChild() {
          function getfiles() {
             const $state = ion(undefined);
       
-            initIonicTask(() => {
+            queueIonicTask(() => {
                const res = await fetch(`files/${$id()}`)
                res.json().then(v => $state.value = v)
             })

@@ -476,7 +476,7 @@ watch(($count), () => {
 })
 
 // ionic task
-initIonicTask(() => {
+queueIonicTask(() => {
    console.log('card number:', $cardNumber())
    console.log('card suit:', $cardSuit())
 }) // default poster render

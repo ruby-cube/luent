@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import {  ion, initIonicTask, SYNC } from "@rue/quarky"
+import {  ion, queueIonicTask, SYNC } from "@rue/quarky"
 
 
 export function TestIonicEffect() {
@@ -10,7 +10,7 @@ export function TestIonicEffect() {
         }
     })
 
-    initIonicTask(() => {
+    queueIonicTask(() => {
         $count.increment()
     }, { phase: SYNC })
 

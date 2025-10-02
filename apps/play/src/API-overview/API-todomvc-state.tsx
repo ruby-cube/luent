@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, For, If, Else } from "@rue/lumo"
-import { watch, ion, initIonicTask, ionize, Ionized, ionic } from "@rue/quarky"
+import { watch, ion, queueIonicTask, ionize, Ionized, ionic } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 
 interface Todo {
@@ -38,7 +38,7 @@ export function TodoMVC() {
    onHashChange()
 
    // persist state
-   initIonicTask(() => {
+   queueIonicTask(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(todos.value))
    })
 
