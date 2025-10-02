@@ -1,5 +1,5 @@
 import { component, Else, For, If} from "@rue/lumo"
-import { ion, ionicTask } from "@rue/quarky"
+import { ion, initIonicTask } from "@rue/quarky"
 import { $postrender} from "../../../../packages/lumo/src/render-cycle"
 import { $_run_with_, $_snap_context } from "@rue/flask"
 
@@ -31,13 +31,13 @@ export function View() {
 
    // const context = $_snap_context()
 
-   ionicTask(async (initial) => {
+   initIonicTask(async (initial) => {
       if (!initial) $commits.value = []
       const response = await fetch(`${API_URL}${$currentBranch()}`)
       $commits.value = await response.json()
    })
 
-   // ionicTask(async () => {
+   // initIonicTask(async () => {
    //    await $postrender()
    //    console.log('postlude logging', $currentBranch())
    // })

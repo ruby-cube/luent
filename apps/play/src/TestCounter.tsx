@@ -7,7 +7,7 @@
 
 
 import { component, FromTag } from "@rue/lumo"
-import { Ion, ion, ionic, ionicTask, ionize } from "@rue/quarky"
+import { Ion, ion, ionic, initIonicTask, ionize } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
@@ -94,7 +94,7 @@ export function TestCount() {
       $count.value--
    }
 
-   ionicTask(() => {
+   initIonicTask(() => {
       console.log('running ionic task', $count())
    })
 

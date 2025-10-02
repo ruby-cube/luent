@@ -2,7 +2,6 @@ import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon, isGetter }
 import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { $Node, $Nodes } from "./NodeRef";
-import { getCurrentIndex } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
@@ -11,6 +10,7 @@ import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
+import { getCurrentIndex } from "../iteratives/List";
 
 // export function Fragment() {
 //    // for jsx-runtime

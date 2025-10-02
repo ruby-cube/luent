@@ -174,7 +174,7 @@ export const queuePostrenderTask = (task: () => void) => {
  * @param eager 
  * @returns 
  */
-export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask }) => void, flask: Flask = getFlask(), eager: boolean = false) {
+export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getFlask(), eager: boolean = false) {
    // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRERENDER, eager})
    // return;
    const subject = new IonSubject(ion)
@@ -197,9 +197,12 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
       _render()
    }, PRERENDER)
 
+   let eagerRun = eager;
+   
    function _render() {
       const newState = subject.trackedCall()
-      render({ current: newState, previous: prevState, flask })
+      render({ current: newState, previous: prevState, flask, eagerRun })
+      eagerRun = false;
       prevState = newState;
    }
 
@@ -235,7 +238,7 @@ export const RUN_EAGERLY = true;
 // const $todoID = ion('kldk')
 // const $data = ion()
 
-// ionicTask(async w => {
+// initIonicTask(async w => {
 //    await postlude()
 
 //    if (w($active)) {
@@ -294,7 +297,7 @@ export const RUN_EAGERLY = true;
 //    petsEl.focus()
 // })
 
-// ionicTask((w, initial) => {
+// initIonicTask((w, initial) => {
 
 // }, { phase: RENDER })
 

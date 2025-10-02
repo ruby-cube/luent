@@ -48,7 +48,7 @@ export const MARK = Symbol('marked')
 /**
  * Ionized deeply
  */
-export type Ionized<T extends object> = Properties<T> & { '~ionized'?: true }
+export type Ionized<T extends object> = Properties<T> & { '~ionized': true }
 
 
 // Properties<T>
@@ -68,7 +68,7 @@ type InvertProperties<T, ROKeys> = {
 
 type IsAbsorbedIon<K, T> = K extends `$${string}` ? T extends Ion ? true : false : false
 type IsMethod<K, T> = K extends `$${string}` ? T extends Ion ? false : false : T extends Function ? true : false
-export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized'?: true } ? true : false
+export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized': true } ? true : false
 // T extends Ion ? false : false : T extends Function ? true : false
 
 type MaybeIonizeProperty<K, T> =
@@ -101,8 +101,8 @@ type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args:
  * Wrap the return of a method of an ionizable class with this type helper in order to 
  * propagate any deep ionization that has been defined in the class's enlistIonizedMethods config
  */
-export type IonizeBy<H, T> = IsIonized<H> extends true ?
-   MaybeIonize<T> : T
+export type IonizeBy<H, T> =  IsIonized<H> extends true ?
+   (T extends AnyObject ? Ionized<T> : T) : T
 
 export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T
 // T extends Ionized<infer O> ? O | T : T | Ionized<T>
@@ -199,6 +199,9 @@ function getExistingIonizedModel(target: object, markMap?: object) {
    }
    return existing
 }
+
+export const Ionized = ionize
+export const $$ = ionize
 
 export function ionize<T, MARKS>(target: T & object, options?: IonizeOptions): MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> {
    //TODO: store stack trace
@@ -386,7 +389,7 @@ export function toRaw<T>(target: T): ToRaw<T> {
 //     }
 //     // clean up
 //     const prop = asObservedProp(reactive, key)
-//     const watchSubject = asWatchedAtom(prop)
+//     const watchSubject = asWatched(prop)
 //     watchSubject.onUnwatched(() => {
 //         unobserve(prop, isIndex ? () => {
 //             (<MetaIonicCollection>modelQuark).deleteObservedEntryKey(key)
@@ -397,7 +400,7 @@ export function toRaw<T>(target: T): ToRaw<T> {
 
 
 // function unobserve(prop: ObservedProp) {
-//     const watchSubject = asWatchedAtom(prop)
+//     const watchSubject = asWatched(prop)
 //     const atom = asParticle(prop)
 //     if (watchSubject.watchCount === 0 && atom.compounds.size === 0) {
 //         prop.discard()

@@ -32,7 +32,6 @@ import { TestSetHas } from './TestSetHas';
 import { TestCustomRadioSelection } from './TestSelected';
 import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
-import { ion, ionize, isAtomic, isIonizedModel, neutron, SYNC, watch } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
 import { TestAnimationController } from './demos/animation-controller';
 import { CounterModelApp } from './TestCounterModel';

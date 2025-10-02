@@ -54,33 +54,35 @@ const count = Ion(0, {
    decrement() {
 
    },
-   get value() {
+   '@get'() {
       return this.value
    },
-   set value(num) {
+   '@set'(num) {
       if (timeout) return false;
       timeout = setTimeout(() => {
          timeout = undefined;
       }, 1000)
       this.value = num
-      return true;
    }
 })
 
+//TODO:
 // writable derivation
 const $doubleCount = Ion(() => $count() * 2, {
-   set value(num: number) {
-      $count.value = num
+   '@set'(num: number) {
+      $count.value = num / 2
    }
 })
 
+//TODO:
 // overwritable derivation
 const $doubleCount = Ion(() => $count() * 2, {
-   set value(num: number) {
+   '@set'(num: number) {
       this.value = num
    }
 })
 
+// TODO:
 const list = Ionize([], {
    __DEV__debug: {
       push() { console.trace() },
@@ -89,7 +91,72 @@ const list = Ionize([], {
 })
 
 
+
 debug.logAtoms($doubleCount)
+
+
+//TODO: Identity hazards
+
+
+const itemA = new Item()
+
+const itemB = list[2] = itemA
+
+itemB !== itemA
+
+class Frog{}
+
+
+const frogB = list[0] = { name: 'frog ' }
+
+list.push({
+   name: 'frog '
+})
+
+
+const frogB = list[0] = Ionized({ name: 'frog ' })
+
+list.push(Ionized({
+   name: 'frog '
+}))
+
+
+
+
+list.push($$({
+   name: 'frog '
+}))
+
+
+const frogB = list[0] = $$({ name: 'frog ' })
+
+list.push(!{
+   name: 'frog '
+})
+
+
+const frogB = list[0] = new $$Frog('kermit')
+
+list.push(new Frog('kermit'))
+
+
+
+
+
+const frogB = list[0] = $$(new Frog('kermit'))
+
+list.push($$(new Frog('kermit')))
+
+
+
+
+
+const frogB = list[0] = Ionized(new Frog('kermit'))
+
+list.push(Ionized(new Frog('kermit')))
+
+
+
 
 // const $firstName = ion('')
 // const $lastName = ion('')
@@ -409,7 +476,7 @@ watch(($count), () => {
 })
 
 // ionic task
-ionicTask(() => {
+initIonicTask(() => {
    console.log('card number:', $cardNumber())
    console.log('card suit:', $cardSuit())
 }) // default poster render

@@ -65,11 +65,11 @@ import { PionState } from "../ion/AtomicIon"
 //    key: PropertyKey,
 // ) {
 //    const pion = quarkOf(model).pions.get(key)
-//    return pion && (pion.asWatchedAtom || pion.asParticle) ? pion : undefined
+//    return pion && (pion.asWatched || pion.asParticle) ? pion : undefined
 // }
 
 
 
 // export function triggerPion(quark: PionQuark | undefined) {
-//    quark?.asWatchedAtom?.triggerEffects()
+//    quark?.asWatched?.triggerEffects()
 // }

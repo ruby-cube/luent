@@ -2,14 +2,14 @@ import { AnyObject } from "@rue/types";
 import { Effect } from "./EffectQueue"
 import { IonizedModel } from "../ionized/IonizedModel"
 import { hasQuark, QUARK, Quark, quarkOf } from "../Quark"
-import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom } from "./WatchedAtom"
+import { asWatched, isWatchable, isWatchableEntity, Watchable, Watched } from "./Watched"
 import { isFunction, isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel, toRaw } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { WatchSubjects } from "./watch";
 import { IonicCompound } from "../ionic/IonicCompound";
 import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../compound/Compound";
-import { isAtomic } from "../ion/AtomicIon";
+import { isAtomic } from "./AtomicQuark";
 
 export function isWatchSubject(value: AnyObject): value is WatchSubject {
    if ('inert' in value) return !value.inert;
@@ -258,11 +258,11 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       const atom = this.valueAtom = isWatchableEntity(value) ? quarkOf(value) : undefined
 
       if (prevAtom) {
-         this.effect.unlink(asWatchedAtom(prevAtom))
+         this.effect.unlink(asWatched(prevAtom))
       }
 
       if (atom) {
-         this.effect.link(asWatchedAtom(atom))
+         this.effect.link(asWatched(atom))
       }
    }
 
@@ -284,13 +284,13 @@ export class IonSubject extends IonicCompound implements WatchSubject {
 
 function linkEffectToAtom(atom: Watchable | undefined, effect: Effect) {
    if (!atom) return;
-   effect.link(asWatchedAtom(atom))
+   effect.link(asWatched(atom))
 }
 
 // function toWatchedAtoms(atoms: Set<Watchable>) {
 //    const watchedAtoms = [];
 //    for (const atom of atoms) {
-//       watchedAtoms.push(asWatchedAtom(atom))
+//       watchedAtoms.push(asWatched(atom))
 //    }
 //    return watchedAtoms;
 // }

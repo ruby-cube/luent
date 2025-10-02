@@ -628,10 +628,12 @@ function setUpClassesFromString(classString: string, classList: DOMTokenList) {
 // }
 function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
    let display = node.style.display
-   watchToRender($show, ({ flask }) => {
-      if ($show()) {
+
+   watchToRender($show, ({ flask, current: shouldShow, previous, eagerRun }) => {
+      if (!eagerRun && shouldShow === previous) return;
+      if (shouldShow) {
          queueInternalRenderTask(() => {
-            if (display === undefined) {
+            if (!display) {
                node.style.removeProperty('display');
             }
             else {
@@ -645,7 +647,7 @@ function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
             node.style.display = 'none'
          }, flask)
       }
-   })
+   }, getFlask(), RUN_EAGERLY)
 }
 
 function setUpStyles(node: Element, styles: StyleInput[]) {

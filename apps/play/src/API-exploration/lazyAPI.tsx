@@ -2,7 +2,7 @@
 // You're filtering a large list based on a search input.
 
 import { SuspenseIon, component, For, fromGlobal, provideGlobal } from "@rue/lumo";
-import { Ion, ion, ionicTask } from "@rue/quarky";
+import { Ion, ion, initIonicTask } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
 // tsx

@@ -9,7 +9,7 @@
    - memoized derivations
    - ionic effects
 
-- WatchedAtom
+- Watched
    - ionized model
    - atomic ions
    - pion
@@ -77,13 +77,13 @@ interface Link {
    nextCompound: Link | undefined
 }
 
-interface WatchedAtom {
+interface Watched {
    effects?: Set<WatchEffect>
    effectsHead?: WatchEffect
    effectsTail?: WatchEffect
 }
 
-function triggerEffects(subject: WatchedAtom) {
+function triggerEffects(subject: Watched) {
    // TODO:
    // run sync
    // or schedule
@@ -140,7 +140,7 @@ class AtomicOp implements Particle {
 } // 'trackable get ops'
 
 
-class MemoizedIonQuark implements IonicCompound, Particle, WatchedAtom, Quark<MemoizedIon> {
+class MemoizedIonQuark implements IonicCompound, Particle, Watched, Quark<MemoizedIon> {
    react: (this: Particle, oldState: unknown, newState: unknown) => void
    type: string | symbol
    particles: Set<Particle>
@@ -162,7 +162,7 @@ class MemoizedIonQuark implements IonicCompound, Particle, WatchedAtom, Quark<Me
    }
 }
 
-class IonicEffectQuark implements IonicCompound, WatchedAtom, Quark<IonicEffect> {
+class IonicEffectQuark implements IonicCompound, Watched, Quark<IonicEffect> {
    trigger: (this: IonicCompound, oldState: unknown, newState: unknown) => void
    type: string | symbol
    particles: Set<Particle>

@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import { ion, ionic, ionicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
+import { ion, ionic, initIonicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
 
 //TODO:
 // [x] private this access in methods and typing
@@ -55,7 +55,7 @@ export function TestMutableCounter() {
       count.value--
    }
 
-   // ionicTask(()=>{
+   // initIonicTask(()=>{
    //    console.log('running ionic task', count.value)
    // })
 

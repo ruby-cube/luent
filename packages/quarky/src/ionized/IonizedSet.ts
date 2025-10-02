@@ -284,7 +284,7 @@ export function installIonicSet() {
 //         if (sizeProp)
 //             trigger(sizeProp, newSize, oldSize);
 
-//         const hasOp = $atomicOp(ionizedModel, 'has', _newValue)
+//         const hasOp = getAtomicOp(ionizedModel, 'has', _newValue)
 //         if (hasOp) triggerIonicAtom(hasOp);
 
 //         triggerIonizedModel(
@@ -333,7 +333,7 @@ export function installIonicSet() {
 //       modelQuark.trigger()
 
 //       $atomicPion(ionizedModel, 'size')?.trigger()
-//       $atomicOp(ionizedModel, 'has', key)?.trigger()
+//       getAtomicOp(ionizedModel, 'has', key)?.trigger()
 
 //       runSyncEffects()
 
@@ -372,7 +372,7 @@ export function installIonicSet() {
 //       // custom triggers
 //       modelQuark.trigger()
 
-//       const hasOps = getAtomicOps(ionizedModel, 'has')
+//       const hasOps = getTrackedOps(ionizedModel, 'has')
 //       if (hasOps) {
 //          for (const [_, atomicOp] of hasOps) {
 //             atomicOp.trigger()

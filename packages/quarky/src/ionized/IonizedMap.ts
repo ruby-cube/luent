@@ -270,9 +270,9 @@ export function installIonicMap() {
 //                 trigger(sizeProp, newSize, oldSize);
 //         }
 
-//         const hasOp = $atomicOp(ionizedModel, 'has', key)
+//         const hasOp = getAtomicOp(ionizedModel, 'has', key)
 //         if (hasOp) triggerIonicAtom(hasOp);
-//         const getOp = $atomicOp(ionizedModel, 'get', key)
+//         const getOp = getAtomicOp(ionizedModel, 'get', key)
 //         if (getOp) triggerIonicAtom(getOp);
 
 //         triggerIonizedModelWithMutation(

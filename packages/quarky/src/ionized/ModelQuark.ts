@@ -1,64 +1,33 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { IonizedModel } from "./IonizedModel"
-import { trigger, WatchedAtom } from "../reactivity/WatchedAtom"
-import { QuarkOf } from "../Quark"
+import { trigger, Watchable, Watched } from "../reactivity/Watched"
 import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
-import { $atomicOp, asAtomicOp, TrackedOps } from "./AtomicOp"
+import { asAtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMemberDef } from "./IonizedMethods"
 import { Update } from "../reactivity/UpdateCycle"
-import { AtomicIonQuark, AtomicQuark, ModelState, NULL } from "../ion/AtomicIon"
+import { AtomicIonQuark } from "../ion/AtomicIon"
 import { trackParticle } from "../compound/Compound"
+import { ModelState } from "../reactivity/LazyState"
+import { AtomicQuark } from "../reactivity/AtomicQuark"
+import { Ion } from "../ion/Ion"
 
-
-
-
-// type OpMap = Map<EntryKey, AtomicOp>
-// type OpName = string
-// type EntryKey = any
-
-
-
-
-// type ModelQuark = Quark<IonizedModel>
-// & Watchable
-// & CapsuleQuark
-// & ParticleMorph
-// & CompoundMorph<IonizedCompound>
-
-// INERT MAP:
-// inert
-// withInertItems
-// withInertEntries
-// withInertKeys
-
-// inertCollection:
-// - items
-// - entries
-// - keys
-
-export const InertCollection = {
-   NA: 0,
-   ITEMS: 1,
-   ENTRIES: 2,
-   KEYS: 3
-} as const
-
-export type InertCollectionType = (typeof InertCollection)[keyof typeof InertCollection]
 
 const IONIZED_MODEL = 'ionized model' as const
 
+type PionProxy = {[key: PropertyKey]: Ion<unknown>}
 
 
+export class ModelQuark implements Watchable {
 
-export class ModelQuark implements QuarkOf<IonizedModel> {
    quarkType = IONIZED_MODEL
+
    __DEV__asTraceable: Traceable
 
    constructor(
-      public entity: IonizedModel,
+      public model: IonizedModel,
       public rawTarget: AnyObject, //initialData
       public state: ModelState,
       public clone: ((obj: AnyObject) => AnyObject) | undefined,
@@ -66,66 +35,22 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
       // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
 
-
-      // this.$ = Object.create(this.rawTarget)
       this.__DEV__asTraceable = new Traceable()
-      // this.watch = () => {
-      //    this.trackAbsorbedIons() //FIX: find where to put this
-      //    return watch.call(this)
-      // }
-      // this.unwatch = () => unwatch.call(this)
    }
 
    pendingUpdate: Update | null = null
 
    asMutable: Mutable = new Mutable()
 
-   asWatchedAtom: WatchedAtom | undefined
-
-   // watch: (this: Watchable) => WatchedAtom<Watchable>
-   // unwatch: () => void
-
-   private appendedProperties: Set<PropertyKey> = new Set()
-
-   isNewProperty(key: PropertyKey) {
-      return !(key in this.rawTarget) && !this.appendedProperties.has(key)
-   }
-
-   registerNewProperty(key: PropertyKey) {
-      this.appendedProperties.add(key)
-      // this.markStale()
-   }
-
-   // private hasNewAbsorbedIons: boolean = true;
-   // private markStale() {
-   //    this.hasNewAbsorbedIons = true
-   // }
-   // private undirty() {
-   //    this.hasNewAbsorbedIons = false;
-   // }
-
-   // absorbedIons?: IterableSet<ParticleMorph> 
-
-   // trackAbsorbedIons() {
-   //    if (this.asCompound) return;
-   //    const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
-   //    derivation.collectAbsorbedIons(this.entity!)
-   //    if (this.asCompound.atoms.size === 0) this.asCompound = undefined // prevents watch from marking model as no reactivity
-   //    // this.undirty()
-   //    return derivation.atoms;
-   // }
-   // $: Record<PropertyKey, Ion | TrackedOps>;
+   asWatched: Watched | undefined
 
    trigger = trigger
-   
-   pions: undefined | AnyObject = undefined
+
+
+   pions: undefined | PionProxy = undefined
+
 
    trackedOps: Record<PropertyKey, AtomicIonQuark | TrackedOps> = {}
-
-   trackOp(opKey: PropertyKey, entryKey: unknown) {
-      // console.log("&&& tracking op", this.pions)
-      trackParticle(asAtomicOp(this, opKey, entryKey))
-   }
 
    registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicQuark) {
       const ops = this.trackedOps[key] ?? new Map();
@@ -138,32 +63,25 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
       return atomicOp;
    }
 
-   // unregisterPion(key: PropertyKey){
-   //    this.pions.delete(key)
-   // }
+
+   // New Properties
+
+   private appendedProperties: Set<PropertyKey> = new Set()
+
+   isNewProperty(key: PropertyKey) {
+      return !(key in this.rawTarget) && !this.appendedProperties.has(key)
+   }
+
+   registerNewProperty(key: PropertyKey) {
+      this.appendedProperties.add(key)
+      // this.markStale()
+   }
 
 
-
-   //TODO: Do I really need observed entry keys??  Do I need to unregister pion?
-
-   // allows collections to efficiently trigger observed props/ops when a sweeping mutation like clear() or .length = 0 occurs
-   // observedEntryKeys?: Set<PropertyKey>
-
-   // addObservedEntryKey(entryKey: any) {
-   //    if (!this.observedEntryKeys) this.observedEntryKeys = new Set()
-   //    this.observedEntryKeys.add(entryKey)
-   // }
-
-   // deleteObservedEntryKey(entryKey: any) {
-   //    if (!this.observedEntryKeys) return;
-   //    this.observedEntryKeys.delete(entryKey)
-   // }
-
-   // traceTriggers?: Set<PropertyKey> = __DEV__ ? new Set() : undefined
-   // origin?: string
-   // __DEV__labels?: Set<string>
+   // Revert Ops
 
    reversionOps: Map<string, (mutation: Mutation) => true> = new Map()
+
 
    revertOp(mutation: Mutation) {
       const op = mutation.op
@@ -187,25 +105,23 @@ export class ModelQuark implements QuarkOf<IonizedModel> {
 
 
 
-// export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
 
-// export class MetaIonicCollection<T extends Collection = Collection> extends ModelQuark<T> {
-//     constructor(rawTarget: T, methods: AnyObject = {}) {
-//         super(rawTarget, methods)
-//     }
-
-//     observedEntryKeys = new Set()
-
-//     addObservedEntryKey(entryKey: any) {
-//         this.observedEntryKeys.add(entryKey)
-//     }
-
-//     deleteObservedEntryKey(entryKey: any) {
-//         this.observedEntryKeys.delete(entryKey)
-//     }
+// private hasNewAbsorbedIons: boolean = true;
+// private markStale() {
+//    this.hasNewAbsorbedIons = true
+// }
+// private undirty() {
+//    this.hasNewAbsorbedIons = false;
 // }
 
-// export function isCollection(target: unknown): target is Collection {
-//     return target instanceof Array || target instanceof Set || target instanceof Map
-// }
+// absorbedIons?: IterableSet<ParticleMorph>
 
+// trackAbsorbedIons() {
+//    if (this.asCompound) return;
+//    const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
+//    derivation.collectAbsorbedIons(this.entity!)
+//    if (this.asCompound.atoms.size === 0) this.asCompound = undefined // prevents watch from marking model as no reactivity
+//    // this.undirty()
+//    return derivation.atoms;
+// }
+// $: Record<PropertyKey, Ion | TrackedOps>;

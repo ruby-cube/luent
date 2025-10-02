@@ -1,8 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { InertMark, Ionized, isIonizedModel, isIonKey, toRaw } from "./ionize";
 import { __DEV__asTraceable, emitSignal } from "../debug/debug";
-import { asAtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp";
-import { storeSnapshot } from "./ionize";
+import { asAtomicOp, getAtomicOp, getTrackedOps } from "./AtomicOp";
 import { ModelQuark } from "./ModelQuark";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
@@ -10,14 +9,13 @@ import { __DEV__trace } from "../debug/debug";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
-import { isWatchable, Watchable } from "../reactivity/WatchedAtom";
-// import { IonizedCompound } from "./IonizedCompound";
-import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp } from "./IonizedMethods";
+import { isWatchable, Watchable } from "../reactivity/Watched";
+import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp, trackOp } from "./IonizedMethods";
 import { inert, isInert } from "./inert";
-import { $AtomicIonState, AtomicIonQuark, AtomicQuark, createAtomicIon, ModelState, NULL, PionState, setState } from "../ion/AtomicIon";
+import { $AtomicIonState, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
 import { isTracking, popTracker, pushTracker, trackParticle } from "../compound/Compound";
-import { isIntegerKey } from "./IonizedArray";
 import { Update } from "../reactivity/UpdateCycle";
+import { ModelState, PionState } from "../reactivity/LazyState";
 
 // export function $atomicPion(
 //    modelQuark: ModelQuark,
@@ -300,7 +298,12 @@ function getIonizedConfig(target: AnyObject) {
    }
 }
 
-
+export function isIntegerKey(key: unknown) {
+   if (typeof key === 'symbol') return false;
+   const keyAsNumber = Number(key);
+   if (isNaN(keyAsNumber)) return false;
+   if (Number.isInteger(keyAsNumber)) return true
+}
 
 export type MarkMap = { [key: PropertyKey]: InertMark | MarkMap }
 
@@ -485,7 +488,7 @@ export function createIonizedModel(
 
       has(target, key) {
          if (key === QUARK) return true;
-         modelQuark.trackOp('[[in]]', key)
+         trackOp(ionizedModel, '[[in]]', key)
          //TODO: need to figure out how to deal with ion access keys
          return key in proxyProto || (key in initialTarget)
       },
@@ -527,7 +530,7 @@ export function createIonizedModel(
       },
 
       ownKeys() {
-         modelQuark.trackOp(INTERNAL_OP, 'ownKeys') //TODO: trigger when any new property is added or deleted
+         trackOp(ionizedModel, INTERNAL_OP, ['ownKeys']) //TODO: trigger when any new property is added or deleted
          return Reflect.ownKeys(state.active)
       },
 
@@ -541,13 +544,13 @@ export function createIonizedModel(
       },
 
       isExtensible(target) {
-         modelQuark.trackOp(INTERNAL_OP, 'isExtensible')
+         trackOp(ionizedModel, INTERNAL_OP, 'isExtensible')
          return Reflect.isExtensible(state.active)
       },
 
       preventExtensions(target) {
          const update = initModelUpdate(modelQuark)
-         $atomicOp(modelQuark, INTERNAL_OP, 'isExtensible')?.trigger(update)
+         getAtomicOp(modelQuark, INTERNAL_OP, 'isExtensible')?.trigger(update)
          return Reflect.preventExtensions(state.active)
       },
 
@@ -567,8 +570,8 @@ export function createIonizedModel(
 export type ProxyPropertyMap = Record<ProxyKey, (() => any) | undefined>
 
 function triggerKeysChange(quark: ModelQuark, key: ProxyKey, update: Update) {
-   $atomicOp(quark, INTERNAL_OP, 'ownKeys')?.trigger(update)
-   $atomicOp(quark, KEY_IN_OP, key)?.trigger(update)
+   getAtomicOp(quark, INTERNAL_OP, 'ownKeys')?.trigger(update)
+   getAtomicOp(quark, KEY_IN_OP, key)?.trigger(update)
    //QUESTION: shoule this trigger the whole model? I don't think so?
 }
 
@@ -1034,7 +1037,7 @@ function bindNativeMethod(
 // }
 // else if (op) {
 //    return function triggerOp(this: { update: Update }) {
-//       const atomicOp = $atomicOp(model, op, entryKey)
+//       const atomicOp = getAtomicOp(model, op, entryKey)
 //       if (atomicOp) {
 //          initModelUpdate(atomicOp, this.update)
 //          atomicOp.trigger()
@@ -1138,9 +1141,9 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 // export function triggerIonizedModel(
 //    model: IonizedModel
 // ) {
-//    const { asParticle, asWatchedAtom } = quarkOf(model);
+//    const { asParticle, asWatched } = quarkOf(model);
 //    asParticle?.triggerCompounds()
-//    asWatchedAtom?.triggerEffects()
+//    asWatched?.triggerEffects()
 // }
 
 

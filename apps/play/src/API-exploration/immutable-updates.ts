@@ -1,4 +1,6 @@
-//@ts-nocheck
+import { Ion } from "@rue/quarky"
+
+Ion(0)
 
 const todos = [{
    id: 0,

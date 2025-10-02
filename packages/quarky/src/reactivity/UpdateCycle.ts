@@ -1,6 +1,6 @@
 import { setImmediate } from "@rue/thread";
 import { createOneoff, Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
-import { WatchedAtom } from "./WatchedAtom";
+import { Watched } from "./Watched";
 import { $schedule, SchedulerOptions } from "@rue/flask";
 
 
@@ -96,7 +96,7 @@ export class Update {
       this.cycle = new UpdateCycle(this)
    }
 
-   atoms: Set<WatchedAtom> = new Set()
+   atoms: Set<Watched> = new Set()
 
    cycle: UpdateCycle;
 

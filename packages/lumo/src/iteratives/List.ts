@@ -3,10 +3,21 @@ import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, remov
 import { Ion, ion, ionic, MaybeIonized, MutableIon } from "@rue/quarky";
 import { queueInternalRenderTask, watchToRender } from "../render-cycle";
 import { RenderItem } from "./For";
-import { setCurrentIndex } from "./ListRenderKit";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
 type UID = unknown
+
+// let currentItem: any;
+let $currentIndex: Ion<number> | undefined;
+
+export function getCurrentIndex(): Ion<number> | undefined {
+   return $currentIndex
+}
+
+export function setCurrentIndex($index: Ion<number> | undefined) {
+   // currentItem = item;
+   $currentIndex = $index;
+}
 
 
 export class ListKit extends VineNode {

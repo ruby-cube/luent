@@ -1,7 +1,7 @@
 import { debug, isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
 import { createManagedDerivation } from "../ionic/DerivationIon";
-import { AtomicIonQuark, createAtomicIon, IONIZED, IonState } from "./AtomicIon";
+import { AtomicIonQuark, createAtomicIon, IONIZED } from "./AtomicIon";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
 import { Inert, IsInert } from "../ionized/inert";
@@ -9,6 +9,7 @@ import { initializeSnapshots } from "../ionized/TimeTraveler";
 import { hasQuark, QUARK } from "../Quark";
 import { IonizeOptions, maybeIonize } from "../ionized/IonizedModel";
 import { isGetter } from "../reactivity/WatchSubject";
+import { IonState } from "../reactivity/LazyState";
 
 /* API */
 export type Ion<T = unknown> = () => T

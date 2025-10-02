@@ -1,16 +1,16 @@
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
-import { quarkOf, QUARK, hasQuark, QuarkOf, Quark } from "../Quark";
+import { quarkOf, QUARK, hasQuark, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { emitSignal } from "../debug/debug";
-import { asWatchedAtom } from "../reactivity/WatchedAtom";
+import { asWatched } from "../reactivity/Watched";
 import { Ion } from "../ion/Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
 import { SYNC, isLazyUpdate, $activeUpdate } from "../reactivity/UpdateCycle";
-import { NULL } from "../ion/AtomicIon";
 import {  trackParticle } from "../compound/Compound";
+import { NULL } from "../reactivity/LazyState";
 
 
 
@@ -34,7 +34,7 @@ export type $DerivedState = Ion & Capsule & {
       derivation: (prev?: unknown) => unknown
       staleMarker: Effect | undefined
    }
-   & Quark<typeof DERIVATION_ION, $DerivedState>
+   & Quark
 }
 
 class ManagedDerivation extends IonicCompound {
@@ -59,7 +59,6 @@ class ManagedDerivation extends IonicCompound {
 /** 
  * INTERNAL 
  * */
-// export type ManagedDerivation = QuarkOf<$DerivedState>
 
 export const DERIVATION_ION = Symbol('Derivation Ion')
 
@@ -207,7 +206,7 @@ function retrackedCall(ion: ManagedDerivation) {
 
 function linkAtoms(compound: IonicCompound, effect: Effect) {
    compound.forEachAtom(atom => {
-      effect.link(asWatchedAtom(atom))
+      effect.link(asWatched(atom))
    })
 }
 

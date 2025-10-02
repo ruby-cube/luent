@@ -1,5 +1,5 @@
 import { __DEV__unwrap } from "@rue/utils";
-import { WatchedAtom } from "./WatchedAtom";
+import { Watched } from "./Watched";
 import { UpdateCycle, Phase, SYNC, popUpdate, pushUpdate } from "./UpdateCycle";
 
 // const PRERENDER = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
@@ -14,15 +14,15 @@ export class Effect {
       public phase: Phase
    ) { }
 
-   private atoms: Set<WatchedAtom> = new Set()
+   private atoms: Set<Watched> = new Set()
 
    active: boolean = false;
 
-   isLinked(atom: WatchedAtom) {
+   isLinked(atom: Watched) {
       return this.atoms.has(atom)
    }
 
-   link(atom: WatchedAtom) {
+   link(atom: Watched) {
       if (this.isLinked(atom)) return;
       atom.link(this)
       this.atoms.add(atom);
@@ -33,7 +33,7 @@ export class Effect {
       this.unlinkAtoms()
    }
 
-   unlink(atom: WatchedAtom) {
+   unlink(atom: Watched) {
       if (!this.isLinked(atom)) return;
       this.requeued = false; //QUESTION: not sure if this is necessary
       this.atoms.delete(atom)
@@ -108,7 +108,7 @@ export class PhaseQueue {
 
    constructor(
       private phase: Phase,
-      private atom?: WatchedAtom
+      private atom?: Watched
    ) {
    }
 

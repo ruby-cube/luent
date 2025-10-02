@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { IonizedModel, maybeIonize } from "./IonizedModel";
-import { MutatingOpDef, IonizedMethodsDef, TrackableOpDef, MemberType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
+import { MutatingOpDef, TrackableOpDef, MemberType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
 import { trackParticle } from "../compound/Compound";
 
 
@@ -336,7 +336,7 @@ enlistIonizedMethods(Array,
 
       //       // afterSet(ionizedModel, quark, key, newValue, oldValue) {
       //       //    if (isIntegerKey(key)) {
-      //       //       $atomicOp(ionizedModel, 'at', key)?.trigger()
+      //       //       getAtomicOp(ionizedModel, 'at', key)?.trigger()
       //       //       return;
       //       //    }
 
@@ -354,10 +354,10 @@ enlistIonizedMethods(Array,
       //       //       const index = parseInt(<string>indexKey)
       //       //       if (index >= newValue) {
       //       //          $atomicPion(ionizedModel, indexKey)?.trigger()
-      //       //          $atomicOp(ionizedModel, 'at', index)?.trigger()
+      //       //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
       //       //       }
       //       //       if (index > oldValue) {
-      //       //          $atomicOp(ionizedModel, 'at', index)?.trigger()
+      //       //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
       //       //       }
       //       //    }
       //       // }
@@ -450,7 +450,7 @@ enlistIonizedMethods(Array,
 //       const prevLength = target.length;
 //       const output = performOp()
 //       $atomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
-//       $atomicOp(ionizedModel, 'at', - 1)?.trigger()
+//       getAtomicOp(ionizedModel, 'at', - 1)?.trigger()
 //       return output;
 //    }
 // }
@@ -483,12 +483,7 @@ function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args
 
 
 
-export function isIntegerKey(key: unknown) {
-   if (typeof key === 'symbol') return false;
-   const keyAsNumber = Number(key);
-   if (isNaN(keyAsNumber)) return false;
-   if (Number.isInteger(keyAsNumber)) return true
-}
+
 
 
 export function isIonizedArray(target: any): target is IonizedModel {

@@ -16,7 +16,7 @@ export default function lumoPreTransform({ types }) {
          //          ImportDeclaration(path) {
          //             // prevent name collisions
          //             // storeLocalNameOfImport(path, 'watch', this.localWatchNames)
-         //             // storeLocalNameOfImport(path, 'ionicTask', this.localIonicTaskNames)
+         //             // storeLocalNameOfImport(path, 'initIonicTask', this.localIonicTaskNames)
          //          },
 
          //          CallExpression(path) {

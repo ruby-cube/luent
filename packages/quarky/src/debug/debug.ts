@@ -1,5 +1,4 @@
 import { isFunction, isObject } from "@rue/utils";
-import { isAtomic } from "../ion/AtomicIon";
 import {  isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
@@ -11,7 +10,7 @@ import { IonizedModel } from "../ionized/IonizedModel";
 import { Traceable } from "./Traceable";
 import { debug as _debug } from "@rue/utils";
 import { Mutation } from "../Mutable";
-import { Watchable } from "../reactivity/WatchedAtom";
+import { Watchable } from "../reactivity/Watched";
 
 // export interface DEVLabellable {
 //    labelName?: string

@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { TraceableSubject } from "../debug/debug";
-import { QUARK, Quark, QuarkOf } from "../Quark";
+import { QUARK, Quark } from "../Quark";
 
 
 export type Capsule = TraceableSubject & {

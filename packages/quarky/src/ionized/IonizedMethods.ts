@@ -2,9 +2,9 @@ import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonizedModel, ProxyKey } from "./IonizedModel"
 import { quarkOf } from "../Quark"
-import { initUpdate, popUpdate, pushUpdate, Update} from "../reactivity/UpdateCycle"
+import { initUpdate, popUpdate, pushUpdate, Update } from "../reactivity/UpdateCycle"
 import { ModelQuark } from "./ModelQuark"
-import { $atomicOp, getAtomicOps } from "./AtomicOp"
+import { asAtomicOp, getAtomicOp, getTrackedOps } from "./AtomicOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
 import { trackParticle } from "../compound/Compound"
@@ -144,11 +144,11 @@ class TriggerableModel {
    // }
 
    triggerOp(op: PropertyKey, entryKey: unknown) {
-      $atomicOp(this.quark, op, entryKey)?.trigger(this.update)
+      getAtomicOp(this.quark, op, entryKey)?.trigger(this.update)
    }
 
    triggerAllOps(op: PropertyKey) {
-      const ops = getAtomicOps(this.quark, op)
+      const ops = getTrackedOps(this.quark, op)
       if (ops)
          for (const [_, op] of ops) {
             op.trigger(this.update)
@@ -178,8 +178,8 @@ export type MutatingOpDef = {
 
 export type PropertyDef = {
    type: typeof MemberType.PROPERTY
-   track?: (this: AtomicIonQuark)=>void
-   trigger?: (this: AtomicIonQuark)=>void
+   track?: (this: AtomicIonQuark) => void
+   trigger?: (this: AtomicIonQuark) => void
 }
 
 type IonizableMethodDef = TrackableOpDef | MutatingOpDef | { get?: TrackableOpDef, set?: MutatingOpDef } | PropertyDef
@@ -254,7 +254,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
  *  */
 // export function triggerAll(model: IonizedModel, op: PropertyKey): () => void {
 //    return function triggerAllOps(this: { update: Update }) {
-//       const ops = getAtomicOps(model, op)
+//       const ops = getTrackedOps(model, op)
 //       if (ops)
 //          for (const [_, op] of ops) {
 //             initModelUpdate(op, this.update)
@@ -279,7 +279,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //    }
 //    else if (op) {
 //       return function triggerOp(this: { update: Update }) {
-//          const atomicOp = $atomicOp(model, op, entryKey)
+//          const atomicOp = getAtomicOp(model, op, entryKey)
 //          if (atomicOp) {
 //             initModelUpdate(atomicOp, this.update)
 //             atomicOp.trigger()
@@ -332,8 +332,9 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 export const trackModel = (model: IonizedModel) => {
    trackParticle(quarkOf(model))
 }
-export function trackOp(model: IonizedModel, op: PropertyKey, args: unknown[]) {
-   quarkOf(model).trackOp(op, args![0])
+
+export function trackOp(model: IonizedModel, op: PropertyKey, key: any) {
+   trackParticle(asAtomicOp(quarkOf(model), op, key))
 }
 
 
@@ -403,13 +404,13 @@ export function useDeleteOp(hasOp: HasOp) {
  */
 export const trackableCreativeOp: TrackableOpDef = {
    type: MemberType.TRACKABLE,
-     privateState: true,
+   privateState: true,
    track: trackModel,
    output: (o) => ionize(o)
 }
 
 export const trackableOp: TrackableOpDef = {
    type: MemberType.TRACKABLE,
-     privateState: true,
+   privateState: true,
    track: trackModel
 }

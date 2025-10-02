@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { ion, __addDevName, ionicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
+import { ion, __addDevName, initIonicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
 import { SYNC } from "../render-cycle";
 
@@ -98,7 +98,7 @@ export function SuspenseIon<
       error: null as null | Error,
    })
 
-   ionicTask(() => {
+   initIonicTask(() => {
       const promise = $promise.value = input($ion as SuspenseIon<T>);
 
       promise

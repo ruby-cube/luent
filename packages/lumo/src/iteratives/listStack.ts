@@ -1,9 +1,9 @@
 import { $listen, Flask, SustainedListenerOptions } from "@rue/flask";
-import type { ListRenderKit } from "./ListRenderKit";
+import { ListKit } from "./List";
 
-const listSetupStack: ListRenderKit[] = [];
+const listSetupStack: ListKit[] = [];
 
-export function pushList(list: ListRenderKit) {
+export function pushList(list: ListKit) {
    listSetupStack.push(list)
 }
 
