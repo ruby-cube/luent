@@ -278,6 +278,9 @@ function getCloner(entity: object): CloneFn {
    if (entity instanceof Array) return (entity: any[]) => {
       return Object.assign([], entity)
    }
+   if (entity instanceof Date) return (entity: Date) => {
+      return Object.assign(new Date(entity), entity)
+   }
    if (entity instanceof Set) return (entity: Set<any>) => {
       return Object.assign(new Set(entity), entity)
    }
@@ -329,6 +332,8 @@ export function createIonizedModel(
 
    function initializeProperty(proxyProto: AnyObject, key: ProxyKey, op: typeof GET | typeof SET = GET, value: unknown = undefined): boolean {
       let target = initialTarget
+
+      if (key === 'setTime') console.log('methodDef')
 
       // const ionKey = toIonKey(key, target);
       // const stateKey = ionKey ? ionKey.slice(1) : key;
@@ -386,6 +391,7 @@ export function createIonizedModel(
                      return propertyDescriptor.writable ?? false;
                   }
                   const methodDef = getIonizedMemberDef(initialTarget, key) as TrackableOpDef | MutatingOpDef
+                  if (key === 'setTime') console.log('methodDef', methodDef)
                   if (methodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
                      bindNativeMethod(
                         proxyProto,

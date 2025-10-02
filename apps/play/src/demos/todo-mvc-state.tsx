@@ -1,4 +1,5 @@
-import { component, For, If, Else, FromTag } from "@rue/lumo"
+//@ts-nocheck
+import { component, For, If, Else, FromTag, listen } from "@rue/lumo"
 import { watch, ion, initIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
@@ -100,133 +101,196 @@ type RadioInputEvent = { target: { checked: boolean } }
 // }
 type FilterKeys = 'all' | 'active' | 'completed'
 
+
+class IonizedTodoApp {
+
+   view: FilterKeys = 'all'
+
+   constructor(
+      public todos: Todo[],
+   ) {
+      console.log(todos)
+      return Ionized(this)
+   }
+
+   filters = {
+      all: (todos: Todo[]) => todos,
+      active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
+      completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
+   }
+
+   get filteredTodos() {
+      return this.filters[this.view](this.todos)
+   }
+
+   get remaining() {
+      return this.filters.active(this.todos).length
+   }
+
+   addTodo(title: string) {
+      const item = Ionized({
+         id: Date.now(),
+         title,
+         completed: false
+      })
+
+      this.todos.push(item)
+
+      // const lastItem = this.todos.pop()
+
+      // this.todos.push(lastItem) // FIX: should update list rendering
+
+      // console.log('IDENTITY?', item === lastItem) //FIX: Identity hazard
+   }
+
+   removeTodo(todo: Todo) {
+      const index = this.todos.indexOf(todo)
+      this.todos.splice(index, 1)
+   }
+
+   removeCompleted() {
+      this.todos = this.filters.active(this.todos)
+   }
+
+   toggleAll(completed: boolean) {
+      this.todos.forEach((todo) => (todo.completed = completed))
+   }
+}
+
+
+class TodoApp {
+
+   view: FilterKeys = 'all'
+
+   constructor(
+      public todos: Todo[],
+   ) {
+      console.log(todos)
+   }
+
+   filters = {
+      all: (todos: Todo[]) => todos,
+      active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
+      completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
+   }
+
+   get filteredTodos() {
+      return this.filters[this.view](this.todos)
+   }
+
+   get remaining() {
+      return this.filters.active(this.todos).length
+   }
+
+   addTodo(title: string) {
+      this.todos.push({
+         id: Date.now(),
+         title,
+         completed: false
+      })
+
+      // const lastItem = this.todos.pop()
+
+      // this.todos.push(lastItem) // FIX: should update list rendering
+
+      // console.log('IDENTITY?', item === lastItem) //FIX: Identity hazard
+   }
+
+   removeTodo(index: number) {
+      this.todos.splice(index, 1)
+   }
+
+   removeCompleted() {
+      this.todos = this.filters.active(this.todos)
+   }
+
+   toggleAll(completed: boolean) {
+      this.todos.forEach((todo) => (todo.completed = completed))
+   }
+}
+
+function TodoStorageKit() {
+
+   const STORAGE_KEY = 'vue-todomvc'
+
+   function getTodos() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
+   }
+
+   function storeTodos(todos: Todo[]) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+   }
+
+   return { getTodos, storeTodos }
+}
+
+
 export function TodoMVC() {
 
-   const $todos = Ion.Ionized(getTodos())
-   const $view = Ion('all' as keyof typeof filters)
+   // # init and persist state
+   const { getTodos, storeTodos } = TodoStorageKit()
 
-   const $filteredTodos = Ion(() => filters[$view()]($todos()))
-   const $remaining = Ion(() => filters.active($todos()).length)
-   const $todoCount = Ion(() => $todos().length)
+   const app = new IonizedTodoApp(getTodos())
+   app.todos
+   app.view
+   app.filters
+   app.filteredTodos
 
-   const filters = {
-      all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => !todo.completed)),
-      completed: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => todo.completed))
-   }
+   console.log('filtered todos', $(app).filteredTodos)
+
+   initIonicTask(() => {
+      storeTodos(app.todos)
+   })
 
 
    // # handle routing
-
-   window.addEventListener('hashchange', onHashChange)
+   listen(window, 'hashchange', onHashChange)
    onHashChange()
 
    function onHashChange() {
       const route = window.location.hash.replace(/#\/?/, '') as FilterKeys
-      if (filters[route]) {
-         $view.value = route
+      if (app.filters[route]) {
+         app.view = route
       } else {
          window.location.hash = ''
-         $view.value = 'all'
+         app.view = 'all'
       }
    }
-
-
-   // # persist state
-
-   function getTodos(): Todo[] {
-      const STORAGE_KEY = 'vue-todomvc'
-
-      initIonicTask(() => {
-         localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
-      })
-
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
-   }
-
-
-   // # todos methods
-
-   function addTodo(title: string) {
-      $todos().push(Ionized({
-         id: Date.now(),
-         title,
-         completed: false
-      }))
-   }
-
-   function removeTodo(todo: Ionized<Todo>) {
-      const index = $todos().indexOf(todo)
-      $todos().splice(index, 1)
-   }
-
-   function removeCompleted() {
-      $todos.value = filters.active($todos())
-   }
-
-
-   // # toggle completed
-
-   function toggleAll(e: RadioInputEvent) {
-      $todos().forEach((todo) => (todo.completed = e.target.checked))
-   }
-
-   const ToggleAllButton = () => (
-      <>
-         <input
-            id="toggle-all"
-            class="toggle-all"
-            type="checkbox"
-            checked={($remaining() === 0)}
-            on:change={toggleAll}
-         />
-         <label for="toggle-all">Mark all as complete</label>
-      </>
-   )
-
-
-   // # remaining todos
-
-   const RemainingCount = () => (
-      <span class="todo-count">
-         <strong>{$remaining}</strong>
-         <span>{($remaining() === 1 ? ' item' : ' items')} left</span>
-      </span>
-   )
 
 
    return component(
       <>
          <section class="todoapp">
             <header class="header">
-               <h1>Todos</h1>
-               <TodoInput can:addTodo={addTodo}></TodoInput>
+               <h1>Class: Todos</h1>
+               <TodoInput can:addTodo={app.addTodo.bind(app)}></TodoInput>
             </header>
             <section class="main">
-               {ToggleAllButton()}
-               <TodoList todos={$filteredTodos} can:removeTodo={removeTodo}></TodoList>
+               <ToggleAll can:toggleAll={app.toggleAll.bind(app)} ctx={app}></ToggleAll>
+               <TodoList todos={(app.filteredTodos)} can:removeTodo={app.removeTodo.bind(app)}></TodoList>
             </section>
-            <footer show-if={$todoCount} class="footer">
-               {RemainingCount()}
+            <footer show-if={(app.todos.length)} class="footer">
+               <Remaining count={(app.remaining)}></Remaining>
                <ul class="filters">
                   <li>
-                     <a href="#/all" class={{ 'selected': ($view() === 'all') }}>All</a>
+                     <a href="#/all" class={{ 'selected': (app.view === 'all') }}>All</a>
                   </li>
                   <li>
-                     <a href="#/active" class={{ 'selected': ($view() === 'active') }}>Active</a>
+                     <a href="#/active" class={{ 'selected': (app.view === 'active') }}>Active</a>
                   </li>
                   <li>
-                     <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
+                     <a href="#/completed" class={{ 'selected': (app.view === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
+               <button show-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={app.removeCompleted.bind(app)}>
                   Clear completed
                </button>
             </footer>
          </section>
 
          <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
-      </>)
+      </>
+   )
 }
 
 {/* <style>
@@ -286,7 +350,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
 
    return component(
       <ul class="todo-list">
-         {For($todos, o => o.id, (todo) => {
+         {For($todos, o => o.id, (todo, $index) => {
             const $isEditing = Ion(() => todo === $editedTodo());
 
             return (
@@ -294,7 +358,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={$(todo).completed} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
-                     <button class="destroy" on:click={e => removeTodo(todo)}></button>
+                     <button class="destroy" on:click={e => removeTodo($index())}></button>
                   </div>
                   {If($isEditing,
                      <input
@@ -314,3 +378,31 @@ function TodoList({ $todos, removeTodo }: FromTag<{
 }
 
 
+function ToggleAll({ toggleAll, ctx }: FromTag<{
+   'can:toggleAll': TodoApp['toggleAll']
+   ctx: Ionized<{ remaining: TodoApp['remaining'] }>
+}>) {
+
+   return component(
+      <>
+         <input
+            id="toggle-all"
+            class="toggle-all"
+            type="checkbox"
+            checked={(ctx.remaining === 0)}
+            on:change={e => toggleAll(e.target.checked)}
+         />
+         <label for="toggle-all">Mark all as complete</label>
+      </>
+   )
+}
+
+function Remaining({ $count }: FromTag<{ count: Ion<number> }>) {
+
+   return component(
+      <span class="todo-count">
+         <strong>{$count}</strong>
+         <span>{($count() === 1 ? ' item' : ' items')} left</span>
+      </span>
+   )
+}

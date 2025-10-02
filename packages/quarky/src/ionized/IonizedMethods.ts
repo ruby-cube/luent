@@ -7,7 +7,7 @@ import { ModelQuark } from "./ModelQuark"
 import { asAtomicOp, getAtomicOp, getTrackedOps } from "./AtomicOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
-import { trackParticle } from "../compound/Compound"
+import { isTracking, trackParticle } from "../compound/Compound"
 import { AtomicIonQuark } from "../ion/AtomicIon"
 
 export type Constructor = new (...args: any[]) => any
@@ -38,12 +38,13 @@ export function useTrackableOp(
    config: TrackableOpDef,
 ) {
    const { track, op = method, input = noTransform, output = noTransform } = config
-
+   if (opKey === 'valueOf') console.log('active state', state.active)
    const o = {
       [opKey](...args: any[]) {
          if (__DEV__) emitSignal();
          const _args = input(args);
-         track?.(ionized, opKey, _args)
+         if (isTracking())
+            track?.(ionized, opKey, _args)
          return output(op.apply(state.active, _args), ionized)
       }
    }
@@ -220,18 +221,23 @@ const ionizedMethodsMap = new Map()
 
 export function getIonizedMemberDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
    let constructor = target.constructor as Constructor
+   if (methodKey === 'valueOf') console.log('here', constructor, ionizedMethodsMap)
    let _target = target;
    while (constructor !== Object) {
       if (Object.hasOwn(target, methodKey)) {
+         if (methodKey === 'valueOf') console.log('A', constructor)
          return ionizedMethodsMap.get(constructor)?.[methodKey]
       }
       const def = ionizedMethodsMap.get(constructor)?.[methodKey]
       if (def) {
+         if (methodKey === 'valueOf') console.log('B', def)
          return def;
       }
       _target = Object.getPrototypeOf(_target)
       constructor = _target.constructor as Constructor
+      if (methodKey === 'valueOf') console.log('C', constructor)
    }
+   if (methodKey === 'valueOf') console.log('D')
    // return ionizedMethodsMap.get(Object)?.['[[set]]']
 }
 

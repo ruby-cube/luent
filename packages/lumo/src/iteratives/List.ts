@@ -32,6 +32,7 @@ export class ListKit extends VineNode {
       this.nodes = this.render($list(), renderItem);
 
       watchToRender($list, ({ current: newList }) => {
+
          this.nodes = this.rerender(newList, renderItem)
       })
    }
@@ -54,6 +55,7 @@ export class ListKit extends VineNode {
    }
 
    private rerender(list: unknown[], renderItem: RenderItem<unknown>) {
+      console.log('rerendering list') // FIX: Why is this running twice?
       const prevItems = this.prevItems;
       const prevKits = this.nodes! as ListItemKit[];
       const kits: ListItemKit[] = []
@@ -115,6 +117,7 @@ export class ListKit extends VineNode {
       console.log('$$$@ sequences', sequences)
 
       queueInternalRenderTask(() => {
+         console.log('qIR rerendering list')
          //TODO: Can we make this call more efficient??
          // remove DOMNodes
          let i = prevKits.length;
@@ -199,7 +202,7 @@ export class ListItemKit extends VineNode {
    ) {
       super()
       const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
-      this.nodes = processJSXOutput(this.render(item, ion(() =>$index())))
+      this.nodes = processJSXOutput(this.render(item, ion(() => $index())))
       flask.emitInitialMount()
    }
 

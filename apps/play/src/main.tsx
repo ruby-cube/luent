@@ -9,7 +9,7 @@
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { TodoMVC } from './demos/todo-mvc';
+import { TodoMVC } from './demos/todo-mvc-state';
 import { CircleApp, CRUDApp, SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
 
@@ -61,6 +61,8 @@ import { TestNestedConditional } from './TestNestedConditional';
 import { DebugLeakyFlask } from './DebugLeakyFlask';
 import { TestVineNodes } from './TestVineNodes';
 import { For } from '../../../packages/lumo/src/iteratives/For';
+import { DateApp } from './demos/DateObject';
+import { installIonizedDate } from '../../../packages/quarky/src/ionized/IonizedDate';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -85,8 +87,8 @@ import { For } from '../../../packages/lumo/src/iteratives/For';
 // import { NestedPend } from './NestedPend';
 
 
-
-const app = createApp(TodoMVC)
+installIonizedDate()
+const app = createApp(DateApp)
 
 app.mount('#app')
 

@@ -13,6 +13,7 @@ type IonicTaskOptions = {
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
 export function initIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+   console.log('init task')
 
    const retrack = options?.retrack === undefined ? true : options.retrack
 
