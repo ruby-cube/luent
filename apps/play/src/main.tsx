@@ -61,7 +61,7 @@ import { TestNestedConditional } from './TestNestedConditional';
 import { DebugLeakyFlask } from './DebugLeakyFlask';
 import { TestVineNodes } from './TestVineNodes';
 import { For } from '../../../packages/lumo/src/iteratives/For';
-import { DateApp } from './demos/DateObject';
+import { DateApp } from './demos/DateApp';
 import { installIonizedDate } from '../../../packages/quarky/src/ionized/IonizedDate';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
@@ -88,7 +88,7 @@ import { installIonizedDate } from '../../../packages/quarky/src/ionized/Ionized
 
 
 installIonizedDate()
-const app = createApp(DateApp)
+const app = createApp(TestIonicTask)
 
 app.mount('#app')
 
