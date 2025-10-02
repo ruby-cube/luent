@@ -6,6 +6,17 @@ import { IonicTaskSubject } from "./WatchSubject";
 import { maybePostcycleTask, Phase, SYNC } from "./UpdateCycle";
 import { createOneoff, Effect } from "./EffectQueue";
 
+
+
+//  wrappedEffect = phase === 'postrender' ? delayedTask(wrappedEffect) : wrappedEffect;
+//    phase = phase === 'postrender' ? 3 : phase;
+
+         // scheduleEagerEffect(delayedTask(() => {
+         //    subject.trackedCall()
+         //    subject.linkEffect(effect)
+         // }), phase)
+
+
 type IonicTaskOptions = {
    phase?: Phase;
    sync?: boolean;
@@ -13,7 +24,6 @@ type IonicTaskOptions = {
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
 export function initIonicTask(task: IonicTask, options?: IonicTaskOptions) {
-   console.log('init task')
 
    const retrack = options?.retrack === undefined ? true : options.retrack
 
@@ -27,7 +37,6 @@ export function initIonicTask(task: IonicTask, options?: IonicTaskOptions) {
          initial = false;
       }
    }
-
 
    const subject = new IonicTaskSubject(wrappedEffect, retrack)
 
@@ -43,7 +52,7 @@ export function initIonicTask(task: IonicTask, options?: IonicTaskOptions) {
       enroll(_task) {
          const effect = new Effect(_task, phase)
          scheduleEagerEffect(() => {
-            maybePostcycleTask(() => subject.trackedCall, phase)()
+            maybePostcycleTask(() => subject.trackedCall(), phase)()
             subject.linkEffect(effect)
          }, phase)
          return effect;
