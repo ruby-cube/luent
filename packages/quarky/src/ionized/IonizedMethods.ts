@@ -60,13 +60,15 @@ export function initModelUpdate(quark: ModelQuark) {
    const update = initUpdate()
    const state = quark.state
 
-   update.onComplete(() => {
-      state.commitChange()
-   })
-
-   update.onCancel(() => {
-      state.cancelChange()
-   })
+   if (update.lazy){
+      update.onComplete(() => {
+         state.commitChange()
+      })
+   
+      update.onCancel(() => {
+         state.cancelChange()
+      })
+   }
 
    return update;
 }

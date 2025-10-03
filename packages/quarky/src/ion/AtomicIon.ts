@@ -121,7 +121,6 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    // if (newState === oldState) { //NOTE: we cannot do this if we are cloning arrays--the new array needs to be updated with all changes
    //    return newState;
    // }
-
    const state = this.state
 
    const update = initUpdate()
@@ -135,31 +134,27 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    }
 
    const pendingUpdate = this.pendingUpdate
-   if (pendingUpdate === update) return state;
+   if (pendingUpdate === update) {
+      return state;
+   }
 
    if (pendingUpdate && pendingUpdate !== update) {
       pendingUpdate.cancel()
    }
 
-   this.pendingUpdate = update
+   if (update.lazy) {
+      this.pendingUpdate = update
 
-   update.onComplete(() => {
-      state.commitChange()
-      this.pendingUpdate = null;
-   })
+      update.onComplete(() => {
+         state.commitChange()
+         this.pendingUpdate = null;
+      })
 
-   update.onCancel(() => {
-      state.cancelChange()
-      this.pendingUpdate = null;
-   })
-
-   // queue change/record mutation
-   // update.onComplete(() => {
-   // })
-
-   // update.onCancel(() => {
-   // })
-
+      update.onCancel(() => {
+         state.cancelChange()
+         this.pendingUpdate = null;
+      })
+   }
    // trigger effects
    this.trigger(update)
    this.modelQuark?.trigger(update); //TODO: Do I need this? For absorbed ions?

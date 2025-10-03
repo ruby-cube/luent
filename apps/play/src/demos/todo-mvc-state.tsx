@@ -1,27 +1,6 @@
-//@ts-nocheck
 import { component, For, If, Else, FromTag, listen } from "@rue/lumo"
-import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@rue/quarky"
-import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
-import { create } from "domain"
-import { isTracking } from "../../../../packages/quarky/src/compound/Compound"
+import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
 
-// entity.name.type.tsx
-// meta.type.annotation.tsx
-// meta.parameters.tsx
-// meta.arrow.tsx
-// meta.object.member.tsx
-// meta.objectliteral.tsx
-
-
-
-// variable.other.object.tsx
-// meta.function-call.tsx
-
-// entity.name.function.tsx
-// meta.function-call.tsx
-
-// foreground	
-// entity.name.function
 
 interface Todo {
    id: number
@@ -29,126 +8,60 @@ interface Todo {
    completed: boolean
 }
 
-type InputEvent = { target: { value: string }, key: string }
-type RadioInputEvent = { target: { checked: boolean } }
+type FilterKeys = keyof typeof IonicTodoApp['filters']
 
-//TODO:
-// const frog = Ionized({
-//    name: absorb($name),
-//    canvas: inert(null)
-// })
-
-// const CountIon = defineIon({
-//    increment() {
-//       this.value++
-//    },
-//    decrement() {
-//       this.value--
-//    }
-// }, { value: 0 })
-
-// const increment_decrement = asIonMethods({
-//    increment() {
-//       this.value++
-//    },
-//    decrement() {
-//       this.value--
-//    }
-// })
-// const divStyle = jsx({
-
-// })
-
-// export function CounterA() {
-
-//    const $count = Ion(0, {
-//       increment() {
-//          this.value++
-//       },
-//       decrement() {
-//          this.value--
-//       }
-//    })
-
-//    return component(
-//       <>
-//          <div>{$count}</div>
-//          <button on:click={e => $count.increment()}>increment</button>
-//          <button on:click={e => $count.decrement()}>decrement</button>
-//       </>
-//    )
-// }
-
-// export function CounterB() {
-
-//    const $count = Ion(0)
-
-//    function incrementCount() {
-//       $count.value++
-//    }
-
-//    function decrementCount() {
-//       $count.value--
-//    }
-
-//    return component(
-//       <>
-//          <div>{$count}</div>
-//          <button on:click={incrementCount}>increment</button>
-//          <button on:click={decrementCount}>decrement</button>
-//       </>
-//    )
-// }
-type FilterKeys = 'all' | 'active' | 'completed'
-
-
-class IonizedTodoApp {
+class IonicTodoApp {
 
    filter: FilterKeys = 'all'
+   todos: Ionized<Todo[]>
+
+   setFilter(value: string) {
+      if (value in IonicTodoApp.filters) {
+         this.filter = value as FilterKeys
+      } else {
+         this.filter = 'all'
+      }
+   }
 
    constructor(
-      public todos: Todo[],
+      todos: Todo[],
    ) {
-      console.log(todos)
+      this.todos = Ionized(todos)
       return Ionized(this)
    }
 
-   filters = {
-      all: (todos: Todo[]) => todos,
-      active: (todos: Todo[]) => Ionized(todos.filter(todo => !todo.completed)),
-      completed: (todos: Todo[]) => Ionized(todos.filter(todo => todo.completed))
+   static filters = {
+      all: (todos: Ionized<Todo[]>) => todos,
+      active: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => !todo.completed)),
+      completed: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => todo.completed))
    }
 
    get filteredTodos() {
-      return this.filters[this.filter](this.todos)
+      return IonicTodoApp.filters[this.filter](this.todos)
    }
 
    get remaining() {
-      return this.filters.active(this.todos).length
+      return IonicTodoApp.filters.active(this.todos).length
    }
 
    addTodo(title: string) {
-      // const item = Ionized()
-
       this.todos.push({
          id: Date.now(),
          title,
          completed: false
       })
-
-      // const lastItem = this.todos.pop()
-
-      // this.todos.push(lastItem) // FIX: should update list rendering
-
-      // console.log('IDENTITY?', item === lastItem) //FIX: Identity hazard
    }
 
    removeTodo(todo: Todo) {
       this.todos = Ionized(this.todos.filter(item => item !== todo))
    }
 
+   static updateTodo(todo: Todo, title: string) {
+      todo.title = title;
+   }
+
    removeCompleted() {
-      this.todos = this.filters.active(this.todos)
+      this.todos = IonicTodoApp.filters.active(this.todos)
    }
 
    toggleAll(completed: boolean) {
@@ -178,44 +91,37 @@ export function TodoMVC() {
    // # init and persist state
    const { getTodos, storeTodos } = TodoStorageKit()
 
-   const app = new IonizedTodoApp(getTodos())
-   app.todos
-   app.filter
-   app.filters
-   app.filteredTodos
+   const app = new IonicTodoApp(getTodos())
 
-   // console.log('filtered todos', $(app).filteredTodos)
+   const { updateTodo } = IonicTodoApp
 
    queueIonicTask(() => {
       storeTodos(app.todos)
    })
-
 
    // # handle routing
    window.addEventListener('hashchange', onHashChange)
    onHashChange()
 
    function onHashChange() {
-      const route = window.location.hash.replace(/#\/?/, '') as FilterKeys
-      if (app.filters[route]) {
-         app.filter = route
-      } else {
-         window.location.hash = ''
-         app.filter = 'all'
-      }
+      const route = window.location.hash.replace(/#\/?/, '')
+      app.setFilter(route) ?? (window.location.hash = '')
    }
-
 
    return component(
       <>
          <section class="todoapp">
             <header class="header">
                <h1>Class: Todos</h1>
-               <TodoInput can:addTodo={app.addTodo.bind(app)}></TodoInput>
+               <TodoInput can:addTodo={(app.addTodo)}></TodoInput>
             </header>
             <section class="main">
-               <ToggleAll can:toggleAll={app.toggleAll.bind(app)} ctx={app}></ToggleAll>
-               <TodoList todos={(app.filteredTodos)} can:removeTodo={app.removeTodo.bind(app)}></TodoList>
+               <CheckBox can:toggleAll={(app.toggleAll)} ctx={app}></CheckBox>
+               <TodoList
+                  todos={(app.filteredTodos)}
+                  can:removeTodo={(app.removeTodo)}
+                  can:updateTodo={updateTodo}
+               ></TodoList>
             </section>
             <footer show-if={(app.todos.length)} class="footer">
                <Remaining count={(app.remaining)}></Remaining>
@@ -230,7 +136,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={{ 'selected': (app.filter === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={app.removeCompleted.bind(app)}>
+               <button show-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={(app.removeCompleted)}>
                   Clear completed
                </button>
             </footer>
@@ -245,9 +151,14 @@ export function TodoMVC() {
 @import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
 </style> */}
 
+type InputEvent = { target: { value: string }, key: string }
+type RadioInputEvent = { target: { checked: boolean } }
 
 
-function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void }>) {
+function TodoInput(input: FromTag<{
+   'can:addTodo': (title: string) => void
+}>) {
+   const { addTodo } = input
 
    function submitTodo(e: InputEvent) {
       const value = e.target.value.trim()
@@ -269,40 +180,42 @@ function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void
 
 
 
-function TodoList({ $todos, removeTodo }: FromTag<{
+function TodoList(input: FromTag<{
    todos: Ion<Ionized<Todo[]>>,
-   'can:removeTodo': (todo: Ionized<Todo>) => void
+   'can:removeTodo': (todo: Ionized<Todo>) => void,
+   'can:updateTodo': typeof IonicTodoApp['updateTodo']
 }>) {
+   const { $todos, removeTodo, updateTodo } = input;
 
    const $editedTodo = Ion(null as Todo | null)
 
-   let beforeEditCache = ''
+   let titleCache = ''
 
    function editTodo(todo: Todo) {
-      beforeEditCache = todo.title
+      titleCache = todo.title
       $editedTodo.value = todo
    }
 
    function cancelEdit(todo: Todo) {
       $editedTodo.value = null
-      todo.title = beforeEditCache
+      updateTodo(todo, titleCache)
    }
 
    function doneEdit(todo: Ionized<Todo>) {
       if ($editedTodo()) {
          $editedTodo.value = null
-         todo.title = todo.title.trim()
+         updateTodo(todo, todo.title.trim())
          if (!todo.title) removeTodo(todo)
       }
    }
 
    return component(
       <ul class="todo-list">
-         {For($todos, o => o.id, (todo, $index) => {
+         {For($todos, o => o.id, (todo) => {
             const $isEditing = Ion(() => todo === $editedTodo());
 
             return (
-               <li class={["todo", { completed: (todo.completed), editing: $isEditing }]}>
+               <li class={{ todo: true, completed: (todo.completed), editing: $isEditing }}>
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={$(todo).completed} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
@@ -325,11 +238,13 @@ function TodoList({ $todos, removeTodo }: FromTag<{
    )
 }
 
+type Ctx<T> = T //TODO: this should allow ionized object to be destructured, toIons
 
-function ToggleAll({ toggleAll, ctx }: FromTag<{
-   'can:toggleAll': TodoApp['toggleAll']
-   ctx: Ionized<{ remaining: TodoApp['remaining'] }>
+function CheckBox(input: FromTag<{
+   'can:toggleAll': IonicTodoApp['toggleAll']
+   ctx: Ctx<{ remaining: IonicTodoApp['remaining'] }>
 }>) {
+   const { toggleAll, ctx } = input
 
    return component(
       <>
@@ -345,7 +260,10 @@ function ToggleAll({ toggleAll, ctx }: FromTag<{
    )
 }
 
-function Remaining({ $count }: FromTag<{ count: Ion<number> }>) {
+function Remaining(input: FromTag<{
+   count: Ion<number>
+}>) {
+   const { $count } = input
 
    return component(
       <span class="todo-count">

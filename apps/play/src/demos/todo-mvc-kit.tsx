@@ -100,9 +100,10 @@ type RadioInputEvent = { target: { checked: boolean } }
 // }
 type FilterKeys = 'all' | 'active' | 'completed'
 
-export function TodoMVC() {
 
-   const $todos = Ion.Ionized(getTodos())
+function TodoKit(todos: Todo[]) {
+
+   const $todos = Ion.Ionized(todos)
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
@@ -114,6 +115,44 @@ export function TodoMVC() {
       active: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => !todo.completed)),
       completed: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => todo.completed))
    }
+
+   function addTodo(title: string) {
+      $todos().push(Ionized({
+         id: Date.now(),
+         title,
+         completed: false
+      }))
+   }
+
+   function removeTodo(todo: Ionized<Todo>) {
+      $todos().splice($todos().indexOf(todo), 1)
+   }
+
+   function removeCompleted() {
+      $todos.value = filters.active($todos())
+   }
+
+   function toggleAll(e: RadioInputEvent) {
+      $todos().forEach((todo) => (todo.completed = e.target.checked))
+   }
+
+   return {
+      $todos,
+      $view,
+      filters,
+      $filteredTodos,
+      $remaining,
+      $todoCount,
+      addTodo,
+      removeTodo,
+      removeCompleted,
+      toggleAll
+   }
+}
+
+export function TodoMVC() {
+
+   const { $filteredTodos, $remaining, $todoCount, $todos, $view, addTodo, removeCompleted, removeTodo, toggleAll, filters } = TodoKit(getTodos())
 
 
    // # handle routing
@@ -145,40 +184,6 @@ export function TodoMVC() {
    }
 
 
-   // # todos methods
-
-   function addTodo(title: string) {
-      update(() => {
-         const item = Ionized({
-            id: Date.now(),
-            title,
-            completed: false
-         })
-         $todos().push(item)
-         const lastItem = $todos().pop();
-         $todos().push(lastItem!)
-      }, { lazy: 100 })
-   }
-
-   watch($todos(), () => {
-      console.log('todos changed')
-   })
-
-   function removeTodo(todo: Ionized<Todo>) {
-      $todos().splice($todos().indexOf(todo), 1)
-      // $todos.value = Ionized($todos().filter(item => item !== todo))
-   }
-
-   function removeCompleted() {
-      $todos.value = filters.active($todos())
-   }
-
-
-   // # toggle completed
-
-   function toggleAll(e: RadioInputEvent) {
-      $todos().forEach((todo) => (todo.completed = e.target.checked))
-   }
 
    const ToggleAllButton = () => (
       <>

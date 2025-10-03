@@ -367,11 +367,13 @@ export function createIonizedModel(
             if (propertyDescriptor.get || propertyDescriptor.set) {
                const opDef = getIonizedMemberDef(initialTarget, originalKey)
                if (opDef) {
-                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[MemberType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get
-                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[MemberType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set
+                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[MemberType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get?.bind(ionizedModel)
+                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[MemberType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set?.bind(ionizedModel)
                   Object.defineProperty(proxyProto, key, propertyDescriptor)
                   return !!propertyDescriptor.set;
                }
+               propertyDescriptor.get = propertyDescriptor.get?.bind(ionizedModel)
+               propertyDescriptor.set = propertyDescriptor.set?.bind(ionizedModel)
                Object.defineProperty(proxyProto, key, propertyDescriptor)
                return true;
             }
@@ -677,10 +679,10 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion)
 //  
 
 
-type ExposeIons<T extends AnyObject> = { [K in keyof T]: T[K] extends Function ? never : MutableIon<T[K]> }
+type ExposeIons<T extends AnyObject> = { [K in keyof T]: T[K] extends Function ? undefined : MutableIon<T[K]> } //TODO: Ion if readonly
 
-export function $<T>(value: T): T extends Ionized<infer O> ? ExposeIons<O> : undefined {
-   if (!isIonizedModel(value)) return undefined as T extends Ionized<infer O> ? ExposeIons<O> : undefined;
+export function $<T extends AnyObject>(value: T): ExposeIons<T> {
+   if (!isIonizedModel(value)) return value as ExposeIons<T>
    const modelQuark = quarkOf(value);
    return modelQuark.pions ?? (modelQuark.pions = createPionsProxy(modelQuark.proxyProto, value))
 }
@@ -688,7 +690,7 @@ export function $<T>(value: T): T extends Ionized<infer O> ? ExposeIons<O> : und
 function createPionsProxy(proxyProto: AnyObject, model: IonizedModel) {
    return new Proxy(proxyProto, {
       get(target, key) {
-         return getPion(target, key) ?? (model[key], getPion(target, key))
+         return getPion(target, key) ?? (Ion(() => model[key]), model[key], getPion(target, key)) //NOTE: Ion(() => model[key]) is a cheat to provide the property access with a tracker so that a pion is created. We need a better way...
       }
    })
 }

@@ -63,6 +63,7 @@ import { TestVineNodes } from './TestVineNodes';
 import { For } from '../../../packages/lumo/src/iteratives/For';
 import { DateApp } from './demos/DateApp';
 import { installIonizedDate } from '../../../packages/quarky/src/ionized/IonizedDate';
+import { TestMultisetting } from './demos/TestMultisetting';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
