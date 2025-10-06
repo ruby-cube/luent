@@ -5,6 +5,7 @@ import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./iner
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { createIonizedModel, getIonizedModel, IonizedModel, IonizeOptions } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
+import { AnyARecord } from "node:dns";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -209,6 +210,23 @@ export function ionize<T extends object, MARKS>(target: T & ThisType<Ionized<T>>
       <unknown>ionizeModel(target, options) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>>
 }
 
+// export function defineDeepIonize<T extends object>(getConfig: () => IonizeOptions) {
+//    return (obj: T) => ionize(obj, getConfig())
+// }
+
+// **** THIS WORKS: I just need to figure out how to connect it to selective ionization config
+export type NoExpand<T> = T extends infer O ? O : never;
+
+export type Ionic<T, N = {}> = NoExpand<{ [K in keyof T]: K extends keyof N ? Ionic<T[K], N[K] extends { nested: infer NN } ? NN : {}> : T[K] } & { '~ionized': true }>
+
+export function defineDeepIonize<O extends (arg: any) => any>(getConfig: O) {
+   const config = getConfig({})
+   function ionizer<T>(value: T & RawType<O>) { return ionize(value, config) as Ionic<RawType<O>, O extends (arg: any) => infer R ? R extends { nested: infer N } ? N : {} : {}> }
+   ionizer.nested = config.nested as O extends (arg: any) => infer R ? R extends { nested: infer N } ? N : undefined : undefined
+   return ionizer
+}
+
+type RawType<O> = O extends (arg: infer T) =>any ? T extends object ? T : never : never
 
 // function _withInertItems<T, M>(target: T & object): M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>> {
 //    return ionizeModel(target, InertCollection.ITEMS) as M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>>

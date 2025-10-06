@@ -118,8 +118,9 @@ declare namespace React {
     * @template P The props the component accepts.
     */
    //$$$ important for component
-   type JSXElementConstructor<P> = (
-      props: P
+   type JSXElementConstructor<P, O> = (
+      input: P,
+      optionals: O
    ) => Component
 
 

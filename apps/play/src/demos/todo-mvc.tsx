@@ -234,6 +234,8 @@ export function TodoMVC() {
             </footer>
          </section>
 
+         {/* <Test message={'hi'} count={3}></Test> */}
+
          <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)
 }
@@ -242,7 +244,11 @@ export function TodoMVC() {
 @import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
 </style> */}
 
-
+// function Test({ message }, { count = 0 }) {
+//    return component(
+//       <div></div>
+//    )
+// }
 
 function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void }>) {
 

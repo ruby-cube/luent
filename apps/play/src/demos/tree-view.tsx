@@ -1,19 +1,24 @@
-import { component, FromTag, If, Else, For } from "@rue/lumo";
-import { ion, ionize, Ionized } from "@rue/quarky";
+import { component, FromTag, If, Else, For, fromGlobal, CommonsKey } from "@rue/lumo";
+import { $from, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, NoExpand } from "@rue/quarky";
 
 
+type DeepIonic<D extends (...args: any[]) => any, M = {}> = Omit<ReturnType<D>, keyof M> & M
 
 
-// const list = withInertItems(new Map([['hi', { nom: true }]]))
+function asGlobal<T>(value: T) {
+   const key = CommonsKey('global')
+   function $GlobalValue(): T {
+      const _value = fromGlobal(key) ?? provideGlobal(key, value);
+      return _value
+   }
 
-export function TreeApp() {
+   return [$GlobalValue, key] as const
+}
 
-   const treeData = {
+function getTreeItemData(): TreeItemData {
+   return {
       name: 'My Tree',
       children: [
-         // { name: 'hello' },
-         // { name: 'hello' },
-         // { name: 'world' },
          {
             name: 'child folder',
             children: [
@@ -31,15 +36,79 @@ export function TreeApp() {
          }
       ]
    }
+}
 
-   const treeItem = ionize(createTreeItem(treeData), {})
+// # data
+type TreeItemData = {
+   name: string,
+   children?: TreeItemData[]
+}
 
-   return component((
-      TreeItem = TreeItemView
-   ) =>
+
+// # class
+
+class TreeItem {
+   constructor(
+      public name: string,
+      public children?: TreeItem[]
+   ) { }
+
+   addChild(item: TreeItem) {
+      this.children?.push(item)
+   }
+}
+
+
+// # rich model from data
+function createTreeItem(data: TreeItemData): TreeItem {
+   const TreeItem = $GlobalTreeItem()
+   return new TreeItem(
+      data.name,
+      data.children?.map(data => createTreeItem(data))
+   )
+}
+
+
+// # ionic factory
+function IonicTreeItem(data: TreeItemData): IonicTreeItem {
+   return ionizeTreeItem(createTreeItem(data))
+}
+
+
+// # ionic type
+type IonicTreeItem = DeepIonic<typeof ionizeTreeItem, {
+   addChild(item: IonicTreeItem): void,
+}>
+
+
+// # deep ionize
+const ionizeTreeItem = defineDeepIonize((_: TreeItem) => ({
+   nested: {
+      children: ionizeChildren
+   }
+}))
+
+// # global class (DI)
+export const [$GlobalTreeItem, TREE_ITEM_CLASS] = asGlobal(TreeItem)
+
+
+
+const ionizeChildren = defineDeepIonize((_: TreeItem[]) => ({
+   nested: [ionizeTreeItem]
+}))
+
+
+
+// # Tree App
+
+export function TreeApp({ data = getTreeItemData() }) {
+
+   const root = IonicTreeItem(data)
+
+   return component(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-            <TreeItem item={treeItem}></TreeItem>
+            <TreeItemView item={root}></TreeItemView>
          </ul>
          <o--link href='/src/demos/tree-view.css' rel='stylesheet' />
       </>
@@ -47,8 +116,108 @@ export function TreeApp() {
    )
 }
 
+function Counter() {
+   const $count = Ion(0, {
+      increment() {
+         this.value++
+      },
+      decrement() {
+         this.value--
+      }
+   })
 
-function mutable(arg: any) { return arg }
+   const frog = ionize({ name: 'kermit', age: NaN })
+
+   return component(
+      <Child mu:count={$count}></Child>
+   )
+}
+
+type Readonly<T> =
+   T extends (infer I)[] ? readonly MaybeReadonly<I>[] & T
+   : T extends Set<infer I> ? Set<MaybeReadonly<I>>
+   : { readonly [K in keyof T as T[K] extends Function ? T[K] extends { '~can'?: true } ? K : never : K]: T[K] }
+
+type MaybeReadonly<T> = T extends object ? Readonly<T> : T
+
+
+type Frog = { name: string, age: number, qualities: { brave: boolean }[] }
+type Qualities = { brave: boolean }
+
+// type Mu<T extends object, M extends keyof T, N = {}> = { [K in keyof T as K extends keyof M ? M[K] extends 'mu' ? K : never : never]: T[K] }
+
+function Child(input: FromTag<{
+   'mu:count': Ion<number> & { increment: () => void },
+   // 'mu:frog': Frog
+   // Mu<Frog, 'age', { qualities: Mu<Qualities[], 'brave'> }>
+}>) {
+   return component(
+      <div></div>
+   )
+}
+
+// type ReadonlyExcludeMu<T, M extends keyof T, N> = { readonly [K in Exclude<keyof T, keyof N> as T[K] extends Function ? never : K extends M ? never : K]: T[K] }
+// type Muonly<T, M extends keyof T, N> = { [K in Exclude<keyof T, keyof N> as K extends M ? K : never]: T[K] }
+// type ShallowMu<T, M extends keyof T> = ReadonlyExcludeMu<T, M> & Muonly<T, M>
+
+
+type Mu<T extends object, M extends keyof T, N = {}> =
+   { readonly [K in keyof T as T[K] extends Function ? never : K extends M ? never : K]: K extends keyof N ? N[K] : T[K] }
+   & { [K in keyof T as K extends M ? K : never]: K extends keyof N ? N[K] : T[K] } // mutable or allowed methods
+   & { '~mu'?: true }
+
+type MuonicTreeItem = Mu<IonicTreeItem, 'addChild' | 'children', {
+   children?: MuonicTreeItem[]
+}>
+
+// # TreeItem
+
+function TreeItemView(input: FromTag<{
+   item: Mu<IonicTreeItem, 'addChild' | 'children', { children?: MuonicTreeItem[] }>,
+}>) {
+   const { item } = input
+
+   const $isFolder = ion(() => !!item.children?.length)
+   const $isOpen = ion($isFolder(), {
+      toggle() {
+         this.value = !this.value
+      }
+   })
+
+   function changeType() {
+      if (!$isFolder()) {
+         item.children = ionizeChildren([])
+         item.addChild(IonicTreeItem({ name: 'stuff' }))
+         $isOpen.value = true
+      }
+   }
+
+   return component(
+      <li class='item'>
+         <div
+            class={{ 'bold': $isFolder }}
+            on:click={$isOpen.toggle}
+            on:dblclick={changeType}
+         >
+            {(item.name)}
+            {If($isFolder,
+               <span>[{($isOpen() ? '-' : '+')}]</span>
+            )}
+         </div>
+         {If($isFolder,
+            <ul show-if={$isOpen}>
+               {For(item.children!, m => m, item => (
+                  <TreeItemView
+                     item={item}
+                  >
+                  </TreeItemView>
+               ))}
+               <li class='add' on:click={e => item.addChild(IonicTreeItem({ name: 'stuff' }))}>+</li>
+            </ul>
+         )}
+      </li>
+   )
+}
 
 
 // type DeepReadonly<T> = T extends object
@@ -65,148 +234,36 @@ function mutable(arg: any) { return arg }
 //    readonly [P in keyof T]: DeepReadonly<T[P]>;
 // } : T
 
-type ItemData = {
-   name: string,
-   children?: ItemData[],
-   child?: ItemData,
-}
-
-// const iven: DeepReadonly<ItemData> = {name: 'iven'}
-// const iven2: _Nonlocal<ItemData> = { name: 'iven' }
-
-// const chi = iven.children
-// const ch2 = chi!.children
-
-// type ItemData2 = {
-//    readonly name: string,
-//    readonly children?: DeepReadonly<ItemData[]>
-// }
-
-// type ItemData = {
-//    readonly name: string;
-//    readonly children?: readonly {
-//        readonly name: string;
-//        readonly children?: readonly {
-//            readonly name: string;
-//            readonly children?: readonly {
-//                readonly name: string;
-//                readonly children?: readonly {
-//                    readonly name: string;
-//                    readonly children?: readonly {
-//                        readonly name: string;
-//                        ...
-
-class TreeItem {
-   constructor(
-      public name: string,
-      public children?: TreeItem[],
-   ) { }
-
-   addChild() {
-      console.trace('adding child')
-      const children = this.children || (this.children = [])
-      console.log(this, children)
-      children.push(new TreeItem('new stuff'))
-   }
-}
 
 
 
+// type TreeItemIonicProperties = { children: { nested: TreeItemsIonicProperties } }
 
+// type TreeItemsIonicProperties = { [key: number]: { nested: TreeItemIonicProperties } }
 
-function createTreeItem(data: ItemData): TreeItem {
-   return new TreeItem(
-      data.name,
-      data.children?.map(child => createTreeItem(child))
-   )
-}
-
-// function createTreeItem(data: ItemData) { 
-//    return {
-//       name: data.name,
-//       children: data.children?.map(child => createTreeItem(child)), //NOTE: THIS PRODUCES CIRCULAR TYPE ERRORS, and requires writing the type, therefore prefer class syntax
-//       addChild() {
-//          const children = this.children || (this.children = [])
-//          children?.push(new TreeItem({ name: 'new stuff' }))
-//       }
+// const ionizeItem = defIonize(() => ({
+//    nested: {
+//       children: ionizeList
 //    }
-// }
+// }))
+
+// const ionizeList = defIonize(() => ({
+//    nested: [ionizeItem]
+// }))
 
 
-const textarea = document.createElement('textarea')
+// const BBB = ionizeItem({} as TreeItem)
 
-function TreeItemView(input: FromTag<{
-   item: Ionized<TreeItem>,
-   // list: v<string[]>,
-   // 'on:click': v<(e: { pen: string }) => void>('?')
-}>) {
-   const { item } = input
-
-   // item.children
-   // emit('click', { pen: 'hi' })
-   // const item = ionize({...data}, {
-   //    addChild() {
-   //       console.log('adding child')
-   //       const children = item.children || (item.children = [])
-   //       console.log(item, children)
-   //       children.push({name: 'new stuff'})
-   //    }
-   // })
-
-   const $isOpen = ion(!!item.children?.length, {
-      toggle() {
-         $isOpen.value = !$isOpen.value
-      }
-   })
-
-   const $isFolder = ion(() =>!!item.children?.length)
-
-   function changeType() {
-      if (!$isFolder()) {
-         item.addChild()
-         $isOpen.value = true
-      }
-   }
-
-   return component((
-      TreeItem = TreeItemView
-   ) =>
-      <li class='item'>
-         <div
-            class={{ 'bold': ($isFolder() && $isOpen()) }}
-            on:click={$isOpen.toggle} on:dblclick={changeType}
-         >
-            {item.$name}
-            {If($isFolder,
-               <span>[{($isOpen() ? '-' : '+')}]</span>
-            )}
-         </div>
-         {If($isFolder,
-            <>
-               {If($isOpen, 'remount',
-                  <ul>
-                     {For(item.children!, m => m, item => (
-                        <TreeItem item={item}></TreeItem>
-                     ))}
-                     <li class='add' on:click={e => item.addChild()}>+</li>
-                  </ul>
-               )}
-            </>
-         )}
-         {/* {If($isFolder, 'create', () => (console.log('*** render contents'),
-            <>
-               {If($isOpen, 'remount', () => (console.log('*** render nested'),
-                  <ul>
-                     {For(item.children!, m => m, item => (
-                        <TreeItem item={item}></TreeItem>
-                     ))}
-                     <li class='add' on:click={e => item.addChild()}>+</li>
-                  </ul>
-               ))}
-            </>
-         ))} */}
-      </li>
-   )
-}
+// const what = BBB.children![0].children![0].children![0].children![0].children
 
 
+// type IonicTreeItem = Ionic<TreeItem, TreeItemIonicProperties>
+
+// const tr: IonicTreeItem = {} as IonicTreeItem
+
+// const a = tr.children![0].children![0].children!
+
+// type IonicTreeItem = Ionic<{
+//    name: string
+//    children?: IonicTreeItem[]
+// }>

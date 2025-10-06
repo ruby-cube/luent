@@ -310,7 +310,15 @@ export function isIntegerKey(key: unknown) {
 
 export type MarkMap = { [key: PropertyKey]: InertMark | MarkMap }
 
-export type IonizeOptions = { mark?: MarkMap }
+// export type IonizeOptions = { mark?: MarkMap }
+
+
+
+export type IonizeOptions = {
+   nested?: any,
+   '@set'?: { [key: string]: () => void },
+   '@get'?: { [key: string]: () => void },
+}
 
 export const EACH = Symbol('each')
 
@@ -681,7 +689,7 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion)
 
 type ExposeIons<T extends AnyObject> = { [K in keyof T]: T[K] extends Function ? undefined : MutableIon<T[K]> } //TODO: Ion if readonly
 
-export function $<T extends AnyObject>(value: T): ExposeIons<T> {
+export function $from<T extends AnyObject>(value: T): ExposeIons<T> {
    if (!isIonizedModel(value)) return value as ExposeIons<T>
    const modelQuark = quarkOf(value);
    return modelQuark.pions ?? (modelQuark.pions = createPionsProxy(modelQuark.proxyProto, value))

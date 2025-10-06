@@ -6,7 +6,7 @@ import { RawJSXNode } from "../node/makeJSXNode";
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.
 
-export type HandleEvent<E = {}> = keyof E extends never ? (() => void)|((event: E) => void) : (event: E) => void
+export type HandleEvent<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
 
 export const MU_IONS = 'mu_ions'
 
@@ -195,6 +195,12 @@ export function toInput(attributes: AnyObject) {
             assertFunction(op)
             return op;
          }
+         // const seeKey = 'see:' + key
+         // if (seeKey in target) {
+         //    const op = target[seeKey]
+         //    assertFunction(op)
+         //    return op;
+         // }
          if (key in target) {
             const value = target[key]
             if (isFunction(value) && value.length !== 0)
@@ -218,8 +224,10 @@ type TagAttributes<D> =
    StaticInput<D>
    & MaybeIonAttributes<D>
    & MutableIonAttributes<D>
+   & NonmutableIonAttributes<D>
    & TagEvents<D>
    & OpAttribute<D>
+   // & SeeAttribute<D>
    & TagSlot<D>
    & (D extends { provide: infer P } ? P : {})
 // [] mu ---> {mu:name: MutableIon<string>}
@@ -239,11 +247,24 @@ type TagSlot<D> = D extends { Slot: infer S } ? {
 type MaybeIonAttributes<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
-   K extends `mu:${infer I}` ? I
-   : K extends `can:${string}` | `on:${string}` | 'Slot' ? never
+   K extends `mu:${infer I}` ? never
+   : K extends `can:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' ? never
    : K extends string ? K
    : never
    : never]:
+   (NonlocalIon<ExcludePrimitives<D[K]>>) |
+   (ExcludePrimitives<D[K]> extends Ion<infer S> ?
+      S
+      // MaybeMarkInert<S>
+      : never)
+   | (OnlyPrimitives<D[K]>)
+}
+type NonmutableIonAttributes<D> = {
+   [K in keyof D
+   as IncludesIon<D[K]> extends true ?
+   K extends `mu:${infer I}` ? I
+   : never
+   : never]?:
    (NonlocalIon<ExcludePrimitives<D[K]>>) |
    (ExcludePrimitives<D[K]> extends Ion<infer S> ?
       S
@@ -257,7 +278,7 @@ type MutableIonAttributes<D> = {
    as IncludesIon<D[K]> extends true ?
    K extends `mu:${string}` ? K
    : never
-   : never]:
+   : never]?:
    ToMuIon<ExcludePrimitives<D[K]>> | OnlyPrimitives<D[K]>
 }
 
@@ -278,6 +299,7 @@ export type FromTag<D> =
    & WithEmit<D>
    & WithMu<D>
    & OpInput<D>
+   // & SeeInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
    & (D extends { provide: infer S } ? { provide: S } : { provide: undefined })
    & { '~attributes'?: TagAttributes<D> }
@@ -293,13 +315,19 @@ type MuIon<I> = ExcludePrimitives<I> extends { value: any } ? I
 type OpInput<D> = {
    [K in keyof D as K extends `can:${infer F}` ? F : never]: D[K]
 }
+// type SeeInput<D> = {
+//    [K in keyof D as K extends `see:${infer F}` ? F : never]: D[K]
+// }
 type OpAttribute<D> = {
    [K in keyof D as K extends `can:${string}` ? K : never]: D[K]
 }
+// type SeeAttribute<D> = {
+//    [K in keyof D as K extends `see:${string}` ? K : never]: D[K]
+// }
 
 type StaticInput<D> = {
    [K in keyof D as IncludesIon<D[K]> extends true ? never
-   : K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' | 'provide' ? never
+   : K extends `mu:${string}` | `can:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' | 'provide' ? never
    : K]:
    D[K]
    // MaybeMarkInert<D[K]>
@@ -312,7 +340,7 @@ type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, P
 type ReadonlyIonInput<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
-   K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' ? never
+   K extends `mu:${string}` | `can:${string}` /* | `see:${string}` */ | `on:${string}` | 'Slot' ? never
    : K extends string ? `$${K}`
    : never
    : never

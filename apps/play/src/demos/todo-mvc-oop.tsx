@@ -1,28 +1,40 @@
-//@ts-nocheck
 import { component, For, If, Else, FromTag, listen } from "@rue/lumo"
-import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
+import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
 
+// PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)
+// CONS: Not as composable as kits
 
-interface Todo {
-   id: number
-   title: string
-   completed: boolean
+type FilterKeys = 'all' | 'active' | 'complete'
+
+class Todo {
+   constructor(
+      public readonly id: string,
+      public title: string,
+      public completed: boolean
+   ) {
+
+   }
 }
 
-type FilterKeys = keyof typeof IonicTodoApp['filters']
+const ionizeTodo = defineDeepIonize((value: Todo) => ({
+   '@set': {
+      title: () => { console.trace() }
+   }
+}))
+
+
+const ionizeTodos = defineDeepIonize((value: Todo[]) => ({
+   nested: [ionizeTodo]
+}))
+
 
 class IonicTodoApp {
 
    constructor(
       todos: Todo[],
    ) {
-      this.todos = ionize(todos, {
-         [EACH]: todo => ionize(todo, {
-            __DEV__debug: {
-               '@set title': () => { console.trace }
-            }
-         })
-      }) //TODO:
+      this.todos = ionizeTodos(todos)
+
       return ionize(this)
    }
 
@@ -40,8 +52,8 @@ class IonicTodoApp {
 
    static filters = {
       all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => ionize(todos.filter(todo => !todo.completed)),
-      completed: (todos: Ionized<Todo[]>) => ionize(todos.filter(todo => todo.completed))
+      active: (todos: Ionized<Todo[]>) => ionizeTodos(todos.filter(todo => !todo.completed)),
+      completed: (todos: Ionized<Todo[]>) => ionizeTodos(todos.filter(todo => todo.completed))
    }
 
    get filteredTodos() {
@@ -53,19 +65,15 @@ class IonicTodoApp {
    }
 
    addTodo(title: string) {
-      this.todos.push({
+      this.todos.push(ionizeTodo({
          id: Date.now(),
          title,
          completed: false
-      })
+      }))
    }
 
    removeTodo(todo: Todo) {
-      this.todos = ionize(this.todos.filter(item => item !== todo))
-   }
-
-   updateTodo(todo: Todo, title: string) {
-      todo.title = title;
+      this.todos = ionizeTodos(this.todos.filter(item => item !== todo))
    }
 
    removeCompleted() {
@@ -74,6 +82,12 @@ class IonicTodoApp {
 
    toggleAll(completed: boolean) {
       this.todos.forEach((todo) => (todo.completed = completed))
+   }
+
+   // # todo procedures
+
+   updateTodo(todo: Ionized<Todo>, title: string) {
+      todo.title = title;
    }
 }
 
@@ -101,9 +115,7 @@ export function TodoMVC() {
 
    const app = new IonicTodoApp(getTodos())
 
-   const { $filteredTodos, removeTodo } = $from(app)
-
-   const { updateTodo } = IonicTodoApp
+   const { $filteredTodos, removeTodo, updateTodo } = $from(app)
 
    queueIonicTask(() => {
       storeTodos(app.todos)

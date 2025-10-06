@@ -99,11 +99,22 @@ type RadioInputEvent = { target: { checked: boolean } }
 //       </>
 //    )
 // }
+
+const ionizeTodo = defineDeepIonize({
+   __DEV__debug: {
+      '@set title': () => { console.trace() }
+   }
+})
+
+const ionizeTodos = defineDeepIonize({
+   [EACH]: ionizeTodo
+})
+
 type FilterKeys = 'all' | 'active' | 'completed'
 
 export function TodoMVC() {
 
-   let todos = Ion.Ionized(getTodos())
+   let todos = Ion.Ionized(getTodos(), ionizeTodos)
    let view = Ion('all' as keyof typeof filters)
 
    let filteredTodos = Ion(() => filters[view](todos))
@@ -112,8 +123,28 @@ export function TodoMVC() {
 
    const filters = {
       all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => !todo.completed)),
-      completed: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => todo.completed))
+      active: (todos: Ionized<Todo[]>) => ionizeTodos(todos.filter(todo => !todo.completed)),
+      completed: (todos: Ionized<Todo[]>) => ionizeTodos(todos.filter(todo => todo.completed))
+   }
+
+   function addTodo(title: string) {
+      todos.push(ionizeTodo({
+         id: Date.now(),
+         title,
+         completed: false
+      }))
+   }
+
+   function removeTodo(todo: Ionized<Todo>) {
+      todos = ionizeTodos(todos.filter(item => item !== todo))
+   }
+
+   function removeCompleted() {
+      todos = filters.active($todos())
+   }
+
+   function toggleAll(e: RadioInputEvent) {
+      todos.forEach((todo) => (todo.completed = e.target.checked))
    }
 
 
@@ -133,6 +164,7 @@ export function TodoMVC() {
    }
 
 
+
    // # persist state
 
    function getTodos(): Todo[] {
@@ -146,68 +178,19 @@ export function TodoMVC() {
    }
 
 
-   // # todos methods
-
-   function addTodo(title: string) {
-      todos.push(Ionized({
-         id: Date.now(),
-         title,
-         completed: false
-      }))
-   }
-
-   function removeTodo(todo: Ionized<Todo>) {
-      todos = Ionized(todos.filter(item => item !== todo))
-   }
-
-   function removeCompleted() {
-      todos = filters.active($todos())
-   }
-
-
-   // # toggle completed
-
-   function toggleAll(e: RadioInputEvent) {
-      todos.forEach((todo) => (todo.completed = e.target.checked))
-   }
-
-   const ToggleAllButton = () => (
-      <>
-         <input
-            id="toggle-all"
-            class="toggle-all"
-            type="checkbox"
-            checked={(remaining === 0)}
-            on:change={toggleAll}
-         />
-         <label for="toggle-all">Mark all as complete</label>
-      </>
-   )
-
-
-   // # remaining todos
-
-   const RemainingCount = () => (
-      <span class="todo-count">
-         <strong>{%remaining}</strong>
-         <span>{%(remaining === 1 ? ' item' : ' items')} left</span>
-      </span>
-   )
-
-
    return component(
       <>
          <section class="todoapp">
             <header class="header">
                <h1>Todos</h1>
-               <TodoInput can:addTodo={addTodo}></TodoInput>
+               {TodoInput(addTodo)}
             </header>
             <section class="main">
-               {ToggleAllButton()}
-               <TodoList todos={%filteredTodos} can:removeTodo={removeTodo}></TodoList>
+               {CheckBox(toggleAll, asCtx(app))}
+               {TodoList(%todos, removeTodos)}
             </section>
             <footer show-if={%todoCount} class="footer">
-               {RemainingCount()}
+               {RemainingCount(%remaining)}
                <ul class="filters">
                   <li>
                      <a href="#/all" class={{ 'selected': %(view === 'all') }}>All</a>
@@ -232,6 +215,111 @@ export function TodoMVC() {
 {/* <style>
 %import "https://unpkg.com/todomvc-app-css%2.4.1/index.css";
 </style> */}
+
+{/* <TodoList todos={%filteredTodos} can:removeTodo={removeTodo}></TodoList> */}
+{/* <TodoInput can:addTodo={addTodo}></TodoInput> */}
+
+
+
+const CheckBox = (toggleAll: () => void, ctx: {%remaining: number}) => (
+   <>
+      <input
+         id="toggle-all"
+         class="toggle-all"
+         type="checkbox"
+         checked={%(remaining === 0)}
+         on:change={toggleAll}
+      />
+      <label for="toggle-all">Mark all as complete</label>
+   </>
+)
+
+
+
+const RemainingCount = (%remaining: number) => (
+   <span class="todo-count">
+      <strong>{%remaining}</strong>
+      <span>{%(remaining === 1 ? ' item' : ' items')} left</span>
+   </span>
+)
+
+
+
+function TodoInput(addTodo: (title: string) => void }>) {
+
+   function submitTodo(e: InputEvent) {
+      const value = e.target.value.trim()
+      if (value) {
+         addTodo(value)
+         e.target.value = ''
+      }
+   }
+
+   return (
+      <input
+         class="new-todo"
+         autofocus
+         placeholder="What needs to be done?"
+         on:keyup={e => e.key === 'Enter' && submitTodo(e as unknown as InputEvent)}
+      />
+   )
+}
+
+
+
+function TodoList(%todos: Ionized<Todo[]>, removeTodo: (todo: Ionized<Todo>) => void }) {
+
+   let editedTodo = Ion(null as Todo | null)
+
+   let beforeEditCache = ''
+
+   function editTodo(todo: Todo) {
+      beforeEditCache = todo.title
+      editedTodo = todo
+   }
+
+   function cancelEdit(todo: Todo) {
+      editedTodo = null
+      todo.title = beforeEditCache
+   }
+
+   function doneEdit(todo: Ionized<Todo>) {
+      if (editedTodo) {
+         editedTodo = null
+         todo.title = todo.title.trim()
+         if (!todo.title) removeTodo(todo)
+      }
+   }
+
+   return (
+      <ul class="todo-list">
+         {For(%todos, o => o.id, (todo) => {
+            let %isEditing = Ion(() => todo === editedTodo);
+
+            return (
+               <li class={{ todo: true, completed: todo.%completed, editing: %isEditing }}>
+                  <div class="view">
+                     <input class="toggle" type="checkbox" mu:checked={todo.%completed} />
+                     <label on:dblclick={e => editTodo(todo)}>{todo.%title}</label>
+                     <button class="destroy" on:click={e => removeTodo(todo)}></button>
+                  </div>
+                  {If(%isEditing,
+                     <input
+                        class="edit"
+                        type="text"
+                        mu:value={todo.%title}
+                        at:mounted={node => node.focus()}
+                        on:blur={e => doneEdit(todo)}
+                        on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
+                     />
+                  )}
+               </li>
+            )
+         })}
+      </ul>
+   )
+}
+
 
 
 
