@@ -56,7 +56,7 @@ type TimerDef<T = any, C = any> = {
    while?: (this: T, context: C & StreamContext) => boolean,
    run(this: T, context: C & StreamContext): void
    interval: number | 'frame'
-   x?: number
+   max?: number
    doWhile?: (this: T, context: C & StreamContext) => boolean,
    '@post'?: (this: T, context: C & StreamContext) => void
 }
@@ -257,11 +257,11 @@ function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamConte
    for (let i = 0; i < timers.length; i++) {
       const timer = timers[i]
       const checksConditions = timer.doWhile || timer.while
-      timer.x = timer.x ?? (checksConditions ? Infinity : 1)
-      const { interval, x: maxTimes } = timer
+      timer.max = timer.max ?? (checksConditions ? Infinity : 1)
+      const { interval, max } = timer
       const setUpTimer = interval === 'frame'
          ? setUpAnimation
-         : maxTimes > 1 || checksConditions
+         : max > 1 || checksConditions
             ? setUpInterval
             : setUpTimeout
 
@@ -290,7 +290,7 @@ function setUpAnimation(timer: TimerDef, entity: AnyObject, context: StreamConte
          return;
       }
       run.apply(entity, [context])
-      if (context.timer.x === timer.x || postcondition && !postcondition.apply(entity, [context])) {
+      if (context.timer.x === timer.max || postcondition && !postcondition.apply(entity, [context])) {
          atPost?.apply(entity, [context])
          stop()
          next()?.start()
@@ -316,7 +316,7 @@ function setUpInterval(timer: TimerDef, entity: AnyObject, context: StreamContex
          return;
       }
       run.apply(entity, [context])
-      if (context.timer.x === timer.x || postcondition && !postcondition.apply(entity, [context])) {
+      if (context.timer.x === timer.max || postcondition && !postcondition.apply(entity, [context])) {
          atPost?.apply(entity, [context])
          stop()
          next()?.start()

@@ -9,8 +9,8 @@ export function TestStreamIon() {
       timer: {
          '@pre'() { this.value = true },
          interval: 500,
-         run(o) { console.log('times', o.timer.x), this.value = !this.value },
-         x: 4,
+         run(o) { this.value = !this.value },
+         max: 4,
          '@post'() { this.value = false }
       }
    })
@@ -21,7 +21,7 @@ export function TestStreamIon() {
          '@pre'() { this.value = 'r' },
          interval: 1000,
          run() { this.value = this.value === 'l' ? 'r' : 'l' },
-         x: 3,
+         max: 3,
          '@post'() { this.value = 'l' }
       },
    })
@@ -32,7 +32,7 @@ export function TestStreamIon() {
          '@pre'() { this.value = 3 },
          interval: 125,
          run() { this.value = this.value === 3 ? 4 : 3 },
-         x: 32,
+         max: 32,
          '@post'() { this.value = false }
       }
    })
