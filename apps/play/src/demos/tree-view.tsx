@@ -56,7 +56,37 @@ class TreeItem {
    addChild(item: TreeItem) {
       this.children?.push(item)
    }
+
+   isFolder(this: ShallowRO<TreeItem>) {
+      return !!this.children?.length
+   }
 }
+
+
+
+
+type PickKeys<T, K extends keyof T> = K
+
+type ShallowRO<T> = { readonly [K in keyof T]: T[K] }
+
+type IsFullyReadonly<T> =
+   keyof T extends never
+   ? false // empty object, treat as not readonly
+   : { [K in keyof T]-?: IfEquals<
+      { [P in K]: T[P] },
+      { -readonly [P in K]: T[P] },
+      false,
+      true
+   > }[keyof T] extends true ? true : false
+
+type IfEquals<X, Y, A = true, B = false> =
+   (<T>() => T extends X ? 1 : 2) extends
+   (<T>() => T extends Y ? 1 : 2) ? A : B;
+
+
+type ROMethods<T> = { [K in keyof T as  T[K] extends Function ? T[K] extends (this: infer H, ...args: any[]) => any ? IsFullyReadonly<H> extends true ? K : never : never : never]: T[K] }
+
+type Hey = ROMethods<TreeItem>
 
 
 // # rich model from data
@@ -101,7 +131,12 @@ const ionizeChildren = defineDeepIonize((_: TreeItem[]) => ({
 
 // # Tree App
 
-export function TreeApp({ data = getTreeItemData() }) {
+export function TreeApp(input: FromTag<{
+   data?: TreeItemData
+}>) {
+   const { data = getTreeItemData() } = input
+
+   data.name = 'hi'
 
    const root = IonicTreeItem(data)
 
@@ -170,12 +205,20 @@ type MuonicTreeItem = Mu<IonicTreeItem, 'addChild' | 'children', {
    children?: MuonicTreeItem[]
 }>
 
+const list = [1] as readonly number[]
+
+type ReadonlyObj = { readonly [key: PropertyKey]: string }
+
+type Obj = { [key: PropertyKey]: string }
+
+type Yes = ReadonlyObj extends Obj ? true : false
+
 // # TreeItem
 
 function TreeItemView(input: FromTag<{
-   item: Mu<IonicTreeItem, 'addChild' | 'children', { children?: MuonicTreeItem[] }>,
+   'mu:item': Mu<IonicTreeItem, 'addChild' | 'children', { children?: MuonicTreeItem[] }>,
 }>) {
-   const { item } = input
+   const { item } = input()
 
    const $isFolder = ion(() => !!item.children?.length)
    const $isOpen = ion($isFolder(), {
@@ -207,10 +250,7 @@ function TreeItemView(input: FromTag<{
          {If($isFolder,
             <ul show-if={$isOpen}>
                {For(item.children!, m => m, item => (
-                  <TreeItemView
-                     item={item}
-                  >
-                  </TreeItemView>
+                  <TreeItemView mu:item={item}></TreeItemView>
                ))}
                <li class='add' on:click={e => item.addChild(IonicTreeItem({ name: 'stuff' }))}>+</li>
             </ul>

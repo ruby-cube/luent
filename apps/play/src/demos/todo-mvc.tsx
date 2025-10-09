@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, For, If, Else, FromTag } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
@@ -271,11 +272,26 @@ function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void
 }
 
 
+// INPUT TYPING
+// ------------
+// number (static)
+// Ion<number>
+// ToIon<number> (will normalize to ion)
+// Frog (static/data) (readonly, will copy before ionizing)
+// Ionized<Frog>
+// ToIonized<Frog> (will normalize ionized)
+// To<IonicFrog>
 
-function TodoList({ $todos, removeTodo }: FromTag<{
+
+function TodoList(input: FromTag<{
    todos: Ion<Ionized<Todo[]>>,
+   frog: ToIonized<Frog>,
    'can:removeTodo': (todo: Ionized<Todo>) => void
 }>) {
+
+   const { $todos, removeTodo, frog } = input({
+      frog: ionize
+   })
 
    const $editedTodo = Ion(null as Todo | null)
 

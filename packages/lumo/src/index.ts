@@ -24,6 +24,7 @@ export * from './transition/transitions'
 export * from './transition/TransitionNode' 
 export * from './flask/flask-hooks' 
 export * from './flask/ViewFlask' 
+export * from './specialty/Stream' 
 export * from './measureLayout'
 export * from './render-cycle'
 

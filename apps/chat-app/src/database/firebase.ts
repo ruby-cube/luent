@@ -298,7 +298,7 @@ export function ChatKit() {
       unsavedSet.add(newMessageRef.id)
       $messages().push(newMessage)
 
-      return post()
+      return post();
 
       function post() {
          const rando = Math.random()

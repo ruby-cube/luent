@@ -46,11 +46,11 @@ export function VideoPlayer() {
       }
    })
 
-   let duration = 0
+   const $duration = () => $video()?.duration ?? 0
 
-   player.on("init", () => {
-      duration = $video()?.duration ?? 0
-   })
+   // player.on("init", () => {
+   //    duration = $video()?.duration ?? 0
+   // })
 
    track.on("play", () => {
       const video = $video()
@@ -97,9 +97,6 @@ export function VideoPlayer() {
          ]
       })
 
-   const videoPlayer = ionize({
-      player
-   })
    // {
    //    init() {
    //       player.apply('init')
@@ -142,7 +139,7 @@ export function VideoPlayer() {
 
             {If((player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
                <div>
-                  <ElapsedBar elapsed={$elapsedTime} duration={duration} paused={(track.is("paused"))}
+                  <ElapsedBar elapsed={$elapsedTime} duration={$duration()} paused={(track.is("paused"))}
                      on:click={reClickElapsedBar}
                   />
                   <mount-remount>
@@ -153,7 +150,7 @@ export function VideoPlayer() {
                         <button on:click={e => track.apply("play")}>►</button>
                      )}
                   </mount-remount>
-                  <Timer elapsed={$elapsedTime} duration={duration} />
+                  <Timer elapsed={$elapsedTime} duration={$duration()} />
                </div>
             )}
          </div>

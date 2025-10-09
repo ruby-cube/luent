@@ -64,6 +64,7 @@ import { For } from '../../../packages/lumo/src/iteratives/For';
 import { DateApp } from './demos/DateApp';
 import { installIonizedDate } from '../../../packages/quarky/src/ionized/IonizedDate';
 import { TestMultisetting } from './demos/TestMultisetting';
+import { TestStreamIon } from './TestStreamIon';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -89,7 +90,7 @@ import { TestMultisetting } from './demos/TestMultisetting';
 
 
 installIonizedDate()
-const app = createApp(TodoMVC)
+const app = createApp(TestStreamIon)
 
 app.mount('#app')
 
