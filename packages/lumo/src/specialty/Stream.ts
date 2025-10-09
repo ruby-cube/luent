@@ -50,29 +50,29 @@ type StreamIon<T> = {
    // resume
 } & Stream
 
-type TimerDef<T = any> = {
-   '@pre'?: (this: T, context: StreamContext) => void,
+type TimerDef<T = any, C = any> = {
+   '@pre'?: (this: T, context: C & StreamContext) => void,
    delay?: number,
-   while?: (this: T, context: StreamContext) => boolean,
-   run(this: T, context: StreamContext): void
+   while?: (this: T, context: C & StreamContext) => boolean,
+   run(this: T, context: C & StreamContext): void
    interval: number | 'frame'
    x?: number
-   doWhile?: (this: T, context: StreamContext) => boolean,
-   '@post'?: (this: T, context: StreamContext) => void
+   doWhile?: (this: T, context: C & StreamContext) => boolean,
+   '@post'?: (this: T, context: C & StreamContext) => void
 }
 
-interface Def<T> {
+interface Def<T, C> {
    // service?: boolean,
-   timer: TimerDef<T> | TimerDef<T>[],
+   timer: TimerDef<T, C> | TimerDef<T, C>[],
+   context?: C & AnyObject
 }
 
-interface StreamDef<T> extends Def<T> {
+interface StreamDef<T, C> extends Def<T, C> {
    this: T
 }
 
-interface StreamIonDef<T, C, P> extends Def<StreamIon<T> & P> {
+interface StreamIonDef<T, C, P> extends Def<StreamIon<T> & P, C> {
    value: T,
-   context?: C & AnyObject
 }
 
 type Proto = {
@@ -160,25 +160,25 @@ export function StreamIon<T, C, P>(def: StreamIonDef<T, C, P>, proto?: P & ThisT
    if (proto && 'start' in proto) throw new Error('[INVALID INPUT] StreamIons cannot be assigned a start method. Did you mean `@start`?')
    if (proto && 'stop' in proto) throw new Error('[INVALID INPUT] StreamIons cannot be assigned a start method. Did you mean `@end`?')
 
-   const state: StreamContext = { ...context, x: 0, timerIndex: 0 }
+   const state: StreamContext = { ...context, timer: {x: 1, index: 0} }
 
    const streamMethods = {
       start() {
-         state.x = 0
-         state.timerIndex = 0
+         state.timer.x = 1
+         state.timer.index = 0
          return start()
       },
       stop() {
          stop()
-         state.timerIndex = null
+         state.timer.index = null
       }
    }
 
    const prototype = proto ? Object.assign(proto, streamMethods) : streamMethods //TODO: make a clone instead?
 
    const $state = Ion(value as Primitive, prototype)
-
-   const { start, stop } = setUpTimers(normalizeToArray(timer), $state, state)
+const tims = normalizeToArray(timer)
+   const { start, stop } = setUpTimers(tims, $state, state)
 
    return $state as unknown as T extends Function ? never : StreamIon<T> & P
 }
@@ -202,7 +202,7 @@ export function StreamIon<T, C, P>(def: StreamIonDef<T, C, P>, proto?: P & ThisT
 // }
 
 
-type StreamContext = AnyObject & { x: number, timerIndex: number | null }
+type StreamContext = { timer: { x: number, index: number | null } }
 
 type Timer = {
    start(): void
@@ -225,7 +225,7 @@ function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamConte
    }
 
    function stop() {
-      const index = context.timerIndex
+      const index = context.timer.index
       if (index != null) {
          activeTimers[index].stop()
       }
@@ -239,11 +239,11 @@ function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamConte
 
    function conclude() {
       done();
-      context.timerIndex = null
+      context.timer.index = null
    }
 
    function next() {
-      const index = context.timerIndex
+      const index = context.timer.index
       if (index != null) {
          const timer = activeTimers[index + 1]
          if (timer) return timer;
@@ -256,11 +256,12 @@ function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamConte
 
    for (let i = 0; i < timers.length; i++) {
       const timer = timers[i]
-      timer.x = timer.x ?? 1
-      const { interval, doWhile, while: onlyWhile, x: maxTimes } = timer
+      const checksConditions = timer.doWhile || timer.while
+      timer.x = timer.x ?? (checksConditions ? Infinity : 1)
+      const { interval, x: maxTimes } = timer
       const setUpTimer = interval === 'frame'
          ? setUpAnimation
-         : maxTimes > 1 || doWhile || onlyWhile
+         : maxTimes > 1 || checksConditions
             ? setUpInterval
             : setUpTimeout
 
@@ -275,7 +276,7 @@ function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamConte
 
 
 function setUpAnimation(timer: TimerDef, entity: AnyObject, context: StreamContext, stop: () => void, next: () => Timer | undefined) {
-   const { interval, run, "@pre": atPre, "@post": atPost, while: onlyWhile, doWhile } = timer
+   const { interval, run, "@pre": atPre, "@post": atPost, while: precondition, doWhile: postcondition } = timer
    if (interval !== 'frame') throw new Error('[INVALID INPUT]')
    let id: number;
 
@@ -283,20 +284,20 @@ function setUpAnimation(timer: TimerDef, entity: AnyObject, context: StreamConte
    id = requestAnimationFrame(runFrame)
 
    function runFrame() {
-      if (onlyWhile && !onlyWhile.apply(entity, [context])) {
+      if (precondition && !precondition.apply(entity, [context])) {
          stop();
          next()?.start()
          return;
       }
       run.apply(entity, [context])
-      if (context.x === timer.x || doWhile && !doWhile.apply(entity, [context])) {
+      if (context.timer.x === timer.x || postcondition && !postcondition.apply(entity, [context])) {
          atPost?.apply(entity, [context])
          stop()
          next()?.start()
          return;
       }
       else {
-         context.x++
+         context.timer.x++
          id = requestAnimationFrame(runFrame)
       }
    }
@@ -305,25 +306,24 @@ function setUpAnimation(timer: TimerDef, entity: AnyObject, context: StreamConte
 }
 
 function setUpInterval(timer: TimerDef, entity: AnyObject, context: StreamContext, stop: () => void, next: () => Timer | undefined) {
-   const { interval, run, "@pre": atPre, "@post": atPost, while: onlyWhile, doWhile } = timer
+   const { interval, run, "@pre": atPre, "@post": atPost, while: precondition, doWhile: postcondition } = timer
    if (interval === 'frame') throw new Error('[INVALID INPUT]')
    atPre?.apply(entity, [context])
    const id = setInterval(() => {
-      // if (context.x === 1)
-      if (onlyWhile && !onlyWhile.apply(entity, [context])) {
+      if (precondition && !precondition.apply(entity, [context])) {
          stop();
          next()?.start()
          return;
       }
       run.apply(entity, [context])
-      if (context.x === timer.x || doWhile && !doWhile.apply(entity, [context])) {
+      if (context.timer.x === timer.x || postcondition && !postcondition.apply(entity, [context])) {
          atPost?.apply(entity, [context])
          stop()
          next()?.start()
          return;
       }
       else {
-         context.x++
+         context.timer.x++
       }
    }, interval)
    return () => id
@@ -357,7 +357,7 @@ function createTimer(timer: TimerDef, setUpTimer: SetUpTimer, entity: AnyObject,
 
    return {
       start() {
-         context.timerIndex = index;
+         context.timer.index = index;
          if (delay) {
             id = setTimeout(() => {
                $id = setUpTimer(timer, entity, context, stop, next)

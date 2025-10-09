@@ -4,13 +4,12 @@ import { Ion } from "@rue/quarky";
 
 export function TestStreamIon() {
 
-
-   const $bugEye = StreamIon({
+   const $bugeye = StreamIon({
       value: false,
       timer: {
          '@pre'() { this.value = true },
          interval: 500,
-         run() { this.value = !this.value },
+         run(o) { console.log('times', o.timer.x), this.value = !this.value },
          x: 4,
          '@post'() { this.value = false }
       }
@@ -38,10 +37,10 @@ export function TestStreamIon() {
       }
    })
 
-   const animation = concatStreams([mergeStreams([$side, $running]), $bugEye])
+   const animation = concatStreams([mergeStreams([$side, $running]), $bugeye])
 
    const $frame = Ion(() =>
-      $bugEye()
+      $bugeye()
          ? 2
          : $running()
             ? $running()
