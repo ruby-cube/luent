@@ -64,6 +64,10 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             
             flask.emitInitialMount()
          }
+         // catch(err){
+         //    if (err === 'stream cancelled') console.log('stream cancelled')
+         //    else throw err
+         // }
          finally {
             flaskStack.pop()
             popUpdate()

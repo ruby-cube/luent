@@ -65,6 +65,8 @@ import { DateApp } from './demos/DateApp';
 import { installIonizedDate } from '../../../packages/quarky/src/ionized/IonizedDate';
 import { TestMultisetting } from './demos/TestMultisetting';
 import { TestStreamIon } from './TestStreamIon';
+import { TestVanillaStream } from './TestStream-await';
+import { TestSearchDebounce } from './TestSearchDebounce';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -90,7 +92,7 @@ import { TestStreamIon } from './TestStreamIon';
 
 
 installIonizedDate()
-const app = createApp(TestStreamIon)
+const app = createApp(TestSearchDebounce)
 
 app.mount('#app')
 

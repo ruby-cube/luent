@@ -29,7 +29,7 @@ export type Suspense<T> = {
    // cancel(): void
    // onCancel(task: () => void): void
 }
-export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
+export type SuspenseIon<T> = MutableIon<T> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
 export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
@@ -58,7 +58,8 @@ export function isPending(ion: SuspenseIon<unknown>) {
 }
 
 type SuspenseIonOptions = {
-   awaited: true | 'load'
+   awaited?: true | 'load',
+   debounced?: number
 }
 
 export function SuspenseIon<
@@ -98,20 +99,42 @@ export function SuspenseIon<
       error: null as null | Error,
    })
 
-   queueIonicTask(() => {
-      const promise = $promise.value = input($ion as SuspenseIon<T>);
+   const debounce = Debouncer()
 
-      promise
-         .then(value => {
-            $ion.value = value
-            $promise.value = null;
-         })
-         .catch(err => {
-            $ion.error = toError(err)
-            $promise.value = null;
-            throw err;
-         })
-   }, { phase: SYNC })
+   if (options?.debounced) {
+      debounce(options.debounced, () => {
+         queueIonicTask(() => {
+            const promise = $promise.value = input($ion as SuspenseIon<T>);
+
+            promise
+               .then(value => {
+                  $ion.value = value
+                  $promise.value = null;
+               })
+               .catch(err => {
+                  $ion.error = toError(err)
+                  $promise.value = null;
+                  throw err;
+               })
+         }, { phase: SYNC })
+      })
+   }
+   else {
+      queueIonicTask(() => {
+         const promise = $promise.value = input($ion as SuspenseIon<T>);
+
+         promise
+            .then(value => {
+               $ion.value = value
+               $promise.value = null;
+            })
+            .catch(err => {
+               $ion.error = toError(err)
+               $promise.value = null;
+               throw err;
+            })
+      }, { phase: SYNC })
+   }
 
    if (options?.awaited) {
       const promise = $promise()
@@ -132,3 +155,15 @@ function isSuspenseIon(value: unknown): value is SuspenseIon<unknown> {
    return isFunction(value) && SUSPENSE_ION in value;
 }
 
+function Debouncer() {
+   let id: NodeJS.Timeout;
+   return function debounce<T>(ms: number, fn: () => T): Promise<T> {
+      if (id)
+         clearTimeout(id)
+      return new Promise<T>(resolve => {
+         id = setTimeout(() => {
+            resolve(fn())
+         }, ms)
+      })
+   }
+}
