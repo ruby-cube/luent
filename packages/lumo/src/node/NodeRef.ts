@@ -13,7 +13,7 @@ type RefSource = HTMLTag | ((...args: any[]) => Component)
 export type NodeReferent<
    T extends RefSource = RefSource
 > =
-   T extends HTMLTag ? HTMLElementTagNameMap[T] : //TODO: SVGs and Math elements
+   T extends HTMLTag ? HTMLElementTagNameMap[T] : // TODO: SVGs and Math elements
    T extends (...args: any[]) => infer R ?
    R extends Component<infer I> ?
    I extends PublicComponent ? I
@@ -75,7 +75,7 @@ export function NodeRef<
          ref.value = [] // clear nodes
       })
 
-      //TODO: there has to be a better way T_T
+      // TODO: there has to be a better way T_T
       if (isSettingUpList()) {
          onBeforeListUpdate(() => {
             ref.prepUpdate();

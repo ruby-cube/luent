@@ -51,7 +51,7 @@ class LazyEffectCyclePhase {
 
 }
 
-const interval = 1000 / 60; // ~16.67ms for 60Hz //TODO: what if user has a different frame rate
+const interval = 1000 / 60; // ~16.67ms for 60Hz // TODO: what if user has a different frame rate
 let frameTrackerActive = false;
 let timeLeft = interval;
 

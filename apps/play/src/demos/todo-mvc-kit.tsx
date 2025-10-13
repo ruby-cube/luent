@@ -42,7 +42,7 @@ type $$$<T extends object> = Ion<Ionized<T>>
 type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 
-//TODO:
+// TODO:
 // const frog = Ionized({
 //    name: absorb($name),
 //    canvas: inert(null)
@@ -270,7 +270,7 @@ function TodoAppKit(todos: Todo[]) {
 type FromAbove<T> = T extends CommonsEntryKey<infer I> ? I : never
 
 
-//TODO: fromGlobal (checks appwide first then global) only (no fromApp), provideGlobal, and provideAppwide
+// TODO: fromGlobal (checks appwide first then global) only (no fromApp), provideGlobal, and provideAppwide
 
 const USE_TODO_APP = CommonsKey<typeof TodoAppKit>('useTodoApp')
 

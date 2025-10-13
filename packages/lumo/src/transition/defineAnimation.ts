@@ -73,7 +73,7 @@ function mountKeyframes(name: string, keyframes: Keyframes | string) {
     }
     const style = getTransitionStylesheet() ?? createTransitionStyleSheet()
     const keyframesCSS = compileKeyframes(keyframes)
-    const keyframesID = name; //TODO: manage namespace collisions
+    const keyframesID = name; // TODO: manage namespace collisions
     style.insertRule(`@keyframes ${keyframesID} { ${keyframesCSS} }`, style.cssRules.length)
     return keyframesID;
 }
@@ -81,5 +81,5 @@ function mountKeyframes(name: string, keyframes: Keyframes | string) {
 //NOTE: Potentially we can use build-time optimizations to pre-compile the animation/transition def to a css`` template literal. 
 // Test if it would actually boost performance first.
 function compileKeyframes(keyframes: Keyframes) {
-    //TODO:
+    // TODO:
 }

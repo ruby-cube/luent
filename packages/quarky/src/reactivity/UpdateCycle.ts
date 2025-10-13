@@ -104,7 +104,7 @@ export class Update {
       commitUpdate.__DEVName = 'commitUpdate'
       const effect = createOneoff(commitUpdate, this.cycle.phases.length - 1)
       this.cycle.scheduleEffect(effect)
-      // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) //TODO: Make sure we don't need this line
+      // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) // TODO: Make sure we don't need this line
       this.commits.push(effect)
    }
 
@@ -149,7 +149,7 @@ export class UpdateCycle {
          this.currentPhase = index;
          this.subphase = 'effects'
          pushUpdate(this.update) // from module
-         const running = this.runEffects(index) //TODO: returns promise for async effects, must coordinate with pendingPreupdate
+         const running = this.runEffects(index) // TODO: returns promise for async effects, must coordinate with pendingPreupdate
          this.subphase = 'microtasks'
          popUpdate() // from module
 
@@ -261,7 +261,7 @@ export const queueTask = setImmediate;
 export function useUpdateCycleScheduler(phase: Phase) {
    return (task: () => void, options?: SchedulerOptions) => {
       const cycle = $currentCycle()
-      return $schedule(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
+      return $schedule(task, options ?? {}, { // TODO: potentially get rid of $listen depending on typical usage
          enroll(task) {
             const effect = new Effect(task, phase)
             cycle.scheduleEffect(effect)
@@ -301,7 +301,7 @@ export function $currentCycle() {
    return initUpdate().cycle
 }
 
-export function getDefaultPhase() { //TODO: should be configured
+export function getDefaultPhase() { // TODO: should be configured
    const currentPhase = getCurrentPhase()
    if (currentPhase !== SYNC) return currentPhase
    return _defaultPhase;
@@ -324,7 +324,7 @@ export function maybePostcycleTask(task: Task, phase: Phase) {
 }
 
 export function postcycleTask(task: Task) {
-   function delayed() { //TODO: need to cancel with action
+   function delayed() { // TODO: need to cancel with action
       const id = requestIdleCallback(task, { timeout: 18 })
       // $action().onCancel(()=>cancelIdleCallback(id))
    }
@@ -349,7 +349,7 @@ export function initUpdate(timeMargin: number = 0, lazy: boolean = false) {
 
 
 
-//TODO: return type should be based on options--whether it's lazy
+// TODO: return type should be based on options--whether it's lazy
 export function update<T, OPT>(fn: () => T, options?: { timeMargin?: number, lazy?: number }): Promise<T> | T {
    const timeMargin = options?.lazy ?? options?.timeMargin ?? 100;
    const update = initUpdate(timeMargin, !!(options?.lazy)) //FIX: because Interval wraps context, the loading update is passed down

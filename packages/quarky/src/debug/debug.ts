@@ -31,7 +31,7 @@ function isReactive<T>(maybeHasSignal: T): maybeHasSignal is T & Function {
    console.warn('Using `isReactive` on a function with unknown side effects can cause bugs. To avoid unknown side-effects, never use isReactive() in production. Instead use `isIon` to check for reactivity and pass any impromptu getters into the $ function. `isReactive` is only to check if you have a wrapped signal')
    _isSignal = false;
    try {
-      detachedCall(maybeHasSignal) //TODO: what if function has async code?
+      detachedCall(maybeHasSignal) // TODO: what if function has async code?
    }
    finally {
       if (_isSignal) {
@@ -63,7 +63,7 @@ export function __DEV__trace(type: string, label: string | undefined, origin: st
 // type Traceable = AnyObject | Ion;
 
 
-//TODO:
+// TODO:
 // debug.logDefinitionSource($count)
 // debug.traceTriggers('# animation', animation, { 
 //    canvas: true 
@@ -76,7 +76,7 @@ export const debug = {
    // traceCalls,
 
    logAtoms, // deeply? or shallowly?
-   // logDefinitionSource, //TODO:
+   // logDefinitionSource, // TODO:
    // traceable, // for tracing plain objects
 
    traceAsyncPath,
@@ -115,7 +115,7 @@ function logAtoms(entity: { [QUARK]: CompoundMorph }, label: string) {
 //    }
 //    const quark = quarkOf(model)
 //    quark.trackAbsorbedIons()
-//    //TODO: need to identify and log property keys
+//    // TODO: need to identify and log property keys
 // }
 
 function _logAtoms(atoms: Set<Watchable>) {
@@ -206,7 +206,7 @@ function logAtom(atom: TraceableQuark) {
 // }
 
 // function traceDerivationTriggers(subject: () => any) {
-//    //TODO: see watch/debug.ts
+//    // TODO: see watch/debug.ts
 // }
 
 export type TraceableQuark = {

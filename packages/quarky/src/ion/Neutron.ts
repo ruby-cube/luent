@@ -11,13 +11,13 @@ export function neutron<T, M>(initialState: T, props?: M & object): MutableIon<T
 }
 
 
-//TODO: I don't know how I should handle read-only, and traceability for neutrons.
+// TODO: I don't know how I should handle read-only, and traceability for neutrons.
 /** INTERNAL */
 export type $AtomicNeutronState = MutableIon<unknown> & Capsule & {
    [QUARK]: {
       inert: true;
       value: any,
-      ionized: boolean, //TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
+      ionized: boolean, // TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
    } & Quark<typeof INERT_ION, $AtomicNeutronState>
 }
 

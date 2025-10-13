@@ -34,7 +34,7 @@ export function getTrace() {
    }
 }
 
-const libraryPaths = ['/packages/'] //TODO: make this configurable
+const libraryPaths = ['/packages/'] // TODO: make this configurable
 
 
 export function getPublicTrace(){

@@ -12,7 +12,7 @@ import { AtomicIonQuark } from "../ion/AtomicIon"
 
 export type Constructor = new (...args: any[]) => any
 
-//TODO: if you don't provide a clone method, you cannot update lazily
+// TODO: if you don't provide a clone method, you cannot update lazily
 
 export const MemberType = {
    TRACKABLE: 0,
@@ -134,7 +134,7 @@ class TriggerableModel {
    }
 
    trigger() {
-      this.quark.trigger(this.update) //TODO: only trigger if watched? but what about preventing overlapping mutations?
+      this.quark.trigger(this.update) // TODO: only trigger if watched? but what about preventing overlapping mutations?
    }
 
    // triggerProperty(key: PropertyKey) {
@@ -207,7 +207,7 @@ export type IonizedMethodsDef = {
 //       trigger(model),
 //       trigger(model, '[[get]]', key as PropertyKey)
 //    ],
-//    // output: (o) => maybeIonize(o), //TODO: this is tricky if encapsulation is involved ... you need to pass the parent quark to know what kind of ionization to do
+//    // output: (o) => maybeIonize(o), // TODO: this is tricky if encapsulation is involved ... you need to pass the parent quark to know what kind of ionization to do
 //    revert: (model, { preopData: { key, oldState } }) => {
 //       model[key] = oldState //QUESTION: When reverting, should we revert on the ionized model or the raw target?
 //    }

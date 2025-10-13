@@ -45,7 +45,7 @@ class SpreadKit {
             const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
             let clone = createClone(data, _data)
             // let clone = isIon(data) && isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined
-            //TODO: figure out typing for Set, Map, Object vs Array
+            // TODO: figure out typing for Set, Map, Object vs Array
             let recording = isIonizedModel(_data) ? recordMutations(_data) : undefined
    
    
@@ -62,7 +62,7 @@ class SpreadKit {
                // if (recording && current === previous){
                //    recording.stop()
                //    console.log('updating list via MUTATIONS')
-               //    //TODO: this.applyMutations(recording.mutations)
+               //    // TODO: this.applyMutations(recording.mutations)
                //    recording = recordMutations(_data)
                //    return;
                // }
@@ -70,7 +70,7 @@ class SpreadKit {
                clone = createClone(data, current)
                // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
                const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
-               if (noChange) { //TODO: should we use hasChanged function in watch options instead?
+               if (noChange) { // TODO: should we use hasChanged function in watch options instead?
                   return;
                }
                if (dynamicNodePod!.length !== _prevState.length)
@@ -100,7 +100,7 @@ class SpreadKit {
       ) {
          const data = toValue(this.data);
          const $list  = toIon(this.data);
-         const list = data instanceof Array ? data : data //TODO: need to implement for sets, maps, and objects
+         const list = data instanceof Array ? data : data // TODO: need to implement for sets, maps, and objects
          const listKit = this;
          const isDynamic = this.isDynamic;
          const dynamicNodePod = this.dynamicNodePod!;

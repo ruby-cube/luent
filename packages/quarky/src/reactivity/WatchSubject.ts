@@ -34,7 +34,7 @@ export function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjec
 }
 
 function asSingleWatchSubject(subject: Ionized<object> | Ion<any> | AnyObject, retrack: boolean, once: boolean) {
-   //TODO: do not retrack if effect runs once
+   // TODO: do not retrack if effect runs once
    return isIonizedModel(subject) ? new IonizedModelSubject(subject)
       : isFunction(subject) ? new IonSubject(subject)
          // : isGetter(subject) ? new IonSubject(createWatchedDerivation(subject, !!retrack))
@@ -123,11 +123,11 @@ class IonizedModelSubject extends Compound implements WatchSubject {
       super()
       const modelQuark = quarkOf(model)
       this.atoms.push(modelQuark)
-      this.trackAbsorbedIons() //TODO: if absorbed ions can be reassigned, we need to retrack
+      this.trackAbsorbedIons() // TODO: if absorbed ions can be reassigned, we need to retrack
    }
 
    trackedCall() {
-      //TODO: retrack pions??
+      // TODO: retrack pions??
       return this.model
    }
 
@@ -151,13 +151,13 @@ function trackPions(model: IonizedModel) {
    const keys = Reflect.ownKeys(target)
    for (const key of keys) {
       const value = target[key]
-      //TODO: what about methods?
+      // TODO: what about methods?
       if (isIon(value)) {
          if (isWatchableEntity(value)) {
             compound.track(quarkOf(value))
          }
          else {
-            //TODO: collect the absorbed ions of derivations and memoized ions
+            // TODO: collect the absorbed ions of derivations and memoized ions
          }
       }
       else {

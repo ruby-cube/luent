@@ -92,7 +92,7 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 
 
 installIonizedDate()
-const app = createApp(MountIf)
+const app = createApp(List)
 
 app.mount('#app')
 

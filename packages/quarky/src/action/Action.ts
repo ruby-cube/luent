@@ -14,7 +14,7 @@ requestIdleCallback(()=>{
 
 // Actions may span mulitple effect cycles
 
-//TODO: figure out how to distinguish between state that should rollback vs state that shouldn't
+// TODO: figure out how to distinguish between state that should rollback vs state that shouldn't
 // - is this something defined when an atomic ion or ionized model is created?
 // - OR is this something defined when creating an action?
 // - OR is this defined DURING mutation?
@@ -34,7 +34,7 @@ requestIdleCallback(()=>{
 *    }
 * })
 * 
-* __DEV__label(INSERT_TEXT, 'insert text') //TODO:
+* __DEV__label(INSERT_TEXT, 'insert text') // TODO:
 *
 * const output = doAction(INSERT_TEXT, [document, word, index]) 
 * 
@@ -61,10 +61,10 @@ class InternalAction {
    mutations: Mutation[] = []
 
    // snapshot(target: MutableEntity, deep: boolean) {
-   //    if (!hasQuark(target)) return false; //TODO: or, if it is a plain object, we can do the clone method instead of mutations. What about derivations from neutrons?
+   //    if (!hasQuark(target)) return false; // TODO: or, if it is a plain object, we can do the clone method instead of mutations. What about derivations from neutrons?
    //    if (deep) {
    //       storeMutations(this, <MutableEntity>target)
-   //       //TODO: What about arrays, or arrays with properties on them, or tuples?
+   //       // TODO: What about arrays, or arrays with properties on them, or tuples?
    //       for (const key in target) {
    //          const value = (<AnyObject>target)[key]
    //          if (isMutableEntity(value)) {
@@ -191,7 +191,7 @@ function useAction<T extends (action: Action) => BoundActionFn>(createActionFn: 
       return actionFn
    }
 
-   //TODO: provide from global if createActionFn not provided
+   // TODO: provide from global if createActionFn not provided
    return [makeActionFn, action]
 }
 
@@ -219,7 +219,7 @@ type ActionOptions = {
 }
 
 export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOptions): T {
-   //TODO: onOverlap
+   // TODO: onOverlap
    if (action.length === 0) throw new Error('Action cannot not be a method that mutates state via this or closure. Any state to be mutated by actions must be explicitly passed in as an argument')
    const action = 'actionFn' in actionFn ? actionFn.action as Action : ionize(new Action())
    const outerAction = getCurrentAction()
@@ -245,7 +245,7 @@ export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOpt
             .then(() => {
                if (action.status === 'canceled') return;
                action[INTERNAL].emitDone() // will run effects
-               await action[INTERNAL].rendered //TODO: I dunno how this should work
+               await action[INTERNAL].rendered // TODO: I dunno how this should work
                metaaction(() => {
                   action.settled = true;
                   action.pending = false;

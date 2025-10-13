@@ -34,7 +34,7 @@ export const {
 export const queuePrerenderTask = useUpdateCycleScheduler(PRERENDER)
 
 
-export function queueInternalRenderTask(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
+export function queueInternalRenderTask(fn: () => void, flask: Flask) { // TODO: needs to be able to be cancelled if action is cancelled
    if (getCurrentPhase() === INTERNAL_RENDER) {
       fn()
       return;
@@ -45,7 +45,7 @@ export function queueInternalRenderTask(fn: () => void, flask: Flask) { //TODO: 
    // console.log('schedule qIR', fn)
    $activeUpdate().cycle.scheduleEffect(effect)
 
-   // flask?.onDiscard(() => { //TODO: need a better solution to this
+   // flask?.onDiscard(() => { // TODO: need a better solution to this
    //    console.log('!!!!!!OHHH NOOOOOO')
    //    effect.destroy()
    // })
@@ -152,7 +152,7 @@ export const queuePostrenderTask = (task: () => void) => {
 //       await postlude({ cancel: onAbort })
 //       column.width = width;
 //    })
-// }) //TODO: { sync: true } with batched as default, no phases. Phases will be the responsibility of the ui framework
+// }) // TODO: { sync: true } with batched as default, no phases. Phases will be the responsibility of the ui framework
 
 // watch($active).beforeRender(() => {
 //    const { width } = measureWidth()
@@ -301,7 +301,7 @@ export const RUN_EAGERLY = true;
 
 // }, { phase: RENDER })
 
-// //TODO: figure out updating ui vs updating database, e.g. animating drag, then posting final position to db
+// // TODO: figure out updating ui vs updating database, e.g. animating drag, then posting final position to db
 
 // function reMouseDown() {
 //    listen('mousemove', e => {

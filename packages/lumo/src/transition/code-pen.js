@@ -200,7 +200,7 @@ function pauseAnimation() {
 //     divIO.style.opacity = o;
 
 function computeTransitionalState(duration, elapsedTime, initialState, finalState, easing) {
-    //TODO: incorporate easing into computation
+    // TODO: incorporate easing into computation
     const percentage = elapsedTime / duration;
     return (finalState - initialState) * percentage + initialState;
 }

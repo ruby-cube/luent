@@ -115,7 +115,7 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [At
  * ```
  * 
  * 
- * //TODO: what should happen when you pass an ion as the initial state?
+ * // TODO: what should happen when you pass an ion as the initial state?
  * 
  * @param initialState or pure getter for derivations
  * @param methods optional
@@ -164,8 +164,8 @@ ion.ionize = createIonizedIon
 function createIonizedIon<
    T,
    M
->(initialState: T, options?: IonizeOptions & { set?: Function, get?: Function }): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> { //TODO: inert marks
-   return asIon(initialState, IONIZED, options) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> //TODO: add inert marks
+>(initialState: T, options?: IonizeOptions & { set?: Function, get?: Function }): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> { // TODO: inert marks
+   return asIon(initialState, IONIZED, options) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> // TODO: add inert marks
 }
 
 // function createDeepMutableIonizedIon<

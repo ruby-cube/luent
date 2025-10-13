@@ -32,7 +32,7 @@ interface Todo {
 type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 
-//TODO:
+// TODO:
 // const frog = Ionized({
 //    name: absorb($name),
 //    canvas: inert(null)

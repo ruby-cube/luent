@@ -12,7 +12,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
     Placeholder?: ComponentSetup,
     timeout?: number,
     Error?: ComponentSetup<{ error: any }>,
-}) { //TODO: Idle load priorities
+}) { // TODO: Idle load priorities
     const { load, Error, Placeholder, timeout, onIdle } = config;
     const $loading = ion(true);
     const $error = ion("");
@@ -49,7 +49,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
                     $loaded.value = true
                 })
                 .catch(err => {
-                    $error.value = err; //TODO: Normalize error type
+                    $error.value = err; // TODO: Normalize error type
                     $loading.value = false
                 })
         }

@@ -102,7 +102,7 @@ console.log('name:', frog.name)
 
 -----
 
-//TODO: Arrays need to have pArray.. array items cannot be getters and setters, they need to be deleted
+// TODO: Arrays need to have pArray.. array items cannot be getters and setters, they need to be deleted
 let initArray = [1, 2, 3] // make sure initArray doesn't get stuck in memory. set to null after finish initializing and don't use in closures
 
 const indexArray = [$0, $1, $2] // this array will continue to grow .. maybe use atomicOp instead, where they are only created if explicitly watched?

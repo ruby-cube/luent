@@ -51,7 +51,7 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For([...cells[0]], (_, row) => (//TODO: allow numbers as input for For()
+               {For([...cells[0]], (_, row) => (// TODO: allow numbers as input for For()
                   <tr>
                      <th>{row}</th>
                      {For(cols, (_, col) =>

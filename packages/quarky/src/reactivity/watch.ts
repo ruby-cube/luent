@@ -74,8 +74,8 @@ type SubjectValue<T> = T extends () => infer R ? R : T
 export class StateChangeEvent<S = unknown> {
    // trace?: string;
    constructor(
-      public previous: S, //TODO: change to prev
-      public current: S, //TODO: change to current
+      public previous: S, // TODO: change to prev
+      public current: S, // TODO: change to current
       public eager: boolean
    ) { }
 }
@@ -90,7 +90,7 @@ export function watch<
 
    const watchSubject = asWatchSubject(subject, options.retrack, Boolean(options.once))
    if (options?.traceTriggers) {
-      //TODO:
+      // TODO:
    }
 
    if (!isWatchSubject(watchSubject)) { // plain object
@@ -106,7 +106,7 @@ export function watch<
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
-      const newState = watchSubject.trackedCall() // retracking happens here //TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
+      const newState = watchSubject.trackedCall() // retracking happens here // TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;
       }

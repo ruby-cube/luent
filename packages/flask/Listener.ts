@@ -8,7 +8,7 @@ import { AnyObject } from "@rue/types";
 
 type A = { [K in keyof AbortSignal]: AbortSignal[K] }['removeEventListener']
 
-//TODO: make sure abort signal can be used generically and not just for events
+// TODO: make sure abort signal can be used generically and not just for events
 type _AbortSignal = {
    readonly aborted: boolean;
    readonly reason: any;

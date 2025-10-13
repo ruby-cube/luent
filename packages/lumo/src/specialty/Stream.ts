@@ -45,7 +45,7 @@ import { isFunction, noop, normalizeToArray } from "@rue/utils"
  * of asynchronous operations: timeout, interval, animation, promises/suspense
  */
 
-//TODO: { until:} atUnmount
+// TODO: { until:} atUnmount
 
 interface StreamControl {
    start(stream?: PropertyKey): Promise<void>
@@ -102,7 +102,7 @@ interface StreamDef<T, C> {
 //    until: atUnmount
 // })
 
-//TODO: allow normal, both sync and async functions to be chained in concat
+// TODO: allow normal, both sync and async functions to be chained in concat
 // function toStream(start: () => Promise<void>) {
 //    let started = false;
 //    return {
@@ -226,7 +226,7 @@ function repeat(times: number, stream: Stream): ComposedStream {
 }
 
 function pend(suspenseful: Promise<unknown>) {
-   const promise = suspenseful; //TODO: or from suspenseIon
+   const promise = suspenseful; // TODO: or from suspenseIon
    return {
       [AS_STREAM]: {
          start() {
@@ -348,12 +348,12 @@ const AS_STREAM = Symbol('stream') as unknown as '~streams'
 //    return $state as T extends Function ? never : Stream<Ion<T> & P>
 // }
 
-//TODO: Manage multiple stream definitions
+// TODO: Manage multiple stream definitions
 export function asStream<T extends object, C>(def: StreamDef<T, C>) {
    const { stream, context, this: entity } = def;
    const streams = def.streams ?? { default: stream }
 
-   //TODO: hook tasks
+   // TODO: hook tasks
    // const { proto, tasks } = extractHookTasks(protoDef ?? {})
 
 
@@ -385,7 +385,7 @@ export function asStream<T extends object, C>(def: StreamDef<T, C>) {
       }
    }
 
-   const { start, stop } = setUpTimers(normalizeToArray(streams.default), entity, state) //TODO: implement named streams
+   const { start, stop } = setUpTimers(normalizeToArray(streams.default), entity, state) // TODO: implement named streams
 
    return entity
 }
@@ -483,7 +483,7 @@ function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamConte
 
 
 
-//TODO: provide timestamp in context
+// TODO: provide timestamp in context
 
 function setUpAnimation(timer: TimerDef, entity: AnyObject, context: StreamContext, stop: () => void, next: () => Timer | undefined) {
    const { interval, run, "@pre": atPre, "@post": atPost, while: precondition, doWhile: postcondition } = timer

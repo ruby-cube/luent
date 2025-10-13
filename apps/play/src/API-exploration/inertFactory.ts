@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types"
 import { Inert, inert, markInertProps } from "../../../../packages/quarky/src/ionized/inert"
 import { ionize, MARKED, shallow } from "@rue/quarky"
 
-//TODO:
+// TODO:
 // [] input type mark maps
 // [] collections with inert items
 

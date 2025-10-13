@@ -10,7 +10,7 @@ export function target(...args: [...(string | ((x: HTMLElement) => boolean) | $N
          if (matchSelector(targ as HTMLElement, arg))
             return true;
       }
-      // else if (isNodeRef(arg)){ //TODO:
+      // else if (isNodeRef(arg)){ // TODO:
 
       // }
       else if (isFunction(arg) && arg(targ as HTMLElement)) {
@@ -31,11 +31,11 @@ function matchSelector(target: EventTarget & HTMLElement, selector: string): boo
       // style: pattern 'style.propertyCamel:value'
       const [key, value] = selector.slice(6).split(':')
       //@ts-expect-error
-      return target.style[key] === value; //TODO: key toCamelCase
+      return target.style[key] === value; // TODO: key toCamelCase
    }
    else if (selector.startsWith('x-')) {
       // data-attribute
-      // return target.dataset[toCamelCase(selector.slice(2))] === 'true'; //TODO: toCamelCase
+      // return target.dataset[toCamelCase(selector.slice(2))] === 'true'; // TODO: toCamelCase
    }
    else {
       return target.tagName === selector;

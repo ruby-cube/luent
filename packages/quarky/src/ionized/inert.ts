@@ -47,7 +47,7 @@ const inertCollections: WeakMap<AnyObject, InertCollectionType> = new WeakMap()
 // - never ionize an object unless you yourself have instantiate it
 // - if you need an object to be ionized, type it as ionized in the input type so that the parent knows to ionize it on instantiation
 
-//TODO: for inertCollections, inert marking should happen on insert, not on access
+// TODO: for inertCollections, inert marking should happen on insert, not on access
 
 
 

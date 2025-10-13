@@ -122,7 +122,7 @@ export function createTransitionStyleSheet() {
    document.head.appendChild(style)
    const stylesheet = stylesheets.item(index)
    if (!stylesheet) throw new Error(`no stylesheet at this index!`)
-   transitionStylesheet = stylesheet //TODO: replace with provideGlobal(OFFSCREEN_STYLESHEET, stylesheet)
+   transitionStylesheet = stylesheet // TODO: replace with provideGlobal(OFFSCREEN_STYLESHEET, stylesheet)
    return stylesheet;
 }
 
@@ -163,7 +163,7 @@ function compileOffscreenClasses(properties: string[] | { [K in keyof CSSTransit
          classes.push(...parseTransform(properties[key as keyof { transform: string }]))
       }
       else {
-         const value = properties[key as keyof CSSTransitionProperties] //TODO: remove spaces?
+         const value = properties[key as keyof CSSTransitionProperties] // TODO: remove spaces?
          classes.push(key + '-' + value);
       }
    }

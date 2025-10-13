@@ -163,7 +163,7 @@ function CounterKit() {
 
 function ArticleBlock(setup: {
    Slot: (setup: { frog: string }) => any;
-   SlotKit: typeof CounterKit //TODO: auto add ReturnType of SlotKit to setup props
+   SlotKit: typeof CounterKit // TODO: auto add ReturnType of SlotKit to setup props
 }) {
 
 }

@@ -3,7 +3,7 @@ import { atUnmount } from "../flask/flask-hooks";
 
 const genUID = UIDGenerator(11)
 
-//TODO: dynamic styling?
+// TODO: dynamic styling?
 export function Style(strings: TemplateStringsArray, ...values: string[]) {
    const cssText = composeCSSText(strings, values)
    const id = genUID()

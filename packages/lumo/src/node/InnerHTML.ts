@@ -29,7 +29,7 @@ export function mountInnerHTML(htmlString: MaybeIon<any>, parent: DOMParent) {
 
 
 function toString(value: any) {
-   return value.toString(); //TODO: make sure it works with any value
+   return value.toString(); // TODO: make sure it works with any value
 }
 
 export type InnerHTMLKit = { innerHTML: MaybeIon<string> }

@@ -25,7 +25,7 @@ interface Todo {
 type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 
-//TODO:
+// TODO:
 // const frog = Ionized({
 //    name: absorb($name),
 //    canvas: inert(null)
@@ -96,7 +96,7 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 // [X] Can we write kits without rewriting objects? ... no :(
 // [X] How to pass DBKit 
-//TODO: Ionizing with options
+// TODO: Ionizing with options
 
 
 

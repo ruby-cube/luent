@@ -8,7 +8,7 @@ import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/data
 import { FriendApp } from "./components/FriendApp";
 import { getClosestCommons } from "../../../packages/lumo/src/commons/commons-stack";
 
-//TODO: Figure out how to provide user
+// TODO: Figure out how to provide user
 
 // [ ] tabs to open chat window while logged in
 // [ ] new messages notification

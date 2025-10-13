@@ -66,7 +66,7 @@ const count = Ion(0, {
    }
 })
 
-//TODO:
+// TODO:
 // writable derivation
 const $doubleCount = Ion(() => $count() * 2, {
    '@set'(num: number) {
@@ -74,7 +74,7 @@ const $doubleCount = Ion(() => $count() * 2, {
    }
 })
 
-//TODO:
+// TODO:
 // overwritable derivation
 const $doubleCount = Ion(() => $count() * 2, {
    '@set'(num: number) {
@@ -95,7 +95,7 @@ const list = Ionize([], {
 debug.logAtoms($doubleCount)
 
 
-//TODO: Identity hazards
+// TODO: Identity hazards
 
 
 const itemA = new Item()

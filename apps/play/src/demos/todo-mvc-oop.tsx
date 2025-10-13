@@ -256,7 +256,7 @@ function TodoList(input: FromTag<{
    )
 }
 
-type Ctx<T> = T //TODO: this should allow ionized object to be destructured, toIons
+type Ctx<T> = T // TODO: this should allow ionized object to be destructured, toIons
 
 function CheckBox(input: FromTag<{
    'can:toggleAll': IonicTodoApp['toggleAll']

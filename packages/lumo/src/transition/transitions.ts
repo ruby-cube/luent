@@ -28,7 +28,7 @@ function fly(
 ): TransitionConfig;
 */
 
-//TODO: concatentate transform values so original is not overwritten
+// TODO: concatentate transform values so original is not overwritten
 
 
 export const fade = defineTransition(

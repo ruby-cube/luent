@@ -2,7 +2,7 @@ import { component, EventHandler, For, fromCommons, FromTag, HandleEvent,} from 
 import { inert, ion, Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
-//TODO:
+// TODO:
 // [] ion() as Ion<Inert<>>
 // [] ion.ionize() in ionized models proxy ion access
 // [] type fromTag<T>() ---> input
@@ -59,7 +59,7 @@ export function RoboFriendsApp() {
 export function RoboList(input : FromTag<{
    robots: Ion<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
 }>) {
-   const { $robots } = input; //TODO: type input such that $robots is defined
+   const { $robots } = input; // TODO: type input such that $robots is defined
 
    return component(
       <div class='robo-list'>

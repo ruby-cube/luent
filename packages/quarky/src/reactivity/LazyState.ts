@@ -44,7 +44,7 @@ class LazyState<T> implements ILazyState {
       this._pending = value;
    }
 
-   commitChange() { //TODO: record mutation here?
+   commitChange() { // TODO: record mutation here?
       if (this._pending === NULL) return;
       this.current = this._pending;
       this._pending = NULL;
@@ -58,9 +58,9 @@ class LazyState<T> implements ILazyState {
 
    // recordChange(newState: unknown, oldState: unknown) {
    //    // recordMutation(this.asMutable, new Mutation(
-   //    //    this, //TODO: figure out what to pass here
+   //    //    this, // TODO: figure out what to pass here
    //    //    '[[set]]',
-   //    //    ['value', newState], //TODO: should the key be 'current' ?
+   //    //    ['value', newState], // TODO: should the key be 'current' ?
    //    //    newState,
    //    //    oldState
    //    // ))
@@ -145,7 +145,7 @@ export class PionState implements ILazyState {
 
    // recordChange(newState: unknown, oldState: unknown) {
    //    // recordMutation(this.asMutable, new Mutation(
-   //    //    this.entity, //TODO: figure out what to pass here
+   //    //    this.entity, // TODO: figure out what to pass here
    //    //    '[[set]]',
    //    //    [this.key, newState],
    //    //    newState,

@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 type TypedKey<T> = (string | symbol) & T
 
 type DispatchConfig = {
-    GET?: (specifiers?: AnyObject) => Promise<any> //TODO: understand specifiers
+    GET?: (specifiers?: AnyObject) => Promise<any> // TODO: understand specifiers
     PATCH?: (patch: AnyObject, specifiers?: AnyObject) => Promise<unknown>
     PUT?: (value: any, specifiers?: AnyObject) => Promise<unknown>
     POST?: (value: any, specifiers?: AnyObject) => Promise<unknown>
@@ -12,7 +12,7 @@ type DispatchConfig = {
 
 const dispatchMap: Map<TypedKey<unknown>, DispatchConfig> = new Map()
 
-export function defineDispatch(key: TypedKey<any>, config: DispatchConfig) { //TODO: lazy define and clean up on unmounted (count subscribers and unmount on last unmount)
+export function defineDispatch(key: TypedKey<any>, config: DispatchConfig) { // TODO: lazy define and clean up on unmounted (count subscribers and unmount on last unmount)
     if (dispatchMap.get(key)) {
         if (__DEV__) throw new Error("Dispatch already defined for this key")
         return;

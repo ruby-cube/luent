@@ -17,12 +17,12 @@ import { getIonizedModel } from "./IonizedModel";
 // class TimeTraveler {
 //    private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
 //    takeSnapshot(original: AnyObject, index: number, clone: undefined | AnyObject) {
-//       return; //TODO: temporarily disable
+//       return; // TODO: temporarily disable
 //       const snapshotMap = this.snapshotMap;
 //       const snapshot = new Proxy(clone ? clone : shallowClone(original), {
 //          get(target, key, receiver) {
 //             const value = Reflect.get(target, key, receiver);
-//             if (value instanceof Object) { //TODO: make sure functions are handled appropriately
+//             if (value instanceof Object) { // TODO: make sure functions are handled appropriately
 //                const snapshots = snapshotMap.get(value)
 //                if (!snapshots) return value;
 //                return findSnapshot(snapshots, index) || value;
@@ -83,7 +83,7 @@ type SnapshotsInfo = {
 const snapshotMap: Map<object, SnapshotsInfo> = new Map()
 
 function getCurrentSnapshot(target: object) {
-   //TODO: need to coordinate with update cycle...
+   // TODO: need to coordinate with update cycle...
    const { snapshots, latestIndex } = getSnapshotsInfo(target)
    return snapshots[latestIndex]
 }
@@ -112,7 +112,7 @@ export function initializeSnapshots(target: object) {
 }
 
 // function createSnapshotInfo(target: object) {
-//    const index = getUpdateCycleCount() //TODO: make sure we are calling this at the appropriate time for an accurate count
+//    const index = getUpdateCycleCount() // TODO: make sure we are calling this at the appropriate time for an accurate count
 //    const snapshots: Snapshots = {}
 //    snapshots[index] = takeSnapshot(target)
 //    return {
@@ -144,11 +144,11 @@ function takeSnapshot(target: AnyObject) {
    // Can we make snapshots lazy by bringing them to the level of pions? 
    // snapshots would have to be proxies then..
 
-   const collectionSnapshot: undefined | any[] = isIterable(target) ? [] : undefined //TODO: need to getCurrentSnapshot
+   const collectionSnapshot: undefined | any[] = isIterable(target) ? [] : undefined // TODO: need to getCurrentSnapshot
 
    if (isIterable(target)) {
       for (const item of target) {
-         //TODO: differentiate between values and entries
+         // TODO: differentiate between values and entries
          if (item instanceof Object){
             collectionSnapshot?.push(getCurrentSnapshot(toRaw(ionize(item))))
          }
@@ -183,7 +183,7 @@ function takeSnapshot(target: AnyObject) {
 // a wrapper to make snapshots interfacable with jsx templates, with trackable ops and ion access 
 
 export function reviveSnapshot(snapshot: AnyObject, current: AnyObject) {
-   if (current instanceof Array) { //TODO: but what about extensions of arrays?
+   if (current instanceof Array) { // TODO: but what about extensions of arrays?
       return current;
    }
    if (isIterable(current)) {

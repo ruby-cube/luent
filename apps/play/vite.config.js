@@ -10,7 +10,7 @@ export default defineConfig({
          cachedChecks: false
       }
    },
-   plugins: [ //TODO: replace with proper vite lumo plugin
+   plugins: [ // TODO: replace with proper vite lumo plugin
       {
          name: 'vite-lumo-plugin-pre',
          enforce: 'pre',

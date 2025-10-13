@@ -1,6 +1,6 @@
 import exp from "constants";
 
-let t; //TODO: import from @babel/types
+let t; // TODO: import from @babel/types
 
 
 export default function lumoPreTransform({ types }) {
@@ -20,7 +20,7 @@ export default function lumoPreTransform({ types }) {
          //          },
 
          //          CallExpression(path) {
-         //             transformWatchCalls(path, this.localWatchNames) //TODO: MultiSubject watch calls
+         //             transformWatchCalls(path, this.localWatchNames) // TODO: MultiSubject watch calls
          //             // transformIonicTaskCalls(path, this.localIonicTaskNames)
          //          }
          //       }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
@@ -189,7 +189,7 @@ function createAwaitSeries(series) {
 
 
 
-//TODO: 
+// TODO: 
 /*
 - `jsxAttributes()`
 
@@ -322,7 +322,7 @@ function transformTemplateCallExpressions(path) {
 
 
 function normalizeSlotToRenderFunction(paths) { // returns jsxExpressionContainer with arrowFunctionExpression
-   if (slotIsRenderFunction(paths)) return paths[0].node; //TODO: still need to transform return of renderfunction if is derivation 
+   if (slotIsRenderFunction(paths)) return paths[0].node; // TODO: still need to transform return of renderfunction if is derivation 
    return transformChildrenToRenderFunction(paths)
 }
 
@@ -482,7 +482,7 @@ function transformTemplateArgToRenderFunction(path) {
 
 let derivationCount = 0;
 
-//TODO: import $_derivation
+// TODO: import $_derivation
 function toDerivationFunction(node) {
    // return t.arrowFunctionExpression([], t.blockStatement([
    //    t.returnStatement(node) // Return the original expression

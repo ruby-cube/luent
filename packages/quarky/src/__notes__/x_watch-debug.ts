@@ -9,7 +9,7 @@ export function registerDebuggers(targets: (AtomicIon | PropIon)[] | IonizedMode
     const _targets = isIonizedModel(targets) ? [targets] : targets
     if (onTrack){
         for (const target of _targets){
-            onTrack(target) //TODO: THis works for watch, but DerivedIon and reactiveEffects will be tracked per re-eval
+            onTrack(target) // TODO: THis works for watch, but DerivedIon and reactiveEffects will be tracked per re-eval
         }
     }
     if (onTrigger){

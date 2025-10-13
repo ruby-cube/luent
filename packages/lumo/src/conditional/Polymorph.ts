@@ -15,7 +15,7 @@ import { AsyncRender, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, r
 
 
 
-//TODO: 
+// TODO: 
 // [X] implement static polymorph
 // [X] implement dynamic finite polymorph
 // [X] implement dynamic infinite polymorph
@@ -45,7 +45,7 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: {
    const switchMap = new Map(entries)
 
    function $Polymorph(input: FromTag<{
-      as: Morphable | PolymorphKey, //TODO: fromTag needs to handle mixed ion or not-ion type.
+      as: Morphable | PolymorphKey, // TODO: fromTag needs to handle mixed ion or not-ion type.
       with?: Object,
       provide?: Provided
    }>): Component {
@@ -197,7 +197,7 @@ export class PolymorphKit extends VineNode {
 
    //    $_run_with_(context, () => {
    //       const nodeEntities = this.preserve ?
-   //          kit.cache ?? (kit.cache = //TODO: allow choice between remount and create
+   //          kit.cache ?? (kit.cache = // TODO: allow choice between remount and create
    //             kit.renderConditional(parent, kit.nodePod!, kit.input)
    //          ) : kit.renderConditional(parent, kit.nodePod!, kit.input)
    //       mountConditional(parent, kit.nodePod!, nodeEntities, this.outerFlask, fragment);
@@ -253,7 +253,7 @@ export class PolymorphKit extends VineNode {
 
    discard(key: PolymorphKey, input?: Object) {
       if (this.isActiveKey(key, input)) {
-         //TODO: This is the diamond problem... if the watch() is not sync, then we'd have to perform discard after update... 
+         // TODO: This is the diamond problem... if the watch() is not sync, then we'd have to perform discard after update... 
          // but how would anyone know whether the update were synchronous or batched?
          // we want state manipulation to be synchronous but then schedule the rendering...
          // but synchronous calls can end up with extraneous effects

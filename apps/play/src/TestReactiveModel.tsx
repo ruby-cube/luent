@@ -1,6 +1,6 @@
 import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, ionic, ionize, toRaw, update } from "@rue/quarky";
+import { $from, ion, ionic, ionize, toRaw, update } from "@rue/quarky";
 import './style.css'
 
 
@@ -124,7 +124,7 @@ class Selected<T> extends Set<T> {
 export function List(
 
 ) {
-   const frog = ionize({ id: 0, content: "frog" })
+   // const frog = ionize({ id: 0, content: "frog" })
    // const mixed = [
    //    frog,
    //    { id: 1, content: "robin" },
@@ -138,7 +138,7 @@ export function List(
    const list = ionize(
       new ItemList(
          // [
-         frog,
+         { id: 0, content: "frog" },
          // { id: 0, content: "frog" },
          { id: 1, content: "robin" },
          { id: 2, content: "fly" },
@@ -236,7 +236,7 @@ export function List(
                </p>
 
                <li on:click={e => responsive(() => list.changeContent($index()))}>
-                  {item.$content}
+                  {(item.content)}
                </li>
                <p>{$index}</p>
                <div on:click={e => responsive(() => list.insert($index() + 1))} style="background-color: gray; cursor: pointer">

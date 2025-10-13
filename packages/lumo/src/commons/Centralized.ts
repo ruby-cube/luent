@@ -18,7 +18,7 @@ function defineCentralized<F extends (...args: any[]) => any>(key: string, facto
    }) as F
 }
 
-//TODO: Services are instantiated and removed based on usage
+// TODO: Services are instantiated and removed based on usage
 export function defineService() {
 
 }

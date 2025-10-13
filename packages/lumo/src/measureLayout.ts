@@ -32,5 +32,5 @@ export function measureLayout<T>(measure: () => T): Promise<T> {
 // - to read measurements from the mutation, you must call await afterEffects()
 
 
-//TODO: what do you do about queueMicrotasks and promises by the dev? It's their responsibility to call it in the appropriate place.
+// TODO: what do you do about queueMicrotasks and promises by the dev? It's their responsibility to call it in the appropriate place.
 // - provide a queuePS(() => {}) hook that schedules into the effect queue

@@ -37,7 +37,7 @@ export type RenderError = (err: Error) => RawJSXNode
 
 //    return function $TryNode(
 //       input : FromTag<{
-//          // provide //TODO:
+//          // provide // TODO:
 //       }>()
 //    ) {
 

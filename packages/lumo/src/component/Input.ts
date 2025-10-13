@@ -38,9 +38,9 @@ export type Readonly<T> = {
 // - commons input
 // - tag input
 
-//TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
+// TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
-//TODO: transform slot render function to Slot component
+// TODO: transform slot render function to Slot component
 // Ion<string>  => Ion<string>
 // Ion<string, { set: () => void }, 'mu?'>('?')
 // Ionized<{}> => Ionized<{}>
@@ -70,7 +70,7 @@ type HasMu<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C
  *    'mu?:frog': v<Frog>,
  *    'mu?:well': v<Well>,
  *    // 'mu:wellB': v<Well>
- * } //TODO: Mutable Ions with state and set
+ * } // TODO: Mutable Ions with state and set
  * 
  * type Frog = { name: string }
  * type Well = { depth: number }
@@ -132,7 +132,7 @@ function assertFunction(value: unknown) {
    if (!isFunction(value) || isIon(value)) throw new Error('Event handler must be a function')
 }
 
-//TODO: Slots
+// TODO: Slots
 // function getMuIons(attributes: AnyObject) {
 //    const muIons: Set<Ion> = new Set()
 //    for (const key in attributes) {
@@ -156,7 +156,7 @@ export function toInput(attributes: AnyObject) {
    const muIons = new Set()
 
    function isMutableIon(value: unknown) {
-      return muIons.has(value); //TODO: what about fromCommons?
+      return muIons.has(value); // TODO: what about fromCommons?
    }
 
    return new Proxy(attributes, {
@@ -214,7 +214,7 @@ export function toInput(attributes: AnyObject) {
          return false;
       },
       has(target, key) {
-         return key in target; //TODO:
+         return key in target; // TODO:
       }
    })
 }
@@ -291,7 +291,7 @@ type ToMuIon<T> = ExcludePrimitives<T> extends { value: any } ? T
 
 
 
-//TODO: only allow 'mu:' for ions
+// TODO: only allow 'mu:' for ions
 export type FromTag<D> =
    StaticInput<D>
    & ReadonlyIonInput<D>

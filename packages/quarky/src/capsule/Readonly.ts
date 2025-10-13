@@ -26,7 +26,7 @@ export function asNonlocalReadonly(value: any) {
    return value;
 }
 
-//TODO: Should we have readonly functions that return deep readonly? Or leave it up to dev to call asNonlocalReadonly?
+// TODO: Should we have readonly functions that return deep readonly? Or leave it up to dev to call asNonlocalReadonly?
 export function returnsReadonly() {
 
 }
@@ -40,11 +40,11 @@ export function isReadonly(value: any) {
 
 const readonlyQuarkMap = new Map()
 
-export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays, Maps, and Sets for deep readonly
+export function createReadonlyObject(obj: AnyObject) { // TODO: what about Arrays, Maps, and Sets for deep readonly
    const meta = readonlyQuarkMap.get(obj) ?? new MetaReadonlyObject(obj)
    const switchMap = createProxyPropertyMap(meta)
    const proxy = new Proxy(obj, {
-      has(target, key) { //TODO: should methods not be in readonly object?
+      has(target, key) { // TODO: should methods not be in readonly object?
          const getValue = switchMap.get(key)
          if (getValue)
             return true;

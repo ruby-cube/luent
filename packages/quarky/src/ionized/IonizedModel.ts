@@ -97,7 +97,7 @@ export const UNDEFINED_OP: Function = noop
 // }
 
 // function getStructureConfig(target: AnyObject, configs: any[]) {
-//    const proto = Object.getPrototypeOf(target); //TODO: custom get data structure for factory functions
+//    const proto = Object.getPrototypeOf(target); // TODO: custom get data structure for factory functions
 //    if (!proto) return configs;
 //    const constructor = proto.constructor;
 //    if (!isCustomIonicStructure(constructor)) {
@@ -114,7 +114,7 @@ export const UNDEFINED_OP: Function = noop
 //    nontrackableKeys?: { [key: ProxyKey]: boolean };
 //    trackableOps?: { [key: ProxyKey]: CreateTrackableOp }
 //    mutatingOps?: { [key: ProxyKey]: MutatingOpConfig };
-//    beforeSet?: BeforeSetCallback; //TODO:
+//    beforeSet?: BeforeSetCallback; // TODO:
 //    afterSet?: AfterSetCallback;
 //    isEntryKey?: (model: AnyObject, key: ProxyKey) => boolean
 //    // getStructureKeys: (model: AnyObject) => any[]
@@ -149,7 +149,7 @@ export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 // function asTrackable(tracked: [IonizedModel] | [IonizedModel, ProxyKey, any[]]) {
 //    const [model, op, input] = tracked;
 //    if (op) {
-//       return asAtomicOp(model, op, input![0]) //TODO: atomicOps that have more than one 'entry key'
+//       return asAtomicOp(model, op, input![0]) // TODO: atomicOps that have more than one 'entry key'
 //    } else {
 //       return quarkOf(model)
 //    }
@@ -225,7 +225,7 @@ export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 // }
 
 
-// export function isNonTrackable(key: ProxyKey, structureConfigs: CustomIonizedModelConfig[]) { //TODO: ?
+// export function isNonTrackable(key: ProxyKey, structureConfigs: CustomIonizedModelConfig[]) { // TODO: ?
 //    // for (const config of structureConfigs) {
 //    //    const nontrackableKeys = config.nontrackableKeys
 //    //    if (nontrackableKeys && key in nontrackableKeys) return true;
@@ -240,7 +240,7 @@ const KEY_IN_OP = "[[in]]"
 
 
 // function initializeState(initialData: AnyObject) {
-//    //TODO: should we do a structured clone instead using Object.getGetOwnProperties?
+//    // TODO: should we do a structured clone instead using Object.getGetOwnProperties?
 //    // - turn absorbed ions into getters
 //    // - delete ion keys
 //    for (const key in initialData) {
@@ -274,7 +274,7 @@ const SET = 1 as const;
 export type ProxyKey = string | symbol
 type CloneFn = (entity: any) => any
 function getCloner(entity: object): CloneFn {
-   //TODO: get cloner from data structure configs
+   // TODO: get cloner from data structure configs
    if (entity instanceof Array) return (entity: any[]) => {
       return Object.assign([], entity)
    }
@@ -323,7 +323,7 @@ export type IonizeOptions = {
 export const EACH = Symbol('each')
 
 
-//TODO:
+// TODO:
 // - I really need to think through if property changes should trigger the whole model
 // - adding and deleting properties
 export function createIonizedModel(
@@ -350,11 +350,11 @@ export function createIonizedModel(
       if (!originalKey) {
          if (op === SET) {
             if (isAbsorbedIon(value, key)) {
-               //TODO: absorbed ion
+               // TODO: absorbed ion
                return true;
             }
             else if (isFunction(value)) {
-               //TODO: method
+               // TODO: method
                return true;
             }
             else {
@@ -505,13 +505,13 @@ export function createIonizedModel(
       has(target, key) {
          if (key === QUARK) return true;
          trackOp(ionizedModel, '[[in]]', key)
-         //TODO: need to figure out how to deal with ion access keys
+         // TODO: need to figure out how to deal with ion access keys
          return key in proxyProto || (key in initialTarget)
       },
 
       getOwnPropertyDescriptor(target, key) {
-         //TODO: track
-         return Object.getOwnPropertyDescriptor(target, key) //TODO: adjust key for absorbed ion
+         // TODO: track
+         return Object.getOwnPropertyDescriptor(target, key) // TODO: adjust key for absorbed ion
       },
 
       defineProperty(target: AnyObject, key, attributes) {
@@ -525,7 +525,7 @@ export function createIonizedModel(
             getPionQuark(target, key)?.trigger(update)
          }
          modelQuark.trigger(update)
-         //TODO: record mutation?
+         // TODO: record mutation?
          return true;
       },
 
@@ -541,12 +541,12 @@ export function createIonizedModel(
             triggerKeysChange(modelQuark, key, update)
          }
          modelQuark.trigger(update)
-         //TODO: record mutation?
+         // TODO: record mutation?
          return true;
       },
 
       ownKeys() {
-         trackOp(ionizedModel, INTERNAL_OP, ['ownKeys']) //TODO: trigger when any new property is added or deleted
+         trackOp(ionizedModel, INTERNAL_OP, ['ownKeys']) // TODO: trigger when any new property is added or deleted
          return Reflect.ownKeys(state.active)
       },
 
@@ -687,7 +687,7 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion)
 //  
 
 
-type ExposeIons<T extends AnyObject> = { [K in keyof T]: T[K] extends Function ? undefined : MutableIon<T[K]> } //TODO: Ion if readonly
+type ExposeIons<T extends AnyObject> = { [K in keyof T]: T[K] extends Function ? undefined : MutableIon<T[K]> } // TODO: Ion if readonly
 
 export function $from<T extends AnyObject>(value: T): ExposeIons<T> {
    if (!isIonizedModel(value)) return value as ExposeIons<T>
@@ -788,7 +788,7 @@ function createPion(
 //    // marks: MarkMap | ShallowMark | undefined,
 // ) {
 
-//    // if (isNonTrackable(key)) { //QUESTION: is this worth it? //TODO: include non-writable properties
+//    // if (isNonTrackable(key)) { //QUESTION: is this worth it? // TODO: include non-writable properties
 //    //    return initialNonTrackablePropertyAccess(target, key, value, proxyProto, transformValue);
 //    // }
 
@@ -883,7 +883,7 @@ function initialAbsorbedIonStateAccess(key: string | symbol, value: any, proxyPr
 
 function getTargetPropertyValue(target: AnyObject, key: string | symbol, receiver: AnyObject) {
    try {
-      //TODO: decide whether to use Reflect.get or target[key], or when to use which
+      // TODO: decide whether to use Reflect.get or target[key], or when to use which
       // console.warn('Reflect.get failed with error, switched to target[key]:', err)
       return target[key]
    }
@@ -1106,10 +1106,10 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 //    proxyProto: ProxyPropertyMap
 // ) {
 //    if (isIonKey(key)) {
-//       //TODO:
+//       // TODO:
 //    }
 //    else {
-//       //TODO: new property
+//       // TODO: new property
 //       const ion = proxyProto[key] ?? (proxyProto[key] = createPion(model, initialTarget, key, initialTarget[key]))
 
 //       // set ion
@@ -1117,7 +1117,7 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 //          const ionQuark = quarkOf(ion) as AtomicIonQuark
 //          ionQuark.asPion!.setPionState(quarkOf(model), value)
 //          // ionQuark.addModel(quarkOf(model)) 
-//          // ion.state = value; //TODO: deionize?
+//          // ion.state = value; // TODO: deionize?
 //          return true;
 //       }
 //       else {
@@ -1134,7 +1134,7 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 //       return true;
 //    }
 
-//    // const oldState = target[key]; //TODO: make sure key is correct for absorbed ions
+//    // const oldState = target[key]; // TODO: make sure key is correct for absorbed ions
 
 //    // if (isIon(oldState)) {
 //    //    return setAbsorbedIonState(model, key, oldState, value) // we let absorbed ion to decide whether to ionize value or not
@@ -1176,7 +1176,7 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 //          ion.state = value;
 //       }
 //       catch (err) {
-//          if (__DEV__) throw new Error("Absorbed AtomicIon is read only") //TODO: since readonly is only being enforced at the typescript level, make sure typescript prevents mutation of readonly absorbed ions
+//          if (__DEV__) throw new Error("Absorbed AtomicIon is read only") // TODO: since readonly is only being enforced at the typescript level, make sure typescript prevents mutation of readonly absorbed ions
 //          return false;
 //       }
 //       // const newState = ion.state // get the state that has been maybeIonized

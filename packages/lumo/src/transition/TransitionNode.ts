@@ -73,7 +73,7 @@ function createTransitionNode(
 
    const $div = NodeRef('div')
 
-   //TODO: init with
+   // TODO: init with
 
    const [transitionLoad, animateLoad] = inputLoad === true ? normalizeToKitArrays(inputBoth ? inputBoth : inputIn ?? defaultFade) : normalizeToKitArrays(inputLoad)
    const [transitionIn, animateIn] = normalizeToKitArrays(inputIn)
@@ -83,8 +83,8 @@ function createTransitionNode(
    if (__DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
       console.warn(`The transition for 'both' will override transition for either 'in' or 'out'`)
 
-   const transitionInProperties = undefined; //TODO:
-   const transitionOutProperties = undefined; //TODO: 
+   const transitionInProperties = undefined; // TODO:
+   const transitionOutProperties = undefined; // TODO: 
 
    const enterFromClasses = collectOffscreenClasses(transitionBoth || transitionIn)
    const transition_in = mountTransitionClass(transitionBoth || transitionIn)
@@ -197,8 +197,8 @@ function createTransitionNode(
             { transform: `translate(${delta.x}px, ${delta.y}px) scale(${delta.scaleX}, ${delta.scaleY})` },
             { transform: 'translate(0, 0) scale(1, 1)' }
          ], {
-            duration: 1800, //TODO:
-            easing: 'cubic-bezier(0,0,0.32,1)', //TODO:
+            duration: 1800, // TODO:
+            easing: 'cubic-bezier(0,0,0.32,1)', // TODO:
          });
       },
 
@@ -209,8 +209,8 @@ function createTransitionNode(
             { width: initialPosition.width + 'px', height: initialPosition.height + 'px' },
             { width: finalPosition.width + 'px', height: finalPosition.height + 'px' }
          ], {
-            duration: 200, //TODO:
-            easing: 'cubic-bezier(0,0,0.32,1)', //TODO:
+            duration: 200, // TODO:
+            easing: 'cubic-bezier(0,0,0.32,1)', // TODO:
          });
       },
 
@@ -363,7 +363,7 @@ function createTransitionNode(
       pause(direction: 'in' | 'out', transitionStartTime: number) {
          // pause state
          // for (const key in transitionInProperties) {
-         //     //TODO: requires A LOT more information to compute transitional state...
+         //     // TODO: requires A LOT more information to compute transitional state...
          //     const transitionalState = computeTransitionalState(transitionIn.duration, new Date().getTime() - transitionStartTime, 0, -100, '')
 
          //     node.style.setProperty('transform', `translateX(${transitionalState}px)`);
@@ -481,7 +481,7 @@ function collectOffscreenClasses(transitions: (TransitionKit | TransitionFunctio
 }
 
 
-//TODO: unmount when component unmounted
+// TODO: unmount when component unmounted
 function mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses) {
    if (!transitions)
       return undefined;
@@ -563,5 +563,5 @@ function compileTransitionClassName(transitions: (TransitionKit | TransitionFunc
 function mountAnimationClass(animations: (AnimationKit | AnimationFunction)[] | undefined | AnimationClass) {
    if (!animations || typeof animations === 'string')
       return animations
-   return '' //TODO:
+   return '' // TODO:
 }

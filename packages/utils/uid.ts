@@ -12,4 +12,4 @@ export function UIDGenerator(len: number){
 }
 
 
-//TODO: add a unique collaborator/browser prefix so collaborators never generate the same id
+// TODO: add a unique collaborator/browser prefix so collaborators never generate the same id

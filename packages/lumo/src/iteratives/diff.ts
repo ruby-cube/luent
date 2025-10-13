@@ -46,7 +46,7 @@ export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[]
    return {
       insertAndMoveKit: {
          isNewItem: (item: any) => newItems.has(getUID(item)),
-         hasMoved: (item: any) => lcs.indexOf(getUID(item)) === -1, //TODO: make o(1)
+         hasMoved: (item: any) => lcs.indexOf(getUID(item)) === -1, // TODO: make o(1)
          isRemoved: (item: any) => !newMap.has(getUID(item)),
          newArray,
          oldArray,

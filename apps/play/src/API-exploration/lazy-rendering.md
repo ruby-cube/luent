@@ -73,14 +73,14 @@ Also, actions are not stateful. They are procedures.
 
 
 
-//TODO: How does textDeletion affect textInsertion if they overlap? Cancel? Queue? How do we know they modify the same state?
+// TODO: How does textDeletion affect textInsertion if they overlap? Cancel? Queue? How do we know they modify the same state?
 
 type Action = {
    cancel(): void
    onCancel(task: () => void): void
    pending: boolean;
    settled: boolean;
-   status: 'in progress' | 'queued' | 'canceled' | 'complete' //TODO: use a finite ion instead?
+   status: 'in progress' | 'queued' | 'canceled' | 'complete' // TODO: use a finite ion instead?
    error: Error | null
    onDone(task: () => void): void
 }

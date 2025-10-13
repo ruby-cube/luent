@@ -204,7 +204,7 @@ export function CRUDApp() {
       [$last.value, $first.value] = current.split(', ')
    }, { phase: SYNC })
 
-   // watch(names, () => { //TODO: this is a stand-in to initialize pions for .filter. Figure out why .filter is not initializing pions
+   // watch(names, () => { // TODO: this is a stand-in to initialize pions for .filter. Figure out why .filter is not initializing pions
    //    console.log('names updated')
    // })
    const proxyProto = quarkOf(names).proxyProto

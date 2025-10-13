@@ -152,7 +152,7 @@ function toString(value: any) {
    if (value instanceof Object) {
       return JSON.stringify(value);
    }
-   return value.toString(); //TODO: make sure it works with any value
+   return value.toString(); // TODO: make sure it works with any value
 }
 
 

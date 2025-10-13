@@ -111,8 +111,8 @@ import { QUARK } from "../Quark";
 //    ]
 // })
 
-//TODO: nesting
-//TODO: onTerminalized
+// TODO: nesting
+// TODO: onTerminalized
 
 // nesting means nested state will be activated and deactivated based on the parents
 // QUESTION: If a finiton reaches final state what does that mean for it's parent(s) and children?
@@ -158,7 +158,7 @@ type Transition<S extends _FiniteStates = _FiniteStates> = () => State<S> | unde
 type A = keyof ({ a: boolean } | { b: boolean })
 
 
-//TODO: should on:enter apply to intitial state?
+// TODO: should on:enter apply to intitial state?
 type StateDefinition<S extends _FiniteStates = _FiniteStates> = {
    'on:enter'?: (this: FiniteState) => void
    'on:exit'?: (this: FiniteState) => void
@@ -230,7 +230,7 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
    $state.init = init
    $state.isActive = () => $currentState() !== undefined;
 
-   //TODO: attach methods
+   // TODO: attach methods
 
    let _nestedStates: NestedStates;
 
@@ -244,7 +244,7 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
                return;
             }
             _nestedStates = nestedStates
-            // updateNestedStates(initializer(undefined), 'activate') //TODO: should not activate if not activated
+            // updateNestedStates(initializer(undefined), 'activate') // TODO: should not activate if not activated
 
             return {
                finiton: $state,
@@ -369,12 +369,12 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
 
       const anyStateHooks = getHooks(ANY_STATE)
       if (prevStateID) {
-         runExitHooks(prevStateID, anyStateHooks) //TODO: should I pass the next state to the exit hook?
+         runExitHooks(prevStateID, anyStateHooks) // TODO: should I pass the next state to the exit hook?
       }
 
       $currentState.value = nextStateID;
 
-      runEnterHooks(nextStateID, anyStateHooks) //TODO: should I pass the prev state to the enter hook?
+      runEnterHooks(nextStateID, anyStateHooks) // TODO: should I pass the prev state to the enter hook?
 
       return {
          state: nextStateID,

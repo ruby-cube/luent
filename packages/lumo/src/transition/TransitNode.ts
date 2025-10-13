@@ -83,7 +83,7 @@ export function useTransitionNodes() {
 
 
 export function computeTransitionalState(duration: number, elapsedTime: number, initialState: number, finalState: number, easing: string) {
-   //TODO: incorporate easing into computation
+   // TODO: incorporate easing into computation
    const percentage = elapsedTime / duration;
    return (finalState - initialState) * percentage + initialState;
 }

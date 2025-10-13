@@ -94,7 +94,7 @@ export function watchItems<T extends ReactiveGet | IonizedModel>(
 function watchNewItem(newItem: AnyObject | ReactiveGet, effect: OnChangeHandler | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: IonizedModel) {
     const target = maybeReactivize(newItem, reactiveList)
     const watcher = watch(target, effect, options)
-    watchers.set(newItem, watcher) //TODO: must inherit original flask
+    watchers.set(newItem, watcher) // TODO: must inherit original flask
     return watchers;
 }
 
@@ -128,7 +128,7 @@ function maybeReactivize(item: ReactiveGet | AnyObject, reactiveList: IonizedMod
 }
 
 
-//TODO: Write overloads
+// TODO: Write overloads
 // export function watchCollectionValues<T extends AnyObject>(
 //     reactiveCollection: DeepReactiveModel<Set<T>> | DeepReactiveModel<Map<any, T>> | IonizedModel<Set<IonizedModel<T>>> | IonizedModel<Set<ReactiveGet<T>>> | IonizedModel<Map<any, IonizedModel<T>>> | IonizedModel<Map<any, ReactiveGet<T>>>,
 //     effect: OnChangeHandler | MutationEffect,

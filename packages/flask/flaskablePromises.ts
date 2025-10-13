@@ -22,7 +22,7 @@ export function flaskablePromise<T>(promise: Promise<T>): Promise<T> {
         }
     } as Promise<T>
 
-    Object.setPrototypeOf(flaskable, promise); //TODO: get rid of setPrototypeOf
+    Object.setPrototypeOf(flaskable, promise); // TODO: get rid of setPrototypeOf
     return flaskable;
 }
 

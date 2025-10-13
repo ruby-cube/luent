@@ -39,12 +39,12 @@ type TriggerEvent = {
 export function traceTriggers<T>(subject: T) {
    if (!__DEV__) return;
    watch(subject, () => {
-      const atom = getTriggeredAtoms($thisEffect()!)[0] as Atom //TODO: type casting is temporary
+      const atom = getTriggeredAtoms($thisEffect()!)[0] as Atom // TODO: type casting is temporary
       const traceableAtom = __DEV__asTraceable(atom)
       traceableAtom.__addTrigger({
          trace: traceTrigger(),
-         newState: hasQuark(atom) ? quarkOf(atom).state : atom.state, //TODO:
-         oldState: hasQuark(atom) ? quarkOf(atom).prevState : atom.prevState //TODO:
+         newState: hasQuark(atom) ? quarkOf(atom).state : atom.state, // TODO:
+         oldState: hasQuark(atom) ? quarkOf(atom).prevState : atom.prevState // TODO:
       })
       __logTriggeredAtom(atom)
    }, {
@@ -98,13 +98,13 @@ function logAtomicIonTrace(atom: AtomicIon) {
 
 function logPropTrace(atom: PropIon) {
    const quark = quarkOf(atom)
-   const originTrace = quark.origin //TODO: add property
+   const originTrace = quark.origin // TODO: add property
    console.log(`\n[TRIGGER TRACE] for ionic property "${String(quark.key)}"`)
    console.log('NonError origin trace\n    ' + originTrace)
 }
 
 function logTrackedOpTrace(atom: AtomicOp) {
-   const originTrace = atom.origin //TODO: add property
+   const originTrace = atom.origin // TODO: add property
    console.log(`\n[TRIGGER TRACE] for ionic op "${String(atom.op)}"`) //QUESTION: should i provide entryKey?
    console.log('NonError origin trace\n    ' + originTrace)
 }

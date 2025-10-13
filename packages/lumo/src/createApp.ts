@@ -73,7 +73,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             popUpdate()
             // if (remountable) markMountPhase()
             // component.setUp(root, nodePod)
-            // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
+            // component.mount(root) // TODO: if this is a remount, how would it be different than a first mount? use fragment?
             // if (remountable) unmarkMountPhase()
             popCommons() // for sibling components to access parent, must be set AFTER `component()`
          }
@@ -81,7 +81,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
 
       },
 
-      unmount() { //TODO: should I call dynamicNode.unmount() instead of emit?? same for discard?
+      unmount() { // TODO: should I call dynamicNode.unmount() instead of emit?? same for discard?
          if (!remountable) {
             if (__DEV__) throw new Error('App cannot be unmounted. Did you mean to call `discard`? To enable unmount and remount, set `remountable` to true in config.')
             return;

@@ -312,7 +312,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
       // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
       const value = attributes[key]
-      //TODO: only attributes that affect layout should be scheduled for render phase
+      // TODO: only attributes that affect layout should be scheduled for render phase
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
@@ -355,11 +355,11 @@ function toNumber(value: any) {
    return type === 'string' ? Number(value) : type === 'number' ? value : undefined
 }
 
-//TODO:
+// TODO:
 // HTML Attribute | DOM Property | Notes
 // value (on <option>) | value | JS returns the value set by DOM, not necessarily the attribute.
 
-//TODO:
+// TODO:
 // Writable properties with no html attribute
 // innerText	Represents the visible text content of an element, considering CSS visibility/display.
 // valueAsNumber	For <input type="number">, represents the value as a number.
@@ -493,10 +493,10 @@ function isNumberValue(attribute: string) {
 }
 
 function toString(value: any) {
-   return value?.toString() ?? ""; //TODO: make sure it works with any value
+   return value?.toString() ?? ""; // TODO: make sure it works with any value
 }
 
-//TODO: figure out how to incorporate options into inline events
+// TODO: figure out how to incorporate options into inline events
 function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, options?: SustainedListenerOptions & AddEventListenerOptions) {
 
    for (const key in events) {

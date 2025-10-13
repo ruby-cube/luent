@@ -235,7 +235,7 @@ const MARKDOWN_FILES = defineDBSync(() => {
 
    watch($files, ({ mutations }) => {
       dispatch({ post: '...', })
-      //TODO: how to rollback with failed action(s)
+      // TODO: how to rollback with failed action(s)
    })
 
    return $files;

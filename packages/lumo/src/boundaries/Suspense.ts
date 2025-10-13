@@ -13,14 +13,14 @@ import { SYNC } from "../render-cycle";
 // }
 
 
-//TODO: Suspense Ion must have value (T | undefined)
+// TODO: Suspense Ion must have value (T | undefined)
 // QUESTION: should suspense boundaries be the default? No because you might not want to hold up rendering for something that is ok to be undefined
 // Should { awaited: true } be the default? or { renderUndefined: true } or { dontAwait } or 
 
 const SUSPENSE_ION = Symbol('suspense ion')
 
 
-//TODO:
+// TODO:
 export type Suspense<T> = {
    [SUSPENSE_ION]: true,
    error: null | Error,

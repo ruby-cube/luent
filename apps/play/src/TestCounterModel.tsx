@@ -1,7 +1,7 @@
 import { component } from "@rue/lumo"
 import { ion, ionic, queueIonicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
 
-//TODO:
+// TODO:
 // [x] private this access in methods and typing
 // [x] native method override and 'super' access
 // [x] mu vs encapsulated

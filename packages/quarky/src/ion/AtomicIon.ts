@@ -14,6 +14,7 @@ import { Update, isLazyUpdate, initUpdate } from "../reactivity/UpdateCycle";
 import { maybeIonize, MarkMap } from "../ionized/IonizedModel";
 import { ILazyState } from "../reactivity/LazyState";
 import { AtomicQuark } from "../reactivity/AtomicQuark";
+import { isObjectLiteral } from "@rue/utils";
 
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
@@ -70,6 +71,7 @@ export function createAtomicIon(
    $state.displayName = 'getState'
 
    if (props) {
+      if (!isObjectLiteral(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
       const descriptors = Object.getOwnPropertyDescriptors(props)
       const onGet = descriptors.value?.get
       const onSet = descriptors.value?.set as (value: unknown) => boolean
@@ -157,7 +159,7 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    }
    // trigger effects
    this.trigger(update)
-   this.modelQuark?.trigger(update); //TODO: Do I need this? For absorbed ions?
+   this.modelQuark?.trigger(update); // TODO: Do I need this? For absorbed ions?
 
    return state;
 }

@@ -21,7 +21,7 @@ export function getFlask(): Flask {
 //    flaskStack.pop()
 // }
 
-export function $thisFlask(): ThisFlask { //TODO: limit public properties and methods
+export function $thisFlask(): ThisFlask { // TODO: limit public properties and methods
    const flask = getActiveFlask()
    if (!flask) throw new Error('No flask found. Must call within the scope of a flask')
    return flask.thisFlask || new ThisFlask(flask);

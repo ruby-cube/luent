@@ -262,7 +262,7 @@ export function SomeChild() {
                      <p>Welcome, {$user}</p>
                   </>
                ],
-               // with suspense // How do we tell if $file is synchronous or suspenseful? //TODO: Resolved type marker ResolvedIon<File>
+               // with suspense // How do we tell if $file is synchronous or suspenseful? // TODO: Resolved type marker ResolvedIon<File>
                [route`/${$userID}/${$fileID}#${$section}`, {
                   loading: () => (
                      <Loading />

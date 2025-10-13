@@ -55,7 +55,7 @@ import { isObject } from "@rue/utils"
 
 
 // export function maybeIonizeNested(value: any, model: IonizedModel) {
-//    return maybeIonize(value)//TODO: encapsulated or readonly
+//    return maybeIonize(value)// TODO: encapsulated or readonly
 // }
 
 

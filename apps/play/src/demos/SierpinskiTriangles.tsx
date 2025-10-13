@@ -2,7 +2,7 @@ import { component, FromTag, atUnmount } from "@rue/lumo";
 import { Animation, Interval, ion, update, ThrottledHover, ionize, $_derivation, ionic } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
-//TODO:
+// TODO:
 // - time warning for lazy update
 // - pState for consistency, how to keep lazy state consistent with 'watch() derivations'?
 //QUESTION:
@@ -71,7 +71,7 @@ export function TriangleDemo() {
       secondsInterval.stop()
       update(() => {
          $seconds.value = 0
-      }, { lazy: 1000 }) //TODO: reset is inconsistent without lazy update (solid.js has the same problem)
+      }, { lazy: 1000 }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsInterval.start()
    }
 

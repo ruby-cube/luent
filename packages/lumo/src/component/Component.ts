@@ -25,7 +25,7 @@ export interface Component<T extends AnyObject | undefined = AnyObject | undefin
 
 type JSXTemplate = RawJSXNode
 
-//TODO: accept a third paramenter for mountTeleported
+// TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
 export function component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, template: JSXTemplate): Component<T>
 export function component<T extends AnyObject | undefined = AnyObject | undefined>(template: JSXTemplate): Component<undefined>
@@ -33,7 +33,7 @@ export function component<T extends AnyObject | undefined = AnyObject | undefine
    const jsxNodes = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
    const exposed = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
    return {
-      exposed, //TODO: make read only
+      exposed, // TODO: make read only
       jsxNodes: normalizeToArray(toValue(jsxNodes ? unnestComponent(jsxNodes) : undefined)),
    } as Component<T extends AnyObject ? T : undefined>
 }
@@ -57,11 +57,11 @@ export function initializeComponentRef(
 }
 
 function __DEV__leakProof(exposed: AnyObject) {
-   //TODO: make sure everything has creationScopeID
+   // TODO: make sure everything has creationScopeID
 }
 
 function __DEV__assertInCreationScope(object: AnyObject) {
-   //TODO: assert that object is within its creation scope
+   // TODO: assert that object is within its creation scope
 }
 
 export function unnestComponent(jsxNodes: RawJSXNode) {
@@ -103,7 +103,7 @@ export function makeComponent(
    tag: ComponentConfig,
    $index: Ion<number> | undefined
 ): Component {
-   //TODO: component flask lifecycle hooks
+   // TODO: component flask lifecycle hooks
    tag.Slot = Slot;
    const output = Component(toInput(tag))
    if (output instanceof Promise)

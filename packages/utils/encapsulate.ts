@@ -71,7 +71,7 @@ export function encapsulate<T extends AnyObject>(target: T): T {
             return true;
         }
     }) as T & { [ENCAPSULATED]: true }
-    // as Omit<AnyObject, 'push'>  //TODO: only omit mutating methods that are not own methods
+    // as Omit<AnyObject, 'push'>  // TODO: only omit mutating methods that are not own methods
     encapsulatedObject[ENCAPSULATED] = true;
     return encapsulatedObject
 }

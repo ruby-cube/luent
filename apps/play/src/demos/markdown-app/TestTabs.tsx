@@ -74,7 +74,7 @@ function asFiles(data: FileData[]) {
    return data.map(file => new File(file.id, file.markdown))
 }
 
-//TODO: What's the best way to sync with your database?
+// TODO: What's the best way to sync with your database?
 
 
 // A resource is where you transform the raw data into a rich domain model and set up syncing to the db
@@ -83,7 +83,7 @@ function asFiles(data: FileData[]) {
 //    const data = await dispatch({ get: DB_FILES })
 //    // [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
 
-//    //TODO: how do you set up realtime updates from database and locally from another tab
+//    // TODO: how do you set up realtime updates from database and locally from another tab
 
 //    const files = ionize(asFiles(data), {
 //       add(file: File) {
@@ -94,7 +94,7 @@ function asFiles(data: FileData[]) {
 //          files.splice(index, 1)
 //       },
 //       sortAlphabetically() {
-//          //TODO:
+//          // TODO:
 //       }
 //    })
 
@@ -120,7 +120,7 @@ function LoadingApp() { //Stand in until I fix createApp
          files.splice(index, 1)
       },
       sortAlphabetically() {
-         //TODO:
+         // TODO:
       }
    })
 
@@ -234,7 +234,7 @@ function App(input : FromTag<{
    })
 
    // watch(openedFiles, ({ collectionChange }) => {
-   //    const { removedItems, newItems, movedItems } = collectionChange //TODO: implement with getters for lazy computation
+   //    const { removedItems, newItems, movedItems } = collectionChange // TODO: implement with getters for lazy computation
    //    if (removedItems)
    //       for (const file of removedItems) {
    //          MainView.discard('file', file.id)
@@ -315,7 +315,7 @@ const PEAR = CommonsKey<MaybeIon<string>>('PEAR')
 
 
 function Sidebar(input : FromTag<{
-   files: Ionized<File[]> //TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
+   files: Ionized<File[]> // TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
 }>) {
    const { files } = input
    const { addFile } = fromCommons(FILES_KIT);

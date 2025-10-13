@@ -76,7 +76,7 @@ const location = frog$.location // returns an inert proxy with a $ property
 const location$ = location.$
 
 const position$ = ionize(frog$.location.position)
-//TODO: Keep a WeakMap of reactives so if an object is already made into a reactive, return that reactive instead of creating a new one
+// TODO: Keep a WeakMap of reactives so if an object is already made into a reactive, return that reactive instead of creating a new one
 
 
 

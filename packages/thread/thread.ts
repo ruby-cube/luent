@@ -16,7 +16,7 @@ export const queuePS = queueMicrotask;
 export function queueTask<CB extends Callback>(callback: CB, options?: SchedulerOptions) {
     return $schedule(callback, options, { enroll: setImmediate, remove: clearImmediate });
 }
-export function beforeRepaint<CB extends FrameRequestCallback>(callback: CB, options?: SchedulerOptions) { //TODO: These should be usable as CancelSchedulers
+export function beforeRepaint<CB extends FrameRequestCallback>(callback: CB, options?: SchedulerOptions) { // TODO: These should be usable as CancelSchedulers
     return $schedule(callback, options, { enroll: requestAnimationFrame, remove: cancelAnimationFrame });
 }
 export function onTimeout<CB extends Callback>(delay: number, callback: CB, options?: SchedulerOptions, ...args: any[]) {

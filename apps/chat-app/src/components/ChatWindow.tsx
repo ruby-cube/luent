@@ -105,7 +105,7 @@ export function ChatWindow(input: FromTag<{
          return;
       }
 
-      node.scrollTop = newMessageMarker.offsetTop - (63 + 44) //TODO: what are these numbers?
+      node.scrollTop = newMessageMarker.offsetTop - (63 + 44) // TODO: what are these numbers?
    }
 
    function scrollToBottom() {

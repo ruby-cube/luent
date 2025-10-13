@@ -388,10 +388,10 @@ export function TestStreamIon() {
 
    // const $something = StreamIon()
 
-   //TODO: add more config options to composed stream
-   //TODO: until 
-   //TODO: conditions and context
-   //TODO: interval
+   // TODO: add more config options to composed stream
+   // TODO: until 
+   // TODO: conditions and context
+   // TODO: interval
 
    const animation = ComposedStream(({ sequence, merge, repeat, delay }) =>
       sequence(

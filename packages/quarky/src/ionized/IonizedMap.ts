@@ -69,7 +69,7 @@ export function installIonicMap() {
          op: function set(this: Map<unknown, unknown>, key: unknown, value: unknown) {
             const ionizedKey = getIonizedModel(key);
             if (ionizedKey) this.delete(ionizedKey);
-            return this.set(key, value) //TODO: we need
+            return this.set(key, value) // TODO: we need
          },
          input: ([key, value]) => [toRaw(key), toRaw(value)],
          preop: (target, [key, value]) => ({

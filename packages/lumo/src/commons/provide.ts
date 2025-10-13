@@ -15,7 +15,7 @@ export interface AppCommons {
 }
 
 
-//TODO: trace provider
+// TODO: trace provider
 // fromCommons.trace('dog')(DOG)
 
 export function fromCommons<K>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): CommonsValue<K> {
@@ -52,7 +52,7 @@ export function createAppCommons(provided: [CommonsEntryKey | string, unknown][]
 
 type CommonsValue<K> = K extends (arg: infer T) => any ? T : unknown
 
-//TODO: validate value
+// TODO: validate value
 export function provideAppwide<K extends CommonsEntryKey>(key: K, value: CommonsValue<K>) {
    let commons = getClosestCommons();
    if (!commons)
@@ -66,7 +66,7 @@ export function provideAppwide<K extends CommonsEntryKey>(key: K, value: Commons
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
          console.trace();
       }
-      return value; //TODO: Maybe allow overrides??
+      return value; // TODO: Maybe allow overrides??
    }
    appEntries.set(commonsKey, value);
    return value;
@@ -107,7 +107,7 @@ export function provideGlobal<K extends CommonsEntryKey | string>(key: K, value:
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
          console.trace();
       }
-      return value; //TODO: Maybe allow overrides??
+      return value; // TODO: Maybe allow overrides??
    }
    globalEntries.set(commonsKey, value);
    return value;

@@ -16,7 +16,7 @@ import { getCurrentIndex } from "../iteratives/List";
 //    // for jsx-runtime
 // }
 
-// export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpiler should compile children to function
+// export function jsx(tag: any, config: any, ...children: any[]) { // TODO: transpiler should compile children to function
 //    console.log("JSX!!!")
 //    const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
 //    return makeJSXNode(tag, _children, config || {})

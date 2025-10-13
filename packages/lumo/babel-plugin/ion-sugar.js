@@ -62,7 +62,7 @@ function transformReassignee(path) {
    path.replaceWith(node)
    objNode.created = true;
    propertyNode.created = true;
-   //TODO: what if it's ambiguous?
+   // TODO: what if it's ambiguous?
 }
 
 function transformStateRef(path) {

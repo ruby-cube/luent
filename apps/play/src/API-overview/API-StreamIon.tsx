@@ -138,7 +138,7 @@ export function DinoLogo() {
    }, {
       '@start': () => { },
       reset() {
-         //TODO: how to access context??
+         // TODO: how to access context??
          this.value = false;
       },
    })
@@ -243,7 +243,7 @@ export function DinoLogo() {
    })
 
 
-   const $messages = SuspenseIon(ionize([]), () => fetch('/messages'), { //TODO: SuspenseIon must remember initial ionizer
+   const $messages = SuspenseIon(ionize([]), () => fetch('/messages'), { // TODO: SuspenseIon must remember initial ionizer
       post(msg) {
          this.value.push(msg);
 

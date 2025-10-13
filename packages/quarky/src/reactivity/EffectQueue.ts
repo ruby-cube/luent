@@ -163,7 +163,7 @@ export class PhaseQueue {
                         else resolve(undefined)
                         cycle.preupdateCount--
                         if (cycle.preupdateCount === 0) {
-                           cycle.resolvePreupdate?.(cycle.lazyResult) //TODO: need to wait till all promises resolve
+                           cycle.resolvePreupdate?.(cycle.lazyResult) // TODO: need to wait till all promises resolve
                         }
                      }
                   }, { timeout: 17/* TODO: prioritize based on time margin */ })
@@ -218,7 +218,7 @@ export class EffectQueue {
    private moreQueues: PhaseQueue[] | undefined;
    private queues: PhaseQueue[] = []
 
-   private taskQueue: PhaseQueue | undefined; //TODO: need to run
+   private taskQueue: PhaseQueue | undefined; // TODO: need to run
 
    constructor(
       public cycle: UpdateCycle,

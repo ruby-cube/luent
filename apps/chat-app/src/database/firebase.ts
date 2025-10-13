@@ -76,12 +76,12 @@ export class User {
    private userData: Ionized<{ lastSeenMessageID: string | null }> | undefined
 
    get lastSeenMessageID() {
-      //TODO: throw error if no userData?
+      // TODO: throw error if no userData?
       return this.userData!.lastSeenMessageID
    }
 
    set lastSeenMessageID(id: string | null) {
-      //TODO: throw error if no userData?
+      // TODO: throw error if no userData?
       this.userData!.lastSeenMessageID = id
    }
 }
@@ -91,7 +91,7 @@ export class User {
 let pendingLogin: Promise<{ error: string | null }> | null = null
 
 export function signUp(email: string, password: string, username: string) {
-   const auth = fromGlobal('auth') as Auth //TODO: easy typing, throw error if not provided
+   const auth = fromGlobal('auth') as Auth // TODO: easy typing, throw error if not provided
 
    return pendingLogin = createUserWithEmailAndPassword(auth, email, password)
       .then(async ({ user }) => {
@@ -99,7 +99,7 @@ export function signUp(email: string, password: string, username: string) {
          await Promise.all([
             updateProfile(user, { displayName: username }),
             createUserData(user.uid)
-         ]) //TODO: Catch errors?
+         ]) // TODO: Catch errors?
 
          return {
             // user,

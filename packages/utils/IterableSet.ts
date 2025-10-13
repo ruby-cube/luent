@@ -34,6 +34,6 @@ export class IterableSet<T> {
    }
 
    *[Symbol.iterator]() {
-      yield* this.arr; // Fast iteration via array //TODO: need to be able to delete while iterating and not mess things up
+      yield* this.arr; // Fast iteration via array // TODO: need to be able to delete while iterating and not mess things up
    }
 }

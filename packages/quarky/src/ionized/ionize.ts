@@ -13,7 +13,7 @@ import { AnyARecord } from "node:dns";
 // - object literals that have NOT been marked inert
 // - class instances whose DIRECT prototype has been registered as ionizable
 
-//TODO: figure out the simplest way developers can add types to custom data strucures
+// TODO: figure out the simplest way developers can add types to custom data strucures
 
 
 
@@ -183,7 +183,7 @@ type IsInertMark<T> = T extends { '~markInert': true } ? true : false
 
 //API
 // export function ionize<T, PROTO>(target: T & object, proto?: (PROTO & Proto) & ThisType<T & PROTO & { super: T }>): PROTO extends AnyObject ? Ionized<ToRawItems<T>, PROTO> : Ionized<ToRawItems<T>> {
-//    //TODO: store stack trace
+//    // TODO: store stack trace
 
 //    return <unknown>getExistingIonizedModel(target, proto) as PROTO extends AnyObject ? Ionized<ToRawItems<T>, PROTO> : Ionized<ToRawItems<T>> ??
 //       ionizeModel(target, proto, undefined) as PROTO extends AnyObject ? Ionized<ToRawItems<T>, PROTO> : Ionized<ToRawItems<T>>
@@ -208,7 +208,7 @@ export const Ionized = ionize
 export const $$ = ionize
 
 export function ionize<T extends object, O>(target: T & ThisType<Ionized<T>>, options?: O & IonizeOptions): O extends { nested: infer N } ? DeepIonic<T, N> : Ionized<T> {
-   //TODO: store stack trace
+   // TODO: store stack trace
    return <unknown>getExistingIonizedModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T> ??
       <unknown>ionizeModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T>
 }
@@ -239,12 +239,12 @@ type RawType<O> = O extends (arg: infer T) => any ? T extends object ? T : never
 
 // export { _withInertItems as withInertItems }
 
-//TODO:
+// TODO:
 // export function withInertKeys<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<M>>, M> : Ionized<ToRawItems<T>> {
 //    return ionizeModel(target, methods, InertCollection.KEYS) as M extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<M>>, M> : Ionized<ToRawItems<T>>
 // }
 
-//TODO:
+// TODO:
 // export function withInertEntries<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<M>>, M> : Ionized<ToRawItems<T>> {
 //    return ionizeModel(target, methods, InertCollection.ENTRIES) as M extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<M>>, M> : Ionized<ToRawItems<T>>
 // }
@@ -278,7 +278,7 @@ type RawType<O> = O extends (arg: infer T) => any ? T extends object ? T : never
 
 
 
-// function traceIonized() { //TODO: what about objects that are ionized by ionsOf()?
+// function traceIonized() { // TODO: what about objects that are ionized by ionsOf()?
 //    return extractTrace(getPublicTrace() 
 // }
 
@@ -320,7 +320,7 @@ type RawType<O> = O extends (arg: infer T) => any ? T extends object ? T : never
 //    return ionize(target, undefined, publicMethods)
 // }
 
-// type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | InertMark }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends InertMark ? T[K] & Inert : T[K] } //TODO: Mark public
+// type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | InertMark }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends InertMark ? T[K] & Inert : T[K] } // TODO: Mark public
 
 export function storeSnapshot(modelQuark: ModelQuark, clone?: AnyObject) {
    // timeTraveler.takeSnapshot(toRaw(modelQuark), $effectCycle().count, clone)

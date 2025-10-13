@@ -5,7 +5,7 @@
 // [] if open, append message in main messages view
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
-//TODO:
+// TODO:
 // [] fromCommons type is broken 
 // [] AtomicIon type is broken, the state def feels like a hassle... maybe just use this.value? or maybe just use $unseenCount.value++? or .value++? or something else?
 // [] defineIonCapsule should use this.count++, for ion(), use $count.value++ ... it should be .value

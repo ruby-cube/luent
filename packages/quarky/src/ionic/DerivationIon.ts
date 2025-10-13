@@ -134,7 +134,7 @@ export function createManagedDerivation(
    }
 
    function getMemoizedState() {
-      //TODO: not sure if I should assert initialization only or all calls
+      // TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
       const stale = isLazyUpdate() ? ion.pStale : ion.stale;
       if (!stale || !retrack) trackParticle(ion)
@@ -229,7 +229,7 @@ Memory leaks occur when an object is referenced outside of its creation scope in
 */
 function assertValidInitialization(initializationFlask: Flask | undefined, creationFlask: Flask | undefined) {
    if (true) return;
-   //TODO:
+   // TODO:
    // if (!creationFlask) return;
    // if (!initializationFlask) {
    //    if (creationFlask.creationScopeID === "0") // both are in global creation scope

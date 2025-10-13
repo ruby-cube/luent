@@ -61,7 +61,7 @@ declare global {
       toReversed<H>(this: H): IonizeBy<H, T>[];
       with<H>(this: H, index: number, value: IonizeBy<H, T>): IonizeBy<H, T>[];
 
-      //flat //TODO:
+      //flat // TODO:
       //flatMap
 
       [Symbol.iterator]<H>(): IonizeBy<H, IterableIterator<ToRaw<T>>>;
@@ -185,7 +185,7 @@ enlistIonizedMethods(Array,
 
       // forEach: trackableOp,//forEach(callbackFn, thisArg?)
 
-      keys: trackableOp,  // newIterable = keys() //TODO: this does not need to track the entire model, just [[ownKeys]]
+      keys: trackableOp,  // newIterable = keys() // TODO: this does not need to track the entire model, just [[ownKeys]]
       // entries: trackableOp, // newEntriesIterator = entries()
       // values: trackableOp, // newIterable = values()
 
@@ -201,14 +201,14 @@ enlistIonizedMethods(Array,
       // every: trackableOp, // boolean = every(callbackFn, thisArg?)
       // some: trackableOp, // boolean = some(callbackFn, thisArg?)
 
-      // depends on index //TODO: possible performance optimization if we trigger based on indices?
-      // lastIndexOf: indexOp, // index = lastIndexOf(item, fromIndex?) //TODO: atomic op that includes fromIndex
+      // depends on index // TODO: possible performance optimization if we trigger based on indices?
+      // lastIndexOf: indexOp, // index = lastIndexOf(item, fromIndex?) // TODO: atomic op that includes fromIndex
       // indexOf: indexOp, // index = indexOf(item, fromIndex?)
       // includes: indexOp, // boolean = includes(item, fromIndex?)
 
       slice: creativeOp, // newArray = slice(start?, end?) 
 
-      //TODO: test if this functions properly
+      // TODO: test if this functions properly
       toSpliced: creativeOp,
       // newArray = toSpliced(start?, delete[Count?, item1, item2, /* …, */ itemN)
       // {
@@ -332,7 +332,7 @@ enlistIonizedMethods(Array,
       //    triggers: (model, [key, value]) => [
       //       trigger(model),
       //       isIntegerKey(key) ? trigger(model, 'at', key) : trigger(model, '[[get]]', key)
-      //       //TODO: length should trigger observed indices
+      //       // TODO: length should trigger observed indices
 
       //       // afterSet(ionizedModel, quark, key, newValue, oldValue) {
       //       //    if (isIntegerKey(key)) {

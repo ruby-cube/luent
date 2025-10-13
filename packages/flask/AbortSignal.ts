@@ -3,7 +3,7 @@
 export type AbortSignal = (remove?: RemoveTask) => void
 type RemoveTask = () => void
 
-//TODO: make sure RemoveTask doesn't cause memory leak?
+// TODO: make sure RemoveTask doesn't cause memory leak?
 export function AbortSignal(): AbortSignal {
    // const controller = new AbortController()
    let tasks: RemoveTask[] = []
