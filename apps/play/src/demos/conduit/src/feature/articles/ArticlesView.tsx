@@ -76,7 +76,7 @@ ArticlesNav.router = CommonsKey<Router>()
 
 function ArticlesNav(input: FromTag<{}>) {
    const router = fromRoot(ArticlesNav.router)
-   
+
    return component(
       <div>
          hi
@@ -112,21 +112,18 @@ export function ArticlePreview(input: FromTag<{
    return component(
       <div class="article-preview">
          <div class="article-meta">
-            <SiteLink
-               name="profile"
-               params={({ username: $author })}
-            >
+            <router-link to="profile" params={{ username: $author }}>
                <img alt={$author} src={$authorImage}></img>
-            </SiteLink>
+            </router-link>
          </div>
          <div class="info">
-            <SiteLink
+            <router-link
                class="author"
-               name="profile"
-               params={({ username: $author })}
+               to="profile"
+               params={{ username: $author }}
             >
                {$author}
-            </SiteLink>
+            </router-link>
             <span class="date">{new Date(article.createdAt).toDateString()}</span>
             <button
                class={(article.favorited ? 'btn-primary' : 'btn-outline-primary')}
@@ -135,10 +132,11 @@ export function ArticlePreview(input: FromTag<{
                <i class='ion-heart'>{(article.favoritesCount)}</i>
             </button>
          </div>
-         <SiteLink
+         <router-link
             class="preview-link"
-            name="article"
-            params={({ slug: article.slug })}>
+            to="article"
+            params={{ slug: article.slug }}
+         >
             <h1>{(article.title)}</h1>
             <p>{article.description}</p>
             <span>Read more...</span>
@@ -149,7 +147,7 @@ export function ArticlePreview(input: FromTag<{
                   </li>
                ))}
             </ul>
-         </SiteLink>
+         </router-link>
       </div>
    )
 }

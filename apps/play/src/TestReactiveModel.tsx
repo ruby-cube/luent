@@ -161,12 +161,12 @@ export function List(
 
    console.log('$$$ values vs entries', [][Symbol.iterator].constructor)
 
+   // FIX:
    const ionizedValues = ionize(list.values())
    for (const value of ionizedValues) {
       console.log('$$$ value of ionized values()', value)
    }
-   // console.log('raw list', toRaw(list))
-   // console.log([...list])
+
 
 
 

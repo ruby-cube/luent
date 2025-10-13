@@ -16,7 +16,7 @@ import { getClosestCommons } from "../../../packages/lumo/src/commons/commons-st
 
 export function FriendSite() {
    const $connected = initDatabaseConnection();
-   const $user = ion(null as User | null)
+   const $user = Ion(null as User | null)
    let initialLoad = true;
    const $route = getRouter()
 

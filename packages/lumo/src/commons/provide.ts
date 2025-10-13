@@ -14,7 +14,6 @@ export interface AppCommons {
    muIons: Set<Ion> | undefined
 }
 
-export const fromCommons = fromCommons
 
 //TODO: trace provider
 // fromCommons.trace('dog')(DOG)
