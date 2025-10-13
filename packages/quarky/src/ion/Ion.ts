@@ -32,9 +32,9 @@ type PickMethods = (...args: string[]) => ReinConfig
 type ReinConfig = { capsule: AnyObject, selectedMethods: string[] }
 
 export function isIon(value: unknown): value is Ion {
-   return isFunction(value) && 
-   // value.length === 0
-   QUARK in value
+   return isFunction(value) &&
+      // value.length === 0
+      QUARK in value
    // /^\$[a-z]/.test(value.name) && 
    // value.length === 0
 }
@@ -184,7 +184,9 @@ function createIonizedIon<
 // }
 
 
-
+export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, proto?: P & ThisType<P & { value: T }> & {'~pure'?: () =>(keyof P)[]}, protoOptions?: { pure: string }) {
+   return (...args: A & any) => Ion(constructor(...args), proto) as MutableIon<T> & P
+}
 
 
 /**

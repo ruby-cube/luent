@@ -1,5 +1,6 @@
 import { component, FromTag, If, Else, For, fromGlobal, CommonsKey } from "@rue/lumo";
-import { $from, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, NoExpand } from "@rue/quarky";
+import { $from, DeepIonized, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, isIonizedModel, NoExpand } from "@rue/quarky";
+import { isObjectLiteral } from "@rue/utils";
 
 
 type DeepIonic<D extends (...args: any[]) => any, M = {}> = Omit<ReturnType<D>, keyof M> & M
@@ -56,10 +57,6 @@ class TreeItem {
    addChild(item: TreeItem) {
       this.children?.push(item)
    }
-
-   isFolder(this: ShallowRO<TreeItem>) {
-      return !!this.children?.length
-   }
 }
 
 
@@ -89,6 +86,23 @@ type ROMethods<T> = { [K in keyof T as  T[K] extends Function ? T[K] extends (th
 type Hey = ROMethods<TreeItem>
 
 
+
+// function IonizedChildren(data: TreeItemData[] | undefined) {
+//    if (!data) return ionize([]);
+//    return ionize(data.map(data => IonizedTreeItem(data)))
+// }
+
+// # ionic factory
+// function IonizedTreeItem(data: TreeItemData) {
+//    return ionizeTreeItem(createTreeItem(data))
+// }
+
+
+// # ionic type
+// type $$TreeItem = DeepIonic<typeof ionizeTreeItem, {
+//    addChild(item: $$TreeItem): void,
+// }>
+
 // # rich model from data
 function createTreeItem(data: TreeItemData): TreeItem {
    const TreeItem = $GlobalTreeItem()
@@ -98,34 +112,52 @@ function createTreeItem(data: TreeItemData): TreeItem {
    )
 }
 
-
 // # ionic factory
-function IonicTreeItem(data: TreeItemData): IonicTreeItem {
-   return ionizeTreeItem(createTreeItem(data))
+function IonizedTreeItem(data: TreeItemData): $$TreeItem {
+   return ionize(createTreeItem(data), {
+      nested: { children: (items: TreeItem[]) => ionize(items.map(item => IonizedTreeItem(item))) }
+   })
+}
+
+
+// # ionizer
+function ionizeTreeItem(item: TreeItemData | TreeItem | $$TreeItem): $$TreeItem {
+   return ionized(item) ?? ionize(isObjectLiteral(item) ? createTreeItem(item) : item, {
+      nested: { children: (items: TreeItem[]) => ionize(items.map(item => ionizeTreeItem(item))) }
+   })
 }
 
 
 // # ionic type
-type IonicTreeItem = DeepIonic<typeof ionizeTreeItem, {
-   addChild(item: IonicTreeItem): void,
+type $$TreeItem = DeepIonized<TreeItem, {
+   children?: Ionized<$$TreeItem[]>
+   addChild(item: $$TreeItem): void
 }>
 
 
-// # deep ionize
-const ionizeTreeItem = defineDeepIonize((_: TreeItem) => ({
-   nested: {
-      children: ionizeChildren
-   }
-}))
+
+function ionized<T>(value: T): T extends { '~ionized': true } ? T : undefined {
+   return isIonizedModel(value)
+      ? value as T extends { '~ionized': true } ? T : undefined
+      : undefined as T extends { '~ionized': true } ? T : undefined
+}
+
+// // # deep ionize
+// const ionizeTreeItem = defineDeepIonize((_: TreeItem) => ({
+//    nested: {
+//       children: ionizeChildren
+//    }
+// }))
+
+// const ionizeChildren = defineDeepIonize((_: TreeItem[]) => ({
+//    nested: [ionizeTreeItem]
+// }))
+
 
 // # global class (DI)
 export const [$GlobalTreeItem, TREE_ITEM_CLASS] = asGlobal(TreeItem)
 
 
-
-const ionizeChildren = defineDeepIonize((_: TreeItem[]) => ({
-   nested: [ionizeTreeItem]
-}))
 
 
 
@@ -136,9 +168,7 @@ export function TreeApp(input: FromTag<{
 }>) {
    const { data = getTreeItemData() } = input
 
-   data.name = 'hi'
-
-   const root = IonicTreeItem(data)
+   const root = IonizedTreeItem(data)
 
    return component(
       <>
@@ -201,7 +231,7 @@ type Mu<T extends object, M extends keyof T, N = {}> =
    & { [K in keyof T as K extends M ? K : never]: K extends keyof N ? N[K] : T[K] } // mutable or allowed methods
    & { '~mu'?: true }
 
-type MuonicTreeItem = Mu<IonicTreeItem, 'addChild' | 'children', {
+type MuonicTreeItem = Mu<$$TreeItem, 'addChild' | 'children', {
    children?: MuonicTreeItem[]
 }>
 
@@ -216,7 +246,7 @@ type Yes = ReadonlyObj extends Obj ? true : false
 // # TreeItem
 
 function TreeItemView(input: FromTag<{
-   'mu:item': Mu<IonicTreeItem, 'addChild' | 'children', { children?: MuonicTreeItem[] }>,
+   'mu:item': Mu<$$TreeItem, 'addChild' | 'children', { children?: MuonicTreeItem[] }>,
 }>) {
    const { item } = input()
 
@@ -230,7 +260,7 @@ function TreeItemView(input: FromTag<{
    function changeType() {
       if (!$isFolder()) {
          item.children = ionizeChildren([])
-         item.addChild(IonicTreeItem({ name: 'stuff' }))
+         item.addChild(IonizedTreeItem({ name: 'stuff' }))
          $isOpen.value = true
       }
    }
@@ -252,7 +282,7 @@ function TreeItemView(input: FromTag<{
                {For(item.children!, m => m, item => (
                   <TreeItemView mu:item={item}></TreeItemView>
                ))}
-               <li class='add' on:click={e => item.addChild(IonicTreeItem({ name: 'stuff' }))}>+</li>
+               <li class='add' on:click={e => item.addChild(IonizedTreeItem({ name: 'stuff' }))}>+</li>
             </ul>
          )}
       </li>

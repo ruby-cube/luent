@@ -1,4 +1,4 @@
-import { component, fromGlobal, If, Style } from "@rue/lumo";
+import { component, fromGlobal, fromRoot, If, Style } from "@rue/lumo";
 import { Router } from "./router";
 import { Ion, ion, Ionized } from "@rue/quarky";
 import { User } from "./commons/keys";
@@ -18,41 +18,23 @@ export function FriendSite() {
    const $connected = initDatabaseConnection();
    const $user = ion(null as User | null)
    let initialLoad = true;
-
-   const { $View, $route, routeTo } = Router([
-      ['/', () => {
-         const user = $user()
-         if (user) {
-            routeTo('/app')
-            return;
-         }
-         return <WelcomeView initialLoad={initialLoad}></WelcomeView>
-      }],
-      ['/app', () => {
-         const user = $user()
-         if (!user) {
-            routeTo('/')
-            return;
-         }
-         return <FriendApp user={user}></FriendApp> //TODO: non-null assertion
-      }],
-   ])
+   const $route = getRouter()
 
    onLoggedIn(user => {
       $user.value = user
-      routeTo('/app')
+      $route.to('app')
       initialLoad = false
    })
 
    onLoggedOut(() => {
-      routeTo('/')
+      $route.to('default')
       $user.value = null
    })
 
    return component(
       <>
          {If($connected,
-            <$View as={$route}></$View>
+            <RouteView as={$route}></RouteView>
          )}
 
          {Style`
@@ -65,4 +47,5 @@ export function FriendSite() {
       </>
    )
 }
+
 

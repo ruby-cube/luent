@@ -1,9 +1,11 @@
+//@ts-nocheck
 import { component, For, If, Else, FromTag, fromApp, CommonsKey, CommonsEntryKey, fromGlobal } from "@rue/lumo"
-import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH, defineDeepIonize } from "@rue/quarky"
+import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
 import { isTracking } from "../../../../packages/quarky/src/compound/Compound"
 import { TODO_DB_KIT } from "./todo-mvc-local"
+import { AnyObject } from "@rue/types"
 
 // CON: You have to return a whole object
 // PRO: More composable
@@ -19,6 +21,11 @@ type IonizeOptions = {
 }
 
 
+type $<T> = Ion<T>
+
+type $$<T extends object> = Ionized<T>
+
+type $$$<T extends object> = Ion<Ionized<T>>
 
 
 // interface Todo {
@@ -29,9 +36,7 @@ type IonizeOptions = {
 
 // # procedures for interface
 
-function muTodo(todo: Todo): todo is Mutable<Todo> {
-   return true
-}
+
 
 
 type InputEvent = { target: { value: string }, key: string }
@@ -110,16 +115,23 @@ type FilterKeys = 'all' | 'active' | 'completed'
 // [X] How to pass DBKit 
 // [X] Ionizing with options
 
+function can<T>(fn: T): T {
+   return fn
+}
 
+// class Todo {
+//    constructor(
+//       public readonly id: number,
+//       public title: string,
+//       public completed: boolean
+//    ) {
 
-class Todo {
-   constructor(
-      public readonly id: number,
-      public title: string,
-      public completed: boolean
-   ) {
-
-   }
+//    }
+// }
+interface Todo {
+   readonly id: number,
+   title: string,
+   completed: boolean
 }
 
 
@@ -142,24 +154,71 @@ export function TodoDBKit() {
 
 export const TODO_DB = CommonsKey<TodoDB>('todoDB')
 
+type $$TodoArray = ReturnType<typeof ionizeTodos>
 
-
-const ionizeTodos = defineDeepIonize((value: Todo[]) => ({
-   nested: [ionizeTodo]
+const ionizeTodos = defineDeepIonize((type: Todo[]) => ({
+   nested: [ionizeTodo],
 }))
 
-const ionizeTodo = defineDeepIonize((value: Todo) => ({
-   fromData: (todo: Todo) => new Todo(todo.id, todo.title, todo.completed),
+type $$Todo = ReturnType<typeof ionizeTodo>
+
+const ionizeTodo = defineDeepIonize((type: Todo) => ({
+   // fromData: (todo: Todo) => new Todo(todo.id, todo.title, todo.completed),
    '@set': {
       title: () => console.trace('set title!')
    }
 }))
 
+
+//QUESTION: while create an ionizedTodos function instead of a $TodoArray function?
+
+function IonizedTodoArray(todos: Todo[]) {
+   return ionize(todos, {
+      nested: [IonizedTodo]
+   })
+}
+
+function IonizedTodo(todo: Todo) {
+   return ionize(todo, {
+      '@set': {
+         title: () => console.trace('set title!')
+      }
+   })
+}
+
+const somthing = Ion(0, { addOne() { } })
+
+const TodosIon = defineIon((todos: Todo[]) => IonizedTodoArray(todos), {
+
+   addTodo(todo: $$Todo) {
+      this.value.push(todo)
+   },
+
+   removeTodo(todo: $$Todo) {
+      this.value.splice(this.value.indexOf(todo), 1)
+   },
+
+   toggleAllComplete(completed: boolean) {
+      this.value.forEach((todo) => (todo.completed = completed))
+   },
+
+   isAllComplete() {
+
+   },
+
+   '~pure'() {
+      return ['isAllComplete']
+   }
+})
+
+
+
+
 type TodoAppKit = typeof TodoAppKit
 
 function TodoAppKit(todos: Todo[]) {
 
-   const $todos = Ion(ionizeTodos(todos))
+   const $todos = TodosIon(todos)
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
@@ -167,9 +226,9 @@ function TodoAppKit(todos: Todo[]) {
    const $todoCount = Ion(() => $todos().length)
 
    const filters = {
-      all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => ionizeTodos(todos.filter(todo => !todo.completed)),
-      completed: (todos: Ionized<Todo[]>) => ionizeTodos(todos.filter(todo => todo.completed))
+      all: (todos: $$TodoArray) => todos,
+      active: (todos: $$TodoArray) => ionize(todos.filter(todo => !todo.completed)),
+      completed: (todos: $$TodoArray) => ionize(todos.filter(todo => todo.completed))
    }
 
    function createTodo(title: string) {
@@ -180,21 +239,21 @@ function TodoAppKit(todos: Todo[]) {
       })
    }
 
-   function addTodo(todo: Ionized<Todo>) {
-      $todos().push(todo)
-   }
+   // function addTodo(todo: Ionized<Todo>) {
+   //    $todos().push(todo)
+   // }
 
-   function removeTodo(todo: Ionized<Todo>) {
-      $todos().splice($todos().indexOf(todo), 1)
-   }
+   // function removeTodo(todo: Ionized<Todo>) {
+   //    $todos().splice($todos().indexOf(todo), 1)
+   // }
 
    function removeCompleted() {
       $todos.value = filters.active($todos())
    }
 
-   function toggleAll(checked: boolean) {
-      $todos().forEach((todo) => (todo.completed = checked))
-   }
+   // function toggleAll(checked: boolean) {
+   //    $todos().forEach((todo) => (todo.completed = checked))
+   // }
 
    return {
       $todos,
@@ -203,11 +262,8 @@ function TodoAppKit(todos: Todo[]) {
       $remaining,
       $todoCount,
       filters,
-      addTodo,
-      removeTodo,
-      toggleAll,
       removeCompleted,
-      muTodo
+      createTodo
    }
 }
 
@@ -238,11 +294,8 @@ export function TodoMVC({
       $filteredTodos,
       $remaining,
       $todoCount,
-      addTodo,
-      removeTodo,
       removeCompleted,
-      toggleAll,
-      muTodo
+      createTodo
    } = useTodoApp(getTodos())
 
 
@@ -268,20 +321,24 @@ export function TodoMVC({
       storeTodos($todos())
    })
 
-
    return component(
       <>
          <section class="todoapp">
             <header class="header">
                <h1>Todos</h1>
-               {TodoInput(addTodo)}
+               {TodoInput(
+                  can(($todos.addTodo)),
+                  can(createTodo)
+               )}
             </header>
             <section class="main">
-               {Checkbox(toggleAll, { $remaining })}
+               {Checkbox(
+                  can(($todos.toggleAllComplete)),
+                  { $remaining }
+               )}
                <TodoList
-                  todos={$filteredTodos}
-                  can:removeTodo={removeTodo}
-                  can:muTodo={muTodo}
+                  mu:todos={$filteredTodos}
+                  can:removeTodo={($todos.removeTodo)}
                ></TodoList>
             </section>
             <footer show-if={$todoCount} class="footer">
@@ -311,7 +368,7 @@ export function TodoMVC({
 @import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
 </style> */}
 
-const Checkbox = (toggleAll: (checked: boolean) => void, ctx: { $remaining: Ion<number> }) => (
+const Checkbox = (toggleAll: (checked: boolean) => void, ctx: { $remaining: $<number> }) => (
    <>
       <input
          id="toggle-all"
@@ -327,7 +384,7 @@ const Checkbox = (toggleAll: (checked: boolean) => void, ctx: { $remaining: Ion<
 
 // # remaining todos
 
-const RemainingCount = ($remaining: Ion<number>) => (
+const RemainingCount = ($remaining: $<number>) => (
    <span class="todo-count">
       <strong>{$remaining}</strong>
       <span>{($remaining() === 1 ? ' item' : ' items')} left</span>
@@ -336,12 +393,13 @@ const RemainingCount = ($remaining: Ion<number>) => (
 
 
 
-function TodoInput(addTodo: (title: string) => void) {
+
+function TodoInput(addTodo: (todo: $$<Todo>) => void, createTodo: (title: string) => $$Todo) {
 
    function submitTodo(e: InputEvent) {
       const value = e.target.value.trim()
       if (value) {
-         addTodo(value)
+         addTodo(createTodo(value))
          e.target.value = ''
       }
    }
@@ -359,18 +417,12 @@ function TodoInput(addTodo: (title: string) => void) {
 type IsMutable<T> = (value: T) => value is Mutable<T>
 type Mutable<T> = T
 
-type TodoListInput = FromTag<{
-   todos: Ion<Ionized<Todo[]>>,
-   'can:removeTodo': (todo: Ionized<Todo>) => void,
-   'can:muTodo': IsMutable<Todo>
-}>
 
-function TodoList({
-   $todos,
-   removeTodo,
-   muTodo
-
-}: TodoListInput) {
+function TodoList(input: FromTag<{
+   'mu:todos': $<$$TodoArray>,
+   'can:removeTodo': (todo: $$<Todo>) => void,
+}>) {
+   const { mu, $todos, removeTodo, } = input()
 
    const $editedTodo = Ion(null as Todo | null)
 
@@ -378,18 +430,18 @@ function TodoList({
 
    function editTodo(todo: Todo) {
       beforeEditCache = todo.title
-      $editedTodo.value = todo
+      mu($editedTodo).value = todo
    }
 
-   function cancelEdit(todo: Todo) {
-      $editedTodo.value = null
-      if (muTodo(todo)) todo.title = beforeEditCache
+   function cancelEdit(todo: $$<Todo>) {
+      mu($editedTodo).value = null
+      mu(todo).title = beforeEditCache
    }
 
-   function doneEdit(todo: Ionized<Todo>) {
+   function doneEdit(todo: Mu<$$Todo>) { //NOTE: Typescript is not a fullproof solution to preventing mutations. When you do something like this, you give the power to mutate again...
       if ($editedTodo()) {
-         $editedTodo.value = null
-         if (muTodo(todo)) todo.title = todo.title.trim()
+         mu($editedTodo).value = null
+         mu(todo).title = todo.title.trim() //FIX: But how would you implement this? How do you know todo is mutable when it's nested in filtered todos?
          if (!todo.title) removeTodo(todo)
       }
    }
@@ -402,7 +454,7 @@ function TodoList({
             return (
                <li class={{ todo: true, completed: (todo.completed), editing: $isEditing }}>
                   <div class="view">
-                     <input class="toggle" type="checkbox" mu:checked={muTodo(todo) && $from(todo).$completed} />
+                     <input class="toggle" type="checkbox" mu:checked={$from(todo).$completed} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
                      <button class="destroy" on:click={e => removeTodo(todo)}></button>
                   </div>
@@ -410,7 +462,7 @@ function TodoList({
                      <input
                         class="edit"
                         type="text"
-                        mu:value={muTodo(todo) && $from(todo).$title}
+                        mu:value={$from(todo).$title}
                         at:mounted={node => node.focus()}
                         on:blur={e => doneEdit(todo)}
                         on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
@@ -424,3 +476,14 @@ function TodoList({
 }
 
 
+function mutateTodo(todo: Todo) {
+
+}
+
+mutateTodo(null as unknown as Readonly<Todo>)
+
+function readTodo(todo: Readonly<Todo>) {
+
+}
+
+readTodo(null as unknown as Todo)

@@ -35,7 +35,7 @@ export function toCommonsKey(key: CommonsEntryKey | string): string {
    return key.name
 }
 
-export function CommonsKey<T>(key: string): CommonsEntryKey<T> {
+export function CommonsKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
    const fnKey = function (v: T) {
       return [fnKey, v]
    }

@@ -14,7 +14,7 @@ export interface AppCommons {
    muIons: Set<Ion> | undefined
 }
 
-
+export const fromCommons = fromCommons
 
 //TODO: trace provider
 // fromCommons.trace('dog')(DOG)
@@ -113,6 +113,8 @@ export function provideGlobal<K extends CommonsEntryKey | string>(key: K, value:
    globalEntries.set(commonsKey, value);
    return value;
 }
+
+export const fromRoot = fromGlobal
 
 export function fromGlobal<K extends CommonsEntryKey | string>(key: K, commons?: NodeCommons | AppCommons): CommonsValue<K> {
    let _context = commons || getClosestCommons();

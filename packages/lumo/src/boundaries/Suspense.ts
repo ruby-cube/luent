@@ -24,7 +24,11 @@ const SUSPENSE_ION = Symbol('suspense ion')
 export type Suspense<T> = {
    [SUSPENSE_ION]: true,
    error: null | Error,
-   loading: Promise<T> | false,
+   pending: boolean,
+   then: Promise<T>['then']
+   catch: Promise<T>['then']
+   finally: Promise<T>['then']
+   // TODO: need a way to distinguish re'fetches' from initial 'fetch'
    // pending: boolean
    // cancel(): void
    // onCancel(task: () => void): void
@@ -33,7 +37,7 @@ export type SuspenseIon<T> = MutableIon<T> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
 export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
-   loading: false,
+   pending: false,
    error: null, // different
    onLoaded(initial: boolean): unknown
    // cancel(): void
@@ -73,18 +77,18 @@ export function SuspenseIon<
       }
       const $ion = ion(initialState as T | undefined, {
          [SUSPENSE_ION]: true,
-         loading: input,
+         pending: input,
          error: null,
       }) as SuspenseIon<T>
 
       input
          .then(value => {
             $ion.value = value;
-            $ion.loading = false;
+            $ion.pending = false;
          })
          .catch(err => {
             $ion.error = toError(err)
-            $ion.loading = false;
+            $ion.pending = false;
          })
 
       return $ion;
@@ -93,7 +97,7 @@ export function SuspenseIon<
    const $promise = ion(null as null | Promise<T>)
    const $ion = ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
-      get loading() {
+      get pending() {
          return $promise() ?? false
       },
       error: null as null | Error,

@@ -1,6 +1,6 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { debug, isFunction, isObject } from "@rue/utils";
-import { InertCollection, InertCollectionType, ModelQuark } from "./ModelQuark";
+import { ModelQuark } from "./ModelQuark";
 import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { createIonizedModel, getIonizedModel, IonizedModel, IonizeOptions } from "./IonizedModel";
@@ -102,7 +102,7 @@ type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args:
  * Wrap the return of a method of an ionizable class with this type helper in order to 
  * propagate any deep ionization that has been defined in the class's enlistIonizedMethods config
  */
-export type IonizeBy<H, T> =  IsIonized<H> extends true ?
+export type IonizeBy<H, T> = IsIonized<H> extends true ?
    (T extends AnyObject ? Ionized<T> : T) : T
 
 export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T
@@ -201,13 +201,16 @@ function getExistingIonizedModel(target: object, markMap?: object) {
    return existing
 }
 
+
+export type DeepIonic<T, N> = Ionized<{ [P in Exclude<keyof T, keyof N>]: T[P]; }> & { [K in keyof N]: N[K] extends (...args: any[]) => infer R ? R : never }
+export type DeepIonized<T, N extends Partial<T>> = Ionized<{ [P in Exclude<keyof T, keyof N>]: T[P]; }> & N
 export const Ionized = ionize
 export const $$ = ionize
 
-export function ionize<T extends object, MARKS>(target: T & ThisType<Ionized<T>>, options?: IonizeOptions): MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> {
+export function ionize<T extends object, O>(target: T & ThisType<Ionized<T>>, options?: O & IonizeOptions): O extends { nested: infer N } ? DeepIonic<T, N> : Ionized<T> {
    //TODO: store stack trace
-   return <unknown>getExistingIonizedModel(target, options) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> ??
-      <unknown>ionizeModel(target, options) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>>
+   return <unknown>getExistingIonizedModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T> ??
+      <unknown>ionizeModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T>
 }
 
 // export function defineDeepIonize<T extends object>(getConfig: () => IonizeOptions) {
@@ -226,7 +229,7 @@ export function defineDeepIonize<O extends (arg: any) => any>(getConfig: O) {
    return ionizer
 }
 
-type RawType<O> = O extends (arg: infer T) =>any ? T extends object ? T : never : never
+type RawType<O> = O extends (arg: infer T) => any ? T extends object ? T : never : never
 
 // function _withInertItems<T, M>(target: T & object): M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>> {
 //    return ionizeModel(target, InertCollection.ITEMS) as M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>>

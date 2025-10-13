@@ -1,4 +1,4 @@
-import { unnestComponent } from "../component/Component";
+import { component, unnestComponent } from "../component/Component";
 import { CommonsNode, getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
@@ -24,7 +24,7 @@ export function Commons(
    }>
 ) {
    if (!Slot) debug.warn(`Extraneous <Commons>`)
-   return callWithCommons(Slot, createCommonsNode(provide))
+   return component(callWithCommons(Slot, createCommonsNode(provide)))
 }
 
 export function createCommonsNode(

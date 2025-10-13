@@ -10,7 +10,7 @@ export function TestSearchDebounce() {
    const $searchTerm = Ion('')
 
    const $articles = SuspenseIon([] as Article[], () => {
-      return fetchArticles($searchTerm(), {debounce: 100})
+      return fetchArticles($searchTerm(), { debounce: 100 })
    })
 
    return component(
@@ -24,7 +24,7 @@ export function TestSearchDebounce() {
 }
 
 
-function Debounced<T extends (...args: any[]) => any>(ms: number, fn: T) {
+export function Debounced<T extends (...args: any[]) => any>(ms: number, fn: T) {
    let id: NodeJS.Timeout;
 
    return (...args: Parameters<T>) => {
@@ -47,7 +47,7 @@ function Debouncer() {
          id = setTimeout(() => {
             resolve(fn())
          }, ms)
-      })
+      }).then(res => res)
    }
 }
 
@@ -90,7 +90,7 @@ function toDebounceable<F extends (...args: any[]) => any>(fn: F): Debounceable<
       const maybeOptions = args.at(-1)
 
       if (isObjectLiteral(maybeOptions) && maybeOptions.debounce)
-         return debounce(maybeOptions.debounce, () => fn(...args)).then(res => res) as ReturnType<F>
+         return debounce(maybeOptions.debounce, () => fn(...args)) as ReturnType<F>
       else {
          return fn(...args)
       }
