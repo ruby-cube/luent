@@ -3,7 +3,7 @@ import { component, For, If, Else, FromTag } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
-import { isTracking } from "../../../../packages/quarky/src/compound/Compound"
+import { isTracking } from "../../../../packages/quarky/src/abstract/Compound"
 
 // entity.name.type.tsx
 // meta.type.annotation.tsx

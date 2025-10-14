@@ -1,4 +1,4 @@
-import { component, For, If, listen, NodeRef, Portal, Style } from "@rue/lumo"
+import { component, For, If, listen, GetNode, Portal, Style } from "@rue/lumo"
 import { FiniteState, ion, watch } from "@rue/quarky"
 
 //FIX: 
@@ -6,7 +6,7 @@ import { FiniteState, ion, watch } from "@rue/quarky"
 
 export function Sidebar() {
    const items = ['a', 'b', 'c']
-   const $contextMenu = NodeRef(IfContextMenu)
+   const $contextMenu = GetNode(IfContextMenu)
 
    return component(
       <>
@@ -16,7 +16,7 @@ export function Sidebar() {
                   <li class='sidebar-item' on:contextmenu={e => (e.preventDefault(), console.log($contextMenu()), $contextMenu()!.open())}>{item}</li>
                </>
             ))}
-            <IfContextMenuC ref={$contextMenu}></IfContextMenuC>
+            <IfContextMenuC get={$contextMenu}></IfContextMenuC>
          </ul>
 
          {Style`
@@ -43,7 +43,7 @@ export function Sidebar() {
 }
 
 function IfContextMenu() {
-   const $container = NodeRef('div')
+   const $container = GetNode('div')
 
    const $menu = FiniteState({
       'opened': {
@@ -78,7 +78,7 @@ function IfContextMenu() {
          <o--portal to='body'>
             <div>
                {If(($menu.is('opened')),
-                  <div ref={$container} at:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
+                  <div get={$container} at:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
                      menu item 1
                      -
                      menu item 2
@@ -96,7 +96,7 @@ function IfContextMenu() {
 
 
 function IfContextMenuB() {
-   const $container = NodeRef('div')
+   const $container = GetNode('div')
 
    const $open = ion(false)
 
@@ -124,7 +124,7 @@ function IfContextMenuB() {
          open
       },
       Portal('body',
-         <dialog ref={container} open={$open} style={{ position: 'absolute', top: 0, left: 0, width: '10rem', height: '10rem' }}>
+         <dialog get={container} open={$open} style={{ position: 'absolute', top: 0, left: 0, width: '10rem', height: '10rem' }}>
             <div >
                menu item 1
                -
@@ -140,7 +140,7 @@ function IfContextMenuB() {
 }
 
 function IfContextMenuC() {
-   const $container = NodeRef('div')
+   const $container = GetNode('div')
 
    const $open = ion(false)
 
@@ -172,7 +172,7 @@ function IfContextMenuC() {
       <div>
          {If($open,
             <o--portal to='body'>
-               <div ref={$container} at:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
+               <div get={$container} at:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
                   <p>
                      menu item 1
                   </p>

@@ -1,19 +1,19 @@
 import { emitSignal } from "../debug/debug";
-import { InertMark } from "../ionized/ionize";
+import { InertMark } from "../ionic/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
-import { hasQuark, Quark, QUARK, quarkOf } from "../Quark";
+import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark";
 import { trigger, Watchable, Watched } from "../reactivity/Watched";
 import { Mutable } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
-import { ModelQuark } from "../ionized/ModelQuark";
-import { trackParticle } from "../compound/Compound";
+import { ModelQuark } from "../ionic/ModelQuark";
+import { trackParticle } from "../abstract/Compound";
 import { Update, isLazyUpdate, initUpdate } from "../reactivity/UpdateCycle";
-import { maybeIonize, MarkMap } from "../ionized/IonizedModel";
+import { maybeIonize, MarkMap } from "../ionic/Ionic";
 import { ILazyState } from "../reactivity/LazyState";
-import { AtomicQuark } from "../reactivity/AtomicQuark";
+import { AtomicQuark } from "../abstract/AtomicQuark";
 import { isObjectLiteral } from "@rue/utils";
 
 export const IONIZED = true

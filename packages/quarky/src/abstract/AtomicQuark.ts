@@ -1,6 +1,6 @@
-import { hasQuark, QUARK, Quark, quarkOf } from "../Quark"
-import { Update } from "./UpdateCycle"
-import { trigger, Watchable, Watched } from "./Watched"
+import { hasQuark, QUARK, Quark, quarkOf } from "./Quark"
+import { Update } from "../reactivity/UpdateCycle"
+import { trigger, Watchable, Watched } from "../reactivity/Watched"
 
 
 const ATOMIC = Symbol('atomic')

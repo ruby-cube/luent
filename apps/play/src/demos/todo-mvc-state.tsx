@@ -101,7 +101,7 @@ export function TodoMVC() {
 
    const app = new IonicTodoApp(getTodos())
 
-   const { $filteredTodos, removeTodo } = $from(app)
+   const { $filteredTodos, removeTodo } = $of(app)
 
    const { updateTodo } = IonicTodoApp
 

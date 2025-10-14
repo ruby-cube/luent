@@ -1,5 +1,5 @@
 import { TransitionNode } from "./TransitionNode";
-import { $Node } from "../node/NodeRef";
+import { $Node } from "../node/GetNode";
 import { makeElement } from "../element/makeElement";
 import { fromCommons } from "../commons/provide";
 import { Ion } from "@rue/quarky";
@@ -24,13 +24,13 @@ export function renderTransitNode(
             ),
             Else(() => {
                registerTransitionNode(transitionNode)
-               return makeElement('div', () => output, { ref: $div }, undefined)
+               return makeElement('div', () => output, { get: $div }, undefined)
             })
          ])
       )
    }
    registerTransitionNode(transitionNode)
-   return makeElement('div', Slot, { ref: $div, class: 'transit' }, undefined)
+   return makeElement('div', Slot, { get: $div, class: 'transit' }, undefined)
 }
 
 

@@ -1,6 +1,6 @@
 import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
-import { Ionized, isIonizedModel } from "../ionized/ionize";
+import { Ionized, isIonicProxy } from "../ionic/ionize";
 import { Phase, SYNC, $currentCycle, getDefaultPhase, getAdjustedPhase, maybePostcycleTask } from "./UpdateCycle";
 import { createOneoff, Effect } from "./EffectQueue";
 import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
@@ -194,7 +194,7 @@ export function InertWatcher() {
 }
 
 function getHasChangedFn(options: EffectOptions | undefined, state: unknown) {
-   return options?.hasChanged ?? isIonizedModel(state) ? always : notStrictlyEqual
+   return options?.hasChanged ?? isIonicProxy(state) ? always : notStrictlyEqual
 }
 
 function always() {

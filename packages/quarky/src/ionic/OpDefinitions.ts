@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types"
 import { ionize, toRaw } from "./ionize"
-import { getIonizedModel, IonizedModel, maybeIonize } from "./IonizedModel"
-import { quarkOf } from "../Quark"
-import { trackParticle } from "../compound/Compound"
+import { getIonizedModel, IonicProxy, maybeIonize } from "./Ionic"
+import { quarkOf } from "../abstract/Quark"
+import { trackParticle } from "../abstract/Compound"
 import { isObject } from "@rue/utils"
 
 
@@ -54,7 +54,7 @@ import { isObject } from "@rue/utils"
 
 
 
-// export function maybeIonizeNested(value: any, model: IonizedModel) {
+// export function maybeIonizeNested(value: any, model: IonicProxy) {
 //    return maybeIonize(value)// TODO: encapsulated or readonly
 // }
 

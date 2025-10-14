@@ -1,8 +1,8 @@
 //@ts-nocheck
 import { describe, expect, it } from "vitest"
-import { ionize, isIonizedModel, MARK, withInertItems } from "../ionize"
+import { ionize, isIonicProxy, MARK, withInertItems } from "../ionize"
 import { watch } from "../../reactivity/watch"
-import { inert, isInert } from "../inert"
+import { inert, isInert } from "../notes/inert"
 
 // [x] ionize Object
 // [] ionize Array
@@ -87,7 +87,7 @@ describe('ionize', () => {
       const frogB = ionize(frog)
       expect(isInert(frogB)).toBe(true)
       expect(frogB).toBe(frog)
-      expect(isIonizedModel(frogB)).toBe(false)
+      expect(isIonicProxy(frogB)).toBe(false)
    })
 
    // INERT PROPERTIES VIA NESTING
@@ -98,7 +98,7 @@ describe('ionize', () => {
       const swamp = ionize({ frog })
       expect(isInert(swamp.frog)).toBe(true)
       expect(swamp.frog).toBe(frog)
-      expect(isIonizedModel(swamp.frog)).toBe(false)
+      expect(isIonicProxy(swamp.frog)).toBe(false)
    })
 
    it('should make property inert via nested inert objects (objects assigned to property will be made inert)', () => {
@@ -107,7 +107,7 @@ describe('ionize', () => {
       const swamp = ionize({ frog })
       expect(isInert(swamp.frog)).toBe(true)
       expect(swamp.frog).toBe(frog)
-      expect(isIonizedModel(swamp.frog)).toBe(false)
+      expect(isIonicProxy(swamp.frog)).toBe(false)
    })
 
    // [] need to handle properties that could be primitive value | inert object

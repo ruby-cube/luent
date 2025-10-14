@@ -1,11 +1,11 @@
 import { isFunction } from "@rue/utils";
-import { isIonizedModel, toRaw } from "./ionize";
-import { IonizedModel } from "./IonizedModel";
+import { isIonicProxy, toRaw } from "./ionize";
+import { IonicProxy } from "./Ionic";
 
 // export const runningIonicObject = true;
 
-export function isIonicObject(value: any): value is IonizedModel {
-    if (!isIonizedModel(value)) return false;
+export function isIonicObject(value: any): value is IonicProxy {
+    if (!isIonicProxy(value)) return false;
     const raw = toRaw(value);
     return !(raw instanceof Map || raw instanceof Array || raw instanceof Set || isFunction(raw))
 }
@@ -75,7 +75,7 @@ export function isIonicObject(value: any): value is IonizedModel {
 //                 receiver
 //             )
 //         }
-//     }) as IonizedModel
+//     }) as IonicProxy
 
 //     modelQuark.initIonizedModel(ionicModel)
 //     registerIonizedModel(ionicModel, target)

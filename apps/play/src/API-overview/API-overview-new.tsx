@@ -567,10 +567,10 @@ export function PlayingCard(input: FromTag<{
    const { $number, $suit, startFaceup = false, $cardBack } = input
 
    let $faceup = ion(startFaceup)
-   const $div = NodeRef('div')
+   const $div = GetNode('div')
 
    return component(
-      <div on:click={e => { $$: $faceup = !$faceup }} ref={$div}>
+      <div on:click={e => { $$: $faceup = !$faceup }} get={$div}>
          {If(($faceup),
             <CardFace number={($number)} suit={($suit)}></CardFace>
          )}

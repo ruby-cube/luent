@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
-import { IonizedModel, maybeIonize } from "./IonizedModel";
-import { MutatingOpDef, TrackableOpDef, MemberType, trackModel, enlistIonizedMethods, Constructor, trackableOp } from "./IonizedMethods";
-import { trackParticle } from "../compound/Compound";
+import { isIonicProxy, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
+import { IonicProxy, maybeIonize } from "./Ionic";
+import { MutatingOpDef, TrackableOpDef, MemberType, trackModel, defineIonicStructure, Constructor, trackableOp } from "./IonicMethods";
+import { trackParticle } from "../abstract/Compound";
 
 
 declare global {
@@ -158,7 +158,7 @@ const creativeOp: TrackableOpDef = {
    output: ionize
 }
 
-enlistIonizedMethods(Array,
+defineIonicStructure(Array,
    {
       at: {
          type: MemberType.TRACKABLE,
@@ -365,7 +365,7 @@ enlistIonizedMethods(Array,
       // }
    }
 )
-// function triggerModel(model: IonizedModel) { return [trigger(model)] }
+// function triggerModel(model: IonicProxy) { return [trigger(model)] }
 
 // isEntryKey(model, key) {
 //    return !!(model instanceof Array && isIntegerKey(key))
@@ -375,7 +375,7 @@ enlistIonizedMethods(Array,
 //    opName: string,
 //    deionizeArgs?: (args: any[]) => any[]
 // ) {
-//    return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
+//    return function createOp(target: AnyObject, ionizedModel: IonicProxy, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
 //       const fn = target[opName]
 //       return useMutatingArrayOp(
 //          ionizedModel,
@@ -392,7 +392,7 @@ enlistIonizedMethods(Array,
 
 
 // function useMutatingArrayOp(
-//    model: IonizedModel,
+//    model: IonicProxy,
 //    modelQuark: ModelQuark,
 //    target: any[],
 //    key: string,
@@ -435,7 +435,7 @@ enlistIonizedMethods(Array,
 //    }
 // }
 
-// function createPopMethod(target: AnyObject, ionizedModel: IonizedModel, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
+// function createPopMethod(target: AnyObject, ionizedModel: IonicProxy, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
 //    const performOp = useMutatingArrayOp(
 //       ionizedModel,
 //       quark,
@@ -486,15 +486,15 @@ function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args
 
 
 
-export function isIonizedArray(target: any): target is IonizedModel {
-   if (!isIonizedModel(target)) return false;
+export function isIonizedArray(target: any): target is IonicProxy {
+   if (!isIonicProxy(target)) return false;
    if (toRaw(target) instanceof Array) return true;
    return false;
 }
 
 // for .values(), .entries() and .keys() to output ionized objects
 
-enlistIonizedMethods([].values().constructor as Constructor, {
+defineIonicStructure([].values().constructor as Constructor, {
    next: {
       privateState: true,
       type: MemberType.TRACKABLE,

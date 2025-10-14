@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, NodeRef } from "@rue/lumo";
+import { component, GetNode } from "@rue/lumo";
 import { MorphicNode } from "../../../packages/lumo/src/morphic/MorphicNode";
 
 export function TestMorphic() {
@@ -12,8 +12,8 @@ export function TestMorphic() {
          <div>bye</div>
    })
 
-   const $morphicNode = NodeRef($Morphable)
-   const $comment = NodeRef(CommentBlock)
+   const $morphicNode = GetNode($Morphable)
+   const $comment = GetNode(CommentBlock)
 
    function morph(key: string) {
       // console.log("$morphic node", $morphicNode)
@@ -22,7 +22,7 @@ export function TestMorphic() {
 
    return component(
       <>
-         <$Morphable as='hi' ref={$morphicNode}></$Morphable>
+         <$Morphable as='hi' get={$morphicNode}></$Morphable>
 
          <i--i>do something</i--i>
 

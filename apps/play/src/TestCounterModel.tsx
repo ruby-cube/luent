@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import { ion, ionic, queueIonicTask, ionize, isIonizedModel, SYNC, watch } from "@rue/quarky"
+import { ion, ionic, queueIonicTask, ionize, isIonicProxy, SYNC, watch } from "@rue/quarky"
 
 // TODO:
 // [x] private this access in methods and typing

@@ -3,7 +3,7 @@ import { component, For, If, Else, FromTag, fromApp, CommonsKey, CommonsEntryKey
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
-import { isTracking } from "../../../../packages/quarky/src/compound/Compound"
+import { isTracking } from "../../../../packages/quarky/src/abstract/Compound"
 import { TODO_DB_KIT } from "./todo-mvc-local"
 import { AnyObject } from "@rue/types"
 
@@ -454,7 +454,7 @@ function TodoList(input: FromTag<{
             return (
                <li class={{ todo: true, completed: (todo.completed), editing: $isEditing }}>
                   <div class="view">
-                     <input class="toggle" type="checkbox" mu:checked={$from(todo).$completed} />
+                     <input class="toggle" type="checkbox" mu:checked={$of(todo).$completed} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
                      <button class="destroy" on:click={e => removeTodo(todo)}></button>
                   </div>
@@ -462,7 +462,7 @@ function TodoList(input: FromTag<{
                      <input
                         class="edit"
                         type="text"
-                        mu:value={$from(todo).$title}
+                        mu:value={$of(todo).$title}
                         at:mounted={node => node.focus()}
                         on:blur={e => doneEdit(todo)}
                         on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}

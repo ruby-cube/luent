@@ -1,6 +1,5 @@
 import { debug } from "@rue/utils";
-import { ion } from "./Ion";
-import { QUARK } from "../Quark";
+import { ion, QUARK } from "@rue/quarky";
 
 
 // trafficLight.is('on') // reactive
@@ -210,6 +209,7 @@ export function withTimeout(ms: number, transition: Transition) {
    return transition;
 }
 
+//TODO: implement as custom ionized object
 export function FiniteState<S extends FiniteStates, M extends Methods>(states: S, methods?: M): FiniteState<S, M> {
    const $currentState = ion(undefined as undefined | string);
 
@@ -218,8 +218,6 @@ export function FiniteState<S extends FiniteStates, M extends Methods>(states: S
    const $state = (() => $currentState()) as unknown as FiniteState
 
    // }) as unknown as FiniteState
-   //@ts-expect-error
-   $state[QUARK] = { inert: false }
    $state.is = is
    $state.apply = apply
    $state.on = on

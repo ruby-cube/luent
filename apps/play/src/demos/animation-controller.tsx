@@ -1,6 +1,6 @@
-import { $thisView, component, If, NodeRef } from "@rue/lumo";
-import { ion, ionic, ionize, isIonizedModel, queueTask, watch } from "@rue/quarky";
-import { inert } from "../../../../packages/quarky/src/ionized/inert";
+import { $thisView, component, If, GetNode } from "@rue/lumo";
+import { ion, ionic, ionize, isIonicProxy, queueTask, watch } from "@rue/quarky";
+import { inert } from "../../../../packages/quarky/src/ionic/notes/inert";
 
 class AnimationAnimator {
    canvas: HTMLCanvasElement;
@@ -119,7 +119,7 @@ class AnimationAnimator {
 
 export function TestAnimationController() {
 
-   const $canvas = NodeRef('canvas')
+   const $canvas = GetNode('canvas')
 
    // const $animation = ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
 
@@ -175,7 +175,7 @@ export function TestAnimationController() {
    return component(
       <>
          <div style="display: flex; flex-direction: column; align-items: flex-start">
-            <canvas ref={$canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>
+            <canvas get={$canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>
             {/* {If($canvas, ({ $elapsed, $isPlaying, playPause, updateTime, play } = AnimationKit()) => (queueTask(() => play()), */}
             {/* {If($canvas, (o = initAnimation($canvas())) => */}
             {/* <> */}

@@ -1,6 +1,6 @@
 import { toRaw } from "./ionize";
-import { enlistIonizedMethods, MemberType, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonizedMethods";
-import { getIonizedModel, maybeIonize } from "./IonizedModel";
+import { defineIonicStructure, MemberType, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonicMethods";
+import { getIonizedModel, maybeIonize } from "./Ionic";
 
 // declare global {
 //    interface Map<K, V> {
@@ -36,7 +36,7 @@ const hasOp = useHasOp((target, rawKey, ionizedKey) => {
 
 
 export function installIonicMap() {
-   enlistIonizedMethods(Map, {
+   defineIonicStructure(Map, {
       has: {
          type: MemberType.TRACKABLE,
          privateState: true,

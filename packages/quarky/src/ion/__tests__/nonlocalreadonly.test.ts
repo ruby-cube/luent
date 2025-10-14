@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ionize } from '../../ionized/ionize';
+import { ionize } from '../../ionic/ionize';
 import { asNonlocalReadonly, isReadonly } from '../../capsule/Readonly';
 import { ion } from '../ion';
 

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, FromTag, If, Else, For } from "@rue/lumo";
-import { $from, defineDeepIonize, EACH, ion, Ionic, ionize, Ionized } from "@rue/quarky";
+import { $of, defineDeepIonize, EACH, ion, Ionic, ionize, Ionized } from "@rue/quarky";
 
 
 function getTreeData(): TreeItem {

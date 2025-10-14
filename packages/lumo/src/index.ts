@@ -1,6 +1,6 @@
 import { wrapWithCommons } from './commons/Commons'
 
-export * from './node/NodeRef' 
+export * from './node/GetNode' 
 export * from './node/NodeSetup' 
 export * from './component/Component' 
 export * from './boundaries/Suspense' 

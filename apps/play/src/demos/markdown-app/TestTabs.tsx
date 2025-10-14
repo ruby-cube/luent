@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { CommonsKey, component, For, fromCommons, FromTag, If, NodeRef } from "@rue/lumo";
+import { CommonsKey, component, For, fromCommons, FromTag, If, GetNode } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -335,14 +335,14 @@ function SidebarFile(input : FromTag<{
    index: Ion<number>
 }>) {
    const { $index, file } = input
-   const $menu = NodeRef(IfContextMenu)
+   const $menu = GetNode(IfContextMenu)
 
    const { openFile } = fromCommons(FILES_KIT)
 
 
    return component(
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
-         <IfContextMenu on:click={reMenuClick} ref={$menu}></IfContextMenu>
+         <IfContextMenu on:click={reMenuClick} get={$menu}></IfContextMenu>
          {file.$title}
       </div>
    )

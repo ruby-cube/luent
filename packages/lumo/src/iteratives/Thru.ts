@@ -32,7 +32,7 @@ class SpreadKit {
       ) {
          const data = this.data
    
-         const _isIonizedModel = isIonizedModel(data)
+         const _isIonizedModel = isIonicProxy(data)
          const isDynamic = this.isDynamic = _isIonizedModel || isIon(data);
          this.outerNodePod = outerNodePod;
          const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendNodePod() : undefined;
@@ -44,14 +44,14 @@ class SpreadKit {
             // const effectCycle = getCurrentEffectCylce();
             const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
             let clone = createClone(data, _data)
-            // let clone = isIon(data) && isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined
+            // let clone = isIon(data) && isIonicProxy(_data) ? shallowClone(toRaw(_data)) : undefined
             // TODO: figure out typing for Set, Map, Object vs Array
-            let recording = isIonizedModel(_data) ? recordMutations(_data) : undefined
+            let recording = isIonicProxy(_data) ? recordMutations(_data) : undefined
    
    
             function createClone(subject: AnyObject, state: AnyObject){
-               return isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
-               // return isIon(subject) && isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
+               return isIonicProxy(state) ? shallowClone(toRaw(state)) : undefined
+               // return isIon(subject) && isIonicProxy(state) ? shallowClone(toRaw(state)) : undefined
             }
    
             function hasChanged(oldState: AnyObject, state: AnyObject){
@@ -68,7 +68,7 @@ class SpreadKit {
                // }
                const _prevState = clone ?? toRaw(previous)
                clone = createClone(data, current)
-               // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
+               // clone = isIon(data) && isIonicProxy(state) ? shallowClone(_state) as any[] : undefined
                const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
                if (noChange) { // TODO: should we use hasChanged function in watch options instead?
                   return;

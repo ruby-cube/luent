@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { Ion, ion, ionize, watch } from '@rue/quarky'
-import { component, FromTag, NodeRef, atMounted, atUnmount } from '@rue/lumo'
+import { component, FromTag, GetNode, atMounted, atUnmount } from '@rue/lumo'
 
 
 export function MarkdownApp(
@@ -20,7 +20,7 @@ export function MarkdownApp(
    //    $markdown.value = e.target.value
    // }
 
-   const $textArea = NodeRef('textarea')
+   const $textArea = GetNode('textarea')
 
    const caretRange = ionize({
       selectionStart: undefined as undefined | number,
@@ -78,7 +78,7 @@ export function MarkdownApp(
          <div>local state: {$doubleCount}</div>
          <button on:click={e => $count.increment()}>increment</button>
          <div class='editor'>
-            <textarea class='input' ref={$textArea} mu:value={$markdown}></textarea>
+            <textarea class='input' get={$textArea} mu:value={$markdown}></textarea>
             {/* <div class='output'>{$output}</div> */}
             <div class='output'>{{ innerHTML: $output }}</div>
             {/* <textarea>{$markdown}</textarea> */}

@@ -1,4 +1,4 @@
-import { queueRenderTask, component, Else, For, FromTag, If, NodeRef, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
+import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
 import { ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -19,7 +19,7 @@ export function ChatWindow(input: FromTag<{
 }>) {
    const { user, chat: { $messages, atMessagePosted, atMessageReceived, atErrorReceived, $error } } = input
    console.log('ChatWindow()')
-   const $messagesNode = NodeRef('div')
+   const $messagesNode = GetNode('div')
 
    const $newMessageMarker = ion(null as null | HTMLDivElement)
    const $hasUnseenMessages = ion(false)
@@ -151,7 +151,7 @@ export function ChatWindow(input: FromTag<{
             <div class='error'>{$error}</div>
          )}
          {Else(
-            <div class='messages' ref={$messagesNode} on:scrollend={reScrollend} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
+            <div class='messages' get={$messagesNode} on:scrollend={reScrollend} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
                {For($messages, m => m.id, (message) => (
                   <>
                      <div>

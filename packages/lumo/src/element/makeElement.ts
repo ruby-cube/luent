@@ -6,7 +6,7 @@ import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "./attributes";
-import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
+import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/GetNode";
 import { camelToKebabCase } from "@rue/utils";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
@@ -50,7 +50,7 @@ export function makeElement(
       : XML_NS ? createNSElement(tagName, XML_NS)
          : document.createElement(tagName)
    if (ref) {
-      if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
+      if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use GetNode or NodesRef as ref")
       if (isNodesRef(ref)) {
          initializeListRef(ref, domNode, $index!)
       }

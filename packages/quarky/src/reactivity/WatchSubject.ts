@@ -1,15 +1,16 @@
 import { AnyObject } from "@rue/types";
 import { Effect } from "./EffectQueue"
-import { IonizedModel } from "../ionized/IonizedModel"
-import { hasQuark, QUARK, Quark, quarkOf } from "../Quark"
+import { IonicProxy } from "../ionic/Ionic"
+import { hasQuark, QUARK, Quark, quarkOf } from "../abstract/Quark"
 import { asWatched, isWatchable, isWatchableEntity, Watchable, Watched } from "./Watched"
 import { isFunction, isObject, noop } from "@rue/utils";
-import { Ionized, isIonizedModel, toRaw } from "../ionized/ionize";
+import { Ionized, isIonicProxy, toRaw } from "../ionic/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { WatchSubjects } from "./watch";
-import { IonicCompound } from "../ionic/IonicCompound";
-import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../compound/Compound";
-import { isAtomic } from "./AtomicQuark";
+import { IonicCompound } from "../abstract/IonicCompound";
+import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../abstract/Compound";
+import { isAtomic } from "../abstract/AtomicQuark";
+
 
 export function isWatchSubject(value: AnyObject): value is WatchSubject {
    if ('inert' in value) return !value.inert;
@@ -35,7 +36,7 @@ export function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjec
 
 function asSingleWatchSubject(subject: Ionized<object> | Ion<any> | AnyObject, retrack: boolean, once: boolean) {
    // TODO: do not retrack if effect runs once
-   return isIonizedModel(subject) ? new IonizedModelSubject(subject)
+   return isIonicProxy(subject) ? new IonicProxySubject(subject)
       : isFunction(subject) ? new IonSubject(subject)
          // : isGetter(subject) ? new IonSubject(createWatchedDerivation(subject, !!retrack))
          : isObject(subject) ? subject  //non-ionized object
@@ -114,11 +115,11 @@ export interface WatchSubject {
  * Watching ionized models will NOT track absorbed ions and derivations. 
  * To watch absorbed ions and derivations, use multisubject
  */
-class IonizedModelSubject extends Compound implements WatchSubject {
+class IonicProxySubject extends Compound implements WatchSubject {
    inert: boolean = false
 
    constructor(
-      private model: IonizedModel,
+      private model: IonicProxy,
    ) {
       super()
       const modelQuark = quarkOf(model)
@@ -144,7 +145,7 @@ class IonizedModelSubject extends Compound implements WatchSubject {
    }
 }
 
-function trackPions(model: IonizedModel) {
+function trackPions(model: IonicProxy) {
    const compound = getActiveTracker()
    if (!compound) throw new Error('must call trackPions within trackers')
    const target = quarkOf(model).rawTarget;
@@ -201,7 +202,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       // this.atoms = compound ? compound.atoms.length ? compound.atoms : (quark.inert = true, [])
       //    : !quark.inert && isWatchable(quark) ? [quark] : []
 
-      if (isIonizedModel(value)) {
+      if (isIonicProxy(value)) {
          this.valueAtom = quarkOf(value)
          pushTracker(this)
          trackPions(value)
@@ -215,7 +216,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       if (retrack) {
          this.effect.unlinkAtoms()
          const value = detachedCall(() => this.retrackCall(this.ion))
-         if (isIonizedModel(value)) { 
+         if (isIonicProxy(value)) { 
             pushTracker(this)
             trackPions(value)
             popTracker()
@@ -228,7 +229,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       }
       else {
          const value = this.ion()
-         if (isIonizedModel(value)) {
+         if (isIonicProxy(value)) {
             pushTracker(this)
             trackPions(value)
             popTracker()

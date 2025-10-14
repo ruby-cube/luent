@@ -57,7 +57,7 @@ export function ArticlesView(input: FromTag<{
                   ))}
                   <ArticlePagination
                      mu:page={$page}
-                     articlesPerPage={$from(settings).$articlesPerPage}
+                     articlesPerPage={$of(settings).$articlesPerPage}
                      articleCount={$articleCount}
                   ></ArticlePagination>
                </>

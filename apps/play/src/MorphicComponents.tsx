@@ -1,6 +1,6 @@
 import { RENDER } from "../../../packages/lumo/src/render-cycle";
 import { ion } from "../../../packages/quarky/src"
-import { NodeRef } from "@rue/lumo";
+import { GetNode } from "@rue/lumo";
 
 export function MainBlock() {
 
@@ -25,7 +25,7 @@ export function MainBlock() {
 
    const $records_list = $ListPort($records, (record) => (
       <h1>{record.content}</h1>
-   ), { ref: $recordNodes, IDKey: 'id' })
+   ), { get: $recordNodes, IDKey: 'id' })
 
    function changeMainContent(index) {
       $main_content.as($bye)
@@ -37,13 +37,13 @@ export function MainBlock() {
 
 
 
-   const mainContent = NodeRef($MainContent)
+   const mainContent = GetNode($MainContent)
 
    $mainContent.render('bye')
 
    return (
       <main>
-         <$MainContent as='hello' ref={mainContent} />
+         <$MainContent as='hello' get={mainContent} />
          <$records_list />
          <button on:click={changeMainContent}>click</button>
       </main>

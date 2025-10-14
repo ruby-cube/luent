@@ -1,6 +1,6 @@
 import { Ion } from "../ion/Ion"
-import { Quark, quarkOf } from "../Quark"
-import { IonizedModel } from "./IonizedModel"
+import { Quark, quarkOf } from "../abstract/Quark"
+import { IonicProxy } from "./Ionic"
 import { ModelQuark } from "./ModelQuark"
 import { debug } from "@rue/utils"
 import { AnyObject } from "@rue/types"
@@ -9,7 +9,7 @@ import { PionState } from "../ion/AtomicIon"
 // export type PionQuark = Quark<string | symbol, $AtomicPionState | $DerivedPionState>
 
 // function asPionQuark(
-//    model: IonizedModel,
+//    model: IonicProxy,
 //    key: PropertyKey,
 // ) {
 //    const pionQuark = quarkOf(model).pions[key] ?? new AtomicPionQuark(new PionState())
@@ -18,7 +18,7 @@ import { PionState } from "../ion/AtomicIon"
 //    debug.error(`[INVALID KEY] ${String(key)} is not a pion`)
 // }
 
-// function createPionQuark(model: IonizedModel, key: PropertyKey) {
+// function createPionQuark(model: IonicProxy, key: PropertyKey) {
 //    const quark = quarkOf(model)
 //    const derivation = getPropertyGetter(quark, key)
 //    const pion = derivation ? new DerivationPionQuark(model, key, derivation) : new AtomicPionQuark(model, key)
@@ -38,7 +38,7 @@ import { PionState } from "../ion/AtomicIon"
 // }
 
 // export function asPion(
-//    model: IonizedModel,
+//    model: IonicProxy,
 //    key: PropertyKey,
 // ): Ion | undefined {
 //    const pion = asPionQuark(model, key)
@@ -50,7 +50,7 @@ import { PionState } from "../ion/AtomicIon"
 //    // TODO: tidy up pion code... some of it feels redundant, especially setting entity
 // }
 
-// function createPion(model: IonizedModel, key: PropertyKey, pionQuark: Quark & AnyObject) {
+// function createPion(model: IonicProxy, key: PropertyKey, pionQuark: Quark & AnyObject) {
 //    const derivation = pionQuark && 'derivation' in pionQuark ? pionQuark.derivation : getPropertyGetter(quarkOf(model), key)
 //    return derivation ? createDerivationPion(model, key, pionQuark) : createAtomicPion(model, key, pionQuark)
 // }
@@ -61,7 +61,7 @@ import { PionState } from "../ion/AtomicIon"
 //  * @param key 
 //  */
 // export function getObservedPion(
-//    model: IonizedModel,
+//    model: IonicProxy,
 //    key: PropertyKey,
 // ) {
 //    const pion = quarkOf(model).pions.get(key)

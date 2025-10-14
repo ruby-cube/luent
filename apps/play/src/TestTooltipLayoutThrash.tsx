@@ -1,4 +1,4 @@
-import { component, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
+import { component, If, measureLayout, GetNode, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
 import { Ion, ion, ionic, MutableIon } from '@rue/quarky';
 
 
@@ -100,7 +100,7 @@ export function Tooltip(input: FromTag<{
 }>) {
    const { Slot, targetRect } = input
 
-   const $div = NodeRef('div');
+   const $div = GetNode('div');
    const $height = ion(undefined as number | undefined)
 
    atMounted(async () => {
@@ -130,7 +130,7 @@ export function Tooltip(input: FromTag<{
                transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
             }}
          >
-            <div ref={$div} class="tooltip">
+            <div get={$div} class="tooltip">
                {Slot()}
             </div>
          </div>

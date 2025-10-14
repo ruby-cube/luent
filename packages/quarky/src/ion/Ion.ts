@@ -1,13 +1,13 @@
 import { debug, isFunction } from "@rue/utils";
-import { neutron } from "./Neutron";
-import { createManagedDerivation } from "../ionic/DerivationIon";
+import { inert } from "./Get";
+import { createManagedDerivation } from "../ion/DerivationIon";
 import { AtomicIonQuark, createAtomicIon, IONIZED } from "./AtomicIon";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
-import { Ionized, IsIonized } from "../ionized/ionize";
-import { Inert, IsInert } from "../ionized/inert";
-import { initializeSnapshots } from "../ionized/TimeTraveler";
-import { hasQuark, QUARK } from "../Quark";
-import { IonizeOptions, maybeIonize } from "../ionized/IonizedModel";
+import { Ionized, IsIonized } from "../ionic/ionize";
+import { Inert, IsInert } from "../ionic/notes/inert";
+import { initializeSnapshots } from "../ionic/TimeTraveler";
+import { hasQuark, QUARK } from "../abstract/Quark";
+import { IonizeOptions, maybeIonize } from "../ionic/Ionic";
 import { isGetter } from "../reactivity/WatchSubject";
 import { IonState } from "../reactivity/LazyState";
 
@@ -74,8 +74,10 @@ function $_is_ref(value: AnyObject) {
 }
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-   return (isGetter(value) ? value : neutron(value)) as T extends Ion ? T : Ion<T> //QUESTION: Why neutron and not just a getter?
+   return (isGetter(value) ? value : inert(value)) as T extends Ion ? T : Ion<T>
 }
+
+
 
 export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
    return isFunction(maybeFn) && maybeFn.length === 0 ? maybeFn() : maybeFn as T extends () => infer R ? R : T;
@@ -184,7 +186,7 @@ function createIonizedIon<
 // }
 
 
-export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, proto?: P & ThisType<P & { value: T }> & {'~pure'?: () =>(keyof P)[]}, protoOptions?: { pure: string }) {
+export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, proto?: P & ThisType<P & { value: T }> & { '~pure'?: () => (keyof P)[] }, protoOptions?: { pure: string }) {
    return (...args: A & any) => Ion(constructor(...args), proto) as MutableIon<T> & P
 }
 

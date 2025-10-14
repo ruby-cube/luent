@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel } from "./ionized/ionize";
+import { isIonicProxy } from "../ionic/ionize";
 import { hasQuark, QUARK, quarkOf } from "./Quark";
-import { AbortSignal } from "../../flask/AbortSignal";
+import { AbortSignal } from "../../../flask/AbortSignal";
 import { IterableSet } from "@rue/utils";
 
 export type MutableEntity = {
@@ -55,7 +55,7 @@ export class Mutation {
          const [key] = this.args as [PropertyKey]
          const oldValue = this.preopData
          target[key] = oldValue; //QUESTION: Should this trigger effects?? or should we set the raw object?
-      } else if (isIonizedModel(this.target)) {
+      } else if (isIonicProxy(this.target)) {
          quarkOf(this.target).revertOp(this)
       }
       else {

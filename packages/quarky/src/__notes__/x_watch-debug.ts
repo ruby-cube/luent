@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel, Ionized } from "../ionized/ionize";
+import { isIonicProxy, Ionized } from "../ionic/ionize";
 
 
 
 
 export function registerDebuggers(targets: (AtomicIon | PropIon)[] | IonizedModel, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
-    const _targets = isIonizedModel(targets) ? [targets] : targets
+    const _targets = isIonicProxy(targets) ? [targets] : targets
     if (onTrack){
         for (const target of _targets){
             onTrack(target) // TODO: THis works for watch, but DerivedIon and reactiveEffects will be tracked per re-eval
@@ -30,7 +30,7 @@ export function runTriggerDebugger(target: AtomicIon | PropIon | IonizedModel){
 }
 
 export function collectReactiveProps(target: IonizedModel, deps?: PropIon[]) {
-    if (!isIonizedModel(target)) return [];
+    if (!isIonicProxy(target)) return [];
     const _deps = deps || [];
     // for (const key in target) {
     //     _deps.push(asObservedProp(target, key));

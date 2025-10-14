@@ -4,7 +4,7 @@
 // [] if open, append message in main messages view
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
-import { component, FromTag, NodeRef, Slot } from "@rue/lumo";
+import { component, FromTag, GetNode, Slot } from "@rue/lumo";
 import { MorphicNode as Polymorph } from "../../../../packages/lumo/src/conditional/Polymorph";
 import { FiniteState, finiton, ion } from "@rue/quarky";
 
@@ -91,7 +91,7 @@ export function FBApp() {
    watchDB((data) => {
       data.newMessages
    })
-   const $mainContent = NodeRef($Main)
+   const $mainContent = GetNode($Main)
 
    const $unseenCount = ion(0, {
       increment(count: number = 1) {

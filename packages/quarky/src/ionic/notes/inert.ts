@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
-import { IsIonized, isIonizedModel, withInertItems } from "./ionize";
+import { IsIonized, isIonicProxy, withInertItems } from "../ionize";
 import { isFunction } from "@rue/utils";
-import { InertCollectionType } from "./ModelQuark";
-import { getIonizedModel } from "./IonizedModel";
+import { InertCollectionType } from "../ModelQuark";
+import { getIonizedModel } from "../Ionic";
 
 const inertObjects: WeakSet<AnyObject> = new WeakSet()
 
@@ -22,7 +22,7 @@ function _inert<T>(obj: T): T extends Function ? T : IsIonized<T> extends true ?
    if (!(obj instanceof Object)) throw new Error("[INVALID INPUT] Only objects can be marked as inert")
 
    if (getIonizedModel(obj)) throw new Error('[INVALID INPUT] Cannot mark a the raw object of an ionized model as inert')
-   if (isIonizedModel(obj)) throw new Error('[INVALID INPUT] Cannot mark an ionized model as inert')
+   if (isIonicProxy(obj)) throw new Error('[INVALID INPUT] Cannot mark an ionized model as inert')
    if (isFunction(obj)) throw new Error(`[INVALID INPUT] Functions are inert by default`)
    inertObjects.add(obj)
    return obj as T extends Function ? T : IsIonized<T> extends true ? T : T extends object ? Inert<T> : T

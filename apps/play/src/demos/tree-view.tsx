@@ -1,5 +1,5 @@
 import { component, FromTag, If, Else, For, fromGlobal, CommonsKey } from "@rue/lumo";
-import { $from, DeepIonized, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, isIonizedModel, NoExpand } from "@rue/quarky";
+import { $of, DeepIonized, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, isIonicProxy, NoExpand } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 
 
@@ -137,7 +137,7 @@ type $$TreeItem = DeepIonized<TreeItem, {
 
 
 function ionized<T>(value: T): T extends { '~ionized': true } ? T : undefined {
-   return isIonizedModel(value)
+   return isIonicProxy(value)
       ? value as T extends { '~ionized': true } ? T : undefined
       : undefined as T extends { '~ionized': true } ? T : undefined
 }

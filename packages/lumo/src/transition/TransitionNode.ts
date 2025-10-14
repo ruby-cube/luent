@@ -5,7 +5,7 @@ import { renderTransitNode } from "./TransitNode";
 import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
-import { NodeRef } from "../node/NodeRef";
+import { GetNode } from "../node/GetNode";
 import { RenderSlot, FromTag } from "../component/Input";
 
 export type TransitionHook = {
@@ -71,7 +71,7 @@ function createTransitionNode(
       return isFunction(Slot) ? Slot() : Slot
    }
 
-   const $div = NodeRef('div')
+   const $div = GetNode('div')
 
    // TODO: init with
 

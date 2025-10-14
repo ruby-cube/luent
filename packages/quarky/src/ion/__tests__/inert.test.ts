@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { inert, isInert, markInertProps } from '../../ionized/inert';
+import { inert, isInert, markInertProps } from '../../ionic/notes/inert';
 
 describe('inert', () => {
    it('should mark an object as inert', () => {

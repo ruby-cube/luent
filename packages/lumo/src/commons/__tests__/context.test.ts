@@ -7,7 +7,7 @@ import { JSDOM } from 'jsdom'
 import { Commons, createCommons } from '../Commons';
 import { CommonsKey } from '../CommonsKey';
 import { Ion, Ionized, MaybeIon, v } from '../../component/Input';
-import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
+import { ion, ionize, isIon, isIonicProxy } from '@rue/quarky';
 
 
 // Common setup to reset the environment before each test
@@ -622,7 +622,7 @@ describe('Integration tests the Context API', () => {
 
             app.mount(<HTMLElement>document.createElement('div'))
 
-            expect(isIonizedModel(frog)).toBe(true)
+            expect(isIonicProxy(frog)).toBe(true)
         });
 
 

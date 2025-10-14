@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import { Mutable } from "../Mutable"
+import { Mutable } from "../abstract/Mutable"
 import { isLazyUpdate } from "./UpdateCycle"
 
 export const NULL = Symbol('null')

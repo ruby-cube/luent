@@ -2,11 +2,11 @@ import { isFunction, isObject } from "@rue/utils";
 import {  isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
-import { quarkOf, hasQuark, QUARK, Quark } from "../Quark";
-import { detachedCall } from "../compound/Compound";
-import { Compound, CompoundMorph, isCompound } from "../compound/Compound";
-import { isIonizedModel } from "../ionized/ionize";
-import { IonizedModel } from "../ionized/IonizedModel";
+import { quarkOf, hasQuark, QUARK, Quark } from "../abstract/Quark";
+import { detachedCall } from "../abstract/Compound";
+import { Compound, CompoundMorph, isCompound } from "../abstract/Compound";
+import { isIonicProxy } from "../ionic/ionize";
+import { IonicProxy } from "../ionic/Ionic";
 import { Traceable } from "./Traceable";
 import { debug as _debug } from "@rue/utils";
 import { Mutation } from "../Mutable";
@@ -109,8 +109,8 @@ function logAtoms(entity: { [QUARK]: CompoundMorph }, label: string) {
    debug.log('-------------------')
 }
 
-// function logAbsorbedIons(model: IonizedModel) {
-//    if (!isIonizedModel(model)) {
+// function logAbsorbedIons(model: IonicProxy) {
+//    if (!isIonicProxy(model)) {
 //       debug.log('No absorbed ions found. Target is not ionized model.')
 //    }
 //    const quark = quarkOf(model)
@@ -265,11 +265,11 @@ export type TraceableQuark = {
 //          if (getValue) return getValue();
 //          const value = Reflect.get(target, key, receiver)
 //          if (isFunction(value) && !isIon(value)) {
-//             return wrappedMethods[key] ?? (wrappedMethods[key] = traceableMethodWrap('IonizedModel', proxy, key, value))
+//             return wrappedMethods[key] ?? (wrappedMethods[key] = traceableMethodWrap('IonicProxy', proxy, key, value))
 //          }
 //       },
 //       set(target, key, newValue, receiver) {
-//          // __DEV__traceMethodCall('IonizedModel', proxy, key)
+//          // __DEV__traceMethodCall('IonicProxy', proxy, key)
 //          return Reflect.set(target, key, newValue, receiver)
 //       }
 //    })

@@ -3,7 +3,7 @@ import { component, For, If, Else, FromTag, fromApp, CommonsKey } from "@rue/lum
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
-import { isTracking } from "../../../../packages/quarky/src/compound/Compound"
+import { isTracking } from "../../../../packages/quarky/src/abstract/Compound"
 
 // CON: You have to return a whole object
 // PRO: More composable

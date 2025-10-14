@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
 import { Ion, toValue } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
-import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
+import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/GetNode";
 import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 
@@ -44,15 +44,15 @@ export function component<T extends AnyObject | undefined = AnyObject | undefine
 
 
 export function initializeComponentRef(
-   ref: $Node | $Nodes,
+   get: $Node | $Nodes,
    publicComponent: PublicComponent,
    $index: Ion<number> | undefined,
 ) {
-   if (isNodesRef(ref)) {
-      initializeListRef(ref, publicComponent, $index!)
+   if (isNodesRef(get)) {
+      initializeListRef(get, publicComponent, $index!)
    }
    else {
-      initializeRef(<InternalRef<$Node>>ref, publicComponent)
+      initializeRef(<InternalRef<$Node>>get, publicComponent)
    }
 }
 

@@ -1,27 +1,26 @@
 // import { installIonicArray } from "./ionized/IonizedArray"
-import { installIonicMap } from "./ionized/IonizedMap"
-import { installIonicSet } from "./ionized/IonizedSet"
+import { installIonicMap } from "./ionic/IonicMap"
+import { installIonicSet } from "./ionic/IonicSet"
 
-export * from "./debug/debug" // TODO: limit exports to public api
-export * from "./ionized/ionize" // TODO: limit exports to public api
-export * from "./ion/AtomicIon" // TODO: limit exports to public api
-export * from "./ion/Ion" // TODO: limit exports to public api
-export * from "./ion/Neutron" // TODO: limit exports to public api
-export * from "./ion/type-utils" // TODO: limit exports to public api
-export * from "./reactivity/watch" // TODO: limit exports to public api
-export * from "./reactivity/UpdateCycle" // TODO: limit exports to public api
-export * from "./reactivity/WatchSubject" // TODO: limit exports to public api
-export * from "../../lumo/src/animation" // TODO: limit exports to public api
-export * from "./reactivity/EffectQueue" // TODO: limit exports to public api
-export * from "./ionized/TimeTraveler" // TODO: limit exports to public api
-export * from "./ionized/IonizedModel" // TODO: limit exports to public api
-export * from "./ionized/inert" // TODO: limit exports to public api
-export * from "./__notes__/areEqual" // TODO: limit exports to public api
-// export * from "./capsule/Readonly" // TODO: limit exports to public api
-export * from "./ionic/IonicCompound" // TODO: limit exports to public api
-export * from "./ionic/DerivationIon" // TODO: limit exports to public api
-export * from "./reactivity/ionicTask" // TODO: limit exports to public api
-export * from "./ion/FiniteState" // TODO: limit exports to public api
+// TODO: limit exports to public api
+export * from "./debug/debug" 
+export * from "./ionic/ionize" 
+export * from "./ion/AtomicIon" 
+export * from "./ion/Ion" 
+export * from "./ion/DerivationIon" 
+export * from "./ion/Get" 
+export * from "./ion/type-utils" 
+export * from "./reactivity/watch" 
+export * from "./reactivity/UpdateCycle" 
+export * from "./reactivity/WatchSubject" 
+export * from "../../lumo/src/animation" 
+export * from "./reactivity/EffectQueue" 
+export * from "./ionic/TimeTraveler" 
+export * from "./ionic/Ionic" 
+export * from "./__notes__/areEqual" 
+export * from "./abstract/IonicCompound" 
+export * from "./reactivity/IonicTask" 
+export * from "../../lumo/src/specialty/FiniteState" 
 
 // installIonicArray()
 installIonicSet()

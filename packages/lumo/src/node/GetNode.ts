@@ -19,12 +19,12 @@ export type NodeReferent<
    I extends PublicComponent ? I
    : never : never : never
 /* 
-* NodeRef property:
+* GetNode property:
 * - undefined means ref has not been set or has been removed from the DOM
 * - null means component did not expose anything
 */
 
-// export type NodeRef<T extends RefSource = RefSource> = {
+// export type GetNode<T extends RefSource = RefSource> = {
 //    node: NodeReferent<T> | undefined
 //    nodes: undefined
 //    // [INTERNAL]: MetaNodeRef;
@@ -62,7 +62,7 @@ type RefReturn<T extends RefSource, A> = A extends never[] ? $Nodes<T> : $Node<T
 /**
  * @public
  */
-export function NodeRef<
+export function GetNode<
    T extends RefSource,
    A,
 >(source: T, array?: A & never[]): A extends never[] ? $Nodes<T> : $Node<T> {

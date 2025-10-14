@@ -1,5 +1,5 @@
 import { Traceable } from "../debug/Traceable";
-import { AtomicQuark } from "../reactivity/AtomicQuark";
+import { AtomicQuark } from "../abstract/AtomicQuark";
 import { ModelQuark } from "./ModelQuark";
 
 export type TrackedOps = Map<EntryKey, AtomicQuark>

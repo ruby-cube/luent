@@ -171,8 +171,8 @@ function ArticleBlock(setup: {
 //     const _this = $thisComponent()
 //     const $count = ion(0)
 
-//     const $button = NodeRef('button')
-//     const $countDiv = NodeRef('div')
+//     const $button = GetNode('button')
+//     const $countDiv = GetNode('div')
 
 //     // onNodesCreated(
 //     //     [$button, $countDiv],
@@ -220,8 +220,8 @@ function ArticleBlock(setup: {
 
 //     return component(
 //         <>
-//             <div ref={$countDiv}>{$count}</div>
-//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} ref={$button}>increment</button >
+//             <div get={$countDiv}>{$count}</div>
+//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} get={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

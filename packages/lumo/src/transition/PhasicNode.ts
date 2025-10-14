@@ -3,7 +3,7 @@ import { makeElement } from "../element/makeElement";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
 import { fromCommons } from "../commons/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
-import { $Node, NodeRef } from "../node/NodeRef";
+import { $Node, GetNode } from "../node/GetNode";
 import { TransitionNode } from "./TransitionNode";
 import type { Commons } from "../commons/commons-stack";
 import { Ion } from "@rue/quarky";
@@ -79,7 +79,7 @@ function createPhasicNode(
 
    return createCommons({
       Slot: () => (
-         makeElement('div', Slot, { ref: $div, class: 'phasic' }, undefined)
+         makeElement('div', Slot, { get: $div, class: 'phasic' }, undefined)
       ),
       provide: [GET_PHASIC_NODE(_getPhasicNode)]
    })

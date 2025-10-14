@@ -1,8 +1,8 @@
-import { enlistIonizedMethods, MemberType, trackOp } from "./IonizedMethods";
+import { defineIonicStructure, MemberType, trackOp } from "./IonicMethods";
 
 const date = new Date()
 export function installIonizedDate() {
-   enlistIonizedMethods(Date,
+   defineIonicStructure(Date,
       {
          valueOf: {
             type: MemberType.TRACKABLE,

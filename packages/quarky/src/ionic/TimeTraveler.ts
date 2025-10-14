@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { isFunction } from "@rue/utils";
 import { isIon } from "../ion/Ion";
 import { ionize, isIonKey, toRaw } from "./ionize";
-import { getIonizedModel } from "./IonizedModel";
+import { getIonizedModel } from "./Ionic";
 
 //NOTE: Temporarily pause development of this until usefulness is confirmed
 // Currently, for snapshots to work, we need to take a snapshot of every piece of state created upon initialization with $ or ionize

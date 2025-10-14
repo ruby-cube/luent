@@ -1,4 +1,4 @@
-import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "../compound/Compound";
+import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "./Compound";
 
 
 
@@ -10,7 +10,7 @@ export class IonicCompound extends Compound {
       pushTracker(this);
       try {
          const value = fn();
-         // if (isIonizedModel(value)) trackParticle(quarkOf(value)) // TODO: not sure if I need this here or only in watched subject
+         // if (isIonicProxy(value)) trackParticle(quarkOf(value)) // TODO: not sure if I need this here or only in watched subject
          return value;
       }
       finally {

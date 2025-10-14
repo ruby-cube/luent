@@ -1,19 +1,26 @@
-import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
-import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { ionize } from "../ionized/ionize";
+import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
-import { maybeIonize } from "../ionized/IonizedModel";
+import { maybeIonize } from "../ionic/Ionic";
 
 
-export function neutron<T, M>(initialState: T, props?: M & object): MutableIon<T> & M {
+
+// const $count = Get(0, {
+//    increment() {
+
+//    }
+// })
+
+
+
+export function Get<T, M>(initialState: T, props?: M & object): MutableIon<T> & M {
    return createAtomicNeutron(initialState, props, false) as MutableIon<T> & M
 }
 
 
 // TODO: I don't know how I should handle read-only, and traceability for neutrons.
 /** INTERNAL */
-export type $AtomicNeutronState = MutableIon<unknown> & Capsule & {
+export type $AtomicNeutronState = MutableIon<unknown> & {
    [QUARK]: {
       inert: true;
       value: any,
@@ -72,4 +79,13 @@ export function isInertIon(value: unknown): value is { [QUARK]: { inert: true } 
    if (!hasQuark(value)) return false;
    const quark = quarkOf(value)
    return 'inert' in quark && quark.inert === true;
+}
+
+
+export function inert<T>(value: T): () => T {
+   function inertGet() {
+      return value
+   }
+   inertGet[QUARK] = { inert: true } as { inert: true }
+   return inertGet
 }

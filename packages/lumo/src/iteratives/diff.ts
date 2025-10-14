@@ -1,14 +1,14 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
-import { areShallowEqualArrays, isIonizedModel } from "../../../quarky/src";
+import { areShallowEqualArrays, isIonicProxy } from "../../../quarky/src";
 import { UniqueItem } from "./For";
-import { quarkOf } from "../../../quarky/src/Quark";
+import { quarkOf } from "../../../quarky/src/abstract/Quark";
 
 
 // TODO: implementation for sets, objects, and maps
 export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) =i=>i, prevMap: Map<unknown, number> | undefined) {
    // const [newArr, oldArr] = makeItemsUnique(newArray, oldArray, getUID);
-   const rawNewArray = isIonizedModel(newArray) ? quarkOf(newArray).state.current as any[] : newArray
+   const rawNewArray = isIonicProxy(newArray) ? quarkOf(newArray).state.current as any[] : newArray
    if (areShallowEqualArrays(rawNewArray, oldArray, getUID)) return { noChange: true };
 
    const newMap = toUIDMap(rawNewArray, getUID);

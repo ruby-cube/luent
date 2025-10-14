@@ -2,7 +2,7 @@
 import { atMounted, For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
 import { $$, ion, ionic, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
-import { quarkOf } from "../../../../packages/quarky/src/Quark"
+import { quarkOf } from "../../../../packages/quarky/src/abstract/Quark"
 import { getFlask } from "@rue/flask"
 
 export function SevenGUIs() {

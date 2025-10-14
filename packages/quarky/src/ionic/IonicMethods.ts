@@ -1,13 +1,13 @@
 import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
-import { getIonizedModel, IonizedModel, ProxyKey } from "./IonizedModel"
-import { quarkOf } from "../Quark"
+import { getIonizedModel, IonicProxy, ProxyKey } from "./Ionic"
+import { quarkOf } from "../abstract/Quark"
 import { initUpdate, popUpdate, pushUpdate, Update } from "../reactivity/UpdateCycle"
 import { ModelQuark } from "./ModelQuark"
 import { asAtomicOp, getAtomicOp, getTrackedOps } from "./AtomicOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
-import { isTracking, trackParticle } from "../compound/Compound"
+import { isTracking, trackParticle } from "../abstract/Compound"
 import { AtomicIonQuark } from "../ion/AtomicIon"
 
 export type Constructor = new (...args: any[]) => any
@@ -20,7 +20,7 @@ export const MemberType = {
    PROPERTY: 3
 } as const
 
-type CreateOp = (method: Function, target: AnyObject, ionized: IonizedModel, opKey: ProxyKey, config: OpTransforms) =>
+type CreateOp = (method: Function, target: AnyObject, ionized: IonicProxy, opKey: ProxyKey, config: OpTransforms) =>
    (...args: any[]) => any
 
 
@@ -33,7 +33,7 @@ export const useIonicOp = {
 export function useTrackableOp(
    method: Function,
    state: { active: AnyObject },
-   ionized: IonizedModel,
+   ionized: IonicProxy,
    opKey: ProxyKey,
    config: TrackableOpDef,
 ) {
@@ -78,7 +78,7 @@ export function initModelUpdate(quark: ModelQuark) {
 function useMutatingOp(
    method: Function,
    state: { active: AnyObject },
-   model: IonizedModel,
+   model: IonicProxy,
    opKey: ProxyKey,
    config: MutatingOpDef
 ) {
@@ -162,13 +162,13 @@ class TriggerableModel {
 type OpTransforms = {
    op?: Function, // customized
    input?: (input: any[]) => any[],
-   output?: (output: any, model: IonizedModel) => any,
+   output?: (output: any, model: IonicProxy) => any,
 }
 
 export type TrackableOpDef = {
    type: typeof MemberType.TRACKABLE,
    privateState?: true,
-   track?: (model: IonizedModel, op: PropertyKey, input: any[]) => void
+   track?: (model: IonicProxy, op: PropertyKey, input: any[]) => void
 } & OpTransforms
 
 export type MutatingOpDef = {
@@ -243,7 +243,7 @@ export function getIonizedMemberDef(target: AnyObject, methodKey: PropertyKey) {
    // return ionizedMethodsMap.get(Object)?.['[[set]]']
 }
 
-export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMethodsDef) {
+export function defineIonicStructure(constructor: Constructor, def?: IonizedMethodsDef) {
    const existingDef = ionizedMethodsMap.get(constructor)
    if (existingDef && def) debug.warn(`Overriding existing Ionized Methods defintion for ${constructor.name}`)
    if (existingDef) return;
@@ -260,7 +260,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
  *    ]
  * }
  *  */
-// export function triggerAll(model: IonizedModel, op: PropertyKey): () => void {
+// export function triggerAll(model: IonicProxy, op: PropertyKey): () => void {
 //    return function triggerAllOps(this: { update: Update }) {
 //       const ops = getTrackedOps(model, op)
 //       if (ops)
@@ -271,10 +271,10 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 //    }
 // }
 
-// export function trigger(model: IonizedModel): () => void
-// export function trigger(model: IonizedModel, op: '[[get]]', entryKey: PropertyKey): () => void
-// export function trigger(model: IonizedModel, op: PropertyKey, entryKey: any): () => void
-// export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entryKey?: any): () => void {
+// export function trigger(model: IonicProxy): () => void
+// export function trigger(model: IonicProxy, op: '[[get]]', entryKey: PropertyKey): () => void
+// export function trigger(model: IonicProxy, op: PropertyKey, entryKey: any): () => void
+// export function trigger(model: IonicProxy, op?: PropertyKey | '[[get]]', entryKey?: any): () => void {
 //    if (op === '[[get]]') {
 //       if (!entryKey) throw new Error('must provide property key to trigger [[get]] op')
 //       return function triggerPion(this: { update: Update }) {
@@ -337,11 +337,11 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
 
 
 // const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)
-export const trackModel = (model: IonizedModel) => {
+export const trackModel = (model: IonicProxy) => {
    trackParticle(quarkOf(model))
 }
 
-export function trackOp(model: IonizedModel, op: PropertyKey, key: any) {
+export function trackOp(model: IonicProxy, op: PropertyKey, key: any) {
    trackParticle(asAtomicOp(quarkOf(model), op, key))
 }
 
@@ -361,7 +361,7 @@ export function trackOp(model: IonizedModel, op: PropertyKey, key: any) {
 //    target: { has(value: unknown): boolean },
 //    { passRaw, fail, passIonized }: {
 //       passRaw: (key: unknown) => unknown,
-//       passIonized: (key: IonizedModel, rawKey: AnyObject) => unknown,
+//       passIonized: (key: IonicProxy, rawKey: AnyObject) => unknown,
 //       fail: unknown
 //    }) {
 //    if (target.has(rawKey)) {

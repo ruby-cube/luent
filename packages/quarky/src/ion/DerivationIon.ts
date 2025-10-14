@@ -1,15 +1,15 @@
-import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
+import { IonicCompound, IonicCompoundMorph } from "../abstract/IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
-import { quarkOf, QUARK, hasQuark, Quark } from "../Quark";
-import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
+import { quarkOf, QUARK, hasQuark, Quark } from "../abstract/Quark";
+// import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { emitSignal } from "../debug/debug";
 import { asWatched } from "../reactivity/Watched";
 import { Ion } from "../ion/Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
 import { SYNC, isLazyUpdate, $activeUpdate } from "../reactivity/UpdateCycle";
-import {  trackParticle } from "../compound/Compound";
+import {  trackParticle } from "../abstract/Compound";
 import { NULL } from "../reactivity/LazyState";
 
 
@@ -24,7 +24,7 @@ import { NULL } from "../reactivity/LazyState";
 **/
 
 // /** INTERNAL */
-export type $DerivedState = Ion & Capsule & {
+export type $DerivedState = Ion & {
    [QUARK]: {
       inert: boolean
       state: unknown
@@ -188,9 +188,9 @@ export function createManagedDerivation(
    // $derived.__DEV__label = __DEV__label
 
 
-   if (methods) {
-      attachCapsuleMethods('MemoizedDerivationIon', $derived, methods)
-   }
+   // if (methods) {
+   //    attachCapsuleMethods('MemoizedDerivationIon', $derived, methods)
+   // }
 
    return $derived;
 }

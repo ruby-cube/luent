@@ -1,32 +1,18 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { ModelQuark } from "./ModelQuark";
-import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
-import { createIonizedModel, getIonizedModel, IonizedModel, IonizeOptions } from "./IonizedModel";
-import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { AnyARecord } from "node:dns";
-
-
-// The current approach to reactivity depth is that all models are deeply reactive.
-// However, reactivity is applied only to:
-// - object literals that have NOT been marked inert
-// - class instances whose DIRECT prototype has been registered as ionizable
-
-// TODO: figure out the simplest way developers can add types to custom data strucures
+import { createIonicProxy, getIonizedModel, IonicProxy, IonizeOptions } from "./Ionic";
+import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 
 
 
 
 
-type AbsorbedIon<T> = {
-   (...args: any[]): T;
-   [QUARK]: any;
-}
 
-export type Readonly<T extends AnyObject = AnyObject> = {
-   readonly [K in keyof T]: T[K]
-}
+
+
+
 
 /**
  * [v] ion access --for objects only (not collections)
@@ -39,12 +25,6 @@ export type Readonly<T extends AnyObject = AnyObject> = {
  */
 
 
-
-
-
-
-
-export const MARK = Symbol('marked')
 
 /**
  * Ionized deeply
@@ -100,7 +80,7 @@ type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args:
 
 /**
  * Wrap the return of a method of an ionizable class with this type helper in order to 
- * propagate any deep ionization that has been defined in the class's enlistIonizedMethods config
+ * propagate any deep ionization that has been defined in the class's defineIonicStructure config
  */
 export type IonizeBy<H, T> = IsIonized<H> extends true ?
    (T extends AnyObject ? Ionized<T> : T) : T
@@ -326,7 +306,7 @@ export function storeSnapshot(modelQuark: ModelQuark, clone?: AnyObject) {
    // timeTraveler.takeSnapshot(toRaw(modelQuark), $effectCycle().count, clone)
 }
 
-export function isIonizedModel(value: any): value is IonizedModel {
+export function isIonicProxy(value: any): value is IonicProxy {
    if (!isObject(value)) return false;
    return hasQuark(value) && quarkOf(value) instanceof ModelQuark;
 }
@@ -335,11 +315,11 @@ export function isIonizedModel(value: any): value is IonizedModel {
 export function ionizeModel(target: object, options: IonizeOptions) {
    if (!isObject(target)) return target;
    // throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
-   if (isIonizedModel(target) || isFunction(target) || isInert(target)) {
-      if (options) debug.warn(`CASE RESEARCH: Target is ${isIonizedModel(target) ? 'ionized model' : isIon(target) ? 'ion' : 'inert'}. Cannot extend using ionize()`)
+   if (isIonicProxy(target) || isFunction(target) || isInert(target)) {
+      if (options) debug.warn(`CASE RESEARCH: Target is ${isIonicProxy(target) ? 'ionized model' : isIon(target) ? 'ion' : 'inert'}. Cannot extend using ionize()`)
       return target
    }
-   return createIonizedModel(target, options)
+   return createIonicProxy(target, options)
 }
 
 export function isIonKey(key: PropertyKey): key is string {
@@ -351,7 +331,7 @@ export function toRaw<T>(target: T): ToRaw<T> {
    if (target instanceof ModelQuark) {
       return target.rawTarget as ToRaw<T>;
    }
-   if (isIonizedModel(target)) {
+   if (isIonicProxy(target)) {
       return quarkOf(target).rawTarget as ToRaw<T>;
    }
    return target as ToRaw<T>; // already raw target
@@ -359,7 +339,7 @@ export function toRaw<T>(target: T): ToRaw<T> {
 
 
 // export function exposeIons<T>(model: T): asserts model is T & AsIons<T> {
-//    if (!isIonizedModel(model)) throw new Error("model must be ionized")
+//    if (!isIonicProxy(model)) throw new Error("model must be ionized")
 // }
 
 // export function ions<T>(model: T): AsIons<T> {
@@ -402,7 +382,7 @@ export function toRaw<T>(target: T): ToRaw<T> {
 
 
 
-// export function toWatchedProp(reactive: IonizedModel, key: PropertyKey) {
+// export function toWatchedProp(reactive: IonicProxy, key: PropertyKey) {
 //     const modelQuark = reactive[QUARK]
 //     const isIndex = toRaw(modelQuark) instanceof Array && isIntegerKey(key)
 //     if (isIndex) {

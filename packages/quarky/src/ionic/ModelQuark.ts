@@ -1,17 +1,17 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
-import { IonizedModel } from "./IonizedModel"
+import { IonicProxy } from "./Ionic"
 import { trigger, Watchable, Watched } from "../reactivity/Watched"
-import { Mutable, Mutation } from "../Mutable"
+import { Mutable, Mutation } from "../abstract/Mutable"
 import { Traceable } from "../debug/Traceable"
 import { asAtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
-import { getIonizedMemberDef } from "./IonizedMethods"
+import { getIonizedMemberDef } from "./IonicMethods"
 import { Update } from "../reactivity/UpdateCycle"
 import { AtomicIonQuark } from "../ion/AtomicIon"
-import { trackParticle } from "../compound/Compound"
+import { trackParticle } from "../abstract/Compound"
 import { ModelState } from "../reactivity/LazyState"
-import { AtomicQuark } from "../reactivity/AtomicQuark"
+import { AtomicQuark } from "../abstract/AtomicQuark"
 import { Ion } from "../ion/Ion"
 
 
@@ -27,7 +27,7 @@ export class ModelQuark implements Watchable {
    __DEV__asTraceable: Traceable
 
    constructor(
-      public model: IonizedModel,
+      public model: IonicProxy,
       public rawTarget: AnyObject, //initialData
       public state: ModelState,
       public clone: ((obj: AnyObject) => AnyObject) | undefined,

@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } 
 import { MaybeIon } from "../component/Input";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListItemKit, ListKit, toAsyncRenderItem } from "./List";
-import { Ion, IonizeBy, Ionized, isGetter, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonize, toIon, toValue } from "@rue/quarky";
+import { Ion, IonizeBy, Ionized, isGetter, isInertIon, isIon, IsIonized, isIonicProxy, MaybeIonize, toIon, toValue } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
 
@@ -32,7 +32,7 @@ export function For<L extends ListData>(data: L, render: RenderItem<L>): ListKit
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
    // const _render = normalizeToRenderFunction(render) as RenderItem<any[]>;
-   if (isGetter(data) || isIonizedModel(data) || isIonizedModel(toValue(data))) {
+   if (isGetter(data) || isIonicProxy(data) || isIonicProxy(toValue(data))) {
       return new ListKit(toIon(data), toAsyncRenderItem(_render), getUID, getFlask())
    }
    return renderStaticList(data, _render)
