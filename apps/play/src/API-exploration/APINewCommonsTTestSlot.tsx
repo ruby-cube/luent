@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Commons, CommonsKey, component, fromCommons, FromTag, RenderSlot } from "@rue/lumo";
-import { ArticleDatabase } from "./ArticleDatabase.class";
+import { ArticleDatabase } from "../demos/conduit/src/db/ArticleDatabase";
 
 // # via commons
 

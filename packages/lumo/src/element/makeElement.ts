@@ -39,7 +39,7 @@ export function makeElement(
    config: ElementConfig,
    $index: Ion<number> | undefined
 ): DOMNode {
-   const { class: classes, style: styles, 'show-if': showIf, ref, ...other } = config;
+   const { class: classes, style: styles, 'show:if': showIf, ref, ...other } = config;
 
    const { attributes, events, hooks } = analyzeAttributes(other)
 

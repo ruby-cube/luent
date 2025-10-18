@@ -12,7 +12,7 @@ import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { isWatchable, Watchable } from "../reactivity/Watched";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp, trackOp } from "./IonicMethods";
 import { inert, isInert } from "./notes/inert";
-import { $AtomicIonState, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
+import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
 import { isTracking, popTracker, pushTracker, trackParticle } from "../abstract/Compound";
 import { Update } from "../reactivity/UpdateCycle";
 import { ModelState, PionState } from "../reactivity/LazyState";
@@ -32,8 +32,8 @@ export type IonicProxy = {
 } & Capsule & MutableEntity & AnyObject
 
 // for inert properties use absorbed neutrons
-// const frog = ionized({
-//    name: inert('kermit'),
+// const frog = Ionic({
+//    name: Neutron('kermit'),
 //    age: 0
 // })
 
@@ -689,7 +689,7 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion)
 
 type ExposeIons<T extends AnyObject> = { [K in keyof T]: T[K] extends Function ? undefined : MutableIon<T[K]> } // TODO: Ion if readonly
 
-export function $of<T extends AnyObject>(value: T): ExposeIons<T> {
+export function $from<T extends AnyObject>(value: T): ExposeIons<T> {
    if (!isIonicProxy(value)) return value as ExposeIons<T>
    const modelQuark = quarkOf(value);
    return modelQuark.pions ?? (modelQuark.pions = createPionsProxy(modelQuark.proxyProto, value))
@@ -707,7 +707,7 @@ function createPionsProxy(proxyProto: AnyObject, model: IonicProxy) {
 function getPion(proxyProto: ProxyPropertyMap, key: ProxyKey) {
    const getter = Object.getOwnPropertyDescriptor(proxyProto, key)?.get
    if (!getter) return undefined;
-   if (QUARK in getter) return getter as $AtomicIonState;
+   if (QUARK in getter) return getter as QuarkyAtomicIon;
    return undefined
 }
 

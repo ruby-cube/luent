@@ -71,7 +71,7 @@ export type MaybeIonize<T> = IsIonized<T> extends true ? T
 
 
 // type IonizeCollectionByMarkMap<T, MK, K> = MK extends Shallow ? Ionized<T> : Ionized<T,>
-
+export const Ionic = ionize
 
 
 export type ToRaw<T> = IsIonized<T> extends true ? T extends Ionized<infer R> ? R : T : T

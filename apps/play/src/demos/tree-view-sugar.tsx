@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, FromTag, If, Else, For } from "@rue/lumo";
-import { $of, defineDeepIonize, EACH, ion, Ionic, ionize, Ionized } from "@rue/quarky";
+import { $from, defineDeepIonize, EACH, ion, Ionic, ionize, Ionized } from "@rue/quarky";
 
 
 function getTreeData(): TreeItem {
@@ -109,7 +109,7 @@ export function TreeApp({ data = getTreeData() }) {
 //             )}
 //          </div>
 //          {If(%isFolder,
-//             <ul show-if={%isOpen}>
+//             <ul show:if={%isOpen}>
 //                {For(item.children!, m => m, item => (
 //                   <TreeItem
 //                      item={item}

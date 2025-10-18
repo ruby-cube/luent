@@ -1,291 +1,24 @@
-//  const $blink = StreamIon({
-//       service: true, // does not stop when component is discarded
-//       value: false,
-//       timer: {  // can pass array of timers too
-//          delay: 50,
-//          run() {
-//             this.value = !this.value;
-//          },
-//          interval: 500,
-//          x: 6,
-//          end() {
-//             this.value = true
-//          }
-//       }
-//    }, {
-//       reset() {
-//          this.value = false;
-//       },
-//    })
+import { AnyObject } from "@rue/types"
+import { isFunction } from "@rue/utils"
 
-// const animation = concat([
-//    running,
-//    running,
-//    $blink
-// ], {
-//    timer: {
-//       delay: 5000,
-//       x: 1000,
-//    },
-//    until: atUnmount
-// })
-
-// animation.start();
-
-import { Ion, MutableIon } from "@rue/quarky"
-import { AnyObject, Primitive } from "@rue/types"
-import { isFunction, noop, normalizeToArray } from "@rue/utils"
-
-/**
- * Streams
- * 
- * Purpose:
- * - stopability
- * - composability
- * of asynchronous operations: timeout, interval, animation, promises/suspense
- */
-
-// TODO: { until:} atUnmount
-
-interface StreamControl {
-   start(stream?: PropertyKey): Promise<void>
+export type Stream = {
+   start(): Promise<void>
    stop(): void
 }
 
-type ComposedStream = StreamControl
+// TODO: timeout
+// TODO: animation ... interval 'frame'
+// TODO: until atUnmount
 
-type TimerDef<T = any, C = any> = {
-   '@pre'?: (this: T, context: C & StreamContext) => void,
-   delay?: number,
-   while?: (this: T, context: C & StreamContext) => boolean,
-   run(this: T, context: C & StreamContext): void
-   interval: number | 'frame'
-   max?: number
-   doWhile?: (this: T, context: C & StreamContext) => boolean,
-   '@post'?: (this: T, context: C & StreamContext) => void
-}
+export function Stream(startDef: (utils: AnyObject) => Promise<void>, options?: { '@stop': () => void }): Stream {
 
-interface StreamDef<T, C> {
-   this: T
-   // service?: boolean,
-   stream?: TimerDef<T, C> | TimerDef<T, C>[], // default timer
-   streams?: { [key: PropertyKey]: TimerDef<T, C> | TimerDef<T, C>[] } // named timers
-   context?: C & AnyObject,
-   '@start'?: (context: C & StreamContext) => void
-   '@@stop'?: (context: C & StreamContext) => void
-}
+   const stopTask = options?.["@stop"]
+   let stopCurrentStream: () => void
 
-// interface StreamDef<T = any, C = any> extends Def<T, C> {
-//    this: T
-// }
+   const interval = Interval()
+   let stopped = false
+   let started = false
 
-// interface StreamIonDef<T, C, P> extends Def<MutableIon<T> & P, C> {
-//    value: T,
-// }
-
-// type Proto = {
-
-// }
-
-
-// type InternalThis<T = any, C = AnyObject, P = AnyObject> = { value: T, context?: C & { x: number } } & P
-
-// const animation = concat([
-//    running,
-//    running,
-//    $blink
-// ], {
-//    timer: {
-//       delay: 5000,
-//       x: 1000,
-//    },
-//    until: atUnmount
-// })
-
-// TODO: allow normal, both sync and async functions to be chained in concat
-// function toStream(start: () => Promise<void>) {
-//    let started = false;
-//    return {
-//       start() {
-//          if (started) {
-//             this.stop()
-//             return new Promise<void>((resolve) => {
-//                setTimeout(() => this.start().then(resolve), 0)
-//             })
-//          }
-//          started = true;
-//          return start()
-//             .then(() => started = false)
-//             .catch(() => { started = false }) as unknown as Promise<void>
-//       },
-//       stop() {
-//          if (!started) return;
-//             stream.stop()
-//          started = false
-//       }
-//    }
-// }
-
-type ComposeUtils = {
-   sequence: typeof sequence,
-   merge: typeof merge,
-   pend: typeof pend,
-   delay: typeof delay,
-   repeat: typeof repeat
-}
-
-
-export function ComposedStream(def: (utils: ComposeUtils) => Stream): Stream {
-   return def({ sequence, merge, pend, delay, repeat })
-}
-
-function delay(ms: number) {
-   let id: NodeJS.Timeout
-   return {
-      [AS_STREAM]: {
-         start() {
-            return new Promise(resolve => {
-               id = setTimeout(resolve, ms)
-            })
-         },
-         stop() {
-            clearTimeout(id)
-         }
-      }
-   }
-}
-
-// function repeat(times: number, stream: Stream): ComposedStream {
-//    let i = times;
-
-//    async function start(){
-//       while(i--){
-//          await startStream(stream)
-//       }
-//    }
-
-//    function stop(){
-
-//    }
-
-//    return {
-//       [AS_STREAM]: {
-//          start,
-//          stop
-//       },
-//       start,
-//       stop
-//    } as ComposedStream
-// }
-
-
-function repeat(times: number, stream: Stream): ComposedStream {
-   let currentStream: Stream;
-   let started = false;
-   let stopped = false;
-
-   async function start() {
-      if (started) {
-         stop()
-         return new Promise<void>((resolve) => {
-            setTimeout(() => start().then(resolve), 0)
-         })
-      }
-      if (stopped) {
-         stopped = false;
-      }
-      started = true;
-      let i = times
-      while (i--) {
-         if (stopped) {
-            stopped = false;
-            return;
-         }
-         currentStream = stream
-         await startStream(stream)
-            .catch(() => { started = false })
-      }
-      started = false;
-   }
-
-   function stop() {
-      if (!started) return;
-      stopped = true;
-      stopStream(currentStream)
-      started = false;
-   }
-
-   return {
-      [AS_STREAM]: {
-         start,
-         stop
-      },
-      start,
-      stop
-   } as ComposedStream
-}
-
-function pend(suspenseful: Promise<unknown>) {
-   const promise = suspenseful; // TODO: or from suspenseIon
-   return {
-      [AS_STREAM]: {
-         start() {
-            return promise
-         },
-         stop: noop
-      }
-   }
-}
-
-function sequence(...streams: (Stream | (() => void))[]): ComposedStream {
-   let currentStream: Stream | (() => void);
-   let started = false;
-   let stopped = false;
-
-   async function start() {
-      if (started) {
-         stop()
-         return new Promise<void>((resolve) => {
-            setTimeout(() => start().then(resolve), 0)
-         })
-      }
-      if (stopped) {
-         stopped = false;
-      }
-      started = true;
-      for (const stream of streams) {
-         if (stopped) {
-            stopped = false;
-            return;
-         }
-         currentStream = stream
-         await startStream(stream)
-            .catch(() => { started = false })
-      }
-      started = false;
-   }
-
-   function stop() {
-      if (!started) return;
-      stopped = true;
-      stopStream(currentStream)
-      started = false;
-   }
-
-   return {
-      [AS_STREAM]: {
-         start,
-         stop
-      },
-      start,
-      stop
-   } as ComposedStream
-}
-
-
-
-function merge(...streams: Stream[]): ComposedStream {
-   let started = false;
    function start() {
       if (started) {
          stop()
@@ -294,185 +27,97 @@ function merge(...streams: Stream[]): ComposedStream {
          })
       }
       started = true;
-      const promises = []
-      for (const stream of streams) {
-         promises.push(startStream(stream))
-      }
-      return Promise.all(promises)
-         .then(() => started = false)
-         .catch(() => { started = false }) as unknown as Promise<void>
-   }
-   function stop() {
-      if (!started) return;
-      for (const stream of streams) {
-         stopStream(stream)
-      }
-      started = false
-   }
-   return {
-      [AS_STREAM]: {
-         start,
-         stop
-      },
-      start,
-      stop
-   } as ComposedStream
-}
-
-type Stream<T = unknown, S = PropertyKey> = T & { '~streams': S }
-type InternalStream = { [AS_STREAM]: StreamControl }
-
-type StreamsOf<T> = T extends { '~streams': infer S } ? S : never
-
-export function startStream<T extends Stream | (() => void | Promise<void>)>(entity: T, name?: StreamsOf<T>) {
-   if (!(AS_STREAM in entity)) {
-      const promise = entity()
-      if (promise) return promise;
-      return new Promise((resolve) => setImmediate(resolve))
-   }
-   return (<InternalStream><unknown>entity)[AS_STREAM].start(name)
-}
-
-export function stopStream(entity: Stream<unknown> | (() => void | Promise<void>)) {
-   if (!(AS_STREAM in entity)) return;
-   return (<InternalStream><unknown>entity)[AS_STREAM].stop()
-}
-
-const AS_STREAM = Symbol('stream') as unknown as '~streams'
-
-// export function StreamIon<T, C, P>(def: StreamIonDef<T, C, P>, proto?: P & ThisType<MutableIon<T>>): T extends Function ? never : Stream<Ion<T> & P> {
-//    const { value } = def;
-//    if (value instanceof Function) throw new Error('[INVALID INPUT] The value of StreamIon cannot be a function')
-//    const $state = Ion(value as Primitive, proto!)
-//    asStream($state, def)
-//    return $state as T extends Function ? never : Stream<Ion<T> & P>
-// }
-
-// TODO: Manage multiple stream definitions
-export function asStream<T extends object, C>(def: StreamDef<T, C>) {
-   const { stream, context, this: entity } = def;
-   const streams = def.streams ?? { default: stream }
-
-   // TODO: hook tasks
-   // const { proto, tasks } = extractHookTasks(protoDef ?? {})
-
-
-
-   const state: StreamContext = { ...context, stream: { x: 1, index: 0, timestamp: undefined, name: 'default' } }
-
-   let started = false;
-
-   (<InternalStream>entity)[AS_STREAM] = {
-      start(stream?: string) {
-         if (started) {
-            this.stop()
-            return new Promise<void>((resolve) => {
-               setTimeout(() => this.start().then(resolve), 0)
-            })
-         }
-         started = true;
-         state.stream.x = 1
-         state.stream.index = 0
-         return start()
-            .then(() => { started = false })
-            .catch(() => { started = false })
-      },
-      stop() {
-         if (!started) return;
-         stop()
-         state.stream.index = null
-         started = false;
-      }
-   }
-
-   const { start, stop } = setUpTimers(normalizeToArray(streams.default), entity, state) // TODO: implement named streams
-
-   return entity
-}
-
-// function extractHookTasks(protoDef: AnyObject) {
-//    const propertyDefs = Object.getOwnPropertyDescriptors(Object.getPrototypeOf(protoDef))
-//    const proto: AnyObject = {}
-//    const tasks: AnyObject = {}
-//    for (const key in protoDef) {
-//       if (key.startsWith('@')) {
-//          tasks[key.slice(1)] = protoDef[key]
-//       }
-//       else if (key in propertyDefs) {
-//          Object.defineProperty(proto, key, propertyDefs[key])
-//       }
-//       else {
-//          proto[key] = protoDef[key]
-//       }
-//    }
-//    return { proto, tasks }
-// }
-
-
-type StreamContext = { stream: { name: string | 'default', x: number, index: number | null, timestamp?: DOMHighResTimeStamp } }
-
-type Timer = {
-   start(): void
-   stop(): void
-}
-
-function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamContext) {
-   const activeTimers: Timer[] = []
-
-   let done: () => void
-   let cancel: () => void
-
-   function start() {
-      const promise = new Promise<void>((resolve, reject) => {
-         done = resolve
-         cancel = reject
+      stopped = false;
+      return startDef({
+         get interval() {
+            return (ms: number, task: () => void, options?: { max?: number }) => {
+               if (stopped) return;
+               stopCurrentStream = interval.stop
+               return interval.start(ms, task, options)
+            }
+         },
+         // stream,
+         run,
+         repeat
+      }).catch(err => {
+         if (err !== 'stream cancelled') throw err
       })
-      activeTimers[0].start()
-      return promise;
+   }
+
+   let value: unknown;
+
+   function run(...streams: [Function] | (Stream | Promise<any>)[]): unknown | Promise<unknown> {
+      if (stopped) return undefined as unknown as Promise<any>
+      if (streams.length === 1) {
+         const stream = streams[0]
+         if (stream instanceof Function) {
+            const maybePromise = stream(value)
+            if ('then' in maybePromise) {
+               maybePromise.then((res: unknown) => value = res)
+            }
+            else {
+               value = maybePromise
+            }
+            return maybePromise
+         }
+         if ('start' in stream && 'stop' in stream) {
+            stopCurrentStream = stream.stop
+            return stream.start().then(res => value = res)
+         }
+         else return stream.then(res => value = res)
+      }
+      const promises: Promise<any>[] = []
+      stopCurrentStream = () => {
+         for (const stream of streams) {
+            if ('stop' in stream)
+               stream.stop()
+         }
+      }
+      for (const stream of streams) {
+         promises.push('start' in stream ? stream.start() : stream instanceof Function ? stream() : stream)
+      }
+
+      return Promise.all(promises).then(res => value = res)
+   }
+
+   // function stream(...streams: (Stream | Promise<any>)[]) {
+   //    if (stopped) return;
+   //    if (streams.length === 1) {
+   //       const stream = streams[0]
+   //       if ('start' in stream && 'stop' in stream) {
+   //          stopCurrentStream = stream.stop
+   //          return stream.start()
+   //       }
+   //       else return stream
+   //    }
+   //    const promises: Promise<any>[] = []
+   //    stopCurrentStream = () => {
+   //       for (const stream of streams) {
+   //          if ('stop' in stream)
+   //             stream.stop()
+   //       }
+   //    }
+   //    for (const stream of streams) {
+   //       promises.push('start' in stream ? stream.start() : stream)
+   //    }
+
+   //    return Promise.all(promises)
+   // }
+
+   async function repeat(times: number, fn: () => Promise<void>) {
+      if (stopped) return;
+      let x = times;
+      while (x--) {
+         await fn()
+      }
    }
 
    function stop() {
-      const index = context.stream.index
-      if (index != null) {
-         activeTimers[index].stop()
-      }
-      try {
-         cancel();
-      }
-      catch (err) {
-         ;
-      }
-   }
-
-   function conclude() {
-      done();
-      context.stream.index = null
-   }
-
-   function next() {
-      const index = context.stream.index
-      if (index != null) {
-         const timer = activeTimers[index + 1]
-         if (timer) return timer;
-         return {
-            start: conclude,
-            stop: noop
-         }
-      }
-   }
-
-   for (let i = 0; i < timers.length; i++) {
-      const timer = timers[i]
-      const checksConditions = timer.doWhile || timer.while
-      timer.max = timer.max ?? (checksConditions ? Infinity : 1)
-      const { interval, max } = timer
-      const setUpTimer = interval === 'frame'
-         ? setUpAnimation
-         : max > 1 || checksConditions
-            ? setUpInterval
-            : setUpTimeout
-
-      activeTimers.push(createTimer(timer, setUpTimer, entity, context, i, next))
+      if (!started) return;
+      stopTask?.()
+      stopCurrentStream()
+      stopped = true;
+      started = false;
    }
 
    return {
@@ -483,114 +128,58 @@ function setUpTimers(timers: TimerDef[], entity: AnyObject, context: StreamConte
 
 
 
-// TODO: provide timestamp in context
 
-function setUpAnimation(timer: TimerDef, entity: AnyObject, context: StreamContext, stop: () => void, next: () => Timer | undefined) {
-   const { interval, run, "@pre": atPre, "@post": atPost, while: precondition, doWhile: postcondition } = timer
-   if (interval !== 'frame') throw new Error('[INVALID INPUT]')
-   let id: number;
 
-   atPre?.apply(entity, [context])
-   id = requestAnimationFrame(runFrame)
-
-   function runFrame(time: DOMHighResTimeStamp) {
-      context.stream.timestamp = time
-      if (precondition && !precondition.apply(entity, [context])) {
-         stop();
-         next()?.start()
-         return;
-      }
-      run.apply(entity, [context])
-      if (context.stream.x === timer.max || postcondition && !postcondition.apply(entity, [context])) {
-         atPost?.apply(entity, [context])
-         stop()
-         next()?.start()
-         return;
-      }
-      else {
-         context.stream.x++
-         id = requestAnimationFrame(runFrame)
-      }
+function Interval() {
+   const state = {
+      x: 0,
+      end
    }
 
-   return () => id
-}
+   let id: NodeJS.Timeout | null = null
+   let resolve: (() => void) | null = null
+   let reject: ((reason?: any) => void) | null = null
 
-function setUpInterval(timer: TimerDef, entity: AnyObject, context: StreamContext, stop: () => void, next: () => Timer | undefined) {
-   const { interval, run, "@pre": atPre, "@post": atPost, while: precondition, doWhile: postcondition } = timer
-   if (interval === 'frame') throw new Error('[INVALID INPUT]')
-   atPre?.apply(entity, [context])
-   const id = setInterval(() => {
-      if (precondition && !precondition.apply(entity, [context])) {
-         stop();
-         next()?.start()
-         return;
+   function startInterval(ms: number, task: () => void, options?: { max?: number }) {
+      console.log('starting interval')
+      const maxTimes = options?.max ?? Infinity
+      console.log('maxTimes', maxTimes)
+      const boundTask = () => {
+         state.x++
+         task.call(state)
+         if (state.x === maxTimes) end()
       }
-      run.apply(entity, [context])
-      if (context.stream.x === timer.max || postcondition && !postcondition.apply(entity, [context])) {
-         atPost?.apply(entity, [context])
-         stop()
-         next()?.start()
-         return;
-      }
-      else {
-         context.stream.x++
-      }
-   }, interval)
-   return () => id
-}
+      id = setInterval(boundTask, ms)
 
-
-type SetUpTimer = (timer: TimerDef<any>, entity: AnyObject, context: StreamContext, stop: () => void, next: () => Timer | undefined) => () => any
-
-function setUpTimeout(timer: TimerDef, entity: AnyObject, context: StreamContext, stop: () => void, next: () => Timer | undefined) {
-   const { interval, run, "@pre": atPre, "@post": atPost } = timer
-   if (interval === 'frame') throw new Error('[INVALID INPUT]')
-   atPre?.apply(entity, [context]) //QUESTION: not sure if there's a point for pre and post for timeouts...
-   const id = setTimeout(() => {
-      run.apply(entity, [context])
-      atPost?.apply(entity, [context])
-      next()?.start()
-   }, interval)
-   return () => id
-}
-
-function createTimer(timer: TimerDef, setUpTimer: SetUpTimer, entity: AnyObject, context: StreamContext, index: number, next: () => Timer | undefined): Timer {
-   const { delay, '@post': atPost } = timer
-
-   let id: NodeJS.Timeout;
-   let $id = () => id;
-
-   function stop() {
-      clearTimeout($id())
-      atPost?.apply(entity, [context])
+      return new Promise<void>((_resolve, _reject) => {
+         resolve = _resolve
+         reject = _reject
+      })
    }
 
-   return {
-      start() {
-         context.stream.index = index;
-         if (delay) {
-            id = setTimeout(() => {
-               $id = setUpTimer(timer, entity, context, stop, next)
-            }, delay)
-         }
-         else {
-            $id = setUpTimer(timer, entity, context, stop, next)
-         }
-      },
-      stop
+   function clear() {
+      if (id === null) return;
+      clearInterval(id)
    }
-}
 
+   function end() {
+      clear()
+      resolve?.()
+      resetInterval()
+   }
 
-function StreamIonService() {
+   function cancel() {
+      clear()
+      reject?.('stream cancelled')
+      resetInterval()
+   }
 
-}
+   function resetInterval() {
+      state.x = 0
+      id = null;
+      resolve = null
+      reject = null
+   }
 
-function Stream() {
-
-}
-
-function StreamService() {
-
+   return { start: startInterval, stop: cancel }
 }

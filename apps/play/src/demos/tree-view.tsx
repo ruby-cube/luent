@@ -1,5 +1,5 @@
 import { component, FromTag, If, Else, For, fromGlobal, CommonsKey } from "@rue/lumo";
-import { $of, DeepIonized, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, isIonicProxy, NoExpand } from "@rue/quarky";
+import { $from, DeepIonized, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, isIonicProxy, NoExpand } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 
 
@@ -278,7 +278,7 @@ function TreeItemView(input: FromTag<{
             )}
          </div>
          {If($isFolder,
-            <ul show-if={$isOpen}>
+            <ul show:if={$isOpen}>
                {For(item.children!, m => m, item => (
                   <TreeItemView mu:item={item}></TreeItemView>
                ))}

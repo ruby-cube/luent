@@ -73,7 +73,7 @@ class Folder implements FileTreeNode {
 class FileTree extends Folder {
 
    constructor(
-      nodes: FileTreeNodeData[]
+      public nodes: FileTreeNodeData[]
    ) {
       super('root', 'root', null, null)
 

@@ -82,7 +82,7 @@ export function isInertIon(value: unknown): value is { [QUARK]: { inert: true } 
 }
 
 
-export function inert<T>(value: T): () => T {
+export function Inert<T>(value: T): () => T {
    function inertGet() {
       return value
    }

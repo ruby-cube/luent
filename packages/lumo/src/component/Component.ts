@@ -109,6 +109,6 @@ export function makeComponent(
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    if (tag.ref) initializeComponentRef(tag.ref, output.exposed ?? {}, $index)
-      // if (tag['show-if']) setUpConditionalDisplay()
+      // if (tag['show:if']) setUpConditionalDisplay()
    return output
 }

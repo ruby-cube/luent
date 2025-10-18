@@ -1,6 +1,6 @@
 import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $of, ion, ionic, ionize, toRaw, update } from "@rue/quarky";
+import { $from, ion, ionic, ionize, toRaw, update } from "@rue/quarky";
 import './style.css'
 
 

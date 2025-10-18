@@ -1,10 +1,9 @@
 import { debug, isFunction } from "@rue/utils";
-import { inert } from "./Get";
+import { Inert } from "./Get";
 import { createManagedDerivation } from "../ion/DerivationIon";
 import { AtomicIonQuark, createAtomicIon, IONIZED } from "./AtomicIon";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionic/ionize";
-import { Inert, IsInert } from "../ionic/notes/inert";
 import { initializeSnapshots } from "../ionic/TimeTraveler";
 import { hasQuark, QUARK } from "../abstract/Quark";
 import { IonizeOptions, maybeIonize } from "../ionic/Ionic";
@@ -74,7 +73,7 @@ function $_is_ref(value: AnyObject) {
 }
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-   return (isGetter(value) ? value : inert(value)) as T extends Ion ? T : Ion<T>
+   return (isGetter(value) ? value : Inert(value)) as T extends Ion ? T : Ion<T>
 }
 
 

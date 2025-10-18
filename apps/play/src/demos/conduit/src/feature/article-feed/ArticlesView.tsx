@@ -3,7 +3,7 @@ import { Commons, CommonsKey, component, Else, ElseIf, For, fromCommons, fromApp
 import { Ion, Ionized, watch } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";
-import { ArticleDatabase } from "./ArticleDatabase.class";
+import { ArticleDatabase } from "../../db/ArticleDatabase";
 
 
 // #region: main
@@ -25,19 +25,24 @@ export function ArticlesView(input: FromTag<{
    const db = fromRoot.required(ArticlesView.root.db)
 
    const $page = Ion(0)
-   const $result = SuspenseIon({ articles: [], articleCount: 0 } as ArticleResponse,
-      () => db.fetchArticles($articlesMeta(), $page(), $articlesPerPage())
-   )
+   const $result = fetchArticles($articlesMeta, $page, $articlesPerPage)
 
    const $articles = Ion(() => $result().articles)
    const $articleCount = Ion(() => $result().articleCount)
 
+   const $feed = Ion('global' as 'global' | 'user')
+   const $tabs = Ion(['global', 'my-feed'])
+
    return component(
       <>
-         <ArticlesNav></ArticlesNav>
+         <ArticlesNav
+            mu:activetab={$feed}
+            tabs={$tabs}
+            can:prefetch={(feed) => $result.prefetch(feed, 0, $articlesPerPage())}
+         ></ArticlesNav>
          {If(($result.pending),
             <div class="article-preview">
-               loading...
+               <ArticlesSkeleton></ArticlesSkeleton>
             </div>
          )}
          {ElseIf(($result.error),
@@ -48,21 +53,18 @@ export function ArticlesView(input: FromTag<{
          {ElseIf($articles.length === 0,
             <>No articles here yet</>
          )}
-         {Else(() => {
-            const settings = fromCommons(ArticlesView.settings) ?? 10
-            return (
-               <>
-                  {For($articles, m => m.id, article => (
-                     <ArticlePreview mu:article={article}></ArticlePreview>
-                  ))}
-                  <ArticlePagination
-                     mu:page={$page}
-                     articlesPerPage={$of(settings).$articlesPerPage}
-                     articleCount={$articleCount}
-                  ></ArticlePagination>
-               </>
-            )
-         })}
+         {Else((settings = fromCommons(ArticlesView.settings)) =>
+            <>
+               {For($articles, m => m.id, article => (
+                  <ArticlePreview mu:article={article}></ArticlePreview>
+               ))}
+               <ArticlePagination
+                  mu:page={$page}
+                  articlesPerPage={settings?.$articlesPerPage ?? 10}
+                  articleCount={$articleCount}
+               ></ArticlePagination>
+            </>
+         )}
       </>
    )
 }
@@ -91,7 +93,7 @@ function ArticlesNav(input: FromTag<{}>) {
 
 ArticlePreview['mu:db'] = RootCommonsKey.Mutable<ArticleDatabase>()
 ArticlePreview['author'] = RootCommonsKey.Ion<ArticleDatabase>()
-ArticlePreview['can:addTodo'] = CommonsKey<() => void>()
+ArticlePreview['mm:addTodo'] = CommonsKey<() => void>()
 ArticlePreview['on:clickIncrement'] = CommonsKey<() => void>()
 
 export function ArticlePreview(input: FromTag<{
@@ -104,26 +106,21 @@ export function ArticlePreview(input: FromTag<{
    const $author = Ion(() => article.author.username)
    const $authorImage = Ion(() => article.author.image)
 
-   watch(() => article.favorited, async ({ previous }) => {
-      await __postrender()
-      db.markFavoriteState(article.slug, article.favorited, { debounce: 50, previous })
-   })
-
    return component(
       <div class="article-preview">
          <div class="article-meta">
-            <router-link to="profile" params={{ username: $author }}>
+            <RouterLink to="profile" params={{ username: $author }}>
                <img alt={$author} src={$authorImage}></img>
-            </router-link>
+            </RouterLink>
          </div>
          <div class="info">
-            <router-link
+            <RouterLink
                class="author"
                to="profile"
                params={{ username: $author }}
             >
                {$author}
-            </router-link>
+            </RouterLink>
             <span class="date">{new Date(article.createdAt).toDateString()}</span>
             <button
                class={(article.favorited ? 'btn-primary' : 'btn-outline-primary')}
@@ -132,7 +129,7 @@ export function ArticlePreview(input: FromTag<{
                <i class='ion-heart'>{(article.favoritesCount)}</i>
             </button>
          </div>
-         <router-link
+         <RouterLink
             class="preview-link"
             to="article"
             params={{ slug: article.slug }}
@@ -147,7 +144,7 @@ export function ArticlePreview(input: FromTag<{
                   </li>
                ))}
             </ul>
-         </router-link>
+         </RouterLink>
       </div>
    )
 }

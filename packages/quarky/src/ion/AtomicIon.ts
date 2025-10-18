@@ -5,7 +5,6 @@ import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark";
 import { trigger, Watchable, Watched } from "../reactivity/Watched";
-import { Mutable } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { ModelQuark } from "../ionic/ModelQuark";
@@ -21,7 +20,7 @@ export const ALL_METHODS = 'all_methods'
 
 
 /** INTERNAL */
-export type $AtomicIonState = MutableIon<unknown> & { [QUARK]: AtomicIonQuark }
+export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark }
 
 
 /**
@@ -65,7 +64,7 @@ export function createAtomicIon(
    mark?: InertMark | MarkMap | undefined,
    props?: AnyObject
 ) {
-   const $state = getState.bind(quark) as $AtomicIonState
+   const $state = getState.bind(quark) as QuarkyAtomicIon
    $state[QUARK] = quark
    //@ts-expect-error
    $state.displayName = 'getState'

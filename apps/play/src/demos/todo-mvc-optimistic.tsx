@@ -1,11 +1,12 @@
 //@ts-nocheck
-import { component, For, If, Else, FromTag, fromApp, CommonsKey, CommonsEntryKey, fromGlobal } from "@rue/lumo"
+import { component, For, If, Else, FromTag, fromApp, CommonsKey, CommonsEntryKey, fromGlobal, SuspenseIon, fromRoot } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
 import { isTracking } from "../../../../packages/quarky/src/abstract/Compound"
 import { TODO_DB_KIT } from "./todo-mvc-local"
 import { AnyObject } from "@rue/types"
+import { json } from "stream/consumers"
 
 // CON: You have to return a whole object
 // PRO: More composable
@@ -14,10 +15,11 @@ import { AnyObject } from "@rue/types"
 // RULES OF COMPONENTS VS RENDER FUNCTION:
 // - Component if you need slot, ref, events, styles, mu:
 
-type IonizeOptions = {
-   nested?: any,
-   '@set'?: { [key: string]: () => void },
-   '@get'?: { [key: string]: () => void },
+type ModProp = {
+   '~mod': true,
+   '@get': (value: unknown) => void
+   '@set': (value: unknown) => void
+   get: <T>(that: H, value: T) => T
 }
 
 
@@ -156,49 +158,198 @@ export const TODO_DB = CommonsKey<TodoDB>('todoDB')
 
 type $$TodoArray = ReturnType<typeof ionizeTodos>
 
-const ionizeTodos = defineDeepIonize((type: Todo[]) => ({
-   nested: [ionizeTodo],
-}))
+// const ionizeTodos = defineDeepIonize((type: Todo[]) => ({
+//    nested: [ionizeTodo],
+// }))
 
 type $$Todo = ReturnType<typeof ionizeTodo>
 
-const ionizeTodo = defineDeepIonize((type: Todo) => ({
-   // fromData: (todo: Todo) => new Todo(todo.id, todo.title, todo.completed),
-   '@set': {
-      title: () => console.trace('set title!')
-   }
-}))
+// const ionizeTodo = defineDeepIonize((type: Todo) => ({
+//    // fromData: (todo: Todo) => new Todo(todo.id, todo.title, todo.completed),
+//    '@set': {
+//       title: () => console.trace('set title!')
+//    }
+// }))
+
+
+// class IonicTodoA {
+//    id: string
+
+//    constructor() {
+//       const todo = this;
+
+//       this.completed = SuspenseIon(this.completed, {
+//          '@set'() {
+//             await db.patchTodo(todo.id).setCompleted(todo.completed)
+//          }
+//       })
+//    }
+//    completed = SuspenseIon(this.completed, {
+//       '@set'() {
+//          await db.patchTodo(this.id).setCompleted(this.completed)
+//       }
+//    })
+// }
 
 
 //QUESTION: while create an ionizedTodos function instead of a $TodoArray function?
 
-function IonizedTodoArray(todos: Todo[]) {
-   return ionize(todos, {
-      nested: [IonizedTodo]
+// function IonicTodoArray(todos: Todo[]) {
+//    return Ionic(todos, {
+//       '@setup'() {
+
+//       },
+//       nest() { return [IonicTodo] }
+//    })
+// }
+
+// function IonicTodo(todo: Todo) {
+//    return Ionic(todo, {
+//       '@set': {
+//          title: () => console.trace('set title!')
+//       },
+//       nest(todo) {
+//          return {
+//             completed: SuspenseIon(todo.completed, {
+//                '@set'() {
+//                   await db.patchTodo(todo.id).setCompleted(todo.completed)
+//                }
+//             })
+//          }
+//       }
+//    })
+// }
+
+//TODO: How do we do DI for IonicTodo and db?? 
+// We can't call fromRoot inside because they may be called in an async 'dead zone'
+// - either we explicitly pass them in
+// - or we ensure they are never called in a dead zone
+// - or we unashamedly couple them the way we unashamedly couple components
+// - or we wrap them in a kit that must be called at the top level of a component
+
+// - I'm fine with coupling the IonicTodoArray and IonicArray, the Todo class and db still need to be passed in
+
+function IonicTodoArray(todos: Todo[]) {
+   return Ionic(todos, {
+      [EACH]: { init: IonicTodo }
    })
 }
 
-function IonizedTodo(todo: Todo) {
-   return ionize(todo, {
-      '@set': {
-         title: () => console.trace('set title!')
-      }
+IonicTodo.db = RootCommonsKey<TodosDatabase>()
+
+function IonicTodo(todo: Todo) {
+   const db = fromRoot(IonicTodo.db)
+
+   return Ionic(todo, {
+      title: {
+         '@set'(value) { console.trace('set title!', value) },
+      },
+      completed: {
+         suspense: true,
+         initial: todo.completed,
+         '@set'(value) {
+            await db.patchTodo(this.id, { completed: value })
+         }
+      },
+      author: { ionize: IonicProfile },
+      article: { ionize: IonicArticle }
    })
 }
 
-const somthing = Ion(0, { addOne() { } })
+// function IonicTodo(todo: Todo) {
 
-const TodosIon = defineIon((todos: Todo[]) => IonizedTodoArray(todos), {
+//    return Ionic(todo, mod => ({
+//       title: mod({
+//          '@set'(value) { console.trace('set title!', value) },
+//       }),
+//       completed: mod({
+//          get: SuspenseIon(todo.completed),
+//          '@set'(value) {
+//             this.$completed.markStale()
+//             await db.patchTodo(this.id).setCompleted(value)
+//             this.$completed.markFresh()
+//          }
+//       }),
+//       author: IonicProfile,
+//       article: IonicArticle
+//    }))
+// }
 
-   addTodo(todo: $$Todo) {
+
+
+// server or client logic
+class Todos {
+   constructor(public value: Todo) {
+
+   }
+
+   addTodo(todo: Todo) {
       this.value.push(todo)
+   }
+
+   removeTodo(todo: Todo) {
+      this.value.splice(this.value.indexOf(todo), 1)
+   }
+
+   setCompleteForEach(complete: boolean) {
+      this.value.forEach((todo) => (todo.completed = completed))
+   }
+}
+
+
+// server functions -- business logic on server: must capture intent
+class TodosDB {
+   async addTodo(todo: Todo) {
+      app.post('/todos', { body: JSON.stringify(todo) })
+   }
+
+   async removeTodo(todo: Todo) {
+      app.delete(`/todos/${todo.id}`)
+   }
+
+   async setCompleteForEach(complete: boolean) {
+      app.patch('/todos', { type: 'patch' })
+   }
+
+   patchTodo(id: string) {
+      return {
+         async setCompleted(value: boolean, options: { debounced: number }) {
+            return app.dispatch({
+               action: SET_COMPLETED,
+               payload: [value],
+               method: 'PATCH',
+               url: `/todos/todo/${id}`
+            })
+         }
+      }
+   }
+}
+
+
+
+const todosIon = SuspenseIon(undefined, {
+   fetch: () => db.fetchTodos().then(todos => IonicTodoArray(todos)),
+   '@init'() {
+
+   },
+   '@set'(value) {
+      await db.setTodos(value)
+   },
+   standin: () => { }
+}, {
+   addTodo(todo: $$Todo) {
+      this.value.push(todo) // optimistic update
    },
 
    removeTodo(todo: $$Todo) {
       this.value.splice(this.value.indexOf(todo), 1)
    },
 
-   toggleAllComplete(completed: boolean) {
+   removeCompleted() {
+      this.value = this.value.filter(todo => !todo.completed)
+   },
+
+   setCompleteForEach(completed: boolean) {
       this.value.forEach((todo) => (todo.completed = completed))
    },
 
@@ -208,10 +359,90 @@ const TodosIon = defineIon((todos: Todo[]) => IonizedTodoArray(todos), {
 
    '~pure'() {
       return ['isAllComplete']
-   }
+   },
+
+   '@addTodo'(todo: Todo) { // TODO: auto mark stale and unstale 
+      await db.addTodo(todo)
+   },
+
+   '@removeTodo'(todo: $$Todo) {
+      this.value.splice(this.value.indexOf(todo), 1)
+   },
+
+   '@removeCompleted'() {
+      this.value = this.value.filter(todo => !todo.completed)
+   },
+
+   '@setCompleteForEach'(completed: boolean) {
+      this.value.forEach((todo) => (todo.completed = completed))
+   },
 })
 
+class TodosDB {
+   addTodo(todo: Todo) {
+      return dispatch('/todos', { action: 'addTodo', payload: { todo: JSON.stringify(todo) } })
+   }
+}
 
+
+
+// const TodosIon = defineSuspenseIon((todos: Todo[]) => IonicTodoArray(todos), {
+
+//    addTodo(todo: $$Todo) {
+//       this.value.push(todo)
+//    },
+
+//    removeTodo(todo: $$Todo) {
+//       this.value.splice(this.value.indexOf(todo), 1)
+//    },
+
+//    toggleAllComplete(completed: boolean) {
+//       this.value.forEach((todo) => (todo.completed = completed))
+//    },
+
+//    isAllComplete() {
+
+//    },
+
+//    '~pure'() {
+//       return ['isAllComplete']
+//    }
+// })
+
+async function doSomething() {
+   await promise
+      .then(res => {
+         return res.json()
+      })
+      .then(({ a, b }) => {
+         console.log('a', a)
+         console.log('b', b)
+      })
+}
+
+async function doSomething() {
+   const { run } = snapContext()
+   await fetch('/something')
+   run(res => {
+      return res.json()
+      console.log('a', a)
+      console.log('b', b)
+   })
+}
+
+
+// const doSomething = Stream(async ({ run }) => {
+//    await run(promise)
+//    await run(res => {
+//       const a = 'hi'
+//       const b = 'bye' + res
+//       return { a, b }
+//    })
+//    await run(({ a, b }) => {
+//       console.log('a', a)
+//       console.log('b', b)
+//    })
+// })
 
 
 type TodoAppKit = typeof TodoAppKit
@@ -227,12 +458,12 @@ function TodoAppKit(todos: Todo[]) {
 
    const filters = {
       all: (todos: $$TodoArray) => todos,
-      active: (todos: $$TodoArray) => ionize(todos.filter(todo => !todo.completed)),
-      completed: (todos: $$TodoArray) => ionize(todos.filter(todo => todo.completed))
+      active: (todos: $$TodoArray) => Ionic(todos.filter(todo => !todo.completed)),
+      completed: (todos: $$TodoArray) => Ionic(todos.filter(todo => todo.completed))
    }
 
    function createTodo(title: string) {
-      return ionizeTodo({
+      return IonicTodo({
          id: Date.now(),
          title,
          completed: false
@@ -247,9 +478,7 @@ function TodoAppKit(todos: Todo[]) {
    //    $todos().splice($todos().indexOf(todo), 1)
    // }
 
-   function removeCompleted() {
-      $todos.value = filters.active($todos())
-   }
+
 
    // function toggleAll(checked: boolean) {
    //    $todos().forEach((todo) => (todo.completed = checked))
@@ -262,7 +491,6 @@ function TodoAppKit(todos: Todo[]) {
       $remaining,
       $todoCount,
       filters,
-      removeCompleted,
       createTodo
    }
 }
@@ -294,7 +522,6 @@ export function TodoMVC({
       $filteredTodos,
       $remaining,
       $todoCount,
-      removeCompleted,
       createTodo
    } = useTodoApp(getTodos())
 
@@ -354,7 +581,7 @@ export function TodoMVC({
                      <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show:if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
+               <button show:if={($todoCount() > $remaining())} class="clear-completed" on:click={e => $todos.removeCompleted()}>
                   Clear completed
                </button>
             </footer>
@@ -399,6 +626,7 @@ function TodoInput(addTodo: (todo: $$<Todo>) => void, createTodo: (title: string
    function submitTodo(e: InputEvent) {
       const value = e.target.value.trim()
       if (value) {
+         // doAction(addTodo, [createTodo(value)])
          addTodo(createTodo(value))
          e.target.value = ''
       }
