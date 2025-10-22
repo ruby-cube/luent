@@ -17,7 +17,7 @@ function Parent() {
 }
 
 const Shared = {
-   db: mergeCommonsKeys(
+   db: mergeNubKeys(
       ArticlesView.db,
       ArticlePreview.db
    )

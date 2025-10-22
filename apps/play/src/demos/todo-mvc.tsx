@@ -210,11 +210,11 @@ export function TodoMVC() {
          <section class="todoapp">
             <header class="header">
                <h1>Todos</h1>
-               <TodoInput can:addTodo={addTodo}></TodoInput>
+               <TodoInput use:addTodo={addTodo}></TodoInput>
             </header>
             <section class="main">
                {ToggleAllButton()}
-               <TodoList todos={$filteredTodos} can:removeTodo={removeTodo}></TodoList>
+               <TodoList todos={$filteredTodos} use:removeTodo={removeTodo}></TodoList>
             </section>
             <footer show:if={$todoCount} class="footer">
                {RemainingCount()}
@@ -251,7 +251,7 @@ export function TodoMVC() {
 //    )
 // }
 
-function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void }>) {
+function TodoInput({ addTodo }: FromTag<{ 'use:addTodo': (title: string) => void }>) {
 
    function submitTodo(e: InputEvent) {
       const value = e.target.value.trim()
@@ -286,7 +286,7 @@ function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void
 function TodoList(input: FromTag<{
    todos: Ion<Ionized<Todo[]>>,
    frog: ToIonized<Frog>,
-   'can:removeTodo': (todo: Ionized<Todo>) => void
+   'use:removeTodo': (todo: Ionized<Todo>) => void
 }>) {
 
    const { $todos, removeTodo, frog } = input({

@@ -16,7 +16,7 @@ export function Sidebar() {
                   <li class='sidebar-item' on:contextmenu={e => (e.preventDefault(), console.log($contextMenu()), $contextMenu()!.open())}>{item}</li>
                </>
             ))}
-            <IfContextMenuC get={$contextMenu}></IfContextMenuC>
+            <IfContextMenuC node={$contextMenu}></IfContextMenuC>
          </ul>
 
          {Style`
@@ -78,7 +78,7 @@ function IfContextMenu() {
          <o--portal to='body'>
             <div>
                {If(($menu.is('opened')),
-                  <div get={$container} at:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
+                  <div node={$container} at:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
                      menu item 1
                      -
                      menu item 2
@@ -124,7 +124,7 @@ function IfContextMenuB() {
          open
       },
       Portal('body',
-         <dialog get={container} open={$open} style={{ position: 'absolute', top: 0, left: 0, width: '10rem', height: '10rem' }}>
+         <dialog node={container} open={$open} style={{ position: 'absolute', top: 0, left: 0, width: '10rem', height: '10rem' }}>
             <div >
                menu item 1
                -
@@ -172,7 +172,7 @@ function IfContextMenuC() {
       <div>
          {If($open,
             <o--portal to='body'>
-               <div get={$container} at:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
+               <div node={$container} at:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
                   <p>
                      menu item 1
                   </p>

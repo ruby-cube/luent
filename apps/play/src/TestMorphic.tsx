@@ -22,7 +22,7 @@ export function TestMorphic() {
 
    return component(
       <>
-         <$Morphable as='hi' get={$morphicNode}></$Morphable>
+         <$Morphable as='hi' node={$morphicNode}></$Morphable>
 
          <i--i>do something</i--i>
 

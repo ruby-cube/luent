@@ -1,39 +1,57 @@
 import { component, For, FromTag, Style, } from "@rue/lumo"
-import { Ion, ion, ionic, ionize, Ionized, update } from "@rue/quarky"
+import { EACH, Ion, ion, Ionic, ionic, ionize, Ionized, update } from "@rue/quarky"
+
+function mu<T>(obj: T) {
+   return obj
+}
 
 type Stat = {
    label: string,
    value: number
 }
 
+
+
 export function PolygonApp() {
-   const $newLabel = ion('')
-   const stats = ionize([
+   const $newLabel = Ion('')
+   // const stats = Ionic([
+   //    Ionic({ label: 'A', value: 100 }),
+   //    Ionic({ label: 'B', value: 100 }),
+   //    Ionic({ label: 'C', value: 100 }),
+   //    Ionic({ label: 'D', value: 100 }),
+   //    Ionic({ label: 'E', value: 100 }),
+   //    Ionic({ label: 'F', value: 100 })
+   // ])
+
+   const stats = Ionic([
       { label: 'A', value: 100 },
       { label: 'B', value: 100 },
       { label: 'C', value: 100 },
       { label: 'D', value: 100 },
       { label: 'E', value: 100 },
       { label: 'F', value: 100 }
-   ] as Stat[])
+   ], {
+      [EACH]: Ionic
+   })
 
    function add(e: any) {
       e.preventDefault()
       if (!$newLabel()) return
-      stats.push(ionize({
+      mu(stats).push(Ionic({
          label: $newLabel(),
          value: 100
       }))
-      $newLabel.value = ''
+      mu($newLabel).value = ''
    }
 
    function remove(stat: Ionized<Stat>) {
       if (stats.length > 3) {
-         stats.splice(stats.indexOf(stat), 1)
+         mu(stats).splice(stats.indexOf(stat), 1)
       } else {
          alert("Can't delete more!")
       }
    }
+
    return component(
       <>
          <svg width="200" height="200">
@@ -136,7 +154,7 @@ function PolyGraph({ stats }: FromTag<{
    stats: Ionized<Stat[]>
 }>) {
 
-   const $points = ion(() =>{
+   const $points = ion(() => {
       const total = stats.length
       return stats
          .map((stat, i) => {

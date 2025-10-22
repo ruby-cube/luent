@@ -175,7 +175,7 @@ export function TestAnimationController() {
    return component(
       <>
          <div style="display: flex; flex-direction: column; align-items: flex-start">
-            <canvas get={$canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>
+            <canvas node={$canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>
             {/* {If($canvas, ({ $elapsed, $isPlaying, playPause, updateTime, play } = AnimationKit()) => (queueTask(() => play()), */}
             {/* {If($canvas, (o = initAnimation($canvas())) => */}
             {/* <> */}

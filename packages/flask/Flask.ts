@@ -127,6 +127,16 @@ export class Flask {
       }
    }
 
+   private on(hookName: LifecycleHook, task: Task) {
+      const tasks = this.tasks
+      tasks.addToSet(task, hookName)
+      return {
+         stop() {
+            tasks.deleteFromSet(task, hookName)
+         }
+      }
+   }
+
    // Because mount doesn't have a reason to be passed into other hooks as a callback, no need to bind to this.
    emitInitialMount() {
       if (!this.tasks.get(LifecycleHook.INITIAL_MOUNT)) return;
@@ -157,15 +167,6 @@ export class Flask {
       return this.on(LifecycleHook.DISCARD, task)
    }
 
-   private on(hookName: LifecycleHook, task: Task) {
-      const tasks = this.tasks
-      tasks.addToSet(task, hookName)
-      return {
-         stop() {
-            tasks.deleteFromSet(task, hookName)
-         }
-      }
-   }
 
    emitDiscard() {
       this.emit(LifecycleHook.DISCARD)
@@ -210,4 +211,80 @@ export class Flask {
 //          tasks.deleteFromSet(task, hookName)
 //       }
 //    });
+// }
+
+
+
+// custom emitter
+
+
+// export class SetMap<K, V> extends Map<K, Set<V>> {
+//    constructor() {
+//       super();
+//    }
+
+//    private initializeSet(key: K) {
+//       const set: Set<V> = new Set()
+//       this.set(key, set);
+//       return set
+//    }
+
+//    addToSet(value: V, key: K) {
+//       let set = this.get(key)
+//       if (!set) set = this.initializeSet(key);
+//       set.add(value);
+//    }
+
+//    deleteFromSet(value: V, key: K) {
+//       let set = this.get(key)
+//       set?.delete(value);
+//    }
+// }
+
+
+// tasks: SetMap<LifecycleHook, Task> = new SetMap();
+
+// private emit(hookName: LifecycleHook) {
+//    const taskQueue = this.tasks.get(hookName);
+//    if (!taskQueue) return;
+//    for (const task of taskQueue) {
+//       task();
+//    }
+// }
+
+// private on(hookName: LifecycleHook, task: Task) {
+//    const tasks = this.tasks
+//    tasks.addToSet(task, hookName)
+//    return {
+//       stop() {
+//          tasks.deleteFromSet(task, hookName)
+//       }
+//    }
+// }
+
+
+
+
+// Web API events
+
+// class WebFlask {
+//    node = new EventTarget()
+
+//    private create = new Event('create')
+//    private remount = new Event('remount')
+//    private demount = new Event('demount')
+//    private discard = new Event('discard')
+
+//    private emit(event: Event) {
+//       this.node.dispatchEvent(event)
+//    }
+
+//    private on(hookName: LifecycleHook, task: Task) {
+//       this.node.addEventListener(hookName, task)
+//       return {
+//          stop:() => {
+//             this.node.removeEventListener(hookName, task)
+//          }
+//       }
+//    }
 // }

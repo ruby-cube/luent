@@ -130,7 +130,7 @@ export function Tooltip(input: FromTag<{
                transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
             }}
          >
-            <div get={$div} class="tooltip">
+            <div node={$div} class="tooltip">
                {Slot()}
             </div>
          </div>

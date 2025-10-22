@@ -208,7 +208,7 @@ function ListBlock(attributes: {
     })
 
     return component(
-        <div get={$div}>hello</div>
+        <div node={$div}>hello</div>
         ,
         {
             list$,

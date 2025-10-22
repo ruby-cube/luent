@@ -27,7 +27,7 @@ function MessageForm(this: ThisView, {
    })
 
    const files = this.fromApp(FILES)
-   const files = this.fromCommons(FILES)
+   const files = this.fromNub(FILES)
 
    const { $text } = thus.TextKit(files)
 

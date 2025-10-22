@@ -1,4 +1,4 @@
-import { component, fromCommons, FromTag } from "@rue/lumo";
+import { component, fromNub, FromTag } from "@rue/lumo";
 import { USER, User } from '../commons/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";
@@ -10,14 +10,14 @@ export function Chatroom(input: FromTag<{
    user: User
 }>) {
    const { user } = input
-   // const user = fromCommons(USER)
+   // const user = fromNub(USER)
 
    const chatKit = ChatKit()
 
    return component(
       <div class="container">
          <ChatWindow user={user} chat={chatKit} />
-         <MessageForm user={user} can:postMessage={chatKit.postChatMessage} />
+         <MessageForm user={user} use:postMessage={chatKit.postChatMessage} />
          {/* <button on:click={startDebugger}>debug</button> */}
       </div>
    )

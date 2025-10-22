@@ -35,7 +35,7 @@ export function toCommonsKey(key: CommonsEntryKey | string): string {
    return key.name
 }
 
-export function CommonsKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
+export function NubKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
    const fnKey = function (v: T) {
       return [fnKey, v]
    }
@@ -52,44 +52,44 @@ export function CommonsKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
 // }
 
 
-// TODO: should we validate at provide() or validate at fromCommons()?
+// TODO: should we validate at provide() or validate at fromNub()?
 // - required/optional/ toDefault
 // - readonly reined
 // - normalize reactivity
 
 // [ ] Runtime validation and normalization of reactive type. Defaults
 //     - fromTag()
-//     - fromCommons()
+//     - fromNub()
 // 
 // [ ] Read-only and Reined conversion
 //     - fromTag()
-//     - fromCommons()
+//     - fromNub()
 //     - ref()
 
-// const [HELLO, MU_HELLO] = CommonsKey(v<{ dog: string }>, 'm?')
-// const [HELLOA, MU_HELLOA] = CommonsKey(v<{ dog: string }>, 'mu?')
-// const HELLOV = CommonsKey(v<{ dog: string }>, 'm')
-// const HELLOC = CommonsKey(v<{ dog: string }>, 'mu')
-// const HELLOD = CommonsKey(v<{ dog: string }>)
+// const [HELLO, MU_HELLO] = NubKey(v<{ dog: string }>, 'm?')
+// const [HELLOA, MU_HELLOA] = NubKey(v<{ dog: string }>, 'mu?')
+// const HELLOV = NubKey(v<{ dog: string }>, 'm')
+// const HELLOC = NubKey(v<{ dog: string }>, 'mu')
+// const HELLOD = NubKey(v<{ dog: string }>)
 
-// const [OHELLO, OMU_HELLO] = CommonsKey(v<{ dog: string }>('?'), 'm?')
-// const [OHELLOA, OMU_HELLOA] = CommonsKey(v<{ dog: string }>('?'), 'mu?')
-// const OHELLOV = CommonsKey(v<{ dog: string }>('?'), 'm')
-// const OHELLOC = CommonsKey(v<{ dog: string }>('?'), 'mu')
-// const OHELLOD = CommonsKey(v<{ dog: string }>('?'))
+// const [OHELLO, OMU_HELLO] = NubKey(v<{ dog: string }>('?'), 'm?')
+// const [OHELLOA, OMU_HELLOA] = NubKey(v<{ dog: string }>('?'), 'mu?')
+// const OHELLOV = NubKey(v<{ dog: string }>('?'), 'm')
+// const OHELLOC = NubKey(v<{ dog: string }>('?'), 'mu')
+// const OHELLOD = NubKey(v<{ dog: string }>('?'))
 
-// const OHELLOD = CommonsKey(v<{ dog: string }>, 'm')
-// const OHELLOD = CommonsKey(v<{ dog: string }>, 'm?')
-// const OHELLOD = CommonsKey(v<{ dog: string }>, 'mu')
-// const OHELLOD = CommonsKey(v<{ dog: string }>, 'mu?')
+// const OHELLOD = NubKey(v<{ dog: string }>, 'm')
+// const OHELLOD = NubKey(v<{ dog: string }>, 'm?')
+// const OHELLOD = NubKey(v<{ dog: string }>, 'mu')
+// const OHELLOD = NubKey(v<{ dog: string }>, 'mu?')
 
 
 
-// const DOHELLOD = CommonsKey(
+// const DOHELLOD = NubKey(
 //    v('?')({ dog: 'hi' })
 // )
 
-// const DOHELLODWORLD = CommonsKey(v<string>('?')('hi'))
+// const DOHELLODWORLD = NubKey(v<string>('?')('hi'))
 
 
 

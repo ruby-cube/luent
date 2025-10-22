@@ -220,8 +220,8 @@ function ArticleBlock(setup: {
 
 //     return component(
 //         <>
-//             <div get={$countDiv}>{$count}</div>
-//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} get={$button}>increment</button >
+//             <div node={$countDiv}>{$count}</div>
+//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} node={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

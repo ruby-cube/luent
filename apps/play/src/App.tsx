@@ -136,7 +136,6 @@ export function List() {
                 )}
 
                 {For($list, (item$, $index) =>
-
                     <div style={`background-color: ${randomColor.get()}`}>
                         <p
                             on:click={() => removeItem($index())}
@@ -181,7 +180,7 @@ function useModal() {
     }
 
     teleportTo('body',
-        <DialogBox get={$dialogBox} />
+        <DialogBox node={$dialogBox} />
     )
 
     return {
@@ -222,13 +221,13 @@ function Appo(
                 <button>click</button>
             )}
             {ElseIf($active, () => {
-                const $dialogBox = fromCommons(ALERT_DIALOG_BOX) || GetNode()
+                const $dialogBox = fromNub(ALERT_DIALOG_BOX) || GetNode()
 
                 return (
                     <Wrapper title={() => $dialogBox().title}>
                         {() => (
                             <div>
-                                <DialogBox get={$dialogBox} />
+                                <DialogBox node={$dialogBox} />
                                 <button on:click={() => $dialogBox().open}>open</button>
                             </div>)
                         }
@@ -282,20 +281,16 @@ function DialogBox({
     $button?: GetNode
 }) {
 
-
-
     return component(
         teleportTo('body', (
             <dialog style="background-color: gray" open={$open}>
                 Stop
-                <button on:click={close} get={$button}>close</button>
+                <button on:click={close} node={$button}>close</button>
             </dialog>
-        )),
-        {
+        ))).expose({
             $open,
             open
-        }
-    )
+        })
 }
 
 function useDialogBox(config: { initialState: 'open' | 'closed' }) {

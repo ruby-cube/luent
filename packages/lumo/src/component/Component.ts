@@ -27,15 +27,18 @@ type JSXTemplate = RawJSXNode
 
 // TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
-export function component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, template: JSXTemplate): Component<T>
-export function component<T extends AnyObject | undefined = AnyObject | undefined>(template: JSXTemplate): Component<undefined>
-export function component<T extends AnyObject | undefined = AnyObject | undefined>(templateOrComponent: T | JSXTemplate, template?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
-   const jsxNodes = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
-   const exposed = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
+export function component(template: JSXTemplate) {
+   const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
    return {
-      exposed, // TODO: make read only
-      jsxNodes: normalizeToArray(toValue(jsxNodes ? unnestComponent(jsxNodes) : undefined)),
-   } as Component<T extends AnyObject ? T : undefined>
+      exposed: undefined, // TODO: make read only
+      jsxNodes,
+      expose<T extends AnyObject | undefined = AnyObject | undefined>(exposed: T) {
+         return {
+            exposed,
+            jsxNodes
+         }
+      }
+   }
 }
 
 
@@ -44,7 +47,7 @@ export function component<T extends AnyObject | undefined = AnyObject | undefine
 
 
 export function initializeComponentRef(
-   get: $Node | $Nodes,
+   node: $Node | $Nodes,
    publicComponent: PublicComponent,
    $index: Ion<number> | undefined,
 ) {
@@ -109,6 +112,6 @@ export function makeComponent(
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    if (tag.ref) initializeComponentRef(tag.ref, output.exposed ?? {}, $index)
-      // if (tag['show:if']) setUpConditionalDisplay()
+   // if (tag['show:if']) setUpConditionalDisplay()
    return output
 }

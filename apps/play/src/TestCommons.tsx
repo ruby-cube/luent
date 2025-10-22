@@ -1,5 +1,10 @@
-import { Commons, component, fromCommons } from "@rue/lumo";
+// @ts-nocheck
+
+import { Commons, component, fromNub } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
+
+const Nub = Commons
+const fromNub = fromNub
 
 export function TestCommons() {
 
@@ -8,16 +13,16 @@ export function TestCommons() {
    return component(
       <>
          <h1>Something</h1>
-         <Commons provide={[['$message', $message]]}>
+         <Nub provide={[['$message', $message]]}>
             <Child></Child>
-         </Commons>
+         </Nub>
          <input value={$message} on:input={e => $message.value = e.target.value}></input>
       </>
    )
 }
 
 function Child() {
-   const $message = fromCommons('$message')
+   const $message = fromNub('$message')
 
    const $count = ion(0, {
       increment() {
@@ -26,7 +31,7 @@ function Child() {
    })
 
    watch($count, () => {
-      console.log(fromCommons('$message')())
+      console.log(fromNub('$message')())
    })
 
    return component(

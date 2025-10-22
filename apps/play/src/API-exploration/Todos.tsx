@@ -1,6 +1,9 @@
 
 import { component, For, fromRoot, SuspenseIon } from "@rue/lumo";
 import { EACH, Ion, Ionic } from "@rue/quarky";
+import { prototype } from "events";
+import { UseShared } from "../../../../packages/utils/UseShared";
+import { getActiveFlask } from "@rue/flask";
 
 // #region: Model
 
@@ -37,7 +40,7 @@ function IonicTodos(data: Todos[]) {
 }
 
 
-fetchTodos.db = RootCommonsKey<TodosDatabase>()
+fetchTodos.db = RootNubKey<TodosDatabase>()
 
 let $todos: SuspenseIon;
 
@@ -46,16 +49,17 @@ function fetchTodos($userID: Ion<string>) {
    return $todos ?? ($todos = SuspenseIon({
       initial: [],
       fetch: () => IonicTodos(db.fetchTodos($userID())),
-      proto: Todos,
-      ['@set']() {
-
-      }
+      prototype: Todos,
    }, {
-      ['@addTodo']() {
+      '@set value'() {
 
       },
 
-      ['@removeTodo']() {
+      '@addTodo'() {
+
+      },
+
+      '@removeTodo'() {
 
       }
    }))
@@ -63,27 +67,33 @@ function fetchTodos($userID: Ion<string>) {
 
 
 
-const fetchTodos = defineSharedFetch(($userID: Ion<string>) => {
+const fetchTodos = UseShared(($userID: Ion<string>) => {
    const db = fromRoot(fetchTodos.db)
 
    return SuspenseIon({
       initial: [],
       fetch: () => IonicTodos(db.fetchTodos($userID())),
       proto: Todos,
-      ['@set']() {
-
-      }
    }, {
-      ['@addTodo']() {
+      '@set value'() {
+
+      },
+      '@addTodo'() {
 
       },
 
-      ['@removeTodo']() {
+      '@removeTodo'() {
 
       }
    })
 })
 
+
+
+
+// const todos = Ion([], Todos, {
+
+// })
 
 
 // #region: View

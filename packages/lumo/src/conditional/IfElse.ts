@@ -264,7 +264,7 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 }
 
 export function Remount(input: FromTag<{
-   'can:discard'?: () => void,
+   'use:discard'?: () => void,
    Slot: RenderSlot
 
 }>) {

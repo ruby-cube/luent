@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { CommonsKey, fromRoot, SuspenseIon } from "@rue/lumo";
+import { NubKey, fromRoot, SuspenseIon } from "@rue/lumo";
 import { $from, Ion } from "@rue/quarky";
 import { ArticleData, ArticleDatabase, ArticleResponse } from "../../db/ArticleDatabase";
 
@@ -7,7 +7,7 @@ import { ArticleData, ArticleDatabase, ArticleResponse } from "../../db/ArticleD
 
 // #region:
 
-fetchArticles.db = CommonsKey<ArticleDatabase>()
+fetchArticles.db = NubKey<ArticleDatabase>()
 
 export function fetchArticles(
    $articlesMeta: Ion<{ tag: string, username: string, category: string }>,
@@ -89,8 +89,8 @@ type SuspenseOptions = {
 
 // #region:
 
-IonicArticle.Article = RootCommonsKey<typeof Article>()
-IonicArticle.Profile = RootCommonsKey<typeof Profile>()
+IonicArticle.Article = RootNubKey<typeof Article>()
+IonicArticle.Profile = RootNubKey<typeof Profile>()
 
 function asIonicArticle(data: ArticleData) {
 
@@ -109,7 +109,7 @@ function asIonicArticle(data: ArticleData) {
       favorited: {
          suspense: true,
          initial: data.favorited,
-         async dispatch({ favorited, previous }) {
+         async dispatch({ previous }) {
             return db.patchArticle(this.slug, { favorited: this.favorited }, {
                debounce: 50,
                previous: { favorited: previous }

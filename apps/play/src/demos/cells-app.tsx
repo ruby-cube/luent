@@ -1,5 +1,5 @@
-import { component, Else, For, FromTag, If, Style } from "@rue/lumo"
-import { ion, ionize } from "@rue/quarky"
+import { component, Else, For, FromTag, GetNode, If, Style } from "@rue/lumo"
+import { Ion, ion, ionize } from "@rue/quarky"
 
 const COLS = 5
 const ROWS = 20
@@ -38,6 +38,7 @@ function getCellValue(c: number, r: number) {
 
 export function CellsApp() {
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
+   const tds: HTMLTableCellElement[] = []
 
    return component(
       <>
@@ -51,19 +52,19 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For([...cells[0]], (_, row) => (// TODO: allow numbers as input for For()
+               {For([...cells[0]], (_, $row) => (// TODO: allow numbers as input for For()
                   <tr>
-                     <th>{row}</th>
-                     {For(cols, (_, col) =>
-                        <td>
-                           <Cell row={row} column={col}></Cell>
+                     <th>{$row}</th>
+                     {For(cols, (_, $col) =>
+                        <td nodes={[tds, $row, $col]}>
+                           <Cell row={$row()} column={$col()}></Cell>
                         </td>
                      )}
                   </tr>
                ))}
             </tbody>
          </table >
-         
+
          {Style`
             body {
                margin: 0;
@@ -98,7 +99,7 @@ export function CellsApp() {
 }
 
 
-function Cell({ column, row } : FromTag<{
+function Cell({ column, row }: FromTag<{
    column: number,
    row: number
 }>) {

@@ -84,7 +84,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 // attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-   get?: $Node<T> | $Nodes<T>,
+   node?: $Node<T> | $Nodes<T>,
    provide?: Provided
 }
 

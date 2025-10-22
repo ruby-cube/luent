@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { CommonsKey, component, For, fromCommons, FromTag, If, GetNode } from "@rue/lumo";
+import { NubKey, component, For, fromNub, FromTag, If, GetNode } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -280,15 +280,15 @@ type TabManager = {
    focusFile(file: File): void; //tabs
 }
 
-const FILES_KIT = CommonsKey<FileManager>('FILES_KIT')
-const TABS_KIT = CommonsKey<TabManager>('TABS_KIT')
+const FILES_KIT = NubKey<FileManager>('FILES_KIT')
+const TABS_KIT = NubKey<TabManager>('TABS_KIT')
 
 
-// const OPEN_FILE = CommonsKey(v<FileManager['openFile']>)
-// const DELETE_FILE = CommonsKey(v<FileManager['deleteFile']>)
-// const ADD_NEW_FILE = CommonsKey(v<FileManager['addNewFile']>)
-// const CLOSE_FILE = CommonsKey(v<TabManager['closeFile']>)
-// const FOCUS_FILE = CommonsKey(v<TabManager['focusFile']>)
+// const OPEN_FILE = NubKey(v<FileManager['openFile']>)
+// const DELETE_FILE = NubKey(v<FileManager['deleteFile']>)
+// const ADD_NEW_FILE = NubKey(v<FileManager['addNewFile']>)
+// const CLOSE_FILE = NubKey(v<TabManager['closeFile']>)
+// const FOCUS_FILE = NubKey(v<TabManager['focusFile']>)
 
 export function List(input : FromTag<{
 		apple?: string,
@@ -298,19 +298,19 @@ export function List(input : FromTag<{
 }>) {
 		const { 
 				$plum,
-				$apple = fromCommons($APPLE), 
-				peach = fromCommons(PEACH),
+				$apple = fromNub($APPLE), 
+				peach = fromNub(PEACH),
 				_raw_: $
 		} = input
 		
-		$.pear = $.pear ?? fromCommons(PEAR)
+		$.pear = $.pear ?? fromNub(PEAR)
 
 		return component(<></>)
 }
 
-const $APPLE = CommonsKey<Ion<string>>('$APPLE')
-const PEACH = CommonsKey<string>('PEACH')
-const PEAR = CommonsKey<MaybeIon<string>>('PEAR')
+const $APPLE = NubKey<Ion<string>>('$APPLE')
+const PEACH = NubKey<string>('PEACH')
+const PEAR = NubKey<MaybeIon<string>>('PEAR')
 
 
 
@@ -318,7 +318,7 @@ function Sidebar(input : FromTag<{
    files: Ionized<File[]> // TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
 }>) {
    const { files } = input
-   const { addFile } = fromCommons(FILES_KIT);
+   const { addFile } = fromNub(FILES_KIT);
 
    return component(
       <div>
@@ -337,12 +337,12 @@ function SidebarFile(input : FromTag<{
    const { $index, file } = input
    const $menu = GetNode(IfContextMenu)
 
-   const { openFile } = fromCommons(FILES_KIT)
+   const { openFile } = fromNub(FILES_KIT)
 
 
    return component(
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
-         <IfContextMenu on:click={reMenuClick} get={$menu}></IfContextMenu>
+         <IfContextMenu on:click={reMenuClick} node={$menu}></IfContextMenu>
          {file.$title}
       </div>
    )
@@ -366,8 +366,8 @@ function SidebarFile(input : FromTag<{
 //    )
 // }
 
-// const CLOSE_FILE = CommonsKey(v<(index: number) => void>)
-// const FOCUS_FILE = CommonsKey(v<(index: number) => void>)
+// const CLOSE_FILE = NubKey(v<(index: number) => void>)
+// const FOCUS_FILE = NubKey(v<(index: number) => void>)
 
 
 
@@ -377,7 +377,7 @@ function Tab(input : FromTag<{
    file: Ionized<File>,
    tabManager?: TabManager,
 }>) {
-   const { file, tabManager = fromCommons(TABS_KIT), $index = ion('hi') } = input
+   const { file, tabManager = fromNub(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 
    return component(

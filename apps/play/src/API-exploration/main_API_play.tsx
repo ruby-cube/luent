@@ -41,7 +41,7 @@ collectEffects(async () => {
 - constAppState/Global
 - letAppState/Global
 
-- fromCommons
+- fromNub
 - fromGlobal
 - fromApp
 
@@ -61,7 +61,7 @@ context.app.get()
 
 
 const _this = $this()
-const { onCreated, fromCommons } = _this;
+const { onCreated, fromNub } = _this;
 
 const dog = _this.fromGlobal(_dog_)
 
@@ -138,7 +138,7 @@ function SideBar(
 
     return component(
         <ProviderBlock> // dog is provided here...
-            <ChildBlock dog={slot.fromCommons(_dog_)}>hi</ChildBlock>
+            <ChildBlock dog={slot.fromNub(_dog_)}>hi</ChildBlock>
         </ProviderBlock>
     )
 }

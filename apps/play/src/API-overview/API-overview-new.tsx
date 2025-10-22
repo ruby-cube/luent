@@ -570,7 +570,7 @@ export function PlayingCard(input: FromTag<{
    const $div = GetNode('div')
 
    return component(
-      <div on:click={e => { $$: $faceup = !$faceup }} get={$div}>
+      <div on:click={e => { $$: $faceup = !$faceup }} node={$div}>
          {If(($faceup),
             <CardFace number={($number)} suit={($suit)}></CardFace>
          )}

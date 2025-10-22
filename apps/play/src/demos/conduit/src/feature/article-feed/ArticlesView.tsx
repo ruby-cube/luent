@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, CommonsKey, component, Else, ElseIf, For, fromCommons, fromApp, FromTag, If, RenderSlot, SuspenseIon } from "@rue/lumo";
+import { Commons, NubKey, component, Else, ElseIf, For, fromNub, fromApp, FromTag, If, RenderSlot, SuspenseIon } from "@rue/lumo";
 import { Ion, Ionized, watch } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";
@@ -8,9 +8,9 @@ import { ArticleDatabase } from "../../db/ArticleDatabase";
 
 // #region: main
 
-ArticlesView.db = RootCommonsKey<ArticleDatabase>()
-ArticlesView.settings = CommonsKey<SiteSettings>()
-ArticlesView.greeting = CommonsKey<string>()
+ArticlesView.db = RootNubKey<ArticleDatabase>()
+ArticlesView.settings = NubKey<SiteSettings>()
+ArticlesView.greeting = NubKey<string>()
 
 export function ArticlesView(input: FromTag<{
    articlesMeta: Ion<{ tag: string, username: string, category: string }>
@@ -20,7 +20,7 @@ export function ArticlesView(input: FromTag<{
    const {
       $articlesMeta,
       $articlesPerPage,
-      greeting = fromCommons(ArticlesView.greeting) ?? "Hello world"
+      greeting = fromNub(ArticlesView.greeting) ?? "Hello world"
    } = input()
    const db = fromRoot.required(ArticlesView.root.db)
 
@@ -38,7 +38,7 @@ export function ArticlesView(input: FromTag<{
          <ArticlesNav
             mu:activetab={$feed}
             tabs={$tabs}
-            can:prefetch={(feed) => $result.prefetch(feed, 0, $articlesPerPage())}
+            use:prefetch={(feed) => $result.prefetch(feed, 0, $articlesPerPage())}
          ></ArticlesNav>
          {If(($result.pending),
             <div class="article-preview">
@@ -53,7 +53,7 @@ export function ArticlesView(input: FromTag<{
          {ElseIf($articles.length === 0,
             <>No articles here yet</>
          )}
-         {Else((settings = fromCommons(ArticlesView.settings)) =>
+         {Else((settings = fromNub(ArticlesView.settings)) =>
             <>
                {For($articles, m => m.id, article => (
                   <ArticlePreview mu:article={article}></ArticlePreview>
@@ -66,7 +66,7 @@ export function ArticlesView(input: FromTag<{
             </>
          )}
       </>
-   )
+   ).expose({ $page })
 }
 
 // #endregion
@@ -74,7 +74,7 @@ export function ArticlesView(input: FromTag<{
 
 // #region: navigation
 
-ArticlesNav.router = CommonsKey<Router>()
+ArticlesNav.router = NubKey<Router>()
 
 function ArticlesNav(input: FromTag<{}>) {
    const router = fromRoot(ArticlesNav.router)
@@ -91,17 +91,17 @@ function ArticlesNav(input: FromTag<{}>) {
 
 // #region: preview
 
-ArticlePreview['mu:db'] = RootCommonsKey.Mutable<ArticleDatabase>()
-ArticlePreview['author'] = RootCommonsKey.Ion<ArticleDatabase>()
-ArticlePreview['mm:addTodo'] = CommonsKey<() => void>()
-ArticlePreview['on:clickIncrement'] = CommonsKey<() => void>()
+ArticlePreview['mu:db'] = RootNubKey.Mutable<ArticleDatabase>()
+ArticlePreview['author'] = RootNubKey.Ion<ArticleDatabase>()
+ArticlePreview['use:addTodo'] = NubKey<() => void>()
+ArticlePreview['on:clickIncrement'] = NubKey<() => void>()
 
 export function ArticlePreview(input: FromTag<{
    'mu:article': Ionized<Article>,
 }>) {
 
    const { article, mu } = input as unknown as { article: Ionized<Article>, mu: <T>(arg: T) => T }
-   const db = fromCommons(ArticlePreview.db)
+   const db = fromNub(ArticlePreview.db)
 
    const $author = Ion(() => article.author.username)
    const $authorImage = Ion(() => article.author.image)
@@ -153,7 +153,7 @@ export function ArticlePreview(input: FromTag<{
 function __postrender() {
    throw new Error("Function not implemented.");
 }
-function RootCommonsKey<T>() {
+function RootNubKey<T>() {
    throw new Error("Function not implemented.")
 }
 // #endregion

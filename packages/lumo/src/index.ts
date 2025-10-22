@@ -14,7 +14,7 @@ export * from './element/makeElement'
 export * from './conditional/If' 
 export * from './conditional/Polymorph' 
 export * from './commons/provide' 
-export * from './commons/CommonsKey' 
+export * from './commons/NubKey' 
 export * from './commons/Commons' 
 export * from './events/target' 
 export * from './events/listen' 
@@ -38,7 +38,7 @@ window._$$wrapWithCommons = wrapWithCommons;
  *  
  *  export const Frog = Symbol('frog')
  * 
- *  const frogType = CommonsKey(FROG, v<string>)
+ *  const frogType = NubKey(FROG, v<string>)
  *  
  *  declare module '@rue/lumo' {
  *     interface CommonsKeyMap {

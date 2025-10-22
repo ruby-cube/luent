@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, CommonsKey, component, fromCommons, FromTag, RenderSlot } from "@rue/lumo";
+import { Commons, NubKey, component, fromNub, FromTag, RenderSlot } from "@rue/lumo";
 import { ArticleDatabase } from "../demos/conduit/src/db/ArticleDatabase";
 
 // # via commons
@@ -20,7 +20,7 @@ function Parent() {
 }
 
 const Nested = {
-   'something': mergeCommonsKeys(
+   'something': mergeNubKeys(
       Content['something'],
       Deeper['something']
    )
@@ -28,10 +28,10 @@ const Nested = {
 
 //--
 
-Content['something'] = CommonsKey<string>()
+Content['something'] = NubKey<string>()
 
 function Content() {
-   const something = fromCommons(Content['something'])
+   const something = fromNub(Content['something'])
 
    return component(
       <div>hi</div>
@@ -43,7 +43,7 @@ function Content() {
 
 export function Button(input: FromTag<{
    Slot: RenderSlot,
-   Nested: { something: CommonsKey<string> }
+   Nested: { something: NubKey<string> }
 }>) {
    const { Slot, Nested } = input
 
@@ -75,10 +75,10 @@ function ParentB() {
 
 //--
 
-ContentB['something'] = CommonsKey<string>()
+ContentB['something'] = NubKey<string>()
 
 function ContentB(input: FromTag<{ something?: string }>) {
-   const { something = fromCommons(Content['something']) } = input
+   const { something = fromNub(Content['something']) } = input
 
    return component(
       <div>hi</div>

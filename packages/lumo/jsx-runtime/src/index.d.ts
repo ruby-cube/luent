@@ -154,7 +154,7 @@ declare namespace React {
     * Class components, built-in browser components (e.g. `div`) and forwardRef components can receive refs and automatically accept these props.
     * ```tsx
     * const Component = forwardRef(() => <div />);
-    * <Component get={(current) => console.log(current)} />
+    * <Component node={(current) => console.log(current)} />
     * ```
     *
     * You only need this type if you manually author the types of props that need to be compatible with legacy refs.
@@ -190,7 +190,7 @@ declare namespace React {
        *
        * @see {@link https://react.dev/learn/referencing-values-with-refs#refs-and-the-dom React Docs}
        */
-      ref?: Lumo.$Node | Lumo.$Nodes | undefined;
+      node?: Lumo.$Node | Lumo.$Nodes | undefined;
    }
 
    /**
@@ -678,6 +678,7 @@ declare namespace React {
 
    //$$$
    interface DOMEvents<T> {// Clipboard Events
+      'on'?: any;
       'on:copy'?: ClipboardEventHandler<T>;
       'on:cut'?: ClipboardEventHandler<T>;
       'on:paste'?: ClipboardEventHandler<T>;
@@ -2552,7 +2553,7 @@ declare global {
 
       //$$$
       interface IntrinsicAttributes extends React.Attributes {
-         ref?: $Node | $Nodes //#LUMO-EDIT
+         node?: $Node | $Nodes //#LUMO-EDIT
          // children?: Lumo.InferSlot
       }
       interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
@@ -2592,9 +2593,9 @@ declare global {
 
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          'show-hide': { children: ConditionalRenderKit[] | ConditionalRenderKit };
-         'mount-remount': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
-         'o--preserve': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
-         'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
+         'mount-remount': { children: ConditionalRenderKit[]; 'use:discard'?: () => void };
+         'o--preserve': { children: ConditionalRenderKit[]; 'use:discard'?: () => void };
+         'preserve-conditionals': { children: ConditionalRenderKit[]; 'use:discard'?: () => void };
          // 'Slot': {Slot: any}
 
          // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };

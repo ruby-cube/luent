@@ -1,7 +1,7 @@
 import { Commons as createCommons } from "../commons/Commons";
 import { makeElement } from "../element/makeElement";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
-import { fromCommons } from "../commons/provide";
+import { fromNub } from "../commons/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { $Node, GetNode } from "../node/GetNode";
 import { TransitionNode } from "./TransitionNode";
@@ -9,7 +9,7 @@ import type { Commons } from "../commons/commons-stack";
 import { Ion } from "@rue/quarky";
 import { component } from "../component/Component";
 import { createIfSeries, Else, If } from "../conditional/If";
-import { CommonsKey } from "../commons/CommonsKey";
+import { NubKey } from "../commons/NubKey";
 import { RenderSlot } from "../component/Input";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
@@ -19,7 +19,7 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 // export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
 
-const GET_PHASIC_NODE = CommonsKey<() => TransitionNode | null>('GET_PHASIC_NODE')
+const GET_PHASIC_NODE = NubKey<() => TransitionNode | null>('GET_PHASIC_NODE')
 
 // declare module '@rue/lumo' {
 //     interface CommonsKeyMap {
@@ -86,7 +86,7 @@ function createPhasicNode(
 }
 
 export function getPhasicNode(commons?: Commons) {
-   const phasicNode = fromCommons(GET_PHASIC_NODE, '?', commons)?.()
+   const phasicNode = fromNub(GET_PHASIC_NODE, '?', commons)?.()
    return phasicNode
 }
 

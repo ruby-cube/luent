@@ -1,3 +1,5 @@
+
+//@ts-nocheck
 import { component, FromTag, If } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 import { User } from "../commons/keys";
@@ -5,15 +7,13 @@ import './message-form.css'
 import { Timestamp } from "firebase/firestore";
 import { Message } from "../database/database";
 
-type MessageFormInput = FromTag<{
-   user: User,
-   'can:postMessage': (message: Message) => void
-}>
 
-export function MessageForm({
-   user,
-   postMessage
-}: MessageFormInput) {
+export function MessageForm(input: FromTag<{
+   user: User,
+   'use:postMessage': (message: Message) => void
+}>) {
+
+   const { user, postMessage } = input()
 
    const $message = ion('')
 

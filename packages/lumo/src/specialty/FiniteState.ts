@@ -174,7 +174,7 @@ export type FiniteState<S extends FiniteStates<S> = FiniteStates<_FiniteStates>,
    is: (state: State<S>) => boolean
    on: (transition: TransitionKey<S>, task: () => void) => void
    apply: (transition: TransitionKey<S>) => void
-   can: (transition: TransitionKey<S>) => boolean
+   op: (transition: TransitionKey<S>) => boolean
    onFinalState: (task: () => void) => void
    activate: (initializer: () => State<S>) => { nest: (config: { [key: string]: Nested[] }) => Nested }
    deactivate: () => void

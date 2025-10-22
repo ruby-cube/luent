@@ -11,7 +11,7 @@ function Parent() {
          <div>{$child().$doubleCount()}</div>
          {/* $doubleCount is now initialized in a creation scope higher than the one it was created in */}
          {If($active,
-            <Child count={$count} get={$child} />
+            <Child count={$count} node={$child} />
          )}
       </>
    )

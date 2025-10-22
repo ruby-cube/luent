@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { fromApp, fromCommons, createGlobalCommons, fromGlobal } from '../provide';
+import { fromApp, fromNub, createGlobalCommons, fromGlobal } from '../provide';
 import { component, makeComponent } from '../../component/Component';
 import { createApp } from '../../createApp';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { Commons, createCommons } from '../Commons';
-import { CommonsKey } from '../CommonsKey';
+import { NubKey } from '../NubKey';
 import { Ion, Ionized, MaybeIon, v } from '../../component/Input';
 import { ion, ionize, isIon, isIonicProxy } from '@rue/quarky';
 
@@ -53,7 +53,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 frogC = fromApp(_frog_)
-                frogD = fromCommons(_frog_)
+                frogD = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -181,7 +181,7 @@ describe('Integration tests the Context API', () => {
     //     });
     // });
 
-    describe('Context() and fromCommons()', () => {
+    describe('Context() and fromNub()', () => {
         it('should provide all child components with context entries', () => {
 
             const value = 'sir robin'
@@ -202,7 +202,7 @@ describe('Integration tests the Context API', () => {
 
             function Parent() {
                 frogB = fromApp(_frog_)
-                frogC = fromCommons(_frog_)
+                frogC = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => [
@@ -213,7 +213,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frogD = fromCommons(_frog_)
+                frogD = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -221,7 +221,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = fromCommons(_frog_)
+                frogE = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['sibling'], {}, undefined)
@@ -258,7 +258,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frogD = fromCommons(_frog_)
+                frogD = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -266,7 +266,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = fromCommons(_frog_)
+                frogE = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['sibling'], {}, undefined)
@@ -323,10 +323,10 @@ describe('Integration tests the Context API', () => {
                 frogA = fromGlobal(GLOBAL_FROG)
                 frogB = fromApp(APP_FROG)
 
-                frogC = fromCommons(GLOBAL_FROG)
-                frogD = fromCommons(APP_FROG)
-                frogE = fromCommons(APP_CONTEXTUAL_FROG)
-                frogF = fromCommons(CONTEXTUAL_FROG)
+                frogC = fromNub(GLOBAL_FROG)
+                frogD = fromNub(APP_FROG)
+                frogE = fromNub(APP_CONTEXTUAL_FROG)
+                frogF = fromNub(CONTEXTUAL_FROG)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -352,16 +352,16 @@ describe('Integration tests the Context API', () => {
     // it should validate Ionized
 
 
-    describe('CommonsKey and validation', () => {
+    describe('NubKey and validation', () => {
         it('should throw an error if required context prop is not provided', () => {
 
             const value = 0
             const _frog_ = 'frog'
-            CommonsKey(_frog_, v)
+            NubKey(_frog_, v)
             let frog;
 
             const KERMIT = 'kermit'
-            CommonsKey(KERMIT, v)
+            NubKey(KERMIT, v)
 
             function App() {
                 return component(
@@ -374,9 +374,9 @@ describe('Integration tests the Context API', () => {
             let error;
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
                 try {
-                    fromCommons(KERMIT)
+                    fromNub(KERMIT)
                 }
                 catch (err) {
                     error = err
@@ -400,7 +400,7 @@ describe('Integration tests the Context API', () => {
         it('should allow optional props to be undefined', () => {
 
             const _frog_ = 'frog'
-            CommonsKey(_frog_, v('?'))
+            NubKey(_frog_, v('?'))
             let frog = 'hi'
 
             function App() {
@@ -411,7 +411,7 @@ describe('Integration tests the Context API', () => {
 
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -429,7 +429,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            CommonsKey(_frog_, v('?')(() => defaultValue))
+            NubKey(_frog_, v('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {
@@ -439,7 +439,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -457,7 +457,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            CommonsKey(_frog_, MaybeIon)
+            NubKey(_frog_, MaybeIon)
             let frog = 'hi'
 
             function App() {
@@ -469,7 +469,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -488,7 +488,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            CommonsKey(_frog_, Ion)
+            NubKey(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
@@ -503,7 +503,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 try {
-                    frog = fromCommons(_frog_)
+                    frog = fromNub(_frog_)
 
                 }
                 catch (err) {
@@ -528,7 +528,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            CommonsKey(_frog_, Ionized)
+            NubKey(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
@@ -543,7 +543,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 try {
-                    frog = fromCommons(_frog_)
+                    frog = fromNub(_frog_)
                 }
                 catch (err) {
                     error = err
@@ -568,7 +568,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            CommonsKey(_frog_, Ion)
+            NubKey(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
@@ -580,7 +580,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -599,7 +599,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = { name: 'kermit' }
-            CommonsKey(_frog_, Ionized)
+            NubKey(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
@@ -611,7 +611,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -629,7 +629,7 @@ describe('Integration tests the Context API', () => {
         it('should allow MaybeIon to be undefined if optional', () => {
 
             const _frog_ = 'frog'
-            CommonsKey(_frog_, MaybeIon('?'))
+            NubKey(_frog_, MaybeIon('?'))
             let frog = 'hi'
 
             function App() {
@@ -639,7 +639,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -658,7 +658,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            CommonsKey(_frog_, MaybeIon('?')(() => defaultValue))
+            NubKey(_frog_, MaybeIon('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {
@@ -668,7 +668,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromCommons(_frog_)
+                frog = fromNub(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)

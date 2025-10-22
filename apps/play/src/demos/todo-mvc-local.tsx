@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, If, Else, FromTag, fromApp, CommonsKey } from "@rue/lumo"
+import { component, For, If, Else, FromTag, fromApp, NubKey } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
@@ -119,7 +119,7 @@ export function TodoDBKit() {
 }
 
 
-export const TODO_DB_KIT = CommonsKey<{
+export const TODO_DB_KIT = NubKey<{
    getTodos: () => Todo[];
    storeTodos: (todos: Todo[]) => void;
 }>('todoDBKit')

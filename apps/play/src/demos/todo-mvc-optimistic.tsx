@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, If, Else, FromTag, fromApp, CommonsKey, CommonsEntryKey, fromGlobal, SuspenseIon, fromRoot } from "@rue/lumo"
+import { component, For, If, Else, FromTag, fromApp, NubKey, CommonsEntryKey, fromGlobal, SuspenseIon, fromRoot } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
@@ -154,7 +154,7 @@ export function TodoDBKit() {
 }
 
 
-export const TODO_DB = CommonsKey<TodoDB>('todoDB')
+export const TODO_DB = NubKey<TodoDB>('todoDB')
 
 type $$TodoArray = ReturnType<typeof ionizeTodos>
 
@@ -235,7 +235,7 @@ function IonicTodoArray(todos: Todo[]) {
    })
 }
 
-IonicTodo.db = RootCommonsKey<TodosDatabase>()
+IonicTodo.db = RootNubKey<TodosDatabase>()
 
 function IonicTodo(todo: Todo) {
    const db = fromRoot(IonicTodo.db)
@@ -366,15 +366,15 @@ const todosIon = SuspenseIon(undefined, {
    },
 
    '@removeTodo'(todo: $$Todo) {
-      this.value.splice(this.value.indexOf(todo), 1)
+      // this.value.splice(this.value.indexOf(todo), 1)
    },
 
    '@removeCompleted'() {
-      this.value = this.value.filter(todo => !todo.completed)
+      // this.value = this.value.filter(todo => !todo.completed)
    },
 
    '@setCompleteForEach'(completed: boolean) {
-      this.value.forEach((todo) => (todo.completed = completed))
+      // this.value.forEach((todo) => (todo.completed = completed))
    },
 })
 
@@ -500,7 +500,7 @@ type FromAbove<T> = T extends CommonsEntryKey<infer I> ? I : never
 
 // TODO: fromGlobal (checks appwide first then global) only (no fromApp), provideGlobal, and provideAppwide
 
-const USE_TODO_APP = CommonsKey<typeof TodoAppKit>('useTodoApp')
+const USE_TODO_APP = NubKey<typeof TodoAppKit>('useTodoApp')
 
 type TodoDB = ReturnType<typeof TodoDBKit>
 
@@ -565,7 +565,7 @@ export function TodoMVC({
                )}
                <TodoList
                   mu:todos={$filteredTodos}
-                  can:removeTodo={($todos.removeTodo)}
+                  use:removeTodo={($todos.removeTodo)}
                ></TodoList>
             </section>
             <footer show:if={$todoCount} class="footer">
@@ -648,7 +648,7 @@ type Mutable<T> = T
 
 function TodoList(input: FromTag<{
    'mu:todos': $<$$TodoArray>,
-   'can:removeTodo': (todo: $$<Todo>) => void,
+   'use:removeTodo': (todo: $$<Todo>) => void,
 }>) {
    const { mu, $todos, removeTodo, } = input()
 

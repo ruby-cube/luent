@@ -43,7 +43,7 @@ export function MainBlock() {
 
    return (
       <main>
-         <$MainContent as='hello' get={mainContent} />
+         <$MainContent as='hello' node={mainContent} />
          <$records_list />
          <button on:click={changeMainContent}>click</button>
       </main>

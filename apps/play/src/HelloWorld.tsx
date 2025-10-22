@@ -176,7 +176,7 @@ function SvelteA() {
 
    return component(
       <>
-         <mount-remount can:discard={discard}>
+         <mount-remount use:discard={discard}>
             {If($x() > 10,
                $x
             )}
@@ -206,7 +206,7 @@ function SvelteA() {
 
    return component(
       <>
-         <RemountDemount can:discard={discard}>
+         <RemountDemount use:discard={discard}>
             {If($x() > 10,
                $x
             )}

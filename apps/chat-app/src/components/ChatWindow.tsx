@@ -1,5 +1,5 @@
 import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
-import { ion, ionic } from "@rue/quarky";
+import { Ion, ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
@@ -18,13 +18,12 @@ export function ChatWindow(input: FromTag<{
    chat: ChatKit;
 }>) {
    const { user, chat: { $messages, atMessagePosted, atMessageReceived, atErrorReceived, $error } } = input
-   console.log('ChatWindow()')
    const $messagesNode = GetNode('div')
 
-   const $newMessageMarker = ion(null as null | HTMLDivElement)
-   const $hasUnseenMessages = ion(false)
-   const $notifyNewMessages = ion(false)
-   const $smoothScroll = ion(false)
+   const $newMessageMarker = Ion(null as null | HTMLDivElement)
+   const $hasUnseenMessages = Ion(false)
+   const $notifyNewMessages = Ion(false)
+   const $smoothScroll = Ion(false)
 
    atRemounted(() => {
       $smoothScroll.value = false;
@@ -151,8 +150,10 @@ export function ChatWindow(input: FromTag<{
             <div class='error'>{$error}</div>
          )}
          {Else(
-            <div class='messages' get={$messagesNode} on:scrollend={reScrollend} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
+            <div class='messages' node={$messagesNode} on:scrollend={reScrollend} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
                {For($messages, m => m.id, (message) => (
+                  count = 0
+               ) => (
                   <>
                      <div>
                         <div class='single' style={{ opacity: (message.error === null ? 1 : .5) }}>

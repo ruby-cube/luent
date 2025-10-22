@@ -216,8 +216,8 @@ export function TodoMVC() {
 %import "https://unpkg.com/todomvc-app-css%2.4.1/index.css";
 </style> */}
 
-{/* <TodoList todos={%filteredTodos} can:removeTodo={removeTodo}></TodoList> */}
-{/* <TodoInput can:addTodo={addTodo}></TodoInput> */}
+{/* <TodoList todos={%filteredTodos} use:removeTodo={removeTodo}></TodoList> */}
+{/* <TodoInput use:addTodo={addTodo}></TodoInput> */}
 
 
 
@@ -323,7 +323,7 @@ function TodoList(%todos: Ionized<Todo[]>, removeTodo: (todo: Ionized<Todo>) => 
 
 
 
-function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void }>) {
+function TodoInput({ addTodo }: FromTag<{ 'use:addTodo': (title: string) => void }>) {
 
    function submitTodo(e: InputEvent) {
       const value = e.target.value.trim()
@@ -347,7 +347,7 @@ function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void
 
 function TodoList({ %todos, removeTodo }: FromTag<{
    todos: Ion<Ionized<Todo[]>>,
-   'can:removeTodo': (todo: Ionized<Todo>) => void
+   'use:removeTodo': (todo: Ionized<Todo>) => void
 }>) {
 
    let editedTodo = Ion(null as Todo | null)
