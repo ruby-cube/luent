@@ -7,17 +7,19 @@ import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
 type UID = unknown
 
+export type $Index = MutableIon<number> & { dataLength: number }
 // let currentItem: any;
-let $currentIndex: Ion<number> | undefined;
+// let $currentIndex: Ion<number> | undefined;
 
-export function getCurrentIndex(): Ion<number> | undefined {
-   return $currentIndex
-}
+// export function getCurrentIndex(): Ion<number> | undefined {
+//    return $currentIndex
+// }
 
-export function setCurrentIndex($index: Ion<number> | undefined) {
-   // currentItem = item;
-   $currentIndex = $index;
-}
+// export function setCurrentIndex($index: Ion<number> | undefined) {
+//    // currentItem = item;
+//    $currentIndex = $index;
+// }
+
 
 
 export class ListKit extends VineNode {
@@ -44,8 +46,7 @@ export class ListKit extends VineNode {
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
-         const $index = ion(i)
-         setCurrentIndex($index)
+         const $index = ion(i, { dataLength: list.length })
 
          const kit = new ListItemKit(item, $index, renderItem, this.flask)
          nodes.push(kit)
@@ -84,6 +85,7 @@ export class ListKit extends VineNode {
          // existing item
          if (kit) {
             kit.$index.value = i
+            kit.$index.dataLength = list.length;
             if (kit.preceding !== preceding || i === 0) {
                updateLCS(sequences.at(-1))
                sequences.push({ start: i, length: 1 })
@@ -96,8 +98,7 @@ export class ListKit extends VineNode {
          }
          // new item!
          else {
-            const $index = ion(i)
-            setCurrentIndex($index)
+            const $index = ion(i, { dataLength: list.length })
             kit = new ListItemKit(item, $index, renderItem, this.flask)
             kit.parent = this.parent;
             kit.preceding = preceding;
@@ -125,6 +126,8 @@ export class ListKit extends VineNode {
             const kit = prevKits[i]
             const uid = this.getUID(kit.item)
             if (!currentItems.has(uid)) {
+               kit.$index.value = -1;
+               kit.$index.dataLength = list.length;
                const prevNodes = kit.nodes!
                removeDOMNodes(prevNodes)
                kit.nodes = undefined;
@@ -196,7 +199,7 @@ export class ListItemKit extends VineNode {
 
    constructor(
       public item: unknown,
-      public $index: MutableIon<number>,
+      public $index: $Index,
       public render: RenderItem<unknown>,
       outerFlask: Flask
    ) {

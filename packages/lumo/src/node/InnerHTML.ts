@@ -20,9 +20,9 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
    return htmlString;
 }
 
-export function mountInnerHTML(htmlString: MaybeIon<any>, parent: DOMParent) {
-   parent.innerHTML = toString(toValue(htmlString))
-}
+// export function mountInnerHTML(htmlString: MaybeIon<any>, parent: DOMParent) {
+//    parent.innerHTML = toString(toValue(htmlString))
+// }
 
 
 
@@ -33,6 +33,6 @@ function toString(value: any) {
 }
 
 export type InnerHTMLKit = { innerHTML: MaybeIon<string> }
-export function isInnerHTMLKit(nodeEntity: RawJSXNode): nodeEntity is InnerHTMLKit {
-   return isObjectLiteral(nodeEntity) && 'innerHTML' in nodeEntity
-}
+// export function isInnerHTMLKit(nodeEntity: RawJSXNode): nodeEntity is InnerHTMLKit {
+//    return isObjectLiteral(nodeEntity) && 'innerHTML' in nodeEntity
+// }

@@ -10,7 +10,7 @@ import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
-import { getCurrentIndex } from "../iteratives/List";
+import { $Index, getCurrentIndex } from "../iteratives/List";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -83,15 +83,17 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 // style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
 // attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
+type NodesArray<T> = ReturnType<$Node<T>>[] | NodesArray<T>[]
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-   node?: $Node<T> | $Nodes<T>,
+   node?: $Node<T>,
+   nodes?: [NodesArray<T>, ...$Index[]]
    provide?: Provided
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
-   type GroupActivationType = ActivationType | 'show'
+type GroupActivationType = ActivationType | 'show'
 
 let groupActivationType: GroupActivationType | undefined = undefined
 let outerGroupActivationType: GroupActivationType | undefined = undefined
@@ -100,7 +102,7 @@ export function getGroupActivationType() {
    return groupActivationType
 }
 
-export function resetGroupActivationType(){
+export function resetGroupActivationType() {
    groupActivationType = undefined
 }
 
@@ -173,21 +175,21 @@ export function makeJSXNode(
       case Remount:
          if (!Slot) throw new Error(`<Remount> must have children`)
          return markActivationType('remount', Slot, 'discard' in config ? config.discard : undefined);
-      
+
       default:
          if (typeof nodeType === 'string') {
             return makeElement(
                nodeType,
                Slot,
                <ElementConfig>config,
-               getCurrentIndex()
+               // getCurrentIndex()
             )
          }
          return makeComponent(
             nodeType,
             <InferSlot>Slot,
             <ComponentConfig>config,
-            getCurrentIndex()
+            // getCurrentIndex()
          )
    }
 }

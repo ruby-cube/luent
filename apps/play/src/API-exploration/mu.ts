@@ -55,7 +55,16 @@ function MayBeMutableProxy(target: IonicProxy) {
    })
 }
 
-function mu<T extends { '~ionicProxy': true }>(muProxy: T): T {
+function mu<T extends { '~ionicProxy': true }>(proxy: T): T {
    //@ts-expect-error
-   return quarkOf(muProxy).ionicProxy // TODO: change model property of modelQuark to ionicProxy
+   return quarkOf(proxy).ionicProxy // TODO: change model property of modelQuark to ionicProxy
 }
+
+// TODO:
+// in input function
+
+// return ReadonlyProxy(mu(value))
+// return MayBeMutableProxy(mu(value))
+
+// TODO:
+// Ionic returns MayBeMutableProxy()

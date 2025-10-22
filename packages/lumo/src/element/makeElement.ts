@@ -10,10 +10,10 @@ import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../n
 import { camelToKebabCase } from "@rue/utils";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
-import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
 import { queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../render-cycle";
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
+import { setUpNodesArray } from "../node/GetNodes";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -37,9 +37,8 @@ export function makeElement(
    tagName: string,
    Slot: RenderSlot | undefined,
    config: ElementConfig,
-   $index: Ion<number> | undefined
 ): DOMNode {
-   const { class: classes, style: styles, 'show:if': showIf, ref, ...other } = config;
+   const { class: classes, style: styles, 'show:if': showIf, node: $node, nodes, ...other } = config;
 
    const { attributes, events, hooks } = analyzeAttributes(other)
 
@@ -49,14 +48,13 @@ export function makeElement(
    const domNode = isHydrating() ? getElement()
       : XML_NS ? createNSElement(tagName, XML_NS)
          : document.createElement(tagName)
-   if (ref) {
-      if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use GetNode or NodesRef as ref")
-      if (isNodesRef(ref)) {
-         initializeListRef(ref, domNode, $index!)
-      }
-      else {
-         initializeRef(ref, domNode)
-      }
+   if ($node) {
+      if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use GetNode or NodesRef as ref")
+      initializeRef($node, domNode)
+   }
+   if (nodes) {
+      const [nodesArray, ...indices] = nodes
+      setUpNodesArray(domNode, nodesArray, indices)
    }
 
    if (classes) setUpClasses(domNode, normalizeToArray(classes))
@@ -80,15 +78,15 @@ export function makeElement(
       runWithXMLNamespace(() => {
          const rawOutput = normalizeToArray(Slot())
 
-         if (isInnerHTMLKit(rawOutput[0])) {
-            const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
-            mountInnerHTML(innerHTML, domNode)
-         }
-         else {
-            const nodes = processJSXOutput(rawOutput)
-            setUpNodeVine(nodes, domNode)
-            mountDOMNodes(nodes, domNode)
-         }
+         // if (isInnerHTMLKit(rawOutput[0])) {
+         //    const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
+         //    mountInnerHTML(innerHTML, domNode)
+         // }
+         // else {
+         const nodes = processJSXOutput(rawOutput)
+         setUpNodeVine(nodes, domNode)
+         mountDOMNodes(nodes, domNode)
+         // }
       }, xml_ns)
    }
    return domNode;

@@ -5,6 +5,7 @@ import { isObject, normalizeToArray } from "@rue/utils";
 import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/GetNode";
 import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
+import { setUpNodesArray } from "../node/GetNodes";
 
 
 
@@ -46,18 +47,6 @@ export function component(template: JSXTemplate) {
 
 
 
-export function initializeComponentRef(
-   node: $Node | $Nodes,
-   publicComponent: PublicComponent,
-   $index: Ion<number> | undefined,
-) {
-   if (isNodesRef(get)) {
-      initializeListRef(get, publicComponent, $index!)
-   }
-   else {
-      initializeRef(<InternalRef<$Node>>get, publicComponent)
-   }
-}
 
 function __DEV__leakProof(exposed: AnyObject) {
    // TODO: make sure everything has creationScopeID
@@ -104,14 +93,24 @@ export function makeComponent(
    Component: ComponentSetup,
    Slot: InferSlot | undefined,
    tag: ComponentConfig,
-   $index: Ion<number> | undefined
+   // $index: Ion<number> | undefined
 ): Component {
    // TODO: component flask lifecycle hooks
    tag.Slot = Slot;
    const output = Component(toInput(tag))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
-   if (tag.ref) initializeComponentRef(tag.ref, output.exposed ?? {}, $index)
+   const publicComponent = output.exposed ?? {}
+   if (tag.node)
+      initializeRef(tag.node, publicComponent)
+   if (tag.nodes) {
+      const [nodesArray, ...indices] = tag.nodes
+      setUpNodesArray(publicComponent, nodesArray, indices)
+   }
+
    // if (tag['show:if']) setUpConditionalDisplay()
    return output
 }
+
+
+
