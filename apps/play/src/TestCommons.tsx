@@ -1,10 +1,10 @@
 // @ts-nocheck
 
-import { Commons, component, fromNub } from "@rue/lumo";
+import { Commons, component, fromHub } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
 
 const Nub = Commons
-const fromNub = fromNub
+const fromHub = fromHub
 
 export function TestCommons() {
 
@@ -22,7 +22,7 @@ export function TestCommons() {
 }
 
 function Child() {
-   const $message = fromNub('$message')
+   const $message = fromHub('$message')
 
    const $count = ion(0, {
       increment() {
@@ -31,7 +31,7 @@ function Child() {
    })
 
    watch($count, () => {
-      console.log(fromNub('$message')())
+      console.log(fromHub('$message')())
    })
 
    return component(

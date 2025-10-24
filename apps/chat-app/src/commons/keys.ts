@@ -1,4 +1,4 @@
-import { NubKey } from "@rue/lumo";
+import { HubKey } from "@rue/lumo";
 import { Ionized } from "@rue/quarky";
 
 
@@ -9,4 +9,4 @@ export type User = {
    lastSeenMessageID: string | null
 }
 
-export const USER = NubKey<User>('user')
+export const USER = HubKey<User>('user')

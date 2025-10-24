@@ -1,6 +1,6 @@
 import { component, Else, For, If} from "@rue/lumo"
 import { ion, queueIonicTask } from "@rue/quarky"
-import { $postrender} from "../../../../packages/lumo/src/render-cycle"
+import { $postrender} from "../../../../packages/quarky/src/reactivity/render-cycle"
 import { $_run_with_, $_snap_context } from "@rue/flask"
 
 type Commit = {

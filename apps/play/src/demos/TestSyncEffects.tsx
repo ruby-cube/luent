@@ -1,5 +1,5 @@
 import { ion, SYNC, watch } from "@rue/quarky";
-import { PRERENDER } from "../../../../packages/lumo/src/render-cycle";
+import { PRERENDER } from "../../../../packages/quarky/src/reactivity/render-cycle";
 import { component } from "@rue/lumo";
 
 export function TestSyncEffects() {

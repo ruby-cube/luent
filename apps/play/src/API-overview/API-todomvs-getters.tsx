@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { component, For, If, Else } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, ionic } from "@rue/quarky"
-import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
+import { PRERENDER } from "../../../../packages/quarky/src/reactivity/render-cycle"
 
 interface Todo {
    id: number

@@ -1,4 +1,4 @@
-import { component, For, fromApp, fromNub, fromGlobal, FromTag, If, provideAppwide, provideGlobal } from "@rue/lumo";
+import { component, For, fromApp, fromHub, fromGlobal, FromTag, If, provideAppwide, provideGlobal } from "@rue/lumo";
 import { Morphable, Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
 import { ion, isIon } from "@rue/quarky";
 import "./style.css"
@@ -21,7 +21,7 @@ export function TestPolymorph() {
    //    '/*': () => (
    //       <Missing></Missing>
    //    )
-   //    // 'file': (file = fromNub(FILES).get($fileID)) => (
+   //    // 'file': (file = fromHub(FILES).get($fileID)) => (
    //    //    <File file={file} />
    //    // )
    // })

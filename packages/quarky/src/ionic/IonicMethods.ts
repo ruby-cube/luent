@@ -2,13 +2,14 @@ import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonicProxy, ProxyKey } from "./Ionic"
 import { quarkOf } from "../abstract/Quark"
-import { initUpdate, popUpdate, pushUpdate, Update } from "../reactivity/UpdateCycle"
+import { useUpdate, popUpdate, pushUpdate, Update } from "../reactivity/UpdateCycle"
 import { ModelQuark } from "./ModelQuark"
 import { asAtomicOp, getAtomicOp, getTrackedOps } from "./AtomicOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
 import { isTracking, trackParticle } from "../abstract/Compound"
 import { AtomicIonQuark } from "../ion/AtomicIon"
+import { Mutation, recordMutation } from "../abstract/Mutable"
 
 export type Constructor = new (...args: any[]) => any
 
@@ -57,7 +58,7 @@ function noTransform(value: any) {
 }
 
 export function initModelUpdate(quark: ModelQuark) {
-   const update = initUpdate()
+   const update = useUpdate()
    const state = quark.state
 
    if (update.lazy){
@@ -103,15 +104,13 @@ function useMutatingOp(
          finally {
             popUpdate()
 
-            // storeSnapshot(quark)
-
-            // recordMutation(quark.asMutable, new Mutation(
-            //    model,
-            //    opKey,
-            //    _args,
-            //    output,
-            //    preop
-            // ))
+            recordMutation(quark.asMutable, new Mutation(
+               model,
+               opKey,
+               _args,
+               output,
+               preop
+            ))
 
             trigger?.(new TriggerableModel(quark, update), preop);
 

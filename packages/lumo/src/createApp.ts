@@ -1,14 +1,14 @@
 import { Component, ComponentSetup } from "./component/Component";
 import { AnyObject } from "@rue/types";
-import { AppCommons, createAppCommons } from "./commons/provide";
-import {  popCommons, pushCommons } from "./commons/commons-stack";
+import { AppCommons, createAppCommons } from "./hub/provide";
+import {  popCommons, pushCommons } from "./hub/commons-stack";
 import { Flask, flaskStack } from "@rue/flask";
 import { createUpdate, Ion, pushUpdate, popUpdate } from "@rue/quarky";
-import { Provided } from "./commons/Commons";
+import { Provided } from "./hub/Commons";
 import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
 import { normalizeToArray } from "@rue/utils";
-import { queueInternalRenderTask } from "./render-cycle";
+import { queueInternalRenderTask } from "../../quarky/src/reactivity/render-cycle";
 
 let appRoot: Element;
 

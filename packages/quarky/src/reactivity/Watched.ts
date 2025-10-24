@@ -2,11 +2,13 @@ import { isObject, __DEV__unwrap } from "@rue/utils";
 import { Phase, SYNC, Update } from "./UpdateCycle";
 import { Effect, PhaseQueue } from "./EffectQueue";
 import { hasQuark, Quark, QUARK } from "../abstract/Quark";
+import { ILazyState } from "./LazyStateV2";
 
 
 export type Watchable = {
    asWatched: Watched | undefined;
-   pendingUpdate: Update | null;
+   state: ILazyState
+   // pendingUpdate: Update | null;
    trigger: (update: Update) => void
 }
 

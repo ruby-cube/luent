@@ -6,7 +6,7 @@
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
 // TODO:
-// [] fromNub type is broken 
+// [] fromHub type is broken 
 // [] AtomicIon type is broken, the state def feels like a hassle... maybe just use this.value? or maybe just use $unseenCount.value++? or .value++? or something else?
 // [] defineIonCapsule should use this.count++, for ion(), use $count.value++ ... it should be .value
 // [] writing up input type definitions feel like a hassle
@@ -27,7 +27,7 @@
 // Passing an ion with methods is essentially two-way binding..., just a bit more controlled
 
 
-import { Commons, NubKey, component, For, fromNub, If, Ion, Ionized, v } from "@rue/lumo";
+import { Commons, HubKey, component, For, fromHub, If, Ion, Ionized, v } from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
 
 class Message {
@@ -108,18 +108,18 @@ export function FBApp() {
 }
 
 
-const UNSEEN_COUNT = NubKey(Ion<number, {
+const UNSEEN_COUNT = HubKey(Ion<number, {
    increment(): void;
    decrement(): void;
 }>)
-const MESSAGES = NubKey(Ionized<Message[]>)
-const TOGGLE_CHAT_VIEW = NubKey(v<() => void>)
+const MESSAGES = HubKey(Ionized<Message[]>)
+const TOGGLE_CHAT_VIEW = HubKey(v<() => void>)
 
 
 export function ChatPopup() {
-   const $unseenCount = fromNub(UNSEEN_COUNT)
-   const messages = fromNub(MESSAGES) as Message[]
-   const toggleChatView = fromNub(TOGGLE_CHAT_VIEW)
+   const $unseenCount = fromHub(UNSEEN_COUNT)
+   const messages = fromHub(MESSAGES) as Message[]
+   const toggleChatView = fromHub(TOGGLE_CHAT_VIEW)
 
    function openMessage(message: Message) {
       message.open()
@@ -140,9 +140,9 @@ export function ChatPopup() {
 }
 
 export function ChatView() {
-   const $unseenCount = fromNub(UNSEEN_COUNT)
-   const messages = fromNub(MESSAGES) as Message[]
-   const toggleChatView = fromNub(TOGGLE_CHAT_VIEW)
+   const $unseenCount = fromHub(UNSEEN_COUNT)
+   const messages = fromHub(MESSAGES) as Message[]
+   const toggleChatView = fromHub(TOGGLE_CHAT_VIEW)
 
    function openMessage(message: Message) {
       if (message.isNew) {

@@ -38,7 +38,7 @@ function isOwner(user: User | null, context: { ownerID: string } | undefined) {
 
 type PermissionContext<T = 'article'> = T extends 'comment' | 'article' ? { authorID: string } : { ownerID: string }
 
-isPermitted.user = RootNubKey<Ion<User>>()
+isPermitted.user = RootHubKey<Ion<User>>()
 
 export function isPermitted<T extends keyof Permissions>(target: T, action: keyof Permissions[T], context?: PermissionContext<T>): boolean {
    const $user = fromRoot(isPermitted.user)

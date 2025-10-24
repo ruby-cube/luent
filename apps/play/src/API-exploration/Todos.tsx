@@ -40,7 +40,7 @@ function IonicTodos(data: Todos[]) {
 }
 
 
-fetchTodos.db = RootNubKey<TodosDatabase>()
+fetchTodos.db = RootHubKey<TodosDatabase>()
 
 let $todos: SuspenseIon;
 

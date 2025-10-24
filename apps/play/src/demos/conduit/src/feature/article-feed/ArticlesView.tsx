@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, NubKey, component, Else, ElseIf, For, fromNub, fromApp, FromTag, If, RenderSlot, SuspenseIon } from "@rue/lumo";
+import { Commons, HubKey, component, Else, ElseIf, For, fromHub, fromApp, FromTag, If, RenderSlot, SuspenseIon } from "@rue/lumo";
 import { Ion, Ionized, watch } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";
@@ -8,9 +8,9 @@ import { ArticleDatabase } from "../../db/ArticleDatabase";
 
 // #region: main
 
-ArticlesView.db = RootNubKey<ArticleDatabase>()
-ArticlesView.settings = NubKey<SiteSettings>()
-ArticlesView.greeting = NubKey<string>()
+ArticlesView.db = RootHubKey<ArticleDatabase>()
+ArticlesView.settings = HubKey<SiteSettings>()
+ArticlesView.greeting = HubKey<string>()
 
 export function ArticlesView(input: FromTag<{
    articlesMeta: Ion<{ tag: string, username: string, category: string }>
@@ -20,7 +20,7 @@ export function ArticlesView(input: FromTag<{
    const {
       $articlesMeta,
       $articlesPerPage,
-      greeting = fromNub(ArticlesView.greeting) ?? "Hello world"
+      greeting = fromHub(ArticlesView.greeting) ?? "Hello world"
    } = input()
    const db = fromRoot.required(ArticlesView.root.db)
 
@@ -53,7 +53,7 @@ export function ArticlesView(input: FromTag<{
          {ElseIf($articles.length === 0,
             <>No articles here yet</>
          )}
-         {Else((settings = fromNub(ArticlesView.settings)) =>
+         {Else((settings = fromHub(ArticlesView.settings)) =>
             <>
                {For($articles, m => m.id, article => (
                   <ArticlePreview mu:article={article}></ArticlePreview>
@@ -74,7 +74,7 @@ export function ArticlesView(input: FromTag<{
 
 // #region: navigation
 
-ArticlesNav.router = NubKey<Router>()
+ArticlesNav.router = HubKey<Router>()
 
 function ArticlesNav(input: FromTag<{}>) {
    const router = fromRoot(ArticlesNav.router)
@@ -91,17 +91,17 @@ function ArticlesNav(input: FromTag<{}>) {
 
 // #region: preview
 
-ArticlePreview['mu:db'] = RootNubKey.Mutable<ArticleDatabase>()
-ArticlePreview['author'] = RootNubKey.Ion<ArticleDatabase>()
-ArticlePreview['use:addTodo'] = NubKey<() => void>()
-ArticlePreview['on:clickIncrement'] = NubKey<() => void>()
+ArticlePreview['mu:db'] = RootHubKey.Mutable<ArticleDatabase>()
+ArticlePreview['author'] = RootHubKey.Ion<ArticleDatabase>()
+ArticlePreview['use:addTodo'] = HubKey<() => void>()
+ArticlePreview['on:clickIncrement'] = HubKey<() => void>()
 
 export function ArticlePreview(input: FromTag<{
    'mu:article': Ionized<Article>,
 }>) {
 
    const { article, mu } = input as unknown as { article: Ionized<Article>, mu: <T>(arg: T) => T }
-   const db = fromNub(ArticlePreview.db)
+   const db = fromHub(ArticlePreview.db)
 
    const $author = Ion(() => article.author.username)
    const $authorImage = Ion(() => article.author.image)
@@ -134,8 +134,8 @@ export function ArticlePreview(input: FromTag<{
             to="article"
             params={{ slug: article.slug }}
          >
-            <h1>{(article.title)}</h1>
-            <p>{article.description}</p>
+            <h1>{article.$title}</h1>
+            <p>{article.$description}</p>
             <span>Read more...</span>
             <ul class="tag-list">
                {For((article.tagList), m => m, (tag) => (
@@ -153,7 +153,7 @@ export function ArticlePreview(input: FromTag<{
 function __postrender() {
    throw new Error("Function not implemented.");
 }
-function RootNubKey<T>() {
+function RootHubKey<T>() {
    throw new Error("Function not implemented.")
 }
 // #endregion

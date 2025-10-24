@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NubKey, component, For, fromNub, FromTag, If, GetNode } from "@rue/lumo";
+import { HubKey, component, For, fromHub, FromTag, If, GetNode } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -280,15 +280,15 @@ type TabManager = {
    focusFile(file: File): void; //tabs
 }
 
-const FILES_KIT = NubKey<FileManager>('FILES_KIT')
-const TABS_KIT = NubKey<TabManager>('TABS_KIT')
+const FILES_KIT = HubKey<FileManager>('FILES_KIT')
+const TABS_KIT = HubKey<TabManager>('TABS_KIT')
 
 
-// const OPEN_FILE = NubKey(v<FileManager['openFile']>)
-// const DELETE_FILE = NubKey(v<FileManager['deleteFile']>)
-// const ADD_NEW_FILE = NubKey(v<FileManager['addNewFile']>)
-// const CLOSE_FILE = NubKey(v<TabManager['closeFile']>)
-// const FOCUS_FILE = NubKey(v<TabManager['focusFile']>)
+// const OPEN_FILE = HubKey(v<FileManager['openFile']>)
+// const DELETE_FILE = HubKey(v<FileManager['deleteFile']>)
+// const ADD_NEW_FILE = HubKey(v<FileManager['addNewFile']>)
+// const CLOSE_FILE = HubKey(v<TabManager['closeFile']>)
+// const FOCUS_FILE = HubKey(v<TabManager['focusFile']>)
 
 export function List(input : FromTag<{
 		apple?: string,
@@ -298,19 +298,19 @@ export function List(input : FromTag<{
 }>) {
 		const { 
 				$plum,
-				$apple = fromNub($APPLE), 
-				peach = fromNub(PEACH),
+				$apple = fromHub($APPLE), 
+				peach = fromHub(PEACH),
 				_raw_: $
 		} = input
 		
-		$.pear = $.pear ?? fromNub(PEAR)
+		$.pear = $.pear ?? fromHub(PEAR)
 
 		return component(<></>)
 }
 
-const $APPLE = NubKey<Ion<string>>('$APPLE')
-const PEACH = NubKey<string>('PEACH')
-const PEAR = NubKey<MaybeIon<string>>('PEAR')
+const $APPLE = HubKey<Ion<string>>('$APPLE')
+const PEACH = HubKey<string>('PEACH')
+const PEAR = HubKey<MaybeIon<string>>('PEAR')
 
 
 
@@ -318,7 +318,7 @@ function Sidebar(input : FromTag<{
    files: Ionized<File[]> // TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
 }>) {
    const { files } = input
-   const { addFile } = fromNub(FILES_KIT);
+   const { addFile } = fromHub(FILES_KIT);
 
    return component(
       <div>
@@ -337,8 +337,7 @@ function SidebarFile(input : FromTag<{
    const { $index, file } = input
    const $menu = GetNode(IfContextMenu)
 
-   const { openFile } = fromNub(FILES_KIT)
-
+   const { openFile } = fromHub(FILES_KIT)
 
    return component(
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
@@ -366,8 +365,8 @@ function SidebarFile(input : FromTag<{
 //    )
 // }
 
-// const CLOSE_FILE = NubKey(v<(index: number) => void>)
-// const FOCUS_FILE = NubKey(v<(index: number) => void>)
+// const CLOSE_FILE = HubKey(v<(index: number) => void>)
+// const FOCUS_FILE = HubKey(v<(index: number) => void>)
 
 
 
@@ -377,7 +376,7 @@ function Tab(input : FromTag<{
    file: Ionized<File>,
    tabManager?: TabManager,
 }>) {
-   const { file, tabManager = fromNub(TABS_KIT), $index = ion('hi') } = input
+   const { file, tabManager = fromHub(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 
    return component(

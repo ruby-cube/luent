@@ -1,4 +1,4 @@
-import { component, fromNub, FromTag } from "@rue/lumo";
+import { component, fromHub, FromTag } from "@rue/lumo";
 import { USER, User } from '../commons/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";
@@ -10,7 +10,7 @@ export function Chatroom(input: FromTag<{
    user: User
 }>) {
    const { user } = input
-   // const user = fromNub(USER)
+   // const user = fromHub(USER)
 
    const chatKit = ChatKit()
 

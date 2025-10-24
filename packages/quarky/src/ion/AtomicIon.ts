@@ -9,11 +9,12 @@ import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { ModelQuark } from "../ionic/ModelQuark";
 import { trackParticle } from "../abstract/Compound";
-import { Update, isLazyUpdate, initUpdate } from "../reactivity/UpdateCycle";
+import { Update, isLazyUpdate, useUpdate, getActiveUpdate, Mutation } from "../reactivity/UpdateCycle";
 import { maybeIonize, MarkMap } from "../ionic/Ionic";
-import { ILazyState } from "../reactivity/LazyState";
 import { AtomicQuark } from "../abstract/AtomicQuark";
 import { isObjectLiteral } from "@rue/utils";
+import { recordMutation } from "../abstract/Mutable";
+import { LazyState } from "../reactivity/LazyStateV2";
 
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
@@ -32,7 +33,7 @@ export class AtomicIonQuark extends AtomicQuark {
    track = () => trackParticle(this)
 
    constructor(
-      public state: ILazyState,
+      public state: LazyState<unknown>,
       public modelQuark?: ModelQuark,
       public customTrack?: () => void,
       public customTrigger?: () => void
@@ -108,7 +109,9 @@ export function createAtomicIon(
 function getState(this: AtomicIonQuark) {
    if (__DEV__) emitSignal();
    this.track()
-   const state = isLazyUpdate() ? this.state.pending : this.state.current
+   const update = getActiveUpdate()
+   const state = update?.lazy ? this.state.pending : this.state.current
+   if (update?.lazy) update.lock(this.state)
    return this.transformGet ? this.transformGet(state) : state;
 }
 
@@ -123,42 +126,20 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    //    return newState;
    // }
    const state = this.state
+   const pendingUpdate = state.pendingUpdate
 
-   const update = initUpdate()
+   const update = useUpdate()
+   const proceed = update.race(pendingUpdate)
+   if (!proceed) return;
 
    // set state
-   if (update.lazy) {
-      state.pending = newState
-   }
-   else {
-      state.current = newState;
-   }
+   state.set(newState, update)
 
-   const pendingUpdate = this.pendingUpdate
-   if (pendingUpdate === update) {
-      return state;
-   }
+   if (pendingUpdate === update)
+      return;  // return because no need to trigger
 
-   if (pendingUpdate && pendingUpdate !== update) {
-      pendingUpdate.cancel()
-   }
-
-   if (update.lazy) {
-      this.pendingUpdate = update
-
-      update.onComplete(() => {
-         state.commitChange()
-         this.pendingUpdate = null;
-      })
-
-      update.onCancel(() => {
-         state.cancelChange()
-         this.pendingUpdate = null;
-      })
-   }
    // trigger effects
    this.trigger(update)
-   this.modelQuark?.trigger(update); // TODO: Do I need this? For absorbed ions?
 
    return state;
 }

@@ -7,9 +7,7 @@ import { Traceable } from "../debug/Traceable"
 import { asAtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMemberDef } from "./IonicMethods"
-import { Update } from "../reactivity/UpdateCycle"
 import { AtomicIonQuark } from "../ion/AtomicIon"
-import { trackParticle } from "../abstract/Compound"
 import { ModelState } from "../reactivity/LazyState"
 import { AtomicQuark } from "../abstract/AtomicQuark"
 import { Ion } from "../ion/Ion"
@@ -29,16 +27,13 @@ export class ModelQuark implements Watchable {
    constructor(
       public model: IonicProxy,
       public rawTarget: AnyObject, //initialData
-      public state: ModelState,
+      public state: ModelState, // NOTE: this is only relevant for collections...
       public clone: ((obj: AnyObject) => AnyObject) | undefined,
       public proxyProto: AnyObject, //DEV only
-      // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
 
       this.__DEV__asTraceable = new Traceable()
    }
-
-   pendingUpdate: Update | null = null
 
    asMutable: Mutable = new Mutable()
 
@@ -46,9 +41,7 @@ export class ModelQuark implements Watchable {
 
    trigger = trigger
 
-
    pions: undefined | PionProxy = undefined
-
 
    trackedOps: Record<PropertyKey, AtomicIonQuark | TrackedOps> = {}
 

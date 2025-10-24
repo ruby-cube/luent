@@ -2,6 +2,8 @@ import { setImmediate } from "@rue/thread";
 import { createOneoff, Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
 import { Watched } from "./Watched";
 import { $schedule, SchedulerOptions } from "@rue/flask";
+import { ILazyState } from "./LazyStateV2";
+import { AnyObject } from "@rue/types";
 
 
 
@@ -87,42 +89,192 @@ export class CyclePhase implements ICyclePhase {
  * @internal
  */
 
+
+export type Action = {
+   is: (...tags: string[]) => boolean;
+   precedes: (competingUpdate: Update) => boolean;
+   cancel: () => void;
+}
+
+
+export class Mutation {
+
+   constructor(
+      public target: AnyObject,
+      public op: '[[set]]' | PropertyKey,
+      public input: [PropertyKey, unknown] | unknown[],
+   ) { }
+
+   apply() {
+      if (this.op === '[[set]]') {
+         const key = this.input[0] as PropertyKey
+         const value = this.input[1]
+         this.target[key] = value
+      }
+      else {
+         this.target[this.op](...this.input)
+      }
+   }
+}
+
 export class Update {
+   timestamp: Date
 
    constructor(
       public timeMargin: number = 0,
       public lazy: boolean = false
    ) {
       this.cycle = new UpdateCycle(this)
+      this.timestamp = new Date() // TODO: make sure this is correct
    }
 
-   atoms: Set<Watched> = new Set()
+   private mutations: Mutation[] = []
+
+   recordMutation(mutation: Mutation) {
+      this.mutations.push(mutation)
+   }
+
+   commit() {
+      for (const mutation of this.mutations) {
+         mutation.apply()
+      }
+   }
+
+   tags: Set<string> = new Set()
+
+   asAction: Action = {
+      is: (...tags: string[]) => {
+         for (const tag of tags) {
+            if (this.tags.has(tag))
+               return true;
+         }
+         return false
+      },
+
+      precedes: (competingUpdate: Update) => {
+         return this.timestamp < competingUpdate.timestamp  // TODO: make sure this is correct
+      },
+      
+      cancel: () => {
+         this.cancel()
+      }
+   }
+
+   cancelled = false
+
+   cancel() {
+      //    this.cancelTasks.forEach(task => task())
+      //    this.cancelTasks = []
+
+      this.cancelled = true;
+      this.cycle.cancel()
+      for (const state of this.states) {
+         state.cancelPending() // 
+      }
+   }
+
+   states: ILazyState[] = []
+
+   lock(state: ILazyState) {
+      state.pendingUpdate = this
+      // TODO: getState and .filter() etc must lock the state as well!
+      this.states.push(state)
+   }
+
+   precedes(competingUpdate: Update) {
+      return this.timestamp < competingUpdate.timestamp
+   }
+
+   race(competingUpdate: Update | null) {
+      if (competingUpdate === null) {
+         this.cycle.start()
+         return true
+      }
+      if (competingUpdate === this) {
+         return true;
+      }
+      if (competingUpdate) {
+         if (!this.handleRace) {
+            competingUpdate.precedes(this) ? competingUpdate.cancel() : this.cancel()
+         }
+         else {
+            this.handleRace(competingUpdate.asAction)
+         }
+         if (this.cancelled) return false;
+         if (!competingUpdate.cancelled) {
+            competingUpdate.onComplete(() => {
+               // queue
+               this.cycle.start() // TODO: this assumes the cycle hasn't started yet. can we be sure of this?
+            })
+         }
+         return true
+      }
+   }
+
+   private handleRace: ((competingAction: Action) => void) | undefined
 
    cycle: UpdateCycle;
 
-   onComplete(commitUpdate: () => void) {
-      commitUpdate.__DEVName = 'commitUpdate'
+   onComplete(task: () => void) { // TODO:
+      //@ts-expect-error
       const effect = createOneoff(commitUpdate, this.cycle.phases.length - 1)
       this.cycle.scheduleEffect(effect)
       // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) // TODO: Make sure we don't need this line
-      this.commits.push(effect)
+      // this.commits.push(effect)
    }
 
-   private commits: Effect[] = []
+   // private commits: Effect[] = []
 
-   cancel() {
-      this.commits.forEach(commit => commit.destroy())
-      this.cycle.cancel()
-      this.cancelTasks.forEach(task => task())
-      this.cancelTasks = []
-   }
+   // cancel() {
+   //    this.commits.forEach(commit => commit.destroy())
+   //    this.cycle.cancel()
+   //    this.cancelTasks.forEach(task => task())
+   //    this.cancelTasks = []
+   // }
 
-   private cancelTasks: (() => void)[] = []
+   // private cancelTasks: (() => void)[] = []
 
-   onCancel(task: () => void) {
-      this.cancelTasks.push(task)
-   }
+   // onCancel(task: () => void) {
+   //    this.cancelTasks.push(task)
+   // }
 }
+
+// export class Update {
+
+//    constructor(
+//       public timeMargin: number = 0,
+//       public lazy: boolean = false
+//    ) {
+//       this.cycle = new UpdateCycle(this)
+//    }
+
+//    // atoms: Set<Watched> = new Set()
+
+//    cycle: UpdateCycle;
+
+//    onComplete(commitUpdate: () => void) {
+//       commitUpdate.__DEVName = 'commitUpdate'
+//       const effect = createOneoff(commitUpdate, this.cycle.phases.length - 1)
+//       this.cycle.scheduleEffect(effect)
+//       // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) // TODO: Make sure we don't need this line
+//       this.commits.push(effect)
+//    }
+
+//    private commits: Effect[] = []
+
+//    cancel() {
+//       this.commits.forEach(commit => commit.destroy())
+//       this.cycle.cancel()
+//       this.cancelTasks.forEach(task => task())
+//       this.cancelTasks = []
+//    }
+
+//    private cancelTasks: (() => void)[] = []
+
+//    onCancel(task: () => void) {
+//       this.cancelTasks.push(task)
+//    }
+// }
 
 
 /**
@@ -141,6 +293,9 @@ export class UpdateCycle {
       public update: Update,
    ) {
       this.phases = phases // from module
+   }
+
+   start() {
       this.schedulePhase(phases[0]) // from module
    }
 
@@ -265,7 +420,7 @@ export function useUpdateCycleScheduler(phase: Phase) {
          enroll(task) {
             const effect = new Effect(task, phase)
             cycle.scheduleEffect(effect)
-            
+
             return effect;
          },
          remove(effect: Effect) {
@@ -275,30 +430,16 @@ export function useUpdateCycleScheduler(phase: Phase) {
    }
 }
 
-const updateStack: Update[] = [];
 
-export function pushUpdate(update: Update) {
-   return updateStack.push(update)
-}
 
-export function popUpdate() {
-   return updateStack.pop()
-}
 
-export function getActiveUpdate() {
-   return updateStack.at(-1)
-}
-
-export function isLazyUpdate() {
-   return !!(getActiveUpdate()?.lazy)
-}
 
 /**
  * TEMPORARY
  * @returns 
  */
 export function $currentCycle() {
-   return initUpdate().cycle
+   return useUpdate().cycle
 }
 
 export function getDefaultPhase() { // TODO: should be configured
@@ -333,6 +474,28 @@ export function postcycleTask(task: Task) {
 }
 
 
+
+
+const updateStack: Update[] = [];
+
+export function pushUpdate(update: Update) {
+   return updateStack.push(update)
+}
+
+export function popUpdate() {
+   return updateStack.pop()
+}
+
+export function getActiveUpdate() {
+   return updateStack.at(-1)
+}
+
+export function isLazyUpdate() {
+   return !!(getActiveUpdate()?.lazy)
+}
+
+
+
 export function $activeUpdate() {
    const update = getActiveUpdate()
    if (!update) throw new Error('Must be called within update context')
@@ -343,7 +506,7 @@ export function createUpdate(timeMargin: number = 0, lazy: boolean = false) {
    return new Update(timeMargin, lazy);
 }
 
-export function initUpdate(timeMargin: number = 0, lazy: boolean = false) {
+export function useUpdate(timeMargin: number = 0, lazy: boolean = false) {
    return getActiveUpdate() ?? new Update(timeMargin, lazy);
 }
 
@@ -352,7 +515,7 @@ export function initUpdate(timeMargin: number = 0, lazy: boolean = false) {
 // TODO: return type should be based on options--whether it's lazy
 export function update<T, OPT>(fn: () => T, options?: { timeMargin?: number, lazy?: number }): Promise<T> | T {
    const timeMargin = options?.lazy ?? options?.timeMargin ?? 100;
-   const update = initUpdate(timeMargin, !!(options?.lazy)) //FIX: because Interval wraps context, the loading update is passed down
+   const update = useUpdate(timeMargin, !!(options?.lazy)) //FIX: because Interval wraps context, the loading update is passed down
    const cycle = update.cycle
    const promise = cycle.pendingPreupdate = update.lazy ? new Promise((resolve) => { cycle.resolvePreupdate = resolve }) : undefined
    //NOTE: assumes one cycle per lazy call... is this what I want? no... I need a promise.all but for now, let's just use one promise

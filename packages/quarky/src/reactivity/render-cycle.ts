@@ -1,7 +1,11 @@
 import { Flask, getActiveFlask, getFlask } from "@rue/flask"
-import { IonSubject, watch as _watch, configureUpdateCycle, useUpdateCycleScheduler, Effect, createOneoff, Ion, $activeUpdate, scheduleEagerEffect, getCurrentPhase, postcycleTask, watch, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
-import { __DEV__getTrace, getInternalTrace, traceAsyncPath } from "../../flask/debug"
+import { __DEV__getTrace, getInternalTrace, traceAsyncPath } from "../../../flask/debug"
+import { $activeUpdate, configureUpdateCycle, getCurrentPhase, postcycleTask, useUpdateCycleScheduler } from "./UpdateCycle"
+import { createOneoff, Effect } from "./EffectQueue"
+import { IonSubject } from "./WatchSubject"
+import { Ion } from "../ion/Ion"
+import { scheduleEagerEffect } from "./watch"
 
 export const {
    SYNC,
@@ -39,7 +43,9 @@ export function queueInternalRenderTask(fn: () => void, flask: Flask) { // TODO:
       fn()
       return;
    }
+   //@ts-expect-error
    fn.__DEVName = 'queueInternalRenderTask'
+   //@ts-expect-error
    fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)
    // console.log('schedule qIR', fn)

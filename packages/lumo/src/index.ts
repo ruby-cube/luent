@@ -1,4 +1,4 @@
-import { wrapWithCommons } from './commons/Commons'
+import { wrapWithCommons } from './hub/Commons'
 
 export * from './node/GetNode' 
 export * from './node/NodeSetup' 
@@ -13,9 +13,9 @@ export * from './node/makeJSXNode'
 export * from './element/makeElement' 
 export * from './conditional/If' 
 export * from './conditional/Polymorph' 
-export * from './commons/provide' 
-export * from './commons/NubKey' 
-export * from './commons/Commons' 
+export * from './hub/provide' 
+export * from './hub/HubKey'
+export * from './hub/Commons' 
 export * from './events/target' 
 export * from './events/listen' 
 export * from './events/Abortable' 
@@ -26,7 +26,7 @@ export * from './flask/flask-hooks'
 export * from './flask/ViewFlask' 
 export * from './specialty/Stream' 
 export * from './measureLayout'
-export * from './render-cycle'
+export * from '../../quarky/src/reactivity/render-cycle'
 
 //@ts-expect-error
 window._$$wrapWithCommons = wrapWithCommons;
@@ -38,7 +38,7 @@ window._$$wrapWithCommons = wrapWithCommons;
  *  
  *  export const Frog = Symbol('frog')
  * 
- *  const frogType = NubKey(FROG, v<string>)
+ *  const frogType = HubKey(FROG, v<string>)
  *  
  *  declare module '@rue/lumo' {
  *     interface CommonsKeyMap {

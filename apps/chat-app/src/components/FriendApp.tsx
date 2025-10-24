@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, component, fromApp, fromNub, FromTag, If, Polymorph } from "@rue/lumo";
+import { Commons, component, fromApp, fromHub, FromTag, If, Polymorph } from "@rue/lumo";
 import { USER, User } from "../commons/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";

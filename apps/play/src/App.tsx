@@ -221,7 +221,7 @@ function Appo(
                 <button>click</button>
             )}
             {ElseIf($active, () => {
-                const $dialogBox = fromNub(ALERT_DIALOG_BOX) || GetNode()
+                const $dialogBox = fromHub(ALERT_DIALOG_BOX) || GetNode()
 
                 return (
                     <Wrapper title={() => $dialogBox().title}>

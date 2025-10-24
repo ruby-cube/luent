@@ -6,7 +6,7 @@ import { WelcomeView } from "./components/WelcomeView";
 import { Chatroom } from "./components/Chatroom";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
 import { FriendApp } from "./components/FriendApp";
-import { getClosestCommons } from "../../../packages/lumo/src/commons/commons-stack";
+import { getClosestCommons } from "../../../packages/lumo/src/hub/commons-stack";
 
 // TODO: Figure out how to provide user
 

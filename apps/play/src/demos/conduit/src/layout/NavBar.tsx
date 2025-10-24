@@ -1,9 +1,9 @@
-import { NubKey } from "../../../../../../../packages/lumo/src/commons/NubKey"
-import { fromRoot } from "../../../../../../../packages/lumo/src/commons/provide"
+import { HubKey } from "../../../../../../../packages/lumo/src/hub/HubKey"
+import { fromRoot } from "../../../../../../../packages/lumo/src/hub/provide"
 import { component } from "../../../../../../../packages/lumo/src/component/Component"
 import { FromTag } from "../../../../../../../packages/lumo/src/component/Input"
 
-NavBar.router = NubKey<Router>()
+NavBar.router = HubKey<Router>()
 
 function NavBar(input: FromTag<{}>) {
    const router = fromRoot(NavBar.router)

@@ -2,7 +2,7 @@ import { isIon, __DEV__checkIfTracked, Ion, toValue, isGetter } from "@rue/quark
 import { isObjectLiteral } from "@rue/utils";
 import { RawJSXNode } from "./makeJSXNode";
 import { MaybeIon } from "../component/Input";
-import { queueInternalRenderTask, watchToRender } from "../render-cycle";
+import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/render-cycle";
 import { DOMElement, DOMParent } from "./VineNode";
 
 

@@ -143,6 +143,8 @@ const [DeleteText, textDeletion] = useAction(textDeletion =>
    }
 )
 
+
+
 function handleDeletePress() {
    const output = doAction(DeleteText(doc, pos), {
       lazy: { limit: 1000 },

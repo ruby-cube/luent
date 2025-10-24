@@ -35,7 +35,7 @@ export function toCommonsKey(key: CommonsEntryKey | string): string {
    return key.name
 }
 
-export function NubKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
+export function HubKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
    const fnKey = function (v: T) {
       return [fnKey, v]
    }
@@ -52,44 +52,44 @@ export function NubKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
 // }
 
 
-// TODO: should we validate at provide() or validate at fromNub()?
+// TODO: should we validate at provide() or validate at fromHub()?
 // - required/optional/ toDefault
 // - readonly reined
 // - normalize reactivity
 
 // [ ] Runtime validation and normalization of reactive type. Defaults
 //     - fromTag()
-//     - fromNub()
+//     - fromHub()
 // 
 // [ ] Read-only and Reined conversion
 //     - fromTag()
-//     - fromNub()
+//     - fromHub()
 //     - ref()
 
-// const [HELLO, MU_HELLO] = NubKey(v<{ dog: string }>, 'm?')
-// const [HELLOA, MU_HELLOA] = NubKey(v<{ dog: string }>, 'mu?')
-// const HELLOV = NubKey(v<{ dog: string }>, 'm')
-// const HELLOC = NubKey(v<{ dog: string }>, 'mu')
-// const HELLOD = NubKey(v<{ dog: string }>)
+// const [HELLO, MU_HELLO] = HubKey(v<{ dog: string }>, 'm?')
+// const [HELLOA, MU_HELLOA] = HubKey(v<{ dog: string }>, 'mu?')
+// const HELLOV = HubKey(v<{ dog: string }>, 'm')
+// const HELLOC = HubKey(v<{ dog: string }>, 'mu')
+// const HELLOD = HubKey(v<{ dog: string }>)
 
-// const [OHELLO, OMU_HELLO] = NubKey(v<{ dog: string }>('?'), 'm?')
-// const [OHELLOA, OMU_HELLOA] = NubKey(v<{ dog: string }>('?'), 'mu?')
-// const OHELLOV = NubKey(v<{ dog: string }>('?'), 'm')
-// const OHELLOC = NubKey(v<{ dog: string }>('?'), 'mu')
-// const OHELLOD = NubKey(v<{ dog: string }>('?'))
+// const [OHELLO, OMU_HELLO] = HubKey(v<{ dog: string }>('?'), 'm?')
+// const [OHELLOA, OMU_HELLOA] = HubKey(v<{ dog: string }>('?'), 'mu?')
+// const OHELLOV = HubKey(v<{ dog: string }>('?'), 'm')
+// const OHELLOC = HubKey(v<{ dog: string }>('?'), 'mu')
+// const OHELLOD = HubKey(v<{ dog: string }>('?'))
 
-// const OHELLOD = NubKey(v<{ dog: string }>, 'm')
-// const OHELLOD = NubKey(v<{ dog: string }>, 'm?')
-// const OHELLOD = NubKey(v<{ dog: string }>, 'mu')
-// const OHELLOD = NubKey(v<{ dog: string }>, 'mu?')
+// const OHELLOD = HubKey(v<{ dog: string }>, 'm')
+// const OHELLOD = HubKey(v<{ dog: string }>, 'm?')
+// const OHELLOD = HubKey(v<{ dog: string }>, 'mu')
+// const OHELLOD = HubKey(v<{ dog: string }>, 'mu?')
 
 
 
-// const DOHELLOD = NubKey(
+// const DOHELLOD = HubKey(
 //    v('?')({ dog: 'hi' })
 // )
 
-// const DOHELLODWORLD = NubKey(v<string>('?')('hi'))
+// const DOHELLODWORLD = HubKey(v<string>('?')('hi'))
 
 
 

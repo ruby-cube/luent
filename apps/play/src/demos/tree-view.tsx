@@ -1,4 +1,4 @@
-import { component, FromTag, If, Else, For, fromGlobal, NubKey } from "@rue/lumo";
+import { component, FromTag, If, Else, For, fromGlobal, HubKey } from "@rue/lumo";
 import { $from, DeepIonized, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, isIonicProxy, NoExpand } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 
@@ -7,7 +7,7 @@ type DeepIonic<D extends (...args: any[]) => any, M = {}> = Omit<ReturnType<D>, 
 
 
 function asGlobal<T>(value: T) {
-   const key = NubKey('global')
+   const key = HubKey('global')
    function $GlobalValue(): T {
       const _value = fromGlobal(key) ?? provideGlobal(key, value);
       return _value

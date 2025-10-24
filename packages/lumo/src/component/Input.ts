@@ -1,7 +1,11 @@
 import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToIntersection } from "@rue/types";
-import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, MutableIon, toIon, toValue, } from "@rue/quarky";
+import { Ion, isIon, isIonicProxy, IsIonized, isIonKey, MaybeIonize, MutableIon, toIon, toValue, } from "@rue/quarky";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
+import { getIonicProxy, MayBeMutableProxy as _MayBeMutableProxy, ReadonlyProxy as _ReadonlyProxy } from "../../../quarky/src/mu";
+
+const MayBeMutableProxy = __DEV__ ? _MayBeMutableProxy : (arg: any) => arg
+const ReadonlyProxy = __DEV__ ? _ReadonlyProxy : (arg: any) => arg
 
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.
@@ -15,8 +19,13 @@ export const MU = Symbol('mu')
 // export const [getActiveMuIons, muIonsStack] = AsyncState<Set<Ion>>(MU_IONS)
 
 export function assertMutableIon(value: unknown): asserts value is MutableIon<unknown> {
-   if (!isIon(value) || !('value' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion')
+   if (!(isIon(value) && 'value' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion or ionic proxy')
 }
+
+export function assertIonicProxy(value: unknown): asserts value is MutableIon<unknown> {
+   if (!isIonicProxy(value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion or ionic proxy')
+}
+
 
 
 export type MaybeIon<T> = T | Ion<T>
@@ -146,25 +155,20 @@ function assertFunction(value: unknown) {
 // }
 
 export function toInput(attributes: AnyObject) {
-   function emit(event: string, eventObject: object) { 
+   function emit(event: string, eventObject: object) {
       const handler = attributes['on:' + event]
       if (!handler) return;
       assertFunction(handler)
       return handler(eventObject)
    }
 
-   const muIons = new Set()
 
-   function isMutableIon(value: unknown) {
-      return muIons.has(value); // TODO: what about fromNub?
-   }
 
    return new Proxy(attributes, {
       get(target, key) {
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return emit;
          if (key === '_raw_') return { ...attributes };
-         if (key === 'mu') return isMutableIon;
          if (key === 'Slot') return target.children // TODO: Is this correct??
          if (isIonKey(key)) {
             const ionKeyToAttributeKey = (key: string) => key.slice(1)
@@ -180,14 +184,19 @@ export function toInput(attributes: AnyObject) {
                const value = target[attributeKey]
                return toIon(value);
             }
-            const muIonKey = 'mu:' + attributeKey
-            if (muIonKey in target) {
-               const value = target[muIonKey]
+            const muKey = 'mu:' + attributeKey
+            if (muKey in target) {
+               const value = target[muKey]
                assertMutableIon(value)
-               muIons.add(value)
-               return value;
+               return MayBeMutableProxy(getIonicProxy(value)); // TODO: mu protection for ions
             }
             return undefined; // optional
+         }
+         const muKey = 'mu:' + key
+         if (muKey in target) {
+            const value = target[muKey]
+            assertIonicProxy(value)
+            return MayBeMutableProxy(getIonicProxy(value));
          }
          const opKey = 'use:' + key
          if (opKey in target) {
@@ -195,12 +204,6 @@ export function toInput(attributes: AnyObject) {
             assertFunction(op)
             return op;
          }
-         // const seeKey = 'see:' + key
-         // if (seeKey in target) {
-         //    const op = target[seeKey]
-         //    assertFunction(op)
-         //    return op;
-         // }
          if (key in target) {
             const value = target[key]
             if (isFunction(value) && value.length !== 0)

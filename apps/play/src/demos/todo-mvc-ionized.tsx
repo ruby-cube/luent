@@ -1,6 +1,6 @@
 import { component, For, If, Else, FromTag } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@rue/quarky"
-import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
+import { PRERENDER } from "../../../../packages/quarky/src/reactivity/render-cycle"
 import { create } from "domain"
 import { isTracking } from "../../../../packages/quarky/src/abstract/Compound"
 

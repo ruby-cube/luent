@@ -1,7 +1,7 @@
 import { isFunction, toError } from "@rue/utils";
 import { ion, __addDevName, queueIonicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
-import { SYNC } from "../render-cycle";
+import { SYNC } from "../../../quarky/src/reactivity/render-cycle";
 
 
 

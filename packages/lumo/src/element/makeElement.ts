@@ -10,7 +10,7 @@ import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../n
 import { camelToKebabCase } from "@rue/utils";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
-import { queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../render-cycle";
+import { queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../../../quarky/src/reactivity/render-cycle";
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { setUpNodesArray } from "../node/GetNodes";

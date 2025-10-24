@@ -4,6 +4,7 @@ import { ModelQuark } from "./ModelQuark";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { createIonicProxy, getIonizedModel, IonicProxy, IonizeOptions } from "./Ionic";
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
+import { MayBeMutableProxy } from "../mu";
 
 
 
@@ -181,6 +182,7 @@ function getExistingIonizedModel(target: object, markMap?: object) {
    return existing
 }
 
+const protect = __DEV__ ? MayBeMutableProxy : (<T>(arg: T) => arg)
 
 export type DeepIonic<T, N> = Ionized<{ [P in Exclude<keyof T, keyof N>]: T[P]; }> & { [K in keyof N]: N[K] extends (...args: any[]) => infer R ? R : never }
 export type DeepIonized<T, N extends Partial<T>> = Ionized<{ [P in Exclude<keyof T, keyof N>]: T[P]; }> & N
@@ -189,8 +191,8 @@ export const $$ = ionize
 
 export function ionize<T extends object, O>(target: T & ThisType<Ionized<T>>, options?: O & IonizeOptions): O extends { nested: infer N } ? DeepIonic<T, N> : Ionized<T> {
    // TODO: store stack trace
-   return <unknown>getExistingIonizedModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T> ??
-      <unknown>ionizeModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T>
+   return protect(<unknown>getExistingIonizedModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T> ??
+      <unknown>ionizeModel(target, options) as O extends { nested: infer N } ? DeepIonized<T, N> : Ionized<T>)
 }
 
 // export function defineDeepIonize<T extends object>(getConfig: () => IonizeOptions) {

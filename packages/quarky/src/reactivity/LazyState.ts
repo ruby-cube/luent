@@ -7,90 +7,90 @@ export const NULL = Symbol('null')
 /**
  * Interface for managing lazy state updates
  */
-export interface ILazyState {
-   active: unknown // state depending on update context (lazy or priority)
-   current: unknown
-   pending: unknown
-   previous: unknown
-   commitChange(): void
-   cancelChange(): void
-   // recordChange(newState: unknown, oldState: unknown): void
-}
+// export interface ILazyState {
+//    active: unknown // state depending on update context (lazy or priority)
+//    current: unknown
+//    pending: unknown
+//    previous: unknown
+//    commitChange(): void
+//    cancelChange(): void
+//    // recordChange(newState: unknown, oldState: unknown): void
+// }
 
 
-class LazyState<T> implements ILazyState {
+// class LazyState<T> implements ILazyState {
 
-   previous: unknown
+//    previous: unknown
    
-   constructor(
-      public current: T
-   ) {
-      this.previous = current;
-   }
+//    constructor(
+//       public current: T
+//    ) {
+//       this.previous = current;
+//    }
    
-   get active() {
-      return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
-   }
+//    get active() {
+//       return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
+//    }
 
-   protected _pending: T | typeof NULL = NULL
+//    protected _pending: T | typeof NULL = NULL
 
-   get pending() {
-      if (this._pending !== NULL)
-         return this._pending
-      return this.current;
-   }
+//    get pending() {
+//       if (this._pending !== NULL)
+//          return this._pending
+//       return this.current;
+//    }
 
-   set pending(value: T | typeof NULL) {
-      this._pending = value;
-   }
+//    set pending(value: T | typeof NULL) {
+//       this._pending = value;
+//    }
 
-   commitChange() { // TODO: record mutation here?
-      if (this._pending === NULL) return;
-      this.current = this._pending;
-      this._pending = NULL;
-   }
+//    commitChange() { // TODO: record mutation here?
+//       if (this._pending === NULL) return;
+//       this.current = this._pending;
+//       this._pending = NULL;
+//    }
 
-   cancelChange() {
-      this._pending = NULL;
-   }
+//    cancelChange() {
+//       this._pending = NULL;
+//    }
 
-   asMutable = new Mutable()
+//    asMutable = new Mutable()
 
-   // recordChange(newState: unknown, oldState: unknown) {
-   //    // recordMutation(this.asMutable, new Mutation(
-   //    //    this, // TODO: figure out what to pass here
-   //    //    '[[set]]',
-   //    //    ['value', newState], // TODO: should the key be 'current' ?
-   //    //    newState,
-   //    //    oldState
-   //    // ))
-   // }
-}
-
-
-export const IonState = LazyState
+//    // recordChange(newState: unknown, oldState: unknown) {
+//    //    // recordMutation(this.asMutable, new Mutation(
+//    //    //    this, // TODO: figure out what to pass here
+//    //    //    '[[set]]',
+//    //    //    ['value', newState], // TODO: should the key be 'current' ?
+//    //    //    newState,
+//    //    //    oldState
+//    //    // ))
+//    // }
+// }
 
 
-export class ModelState<T extends AnyObject = AnyObject> extends LazyState<T> {
+// export const IonState = LazyState
 
-   constructor(
-      public current: T,
-      public clone: ((current: AnyObject) => AnyObject)
-   ) {
-      super(current)
-   }
 
-   get pending() {
-      return this._pending
-   }
-   set pending(value: T | typeof NULL) {
-      this._pending = value;
-   }
+// export class ModelState<T extends AnyObject = AnyObject> extends LazyState<T> {
 
-   cloneCurrent() {
-      return this.clone(this.current)
-   }
-}
+//    constructor(
+//       public current: T,
+//       public clone: ((current: AnyObject) => AnyObject)
+//    ) {
+//       super(current)
+//    }
+
+//    get pending() {
+//       return this._pending
+//    }
+//    set pending(value: T | typeof NULL) {
+//       this._pending = value;
+//    }
+
+//    cloneCurrent() {
+//       return this.clone(this.current)
+//    }
+// }
 
 
 export class PionState implements ILazyState {

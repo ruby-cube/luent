@@ -27,7 +27,7 @@ function MessageForm(this: ThisView, {
    })
 
    const files = this.fromApp(FILES)
-   const files = this.fromNub(FILES)
+   const files = this.fromHub(FILES)
 
    const { $text } = thus.TextKit(files)
 

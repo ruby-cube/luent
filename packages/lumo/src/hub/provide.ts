@@ -1,6 +1,6 @@
 import { Commons, getClosestCommons } from "./commons-stack";
 import { NodeCommons, toCommonsEntries } from "./Commons";
-import { CommonsEntryKey, isMuKey, toCommonsKey } from "./NubKey";
+import { CommonsEntryKey, isMuKey, toCommonsKey } from "./HubKey";
 import { assertMutableIon } from "../component/Input";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
@@ -16,9 +16,9 @@ export interface AppCommons {
 
 
 // TODO: trace provider
-// fromNub.trace('dog')(DOG)
+// fromHub.trace('dog')(DOG)
 
-export function fromNub<K>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): CommonsValue<K> {
+export function fromHub<K>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): CommonsValue<K> {
    let _commons = commons || getClosestCommons();
    if (!_commons) throw new Error(``)
    if (typeof key !== 'string' && !isFunction(key)) throw new Error('[INVALID INPUT] Invalid commons key')

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NubKey, fromRoot, SuspenseIon } from "@rue/lumo";
+import { HubKey, fromRoot, SuspenseIon } from "@rue/lumo";
 import { $from, Ion } from "@rue/quarky";
 import { ArticleData, ArticleDatabase, ArticleResponse } from "../../db/ArticleDatabase";
 
@@ -7,7 +7,7 @@ import { ArticleData, ArticleDatabase, ArticleResponse } from "../../db/ArticleD
 
 // #region:
 
-fetchArticles.db = NubKey<ArticleDatabase>()
+fetchArticles.db = HubKey<ArticleDatabase>()
 
 export function fetchArticles(
    $articlesMeta: Ion<{ tag: string, username: string, category: string }>,
@@ -89,8 +89,8 @@ type SuspenseOptions = {
 
 // #region:
 
-IonicArticle.Article = RootNubKey<typeof Article>()
-IonicArticle.Profile = RootNubKey<typeof Profile>()
+IonicArticle.Article = RootHubKey<typeof Article>()
+IonicArticle.Profile = RootHubKey<typeof Profile>()
 
 function asIonicArticle(data: ArticleData) {
 

@@ -14,8 +14,8 @@ import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { normalizeToArray, toError } from "@rue/utils";
 import { SuspenseIon } from "./Suspense";
-import { defineAppwide } from "../commons/Centralized";
-import { PRERENDER } from "../render-cycle";
+import { defineAppwide } from "../hub/Centralized";
+import { PRERENDER } from "../../../quarky/src/reactivity/render-cycle";
 
 type AwaitKit = {
    suspenseIons: SuspenseIon<unknown>[] | undefined;

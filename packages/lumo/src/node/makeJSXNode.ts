@@ -5,7 +5,7 @@ import { $Node, $Nodes } from "./GetNode";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
-import { Provided, callWithCommons, createCommonsNode } from "../commons/Commons";
+import { Provided, callWithCommons, createCommonsNode } from "../hub/Commons";
 import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";

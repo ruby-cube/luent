@@ -2,7 +2,7 @@ import { component, unnestComponent } from "../component/Component";
 import { CommonsNode, getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
-import { CommonsEntryKey, toCommonsKey } from "./NubKey";
+import { CommonsEntryKey, toCommonsKey } from "./HubKey";
 import { FromTag, RenderSlot } from "../component/Input";
 
 export interface NodeCommons {

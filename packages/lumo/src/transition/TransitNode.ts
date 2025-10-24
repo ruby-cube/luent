@@ -1,12 +1,12 @@
 import { TransitionNode } from "./TransitionNode";
 import { $Node } from "../node/GetNode";
 import { makeElement } from "../element/makeElement";
-import { fromNub } from "../commons/provide";
+import { fromHub } from "../hub/provide";
 import { Ion } from "@rue/quarky";
 import { component } from "../component/Component";
 import { createIfSeries, Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
-import { NubKey } from "../commons/NubKey";
+import { HubKey } from "../hub/HubKey";
 import { RenderSlot } from "../component/Input";
 
 export function renderTransitNode(
@@ -57,7 +57,7 @@ export function renderTransitNode(
 //    return [REGISTER_TRANSITION_NODE, v] 
 // }
 
-const REGISTER_TRANSITION_NODE = NubKey<(transitionNode: TransitionNode) => void>('REGISTER_TRANSITION_NODE')
+const REGISTER_TRANSITION_NODE = HubKey<(transitionNode: TransitionNode) => void>('REGISTER_TRANSITION_NODE')
 
 // declare module '@rue/lumo' {
 //     interface CommonsKeyMap {
@@ -66,7 +66,7 @@ const REGISTER_TRANSITION_NODE = NubKey<(transitionNode: TransitionNode) => void
 // }
 
 function registerTransitionNode(transitionNode: TransitionNode) {
-   fromNub(REGISTER_TRANSITION_NODE)(transitionNode)
+   fromHub(REGISTER_TRANSITION_NODE)(transitionNode)
 }
 
 export function useTransitionNodes() {

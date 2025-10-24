@@ -2,7 +2,7 @@ import { Component, Else, ElseIf, For, If, provideAppwide } from "@rue/lumo";
 import { Ion, ion, ionize } from "@rue/quarky";
 import { inert } from "../../../packages/quarky/src/ionic/notes/inert";
 import { Well, Wellerman } from "./Well";
-import { Commons } from "../../../packages/lumo/src/commons/Commons";
+import { Commons } from "../../../packages/lumo/src/hub/Commons";
 
 function Swap() {
    return component('')

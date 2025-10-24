@@ -4,12 +4,12 @@ import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
 import { $_derivation, ion, Ion, ionic } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
-import { queueInternalRenderTask, watchToRender } from "../render-cycle";
+import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/render-cycle";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { COMMONS, CommonsNode } from "../commons/commons-stack";
+import { COMMONS, CommonsNode } from "../hub/commons-stack";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
-import { createCommonsNode } from "../commons/Commons";
+import { createCommonsNode } from "../hub/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isObjectLiteral } from "@rue/utils";
 
