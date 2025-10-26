@@ -143,6 +143,24 @@ export function ScoreBoard() {
       })
    })
 
+   ionicRenderTask(o => {
+      let count = 0
+
+      o.interval(500, () => {
+         count++
+         console.log("hi", count)
+      })
+      o.await(render(), res => {
+         if (res.error) {
+            $error.value = res.error
+            return;
+         }
+         const { } = useSelection(x, y)
+         const newTodo = IonicTodo(todo)
+         console.log('other stuff', fromHub(ScoreBoard.stuff))
+      })
+   })
+
    ionicRenderTask(async ({ span, spot, tether, setup }) => {
       setup((count = 0) =>
          setInterval(tethered(() => {
@@ -191,48 +209,235 @@ export function ScoreBoard() {
       }
    }
 
-   ionicRenderTask(async ({ span, spot, tether, setup }) => {
-      setup((count = 0) =>
-         setInterval(tethered(() => {
-            count++
-            console.log("hi", count)
-         }), 500)
-      ).cleanup(clearInterval)
-      await render()
-      tether(() => {
-         const { } = useSelection(x, y)
-         const newTodo = IonicTodo(todo)
-         console.log('other stuff', fromHub(ScoreBoard.stuff))
-      })
-   })
+}
 
-   ionicRenderTask(async ({ span, spot, tether, setup }) => {
-      setup((count = 0) =>
-         setInterval(tethered(() => {
-            count++
-            console.log("hi", count)
-         }), 500)
-      ).cleanup(clearInterval)
-      const res = await render()
-      tether(() => {
-         if (res.error) {
-            $error.value = res.error
-            return;
-         }
-         const { } = useSelection(x, y)
-         const newTodo = IonicTodo(todo)
-         console.log('other stuff', fromHub(ScoreBoard.stuff))
-      })
-   })
+useEffect(() => {
+   const chatroom = createConnection(serverUrl, roomId);
+   chatroom.connect();
+   return () => {
+      chatroom.disconnect();
+   };
+}, [serverUrl, roomId]);
 
-   ionicRenderTask(async ({ span, spot, tether, setup }) => {
-      setup((count = 0) =>
-         setInterval(tethered(() => {
-            count++
-            console.log("hi", count)
-         }), 500)
-      ).cleanup(clearInterval)
-      const res = await render()
+
+queueIonicTask(({ setup }) => {
+   const chatroom = createConnection($serverURL, $roomID)
+   setup(() =>
+      chatroom.connect()
+   ).cleanup(() =>
+      chatroom.disconnect()
+   )
+})
+
+useEffect(() => {
+   function handleMove(e) {
+      setPosition({ x: e.clientX, y: e.clientY });
+   }
+   window.addEventListener('pointermove', handleMove);
+   return () => {
+      window.removeEventListener('pointermove', handleMove);
+   };
+}, []);
+
+queueIonicTask(({ setup }) => {
+   function handleMove(e) {
+      setPosition({ x: e.clientX, y: e.clientY });
+   }
+   setup(() =>
+      window.addEventListener('pointermove', handleMove)
+   ).cleanup(() =>
+      window.removeEventListener('pointermove', handleMove)
+   )
+})
+
+useEffect(() => {
+   const animation = new FadeInAnimation(ref.current);
+   animation.start(1000);
+   return () => {
+      animation.stop();
+   };
+}, []);
+
+queueIonicTask(({ setup }) => {
+   const animation = new FadeInAnimation($div())
+   setup(() =>
+      animation.start(100)
+   ).cleanup(() =>
+      animation.stop
+   )
+})
+
+
+useEffect(() => {
+   const div = ref.current;
+   const observer = new IntersectionObserver(entries => {
+      const entry = entries[0];
+      if (entry.isIntersecting) {
+         document.body.style.backgroundColor = 'black';
+         document.body.style.color = 'white';
+      } else {
+         document.body.style.backgroundColor = 'white';
+         document.body.style.color = 'black';
+      }
+   }, { threshold: 1.0 });
+
+   observer.observe(div);
+   return () => {
+      observer.disconnect();
+   }
+}, []);
+
+
+queueIonicTask(({ setup }) => {
+   const div = $div();
+   const observer = new IntersectionObserver(entries => {
+      const entry = entries[0];
+      if (entry.isIntersecting) {
+         document.body.style.backgroundColor = 'black';
+         document.body.style.color = 'white';
+      } else {
+         document.body.style.backgroundColor = 'white';
+         document.body.style.color = 'black';
+      }
+   }, { threshold: 1.0 });
+
+   setup((observer.observe(div)))
+      .cleanup((observer.disconnect))
+})
+
+useEffect(() => {
+   let ignore = false;
+   setBio(null);
+   fetchBio(person).then(result => {
+      if (!ignore) {
+         setBio(result);
+      }
+   });
+   return () => {
+      ignore = true;
+   }
+}, [person]);
+
+queueIonicTask(({ setup, ooo }) => {
+   let ignore = false;
+   mu($bio).value = null
+   setup(() => {
+      ooo.await(fetchBio(person), result => {
+         if (ignore) return;
+         mu($bio).value = result
+      })
+   }).cleanup(() => ignore = true)
+})
+
+queueIonicTask(({ setup, ooo }) => {
+   let ignore = false;
+   mu($bio).value = null
+   setup(() => {
+      fetchBio(person).then(result => {
+         if (ignore) return;
+         mu($bio).value = result
+      })
+   }).cleanup(() => ignore = true)
+})
+
+// NOTE: ooo is only needed if you want to stack awaits, especially to distinguish action promises from scheduling promises
+// ... maybe only relevant in sync effects? Is it relevant with queueIonicTask??
+
+queueIonicTask(({ ooo, abort }) => {
+   mu($bio).value = null
+
+   ooo.await(fetchBio(person, { abort }))
+      .then(result => {
+         mu($bio).value = result
+      })
+      .catch(err => {
+         console.error(err.message)
+      })
+})
+
+queueIonicTask(({ abort }) => {
+   mu($bio).value = null
+
+   fetchBio(person, { abort })
+      .then(result => {
+         mu($bio).value = result
+      })
+      .catch(err => {
+         console.error(err.message)
+      })
+})
+
+queueIonicTask(async ({ abort }) => {
+   mu($bio).value = null
+   try {
+      const result = await fetchBio(person, { abort })
+      mu($bio).value = result
+   }
+   catch (err) {
+      console.error(err.message)
+   }
+})
+
+queueIonicTask(async ({ abort }) => {
+   mu($bio).value = null
+   const [result, error] = await fetchBio(person, { abort })
+   if (err) {
+      console.error(err.message)
+   }
+   else {
+      mu($bio).value = result
+   }
+})
+
+queueIonicTask(({ setup }) => {
+   let abort = false;
+   mu($bio).value = null
+   setup(async () => {
+      const result = await fetchBio(person)
+      if (abort) return;
+      mu($bio).value = result
+   }).cleanup(() => abort = true)
+})
+
+queueIonicRenderTask(({ ooo, tether, setup }) => {
+   setup((count = 0) =>
+      setInterval(tether(() => {
+         count++
+         console.log("hi", count)
+      }), 500)
+   ).cleanup(clearInterval)
+
+   ooo.await(render, () => {
+      const { } = useSelection(x, y)
+      const newTodo = IonicTodo(todo)
+      console.log('other stuff', fromHub(ScoreBoard.stuff))
+   })
+})
+
+queueIonicRenderTask(({ ooo, tether, setup }) => {
+   setup((count = 0) =>
+      setInterval(tether(() => {
+         count++
+         console.log("hi", count)
+      }), 500)
+   ).cleanup(clearInterval)
+
+   ooo.await(render, () => {
+      const { } = useSelection(x, y)
+      const newTodo = IonicTodo(todo)
+      console.log('other stuff', fromHub(ScoreBoard.stuff))
+   })
+})
+
+ionicRenderTask(async ({ span, spot, tether, setup }) => {
+   setup((count = 0) =>
+      setInterval(tethered(() => {
+         count++
+         console.log("hi", count)
+      }), 500)
+   ).cleanup(clearInterval)
+   const res = await render()
+   tether(() => {
       if (res.error) {
          $error.value = res.error
          return;
@@ -241,43 +446,61 @@ export function ScoreBoard() {
       const newTodo = IonicTodo(todo)
       console.log('other stuff', fromHub(ScoreBoard.stuff))
    })
+})
 
-   // ionicRenderTask(async o => {
-   //    o.setup((count = 0) =>
-   //       setInterval(() => o.tether(() => {
-   //          count++
-   //          console.log("hi", count)
-   //       }), 500)
-   //    ).cleanup(clearInterval)
-   //    await o.span(render())
-   //    await o.spot(res => {
-   //       if (res.error) {
-   //          $error.value = res.error
-   //          return;
-   //       }
-   //       const { } = useSelection(x, y)
-   //       const newTodo = IonicTodo(todo)
-   //       console.log('other stuff', fromHub(ScoreBoard.stuff))
-   //    })
-   // })
+ionicRenderTask(async ({ span, spot, tether, setup }) => {
+   setup((count = 0) =>
+      setInterval(tethered(() => {
+         count++
+         console.log("hi", count)
+      }), 500)
+   ).cleanup(clearInterval)
+   const res = await render()
+   if (res.error) {
+      $error.value = res.error
+      return;
+   }
+   const { } = useSelection(x, y)
+   const newTodo = IonicTodo(todo)
+   console.log('other stuff', fromHub(ScoreBoard.stuff))
+})
 
-   ionicPostTask(async ({ setup, useSelection, IonicTodo }) => {
-      setup((count = 0) =>
-         setInterval(() => {
-            count++
-            console.log("hi", count)
-         }, 500)
-      ).cleanup(clearInterval)
+// ionicRenderTask(async o => {
+//    o.setup((count = 0) =>
+//       setInterval(() => o.tether(() => {
+//          count++
+//          console.log("hi", count)
+//       }), 500)
+//    ).cleanup(clearInterval)
+//    await o.span(render())
+//    await o.spot(res => {
+//       if (res.error) {
+//          $error.value = res.error
+//          return;
+//       }
+//       const { } = useSelection(x, y)
+//       const newTodo = IonicTodo(todo)
+//       console.log('other stuff', fromHub(ScoreBoard.stuff))
+//    })
+// })
 
-      await render()
-      const { } = useSelection(x, y)
-      const newTodo = IonicTodo(todo)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+ionicPostTask(async ({ setup, useSelection, IonicTodo }) => {
+   setup((count = 0) =>
+      setInterval(() => {
+         count++
+         console.log("hi", count)
+      }, 500)
+   ).cleanup(clearInterval)
 
-   }, { contextualize: { useSelection, IonicTodo } })
+   await render()
+   const { } = useSelection(x, y)
+   const newTodo = IonicTodo(todo)
+   console.log('other stuff', fromHub(ScoreBoard.stuff))
+
+}, { contextualize: { useSelection, IonicTodo } })
 
 
-   return component(<></>)
+return component(<></>)
 }
 
 type CleanupFn<T> = (...values: T | [undefined]) => void

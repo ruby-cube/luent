@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, Stream } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
 import { AnyObject } from "@rue/types";
@@ -22,6 +23,12 @@ export function TestVanillaStream() {
       await span(() => $eye.reset())
    }, { '@stop': () => $eye.reset() })
 
+   const bugeyeB = Stream(ooo => {
+      ooo.do(($eye.bug))
+      ooo.interval(500, ($eye.toggle), { max: 5 })
+      ooo.do(($eye.reset))
+   }, { '@stop': ($eye.reset) })
+
    const $side = Ion('l' as 'l' | 'r')
 
    const turning = Stream(async ({ interval, span }) => {
@@ -43,6 +50,20 @@ export function TestVanillaStream() {
       await repeat(3, async () => {
          await span(turning, running)
          await span(bugeye)
+      })
+   })
+
+   const animationB = Stream(ooo => {
+      ooo.repeat(3, ooo => {
+         ooo.stream(turning, running)
+         ooo.stream(bugeye)
+      })
+   })
+
+   const animationB = Stream(ooo => { // new AsyncSequence()
+      ooo.repeat(3, ooo => {
+         ooo.await(turning, running) // await() returns .then and .catch and can take in a then fn as last argument, span() does not
+         ooo.await(bugeye)
       })
    })
 

@@ -1,8 +1,9 @@
 import { resolve } from "path"
-import { isLazyUpdate, Mutation, Update } from "./UpdateCycle"
+import { getCurrentPhase, isLazyUpdate, Mutation, Update } from "./UpdateCycle"
 import type { Action } from "./UpdateCycle"
 import { Watchable, Watched } from "./Watched"
 import { AnyObject } from "@rue/types"
+import { INTERNAL_RENDER, RENDER } from "./render-cycle"
 
 interface ActionStack<T> {
    action: T;
@@ -39,7 +40,7 @@ export interface ILazyState {
    current: unknown
    pending: unknown
 
-   triggered: boolean
+   changed: boolean
 
    cancelPending(): void
    pendingUpdate: Update | null
@@ -61,14 +62,17 @@ export class LazyState<T> implements ILazyState {
    }
 
    get active() {
-      return isLazyUpdate() ? this.pending : this.current
+      const phase = getCurrentPhase()
+      return phase === INTERNAL_RENDER || phase === RENDER ? this.current : this.pending
+      // return isLazyUpdate() ? this.pending : this.current
    }
 
-   triggered = false
+   changed = false
 
    cancelPending() {
-      if (this.triggered) {
+      if (this.changed) {
          this.pending = this.current
+         this.changed = false;
       }
       this.pendingUpdate = null;
    }
@@ -91,7 +95,9 @@ export class LazyState<T> implements ILazyState {
 
       update.lock(this)
 
-      this.triggered = true
+      this.changed = true
+      
+      return this.active
    }
 }
 
@@ -113,12 +119,12 @@ class LazyCollectionState<T> implements ILazyState {
       return isLazyUpdate() ? this.pending : this.current
    }
 
-   triggered = false;
+   changed = false;
 
    cancelPending() {
-      if (this.triggered) {
+      if (this.changed) {
          this.pending = this.clone(this.current)
-         this.triggered = false
+         this.changed = false
       }
       this.pendingUpdate = null
    }

@@ -129,16 +129,16 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    const pendingUpdate = state.pendingUpdate
 
    const update = useUpdate()
+
+   // handle race conditions
    const proceed = update.race(pendingUpdate)
    if (!proceed) return;
 
-   // set state
    state.set(newState, update)
 
    if (pendingUpdate === update)
       return;  // return because no need to trigger
 
-   // trigger effects
    this.trigger(update)
 
    return state;

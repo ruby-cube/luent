@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
 import { Ion, ion, ionic } from "@rue/quarky";
 import './chat-window.css'
@@ -38,16 +39,40 @@ export function ChatWindow(input: FromTag<{
       })
    })
 
-   // atRemounted(async () => {
-   //    $smoothScroll.value = false;
-   //    $notifyNewMessages.value = false;
+   atRemounted(async () => {
+      mu($smoothScroll).value = false;
+      mu($notifyNewMessages).value = false;
 
-   //    await __postrender__()
-   //    scrollToNew()
+      await tick()
+      scrollToNew()
 
-   //    await __postrender__()
-   //    $smoothScroll.value = true;
-   // })
+      await tick()
+      mu($smoothScroll).value = true;
+   })
+
+   atRemounted(ooo => {
+      mu($smoothScroll).value = false;
+      mu($notifyNewMessages).value = false;
+
+      ooo.await(tick).then(() => {
+         scrollToNew()
+      })
+      ooo.await(tick).then(() => {
+         mu($smoothScroll).value = true
+      })
+   })
+
+   atRemounted(ooo => {
+      mu($smoothScroll).value = false;
+      mu($notifyNewMessages).value = false;
+
+      ooo.await(tick, () => {
+         scrollToNew()
+      })
+      ooo.await(tick, () => {
+         mu($smoothScroll).value = true
+      })
+   })
 
    atDemount(() => {
       if (!$hasUnseenMessages()) $newMessageMarker.value = null

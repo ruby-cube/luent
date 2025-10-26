@@ -174,3 +174,66 @@ function asIonicArticle(data: ArticleData) {
       }
    })
 }
+
+
+
+
+
+
+
+function asIonicArticle(data: ArticleData) {
+
+   const db = fromRoot(fetchArticles.db)
+   const Article = fromRoot(IonicArticle.Article)
+   const Profile = fromRoot(IonicArticle.Profile)
+   const profile = as(Profile, [data.author], data.author.id)
+   const article = as(Article, [data, profile], data.slug)
+
+   const profile = as(Symbol('Profile'), [data.author], data.author.id)
+   const article = as(Symbol('Article'), [data], data.slug)
+
+   return asIonic(article, article => ({
+      favorited: SuspenseIon({
+         initial: data.favorited,
+         dispatch({ previous }) {
+            return db.patchArticle(this.slug, { favorited: this.favorited }, {
+               debounce: 50,
+               previous: { favorited: previous }
+            })
+         },
+         '@set'({ previous }) {
+            this.abortDispatches()
+            this.await(this.dispatch({ favorited: article.favorited, previous }))
+         },
+         '@race'() {
+
+         }
+      }),
+
+      favoritesCount: {
+         suspense: true,
+         initial: data.favoritesCount,
+         stale: localDB.getArticle(this.slug).favorited.stale,
+         ['@init']() {
+            db.onArticleUpdated(this.slug, (article) => {
+               const $count = this.$favoritesCount
+               if ($count.stale && this.$favorited.stale) {
+                  $count.staleValue = article.favoritesCount
+               }
+               else {
+                  $count.update(article.favoritesCount)
+               }
+            })
+
+            watch(this.$favorited, sync(() => {
+               $count.stale = true;
+            }))
+         },
+         standin(staleCount) { return staleCount + (this.favorited ? 1 : 0) },
+      },
+
+      author: {
+         ionize: asIonicProfile
+      }
+   }))
+}
