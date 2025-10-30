@@ -175,65 +175,224 @@ function asIonicArticle(data: ArticleData) {
    })
 }
 
+type IonFetchConfig<T> = {
+   fetch(): Promise<T> // --> status: 'pending', stale: 'fetching'
+} | {
+   initial: T // --> latest: T, status: 'received', stale: false
+   fetch?(): Promise<T> // --> status: 'pending', stale: 'fetching'
+}
+
+type IonDispatchConfig<T> = {
+   dispatch(context: DispatchContext, value: T): Promise<T> // --> status: 'pending', stale: 'fetching'
+   presumes?: boolean // whether or not to set ion optimistically
+} | {
+   presuming: () => boolean
+   presumption: () => T
+}
 
 
+type AsyncIonConfig<T> = IonFetchConfig<T> & IonDispatchConfig<T> & {
+   expiration?: number
+   // preawait?: boolean // throws promise while 'pending'
+   reawait?: boolean // throws promise while 'refetching'
+}
+
+type DispatchContext = {
+   ooo: AsyncSequence
+   abortSignal: AbortSignal
+   dispatchID: string
+}
+
+const UNDEFINED = Symbol('undefined')
+
+class AsyncIon<T> {
+
+   private _fetch(): Promise<T>
+
+   private _dispatch(): void
+
+   private initialized;
+
+   constructor(config: AsyncIonConfig) {
+      this._fetch = config.fetch
+      this._dispatch = config.dispatch
+      this.initialized = 'initial' in config ? true : false;
+      this.latest = 'initial' in config ? config.initial : undefined
+      this.status = 'initial' in config ? 'received' : 'fetch' in config ? 'pending' : 'error'
+      this.stale = 'initial' in config ? false : 'fetch' in config ? 'fetching' : true
+      if (this.status === 'error') throw new Error('[INVALID INPUT] Async ion config is requires an initial value or a fetch function')
+      if (isFunction(config.presuming)) {
+         Object.defineProperty(this, 'presuming', {
+            get: config.presuming
+         })
+      }
+
+      if (isFunction(config.presumption)) {
+         Object.defineProperty(this, 'presumption', {
+            get: config.presumption
+         })
+      }
+
+      if ('fetch' in config && !this.initialized) {
+         this.watchFetch()
+      }
+   }
+
+   private watchingFetch = false;
+
+   private watchFetch() {
+      queueIonicTask(() => this.fetch())
+      this.watchingFetch = true;
+   }
+
+   private fetch() {
+      if (!this._fetch) return;
+      if (!this.watchingFetch) {
+         this.watchFetch()
+      }
+      this.status = this.initialized ? 'refetching' : 'pending'
+
+      return this._fetch()
+         .then(res => {
+            this.status = 'received'
+            return res
+         })
+         .catch(err => {
+            this.status = 'error'
+            this.error = err
+         })
+         .finally(res => {
+            this.initialized = true
+            return res
+         })
+   }
+
+   private dispatch() {
+      if (!this._dispatch) return;
+
+   }
+
+   latest: T | undefined = 0 // latest synced value
+
+   private presumption: T | typeof UNDEFINED = UNDEFINED
+
+   private status: 'pending' | 'error' | 'received' | 'refetching' = 'received'
+
+   // #region: status booleans
+   get pending() {
+      return this.status === 'pending'
+   }
+
+   _error: Error = new Error("")
+
+   get error() {
+      return this.status === 'error' ? this._error : null
+   }
+
+   get fetching() {
+      return this.status === 'pending' | 'refetching'
+   }
+
+   fetchStatus: 'idle' // 'idle' | 'active' | 'paused'
+
+   // #endregion
 
 
+   get value() {
+      return this.presuming ? this.presumption : this.latest
+   }
+
+   get presuming() {
+      return this.presumes && this.presumption !== UNDEFINED
+   }
+
+   get synced() {
+      return this.presumption === UNDEFINED
+   }
+
+   private presumes: boolean = true
+
+   set value(value: T) {
+      if (this.presumes) this.presumption = value
+      const ooo = new AsyncSequence()
+      this.dispatch({ ooo }, value)
+   }
+
+   sync(value: T) {
+      this.presumption = UNDEFINED
+      this.latest = value;
+   }
+
+   private stale: false | true | 'fetching'
+
+   refetch() {
+      this.stale = true
+   }
+}
 
 
-function asIonicArticle(data: ArticleData) {
+function asArticle(data: ArticleData) {
+   const Article = fromRoot(asIonicArticle.Article)
+   const Profile = fromRoot(asIonicArticle.Profile)
 
+   const profile = as(Profile)(data.author).uid(data.author.id) // TODO: refactor as() to this format
+   
+   return as(Article)(data, profile).uid(data.slug)
+}
+
+
+function asIonicArticle(data: ArticleData, refetchArticles: () => void) {
    const db = fromRoot(fetchArticles.db)
-   const Article = fromRoot(IonicArticle.Article)
-   const Profile = fromRoot(IonicArticle.Profile)
-   const profile = as(Profile, [data.author], data.author.id)
-   const article = as(Article, [data, profile], data.slug)
 
-   const profile = as(Symbol('Profile'), [data.author], data.author.id)
-   const article = as(Symbol('Article'), [data], data.slug)
-
-   return asIonic(article, article => ({
-      favorited: SuspenseIon({
+   const article = asIonic(asArticle(data), {
+      favorited: asAsyncIon({
+         uid: article.slug, // used for caching such that if articles is refetched by another part of the app, stale state etc won't be overwritten
          initial: data.favorited,
-         dispatch({ previous }) {
-            return db.patchArticle(this.slug, { favorited: this.favorited }, {
-               debounce: 50,
-               previous: { favorited: previous }
-            })
+         presumes: true,
+
+         '@init'({ ooo }) {
+            ooo.await(() => localDB.getArticle(article.slug))
          },
-         '@set'({ previous }) {
-            this.abortDispatches()
-            this.await(this.dispatch({ favorited: article.favorited, previous }))
+
+         dispatch({ ooo }) {
+            ooo.await(() => db.patchArticle(this.slug).favorited(this.favorited))
+               .then(favorited => this.sync(favorited))
+            // .finally(refetchArticles)
          },
+         debounce: 50,
          '@race'() {
 
          }
       }),
 
-      favoritesCount: {
-         suspense: true,
+      // value: T
+      // latest: T
+      // stale: boolean
+      // 
+
+      favoritesCount: asAsyncIon({
+         uid: article.slug,
          initial: data.favoritesCount,
-         stale: localDB.getArticle(this.slug).favorited.stale,
-         ['@init']() {
-            db.onArticleUpdated(this.slug, (article) => {
-               const $count = this.$favoritesCount
-               if ($count.stale && this.$favorited.stale) {
-                  $count.staleValue = article.favoritesCount
+         '@init'() {
+            db.watchArticle(this.slug).favoritesCount((count) => {
+               if (this.stale) {
+                  this.staleValue = count
                }
                else {
-                  $count.update(article.favoritesCount)
+                  this.value = count
                }
             })
-
-            watch(this.$favorited, sync(() => {
-               $count.stale = true;
-            }))
          },
-         standin(staleCount) { return staleCount + (this.favorited ? 1 : 0) },
-      },
+         presuming() { return article.$favorited.presuming },
+         presumption(latest) {
+            return article.favorited === article.$favorited.latest
+               ? latest
+               : latest + article.favorited ? 1 : -1
+         }
+      }),
 
-      author: {
-         ionize: asIonicProfile
-      }
-   }))
+      author: nest(asIonicProfile)
+   })
+
+   return article
 }

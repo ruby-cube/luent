@@ -213,12 +213,41 @@ export function ChatWindow(input: FromTag<{
                ))}
             </div>
          )}
+
          {If(($hasUnseenMessages() && $notifyNewMessages()), //FIX: without the outer div, the if series affects message form
             <div>
                New messages below!
                <button on:click={scrollToBottom}>⌄</button>
             </div>
          )}
+
+         {/* {If($ => $hasUnseenMessages() && $notifyNewMessages(), //FIX: without the outer div, the if series affects message form
+            <div>
+               New messages below!
+               <button on:click={scrollToBottom}>⌄</button>
+            </div>
+         )} */}
+
+         {/* {If(() => $hasUnseenMessages() && $notifyNewMessages(), //FIX: without the outer div, the if series affects message form
+            <div>
+               New messages below!
+               <button on:click={scrollToBottom}>⌄</button>
+            </div>
+         )} */}
+
+         {/* {If($($hasUnseenMessages() && $notifyNewMessages()), //FIX: without the outer div, the if series affects message form
+            <div>
+               New messages below!
+               <button on:click={scrollToBottom}>⌄</button>
+            </div>
+         )} */}
+
+         {/* {If($(o => $hasUnseenMessages() && $notifyNewMessages()), //FIX: without the outer div, the if series affects message form
+            <div>
+               New messages below!
+               <button on:click={scrollToBottom}>⌄</button>
+            </div>
+         )} */}
       </div>
    )
 }

@@ -4,6 +4,7 @@
 
 import { component, POSTRENDER, PRERENDER } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
+import { isFunction } from "@rue/utils";
 import { time } from "console";
 import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 
@@ -67,7 +68,7 @@ const count = Ion(0, {
 })
 
 // TODO:
-// writable derivation
+// settable derivation
 const $doubleCount = Ion(() => $count() * 2, {
    '@set'(num: number) {
       $count.value = num / 2
@@ -75,12 +76,71 @@ const $doubleCount = Ion(() => $count() * 2, {
 })
 
 // TODO:
-// overwritable derivation
-const $doubleCount = Ion(() => $count() * 2, {
-   '@set'(num: number) {
-      this.value = num
-   }
+// writable derivations
+
+// const $shippingMethod = Ion.watch($shippingOptions, (options, prev) => options.find(opt => opt.id === prev.id) ?? options[0])
+
+// const $shippingMethod = Ion.watch($shippingOptions, options => options[0])
+
+// const $shippingMethod = Ion.writable(() => $shippingOptions()[0])
+
+
+// const $quantity = Ion.watch($selectedProduct, () => 1)
+
+
+const $quantity = HybridIon({
+   initial: null,
+   watch: $selectedProduct,
+   derive: () => 1
 })
+
+const $shippingMethod = HybridIon(() => $shippingOptions()[0])
+
+
+
+
+
+
+
+
+// cases where you want to start with an initial value
+// const $quantity = Ion(null, {
+//    '@init'({ watch }) { watch($selectedProduct, () => 1) }
+// })
+
+// const $quantity = Ion(null, {
+//    watch: [$selectedProduct, () => 1]
+// })
+
+// const $quantity = Ion(null, {
+//    watch: $selectedProduct,
+//    derive: () => 1
+// })
+
+// const $shippingMethod = Ion(null, {
+//    derive: () => $shippingOptions()[0]
+// })
+
+// const $quantity = Ion(null, {
+//    '@init'() { watch($selectedProduct, sync(() => this.value = 1)) }
+// })
+
+// const $shippingMethod = Ion(null, {
+//    '@init'({ watch }) { watch($shippingOptions, ({ current }) => current[0]) }
+// })
+
+const $shippingMethod = Ion(null, {
+   '@init'({ derive }) { derive(() => $shippingOptions()[0]) }
+})
+
+// const $shippingMethod = Ion(null, {
+//    '@init'() { runIonicTask(() => this.value = $shippingOptions()[0]) }
+// })
+
+// const $shippingMethod = Ion(null, {
+//    '@init'({ watch }) { watch($shippingOptions, ({ current, previous }) => options.find(opt => opt.id === prev.id) ?? options[0]) }
+// })
+
 
 // TODO:
 const list = Ionize([], {
@@ -104,7 +164,7 @@ const itemB = list[2] = itemA
 
 itemB !== itemA
 
-class Frog{}
+class Frog { }
 
 
 const frogB = list[0] = { name: 'frog ' }

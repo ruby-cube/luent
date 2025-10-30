@@ -11,7 +11,7 @@ import { isGetter } from "../reactivity/WatchSubject";
 import { IonState } from "../reactivity/LazyState";
 
 /* API */
-export type Ion<T = unknown> = () => T & { '~ion': true }
+export type Ion<T = unknown> = (() => T) & { '~ion': true }
 
 // type MaybeInert<T = unknown> = IsIonized<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 

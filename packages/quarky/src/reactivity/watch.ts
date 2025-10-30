@@ -138,6 +138,11 @@ export function getPhase(options: undefined | EffectOptions) {
 
 
 
+export function sync<F>(fn: F): F {
+   //@ts-expect-error
+   fn.sync = true
+   return fn
+}
 
 
 export function setUpWatcher(

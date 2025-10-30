@@ -4,6 +4,32 @@ import { component } from "@rue/lumo"
 import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await"
 import { doAction } from "../../../../packages/quarky/src/action/Action"
 
+// AsyncOp() is about managing and coordinating async operations
+// - it batches updates across async scopes
+
+
+// render() is about scheduling of rendering, can also batch
+// - renders can be canceled
+
+// render types: idle | default (idle w 17ms deadline) | swift (next rAF)
+
+// idleRender()
+// render()
+// swiftRender()
+// animate()
+
+
+ooo.await(phase.prerender, () => {
+
+})
+ooo.await(phase.render, () => {
+
+})
+ooo.await(cycle.tick, () => {
+
+})
+
+
 function TodoWithSuspense() {
 
    // Suspense
@@ -15,26 +41,42 @@ function TodoWithSuspense() {
 
    return component(
       <div>
-         {Await(toggleComplete,
+         {Await(toggleComplete)}
+         {Meanwhile(
+            <>loading...</>
+         )}
+         {Then(
             <>
                {If(todo.$complete,
-                  <p on:click={toggleComplete}>[x]</p>)}
+                  <p on:click={toggleComplete}>[x]</p>
+               )}
                {Else(
                   <p on:click={toggleComplete}>[ ]</p>
                )}
             </>
          )}
-         {Meanwhile(
-            <>loading...</>
-         )}
       </div>
    )
 }
 
-const markComplete = Action(({ ooo }) => () => {
-   mu(todo).complete = true
+class Animal {
+   readonly something = 0
 
-   ooo.await(tick)
+   /*reined*/ value = 0
+
+   /*pure*/ isSomething() {
+
+   }
+
+   private doSomething() {
+
+   }
+}
+
+const markComplete = Action(({ ooo }) => () => {
+   mu: const something = todo.complete = true
+
+   ooo.await(cycle.tick)
    ooo.await((dispatch('...')))
 }, {
    '@race'(rival) {
@@ -76,32 +118,44 @@ const todo = Ionic(data, todo => ({
 // }
 
 function IonicTodo(data: Todo) {
-   const
+
 }
 
 function Todo() {
 
    const $todos = fetchTodos()
 
-   const $articles = SuspenseIon({
+   const $articles = AsyncIon({
       initial: [] as Article[],
       fetch: () => db.fetchArticles($searchTerm(), { debounce: 100 })
    })
 
-   const $articles = SuspenseIon(() => asIonicArticles(db.fetchArticles($searchTerm(), { debounce: 100 })))
+   const $articles = AsyncIon(() => asIonicArticles(db.fetchArticles($searchTerm(), { debounce: 100 })))
 
    // Optimistic
-   const markComplete = Action(function () {
-      mu(todo).complete = true
+   const markComplete = AsyncAction(({ ooo }) => function () {
+      mu: todo.complete = true
 
-      this.await(tick)
-      this.await((db.dispatch('...')))
+      ooo.await(tick)
+      ooo.await((db.dispatch('...')))
          .catch(err => { this.retry() })
          .catch(err => { this.rollback() })
    })
 
    return component(
       <>
+         {Await(suspense)}
+         {Meanwhile(
+            <p>loading...</p>
+         )}
+         {Catch((err, retry) =>
+            <Error msg={err.message} on:click={retry}></Error>
+         )}
+         {Then(
+            <Article></Article>
+         )}
+
+
          {Try(
 
          )}

@@ -1,4 +1,5 @@
 
+//@ts-nocheck
 import { atMounted, For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
 import { $$, ion, ionic, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
@@ -24,7 +25,7 @@ export function SevenGUIs() {
 //FIX:
 function TemperatureApp() {
    const $c = ion(0)
-   const $f = ion(() =>$c() * (9 / 5 + 32),
+   const $f = ion(() => $c() * (9 / 5 + 32),
       {
          // set state(v: number) {
          //    $c.value = (v - 32) * (5 / 9)
@@ -57,7 +58,7 @@ function FlightBooker() {
    const $departureDate = ion(dateToString(new Date()))
    const $returnDate = ion($departureDate())
 
-   const $isReturn = ion(() =>$flightType() === 'return flight')
+   const $isReturn = ion(() => $flightType() === 'return flight')
 
    const $canBook = ion(() =>
       !$isReturn() ||
@@ -92,37 +93,35 @@ function FlightBooker() {
    }
 
    return component(
-      <>
-         <select mu:value={$flightType}>
-            <option value="one-way flight">One-way Flight</option>
-            <option value="return flight">Return Flight</option>
-         </select>
+      <select mu:value={$flightType}>
+         <option value="one-way flight">One-way Flight</option>
+         <option value="return flight">Return Flight</option>
+      </select>,
 
-         <input type="date" mu:value={$departureDate} />
-         <input type="date" mu:value={$returnDate} disabled={(!$isReturn())} />
+      <input type="date" mu:value={$departureDate} />,
+      <input type="date" mu:value={$returnDate} disabled={(!$isReturn())} />,
 
-         <button disabled={(!$canBook())} on:click={book}>Book</button>
+      <button disabled={(!$canBook())} on:click={book}>Book</button>,
 
-         <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>
+      <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>,
 
-         {Style`
-            select,
-            input,
-            button {
-               display: block;
-               margin: 0.5em 0;
-               font-size: 15px;
-            }
+      style('flight-booker').css`
+         select,
+         input,
+         button {
+            display: block;
+            margin: 0.5em 0;
+            font-size: 15px;
+         }
          
-            input[disabled] {
-               color: #999;
-            }
+         input[disabled] {
+            color: #999;
+         }
          
-            p {
-               color: red;
-            }
-         `}
-      </>
+         p {
+            color: red;
+         }
+      `
    )
 }
 
@@ -211,7 +210,7 @@ export function CRUDApp() {
    // console.log('before', Object.getOwnPropertyDescriptors(proxyProto))
    console.log('before', proxyProto)
 
-   const $filteredNames = ion(() =>{
+   const $filteredNames = ion(() => {
       const res = names.filter((n) =>
          n.toLowerCase().startsWith($prefix().toLowerCase())
       )

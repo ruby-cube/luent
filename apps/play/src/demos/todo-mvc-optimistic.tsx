@@ -279,7 +279,7 @@ function IonicTodo(todo: Todo) {
 
 // server or client logic
 class Todos {
-   constructor(public value: Todo) {
+   constructor(public value: Todo[]) {
 
    }
 
