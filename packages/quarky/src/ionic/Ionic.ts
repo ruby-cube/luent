@@ -1,21 +1,21 @@
 import { AnyObject } from "@rue/types";
 import { InertMark, Ionized, isIonicProxy, isIonKey, toRaw } from "./ionize";
 import { __DEV__asTraceable, emitSignal } from "../debug/debug";
-import { asAtomicOp, getAtomicOp, getTrackedOps } from "./AtomicOp";
+import { getAtomicOp, getTrackedOps } from "./TrackableOp";
 import { ModelQuark } from "./ModelQuark";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
-import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
-import { Capsule } from "../capsule/Capsule";
-import { MutableEntity, Mutation, recordMutation } from "../Mutable";
-import { isWatchable, Watchable } from "../reactivity/Watched";
+import { QUARK, quarkOf } from "../abstract/Quark";
+import { Atom } from "../reactivity/Atom";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp, trackOp } from "./IonicMethods";
 import { inert, isInert } from "./notes/inert";
 import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
-import { isTracking, popTracker, pushTracker, trackParticle } from "../abstract/Compound";
+import { isTracking } from "../abstract/Compound";
 import { Update } from "../reactivity/UpdateCycle";
-import { ModelState, PionState } from "../reactivity/LazyState";
+import { PionState } from "../reactivity/LazyState";
+import { MutableEntity } from "../abstract/Mutable";
+import { ModelState } from "../reactivity/LazyStateV2";
 
 // export function $atomicPion(
 //    modelQuark: ModelQuark,
@@ -28,7 +28,7 @@ import { ModelState, PionState } from "../reactivity/LazyState";
 
 // // /** INTERNAL */
 export type IonicProxy = {
-   [QUARK]: Watchable & ModelQuark
+   [QUARK]: Atom & ModelQuark
 } & Capsule & MutableEntity & AnyObject
 
 // for inert properties use absorbed neutrons
@@ -375,8 +375,8 @@ export function createIonicProxy(
             if (propertyDescriptor.get || propertyDescriptor.set) {
                const opDef = getIonizedMemberDef(initialTarget, originalKey)
                if (opDef) {
-                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[MemberType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get?.bind(ionizedModel)
-                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[MemberType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { active: ionizedModel }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set?.bind(ionizedModel)
+                  propertyDescriptor.get = 'get' in opDef && propertyDescriptor.get ? useIonicOp[MemberType.TRACKABLE](propertyDescriptor.get, opDef.get?.privateState ? state : { get() { return ionizedModel } }, ionizedModel, '[[get]]', opDef.get!) : propertyDescriptor.get?.bind(ionizedModel)
+                  propertyDescriptor.set = 'set' in opDef && propertyDescriptor.set ? useIonicOp[MemberType.MUTATING](propertyDescriptor.set, opDef.set?.privateState ? state : { get() { return ionizedModel } }, ionizedModel, '[[set]]', opDef.set!) : propertyDescriptor.set?.bind(ionizedModel)
                   Object.defineProperty(proxyProto, key, propertyDescriptor)
                   return !!propertyDescriptor.set;
                }
@@ -515,7 +515,7 @@ export function createIonicProxy(
       },
 
       defineProperty(target: AnyObject, key, attributes) {
-         const success = Reflect.defineProperty(state.active, key, attributes)
+         const success = Reflect.defineProperty(state.get(), key, attributes)
          if (!success) return false;
          const update = initModelUpdate(modelQuark)
          if (!(key in target)) {
@@ -531,7 +531,7 @@ export function createIonicProxy(
 
       deleteProperty(target: AnyObject, key) {
          const pionQuark = getPionQuark(proxyProto, key)
-         const success = Reflect.deleteProperty(state.active, key)
+         const success = Reflect.deleteProperty(state.get(), key)
          if (!success) return false;
 
          const update = initModelUpdate(modelQuark)
@@ -547,7 +547,7 @@ export function createIonicProxy(
 
       ownKeys() {
          trackOp(ionizedModel, INTERNAL_OP, ['ownKeys']) // TODO: trigger when any new property is added or deleted
-         return Reflect.ownKeys(state.active)
+         return Reflect.ownKeys(state.get())
       },
 
       getPrototypeOf(target) {
@@ -561,13 +561,13 @@ export function createIonicProxy(
 
       isExtensible(target) {
          trackOp(ionizedModel, INTERNAL_OP, 'isExtensible')
-         return Reflect.isExtensible(state.active)
+         return Reflect.isExtensible(state.get())
       },
 
       preventExtensions(target) {
          const update = initModelUpdate(modelQuark)
          getAtomicOp(modelQuark, INTERNAL_OP, 'isExtensible')?.trigger(update)
-         return Reflect.preventExtensions(state.active)
+         return Reflect.preventExtensions(state.get())
       },
 
    }) as unknown as IonicProxy
@@ -1027,7 +1027,7 @@ function bindNativeMethod(
 ) {
    propertyDescriptor.value = useIonicOp[config.type](
       initialTarget[key],
-      config.privateState ? state : { active: ionizedModel },
+      config.privateState ? state : { get() { return ionizedModel } },
       ionizedModel,
       key,
       config
@@ -1157,9 +1157,9 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 // export function triggerIonizedModel(
 //    model: IonicProxy
 // ) {
-//    const { asParticle, asWatched } = quarkOf(model);
+//    const { asParticle, asTrackedAtom } = quarkOf(model);
 //    asParticle?.triggerCompounds()
-//    asWatched?.triggerEffects()
+//    asTrackedAtom?.triggerEffects()
 // }
 
 

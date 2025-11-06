@@ -5,7 +5,7 @@ import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reac
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
-import { COMMONS, CommonsNode } from "../hub/commons-stack";
+import { COMMONS, CommonsNode } from "../context/context-stack";
 import { TRACE } from "../../../flask/debug";
 
 export type JSXNode = DOMNode | VineNode

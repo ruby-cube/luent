@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, If, Else, FromTag, fromApp, HubKey } from "@rue/lumo"
+import { component, For, If, Else, FromTag, fromApp, ContextKey } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/quarky/src/reactivity/render-cycle"
 import { create } from "domain"
@@ -119,7 +119,7 @@ export function TodoDBKit() {
 }
 
 
-export const TODO_DB_KIT = HubKey<{
+export const TODO_DB_KIT = ContextKey<{
    getTodos: () => Todo[];
    storeTodos: (todos: Todo[]) => void;
 }>('todoDBKit')

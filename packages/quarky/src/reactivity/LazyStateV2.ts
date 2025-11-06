@@ -1,7 +1,7 @@
 import { resolve } from "path"
-import { getCurrentPhase, isLazyUpdate, Mutation, Update } from "./UpdateCycle"
+import { getActiveUpdate, getCurrentPhase, isIdleUpdate, Mutation, Update, useUpdate } from "./UpdateCycle"
 import type { Action } from "./UpdateCycle"
-import { Watchable, Watched } from "./Watched"
+import { Atom, TrackedAtom } from "./Atom"
 import { AnyObject } from "@rue/types"
 import { INTERNAL_RENDER, RENDER } from "./render-cycle"
 
@@ -36,13 +36,17 @@ export interface ILazyState {
    // TODO: history
    previous: unknown
 
-   active: unknown // state depending on update context (lazy or priority)
+   // active: unknown // state depending on update context (lazy or priority)
+   // get(): unknown
    current: unknown
    pending: unknown
 
-   changed: boolean
+   // changed: boolean
 
+   // cancelPending(): void
    cancelPending(): void
+   commitPending(): void
+
    pendingUpdate: Update | null
 }
 
@@ -61,48 +65,53 @@ export class LazyState<T> implements ILazyState {
       this.pending = current;
    }
 
-   get active() {
-      const phase = getCurrentPhase()
-      return phase === INTERNAL_RENDER || phase === RENDER ? this.current : this.pending
-      // return isLazyUpdate() ? this.pending : this.current
+   pendingUpdate: Update | null = null
+
+   get() {
+      if (this.pendingUpdate === getActiveUpdate()) return this.current;
+      return this.pendingUpdate && this.pendingUpdate?.idle ? this.pending : this.current
    }
 
-   changed = false
+   set(value: T, update: Update) {
+      update.onBegin(() => { // in case update has been queued
+         if (update.idle) {
+            this.pending = value
+         }
+         else {
+            this.current = value
+            this.pending = value
+         }
+      })
+      return value
+   }
+
+   lock(type: 'read' | 'write' = 'write') {
+      const update = type === 'read' ? getActiveUpdate() : useUpdate(16)  // to warn if render blocking, give a 16ms timemargin
+      if (!update) return;
+      const pendingUpdate = this.pendingUpdate
+      const success = update.race(pendingUpdate)
+      if (success) {
+         this.pendingUpdate = update
+         if (type == 'write') update.queueCommit(this)
+         return update
+      }
+      return;
+   }
 
    cancelPending() {
-      if (this.changed) {
-         this.pending = this.current
-         this.changed = false;
-      }
+      this.pending = this.current
       this.pendingUpdate = null;
    }
 
-   pendingUpdate: Update | null = null
-
-   set(value: T, update: Update) {
-      if (update.lazy) {
-         this.pending = value
-         update.recordMutation(new Mutation(this, '[[set]]', ['current', value]))
-      }
-      else {
-         this.current = value
-         this.pending = value
-      }
-
-      if (this.pendingUpdate === update) {
-         return; // return because no need to trigger and lock
-      }
-
-      update.lock(this)
-
-      this.changed = true
-      
-      return this.active
+   commitPending(): void {
+      this.current = this.pending
+      this.pendingUpdate = null;
    }
+
 }
 
 
-class LazyCollectionState<T> implements ILazyState {
+export class ModelState<T> implements ILazyState {
 
    previous: unknown
    pending: T
@@ -115,8 +124,9 @@ class LazyCollectionState<T> implements ILazyState {
       this.pending = clone(current);
    }
 
-   get active() {
-      return isLazyUpdate() ? this.pending : this.current
+   get() {
+      if (this.pendingUpdate === getActiveUpdate()) return this.current;
+      return this.pendingUpdate && this.pendingUpdate?.idle ? this.pending : this.current
    }
 
    changed = false;
@@ -132,7 +142,11 @@ class LazyCollectionState<T> implements ILazyState {
    pendingUpdate: Update | null = null
 }
 
+
+
 // TODO: LazyPionState
 
 
 // TODO: LazyOpsState
+
+

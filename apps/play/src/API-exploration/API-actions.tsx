@@ -4,19 +4,25 @@ import { component } from "@rue/lumo"
 import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await"
 import { doAction } from "../../../../packages/quarky/src/action/Action"
 
-// AsyncOp() is about managing and coordinating async operations
+// AsyncAction() is about managing and coordinating async operations
 // - it batches updates across async scopes
 
+// Actions are about user intention, outermost action is considered the action
+// - used for logging actions in development
+// - history and undo-redo
+// - rollback and cancellation
+// - conflict resolution
 
-// render() is about scheduling of rendering, can also batch
-// - renders can be canceled
 
-// render types: idle | default (idle w 17ms deadline) | swift (next rAF)
+// update() is about scheduling of effects, can also batch
+// - updates can be canceled
 
-// idleRender()
-// render()
-// swiftRender()
-// animate()
+// render types: idle | swift (idle w 17ms deadline) | instant (within task, potential to be render blocking) | animate / frameUpdate (next rAF)
+
+// idleUpdate()
+// swiftUpdate()
+// instantUpdate()
+// animate / celUpdate()
 
 
 ooo.await(phase.prerender, () => {
@@ -32,46 +38,34 @@ ooo.await(cycle.tick, () => {
 
 function TodoWithSuspense() {
 
-   // Suspense
-   const toggleComplete = Action(({ ooo }) => () => {
-      mu(todo).complete = !todo.complete
+   const toggleComplete = AsyncAction(({ ooo }) => () => {
+      mu: todo.complete = !todo.complete
 
-      ooo.await((dispatch('...', todo.complete)))
-   }, { await: true })
+      ooo.await(dispatch('...', todo.complete))
+   })
 
    return component(
       <div>
-         {Await(toggleComplete)}
-         {Meanwhile(
-            <>loading...</>
-         )}
-         {Then(
-            <>
-               {If(todo.$complete,
-                  <p on:click={toggleComplete}>[x]</p>
-               )}
-               {Else(
-                  <p on:click={toggleComplete}>[ ]</p>
-               )}
-            </>
-         )}
+         Hello `'20%'` of people
+         % '1%'
+         % (3 % 1)
+         % Await(toggleComplete)
+         % Meanwhile(
+           <>loading...</>
+         )
+         % Then(
+            % If(todo.$complete,
+               <p on:click='toggleComplete'>[x]</p>
+            )
+            % Else(
+               <p on:click='toggleComplete'>[ ]</p>
+            )
+         )
       </div>
    )
 }
 
-class Animal {
-   readonly something = 0
 
-   /*reined*/ value = 0
-
-   /*pure*/ isSomething() {
-
-   }
-
-   private doSomething() {
-
-   }
-}
 
 const markComplete = Action(({ ooo }) => () => {
    mu: const something = todo.complete = true
@@ -86,8 +80,8 @@ const markComplete = Action(({ ooo }) => () => {
    },
    catch(err) { },
    tags: ['markComplete'],
-   lazy: { limit: 100 },
-   await: true
+   idle: { due: 100 },
+   suspense: true
 })
 
 // TODO: how to return output of an action?
@@ -102,7 +96,7 @@ const todo = Ionic(data, todo => ({
 //TODO: canceling action vs canceling dispatches are two different things
 const todo = Ionic(data, todo => ({
    markComplete: Action({
-      do: () => todo.markComplete(),
+      presume: () => todo.markComplete(),
       dispatch() {
          this.await(db.dispatch('...'))
       }

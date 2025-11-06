@@ -4,11 +4,11 @@ import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, Quark } from "../abstract/Quark";
 // import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { emitSignal } from "../debug/debug";
-import { asWatched } from "../reactivity/Watched";
+import { asTrackedAtom } from "../reactivity/Atom";
 import { Ion } from "../ion/Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
-import { SYNC, isLazyUpdate, $activeUpdate } from "../reactivity/UpdateCycle";
+import { SYNC, isIdleUpdate, $activeUpdate } from "../reactivity/UpdateCycle";
 import {  trackParticle } from "../abstract/Compound";
 import { NULL } from "../reactivity/LazyState";
 
@@ -94,7 +94,7 @@ export function createManagedDerivation(
          ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
          const effect = ion.staleMarker = new Effect(() => {
-            if (isLazyUpdate()) {
+            if (isIdleUpdate()) {
                ion.pStale = true;
             }
             else ion.stale = true
@@ -105,7 +105,7 @@ export function createManagedDerivation(
             compound!.untrackAtoms()
             fn = initialize;
          })
-         if (isLazyUpdate()) {
+         if (isIdleUpdate()) {
             ion.pState = value;
             ion.pStale = false;
             const update = $activeUpdate()
@@ -137,17 +137,17 @@ export function createManagedDerivation(
    function getMemoizedState() {
       // TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
-      const stale = isLazyUpdate() ? ion.pStale : ion.stale;
+      const stale = isIdleUpdate() ? ion.pStale : ion.stale;
       if (!stale || !retrack) trackParticle(ion)
 
-      const prevState = isLazyUpdate() && ion.pState !== NULL ? ion.pState : ion.state
+      const prevState = isIdleUpdate() && ion.pState !== NULL ? ion.pState : ion.state
 
       const value =
          (retrack && stale) ? retrackedCall(ion)
             : stale ? derivation(prevState)
                : prevState;
 
-      if (isLazyUpdate()) {
+      if (isIdleUpdate()) {
          ion.pState = value;
          ion.pStale = false;
          // window.__DEV__log.push('lazy update ' + value)
@@ -207,7 +207,7 @@ function retrackedCall(ion: ManagedDerivation) {
 
 function linkAtoms(compound: IonicCompound, effect: Effect) {
    compound.forEachAtom(atom => {
-      effect.link(asWatched(atom))
+      effect.link(asTrackedAtom(atom))
    })
 }
 

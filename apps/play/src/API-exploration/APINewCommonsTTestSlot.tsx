@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, HubKey, component, fromHub, FromTag, RenderSlot } from "@rue/lumo";
+import { Commons, ContextKey, component, fromContext, FromTag, RenderSlot } from "@rue/lumo";
 import { ArticleDatabase } from "../demos/conduit/src/db/ArticleDatabase";
 
 // # via commons
@@ -7,14 +7,14 @@ import { ArticleDatabase } from "../demos/conduit/src/db/ArticleDatabase";
 function Parent() {
    return component(
       <div>
-         <Commons provide={[
+         <Context provide={[
             Content['something'](new Something()),
             ArticleView['mu:db'](new ArticleDatabase())
          ]}>
             <Button Nested={Nested}>
                <Content></Content>
             </Button>
-         </Commons>
+         </Context>
       </div >
    )
 }
@@ -28,10 +28,10 @@ const Nested = {
 
 //--
 
-Content['something'] = HubKey<string>()
+Content['something'] = ContextKey<string>()
 
 function Content() {
-   const something = fromHub(Content['something'])
+   const something = fromContext(Content['something'])
 
    return component(
       <div>hi</div>
@@ -43,15 +43,15 @@ function Content() {
 
 export function Button(input: FromTag<{
    Slot: RenderSlot,
-   Nested: { something: HubKey<string> }
+   Nested: { something: ContextKey<string> }
 }>) {
    const { Slot, Nested } = input
 
    return component(
       <div>
-         <Commons provide={[Nested['something']('hello')]}>
+         <Context provide={[Nested['something']('hello')]}>
             {Slot()}
-         </Commons>
+         </Context>
       </div>
    )
 }
@@ -75,10 +75,10 @@ function ParentB() {
 
 //--
 
-ContentB['something'] = HubKey<string>()
+ContentB['something'] = ContextKey<string>()
 
 function ContentB(input: FromTag<{ something?: string }>) {
-   const { something = fromHub(Content['something']) } = input
+   const { something = fromContext(Content['something']) } = input
 
    return component(
       <div>hi</div>

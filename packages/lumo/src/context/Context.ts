@@ -1,8 +1,8 @@
 import { component, unnestComponent } from "../component/Component";
-import { CommonsNode, getClosestCommons, popCommons, pushCommons } from "./commons-stack";
+import { CommonsNode, getClosestCommons, popCommons, pushCommons } from "./context-stack";
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
-import { CommonsEntryKey, toCommonsKey } from "./HubKey";
+import { CommonsEntryKey, toCommonsKey } from "./ContextKey";
 import { FromTag, RenderSlot } from "../component/Input";
 
 export interface NodeCommons {
@@ -23,7 +23,7 @@ export function Commons(
       Slot: RenderSlot
    }>
 ) {
-   if (!Slot) debug.warn(`Extraneous <Commons>`)
+   if (!Slot) debug.warn(`Extraneous <Context>`)
    return component(callWithCommons(Slot, createCommonsNode(provide)))
 }
 

@@ -1,10 +1,9 @@
 import { $listen, SustainedListenerOptions } from "@rue/flask";
 import {  getPhase, scheduleEagerEffect, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
-import { IonicTask } from "../ionic/x_IonicEffect";
-import { IonicTaskSubject } from "./WatchSubject";
 import { maybePostcycleTask, Phase, SYNC } from "./UpdateCycle";
 import { createOneoff, Effect } from "./EffectQueue";
+import { IonicTaskSubject } from "./Subject";
 
 
 
@@ -72,7 +71,5 @@ type Task = () => void
 // ) {
 
 // }
-
-
 
 

@@ -35,7 +35,7 @@ export function toCommonsKey(key: CommonsEntryKey | string): string {
    return key.name
 }
 
-export function HubKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
+export function ContextKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
    const fnKey = function (v: T) {
       return [fnKey, v]
    }
@@ -52,44 +52,44 @@ export function HubKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
 // }
 
 
-// TODO: should we validate at provide() or validate at fromHub()?
+// TODO: should we validate at provide() or validate at fromContext()?
 // - required/optional/ toDefault
 // - readonly reined
 // - normalize reactivity
 
 // [ ] Runtime validation and normalization of reactive type. Defaults
 //     - fromTag()
-//     - fromHub()
+//     - fromContext()
 // 
 // [ ] Read-only and Reined conversion
 //     - fromTag()
-//     - fromHub()
+//     - fromContext()
 //     - ref()
 
-// const [HELLO, MU_HELLO] = HubKey(v<{ dog: string }>, 'm?')
-// const [HELLOA, MU_HELLOA] = HubKey(v<{ dog: string }>, 'mu?')
-// const HELLOV = HubKey(v<{ dog: string }>, 'm')
-// const HELLOC = HubKey(v<{ dog: string }>, 'mu')
-// const HELLOD = HubKey(v<{ dog: string }>)
+// const [HELLO, MU_HELLO] = ContextKey(v<{ dog: string }>, 'm?')
+// const [HELLOA, MU_HELLOA] = ContextKey(v<{ dog: string }>, 'mu?')
+// const HELLOV = ContextKey(v<{ dog: string }>, 'm')
+// const HELLOC = ContextKey(v<{ dog: string }>, 'mu')
+// const HELLOD = ContextKey(v<{ dog: string }>)
 
-// const [OHELLO, OMU_HELLO] = HubKey(v<{ dog: string }>('?'), 'm?')
-// const [OHELLOA, OMU_HELLOA] = HubKey(v<{ dog: string }>('?'), 'mu?')
-// const OHELLOV = HubKey(v<{ dog: string }>('?'), 'm')
-// const OHELLOC = HubKey(v<{ dog: string }>('?'), 'mu')
-// const OHELLOD = HubKey(v<{ dog: string }>('?'))
+// const [OHELLO, OMU_HELLO] = ContextKey(v<{ dog: string }>('?'), 'm?')
+// const [OHELLOA, OMU_HELLOA] = ContextKey(v<{ dog: string }>('?'), 'mu?')
+// const OHELLOV = ContextKey(v<{ dog: string }>('?'), 'm')
+// const OHELLOC = ContextKey(v<{ dog: string }>('?'), 'mu')
+// const OHELLOD = ContextKey(v<{ dog: string }>('?'))
 
-// const OHELLOD = HubKey(v<{ dog: string }>, 'm')
-// const OHELLOD = HubKey(v<{ dog: string }>, 'm?')
-// const OHELLOD = HubKey(v<{ dog: string }>, 'mu')
-// const OHELLOD = HubKey(v<{ dog: string }>, 'mu?')
+// const OHELLOD = ContextKey(v<{ dog: string }>, 'm')
+// const OHELLOD = ContextKey(v<{ dog: string }>, 'm?')
+// const OHELLOD = ContextKey(v<{ dog: string }>, 'mu')
+// const OHELLOD = ContextKey(v<{ dog: string }>, 'mu?')
 
 
 
-// const DOHELLOD = HubKey(
+// const DOHELLOD = ContextKey(
 //    v('?')({ dog: 'hi' })
 // )
 
-// const DOHELLODWORLD = HubKey(v<string>('?')('hi'))
+// const DOHELLODWORLD = ContextKey(v<string>('?')('hi'))
 
 
 

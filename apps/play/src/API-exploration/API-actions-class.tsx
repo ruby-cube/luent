@@ -26,48 +26,46 @@ const $todos = AsyncIon({
    reawait: true
 })
 
+function _(...args: any[]) { }
 
+// TODO:
+// 1) proto
+// 2) method overrides
+// 3) extensions
+
+// - access to this
+
+// addTodo(todo) {
+//    this.value.push(todo)
+// },
 
 const $todos = AsyncIon({
    initial: [],
-   fetch: () => IonicTodos(db.fetchTodos()),
-   '@init'() {
+   fetch: () => IonicTodos(db.fetchTodos())
+}, class {
+   @_ init() {
       onTodosUpdated(applyMutations => { // TODO: How do you coordinate these real-time updates with everything else?
          applyMutations()
       })
    }
-}, {
 
-   // TODO:
-   // 1) proto
-   // 2) method overrides
-   // 3) extensions
-
-   // - access to this
-
-   [PROTO]: Todos,
-
-   // addTodo(todo) {
-   //    this.value.push(todo)
-   // },
-
-   addTodo: AsyncAction({
+   addTodo = AsyncAction({
       dispatch({ ooo }, todo) {
          ooo.await(db.addTodo(todo))
             .then(() => $todos.refetch())
             .catch(err => { })
       }
-   }),
+   })
 
-   delTodo: AsyncAction({
+   delTodo = AsyncAction({
       dispatch({ ooo }, todo) {
          ooo.await(db.delTodo(todo))
             .then(() => $todos.refetch())
             .catch(err => { })
       }
-   }),
+   })
 
-   deleteTodo: AsyncAction({
+   deleteTodo = AsyncAction({
       optimistic(index: number) {
          return $todos().deleteTodo(index, 1)
       },
@@ -75,9 +73,9 @@ const $todos = AsyncIon({
          ooo.await(db.deleteTodo(index))
             .catch(err => { })
       },
-   }),
+   })
 
-   removeTodo: AsyncAction({
+   removeTodo = AsyncAction({
       optimistic(index: number) {
          return $todos().deleteTodo(index, 1)
       },
@@ -85,41 +83,51 @@ const $todos = AsyncIon({
          ooo.await(db.deleteTodo(index))
             .catch(err => { })
       },
-   }),
+   })
 
-   complexOp: AsyncAction({
+   complexOp = AsyncAction({
       dispatch({ ooo, output }, index) {
-         mu($something).value = 0
+         mu: $something.value = 0
 
          ooo.await(db.deleteTodo(index))
             .catch(err => { })
       },
-      '@race': rival => rival.cancel()
+      atRace: rival => rival.cancel()
    })
 })
 
+
+
 function IonicTodo(data: Todo) {
    const todo = Ionic(new Todo(data), {
+
       author: nest(IonicProfile),
 
-      completed: AsyncIon({
+      $completed: nestAsyncIon($completed => ({
          initial: data.completed,
          optimistic: true,
          dispatch({ ooo }, value) {
             ooo.await(db.setCompleted(value))
          },
          // debounce: 500
-      }),
+      })),
 
-      updateTitle: AsyncAction({
+      updateTitle: nestAsyncAction(updateTitle => ({
          optimistic(title: string) {
             todo.updateTitle(title)
          }
-      })
+      })),
+
+      //@pure
+      isSomething() {
+
+      }
    })
 
    return todo;
 }
+
+
 
 // There are two/three types of AsyncOps
 // - optimistic + dispatch (logic on client)

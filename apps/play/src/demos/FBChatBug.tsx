@@ -6,7 +6,7 @@
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
 // TODO:
-// [] fromHub type is broken 
+// [] fromContext type is broken 
 // [] AtomicIon type is broken, the state def feels like a hassle... maybe just use this.value? or maybe just use $unseenCount.value++? or .value++? or something else?
 // [] defineIonCapsule should use this.count++, for ion(), use $count.value++ ... it should be .value
 // [] writing up input type definitions feel like a hassle
@@ -27,7 +27,7 @@
 // Passing an ion with methods is essentially two-way binding..., just a bit more controlled
 
 
-import { Commons, HubKey, component, For, fromHub, If, Ion, Ionized, v } from "@rue/lumo";
+import { Commons, ContextKey, component, For, fromContext, If, Ion, Ionized, v } from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
 
 class Message {
@@ -80,7 +80,7 @@ export function FBApp() {
          <button on:click={toggleChatPopup}>(Z)</button>
          <div style='border-radius: 50%; width: 25px; height: 25px; background-color: red; color: white; text-align: center'>{$unseenCount}</div>
          <div style='display: flex; flex-direction: horizontal'>
-            <Commons provide={[
+            <Context provide={[
                UNSEEN_COUNT($unseenCount.with_only('increment')),
                MESSAGES(messages),
                TOGGLE_CHAT_VIEW(toggleChatView)
@@ -95,7 +95,7 @@ export function FBApp() {
                      <ChatPopup></ChatPopup>
                   )}
                </div>
-            </Commons>
+            </Context>
          </div>
          <input
             mu:value={$newMessage}
@@ -108,18 +108,18 @@ export function FBApp() {
 }
 
 
-const UNSEEN_COUNT = HubKey(Ion<number, {
+const UNSEEN_COUNT = ContextKey(Ion<number, {
    increment(): void;
    decrement(): void;
 }>)
-const MESSAGES = HubKey(Ionized<Message[]>)
-const TOGGLE_CHAT_VIEW = HubKey(v<() => void>)
+const MESSAGES = ContextKey(Ionized<Message[]>)
+const TOGGLE_CHAT_VIEW = ContextKey(v<() => void>)
 
 
 export function ChatPopup() {
-   const $unseenCount = fromHub(UNSEEN_COUNT)
-   const messages = fromHub(MESSAGES) as Message[]
-   const toggleChatView = fromHub(TOGGLE_CHAT_VIEW)
+   const $unseenCount = fromContext(UNSEEN_COUNT)
+   const messages = fromContext(MESSAGES) as Message[]
+   const toggleChatView = fromContext(TOGGLE_CHAT_VIEW)
 
    function openMessage(message: Message) {
       message.open()
@@ -140,9 +140,9 @@ export function ChatPopup() {
 }
 
 export function ChatView() {
-   const $unseenCount = fromHub(UNSEEN_COUNT)
-   const messages = fromHub(MESSAGES) as Message[]
-   const toggleChatView = fromHub(TOGGLE_CHAT_VIEW)
+   const $unseenCount = fromContext(UNSEEN_COUNT)
+   const messages = fromContext(MESSAGES) as Message[]
+   const toggleChatView = fromContext(TOGGLE_CHAT_VIEW)
 
    function openMessage(message: Message) {
       if (message.isNew) {

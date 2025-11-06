@@ -105,11 +105,29 @@ function FlightBooker() {
 
       <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>,
 
+      <o-style scoped="flight-booker">
+         select,
+         input,
+         button {
+            display: `$display`;
+            margin: 0.5em 0;
+            font-size: 15px;
+         }
+      
+         input[disabled] {
+            color: #999;
+         }
+      
+         p {
+            color: red;
+         }
+      </o-style>,
+
       style('flight-booker').css`
          select,
          input,
          button {
-            display: block;
+            display: ${$display};
             margin: 0.5em 0;
             font-size: 15px;
          }

@@ -12,10 +12,11 @@ Hello world, I know you’re tired of JS frameworks.
 
 You don’t need this framework, but at the very least what you’ll find here is:
 - an exploration of an abstraction and mental model that unifies various aspects of reactivity in a way that makes poetic sense. 
+- encapsulation 
 - a reactivity system that’s compatible with domain models and data structures authored as JavaScript classes, regardless of the presence of private properties
 - attempts at ironing out rough API edges encountered in the four major frameworks (React, Vue, Solid, and Svelte)
 
-This framework is a journey back to the foundations of language. It strives for eloquence by prioritizing clarity and consistency,  and seeks elegance that’s based on simple sweetness over magic. 
+This framework is a journey back to the foundations of language. It strives for eloquence by prioritizing clarity and consistency and seeks elegance that’s based on simple sweetness over magic. 
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>

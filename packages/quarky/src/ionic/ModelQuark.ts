@@ -1,10 +1,10 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { IonicProxy } from "./Ionic"
-import { trigger, Watchable, Watched } from "../reactivity/Watched"
+import { trigger, Atom, TrackedAtom } from "../reactivity/Atom"
 import { Mutable, Mutation } from "../abstract/Mutable"
 import { Traceable } from "../debug/Traceable"
-import { asAtomicOp, TrackedOps } from "./AtomicOp"
+import { asAtomicOp, TrackedOps } from "./TrackableOp"
 import { debug } from "@rue/utils"
 import { getIonizedMemberDef } from "./IonicMethods"
 import { AtomicIonQuark } from "../ion/AtomicIon"
@@ -18,7 +18,7 @@ const IONIZED_MODEL = 'ionized model' as const
 type PionProxy = {[key: PropertyKey]: Ion<unknown>}
 
 
-export class ModelQuark implements Watchable {
+export class ModelQuark implements Atom {
 
    quarkType = IONIZED_MODEL
 
@@ -37,7 +37,7 @@ export class ModelQuark implements Watchable {
 
    asMutable: Mutable = new Mutable()
 
-   asWatched: Watched | undefined
+   asTrackedAtom: TrackedAtom | undefined
 
    trigger = trigger
 

@@ -3,7 +3,7 @@ import { createAwaitableHook } from "@rue/utils"
 import { __DEV__getTrace, getInternalTrace, traceAsyncPath } from "../../../flask/debug"
 import { $activeUpdate, configureUpdateCycle, getCurrentPhase, postcycleTask, useUpdateCycleScheduler } from "./UpdateCycle"
 import { createOneoff, Effect } from "./EffectQueue"
-import { IonSubject } from "./WatchSubject"
+import { IonSubject } from "./Subject"
 import { Ion } from "../ion/Ion"
 import { scheduleEagerEffect } from "./watch"
 
@@ -49,7 +49,7 @@ export function queueInternalRenderTask(fn: () => void, flask: Flask) { // TODO:
    fn.__DEVTrace = getInternalTrace('internal render')
    const effect = createOneoff(fn, INTERNAL_RENDER)
    // console.log('schedule qIR', fn)
-   $activeUpdate().cycle.scheduleEffect(effect)
+   $activeUpdate().cycle.scheduleTask(effect)
 
    // flask?.onDiscard(() => { // TODO: need a better solution to this
    //    console.log('!!!!!!OHHH NOOOOOO')

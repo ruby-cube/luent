@@ -2,9 +2,9 @@ import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonicProxy, ProxyKey } from "./Ionic"
 import { quarkOf } from "../abstract/Quark"
-import { useUpdate, popUpdate, pushUpdate, Update } from "../reactivity/UpdateCycle"
+import { useUpdate, popUpdate, pushUpdate, Update, getActiveUpdate } from "../reactivity/UpdateCycle"
 import { ModelQuark } from "./ModelQuark"
-import { asAtomicOp, getAtomicOp, getTrackedOps } from "./AtomicOp"
+import { asAtomicOp, getAtomicOp, getTrackedOps } from "./TrackableOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
 import { isTracking, trackParticle } from "../abstract/Compound"
@@ -33,20 +33,19 @@ export const useIonicOp = {
 // a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
 export function useTrackableOp(
    method: Function,
-   state: { active: AnyObject },
+   state: { get(): AnyObject },
    ionized: IonicProxy,
    opKey: ProxyKey,
    config: TrackableOpDef,
 ) {
    const { track, op = method, input = noTransform, output = noTransform } = config
-   if (opKey === 'valueOf') console.log('active state', state.active)
    const o = {
       [opKey](...args: any[]) {
          if (__DEV__) emitSignal();
          const _args = input(args);
          if (isTracking())
             track?.(ionized, opKey, _args)
-         return output(op.apply(state.active, _args), ionized)
+         return output(op.apply(state.get(), _args), ionized)
       }
    }
    //@ts-expect-error
@@ -61,7 +60,7 @@ export function initModelUpdate(quark: ModelQuark) {
    const update = useUpdate()
    const state = quark.state
 
-   if (update.lazy){
+   if (update.idle){
       update.onComplete(() => {
          state.commitChange()
       })
@@ -78,7 +77,7 @@ export function initModelUpdate(quark: ModelQuark) {
 
 function useMutatingOp(
    method: Function,
-   state: { active: AnyObject },
+   state: { get(): AnyObject },
    model: IonicProxy,
    opKey: ProxyKey,
    config: MutatingOpDef
@@ -89,7 +88,7 @@ function useMutatingOp(
 
    const o = {
       [opKey](...args: any) {
-         const target = state.active;
+         const target = state.get();
 
          const _args = transformInput(args)
          const preop = config.preop?.(target, _args)
@@ -167,14 +166,14 @@ type OpTransforms = {
 export type TrackableOpDef = {
    type: typeof MemberType.TRACKABLE,
    privateState?: true,
-   track?: (model: IonicProxy, op: PropertyKey, input: any[]) => void
+   track?: (model: IonicProxy, op: PropertyKey, input: any[]) => void // 'model' | 'op'
 } & OpTransforms
 
 export type MutatingOpDef = {
    type: typeof MemberType.MUTATING,
    privateState?: true,
    preop?: GetPreopData
-   trigger?: (model: TriggerableModel, preopData: any) => void
+   trigger?: (model: TriggerableModel, preopData: any) => void // this.triggerModel() this.triggerOp()
    revert?: Revert,
 } & OpTransforms
 
@@ -419,5 +418,8 @@ export const trackableCreativeOp: TrackableOpDef = {
 export const trackableOp: TrackableOpDef = {
    type: MemberType.TRACKABLE,
    privateState: true,
-   track: trackModel
+   track: trackModel,
+   // track(){
+   //    this.trackModel()
+   // }
 }

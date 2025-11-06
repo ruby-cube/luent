@@ -10,7 +10,7 @@ import { IonicProxy } from "../ionic/Ionic";
 import { Traceable } from "./Traceable";
 import { debug as _debug } from "@rue/utils";
 import { Mutation } from "../Mutable";
-import { Watchable } from "../reactivity/Watched";
+import { Atom } from "../reactivity/Atom";
 
 // export interface DEVLabellable {
 //    labelName?: string
@@ -118,7 +118,7 @@ function logAtoms(entity: { [QUARK]: CompoundMorph }, label: string) {
 //    // TODO: need to identify and log property keys
 // }
 
-function _logAtoms(atoms: Set<Watchable>) {
+function _logAtoms(atoms: Set<Atom>) {
    for (const atom of atoms) {
       if (isCompound(atom)) {
          _logAtoms(atom.atoms)

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { getActiveFlask } from "@rue/flask";
-import { component, fromHub, RENDER } from "@rue/lumo";
+import { component, fromContext, RENDER } from "@rue/lumo";
 import { queueIonicTask } from "@rue/quarky";
 
 
@@ -25,7 +25,7 @@ export function ScoreBoard() {
    })
 
    // prerender
-   ionicPreTask(async ({ setup, fromHub }) => {
+   ionicPreTask(async ({ setup, fromContext }) => {
       setup(() =>
          setInterval(() => {
             console.log("hi")
@@ -34,7 +34,7 @@ export function ScoreBoard() {
 
       await render()
       const { } = useSelection(x, y)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 
    ionicRenderTask(async ({ setup, ctxz }) => {
@@ -47,7 +47,7 @@ export function ScoreBoard() {
       await render()
       const { } = ctxz(() => useSelection(x, y))
       const newTodo = ctxz(() => IonicTodo(todo))
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 
    ionicRenderTask(async ({ setup, cxz }) => {
@@ -60,7 +60,7 @@ export function ScoreBoard() {
       await render()
       const { } = cxz(useSelection(x, y))
       const newTodo = cxz(IonicTodo(todo))
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 
    ionicRenderTask(async ({ setup, cxz }) => {
@@ -73,7 +73,7 @@ export function ScoreBoard() {
       await render()
       const { } = cxz(useSelection)(x, y)
       const newTodo = cxz(IonicTodo)(todo)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 
    ionicRenderTask(async ({ setup, useSelection, IonicTodo }) => {
@@ -86,7 +86,7 @@ export function ScoreBoard() {
       await render()
       const { } = useSelection(x, y)
       const newTodo = IonicTodo(todo)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
 
    }, { contextualize: { useSelection, IonicTodo } })
 
@@ -100,7 +100,7 @@ export function ScoreBoard() {
       await render()
       const { } = o.useSelection(x, y)
       const newTodo = o.IonicTodo(todo)
-      console.log('other stuff', o.fromHub(ScoreBoard.stuff))
+      console.log('other stuff', o.fromContext(ScoreBoard.stuff))
 
    }, { contextualize: { useSelection, IonicTodo } })
 
@@ -118,7 +118,7 @@ export function ScoreBoard() {
          }
          const { } = useSelection(x, y)
          const newTodo = IonicTodo(todo)
-         console.log('other stuff', fromHub(ScoreBoard.stuff))
+         console.log('other stuff', fromContext(ScoreBoard.stuff))
       })
       return coop()
    })
@@ -139,7 +139,7 @@ export function ScoreBoard() {
          }
          const { } = useSelection(x, y)
          const newTodo = IonicTodo(todo)
-         console.log('other stuff', fromHub(ScoreBoard.stuff))
+         console.log('other stuff', fromContext(ScoreBoard.stuff))
       })
    })
 
@@ -157,7 +157,7 @@ export function ScoreBoard() {
          }
          const { } = useSelection(x, y)
          const newTodo = IonicTodo(todo)
-         console.log('other stuff', fromHub(ScoreBoard.stuff))
+         console.log('other stuff', fromContext(ScoreBoard.stuff))
       })
    })
 
@@ -172,7 +172,7 @@ export function ScoreBoard() {
       await spot(o => {
          const { } = useSelection(x, y)
          const newTodo = IonicTodo(todo)
-         console.log('other stuff', fromHub(ScoreBoard.stuff))
+         console.log('other stuff', fromContext(ScoreBoard.stuff))
       })
    })
 
@@ -186,7 +186,7 @@ export function ScoreBoard() {
       await render()
       const { } = useSelection(x, y)
       const newTodo = IonicTodo(todo)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 
    function doSomething() {
@@ -410,7 +410,7 @@ queueIonicRenderTask(({ ooo, tether, setup }) => {
    ooo.await(render, () => {
       const { } = useSelection(x, y)
       const newTodo = IonicTodo(todo)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 })
 
@@ -425,7 +425,7 @@ queueIonicRenderTask(({ ooo, tether, setup }) => {
    ooo.await(render, () => {
       const { } = useSelection(x, y)
       const newTodo = IonicTodo(todo)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 })
 
@@ -444,7 +444,7 @@ ionicRenderTask(async ({ span, spot, tether, setup }) => {
       }
       const { } = useSelection(x, y)
       const newTodo = IonicTodo(todo)
-      console.log('other stuff', fromHub(ScoreBoard.stuff))
+      console.log('other stuff', fromContext(ScoreBoard.stuff))
    })
 })
 
@@ -462,7 +462,7 @@ ionicRenderTask(async ({ span, spot, tether, setup }) => {
    }
    const { } = useSelection(x, y)
    const newTodo = IonicTodo(todo)
-   console.log('other stuff', fromHub(ScoreBoard.stuff))
+   console.log('other stuff', fromContext(ScoreBoard.stuff))
 })
 
 // ionicRenderTask(async o => {
@@ -480,7 +480,7 @@ ionicRenderTask(async ({ span, spot, tether, setup }) => {
 //       }
 //       const { } = useSelection(x, y)
 //       const newTodo = IonicTodo(todo)
-//       console.log('other stuff', fromHub(ScoreBoard.stuff))
+//       console.log('other stuff', fromContext(ScoreBoard.stuff))
 //    })
 // })
 
@@ -495,7 +495,7 @@ ionicPostTask(async ({ setup, useSelection, IonicTodo }) => {
    await render()
    const { } = useSelection(x, y)
    const newTodo = IonicTodo(todo)
-   console.log('other stuff', fromHub(ScoreBoard.stuff))
+   console.log('other stuff', fromContext(ScoreBoard.stuff))
 
 }, { contextualize: { useSelection, IonicTodo } })
 

@@ -1,9 +1,9 @@
-import { HubKey } from "../../../../../../../packages/lumo/src/hub/HubKey"
-import { fromRoot } from "../../../../../../../packages/lumo/src/hub/provide"
+import { ContextKey } from "../../../../../../../packages/lumo/src/context/ContextKey"
+import { fromRoot } from "../../../../../../../packages/lumo/src/context/provide"
 import { component } from "../../../../../../../packages/lumo/src/component/Component"
 import { FromTag } from "../../../../../../../packages/lumo/src/component/Input"
 
-NavBar.router = HubKey<Router>()
+NavBar.router = ContextKey<Router>()
 
 function NavBar(input: FromTag<{}>) {
    const router = fromRoot(NavBar.router)

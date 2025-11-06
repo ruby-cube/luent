@@ -1,4 +1,4 @@
-import { wrapWithCommons } from './hub/Commons'
+import { wrapWithCommons } from './context/Context'
 
 export * from './node/GetNode' 
 export * from './node/NodeSetup' 
@@ -13,9 +13,9 @@ export * from './node/makeJSXNode'
 export * from './element/makeElement' 
 export * from './conditional/If' 
 export * from './conditional/Polymorph' 
-export * from './hub/provide' 
-export * from './hub/HubKey'
-export * from './hub/Commons' 
+export * from './context/provide' 
+export * from './context/ContextKey'
+export * from './context/Context' 
 export * from './events/target' 
 export * from './events/listen' 
 export * from './events/Abortable' 
@@ -38,7 +38,7 @@ window._$$wrapWithCommons = wrapWithCommons;
  *  
  *  export const Frog = Symbol('frog')
  * 
- *  const frogType = HubKey(FROG, v<string>)
+ *  const frogType = ContextKey(FROG, v<string>)
  *  
  *  declare module '@rue/lumo' {
  *     interface CommonsKeyMap {

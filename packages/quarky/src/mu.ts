@@ -131,7 +131,7 @@ export function getIonicProxy(proxy: { [QUARK]: Quark & { ionicProxy: AnyObject 
 
 
 
-// TODO: protection in fromHub()
+// TODO: protection in fromContext()
 // TODO: Readonly Proxy in input
 // TODO: what happens if you pass a plain object with mu: ? Can we protect plain objects this way? ... don't. Proxies everywhere is a pain
 // TODO: ions need to be protected

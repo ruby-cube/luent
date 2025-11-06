@@ -1,4 +1,4 @@
-import { HubKey } from "@rue/lumo";
+import { ContextKey } from "@rue/lumo";
 import { Ionized } from "@rue/quarky";
 
 
@@ -9,4 +9,4 @@ export type User = {
    lastSeenMessageID: string | null
 }
 
-export const USER = HubKey<User>('user')
+export const USER = ContextKey<User>('user')

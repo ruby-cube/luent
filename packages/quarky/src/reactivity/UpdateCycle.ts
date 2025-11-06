@@ -1,13 +1,23 @@
 import { setImmediate } from "@rue/thread";
-import { createOneoff, Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
-import { Watched } from "./Watched";
+import { createOneoff, Effect, EffectQueue, PhaseTask, TaskQueue } from "./EffectQueue";
+import { Atom, TrackedAtom } from "./Atom";
 import { $schedule, SchedulerOptions } from "@rue/flask";
 import { ILazyState } from "./LazyStateV2";
 import { AnyObject } from "@rue/types";
+import { EffectCycle } from "./EffectCycle";
+
+let tick: Promise<void> | undefined
+
+export const cycle = {
+   get tick() {
+      return tick ?? Promise.resolve()
+   }
+}
 
 
 
-interface ICyclePhase {
+
+export interface ICyclePhase {
    name: string
    index: number
    schedule: Function
@@ -117,26 +127,33 @@ export class Mutation {
    }
 }
 
-export class Update {
+export class Update<T = any> {
    timestamp: Date
+   pendingCommit?: Promise<T>
+   resolveCommit?: ((value: T) => void)
 
    constructor(
       public timeMargin: number = 0,
-      public lazy: boolean = false
+      public idle: boolean | number = false
    ) {
-      this.cycle = new UpdateCycle(this)
+      this.pendingCommit = idle ? new Promise((resolve) => { this.resolveCommit = resolve }) : undefined
+      this.cycle = new EffectCycle(this)
       this.timestamp = new Date() // TODO: make sure this is correct
    }
 
-   private mutations: Mutation[] = []
+   idleOutput: unknown
 
-   recordMutation(mutation: Mutation) {
-      this.mutations.push(mutation)
-   }
+   // private mutations: Mutation[] = []
+
+   // recordMutation(mutation: Mutation) {
+   //    this.mutations.push(mutation)
+   // }
+
+   private states: ILazyState[] = []
 
    commit() {
-      for (const mutation of this.mutations) {
-         mutation.apply()
+      for (const state of this.states) {
+         state.commitPending()
       }
    }
 
@@ -154,7 +171,7 @@ export class Update {
       precedes: (competingUpdate: Update) => {
          return this.timestamp < competingUpdate.timestamp  // TODO: make sure this is correct
       },
-      
+
       cancel: () => {
          this.cancel()
       }
@@ -169,15 +186,11 @@ export class Update {
       this.cancelled = true;
       this.cycle.cancel()
       for (const state of this.states) {
-         state.cancelPending() // 
+         state.cancelPending()
       }
    }
 
-   states: ILazyState[] = []
-
-   lock(state: ILazyState) {
-      state.pendingUpdate = this
-      // TODO: getState and .filter() etc must lock the state as well!
+   queueCommit(state: ILazyState) {
       this.states.push(state)
    }
 
@@ -185,7 +198,7 @@ export class Update {
       return this.timestamp < competingUpdate.timestamp
    }
 
-   race(competingUpdate: Update | null) {
+   race(competingUpdate: Update | null): boolean | 'queue' { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
       if (competingUpdate === null) {
          this.cycle.start()
          return true
@@ -209,16 +222,17 @@ export class Update {
          }
          return true
       }
+      return true;
    }
 
    private handleRace: ((competingAction: Action) => void) | undefined
 
-   cycle: UpdateCycle;
+   cycle: EffectCycle;
 
    onComplete(task: () => void) { // TODO:
       //@ts-expect-error
       const effect = createOneoff(commitUpdate, this.cycle.phases.length - 1)
-      this.cycle.scheduleEffect(effect)
+      this.cycle.scheduleTask(effect)
       // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) // TODO: Make sure we don't need this line
       // this.commits.push(effect)
    }
@@ -248,14 +262,14 @@ export class Update {
 //       this.cycle = new UpdateCycle(this)
 //    }
 
-//    // atoms: Set<Watched> = new Set()
+//    // atoms: Set<TrackedAtom> = new Set()
 
 //    cycle: UpdateCycle;
 
 //    onComplete(commitUpdate: () => void) {
 //       commitUpdate.__DEVName = 'commitUpdate'
 //       const effect = createOneoff(commitUpdate, this.cycle.phases.length - 1)
-//       this.cycle.scheduleEffect(effect)
+//       this.cycle.scheduleTask(effect)
 //       // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) // TODO: Make sure we don't need this line
 //       this.commits.push(effect)
 //    }
@@ -277,129 +291,127 @@ export class Update {
 // }
 
 
-/**
- * @internal
- */
 
-export class UpdateCycle {
 
-   currentPhase: Phase = SYNC
+// export class UpdateCycle {
 
-   phases: ICyclePhase[]
+//    currentPhase: Phase = SYNC
 
-   startTime = performance.now()
+//    phases: ICyclePhase[]
 
-   constructor(
-      public update: Update,
-   ) {
-      this.phases = phases // from module
-   }
+//    startTime = performance.now()
 
-   start() {
-      this.schedulePhase(phases[0]) // from module
-   }
+//    constructor(
+//       public update: Update,
+//    ) {
+//       this.phases = phases // from module
+//    }
 
-   schedulePhase({ index, schedule, next }: ICyclePhase) {
-      schedule(() => {
-         this.currentPhase = index;
-         this.subphase = 'effects'
-         pushUpdate(this.update) // from module
-         const running = this.runEffects(index) // TODO: returns promise for async effects, must coordinate with pendingPreupdate
-         this.subphase = 'microtasks'
-         popUpdate() // from module
+//    start() {
+//       this.schedulePhase(phases[0]) // from module
+//    }
 
-         if (this.pendingPreupdate) {
-            this.pendingPreupdate.then(() => this.closePhase(next)) // delays scheduling next phase until prerender is complete
-            this.pendingPreupdate = undefined
-         }
-         else {
-            this.closePhase(next)
-         }
-      })
-   }
+//    schedulePhase({ index, schedule, next }: ICyclePhase) {
+//       schedule(() => {
+//          this.currentPhase = index;
+//          this.subphase = 'effects'
+//          pushUpdate(this.update) // from module
+//          const running = this.runEffects(index) // TODO: returns promise for async effects, must coordinate with pendingPreupdate
+//          this.subphase = 'microtasks'
+//          popUpdate() // from module
 
-   closePhase(nextPhase: ICyclePhase | undefined) {
-      if (!nextPhase || this.cancelled) {
-         this.close()
-      }
-      else this.schedulePhase(nextPhase)
-   }
+//          if (this.pendingPreupdate) {
+//             this.pendingPreupdate.then(() => this.closePhase(next)) // delays scheduling next phase until prerender is complete
+//             this.pendingPreupdate = undefined
+//          }
+//          else {
+//             this.closePhase(next)
+//          }
+//       })
+//    }
 
-   idleIDs: number[] = []
+//    closePhase(nextPhase: ICyclePhase | undefined) {
+//       if (!nextPhase || this.cancelled) {
+//          this.close()
+//       }
+//       else this.schedulePhase(nextPhase)
+//    }
 
-   cancelled: boolean = false;
+//    idleIDs: number[] = []
 
-   cancel() {
-      this.idleIDs.forEach((id) => cancelIdleCallback(id))
-      this.cancelled = true;
-   }
+//    cancelled: boolean = false;
 
-   // private closingTasks: (() => void)[] = []
+//    cancel() {
+//       this.idleIDs.forEach((id) => cancelIdleCallback(id))
+//       this.cancelled = true;
+//    }
 
-   // onClose(task: () => void) {
-   //    this.closingTasks.push(task)
-   // }
+//    // private closingTasks: (() => void)[] = []
 
-   close() {
-      const delta = performance.now() - this.startTime
-      const timeMargin = this.update.timeMargin
-      if (timeMargin && delta > timeMargin) console.warn('Interaction-to-update time exceeds', timeMargin, 'ms:', delta)
-      // this.closingTasks.forEach(task => task())
-   }
+//    // onClose(task: () => void) {
+//    //    this.closingTasks.push(task)
+//    // }
 
-   private effects: Map<Phase, EffectQueue> = new Map(); // pass in an object to constructor instead of map
+//    close() {
+//       const delta = performance.now() - this.startTime
+//       const timeMargin = this.update.timeMargin
+//       if (timeMargin && delta > timeMargin) console.warn('Interaction-to-update time exceeds', timeMargin, 'ms:', delta)
+//       // this.closingTasks.forEach(task => task())
+//    }
 
-   // effectStack: Set<Effect> = new Set()
+//    private effects: Map<Phase, TaskQueue> = new Map(); // pass in an object to constructor instead of map
 
-   private initializeQueue(phase: Phase) {
-      const queue: EffectQueue = new EffectQueue(this, phase)
-      this.effects.set(phase, queue);
-      return queue
-   }
+//    // effectStack: Set<Effect> = new Set()
 
-   scheduleEffects(effects: PhaseQueue, phase: Phase) {
-      const adjustedPhase = this.adjustPhase(phase)
-      // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
-      const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
-      queue.scheduleEffects(effects)
-   }
+//    private initializeQueue(phase: Phase) {
+//       const queue: TaskQueue = new TaskQueue(this, phase)
+//       this.effects.set(phase, queue);
+//       return queue
+//    }
 
-   scheduleEffect(effect: Effect) {
-      // if ($currentCycle().manager.name === 'UpdateCycle') console.trace('wrong cycle?')
-      const phase = effect.phase
-      const adjustedPhase = this.adjustPhase(phase)
-      // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
-      const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
-      queue.scheduleEffect(effect)
-   }
+//    scheduleEffects(effects: EffectQueue, phase: Phase) {
+//       const adjustedPhase = this.adjustPhase(phase)
+//       // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+//       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
+//       queue.scheduleEffects(effects)
+//    }
 
-   subphase: 'effects' | 'microtasks' = 'effects'
+//    scheduleTask(task: PhaseTask) {
+//       // if ($currentCycle().manager.name === 'UpdateCycle') console.trace('wrong cycle?')
+//       const phase = task.phase
+//       const adjustedPhase = this.adjustPhase(phase)
+//       // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+//       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
+//       queue.scheduleTask(task)
+//    }
 
-   runningEffects: boolean = false;
+//    subphase: 'effects' | 'microtasks' = 'effects'
 
-   runEffects(phase: Phase) {
-      // this.currentPhase = phase;
-      // this.subphase = 'effects'
-      const queue = this.effects.get(phase);
-      this.runningEffects = true
-      const promise = queue?.runEffects(this)
-      this.runningEffects = false
-      return promise
-      // this.subphase = 'microtasks'
-   }
+//    runningEffects: boolean = false;
 
-   adjustPhase(phase: Phase) {
-      // if (phase === SYNC) return SYNC;
-      return this.currentPhase === phase ? phase
-         : phase === SYNC ? this.currentPhase
-            : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase
-   }
+//    runEffects(phase: Phase) {
+//       // this.currentPhase = phase;
+//       // this.subphase = 'effects'
+//       const queue = this.effects.get(phase);
+//       this.runningEffects = true
+//       const promise = queue?.runEffects(this)
+//       this.runningEffects = false
+//       return promise
+//       // this.subphase = 'microtasks'
+//    }
 
-   pendingPreupdate?: Promise<void>;
-   resolvePreupdate?: (result: any) => void
-   preupdateCount: number = 0;
-   lazyResult: unknown
-}
+//    adjustPhase(phase: Phase) {
+//       // if (phase === SYNC) return SYNC;
+//       return this.currentPhase === phase ? phase
+//          : phase === SYNC ? this.currentPhase
+//             : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase
+//    }
+
+//    pendingPreupdate?: Promise<void>;
+//    resolvePreupdate?: (result: any) => void
+//    preupdateCount: number = 0;
+//    lazyResult: unknown
+// }
 
 
 export const queueTask = setImmediate;
@@ -419,7 +431,7 @@ export function useUpdateCycleScheduler(phase: Phase) {
       return $schedule(task, options ?? {}, { // TODO: potentially get rid of $listen depending on typical usage
          enroll(task) {
             const effect = new Effect(task, phase)
-            cycle.scheduleEffect(effect)
+            cycle.scheduleTask(effect)
 
             return effect;
          },
@@ -439,7 +451,9 @@ export function useUpdateCycleScheduler(phase: Phase) {
  * @returns 
  */
 export function $currentCycle() {
-   return useUpdate().cycle
+   const update = getActiveUpdate()
+   if (!update) throw new Error('Must wrap in update')
+   return update.cycle
 }
 
 export function getDefaultPhase() { // TODO: should be configured
@@ -474,8 +488,7 @@ export function postcycleTask(task: Task) {
 }
 
 
-
-
+// TODO: change to stack type
 const updateStack: Update[] = [];
 
 export function pushUpdate(update: Update) {
@@ -490,8 +503,8 @@ export function getActiveUpdate() {
    return updateStack.at(-1)
 }
 
-export function isLazyUpdate() {
-   return !!(getActiveUpdate()?.lazy)
+export function isIdleUpdate() {
+   return !!(getActiveUpdate()?.idle)
 }
 
 
@@ -502,32 +515,45 @@ export function $activeUpdate() {
    return update;
 }
 
-export function createUpdate(timeMargin: number = 0, lazy: boolean = false) {
-   return new Update(timeMargin, lazy);
-}
+// export function createUpdate(timeMargin: number = 0, lazy: boolean = false) {
+//    return new Update(timeMargin, lazy);
+// }
 
-export function useUpdate(timeMargin: number = 0, lazy: boolean = false) {
-   return getActiveUpdate() ?? new Update(timeMargin, lazy);
+export function useUpdate(timeMargin: number = 16, idle: boolean | number = false) {
+   return getActiveUpdate() ?? new Update(timeMargin, idle);
 }
 
 
 
 // TODO: return type should be based on options--whether it's lazy
-export function update<T, OPT>(fn: () => T, options?: { timeMargin?: number, lazy?: number }): Promise<T> | T {
-   const timeMargin = options?.lazy ?? options?.timeMargin ?? 100;
-   const update = useUpdate(timeMargin, !!(options?.lazy)) //FIX: because Interval wraps context, the loading update is passed down
-   const cycle = update.cycle
-   const promise = cycle.pendingPreupdate = update.lazy ? new Promise((resolve) => { cycle.resolvePreupdate = resolve }) : undefined
+export function idleUpdate<T>(fn: () => T, options?: { timeMargin?: number, deadline?: number }): Promise<T> {
+   const timeMargin = options?.deadline ?? options?.timeMargin ?? 100;
+   const update = new Update<T>(timeMargin, options?.deadline ?? true) //FIX: because Interval wraps context, the loading update is passed down
    //NOTE: assumes one cycle per lazy call... is this what I want? no... I need a promise.all but for now, let's just use one promise
 
    try {
       pushUpdate(update)
       // lazyUpdate = timeMargin; // assuming function is synchronous. Need AsyncState for asynchronous
-      const result = cycle.lazyResult = fn()
-      return update.lazy ? promise as Promise<T> : result
+      update.idleOutput = fn() // QUESTION: should we resolve after cycle completes or when prerender completes/state is committed?
+      return update.pendingCommit!
    }
    finally {
       popUpdate()
       // lazyUpdate = false;
    }
+}
+
+export function instantUpdate<T>(fn: () => T): T {
+   const update = new Update(16)
+   try {
+      pushUpdate(update)
+      return fn()
+   }
+   finally {
+      popUpdate()
+   }
+}
+
+export function swiftUpdate<T>(fn: () => T): Promise<T> {
+   return idleUpdate(fn, { timeMargin: 50, deadline: 17 })
 }

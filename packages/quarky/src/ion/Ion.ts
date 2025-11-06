@@ -7,7 +7,7 @@ import { Ionized, IsIonized } from "../ionic/ionize";
 import { initializeSnapshots } from "../ionic/TimeTraveler";
 import { hasQuark, QUARK } from "../abstract/Quark";
 import { IonizeOptions, maybeIonize } from "../ionic/Ionic";
-import { isGetter } from "../reactivity/WatchSubject";
+import { isGetter } from "../reactivity/Subject";
 import { IonState } from "../reactivity/LazyState";
 
 /* API */

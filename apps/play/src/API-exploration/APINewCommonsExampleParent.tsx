@@ -7,12 +7,12 @@ import { ArticlePreview } from "./ArticlePreview"
 function Parent() {
 
    component(
-      <Commons provide={[
+      <Context provide={[
          ArticlePreview['mu:db'](new ArticleDatabase()),
          Shared.db(new ArticleDatabase()),
       ]}>
          <ArticlesView></ArticlesView>
-      </Commons>
+      </Context>
    )
 }
 

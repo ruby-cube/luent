@@ -4,7 +4,7 @@ import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, Quark } from "../abstract/Quark";
 // import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { emitSignal } from "../debug/debug";
-import { asWatched } from "../reactivity/Watched";
+import { asTrackedAtom } from "../reactivity/Atom";
 import { Ion } from "./Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
@@ -118,10 +118,10 @@ export function createManagedDerivation(
    function getMemoizedState() {
       // TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
-      const stale = ion.staleState.active;
+      const stale = ion.staleState.get();
       if (!stale || !retrack) trackParticle(ion)
 
-      const prevState = ion.state.active;
+      const prevState = ion.state.get();
 
       const value =
          (retrack && stale) ? retrackedCall(ion)
@@ -149,7 +149,7 @@ export function createManagedDerivation(
          // TODO: what about race conditions??
          console.warn('[DEV RESEARCH] race condition for derivation stale marker')
       }
-      return state.set(derivation(state.active), update)
+      return state.set(derivation(state.get()), update)
    }
 
    const ion: ManagedDerivation = quark ?? new ManagedDerivation(derivation, $derived) // TODO: if inert, no need for ManagedDerivation...
@@ -179,7 +179,7 @@ function retrackedCall(ion: ManagedDerivation) {
 
 function linkAtoms(compound: IonicCompound, effect: Effect) {
    compound.forEachAtom(atom => {
-      effect.link(asWatched(atom))
+      effect.link(asTrackedAtom(atom))
    })
 }
 

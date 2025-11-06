@@ -1,4 +1,4 @@
-import { component, EventHandler, For, fromHub, FromTag, HandleEvent,} from "@rue/lumo";
+import { component, EventHandler, For, fromContext, FromTag, HandleEvent,} from "@rue/lumo";
 import { inert, ion, Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
@@ -9,7 +9,7 @@ import { robots } from "./robots";
 //    [] mu: and mu?:
 // [] type input ---> jsx attributes
 //    [] Inert vs non-inert
-// [] fromHub.ion()
+// [] fromContext.ion()
 //    [] .ion('mu')(FROG)
 // [] mu() typehelper
 
@@ -112,14 +112,14 @@ export function RoboCard(input : FromTag<{
       $email,
    } = input
 
-   // const list = fromHub(LIST, '?') ?? []
-   // const items = fromHub(ITEMS)
-   // const closeDialog = fromHub(CAN_CLOSE_DIALOG)
-   // const emitClick = fromHub(ON_CLOSE_BUTTON_CLICK)
+   // const list = fromContext(LIST, '?') ?? []
+   // const items = fromContext(ITEMS)
+   // const closeDialog = fromContext(CAN_CLOSE_DIALOG)
+   // const emitClick = fromContext(ON_CLOSE_BUTTON_CLICK)
 
-   // const $swamp = fromHub(SWAMP)
+   // const $swamp = fromContext(SWAMP)
 
-   // const $swamp = fromHub(MU(SWAMP))
+   // const $swamp = fromContext(MU(SWAMP))
 
 
    // function updateEmail() {

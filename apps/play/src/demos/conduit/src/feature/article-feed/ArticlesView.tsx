@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, HubKey, component, Else, ElseIf, For, fromHub, fromApp, FromTag, If, RenderSlot, SuspenseIon } from "@rue/lumo";
+import { Commons, ContextKey, component, Else, ElseIf, For, fromContext, fromApp, FromTag, If, RenderSlot, SuspenseIon } from "@rue/lumo";
 import { Ion, Ionized, watch } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";
@@ -8,21 +8,21 @@ import { ArticleDatabase } from "../../db/ArticleDatabase";
 
 // #region: main
 
-ArticlesView.db = RootHubKey<ArticleDatabase>()
-ArticlesView.settings = HubKey<SiteSettings>()
-ArticlesView.greeting = HubKey<string>()
+ArticlesView['db'] = RootContextKey<ArticleDatabase>()
+ArticlesView['settings'] = ContextKey<SiteSettings>()
+ArticlesView['greeting'] = ContextKey<string>()
 
 export function ArticlesView(input: FromTag<{
-   articlesMeta: Ion<{ tag: string, username: string, category: string }>
-   articlesPerPage: Ion<number>,
-   greeting?: string
+   'articlesMeta': $<{ tag: string, username: string, category: string }>
+   'articlesPerPage': $<number>,
+   'greeting'?: string
 }>) {
    const {
       $articlesMeta,
       $articlesPerPage,
-      greeting = fromHub(ArticlesView.greeting) ?? "Hello world"
+      greeting = fromContext(ArticlesView['greeting'], '?') ?? "Hello world",
+      db = fromRoot(ArticlesView['db'])
    } = input()
-   const db = fromRoot.required(ArticlesView.root.db)
 
    const $page = Ion(0)
    const $result = fetchArticles($articlesMeta, $page, $articlesPerPage)
@@ -50,10 +50,10 @@ export function ArticlesView(input: FromTag<{
                Something went wrong
             </div>
          )}
-         {ElseIf($articles.length === 0,
+         {ElseIf(($articles().length === 0),
             <>No articles here yet</>
          )}
-         {Else((settings = fromHub(ArticlesView.settings)) =>
+         {Else((settings = fromContext(ArticlesView.settings)) =>
             <>
                {For($articles, m => m.id, article => (
                   <ArticlePreview mu:article={article}></ArticlePreview>
@@ -66,7 +66,9 @@ export function ArticlesView(input: FromTag<{
             </>
          )}
       </>
-   ).expose({ $page })
+   ).expose({
+      'mu:page': $page  // TODO: may only expose locally created ions and ionic objects, may not expose ions directly
+   })
 }
 
 // #endregion
@@ -74,7 +76,7 @@ export function ArticlesView(input: FromTag<{
 
 // #region: navigation
 
-ArticlesNav.router = HubKey<Router>()
+ArticlesNav.router = ContextKey<Router>()
 
 function ArticlesNav(input: FromTag<{}>) {
    const router = fromRoot(ArticlesNav.router)
@@ -91,17 +93,17 @@ function ArticlesNav(input: FromTag<{}>) {
 
 // #region: preview
 
-ArticlePreview['mu:db'] = RootHubKey.Mutable<ArticleDatabase>()
-ArticlePreview['author'] = RootHubKey.Ion<ArticleDatabase>()
-ArticlePreview['use:addTodo'] = HubKey<() => void>()
-ArticlePreview['on:clickIncrement'] = HubKey<() => void>()
+ArticlePreview['mu:db'] = RootContextKey.Mutable<ArticleDatabase>()
+ArticlePreview['author'] = RootContextKey.Ion<ArticleDatabase>()
+ArticlePreview['use:addTodo'] = ContextKey<() => void>()
+ArticlePreview['on:clickIncrement'] = ContextKey<() => void>()
 
 export function ArticlePreview(input: FromTag<{
    'mu:article': Ionized<Article>,
 }>) {
 
    const { article, mu } = input as unknown as { article: Ionized<Article>, mu: <T>(arg: T) => T }
-   const db = fromHub(ArticlePreview.db)
+   const db = fromContext(ArticlePreview.db)
 
    const $author = Ion(() => article.author.username)
    const $authorImage = Ion(() => article.author.image)
@@ -153,7 +155,7 @@ export function ArticlePreview(input: FromTag<{
 function __postrender() {
    throw new Error("Function not implemented.");
 }
-function RootHubKey<T>() {
+function RootContextKey<T>() {
    throw new Error("Function not implemented.")
 }
 // #endregion

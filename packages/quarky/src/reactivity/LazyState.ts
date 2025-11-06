@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types"
 import { Mutable } from "../abstract/Mutable"
-import { isLazyUpdate } from "./UpdateCycle"
+import { isIdleUpdate } from "./UpdateCycle"
 
 export const NULL = Symbol('null')
 
@@ -29,7 +29,7 @@ export const NULL = Symbol('null')
 //    }
    
 //    get active() {
-//       return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
+//       return isIdleUpdate() && this.pending !== NULL ? this.pending : this.current
 //    }
 
 //    protected _pending: T | typeof NULL = NULL
@@ -103,7 +103,7 @@ export class PionState implements ILazyState {
    }
 
    get active() {
-      return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
+      return isIdleUpdate() && this.pending !== NULL ? this.pending : this.current
    }
 
    previous: unknown

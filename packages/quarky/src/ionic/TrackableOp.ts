@@ -1,8 +1,11 @@
+import { Quark } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
-import { AtomicQuark } from "../abstract/AtomicQuark";
+import { Atom, TrackedAtom, trigger } from "../reactivity/Atom";
+import { ILazyState } from "../reactivity/LazyStateV2";
+import { Update } from "../reactivity/UpdateCycle";
 import { ModelQuark } from "./ModelQuark";
 
-export type TrackedOps = Map<EntryKey, AtomicQuark>
+export type TrackedOps = Map<EntryKey, Atom>
 
 type EntryKey = any
 
@@ -17,23 +20,27 @@ export function asAtomicOp(
    quark: ModelQuark,
    op: PropertyKey,
    key: EntryKey
-): AtomicQuark {
+): Atom {
    return getAtomicOp(quark, op, key) ?? quark.registerOp(op, key, new AtomicOpQuark(quark, op, key))
 }
 
-export const AtomicOpQuark = __DEV__ ? class AtomicOpQuark extends AtomicQuark {
+const ATOMIC_ACCESSOR = Symbol('atomic op')
+
+export class AtomicOpQuark implements Atom, Quark {
    constructor(
       public modelQuark: ModelQuark,
       public op: PropertyKey,
       public key: EntryKey
    ) {
-      super()
       this.__DEV__asTraceable = modelQuark.__DEV__asTraceable
    }
+   quarkType: string | symbol = ATOMIC_ACCESSOR
+   asTrackedAtom: TrackedAtom | undefined;
+   trigger: (update: Update) => void = trigger
 
    public __DEV__asTraceable: Traceable
 
-} : AtomicQuark
+} 
 
 
 export function getAtomicOp(
@@ -59,10 +66,10 @@ export function getTrackedOps(
 
 
 
-// export class AtomicOp implements Quark, Watchable {
+// export class AtomicOp implements Quark, Atom {
 //    quarkType: string | symbol = 'atomic op'
 //    __DEV__asTraceable: Traceable;
-//    asWatched: Watched | undefined;
+//    asTrackedAtom: TrackedAtom | undefined;
 //    trigger = trigger
 
 //    constructor(

@@ -129,6 +129,11 @@ export function installIonicMap() {
             model.triggerOp('has', key);
             model.triggerOp('get', key);
             model.triggerOp('[[get]]', 'size')
+
+            // this.triggerModel()
+            // this.trigger('has', key);
+            // this.trigger('get', key);
+            // this.trigger('[[get]]', 'size')
          },
          revert(ionizedModel, { preopData: { key, value } }) {
             ionizedModel.set(key, value)
@@ -138,7 +143,7 @@ export function installIonicMap() {
          get: {
             type: MemberType.TRACKABLE,
             privateState: true,
-            track: trackOp
+            track: trackOp, 
          }
       }
    })

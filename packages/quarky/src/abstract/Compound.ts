@@ -1,4 +1,4 @@
-import { Watchable } from "../reactivity/Watched"
+import { Atom } from "../reactivity/Atom"
 import { isObject } from "@rue/utils"
 
 const trackerStack: (Compound | null)[] = []
@@ -69,7 +69,7 @@ export function detachedCall<T extends ((...args: any[]) => any)>(fn: T): Return
 }
 
 export function isParticle(value: unknown): value is Particle{
-   return isObject(value) && ('asWatched' in value || 'atoms' in value)
+   return isObject(value) && ('asTrackedAtom' in value || 'atoms' in value)
 }
 
 export function trackParticle(atom: Particle) {
@@ -121,7 +121,7 @@ export function isCompound(value: unknown): value is Compound {
    return isObject(value) && 'atoms' in value;
 }
 
-export type Particle = Watchable | Compound
+export type Particle = Atom | Compound
 
 /**
  * INTERNAL
@@ -144,7 +144,7 @@ export class Compound {
       this._atoms.clear()
    }
 
-   forEachAtom(fn: (atom: Watchable) => void) {
+   forEachAtom(fn: (atom: Atom) => void) {
       const atoms = this.atoms;
       atoms.forEach(particle => {
          if ('forEachAtom' in particle) {
@@ -192,5 +192,5 @@ export class Compound {
 //  * @param compound 
 //  */
 // export function triggerEffects(compound: Compound) {
-//    compound.quark.asWatched?.triggerEffects()
+//    compound.quark.asTrackedAtom?.triggerEffects()
 // }

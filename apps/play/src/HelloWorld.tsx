@@ -2,7 +2,7 @@ import { Component, Else, ElseIf, For, If, provideAppwide } from "@rue/lumo";
 import { Ion, ion, ionize } from "@rue/quarky";
 import { inert } from "../../../packages/quarky/src/ionic/notes/inert";
 import { Well, Wellerman } from "./Well";
-import { Commons } from "../../../packages/lumo/src/hub/Commons";
+import { Commons } from "../../../packages/lumo/src/context/Context";
 
 function Swap() {
    return component('')
@@ -438,10 +438,10 @@ function J(input: { for: any, Slot: any, params: any }) {
       door: 0
    },
       <>
-         <Commons provide={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
+         <Context provide={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
             <input value={mu($msg, 'set', '+trace')}></input> // auto-readonly unless marked with m: .. then it's reined
             <input value={$msg} on:input={e => { $msg.value = e.target.value }}></input> // auto-readonly unless marked with m: .. then it's reined
-         </Commons>
+         </Context>
       </>
    )
 }

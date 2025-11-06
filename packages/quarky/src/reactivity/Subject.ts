@@ -2,14 +2,14 @@ import { AnyObject } from "@rue/types";
 import { Effect } from "./EffectQueue"
 import { IonicProxy } from "../ionic/Ionic"
 import { hasQuark, QUARK, Quark, quarkOf } from "../abstract/Quark"
-import { asWatched, isWatchable, isWatchableEntity, Watchable, Watched } from "./Watched"
+import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction, isObject, noop } from "@rue/utils";
 import { Ionized, isIonicProxy, toRaw } from "../ionic/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { WatchSubjects } from "./watch";
 import { IonicCompound } from "../abstract/IonicCompound";
 import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../abstract/Compound";
-import { isAtomic } from "../abstract/AtomicQuark";
+import { isManagedDerivation } from "../ion/DerivationIon_V2";
 
 
 export function isWatchSubject(value: AnyObject): value is WatchSubject {
@@ -66,7 +66,7 @@ class Multisubject implements WatchSubject {
 
    inertCount: number = 0;
 
-   trackedCall() {
+   getValue() {
       const subjects = this.subjects;
       const values = this.values
       const initialized = this.initialized
@@ -76,7 +76,7 @@ class Multisubject implements WatchSubject {
             values.push(toValue(subject))
             if (!initialized) this.inertCount++
          }
-         const value = subject.trackedCall()
+         const value = subject.getValue()
          values.push(value)
       }
 
@@ -103,9 +103,12 @@ class Multisubject implements WatchSubject {
 // }
 export const isGetter = isIon
 
-export interface WatchSubject {
+interface WatchSubject extends Subject {
+   getValue: () => unknown
+}
+
+interface Subject {
    inert: boolean,
-   trackedCall: () => unknown
    linkEffect(effect: Effect): void
 }
 
@@ -124,10 +127,10 @@ class IonicProxySubject extends Compound implements WatchSubject {
       super()
       const modelQuark = quarkOf(model)
       this.atoms.push(modelQuark)
-      this.trackAbsorbedIons() // TODO: if absorbed ions can be reassigned, we need to retrack
+      trackAbsorbedIons(this, this.model) // TODO: if absorbed ions can be reassigned, we need to retrack
    }
 
-   trackedCall() {
+   getValue() {
       // TODO: retrack pions??
       return this.model
    }
@@ -137,24 +140,24 @@ class IonicProxySubject extends Compound implements WatchSubject {
          linkEffectToAtom(atom, effect)
       })
    }
-
-   trackAbsorbedIons() {
-      pushTracker(this)
-      trackPions(this.model)
-      popTracker()
-   }
 }
 
-function trackPions(model: IonicProxy) {
+function trackAbsorbedIons(compound: Compound, proxy: IonicProxy) {
+   pushTracker(compound)
+   trackPions(proxy)
+   popTracker()
+}
+
+function trackPions(proxy: IonicProxy) {
    const compound = getActiveTracker()
    if (!compound) throw new Error('must call trackPions within trackers')
-   const target = quarkOf(model).rawTarget;
+   const target = quarkOf(proxy).rawTarget;
    const keys = Reflect.ownKeys(target)
    for (const key of keys) {
       const value = target[key]
       // TODO: what about methods?
       if (isIon(value)) {
-         if (isWatchableEntity(value)) {
+         if (isTrackableAtom(value)) {
             compound.track(quarkOf(value))
          }
          else {
@@ -162,7 +165,7 @@ function trackPions(model: IonicProxy) {
          }
       }
       else {
-         model[key]; // initialize pion via access within tracking context
+         proxy[key]; // initialize pion via access within tracking context
       }
    }
 }
@@ -177,7 +180,7 @@ function trackPions(model: IonicProxy) {
 export class IonSubject extends IonicCompound implements WatchSubject {
    inert: boolean = false;
 
-   private valueAtom?: Watchable
+   private valueAtom?: Atom
    retrack: boolean;
    // private quark: { asCompound?: IonicCompound, inert: boolean } & Quark
 
@@ -185,12 +188,12 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       private ion: Ion,
    ) {
       super()
-      this.retrack = !isAtomic(ion)
+      this.retrack = isManagedDerivation(ion)
    }
 
    private initialized = false;
 
-   trackedCall() {
+   getValue() {
       if (this.initialized)
          return this.retrackedCall()
 
@@ -204,9 +207,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
 
       if (isIonicProxy(value)) {
          this.valueAtom = quarkOf(value)
-         pushTracker(this)
-         trackPions(value)
-         popTracker()
+         trackAbsorbedIons(this, value)
       }
       return value;
    }
@@ -216,10 +217,8 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       if (retrack) {
          this.effect.unlinkAtoms()
          const value = detachedCall(() => this.retrackCall(this.ion))
-         if (isIonicProxy(value)) { 
-            pushTracker(this)
-            trackPions(value)
-            popTracker()
+         if (isIonicProxy(value)) {
+            trackAbsorbedIons(this, value)
          }
          this.forEachAtom(atom => {
             linkEffectToAtom(atom, this.effect)
@@ -230,9 +229,7 @@ export class IonSubject extends IonicCompound implements WatchSubject {
       else {
          const value = this.ion()
          if (isIonicProxy(value)) {
-            pushTracker(this)
-            trackPions(value)
-            popTracker()
+            trackAbsorbedIons(this, value)
          }
          this.forEachAtom(atom => {
             linkEffectToAtom(atom, this.effect)
@@ -255,16 +252,8 @@ export class IonSubject extends IonicCompound implements WatchSubject {
    private relinkValue(
       value: unknown,
    ) {
-      const prevAtom = this.valueAtom;
-      const atom = this.valueAtom = isWatchableEntity(value) ? quarkOf(value) : undefined
-
-      if (prevAtom) {
-         this.effect.unlink(asWatched(prevAtom))
-      }
-
-      if (atom) {
-         this.effect.link(asWatched(atom))
-      }
+      linkEffectToAtom(this.valueAtom, this.effect);
+      linkEffectToAtom(this.valueAtom = isTrackableAtom(value) ? quarkOf(value) : undefined, this.effect);
    }
 
 }
@@ -283,21 +272,22 @@ export class IonSubject extends IonicCompound implements WatchSubject {
 //    }
 // }
 
-function linkEffectToAtom(atom: Watchable | undefined, effect: Effect) {
+function linkEffectToAtom(atom: Atom | undefined, effect: Effect) {
    if (!atom) return;
-   effect.link(asWatched(atom))
+   effect.link(asTrackedAtom(atom))
 }
 
-// function toWatchedAtoms(atoms: Set<Watchable>) {
+// function toWatchedAtoms(atoms: Set<Atom>) {
 //    const watchedAtoms = [];
 //    for (const atom of atoms) {
-//       watchedAtoms.push(asWatched(atom))
+//       watchedAtoms.push(asTrackedAtom(atom))
 //    }
 //    return watchedAtoms;
 // }
 
 
-export class IonicTaskSubject extends IonicCompound implements WatchSubject {
+
+export class IonicTaskSubject extends IonicCompound implements Subject {
    inert: boolean = false;
 
    atoms: Particle[] = []

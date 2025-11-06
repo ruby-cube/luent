@@ -1,28 +1,44 @@
 import { __DEV__unwrap } from "@rue/utils";
-import { Watched } from "./Watched";
-import { UpdateCycle, Phase, SYNC, popUpdate, pushUpdate } from "./UpdateCycle";
+import { TrackedAtom } from "./Atom";
+import { Phase, SYNC, popUpdate, pushUpdate } from "./UpdateCycle";
+import { EffectCycle } from "./EffectCycle";
+import { INTERNAL_POSTRENDER, INTERNAL_RENDER, PRERENDER, RENDER } from "./render-cycle";
 
 // const PRERENDER = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
 
 type TaskFn = (...args: any[]) => unknown
 
+export class PhaseTask {
+   // running = false
+   // active: boolean = false;
+   // completed: boolean = false;
+   // requeued: boolean = false;
+   // queued: boolean = false;
 
-export class Effect {
-   running = false
+   constructor(
+      public run: TaskFn | null,
+      public phase: Phase
+   ) { }
+}
+
+export class Effect implements PhaseTask {
+   // running = false
+   // active: boolean = false;
+
+
    constructor(
       public run: TaskFn | null,
       public phase: Phase
    ) { }
 
-   private atoms: Set<Watched> = new Set()
+   private atoms: Set<TrackedAtom> = new Set()
 
-   active: boolean = false;
 
-   isLinked(atom: Watched) {
+   isLinked(atom: TrackedAtom) {
       return this.atoms.has(atom)
    }
 
-   link(atom: Watched) {
+   link(atom: TrackedAtom) {
       if (this.isLinked(atom)) return;
       atom.link(this)
       this.atoms.add(atom);
@@ -33,22 +49,22 @@ export class Effect {
       this.unlinkAtoms()
    }
 
-   unlink(atom: Watched) {
+   unlink(atom: TrackedAtom) {
       if (!this.isLinked(atom)) return;
-      this.requeued = false; //QUESTION: not sure if this is necessary
+      // this.requeued = false; //QUESTION: not sure if this is necessary
       this.atoms.delete(atom)
    }
 
    //FIX: unlinking needs to remove effect from the atom's phase queue
    unlinkAtoms() {
-      this.requeued = false;
+      // this.requeued = false;
       // this.queued = false;
       this.atoms.clear()
    }
 
-   completed: boolean = false;
-   requeued: boolean = false;
-   queued: boolean = false;
+   // completed: boolean = false;
+   // requeued: boolean = false;
+   // queued: boolean = false;
 }
 
 /**
@@ -95,31 +111,28 @@ let effectStackCount = 0;
 //    }
 // }
 
-
-export class PhaseQueue {
+export class EffectQueue {
    effects: Effect[] | undefined;
    nextEffects: Effect[] = []
 
-   // runningEffects: boolean = false;
-
    retained: Set<Effect> = new Set() // for sync effects
-   canLaze: boolean | undefined = undefined
+   // canIdle: boolean | undefined = undefined
 
 
    constructor(
       private phase: Phase,
-      private atom?: Watched
+      private atom?: TrackedAtom
    ) {
    }
 
-   runEffects(cycle: UpdateCycle, completed: Set<Effect> | undefined) {
-      const promises: Promise<unknown>[] = []
+   idleCount = 0;
+
+   runEffects(taskQueue: TaskQueue, completed: Set<Effect> | undefined) {
       const effects = this.nextEffects
       this.nextEffects = []
-      const phases = cycle.phases
       const phase = this.phase
       const sync = phase === SYNC
-      const canLaze = this.canLaze !== undefined ? this.canLaze : phases.length - 1 !== phase && !sync && phases[phase].canLaze
+      // const canIdle = this.canIdle !== undefined ? this.canIdle : phases.length - 1 !== phase && !sync && phases[phase].canIdle
 
       for (const effect of effects) {
          if (
@@ -147,33 +160,7 @@ export class PhaseQueue {
          // }
          try {
             effectStackCount++
-            if (canLaze && cycle.update.lazy) {
-               cycle.preupdateCount++;
-               const promise = new Promise((resolve) => {
-                  requestIdleCallback(() => {
-                     let _promise;
-                     const update = cycle.update
-                     try {
-                        pushUpdate(update)
-                        _promise = effect.run?.();
-                     }
-                     finally {
-                        popUpdate()
-                        if (_promise instanceof Promise) _promise.then(resolve)
-                        else resolve(undefined)
-                        cycle.preupdateCount--
-                        if (cycle.preupdateCount === 0) {
-                           cycle.resolvePreupdate?.(cycle.lazyResult) // TODO: need to wait till all promises resolve
-                        }
-                     }
-                  }, { timeout: 17/* TODO: prioritize based on time margin */ })
-               })
-               promises.push(promise)
-            }
-            else {
-               const promise = effect.run() // What about async tasks? T_T How will it affect this system?
-               if (promise instanceof Promise) promises.push(promise)
-            }
+            taskQueue.runEffect(effect)
          }
          finally {
             effectStackCount--
@@ -188,7 +175,6 @@ export class PhaseQueue {
 
       this.effects = undefined
       this.retained.clear()
-      return !sync && promises.length ? Promise.allSettled(promises) : undefined;
    }
 
    retain(effect: Effect) {
@@ -209,31 +195,56 @@ export class PhaseQueue {
    queued: boolean = false
 }
 
+const effectsComplete: { [key: number | string]: undefined | Promise<void> } = {
+   [SYNC]: undefined,
+   [PRERENDER]: undefined,
+   [INTERNAL_RENDER]: undefined,
+   [RENDER]: undefined,
+   [INTERNAL_POSTRENDER]: undefined,
+}
 
+
+export const phase = {
+   get prerender() {
+      return effectsComplete[<number>PRERENDER] ?? Promise.resolve()
+   },
+   get render() {
+      return effectsComplete[<number>RENDER] ?? Promise.resolve()
+   }
+}
+
+export function queuePrerenderTask(task: () => void) {
+   phase.prerender.then(task)
+}
+
+export function queueRenderTask(task: () => void) {
+   phase.render.then(task)
+}
 
 /**
  * Belongs to the current effect cycle.
  */
-export class EffectQueue {
-   private moreQueues: PhaseQueue[] | undefined;
-   private queues: PhaseQueue[] = []
+export class TaskQueue {
+   private moreEffects: EffectQueue[] | undefined;
+   private effects: EffectQueue[] = []
 
-   private taskQueue: PhaseQueue | undefined; // TODO: need to run
+   emitBatchesComplete: (() => void) | undefined
+   
+   effectsComplete: Promise<void>;
+   private emitEffectsComplete!: (value: void | PromiseLike<void>) => void;
 
    constructor(
-      public cycle: UpdateCycle,
+      public cycle: EffectCycle,
       private phase: Phase
    ) {
-
+      effectsComplete[phase] = this.effectsComplete = new Promise<void>((resolve) => { this.emitEffectsComplete = resolve })
    }
 
-   scheduleEffect(task: Effect) {
-      const taskQueue = this.taskQueue ?? (this.taskQueue = new PhaseQueue(this.phase))
-      taskQueue.queue(task)
-      this.scheduleEffects(taskQueue)
+   scheduleTask(task: PhaseTask) {
+      this.effectsComplete.then(task.run) // TODO: how do I run tasks as idle?
    }
 
-   scheduleEffects(effects: PhaseQueue) {
+   scheduleEffects(effects: EffectQueue) {
 
       if (this.runningEffects && !effects.requeued) {
          // a currentEffect during runningEffects means the effect triggered 
@@ -241,40 +252,78 @@ export class EffectQueue {
          // const currentEffect = $currentEffect()
          // if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
          effects.requeued = true;
-         const extension = this.moreQueues ?? (this.moreQueues = [])
+         const extension = this.moreEffects ?? (this.moreEffects = [])
          extension.push(effects)
       }
       else if (!effects.queued) {
-         this.queues.push(effects)
+         this.effects.push(effects)
          effects.queued = true;
       }
    }
 
-   private runningEffects: boolean = false
+   runningEffects: boolean = false
 
-   runEffects(cycle: UpdateCycle) {
-      this.runningEffects = true
+   runEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
+      new Promise<void>(emitBatchesComplete => {
+         const completed: Set<Effect> | undefined = this.phase === SYNC ? undefined : new Set()
+         const queues = this.effects;
+         for (const batch of queues) {
+            batch.runEffects(this, completed)
+            batch.queued = this.moreEffects?.length ? batch.requeued : false;
+            batch.requeued = false;
+         }
+         if (this.idleCount === 0) {
+            emitBatchesComplete()
+         }
+         else {
+            this.emitBatchesComplete = emitBatchesComplete
+         }
+      }).then(() => {
+         this.effects = this.moreEffects ?? []
+         this.moreEffects = undefined;
+         if (this.effects.length) {
+            this.runEffects(cycle, onComplete)
+         }
+         else {
+            onComplete(this.emitEffectsComplete)
+         }
+      })
+      return this.effectsComplete
+   }
 
-      const pendingPreupdate = cycle.pendingPreupdate;
-      const promises: Promise<unknown>[] = pendingPreupdate ? [pendingPreupdate] : []
+   idleCount = 0;
 
-      const completed: Set<Effect> | undefined = this.phase === SYNC ? undefined : new Set()
-      const queues = this.queues;
-      for (const batch of queues) {
-         const promise = batch.runEffects(cycle, completed)
-         if (promise) promises.push(promise)
-         batch.queued = this.moreQueues?.length ? batch.requeued : false;
-         batch.requeued = false;
+   runEffect(effect: Effect) {
+
+      const update = this.cycle.update
+      if (this.phase === PRERENDER && update.idle) {
+         this.idleCount++;
+         requestIdleCallback(() => {
+            try {
+               this.runningEffects = true
+               pushUpdate(update)
+               effect.run?.();
+            }
+            finally {
+               popUpdate()
+               this.runningEffects = false
+               this.idleCount--
+               if (this.idleCount === 0) {
+                  this.emitBatchesComplete?.()
+               }
+            }
+         }, { timeout: update.idle === true ? 17 : update.idle })
       }
-
-      this.queues = this.moreQueues ?? []
-      this.moreQueues = undefined;
-      if (this.queues.length) {
-         const promise = this.runEffects(cycle)
-         if (promise) promises.push(promise)
+      else {
+         try {
+            this.runningEffects = true
+            pushUpdate(update)
+            effect.run?.()
+         }
+         finally {
+            popUpdate()
+            this.runningEffects = false
+         }
       }
-
-      this.runningEffects = false;
-      return promises.length ? Promise.allSettled(promises) : undefined
    }
 }

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, If, Else, FromTag, fromApp, HubKey, CommonsEntryKey, fromGlobal } from "@rue/lumo"
+import { component, For, If, Else, FromTag, fromApp, ContextKey, CommonsEntryKey, fromGlobal } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/quarky/src/reactivity/render-cycle"
 import { create } from "domain"
@@ -152,7 +152,7 @@ export function TodoDBKit() {
 }
 
 
-export const TODO_DB = HubKey<TodoDB>('todoDB')
+export const TODO_DB = ContextKey<TodoDB>('todoDB')
 
 type $$TodoArray = ReturnType<typeof ionizeTodos>
 
@@ -272,7 +272,7 @@ type FromAbove<T> = T extends CommonsEntryKey<infer I> ? I : never
 
 // TODO: fromGlobal (checks appwide first then global) only (no fromApp), provideGlobal, and provideAppwide
 
-const USE_TODO_APP = HubKey<typeof TodoAppKit>('useTodoApp')
+const USE_TODO_APP = ContextKey<typeof TodoAppKit>('useTodoApp')
 
 type TodoDB = ReturnType<typeof TodoDBKit>
 

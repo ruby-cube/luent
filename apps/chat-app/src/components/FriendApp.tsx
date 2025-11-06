@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, component, fromApp, fromHub, FromTag, If, Polymorph } from "@rue/lumo";
+import { Commons, component, fromApp, fromContext, FromTag, If, Polymorph } from "@rue/lumo";
 import { USER, User } from "../commons/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";
@@ -21,11 +21,11 @@ export function FriendApp(input: FromTag<{
    const $main = $App.Morphable('home')
 
    return component(
-      <Commons provide={[USER(user)]}>
+      <Context provide={[USER(user)]}>
          <Navbar user={user} use:navigateHome={() => $main.as('home')}>
             <button on:click={() => $main.as('chat')}>Chat</button>
          </Navbar>
          <$App as={$main}></$App>
-      </Commons>
+      </Context>
    )
 }

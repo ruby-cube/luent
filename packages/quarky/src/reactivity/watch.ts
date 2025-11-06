@@ -3,7 +3,7 @@ import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonicProxy } from "../ionic/ionize";
 import { Phase, SYNC, $currentCycle, getDefaultPhase, getAdjustedPhase, maybePostcycleTask } from "./UpdateCycle";
 import { createOneoff, Effect } from "./EffectQueue";
-import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
+import { asWatchSubject, isWatchSubject, WatchSubject } from "./Subject";
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 
@@ -97,7 +97,7 @@ export function watch<
       return InertWatcher()
    }
 
-   let prevState = watchSubject.trackedCall(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
+   let prevState = watchSubject.getValue(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
    if (watchSubject.inert) {
       return InertWatcher()
@@ -106,7 +106,7 @@ export function watch<
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
-      const newState = watchSubject.trackedCall() // retracking happens here // TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
+      const newState = watchSubject.getValue() // retracking happens here // TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;
       }
@@ -177,9 +177,10 @@ export function setUpWatcher(
 
 export function scheduleEagerEffect(task: Task, phase: Phase) {
    const eagerEffect = createOneoff(task, phase)
-   $currentCycle().scheduleEffect(eagerEffect)
+   const cycle = $currentCycle()
+   cycle.scheduleTask(eagerEffect)
    if (eagerEffect.phase === SYNC) {
-      $currentCycle().runEffects(SYNC)
+      cycle.runSyncEffects()
    }
 }
 

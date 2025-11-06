@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { HubKey, component, For, fromHub, FromTag, If, GetNode } from "@rue/lumo";
+import { ContextKey, component, For, fromContext, FromTag, If, GetNode } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -280,15 +280,15 @@ type TabManager = {
    focusFile(file: File): void; //tabs
 }
 
-const FILES_KIT = HubKey<FileManager>('FILES_KIT')
-const TABS_KIT = HubKey<TabManager>('TABS_KIT')
+const FILES_KIT = ContextKey<FileManager>('FILES_KIT')
+const TABS_KIT = ContextKey<TabManager>('TABS_KIT')
 
 
-// const OPEN_FILE = HubKey(v<FileManager['openFile']>)
-// const DELETE_FILE = HubKey(v<FileManager['deleteFile']>)
-// const ADD_NEW_FILE = HubKey(v<FileManager['addNewFile']>)
-// const CLOSE_FILE = HubKey(v<TabManager['closeFile']>)
-// const FOCUS_FILE = HubKey(v<TabManager['focusFile']>)
+// const OPEN_FILE = ContextKey(v<FileManager['openFile']>)
+// const DELETE_FILE = ContextKey(v<FileManager['deleteFile']>)
+// const ADD_NEW_FILE = ContextKey(v<FileManager['addNewFile']>)
+// const CLOSE_FILE = ContextKey(v<TabManager['closeFile']>)
+// const FOCUS_FILE = ContextKey(v<TabManager['focusFile']>)
 
 export function List(input : FromTag<{
 		apple?: string,
@@ -298,19 +298,19 @@ export function List(input : FromTag<{
 }>) {
 		const { 
 				$plum,
-				$apple = fromHub($APPLE), 
-				peach = fromHub(PEACH),
+				$apple = fromContext($APPLE), 
+				peach = fromContext(PEACH),
 				_raw_: $
 		} = input
 		
-		$.pear = $.pear ?? fromHub(PEAR)
+		$.pear = $.pear ?? fromContext(PEAR)
 
 		return component(<></>)
 }
 
-const $APPLE = HubKey<Ion<string>>('$APPLE')
-const PEACH = HubKey<string>('PEACH')
-const PEAR = HubKey<MaybeIon<string>>('PEAR')
+const $APPLE = ContextKey<Ion<string>>('$APPLE')
+const PEACH = ContextKey<string>('PEACH')
+const PEAR = ContextKey<MaybeIon<string>>('PEAR')
 
 
 
@@ -318,7 +318,7 @@ function Sidebar(input : FromTag<{
    files: Ionized<File[]> // TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
 }>) {
    const { files } = input
-   const { addFile } = fromHub(FILES_KIT);
+   const { addFile } = fromContext(FILES_KIT);
 
    return component(
       <div>
@@ -337,7 +337,7 @@ function SidebarFile(input : FromTag<{
    const { $index, file } = input
    const $menu = GetNode(IfContextMenu)
 
-   const { openFile } = fromHub(FILES_KIT)
+   const { openFile } = fromContext(FILES_KIT)
 
    return component(
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
@@ -365,8 +365,8 @@ function SidebarFile(input : FromTag<{
 //    )
 // }
 
-// const CLOSE_FILE = HubKey(v<(index: number) => void>)
-// const FOCUS_FILE = HubKey(v<(index: number) => void>)
+// const CLOSE_FILE = ContextKey(v<(index: number) => void>)
+// const FOCUS_FILE = ContextKey(v<(index: number) => void>)
 
 
 
@@ -376,7 +376,7 @@ function Tab(input : FromTag<{
    file: Ionized<File>,
    tabManager?: TabManager,
 }>) {
-   const { file, tabManager = fromHub(TABS_KIT), $index = ion('hi') } = input
+   const { file, tabManager = fromContext(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 
    return component(
