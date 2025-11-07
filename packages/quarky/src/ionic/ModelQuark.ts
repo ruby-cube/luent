@@ -8,7 +8,7 @@ import { asAtomicOp, TrackedOps } from "./TrackableOp"
 import { debug } from "@rue/utils"
 import { getIonizedMemberDef } from "./IonicMethods"
 import { AtomicIonQuark } from "../ion/AtomicIon"
-import { ModelState } from "../reactivity/LazyState"
+import { ModelState } from "../reactivity/x_LazyState"
 import { AtomicQuark } from "../abstract/AtomicQuark"
 import { Ion } from "../ion/Ion"
 

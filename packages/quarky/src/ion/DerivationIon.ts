@@ -1,255 +1,113 @@
-import { IonicCompound, IonicCompoundMorph } from "../abstract/IonicCompound";
-import { AnyObject } from "@rue/types";
-import { Flask, getActiveFlask } from "@rue/flask";
-import { quarkOf, QUARK, hasQuark, Quark } from "../abstract/Quark";
-// import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { emitSignal } from "../debug/debug";
-import { asTrackedAtom } from "../reactivity/Atom";
-import { Ion } from "../ion/Ion";
-import { Traceable } from "../debug/Traceable";
+import { SYNC } from "@rue/lumo";
 import { Effect } from "../reactivity/EffectQueue";
-import { SYNC, isIdleUpdate, $activeUpdate } from "../reactivity/UpdateCycle";
-import {  trackParticle } from "../abstract/Compound";
-import { NULL } from "../reactivity/LazyState";
+import { FunctionalSubstance, IonSubject } from "../reactivity/Substance";
+import { SimpleState } from "../reactivity/State";
+import { QUARK } from "../abstract/Quark";
+import { AnyObject } from "@rue/types";
+import { Traceable } from "../debug/Traceable";
 
 
+// function createMemoizedDerivationIon(derive: (prev: unknown) => unknown) {
+//    let initialized = false;
 
-/**
-* Managed Derivation Ion
-* - memoization **
-* ---retracking
-* - provide previous state to derivation
-* - encapsulates with methods
-* ---- manage dev traces through quarky capsule **
-**/
+//    const substance = new FunctionalSubstance(() => {
+//       if (initialized) {
+//          return $derivedState()
+//       }
+//       else {
+//          initialized = true;
+//          return derive(undefined)
+//       }
+//    }, true) // TODO: do not watch output, remove Ion()
 
-// /** INTERNAL */
-export type $DerivedState = Ion & {
-   [QUARK]: {
-      inert: boolean
-      state: unknown
-      stale: boolean
-      pStale: boolean | undefined
-      pState: unknown
-      derivation: (prev?: unknown) => unknown
-      staleMarker: Effect | undefined
-   }
-   & Quark
-}
+//    const isStale = new SimpleState(false)
+//    const state = new SimpleState(substance.trackedCall())
 
-class ManagedDerivation extends IonicCompound {
-   inert: boolean = false
-   state: unknown | undefined
-   stale: boolean = false
-   pStale: boolean | undefined
-   pState: unknown | typeof NULL = NULL
-   staleMarker: Effect | undefined
-   quarkType = DERIVATION_ION
+//    function $derivedState(): unknown {
+//       if (isStale.get()) {
+//          const update = state.lock()
+//          if (!update) return derive(substance.trackedCall())
+//          state.set(derive(substance.trackedCall()))
+//          isStale.set(false);
+//       }
+//       return state.get()
+//    }
+//    $derivedState['~ion'] = true as const
+
+//    substance.linkEffect(new Effect(() => { // TODO: need to cancel if update is canceled
+//       isStale.set(true);
+//    }, SYNC))
+
+//    return $derivedState
+// }
+
+class DerivationIon {
    __DEV__asTraceable = new Traceable()
+   quarkType = DERIVATION_ION
 
    constructor(
-      public derivation: (prev?: unknown) => unknown,
-      public entity: $DerivedState
+      private substance: FunctionalSubstance
+   ) { }
 
-   ) {
-      super()
+   get inert() {
+      return !this.substance.reactive
    }
 }
-
-/** 
- * INTERNAL 
- * */
 
 export const DERIVATION_ION = Symbol('Derivation Ion')
 
-export function isManagedDerivation(value: unknown): value is $DerivedState {
-   return hasQuark(value) && quarkOf(<$DerivedState>value).quarkType === DERIVATION_ION
-}
-
-export function createManagedDerivation(
-   derivation: (previousValue?: unknown) => unknown,
-   methods?: AnyObject,
+export function createMemoizedDerivation(
+   derive: (prev?: unknown) => unknown,
+   methods?: AnyObject, // TODO:
    retrack: boolean = true,
-   quark?: ManagedDerivation,
 ) {
-   const creationFlask = getActiveFlask()
+   const isStale = new SimpleState(true)
+   const state = new SimpleState(undefined)
 
-   let fn = initialize
-   const $derived = (() => fn()) as $DerivedState
+   const substance = new FunctionalSubstance(() => {
+      return derive(state.get())
+   }, retrack)
 
-   function initialize() {
-      const compound = ion
-      const value = compound.trackCall(derivation)
-      const atoms = compound.atoms
-      if (atoms.length === 0) {
-         fn = getState
-         ion.inert = true;
-         // no reactivity, no memoization
-         return value;
+   function $derivedState() {
+      if (isStale.get()) {
+         const value = state.set(substance.trackedCall())
+         if (substance.reactive) isStale.set(false)
+         return value
       }
-      else {
-         if (__DEV__) emitSignal();
-         // getActiveTracker()?.track(ion)
-         fn = getMemoizedState
-         ion.state = value;
-         assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         const effect = ion.staleMarker = new Effect(() => {
-            if (isIdleUpdate()) {
-               ion.pStale = true;
-            }
-            else ion.stale = true
-         }, SYNC)
-         linkAtoms(compound, effect)
-         creationFlask?.onDiscard(() => {
-            effect.destroy()
-            compound!.untrackAtoms()
-            fn = initialize;
-         })
-         if (isIdleUpdate()) {
-            ion.pState = value;
-            ion.pStale = false;
-            const update = $activeUpdate()
-            
-            if (ion.pStale) {
-               update.onComplete(() => {
-                  ion.state = value;
-                  ion.stale = true;
-
-                  ion.pState = NULL;
-                  ion.pStale = undefined;
-               })
-            }
-            update.onCancel(() => {
-               ion.pState = NULL;
-               ion.pStale = undefined;
-            })
-            return value;
-         }
-         return value;
-      }
+      return state.get();
    }
 
-   function assertValidCall() {
-      const flask = getActiveFlask()
-      assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
-   }
+   $derivedState['~ion'] = true as const;
+   $derivedState[QUARK] = new DerivationIon(substance)
 
-   function getMemoizedState() {
-      // TODO: not sure if I should assert initialization only or all calls
-      assertValidCall()
-      const stale = isIdleUpdate() ? ion.pStale : ion.stale;
-      if (!stale || !retrack) trackParticle(ion)
+   substance.linkEffect(new Effect(() => { // TODO: need to cancel if update is canceled
+      isStale.set(true);
+   }, SYNC))
 
-      const prevState = isIdleUpdate() && ion.pState !== NULL ? ion.pState : ion.state
-
-      const value =
-         (retrack && stale) ? retrackedCall(ion)
-            : stale ? derivation(prevState)
-               : prevState;
-
-      if (isIdleUpdate()) {
-         ion.pState = value;
-         ion.pStale = false;
-         // window.__DEV__log.push('lazy update ' + value)
-         const update = $activeUpdate()
-         if (stale) {
-            update.onComplete(() => {
-               ion.state = ion.pState;
-               ion.stale = ion.pStale!;
-
-               ion.pState = NULL;
-               ion.pStale = undefined;
-            })
-         }
-         update.onCancel(() => {
-            ion.pState = NULL;
-            ion.pStale = undefined
-         })
-         return value;
-      }
-
-      if (ion.stale) {
-         ion.state = value;
-         ion.stale = false;
-      }
-
-      return value;
-   }
-
-   function getState() {
-      return ion.state = derivation(ion.state)
-   }
-
-   const ion: ManagedDerivation = quark ?? new ManagedDerivation(derivation, $derived)
-
-   // ion.asCompound.entity = ion;
-
-   $derived[QUARK] = ion
-   // $derived.labelName = undefined
-   // $derived.__DEV__label = __DEV__label
-
-
-   // if (methods) {
-   //    attachCapsuleMethods('MemoizedDerivationIon', $derived, methods)
-   // }
-
-   return $derived;
+   return $derivedState
 }
 
-function retrackedCall(ion: ManagedDerivation) {
-   const { derivation, staleMarker } = ion
-   const compound = ion
-   staleMarker!.unlinkAtoms()
-   const value = compound.retrackCall(() => derivation(ion.state))
-   linkAtoms(compound, staleMarker!)
-   return value;
-}
+// function createMemo(derive: (prev: unknown) => unknown) {
+//    let isStale = false;
+//    let state: unknown;
+//    let get = initialize
 
-function linkAtoms(compound: IonicCompound, effect: Effect) {
-   compound.forEachAtom(atom => {
-      effect.link(asTrackedAtom(atom))
-   })
-}
-
-// function unlinkAtoms(compound: IonicCompound, effect: Effect) {
-//    const atoms = compound.atoms;
-//    for (const atom of atoms) {
-//       effect.destroy()
+//    function initialize() {
+//       get = getValue
+//       return state = derive(undefined)
 //    }
+
+//    function getValue() {
+//       if (isStale) {
+//          isStale = false
+//          return state = derive(state)
+//       }
+//       return state;
+//    }
+
+//    function $derivation() {
+//       return get()
+//    }
+
+//    return $derivation
 // }
-
-
-// function trigger(this: IonicCompound<>): void {
-//    this.quark.stale = true;
-//    this.quark.asParticle?.triggerCompounds()
-//    triggerEffects(this)
-// }
-
-/* Not sure if this is correct. 
-Memory leaks occur when an object is referenced outside of its creation scope in a way that does not reassign it with the new version of the object, ie collecting it in an array, map, or set.
-*/
-function assertValidInitialization(initializationFlask: Flask | undefined, creationFlask: Flask | undefined) {
-   if (true) return;
-   // TODO:
-   // if (!creationFlask) return;
-   // if (!initializationFlask) {
-   //    if (creationFlask.creationScopeID === "0") // both are in global creation scope
-   //       return;
-   //    debug.warn("Memory leak alert A. A memoized ion cannot be called outside its creation scope.")
-   //    return;
-   // }
-   // if (initializationFlask.creationScopeID === creationFlask.creationScopeID) return;
-   // if (!flaskAContainsFlaskB(creationFlask, initializationFlask))
-   //    debug.warn("Memory leak alert B. A memoized ion cannot be called outside its creation scope.")
-}
-
-function flaskAContainsFlaskB(flaskA: Flask, flaskB: Flask) {
-   let outer = flaskB.outer
-   do {
-      if (outer?.creationScopeID === flaskA.creationScopeID)
-         return true;
-      outer = outer?.outer;
-   }
-   while (outer)
-   return false;
-}

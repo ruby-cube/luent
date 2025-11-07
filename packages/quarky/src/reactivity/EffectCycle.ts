@@ -2,7 +2,7 @@
 
 import { noop } from "@rue/utils"
 import { ICyclePhase, Phase, phases, popUpdate, pushUpdate, SYNC, Update } from "./UpdateCycle"
-import { EffectQueue, PhaseTask, TaskQueue } from "./EffectQueue"
+import { EffectQueue, PhaseTask, PrerenderTaskQueue, TaskQueue } from "./EffectQueue"
 import { PRERENDER } from "./render-cycle"
 
 
@@ -31,9 +31,33 @@ export class EffectCycle {
 
 
 
+   started = false
+
    start() {
+      if (this.cancelled == true) return;
+      this.runStartTasks()
       this.schedulePhase(phases[0]) // from module
    }
+
+   private startTasks: (() => void)[] | undefined
+
+   private runStartTasks() {
+      this.startTasks?.forEach(task => {
+         task()
+      })
+   }
+
+   onStart(fn: () => void) {
+      if (this.started) {
+         fn()
+      }
+      else {
+         const startTasks = this.startTasks ?? (this.startTasks = [])
+         startTasks.push(fn)
+      }
+   }
+
+
 
    schedulePhase({ index: phase, next }: ICyclePhase) {
       queueMicrotask(() => {
@@ -114,7 +138,10 @@ export class EffectCycle {
    // effectStack: Set<Effect> = new Set()
 
    private initializeQueue(phase: Phase) {
-      const queue: TaskQueue = new TaskQueue(this, phase)
+      const queue: TaskQueue =
+         phase === PRERENDER
+            ? new PrerenderTaskQueue(this)
+            : new TaskQueue(this, phase)
       this.effects.set(phase, queue);
       return queue
    }

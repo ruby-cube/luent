@@ -2,7 +2,7 @@ import { setImmediate } from "@rue/thread";
 import { createOneoff, Effect, EffectQueue, PhaseTask, TaskQueue } from "./EffectQueue";
 import { Atom, TrackedAtom } from "./Atom";
 import { $schedule, SchedulerOptions } from "@rue/flask";
-import { ILazyState } from "./LazyStateV2";
+import { CancellableState } from "./State";
 import { AnyObject } from "@rue/types";
 import { EffectCycle } from "./EffectCycle";
 
@@ -14,21 +14,16 @@ export const cycle = {
    }
 }
 
-
-
-
 export interface ICyclePhase {
    name: string
    index: number
    schedule: Function
-   canLaze: boolean
    next: ICyclePhase | undefined
 }
 
 type PhaseConfig = {
    name: string,
    scheduler?: Function,
-   canLaze?: boolean,
    default?: true
 }
 
@@ -43,7 +38,7 @@ export type Phase = number | typeof SYNC
 
 export const SYNC = 'SYNC' as const
 
-export let phases: ICyclePhase[] = [{ name: 'Update', schedule: queueMicrotask, index: 0, canLaze: false, next: undefined }]
+export let phases: ICyclePhase[] = [{ name: 'Update', schedule: queueMicrotask, index: 0, next: undefined }]
 
 let _defaultPhase: Phase = SYNC
 
@@ -74,8 +69,8 @@ export function configureUpdateCycle(config: { phases: PhaseConfig[], defaultPha
 }
 
 function addPhase(this: ICyclePhase[], config: PhaseConfig) {
-   const { name, scheduler = queueMicrotask, canLaze = false } = config
-   const phase = new CyclePhase(name, this.length, scheduler, canLaze, this)
+   const { name, scheduler = queueMicrotask } = config
+   const phase = new CyclePhase(name, this.length, scheduler, this)
    this.push(phase);
    return phase;
 }
@@ -85,7 +80,6 @@ export class CyclePhase implements ICyclePhase {
       public name: string,
       public index: number,
       public schedule: Function,
-      public canLaze: boolean,
       private phases: ICyclePhase[]
    ) { }
 
@@ -107,49 +101,48 @@ export type Action = {
 }
 
 
-export class Mutation {
+// export class Mutation {
 
-   constructor(
-      public target: AnyObject,
-      public op: '[[set]]' | PropertyKey,
-      public input: [PropertyKey, unknown] | unknown[],
-   ) { }
+//    constructor(
+//       public target: AnyObject,
+//       public op: '[[set]]' | PropertyKey,
+//       public input: [PropertyKey, unknown] | unknown[],
+//    ) { }
 
-   apply() {
-      if (this.op === '[[set]]') {
-         const key = this.input[0] as PropertyKey
-         const value = this.input[1]
-         this.target[key] = value
-      }
-      else {
-         this.target[this.op](...this.input)
-      }
+//    apply() {
+//       if (this.op === '[[set]]') {
+//          const key = this.input[0] as PropertyKey
+//          const value = this.input[1]
+//          this.target[key] = value
+//       }
+//       else {
+//          this.target[this.op](...this.input)
+//       }
+//    }
+// }
+
+class UpdateCancelled extends Error {
+   constructor() {
+      super('update cancelled')
    }
 }
 
-export class Update<T = any> {
+export class Update {
    timestamp: Date
-   pendingCommit?: Promise<T>
-   resolveCommit?: ((value: T) => void)
+   pendingCommit?: Promise<void>
+   resolveCommit?: () => void
 
    constructor(
       public timeMargin: number = 0,
       public idle: boolean | number = false
    ) {
-      this.pendingCommit = idle ? new Promise((resolve) => { this.resolveCommit = resolve }) : undefined
+      this.pendingCommit = idle ? new Promise<void>((resolve) => { this.resolveCommit = resolve }) : undefined
       this.cycle = new EffectCycle(this)
       this.timestamp = new Date() // TODO: make sure this is correct
    }
 
-   idleOutput: unknown
 
-   // private mutations: Mutation[] = []
-
-   // recordMutation(mutation: Mutation) {
-   //    this.mutations.push(mutation)
-   // }
-
-   private states: ILazyState[] = []
+   private states: CancellableState[] = []
 
    commit() {
       for (const state of this.states) {
@@ -190,7 +183,7 @@ export class Update<T = any> {
       }
    }
 
-   queueCommit(state: ILazyState) {
+   queueCommit(state: CancellableState) {
       this.states.push(state)
    }
 
@@ -198,13 +191,13 @@ export class Update<T = any> {
       return this.timestamp < competingUpdate.timestamp
    }
 
-   race(competingUpdate: Update | null): boolean | 'queue' { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
+   race(competingUpdate: Update | null) { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
       if (competingUpdate === null) {
          this.cycle.start()
-         return true
+         return;
       }
       if (competingUpdate === this) {
-         return true;
+         return;
       }
       if (competingUpdate) {
          if (!this.handleRace) {
@@ -213,19 +206,28 @@ export class Update<T = any> {
          else {
             this.handleRace(competingUpdate.asAction)
          }
-         if (this.cancelled) return false;
+         if (this.cancelled) throw new UpdateCancelled();
          if (!competingUpdate.cancelled) {
-            competingUpdate.onComplete(() => {
-               // queue
-               this.cycle.start() // TODO: this assumes the cycle hasn't started yet. can we be sure of this?
-            })
+            // queue 
+            if (this.cycle.started) {
+               //TODO: WHAT DO WE DO HERE??
+            }
+            else {
+               competingUpdate.onComplete(() => {
+                  this.cycle.start()
+               })
+            }
          }
-         return true
+         return;
       }
-      return true;
+      return;
    }
 
    private handleRace: ((competingAction: Action) => void) | undefined
+
+   onBegin(fn: () => void) {
+      this.cycle.onStart(fn)
+   }
 
    cycle: EffectCycle;
 
@@ -251,6 +253,8 @@ export class Update<T = any> {
    // onCancel(task: () => void) {
    //    this.cancelTasks.push(task)
    // }
+
+
 }
 
 // export class Update {
@@ -526,16 +530,19 @@ export function useUpdate(timeMargin: number = 16, idle: boolean | number = fals
 
 
 // TODO: return type should be based on options--whether it's lazy
-export function idleUpdate<T>(fn: () => T, options?: { timeMargin?: number, deadline?: number }): Promise<T> {
+export function idleUpdate(fn: () => void, options?: { timeMargin?: number, deadline?: number }): Promise<void> | undefined {
    const timeMargin = options?.deadline ?? options?.timeMargin ?? 100;
-   const update = new Update<T>(timeMargin, options?.deadline ?? true) //FIX: because Interval wraps context, the loading update is passed down
+   const update = new Update(timeMargin, options?.deadline ?? true) //FIX: because Interval wraps context, the loading update is passed down
    //NOTE: assumes one cycle per lazy call... is this what I want? no... I need a promise.all but for now, let's just use one promise
 
    try {
       pushUpdate(update)
       // lazyUpdate = timeMargin; // assuming function is synchronous. Need AsyncState for asynchronous
-      update.idleOutput = fn() // QUESTION: should we resolve after cycle completes or when prerender completes/state is committed?
-      return update.pendingCommit!
+      fn() // QUESTION: should we resolve after cycle completes or when prerender completes/state is committed?
+      return update.pendingCommit! // QUESTION: should this be update.onCompleted instead?
+   }
+   catch (err) {
+      catchCancelledUpdate(err)
    }
    finally {
       popUpdate()
@@ -543,17 +550,30 @@ export function idleUpdate<T>(fn: () => T, options?: { timeMargin?: number, dead
    }
 }
 
-export function instantUpdate<T>(fn: () => T): T {
+
+export function instantUpdate(fn: () => void): void {
    const update = new Update(16)
    try {
       pushUpdate(update)
-      return fn()
+      fn()
+   }
+   catch (err) {
+      catchCancelledUpdate(err)
    }
    finally {
       popUpdate()
    }
 }
 
-export function swiftUpdate<T>(fn: () => T): Promise<T> {
+export function swiftUpdate<T>(fn: () => void): Promise<void> | undefined {
    return idleUpdate(fn, { timeMargin: 50, deadline: 17 })
+}
+
+export function catchCancelledUpdate(err: unknown) {
+   if (err instanceof UpdateCancelled) {
+      if (__DEV__) console.warn('update cancelled', err)
+   }
+   else {
+      throw err;
+   }
 }

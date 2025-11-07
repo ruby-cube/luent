@@ -3,17 +3,7 @@ import {  getPhase, scheduleEagerEffect, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
 import { maybePostcycleTask, Phase, SYNC } from "./UpdateCycle";
 import { createOneoff, Effect } from "./EffectQueue";
-import { IonicTaskSubject } from "./Subject";
-
-
-
-//  wrappedEffect = phase === 'postrender' ? delayedTask(wrappedEffect) : wrappedEffect;
-//    phase = phase === 'postrender' ? 3 : phase;
-
-         // scheduleEagerEffect(delayedTask(() => {
-         //    subject.trackedCall()
-         //    subject.linkEffect(effect)
-         // }), phase)
+import { FunctionalSubstance } from "./Substance";
 
 
 type IonicTaskOptions = {
@@ -21,6 +11,8 @@ type IonicTaskOptions = {
    sync?: boolean;
    retrack?: boolean; // defaults to true
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
+
+type IonicTask = (initial: boolean) => void
 
 export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
 
@@ -37,7 +29,7 @@ export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
       }
    }
 
-   const subject = new IonicTaskSubject(wrappedEffect, retrack)
+   const subject = new FunctionalSubstance(wrappedEffect, retrack)
 
    let phase = getPhase(options)
 
@@ -62,10 +54,9 @@ export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
    });
 }
 
-type Task = () => void
 
 // export function setUpIonicTask(
-//    subject: WatchSubject,
+//    subject: WatchedSubstance,
 //    task: Task,
 //    options: EffectOptions,
 // ) {

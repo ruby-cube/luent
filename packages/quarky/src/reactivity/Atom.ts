@@ -2,33 +2,11 @@ import { isObject, __DEV__unwrap } from "@rue/utils";
 import { Phase, SYNC, Update } from "./UpdateCycle";
 import { Effect, EffectQueue } from "./EffectQueue";
 import { hasQuark, Quark, QUARK } from "../abstract/Quark";
-import { ILazyState } from "./LazyStateV2";
-
-
-// const ATOMIC = Symbol('atomic')
-
-
-// export class AtomicQuark implements Atom, Quark {
-//    pendingUpdate: null | Update = null
-//    quarkType = ATOMIC
-//    trigger = trigger
-//    asTrackedAtom: undefined | TrackedAtom
-// }
-
-
-// export function isAtomic(value: unknown): value is { [QUARK]: AtomicQuark } {
-//    return hasQuark(value) && quarkOf(value).quarkType === ATOMIC
-// }
-
-
-// export function isAtomicQuark(value: unknown): value is AtomicQuark {
-//    return value instanceof Object && 'quarkType' in value && value.quarkType === ATOMIC
-// }
 
 
 export type Atom = {
    asTrackedAtom: TrackedAtom | undefined;
-   pendingUpdate: Update | null
+   // pendingUpdate: Update | null
 }
 
 
@@ -43,15 +21,8 @@ export function trigger(
    atom: Atom,
    update: Update
 ) {
-   if (update === atom.pendingUpdate) return;
-   atom.pendingUpdate = update;
    atom.asTrackedAtom?.triggerEffects(update)
 }
-
-
-// export function isWatchable(value: unknown): value is Atom & Quark {
-//    return isObject(value) && 'asTrackedAtom' in value;
-// }
 
 
 export function isTrackableAtom(value: unknown): value is { [QUARK]: Atom & Quark } {
@@ -73,8 +44,6 @@ export class TrackedAtom {
    }
 
    private effects: Map<Phase, EffectQueue> = new Map()
-
-
    private phases: Phase[] = []
 
 
@@ -94,7 +63,6 @@ export class TrackedAtom {
       const phase = effect.phase;
       const phaseQueue = this.effects.get(phase) ?? this.initializePhase(phase);
       phaseQueue.queue(effect)
-      // this.watchCount++
    }
 
 
@@ -102,8 +70,7 @@ export class TrackedAtom {
       const phases = this.phases
       const cycle = update.cycle
       for (const phase of phases) {
-         const queue = this.effects.get(phase)!
-         cycle.scheduleEffects(queue, phase)
+         cycle.scheduleEffects(this.effects.get(phase)!, phase)
          if (phase === SYNC) {
             cycle.runSyncEffects()
          }

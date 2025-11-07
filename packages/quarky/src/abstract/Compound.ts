@@ -128,23 +128,23 @@ export type Particle = Atom | Compound
  */
 export class Compound {
 
-   _atoms: Set<Particle> = new Set()
+   private _atoms: Set<Particle> = new Set()
 
-   atoms: Particle[] = []
+   protected atoms: Particle[] = []
 
-   track(atom: Particle) {
+   protected track(atom: Particle) {
       if (this._atoms.has(atom)) return atom
       this._atoms.add(atom)
       this.atoms.push(atom)
       return atom;
    }
 
-   untrackAtoms() {
+   protected untrackAtoms() {
       this.atoms.length = 0
       this._atoms.clear()
    }
 
-   forEachAtom(fn: (atom: Atom) => void) {
+   protected forEachAtom(fn: (atom: Atom) => void) {
       const atoms = this.atoms;
       atoms.forEach(particle => {
          if ('forEachAtom' in particle) {

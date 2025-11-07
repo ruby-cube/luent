@@ -1,7 +1,7 @@
 import { Quark } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom";
-import { ILazyState } from "../reactivity/LazyStateV2";
+import { ILazyState } from "../reactivity/State";
 import { Update } from "../reactivity/UpdateCycle";
 import { ModelQuark } from "./ModelQuark";
 

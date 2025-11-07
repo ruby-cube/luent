@@ -1,21 +1,22 @@
+//@ts-nocheck
 import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonicProxy } from "../ionic/ionize";
 import { Phase, SYNC, $currentCycle, getDefaultPhase, getAdjustedPhase, maybePostcycleTask } from "./UpdateCycle";
 import { createOneoff, Effect } from "./EffectQueue";
-import { asWatchSubject, isWatchSubject, WatchSubject } from "./Subject";
+import { asWatchedSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
+import { SimpleState } from "./State";
 
 
-// watch(multisubject(
-//    list.$length,
-//    list.$couch
-// ), () => {
-//    doSomething(prevList)
-// }, {
-//    phase: SYNC
-// })
+watch(list.$length, list.$couch, sync(() => {
+   doSomething(prevList)
+}))
+
+watch(multisubstance(list.$length, list.$couch), sync(() => {
+   doSomething(prevList)
+}))
 
 
 /**
@@ -88,16 +89,18 @@ export function watch<
 
    options.retrack = options.retrack ?? true;
 
-   const watchSubject = asWatchSubject(subject, options.retrack, Boolean(options.once))
+   const watchSubject = asWatchedSubstance(subject, options.retrack, Boolean(options.once))
    if (options?.traceTriggers) {
       // TODO:
    }
 
-   if (!isWatchSubject(watchSubject)) { // plain object
+   if (!isWatchedSubstance(watchSubject)) { // plain object
       return InertWatcher()
    }
 
-   let prevState = watchSubject.getValue(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
+   const prevState = new SimpleState(watchSubject.getValue())
+
+   // let prevState = watchSubject.getValue(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
    if (watchSubject.inert) {
       return InertWatcher()
@@ -107,17 +110,17 @@ export function watch<
 
    function wrappedEffect() {
       const newState = watchSubject.getValue() // retracking happens here // TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
-      if (!options.eager && !hasChanged(prevState, newState)) {
+      if (!options.eager && !hasChanged(prevState.get(), newState)) {
          return;
       }
 
       try {
-         (<EffectTask>effect)(new StateChangeEvent(prevState, newState, !!options.eager))
+         (<EffectTask>effect)(new StateChangeEvent(prevState.get(), newState, !!options.eager))
       }
       finally {
          options.eager = false;
-         prevState = newState;
-         hasChanged = getHasChangedFn(options, prevState) //accounts for ions whose value may change from ionized to not ionized
+         prevState.set(newState);
+         hasChanged = getHasChangedFn(options, prevState.get()) //accounts for ions whose value may change from ionized to not ionized
       }
    }
    wrappedEffect.__DEV__fn = effect
@@ -146,7 +149,7 @@ export function sync<F>(fn: F): F {
 
 
 export function setUpWatcher(
-   subject: WatchSubject,
+   subject: WatchedSubstance,
    task: Task,
    options: EffectOptions,
 ) {

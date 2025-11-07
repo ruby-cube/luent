@@ -9,10 +9,10 @@ import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { ModelQuark } from "../ionic/ModelQuark";
 import { trackParticle } from "../abstract/Compound";
-import { Update, isIdleUpdate, useUpdate, getActiveUpdate, Mutation } from "../reactivity/UpdateCycle";
+import { Update} from "../reactivity/UpdateCycle";
 import { maybeIonize, MarkMap } from "../ionic/Ionic";
 import { isObjectLiteral } from "@rue/utils";
-import { LazyState } from "../reactivity/LazyStateV2";
+import { SimpleState } from "../reactivity/State";
 
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
@@ -29,16 +29,13 @@ export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark }
 const ATOMIC_ION = Symbol('atomic ion')
 
 export class AtomicIonQuark implements Atom, Quark {
+   __DEV__asTraceable: Traceable = new Traceable()
    quarkType: string | symbol = ATOMIC_ION
-   __DEV__asTraceable: Traceable;
 
    constructor(
-      public state: LazyState<unknown>,
-   ) {
-      this.__DEV__asTraceable = new Traceable()
-   }
+      public state: SimpleState,
+   ) { }
 
-   // atom
    asTrackedAtom: TrackedAtom | undefined;
    pendingUpdate: Update | null = null
 
@@ -99,7 +96,6 @@ export function createAtomicIon(
 function getState(this: AtomicIonQuark) {
    if (__DEV__) emitSignal();
    trackParticle(this)
-   this.state.lock('read')
    return this.transformGet(this.state.get())
 }
 
@@ -109,13 +105,9 @@ export function setState(this: AtomicIonQuark, value: unknown) {
    const newState = this.transformSet(value, FAIL);
    if (newState === FAIL) return this.state.current;
 
-   const update = this.state.lock()
+   this.state.set(newState)
 
-   if (!update) return this.state.current
+   trigger(this, this.state.pendingUpdate!)
 
-   this.state.set(newState, update)
-
-   trigger(this, update)
-
-   return value;
+   return newState;
 }

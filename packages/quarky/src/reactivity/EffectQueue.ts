@@ -1,6 +1,6 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { Phase, SYNC, popUpdate, pushUpdate } from "./UpdateCycle";
+import { Phase, SYNC, catchCancelledUpdate, popUpdate, pushUpdate } from "./UpdateCycle";
 import { EffectCycle } from "./EffectCycle";
 import { INTERNAL_POSTRENDER, INTERNAL_RENDER, PRERENDER, RENDER } from "./render-cycle";
 
@@ -125,9 +125,7 @@ export class EffectQueue {
    ) {
    }
 
-   idleCount = 0;
-
-   runEffects(taskQueue: TaskQueue, completed: Set<Effect> | undefined) {
+   runEffects(run: (effect: Effect) => void, completed: Set<Effect> | undefined) {
       const effects = this.nextEffects
       this.nextEffects = []
       const phase = this.phase
@@ -160,7 +158,7 @@ export class EffectQueue {
          // }
          try {
             effectStackCount++
-            taskQueue.runEffect(effect)
+            run(effect)
          }
          finally {
             effectStackCount--
@@ -225,17 +223,15 @@ export function queueRenderTask(task: () => void) {
  * Belongs to the current effect cycle.
  */
 export class TaskQueue {
-   private moreEffects: EffectQueue[] | undefined;
-   private effects: EffectQueue[] = []
+   protected moreEffects: EffectQueue[] | undefined;
+   protected effects: EffectQueue[] = []
 
-   emitBatchesComplete: (() => void) | undefined
-   
    effectsComplete: Promise<void>;
-   private emitEffectsComplete!: (value: void | PromiseLike<void>) => void;
+   protected emitEffectsComplete!: (value: void | PromiseLike<void>) => void;
 
    constructor(
       public cycle: EffectCycle,
-      private phase: Phase
+      protected phase: Phase
    ) {
       effectsComplete[phase] = this.effectsComplete = new Promise<void>((resolve) => { this.emitEffectsComplete = resolve })
    }
@@ -245,12 +241,7 @@ export class TaskQueue {
    }
 
    scheduleEffects(effects: EffectQueue) {
-
       if (this.runningEffects && !effects.requeued) {
-         // a currentEffect during runningEffects means the effect triggered 
-         // other effects and should be added to the effectStack to prevent infinite loops
-         // const currentEffect = $currentEffect()
-         // if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
          effects.requeued = true;
          const extension = this.moreEffects ?? (this.moreEffects = [])
          extension.push(effects)
@@ -264,14 +255,107 @@ export class TaskQueue {
    runningEffects: boolean = false
 
    runEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
+      this.runBatches(
+         (effect) => this.runEffect(effect),
+         this.phase === SYNC ? undefined : new Set()
+      )
+      this.runMoreEffects(cycle, onComplete)
+      return this.effectsComplete
+   }
+
+   runBatches(run: (effect: Effect) => void, completed: Set<Effect> | undefined) {
+      const queues = this.effects;
+      for (const batch of queues) {
+         batch.runEffects(run, completed)
+         batch.queued = this.moreEffects?.length ? batch.requeued : false;
+         batch.requeued = false;
+      }
+   }
+
+   runMoreEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
+      this.effects = this.moreEffects ?? []
+      this.moreEffects = undefined;
+      if (this.effects.length) {
+         this.runEffects(cycle, onComplete)
+      }
+      else {
+         onComplete(this.emitEffectsComplete)
+      }
+   }
+
+   runEffect(effect: Effect) {
+      const update = this.cycle.update
+
+      try {
+         this.runningEffects = true
+         pushUpdate(update)
+         effect.run?.()
+      }
+      catch (err) {
+         catchCancelledUpdate(err)
+      }
+      finally {
+         popUpdate()
+         this.runningEffects = false
+      }
+   }
+}
+
+
+
+
+/**
+ * Belongs to the current effect cycle.
+ */
+export class PrerenderTaskQueue extends TaskQueue {
+   // private moreEffects: EffectQueue[] | undefined;
+   // private effects: EffectQueue[] = []
+
+   // effectsComplete: Promise<void>;
+   // private emitEffectsComplete!: (value: void | PromiseLike<void>) => void;
+
+   constructor(
+      cycle: EffectCycle,
+   ) {
+      super(cycle, PRERENDER)
+      // effectsComplete[phase] = this.effectsComplete = new Promise<void>((resolve) => { this.emitEffectsComplete = resolve })
+   }
+
+   // scheduleTask(task: PhaseTask) {
+   //    this.effectsComplete.then(task.run) // TODO: how do I run tasks as idle?
+   // }
+
+   // scheduleEffects(effects: EffectQueue) {
+
+   //    if (this.runningEffects && !effects.requeued) {
+   //       // a currentEffect during runningEffects means the effect triggered 
+   //       // other effects and should be added to the effectStack to prevent infinite loops
+   //       // const currentEffect = $currentEffect()
+   //       // if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
+   //       effects.requeued = true;
+   //       const extension = this.moreEffects ?? (this.moreEffects = [])
+   //       extension.push(effects)
+   //    }
+   //    else if (!effects.queued) {
+   //       this.effects.push(effects)
+   //       effects.queued = true;
+   //    }
+   // }
+
+   // runningEffects: boolean = false
+
+   emitBatchesComplete: (() => void) | undefined
+   idleCount = 0;
+
+   override runEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
       new Promise<void>(emitBatchesComplete => {
-         const completed: Set<Effect> | undefined = this.phase === SYNC ? undefined : new Set()
-         const queues = this.effects;
-         for (const batch of queues) {
-            batch.runEffects(this, completed)
-            batch.queued = this.moreEffects?.length ? batch.requeued : false;
-            batch.requeued = false;
-         }
+         const update = this.cycle.update;
+         this.runBatches(
+            update.idle
+               ? (effect: Effect) => { this.scheduleIdleEffect(effect, <number>update.idle) }
+               : (effect: Effect) => { this.runEffect(effect) },
+            new Set()
+         )
          if (this.idleCount === 0) {
             emitBatchesComplete()
          }
@@ -279,51 +363,47 @@ export class TaskQueue {
             this.emitBatchesComplete = emitBatchesComplete
          }
       }).then(() => {
-         this.effects = this.moreEffects ?? []
-         this.moreEffects = undefined;
-         if (this.effects.length) {
-            this.runEffects(cycle, onComplete)
-         }
-         else {
-            onComplete(this.emitEffectsComplete)
-         }
+         this.runMoreEffects(cycle, onComplete)
       })
       return this.effectsComplete
    }
 
-   idleCount = 0;
-
-   runEffect(effect: Effect) {
-
+   scheduleIdleEffect(effect: Effect, timeout: number) {
       const update = this.cycle.update
-      if (this.phase === PRERENDER && update.idle) {
-         this.idleCount++;
-         requestIdleCallback(() => {
-            try {
-               this.runningEffects = true
-               pushUpdate(update)
-               effect.run?.();
-            }
-            finally {
-               popUpdate()
-               this.runningEffects = false
-               this.idleCount--
-               if (this.idleCount === 0) {
-                  this.emitBatchesComplete?.()
-               }
-            }
-         }, { timeout: update.idle === true ? 17 : update.idle })
-      }
-      else {
+      this.idleCount++;
+      requestIdleCallback(() => {
          try {
             this.runningEffects = true
             pushUpdate(update)
-            effect.run?.()
+            effect.run?.();
+         }
+         catch (err) {
+            catchCancelledUpdate(err)
          }
          finally {
             popUpdate()
             this.runningEffects = false
+            this.idleCount--
+            if (this.idleCount === 0) {
+               this.emitBatchesComplete?.()
+            }
          }
-      }
+      }, { timeout })
    }
+
+   // runEffect(effect: Effect) {
+   //    const update = this.cycle.update
+   //    try {
+   //       this.runningEffects = true
+   //       pushUpdate(update)
+   //       effect.run?.()
+   //    }
+   //    catch (err) {
+   //       catchCancelledUpdate(err)
+   //    }
+   //    finally {
+   //       popUpdate()
+   //       this.runningEffects = false
+   //    }
+   // }
 }

@@ -93,7 +93,7 @@ export type TraceableSubject = {
 
 export function __DEV__asTraceable(subject: TraceableSubject): Traceable {
    const traceable = quarkOf(subject).__DEV__asTraceable
-   if (!traceable) throw new Error('Subject is not traceable')
+   if (!traceable) throw new Error('Substance is not traceable')
    return traceable;
 }
 

@@ -1,14 +1,15 @@
 import { debug, isFunction } from "@rue/utils";
 import { Inert } from "./Get";
-import { createManagedDerivation } from "../ion/DerivationIon";
+import { createManagedDerivation } from "./x_DerivationIon";
 import { AtomicIonQuark, createAtomicIon, IONIZED } from "./AtomicIon";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionic/ionize";
 import { initializeSnapshots } from "../ionic/TimeTraveler";
 import { hasQuark, QUARK } from "../abstract/Quark";
 import { IonizeOptions, maybeIonize } from "../ionic/Ionic";
-import { isGetter } from "../reactivity/Subject";
-import { IonState } from "../reactivity/LazyState";
+import { isGetter } from "../reactivity/Substance";
+import { createMemoizedDerivation } from "./DerivationIon";
+import { SimpleState } from "../reactivity/State";
 
 /* API */
 export type Ion<T = unknown> = (() => T) & { '~ion': true }
@@ -238,11 +239,11 @@ function asIon(
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      return initializeSnapshots(createManagedDerivation(<Derivation>initialState, props, true))
+      return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props, true))
    }
 
    if (isIon(initialState)) return initialState
-   return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new IonState(initialState)), ionized, options?.mark, props)) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new SimpleState(initialState)), ionized, options?.mark, props)) // TODO: add inert mark map
 }
 
 export const ionic = ion

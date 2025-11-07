@@ -6,12 +6,10 @@ export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
 
-   trackCall(fn: () => any) {
+   protected trackCall(fn: () => any) {
       pushTracker(this);
       try {
-         const value = fn();
-         // if (isIonicProxy(value)) trackParticle(quarkOf(value)) // TODO: not sure if I need this here or only in watched subject
-         return value;
+         return fn();
       }
       finally {
          popTracker();
@@ -22,7 +20,7 @@ export class IonicCompound extends Compound {
       }
    }
 
-   retrackCall(fn: () => any) {
+   protected retrackCall(fn: () => any) {
       this.untrackAtoms()
       return this.trackCall(fn)
    }

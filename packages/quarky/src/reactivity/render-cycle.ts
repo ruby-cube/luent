@@ -1,9 +1,8 @@
 import { Flask, getActiveFlask, getFlask } from "@rue/flask"
-import { createAwaitableHook } from "@rue/utils"
 import { __DEV__getTrace, getInternalTrace, traceAsyncPath } from "../../../flask/debug"
 import { $activeUpdate, configureUpdateCycle, getCurrentPhase, postcycleTask, useUpdateCycleScheduler } from "./UpdateCycle"
 import { createOneoff, Effect } from "./EffectQueue"
-import { IonSubject } from "./Subject"
+import { IonSubject } from "./Substance"
 import { Ion } from "../ion/Ion"
 import { scheduleEagerEffect } from "./watch"
 
@@ -16,7 +15,7 @@ export const {
    POSTCYCLE: POSTRENDER
 } = configureUpdateCycle({
    phases: [
-      { name: 'PRERENDER', scheduler: queueMicrotask, canLaze: true },
+      { name: 'PRERENDER', scheduler: queueMicrotask },
       { name: 'INTERNAL_RENDER', scheduler: queueMicrotask },
       { name: 'RENDER', scheduler: queueMicrotask },
       { name: 'INTERNAL_POSTRENDER', scheduler: queueMicrotask }
@@ -185,9 +184,9 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    // return;
    const subject = new IonSubject(ion)
 
-   let prevState = subject.trackedCall()
+   let prevState = subject.getValue()
 
-   if (subject.inert) {
+   if (!subject.reactive) {
       return;
    }
 
@@ -206,7 +205,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    let eagerRun = eager;
    
    function _render() {
-      const newState = subject.trackedCall()
+      const newState = subject.getValue()
       render({ current: newState, previous: prevState, flask, eagerRun })
       eagerRun = false;
       prevState = newState;

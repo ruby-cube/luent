@@ -8,9 +8,9 @@ import { asTrackedAtom } from "../reactivity/Atom";
 import { Ion } from "./Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
-import { SYNC, $activeUpdate, Mutation } from "../reactivity/UpdateCycle";
-import { trackParticle } from "../abstract/Compound";
-import { ILazyState, LazyState } from "../reactivity/LazyStateV2";
+import { SYNC, isIdleUpdate, $activeUpdate } from "../reactivity/UpdateCycle";
+import {  trackParticle } from "../abstract/Compound";
+import { NULL } from "../reactivity/x_LazyState";
 
 
 
@@ -27,8 +27,10 @@ import { ILazyState, LazyState } from "../reactivity/LazyStateV2";
 export type $DerivedState = Ion & {
    [QUARK]: {
       inert: boolean
-      state: ILazyState
-      staleState: ILazyState
+      state: unknown
+      stale: boolean
+      pStale: boolean | undefined
+      pState: unknown
       derivation: (prev?: unknown) => unknown
       staleMarker: Effect | undefined
    }
@@ -37,8 +39,10 @@ export type $DerivedState = Ion & {
 
 class ManagedDerivation extends IonicCompound {
    inert: boolean = false
-   state = new LazyState(undefined as unknown)
-   staleState = new LazyState(false)
+   state: unknown | undefined
+   stale: boolean = false
+   pStale: boolean | undefined
+   pState: unknown | typeof NULL = NULL
    staleMarker: Effect | undefined
    quarkType = DERIVATION_ION
    __DEV__asTraceable = new Traceable()
@@ -85,20 +89,15 @@ export function createManagedDerivation(
       }
       else {
          if (__DEV__) emitSignal();
+         // getActiveTracker()?.track(ion)
          fn = getMemoizedState
-         const update = $activeUpdate()
-         ion.state.set(value, update)
-         ion.staleState.set(false, update)
+         ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
          const effect = ion.staleMarker = new Effect(() => {
-            const update = $activeUpdate()
-            const stale = ion.staleState
-            if (stale.pendingUpdate && stale.pendingUpdate !== update) {
-               // TODO: what about race conditions?? 
-               // Ideally the triggering set will deal with the race condition so derivations don't have to
-               console.warn('[DEV RESEARCH] race condition for derivation stale marker')
+            if (isIdleUpdate()) {
+               ion.pStale = true;
             }
-            stale.set(true, update)
+            else ion.stale = true
          }, SYNC)
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
@@ -106,6 +105,26 @@ export function createManagedDerivation(
             compound!.untrackAtoms()
             fn = initialize;
          })
+         if (isIdleUpdate()) {
+            ion.pState = value;
+            ion.pStale = false;
+            const update = $activeUpdate()
+            
+            if (ion.pStale) {
+               update.onComplete(() => {
+                  ion.state = value;
+                  ion.stale = true;
+
+                  ion.pState = NULL;
+                  ion.pStale = undefined;
+               })
+            }
+            update.onCancel(() => {
+               ion.pState = NULL;
+               ion.pStale = undefined;
+            })
+            return value;
+         }
          return value;
       }
    }
@@ -118,41 +137,50 @@ export function createManagedDerivation(
    function getMemoizedState() {
       // TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
-      const stale = ion.staleState.get();
+      const stale = isIdleUpdate() ? ion.pStale : ion.stale;
       if (!stale || !retrack) trackParticle(ion)
 
-      const prevState = ion.state.get();
+      const prevState = isIdleUpdate() && ion.pState !== NULL ? ion.pState : ion.state
 
       const value =
          (retrack && stale) ? retrackedCall(ion)
             : stale ? derivation(prevState)
                : prevState;
 
-      if (stale) {
+      if (isIdleUpdate()) {
+         ion.pState = value;
+         ion.pStale = false;
+         // window.__DEV__log.push('lazy update ' + value)
          const update = $activeUpdate()
-         const staleState = ion.staleState
-         if (staleState.pendingUpdate && staleState.pendingUpdate !== update) {
-            // TODO: what about race conditions??
-            console.warn('[DEV RESEARCH] race condition for derivation stale marker')
+         if (stale) {
+            update.onComplete(() => {
+               ion.state = ion.pState;
+               ion.stale = ion.pStale!;
+
+               ion.pState = NULL;
+               ion.pStale = undefined;
+            })
          }
-         ion.state.set(value, update)
-         staleState.set(false, update)
+         update.onCancel(() => {
+            ion.pState = NULL;
+            ion.pStale = undefined
+         })
+         return value;
+      }
+
+      if (ion.stale) {
+         ion.state = value;
+         ion.stale = false;
       }
 
       return value;
    }
 
    function getState() {
-      const state = ion.state
-      const update = $activeUpdate()
-      if (state.pendingUpdate && state.pendingUpdate !== update) {
-         // TODO: what about race conditions??
-         console.warn('[DEV RESEARCH] race condition for derivation stale marker')
-      }
-      return state.set(derivation(state.get()), update)
+      return ion.state = derivation(ion.state)
    }
 
-   const ion: ManagedDerivation = quark ?? new ManagedDerivation(derivation, $derived) // TODO: if inert, no need for ManagedDerivation...
+   const ion: ManagedDerivation = quark ?? new ManagedDerivation(derivation, $derived)
 
    // ion.asCompound.entity = ion;
 

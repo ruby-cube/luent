@@ -7,15 +7,15 @@ import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
 import { QUARK, quarkOf } from "../abstract/Quark";
-import { Atom } from "../reactivity/Atom";
+import { Atom, trigger } from "../reactivity/Atom";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp, trackOp } from "./IonicMethods";
 import { inert, isInert } from "./notes/inert";
 import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
 import { isTracking } from "../abstract/Compound";
 import { Update } from "../reactivity/UpdateCycle";
-import { PionState } from "../reactivity/LazyState";
+import { PionState } from "../reactivity/x_LazyState";
 import { MutableEntity } from "../abstract/Mutable";
-import { ModelState } from "../reactivity/LazyStateV2";
+import { ModelState } from "../reactivity/State";
 
 // export function $atomicPion(
 //    modelQuark: ModelQuark,
@@ -524,7 +524,7 @@ export function createIonicProxy(
          else if (target[key] !== attributes.value) {
             getPionQuark(target, key)?.trigger(update)
          }
-         modelQuark.trigger(update)
+         trigger(modelQuark, update)
          // TODO: record mutation?
          return true;
       },
@@ -540,7 +540,7 @@ export function createIonicProxy(
          if (key in proxyProto) {
             triggerKeysChange(modelQuark, key, update)
          }
-         modelQuark.trigger(update)
+         trigger(modelQuark, update)
          // TODO: record mutation?
          return true;
       },
@@ -767,7 +767,7 @@ function createPion(
    propertyDescriptor: PropertyDescriptor,
    mark: InertMark | MarkMap | undefined
 ) {
-   const propDef = getIonizedMemberDef(state.active, key)
+   const propDef = getIonizedMemberDef(state.get(), key)
    const ion = createAtomicIon(new AtomicIonQuark(new PionState(state, key), modelQuark, propDef?.track, propDef?.trigger), true, mark)
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
