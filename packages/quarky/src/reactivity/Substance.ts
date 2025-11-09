@@ -101,7 +101,7 @@ class Multisubstance implements WatchedSubstance {
 // }
 export const isGetter = isIon
 
-interface WatchedSubstance extends Substance {
+export interface WatchedSubstance extends Substance {
    getValue: () => unknown
 }
 

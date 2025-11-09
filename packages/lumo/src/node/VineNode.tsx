@@ -1,7 +1,7 @@
 import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 import { debug, isObject, normalizeToArray } from "@rue/utils";
 import { __DEV__checkIfTracked, Ion, isGetter, isIon, toValue, watch } from "@rue/quarky";
-import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/render-cycle";
+import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";

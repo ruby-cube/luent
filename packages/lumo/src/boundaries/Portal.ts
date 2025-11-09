@@ -1,7 +1,7 @@
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { isFunction, isObject, normalizeToArray } from "@rue/utils";
 import { atMounted, atUnmount, atRemounted } from "../flask/flask-hooks";
-import { queueInternalRenderTask } from "../../../quarky/src/reactivity/render-cycle";
+import { queueInternalRenderTask } from "../../../quarky/src/reactivity/EffectCycle";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput } from "../node/VineNode";
 import { getFlask } from "@rue/flask";
 

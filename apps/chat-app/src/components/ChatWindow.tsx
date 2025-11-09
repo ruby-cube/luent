@@ -43,10 +43,10 @@ export function ChatWindow(input: FromTag<{
       mu: $smoothScroll.value = false;
       mu: $notifyNewMessages.value = false;
 
-      await tick()
+      await $tick()
       scrollToNew()
 
-      await tick()
+      await $tick()
       mu: $smoothScroll.value = true;
    })
 
@@ -54,22 +54,10 @@ export function ChatWindow(input: FromTag<{
       mu: $smoothScroll.value = false;
       mu: $notifyNewMessages.value = false;
 
-      ooo.await(tick).then(() => {
+      ooo.await($postrender, () => {
          scrollToNew()
       })
-      ooo.await(tick).then(() => {
-         mu: $smoothScroll.value = true
-      })
-   })
-
-   atRemounted(ooo => {
-      mu: $smoothScroll.value = false;
-      mu: $notifyNewMessages.value = false;
-
-      ooo.await(tick, () => {
-         scrollToNew()
-      })
-      ooo.await(tick, () => {
+      ooo.await($tick, () => {
          mu: $smoothScroll.value = true
       })
    })

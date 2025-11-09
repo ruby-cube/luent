@@ -12,7 +12,7 @@ import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initMod
 import { inert, isInert } from "./notes/inert";
 import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
 import { isTracking } from "../abstract/Compound";
-import { Update } from "../reactivity/UpdateCycle";
+import { Update } from "../reactivity/Update";
 import { PionState } from "../reactivity/x_LazyState";
 import { MutableEntity } from "../abstract/Mutable";
 import { ModelState } from "../reactivity/State";

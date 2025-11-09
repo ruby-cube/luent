@@ -2,7 +2,7 @@ import { Quark } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom";
 import { ILazyState } from "../reactivity/State";
-import { Update } from "../reactivity/UpdateCycle";
+import { Update } from "../reactivity/Update";
 import { ModelQuark } from "./ModelQuark";
 
 export type TrackedOps = Map<EntryKey, Atom>

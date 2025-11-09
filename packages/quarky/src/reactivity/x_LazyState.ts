@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types"
 import { Mutable } from "../abstract/Mutable"
-import { isIdleUpdate } from "./UpdateCycle"
+import { isIdleUpdate } from "./Update"
 
 export const NULL = Symbol('null')
 

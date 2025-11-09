@@ -1,9 +1,9 @@
 import { $listen, SustainedListenerOptions } from "@rue/flask";
-import {  getPhase, scheduleEagerEffect, WatchDebugOptions } from "./watch";
+import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
-import { maybePostcycleTask, Phase, SYNC } from "./UpdateCycle";
 import { createOneoff, Effect } from "./EffectQueue";
 import { FunctionalSubstance } from "./Substance";
+import { maybePostcycleTask, Phase } from "./EffectCycle";
 
 
 type IonicTaskOptions = {
@@ -20,7 +20,7 @@ export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
 
    let initial = true;
 
-   let wrappedEffect = () => {
+   const wrappedEffect = () => {
       try {
          task(initial)
       }
@@ -33,7 +33,7 @@ export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
 
    let phase = getPhase(options)
 
-   wrappedEffect = maybePostcycleTask(wrappedEffect, phase)
+   // wrappedEffect = maybePostcycleTask(wrappedEffect, phase)
 
    // TODO: options.preserve means non-pausable watcher
    // const preserve = options?.preserve
@@ -43,7 +43,7 @@ export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
       enroll(_task) {
          const effect = new Effect(_task, phase)
          scheduleEagerEffect(() => {
-            maybePostcycleTask(() => subject.trackedCall(), phase)()
+            subject.trackedCall()
             subject.linkEffect(effect)
          }, phase)
          return effect;

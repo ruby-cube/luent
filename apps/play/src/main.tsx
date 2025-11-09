@@ -92,7 +92,12 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 
 
 installIonizedDate()
-const app = createApp(TestCount)
+
+function Hello(){
+   return component(<div>Hello World</div>)
+}
+
+const app = createApp(Hello)
 
 app.mount('#app')
 

@@ -4,7 +4,7 @@ import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
 import { $_derivation, ion, Ion, ionic } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
-import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/render-cycle";
+import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../context/context-stack";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";

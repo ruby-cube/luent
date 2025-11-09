@@ -17,14 +17,14 @@ export type CommonsNode = NodeCommons | AppCommons
 // must be wrapped with its commons with push and pop for when they run asynchronously
 // However, it must NOT push and pop commons for its initial render.
 
-export function pushCommons(commons: CommonsNode | undefined) {
+export function pushContext(commons: CommonsNode | undefined) {
    if (!commons) throw new Error(`Provider is undefined`)
    // previousContext = currentContext;
    // currentContext = commons;
    commonsStack.push(commons)
 }
 
-export function popCommons() {
+export function popContext() {
    commonsStack.pop()
    // currentContext = previousContext;
    // previousContext = previousContext?.parent

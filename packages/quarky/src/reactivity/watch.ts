@@ -1,22 +1,21 @@
-//@ts-nocheck
 import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonicProxy } from "../ionic/ionize";
-import { Phase, SYNC, $currentCycle, getDefaultPhase, getAdjustedPhase, maybePostcycleTask } from "./UpdateCycle";
-import { createOneoff, Effect } from "./EffectQueue";
+import { createOneoff, Effect, PhaseTask } from "./EffectQueue";
 import { asWatchedSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
+import { $currentCycle, getAdjustedPhase, getDefaultPhase, maybePostcycleTask, Phase, SYNC } from "./EffectCycle";
 
 
-watch(list.$length, list.$couch, sync(() => {
-   doSomething(prevList)
-}))
+// watch(list.$length, list.$couch, sync(() => {
+//    doSomething(prevList)
+// }))
 
-watch(multisubstance(list.$length, list.$couch), sync(() => {
-   doSomething(prevList)
-}))
+// watch(multisubstance(list.$length, list.$couch), sync(() => {
+//    doSomething(prevList)
+// }))
 
 
 /**
@@ -102,7 +101,7 @@ export function watch<
 
    // let prevState = watchSubject.getValue(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
-   if (watchSubject.inert) {
+   if (!watchSubject.reactive) {
       return InertWatcher()
    }
 
@@ -134,7 +133,7 @@ export function watch<
 
 type Task = () => void
 
-export function getPhase(options: undefined | EffectOptions) {
+export function getPhase(options: undefined | EffectOptions): Phase {
    const phase = options?.phase ?? getDefaultPhase()
    return getAdjustedPhase(phase)
 }
@@ -158,7 +157,7 @@ export function setUpWatcher(
    // TODO: options.preserve means non-pausable watcher
    const preserve = options.preserve
 
-   task = maybePostcycleTask(task, phase)
+   // task = maybePostcycleTask(task, phase)
 
    if (eager) {
       scheduleEagerEffect(task, phase)
@@ -179,10 +178,10 @@ export function setUpWatcher(
 
 
 export function scheduleEagerEffect(task: Task, phase: Phase) {
-   const eagerEffect = createOneoff(task, phase)
+   // const eagerEffect = createOneoff(task, phase)
    const cycle = $currentCycle()
-   cycle.scheduleTask(eagerEffect)
-   if (eagerEffect.phase === SYNC) {
+   cycle.scheduleTask(new PhaseTask(task, phase))
+   if (phase === SYNC) {
       cycle.runSyncEffects()
    }
 }

@@ -1,6 +1,6 @@
 import { ion, watch } from "@rue/quarky";
 import { describe, expect, it, vi } from "vitest";
-import { PRERENDER } from "../../../../packages/quarky/src/reactivity/render-cycle";
+import { PRERENDER } from "../../../../packages/quarky/src/reactivity/EffectCycle";
 
 //NOTE: Infinite loops should be eliminated from an app, not supported. Infinite loop prevention is for debugging and tracking down loops.
 

@@ -1,14 +1,14 @@
 import { Component, ComponentSetup } from "./component/Component";
 import { AnyObject } from "@rue/types";
 import { AppCommons, createAppCommons } from "./context/provide";
-import {  popCommons, pushCommons } from "./context/context-stack";
+import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { createUpdate, Ion, pushUpdate, popUpdate, Update } from "@rue/quarky";
+import { createUpdate, Ion, pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate } from "@rue/quarky";
 import { Provided } from "./context/Context";
 import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
 import { normalizeToArray } from "@rue/utils";
-import { queueInternalRenderTask } from "../../quarky/src/reactivity/render-cycle";
+import { queueInternalRenderTask } from "../../quarky/src/reactivity/EffectCycle";
 
 let appRoot: Element;
 
@@ -49,25 +49,23 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
          const attributes = {
             ...config?.setup || {},
          }
-         const update = new Update(1000)
+         const update = new Update(UpdateType.SERVER_RESPONSE, 1000) // TODO: add rerun function incase of queued updates due to race conditions
          flaskStack.push(flask)
          pushUpdate(update)
-         pushCommons(appCommons)
+         pushContext(appCommons)
          let nodes: JSXNode[]
          try {
             nodes = this.nodes = processJSXOutput(App(toInput(attributes)))
             setUpNodeVine(nodes, appRoot)
-            
             queueInternalRenderTask(() => {
                mountDOMNodes(nodes, appRoot)
             }, flask)
-            
+
             flask.emitInitialMount()
          }
-         // catch(err){
-         //    if (err === 'stream cancelled') console.log('stream cancelled')
-         //    else throw err
-         // }
+         catch (err) {
+            catchCancelledUpdate(err)
+         }
          finally {
             flaskStack.pop()
             popUpdate()
@@ -75,7 +73,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             // component.setUp(root, nodePod)
             // component.mount(root) // TODO: if this is a remount, how would it be different than a first mount? use fragment?
             // if (remountable) unmarkMountPhase()
-            popCommons() // for sibling components to access parent, must be set AFTER `component()`
+            popContext() // for sibling components to access parent, must be set AFTER `component()`
          }
          // })
 

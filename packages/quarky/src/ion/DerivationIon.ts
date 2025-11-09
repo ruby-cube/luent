@@ -1,10 +1,10 @@
-import { SYNC } from "@rue/lumo";
 import { Effect } from "../reactivity/EffectQueue";
 import { FunctionalSubstance, IonSubject } from "../reactivity/Substance";
 import { SimpleState } from "../reactivity/State";
-import { QUARK } from "../abstract/Quark";
+import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
+import { SYNC } from "../reactivity/EffectCycle";
 
 
 // function createMemoizedDerivationIon(derive: (prev: unknown) => unknown) {
@@ -55,6 +55,10 @@ class DerivationIon {
 }
 
 export const DERIVATION_ION = Symbol('Derivation Ion')
+
+export function isManagedDerivation(value: unknown): value is $DerivedState {
+   return hasQuark(value) && quarkOf(<$DerivedState>value).quarkType === DERIVATION_ION
+}
 
 export function createMemoizedDerivation(
    derive: (prev?: unknown) => unknown,

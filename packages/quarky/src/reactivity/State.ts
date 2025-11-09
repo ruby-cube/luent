@@ -1,5 +1,5 @@
-import { getActiveUpdate,  Update, useUpdate } from "./UpdateCycle"
-import type { Action } from "./UpdateCycle"
+import { getActiveUpdate,  Update, useUpdate } from "./Update"
+import type { Action } from "./Update"
 import { AnyObject } from "@rue/types"
 
 interface ActionStack<T> {

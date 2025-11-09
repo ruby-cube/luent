@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { component, For, If, Else, FromTag, fromApp, ContextKey } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
-import { PRERENDER } from "../../../../packages/quarky/src/reactivity/render-cycle"
+import { PRERENDER } from "../../../../packages/quarky/src/reactivity/EffectCycle"
 import { create } from "domain"
 import { isTracking } from "../../../../packages/quarky/src/abstract/Compound"
 

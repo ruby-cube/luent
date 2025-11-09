@@ -1,7 +1,7 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
 import { Ion, ion, ionic, MaybeIonized, MutableIon } from "@rue/quarky";
-import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/render-cycle";
+import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 

@@ -9,7 +9,7 @@ import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { ModelQuark } from "../ionic/ModelQuark";
 import { trackParticle } from "../abstract/Compound";
-import { Update} from "../reactivity/UpdateCycle";
+import { Update} from "../reactivity/Update";
 import { maybeIonize, MarkMap } from "../ionic/Ionic";
 import { isObjectLiteral } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";

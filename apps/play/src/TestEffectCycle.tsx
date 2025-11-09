@@ -1,6 +1,6 @@
 import { component } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
-import { RENDER } from "../../../packages/quarky/src/reactivity/render-cycle";
+import { RENDER } from "../../../packages/quarky/src/reactivity/EffectCycle";
 
 export function TestEffectCycle() {
    const $count = ion(0, {

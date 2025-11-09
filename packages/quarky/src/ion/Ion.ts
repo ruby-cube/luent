@@ -1,6 +1,5 @@
 import { debug, isFunction } from "@rue/utils";
 import { Inert } from "./Get";
-import { createManagedDerivation } from "./x_DerivationIon";
 import { AtomicIonQuark, createAtomicIon, IONIZED } from "./AtomicIon";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionic/ionize";

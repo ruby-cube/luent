@@ -1,6 +1,6 @@
 import { component } from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
-import {  PRERENDER } from "../../../packages/quarky/src/reactivity/render-cycle";
+import {  PRERENDER } from "../../../packages/quarky/src/reactivity/EffectCycle";
 
 export function TestEffectCyclePhases() {
 

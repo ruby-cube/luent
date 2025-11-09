@@ -1,4 +1,4 @@
-import { RENDER } from "../../../packages/quarky/src/reactivity/render-cycle";
+import { RENDER } from "../../../packages/quarky/src/reactivity/EffectCycle";
 import { ion } from "../../../packages/quarky/src"
 import { GetNode } from "@rue/lumo";
 

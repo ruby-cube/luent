@@ -1,5 +1,5 @@
 import { component, unnestComponent } from "../component/Component";
-import { CommonsNode, getClosestCommons, popCommons, pushCommons } from "./context-stack";
+import { CommonsNode, getClosestCommons, popContext, pushContext } from "./context-stack";
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
 import { CommonsEntryKey, toCommonsKey } from "./ContextKey";
@@ -52,9 +52,9 @@ export function callWithCommons(
    commons: CommonsNode
 ) {
 
-   pushCommons(commons)
+   pushContext(commons)
    const nodeEntities = Slot()
-   popCommons()
+   popContext()
    return unnestComponent(nodeEntities)
 }
 
