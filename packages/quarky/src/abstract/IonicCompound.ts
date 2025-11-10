@@ -1,4 +1,4 @@
-import { Compound, CompoundMorph, detachedCall, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "./Compound";
+import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "./Compound";
 
 
 

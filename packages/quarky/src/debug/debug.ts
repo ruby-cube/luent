@@ -3,13 +3,11 @@ import {  isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { quarkOf, hasQuark, QUARK, Quark } from "../abstract/Quark";
-import { detachedCall } from "../abstract/Compound";
-import { Compound, CompoundMorph, isCompound } from "../abstract/Compound";
+import { Compound, CompoundMorph, isCompound, untrackedCall } from "../abstract/Compound";
 import { isIonicProxy } from "../ionic/ionize";
 import { IonicProxy } from "../ionic/Ionic";
 import { Traceable } from "./Traceable";
 import { debug as _debug } from "@rue/utils";
-import { Mutation } from "../Mutable";
 import { Atom } from "../reactivity/Atom";
 
 // export interface DEVLabellable {
@@ -31,7 +29,7 @@ function isReactive<T>(maybeHasSignal: T): maybeHasSignal is T & Function {
    console.warn('Using `isReactive` on a function with unknown side effects can cause bugs. To avoid unknown side-effects, never use isReactive() in production. Instead use `isIon` to check for reactivity and pass any impromptu getters into the $ function. `isReactive` is only to check if you have a wrapped signal')
    _isSignal = false;
    try {
-      detachedCall(maybeHasSignal) // TODO: what if function has async code?
+      maybeHasSignal() // TODO: what if function has async code?
    }
    finally {
       if (_isSignal) {

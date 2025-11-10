@@ -7,8 +7,7 @@ import { isFunction, isObject, noop } from "@rue/utils";
 import { Ionized, isIonicProxy, toRaw } from "../ionic/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { WatchSubjects } from "./watch";
-import { IonicCompound } from "../abstract/IonicCompound";
-import { Compound, detachedCall, getActiveTracker, isParticle, Particle, popTracker, pushTracker, } from "../abstract/Compound";
+import { Compound, Particle, popTracker, pushTracker } from "../abstract/Compound";
 
 
 
@@ -167,18 +166,14 @@ export class FunctionalSubstance extends Compound implements Substance {
 
    constructor(
       private fn: () => unknown,
-      private retrack: boolean,
-      // shouldForwardAtoms: boolean = false,
+      private retrack: boolean
    ) {
       super()
-      this.trackCall = 
-      // shouldForwardAtoms ? (fn: () => any) => this.trackAtoms(fn) : 
-      (fn: () => any) => detachedCall(() => this.trackAtoms(fn))
    }
 
    private call = () => {
       this.call = () => this.retrackedCall();
-      return this.trackCall(this.fn)
+      return this.trackAtoms(this.fn)
    }
 
    trackedCall() {
@@ -196,7 +191,7 @@ export class FunctionalSubstance extends Compound implements Substance {
       if (!effect) throw new Error('Must call linkEffect before retracking')
       effect.unlinkAtoms()
       this.untrackAtoms()
-      const output = this.trackCall(fn)
+      const output = this.trackAtoms(fn)
       this.forEachAtom(atom => {
          linkEffectToAtom(atom, effect)
       })
@@ -213,7 +208,7 @@ export class FunctionalSubstance extends Compound implements Substance {
 
    // previously Ionic compound
 
-   private trackCall: (fn: () => any) => any;
+   // private trackCall: (fn: () => any) => any;
 
    private trackAtoms(fn: () => any) {
       pushTracker(this);

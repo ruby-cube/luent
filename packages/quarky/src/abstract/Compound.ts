@@ -1,29 +1,30 @@
 import { Atom } from "../reactivity/Atom"
-import { isObject } from "@rue/utils"
+import { createStack, isObject } from "@rue/utils"
 
-const trackerStack: (Compound | null)[] = []
+export const [pushTracker, popTracker, getActiveTracker] = createStack<Compound | null>()
 
-export function pushTracker(tracker: Compound | null) {
-   trackerStack.push(tracker)
-}
 
-export function popTracker() {
-   return trackerStack.pop()
-}
+// export function pushTracker(tracker: Compound | null) {
+//    trackerStack.push(tracker)
+// }
 
-let trackingPaused = false;
+// export function popTracker() {
+//    return trackerStack.pop()
+// }
 
-export function pauseTracking(){
-   trackingPaused = true;
-}
-export function resumeTracking(){
-   trackingPaused = false;
-}
+// let trackingPaused = false;
 
-export function getActiveTracker() {
-   if (trackingPaused) return undefined;
-   return trackerStack.at(-1)
-}
+// export function pauseTracking(){
+//    trackingPaused = true;
+// }
+// export function resumeTracking(){
+//    trackingPaused = false;
+// }
+
+// export function getActiveTracker() {
+//    // if (trackingPaused) return undefined;
+//    return getCurrentTracker
+// }
 
 // export function getActiveTrackers() {
 //    if (trackingPaused) return undefined;
@@ -45,11 +46,13 @@ export function getActiveTracker() {
  */
 export function untrackedCall(fn: Function) {
    try {
-      pauseTracking()
+      // pauseTracking()
+      pushTracker(null)
       return fn();
    }
    finally {
-      resumeTracking()
+      popTracker()
+      // resumeTracking()
    }
 }
 
@@ -58,24 +61,23 @@ export function untrackedCall(fn: Function) {
  * @param fn 
  * @returns 
  */
-export function detachedCall<T extends ((...args: any[]) => any)>(fn: T): ReturnType<T> {
-   return fn()
-   // try {
-   //    pushTracker(null)
-   //    return fn();
-   // }
-   // finally {
-   //    popTracker()
-   // }
-}
+// export function detachedCall<T extends ((...args: any[]) => any)>(fn: T): ReturnType<T> {
+//    return fn()
+//    // try {
+//    //    pushTracker(null)
+//    //    return fn();
+//    // }
+//    // finally {
+//    //    popTracker()
+//    // }
+// }
 
 export function isParticle(value: unknown): value is Particle{
    return isObject(value) && ('asTrackedAtom' in value || 'atoms' in value)
 }
 
 export function trackParticle(atom: Particle) {
-   const compound = trackerStack.at(-1)
-   compound?.track(atom)
+   getActiveTracker()?.track(atom)
 
    // let i = trackerStack.length;
    // while (i--) {
