@@ -7,7 +7,7 @@
 
 
 import { component, FromTag } from "@rue/lumo"
-import { Ion, ion, ionic, queueIonicTask, ionize } from "@rue/quarky"
+import { Ion, ion, ionic, queueIonicTask, ionize, swiftUpdate, instantUpdate } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
@@ -94,9 +94,9 @@ export function TestCount() {
       $count.value--
    }
 
-   queueIonicTask(() => {
-      console.log('running ionic task', $count())
-   })
+   // queueIonicTask(() => {
+   //    console.log('running ionic task', $count())
+   // })
 
    return component(
       <>
@@ -107,9 +107,9 @@ export function TestCount() {
          <div>{($count() * 2)}</div>
          <hr></hr>
          <p>these should work</p>
-         <button on:click={increment}>increment</button>
-         <button on:click={decrement}>decrement</button>
-         <button on:click={e => $active.value = !$active()}>toggle active</button>
+         <button on:click={e=>swiftUpdate(increment)}>increment</button>
+         <button on:click={e=>swiftUpdate(decrement)}>decrement</button>
+         <button on:click={e=>swiftUpdate(() => $active.value = !$active())}>toggle active</button>
       </>
    )
 }

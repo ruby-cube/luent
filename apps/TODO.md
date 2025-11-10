@@ -9,4 +9,4 @@
 ---
 [ ] get rid of node pod when setting up node entities?
 [ ] MutableKit ?
-[ ] createApp with render function
+[ ] createRoot with render function

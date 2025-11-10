@@ -10,7 +10,7 @@ import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../n
 import { camelToKebabCase } from "@rue/utils";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
-import { queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
+import { INTERNAL_RENDER, PRERENDER, queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { setUpNodesArray } from "../node/GetNodes";
@@ -229,10 +229,8 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    const flask = getFlask()
    watchToRender(ion, ({ current, previous }) => {
       // if (current === previous) return;
-      queueInternalRenderTask(() => {
-         element.value = toString(ion())
-      }, flask)
-   }, flask, RUN_EAGERLY)
+      element.value = toString(ion())
+   }, INTERNAL_RENDER, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
@@ -314,10 +312,8 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
-            queueInternalRenderTask(() => {
                setAttribute(node, _key, value())
-            }, flask)
-         }, flask, RUN_EAGERLY)
+         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       // else if (isViewBindingKit(value)) {
       //    watch(value.ion, ({ newState }) => {
@@ -531,11 +527,9 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             // if (current === previous) return;
-            queueInternalRenderTask(() => {
                if (previous) removePreviousClasses(previous, classList)
                if (entry()) addClasses(entry(), classList, flask)
-            }, flask)
-         }, flask, RUN_EAGERLY)
+         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       else if (entry) {
          addClasses(entry, classList, flask)
@@ -591,11 +585,9 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return
-            queueInternalRenderTask(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
-            }, flask)
-         }, flask, RUN_EAGERLY)
+         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       else if (value) {
          classList.add(key)
@@ -645,7 +637,7 @@ function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
             node.style.display = 'none'
          }, flask)
       }
-   }, getFlask(), RUN_EAGERLY)
+   }, PRERENDER, getFlask(), RUN_EAGERLY)
 }
 
 function setUpStyles(node: Element, styles: StyleInput[]) {
@@ -655,10 +647,8 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
-            queueInternalRenderTask(() => {
                setUpStyleEntry(style, entry(), flask);
-            }, flask)
-         }, flask, RUN_EAGERLY)
+         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       else {
          setUpStyleEntry(style, entry, flask)
@@ -674,10 +664,8 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          if (isGetter(value)) {
             watchToRender(value, ({ current, previous }) => {
                // if (current === previous) return;
-               queueInternalRenderTask(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
-               }, flask)
-            }, flask, RUN_EAGERLY)
+            }, INTERNAL_RENDER, flask, RUN_EAGERLY)
          }
          else {
             assignStyleProperty(style, toStylePropertyName(key), value)

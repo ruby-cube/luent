@@ -1,10 +1,11 @@
 import { Effect } from "../reactivity/EffectQueue";
-import { FunctionalSubstance, IonSubject } from "../reactivity/Substance";
+import { FunctionalSubstance, IonSubstance } from "../reactivity/Substance";
 import { SimpleState } from "../reactivity/State";
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
 import { SYNC } from "../reactivity/EffectCycle";
+import { getActiveUpdate } from "../reactivity/Update";
 
 
 // function createMemoizedDerivationIon(derive: (prev: unknown) => unknown) {
@@ -70,7 +71,7 @@ export function createMemoizedDerivation(
 
    const substance = new FunctionalSubstance(() => {
       return derive(state.get())
-   }, retrack)
+   }, retrack, true)
 
    function $derivedState() {
       if (isStale.get()) {
@@ -85,6 +86,7 @@ export function createMemoizedDerivation(
    $derivedState[QUARK] = new DerivationIon(substance)
 
    substance.linkEffect(new Effect(() => { // TODO: need to cancel if update is canceled
+      console.log('memoized state is stale', getActiveUpdate())
       isStale.set(true);
    }, SYNC))
 

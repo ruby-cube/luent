@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createRoot } from 'vue'
 import App from './App.vue'
 import router from './router'
 
@@ -12,7 +12,7 @@ let app
 
 projectAuth.onAuthStateChanged(() => {
   if (!app) {
-    app = createApp(App)
+    app = createRoot(App)
       .use(router)
       .mount('#app')
   }

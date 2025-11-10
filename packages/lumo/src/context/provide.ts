@@ -98,7 +98,7 @@ export function provideGlobal<K extends CommonsEntryKey | string>(key: K, value:
       throw new Error('')
    const globalCommons = commons.global
    if (!globalCommons)
-      throw new Error('No global commons found. Call createGlobalCommons() and pass into createApp() via config')
+      throw new Error('No global commons found. Call createGlobalCommons() and pass into createRoot() via config')
    const globalEntries = globalCommons.entries!
    const commonsKey = toCommonsKey(key)
    markIfMuIon(key, value, globalCommons)

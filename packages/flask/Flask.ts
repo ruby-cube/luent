@@ -167,8 +167,10 @@ export class Flask {
       return this.on(LifecycleHook.DISCARD, task)
    }
 
+   discarded = false
 
    emitDiscard() {
+      this.discarded = true;
       this.emit(LifecycleHook.DISCARD)
       this.tasks.delete(LifecycleHook.INITIAL_MOUNT);
       this.tasks.delete(LifecycleHook.REMOUNT);

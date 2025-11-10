@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { AppCommons, createAppCommons } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { createUpdate, Ion, pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate } from "@rue/quarky";
+import { pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate, renderServerResponse, instantUpdate } from "@rue/quarky";
 import { Provided } from "./context/Context";
 import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
@@ -27,7 +27,7 @@ export function getAppRoot() {
 // }
 
 
-export function createApp<T extends AnyObject, E extends Provided>(App: ComponentSetup<T>, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
+export function createRoot<T extends AnyObject, E extends Provided>(App: ComponentSetup<T>, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
 
    // (1) instantiate developer's root component
    const appCommons = createAppCommons(config?.provide, config?.globalCommons)
@@ -49,34 +49,28 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
          const attributes = {
             ...config?.setup || {},
          }
-         const update = new Update(UpdateType.SERVER_RESPONSE, 1000) // TODO: add rerun function incase of queued updates due to race conditions
-         flaskStack.push(flask)
-         pushUpdate(update)
-         pushContext(appCommons)
-         let nodes: JSXNode[]
-         try {
-            nodes = this.nodes = processJSXOutput(App(toInput(attributes)))
-            setUpNodeVine(nodes, appRoot)
-            queueInternalRenderTask(() => {
-               mountDOMNodes(nodes, appRoot)
-            }, flask)
+         instantUpdate(() => { // FIX:
+            flaskStack.push(flask)
+            pushContext(appCommons)
+            let nodes: JSXNode[]
+            try {
+               nodes = this.nodes = processJSXOutput(App(toInput(attributes)))
+               setUpNodeVine(nodes, appRoot)
+               queueInternalRenderTask(() => {
+                  mountDOMNodes(nodes, appRoot)
+               }, flask)
 
-            flask.emitInitialMount()
-         }
-         catch (err) {
-            catchCancelledUpdate(err)
-         }
-         finally {
-            flaskStack.pop()
-            popUpdate()
-            // if (remountable) markMountPhase()
-            // component.setUp(root, nodePod)
-            // component.mount(root) // TODO: if this is a remount, how would it be different than a first mount? use fragment?
-            // if (remountable) unmarkMountPhase()
-            popContext() // for sibling components to access parent, must be set AFTER `component()`
-         }
-         // })
-
+               flask.emitInitialMount()
+            }
+            finally {
+               flaskStack.pop()
+               // if (remountable) markMountPhase()
+               // component.setUp(root, nodePod)
+               // component.mount(root) // TODO: if this is a remount, how would it be different than a first mount? use fragment?
+               // if (remountable) unmarkMountPhase()
+               popContext() // for sibling components to access parent, must be set AFTER `component()`
+            }
+         })
       },
 
       unmount() { // TODO: should I call dynamicNode.unmount() instead of emit?? same for discard?

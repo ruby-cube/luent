@@ -7,13 +7,6 @@ import { EffectCycle, Phase, POSTRENDER, PRERENDER, RENDER, SYNC } from "./Effec
 
 type TaskFn = (...args: any[]) => unknown
 
-export class PhaseTask {
-   constructor(
-      public run: TaskFn,
-      public phase: Phase
-   ) { }
-}
-
 export class Effect {
    constructor(
       public run: TaskFn | null,
@@ -48,23 +41,7 @@ export class Effect {
    }
 }
 
-/**
- * Tasks that run only once
- * @param fn 
- * @returns 
- */
-export function createOneoff(fn: () => void, phase: Phase) {
-   const effect = new Effect(fn, phase);
-   const oneoff = () => {
-      fn();
-      effect.destroy()
-   }
-   effect.run = oneoff
 
-   if (__DEV__) oneoff.__DEV__fn = fn;
-
-   return effect;
-}
 
 let effectStackCount = 0;
 // const activeEffects = new Set()

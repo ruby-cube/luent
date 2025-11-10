@@ -2,7 +2,7 @@ import { isIon, __DEV__checkIfTracked, Ion, toValue, isGetter } from "@rue/quark
 import { isObjectLiteral } from "@rue/utils";
 import { RawJSXNode } from "./makeJSXNode";
 import { MaybeIon } from "../component/Input";
-import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
+import { INTERNAL_RENDER, queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { DOMElement, DOMParent } from "./VineNode";
 
 
@@ -12,10 +12,8 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
    const htmlString = kit.innerHTML;
    if (isGetter(htmlString)) {
       watchToRender(htmlString, ({ flask }) => {
-         queueInternalRenderTask(() => {
             parentNode.innerHTML = toString(htmlString());
-         }, flask)
-      });
+      }, INTERNAL_RENDER);
    }
    return htmlString;
 }

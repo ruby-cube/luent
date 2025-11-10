@@ -17,7 +17,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp, PRERENDER } from '@rue/lumo';
+import { component, createRoot, PRERENDER } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -91,13 +91,13 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 // import { NestedPend } from './NestedPend';
 
 
-installIonizedDate()
+// installIonizedDate()
 
-function Hello(){
-   return component(<div>Hello World</div>)
-}
+// function Hello(){
+//    return component(<div>Hello World</div>)
+// }
 
-const app = createApp(Hello)
+const app = createRoot(TestCount)
 
 app.mount('#app')
 
@@ -144,7 +144,7 @@ app.mount('#app')
 //    m(DOOR, () => doSomething())
 // ])
 
-// const app = createApp(
+// const app = createRoot(
 //    <SortableTableApp
 //       hideApp={hideApp}
 //       closeApp={closeApp}

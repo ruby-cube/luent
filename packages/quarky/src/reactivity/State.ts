@@ -44,6 +44,7 @@ export interface PendableState extends CancellableState {
 }
 
 function getState(state: PendableState) {
+   console.trace('getting state', state.current)
    if (state.pendingUpdate === getActiveUpdate()) return state.current;
    return state.pendingUpdate && state.pendingUpdate?.idle ? state.pending : state.current
 }
@@ -86,6 +87,8 @@ export class SimpleState implements PendableState {
    }
 
    commitPending(): void {
+      console.log('commit pending', this.pending)
+      console.log('commit current', this.current)
       this.current = this.pending
       this.pendingUpdate = null;
    }

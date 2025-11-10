@@ -37,7 +37,7 @@ export function asWatchedSubstance(subject: Ionized<object> | Ion<any> | WatchSu
 function asMonosubstance(subject: Ionized<object> | Ion<any> | AnyObject, retrack: boolean, once: boolean) {
    // TODO: do not retrack if effect runs once
    return isIonicProxy(subject) ? new IonicProxySubject(subject)
-      : isFunction(subject) ? new IonSubject(subject)
+      : isFunction(subject) ? new IonSubstance(subject)
          : { reactive: false, getValue() { return subject }, linkEffect(effect: Effect) { } }  //non-ionized object
 }
 
@@ -160,21 +160,23 @@ class IonicProxySubject extends Compound implements WatchedSubstance {
 }
 
 
-export class FunctionalSubstance extends IonicCompound implements Substance {
+export class FunctionalSubstance extends Compound implements Substance {
    reactive: boolean = true; // TODO: mark inert
 
    atoms: Particle[] = []
 
    constructor(
       private fn: () => unknown,
-      private retrack: boolean
+      private retrack: boolean,
+      shouldForwardAtoms: boolean = false,
    ) {
       super()
+      this.trackCall = shouldForwardAtoms ? (fn: () => any) => this.trackAtoms(fn) : (fn: () => any) => detachedCall(() => this.trackAtoms(fn))
    }
 
    private call = () => {
       this.call = () => this.retrackedCall();
-      return detachedCall(() => this.trackCall(this.fn))
+      return this.trackCall(this.fn)
    }
 
    trackedCall() {
@@ -191,7 +193,8 @@ export class FunctionalSubstance extends IonicCompound implements Substance {
       const effect = this.effect
       if (!effect) throw new Error('Must call linkEffect before retracking')
       effect.unlinkAtoms()
-      const output = detachedCall(() => this.retrackCall(fn))
+      this.untrackAtoms()
+      const output = this.trackCall(fn)
       this.forEachAtom(atom => {
          linkEffectToAtom(atom, effect)
       })
@@ -204,11 +207,30 @@ export class FunctionalSubstance extends IonicCompound implements Substance {
          linkEffectToAtom(atom, effect)
       })
    }
+
+
+   // previously Ionic compound
+
+   private trackCall: (fn: () => any) => any;
+
+   private trackAtoms(fn: () => any) {
+      pushTracker(this);
+      try {
+         return fn();
+      }
+      finally {
+         popTracker();
+         if (__DEV__ && this.atoms.length === 0) {
+            console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
+            console.trace()
+         }
+      }
+   }
 }
 
 
 
-// export class IonSubject implements WatchedSubstance {
+// export class IonSubstance implements WatchedSubstance {
 //    get inert() {
 //       return this.subject.inert
 //    }
@@ -259,7 +281,7 @@ export class FunctionalSubstance extends IonicCompound implements Substance {
 //    retrackedCall: FunctionalSubstance.prototype.trackedCall
 // }
 
-export class IonSubject implements WatchedSubstance {
+export class IonSubstance implements WatchedSubstance {
    get reactive() {
       if (this.proxySubject) {
          return this.subject.reactive && this.proxySubject.reactive
@@ -296,7 +318,7 @@ export class IonSubject implements WatchedSubstance {
 //  * - relinks value to effect if value is ionized
 //  * - relinks derivation atoms to effect on every call if derivation ion
 //  */
-// export class IonSubject extends IonicCompound implements WatchedSubstance {
+// export class IonSubstance extends IonicCompound implements WatchedSubstance {
 //    inert: boolean = false;
 
 //    private valueAtom?: Atom

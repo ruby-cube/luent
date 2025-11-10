@@ -132,7 +132,7 @@ export class Compound {
 
    protected atoms: Particle[] = []
 
-   protected track(atom: Particle) {
+   track(atom: Particle) {
       if (this._atoms.has(atom)) return atom
       this._atoms.add(atom)
       this.atoms.push(atom)

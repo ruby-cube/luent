@@ -1,12 +1,12 @@
 import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonicProxy } from "../ionic/ionize";
-import { createOneoff, Effect, PhaseTask } from "./EffectQueue";
+import { Effect } from "./EffectQueue";
 import { asWatchedSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
-import { $currentCycle, getAdjustedPhase, getDefaultPhase, maybePostcycleTask, Phase, SYNC } from "./EffectCycle";
+import { $currentCycle, getDefaultPhase, Phase, SYNC } from "./EffectCycle";
 
 
 // watch(list.$length, list.$couch, sync(() => {
@@ -134,8 +134,7 @@ export function watch<
 type Task = () => void
 
 export function getPhase(options: undefined | EffectOptions): Phase {
-   const phase = options?.phase ?? getDefaultPhase()
-   return getAdjustedPhase(phase)
+   return options?.phase ?? getDefaultPhase()
 }
 
 
@@ -178,9 +177,8 @@ export function setUpWatcher(
 
 
 export function scheduleEagerEffect(task: Task, phase: Phase) {
-   // const eagerEffect = createOneoff(task, phase)
    const cycle = $currentCycle()
-   cycle.scheduleTask(new PhaseTask(task, phase))
+   cycle.scheduleTask(task, phase)
    if (phase === SYNC) {
       cycle.runSyncEffects()
    }

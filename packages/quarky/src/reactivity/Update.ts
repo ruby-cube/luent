@@ -1,5 +1,4 @@
 import { setImmediate } from "@rue/thread";
-import { createOneoff, Effect, EffectQueue, PhaseTask, TaskQueue } from "./EffectQueue";
 import { CancellableState } from "./State";
 import { EffectCycle, Phase, POSTRENDER } from "./EffectCycle";
 
@@ -159,10 +158,7 @@ export class Update {
    cycle: EffectCycle;
 
    onComplete(task: () => void) { // TODO:
-      // const effect = createOneoff(commitUpdate, this.cycle.phases.length - 1)
-      this.cycle.scheduleTask(new PhaseTask(task, POSTRENDER))
-      // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy())) // TODO: Make sure we don't need this line
-      // this.commits.push(effect)
+      this.cycle.scheduleTask(task, POSTRENDER) 
    }
 
    // private commits: Effect[] = []
@@ -234,11 +230,11 @@ export function idleUpdate(fn: () => void, options?: { timeMargin?: number, dead
 
 
 export function instantUpdate(fn: () => void): void {
-   runUpdate(fn, new Update(UpdateType.INSTANT, 16, fn))
+   runUpdate(fn, new Update(UpdateType.INSTANT, 16.7, fn))
 }
 
 export function swiftUpdate<T>(fn: () => void) {
-   runUpdate(fn, new Update(UpdateType.USER_INTERACTION, 50, fn, 17))
+   runUpdate(fn, new Update(UpdateType.USER_INTERACTION, 100, fn, 17))
 }
 
 function runUpdate(fn: () => void, update: Update) {
@@ -251,7 +247,9 @@ function runUpdate(fn: () => void, update: Update) {
    }
    finally {
       popUpdate()
-      if (!update.cancelled) update.cycle.start()
+      if (!update.cancelled) {
+         update.cycle.start()
+      }
    }
 }
 
@@ -262,4 +260,8 @@ export function catchCancelledUpdate(error: unknown) {
    else {
       throw error;
    }
+}
+
+export function renderServerResponse(fn: () => void){
+   runUpdate(fn, new Update(UpdateType.SERVER_RESPONSE, 1000, fn))
 }

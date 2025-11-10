@@ -9,7 +9,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
+import { PRERENDER, queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { COMMONS, getClosestCommons } from "../context/context-stack";
 import { AsyncRender, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode";
 
@@ -189,7 +189,7 @@ export class PolymorphKit extends VineNode {
                }, flask)
                kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
             })
-      })
+      }, PRERENDER)
    }
 
    // render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {

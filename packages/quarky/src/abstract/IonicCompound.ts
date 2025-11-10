@@ -1,12 +1,20 @@
-import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "./Compound";
+import { Compound, CompoundMorph, detachedCall, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "./Compound";
 
 
 
 export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
+   trackCall: (fn: () => any) => any;
 
-   protected trackCall(fn: () => any) {
+   constructor(
+      shouldForwardAtoms: boolean = false
+   ) {
+      super()
+      this.trackCall = shouldForwardAtoms ? (fn: () => any) => this.call(fn) : (fn: () => any) => detachedCall(() => this.call(fn))
+   }
+
+   private call(fn: () => any) {
       pushTracker(this);
       try {
          return fn();
@@ -24,10 +32,6 @@ export class IonicCompound extends Compound {
       this.untrackAtoms()
       return this.trackCall(fn)
    }
-
-   // untrackAtoms() {
-   //    this.atoms.clear()
-   // }
 }
 
 export function __DEV__checkIfTracked() {
