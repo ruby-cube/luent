@@ -1,6 +1,6 @@
-//@ts-nocheck
-import { component, If, Else, fade, ElseIf, slide, Transition, Transit } from "@rue/lumo";
-import { debug, Ion, ion, ionize, watch } from "@rue/quarky";
+import { getActiveFlask } from "@rue/flask";
+import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, $tick } from "@rue/lumo";
+import { debug, getActiveUpdate, Ion, ion, ionize, sync, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
@@ -37,7 +37,7 @@ export function MountIf() {
       }
    })
 
-   const $name = Ion('bubby')
+   const $name = Ion('Dobby')
    // const todos = ionize([{ name: 'bubby', date: 0 }] as { name: string, date: number }[])
 
    // const removed = todos.splice(0, 2)
@@ -54,39 +54,40 @@ export function MountIf() {
       }
    })
 
-   watch($color, () => {
-      debug.traceAsyncPath()
-   })
+   watch($color, async () => {
+      console.log('hi sync', getActiveUpdate())
+      await $tick()
+      console.log('hi tick', getActiveUpdate())
+   }, { phase: SYNC })
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
    return component(
-
       <div>
          <button on:click={() => ($color.change(), $name.value += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {$name}</h1>
          {/* <Transition> */}
-            {/* <show-hide> */}
-               {If($active, <>
-                  oh
-                  {/* <Transit with={slide({ x: -100, duration: 2200 })}> */}
-                     <h2>hi</h2>
-                  {/* </Transit> */}
-                  {/* <Transit with={slide({ x: 100, duration: 2200 })}> */}
-                     <h2>hope</h2>
-                  {/* </Transit> */}
-                  {If($ready,
-                     <p>ready</p>
-                  )}
-               </>)}
-               {ElseIf($ready, <>
-                  low
-                  <h2>balloon</h2>
-               </>)}
-               {Else(<>
-                  so
-                  <h2>bye</h2>
-               </>)}
-            {/* </show-hide> */}
+         {/* <show-hide> */}
+         {If($active, <>
+            oh
+            {/* <Transit with={slide({ x: -100, duration: 2200 })}> */}
+            <h2>hi</h2>
+            {/* </Transit> */}
+            {/* <Transit with={slide({ x: 100, duration: 2200 })}> */}
+            <h2>hope</h2>
+            {/* </Transit> */}
+            {If($ready,
+               <p>ready</p>
+            )}
+         </>)}
+         {ElseIf($ready, <>
+            low
+            <h2>balloon</h2>
+         </>)}
+         {Else(<>
+            so
+            <h2>bye</h2>
+         </>)}
+         {/* </show-hide> */}
          {/* </Transition> */}
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>

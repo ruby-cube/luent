@@ -1,6 +1,6 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate, popUpdate, pushUpdate } from "./Update";
+import { catchCancelledUpdate, idleUpdate, popUpdate, pushUpdate } from "./Update";
 import { EffectCycle, Phase, POSTRENDER, PRERENDER, RENDER, SYNC } from "./EffectCycle";
 
 // const PRERENDER = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
@@ -152,7 +152,29 @@ export class EffectQueue {
 }
 
 
+class EffectsComplete {
 
+   constructor(
+      private promise: Promise<unknown>,
+      private wrap: (fn?: ((value?: unknown) => void) | null) => ((value: unknown) => void) | null
+   ) {
+   }
+
+   then(
+      onfulfilled?: ((value: unknown) => void | PromiseLike<void>) | null,
+      onrejected?: ((reason: any) => PromiseLike<never>) | null
+   ): Promise<void> {
+      return this.promise.then(this.wrap(onfulfilled), onrejected)
+   }
+
+   catch(onrejected?: ((reason: any) => PromiseLike<never>) | null | undefined) {
+      return this.promise.catch(onrejected)
+   }
+
+   finally(onfinally?: (() => void) | null | undefined): Promise<unknown> {
+      return this.promise.finally(onfinally)
+   }
+}
 
 
 /**
@@ -162,18 +184,33 @@ export class TaskQueue {
    protected moreEffects: EffectQueue[] | undefined;
    protected effects: EffectQueue[] = []
 
-   effectsComplete: Promise<void>;
+   effectsComplete: EffectsComplete;
    protected emitEffectsComplete!: () => void;
    cancel!: () => void;
 
    constructor(
       public cycle: EffectCycle,
-      protected phase: Phase
+      protected phase: Phase,
+      wrapTask: (fn?: (() => void) | null) => ((value: unknown) => void) | null = (fn) => () => {
+         if (!fn) return;
+         try {
+            pushUpdate(this.cycle.update)
+            fn()
+         }
+         catch (err) {
+            catchCancelledUpdate(err)
+         }
+         finally {
+            queueMicrotask(() => {
+               popUpdate()
+            })
+         }
+      }
    ) {
-      this.effectsComplete = new Promise<void>((resolve, reject) => {
+      this.effectsComplete = new EffectsComplete(new Promise<void>((resolve, reject) => {
          this.emitEffectsComplete = resolve
          this.cancel = reject
-      }).catch(catchCancelledUpdate)
+      }).catch(catchCancelledUpdate), wrapTask)
    }
 
    scheduleTask(task: () => void) {
@@ -304,14 +341,18 @@ export class PrerenderTaskQueue extends TaskQueue {
 
 
 
+// TODO: maybe make postrender distinct from tick?
 /**
  * Belongs to the current effect cycle.
- */
+*/
 export class TickTaskQueue extends TaskQueue {
    constructor(
       cycle: EffectCycle,
    ) {
-      super(cycle, POSTRENDER) // TODO: maybe make postrender distinct from tick?
+      super(cycle, POSTRENDER, (fn) => () => {
+         if (!fn) return;
+         idleUpdate(fn)
+      })
    }
 
    emitBatchesComplete: (() => void) | undefined

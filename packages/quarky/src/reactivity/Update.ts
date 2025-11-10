@@ -52,8 +52,10 @@ export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
 
 export class Update extends EventTarget{
    timestamp: Date
-   pendingCommit?: Promise<void>
-   resolveCommit?: () => void
+   // pendingCommit?: Promise<void>
+   // resolveCommit?: () => void
+
+   cycle: EffectCycle = new EffectCycle(this)
 
    constructor(
       public type: UpdateType,
@@ -63,8 +65,7 @@ export class Update extends EventTarget{
    ) {
       super()
       console.trace('new update!', type)
-      this.pendingCommit = idle ? new Promise<void>((resolve) => { this.resolveCommit = resolve }) : undefined
-      this.cycle = new EffectCycle(this)
+      // this.pendingCommit = idle ? new Promise<void>((resolve) => { this.resolveCommit = resolve }) : undefined
       this.timestamp = new Date() // TODO: make sure this is correct
    }
 
@@ -73,7 +74,6 @@ export class Update extends EventTarget{
    private states: CancellableState[] = []
 
    commit() {
-      console.warn('COMMITTING UPDATE')
       for (const state of this.states) {
          state.commitUpdate()
       }
@@ -157,7 +157,6 @@ export class Update extends EventTarget{
    //    this.cycle.onStart(fn)
    // }
 
-   cycle: EffectCycle;
 
    // onComplete(task: () => void) { // TODO:
    //    this.cycle.scheduleTask(task, POSTRENDER)
@@ -231,7 +230,9 @@ function runUpdate(fn: () => void, update: Update) {
       catchCancelledUpdate(error)
    }
    finally {
-      popUpdate()
+      queueMicrotask(() => {
+         popUpdate()
+      })
       if (!update.cancelled) {
          update.cycle.start()
       }
