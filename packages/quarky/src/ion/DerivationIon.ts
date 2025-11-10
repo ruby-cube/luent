@@ -47,7 +47,8 @@ export function createMemoizedDerivation(
          console.log('memoized state is stale', getActiveUpdate())
          isStale.set(true);
       }, SYNC))
-      trackCall = trackedCall // subsequent calls
+      // subsequent calls
+      trackCall = trackedCall 
       return value
    }
 
@@ -68,13 +69,6 @@ export function createMemoizedDerivation(
 
    $derivedState['~ion'] = true as const;
    $derivedState[QUARK] = new DerivationIonQuark(substance)
-
-   // substance.onTracked(() => {
-   //    substance.linkEffect(new Effect(() => { // TODO: need to cancel if update is canceled
-   //       console.log('memoized state is stale', getActiveUpdate())
-   //       isStale.set(true);
-   //    }, SYNC))
-   // })
 
    return $derivedState
 }
