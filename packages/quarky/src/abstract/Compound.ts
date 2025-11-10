@@ -25,10 +25,10 @@ export function getActiveTracker() {
    return trackerStack.at(-1)
 }
 
-export function getActiveTrackers() {
-   if (trackingPaused) return undefined;
-   return trackerStack
-}
+// export function getActiveTrackers() {
+//    if (trackingPaused) return undefined;
+//    return trackerStack
+// }
 
 // export function track(atom: any){
 
@@ -59,13 +59,14 @@ export function untrackedCall(fn: Function) {
  * @returns 
  */
 export function detachedCall<T extends ((...args: any[]) => any)>(fn: T): ReturnType<T> {
-   try {
-      pushTracker(null)
-      return fn();
-   }
-   finally {
-      popTracker()
-   }
+   return fn()
+   // try {
+   //    pushTracker(null)
+   //    return fn();
+   // }
+   // finally {
+   //    popTracker()
+   // }
 }
 
 export function isParticle(value: unknown): value is Particle{
@@ -73,12 +74,15 @@ export function isParticle(value: unknown): value is Particle{
 }
 
 export function trackParticle(atom: Particle) {
-   let i = trackerStack.length;
-   while (i--) {
-      const compound = trackerStack[i]
-      if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
-      compound.track(atom)
-   }
+   const compound = trackerStack.at(-1)
+   compound?.track(atom)
+
+   // let i = trackerStack.length;
+   // while (i--) {
+   //    const compound = trackerStack[i]
+   //    if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
+   //    compound.track(atom)
+   // }
 }
 
 // /**

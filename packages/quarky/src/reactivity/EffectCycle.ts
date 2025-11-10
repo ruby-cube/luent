@@ -45,6 +45,7 @@ function assertSequentialPhases(phases: CyclePhase[]) {
    }
 }
 
+
 /**
  * @internal
  */
@@ -59,9 +60,8 @@ export class EffectCycle {
    constructor(
       public update: Update,
    ) {
-
-      const scheduleInternalRender = update.idle ? queueTask : queueMicrotask
       const schedulePrerenderTasks = update.idle ? queueSwiftTask : queueMicrotask
+      const scheduleInternalRender = update.idle ? queueTask : queueMicrotask
 
       this.phases = [{
          phase: PRERENDER,
@@ -87,6 +87,7 @@ export class EffectCycle {
    started = false
 
    start() {
+      console.log('starting cycle!')
       if (this.cancelled == true) return;
       this.runStartTasks()
       this.schedulePhase(this.phases[0]) // from module
@@ -122,7 +123,7 @@ export class EffectCycle {
                this.subphase = 'tasks'
                beginTasks()
                queueMicrotask(() => {
-                  this.closePhase(this.phases[phase + 1])
+                  this.closePhase(this.phases[phase + 1]) // TODO: instead of simple + 1, find the next existing phase
                })
             })
          })

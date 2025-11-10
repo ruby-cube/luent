@@ -1,4 +1,4 @@
-import { getActiveUpdate,  Update, useUpdate } from "./Update"
+import { $activeUpdate, getActiveUpdate, Update, useUpdate } from "./Update"
 import type { Action } from "./Update"
 import { AnyObject } from "@rue/types"
 
@@ -31,8 +31,8 @@ function Action<F>(fn: F, options?: ActionOptions) {
 
 export interface CancellableState {
    pendingUpdate: Update | null
-   cancelPending(): void
-   commitPending(): void
+   cancelUpdate(): void
+   commitUpdate(): void
 }
 
 // TODO: history
@@ -44,19 +44,33 @@ export interface PendableState extends CancellableState {
 }
 
 function getState(state: PendableState) {
-   console.trace('getting state', state.current)
-   if (state.pendingUpdate === getActiveUpdate()) return state.current;
-   return state.pendingUpdate && state.pendingUpdate?.idle ? state.pending : state.current
+   if (state.pendingUpdate === getActiveUpdate()) {
+      console.log('pending update matches active update')
+      return state.pending;
+   }
+   console.warn('get from outside of active update...')
+   // return state.pendingUpdate && state.pendingUpdate?.idle ? state.pending : 
+   return state.current
 }
 
 function lockState(state: PendableState, type: 'read' | 'write') {
-   const update = type === 'read' ? getActiveUpdate() : useUpdate(16)  // to warn if render blocking, give a 16ms timemargin
-   if (!update) return;
-   const pendingUpdate = state.pendingUpdate
-   update.race(pendingUpdate) // TODO: race() should throw if cancelling this update
-   state.pendingUpdate = update
+   const update = type === 'read' ? getActiveUpdate() : $activeUpdate()
+   if (!update) {
+      console.log('nothing to lock to')
+      return;
+   }
+   if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
+   if (update.committed) return;
+   update.race(state.pendingUpdate) // TODO: race() should throw if cancelling this update
+   if (state.pendingUpdate === null) {
+      console.warn('SETTING PENDING UPDATE')
+      state.pendingUpdate = update
+      update.atSettled(() => {
+         console.warn('SETTLED: nulling update')
+         state.pendingUpdate = null
+      })
+   }
    if (type == 'write') update.queueCommit(state)
-   // return update
 }
 
 
@@ -81,16 +95,14 @@ export class SimpleState implements PendableState {
 
    pendingUpdate: Update | null = null
 
-   cancelPending(): void {
+   cancelUpdate(): void {
+      console.log('cancel update', this)
       this.pending = this.current
-      this.pendingUpdate = null;
    }
 
-   commitPending(): void {
-      console.log('commit pending', this.pending)
-      console.log('commit current', this.current)
+   commitUpdate(): void {
+      console.log('commit update', this)
       this.current = this.pending
-      this.pendingUpdate = null;
    }
 
    set(value: unknown) {
@@ -127,21 +139,19 @@ export class ModelState implements PendableState {
 
    private mutated = false
 
-   cancelPending() {
+   cancelUpdate() {
       if (this.mutated) {
          this.pending = this.clone(this.current)
          this.mutated = false
       }
-      this.pendingUpdate = null
    }
 
-   commitPending(): void {
+   commitUpdate(): void {
       if (this.mutated) {
          this.current = this.pending
          this.pending = this.clone(this.pending)
          this.mutated = false
       }
-      this.pendingUpdate = null
    }
 
    mutate(fn: (model: AnyObject) => void) {

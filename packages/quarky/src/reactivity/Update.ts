@@ -1,6 +1,7 @@
 import { setImmediate } from "@rue/thread";
 import { CancellableState } from "./State";
 import { EffectCycle, Phase, POSTRENDER } from "./EffectCycle";
+import { createStack } from "@rue/utils";
 
 
 
@@ -36,11 +37,7 @@ export type Action = {
 //    }
 // }
 
-class UpdateCancelled extends Error {
-   constructor() {
-      super('update cancelled')
-   }
-}
+
 
 export const UpdateType = {
    USER_ANIMATION: 0,
@@ -53,7 +50,7 @@ export const UpdateType = {
 
 export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
 
-export class Update {
+export class Update extends EventTarget{
    timestamp: Date
    pendingCommit?: Promise<void>
    resolveCommit?: () => void
@@ -64,18 +61,24 @@ export class Update {
       public rerun?: () => unknown,
       public idle: boolean | number = false
    ) {
+      super()
+      console.trace('new update!', type)
       this.pendingCommit = idle ? new Promise<void>((resolve) => { this.resolveCommit = resolve }) : undefined
       this.cycle = new EffectCycle(this)
       this.timestamp = new Date() // TODO: make sure this is correct
    }
 
+   committed = false
 
    private states: CancellableState[] = []
 
    commit() {
+      console.warn('COMMITTING UPDATE')
       for (const state of this.states) {
-         state.commitPending()
+         state.commitUpdate()
       }
+      this.committed = true
+      this.dispatchEvent(this.settled)
    }
 
    tags: Set<string> = new Set()
@@ -101,11 +104,13 @@ export class Update {
    cancelled = false
 
    cancel() {
+      console.warn('CANCELLING UPDATE')
       this.cancelled = true;
       this.cycle.cancel()
       for (const state of this.states) {
-         state.cancelPending()
+         state.cancelUpdate()
       }
+      this.dispatchEvent(this.settled)
    }
 
    queueCommit(state: CancellableState) {
@@ -117,14 +122,11 @@ export class Update {
    }
 
    race(competingUpdate: Update | null) { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
-      if (competingUpdate === null) {
-         this.cycle.start()
-         return;
-      }
-      if (competingUpdate === this) {
+      if (competingUpdate === null || competingUpdate === this) {
          return;
       }
       if (competingUpdate) {
+         console.warn('RACE CONDITION!!!!')
          if (!this.handleRace) {
             competingUpdate.precedes(this) ? competingUpdate.cancel() : this.cancel()
          }
@@ -135,7 +137,7 @@ export class Update {
          if (!competingUpdate.cancelled) {
             // queue 
             this.cancel()
-            competingUpdate.onComplete(() => {
+            competingUpdate.atSettled(() => {
                const rerun = this.rerun
                if (__DEV__ && !rerun) throw new Error('unable to queue update. must provide rerun fn')
                if (rerun) {
@@ -151,34 +153,33 @@ export class Update {
 
    private handleRace: ((competingAction: Action) => void) | undefined
 
-   onBegin(fn: () => void) {
-      this.cycle.onStart(fn)
-   }
+   // onBegin(fn: () => void) {
+   //    this.cycle.onStart(fn)
+   // }
 
    cycle: EffectCycle;
 
-   onComplete(task: () => void) { // TODO:
-      this.cycle.scheduleTask(task, POSTRENDER) 
+   // onComplete(task: () => void) { // TODO:
+   //    this.cycle.scheduleTask(task, POSTRENDER)
+   // }
+
+
+
+   private SETTLED = 'settled'
+
+   private settled = new Event(this.SETTLED)
+
+   atSettled(task: () => void) {
+      this.addEventListener(this.SETTLED, task)
    }
-
-   // private commits: Effect[] = []
-
-   // cancel() {
-   //    this.commits.forEach(commit => commit.destroy())
-   //    this.cycle.cancel()
-   //    this.cancelTasks.forEach(task => task())
-   //    this.cancelTasks = []
-   // }
-
-   // private cancelTasks: (() => void)[] = []
-
-   // onCancel(task: () => void) {
-   //    this.cancelTasks.push(task)
-   // }
-
-
 }
 
+
+class UpdateCancelled extends Error {
+   constructor() {
+      super('update cancelled')
+   }
+}
 
 export const queueTask = setImmediate;
 
@@ -186,23 +187,7 @@ export const queueTask = setImmediate;
 
 
 
-
-
-
-// TODO: change to stack type
-const updateStack: Update[] = [];
-
-export function pushUpdate(update: Update) {
-   return updateStack.push(update)
-}
-
-export function popUpdate() {
-   return updateStack.pop()
-}
-
-export function getActiveUpdate() {
-   return updateStack.at(-1)
-}
+export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
 
 export function isIdleUpdate() {
    return !!(getActiveUpdate()?.idle)
@@ -262,6 +247,6 @@ export function catchCancelledUpdate(error: unknown) {
    }
 }
 
-export function renderServerResponse(fn: () => void){
+export function renderServerResponse(fn: () => void) {
    runUpdate(fn, new Update(UpdateType.SERVER_RESPONSE, 1000, fn))
 }

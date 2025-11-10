@@ -88,27 +88,27 @@ export function watch<
 
    options.retrack = options.retrack ?? true;
 
-   const watchSubject = asWatchedSubstance(subject, options.retrack, Boolean(options.once))
+   const substance = asWatchedSubstance(subject, options.retrack, Boolean(options.once))
    if (options?.traceTriggers) {
       // TODO:
    }
 
-   if (!isWatchedSubstance(watchSubject)) { // plain object
+   if (!isWatchedSubstance(substance)) { // plain object
       return InertWatcher()
    }
 
-   const prevState = new SimpleState(watchSubject.getValue())
+   const prevState = new SimpleState(substance.getValue())
 
    // let prevState = watchSubject.getValue(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
-   if (!watchSubject.reactive) {
+   if (!substance.reactive) {
       return InertWatcher()
    }
 
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
-      const newState = watchSubject.getValue() // retracking happens here // TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
+      const newState = substance.getValue() // retracking happens here // TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
       if (!options.eager && !hasChanged(prevState.get(), newState)) {
          return;
       }
@@ -125,7 +125,7 @@ export function watch<
    wrappedEffect.__DEV__fn = effect
 
    return setUpWatcher(
-      watchSubject,
+      substance,
       wrappedEffect,
       options,
    )

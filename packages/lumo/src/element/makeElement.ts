@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -312,7 +312,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
-               setAttribute(node, _key, value())
+            setAttribute(node, _key, value())
          }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       // else if (isViewBindingKit(value)) {
@@ -496,7 +496,8 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
    for (const key in events) {
       const handlers = normalizeToArray(events[key]);
       for (const handler of handlers) {
-         $listen(handler, options ? (options.preserve = true, options) : { preserve: true }, {
+         const handleEvent = key === 'click' ? (e) => swiftUpdate(() => handler(e)) : (e) => instantUpdate(() => handler(e)) // FIX: temporary standin
+         $listen(handleEvent, options ? (options.preserve = true, options) : { preserve: true }, {
             // preserve since there is no need to pause listener when it is unmounted--it will never be triggered
             enroll: (cb) => {
                node.addEventListener(key, cb, options);
@@ -514,6 +515,8 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
 
 
 
+
+
 type DynamicClassesConfig = {
    [key: string]: MaybeIon<Booleanny>;
 }
@@ -527,8 +530,8 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             // if (current === previous) return;
-               if (previous) removePreviousClasses(previous, classList)
-               if (entry()) addClasses(entry(), classList, flask)
+            if (previous) removePreviousClasses(previous, classList)
+            if (entry()) addClasses(entry(), classList, flask)
          }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       else if (entry) {
@@ -585,8 +588,8 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return
-               if (value()) classList.add(key)
-               else if (previous) classList.remove(key)
+            if (value()) classList.add(key)
+            else if (previous) classList.remove(key)
          }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       else if (value) {
@@ -647,7 +650,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
-               setUpStyleEntry(style, entry(), flask);
+            setUpStyleEntry(style, entry(), flask);
          }, INTERNAL_RENDER, flask, RUN_EAGERLY)
       }
       else {
@@ -664,7 +667,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          if (isGetter(value)) {
             watchToRender(value, ({ current, previous }) => {
                // if (current === previous) return;
-                  assignStyleProperty(style, toStylePropertyName(key), value())
+               assignStyleProperty(style, toStylePropertyName(key), value())
             }, INTERNAL_RENDER, flask, RUN_EAGERLY)
          }
          else {

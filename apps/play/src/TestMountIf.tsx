@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, If, Else, fade, ElseIf, slide, Transition, Transit } from "@rue/lumo";
-import { debug, ion, ionize, watch } from "@rue/quarky";
+import { debug, Ion, ion, ionize, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
@@ -12,12 +12,12 @@ export function MountIf() {
       }
    })
 
-   const list = ionize({
-      count: 0,
-      increment(value: number) {
-         return this.count = this.count + value
-      }
-   })
+   // const list = ionize({
+   //    count: 0,
+   //    increment(value: number) {
+   //       return this.count = this.count + value
+   //    }
+   // })
 
    const $active = ion(true, {
       toggle() {
@@ -37,7 +37,8 @@ export function MountIf() {
       }
    })
 
-   const todos = ionize([{ name: 'bubby', date: 0 }] as { name: string, date: number }[])
+   const $name = Ion('bubby')
+   // const todos = ionize([{ name: 'bubby', date: 0 }] as { name: string, date: number }[])
 
    // const removed = todos.splice(0, 2)
 
@@ -61,8 +62,8 @@ export function MountIf() {
    return component(
 
       <div>
-         <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
-         <h1>Hello {(todos[0].name)}</h1>
+         <button on:click={() => ($color.change(), $name.value += '!')} style={{ color: ($color() + 'e') }}>shout</button>
+         <h1>Hello {$name}</h1>
          {/* <Transition> */}
             {/* <show-hide> */}
                {If($active, <>

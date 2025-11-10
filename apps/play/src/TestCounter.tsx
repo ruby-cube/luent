@@ -79,7 +79,7 @@ export function TestCount() {
 
    const $active = ion(true)
 
-   const $doubleCount = ion(() =>{
+   const $doubleCount = ion(() => {
       if ($active()) {
          return $count() * 2
       }
@@ -87,11 +87,11 @@ export function TestCount() {
    })
 
    function increment() {
-      $count.value++
+      mu: $count.value++
    }
 
    function decrement() {
-      $count.value--
+      mu: $count.value--
    }
 
    // queueIonicTask(() => {
@@ -102,14 +102,14 @@ export function TestCount() {
       <>
          <h3>mutable ion</h3>
          <div>{$count}</div>
-         <div>{$active}</div>
+         {/* <div>{$active}</div> */}
          <div>{$doubleCount}</div>
-         <div>{($count() * 2)}</div>
+         {/* <div>{($count() * 2)}</div> */}
          <hr></hr>
          <p>these should work</p>
-         <button on:click={e=>swiftUpdate(increment)}>increment</button>
-         <button on:click={e=>swiftUpdate(decrement)}>decrement</button>
-         <button on:click={e=>swiftUpdate(() => $active.value = !$active())}>toggle active</button>
+         <button on:click={increment}>increment</button>
+         <button on:click={decrement}>decrement</button>
+         <button on:click={e => $active.value = !$active()}>toggle active</button>
       </>
    )
 }
@@ -126,7 +126,7 @@ export function TestThisCount() {
       }
    })
 
-   const $doubleCount = ion(() =>$count() * 2)
+   const $doubleCount = ion(() => $count() * 2)
 
    function increment() {
       $count.value++
@@ -406,7 +406,7 @@ export function TestCounterModel() {
       }
    })
 
-   const $doubleCount = ion(() =>counter.count * 2)
+   const $doubleCount = ion(() => counter.count * 2)
 
    // watch(counter, ({ state }) => {
    //    console.log('changed', state)

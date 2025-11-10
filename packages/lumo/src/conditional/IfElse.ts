@@ -178,6 +178,15 @@ function $ActiveIndex(conditions: Ion<Booleanny>[]) {
       }
       return conditions.length;
    })
+   // return () => {
+   //    for (let i = 0; i < conditions.length; i++) {
+   //       const $condition = conditions[i]
+   //       if ($condition()) {
+   //          return i;
+   //       }
+   //    }
+   //    return conditions.length;
+   // }
 }
 
 
