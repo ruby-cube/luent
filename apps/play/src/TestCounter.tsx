@@ -102,9 +102,9 @@ export function TestCount() {
       <>
          <h3>mutable ion</h3>
          <div>{$count}</div>
-         {/* <div>{$active}</div> */}
+         <div>{$active}</div>
          <div>{$doubleCount}</div>
-         {/* <div>{($count() * 2)}</div> */}
+         <div>{($count() * 2)}</div>
          <hr></hr>
          <p>these should work</p>
          <button on:click={increment}>increment</button>

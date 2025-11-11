@@ -160,9 +160,7 @@ class IonicProxySubject extends Compound implements WatchedSubstance {
 
 
 export class FunctionalSubstance extends Compound implements Substance {
-   reactive: boolean = true; // TODO: mark inert
-
-   atoms: Particle[] = []
+   reactive: boolean = true;
 
    constructor(
       private fn: () => unknown,
@@ -178,7 +176,7 @@ export class FunctionalSubstance extends Compound implements Substance {
 
    trackedCall() {
       const value = this.call()
-      if (this.atoms.length === 0) this.reactive = false;
+      if (this.particles.length === 0) this.reactive = false;
       return value;
    }
 
@@ -206,10 +204,6 @@ export class FunctionalSubstance extends Compound implements Substance {
    }
 
 
-   // previously Ionic compound
-
-   // private trackCall: (fn: () => any) => any;
-
    private trackAtoms(fn: () => any) {
       pushTracker(this);
       try {
@@ -217,7 +211,7 @@ export class FunctionalSubstance extends Compound implements Substance {
       }
       finally {
          popTracker();
-         if (__DEV__ && this.atoms.length === 0) {
+         if (__DEV__ && this.particles.length === 0) {
             console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
          }
       }
