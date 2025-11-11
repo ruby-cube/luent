@@ -1,4 +1,4 @@
-import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, trackParticle, } from "./Compound";
+import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, track, } from "../reactivity/Compound";
 
 
 
@@ -34,11 +34,5 @@ export class IonicCompound extends Compound {
    }
 }
 
-export function __DEV__checkIfTracked() {
-   if (getActiveTracker()) console.warn(`RESEARCH: This is currently a tracked context. May need to use untrackedCall`)
-}
-export function __DEV__checkIfNotTracked() {
-   if (!getActiveTracker()) console.warn(`RESEARCH: This is currently not a tracked context. untrackedCall may be extraneous`)
-}
 
 

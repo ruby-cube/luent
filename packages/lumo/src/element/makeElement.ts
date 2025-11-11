@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, INTERNAL_RENDER, RUN_EAGERLY, queueInternalRenderTask, PRELUDE } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -10,7 +10,6 @@ import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../n
 import { camelToKebabCase } from "@rue/utils";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
-import { INTERNAL_RENDER, PRERENDER, queueInternalRenderTask, RUN_EAGERLY, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { setUpNodesArray } from "../node/GetNodes";
@@ -640,7 +639,7 @@ function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
             node.style.display = 'none'
          }, flask)
       }
-   }, PRERENDER, getFlask(), RUN_EAGERLY)
+   }, PRELUDE, getFlask(), RUN_EAGERLY)
 }
 
 function setUpStyles(node: Element, styles: StyleInput[]) {

@@ -8,7 +8,7 @@ import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { ModelQuark } from "../ionic/ModelQuark";
-import { trackParticle } from "../abstract/Compound";
+import { track } from "../reactivity/Compound";
 import { Update} from "../reactivity/Update";
 import { maybeIonize, MarkMap } from "../ionic/Ionic";
 import { isObjectLiteral } from "@rue/utils";
@@ -95,7 +95,7 @@ export function createAtomicIon(
 
 function getState(this: AtomicIonQuark) {
    if (__DEV__) emitSignal();
-   trackParticle(this)
+   track(this)
    return this.transformGet(this.state.get())
 }
 

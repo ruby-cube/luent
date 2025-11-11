@@ -3,7 +3,7 @@ import {  isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { quarkOf, hasQuark, QUARK, Quark } from "../abstract/Quark";
-import { Compound, CompoundMorph, isCompound, untrackedCall } from "../abstract/Compound";
+import { Compound, CompoundMorph, isCompound, untrackedCall } from "../reactivity/Compound";
 import { isIonicProxy } from "../ionic/ionize";
 import { IonicProxy } from "../ionic/Ionic";
 import { Traceable } from "./Traceable";

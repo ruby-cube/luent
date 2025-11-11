@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, __DEV__checkIfNotTracked, Ion, isIon, isGetter } from "../../../quarky/src";
+import { Ion, isIon, isGetter } from "../../../quarky/src";
 import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { $Node, $Nodes } from "./GetNode";
@@ -10,7 +10,7 @@ import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
-import { $Index, getCurrentIndex } from "../iteratives/List";
+import { $Index } from "../iteratives/List";
 
 // export function Fragment() {
 //    // for jsx-runtime

@@ -1,12 +1,12 @@
-import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask";
+import { $listen, Flask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonicProxy } from "../ionic/ionize";
 import { Effect } from "./EffectQueue";
-import { asWatchedSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
+import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
-import { $currentCycle, getDefaultPhase, Phase, SYNC } from "./EffectCycle";
+import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, SYNC } from "./EffectCycle";
 
 
 // watch(list.$length, list.$couch, sync(() => {
@@ -210,3 +210,66 @@ function always() {
 function notStrictlyEqual(oldState: unknown, newState: unknown) {
    return newState !== oldState
 }
+
+
+
+/**
+ * Optimized barebones ion-only watch function. links effect to atoms and flask. No async context used.
+ * @param ion 
+ * @param render 
+ * @param eager 
+ * @returns 
+ */
+export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, phase: typeof PRELUDE | typeof INTERNAL_RENDER = INTERNAL_RENDER, flask: Flask = getFlask(), eager: boolean = false) {
+   // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
+   // return;
+   const subject = new IonSubstance(ion)
+
+   let prevState = subject.getValue()
+
+   if (!subject.reactive) {
+      return;
+   }
+
+   let stale = false;
+   let paused = false;
+
+   const effect = new Effect(() => {
+      if (paused) {
+         stale = true;
+         return;
+      }
+      stale = false;
+      _render()
+   }, phase)
+
+   let eagerRun = eager;
+
+   function _render() {
+      const newState = subject.getValue()
+      render({ current: newState, previous: prevState, flask, eagerRun })
+      eagerRun = false;
+      prevState = newState;
+   }
+
+   if (eager) {
+      scheduleEagerEffect(_render, PRELUDE)
+   }
+
+   subject.linkEffect(effect)
+
+   flask.onDiscard(/* listener.stop */() => {
+      effect.destroy()
+   });
+   flask.onDemount(/* listener.pause */() => {
+      paused = true;
+   });
+   flask.onRemount(/* listener.resume */() => {
+      paused = false;
+      if (stale) {
+         effect.run?.()
+      }
+   });
+}
+
+export const RUN_EAGERLY = true;

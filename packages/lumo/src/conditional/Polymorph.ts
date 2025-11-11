@@ -4,12 +4,11 @@ import { RawJSXNode } from "../node/makeJSXNode";
 import { Commons, createCommonsNode, NodeCommons, Provided } from "../context/Context";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { FromTag } from "../component/Input";
-import { ion, Ion, isGetter, isIon, MutableIon, toValue, watch } from "@rue/quarky";
+import { ion, Ion, isGetter, isIon, MutableIon, PRELUDE, queueInternalRenderTask, toValue, watch, watchToRender } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { PRERENDER, queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
 import { COMMONS, getClosestCommons } from "../context/context-stack";
 import { AsyncRender, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode";
 
@@ -189,7 +188,7 @@ export class PolymorphKit extends VineNode {
                }, flask)
                kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
             })
-      }, PRERENDER)
+      }, PRELUDE)
    }
 
    // render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {

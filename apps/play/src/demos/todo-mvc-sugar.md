@@ -1,7 +1,7 @@
 ```tsx
 import { component, For, If, Else, FromTag } from "%rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
-import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
+import { PRELUDE } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
 import { isTracking } from "../../../../packages/quarky/src/compound/Compound"
 

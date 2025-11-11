@@ -60,7 +60,7 @@ export function TriangleDemo() {
 
    // watch($seconds, () => {
    //    console.log('changed', $seconds())
-   // }, { phase: POSTRENDER })
+   // }, { phase: POSTLUDE })
 
    function stop() {
       secondsInterval.stop();
@@ -115,7 +115,7 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
 
    // const $slow = ion($seconds())
 
-   // // SOLUTION: segregate long derivation from rendering with watch() prerender, 
+   // // SOLUTION: segregate long derivation from rendering with watch() prelude, 
 
    // watch($seconds, async () => {
    //    await lazyBatch(() => {
@@ -124,7 +124,7 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
    //       while (performance.now() < e) { }
    //    })
    //    $slow.value = $seconds()
-   // }, { phase: PRERENDER }) // phase doesn't really matter since await makes this into a separate task
+   // }, { phase: PRELUDE }) // phase doesn't really matter since await makes this into a separate task
 
 
    const $slow = ion(() => {

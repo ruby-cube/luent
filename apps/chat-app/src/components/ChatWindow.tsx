@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTRENDER, PRERENDER, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
+import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTLUDE, PRELUDE, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
 import { Ion, ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -54,7 +54,7 @@ export function ChatWindow(input: FromTag<{
       mu: $smoothScroll.value = false;
       mu: $notifyNewMessages.value = false;
 
-      ooo.await($postrender, () => {
+      ooo.await($postlude, () => {
          scrollToNew()
       })
       ooo.await($tick, () => {

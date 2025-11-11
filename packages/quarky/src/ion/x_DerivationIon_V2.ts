@@ -9,7 +9,7 @@ import { Ion } from "./Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
 import { SYNC, $activeUpdate, Mutation } from "../reactivity/Update";
-import { trackParticle } from "../abstract/Compound";
+import { track } from "../reactivity/Compound";
 import { SimpleState } from "../reactivity/State";
 
 
@@ -119,7 +119,7 @@ export function createManagedDerivation(
       // TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
       const stale = ion.staleState.get();
-      if (!stale || !retrack) trackParticle(ion)
+      if (!stale || !retrack) track(ion)
 
       const prevState = ion.state.get();
 

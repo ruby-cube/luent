@@ -3,7 +3,7 @@
    - refetch
 --
 EFFECT SYSTEM
-[ ] watch( , { phase: 'sync' | 'prerender' | 'internal render' | 'render' | 'postrender' })
+[ ] watch( , { phase: 'sync' | 'prelude' | 'internal render' | 'render' | 'postlude' })
 [ ] responsive rendering
    - console.warn when rendering exceeds 50ms
 [ ] PhaseEffectQueue and new effect cycle system
@@ -38,10 +38,10 @@ This means we must separate derivation access from render
 
 - watch()
    - sync
-   - prerender
+   - prelude
    - (internal jsx render)
    - render (for stuff like tooltip positioning)
-   - postrender (responsive tasks)
+   - postlude (responsive tasks)
 - lazyWatch()
 
 # Actions

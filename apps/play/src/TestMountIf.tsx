@@ -1,6 +1,6 @@
 import { getActiveFlask } from "@rue/flask";
 import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, $tick } from "@rue/lumo";
-import { debug, getActiveUpdate, Ion, ion, ionize, sync, watch } from "@rue/quarky";
+import { debug, getActiveUpdate, instantUpdate, Ion, ion, ionize, sync, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
@@ -54,11 +54,9 @@ export function MountIf() {
       }
    })
 
-   watch($color, async () => {
-      console.log('hi sync', getActiveUpdate())
-      await $tick()
-      console.log('hi tick', getActiveUpdate())
-   }, { phase: SYNC })
+   watch($color, () => {
+      console.log('hi tick instant', getActiveUpdate())
+   })
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
    return component(

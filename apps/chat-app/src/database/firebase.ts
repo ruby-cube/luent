@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
 import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
-import { atUnmount, fromGlobal, POSTRENDER, PRERENDER, provideGlobal } from "@rue/lumo";
+import { atUnmount, fromGlobal, POSTLUDE, PRELUDE, provideGlobal } from "@rue/lumo";
 import { ion, ionize, Ionized, SYNC, watch } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need
@@ -218,7 +218,7 @@ export function ChatKit() {
          if (e.current === 0) return;
          if (e.current < e.previous) return;
          task()
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
    }
 
    function atMessageReceived(task: () => void) {
@@ -232,11 +232,11 @@ export function ChatKit() {
          }
          console.log('event', e)
          task()
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
    }
 
    function atErrorReceived(task: () => void) {
-      watch($errorCount, task, { phase: PRERENDER })
+      watch($errorCount, task, { phase: PRELUDE })
    }
 
    const $error = ion(null as null | string)

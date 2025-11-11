@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { isIonicProxy, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
 import { IonicProxy, maybeIonize } from "./Ionic";
 import { MutatingOpDef, TrackableOpDef, MemberType, trackModel, defineIonicStructure, Constructor, trackableOp } from "./IonicMethods";
-import { trackParticle } from "../abstract/Compound";
+import { track } from "../reactivity/Compound";
 
 
 declare global {
@@ -325,7 +325,7 @@ defineIonicStructure(Array,
       length: {
          type: MemberType.PROPERTY,
          track() {
-            trackParticle(this.modelQuark!)
+            track(this.modelQuark!)
          }
       }
       // '[[set]]': {

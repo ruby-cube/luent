@@ -7,7 +7,7 @@ import { ModelQuark } from "./ModelQuark"
 import { asAtomicOp, getAtomicOp, getTrackedOps } from "./TrackableOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
-import { isTracking, trackParticle } from "../abstract/Compound"
+import { isTracking, track } from "../reactivity/Compound"
 import { AtomicIonQuark } from "../ion/AtomicIon"
 import { Mutation, recordMutation } from "../abstract/Mutable"
 
@@ -336,11 +336,11 @@ export function defineIonicStructure(constructor: Constructor, def?: IonizedMeth
 
 // const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)
 export const trackModel = (model: IonicProxy) => {
-   trackParticle(quarkOf(model))
+   track(quarkOf(model))
 }
 
 export function trackOp(model: IonicProxy, op: PropertyKey, key: any) {
-   trackParticle(asAtomicOp(quarkOf(model), op, key))
+   track(asAtomicOp(quarkOf(model), op, key))
 }
 
 

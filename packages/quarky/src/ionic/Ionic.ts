@@ -11,7 +11,7 @@ import { Atom, trigger } from "../reactivity/Atom";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp, trackOp } from "./IonicMethods";
 import { inert, isInert } from "./notes/inert";
 import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
-import { isTracking } from "../abstract/Compound";
+import { isTracking } from "../reactivity/Compound";
 import { Update } from "../reactivity/Update";
 import { PionState } from "../reactivity/x_LazyState";
 import { MutableEntity } from "../abstract/Mutable";

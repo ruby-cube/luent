@@ -1,13 +1,14 @@
 
 
-import { noop } from "@rue/utils"
-import { $activeUpdate, getActiveUpdate, queueTask, Update } from "./Update"
-import { Effect, EffectQueue, PrerenderTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
+import { setImmediate } from "@rue/thread";
+import { $activeUpdate, getActiveUpdate, Update } from "./Update"
+import { Effect, EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
 import { $schedule, Flask, getFlask, SchedulerOptions } from "@rue/flask"
-import { IonSubstance } from "./Substance"
-import { Ion } from "../ion/Ion"
-import { scheduleEagerEffect } from "./watch"
 import { getInternalTrace } from "../../../flask/debug"
+
+
+export const queueTask = setImmediate;
+
 
 function queueSwiftTask(task: Task) {
    return requestIdleCallback(task, { timeout: 17 })
@@ -16,17 +17,17 @@ function queueSwiftTask(task: Task) {
 export type Phase = typeof SYNC | AsyncPhase
 
 type AsyncPhase =
-   typeof PRERENDER
+   typeof PRELUDE
    | typeof INTERNAL_RENDER
    | typeof RENDER
-   | typeof POSTRENDER
+   | typeof POSTLUDE
 
 
 export const SYNC = 'SYNC'
-export const PRERENDER = 0
+export const PRELUDE = 0
 export const INTERNAL_RENDER = 1
 export const RENDER = 2
-export const POSTRENDER = 3
+export const POSTLUDE = 3
 
 
 type CyclePhase = {
@@ -66,7 +67,7 @@ export class EffectCycle {
       const scheduleInternalRender = update.idle ? queueTask : queueMicrotask
 
       this.phases = [{
-         phase: PRERENDER,
+         phase: PRELUDE,
          scheduleEffects: queueMicrotask,
          scheduleTasks: schedulePrerenderTasks
       }, {
@@ -78,7 +79,7 @@ export class EffectCycle {
          scheduleEffects: queueMicrotask,
          scheduleTasks: queueMicrotask
       }, {
-         phase: POSTRENDER,
+         phase: POSTLUDE,
          scheduleEffects: queueTask,
          scheduleTasks: queueSwiftTask
       }]
@@ -170,15 +171,15 @@ export class EffectCycle {
 
    effects: { [key: number | string]: TaskQueue | undefined } = {
       [SYNC]: undefined,
-      [PRERENDER]: undefined,
+      [PRELUDE]: undefined,
       [INTERNAL_RENDER]: undefined,
       [RENDER]: undefined,
-      [POSTRENDER]: undefined,
+      [POSTLUDE]: undefined,
       // [SYNC]: new TaskQueue(this, SYNC),
-      // [PRERENDER]: new PrerenderTaskQueue(this),
+      // [PRELUDE]: new PreludeTaskQueue(this),
       // [INTERNAL_RENDER]: new TaskQueue(this, INTERNAL_RENDER),
       // [RENDER]: new TaskQueue(this, RENDER),
-      // [POSTRENDER]: new TickTaskQueue(this),
+      // [POSTLUDE]: new TickTaskQueue(this),
    }
    // : Map<Phase, TaskQueue> = new Map(); // pass in an object to constructor instead of map
 
@@ -186,8 +187,8 @@ export class EffectCycle {
 
    // private initializeQueue(phase: Phase) {
    //    const queue: TaskQueue =
-   //       phase === PRERENDER
-   //          ? new PrerenderTaskQueue(this)
+   //       phase === PRELUDE
+   //          ? new PreludeTaskQueue(this)
    //          : new TaskQueue(this, phase)
    //    this.effects[phase] = queue;
    //    return queue
@@ -196,9 +197,9 @@ export class EffectCycle {
    useTaskQueue(phase: Phase) {
       return this.effects[phase]
          ?? (this.effects[phase] =
-            phase === PRERENDER
-               ? new PrerenderTaskQueue(this)
-               : phase === POSTRENDER
+            phase === PRELUDE
+               ? new PreludeTaskQueue(this)
+               : phase === POSTLUDE
                   ? new TickTaskQueue(this)
                   : new TaskQueue(this, phase)
          )
@@ -249,7 +250,7 @@ export function $currentCycle() {
 }
 
 export function getDefaultPhase(): Phase {
-   return POSTRENDER;
+   return POSTLUDE;
 }
 
 
@@ -261,28 +262,14 @@ export function getCurrentPhase() {
 
 type Task = () => void
 
-// export function maybePostcycleTask(task: Task, phase: Phase) {
-//    return phase === CyclePhase.phases.length ? postcycleTask(task) : task;
-// }
-
-// export function postcycleTask(task: Task) {
-//    function delayed() { // TODO: need to cancel with action
-//       const id = requestIdleCallback(task, { timeout: 18 })
-//       // $action().onCancel(()=>cancelIdleCallback(id))
-//    }
-//    if (__DEV__) delayed.__DEV__fn = task;
-//    return delayed;
-// }
-
-
-let prerender: Promise<void> | undefined = undefined
+let prelude: Promise<void> | undefined = undefined
 let render: Promise<void> | undefined = undefined
 let tick: Promise<void> | undefined = undefined
 
 function usePrerenderPromise() {
-   return prerender ?? (prerender = new Promise<void>(resolve => {
+   return prelude ?? (prelude = new Promise<void>(resolve => {
       queueMicrotask(() => {
-         prerender = undefined
+         prelude = undefined
          resolve()
       })
    }))
@@ -292,7 +279,7 @@ function usePrerenderPromise() {
 export function $prerender() {
    const update = $activeUpdate()
    if (!update) return usePrerenderPromise()
-   return update.cycle.$effectsComplete(PRERENDER)
+   return update.cycle.$effectsComplete(PRELUDE)
 }
 
 
@@ -318,12 +305,12 @@ export function $tick() {
          resolve()
       })
    }))
-   return update.cycle.$effectsComplete(POSTRENDER)
+   return update.cycle.$effectsComplete(POSTLUDE)
 }
 
 
 export function queuePrerenderTask(task: Task) {
-   $activeUpdate()?.cycle.scheduleTask(task, PRERENDER)
+   $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
 }
 
 export function queueInternalRenderTask(task: Task, flask: Flask) { // TODO: do other task schedulers also need flask??
@@ -346,7 +333,7 @@ export function queueRenderTask(task: Task) {
 }
 
 export function queuePostrenderTask(task: Task) {
-   $activeUpdate()?.cycle.scheduleTask(task, POSTRENDER)
+   $activeUpdate()?.cycle.scheduleTask(task, POSTLUDE)
 }
 
 
@@ -466,67 +453,6 @@ export function queuePostrenderTask(task: Task) {
 
 
 
-
-/**
- * Optimized barebones ion-only watch function. links effect to atoms and flask. No async context used.
- * @param ion 
- * @param render 
- * @param eager 
- * @returns 
- */
-export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, phase: typeof PRERENDER | typeof INTERNAL_RENDER = INTERNAL_RENDER, flask: Flask = getFlask(), eager: boolean = false) {
-   // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRERENDER, eager})
-   // return;
-   const subject = new IonSubstance(ion)
-
-   let prevState = subject.getValue()
-
-   if (!subject.reactive) {
-      return;
-   }
-
-   let stale = false;
-   let paused = false;
-
-   const effect = new Effect(() => {
-      if (paused) {
-         stale = true;
-         return;
-      }
-      stale = false;
-      _render()
-   }, phase)
-
-   let eagerRun = eager;
-
-   function _render() {
-      const newState = subject.getValue()
-      render({ current: newState, previous: prevState, flask, eagerRun })
-      eagerRun = false;
-      prevState = newState;
-   }
-
-   if (eager) {
-      scheduleEagerEffect(_render, PRERENDER)
-   }
-
-   subject.linkEffect(effect)
-
-   flask.onDiscard(/* listener.stop */() => {
-      effect.destroy()
-   });
-   flask.onDemount(/* listener.pause */() => {
-      paused = true;
-   });
-   flask.onRemount(/* listener.resume */() => {
-      paused = false;
-      if (stale) {
-         effect.run?.()
-      }
-   });
-}
-
-export const RUN_EAGERLY = true;
 
 
 

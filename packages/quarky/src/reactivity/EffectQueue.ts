@@ -1,9 +1,9 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate, idleUpdate, popUpdate, pushUpdate } from "./Update";
-import { EffectCycle, Phase, POSTRENDER, PRERENDER, RENDER, SYNC } from "./EffectCycle";
+import { catchCancelledUpdate, idleUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update";
+import { EffectCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC } from "./EffectCycle";
 
-// const PRERENDER = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
+// const PRELUDE = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
 
 type TaskFn = (...args: any[]) => unknown
 
@@ -284,11 +284,11 @@ export class TaskQueue {
 /**
  * Belongs to the current effect cycle.
  */
-export class PrerenderTaskQueue extends TaskQueue {
+export class PreludeTaskQueue extends TaskQueue {
    constructor(
       cycle: EffectCycle,
    ) {
-      super(cycle, PRERENDER)
+      super(cycle, PRELUDE)
    }
 
    emitBatchesComplete: (() => void) | undefined
@@ -339,9 +339,14 @@ export class PrerenderTaskQueue extends TaskQueue {
    }
 }
 
+function wrapTickTask(fn?: (() => void) | null) {
+   return () => {
+      if (!fn) return;
+      tickUpdate(fn)
+   }
+}
 
-
-// TODO: maybe make postrender distinct from tick?
+// TODO: maybe make postlude distinct from tick?
 /**
  * Belongs to the current effect cycle.
 */
@@ -349,10 +354,7 @@ export class TickTaskQueue extends TaskQueue {
    constructor(
       cycle: EffectCycle,
    ) {
-      super(cycle, POSTRENDER, (fn) => () => {
-         if (!fn) return;
-         idleUpdate(fn)
-      })
+      super(cycle, POSTLUDE, wrapTickTask)
    }
 
    emitBatchesComplete: (() => void) | undefined
@@ -381,7 +383,7 @@ export class TickTaskQueue extends TaskQueue {
       requestIdleCallback(() => {
          try {
             this.runningEffects = true
-            effect.run?.(); // TODO: auto wrap with update??
+            wrapTickTask(effect.run)();
          }
          finally {
             this.runningEffects = false
@@ -393,13 +395,13 @@ export class TickTaskQueue extends TaskQueue {
       }, { timeout: 17 })
    }
 
-   override runEffect(effect: Effect) {
-      try {
-         this.runningEffects = true
-         effect.run?.() // TODO: auto wrap with update??
-      }
-      finally {
-         this.runningEffects = false
-      }
-   }
+   // override runEffect(effect: Effect) {
+   //    try {
+   //       this.runningEffects = true
+   //       effect.run?.() // TODO: auto wrap with update??
+   //    }
+   //    finally {
+   //       this.runningEffects = false
+   //    }
+   // }
 }

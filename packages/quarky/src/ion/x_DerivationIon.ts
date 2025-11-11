@@ -9,7 +9,7 @@ import { Ion } from "./Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
 import { SYNC, isIdleUpdate, $activeUpdate } from "../reactivity/Update";
-import {  trackParticle } from "../abstract/Compound";
+import {  track } from "../reactivity/Compound";
 import { NULL } from "../reactivity/x_LazyState";
 
 
@@ -138,7 +138,7 @@ export function createManagedDerivation(
       // TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
       const stale = isIdleUpdate() ? ion.pStale : ion.stale;
-      if (!stale || !retrack) trackParticle(ion)
+      if (!stale || !retrack) track(ion)
 
       const prevState = isIdleUpdate() && ion.pState !== NULL ? ion.pState : ion.state
 

@@ -1,6 +1,6 @@
 import { component } from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
-import {  PRERENDER } from "../../../packages/quarky/src/reactivity/EffectCycle";
+import {  PRELUDE } from "../../../packages/quarky/src/reactivity/EffectCycle";
 
 export function TestEffectCyclePhases() {
 
@@ -28,23 +28,23 @@ export function TestEffectCyclePhases() {
 
 
    watch($count, async ({ current: count }) => {
-      console.log('### prerender: watch $count', count.frog)
+      console.log('### prelude: watch $count', count.frog)
       watch(()=>count.frog, ({ current: frog }) => {
          console.log('### frog', frog)
       })
-   }, { eager: true, phase: PRERENDER })
+   }, { eager: true, phase: PRELUDE })
 
    // watch($count, () => {
    //    console.log('### internal render: watch $count')
-   // }, { phase: PRERENDER })
+   // }, { phase: PRELUDE })
 
    // watch($count, () => {
    //    console.log('### render: watch $count')
    // }, { phase: RENDER })
 
    // watch($count, () => {
-   //    console.log('### postrender: watch $count')
-   // }, { phase: POSTRENDER })
+   //    console.log('### postlude: watch $count')
+   // }, { phase: POSTLUDE })
 
 
 

@@ -17,7 +17,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createRoot, PRERENDER } from '@rue/lumo';
+import { component, createRoot, PRELUDE } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -97,7 +97,7 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 //    return component(<div>Hello World</div>)
 // }
 
-const app = createRoot(MountIf)
+const app = createRoot(TestCount)
 
 app.mount('#app')
 

@@ -2,7 +2,7 @@
 //@ts-nocheck
 // COMPONENTS
 
-import { component, POSTRENDER, PRERENDER } from "@rue/lumo"
+import { component, POSTLUDE, PRELUDE } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
 import { isFunction } from "@rue/utils";
 import { time } from "console";
@@ -548,7 +548,7 @@ watch(($count), ({ current, previous }) => {
 
 watch($count, ({ current, previous }) => {
    doStateChanges(current)
-}, { phase: PRERENDER })
+}, { phase: PRELUDE })
 
 watch($count, ({ current, previous }) => {
    manipulateDOM(current)
@@ -556,7 +556,7 @@ watch($count, ({ current, previous }) => {
 
 watch($count, ({ current, previous }) => {
    updateDatabase(current)
-}, { phase: POSTRENDER })
+}, { phase: POSTLUDE })
 
 
 watch($count, () => {
@@ -566,7 +566,7 @@ watch($count, () => {
    console.log('render phase')
 
    await __postrender___()
-   console.log('postrender phase')
+   console.log('postlude phase')
 })
 
 

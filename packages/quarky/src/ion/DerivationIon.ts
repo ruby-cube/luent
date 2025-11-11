@@ -6,7 +6,7 @@ import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
 import { SYNC } from "../reactivity/EffectCycle";
 import { getActiveUpdate } from "../reactivity/Update";
-import { trackParticle } from "../abstract/Compound";
+import { track } from "../reactivity/Compound";
 
 
 class DerivationIonQuark {
@@ -59,7 +59,7 @@ export function createMemoizedDerivation(
    }
 
    function $derivedState() {
-      trackParticle(substance)
+      track(substance)
       if (isStale.get()) {
          return trackCall()
       }

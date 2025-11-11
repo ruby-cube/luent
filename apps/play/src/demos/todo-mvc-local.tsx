@@ -1,9 +1,9 @@
 //@ts-nocheck
 import { component, For, If, Else, FromTag, fromApp, ContextKey } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
-import { PRERENDER } from "../../../../packages/quarky/src/reactivity/EffectCycle"
+import { PRELUDE } from "../../../../packages/quarky/src/reactivity/EffectCycle"
 import { create } from "domain"
-import { isTracking } from "../../../../packages/quarky/src/abstract/Compound"
+import { isTracking } from "../../../../packages/quarky/src/reactivity/Compound"
 
 // CON: You have to return a whole object
 // PRO: More composable

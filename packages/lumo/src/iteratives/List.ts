@@ -1,7 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import { Ion, ion, ionic, MaybeIonized, MutableIon } from "@rue/quarky";
-import { PRERENDER, queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
+import { Ion, ion, ionic, MaybeIonized, MutableIon, PRELUDE, queueInternalRenderTask, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
@@ -36,7 +35,7 @@ export class ListKit extends VineNode {
       watchToRender($list, ({ current: newList }) => {
 
          this.nodes = this.rerender(newList, renderItem)
-      }, PRERENDER)
+      }, PRELUDE)
    }
 
    prevItems: Map<UID, ListItemKit> = new Map()

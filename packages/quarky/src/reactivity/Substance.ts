@@ -1,13 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { Effect } from "./EffectQueue"
 import { IonicProxy } from "../ionic/Ionic"
-import { hasQuark, QUARK, Quark, quarkOf } from "../abstract/Quark"
+import { quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
-import { isFunction, isObject, noop } from "@rue/utils";
-import { Ionized, isIonicProxy, toRaw } from "../ionic/ionize";
-import { Ion, isIon, toValue } from "../ion/Ion";
+import { isFunction } from "@rue/utils";
+import { Ionized, isIonicProxy } from "../ionic/ionize";
+import { Ion, isIon } from "../ion/Ion";
 import { WatchSubjects } from "./watch";
-import { Compound, Particle, popTracker, pushTracker } from "../abstract/Compound";
+import { Compound, Particle, popTracker, pushTracker } from "./Compound";
 
 
 

@@ -1,7 +1,5 @@
-import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 import { debug, isObject, normalizeToArray } from "@rue/utils";
-import { __DEV__checkIfTracked, Ion, isGetter, isIon, toValue, watch } from "@rue/quarky";
-import { INTERNAL_RENDER, queueInternalRenderTask, watchToRender } from "../../../quarky/src/reactivity/EffectCycle";
+import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, watchToRender} from "@rue/quarky";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
@@ -131,7 +129,7 @@ class DynamicTextNode extends VineNode {
          // if (current === previous) return;
             textNode.data = toString($text()); 
             //NOTE: We call the ion instead of using the current value passed in because, 
-            // the time between PRERENDER and PAINT is long enough that the value may have changed already in cases of animation
+            // the time between PRELUDE and PAINT is long enough that the value may have changed already in cases of animation
             // Passing in current can cause weird lags as seen in the Sierpinski Triangle
       }, INTERNAL_RENDER);
    }

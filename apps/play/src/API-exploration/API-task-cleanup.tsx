@@ -24,7 +24,7 @@ export function ScoreBoard() {
 
    })
 
-   // prerender
+   // prelude
    ionicPreTask(async ({ setup, fromContext }) => {
       setup(() =>
          setInterval(() => {

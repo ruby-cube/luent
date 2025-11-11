@@ -1,6 +1,6 @@
 import { component, Else, For, If} from "@rue/lumo"
 import { ion, queueIonicTask } from "@rue/quarky"
-import { $postrender} from "../../../../packages/quarky/src/reactivity/EffectCycle"
+import { $postlude} from "../../../../packages/quarky/src/reactivity/EffectCycle"
 import { $_run_with_, $_snap_context } from "@rue/flask"
 
 type Commit = {
@@ -38,7 +38,7 @@ export function View() {
    })
 
    // queueIonicTask(async () => {
-   //    await $postrender()
+   //    await $postlude()
    //    console.log('postlude logging', $currentBranch())
    // })
 

@@ -15,7 +15,7 @@ import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { normalizeToArray, toError } from "@rue/utils";
 import { SuspenseIon } from "./Suspense";
 import { defineAppwide } from "../context/Centralized";
-import { PRERENDER } from "../../../quarky/src/reactivity/EffectCycle";
+import { PRELUDE } from "../../../quarky/src/reactivity/EffectCycle";
 
 type AwaitKit = {
    suspenseIons: SuspenseIon<unknown>[] | undefined;
@@ -181,7 +181,7 @@ export function createAwaitSeries(
                         $error.value = toError(err);
                         $pending.value = false
                      })
-               }, {phase: PRERENDER})
+               }, {phase: PRELUDE})
             }
          }
       })

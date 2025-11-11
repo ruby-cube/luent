@@ -25,7 +25,7 @@ import { doAction } from "../../../../packages/quarky/src/action/Action"
 // animate / celUpdate()
 
 
-ooo.await(phase.prerender, () => {
+ooo.await(phase.prelude, () => {
 
 })
 ooo.await(phase.render, () => {
@@ -177,7 +177,7 @@ function Todo() {
 }
 
 
-// await phase.prerender(() => {
+// await phase.prelude(() => {
 
 // })
 // await phase.render(() => {
@@ -190,7 +190,7 @@ function Todo() {
 runIonicTask() // sync
 queueIonicPrerendertask()
 queueIonicRenderTask()
-queueIonicTask() // postrender
+queueIonicTask() // postlude
 
 watch($count, () => {
    // synchronous to action
@@ -244,7 +244,7 @@ watch($count)
    .sync(() => doSomething())
    .span(() => dispatch('...'))
    .sync(() => { })
-   .prerender(() => { })
+   .prelude(() => { })
    .render(() => { })
    .tick(() => { })
 
@@ -254,7 +254,7 @@ watch($count)
 //    o.await(dispatch('...'), () => {
 
 //     })
-//    o.prerender(() => { 
+//    o.prelude(() => { 
 
 //    })
 //    o.render(() => { 
@@ -273,7 +273,7 @@ watch($count)
 //    o.await(dispatch('...'), () => {
 
 //    })
-//    o.await(prerender, () => {
+//    o.await(prelude, () => {
 
 //    })
 //    o.await(render, () => {
@@ -292,7 +292,7 @@ watch($count)
 //    ooo.await(dispatch('...'), () => {
 
 //    })
-//    ooo.prerender(() => {
+//    ooo.prelude(() => {
 
 //    })
 //    ooo.render(() => {
@@ -310,7 +310,7 @@ watch($count, sync(ooo => { // as an effect (compare below)
    ooo.await(dispatch('...'), () => {
 
    })
-   ooo.await($prerender, () => {
+   ooo.await($prelude, () => {
 
    })
    ooo.await($render, () => {
@@ -325,7 +325,7 @@ watch($count, sync(o => { // as an effect (compare below)
    doSomething()
 
    o.await(dispatch('...'), () => { })
-   o.await($prerender, () => { })
+   o.await($prelude, () => { })
    o.await($render, () => { })
    o.await($tick, () => { })
 }))
@@ -339,7 +339,7 @@ watch($count, sync(o => { // as an effect (compare below)
    o.await(dispatch('...'), () => {
       doSomething()
    })
-   o.await.prerender(() => {
+   o.await.prelude(() => {
 
    })
    o.await.render(() => {
@@ -388,7 +388,7 @@ watch($count, sync(o => { // as an effect (compare below)
    o.await(dispatch('...'), () => {
 
    })
-   o.await($prerender, () => {
+   o.await($prelude, () => {
 
    })
    o.await($render, () => {
@@ -420,7 +420,7 @@ watch($count, sync(({ ooo }) => { // as an effect (compare below)
    ooo.await((dispatch('...')), o => {
       doSomething()
    })
-   ooo.await(prerender, o => {
+   ooo.await(prelude, o => {
       console.log('something')
    })
    ooo.await(render, o => {
@@ -450,7 +450,7 @@ watch($count, sync(({ ooo }) => { // as an effect (compare below)
       .catch(err => {
          console.error(err.message)
       })
-   ooo.await(prerender, () => {
+   ooo.await(prelude, () => {
       console.log('something')
    })
    ooo.await(render, () => {
@@ -470,13 +470,13 @@ watch($count, sync(({ ooo }) => { // as an effect (compare below)
 
 runIonicTask(({ ooo }) => {
 
-   ooo.await(PRERENDER, () => {
+   ooo.await(PRELUDE, () => {
 
    })
 }) // sync
 queueIonicPrerendertask()
 queueIonicRenderTask()
-queueIonicTask() // postrender
+queueIonicTask() // postlude
 
 // watch($count, ooo => { // QUESTION: should this be a setup function or an effect?? Here, it is a setup function
 //    ooo.run(() => {
@@ -485,7 +485,7 @@ queueIonicTask() // postrender
 //    ooo.await(dispatch('...'), () => {
 
 //    })
-//    ooo.await(prerender, () => {
+//    ooo.await(prelude, () => {
 
 //    })
 //    ooo.await(render, () => {
@@ -502,18 +502,18 @@ watch($count).sync(ooo => {
 
    ooo.span(() => dispatch('...'))
    ooo.sync(() => { })
-   ooo.prerender(() => { })
+   ooo.prelude(() => { })
    ooo.render(() => { })
    ooo.tick(() => { })
 })
 
-watch($count).prerender(() => {
+watch($count).prelude(() => {
    // microtask
 })
 
 watch($count, ooo => {
    // NOTE: this will run on every change!
-   ooo.prerender(() => {
+   ooo.prelude(() => {
 
    })
 })

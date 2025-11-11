@@ -1,6 +1,6 @@
 import { ion, watch } from "@rue/quarky";
 import { describe, expect, it, vi } from "vitest";
-import { PRERENDER } from "../../../../packages/quarky/src/reactivity/EffectCycle";
+import { PRELUDE } from "../../../../packages/quarky/src/reactivity/EffectCycle";
 
 //NOTE: Infinite loops should be eliminated from an app, not supported. Infinite loop prevention is for debugging and tracking down loops.
 
@@ -252,14 +252,14 @@ describe('infinite loop prevention', () => {
          $count.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
       watch($count, () => {
          console.log('---effect!')
          callMeOnceB()
          res(undefined)
          console.log('**count', count)
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
       $count.increment()
       count++;
@@ -327,19 +327,19 @@ describe('infinite loop prevention', () => {
          console.log('---effect!')
          callMeOnceB()
          console.log('**count', count)
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
       watch($count, () => {
          console.log('--start effect increment')
          $count.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
       watch($count, () => {
          console.log("!!!!!!!!")
          res(undefined)
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
 
       $count.increment()
@@ -418,25 +418,25 @@ describe('infinite loop prevention', () => {
          $count2.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
       watch($count2, () => {
          console.log('--start effect2 increment')
          $count.value = $count2() + 1;
          callMeOnceB()
          console.log('--end effect2 increment')
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
       watch($count, () => {
          console.log('---effect')
          callMeOnceC()
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
 
       watch($count, () => {
          console.log('!!!!')
          res(undefined)
-      }, { phase: PRERENDER })
+      }, { phase: PRELUDE })
 
       $count.increment()
       count++;
