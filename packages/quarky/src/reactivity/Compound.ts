@@ -23,22 +23,11 @@ export function track(particle: Particle) {
 
 
 
-export function isTracking() {
+export function inTrackedScope() {
    return !!getActiveTracker()
 }
 
 
-
-/**
- * INTERNAL
- */
-export type CompoundMorph<T> = {
-   asCompound: T
-}
-
-export function isCompound(value: unknown): value is Compound {
-   return isObject(value) && 'particles' in value;
-}
 
 export type Particle = Atom | Compound
 

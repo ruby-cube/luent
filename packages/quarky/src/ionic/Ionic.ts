@@ -11,7 +11,7 @@ import { Atom, trigger } from "../reactivity/Atom";
 import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp, trackOp } from "./IonicMethods";
 import { inert, isInert } from "./notes/inert";
 import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
-import { isTracking } from "../reactivity/Compound";
+import { inTrackedScope } from "../reactivity/Compound";
 import { Update } from "../reactivity/Update";
 import { PionState } from "../reactivity/x_LazyState";
 import { MutableEntity } from "../abstract/Mutable";
@@ -424,7 +424,7 @@ export function createIonicProxy(
                   return propertyDescriptor.writable ?? false
                }
                else if (!isProto && propertyDescriptor.writable) {
-                  if (isTracking()) {
+                  if (inTrackedScope()) {
                      createPion(
                         proxyProto,
                         key,
@@ -442,7 +442,7 @@ export function createIonicProxy(
                         configurable: true,
                         enumerable: propertyDescriptor.enumerable,
                         get() {
-                           if (isTracking()) {
+                           if (inTrackedScope()) {
                               const pion = createPion(
                                  proxyProto,
                                  key,

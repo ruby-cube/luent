@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, INTERNAL_RENDER, RUN_EAGERLY, queueInternalRenderTask, PRELUDE } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, INTERNAL_RENDER, RUN_EAGERLY, queueInternalRender, PRELUDE } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -250,7 +250,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 //    const ion = kit.mu;
 //    const flask = getFlask()
 //    watchToRender(ion, () => {
-//       queueInternalRenderTask(() => {
+//       queueInternalRender(() => {
 //          element.value = toString(ion())
 //       }, flask)
 //    }, flask, RUN_EAGERLY)
@@ -624,7 +624,7 @@ function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
    watchToRender($show, ({ flask, current: shouldShow, previous, eagerRun }) => {
       if (!eagerRun && shouldShow === previous) return;
       if (shouldShow) {
-         queueInternalRenderTask(() => {
+         queueInternalRender(() => {
             if (!display) {
                node.style.removeProperty('display');
             }
@@ -635,7 +635,7 @@ function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
       }
       else {
          display = node.style.display
-         queueInternalRenderTask(() => {
+         queueInternalRender(() => {
             node.style.display = 'none'
          }, flask)
       }

@@ -4,7 +4,7 @@ import { RawJSXNode } from "../node/makeJSXNode";
 import { Commons, createCommonsNode, NodeCommons, Provided } from "../context/Context";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { FromTag } from "../component/Input";
-import { ion, Ion, isGetter, isIon, MutableIon, PRELUDE, queueInternalRenderTask, toValue, watch, watchToRender } from "@rue/quarky";
+import { ion, Ion, isGetter, isIon, MutableIon, PRELUDE, queueInternalRender, toValue, watch, watchToRender } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
@@ -183,7 +183,7 @@ export class PolymorphKit extends VineNode {
                setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
                const fragment = new DocumentFragment()
                mountDOMNodes(kit.nodes!, fragment)
-               queueInternalRenderTask(() => {
+               queueInternalRender(() => {
                   mountFragment(fragment, this.precedingLeaf, this.parent)
                }, flask)
                kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
@@ -243,7 +243,7 @@ export class PolymorphKit extends VineNode {
       }
       else kit.flask!.emitDemount()
 
-      queueInternalRenderTask(() => {
+      queueInternalRender(() => {
          removeDOMNodes(prevNodes)
       })
       return kit;

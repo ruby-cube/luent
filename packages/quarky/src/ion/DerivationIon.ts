@@ -4,7 +4,7 @@ import { SimpleState } from "../reactivity/State";
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
-import { SYNC } from "../reactivity/EffectCycle";
+import { SYNC } from "../reactivity/RenderCycle";
 import { getActiveUpdate } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
 

@@ -1,5 +1,5 @@
 import { getFlask } from "@rue/flask";
-import { queueRenderTask } from "../../../quarky/src/reactivity/EffectCycle";
+import { queueRenderTask } from "../../../quarky/src/reactivity/RenderCycle";
 
 
 // TODO: API

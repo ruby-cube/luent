@@ -6,7 +6,7 @@ import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance 
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
-import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, SYNC } from "./EffectCycle";
+import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, SYNC } from "./RenderCycle";
 
 
 // watch(list.$length, list.$couch, sync(() => {
@@ -32,7 +32,6 @@ export type EffectOptions = {
    eager?: boolean;
    preserve?: boolean;
    retrack?: boolean;
-   hasChanged?: (prevState?: any, newState?: any) => boolean;
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
 export type WatchDebugOptions = {
@@ -74,8 +73,8 @@ type SubjectValue<T> = T extends () => infer R ? R : T
 export class StateChangeEvent<S = unknown> {
    // trace?: string;
    constructor(
-      public previous: S, // TODO: change to prev
-      public current: S, // TODO: change to current
+      public previous: S,
+      public current: S,
       public eager: boolean
    ) { }
 }
@@ -97,21 +96,14 @@ export function watch<
       return InertWatcher()
    }
 
-   const prevState = new SimpleState(substance.getValue())
-
-   // let prevState = watchSubject.getValue(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
+   const prevState = new SimpleState(substance.getValue()) // tracking
 
    if (!substance.reactive) {
       return InertWatcher()
    }
 
-   let hasChanged = getHasChangedFn(options, prevState)
-
    function wrappedEffect() {
-      const newState = substance.getValue() // retracking happens here // TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
-      if (!options.eager && !hasChanged(prevState.get(), newState)) {
-         return;
-      }
+      const newState = substance.getValue() // retracking
 
       try {
          (<EffectTask>effect)(new StateChangeEvent(prevState.get(), newState, !!options.eager))
@@ -119,7 +111,7 @@ export function watch<
       finally {
          options.eager = false;
          prevState.set(newState);
-         hasChanged = getHasChangedFn(options, prevState.get()) //accounts for ions whose value may change from ionized to not ionized
+         // hasChanged = getHasChangedFn(options, prevState.get()) //accounts for ions whose value may change from ionized to not ionized
       }
    }
    wrappedEffect.__DEV__fn = effect
@@ -199,17 +191,8 @@ export function InertWatcher() {
    }
 }
 
-function getHasChangedFn(options: EffectOptions | undefined, state: unknown) {
-   return options?.hasChanged ?? isIonicProxy(state) ? always : notStrictlyEqual
-}
 
-function always() {
-   return true
-}
 
-function notStrictlyEqual(oldState: unknown, newState: unknown) {
-   return newState !== oldState
-}
 
 
 

@@ -2,13 +2,12 @@
 
 import { setImmediate } from "@rue/thread";
 import { $activeUpdate, getActiveUpdate, Update } from "./Update"
-import { Effect, EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
-import { $schedule, Flask, getFlask, SchedulerOptions } from "@rue/flask"
+import { EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
+import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
 
 
 export const queueTask = setImmediate;
-
 
 function queueSwiftTask(task: Task) {
    return requestIdleCallback(task, { timeout: 17 })
@@ -21,6 +20,7 @@ type AsyncPhase =
    | typeof INTERNAL_RENDER
    | typeof RENDER
    | typeof POSTLUDE
+   | typeof TICK
 
 
 export const SYNC = 'SYNC'
@@ -28,6 +28,7 @@ export const PRELUDE = 0
 export const INTERNAL_RENDER = 1
 export const RENDER = 2
 export const POSTLUDE = 3
+export const TICK = 4
 
 
 type CyclePhase = {
@@ -47,12 +48,10 @@ function assertSequentialPhases(phases: CyclePhase[]) {
 }
 
 
-
-
 /**
  * @internal
  */
-export class EffectCycle {
+export class RenderCycle {
 
    currentPhase: Phase = SYNC
 
@@ -80,6 +79,10 @@ export class EffectCycle {
          scheduleTasks: queueMicrotask
       }, {
          phase: POSTLUDE,
+         scheduleEffects: queueMicrotask,
+         scheduleTasks: queueMicrotask
+      }, {
+         phase: TICK,
          scheduleEffects: queueTask,
          scheduleTasks: queueSwiftTask
       }]
@@ -126,7 +129,7 @@ export class EffectCycle {
                this.subphase = 'tasks'
                beginTasks()
                queueMicrotask(() => {
-                  this.closePhase(this.phases[phase + 1]) // TODO: instead of simple + 1, find the next existing phase
+                  this.closePhase(phase)
                })
             })
          })
@@ -141,7 +144,8 @@ export class EffectCycle {
       })
    }
 
-   closePhase(nextPhase: CyclePhase | undefined) {
+   closePhase(phase: AsyncPhase) {
+      const nextPhase = this.phases[phase + 1]
       if (nextPhase && !this.cancelled) {
          this.schedulePhase(nextPhase)
       }
@@ -172,34 +176,21 @@ export class EffectCycle {
    effects: { [key: number | string]: TaskQueue | undefined } = {
       [SYNC]: undefined,
       [PRELUDE]: undefined,
-      [INTERNAL_RENDER]: undefined,
+      [INTERNAL_RENDER]: new TaskQueue(this, INTERNAL_RENDER),
       [RENDER]: undefined,
       [POSTLUDE]: undefined,
-      // [SYNC]: new TaskQueue(this, SYNC),
-      // [PRELUDE]: new PreludeTaskQueue(this),
-      // [INTERNAL_RENDER]: new TaskQueue(this, INTERNAL_RENDER),
-      // [RENDER]: new TaskQueue(this, RENDER),
-      // [POSTLUDE]: new TickTaskQueue(this),
+      [TICK]: undefined
    }
-   // : Map<Phase, TaskQueue> = new Map(); // pass in an object to constructor instead of map
 
    // effectStack: Set<Effect> = new Set()
 
-   // private initializeQueue(phase: Phase) {
-   //    const queue: TaskQueue =
-   //       phase === PRELUDE
-   //          ? new PreludeTaskQueue(this)
-   //          : new TaskQueue(this, phase)
-   //    this.effects[phase] = queue;
-   //    return queue
-   // }
-
    useTaskQueue(phase: Phase) {
+      console.trace('creating task queue', phase)
       return this.effects[phase]
          ?? (this.effects[phase] =
             phase === PRELUDE
                ? new PreludeTaskQueue(this)
-               : phase === POSTLUDE
+               : phase === TICK
                   ? new TickTaskQueue(this)
                   : new TaskQueue(this, phase)
          )
@@ -212,7 +203,6 @@ export class EffectCycle {
    scheduleEffects(effects: EffectQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
       if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
-      // const queue = this.effects[adjustedPhase] ?? this.initializeQueue(adjustedPhase);
       this.useTaskQueue(adjustedPhase).scheduleEffects(effects)
    }
 
@@ -225,13 +215,19 @@ export class EffectCycle {
    runningEffects: boolean = false;
 
    runEffects(phase: Phase, onComplete: (beginTasks: Function) => void) {
-      return this.useTaskQueue(phase).runEffects(this, onComplete)
+      const queue = this.effects[phase]
+      if (queue) {
+         queue.runEffects(this, onComplete)
+      }
+      else if (phase !== SYNC){
+         this.closePhase(phase)
+      }
    }
 
    adjustPhase(phase: Phase) {
       return this.currentPhase === phase ? phase
          : phase === SYNC ? this.currentPhase
-            : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase
+            : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase // TODO: phase adjustment for tick may be different...
    }
 }
 
@@ -250,7 +246,7 @@ export function $currentCycle() {
 }
 
 export function getDefaultPhase(): Phase {
-   return POSTLUDE;
+   return TICK;
 }
 
 
@@ -262,33 +258,32 @@ export function getCurrentPhase() {
 
 type Task = () => void
 
-let prelude: Promise<void> | undefined = undefined
-let render: Promise<void> | undefined = undefined
-let tick: Promise<void> | undefined = undefined
+let _prelude: Promise<void> | undefined = undefined
+let _render: Promise<void> | undefined = undefined
+let _postlude: Promise<void> | undefined = undefined
+let _tick: Promise<void> | undefined = undefined
 
-function usePrerenderPromise() {
-   return prelude ?? (prelude = new Promise<void>(resolve => {
+
+
+
+export function $prelude() {
+   const update = $activeUpdate()
+   if (!update) return _prelude ?? (_prelude = new Promise<void>(resolve => {
       queueMicrotask(() => {
-         prelude = undefined
+         _prelude = undefined
          resolve()
       })
    }))
-}
-
-
-export function $prerender() {
-   const update = $activeUpdate()
-   if (!update) return usePrerenderPromise()
    return update.cycle.$effectsComplete(PRELUDE)
 }
 
 
 export function $render() {
    const update = $activeUpdate()
-   if (!update) return render ?? (render = new Promise<void>(resolve => {
-      usePrerenderPromise().then(() => {
+   if (!update) return _render ?? (_render = new Promise<void>(resolve => {
+      $prelude().then(() => {
          queueMicrotask(() => {
-            render = undefined
+            _render = undefined
             resolve()
          })
       })
@@ -296,32 +291,46 @@ export function $render() {
    return update.cycle.$effectsComplete(RENDER)
 }
 
-
-export function $tick() {
+export function $postlude() {
    const update = $activeUpdate()
-   if (!update) return tick ?? (tick = new Promise<void>(resolve => {
-      queueTask(() => {
-         tick = undefined
-         resolve()
+   if (!update) return _postlude ?? (_postlude = new Promise<void>(resolve => {
+      $render().then(() => {
+         queueMicrotask(() => {
+            _postlude = undefined
+            resolve()
+         })
       })
    }))
    return update.cycle.$effectsComplete(POSTLUDE)
 }
 
 
-export function queuePrerenderTask(task: Task) {
+export function $tick() {
+   const update = $activeUpdate()
+   if (!update) return _tick ?? (_tick = new Promise<void>(resolve => {
+      queueTask(() => {
+         _tick = undefined
+         resolve()
+      })
+   }))
+   return update.cycle.$effectsComplete(TICK)
+}
+
+
+export function queuePreludeTask(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
 }
 
-export function queueInternalRenderTask(task: Task, flask: Flask) { // TODO: do other task schedulers also need flask??
+export function queueInternalRender(task: Task, flask: Flask) { // TODO: do other task schedulers also need flask??
    task
       //@ts-expect-error
       .__DEVName
-      = 'queueInternalRenderTask'
+      = 'queueInternalRender'
    task
       //@ts-expect-error
       .__DEVTrace
       = getInternalTrace('internal render')
+      
    $activeUpdate()?.cycle.scheduleTask(() => {
       if (flask.discarded) return;
       task()
@@ -332,22 +341,26 @@ export function queueRenderTask(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, RENDER)
 }
 
-export function queuePostrenderTask(task: Task) {
+export function queuePostludeTask(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, POSTLUDE)
+}
+
+export function onTick(task: Task) {
+   $activeUpdate()?.cycle.scheduleTask(task, TICK)
 }
 
 
 
 
-// export const queueInternalRenderTask = (fn: Function) => {
+// export const queueInternalRender = (fn: Function) => {
 //    console.log('running internal render'),
 //    fn()
 // }
 
 
-// export const queueInternalRenderTask = useUpdateCycleScheduler(INTERNAL_RENDER)
+// export const queueInternalRender = useUpdateCycleScheduler(INTERNAL_RENDER)
 // export const queueInternalPostrenderTask = useUpdateCycleScheduler(INTERNAL_POSTRENDER)
-// export const queuePostrenderTask = (task: () => void) => {
+// export const queuePostludeTask = (task: () => void) => {
 //    queueInternalPostrenderTask(postcycleTask(task))
 // }
 
@@ -519,7 +532,7 @@ export function queuePostrenderTask(task: Task) {
 //    await $renderphase();
 //    petsEl.width = width;
 
-//    await $postrender();
+//    await $postlude();
 //    petsEl.focus()
 // })
 

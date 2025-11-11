@@ -1,4 +1,4 @@
-import { Compound, CompoundMorph, getActiveTracker, isTracking, popTracker, pushTracker, track, } from "../reactivity/Compound";
+import { Compound, CompoundMorph, getActiveTracker, inTrackedScope, popTracker, pushTracker, track, } from "../reactivity/Compound";
 
 
 

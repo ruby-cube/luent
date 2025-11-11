@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTLUDE, PRELUDE, RENDER, fromApp, atUnmount, queuePostrenderTask, atDemount, atRemounted } from "@rue/lumo";
+import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTLUDE, PRELUDE, RENDER, fromApp, atUnmount, queuePostludeTask, atDemount, atRemounted } from "@rue/lumo";
 import { Ion, ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -30,9 +30,9 @@ export function ChatWindow(input: FromTag<{
       $smoothScroll.value = false;
       $notifyNewMessages.value = false;
 
-      queuePostrenderTask(() => {
+      queuePostludeTask(() => {
          scrollToNew()
-         queuePostrenderTask(() => {
+         queuePostludeTask(() => {
             $smoothScroll.value = true;
             console.log('A smooth true')
          })
@@ -87,7 +87,7 @@ export function ChatWindow(input: FromTag<{
          $hasUnseenMessages.value = true;
       }
 
-      queuePostrenderTask(() => {
+      queuePostludeTask(() => {
          $smoothScroll.value = true;
          console.log('B smooth true')
       })

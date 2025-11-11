@@ -15,7 +15,7 @@ import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { normalizeToArray, toError } from "@rue/utils";
 import { SuspenseIon } from "./Suspense";
 import { defineAppwide } from "../context/Centralized";
-import { PRELUDE } from "../../../quarky/src/reactivity/EffectCycle";
+import { PRELUDE } from "../../../quarky/src/reactivity/RenderCycle";
 
 type AwaitKit = {
    suspenseIons: SuspenseIon<unknown>[] | undefined;

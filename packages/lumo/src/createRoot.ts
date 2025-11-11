@@ -8,7 +8,7 @@ import { Provided } from "./context/Context";
 import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
 import { normalizeToArray } from "@rue/utils";
-import { queueInternalRenderTask } from "../../quarky/src/reactivity/EffectCycle";
+import { queueInternalRender } from "../../quarky/src/reactivity/RenderCycle";
 
 let appRoot: Element;
 
@@ -56,7 +56,7 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
             try {
                nodes = this.nodes = processJSXOutput(App(toInput(attributes)))
                setUpNodeVine(nodes, appRoot)
-               queueInternalRenderTask(() => {
+               queueInternalRender(() => {
                   mountDOMNodes(nodes, appRoot)
                }, flask)
 

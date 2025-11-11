@@ -1,9 +1,9 @@
 //@ts-nocheck
 import { component, For, If, Else, FromTag } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
-import { PRELUDE } from "../../../../packages/quarky/src/reactivity/EffectCycle"
+import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
-import { isTracking } from "../../../../packages/quarky/src/reactivity/Compound"
+import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
 
 // entity.name.type.tsx
 // meta.type.annotation.tsx

@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { describe, expect, it } from "vitest"
 import { ionize, isIonicProxy, MARK, withInertItems } from "../ionize"
-import { watch } from "../../reactivity/watch"
+import { watch } from "../../reactivity/Watcher"
 import { inert, isInert } from "../notes/inert"
 
 // [x] ionize Object

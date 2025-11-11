@@ -26,7 +26,7 @@ export * from './flask/flask-hooks'
 export * from './flask/ViewFlask' 
 export * from './specialty/Stream' 
 export * from './measureLayout'
-export * from '../../quarky/src/reactivity/EffectCycle'
+export * from '../../quarky/src/reactivity/RenderCycle'
 
 //@ts-expect-error
 window._$$wrapWithCommons = wrapWithCommons;

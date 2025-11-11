@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFl
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { $_derivation, ion, Ion, ionic, PRELUDE, queueInternalRenderTask, watchToRender } from "@rue/quarky";
+import { $_derivation, ion, Ion, ionic, PRELUDE, queueInternalRender, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../context/context-stack";
@@ -90,7 +90,7 @@ export class IfElseKit extends VineNode {
             setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
             const fragment = new DocumentFragment()
             mountDOMNodes(kit.nodes!, fragment)
-            queueInternalRenderTask(() => {
+            queueInternalRender(() => {
                mountFragment(fragment, this.precedingLeaf, this.parent)
             }, flask)
             kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
@@ -127,7 +127,7 @@ export class IfElseKit extends VineNode {
       }
       else kit.flask!.emitDemount()
 
-      queueInternalRenderTask(() => {
+      queueInternalRender(() => {
          removeDOMNodes(prevNodes)
       }, this.outerFlask)
       return kit;
@@ -256,12 +256,12 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
       watchToRender($match, ({ current: isActive, previous: wasActive, flask }) => {
          if (isActive === wasActive) return;
          if ($match()) {
-            queueInternalRenderTask(() => {
+            queueInternalRender(() => {
                showDOMNodes(nodes)
             }, flask)
          }
          else if (wasActive) {
-            queueInternalRenderTask(() => {
+            queueInternalRender(() => {
                hideDOMNodes(nodes)
             }, flask)
          }

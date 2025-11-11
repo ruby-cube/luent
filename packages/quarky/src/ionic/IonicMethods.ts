@@ -2,12 +2,12 @@ import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonicProxy, ProxyKey } from "./Ionic"
 import { quarkOf } from "../abstract/Quark"
-import { useUpdate, popUpdate, pushUpdate, Update, getActiveUpdate } from "../reactivity/Update"
+import { popUpdate, pushUpdate, Update, getActiveUpdate } from "../reactivity/Update"
 import { ModelQuark } from "./ModelQuark"
 import { asAtomicOp, getAtomicOp, getTrackedOps } from "./TrackableOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
-import { isTracking, track } from "../reactivity/Compound"
+import { inTrackedScope, track } from "../reactivity/Compound"
 import { AtomicIonQuark } from "../ion/AtomicIon"
 import { Mutation, recordMutation } from "../abstract/Mutable"
 
@@ -43,7 +43,7 @@ export function useTrackableOp(
       [opKey](...args: any[]) {
          if (__DEV__) emitSignal();
          const _args = input(args);
-         if (isTracking())
+         if (inTrackedScope())
             track?.(ionized, opKey, _args)
          return output(op.apply(state.get(), _args), ionized)
       }

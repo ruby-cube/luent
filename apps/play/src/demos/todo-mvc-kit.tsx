@@ -1,9 +1,9 @@
 //@ts-nocheck
 import { component, For, If, Else, FromTag, fromApp, ContextKey, CommonsEntryKey, fromGlobal } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
-import { PRELUDE } from "../../../../packages/quarky/src/reactivity/EffectCycle"
+import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
-import { isTracking } from "../../../../packages/quarky/src/reactivity/Compound"
+import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
 import { TODO_DB_KIT } from "./todo-mvc-local"
 import { AnyObject } from "@rue/types"
 

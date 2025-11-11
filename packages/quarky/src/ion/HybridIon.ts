@@ -1,6 +1,6 @@
 import { isFunction } from "@rue/utils"
 import { Ion, MutableIon } from "./Ion"
-import { sync, watch } from "../reactivity/watch"
+import { sync, watch } from "../reactivity/Watcher"
 
 type HybridIonConfig<T> = {
    initial?: T,

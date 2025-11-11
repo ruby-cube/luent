@@ -6,10 +6,10 @@ import { ion } from "@rue/quarky";
 // + outer conditional has a fragment as the root
 // + it is the initial mount
 
-// - it has something to do with the timing of queueInternalRenderTask
-//   - when this.render() is placed outside of queueInternalRenderTask, it mounts correctly (but subsequent mounting is broken)
+// - it has something to do with the timing of queueInternalRender
+//   - when this.render() is placed outside of queueInternalRender, it mounts correctly (but subsequent mounting is broken)
 
-// SOLUTION: If queueInternalRenderTask is called within INTERNAL_RENDER phase, call fn immediately.
+// SOLUTION: If queueInternalRender is called within INTERNAL_RENDER phase, call fn immediately.
 
 export function TestNestedConditionalB() {
    const $ready = ion(true)

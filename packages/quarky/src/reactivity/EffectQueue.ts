@@ -1,7 +1,7 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
 import { catchCancelledUpdate, idleUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update";
-import { EffectCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC } from "./EffectCycle";
+import { RenderCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 
 // const PRELUDE = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
 
@@ -42,40 +42,12 @@ export class Effect {
 }
 
 
-
 let effectStackCount = 0;
-// const activeEffects = new Set()
-
-// export function $currentEffect() {
-//    return _effectStack.at(-1)
-// }
-
-// export const effectStack = {
-//    get size() {
-//       return activeEffects.size;
-//    },
-//    has(effect: Effect) {
-//       return activeEffects.has(effect)
-//    },
-
-//    push(effect: Effect) {
-//       activeEffects.add(effect)
-//       _effectStack.push(effect)
-//    },
-
-//    pop() {
-//       const effect = _effectStack.pop()
-//       activeEffects.delete(effect)
-//    }
-// }
 
 export class EffectQueue {
    effects: Effect[] | undefined;
    nextEffects: Effect[] = []
-
-   retained: Set<Effect> = new Set() // for sync effects
-   // canIdle: boolean | undefined = undefined
-
+   retained: Set<Effect> = new Set()
 
    constructor(
       private phase: Phase,
@@ -88,7 +60,6 @@ export class EffectQueue {
       this.nextEffects = []
       const phase = this.phase
       const sync = phase === SYNC
-      // const canIdle = this.canIdle !== undefined ? this.canIdle : phases.length - 1 !== phase && !sync && phases[phase].canIdle
 
       for (const effect of effects) {
          if (
@@ -102,20 +73,10 @@ export class EffectQueue {
             this.retain(effect)
             continue;
          }
-         // // stops infinite loops
-         // if (effectStack.has(effect)
-         //    // || $currentEffectCycle().effectStack.has(effect)
-         // ) {
-         //    if (retained.has(effect))
-         //       continue;
-         //    this.retain(effect)
-         //    retained.add(effect)
 
-         //    console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
-         //    continue;
-         // }
          try {
             effectStackCount++
+            if (effectStackCount > 100_000) throw new Error('Infite loop detected')
             run(effect)
          }
          finally {
@@ -189,9 +150,9 @@ export class TaskQueue {
    cancel!: () => void;
 
    constructor(
-      public cycle: EffectCycle,
+      public cycle: RenderCycle,
       protected phase: Phase,
-      wrapTask: (fn?: (() => void) | null) => ((value: unknown) => void) | null = (fn) => () => {
+      protected wrapTask: (fn?: (() => void) | null) => ((value?: unknown) => void) | null = (fn) => () => {
          if (!fn) return;
          try {
             pushUpdate(this.cycle.update)
@@ -231,7 +192,7 @@ export class TaskQueue {
 
    runningEffects: boolean = false
 
-   runEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
+   runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
       this.runBatches(
          (effect) => this.runEffect(effect),
          this.phase === SYNC ? undefined : new Set()
@@ -249,7 +210,7 @@ export class TaskQueue {
       }
    }
 
-   runMoreEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
+   runMoreEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
       this.effects = this.moreEffects ?? []
       this.moreEffects = undefined;
       if (this.effects.length) {
@@ -286,7 +247,7 @@ export class TaskQueue {
  */
 export class PreludeTaskQueue extends TaskQueue {
    constructor(
-      cycle: EffectCycle,
+      cycle: RenderCycle,
    ) {
       super(cycle, PRELUDE)
    }
@@ -294,7 +255,7 @@ export class PreludeTaskQueue extends TaskQueue {
    emitBatchesComplete: (() => void) | undefined
    idleCount = 0;
 
-   override runEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
+   override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
       new Promise<void>(emitBatchesComplete => {
          const update = this.cycle.update;
          this.runBatches(
@@ -339,28 +300,27 @@ export class PreludeTaskQueue extends TaskQueue {
    }
 }
 
-function wrapTickTask(fn?: (() => void) | null) {
-   return () => {
-      if (!fn) return;
-      tickUpdate(fn)
-   }
-}
 
-// TODO: maybe make postlude distinct from tick?
+
 /**
  * Belongs to the current effect cycle.
 */
 export class TickTaskQueue extends TaskQueue {
    constructor(
-      cycle: EffectCycle,
+      cycle: RenderCycle,
    ) {
-      super(cycle, POSTLUDE, wrapTickTask)
+      super(cycle, TICK, (fn?: (() => void) | null) => {
+         return () => {
+            if (!fn) return;
+            tickUpdate(fn, this.cycle.update)
+         }
+      })
    }
 
    emitBatchesComplete: (() => void) | undefined
    idleCount = 0;
 
-   override runEffects(cycle: EffectCycle, onComplete: (resolve: Function) => void) {
+   override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
       new Promise<void>(emitBatchesComplete => {
          this.runBatches(
             (effect: Effect) => { this.scheduleIdleEffect(effect) },
@@ -383,7 +343,7 @@ export class TickTaskQueue extends TaskQueue {
       requestIdleCallback(() => {
          try {
             this.runningEffects = true
-            wrapTickTask(effect.run)();
+            this.wrapTask(effect.run)?.()
          }
          finally {
             this.runningEffects = false
@@ -394,14 +354,4 @@ export class TickTaskQueue extends TaskQueue {
          }
       }, { timeout: 17 })
    }
-
-   // override runEffect(effect: Effect) {
-   //    try {
-   //       this.runningEffects = true
-   //       effect.run?.() // TODO: auto wrap with update??
-   //    }
-   //    finally {
-   //       this.runningEffects = false
-   //    }
-   // }
 }

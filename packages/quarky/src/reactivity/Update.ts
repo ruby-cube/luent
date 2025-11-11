@@ -1,5 +1,5 @@
 import { CancellableState } from "./State";
-import { EffectCycle, Phase, POSTLUDE } from "./EffectCycle";
+import { RenderCycle, Phase, POSTLUDE } from "./RenderCycle";
 import { createStack } from "@rue/utils";
 
 
@@ -14,17 +14,21 @@ export function $activeUpdate() {
 
 
 
-export class Update extends EventTarget {
+export class Update {
    timestamp: Date = new Date() // TODO: make sure this is correct
-   cycle: EffectCycle = new EffectCycle(this)
+
+   private _cycle?: RenderCycle
+
+   get cycle() {
+      return this._cycle ?? (this._cycle = new RenderCycle(this))
+   }
 
    constructor(
+      public fn: () => unknown,
       public type: UpdateType,
       public timeMargin: number = 0,
-      public rerun?: () => unknown,
       public idle: boolean | number = false
    ) {
-      super()
       console.trace('new update!', type)
    }
 
@@ -41,7 +45,7 @@ export class Update extends EventTarget {
          state.commitUpdate()
       }
       this.committed = true
-      this.dispatchEvent(this.settled)
+      this.emitter.dispatchEvent(this.settled!)
    }
 
    cancelled = false
@@ -53,18 +57,23 @@ export class Update extends EventTarget {
       for (const state of this.states) {
          state.cancelUpdate()
       }
-      this.dispatchEvent(this.settled)
+      this.emitter.dispatchEvent(this.settled!)
    }
 
+   private _emitter?: EventTarget;
+
+   get emitter() {
+      return this._emitter ?? (this.settled = new Event(this.SETTLED), this._emitter = new EventTarget())
+   }
 
    // 'settled' hook
 
    private SETTLED = 'settled'
 
-   private settled = new Event(this.SETTLED)
+   private settled: Event | undefined
 
    atSettled(task: () => void) {
-      this.addEventListener(this.SETTLED, task)
+      this.emitter.addEventListener(this.SETTLED, task)
    }
 
 
@@ -77,27 +86,30 @@ export class Update extends EventTarget {
       if (competingUpdate) {
          console.warn('RACE CONDITION!!!!')
          if (!this.handleRace) {
+            this.raceByType(competingUpdate)
             competingUpdate.precedes(this) ? competingUpdate.cancel() : this.cancel()
          }
          else {
             this.handleRace(competingUpdate.asAction)
          }
+
          if (this.cancelled) throw new UpdateCancelled();
          if (!competingUpdate.cancelled) {
             // queue 
             this.cancel()
             competingUpdate.atSettled(() => {
-               const rerun = this.rerun
-               if (__DEV__ && !rerun) throw new Error('unable to queue update. must provide rerun fn')
-               if (rerun) {
-                  runUpdate(rerun, new Update(this.type, this.timeMargin, rerun, this.idle))
-               }
+               new Update(this.fn, this.type, this.timeMargin, this.idle)
+                  .run()
             })
 
          }
          return;
       }
       return;
+   }
+
+   raceByType(competingAction) {
+
    }
 
    precedes(competingUpdate: Update) {
@@ -153,9 +165,9 @@ export function catchCancelledUpdate(error: unknown) {
 
 
 // TODO: not sure if I need this. Delete maybe
-export function useUpdate(timeMargin: number = 16, idle: boolean | number = false) {
-   return getActiveUpdate() ?? new Update(UpdateType.INSTANT, timeMargin, undefined, idle);
-}
+// export function useUpdate(timeMargin: number = 16, idle: boolean | number = false) {
+//    return getActiveUpdate() ?? new Update(UpdateType.INSTANT, timeMargin, undefined, idle);
+// }
 
 export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
 
@@ -171,22 +183,22 @@ export const UpdateType = {
 
 export function idleUpdate(fn: () => void, options?: { timeMargin?: number, deadline?: number }): void {
    const timeMargin = options?.deadline ?? options?.timeMargin ?? 1000;
-   runUpdate(fn, new Update(UpdateType.IDLE, timeMargin, fn, options?.deadline ?? true))
+   runUpdate(new Update(fn, UpdateType.IDLE, timeMargin, options?.deadline ?? true))
 }
 
 
 export function instantUpdate(fn: () => void): void {
-   runUpdate(fn, new Update(UpdateType.INSTANT, 16.7, fn))
+   runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
 }
 
 export function swiftUpdate<T>(fn: () => void) {
-   runUpdate(fn, new Update(UpdateType.USER_INTERACTION, 100, fn, 17))
+   runUpdate(new Update(fn, UpdateType.USER_INTERACTION, 100, 17))
 }
 
-function runUpdate(fn: () => void, update: Update) {
+export function runUpdate(update: Update) {
    try {
       pushUpdate(update)
-      fn()
+      update.fn()
    }
    catch (error) {
       catchCancelledUpdate(error)
@@ -199,9 +211,17 @@ function runUpdate(fn: () => void, update: Update) {
    }
 }
 
-
-export function tickUpdate(fn: () => void): void {
-   const update = new Update(UpdateType.IDLE, 1000, fn, 1000)
+/**
+ * tickUpdates will be initialized as a new task after 
+ * @param fn 
+ * @param origin 
+ */
+export function tickUpdate(fn: () => void, origin: Update): void {
+   const update = new Update(fn,
+      origin.type,
+      origin.timeMargin,
+      origin.type === UpdateType.USER_INTERACTION ? false : origin.idle
+   )
    try {
       pushUpdate(update)
       fn()

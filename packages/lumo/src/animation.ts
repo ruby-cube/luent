@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
-import { pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate } from "@rue/quarky";
+import { pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate, runUpdate } from "@rue/quarky";
 
 // let forAnimation = false;
 // export function $forAnimation() {
@@ -27,17 +27,7 @@ export function ThrottledHover() {
          hoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             hoverID = null;
-            const update = new Update(UpdateType.USER_ANIMATION, 16.7)
-            try {
-               pushUpdate(update)
-               fn(e); // Execute the original function with its context and arguments
-            }
-            catch (err) {
-               catchCancelledUpdate(err)
-            }
-            finally {
-               popUpdate()
-            }
+            runUpdate(new Update(() => fn(e), UpdateType.USER_ANIMATION, 16.7))
             // })
          })
          // Otherwise, the function call is ignored (throttled)
@@ -51,18 +41,7 @@ export function ThrottledHover() {
          unhoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             unhoverID = null;
-            const update = new Update(UpdateType.USER_ANIMATION, 16.7)
-            try {
-               pushUpdate(update)
-               fn(e); // Execute the original function with its context and arguments
-            }
-            catch (err) {
-               catchCancelledUpdate(err)
-            }
-            finally {
-               popUpdate()
-            }
-            // })
+            runUpdate(new Update(() => fn(e), UpdateType.USER_ANIMATION, 16.7))
          })
          // Otherwise, the function call is ignored (throttled)
       };
@@ -82,14 +61,7 @@ export function SharedThrottledUpdate() {
          frameID = requestAnimationFrame(() => {
             setImmediate(() => {
                frameID = null;
-               const update = new Update(UpdateType.USER_ANIMATION, 16.7)
-               try {
-                  pushUpdate(update)
-                  fn(); // Execute the original function with its context and arguments
-               }
-               finally {
-                  popUpdate()
-               }
+               runUpdate(new Update(fn as () => unknown, UpdateType.USER_ANIMATION, 16.7))
             })
          })
          // Otherwise, the function call is ignored (throttled)
@@ -109,17 +81,7 @@ export function ThrottlePointer(fn: Function) {
       if (frameID !== null) cancelAnimationFrame(frameID)
       frameID = requestAnimationFrame(() => {
          frameID = null;
-         const update = new Update(UpdateType.USER_ANIMATION, 16.7)
-         try {
-            pushUpdate(update)
-            fn(e); // Execute the original function with its context and arguments
-         }
-         catch (err) {
-            catchCancelledUpdate(err)
-         }
-         finally {
-            popUpdate()
-         }
+         runUpdate(new Update(() => fn(e), UpdateType.USER_ANIMATION, 16.7))
       })
       // Otherwise, the function call is ignored (throttled)
    };
@@ -137,17 +99,7 @@ export function ThrottledUpdate(fn: Function) {
       frameID = requestAnimationFrame(() => {
          setImmediate(() => {
             frameID = null;
-            const update = new Update(UpdateType.USER_ANIMATION, 16.7)
-            try {
-               pushUpdate(update)
-               fn(); // Execute the original function with its context and arguments
-            }
-            catch (err) {
-               catchCancelledUpdate(err)
-            }
-            finally {
-               popUpdate()
-            }
+            runUpdate(new Update(fn as () => unknown, UpdateType.USER_ANIMATION, 16.7))
          })
       })
       // Otherwise, the function call is ignored (throttled)
@@ -203,17 +155,7 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
 
    function renderFrame(time: DOMHighResTimeStamp) {
       setImmediate(() => {
-         try {
-            const update = new Update(stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7)
-            pushUpdate(update)
-            prepFrame(time)
-         }
-         catch (err) {
-            catchCancelledUpdate(err)
-         }
-         finally {
-            popUpdate()
-         }
+         runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
       })
    }
 

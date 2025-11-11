@@ -6,7 +6,7 @@ import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction } from "@rue/utils";
 import { Ionized, isIonicProxy } from "../ionic/ionize";
 import { Ion, isIon } from "../ion/Ion";
-import { WatchSubjects } from "./watch";
+import { WatchSubjects } from "./Watcher";
 import { Compound, Particle, popTracker, pushTracker } from "./Compound";
 
 

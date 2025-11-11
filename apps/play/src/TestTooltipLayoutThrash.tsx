@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, If, measureLayout, GetNode, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
 import { Ion, ion, ionic, MutableIon } from '@rue/quarky';
 
@@ -103,10 +104,18 @@ export function Tooltip(input: FromTag<{
    const $div = GetNode('div');
    const $height = ion(undefined as number | undefined)
 
+   atMounted(({ ooo }) => {
+      ooo.await(layout(() => $div()?.getBoundingClientRect().height))
+         .then(height => {
+            if (height != null) $height.value = height;
+         })
+   })
+
+   // prevent looped layout thrashing w/ measureLayout
    atMounted(async () => {
-      const height = await measureLayout(() =>
+      const height = await layout(() =>
          $div()?.getBoundingClientRect().height
-      ) // prevents looped layout thrashing
+      )
       if (height != null) $height.value = height;
    })
 

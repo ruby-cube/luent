@@ -1,7 +1,7 @@
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { isFunction, isObject, normalizeToArray } from "@rue/utils";
 import { atMounted, atUnmount, atRemounted } from "../flask/flask-hooks";
-import { queueInternalRenderTask } from "../../../quarky/src/reactivity/EffectCycle";
+import { queueInternalRender } from "../../../quarky/src/reactivity/RenderCycle";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput } from "../node/VineNode";
 import { getFlask } from "@rue/flask";
 
@@ -47,12 +47,12 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
    setUpNodeVine(nodes, element)
    const flask = getFlask()
 
-   queueInternalRenderTask(() => {
+   queueInternalRender(() => {
       mountDOMNodes(nodes, element)
    }, flask)
 
    atUnmount((final) => {
-      queueInternalRenderTask(() => {
+      queueInternalRender(() => {
          removeDOMNodes(nodes)
       }, flask)
    })

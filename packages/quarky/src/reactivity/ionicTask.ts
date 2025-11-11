@@ -1,12 +1,12 @@
 import { $listen, SustainedListenerOptions } from "@rue/flask";
-import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./watch";
+import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./Watcher";
 import { Glass } from "@rue/types";
 import { Effect } from "./EffectQueue";
 import { FunctionalSubstance } from "./Substance";
-import { Phase } from "./EffectCycle";
+import { Phase, POSTLUDE, PRELUDE, RENDER, TICK } from "./RenderCycle";
 
 
-type IonicTaskOptions = {
+type _IonicTaskOptions = {
    phase?: Phase;
    sync?: boolean;
    retrack?: boolean; // defaults to true
@@ -14,9 +14,10 @@ type IonicTaskOptions = {
 
 type IonicTask = (initial: boolean) => void
 
-export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 
    const retrack = options?.retrack === undefined ? true : options.retrack
+   const phase = getPhase(options)
 
    let initial = true;
 
@@ -31,9 +32,6 @@ export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
 
    const subject = new FunctionalSubstance(wrappedEffect, retrack)
 
-   let phase = getPhase(options)
-
-   // wrappedEffect = maybePostcycleTask(wrappedEffect, phase)
 
    // TODO: options.preserve means non-pausable watcher
    // const preserve = options?.preserve
@@ -54,13 +52,22 @@ export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
    });
 }
 
+type IonicTaskOptions = {[K in keyof _IonicTaskOptions as K extends 'phase' ? never: K]: _IonicTaskOptions[K]}
 
-// export function setUpIonicTask(
-//    subject: WatchedSubstance,
-//    task: Task,
-//    options: EffectOptions,
-// ) {
 
-// }
+export function queueIonicPreludeTask(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, { phase: PRELUDE, ...options ?? {} })
+}
 
+export function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, { phase: RENDER, ...options ?? {} })
+}
+
+export function queueIonicPostludeTask(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, { phase: POSTLUDE, ...options ?? {} })
+}
+
+export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, { phase: TICK, ...options ?? {} })
+}
 
