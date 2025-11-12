@@ -203,7 +203,7 @@ export function InertWatcher() {
  * @param eager 
  * @returns 
  */
-export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, phase: typeof PRELUDE | typeof INTERNAL_RENDER = INTERNAL_RENDER, flask: Flask = getFlask(), eager: boolean = false) {
+export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getFlask(), eager: boolean = false) {
    // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
    // return;
    const subject = new IonSubstance(ion)
@@ -224,7 +224,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
       }
       stale = false;
       _render()
-   }, phase)
+   }, PRELUDE)
 
    let eagerRun = eager;
 

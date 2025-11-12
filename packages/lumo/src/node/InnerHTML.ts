@@ -12,8 +12,10 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
    const htmlString = kit.innerHTML;
    if (isGetter(htmlString)) {
       watchToRender(htmlString, ({ flask }) => {
+         queueInternalRender(() => {
             parentNode.innerHTML = toString(htmlString());
-      }, INTERNAL_RENDER);
+         }, flask)
+      });
    }
    return htmlString;
 }

@@ -188,7 +188,7 @@ export class PolymorphKit extends VineNode {
                }, flask)
                kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
             })
-      }, PRELUDE)
+      })
    }
 
    // render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {

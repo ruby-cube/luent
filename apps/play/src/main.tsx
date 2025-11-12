@@ -97,7 +97,7 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 //    return component(<div>Hello World</div>)
 // }
 
-const app = createRoot(MountIf)
+const app = createRoot(TriangleDemo)
 
 app.mount('#app')
 

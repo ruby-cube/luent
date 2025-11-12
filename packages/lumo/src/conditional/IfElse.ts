@@ -95,7 +95,7 @@ export class IfElseKit extends VineNode {
             }, flask)
             kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
          })
-      }, PRELUDE)
+      })
    }
 
    phasicNode?: TransitionNode | null | undefined;
@@ -265,7 +265,7 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
                hideDOMNodes(nodes)
             }, flask)
          }
-      }, PRELUDE)
+      })
    }
 
    return seriesNodes

@@ -31,7 +31,7 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
 
    // (1) instantiate developer's root component
    const appCommons = createAppCommons(config?.provide, config?.globalCommons)
-   console.trace('appCommons', appCommons, config)
+   // console.trace('appCommons', appCommons, config)
    const remountable = config?.remountable
    const flask = new Flask({ type: 'view' });
 

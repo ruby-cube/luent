@@ -1,6 +1,7 @@
 import { CancellableState } from "./State";
-import { RenderCycle, Phase, POSTLUDE } from "./RenderCycle";
+import { RenderCycle } from "./RenderCycle";
 import { createStack } from "@rue/utils";
+import { Ion } from "../ion/Ion";
 
 
 
@@ -12,6 +13,20 @@ export function $activeUpdate() {
    return update;
 }
 
+export const $cancelCount = Ion(0)
+
+type RaceHandled = boolean
+
+export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
+
+export const UpdateType = {
+   USER_ANIMATION: 0,
+   USER_INTERACTION: 1,
+   BACKGROUND_ANIMATION: 2,
+   SERVER_RESPONSE: 3,
+   INSTANT: 4, // Catch-all for any unknown update type
+   IDLE: 5, // Catch-all for any unknown update type
+}
 
 
 export class Update {
@@ -29,7 +44,6 @@ export class Update {
       public timeMargin: number = 0,
       public idle: boolean | number = false
    ) {
-      console.trace('new update!', type)
    }
 
    private states: CancellableState[] = []
@@ -51,6 +65,7 @@ export class Update {
    cancelled = false
 
    cancel() {
+      $cancelCount.value++
       console.warn('CANCELLING UPDATE')
       this.cancelled = true;
       this.cycle.cancel()
@@ -79,41 +94,79 @@ export class Update {
 
    // race conditions
 
-   race(competingUpdate: Update | null) { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
-      if (competingUpdate === null || competingUpdate === this) {
+   race(rival: Update | null) { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
+      if (rival === null || rival === this) {
          return;
       }
-      if (competingUpdate) {
+      if (rival) {
          console.warn('RACE CONDITION!!!!')
          if (!this.handleRace) {
-            this.raceByType(competingUpdate)
-            competingUpdate.precedes(this) ? competingUpdate.cancel() : this.cancel()
+            this.raceByType(rival)
          }
          else {
-            this.handleRace(competingUpdate.asAction)
+            this.handleRace(rival.asAction)
          }
-
-         if (this.cancelled) throw new UpdateCancelled();
-         if (!competingUpdate.cancelled) {
-            // queue 
-            this.cancel()
-            competingUpdate.atSettled(() => {
-               new Update(this.fn, this.type, this.timeMargin, this.idle)
-                  .run()
-            })
-
-         }
-         return;
+         if (this.cancelled) throw new UpdateCancelled()
       }
-      return;
    }
 
-   raceByType(competingAction) {
-
+   raceByType(rival: Update) {
+      if (this.precedes(rival)) {
+         Update.races[this.type]?.(this, rival) ?? rival.queueAfter(this)
+      }
+      else {
+         Update.races[rival.type]?.(rival, this) ?? this.queueAfter(rival)
+      }
    }
 
-   precedes(competingUpdate: Update) {
-      return this.timestamp < competingUpdate.timestamp
+   static races = {
+      [UpdateType.USER_INTERACTION](updateA: Update, updateB: Update): RaceHandled {
+         switch (updateB.type) {
+            case UpdateType.USER_ANIMATION:
+            case UpdateType.BACKGROUND_ANIMATION:
+               updateB.drop()
+               return true;
+
+            default:
+               updateB.queueAfter(updateA)
+               return true;
+         }
+      },
+      [UpdateType.SERVER_RESPONSE](updateA: Update, updateB: Update) {
+         switch (updateB.type) {
+            case UpdateType.USER_INTERACTION:
+            case UpdateType.USER_ANIMATION:
+            case UpdateType.BACKGROUND_ANIMATION:
+               if (__DEV__) throw new Error('This race condition should be made impossible by disabling UI interactions or unsharing state')
+               else updateB.queueAfter(updateA)
+               return true;
+
+            default:
+               updateB.queueAfter(updateA)
+               return true;
+         }
+      }
+   }
+
+   drop() {
+      console.log('dropping', this.type)
+      this.cancel()
+   }
+
+   queueAfter(rival: Update) {
+      console.log('queuing', this.type, 'after', rival.type)
+      this.cancel()
+      rival.atSettled(() => {
+         runUpdate(new Update(this.fn, this.type, this.timeMargin, this.idle))
+      })
+   }
+
+   private override(rival: Update) {
+      rival.cancel()
+   }
+
+   private precedes(rival: Update) {
+      return this.timestamp < rival.timestamp
    }
 
    private handleRace: ((competingAction: Action) => void) | undefined
@@ -130,8 +183,8 @@ export class Update {
          return false
       },
 
-      precedes: (competingUpdate: Update) => {
-         return this.timestamp < competingUpdate.timestamp  // TODO: make sure this is correct
+      precedes: (rival: Update) => {
+         return this.timestamp < rival.timestamp  // TODO: make sure this is correct
       },
 
       cancel: () => {
@@ -151,6 +204,9 @@ export function catchCancelledUpdate(error: unknown) {
    if (error instanceof UpdateCancelled) {
       if (__DEV__) console.warn('update cancelled', error)
    }
+   else if (error === 'update cancelled') {
+      // effectsComplete promise cancelled
+   }
    else {
       throw error;
    }
@@ -169,16 +225,6 @@ export function catchCancelledUpdate(error: unknown) {
 //    return getActiveUpdate() ?? new Update(UpdateType.INSTANT, timeMargin, undefined, idle);
 // }
 
-export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
-
-export const UpdateType = {
-   USER_ANIMATION: 0,
-   USER_INTERACTION: 1,
-   BACKGROUND_ANIMATION: 2,
-   SERVER_RESPONSE: 3,
-   INSTANT: 4, // Catch-all for any unknown update type
-   IDLE: 5, // Catch-all for any unknown update type
-}
 
 
 export function idleUpdate(fn: () => void, options?: { timeMargin?: number, deadline?: number }): void {
@@ -244,7 +290,7 @@ export function tickUpdate(fn: () => void, origin: Update): void {
 
 
 export function renderServerResponse(fn: () => void) {
-   runUpdate(fn, new Update(UpdateType.SERVER_RESPONSE, 1000, fn))
+   runUpdate(new Update(fn, UpdateType.SERVER_RESPONSE, 1000))
 }
 
 
@@ -257,7 +303,7 @@ export function renderServerResponse(fn: () => void) {
 
 export type Action = {
    is: (...tags: string[]) => boolean;
-   precedes: (competingUpdate: Update) => boolean;
+   precedes: (rival: Update) => boolean;
    cancel: () => void;
 }
 

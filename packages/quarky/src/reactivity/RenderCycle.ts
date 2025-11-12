@@ -1,7 +1,7 @@
 
 
 import { setImmediate } from "@rue/thread";
-import { $activeUpdate, getActiveUpdate, Update } from "./Update"
+import { $activeUpdate, catchCancelledUpdate, getActiveUpdate, Update } from "./Update"
 import { EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
 import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
@@ -93,7 +93,6 @@ export class RenderCycle {
    started = false
 
    start() {
-      console.log('starting cycle!')
       if (this.cancelled == true) return;
       this.runStartTasks()
       this.schedulePhase(this.phases[0]) // from module
@@ -119,7 +118,6 @@ export class RenderCycle {
 
    schedulePhase({ phase, scheduleEffects, scheduleTasks }: CyclePhase) {
       scheduleEffects(() => {
-         console.log('running phase', phase)
          if (this.cancelled) return;
          this.currentPhase = phase
          this.subphase = 'effects'
@@ -159,18 +157,25 @@ export class RenderCycle {
    cancelled: boolean = false;
 
    cancel() {
-      this.idleIDs.forEach((id) => cancelIdleCallback(id))
-      let i = this.phases.length
-      while (i--) {
-         this.effects[i]?.cancel()
+      try{
+         this.idleIDs.forEach((id) => cancelIdleCallback(id))
+         let i = this.phases.length
+         while (i--) {
+            this.effects[i]?.cancel()
+         }
+         this.cancelled = true;
       }
-      this.cancelled = true;
+      catch(error){
+         console.log('CATCH', error)
+      }
    }
 
    timecheck(now: DOMHighResTimeStamp) {
       const delta = now - this.startTime
       const timeMargin = this.update.timeMargin
-      if (timeMargin && delta > timeMargin) console.warn('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+      if (timeMargin && delta > timeMargin) {
+         // console.warn('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+      }
    }
 
    effects: { [key: number | string]: TaskQueue | undefined } = {
@@ -185,7 +190,6 @@ export class RenderCycle {
    // effectStack: Set<Effect> = new Set()
 
    useTaskQueue(phase: Phase) {
-      console.trace('creating task queue', phase)
       return this.effects[phase]
          ?? (this.effects[phase] =
             phase === PRELUDE
@@ -219,7 +223,7 @@ export class RenderCycle {
       if (queue) {
          queue.runEffects(this, onComplete)
       }
-      else if (phase !== SYNC){
+      else if (phase !== SYNC) {
          this.closePhase(phase)
       }
    }
@@ -330,7 +334,7 @@ export function queueInternalRender(task: Task, flask: Flask) { // TODO: do othe
       //@ts-expect-error
       .__DEVTrace
       = getInternalTrace('internal render')
-      
+
    $activeUpdate()?.cycle.scheduleTask(() => {
       if (flask.discarded) return;
       task()

@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, INTERNAL_RENDER, RUN_EAGERLY, queueInternalRender, PRELUDE } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -228,8 +228,10 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    const flask = getFlask()
    watchToRender(ion, ({ current, previous }) => {
       // if (current === previous) return;
-      element.value = toString(ion())
-   }, INTERNAL_RENDER, flask, RUN_EAGERLY)
+      queueInternalRender(() => {
+         element.value = toString(ion())
+      }, flask)
+   }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
@@ -311,8 +313,10 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
-            setAttribute(node, _key, value())
-         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
+            queueInternalRender(() => {
+               setAttribute(node, _key, value())
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       // else if (isViewBindingKit(value)) {
       //    watch(value.ion, ({ newState }) => {
@@ -529,9 +533,11 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             // if (current === previous) return;
-            if (previous) removePreviousClasses(previous, classList)
-            if (entry()) addClasses(entry(), classList, flask)
-         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
+            queueInternalRender(() => {
+               if (previous) removePreviousClasses(previous, classList)
+               if (entry()) addClasses(entry(), classList, flask)
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       else if (entry) {
          addClasses(entry, classList, flask)
@@ -587,9 +593,11 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return
-            if (value()) classList.add(key)
-            else if (previous) classList.remove(key)
-         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
+            queueInternalRender(() => {
+               if (value()) classList.add(key)
+               else if (previous) classList.remove(key)
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       else if (value) {
          classList.add(key)
@@ -639,7 +647,7 @@ function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
             node.style.display = 'none'
          }, flask)
       }
-   }, PRELUDE, getFlask(), RUN_EAGERLY)
+   }, getFlask(), RUN_EAGERLY)
 }
 
 function setUpStyles(node: Element, styles: StyleInput[]) {
@@ -649,8 +657,10 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
-            setUpStyleEntry(style, entry(), flask);
-         }, INTERNAL_RENDER, flask, RUN_EAGERLY)
+            queueInternalRender(() =>{
+               setUpStyleEntry(style, entry(), flask);
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       else {
          setUpStyleEntry(style, entry, flask)
@@ -666,8 +676,10 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          if (isGetter(value)) {
             watchToRender(value, ({ current, previous }) => {
                // if (current === previous) return;
-               assignStyleProperty(style, toStylePropertyName(key), value())
-            }, INTERNAL_RENDER, flask, RUN_EAGERLY)
+               queueInternalRender(() =>{
+                  assignStyleProperty(style, toStylePropertyName(key), value())
+               }, flask)
+            }, flask, RUN_EAGERLY)
          }
          else {
             assignStyleProperty(style, toStylePropertyName(key), value)

@@ -170,7 +170,7 @@ export class TaskQueue {
    ) {
       this.effectsComplete = new EffectsComplete(new Promise<void>((resolve, reject) => {
          this.emitEffectsComplete = resolve
-         this.cancel = reject
+         this.cancel = () => reject('update cancelled')
       }).catch(catchCancelledUpdate), wrapTask)
    }
 

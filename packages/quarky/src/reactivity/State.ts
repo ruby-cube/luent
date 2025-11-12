@@ -1,4 +1,4 @@
-import { $activeUpdate, getActiveUpdate, Update, useUpdate } from "./Update"
+import { $activeUpdate, getActiveUpdate, Update } from "./Update"
 import type { Action } from "./Update"
 import { AnyObject } from "@rue/types"
 
@@ -45,32 +45,28 @@ export interface PendableState extends CancellableState {
 
 function getState(state: PendableState) {
    if (state.pendingUpdate === getActiveUpdate()) {
-      console.log('pending update matches active update')
       return state.pending;
    }
-   console.warn('get from outside of active update...')
    // return state.pendingUpdate && state.pendingUpdate?.idle ? state.pending : 
    return state.current
 }
 
-function lockState(state: PendableState, type: 'read' | 'write') {
-   const update = type === 'read' ? getActiveUpdate() : $activeUpdate()
+function lockState(state: PendableState) {
+   const update = $activeUpdate()
    if (!update) {
-      console.log('nothing to lock to')
+      console.warn('nothing to lock to')
       return;
    }
    if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
    if (update.committed) return;
    update.race(state.pendingUpdate) // TODO: race() should throw if cancelling this update
    if (state.pendingUpdate === null) {
-      console.warn('SETTING PENDING UPDATE')
       state.pendingUpdate = update
       update.atSettled(() => {
-         console.warn('SETTLED: nulling update')
          state.pendingUpdate = null
       })
    }
-   if (type == 'write') update.queueCommit(state)
+   update.queueCommit(state)
 }
 
 
@@ -85,23 +81,21 @@ export class SimpleState implements PendableState {
    }
 
    get() {
-      this.lock('read')
+      // this.lock('read')
       return getState(this)
    }
 
-   private lock(type: 'read' | 'write' = 'write') {
-      return lockState(this, type)
+   private lock() {
+      return lockState(this)
    }
 
    pendingUpdate: Update | null = null
 
    cancelUpdate(): void {
-      console.log('cancel update', this)
       this.pending = this.current
    }
 
    commitUpdate(): void {
-      console.log('commit update', this)
       this.current = this.pending
    }
 
@@ -127,12 +121,12 @@ export class ModelState implements PendableState {
    }
 
    get() {
-      this.lock('read')
+      // this.lock('read')
       return getState(this)
    }
 
-   private lock(type: 'read' | 'write' = 'write') {
-      return lockState(this, type)
+   private lock() {
+      return lockState(this)
    }
 
    pendingUpdate: Update | null = null

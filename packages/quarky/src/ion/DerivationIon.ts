@@ -44,7 +44,6 @@ export function createMemoizedDerivation(
       // initial call
       const value = trackedCall()
       substance.linkEffect(new Effect(() => { // TODO: need to cancel if update is canceled
-         console.log('memoized state is stale', getActiveUpdate())
          isStale.set(true);
       }, SYNC))
       // subsequent calls

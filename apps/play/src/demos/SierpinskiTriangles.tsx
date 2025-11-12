@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, ion, update, ThrottledHover, ionize, $_derivation, ionic } from "@rue/quarky";
+import { Animation, Interval, ion, ThrottledHover, ionize, $_derivation, ionic, idleUpdate, Ion, swiftUpdate, $cancelCount } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // TODO:
@@ -28,19 +28,21 @@ function doAction(fn: Function) {
 
 
 export function TriangleDemo() {
-   const $elapsed = ion(0)
-   const $seconds = ion(0)
+   const $elapsed = Ion(0)
+   const $seconds = Ion(0)
 
-   const $scale = ion(() => {
+   const $scale = Ion(() => {
       const e = ($elapsed() / 1000) % 10;
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
    const start = Date.now()
 
    const secondsInterval = Interval(() => {
-      update(() => ($seconds.value = ($seconds() % 10) + 1), { lazy: 1000 })
+      idleUpdate(() => $seconds.value = ($seconds() % 10) + 1)
    }, 1000).start();
-   // t = setInterval(() => startTransition(() => $seconds.value = ($seconds() % 10) + 1), 1000);
+   // t = setInterval(() => 
+   // startTransition(() => $seconds.value = ($seconds() % 10) + 1)
+   // , 1000);
 
    const animation = Animation(() => {
       $elapsed.value = Date.now() - start;
@@ -69,9 +71,9 @@ export function TriangleDemo() {
 
    function reset() {
       secondsInterval.stop()
-      update(() => {
+      idleUpdate(() => {
          $seconds.value = 0
-      }, { lazy: 1000 }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
+      }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsInterval.start()
    }
 
@@ -79,12 +81,12 @@ export function TriangleDemo() {
       <>
          {/* <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div> */}
          <div>
+            <p>cancel count: {$cancelCount}</p>
             <button on:click={stop}>
                stop
             </button>
             <button on:click={e => (
-               secondsInterval.start()
-               ,
+               secondsInterval.start(),
                animation.start()
             )}>
                play
@@ -113,21 +115,7 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
    }
    s = s / 2;
 
-   // const $slow = ion($seconds())
-
-   // // SOLUTION: segregate long derivation from rendering with watch() prelude, 
-
-   // watch($seconds, async () => {
-   //    await lazyBatch(() => {
-   //       var e = performance.now() + 0.8;
-   //       // Artificially long execution time.
-   //       while (performance.now() < e) { }
-   //    })
-   //    $slow.value = $seconds()
-   // }, { phase: PRELUDE }) // phase doesn't really matter since await makes this into a separate task
-
-
-   const $slow = ion(() => {
+   const $slow = Ion(() => {
       var e = performance.now() + 0.8;
       // Artificially long execution time.
       while (performance.now() < e) { }
@@ -145,13 +133,9 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
 
 
 function Dot({ x, y, s, $text }: FromTag<any>) {
-   const $hover = ion(false)
+   const $hover = Ion(false)
 
    const [Hover, Unhover] = ThrottledHover()
-   // const Throttled = (fn: Function)=>fn
-
-   // const hover = () => $hover.value = true
-   // const unhover = () => $hover.value = false
    const hover = Hover(() => $hover.value = true)
    const unhover = Unhover(() => $hover.value = false)
 
