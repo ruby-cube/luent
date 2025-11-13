@@ -118,16 +118,16 @@ class IonicProxySubject extends Compound implements WatchedSubstance {
    reactive: boolean = true
 
    constructor(
-      private model: IonicProxy,
+      private proxy: IonicProxy,
    ) {
       super()
-      this.track(quarkOf(model))
+      this.track(quarkOf(proxy))
       this.trackAbsorbedIons() // TODO: if absorbed ions can be reassigned, we need to retrack
    }
 
    getValue() {
       // TODO: retrack pions??
-      return this.model
+      return this.proxy
    }
 
    linkEffect(effect: Effect) {
@@ -137,8 +137,8 @@ class IonicProxySubject extends Compound implements WatchedSubstance {
    }
 
    private trackAbsorbedIons() {
-      const proxy = this.model
-      const target = quarkOf(proxy).rawTarget;
+      const proxy = this.proxy
+      const target = quarkOf(proxy).target;
       const keys = Reflect.ownKeys(target)
       for (const key of keys) {
          const value = target[key]

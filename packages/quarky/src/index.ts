@@ -1,6 +1,6 @@
 // import { installIonicArray } from "./ionized/IonizedArray"
-import { installIonicMap } from "./ionic/IonicMap"
-import { installIonicSet } from "./ionic/IonicSet"
+import { installIonicMap } from "./ionic/$$Map"
+import { installIonicSet } from "./ionic/$$Set"
 
 // TODO: limit exports to public api
 export * from "./debug/debug" 

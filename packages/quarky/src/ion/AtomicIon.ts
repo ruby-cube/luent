@@ -6,12 +6,14 @@ import { __DEV__trace } from "../debug/debug";
 import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark";
 import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
 import { Traceable } from "../debug/Traceable";
-import { MutableIon } from "./Ion";
+import { ion, MutableIon } from "./Ion";
 import { track } from "../reactivity/Compound";
-import { Update} from "../reactivity/Update";
-import { maybeIonize, MarkMap } from "../ionic/Ionic";
-import { isObjectLiteral } from "@rue/utils";
+import { Update } from "../reactivity/Update";
+import { maybeIonize, MarkMap, IonicProxy } from "../ionic/Ionic";
+import { isFunction, isObjectLiteral } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";
+import { ModelQuark } from "../ionic/IonicModel";
+import { Mode } from "fs";
 
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
@@ -36,7 +38,7 @@ export class AtomicIonQuark implements Atom, Quark {
    ) { }
 
    asTrackedAtom: TrackedAtom | undefined;
-   pendingUpdate: Update | null = null
+   // pendingUpdate: Update | null = null
 
    transformGet: (value: unknown) => unknown = (value) => value
    transformSet: (value: unknown, fail: typeof FAIL) => unknown | typeof FAIL = (value) => value
@@ -92,8 +94,7 @@ export function createAtomicIon(
 }
 
 
-function getState(this: AtomicIonQuark) {
-   if (__DEV__) emitSignal();
+export function getState(this: AtomicIonQuark) {
    track(this)
    return this.transformGet(this.state.get())
 }
@@ -110,3 +111,5 @@ export function setState(this: AtomicIonQuark, value: unknown) {
 
    return newState;
 }
+
+

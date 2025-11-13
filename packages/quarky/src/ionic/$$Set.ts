@@ -68,7 +68,7 @@ export function installIonicSet() {
    defineIonicStructure(Set, {
       has: {
          type: MemberType.TRACKABLE,
-           privateState: true,
+         privateState: true,
          input: ([key]) => [toRaw(key)],
          op: hasOp,
          track: trackOp,
@@ -90,7 +90,7 @@ export function installIonicSet() {
       // mutating
       add: {
          type: MemberType.MUTATING,
-           privateState: true,
+         privateState: true,
          op: function add(this: Set<unknown>, value: unknown) {
             const ionizedKey = getIonizedModel(value);
             if (ionizedKey) this.delete(ionizedKey);
@@ -110,9 +110,18 @@ export function installIonicSet() {
       },
       clear: {
          type: MemberType.MUTATING,
-           privateState: true,
+         privateState: true,
          preop(target) {
             return { entries: Array.from(<Set<any>>target), prevSize: target.size, target }
+         },
+
+         op(triggerEffects) {
+            return function clear(this: Set<unknown>) {
+               const prevSize = this.size
+               const output = this.clear()
+               if (prevSize !== this.size) triggerEffects()
+               return output;
+            }
          },
 
          trigger: (model, { prevSize, target }) => {
@@ -130,7 +139,7 @@ export function installIonicSet() {
       },
       delete: {
          type: MemberType.MUTATING,
-           privateState: true,
+         privateState: true,
          input: ([value]) => [toRaw(value)],
          op: useDeleteOp(hasOp),
          preop: (target, [value]) => ({
@@ -140,9 +149,9 @@ export function installIonicSet() {
          }),
          trigger: (model, { prevSize, target, value }) => {
             if (prevSize === target.size) return;
-            model.trigger(),
-               model.triggerOp('has', value),
-               model.triggerOp('[[get]]', 'size')
+            this.triggerModel()
+            this.triggerOp('has', value)
+            this.triggerOp('[[get]]', 'size')
          },
          revert(ionizedModel, { preopData: { value } }) {
             ionizedModel.add(value)
@@ -151,7 +160,7 @@ export function installIonicSet() {
       size: {
          get: {
             type: MemberType.TRACKABLE,
-              privateState: true,
+            privateState: true,
             track: trackOp
          }
       }
@@ -284,7 +293,7 @@ export function installIonicSet() {
 //         if (sizeProp)
 //             trigger(sizeProp, newSize, oldSize);
 
-//         const hasOp = getAtomicOp(ionizedModel, 'has', _newValue)
+//         const hasOp = getTrackedOp(ionizedModel, 'has', _newValue)
 //         if (hasOp) triggerIonicAtom(hasOp);
 
 //         triggerIonizedModel(
@@ -333,7 +342,7 @@ export function installIonicSet() {
 //       modelQuark.trigger()
 
 //       $atomicPion(ionizedModel, 'size')?.trigger()
-//       getAtomicOp(ionizedModel, 'has', key)?.trigger()
+//       getTrackedOp(ionizedModel, 'has', key)?.trigger()
 
 //       runSyncEffects()
 

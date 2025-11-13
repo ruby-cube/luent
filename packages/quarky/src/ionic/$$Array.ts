@@ -336,7 +336,7 @@ defineIonicStructure(Array,
 
       //       // afterSet(ionizedModel, quark, key, newValue, oldValue) {
       //       //    if (isIntegerKey(key)) {
-      //       //       getAtomicOp(ionizedModel, 'at', key)?.trigger()
+      //       //       getTrackedOp(ionizedModel, 'at', key)?.trigger()
       //       //       return;
       //       //    }
 
@@ -354,10 +354,10 @@ defineIonicStructure(Array,
       //       //       const index = parseInt(<string>indexKey)
       //       //       if (index >= newValue) {
       //       //          $atomicPion(ionizedModel, indexKey)?.trigger()
-      //       //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
+      //       //          getTrackedOp(ionizedModel, 'at', index)?.trigger()
       //       //       }
       //       //       if (index > oldValue) {
-      //       //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
+      //       //          getTrackedOp(ionizedModel, 'at', index)?.trigger()
       //       //       }
       //       //    }
       //       // }
@@ -450,7 +450,7 @@ defineIonicStructure(Array,
 //       const prevLength = target.length;
 //       const output = performOp()
 //       $atomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
-//       getAtomicOp(ionizedModel, 'at', - 1)?.trigger()
+//       getTrackedOp(ionizedModel, 'at', - 1)?.trigger()
 //       return output;
 //    }
 // }

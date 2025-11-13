@@ -101,7 +101,23 @@ const $todos = AsyncIon({
 function IonicTodo(data: Todo) {
    const todo = Ionic(new Todo(data), {
 
-      author: nest(IonicProfile),
+      author: nest(IonicProfile, {
+         '@get'() {
+
+         },
+         '@set'() {
+
+         }
+      }),
+
+      something: {
+         '@get'() {
+
+         },
+         '@set'() {
+
+         }
+      },
 
       $completed: nestAsyncIon($completed => ({
          initial: data.completed,

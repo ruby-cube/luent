@@ -1,6 +1,6 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { debug, isFunction, isObject } from "@rue/utils";
-import { ModelQuark } from "./ModelQuark";
+import { ModelQuark } from "./IonicModel";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { createIonicProxy, getIonizedModel, IonicProxy, IonizeOptions } from "./Ionic";
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";

@@ -1,75 +1,251 @@
-import { Ion } from "../ion/Ion"
-import { Quark, quarkOf } from "../abstract/Quark"
-import { IonicProxy } from "./Ionic"
-import { ModelQuark } from "./ModelQuark"
-import { debug } from "@rue/utils"
 import { AnyObject } from "@rue/types"
-import { PionState } from "../ion/AtomicIon"
+import { hasQuark } from "../abstract/Quark"
+import { ModelQuark } from "./IonicModel"
+import { IonicProxy } from "./Ionic"
+import { isFunction } from "@rue/utils"
+import { isIonKey } from "./ionize"
+import { SimpleState } from "../reactivity/State"
+import { AtomicIonQuark, getState, setState } from "../ion/AtomicIon"
+import { trigger } from "../reactivity/Atom"
 
-// export type PionQuark = Quark<string | symbol, $AtomicPionState | $DerivedPionState>
 
-// function asPionQuark(
-//    model: IonicProxy,
-//    key: PropertyKey,
-// ) {
-//    const pionQuark = quarkOf(model).pions[key] ?? new AtomicPionQuark(new PionState())
-//    if (pionQuark instanceof AtomicPionQuark)
-//       return pionQuark;
-//    debug.error(`[INVALID KEY] ${String(key)} is not a pion`)
-// }
-
-// function createPionQuark(model: IonicProxy, key: PropertyKey) {
-//    const quark = quarkOf(model)
-//    const derivation = getPropertyGetter(quark, key)
-//    const pion = derivation ? new DerivationPionQuark(model, key, derivation) : new AtomicPionQuark(model, key)
-//    quark.registerPion(key, pion)
-//    return pion
-// }
-
-// function getPropertyGetter(modelQuark: ModelQuark, key: PropertyKey) {
-//    let rawTarget = modelQuark.rawTarget
-//    while (rawTarget.constructor !== Object) {
-//       const propertyDescriptor = Object.getOwnPropertyDescriptor(rawTarget, key)
-//       if (propertyDescriptor)
-//          return propertyDescriptor.get;
-//       rawTarget = Object.getPrototypeOf(rawTarget)
+// class PionState extends SimpleState {
+//    constructor(
+//       private target: AnyObject,
+//       private key: PropertyKey
+//    ) {
+//       super(target[key])
 //    }
-//    return undefined;
-// }
 
-// export function asPion(
-//    model: IonicProxy,
-//    key: PropertyKey,
-// ): Ion | undefined {
-//    const pion = asPionQuark(model, key)
-//    if (!pion) {
-//       debug.error(`${String(key)} is not a pion key`)
-//       return;
+//    override commitUpdate(): void {
+//       this.target[this.key] = super.commitUpdate()
 //    }
-//    return pion.entity ?? (pion.entity = createPion(model, key, pion))
-//    // TODO: tidy up pion code... some of it feels redundant, especially setting entity
 // }
 
-// function createPion(model: IonicProxy, key: PropertyKey, pionQuark: Quark & AnyObject) {
-//    const derivation = pionQuark && 'derivation' in pionQuark ? pionQuark.derivation : getPropertyGetter(quarkOf(model), key)
-//    return derivation ? createDerivationPion(model, key, pionQuark) : createAtomicPion(model, key, pionQuark)
-// }
+// class InternalPionState extends SimpleState {
+//    constructor(
+//       private target: AnyObject,
+//       private key: PropertyKey,
+//       private onCommit: () => void
+//    ) {
+//       super(target[key])
+//    }
 
-// /**
-//  * Observed means tracked and/or watched
-//  * @param model 
-//  * @param key 
-//  */
-// export function getObservedPion(
-//    model: IonicProxy,
-//    key: PropertyKey,
-// ) {
-//    const pion = quarkOf(model).pions.get(key)
-//    return pion && (pion.asTrackedAtom || pion.asParticle) ? pion : undefined
+//       override commitUpdate(): void {
+//       this.target[this.key] = super.commitUpdate()
+//    }
 // }
 
 
+function createAtomicPion(
+   target: AnyObject,
+   key: PropertyKey,
+   modelQuark: ModelQuark
+) {
+   const quark = new AtomicPionQuark(target, key, modelQuark)
+   const $state = getState.bind(quark)
+   const setState = setPion.bind(quark)
+   //@ts-expect-error
+   $state[QUARK] = quark
+   //@ts-expect-error
+   $state.displayName = 'getPropertyValue'
+   Object.defineProperty($state, 'value', {
+      get: $state,
+      set: setState
+   })
 
-// export function triggerPion(quark: PionQuark | undefined) {
-//    quark?.asTrackedAtom?.triggerEffects()
-// }
+   return [$state, setState] as const
+}
+
+
+
+export function createInternalPion(
+   quark: AtomicPionQuark
+) {
+   return [getState.bind(quark), setPion.bind(quark)]
+}
+
+
+export function setPion(this: AtomicPionQuark, value: unknown) {
+   setState.apply(this, [value])
+   trigger(this.modelQuark, this.state.pendingUpdate!)
+}
+
+
+class AtomicPionQuark extends AtomicIonQuark {
+   constructor(
+      target: AnyObject,
+      key: PropertyKey,
+      public modelQuark: ModelQuark
+   ) {
+      super(new SimpleState(target[key], (value) => { target[key] = value }))
+   }
+}
+
+export class InternalPionQuark extends AtomicIonQuark {
+   constructor(
+      initialValue: unknown,
+      public modelQuark: ModelQuark,
+      onCommit: (value: unknown) => void
+   ) {
+      super(new SimpleState(initialValue, onCommit))
+   }
+}
+
+
+
+export function initializeProperty(
+   modelQuark: ModelQuark,
+   key: PropertyKey,
+   descriptor: PropertyDescriptor,
+) {
+   const valueKey = isIonKey(key) ? key.slice(1) : key
+   const ionKey = key === valueKey && typeof key === 'string' ? '$' + key : undefined
+   if ('value' in descriptor) {
+      initDataProperty(
+         modelQuark,
+         key,
+         valueKey,
+         ionKey,
+         descriptor
+      )
+   }
+   else {
+      initAccessorProperty(
+         modelQuark,
+         key,
+         key === valueKey ? ionKey : undefined,
+         descriptor
+      )
+   }
+}
+
+function initDataProperty(
+   modelQuark: ModelQuark,
+   key: PropertyKey,
+   valueKey: PropertyKey,
+   ionKey: string | undefined,
+   descriptor: { value?: unknown, writable?: boolean }
+) {
+   const { value, writable } = descriptor
+   if (isFunction(value) && key === ionKey && value.length == 0) {
+      initAbsorbedIon(
+         modelQuark,
+         valueKey as string,
+         ionKey,
+         value,
+      )
+   }
+   else if (isFunction(value)) {
+      initMethod(
+         modelQuark,
+         key,
+         value,
+      )
+   }
+   else if (key === valueKey && writable) {
+      initPion(
+         modelQuark,
+         valueKey,
+         ionKey,
+         value
+      )
+   }
+   else {
+      initStaticProperty(
+         modelQuark,
+         key,
+         value
+      )
+   }
+}
+
+
+
+function assertNotFunction(value: unknown) {
+   if (isFunction(value)) throw new Error('TypeError: value cannot be a function')
+}
+
+export function initPion(
+   modelQuark: ModelQuark,
+   key: PropertyKey,
+   ionKey: string | undefined,
+   value: unknown,
+) {
+   const { proto, target } = modelQuark
+   if (__DEV__) assertNotFunction(value)
+   const pionAccess = ionKey && !(ionKey in target)
+
+   const [pion, setPion] =
+      pionAccess
+         ? createAtomicPion(target, key, modelQuark)
+         : createInternalPion(new AtomicPionQuark(target, key, modelQuark))
+
+   proto.getters[key] = pion;
+   proto.setters[key] = setPion;
+
+   if (pionAccess) {
+      proto.getters[ionKey] = () => pion
+      proto.setters[ionKey] = (value: unknown) => false
+   }
+}
+
+function initStaticProperty(
+   modelQuark: ModelQuark,
+   key: PropertyKey,
+   value: unknown,
+) {
+   const { proto } = modelQuark
+   proto.getters[key] = () => value
+   proto.setters[key] = (value: unknown) => false
+}
+
+
+function initAccessorProperty(
+   modelQuark: ModelQuark,
+   key: PropertyKey,
+   ionKey: string | undefined,
+   descriptor: PropertyDescriptor
+) {
+   const { proto, target } = modelQuark
+   const getter = proto.getters[key] = descriptor.get ?? (() => undefined)
+   const setter = proto.setters[key] = descriptor.set ?? ((value: unknown) => { })
+   if (ionKey) {
+      const pion = () => getter()
+      Object.defineProperty(pion, 'value', {
+         get: getter,
+         set: setter
+      })
+      proto.getters[ionKey] = () => pion
+      proto.setters[ionKey] = (value: unknown) => false
+   }
+}
+
+function initMethod(
+   modelQuark: ModelQuark,
+   key: PropertyKey,
+   fn: Function,
+) {
+   const { proto, proxy } = modelQuark
+   proto.getters[key] = GetBoundMethod(fn, proxy)
+   proto.setters[key] = (value: unknown) => false
+}
+
+function initAbsorbedIon(
+   modelQuark: ModelQuark,
+   key: string,
+   ionKey: string,
+   ion: Function,
+) {
+   const { proto, proxy, target } = modelQuark
+   proto.getters[key] = ion
+   proto.setters[key] = 'value' in ion ? (value: unknown) => ion.value = value : (value: undefined) => false
+
+   proto.getters[ionKey] = !hasQuark(ion) ? GetBoundMethod(ion, proxy) : () => target[ionKey]
+   proto.setters[ionKey] = (value: unknown) => false
+}
+
+function GetBoundMethod(method: Function, proxy: IonicProxy) {
+   const boundMethod = method.bind(proxy)
+   return () => boundMethod
+}

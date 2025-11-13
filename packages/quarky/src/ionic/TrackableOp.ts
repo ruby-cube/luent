@@ -1,13 +1,32 @@
 import { Quark } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
-import { Atom, TrackedAtom, trigger } from "../reactivity/Atom";
-import { ILazyState } from "../reactivity/State";
-import { Update } from "../reactivity/Update";
-import { ModelQuark } from "./ModelQuark";
+import { Atom, TrackedAtom } from "../reactivity/Atom";
+import { CollectiveQuark } from "./IonicCollective";
+import { ModelQuark } from "./IonicModel";
 
-export type TrackedOps = Map<EntryKey, Atom>
+export type TrackedOps = Map<EntryKey, TrackedOpQuark>
 
 type EntryKey = any
+
+const ATOMIC_ACCESSOR = Symbol('atomic op')
+
+export class TrackedOpQuark implements Atom, Quark {
+   __DEV__asTraceable: Traceable
+   quarkType: string | symbol = ATOMIC_ACCESSOR
+   asTrackedAtom: TrackedAtom | undefined;
+
+   constructor(
+      public collectiveQuark: CollectiveQuark,
+      public op: PropertyKey,
+      public key: EntryKey
+   ) {
+      this.__DEV__asTraceable = collectiveQuark.__DEV__asTraceable
+   }
+
+   get state() {
+      return this.collectiveQuark.state
+   }
+}
 
 /**
  * Returns atomic op if it exists, otherwise creates a new atomic op 
@@ -16,34 +35,15 @@ type EntryKey = any
  * @param key 
  * @returns 
  */
-export function asAtomicOp(
+export function asTrackedOp(
    quark: ModelQuark,
    op: PropertyKey,
    key: EntryKey
 ): Atom {
-   return getAtomicOp(quark, op, key) ?? quark.registerOp(op, key, new AtomicOpQuark(quark, op, key))
+   return getTrackedOp(quark, op, key) ?? quark.registerOp(op, key, new TrackedOpQuark(quark, op, key))
 }
 
-const ATOMIC_ACCESSOR = Symbol('atomic op')
-
-export class AtomicOpQuark implements Atom, Quark {
-   constructor(
-      public modelQuark: ModelQuark,
-      public op: PropertyKey,
-      public key: EntryKey
-   ) {
-      this.__DEV__asTraceable = modelQuark.__DEV__asTraceable
-   }
-   quarkType: string | symbol = ATOMIC_ACCESSOR
-   asTrackedAtom: TrackedAtom | undefined;
-   trigger: (update: Update) => void = trigger
-
-   public __DEV__asTraceable: Traceable
-
-} 
-
-
-export function getAtomicOp(
+export function getTrackedOp(
    quark: ModelQuark,
    op: PropertyKey,
    entryKey: EntryKey
@@ -60,42 +60,3 @@ export function getTrackedOps(
    if (!(atomicOps instanceof Map)) return undefined;
    return atomicOps;
 }
-
-
-
-
-
-
-// export class AtomicOp implements Quark, Atom {
-//    quarkType: string | symbol = 'atomic op'
-//    __DEV__asTraceable: Traceable;
-//    asTrackedAtom: TrackedAtom | undefined;
-//    trigger = trigger
-
-//    constructor(
-//       public model: IonizedModel,
-//       public op: PropertyKey,
-//       public entryKey: any,
-//    ) {
-//       quarkOf(model).registerOp(op, entryKey, this)
-
-//       this.__DEV__asTraceable = quarkOf(this.model).__DEV__asTraceable
-//    }
-//    pendingUpdate: Update | null = null
-
-//    entity = undefined
-
-//    // discard() {
-//    //    unregisterAtomicOp(this.trackableOp, this.entryKey)
-//    // }
-
-//    // getOutput() {
-//    //    return this.modelQuark.rawTarget[this.op](this.entryKey)
-//    // }
-// }
-
-
-// export function isTrackedOp(value: any): value is AtomicOp {
-//    if (!(value instanceof Object)) return false;
-//    return value instanceof AtomicOp;
-// }

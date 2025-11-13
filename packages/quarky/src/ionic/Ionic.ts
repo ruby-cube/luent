@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { InertMark, Ionized, isIonicProxy, isIonKey, toRaw } from "./ionize";
 import { __DEV__asTraceable, emitSignal } from "../debug/debug";
-import { getAtomicOp, getTrackedOps } from "./TrackableOp";
-import { ModelQuark } from "./ModelQuark";
+import { getTrackedOp, getTrackedOps } from "./TrackableOp";
+import { ModelQuark } from "./IonicModel";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
@@ -15,7 +15,8 @@ import { inTrackedScope } from "../reactivity/Compound";
 import { Update } from "../reactivity/Update";
 import { PionState } from "../reactivity/x_LazyState";
 import { MutableEntity } from "../abstract/Mutable";
-import { ModelState } from "../reactivity/State";
+import { CollectiveState } from "../reactivity/State";
+import { CollectiveQuark } from "./IonicCollective";
 
 // export function $atomicPion(
 //    modelQuark: ModelQuark,
@@ -26,10 +27,9 @@ import { ModelState } from "../reactivity/State";
 //    return pion;
 // }
 
-// // /** INTERNAL */
-export type IonicProxy = {
-   [QUARK]: Atom & ModelQuark
-} & Capsule & MutableEntity & AnyObject
+export type IonicProxy = AnyObject & { '~ionic-proxy': true }
+export type IonicModel = AnyObject & { [QUARK]: ModelQuark }
+export type IonicCollective = AnyObject & { [QUARK]: CollectiveQuark }
 
 // for inert properties use absorbed neutrons
 // const frog = Ionic({
@@ -149,7 +149,7 @@ export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 // function asTrackable(tracked: [IonicProxy] | [IonicProxy, ProxyKey, any[]]) {
 //    const [model, op, input] = tracked;
 //    if (op) {
-//       return asAtomicOp(model, op, input![0]) // TODO: atomicOps that have more than one 'entry key'
+//       return asTrackedOp(model, op, input![0]) // TODO: atomicOps that have more than one 'entry key'
 //    } else {
 //       return quarkOf(model)
 //    }
@@ -505,7 +505,7 @@ export function createIonicProxy(
       has(target, key) {
          if (key === QUARK) return true;
          trackOp(ionizedModel, '[[in]]', key)
-         // TODO: need to figure out how to deal with ion access keys
+         // TODO: need to figure out how to deal with ion access keys DONE
          return key in proxyProto || (key in initialTarget)
       },
 
@@ -566,7 +566,7 @@ export function createIonicProxy(
 
       preventExtensions(target) {
          const update = initModelUpdate(modelQuark)
-         getAtomicOp(modelQuark, INTERNAL_OP, 'isExtensible')?.trigger(update)
+         getTrackedOp(modelQuark, INTERNAL_OP, 'isExtensible')?.trigger(update)
          return Reflect.preventExtensions(state.get())
       },
 
@@ -586,8 +586,8 @@ export function createIonicProxy(
 export type ProxyPropertyMap = Record<ProxyKey, (() => any) | undefined>
 
 function triggerKeysChange(quark: ModelQuark, key: ProxyKey, update: Update) {
-   getAtomicOp(quark, INTERNAL_OP, 'ownKeys')?.trigger(update)
-   getAtomicOp(quark, KEY_IN_OP, key)?.trigger(update)
+   getTrackedOp(quark, INTERNAL_OP, 'ownKeys')?.trigger(update)
+   getTrackedOp(quark, KEY_IN_OP, key)?.trigger(update)
    //QUESTION: shoule this trigger the whole model? I don't think so?
 }
 
@@ -1053,7 +1053,7 @@ function bindNativeMethod(
 // }
 // else if (op) {
 //    return function triggerOp(this: { update: Update }) {
-//       const atomicOp = getAtomicOp(model, op, entryKey)
+//       const atomicOp = getTrackedOp(model, op, entryKey)
 //       if (atomicOp) {
 //          initModelUpdate(atomicOp, this.update)
 //          atomicOp.trigger()

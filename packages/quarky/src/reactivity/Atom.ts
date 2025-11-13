@@ -7,7 +7,6 @@ import { Phase, SYNC } from "./RenderCycle";
 
 export type Atom = {
    asTrackedAtom: TrackedAtom | undefined;
-   // pendingUpdate: Update | null
 }
 
 
@@ -19,9 +18,10 @@ export type Atom = {
  * @param preopData 
  */
 export function trigger(
-   atom: Atom,
+   atom: Atom | undefined,
    update: Update
 ) {
+   if (!atom) return;
    atom.asTrackedAtom?.triggerEffects(update)
 }
 

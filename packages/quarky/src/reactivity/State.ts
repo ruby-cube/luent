@@ -59,7 +59,7 @@ function lockState(state: PendableState) {
    }
    if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
    if (update.committed) return;
-   update.race(state.pendingUpdate) // TODO: race() should throw if cancelling this update
+   update.race(state.pendingUpdate)
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
       update.atSettled(() => {
@@ -75,13 +75,15 @@ export class SimpleState implements PendableState {
    current: unknown
    pending: unknown
 
-   constructor(current: unknown) {
+   constructor(
+      current: unknown,
+      // private onCommit?: (value: unknown) => void
+   ) {
       this.current = current;
       this.pending = current;
    }
 
    get() {
-      // this.lock('read')
       return getState(this)
    }
 
@@ -95,8 +97,9 @@ export class SimpleState implements PendableState {
       this.pending = this.current
    }
 
-   commitUpdate(): void {
-      this.current = this.pending
+   commitUpdate() {
+      const value = this.current = this.pending
+      // this.onCommit?.(value)
    }
 
    set(value: unknown) {
@@ -106,26 +109,44 @@ export class SimpleState implements PendableState {
    }
 }
 
+export class PionState extends SimpleState {
+   constructor(
+      current: unknown,
+      private onCommit: (value: unknown) => void
+   ) {
+      super(current)
+   }
+   override commitUpdate() {
+      this.onCommit(this.current = this.pending)
+   }
+}
 
-export class ModelState implements PendableState {
+// TODO:
+// for ionic model
+// value => target[key] = value
+
+// for ionic collective 
+// value => state.current[key] = state.pending[key] = value
+
+
+export class CollectiveState implements PendableState {
 
    current: AnyObject
    pending: AnyObject
 
    constructor(
       current: AnyObject,
-      private clone: <T>(current: AnyObject) => AnyObject = (model: AnyObject) => model
+      protected clone: <T>(current: AnyObject) => AnyObject = (model: AnyObject) => model
    ) {
       this.current = current;
       this.pending = clone(current);
    }
 
    get() {
-      // this.lock('read')
       return getState(this)
    }
 
-   private lock() {
+   protected lock() {
       return lockState(this)
    }
 
@@ -148,10 +169,44 @@ export class ModelState implements PendableState {
       }
    }
 
-   mutate(fn: (model: AnyObject) => void) {
+
+   mutate(fn: (model: AnyObject) => unknown) {
       this.lock()
       this.mutated = true;
-      fn(this.pending)
+      return fn(this.pending)
+   }
+}
+
+
+
+
+export class ModelState extends CollectiveState {
+
+   constructor(
+      current: AnyObject,
+      clone: <T>(current: AnyObject) => AnyObject = (model: AnyObject) => model
+   ) {
+      super(current, clone)
+   }
+
+   override commitUpdate(): void {
+      if (this.mutations.length)
+         this.applyMutations()
+   }
+
+   private mutations: ((model: AnyObject) => unknown)[] = []
+
+   override mutate(fn: (model: AnyObject) => unknown) {
+      this.lock()
+      this.mutations.push(fn)
+      return fn(this.pending)
+   }
+
+   private applyMutations() {
+      for (const mutate of this.mutations) {
+         mutate(this.current)
+      }
+      this.mutations = []
    }
 }
 

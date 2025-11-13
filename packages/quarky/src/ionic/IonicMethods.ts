@@ -3,13 +3,15 @@ import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonicProxy, ProxyKey } from "./Ionic"
 import { quarkOf } from "../abstract/Quark"
 import { popUpdate, pushUpdate, Update, getActiveUpdate } from "../reactivity/Update"
-import { ModelQuark } from "./ModelQuark"
-import { asAtomicOp, getAtomicOp, getTrackedOps } from "./TrackableOp"
+import { ModelQuark } from "./IonicModel"
+import { asTrackedOp, getTrackedOp, getTrackedOps } from "./TrackableOp"
 import { emitSignal } from "../debug/debug"
 import { ionize } from "./ionize"
 import { inTrackedScope, track } from "../reactivity/Compound"
 import { AtomicIonQuark } from "../ion/AtomicIon"
 import { Mutation, recordMutation } from "../abstract/Mutable"
+import { trigger } from "../reactivity/Atom"
+import { CollectiveQuark } from "./IonicCollective"
 
 export type Constructor = new (...args: any[]) => any
 
@@ -34,93 +36,109 @@ export const useIonicOp = {
 export function useTrackableOp(
    method: Function,
    state: { get(): AnyObject },
-   ionized: IonicProxy,
+   proxy: IonicProxy,
    opKey: ProxyKey,
    config: TrackableOpDef,
 ) {
    const { track, op = method, input = noTransform, output = noTransform } = config
-   const o = {
-      [opKey](...args: any[]) {
-         if (__DEV__) emitSignal();
-         const _args = input(args);
-         if (inTrackedScope())
-            track?.(ionized, opKey, _args)
-         return output(op.apply(state.get(), _args), ionized)
-      }
+   const trackableOp = function (...args: any[]) {
+      const _args = input(args);
+      if (inTrackedScope())
+         track?.(proxy, opKey, _args)
+      return output(op.apply(state.get(), _args), proxy)
    }
-   //@ts-expect-error
-   return o[opKey]
+   Object.defineProperty(trackableOp, 'name', opKey)
+   return trackableOp
 }
 
 function noTransform(value: any) {
    return value;
 }
 
-export function initModelUpdate(quark: ModelQuark) {
-   const update = useUpdate()
-   const state = quark.state
 
-   if (update.idle){
-      update.onComplete(() => {
-         state.commitChange()
-      })
-   
-      update.onCancel(() => {
-         state.cancelChange()
-      })
-   }
 
-   return update;
-}
 
+// export function setState(this: AtomicIonQuark, value: unknown) {
+
+//    this.state.set(newState)
+
+//    trigger(this, this.state.pendingUpdate!)
+
+//    return newState;
+// }
 
 
 function useMutatingOp(
-   method: Function,
-   state: { get(): AnyObject },
-   model: IonicProxy,
+   collectiveQuark: CollectiveQuark,
+   state: { get(): AnyObject, mutate: (fn: (model: AnyObject) => void) => unknown, pendingUpdate: Update },
    opKey: ProxyKey,
-   config: MutatingOpDef
+   op: Function,
+   trigger: (collectiveQuark: CollectiveQuark, update: Update) => void
 ) {
-   const { trigger, input: transformInput = noTransform, output: transformOutput = noTransform, op = method } = config
+   const mutate = function (...args: any) {
 
-   const quark = quarkOf(model)
+      const output = state.mutate((target) => op.apply(target, args));
 
-   const o = {
-      [opKey](...args: any) {
-         const target = state.get();
+      trigger(collectiveQuark, state.pendingUpdate) // 
 
-         const _args = transformInput(args)
-         const preop = config.preop?.(target, _args)
-
-         const update = initModelUpdate(quark)
-
-         let output: any;
-         try {
-            pushUpdate(update)
-            output = transformOutput(op.apply(target, _args), model); // perform mutation
-         }
-         finally {
-            popUpdate()
-
-            recordMutation(quark.asMutable, new Mutation(
-               model,
-               opKey,
-               _args,
-               output,
-               preop
-            ))
-
-            trigger?.(new TriggerableModel(quark, update), preop);
-
-            return output;
-         }
-
-      }
+      return output;
    }
-   //@ts-expect-error
-   return o[opKey]
+   Object.defineProperty(mutate, 'name', opKey)
+   return mutate
 }
+
+function CollectiveTriggerKit(customTrigger: undefined | (() => void)) {
+   let shouldTrigger = false;
+
+   function publicTrigger() {
+      shouldTrigger = true;
+   }
+
+   function internalTrigger(collectiveQuark: CollectiveQuark, update: Update) {
+      if (shouldTrigger) {
+         trigger(collectiveQuark, update);
+         customTrigger?.apply({
+            trigger(op: PropertyKey, entryKey?: unknown) {
+               if (this.trigger.length === 1) {
+                  const ops = getTrackedOps(collectiveQuark, op)
+                  if (ops)
+                     for (const [_, op] of ops) {
+                        trigger(op, update)
+                     }
+               }
+               else {
+                  trigger(getTrackedOp(collectiveQuark, op, entryKey), update)
+               }
+            }
+         })
+      }
+
+      shouldTrigger = false;
+   }
+
+   return [internalTrigger, publicTrigger]
+}
+
+// export class Mutation {
+
+//    constructor(
+//       public target: AnyObject,
+//       public op: '[[set]]' | PropertyKey,
+//       public input: [PropertyKey, unknown] | unknown[],
+//    ) { }
+
+//    apply() {
+//       if (this.op === '[[set]]') {
+//          const key = this.input[0] as PropertyKey
+//          const value = this.input[1]
+//          this.target[key] = value
+//       }
+//       else {
+//          this.target[this.op](...this.input)
+//       }
+//    }
+// }
+
 
 class TriggerableModel {
 
@@ -145,7 +163,7 @@ class TriggerableModel {
    // }
 
    triggerOp(op: PropertyKey, entryKey: unknown) {
-      getAtomicOp(this.quark, op, entryKey)?.trigger(this.update)
+      getTrackedOp(this.quark, op, entryKey)?.trigger(this.update)
    }
 
    triggerAllOps(op: PropertyKey) {
@@ -166,7 +184,7 @@ type OpTransforms = {
 export type TrackableOpDef = {
    type: typeof MemberType.TRACKABLE,
    privateState?: true,
-   track?: (model: IonicProxy, op: PropertyKey, input: any[]) => void // 'model' | 'op'
+   track?: (model: IonicProxy, op: PropertyKey, input: any[]) => void // FIX: 'model' | 'op'
 } & OpTransforms
 
 export type MutatingOpDef = {
@@ -285,7 +303,7 @@ export function defineIonicStructure(constructor: Constructor, def?: IonizedMeth
 //    }
 //    else if (op) {
 //       return function triggerOp(this: { update: Update }) {
-//          const atomicOp = getAtomicOp(model, op, entryKey)
+//          const atomicOp = getTrackedOp(model, op, entryKey)
 //          if (atomicOp) {
 //             initModelUpdate(atomicOp, this.update)
 //             atomicOp.trigger()
@@ -339,8 +357,8 @@ export const trackModel = (model: IonicProxy) => {
    track(quarkOf(model))
 }
 
-export function trackOp(model: IonicProxy, op: PropertyKey, key: any) {
-   track(asAtomicOp(quarkOf(model), op, key))
+export function trackOp(modelQuark: ModelQuark, op: PropertyKey, key: any) {
+   track(asTrackedOp(modelQuark, op, key))
 }
 
 

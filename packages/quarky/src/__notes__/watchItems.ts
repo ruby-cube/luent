@@ -1,7 +1,7 @@
 import { PausableListener } from "@rue/flask";
 import { ionize, isIonicProxy, toRaw } from "../ionic/ionize";
 import { OnChangeHandler, watch, WatchOptions } from "../reactivity/Watcher";
-import { isIntegerKey } from "../ionic/IonicArray";
+import { isIntegerKey } from "../ionic/$$Array";
 import { AnyObject } from "@rue/types";
 import { shallowClone } from "../ionic/TimeTraveler";
 
