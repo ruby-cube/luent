@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
-import { pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate, runUpdate } from "@rue/quarky";
+import { pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate, runUpdate, instantUpdate } from "@rue/quarky";
 
 // let forAnimation = false;
 // export function $forAnimation() {
@@ -125,11 +125,11 @@ export function ThrottledUpdate(fn: Function) {
 // }
 
 
-export function Interval(fn: () => void, interval: number) {
+export function Interval(interval: number, fn: () => void) {
 
    let timeout: undefined | NodeJS.Timeout = undefined
    let stopped = true;
-   const fnWithContext = $_wrap_with_context(fn)
+   const fnWithContext = $_wrap_with_context(() => instantUpdate(fn))
 
    return {
       stop() {

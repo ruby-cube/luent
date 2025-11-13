@@ -66,7 +66,7 @@ const $todos = AsyncIon({
    })
 
    deleteTodo = AsyncAction({
-      optimistic(index: number) {
+      presume(index: number) {
          return $todos().deleteTodo(index, 1)
       },
       dispatch({ ooo }, index) {
@@ -76,7 +76,7 @@ const $todos = AsyncIon({
    })
 
    removeTodo = AsyncAction({
-      optimistic(index: number) {
+      presume(index: number) {
          return $todos().deleteTodo(index, 1)
       },
       dispatch({ ooo, output }, index) {
@@ -158,9 +158,11 @@ function IonicTodo(data: Todo) {
 // cancelling previous fetches/dispatches is handled under the hood with last op wins strategy
 
 
-// Actions batch reads and writes, including within pre-render effects
+// Actions batch reads and writes, including within prelude effects ... but what's the point of batching non-async reads and writes?
 const doSomething = Action(function () {
 
 })
 
-action(() => mu($seconds).value++)
+action(() => { mu: $seconds.value++ })
+
+

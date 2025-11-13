@@ -96,7 +96,9 @@ export class RenderCycle {
       if (this.cancelled == true) return;
       this.runStartTasks()
       this.schedulePhase(this.phases[0]) // from module
+      return this.update.completed
    }
+
 
    private startTasks: (() => void)[] | undefined
 
@@ -157,7 +159,7 @@ export class RenderCycle {
    cancelled: boolean = false;
 
    cancel() {
-      try{
+      try {
          this.idleIDs.forEach((id) => cancelIdleCallback(id))
          let i = this.phases.length
          while (i--) {
@@ -165,7 +167,7 @@ export class RenderCycle {
          }
          this.cancelled = true;
       }
-      catch(error){
+      catch (error) {
          console.log('CATCH', error)
       }
    }
@@ -184,7 +186,7 @@ export class RenderCycle {
       [INTERNAL_RENDER]: new TaskQueue(this, INTERNAL_RENDER),
       [RENDER]: undefined,
       [POSTLUDE]: undefined,
-      [TICK]: undefined
+      [TICK]: new TickTaskQueue(this)
    }
 
    // effectStack: Set<Effect> = new Set()
@@ -194,10 +196,12 @@ export class RenderCycle {
          ?? (this.effects[phase] =
             phase === PRELUDE
                ? new PreludeTaskQueue(this)
-               : phase === TICK
-                  ? new TickTaskQueue(this)
-                  : new TaskQueue(this, phase)
+               : new TaskQueue(this, phase)
          )
+   }
+
+   onCompleted(fn: () =>void) {
+      this.$effectsComplete(TICK).then(fn)
    }
 
    $effectsComplete(phase: Phase) {

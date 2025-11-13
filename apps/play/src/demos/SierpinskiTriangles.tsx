@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, ion, ThrottledHover, ionize, $_derivation, ionic, idleUpdate, Ion, swiftUpdate, $cancelCount } from "@rue/quarky";
+import { Animation, Interval, ion, ThrottledHover, ionize, $_derivation, ionic, dispatch, Ion, swiftUpdate, $cancelCount } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // TODO:
@@ -27,22 +27,51 @@ function doAction(fn: Function) {
 // }
 
 
+// Types of update delays
+// - expensive work or fetches in original task
+// - expensive work or fetches in prelude effects
+// - many prelude effects
+
+// QUESTION: Should these be handled in one API or two?
+
+
+// prerender
+// beforehand
+// in the meantime
+// standin
+// immediate
+// swift
+// sync
+
 export function TriangleDemo() {
    const $elapsed = Ion(0)
    const $seconds = Ion(0)
+   const $realSeconds = Ion(0)
 
    const $scale = Ion(() => {
       const e = ($elapsed() / 1000) % 10;
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
-   const start = Date.now()
 
-   const secondsInterval = Interval(() => {
-      idleUpdate(() => $seconds.value = ($seconds() % 10) + 1)
-   }, 1000).start();
-   // t = setInterval(() => 
-   // startTransition(() => $seconds.value = ($seconds() % 10) + 1)
-   // , 1000);
+   // const incrementSeconds = AsyncAction({
+   //    meantime: () => $realSeconds.value = ($seconds() % 10) + 1,
+   //    dispatch: () => $seconds.value = ($seconds() % 10) + 1
+   // })
+
+   // incrementSeconds.$pending
+   // incrementSeconds.dispatch()
+
+   let promise: Promise<void>;
+   let resolve: undefined | (() => void)
+
+   const secondsInterval = Interval(1000, () => {
+      resolve?.()
+      promise = new Promise<void>(_resolve => {resolve = _resolve})
+      $realSeconds.value = ($realSeconds() % 10) + 1
+      dispatch(() => {$seconds.value = ($seconds() % 10) + 1; return promise})
+   }).start();
+
+   const start = Date.now()
 
    const animation = Animation(() => {
       $elapsed.value = Date.now() - start;
@@ -71,7 +100,7 @@ export function TriangleDemo() {
 
    function reset() {
       secondsInterval.stop()
-      idleUpdate(() => {
+      dispatch(() => {
          $seconds.value = 0
       }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsInterval.start()
@@ -82,6 +111,7 @@ export function TriangleDemo() {
          {/* <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div> */}
          <div>
             <p>cancel count: {$cancelCount}</p>
+            <p>real secs: {$realSeconds}</p>
             <button on:click={stop}>
                stop
             </button>
@@ -96,9 +126,7 @@ export function TriangleDemo() {
             </button>
             <div
                class="container"
-               style={{
-                  transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
-               }}
+               style={{ transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)") }}
             >
                <Triangle x={0} y={0} s={1000} seconds={$seconds} />
             </div>

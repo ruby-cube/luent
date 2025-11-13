@@ -33,17 +33,48 @@ export class Update {
    timestamp: Date = new Date() // TODO: make sure this is correct
 
    private _cycle?: RenderCycle
+   fn: () => unknown;
+   private output: unknown;
+
+   completed: Promise<unknown>;
+   resolve!: (value: unknown) => void;
+   reject!: (reason?: any) => void;
 
    get cycle() {
       return this._cycle ?? (this._cycle = new RenderCycle(this))
    }
 
+   start() {
+      const output = this.output
+      if (output instanceof Promise) {
+         output.then((o) => {
+            this.cycle.start()
+            this.cycle.onCompleted(() => {
+               this.resolve(o)
+            })
+            return this.completed
+         })
+      }
+      else {
+         this.cycle.start() // TODO: return a promise resolved with output
+         this.cycle.onCompleted(() => {
+            this.resolve(output)
+         })
+         return this.completed
+      }
+   }
+
    constructor(
-      public fn: () => unknown,
+      fn: () => unknown,
       public type: UpdateType,
       public timeMargin: number = 0,
       public idle: boolean | number = false
    ) {
+      this.fn = () => this.output = fn()
+      this.completed = new Promise<unknown>((resolve, reject) => {
+         this.resolve = resolve;
+         this.reject = reject
+      }).catch(catchCancelledUpdate)
    }
 
    private states: CancellableState[] = []
@@ -68,6 +99,7 @@ export class Update {
       $cancelCount.value++
       console.warn('CANCELLING UPDATE')
       this.cancelled = true;
+      this.reject('update cancelled')
       this.cycle.cancel()
       for (const state of this.states) {
          state.cancelUpdate()
@@ -227,9 +259,10 @@ export function catchCancelledUpdate(error: unknown) {
 
 
 
-export function idleUpdate(fn: () => void, options?: { timeMargin?: number, deadline?: number }): void {
+
+export function dispatch<T>(fn: () => T, options?: { timeMargin?: number, deadline?: number }): Promise<T> {
    const timeMargin = options?.deadline ?? options?.timeMargin ?? 1000;
-   runUpdate(new Update(fn, UpdateType.IDLE, timeMargin, options?.deadline ?? true))
+   return runUpdate(new Update(fn, UpdateType.IDLE, timeMargin, options?.deadline ?? true)) as Promise<T>
 }
 
 
@@ -237,6 +270,8 @@ export function instantUpdate(fn: () => void): void {
    runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
 }
 
+
+// TODO: what happens when swiftUpdates queue up too long??
 export function swiftUpdate<T>(fn: () => void) {
    runUpdate(new Update(fn, UpdateType.USER_INTERACTION, 100, 17))
 }
@@ -244,7 +279,8 @@ export function swiftUpdate<T>(fn: () => void) {
 export function runUpdate(update: Update) {
    try {
       pushUpdate(update)
-      update.fn()
+      update.fn() // TODO: pass in await sequence?
+
    }
    catch (error) {
       catchCancelledUpdate(error)
@@ -252,7 +288,7 @@ export function runUpdate(update: Update) {
    finally {
       popUpdate()
       if (!update.cancelled) {
-         update.cycle.start()
+         return update.start()
       }
    }
 }

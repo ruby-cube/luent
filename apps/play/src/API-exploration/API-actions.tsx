@@ -19,7 +19,7 @@ import { doAction } from "../../../../packages/quarky/src/action/Action"
 
 // render types: idle | swift (idle w 17ms deadline) | instant (within task, potential to be render blocking) | animate / frameUpdate (next rAF)
 
-// idleUpdate()
+// dispatch()
 // swiftUpdate()
 // instantUpdate()
 // animate / celUpdate()
@@ -34,6 +34,18 @@ ooo.await(phase.render, () => {
 ooo.await(cycle.tick, () => {
 
 })
+
+
+// fetch
+// retreive
+// request('GET')
+
+// dispatch
+
+// transmit
+// relay
+
+request
 
 
 function TodoWithSuspense() {

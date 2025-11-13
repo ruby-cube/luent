@@ -8,14 +8,12 @@ import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
 import { QUARK, quarkOf } from "../abstract/Quark";
 import { Atom, trigger } from "../reactivity/Atom";
-import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, initModelUpdate, useIonicOp, trackOp } from "./IonicMethods";
+import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, useIonicOp, trackOp } from "./IonicMethods";
 import { inert, isInert } from "./notes/inert";
 import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
 import { inTrackedScope } from "../reactivity/Compound";
 import { Update } from "../reactivity/Update";
 import { PionState } from "../reactivity/x_LazyState";
-import { MutableEntity } from "../abstract/Mutable";
-import { CollectiveState } from "../reactivity/State";
 import { CollectiveQuark } from "./IonicCollective";
 
 // export function $atomicPion(

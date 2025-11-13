@@ -1,6 +1,6 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate, idleUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update";
+import { catchCancelledUpdate, dispatch, popUpdate, pushUpdate, tickUpdate } from "./Update";
 import { RenderCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 
 // const PRELUDE = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
