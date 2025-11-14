@@ -35,8 +35,8 @@ export function createMemoizedDerivation(
    methods?: AnyObject, // TODO:
    retrack: boolean = true,
 ) {
-   const isStale = new StaleState()
-   const state = new SimpleState(undefined)
+   const isStale = new ParallelState(true)
+   const state = new ParallelState(undefined)
 
    const substance = new FunctionalSubstance(() => {
       return derive(state.get())
@@ -76,9 +76,9 @@ export function createMemoizedDerivation(
    return $derivedState
 }
 
-class StaleState extends SimpleState {
-   constructor() {
-      super(true)
+class ParallelState extends SimpleState {
+   constructor(state: unknown) {
+      super(state)
    }
 
    override lock() {
@@ -89,13 +89,10 @@ class StaleState extends SimpleState {
       }
       if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
       if (update.committed) return;
-      // update.race(state.pendingUpdate)
-      // if (state.pendingUpdate === null) {
       this.pendingUpdate = update
       update.atSettled(() => {
          this.pendingUpdate = null
       })
-      // }
       update.queueCommit(this)
    }
 }
