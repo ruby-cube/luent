@@ -144,10 +144,12 @@ export class Update {
 
    raceByType(rival: Update) {
       if (this.precedes(rival)) {
-         Update.races[this.type]?.(this, rival) ?? rival.queueAfter(this)
+         Update.races[this.type]?.(this, rival) ??
+            rival.queueAfter(this)
       }
       else {
-         Update.races[rival.type]?.(rival, this) ?? this.queueAfter(rival)
+         Update.races[rival.type]?.(rival, this) ??
+            this.queueAfter(rival)
       }
    }
 
@@ -266,8 +268,8 @@ export function dispatch<T>(fn: () => T, options?: { timeMargin?: number, deadli
 }
 
 
-export function instantUpdate(fn: () => void): void {
-   runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
+export function instantUpdate(fn: () => void) {
+   return runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
 }
 
 

@@ -47,6 +47,7 @@ export function TriangleDemo() {
    const $elapsed = Ion(0)
    const $seconds = Ion(0)
    const $realSeconds = Ion(0)
+   const $delta = Ion(() => ($realSeconds() - $seconds()))
 
    const $scale = Ion(() => {
       const e = ($elapsed() / 1000) % 10;
@@ -62,13 +63,13 @@ export function TriangleDemo() {
    // incrementSeconds.dispatch()
 
    let promise: Promise<void>;
-   let resolve: undefined | (() => void)
+   // let resolve: undefined | (() => void)
 
    const secondsInterval = Interval(1000, () => {
-      resolve?.()
-      promise = new Promise<void>(_resolve => {resolve = _resolve})
+      // resolve?.()
+      // promise = new Promise<void>(_resolve => { resolve = _resolve })
       $realSeconds.value = ($realSeconds() % 10) + 1
-      dispatch(() => {$seconds.value = ($seconds() % 10) + 1; return promise})
+      dispatch(() => { $seconds.value = ($seconds() % 10) + 1 })
    }).start();
 
    const start = Date.now()
@@ -111,7 +112,7 @@ export function TriangleDemo() {
          {/* <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div> */}
          <div>
             <p>cancel count: {$cancelCount}</p>
-            <p>real secs: {$realSeconds}</p>
+            <p>real secs: {$realSeconds} | delta: {$delta}</p>
             <button on:click={stop}>
                stop
             </button>

@@ -44,10 +44,9 @@ export interface PendableState extends CancellableState {
 }
 
 function getState(state: PendableState) {
-   if (state.pendingUpdate === getActiveUpdate()) {
+   if (state.pendingUpdate && state.pendingUpdate === getActiveUpdate()) {
       return state.pending;
    }
-   // return state.pendingUpdate && state.pendingUpdate?.idle ? state.pending : 
    return state.current
 }
 
@@ -71,6 +70,7 @@ function lockState(state: PendableState) {
 
 
 
+
 export class SimpleState implements PendableState {
    current: unknown
    pending: unknown
@@ -87,7 +87,7 @@ export class SimpleState implements PendableState {
       return getState(this)
    }
 
-   private lock() {
+   protected lock() {
       return lockState(this)
    }
 

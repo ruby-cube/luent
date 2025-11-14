@@ -1,12 +1,12 @@
 import { Effect } from "../reactivity/EffectQueue";
 import { FunctionalSubstance, IonSubstance } from "../reactivity/Substance";
-import { SimpleState } from "../reactivity/State";
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
 import { SYNC } from "../reactivity/RenderCycle";
-import { getActiveUpdate } from "../reactivity/Update";
+import { $activeUpdate, getActiveUpdate, instantUpdate, Update } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
+import { PendableState, SimpleState } from "../reactivity/State";
 
 
 class DerivationIonQuark {
@@ -28,12 +28,14 @@ export function isManagedDerivation(value: unknown) {
    return hasQuark(value) && quarkOf(value).quarkType === DERIVATION_ION
 }
 
+
+
 export function createMemoizedDerivation(
    derive: (prev?: unknown) => unknown,
    methods?: AnyObject, // TODO:
    retrack: boolean = true,
 ) {
-   const isStale = new SimpleState(true)
+   const isStale = new StaleState()
    const state = new SimpleState(undefined)
 
    const substance = new FunctionalSubstance(() => {
@@ -43,17 +45,19 @@ export function createMemoizedDerivation(
    let trackCall = () => {
       // initial call
       const value = trackedCall()
-      substance.linkEffect(new Effect(() => { // TODO: need to cancel if update is canceled
+      substance.linkEffect(new Effect(() => {
          isStale.set(true);
       }, SYNC))
       // subsequent calls
-      trackCall = trackedCall 
+      trackCall = trackedCall
       return value
    }
 
    function trackedCall() {
       const value = state.set(substance.trackedCall())
-      if (substance.reactive) isStale.set(false)
+      if (substance.reactive) {
+         isStale.set(false)
+      }
       return value
    }
 
@@ -70,4 +74,28 @@ export function createMemoizedDerivation(
    $derivedState[QUARK] = new DerivationIonQuark(substance)
 
    return $derivedState
+}
+
+class StaleState extends SimpleState {
+   constructor() {
+      super(true)
+   }
+
+   override lock() {
+      const update = $activeUpdate()
+      if (!update) {
+         console.warn('nothing to lock to')
+         return;
+      }
+      if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
+      if (update.committed) return;
+      // update.race(state.pendingUpdate)
+      // if (state.pendingUpdate === null) {
+      this.pendingUpdate = update
+      update.atSettled(() => {
+         this.pendingUpdate = null
+      })
+      // }
+      update.queueCommit(this)
+   }
 }
