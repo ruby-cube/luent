@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { ContextKey, fromRoot, SuspenseIon } from "@rue/lumo";
-import { $from, Ion } from "@rue/quarky";
+import { ContextKey, fromRoot, AsyncIon } from "@rue/lumo";
+import { $from, dispatch, Ion } from "@rue/quarky";
 import { ArticleData, ArticleDatabase, ArticleResponse } from "../../db/ArticleDatabase";
 
 
@@ -16,7 +16,7 @@ export function fetchArticles(
    db = fromRoot(fetchArticles.db)
 ) {
 
-   return SuspenseIon({
+   return AsyncIon({
       initial: { articles: [], articleCount: 0 } as ArticleResponse,
       fetch: () => db.fetchArticles($articlesMeta(), $page(), $articlesPerPage())
          .then(res => toIonicArticleResponse(res))
@@ -56,7 +56,7 @@ function as<T, P>(Entity: (new (...args: P) => T) | symbol, args: P, uid: unknow
 //    return depot.get(uid) ?? depot.store(obj, uid)
 // }
 
-type SuspenseIon = {
+type AsyncIon = {
    value: unknown
 
    error: Error | null
@@ -73,7 +73,7 @@ type SuspenseIon = {
    prefetch(...args: unknown[]): Promise<unknown>
 }
 
-type PrivateSuspenseIon = {
+type PrivateAsyncIon = {
    stale: boolean
    staleTime: number
    update(value: unknown): void
@@ -82,97 +82,143 @@ type PrivateSuspenseIon = {
    abortDispatches(): void
 }
 
-type SuspenseOptions = {
+type AsyncOptions = {
    await: true,
    reawait: true
 }
 
+asArticle['Article'] = RootContextKey<typeof Article>()
+
+function asArticle(data: ArticleData) {
+   return depot.get(data.slug) ?? depot.create(() => {
+      const Article = fromRoot(asArticle['Article'])
+      return new Article(data, asProfile(data.author))
+   })
+}
+
+
+
+asProfile['Profile'] = RootContextKey<typeof Profile>()
+
+function asProfile(data) {
+   return depot.get(data.id) ?? depot.create(() => {
+      // optional dependency injection
+      const Profile = fromRoot(asProfile['Profile'])
+      return new Profile(data)
+   })
+}
+
 // #region:
 
-IonicArticle.Article = RootContextKey<typeof Article>()
-IonicArticle.Profile = RootContextKey<typeof Profile>()
 
+// data --> class --> ionic instance --> async ionic instance
 function asIonicArticle(data: ArticleData) {
+   // NOTE: Ionic and asIonic can take two types of configs: an object config and an extender function
+   // - object config hooks into ionic model
+   // - extender function extends the ionic model with the provided properties and methods
 
-   const db = fromRoot(fetchArticles.db)
-   const Article = fromRoot(IonicArticle.Article)
-   const Profile = fromRoot(IonicArticle.Profile)
-   const profile = as(Profile, [data.author], data.author.id)
-   const article = as(Article, [data, profile], data.slug)
+   return depot.getIonic(data.slug) ?? depot.createIonic(() => {
+      const db = fromRoot(fetchArticles.db)
+      return asIonic(asArticle(data), article => ({
+         $author: AsyncIon({
+            initial: asIonicProfile(article.super.author),
+            sync: true,
+            dispatch() {
 
-   const profile = as(Symbol('Profile'), [data.author], data.author.id)
-   const article = as(Symbol('Article'), [data], data.slug)
+            },
+            '@get'() { },
+            '@set'() { },
+         })
+      }))
+   })
 
-   return asIonic(article, {
-      ['@init']() { },
 
-      favorited: {
-         suspense: true,
-         initial: data.favorited,
-         async dispatch({ previous }) {
-            return db.patchArticle(this.slug, { favorited: this.favorited }, {
-               debounce: 50,
-               previous: { favorited: previous }
-            })
+   const article = extendIonicInstance(_article, class {
+      $favorited = AsyncIon({
+
+      })
+
+      doSomething = AsyncAction({
+         sync() {
+            article.super.doSomething()
          },
-         async['@init']() {
-            if (localDB.getArticle(this.slug).favorited.stale) {
+         dispatch() {
+
+         }
+      })
+   }
+
+
+      , {
+         ['@init']() { },
+
+         favorited: {
+            suspense: true,
+            initial: data.favorited,
+            async dispatch({ previous }) {
+               return db.patchArticle(this.slug, { favorited: this.favorited }, {
+                  debounce: 50,
+                  previous: { favorited: previous }
+               })
+            },
+            async['@init']() {
+               if (localDB.getArticle(this.slug).favorited.stale) {
+                  await this.$favorited.dispatch({ favorited: this.favorited, previous })
+               }
+            },
+            async['@set']({ previous }) {
+               this.$favorited.abortDispatches()
                await this.$favorited.dispatch({ favorited: this.favorited, previous })
+            },
+            async['@error'](err, { previous }) {
+               await this.$favorited.retryDispatch({ favorited: this.favorited, previous })
+
+               // runStream(async ({ timeout, run }) => {
+               //    await timeout(500)
+               //    await run(() =>
+               //       db.patchArticle(this.slug, { favorited: this.favorited }, {
+               //          debounce: 50,
+               //          previous: { favorited: previous },
+               //          abort: abortDispatches.signal
+               //       }) // TODO: what about deeply nested properties that need the article slug?
+               //    )
+               //    run(() => {
+               //       // store in local storage
+
+               //       db.onArticleUpdated(this.slug, (article) => {
+
+               //       }, { once: true })
+               //    })
+               // })
             }
          },
-         async['@set']({ previous }) {
-            this.$favorited.abortDispatches()
-            await this.$favorited.dispatch({ favorited: this.favorited, previous })
+
+         favoritesCount: {
+            suspense: true,
+            initial: data.favoritesCount,
+            stale: localDB.getArticle(this.slug).favorited.stale,
+            ['@init']() {
+               db.onArticleUpdated(this.slug, (article) => {
+                  const $count = this.$favoritesCount
+                  if ($count.stale && this.$favorited.stale) {
+                     $count.staleValue = article.favoritesCount
+                  }
+                  else {
+                     $count.update(article.favoritesCount)
+                  }
+               })
+
+               watch(this.$favorited, sync(() => {
+                  $count.stale = true;
+               }))
+            },
+            standin(staleCount) { return staleCount + (this.favorited ? 1 : 0) },
          },
-         async['@error'](err, { previous }) {
-            await this.$favorited.retryDispatch({ favorited: this.favorited, previous })
 
-            // runStream(async ({ timeout, run }) => {
-            //    await timeout(500)
-            //    await run(() =>
-            //       db.patchArticle(this.slug, { favorited: this.favorited }, {
-            //          debounce: 50,
-            //          previous: { favorited: previous },
-            //          abort: abortDispatches.signal
-            //       }) // TODO: what about deeply nested properties that need the article slug?
-            //    )
-            //    run(() => {
-            //       // store in local storage
-
-            //       db.onArticleUpdated(this.slug, (article) => {
-
-            //       }, { once: true })
-            //    })
-            // })
+         author: {
+            ionize: asIonicProfile
          }
-      },
-
-      favoritesCount: {
-         suspense: true,
-         initial: data.favoritesCount,
-         stale: localDB.getArticle(this.slug).favorited.stale,
-         ['@init']() {
-            db.onArticleUpdated(this.slug, (article) => {
-               const $count = this.$favoritesCount
-               if ($count.stale && this.$favorited.stale) {
-                  $count.staleValue = article.favoritesCount
-               }
-               else {
-                  $count.update(article.favoritesCount)
-               }
-            })
-
-            watch(this.$favorited, sync(() => {
-               $count.stale = true;
-            }))
-         },
-         standin(staleCount) { return staleCount + (this.favorited ? 1 : 0) },
-      },
-
-      author: {
-         ionize: asIonicProfile
-      }
-   })
+      })
 }
 
 type IonFetchConfig<T> = {
@@ -336,7 +382,7 @@ function asArticle(data: ArticleData) {
    const Profile = fromRoot(asIonicArticle.Profile)
 
    const profile = as(Profile)(data.author).uid(data.author.id) // TODO: refactor as() to this format
-   
+
    return as(Article)(data, profile).uid(data.slug)
 }
 

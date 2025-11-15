@@ -18,29 +18,33 @@ export class TrackedOpQuark implements Atom, Quark {
    constructor(
       public collectiveQuark: CollectiveQuark,
       public op: PropertyKey,
-      public key: EntryKey
+      public key: EntryKey,
    ) {
       this.__DEV__asTraceable = collectiveQuark.__DEV__asTraceable
    }
-
-   get state() {
-      return this.collectiveQuark.state
-   }
 }
+
 
 /**
  * Returns atomic op if it exists, otherwise creates a new atomic op 
  * @param quark 
  * @param op 
  * @param key 
- * @returns 
+ * @returns
  */
 export function asTrackedOp(
-   quark: ModelQuark,
+   modelQuark: CollectiveQuark | ModelQuark,
    op: PropertyKey,
    key: EntryKey
 ): Atom {
-   return getTrackedOp(quark, op, key) ?? quark.registerOp(op, key, new TrackedOpQuark(quark, op, key))
+   return getTrackedOp(modelQuark, op, key) ??
+      modelQuark.registerOp(op, key,
+         new TrackedOpQuark(modelQuark, op, key
+            // modelQuark instanceof CollectiveQuark
+               // ? modelQuark.state
+               // : new PrivateState(modelQuark.target, modelQuark.clone)
+         )
+      )
 }
 
 export function getTrackedOp(

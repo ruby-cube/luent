@@ -77,50 +77,58 @@ export class Update {
       }).catch(catchCancelledUpdate)
    }
 
-   private states: CancellableState[] = []
-
-   queueCommit(state: CancellableState) {
-      this.states.push(state)
-   }
-
    committed = false
 
    commit() {
-      for (const state of this.states) {
-         state.commitUpdate()
-      }
+      // for (const state of this.states) {
+      //    state.commitUpdate()
+      // }
       this.committed = true
-      this.emitter.dispatchEvent(this.settled!)
+      // this.emitter.dispatchEvent(this.settled!)
+      this.emitter.dispatchEvent(this.commitupdate!)
    }
 
    cancelled = false
 
    cancel() {
-      $cancelCount.value++
+      instantUpdate(() => { $cancelCount.value++ })
       console.warn('CANCELLING UPDATE')
       this.cancelled = true;
       this.reject('update cancelled')
       this.cycle.cancel()
-      for (const state of this.states) {
-         state.cancelUpdate()
-      }
-      this.emitter.dispatchEvent(this.settled!)
+      this.emitter.dispatchEvent(this.cancelupdate!)
    }
 
    private _emitter?: EventTarget;
 
    get emitter() {
-      return this._emitter ?? (this.settled = new Event(this.SETTLED), this._emitter = new EventTarget())
+      return this._emitter ?? (
+         this.commitupdate = new Event(this.COMMIT),
+         this.cancelupdate = new Event(this.CANCEL),
+         this._emitter = new EventTarget()
+      )
    }
 
-   // 'settled' hook
-
-   private SETTLED = 'settled'
-
-   private settled: Event | undefined
 
    atSettled(task: () => void) {
-      this.emitter.addEventListener(this.SETTLED, task)
+      this.atCommit(task)
+      this.atCancel(task)
+   }
+
+   private COMMIT = 'commit'
+
+   private commitupdate: Event | undefined
+
+   atCommit(task: () => void) {
+      this.emitter.addEventListener(this.COMMIT, task)
+   }
+
+   private CANCEL = 'cancel'
+
+   private cancelupdate: Event | undefined
+
+   atCancel(task: () => void) {
+      this.emitter.addEventListener(this.CANCEL, task)
    }
 
 

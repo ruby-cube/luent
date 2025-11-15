@@ -149,19 +149,25 @@ export function installIonicSet() {
          }),
          trigger: (model, { prevSize, target, value }) => {
             if (prevSize === target.size) return;
-            this.triggerModel()
-            this.triggerOp('has', value)
-            this.triggerOp('[[get]]', 'size')
+            this.trigger('has', value)
+            this.trigger('[[get]]', 'size')
          },
          revert(ionizedModel, { preopData: { value } }) {
             ionizedModel.add(value)
+         },
+         delete(value: unknown){
+            
          }
       },
       size: {
          get: {
             type: MemberType.TRACKABLE,
             privateState: true,
-            track: trackOp
+            track: trackOp,
+            get(){
+               this.track('[[get]]', 'size')
+               return this.target.size
+            }
          }
       }
       // }

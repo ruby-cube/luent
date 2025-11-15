@@ -65,9 +65,18 @@ function lockState(state: PendableState) {
          state.pendingUpdate = null
       })
    }
-   update.queueCommit(state)
+   queueCommit(update, state)
 }
 
+
+export function queueCommit(update: Update, state: PendableState) {
+   update.atCommit(() => {
+      state.commitUpdate()
+   })
+   update.atCancel(() => {
+      state.cancelUpdate()
+   })
+}
 
 
 
@@ -77,7 +86,6 @@ export class SimpleState implements PendableState {
 
    constructor(
       current: unknown,
-      // private onCommit?: (value: unknown) => void
    ) {
       this.current = current;
       this.pending = current;
@@ -98,8 +106,7 @@ export class SimpleState implements PendableState {
    }
 
    commitUpdate() {
-      const value = this.current = this.pending
-      // this.onCommit?.(value)
+      return this.current = this.pending
    }
 
    set(value: unknown) {
@@ -143,7 +150,7 @@ export class CollectiveState implements PendableState {
    }
 
    get() {
-      return getState(this)
+      return getState(this) as AnyObject
    }
 
    protected lock() {
@@ -180,7 +187,7 @@ export class CollectiveState implements PendableState {
 
 
 
-export class ModelState extends CollectiveState {
+export class PrivateState extends CollectiveState {
 
    constructor(
       current: AnyObject,

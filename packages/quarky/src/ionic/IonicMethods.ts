@@ -237,23 +237,18 @@ const ionizedMethodsMap = new Map()
 
 export function getIonizedMemberDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
    let constructor = target.constructor as Constructor
-   if (methodKey === 'valueOf') console.log('here', constructor, ionizedMethodsMap)
    let _target = target;
    while (constructor !== Object) {
       if (Object.hasOwn(target, methodKey)) {
-         if (methodKey === 'valueOf') console.log('A', constructor)
          return ionizedMethodsMap.get(constructor)?.[methodKey]
       }
       const def = ionizedMethodsMap.get(constructor)?.[methodKey]
       if (def) {
-         if (methodKey === 'valueOf') console.log('B', def)
          return def;
       }
       _target = Object.getPrototypeOf(_target)
       constructor = _target.constructor as Constructor
-      if (methodKey === 'valueOf') console.log('C', constructor)
    }
-   if (methodKey === 'valueOf') console.log('D')
    // return ionizedMethodsMap.get(Object)?.['[[set]]']
 }
 

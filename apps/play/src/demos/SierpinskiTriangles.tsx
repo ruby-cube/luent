@@ -111,8 +111,7 @@ export function TriangleDemo() {
       <>
          {/* <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div> */}
          <div>
-            <p>cancel count: {$cancelCount}</p>
-            <p>real secs: {$realSeconds} | delta: {$delta}</p>
+            <p>cancel count: {$cancelCount} | real secs: {$realSeconds} | delta: {$delta}</p>
             <button on:click={stop}>
                stop
             </button>

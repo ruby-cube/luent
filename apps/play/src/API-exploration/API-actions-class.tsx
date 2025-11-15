@@ -66,17 +66,17 @@ const $todos = AsyncIon({
    })
 
    deleteTodo = AsyncAction({
-      presume(index: number) {
+      sync(index: number) {
          return $todos().deleteTodo(index, 1)
       },
       dispatch({ ooo }, index) {
-         ooo.await(db.deleteTodo(index))
+         ooo.await(() => db.deleteTodo(index))
             .catch(err => { })
       },
    })
 
    removeTodo = AsyncAction({
-      presume(index: number) {
+      sync(index: number) {
          return $todos().deleteTodo(index, 1)
       },
       dispatch({ ooo, output }, index) {

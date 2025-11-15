@@ -6,7 +6,7 @@ import { Traceable } from "../debug/Traceable";
 import { SYNC } from "../reactivity/RenderCycle";
 import { $activeUpdate, getActiveUpdate, instantUpdate, Update } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
-import { PendableState, SimpleState } from "../reactivity/State";
+import { PendableState, queueCommit, SimpleState } from "../reactivity/State";
 
 
 class DerivationIonQuark {
@@ -35,8 +35,8 @@ export function createMemoizedDerivation(
    methods?: AnyObject, // TODO:
    retrack: boolean = true,
 ) {
-   const isStale = new ParallelState(true)
-   const state = new ParallelState(undefined)
+   const isStale = new MemoizedState(true)
+   const state = new MemoizedState(undefined)
 
    const substance = new FunctionalSubstance(() => {
       return derive(state.get())
@@ -66,9 +66,10 @@ export function createMemoizedDerivation(
       if (isStale.get()) {
          return trackCall()
       }
-      return state.get();
+      return state.get(); 
+      // FIX: state is inaccurate when mouse starts hovering and updates are queued/cancelled, 
+      // b/c resetting this.pending with this.current is not accurate anymore
    }
-
 
    $derivedState['~ion'] = true as const;
    $derivedState[QUARK] = new DerivationIonQuark(substance)
@@ -76,7 +77,19 @@ export function createMemoizedDerivation(
    return $derivedState
 }
 
-class ParallelState extends SimpleState {
+
+// TODO: We need state that doesn't lock state to updates, 
+// otherwise derivations that use state from different updates
+// will overload the system with update cancellations from race conditions.
+//
+// The following solution seems to work decently, but it's not fully robust.
+// It appears that once updates get cancelled and requeued and causes a cascade of requeuing,
+// the memoized state can get outdated (outdated state gets rendered, which we absolutely cannot allow) 
+// We need to either prevent cascading race conditions
+// or write a more robust solution. 
+
+class MemoizedState extends SimpleState {
+
    constructor(state: unknown) {
       super(state)
    }
@@ -93,6 +106,6 @@ class ParallelState extends SimpleState {
       update.atSettled(() => {
          this.pendingUpdate = null
       })
-      update.queueCommit(this)
+      queueCommit(update, this)
    }
 }

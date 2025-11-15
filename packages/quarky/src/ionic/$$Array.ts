@@ -164,6 +164,9 @@ defineIonicStructure(Array,
          type: MemberType.TRACKABLE,
          // track: trackOp,
          output: maybeIonize
+         at(index){ 
+            return maybeIonize(this.ionic.at(index))
+         }
       },
 
       [Symbol.iterator]: trackableOp, // decoy
@@ -280,54 +283,67 @@ defineIonicStructure(Array,
             const start = args[0];
             const numItems = args.length - 2;
             model.splice(start, numItems, ...output)
-         }
-      },
-
-      copyWithin: {
-         type: MemberType.MUTATING,
-         preop: fillOrCopyWithinPreop,
-         // triggers: () => [],
-         // triggers: triggerModel,
-         revert: fillOrCopyWithinRevert
-      },
-
-      fill: {
-         type: MemberType.MUTATING,
-         // input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
-         preop: fillOrCopyWithinPreop,
-         // triggers: triggerModel,
-         // triggers: () => [],
-         revert: fillOrCopyWithinRevert
-      },
-
-      reverse: {
-         type: MemberType.MUTATING,
-         // triggers: () => [],
-         // triggers: triggerModel,
-         revert(model) {
-            model.reverse()
-         }
-      },
-
-      sort: {
-         type: MemberType.MUTATING,
-         preop(model) {
-            return model.slice()
          },
-         // triggers: triggerModel,
-         // triggers: () => [],
-         revert(model, { preopData: snapshot }) {
-            for (let i = 0; i < model.length; i++) {
-               model[i] = snapshot[i]
-            }
+         splice(...args) {
+            return ionize(this.ionic.splice(...args))
+         },
+
+         bind(op: string) {
+            let ionicOp;
+            let rawOp;
+            return op.bind({
+               ionic: { get splice() { return ionicOp ?? (ionicOp = fn.bind(proxy)) } },
+               get splice() { return rawOp ?? (rawOp = (...args) => { fn.apply(state.get(), args) }))
+         }
+      })
          }
       },
-      length: {
-         type: MemberType.PROPERTY,
-         track() {
-            track(this.modelQuark!)
-         }
+
+copyWithin: {
+   type: MemberType.MUTATING,
+      preop: fillOrCopyWithinPreop,
+         // triggers: () => [],
+         // triggers: triggerModel,
+         revert: fillOrCopyWithinRevert
+},
+
+fill: {
+   type: MemberType.MUTATING,
+      // input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
+      preop: fillOrCopyWithinPreop,
+         // triggers: triggerModel,
+         // triggers: () => [],
+         revert: fillOrCopyWithinRevert
+},
+
+reverse: {
+   type: MemberType.MUTATING,
+      // triggers: () => [],
+      // triggers: triggerModel,
+      revert(model) {
+      model.reverse()
+   }
+},
+
+sort: {
+   type: MemberType.MUTATING,
+      preop(model) {
+      return model.slice()
+   },
+   // triggers: triggerModel,
+   // triggers: () => [],
+   revert(model, { preopData: snapshot }) {
+      for (let i = 0; i < model.length; i++) {
+         model[i] = snapshot[i]
       }
+   }
+},
+length: {
+   type: MemberType.PROPERTY,
+      track() {
+      track(this.modelQuark!)
+   }
+}
       // '[[set]]': {
       //    triggers: (model, [key, value]) => [
       //       trigger(model),
