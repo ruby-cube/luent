@@ -6,7 +6,7 @@ import { Ionic } from "@rue/quarky";
 
 function IonicTodos(data: Todo[], { refetch }) {
    return Ionic(data, {
-      [EACH]: { mod: asIonicTodo }
+      [EACH]: { as: asIonicTodo }
    })
 }
 
@@ -97,7 +97,6 @@ const $todos = AsyncIon({
 })
 
 
-
 function IonicTodo(data: Todo) {
    const todo = Ionic(new Todo(data), {
 
@@ -113,10 +112,10 @@ function IonicTodo(data: Todo) {
 
       '@doSomething'({ input: [a], output }) {
          if (a === 0) {
-            return(undefined)
+            return (undefined)
          }
          else {
-            return(IonicProfile(output))
+            return (IonicProfile(output))
          }
       },
 

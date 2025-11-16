@@ -6,7 +6,7 @@ import { Traceable } from "../debug/Traceable"
 import { hasQuark, QUARK } from "../abstract/Quark"
 import { AtomicPionQuark, createAtomicPion, createInternalPion, InternalPionQuark } from "./Pion"
 import { trackOp } from "./IonicMethods"
-import { debug, isFunction } from "@rue/utils"
+import { debug, isFunction, isObjectLiteral } from "@rue/utils"
 import { asTrackedOp, getTrackedOp, TrackedOpQuark, TrackedOps } from "./TrackableOp"
 import { track } from "../reactivity/Compound"
 import { isIonKey } from "./ionize"
@@ -33,10 +33,11 @@ export class ModelQuark implements Atom {
    asTrackedAtom: TrackedAtom | undefined
    proto: Proto
    proxy!: IonicProxy
+   hooks!: IonicModelHooks | undefined
+   extension!: AnyObject | undefined
 
    constructor(
       public target: AnyObject, //initialData
-      public config: AnyObject
    ) {
       this.proto = Object.create(target, {
          [QUARK]: { value: { get: () => this, set: nowrite } },
@@ -104,7 +105,7 @@ export class ModelQuark implements Atom {
       if (!Object.isExtensible(this.target)) return;
       const valueKey = isIonKey(key) ? key.slice(1) : key
       const ionKey = key === valueKey && typeof key === 'string' ? '$' + key : undefined
-      return this.initPion(key, valueKey, ionKey, undefined)
+      return this.initPion(key, valueKey, ionKey, undefined, undefined)
    }
 
 
@@ -146,7 +147,7 @@ export class ModelQuark implements Atom {
    protected initializeProperty(
       key: PropertyKey,
       descriptor: PropertyDescriptor,
-      def: AnyObject // TODO:
+      def: AnyObject | undefined// TODO:
    ) {
       const valueKey = isIonKey(key) ? key.slice(1) : key
       const ionKey = key === valueKey && typeof key === 'string' ? '$' + key : undefined
@@ -175,7 +176,7 @@ export class ModelQuark implements Atom {
       valueKey: PropertyKey,
       ionKey: string | undefined,
       descriptor: { value?: unknown, writable?: boolean },
-      def: AnyObject //TODO:
+      def: AnyObject | undefined //TODO:
    ) {
       const { value, writable } = descriptor
       if (isFunction(value) && key === ionKey && value.length == 0) {
@@ -213,26 +214,27 @@ export class ModelQuark implements Atom {
 
    private PionQuark = AtomicPionQuark
 
+   private getPropertyHooks(key: PropertyKey) {
+      const maybeHooks = this.hooks?.[key]
+      return isObjectLiteral(maybeHooks) && ('@set' in maybeHooks || '@get' in maybeHooks || 'as' in maybeHooks) ? maybeHooks : undefined
+   }
+
    protected initPion(
       key: PropertyKey,
       valueKey: PropertyKey,
       ionKey: string | undefined,
       value: unknown,
-      def: AnyObject
+      def: AnyObject | undefined // TODO:
    ) {
-      // TODO: ionic config
-      // TODO: ionic structure def
-
-      const { proto, target, config } = this
+      const { proto, target } = this
       if (__DEV__) assertNotFunction(value)
+      const hooks = this.getPropertyHooks(valueKey)
+
       const pionAccess = ionKey && !(ionKey in target) // makes sure not an absorbed ion
 
       const AtomicPionQuark = this.PionQuark
 
-      const [pion, setPion] =
-         pionAccess
-            ? createAtomicPion(target, valueKey, new AtomicPionQuark(target, valueKey, this))
-            : createInternalPion(new AtomicPionQuark(target, valueKey, this))
+      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target, valueKey, this), hooks, !pionAccess)
 
       const state = proto[valueKey] = {
          get: pion,
@@ -263,7 +265,7 @@ export class ModelQuark implements Atom {
       valueKey: PropertyKey,
       ionKey: string | undefined,
       descriptor: PropertyDescriptor,
-      def: AnyObject
+      def: AnyObject | undefined
    ) {
       const { proto } = this
       const { get, set } = descriptor
@@ -293,7 +295,7 @@ export class ModelQuark implements Atom {
    protected initMethod(
       key: PropertyKey,
       fn: Function,
-      def: AnyObject
+      def: AnyObject | undefined
    ) {
       this.proto[key] = {
          get: GetBoundMethod(fn, this.proxy),
@@ -306,7 +308,7 @@ export class ModelQuark implements Atom {
       valueKey: string,
       ionKey: string,
       ion: () => unknown,
-      def: AnyObject
+      def: AnyObject | undefined
    ) {
       const { proto, proxy, target } = this
 
@@ -338,16 +340,31 @@ function assertNotFunction(value: unknown) {
    if (isFunction(value)) throw new Error('TypeError: value cannot be a function')
 }
 
+
+
+
+type MethodHook = (event: { input: unknown[], output: unknown }) => unknown;
+
+type IonicModelHooks = { [key: PropertyKey]: PropertyHooks | MethodHook }
+
+type Overrides = { [key: PropertyKey]: unknown }
+
+type Extender = (proxy: AnyObject) => IonicModelHooks & Overrides
+
 export function createIonicModel(
    target: AnyObject,
-   config: AnyObject // TODO:
+   config: IonicModelHooks | Extender
 ) {
-   const modelQuark = new ModelQuark(target, config)
+   const modelQuark = new ModelQuark(target)
 
    const proxy = new Proxy(modelQuark, traps) as any as IonicProxy
 
    modelQuark.proxy = proxy;
    target[IONIC_PROXY] = proxy;
+
+   const extension = isFunction(config) ? config(proxy) : undefined
+   modelQuark.hooks = extension ?? config as IonicModelHooks
+   modelQuark.extension = extension
    return proxy
 }
 

@@ -4,21 +4,42 @@ import { PionState, SimpleState } from "../reactivity/State"
 import { AtomicIonQuark, getState, setState } from "../ion/AtomicIon"
 import { trigger } from "../reactivity/Atom"
 import { CollectiveQuark } from "./IonicCollective"
+import { QUARK } from "../abstract/Quark"
 
 
 
-
+export type PropertyHooks = {
+   as?: (value: unknown) => unknown,
+   '@get'?: (value: unknown) => void,
+   '@set'?: (event: { value: unknown, previous: unknown }) => void
+}
 
 export function createAtomicPion(
-   target: AnyObject,
-   key: PropertyKey,
-   quark: AtomicPionQuark
+   quark: AtomicPionQuark,
+   hooks: PropertyHooks | undefined,
+   internal: boolean = false
 ) {
-   const $state = getState.bind(quark)
-   const setState = setPion.bind(quark)
-   //@ts-expect-error
+   const transform = hooks?.as
+   const castGet = hooks?.["@get"]
+   const castSet = hooks?.["@set"]
+
+   let initialState = true;
+   const $state = () => {
+      const value = getState.apply(quark)
+      castGet?.(value)
+      return initialState ? transform?.(value) : value
+   }
+   const setState = (value: unknown) => {
+      initialState = false;
+      const previous = quark.state.get()
+      const output = setPion.apply(quark, [value])
+      castSet?.({ value, previous })
+      return output
+   }
+
+   if (internal) return [$state, setState] as const
+
    $state[QUARK] = quark
-   //@ts-expect-error
    $state.displayName = 'getPropertyValue'
    Object.defineProperty($state, 'value', {
       get: $state,
@@ -32,11 +53,29 @@ export function createAtomicPion(
 
 
 
-export function createInternalPion<T>(
-   quark: AtomicPionQuark
-) {
-   return [getState.bind(quark), setPion.bind(quark)] as [() =>T, (value: T) =>T]
-}
+// export function createInternalPion<T>(
+//    quark: AtomicPionQuark,
+//    hooks: PropertyHooks | undefined
+// ) {
+//    const transform = hooks?.as
+//    const castGet = hooks?.["@get"]
+//    const castSet = hooks?.["@set"]
+
+//    let initialState = true;
+//    const $state = () => {
+//       const value = getState.apply(quark)
+//       castGet?.(value)
+//       return initialState ? transform?.(value) : value
+//    }
+//    const setState = (value: unknown) => {
+//       initialState = false;
+//       const previous = quark.state.get()
+//       const output = setPion.apply(quark, [value])
+//       castSet?.({ value, previous })
+//       return output
+//    }
+//    return [$state, setState] as [() => T, (value: T) => T]
+// }
 
 
 export function setPion(this: AtomicPionQuark, value: unknown) {
