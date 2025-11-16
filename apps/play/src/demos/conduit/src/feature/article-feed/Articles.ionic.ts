@@ -90,7 +90,7 @@ type AsyncOptions = {
 asArticle['Article'] = RootContextKey<typeof Article>()
 
 function asArticle(data: ArticleData) {
-   return depot.get(data.slug) ?? depot.create(() => {
+   return depot.get(data.slug) ?? depot.create(() => { // create will throw if not preceded by depot.get(id), it needs the id
       const Article = fromRoot(asArticle['Article'])
       return new Article(data, asProfile(data.author))
    })
@@ -111,7 +111,13 @@ function asProfile(data) {
 // #region:
 
 
-// data --> class --> ionic instance --> async ionic instance
+// data --> class instance --> ionic instance
+
+// data type
+// class declaration
+// asClass
+// asIonic
+
 function asIonicArticle(data: ArticleData) {
    // NOTE: Ionic and asIonic can take two types of configs: an object config and an extender function
    // - object config hooks into ionic model
@@ -119,7 +125,8 @@ function asIonicArticle(data: ArticleData) {
 
    return depot.getIonic(data.slug) ?? depot.createIonic(() => {
       const db = fromRoot(fetchArticles.db)
-      return asIonic(asArticle(data), article => ({
+
+      return Ionic(asArticle(data), article => ({
          $author: AsyncIon({
             initial: asIonicProfile(article.super.author),
             sync: true,
