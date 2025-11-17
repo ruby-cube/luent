@@ -1,16 +1,16 @@
 import { AnyObject } from "@rue/types"
 import { ModelQuark } from "./IonicModel"
 import { PionState, SimpleState } from "../reactivity/State"
-import { AtomicIonQuark, getState, IonHooks, setState } from "../ion/AtomicIon"
+import { AtomicIonQuark, getState, IonHooks, setState, withGetHook, withSetHook } from "../ion/AtomicIon"
 import { trigger } from "../reactivity/Atom"
 import { CollectiveQuark } from "./IonicCollective"
 import { QUARK } from "../abstract/Quark"
 
 
 
-export type PropertyHooks = {
+export interface PropertyHooks extends IonHooks {
    as?: (value: unknown) => unknown
-} & IonHooks
+}
 
 /**
  * NOTE: We auto-transform only for initial values to 
@@ -18,64 +18,52 @@ export type PropertyHooks = {
  * obj.a = a
  * console.log(a === obj.a) // false because a is raw and obj.a is ionic
  */
-export function createAtomicPion(
+export function createAtomicPion<T = unknown>(
    quark: AtomicPionQuark,
    transform: ((value: unknown) => unknown) | undefined,
    internal: boolean = false
-) {
-   let initialState = true;
-   const $state = () => {
-      const value = getState.apply(quark)
-      // castGet?.(value)
-      return initialState ? transform?.(value) : value
+): [() => T, (value: T) => T] {
+   const get = quark.castGet ? withGetHook(getState.bind(quark), quark.castGet) : function () { return getState.apply(quark) }
+   const set = quark.castSet ? withSetHook(setPion.bind(quark), quark.castSet, () => quark.state.get()) : setPion.bind(quark)
+   const wrapped = transform ? withTransform(transform, get, set) : [get, set] as const
+
+   if (internal) return wrapped as [() => T, (value: T) => T]
+
+   const [$state, setState] = wrapped
+
+   if (__DEV__) {
+      // @ts-expect-error
+      $state.displayName = 'getPropertyValue'
    }
 
-   const setState = (value: unknown) => {
-      initialState = false;
-      // const previous = quark.state.get()
-      return setPion.apply(quark, [value])
-      // castSet?.({ value, previous })
-   }
-
-   if (internal) return [$state, setState] as const
-
+   // @ts-expect-error
    $state[QUARK] = quark
-   $state.displayName = 'getPropertyValue'
    Object.defineProperty($state, 'value', {
       get: $state,
       set: setState
    })
 
+   return [$state, setState] as [() => T, (value: T) => T]
+}
+
+function withTransform(transform: (value: unknown) => unknown, get: () => unknown, set: (value: unknown) => unknown) {
+   let initialState = true;
+
+   function $state() {
+      const value = get()
+      return initialState ? transform(value) : value
+   }
+   // preserve monomorphism
+   $state.value = undefined
+   $state[QUARK] = undefined
+
+   function setState(value: unknown) {
+      initialState = false
+      return set(value)
+   }
    return [$state, setState] as const
 }
 
-
-
-
-
-// export function createInternalPion<T>(
-//    quark: AtomicPionQuark,
-//    hooks: PropertyHooks | undefined
-// ) {
-//    const transform = hooks?.as
-//    const castGet = hooks?.["@get"]
-//    const castSet = hooks?.["@set"]
-
-//    let initialState = true;
-//    const $state = () => {
-//       const value = getState.apply(quark)
-//       castGet?.(value)
-//       return initialState ? transform?.(value) : value
-//    }
-//    const setState = (value: unknown) => {
-//       initialState = false;
-//       const previous = quark.state.get()
-//       const output = setPion.apply(quark, [value])
-//       castSet?.({ value, previous })
-//       return output
-//    }
-//    return [$state, setState] as [() => T, (value: T) => T]
-// }
 
 
 export function setPion(this: AtomicPionQuark, value: unknown) {
@@ -107,6 +95,7 @@ export class CollectivePionQuark extends AtomicIonQuark {
       super(new PionState(target[key], (value) => { collectiveState.mutate(target => target[key] = value) }), hooks)
    }
 }
+
 
 export class InternalPionQuark extends AtomicIonQuark {
    constructor(

@@ -3,8 +3,8 @@ import { __DEV__getTrace } from "../../../flask/debug"
 import { IonicProxy } from "./Ionic"
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { Traceable } from "../debug/Traceable"
-import { hasQuark, QUARK } from "../abstract/Quark"
-import { AtomicPionQuark, createAtomicPion, createInternalPion, InternalPionQuark, PropertyHooks } from "./Pion"
+import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
+import { AtomicPionQuark, createAtomicPion, InternalPionQuark, PropertyHooks } from "./Pion"
 import { trackOp } from "./IonicMethods"
 import { debug, isFunction, isObjectLiteral } from "@rue/utils"
 import { asTrackedOp, getTrackedOp, TrackedOpQuark, TrackedOps } from "./TrackableOp"
@@ -12,7 +12,7 @@ import { track } from "../reactivity/Compound"
 import { isIonKey } from "./ionize"
 import { CollectiveState, PrivateState } from "../reactivity/State"
 import { $activeUpdate } from "../reactivity/Update"
-import { IonHooks } from "../ion/AtomicIon"
+import { IonHooks, withGetHook, withSetHook } from "../ion/AtomicIon"
 
 export type Proto = {
    [key: PropertyKey]: {
@@ -62,10 +62,10 @@ export class ModelQuark implements Atom {
    initIsExtensible() {
       if (this.$isExtensible) return;
       const target = this.target;
-      [this.$isExtensible, this.setIsExtensible] = createInternalPion<boolean>(new InternalPionQuark(Object.isExtensible(target), this, (value) => {
+      [this.$isExtensible, this.setIsExtensible] = createAtomicPion<boolean>(new InternalPionQuark(Object.isExtensible(target), this, (value) => {
          if (value === true) throw new Error('invalid set')
          Reflect.preventExtensions(target)
-      }))
+      }, this.hooks), undefined, true)
    }
 
 
@@ -314,11 +314,13 @@ export class ModelQuark implements Atom {
       def: AnyObject | undefined
    ) {
       const { proto, proxy, target } = this
-      if (__DEV__ && this.getPropertyHooks(valueKey)) console.warn('`as`, `@get` and `@set` hooks not supported for absorbed ions')
+      const hooks = this.getPropertyHooks(valueKey)
+
+      const set = 'value' in ion ? (value: unknown) => { ion.value = value; return true } : nowrite
 
       const state = proto[valueKey] = {
-         get: ion,
-         set: 'value' in ion ? (value: unknown) => { ion.value = value; return true } : nowrite
+         get: hooks?.['@get'] ? withGetHook(ion, hooks['@get']) : ion,
+         set: hooks?.["@set"] ? withSetHook<boolean>(set, hooks['@set'], ion) : set
       }
 
       const $state = proto[ionKey] = {

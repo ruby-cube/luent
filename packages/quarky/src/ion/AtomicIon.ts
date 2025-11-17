@@ -6,7 +6,7 @@ import { __DEV__trace } from "../debug/debug";
 import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark";
 import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
 import { Traceable } from "../debug/Traceable";
-import { ion, MutableIon } from "./Ion";
+import { MutableIon } from "./Ion";
 import { track } from "../reactivity/Compound";
 import { Update } from "../reactivity/Update";
 import { maybeIonize, MarkMap, IonicProxy } from "../ionic/Ionic";
@@ -23,7 +23,7 @@ export const ALL_METHODS = 'all_methods'
 /** INTERNAL */
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark }
 
-export type IonHooks = {
+export interface IonHooks {
    '@get'?: (value: unknown) => void,
    '@set'?: (event: { value: unknown, previous: unknown }) => void
 }
@@ -60,12 +60,12 @@ export function createAtomicIon(
    props?: AnyObject
 ) {
 
-   const $state = (quark.castGet ? function () { const value = getState.apply(quark); quark.castGet!(value); return value } : getState.bind(quark)) as QuarkyAtomicIon
+   const $state = (quark.castGet ? withGetHook(getState.bind(quark), quark.castGet) : function () { return getState.apply(quark) }) as QuarkyAtomicIon
 
    $state[QUARK] = quark
    if (__DEV__) {
       //@ts-expect-error
-      $state.name = 'getState'
+      $state.displayName = 'getState'
    }
 
    if (props) {
@@ -79,12 +79,7 @@ export function createAtomicIon(
 
    Object.defineProperty($state, 'value', {
       get: $state,
-      set: quark.castSet ? function (this: AtomicIonQuark, value: unknown) {
-         const previous = this.state.get()
-         setState.apply(quark, [value])
-         this.castSet!({ value: value, previous })
-         return value;
-      } : setState.bind(quark)
+      set: quark.castSet ? withSetHook(setState.bind(quark), quark.castSet, () => quark.state.get()) : setState.bind(quark)
    })
 
    return $state
@@ -103,3 +98,23 @@ export function setState(this: AtomicIonQuark, value: unknown) {
 }
 
 
+export function withGetHook(getState: () => unknown, castGet: (value: unknown) => void) {
+   function $state() {
+      const value = getState();
+      castGet(value)
+      return value;
+   }
+   // preserve monomorphism
+   $state.value = undefined
+   $state[QUARK] = undefined
+   return $state
+}
+
+export function withSetHook<T = unknown>(set: (value: unknown) => T, castSet: (event: { value: unknown, previous: unknown }) => void, getState: () => unknown) {
+   return function setState(value: unknown) {
+      const previous = getState()
+      const output = set(value)
+      castSet({ value, previous })
+      return output;
+   }
+}

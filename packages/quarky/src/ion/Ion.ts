@@ -190,7 +190,6 @@ function asIon(
    return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), props), props)) // TODO: add inert mark map
 }
 
-export const ionic = ion
 
 
 // isIon // any sort of ion
