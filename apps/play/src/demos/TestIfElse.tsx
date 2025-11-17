@@ -3,8 +3,8 @@ import { component, Else, ElseIf, If } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 export function TestIfElse() {
-   const $active = ion(false)
-   const $ready = ion(true)
+   const $active = Ion(false)
+   const $ready = Ion(true)
 
    console.log('### outer flask', getActiveFlask())
 

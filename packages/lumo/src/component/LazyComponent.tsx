@@ -14,9 +14,9 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
     Error?: ComponentSetup<{ error: any }>,
 }) { // TODO: Idle load priorities
     const { load, Error, Placeholder, timeout, onIdle } = config;
-    const $loading = ion(true);
-    const $error = ion("");
-    const $loaded = ion(false);
+    const $loading = Ion(true);
+    const $error = Ion("");
+    const $loaded = Ion(false);
     let idleID: number | undefined;
     if (onIdle) {
         idleID = requestIdleCallback(() => {

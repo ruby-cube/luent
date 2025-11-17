@@ -121,11 +121,11 @@ export function TestAnimationController() {
 
    const $canvas = GetNode('canvas')
 
-   // const $animation = ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
+   // const $animation = Ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
 
-   const $elapsed = ion(() =>$animation()?.$elapsed() ?? 0)
-   const $isPlaying = ion(() =>$animation()?.$isPlaying() ?? false)
-   const $animation = ion(undefined)
+   const $elapsed = Ion(() =>$animation()?.$elapsed() ?? 0)
+   const $isPlaying = Ion(() =>$animation()?.$isPlaying() ?? false)
+   const $animation = Ion(undefined)
 
    function playPause() {
       const animation = $animation()

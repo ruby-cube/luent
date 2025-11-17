@@ -47,7 +47,7 @@ const list = ionize.withMap(new List(), {
 })
 
 // keep list and files in sync
-const $files = ion(() =>list, {
+const $files = Ion(() =>list, {
    addFile(file: File) {
       list.push(file)
    }

@@ -1168,7 +1168,7 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 
 
 // export function setAbsorbedIonState(model: IonicProxy, key: ProxyKey, ion: Ion, value: unknown) {
-//    // const oldState = ion()
+//    // const oldState = Ion()
 //    if (hasQuark(ion) && 'value' in ion) {
 //       try {
 //          ion.state = value;

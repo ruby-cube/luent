@@ -7,8 +7,8 @@ const useCounterKit = asShared(CounterKit, { ephemeral: true })
 // kit
 function CounterKit(initialCount: number) {
 
-   const $count = ion(0)
-   const $doubleCount = ion(0)
+   const $count = Ion(0)
+   const $doubleCount = Ion(0)
 
    function incrementCount() {
       $count.value++
@@ -114,7 +114,7 @@ interface AnimationController {
 
 // function $Count(initialValue: number) {  //DEPRECATED
 
-//    return ion(initialValue, {
+//    return Ion(initialValue, {
 
 //       increment() {
 //          this.value++

@@ -14,6 +14,7 @@ import { isFunction, isObjectLiteral } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";
 import { ModelQuark } from "../ionic/IonicModel";
 import { Mode } from "fs";
+import { getActiveFlask } from "@rue/flask";
 
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
@@ -22,6 +23,10 @@ export const ALL_METHODS = 'all_methods'
 /** INTERNAL */
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark }
 
+export type IonHooks = {
+   '@get'?: (value: unknown) => void,
+   '@set'?: (event: { value: unknown, previous: unknown }) => void
+}
 
 /**
  * Quark for atomic ion, pion, and atomic get op
@@ -33,15 +38,18 @@ export class AtomicIonQuark implements Atom, Quark {
    __DEV__asTraceable: Traceable = new Traceable()
    quarkType: string | symbol = ATOMIC_ION
 
+   castGet: ((value: unknown) => void) | undefined
+   castSet: ((event: { value: unknown; previous: unknown; }) => void) | undefined;
+
    constructor(
       public state: SimpleState,
-   ) { }
+      hooks: IonHooks | undefined
+   ) {
+      this.castGet = hooks?.["@get"]
+      this.castSet = hooks?.["@set"]
+   }
 
    asTrackedAtom: TrackedAtom | undefined;
-   // pendingUpdate: Update | null = null
-
-   transformGet: (value: unknown) => unknown = (value) => value
-   transformSet: (value: unknown, fail: typeof FAIL) => unknown | typeof FAIL = (value) => value
 }
 
 
@@ -49,45 +57,34 @@ export class AtomicIonQuark implements Atom, Quark {
 /** INTERNAL */
 export function createAtomicIon(
    quark: AtomicIonQuark,
-   ionized: boolean,
-   mark?: InertMark | MarkMap | undefined,
    props?: AnyObject
 ) {
-   const $state = getState.bind(quark) as QuarkyAtomicIon
+
+   const $state = (quark.castGet ? function () { const value = getState.apply(quark); quark.castGet!(value); return value } : getState.bind(quark)) as QuarkyAtomicIon
+
    $state[QUARK] = quark
-   //@ts-expect-error
-   $state.displayName = 'getState'
+   if (__DEV__) {
+      //@ts-expect-error
+      $state.name = 'getState'
+   }
 
    if (props) {
-      if (!isObjectLiteral(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
       const descriptors = Object.getOwnPropertyDescriptors(props)
-      const onGet = descriptors.value?.get
-      const onSet = descriptors.value?.set as (value: unknown) => boolean
-      if (onGet) {
-         quark.transformGet = ionized ? (value: unknown) => {
-            return onGet.apply({ value: maybeIonize(value, mark) })
-         } : (value) => onGet.apply({ value })
-      }
-      if (onSet) {
-         quark.transformSet = (value: unknown, fail: typeof FAIL) => {
-            const state = { value: $state() }
-            const success = onSet.apply(state, [value])
-            if (success === false) return fail;
-            return state.value;
-         }
-      }
-      delete descriptors.value
+      if (__DEV__ && !isObjectLiteral(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
+      if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
+      delete descriptors['@get'];
+      delete descriptors['@set'];
       Object.defineProperties($state, descriptors)
-   }
-   else if (ionized) {
-      quark.transformGet = (value: unknown) => {
-         return maybeIonize(value, mark)
-      }
    }
 
    Object.defineProperty($state, 'value', {
       get: $state,
-      set: setState.bind(quark)
+      set: quark.castSet ? function (this: AtomicIonQuark, value: unknown) {
+         const previous = this.state.get()
+         setState.apply(quark, [value])
+         this.castSet!({ value: value, previous })
+         return value;
+      } : setState.bind(quark)
    })
 
    return $state
@@ -96,20 +93,13 @@ export function createAtomicIon(
 
 export function getState(this: AtomicIonQuark) {
    track(this)
-   return this.transformGet(this.state.get())
+   return this.state.get()
 }
 
-const FAIL = Symbol('fail')
-
 export function setState(this: AtomicIonQuark, value: unknown) {
-   const newState = this.transformSet(value, FAIL);
-   if (newState === FAIL) return this.state.current;
-
-   this.state.set(newState)
-
+   this.state.set(value)
    trigger(this, this.state.pendingUpdate!)
-
-   return newState;
+   return value;
 }
 
 

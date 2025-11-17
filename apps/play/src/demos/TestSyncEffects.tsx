@@ -4,7 +4,7 @@ import { component } from "@rue/lumo";
 
 export function TestSyncEffects() {
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          console.log('start increment')
          this.value++;
@@ -13,7 +13,7 @@ export function TestSyncEffects() {
    })
 
 
-   const $count2 = ion(0)
+   const $count2 = Ion(0)
 
    watch($count, () => {
       console.log('$$$ ---effect')

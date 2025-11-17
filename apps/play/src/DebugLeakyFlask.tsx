@@ -8,8 +8,8 @@ import { ion } from "@rue/quarky";
 
 export function DebugLeakyFlask() {
 
-   const $ready = ion(true)
-   const $active = ion(true)
+   const $ready = Ion(true)
+   const $active = Ion(true)
 
    return component(
       <>

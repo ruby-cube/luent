@@ -8,7 +8,7 @@ export function TestFiniteIon() {
    })
    $color.activate(() => 'red')
 
-   const $excited = ion(()=>{
+   const $excited = Ion(()=>{
       return $color() + '!'
    })
 

@@ -24,8 +24,8 @@ export function SevenGUIs() {
 
 //FIX:
 function TemperatureApp() {
-   const $c = ion(0)
-   const $f = ion(() => $c() * (9 / 5 + 32),
+   const $c = Ion(0)
+   const $f = Ion(() => $c() * (9 / 5 + 32),
       {
          // set state(v: number) {
          //    $c.value = (v - 32) * (5 / 9)
@@ -54,13 +54,13 @@ function TemperatureApp() {
 
 function FlightBooker() {
 
-   const $flightType = ion('one-way flight')
-   const $departureDate = ion(dateToString(new Date()))
-   const $returnDate = ion($departureDate())
+   const $flightType = Ion('one-way flight')
+   const $departureDate = Ion(dateToString(new Date()))
+   const $returnDate = Ion($departureDate())
 
-   const $isReturn = ion(() => $flightType() === 'return flight')
+   const $isReturn = Ion(() => $flightType() === 'return flight')
 
-   const $canBook = ion(() =>
+   const $canBook = Ion(() =>
       !$isReturn() ||
       stringToDate($returnDate()) > stringToDate($departureDate())
    )
@@ -144,8 +144,8 @@ function FlightBooker() {
 }
 
 function TimerApp() {
-   const $duration = ion(15 * 1000)
-   const $elapsed = ion(0)
+   const $duration = Ion(15 * 1000)
+   const $elapsed = Ion(0)
 
    let lastTime: DOMHighResTimeStamp;
    let handle: number;
@@ -165,7 +165,7 @@ function TimerApp() {
       update()
    }
 
-   const $progressRate = ion(() =>
+   const $progressRate = Ion(() =>
       Math.min($elapsed() / $duration(), 1)
    )
 
@@ -211,10 +211,10 @@ function css(str: TemplateStringsArray) {
 export function CRUDApp() {
 
    const names = ionize(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
-   const $selected = ion('')
-   const $prefix = ion('')
-   const $first = ion('')
-   const $last = ion('')
+   const $selected = Ion('')
+   const $prefix = Ion('')
+   const $first = Ion('')
+   const $last = Ion('')
    const $fullName = () => `${$last()}, ${$first()}` //FIX: this can easily be mistaken for an ion.
 
    watch($selected, ({ current }) => {
@@ -228,7 +228,7 @@ export function CRUDApp() {
    // console.log('before', Object.getOwnPropertyDescriptors(proxyProto))
    console.log('before', proxyProto)
 
-   const $filteredNames = ion(() => {
+   const $filteredNames = Ion(() => {
       const res = names.filter((n) =>
          n.toLowerCase().startsWith($prefix().toLowerCase())
       )
@@ -337,10 +337,10 @@ type Circle = { cx: number, cy: number, r: number }
 
 export function CircleApp() {
    const history = ionize([[]] as Circle[][])
-   const $index = ion(0)
+   const $index = Ion(0)
    const $circles = ion.ionize([] as Circle[])
    const $selected = ion.ionize(undefined as undefined | null | Circle)
-   const $adjusting = ion(false)
+   const $adjusting = Ion(false)
 
    function reClick({ clientX: x, clientY: y }: MouseEvent) {
       if ($adjusting()) {

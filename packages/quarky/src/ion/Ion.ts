@@ -94,12 +94,12 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [At
  * 
  * ##### ION:
  * ```
- * const $count = ion(0)
+ * const $count = Ion(0)
  * ```
  * 
  * ##### ION CAPSULE:
  * ```
- * const $count = ion(0, {
+ * const $count = Ion(0, {
  *    increment() {
  *       this.count++
  *    },
@@ -112,7 +112,7 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [At
  * ##### DERIVATION ION:
  * 
  * ```
- * const $doubleCount = ion(() =>$count() * 2)
+ * const $doubleCount = Ion(() =>$count() * 2)
  * ```
  * 
  * 
@@ -123,28 +123,27 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [At
  * @returns `Ion<T>`
  */
 
-export function ion<
+export function Ion<
    T,
    M
 >(initialState: T & (() => unknown), props?: M & ThisType<M>): AsIon<T, M>
-export function ion<
+export function Ion<
    T,
    M
 >(initialState: T, props?: M & ThisType<M & { value: T }>): AsIon<T, M>
-export function ion<
+export function Ion<
    T,
    M
 >(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { value: T }>): AsIon<T, M> {
    return asIon(initialState, false, undefined, props) as AsIon<T, M>
 }
 
-export const Ion = ion
-export const makeIon = ion
-export const createIon = ion
+// export const makeIon = ion
+// export const createIon = ion
 
-Ion.Ionized = createIonizedIon
-makeIon.Ionized = createIonizedIon
-createIon.Ionized = createIonizedIon
+// Ion.Ionized = createIonizedIon
+// makeIon.Ionized = createIonizedIon
+// createIon.Ionized = createIonizedIon
 
 // function createIonizedIon<
 //    T extends Record<string, unknown>,
@@ -155,81 +154,27 @@ createIon.Ionized = createIonizedIon
 
 // type State<D> = [D] extends [StateDef<infer T>] ? T : D
 
-ion.Ionized = createIonizedIon
-ion.ionize = createIonizedIon
+// ion.Ionized = createIonizedIon
+// ion.ionize = createIonizedIon
 // ion.mu = createMutableIon
 // createMutableIon.ionize = createMutableIonizedIon
 // createMutableIonizedIon.mu = createDeepMutableIonizedIon
 
 
-function createIonizedIon<
-   T,
-   M
->(initialState: T, options?: IonizeOptions & { set?: Function, get?: Function }): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> { // TODO: inert marks
-   return asIon(initialState, IONIZED, options) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> // TODO: add inert marks
-}
-
-// function createDeepMutableIonizedIon<
-//    T extends Record<string, unknown>,
+// function createIonizedIon<
+//    T,
 //    M
-// >(initialStateDefinition: T, methods: M & Methods): AsMutableIon<T, M>
-// function createDeepMutableIonizedIon<
-//    T extends unknown,
-//    M
-// >(initialStateDefinition: T): AsMutableIon<T, M>
-// function createDeepMutableIonizedIon<
-//    T extends Record<string, unknown> | unknown,
-//    M
-// >(initialStateDefinition: T, methods?: M & Methods): AsMutableIon<T, M> {
-//    return asIon(initialStateDefinition, MUTABLE, MUTABLE_IONIZED, methods) as AsMutableIon<T, M>
+// >(initialState: T, options?: IonizeOptions & { set?: Function, get?: Function }): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> { // TODO: inert marks
+//    return asIon(initialState, IONIZED, options) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> // TODO: add inert marks
 // }
+
+
 
 
 export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, proto?: P & ThisType<P & { value: T }> & { '~pure'?: () => (keyof P)[] }, protoOptions?: { pure: string }) {
    return (...args: A & any) => Ion(constructor(...args), proto) as MutableIon<T> & P
 }
 
-
-/**
- * 
- * Creates a *mutable* ion or ion capsule.
- * 
- * Simple ion example:
- * ```
- * const $count = ion.mu(0)
- * ```
- * 
- * Ion capsule example:
- * ```
- * const $count = ion.mu({ 
- *    'count': 0 
- * }, {
- *    increment() {
- *       this.count++
- *    },
- *    decrement() {
- *       this.count--
- *    }
- * })
- * ```
- * @param initialState 
- * @param methods 
- * @returns 
- */
-// export function createEncapsulatedIon<
-//    T extends Record<string, unknown>,
-//    M
-// >(initialStateDefinition: T, methods: M & Methods & ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M>
-// export function createEncapsulatedIon<
-//    T extends unknown,
-//    M
-// >(initialStateDefinition: T): AsIon<T, M>
-// export function createEncapsulatedIon<
-//    T extends unknown | Record<string, unknown>,
-//    M
-// >(initialStateDefinition: T, methods?: M & Methods & ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M> {
-//    return asIon(initialStateDefinition, !MUTABLE, !IONIZED, methods) as AsIon<T, M>
-// }
 
 function asIon(
    initialState: unknown | (() => unknown),
@@ -242,7 +187,7 @@ function asIon(
    }
 
    if (isIon(initialState)) return initialState
-   return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new SimpleState(initialState)), ionized, options?.mark, props)) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), props), props)) // TODO: add inert mark map
 }
 
 export const ionic = ion
@@ -262,21 +207,21 @@ export const ionic = ion
 // isReined
 
 
-// const $count = ion(0)
+// const $count = Ion(0)
 
-// const $doublecount = ion(() =>{if (isIon($count)) return $count() * 2}, {
+// const $doublecount = Ion(() =>{if (isIon($count)) return $count() * 2}, {
 //    doSomething(){}
 // })
 
-// const $countB = ion((prev?: number) => (prev ?? 0) + 2)
+// const $countB = Ion((prev?: number) => (prev ?? 0) + 2)
 
-// const $active = ion('frog', {
+// const $active = Ion('frog', {
 //    toggle() {
 
 //    }
 // })
 
-// const $actived = ion(false, {
+// const $actived = Ion(false, {
 //    toggler() { }
 // })
 

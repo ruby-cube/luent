@@ -1,11 +1,11 @@
 
 import { component, Else, For, FromTag, If } from '@rue/lumo'
-import { Ion, ion, ionic, ionize, watch } from '@rue/quarky'
+import { Ion, ionic, ionize, watch } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 
 
 export function SortableTableApp() {
-   const $searchQuery = ion('')
+   const $searchQuery = Ion('')
    const gridColumns = ['name', 'power']
    const gridData = [
       { name: 'Chuck Norris', power: Infinity },
@@ -37,12 +37,12 @@ type SortableTableInput = FromTag<{
 
 function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
 
-   const $sortKey = ion('')
+   const $sortKey = Ion('')
    const sortOrders = ionize(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
 
    console.log('sort orders', sortOrders)
 
-   const $filteredData = ion(() =>{
+   const $filteredData = Ion(() =>{
       let filteredData = data;
       let filterKey = $filterKey()
       const key = $sortKey()

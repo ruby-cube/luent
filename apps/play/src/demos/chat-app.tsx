@@ -93,7 +93,7 @@ export function FBApp() {
    })
    const $mainContent = GetNode($Main)
 
-   const $unseenCount = ion(0, {
+   const $unseenCount = Ion(0, {
       increment(count: number = 1) {
          this.value = $unseenCount() + count
       },

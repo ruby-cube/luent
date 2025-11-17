@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, If, measureLayout, GetNode, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
-import { Ion, ion, ionic, MutableIon } from '@rue/quarky';
+import { Ion, ionic, MutableIon } from '@rue/quarky';
 
 
 export function TestTooltip() {
@@ -60,7 +60,7 @@ type ButtonWithTooltipInput = FromTag<{
 }>
 
 export function ButtonWithTooltip({ Slot }: ButtonWithTooltipInput) {
-   const $targetRect = ion(null as Rect | null)
+   const $targetRect = Ion(null as Rect | null)
 
    return component(
       <>
@@ -102,7 +102,7 @@ export function Tooltip(input: FromTag<{
    const { Slot, targetRect } = input
 
    const $div = GetNode('div');
-   const $height = ion(undefined as number | undefined)
+   const $height = Ion(undefined as number | undefined)
 
    atMounted(({ ooo }) => {
       ooo.await(layout(() => $div()?.getBoundingClientRect().height))
@@ -121,7 +121,7 @@ export function Tooltip(input: FromTag<{
 
    const shiftX = targetRect.left
 
-   const $shiftY = ion(() => {
+   const $shiftY = Ion(() => {
       const height = $height()
       if (height === undefined) return 0;
       const y = targetRect.top - height;

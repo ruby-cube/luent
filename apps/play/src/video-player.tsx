@@ -1,15 +1,15 @@
 import { component, Else, EventHandler, FromTag, If, GetNode, Style } from "@rue/lumo";
-import { FiniteState, Ion, ion, ionize } from "@rue/quarky";
+import { FiniteState, Ion, ionize } from "@rue/quarky";
 import "./reset.css"
 
-const $count = ion(0)
+const $count = Ion(0)
 
 const obj = {
    $count,
-   frog: ion(0)
+   frog: Ion(0)
 }
 
-const _$frog = ion(0)
+const _$frog = Ion(0)
 
 const obj2 = {
    get frog() {
@@ -63,7 +63,7 @@ export function VideoPlayer() {
       $video()?.pause()
    })
 
-   const $elapsedTime = ion(0);
+   const $elapsedTime = Ion(0);
 
    function updateTime(currentTime: number) {
       $elapsedTime.value = currentTime;

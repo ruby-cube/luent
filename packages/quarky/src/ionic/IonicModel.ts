@@ -4,7 +4,7 @@ import { IonicProxy } from "./Ionic"
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { Traceable } from "../debug/Traceable"
 import { hasQuark, QUARK } from "../abstract/Quark"
-import { AtomicPionQuark, createAtomicPion, createInternalPion, InternalPionQuark } from "./Pion"
+import { AtomicPionQuark, createAtomicPion, createInternalPion, InternalPionQuark, PropertyHooks } from "./Pion"
 import { trackOp } from "./IonicMethods"
 import { debug, isFunction, isObjectLiteral } from "@rue/utils"
 import { asTrackedOp, getTrackedOp, TrackedOpQuark, TrackedOps } from "./TrackableOp"
@@ -12,6 +12,7 @@ import { track } from "../reactivity/Compound"
 import { isIonKey } from "./ionize"
 import { CollectiveState, PrivateState } from "../reactivity/State"
 import { $activeUpdate } from "../reactivity/Update"
+import { IonHooks } from "../ion/AtomicIon"
 
 export type Proto = {
    [key: PropertyKey]: {
@@ -234,7 +235,7 @@ export class ModelQuark implements Atom {
 
       const AtomicPionQuark = this.PionQuark
 
-      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target, valueKey, this), hooks, !pionAccess)
+      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target, valueKey, this, hooks), hooks?.as, !pionAccess)
 
       const state = proto[valueKey] = {
          get: pion,
@@ -269,6 +270,8 @@ export class ModelQuark implements Atom {
    ) {
       const { proto } = this
       const { get, set } = descriptor
+      const { as: transform, '@get': castGet, '@set': castSet } = this.getPropertyHooks(valueKey) ?? {} as PropertyHooks
+      let initialValue = true;
       const getter = get ?? (() => undefined)
       const setter = set ? ((value: unknown) => { set(value); return true; }) : nowrite
       const state = proto[valueKey] = {
@@ -311,6 +314,7 @@ export class ModelQuark implements Atom {
       def: AnyObject | undefined
    ) {
       const { proto, proxy, target } = this
+      if (__DEV__ && this.getPropertyHooks(valueKey)) console.warn('`as`, `@get` and `@set` hooks not supported for absorbed ions')
 
       const state = proto[valueKey] = {
          get: ion,

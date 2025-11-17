@@ -218,8 +218,8 @@ list.push(Ionized(new Frog('kermit')))
 
 
 
-// const $firstName = ion('')
-// const $lastName = ion('')
+// const $firstName = Ion('')
+// const $lastName = Ion('')
 
 // const fullname = ionize({
 //    get value() {
@@ -248,7 +248,7 @@ const videoPlayer = FiniteState({
 
 const $door = SuspenseIon(fetchDoor)
 
-const $userId = ion('')
+const $userId = Ion('')
 
 const $user = SuspenseIon(async () => {
    const res = await fetchUser($userId)
@@ -269,7 +269,7 @@ export function App() {
 }
 
 export function Counter() {
-   let $count = ion(0)
+   let $count = Ion(0)
 
    return component(
       <div>
@@ -313,7 +313,7 @@ function reset($count) {
 }
 
 export function Counter() {
-   let $count = ion(0)
+   let $count = Ion(0)
 
    console.log('count is', $count)
 
@@ -334,7 +334,7 @@ export function Counter() {
 // // ION WITH METHODS
 
 // export function Counter() {
-//    const count = ion(0, {
+//    const count = Ion(0, {
 //       increment() {
 //          count++
 //       },
@@ -355,7 +355,7 @@ export function Counter() {
 // DERIVATION ION
 
 export function DoubleCounter() {
-   let $count = ion(0)
+   let $count = Ion(0)
    let $doubleCount = ionic(($count * 2))
 
    return component(
@@ -370,7 +370,7 @@ export function DoubleCounter() {
 // DERIVATION SHORTHAND IN THE TEMPLATE
 
 export function DoubleCounter() {
-   let $count = ion(0)
+   let $count = Ion(0)
 
    return component(
       <div>
@@ -383,10 +383,10 @@ export function DoubleCounter() {
 
 // DERIVATIONS WITH METHODS
 
-let $firstName = ion('')
-let $lastName = ion('')
+let $firstName = Ion('')
+let $lastName = Ion('')
 
-let $fullName = ion(($firstName + ' ' + $lastName), {
+let $fullName = Ion(($firstName + ' ' + $lastName), {
    set(name: string) {
       $$: [$firstName, $lastName] = name.split(' ')
    }
@@ -400,7 +400,7 @@ function makeAnonymous() {
 // STATIC VALUES IN THE TEMPLATE
 
 export function Counter() {
-   let $count = ion(0)
+   let $count = Ion(0)
 
    return component(
       <div>
@@ -505,7 +505,7 @@ function FruitBasket({ $selectedFruit, fruitStore }) {
 // watch ions
 
 export function Counter() {
-   let $count = ion(0)
+   let $count = Ion(0)
 
    watch(($count), () => {
       console.log('count is now', $count())
@@ -591,7 +591,7 @@ function ScoreBoard({ a, b }) {
 
 // absorbed ions
 
-const $username = ion('John Doe')
+const $username = Ion('John Doe')
 
 const player = ionize({
    name: $username,
@@ -626,7 +626,7 @@ export function PlayingCard(input: FromTag<{
 }>) {
    const { $number, $suit, startFaceup = false, $cardBack } = input
 
-   let $faceup = ion(startFaceup)
+   let $faceup = Ion(startFaceup)
    const $div = GetNode('div')
 
    return component(
@@ -684,7 +684,7 @@ export function TodoList() {
    let id = 0
 
    const todos = ionize([], { for: 'id' })
-   const $input = ion('')
+   const $input = Ion('')
 
    function remove(index: number) {
       $$: todos.splice(index, 1)

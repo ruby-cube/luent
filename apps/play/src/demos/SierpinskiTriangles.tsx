@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, ion, ThrottledHover, ionize, $_derivation, ionic, dispatch, Ion, swiftUpdate, $cancelCount } from "@rue/quarky";
+import { Animation, Interval, ThrottledHover, ionize, $_derivation, ionic, dispatch, Ion, swiftUpdate, $cancelCount } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // TODO:
@@ -78,8 +78,8 @@ export function TriangleDemo() {
       $elapsed.value = Date.now() - start;
    }).start()
 
-   // const $x = ion(0)
-   // const $y = ion(0)
+   // const $x = Ion(0)
+   // const $y = Ion(0)
    // listen(document, 'mousemove', ThrottlePointer((e: MouseEvent) => {
    //    $x.value = e.clientX;
    //    $y.value = e.clientY;

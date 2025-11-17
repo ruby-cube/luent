@@ -98,7 +98,7 @@ function IfContextMenu() {
 function IfContextMenuB() {
    const $container = GetNode('div')
 
-   const $open = ion(false)
+   const $open = Ion(false)
 
    function open() {
       $open.value = true
@@ -142,7 +142,7 @@ function IfContextMenuB() {
 function IfContextMenuC() {
    const $container = GetNode('div')
 
-   const $open = ion(false)
+   const $open = Ion(false)
 
    function open() {
       $open.value = true
@@ -200,7 +200,7 @@ function IfContextMenuC() {
 
 // Intuitive:
 function IntuitivePopUpA() {
-   const $open = ion(false)
+   const $open = Ion(false)
 
    return component(
       <o--portal to='body'>
@@ -216,7 +216,7 @@ function IntuitivePopUpA() {
 
 // Intuitive:
 function IntuitivePopUpB() {
-   const $open = ion(false)
+   const $open = Ion(false)
 
    return component(
       <>

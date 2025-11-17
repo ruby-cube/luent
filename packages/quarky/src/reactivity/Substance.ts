@@ -358,7 +358,7 @@ export class IonSubstance implements WatchedSubstance {
 //          return value;
 //       }
 //       else {
-//          const value = this.ion()
+//          const value = this.Ion()
 //          if (isIonicProxy(value)) {
 //             trackAbsorbedIons(this, value)
 //          }

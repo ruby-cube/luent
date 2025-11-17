@@ -1,13 +1,13 @@
 import { component, FromTag } from '@rue/lumo'
-import { ion } from '@rue/quarky'
+import { Ion } from '@rue/quarky'
 import { logIn } from '../database/database'
 
 
 export function LoginForm() {
    
-   const $email = ion('')
-   const $password = ion('')
-   const $error = ion('')
+   const $email = Ion('')
+   const $password = Ion('')
+   const $error = Ion('')
 
    async function reSubmit(e: any) {
       e.preventDefault();

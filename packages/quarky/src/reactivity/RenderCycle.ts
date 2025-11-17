@@ -482,8 +482,8 @@ export function onTick(task: Task) {
 
 
 
-// const $todoID = ion('kldk')
-// const $data = ion()
+// const $todoID = Ion('kldk')
+// const $data = Ion()
 
 // queueIonicTask(async w => {
 //    await postlude()

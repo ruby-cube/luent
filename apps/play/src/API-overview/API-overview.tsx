@@ -16,7 +16,7 @@ export function App() {
 }
 
 export function Counter() {
-   const $count = ion(0)
+   const $count = Ion(0)
 
    return component(
       <div>
@@ -33,7 +33,7 @@ export function Counter() {
 // ION: Reactive State
 
 export function Counter() {
-   const $count = ion(0)
+   const $count = Ion(0)
 
    console.log('count is', $count())
 
@@ -54,7 +54,7 @@ export function Counter() {
 // ION WITH METHODS
 
 export function Counter() {
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          this.value++
       },
@@ -75,8 +75,8 @@ export function Counter() {
 // DERIVATION ION
 
 export function DoubleCounter() {
-   const $count = ion(0)
-   const $doubleCount = ion(() => $count() * 2)
+   const $count = Ion(0)
+   const $doubleCount = Ion(() => $count() * 2)
 
    return component(
       <div>
@@ -90,7 +90,7 @@ export function DoubleCounter() {
 // DERIVATION SHORTHAND IN THE TEMPLATE
 
 export function DoubleCounter() {
-   const $count = ion(0)
+   const $count = Ion(0)
 
    return component(
       <div>
@@ -102,10 +102,10 @@ export function DoubleCounter() {
 }
 
 // DERIVATIONS WITH METHODS
-const $firstName = ion('')
-const $lastName = ion('')
+const $firstName = Ion('')
+const $lastName = Ion('')
 
-const $fullName = ion(() => $firstName() + ' ' + $lastName(), {
+const $fullName = Ion(() => $firstName() + ' ' + $lastName(), {
    set state(name: string) {
       [$firstName.value, $lastName.value] = name.split(' ')
    },
@@ -123,7 +123,7 @@ function makeAnonymous() {
 // STATIC VALUES IN THE TEMPLATE
 
 export function Counter() {
-   const $count = ion(0)
+   const $count = Ion(0)
 
    return component(
       <div>
@@ -136,7 +136,7 @@ export function Counter() {
 }
 
 export function Counter() {
-   const $count = ion(0)
+   const $count = Ion(0)
 
    return component(
       <div>
@@ -240,7 +240,7 @@ function FruitBasket({ $selectedFruit, fruitStore }) {
 // watch ions
 
 export function Counter() {
-   const $count = ion(0)
+   const $count = Ion(0)
 
    watch($count, () => {
       console.log('count is now', $count())
@@ -326,7 +326,7 @@ function ScoreBoard({ a, b }) {
 
 // absorbed ions
 
-const $username = ion('John Doe')
+const $username = Ion('John Doe')
 
 const player = ionize({
    name: $username,
@@ -354,7 +354,7 @@ watch(player.$name, () => {
 
 // IF series
 export function PlayingCard({ $number, $suit, faceup = false, $cardBack }) {
-   const $faceup = ion(faceup)
+   const $faceup = Ion(faceup)
 
    return component(
       <div on:click={e => $faceup.value = !$faceup()}>
@@ -410,7 +410,7 @@ export function WeirdDice({ $number }) {
 export function TodoList() {
    let id = 0
    const todos = ionize([], { for: 'id' })
-   const $input = ion('')
+   const $input = Ion('')
 
    function remove(index: number) {
       todos.splice(index, 1)

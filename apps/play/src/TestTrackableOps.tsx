@@ -3,8 +3,8 @@ import { ion, ionic, ionize } from "@rue/quarky";
 
 export function TestTrackableOps() {
    const list = ionize([{ count: 0 }, { count: 11 }])
-   const $filteredList = ion(() =>list.filter(item => item.count > 10))
-   const $length = ion(()=>$filteredList().length)
+   const $filteredList = Ion(() =>list.filter(item => item.count > 10))
+   const $length = Ion(()=>$filteredList().length)
 
 console.log(list.filter(item => item.count > 10))
    return component(

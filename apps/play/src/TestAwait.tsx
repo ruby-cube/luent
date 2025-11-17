@@ -1,6 +1,6 @@
 import { component, SuspenseIon, Else, If, FromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
-import { ion, Ion } from "@rue/quarky";
+import {  Ion } from "@rue/quarky";
 
 
 
@@ -38,7 +38,7 @@ function fetchNestedDataB($name: Ion<string>) {
 }
 
 export function TestAwait() {
-   const $name = ion('sir robin the brave')
+   const $name = Ion('sir robin the brave')
    const $brave = fetchNestedDataB($name)
 
    return component(

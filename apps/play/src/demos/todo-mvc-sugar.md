@@ -1,6 +1,6 @@
 ```tsx
 import { component, For, If, Else, FromTag } from "%rue/lumo"
-import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
+import { watch, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
 import { PRELUDE } from "../../../../packages/lumo/src/render-cycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/compound/Compound"

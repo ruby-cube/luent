@@ -21,7 +21,7 @@ let $count = 0;
 let $count = () => count
 
 // declaration
-let $count = ion(0);
+let $count = Ion(0);
 
 // dual nature variable
 let $count = someFn(0);
@@ -48,7 +48,7 @@ const obj = {
    $count
 }
 
-const $doubleCount = ion(() => $count * 2)
+const $doubleCount = Ion(() => $count * 2)
 
 const obj = {
    $count: ($count)
@@ -84,7 +84,7 @@ const $countB = isIonized(obj) ? obj.$count : $_derivation(() => obj.count)
 
 // SKIP TRANSFORM
 
-const $count = ion(0)
+const $count = Ion(0)
 // VariableDeclarator
 // - id: Identifier { name }
 

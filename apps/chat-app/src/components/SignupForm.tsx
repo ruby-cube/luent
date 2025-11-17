@@ -4,10 +4,10 @@ import { signUp } from '../database/database'
 
 export function SignupForm() {
 
-   const $username = ion('')
-   const $email = ion('')
-   const $password = ion('')
-   const $error = ion('')
+   const $username = Ion('')
+   const $email = Ion('')
+   const $password = Ion('')
+   const $error = Ion('')
 
    async function reSubmit(e: any) {
       e.preventDefault();

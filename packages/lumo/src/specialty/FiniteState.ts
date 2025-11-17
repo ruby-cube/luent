@@ -211,7 +211,7 @@ export function withTimeout(ms: number, transition: Transition) {
 
 //TODO: implement as custom ionized object
 export function FiniteState<S extends FiniteStates, M extends Methods>(states: S, methods?: M): FiniteState<S, M> {
-   const $currentState = ion(undefined as undefined | string);
+   const $currentState = Ion(undefined as undefined | string);
 
    let activated = false;
 

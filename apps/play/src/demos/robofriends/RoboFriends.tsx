@@ -1,16 +1,16 @@
 import { component, EventHandler, For, fromContext, FromTag, HandleEvent,} from "@rue/lumo";
-import { inert, ion, Inert, ionize, Ion, Ionized } from "@rue/quarky";
+import {  Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
 // TODO:
-// [] ion() as Ion<Inert<>>
+// [] Ion() as Ion<Inert<>>
 // [] ion.ionize() in ionized models proxy ion access
 // [] type fromTag<T>() ---> input
 //    [] mu: and mu?:
 // [] type input ---> jsx attributes
 //    [] Inert vs non-inert
-// [] fromContext.ion()
-//    [] .ion('mu')(FROG)
+// [] fromContext.Ion()
+//    [] .Ion('mu')(FROG)
 // [] mu() typehelper
 
 // concerns: 
@@ -34,7 +34,7 @@ interface Robot {
 // const $$greeting = muon('hi', {change(){}})
 
 export function RoboFriendsApp() {
-   const $robots = ion(robots as Robot[])
+   const $robots = Ion(robots as Robot[])
 
    return component(
       <>

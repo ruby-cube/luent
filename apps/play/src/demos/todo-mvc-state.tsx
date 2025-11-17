@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, For, If, Else, FromTag, listen } from "@rue/lumo"
-import { watch, ion, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
+import { watch,  queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
 
 
 interface Todo {

@@ -3,7 +3,7 @@ import { ion } from "@rue/quarky"
 
 export function SimpleCounter() {
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          this.value++
       },

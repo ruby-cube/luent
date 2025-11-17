@@ -1,5 +1,5 @@
 import { component, For, FromTag, Style, } from "@rue/lumo"
-import { EACH, Ion, ion, Ionic, ionic, ionize, Ionized, update } from "@rue/quarky"
+import { EACH, Ion, Ionic, ionic, ionize, Ionized } from "@rue/quarky"
 
 function mu<T>(obj: T) {
    return obj
@@ -139,7 +139,7 @@ function AxisLabel(input: FromTag<{
 }>) {
    const { $index, stat, $total } = input
 
-   const $point = ion(() =>
+   const $point = Ion(() =>
       valueToPoint(+stat.value + 10, $index(), $total())
    )
 
@@ -154,7 +154,7 @@ function PolyGraph({ stats }: FromTag<{
    stats: Ionized<Stat[]>
 }>) {
 
-   const $points = ion(() => {
+   const $points = Ion(() => {
       const total = stats.length
       return stats
          .map((stat, i) => {

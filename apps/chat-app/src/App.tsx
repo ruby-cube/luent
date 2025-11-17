@@ -1,6 +1,6 @@
 import { component, fromGlobal, fromRoot, If, Style } from "@rue/lumo";
 import { Router } from "./router";
-import { Ion, ion, Ionized } from "@rue/quarky";
+import { Ion, Ionized } from "@rue/quarky";
 import { User } from "./commons/keys";
 import { WelcomeView } from "./components/WelcomeView";
 import { Chatroom } from "./components/Chatroom";

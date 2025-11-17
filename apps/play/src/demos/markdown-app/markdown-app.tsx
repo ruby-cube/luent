@@ -1,5 +1,5 @@
 import { marked } from 'marked'
-import { Ion, ion, ionize, watch } from '@rue/quarky'
+import { Ion, ionize, watch } from '@rue/quarky'
 import { component, FromTag, GetNode, atMounted, atUnmount } from '@rue/lumo'
 
 
@@ -9,10 +9,10 @@ export function MarkdownApp(
    }>
 ) {
 
-   const { $markdown = ion('# Hello World') } = input
-   // const $markdown = ion('Hello World')
+   const { $markdown = Ion('# Hello World') } = input
+   // const $markdown = Ion('Hello World')
 
-   const $output = ion(() =>(marked($markdown())))
+   const $output = Ion(() =>(marked($markdown())))
 
 
    // const update = (e: any) => {
@@ -45,7 +45,7 @@ export function MarkdownApp(
       textArea.selectionEnd = selectionEnd!
    })
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          $count.value++
       }
@@ -53,7 +53,7 @@ export function MarkdownApp(
 
 
 
-   const $doubleCount = ion(() =>$count() * 2)
+   const $doubleCount = Ion(() =>$count() * 2)
 
    // watch($count, e => {
    //    console.log(e.newState)

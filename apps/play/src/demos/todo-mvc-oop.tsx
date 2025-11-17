@@ -1,5 +1,5 @@
 import { component, For, If, Else, FromTag, listen } from "@rue/lumo"
-import { watch, ion, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
+import { watch, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
 
 // PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)
 // CONS: Not as composable as kits

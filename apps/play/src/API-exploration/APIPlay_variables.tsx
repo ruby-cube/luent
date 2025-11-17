@@ -15,8 +15,8 @@ export function TodoList({ todos, addTodo }: Props) {
             }
          </ul>
          if ((todos.length > 0)) {
-            let $count = ion(0);
-            let $doubled = ion(() =>$count * 2);
+            let $count = Ion(0);
+            let $doubled = Ion(() =>$count * 2);
          <>
             <p>{todos.length} {"items"}</p>
             <p>{$count}</p>
@@ -54,8 +54,8 @@ export function TodoList({ todos, addTodo }: Props) {
 
          <remount-demount />
          {If((todos.length > 0), (
-            $count = ion(0),
-            $doubled = ion(() =>$count * 2),
+            $count = Ion(0),
+            $doubled = Ion(() =>$count * 2),
             _1 = console.log('hi'),
             _2 = console.log('hi'),
          ) =>
@@ -96,8 +96,8 @@ export function TodoList({ todos, addTodo }: Props) {
 
          <remount-demount />
          {If($active, v => {
-            const $count = ion(0);
-            const $doubled = ion(() =>$count * 2);
+            const $count = Ion(0);
+            const $doubled = Ion(() =>$count * 2);
             console.log('hi');
 
             <>

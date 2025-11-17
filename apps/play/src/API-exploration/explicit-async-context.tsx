@@ -93,7 +93,7 @@ function doSomething(this: ThisView) {
 
 function TextKit(this: ThisView, files: any) {
 
-   const $text = ion('hi')
+   const $text = Ion('hi')
 
    this.atMounted(() => {
 

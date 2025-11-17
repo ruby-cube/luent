@@ -1,8 +1,8 @@
 import { If, component, Else, ElseIf } from "@rue/lumo";
-import { ion, ionic } from "@rue/quarky";
+import { Ion, ionic } from "@rue/quarky";
 
 export function TestDerivedConditional() {
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          this.value++
       },
@@ -11,29 +11,29 @@ export function TestDerivedConditional() {
       }
 
    })
-   const $doubleCount = ion(() =>$count() * 2)
+   const $doubleCount = Ion(() =>$count() * 2)
 
-   const $aActive = ion(true, {
+   const $aActive = Ion(true, {
       toggle() {
          $aActive.value = !$aActive.value
       }
    })
 
-   const $bActive = ion(true, {
+   const $bActive = Ion(true, {
       toggle() {
          $bActive.value = !$bActive.value
       }
    })
 
 
-   const $cActive = ion(false, {
+   const $cActive = Ion(false, {
       toggle() {
          $cActive.value = !$cActive.value
       }
    })
 
 
-   const $dActive = ion(false, {
+   const $dActive = Ion(false, {
       toggle() {
          $dActive.value = !$dActive.value
       }

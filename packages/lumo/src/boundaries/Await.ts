@@ -8,7 +8,7 @@
 //    <div>{err}</div>
 // )}
 
-import { Ion, ion, watch } from "@rue/quarky";
+import { Ion,  watch } from "@rue/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
@@ -99,8 +99,8 @@ export function createAwaitSeries(
    const renderPlaceholder = secondKit && 'renderPlaceholder' in secondKit ? secondKit.renderPlaceholder : (() => undefined);
    const renderError = secondKit && 'renderError' in secondKit ? secondKit.renderError : thirdKit?.renderError ?? (() => undefined);
    const timeout = secondKit && 'timeout' in secondKit ? secondKit.timeout : undefined
-   const $pending = ion(true);
-   const $error = ion(undefined as undefined | Error);
+   const $pending = Ion(true);
+   const $error = Ion(undefined as undefined | Error);
 
    let timeoutID: any;
    if (timeout) {

@@ -102,7 +102,7 @@ const app = createRoot(TriangleDemo)
 app.mount('#app')
 
 // function TestSimpleList() {
-//    const $list = ion(['apples', 'peaches', 'pears', 'plums'])
+//    const $list = Ion(['apples', 'peaches', 'pears', 'plums'])
 
 //    return component(
 //       <div>
@@ -204,7 +204,7 @@ app.mount('#app')
 
 
 
-// const $frog = ion('kermit')
+// const $frog = Ion('kermit')
 
 // const obj = {
 //    frog: $frog
@@ -266,7 +266,7 @@ app.mount('#app')
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)
 //     const unrelated = true;
-//     const $count = ion(0)
+//     const $count = Ion(0)
 //     function increment() {
 //         $count.set(c => c + 1)
 //     }

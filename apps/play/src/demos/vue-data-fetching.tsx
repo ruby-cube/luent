@@ -25,8 +25,8 @@ export function View() {
    const API_URL = `https://api.github.com/repos/vuejs/core/commits?per_page=3&sha=`
    const branches = ['main', 'minor']
 
-   const $currentBranch = ion(branches[0])
-   const $commits = ion([] as Commit[])
+   const $currentBranch = Ion(branches[0])
+   const $commits = Ion([] as Commit[])
 
 
    // const context = $_snap_context()

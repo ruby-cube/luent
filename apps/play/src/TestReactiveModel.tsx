@@ -12,7 +12,7 @@ function genId() {
 }
 
 
-// const $count = ion(0)
+// const $count = Ion(0)
 // watch($=(doubleCount => $count() + 2), () => {  
 
 // })
@@ -148,7 +148,7 @@ export function List(
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
-   const $listClone = ion(() =>list.slice())
+   const $listClone = Ion(() =>list.slice())
 
    const values = list.values()
    for (const value of values) {

@@ -2,7 +2,7 @@
 // You're filtering a large list based on a search input.
 
 import { SuspenseIon, component, For, fromGlobal, provideGlobal } from "@rue/lumo";
-import { Ion, ion, queueIonicTask } from "@rue/quarky";
+import { Ion,queueIonicTask } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
 // tsx
@@ -99,7 +99,7 @@ type SuspenseIon<T> = {
 function App() {
    const $searchTerm = ion.debounced('', 100)
 
-   const $items = ion(largeList)
+   const $items = Ion(largeList)
 
    const lazyBatch = useLazyBatch()
 

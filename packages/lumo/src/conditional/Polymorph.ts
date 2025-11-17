@@ -4,7 +4,7 @@ import { RawJSXNode } from "../node/makeJSXNode";
 import { Commons, createCommonsNode, NodeCommons, Provided } from "../context/Context";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { FromTag } from "../component/Input";
-import { ion, Ion, isGetter, isIon, MutableIon, PRELUDE, queueInternalRender, toValue, watch, watchToRender } from "@rue/quarky";
+import { Ion, isGetter, isIon, MutableIon, PRELUDE, queueInternalRender, toValue, watch, watchToRender } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
@@ -72,7 +72,7 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: {
       return switchMap.has(key);
    }
    $Polymorph.Morphable = function Morphable(initialKey: PolymorphKey | null, input?: Object): Morphable {
-      const morphable = ion(input ? [initialKey, input] : initialKey, {
+      const morphable = Ion(input ? [initialKey, input] : initialKey, {
          as(key: PolymorphKey | null, input?: Object) {
             if (input) {
                if (Array.isArray(this.value) && this.value[0] === key && this.value[1] === input)

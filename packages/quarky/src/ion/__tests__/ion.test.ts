@@ -6,7 +6,7 @@ import exp from 'constants';
 
 describe('ion function', () => {
     it('should create an AtomicIon when given a non-function value', () => {
-        const atomicIon = ion(10);
+        const atomicIon = Ion(10);
         expect(typeof atomicIon).toBe('function');
         expect(isFunction(atomicIon)).toBe(false)
         expect(atomicIon()).toBe(10);
@@ -14,7 +14,7 @@ describe('ion function', () => {
     });
 
     it('should invoke setValue when `value` is set', () => {
-        const atomicIon = ion(15);
+        const atomicIon = Ion(15);
         const newValue = 25;
         atomicIon.value = newValue;
 
@@ -22,7 +22,7 @@ describe('ion function', () => {
     });
 
     it('should attach methods to the ion when methods are provided', () => {
-        const $count = ion(5, {
+        const $count = Ion(5, {
             double() {
                 $count.value = $count() * 2
             }
@@ -34,7 +34,7 @@ describe('ion function', () => {
     });
 
     it('should throw an error if .value is read', () => {
-        const $count = ion(5, {
+        const $count = Ion(5, {
             double() {
                 $count.value = $count() * 2
             }
@@ -46,7 +46,7 @@ describe('ion function', () => {
  
 
    //  it('should replace `as` method with `_as` if provided with `as` method', () => {
-   //      const $count = ion(15, {
+   //      const $count = Ion(15, {
    //          as(value: number){
    //              $count.value = value;
    //          },
@@ -67,9 +67,9 @@ describe('ion function', () => {
    //  });
 
       it('should create a ReactiveDerivedIon when given a function', () => {
-        const $count = ion(1)
+        const $count = Ion(1)
 
-        const $doubleCount = ion(() =>$count() * 2);
+        const $doubleCount = Ion(() =>$count() * 2);
         expect(typeof $doubleCount).toBe('function');
         expect(isFunction($doubleCount)).toBe(false)
         expect($doubleCount()).toBe(2);
@@ -79,8 +79,8 @@ describe('ion function', () => {
       });
 
       it('should create a derived ion that tracks dependencies correctly', () => {
-        const depIon = ion(1);
-        const derivedIon = ion(() =>depIon() + 10);
+        const depIon = Ion(1);
+        const derivedIon = Ion(() =>depIon() + 10);
         depIon.value = 2;  // update dependency
 
         expect(derivedIon()).toBe(12);
@@ -88,9 +88,9 @@ describe('ion function', () => {
 
 
     //   it('should return an existing ion without attaching new methods', () => {
-    //     const existingIon = ion(30);
+    //     const existingIon = Ion(30);
     //     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    //     const ionWithMethods = ion(existingIon, { triple: () => {} });
+    //     const ionWithMethods = Ion(existingIon, { triple: () => {} });
 
     //     expect(ionWithMethods).toBe(existingIon);
     //     expect(warnSpy).toHaveBeenCalledWith(
@@ -100,7 +100,7 @@ describe('ion function', () => {
     //   });
 
     //   it('should not track dependencies if inert flag is true', () => {
-    //     const depIon = ion(1);
+    //     const depIon = Ion(1);
     //     const inertDerivedIon = createDerivationIon(() => depIon() * 2, {}, true);
     //     depIon.as(3);  // update dependency
 

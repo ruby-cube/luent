@@ -93,7 +93,7 @@ export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T
 //    return ionizeModel(target, methods, MUTABLE) as M extends AnyObject ? Ionized<T> & M : Ionized<T>
 // }
 
-// const $location = ion('')
+// const $location = Ion('')
 
 // const frog = ionize({
 //    name: {

@@ -28,7 +28,7 @@ const $frogWithGetter = ionize({
 })
 
 const $frogWithDerived = ionize({
-    name: ion(() =>$asFroggy.name)
+    name: Ion(() =>$asFroggy.name)
 })
 
 const $frogWithPropIon = ionize({

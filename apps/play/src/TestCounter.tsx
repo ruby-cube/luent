@@ -7,7 +7,7 @@
 
 
 import { component, FromTag } from "@rue/lumo"
-import { Ion, ion, ionic, queueIonicTask, ionize, swiftUpdate, instantUpdate } from "@rue/quarky"
+import { Ion, ionic, queueIonicTask, ionize, swiftUpdate, instantUpdate } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
@@ -51,7 +51,7 @@ function TestIonize() {
 }
 
 function TestIon() {
-   const $message = ion('hi')
+   const $message = Ion('hi')
 
    function changeMessage() {
       console.log('message', $message.value)
@@ -75,11 +75,11 @@ type TestCountInput = FromTag<{
 
 export function TestCount() {
 
-   const $count = ion(0)
+   const $count = Ion(0)
 
-   const $active = ion(true)
+   const $active = Ion(true)
 
-   const $doubleCount = ion(() => {
+   const $doubleCount = Ion(() => {
       if ($active()) {
          return $count() * 2
       }
@@ -116,7 +116,7 @@ export function TestCount() {
 
 export function TestThisCount() {
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          console.log('increment', this)
          this.value++
@@ -126,7 +126,7 @@ export function TestThisCount() {
       }
    })
 
-   const $doubleCount = ion(() => $count() * 2)
+   const $doubleCount = Ion(() => $count() * 2)
 
    function increment() {
       $count.value++
@@ -155,7 +155,7 @@ export function TestThisCount() {
 
 // export function TestImmutableCount() {
 
-//    const $count = ion({
+//    const $count = Ion({
 //       'count': 0
 //    }, {
 //       increment() {
@@ -167,7 +167,7 @@ export function TestThisCount() {
 //       }
 //    })
 
-//    const $doubleCount = ion(() =>$count() * 2)
+//    const $doubleCount = Ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.value++
@@ -196,7 +196,7 @@ export function TestThisCount() {
 
 // export function TestReadonlyImmutableCount() {
 
-//    const $count = asReadonlyIon(ion({
+//    const $count = asReadonlyIon(Ion({
 //       'count': 0
 //    }, {
 //       increment() {
@@ -208,7 +208,7 @@ export function TestThisCount() {
 //       }
 //    }))
 
-//    const $doubleCount = ion(() =>$count() * 2)
+//    const $doubleCount = Ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.value++
@@ -237,7 +237,7 @@ export function TestThisCount() {
 
 // export function TestReadonlyMutableCount() {
 
-//    const $count = asReadonlyIon(ion(0, {
+//    const $count = asReadonlyIon(Ion(0, {
 //       increment() {
 //          console.log('increment', this)
 //          this.value++
@@ -247,7 +247,7 @@ export function TestThisCount() {
 //       }
 //    }))
 
-//    const $doubleCount = ion(() =>$count() * 2)
+//    const $doubleCount = Ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.value++
@@ -276,7 +276,7 @@ export function TestThisCount() {
 
 // export function TestReinedMutableCount() {
 
-//    const $count = asReinedIon(ion(0, {
+//    const $count = asReinedIon(Ion(0, {
 //       increment() {
 //          console.log('**increment', this)
 //          this.value++
@@ -289,7 +289,7 @@ export function TestThisCount() {
 //    console.log('increment in coutn', 'increment' in $count)
 //    console.log('decrement in coutn', 'decrement' in $count)
 
-//    const $doubleCount = ion(() =>$count() * 2)
+//    const $doubleCount = Ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.value++
@@ -318,7 +318,7 @@ export function TestThisCount() {
 
 // export function TestReinedImmutableCount() {
 
-//    const $count = asReinedIon(ion({
+//    const $count = asReinedIon(Ion({
 //       'count': 0
 //    }, {
 //       increment() {
@@ -330,7 +330,7 @@ export function TestThisCount() {
 //       }
 //    }), false, ['increment'])
 
-//    const $doubleCount = ion(() =>$count() * 2)
+//    const $doubleCount = Ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.value++
@@ -358,7 +358,7 @@ export function TestThisCount() {
 
 // export function TestMutableNoMethodCount() {
 
-//    const $count = asReinedIon(ion(0, {
+//    const $count = asReinedIon(Ion(0, {
 //       increment() {
 //          console.log('increment', this)
 //          this.value++
@@ -368,7 +368,7 @@ export function TestThisCount() {
 //       }
 //    }), true, [])
 
-//    const $doubleCount = ion(() =>$count() * 2)
+//    const $doubleCount = Ion(() =>$count() * 2)
 
 //    function increment() {
 //       $count.value++
@@ -406,7 +406,7 @@ export function TestCounterModel() {
       }
    })
 
-   const $doubleCount = ion(() => counter.count * 2)
+   const $doubleCount = Ion(() => counter.count * 2)
 
    // watch(counter, ({ state }) => {
    //    console.log('changed', state)

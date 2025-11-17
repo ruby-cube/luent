@@ -11,8 +11,8 @@ export function Transformers() {
    const item = {
       active: 'active'
    }
-   const $activ = ion('activ')
-   const $active = ion('active')
+   const $activ = Ion('activ')
+   const $active = Ion('active')
 
    function Z(arg: any) {
       return ''

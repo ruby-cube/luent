@@ -4,19 +4,19 @@ import {  PRELUDE } from "../../../packages/quarky/src/reactivity/RenderCycle";
 
 export function TestEffectCyclePhases() {
 
-   const $frog = ion('sir robin', {
+   const $frog = Ion('sir robin', {
       sing() {
          this.value += '!'
       }
    })
 
-   const $frogB = ion('kermit', {
+   const $frogB = Ion('kermit', {
       sing() {
          this.value += '!'
       }
    })
 
-   const $count = ion({
+   const $count = Ion({
       frog: $frog
    }, {
       change() {

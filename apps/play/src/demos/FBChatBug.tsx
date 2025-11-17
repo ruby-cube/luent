@@ -8,7 +8,7 @@
 // TODO:
 // [] fromContext type is broken 
 // [] AtomicIon type is broken, the state def feels like a hassle... maybe just use this.value? or maybe just use $unseenCount.value++? or .value++? or something else?
-// [] defineIonCapsule should use this.count++, for ion(), use $count.value++ ... it should be .value
+// [] defineIonCapsule should use this.count++, for Ion(), use $count.value++ ... it should be .value
 // [] writing up input type definitions feel like a hassle
 // [] instead of readonly as the default, encapsulate as the default. That makes more sense--if you pass an object, you shouldn't expect methods to disappear.
 
@@ -44,7 +44,7 @@ class Message {
 export function FBApp() {
    const messages = ionize([new Message('bonjour', false), new Message('comment ca va', false), new Message('jai faim quoi', false)])
 
-   const $unseenCount = ion(0, {
+   const $unseenCount = Ion(0, {
       increment() {
          this.value++
       },
@@ -53,19 +53,19 @@ export function FBApp() {
       },
    })
 
-   const $chatPopupOpen = ion(false)
+   const $chatPopupOpen = Ion(false)
 
    function toggleChatPopup() {
       $chatPopupOpen.value = !$chatPopupOpen.value
    }
 
-   const $chatViewOpen = ion(false)
+   const $chatViewOpen = Ion(false)
 
    function toggleChatView() {
       $chatViewOpen.value = !$chatViewOpen.value
    }
 
-   const $newMessage = ion('')
+   const $newMessage = Ion('')
 
    function receiveNewMessage() {
       messages.push(new Message($newMessage()))

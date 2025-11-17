@@ -1,5 +1,5 @@
 import { component, FromTag, If, Else, For, fromGlobal, ContextKey } from "@rue/lumo";
-import { $from, DeepIonized, defineDeepIonize, EACH, Ion, ion, Ionic, ionize, IonizeBy, Ionized, isIonicProxy, NoExpand } from "@rue/quarky";
+import { $from, DeepIonized, defineDeepIonize, EACH, Ion,  Ionic, ionize, IonizeBy, Ionized, isIonicProxy, NoExpand } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 
 
@@ -250,8 +250,8 @@ function TreeItemView(input: FromTag<{
 }>) {
    const { item } = input()
 
-   const $isFolder = ion(() => !!item.children?.length)
-   const $isOpen = ion($isFolder(), {
+   const $isFolder = Ion(() => !!item.children?.length)
+   const $isOpen = Ion($isFolder(), {
       toggle() {
          this.value = !this.value
       }

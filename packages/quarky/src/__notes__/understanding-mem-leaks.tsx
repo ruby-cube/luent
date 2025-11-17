@@ -3,7 +3,7 @@ import { Flask, getActiveFlask } from "@rue/flask"
 import { FromTag, Ion } from "@rue/lumo"
 
 function Parent() {
-   const $count = ion(0)
+   const $count = Ion(0)
    const $child = GetNode(Child)
 
    return component(
@@ -22,7 +22,7 @@ function Child({
 } : FromTag<{
    count: Ion
 }>) {
-   const $doubleCount = ion(() =>$count() * 2)
+   const $doubleCount = Ion(() =>$count() * 2)
    return component({
       $doubleCount
    },
@@ -51,7 +51,7 @@ function Child({
 
 const creationFlask = getActiveFlask()
 
-function $ion() {
+function $Ion() {
    const initializationFlask = getActiveFlask()
    assertValidInitialization(initializationFlask, creationFlask)
    initializationFlask.onDiscard(() => {

@@ -81,8 +81,8 @@ export function TreeApp({ data = getTreeData() }) {
 // }>) {
 //    const { item, addChildTo } = input
 
-//    let isFolder = ion(() => !!item.children?.length)
-//    let isOpen = ion(isFolder)
+//    let isFolder = Ion(() => !!item.children?.length)
+//    let isOpen = Ion(isFolder)
 
 //    function toggle() {
 //       isOpen = !isOpen

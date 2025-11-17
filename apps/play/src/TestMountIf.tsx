@@ -1,12 +1,12 @@
 import { getActiveFlask } from "@rue/flask";
 import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, $tick } from "@rue/lumo";
-import { debug, getActiveUpdate, instantUpdate, Ion, ion, ionize, sync, watch } from "@rue/quarky";
+import { debug, getActiveUpdate, instantUpdate, Ion, ionize, sync, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
 export function MountIf() {
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          $count.value = $count() + 1
       }
@@ -19,19 +19,19 @@ export function MountIf() {
    //    }
    // })
 
-   const $active = ion(true, {
+   const $active = Ion(true, {
       toggle() {
          $active.value = !$active()
       }
    })
 
-   const $ready = ion(false, {
+   const $ready = Ion(false, {
       toggle() {
          $ready.value = !$ready()
       }
    })
 
-   const $isMobile = ion(false, {
+   const $isMobile = Ion(false, {
       toggle() {
          $isMobile.value = !$isMobile()
       }
@@ -46,7 +46,7 @@ export function MountIf() {
    // return ""
    // }
    
-   const $color = ion('lim', {
+   const $color = Ion('lim', {
       change() {
          if ($color() === 'lim')
             $color.value = 'blu'
@@ -158,7 +158,7 @@ export function MountIf() {
 
 function CounterKit() {
    return {
-      $count: ion(0)
+      $count: Ion(0)
    }
 }
 
@@ -170,7 +170,7 @@ function ArticleBlock(setup: {
 }
 // function Counter() {
 //     const _this = $thisComponent()
-//     const $count = ion(0)
+//     const $count = Ion(0)
 
 //     const $button = GetNode('button')
 //     const $countDiv = GetNode('div')

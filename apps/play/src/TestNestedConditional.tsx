@@ -12,8 +12,8 @@ import { ion } from "@rue/quarky";
 // SOLUTION: If queueInternalRender is called within INTERNAL_RENDER phase, call fn immediately.
 
 export function TestNestedConditionalB() {
-   const $ready = ion(true)
-   const $open = ion(true)
+   const $ready = Ion(true)
+   const $open = Ion(true)
 
    return component(
       <div>
@@ -35,8 +35,8 @@ export function TestNestedConditionalB() {
    )
 }
 export function TestNestedConditional() {
-   const $ready = ion(true)
-   const $open = ion(true)
+   const $ready = Ion(true)
+   const $open = Ion(true)
 
    return component(
       <div>

@@ -3,7 +3,7 @@ import { ion, watch } from "@rue/quarky";
 import { RENDER } from "../../../packages/quarky/src/reactivity/RenderCycle";
 
 export function TestEffectCycle() {
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          $count.value++
       },
@@ -12,7 +12,7 @@ export function TestEffectCycle() {
       }
    })
 
-   const $doubleCount = ion(() =>$count() * 2)
+   const $doubleCount = Ion(() =>$count() * 2)
 
    watch($doubleCount, () => {
       console.log("&% watch $doubleCount 0")

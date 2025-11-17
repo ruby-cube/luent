@@ -214,9 +214,9 @@ export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC 
 
    })
 
-   const priceNum = ion(0);
+   const priceNum = Ion(0);
 
-   const price = ion(() =>'$' + priceNum)
+   const price = Ion(() =>'$' + priceNum)
 
    const priceCurrency = asCurrency(priceNum, 'USD')
 
@@ -286,11 +286,11 @@ export function TestCleanupScheduler({
    })
 
    //@ts-expect-error
-   const $frogName = ion(()=>$frog.name, {
+   const $frogName = Ion(()=>$frog.name, {
       $$set: $frog.setName
    })
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       setTo(value: number) {
          if (value > 100) return value;
          $count.value = value;

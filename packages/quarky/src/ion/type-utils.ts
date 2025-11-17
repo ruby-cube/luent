@@ -1,4 +1,4 @@
-import { ion, Ion, isIon, MutableIon } from "./Ion";
+import { Ion, isIon, MutableIon } from "./Ion";
 
 // export function isNonNull<T>(value: T): value is NonNullable<T extends Ion<infer V> ? NonNullable<V> : T> {
 //    if (isIon(value)) return value() != null;
@@ -14,7 +14,7 @@ import { ion, Ion, isIon, MutableIon } from "./Ion";
 //   return value != null;
 // }
 
-// const $target = ion(null as { hi: 'hi' } | null, {
+// const $target = Ion(null as { hi: 'hi' } | null, {
 //    other() {
 
 //    }

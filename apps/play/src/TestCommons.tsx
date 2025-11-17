@@ -1,14 +1,14 @@
 // @ts-nocheck
 
 import { Commons, component, fromContext } from "@rue/lumo";
-import { ion, watch } from "@rue/quarky";
+import { Ion, watch } from "@rue/quarky";
 
 const Nub = Commons
 const fromContext = fromContext
 
 export function TestCommons() {
 
-   const $message = ion('hello')
+   const $message = Ion('hello')
 
    return component(
       <>
@@ -24,7 +24,7 @@ export function TestCommons() {
 function Child() {
    const $message = fromContext('$message')
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          $count.value++
       }

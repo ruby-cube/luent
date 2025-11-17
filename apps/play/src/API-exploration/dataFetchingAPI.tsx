@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, Else, If, v } from "@rue/lumo";
-import { ion, Ion } from "@rue/quarky";
+import {Ion } from "@rue/quarky";
 
 
 const POSTS = Symbol()
@@ -15,7 +15,7 @@ const USER_POSTS = defineFetch({
 })
 
 export function List() {
-   const $userId = ion('')
+   const $userId = Ion('')
 
    const $userPosts = fromCloud(USER_POSTS, { $userId })
 
@@ -63,7 +63,7 @@ function Item(...args: any[]) {
 }
 
 function dispatch(request: { get: symbol, with: Ion }) {
-   return ion('hi', {
+   return Ion('hi', {
       loading() {
          return true;
       }

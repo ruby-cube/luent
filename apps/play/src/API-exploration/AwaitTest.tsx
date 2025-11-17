@@ -28,7 +28,7 @@ const $TextArea = Suspense({
 })
 
 export function MainSite() {
-    const $count = ion(0)
+    const $count = Ion(0)
     return component(
         <>
             <h1>Hello World</h1>
@@ -57,7 +57,7 @@ function ListBlock() {
 }
 
 function TextArea() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
 
     pend(simFetchC("pomp"))
@@ -76,7 +76,7 @@ function TextArea() {
 
 
 function ItemBlockA() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     pend(simFetch("calico"))
         .then(word => $word.value = word)
@@ -92,7 +92,7 @@ function run(fn: Function) {
 
 
 function ItemBlockB() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     pend(fetch("basset"))
         .then(word =>
@@ -125,7 +125,7 @@ function ItemBlockB() {
 }
 
 function ItemBlockC() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     pend(simFetchB("cerulean"))
         .then(word => $word.value = word)
@@ -136,7 +136,7 @@ function ItemBlockC() {
 }
 
 function ItemBlockD() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     pend(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.value = word)

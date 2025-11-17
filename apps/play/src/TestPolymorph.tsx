@@ -115,7 +115,7 @@ function Home() {
 }
 
 function Happy() {
-   const $message = ion('hi')
+   const $message = Ion('hi')
 
    return component(
       <>

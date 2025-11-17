@@ -1,4 +1,4 @@
-import { ion, Ion, toIon, toValue } from "@rue/quarky"
+import {  Ion, toIon, toValue } from "@rue/quarky"
 import { JSXNode } from "../node/makeJSXNode"
 import { MaybeIon } from "../component/Input"
 import { NodePod } from "../node/x_NodePod"
@@ -107,7 +107,7 @@ class SpreadKit {
    
          for (let i = 0; i < list.length; i++) {
             const item = list[i]
-            const $index = ion(()=>$list()?.indexOf(item))
+            const $index = Ion(()=>$list()?.indexOf(item))
             $currentIndex = $index;
             // this.indices.push($index)
    

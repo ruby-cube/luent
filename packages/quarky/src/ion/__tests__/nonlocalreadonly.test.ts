@@ -40,7 +40,7 @@ describe('ionized class', () => {
 
 describe('ion', () => {
   it('should prevent state modification on readonly ion', () => {
-    const $count = ion(0, { increment() { $count.value++; } });
+    const $count = Ion(0, { increment() { $count.value++; } });
     const $roCount = asNonlocalReadonly($count);
     $roCount.value = 10;
     expect($roCount()).toBe(0)
@@ -48,7 +48,7 @@ describe('ion', () => {
   });
 
   it('should return the same readonly instance', () => {
-    const $count = ion(0);
+    const $count = Ion(0);
     expect(asNonlocalReadonly($count)).toBe(asNonlocalReadonly($count));
   });
 });

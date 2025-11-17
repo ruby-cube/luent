@@ -575,7 +575,7 @@ describe('Integration tests the Context API', () => {
                 return component(
                     createCommons(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { provide: { [_frog_]: ion(value) } })
+                    ], { provide: { [_frog_]: Ion(value) } })
                 )
             }
 

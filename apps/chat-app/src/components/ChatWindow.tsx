@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { queueRenderTask, component, Else, For, FromTag, If, GetNode, POSTLUDE, PRELUDE, RENDER, fromApp, atUnmount, queuePostludeTask, atDemount, atRemounted } from "@rue/lumo";
-import { Ion, ion, ionic } from "@rue/quarky";
+import { Ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
@@ -150,7 +150,7 @@ export function ChatWindow(input: FromTag<{
 
 
    function $ShowNewMessageMarker(message: Message) {
-      return ion(() => {
+      return Ion(() => {
          const lastMessage = $messages().at(-1)
          const newMessageMarker = $newMessageMarker()
          return ($hasUnseenMessages() && user.lastSeenMessageID === message.id || newMessageMarker && newMessageMarker.getAttribute('data-messageID') === message.id) && lastMessage && lastMessage.id !== message.id

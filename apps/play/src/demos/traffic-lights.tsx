@@ -60,7 +60,7 @@ export function TrafficLight() {
       });
 
    function $LightOpacity(color: ReturnType<typeof $trafficLight>) {
-      return ion(() =>{
+      return Ion(() =>{
          return $power.is("on") && !$state.is("sleep")
             ? $power.is("x:broken")
                ? 0
@@ -72,7 +72,7 @@ export function TrafficLight() {
    }
 
    function $BtnOpacity(isActive: () => boolean = () => !$power.is("x:broken")) {
-      return ion(() =>{
+      return Ion(() =>{
          return $power.is("x:broken") ? 0.5 : isActive() ? 1 : 0.5;
       });
    }

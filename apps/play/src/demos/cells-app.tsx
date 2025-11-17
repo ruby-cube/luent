@@ -104,7 +104,7 @@ function Cell({ column, row }: FromTag<{
    row: number
 }>) {
 
-   const $editing = ion(false)
+   const $editing = Ion(false)
 
    function update(e: any) {
       $editing.value = false

@@ -2,8 +2,8 @@ import { component, If, RenderSlot, FromTag } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 export function TestNormalizeToRenderFunction(){
-   const $active = ion(true)
-   const $msg = ion('hellow world')
+   const $active = Ion(true)
+   const $msg = Ion('hellow world')
    return component(
       <>
       <h1>Test Normalize to Renderfunction</h1>

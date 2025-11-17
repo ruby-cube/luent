@@ -14,7 +14,7 @@ export function TestPropIons() {
       }
    })
 
-   const $frogName = ion(() =>frog.name, {
+   const $frogName = Ion(() =>frog.name, {
       set: frog.setName
    })
 

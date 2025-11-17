@@ -181,7 +181,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const ion = attributes['mu:checked'];
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
-   attributes.checked = () => ion() === radioValue;
+   attributes.checked = () => Ion() === radioValue;
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
@@ -229,7 +229,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    watchToRender(ion, ({ current, previous }) => {
       // if (current === previous) return;
       queueInternalRender(() => {
-         element.value = toString(ion())
+         element.value = toString(Ion())
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
@@ -253,7 +253,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 //    const flask = getFlask()
 //    watchToRender(ion, () => {
 //       queueInternalRender(() => {
-//          element.value = toString(ion())
+//          element.value = toString(Ion())
 //       }, flask)
 //    }, flask, RUN_EAGERLY)
 //    if (!isMutableIon(ion)) {

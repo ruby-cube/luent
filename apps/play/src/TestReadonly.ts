@@ -93,7 +93,7 @@ console.log(roFrogPrinceA === roFrogPrinceB)
 
 
 // ION
-const $count = ion(0, {
+const $count = Ion(0, {
    increment() {
       $count.value++
    }

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, FromTag, v } from "@rue/lumo"
-import { Ion, ion, watch } from "@rue/quarky"
+import { Ion, watch } from "@rue/quarky"
 import { DynamicNode } from "../../../../packages/lumo/src/flask/ViewFlask";
 
 /**
@@ -21,7 +21,7 @@ function TestingStuff(
 
    const { $count } = CounterKit($thisNode())
 
-   const $songBird = ion('')
+   const $songBird = Ion('')
 
    onDismantle(() => {
       $songBird.value = fromCoop(_song_bird_)
@@ -43,7 +43,7 @@ function doSomething(context: ThisNode) {
 
 function CounterKit(context: ThisNode) {
 
-   const $count = ion(0)
+   const $count = Ion(0)
 
    //@ts-ignore
    watch($count, e => {

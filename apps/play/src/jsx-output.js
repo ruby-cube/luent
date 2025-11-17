@@ -1,8 +1,8 @@
 import { jsxDEV } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/jsx-runtime/src/index.ts";
 import { component, If, Else, ElseIf } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
-import { ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
+import { Ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
 export function MountIf() {
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          $count.value = $count() + 1;
       }
@@ -13,17 +13,17 @@ export function MountIf() {
          return this.count = this.count + value;
       }
    });
-   const $active = ion(false, {
+   const $active = Ion(false, {
       toggle() {
          $active.value = !$active();
       }
    });
-   const $ready = ion(false, {
+   const $ready = Ion(false, {
       toggle() {
          $ready.value = !$ready();
       }
    });
-   const $isMobile = ion(false, {
+   const $isMobile = Ion(false, {
       toggle() {
          $isMobile.value = !$isMobile();
       }
@@ -32,7 +32,7 @@ export function MountIf() {
       name: "bubby",
       date: 0
    }]);
-   const $color = ion("lim", {
+   const $color = Ion("lim", {
       change() {
          if ($color() === "lim")
             $color.value = "blu";
@@ -135,7 +135,7 @@ export function MountIf() {
 }
 function CounterKit() {
    return {
-      $count: ion(0)
+      $count: Ion(0)
    };
 }
 function ArticleBlock(setup) { }

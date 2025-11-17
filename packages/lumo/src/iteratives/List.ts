@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import { Ion, ion, ionic, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
+import { Ion, ionic, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
@@ -44,7 +44,7 @@ export class ListKit extends VineNode {
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
-         const $index = ion(i, { dataLength: list.length })
+         const $index = Ion(i, { dataLength: list.length })
 
          const kit = new ListItemKit(item, $index, renderItem, this.flask)
          nodes.push(kit)
@@ -96,7 +96,7 @@ export class ListKit extends VineNode {
          }
          // new item!
          else {
-            const $index = ion(i, { dataLength: list.length })
+            const $index = Ion(i, { dataLength: list.length })
             kit = new ListItemKit(item, $index, renderItem, this.flask)
             kit.parent = this.parent;
             kit.preceding = preceding;
@@ -203,7 +203,7 @@ export class ListItemKit extends VineNode {
    ) {
       super()
       const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
-      this.nodes = processJSXOutput(this.render(item, ion(() => $index())))
+      this.nodes = processJSXOutput(this.render(item, Ion(() => $index())))
       flask.emitInitialMount()
    }
 

@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { ion, __addDevName, queueIonicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
+import {  __addDevName, queueIonicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
 import { SYNC } from "../../../quarky/src/reactivity/RenderCycle";
 
@@ -75,7 +75,7 @@ export function SuspenseIon<
       if (options?.awaited) {
          pend(input)
       }
-      const $ion = ion(initialState as T | undefined, {
+      const $ion = Ion(initialState as T | undefined, {
          [SUSPENSE_ION]: true,
          pending: input,
          error: null,
@@ -94,8 +94,8 @@ export function SuspenseIon<
       return $ion;
    }
 
-   const $promise = ion(null as null | Promise<T>)
-   const $ion = ion(initialState as unknown, {
+   const $promise = Ion(null as null | Promise<T>)
+   const $ion = Ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
       get pending() {
          return $promise() ?? false

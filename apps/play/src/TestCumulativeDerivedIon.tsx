@@ -1,18 +1,18 @@
 import { component, For } from "@rue/lumo";
-import { ion, ionize } from "@rue/quarky";
+import { Ion, ionize } from "@rue/quarky";
 
 export function TestDerived() {
 
    const counts = ionize([0])
    const sequence = ionize([0])
 
-   const $count = ion(0, {
+   const $count = Ion(0, {
       increment() {
          $count.value = $count() + 1
       }
    });
 
-   const $accumulate = ion((prev?: number) =>
+   const $accumulate = Ion((prev?: number) =>
       (prev ?? 0) + $count()
    )
 

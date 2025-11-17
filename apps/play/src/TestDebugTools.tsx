@@ -13,7 +13,7 @@ export function TestDebugApp() {
 
 
 
-   const $count = ion(0,
+   const $count = Ion(0,
       {
          increment() {
             this.value++

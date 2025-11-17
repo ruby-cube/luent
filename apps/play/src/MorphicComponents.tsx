@@ -21,7 +21,7 @@ export function MainBlock() {
       ]
    ], $hello) // if using directly in template
 
-   const $list = ion(['ho'])
+   const $list = Ion(['ho'])
 
    const $records_list = $ListPort($records, (record) => (
       <h1>{record.content}</h1>
@@ -68,8 +68,8 @@ function $MorphicNode() {
 
 function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; as: (key: string) => any } {
 
-   const $key = ion(initialKey)
-   const $render = ion(switchMap[$key()])
+   const $key = Ion(initialKey)
+   const $render = Ion(switchMap[$key()])
 
    watch($key, (key) => {
       $render.update(switchMap[key])
@@ -86,7 +86,7 @@ function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: st
 
 function MainContent() {
 
-   const $mainContent = ion(() =>
+   const $mainContent = Ion(() =>
       <div>hello</div>)
 
    function changeMainContent() {

@@ -15,7 +15,7 @@ function CompA() {
 
 // ion
 function CompB() {
-   const $hello = ion('hi')
+   const $hello = Ion('hi')
 
    return component(
       <div>{$hello}</div>
@@ -24,7 +24,7 @@ function CompB() {
 
 // interpolated (to array)
 function CompC() {
-   const $hello = ion('hi')
+   const $hello = Ion('hi')
 
    return component(
       <div>greeting: {$hello}</div>
@@ -35,7 +35,7 @@ function CompC() {
 
 // derived ion
 function CompD() {
-   const $hello = ion('hi')
+   const $hello = Ion('hi')
 
    return component(
       <div>{$hello() + '!'}</div>
@@ -44,7 +44,7 @@ function CompD() {
 
 // transformed derived ion slot
 function CompDTransform() {
-   const $hello = ion('hi')
+   const $hello = Ion('hi')
 
    return component(
       <div>{() => function $() { return $hello() + '!' }}</div>
@@ -53,7 +53,7 @@ function CompDTransform() {
 
 // another element
 function CompE() {
-   const $hello = ion('hi')
+   const $hello = Ion('hi')
 
    return component(
       <div><p>{$hello() + '!'}</p></div>
@@ -70,7 +70,7 @@ function CompG() {
 
 // other elements
 function CompF() {
-   const $hello = ion('hi')
+   const $hello = Ion('hi')
 
    return component(
       <div>
@@ -186,7 +186,7 @@ function ParentF() {
 
 // Template function
 function ParentG() {
-   const $active = ion(true);
+   const $active = Ion(true);
 
    return component(
       <div>
@@ -199,7 +199,7 @@ function ParentG() {
 
 // Template function: with fragment
 function ParentG3() {
-   const $active = ion(true);
+   const $active = Ion(true);
 
    return component(
       <div>
@@ -214,7 +214,7 @@ function ParentG3() {
 
 // Template function: with sequence expression
 function ParentG2() {
-   const $active = ion(true);
+   const $active = Ion(true);
 
    return component(
       <div>
