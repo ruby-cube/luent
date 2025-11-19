@@ -3,7 +3,7 @@ import { __DEV__getTrace } from "../../../flask/debug"
 import { IonicProxy } from "./Ionic"
 import { Atom, TrackedAtom } from "../reactivity/Atom"
 import { Traceable } from "../debug/Traceable"
-import { TrackedOpQuark, TrackedOps } from "./TrackableOp"
+import { TrackedOpQuark, TrackedOps } from "./TrackedOp"
 import { debug } from "@rue/utils"
 import { CollectiveState } from "../reactivity/State"
 

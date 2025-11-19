@@ -1,5 +1,5 @@
 import { toRaw } from "./ionize";
-import { defineIonicStructure, MemberType, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonicMethods";
+import { defineIonicStructure, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonicMethods";
 import { getIonizedModel, maybeIonize } from "./Ionic";
 
 // declare global {
@@ -63,87 +63,70 @@ export function installIonicMap() {
       entries: trackableOp,
 
       // Mutating
-      set: {
-         type: MemberType.MUTATING,
-         privateState: true,
-         op: function set(this: Map<unknown, unknown>, key: unknown, value: unknown) {
-            const ionizedKey = getIonizedModel(key);
-            if (ionizedKey) this.delete(ionizedKey);
-            return this.set(key, value) // TODO: we need
-         },
-         input: ([key, value]) => [toRaw(key), toRaw(value)],
-         preop: (target, [key, value]) => ({
-            target,
-            key,
-            prevState: target.get(key),
-            prevSize: target.size
-         }),
-         trigger: (model, { prevSize, prevState, target, key }) => {
-            if (prevState !== target.get(key)) return;
-            model.trigger();
-            model.triggerOp('has', key);
-            model.triggerOp('get', key);
-            if (prevSize !== target.size) model.triggerOp('[[get]]', 'size');
-         },
-         revert(ionized, data) {
-            ionized.delete(data.args[0])
-         }
+      set(key: unknown, value: unknown) {
+         const rawValue = toRaw(value)
+
+
+         const prevSize = this.raw.size
+         const output = this.raw.set(key, value)
+         this.triggerModel()
+         this.trigger('has', key)
+         this.trigger('get', key)
+         if (this.raw.size !== prevSize) this.trigger('[[get]]', 'size')
+         return output;
+      },
+      // {
+      //    type: MemberType.MUTATING,
+      //    privateState: true,
+      //    op: function set(this: Map<unknown, unknown>, key: unknown, value: unknown) {
+      //       const ionizedKey = getIonizedModel(key);
+      //       if (ionizedKey) this.delete(ionizedKey);
+      //       return this.set(key, value) // TODO: we need
+      //    },
+      //    input: ([key, value]) => [toRaw(key), toRaw(value)],
+      //    preop: (target, [key, value]) => ({
+      //       target,
+      //       key,
+      //       prevState: target.get(key),
+      //       prevSize: target.size
+      //    }),
+      //    trigger: (model, { prevSize, prevState, target, key }) => {
+      //       if (prevState !== target.get(key)) return;
+      //       model.trigger();
+      //       model.triggerOp('has', key);
+      //       model.triggerOp('get', key);
+      //       if (prevSize !== target.size) model.triggerOp('[[get]]', 'size');
+      //    },
+      //    revert(ionized, data) {
+      //       ionized.delete(data.args[0])
+      //    }
+      // },
+
+      clear() {
+         const size = this.raw.size;
+         if (size === 0) return;
+         this.raw.clear()
+         this.triggerModel()
+         this.triggerAll('has')
+         this.triggerAll('get')
+         this.trigger('[[get]]', 'size')
       },
 
-      clear: {
-         type: MemberType.MUTATING,
-         privateState: true,
-         preop(target) {
-            return { entries: Array.from(<Map<any, any>>target), prevSize: target.size, target }
-         },
-
-         trigger: (model, { prevSize, target }) => {
-            if (prevSize === target.size) return;
-            model.triggerAllOps('get');
-            model.triggerAllOps('has');
-            model.triggerOp('[[get]]', 'size');
-            model.trigger()
-         },
-
-         revert(ionizedModel, { preopData: { entries } }) {
-            for (const [key, value] of entries) {
-               ionizedModel.set(key, value) //QUESTION: not sure if this should be the raw target or the ionic model
-            }
+      delete(key) {
+         const success = this.raw.delete(key)
+         if (success) {
+            this.triggerModel()
+            this.trigger('has', key)
+            this.trigger('get', key)
+            this.trigger('[[get]]', 'size')
          }
+         return success;
       },
 
-      delete: {
-         type: MemberType.MUTATING,
-         privateState: true,
-         input: ([key]) => [toRaw(key)],
-         op: useDeleteOp(hasOp),
-         preop: (target, [key]) => ({
-            target,
-            key,
-            value: target.get(key),
-            prevSize: target.size
-         }),
-         trigger: (model, { prevSize, target, key }) => {
-            if (prevSize === target.size) return;
-            model.trigger();
-            model.triggerOp('has', key);
-            model.triggerOp('get', key);
-            model.triggerOp('[[get]]', 'size')
-
-            // this.triggerModel()
-            // this.trigger('has', key);
-            // this.trigger('get', key);
-            // this.trigger('[[get]]', 'size')
-         },
-         revert(ionizedModel, { preopData: { key, value } }) {
-            ionizedModel.set(key, value)
-         }
-      },
       size: {
-         get: {
-            type: MemberType.TRACKABLE,
-            privateState: true,
-            track: trackOp, 
+         get() {
+            this.track('[[get]]', 'size')
+            return this.raw.size
          }
       }
    })

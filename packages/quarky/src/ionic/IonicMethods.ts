@@ -2,9 +2,8 @@ import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
 import { getIonizedModel, IonicProxy, ProxyKey } from "./Ionic"
 import { quarkOf } from "../abstract/Quark"
-import {  Update } from "../reactivity/Update"
+import { Update } from "../reactivity/Update"
 import { ModelQuark } from "./IonicModel"
-import { asTrackedOp, getTrackedOp, getTrackedOps } from "./TrackableOp"
 import { ionize } from "./ionize"
 import { inTrackedScope, track } from "../reactivity/Compound"
 import { AtomicIonQuark } from "../ion/AtomicIon"
@@ -15,43 +14,43 @@ export type Constructor = new (...args: any[]) => any
 
 // TODO: if you don't provide a clone method, you cannot update lazily
 
-export const MemberType = {
-   TRACKABLE: 0,
-   MUTATING: 1,
-   PROPERTY: 3
-} as const
+// export const MemberType = {
+//    TRACKABLE: 0,
+//    MUTATING: 1,
+//    PROPERTY: 3
+// } as const
 
-type CreateOp = (method: Function, target: AnyObject, ionized: IonicProxy, opKey: ProxyKey, config: OpTransforms) =>
-   (...args: any[]) => any
+// type CreateOp = (method: Function, target: AnyObject, ionized: IonicProxy, opKey: ProxyKey, config: OpTransforms) =>
+//    (...args: any[]) => any
 
 
-export const useIonicOp = {
-   [MemberType.TRACKABLE]: useTrackableOp as CreateOp,
-   [MemberType.MUTATING]: useMutatingOp as CreateOp,
-}
+// export const useIonicOp = {
+//    [MemberType.TRACKABLE]: useTrackableOp as CreateOp,
+//    [MemberType.MUTATING]: useMutatingOp as CreateOp,
+// }
 
 // a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
-export function useTrackableOp(
-   method: Function,
-   state: { get(): AnyObject },
-   proxy: IonicProxy,
-   opKey: ProxyKey,
-   config: TrackableOpDef,
-) {
-   const { track, op = method, input = noTransform, output = noTransform } = config
-   const trackableOp = function (...args: any[]) {
-      const _args = input(args);
-      if (inTrackedScope())
-         track?.(proxy, opKey, _args)
-      return output(op.apply(state.get(), _args), proxy)
-   }
-   Object.defineProperty(trackableOp, 'name', opKey)
-   return trackableOp
-}
+// export function useTrackableOp(
+//    method: Function,
+//    state: { get(): AnyObject },
+//    proxy: IonicProxy,
+//    opKey: ProxyKey,
+//    config: TrackableOpDef,
+// ) {
+//    const { track, op = method, input = noTransform, output = noTransform } = config
+//    const trackableOp = function (...args: any[]) {
+//       const _args = input(args);
+//       if (inTrackedScope())
+//          track?.(proxy, opKey, _args)
+//       return output(op.apply(state.get(), _args), proxy)
+//    }
+//    Object.defineProperty(trackableOp, 'name', opKey)
+//    return trackableOp
+// }
 
-function noTransform(value: any) {
-   return value;
-}
+// function noTransform(value: any) {
+//    return value;
+// }
 
 
 
@@ -66,56 +65,56 @@ function noTransform(value: any) {
 // }
 
 
-function useMutatingOp(
-   collectiveQuark: CollectiveQuark,
-   state: { get(): AnyObject, mutate: (fn: (model: AnyObject) => void) => unknown, pendingUpdate: Update },
-   opKey: ProxyKey,
-   op: Function,
-   trigger: (collectiveQuark: CollectiveQuark, update: Update) => void
-) {
-   const mutate = function (...args: any) {
+// function useMutatingOp(
+//    collectiveQuark: CollectiveQuark,
+//    state: { get(): AnyObject, mutate: (fn: (model: AnyObject) => void) => unknown, pendingUpdate: Update },
+//    opKey: ProxyKey,
+//    op: Function,
+//    trigger: (collectiveQuark: CollectiveQuark, update: Update) => void
+// ) {
+//    const mutate = function (...args: any) {
 
-      const output = state.mutate((target) => op.apply(target, args));
+//       const output = state.mutate((target) => op.apply(target, args));
 
-      trigger(collectiveQuark, state.pendingUpdate) // 
+//       trigger(collectiveQuark, state.pendingUpdate) // 
 
-      return output;
-   }
-   Object.defineProperty(mutate, 'name', opKey)
-   return mutate
-}
+//       return output;
+//    }
+//    Object.defineProperty(mutate, 'name', opKey)
+//    return mutate
+// }
 
-function CollectiveTriggerKit(customTrigger: undefined | (() => void)) {
-   let shouldTrigger = false;
+// function CollectiveTriggerKit(customTrigger: undefined | (() => void)) {
+//    let shouldTrigger = false;
 
-   function publicTrigger() {
-      shouldTrigger = true;
-   }
+//    function publicTrigger() {
+//       shouldTrigger = true;
+//    }
 
-   function internalTrigger(collectiveQuark: CollectiveQuark, update: Update) {
-      if (shouldTrigger) {
-         trigger(collectiveQuark, update);
-         customTrigger?.apply({
-            trigger(op: PropertyKey, entryKey?: unknown) {
-               if (this.trigger.length === 1) {
-                  const ops = getTrackedOps(collectiveQuark, op)
-                  if (ops)
-                     for (const [_, op] of ops) {
-                        trigger(op, update)
-                     }
-               }
-               else {
-                  trigger(getTrackedOp(collectiveQuark, op, entryKey), update)
-               }
-            }
-         })
-      }
+//    function internalTrigger(collectiveQuark: CollectiveQuark, update: Update) {
+//       if (shouldTrigger) {
+//          trigger(collectiveQuark, update);
+//          customTrigger?.apply({
+//             trigger(op: PropertyKey, entryKey?: unknown) {
+//                if (this.trigger.length === 1) {
+//                   const ops = getTrackedOps(collectiveQuark, op)
+//                   if (ops)
+//                      for (const [_, op] of ops) {
+//                         trigger(op, update)
+//                      }
+//                }
+//                else {
+//                   trigger(getTrackedOp(collectiveQuark, op, entryKey), update)
+//                }
+//             }
+//          })
+//       }
 
-      shouldTrigger = false;
-   }
+//       shouldTrigger = false;
+//    }
 
-   return [internalTrigger, publicTrigger]
-}
+//    return [internalTrigger, publicTrigger]
+// }
 
 // export class Mutation {
 
@@ -138,40 +137,40 @@ function CollectiveTriggerKit(customTrigger: undefined | (() => void)) {
 // }
 
 
-class TriggerableModel {
+// class TriggerableModel {
 
-   constructor(
-      private quark: ModelQuark,
-      private update: Update
-   ) {
+//    constructor(
+//       private quark: ModelQuark,
+//       private update: Update
+//    ) {
 
-   }
+//    }
 
-   trigger() {
-      this.quark.trigger(this.update) // TODO: only trigger if watched? but what about preventing overlapping mutations?
-   }
+//    trigger() {
+//       this.quark.trigger(this.update) // TODO: only trigger if watched? but what about preventing overlapping mutations?
+//    }
 
-   // triggerProperty(key: PropertyKey) {
-   //    Object.getOwnPropertyDescriptor(this.quark.proxyProto, key)
-   //    const pion = $atomicPion(this.quark, key)
-   //    if (pion) {
-   //       initModelUpdate(pion, this.update)
-   //       pion.trigger()
-   //    }
-   // }
+//    // triggerProperty(key: PropertyKey) {
+//    //    Object.getOwnPropertyDescriptor(this.quark.proxyProto, key)
+//    //    const pion = $atomicPion(this.quark, key)
+//    //    if (pion) {
+//    //       initModelUpdate(pion, this.update)
+//    //       pion.trigger()
+//    //    }
+//    // }
 
-   triggerOp(op: PropertyKey, entryKey: unknown) {
-      getTrackedOp(this.quark, op, entryKey)?.trigger(this.update)
-   }
+//    triggerOp(op: PropertyKey, entryKey: unknown) {
+//       getTrackedOp(this.quark, op, entryKey)?.trigger(this.update)
+//    }
 
-   triggerAllOps(op: PropertyKey) {
-      const ops = getTrackedOps(this.quark, op)
-      if (ops)
-         for (const [_, op] of ops) {
-            op.trigger(this.update)
-         }
-   }
-}
+//    triggerAllOps(op: PropertyKey) {
+//       const ops = getTrackedOps(this.quark, op)
+//       if (ops)
+//          for (const [_, op] of ops) {
+//             op.trigger(this.update)
+//          }
+//    }
+// }
 
 type OpTransforms = {
    op?: Function, // customized
@@ -193,11 +192,11 @@ export type MutatingOpDef = {
    revert?: Revert,
 } & OpTransforms
 
-export type PropertyDef = {
-   type: typeof MemberType.PROPERTY
-   track?: (this: AtomicIonQuark) => void
-   trigger?: (this: AtomicIonQuark) => void
-}
+// export type PropertyDef = {
+//    type: typeof MemberType.PROPERTY
+//    track?: (this: AtomicIonQuark) => void
+//    trigger?: (this: AtomicIonQuark) => void
+// }
 
 type IonizableMethodDef = TrackableOpDef | MutatingOpDef | { get?: TrackableOpDef, set?: MutatingOpDef } | PropertyDef
 
@@ -205,7 +204,10 @@ export type GetPreopData = (target: AnyObject, args: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
 export type IonizedMethodsDef = {
-   [key: PropertyKey]: IonizableMethodDef
+   '@initEach'(item: any, target: AnyObject, transform: (value: unknown) => unknown, index: number): void
+   '@getHookKey'(key: PropertyKey): PropertyKey
+} & {
+   [key: Exclude<PropertyKey, '@initEach' | '@getHookKey'>]: PropertyDef | MethodDef
 }
 
 // export const triggeringPropertySetOp: MutatingOpDef = {
@@ -227,10 +229,34 @@ export type IonizedMethodsDef = {
 //    }
 // }
 
-const ionizedMethodsMap = new Map()
+interface ConfigurableThis {
+   raw: AnyObject,
+   ionic: AnyObject,
+   config: AnyObject | undefined
+}
+
+export interface TrackableThis extends ConfigurableThis {
+   trackModel(): void,
+   track(op: string, key: unknown): void
+}
+
+export interface TriggerableThis extends ConfigurableThis {
+   triggerModel(): void,
+   trigger(op: string, key: unknown): void
+   triggerAll(op: string): void
+}
+
+export type PropertyDef = {
+   get?(this: TrackableThis): unknown
+   set?(this: TriggerableThis, value: unknown): unknown
+}
+
+export type MethodDef = (this: TrackableThis & TriggerableThis, ...args: any[]) => any
+
+const ionicMethodsMap: Map<Constructor, IonizedMethodsDef> = new Map()
 
 // export function isIonizable(constructor: Constructor) {
-//    return ionizedMethodsMap.has(constructor);
+//    return ionicMethodsMap.has(constructor);
 // }
 
 
@@ -240,23 +266,27 @@ export function getIonizedMemberDef(target: AnyObject, methodKey: PropertyKey) {
    let _target = target;
    while (constructor !== Object) {
       if (Object.hasOwn(target, methodKey)) {
-         return ionizedMethodsMap.get(constructor)?.[methodKey]
+         return ionicMethodsMap.get(constructor)?.[methodKey]
       }
-      const def = ionizedMethodsMap.get(constructor)?.[methodKey]
+      const def = ionicMethodsMap.get(constructor)?.[methodKey]
       if (def) {
          return def;
       }
       _target = Object.getPrototypeOf(_target)
       constructor = _target.constructor as Constructor
    }
-   // return ionizedMethodsMap.get(Object)?.['[[set]]']
+   // return ionicMethodsMap.get(Object)?.['[[set]]']
 }
 
 export function defineIonicStructure(constructor: Constructor, def?: IonizedMethodsDef) {
-   const existingDef = ionizedMethodsMap.get(constructor)
+   const existingDef = ionicMethodsMap.get(constructor)
    if (existingDef && def) debug.warn(`Overriding existing Ionized Methods defintion for ${constructor.name}`)
    if (existingDef) return;
-   if (def) ionizedMethodsMap.set(constructor, def)
+   if (def) ionicMethodsMap.set(constructor, def)
+}
+
+export function getIonicDef(constructor: Constructor) {
+   return ionicMethodsMap.get(constructor)
 }
 
 /**

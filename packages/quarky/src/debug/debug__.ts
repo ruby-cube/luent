@@ -1,5 +1,5 @@
 import { ionize, isAtomic, MutableIon, SYNC, watch } from "@rue/quarky"
-import { AtomicOp } from "../ionic/TrackableOp";
+import { AtomicOp } from "../ionic/TrackedOp";
 import { quarkOf, hasQuark } from "../abstract/Quark";
 import { getTrace } from "../../../flask/debug";
 

@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { isIonicProxy, toRaw, ionize, IonizeBy, ToRaw, } from "./ionize";
-import { IonicProxy, maybeIonize } from "./Ionic";
-import { MutatingOpDef, TrackableOpDef, MemberType, trackModel, defineIonicStructure, Constructor, trackableOp } from "./IonicMethods";
+import { isIonicProxy, toRaw, ionize, IonizeBy, ToRaw, Ionic, } from "./ionize";
+import { EACH, INTERNAL_OP, IonicProxy, isIntegerKey, maybeIonize } from "./Ionic";
+import { MutatingOpDef, TrackableOpDef, trackModel, defineIonicStructure, Constructor, trackableOp } from "./IonicMethods";
 import { track } from "../reactivity/Compound";
 
 
@@ -69,36 +69,6 @@ declare global {
    }
 }
 
-class Frog {
-   name = 'kermit'
-}
-
-class Frogs extends Array<Frog> {
-   length = 9
-}
-
-class Log {
-   location = 'swamp'
-}
-
-class Logs extends Array<Log> {
-   length: number = 1
-}
-
-declare global {
-   interface Ionizables {
-      Array: Array<unknown>
-      Set: Set<unknown>
-   }
-}
-
-declare global {
-   interface Ionizables {
-      LogsA: Logs
-   }
-}
-
-type IsIonizable<T> = T extends Ionizables[keyof Ionizables] ? true : false
 
 
 
@@ -148,239 +118,56 @@ type IsIonizable<T> = T extends Ionizables[keyof Ionizables] ? true : false
 
 
 
-const arrayLengthMutatingOp: Omit<MutatingOpDef, 'type'> = {
-   preop: (target) => ({ target, prevLength: target.length }),
-   // shouldTrigger: ({ target, prevLength }) => target.length !== prevLength, // only for length mutating ops 
-}
+// const arrayLengthMutatingOp: Omit<MutatingOpDef, 'type'> = {
+//    preop: (target) => ({ target, prevLength: target.length }),
+//    // shouldTrigger: ({ target, prevLength }) => target.length !== prevLength, // only for length mutating ops 
+// }
 
-const creativeOp: TrackableOpDef = {
-   type: MemberType.TRACKABLE,
-   output: ionize
-}
+// const creativeOp: TrackableOpDef = {
+//    type: MemberType.TRACKABLE,
+//    output: ionize
+// }
 
-defineIonicStructure(Array,
-   {
-      at: {
-         type: MemberType.TRACKABLE,
-         // track: trackOp,
-         output: maybeIonize
-         at(index){ 
-            return maybeIonize(this.ionic.at(index))
-         }
-      },
-
-      [Symbol.iterator]: trackableOp, // decoy
-
-      // toReversed: creativeOp, // newArray = toReversed()
-      // flat: creativeOp, // newArray = flat(depth?)
-      // toSorted: trackableOp, // newArray = toSorted(compareFn?)
-      // flatMap: creativeOp, // newArray = flatMap(callbackFn, thisArg?)
-      // map: creativeOp, // newArray = map(callbackFn, thisArg?)
-      // filter: creativeOp, // newArray = filter(callbackFn, thisArg?)
-
-      concat: creativeOp, // newArray = concat(arrayB, arrayC, ...)
-      // with: creativeOp, // newArray = arrayInstance.with(index, value)
-
-      // reduce: trackableOp, // result = reduce(callbackFn, initialValue?)
-      // reduceRight: trackableOp, // result = reduceRight(callbackFn, initialValue?)
-
-      // join: trackableOp, // string = join(separator?)
-
-      // forEach: trackableOp,//forEach(callbackFn, thisArg?)
-
-      keys: trackableOp,  // newIterable = keys() // TODO: this does not need to track the entire model, just [[ownKeys]]
-      // entries: trackableOp, // newEntriesIterator = entries()
-      // values: trackableOp, // newIterable = values()
-
-      // toLocaleString: trackableOp, // string = toLocaleString() 
-      // toString: trackableOp, // string = toString()
-
-      // find: trackableOp, // item = find(callbackFn, thisArg?)
-      // findLast: trackableOp, // item = findLast(callbackFn, thisArg?)
-
-      // findIndex: trackableOp, // index = findIndex(callbackFn, thisArg?)
-      // findLastIndex: trackableOp, // index = findLastIndex(callbackFn, thisArg?)
-
-      // every: trackableOp, // boolean = every(callbackFn, thisArg?)
-      // some: trackableOp, // boolean = some(callbackFn, thisArg?)
-
-      // depends on index // TODO: possible performance optimization if we trigger based on indices?
-      // lastIndexOf: indexOp, // index = lastIndexOf(item, fromIndex?) // TODO: atomic op that includes fromIndex
-      // indexOf: indexOp, // index = indexOf(item, fromIndex?)
-      // includes: indexOp, // boolean = includes(item, fromIndex?)
-
-      slice: creativeOp, // newArray = slice(start?, end?) 
-
-      // TODO: test if this functions properly
-      toSpliced: creativeOp,
-      // newArray = toSpliced(start?, delete[Count?, item1, item2, /* …, */ itemN)
-      // {
-      //    type: MemberType.TRACKABLE,
-      //    input: (args) => args.map((item, index) => index < 2 ? item : toRaw(item)),
-      //    // track: trackModel,
-      //    output: maybeIonize,
-      // }, 
-
-      // MUTATING
-      push: {
-         type: MemberType.MUTATING,
-         preop: arrayLengthMutatingOp.preop,
-         // trigger: (model, { prevLength }) => [
-         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
-         //    // model.triggerPion(prevLength.toString()),
-         // ],
-         revert(model, { preopData: { prevLength }, args }) {
-            model.splice(prevLength, args.length)
-         }
-      },
-
-      pop: {
-         type: MemberType.MUTATING,
-         preop: arrayLengthMutatingOp.preop,
-         // shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-         // triggers: () => [],
-         // trigger: (model, { prevLength }) => [
-         //    // model.triggerOp('[[get]]', (prevLength - 1).toString()),
-         //    // model.triggerOp('at', - 1),
-         //    model.triggerOp('[[get]]', 'length'),
-         // ],
-         revert: (model, { output }) => {
-            model.push(output)
-         }
-      },
-
-      unshift: {
-         type: MemberType.MUTATING,
-         preop: arrayLengthMutatingOp.preop,
-         // trigger: (model) => [
-         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
-         // ],
-         revert(model, { args }) {
-            model.splice(0, args.length)
-         }
-      },
-
-      shift: {
-         type: MemberType.MUTATING,
-         preop: arrayLengthMutatingOp.preop,
-         // trigger: (model) => [
-         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
-         // ],
-         revert(model, { output }) {
-            model.unshift(output)
-         }
-      },
-
-      splice: {
-         type: MemberType.MUTATING,
-         // input: ([start, deleteCount, ...args]) => [start, deleteCount, ...deionizeArgs(args)],
-         output: ionize,
-         preop: arrayLengthMutatingOp.preop,
-         // trigger: (model, { prevLength }) => [
-         //    model.triggerOp('[[get]]', 'length') // manually trigger because setting the index will auto set length on current array which makes length trigger fail
-         // ],
-         revert(model, { output, args }) {
-            const start = args[0];
-            const numItems = args.length - 2;
-            model.splice(start, numItems, ...output)
-         },
-         splice(...args) {
-            return ionize(this.ionic.splice(...args))
-         },
-
-         bind(op: string) {
-            let ionicOp;
-            let rawOp;
-            return op.bind({
-               ionic: { get splice() { return ionicOp ?? (ionicOp = fn.bind(proxy)) } },
-               get splice() { return rawOp ?? (rawOp = (...args) => { fn.apply(state.get(), args) }))
-         }
-      })
-         }
-      },
-
-copyWithin: {
-   type: MemberType.MUTATING,
-      preop: fillOrCopyWithinPreop,
-         // triggers: () => [],
-         // triggers: triggerModel,
-         revert: fillOrCopyWithinRevert
-},
-
-fill: {
-   type: MemberType.MUTATING,
-      // input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
-      preop: fillOrCopyWithinPreop,
-         // triggers: triggerModel,
-         // triggers: () => [],
-         revert: fillOrCopyWithinRevert
-},
-
-reverse: {
-   type: MemberType.MUTATING,
-      // triggers: () => [],
-      // triggers: triggerModel,
-      revert(model) {
-      model.reverse()
-   }
-},
-
-sort: {
-   type: MemberType.MUTATING,
-      preop(model) {
-      return model.slice()
+defineIonicStructure(Array, {
+   '@initEach'(item, target, transform, index) {
+      target[index] = transform(item)
    },
-   // triggers: triggerModel,
-   // triggers: () => [],
-   revert(model, { preopData: snapshot }) {
-      for (let i = 0; i < model.length; i++) {
-         model[i] = snapshot[i]
-      }
+
+   '@getHookKey'(key){
+      return isIntegerKey(key) ? EACH : key
+   },
+
+   at(index) {
+      return this.ionic.at(index)
+   },
+
+   [Symbol.iterator]() {
+      this.trackModel()
+      return Ionic(this.raw[Symbol.iterator](), this.config)
+   },
+
+   concat(...args: any[]) {
+      return Ionic(this.ionic.concat(...args), this.config)
+   },
+
+   keys() {
+      this.track(INTERNAL_OP, 'ownKeys')
+      return this.raw.keys()
+   },
+
+   slice(start, end) {
+      return Ionic(this.ionic.slice(start, end), this.config)
+   },
+
+   // TODO: test if this functions properly
+   toSpliced(...args: any[]) {
+      return Ionic(this.ionic.toSpliced(...args), this.config)
+   },
+
+   splice(...args) {
+      return Ionic(this.ionic.splice(...args), this.config)
    }
-},
-length: {
-   type: MemberType.PROPERTY,
-      track() {
-      track(this.modelQuark!)
-   }
-}
-      // '[[set]]': {
-      //    triggers: (model, [key, value]) => [
-      //       trigger(model),
-      //       isIntegerKey(key) ? trigger(model, 'at', key) : trigger(model, '[[get]]', key)
-      //       // TODO: length should trigger observed indices
-
-      //       // afterSet(ionizedModel, quark, key, newValue, oldValue) {
-      //       //    if (isIntegerKey(key)) {
-      //       //       getTrackedOp(ionizedModel, 'at', key)?.trigger()
-      //       //       return;
-      //       //    }
-
-      //       //    if (key !== 'length') {
-      //       //       return;
-      //       //    }
-
-      //       //    const pions = quark.pions
-      //       //    if (!pions) {
-      //       //       return;
-      //       //    }
-
-      //       //    for (const [indexKey] of pions) {
-      //       //       if (!isIntegerKey(indexKey)) continue;
-      //       //       const index = parseInt(<string>indexKey)
-      //       //       if (index >= newValue) {
-      //       //          $atomicPion(ionizedModel, indexKey)?.trigger()
-      //       //          getTrackedOp(ionizedModel, 'at', index)?.trigger()
-      //       //       }
-      //       //       if (index > oldValue) {
-      //       //          getTrackedOp(ionizedModel, 'at', index)?.trigger()
-      //       //       }
-      //       //    }
-      //       // }
-      //    ]
-      // }
-   }
-)
+})
 // function triggerModel(model: IonicProxy) { return [trigger(model)] }
 
 // isEntryKey(model, key) {
@@ -510,12 +297,10 @@ export function isIonizedArray(target: any): target is IonicProxy {
 
 // for .values(), .entries() and .keys() to output ionized objects
 
-defineIonicStructure([].values().constructor as Constructor, {
-   next: {
-      privateState: true,
-      type: MemberType.TRACKABLE,
-      output: maybeIonize,
-      track: trackModel
+defineIonicStructure(Iterator as unknown as Constructor, {
+   next() {
+      this.trackModel()
+      return this.raw.next();
    }
 })
 

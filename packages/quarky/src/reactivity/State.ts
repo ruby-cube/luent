@@ -182,6 +182,12 @@ export class CollectiveState implements PendableState {
       this.mutated = true;
       return fn(this.pending)
    }
+
+   mutateSync(fn: (model: AnyObject) => unknown) {
+      this.mutated = true;
+      return fn(this.pending)
+   }
+
 }
 
 
@@ -209,12 +215,19 @@ export class PrivateState extends CollectiveState {
       return fn(this.pending)
    }
 
+   override mutateSync(fn: (model: AnyObject) => unknown) {
+      this.mutations.push(fn)
+      return fn(this.pending)
+   }
+
    private applyMutations() {
       for (const mutate of this.mutations) {
          mutate(this.current)
       }
       this.mutations = []
    }
+
+
 }
 
 

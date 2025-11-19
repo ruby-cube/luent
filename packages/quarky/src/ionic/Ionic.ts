@@ -1,20 +1,19 @@
 import { AnyObject } from "@rue/types";
 import { InertMark, Ionized, isIonicProxy, isIonKey, toRaw } from "./ionize";
 import { __DEV__asTraceable, emitSignal } from "../debug/debug";
-import { getTrackedOp, getTrackedOps } from "./TrackableOp";
+import { getTrackedOp } from "./TrackedOp";
 import { ModelQuark } from "./IonicModel";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
 import { QUARK, quarkOf } from "../abstract/Quark";
 import { Atom, trigger } from "../reactivity/Atom";
-import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, MemberType, useIonicOp, trackOp } from "./IonicMethods";
+import { getIonizedMemberDef, MutatingOpDef, TrackableOpDef, trackOp } from "./IonicMethods";
 import { inert, isInert } from "./notes/inert";
 import { QuarkyAtomicIon, AtomicIonQuark, createAtomicIon } from "../ion/AtomicIon";
 import { inTrackedScope } from "../reactivity/Compound";
 import { Update } from "../reactivity/Update";
 import { PionState } from "../reactivity/x_LazyState";
-import { CollectiveQuark } from "./IonicCollective";
 
 // export function $atomicPion(
 //    modelQuark: ModelQuark,
@@ -27,7 +26,6 @@ import { CollectiveQuark } from "./IonicCollective";
 
 export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 export type IonicModel = AnyObject & { [QUARK]: ModelQuark }
-export type IonicCollective = AnyObject & { [QUARK]: CollectiveQuark }
 
 // for inert properties use absorbed neutrons
 // const frog = Ionic({
@@ -232,7 +230,7 @@ export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 //    return false;
 // }
 
-const INTERNAL_OP = "[[INTERNAL]]"
+export const INTERNAL_OP = "[[INTERNAL]]"
 const KEY_IN_OP = "[[in]]"
 
 

@@ -1,6 +1,6 @@
 import { toRaw } from "./ionize";
 import { getIonizedModel } from "./Ionic";
-import { defineIonicStructure, MemberType, trackableCreativeOp, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonicMethods";
+import { defineIonicStructure, trackableCreativeOp, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonicMethods";
 
 // declare global {
 //    interface Set<T> {
@@ -66,6 +66,10 @@ const hasOp = useHasOp((target, ionizedKey, rawKey) => {
 
 export function installIonicSet() {
    defineIonicStructure(Set, {
+      '@initEach'(item, target, transform) {
+         target.delete(item)
+         target.add(transform(item))
+      },
       has: {
          type: MemberType.TRACKABLE,
          privateState: true,
@@ -155,8 +159,8 @@ export function installIonicSet() {
          revert(ionizedModel, { preopData: { value } }) {
             ionizedModel.add(value)
          },
-         delete(value: unknown){
-            
+         delete(value: unknown) {
+
          }
       },
       size: {
@@ -164,7 +168,7 @@ export function installIonicSet() {
             type: MemberType.TRACKABLE,
             privateState: true,
             track: trackOp,
-            get(){
+            get() {
                this.track('[[get]]', 'size')
                return this.target.size
             }
