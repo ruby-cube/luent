@@ -4,7 +4,7 @@ import { EACH, IonicProxy, isIntegerKey } from "./Ionic"
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { Traceable } from "../debug/Traceable"
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
-import { AtomicPionQuark, createAtomicPion, InternalPionQuark, PropertyHooks, withTransform } from "./Pion"
+import { AtomicPionQuark, createAtomicPion, InternalPionQuark, PropertyHooks } from "./Pion"
 import { Constructor, getIonicDef, MethodDef, PropertyDef, TrackableThis, TriggerableThis } from "./IonicMethods"
 import { debug, isFunction, isObjectLiteral } from "@rue/utils"
 import { TrackedOps, } from "./TrackedOp"
@@ -43,7 +43,7 @@ export class ModelQuark implements Atom {
 
    constructor(
       public target: AnyObject, //initialData
-      private collective: boolean
+      collective: boolean | 'collection' = false
    ) {
       this.proto = Object.create(target, {
          [QUARK]: { value: { get: () => this, set: nowrite } },
@@ -62,17 +62,18 @@ export class ModelQuark implements Atom {
       this.state = new Collective(target, (target) => ({ ...target }))  // FIX: standin cloner
       this.ops = new TrackedOps(this)
 
-      if (collective) {
-         this.initCollective()
+      if (collective === 'collection') {
+         this.initCollection()
       }
    }
 
-   private initCollective() {
+   private initCollection() {
       const hooks = this.hooks
       if (hooks && EACH in hooks && hooks[EACH]) {
          const each = hooks[EACH]
          if ('as' in each && each.as) {
             this.initEach(each.as)
+            delete each.as
          }
          this.overrideGetPropertyHooks()
       }
@@ -334,7 +335,7 @@ export class ModelQuark implements Atom {
          triggerAll
       }) : _setter;
 
-      const { as: transform, '@get': castGet, '@set': castSet } = this.getPropertyHooks(valueKey) ?? {} as PropertyHooks
+      const { as: transform, '@get': castGet, '@set': castSet } = (this.getPropertyHooks(valueKey) ?? {}) as PropertyHooks
 
       const getWithHook = castGet ? withGetHook(get, castGet) : get;
       const setWithHook = castSet ? withSetHook<boolean>(set, castSet, () => this.state.get()[valueKey]) : set;
