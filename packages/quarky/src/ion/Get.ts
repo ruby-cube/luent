@@ -1,7 +1,6 @@
 import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
-import { maybeIonize } from "../ionic/Ionic";
 
 
 

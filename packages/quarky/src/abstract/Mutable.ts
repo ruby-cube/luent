@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonicProxy } from "../ionic/ionize";
+import { isIonicProxy } from "../ionic/x_ionize";
 import { hasQuark, QUARK, quarkOf } from "./Quark";
 import { AbortSignal } from "../../../flask/AbortSignal";
 import { IterableSet } from "@rue/utils";

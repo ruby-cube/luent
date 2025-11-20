@@ -1,8 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { isIonicProxy, toRaw, ionize, IonizeBy, ToRaw, Ionic, } from "./ionize";
-import { EACH, INTERNAL_OP, IonicProxy, isIntegerKey, maybeIonize } from "./Ionic";
-import { MutatingOpDef, TrackableOpDef, trackModel, defineIonicStructure, Constructor, trackableOp } from "./IonicMethods";
-import { track } from "../reactivity/Compound";
+import { isIonicProxy, toRaw, ionize, IonizeBy, ToRaw, Ionic, } from "./x_ionize";
+import { EACH, INTERNAL_OP, IonicProxy, isIntegerKey } from "./Ionic";
+import { defineIonicCollective, Constructor, defineIonicCollection, IonicDef } from "./IonicDef";
 
 
 declare global {
@@ -128,22 +127,24 @@ declare global {
 //    output: ionize
 // }
 
-defineIonicStructure(Array, {
+
+
+defineIonicCollection(Array, {
    '@initEach'(item, target, transform, index) {
       target[index] = transform(item)
    },
-
-   '@getHookKey'(key){
+   
+   '@getHookKey'(key) {
       return isIntegerKey(key) ? EACH : key
+   }
+}, {
+   [Symbol.iterator]() {
+      this.trackModel()
+      return Ionic(this.raw[Symbol.iterator]())
    },
 
    at(index) {
       return this.ionic.at(index)
-   },
-
-   [Symbol.iterator]() {
-      this.trackModel()
-      return Ionic(this.raw[Symbol.iterator](), this.config)
    },
 
    concat(...args: any[]) {
@@ -151,157 +152,27 @@ defineIonicStructure(Array, {
    },
 
    keys() {
-      this.track(INTERNAL_OP, 'ownKeys')
+      this.track(INTERNAL_OP, 'ownKeys') // QUESTION: is this correct?
       return this.raw.keys()
    },
 
-   slice(start, end) {
+   slice(start?, end?) {
       return Ionic(this.ionic.slice(start, end), this.config)
    },
 
    // TODO: test if this functions properly
-   toSpliced(...args: any[]) {
-      return Ionic(this.ionic.toSpliced(...args), this.config)
+   toSpliced(start, deleteCount, ...args) {
+      return Ionic(this.ionic.toSpliced(start, deleteCount, ...args), this.config)
    },
 
    splice(...args) {
       return Ionic(this.ionic.splice(...args), this.config)
-   }
+   },
+
 })
-// function triggerModel(model: IonicProxy) { return [trigger(model)] }
-
-// isEntryKey(model, key) {
-//    return !!(model instanceof Array && isIntegerKey(key))
-// },
-
-// function useMutatingArrayOpFactory(
-//    opName: string,
-//    deionizeArgs?: (args: any[]) => any[]
-// ) {
-//    return function createOp(target: AnyObject, ionizedModel: IonicProxy, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
-//       const fn = target[opName]
-//       return useMutatingArrayOp(
-//          ionizedModel,
-//          quark,
-//          <any[]>target,
-//          opName,
-//          fn,
-//          getPreopData,
-//          deionizeArgs
-//       )
-//    }
-// }
-
-
-
-// function useMutatingArrayOp(
-//    model: IonicProxy,
-//    modelQuark: ModelQuark,
-//    target: any[],
-//    key: string,
-//    fn: Function,
-//    getPreopData?: ((target: any[], args: any[]) => any),
-//    deionizeArgs?: (args: any[]) => any[]
-// ) {
-
-//    return (...args: any[]) => {
-//       const preopData = getPreopData ? getPreopData(target, args) : undefined
-//       const _args = deionizeArgs ? deionizeArgs(args) : args
-//       const prevLength = target.length;
-
-//       const output = fn.apply(target, _args); // perform mutation
-
-//       const newLength = target.length;
-
-//       if (key in lengthMutatingOps && prevLength === newLength) return output;
-
-//       storeSnapshot(modelQuark)
-
-//       recordMutation(modelQuark, new Mutation(
-//          model,
-//          key,
-//          _args,
-//          output,
-//          preopData
-//       ))
-
-//       modelQuark.trigger()
-
-//       $atomicPion(model, 'length')?.trigger()
-
-//       //FIX: These need to be different depending on the op
-//       triggerObservedIndices(model, modelQuark.pions, prevLength, newLength)
-
-//       runSyncEffects()
-
-//       return output;
-//    }
-// }
-
-// function createPopMethod(target: AnyObject, ionizedModel: IonicProxy, quark: ModelQuark, getPreopData: GetPreopData | undefined) {
-//    const performOp = useMutatingArrayOp(
-//       ionizedModel,
-//       quark,
-//       <any[]>target,
-//       'pop',
-//       target.pop,
-//       getPreopData,
-//       deionizeArgs
-//    )
-
-//    return () => {
-//       const prevLength = target.length;
-//       const output = performOp()
-//       $atomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
-//       getTrackedOp(ionizedModel, 'at', - 1)?.trigger()
-//       return output;
-//    }
-// }
-
-
-function fillOrCopyWithinPreop(model: AnyObject, args: any[] | undefined) {
-   const start = args![1] ?? 0
-   const end = args![2]
-   return model.slice(start, end)
-}
-
-function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
-   const { preopData: slice, args } = data
-
-   let index = args![1] ?? 0;
-   for (let i = 0; i < slice.length; i++) {
-      model[index] = slice[i];
-      index++;
-   }
-}
-
-// function deionizeArgs(args: any[]) {
-//    const _args = []
-//    for (const arg of args) {
-//       _args.push(toRaw(arg))
-//    }
-//    return _args;
-// }
-
-
-
-
-
-
 
 export function isIonizedArray(target: any): target is IonicProxy {
    if (!isIonicProxy(target)) return false;
    if (toRaw(target) instanceof Array) return true;
    return false;
 }
-
-// for .values(), .entries() and .keys() to output ionized objects
-
-defineIonicStructure(Iterator as unknown as Constructor, {
-   next() {
-      this.trackModel()
-      return this.raw.next();
-   }
-})
-
-

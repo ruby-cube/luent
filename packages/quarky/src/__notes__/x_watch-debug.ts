@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonicProxy, Ionized } from "../ionic/ionize";
+import { isIonicProxy, Ionized } from "../ionic/x_ionize";
 
 
 

@@ -79,7 +79,7 @@ export class AtomicPionQuark extends AtomicIonQuark {
       public modelQuark: ModelQuark,
       hooks: PropertyHooks | undefined
    ) {
-      super(new PionState(target[key], (value) => { target[key] = value }), hooks)
+      super(new PionState(target[key], (value) => { target[key] = value }), hooks, modelQuark.__DEV__asTraceable)
    }
 }
 
@@ -91,7 +91,7 @@ export class CollectivePionQuark extends AtomicIonQuark {
       hooks: PropertyHooks | undefined
    ) {
       const collectiveState = modelQuark.state
-      super(new PionState(target[key], (value) => { collectiveState.mutate(target => target[key] = value) }), hooks)
+      super(new PionState(target[key], (value) => { collectiveState.mutate(target => target[key] = value) }), hooks, modelQuark.__DEV__asTraceable)
    }
 }
 

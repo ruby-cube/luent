@@ -1,11 +1,9 @@
-import { debug, isFunction } from "@rue/utils";
+import { isFunction } from "@rue/utils";
 import { Inert } from "./Get";
-import { AtomicIonQuark, createAtomicIon, IONIZED } from "./AtomicIon";
-import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
-import { Ionized, IsIonized } from "../ionic/ionize";
-import { initializeSnapshots } from "../ionic/TimeTraveler";
-import { hasQuark, QUARK } from "../abstract/Quark";
-import { IonizeOptions, maybeIonize } from "../ionic/Ionic";
+import { AtomicIonQuark, createAtomicIon } from "./AtomicIon";
+import { AnyObject } from "@rue/types";
+import { initializeSnapshots } from "../ionic/x_TimeTraveler";
+import { QUARK } from "../abstract/Quark";
 import { isGetter } from "../reactivity/Substance";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { SimpleState } from "../reactivity/State";
@@ -135,7 +133,7 @@ export function Ion<
    T,
    M
 >(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { value: T }>): AsIon<T, M> {
-   return asIon(initialState, false, undefined, props) as AsIon<T, M>
+   return asIon(initialState, props) as AsIon<T, M>
 }
 
 // export const makeIon = ion
@@ -178,8 +176,6 @@ export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, pr
 
 function asIon(
    initialState: unknown | (() => unknown),
-   ionized: boolean,
-   options?: IonizeOptions,
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {

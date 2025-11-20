@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { IsIonized, isIonicProxy, withInertItems } from "../ionize";
+import { IsIonized, isIonicProxy, withInertItems } from "../x_ionize";
 import { isFunction } from "@rue/utils";
 import { InertCollectionType } from "../IonicModel";
 import { getIonizedModel } from "../Ionic";

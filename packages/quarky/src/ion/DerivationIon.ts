@@ -1,12 +1,12 @@
 import { Effect } from "../reactivity/EffectQueue";
-import { FunctionalSubstance, IonSubstance } from "../reactivity/Substance";
+import { FunctionalSubstance } from "../reactivity/Substance";
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
 import { SYNC } from "../reactivity/RenderCycle";
-import { $activeUpdate, getActiveUpdate, instantUpdate, Update } from "../reactivity/Update";
+import { $activeUpdate } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
-import { PendableState, queueCommit, SimpleState } from "../reactivity/State";
+import { queueCommit, SimpleState } from "../reactivity/State";
 
 
 class DerivationIonQuark {
@@ -66,7 +66,7 @@ export function createMemoizedDerivation(
       if (isStale.get()) {
          return trackCall()
       }
-      return state.get(); 
+      return state.get();
       // FIX: state is inaccurate when mouse starts hovering and updates are queued/cancelled, 
       // b/c resetting this.pending with this.current is not accurate anymore
    }

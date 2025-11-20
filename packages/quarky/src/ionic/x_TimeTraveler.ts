@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isFunction } from "@rue/utils";
 import { isIon } from "../ion/Ion";
-import { ionize, isIonKey, toRaw } from "./ionize";
+import { ionize, isIonKey, toRaw } from "./x_ionize";
 import { getIonizedModel } from "./Ionic";
 
 //NOTE: Temporarily pause development of this until usefulness is confirmed

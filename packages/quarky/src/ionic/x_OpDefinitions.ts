@@ -1,9 +1,6 @@
 import { AnyObject } from "@rue/types"
-import { ionize, toRaw } from "./ionize"
-import { getIonizedModel, IonicProxy, maybeIonize } from "./Ionic"
-import { quarkOf } from "../abstract/Quark"
-import { track } from "../reactivity/Compound"
-import { isObject } from "@rue/utils"
+import { ionize, toRaw } from "./x_ionize"
+
 
 
 

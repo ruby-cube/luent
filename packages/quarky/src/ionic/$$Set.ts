@@ -1,7 +1,8 @@
-import { toRaw } from "./ionize";
+import { Ionic, toRaw } from "./x_ionize";
 import { getIonizedModel } from "./Ionic";
-import { defineIonicStructure, trackableCreativeOp, trackableOp, trackOp, useDeleteOp, useHasOp } from "./IonicMethods";
+import { defineIonicCollection, IonicDef } from "./IonicDef";
 
+// TODO: type ionic set
 // declare global {
 //    interface Set<T> {
 //       '~$methods'?: {
@@ -23,388 +24,144 @@ import { defineIonicStructure, trackableCreativeOp, trackableOp, trackOp, useDel
 //    }
 // }
 
-// const trackableCollectionOps = {
-//    keys: true,  // newIterable = keys()
-//    entries: true, // newEntriesIterator = entries()
-//    values: true, // newIterable = values()
-// }
 
-// export const trackableIterableOps = {
-//    forEach: true,
-//    'Symbol.iterator': true
-// }
-
-
-
-
-// const trackableSetOps = {
-//    has: true, // boolean = has(item) //NOTE: trackable ops
-
-//    // add: true,
-//    // delete: true,
-//    // clear: true,
-//    // forEach: true,
-//    // size: true,
-//    // entries: true, // newEntriesIterator = entries()
-//    // keys: true, // newIterable = keys()
-//    // values: true, // newIterable = values()
-
-//    difference: true, // newSet = difference(otherSet) 
-//    union: true,
-//    intersection: true,
-//    symmetricDifference: true,
-
-//    isSubsetOf: true, // boolean = isSubsetOf(otherSet)
-//    isSupersetOf: true, // boolean = isSupersetOf(otherSet)
-//    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
-// }
-
-const hasOp = useHasOp((target, ionizedKey, rawKey) => {
-   target.delete(ionizedKey)
-   target.add(rawKey)
-})
 
 export function installIonicSet() {
-   defineIonicStructure(Set, {
+   defineIonicCollection(Set, {
       '@initEach'(item, target, transform) {
          target.delete(item)
          target.add(transform(item))
-      },
-      has: {
-         type: MemberType.TRACKABLE,
-         privateState: true,
-         input: ([key]) => [toRaw(key)],
-         op: hasOp,
-         track: trackOp,
-      },
-      [Symbol.iterator]: trackableOp,
-      forEach: trackableOp,
-      keys: trackableOp,
-      values: trackableOp,
-      entries: trackableOp,
-      difference: trackableCreativeOp, // newSet = difference(otherSet) 
-      union: trackableCreativeOp,
-      intersection: trackableCreativeOp,
-      symmetricDifference: trackableCreativeOp,
-
-      isSubsetOf: trackableOp, // boolean = isSubsetOf(otherSet)
-      isSupersetOf: trackableOp, // boolean = isSupersetOf(otherSet)
-      isDisjointFrom: trackableOp, // boolean = isDisjointFrom(otherSet)
-
-      // mutating
-      add: {
-         type: MemberType.MUTATING,
-         privateState: true,
-         op: function add(this: Set<unknown>, value: unknown) {
-            const ionizedKey = getIonizedModel(value);
-            if (ionizedKey) this.delete(ionizedKey);
-            return this.add(value)
-         },
-         input: ([value]) => [toRaw(value)],
-         preop: (target, [value]) => ({ prevSize: target.size, target, value }),
-         trigger: (model, { prevSize, target, value }) => {
-            if (prevSize === target.size) return;
-            model.trigger();
-            model.triggerOp('[[get]]', 'size');
-            model.triggerOp('has', value)
-         },
-         revert(model, { preopData: { value } }) {
-            model.delete(value)
-         }
-      },
-      clear: {
-         type: MemberType.MUTATING,
-         privateState: true,
-         preop(target) {
-            return { entries: Array.from(<Set<any>>target), prevSize: target.size, target }
-         },
-
-         op(triggerEffects) {
-            return function clear(this: Set<unknown>) {
-               const prevSize = this.size
-               const output = this.clear()
-               if (prevSize !== this.size) triggerEffects()
-               return output;
-            }
-         },
-
-         trigger: (model, { prevSize, target }) => {
-            if (prevSize === target.size) return;
-            model.triggerAllOps('has');
-            model.triggerOp('[[get]]', 'size');
-            model.trigger()
-         },
-
-         revert(model, { preopData: { entries } }) {
-            for (const value of entries) {
-               model.add(value) //QUESTION: not sure if this should be the raw target or the ionic model
-            }
-         }
-      },
-      delete: {
-         type: MemberType.MUTATING,
-         privateState: true,
-         input: ([value]) => [toRaw(value)],
-         op: useDeleteOp(hasOp),
-         preop: (target, [value]) => ({
-            target,
-            value,
-            prevSize: target.size
-         }),
-         trigger: (model, { prevSize, target, value }) => {
-            if (prevSize === target.size) return;
-            this.trigger('has', value)
-            this.trigger('[[get]]', 'size')
-         },
-         revert(ionizedModel, { preopData: { value } }) {
-            ionizedModel.add(value)
-         },
-         delete(value: unknown) {
-
-         }
-      },
-      size: {
-         get: {
-            type: MemberType.TRACKABLE,
-            privateState: true,
-            track: trackOp,
-            get() {
-               this.track('[[get]]', 'size')
-               return this.target.size
-            }
-         }
       }
-      // }
+   }, {
+      [Symbol.iterator]() {
+         this.trackModel()
+         return Ionic(this.raw[Symbol.iterator]())
+      },
+      forEach: SetlikeDef.forEach,
+      keys: SetlikeDef.keys,
+      values: SetlikeDef.values,
+      entries: SetlikeDef.entries,
+
+      difference(other) {
+         this.trackModel()
+         return Ionic(this.raw.difference(other))
+      }, // newSet = difference(otherSet) 
+
+      union(other) {
+         this.trackModel()
+         return Ionic(this.raw.union(other))
+      },
+      intersection(other) {
+         this.trackModel()
+         return Ionic(this.raw.intersection(other))
+      },
+      symmetricDifference(other) {
+         this.trackModel()
+         return Ionic(this.raw.symmetricDifference(other))
+      },
+
+      isSubsetOf(other) {
+         this.trackModel()
+         return this.raw.isSubsetOf(other)
+      }, // boolean = isSubsetOf(otherSet)
+
+      isSupersetOf(other) {
+         this.trackModel()
+         return this.raw.isSubsetOf(other)
+      }, // boolean = isSupersetOf(otherSet)
+
+      isDisjointFrom(other) {
+         this.trackModel()
+         return this.raw.isDisjointFrom(other)
+      }, // boolean = isDisjointFrom(otherSet)
+
+      add(value) {
+         if (this.raw.has(value)) return asIonic(this.raw);
+         const set = this.raw.add(value)
+         this.trigger('has', value)
+         this.trigger('[[get]]', 'size')
+         this.triggerModel()
+         return asIonic(set)
+      },
+
+      has: SetlikeDef.has,
+
+      clear: SetlikeDef.clear,
+
+      delete: SetlikeDef.delete,
+
+      size: SetlikeDef.size
    })
 }
 
+interface Setlike<T> {
+  forEach(
+    callback: (value: T, value2: T, set: Setlike<T>) => void,
+    thisArg?: any
+  ): void;
+
+  keys(): IterableIterator<T>;
+  values(): IterableIterator<T>;
+  entries(): IterableIterator<[T, T]>;
+
+  has(value: T): boolean;
+  delete(value: T): boolean;
+  clear(): void;
+
+  readonly size: number;
+}
+
+// type Setlike = Pick<Set<unknown> | Map<unknown, unknown>, 'forEach' | 'keys' | 'values' | 'entries' | 'has' | 'delete' | 'clear' | 'size'>
 
 
+export const SetlikeDef: IonicDef<Setlike<unknown>> = {
+   forEach(cb) {
+      this.trackModel()
+      return this.raw.forEach(cb)
+   },
 
-// export function createIonicSet(
-//     target: Set<any>,
-//     methods: AnyObject | undefined
-// ) {
-//     const modelQuark = new MetaIonicCollection(target, methods)
+   keys() {
+      this.trackModel()
+      return Ionic(this.raw.keys())
+   },
 
-//     const ionizedModel = new Proxy(target, {
-//         get(target, key, receiver) {
-//             if (__DEV__) emitSignal()
-//             if (key === QUARK) return modelQuark
-//             const reinedMeta = getReinedMeta(target, ionizedModel, receiver)
-//             if (reinedMeta) {
-//                 const keys = reinedMeta.propertyKeys
-//                 if (keys && !(key in keys)) {
-//                     if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
-//                     return undefined;
-//                 }
-//             }
-//             if (methods && key in methods) {
-//                 return accessMethod(
-//                     target,
-//                     ionizedModel,
-//                     receiver,
-//                     key,
-//                     boundMethodMap,
-//                     methods[key]
-//                 )
-//             }
+   values() {
+      this.trackModel()
+      return Ionic(this.raw.values())
+   },
 
-//             if (key in mutatingSetOps) {
-//                 if (reinedMeta) {
-//                     const keys = reinedMeta.propertyKeys
-//                     if (keys && key in keys) {
-//                         return accessMethod(
-//                             target,
-//                             ionizedModel,
-//                             receiver,
-//                             key,
-//                             boundMethodMap
-//                         )
-//                     }
-//                     return undefined;
-//                 }
-//             }
+   entries() {
+      this.trackModel()
+      return Ionic(this.raw.entries())
+   },
 
-//             const value = Reflect.get(target, key, receiver)
+   has(key) {
+      this.track('has', key)
+      return this.raw.has(key)
+   },
 
-//             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
-//                 return value;
-//             }
+   clear() {
+      if (this.raw.size === 0) return;
+      this.raw.clear()
+      this.triggerAll('has')
+      this.trigger('[[get]]', 'size')
+      this.triggerModel()
+   },
 
-//             if (isNonTrackable(key, Set))
-//                 return value;
+   delete(key) {
+      const success = this.raw.delete(key)
+      if (success) {
+         this.triggerModel()
+         this.trigger('has', key)
+         this.trigger('[[get]]', 'size')
+      }
+      return success;
+   },
 
-//             if (isIon(value))
-//                 return value();
-
-//             if (isFunction(value)) {
-//                 return accessMethod(
-//                     target,
-//                     ionizedModel,
-//                     receiver,
-//                     key,
-//                     boundMethodMap,
-//                     value
-//                 )
-//             }
-//             const _value = maybeIonize(value, target, ionizedModel, receiver)
-//             const tracker = getActiveTracker()
-//             if (!tracker)
-//                 return _value;
-//             tracker.track(asPionQuark(ionizedModel, key))
-//             return _value;
-//         },
-//         set(target, key, value, receiver) {
-//             return reactiveSetter(
-//                 Set,
-//                 ionizedModel,
-//                 modelQuark,
-//                 target,
-//                 key,
-//                 value,
-//                 receiver
-//             )
-//         }
-//     }) as IonizedModel<Set<any>>
-
-// const boundMethodMap: Map<string | symbol, Function> = new Map([
-//     ['has', useTrackableGetOp(
-//         ionizedModel,
-//         target,
-//         'has',
-//         target.has
-//     )],
-//     ['add', addOp],
-//     ['clear', useClearOp(
-//         ionizedModel,
-//         modelQuark,
-//         target
-//     )],
-//     ['delete', useDeleteOp(
-//         ionizedModel,
-//         modelQuark,
-//         target
-//     )]
-// ])
-
-//     function addOp(newValue: any) {
-//         const oldSize = target.size
-//         const _newValue = toRaw(newValue)
-//         const preopData = getPreopData(target, [_newValue])
-//         const output = target.add(_newValue); //perform op
-//         const newSize = target.size
-
-
-//         if (oldSize === newSize) return;
-//         storeSnapshot(modelQuark)
-
-//         const sizeProp = getObservedPion(ionizedModel, 'size')
-//         if (sizeProp)
-//             trigger(sizeProp, newSize, oldSize);
-
-//         const hasOp = getTrackedOp(ionizedModel, 'has', _newValue)
-//         if (hasOp) triggerIonicAtom(hasOp);
-
-//         triggerIonizedModel(
-//             ionizedModel,
-//             'add',
-//             [_newValue],
-//             output,
-//             preopData
-//         )
-
-//         return output;
-//     }
-
-//     modelQuark.initIonizedModel(ionizedModel)
-//     registerIonizedModel(ionizedModel, target)
-//     return ionizedModel
-// }
-
-
-
-
-// export function useDeleteOp(
-//    ionizedModel: IonizedModel,
-//    modelQuark: ModelQuark,
-//    target: AnyObject,
-//    getPreopData: GetPreopData
-// ) {
-//    return function deleteOp(_key: any) {
-//       const key = toRaw(_key)
-//       const oldSize = target.size
-//       const preopData = getPreopData(target, [key])
-//       const output = target.delete(key); //perform op
-//       const newSize = target.size
-//       if (oldSize === newSize) return;
-
-//       storeSnapshot(modelQuark)
-
-//       recordMutation(modelQuark, new Mutation(
-//          ionizedModel,
-//          'delete',
-//          [key],
-//          output,
-//          preopData
-//       ))
-
-//       modelQuark.trigger()
-
-//       $atomicPion(ionizedModel, 'size')?.trigger()
-//       getTrackedOp(ionizedModel, 'has', key)?.trigger()
-
-//       runSyncEffects()
-
-//       return output;
-//    }
-// }
-
-
-
-
-
-// export function useClearOp(
-//    ionizedModel: IonizedModel,
-//    modelQuark: ModelQuark,
-//    target: AnyObject,
-//    getPreopData: GetPreopData
-// ) {
-//    return function clearOp() {
-//       const preopData = getPreopData(target)
-//       const oldSize = target.size
-//       const output = target.clear(); //perform op
-//       const newSize = target.size
-
-//       if (oldSize === newSize) return;
-
-//       storeSnapshot(modelQuark)
-
-//       recordMutation(modelQuark, new Mutation(
-//          ionizedModel,
-//          'clear',
-//          [],
-//          output,
-//          preopData
-//       ))
-
-//       // custom triggers
-//       modelQuark.trigger()
-
-//       const hasOps = getTrackedOps(ionizedModel, 'has')
-//       if (hasOps) {
-//          for (const [_, atomicOp] of hasOps) {
-//             atomicOp.trigger()
-//          }
-//       }
-
-//       $atomicPion(ionizedModel, 'size')?.trigger()
-
-
-//       runSyncEffects()
-
-//       return output;
-//    }
-// }
-
-
+   size: {
+      get() {
+         this.track('[[get]]', 'size')
+         return this.raw.size
+      }
+   }
+}

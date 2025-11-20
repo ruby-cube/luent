@@ -1,5 +1,5 @@
 import { isEqual } from "@rue/utils";
-import { Ionized, toRaw } from "../ionic/ionize";
+import { Ionized, toRaw } from "../ionic/x_ionize";
 import { isIonicObject } from "../ionic/$$Object";
 import { AnyObject } from "@rue/types";
 

@@ -52,7 +52,7 @@ const useCounter = asShared(Counter, { class: true })
 const useIonizedCounter = asShared(IonizedCounter) 
 
 
-defineIonicStructure(AnimationController, {
+defineIonicCollective(AnimationController, {
    getSomething: {
       input: i => raw(i),
       output: o => ionize(o),

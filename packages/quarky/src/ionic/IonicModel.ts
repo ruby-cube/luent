@@ -4,12 +4,12 @@ import { EACH, IonicProxy, isIntegerKey } from "./Ionic"
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { Traceable } from "../debug/Traceable"
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
-import { AtomicPionQuark, createAtomicPion, InternalPionQuark, PropertyHooks } from "./Pion"
-import { Constructor, getIonicDef, MethodDef, PropertyDef, TrackableThis, TriggerableThis } from "./IonicMethods"
+import { AtomicPionQuark, createAtomicPion, InternalPionQuark, PropertyHooks, withTransform } from "./Pion"
+import { Constructor, getIonicDef, MethodDef, PropertyDef, TrackableThis, TriggerableThis } from "./IonicDef"
 import { debug, isFunction, isObjectLiteral } from "@rue/utils"
 import { TrackedOps, } from "./TrackedOp"
 import { track } from "../reactivity/Compound"
-import { isIonKey } from "./ionize"
+import { isIonKey } from "./x_ionize"
 import { CollectiveState, PrivateState } from "../reactivity/State"
 import { $activeUpdate, instantUpdate, swiftUpdate, Update } from "../reactivity/Update"
 import { withGetHook, withSetHook } from "../ion/AtomicIon"
@@ -88,7 +88,7 @@ export class ModelQuark implements Atom {
                const hooks = this.hooks
                if (!hooks) return undefined
                const maybeHooks = hooks[key]
-               return maybeHooks ?? hooks[getHookKey(key)]
+               return (maybeHooks ?? hooks[getHookKey(key)]) as PropertyHooks | undefined
             }
          }
          obj = Object.getPrototypeOf(obj)
@@ -96,8 +96,8 @@ export class ModelQuark implements Atom {
    }
 
 
-   private getPropertyHooks(key: PropertyKey) {
-      return this.hooks?.[key]
+   private getPropertyHooks(key: PropertyKey): PropertyHooks | undefined {
+      return this.hooks?.[key] as PropertyHooks
    }
 
    private initEach(transform: (value: unknown) => unknown) {
@@ -134,7 +134,7 @@ export class ModelQuark implements Atom {
       [this.$isExtensible, this.setIsExtensible] = createAtomicPion<boolean>(new InternalPionQuark(Object.isExtensible(target), this, (value) => {
          if (value === true) throw new Error('invalid set')
          Reflect.preventExtensions(target)
-      }, this.hooks), undefined, true)
+      }, undefined), undefined, true)
    }
 
 

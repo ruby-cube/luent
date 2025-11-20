@@ -1,5 +1,5 @@
 import { isFunction } from "@rue/utils";
-import { isIonicProxy, toRaw } from "./ionize";
+import { isIonicProxy, toRaw } from "./x_ionize";
 import { IonicProxy } from "./Ionic";
 
 // export const runningIonicObject = true;
