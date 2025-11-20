@@ -1,6 +1,6 @@
 import { isFunction } from "@rue/utils";
-import { isIonicProxy, toRaw } from "./x_ionize";
 import { IonicProxy } from "./Ionic";
+import { isIonicProxy, toRaw } from "./ModelQuark";
 
 // export const runningIonicObject = true;
 

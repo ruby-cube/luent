@@ -1,30 +1,22 @@
 import { AnyObject } from "@rue/types"
 import { debug, isObject } from "@rue/utils"
-import { getIonizedModel, IonicProxy, ProxyKey } from "./Ionic"
-import { quarkOf } from "../abstract/Quark"
-import { Update } from "../reactivity/Update"
-import { ModelQuark } from "./IonicModel"
-import { ionize } from "./x_ionize"
-import { inTrackedScope, track } from "../reactivity/Compound"
-import { AtomicIonQuark } from "../ion/AtomicIon"
-import { trigger } from "../reactivity/Atom"
-import { CollectiveQuark } from "./x_IonicCollective"
+import { ProxyKey } from "./ModelQuark"
 
 export type Constructor = new (...args: any[]) => any
 
 
 type CollectiveHooks = {
    '@initEach'?(item: any, target: AnyObject, transform: (value: unknown) => unknown, index: number): void
-   '@getHookKey'?(key: PropertyKey): PropertyKey
+   '@getHookKey'?(key: ProxyKey): ProxyKey
 }
 
 export type IonicDef<T = any> = {
    [K in Exclude<keyof T, number>]?: T[K] extends (...args: any[]) => any ? MethodDef<T, T[K]> : PropertyDef
 }
 
-interface CustomThis<T = AnyObject, P = any> {
+export interface CustomThis<T = AnyObject, P = any> {
    raw: T,
-   ionic: { [key: PropertyKey]: P },
+   ionic: { [key: ProxyKey]: P },
    config: AnyObject | undefined
 }
 

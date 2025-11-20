@@ -1,70 +1,69 @@
-import { AnyObject } from "@rue/types";
-import { isIonicProxy, toRaw, ionize, IonizeBy, ToRaw, Ionic, } from "./x_ionize";
-import { EACH, INTERNAL_OP, IonicProxy, isIntegerKey } from "./Ionic";
-import { defineIonicCollective, Constructor, defineIonicCollection, IonicDef } from "./IonicDef";
-
+import { EACH, INTERNAL_OP, Ionic, IonicProxy } from "./Ionic";
+import { defineIonicCollection } from "./IonicDef";
+import { isIonicProxy, ProxyKey, toRaw } from "./ModelQuark";
+import { IonizeBy, ToRaw } from "./x_ionize";
 
 declare global {
    interface Array<T> {
-      values<H>(this: H): ArrayIterator<IonizeBy<H, T>>;
-      entries<H>(this: H): ArrayIterator<IonizeBy<H, T>>;
+      values<H>(this: H): ArrayIterator<T>;
+      entries<H>(this: H): ArrayIterator<T>;
 
-      at<H>(this: H, index: number): IonizeBy<H, T> | undefined;
-      concat<H>(this: H, ...items: (IonizeBy<H, T> | IonizeBy<H, T>[])[]): IonizeBy<H, ToRaw<T>[]>;
-      slice<H>(this: H, start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
+      at<H>(this: H, index: number): T | undefined;
+      concat<H>(this: H, ...items: (T | T[])[]): IonizeBy<H, T[]>;
+      slice<H>(this: H, start?: number, end?: number): IonizeBy<H, T[]>;
 
       // // Mutator methods
-      copyWithin<H>(this: H, target: number, start: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
-      fill<H>(this: H, value: IonizeBy<H, T>, start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
-      pop<H>(this: H): IonizeBy<H, T> | undefined;
-      push<H>(this: H, ...items: IonizeBy<H, T>[]): number;
-      reverse<H>(this: H): IonizeBy<H, ToRaw<T>[]>;
-      shift<H>(this: H): IonizeBy<H, T> | undefined;
-      sort<H>(this: H, compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, ToRaw<T>[]>;
-      splice<H>(this: H, start: number, deleteCount?: number, ...items: IonizeBy<H, T>[]): IonizeBy<H, ToRaw<T>[]>;
+      pop<H>(this: H): T | undefined;
+      push<H>(this: H, ...items: T[]): number;
+      shift<H>(this: H): T | undefined;
+      copyWithin<H>(this: H, target: number, start: number, end?: number): IonizeBy<H, T[]>;
+      fill<H>(this: H, value: IonizeBy<H, T>, start?: number, end?: number): IonizeBy<H, T[]>;
+      reverse<H>(this: H): IonizeBy<H, T[]>;
+      sort<H>(this: H, compareFn?: (a: T, b: T) => number): IonizeBy<H, T[]>;
+      splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): IonizeBy<H, T[]>;
 
       forEach<H, O>(
          this: H,
-         callback: (this: O, value: IonizeBy<H, T>, index: number, array: H) => void,
+         callback: (this: O, value: T, index: number, array: H) => void,
          thisArg?: O
       ): void;
-      map<U, H, O>(
-         this: H,
-         callback: (this: O, value: IonizeBy<H, T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
-         thisArg?: O
-      ): IonizeBy<H, U>[];
-      filter<H, O>(
-         this: H,
-         predicate: (this: H, value: IonizeBy<H, T>, index: number, array: H) => boolean,
-         thisArg?: O
-      ): IonizeBy<H, T>[];
       find<H, O>(
          this: H,
-         predicate: (this: O, value: IonizeBy<H, T>, index: number, array: H) => boolean,
+         predicate: (this: O, value: T, index: number, array: H) => boolean,
          thisArg?: O
-      ): IonizeBy<H, T> | undefined;
+      ): T | undefined;
+      map<U, H, O>(
+         this: H,
+         callback: (this: O, value: T, index: number, array: H) => U, //QUESTION: should the array be ionized?
+         thisArg?: O
+      ): IonizeBy<H, U[]>;
+      filter<H, O>(
+         this: H,
+         predicate: (this: H, value: T, index: number, array: H) => boolean,
+         thisArg?: O
+      ): IonizeBy<H, T[]>;
 
       reduce<U, H>(
          this: H,
-         callback: (accumulator: U, currentValue: IonizeBy<H, T>, index: number, array: H) => U,
-         initialValue: IonizeBy<H, U>
-      ): IonizeBy<H, U>;
+         callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
+         initialValue: U
+      ): U;
       reduceRight<U, H>(
          this: H,
-         callback: (accumulator: U, currentValue: IonizeBy<H, T>, index: number, array: H) => U,
-         initialValue: IonizeBy<H, U>
-      ): IonizeBy<H, U>;
+         callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
+         initialValue: U
+      ): U;
 
       // // Methods introduced in ES2023
-      toSorted<H>(this: H, compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, T>[];
-      toReversed<H>(this: H): IonizeBy<H, T>[];
-      with<H>(this: H, index: number, value: IonizeBy<H, T>): IonizeBy<H, T>[];
+      toSorted<H>(this: H, compareFn?: (a: T, b: T) => number): IonizeBy<H, T[]>;
+      toReversed<H>(this: H): IonizeBy<H, T[]>;
+      with<H>(this: H, index: number, value: T): IonizeBy<H, T[]>;
 
       //flat // TODO:
       //flatMap
 
       [Symbol.iterator]<H>(): IonizeBy<H, IterableIterator<ToRaw<T>>>;
-      ionizable: 'Array'
+      // ionizable: 'Array'
    }
 }
 
@@ -148,7 +147,7 @@ defineIonicCollection(Array, {
    },
 
    concat(...args: any[]) {
-      return Ionic(this.ionic.concat(...args), this.config)
+      return Ionic(this.ionic.concat(...args))
    },
 
    keys() {
@@ -157,22 +156,56 @@ defineIonicCollection(Array, {
    },
 
    slice(start?, end?) {
-      return Ionic(this.ionic.slice(start, end), this.config)
+      return Ionic(this.ionic.slice(start, end))
    },
 
    // TODO: test if this functions properly
    toSpliced(start, deleteCount, ...args) {
-      return Ionic(this.ionic.toSpliced(start, deleteCount, ...args), this.config)
+      return Ionic(this.ionic.toSpliced(start, deleteCount, ...args))
    },
 
    splice(...args) {
-      return Ionic(this.ionic.splice(...args), this.config)
+      return Ionic(this.ionic.splice(...args))
    },
 
+   copyWithin(target, start, end) {
+      return Ionic(this.ionic.copyWithin(target, start, end))
+   },
+
+   fill(value, start, end){
+      return Ionic(this.ionic.fill(value, start, end))
+   },
+
+   reverse(){
+      return Ionic(this.ionic.reverse())
+   },
+
+   sort(compare){
+      return Ionic(this.ionic.sort(compare))
+   },
+
+   toSorted(compare){
+      return Ionic(this.ionic.toSorted(compare))
+   },
+
+   toReversed(){
+      return Ionic(this.ionic.toReversed())
+   },
+
+   with(index, value){
+      return Ionic(this.ionic.with(index, value))
+   }
 })
 
 export function isIonizedArray(target: any): target is IonicProxy {
    if (!isIonicProxy(target)) return false;
    if (toRaw(target) instanceof Array) return true;
    return false;
+}
+
+function isIntegerKey(key: ProxyKey) {
+   if (typeof key === 'symbol') return false;
+   const keyAsNumber = Number(key);
+   if (isNaN(keyAsNumber)) return false;
+   if (Number.isInteger(keyAsNumber)) return true
 }

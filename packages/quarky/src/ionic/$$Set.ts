@@ -1,5 +1,4 @@
-import { Ionic, toRaw } from "./x_ionize";
-import { getIonizedModel } from "./Ionic";
+import { asIonic, Ionic } from "./Ionic";
 import { defineIonicCollection, IonicDef } from "./IonicDef";
 
 // TODO: type ionic set

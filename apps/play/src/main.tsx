@@ -34,7 +34,7 @@ import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
 import { TestViewFlasks } from './TestViewFlasks';
 import { TestAnimationController } from './demos/animation-controller';
-import { CounterModelApp } from './TestCounterModel';
+import { CounterModelApp, TestMutableCounter } from './TestCounterModel';
 import { Sidebar } from './demos/IfContextMenu';
 import { FBApp } from './demos/FBChatBug';
 import { PlainList } from './TestList';
@@ -97,7 +97,7 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 //    return component(<div>Hello World</div>)
 // }
 
-const app = createRoot(TriangleDemo)
+const app = createRoot(TestMutableCounter)
 
 app.mount('#app')
 

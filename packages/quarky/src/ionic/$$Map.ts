@@ -1,7 +1,6 @@
-import { Ionic, toRaw } from "./x_ionize";
-import { defineIonicCollection, defineIonicCollective } from "./IonicDef";
+import { defineIonicCollection } from "./IonicDef";
 import { SetlikeDef } from "./$$Set";
-import { EACH } from "./Ionic";
+import { asIonic, Ionic } from "./Ionic";
 
 // declare global {
 //    interface Map<K, V> {

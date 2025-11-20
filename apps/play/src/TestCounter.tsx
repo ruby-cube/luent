@@ -7,7 +7,7 @@
 
 
 import { component, FromTag } from "@rue/lumo"
-import { Ion, ionic, queueIonicTask, ionize, swiftUpdate, instantUpdate } from "@rue/quarky"
+import { Ion, } from "@rue/quarky"
 
 export function CounterApp() {
    return component(

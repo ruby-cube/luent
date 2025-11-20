@@ -2,7 +2,9 @@ import { debug } from "@rue/utils";
 import { Quark } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
 import { Atom, TrackedAtom } from "../reactivity/Atom";
-import { ModelQuark } from "./IonicModel";
+import { ModelQuark } from "./ModelQuark";
+
+// a `trackable op` is a method like 'filter' that tracks the entire ionic model rather than a specific property
 
 type Tracked = Map<EntryKey, TrackedOpQuark>
 
@@ -27,7 +29,7 @@ export class TrackedOpQuark implements Atom, Quark {
 
 export class TrackedOps {
 
-   private tracked: Record<PropertyKey, Tracked>
+   private tracked: Map<PropertyKey, Tracked>
 
    constructor(
       private modelQuark: ModelQuark
@@ -38,14 +40,15 @@ export class TrackedOps {
       })
    }
 
-   private register(key: PropertyKey, entryKey: any, trackedOp: TrackedOpQuark) {
-      const ops = this.tracked[key] ?? new Map();
+
+   private register(op: PropertyKey, key: any, trackedOp: TrackedOpQuark) {
+      const ops = this.tracked.get(op) ?? new Map();
       if (!(ops instanceof Map)) {
-         debug.error(`${String(key)} is not an op`)
+         debug.error(`${String(op)} is not an op`)
          return trackedOp;
       }
-      this.tracked[key] = ops;
-      ops.set(entryKey, trackedOp)
+      this.tracked.set(op, ops);
+      ops.set(key, trackedOp)
       return trackedOp;
    }
 
@@ -59,15 +62,15 @@ export class TrackedOps {
 
    getTracked(
       op: PropertyKey,
-      entryKey: EntryKey
+      key: EntryKey
    ) {
-      return this.getAllTracked(op)?.get(entryKey)
+      return this.getAllTracked(op)?.get(key)
    }
 
    getAllTracked(
       op: PropertyKey
    ) {
-      const atomicOps = this.tracked[op]
+      const atomicOps = this.tracked.get(op)
       if (!(atomicOps instanceof Map)) return undefined;
       return atomicOps;
    }

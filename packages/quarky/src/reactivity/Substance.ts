@@ -4,10 +4,11 @@ import { IonicProxy } from "../ionic/Ionic"
 import { quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction } from "@rue/utils";
-import { Ionized, isIonicProxy } from "../ionic/x_ionize";
+import { Ionized } from "../ionic/x_ionize";
 import { Ion, isIon } from "../ion/Ion";
 import { WatchSubjects } from "./Watcher";
 import { Compound, Particle, popTracker, pushTracker } from "./Compound";
+import { isIonicProxy } from "../ionic/ModelQuark";
 
 
 

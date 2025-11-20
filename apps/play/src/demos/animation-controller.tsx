@@ -1,5 +1,5 @@
 import { $thisView, component, If, GetNode } from "@rue/lumo";
-import { ion, ionic, ionize, isIonicProxy, queueTask, watch } from "@rue/quarky";
+import {  ionize } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionic/notes/inert";
 
 class AnimationAnimator {

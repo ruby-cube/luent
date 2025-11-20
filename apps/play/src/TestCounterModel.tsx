@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import { Ion, ionic, queueIonicTask, ionize, isIonicProxy, SYNC, watch } from "@rue/quarky"
+import { Ion, Ionic, SYNC, watch } from "@rue/quarky"
 
 // TODO:
 // [x] private this access in methods and typing
@@ -24,7 +24,7 @@ export function CounterModelApp() {
 
 export function TestMutableCounter() {
 
-   const count = ionize({
+   const count = Ionic({
       value: 0,
       increment() {
          this.value++
@@ -39,9 +39,9 @@ export function TestMutableCounter() {
       }
    })
 
-   watch(count, () => {
-      console.log('&&&& count model changed', count.value)
-   })
+   // watch(count, () => {
+   //    console.log('&&&& count model changed', count.value)
+   // })
 
 
    console.log('is it in count', 'increment' in count)

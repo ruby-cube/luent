@@ -1,5 +1,5 @@
 import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToIntersection } from "@rue/types";
-import { Ion, isIon, isIonicProxy, IsIonized, isIonKey, MaybeIonize, MutableIon, toIon, toValue, } from "@rue/quarky";
+import { Ion, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, } from "@rue/quarky";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { getIonicProxy, MayBeMutableProxy as _MayBeMutableProxy, ReadonlyProxy as _ReadonlyProxy } from "../../../quarky/src/mu";

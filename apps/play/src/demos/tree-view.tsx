@@ -1,5 +1,5 @@
 import { component, FromTag, If, Else, For, fromGlobal, ContextKey } from "@rue/lumo";
-import { $from, DeepIonized, defineDeepIonize, EACH, Ion,  Ionic, ionize, IonizeBy, Ionized, isIonicProxy, NoExpand } from "@rue/quarky";
+import { DeepIonized, defineDeepIonize, EACH, Ion,  Ionic, ionize, IonizeBy, Ionized, isIonicProxy,} from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 
 

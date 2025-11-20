@@ -1,7 +1,7 @@
 import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $from, ion, ionic, ionize, toRaw, update } from "@rue/quarky";
 import './style.css'
+import { EACH, Ionic } from "../../../packages/quarky/src/ionic/Ionic";
 
 
 const randomColor = useRandomColorGenerator()
@@ -135,20 +135,17 @@ export function List(
    // type A = typeof mixed extends Array<infer I> ? IsRedundantUnion<ToRaw<I>> extends true ? 'yes' : 'no' : 'no'
    // // {[K in keyof ToRaw<I>]: ToRaw<I>[K]}[]  : never
    // // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
-   const list = ionize(
-      new ItemList(
-         // [
-         { id: 0, content: "frog" },
-         // { id: 0, content: "frog" },
-         { id: 1, content: "robin" },
-         { id: 2, content: "fly" },
-         { id: 3, content: "swamp" }
-         // ])
-      ))
+   const list = Ionic(new ItemList(
+      { id: 0, content: "frog" },
+      { id: 1, content: "robin" },
+      { id: 2, content: "fly" },
+      { id: 3, content: "swamp" }
+   ), { [EACH]: { as: Ionic } })
+
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
-   const $listClone = Ion(() =>list.slice())
+   // const $listClone = Ion(() => list.slice())
 
    const values = list.values()
    for (const value of values) {
@@ -162,7 +159,7 @@ export function List(
    console.log('$$$ values vs entries', [][Symbol.iterator].constructor)
 
    // FIX:
-   const ionizedValues = ionize(list.values())
+   const ionizedValues = Ionic(list.values())
    for (const value of ionizedValues) {
       console.log('$$$ value of ionized values()', value)
    }
@@ -170,7 +167,7 @@ export function List(
 
 
 
-   const selected = ionize(new Selected<Item>())
+   const selected = Ionic(new Selected<Item>())
 
    // function toggleSelect(item: typeof list[number]) {
    //    // update(() => {
@@ -204,13 +201,11 @@ export function List(
 
    // toRaw(selected).add({id: '', content: ''})
 
-   const vals = selected.values()
-   Array.from(toRaw(selected))
+   // const vals = selected.values()
+   // Array.from(toRaw(selected))
 
    function moveSelectedItems(index: number) {
-      update(() =>
          moveUniqueItems(selected, list, index)
-         , { timeMargin: 100 })
    }
 
    function removeItem(index: number) {
