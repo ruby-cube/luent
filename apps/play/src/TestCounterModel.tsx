@@ -39,9 +39,9 @@ export function TestMutableCounter() {
       }
    })
 
-   // watch(count, () => {
-   //    console.log('&&&& count model changed', count.value)
-   // })
+   watch(count, () => {
+      console.log('&&&& count model changed', count.value)
+   })
 
 
    console.log('is it in count', 'increment' in count)
