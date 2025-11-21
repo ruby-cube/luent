@@ -55,11 +55,13 @@ const traps: ProxyHandler<ModelQuark> = {
       __DEV__assertNotPrototype(modelQuark.proxy, receiver)
       const proto = modelQuark.proto
       if (!proto.has(key) && !(key in modelQuark.state.get())) {
-         return modelQuark.setNewProperty(key, newValue)!.set(newValue) // FIX: what if property was set in a preceding update that hasn't committed?
+         return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue)) // FIX: what if property was set in a preceding update that hasn't committed?
       }
-      if (!proto.has(key))
-         return Boolean(modelQuark.initProperty(key)?.set(newValue))
-      return proto.get(key)!.set(newValue)
+      const success = !proto.has(key)
+         ? Boolean(modelQuark.initProperty(key)?.set(newValue))
+         : proto.get(key)!.set(newValue)
+      if (success) $activeUpdate()?.atCommit(() => modelQuark.target[key] = newValue)
+      return success
    },
 
 
@@ -93,6 +95,7 @@ const traps: ProxyHandler<ModelQuark> = {
       triggerOp(modelQuark, INTERNAL_OP, 'ownKeys', update)
       triggerOp(modelQuark, '[[in]]', key, update)
 
+      modelQuark.proto.get(key)?.set(descriptor.value)
       return true;
    },
 

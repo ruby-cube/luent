@@ -124,7 +124,9 @@ export class PionState extends SimpleState {
       super(current)
    }
    override commitUpdate() {
-      this.onCommit(this.current = this.pending)
+      // this.onCommit(
+         this.current = this.pending
+      // )
    }
 }
 
