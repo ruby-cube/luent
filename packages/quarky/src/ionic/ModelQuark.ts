@@ -6,7 +6,7 @@ import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
 import { withGetHook, withSetHook } from "../ion/AtomicIon"
 import { AnyObject } from "@rue/types"
 import { Constructor, CustomThis, getIonicDef, TrackableThis, TriggerableThis } from "./IonicDef"
-import { AtomicPionQuark, createAtomicPion, InternalPionQuark, PropertyHooks, withTransform } from "./Pion"
+import { AtomicPionQuark, createAtomicPion, PropertyHooks, withTransform } from "./Pion"
 import { EACH, INTERNAL_OP, IonicProxy } from "./Ionic"
 import { $activeUpdate, Update } from "../reactivity/Update"
 import { TrackedOps } from "./TrackedOp"
@@ -62,7 +62,7 @@ export class ModelQuark implements Atom {
    config!: AnyObject
    ops: TrackedOps
 
-   private PionQuark = AtomicPionQuark
+   // private PionQuark = AtomicPionQuark
 
    constructor(
       public target: AnyObject, //initialData
@@ -163,10 +163,7 @@ export class ModelQuark implements Atom {
    initIsExtensible() {
       if (this.$isExtensible) return;
       const target = this.target;
-      [this.$isExtensible, this.setIsExtensible] = createAtomicPion<boolean>(new InternalPionQuark(Object.isExtensible(target), this, (value) => {
-         if (value === true) throw new Error('invalid set')
-         Reflect.preventExtensions(target)
-      }, undefined), undefined, true)
+      [this.$isExtensible, this.setIsExtensible] = createAtomicPion<boolean>(new AtomicPionQuark(Object.isExtensible(target), this, undefined), undefined, true)
    }
 
 
@@ -309,9 +306,7 @@ export class ModelQuark implements Atom {
 
       const pionAccess = ionKey && !(ionKey in target) // makes sure not an absorbed ion
 
-      const AtomicPionQuark = this.PionQuark
-
-      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target, valueKey, this, hooks), hooks?.as, !pionAccess)
+      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target[valueKey], this, hooks), hooks?.as, !pionAccess)
 
       const state = {
          get: pion,

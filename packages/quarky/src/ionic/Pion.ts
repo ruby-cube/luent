@@ -74,39 +74,37 @@ export function setPion(this: AtomicPionQuark, value: unknown) {
 
 export class AtomicPionQuark extends AtomicIonQuark {
    constructor(
-      target: AnyObject,
-      key: PropertyKey,
-      public modelQuark: ModelQuark,
-      hooks: PropertyHooks | undefined
-   ) {
-      super(new PionState(target[key], (value) => { target[key] = value }), hooks, modelQuark.__DEV__asTraceable)
-   }
-}
-
-export class CollectivePionQuark extends AtomicIonQuark {
-   constructor(
-      target: AnyObject,
-      key: PropertyKey,
-      public modelQuark: ModelQuark,
-      hooks: PropertyHooks | undefined
-   ) {
-      const collectiveState = modelQuark.state
-      super(new PionState(target[key], (value) => { 
-         return collectiveState.mutate(target => target[key] = value); // FIX: should this be mutateSync?
-         // collectiveState.commitUpdate() 
-      }), hooks, modelQuark.__DEV__asTraceable)
-   }
-}
-
-
-export class InternalPionQuark extends AtomicIonQuark {
-   constructor(
       initialValue: unknown,
       public modelQuark: ModelQuark,
-      onCommit: (value: unknown) => void,
       hooks: PropertyHooks | undefined
    ) {
-      super(new PionState(initialValue, onCommit), hooks)
+      super(new SimpleState(initialValue), hooks, modelQuark.__DEV__asTraceable)
    }
 }
+
+// export class CollectivePionQuark extends AtomicIonQuark {
+//    constructor(
+//       target: AnyObject,
+//       key: PropertyKey,
+//       public modelQuark: ModelQuark,
+//       hooks: PropertyHooks | undefined
+//    ) {
+//       const collectiveState = modelQuark.state
+//       super(new PionState(target[key], (value) => { 
+//          return collectiveState.mutate(target => target[key] = value); // FIX: should this be mutateSync?
+//          // collectiveState.commitUpdate() 
+//       }), hooks, modelQuark.__DEV__asTraceable)
+//    }
+// }
+
+
+// export class InternalPionQuark extends AtomicIonQuark {
+//    constructor(
+//       initialValue: unknown,
+//       public modelQuark: ModelQuark,
+//       hooks: PropertyHooks | undefined
+//    ) {
+//       super(new SimpleState(initialValue), hooks)
+//    }
+// }
 

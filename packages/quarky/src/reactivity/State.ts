@@ -116,19 +116,19 @@ export class SimpleState implements PendableState {
    }
 }
 
-export class PionState extends SimpleState {
-   constructor(
-      current: unknown,
-      private onCommit: (value: unknown) => void
-   ) {
-      super(current)
-   }
-   override commitUpdate() {
-      // this.onCommit(
-         this.current = this.pending
-      // )
-   }
-}
+// export class PionState extends SimpleState {
+//    constructor(
+//       current: unknown,
+//       private onCommit: (value: unknown) => void
+//    ) {
+//       super(current)
+//    }
+//    override commitUpdate() {
+//       // this.onCommit(
+//          this.current = this.pending
+//       // )
+//    }
+// }
 
 // TODO:
 // for ionic model
