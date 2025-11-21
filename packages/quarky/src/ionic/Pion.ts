@@ -1,9 +1,9 @@
-import { AnyObject } from "@rue/types"
-import { PionState, SimpleState } from "../reactivity/State"
+import { SimpleState } from "../reactivity/State"
 import { AtomicIonQuark, getState, IonHooks, setState, withGetHook, withSetHook } from "../ion/AtomicIon"
 import { trigger } from "../reactivity/Atom"
 import { QUARK } from "../abstract/Quark"
 import { ModelQuark } from "./ModelQuark"
+import { isObject } from "@rue/utils"
 
 
 
@@ -50,7 +50,7 @@ export function withTransform<T>(transform: (value: unknown) => unknown, get: ()
 
    function $state() {
       const value = get()
-      return initialState ? transform(value) : value
+      return initialState && isObject(value) ? transform(value) : value
    }
    // preserve monomorphism
    $state.value = undefined
