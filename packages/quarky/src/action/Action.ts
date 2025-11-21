@@ -4,6 +4,30 @@ import { Mutation, MutableEntity, asMutable } from "../Mutable";
 import { AsyncState } from "@rue/flask";
 import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
 import { UpdateCycle } from "../reactivity/Update";
+
+interface ActionStack<T> {
+   action: T;
+   prev: ActionStack<T> | undefined;
+}
+
+let actionStack = undefined
+
+type ActionOptions = {
+   '@race'?: (competingAction: Action) => void
+   // catch(err) { },
+   tags?: string[],
+   lazy?: { limit: number } | true,
+   await?: true
+}
+
+function Action<F>(fn: F, options?: ActionOptions) {
+
+   // TODO: add pending state to function
+
+   return fn
+}
+
+
 // import { getEffectCycleManager } from "../reactivity/ReactiveSystem";
 
 // responsive 

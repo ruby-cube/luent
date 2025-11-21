@@ -1,45 +1,16 @@
 import { $activeUpdate, getActiveUpdate, Update } from "./Update"
-import type { Action } from "./Update"
 import { AnyObject } from "@rue/types"
 
-interface ActionStack<T> {
-   action: T;
-   prev: ActionStack<T> | undefined;
-}
-
-let actionStack = undefined
-
-type ActionOptions = {
-   '@race'?: (competingAction: Action) => void
-   // catch(err) { },
-   tags?: string[],
-   lazy?: { limit: number } | true,
-   await?: true
-}
-
-function Action<F>(fn: F, options?: ActionOptions) {
-
-   // TODO: add pending state to function
-
-   return fn
-}
-
-
-/**
- * Interface for managing lazy state updates
- */
-
-export interface CancellableState {
-   pendingUpdate: Update | null
-   cancelUpdate(): void
-   commitUpdate(): void
-}
 
 // TODO: history
-export interface PendableState extends CancellableState {
+export interface PendableState {
    current: unknown
    pending: unknown
    get(): unknown
+
+   pendingUpdate: Update | null
+   cancelUpdate(): void
+   commitUpdate(): void
    // lock(): Update | undefined
 }
 
@@ -228,8 +199,6 @@ export class PrivateState extends CollectiveState {
       }
       this.mutations = []
    }
-
-
 }
 
 

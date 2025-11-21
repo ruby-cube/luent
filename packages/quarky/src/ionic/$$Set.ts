@@ -27,6 +27,7 @@ import { defineIonicCollection, IonicDef } from "./IonicDef";
 
 export function installIonicSet() {
    defineIonicCollection(Set, {
+      clone: set => new Set(set),
       '@initEach'(item, target, transform) {
          target.delete(item)
          target.add(transform(item))
@@ -94,20 +95,20 @@ export function installIonicSet() {
 }
 
 interface Setlike<T> {
-  forEach(
-    callback: (value: T, value2: T, set: Setlike<T>) => void,
-    thisArg?: any
-  ): void;
+   forEach(
+      callback: (value: T, value2: T, set: Setlike<T>) => void,
+      thisArg?: any
+   ): void;
 
-  keys(): IterableIterator<T>;
-  values(): IterableIterator<T>;
-  entries(): IterableIterator<[T, T]>;
+   keys(): IterableIterator<T>;
+   values(): IterableIterator<T>;
+   entries(): IterableIterator<[T, T]>;
 
-  has(value: T): boolean;
-  delete(value: T): boolean;
-  clear(): void;
+   has(value: T): boolean;
+   delete(value: T): boolean;
+   clear(): void;
 
-  readonly size: number;
+   readonly size: number;
 }
 
 // type Setlike = Pick<Set<unknown> | Map<unknown, unknown>, 'forEach' | 'keys' | 'values' | 'entries' | 'has' | 'delete' | 'clear' | 'size'>

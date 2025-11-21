@@ -14,11 +14,7 @@ export function getSpreadableMethods(object: Object) {
    return methods;
 }
 
-export function cloneObjectLiteral<T>(obj: T): T {
-   const clone = {} as T
-   Object.defineProperties(clone, Object.getOwnPropertyDescriptors(obj))
-   return clone
-}
+
 
 export function clone<T extends { [key: string | number | symbol]: any }>(obj: T, levels?: number, _nestedCall?: boolean) {
    if (!_nestedCall && levels === 0) throw new Error("[clone] `levels` argument must be greater than 0");

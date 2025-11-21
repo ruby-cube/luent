@@ -4,8 +4,11 @@ import { ProxyKey } from "./ModelQuark"
 
 export type Constructor = new (...args: any[]) => any
 
+type Config<T = any> = {
+   clone: Cloner<T>
+} & CollectionHooks
 
-type CollectiveHooks = {
+type CollectionHooks = {
    '@initEach'?(item: any, target: AnyObject, transform: (value: unknown) => unknown, index: number): void
    '@getHookKey'?(key: ProxyKey): ProxyKey
 }
@@ -31,6 +34,8 @@ export interface TriggerableThis {
    triggerAll(op: string): void
 }
 
+type Cloner<T> = (entity: T) => T
+
 export type PropertyDef = {
    get?(this: TrackableThis & CustomThis): unknown
    set?(this: TriggerableThis & CustomThis, value: unknown): unknown
@@ -38,7 +43,7 @@ export type PropertyDef = {
 
 export type MethodDef<T, F extends (...args: any[]) => any> = (this: TrackableThis & TriggerableThis & CustomThis<T, F>, ...args: Parameters<F>) => ReturnType<F>
 
-const ionicDefMap: Map<Constructor, { hooks: CollectiveHooks | undefined, def: IonicDef }> = new Map()
+const ionicDefMap: Map<Constructor, { config: Config, def: IonicDef }> = new Map()
 
 
 export function getIonicDef(constructor: Constructor) {
@@ -46,20 +51,20 @@ export function getIonicDef(constructor: Constructor) {
 }
 
 /** Library API */
-export function defineIonicCollection<C extends Constructor>(constructor: C, hooks: CollectiveHooks, def: IonicDef<C extends { prototype: infer T } ? T : never>) {
-   defineIonicStructure(constructor, hooks, def)
+export function defineIonicCollection<C extends Constructor>(constructor: C, config: Config<C extends { prototype: infer T } ? T : never>, def: IonicDef<C extends { prototype: infer T } ? T : never>) {
+   defineIonicStructure(constructor, config, def)
 }
 
 
 /** Library API */
-export function defineIonicCollective(constructor: Constructor, def: IonicDef) {
-   defineIonicStructure(constructor, undefined, def)
+export function defineIonicCollective<C extends Constructor>(constructor: C, config: Config<C extends { prototype: infer T } ? T : never>, def: IonicDef) {
+   defineIonicStructure(constructor, config, def)
 }
 
 
-function defineIonicStructure(constructor: Constructor, hooks: CollectiveHooks | undefined, def: IonicDef) {
+function defineIonicStructure(constructor: Constructor, config: Config, def: IonicDef) {
    const existingDef = ionicDefMap.get(constructor)
    if (existingDef && def) debug.warn(`Overriding existing Ionized Methods defintion for ${constructor.name}`)
    if (existingDef) return;
-   if (def) ionicDefMap.set(constructor, { hooks, def })
+   if (def) ionicDefMap.set(constructor, { config, def })
 }

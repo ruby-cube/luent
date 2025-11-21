@@ -35,6 +35,7 @@ import { asIonic, Ionic } from "./Ionic";
 
 export function installIonicMap() {
    defineIonicCollection(Map, {
+      clone: map => new Map(map),
       '@initEach'(entry, target, transform) {
          target.delete(entry.key)
          const [key, value] = transform(entry) as [unknown, unknown]

@@ -1,4 +1,3 @@
-import { CancellableState } from "./State";
 import { RenderCycle } from "./RenderCycle";
 import { createStack } from "@rue/utils";
 import { Ion } from "../ion/Ion";

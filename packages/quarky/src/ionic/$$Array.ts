@@ -130,8 +130,12 @@ declare global {
 // independent pion vs collective
 // model vs collection
 
-// FIX: Array should be a key-value structure, not a collective
+// NOTE: if a class is a subclass of Array, it MUST provide its own clone function to account for its properties and methods
+// e.g.  class SpecialArray extends Array {}
+// defineIonicCollection(SpecialArray, { clone: arr => new SpecialArray(...arr)})
+
 defineIonicCollection(Array, {
+   clone: (arr) => [...arr],
    '@initEach'(item, target, transform, index) {
       target[index] = transform(item)
    },

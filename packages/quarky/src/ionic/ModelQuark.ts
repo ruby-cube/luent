@@ -30,25 +30,25 @@ function nowrite(value: unknown) {
 }
 
 
-type CloneFn = (entity: any) => any
-function getCloner(entity: object): CloneFn {
-   // TODO: get cloner from data structure configs
-   if (entity instanceof Array) return (entity: any[]) => {
-      return Object.assign([], entity)
-   }
-   if (entity instanceof Date) return (entity: Date) => {
-      return Object.assign(new Date(entity), entity)
-   }
-   if (entity instanceof Set) return (entity: Set<any>) => {
-      return Object.assign(new Set(entity), entity)
-   }
-   if (entity instanceof Map) return (entity: Map<any, any>) => {
-      return Object.assign(new Map(entity), entity)
-   }
-   return (entity: object) => {
-      return Object.create(Object.getPrototypeOf(entity), Object.getOwnPropertyDescriptors(entity))
-   }
-}
+// type CloneFn = (entity: any) => any
+// function getCloner(entity: object): CloneFn {
+//    // TODO: get cloner from data structure configs
+//    if (entity instanceof Array) return (entity: any[]) => {
+//       return Object.assign([], entity)
+//    }
+//    if (entity instanceof Date) return (entity: Date) => {
+//       return Object.assign(new Date(entity), entity)
+//    }
+//    if (entity instanceof Set) return (entity: Set<any>) => {
+//       return Object.assign(new Set(entity), entity)
+//    }
+//    if (entity instanceof Map) return (entity: Map<any, any>) => {
+//       return Object.assign(new Map(entity), entity)
+//    }
+//    return (entity: object) => {
+//       return Object.create(Object.getPrototypeOf(entity), Object.getOwnPropertyDescriptors(entity))
+//    }
+// }
 
 
 export class ModelQuark implements Atom {
@@ -62,11 +62,8 @@ export class ModelQuark implements Atom {
    config!: AnyObject
    ops: TrackedOps
 
-   // private PionQuark = AtomicPionQuark
-
    constructor(
       public target: AnyObject, //initialData
-      collective: boolean | 'collection' = false
    ) {
       this.proto = new Map<ProxyKey, PropertyAccess>([
          [QUARK, {
@@ -90,12 +87,27 @@ export class ModelQuark implements Atom {
       // toString
       // valueOf
 
-      const Collective = collective ? CollectiveState : PrivateState
-      this.state = new Collective(target, getCloner(target))  // FIX: standin cloner
+      // const Collective = collective ? CollectiveState : PrivateState
+      this.state = new PrivateState(target, this.getCloner())
       this.ops = new TrackedOps(this)
 
-      if (collective === 'collection') {
-         this.initCollection()
+      this.initCollection()
+   }
+
+   private getCloner() {
+      let obj = this.target; // TODO: should this be target or state.get() ??
+      do {
+         const cloner = getIonicDef(obj.constructor as Constructor)?.config.clone
+         if (cloner) {
+            return cloner
+         }
+         obj = Object.getPrototypeOf(obj)
+      } while (obj && obj.constructor !== Object)
+
+      return function clonePlainObject(entity: AnyObject) {
+         // if (this.preserveAccessorProperties)
+         //    return Object.create(Object.getPrototypeOf(entity), Object.getOwnPropertyDescriptors(entity))
+         return Object.assign(Object.create(Object.getPrototypeOf(entity)), entity); // assumes no POJOs with accessor properties
       }
    }
 
@@ -107,14 +119,14 @@ export class ModelQuark implements Atom {
             this.initEach(each.as)
             delete each.as
          }
-         this.overrideGetPropertyHooks()
+         if ('@get' in each || '@set' in each) this.overrideGetPropertyHooks()
       }
    }
 
    private overrideGetPropertyHooks() {
       let obj = this.state.get(); // TODO: should this be target or state.get() ??
       do {
-         const getHookKey = getIonicDef(obj.constructor as Constructor)?.hooks?.['@getHookKey']
+         const getHookKey = getIonicDef(obj.constructor as Constructor)?.config['@getHookKey']
          if (getHookKey) {
             this.getPropertyHooks = (key: ProxyKey) => {
                const hooks = this.hooks
@@ -127,7 +139,6 @@ export class ModelQuark implements Atom {
       } while (obj && obj.constructor !== Object)
    }
 
-
    private getPropertyHooks(key: ProxyKey): PropertyHooks | undefined {
       return this.hooks?.[key] as PropertyHooks
    }
@@ -135,7 +146,7 @@ export class ModelQuark implements Atom {
    private initEach(transform: (value: unknown) => unknown) {
       let obj = this.state.get(); // TODO: should this be target or state.get() ??
       do {
-         const initEach = getIonicDef(obj.constructor as Constructor)?.hooks?.['@initEach']
+         const initEach = getIonicDef(obj.constructor as Constructor)?.config['@initEach']
          if (initEach) {
             const collection = this.state.get() as any[]
             if (!(Symbol.iterator in collection)) {
