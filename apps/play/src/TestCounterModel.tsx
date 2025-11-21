@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import { Ion, Ionic, SYNC, watch } from "@rue/quarky"
+import { Ion, Ionic, watch } from "@rue/quarky"
 
 // TODO:
 // [x] private this access in methods and typing
@@ -32,19 +32,19 @@ export function TestMutableCounter() {
       },
       decrement() {
          this.value--
-      },
-      logSuper() {
-         console.log('super')
-         return 'olay!'
       }
+      // logSuper() {
+      //    console.log('super')
+      //    return 'olay!'
+      // }
    })
 
-   watch(count, () => {
-      console.log('&&&& count model changed', count.value)
-   })
+   // watch(count, () => {
+   //    // console.log('&&&& count model changed', count.value)
+   // })
 
 
-   console.log('is it in count', 'increment' in count)
+   // console.log('is it in count', 'increment' in count)
 
    const $doubleCount = Ion(() =>count.value * 2)
 
@@ -64,7 +64,7 @@ export function TestMutableCounter() {
          <h3>encapsulated model with methods</h3>
          <div>{(count.value)}</div>
          <div>{$doubleCount}</div>
-         {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
+         <div>The count is: {(count.value)}. Doubled: {$doubleCount}</div>
          <p>these should work</p>
          <button on:click={count.increment}>increment</button>
          <button on:click={count.decrement}>decrement</button>

@@ -55,7 +55,7 @@ const traps: ProxyHandler<ModelQuark> = {
       __DEV__assertNotPrototype(modelQuark.proxy, receiver)
       const proto = modelQuark.proto
       if (!proto.has(key) && !(key in modelQuark.state.get())) {
-         return modelQuark.setNewProperty(key, newValue) // FIX: what if property was set in a preceding update that hasn't committed?
+         return modelQuark.setNewProperty(key, newValue)!.set(newValue) // FIX: what if property was set in a preceding update that hasn't committed?
       }
       if (!proto.has(key))
          return Boolean(modelQuark.initProperty(key)?.set(newValue))

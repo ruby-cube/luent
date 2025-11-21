@@ -129,7 +129,7 @@ class EffectsComplete {
    }
 
    catch(onrejected?: ((reason: any) => PromiseLike<never>) | null | undefined) {
-      return this.promise.catch(onrejected)
+      return this.promise.catch((err) => { onrejected?.(err); throw err })
    }
 
    finally(onfinally?: (() => void) | null | undefined): Promise<unknown> {

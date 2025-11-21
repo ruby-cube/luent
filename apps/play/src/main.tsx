@@ -67,6 +67,7 @@ import { TestMultisetting } from './demos/TestMultisetting';
 import { TestStreamIon } from './TestStreamIon';
 import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
+import { TestIonicList } from './TestIonicList';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -97,7 +98,7 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 //    return component(<div>Hello World</div>)
 // }
 
-const app = createRoot(TestMutableCounter)
+const app = createRoot(TestIonicList)
 
 app.mount('#app')
 

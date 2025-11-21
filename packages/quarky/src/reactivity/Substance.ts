@@ -1,6 +1,5 @@
 import { AnyObject } from "@rue/types";
 import { Effect } from "./EffectQueue"
-import { IonicProxy } from "../ionic/Ionic"
 import { quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction } from "@rue/utils";
@@ -8,7 +7,7 @@ import { Ionized } from "../ionic/x_ionize";
 import { Ion, isIon } from "../ion/Ion";
 import { WatchSubjects } from "./Watcher";
 import { Compound, Particle, popTracker, pushTracker } from "./Compound";
-import { isIonicProxy } from "../ionic/ModelQuark";
+import { isIonicProxy, QuarkyIonicProxy } from "../ionic/ModelQuark";
 
 
 
@@ -119,7 +118,7 @@ class IonicProxySubject extends Compound implements WatchedSubstance {
    reactive: boolean = true
 
    constructor(
-      private proxy: IonicProxy,
+      private proxy: QuarkyIonicProxy,
    ) {
       super()
       this.track(quarkOf(proxy))
@@ -184,7 +183,7 @@ export class FunctionalSubstance extends Compound implements Substance {
    effect: Effect | undefined
 
    private retrackedCall() {
-      if (!this.retrack) return this.fn()
+      if (!this.retrack || !this.reactive) return this.fn()
       const fn = this.fn
       const effect = this.effect
       if (!effect) throw new Error('Must call linkEffect before retracking')
@@ -275,7 +274,7 @@ export class FunctionalSubstance extends Compound implements Substance {
 export class IonSubstance implements WatchedSubstance {
    get reactive() {
       if (this.proxySubject) {
-         return this.subject.reactive && this.proxySubject.reactive
+         return this.subject.reactive || this.proxySubject.reactive
       }
       return this.subject.reactive
    }
@@ -291,13 +290,16 @@ export class IonSubstance implements WatchedSubstance {
    }
 
    linkEffect(effect: Effect): void {
-      this.subject.linkEffect(effect)
+      if (this.subject.reactive)
+         this.subject.linkEffect(effect)
+      console.log('AHH')
       this.proxySubject?.linkEffect(effect)
    }
 
    getValue() {
       const value = this.subject.trackedCall()
       if (value !== this.proxySubject?.getValue() && isIonicProxy(value)) {
+         console.log('YES!!')
          this.proxySubject = new IonicProxySubject(value)
       }
       return value;

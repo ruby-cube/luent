@@ -185,7 +185,7 @@ export class ModelQuark implements Atom {
    initNonProperty(
       key: ProxyKey
    ) {
-      if (!Object.isExtensible(this.target)) return;
+      if (!Object.isExtensible(this.target)) return { get: () => undefined, set: nowrite }
       const valueKey = isIonKey(key) ? key.slice(1) : key
       const ionKey = key === valueKey && typeof key === 'string' ? '$' + key : undefined
       return this.initPion(key, valueKey, ionKey, undefined)
@@ -196,19 +196,19 @@ export class ModelQuark implements Atom {
       key: ProxyKey,
       value: unknown
    ) {
-      if (!Object.isExtensible(this.target)) return false;
+      if (!Object.isExtensible(this.target)) return { set: nowrite };
       if (isFunction(value)) {
          if (__DEV__) console.warn(`Adding new methods or absorbed ions to a proxy is not supported. You must add ${value} to the raw object before ionizing it`)
-         return false;
+         return { set: nowrite };
       }
       const update = $activeUpdate()
-      if (!update) return false;
-      const success = this.state.mutate(target => Reflect.set(target, key, value))
-      if (!success) return false;
-      if (!this.proto.has(key)) this.initNonProperty(key)
+      if (!update) return { set: nowrite };
+      const success = this.state.mutate(target => Reflect.set(target, key, value)) // TODO: Eliminate redundancy of setting pion as well as mutating the state
+      if (!success) return { set: nowrite };
       triggerOp(this, INTERNAL_OP, 'ownKeys', update)
       triggerOp(this, '[[in]]', key, update)
-      return true;
+      trigger(this, update)
+      return !this.proto.has(key) ? this.initNonProperty(key) : this.proto.get(key);
    }
 
    protected _initProperty(

@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types"
-import { ModelQuark } from "./IonicModel"
 import { PionState, SimpleState } from "../reactivity/State"
 import { AtomicIonQuark, getState, IonHooks, setState, withGetHook, withSetHook } from "../ion/AtomicIon"
 import { trigger } from "../reactivity/Atom"
 import { QUARK } from "../abstract/Quark"
+import { ModelQuark } from "./ModelQuark"
 
 
 
@@ -91,7 +91,10 @@ export class CollectivePionQuark extends AtomicIonQuark {
       hooks: PropertyHooks | undefined
    ) {
       const collectiveState = modelQuark.state
-      super(new PionState(target[key], (value) => { collectiveState.mutate(target => target[key] = value) }), hooks, modelQuark.__DEV__asTraceable)
+      super(new PionState(target[key], (value) => { 
+         return collectiveState.mutate(target => target[key] = value); // FIX: should this be mutateSync?
+         // collectiveState.commitUpdate() 
+      }), hooks, modelQuark.__DEV__asTraceable)
    }
 }
 

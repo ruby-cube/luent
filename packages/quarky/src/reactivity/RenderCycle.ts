@@ -159,17 +159,17 @@ export class RenderCycle {
    cancelled: boolean = false;
 
    cancel() {
-      try {
+      // try {
          this.idleIDs.forEach((id) => cancelIdleCallback(id))
          let i = this.phases.length
          while (i--) {
             this.effects[i]?.cancel()
          }
          this.cancelled = true;
-      }
-      catch (error) {
-         console.log('CATCH', error)
-      }
+      // }
+      // catch (error) {
+      //    console.log('CATCH', error)
+      // }
    }
 
    timecheck(now: DOMHighResTimeStamp) {

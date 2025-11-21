@@ -126,8 +126,11 @@ declare global {
 //    output: ionize
 // }
 
+//TODO:
+// independent pion vs collective
+// model vs collection
 
-
+// FIX: Array should be a key-value structure, not a collective
 defineIonicCollection(Array, {
    '@initEach'(item, target, transform, index) {
       target[index] = transform(item)

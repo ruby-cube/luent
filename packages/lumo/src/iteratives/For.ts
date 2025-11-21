@@ -30,7 +30,7 @@ export function For<L extends ListData>(data: L, render: RenderItem<L>): ListKit
    export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> | (L extends Collection<infer T> ? (item: T) => unknown : never), render?: RenderItem<L>): ListKit | undefined | RawJSXNode {
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
-   const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
+   const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : (m: unknown) =>m;
    // const _render = normalizeToRenderFunction(render) as RenderItem<any[]>;
    if (isGetter(data) || isIonicProxy(data) || isIonicProxy(toValue(data))) {
       return new ListKit(toIon(data), toAsyncRenderItem(_render), getUID, getFlask())

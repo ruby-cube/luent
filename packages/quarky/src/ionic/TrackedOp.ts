@@ -35,9 +35,7 @@ export class TrackedOps {
       private modelQuark: ModelQuark
    ) {
 
-      this.tracked = Object.create(modelQuark.target, {
-         '[[in]]': { value: new Map() }
-      })
+      this.tracked = new Map([['[[in]]', new Map()]])
    }
 
 

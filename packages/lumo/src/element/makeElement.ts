@@ -37,6 +37,7 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    config: ElementConfig,
 ): DOMNode {
+   console.log('makeElement', tagName)
    const { class: classes, style: styles, 'show:if': showIf, node: $node, nodes, ...other } = config;
 
    const { attributes, events, hooks } = analyzeAttributes(other)
@@ -74,19 +75,22 @@ export function makeElement(
 
    if (Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
-      runWithXMLNamespace(() => {
-         const rawOutput = normalizeToArray(Slot())
+         runWithXMLNamespace(() => {
+            const rawOutput = normalizeToArray(Slot())
 
-         // if (isInnerHTMLKit(rawOutput[0])) {
-         //    const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
-         //    mountInnerHTML(innerHTML, domNode)
-         // }
-         // else {
-         const nodes = processJSXOutput(rawOutput)
-         setUpNodeVine(nodes, domNode)
-         mountDOMNodes(nodes, domNode)
-         // }
-      }, xml_ns)
+            // if (isInnerHTMLKit(rawOutput[0])) {
+            //    const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
+            //    mountInnerHTML(innerHTML, domNode)
+            // }
+            // else {
+            const nodes = processJSXOutput(rawOutput)
+            setUpNodeVine(nodes, domNode)
+            mountDOMNodes(nodes, domNode)
+
+         }, xml_ns)
+
+ 
+      // }
    }
    return domNode;
 }
@@ -657,7 +661,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
-            queueInternalRender(() =>{
+            queueInternalRender(() => {
                setUpStyleEntry(style, entry(), flask);
             }, flask)
          }, flask, RUN_EAGERLY)
@@ -676,7 +680,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          if (isGetter(value)) {
             watchToRender(value, ({ current, previous }) => {
                // if (current === previous) return;
-               queueInternalRender(() =>{
+               queueInternalRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
                }, flask)
             }, flask, RUN_EAGERLY)

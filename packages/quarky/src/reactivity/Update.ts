@@ -247,10 +247,12 @@ export function catchCancelledUpdate(error: unknown) {
       if (__DEV__) console.warn('update cancelled', error)
    }
    else if (error === 'update cancelled') {
+      if (__DEV__) console.warn('update cancelled')
       // effectsComplete promise cancelled
    }
    else {
-      throw error;
+      console.error(error)
+      throw error; // FIX: this is not being thrown for some reason in runUpdate
    }
 }
 
@@ -277,7 +279,8 @@ export function dispatch<T>(fn: () => T, options?: { timeMargin?: number, deadli
 
 
 export function instantUpdate(fn: () => void) {
-   return runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
+   // return 
+   runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
 }
 
 
@@ -287,13 +290,14 @@ export function swiftUpdate<T>(fn: () => void) {
 }
 
 export function runUpdate(update: Update) {
+   console.log('run update')
    try {
       pushUpdate(update)
       update.fn() // TODO: pass in await sequence?
 
    }
    catch (error) {
-      catchCancelledUpdate(error)
+      catchCancelledUpdate(error) // FIX: errors are being swallowed up here despite being rethrown. May be because run update returns a promise
    }
    finally {
       popUpdate()

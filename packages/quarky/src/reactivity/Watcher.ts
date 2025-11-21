@@ -1,6 +1,6 @@
 import { $listen, Flask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
-import { Ionized, isIonicProxy } from "../ionic/x_ionize";
+import { Ionized } from "../ionic/x_ionize";
 import { Effect } from "./EffectQueue";
 import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
 import { Glass } from "@rue/types";

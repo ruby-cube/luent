@@ -49,7 +49,8 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
          const attributes = {
             ...config?.setup || {},
          }
-         instantUpdate(() => { // FIX:
+
+         instantUpdate(() => { // FIX: Erros are being swallowed up here despite being rethrown
             flaskStack.push(flask)
             pushContext(appCommons)
             let nodes: JSXNode[]
@@ -71,6 +72,8 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
                popContext() // for sibling components to access parent, must be set AFTER `component()`
             }
          })
+
+
       },
 
       unmount() { // TODO: should I call dynamicNode.unmount() instead of emit?? same for discard?

@@ -157,7 +157,7 @@ export function makeJSXNode(
 
       case 'o--link':
          return Portal('head', () =>
-            makeElement('link', undefined, <ElementConfig>config, undefined)
+            makeElement('link', undefined, <ElementConfig>config)
          );
 
       case 'show-hide':
@@ -178,12 +178,12 @@ export function makeJSXNode(
 
       default:
          if (typeof nodeType === 'string') {
-            return makeElement(
-               nodeType,
-               Slot,
-               <ElementConfig>config,
-               // getCurrentIndex()
-            )
+               return makeElement(
+                  nodeType,
+                  Slot,
+                  <ElementConfig>config,
+                  // getCurrentIndex()
+               )
          }
          return makeComponent(
             nodeType,

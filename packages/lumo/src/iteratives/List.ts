@@ -31,7 +31,6 @@ export class ListKit extends VineNode {
    ) {
       super()
       this.nodes = this.render($list(), renderItem);
-
       watchToRender($list, ({ current: newList }) => {
          this.nodes = this.rerender(newList, renderItem)
       })
@@ -41,11 +40,9 @@ export class ListKit extends VineNode {
 
    private render(list: unknown[], renderItem: RenderItem<unknown>) {
       const nodes: JSXNode[] = []
-
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
          const $index = Ion(i, { dataLength: list.length })
-
          const kit = new ListItemKit(item, $index, renderItem, this.flask)
          nodes.push(kit)
          this.prevItems.set(this.getUID(item), kit)
