@@ -7,7 +7,7 @@
 
 
 import { component, FromTag } from "@rue/lumo"
-import { Ion, } from "@rue/quarky"
+import { Ion, Ionic, } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
@@ -396,7 +396,7 @@ export function TestThisCount() {
 
 export function TestCounterModel() {
 
-   const counter = ionize({
+   const counter = Ionic({
       count: 0,
       increment() {
          this.count++
@@ -405,6 +405,8 @@ export function TestCounterModel() {
          this.count--
       }
    })
+
+   console.log('&&&', counter.$count)
 
    const $doubleCount = Ion(() => counter.count * 2)
 

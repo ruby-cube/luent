@@ -2,6 +2,7 @@ import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { EACH, Ionic } from "../../../packages/quarky/src/ionic/Ionic";
+import { defineIonicCollection } from "../../../packages/quarky/src/ionic/IonicDef";
 
 
 const randomColor = useRandomColorGenerator()
@@ -106,9 +107,12 @@ class ItemList extends Array<Item> {
 
    changeContent(index: number) {
       const item = this[index];
+      console.log('$$$ item', item)
       item.content = 'something else'
    }
 }
+
+defineIonicCollection(ItemList, {clone: list => new ItemList(...list)})
 
 class Selected<T> extends Set<T> {
    toggle(item: T) {
@@ -120,6 +124,7 @@ class Selected<T> extends Set<T> {
       }
    }
 }
+defineIonicCollection(Selected, {clone: set => new Selected(set)})
 
 export function List(
 
@@ -140,29 +145,29 @@ export function List(
       { id: 1, content: "robin" },
       { id: 2, content: "fly" },
       { id: 3, content: "swamp" }
-   ), { [EACH]: { as: Ionic } })
+   ), { [EACH]: { as: (value) => ( console.log('$$$ transform', value), Ionic(value)) } })
 
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
    // const $listClone = Ion(() => list.slice())
 
-   const values = list.values()
-   for (const value of values) {
-      console.log('$$$ value', value)
-   }
+   // const values = list.values()
+   // for (const value of values) {
+   //    console.log('$$$ value', value)
+   // }
 
-   for (const value of list) {
-      console.log('$$$ value of list', value)
-   }
+   // for (const value of list) {
+   //    console.log('$$$ value of list', value)
+   // }
 
-   console.log('$$$ values vs entries', [][Symbol.iterator].constructor)
+   // console.log('$$$ values vs entries', [][Symbol.iterator].constructor)
 
    // FIX:
-   const ionizedValues = Ionic(list.values())
-   for (const value of ionizedValues) {
-      console.log('$$$ value of ionized values()', value)
-   }
+   // const ionizedValues = Ionic(list.values())
+   // for (const value of ionizedValues) {
+   //    console.log('$$$ value of ionized values()', value)
+   // }
 
 
 
@@ -230,11 +235,11 @@ export function List(
                   X
                </p>
 
-               <li on:click={e => responsive(() => list.changeContent($index()))}>
-                  {(item.content)}
+               <li on:click={e => (console.log('$$$ change content?', item), list.changeContent($index()))}>
+                  {item.$content}
                </li>
                <p>{$index}</p>
-               <div on:click={e => responsive(() => list.insert($index() + 1))} style="background-color: gray; cursor: pointer">
+               <div on:click={e => list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
                   insert
                </div>
                <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
@@ -243,7 +248,7 @@ export function List(
             </div>
          ))}
 
-         <button on:click={e => responsive(() => selected.clear())}>clear</button>
+         <button on:click={e => selected.clear()}>clear</button>
          <hr></hr>
 
          {/* {For($listClone, (item, $index) =>

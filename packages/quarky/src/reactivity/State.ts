@@ -109,6 +109,60 @@ export class SimpleState implements PendableState {
 // value => state.current[key] = state.pending[key] = value
 
 
+// export class CollectiveState implements PendableState {
+
+//    current: AnyObject
+//    pending: AnyObject
+
+//    constructor(
+//       current: AnyObject,
+//       protected clone: <T>(current: AnyObject) => AnyObject = (model: AnyObject) => model
+//    ) {
+//       this.current = current;
+//       this.pending = clone(current);
+//    }
+
+//    get() {
+//       return getState(this) as AnyObject
+//    }
+
+//    protected lock() {
+//       return lockState(this)
+//    }
+
+//    pendingUpdate: Update | null = null
+
+//    private mutated = false
+
+//    cancelUpdate() {
+//       if (this.mutated) {
+//          this.pending = this.clone(this.current)
+//          this.mutated = false
+//       }
+//    }
+
+//    commitUpdate(): void {
+//       if (this.mutated) {
+//          this.current = this.pending
+//          this.pending = this.clone(this.pending)
+//          this.mutated = false
+//       }
+//    }
+
+
+//    mutate(fn: (model: AnyObject) => unknown) {
+//       this.lock()
+//       this.mutated = true;
+//       return fn(this.pending)
+//    }
+
+//    mutateSync(fn: (model: AnyObject) => unknown) {
+//       this.mutated = true;
+//       return fn(this.pending)
+//    }
+
+// }
+
 export class CollectiveState implements PendableState {
 
    current: AnyObject
@@ -132,63 +186,36 @@ export class CollectiveState implements PendableState {
 
    pendingUpdate: Update | null = null
 
-   private mutated = false
+   // private mutated = false
 
    cancelUpdate() {
-      if (this.mutated) {
+      if (this.mutations.length) {
          this.pending = this.clone(this.current)
-         this.mutated = false
+         this.mutations = []
       }
    }
 
+   // commitUpdate(): void {
+   //    if (this.mutated) {
+   //       this.current = this.pending
+   //       this.pending = this.clone(this.pending)
+   //       this.mutated = false
+   //    }
+   // }
    commitUpdate(): void {
-      if (this.mutated) {
-         this.current = this.pending
-         this.pending = this.clone(this.pending)
-         this.mutated = false
-      }
-   }
-
-
-   mutate(fn: (model: AnyObject) => unknown) {
-      this.lock()
-      this.mutated = true;
-      return fn(this.pending)
-   }
-
-   mutateSync(fn: (model: AnyObject) => unknown) {
-      this.mutated = true;
-      return fn(this.pending)
-   }
-
-}
-
-
-
-
-export class PrivateState extends CollectiveState {
-
-   constructor(
-      current: AnyObject,
-      clone: <T>(current: AnyObject) => AnyObject = (model: AnyObject) => model
-   ) {
-      super(current, clone)
-   }
-
-   override commitUpdate(): void {
       if (this.mutations.length)
          this.applyMutations()
    }
 
-   private mutations: ((model: AnyObject) => unknown)[] = []
+      private mutations: ((model: AnyObject) => unknown)[] = []
 
-   override mutate(fn: (model: AnyObject) => unknown) {
+   mutate(fn: (model: AnyObject) => unknown) {
       this.lock()
       this.mutations.push(fn)
       return fn(this.pending)
    }
 
-   override mutateSync(fn: (model: AnyObject) => unknown) {
+   mutateSync(fn: (model: AnyObject) => unknown) {
       this.mutations.push(fn)
       return fn(this.pending)
    }
@@ -199,7 +226,58 @@ export class PrivateState extends CollectiveState {
       }
       this.mutations = []
    }
+
+
+   // mutate(fn: (model: AnyObject) => unknown) {
+   //    this.lock()
+   //    this.mutated = true;
+   //    return fn(this.pending)
+   // }
+
+   // mutateSync(fn: (model: AnyObject) => unknown) {
+   //    this.mutated = true;
+   //    return fn(this.pending)
+   // }
+
 }
+
+
+
+
+// export class PrivateState extends CollectiveState {
+
+//    constructor(
+//       current: AnyObject,
+//       clone: <T>(current: AnyObject) => AnyObject = (model: AnyObject) => model
+//    ) {
+//       super(current, clone)
+//    }
+
+//    override commitUpdate(): void {
+//       if (this.mutations.length)
+//          this.applyMutations()
+//    }
+
+//    private mutations: ((model: AnyObject) => unknown)[] = []
+
+//    override mutate(fn: (model: AnyObject) => unknown) {
+//       this.lock()
+//       this.mutations.push(fn)
+//       return fn(this.pending)
+//    }
+
+//    override mutateSync(fn: (model: AnyObject) => unknown) {
+//       this.mutations.push(fn)
+//       return fn(this.pending)
+//    }
+
+//    private applyMutations() {
+//       for (const mutate of this.mutations) {
+//          mutate(this.current)
+//       }
+//       this.mutations = []
+//    }
+// }
 
 
 

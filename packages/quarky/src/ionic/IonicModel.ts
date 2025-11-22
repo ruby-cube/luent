@@ -22,15 +22,14 @@ type Extender = (proxy: AnyObject) => IonicModelHooks & Overrides
 
 export function createIonicModel(
    target: AnyObject,
-   config: IonicModelHooks | Extender
+   config: IonicModelHooks | undefined,
+   extender: Function | undefined
 ) {
-   const modelQuark = new ModelQuark(target)
+   const modelQuark = new ModelQuark(target, config)
 
    const proxy = new Proxy(modelQuark, traps) as any as QuarkyIonicProxy
 
-   const extension = isFunction(config) ? config(proxy) : undefined
-   modelQuark.config = config
-   modelQuark.hooks = extension ?? config as IonicModelHooks
+   const extension = extender ? extender(proxy) : undefined
    modelQuark.extension = extension
    modelQuark.proxy = proxy;
    return proxy

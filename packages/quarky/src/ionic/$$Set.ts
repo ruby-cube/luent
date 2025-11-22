@@ -1,5 +1,7 @@
+import { AnyObject } from "@rue/types";
 import { asIonic, Ionic } from "./Ionic";
 import { defineIonicCollection, IonicDef } from "./IonicDef";
+import { trigger } from "../reactivity/Atom";
 
 // TODO: type ionic set
 // declare global {
@@ -51,10 +53,12 @@ export function installIonicSet() {
          this.trackModel()
          return Ionic(this.raw.union(other))
       },
+
       intersection(other) {
          this.trackModel()
          return Ionic(this.raw.intersection(other))
       },
+      
       symmetricDifference(other) {
          this.trackModel()
          return Ionic(this.raw.symmetricDifference(other))
@@ -77,11 +81,11 @@ export function installIonicSet() {
 
       add(value) {
          if (this.raw.has(value)) return asIonic(this.raw);
-         const set = this.raw.add(value)
-         this.trigger('has', value)
-         this.trigger('[[get]]', 'size')
-         this.triggerModel()
-         return asIonic(set)
+         return asIonic(this.mutate(raw => raw.add(value), ({ op }) => {
+            op.trigger('has', value)
+            op.trigger('[[get]]', 'size')
+            op.triggerModel()
+         }))
       },
 
       has: SetlikeDef.has,
@@ -142,20 +146,21 @@ export const SetlikeDef: IonicDef<Setlike<unknown>> = {
 
    clear() {
       if (this.raw.size === 0) return;
-      this.raw.clear()
-      this.triggerAll('has')
-      this.trigger('[[get]]', 'size')
-      this.triggerModel()
+      this.mutate(raw => raw.clear(), ({ op }) => {
+         op.triggerModel()
+         op.triggerAll('has')
+         op.trigger('[[get]]', 'size')
+      })
    },
 
    delete(key) {
-      const success = this.raw.delete(key)
-      if (success) {
-         this.triggerModel()
-         this.trigger('has', key)
-         this.trigger('[[get]]', 'size')
-      }
-      return success;
+      return this.mutate(raw => raw.delete(key), ({ output: success, op }) => {
+         if (success) {
+            op.triggerModel()
+            op.trigger('has', key)
+            op.trigger('[[get]]', 'size')
+         }
+      })
    },
 
    size: {
@@ -165,3 +170,4 @@ export const SetlikeDef: IonicDef<Setlike<unknown>> = {
       }
    }
 }
+

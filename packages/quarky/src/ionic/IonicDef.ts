@@ -21,6 +21,10 @@ export interface CustomThis<T = AnyObject, P = any> {
    raw: T,
    ionic: { [key: ProxyKey]: P },
    config: AnyObject | undefined
+   mutate: <R>(
+      mutationFn: (raw: AnyObject) => R,
+      triggerFn: (mutation: { output: R, op: MutationOp }) => void
+   ) => R
 }
 
 export interface TrackableThis {
@@ -28,7 +32,7 @@ export interface TrackableThis {
    track(op: string, key: unknown): void
 }
 
-export interface TriggerableThis {
+export interface MutationOp {
    triggerModel(): void,
    trigger(op: string, key: unknown): void
    triggerAll(op: string): void
@@ -38,12 +42,12 @@ type Cloner<T> = (entity: T) => T
 
 export type PropertyDef = {
    get?(this: TrackableThis & CustomThis): unknown
-   set?(this: TriggerableThis & CustomThis, value: unknown): unknown
+   set?(this: MutationOp & CustomThis, value: unknown): unknown
 }
 
-export type MethodDef<T, F extends (...args: any[]) => any> = (this: TrackableThis & TriggerableThis & CustomThis<T, F>, ...args: Parameters<F>) => ReturnType<F>
+export type MethodDef<T, F extends (...args: any[]) => any> = (this: TrackableThis & CustomThis<T, F>, ...args: Parameters<F>) => ReturnType<F>
 
-const ionicDefMap: Map<Constructor, { config: Config, def: IonicDef }> = new Map()
+const ionicDefMap: Map<Constructor, { config: Config, def: IonicDef | undefined }> = new Map()
 
 
 export function getIonicDef(constructor: Constructor) {
@@ -51,20 +55,21 @@ export function getIonicDef(constructor: Constructor) {
 }
 
 /** Library API */
-export function defineIonicCollection<C extends Constructor>(constructor: C, config: Config<C extends { prototype: infer T } ? T : never>, def: IonicDef<C extends { prototype: infer T } ? T : never>) {
+export function defineIonicCollection<C extends Constructor>(constructor: C, config: Config<C extends { prototype: infer T } ? T : never>, def?: IonicDef<C extends { prototype: infer T } ? T : never>) {
    defineIonicStructure(constructor, config, def)
 }
 
 
 /** Library API */
-export function defineIonicCollective<C extends Constructor>(constructor: C, config: Config<C extends { prototype: infer T } ? T : never>, def: IonicDef) {
+export function defineIonicCollective<C extends Constructor>(constructor: C, config: Config<C extends { prototype: infer T } ? T : never>, def?: IonicDef) {
    defineIonicStructure(constructor, config, def)
 }
 
 
-function defineIonicStructure(constructor: Constructor, config: Config, def: IonicDef) {
+function defineIonicStructure(constructor: Constructor, config: Config, def: IonicDef | undefined) {
    const existingDef = ionicDefMap.get(constructor)
-   if (existingDef && def) debug.warn(`Overriding existing Ionized Methods defintion for ${constructor.name}`)
-   if (existingDef) return;
-   if (def) ionicDefMap.set(constructor, { config, def })
+   if (existingDef){
+      debug.warn(`Ionic ops for ${constructor.name} already defined`)
+   } 
+   ionicDefMap.set(constructor, { config, def })
 }

@@ -1,11 +1,11 @@
 import { isFunction, isObject } from "@rue/utils"
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { track } from "../reactivity/Compound"
-import { CollectiveState, PrivateState } from "../reactivity/State"
+import { CollectiveState } from "../reactivity/State"
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
 import { withGetHook, withSetHook } from "../ion/AtomicIon"
 import { AnyObject } from "@rue/types"
-import { Constructor, CustomThis, getIonicDef, TrackableThis, TriggerableThis } from "./IonicDef"
+import { Constructor, CustomThis, getIonicDef, TrackableThis } from "./IonicDef"
 import { AtomicPionQuark, createAtomicPion, PropertyHooks, withTransform } from "./Pion"
 import { EACH, INTERNAL_OP, IonicProxy } from "./Ionic"
 import { $activeUpdate, Update } from "../reactivity/Update"
@@ -57,13 +57,12 @@ export class ModelQuark implements Atom {
    asTrackedAtom: TrackedAtom | undefined
    proto: Proto
    proxy!: QuarkyIonicProxy
-   hooks!: IonicModelHooks | undefined
    extension!: AnyObject | undefined
-   config!: AnyObject
    ops: TrackedOps
 
    constructor(
       public target: AnyObject, //initialData
+      public hooks: IonicModelHooks | undefined
    ) {
       this.proto = new Map<ProxyKey, PropertyAccess>([
          [QUARK, {
@@ -87,8 +86,7 @@ export class ModelQuark implements Atom {
       // toString
       // valueOf
 
-      // const Collective = collective ? CollectiveState : PrivateState
-      this.state = new PrivateState(target, this.getCloner())
+      this.state = new CollectiveState(target, this.getCloner())
       this.ops = new TrackedOps(this)
 
       this.initCollection()
@@ -116,6 +114,7 @@ export class ModelQuark implements Atom {
       if (hooks && EACH in hooks && hooks[EACH]) {
          const each = hooks[EACH]
          if ('as' in each && each.as) {
+            console.log('&&& init collection!', each.as)
             this.initEach(each.as)
             delete each.as
          }
@@ -147,6 +146,7 @@ export class ModelQuark implements Atom {
       let obj = this.state.get(); // TODO: should this be target or state.get() ??
       do {
          const initEach = getIonicDef(obj.constructor as Constructor)?.config['@initEach']
+         // console.log('&&& initEach',obj.constructor, getIonicDef(obj.constructor), initEach)
          if (initEach) {
             const collection = this.state.get() as any[]
             if (!(Symbol.iterator in collection)) {
@@ -156,8 +156,9 @@ export class ModelQuark implements Atom {
 
             let i = 0;
             for (const item of collection) {
+               const index = i++;
                this.state.mutateSync(target => {
-                  initEach(item, target, transform, i++)
+                  initEach(item, target, transform, index)
                })
             }
             this.state.commitUpdate()
@@ -195,7 +196,7 @@ export class ModelQuark implements Atom {
    ) {
       if (!Object.isExtensible(this.target)) return { get: () => undefined, set: nowrite }
       const valueKey = isIonKey(key) ? key.slice(1) : key
-      const ionKey = key === valueKey && typeof key === 'string' ? '$' + key : undefined
+      const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? '$' + key : undefined
       return this.initPion(key, valueKey, ionKey, undefined)
    }
 
@@ -327,12 +328,12 @@ export class ModelQuark implements Atom {
       proto.set(valueKey, state)
 
       const $state = pionAccess ? {
-         get: () => pion,
+         get: () => { console.log('&&& getting pion', key); return pion },
          set: nowrite
       } : undefined
 
       if (pionAccess) proto.set(ionKey, $state!)
-
+      console.trace('pion access', key, ionKey, $state)
       return key === ionKey ? $state : state
    }
 
@@ -356,13 +357,13 @@ export class ModelQuark implements Atom {
       descriptor: PropertyDescriptor,
       def: AnyObject | undefined
    ) {
-      const { proto, config, proxy, track, trackModel, trigger, triggerAll, triggerModel } = this
+      const { proto, hooks, proxy, track, trackModel, trigger, triggerAll, triggerModel } = this
       const descriptor_set = descriptor.set
       const _getter = descriptor.get ?? (() => undefined)
       const _setter = descriptor_set ? ((value: unknown) => { descriptor_set(value); return true; }) : nowrite
 
       const get = def?.get ? def.get.bind({
-         config,
+         config: hooks,
          get raw() { return state.get() },
          get ionic() { return { get [key]() { return _getter.apply(proxy) } } },
          track,
@@ -370,7 +371,7 @@ export class ModelQuark implements Atom {
       }) : _getter;
 
       const set = def?.set ? def.set.bind({
-         config,
+         config: hooks,
          get raw() { return state.get() },
          get ionic() { return { set [key](value: unknown) { _setter.apply(proxy, [value]) } } },
          trigger,
@@ -417,17 +418,27 @@ export class ModelQuark implements Atom {
    ) {
       if (def) {
          if (__DEV__ && !isFunction(def)) console.warn('Invalid method definition')
-         const { state, proxy, track, trackModel, trigger, triggerModel, triggerAll, config } = this
+         const { state, proxy, track, trackModel, hooks } = this
          const method = def.bind({
-            config,
+            config: hooks,
+            mutate: (mutationFn, triggerFn) => {
+               const { trigger, triggerModel, triggerAll } = this
+               const output = this.state.mutate(mutationFn) as any
+               triggerFn({
+                  output,
+                  op: {
+                     triggerModel,
+                     triggerAll,
+                     trigger
+                  }
+               })
+               return output;
+            },
             get raw() { return state.get() },
             get ionic() { return { [key]: fn.bind(proxy) } },
             track,
-            trackModel,
-            trigger,
-            triggerModel,
-            triggerAll
-         } satisfies TriggerableThis & TrackableThis & CustomThis)
+            trackModel
+         } satisfies TrackableThis & CustomThis)
 
          const methodAccess = {
             get: () => method,
@@ -453,7 +464,7 @@ export class ModelQuark implements Atom {
       ion: () => unknown,
       def: AnyObject | undefined
    ) {
-      const { proto, proxy, target, config, track, trackModel, trigger, triggerAll, triggerModel } = this
+      const { proto, proxy, target, hooks: config, track, trackModel, trigger, triggerAll, triggerModel } = this
 
       const hooks = this.getPropertyHooks(valueKey)
       const setState = 'value' in ion ? Object.getOwnPropertyDescriptor(ion, 'value')?.set ?? nowrite : nowrite

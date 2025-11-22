@@ -18,7 +18,7 @@ export function asIonic<T extends AnyObject>(target: T, config?: AnyObject): Ion
    if (isIonicProxy(target)) return target as any as IonicProxy & T;
    const existing = ionicModels.get(target)
    if (existing) {
-      if (__DEV__ && quarkOf(existing).config !== config) {
+      if (__DEV__ && quarkOf(existing).hooks !== config) {
          console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by asIonic`)
       }
       return existing as any as IonicProxy & T
@@ -27,7 +27,7 @@ export function asIonic<T extends AnyObject>(target: T, config?: AnyObject): Ion
 }
 
 export function Ionic<T extends AnyObject>(target: T, config?: AnyObject): IonicProxy & T {
-   const proxy = createIonicModel(target, config ?? {})
+   const proxy = createIonicModel(target, config ?? {}, undefined)
    ionicModels.set(target, proxy)
    return proxy as any as IonicProxy & T
 }

@@ -53,11 +53,11 @@ export function installIonicMap() {
       entries: SetlikeDef.entries,
 
       set(key, value) {
-         const map = this.raw.set(key, value)
-         this.trigger('has', key)
-         this.trigger('[[get]]', 'size')
-         this.triggerModel()
-         return asIonic(map)
+         return asIonic(this.mutate(raw => raw.set(key, value), ({ op }) => {
+            op.trigger('has', key)
+            op.trigger('[[get]]', 'size')
+            op.triggerModel()
+         }))
       },
 
       has: SetlikeDef.has,
