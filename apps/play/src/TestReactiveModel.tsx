@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
@@ -83,36 +84,88 @@ interface Item {
    id: number, content: string
 }
 
-class ItemList extends Array<Item> {
+// OPTION A: 
+
+class ItemList {
+   list: { id: number, content: string }[]
+
+   constructor(...args: { id: number, content: string }[]) {
+      this.list = args;
+   }
 
    insert(index: number) {
-      if (index === this.length) {
-         this.push({
-            id: genId(),
-            content: (Math.random() * 100).toString(),
-         })
+      const item = {
+         id: genId(),
+         content: (Math.random() * 100).toString(),
+      }
+      if (index === this.list.length) {
+         this.list.push(item)
+         console.log('this?', this)
+         return item;
       }
       else
-         this.splice(index, 0, {
-            id: genId(),
-            content: (Math.random() * 100).toString(),
-         })
+         this.list.splice(index, 0, item)
+      return item;
    }
 
    remove(index: number) {
-      console.log('being remove ==============', index)
+      this.list.splice(index, 1);
+   }
+
+   changeContent(index: number) {
+      const item = this.list[index];
+      item.content = 'something else'
+   }
+
+   clone() {
+      return new ItemList(...this.list)
+   }
+}
+
+class ItemListB extends Array<Item> {
+
+   insert(index: number) {
+      const item = {
+         id: genId(),
+         content: (Math.random() * 100).toString(),
+      }
+      if (index === this.length) {
+         this.push(item)
+         console.log('this?', this)
+         return item;
+      }
+      else
+         this.splice(index, 0, item)
+      return item;
+   }
+
+   remove(index: number) {
       this.splice(index, 1);
-      console.log('end remove ==============', index)
    }
 
    changeContent(index: number) {
       const item = this[index];
-      console.log('$$$ item', item)
       item.content = 'something else'
    }
 }
 
-defineIonicCollection(ItemList, {clone: list => new ItemList(...list)})
+class ListItem {
+   id = genId()
+   constructor(
+      public content: string
+   ) { }
+
+   changeContent() {
+      this.content = 'something else'
+   }
+}
+
+defineIonicCollection(ItemList, {
+   clone: list => list.clone()
+   // '@initEach'(item, target, transform, index) {
+   //    target.list[index] = transform(item)
+   // }
+})
 
 class Selected<T> extends Set<T> {
    toggle(item: T) {
@@ -124,7 +177,7 @@ class Selected<T> extends Set<T> {
       }
    }
 }
-defineIonicCollection(Selected, {clone: set => new Selected(set)})
+defineIonicCollection(Selected, { clone: set => new Selected(set) })
 
 export function List(
 
@@ -140,15 +193,39 @@ export function List(
    // type A = typeof mixed extends Array<infer I> ? IsRedundantUnion<ToRaw<I>> extends true ? 'yes' : 'no' : 'no'
    // // {[K in keyof ToRaw<I>]: ToRaw<I>[K]}[]  : never
    // // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
-   const list = Ionic(new ItemList(
-      { id: 0, content: "frog" },
-      { id: 1, content: "robin" },
-      { id: 2, content: "fly" },
-      { id: 3, content: "swamp" }
-   ), { [EACH]: { as: (value) => ( console.log('$$$ transform', value), Ionic(value)) } })
+   // const list = Ionic(new ItemList(
+   //    { id: 0, content: "frog" },
+   //    { id: 1, content: "robin" },
+   //    { id: 2, content: "fly" },
+   //    { id: 3, content: "swamp" }
+   // ), { list: { as: (list: any[]) => Ionic(list, { [EACH]: Ionic }) } })
 
-   console.log('$$$ list values', list.values().next())
-   console.log('$$$ list iterator', list[Symbol.iterator])
+   const list = Ionic([
+      new ListItem("frog"),
+      new ListItem("robin"),
+      new ListItem("fly"),
+      new ListItem("swamp")
+   ], {
+      [EACH]: { as: Ionic },
+
+      insert(index: number) {
+         const item = Ionic(new ListItem((Math.random() * 100).toString()))
+         if (index === this.length) {
+            this.push(item)
+            return item;
+         }
+         else
+            this.splice(index, 0, item)
+         return item;
+      },
+
+      remove(index: number) {
+         this.splice(index, 1);
+      }
+   })
+
+   // console.log('$$$ list values', list.values().next())
+   // console.log('$$$ list iterator', list[Symbol.iterator])
 
    // const $listClone = Ion(() => list.slice())
 
@@ -169,10 +246,18 @@ export function List(
    //    console.log('$$$ value of ionized values()', value)
    // }
 
+   const selected = Ionic(new Set<$$Item>(), {
+      toggle(item) {
+         if (this.has(item)) {
+            this.delete(item)
+         }
+         else {
+            this.add(item)
+         }
+      }
+   })
 
-
-
-   const selected = Ionic(new Selected<Item>())
+   // const selected = Ionic(new Selected<Item>())
 
    // function toggleSelect(item: typeof list[number]) {
    //    // update(() => {
@@ -210,7 +295,7 @@ export function List(
    // Array.from(toRaw(selected))
 
    function moveSelectedItems(index: number) {
-         moveUniqueItems(selected, list, index)
+      moveUniqueItems(selected, list, index)
    }
 
    function removeItem(index: number) {
@@ -235,11 +320,11 @@ export function List(
                   X
                </p>
 
-               <li on:click={e => (console.log('$$$ change content?', item), list.changeContent($index()))}>
-                  {item.$content}
+               <li on:click={e => (console.log('$$$ change content?', item), item.changeContent())}>
+                  {(item.content)}
                </li>
                <p>{$index}</p>
-               <div on:click={e => list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
+               <div on:click={e => { list.insert($index() + 1) }} style="background-color: gray; cursor: pointer">
                   insert
                </div>
                <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">

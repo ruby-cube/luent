@@ -42,30 +42,30 @@ function _(...args: any[]) { }
 const $todos = AsyncIon({
    initial: [],
    fetch: () => IonicTodos(db.fetchTodos())
-}, class {
-   @_ init() {
+}, ($data, $todos) => ({
+   '@init'() {
       onTodosUpdated(applyMutations => { // TODO: How do you coordinate these real-time updates with everything else?
          applyMutations()
       })
-   }
+   },
 
-   addTodo = AsyncAction({
+   addTodo: AsyncAction({
       dispatch({ ooo }, todo) {
          ooo.await(db.addTodo(todo))
-            .then(() => $todos.refetch())
+            .then(() => $data.refetch())
             .catch(err => { })
       }
-   })
+   }),
 
-   delTodo = AsyncAction({
+   delTodo: AsyncAction({
       dispatch({ ooo }, todo) {
          ooo.await(db.delTodo(todo))
-            .then(() => $todos.refetch())
+            .then(() => $data.refetch())
             .catch(err => { })
       }
-   })
+   }),
 
-   deleteTodo = AsyncAction({
+   deleteTodo: AsyncAction({
       sync(index: number) {
          return $todos().deleteTodo(index, 1)
       },
@@ -73,9 +73,9 @@ const $todos = AsyncIon({
          ooo.await(() => db.deleteTodo(index))
             .catch(err => { })
       },
-   })
+   }),
 
-   removeTodo = AsyncAction({
+   removeTodo: AsyncAction({
       sync(index: number) {
          return $todos().deleteTodo(index, 1)
       },
@@ -83,9 +83,9 @@ const $todos = AsyncIon({
          ooo.await(db.deleteTodo(index))
             .catch(err => { })
       },
-   })
+   }),
 
-   complexOp = AsyncAction({
+   complexOp: AsyncAction({
       dispatch({ ooo, output }, index) {
          mu: $something.value = 0
 
@@ -94,7 +94,7 @@ const $todos = AsyncIon({
       },
       atRace: rival => rival.cancel()
    })
-})
+}))
 
 
 function IonicTodo(data: Todo) {
@@ -119,6 +119,17 @@ function IonicTodo(data: Todo) {
          }
       },
 
+      doSomething: {
+         '@call'({ input: [a], output }) {
+            if (a === 0) {
+               return (undefined)
+            }
+            else {
+               return (IonicProfile(output))
+            }
+         }
+      },
+
       something: {
          '@get'() {
 
@@ -128,14 +139,14 @@ function IonicTodo(data: Todo) {
          }
       },
 
-      $completed: nestAsyncIon($completed => ({
+      $completed: AsyncIon({
          initial: data.completed,
          optimistic: true,
          dispatch({ ooo }, value) {
             ooo.await(db.setCompleted(value))
          },
          // debounce: 500
-      })),
+      }),
 
       updateTitle: nestAsyncAction(updateTitle => ({
          optimistic(title: string) {

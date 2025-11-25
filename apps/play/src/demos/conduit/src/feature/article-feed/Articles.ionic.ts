@@ -398,8 +398,8 @@ function asIonicArticle(data: ArticleData, refetchArticles: () => void) {
    const db = fromRoot(fetchArticles.db)
 
    const article = asIonic(asArticle(data), {
-      favorited: asAsyncIon({
-         uid: article.slug, // used for caching such that if articles is refetched by another part of the app, stale state etc won't be overwritten
+      $favorited: AsyncIon({
+         uid: data.slug, // used for caching such that if articles is refetched by another part of the app, stale state etc won't be overwritten
          initial: data.favorited,
          presumes: true,
 
@@ -408,7 +408,7 @@ function asIonicArticle(data: ArticleData, refetchArticles: () => void) {
          },
 
          dispatch({ ooo }) {
-            ooo.await(() => db.patchArticle(this.slug).favorited(this.favorited))
+            ooo.await(() => db.patchArticle(article.slug).favorited(article.favorited))
                .then(favorited => this.sync(favorited))
             // .finally(refetchArticles)
          },
@@ -444,7 +444,7 @@ function asIonicArticle(data: ArticleData, refetchArticles: () => void) {
          }
       }),
 
-      author: nest(asIonicProfile)
+      author: { as: asIonicProfile }
    })
 
    return article

@@ -4,17 +4,25 @@ import { EACH } from "./Ionic"
 import { trigger } from "../reactivity/Atom"
 import { QUARK } from "../abstract/Quark"
 import { PropertyHooks } from "./Pion"
-import { debug, isFunction } from "@rue/utils"
-import { track } from "../reactivity/Compound"
-import { $activeUpdate, Update } from "../reactivity/Update"
+import { debug } from "@rue/utils"
+import { $activeUpdate } from "../reactivity/Update"
 import { ModelQuark, ProxyKey, QuarkyIonicProxy, trackOp, triggerOp } from "./ModelQuark"
 
 
+type MethodHook = { '@call': (event: { input: unknown[], output: unknown }) => unknown; }
 
+export type IonicModelHooks<T = AnyObject> = {
+   [EACH]?: PropertyHooks
+} & {
+   [K in keyof Partial<T>]?: PropertyHooks | /* TODO: */MethodHook | NestedAsyncAction
+} & {
+   [key: `${string}`]: NestedAsyncIon // TODO:
+} & {
+   [key: ProxyKey]: Function // TODO:
+}
 
-type MethodHook = (event: { input: unknown[], output: unknown }) => unknown;
-
-export type IonicModelHooks = { [EACH]?: PropertyHooks } & { [key: ProxyKey]: PropertyHooks | MethodHook }
+type NestedAsyncIon = (() => any) & { pending: boolean } // FIX: standin
+type NestedAsyncAction = Function & { pending: boolean } // FIX: standin
 
 type Overrides = { [key: ProxyKey]: unknown }
 
@@ -23,14 +31,14 @@ type Extender = (proxy: AnyObject) => IonicModelHooks & Overrides
 export function createIonicModel(
    target: AnyObject,
    config: IonicModelHooks | undefined,
-   extender: Function | undefined
+   // extender: Function | undefined
 ) {
    const modelQuark = new ModelQuark(target, config)
 
    const proxy = new Proxy(modelQuark, traps) as any as QuarkyIonicProxy
 
-   const extension = extender ? extender(proxy) : undefined
-   modelQuark.extension = extension
+   // const extension = extender ? extender(proxy) : undefined
+   // modelQuark.extension = extension
    modelQuark.proxy = proxy;
    return proxy
 }
@@ -59,7 +67,7 @@ const traps: ProxyHandler<ModelQuark> = {
       const success = !proto.has(key)
          ? Boolean(modelQuark.initProperty(key)?.set(newValue))
          : proto.get(key)!.set(newValue)
-      if (success) $activeUpdate()?.atCommit(() => modelQuark.target[key] = newValue)
+      if (success) $activeUpdate()!.atCommit(() => modelQuark.target[key] = modelQuark.state.pending[key] = newValue)
       return success
    },
 
