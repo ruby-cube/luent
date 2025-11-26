@@ -164,7 +164,8 @@ export class FunctionalSubstance extends Compound implements Substance {
 
    constructor(
       private fn: () => unknown,
-      private retrack: boolean
+      private retrack: boolean,
+      private warnNoAtoms = true
    ) {
       super()
    }
@@ -211,7 +212,7 @@ export class FunctionalSubstance extends Compound implements Substance {
       }
       finally {
          popTracker();
-         if (__DEV__ && this.particles.length === 0) {
+         if (__DEV__ && this.warnNoAtoms && this.particles.length === 0) {
             console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
          }
       }
@@ -286,7 +287,7 @@ export class IonSubstance implements WatchedSubstance {
       getState: () => unknown,
       retrack: boolean = true
    ) {
-      this.subject = new FunctionalSubstance(getState, retrack);
+      this.subject = new FunctionalSubstance(getState, retrack, false);
    }
 
    linkEffect(effect: Effect): void {
@@ -298,7 +299,6 @@ export class IonSubstance implements WatchedSubstance {
    getValue() {
       const value = this.subject.trackedCall()
       if (value !== this.proxySubject?.getValue() && isIonicProxy(value)) {
-         console.log('YES!!')
          this.proxySubject = new IonicProxySubject(value)
       }
       return value;

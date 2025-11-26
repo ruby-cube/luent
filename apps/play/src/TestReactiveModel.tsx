@@ -294,7 +294,8 @@ export function List(
    }
 
    function removeItem(index: number) {
-      selected.delete(list[index])
+      const item = list[index]
+      if (selected.has(item)) selected.delete(item)
       list.remove(index);
    }
 
@@ -378,8 +379,3 @@ export function List(
 
 
 
-
-function responsive(fn: () => unknown) {
-   return fn()
-   // return update(fn, {timeMargin: 100})
-}

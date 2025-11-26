@@ -11,7 +11,7 @@ import { EACH, INTERNAL_OP, IonicProxy } from "./Ionic"
 import { $activeUpdate, Update } from "../reactivity/Update"
 import { TrackedOps } from "./TrackedOp"
 import { Traceable } from "../debug/Traceable"
-import { IonicModelHooks } from "./IonicModel"
+import { IonicModelHooks, MethodHook } from "./IonicModel"
 
 export type QuarkyIonicProxy = AnyObject & { [QUARK]: ModelQuark }
 export type Proto = Map<ProxyKey, PropertyAccess>
@@ -50,6 +50,7 @@ function nowrite(value: unknown) {
 //    }
 // }
 
+type GetHooks = <T extends "property" | "method">(key: ProxyKey) => T extends "property" ? PropertyHooks | undefined : MethodHook | undefined
 
 export class ModelQuark implements Atom {
    __DEV__asTraceable: Traceable = new Traceable()
@@ -74,7 +75,7 @@ export class ModelQuark implements Atom {
             set: nowrite
          }],
          ['isPrototypeOf', {
-            get: GetBoundMethod(target.isPrototypeOf, target),
+            get: this.GetBoundMethod(target.isPrototypeOf, target),
             set: nowrite
          }]
       ])
@@ -114,9 +115,8 @@ export class ModelQuark implements Atom {
       if (hooks && EACH in hooks && hooks[EACH]) {
          const each = hooks[EACH]
          if ('as' in each && each.as) {
-            console.log('&&& init collection!', each.as)
             this.initEach(each.as)
-            delete each.as
+            // delete each.as
          }
          if ('@get' in each || '@set' in each) this.overrideGetPropertyHooks()
       }
@@ -127,20 +127,20 @@ export class ModelQuark implements Atom {
       do {
          const getHookKey = getIonicDef(obj.constructor as Constructor)?.config['@getHookKey']
          if (getHookKey) {
-            this.getPropertyHooks = (key: ProxyKey) => {
+            this.getHooks = ((key: ProxyKey) => {
                const hooks = this.extension
                if (!hooks) return undefined
                const maybeHooks = hooks[key]
-               return (maybeHooks ?? hooks[getHookKey(key)]) as PropertyHooks | undefined
-            }
+               return (maybeHooks ?? hooks[getHookKey(key)])
+            }) as GetHooks
             return;
          }
          obj = Object.getPrototypeOf(obj)
       } while (obj && obj.constructor !== Object)
    }
 
-   private getPropertyHooks(key: ProxyKey): PropertyHooks | undefined {
-      return this.extension?.[key] as PropertyHooks
+   private getHooks: GetHooks = <T extends 'property' | 'method'>(key: ProxyKey) => {
+      return this.extension?.[key] as T extends "property" ? PropertyHooks | undefined : MethodHook | undefined
    }
 
    private initEach(transform: (value: unknown) => unknown) {
@@ -204,9 +204,7 @@ export class ModelQuark implements Atom {
 
    initExtensionMethod(key: ProxyKey, method: Function) {
       const methodAccess = {
-         get: 
-         // () => method,
-         GetBoundMethod(method, this.proxy),
+         get: this.GetBoundMethod(method, this.proxy),
          set: nowrite
       }
       this.proto.set(key, methodAccess)
@@ -217,7 +215,6 @@ export class ModelQuark implements Atom {
    initNonProperty(
       key: ProxyKey
    ) {
-      console.log('init non property', key)
       if (!Object.isExtensible(this.target)) return { get: () => undefined, set: nowrite }
       const valueKey = isIonKey(key) ? key.slice(1) : key
       const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? '$' + key : undefined
@@ -307,7 +304,7 @@ export class ModelQuark implements Atom {
          return this.initMethod(
             key,
             value,
-            def
+            isFunction(def) ? def : undefined
          )
       }
       else if (key === valueKey && writable) {
@@ -338,7 +335,7 @@ export class ModelQuark implements Atom {
    ) {
       const { proto, target } = this
       if (__DEV__) assertNotFunction(value)
-      const hooks = this.getPropertyHooks(valueKey)
+      const hooks = this.getHooks<'property'>(valueKey)
 
       const pionAccess = ionKey && !(ionKey in target) // makes sure not an absorbed ion
 
@@ -402,7 +399,7 @@ export class ModelQuark implements Atom {
          triggerAll
       }) : _setter;
 
-      const { as: transform, '@get': castGet, '@set': castSet } = (this.getPropertyHooks(valueKey) ?? {}) as PropertyHooks
+      const { as: transform, '@get': castGet, '@set': castSet } = (this.getHooks(valueKey) ?? {}) as PropertyHooks
 
       const getWithHook = castGet ? withGetHook(get, castGet) : get;
       const setWithHook = castSet ? withSetHook<boolean>(set, castSet, () => this.state.get()[valueKey]) : set;
@@ -437,47 +434,59 @@ export class ModelQuark implements Atom {
    protected initMethod(
       key: ProxyKey,
       fn: Function,
-      def: AnyObject | undefined
+      def: Function | undefined
    ) {
-      if (def) {
-         if (__DEV__ && !isFunction(def)) console.warn('Invalid method definition')
-         const { state, proxy, track, trackModel, extension } = this
-         const method = def.bind({
-            config: extension,
-            mutate: (mutationFn, triggerFn) => {
-               const { trigger, triggerModel, triggerAll } = this
-               const output = this.state.mutate(mutationFn) as any
-               triggerFn({
-                  output,
-                  op: {
-                     triggerModel,
-                     triggerAll,
-                     trigger
-                  }
-               })
-               return output;
-            },
-            get raw() { return state.get() },
-            get ionic() { return { [key]: fn.bind(proxy) } },
-            track,
-            trackModel
-         } satisfies TrackableThis & CustomThis)
+      const castHook = this.getHooks<'method'>(key)?.["@call"]
+      const thisObj = def ? this.CustomThis(key, fn, def) : this.proxy
+      const methodAccess = {
+         get: castHook ? this.GetBoundMethodWithHook(key, def ?? fn, thisObj, castHook) : this.GetBoundMethod(def ?? fn, thisObj),
+         set: nowrite
+      }
+      this.proto.set(key, methodAccess)
+      return methodAccess
 
-         const methodAccess = {
-            get: () => method,
-            set: nowrite
-         }
-         this.proto.set(key, methodAccess)
-         return methodAccess
+   }
+
+   private CustomThis(key: ProxyKey, fn: Function, def: Function): TrackableThis & CustomThis {
+      const { state, proxy, track, trackModel, extension } = this
+
+      return {
+         config: extension,
+         mutate: (mutationFn, triggerFn) => {
+            const { trigger, triggerModel, triggerAll } = this
+            const output = this.state.mutate(mutationFn) as any
+            triggerFn({
+               output,
+               op: {
+                  triggerModel,
+                  triggerAll,
+                  trigger
+               }
+            })
+            return output;
+         },
+         get raw() { return state.get() },
+         get ionic() { return { [key]: fn.bind(proxy) } },
+         track,
+         trackModel
       }
-      else {
-         const methodAccess = {
-            get: () => this.target[key],
-            set: nowrite
-         }
-         this.proto.set(key, methodAccess)
-         return methodAccess
+   }
+
+   private GetBoundMethodWithHook(key: ProxyKey, method: Function, obj: Object, castHook: (hook: { input: any[], output: any }) => void) {
+      const boundMethod = function (...input: any[]) {
+         const output = method.apply(obj, input)
+         castHook({ input, output })
+         return output;
       }
+
+      if (__DEV__) boundMethod.displayName = key
+
+      return () => boundMethod
+   }
+
+   private GetBoundMethod(method: Function, obj: AnyObject) {
+      const boundMethod = method.bind(obj)
+      return () => boundMethod
    }
 
    protected initAbsorbedIon(
@@ -489,7 +498,7 @@ export class ModelQuark implements Atom {
    ) {
       const { proto, proxy, target, extension: config, track, trackModel, trigger, triggerAll, triggerModel } = this
 
-      const hooks = this.getPropertyHooks(valueKey)
+      const hooks = this.getHooks<'property'>(valueKey)
       const setState = 'value' in ion ? Object.getOwnPropertyDescriptor(ion, 'value')?.set ?? nowrite : nowrite
 
       const get = def?.get ? def.get.bind({
@@ -529,7 +538,7 @@ export class ModelQuark implements Atom {
       proto.set(valueKey, state)
 
       const $state = {
-         get: !hasQuark(ion) ? GetBoundMethod(ion, proxy) : () => target[ionKey],
+         get: !hasQuark(ion) ? this.GetBoundMethod(ion, proxy) : () => target[ionKey],
          set: nowrite
       }
 
@@ -586,10 +595,10 @@ export class ModelQuark implements Atom {
 }
 
 
-function GetBoundMethod(method: Function, obj: AnyObject) {
-   const boundMethod = method.bind(obj)
-   return () => boundMethod
-}
+// function GetBoundMethod(method: Function, obj: AnyObject) {
+//    const boundMethod = method.bind(obj)
+//    return () => boundMethod
+// }
 
 function assertNotFunction(value: unknown) {
    if (isFunction(value)) throw new Error('TypeError: value cannot be a function')

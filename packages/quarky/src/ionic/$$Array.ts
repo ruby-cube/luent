@@ -171,7 +171,6 @@ defineIonicCollection(Array, {
       return Ionic(this.ionic.toSpliced(start, deleteCount, ...args))
    },
 
-   // TODO: lock model for mutating ops
    splice(...args) {
       return Ionic(this.ionic.splice(...args))
    },

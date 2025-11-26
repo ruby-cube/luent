@@ -210,7 +210,7 @@ export class RenderCycle {
 
    scheduleEffects(effects: EffectQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      if (__DEV__ && adjustedPhase !== phase && phase !== 'SYNC') console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       this.useTaskQueue(adjustedPhase).scheduleEffects(effects)
    }
 

@@ -9,7 +9,7 @@ import { $activeUpdate } from "../reactivity/Update"
 import { ModelQuark, ProxyKey, QuarkyIonicProxy, trackOp, triggerOp } from "./ModelQuark"
 
 
-type MethodHook = { '@call': (event: { input: unknown[], output: unknown }) => unknown; }
+export type MethodHook = { '@call': (event: { input: unknown[], output: unknown }) => unknown; }
 
 export type IonicModelHooks<T = AnyObject> = {
    [EACH]?: PropertyHooks
