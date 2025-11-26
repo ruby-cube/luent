@@ -79,12 +79,9 @@ export class Update {
    committed = false
 
    commit() {
-      // for (const state of this.states) {
-      //    state.commitUpdate()
-      // }
       this.committed = true
-      // this.emitter.dispatchEvent(this.settled!)
       this.emitter.dispatchEvent(this.commitupdate!)
+      this.emitter.dispatchEvent(this.settled!)
    }
 
    cancelled = false
@@ -96,6 +93,7 @@ export class Update {
       this.reject('update cancelled')
       this.cycle.cancel()
       this.emitter.dispatchEvent(this.cancelupdate!)
+      this.emitter.dispatchEvent(this.settled!)
    }
 
    private _emitter?: EventTarget;
@@ -104,14 +102,19 @@ export class Update {
       return this._emitter ?? (
          this.commitupdate = new Event(this.COMMIT),
          this.cancelupdate = new Event(this.CANCEL),
+         this.settled = new Event(this.SETTLED),
          this._emitter = new EventTarget()
       )
    }
 
+   // NOTE: settled event must be dispatched AFTER commit and cancel
+
+   private SETTLED = 'settled'
+
+   private settled: Event | undefined
 
    atSettled(task: () => void) {
-      this.atCommit(task)
-      this.atCancel(task)
+      this.emitter.addEventListener(this.SETTLED, task)
    }
 
    private COMMIT = 'commit'

@@ -112,39 +112,44 @@ export class ListKit extends VineNode {
       console.log('$$$@ lcsLength', lcsLength)
       console.log('$$$@ sequences', sequences)
 
-      queueInternalRender(() => {
-         console.log('qIR rerendering list')
-         // TODO: Can we make this call more efficient??
-         // remove DOMNodes
-         let i = prevKits.length;
-         while (i--) {
-            const kit = prevKits[i]
-            const uid = this.getUID(kit.item)
-            if (!currentItems.has(uid)) {
-               kit.$index.value = -1;
-               kit.$index.dataLength = list.length;
+      console.log('qIR rerendering list')
+      // TODO: Can we make this call more efficient??
+      // remove DOMNodes
+      let i = prevKits.length;
+      while (i--) {
+         const kit = prevKits[i]
+         const uid = this.getUID(kit.item)
+         if (!currentItems.has(uid)) {
+            kit.$index.value = -1;
+            kit.$index.dataLength = list.length;
+            queueInternalRender(() => {
                const prevNodes = kit.nodes!
                removeDOMNodes(prevNodes)
                kit.nodes = undefined;
-               kit.flask.emitDiscard()
-            }
-            else if (hasMoved(kit)) {
+            }, this.flask)
+            kit.flask.emitDiscard()
+         }
+         else if (hasMoved(kit)) {
+            queueInternalRender(() => {
                const prevNodes = kit.nodes!
                removeDOMNodes(prevNodes)
-               kit.hasMoved = true;
-               hasMovedItems = true;
-            }
+            }, this.flask)
+            kit.hasMoved = true;
+            hasMovedItems = true;
          }
+      }
 
-         function hasMoved(kit: ListItemKit) {
-            if (inLongestSeq(kit.$index())) return false;
-            // TODO: check if sequence is in correct order relative to lcs and other seqs
-            return true
-         }
+      function hasMoved(kit: ListItemKit) {
+         if (inLongestSeq(kit.$index())) return false;
+         // TODO: check if sequence is in correct order relative to lcs and other seqs
+         return true
+      }
 
-         function inLongestSeq(index: number) {
-            return index >= lcsStart && index < lcsLength
-         }
+      function inLongestSeq(index: number) {
+         return index >= lcsStart && index < lcsLength
+      }
+
+      queueInternalRender(() => {
 
          const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
 

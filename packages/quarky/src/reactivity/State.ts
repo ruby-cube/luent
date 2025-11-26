@@ -22,6 +22,7 @@ function getState(state: PendableState) {
 }
 
 function lockState(state: PendableState) {
+   console.log('%%% LOCKING STATE', state)
    const update = $activeUpdate()
    if (!update) {
       console.warn('nothing to lock to')
@@ -203,8 +204,9 @@ export class CollectiveState implements PendableState {
    //    }
    // }
    commitUpdate(): void {
-      if (this.mutations.length)
+      if (this.mutations.length){
          this.applyMutations()
+      }
    }
 
       private mutations: ((model: AnyObject) => unknown)[] = []
@@ -221,9 +223,11 @@ export class CollectiveState implements PendableState {
    }
 
    private applyMutations() {
+      console.log('%%%', '== APPLYING MUTATIONS')
       for (const mutate of this.mutations) {
          mutate(this.current)
       }
+      console.log('%%%', '== END APPLYING MUTATIONS')
       this.mutations = []
    }
 

@@ -85,7 +85,7 @@ export function installIonicSet() {
             op.trigger('has', value)
             op.trigger('[[get]]', 'size')
             op.triggerModel()
-         }))
+         })) // FIX: just return the proxy? or don't require config?
       },
 
       has: SetlikeDef.has,

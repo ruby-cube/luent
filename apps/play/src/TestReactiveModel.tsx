@@ -224,27 +224,24 @@ export function List(
       }
    })
 
-   // console.log('$$$ list values', list.values().next())
-   // console.log('$$$ list iterator', list[Symbol.iterator])
+   console.log('$$$ list values', list.values().next())
+   console.log('$$$ list iterator', list[Symbol.iterator])
 
    // const $listClone = Ion(() => list.slice())
 
-   // const values = list.values()
-   // for (const value of values) {
-   //    console.log('$$$ value', value)
-   // }
+   const values = list.values()
+   for (const value of values) {
+      console.log('$$$ value', value)
+   }
 
-   // for (const value of list) {
-   //    console.log('$$$ value of list', value)
-   // }
+   for (const value of list) {
+      console.log('$$$ value of list', value)
+   }
 
-   // console.log('$$$ values vs entries', [][Symbol.iterator].constructor)
-
-   // FIX:
-   // const ionizedValues = Ionic(list.values())
-   // for (const value of ionizedValues) {
-   //    console.log('$$$ value of ionized values()', value)
-   // }
+   const ionizedValues = Ionic(list.values())
+   for (const value of ionizedValues) {
+      console.log('$$$ value of ionized values()', value)
+   }
 
    const selected = Ionic(new Set<$$Item>(), {
       toggle(item) {
@@ -256,8 +253,6 @@ export function List(
          }
       }
    })
-
-   // const selected = Ionic(new Selected<Item>())
 
    // function toggleSelect(item: typeof list[number]) {
    //    // update(() => {
@@ -282,17 +277,17 @@ export function List(
    //    }
    // })
 
-   // try {
-   //    console.log('has it?', selected.has(0))
-   // }
-   // catch (err) {
-   //    console.error('EEP', err)
-   // }
+   try {
+      console.log('has it?', selected.has(0))
+   }
+   catch (err) {
+      console.error('EEP', err)
+   }
 
    // toRaw(selected).add({id: '', content: ''})
 
-   // const vals = selected.values()
-   // Array.from(toRaw(selected))
+   const vals = selected.values()
+   Array.from(selected)
 
    function moveSelectedItems(index: number) {
       moveUniqueItems(selected, list, index)

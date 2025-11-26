@@ -133,6 +133,7 @@ export class ModelQuark implements Atom {
                const maybeHooks = hooks[key]
                return (maybeHooks ?? hooks[getHookKey(key)]) as PropertyHooks | undefined
             }
+            return;
          }
          obj = Object.getPrototypeOf(obj)
       } while (obj && obj.constructor !== Object)
@@ -162,7 +163,7 @@ export class ModelQuark implements Atom {
                })
             }
             this.state.commitUpdate()
-
+            return;
          }
          obj = Object.getPrototypeOf(obj)
       } while (obj && obj.constructor !== Object)
@@ -356,7 +357,6 @@ export class ModelQuark implements Atom {
       } : undefined
 
       if (pionAccess) proto.set(ionKey, $state!)
-      console.trace('pion access', key, ionKey, $state)
       return key === ionKey ? $state : state
    }
 

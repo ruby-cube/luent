@@ -292,7 +292,6 @@ export class IonSubstance implements WatchedSubstance {
    linkEffect(effect: Effect): void {
       if (this.subject.reactive)
          this.subject.linkEffect(effect)
-      console.log('AHH')
       this.proxySubject?.linkEffect(effect)
    }
 
