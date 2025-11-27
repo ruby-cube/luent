@@ -74,21 +74,21 @@ export function makeElement(
 
    if (Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
-         runWithXMLNamespace(() => {
-            const rawOutput = normalizeToArray(Slot())
+      runWithXMLNamespace(() => {
+         const rawOutput = normalizeToArray(Slot())
 
-            // if (isInnerHTMLKit(rawOutput[0])) {
-            //    const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
-            //    mountInnerHTML(innerHTML, domNode)
-            // }
-            // else {
-            const nodes = processJSXOutput(rawOutput)
-            setUpNodeVine(nodes, domNode)
-            mountDOMNodes(nodes, domNode)
+         // if (isInnerHTMLKit(rawOutput[0])) {
+         //    const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
+         //    mountInnerHTML(innerHTML, domNode)
+         // }
+         // else {
+         const nodes = processJSXOutput(rawOutput)
+         setUpNodeVine(nodes, domNode)
+         mountDOMNodes(nodes, domNode)
 
-         }, xml_ns)
+      }, xml_ns)
 
- 
+
       // }
    }
    return domNode;
@@ -148,7 +148,7 @@ function analyzeAttributes(entries: AnyObject) {
    }
 }
 
-function isMutableIon(ion: unknown): ion is MutableIon<any> {
+export function isMutableIon(ion: unknown): ion is MutableIon<any> {
    return isIon(ion) && 'value' in ion
 }
 
@@ -172,7 +172,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    delete attributes['mu:checked'];
    attributes.checked = ion;
    if (!isMutableIon(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion, 'checked')
@@ -241,7 +241,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    }
    else {
       element.addEventListener('change', e => {
-         updateIonWithInput(ion, e)
+         swiftUpdate(() => updateIonWithInput(ion, e))
       })
    }
 }
@@ -270,13 +270,17 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 
 function setUpCheckboxInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {
-      updateIonWithInput(ion, e, 'checked')
+      instantUpdate(() => {
+         updateIonWithInput(ion, e, 'checked')
+      })
    })
 }
 
 function setUpInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }, key: string = 'value') {
    element.addEventListener('input', e => {
-      updateIonWithInput(ion, e, key)
+      instantUpdate(() => {
+         updateIonWithInput(ion, e, key)
+      })
    })
 }
 
@@ -502,8 +506,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
    for (const key in events) {
       const handlers = normalizeToArray(events[key]);
       for (const handler of handlers) {
-         const handleEvent = key === 'click' ? (e) => swiftUpdate(() => handler(e)) : (e) => instantUpdate(() => handler(e)) // FIX: temporary standin
-         $listen(handleEvent, options ? (options.preserve = true, options) : { preserve: true }, {
+         $listen(withUpdate(handler, key), options ? (options.preserve = true, options) : { preserve: true }, {
             // preserve since there is no need to pause listener when it is unmounted--it will never be triggered
             enroll: (cb) => {
                node.addEventListener(key, cb, options);
@@ -516,6 +519,11 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
       }
 
    }
+}
+
+export function withUpdate(handler: Function, event: string) {
+   const update = event === 'click' ? swiftUpdate : instantUpdate  // FIX: standin update type should depend on event type
+   return (e) => update(() => handler(e))
 }
 
 

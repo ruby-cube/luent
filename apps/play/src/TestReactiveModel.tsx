@@ -1,153 +1,17 @@
-// @ts-nocheck
 import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { EACH, Ionic } from "../../../packages/quarky/src/ionic/Ionic";
-import { defineIonicCollection } from "../../../packages/quarky/src/ionic/IonicDef";
+import { Ion } from "@rue/quarky";
 
 
 const randomColor = useRandomColorGenerator()
-let id = 4;
+let id = 0;
 
 function genId() {
    return id++;
 }
 
-
-// const $count = Ion(0)
-// watch($=(doubleCount => $count() + 2), () => {  
-
-// })
-
-
-// type RedefineReturn <P, M extends string, R extends >= <T extends Frog>(this: T, ...args: Parameters<Frog['getQualitiesB']>) => T["qualities"]
-
-// const blub = {
-//     getQualities<T extends Frog>(this: T): T['qualities'] {
-//         return this.qualities;
-//     }
-// }
-
-// type Star = {
-//     fish: () => DeepReactiveModel<Frog>['qualities']
-// } & ThisType<DeepReactiveModel<Frog>>
-
-// const star: Star = {
-//     fish() {
-//         return this.qualities
-//     }
-// }
-
-// const something = star.fish()
-
-
-// const frog = new Frog() as FrogB
-// const frog$$=ionize(frog)
-
-// const q = frog$$.qualities
-// const qual$$=frog$$.getQualitiesB()
-// const qual = frog.getQualitiesB()
-
-class Frog {
-   name = 'kermit'
-   setName() {
-
-   }
-}
-
-// Ionized<(Ionized<{
-//    id: number;
-//    content: string;
-// }, {}> | {
-//    id: number;
-//    content: string;
-// })[], {}>
-
-// Ionized<{
-//    id: number;
-//    content: string;
-// }[], {}>
-
-// (Ionized<{
-//    id: number;
-//    content: string;
-// }, {}> | Ionized<Ionized<{
-//    id: number;
-//    content: string;
-// }, {}>, {}>)[]
-
-type Froggy = {
-   name?: string
-}
-
-interface Item {
-   id: number, content: string
-}
-
-// OPTION A: 
-
-class ItemList {
-   list: { id: number, content: string }[]
-
-   constructor(...args: { id: number, content: string }[]) {
-      this.list = args;
-   }
-
-   insert(index: number) {
-      const item = {
-         id: genId(),
-         content: (Math.random() * 100).toString(),
-      }
-      if (index === this.list.length) {
-         this.list.push(item)
-         console.log('this?', this)
-         return item;
-      }
-      else
-         this.list.splice(index, 0, item)
-      return item;
-   }
-
-   remove(index: number) {
-      this.list.splice(index, 1);
-   }
-
-   changeContent(index: number) {
-      const item = this.list[index];
-      item.content = 'something else'
-   }
-
-   clone() {
-      return new ItemList(...this.list)
-   }
-}
-
-class ItemListB extends Array<Item> {
-
-   insert(index: number) {
-      const item = {
-         id: genId(),
-         content: (Math.random() * 100).toString(),
-      }
-      if (index === this.length) {
-         this.push(item)
-         console.log('this?', this)
-         return item;
-      }
-      else
-         this.splice(index, 0, item)
-      return item;
-   }
-
-   remove(index: number) {
-      this.splice(index, 1);
-   }
-
-   changeContent(index: number) {
-      const item = this[index];
-      item.content = 'something else'
-   }
-}
 
 class ListItem {
    id = genId()
@@ -160,45 +24,9 @@ class ListItem {
    }
 }
 
-defineIonicCollection(ItemList, {
-   clone: list => list.clone()
-   // '@initEach'(item, target, transform, index) {
-   //    target.list[index] = transform(item)
-   // }
-})
 
-class Selected<T> extends Set<T> {
-   toggle(item: T) {
-      if (this.has(item)) {
-         this.delete(item)
-      }
-      else {
-         this.add(item)
-      }
-   }
-}
-defineIonicCollection(Selected, { clone: set => new Selected(set) })
 
-export function List(
-
-) {
-   // const frog = ionize({ id: 0, content: "frog" })
-   // const mixed = [
-   //    frog,
-   //    { id: 1, content: "robin" },
-   //    { id: 2, content: "fly" },
-   //    { id: 3, content: "swamp" }
-   // ]
-   // type B = typeof mixed extends Array<infer I> ? ToRaw<I> : 'n'
-   // type A = typeof mixed extends Array<infer I> ? IsRedundantUnion<ToRaw<I>> extends true ? 'yes' : 'no' : 'no'
-   // // {[K in keyof ToRaw<I>]: ToRaw<I>[K]}[]  : never
-   // // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
-   // const list = Ionic(new ItemList(
-   //    { id: 0, content: "frog" },
-   //    { id: 1, content: "robin" },
-   //    { id: 2, content: "fly" },
-   //    { id: 3, content: "swamp" }
-   // ), { list: { as: (list: any[]) => Ionic(list, { [EACH]: Ionic }) } })
+export function List() {
 
    const list = Ionic([
       new ListItem("frog"),
@@ -227,7 +55,7 @@ export function List(
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
-   // const $listClone = Ion(() => list.slice())
+   const $listClone = Ion(() => list.slice())
 
    const values = list.values()
    for (const value of values) {
@@ -254,37 +82,12 @@ export function List(
       }
    })
 
-   // function toggleSelect(item: typeof list[number]) {
-   //    // update(() => {
-   //    if (selected.has(item)) {
-   //       selected.delete(item)
-   //    }
-   //    else {
-   //       selected.add(item)
-   //    }
-   //    // }, { lazy: 100 })
-   // }
-
-   // const selectedB = new IonizedSet(list, {
-   //    toggle(item: typeof list[number]) {
-   //       console.log('$$$ selected', selected)
-   //       if (selected.has(item)) {
-   //          selected.delete(item)
-   //       }
-   //       else {
-   //          selected.add(item)
-   //       }
-   //    }
-   // })
-
    try {
       console.log('has it?', selected.has(0))
    }
    catch (err) {
       console.error('EEP', err)
    }
-
-   // toRaw(selected).add({id: '', content: ''})
 
    const vals = selected.values()
    Array.from(selected)
@@ -294,9 +97,8 @@ export function List(
    }
 
    function removeItem(index: number) {
-      const item = list[index]
-      if (selected.has(item)) selected.delete(item)
-      list.remove(index);
+      mu: selected.delete(list[index])
+      mu: list.remove(index);
    }
 
    return component(
@@ -316,8 +118,8 @@ export function List(
                   X
                </p>
 
-               <li on:click={e => (console.log('$$$ change content?', item), item.changeContent())}>
-                  {(item.content)}
+               <li on:click={e => item.changeContent()}>
+                  {item.$content}
                </li>
                <p>{$index}</p>
                <div on:click={e => { list.insert($index() + 1) }} style="background-color: gray; cursor: pointer">
@@ -332,7 +134,7 @@ export function List(
          <button on:click={e => selected.clear()}>clear</button>
          <hr></hr>
 
-         {/* {For($listClone, (item, $index) =>
+         {For($listClone, (item, $index) =>
             <div
                style={{
                   backgroundColor: randomColor.get(),
@@ -343,7 +145,7 @@ export function List(
                </li>
                <p>{$index}</p>
             </div>
-         )} */}
+         )}
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >

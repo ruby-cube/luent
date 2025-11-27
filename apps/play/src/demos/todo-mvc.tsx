@@ -1,9 +1,9 @@
-//@ts-nocheck
-import { component, For, If, Else, FromTag } from "@rue/lumo"
-import { watch, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
+import { component, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
+import { watch, queueIonicTask, Ion, Ionic, toRaw, EACH } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
+import { QUARK } from "../../../../packages/quarky/src/abstract/Quark"
 
 // entity.name.type.tsx
 // meta.type.annotation.tsx
@@ -103,7 +103,7 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 export function TodoMVC() {
 
-   const $todos = Ion.Ionized(getTodos())
+   const $todos = Ion(Ionic(getTodos(), { [EACH]: { as: Ionic } }))
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
@@ -112,14 +112,14 @@ export function TodoMVC() {
 
    const filters = {
       all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => !todo.completed)),
-      completed: (todos: Ionized<Todo[]>) => Ionized(todos.filter(todo => todo.completed))
+      active: (todos: Ionized<Todo[]>) => todos.filter(todo => !todo.completed),
+      completed: (todos: Ionized<Todo[]>) => todos.filter(todo => todo.completed)
    }
 
 
    // # handle routing
 
-   window.addEventListener('hashchange', onHashChange)
+   listen(window, 'hashchange', onHashChange)
    onHashChange()
 
    function onHashChange() {
@@ -139,7 +139,7 @@ export function TodoMVC() {
       const STORAGE_KEY = 'vue-todomvc'
 
       queueIonicTask(() => {
-         localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
+         localStorage.setItem(STORAGE_KEY, JSON.stringify(toRaw($todos()))) // FIX: Do can we eliminate toRaw()?
       })
 
       return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
@@ -149,20 +149,18 @@ export function TodoMVC() {
    // # todos methods
 
    function addTodo(title: string) {
-      update(() => {
-         const item = Ionized({
-            id: Date.now(),
-            title,
-            completed: false
-         })
-         $todos().push(item)
-         const lastItem = $todos().pop();
-         $todos().push(lastItem!)
-      }, { lazy: 100 })
+      const item = Ionic({
+         id: Date.now(),
+         title,
+         completed: false
+      })
+      $todos().push(item)
+      // const lastItem = $todos().pop();
+      // $todos().push(lastItem!)
    }
 
-   watch($todos(), () => {
-      console.log('todos changed')
+   watch($todos, () => {
+      console.log('### todos changed')
    })
 
    function removeTodo(todo: Ionized<Todo>) {
@@ -285,13 +283,10 @@ function TodoInput({ addTodo }: FromTag<{ 'use:addTodo': (title: string) => void
 
 function TodoList(input: FromTag<{
    todos: Ion<Ionized<Todo[]>>,
-   frog: ToIonized<Frog>,
    'use:removeTodo': (todo: Ionized<Todo>) => void
 }>) {
 
-   const { $todos, removeTodo, frog } = input({
-      frog: ionize
-   })
+   const { $todos, removeTodo } = input
 
    const $editedTodo = Ion(null as Todo | null)
 
@@ -323,7 +318,7 @@ function TodoList(input: FromTag<{
             return (
                <li class={["todo", { completed: (todo.completed), editing: $isEditing }]}>
                   <div class="view">
-                     <input class="toggle" type="checkbox" mu:checked={$(todo).completed} />
+                     <input class="toggle" type="checkbox" mu:checked={todo.$completed} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
                      <button class="destroy" on:click={e => removeTodo(todo)}></button>
                   </div>
@@ -331,7 +326,7 @@ function TodoList(input: FromTag<{
                      <input
                         class="edit"
                         type="text"
-                        mu:value={$(todo).title}
+                        mu:value={todo.$title}
                         at:mounted={node => node.focus()}
                         on:blur={e => doneEdit(todo)}
                         on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}

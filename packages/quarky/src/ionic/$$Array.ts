@@ -139,7 +139,7 @@ defineIonicCollection(Array, {
    '@initEach'(item, target, transform, index) {
       target[index] = transform(item)
    },
-   
+
    '@getHookKey'(key) {
       return isIntegerKey(key) ? EACH : key
    }
@@ -155,6 +155,14 @@ defineIonicCollection(Array, {
 
    concat(...args: any[]) {
       return Ionic(this.ionic.concat(...args))
+   },
+
+   filter(predicate, thisArg) {
+      return Ionic(this.ionic.filter(predicate, thisArg))
+   },
+
+   map(callback, thisArg) {
+      return Ionic(this.ionic.map(callback, thisArg))
    },
 
    keys() {
@@ -179,27 +187,27 @@ defineIonicCollection(Array, {
       return Ionic(this.ionic.copyWithin(target, start, end))
    },
 
-   fill(value, start, end){
+   fill(value, start, end) {
       return Ionic(this.ionic.fill(value, start, end))
    },
 
-   reverse(){
+   reverse() {
       return Ionic(this.ionic.reverse())
    },
 
-   sort(compare){
+   sort(compare) {
       return Ionic(this.ionic.sort(compare))
    },
 
-   toSorted(compare){
+   toSorted(compare) {
       return Ionic(this.ionic.toSorted(compare))
    },
 
-   toReversed(){
+   toReversed() {
       return Ionic(this.ionic.toReversed())
    },
 
-   with(index, value){
+   with(index, value) {
       return Ionic(this.ionic.with(index, value))
    }
 })

@@ -2,7 +2,7 @@
 //@ts-nocheck
 import { atMounted, For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
-import { $$, ion, ionic, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
+import { $$, ion, Ionic, ionic, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
 import { quarkOf } from "../../../../packages/quarky/src/abstract/Quark"
 import { getFlask } from "@rue/flask"
 
@@ -207,10 +207,10 @@ function css(str: TemplateStringsArray) {
    return str[0] as any
 }
 
-//FIX: selected state disappears after clicking update
+// FIX: selected state disappears after clicking update
 export function CRUDApp() {
 
-   const names = ionize(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
+   const names = Ionic(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
    const $selected = Ion('')
    const $prefix = Ion('')
    const $first = Ion('')

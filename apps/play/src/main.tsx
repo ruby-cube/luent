@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -9,7 +9,7 @@ import './style.css'
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { TodoMVC } from './demos/todo-mvc-state';
+import { TodoMVC } from './demos/todo-mvc';
 import { CircleApp, CRUDApp, SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
 
@@ -98,7 +98,7 @@ import { TestIonicList } from './TestIonicList';
 //    return component(<div>Hello World</div>)
 // }
 
-const app = createRoot(List)
+const app = createRoot(TodoMVC)
 
 app.mount('#app')
 

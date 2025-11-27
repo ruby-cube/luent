@@ -1,4 +1,6 @@
 import { $listen, PausableListener, CallbackRemover, defineCustomCleanupScheduler, SustainedListenerOptions, ScheduleStop } from '@rue/flask';
+import { swiftUpdate } from '@rue/quarky';
+import { withUpdate } from '../element/makeElement';
 
 
 type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<SustainedListenerOptions, 'until'> & CustomCleanupSchedulerListenerOptions
@@ -25,8 +27,7 @@ export function listen<
     handler: CB & EventHandler<T, EventName<T>>,
     options?: EventListenerOptions
 ){
-
-    return $listen(handler, <SustainedListenerOptions>options || {}, {
+    return $listen(withUpdate(handler, event), <SustainedListenerOptions>options || {}, {
         enroll(cb) {
             element.addEventListener(event, cb, options)
         },

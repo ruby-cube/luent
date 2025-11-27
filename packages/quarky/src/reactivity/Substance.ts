@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { Effect } from "./EffectQueue"
 import { quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
-import { isFunction } from "@rue/utils";
+import { isFunction, noop } from "@rue/utils";
 import { Ionized } from "../ionic/x_ionize";
 import { Ion, isIon } from "../ion/Ion";
 import { WatchSubjects } from "./Watcher";
@@ -285,7 +285,7 @@ export class IonSubstance implements WatchedSubstance {
 
    constructor(
       getState: () => unknown,
-      retrack: boolean = true
+      private retrack: boolean = true
    ) {
       this.subject = new FunctionalSubstance(getState, retrack, false);
    }
@@ -296,11 +296,24 @@ export class IonSubstance implements WatchedSubstance {
       this.proxySubject?.linkEffect(effect)
    }
 
+   private relinkProxy = () => {
+      if (!this.retrack) {
+         this.relinkProxy = noop
+         return;
+      }
+      this.relinkProxy = () => {
+         const effect = this.subject.effect
+         if (!effect) throw new Error('Must call linkEffect before retracking')
+         this.proxySubject?.linkEffect(effect)
+      }
+   }
+
    getValue() {
       const value = this.subject.trackedCall()
       if (value !== this.proxySubject?.getValue() && isIonicProxy(value)) {
          this.proxySubject = new IonicProxySubject(value)
       }
+      this.relinkProxy()
       return value;
    }
 }

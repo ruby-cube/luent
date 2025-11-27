@@ -118,11 +118,11 @@ export class ModelQuark implements Atom {
             this.initEach(each.as)
             // delete each.as
          }
-         if ('@get' in each || '@set' in each) this.overrideGetPropertyHooks()
+         if ('@get' in each || '@set' in each) this.overrideGetHooks()
       }
    }
 
-   private overrideGetPropertyHooks() {
+   private overrideGetHooks() {
       let obj = this.state.get(); // TODO: should this be target or state.get() ??
       do {
          const getHookKey = getIonicDef(obj.constructor as Constructor)?.config['@getHookKey']
