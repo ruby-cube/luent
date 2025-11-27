@@ -35,7 +35,7 @@ export function createIonicModel(
 ) {
    const modelQuark = new ModelQuark(target, config)
 
-   const proxy = new Proxy(modelQuark, traps) as any as QuarkyIonicProxy
+   const proxy = new Proxy(target, useTraps(modelQuark)) as any as QuarkyIonicProxy
 
    // const extension = extender ? extender(proxy) : undefined
    // modelQuark.extension = extension
@@ -47,115 +47,113 @@ export function createIonicModel(
 
 const INTERNAL_OP = "[[INTERNAL]]"
 
-const traps: ProxyHandler<ModelQuark> = {
+function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
+   return {
+      get(_, key, receiver) {
+         __DEV__assertNotPrototype(modelQuark.proxy, receiver)
+         const proto = modelQuark.proto
+         if (!proto.has(key)) {
+            return modelQuark.initProperty(key)?.get()
+         }
+         return proto.get(key)!.get()
+      },
 
-   get(modelQuark, key, receiver) {
-      __DEV__assertNotPrototype(modelQuark.proxy, receiver)
-      const proto = modelQuark.proto
-      if (!proto.has(key)) {
-         return modelQuark.initProperty(key)?.get()
-      }
-      return proto.get(key)!.get()
-   },
-
-   set(modelQuark, key, newValue, receiver) {
-      __DEV__assertNotPrototype(modelQuark.proxy, receiver)
-      const proto = modelQuark.proto
-      if (!proto.has(key) && !(key in modelQuark.state.get())) {
-         return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue)) // FIX: what if property was set in a preceding update that hasn't committed?
-      }
-      const success = !proto.has(key)
-         ? Boolean(modelQuark.initProperty(key)?.set(newValue))
-         : proto.get(key)!.set(newValue)
-      if (success) $activeUpdate()!.atCommit(() => modelQuark.target[key] = modelQuark.state.pending[key] = newValue)
-      return success
-   },
+      set(_, key, newValue, receiver) {
+         __DEV__assertNotPrototype(modelQuark.proxy, receiver)
+         const proto = modelQuark.proto
+         if (!proto.has(key) && !(key in modelQuark.state.get())) {
+            return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue)) // FIX: what if property was set in a preceding update that hasn't committed?
+         }
+         const success = !proto.has(key)
+            ? Boolean(modelQuark.initProperty(key)?.set(newValue))
+            : proto.get(key)!.set(newValue)
+         if (success) $activeUpdate()!.atCommit(() => modelQuark.target[key] = modelQuark.state.pending[key] = newValue)
+         return success
+      },
 
 
-   has(modelQuark, key) {
-      if (key === QUARK) return true;
-      if (!modelQuark.proto.has(key)) modelQuark.initProperty(key)
-      trackOp(modelQuark, '[[in]]', key)
-      return modelQuark.proto.has(key)
-   },
+      has(_, key) {
+         if (key === QUARK) return true;
+         if (!modelQuark.proto.has(key)) modelQuark.initProperty(key)
+         trackOp(modelQuark, '[[in]]', key)
+         return modelQuark.proto.has(key)
+      },
 
-   getOwnPropertyDescriptor(modelQuark, key) {
-      if (modelQuark.state.get()) {
+      getOwnPropertyDescriptor(_, key) {
          modelQuark.proxy[key] // tracks property
-      }
-      return Object.getOwnPropertyDescriptor(modelQuark.state.get(), key)
-   },
+         return Object.getOwnPropertyDescriptor(modelQuark.state.get(), key)
+      },
 
-   defineProperty(modelQuark, key, descriptor) {
-      if (key in modelQuark.state.get()) { // FIX: should this check both state.current and state.pending??
-         if (__DEV__) console.warn(`Redefining property of an ionic proxy not supported`)
+      defineProperty(_, key, descriptor) {
+         if (key in modelQuark.state.get()) { // FIX: should this check both state.current and state.pending??
+            if (__DEV__) console.warn(`Redefining property of an ionic proxy not supported`)
+            return false
+         }
+         const update = $activeUpdate()
+         if (!update) return false;
+
+         // FIX: what if property was set in a preceding update that hasn't committed?
+         const success = modelQuark.state.mutate(target => Reflect.defineProperty(target, key, descriptor))
+         if (!success) return false;
+
+         trigger(modelQuark, update)
+         triggerOp(modelQuark, INTERNAL_OP, 'ownKeys', update)
+         triggerOp(modelQuark, '[[in]]', key, update)
+
+         modelQuark.proto.get(key)?.set(descriptor.value)
+         return true;
+      },
+
+      deleteProperty(_, key) {
+         const update = $activeUpdate()
+         if (!update) return false;
+
+         const success = modelQuark.state.mutate(target => Reflect.deleteProperty(target, key))
+         if (!success) return false;
+
+         const proto = modelQuark.proto
+         if (proto.has(key)) {
+            // set/trigger pion
+            proto.get(key)!.set(undefined)
+
+            // update proto
+            update.atCommit(() => {
+               proto.delete(key)
+            })
+         }
+
+         trigger(modelQuark, update)
+         triggerOp(modelQuark, INTERNAL_OP, 'ownKeys', update)
+         triggerOp(modelQuark, '[[in]]', key, update)
+
+         return true;
+      },
+
+      ownKeys(_) {
+         trackOp(modelQuark, INTERNAL_OP, 'ownKeys')
+         return Reflect.ownKeys(modelQuark.state.get())
+      },
+
+      getPrototypeOf(_) {
+         return Reflect.getPrototypeOf(modelQuark.target)
+      },
+
+      setPrototypeOf() {
+         debug.warn("[DISALLOWED] Cannot setPrototypeOf ionized model")
          return false
-      }
-      const update = $activeUpdate()
-      if (!update) return false;
+      },
 
-      // FIX: what if property was set in a preceding update that hasn't committed?
-      const success = modelQuark.state.mutate(target => Reflect.defineProperty(target, key, descriptor))
-      if (!success) return false;
+      isExtensible(_) {
+         modelQuark.initIsExtensible()
+         return modelQuark.$isExtensible!()
+      },
 
-      trigger(modelQuark, update)
-      triggerOp(modelQuark, INTERNAL_OP, 'ownKeys', update)
-      triggerOp(modelQuark, '[[in]]', key, update)
-
-      modelQuark.proto.get(key)?.set(descriptor.value)
-      return true;
-   },
-
-   deleteProperty(modelQuark, key) {
-      const update = $activeUpdate()
-      if (!update) return false;
-
-      const success = modelQuark.state.mutate(target => Reflect.deleteProperty(target, key))
-      if (!success) return false;
-
-      const proto = modelQuark.proto
-      if (proto.has(key)) {
-         // set/trigger pion
-         proto.get(key)!.set(undefined)
-
-         // update proto
-         update.atCommit(() => {
-            proto.delete(key)
-         })
-      }
-
-      trigger(modelQuark, update)
-      triggerOp(modelQuark, INTERNAL_OP, 'ownKeys', update)
-      triggerOp(modelQuark, '[[in]]', key, update)
-
-      return true;
-   },
-
-   ownKeys(modelQuark) {
-      trackOp(modelQuark, INTERNAL_OP, 'ownKeys')
-      return Reflect.ownKeys(modelQuark.state.get())
-   },
-
-   getPrototypeOf(modelQuark) {
-      return Reflect.getPrototypeOf(modelQuark.target)
-   },
-
-   setPrototypeOf(target, proto) {
-      debug.warn("[DISALLOWED] Cannot setPrototypeOf ionized model")
-      return false
-   },
-
-   isExtensible(modelQuark) {
-      modelQuark.initIsExtensible()
-      return modelQuark.$isExtensible!()
-   },
-
-   preventExtensions(modelQuark) {
-      modelQuark.initIsExtensible()
-      return modelQuark.setIsExtensible!(false)
-   },
+      preventExtensions(_) {
+         modelQuark.initIsExtensible()
+         return modelQuark.setIsExtensible!(false)
+      },
+   }
 }
-
 export function __DEV__assertNotPrototype(proxy: QuarkyIonicProxy, receiver: AnyObject) {
    if (proxy !== receiver) throw new Error('An ionic model may not serve as a prototype. Construct inheritance tree from raw classes')
 }

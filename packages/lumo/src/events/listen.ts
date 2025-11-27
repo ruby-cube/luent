@@ -6,40 +6,41 @@ import { withUpdate } from '../element/makeElement';
 type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<SustainedListenerOptions, 'until'> & CustomCleanupSchedulerListenerOptions
 
 export type CustomCleanupSchedulerListenerOptions = {
-    until?: [EventTarget, keyof DocumentEventMap | keyof HTMLElementEventMap | keyof WindowEventMap] | ScheduleStop  | AbortSignal
+   until?: [EventTarget, keyof DocumentEventMap | keyof HTMLElementEventMap | keyof WindowEventMap] | ScheduleStop | AbortSignal
 }
 
 type EventName<T> = T extends Document ? keyof DocumentEventMap :
-    T extends Window ? keyof DocumentEventMap :
-    keyof HTMLElementEventMap
+   T extends Window ? keyof DocumentEventMap :
+   keyof HTMLElementEventMap
 
 type EventHandler<T, K extends string> = T extends Document ? (event: K extends keyof DocumentEventMap ? DocumentEventMap[K] : Event) => void
-    : T extends Window ? (event: K extends keyof WindowEventMap ? WindowEventMap[K] : Event) => void
-    : T extends HTMLElement ? (event: K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K] : Event) => void
-    : EventListener
+   : T extends Window ? (event: K extends keyof WindowEventMap ? WindowEventMap[K] : Event) => void
+   : T extends HTMLElement ? (event: K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K] : Event) => void
+   : EventListener
 
 export function listen<
-    T extends EventTarget,
-    CB
+   T extends EventTarget,
+   CB
 >(
-    element: T,
-    event: EventName<T>,
-    handler: CB & EventHandler<T, EventName<T>>,
-    options?: EventListenerOptions
-){
-    return $listen(withUpdate(handler, event), <SustainedListenerOptions>options || {}, {
-        enroll(cb) {
-            element.addEventListener(event, cb, options)
-        },
-        remove(cb) {
-            element.removeEventListener(event, cb, options)
-        }
-    })
+   element: T,
+   event: EventName<T>,
+   handler: CB & EventHandler<T, EventName<T>>,
+   options?: EventListenerOptions & { eager?: true }
+) {
+   if (options?.eager) handler()
+   return $listen(withUpdate(handler, event), <SustainedListenerOptions>options || {}, {
+      enroll(cb) {
+         element.addEventListener(event, cb, options)
+      },
+      remove(cb) {
+         element.removeEventListener(event, cb, options)
+      }
+   })
 }
 
 defineCustomCleanupScheduler(
-    (target, event) =>
-        (cleanup: CallbackRemover) =>
-            listen(target, event, cleanup)
+   (target, event) =>
+      (cleanup: CallbackRemover) =>
+         listen(target, event, cleanup)
 )
 

@@ -103,7 +103,9 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 export function TodoMVC() {
 
-   const $todos = Ion(Ionic(getTodos(), { [EACH]: { as: Ionic } }))
+   const $todos = Ion(Ionic(getTodos(), {
+      [EACH]: { as: Ionic }
+   }))
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
@@ -117,12 +119,10 @@ export function TodoMVC() {
    }
 
 
+   console.log(Object.getOwnPropertyDescriptor($todos(), 'length' ))
    // # handle routing
 
-   listen(window, 'hashchange', onHashChange)
-   onHashChange()
-
-   function onHashChange() {
+   listen(window, 'hashchange', () => {
       const route = window.location.hash.replace(/#\/?/, '') as FilterKeys
       if (filters[route]) {
          $view.value = route
@@ -130,7 +130,7 @@ export function TodoMVC() {
          window.location.hash = ''
          $view.value = 'all'
       }
-   }
+   }, { eager: true })
 
 
    // # persist state
@@ -139,9 +139,8 @@ export function TodoMVC() {
       const STORAGE_KEY = 'vue-todomvc'
 
       queueIonicTask(() => {
-         localStorage.setItem(STORAGE_KEY, JSON.stringify(toRaw($todos()))) // FIX: Do can we eliminate toRaw()?
+         localStorage.setItem(STORAGE_KEY, JSON.stringify($todos())) // FIX: Do can we eliminate toRaw()?
       })
-
       return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
    }
 
