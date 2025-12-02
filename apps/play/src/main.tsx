@@ -98,7 +98,7 @@ import { TestIonicList } from './TestIonicList';
 //    return component(<div>Hello World</div>)
 // }
 
-const app = createRoot(List)
+const app = createRoot(CircleApp)
 
 app.mount('#app')
 

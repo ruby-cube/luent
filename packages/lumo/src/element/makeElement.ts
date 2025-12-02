@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -170,7 +170,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
       return;
    const ion = attributes['mu:checked'];
    delete attributes['mu:checked'];
-   attributes.checked = ion;
+   attributes.checked = toValue(ion);
    if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
 
@@ -185,7 +185,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const ion = attributes['mu:checked'];
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
-   attributes.checked = () => Ion() === radioValue;
+   attributes.checked = () => toValue(ion) === radioValue;
    if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
@@ -199,11 +199,9 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
       return;
    const ion = attributes['mu:value'];
    delete attributes['mu:value'];
-   attributes.value = ion;
-   console.log('bindTextInput, value', ion)
+   attributes.value = toValue(ion);
    if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
-
    }
    else {
       setUpInputListener(element, ion)
@@ -234,7 +232,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    watchToRender(ion, ({ current, previous }) => {
       // if (current === previous) return;
       queueInternalRender(() => {
-         element.value = toString(Ion())
+         element.value = toString(toValue(ion))
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
@@ -534,8 +532,8 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
 
 export function withUpdate(handler: Function, event: string) {
    if (handler.name === 'noWrap') return handler;
-   const update = event === 'click' ? swiftUpdate : instantUpdate  // FIX: standin update type should depend on event type
-   return (e) => update(() => handler(e))
+   // const update = event === 'click' ? swiftUpdate : instantUpdate  // FIX: standin update type should depend on event type
+   return (e) => swiftUpdate(() => handler(e))
 }
 
 

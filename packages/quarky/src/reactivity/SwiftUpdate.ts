@@ -1,5 +1,5 @@
 import { INTERNAL_RENDER, PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
-import { popUpdate, pushUpdate, UpdateType } from "./Update";
+import { popUpdate, pushUpdate, runUpdate, UpdateType } from "./Update";
 
 export class Update {
    timestamp: number = Date.now()
@@ -7,7 +7,7 @@ export class Update {
    constructor(
       public type: UpdateType = UpdateType.USER_INTERACTION,
       public timeMargin = 100,
-      public idle = 50
+      public idle: number | boolean = 50
    ) {
       console.trace('new update')
    }
@@ -49,6 +49,7 @@ export class Update {
          popUpdate()
          this.cycle.start()
       }
+      return this
    }
 
    committed = false
@@ -123,17 +124,25 @@ function createSwiftUpdate() {
    }
    else {
       update.start()
+      update.atComplete(() => {
+         latestSwiftUpdate = null;
+      })
    }
    latestSwiftUpdate = update
    return update
 }
 
 
-export function instantUpdate(fn: () => void) {
-   // return 
-   runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
+
+
+
+export function instantUpdate(task: () => unknown) {
+   createInstantUpdate().queue(task)
 }
 
+function createInstantUpdate() {
+   return new Update(UpdateType.USER_ANIMATION, 16.7, false).start()!
+}
 
 /**
  * tickUpdates will be initialized as a new task after 

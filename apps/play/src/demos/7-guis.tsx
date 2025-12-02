@@ -396,15 +396,8 @@ export function CircleApp() {
          push()
          return;
       }
-      console.log('### not adjusting', $selected.value, target.tagName)
 
       if (target?.tagName !== 'circle') $selected.value = null
-
-      // $selected.value = [...$circles()].reverse().find(({ cx, cy, r }) => {
-      //    const dx = cx - x
-      //    const dy = cy - y
-      //    return Math.sqrt(dx * dx + dy * dy) <= r
-      // })
 
       if (!$selected()) {
          $circles().push(Ionic({
@@ -417,7 +410,6 @@ export function CircleApp() {
    }
 
    function adjust(circle: Ionized<Circle>) {
-      console.log('adjust new circle')
       $selected.value = circle
       $adjusting.value = true
    }
