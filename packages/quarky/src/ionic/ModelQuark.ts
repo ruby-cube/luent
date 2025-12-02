@@ -377,14 +377,14 @@ export class ModelQuark implements Atom {
       descriptor: PropertyDescriptor,
       def: AnyObject | undefined
    ) {
-      const { proto, extension, proxy, track, trackModel, trigger, triggerAll, triggerModel } = this
+      const { proto, extension, proxy, track, trackModel, trigger, triggerAll, triggerModel, state: raw } = this
       const descriptor_set = descriptor.set
       const _getter = descriptor.get ?? (() => undefined)
       const _setter = descriptor_set ? ((value: unknown) => { descriptor_set(value); return true; }) : nowrite
 
       const get = def?.get ? def.get.bind({
          config: extension,
-         get raw() { return state.get() },
+         get raw() { return raw.get() },
          get ionic() { return { get [key]() { return _getter.apply(proxy) } } },
          track,
          trackModel
@@ -392,7 +392,7 @@ export class ModelQuark implements Atom {
 
       const set = def?.set ? def.set.bind({
          config: extension,
-         get raw() { return state.get() },
+         get raw() { return raw.get() },
          get ionic() { return { set [key](value: unknown) { _setter.apply(proxy, [value]) } } },
          trigger,
          triggerModel,

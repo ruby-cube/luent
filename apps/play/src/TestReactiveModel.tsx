@@ -79,9 +79,10 @@ export function List() {
          else {
             this.add(item)
          }
-         // console.log('toggling selected', this.size) // FIX: THis causes infinite loop
       }
    })
+
+   console.log('toggling selected', selected.size) // FIX: THis causes infinite loop
 
    try {
       console.log('has it?', selected.has(0))
