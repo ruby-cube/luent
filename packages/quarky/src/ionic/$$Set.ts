@@ -80,11 +80,19 @@ export function installIonicSet() {
       }, // boolean = isDisjointFrom(otherSet)
 
       add(value) {
+         console.log("$$$ ADD")
          if (this.raw.has(value)) return asIonic(this.raw);
-         return asIonic(this.mutate(raw => raw.add(value), ({ op }) => {
+         return asIonic(this.mutate(raw => {
+            console.log('$$$ RAW ADD')
+            return raw.add(value)
+         }, ({ op }) => {
+            console.log('$$$ A')
             op.trigger('has', value)
+            console.log('$$$ B')
             op.trigger('[[get]]', 'size')
+            console.log('$$$ C')
             op.triggerModel()
+            console.log('$$$ D')
          })) // FIX: just return the proxy? or don't require config?
       },
 

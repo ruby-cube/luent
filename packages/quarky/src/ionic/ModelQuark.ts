@@ -1,6 +1,6 @@
 import { isFunction, isObject } from "@rue/utils"
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
-import { track } from "../reactivity/Compound"
+import { getActiveTracker, track } from "../reactivity/Compound"
 import { CollectiveState } from "../reactivity/State"
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
 import { withGetHook, withSetHook } from "../ion/AtomicIon"
@@ -630,7 +630,7 @@ export function trackOp(
    op: ProxyKey,
    key: unknown
 ) {
-   track(quark.ops.asTracked(op, key))
+   getActiveTracker()?.track(quark.ops.asTracked(op, key))
 }
 
 export function triggerOp(

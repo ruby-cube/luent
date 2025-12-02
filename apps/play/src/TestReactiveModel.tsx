@@ -79,6 +79,7 @@ export function List() {
          else {
             this.add(item)
          }
+         // console.log('toggling selected', this.size) // FIX: THis causes infinite loop
       }
    })
 

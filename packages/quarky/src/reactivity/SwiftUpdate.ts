@@ -104,7 +104,10 @@ let latestSwiftUpdate: Update | null = null
 
 function getSwiftUpdate() {
    if (latestSwiftUpdate) {
-      if (latestSwiftUpdate.closed) return;
+      if (latestSwiftUpdate.closed) {
+         console.log('update closed')
+         return;
+      }
       return latestSwiftUpdate;
    }
    return;

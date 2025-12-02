@@ -126,6 +126,7 @@ export class RenderCycle {
          if (this.cancelled) return;
          this.currentPhase = phase
          this.subphase = 'effects'
+         console.log('run effects', phase)
          this.runEffects(phase, (beginTasks) => {
             scheduleTasks(() => {
                if (this.cancelled) return;
