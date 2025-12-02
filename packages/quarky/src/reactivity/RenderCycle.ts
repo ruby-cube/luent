@@ -68,7 +68,7 @@ export class RenderCycle {
 
       this.phases = [{
          phase: PRELUDE,
-         scheduleEffects: queueMicrotask,
+         scheduleEffects: update.idle ? (task) => requestIdleCallback(task, { timeout: 1 }) : queueMicrotask,
          scheduleTasks: schedulePrerenderTasks
       }, {
          phase: INTERNAL_RENDER,
