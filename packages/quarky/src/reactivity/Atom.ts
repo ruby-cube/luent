@@ -1,5 +1,5 @@
 import { isObject, __DEV__unwrap } from "@rue/utils";
-import { Update } from "./Update";
+import { Update } from "./LazyUpdate";
 import { Effect, EffectQueue } from "./EffectQueue";
 import { hasQuark, Quark, QUARK } from "../abstract/Quark";
 import { Phase, SYNC } from "./RenderCycle";

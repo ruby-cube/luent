@@ -1,8 +1,8 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate, dispatch, popUpdate, pushUpdate } from "./Update";
+import { catchCancelledUpdate } from "./LazyUpdate";
 import { RenderCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
-import { Update, tickUpdate } from "./SwiftUpdate";
+import { Update, popUpdate, pushUpdate, tickUpdate } from "./Update";
 
 // const PRELUDE = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
 
@@ -118,7 +118,7 @@ class EffectsComplete {
 
    constructor(
       private promise: Promise<unknown>,
-      private wrap: (fn?: ((value?: unknown) => void) | null) => ((value: unknown) => void) | null
+      private runWithUpdate: (fn?: ((value?: unknown) => void) | null) => void
    ) {
    }
 
@@ -126,7 +126,7 @@ class EffectsComplete {
       onfulfilled?: ((value: unknown) => void | PromiseLike<void>) | null,
       onrejected?: ((reason: any) => PromiseLike<never>) | null
    ): Promise<void> {
-      return this.promise.then(this.wrap(onfulfilled), onrejected)
+      return this.promise.then(() => this.runWithUpdate(onfulfilled), onrejected)
    }
 
    catch(onrejected?: ((reason: any) => PromiseLike<never>) | null | undefined) {
@@ -155,7 +155,7 @@ export class TaskQueue {
    constructor(
       public update: Update,
       protected phase: Phase,
-      protected wrapTask: (fn?: (() => void) | null) => ((value?: unknown) => void) | null = (fn) => () => {
+      protected runWithUpdate: ((fn?: (() => void) | null) => void) = (fn) => {
          if (!fn) return;
          try {
             pushUpdate(this.update)
@@ -165,16 +165,14 @@ export class TaskQueue {
             catchCancelledUpdate(err)
          }
          finally {
-            queueMicrotask(() => {
-               popUpdate()
-            })
+            queueMicrotask(popUpdate)
          }
       }
    ) {
       this.effectsComplete = new EffectsComplete(new Promise<void>((resolve, reject) => {
          this.emitEffectsComplete = resolve
          this.cancel = () => reject('update cancelled')
-      }).catch(catchCancelledUpdate), wrapTask)
+      }).catch(catchCancelledUpdate), runWithUpdate)
    }
 
    scheduleTask(task: () => void) {
@@ -261,7 +259,7 @@ export class PreludeTaskQueue extends TaskQueue {
    idleCount = 0;
 
    override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
-      if (this.effects.length === 0) this.started = true;
+      this.started = true;
       new Promise<void>(emitBatchesComplete => {
          const update = this.update;
          this.runBatches(
@@ -288,15 +286,15 @@ export class PreludeTaskQueue extends TaskQueue {
          const elapsed = Date.now() - update.timestamp
          const timeLeft = update.idle - elapsed
          return timeLeft > -1 ? timeLeft : 0
+      } else {
+         return undefined
       }
-      throw new TypeError('Invalid idle task deadline. Must provide positive number')
    }
 
    scheduleIdleEffect(effect: Effect) {
       const update = this.update
       this.idleCount++;
       requestIdleCallback(() => {
-         this.started = true
          try {
             this.runningEffects = true
             pushUpdate(update)
@@ -363,7 +361,7 @@ export class TickTaskQueue extends TaskQueue {
       requestIdleCallback(() => {
          try {
             this.runningEffects = true
-            this.wrapTask(effect.run)?.()
+            this.runWithUpdate(effect.run)
          }
          finally {
             this.runningEffects = false

@@ -1,6 +1,5 @@
-import { $activeUpdate, getActiveUpdate } from "./Update"
 import { AnyObject } from "@rue/types"
-import {Update} from "./SwiftUpdate"
+import {Update, $activeUpdate, getActiveUpdate} from "./Update"
 
 
 // TODO: history
@@ -23,13 +22,11 @@ function getState(state: PendableState) {
 }
 
 function lockState(state: PendableState) {
-   console.trace('%%% LOCKING STATE', state)
    const update = $activeUpdate()
    if (!update) {
       console.warn('nothing to lock to')
       return;
    }
-   console.log('update', update.committed)
    // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
    if (update.committed) {
       return;
@@ -227,11 +224,9 @@ export class CollectiveState implements PendableState {
    }
 
    private applyMutations() {
-      console.log('%%%', '== APPLYING MUTATIONS')
       for (const mutate of this.mutations) {
          mutate(this.current)
       }
-      console.log('%%%', '== END APPLYING MUTATIONS')
       this.mutations = []
    }
 

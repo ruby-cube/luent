@@ -5,7 +5,7 @@ import { $activeUpdate, getActiveUpdate } from "./Update"
 import { EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
 import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
-import { Update } from "./SwiftUpdate";
+import { Update } from "./Update";
 
 
 export const queueTask = setImmediate;
@@ -126,7 +126,6 @@ export class RenderCycle {
          if (this.cancelled) return;
          this.currentPhase = phase
          this.subphase = 'effects'
-         console.log('run effects', phase)
          this.runEffects(phase, (beginTasks) => {
             scheduleTasks(() => {
                if (this.cancelled) return;

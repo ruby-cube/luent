@@ -29,7 +29,6 @@ type JSXTemplate = RawJSXNode
 // TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
 export function component(template: JSXTemplate) {
-   console.log('template', template)
    const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
    return {
       exposed: undefined, // TODO: make read only
@@ -110,7 +109,7 @@ export function makeComponent(
       setUpNodesArray(publicComponent, nodesArray, indices)
    }
 
-   // if (tag['show:if']) setUpConditionalDisplay()
+   // if (tag['show-hide']) setUpConditionalDisplay()
    return output
 }
 

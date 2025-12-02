@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
-import { pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate, runUpdate, instantUpdate } from "@rue/quarky";
+import { instantUpdate } from "./Update";
 
 // let forAnimation = false;
 // export function $forAnimation() {
@@ -27,7 +27,7 @@ export function ThrottledHover() {
          hoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             hoverID = null;
-            runUpdate(new Update(() => fn(e), UpdateType.USER_ANIMATION, 16.7))
+            instantUpdate(() => fn(e))
             // })
          })
          // Otherwise, the function call is ignored (throttled)
@@ -41,7 +41,7 @@ export function ThrottledHover() {
          unhoverID = requestAnimationFrame(() => {
             // setImmediate(() => {
             unhoverID = null;
-            runUpdate(new Update(() => fn(e), UpdateType.USER_ANIMATION, 16.7))
+            instantUpdate(() => fn(e))
          })
          // Otherwise, the function call is ignored (throttled)
       };
@@ -61,7 +61,7 @@ export function SharedThrottledUpdate() {
          frameID = requestAnimationFrame(() => {
             setImmediate(() => {
                frameID = null;
-               runUpdate(new Update(fn as () => unknown, UpdateType.USER_ANIMATION, 16.7))
+               instantUpdate(() => fn(e))
             })
          })
          // Otherwise, the function call is ignored (throttled)
@@ -69,21 +69,43 @@ export function SharedThrottledUpdate() {
    }
 }
 
+// /**
+//  * Throttled by animation frame
+//  * @param fn 
+//  * @returns 
+//  */
+// export function ThrottlePointer() {
+//    let frameID: number | null = null
+
+//    return function pointerUpdate(fn: () =>void) {
+//       if (frameID !== null) cancelAnimationFrame(frameID)
+//       frameID = requestAnimationFrame(() => {
+//          frameID = null;
+//          instantUpdate(fn)
+//       })
+//       // Otherwise, the function call is ignored (throttled)
+//    };
+// }
+
 /**
  * Throttled by animation frame
  * @param fn 
  * @returns 
  */
-export function ThrottlePointer(fn: Function) {
-   let frameID: number | null = null
+export function ThrottlePointer() {
+   return instantUpdate;
+   let pendingFrame = false;
 
-   return function throttled(e: MouseEvent) {
-      if (frameID !== null) cancelAnimationFrame(frameID)
-      frameID = requestAnimationFrame(() => {
-         frameID = null;
-         runUpdate(new Update(() => fn(e), UpdateType.USER_ANIMATION, 16.7))
+   return function pointerUpdate(fn: () => void) {
+      if (pendingFrame) {
+         fn()
+         return;
+      }
+      pendingFrame = true;
+      instantUpdate(fn)
+      requestAnimationFrame(() => {
+         pendingFrame = false;
       })
-      // Otherwise, the function call is ignored (throttled)
    };
 }
 /**
@@ -99,7 +121,7 @@ export function ThrottledUpdate(fn: Function) {
       frameID = requestAnimationFrame(() => {
          setImmediate(() => {
             frameID = null;
-            runUpdate(new Update(fn as () => unknown, UpdateType.USER_ANIMATION, 16.7))
+            instantUpdate(() => fn(e))
          })
       })
       // Otherwise, the function call is ignored (throttled)
@@ -155,7 +177,8 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
 
    function renderFrame(time: DOMHighResTimeStamp) {
       setImmediate(() => {
-         runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
+         instantUpdate(() => prepFrame(time))
+         // runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
       })
    }
 

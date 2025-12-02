@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import { Mutable } from "../abstract/Mutable"
+import { Mutable } from "../abstract/x_Mutable"
 
 export const NULL = Symbol('null')
 

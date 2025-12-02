@@ -349,7 +349,7 @@ export class ModelQuark implements Atom {
       proto.set(valueKey, state)
 
       const $state = pionAccess ? {
-         get: () => { console.log('&&& getting pion', key); return pion },
+         get: () => pion,
          set: nowrite
       } : undefined
 

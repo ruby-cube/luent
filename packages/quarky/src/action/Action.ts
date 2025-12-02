@@ -3,7 +3,7 @@ import { toError } from "@rue/utils";
 import { Mutation, MutableEntity, asMutable } from "../Mutable";
 import { AsyncState } from "@rue/flask";
 import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
-import { UpdateCycle } from "../reactivity/Update";
+import { UpdateCycle } from "../reactivity/LazyUpdate";
 
 interface ActionStack<T> {
    action: T;

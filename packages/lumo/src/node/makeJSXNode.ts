@@ -75,7 +75,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 {
    class?: ClassInput | ClassInput[],
    style?: StyleInput | StyleInput[],
-   'show:if'?: Ion<Booleanny>
+   'show-hide'?: Ion<Booleanny>
    // attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 

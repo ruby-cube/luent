@@ -173,7 +173,7 @@ export function TodoMVC() {
    // # toggle completed
 
    function toggleAll(e: RadioInputEvent) {
-      $todos().forEach((todo) => (todo.completed = e.target.checked))
+      $todos().forEach((todo) => { todo.completed = e.target.checked })
    }
 
    const ToggleAllButton = () => (
@@ -211,7 +211,7 @@ export function TodoMVC() {
                {ToggleAllButton()}
                <TodoList todos={$filteredTodos} use:removeTodo={removeTodo}></TodoList>
             </section>
-            <footer show:if={$todoCount} class="footer">
+            <footer show-hide={$todoCount} class="footer">
                {RemainingCount()}
                <ul class="filters">
                   <li>
@@ -224,7 +224,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show:if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
+               <button show-hide={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
                   Clear completed
                </button>
             </footer>

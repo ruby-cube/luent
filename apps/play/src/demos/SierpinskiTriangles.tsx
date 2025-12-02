@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, ThrottledHover, ionize, $_derivation, ionic, dispatch, Ion, swiftUpdate, $cancelCount } from "@rue/quarky";
+import { Animation, Interval, dispatch, Ion, $cancelCount, swiftUpdate } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // TODO:
@@ -46,8 +46,8 @@ function doAction(fn: Function) {
 export function TriangleDemo() {
    const $elapsed = Ion(0)
    const $seconds = Ion(0)
-   const $realSeconds = Ion(0)
-   const $delta = Ion(() => ($realSeconds() - $seconds()))
+   // const $realSeconds = Ion(0)
+   // const $delta = Ion(() => ($realSeconds() - $seconds()))
 
    const $scale = Ion(() => {
       const e = ($elapsed() / 1000) % 10;
@@ -66,10 +66,12 @@ export function TriangleDemo() {
    // let resolve: undefined | (() => void)
 
    const secondsInterval = Interval(1000, () => {
+      swiftUpdate(() => $seconds.value = ($seconds() % 10) + 1)
+      // $seconds.value = ($seconds() % 10) + 1
       // resolve?.()
       // promise = new Promise<void>(_resolve => { resolve = _resolve })
-      $realSeconds.value = ($realSeconds() % 10) + 1
-      dispatch(() => { $seconds.value = ($seconds() % 10) + 1 })
+      // $realSeconds.value = ($realSeconds() % 10) + 1
+      // dispatch(() => { $seconds.value = ($seconds() % 10) + 1 }, { deadline: 1000 })
    }).start();
 
    const start = Date.now()
@@ -101,7 +103,10 @@ export function TriangleDemo() {
 
    function reset() {
       secondsInterval.stop()
-      dispatch(() => {
+      // dispatch(() => {
+      //    $seconds.value = 0
+      // }, { deadline: 1000 }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
+      swiftUpdate(() => {
          $seconds.value = 0
       }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsInterval.start()
@@ -111,7 +116,7 @@ export function TriangleDemo() {
       <>
          {/* <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div> */}
          <div>
-            <p>cancel count: {$cancelCount} | real secs: {$realSeconds} | delta: {$delta}</p>
+            {/* <p>cancel count: {$cancelCount} | real secs: {$realSeconds} | delta: {$delta}</p> */}
             <button on:click={stop}>
                stop
             </button>
@@ -163,11 +168,6 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
 function Dot({ x, y, s, $text }: FromTag<any>) {
    const $hover = Ion(false)
 
-   const [Hover, Unhover] = ThrottledHover()
-   const hover = Hover(() => $hover.value = true)
-   const unhover = Unhover(() => $hover.value = false)
-
-
    return component(
       <div
          class="dot"
@@ -180,8 +180,8 @@ function Dot({ x, y, s, $text }: FromTag<any>) {
             "line-height": s + "px",
             background: ($hover() ? "#ff0" : "#61dafb")
          }}
-         on:mouseenter={hover}
-         on:mouseleave={unhover}
+         on:mouseenter={e => $hover.value = true}
+         on:mouseleave={e => $hover.value = false}
       >{($hover() ? "**" + $text() + "**" : $text())}</div>
    );
 };

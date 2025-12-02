@@ -278,7 +278,7 @@ function TreeItemView(input: FromTag<{
             )}
          </div>
          {If($isFolder,
-            <ul show:if={$isOpen}>
+            <ul show-hide={$isOpen}>
                {For(item.children!, m => m, item => (
                   <TreeItemView mu:item={item}></TreeItemView>
                ))}

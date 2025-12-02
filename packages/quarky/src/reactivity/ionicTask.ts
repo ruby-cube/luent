@@ -55,19 +55,19 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 type IonicTaskOptions = {[K in keyof _IonicTaskOptions as K extends 'phase' ? never: K]: _IonicTaskOptions[K]}
 
 
-export function queueIonicPreludeTask(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { phase: PRELUDE, ...options ?? {} })
+export function queueIonicPrelude(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, {...options ?? {}, phase: PRELUDE })
 }
 
 export function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { phase: RENDER, ...options ?? {} })
+   return _queueIonicTask(task, { ...options ?? {}, phase: RENDER })
 }
 
-export function queueIonicPostludeTask(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { phase: POSTLUDE, ...options ?? {} })
+export function queueIonicPostlude(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
 }
 
 export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { phase: TICK, ...options ?? {} })
+   return _queueIonicTask(task, { ...options ?? {}, phase: TICK })
 }
 

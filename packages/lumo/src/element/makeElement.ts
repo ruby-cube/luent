@@ -5,7 +5,7 @@ import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } fr
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
-import { isHTMLEvent } from "./attributes";
+import { getEventUpdater, isHTMLEvent } from "./attributes";
 import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/GetNode";
 import { camelToKebabCase } from "@rue/utils";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
@@ -37,7 +37,7 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    config: ElementConfig,
 ): DOMNode {
-   const { class: classes, style: styles, 'show:if': showIf, node: $node, nodes, ...other } = config;
+   const { class: classes, style: styles, 'show-hide': showIf, node: $node, nodes, ...other } = config;
 
    const { attributes, events, hooks } = analyzeAttributes(other)
 
@@ -170,10 +170,9 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
       return;
    const ion = attributes['mu:checked'];
    delete attributes['mu:checked'];
-   attributes.checked = toValue(ion);
+   attributes.checked = ion;
    if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
-
    }
    else {
       setUpInputListener(element, ion, 'checked')
@@ -183,9 +182,10 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    if (!('mu:checked' in attributes))
       return;
    const ion = attributes['mu:checked'];
+   console.log('radio')
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
-   attributes.checked = () => toValue(ion) === radioValue;
+   attributes.checked = () => ion() === radioValue;
    if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
@@ -199,7 +199,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
       return;
    const ion = attributes['mu:value'];
    delete attributes['mu:value'];
-   attributes.value = toValue(ion);
+   attributes.value = ion;
    if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
@@ -526,14 +526,12 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
             }
          })
       }
-
    }
 }
 
 export function withUpdate(handler: Function, event: string) {
-   if (handler.name === 'noWrap') return handler;
-   // const update = event === 'click' ? swiftUpdate : instantUpdate  // FIX: standin update type should depend on event type
-   return (e) => swiftUpdate(() => handler(e))
+   const update = getEventUpdater(event) ?? swiftUpdate
+   return (e: any) => update(() => handler(e))
 }
 
 

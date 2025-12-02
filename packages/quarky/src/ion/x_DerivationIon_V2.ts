@@ -8,7 +8,7 @@ import { asTrackedAtom } from "../reactivity/Atom";
 import { Ion } from "./Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
-import { SYNC, $activeUpdate, Mutation } from "../reactivity/Update";
+import { SYNC, $activeUpdate, Mutation } from "../reactivity/LazyUpdate";
 import { track } from "../reactivity/Compound";
 import { SimpleState } from "../reactivity/State";
 
