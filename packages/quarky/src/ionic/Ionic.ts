@@ -4,6 +4,7 @@ import { createIonicModel } from "./IonicModel";
 import { __DEV__trace } from "../debug/debug";
 import { QUARK, quarkOf } from "../abstract/Quark";
 import { isIonicProxy, QuarkyIonicProxy } from "./ModelQuark";
+import { isObject } from "@rue/utils";
 
 
 export type IonicProxy = AnyObject & { '~ionic-proxy': true }
@@ -32,6 +33,7 @@ export function Ionic<T extends AnyObject>(target: T, config?: AnyObject): Ionic
    //    console.log(target)
    //    throw Error('ALREADY')
    // }
+   if (!isObject(target)) return target;
    const proxy = createIonicModel(target, config ?? {})
    ionicModels.set(target, proxy)
    return proxy as any as IonicProxy & T

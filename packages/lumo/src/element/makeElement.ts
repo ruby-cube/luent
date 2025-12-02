@@ -171,8 +171,9 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    const ion = attributes['mu:checked'];
    delete attributes['mu:checked'];
    attributes.checked = ion;
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
+
    }
    else {
       setUpInputListener(element, ion, 'checked')
@@ -185,7 +186,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
    attributes.checked = () => Ion() === radioValue;
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -200,8 +201,9 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    delete attributes['mu:value'];
    attributes.value = ion;
    console.log('bindTextInput, value', ion)
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
+
    }
    else {
       setUpInputListener(element, ion)
@@ -236,7 +238,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -296,7 +298,16 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
          e.currentTarget?.[key];
    }
    else {
-      throw new Error('invalid two-way binding')
+      const maybeIon = ion()
+      if (isMutableIon(maybeIon)) {
+         maybeIon.value =
+            //@ts-expect-error
+            e.currentTarget?.[key];
+      }
+      else {
+         throw new Error('invalid two-way binding')
+      }
+
    }
 }
 
@@ -522,6 +533,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
 }
 
 export function withUpdate(handler: Function, event: string) {
+   if (handler.name === 'noWrap') return handler;
    const update = event === 'click' ? swiftUpdate : instantUpdate  // FIX: standin update type should depend on event type
    return (e) => update(() => handler(e))
 }

@@ -1,5 +1,6 @@
-import { $activeUpdate, getActiveUpdate, Update } from "./Update"
+import { $activeUpdate, getActiveUpdate } from "./Update"
 import { AnyObject } from "@rue/types"
+import {Update} from "./SwiftUpdate"
 
 
 // TODO: history
@@ -22,18 +23,21 @@ function getState(state: PendableState) {
 }
 
 function lockState(state: PendableState) {
-   console.log('%%% LOCKING STATE', state)
+   console.trace('%%% LOCKING STATE', state)
    const update = $activeUpdate()
    if (!update) {
       console.warn('nothing to lock to')
       return;
    }
-   if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
-   if (update.committed) return;
-   update.race(state.pendingUpdate)
+   console.log('update', update.committed)
+   // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
+   if (update.committed) {
+      return;
+   }
+   // update.race(state.pendingUpdate)
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
-      update.atSettled(() => {
+      update.atCommit(() => {
          state.pendingUpdate = null
       })
    }
@@ -45,7 +49,7 @@ export function queueCommit(update: Update, state: PendableState) {
    update.atCommit(() => {
       state.commitUpdate()
    })
-   update.atCancel(() => {
+   update.atCancel?.(() => {
       state.cancelUpdate()
    })
 }

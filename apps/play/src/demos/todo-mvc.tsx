@@ -103,9 +103,7 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 export function TodoMVC() {
 
-   const $todos = Ion(Ionic(getTodos(), {
-      [EACH]: { as: Ionic }
-   }))
+   const $todos = Ion(Ionic(getTodos(), { [EACH]: { as: Ionic } }))
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
@@ -119,7 +117,6 @@ export function TodoMVC() {
    }
 
 
-   console.log(Object.getOwnPropertyDescriptor($todos(), 'length' ))
    // # handle routing
 
    listen(window, 'hashchange', () => {
@@ -141,6 +138,7 @@ export function TodoMVC() {
       queueIonicTask(() => {
          localStorage.setItem(STORAGE_KEY, JSON.stringify($todos())) // FIX: Do can we eliminate toRaw()?
       })
+
       return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
    }
 

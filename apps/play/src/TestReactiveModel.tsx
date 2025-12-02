@@ -55,7 +55,7 @@ export function List() {
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
-   const $listClone = Ion(() => list.slice())
+   // const $listClone = Ion(() => list.slice())
 
    const values = list.values()
    for (const value of values) {
@@ -134,7 +134,7 @@ export function List() {
          <button on:click={e => selected.clear()}>clear</button>
          <hr></hr>
 
-         {For($listClone, (item, $index) =>
+         {/* {For($listClone, (item, $index) =>
             <div
                style={{
                   backgroundColor: randomColor.get(),
@@ -145,7 +145,7 @@ export function List() {
                </li>
                <p>{$index}</p>
             </div>
-         )}
+         )} */}
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >

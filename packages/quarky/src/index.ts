@@ -24,6 +24,8 @@ export * from "./ionic/$$Array"
 export * from "./ionic/$$Iterator" 
 export * from "./__notes__/areEqual" 
 export * from "./reactivity/ionicTask" 
+export * from "./reactivity/Update" 
+export * from "./reactivity/SwiftUpdate" 
 export * from "../../lumo/src/specialty/FiniteState" 
 
 // installIonicArray()

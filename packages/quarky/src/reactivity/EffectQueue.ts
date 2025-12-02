@@ -1,7 +1,8 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate, dispatch, popUpdate, pushUpdate, tickUpdate } from "./Update";
+import { catchCancelledUpdate, dispatch, popUpdate, pushUpdate } from "./Update";
 import { RenderCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
+import { Update, tickUpdate } from "./SwiftUpdate";
 
 // const PRELUDE = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
 
@@ -149,13 +150,15 @@ export class TaskQueue {
    protected emitEffectsComplete!: () => void;
    cancel!: () => void;
 
+   started = false;
+
    constructor(
-      public cycle: RenderCycle,
+      public update: Update,
       protected phase: Phase,
       protected wrapTask: (fn?: (() => void) | null) => ((value?: unknown) => void) | null = (fn) => () => {
          if (!fn) return;
          try {
-            pushUpdate(this.cycle.update)
+            pushUpdate(this.update)
             fn()
          }
          catch (err) {
@@ -193,6 +196,7 @@ export class TaskQueue {
    runningEffects: boolean = false
 
    runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
+      this.started = true;
       this.runBatches(
          (effect) => this.runEffect(effect),
          this.phase === SYNC ? undefined : new Set()
@@ -222,7 +226,7 @@ export class TaskQueue {
    }
 
    runEffect(effect: Effect) {
-      const update = this.cycle.update
+      const update = this.update
 
       try {
          this.runningEffects = true
@@ -246,21 +250,23 @@ export class TaskQueue {
  * Belongs to the current effect cycle.
  */
 export class PreludeTaskQueue extends TaskQueue {
+
    constructor(
-      cycle: RenderCycle,
+      public update: Update,
    ) {
-      super(cycle, PRELUDE)
+      super(update, PRELUDE)
    }
 
    emitBatchesComplete: (() => void) | undefined
    idleCount = 0;
 
    override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
+      if (this.effects.length === 0) this.started = true;
       new Promise<void>(emitBatchesComplete => {
-         const update = this.cycle.update;
+         const update = this.update;
          this.runBatches(
             update.idle
-               ? (effect: Effect) => { this.scheduleIdleEffect(effect, <number>update.idle) }
+               ? (effect: Effect) => { this.scheduleIdleEffect(effect) }
                : (effect: Effect) => { this.runEffect(effect) },
             new Set()
          )
@@ -276,10 +282,21 @@ export class PreludeTaskQueue extends TaskQueue {
       return this.effectsComplete
    }
 
-   scheduleIdleEffect(effect: Effect, timeout: number) {
-      const update = this.cycle.update
+   private get deadline() {
+      const update = this.update;
+      if (typeof update.idle === 'number') {
+         const elapsed = Date.now() - update.timestamp
+         const timeLeft = update.idle - elapsed
+         return timeLeft > -1 ? timeLeft : 0
+      }
+      throw new TypeError('Invalid idle task deadline. Must provide positive number')
+   }
+
+   scheduleIdleEffect(effect: Effect) {
+      const update = this.update
       this.idleCount++;
       requestIdleCallback(() => {
+         this.started = true
          try {
             this.runningEffects = true
             pushUpdate(update)
@@ -296,7 +313,7 @@ export class PreludeTaskQueue extends TaskQueue {
                this.emitBatchesComplete?.()
             }
          }
-      }, { timeout })
+      }, { timeout: this.deadline })
    }
 }
 
@@ -306,13 +323,16 @@ export class PreludeTaskQueue extends TaskQueue {
  * Belongs to the current effect cycle.
 */
 export class TickTaskQueue extends TaskQueue {
+
+
+
    constructor(
-      cycle: RenderCycle,
+      public update: Update,
    ) {
-      super(cycle, TICK, (fn?: (() => void) | null) => {
+      super(update, TICK, (fn?: (() => void) | null) => {
          return () => {
             if (!fn) return;
-            tickUpdate(fn, this.cycle.update)
+            tickUpdate(fn, this.update)
          }
       })
    }

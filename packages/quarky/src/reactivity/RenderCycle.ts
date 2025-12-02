@@ -1,10 +1,11 @@
 
 
 import { setImmediate } from "@rue/thread";
-import { $activeUpdate, catchCancelledUpdate, getActiveUpdate, Update } from "./Update"
+import { $activeUpdate, getActiveUpdate } from "./Update"
 import { EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
 import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
+import { Update } from "./SwiftUpdate";
 
 
 export const queueTask = setImmediate;
@@ -87,6 +88,9 @@ export class RenderCycle {
          scheduleTasks: queueSwiftTask
       }]
 
+      this.effects[INTERNAL_RENDER] = new TaskQueue(update, INTERNAL_RENDER)
+      this.effects[TICK] = new TickTaskQueue(update)
+
       if (__DEV__) assertSequentialPhases(this.phases)
    }
 
@@ -96,7 +100,6 @@ export class RenderCycle {
       if (this.cancelled == true) return;
       this.runStartTasks()
       this.schedulePhase(this.phases[0]) // from module
-      return this.update.completed
    }
 
 
@@ -144,13 +147,15 @@ export class RenderCycle {
       })
    }
 
-   closePhase(phase: AsyncPhase) {
+
+   private closePhase(phase: AsyncPhase) {
       const nextPhase = this.phases[phase + 1]
       if (nextPhase && !this.cancelled) {
          this.schedulePhase(nextPhase)
       }
-      else if (__DEV__) {
-         requestAnimationFrame((time) => this.timecheck(time))
+      else {
+         this.update.complete()
+         if (__DEV__) requestAnimationFrame((time) => this.timecheck(time))
       }
    }
 
@@ -160,12 +165,12 @@ export class RenderCycle {
 
    cancel() {
       // try {
-         this.idleIDs.forEach((id) => cancelIdleCallback(id))
-         let i = this.phases.length
-         while (i--) {
-            this.effects[i]?.cancel()
-         }
-         this.cancelled = true;
+      this.idleIDs.forEach((id) => cancelIdleCallback(id))
+      let i = this.phases.length
+      while (i--) {
+         this.effects[i]?.cancel()
+      }
+      this.cancelled = true;
       // }
       // catch (error) {
       //    console.log('CATCH', error)
@@ -183,10 +188,10 @@ export class RenderCycle {
    effects: { [key: number | string]: TaskQueue | undefined } = {
       [SYNC]: undefined,
       [PRELUDE]: undefined,
-      [INTERNAL_RENDER]: new TaskQueue(this, INTERNAL_RENDER),
+      [INTERNAL_RENDER]: undefined,
       [RENDER]: undefined,
       [POSTLUDE]: undefined,
-      [TICK]: new TickTaskQueue(this)
+      [TICK]: undefined
    }
 
    // effectStack: Set<Effect> = new Set()
@@ -195,12 +200,12 @@ export class RenderCycle {
       return this.effects[phase]
          ?? (this.effects[phase] =
             phase === PRELUDE
-               ? new PreludeTaskQueue(this)
-               : new TaskQueue(this, phase)
+               ? new PreludeTaskQueue(this.update)
+               : new TaskQueue(this.update, phase)
          )
    }
 
-   onCompleted(fn: () =>void) {
+   onCompleted(fn: () => void) {
       this.$effectsComplete(TICK).then(fn)
    }
 

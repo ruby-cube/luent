@@ -1,10 +1,9 @@
 
-//@ts-nocheck
 import { atMounted, For, If, Style } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
-import { $$, ion, Ionic, ionic, ionize, Ionized, ions, SYNC, watch } from "@rue/quarky"
+import {  Ion, Ionic, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
 import { quarkOf } from "../../../../packages/quarky/src/abstract/Quark"
-import { getFlask } from "@rue/flask"
+import { AnyObject } from "@rue/types"
 
 export function SevenGUIs() {
    return component(
@@ -93,55 +92,58 @@ function FlightBooker() {
    }
 
    return component(
-      <select mu:value={$flightType}>
-         <option value="one-way flight">One-way Flight</option>
-         <option value="return flight">Return Flight</option>
-      </select>,
+      <>
+         <select mu:value={$flightType}>
+            <option value="one-way flight">One-way Flight</option>
+            <option value="return flight">Return Flight</option>
+         </select>
 
-      <input type="date" mu:value={$departureDate} />,
-      <input type="date" mu:value={$returnDate} disabled={(!$isReturn())} />,
+         <input type="date" mu:value={$departureDate} />
+         <input type="date" mu:value={$returnDate} disabled={(!$isReturn())} />
 
-      <button disabled={(!$canBook())} on:click={book}>Book</button>,
+         <button disabled={(!$canBook())} on:click={book}>Book</button>
 
-      <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>,
+         <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>
+      </>
 
-      <o-style scoped="flight-booker">
-         select,
-         input,
-         button {
-            display: `$display`;
-            margin: 0.5em 0;
-            font-size: 15px;
-         }
-      
-         input[disabled] {
-            color: #999;
-         }
-      
-         p {
-            color: red;
-         }
-      </o-style>,
-
-      style('flight-booker').css`
-         select,
-         input,
-         button {
-            display: ${$display};
-            margin: 0.5em 0;
-            font-size: 15px;
-         }
-         
-         input[disabled] {
-            color: #999;
-         }
-         
-         p {
-            color: red;
-         }
-      `
    )
 }
+
+// <o-style scoped="flight-booker">
+//    select,
+//    input,
+//    button {
+//       display: `$display`;
+//       margin: 0.5em 0;
+//       font-size: 15px;
+//    }
+
+//    input[disabled] {
+//       color: #999;
+//    }
+
+//    p {
+//       color: red;
+//    }
+// </o-style>,
+
+// style('flight-booker').css`
+//    select,
+//    input,
+//    button {
+//       display: ${$display};
+//       margin: 0.5em 0;
+//       font-size: 15px;
+//    }
+
+//    input[disabled] {
+//       color: #999;
+//    }
+
+//    p {
+//       color: red;
+//    }
+// `
 
 function TimerApp() {
    const $duration = Ion(15 * 1000)
@@ -333,40 +335,89 @@ button + button {
    )
 }
 
+// function OnEventFlow(obj: { [key: string]: Function } | any) {
+//    const update = createSwiftUpdate(() => undefined)
+//    const onEventFlow: AnyObject = {
+//       start() {
+//          pushUpdate(update)
+//       },
+//       end() {
+//          popUpdate()
+//          if (!update.cancelled) {
+//             update.start()
+//          }
+//       }
+//    }
+//    for (const key in obj) {
+//       onEventFlow[key] = function noWrap(...args: any[]) { tryUpdate(() => obj[key](...args)) }
+//    }
+//    return onEventFlow
+// }
+
 type Circle = { cx: number, cy: number, r: number }
 
 export function CircleApp() {
-   const history = ionize([[]] as Circle[][])
+   const history = Ionic([Ionic([])] as Circle[][])
    const $index = Ion(0)
-   const $circles = ion.ionize([] as Circle[])
-   const $selected = ion.ionize(undefined as undefined | null | Circle)
+   const $circles = Ion(Ionic([] as Circle[]))
+   const $selected = Ion(undefined as undefined | null | Circle)
    const $adjusting = Ion(false)
 
-   function reClick({ clientX: x, clientY: y }: MouseEvent) {
+   // const handleClick = OnEventFlow(end => ({
+   //    circle(circle: Circle) {
+   //       $selected.value = circle
+   //    },
+   //    svg({ clientX: x, clientY: y, target }: MouseEvent) {
+   //       if ($adjusting()) {
+   //          $adjusting.value = false
+   //          $selected.value = null
+   //          push()
+   //          return end();
+   //       }
+
+   //       if (target?.tagName !== 'circle') $selected.value = null
+
+   //       if (!$selected()) {
+   //          $circles().push(Ionic({
+   //             cx: x,
+   //             cy: y,
+   //             r: 50
+   //          }))
+   //          push()
+   //       }
+   //       return end();
+   //    }
+   // }))
+
+   function reClick({ clientX: x, clientY: y, target }: MouseEvent) {
       if ($adjusting()) {
          $adjusting.value = false
          $selected.value = null
          push()
-         return
+         return;
       }
+      console.log('### not adjusting', $selected.value, target.tagName)
 
-      $selected.value = ionize([...$circles()].reverse().find(({ cx, cy, r }) => {
-         const dx = cx - x
-         const dy = cy - y
-         return Math.sqrt(dx * dx + dy * dy) <= r
-      }))
+      if (target?.tagName !== 'circle') $selected.value = null
+
+      // $selected.value = [...$circles()].reverse().find(({ cx, cy, r }) => {
+      //    const dx = cx - x
+      //    const dy = cy - y
+      //    return Math.sqrt(dx * dx + dy * dy) <= r
+      // })
 
       if (!$selected()) {
-         $circles().push({
+         $circles().push(Ionic({
             cx: x,
             cy: y,
             r: 50
-         })
+         }))
          push()
       }
    }
 
    function adjust(circle: Ionized<Circle>) {
+      console.log('adjust new circle')
       $selected.value = circle
       $adjusting.value = true
    }
@@ -378,19 +429,21 @@ export function CircleApp() {
    }
 
    function undo() {
-      $circles.value = ionize(clone(history[--$index.value]))
+      $circles.value = clone(history[--$index.value])
    }
 
    function redo() {
-      $circles.value = ionize(clone(history[++$index.value]))
+      $circles.value = clone(history[++$index.value])
    }
 
    function clone(circles: Circle[]) {
-      return circles.map((c) => ({ ...c }))
+      return circles.map((circle) => Ionic({ ...circle }))
    }
+
    return component(
       <>
-         <svg on:click={e => reClick(e)}>
+         <svg on:click={e => reClick(e as any as MouseEvent)}>
+         {/* <svg on:click={(e) => { handleClick.svg(e) }}> */}
             <foreignObject x="0" y="40%" width="100%" height="200">
                <p class="tip">
                   Click on the canvas to draw a circle. Click on a circle to select it.
@@ -403,7 +456,8 @@ export function CircleApp() {
                   cy={circle.cy}
                   r={circle.$r}
                   fill={(circle === $selected() ? '#ccc' : '#fff')}
-                  on:click={e => $selected.value = circle}
+                  on:click={e => { $selected.value = circle }}
+                  // on:click={e => { handleClick.circle(circle) }}
                   on:contextmenu={e => (e.preventDefault(), adjust(circle))}
                ></circle>)
             )}
@@ -413,12 +467,12 @@ export function CircleApp() {
             <button on:click={undo} disabled={($index() <= 0)}>Undo</button>
             <button on:click={redo} disabled={($index() >= history.length - 1)}>Redo</button>
          </div>
-         {If($adjusting, (selected = $selected()!) =>
+         {If($adjusting,
             <div class="dialog" on:click={e => e.stopPropagation()}>
-               <p>Adjust radius of circle at ({selected.cx}, {selected.cy})</p>
+               <p>Adjust radius of circle at ({($selected()!.cx)}, {($selected()!.cy)})</p>
                <input
                   type="range"
-                  mu:value={selected.$r}
+                  mu:value={($selected()!.$r)}
                   min="1" max="300"
                />
             </div>

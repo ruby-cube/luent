@@ -100,10 +100,10 @@ class MemoizedState extends SimpleState {
          console.warn('nothing to lock to')
          return;
       }
-      if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
+      // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
       if (update.committed) return;
       this.pendingUpdate = update
-      update.atSettled(() => {
+      update.atCommit(() => {
          this.pendingUpdate = null
       })
       queueCommit(update, this)

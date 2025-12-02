@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
+import './style.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -98,7 +98,7 @@ import { TestIonicList } from './TestIonicList';
 //    return component(<div>Hello World</div>)
 // }
 
-const app = createRoot(TodoMVC)
+const app = createRoot(List)
 
 app.mount('#app')
 

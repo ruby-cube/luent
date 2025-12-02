@@ -1,10 +1,12 @@
-import { RenderCycle } from "./RenderCycle";
 import { createStack } from "@rue/utils";
 import { Ion } from "../ion/Ion";
+import { Update } from "./SwiftUpdate";
+import { queueTask, RenderCycle } from "./RenderCycle";
 
 
 
 export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
+
 
 export function $activeUpdate() {
    const update = getActiveUpdate()
@@ -28,16 +30,16 @@ export const UpdateType = {
 }
 
 
-export class Update {
-   timestamp: Date = new Date() // TODO: make sure this is correct
+export class LazyUpdate {
+   timestamp: number = Date.now()
 
    private _cycle?: RenderCycle
    fn: () => unknown;
    private output: unknown;
 
    completed: Promise<unknown>;
-   resolve!: (value: unknown) => void;
-   reject!: (reason?: any) => void;
+   private resolve!: (value: unknown) => void;
+   private reject!: (reason?: any) => void;
 
    get cycle() {
       return this._cycle ?? (this._cycle = new RenderCycle(this))
@@ -276,23 +278,21 @@ export function catchCancelledUpdate(error: unknown) {
 
 export function dispatch<T>(fn: () => T, options?: { timeMargin?: number, deadline?: number }): Promise<T> {
    const timeMargin = options?.deadline ?? options?.timeMargin ?? 1000;
-   return runUpdate(new Update(fn, UpdateType.IDLE, timeMargin, options?.deadline ?? true)) as Promise<T>
+   return runUpdate(new LazyUpdate(fn, UpdateType.IDLE, timeMargin, options?.deadline ?? true)) as Promise<T>
 }
 
 
-export function instantUpdate(fn: () => void) {
-   // return 
-   runUpdate(new Update(fn, UpdateType.INSTANT, 16.7))
-}
+
+
 
 
 // TODO: what happens when swiftUpdates queue up too long??
-export function swiftUpdate<T>(fn: () => void) {
-   runUpdate(new Update(fn, UpdateType.USER_INTERACTION, 100, 17))
-}
+// export function swiftUpdate<T>(fn: () => void) {
+//    runUpdate(new Update(fn, UpdateType.USER_INTERACTION, 100, 17))
+// }
 
 export function runUpdate(update: Update) {
-   console.log('run update')
+   console.trace('run update')
    try {
       pushUpdate(update)
       update.fn() // TODO: pass in await sequence?
@@ -309,32 +309,13 @@ export function runUpdate(update: Update) {
    }
 }
 
-/**
- * tickUpdates will be initialized as a new task after 
- * @param fn 
- * @param origin 
- */
-export function tickUpdate(fn: () => void, origin: Update): void {
-   const update = new Update(fn,
-      origin.type,
-      origin.timeMargin,
-      origin.type === UpdateType.USER_INTERACTION ? false : origin.idle
-   )
+export function tryUpdate(fn: () => unknown) {
    try {
-      pushUpdate(update)
-      fn()
+      fn() // TODO: pass in await sequence?
+
    }
    catch (error) {
-      catchCancelledUpdate(error)
-   }
-   finally {
-      // NOTE: I'm worried about the chaos not running popUpdate synchronously will cause, but it's the only way to wrap an await's 'then' :(
-      queueMicrotask(() => {
-         popUpdate()
-      })
-      if (!update.cancelled) {
-         update.cycle.start()
-      }
+      catchCancelledUpdate(error) // FIX: errors are being swallowed up here despite being rethrown. May be because run update returns a promise
    }
 }
 
@@ -379,3 +360,8 @@ export type Action = {
 //       }
 //    }
 // }
+
+
+
+
+

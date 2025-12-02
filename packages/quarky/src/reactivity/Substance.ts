@@ -291,7 +291,7 @@ export class IonSubstance implements WatchedSubstance {
    }
 
    linkEffect(effect: Effect): void {
-      if (this.subject.reactive)
+      if (this.reactive)
          this.subject.linkEffect(effect)
       this.proxySubject?.linkEffect(effect)
    }
@@ -303,7 +303,9 @@ export class IonSubstance implements WatchedSubstance {
       }
       this.relinkProxy = () => {
          const effect = this.subject.effect
-         if (!effect) throw new Error('Must call linkEffect before retracking')
+         if (!effect) {
+            throw new Error('Must call linkEffect before retracking')
+         }
          this.proxySubject?.linkEffect(effect)
       }
    }
