@@ -173,7 +173,7 @@ export const SetlikeDef: IonicDef<Setlike<unknown>> = {
 
    size: {
       get() {
-         // this.track('[[get]]', 'size')
+         this.track('[[get]]', 'size')
          return this.raw.size
       }
    }
