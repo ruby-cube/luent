@@ -1,5 +1,6 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
 import { instantUpdate } from "./Update";
+import { fail } from "assert";
 
 // let forAnimation = false;
 // export function $forAnimation() {
@@ -173,13 +174,25 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
    let stopped = true;
    const context = $_snap_context()
 
+   let totalFrames = 0;
+   let failCount = 0;
 
+   let startTime = performance.now()
+
+   let totalDelta = 0
 
    function renderFrame(time: DOMHighResTimeStamp) {
-      setImmediate(() => {
+      // setImmediate(() => {
+         ++totalFrames
+         const now = performance.now()
+         const delta = now - startTime
+         totalDelta += delta
+         const average = totalDelta/totalFrames
+         console.log('frame time', delta, delta > 16.7 ? (++failCount, 'X') : '', 'RATIO:', failCount/totalFrames, 'AVERAGE', average, average > 16.7 ? (++failCount, 'X') : '')
+         startTime = now;
          instantUpdate(() => prepFrame(time))
          // runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
-      })
+      // })
    }
 
    function prepFrame(time: DOMHighResTimeStamp | undefined) {

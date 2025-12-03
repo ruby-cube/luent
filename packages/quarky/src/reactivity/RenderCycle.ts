@@ -63,11 +63,12 @@ export class RenderCycle {
    constructor(
       public update: Update,
    ) {
-      const schedulePrerenderTasks = update.idle ? queueSwiftTask : queueMicrotask
+      const schedulePrerenderTasks = update.idle ? queueSwiftTask : queueMicrotask // TODO: need to check deadline for queueSwiftTask
       const scheduleInternalRender = update.idle ? queueTask : queueMicrotask
 
       this.phases = [{
          phase: PRELUDE,
+         // scheduleEffects: queueTask,
          scheduleEffects: update.idle ? (task) => requestIdleCallback(task, { timeout: 1 }) : queueMicrotask,
          scheduleTasks: schedulePrerenderTasks
       }, {
@@ -155,7 +156,11 @@ export class RenderCycle {
       }
       else {
          this.update.complete()
-         if (__DEV__) requestAnimationFrame((time) => this.timecheck(time))
+         if (__DEV__) {
+            // requestAnimationFrame((time) =>
+               this.timecheck(performance.now())
+            // )
+         }
       }
    }
 
@@ -181,7 +186,10 @@ export class RenderCycle {
       const delta = now - this.startTime
       const timeMargin = this.update.timeMargin
       if (timeMargin && delta > timeMargin) {
-         // console.warn('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+         // console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+      }
+      else {
+         // console.log('passed timecheck')
       }
    }
 

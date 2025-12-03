@@ -12,7 +12,7 @@ export function $activeUpdate() {
 }
 
 export class Update {
-   timestamp: number = Date.now()
+   timestamp: number = performance.now()
 
    constructor(
       public type: UpdateType = UpdateType.USER_INTERACTION,
@@ -158,6 +158,39 @@ export function instantUpdate(task: () => unknown) {
 function createInstantUpdate() {
    return new Update(UpdateType.USER_ANIMATION, 16.7, false).start()!
 }
+
+
+// export function instantUpdate(task: () => unknown) {
+//    (getInstantUpdate() ?? createInstantUpdate()).queue(task)
+// }
+
+// let latestInstantUpdate: Update | null = null
+
+// function getInstantUpdate() {
+//    if (latestInstantUpdate) {
+//       if (latestInstantUpdate.closed) {
+//          return;
+//       }
+//       return latestInstantUpdate;
+//    }
+//    return;
+// }
+
+// function createInstantUpdate() {
+//    console.log('* new update')
+//    const update = new Update(UpdateType.USER_ANIMATION, 16.7, false)
+//    if (latestInstantUpdate && !latestInstantUpdate.completed) {
+//       console.warn('queueing update')
+//       latestInstantUpdate.atComplete(() => {
+//          queueTask(() => update.start())
+//       })
+//    }
+//    else {
+//       update.start() // TODO: only start if there are any state mutations
+//    }
+//    latestInstantUpdate = update
+//    return update
+// }
 
 /**
  * tickUpdates will be initialized as a new task after 

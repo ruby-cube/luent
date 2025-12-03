@@ -461,10 +461,10 @@ export function CircleApp() {
          </div>
          {If($adjusting,
             <div class="dialog" on:click={e => e.stopPropagation()}>
-               <p>Adjust radius of circle at ({($selected()!.cx)}, {($selected()!.cy)})</p>
+               <p>Adjust radius of circle at ({($selected()?.cx)}, {($selected()?.cy)})</p>
                <input
                   type="range"
-                  mu:value={($selected()!.$r)}
+                  mu:value={($selected()?.$r)}
                   min="1" max="300"
                />
             </div>

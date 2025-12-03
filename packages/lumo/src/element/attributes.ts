@@ -27,7 +27,8 @@ const htmlEvents = {
    focusout: swiftUpdate,
 
    // Form Events
-   input: swiftUpdate, // vvv user animation // TODO:
+   beforeinput: instantUpdate, // vvv user animation // TODO:
+   input: instantUpdate, // vvv user animation // TODO:
    change: swiftUpdate,
 
    submit: swiftUpdate, // vvv user interaction

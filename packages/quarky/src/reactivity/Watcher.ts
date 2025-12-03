@@ -1,5 +1,5 @@
 import { $listen, Flask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
-import { Ion, isIon } from "../ion/Ion";
+import { Ion, isIon, toValue } from "../ion/Ion";
 import { Ionized } from "../ionic/x_ionize";
 import { Effect } from "./EffectQueue";
 import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
@@ -206,7 +206,7 @@ export function InertWatcher() {
 export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getFlask(), eager: boolean = false) {
    // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
    // return;
-   const subject = new IonSubstance(ion)
+   const subject = new IonSubstance(() => toValue(ion())) // toValue in case of mutable ion getter
 
    let prevState = subject.getValue()
 

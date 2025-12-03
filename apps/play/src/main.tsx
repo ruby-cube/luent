@@ -17,7 +17,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createRoot, PRELUDE } from '@rue/lumo';
+import { component, createRoot, PRELUDE, queueTask } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -68,6 +68,7 @@ import { TestStreamIon } from './TestStreamIon';
 import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
+import { Animation } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -92,30 +93,18 @@ import { TestIonicList } from './TestIonicList';
 // import { NestedPend } from './NestedPend';
 
 
-// installIonizedDate()
-
-// function Hello(){
-//    return component(<div>Hello World</div>)
+// function TestApp2() {
+//    return component(
+//       <div contenteditable on:beforeinput={e => console.log('before input')} on:input={e => console.log('input')}>
+//          hi
+//       </div>
+//    )
 // }
 
 const app = createRoot(TriangleDemo)
 
 app.mount('#app')
 
-// function TestSimpleList() {
-//    const $list = Ion(['apples', 'peaches', 'pears', 'plums'])
-
-//    return component(
-//       <div>
-//          {For($list, (item, $index) => (
-//             <>
-//                <div>{$index()} {item}</div>
-//                <div>--</div>
-//             </>
-//          ))}
-//       </div>
-//    )
-// }
 
 // const frog = ionize({ name: 'sir robin' })
 

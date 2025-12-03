@@ -4,7 +4,7 @@ import { quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction, noop } from "@rue/utils";
 import { Ionized } from "../ionic/x_ionize";
-import { Ion, isIon } from "../ion/Ion";
+import { Ion, isIon, toValue } from "../ion/Ion";
 import { WatchSubjects } from "./Watcher";
 import { Compound, Particle, popTracker, pushTracker } from "./Compound";
 import { isIonicProxy, QuarkyIonicProxy } from "../ionic/ModelQuark";
@@ -172,7 +172,7 @@ export class FunctionalSubstance extends Compound implements Substance {
 
    private call = () => {
       this.call = () => this.retrackedCall();
-      return this.trackAtoms(this.fn)
+      return this.trackAtoms(this.fn) // toValue in case of mutable ion getters
    }
 
    trackedCall() {
@@ -184,13 +184,13 @@ export class FunctionalSubstance extends Compound implements Substance {
    effect: Effect | undefined
 
    private retrackedCall() {
-      if (!this.retrack || !this.reactive) return this.fn()
+      if (!this.retrack || !this.reactive) return toValue(this.fn())
       const fn = this.fn
       const effect = this.effect
       if (!effect) throw new Error('Must call linkEffect before retracking')
       effect.unlinkAtoms()
       this.untrackAtoms()
-      const output = this.trackAtoms(fn)
+      const output = this.trackAtoms(this.fn)
       this.forEachAtom(atom => {
          linkEffectToAtom(atom, effect)
       })

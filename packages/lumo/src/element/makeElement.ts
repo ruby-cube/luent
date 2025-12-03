@@ -330,7 +330,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
             queueInternalRender(() => {
-               setAttribute(node, _key, value())
+               setAttribute(node, _key, toValue(value())) // toValue for mu getters
             }, flask)
          }, flask, RUN_EAGERLY)
       }
