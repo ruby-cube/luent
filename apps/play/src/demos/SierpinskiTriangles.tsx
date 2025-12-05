@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, dispatch, Ion, $cancelCount, swiftUpdate } from "@rue/quarky";
+import { Animation, Interval, dispatch, Ion, $cancelCount, swiftUpdate, $_derivation } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // TODO:
@@ -62,6 +62,20 @@ export function TriangleDemo() {
    // incrementSeconds.$pending
    // incrementSeconds.dispatch()
 
+   // const queue = new InterruptibleQueue()
+   // let count = 1458;
+   // while (count--) {
+   //    queue.addTask(() => {
+   //       var e = performance.now() + 0.8;
+   //       // Artificially long execution time.
+   //       while (performance.now() < e) { }
+   //    })
+   // }
+
+   // const taskInterval = Interval(1000, () => {
+   //    queue.runTasks()
+   // }).start()
+
    let promise: Promise<void>;
    // let resolve: undefined | (() => void)
 
@@ -72,7 +86,8 @@ export function TriangleDemo() {
       // promise = new Promise<void>(_resolve => { resolve = _resolve })
       // $realSeconds.value = ($realSeconds() % 10) + 1
       // dispatch(() => { $seconds.value = ($seconds() % 10) + 1 }, { deadline: 1000 })
-   }).start();
+   })
+      .start();
 
    const start = Date.now()
 
@@ -164,6 +179,8 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
    );
 };
 
+
+// 729 dots
 
 function Dot({ x, y, s, $text }: FromTag<any>) {
    const $hover = Ion(false)

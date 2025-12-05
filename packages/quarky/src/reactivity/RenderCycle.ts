@@ -1,7 +1,7 @@
 
 
 import { setImmediate } from "@rue/thread";
-import { $activeUpdate, getActiveUpdate } from "./Update"
+import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate } from "./Update"
 import { EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
 import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
@@ -10,9 +10,10 @@ import { Update } from "./Update";
 
 export const queueTask = setImmediate;
 
-function queueSwiftTask(task: Task) {
-   return requestIdleCallback(task, { timeout: 17 })
-}
+// function queueSwiftTask(task: Task) {
+//    // console.trace('queueSwiftTask')
+//    return requestIdleCallback(task, { timeout: 17 })
+// }
 
 export type Phase = typeof SYNC | AsyncPhase
 
@@ -48,6 +49,9 @@ function assertSequentialPhases(phases: CyclePhase[]) {
    }
 }
 
+function runTask(fn: Function){
+   fn()
+}
 
 /**
  * @internal
@@ -63,30 +67,30 @@ export class RenderCycle {
    constructor(
       public update: Update,
    ) {
-      const schedulePrerenderTasks = update.idle ? queueSwiftTask : queueMicrotask // TODO: need to check deadline for queueSwiftTask
-      const scheduleInternalRender = update.idle ? queueTask : queueMicrotask
+      const schedulePrerenderTasks = update.idle ? queueTask : runTask // TODO: need to check deadline for queueSwiftTask
+      const scheduleInternalRender = update.idle ? queueTask : runTask
 
       this.phases = [{
          phase: PRELUDE,
          // scheduleEffects: queueTask,
-         scheduleEffects: update.idle ? (task) => requestIdleCallback(task, { timeout: 1 }) : queueMicrotask,
+         scheduleEffects: update.idle ?  /* (task) => requestIdleCallback(task, { timeout: 1 })  */queueTask : queueMicrotask, // TODO: can I get rid of this microtask?
          scheduleTasks: schedulePrerenderTasks
       }, {
          phase: INTERNAL_RENDER,
          scheduleEffects: (runEffects, update) => scheduleInternalRender(() => { update.commit(); runEffects() }),
-         scheduleTasks: queueMicrotask
+         scheduleTasks: runTask
       }, {
          phase: RENDER,
-         scheduleEffects: queueMicrotask,
-         scheduleTasks: queueMicrotask
+         scheduleEffects: runTask,
+         scheduleTasks: runTask
       }, {
          phase: POSTLUDE,
-         scheduleEffects: queueMicrotask,
-         scheduleTasks: queueMicrotask
+         scheduleEffects: runTask,
+         scheduleTasks: runTask
       }, {
          phase: TICK,
          scheduleEffects: queueTask,
-         scheduleTasks: queueSwiftTask
+         scheduleTasks: queueTask
       }]
 
       this.effects[INTERNAL_RENDER] = new TaskQueue(update, INTERNAL_RENDER)
@@ -107,9 +111,11 @@ export class RenderCycle {
    private startTasks: (() => void)[] | undefined
 
    private runStartTasks() {
-      this.startTasks?.forEach(task => {
-         task()
-      })
+      const startTasks = this.startTasks
+      if (startTasks)
+         for (const task of startTasks) {
+            task()
+         }
    }
 
    onStart(fn: () => void) {
@@ -127,6 +133,8 @@ export class RenderCycle {
          if (this.cancelled) return;
          this.currentPhase = phase
          this.subphase = 'effects'
+
+         // pushUpdate(this.update)
          this.runEffects(phase, (beginTasks) => {
             scheduleTasks(() => {
                if (this.cancelled) return;
@@ -137,6 +145,8 @@ export class RenderCycle {
                })
             })
          })
+         // popUpdate()
+
       }, this.update)
    }
 
@@ -158,7 +168,7 @@ export class RenderCycle {
          this.update.complete()
          if (__DEV__) {
             // requestAnimationFrame((time) =>
-               this.timecheck(performance.now())
+            this.timecheck(performance.now())
             // )
          }
       }

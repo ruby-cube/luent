@@ -174,22 +174,22 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
    let stopped = true;
    const context = $_snap_context()
 
-   let totalFrames = 0;
-   let failCount = 0;
+   // let totalFrames = 0;
+   // let failCount = 0;
 
-   let startTime = performance.now()
+   // let startTime = performance.now()
 
-   let totalDelta = 0
+   // let totalDelta = 0
 
    function renderFrame(time: DOMHighResTimeStamp) {
       // setImmediate(() => {
-         ++totalFrames
-         const now = performance.now()
-         const delta = now - startTime
-         totalDelta += delta
-         const average = totalDelta/totalFrames
-         console.log('frame time', delta, delta > 16.7 ? (++failCount, 'X') : '', 'RATIO:', failCount/totalFrames, 'AVERAGE', average, average > 16.7 ? (++failCount, 'X') : '')
-         startTime = now;
+         // ++totalFrames
+         // const now = performance.now()
+         // const delta = now - startTime
+         // totalDelta += delta
+         // const average = totalDelta/totalFrames
+         // console.log('frame time', delta, delta > 16.7 ? (++failCount, 'X') : '', 'RATIO:', failCount/totalFrames, 'AVERAGE', average, average > 16.7 ? (++failCount, 'X') : '')
+         // startTime = now;
          instantUpdate(() => prepFrame(time))
          // runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
       // })

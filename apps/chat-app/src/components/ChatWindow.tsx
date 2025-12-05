@@ -43,21 +43,33 @@ export function ChatWindow(input: FromTag<{
       mu: $smoothScroll.value = false;
       mu: $notifyNewMessages.value = false;
 
-      await $tick()
+      await $postlude()
       scrollToNew()
 
       await $tick()
       mu: $smoothScroll.value = true;
    })
 
+   atRemounted(() => {
+      mu: $smoothScroll.value = false;
+      mu: $notifyNewMessages.value = false;
+
+      postlude.then(() => {
+         scrollToNew()
+      })
+      tick.then(() => {
+         mu: $smoothScroll.value = true
+      })
+   })
+
    atRemounted(ooo => {
       mu: $smoothScroll.value = false;
       mu: $notifyNewMessages.value = false;
 
-      ooo.await($postlude, () => {
+      ooo.await(postlude, () => {
          scrollToNew()
       })
-      ooo.await($tick, () => {
+      ooo.await(tick, () => {
          mu: $smoothScroll.value = true
       })
    })

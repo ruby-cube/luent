@@ -7,6 +7,7 @@ export const [getAsyncPath, __DEV__traceStack] = __DEV__ ? AsyncState<string>(TR
 const __INTERNAL_TRACE__ = false;
 
 export function __DEV__getTrace() {
+   if (true) return
    return __INTERNAL_TRACE__ ? getInternalTrace(__DEV__getTrace.name) : getPublicTrace()
 }
 
@@ -55,6 +56,7 @@ export function getPublicTrace(){
 // }
 
 export function getInternalTrace(cutoff: string) {
+   if (true) return;
    const rawTrace = getTrace() as string;
    const rawTraceTail = rawTrace.split(cutoff).at(-1)!
    return rawTraceTail.slice(rawTraceTail.indexOf('at ')).trim()

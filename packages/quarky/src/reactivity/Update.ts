@@ -16,8 +16,10 @@ export class Update {
 
    constructor(
       public type: UpdateType = UpdateType.USER_INTERACTION,
-      public timeMargin = 100,
-      public idle: number | boolean = 50
+      public timeMargin = 1000, // FIX: TEMPORARY for sierpinski test
+      public idle: number | boolean = 1000
+      // public timeMargin = 100,
+      // public idle: number | boolean = 50
    ) {
    }
 
@@ -60,8 +62,8 @@ export class Update {
       finally {
          popUpdate()
          // if (this._cycle)
-            // if () // TODO: only start cycle if there were any state changes
-            this.cycle.start()
+         // if () // TODO: only start cycle if there were any state changes
+         this.cycle.start()
       }
       return this
    }
@@ -70,32 +72,49 @@ export class Update {
 
    commit() {
       this.committed = true
-      this.emitter.dispatchEvent(this.commitUpdate!)
+      this.cast('commit')
+      // this.emitter.dispatchEvent(this.commitUpdate!)
    }
 
-   private emitter: EventTarget = new EventTarget()
+   private cast(hook: 'commit' | 'complete') {
+      const tasks = this.hooks[hook]
 
-   private COMMIT = 'commit'
+      for (const task of tasks) {
+         task()
+      }
+   }
 
-   private commitUpdate: Event = new Event(this.COMMIT)
+   private hooks = {
+      commit: [] as (() => void)[],
+      complete: [] as (() => void)[],
+   }
+
+   // private emitter: EventTarget = new EventTarget()
+
+   // private COMMIT = 'commit'
+
+   // private commitUpdate: Event = new Event(this.COMMIT)
 
    atCommit(task: () => void) {
-      this.emitter.addEventListener(this.COMMIT, task)
+      this.hooks.commit.push(task)
+      // this.emitter.addEventListener(this.COMMIT, task)
    }
 
    completed = false;
 
    complete() {
       this.completed = true;
-      this.emitter.dispatchEvent(this.completeUpdate)
+      this.cast('complete')
+      // this.emitter.dispatchEvent(this.completeUpdate)
    }
 
-   private COMPLETE = 'complete'
+   // private COMPLETE = 'complete'
 
-   private completeUpdate: Event = new Event(this.COMPLETE)
+   // private completeUpdate: Event = new Event(this.COMPLETE)
 
    atComplete(task: () => void) {
-      this.emitter.addEventListener(this.COMPLETE, task)
+      this.hooks.complete.push(task)
+      // this.emitter.addEventListener(this.COMPLETE, task)
    }
 
    // disallows new update tasks
@@ -127,7 +146,7 @@ function getSwiftUpdate() {
 function createSwiftUpdate() {
    const update = new Update()
    if (latestSwiftUpdate && !latestSwiftUpdate.completed) {
-      console.warn('queueing update')
+      // console.warn('queueing update')
       latestSwiftUpdate.atComplete(() => {
          queueTask(() => update.start())
       })

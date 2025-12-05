@@ -97,7 +97,7 @@ export class LazyUpdate implements Update {
          this.commitupdate = new Event(this.COMMIT),
          this.cancelupdate = new Event(this.CANCEL),
          this.settled = new Event(this.SETTLED),
-         this._emitter = new EventTarget()
+         this._emitter = new EventTarget() // TODO: replace with arrays
       )
    }
 

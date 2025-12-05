@@ -3,6 +3,7 @@ import { TrackedAtom } from "./Atom";
 import { catchCancelledUpdate } from "./LazyUpdate";
 import { RenderCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 import { Update, popUpdate, pushUpdate, tickUpdate } from "./Update";
+import { queueTask } from "@rue/thread";
 
 // const PRELUDE = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
 
@@ -62,6 +63,7 @@ export class EffectQueue {
       const phase = this.phase
       const sync = phase === SYNC
 
+
       for (const effect of effects) {
          if (
             !effect.run
@@ -114,7 +116,7 @@ export class EffectQueue {
 }
 
 
-class EffectsComplete {
+class EffectsComplete { // FIX: use array instead of promise
 
    constructor(
       private promise: Promise<unknown>,
@@ -126,7 +128,10 @@ class EffectsComplete {
       onfulfilled?: ((value: unknown) => void | PromiseLike<void>) | null,
       onrejected?: ((reason: any) => PromiseLike<never>) | null
    ): Promise<void> {
-      return this.promise.then(() => this.runWithUpdate(onfulfilled), onrejected)
+      return this.promise.then(
+         // onfulfilled
+         () => this.runWithUpdate(onfulfilled) // TODO: wrap for loop in update, not each task
+         , onrejected)
    }
 
    catch(onrejected?: ((reason: any) => PromiseLike<never>) | null | undefined) {
@@ -165,7 +170,8 @@ export class TaskQueue {
             catchCancelledUpdate(err)
          }
          finally {
-            queueMicrotask(popUpdate)
+            popUpdate()
+            // queueMicrotask(popUpdate) // FIX: It's me hi, I'm the problem it's me
          }
       }
    ) {
@@ -176,6 +182,7 @@ export class TaskQueue {
    }
 
    scheduleTask(task: () => void) {
+      // console.trace('scheduleTask', task)
       this.effectsComplete.then(task) // TODO: how do I run tasks as idle?
    }
 
@@ -357,6 +364,7 @@ export class TickTaskQueue extends TaskQueue {
    }
 
    scheduleIdleEffect(effect: Effect) {
+      console.trace('tick idle', this.update.idle)
       this.idleCount++;
       requestIdleCallback(() => {
          try {

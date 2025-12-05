@@ -61,9 +61,7 @@ export class TrackedAtom {
      * @param effect 
      */
    link(effect: Effect) {
-      const phase = effect.phase;
-      const phaseQueue = this.effects.get(phase) ?? this.initializePhase(phase);
-      phaseQueue.queue(effect)
+      (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase)).queue(effect);
    }
 
 

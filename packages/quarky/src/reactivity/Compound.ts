@@ -54,14 +54,14 @@ export class Compound {
 
    protected forEachAtom(fn: (atom: Atom) => void) {
       const particles = this.particles;
-      particles.forEach(particle => {
+      for (const particle of particles){
          if ('forEachAtom' in particle) {
             particle.forEachAtom(fn)
          }
          else {
             fn(particle)
          }
-      })
+      }
    }
 }
 

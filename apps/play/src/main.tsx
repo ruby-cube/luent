@@ -69,6 +69,8 @@ import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
 import { Animation } from '@rue/quarky';
+import { compareTaskPromise } from './TestMicrotask';
+import { gen } from './TestGenerators';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -95,15 +97,19 @@ import { Animation } from '@rue/quarky';
 
 // function TestApp2() {
 //    return component(
-//       <div contenteditable on:beforeinput={e => console.log('before input')} on:input={e => console.log('input')}>
+//       <div contenteditable on:beforeinput={e => (console.log('before input'), queueTask(()=>console.log('task!')))} on:input={e => console.log('input')}>
 //          hi
 //       </div>
 //    )
 // }
 
-const app = createRoot(TriangleDemo)
+const generate = gen()
 
-app.mount('#app')
+window.addEventListener('click', () => generate.next())
+
+// const app = createRoot(TriangleDemo)
+
+// app.mount('#app')
 
 
 // const frog = ionize({ name: 'sir robin' })
