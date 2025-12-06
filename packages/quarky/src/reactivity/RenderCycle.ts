@@ -151,21 +151,6 @@ export class RenderCycle {
       // ---- DO NOT WRITE CYCLE BEHAVIOR AFTER THIS LINE: GENERATOR MAY BE PAUSED ----
    }
 
-   // runPrecommit(onComplete: () => void) {
-   //    if (this.cancelled) return;
-   //    this.currentPhase = PRELUDE
-   //    this.subphase = 'effects'
-
-   //    this.runEffects(PRELUDE)
-
-
-
-   //    if (this.cancelled) return;
-   //    this.subphase = 'tasks'
-   //    this.runTasks(PRELUDE)
-
-   //    onComplete()
-   // }
    runPrecommit(onComplete: () => void) {
       const genState: { paused: boolean, gen: Generator } = { paused: false, gen: undefined! }
       if (this.update.idle) {
@@ -175,44 +160,6 @@ export class RenderCycle {
       else {
          this.process.runSync(() => this.runPhase(PRELUDE, undefined, onComplete))
       }
-   }
-
-
-   private get deadline() {
-      const update = this.update;
-      if (typeof update.idle === 'number') {
-         const elapsed = Date.now() - update.timestamp
-         const timeLeft = update.idle - elapsed
-         return timeLeft > 0 ? timeLeft : 1
-      } else {
-         return 1
-      }
-   }
-
-   idleCount = 0
-
-   scheduleIdleEffect(effect: Effect, queue: TaskQueue, onComplete: () => void) {
-      const update = this.update
-      this.idleCount++;
-      requestIdleCallback(() => {
-         try {
-            queue.runningEffects = true
-            pushUpdate(update)
-            effect.run?.();
-         }
-         // catch (err) {
-         //    catchCancelledUpdate(err)
-         // }
-         finally {
-            popUpdate()
-            queue.runningEffects = false
-            this.idleCount--
-            if (this.idleCount === 0) {
-               onComplete()
-               // this.emitBatchesComplete?.()
-            }
-         }
-      }, { timeout: this.deadline })
    }
 
    *runPhase(phase: Phase, genState?: { paused: boolean, gen: Generator }, onComplete: () => void = noop) {
@@ -231,9 +178,9 @@ export class RenderCycle {
          phase === PRELUDE && update.idle ? (fn: () => Generator) => process.runNext(fn) :
             (fn: () => Generator) => process.runSync(fn)
 
-      const runEffect = 
-      // phase === PRELUDE && update.idle ? (effect: Effect) => this.scheduleIdleEffect(effect, queue, onComplete) : 
-      (effect: Effect) => effect.run?.()
+      const runEffect =
+         // phase === PRELUDE && update.idle ? (effect: Effect) => this.scheduleIdleEffect(effect, queue, onComplete) : 
+         (effect: Effect) => effect.run?.()
 
       queue.started = true;
       pushUpdate(update)
@@ -400,7 +347,7 @@ export class RenderCycle {
       const delta = now - this.startTime
       const timeMargin = this.update.timeMargin
       if (timeMargin && delta > timeMargin) {
-         if (timeMargin === 1000) console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+         console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
       }
       else {
          if (timeMargin === 1000) console.log('passed timecheck', timeMargin, delta)
@@ -495,37 +442,28 @@ export class RenderCycle {
 export class CycleProcess {
    constructor(
       private update: Update,
-      private BUFFER = 2
    ) {
 
    }
 
    private gen!: Generator
-   private idle!: IdleDeadline
 
-   get timeout() {
-      if (typeof this.update.idle === 'number') {
-         const timeLeft = this.update.idle - (performance.now() - this.update.timestamp)
-         return timeLeft > 0 ? timeLeft : 1
+   timeLeft() {
+      return 5
+   }
+
+   resetTime() {
+      const startTime = performance.now()
+      this.timeLeft = () => {
+         return 5 - (performance.now() - startTime)
       }
-      return 1;
    }
 
    start(fn: () => Generator, genState: { paused: boolean, gen: Generator } = { paused: false, gen: undefined! }) {
-      // queueTask(() => {
-      //    const startTime = performance.now()
-      //    this.idle = {
-      //       timeRemaining() {
-      //          return 8 - (startTime - performance.now())
-      //       },
-      //       didTimeout: false
-      //    };
-      //    this.runOuter(fn, genState)
-      // })
-      requestIdleCallback((deadline) => {
-         this.idle = deadline;
+      queueTask(() => {
+         this.resetTime()
          this.runOuter(fn, genState)
-      }, { timeout: this.timeout })
+      })
    }
 
    runSync(fn: () => Generator) {
@@ -543,57 +481,42 @@ export class CycleProcess {
    }
 
    mustPause() {
-      return this.idle!.timeRemaining() < this.BUFFER
+      return this.timeLeft() < 0
    }
 
    prepOuterPause(genState: { paused: boolean, gen: Generator }, onResume?: () => void) {
       genState.paused = true;
       if (this.gen === genState.gen) {
-         requestAnimationFrame(() => {
-            genState.paused = false;
-            this.resume(onResume)
-         })
+         // requestAnimationFrame(() => {
+         genState.paused = false;
+         this.resume(onResume)
+         // })
       }
    }
 
    resumeOuter(genState: { paused: boolean, gen: Generator }) {
       this.gen = genState.gen;
       if (genState.paused)
-         requestAnimationFrame(() => {
-            genState.paused = false;
-            this.resume()
-         })
+         // requestAnimationFrame(() => {
+         genState.paused = false;
+      this.resume()
+      // })
    }
 
    prepPause(onResume?: () => void) {
-      requestAnimationFrame(() => {
-         this.resume(onResume)
-      })
+      this.resume(onResume)
    }
 
    resume(onResume?: () => void) {
-      requestIdleCallback((deadline) => {
-         this.idle = deadline;
+      queueTask(() => {
+         this.resetTime()
          onResume?.()
          this.gen.next()
-      }, { timeout: this.timeout })
-      // queueTask(() => {
-      //    const startTime = performance.now()
-      //    this.idle = {
-      //       timeRemaining() {
-      //          return 15 - (startTime - performance.now())
-      //       },
-      //       didTimeout: false
-      //    };
-      //    onResume?.()
-      //    this.gen.next()
-      // })
+      })
    }
 }
 
-class IdleRenderCycle extends RenderCycle {
 
-}
 
 
 /**
