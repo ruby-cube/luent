@@ -80,8 +80,8 @@ export function TriangleDemo() {
    // let resolve: undefined | (() => void)
 
    const secondsInterval = Interval(1000, () => {
-      // swiftUpdate(() => $seconds.value = ($seconds() % 10) + 1)
-      $seconds.value = ($seconds() % 10) + 1
+      swiftUpdate(() => $seconds.value = ($seconds() % 10) + 1)
+      // $seconds.value = ($seconds() % 10) + 1
       // resolve?.()
       // promise = new Promise<void>(_resolve => { resolve = _resolve })
       // $realSeconds.value = ($realSeconds() % 10) + 1
@@ -163,9 +163,9 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
    s = s / 2;
 
    const $slow = Ion(() => {
-      // var e = performance.now() + 0.8;
+      var e = performance.now() + 0.8;
       // Artificially long execution time.
-      // while (performance.now() < e) { }
+      while (performance.now() < e) { }
       return $seconds()
    })
 

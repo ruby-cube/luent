@@ -111,7 +111,7 @@ import { startCycle } from './TestGenerators';
 // animate()
 // window.addEventListener('click', startCycle)
 
-const app = createRoot(TestCount)
+const app = createRoot(TriangleDemo)
 
 app.mount('#app')
 

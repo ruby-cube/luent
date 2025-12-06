@@ -169,12 +169,50 @@ export class RenderCycle {
    runPrecommit(onComplete: () => void) {
       const genState: { paused: boolean, gen: Generator } = { paused: false, gen: undefined! }
       if (this.update.idle) {
+         // queueIdleTask(() => this.process.runSync(() => this.runPhase(PRELUDE, undefined, onComplete)))
          this.process.start(() => this.runPhase(PRELUDE, genState, onComplete), genState)
-
       }
       else {
          this.process.runSync(() => this.runPhase(PRELUDE, undefined, onComplete))
       }
+   }
+
+
+   private get deadline() {
+      const update = this.update;
+      if (typeof update.idle === 'number') {
+         const elapsed = Date.now() - update.timestamp
+         const timeLeft = update.idle - elapsed
+         return timeLeft > 0 ? timeLeft : 1
+      } else {
+         return 1
+      }
+   }
+
+   idleCount = 0
+
+   scheduleIdleEffect(effect: Effect, queue: TaskQueue, onComplete: () => void) {
+      const update = this.update
+      this.idleCount++;
+      requestIdleCallback(() => {
+         try {
+            queue.runningEffects = true
+            pushUpdate(update)
+            effect.run?.();
+         }
+         // catch (err) {
+         //    catchCancelledUpdate(err)
+         // }
+         finally {
+            popUpdate()
+            queue.runningEffects = false
+            this.idleCount--
+            if (this.idleCount === 0) {
+               onComplete()
+               // this.emitBatchesComplete?.()
+            }
+         }
+      }, { timeout: this.deadline })
    }
 
    *runPhase(phase: Phase, genState?: { paused: boolean, gen: Generator }, onComplete: () => void = noop) {
@@ -189,7 +227,13 @@ export class RenderCycle {
       }
 
       const { update } = queue
-      const runProcess = phase === PRELUDE ? (fn: () => Generator) => process.runNext(fn) : (fn: () => Generator) => process.runSync(fn)
+      const runProcess =
+         phase === PRELUDE && update.idle ? (fn: () => Generator) => process.runNext(fn) :
+            (fn: () => Generator) => process.runSync(fn)
+
+      const runEffect = 
+      // phase === PRELUDE && update.idle ? (effect: Effect) => this.scheduleIdleEffect(effect, queue, onComplete) : 
+      (effect: Effect) => effect.run?.()
 
       queue.started = true;
       pushUpdate(update)
@@ -201,7 +245,7 @@ export class RenderCycle {
          const completed = phase === SYNC ? undefined : new Set<Effect>()
          for (const batch of queues) {
 
-            runProcess(() => batch.runEffects(completed, genState ? process : undefined, () => {
+            runProcess(() => batch.runEffects(runEffect, completed, genState ? process : undefined, () => {
                if (genState) {
                   process.resumeOuter(genState)
                }
@@ -461,9 +505,10 @@ export class CycleProcess {
 
    get timeout() {
       if (typeof this.update.idle === 'number') {
-         return this.update.idle - (performance.now() - this.update.timestamp)
+         const timeLeft = this.update.idle - (performance.now() - this.update.timestamp)
+         return timeLeft > 0 ? timeLeft : 1
       }
-      return 0;
+      return 1;
    }
 
    start(fn: () => Generator, genState: { paused: boolean, gen: Generator } = { paused: false, gen: undefined! }) {
@@ -480,7 +525,7 @@ export class CycleProcess {
       requestIdleCallback((deadline) => {
          this.idle = deadline;
          this.runOuter(fn, genState)
-      }, { timeout: 1 })
+      }, { timeout: this.timeout })
    }
 
    runSync(fn: () => Generator) {
@@ -527,22 +572,22 @@ export class CycleProcess {
    }
 
    resume(onResume?: () => void) {
-      // requestIdleCallback((deadline) => {
-      //    this.idle = deadline;
-      //    onResume?.()
-      //    this.gen.next()
-      // }, { timeout: 1 })
-      queueTask(() => {
-         const startTime = performance.now()
-         this.idle = {
-            timeRemaining() {
-               return 15 - (startTime - performance.now())
-            },
-            didTimeout: false
-         };
+      requestIdleCallback((deadline) => {
+         this.idle = deadline;
          onResume?.()
          this.gen.next()
-      })
+      }, { timeout: this.timeout })
+      // queueTask(() => {
+      //    const startTime = performance.now()
+      //    this.idle = {
+      //       timeRemaining() {
+      //          return 15 - (startTime - performance.now())
+      //       },
+      //       didTimeout: false
+      //    };
+      //    onResume?.()
+      //    this.gen.next()
+      // })
    }
 }
 

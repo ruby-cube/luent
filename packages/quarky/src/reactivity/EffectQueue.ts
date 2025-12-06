@@ -58,7 +58,7 @@ export class EffectQueue {
    }
 
 
-   *runEffects(/* run: (effect: Effect) => void,  */completed: Set<Effect> | undefined, process?: CycleProcess, onComplete: () => void = noop) {
+   *runEffects(run: (effect: Effect) => void, completed: Set<Effect> | undefined, process?: CycleProcess, onComplete: () => void = noop) {
       const effects = this.nextEffects
       this.nextEffects = []
       const phase = this.phase
@@ -83,7 +83,7 @@ export class EffectQueue {
          try {
             effectStackCount++
             if (effectStackCount > 100_000) throw new Error('Infite loop detected')
-            effect.run?.()
+            run(effect)
          }
          catch (err) {
             catchCancelledUpdate(err)
@@ -219,7 +219,7 @@ export class TaskQueue {
    runBatches(/* run: (effect: Effect) => void,  */completed: Set<Effect> | undefined, onComplete: () => void) {
       const queues = this.effects;
       for (const batch of queues) {
-         batch.runSyncEffects(/* run,  */completed)
+         batch.runEffects(run, completed)
          // TODO: yield if runEffects is paused
          batch.queued = this.moreEffects?.length ? batch.requeued : false;
          batch.requeued = false;
@@ -308,9 +308,9 @@ export class PreludeTaskQueue extends TaskQueue {
       if (typeof update.idle === 'number') {
          const elapsed = Date.now() - update.timestamp
          const timeLeft = update.idle - elapsed
-         return timeLeft > -1 ? timeLeft : 0
+         return timeLeft > 0 ? timeLeft : 1
       } else {
-         return undefined
+         return 1
       }
    }
 
