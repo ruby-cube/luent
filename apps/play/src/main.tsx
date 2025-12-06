@@ -70,7 +70,7 @@ import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
 import { Animation } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';
-import { gen } from './TestGenerators';
+import { startCycle } from './TestGenerators';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -103,13 +103,17 @@ import { gen } from './TestGenerators';
 //    )
 // }
 
-const generate = gen()
+// function animate(){
+//    requestAnimationFrame(() => {
+//       animate()
+//    })
+// }
+// animate()
+// window.addEventListener('click', startCycle)
 
-window.addEventListener('click', () => generate.next())
+const app = createRoot(TestCount)
 
-// const app = createRoot(TriangleDemo)
-
-// app.mount('#app')
+app.mount('#app')
 
 
 // const frog = ionize({ name: 'sir robin' })

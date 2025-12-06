@@ -50,7 +50,7 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
             ...config?.setup || {},
          }
 
-         swiftUpdate(() => { // FIX: Erros are being swallowed up here despite being rethrown
+         instantUpdate(() => { // FIX: Erros are being swallowed up here despite being rethrown
             flaskStack.push(flask)
             pushContext(appCommons)
             let nodes: JSXNode[]

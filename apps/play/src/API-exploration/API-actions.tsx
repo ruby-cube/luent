@@ -322,13 +322,13 @@ watch($count, sync(ooo => { // as an effect (compare below)
    ooo.await(dispatch('...'), () => {
 
    })
-   ooo.await($prelude, () => {
+   ooo.await(prelude, () => {
 
    })
-   ooo.await($render, () => {
+   ooo.await(renderphase, () => {
 
    })
-   ooo.await($tick, () => {
+   ooo.await(tick, () => {
 
    })
 }))
@@ -337,9 +337,9 @@ watch($count, sync(o => { // as an effect (compare below)
    doSomething()
 
    o.await(dispatch('...'), () => { })
-   o.await($prelude, () => { })
-   o.await($render, () => { })
-   o.await($tick, () => { })
+   o.await(prelude, () => { })
+   o.await(renderphase, () => { })
+   o.await(tick, () => { })
 }))
 
 
@@ -381,7 +381,7 @@ watch($count, render(o => {
 watch($count, render(o => {
    doSomething()
 
-   o.await($tick, () => {
+   o.await(tick, () => {
 
    })
 }))
@@ -400,13 +400,13 @@ watch($count, sync(o => { // as an effect (compare below)
    o.await(dispatch('...'), () => {
 
    })
-   o.await($prelude, () => {
+   o.await(prelude, () => {
 
    })
-   o.await($render, () => {
+   o.await(renderphase, () => {
 
    })
-   o.await($tick, () => {
+   o.await(tick, () => {
 
    })
 }))

@@ -105,9 +105,47 @@ export function Tooltip(input: FromTag<{
    const $height = Ion(undefined as number | undefined)
 
    atMounted(({ ooo }) => {
-      ooo.await(layout(() => $div()?.getBoundingClientRect().height))
-         .then(height => {
-            if (height != null) $height.value = height;
+      ooo.await(layout(() =>
+         $div()?.getBoundingClientRect().height
+      )).then(height => {
+         if (height != null) $height.value = height;
+      })
+   })
+
+   atMounted(({ ooo }) => {
+      ooo.await(layout, () =>
+         $div()?.getBoundingClientRect().height
+      )
+      ooo.then(height => {
+         if (height != null) $height.value = height;
+      })
+   })
+
+   atMounted(({ ooo }) => {
+      ooo.await(layout)
+         .then(() => $div()?.getBoundingClientRect().height)
+         .then(hg => { if (hg != null) $height.value = hg; })
+      ooo.await(tick, () => {
+         console.log('this runs after tick resolves which is awaited once layout resolves')
+      })
+   })
+
+   atMounted(({ ooo }) => {
+      ooo.await(layout)
+      ooo.then(() => $div()?.getBoundingClientRect().height)
+      ooo.then(hg => { if (hg != null) $height.value = hg; })
+      ooo.await(tick, () => {
+         console.log('tick is awaited only after height is set')
+      })
+   })
+
+   atMounted(() => {
+      ooo.await(layout)
+         .then(() => {
+            return $div()?.getBoundingClientRect().height
+         })
+         .then(hg => {
+            if (hg != null) $height.value = hg;
          })
    })
 

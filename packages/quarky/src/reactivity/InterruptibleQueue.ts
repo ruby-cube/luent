@@ -5,12 +5,17 @@ export class InterruptibleQueue {
    startTime: number = performance.now();
    startIndex = 0
 
+   idle?: IdleDeadline
+
    constructor() {
       const checkTime = () => {
          requestAnimationFrame(time => {
             this.startTime = time
             if (this.paused) {
-               queueTask(() => this.runTasks())
+               requestIdleCallback(deadline => {
+                  this.idle = deadline
+                  this.runTasks()
+            })
             }
             checkTime()
          })
@@ -25,9 +30,7 @@ export class InterruptibleQueue {
       if (this.startIndex < tasks.length)
          for (let i = this.startIndex; i < tasks.length; i++) {
             tasks[i]()
-            const elapsed = performance.now() - this.startTime
-            const timeLeft = 16.7 - elapsed
-            if (timeLeft < 9 && i + 1 < tasks.length) {
+            if (this.idle!.timeRemaining() < 9 && i + 1 < tasks.length) {
                this.startIndex = i + 1
                this.paused = true;
                break;

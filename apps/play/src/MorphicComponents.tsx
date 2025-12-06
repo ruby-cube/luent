@@ -69,14 +69,14 @@ function $MorphicNode() {
 function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; as: (key: string) => any } {
 
    const $key = Ion(initialKey)
-   const $render = Ion(switchMap[$key()])
+   const renderphase = Ion(switchMap[$key()])
 
    watch($key, (key) => {
-      $render.update(switchMap[key])
+      renderphase.update(switchMap[key])
    })
 
    function $Morphable() {
-      return $morphling($render)
+      return $morphling(renderphase)
    }
 
    $Morphable.set = $key.set
@@ -103,17 +103,17 @@ function MainContent() {
    )
 }
 
-function $morphling($render: AtomicIon<() => any>) {
-   return new MorphlingKit($render)
+function $morphling(renderphase: AtomicIon<() => any>) {
+   return new MorphlingKit(renderphase)
 }
 
 class MorphlingKit {
-   constructor(public $render: AtomicIon<() => any>) { }
+   constructor(public renderphase: AtomicIon<() => any>) { }
 }
 
 function setUpMorphling(morphlingKit: MorphlingKit) {
-   const $render = morphlingKit.$render
-   watch($render, (render) => {
+   const renderphase = morphlingKit.renderphase
+   watch(renderphase, (render) => {
       const output = render()
    }, { phase: RENDER })
 }

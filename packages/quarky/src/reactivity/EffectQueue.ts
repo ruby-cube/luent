@@ -1,8 +1,8 @@
-import { __DEV__unwrap } from "@rue/utils";
+import { __DEV__unwrap, noop } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate } from "./LazyUpdate";
-import { RenderCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
-import { Update, popUpdate, pushUpdate, tickUpdate } from "./Update";
+import { catchCancelledUpdate } from "./IdleUpdate";
+import { RenderCycle, Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK, CycleProcess } from "./RenderCycle";
+import { $activeUpdate, Update, instantUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update";
 import { queueTask } from "@rue/thread";
 
 // const PRELUDE = 0 //QUESTION: Should UpdateCycle and EffectQueue belong to Lumo also??
@@ -57,14 +57,17 @@ export class EffectQueue {
    ) {
    }
 
-   runEffects(run: (effect: Effect) => void, completed: Set<Effect> | undefined) {
+
+   *runEffects(/* run: (effect: Effect) => void,  */completed: Set<Effect> | undefined, process?: CycleProcess, onComplete: () => void = noop) {
       const effects = this.nextEffects
       this.nextEffects = []
       const phase = this.phase
       const sync = phase === SYNC
 
+      const limit = effects.length
 
-      for (const effect of effects) {
+      for (let i = 0; i < limit; i++) {
+         const effect = effects[i]
          if (
             !effect.run
             || this.atom && !effect.isLinked(this.atom) // weeds out effects that have been unlinked due to retracking
@@ -80,12 +83,30 @@ export class EffectQueue {
          try {
             effectStackCount++
             if (effectStackCount > 100_000) throw new Error('Infite loop detected')
-            run(effect)
+            effect.run?.()
+         }
+         catch (err) {
+            catchCancelledUpdate(err)
          }
          finally {
             effectStackCount--
             completed?.add(effect)
             this.retain(effect)
+         }
+
+         if (process && process.mustPause() && i + 1 < limit) {
+            const update = $activeUpdate()
+            if (update) {
+               popUpdate()
+               process.prepPause(() => {
+                  pushUpdate(update)
+               })
+            }
+            else {
+               process.prepPause()
+               console.warn('no update :(')
+            }
+            yield;
          }
       }
 
@@ -95,6 +116,7 @@ export class EffectQueue {
 
       this.effects = undefined
       this.retained.clear()
+      onComplete()
    }
 
    retain(effect: Effect) {
@@ -113,6 +135,10 @@ export class EffectQueue {
 
    requeued: boolean = false;
    queued: boolean = false
+}
+
+class IdleEffectQueue extends EffectQueue {
+
 }
 
 
@@ -148,45 +174,25 @@ class EffectsComplete { // FIX: use array instead of promise
  * Belongs to the current effect cycle.
  */
 export class TaskQueue {
-   protected moreEffects: EffectQueue[] | undefined;
-   protected effects: EffectQueue[] = []
+   moreEffects: EffectQueue[] | undefined;
+   effects: EffectQueue[] = []
+   tasks: (() => void)[] = []
 
-   effectsComplete: EffectsComplete;
-   protected emitEffectsComplete!: () => void;
    cancel!: () => void;
 
    started = false;
 
    constructor(
       public update: Update,
-      protected phase: Phase,
-      protected runWithUpdate: ((fn?: (() => void) | null) => void) = (fn) => {
-         if (!fn) return;
-         try {
-            pushUpdate(this.update)
-            fn()
-         }
-         catch (err) {
-            catchCancelledUpdate(err)
-         }
-         finally {
-            popUpdate()
-            // queueMicrotask(popUpdate) // FIX: It's me hi, I'm the problem it's me
-         }
-      }
-   ) {
-      this.effectsComplete = new EffectsComplete(new Promise<void>((resolve, reject) => {
-         this.emitEffectsComplete = resolve
-         this.cancel = () => reject('update cancelled')
-      }).catch(catchCancelledUpdate), runWithUpdate)
-   }
+      protected phase: Phase
+   ) { }
 
    scheduleTask(task: () => void) {
-      // console.trace('scheduleTask', task)
-      this.effectsComplete.then(task) // TODO: how do I run tasks as idle?
+      this.tasks.push(task)
    }
 
    scheduleEffects(effects: EffectQueue) {
+      if (this.phase === TICK) console.warn('ACK THERE ARE TICK EFFECTS')
       if (this.runningEffects && !effects.requeued) {
          effects.requeued = true;
          const extension = this.moreEffects ?? (this.moreEffects = [])
@@ -200,55 +206,63 @@ export class TaskQueue {
 
    runningEffects: boolean = false
 
-   runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
+   runEffects(cycle: RenderCycle) {
       this.started = true;
       this.runBatches(
-         (effect) => this.runEffect(effect),
-         this.phase === SYNC ? undefined : new Set()
+         // (effect) => this.runEffect(effect),
+         this.phase === SYNC ? undefined : new Set(),
+         () => this.runMoreEffects(cycle)
       )
-      this.runMoreEffects(cycle, onComplete)
-      return this.effectsComplete
+      // --- DO NOT WRITE CODE UNDER THIS LINE; GENERATOR MAY BE PAUSED----
    }
 
-   runBatches(run: (effect: Effect) => void, completed: Set<Effect> | undefined) {
+   runBatches(/* run: (effect: Effect) => void,  */completed: Set<Effect> | undefined, onComplete: () => void) {
       const queues = this.effects;
       for (const batch of queues) {
-         batch.runEffects(run, completed)
+         batch.runSyncEffects(/* run,  */completed)
+         // TODO: yield if runEffects is paused
          batch.queued = this.moreEffects?.length ? batch.requeued : false;
          batch.requeued = false;
       }
+      onComplete()
    }
 
-   runMoreEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
+   runMoreEffects(cycle: RenderCycle) {
       this.effects = this.moreEffects ?? []
       this.moreEffects = undefined;
       if (this.effects.length) {
-         this.runEffects(cycle, onComplete)
-      }
-      else {
-         onComplete(this.emitEffectsComplete)
+         this.runEffects(cycle)
       }
    }
 
-   runEffect(effect: Effect) {
-      const update = this.update
-
-      try {
-         this.runningEffects = true
-         pushUpdate(update)
-         effect.run?.()
-      }
-      catch (err) {
-         catchCancelledUpdate(err)
-      }
-      finally {
-         popUpdate()
-         this.runningEffects = false
+   runTasks() {
+      const tasks = this.tasks;
+      for (let i = 0; i < tasks.length; i++) {
+         tasks[i]()
       }
    }
+
+   // runEffect(effect: Effect) {
+   //    const update = this.update
+
+   //    try {
+   //       this.runningEffects = true
+   //       pushUpdate(update)
+   //       effect.run?.()
+   //    }
+   //    catch (err) {
+   //       catchCancelledUpdate(err)
+   //    }
+   //    finally {
+   //       popUpdate()
+   //       this.runningEffects = false
+   //    }
+   // }
 }
 
+class IdleTaskQueue extends TaskQueue {
 
+}
 
 
 /**
@@ -265,27 +279,29 @@ export class PreludeTaskQueue extends TaskQueue {
    emitBatchesComplete: (() => void) | undefined
    idleCount = 0;
 
-   override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
-      this.started = true;
-      new Promise<void>(emitBatchesComplete => {
-         const update = this.update;
-         this.runBatches(
-            update.idle
-               ? (effect: Effect) => { this.scheduleIdleEffect(effect) }
-               : (effect: Effect) => { this.runEffect(effect) },
-            new Set()
-         )
-         if (this.idleCount === 0) {
-            emitBatchesComplete()
-         }
-         else {
-            this.emitBatchesComplete = emitBatchesComplete
-         }
-      }).then(() => {
-         this.runMoreEffects(cycle, onComplete)
-      })
-      return this.effectsComplete
-   }
+
+
+   // override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
+   //    this.started = true;
+   //    new Promise<void>(emitBatchesComplete => {
+   //       const update = this.update;
+   //       this.runBatches(
+   //          update.idle
+   //             ? (effect: Effect) => { this.scheduleIdleEffect(effect) }
+   //             : (effect: Effect) => { this.runEffect(effect) },
+   //          new Set()
+   //       )
+   //       if (this.idleCount === 0) {
+   //          emitBatchesComplete()
+   //       }
+   //       else {
+   //          this.emitBatchesComplete = emitBatchesComplete
+   //       }
+   //    }).then(() => {
+   //       this.runMoreEffects(cycle, onComplete)
+   //    })
+   //    return this.effectsComplete
+   // }
 
    private get deadline() {
       const update = this.update;
@@ -328,56 +344,60 @@ export class PreludeTaskQueue extends TaskQueue {
  * Belongs to the current effect cycle.
 */
 export class TickTaskQueue extends TaskQueue {
-
-
-
    constructor(
       public update: Update,
    ) {
-      super(update, TICK, (fn?: (() => void) | null) => {
-         return () => {
-            if (!fn) return;
-            tickUpdate(fn, this.update)
-         }
+      super(update, TICK)
+      // , (fn?: (() => void) | null) => {
+      //    return () => {
+      //       if (!fn) return;
+      //       tickUpdate(fn, this.update)
+      //    }
+      // })
+   }
+
+   // emitBatchesComplete: (() => void) | undefined
+   // idleCount = 0;
+
+   override scheduleTask(task: () => void) {
+      this.tasks.push(() => {
+         instantUpdate(task)
       })
    }
 
-   emitBatchesComplete: (() => void) | undefined
-   idleCount = 0;
+   // override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
+   //    new Promise<void>(emitBatchesComplete => {
+   //       this.runBatches(
+   //          (effect: Effect) => { this.scheduleIdleEffect(effect) },
+   //          new Set()
+   //       )
+   //       if (this.idleCount === 0) {
+   //          emitBatchesComplete()
+   //       }
+   //       else {
+   //          this.emitBatchesComplete = emitBatchesComplete
+   //       }
+   //    }).then(() => {
+   //       this.runMoreEffects(cycle, onComplete)
+   //    })
+   //    return this.effectsComplete
+   // }
 
-   override runEffects(cycle: RenderCycle, onComplete: (resolve: Function) => void) {
-      new Promise<void>(emitBatchesComplete => {
-         this.runBatches(
-            (effect: Effect) => { this.scheduleIdleEffect(effect) },
-            new Set()
-         )
-         if (this.idleCount === 0) {
-            emitBatchesComplete()
-         }
-         else {
-            this.emitBatchesComplete = emitBatchesComplete
-         }
-      }).then(() => {
-         this.runMoreEffects(cycle, onComplete)
-      })
-      return this.effectsComplete
-   }
-
-   scheduleIdleEffect(effect: Effect) {
-      console.trace('tick idle', this.update.idle)
-      this.idleCount++;
-      requestIdleCallback(() => {
-         try {
-            this.runningEffects = true
-            this.runWithUpdate(effect.run)
-         }
-         finally {
-            this.runningEffects = false
-            this.idleCount--
-            if (this.idleCount === 0) {
-               this.emitBatchesComplete?.()
-            }
-         }
-      }, { timeout: 17 })
-   }
+   // scheduleIdleEffect(effect: Effect) {
+   //    console.trace('tick idle', this.update.idle)
+   //    this.idleCount++;
+   //    requestIdleCallback(() => {
+   //       try {
+   //          this.runningEffects = true
+   //          this.runWithUpdate(effect.run)
+   //       }
+   //       finally {
+   //          this.runningEffects = false
+   //          this.idleCount--
+   //          if (this.idleCount === 0) {
+   //             this.emitBatchesComplete?.()
+   //          }
+   //       }
+   //    }, { timeout: 17 })
+   // }
 }

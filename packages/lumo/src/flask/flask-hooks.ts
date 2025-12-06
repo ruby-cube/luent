@@ -1,5 +1,5 @@
 import { getFlask } from "@rue/flask";
-import { queueRenderTask } from "../../../quarky/src/reactivity/RenderCycle";
+import { queueRender } from "../../../quarky/src/reactivity/RenderCycle";
 
 
 // TODO: API
@@ -21,10 +21,10 @@ import { queueRenderTask } from "../../../quarky/src/reactivity/RenderCycle";
 
 
 export function atMounted(task: (initial: boolean) => void) {
-   // getFlask().onInitialMount(() => { queueRenderTask(() => task(true)) });
-   // getFlask().onRemount(() => { queueRenderTask(() => task(false)) });
-   getFlask().onInitialMount(() => { queueRenderTask(() => task(true)) });
-   getFlask().onRemount(() => { queueRenderTask(() => task(false)) });
+   // getFlask().onInitialMount(() => { queueRender(() => task(true)) });
+   // getFlask().onRemount(() => { queueRender(() => task(false)) });
+   getFlask().onInitialMount(() => { queueRender(() => task(true)) });
+   getFlask().onRemount(() => { queueRender(() => task(false)) });
 }
 
 export function atUnmount(task: (final: boolean) => void) {
@@ -33,7 +33,7 @@ export function atUnmount(task: (final: boolean) => void) {
 }
 
 export function atRemounted(task: () => void) {
-   getFlask().onRemount(() => { queueRenderTask(task) });
+   getFlask().onRemount(() => { queueRender(task) });
 }
 
 export function atDemount(task: () => void) {

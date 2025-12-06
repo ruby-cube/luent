@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, $tick } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick } from "@rue/lumo";
 import { debug, getActiveUpdate, instantUpdate, Ion, ionize, sync, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 

@@ -1,6 +1,6 @@
 import { createStack } from "@rue/utils";
 import { INTERNAL_RENDER, PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
-import { UpdateType } from "./LazyUpdate";
+import { UpdateType } from "./IdleUpdate";
 
 export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
 
@@ -38,6 +38,7 @@ export class Update {
       else {
          this.tasks.push(task)
       }
+      return this
    }
 
    _cycle?: RenderCycle
@@ -171,11 +172,11 @@ function createSwiftUpdate() {
 // - queue() run function
 
 export function instantUpdate(task: () => unknown) {
-   createInstantUpdate().queue(task)
+   createInstantUpdate().queue(task).start()
 }
 
 function createInstantUpdate() {
-   return new Update(UpdateType.USER_ANIMATION, 16.7, false).start()!
+   return new Update(UpdateType.USER_ANIMATION, 16.7, false)
 }
 
 

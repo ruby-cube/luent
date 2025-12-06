@@ -86,8 +86,7 @@ export function TriangleDemo() {
       // promise = new Promise<void>(_resolve => { resolve = _resolve })
       // $realSeconds.value = ($realSeconds() % 10) + 1
       // dispatch(() => { $seconds.value = ($seconds() % 10) + 1 }, { deadline: 1000 })
-   })
-      .start();
+   }).start();
 
    const start = Date.now()
 
