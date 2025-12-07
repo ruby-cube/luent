@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { AppCommons, createAppCommons } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { pushUpdate, popUpdate, Update, UpdateType, catchCancelledUpdate, renderServerResponse, instantUpdate, swiftUpdate } from "@rue/quarky";
+import { load } from "@rue/quarky";
 import { Provided } from "./context/Context";
 import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
@@ -50,7 +50,7 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
             ...config?.setup || {},
          }
 
-         instantUpdate(() => { // FIX: Erros are being swallowed up here despite being rethrown
+         load(() => { // FIX: Error are being swallowed up here despite being rethrown
             flaskStack.push(flask)
             pushContext(appCommons)
             let nodes: JSXNode[]

@@ -16,10 +16,10 @@ export class Update {
 
    constructor(
       public type: UpdateType = UpdateType.USER_INTERACTION,
-      public timeMargin = 1000, // FIX: TEMPORARY for sierpinski test
-      public idle: number | boolean = 1000
-      // public timeMargin = 100,
-      // public idle: number | boolean = 50
+      // public timeMargin = 1000, // FIX: TEMPORARY for sierpinski test
+      // public idle: number | boolean = 1000
+      public timeMargin = 100,
+      public idle: boolean = true
    ) {
    }
 
@@ -124,9 +124,78 @@ export class Update {
       if (taskqueues[PRELUDE]) return taskqueues[PRELUDE].started
       return taskqueues[INTERNAL_RENDER]!.started
    }
+
+   race(rival: Update | null, ...info: any[]) { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
+      if (rival === null || rival === this) {
+         return;
+      }
+      if (rival) {
+         console.warn('[DEV RESEARCH] RACE CONDITION!!!!')
+         console.log(...info)
+         // if (!this.handleRace) {
+         //    this.raceByType(rival)
+         // }
+         // else {
+         //    this.handleRace(rival.asAction)
+         // }
+         // if (this.cancelled) throw new UpdateCancelled()
+      }
+   }
 }
 
 
+export function AsyncOp<T>(fn: (...args: any[]) => T): () => Promise<T> {
+   return (...args) => {
+      return dispatch(fn)
+   }
+}
+
+// FIX: temporary ... I think we should just create AsyncOp or AsyncAction (should there be a distinction?)
+export function dispatch(task: () => any): Promise<any> {
+   return (getLazyUpdate() ?? createLazyUpdate()).queue(task)
+}
+
+let latestLazyUpdate: Update | null = null
+
+function getLazyUpdate() {
+   if (latestLazyUpdate) {
+      if (latestLazyUpdate.closed) {
+         return;
+      }
+      return latestLazyUpdate;
+   }
+   return;
+}
+
+function createLazyUpdate() {
+   const update = new Update(
+      undefined,
+      Infinity,
+      true
+   )
+   if (latestLazyUpdate && !latestLazyUpdate.completed) {
+      // console.warn('queueing update')
+      latestLazyUpdate.atComplete(() => {
+         queueTask(() => update.start())
+      })
+   }
+   else {
+      update.start() // TODO: only start if there are any state mutations
+   }
+   latestLazyUpdate = update
+   return update
+}
+
+export let initialLoad: Update | null = null
+export let load = (task: () => unknown) => {
+   const update = initialLoad = new Update(undefined, 1000, true)
+   update.queue(task)
+   update.atComplete(() => {
+      load = (fn: Function) => fn()
+      initialLoad = null;
+   })
+   update.start()
+}
 
 export function swiftUpdate(task: () => unknown) {
    (getSwiftUpdate() ?? createSwiftUpdate()).queue(task)
@@ -217,12 +286,11 @@ function createInstantUpdate() {
  * @param fn 
  * @param origin 
  */
-export function tickUpdate(fn: () => void, origin: Update): void { // TODO: base tick update on original update?
-   const update = createSwiftUpdate()
-   // new Update(
-   //    origin.type,
-   //    origin.timeMargin,
-   //    origin.type === UpdateType.USER_INTERACTION ? false : origin.idle
-   // )
+export function tickUpdate(fn: () => void, origin: Update): void {
+   const update = new Update(
+      origin.type,
+      origin.timeMargin,
+      origin.type === UpdateType.USER_INTERACTION ? false : origin.idle // TODO: not sure about this
+   )
    update.queue(fn)
 }

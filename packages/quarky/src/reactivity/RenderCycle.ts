@@ -1,8 +1,8 @@
 
 
 import { setImmediate } from "@rue/thread";
-import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate } from "./Update"
-import { Effect, EffectQueue, PreludeTaskQueue, TaskQueue, TickTaskQueue } from "./EffectQueue"
+import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update"
+import { Effect, EffectQueue, TaskQueue } from "./EffectQueue"
 import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
 import { Update } from "./Update";
@@ -126,7 +126,11 @@ export class RenderCycle {
       // }]
 
       this.effects[INTERNAL_RENDER] = new TaskQueue(update, INTERNAL_RENDER)
-      this.effects[TICK] = new TickTaskQueue(update)
+      const tick = this.effects[TICK] = new TaskQueue(update, TICK)
+      tick.runEffect = (effect) => {
+         if (!effect.run) return;
+         tickUpdate(effect.run, update)
+      }
 
       // if (__DEV__) assertSequentialPhases(this.phases)
    }
@@ -135,8 +139,6 @@ export class RenderCycle {
 
    start() {
       if (this.cancelled === true) return;
-      // this.runStartTasks()
-      // this.schedulePhase(this.phases[0]) // from module
       this.runPrecommit(() => {
          this.update.commit()
          this.runPostcommit()
@@ -154,7 +156,6 @@ export class RenderCycle {
    runPrecommit(onComplete: () => void) {
       const genState: { paused: boolean, gen: Generator } = { paused: false, gen: undefined! }
       if (this.update.idle) {
-         // queueIdleTask(() => this.process.runSync(() => this.runPhase(PRELUDE, undefined, onComplete)))
          this.process.start(() => this.runPhase(PRELUDE, genState, onComplete), genState)
       }
       else {
@@ -178,10 +179,6 @@ export class RenderCycle {
          phase === PRELUDE && update.idle ? (fn: () => Generator) => process.runNext(fn) :
             (fn: () => Generator) => process.runSync(fn)
 
-      const runEffect =
-         // phase === PRELUDE && update.idle ? (effect: Effect) => this.scheduleIdleEffect(effect, queue, onComplete) : 
-         (effect: Effect) => effect.run?.()
-
       queue.started = true;
       pushUpdate(update)
 
@@ -192,7 +189,7 @@ export class RenderCycle {
          const completed = phase === SYNC ? undefined : new Set<Effect>()
          for (const batch of queues) {
 
-            runProcess(() => batch.runEffects(runEffect, completed, genState ? process : undefined, () => {
+            runProcess(() => batch.runEffects(queue.runEffect, completed, genState ? process : undefined, () => {
                if (genState) {
                   process.resumeOuter(genState)
                }
@@ -244,20 +241,14 @@ export class RenderCycle {
          const phase = phases[i]
          this.process.runSync(() => this.runPhase(phase))
          if (this.cancelled) return;
-         // this.currentPhase = phase
-         // this.subphase = 'effects'
-
-         // this.runEffects(phase)
-         // if (this.cancelled) return;
-         // this.subphase = 'tasks'
-         // this.runTasks(phase)
       }
    }
 
    scheduleTick() {
-      queueTask(() => {
-         // this.runEffects(TICK) // TODO:
-         this.runTasks(TICK)
+      requestAnimationFrame(() => {
+         queueTask(() => {
+            this.process.runSync(() => this.runPhase(TICK))
+         })
       })
    }
 
@@ -347,10 +338,10 @@ export class RenderCycle {
       const delta = now - this.startTime
       const timeMargin = this.update.timeMargin
       if (timeMargin && delta > timeMargin) {
-         console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+         if (timeMargin !== 16.7) console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
       }
       else {
-         if (timeMargin === 1000) console.log('passed timecheck', timeMargin, delta)
+         if (timeMargin === Infinity) console.log('passed timecheck', timeMargin, delta)
       }
    }
 

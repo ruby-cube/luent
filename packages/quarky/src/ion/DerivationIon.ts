@@ -35,8 +35,8 @@ export function createMemoizedDerivation(
    methods?: AnyObject, // TODO:
    retrack: boolean = true,
 ) {
-   const isStale = new MemoizedState(true)
-   const state = new MemoizedState(undefined)
+   const isStale = new MemoizedState(true, derive)
+   const state = new MemoizedState(undefined, derive)
 
    const substance = new FunctionalSubstance(() => {
       return derive(state.get())
@@ -90,7 +90,7 @@ export function createMemoizedDerivation(
 
 class MemoizedState extends SimpleState {
 
-   constructor(state: unknown) {
+   constructor(private state: unknown, private derive: Function) {
       super(state)
    }
 
@@ -102,10 +102,13 @@ class MemoizedState extends SimpleState {
       }
       // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
       if (update.committed) return;
-      this.pendingUpdate = update
-      update.atCommit(() => {
-         this.pendingUpdate = null
-      })
+      update.race(this.pendingUpdate, this.derive, this.state)
+      if (this.pendingUpdate === null){
+         this.pendingUpdate = update
+         update.atCommit(() => {
+            this.pendingUpdate = null
+         })
+      }
       queueCommit(update, this)
    }
 }

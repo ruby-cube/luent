@@ -283,10 +283,10 @@ export function catchCancelledUpdate(error: unknown) {
 
 
 
-export function dispatch<T>(fn: () => T, options?: { timeMargin?: number, deadline?: number }): Promise<T> {
-   const timeMargin = options?.deadline ?? options?.timeMargin ?? 1000;
-   return runUpdate(new LazyUpdate(fn, UpdateType.IDLE, timeMargin, options?.deadline ?? true)) as Promise<T>
-}
+// export function dispatch<T>(fn: () => T, options?: { timeMargin?: number, deadline?: number }): Promise<T> {
+//    const timeMargin = options?.deadline ?? options?.timeMargin ?? 1000;
+//    return runUpdate(new LazyUpdate(fn, UpdateType.IDLE, timeMargin, options?.deadline ?? true)) as Promise<T>
+// }
 
 
 

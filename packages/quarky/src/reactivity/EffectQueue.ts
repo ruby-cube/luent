@@ -55,6 +55,7 @@ export class EffectQueue {
       private phase: Phase,
       private atom?: TrackedAtom
    ) {
+
    }
 
 
@@ -182,10 +183,14 @@ export class TaskQueue {
 
    started = false;
 
+   runEffect(effect: Effect) { effect.run?.() }
+
    constructor(
       public update: Update,
       protected phase: Phase
-   ) { }
+   ) {
+
+   }
 
    scheduleTask(task: () => void) {
       this.tasks.push(task)
@@ -206,69 +211,66 @@ export class TaskQueue {
 
    runningEffects: boolean = false
 
-   runEffects(cycle: RenderCycle) {
-      this.started = true;
-      this.runBatches(
-         // (effect) => this.runEffect(effect),
-         this.phase === SYNC ? undefined : new Set(),
-         () => this.runMoreEffects(cycle)
-      )
-      // --- DO NOT WRITE CODE UNDER THIS LINE; GENERATOR MAY BE PAUSED----
-   }
+   // runEffects(cycle: RenderCycle) {
+   //    this.started = true;
+   //    this.runBatches(
+   //       // (effect) => this.runEffect(effect),
+   //       this.phase === SYNC ? undefined : new Set(),
+   //       () => this.runMoreEffects(cycle)
+   //    )
+   //    // --- DO NOT WRITE CODE UNDER THIS LINE; GENERATOR MAY BE PAUSED----
+   // }
 
-   runBatches(/* run: (effect: Effect) => void,  */completed: Set<Effect> | undefined, onComplete: () => void) {
-      const queues = this.effects;
-      for (const batch of queues) {
-         batch.runEffects(run, completed)
-         // TODO: yield if runEffects is paused
-         batch.queued = this.moreEffects?.length ? batch.requeued : false;
-         batch.requeued = false;
-      }
-      onComplete()
-   }
-
-   runMoreEffects(cycle: RenderCycle) {
-      this.effects = this.moreEffects ?? []
-      this.moreEffects = undefined;
-      if (this.effects.length) {
-         this.runEffects(cycle)
-      }
-   }
-
-   runTasks() {
-      const tasks = this.tasks;
-      for (let i = 0; i < tasks.length; i++) {
-         tasks[i]()
-      }
-   }
-
-   // runEffect(effect: Effect) {
-   //    const update = this.update
-
-   //    try {
-   //       this.runningEffects = true
-   //       pushUpdate(update)
-   //       effect.run?.()
+   // runBatches(/* run: (effect: Effect) => void,  */completed: Set<Effect> | undefined, onComplete: () => void) {
+   //    const queues = this.effects;
+   //    for (const batch of queues) {
+   //       batch.runEffects(run, completed)
+   //       // TODO: yield if runEffects is paused
+   //       batch.queued = this.moreEffects?.length ? batch.requeued : false;
+   //       batch.requeued = false;
    //    }
-   //    catch (err) {
-   //       catchCancelledUpdate(err)
-   //    }
-   //    finally {
-   //       popUpdate()
-   //       this.runningEffects = false
+   //    onComplete()
+   // }
+
+   // runMoreEffects(cycle: RenderCycle) {
+   //    this.effects = this.moreEffects ?? []
+   //    this.moreEffects = undefined;
+   //    if (this.effects.length) {
+   //       this.runEffects(cycle)
    //    }
    // }
+
+   // runTasks() {
+   //    const tasks = this.tasks;
+   //    for (let i = 0; i < tasks.length; i++) {
+   //       tasks[i]()
+   //    }
+   // }
+
+   // // runEffect(effect: Effect) {
+   // //    const update = this.update
+
+   // //    try {
+   // //       this.runningEffects = true
+   // //       pushUpdate(update)
+   // //       effect.run?.()
+   // //    }
+   // //    catch (err) {
+   // //       catchCancelledUpdate(err)
+   // //    }
+   // //    finally {
+   // //       popUpdate()
+   // //       this.runningEffects = false
+   // //    }
+   // // }
 }
 
-class IdleTaskQueue extends TaskQueue {
-
-}
 
 
 /**
  * Belongs to the current effect cycle.
  */
-export class PreludeTaskQueue extends TaskQueue {
+export class xPreludeTaskQueue extends TaskQueue {
 
    constructor(
       public update: Update,
@@ -343,17 +345,16 @@ export class PreludeTaskQueue extends TaskQueue {
 /**
  * Belongs to the current effect cycle.
 */
-export class TickTaskQueue extends TaskQueue {
+export class xTickTaskQueue extends TaskQueue {
    constructor(
       public update: Update,
    ) {
-      super(update, TICK)
-      // , (fn?: (() => void) | null) => {
-      //    return () => {
-      //       if (!fn) return;
-      //       tickUpdate(fn, this.update)
-      //    }
-      // })
+      super(update, TICK, (fn?: (() => void) | null) => {
+         return () => {
+            if (!fn) return;
+            tickUpdate(fn, this.update)
+         }
+      })
    }
 
    // emitBatchesComplete: (() => void) | undefined

@@ -31,7 +31,7 @@ function lockState(state: PendableState) {
    if (update.committed) {
       return;
    }
-   // update.race(state.pendingUpdate)
+   update.race(state.pendingUpdate)
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
       update.atCommit(() => {
@@ -46,9 +46,9 @@ export function queueCommit(update: Update, state: PendableState) {
    update.atCommit(() => {
       state.commitUpdate()
    })
-   update.atCancel?.(() => {
-      state.cancelUpdate()
-   })
+   // update.atCancel?.(() => {
+   //    state.cancelUpdate()
+   // })
 }
 
 

@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
-import { instantUpdate } from "./Update";
+import { initialLoad, instantUpdate } from "./Update";
 import { fail } from "assert";
 
 // let forAnimation = false;
@@ -183,15 +183,15 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
 
    function renderFrame(time: DOMHighResTimeStamp) {
       // setImmediate(() => {
-         // ++totalFrames
-         // const now = performance.now()
-         // const delta = now - startTime
-         // totalDelta += delta
-         // const average = totalDelta/totalFrames
-         // console.log('frame time', delta, delta > 16.7 ? (++failCount, 'X') : '', 'RATIO:', failCount/totalFrames, 'AVERAGE', average, average > 16.7 ? (++failCount, 'X') : '')
-         // startTime = now;
-         instantUpdate(() => prepFrame(time))
-         // runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
+      // ++totalFrames
+      // const now = performance.now()
+      // const delta = now - startTime
+      // totalDelta += delta
+      // const average = totalDelta/totalFrames
+      // console.log('frame time', delta, delta > 16.7 ? (++failCount, 'X') : '', 'RATIO:', failCount/totalFrames, 'AVERAGE', average, average > 16.7 ? (++failCount, 'X') : '')
+      // startTime = now;
+      instantUpdate(() => prepFrame(time))
+      // runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
       // })
    }
 
@@ -212,6 +212,13 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
       },
       start() {
          if (!stopped) return this;
+         if (initialLoad) {
+            initialLoad.atComplete(() => {
+               stopped = false;
+               requestAnimationFrame(renderFrame)
+            })
+            return this;
+         }
          stopped = false;
          requestAnimationFrame(renderFrame)
          return this;

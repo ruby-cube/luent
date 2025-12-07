@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, dispatch, Ion, $cancelCount, swiftUpdate, $_derivation } from "@rue/quarky";
+import { Animation, Interval, dispatch, Ion, swiftUpdate, AsyncOp, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // TODO:
@@ -79,8 +79,11 @@ export function TriangleDemo() {
    let promise: Promise<void>;
    // let resolve: undefined | (() => void)
 
+   const incrementSeconds = AsyncOp(() => $seconds.value = ($seconds() % 10) + 1)
+
    const secondsInterval = Interval(1000, () => {
-      swiftUpdate(() => $seconds.value = ($seconds() % 10) + 1)
+      incrementSeconds()
+      // dispatch(() => $seconds.value = ($seconds() % 10) + 1) // TODO: AsyncUpdates should return promise and be cancellable
       // $seconds.value = ($seconds() % 10) + 1
       // resolve?.()
       // promise = new Promise<void>(_resolve => { resolve = _resolve })
@@ -188,6 +191,7 @@ function Dot({ x, y, s, $text }: FromTag<any>) {
       <div
          class="dot"
          style={{
+            // color: "#61dafb",
             width: s + "px",
             height: s + "px",
             left: x + "px",

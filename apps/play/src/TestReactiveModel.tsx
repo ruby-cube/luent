@@ -111,7 +111,7 @@ export function List() {
          </div>
 
          {For(list, m => m.id, (item, $index) => (
-            <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
+            <div on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
                style={{
                   backgroundColor: randomColor.get(),
                   outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
