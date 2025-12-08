@@ -1,5 +1,5 @@
 import { isFunction, isObject } from "@rue/utils"
-import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
+import { asTrackedAtom, Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { getActiveTracker, track } from "../reactivity/Compound"
 import { CollectiveState } from "../reactivity/State"
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"

@@ -154,28 +154,34 @@ defineIonicCollection(Array, {
    },
 
    concat(...args: any[]) {
+      // this.trackModel()
       return Ionic(this.ionic.concat(...args))
    },
 
    filter(predicate, thisArg) {
+      // this.trackModel()
       return Ionic(this.ionic.filter(predicate, thisArg))
    },
 
    map(callback, thisArg) {
+      // this.trackModel()
       return Ionic(this.ionic.map(callback, thisArg))
    },
 
    keys() {
+      // this.trackModel()
       this.track(INTERNAL_OP, 'ownKeys') // QUESTION: is this correct?
       return this.raw.keys()
    },
 
    slice(start?, end?) {
+      // this.trackModel()
       return Ionic(this.ionic.slice(start, end))
    },
 
    // TODO: test if this functions properly
    toSpliced(start, deleteCount, ...args) {
+      // this.trackModel()
       return Ionic(this.ionic.toSpliced(start, deleteCount, ...args))
    },
 
@@ -200,14 +206,17 @@ defineIonicCollection(Array, {
    },
 
    toSorted(compare) {
+      // this.trackModel()
       return Ionic(this.ionic.toSorted(compare))
    },
 
    toReversed() {
+      // this.trackModel()
       return Ionic(this.ionic.toReversed())
    },
 
    with(index, value) {
+      // this.trackModel()
       return Ionic(this.ionic.with(index, value))
    }
 })

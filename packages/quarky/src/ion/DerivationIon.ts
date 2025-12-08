@@ -28,15 +28,14 @@ export function isManagedDerivation(value: unknown) {
    return hasQuark(value) && quarkOf(value).quarkType === DERIVATION_ION
 }
 
-
+const STALE = Symbol('stale')
 
 export function createMemoizedDerivation(
    derive: (prev?: unknown) => unknown,
    methods?: AnyObject, // TODO:
    retrack: boolean = true,
 ) {
-   const isStale = new MemoizedState(true, derive)
-   const state = new MemoizedState(undefined, derive)
+   const state = new SimpleState(STALE) // FIX: ?
 
    const substance = new FunctionalSubstance(() => {
       return derive(state.get())
@@ -46,7 +45,7 @@ export function createMemoizedDerivation(
       // initial call
       const value = trackedCall()
       substance.linkEffect(new Effect(() => {
-         isStale.set(true);
+         state.set(STALE);
       }, SYNC))
       // subsequent calls
       trackCall = trackedCall
@@ -54,17 +53,13 @@ export function createMemoizedDerivation(
    }
 
    function trackedCall() {
-      const value = state.set(substance.trackedCall())
-      if (substance.reactive) {
-         isStale.set(false)
-      }
-      return value
+      return substance.trackedCall()
    }
 
    function $derivedState() {
       track(substance)
-      if (isStale.get()) {
-         return trackCall()
+      if (state.get() === STALE) {
+         return state.set(trackCall())
       }
       return state.get();
       // FIX: state is inaccurate when mouse starts hovering and updates are queued/cancelled, 
@@ -92,6 +87,13 @@ class MemoizedState extends SimpleState {
 
    constructor(private state: unknown, private derive: Function) {
       super(state)
+   }
+
+   get() {
+      if (this.pendingUpdate) {
+         return this.pending;
+      }
+      return this.current
    }
 
    override lock() {

@@ -179,7 +179,7 @@ function asIon(
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props, false))
+      return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props))
    }
 
    if (isIon(initialState)) return initialState

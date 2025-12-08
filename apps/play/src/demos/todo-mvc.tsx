@@ -107,22 +107,23 @@ export function TodoMVC() {
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
-   const $remaining = $_derivation(() => {
+   const $remaining = Ion(() => {
+      'remaining';
       // return filters.active($todos()).length
-      const todos = filters.active($todos())
-      let i = 1000
-      while (i--) {
-         // long task
-         if (i === 0)
-            console.log('remaining todos', todos)
-      }
+      const todos = filters.active(
+         $todos()
+      )
+      // console.trace('remaining todos', todos)
       return todos.length
    }) // FIX: when this is memoized, it breaks
    const $todoCount = Ion(() => $todos().length)
 
    const filters = {
       all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => todos.filter(todo => !todo.completed),
+      active: (todos: Ionized<Todo[]>) => todos.filter(todo => {
+         console.log('is Proxy?', todo)
+         return !todo.completed
+      }),
       completed: (todos: Ionized<Todo[]>) => todos.filter(todo => todo.completed)
    }
 

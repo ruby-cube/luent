@@ -32,6 +32,7 @@ export function isTrackableAtom(value: unknown): value is { [QUARK]: Atom & Quar
 
 
 export function asTrackedAtom(watchable: Atom) {
+   // console.log('asTrackedAtom', watchable)
    return watchable.asTrackedAtom ?? (watchable.asTrackedAtom = new TrackedAtom(watchable))
 }
 

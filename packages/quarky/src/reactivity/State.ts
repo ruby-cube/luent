@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import {Update, $activeUpdate, getActiveUpdate} from "./Update"
+import { Update, $activeUpdate, getActiveUpdate } from "./Update"
 
 
 // TODO: history
@@ -205,12 +205,12 @@ export class CollectiveState implements PendableState {
    //    }
    // }
    commitUpdate(): void {
-      if (this.mutations.length){
+      if (this.mutations.length) {
          this.applyMutations()
       }
    }
 
-      private mutations: ((model: AnyObject) => unknown)[] = []
+   private mutations: ((model: AnyObject) => unknown)[] = []
 
    mutate(fn: (model: AnyObject) => unknown) {
       this.lock()
