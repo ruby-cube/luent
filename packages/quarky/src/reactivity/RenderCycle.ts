@@ -126,11 +126,6 @@ export class RenderCycle {
       // }]
 
       this.effects[INTERNAL_RENDER] = new TaskQueue(update, INTERNAL_RENDER)
-      const tick = this.effects[TICK] = new TaskQueue(update, TICK)
-      tick.runEffect = (effect) => {
-         if (!effect.run) return;
-         tickUpdate(effect.run, update)
-      }
 
       // if (__DEV__) assertSequentialPhases(this.phases)
    }
@@ -191,7 +186,7 @@ export class RenderCycle {
 
             runProcess(() => batch.runEffects(queue.runEffect, completed, genState ? process : undefined, () => {
                if (genState) {
-                  process.resumeOuter(genState)
+                  process.resumeOuter(genState, () => pushUpdate(this.update))
                }
             }))
 
@@ -365,10 +360,20 @@ export class RenderCycle {
    useTaskQueue(phase: Phase) {
       return this.effects[phase]
          ?? (this.effects[phase] =
-            phase === PRELUDE
-               ? new TaskQueue(this.update, phase)
+            phase === TICK
+               ? this.createTickTaskQueue()
                : new TaskQueue(this.update, phase)
          )
+   }
+
+   private createTickTaskQueue() {
+      const { update } = this
+      const tick = new TaskQueue(update, TICK)
+      tick.runEffect = (effect) => {
+         if (!effect.run) return;
+         tickUpdate(effect.run, update)
+      }
+      return tick
    }
 
    onCompleted(task: () => void) { // TODO: tick tasks
@@ -475,7 +480,7 @@ export class CycleProcess {
       return this.timeLeft() < 0
    }
 
-   prepOuterPause(genState: { paused: boolean, gen: Generator }, onResume?: () => void) {
+   prepOuterPause(genState: { paused: boolean, gen: Generator }, onResume: () => void) {
       genState.paused = true;
       if (this.gen === genState.gen) {
          // requestAnimationFrame(() => {
@@ -485,23 +490,23 @@ export class CycleProcess {
       }
    }
 
-   resumeOuter(genState: { paused: boolean, gen: Generator }) {
+   resumeOuter(genState: { paused: boolean, gen: Generator }, onResume: () => void) {
       this.gen = genState.gen;
       if (genState.paused)
          // requestAnimationFrame(() => {
          genState.paused = false;
-      this.resume()
+      this.resume(onResume)
       // })
    }
 
-   prepPause(onResume?: () => void) {
+   prepPause(onResume: () => void) {
       this.resume(onResume)
    }
 
-   resume(onResume?: () => void) {
+   resume(onResume: () => void) {
       queueTask(() => {
          this.resetTime()
-         onResume?.()
+         onResume()
          this.gen.next()
       })
    }

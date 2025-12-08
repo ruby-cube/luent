@@ -2,7 +2,18 @@ import { createStack } from "@rue/utils";
 import { INTERNAL_RENDER, PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
 import { UpdateType } from "./IdleUpdate";
 
-export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
+export const [_pushUpdate, _popUpdate, getActiveUpdate] = createStack<Update>()
+
+export function pushUpdate(update: Update){
+   console.log('pushUpdate')
+   _pushUpdate(update)
+}
+
+export function popUpdate(){
+   console.trace('popUpdate')
+   _popUpdate()
+}
+
 
 
 export function $activeUpdate() {

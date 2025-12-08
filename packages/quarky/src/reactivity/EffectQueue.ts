@@ -197,7 +197,6 @@ export class TaskQueue {
    }
 
    scheduleEffects(effects: EffectQueue) {
-      if (this.phase === TICK) console.warn('ACK THERE ARE TICK EFFECTS')
       if (this.runningEffects && !effects.requeued) {
          effects.requeued = true;
          const extension = this.moreEffects ?? (this.moreEffects = [])

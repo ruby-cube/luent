@@ -103,12 +103,10 @@ class MemoizedState extends SimpleState {
       // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
       if (update.committed) return;
       update.race(this.pendingUpdate, this.derive, this.state)
-      if (this.pendingUpdate === null){
-         this.pendingUpdate = update
-         update.atCommit(() => {
-            this.pendingUpdate = null
-         })
-      }
+      this.pendingUpdate = update // NOTE: It's important to do this even for race conditions, otherwise state becomes inaccurate
+      update.atCommit(() => {
+         this.pendingUpdate = null
+      })
       queueCommit(update, this)
    }
 }

@@ -1,5 +1,5 @@
 import { component, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, toRaw, EACH } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, toRaw, EACH, $_derivation } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
@@ -107,7 +107,17 @@ export function TodoMVC() {
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
-   const $remaining = Ion(() => filters.active($todos()).length)
+   const $remaining = $_derivation(() => {
+      // return filters.active($todos()).length
+      const todos = filters.active($todos())
+      let i = 1000
+      while (i--) {
+         // long task
+         if (i === 0)
+            console.log('remaining todos', todos)
+      }
+      return todos.length
+   }) // FIX: when this is memoized, it breaks
    const $todoCount = Ion(() => $todos().length)
 
    const filters = {
