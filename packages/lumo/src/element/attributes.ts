@@ -1,8 +1,9 @@
 import { instantUpdate, swiftUpdate } from "@rue/quarky";
-import { ThrottlePointer } from "../../../quarky/src/reactivity/animation";
+// import { ThrottlePointer } from "../../../quarky/src/reactivity/animation";
 import { AnyObject } from "@rue/types";
 
-const pointerUpdate = ThrottlePointer()
+const pointerUpdate = instantUpdate
+// ThrottlePointer()
 
 const htmlEvents = {
    // Mouse Events

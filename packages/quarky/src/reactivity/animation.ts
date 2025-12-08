@@ -1,80 +1,69 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
 import { initialLoad, instantUpdate } from "./Update";
-import { fail } from "assert";
 
-// let forAnimation = false;
-// export function $forAnimation() {
-//    return forAnimation
-// }
-
-// export function prioritize(fn: Function) {
-//    forAnimation = true;
-//    fn()
-//    forAnimation = false;
-// }
 
 /**
  * Throttle by animation frame across mouse events like mouse enter and mouse leave
- */
-export function ThrottledHover() {
-   let hoverID: number | null = null
-   let unhoverID: number | null = null
+//  */
+// export function ThrottledHover() {
+//    let hoverID: number | null = null
+//    let unhoverID: number | null = null
 
-   return [function Hover(fn: <T>(e: T) => void) {
+//    return [function Hover(fn: <T>(e: T) => void) {
 
-      return function hover<T>(e: T) {
-         if (unhoverID !== null) cancelAnimationFrame(unhoverID)
-         if (hoverID !== null) cancelAnimationFrame(hoverID)
-         hoverID = requestAnimationFrame(() => {
-            // setImmediate(() => {
-            hoverID = null;
-            instantUpdate(() => fn(e))
-            // })
-         })
-         // Otherwise, the function call is ignored (throttled)
-      };
-   },
-   function Unhover(fn: <T>(e: T) => void) {
+//       return function hover<T>(e: T) {
+//          if (unhoverID !== null) cancelAnimationFrame(unhoverID)
+//          if (hoverID !== null) cancelAnimationFrame(hoverID)
+//          hoverID = requestAnimationFrame(() => {
+//             // setImmediate(() => {
+//             hoverID = null;
+//             instantUpdate(() => fn(e))
+//             // })
+//          })
+//          // Otherwise, the function call is ignored (throttled)
+//       };
+//    },
+//    function Unhover(fn: <T>(e: T) => void) {
 
-      return function unhover<T>(e: T) {
-         if (unhoverID !== null) cancelAnimationFrame(unhoverID)
-         if (hoverID !== null) cancelAnimationFrame(hoverID)
-         unhoverID = requestAnimationFrame(() => {
-            // setImmediate(() => {
-            unhoverID = null;
-            instantUpdate(() => fn(e))
-         })
-         // Otherwise, the function call is ignored (throttled)
-      };
-   }]
-}
-
-/**
- * Throttle by animation frame across mouse events like mouse enter and mouse leave
- */
-export function SharedThrottledUpdate() {
-   let frameID: number | null = null
-
-   return function Throttled(fn: Function) {
-
-      return function throttled() {
-         if (frameID !== null) return;
-         frameID = requestAnimationFrame(() => {
-            setImmediate(() => {
-               frameID = null;
-               instantUpdate(() => fn(e))
-            })
-         })
-         // Otherwise, the function call is ignored (throttled)
-      };
-   }
-}
+//       return function unhover<T>(e: T) {
+//          if (unhoverID !== null) cancelAnimationFrame(unhoverID)
+//          if (hoverID !== null) cancelAnimationFrame(hoverID)
+//          unhoverID = requestAnimationFrame(() => {
+//             // setImmediate(() => {
+//             unhoverID = null;
+//             instantUpdate(() => fn(e))
+//          })
+//          // Otherwise, the function call is ignored (throttled)
+//       };
+//    }]
+// }
 
 // /**
-//  * Throttled by animation frame
-//  * @param fn 
-//  * @returns 
+//  * Throttle by animation frame across mouse events like mouse enter and mouse leave
 //  */
+// export function SharedThrottledUpdate() {
+//    let frameID: number | null = null
+
+//    return function Throttled(fn: Function) {
+
+//       return function throttled() {
+//          if (frameID !== null) return;
+//          frameID = requestAnimationFrame(() => {
+//             setImmediate(() => {
+//                frameID = null;
+//                instantUpdate(() => fn(e))
+//             })
+//          })
+//          // Otherwise, the function call is ignored (throttled)
+//       };
+//    }
+// }
+
+/**
+ * Throttled by animation frame
+ * @param fn 
+ * @returns 
+ */
 // export function ThrottlePointer() {
 //    let frameID: number | null = null
 
@@ -88,46 +77,46 @@ export function SharedThrottledUpdate() {
 //    };
 // }
 
-/**
- * Throttled by animation frame
- * @param fn 
- * @returns 
- */
-export function ThrottlePointer() {
-   return instantUpdate;
-   let pendingFrame = false;
+// /**
+//  * Throttled by animation frame
+//  * @param fn 
+//  * @returns 
+//  */
+// export function ThrottlePointer() {
+//    return instantUpdate;
+//    let pendingFrame = false;
 
-   return function pointerUpdate(fn: () => void) {
-      if (pendingFrame) {
-         fn()
-         return;
-      }
-      pendingFrame = true;
-      instantUpdate(fn)
-      requestAnimationFrame(() => {
-         pendingFrame = false;
-      })
-   };
-}
-/**
- * Throttled by animation frame
- * @param fn 
- * @returns 
- */
-export function ThrottledUpdate(fn: Function) {
-   let frameID: number | null = null
+//    return function pointerUpdate(fn: () => void) {
+//       if (pendingFrame) {
+//          fn()
+//          return;
+//       }
+//       pendingFrame = true;
+//       instantUpdate(fn)
+//       requestAnimationFrame(() => {
+//          pendingFrame = false;
+//       })
+//    };
+// }
+// /**
+//  * Throttled by animation frame
+//  * @param fn 
+//  * @returns 
+//  */
+// export function ThrottledUpdate(fn: Function) {
+//    let frameID: number | null = null
 
-   return function throttled() {
-      if (frameID !== null) return;
-      frameID = requestAnimationFrame(() => {
-         setImmediate(() => {
-            frameID = null;
-            instantUpdate(() => fn(e))
-         })
-      })
-      // Otherwise, the function call is ignored (throttled)
-   };
-}
+//    return function throttled() {
+//       if (frameID !== null) return;
+//       frameID = requestAnimationFrame(() => {
+//          setImmediate(() => {
+//             frameID = null;
+//             instantUpdate(() => fn(e))
+//          })
+//       })
+//       // Otherwise, the function call is ignored (throttled)
+//    };
+// }
 
 
 // export function Throttled(fn: Function) {
@@ -161,8 +150,16 @@ export function Interval(interval: number, fn: () => void) {
       },
       start() {
          if (!stopped) return this;
-         stopped = false;
-         timeout = setInterval(fnWithContext, interval)
+         if (initialLoad) {
+            initialLoad.atComplete(() => {
+               stopped = false;
+               timeout = setInterval(fnWithContext, interval)
+            })
+         }
+         else {
+            stopped = false;
+            timeout = setInterval(fnWithContext, interval)
+         }
          return this;
       }
    }
@@ -174,25 +171,8 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
    let stopped = true;
    const context = $_snap_context()
 
-   // let totalFrames = 0;
-   // let failCount = 0;
-
-   // let startTime = performance.now()
-
-   // let totalDelta = 0
-
    function renderFrame(time: DOMHighResTimeStamp) {
-      // setImmediate(() => {
-      // ++totalFrames
-      // const now = performance.now()
-      // const delta = now - startTime
-      // totalDelta += delta
-      // const average = totalDelta/totalFrames
-      // console.log('frame time', delta, delta > 16.7 ? (++failCount, 'X') : '', 'RATIO:', failCount/totalFrames, 'AVERAGE', average, average > 16.7 ? (++failCount, 'X') : '')
-      // startTime = now;
       instantUpdate(() => prepFrame(time))
-      // runUpdate(new Update(() => prepFrame(time), stopped ? UpdateType.USER_ANIMATION /* FIX: this should actually depend on the outer update type */ : UpdateType.BACKGROUND_ANIMATION, 16.7))
-      // })
    }
 
    function prepFrame(time: DOMHighResTimeStamp | undefined) {
@@ -217,10 +197,11 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
                stopped = false;
                requestAnimationFrame(renderFrame)
             })
-            return this;
          }
-         stopped = false;
-         requestAnimationFrame(renderFrame)
+         else {
+            stopped = false;
+            requestAnimationFrame(renderFrame)
+         }
          return this;
       }
    }

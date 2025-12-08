@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import { Ion, ionic, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
+import { $_derivation, Ion, ionic, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
@@ -79,8 +79,10 @@ export class ListKit extends VineNode {
 
          // existing item
          if (kit) {
-            kit.$index.value = i
-            kit.$index.dataLength = list.length;
+            const { $index } = kit
+            console.log('existing item', $index.value, '=>', i)
+            $index.value = i
+            $index.dataLength = list.length;
             if (kit.preceding !== preceding || i === 0) {
                updateLCS(sequences.at(-1))
                sequences.push({ start: i, length: 1 })
@@ -120,8 +122,10 @@ export class ListKit extends VineNode {
          const kit = prevKits[i]
          const uid = this.getUID(kit.item)
          if (!currentItems.has(uid)) {
-            kit.$index.value = -1;
-            kit.$index.dataLength = list.length;
+            const { $index } = kit
+            console.log('existing item', $index.value, '=>', i)
+            $index.value = -1;
+            $index.dataLength = list.length;
             queueInternalRender(() => {
                const prevNodes = kit.nodes!
                removeDOMNodes(prevNodes)
@@ -205,7 +209,7 @@ export class ListItemKit extends VineNode {
    ) {
       super()
       const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
-      this.nodes = processJSXOutput(this.render(item, Ion(() => $index())))
+      this.nodes = processJSXOutput(this.render(item, $_derivation(() => $index())))
       flask.emitInitialMount()
    }
 
