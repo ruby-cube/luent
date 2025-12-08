@@ -111,7 +111,7 @@ import { startCycle } from './TestGenerators';
 // animate()
 // window.addEventListener('click', startCycle)
 
-const app = createRoot(TodoMVC)
+const app = createRoot(TriangleDemo)
 
 app.mount('#app')
 
