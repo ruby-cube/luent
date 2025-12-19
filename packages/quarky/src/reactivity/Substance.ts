@@ -165,14 +165,15 @@ export class FunctionalSubstance extends Compound implements Substance {
    constructor(
       private fn: () => unknown,
       private retrack: boolean,
-      private warnNoAtoms = true
+      private warnNoAtoms = true,
+      private logAtoms = false
    ) {
       super()
    }
 
    private call = () => {
       this.call = () => this.retrackedCall();
-      return this.trackAtoms(this.fn) // toValue in case of mutable ion getters
+      return this.trackAtoms(this.fn, this.logAtoms) // toValue in case of mutable ion getters
    }
 
    trackedCall() {
@@ -205,7 +206,7 @@ export class FunctionalSubstance extends Compound implements Substance {
    }
 
 
-   private trackAtoms(fn: () => any) {
+   private trackAtoms(fn: () => any, logAtoms: boolean = false) {
       pushTracker(this);
       try {
          return fn();
@@ -214,6 +215,9 @@ export class FunctionalSubstance extends Compound implements Substance {
          popTracker();
          if (__DEV__ && this.warnNoAtoms && this.particles.length === 0) {
             console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
+         }
+         if (__DEV__ && logAtoms) {
+            console.log('ATOMS', this.particles)
          }
       }
    }

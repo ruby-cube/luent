@@ -1,5 +1,5 @@
 import { isFunction } from "@rue/utils"
-import { Ion, MutableIon } from "./Ion"
+import { $_derivation, Ion, MutableIon } from "./Ion"
 import { sync, watch } from "../reactivity/Watcher"
 // import { SYNC } from "@rue/lumo"
 import { AnyObject } from "@rue/types"
@@ -26,12 +26,15 @@ function HybridIon<T>(config: Derivation<T> | HybridIonConfig<T>) {
 }
 
 export function createHybridIon<T>(derive: Derivation<T>, initial?: T, props?: AnyObject) {
-   const $derived = Ion(derive)
+   const $derived = Ion(derive, { '#logAtoms': true })
    const $state = Ion(initial ?? $derived(), {...props?? {}, '@set'() {console.log('setting', derive)}}) as MutableIon<T>
 
+      // $states
    watch($derived, () => {
+      console.trace('set hybrid', derive)
+      // $selectedState.value = $states()[0]
       $state.value = $derived()
-   }, { phase: 'SYNC' })
+   }, { phase: 'SYNC'})
 
    return $state;
 }

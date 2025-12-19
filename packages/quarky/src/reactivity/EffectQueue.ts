@@ -79,7 +79,7 @@ export class EffectQueue {
 
          try {
             effectStackCount++
-            if (effectStackCount > 100_000) throw new Error('Infite loop detected')
+            if (effectStackCount > 3) throw new Error('Infite loop detected')
             run(effect)
          }
          catch (err) {
@@ -106,11 +106,11 @@ export class EffectQueue {
             yield;
          }
       }
-      
+
       if (sync && effectStackCount !== 0) {
          return;
       }
-      
+
       this.effects = undefined
       this.retained.clear()
       onComplete()

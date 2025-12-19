@@ -106,7 +106,7 @@ export function SuspenseIon<
 
    if (options?.debounced) {
       debounce(options.debounced, () => {
-         runIonicTask(() => {
+         queueIonicTask(() => {
             const promise = $promise.value = input($ion as SuspenseIon<T>);
 
             promise
@@ -127,25 +127,29 @@ export function SuspenseIon<
       })
    }
    else {
-      console.log('init suspense ion', input)
-      runIonicTask(() => {
-         console.trace('>>> run ionic task', input)
-         const promise = $promise.value = input(/* $ion as SuspenseIon<T> */);
+      queueIonicTask(() => {
+         console.log('>>> run ionic task', input)
 
-         promise
-            .then(value => {
-               instantUpdate(() => {
-                  $ion.value = value
-                  $promise.value = null;
+         instantUpdate(() => {
+            const promise = $promise.value = input($ion as SuspenseIon<T>)
+            promise
+               .then(value => {
+                  instantUpdate(() => {
+                     console.log('suspense.then', input)
+                     $ion.value = value
+                     console.log('END suspense.then', input)
+                     $promise.value = null;
+                  })
                })
-            })
-            .catch(err => {
-               instantUpdate(() => {
-                  $ion.error = toError(err)
-                  $promise.value = null;
+               .catch(err => {
+                  instantUpdate(() => {
+                     $ion.error = toError(err)
+                     $promise.value = null;
+                  })
+                  throw err;
                })
-               throw err;
-            })
+         });
+
       })
    }
 

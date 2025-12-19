@@ -112,24 +112,24 @@ import { TestAsyncSelect } from './demos/TestAsyncSelect';
 // animate()
 // window.addEventListener('click', startCycle)
 
-instantUpdate(() => {
-   runIonicTask(() => {
-      console.log('*** A')
-   })
+// instantUpdate(() => {
+//    runIonicTask(() => {
+//       console.log('*** A')
+//    })
    
-   runIonicTask(() => {
-      console.log('*** B')
-   })
+//    runIonicTask(() => {
+//       console.log('*** B')
+//    })
 
-   runIonicTask(() => {
-      console.log('*** C')
-   })
-})
+//    runIonicTask(() => {
+//       console.log('*** C')
+//    })
+// })
 
 
-// const app = createRoot(TestAsyncSelect)
+const app = createRoot(TestAsyncSelect)
 
-// app.mount('#app')
+app.mount('#app')
 
 
 // const frog = ionize({ name: 'sir robin' })

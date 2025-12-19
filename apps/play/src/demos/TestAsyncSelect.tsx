@@ -1,5 +1,6 @@
+import { $_run_with_, $_snap_context } from "@rue/flask";
 import { component, For, SuspenseIon } from "@rue/lumo";
-import { Ion } from "@rue/quarky";
+import { $activeUpdate, instantUpdate, Ion, popUpdate, PRELUDE, pushUpdate, queueIonicTask, runIonicTask, SYNC, watch } from "@rue/quarky";
 
 const AsyncIon = SuspenseIon
 // derivation
@@ -16,13 +17,25 @@ const AsyncIon = SuspenseIon
 
 export function TestAsyncSelect() {
 
-   const $states = fetchStates()
+   const $states = fetchStates() // FIX:
    // const $selectedState = Ion(() => $states()[0])
-   const $selectedState = Ion(() => (console.log('>>> get first state'), $states()[0]), { value: null })
+   const $selectedState = Ion(() => (console.trace('>>> get first state'), $states()[0]), { value: null }) // FIX:
 
-   console.log('>>>> now cities')
+   // const $firstState = Ion(() => $states()[0], { '#logAtoms': true })
+   // const $selectedState = Ion($firstState())
+
+   // watch($firstState, ({current}) => {
+   //    // queueMicrotask(() => {
+   //    // instantUpdate(() => {
+   //    $selectedState.value = current
+   //    // })
+   //    // })
+   // }, { phase: SYNC })
+
+
+   console.log('>>> ========== now cities')
    const $cities = fetchCities($selectedState)
-   // const $selectedCity = Ion(() => (console.log('>>> get first city'), $cities()[0]), { value: null })
+   const $selectedCity = Ion(() => (console.log('>>> get first city'), $cities()[0]), { value: null })
    // const $selectedCity = Ion(() => $cities()[0])
 
 
@@ -33,13 +46,13 @@ export function TestAsyncSelect() {
          )}
       </select>
 
-      {/* <select mu:value={$selectedCity} disabled={$cities.pending}> */}
-         {/* {For($cities, city => */}
-            {/* <option>{city}</option> */}
-         {/* )} */}
-      {/* </select> */}
+      <select mu:value={$selectedCity} disabled={($cities.pending)}>
+         {For($cities, city =>
+            <option>{city}</option>
+         )}
+      </select>
 
-      {/* <p>Selection: {$selectedCity}, {$selectedState}</p> */}
+      <p>Selection: {$selectedCity}, {$selectedState}</p>
    </>
    )
 }
@@ -54,21 +67,22 @@ const stateCities: Record<string, string[]> = {
 
 export function fetchStates() {
    return AsyncIon([], async () => {
-      console.trace('>>> FETCH STATES')
-      await new Promise((res) => setTimeout(res, 500));
+      console.log('>>> FETCH STATES')
+      await new Promise((res) => setTimeout(res, 1000));
       console.log('>>> FETCH STATES resolved')
       return Object.keys(stateCities);
    })
 }
 
-export function fetchCities($state: Ion<string>) {
+export function fetchCities($selectedState: Ion<string>) {
    return AsyncIon([], async () => {
-      // console.log('>>> FETCH CITIES')
-      // // $state()
-      // await new Promise((res) => setTimeout(res, 500));
-      // console.log('>>> FETCH CITIES resolved')
-      // return stateCities[$state()] ?? [];
-      return []
+      console.log('>>> FETCH CITIES')
+      console.log('>>> =======TRACK $state()')
+      $selectedState()
+      console.log('>>> =======END TRACK $state()')
+      await new Promise((res) => setTimeout(res, 1000));
+      console.log('>>> FETCH CITIES resolved')
+      return stateCities[$selectedState()] ?? [];
    })
 }
 export function getStates() {

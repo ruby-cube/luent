@@ -39,7 +39,7 @@ export function createMemoizedDerivation(
 
    const substance = new FunctionalSubstance(() => {
       return derive(state.get())
-   }, retrack)
+   }, retrack, undefined, methods?.['#logAtoms'])
 
    let trackCall = () => {
       // initial call
