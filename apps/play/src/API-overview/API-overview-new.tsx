@@ -6,6 +6,7 @@ import { component, POSTLUDE, PRELUDE } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
 import { isFunction } from "@rue/utils";
 import { time } from "console";
+import { watch } from "fs";
 import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 
 // [ ] ions with methods
@@ -88,17 +89,76 @@ const $doubleCount = Ion(() => $count() * 2, {
 // const $quantity = Ion.watch($selectedProduct, () => 1)
 
 
-const $quantity = HybridIon({
-   initial: null,
-   watch: $selectedProduct,
-   derive: () => 1
-})
+// const $quantity = HybridIon({
+//    initial: null,
+//    watch: $selectedProduct,
+//    derive: () => 1
+// })
 
 const $shippingMethod = HybridIon(() => $shippingOptions()[0])
 
 
+// Hybrid ion: three ways:
+
+// (1)
+const $quantity = Ion(1, {
+   '@init'() {
+      watch($selectedproduct, () => { this.value = 1 })
+   },
+   increment() {
+      this.value++
+   },
+   decrement() {
+      this.value--
+   }
+})
+
+// (2)
+const $shippingMethod = Ion(() => $shippingOptions()[0], { value: undefined })
 
 
+// (3)
+const $shippingMethod = Ion(null, { value: () => $shippingOptions()[0] })
+
+
+// Async Ion
+const $states = AsyncIon(fetchStates)
+
+const $states = AsyncIon({
+   initial: null,
+   fetch: fetchStates,
+   refetch: () => { },
+   dispatch: () => { }
+})
+
+const $liked = AsyncIon({
+   initial: false,
+   dispatch: (liked) => {
+      if (liked) db.markLiked()
+      else db.unmarkLiked()
+   }
+}, {
+   toggle() {
+      this.value = !this.value
+   }
+})
+
+
+// Optimistic
+
+const $liked = Ion(false, {
+   toggle() {
+      this.value = !this.value
+   },
+   '@set'() {
+      markLiked(this.value)
+   }
+})
+
+const markLiked = AsyncOp((liked) => {
+   if (liked) db.markLiked()
+   else db.unmarkLiked()
+})
 
 
 
@@ -129,9 +189,9 @@ const $shippingMethod = HybridIon(() => $shippingOptions()[0])
 //    '@init'({ watch }) { watch($shippingOptions, ({ current }) => current[0]) }
 // })
 
-const $shippingMethod = Ion(null, {
-   '@init'({ derive }) { derive(() => $shippingOptions()[0]) }
-})
+// const $shippingMethod = Ion(null, {
+//    '@init'({ derive }) { derive(() => $shippingOptions()[0]) }
+// })
 
 // const $shippingMethod = Ion(null, {
 //    '@init'() { runIonicTask(() => this.value = $shippingOptions()[0]) }

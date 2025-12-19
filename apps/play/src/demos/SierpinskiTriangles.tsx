@@ -42,6 +42,10 @@ function doAction(fn: Function) {
 // immediate
 // swift
 // sync
+function Suspense() {
+
+   return
+}
 
 export function TriangleDemo() {
    const $elapsed = Ion(0)
@@ -62,33 +66,13 @@ export function TriangleDemo() {
    // incrementSeconds.$pending
    // incrementSeconds.dispatch()
 
-   // const queue = new InterruptibleQueue()
-   // let count = 1458;
-   // while (count--) {
-   //    queue.addTask(() => {
-   //       var e = performance.now() + 0.8;
-   //       // Artificially long execution time.
-   //       while (performance.now() < e) { }
-   //    })
-   // }
-
-   // const taskInterval = Interval(1000, () => {
-   //    queue.runTasks()
-   // }).start()
-
    let promise: Promise<void>;
    // let resolve: undefined | (() => void)
 
    const incrementSeconds = AsyncOp(() => $seconds.value = ($seconds() % 10) + 1)
 
-   const secondsInterval = Interval(1000, () => {
+   const secondsStream = Interval(1000, () => {
       incrementSeconds()
-      // dispatch(() => $seconds.value = ($seconds() % 10) + 1) // TODO: AsyncUpdates should return promise and be cancellable
-      // $seconds.value = ($seconds() % 10) + 1
-      // resolve?.()
-      // promise = new Promise<void>(_resolve => { resolve = _resolve })
-      // $realSeconds.value = ($realSeconds() % 10) + 1
-      // dispatch(() => { $seconds.value = ($seconds() % 10) + 1 }, { deadline: 1000 })
    }).start();
 
    const start = Date.now()
@@ -97,36 +81,25 @@ export function TriangleDemo() {
       $elapsed.value = Date.now() - start;
    }).start()
 
-   // const $x = Ion(0)
-   // const $y = Ion(0)
-   // listen(document, 'mousemove', ThrottlePointer((e: MouseEvent) => {
-   //    $x.value = e.clientX;
-   //    $y.value = e.clientY;
-   // }))
-
    atUnmount(() => {
-      secondsInterval.stop();
+      secondsStream.stop();
       animation.stop();
    });
 
-   // watch($seconds, () => {
-   //    console.log('changed', $seconds())
-   // }, { phase: POSTLUDE })
-
    function stop() {
-      secondsInterval.stop();
+      secondsStream.stop();
       animation.stop()
    }
 
    function reset() {
-      secondsInterval.stop()
+      secondsStream.stop()
       // dispatch(() => {
       //    $seconds.value = 0
       // }, { deadline: 1000 }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       swiftUpdate(() => {
          $seconds.value = 0
       }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
-      secondsInterval.start()
+      secondsStream.start()
    }
 
    return component(
@@ -138,7 +111,7 @@ export function TriangleDemo() {
                stop
             </button>
             <button on:click={e => (
-               secondsInterval.start(),
+               secondsStream.start(),
                animation.start()
             )}>
                play
@@ -150,14 +123,14 @@ export function TriangleDemo() {
                class="container"
                style={{ transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)") }}
             >
-               <Triangle x={0} y={0} s={1000} seconds={$seconds} />
+               <Triangle x={0} y={0} s={1000} seconds={$seconds} suspense={suspense} />
             </div>
          </div>
       </>
    );
 };
 
-function Triangle({ x, y, s, $seconds }: FromTag<any>) {
+function Triangle({ x, y, s, $seconds, suspense }: FromTag<any>) {
    if (s <= TARGET) {
       return component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET} text={$seconds} />
@@ -165,18 +138,27 @@ function Triangle({ x, y, s, $seconds }: FromTag<any>) {
    }
    s = s / 2;
 
-   const $slow = Ion(() => {
-      var e = performance.now() + 0.8;
-      // Artificially long execution time.
-      while (performance.now() < e) { }
-      return $seconds()
-   })
+   const $slow = AsyncIon(async () => {
+      const sec = $seconds()
+      const worker = new Promise(resolve => {
+         setTimeout(resolve, 100)
+      })
+      await worker
+      return sec;
+   }, { await: suspense })
+
+   // const $slow = Ion(() => {
+   //    var e = performance.now() + 0.8;
+   //    // Artificially long execution time.
+   //    while (performance.now() < e) { }
+   //    return $seconds()
+   // })
 
    return component(
       <>
-         <Triangle x={x} y={y - s / 2} s={s} seconds={$slow} />
-         <Triangle x={x - s} y={y + s / 2} s={s} seconds={$slow} />
-         <Triangle x={x + s} y={y + s / 2} s={s} seconds={$slow} />
+         <Triangle x={x} y={y - s / 2} s={s} seconds={$slow} suspense={suspense} />
+         <Triangle x={x - s} y={y + s / 2} s={s} seconds={$slow} suspense={suspense} />
+         <Triangle x={x + s} y={y + s / 2} s={s} seconds={$slow} suspense={suspense} />
       </>
    );
 };

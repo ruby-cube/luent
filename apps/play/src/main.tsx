@@ -68,9 +68,10 @@ import { TestStreamIon } from './TestStreamIon';
 import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
-import { Animation } from '@rue/quarky';
+import { Animation, instantUpdate, Ion, queueIonicPrelude, queueIonicTask, runIonicTask } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
+import { TestAsyncSelect } from './demos/TestAsyncSelect';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -111,9 +112,24 @@ import { startCycle } from './TestGenerators';
 // animate()
 // window.addEventListener('click', startCycle)
 
-const app = createRoot(TriangleDemo)
+instantUpdate(() => {
+   runIonicTask(() => {
+      console.log('*** A')
+   })
+   
+   runIonicTask(() => {
+      console.log('*** B')
+   })
 
-app.mount('#app')
+   runIonicTask(() => {
+      console.log('*** C')
+   })
+})
+
+
+// const app = createRoot(TestAsyncSelect)
+
+// app.mount('#app')
 
 
 // const frog = ionize({ name: 'sir robin' })

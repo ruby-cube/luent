@@ -288,28 +288,8 @@ export class RenderCycle {
 
    runSyncEffects() {
       this.process.runSync(() => this.runPhase(SYNC))
-
-      // this.subphase = 'effects'
-      // this.runEffects(SYNC)
-      // this.subphase = 'tasks'
-      // this.runTasks(SYNC)
+      this.effects[SYNC] = undefined
    }
-
-
-   // private closePhase(phase: AsyncPhase) {
-   //    const nextPhase = this.phases[phase + 1]
-   //    if (nextPhase && !this.cancelled) {
-   //       this.schedulePhase(nextPhase)
-   //    }
-   //    else {
-   //       this.update.complete()
-   //       if (__DEV__) {
-   //          requestAnimationFrame((time) =>
-   //             this.timecheck(performance.now())
-   //          )
-   //       }
-   //    }
-   // }
 
    idleIDs: number[] = []
 
@@ -396,35 +376,6 @@ export class RenderCycle {
 
    subphase: 'effects' | 'tasks' = 'effects'
 
-   runEffects(phase: Phase) {
-      const queue = this.effects[phase]
-      if (queue) {
-         try {
-            pushUpdate(queue.update)
-            queue.runningEffects = true
-
-            queue.runEffects(this)
-         }
-         finally {
-            queue.runningEffects = false
-            popUpdate()
-         }
-      }
-   }
-
-   runTasks(phase: Phase) {
-      const queue = this.effects[phase]
-      if (queue) {
-         try {
-            pushUpdate(queue.update)
-            queue.runTasks()
-         }
-         finally {
-            popUpdate()
-         }
-      }
-   }
-
    adjustPhase(phase: Phase) {
       return this.currentPhase === phase ? phase
          : phase === SYNC ? this.currentPhase
@@ -435,6 +386,9 @@ export class RenderCycle {
 
 
 
+/**
+ * Manages pausing and resuming of effects to prevent render-blocking
+ */
 export class CycleProcess {
    constructor(
       private update: Update,

@@ -1,7 +1,6 @@
 import { isFunction, toError } from "@rue/utils";
-import {  __addDevName, queueIonicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
+import { __addDevName, queueIonicTask, Ion, MutableIon, isIon, runIonicTask, instantUpdate } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
-import { SYNC } from "../../../quarky/src/reactivity/RenderCycle";
 
 
 
@@ -107,37 +106,47 @@ export function SuspenseIon<
 
    if (options?.debounced) {
       debounce(options.debounced, () => {
-         queueIonicTask(() => {
+         runIonicTask(() => {
             const promise = $promise.value = input($ion as SuspenseIon<T>);
 
             promise
                .then(value => {
-                  $ion.value = value
-                  $promise.value = null;
+                  instantUpdate(() => {
+                     $ion.value = value
+                     $promise.value = null;
+                  })
                })
                .catch(err => {
-                  $ion.error = toError(err)
-                  $promise.value = null;
+                  instantUpdate(() => {
+                     $ion.error = toError(err)
+                     $promise.value = null;
+                  })
                   throw err;
                })
-         }, { phase: SYNC })
+         })
       })
    }
    else {
-      queueIonicTask(() => {
-         const promise = $promise.value = input($ion as SuspenseIon<T>);
+      console.log('init suspense ion', input)
+      runIonicTask(() => {
+         console.trace('>>> run ionic task', input)
+         const promise = $promise.value = input(/* $ion as SuspenseIon<T> */);
 
          promise
             .then(value => {
-               $ion.value = value
-               $promise.value = null;
+               instantUpdate(() => {
+                  $ion.value = value
+                  $promise.value = null;
+               })
             })
             .catch(err => {
-               $ion.error = toError(err)
-               $promise.value = null;
+               instantUpdate(() => {
+                  $ion.error = toError(err)
+                  $promise.value = null;
+               })
                throw err;
             })
-      }, { phase: SYNC })
+      })
    }
 
    if (options?.awaited) {

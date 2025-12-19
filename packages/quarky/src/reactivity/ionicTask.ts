@@ -3,7 +3,7 @@ import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./Watcher";
 import { Glass } from "@rue/types";
 import { Effect } from "./EffectQueue";
 import { FunctionalSubstance } from "./Substance";
-import { Phase, POSTLUDE, PRELUDE, RENDER, TICK } from "./RenderCycle";
+import { Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 
 
 type _IonicTaskOptions = {
@@ -20,7 +20,7 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
    const phase = getPhase(options)
 
    let initial = true;
-
+   
    const wrappedEffect = () => {
       try {
          task(initial)
@@ -37,11 +37,11 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
    // const preserve = options?.preserve
 
 
-   return $listen(wrappedEffect, options || {}, {
+   return $listen(() => subject.trackedCall(), options || {}, {
       enroll(_task) {
          const effect = new Effect(_task, phase)
          scheduleEagerEffect(() => {
-            subject.trackedCall()
+            _task()
             subject.linkEffect(effect)
          }, phase)
          return effect;
@@ -57,6 +57,10 @@ type IonicTaskOptions = {[K in keyof _IonicTaskOptions as K extends 'phase' ? ne
 
 export function queueIonicPrelude(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, {...options ?? {}, phase: PRELUDE })
+}
+
+export function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, {...options ?? {}, phase: SYNC })
 }
 
 export function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {

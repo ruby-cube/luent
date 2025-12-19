@@ -7,6 +7,7 @@ import { QUARK } from "../abstract/Quark";
 import { isGetter } from "../reactivity/Substance";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { SimpleState } from "../reactivity/State";
+import { createHybridIon } from "./HybridIon";
 
 /* API */
 export type Ion<T = unknown> = (() => T) & { '~ion': true }
@@ -179,6 +180,11 @@ function asIon(
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
+      if (props && 'value' in props) {
+         const initial = props.value
+         delete props.value
+         return createHybridIon(initialState, initial, props)
+      }
       return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props))
    }
 

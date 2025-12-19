@@ -12,6 +12,8 @@ import { SimpleState } from "../reactivity/State";
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark, displayName: string }
 
 export interface IonHooks {
+   '@derive'?: () => unknown,
+   '@init'?: () => void,
    '@get'?: (value: unknown) => void,
    '@set'?: (event: { value: unknown, previous: unknown }) => void
 }
@@ -25,6 +27,7 @@ export class AtomicIonQuark implements Atom, Quark {
 
    castGet: ((value: unknown) => void) | undefined
    castSet: ((event: { value: unknown; previous: unknown; }) => void) | undefined;
+   castInit: (() =>void) | undefined
 
    constructor(
       public state: SimpleState,
@@ -33,6 +36,7 @@ export class AtomicIonQuark implements Atom, Quark {
    ) {
       this.castGet = hooks?.["@get"]
       this.castSet = hooks?.["@set"]
+      this.castInit = hooks?.["@init"]
    }
 }
 
@@ -59,6 +63,7 @@ export function createAtomicIon(
       if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
       delete descriptors['@get'];
       delete descriptors['@set'];
+      delete descriptors['@init'];
       Object.defineProperties($state, descriptors)
    }
 
