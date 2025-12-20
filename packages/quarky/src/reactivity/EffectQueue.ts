@@ -79,7 +79,7 @@ export class EffectQueue {
 
          try {
             effectStackCount++
-            if (effectStackCount > 3) throw new Error('Infite loop detected')
+            if (effectStackCount > 100_000) throw new Error('Infinite loop detected')
             run(effect)
          }
          catch (err) {

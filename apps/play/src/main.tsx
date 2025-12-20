@@ -17,7 +17,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createRoot, PRELUDE, queueTask } from '@rue/lumo';
+import { component, createRoot, listen, PRELUDE, queueTask } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -68,7 +68,7 @@ import { TestStreamIon } from './TestStreamIon';
 import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
-import { Animation, instantUpdate, Ion, queueIonicPrelude, queueIonicTask, runIonicTask } from '@rue/quarky';
+import { Animation, instantUpdate, Ion, queueIonicPostlude, queueIonicPrelude, queueIonicTask, runIonicTask } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
@@ -116,7 +116,7 @@ import { TestAsyncSelect } from './demos/TestAsyncSelect';
 //    runIonicTask(() => {
 //       console.log('*** A')
 //    })
-   
+
 //    runIonicTask(() => {
 //       console.log('*** B')
 //    })
@@ -125,7 +125,18 @@ import { TestAsyncSelect } from './demos/TestAsyncSelect';
 //       console.log('*** C')
 //    })
 // })
+// instantUpdate(() => {
+//    const $count = Ion(0)
 
+//    queueIonicPostlude(() => {
+//       console.log('ionic task')
+//       $count()
+//    })
+
+//    listen(window, 'click', () => {
+//       $count.value = $count() + 1
+//    })
+// })
 
 const app = createRoot(TestAsyncSelect)
 

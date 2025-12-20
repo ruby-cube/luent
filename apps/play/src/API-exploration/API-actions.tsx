@@ -63,15 +63,15 @@ function TodoWithSuspense() {
          % (3 % 1)
          % Await(toggleComplete)
          % Meanwhile(
-           <>loading...</>
+         <>loading...</>
          )
          % Then(
-            % If(todo.$complete,
-               <p on:click='toggleComplete'>[x]</p>
-            )
-            % Else(
-               <p on:click='toggleComplete'>[ ]</p>
-            )
+         % If(todo.$complete,
+         <p on:click='toggleComplete'>[x]</p>
+         )
+         % Else(
+         <p on:click='toggleComplete'>[ ]</p>
+         )
          )
       </div>
    )
@@ -150,15 +150,14 @@ function Todo() {
 
    return component(
       <>
-         {Await(suspense)}
+         {Await(suspense,
+            <Article></Article>
+         )}
          {Meanwhile(
             <p>loading...</p>
          )}
          {Catch((err, retry) =>
             <Error msg={err.message} on:click={retry}></Error>
-         )}
-         {Then(
-            <Article></Article>
          )}
 
 

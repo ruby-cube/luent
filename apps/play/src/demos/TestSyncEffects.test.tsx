@@ -1,4 +1,4 @@
-import { ion, watch } from "@rue/quarky";
+import { watch } from "@rue/quarky";
 import { describe, expect, it, vi } from "vitest";
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle";
 

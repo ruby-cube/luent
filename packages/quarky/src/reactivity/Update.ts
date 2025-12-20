@@ -22,6 +22,7 @@ export class Update {
       public timeMargin = 100,
       public idle: boolean = true
    ) {
+      console.trace('======== NEW UPDATE')
    }
 
    private tasks: (() => void)[] = []

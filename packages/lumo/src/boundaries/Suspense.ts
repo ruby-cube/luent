@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { __addDevName, queueIonicTask, Ion, MutableIon, isIon, runIonicTask, instantUpdate } from "../../../quarky/src";
+import { __addDevName, queueIonicTask, Ion, MutableIon, isIon, runIonicTask, instantUpdate, queueIonicPrelude } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
 
 
@@ -127,11 +127,12 @@ export function SuspenseIon<
       })
    }
    else {
-      queueIonicTask(() => {
+      queueIonicPrelude(() => {
          console.log('>>> run ionic task', input)
 
+         const promise = input($ion as SuspenseIon<T>)
          instantUpdate(() => {
-            const promise = $promise.value = input($ion as SuspenseIon<T>)
+            $promise.value = promise
             promise
                .then(value => {
                   instantUpdate(() => {
