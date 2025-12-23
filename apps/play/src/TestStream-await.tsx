@@ -55,14 +55,14 @@ export function TestVanillaStream() {
 
    const animationB = Stream(ooo => {
       ooo.repeat(3, ooo => {
-         ooo.stream(turning, running)
-         ooo.stream(bugeye)
+         ooo.span(turning, running)
+         ooo.span(bugeye)
       })
    })
 
    const animationB = Stream(ooo => { // new AsyncSequence()
       ooo.repeat(3, ooo => {
-         ooo.await(turning, running) // await() returns .then and .catch and can take in a then fn as last argument, span() does not
+         ooo.await([turning, running]) // await() returns .then and .catch and can take in a then fn as last argument, span() does not
          ooo.await(bugeye)
       })
    })

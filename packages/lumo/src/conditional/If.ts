@@ -18,15 +18,15 @@ export function As<T>(value: T): asserts value is Exclude<T, null> {
 
 }
 
-export function If<T extends Booleanny| ((_?: any) => Booleanny)>($condition: T, jsx: RenderConditional<T> | RawJSXNode):  ConditionalKit
-   // if (!isActivationKit(jsx)) {
-   //    if (__DEV__) console.error('compiler failed to tranform last argument to activation kit')
-   //    return createConditionalKit('if', 'create', () => jsx, $condition)
-   // }
+export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, jsx: RenderConditional<T> | RawJSXNode): ConditionalKit
+// if (!isActivationKit(jsx)) {
+//    if (__DEV__) console.error('compiler failed to tranform last argument to activation kit')
+//    return createConditionalKit('if', 'create', () => jsx, $condition)
+// }
 
-   // const { activationType, discard, render } = jsx
-   export function If<T extends Booleanny| ((_?: any) => Booleanny)>($condition: T, activationType: ActivationType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
-   export function If<T extends Booleanny| ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RenderConditional<T> | RawJSXNode | ActivationType, renderConditional?: RenderConditional<T> | RawJSXNode): ConditionalKit {
+// const { activationType, discard, render } = jsx
+export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, activationType: ActivationType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
+export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RenderConditional<T> | RawJSXNode | ActivationType, renderConditional?: RenderConditional<T> | RawJSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    // resetCurrentNodePodIndex()
    return createConditionalKit('if', activationType, render, $condition)
@@ -35,9 +35,9 @@ export function If<T extends Booleanny| ((_?: any) => Booleanny)>($condition: T,
 
 
 
-export function ElseIf<T extends Booleanny| ((_?: any) => Booleanny)>($condition: T, jsx: RenderConditional<T> | RawJSXNode): ConditionalKit 
-   export function ElseIf<T extends Booleanny| ((_?: any) => Booleanny)>($condition: T, activationType: ActivationType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
-   export function ElseIf<T extends Booleanny| ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RawJSXNode | RenderConditional<T> | ActivationType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
+export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, jsx: RenderConditional<T> | RawJSXNode): ConditionalKit
+export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, activationType: ActivationType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
+export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RawJSXNode | RenderConditional<T> | ActivationType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    // if (!isActivationKit(jsx)) {
    //    if (__DEV__) console.error('compiler failed to tranform last argument to activation kit')
@@ -49,9 +49,9 @@ export function ElseIf<T extends Booleanny| ((_?: any) => Booleanny)>($condition
 }
 
 
-export function Else(jsx: RenderConditional | RawJSXNode): ConditionalKit 
-   export function Else(activationType: ActivationType, renderConditional: RenderConditional | RawJSXNode): ConditionalKit
-   export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | ActivationType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
+export function Else(jsx: RenderConditional | RawJSXNode): ConditionalKit
+export function Else(activationType: ActivationType, renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | ActivationType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    // if (!isActivationKit(jsx)) {
    //    if (__DEV__) console.error('compiler failed to tranform last argument to activation kit')
@@ -82,12 +82,12 @@ export function createConditionalKit(statementType: "if" | "elseIf" | "else", ac
 export function createIfSeries(kits: ConditionalKit[]) {
    const condition = kits[0].$condition
    if (!isGetter(condition) || isInertIon(condition)) return renderStaticConditional(kits)
-      const activationType = getGroupActivationType()
-      resetGroupActivationType()
+   const activationType = getGroupActivationType()
+   resetGroupActivationType()
    if (activationType === 'show') {
       return renderShowHideSeries(kits)
    }
-    const dynamicKits = toDynamicConditionalKits(kits, activationType)
+   const dynamicKits = toDynamicConditionalKits(kits, activationType)
    return new IfElseKit(dynamicKits, getFlask())
 }
 

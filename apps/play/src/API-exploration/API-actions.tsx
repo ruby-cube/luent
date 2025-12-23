@@ -127,19 +127,26 @@ function IonicTodo(data: Todo) {
 
 }
 
+// [ ] await load only vs refetches
+// [ ] await remoteIons within render
+// [ ] await promise
+// [ ] coordinating 'suspense'
+
+
+
 function Todo() {
 
    const $todos = fetchTodos()
 
-   const $articles = AsyncIon({
+   const $articles = RemoteIon({
       initial: [] as Article[],
       fetch: () => db.fetchArticles($searchTerm(), { debounce: 100 })
    })
 
-   const $articles = AsyncIon(() => asIonicArticles(db.fetchArticles($searchTerm(), { debounce: 100 })))
+   const $articles = RemoteIon(() => asIonicArticles(db.fetchArticles($searchTerm(), { debounce: 100 })))
 
    // Optimistic
-   const markComplete = AsyncAction(({ ooo }) => function () {
+   const markComplete = RemoteAction(() => {
       mu: todo.complete = true
 
       ooo.await(tick)
@@ -150,7 +157,37 @@ function Todo() {
 
    return component(
       <>
-         {Await(suspense,
+         {Await(
+            <Article></Article>
+         )}
+         {Meanwhile(
+            <p>loading...</p>
+         )}
+         {Catch((err, retry) =>
+            <Error msg={err.message} on:click={retry}></Error>
+         )}
+
+         {Await([$cities, $stories,
+            <Article></Article>
+         ])}
+         {Meanwhile(
+            <p>loading...</p>
+         )}
+         {Catch((err, retry) =>
+            <Error msg={err.message} on:click={retry}></Error>
+         )}
+
+         {Await($cities,
+            <Article></Article>
+         )}
+         {Meanwhile(
+            <p>loading...</p>
+         )}
+         {Catch((err, retry) =>
+            <Error msg={err.message} on:click={retry}></Error>
+         )}
+
+         {Await($cities)} {Then(
             <Article></Article>
          )}
          {Meanwhile(

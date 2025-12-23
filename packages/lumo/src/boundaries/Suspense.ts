@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { __addDevName, queueIonicTask, Ion, MutableIon, isIon, runIonicTask, instantUpdate, queueIonicPrelude } from "../../../quarky/src";
+import { __addDevName, queueIonicTask, Ion, MutableIon, isIon, runIonicTask, instantUpdate, queueIonicPrelude, swiftUpdate } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
 
 
@@ -19,11 +19,21 @@ import { pend, pendReload } from "./Await";
 const SUSPENSE_ION = Symbol('suspense ion')
 
 
+// RemoteIon({
+//    watch: $a,
+//    fetch: a => new Promise<number>((resolve, reject) => {
+//       setTimeout(() => {
+//          resolve(a * b);
+//       }, Math.random() * 2000);
+//    })
+// })
+
 // TODO:
 export type Suspense<T> = {
    [SUSPENSE_ION]: true,
    error: null | Error,
    pending: boolean,
+   loading: boolean,
    then: Promise<T>['then']
    catch: Promise<T>['then']
    finally: Promise<T>['then']
@@ -37,6 +47,7 @@ export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
 export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
    pending: false,
+   loading: boolean,
    error: null, // different
    onLoaded(initial: boolean): unknown
    // cancel(): void
@@ -93,12 +104,17 @@ export function SuspenseIon<
       return $ion;
    }
 
-   const $promise = Ion(null as null | Promise<T>)
+   const $loaded = Ion(false)
+   const $promise = Ion(undefined as undefined | null | Promise<T>)
    const $ion = Ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
       get pending() {
          return $promise() ?? false
       },
+      get loaded() {
+         return $loaded()
+      },
+      $promise,
       error: null as null | Error,
    })
 
@@ -106,18 +122,18 @@ export function SuspenseIon<
 
    if (options?.debounced) {
       debounce(options.debounced, () => {
-         queueIonicTask(() => {
+         queueIonicPrelude(() => {
             const promise = $promise.value = input($ion as SuspenseIon<T>);
 
             promise
                .then(value => {
-                  instantUpdate(() => {
+                  swiftUpdate(() => {
                      $ion.value = value
                      $promise.value = null;
                   })
                })
                .catch(err => {
-                  instantUpdate(() => {
+                  swiftUpdate(() => {
                      $ion.error = toError(err)
                      $promise.value = null;
                   })
@@ -131,21 +147,21 @@ export function SuspenseIon<
          console.log('>>> run ionic task', input)
 
          const promise = input($ion as SuspenseIon<T>)
-         instantUpdate(() => {
+         swiftUpdate(() => { // NOTE: It's me. Hi. I'm the problem it's me. When this was instantUpdate, it caused a weird double fetchCities
             $promise.value = promise
             promise
                .then(value => {
-                  instantUpdate(() => {
-                     console.log('suspense.then', input)
+                  swiftUpdate(() => {
                      $ion.value = value
-                     console.log('END suspense.then', input)
                      $promise.value = null;
+                     $loaded.value = true
                   })
                })
                .catch(err => {
-                  instantUpdate(() => {
+                  swiftUpdate(() => {
                      $ion.error = toError(err)
                      $promise.value = null;
+                     $loaded.value = true
                   })
                   throw err;
                })

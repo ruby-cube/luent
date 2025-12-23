@@ -8,7 +8,7 @@
 //    <div>{err}</div>
 // )}
 
-import { Ion,  watch } from "@rue/quarky";
+import { Ion, watch } from "@rue/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
@@ -67,9 +67,11 @@ function $awaitStack() {
 
 export function pend(promiseValue: Promise<any> | Promise<any>[]) {
    const awaitStack = $awaitStack()
-   const promise = promiseValue instanceof Array ?
-      Promise.all(promiseValue)
-      : promiseValue
+   const promise =
+      promiseValue instanceof Array
+         ? Promise.all(promiseValue)
+         : promiseValue
+
    const { promises } = awaitStack.at(-1)!;
    promises.push(promise)
    return promise;
@@ -125,7 +127,7 @@ export function createAwaitSeries(
    const awaitSeries = createIfSeries([
       If($pending, renderPlaceholder),
       ElseIf($error, () => renderError($error()!)),
-      Else('show', () => {
+      Else("show", () => { // FIX:
          try {
             awaitStack.push(suspenseCollection);
             return renderResolved()
@@ -181,7 +183,7 @@ export function createAwaitSeries(
                         $error.value = toError(err);
                         $pending.value = false
                      })
-               }, {phase: PRELUDE})
+               }, { phase: PRELUDE })
             }
          }
       })

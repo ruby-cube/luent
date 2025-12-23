@@ -241,6 +241,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    }
    else {
       element.addEventListener('change', e => {
+         console.log('&&& change event', ion())
          swiftUpdate(() => updateIonWithInput(ion, e))
       })
    }
