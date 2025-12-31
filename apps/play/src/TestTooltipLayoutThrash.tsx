@@ -1,6 +1,6 @@
-//@ts-nocheck
+// @ts-nocheck
 import { component, If, measureLayout, GetNode, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
-import { Ion, ionic, MutableIon } from '@rue/quarky';
+import { Ion, MutableIon } from '@rue/quarky';
 
 
 export function TestTooltip() {
@@ -104,50 +104,56 @@ export function Tooltip(input: FromTag<{
    const $div = GetNode('div');
    const $height = Ion(undefined as number | undefined)
 
-   atMounted(({ ooo }) => {
-      ooo.await(layout(() =>
-         $div()?.getBoundingClientRect().height
-      )).then(height => {
-         if (height != null) $height.value = height;
-      })
-   })
-
-   atMounted(({ ooo }) => {
-      ooo.await(layout, () =>
+   atMounted(() => {
+      ooo.await($layout, () =>
          $div()?.getBoundingClientRect().height
       )
-      ooo.then(height => {
+      ooo.await($render, height => {
          if (height != null) $height.value = height;
       })
    })
 
-   atMounted(({ ooo }) => {
-      ooo.await(layout)
-         .then(() => $div()?.getBoundingClientRect().height)
-         .then(hg => { if (hg != null) $height.value = hg; })
-      ooo.await(tick, () => {
+   // atMounted(({ ooo }) => {
+   //    ooo.await($layout)
+   //       .then(() => $div()?.getBoundingClientRect().height)
+   //    ooo.await($render)
+   //       .then(hg => { if (hg != null) $height.value = hg; })
+   //    ooo.await(tick, () => {
+   //       console.log('this runs after tick resolves which is awaited once layout resolves')
+   //    })
+   // })
+   const doSomething = Async(() => {
+      oo.await(fetchCities, res => (
+         res.JSON()
+      ))
+      oo.await([$pipeout, $render], cities => (
+         cities
+      ))
+      oo.await($tick, () => {
+         console.log($pipeout)
+      })
+      return oo.pipeout
+   })
+
+   const doSomething = Async(() => {
+      oo.await(fetchCities, res => res.JSON())
+      oo.await([$pipeout, $render], cities => cities)
+      oo.await($tick, () => console.log($pipeout))
+      return oo.awaited
+   })
+
+   atMounted(Async(() => {
+      oo.await($layout, () => (
+         $div()?.getBoundingClientRect().height
+      ))
+      oo.await($render, () => {
+         if ($pipeout() != null) $height.value = $pipeout();
+      })
+      oo.await($tick, () => {
          console.log('this runs after tick resolves which is awaited once layout resolves')
       })
-   })
+   }))
 
-   atMounted(({ ooo }) => {
-      ooo.await(layout)
-      ooo.then(() => $div()?.getBoundingClientRect().height)
-      ooo.then(hg => { if (hg != null) $height.value = hg; })
-      ooo.await(tick, () => {
-         console.log('tick is awaited only after height is set')
-      })
-   })
-
-   atMounted(() => {
-      ooo.await(layout)
-         .then(() => {
-            return $div()?.getBoundingClientRect().height
-         })
-         .then(hg => {
-            if (hg != null) $height.value = hg;
-         })
-   })
 
    // prevent looped layout thrashing w/ measureLayout
    atMounted(async () => {

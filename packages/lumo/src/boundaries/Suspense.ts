@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { __addDevName, queueIonicTask, Ion, MutableIon, isIon, runIonicTask, instantUpdate, queueIonicPrelude, swiftUpdate } from "../../../quarky/src";
+import { __addDevName, queueIonicTask, Ion, MutableIon, isIon, runIonicTask, instantUpdate, queueIonicPrelude, swiftUpdate, untracked } from "../../../quarky/src";
 import { pend, pendReload } from "./Await";
 
 
@@ -33,10 +33,13 @@ export type Suspense<T> = {
    [SUSPENSE_ION]: true,
    error: null | Error,
    pending: boolean,
-   loading: boolean,
+   loaded: boolean,
+   fetching: boolean
+   cancelFetch: () => void
    then: Promise<T>['then']
    catch: Promise<T>['then']
    finally: Promise<T>['then']
+   refetch(): void
    // TODO: need a way to distinguish re'fetches' from initial 'fetch'
    // pending: boolean
    // cancel(): void
@@ -48,6 +51,7 @@ export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
    pending: false,
    loading: boolean,
+   fetching: boolean,
    error: null, // different
    onLoaded(initial: boolean): unknown
    // cancel(): void
@@ -76,89 +80,161 @@ type SuspenseIonOptions = {
    debounced?: number
 }
 
+function unpackAsyncIonArgs<T, OPT>(
+   arg1: T | ((ion: SuspenseIon<T>) => Promise<T>),
+   arg2?: ((ion: SuspenseIon<T>) => Promise<T>) | OPT & SuspenseIonOptions,
+   arg3?: OPT & SuspenseIonOptions
+) {
+   const fetch = isFunction(arg1) ? arg1 : isFunction(arg2) ? arg2 : () => { throw new Error('fetch not provided') }
+
+   return {
+      fetch,
+      initialState: arg1 !== fetch ? arg1 : undefined,
+      options: arg1 === fetch ? arg2 : arg3
+   }
+}
+
 export function SuspenseIon<
    T,
    B extends boolean,
    OPT = undefined
->(initialState: T | undefined, input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & SuspenseIonOptions): OPT extends undefined ? SuspenseIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : SuspenseIon<T> {
-   if (input instanceof Promise) {
-      if (options?.awaited) {
-         pend(input)
-      }
-      const $ion = Ion(initialState as T | undefined, {
-         [SUSPENSE_ION]: true,
-         pending: input,
-         error: null,
-      }) as SuspenseIon<T>
+>(
+   fetch: ((ion: SuspenseIon<T>) => Promise<T> | T),
+   options?: OPT & SuspenseIonOptions
+): OPT extends undefined ? SuspenseIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : SuspenseIon<T>
+export function SuspenseIon<
+   T,
+   B extends boolean,
+   OPT = undefined
+>(
+   initialState: T | undefined,
+   fetch: ((ion: SuspenseIon<T>) => Promise<T>),
+   options?: OPT & SuspenseIonOptions
+): OPT extends undefined ? SuspenseIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : SuspenseIon<T>
+export function SuspenseIon<
+   T,
+   B extends boolean,
+   OPT = undefined
+>(
+   arg1: T | ((ion: SuspenseIon<T>) => Promise<T>),
+   arg2?: ((ion: SuspenseIon<T>) => Promise<T>) | OPT & SuspenseIonOptions,
+   arg3?: OPT & SuspenseIonOptions
+): OPT extends undefined ? SuspenseIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : SuspenseIon<T> {
+   const { initialState, fetch, options } = unpackAsyncIonArgs(arg1, arg2, arg3)
 
-      input
-         .then(value => {
-            $ion.value = value;
-            $ion.pending = false;
-         })
-         .catch(err => {
-            $ion.error = toError(err)
-            $ion.pending = false;
-         })
+   // if (input instanceof Promise) {
+   //    if (options?.awaited) {
+   //       pend(input)
+   //    }
+   //    const $ion = Ion(initialState as T | undefined, {
+   //       [SUSPENSE_ION]: true,
+   //       pending: input,
+   //       error: null,
+   //    }) as SuspenseIon<T>
 
-      return $ion;
-   }
+   //    input
+   //       .then(value => {
+   //          $ion.value = value;
+   //          $ion.pending = false;
+   //       })
+   //       .catch(err => {
+   //          $ion.error = toError(err)
+   //          $ion.pending = false;
+   //       })
 
+   //    return $ion;
+   // }
+
+   let resolve: ((value: T | PromiseLike<T>) => void) | null;
+   let reject: ((reason?: any) => void) | null
    const $loaded = Ion(false)
-   const $promise = Ion(undefined as undefined | null | Promise<T>)
+   const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as undefined | null | Promise<T>)
+
    const $ion = Ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
       get pending() {
-         return $promise() ?? false
+         return $promise()
       },
       get loaded() {
          return $loaded()
+      },
+      fetching: false,
+      cancelFetch() {
+         cancelledPromises.add(currentFetchPromise)
       },
       $promise,
       error: null as null | Error,
    })
 
-   const debounce = Debouncer()
+   let currentFetchPromise: null | Promise<unknown> = null;
 
-   if (options?.debounced) {
-      debounce(options.debounced, () => {
-         queueIonicPrelude(() => {
-            const promise = $promise.value = input($ion as SuspenseIon<T>);
+   // const debounce = Debouncer()
 
-            promise
+   // if (options?.debounced) {
+   //    debounce(options.debounced, () => {
+   //       queueIonicPrelude(() => {
+   //          const promise = $promise.value = fetch($ion as SuspenseIon<T>);
+
+   //          promise
+   //             .then(value => {
+   //                if (resolveInitial) {
+   //                   resolveInitial(value)
+   //                   resolveInitial = null
+   //                }
+   //                swiftUpdate(() => {
+   //                   $ion.value = value
+   //                   $promise.value = null;
+   //                })
+   //             })
+   //             .catch(err => {
+   //                swiftUpdate(() => {
+   //                   $ion.error = toError(err)
+   //                   $promise.value = null;
+   //                })
+   //                throw err;
+   //             })
+   //       })
+   //    })
+   // }
+   // else {
+   const cancelledPromises = new Set()
+   queueIonicPrelude(() => {
+      const output = fetch($ion as SuspenseIon<T>)
+      if (output instanceof Promise) {
+         $ion.fetching = true
+
+         // NOTE: It's me. Hi. I'm the problem it's me. When this was instantUpdate, it caused a weird double fetchCities
+         swiftUpdate(() => {
+            if (!resolve) { $promise.value = new Promise((res, rej) => { resolve = res; reject = rej }) }
+            currentFetchPromise = output
+            output
                .then(value => {
-                  swiftUpdate(() => {
-                     $ion.value = value
-                     $promise.value = null;
-                  })
-               })
-               .catch(err => {
-                  swiftUpdate(() => {
-                     $ion.error = toError(err)
-                     $promise.value = null;
-                  })
-                  throw err;
-               })
-         })
-      })
-   }
-   else {
-      queueIonicPrelude(() => {
-         console.log('>>> run ionic task', input)
-
-         const promise = input($ion as SuspenseIon<T>)
-         swiftUpdate(() => { // NOTE: It's me. Hi. I'm the problem it's me. When this was instantUpdate, it caused a weird double fetchCities
-            $promise.value = promise
-            promise
-               .then(value => {
-                  swiftUpdate(() => {
+                  if (cancelledPromises.has(output)) {
+                     cancelledPromises.delete(output)
+                     return;
+                  }
+                  $ion.fetching = false;
+                  currentFetchPromise = null
+                  if (resolve) {
+                     resolve(value)
+                     resolve = null
+                     reject = null
+                  }
+                  instantUpdate(() => {
                      $ion.value = value
                      $promise.value = null;
                      $loaded.value = true
                   })
                })
                .catch(err => {
-                  swiftUpdate(() => {
+                  $ion.fetching = false;
+                  currentFetchPromise = null
+                  if (reject) {
+                     reject(err)
+                     resolve = null
+                     reject = null
+                  }
+                  instantUpdate(() => {
                      $ion.error = toError(err)
                      $promise.value = null;
                      $loaded.value = true
@@ -166,9 +242,12 @@ export function SuspenseIon<
                   throw err;
                })
          });
-
-      })
-   }
+      }
+      else {
+         instantUpdate(() => $ion.value = output)
+      }
+   })
+   // }
 
    if (options?.awaited) {
       const promise = $promise()

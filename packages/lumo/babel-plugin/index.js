@@ -346,7 +346,6 @@ function transformJSXChildren(childrenPath) {
 
 function transformIfDerivationShorthand(path) {
    if (!path || !path.node) return;
-   console.log('DERIVATION?', path.node)
    if (isDerivationShorthand(path)) {
       // transformLiterals(path.get('right'))
       path.replaceWith(toDerivationFunction(path.node))
@@ -362,7 +361,6 @@ function transformLiterals(path) {
    path.traverse({
       ObjectExpression(path) {
          if (path.visited || path.node.visited) {
-            console.log('visited!')
             return;
          }
          path.visited = true;
@@ -370,7 +368,6 @@ function transformLiterals(path) {
       },
       ArrayExpression(path) {
          if (path.visited || path.node.visited) {
-            console.log('array visited!')
             return;
          }
          path.visited = true;
@@ -470,11 +467,10 @@ function transformTemplateArgToRenderFunction(path) {
    const args = path.node.arguments
    const lastIndex = args.length - 1;
    const templateArg = args[lastIndex]
-   // console.log('transforming template arg', templateArg)
-   if (
-      t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)
-      || templateArg && isJSXRoot(templateArg)
-      || t.isSequenceExpression(templateArg)
+   if (!t.isArrowFunctionExpression(templateArg)
+      // t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)
+      // || templateArg && isJSXRoot(templateArg)
+      // || t.isSequenceExpression(templateArg)
    ) {
       args[lastIndex] = toRenderFunction(templateArg)
    }
@@ -658,7 +654,6 @@ function isDefaultSlot(node) {
    if (!t.isJSXElement(node)) return false;
    const openingElement = node.openingElement
    const attribute = openingElement.attributes[0]
-   console.log('attribute', attribute)
    return openingElement.name.name === 'Slot' && (attribute === undefined) || (attribute.name.name === 'provide')
 }
 
@@ -802,7 +797,6 @@ function hasNonIonMemberExpression(path) {
    let found = false;
    path.traverse({
       MemberExpression(path) {
-         console.log('==========MEMBER EXPRESSION', node.property)
          if (path.node.property.name.startsWith('$')) return;
          found = true;
          path.stop()

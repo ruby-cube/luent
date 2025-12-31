@@ -1,12 +1,11 @@
 // @ts-nocheck
 import { Ion } from "@rue/quarky";
 import "./styles.css";
-import { Await } from "../../../packages/lumo/src/boundaries/Await";
+import { Await } from "../../../../packages/lumo/src/boundaries/Await";
 import { component, FromTag } from "@rue/lumo";
 
 export function TestAsyncTabs() {
    const $tab = Ion(0);
-   // const [$suspense, $resolution] = Suspense() // $suspense boolean, $resolution promise
 
    return (<>
       <ul class="inline">
@@ -20,7 +19,7 @@ export function TestAsyncTabs() {
             Tres
          </li>
       </ul>
-      {Await(<>
+      {Await($suspense => <>
          <div class={{ 'tab': true, 'pending': $suspense }}>
             {Match($tab)}
             {Case(0,
@@ -34,7 +33,7 @@ export function TestAsyncTabs() {
             )}
          </div>
       </>)}
-      {Meanwhile(
+      {Meanwhile($suspense =>
          $suspense.initial ? "Loading..." : undefined // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
       )}
    </>);

@@ -180,10 +180,9 @@ function asIon(
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      if (props && 'value' in props) {
-         const initial = props.value
-         delete props.value
-         return createHybridIon(initialState, initial, props)
+      if (props && '.value' in props) {
+         delete props['.value']
+         return createHybridIon(initialState, undefined, props)
       }
       return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props))
    }

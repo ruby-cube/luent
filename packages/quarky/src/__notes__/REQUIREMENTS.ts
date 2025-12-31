@@ -5,7 +5,7 @@ import { watch } from "../reactivity/Watcher";
 What are the expected behaviors
 - setting value of ion that is being watched --> we don't want to retrigger any 
 - setting value of a different ion ---> we want that ion to trigger its effects
-- preventing infinite loops in nested watchers: use untrackedCall for ions, ionic effects naturally do not propagate reactivity
+- preventing infinite loops in nested watchers: use untracked for ions, ionic effects naturally do not propagate reactivity
 - effects that are scheduled for a previous phase:
    My intuition is that as the developer, the primary expectation is that when x changes, effect will run, regardless of phase.
    So if a phase has passed, we schedule it for the next cycle.
