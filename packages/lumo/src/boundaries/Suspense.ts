@@ -167,20 +167,20 @@ export function AsyncIon<
       get loaded() {
          return $loaded()
       },
-      get fetching() {
-         return Boolean(pendingPromises.size)
-      },
-      cancelFetch() {
-         for (const promise of pendingPromises) {
-            cancelledPromises.add(promise)
-            pendingPromises.delete(promise)
-         }
-      },
       $promise,
       error: null as null | Error,
    })
-
+   
    const pendingPromises: Set<Promise<unknown>> = new Set()
+   function isFetching() {
+      return Boolean(pendingPromises.size)
+   }
+   function cancelFetch() {
+      for (const promise of pendingPromises) {
+         cancelledPromises.add(promise)
+         pendingPromises.delete(promise)
+      }
+   }
 
    // const debounce = Debouncer()
 
@@ -215,6 +215,7 @@ export function AsyncIon<
    const suspense = options?.suspense
    suspense?.[SUSPENSE_QUARK].start($ion as unknown as AsyncIon<T>)
    queueIonicPrelude(() => {
+      if (isFetching()) cancelFetch()
       const output = fetch($ion as unknown as AsyncIon<T>)
       if (output instanceof Promise) {
          pendingPromises.add(output)

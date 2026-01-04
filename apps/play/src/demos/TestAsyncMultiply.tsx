@@ -89,14 +89,9 @@ function MultiplyKit() {
    const $pending = Suspense()
    return {
       $Multiply($n: Ion<number>, o: number) {
-         const $nxo = AsyncIon(() => {
-            return multiply($n(), o)
-         }, { suspense: $pending })
+         const $nxo = AsyncIon(() => multiply($n(), o), { suspense: $pending })
 
          function multiply(n: number, o: number): Promise<number> | void {
-            if ($nxo.fetching) {
-               $nxo.cancelFetch()
-            }
             return db.multiply(n, o)
          }
 
