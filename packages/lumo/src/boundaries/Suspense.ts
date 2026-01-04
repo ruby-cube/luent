@@ -335,6 +335,7 @@ const SUSPENSE_QUARK = Symbol('suspense quark')
 // TODO: Suspense race
 
 export function Suspense() {
+   const asyncIons = new Set<AsyncIon<unknown>>()
    let promiseCount: number = 0;
    let cancelledCount: number = 0;
    let resolve: (() => void) | null
@@ -345,6 +346,13 @@ export function Suspense() {
    //    }
    //    return false
    // })
+
+   const isPending = () => {
+      for (const ion of asyncIons) {
+         if (ion.pending) return true
+      }
+      return false
+   }
 
 
    const $suspense = Ion(new Promise<void>((res, rej) => { resolve = res; reject = rej }) as Promise<void> | null, {
@@ -357,12 +365,16 @@ export function Suspense() {
          //    })
          // },
          start($async: AsyncIon<unknown>) {
+            asyncIons.add($async)
+            getActiveFlask().onDiscard(() => {
+               asyncIons.delete($async)
+            })
             let initial = true;
             watch(Ion(() => $async.pending), ({ current: promise, previous }) => {
                if (promise === null) {
-                  promiseCount--
+                  if (previous) promiseCount--
                   console.log('- resolved', promiseCount)
-                  if (promiseCount === 0) {
+                  if (promiseCount === 0 && !isPending()) {
                      console.log('equal')
                      if (resolve) {
                         resolve()
@@ -373,7 +385,7 @@ export function Suspense() {
                   }
                   return;
                }
-               if (initial || !previous) promiseCount++
+               if (initial || promise !== previous) promiseCount++
                if (initial) initial = false
                console.log('+promise', promiseCount)
                if (!$suspense()) $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
@@ -381,9 +393,10 @@ export function Suspense() {
                promise
                   .catch(err => {
                      if (err === 'cancelled') {
-                        if (!$async.pending) promiseCount--
+                        if (!$async.pending)
+                           promiseCount--
                         console.log('-resolved (cancelled)', promiseCount, cancelledCount)
-                        if (!$async.pending && promiseCount === 0) {
+                        if (promiseCount === 0 && !isPending()) {
                            console.log('equal (canceled)')
                            if (resolve) {
                               resolve()
