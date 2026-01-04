@@ -167,15 +167,19 @@ export function AsyncIon<
       get loaded() {
          return $loaded()
       },
-      fetching: false,
+      get fetching() {
+         return Boolean(pendingPromises.size)
+      },
       cancelFetch() {
-         cancelledPromises.add(currentFetchPromise)
+         for (const promise of pendingPromises){
+            cancelledPromises.add(promise)
+         }
       },
       $promise,
       error: null as null | Error,
    })
 
-   let currentFetchPromise: null | Promise<unknown> = null;
+   const pendingPromises: Set<Promise<unknown>> = new Set()
 
    // const debounce = Debouncer()
 
@@ -213,7 +217,7 @@ export function AsyncIon<
       const output = fetch($ion as unknown as AsyncIon<T>)
       console.log('))) new output', output)
       if (output instanceof Promise) {
-         $ion.fetching = true
+         pendingPromises.add(output)
 
          // NOTE: It's me. Hi. I'm the problem it's me. When this was instantUpdate, it caused a weird double fetchCities
          swiftUpdate(() => {
@@ -225,7 +229,6 @@ export function AsyncIon<
                   else throw err
                })
             }
-            currentFetchPromise = output
             output
                .then(value => {
                   if (cancelledPromises.has(output)) {
@@ -237,20 +240,18 @@ export function AsyncIon<
                         reject = null
                      }
                      console.log('))) cancelled', $promise() === output ? null : $promise())
-                     $ion.fetching = false;
-                     currentFetchPromise = null
-                     instantUpdate(() => $promise.value =  $promise() === output ? null : $promise())
+                     pendingPromises.delete(output)
+                     swiftUpdate(() => $promise.value = $promise())
                      return;
                   }
                   console.log('))) resolved', fetch)
-                  $ion.fetching = false;
-                  currentFetchPromise = null
+                  pendingPromises.delete(output)
                   if (resolve) {
                      resolve(value)
                      resolve = null
                      reject = null
                   }
-                  instantUpdate(() => {
+                  swiftUpdate(() => {
                      $ion.value = value
                      $promise.value = null;
                      $loaded.value = true
@@ -258,14 +259,13 @@ export function AsyncIon<
                })
                .catch(err => {
                   console.log('))) error')
-                  $ion.fetching = false;
-                  currentFetchPromise = null
+                  pendingPromises.delete(output)
                   if (reject) {
                      reject(err)
                      resolve = null
                      reject = null
                   }
-                  instantUpdate(() => {
+                  swiftUpdate(() => {
                      $ion.error = toError(err)
                      $promise.value = null
                      $loaded.value = true
@@ -276,7 +276,7 @@ export function AsyncIon<
          });
       }
       else {
-         instantUpdate(() => $ion.value = output)
+         swiftUpdate(() => $ion.value = output)
       }
    })
    // }
