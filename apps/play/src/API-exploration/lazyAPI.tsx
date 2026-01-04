@@ -1,7 +1,7 @@
 //@ts-nocheck
 // You're filtering a large list based on a search input.
 
-import { SuspenseIon, component, For, fromGlobal, provideGlobal } from "@rue/lumo";
+import { AsyncIon, component, For, fromGlobal, provideGlobal } from "@rue/lumo";
 import { Ion,queueIonicTask } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
@@ -20,7 +20,7 @@ import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await
 // };
 
 function fetchItems($searchTerm: Ion<string>, options: SuspenseOptions) {
-   return SuspenseIon(() => fetch(`/${$searchTerm}`), options)
+   return AsyncIon(() => fetch(`/${$searchTerm}`), options)
 }
 
 provideFetch(fetchItems, ($searchTerm: Ion<string>) =>
@@ -41,7 +41,7 @@ const fetchSomething = useGlobalFunction()
 
 
 
-type SuspenseIon<T> = {
+type AsyncIon<T> = {
    state: T,
    promise: Promise<T>,
    error: Error | null,
@@ -84,7 +84,7 @@ function fetchItems($searchTerm: Ion<string>, options: SuspenseOptions) {
    return ion.suspense(() => fetch(`/${$searchTerm}`), options)
 }
 
-type SuspenseIon<T> = {
+type AsyncIon<T> = {
    state: T,
    promise: Promise<T>,
    error: Error | null,

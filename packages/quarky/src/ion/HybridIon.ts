@@ -31,7 +31,7 @@ export function createHybridIon<T>(derive: Derivation<T>, initial?: T, props?: A
 
       // $states
    watch($derived, () => {
-      console.trace('set hybrid', derive)
+      console.log('set hybrid', derive)
       // $selectedState.value = $states()[0]
       $state.value = $derived()
    }, { phase: 'SYNC'})

@@ -293,7 +293,7 @@ list.push(Ionized(new Frog('kermit')))
 
 
 function fetchUser($id) {
-   return SuspenseIon(async () => {
+   return AsyncIon(async () => {
       const res = await fetch(`http://${$userId}`)
       return res.json()
    })
@@ -306,11 +306,11 @@ const videoPlayer = FiniteState({
    'paused': { play: () => 'playing' }
 })
 
-const $door = SuspenseIon(fetchDoor)
+const $door = AsyncIon(fetchDoor)
 
 const $userId = Ion('')
 
-const $user = SuspenseIon(async () => {
+const $user = AsyncIon(async () => {
    const res = await fetchUser($userId)
    return res.json()
 })

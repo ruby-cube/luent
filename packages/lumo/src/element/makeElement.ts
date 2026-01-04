@@ -242,7 +242,9 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    else {
       element.addEventListener('change', e => {
          console.log('&&& change event', ion())
-         swiftUpdate(() => updateIonWithInput(ion, e))
+         swiftUpdate(() => {
+            updateIonWithInput(ion, e)
+         })
       })
    }
 }
@@ -292,6 +294,7 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
       )
    }
    else if ('value' in ion) {
+      console.log('))) updateIonWithInput')
       ion.value =
          //@ts-expect-error
          e.currentTarget?.[key];

@@ -1,4 +1,4 @@
-import { component, For, SuspenseIon } from "@rue/lumo";
+import { component, For, AsyncIon } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 
@@ -9,7 +9,7 @@ export function TestSearchDebounce() {
 
    const $searchTerm = Ion('')
 
-   const $articles = SuspenseIon([] as Article[], () => {
+   const $articles = AsyncIon([] as Article[], () => {
       return fetchArticles($searchTerm(), { debounce: 100 })
    })
 

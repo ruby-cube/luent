@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { FromTag, SuspenseIon } from "@rue/lumo";
+import { FromTag, AsyncIon } from "@rue/lumo";
 import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 import { Ionic } from "@rue/quarky";
-const AsyncIon = SuspenseIon
+const AsyncIon = AsyncIon
 
 
 const ENTER_KEY = 13;

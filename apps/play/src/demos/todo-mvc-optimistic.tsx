@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, If, Else, FromTag, fromApp, ContextKey, CommonsEntryKey, fromGlobal, SuspenseIon, fromRoot } from "@rue/lumo"
+import { component, For, If, Else, FromTag, fromApp, ContextKey, CommonsEntryKey, fromGlobal, AsyncIon, fromRoot } from "@rue/lumo"
 import { watch,  queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
@@ -178,13 +178,13 @@ type $$Todo = ReturnType<typeof ionizeTodo>
 //    constructor() {
 //       const todo = this;
 
-//       this.completed = SuspenseIon(this.completed, {
+//       this.completed = AsyncIon(this.completed, {
 //          '@set'() {
 //             await db.patchTodo(todo.id).setCompleted(todo.completed)
 //          }
 //       })
 //    }
-//    completed = SuspenseIon(this.completed, {
+//    completed = AsyncIon(this.completed, {
 //       '@set'() {
 //          await db.patchTodo(this.id).setCompleted(this.completed)
 //       }
@@ -210,7 +210,7 @@ type $$Todo = ReturnType<typeof ionizeTodo>
 //       },
 //       nest(todo) {
 //          return {
-//             completed: SuspenseIon(todo.completed, {
+//             completed: AsyncIon(todo.completed, {
 //                '@set'() {
 //                   await db.patchTodo(todo.id).setCompleted(todo.completed)
 //                }
@@ -263,7 +263,7 @@ function IonicTodo(todo: Todo) {
 //          '@set'(value) { console.trace('set title!', value) },
 //       }),
 //       completed: mod({
-//          get: SuspenseIon(todo.completed),
+//          get: AsyncIon(todo.completed),
 //          '@set'(value) {
 //             this.$completed.markStale()
 //             await db.patchTodo(this.id).setCompleted(value)
@@ -327,7 +327,7 @@ class TodosDB {
 
 
 
-const todosIon = SuspenseIon(undefined, {
+const todosIon = AsyncIon(undefined, {
    fetch: () => db.fetchTodos().then(todos => IonicTodoArray(todos)),
    '@init'() {
 

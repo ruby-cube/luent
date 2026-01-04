@@ -1,5 +1,5 @@
 
-import { component, For, fromRoot, SuspenseIon } from "@rue/lumo";
+import { component, For, fromRoot, AsyncIon } from "@rue/lumo";
 import { EACH, Ion, Ionic } from "@rue/quarky";
 import { prototype } from "events";
 import { UseShared } from "../../../../packages/utils/UseShared";
@@ -42,11 +42,11 @@ function IonicTodos(data: Todos[]) {
 
 fetchTodos.db = RootContextKey<TodosDatabase>()
 
-let $todos: SuspenseIon;
+let $todos: AsyncIon;
 
 function fetchTodos($userID: Ion<string>) {
    const db = fromRoot(fetchTodos.db)
-   return $todos ?? ($todos = SuspenseIon({
+   return $todos ?? ($todos = AsyncIon({
       initial: [],
       fetch: () => IonicTodos(db.fetchTodos($userID())),
       prototype: Todos,
@@ -70,7 +70,7 @@ function fetchTodos($userID: Ion<string>) {
 const fetchTodos = UseShared(($userID: Ion<string>) => {
    const db = fromRoot(fetchTodos.db)
 
-   return SuspenseIon({
+   return AsyncIon({
       initial: [],
       fetch: () => IonicTodos(db.fetchTodos($userID())),
       proto: Todos,

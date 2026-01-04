@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { Ion, Ionic } from "@rue/quarky";
 import { Article as ArticleData, Profile } from "../../../api";
-import { SuspenseIon } from "@rue/lumo";
+import { AsyncIon } from "@rue/lumo";
 import { watch } from "node:fs";
 import { ArticleDatabase } from "../../db/ArticleDatabase";
 

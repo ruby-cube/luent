@@ -13,12 +13,12 @@ import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { normalizeToArray, toError, UNDEFINED } from "@rue/utils";
-import { SuspenseIon } from "./Suspense";
+import { AsyncIon } from "./Suspense";
 import { defineAppwide } from "../context/Centralized";
 import { PRELUDE, SYNC } from "../../../quarky/src/reactivity/RenderCycle";
 
 type AwaitKit = {
-   asyncIons: SuspenseIon<unknown>[] | undefined;
+   asyncIons: AsyncIon<unknown>[] | undefined;
    renderResolved: RenderFunction;
 }
 
@@ -28,9 +28,9 @@ type MeanwhileKit = {
 }
 
 export function Await(renderResolved: RenderFunction | RawJSXNode): AwaitKit
-export function Await(suspense: SuspenseIon<unknown> | SuspenseIon<unknown>[], renderResolved: RenderFunction | RawJSXNode): AwaitKit
-export function Await(renderOrSuspense: SuspenseIon<unknown> | SuspenseIon<unknown>[] | RenderFunction | RawJSXNode, renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
-   const asyncIons = renderResolved ? normalizeToArray(renderOrSuspense) as SuspenseIon<unknown>[] : undefined;
+export function Await(suspense: AsyncIon<unknown> | AsyncIon<unknown>[], renderResolved: RenderFunction | RawJSXNode): AwaitKit
+export function Await(renderOrSuspense: AsyncIon<unknown> | AsyncIon<unknown>[] | RenderFunction | RawJSXNode, renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
+   const asyncIons = renderResolved ? normalizeToArray(renderOrSuspense) as AsyncIon<unknown>[] : undefined;
    const render = renderResolved ? renderResolved as RenderFunction : renderOrSuspense as RenderFunction;
    return {
       asyncIons,
@@ -120,33 +120,6 @@ export function createAwaitSeries(
    const $error = Ion(undefined as undefined | Error);
    const $renderPlaceholder = Ion(true);
 
-
-// *** A Promise {<pending>}
-// *** C false null
-// *** B null
-
-// *** A Promise {<pending>}
-// *** C false null
-// *** C true Promise {<pending>}
-// *** C3
-// *** B null
-
-
-// Await.ts:138 *** A Promise {<pending>}
-// Await.ts:146 *** C false null
-// Await.ts:143 *** B Promise {<pending>}
-// Await.ts:146 *** C false null
-
-// *** A Promise {<pending>}
-// Await.ts:152 *** C false null
-// Await.ts:152 *** C false null
-
-
-// *** A Promise {<pending>}
-// Await.ts:157 *** C false null
-// Await.ts:154 *** B null
-
-console.log('*** asyncIons', asyncIons.length)
    for (const $async of asyncIons) {
       watch(() => $async.pending, ({ current: promise, previous }) => {
          // if (previous === undefined) {

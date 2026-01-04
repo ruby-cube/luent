@@ -222,9 +222,9 @@ export function DinoLogo() {
       }
    })
 
-   type SuspenseIon<T> = Ionized<Ion<T>>
+   type AsyncIon<T> = Ionized<Ion<T>>
 
-   const $messages = SuspenseIon({
+   const $messages = AsyncIon({
       value: [],
       await: async () => fetch('/messages'),
       ionize
@@ -243,7 +243,7 @@ export function DinoLogo() {
    })
 
 
-   const $messages = SuspenseIon(ionize([]), () => fetch('/messages'), { // TODO: SuspenseIon must remember initial ionizer
+   const $messages = AsyncIon(ionize([]), () => fetch('/messages'), { // TODO: AsyncIon must remember initial ionizer
       post(msg) {
          this.value.push(msg);
 

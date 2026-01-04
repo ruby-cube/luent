@@ -1,9 +1,8 @@
-import { component, For, If, SuspenseIon } from "@rue/lumo";
+import { component, For, If, AsyncIon } from "@rue/lumo";
 import { Ion, PRELUDE, swiftUpdate, watch } from "@rue/quarky";
 import { normalizeToArray } from "@rue/utils";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
-const AsyncIon = SuspenseIon
 const WRITABLE = true
 
 // TODO:
@@ -16,7 +15,9 @@ const WRITABLE = true
 export function TestAsyncSelect() {
 
    const $states = AsyncIon(() => db.fetchStates())
+   // const $activeState = Ion($states()?.[0])
    const $activeState = Ion(() => $states()?.[0], { '.value': WRITABLE })
+   
 
    const $cities = AsyncIon(() => $activeState() ? fetchCities($activeState()) : [])
    const $activeCity = Ion(() => $cities()?.[0], { '.value': WRITABLE })
@@ -43,8 +44,10 @@ export function TestAsyncSelect() {
                </select>
 
                <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
-                  Selection: {$activeCity}, {async () => { await $cities.pending; return $activeState() }}
-                  {/* Selection: {$activeCity}, {AsyncIon(async () => { await ready($cities); return $activeState() })} */}
+                  Selection 
+                  {/* {($cities.pending ? '' : $activeCity()+',')} {($cities.pending ? '...' : $activeState())} */}
+                  {/* Selection: {$activeCity}, {async () => { await $cities.pending; return $activeState() }} */}
+                  {/* Selection: {$activeCity}, {AsyncIon(async () => { await $cities.pending; return $activeState() })} */}
                   {/* Selection: {$activeCity}, {(oo.await($cities, $activeState))} */}
                </p>
             </>
@@ -56,6 +59,13 @@ export function TestAsyncSelect() {
    )
 }
 
+// ))) updateIonWithInput
+// ))) ** new promise
+// ))) updateIonWithInput
+// ))) reject
+// ))) cancelled Promise {<rejected>: 'cancelled'}
+// ))) resolved () => $activeState() ? fetchCities2($activeState()) : []
+
 const stateCities: Record<string, string[]> = {
    'California': ['Los Angeles', 'San Francisco', 'San Diego'],
    'New York': ['New York City', 'Buffalo', 'Rochester'],
@@ -65,7 +75,7 @@ const stateCities: Record<string, string[]> = {
 };
 
 export function fetchStates() {
-   return AsyncIon(() => db.fetchStates())
+   return AsyncIon([], () => db.fetchStates())
    // return AsyncIon([], () => {
    //    oo.await(db.fetchStates());
    //    return oo.awaited
@@ -116,9 +126,9 @@ function ready<T>($state: Ion<T>) {
 
 const db = {
    fetchStates() {
-      return new Promise<string[]>((res) => setTimeout(() => res(Object.keys(stateCities)), 1000))
+      return new Promise<string[]>((res) => setTimeout(() => res(Object.keys(stateCities)), 2000))
    },
    fetchCities(selectedState: string) {
-      return new Promise<string[]>((res) => { setTimeout(() => res(stateCities[selectedState]), 1000) })
+      return new Promise<string[]>((res) => { setTimeout(() => res(stateCities[selectedState]), 2000) })
    }
 }

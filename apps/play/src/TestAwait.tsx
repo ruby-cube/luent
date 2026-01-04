@@ -1,4 +1,4 @@
-import { component, SuspenseIon, Else, If, FromTag } from "@rue/lumo";
+import { component, AsyncIon, Else, If, FromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import {  Ion } from "@rue/quarky";
 
@@ -6,7 +6,7 @@ import {  Ion } from "@rue/quarky";
 
 
 function fetchData(options: { awaited: true }) {
-   return SuspenseIon(undefined,
+   return AsyncIon(undefined,
       new Promise((resolve, reject) => {
          setTimeout(() => {
             // reject('nooo')s
@@ -17,7 +17,7 @@ function fetchData(options: { awaited: true }) {
 }
 
 function fetchNestedData($name: Ion<string>, options: { awaited: true }) {
-   return SuspenseIon({ name: 'standin' }, () =>
+   return AsyncIon({ name: 'standin' }, () =>
       new Promise((resolve, reject) => {
          const name = $name()
          setTimeout(() => {
@@ -28,7 +28,7 @@ function fetchNestedData($name: Ion<string>, options: { awaited: true }) {
 }
 
 function fetchNestedDataB($name: Ion<string>) {
-   return SuspenseIon({ name: 'placeholder' },
+   return AsyncIon({ name: 'placeholder' },
       new Promise((resolve, reject) => {
          setTimeout(() => {
             resolve({ name: 'nona' })

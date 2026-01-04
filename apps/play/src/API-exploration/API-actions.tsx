@@ -628,7 +628,7 @@ e => action(() => {
    markComplete(todo)
 },)
 
-const $todos = SuspenseIon({
+const $todos = AsyncIon({
    initial: undefined,
    fetch: () => db.fetchTodos().then(todos => IonicTodoArray(todos)),
    '@init'() {

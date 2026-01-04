@@ -72,6 +72,7 @@ import { Animation, instantUpdate, Ion, queueIonicPostlude, queueIonicPrelude, q
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
+import { TestAsyncMultiplyB } from './demos/TestAsyncMultiply';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -138,7 +139,7 @@ import { TestAsyncSelect } from './demos/TestAsyncSelect';
 //    })
 // })
 
-const app = createRoot(TestAsyncSelect)
+const app = createRoot(TestAsyncMultiplyB)
 
 app.mount('#app')
 

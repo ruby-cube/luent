@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, ContextKey, component, Else, ElseIf, For, fromContext, fromApp, FromTag, If, RenderSlot, SuspenseIon } from "@rue/lumo";
+import { Commons, ContextKey, component, Else, ElseIf, For, fromContext, fromApp, FromTag, If, RenderSlot, AsyncIon } from "@rue/lumo";
 import { Ion, Ionized, watch } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";

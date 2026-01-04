@@ -361,7 +361,7 @@ export function TestStreamIon() {
       }
    })
 
-   // const $message = SuspenseIon(undefined, () => fetch('/message')) as any
+   // const $message = AsyncIon(undefined, () => fetch('/message')) as any
 
 
    // const $automessage = StreamIon({

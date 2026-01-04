@@ -5,7 +5,6 @@ import { UpdateType } from "./IdleUpdate";
 export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
 
 
-
 export function $activeUpdate() {
    const update = getActiveUpdate()
    if (!update && __DEV__) throw new Error('Must be called within update context')
@@ -22,7 +21,6 @@ export class Update {
       public timeMargin = 100,
       public idle: boolean = true
    ) {
-      console.trace('======== NEW UPDATE')
    }
 
    private tasks: (() => void)[] = []
