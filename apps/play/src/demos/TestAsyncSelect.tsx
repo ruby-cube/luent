@@ -44,10 +44,9 @@ export function TestAsyncSelect() {
                </select>
 
                <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
-                  Selection 
                   {/* {($cities.pending ? '' : $activeCity()+',')} {($cities.pending ? '...' : $activeState())} */}
                   {/* Selection: {$activeCity}, {async () => { await $cities.pending; return $activeState() }} */}
-                  {/* Selection: {$activeCity}, {AsyncIon(async () => { await $cities.pending; return $activeState() })} */}
+                  Selection: {$activeCity}, {AsyncIon(async () => { await $cities.pending; return $activeState() })}
                   {/* Selection: {$activeCity}, {(oo.await($cities, $activeState))} */}
                </p>
             </>

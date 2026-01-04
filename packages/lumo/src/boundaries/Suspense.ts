@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { Ion, MutableIon, watch, instantUpdate, queueIonicPrelude, swiftUpdate, PRELUDE, $_derivation, untracked } from "@rue/quarky";
+import { Ion, MutableIon, watch, instantUpdate, queueIonicPrelude, swiftUpdate, PRELUDE, $_derivation, untracked, queueTask } from "@rue/quarky";
 import { pend, pendReload } from "./Await";
 import { getActiveFlask } from "@rue/flask";
 import { QUARK } from "../../../quarky/src/abstract/Quark";
@@ -153,12 +153,12 @@ export function AsyncIon<
    let reject: ((reason?: any) => void) | null
    const $loaded = Ion(false)
    const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
-   $promise.value!.catch(err => {
-      console.log('caught I', err)
-      if (err === 'cancelled') return;
-      else throw err
-   })
-
+   if (!options?.awaited && !options?.suspense) {
+      $promise.value!.catch(err => {
+         if (err === 'cancelled') return;
+         else throw err
+      })
+   }
    const $ion = Ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
       get pending() {
@@ -171,8 +171,9 @@ export function AsyncIon<
          return Boolean(pendingPromises.size)
       },
       cancelFetch() {
-         for (const promise of pendingPromises){
+         for (const promise of pendingPromises) {
             cancelledPromises.add(promise)
+            pendingPromises.delete(promise)
          }
       },
       $promise,
@@ -215,16 +216,14 @@ export function AsyncIon<
    suspense?.[SUSPENSE_QUARK].start($ion as unknown as AsyncIon<T>)
    queueIonicPrelude(() => {
       const output = fetch($ion as unknown as AsyncIon<T>)
-      console.log('))) new output', output)
       if (output instanceof Promise) {
          pendingPromises.add(output)
 
          // NOTE: It's me. Hi. I'm the problem it's me. When this was instantUpdate, it caused a weird double fetchCities
          swiftUpdate(() => {
             if (!resolve) {
-               console.log('))) ** new promise')
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-               $promise.value.catch(err => {
+               if (!options?.awaited && !options?.suspense) $promise.value.catch(err => {
                   if (err === 'cancelled') return;
                   else throw err
                })
@@ -234,24 +233,20 @@ export function AsyncIon<
                   if (cancelledPromises.has(output)) {
                      cancelledPromises.delete(output)
                      if (reject) {
-                        console.log('))) reject')
                         reject('cancelled')
                         resolve = null
                         reject = null
                      }
-                     console.log('))) cancelled', $promise() === output ? null : $promise())
-                     pendingPromises.delete(output)
-                     swiftUpdate(() => $promise.value = $promise())
+                     instantUpdate(() => $promise.value = $promise())
                      return;
                   }
-                  console.log('))) resolved', fetch)
                   pendingPromises.delete(output)
                   if (resolve) {
                      resolve(value)
                      resolve = null
                      reject = null
                   }
-                  swiftUpdate(() => {
+                  instantUpdate(() => {
                      $ion.value = value
                      $promise.value = null;
                      $loaded.value = true
@@ -265,7 +260,7 @@ export function AsyncIon<
                      resolve = null
                      reject = null
                   }
-                  swiftUpdate(() => {
+                  instantUpdate(() => {
                      $ion.error = toError(err)
                      $promise.value = null
                      $loaded.value = true
@@ -276,7 +271,19 @@ export function AsyncIon<
          });
       }
       else {
-         swiftUpdate(() => $ion.value = output)
+         if (cancelledPromises.has(output)) {
+            cancelledPromises.delete(output)
+            if (reject) {
+               reject('cancelled')
+               resolve = null
+               reject = null
+            }
+         }
+         instantUpdate(() => {
+            $ion.error = null
+            $promise.value = null
+            $ion.value = output
+         })
       }
    })
    // }
@@ -328,11 +335,17 @@ const SUSPENSE_QUARK = Symbol('suspense quark')
 // TODO: Suspense race
 
 export function Suspense() {
-   // const asyncIons: AsyncIon<unknown>[] = []
    let promiseCount: number = 0;
    let cancelledCount: number = 0;
    let resolve: (() => void) | null
    let reject: ((reason?: any) => void) | null
+   // const $pending = Ion(() => {
+   //    for (const ion of asyncIons) {
+   //       if (ion.pending) return true
+   //    }
+   //    return false
+   // })
+
 
    const $suspense = Ion(new Promise<void>((res, rej) => { resolve = res; reject = rej }) as Promise<void> | null, {
       [SUSPENSE_QUARK]: {
@@ -344,57 +357,42 @@ export function Suspense() {
          //    })
          // },
          start($async: AsyncIon<unknown>) {
-            let cancelled = false
-            watch(Ion(() => $async.pending), ({ current: promise }) => {
+            let initial = true;
+            watch(Ion(() => $async.pending), ({ current: promise, previous }) => {
                if (promise === null) {
                   promiseCount--
-                  console.log('- resolved (null)', promiseCount, cancelledCount)
-                  if (promiseCount === 0 && cancelledCount === 0) {
+                  console.log('- resolved', promiseCount)
+                  if (promiseCount === 0) {
                      console.log('equal')
                      if (resolve) {
                         resolve()
                         resolve = null
                         reject = null
                      }
-                  }
-                  if (promiseCount === 0) {
-                     swiftUpdate(() => { // NOTE: instantUpdate runs too soon
-                        console.log('$$$ $suspense.value (null)')
-                        return $suspense.value = cancelledCount === 0 ? null : $suspense()
-                     }) // NOTE: for some unknown reason, this is needed for promiseCount++ to happen
+                     swiftUpdate(() => $suspense.value = null)
                   }
                   return;
                }
-               promiseCount++
-               if (cancelled) {
-                  cancelledCount--
-                  console.log('- cancelledCount', cancelledCount)
-                  cancelled = false
-               }
+               if (initial || !previous) promiseCount++
+               if (initial) initial = false
                console.log('+promise', promiseCount)
                if (!$suspense()) $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
 
                promise
                   .catch(err => {
                      if (err === 'cancelled') {
-                        promiseCount--
-                        if (!cancelled) {
-                           cancelledCount++
-                           cancelled = true
-                        }
+                        if (!$async.pending) promiseCount--
                         console.log('-resolved (cancelled)', promiseCount, cancelledCount)
-                        if (promiseCount === 0 && cancelledCount === 0) {
+                        if (!$async.pending && promiseCount === 0) {
                            console.log('equal (canceled)')
                            if (resolve) {
                               resolve()
                               resolve = null
                               reject = null
                            }
-                        }
-                        if (promiseCount === 0) {
                            swiftUpdate(() => {
                               console.log('$$$ $suspense.value (cancelled)')
-                              return $suspense.value = cancelledCount === 0 ? null : $suspense()
+                              return $suspense.value = null
                            }) // NOTE: for some unknown reason, this is needed for promiseCount++ to happen
                         }
                         return;
