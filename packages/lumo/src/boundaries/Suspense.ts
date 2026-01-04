@@ -385,7 +385,7 @@ export function Suspense() {
                   }
                   return;
                }
-               if (initial || promise !== previous) promiseCount++
+               if (initial || previous === null) promiseCount++
                if (initial) initial = false
                console.log('+promise', promiseCount)
                if (!$suspense()) $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
