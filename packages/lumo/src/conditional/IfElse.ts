@@ -118,7 +118,6 @@ export class IfElseKit extends VineNode {
       if (!kit) return;
       const prevNodes = kit.nodes;
       if (!prevNodes) return;
-      console.log('deactivating', this.kits, kit)
       kit.nodes = null;
 
       if (kit.type === 'create') {

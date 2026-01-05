@@ -15,17 +15,12 @@ const WRITABLE = true
 export function TestAsyncSelect() {
 
    const $states = AsyncIon(() => db.fetchStates())
-   const $activeState = Ion(() => $states()?.[0], { '+value': true })
-   // const $activeState = Ion(null, { '+derive': () => $states()?.[0] })
+   // const $activeState = Ion(() => $states()[0], { '+value': true })
+   const $activeState = Ion(null as null | string, { '+watch': $states, '+derive': () => $states()[0] })
 
-   const $cities = AsyncIon(() => $activeState() ? fetchCities($activeState()) : [])
-   // const $activeCity = Ion(null, { '+derive': () => $cities()?.[0] })
-   const $activeCity = Ion(() => $cities()?.[0], { '+value': true })
-
-   function fetchCities(state: string) {
-      // if ($cities.fetching) $cities.cancelFetch() // TODO:
-      return db.fetchCities(state)
-   }
+   const $cities = AsyncIon(() => $activeState() ? db.fetchCities($activeState()!) : [])
+   // const $activeCity = Ion(() => $cities()[0], { '+value': true })
+   const $activeCity = Ion(null, { '+watch': $cities, '+derive': () => $cities()[0] })
 
    return component(
       <>

@@ -93,17 +93,24 @@ export function watch<
    }
 
    if (!isWatchedSubstance(substance)) { // plain object
+      console.log('inert A')
+      if (options?.eager) effect(new StateChangeEvent(undefined, subject, true))
       return InertWatcher()
    }
 
    const prevState = new SimpleState(substance.getValue()) // tracking
 
    if (!substance.reactive) {
+      if (options?.eager) {
+         console.log('inert B')
+         effect(new StateChangeEvent(undefined, prevState.get(), true))
+      }
       return InertWatcher()
    }
 
    function wrappedEffect() {
       const newState = substance.getValue() // retracking
+      console.log('effect!!!', prevState.get(), newState)
 
       try {
          (<EffectTask>effect)(new StateChangeEvent(prevState.get(), newState, !!options.eager))
@@ -150,14 +157,18 @@ export function setUpWatcher(
 
    // task = maybePostcycleTask(task, phase)
 
-   if (eager) {
-      scheduleEagerEffect(task, phase)
-   }
+   // if (eager) {
+   //    scheduleEagerEffect(task, phase)
+   // }
 
    return $listen(task, options || {}, {
       enroll(_task) {
          const effect = new Effect(_task, phase)
          subject.linkEffect(effect)
+         if (eager) {
+            console.log('eager', effect)
+            scheduleEagerEffect(_task, phase)
+         }
          return effect;
       },
       remove(effect: Effect) {

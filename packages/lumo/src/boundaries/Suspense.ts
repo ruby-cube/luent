@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { Ion, MutableIon, watch, instantUpdate, queueIonicPrelude, swiftUpdate, PRELUDE, $_derivation, untracked, queueTask } from "@rue/quarky";
+import { Ion, MutableIon, watch, instantUpdate, queueIonicPrelude, swiftUpdate, PRELUDE, $_derivation, untracked, queueTask, runIonicTask, SYNC } from "@rue/quarky";
 import { pend, pendReload } from "./Await";
 import { getActiveFlask } from "@rue/flask";
 import { QUARK } from "../../../quarky/src/abstract/Quark";
@@ -154,7 +154,6 @@ export function AsyncIon<
    const $loaded = Ion(false)
    const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
    if (!options?.awaited && !options?.suspense) {
-      console.warn('CATCH!!')
       $promise.value!.catch(err => {
          if (err === 'cancelled') return;
          else throw err
@@ -220,65 +219,66 @@ export function AsyncIon<
    const cancelledPromises = new Set()
    const suspense = options?.suspense
    suspense?.[SUSPENSE_QUARK].start($ion as unknown as AsyncIon<T>)
+   // watch(() => {console.log('+++ FETCH', fetch.toString().slice(0, 20)); return fetch($ion)}, ({ current: output }) => {
    queueIonicPrelude(() => {
       if (isFetching()) cancelFetch()
-      const output = fetch($ion as unknown as AsyncIon<T>)
+      const output = fetch()
       if (output instanceof Promise) {
          pendingPromises.add(output)
 
          // NOTE: It's me. Hi. I'm the problem it's me. When this was instantUpdate, it caused a weird double fetchCities
-         swiftUpdate(() => {
-            if (!resolve) {
+         if (!resolve) {
+            swiftUpdate(() => {
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
                if (!options?.awaited && !options?.suspense) {
-                  console.warn('CATCH!!B')
                   $promise.value.catch(err => {
                      if (err === 'cancelled') return;
                      else throw err
                   })
                }
-            }
-            output
-               .then(value => {
-                  if (cancelledPromises.has(output)) {
-                     cancelledPromises.delete(output)
-                     if (reject) {
-                        reject('cancelled')
-                        resolve = null
-                        reject = null
-                     }
-                     instantUpdate(() => $promise.value = $promise())
-                     return;
-                  }
-                  pendingPromises.delete(output)
-                  if (resolve) {
-                     resolve(value)
-                     resolve = null
-                     reject = null
-                  }
-                  instantUpdate(() => {
-                     $ion.value = value
-                     $promise.value = null;
-                     $loaded.value = true
-                  })
-               })
-               .catch(err => {
-                  console.log('))) error')
-                  pendingPromises.delete(output)
+            });
+         }
+
+         output
+            .then(value => {
+               if (cancelledPromises.has(output)) {
+                  cancelledPromises.delete(output)
                   if (reject) {
-                     reject(err)
+                     reject('cancelled')
                      resolve = null
                      reject = null
                   }
-                  instantUpdate(() => {
-                     $ion.error = toError(err)
-                     $promise.value = null
-                     $loaded.value = true
-                  })
-                  if (err === 'cancelled') return;
-                  else throw err;
+                  instantUpdate(() => $promise.value = $promise())
+                  return;
+               }
+               pendingPromises.delete(output)
+               if (resolve) {
+                  resolve(value)
+                  resolve = null
+                  reject = null
+               }
+               instantUpdate(() => {
+                  $ion.value = value
+                  $promise.value = null;
+                  $loaded.value = true
                })
-         });
+            })
+            .catch(err => {
+               pendingPromises.delete(output)
+               if (reject) {
+                  reject(err)
+                  resolve = null
+                  reject = null
+               }
+               instantUpdate(() => {
+                  $ion.error = toError(err)
+                  $promise.value = null
+                  $loaded.value = true
+               })
+               if (err === 'cancelled') return;
+               else throw err;
+            })
+
       }
       else {
          if (cancelledPromises.has(output)) {
@@ -440,33 +440,21 @@ export function Suspense() {
 }
 
 
-// 5 ** new promise
-//  +promise 1
-//  +promise 2
-//  +promise 3
-//  +promise 4
-//  +promise 5
-//  - resolved (null) 4 0
-//  ** new promise
-//  +promise 5
-//  - resolved (null) 4 0
-//  -resolved (cancelled) 3 1
-//  -resolved (cancelled) 2 2
-//  -resolved (cancelled) 1 3
-//  -resolved (cancelled) 0 4
-//  $$$ $suspense.value (cancelled)
-// 4 ** new promise
-//  - cancelledCount 3
-//  +promise 1
-//  - cancelledCount 2
-//  +promise 2
-//  - cancelledCount 1
-//  +promise 3
-//  - cancelledCount 0
-//  +promise 4
-//  - resolved (null) 3 0
-//  - resolved (null) 2 0
-//  - resolved (null) 1 0
-//  - resolved (null) 0 0
-//  equal
-//  $$$ $suspense.value (null)
+// +++ FETCH () => db.fetchStates
+// +++ FETCH () => $activeState()
+// RENDER PLACEHOLDER
+// +++ FETCH () => $activeState()
+// +++ no promise () => $activeState()
+
+// RENDER PLACEHOLDER
+// +++ FETCH () => db.fetchStates
+// +++ promise () => db.fetchStates
+// +++ FETCH () => $activeState()
+// +++ no promise () => $activeState()
+// +++ resolved () => db.fetchStates
+// +++ FETCH () => $activeState()
+// +++ resolved () => $activeState()
+// *** C false null
+// RENDER RESOLVED
+// +++ FETCH async () => {    await $cities
+// +++ resolved async () => {    await $cities
