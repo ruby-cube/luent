@@ -180,14 +180,25 @@ function asIon(
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      if (props && '.value' in props) {
-         delete props['.value']
-         return createHybridIon(initialState, undefined, props)
+      if (props && '+value' in props) {
+         const watch = props['+watch']
+         delete props['+value']
+         delete props['+watch']
+         return createHybridIon({ derive: initialState, watch }, props)
       }
       return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props))
    }
 
-   if (isIon(initialState)) return initialState
+   if (isIon(initialState)) {
+      return initialState
+   }
+   if (props && '+derive' in props) {
+      const derive = props['+derive']
+      const watch = props['+watch']
+      delete props['+derive']
+      delete props['+watch']
+      return createHybridIon({ derive, initial: initialState, watch }, props)
+   }
    return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), props), props)) // TODO: add inert mark map
 }
 

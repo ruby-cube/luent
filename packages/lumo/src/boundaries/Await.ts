@@ -159,7 +159,7 @@ export function createAwaitSeries(
 
    function isPending() {
       for (const $async of asyncIons) {
-         if ($async.pending || $async.pending === undefined)
+         if ($async.pending)
             return true;
       }
       return false;
@@ -168,9 +168,12 @@ export function createAwaitSeries(
    let placeholder = renderPlaceholder()
 
    const awaitSeries = createIfSeries([
-      If($renderPlaceholder, () => placeholder),
+      If($renderPlaceholder, () => {
+         console.log('RENDER PLACEHOLDER')
+         return placeholder
+      }),
       ElseIf($error, () => renderError($error()!)),
-      Else(renderResolved)
+      Else(() => { console.log('RENDER RESOLVED'); return renderResolved()})
    ])
 
    return awaitSeries

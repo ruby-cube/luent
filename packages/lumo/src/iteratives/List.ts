@@ -38,7 +38,8 @@ export class ListKit extends VineNode {
 
    prevItems: Map<UID, ListItemKit> = new Map()
 
-   private render(list: unknown[], renderItem: RenderItem<unknown>) {
+   private render(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
+      if (!list) return [];
       const nodes: JSXNode[] = []
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
@@ -50,7 +51,8 @@ export class ListKit extends VineNode {
       return nodes;
    }
 
-   private rerender(list: unknown[], renderItem: RenderItem<unknown>) {
+   private rerender(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
+      if (!list) list = []
       console.log('rerendering list') // FIX: Why is this running twice?
       const prevItems = this.prevItems;
       const prevKits = this.nodes! as ListItemKit[];

@@ -1,63 +1,34 @@
-import { isFunction } from "@rue/utils"
 import { $_derivation, Ion, MutableIon } from "./Ion"
 import { sync, watch } from "../reactivity/Watcher"
-// import { SYNC } from "@rue/lumo"
 import { AnyObject } from "@rue/types"
 
-type HybridIonConfig<T> = {
+type HybridIonConfig<T = any> = {
    initial?: T,
    watch?: Ion,
-   derive: Derivation<T>
+   derive: Ion,
    changed?: (a: T, b: T) => boolean
 }
 
-type Derivation<T> = (previous?: T) => T
+export function createHybridIon(config: HybridIonConfig, props?: AnyObject) {
+   const { derive, initial } = config
+   const subject = config.watch ?? derive
+   const $state = Ion('initial' in config ? initial : derive(), props) as MutableIon<any>
 
-function HybridIon<T>(config: Derivation<T> | HybridIonConfig<T>) {
-   const derive = isFunction(config) ? config : config.derive
-   const subject = isFunction(config) ? () => config() : 'watch' in config ? config.watch! : () => config.derive()
-   const $state = Ion('initial' in config ? config.initial : undefined) as MutableIon<T>
-
-   watch(subject, sync(({ current, previous }) => {
-      $state.value = derive(current, previous)
-   }), { eager: 'initial' in config ? false : true })
-
-   return $state.value;
-}
-
-export function createHybridIon<T>(derive: Derivation<T>, initial?: T, props?: AnyObject) {
-   const $derived = Ion(derive, { '#logAtoms': true })
-   const $state = Ion(initial ?? $derived(), props) as MutableIon<T>
-
-      // $states
-   watch($derived, () => {
-      console.log('set hybrid', derive)
-      // $selectedState.value = $states()[0]
-      $state.value = $derived()
-   }, { phase: 'SYNC'})
+   watch(subject, () => {
+      $state.value = derive()
+   }, { phase: 'SYNC' })
 
    return $state;
 }
 
+// export function createHybridIon<T>(derive: Derivation<T>, initial?: T, props?: AnyObject) {
+//    const $derived = Ion(derive, { '#logAtoms': true })
+//    const $state = Ion(initial ?? $derived(), props) as MutableIon<T>
 
-   // const $states = fetchStates()
-   // // const $selectedState = Ion(() => $states()[0])
-   // const $selectedState = Ion(() => $states()[0], { value: null })
+//    watch($derived, () => {
+//       $state.value = $derived()
+//    }, { phase: 'SYNC'})
 
-   // const $cities = fetchCities($selectedState)
-   // const $selectedCity = Ion(() => /* $selectedState() */$cities()[0], { value: null })
+//    return $state;
+// }
 
-   // export function fetchStates() {
-   //    return AsyncIon([], async () => {
-   //       await new Promise((res) => setTimeout(res, 500));
-   //       return Object.keys(stateCities);
-   //    })
-   // }
-   
-   // export function fetchCities($state: Ion<string>) {
-   //    return AsyncIon([], async () => {
-   //       $state()
-   //       await new Promise((res) => setTimeout(res, 500));
-   //       return stateCities[$state()] ?? [];
-   //    })
-   // }

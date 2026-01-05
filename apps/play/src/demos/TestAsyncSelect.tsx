@@ -1,5 +1,5 @@
 import { component, For, If, AsyncIon } from "@rue/lumo";
-import { Ion, PRELUDE, swiftUpdate, watch } from "@rue/quarky";
+import { Ion, PRELUDE, queueIonicTask, swiftUpdate, SYNC, watch } from "@rue/quarky";
 import { normalizeToArray } from "@rue/utils";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
@@ -15,15 +15,15 @@ const WRITABLE = true
 export function TestAsyncSelect() {
 
    const $states = AsyncIon(() => db.fetchStates())
-   // const $activeState = Ion($states()?.[0])
-   const $activeState = Ion(() => $states()?.[0], { '.value': WRITABLE })
-   
+   const $activeState = Ion(() => $states()?.[0], { '+value': true })
+   // const $activeState = Ion(null, { '+derive': () => $states()?.[0] })
 
    const $cities = AsyncIon(() => $activeState() ? fetchCities($activeState()) : [])
-   const $activeCity = Ion(() => $cities()?.[0], { '.value': WRITABLE })
+   // const $activeCity = Ion(null, { '+derive': () => $cities()?.[0] })
+   const $activeCity = Ion(() => $cities()?.[0], { '+value': true })
 
    function fetchCities(state: string) {
-      if ($cities.fetching) $cities.cancelFetch()
+      // if ($cities.fetching) $cities.cancelFetch() // TODO:
       return db.fetchCities(state)
    }
 
@@ -58,13 +58,6 @@ export function TestAsyncSelect() {
    )
 }
 
-// ))) updateIonWithInput
-// ))) ** new promise
-// ))) updateIonWithInput
-// ))) reject
-// ))) cancelled Promise {<rejected>: 'cancelled'}
-// ))) resolved () => $activeState() ? fetchCities2($activeState()) : []
-
 const stateCities: Record<string, string[]> = {
    'California': ['Los Angeles', 'San Francisco', 'San Diego'],
    'New York': ['New York City', 'Buffalo', 'Rochester'],
@@ -72,41 +65,6 @@ const stateCities: Record<string, string[]> = {
    'Texas': ['Houston', 'Dallas', 'Austin'],
    'Utah': ['Salt Lake City', 'Provo', 'West Valley City'],
 };
-
-export function fetchStates() {
-   return AsyncIon([], () => db.fetchStates())
-   // return AsyncIon([], () => {
-   //    oo.await(db.fetchStates());
-   //    return oo.awaited
-   // })
-
-   // return AsyncIon([], () => {
-   //    return oo.await(db.fetchStates());
-   // })
-}
-
-export function fetchCities($selectedState: Ion<string>) {
-   return AsyncIon(() => $selectedState() ? db.fetchCities($selectedState()) : [])
-   //  await ready($selectedState)
-   // if (!$cities.fetching) return undefined as unknown as Promise<string[]>;
-   // return db.fetchCities($selectedState());
-
-
-   // return AsyncIon([], () => {
-   //    watch: $selectedState(); $selectedState()
-   //    oo.await($states.pending)
-   //    return oo.await(() => db.fetchCities($selectedState()));
-   // })
-
-   // return AsyncIon({
-   //    initial: [],
-   //    watch: $selectedState,
-   //    fetch: () => {
-   //       oo.await($states.pending)
-   //       return oo.await(() => db.fetchCities($selectedState()));
-   //    }
-   // })
-}
 
 function ready<T>($state: Ion<T>) {
    return new Promise<T>(res => {

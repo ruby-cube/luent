@@ -139,7 +139,7 @@ import { TestAsyncMultiplyB } from './demos/TestAsyncMultiply';
 //    })
 // })
 
-const app = createRoot(TestAsyncMultiplyB)
+const app = createRoot(TestAsyncSelect)
 
 app.mount('#app')
 

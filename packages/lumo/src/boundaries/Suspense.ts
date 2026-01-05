@@ -154,6 +154,7 @@ export function AsyncIon<
    const $loaded = Ion(false)
    const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
    if (!options?.awaited && !options?.suspense) {
+      console.warn('CATCH!!')
       $promise.value!.catch(err => {
          if (err === 'cancelled') return;
          else throw err
@@ -168,14 +169,19 @@ export function AsyncIon<
          return $loaded()
       },
       $promise,
+      get fetching() {
+         return isFetching()
+      },
+      cancelFetch,
       error: null as null | Error,
    })
-   
+
    const pendingPromises: Set<Promise<unknown>> = new Set()
    function isFetching() {
       return Boolean(pendingPromises.size)
    }
    function cancelFetch() {
+      console.warn('CANCEL FETCH', fetch)
       for (const promise of pendingPromises) {
          cancelledPromises.add(promise)
          pendingPromises.delete(promise)
@@ -224,10 +230,13 @@ export function AsyncIon<
          swiftUpdate(() => {
             if (!resolve) {
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-               if (!options?.awaited && !options?.suspense) $promise.value.catch(err => {
-                  if (err === 'cancelled') return;
-                  else throw err
-               })
+               if (!options?.awaited && !options?.suspense) {
+                  console.warn('CATCH!!B')
+                  $promise.value.catch(err => {
+                     if (err === 'cancelled') return;
+                     else throw err
+                  })
+               }
             }
             output
                .then(value => {
@@ -282,7 +291,7 @@ export function AsyncIon<
          }
          instantUpdate(() => {
             $ion.error = null
-            $promise.value = null
+            // $promise.value = null
             $ion.value = output
          })
       }
