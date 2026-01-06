@@ -69,11 +69,13 @@ export class EffectQueue {
             !effect.run
             || this.atom && !effect.isLinked(this.atom) // weeds out effects that have been unlinked due to retracking
          ) {
+            console.warn('NO RUN')
             continue;
          }
          // prevent repeats within queue (but not across extended queues and phases)
          if (completed?.has(effect)) {
             this.retain(effect)
+            // console.warn('ALREADY RUN')
             continue;
          }
 
@@ -135,7 +137,9 @@ export class EffectQueue {
 }
 
 
-
+export function cestLePromis(effect: Effect) {
+   return effect.__DEV__fn && effect.__DEV__fn.toString().includes('promis,')
+}
 
 /**
  * Belongs to the current effect cycle.
@@ -149,7 +153,13 @@ export class TaskQueue {
 
    started = false;
 
-   runEffect(effect: Effect) { effect.run?.() }
+   runEffect(effect: Effect) {
+      if (cestLePromis(effect)) {
+         if (!effect.run) console.warn('NO RUN le promis!');
+         else console.warn('>>> run le promis!')
+      }
+      effect.run?.()
+   }
 
    constructor(
       public update: Update,

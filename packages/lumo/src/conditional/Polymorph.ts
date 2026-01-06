@@ -111,7 +111,7 @@ type DynamicRenderKit = {
    nodes: (JSXNode[]) | null
    flask: Flask | undefined;
    render: AsyncRender;
-   type: 'create' | 'remount';
+   type: 'create' | 'mount';
    transitionNodes: TransitionNode[] | undefined;
    cache: JSXNode[] | undefined;
 }
@@ -217,7 +217,7 @@ export class PolymorphKit extends VineNode {
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
-         kit.type === 'remount' ?
+         kit.type === 'mount' ?
             (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask))))
             : processJSXOutput(kit.render(flask));
 
@@ -292,13 +292,13 @@ export class PolymorphKit extends VineNode {
          if (input) {
             const kit = kitOrMap.get(input)
             if (kit) {
-               if (this.preserve) kit.type = 'remount'
+               if (this.preserve) kit.type = 'mount'
                kit.input = input
                return kit;
             }
             const newKit = createDynamicRenderKit(kitOrMap.render, this.context)
             kitOrMap.set(input, newKit)
-            if (this.preserve) newKit.type = 'remount'
+            if (this.preserve) newKit.type = 'mount'
             newKit.input = input
             return newKit;
 
@@ -306,7 +306,7 @@ export class PolymorphKit extends VineNode {
          else console.error('Input object required with this polymorph key. Call .as() with key and input object')
       }
       else {
-         if (this.preserve) kitOrMap.type = 'remount'
+         if (this.preserve) kitOrMap.type = 'mount'
          kitOrMap.input = input
          return kitOrMap;
       }

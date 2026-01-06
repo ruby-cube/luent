@@ -107,7 +107,7 @@ export class IfElseKit extends VineNode {
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
-         kit.type === 'remount' ?
+         kit.type === 'mount' ?
             (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
             : processJSXOutput(kit.render(flask, kit.$condition));
 
@@ -276,7 +276,7 @@ export function Remount(input: FromTag<{
 
 }>) {
    const { discard, Slot } = input;
-   return markActivationType('remount', Slot, discard)
+   return markActivationType('mount', Slot, discard)
 }
 
 export function Create(input: FromTag<{

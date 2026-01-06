@@ -73,6 +73,7 @@ import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
 import { TestAsyncMultiplyB } from './demos/TestAsyncMultiply';
+import { TestAsyncTabs } from './demos/TestAsyncTabs';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -139,7 +140,7 @@ import { TestAsyncMultiplyB } from './demos/TestAsyncMultiply';
 //    })
 // })
 
-const app = createRoot(TestAsyncSelect)
+const app = createRoot(TestAsyncTabs)
 
 app.mount('#app')
 

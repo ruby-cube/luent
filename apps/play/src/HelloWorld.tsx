@@ -141,22 +141,22 @@ export function IonAccess() {
 
    return component(
       <>
-         {If($x() > 10, 'remount',
+         {If($x() > 10, 'mount',
             <p>{$x} is greater than 10</p>
          )}
-         {ElseIf(5 > $x(), 'remount',
+         {ElseIf(5 > $x(), 'mount',
             <p>{$x} is less than 5</p>
          )}
-         {Else('remount',
+         {Else('mount',
             <p>{$x} is between 5 and 10</p>
          )}
-         {$$series(If($x() > 10, 'remount',
+         {$$series(If($x() > 10, 'mount',
             <p>{$x} is greater than 10</p>
          ),
-            ElseIf(5 > $x(), 'remount',
+            ElseIf(5 > $x(), 'mount',
                <p>{$x} is less than 5</p>
             ),
-            Else('remount',
+            Else('mount',
                <p>{$x} is between 5 and 10</p>
             ))}
       </>

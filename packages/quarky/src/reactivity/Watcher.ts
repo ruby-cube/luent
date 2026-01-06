@@ -86,6 +86,7 @@ export function watch<
 >(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
 
    options.retrack = options.retrack ?? true;
+   if (effect.toString().includes('promis,')) console.log('retrack?', options.retrack)
 
    const substance = asWatchedSubstance(subject, options.retrack, Boolean(options.once))
    if (options?.traceTriggers) {
@@ -164,6 +165,7 @@ export function setUpWatcher(
    return $listen(task, options || {}, {
       enroll(_task) {
          const effect = new Effect(_task, phase)
+         effect.__DEV__fn = task.__DEV__fn
          subject.linkEffect(effect)
          if (eager) {
             console.log('eager', effect)

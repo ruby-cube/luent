@@ -36,7 +36,7 @@ export function asWatchedSubstance(subject: Ionized<object> | Ion<any> | WatchSu
 function asMonosubstance(subject: Ionized<object> | Ion<any> | AnyObject, retrack: boolean, once: boolean) {
    // TODO: do not retrack if effect runs once
    return isIonicProxy(subject) ? new IonicProxySubject(subject)
-      : isFunction(subject) ? new IonSubstance(subject)
+      : isFunction(subject) ? new IonSubstance(subject, retrack)
          : { reactive: false, getValue() { return subject }, linkEffect(effect: Effect) { } }  //non-ionized object
 }
 

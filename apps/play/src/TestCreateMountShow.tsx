@@ -71,10 +71,10 @@ export function TestDerivedConditional() {
          {If(($doubleCount() > 3),
             <p>doublecount is greater than 3!</p>
          )}
-         {If(($doubleCount() > 0), 'remount',
+         {If(($doubleCount() > 0), 'mount',
             <p>doublecount is greater than 0!</p>
          )}
-         {If(($count() > 3), 'remount',
+         {If(($count() > 3), 'mount',
             <p>count is greater than 3!</p>
          )}
          {If(($count() > 0), 'show',
@@ -84,10 +84,10 @@ export function TestDerivedConditional() {
          {If(($doubleCount() > 3), 'create',
             <p>doublecount is greater than 3!</p>
          )}
-         {If(($doubleCount() > 0), 'remount',
+         {If(($doubleCount() > 0), 'mount',
             <p>doublecount is greater than 0!</p>
          )}
-         {If(($count() > 3), 'remount',
+         {If(($count() > 3), 'mount',
             <p>count is greater than 3!</p>
          )}
          {If(($count() > 0), 'show',
@@ -98,10 +98,10 @@ export function TestDerivedConditional() {
          {If($doubleCount() > 3, 'create',
             <p>doublecount is greater than 3!</p>
          )}
-         {If($doubleCount() > 0, 'remount',
+         {If($doubleCount() > 0, 'mount',
             <p>doublecount is greater than 0!</p>
          )}
-         {If($count() > 3, 'remount',
+         {If($count() > 3, 'mount',
             <p>count is greater than 3!</p>
          )}
          {If($count() > 0, 'show',
@@ -118,7 +118,7 @@ export function TestDerivedConditional() {
          {/* {If($aActive, 'create',
             <p>A ACTIVE</p>
          )}
-         {ElseIf($bActive, 'remount',
+         {ElseIf($bActive, 'mount',
             <p>A GONE f</p>
          )}
          {Else('show',
@@ -130,7 +130,7 @@ export function TestDerivedConditional() {
          {Else('create',
             <p>B GONE</p>
          )} */}
-         {/* {If($cActive, 'remount',
+         {/* {If($cActive, 'mount',
             <p>C ACTIVE</p>
          )}
          {If($dActive, 'show',

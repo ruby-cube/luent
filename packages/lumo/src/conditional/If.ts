@@ -10,7 +10,7 @@ import { getFlask } from "@rue/flask";
 //    currentNodePodIndex = index ?? undefined;
 // }
 
-export type ActivationType = 'create' | 'remount'
+export type ActivationType = 'create' | 'mount'
 
 export type RenderConditional<T = undefined> = (v: NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>> : T>) => RawJSXNode
 

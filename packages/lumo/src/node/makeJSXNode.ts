@@ -166,7 +166,7 @@ export function makeJSXNode(
 
       case 'mount-remount':
          if (!Slot) throw new Error(`Extraneous <mount-remount>`)
-         return callWithActivationType('remount', Slot, config.provide);
+         return callWithActivationType('mount', Slot, config.provide);
 
       case Create:
          if (!Slot) throw new Error(`<Create> must have children`)
@@ -174,7 +174,7 @@ export function makeJSXNode(
 
       case Remount:
          if (!Slot) throw new Error(`<Remount> must have children`)
-         return markActivationType('remount', Slot, 'discard' in config ? config.discard : undefined);
+         return markActivationType('mount', Slot, 'discard' in config ? config.discard : undefined);
 
       default:
          if (typeof nodeType === 'string') {
