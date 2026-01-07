@@ -47,6 +47,7 @@ export function Await(renderOrSuspense: [...(AsyncIon<unknown> | Suspense)[], Re
       let output: RawJSXNode;
       try {
          pushAwaiting($suspense)
+         // $suspense.hold = 
          output = render($suspense)
       }
       finally {
@@ -174,30 +175,41 @@ export function createAwaitSeries(
          //    console.log('*** A', $async.pending)
          //    return;
          // }
-         console.log('$promise changed!', SUSPENSE_QUARK in $promise, promis, previous)
+         // console.log('$promise changed!', SUSPENSE_QUARK in $promise, promis, previous)
          const pending = isPending()
+
+         // if (pending) {
+         //    $renderPlaceholder.value = true
+         // }
+         // else {
+         //    $renderPlaceholder.value = false
+         // }
+
+
          const usePlaceholder = $renderPlaceholder()
          if (usePlaceholder === pending) {
+            console.warn('use placeholder', usePlaceholder)
             return;
          }
-         $renderPlaceholder.value = pending && notUndefined()
+         $renderPlaceholder.value = pending && !shouldHold()
+         console.log('$renderPlaceholder', $renderPlaceholder())
       }, { phase: PRELUDE, retrack: false })
    }
 
-   function notUndefined() {
+   function shouldHold() {
       placeholder = renderPlaceholder()
       if (placeholder === undefined) {
          console.log('*** C1')
-         return false;
+         return true;
       }
       if (placeholder instanceof Array) {
          if (placeholder.length > 1) {
             console.log('*** C2')
-            return true;
+            return false;
          }
          else {
             console.log('*** C3')
-            return placeholder[0] !== undefined
+            return placeholder[0] === undefined
          }
       }
       console.log('*** C4')
@@ -215,7 +227,7 @@ export function createAwaitSeries(
    let placeholder = renderPlaceholder()
 
    const awaitSeries = createIfSeries([
-      If($renderPlaceholder, 'mount', () => {
+      If($renderPlaceholder, () => {
 
          console.log('RENDER PLACEHOLDER')
          return placeholder

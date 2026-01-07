@@ -327,7 +327,8 @@ function Debouncer() {
 
 export type Suspense = Ion<Promise<void> | null> & {
    initial: boolean
-   oo: boolean
+   oo: Promise<unknown> | null
+   await(): void
    retry(): void
    [SUSPENSE_QUARK]: SuspenseQuark
 }
@@ -358,8 +359,11 @@ export function Suspense() {
 
    const $suspense = Ion(new Promise<void>((res, rej) => { resolve = res; reject = rej }) as Promise<void> | null, {
       initial: true,
-      get oo(): boolean {
-         return Boolean($suspense())
+      get oo(): Promise<unknown> | null {
+         return $suspense()
+      },
+      await() {
+         return $suspense()
       },
       retry() {
          console.warn('NOT YET IMPLEMENTED')
@@ -379,7 +383,7 @@ export function Suspense() {
          start(quark: AsyncQuark) {
             const { $promise } = quark
             if (!$suspense()) {
-               console.log('+ new promise')
+               console.log('++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
             }
             console.log('starting suspense', $promise)
@@ -416,7 +420,7 @@ export function Suspense() {
                if ($suspense.initial) $suspense.initial = false
                console.log('+promise', promiseCount)
                if (!$suspense()) {
-                  console.log('+ new promise')
+                  console.log('++ new promise')
                   $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                }
 

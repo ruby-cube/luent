@@ -38,36 +38,36 @@ export function TestAsyncTabs() {
          <div class={{ 'tab': true, 'pending': (o.oo) }}>
             {/* <p>hi: {(o.oo ? 'loading...' : '')}</p> */}
             {If(($tab() === 0),
-               <Tab page="Un" count={$count} />
+               o.await, <Tab page="Un" count={$count} />
             )}
             {ElseIf(($tab() === 1),
-               <Tab page="Deux" count={$count}/>
+               o.await, <Tab page="Deux" count={$count} />
             )}
             {ElseIf(($tab() === 2),
-               <Tab page="Trois" count={$count}/>
+               o.await, <Tab page="Trois" count={$count} />
             )}
             {ElseIf(($tab() === 3),
-               <Tab page="Quatre" count={$count}/>
+               o.await, <Tab page="Quatre" count={$count} />
             )}
             {ElseIf(($tab() === 4),
-               <Tab page="Cinq" count={$count}/>
+               o.await, <Tab page="Cinq" count={$count} />
             )}
             {Else(
-               <Tab page="Six" count={$count}/>
+               o.await, <Tab page="Six" count={$count} />
             )}
          </div>
       )}
       {Meanwhile(o =>
-         o.initial ? "Loading..." : undefined // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
+         o.initial ? "Loading..." : o.hold // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
       )}
       {/* {Match($tab)}
-            {Case(0,
+            {Case(0, (o.oo),
                <Tab page="Uno" />
-            )}
-            {Case(1,
+            ))}
+            {Case(1, (o.oo),
                <Tab page="Dos" />
             )}
-            {Case(2,
+            {Case(2, (o.oo),
                <Tab page="Tres" />
             )} */}
    </>);
@@ -88,17 +88,20 @@ const CONTENT = {
 function Tab(input: FromTag<{ page: keyof typeof CONTENT, count: Ion<number> }>) {
    const { page, $count } = input
    const $time = AsyncIon(() => new Promise<number>((resolve) => {
-      const delay =/*  Math.random() *  */2000;
-      // const delay = Math.random() * 420 + 160;
+      // const delay =/*  Math.random() *  */2000;
+      const delay = Math.random() * 420 + 160;
       setTimeout(() => resolve(delay), delay);
    }), { awaited: true });
 
-   return component(
+   return component(<>
+      {/* {Await($time, */}
       <div class="tab-content">
          <h3>{$count}</h3>
          This content is for page "{page}" after {($time()?.toFixed())}ms.
          <p>{CONTENT[page]}</p>
       </div>
+      {/* )} */}
+   </>
    );
 };
 

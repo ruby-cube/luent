@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFl
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { $_derivation, Ion, ionic, PRELUDE, queueInternalRender, watchToRender } from "@rue/quarky";
+import { $_derivation, $activeUpdate, Ion, popUpdate, PRELUDE, pushUpdate, queueInternalRender, queueTask, swiftUpdate, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../context/context-stack";
@@ -11,6 +11,7 @@ import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
 import { createCommonsNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isObjectLiteral } from "@rue/utils";
+import { el } from "date-fns/locale";
 
 
 export type ConditionalKit = {
@@ -18,6 +19,7 @@ export type ConditionalKit = {
    render: RenderFunction;
    type: ActivationType | undefined;
    $condition: MaybeIon<Booleanny>
+   pending: (() => Promise<any> | null) | undefined
    // discard: (() => void) | undefined
 }
 
@@ -31,16 +33,17 @@ export type DynamicConditionalRenderKit = {
    render: AsyncRender;
    transitionNodes: TransitionNode[];
    $condition: Ion<Booleanny> | undefined
+   pending: (() => Promise<any> | null) | undefined
    cache: JSXNode[] | undefined;
 }
 
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition?: Ion<Booleanny>): DynamicConditionalRenderKit {
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: (() => Promise<any> | null) | undefined): DynamicConditionalRenderKit {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
 
    const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
-
    return {
+      pending,
       nodes: null,
       flask: undefined,
       statementType: statementType as 'if' | 'elseIf' | 'else',
@@ -61,8 +64,8 @@ export function toDynamicConditionalKits(kits: ConditionalKit[], activationType:
    const dynamicKits = []
    for (const kit of kits) {
       if (!kit) continue;
-      const { $condition, render, statementType, type = activationType } = kit
-      dynamicKits.push(createDynamicConditionalKit(statementType, type, render, context, $condition))
+      const { $condition, render, statementType, type = activationType, pending } = kit
+      dynamicKits.push(createDynamicConditionalKit(statementType, type, render, context, $condition, pending))
    }
    return dynamicKits;
 }
@@ -78,24 +81,67 @@ export class IfElseKit extends VineNode {
 
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
+
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
          kit.flask!.emitInitialMount()
       })
 
       watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
          if (activeIndex === prevIndex) return;
-         this.deactivateConditional(this.kits[prevIndex]);
-
-         this.activateConditional(this.kits[activeIndex], (kit) => {
-            setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
-            const fragment = new DocumentFragment()
-            mountDOMNodes(kit.nodes!, fragment)
-            queueInternalRender(() => {
-               mountFragment(fragment, this.precedingLeaf, this.parent)
-            }, flask)
-            kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
-         })
+         console.log('switch conditional!')
+         const kit = this.kits[activeIndex]
+         if (kit.pending) {
+            if (kit.pending.name === 'await' && !kit.cache) {
+               kit.cache = processJSXOutput(kit.render(flask, kit.$condition))
+               queueTask(() => {
+                  const promise = kit.pending!()
+                  if (promise) {
+                     promise.then(() => {
+                        swiftUpdate(() => {
+                           this.switchConditional(activeIndex, prevIndex, flask)
+                        })
+                     })
+                  }
+                  else {
+                     swiftUpdate(() => {
+                        this.switchConditional(activeIndex, prevIndex, flask)
+                     })
+                  }
+               })
+            }
+            else {
+               const promise = kit.pending()
+               if (promise) {
+                  promise.then(() => {
+                     swiftUpdate(() => {
+                        this.switchConditional(activeIndex, prevIndex, flask)
+                     })
+                  })
+               }
+               else {
+                  this.switchConditional(activeIndex, prevIndex, flask)
+               }
+            }
+         }
+         else {
+            this.switchConditional(activeIndex, prevIndex, flask)
+         }
       })
+   }
+
+   switchConditional(activeIndex: number, prevIndex: number, flask: Flask) {
+      this.deactivateConditional(this.kits[prevIndex]);
+
+      this.activateConditional(this.kits[activeIndex], (kit) => {
+         setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
+         const fragment = new DocumentFragment()
+         mountDOMNodes(kit.nodes!, fragment)
+         queueInternalRender(() => {
+            mountFragment(fragment, this.precedingLeaf, this.parent)
+         }, flask)
+         kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
+      })
+
    }
 
    phasicNode?: TransitionNode | null | undefined;
@@ -107,9 +153,10 @@ export class IfElseKit extends VineNode {
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
-         kit.type === 'mount' ?
-            (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
-            : processJSXOutput(kit.render(flask, kit.$condition));
+         kit.pending?.name === 'await'? (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition)))) :
+            kit.type === 'mount' ?
+               (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
+               : processJSXOutput(kit.render(flask, kit.$condition));
 
       emitActivated(kit)
    }
