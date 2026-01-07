@@ -1,6 +1,7 @@
-import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, dispatch, Ion, swiftUpdate, AsyncOp, } from "@rue/quarky";
+import { component, FromTag, atUnmount, AsyncIon, Suspense } from "@rue/lumo";
+import { Animation, Interval, dispatch, Ion, swiftUpdate, AsyncOp, queueTask, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
+import { Await } from "../../../../packages/lumo/src/boundaries/Await";
 
 // TODO:
 // - time warning for lazy update
@@ -11,9 +12,6 @@ import './SierpinskiTriangles.css'
 
 const TARGET = 25;
 
-function doAction(fn: Function) {
-   return fn()
-}
 
 
 // const updu1000 = useRenderer(1000)
@@ -42,10 +40,7 @@ function doAction(fn: Function) {
 // immediate
 // swift
 // sync
-function Suspense() {
 
-   return
-}
 
 export function TriangleDemo() {
    const $elapsed = Ion(0)
@@ -66,13 +61,12 @@ export function TriangleDemo() {
    // incrementSeconds.$pending
    // incrementSeconds.dispatch()
 
-   let promise: Promise<void>;
-   // let resolve: undefined | (() => void)
 
    const incrementSeconds = AsyncOp(() => $seconds.value = ($seconds() % 10) + 1)
 
    const secondsStream = Interval(1000, () => {
       incrementSeconds()
+      // swiftUpdate(() => $seconds.value = ($seconds() % 10) + 1)
    }).start();
 
    const start = Date.now()
@@ -101,6 +95,7 @@ export function TriangleDemo() {
       }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsStream.start()
    }
+   // const $suspense = Suspense()
 
    return component(
       <>
@@ -123,14 +118,16 @@ export function TriangleDemo() {
                class="container"
                style={{ transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)") }}
             >
-               <Triangle x={0} y={0} s={1000} seconds={$seconds} suspense={suspense} />
+               {Await(o =>
+                  <Triangle x={0} y={0} s={1000} seconds={$seconds} suspense={() =>{}} />
+               )}
             </div>
          </div>
       </>
    );
 };
 
-function Triangle({ x, y, s, $seconds, suspense }: FromTag<any>) {
+function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
    if (s <= TARGET) {
       return component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET} text={$seconds} />
@@ -141,24 +138,27 @@ function Triangle({ x, y, s, $seconds, suspense }: FromTag<any>) {
    const $slow = AsyncIon(async () => {
       const sec = $seconds()
       const worker = new Promise(resolve => {
-         setTimeout(resolve, 100)
+         setTimeout(() => {
+            resolve(sec);
+         }, 50);
       })
-      await worker
-      return sec;
-   }, { await: suspense })
+      return await worker
+   }, { awaited: true /* suspense: $suspense  */ })
 
    // const $slow = Ion(() => {
+   //    console.time('a')
    //    var e = performance.now() + 0.8;
    //    // Artificially long execution time.
    //    while (performance.now() < e) { }
+   //    console.timeEnd('a')
    //    return $seconds()
    // })
 
    return component(
       <>
-         <Triangle x={x} y={y - s / 2} s={s} seconds={$slow} suspense={suspense} />
-         <Triangle x={x - s} y={y + s / 2} s={s} seconds={$slow} suspense={suspense} />
-         <Triangle x={x + s} y={y + s / 2} s={s} seconds={$slow} suspense={suspense} />
+         <Triangle x={x} y={y - s / 2} s={s} seconds={$slow} suspense={$suspense} />
+         <Triangle x={x - s} y={y + s / 2} s={s} seconds={$slow} suspense={$suspense} />
+         <Triangle x={x + s} y={y + s / 2} s={s} seconds={$slow} suspense={$suspense} />
       </>
    );
 };
@@ -189,42 +189,3 @@ function Dot({ x, y, s, $text }: FromTag<any>) {
 };
 
 
-
-function useLazyBatch() {
-   let idleTasks: (() => any)[] | undefined = undefined
-   let resolvers: ((value: any | PromiseLike<unknown>) => void)[] | undefined = undefined
-
-
-   return function onIdle<T>(task: () => T): Promise<void> {
-      if (idleTasks) {
-         idleTasks.push(task)
-         return new Promise((_resolve) => {
-            resolvers!.push(_resolve)
-         })
-      } else {
-         idleTasks = [task]
-         resolvers = []
-         queueMicrotask(() => {
-            const limit = idleTasks!.length
-            for (let i = 0; i < limit; i++) {
-               const task = idleTasks![i]
-               requestIdleCallback(() => {
-                  try {
-                     task()
-                  }
-                  finally {
-                     if (i === limit - 1) {
-                        resolvers?.forEach(resolve => resolve(undefined))
-                        resolvers = undefined
-                     }
-                  }
-               }, { timeout: 17 })
-            }
-            idleTasks = undefined;
-         })
-         return new Promise((_resolve) => {
-            resolvers!.push(_resolve)
-         })
-      }
-   }
-}

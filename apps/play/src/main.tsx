@@ -140,7 +140,7 @@ import { TestAsyncTabs } from './demos/TestAsyncTabs';
 //    })
 // })
 
-const app = createRoot(TestAsyncTabs)
+const app = createRoot(TriangleDemo)
 
 app.mount('#app')
 

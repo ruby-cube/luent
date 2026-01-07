@@ -6,7 +6,7 @@ import { AsyncIon, component, Else, ElseIf, FromTag, If } from "@rue/lumo";
 
 export function TestAsyncTabs() {
    const $tab = Ion(0);
-   const $count = Ion(0)
+   const $count = Ion(0);
    setInterval(() => {
       instantUpdate(() => {
          $count.value++
