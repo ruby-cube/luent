@@ -153,7 +153,7 @@ export class IfElseKit extends VineNode {
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
-         kit.pending?.name === 'await'? (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition)))) :
+         kit.pending?.name === 'await' && kit.cache? kit.cache  :
             kit.type === 'mount' ?
                (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
                : processJSXOutput(kit.render(flask, kit.$condition));
@@ -168,6 +168,7 @@ export class IfElseKit extends VineNode {
       kit.nodes = null;
 
       if (kit.type === 'create') {
+         kit.cache = undefined
          kit.flask!.emitDiscard()
          kit.flask = undefined
       }
