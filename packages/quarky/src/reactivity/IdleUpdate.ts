@@ -1,5 +1,5 @@
 import { Ion } from "../ion/Ion";
-import { popUpdate, pushUpdate, Update } from "./Update";
+import { instantUpdate, popUpdate, pushUpdate, Update } from "./Update";
 import { RenderCycle } from "./RenderCycle";
 
 
@@ -150,7 +150,7 @@ export class LazyUpdate implements Update {
          return;
       }
       if (rival) {
-         console.warn('RACE CONDITION!!!!')
+         // console.warn('RACE CONDITION!!!!')
          if (!this.handleRace) {
             this.raceByType(rival)
          }

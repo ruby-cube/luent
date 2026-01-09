@@ -130,7 +130,7 @@ export class Update {
          return;
       }
       if (rival) {
-         console.warn('[DEV RESEARCH] RACE CONDITION!!!!')
+         // console.warn('[DEV RESEARCH] RACE CONDITION!!!!')
          console.log(...info)
          // if (!this.handleRace) {
          //    this.raceByType(rival)
@@ -144,14 +144,14 @@ export class Update {
 }
 
 
-export function AsyncOp<T>(fn: (...args: any[]) => T): () => Promise<T> {
+export function SlowUpdate<T>(fn: (...args: any[]) => T): () => Promise<T> {
    return (...args) => {
-      return dispatch(fn)
+      return slowUpdate(fn)
    }
 }
 
-// FIX: temporary ... I think we should just create AsyncOp or AsyncAction (should there be a distinction?)
-export function dispatch(task: () => any): Promise<any> {
+// FIX: temporary ... I think we should just create LongUpdate or AsyncAction (should there be a distinction?)
+export function slowUpdate(task: () => any): Promise<any> {
    return (getLazyUpdate() ?? createLazyUpdate()).queue(task)
 }
 

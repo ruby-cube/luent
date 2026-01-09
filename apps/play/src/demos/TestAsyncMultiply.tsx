@@ -60,30 +60,28 @@ export function TestAsyncMultiplyB() {
       increment() { console.log('))) increment'); this.value++ }
    })
 
-   const { $Multiply, $pending } = MultiplyKit()
-   // const $product = AsyncIon(() => {
-   //    return multiply($n(), 2)
-   // })
+   // const { $Multiply, $pending } = MultiplyKit()
+   const $product = AsyncIon(() => {
+      return multiply($n(), 2)
+   })
 
-   // function multiply(n: number, o: number): Promise<number> | void {
-   //    if ($product.fetching) {
-   //       $product.cancelFetch()
-   //    }
-   //    return db.multiply(n, o)
-   // }
    return component(
       <div>
-         {/* <button on:click={e => $n.increment()}>{$n} {($product.pending ? '...' : '')}</button> */}
-         <button on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
-         {/* <p>2 * {$n} = {($product.pending ? '...' : $product())}</p> */}
-         <p>1 * {$n} = {$Multiply($n, 1)}</p>
+         <button on:click={e => $n.increment()}>{$n} {($product.pending ? '...' : '')}</button>
+         {/* <button on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button> */}
+         <p>2 * {$n} = {($product.pending ? '...' : $product())}</p>
+         {/* <p>1 * {$n} = {$Multiply($n, 1)}</p>
          <p>2 * {$n} = {$Multiply($n, 2)}</p>
          <p>3 * {$n} = {$Multiply($n, 3)}</p>
          <p>4 * {$n} = {$Multiply($n, 4)}</p>
-         <p>5 * {$n} = {$Multiply($n, 5)}</p>
+         <p>5 * {$n} = {$Multiply($n, 5)}</p> */}
       </div>
    )
 }
+
+
+
+
 
 function MultiplyKit() {
    const $pending = Suspense()

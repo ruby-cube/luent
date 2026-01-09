@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { AppCommons, createAppCommons } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { load } from "@rue/quarky";
+import { instantUpdate, load } from "@rue/quarky";
 import { Provided } from "./context/Context";
 import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";

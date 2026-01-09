@@ -20,7 +20,7 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
    const phase = getPhase(options)
 
    let initial = true;
-   
+
    const wrappedEffect = () => {
       try {
          task(initial)
@@ -52,15 +52,15 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
    });
 }
 
-type IonicTaskOptions = {[K in keyof _IonicTaskOptions as K extends 'phase' ? never: K]: _IonicTaskOptions[K]}
+type IonicTaskOptions = { [K in keyof _IonicTaskOptions as K extends 'phase' ? never : K]: _IonicTaskOptions[K] }
 
 
 export function queueIonicPrelude(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, {...options ?? {}, phase: PRELUDE })
+   return _queueIonicTask(task, { ...options ?? {}, phase: PRELUDE })
 }
 
 export function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, {...options ?? {}, phase: SYNC })
+   return _queueIonicTask(task, { ...options ?? {}, phase: SYNC })
 }
 
 export function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {

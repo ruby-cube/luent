@@ -111,7 +111,7 @@ export function watch<
 
    function wrappedEffect() {
       const newState = substance.getValue() // retracking
-      console.log('effect!!!', prevState.get(), newState)
+      // console.log('effect!!!', prevState.get(), newState)
 
       try {
          (<EffectTask>effect)(new StateChangeEvent(prevState.get(), newState, !!options.eager))
@@ -168,7 +168,7 @@ export function setUpWatcher(
          effect.__DEV__fn = task.__DEV__fn
          subject.linkEffect(effect)
          if (eager) {
-            console.log('eager', effect)
+            // console.log('eager', effect)
             scheduleEagerEffect(_task, phase)
          }
          return effect;

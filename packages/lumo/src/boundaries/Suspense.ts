@@ -1,5 +1,5 @@
 import { isFunction, toError } from "@rue/utils";
-import { Ion, MutableIon, watch, instantUpdate, queueIonicPrelude, swiftUpdate, PRELUDE, $_derivation, untracked, queueTask, runIonicTask, SYNC } from "@rue/quarky";
+import { Ion, MutableIon, watch, instantUpdate, queueIonicPrelude, swiftUpdate, PRELUDE, $_derivation, untracked, queueTask, runIonicTask, SYNC, TICK, $activeUpdate } from "@rue/quarky";
 import { getActiveFlask } from "@rue/flask";
 import { getAwaiting } from "./Await";
 
@@ -148,13 +148,15 @@ export function AsyncIon<
       error: null as null | Error,
    })
 
+   console.log('has pending key?', 'pending' in $ion)
+
    const pendingPromises: Set<Promise<unknown>> = new Set()
 
    function isFetching() {
       return Boolean(pendingPromises.size)
    }
    function cancelFetch() {
-      console.warn('CANCEL FETCH', fetch)
+      // console.warn('CANCEL FETCH', fetch)
       for (const promise of pendingPromises) {
          cancelledPromises.add(promise)
          pendingPromises.delete(promise)
@@ -209,32 +211,38 @@ export function AsyncIon<
 
    // const inSuspense = suspense || awaiting
 
-   queueIonicPrelude(() => {
+   watch(fetch, ({current: output}) => {
       // if (awaiting) {
       //    awaiting[SUSPENSE_QUARK].cancelIfFetching()
       // }
       // else 
       cancelIfFetching()
 
-      const output = fetch()
+      // const output = fetch()
       if (output instanceof Promise) {
          pendingPromises.add(output)
 
-         // NOTE: It's me. Hi. I'm the problem it's me. When this was instantUpdate, it caused a weird double fetchCities
+         // FIX: It's me. Hi. I'm the problem it's me. 
+         // When this was instantUpdate, it caused a weird double fetchCities, and breaks multiply rapid fire
+         // But when this is swiftUpdate, it causes inaccurate Suspense resolution
+         // WHen this is instantUpdate or no update, it breaks multiply with suspense, on ever other click
+         // The solution should be NO UPDATE. It inherits the update from upstream... but why does so much behavior break?
          if (!resolve) {
-            swiftUpdate(() => {
+            // swiftUpdate(() => {
+               // console.log('NEW PROMISE', $activeUpdate()?.cycle.currentPhase)
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
                if (!options?.awaited && !options?.suspense) {
-                  $promise.value.catch(err => {
+                  untracked($promise).catch(err => {
                      if (err === 'cancelled') return;
                      else throw err
                   })
                }
-            });
+            // });
          }
 
          output
             .then(value => {
+               pendingPromises.delete(output)
                if (cancelledPromises.has(output)) {
                   cancelledPromises.delete(output)
                   if (reject) {
@@ -242,17 +250,20 @@ export function AsyncIon<
                      resolve = null
                      reject = null
                   }
-                  instantUpdate(() => $promise.value = $promise())
+                  swiftUpdate(() =>
+                     $promise.value = $promise()
+                  )
                   return;
                }
-               pendingPromises.delete(output)
                if (resolve) {
+                  // console.log('resolve')
                   resolve(value)
                   resolve = null
                   reject = null
                }
-               instantUpdate(() => {
+               swiftUpdate(() => {
                   $ion.value = value
+                  // console.log('NUL PROMISE!', $promise.value)
                   $promise.value = null;
                   $loaded.value = true
                })
@@ -264,7 +275,7 @@ export function AsyncIon<
                   resolve = null
                   reject = null
                }
-               instantUpdate(() => {
+               swiftUpdate(() => {
                   $ion.error = toError(err)
                   $promise.value = null
                   $loaded.value = true
@@ -283,13 +294,15 @@ export function AsyncIon<
                reject = null
             }
          }
-         instantUpdate(() => {
+         // queueTask(() => {
+         swiftUpdate(() => { // QUESTION: Why does async select break without this when it shouldn't need it?
             $ion.error = null
             // $promise.value = null
             $ion.value = output
          })
+         // })
       }
-   })
+   }, {phase: PRELUDE, eager: true})
    // }
 
    // if (options?.awaited) {
@@ -357,6 +370,12 @@ export function Suspense() {
       return false
    }
 
+   let startTime = performance.now();
+   function timecheck() {
+      const delta = performance.now() - startTime
+      console.log('suspense took', delta)
+   }
+
    const $suspense = Ion(new Promise<void>((res, rej) => { resolve = res; reject = rej }) as Promise<void> | null, {
       initial: true,
       get oo(): Promise<unknown> | null {
@@ -373,6 +392,7 @@ export function Suspense() {
             return $suspense
          },
          cancelIfFetching() {
+            console.warn('group cancel if fetching')
             let success = false
             for (const { cancelIfFetching } of quarks) {
                const cancelled = success = cancelIfFetching()
@@ -381,34 +401,37 @@ export function Suspense() {
             return success
          },
          start(quark: AsyncQuark) {
+            // console.log('start suspense', quark, quarks.size)
             const { $promise } = quark
             if (!$suspense()) {
-               console.log('++ new promise')
+               // console.log('++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
+               startTime = performance.now()
             }
-            console.log('starting suspense', $promise)
+            // console.log('starting suspense', $promise)
             quarks.add(quark)
             getActiveFlask().onDiscard(() => {
                if (quark.cancelIfFetching()) promiseCount--
-               console.log('discarding quark')
+               // console.log('discarding quark')
                quarks.delete(quark)
             })
             let initial = true
             watch($promise, ({ current: promise, previous }) => {
                if (promise === null) {
                   if (previous) promiseCount--
-                  console.log('- resolved', promiseCount)
+                  // console.log('- resolved', promiseCount)
                   if (promiseCount === 0 && !isPending()) {
-                     console.log('equal')
+                     // console.log('equal')
                      if (resolve) {
+                        timecheck()
                         resolve()
                         resolve = null
                         reject = null
                      }
                      // instantUpdate(() => { // NOTE: I'm the problem. It's me. Nested updates interferes with each other :( causing effects to run on every other state change
-                     console.log('suspense to null', $suspense.value)
+                     // console.log('suspense to null', $suspense.value)
                      // if (count === 2) debugger;
-                     $suspense.value = null // FIX: this should cause Await watcher to trigger, but it doesn't
+                     $suspense.value = null
                      // })
                   }
                   if (initial) initial = false
@@ -418,28 +441,28 @@ export function Suspense() {
                if (initial || previous === null) promiseCount++
                if (initial) initial = false
                if ($suspense.initial) $suspense.initial = false
-               console.log('+promise', promiseCount)
+               // console.log('+promise', promiseCount)
                if (!$suspense()) {
-                  console.log('++ new promise')
+                  startTime = performance.now()
+                  // console.log('++ new promise')
                   $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                }
 
                promise
                   .catch(err => {
                      if (err === 'cancelled') {
-                        if (!$promise())
-                           promiseCount--
-                        console.log('-resolved (cancelled)', promiseCount, cancelledCount)
+                        if (!$promise()) promiseCount--
+                        // console.log('-resolved (cancelled)', promiseCount, cancelledCount)
                         if (promiseCount === 0 && !isPending()) {
-                           console.log('equal (canceled)')
+                           // console.log('equal (canceled)')
                            if (resolve) {
                               resolve()
                               resolve = null
                               reject = null
                            }
                            swiftUpdate(() => {
-                              console.log('$$$ $suspense.value (cancelled)')
-                              return $suspense.value = null
+                              // console.log('$$$ $suspense.value (cancelled)')
+                              $suspense.value = null
                            }) // NOTE: for some unknown reason, this is needed for promiseCount++ to happen
                         }
                         return;

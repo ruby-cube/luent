@@ -1,7 +1,8 @@
 import { component, FromTag, atUnmount, AsyncIon, Suspense } from "@rue/lumo";
-import { Animation, Interval, dispatch, Ion, swiftUpdate, AsyncOp, queueTask, } from "@rue/quarky";
+import { Animation, Interval, Ion, swiftUpdate, SlowUpdate, queueTask, $_derivation, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 import { Await } from "../../../../packages/lumo/src/boundaries/Await";
+import { resolve } from "path";
 
 // TODO:
 // - time warning for lazy update
@@ -62,11 +63,13 @@ export function TriangleDemo() {
    // incrementSeconds.dispatch()
 
 
-   const incrementSeconds = AsyncOp(() => $seconds.value = ($seconds() % 10) + 1)
+   const incrementSeconds = SlowUpdate(() =>
+      $seconds.value = ($seconds() % 10) + 1
+   )
 
    const secondsStream = Interval(1000, () => {
-      incrementSeconds()
-      // swiftUpdate(() => $seconds.value = ($seconds() % 10) + 1)
+      // incrementSeconds()
+      $seconds.value = ($seconds() % 10) + 1
    }).start();
 
    const start = Date.now()
@@ -95,7 +98,7 @@ export function TriangleDemo() {
       }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsStream.start()
    }
-   // const $suspense = Suspense()
+   const $suspense = Suspense()
 
    return component(
       <>
@@ -118,14 +121,16 @@ export function TriangleDemo() {
                class="container"
                style={{ transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)") }}
             >
-               {Await(o =>
-                  <Triangle x={0} y={0} s={1000} seconds={$seconds} suspense={() =>{}} />
-               )}
+               {/* {Await( */}
+               <Triangle x={0} y={0} s={1000} seconds={$seconds} suspense={$suspense} />
+               {/* )} */}
             </div>
          </div>
       </>
    );
 };
+
+let $slowCount = 0
 
 function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
    if (s <= TARGET) {
@@ -134,16 +139,30 @@ function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
       );
    }
    s = s / 2;
-
-   const $slow = AsyncIon(async () => {
+   let fetchCount = 0
+   let resolveCount = 0
+   $slowCount++
+   const count = $slowCount
+   const $slow = AsyncIon(0, () => {
+      // fetchCount++
+      // if (fetchCount === 3) {
+      //    console.log('fetch $slow', fetchCount, count)
+      // }
       const sec = $seconds()
       const worker = new Promise(resolve => {
          setTimeout(() => {
+            // resolveCount++
+            // if (resolveCount === 2) {
+            //    console.log('resolve $slow', resolveCount, count)
+            // }
             resolve(sec);
          }, 50);
       })
-      return await worker
-   }, { awaited: true /* suspense: $suspense  */ })
+      return worker
+   }, {
+      // awaited: true 
+      suspense: $suspense
+   })
 
    // const $slow = Ion(() => {
    //    console.time('a')

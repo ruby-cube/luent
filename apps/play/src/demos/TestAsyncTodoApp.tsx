@@ -9,15 +9,14 @@ const ENTER_KEY = 13;
 
 const generateId = () => Date.now().toString(36);
 
-const IonicTodo = todo => {
-   return depot.get(todo.id) ?? depot.create(() => Ionic(todo, {
-      $completed: AsyncIon(todo.completed, { // TODO: finish implementing
-         fetch: () => {
-            const { completed } = await db.toggleTodo(todo.id, completed)
-            return completed;
-         }
+const IonicTodo = (data) => {
+   const todo = depot.get(data.id) ?? depot.create(() => Ionic(data, {
+      toggleCompleted: AsyncAction(() => {
+         const { completed } = await db.toggleTodo(data.id, !todo.completed)
+         todo.completed = completed
       })
    }))
+   return todo
 }
 
 const IonicTodos = todos => Ionic(todos, { [EACH]: IonicTodo })
@@ -52,13 +51,6 @@ export default function TodoApp() {
       )
    })
 
-   const toggleCompleted = AsyncAction((todo: Todo, index: number, completed: boolean) => {
-      oo.await(db.toggleTodo(todo.id, completed), ({ completed }) => (
-         todo.completed = completed
-      ));
-   })
-
-
    return (
       <section class="todoapp">
          <header class="header">
@@ -70,7 +62,6 @@ export default function TodoApp() {
                <TodoList
                   todos={$todos}
                   removeTodo={removeTodo}
-                  toggleCompleted={toggleCompleted}
                />
             </div>
          )}
@@ -140,10 +131,9 @@ function TodoInput(input: FromTag<{
 
 function TodoList(input: FromTag<{
    todos: Ion<Todo[]>;
-   toggleCompleted: () => (id: string, completed: boolean) => Promise<void>;
    removeTodo: (id: string) => Promise<void>;
 }>) {
-   const { $todos, toggleCompleted, removeTodo } = input
+   const { $todos, removeTodo } = input
 
    return (
       <section class="main">
@@ -152,7 +142,6 @@ function TodoList(input: FromTag<{
                <Todo
                   key={todo.id}
                   todo={todo}
-                  toggleCompleted={toggleCompleted}
                   removeTodo={removeTodo}
                />
             ))}
@@ -163,17 +152,27 @@ function TodoList(input: FromTag<{
 
 function Todo({
    todo,
-   toggleCompleted,
    removeTodo,
 }: FromTag<{
    todo: Todo;
-   toggleCompleted: (id: string, completed: boolean) => Promise<void>;
    removeTodo: (id: string) => Promise<void>;
 }>) {
    const $isRemoving = Ion(false);
 
+   // [] Race
+   // [] Optimistic
+   // [] retry
+   // [] realtime races
+
+   const toggleCompleted = AsyncAction((todo: Todo, index: number, completed: boolean) => {
+      todo.completed = checked; // optimistic update // TODO: should optimistic updates be managed with AsyncAction or in event handler?, should optimistic updates be a separate function?
+      oo.await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
+         todo.completed = completed
+         todo.modifiedDate = modifiedDate
+      });
+   })
+
    const reCheckboxChange = ({ target: { checked } }) => {
-      todo.completed = checked; // optimistic update
       toggleCompleted.dispatch(todo.id, checked);
    };
 

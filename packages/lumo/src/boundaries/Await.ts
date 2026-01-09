@@ -43,11 +43,10 @@ export function Await(renderOrSuspense: [...(AsyncIon<unknown> | Suspense)[], Re
    if (arguments.length === 1) {
       $suspense = Suspense()
       ions.push($suspense)
-      console.log('IONS', ions)
+      // console.log('IONS', ions)
       let output: RawJSXNode;
       try {
          pushAwaiting($suspense)
-         // $suspense.hold = 
          output = render($suspense)
       }
       finally {
@@ -175,9 +174,9 @@ export function createAwaitSeries(
          //    console.log('*** A', $async.pending)
          //    return;
          // }
-         // console.log('$promise changed!', SUSPENSE_QUARK in $promise, promis, previous)
+         console.log('$promise changed!', SUSPENSE_QUARK in $promise, promis, previous)
          const pending = isPending()
-
+         console.log('pending', pending)
          // if (pending) {
          //    $renderPlaceholder.value = true
          // }
@@ -193,33 +192,37 @@ export function createAwaitSeries(
          }
          $renderPlaceholder.value = pending && !shouldHold()
          console.log('$renderPlaceholder', $renderPlaceholder())
-      }, { phase: PRELUDE, retrack: false })
+      }, { phase: PRELUDE })
    }
 
    function shouldHold() {
       placeholder = renderPlaceholder()
       if (placeholder === undefined) {
-         console.log('*** C1')
+         // console.log('*** C1')
          return true;
       }
       if (placeholder instanceof Array) {
          if (placeholder.length > 1) {
-            console.log('*** C2')
+            // console.log('*** C2')
             return false;
          }
          else {
-            console.log('*** C3')
+            // console.log('*** C3')
             return placeholder[0] === undefined
          }
       }
-      console.log('*** C4')
+      // console.log('*** C4')
       if (__DEV__) throw new Error('Invalid render function output')
    }
 
    function isPending() {
       for (const ion of ions) {
-         if ('pending' in ion && ion.pending) return true
-         else if (ion()) return true
+         if ('pending' in ion) {
+            if (ion.pending) return true
+         }
+         else {
+            if (ion()) return true
+         }
       }
       return false;
    }
@@ -229,7 +232,7 @@ export function createAwaitSeries(
    const awaitSeries = createIfSeries([
       If($renderPlaceholder, () => {
 
-         console.log('RENDER PLACEHOLDER')
+         // console.log('RENDER PLACEHOLDER')
          return placeholder
       }),
       ElseIf($error, () => renderError($error()!)),

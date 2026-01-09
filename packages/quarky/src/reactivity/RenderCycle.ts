@@ -159,7 +159,7 @@ export class RenderCycle {
    }
 
    *runPhase(phase: Phase, genState?: { paused: boolean, gen: Generator }, onComplete: () => void = noop) {
-      // console.log('running phase', phase)
+      // if (this.update.timeMargin === 1000 && this.update.idle === false) 
       this.currentPhase = phase
       this.subphase = 'effects'
       const { process } = this
@@ -184,7 +184,7 @@ export class RenderCycle {
          const queues = queue.effects;
          const completed = phase === SYNC ? undefined : new Set<Effect>()
          for (const batch of queues) {
-
+            batch.requeued = false
             runProcess(() => batch.runEffects(queue.runEffect, completed, genState ? process : undefined, () => {
                if (genState) {
                   process.resumeOuter(genState, () => pushUpdate(this.update))
@@ -200,7 +200,7 @@ export class RenderCycle {
                yield;
             }
             batch.queued = queue.moreEffects?.length ? batch.requeued : false;
-            batch.requeued = false;
+            // batch.requeued = false;
          }
          queue.effects = queue.moreEffects ?? []
          queue.moreEffects = undefined;

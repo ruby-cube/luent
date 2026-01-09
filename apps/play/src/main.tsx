@@ -17,7 +17,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { View } from './demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createRoot, listen, PRELUDE, queueTask } from '@rue/lumo';
+import { AsyncIon, component, createRoot, listen, PRELUDE, queueTask, Suspense } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -68,7 +68,7 @@ import { TestStreamIon } from './TestStreamIon';
 import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
-import { Animation, instantUpdate, Ion, queueIonicPostlude, queueIonicPrelude, queueIonicTask, runIonicTask } from '@rue/quarky';
+import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, queueIonicPostlude, queueIonicPrelude, queueIonicTask, RENDER, runIonicTask, untracked, watch } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
@@ -140,7 +140,48 @@ import { TestAsyncTabs } from './demos/TestAsyncTabs';
 //    })
 // })
 
-const app = createRoot(TriangleDemo)
+
+// load(() => {
+//    const $count = Ion(0)
+//    // const $other = Ion(true)
+
+//    const $suspense = Suspense()
+
+//    const $async = AsyncIon(() => {
+//       const count = $count();
+//       return new Promise(res => setTimeout(() => res(count), 500))
+//    }, { suspense: $suspense })
+
+//    watch($async, () => {
+//       console.log('render', $async())
+//    }, {phase: INTERNAL_RENDER})
+
+
+//    // queueIonicPrelude(() => {
+//    //    console.log('ionic prelude', $count(), $activeUpdate()?.cycle.currentPhase)
+
+//    //    $other.value = !untracked($other)
+//    // })
+
+//    // watch($other, () => {
+//    //    console.log('Suspense other', $other(), $activeUpdate()?.cycle.currentPhase)
+//    // }, {
+//    //    phase: PRELUDE,
+//    //    eager: true
+//    // })
+
+//    listen(window, 'click', () => {
+//       $count.value++
+//    })
+
+//    // listen(window, 'contextmenu', (e) => {
+//    //    e.preventDefault()
+//    //    $other.value = !$other.value
+//    // })
+
+// })
+
+const app = createRoot(TestAsyncSelect)
 
 app.mount('#app')
 

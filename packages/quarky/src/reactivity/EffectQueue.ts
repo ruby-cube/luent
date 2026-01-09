@@ -62,26 +62,30 @@ export class EffectQueue {
       const sync = phase === SYNC
 
       const limit = effects.length
-
+      // console.log('>>> running phase', phase, 'of', this.atom)
       for (let i = 0; i < limit; i++) {
          const effect = effects[i]
+         // if (cestLePromis(effect)) console.log('le promis is here')
          if (
             !effect.run
             || this.atom && !effect.isLinked(this.atom) // weeds out effects that have been unlinked due to retracking
          ) {
-            console.warn('NO RUN')
+            // if (cestLePromis(effect)) console.warn('NO RUN')
             continue;
          }
          // prevent repeats within queue (but not across extended queues and phases)
          if (completed?.has(effect)) {
             this.retain(effect)
-            // console.warn('ALREADY RUN')
+            // if (cestLePromis(effect)) console.warn('ALREADY RUN')
             continue;
          }
 
          try {
             effectStackCount++
             if (effectStackCount > 100_000) throw new Error('Infinite loop detected')
+            // if (cestLePromis(effect)) {
+            //    console.warn('>>> run le promis!')
+            // }
             run(effect)
          }
          catch (err) {
@@ -138,7 +142,7 @@ export class EffectQueue {
 
 
 export function cestLePromis(effect: Effect) {
-   return effect.__DEV__fn && effect.__DEV__fn.toString().includes('promis,')
+   return effect.__DEV__fn && effect.__DEV__fn.toString().includes('current: promise,')
 }
 
 /**
@@ -154,10 +158,6 @@ export class TaskQueue {
    started = false;
 
    runEffect(effect: Effect) {
-      if (cestLePromis(effect)) {
-         if (!effect.run) console.warn('NO RUN le promis!');
-         else console.warn('>>> run le promis!')
-      }
       effect.run?.()
    }
 
@@ -165,7 +165,6 @@ export class TaskQueue {
       public update: Update,
       protected phase: Phase
    ) {
-
    }
 
    scheduleTask(task: () => void) {
@@ -174,14 +173,17 @@ export class TaskQueue {
 
    scheduleEffects(effects: EffectQueue) {
       if (this.runningEffects && !effects.requeued) {
+         // console.warn('$$$ SCHEDULE EFFECTS while running')
          effects.requeued = true;
          const extension = this.moreEffects ?? (this.moreEffects = [])
          extension.push(effects)
       }
       else if (!effects.queued) {
+         // console.warn('$$$ SCHEDULE EFFECTS')
          this.effects.push(effects)
          effects.queued = true;
       }
+      // else console.warn('NOTHING', effects.queued, effects.requeued)
    }
 
    runningEffects: boolean = false
