@@ -217,6 +217,7 @@ export function createAwaitSeries(
 
    function isPending() {
       for (const ion of ions) {
+         // NOTE: Do not try to simplify this control flow. This is the flow we need.
          if ('pending' in ion) {
             if (ion.pending) return true
          }

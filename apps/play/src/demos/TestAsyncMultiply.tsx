@@ -1,31 +1,97 @@
-import { component, AsyncIon, Suspense } from "@rue/lumo";
-import { $_derivation, instantUpdate, Ion, queueIonicTask } from "@rue/quarky";
+import { component, AsyncIon, Suspense, For } from "@rue/lumo";
+import { $_derivation, instantUpdate, Ion, MutableIon, queueIonicTask, swiftUpdate } from "@rue/quarky";
+import { AsyncAction } from "../../../../packages/lumo/src/boundaries/AsyncAction";
 
 
-// export function TestAsyncMultiply() {
+export function TestAsyncMultiply() {
 
-//    const $n = Ion(1, {
-//       increment() {
-//          this.value++
-//       }
-//    })
+   const $n = Ion(1, {
+      increment() {
+         this.value++
+      }
+   })
 
-//    const multiply = AsyncAction((a: number, b: number) => db.multiply(a, b))
+   function MultiplyKit($n: Ion<number>, b: number) {
+      const $product = Ion($n() * b)
+      const $nxb = $_derivation(() => (multiply.pending ? '...' : $product()))
+      const multiply = AsyncAction(async () => {
+         const res = await db.multiply($n(), b)
+         swiftUpdate(() => { // TODO: auto swiftupdate?
+            $product.value = res
+         })
+      })
+      return { multiply, $product: $nxb }
+   }
 
-//    function $Product($a: Ion<number>, b: number) {
-//       const $product = AsyncIon(() => multiply($a(), b))
-//       return () => (multiply.pending ? '...' : $product())
-//    }
+   const { multiply: nx2, $product } = MultiplyKit($n, 2)
 
-//    return component(
-//       <div>
-//          <button on:click={$n.increment}>+</button>
-//          <p>1 * {$n} = {$Product($n, 1)}</p>
-//          <p>2 * {$n} = {$Product($n, 2)}</p>
-//          <p>3 * {$n} = {$Product($n, 3)}</p>
-//       </div>
-//    )
-// }
+
+   return component(
+      <div>
+         <button on:click={e => {
+            $n.increment();
+            nx2()
+         }}>{$n} {(nx2.pending ? '...' : '')}</button>
+         <p>2 * {$n} = {$product}</p>
+
+      </div>
+   )
+}
+
+export function TestAsyncMultipliers() {
+
+   const $n = Ion(1, {
+      increment() {
+         this.value++
+      }
+   })
+
+   function MultiplyKit($n: Ion<number>, b: number, $suspense: Suspense) {
+      const $product = Ion($n() * b)
+      const $nxb = $_derivation(() => ($suspense() ? '...' : $product()))
+      const multiply = AsyncAction(async () => {
+         const res = await db.multiply($n(), b)
+         instantUpdate(() => { // TODO: auto swiftupdate?
+            $product.value = res
+         })
+      }, {suspense: $suspense})
+      return { multiply, $product: $nxb }
+   }
+
+   function MultipliersKit() {
+      const $suspense = Suspense(false)
+      const multipliers: any[] = []
+      const products: any[] = []
+      for (let i = 1; i < 5; i++) {
+         const { multiply, $product } = MultiplyKit($n, i, $suspense)
+         multipliers.push(multiply)
+         products.push($product)
+      }
+
+      function multiply() {
+         for (const multiplier of multipliers) {
+            multiplier()
+         }
+      }
+
+      return [multiply, products, $suspense] as const
+   }
+   
+   const [multiply, products, $pending] = MultipliersKit()
+
+
+   return component(
+      <div>
+         <button on:click={e => {
+            $n.increment();
+            multiply()
+         }}>{$n} {($pending() ? '...' : '')}</button>
+         {For(products, ($product, i) =>
+            <p>{i + 1} * {$n} = {$product}</p>
+         )}
+      </div>
+   )
+}
 
 // export function TestAsyncMultiplyA() {
 
@@ -60,21 +126,21 @@ export function TestAsyncMultiplyB() {
       increment() { console.log('))) increment'); this.value++ }
    })
 
-   // const { $Multiply, $pending } = MultiplyKit()
-   const $product = AsyncIon(() => {
-      return multiply($n(), 2)
-   })
+   const { $Multiply, $pending } = MultiplyKit()
+   // const $product = AsyncIon(() => {
+   //    return multiply($n(), 2)
+   // })
 
    return component(
       <div>
-         <button on:click={e => $n.increment()}>{$n} {($product.pending ? '...' : '')}</button>
-         {/* <button on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button> */}
-         <p>2 * {$n} = {($product.pending ? '...' : $product())}</p>
-         {/* <p>1 * {$n} = {$Multiply($n, 1)}</p>
+         {/* <button on:click={e => $n.increment()}>{$n} {($product.pending ? '...' : '')}</button> */}
+         <button on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
+         {/* <p>2 * {$n} = {($product.pending ? '...' : $product())}</p> */}
+         <p>1 * {$n} = {$Multiply($n, 1)}</p>
          <p>2 * {$n} = {$Multiply($n, 2)}</p>
          <p>3 * {$n} = {$Multiply($n, 3)}</p>
          <p>4 * {$n} = {$Multiply($n, 4)}</p>
-         <p>5 * {$n} = {$Multiply($n, 5)}</p> */}
+         {/* <p>5 * {$n} = {$Multiply($n, 5)}</p> */}
       </div>
    )
 }

@@ -72,7 +72,7 @@ import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, qu
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
-import { TestAsyncMultiplyB } from './demos/TestAsyncMultiply';
+import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB } from './demos/TestAsyncMultiply';
 import { TestAsyncTabs } from './demos/TestAsyncTabs';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
@@ -181,7 +181,7 @@ import { TestAsyncTabs } from './demos/TestAsyncTabs';
 
 // })
 
-const app = createRoot(TestAsyncSelect)
+const app = createRoot(TestAsyncMultipliers)
 
 app.mount('#app')
 

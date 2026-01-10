@@ -1,8 +1,8 @@
-// @ts-nocheck
-import { FromTag, AsyncIon } from "@rue/lumo";
-import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
-import { Ionic } from "@rue/quarky";
-const AsyncIon = AsyncIon
+import { FromTag, AsyncIon, If, Suspense } from "@rue/lumo";
+import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
+import { EACH, Ion, Ionic } from "@rue/quarky";
+
+
 
 
 const ENTER_KEY = 13;
@@ -10,12 +10,7 @@ const ENTER_KEY = 13;
 const generateId = () => Date.now().toString(36);
 
 const IonicTodo = (data) => {
-   const todo = depot.get(data.id) ?? depot.create(() => Ionic(data, {
-      toggleCompleted: AsyncAction(() => {
-         const { completed } = await db.toggleTodo(data.id, !todo.completed)
-         todo.completed = completed
-      })
-   }))
+   const todo = depot.get(data.id) ?? depot.create(() => Ionic(data))
    return todo
 }
 
@@ -57,7 +52,7 @@ export default function TodoApp() {
             <h1>todos</h1>
          </header>
          <TodoInput addTodo={addTodo} />
-         {Await($todos.loaded, // TODO: first load vs refetches
+         {Await($todos, // TODO: first load vs refetches
             <div>
                <TodoList
                   todos={$todos}
@@ -164,17 +159,28 @@ function Todo({
    // [] retry
    // [] realtime races
 
-   const toggleCompleted = AsyncAction((todo: Todo, index: number, completed: boolean) => {
-      todo.completed = checked; // optimistic update // TODO: should optimistic updates be managed with AsyncAction or in event handler?, should optimistic updates be a separate function?
-      oo.await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
-         todo.completed = completed
-         todo.modifiedDate = modifiedDate
-      });
-   })
+   const toggleCompleted = AsyncAction((todo: Todo, completed: boolean) => {
+      // cancel fetches
 
-   const reCheckboxChange = ({ target: { checked } }) => {
-      toggleCompleted.dispatch(todo.id, checked);
-   };
+      // prep rollback
+      const prev = todo.completed
+      toggleCompleted.rollback = () => todo.completed = prev
+
+      // optimistic update
+      todo.completed = checked; 
+
+      return oo
+         .await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
+            todo.completed = completed
+            todo.modifiedDate = modifiedDate
+         })
+         .catch(err => {
+            console.log(err)
+         })
+         .finally(() => {
+
+         })
+   })
 
    const reRemoveBtnClick = () => {
       $isRemoving.value = true;
@@ -191,10 +197,13 @@ function Todo({
                class="toggle"
                type="checkbox"
                checked={(todo.completed)}
-               on:change={reCheckboxChange}
+               on:change={e => toggleCompleted(todo, e.target.checked)}
             />
             {If((toggleCompleted.error),
-               <div>failed. <span on:click={e => toggleCompleted.retry()}>retry?</span></div>
+               <div>failed.
+                  <span on:click={e => toggleCompleted.retry()}>retry?</span>
+                  <span on:click={e => toggleCompleted.rollback()}>retry?</span>
+               </div>
             )}
             <label>{todo.title}</label>
             <button class="destroy" on:click={reRemoveBtnClick} />

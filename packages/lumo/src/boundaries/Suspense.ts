@@ -148,8 +148,6 @@ export function AsyncIon<
       error: null as null | Error,
    })
 
-   console.log('has pending key?', 'pending' in $ion)
-
    const pendingPromises: Set<Promise<unknown>> = new Set()
 
    function isFetching() {
@@ -222,17 +220,18 @@ export function AsyncIon<
       if (output instanceof Promise) {
          pendingPromises.add(output)
 
-         // FIX: It's me. Hi. I'm the problem it's me. 
+         // It's me. Hi. I'm the problem it's me. 
          // When this was instantUpdate, it caused a weird double fetchCities, and breaks multiply rapid fire
          // But when this is swiftUpdate, it causes inaccurate Suspense resolution
          // WHen this is instantUpdate or no update, it breaks multiply with suspense, on ever other click
-         // The solution should be NO UPDATE. It inherits the update from upstream... but why does so much behavior break?
+         // NOTE: The solution should be NO UPDATE. It inherits the update from upstream... but why does so much behavior break?
+         // The problem was rooted in effect queue scheduling. Effects failed to schedule because of queued and requeued flags. Solved by resetting requeued flag at the beginning of loop, not the end.
          if (!resolve) {
             // swiftUpdate(() => {
                // console.log('NEW PROMISE', $activeUpdate()?.cycle.currentPhase)
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
                if (!options?.awaited && !options?.suspense) {
-                  untracked($promise).catch(err => {
+                  $promise.value.catch(err => {
                      if (err === 'cancelled') return;
                      else throw err
                   })
@@ -357,10 +356,9 @@ type AsyncQuark = {
    $promise: Ion<Promise<unknown> | null>
 }
 
-export function Suspense() {
+export function Suspense(active = true) {
    const quarks = new Set<AsyncQuark>()
    let promiseCount: number = 0;
-   let cancelledCount: number = 0;
    let resolve: (() => void) | null
    let reject: ((reason?: any) => void) | null
    const isPending = () => {
@@ -376,7 +374,7 @@ export function Suspense() {
       console.log('suspense took', delta)
    }
 
-   const $suspense = Ion(new Promise<void>((res, rej) => { resolve = res; reject = rej }) as Promise<void> | null, {
+   const $suspense = Ion(active ? new Promise<void>((res, rej) => { resolve = res; reject = rej }) as Promise<void> | null : null, {
       initial: true,
       get oo(): Promise<unknown> | null {
          return $suspense()
@@ -403,36 +401,33 @@ export function Suspense() {
          start(quark: AsyncQuark) {
             // console.log('start suspense', quark, quarks.size)
             const { $promise } = quark
-            if (!$suspense()) {
-               // console.log('++ new promise')
+            if (!$suspense() && active) {
+               console.log('++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                startTime = performance.now()
             }
-            // console.log('starting suspense', $promise)
+            console.log('starting suspense', $promise)
             quarks.add(quark)
             getActiveFlask().onDiscard(() => {
                if (quark.cancelIfFetching()) promiseCount--
-               // console.log('discarding quark')
+               console.log('discarding quark')
                quarks.delete(quark)
             })
             let initial = true
             watch($promise, ({ current: promise, previous }) => {
                if (promise === null) {
-                  if (previous) promiseCount--
-                  // console.log('- resolved', promiseCount)
-                  if (promiseCount === 0 && !isPending()) {
-                     // console.log('equal')
+                  if (!initial && previous) promiseCount--
+                  console.log('- resolved', promiseCount)
+                  if (!initial && promiseCount === 0 && !isPending()) {
+                     console.log('equal')
                      if (resolve) {
                         timecheck()
                         resolve()
                         resolve = null
                         reject = null
                      }
-                     // instantUpdate(() => { // NOTE: I'm the problem. It's me. Nested updates interferes with each other :( causing effects to run on every other state change
-                     // console.log('suspense to null', $suspense.value)
-                     // if (count === 2) debugger;
+                     console.log('suspense to null', $suspense.value)
                      $suspense.value = null
-                     // })
                   }
                   if (initial) initial = false
                   if ($suspense.initial) $suspense.initial = false
@@ -441,10 +436,10 @@ export function Suspense() {
                if (initial || previous === null) promiseCount++
                if (initial) initial = false
                if ($suspense.initial) $suspense.initial = false
-               // console.log('+promise', promiseCount)
+               console.log('+promise', promiseCount)
                if (!$suspense()) {
                   startTime = performance.now()
-                  // console.log('++ new promise')
+                  console.log('++ new promise')
                   $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                }
 
@@ -452,9 +447,9 @@ export function Suspense() {
                   .catch(err => {
                      if (err === 'cancelled') {
                         if (!$promise()) promiseCount--
-                        // console.log('-resolved (cancelled)', promiseCount, cancelledCount)
+                        console.log('-resolved (cancelled)', promiseCount)
                         if (promiseCount === 0 && !isPending()) {
-                           // console.log('equal (canceled)')
+                           console.log('equal (canceled)')
                            if (resolve) {
                               resolve()
                               resolve = null
@@ -478,7 +473,7 @@ export function Suspense() {
                         $suspense.value = null
                      })
                   })
-            }, { phase: PRELUDE, eager: true })
+            }, { phase: PRELUDE, eager: active })
          }
       }
    })
