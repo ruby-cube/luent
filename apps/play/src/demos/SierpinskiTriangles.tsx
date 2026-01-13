@@ -135,28 +135,35 @@ let $slowCount = 0
 function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
    if (s <= TARGET) {
       return component(
-         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET} text={$seconds} />
+         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}
+            // text={Ion((prev = 0) => $suspense() ? prev : $seconds())}
+            // text={$seconds}
+            text={AsyncIon(0, () => { return $suspense() ? $suspense().then(() => $seconds()) : $seconds() })}
+         />
       );
    }
    s = s / 2;
-   let fetchCount = 0
-   let resolveCount = 0
+   // let fetchCount = 0
+   // let resolveCount = 0
    $slowCount++
-   const count = $slowCount
    const $slow = AsyncIon(0, () => {
       // fetchCount++
       // if (fetchCount === 3) {
       //    console.log('fetch $slow', fetchCount, count)
       // }
       const sec = $seconds()
+      // let id;
       const worker = new Promise(resolve => {
+         // if (id) cancelIdleCallback(id)
+         // id = requestIdleCallback(() => {
+         //    var e = performance.now() + 0.8;
+         //    // Artificially long execution time.
+         //    while (performance.now() < e) { }
+         //    resolve(sec);
+         // })
          setTimeout(() => {
-            // resolveCount++
-            // if (resolveCount === 2) {
-            //    console.log('resolve $slow', resolveCount, count)
-            // }
             resolve(sec);
-         }, 50);
+         }, 1);
       })
       return worker
    }, {
@@ -165,11 +172,11 @@ function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
    })
 
    // const $slow = Ion(() => {
-   //    console.time('a')
+   //    // console.time('a')
    //    var e = performance.now() + 0.8;
    //    // Artificially long execution time.
    //    while (performance.now() < e) { }
-   //    console.timeEnd('a')
+   //    // console.timeEnd('a')
    //    return $seconds()
    // })
 

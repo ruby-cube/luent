@@ -1,28 +1,28 @@
-import { Ion, queueTask, swiftUpdate } from "@rue/quarky";
+import { instantUpdate, Ion } from "@rue/quarky";
 import { Suspense, SUSPENSE_QUARK } from "./Suspense";
 
 // TODO: races
 // suspense
 
-export function AsyncAction<F extends (...args: any[]) => Promise<unknown>>(dispatch: F, options?: { suspense: Suspense }): F & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
-   let resolve: ((value: T | PromiseLike<T>) => void) | null;
+export function AsyncAction<F extends (...args: any[]) => Promise<unknown>>(dispatch: F, onSettled: (value: any) => void, options?: { suspense: Suspense }): F & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
+   let resolve: ((value: any | PromiseLike<any>) => void) | null;
    let reject: ((reason?: any) => void) | null
    const $promise = Ion(null as Promise<unknown> | null)
    const $error = Ion(null)
    let retry: undefined | (() => void); // TODO:
 
-   const pendingPromises: Set<Promise<unknown>> = new Set()
+   // const pendingPromises: Set<Promise<unknown>> = new Set()
+
+   let pendingPromise: Promise<unknown> | null = null
 
    function isFetching() {
-      return Boolean(pendingPromises.size)
+      return Boolean(pendingPromise)
    }
 
    function cancelFetch() {
-      console.warn('CANCEL FETCH', pendingPromises.size, cancelledPromises.size)
-      for (const promise of pendingPromises) {
-         cancelledPromises.add(promise)
-         pendingPromises.delete(promise)
-      }
+      console.warn('CANCEL FETCH')
+      cancelledPromises.add(pendingPromise)
+      pendingPromise = null
    }
 
    function cancelIfFetching() {
@@ -39,10 +39,9 @@ export function AsyncAction<F extends (...args: any[]) => Promise<unknown>>(disp
 
    const cancelledPromises = new Set()
    function dispatchAction(...args: any[]) {
-      
+
       cancelIfFetching()
-      const output = dispatch(...args)
-      pendingPromises.add(output)
+      const output = pendingPromise = dispatch(...args)
 
       if (!resolve) {
          $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
@@ -56,38 +55,37 @@ export function AsyncAction<F extends (...args: any[]) => Promise<unknown>>(disp
 
       output
          .then(value => {
-            pendingPromises.delete(output)
 
             if (cancelledPromises.has(output)) {
                cancelledPromises.delete(output)
+               console.log('cancel value', value)
                if (reject) {
                   reject('cancelled')
                   resolve = null
                   reject = null
                }
-               swiftUpdate(() =>
-                  $promise.value = $promise()
-               )
                return;
             }
+            pendingPromise = null
+            console.log('resolve to:', value)
             if (resolve) {
-               // console.log('resolve')
                resolve(value)
                resolve = null
                reject = null
             }
-            swiftUpdate(() => {
+            instantUpdate(() => {
+               onSettled(value)
                $promise.value = null
             })
          })
          .catch(err => {
-            pendingPromises.delete(output)
+            pendingPromise = null
             if (reject) {
                reject(err)
                resolve = null
                reject = null
             }
-            swiftUpdate(() => {
+            instantUpdate(() => {
                $promise.value = null
             })
             if (err === 'cancelled') return;

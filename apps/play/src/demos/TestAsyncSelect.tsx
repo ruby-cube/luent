@@ -21,6 +21,8 @@ export function TestAsyncSelect() {
    const $cities = AsyncIon(() => $activeState() ? db.fetchCities($activeState()!) : [])
    const $activeCity = Ion(() => $cities()?.[0], { '+value': true })
    // const $activeCity = Ion(null, { '+watch': $cities, '+derive': () => $cities()[0] })
+   // const $state = Ion((prev: any) => $cities.pending ? prev : $activeState())
+   const $state = AsyncIon(async () => {await $cities.pending ; return $activeState()})
 
    return component(
       <>
@@ -41,7 +43,8 @@ export function TestAsyncSelect() {
                <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
                   {/* {($cities.pending ? '' : $activeCity()+',')} {($cities.pending ? '...' : $activeState())} */}
                   {/* Selection: {$activeCity}, {async () => { await $cities.pending; return $activeState() }} */}
-                  Selection: {$activeCity}, {AsyncIon(async () => { await $cities.pending; return $activeState() })}
+                  Selection: {$activeCity}, {$state}
+                  {/* Selection: {$activeCity}, {(prev: any) => $cities.pending ? prev : $activeState()} */}
                   {/* Selection: {$activeCity}, {(oo.await($cities, $activeState))} */}
                </p>
             </>

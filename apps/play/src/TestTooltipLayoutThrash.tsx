@@ -126,7 +126,10 @@ export function Tooltip(input: FromTag<{
       oo.await(fetchCities, res => (
          res.JSON()
       ))
-      oo.await([$pipeout, $render], cities => (
+         .then(cities=> {
+            
+         })
+      oo.await([$piped, $render], cities => (
          cities
       ))
       oo.await($tick, () => {
