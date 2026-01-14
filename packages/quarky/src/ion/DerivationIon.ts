@@ -7,6 +7,7 @@ import { SYNC } from "../reactivity/RenderCycle";
 import { $activeUpdate } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
 import { queueCommit, SimpleState } from "../reactivity/State";
+import { isObjectLiteral } from "@rue/utils";
 
 
 class DerivationIonQuark {
@@ -67,8 +68,21 @@ export function createMemoizedDerivation(
       // b/c resetting this.pending with this.current is not accurate anymore
    }
 
+
+
    $derivedState['~ion'] = true as const;
    $derivedState[QUARK] = new DerivationIonQuark(substance)
+
+   if (methods) {
+      const descriptors = Object.getOwnPropertyDescriptors(methods)
+      if (__DEV__ && !isObjectLiteral(methods)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
+      if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
+      // TODO: this was copy pasted from atomic ion, fix any inconsistencies
+      delete descriptors['@get'];
+      delete descriptors['@set'];
+      delete descriptors['@init'];
+      Object.defineProperties($derivedState, descriptors)
+   }
 
    return $derivedState
 }

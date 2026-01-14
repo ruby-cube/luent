@@ -136,7 +136,11 @@ export function AsyncIon<
       })
    }
 
-   const $ion = Ion(initialState as unknown, {
+   const $ion = Ion(initialState as unknown)
+    const suspense = options?.suspense
+   const pendingValue = options?.suspense?.[SUSPENSE_QUARK].pendingValue
+
+   const $async = Ion(suspense && pendingValue !== undefined ? () => suspense() ? pendingValue : $ion() : () => $ion() as unknown, {
       [SUSPENSE_ION]: true,
       get pending() {
          return $promise()
@@ -203,7 +207,7 @@ export function AsyncIon<
    // }
    // else {
    const cancelledPromises = new Set()
-   const suspense = options?.suspense
+  
    suspense?.[SUSPENSE_QUARK].start(quark)
    const awaiting = options?.awaited && getAwaiting()
    awaiting?.[SUSPENSE_QUARK].start(quark)
@@ -254,8 +258,18 @@ export function AsyncIon<
                   resolve = null
                   reject = null
                }
+
                instantUpdate(() => {
-                  $ion.value = value
+                  if (suspense?.() && pendingValue === undefined) {
+                     suspense()?.then(() => {
+                        instantUpdate(() => {
+                           $ion.value = value
+                        })
+                     })
+                  }
+                  else {
+                     $ion.value = value
+                  }
                   console.log('NUL PROMISE! (resolve to)', value)
                   $promise.value = null;
                   $loaded.value = true
@@ -270,7 +284,7 @@ export function AsyncIon<
                   reject = null
                }
                instantUpdate(() => {
-                  $ion.error = toError(err)
+                  $async.error = toError(err)
                   $promise.value = null
                   $loaded.value = true
                })
@@ -290,7 +304,7 @@ export function AsyncIon<
          }
          // queueTask(() => {
          instantUpdate(() => { // QUESTION: Why does async select break without this when it shouldn't need it?
-            $ion.error = null
+            $async.error = null
             // $promise.value = null
             $ion.value = output
          })
@@ -306,7 +320,7 @@ export function AsyncIon<
    //       pendReload($promise)
    //    }
    // }
-   return $ion as any as AsyncIon<T>;
+   return $async as any as AsyncIon<T>;
 }
 
 export function asAsyncIon<T>(value: AsyncIon<T> | Promise<T>, options: { awaited: true }): AsyncIon<T> {
@@ -342,6 +356,7 @@ export type Suspense = Ion<Promise<void> | null> & {
 
 type SuspenseQuark = {
    start(quark: AsyncQuark): void
+   pendingValue: any
 } & AsyncQuark
 
 export const SUSPENSE_QUARK = Symbol('suspense quark')
@@ -351,7 +366,7 @@ type AsyncQuark = {
    $promise: Ion<Promise<unknown> | null>
 }
 
-export function Suspense(active = true) {
+export function Suspense(pendingValue?: unknown) {
    const quarks = new Set<AsyncQuark>()
    let resolve: (() => void) | null
    let reject: ((reason?: any) => void) | null
@@ -371,7 +386,7 @@ export function Suspense(active = true) {
       console.log('suspense took', delta)
    }
 
-   const $suspense = Ion(active ? new Promise<void>((res, rej) => { resolve = res; reject = rej }) as Promise<void> | null : null, {
+   const $suspense = Ion(null as Promise<unknown> | null, {
       initial: true,
       get oo(): Promise<unknown> | null {
          return $suspense()
@@ -383,6 +398,7 @@ export function Suspense(active = true) {
          console.warn('NOT YET IMPLEMENTED')
       },
       [SUSPENSE_QUARK]: {
+         pendingValue,
          get $promise(): Ion<Promise<unknown> | null> {
             return $suspense
          },
@@ -398,7 +414,7 @@ export function Suspense(active = true) {
          start(quark: AsyncQuark) {
             // console.log('start suspense', quark, quarks.size)
             const { $promise } = quark
-            if (!$suspense() && active) {
+            if ($promise() && !$suspense()) {
                console.log('++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                startTime = performance.now()
@@ -410,17 +426,14 @@ export function Suspense(active = true) {
                console.log('discarding quark')
                quarks.delete(quark)
             })
-            if ($promise()) {
-               pendingPromises.add($promise())
-            }
 
-            watch($promise, ({ current: promise, previous }) => {
-               if (promise === previous) {
+            watch($promise, ({ current: promise, previous, eager }) => {
+               if (!eager && promise === previous) {
                   console.log('same')
                   return;
                }
                if (promise === null) {
-                  if (!$suspense()) throw "impossible. $suspense is null while promise turned null"
+                  if (!$suspense()) console.warn( "should be impossible. $suspense is null while promise turned null", previous)
                   pendingPromises.delete(previous)
                   if (pendingPromises.size === 0 && !isPending()) {
                      console.log('reset', 0)
@@ -463,7 +476,7 @@ export function Suspense(active = true) {
                         $suspense.value = null
                      })
                   })
-            }, { phase: PRELUDE })
+            }, { phase: PRELUDE, eager: true })
          }
       }
    })

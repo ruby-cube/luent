@@ -88,8 +88,8 @@ const CONTENT = {
 function Tab(input: FromTag<{ page: keyof typeof CONTENT, count: Ion<number> }>) {
    const { page, $count } = input
    const $time = AsyncIon(() => new Promise<number>((resolve) => {
-      // const delay =/*  Math.random() *  */2000;
-      const delay = Math.random() * 420 + 160;
+      const delay = Math.random() * 2000;
+      // const delay = Math.random() * 420 + 160;
       setTimeout(() => resolve(delay), delay);
    }), { awaited: true });
 

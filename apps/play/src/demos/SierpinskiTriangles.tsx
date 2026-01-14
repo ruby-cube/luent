@@ -136,21 +136,17 @@ function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
    if (s <= TARGET) {
       return component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}
-            // text={Ion((prev = 0) => $suspense() ? prev : $seconds())}
+            text={$seconds}
             // text={$seconds}
-            text={AsyncIon(0, () => { return $suspense() ? $suspense().then(() => $seconds()) : $seconds() })}
-         />
+            // text={AsyncIon(0, () => { return $suspense() ? $suspense().then(() => $seconds()) : $seconds() })}
+            // text={AsyncIon(0, async () => { await $suspense() ; return $seconds() })}
+         ></Dot>
       );
    }
    s = s / 2;
-   // let fetchCount = 0
-   // let resolveCount = 0
+
    $slowCount++
    const $slow = AsyncIon(0, () => {
-      // fetchCount++
-      // if (fetchCount === 3) {
-      //    console.log('fetch $slow', fetchCount, count)
-      // }
       const sec = $seconds()
       // let id;
       const worker = new Promise(resolve => {
@@ -163,7 +159,7 @@ function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
          // })
          setTimeout(() => {
             resolve(sec);
-         }, 1);
+         }, Math.random() *100);
       })
       return worker
    }, {

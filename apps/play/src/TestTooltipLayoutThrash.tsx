@@ -127,7 +127,7 @@ export function Tooltip(input: FromTag<{
          res.JSON()
       ))
          .then(cities=> {
-            
+
          })
       oo.await([$piped, $render], cities => (
          cities
@@ -140,9 +140,9 @@ export function Tooltip(input: FromTag<{
 
    const doSomething = Async(() => {
       oo.await(fetchCities, res => res.JSON())
-      oo.await([$pipeout, $render], cities => cities)
+      oo.await([$piped, $render], cities => cities)
       oo.await($tick, () => console.log($pipeout))
-      return oo.awaited
+      return $awaited()
    })
 
    atMounted(Async(() => {

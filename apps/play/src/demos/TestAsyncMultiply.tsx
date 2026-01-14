@@ -61,10 +61,11 @@ export function TestAsyncMultipliers() {
       //    $product.value = res
       // }, { suspense: $suspense })
 
-      // const multiply = Async(() => {
-      //    return oo.await(db.multiply($n(), b), res => {
-      //       $product.value = res
-      //    })
+
+      // const multiply = AsyncAction(() => {
+      //    oo.await(() => db.multiply($n(), b),
+      //       res => { $product.value = res }
+      //    )
       // }, { suspense: $suspense })
 
       const multiply = AsyncAction(
@@ -74,10 +75,8 @@ export function TestAsyncMultipliers() {
       })
 
       // const multiply = AsyncAction({
-      //    dispatch() {
-      //       return db.multiply($n(), b)
-      //    },
-      //    settled(res) { $product.value = res },
+      //    dispatch: () => db.multiply($n(), b),
+      //    settled: res => $product.value = res,
       //    suspense: $suspense
       // })
 
@@ -85,7 +84,7 @@ export function TestAsyncMultipliers() {
    }
 
    function MultipliersKit() {
-      const $suspense = Suspense(false)
+      const $suspense = Suspense()
       const multipliers: any[] = []
       const products: any[] = []
       for (let i = 1; i < 5; i++) {
@@ -165,9 +164,6 @@ export function TestAsyncMultiplyB() {
          <p>2 * {$n} = {$Multiply($n, 2)}</p>
          <p>3 * {$n} = {$Multiply($n, 3)}</p>
          <p>4 * {$n} = {$Multiply($n, 4)}</p>
-
-         {/* <p>2 * {$n} = {($product.pending ? '...' : $product())}</p> */}
-         {/* <p>5 * {$n} = {$Multiply($n, 5)}</p> */}
       </div>
    )
 }
@@ -177,16 +173,10 @@ export function TestAsyncMultiplyB() {
 
 
 function MultiplyKit() {
-   const $pending = Suspense()
+   const $pending = Suspense('...')
    return {
       $Multiply($n: Ion<number>, o: number) {
-         const $nxo = AsyncIon(() => multiply($n(), o), { suspense: $pending })
-
-         function multiply(n: number, o: number): Promise<number> | void {
-            return db.multiply(n, o)
-         }
-
-         return Ion(() => $pending() ? '...' : $nxo())
+         return AsyncIon(() => db.multiply($n(), o), { suspense: $pending })
       },
       $pending
    }
