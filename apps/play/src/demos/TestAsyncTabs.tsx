@@ -34,31 +34,31 @@ export function TestAsyncTabs() {
             Six
          </li>
       </ul>
-      {Await(o =>
-         <div class={{ 'tab': true, 'pending': (o.oo) }}>
+      {Await($suspense =>
+         <div class={{ 'tab': true, 'pending': $suspense }}>
             {/* <p>hi: {(o.oo ? 'loading...' : '')}</p> */}
             {If(($tab() === 0),
-               o.await, <Tab page="Un" count={$count} />
+               <Tab page="Un" count={$count} />
             )}
             {ElseIf(($tab() === 1),
-               o.await, <Tab page="Deux" count={$count} />
+               <Tab page="Deux" count={$count} />
             )}
             {ElseIf(($tab() === 2),
-               o.await, <Tab page="Trois" count={$count} />
+               <Tab page="Trois" count={$count} />
             )}
             {ElseIf(($tab() === 3),
-               o.await, <Tab page="Quatre" count={$count} />
+               <Tab page="Quatre" count={$count} />
             )}
             {ElseIf(($tab() === 4),
-               o.await, <Tab page="Cinq" count={$count} />
+               <Tab page="Cinq" count={$count} />
             )}
             {Else(
-               o.await, <Tab page="Six" count={$count} />
+               <Tab page="Six" count={$count} />
             )}
          </div>
       )}
-      {Meanwhile(o =>
-         o.initial ? "Loading..." : o.hold // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
+      {Meanwhile($suspense =>
+         $suspense.initial ? "Loading..." : undefined // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
       )}
       {/* {Match($tab)}
             {Case(0, (o.oo),

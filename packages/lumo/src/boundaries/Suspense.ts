@@ -391,7 +391,7 @@ export function Suspense(pendingValue?: unknown) {
       get oo(): Promise<unknown> | null {
          return $suspense()
       },
-      await() {
+      await(): Suspense {
          return $suspense()
       },
       retry() {
@@ -401,6 +401,9 @@ export function Suspense(pendingValue?: unknown) {
          pendingValue,
          get $promise(): Ion<Promise<unknown> | null> {
             return $suspense
+         },
+         get quarkCount(){
+            return quarks.size
          },
          cancelIfFetching() {
             console.warn('group cancel if fetching')

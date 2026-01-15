@@ -12,6 +12,7 @@ import { createCommonsNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isObjectLiteral } from "@rue/utils";
 import { el } from "date-fns/locale";
+import { Suspense, SUSPENSE_QUARK } from "../boundaries/Suspense";
 
 
 export type ConditionalKit = {
@@ -91,23 +92,35 @@ export class IfElseKit extends VineNode {
          console.log('switch conditional!')
          const kit = this.kits[activeIndex]
          if (kit.pending) {
-            if (kit.pending.name === 'await' && !kit.cache) {
-               kit.cache = processJSXOutput(kit.render(flask, kit.$condition))
-               queueTask(() => {
-                  const promise = kit.pending!()
-                  if (promise) {
-                     promise.then(() => {
+            if (!kit.cache) {
+               const suspenseQuark = kit.pending[SUSPENSE_QUARK] as Suspense
+               const prevCount = suspenseQuark.quarkCount
+               const output = processJSXOutput(kit.render(flask, kit.$condition))
+               const count = suspenseQuark.quarkCount
+               if (count > prevCount) {
+                  console.warn('YES AWAITED!!!')
+                  kit.cache = output
+                  queueTask(() => {
+                     const promise = kit.pending!()
+                     if (promise) {
+                        promise.then(() => {
+                           swiftUpdate(() => {
+                              this.switchConditional(activeIndex, prevIndex, flask)
+                           })
+                        })
+                     }
+                     else {
                         swiftUpdate(() => {
                            this.switchConditional(activeIndex, prevIndex, flask)
                         })
-                     })
-                  }
-                  else {
-                     swiftUpdate(() => {
-                        this.switchConditional(activeIndex, prevIndex, flask)
-                     })
-                  }
-               })
+                     }
+                  })
+               }
+               else {
+                  console.warn('NOT AWAITED')
+                  kit.cache = output
+                  this.switchConditional(activeIndex, prevIndex, flask)
+               }
             }
             else {
                const promise = kit.pending()
@@ -153,7 +166,7 @@ export class IfElseKit extends VineNode {
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
-         kit.pending?.name === 'await' && kit.cache? kit.cache  :
+         kit.pending && kit.cache ? kit.cache :
             kit.type === 'mount' ?
                (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
                : processJSXOutput(kit.render(flask, kit.$condition));

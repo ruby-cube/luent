@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, For, If, AsyncIon } from "@rue/lumo";
 import { Ion, PRELUDE, queueIonicTask, swiftUpdate, SYNC, watch } from "@rue/quarky";
 import { normalizeToArray } from "@rue/utils";
@@ -22,7 +23,14 @@ export function TestAsyncSelect() {
    const $activeCity = Ion(() => $cities()?.[0], { '+value': true })
    // const $activeCity = Ion(null, { '+watch': $cities, '+derive': () => $cities()[0] })
    // const $state = Ion((prev: any) => $cities.pending ? prev : $activeState())
-   const $state = AsyncIon(async () => {await $cities.pending ; return $activeState()})
+   const $state = AsyncIon(async () => { await $cities.pending; return $activeState() })
+
+   const $some = AsyncIon({
+      fetch: () => db.getSomething(),
+      dispatch: value => db.setSomething(value),
+      optimistic: true,
+      awaited: true
+   })
 
    return component(
       <>

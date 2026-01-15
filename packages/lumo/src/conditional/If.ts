@@ -4,6 +4,7 @@ import { Ion, isGetter, isInertIon, isIon, toValue } from "@rue/quarky";
 import { ConditionalKit, IfElseKit, renderShowHideSeries, toDynamicConditionalKits } from "./IfElse";
 import { getFlask } from "@rue/flask";
 import { isFunction } from "@rue/utils";
+import { getAwaiting } from "../boundaries/Await";
 
 // let currentNodePodIndex: number | undefined = undefined
 
@@ -36,7 +37,8 @@ export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T
       statementType: 'if',
       render,
       type,
-      pending,
+      pending: getAwaiting(),
+      // pending,
       $condition
    }
 }
@@ -58,7 +60,8 @@ export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($conditio
       statementType: 'elseIf',
       render,
       type,
-      pending,
+      pending: getAwaiting(),
+      //   pending,
       $condition
    }
 }
@@ -78,7 +81,8 @@ export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | A
       statementType: 'else',
       render,
       type,
-      pending,
+      pending: getAwaiting(),
+      //   pending,
       $condition: undefined
    }
 }
