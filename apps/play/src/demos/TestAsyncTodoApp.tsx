@@ -1,6 +1,8 @@
+// @ts-nocheck
 import { FromTag, AsyncIon, If, Suspense } from "@rue/lumo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 import { EACH, Ion, Ionic } from "@rue/quarky";
+import { AsyncAction } from "../../../../packages/lumo/src/boundaries/AsyncAction";
 
 
 
@@ -16,23 +18,21 @@ const IonicTodo = (data) => {
 
 const IonicTodos = todos => Ionic(todos, { [EACH]: IonicTodo })
 
+
+// TODO:
+// [] Race
+// [] Optimistic
+// [] retry
+// [] realtime races
+
+// TODO: races with other AsyncIons and AsyncActions
+// nested: todo within todos
+// identical: set todos or set all properties
+// partial overlap: set some properties, some may overlap
+
 export default function TodoApp() {
+
    const $todos = AsyncIon([], () => db.fetchTodos(), { ionize: IonicTodos })
-
-   // const addTodo = async (todo: Todo) => {
-   //    await db.addTodo(todo);
-   //    $todos.refetch();
-   // }
-
-   // const removeTodo = async (todoID: string) => {
-   //    await db.removeTodo(todoId);
-   //    $todos.refetch();
-   // }
-
-   // const toggleCompleted = async (todo: Todo, index: number, completed: boolean) => {
-   //    const { completed } = await db.toggleTodo(todo.id, completed)
-   //    todo.completed = completed;
-   // }
 
    const addTodo = AsyncAction((todo: Todo) => {
       oo.await(db.addTodo(todo), () =>
@@ -41,10 +41,44 @@ export default function TodoApp() {
    })
 
    const removeTodo = AsyncAction((todoID: string) => {
-      oo.await(db.removeTodo(todoId), () =>
+      oo.await(db.removeTodo(todoID), () =>
          $todos.refetch()
       )
    })
+
+   const toggleCompleted = AsyncAction((todo: Todo, completed: boolean) => {
+
+      storeRollback({
+         completed: todo.completed,
+         modifiedDate: todo.modifiedDate
+      }, prev => {
+         todo.completed = prev.completed
+         todo.modifiedDate = prev.modifiedDate
+      })
+
+      todo.completed = completed;
+      todo.modifiedDate = Date.now()
+
+      return oo.await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
+         todo.completed = completed
+         todo.modifiedDate = modifiedDate
+      })
+   })
+
+   // one-way overlap
+   definePartialRace($todos, [
+      toggleCompleted,
+      setHighlighted
+   ])
+
+   // two-way overlap
+   definePartialRace(
+      toggleCompleted,
+      setHighlighted
+   )
+
+   // complete overlap
+   defineRace($todos, $sameTodos)
 
    return (
       <section class="todoapp">
@@ -52,7 +86,7 @@ export default function TodoApp() {
             <h1>todos</h1>
          </header>
          <TodoInput addTodo={addTodo} />
-         {Await($todos, // TODO: first load vs refetches
+         {Await($todos,
             <div>
                <TodoList
                   todos={$todos}
@@ -154,33 +188,6 @@ function Todo({
 }>) {
    const $isRemoving = Ion(false);
 
-   // [] Race
-   // [] Optimistic
-   // [] retry
-   // [] realtime races
-
-   const toggleCompleted = AsyncAction((todo: Todo, completed: boolean) => {
-      // cancel fetches
-
-      // prep rollback
-      const prev = todo.completed
-      toggleCompleted.rollback = () => todo.completed = prev
-
-      // optimistic update
-      todo.completed = checked; 
-
-      return oo
-         .await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
-            todo.completed = completed
-            todo.modifiedDate = modifiedDate
-         })
-         .catch(err => {
-            console.log(err)
-         })
-         .finally(() => {
-
-         })
-   })
 
    const reRemoveBtnClick = () => {
       $isRemoving.value = true;

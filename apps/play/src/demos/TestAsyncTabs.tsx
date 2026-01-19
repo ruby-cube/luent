@@ -57,8 +57,8 @@ export function TestAsyncTabs() {
             )}
          </div>
       )}
-      {Meanwhile($suspense =>
-         $suspense.initial ? "Loading..." : undefined // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
+      {Meanwhile(o =>
+         o.initial ? "Loading..." : undefined // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
       )}
       {/* {Match($tab)}
             {Case(0, (o.oo),
