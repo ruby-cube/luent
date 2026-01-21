@@ -3,6 +3,7 @@ import { FromTag, AsyncIon, If, Suspense } from "@rue/lumo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 import { EACH, Ion, Ionic } from "@rue/quarky";
 import { AsyncAction } from "../../../../packages/lumo/src/boundaries/AsyncAction";
+import { toggleCompleted } from "./AsyncDemoLessons/data";
 
 
 
@@ -46,39 +47,32 @@ export default function TodoApp() {
       )
    })
 
-   const toggleCompleted = AsyncAction((todo: Todo, completed: boolean) => {
-
-      storeRollback({
-         completed: todo.completed,
-         modifiedDate: todo.modifiedDate
-      }, prev => {
-         todo.completed = prev.completed
-         todo.modifiedDate = prev.modifiedDate
-      })
-
-      todo.completed = completed;
-      todo.modifiedDate = Date.now()
-
-      return oo.await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
-         todo.completed = completed
-         todo.modifiedDate = modifiedDate
-      })
-   })
-
    // one-way overlap
    definePartialRace($todos, [
-      toggleCompleted,
-      setHighlighted
+      ToggleCompleted,
+      SetHighlighted
    ])
+
 
    // two-way overlap
    definePartialRace(
-      toggleCompleted,
+      toggleCompleted, // This should be in Todo component
       setHighlighted
    )
 
    // complete overlap
    defineRace($todos, $sameTodos)
+
+
+   // function AsyncTodoKit(todo: Todo) {
+   //    const $todos = fromContext($TODOS)
+
+
+   //    return {
+   //       toggleCompleted,
+   //       setHighlighted
+   //    }
+   // }
 
    return (
       <section class="todoapp">
@@ -90,7 +84,7 @@ export default function TodoApp() {
             <div>
                <TodoList
                   todos={$todos}
-                  removeTodo={removeTodo}
+                  can:removeTodo={removeTodo}
                />
             </div>
          )}
@@ -171,7 +165,7 @@ function TodoList(input: FromTag<{
                <Todo
                   key={todo.id}
                   todo={todo}
-                  removeTodo={removeTodo}
+                  can:removeTodo={removeTodo}
                />
             ))}
          </ul>
@@ -188,11 +182,40 @@ function Todo({
 }>) {
    const $isRemoving = Ion(false);
 
-
    const reRemoveBtnClick = () => {
       $isRemoving.value = true;
       removeTodo(todo.id);
    };
+
+   const toggleCompleted = AsyncAction((completed: boolean) => {
+      storeRollback({
+         completed: todo.completed,
+         modifiedDate: todo.modifiedDate
+      }, prev => {
+         todo.completed = prev.completed
+         todo.modifiedDate = prev.modifiedDate
+      })
+
+      todo.completed = completed;
+      todo.modifiedDate = Date.now()
+
+      return oo.await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
+         todo.completed = completed
+         todo.modifiedDate = modifiedDate
+      })
+   })
+
+   // FIX: avoid having to pass down a reference to $todos, can we auto-establish race via For() ?
+   // one-way overlap
+   definePartialRace($todos, [
+      toggleCompleted,
+      setHighlighted
+   ])
+
+   definePartialRace(
+      toggleCompleted,
+      setHighlighted
+   )
 
    return (
       <li

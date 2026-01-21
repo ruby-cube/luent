@@ -72,7 +72,7 @@ import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, qu
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
-import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB } from './demos/TestAsyncMultiply';
+import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './demos/TestAsyncMultiply';
 import { TestAsyncTabs } from './demos/TestAsyncTabs';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
@@ -181,9 +181,9 @@ import { TestAsyncTabs } from './demos/TestAsyncTabs';
 
 // })
 
-const app = createRoot(TestAsyncTabs)
+const app = createRoot(TestAsyncMultiplyB)
 
-app.mount('#app')
+app.mount('#root')
 
 
 // const frog = ionize({ name: 'sir robin' })

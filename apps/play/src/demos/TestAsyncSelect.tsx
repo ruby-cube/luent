@@ -24,13 +24,15 @@ export function TestAsyncSelect() {
    // const $activeCity = Ion(null, { '+watch': $cities, '+derive': () => $cities()[0] })
    // const $state = Ion((prev: any) => $cities.pending ? prev : $activeState())
    const $state = AsyncIon(async () => { await $cities.pending; return $activeState() })
+   
+   const $state = AsyncIon(() => { oo.await($cities, $activeState) })
 
-   const $some = AsyncIon({
-      fetch: () => db.getSomething(),
-      dispatch: value => db.setSomething(value),
-      optimistic: true,
-      awaited: true
-   })
+   // const $some = AsyncIon({
+   //    fetch: () => db.getSomething(),
+   //    dispatch: value => db.setSomething(value),
+   //    optimistic: true,
+   //    awaited: true
+   // })
 
    return component(
       <>
@@ -54,6 +56,8 @@ export function TestAsyncSelect() {
                   Selection: {$activeCity}, {$state}
                   {/* Selection: {$activeCity}, {(prev: any) => $cities.pending ? prev : $activeState()} */}
                   {/* Selection: {$activeCity}, {(oo.await($cities, $activeState))} */}
+
+                  {/* Selection: {$activeCity}, {$Async((oo.await($cities, $activeState)))} */}
                </p>
             </>
          )}

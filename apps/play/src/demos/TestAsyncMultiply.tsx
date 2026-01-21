@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { component, AsyncIon, Suspense, For } from "@rue/lumo";
-import { $_derivation, instantUpdate, Ion, MutableIon, queueIonicTask, swiftUpdate } from "@rue/quarky";
+import { component, AsyncIon, Suspense, For, FromTag } from "@rue/lumo";
+import { $_derivation, instantUpdate, Ion, Ionic, MutableIon, queueIonicTask, swiftUpdate } from "@rue/quarky";
 import { AsyncAction } from "../../../../packages/lumo/src/boundaries/AsyncAction";
-import { Await } from "../../../../packages/lumo/src/boundaries/Await";
+import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
 
 export function TestAsyncMultiply() {
@@ -13,28 +13,28 @@ export function TestAsyncMultiply() {
       }
    })
 
-   function MultiplyKit($n: Ion<number>, b: number) {
-      const $product = Ion($n() * b)
-      const $nxb = $_derivation(() => (multiply.pending ? '...' : $product()))
-      const multiply = AsyncAction(async () => {
-         const res = await db.multiply($n(), b)
-         swiftUpdate(() => { // TODO: auto swiftupdate?
-            $product.value = res
-         })
-      })
-      return { multiply, $product: $nxb }
-   }
+   // function MultiplyKit($n: Ion<number>, b: number) {
+   //    const $product = Ion($n() * b)
+   //    const $nxb = $_derivation(() => (multiply.pending ? '...' : $product()))
+   //    const multiply = AsyncAction(async () => {
+   //       const res = await db.multiply($n(), b)
+   //       swiftUpdate(() => { // TODO: auto swiftupdate?
+   //          $product.value = res
+   //       })
+   //    })
+   //    return { multiply, $product: $nxb }
+   // }
 
-   const { multiply: nx2, $product } = MultiplyKit($n, 2)
+   // const { multiply: nx2, $product } = MultiplyKit($n, 2)
 
+   const $nx2 = AsyncIon(() => db.multiply($n(), 2))
 
    return component(
       <div>
          <button on:click={e => {
             $n.increment();
-            nx2()
-         }}>{$n} {(nx2.pending ? '...' : '')}</button>
-         <p>2 * {$n} = {$product}</p>
+         }}>{$n} {($nx2.pending ? '...' : '')}</button>
+         <p>2 * {$n} = {($nx2.pending ? '...' : $nx2())}</p>
 
       </div>
    )
@@ -169,7 +169,75 @@ export function TestAsyncMultiplyB() {
 }
 
 
+export function TestAsyncMultiplyDrop() {
 
+   const $n = Ion(1, {
+      increment() { this.value++ }
+   })
+
+   const { $Multiply, $pending } = MultiplyKit()
+
+   return component(
+      <div>
+         <button disabled={$pending} on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
+         <p>1 * {$n} = {$Multiply($n, 1)}</p>
+         <p>2 * {$n} = {$Multiply($n, 2)}</p>
+         <p>3 * {$n} = {$Multiply($n, 3)}</p>
+         <p>4 * {$n} = {$Multiply($n, 4)}</p>
+      </div>
+   )
+}
+
+const AwaitedIon = (a: any) => AsyncIon(a, { awaited: true })
+const $Awaited = AwaitedIon
+
+export function TestAsyncMultiplyQueue() {
+
+   const $n = Ion((1 as null | number), {
+      increment() { this.value++ }
+   })
+
+   const nums = Ionic([1])
+
+   return component(
+      <div>
+         <button on:click={e => { $n.increment(); nums.push($n()) }}>{$n}</button>
+         {For(nums, (num) => (
+            <Result n={num}></Result>
+         ))}
+      </div>
+   )
+}
+
+function Result(input: FromTag<{ n: number }>) {
+   const { n } = input
+
+   function $Multiply(n: number, o: number) {
+      return AwaitedIon(() => db.multiply(n, o))
+   }
+
+   return component(
+      <div style="border: 1px solid gray; padding: 5px">
+         {Await(<>
+            <p>1 * {n} = {$Multiply(n, 1)}</p>
+            <p>2 * {n} = {$Multiply(n, 2)}</p>
+            <p>3 * {n} = {$Multiply(n, 3)}</p>
+            <p>4 * {n} = {$Multiply(n, 4)}</p>
+
+            <p>1 * {n} = {$Awaited(() => db.multiply(n, 1))}</p>
+            <p>2 * {n} = {$Awaited(() => db.multiply(n, 2))}</p>
+            <p>3 * {n} = {$Awaited(() => db.multiply(n, 3))}</p>
+            <p>4 * {n} = {$Awaited(() => db.multiply(n, 4))}</p>
+
+            {/* <p>1 * {n} = {$Awaited((db.multiply(n, 1)))}</p>
+            <p>2 * {n} = {$Awaited((db.multiply(n, 2)))}</p>
+            <p>3 * {n} = {$Awaited((db.multiply(n, 3)))}</p>
+            <p>4 * {n} = {$Awaited((db.multiply(n, 4)))}</p> */}
+         </>)}
+         {Meanwhile('...')}
+      </div>
+   )
+}
 
 
 function MultiplyKit() {
@@ -187,7 +255,7 @@ const db = {
       return new Promise<number>((resolve) => {
          setTimeout(() => {
             resolve(a * b);
-         }, Math.random() * 2000);
+         }, Math.random() * 100);
       })
    }
 }
