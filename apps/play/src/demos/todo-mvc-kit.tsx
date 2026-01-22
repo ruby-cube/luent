@@ -338,7 +338,7 @@ export function TodoMVC({
                )}
                <TodoList
                   mu:todos={$filteredTodos}
-                  use:removeTodo={($todos.removeTodo)}
+                  can:removeTodo={($todos.removeTodo)}
                ></TodoList>
             </section>
             <footer show-hide={$todoCount} class="footer">
@@ -420,7 +420,7 @@ type Mutable<T> = T
 
 function TodoList(input: FromTag<{
    'mu:todos': $<$$TodoArray>,
-   'use:removeTodo': (todo: $$<Todo>) => void,
+   'can:removeTodo': (todo: $$<Todo>) => void,
 }>) {
    const { mu, $todos, removeTodo, } = input()
 

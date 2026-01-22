@@ -84,7 +84,7 @@ class AnimalB {
 function Stuff(input = FromTag<{
    'mu:frog': Ion<string>,
    'mm:changeSomething': () => void
-   'use:isSomething': () => boolean
+   'can:isSomething': () => boolean
 }>) {
    const { $frog } = input()
 

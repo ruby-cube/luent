@@ -10,7 +10,7 @@ import { Message } from "../database/database";
 
 export function MessageForm(input: FromTag<{
    user: User,
-   'use:postMessage': (message: Message) => void
+   'can:postMessage': (message: Message) => void
 }>) {
 
    const { user, postMessage } = input()

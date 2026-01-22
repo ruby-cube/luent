@@ -265,7 +265,7 @@ import { AnyObject } from "@rue/types";
 //    textPath: true,
 //    title: true,
 //    tspan: true,
-//    use: true,
+//    can: true,
 //    view: true,
 // } as const;
 

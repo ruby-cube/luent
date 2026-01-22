@@ -2,8 +2,8 @@
 /**
  * I want to understand the difference between
  * - component events "on:incrementClick" // TODO: should use Web API Event and EventTarget, need to create a mini detached dom
- * - component methods "use:increment"
- * - app/model hooks (use:atIncrementCount -- state is higher up, allow children to )
+ * - component methods "can:increment"
+ * - app/model hooks (can:atIncrementCount -- state is higher up, allow children to )
  * - composed events and bubbling
  */
 
@@ -171,8 +171,8 @@ function Parent() {
    return component(
       <>
          <Child
-            use:atIncrementProductQty={getHook(product, 'incrementQty')}
-            use:postMessage={postMessage}
+            can:atIncrementProductQty={getHook(product, 'incrementQty')}
+            can:postMessage={postMessage}
             on:click={ }
          ></Child>
 
@@ -183,7 +183,7 @@ function Parent() {
 
 
 function Child(input: FromTag<{
-   'use:atIncrementProductQty': (task: Task) => (() => void)
+   'can:atIncrementProductQty': (task: Task) => (() => void)
 }>) {
    const { atIncrementProductQty } = input
 
@@ -287,8 +287,8 @@ function SmartProduct(input: FromTag<{
 
          <DumbCounterC
             count={product.$qty}
-            use:incrementCount={mu(product).incrementQty}
-            use:decrementCount={mu(product).decrementQty}
+            can:incrementCount={mu(product).incrementQty}
+            can:decrementCount={mu(product).decrementQty}
          ></DumbCounterC>
          <DumbCounter
             count={product.$qty}

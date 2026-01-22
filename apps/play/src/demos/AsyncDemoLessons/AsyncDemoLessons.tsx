@@ -3,8 +3,9 @@ import "./debugger.css";
 import { AsyncIon, component, Else, For, FromTag, HandleEvent, If, RenderSlot, Suspense } from "@rue/lumo";
 import * as db from "./data/index"
 import { Ion } from "@rue/quarky";
-import { Await, Meanwhile } from "../../../../../packages/lumo/src/boundaries/Await";
+import { Await, Meanwhile, Nonce } from "../../../../../packages/lumo/src/boundaries/Await";
 import { AsyncAction } from "../../../../../packages/lumo/src/boundaries/AsyncAction";
+
 
 
 export function AsyncDemoLessons() {
@@ -44,7 +45,7 @@ function Home() {
          takes longer than 150ms, it automatically shows a loading state on
          the tab, so the user knows their optimistic tab is still loading.
       */}
-         <TabList activeTab={$tab} on:change={tabAction} contentPending={$suspense}>
+         <TabList activeTab={$tab} on:change={e => { }} contentPending={$suspense}>
             {/*
            This fallback will be shown when the LessonList suspends initially.
            It will not be show again, like when switching tabs or searching,
@@ -67,8 +68,44 @@ function Home() {
 
 
 
+export function TabList(input: FromTag<{
+   activeTab: Ion<string>,
+   'on:change': HandleEvent,
+   Slot: RenderSlot,
+   contentPending: Suspense
+}>) {
+   const { $activeTab, emit, Slot, $contentPending } = input
 
-function LessonList({ $tab, $search, $pending }: FromTag<{ tab: Ion<string>, search: Ion<string> }>) {
+   return (
+      <Tabs
+         activationMode="manual"
+         value={$activeTab}
+         on:valuechange={e => emit('change')}
+         class="relative w-full h-full"
+      >
+         <div class="px-8">
+            <TabsList class="w-full">
+               <TabsTrigger value="all" class="relative overflow-hidden">
+                  All
+                  <ButtonShimmer isPending={$contentPending() && $activeTab() === "all"} />
+               </TabsTrigger>
+               <TabsTrigger value="wip" class="relative overflow-hidden">
+                  In Progress
+                  <ButtonShimmer isPending={$contentPending()  && $activeTab() === "wip"} />
+               </TabsTrigger>
+               <TabsTrigger value="done" class="relative overflow-hidden">
+                  Complete
+                  <ButtonShimmer isPending={($contentPending()  && $activeTab() === "done")} />
+               </TabsTrigger>
+            </TabsList>
+         </div>
+         {Slot()}
+      </Tabs>
+   );
+}
+
+
+function LessonList({ $tab, $search, $pending }: FromTag<{ tab: Ion<string>, search: Ion<string>, pending: Suspense }>) {
    /**
     * data.getLessons is a suspense-enabled data fetching function.
     * It returns a cached promise that fetched the first time it's called
@@ -84,8 +121,6 @@ function LessonList({ $tab, $search, $pending }: FromTag<{ tab: Ion<string>, sea
    // const lessons = use(data.getLessons(tab, search));
 
    const $lessons = AsyncIon(() => db.getLessons($tab(), $search()), { suspense: $pending })
-
-   const toggleCompleted = AsyncAction((id: string) => db.toggleCompleted(id), () => $lessons.refetch())
 
    return component(
       <>
@@ -114,8 +149,7 @@ function Lesson({ id, item, toggleCompleted }) {
    return (
       <LessonCard item={item}>
          <CompleteButton
-            completed={item.complete}
-            can:toggleCompleted={e => toggleCompleted(id)}
+            mu:completed={item.$complete}
          ></CompleteButton>
       </LessonCard>
    );
@@ -159,20 +193,20 @@ export function SearchInput(input: FromTag<{ value: string, 'on:change': HandleE
 }
 
 
-export function CompleteButton({ $completed, toggleCompleted }: FromTag<{ 'use:toggleCompleted': Function, completed: Ion<boolean> }>) {
-
-   function clickAction() {
-      startTransition(async () => {
-         setOptimisticComplete(!optimisticComplete);
-         await action();
-      });
-   }
+export function CompleteButton({ $completed }: FromTag<{ completed: Ion<boolean> }>) {
+   const toggleCompleted = AsyncAction((id: string) => {
+      storeRollback($completed(), prev => {
+         $completed.value = prev
+      })
+      $completed.value = !$completed()
+      db.toggleCompleted(id)}, 
+   () => $lessons.refetch())
 
    return (
       <PendingButton action={clickAction}>
          {optimisticComplete ? (
             <CircleCheckBig
-               className={cn({ "text-chart-2": optimisticComplete })}
+               class={cn({ "text-chart-2": optimisticComplete })}
                size={48}
             />
          ) : (

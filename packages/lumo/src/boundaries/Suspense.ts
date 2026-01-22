@@ -125,16 +125,18 @@ export function AsyncIon<
 ): OPT extends undefined ? AsyncIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : AsyncIon<T> {
    const { initialState, fetch, options } = unpackAsyncIonArgs(arg1, arg2, arg3)
 
+   let pendingStart: DOMHighResTimeStamp;
    let resolve: ((value: T | PromiseLike<T>) => void) | null;
    let reject: ((reason?: any) => void) | null
    const $loaded = Ion(false)
-   const $promise = Ion(null as null | Promise<T>)
-   // if (!options?.awaited && !options?.suspense) {
-   //    $promise.value!.catch(err => {
-   //       if (err === 'cancelled') return;
-   //       else throw err
-   //    })
-   // }
+   const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
+   pendingStart = performance.now()
+   if (!options?.awaited && !options?.suspense) {
+      $promise.value!.catch(err => {
+         if (err === 'cancelled') return;
+         else throw err
+      })
+   }
 
    const $ion = Ion(initialState as unknown)
    const suspense = options?.suspense
@@ -214,8 +216,9 @@ export function AsyncIon<
 
 
    // const inSuspense = suspense || awaiting
-   let pendingStart: DOMHighResTimeStamp;
+
    let timeout: NodeJS.Timeout | undefined;
+   let timeoutResolve: NodeJS.Timeout | undefined;
 
    watch(fetch, ({ current: output }) => {
       cancelIfFetching()
@@ -230,34 +233,54 @@ export function AsyncIon<
          // NOTE: The solution should be NO UPDATE. It inherits the update from upstream... but why does so much behavior break?
          // The problem was rooted in effect queue scheduling. Effects failed to schedule because of queued and requeued flags. Solved by resetting requeued flag at the beginning of loop, not the end.
          if (!resolve) {
-            timeout = setTimeout(() => {
-               console.log('NEW PROMISE')
-               instantUpdate(() => {
-                  $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-                  pendingStart = performance.now()
-                  if (!options?.awaited && !options?.suspense) {
-                     $promise.value.catch(err => {
-                        if (err === 'cancelled') return;
-                        else throw err
-                     })
-                  }
-               })
-            }, 50)
+            if (!suspense && !awaiting) {
+               timeout = setTimeout(() => {
+                  console.log('Ion: NEW PROMISE')
+                  instantUpdate(() => {
+                     $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
+                     pendingStart = performance.now()
+                     if (!options?.awaited && !options?.suspense) {
+                        $promise.value.catch(err => {
+                           if (err === 'cancelled') return;
+                           else throw err
+                        })
+                     }
+                  })
+               }, 50)
+            }
+            else {
+               $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
+                pendingStart = performance.now()
+               if (!options?.awaited && !options?.suspense) {
+                  $promise.value.catch(err => {
+                     if (err === 'cancelled') return;
+                     else throw err
+                  })
+               }
+            }
          }
 
          output
             .then(value => {
+               if (timeout !== undefined) {
+                  clearTimeout(timeout)
+                  timeout = undefined
+               }
+
                if (cancelledPromises.has(output)) {
+
                   cancelledPromises.delete(output)
                   if (reject) {
                      reject('cancelled')
                      resolve = null
                      reject = null
                   }
-                  console.log('(CANCELED', $promise(), "'")
+                  console.log('Ion: (CANCELED', $promise(), "'")
                   return;
                }
 
+
+               const elapsed = pendingStart ? performance.now() - pendingStart : undefined
                pendingPromise = null;
                if (resolve) {
                   // console.log('resolve to:', value)
@@ -265,14 +288,6 @@ export function AsyncIon<
                   resolve = null
                   reject = null
                }
-
-               const elapsed =pendingStart ? performance.now() - pendingStart : undefined
-               if (timeout !== undefined) {
-                  clearTimeout(timeout)
-                  timeout = undefined
-               }
-
-
 
                instantUpdate(() => {
                   if (suspense?.() && pendingValue === undefined) {
@@ -285,19 +300,27 @@ export function AsyncIon<
                   else {
                      $ion.value = value
                   }
-                  console.log('NUL PROMISE! (resolve to)', value, $promise.value, elapsed)
+                  console.log('Ion: should null promise (resolve to)', value, $promise.value, elapsed)
 
-                  if ($promise.value && elapsed && elapsed >= 250) {
+                  if ($promise.value && (elapsed && elapsed >= 250 || !elapsed)) {
                      $promise.value = null;
-                     console.log('NULL immediately')
+                     pendingStart = undefined
+                     console.log('Ion: NULL immediately')
                   }
                   $loaded.value = true
                })
                if ($promise.value && elapsed && elapsed < 250) {
-                  setTimeout(() => {
+
+                  // FIX: I don't know where to put this
+                  if (timeoutResolve !== undefined) {
+                     clearTimeout(timeoutResolve)
+                     timeoutResolve = undefined
+                  }
+                  timeoutResolve = setTimeout(() => {
                      instantUpdate(() => {
-                        console.log('finally NULL')
+                        console.log('Ion: finally NULL')
                         $promise.value = null
+                        pendingStart = undefined
                      })
                   }, 250 - elapsed)
                }
@@ -305,6 +328,7 @@ export function AsyncIon<
             .catch(err => {
                // pendingPromises.delete(output)
                pendingPromise = null
+               // pendingStart = undefined
                if (reject) {
                   reject(err)
                   resolve = null
@@ -321,14 +345,14 @@ export function AsyncIon<
 
       }
       else {
-         if (cancelledPromises.has(output)) {
-            cancelledPromises.delete(output)
-            if (reject) {
-               reject('cancelled')
-               resolve = null
-               reject = null
-            }
-         }
+         // if (cancelledPromises.has(output)) {
+         //    cancelledPromises.delete(output)
+         //    if (reject) {
+         //       reject('cancelled')
+         //       resolve = null
+         //       reject = null
+         //    }
+         // }
          // queueTask(() => {
          instantUpdate(() => { // QUESTION: Why does async select break without this when it shouldn't need it?
             $async.error = null
@@ -410,7 +434,7 @@ export function Suspense(pendingValue?: unknown) {
    let startTime = performance.now();
    function timecheck() {
       const delta = performance.now() - startTime
-      console.log('suspense took', delta)
+      console.log('Suspense: suspense took', delta)
    }
 
    const $suspense = Ion(null as Promise<unknown> | null, {
@@ -445,47 +469,50 @@ export function Suspense(pendingValue?: unknown) {
             // console.log('start suspense', quark, quarks.size)
             const { $promise } = quark
             if ($promise() && !$suspense()) {
-               console.log('++ new promise')
+               console.log('Suspense: ++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                startTime = performance.now()
             }
-            console.log('starting suspense', $promise)
+            console.log('Suspense: starting suspense', $promise())
             quarks.add(quark)
             getActiveFlask().onDiscard(() => {
                if (quark.cancelIfFetching()) pendingPromises.delete($promise())
-               console.log('discarding quark')
+               console.log('Suspense: discarding quark')
                quarks.delete(quark)
             })
 
             watch($promise, ({ current: promise, previous, eager }) => {
+               console.log('SUSPENSE: promise:', promise, 'prev:', previous)
                if (!eager && promise === previous) {
-                  console.log('same')
+                  console.log('Suspense: same', promise)
                   return;
                }
+               pendingPromises.delete(previous)
                if (promise === null) {
-                  if (!$suspense()) console.warn("should be impossible. $suspense is null while promise turned null", previous)
-                  pendingPromises.delete(previous)
+                  if (!$suspense()) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
+                  if (!pendingPromises.has(previous)) console.warn('Suspense: previous not in pending promises', previous)
+                  console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
                   if (pendingPromises.size === 0 && !isPending()) {
-                     console.log('reset', 0)
                      if (resolve) {
                         timecheck()
                         resolve()
                         resolve = null
                         reject = null
                      }
-                     console.log('suspense to null', $suspense.value)
+                     console.log('Suspense RESOLVED: Suspense to NULL :D', $suspense.value)
                      $suspense.value = null
                      if ($suspense.initial) $suspense.initial = false
                   }
                   return;
                }
 
+
                pendingPromises.add(promise)
-               console.log('+promise', pendingPromises.size, quarks.size)
+               console.log('Suspense: +promise; pending promises:', pendingPromises.size)
                if ($suspense.initial) $suspense.initial = false
                if (!$suspense()) {
                   startTime = performance.now()
-                  console.log('++ new suspense promise')
+                  console.log('Suspense: ++ new suspense promise')
                   $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                }
 
@@ -493,6 +520,7 @@ export function Suspense(pendingValue?: unknown) {
                   .catch(err => {
                      pendingPromises.delete(promise)
                      if (err === 'cancelled') {
+                        console.log('Suspense: catch canceled; delete promise', pendingPromises.size)
                         return;
                      }
                      console.log('ERROR')

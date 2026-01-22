@@ -17,7 +17,7 @@ export function Chatroom(input: FromTag<{
    return component(
       <div class="container">
          <ChatWindow user={user} chat={chatKit} />
-         <MessageForm user={user} use:postMessage={chatKit.postChatMessage} />
+         <MessageForm user={user} can:postMessage={chatKit.postChatMessage} />
          {/* <button on:click={startDebugger}>debug</button> */}
       </div>
    )

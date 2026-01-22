@@ -25,7 +25,7 @@ export function TestAsyncSelect() {
    // const $state = Ion((prev: any) => $cities.pending ? prev : $activeState())
    const $state = AsyncIon(async () => { await $cities.pending; return $activeState() })
    
-   const $state = AsyncIon(() => { oo.await($cities, $activeState) })
+   // const $state = AsyncIon(() => { oo.await($cities, $activeState) })
 
    // const $some = AsyncIon({
    //    fetch: () => db.getSomething(),

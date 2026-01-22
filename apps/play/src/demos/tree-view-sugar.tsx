@@ -64,7 +64,7 @@ export function TreeApp({ data = getTreeData() }) {
    return component(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-            <TreeItem item={root} use:addChildTo={addChildTo}></TreeItem>
+            <TreeItem item={root} can:addChildTo={addChildTo}></TreeItem>
          </ul>
          <o--link href='/src/demos/tree-view.css' rel='stylesheet' />
       </>
@@ -77,7 +77,7 @@ export function TreeApp({ data = getTreeData() }) {
 
 // function TreeItem(input: FromTag<{
 //    item: IonicTreeItem,
-//    'use:addChildTo': (item: IonicTreeItem) => void
+//    'can:addChildTo': (item: IonicTreeItem) => void
 // }>) {
 //    const { item, addChildTo } = input
 
@@ -113,7 +113,7 @@ export function TreeApp({ data = getTreeData() }) {
 //                {For(item.children!, m => m, item => (
 //                   <TreeItem
 //                      item={item}
-//                      use:addChildTo={addChildTo}>
+//                      can:addChildTo={addChildTo}>
 //                   </TreeItem>
 //                ))}
 //                <li class='add' on:click={e => addChildTo(item)}>+</li>

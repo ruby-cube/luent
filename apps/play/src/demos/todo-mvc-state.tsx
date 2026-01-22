@@ -123,10 +123,10 @@ export function TodoMVC() {
          <section class="todoapp">
             <header class="header">
                <h1>Class: Todos</h1>
-               <TodoInput use:addTodo={(app.addTodo)}></TodoInput>
+               <TodoInput can:addTodo={(app.addTodo)}></TodoInput>
             </header>
             <section class="main">
-               <CheckBox use:toggleAll={(app.toggleAll)} ctx={app}></CheckBox>
+               <CheckBox can:toggleAll={(app.toggleAll)} ctx={app}></CheckBox>
                {TodoList($filteredTodos, removeTodo, updateTodo)}
             </section>
             <footer show-hide={(app.todos.length)} class="footer">
@@ -162,7 +162,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 
 function TodoInput(input: FromTag<{
-   'use:addTodo': (title: string) => void
+   'can:addTodo': (title: string) => void
 }>) {
    const { addTodo } = input
 
@@ -188,8 +188,8 @@ function TodoInput(input: FromTag<{
 
 function TodoList(input: FromTag<{
    todos: Ion<Ionized<Todo[]>>,
-   'use:removeTodo': (todo: Ionized<Todo>) => void,
-   'use:updateTodo': typeof IonicTodoApp['updateTodo']
+   'can:removeTodo': (todo: Ionized<Todo>) => void,
+   'can:updateTodo': typeof IonicTodoApp['updateTodo']
 }>) {
    const { $todos, removeTodo, updateTodo } = input;
 
@@ -259,7 +259,7 @@ function TodoList(input: FromTag<{
 type Ctx<T> = T // TODO: this should allow ionized object to be destructured, toIons
 
 function CheckBox(input: FromTag<{
-   'use:toggleAll': IonicTodoApp['toggleAll']
+   'can:toggleAll': IonicTodoApp['toggleAll']
    ctx: Ctx<{ remaining: IonicTodoApp['remaining'] }>
 }>) {
    const { toggleAll, ctx: { $remaining } } = input

@@ -73,6 +73,10 @@ export function Meanwhile(renderOrOptions: RenderFunction | RawJSXNode | { timeo
    }
 }
 
+export function Nonce(renderPlaceholder: any) {
+   return Meanwhile(o => o.initial ? renderPlaceholder() : undefined)
+}
+
 export function Catch(renderError: RenderError) {
    return {
       renderError

@@ -38,7 +38,7 @@ export function ArticlesView(input: FromTag<{
          <ArticlesNav
             mu:activetab={$feed}
             tabs={$tabs}
-            use:prefetch={(feed) => $result.prefetch(feed, 0, $articlesPerPage())}
+            can:prefetch={(feed) => $result.prefetch(feed, 0, $articlesPerPage())}
          ></ArticlesNav>
          {If(($result.pending),
             <div class="article-preview">
@@ -95,7 +95,7 @@ function ArticlesNav(input: FromTag<{}>) {
 
 ArticlePreview['mu:db'] = RootContextKey.Mutable<ArticleDatabase>()
 ArticlePreview['author'] = RootContextKey.Ion<ArticleDatabase>()
-ArticlePreview['use:addTodo'] = ContextKey<() => void>()
+ArticlePreview['can:addTodo'] = ContextKey<() => void>()
 ArticlePreview['on:clickIncrement'] = ContextKey<() => void>()
 
 export function ArticlePreview(input: FromTag<{

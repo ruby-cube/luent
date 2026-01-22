@@ -172,9 +172,9 @@ export function toInput(attributes: AnyObject) {
          if (key === 'Slot') return target.children // TODO: Is this correct??
          if (isIonKey(key)) {
             const ionKeyToAttributeKey = (key: string) => key.slice(1)
-            const opKey = 'use:' + key
+            const opKey = 'can:' + key
             if (opKey in target) {
-               // case: use:$frog  (as shorthand for getFrog)
+               // case: can:$frog  (as shorthand for getFrog)
                const op = target[opKey]
                assertFunction(op)
                return op;
@@ -198,7 +198,7 @@ export function toInput(attributes: AnyObject) {
             assertIonicProxy(value)
             return MayBeMutableProxy(getIonicProxy(value));
          }
-         const opKey = 'use:' + key
+         const opKey = 'can:' + key
          if (opKey in target) {
             const op = target[opKey]
             assertFunction(op)
@@ -207,7 +207,7 @@ export function toInput(attributes: AnyObject) {
          if (key in target) {
             const value = target[key]
             if (isFunction(value) && value.length !== 0)
-               debug.error('To pass a function as component input, prefix attribute with `use:`')
+               debug.error('To pass a function as component input, prefix attribute with `can:`')
             return toValue(target[key])
          }
          return undefined
@@ -251,7 +251,7 @@ type MaybeIonAttributes<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
    K extends `mu:${infer I}` ? never
-   : K extends `use:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' ? never
+   : K extends `can:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' ? never
    : K extends string ? K
    : never
    : never]:
@@ -316,13 +316,13 @@ type MuIon<I> = ExcludePrimitives<I> extends { value: any } ? I
    : ExcludePrimitives<I> & { value: ExcludePrimitives<I> extends Ion<infer S> ? S : never } | OnlyPrimitives<I>
 
 type OpInput<D> = {
-   [K in keyof D as K extends `use:${infer F}` ? F : never]: D[K]
+   [K in keyof D as K extends `can:${infer F}` ? F : never]: D[K]
 }
 // type SeeInput<D> = {
 //    [K in keyof D as K extends `see:${infer F}` ? F : never]: D[K]
 // }
 type OpAttribute<D> = {
-   [K in keyof D as K extends `use:${string}` ? K : never]: D[K]
+   [K in keyof D as K extends `can:${string}` ? K : never]: D[K]
 }
 // type SeeAttribute<D> = {
 //    [K in keyof D as K extends `see:${string}` ? K : never]: D[K]
@@ -330,7 +330,7 @@ type OpAttribute<D> = {
 
 type StaticInput<D> = {
    [K in keyof D as IncludesIon<D[K]> extends true ? never
-   : K extends `mu:${string}` | `use:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' | 'provide' ? never
+   : K extends `mu:${string}` | `can:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' | 'provide' ? never
    : K]:
    D[K]
    // MaybeMarkInert<D[K]>
@@ -343,7 +343,7 @@ type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, P
 type ReadonlyIonInput<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
-   K extends `mu:${string}` | `use:${string}` /* | `see:${string}` */ | `on:${string}` | 'Slot' ? never
+   K extends `mu:${string}` | `can:${string}` /* | `see:${string}` */ | `on:${string}` | 'Slot' ? never
    : K extends string ? `$${K}`
    : never
    : never
@@ -419,7 +419,7 @@ export type RenderSlot<T = {}> = (input?: T) => RawJSXNode
 //    frogC: Frog // --> Inert<Frog>
 //    frogD: Ionized<Frog> // --> Ionized<Frog>
 //    frogE: Inert<Frog> // --> Inert<Frog>
-//    'use:close': () => void
+//    'can:close': () => void
 //    'on:click': {}
 //    Slot: Slot
 //    name: Ion<string> & { state: string } & { changeName: () => void }
@@ -452,7 +452,7 @@ export type RenderSlot<T = {}> = (input?: T) => RawJSXNode
 //    frogC: Frog // --> Inert<Frog>
 //    frogD: Ionized<Frog> // --> Ionized<Frog>
 //    frogE: Inert<Frog> // --> Inert<Frog>
-//    'use:close': () => void
+//    'can:close': () => void
 //    'on:click': {}
 //    Slot: Slot
 //    name: Ion<string> & { state: string } & { changeName: () => void }

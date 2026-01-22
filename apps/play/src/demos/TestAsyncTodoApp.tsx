@@ -13,8 +13,16 @@ const ENTER_KEY = 13;
 const generateId = () => Date.now().toString(36);
 
 const IonicTodo = (data) => {
-   const todo = depot.get(data.id) ?? depot.create(() => Ionic(data))
-   return todo
+   // const todo = depot.get(data.id) ?? depot.create(() => Ionic(data))
+   return ionize(data, 'id', {
+      refetch: (id: string) => db.getTodo(id),
+      update: (todo, data) => {
+         todo.completed = data.completed
+         todo.doSomething(data.something)
+      }
+   })
+
+   // return ionize(data.id, data, data => Ionic(new Todo(data)))
 }
 
 const IonicTodos = todos => Ionic(todos, { [EACH]: IonicTodo })
@@ -33,7 +41,7 @@ const IonicTodos = todos => Ionic(todos, { [EACH]: IonicTodo })
 
 export default function TodoApp() {
 
-   const $todos = AsyncIon([], () => db.fetchTodos(), { ionize: IonicTodos })
+   const $todos = AsyncIon([], () => db.fetchTodos(), { to: IonicTodos })
 
    const addTodo = AsyncAction((todo: Todo) => {
       oo.await(db.addTodo(todo), () =>
@@ -47,21 +55,21 @@ export default function TodoApp() {
       )
    })
 
-   // one-way overlap
-   definePartialRace($todos, [
-      ToggleCompleted,
-      SetHighlighted
-   ])
+   // // one-way overlap
+   // definePartialRace($todos, [
+   //    ToggleCompleted,
+   //    SetHighlighted
+   // ])
 
 
-   // two-way overlap
-   definePartialRace(
-      toggleCompleted, // This should be in Todo component
-      setHighlighted
-   )
+   // // two-way overlap
+   // definePartialRace(
+   //    toggleCompleted, // This should be in Todo component
+   //    setHighlighted
+   // )
 
-   // complete overlap
-   defineRace($todos, $sameTodos)
+   // // complete overlap
+   // defineRace($todos, $sameTodos)
 
 
    // function AsyncTodoKit(todo: Todo) {
@@ -199,23 +207,22 @@ function Todo({
       todo.completed = completed;
       todo.modifiedDate = Date.now()
 
-      return oo.await(db.toggleTodo(todo.id, completed), ({ completed, modifiedDate }) => {
-         todo.completed = completed
-         todo.modifiedDate = modifiedDate
+      return oo.await(db.toggleTodo(todo.id, completed), () => {
+         todo.refetch()
       })
    })
 
    // FIX: avoid having to pass down a reference to $todos, can we auto-establish race via For() ?
    // one-way overlap
-   definePartialRace($todos, [
-      toggleCompleted,
-      setHighlighted
-   ])
+   // definePartialRace($todos, [
+   //    toggleCompleted,
+   //    setHighlighted
+   // ])
 
-   definePartialRace(
-      toggleCompleted,
-      setHighlighted
-   )
+   // definePartialRace(
+   //    toggleCompleted,
+   //    setHighlighted
+   // )
 
    return (
       <li
