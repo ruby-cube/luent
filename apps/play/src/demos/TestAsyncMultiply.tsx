@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { component, AsyncIon, Suspense, For, FromTag } from "@rue/lumo";
 import { $_derivation, instantUpdate, Ion, Ionic, MutableIon, queueIonicTask, swiftUpdate } from "@rue/quarky";
-import { AsyncAction } from "../../../../packages/lumo/src/boundaries/AsyncAction";
+import { AsyncAction, oo } from "../../../../packages/lumo/src/boundaries/AsyncAction";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
 
@@ -42,6 +42,8 @@ export function TestAsyncMultiply() {
 
 
 
+
+
 export function TestAsyncMultipliers() {
 
    const $n = Ion(1, {
@@ -68,11 +70,11 @@ export function TestAsyncMultipliers() {
       //    )
       // }, { suspense: $suspense })
 
-      const multiply = AsyncAction(
-         () => db.multiply($n(), b),
-         res => { $product.value = res }, {
-         suspense: $suspense
-      })
+      const multiply = AsyncAction(() => {
+         oo.await(() => db.multiply($n(), b), res => {
+            $product.value = res
+         })
+      }, { suspense: $suspense })
 
       // const multiply = AsyncAction({
       //    dispatch: () => db.multiply($n(), b),
@@ -84,7 +86,7 @@ export function TestAsyncMultipliers() {
    }
 
    function MultipliersKit() {
-      const $suspense = Suspense()
+      const $suspense = Suspense('...')
       const multipliers: any[] = []
       const products: any[] = []
       for (let i = 1; i < 5; i++) {
@@ -142,7 +144,6 @@ export function TestAsyncMultipliers() {
 //    )
 // }
 
-const oo = { await(a: any) { } }
 
 
 export function TestAsyncMultiplyB() {
@@ -255,7 +256,7 @@ const db = {
       return new Promise<number>((resolve) => {
          setTimeout(() => {
             resolve(a * b);
-         }, Math.random() * 100);
+         }, Math.random() * 2000);
       })
    }
 }

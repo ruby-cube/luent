@@ -181,7 +181,7 @@ import { TestAsyncTabs } from './demos/TestAsyncTabs';
 
 // })
 
-const app = createRoot(TestAsyncMultiplyB)
+const app = createRoot(TestAsyncMultipliers)
 
 app.mount('#root')
 
