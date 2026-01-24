@@ -4,7 +4,7 @@ import { Suspense, SUSPENSE_QUARK } from "./Suspense";
 // TODO: races
 // suspense
 
-export let oo: { await<T>(dispatch: () => Promise<T>, onFulfilled: (result: T) => unknown): Promise<void> } = { await() { } }
+export let oo: { await<T>(dispatch: () => Promise<T>, onFulfilled?: (result: T) => unknown): Promise<void> } = { await() { } }
 
 export function AsyncAction<F extends (...args: any[]) => Promise<unknown>>(dispatch: F, options?: { suspense: Suspense }): F & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
    let resolve: ((value: any | PromiseLike<any>) => void) | null;
@@ -42,7 +42,7 @@ export function AsyncAction<F extends (...args: any[]) => Promise<unknown>>(disp
    const cancelledPromises = new Set()
    function dispatchAction(...args: any[]) {
       oo = {
-         await<T>(dispatch: () => Promise<T>, onFulfilled: (result: T) => unknown) {
+         await<T>(dispatch: () => Promise<T>, onFulfilled?: (result: T) => unknown) {
             const output = pendingPromise = dispatch()
             if (!resolve) {
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
@@ -74,7 +74,7 @@ export function AsyncAction<F extends (...args: any[]) => Promise<unknown>>(disp
                      reject = null
                   }
                   instantUpdate(() => {
-                     onFulfilled(value)
+                     onFulfilled?.(value)
                      $promise.value = null
                   })
                })

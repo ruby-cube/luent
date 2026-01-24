@@ -74,6 +74,7 @@ import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
 import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './demos/TestAsyncMultiply';
 import { TestAsyncTabs } from './demos/TestAsyncTabs';
+import { Async, oo } from '../../../packages/lumo/src/boundaries/oo';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -170,9 +171,9 @@ import { TestAsyncTabs } from './demos/TestAsyncTabs';
 //    //    eager: true
 //    // })
 
-//    listen(window, 'click', () => {
-//       $count.value++
-//    })
+listen(window, 'click', () => {
+   doSomething('frog').then((value) => console.log('final:', value))
+})
 
 //    // listen(window, 'contextmenu', (e) => {
 //    //    e.preventDefault()
@@ -181,9 +182,41 @@ import { TestAsyncTabs } from './demos/TestAsyncTabs';
 
 // })
 
-const app = createRoot(TestAsyncMultipliers)
 
-app.mount('#root')
+const doSomething = Async((name: string) => {
+   return oo.await(fetchSomething('one', rando()), (value) => {
+      console.log('(1)', value, name)
+      // return 'something'
+      return fetchSomething('piped one', rando())()
+   })
+      .then(value => {
+         console.log('(2)', value)
+         return 'song'
+      })
+      .await(fetchSomething('two', rando()), ({ res: cities, piped: word }) => {
+         console.log('(3)', cities, 'piped:', word)
+         return 'puffball'
+      })
+})
+
+
+
+function rando() {
+   return Math.random() * 1000
+}
+
+
+function fetchSomething(word: string, time: number) {
+   return () => new Promise(resolve => {
+      setTimeout(() => {
+         resolve('Kermit' + ' ' + Math.round(time) + ' ' + word)
+      }, time)
+   })
+}
+
+// const app = createRoot(TestAsyncMultipliers)
+
+// app.mount('#root')
 
 
 // const frog = ionize({ name: 'sir robin' })

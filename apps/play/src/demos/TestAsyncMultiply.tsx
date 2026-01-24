@@ -43,6 +43,11 @@ export function TestAsyncMultiply() {
 
 
 
+function Async(fn: (...args: any[]) => Promise<unknown> | unknown) {
+
+}
+
+
 
 export function TestAsyncMultipliers() {
 
@@ -51,8 +56,6 @@ export function TestAsyncMultipliers() {
          this.value++
       }
    })
-
-   const Async = AsyncAction
 
    function MultiplyKit($n: Ion<number>, b: number, $suspense: Suspense) {
       const $product = Ion($n() * b)

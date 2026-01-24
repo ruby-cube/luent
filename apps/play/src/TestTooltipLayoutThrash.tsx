@@ -108,9 +108,9 @@ export function Tooltip(input: FromTag<{
       ooo.await($layout, () =>
          $div()?.getBoundingClientRect().height
       )
-      ooo.await($render, height => {
-         if (height != null) $height.value = height;
-      })
+         .await($render, height => {
+            if (height != null) $height.value = height;
+         })
    })
 
    // atMounted(({ ooo }) => {
@@ -123,25 +123,26 @@ export function Tooltip(input: FromTag<{
    //    })
    // })
    const doSomething = Async(() => {
-      oo.await(fetchCities, res => (
-         res.JSON()
-      ))
-         .then(cities=> {
-
-         })
-      oo.await([$piped, $render], cities => (
-         cities
-      ))
-      oo.await($tick, () => {
-         console.log($pipeout)
-      })
-      return oo.pipeout
+      return (
+         oo.await(fetchCities, res =>
+            res.JSON()
+         )
+            .then(cities =>
+               doSomething()
+            )
+            .await($render, cities =>
+               console.log(cities)
+            )
+            .await($tick, () =>
+               console.log($pipeout)
+            )
+      )
    })
 
    const doSomething = Async(() => {
       oo.await(fetchCities, res => res.JSON())
-      oo.await([$piped, $render], cities => cities)
-      oo.await($tick, () => console.log($pipeout))
+         .await($render, cities => cities)
+         .await($tick, (o, cities) => console.log(cities))
       return $awaited()
    })
 
@@ -149,12 +150,12 @@ export function Tooltip(input: FromTag<{
       oo.await($layout, () => (
          $div()?.getBoundingClientRect().height
       ))
-      oo.await($render, () => {
-         if ($pipeout() != null) $height.value = $pipeout();
-      })
-      oo.await($tick, () => {
-         console.log('this runs after tick resolves which is awaited once layout resolves')
-      })
+         .await($render, () => {
+            if ($pipeout() != null) $height.value = $pipeout();
+         })
+         .await($tick, () => {
+            console.log('this runs after tick resolves which is awaited once layout resolves')
+         })
    }))
 
 
