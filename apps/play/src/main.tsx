@@ -1,3 +1,4 @@
+// @ts-nocheck
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
@@ -74,7 +75,9 @@ import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
 import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './demos/TestAsyncMultiply';
 import { TestAsyncTabs } from './demos/TestAsyncTabs';
-import { Async, oo } from '../../../packages/lumo/src/boundaries/oo';
+import { Async, ooo } from '../../../packages/lumo/src/boundaries/ooo';
+import { Counter } from './TestCounterB';
+import { fetchArticles } from './demos/conduit/src/feature/article-feed/Articles.ionic';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -179,26 +182,135 @@ listen(window, 'click', () => {
 //    //    e.preventDefault()
 //    //    $other.value = !$other.value
 //    // })
+// })
 
+// function A() {
+//    const something =
+//       await fetchSomething()
+//          .catch(err => console.error(err))
+//          .finally(() => console.log('done'))
+
+//    console.log('something', something)
+// }
+
+
+// function B() {
+//    fetchSomething()
+//       .then(something => console.log('something', something))
+//       .catch(err => console.error(err))
+//       .finally(() => console.log('done'))
+// }
+
+
+
+// const doSomething = Async((name: string) => {
+//    return ooo.await(FetchSomething('one', rando()), res => {
+//       console.log('(1)', res, name)
+//       // return 'something'
+//       return FetchSomething('piped one', rando())()
+//    })
+//       .then(id => fetchArticles(id))
+//       .await(id => fetchArticle(id), () => {
+
+//       })
+//       .then(piped => {
+//          console.log('(2)', piped)
+//          return 'song'
+//       })
+//       .await(FetchSomething('two', rando()), (cities, piped) => {
+//          console.log('(3)', cities, 'piped:', word)
+//          return 'puffball'
+//       })
+//       .then(value => console.log('then...', value))
+// })
+
+const doSomething = Async((name: string) => {
+   return ooo
+      .await(FetchSomething('one', rando()), (res, context) => {
+         console.log('(1)', res, name, 'context', context)
+      })
+      .await(FetchSomething('piped one', rando()), piped => {
+         console.log('(2)', piped)
+         return { piped }
+      })
+      .await(FetchSomething('pipette', rando()), (pipette, c) => {
+         console.log('(3)', pipette, 'context', c)
+         return { pipette }
+      })
+      .catch((err, c) => console.error(err, c))
+      .finally(c => console.log('context', c))
+      .await(FetchSomething('two', rando()), (cities, context) => {
+         console.log('(4)', cities, 'context:', context)
+         return 'puffball'
+      })
+   // .then(value => console.log('then...', value))
+})
+
+// FetchSomething('kermit', 1000)().then(res => {
+
+//    return FetchSomething('a', rando())()
+// }).then(piped => {
+
+//    return FetchSomething('two', rando())
+// }).then((res) => {
+//    onFulfilled(res, piped)
+//    return Promise.all([promise, FetchSomething()])
 // })
 
 
-const doSomething = Async((name: string) => {
-   return oo.await(fetchSomething('one', rando()), (value) => {
-      console.log('(1)', value, name)
-      // return 'something'
-      return fetchSomething('piped one', rando())()
-   })
-      .then(value => {
-         console.log('(2)', value)
-         return 'song'
-      })
-      .await(fetchSomething('two', rando()), ({ res: cities, piped: word }) => {
-         console.log('(3)', cities, 'piped:', word)
-         return 'puffball'
-      })
-})
 
+// await + (awaited) => value
+// then (value) => {}
+
+// await + (awaited) => promise
+// then (res) => {}
+
+// await
+// then (res) => {}
+
+// --
+
+// await + (awaited) => value
+// await + (res, value) => {}
+
+// await + (awaited) => promise
+// await (res, res) => {}
+
+// await
+// await (res) => {}
+
+// --
+
+// await + (awaited) => value
+// finally()
+
+// await + (awaited) => promise
+// then (res) => {}
+
+// await
+// then (res) => {}
+
+
+
+
+
+// FetchSomething('kermit', 1000)()
+//    .then(value => {
+//       console.log('value', value)
+//       return new Promise((res, rej) => {
+//          setTimeout(() => {
+//             res('hi')
+//          }, 500)
+//       })
+//    }, error => {
+//       console.warn(error)
+//    })
+//    .finally(() => {
+//       console.log('finally')
+//    })
+//    .then(value => {
+//       console.log('last value', value)
+//    })
 
 
 function rando() {
@@ -206,15 +318,17 @@ function rando() {
 }
 
 
-function fetchSomething(word: string, time: number) {
-   return () => new Promise(resolve => {
+function FetchSomething(word: string, time: number) {
+   return () => new Promise((resolve, reject) => {
       setTimeout(() => {
+         // reject('oops')
+         // throw new Error('oops')
          resolve('Kermit' + ' ' + Math.round(time) + ' ' + word)
       }, time)
    })
 }
 
-// const app = createRoot(TestAsyncMultipliers)
+// const app = createRoot(Counter)
 
 // app.mount('#root')
 

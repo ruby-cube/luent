@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { component, If, measureLayout, GetNode, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
 import { Ion, MutableIon } from '@rue/quarky';
+import { AnyObject } from '@rue/types';
 
 
 export function TestTooltip() {
@@ -116,47 +117,131 @@ export function Tooltip(input: FromTag<{
    // atMounted(({ ooo }) => {
    //    ooo.await($layout)
    //       .then(() => $div()?.getBoundingClientRect().height)
-   //    ooo.await($render)
+   //       .await($render)
    //       .then(hg => { if (hg != null) $height.value = hg; })
-   //    ooo.await(tick, () => {
+   //       .await(tick, () => {
    //       console.log('this runs after tick resolves which is awaited once layout resolves')
    //    })
    // })
+
+   async function doSomething() {
+      const res = await fetchCities()
+      const cities = await res.JSON()
+      const id = doSomething(cities)
+      const [cats] = await Promise.all([cities.store.fetchOther(id), $render()])
+      console.log(cats)
+   }
+
+
    const doSomething = Async(() => {
       return (
-         oo.await(fetchCities, res =>
-            res.JSON()
-         )
-            .then(cities =>
-               doSomething()
-            )
-            .await($render, cities =>
-               console.log(cities)
-            )
-            .await($tick, () =>
-               console.log($pipeout)
-            )
+         oo.await(fetchCities, res => res.JSON())
+            .then(o => (doSomething(o), o))
+            .await(o => [o.JSON(), $render()], ([cats]) => {
+               console.log(cats)
+            })
       )
    })
 
+   const doSomething = Async(() => ooo
+      .await(fetchCities, res => ({
+         res
+      }))
+      .await(c => c.res.JSON(), cities => ({
+         id: doSomething(cities), cities
+      }))
+      .await(c => [c.cities.store.fetchOther(c.id), $render()], ([cats], c) => {
+         console.log(cats)
+      })
+      .await($render)
+      .return((_, c) => c.cities)
+   )
+
+   const doSomething = Async(() => ooo
+      .await(fetchCities)
+      .await(res => res.JSON(), cities =>
+         [...cities, 'o']
+      )
+   )
+
+
+   const ooo = {
+      await<T, O extends object>(promised: T, onFulfilled?: (value: T) => O | void) {
+
+         const promise = promised // TODO: non-promise and array
+
+         return {
+            await() {
+
+            },
+            catch() {
+
+            },
+            finally() {
+
+            }
+         }
+      }
+   }
+
+
+
+   const doSomething = Async(() => ooo
+      .await(fetchCities)
+      .await(res => res.JSON(), cities => ({
+         id: doSomething(cities),
+         cities
+      }))
+      .await(co => [co.cities.store.fetchOther(co.id), co.$render()], ([cats], co) => {
+         console.log(cats, co.id)
+      })
+      .await($tick, (x, co) => {
+         console.log(co.cities)
+      })
+   )
+
+
    const doSomething = Async(() => {
-      oo.await(fetchCities, res => res.JSON())
-         .await($render, cities => cities)
-         .await($tick, (o, cities) => console.log(cities))
-      return $awaited()
+      return (
+         ooo.await(fetchCities)
+            .await(res => res.JSON(), cities => ({
+               id: doSomething(cities), cities
+            }))
+            .await(o => [o.cities.store.fetchOther(o.id), $render()], ([cats], o) => {
+               console.log(cats)
+            })
+      )
    })
 
-   atMounted(Async(() => {
-      oo.await($layout, () => (
-         $div()?.getBoundingClientRect().height
-      ))
-         .await($render, () => {
-            if ($pipeout() != null) $height.value = $pipeout();
-         })
-         .await($tick, () => {
-            console.log('this runs after tick resolves which is awaited once layout resolves')
-         })
-   }))
+
+   const doSomething = Async(() => {
+
+
+      return ooo
+         .await(fetchCities, res => ({
+            res
+         }))
+         .await(co => co.res.JSON(), cities => ({
+            cities
+         }))
+         .await($render)
+         .await($tick, (x, o) =>
+            console.log(o.cities)
+         )
+   })
+
+
+   atMounted(Async(() => ooo
+      .await($layout, () => ({
+         height: $div()?.getBoundingClientRect().height
+      }))
+      .await($render, (x, { height }) => {
+         if (height != null) $height.value = height;
+      })
+      .await($tick, () => {
+         console.log('this runs after tick resolves which is awaited once layout resolves')
+      })
+   ))
 
 
    // prevent looped layout thrashing w/ measureLayout
