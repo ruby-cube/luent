@@ -80,7 +80,7 @@ export function TestAsyncMultipliers() {
       const $suspense = Suspense('...')
       const multipliers: any[] = []
       const products: any[] = []
-      
+
       for (let i = 1; i < 5; i++) {
          const { multiply, $product } = MultiplyKit($n, i, $suspense)
          multipliers.push(multiply)

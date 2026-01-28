@@ -5,6 +5,7 @@ import { resolve } from "path"
 import { QUARK } from "../../../quarky/src/abstract/Quark"
 import { AnyObject } from "@rue/types"
 import { isFunction, isPlainObject } from "@rue/utils"
+import { instantUpdate, swiftUpdate } from "@rue/quarky"
 
 // interface Promise<T> {
 //    /**
@@ -76,7 +77,7 @@ export const ooo = {
          series,
          promise.then((value: Resolved<T>) => {
             if (series.cancelled) return;
-            return output = onFulfilled ? onFulfilled(value) : value
+            return output = onFulfilled ? instantUpdate(() => onFulfilled(value)) : value
          }),
          () => output
       )
@@ -242,7 +243,7 @@ export class AsyncNode<P> {
          series,
          promise.then(value => {
             if (series.cancelled) return;
-            return output = onFulfilled ? onFulfilled(value, $piped()) : value
+            return output = onFulfilled ? instantUpdate(() => onFulfilled(value, $piped())) : value
          }),
          () => output
       )
@@ -291,7 +292,7 @@ export class AsyncNode<P> {
       return new AsyncNode<P | TResult>(
          series,
          task
-            ? this.asPromise.catch(error => series.cancelled || (output = task(error, $piped())))
+            ? this.asPromise.catch(error => series.cancelled || (output = instantUpdate(() => task(error, $piped()))))
             : this.asPromise,
          () => output
       )
@@ -303,7 +304,7 @@ export class AsyncNode<P> {
       return new AsyncNode(
          series,
          task
-            ? this.asPromise.finally(() => series.cancelled || task($piped()))
+            ? this.asPromise.finally(() => series.cancelled || instantUpdate(() => task($piped())))
             : this.asPromise,
          $piped
       )

@@ -25,11 +25,13 @@ export class Update {
 
    private tasks: (() => void)[] = []
 
-   queue(task: () => void) {
+   output: any
+
+   queue(task: () => any) {
       if (this.started) {
          try {
             pushUpdate(this)
-            task()
+            this.output = task()
          }
          finally {
             popUpdate()
@@ -51,13 +53,13 @@ export class Update {
    private started = false;
 
    start() {
-      if (this.started) return;
+      if (this.started) return this;
       this.started = true
 
       try {
          pushUpdate(this)
          for (const task of this.tasks) {
-            task()
+            this.output = task()
          }
       }
       finally {
@@ -241,7 +243,7 @@ function createSwiftUpdate() {
 // - queue() run function
 
 export function instantUpdate(task: () => unknown) {
-   createInstantUpdate().queue(task).start()
+   return createInstantUpdate().queue(task).start()?.output
 }
 
 function createInstantUpdate() {
