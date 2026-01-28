@@ -1,6 +1,6 @@
 import { component, FromTag, If, Else, For, fromGlobal, ContextKey } from "@rue/lumo";
 import { DeepIonized, defineDeepIonize, EACH, Ion,  Ionic, ionize, IonizeBy, Ionized, isIonicProxy,} from "@rue/quarky";
-import { isObjectLiteral } from "@rue/utils";
+import { isPlainObject } from "@rue/utils";
 
 
 type DeepIonic<D extends (...args: any[]) => any, M = {}> = Omit<ReturnType<D>, keyof M> & M
@@ -122,7 +122,7 @@ function IonizedTreeItem(data: TreeItemData): $$TreeItem {
 
 // # ionizer
 function ionizeTreeItem(item: TreeItemData | TreeItem | $$TreeItem): $$TreeItem {
-   return ionized(item) ?? ionize(isObjectLiteral(item) ? createTreeItem(item) : item, {
+   return ionized(item) ?? ionize(isPlainObject(item) ? createTreeItem(item) : item, {
       nested: { children: (items: TreeItem[]) => ionize(items.map(item => ionizeTreeItem(item))) }
    })
 }

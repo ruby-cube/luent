@@ -1,5 +1,5 @@
 import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue } from "@rue/quarky";
-import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
+import { isFunction, isObject, isPlainObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
 import { isHydrating } from "../hydration/hydration";
@@ -254,7 +254,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 //    if (!Slot || !isFunction(Slot)) return;
 //    const nodeEntities = Slot();
 //    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
-//    if (!isObjectLiteral(kit) && !('mu' in kit)) return;
+//    if (!isPlainObject(kit) && !('mu' in kit)) return;
 //    const ion = kit.mu;
 //    const flask = getFlask()
 //    watchToRender(ion, () => {

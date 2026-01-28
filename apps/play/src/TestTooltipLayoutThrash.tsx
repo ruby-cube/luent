@@ -105,14 +105,14 @@ export function Tooltip(input: FromTag<{
    const $div = GetNode('div');
    const $height = Ion(undefined as number | undefined)
 
-   atMounted(() => {
-      ooo.await($layout, () =>
+   atMounted(() => ooo
+      .await($layout, () => (
          $div()?.getBoundingClientRect().height
-      )
-         .await($render, height => {
-            if (height != null) $height.value = height;
-         })
-   })
+      ))
+      .await($render, height => {
+         if (height != null) $height.value = height;
+      })
+   )
 
    // atMounted(({ ooo }) => {
    //    ooo.await($layout)
@@ -147,14 +147,26 @@ export function Tooltip(input: FromTag<{
       .await(fetchCities, res => ({
          res
       }))
-      .await(c => c.res.JSON(), cities => ({
-         id: doSomething(cities), cities
-      }))
-      .await(c => [c.cities.store.fetchOther(c.id), $render()], ([cats], c) => {
-         console.log(cats)
-      })
-      .await($render)
-      .return((_, c) => c.cities)
+      .await(c => c.res.JSON(), (cities, c, co = {}) => (
+         co.ash = console.log('context', c),
+         co.store = console.log('context', c),
+         {
+            id: doSomething(cities, co.ash),
+            cities
+         }
+      ))
+      .await(c => c.res.JSON(), (cities, c) => (
+         console.log('context', c),
+         {
+            ...c,
+            id: doSomething(cities),
+            cities
+         }
+      ))
+      .await(c => [c.cities.store.fetchOther(c.id), $render()], ([cats], c) => (
+         console.log(cats), c
+      ))
+      .await($render, (_, c) => c.cities)
    )
 
    const doSomething = Async(() => ooo
@@ -165,24 +177,7 @@ export function Tooltip(input: FromTag<{
    )
 
 
-   const ooo = {
-      await<T, O extends object>(promised: T, onFulfilled?: (value: T) => O | void) {
 
-         const promise = promised // TODO: non-promise and array
-
-         return {
-            await() {
-
-            },
-            catch() {
-
-            },
-            finally() {
-
-            }
-         }
-      }
-   }
 
 
 

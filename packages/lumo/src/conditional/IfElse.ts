@@ -10,7 +10,7 @@ import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
 import { createCommonsNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { isObjectLiteral } from "@rue/utils";
+import { isPlainObject } from "@rue/utils";
 import { el } from "date-fns/locale";
 import { Suspense, SUSPENSE_QUARK } from "../boundaries/Suspense";
 
@@ -364,5 +364,5 @@ export function markActivationType(activationType: ActivationType, render: Rende
 }
 
 export function isActivationKit(value: unknown): value is ActivationKit {
-   return isObjectLiteral(value) && 'activationType' in value
+   return isPlainObject(value) && 'activationType' in value
 }

@@ -1,7 +1,8 @@
 //@ts-nocheck
 import { component, AsyncIon, Suspense, For, FromTag } from "@rue/lumo";
 import { $_derivation, instantUpdate, Ion, Ionic, MutableIon, queueIonicTask, swiftUpdate } from "@rue/quarky";
-import { AsyncAction, oo } from "../../../../packages/lumo/src/boundaries/AsyncAction";
+import { AsyncAction } from "../../../../packages/lumo/src/boundaries/AsyncAction";
+import { ooo } from "../../../../packages/lumo/src/boundaries/ooo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
 
@@ -66,24 +67,11 @@ export function TestAsyncMultipliers() {
       //    $product.value = res
       // }, { suspense: $suspense })
 
-
-      // const multiply = AsyncAction(() => {
-      //    oo.await(() => db.multiply($n(), b),
-      //       res => { $product.value = res }
-      //    )
-      // }, { suspense: $suspense })
-
-      const multiply = AsyncAction(() => {
-         oo.await(() => db.multiply($n(), b), res => {
+      const multiply = AsyncAction(() => (ooo
+         .await(db.multiply($n(), b), res => (
             $product.value = res
-         })
-      }, { suspense: $suspense })
-
-      // const multiply = AsyncAction({
-      //    dispatch: () => db.multiply($n(), b),
-      //    settled: res => $product.value = res,
-      //    suspense: $suspense
-      // })
+         ))
+      ), { suspense: $suspense })
 
       return { multiply, $product: $nxb }
    }
@@ -92,6 +80,7 @@ export function TestAsyncMultipliers() {
       const $suspense = Suspense('...')
       const multipliers: any[] = []
       const products: any[] = []
+      
       for (let i = 1; i < 5; i++) {
          const { multiply, $product } = MultiplyKit($n, i, $suspense)
          multipliers.push(multiply)

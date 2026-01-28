@@ -6,7 +6,7 @@ import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { track } from "../reactivity/Compound";
-import { isObjectLiteral } from "@rue/utils";
+import { isPlainObject } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";
 
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark, displayName: string }
@@ -59,7 +59,7 @@ export function createAtomicIon(
 
    if (props) {
       const descriptors = Object.getOwnPropertyDescriptors(props)
-      if (__DEV__ && !isObjectLiteral(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
+      if (__DEV__ && !isPlainObject(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
       if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
       delete descriptors['@get'];
       delete descriptors['@set'];

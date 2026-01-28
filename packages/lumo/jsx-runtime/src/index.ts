@@ -1,6 +1,6 @@
 import { ComponentSetup, HTMLTag, makeJSXNode, normalizeToRenderFunction, RenderSlot, Commons, RawJSXNode } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
-import { isObjectLiteral, normalizeToArray } from "@rue/utils";
+import { isPlainObject, normalizeToArray } from "@rue/utils";
 
 // without custom jsx compiler
 // - nodeEntity | nodeEntity[]
@@ -28,7 +28,7 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Rend
 
 function processSlot(Slot: Slot | { mu: AnyObject } | { [key: string]: Slot } | undefined) {
    if (Slot === undefined) return undefined;
-   if (isObjectLiteral(Slot)) {
+   if (isPlainObject(Slot)) {
       // named slots, innerHTML kit, or two-way binding
       return Slot;
    }

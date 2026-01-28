@@ -140,9 +140,9 @@ export function AsyncIon<
 
    const $ion = Ion(initialState as unknown)
    const suspense = options?.suspense
-   const pendingValue = options?.suspense?.[SUSPENSE_QUARK].pendingValue
+   const pendingState = options?.suspense?.[SUSPENSE_QUARK].pendingState
 
-   const $async = Ion(suspense && pendingValue !== undefined ? () => suspense() ? pendingValue : $ion() : () => $ion() as unknown, {
+   const $async = Ion(suspense && pendingState !== undefined ? () => suspense() ? pendingState : $ion() : () => $ion() as unknown, {
       [SUSPENSE_ION]: true,
       get pending() {
          return $promise()
@@ -290,7 +290,7 @@ export function AsyncIon<
                }
 
                instantUpdate(() => {
-                  if (suspense?.() && pendingValue === undefined) {
+                  if (suspense?.() && pendingState === undefined) {
                      suspense()?.then(() => {
                         instantUpdate(() => {
                            $ion.value = value
@@ -407,7 +407,7 @@ export type Suspense = Ion<Promise<void> | null> & {
 
 type SuspenseQuark = {
    start(quark: AsyncQuark): void
-   pendingValue: any
+   pendingState: any
 } & AsyncQuark
 
 export const SUSPENSE_QUARK = Symbol('suspense quark')
@@ -417,7 +417,7 @@ type AsyncQuark = {
    $promise: Ion<Promise<unknown> | null>
 }
 
-export function Suspense(pendingValue?: unknown) {
+export function Suspense(pendingState?: unknown) {
    const quarks = new Set<AsyncQuark>()
    let resolve: (() => void) | null
    let reject: ((reason?: any) => void) | null
@@ -449,7 +449,7 @@ export function Suspense(pendingValue?: unknown) {
          console.warn('NOT YET IMPLEMENTED')
       },
       [SUSPENSE_QUARK]: {
-         pendingValue,
+         pendingState,
          get $promise(): Ion<Promise<unknown> | null> {
             return $suspense
          },
@@ -505,7 +505,6 @@ export function Suspense(pendingValue?: unknown) {
                   }
                   return;
                }
-
 
                pendingPromises.add(promise)
                console.log('Suspense: +promise; pending promises:', pendingPromises.size)

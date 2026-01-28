@@ -174,9 +174,9 @@ import { fetchArticles } from './demos/conduit/src/feature/article-feed/Articles
 //    //    eager: true
 //    // })
 
-listen(window, 'click', () => {
-   doSomething('frog').then((value) => console.log('final:', value))
-})
+// listen(window, 'click', () => {
+//    doSomething('frog').then((value) => console.log('final:', value))
+// })
 
 //    // listen(window, 'contextmenu', (e) => {
 //    //    e.preventDefault()
@@ -224,27 +224,27 @@ listen(window, 'click', () => {
 //       .then(value => console.log('then...', value))
 // })
 
-const doSomething = Async((name: string) => {
-   return ooo
-      .await(FetchSomething('one', rando()), (res, context) => {
-         console.log('(1)', res, name, 'context', context)
-      })
-      .await(FetchSomething('piped one', rando()), piped => {
-         console.log('(2)', piped)
-         return { piped }
-      })
-      .await(FetchSomething('pipette', rando()), (pipette, c) => {
-         console.log('(3)', pipette, 'context', c)
-         return { pipette }
-      })
-      .catch((err, c) => console.error(err, c))
-      .finally(c => console.log('context', c))
-      .await(FetchSomething('two', rando()), (cities, context) => {
-         console.log('(4)', cities, 'context:', context)
-         return 'puffball'
-      })
-   // .then(value => console.log('then...', value))
-})
+// const doSomething = Async((name: string) => {
+//    return ooo
+//       .await(FetchSomething('one', rando()), (res, context) => {
+//          console.log('(1)', res, name, 'context', context)
+//       })
+//       .await(FetchSomething('piped one', rando()), piped => {
+//          console.log('(2)', piped)
+//          return { piped }
+//       })
+//       .await(FetchSomething('pipette', rando()), (pipette, c) => {
+//          console.log('(3)', pipette, 'context', c)
+//          return { pipette }
+//       })
+//       .catch((err, c) => console.error(err, c))
+//       .finally(c => console.log('context', c))
+//       .await(FetchSomething('two', rando()), (cities, context) => {
+//          console.log('(4)', cities, 'context:', context)
+//          return 'puffball'
+//       })
+//    // .then(value => console.log('then...', value))
+// })
 
 // FetchSomething('kermit', 1000)().then(res => {
 
@@ -313,24 +313,24 @@ const doSomething = Async((name: string) => {
 //    })
 
 
-function rando() {
-   return Math.random() * 1000
-}
+// function rando() {
+//    return Math.random() * 1000
+// }
 
 
-function FetchSomething(word: string, time: number) {
-   return () => new Promise((resolve, reject) => {
-      setTimeout(() => {
-         // reject('oops')
-         // throw new Error('oops')
-         resolve('Kermit' + ' ' + Math.round(time) + ' ' + word)
-      }, time)
-   })
-}
+// function FetchSomething(word: string, time: number) {
+//    return () => new Promise((resolve, reject) => {
+//       setTimeout(() => {
+//          // reject('oops')
+//          // throw new Error('oops')
+//          resolve('Kermit' + ' ' + Math.round(time) + ' ' + word)
+//       }, time)
+//    })
+// }
 
-// const app = createRoot(Counter)
+const app = createRoot(TestAsyncMultipliers)
 
-// app.mount('#root')
+app.mount('#root')
 
 
 // const frog = ionize({ name: 'sir robin' })

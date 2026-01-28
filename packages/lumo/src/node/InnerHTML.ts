@@ -1,5 +1,5 @@
 import { isIon, __DEV__checkIfTracked, Ion, toValue, isGetter } from "@rue/quarky";
-import { isObjectLiteral } from "@rue/utils";
+import { isPlainObject } from "@rue/utils";
 import { RawJSXNode } from "./makeJSXNode";
 import { MaybeIon } from "../component/Input";
 import { INTERNAL_RENDER, queueInternalRender, watchToRender } from "../../../quarky/src/reactivity/RenderCycle";
@@ -34,5 +34,5 @@ function toString(value: any) {
 
 export type InnerHTMLKit = { innerHTML: MaybeIon<string> }
 // export function isInnerHTMLKit(nodeEntity: RawJSXNode): nodeEntity is InnerHTMLKit {
-//    return isObjectLiteral(nodeEntity) && 'innerHTML' in nodeEntity
+//    return isPlainObject(nodeEntity) && 'innerHTML' in nodeEntity
 // }

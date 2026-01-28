@@ -100,7 +100,7 @@ function swapKeysAndValues(source: { [key: string]: string }) {
 }
 
 
-export function isObjectLiteral(obj: any): obj is AnyObject {
+export function isPlainObject(obj: any): obj is AnyObject {
    if (obj instanceof Object)
       return obj.constructor === Object;
    return false;

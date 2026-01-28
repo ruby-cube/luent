@@ -1,6 +1,6 @@
 import { component, For, AsyncIon } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
-import { isObjectLiteral } from "@rue/utils";
+import { isPlainObject } from "@rue/utils";
 
 type Article = { id: number, word: string }
 
@@ -89,7 +89,7 @@ function toDebounceable<F extends (...args: any[]) => any>(fn: F): Debounceable<
    function debounceable(...args: Parameters<F>): ReturnType<F> {
       const maybeOptions = args.at(-1)
 
-      if (isObjectLiteral(maybeOptions) && maybeOptions.debounce)
+      if (isPlainObject(maybeOptions) && maybeOptions.debounce)
          return debounce(maybeOptions.debounce, () => fn(...args)) as ReturnType<F>
       else {
          return fn(...args)

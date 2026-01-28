@@ -4,7 +4,7 @@
 import { resolve } from "path"
 import { QUARK } from "../../../quarky/src/abstract/Quark"
 import { AnyObject } from "@rue/types"
-import { isFunction, isObjectLiteral } from "@rue/utils"
+import { isFunction, isPlainObject } from "@rue/utils"
 
 // interface Promise<T> {
 //    /**
@@ -49,22 +49,49 @@ type AwaitKit = {
    options?: ThenOptions
 }
 
+// function wrap(onFulfilled: (value: unknown) => unknown, series: AsyncSeries) {
+//    return (value: unknown) => {
+//       if (series.cancelled) return;
+//       return onFulfilled(value)
+//    }
+// }
+
+type Resolved<T> = T extends PromiseLike<infer V> ? V : T extends () => PromiseLike<infer V> ? V : unknown
+
 export const ooo = {
-   await<T, O extends object>(awaited: T, onFulfilled?: (value: T) => O | void) {
+   await<T, F>(awaited: T, onFulfilled?: F & ((value: Resolved<T>) => any)) {
 
       const promise = toPromise(isFunction(awaited) ? awaited() : awaited) as Promise<any> // TODO: Function and Array cases and value (Promise.resolve())
 
-      return new AsyncNode(
-         onFulfilled ? promise.then(onFulfilled) : promise,
-         onFulfilled ? () => ({}) : undefined
+      const series = {
+         cancelled: false,
+         cancel() {
+            this.cancelled = true
+         }
+      }
+
+      let output: any;
+
+      return new AsyncNode<F extends (...args: any[]) => infer R ? R : Resolved<T>>(
+         series,
+         promise.then((value: Resolved<T>) => {
+            if (series.cancelled) return;
+            return output = onFulfilled ? onFulfilled(value) : value
+         }),
+         () => output
       )
    }
 }
 
 function toPromise(awaited: any) {
    if (awaited instanceof Promise) return awaited
-   else if (awaited instanceof Array) return Promise.all(awaited)
+   if ('asPromise' in awaited) return awaited.asPromise
+   else if (awaited instanceof Array) return Promise.all(toPromises(awaited))
    else return Promise.resolve(awaited)
+}
+
+function toPromises(awaited: any[]) {
+   return awaited.map((awaited) => 'asPromise' in awaited ? awaited.asPromise : awaited)
 }
 
 // class AsyncSeries {
@@ -171,46 +198,54 @@ function toPromise(awaited: any) {
 // }
 
 
-const INTERNAL = Symbol('internal')
+export const INTERNAL = Symbol('internal')
 
+export type AsyncSeries = {
+   cancelled: boolean
+   cancel(): void
+}
 
 /**
  * Represents the completion of an asynchronous operation
  */
-class AsyncNode<C> {
+export class AsyncNode<P> {
 
    private [INTERNAL] = {
-      promise: undefined as any as Promise<any>,
-      $context: undefined as (() => object) | undefined,
-      /**
-       * Converts AsyncNode into promise
-       * @returns Promise<any>
-       */
-      start() {
-         return new Promise((resolve, reject) => {
-            this.promise.then(resolve).catch(reject)
-         })
+      series: undefined as any as AsyncSeries,
+      $piped: undefined as any as () => any,
+      cancel() {
+         this.series.cancel()
       }
    }
 
    constructor(
-      promise: Promise<C>,
-      $context: (() => object) | undefined
+      series: AsyncSeries,
+      promise: Promise<any>,
+      $piped: () => any
    ) {
-      this[INTERNAL].promise = promise
-      this[INTERNAL].$context = $context
+      this[INTERNAL].series = series
+      this.asPromise = promise // previous promise
+      this[INTERNAL].$piped = $piped
    }
 
-   await<T, Res, Rej>(awaited: (context: C) => (PromiseLike<any> | any)[] | PromiseLike<T> | T, onFulfilled?: ((value: T, context: C) => Res | Promise<Res>) | undefined | null, options?: { catch?: ((reason: any, context: C) => Rej | Promise<Rej>) | undefined | null, finally?: (context: C) => void }): AsyncNode<Res | Rej> {
-      const $context = this[INTERNAL].$context
-      let context: any;
-      const promise = this[INTERNAL].promise.then(value => toPromise(awaited($context ? (context = { ...$context(), ...value ?? {} }) : value)))
+   asPromise!: Promise<P>
 
-      return new AsyncNode(onFulfilled ? promise.then(value => {
-         const output = onFulfilled(value, context)
-         if (isObjectLiteral(output) && $context) context = { ...$context(), ...output }
-         return output
-      }) : promise, () => context)
+   await<T, F>(awaited: (piped: P) => T, onFulfilled?: F & ((value: T, piped: P) => any)) {
+      const { $piped, series } = this[INTERNAL]
+      const promise = this.asPromise.then(value => {
+         if (series.cancelled) return;
+         return toPromise(awaited($piped()))
+      })
+
+      let output: any;
+      return new AsyncNode<F extends (...args: any[]) => infer R ? R : Resolved<T>>(
+         series,
+         promise.then(value => {
+            if (series.cancelled) return;
+            return output = onFulfilled ? onFulfilled(value, $piped()) : value
+         }),
+         () => output
+      )
 
       // this.oo
       //    //@ts-expect-error: private property
@@ -249,37 +284,28 @@ class AsyncNode<C> {
     * @param onrejected The callback to execute when the Promise is rejected.
     * @returns A Promise for the completion of the callback.
     */
-   catch<TResult = never>(task?: ((reason: any, context?: AnyObject) => TResult | Promise<TResult>) | undefined | null): AsyncNode<C | TResult> {
+   catch<TResult = never>(task?: ((reason: any, piped: P) => TResult) | undefined | null) {
+      const { $piped, series } = this[INTERNAL]
 
-      // this.oo
-      //    //@ts-expect-error: private property
-      //    .series
-      //    .push({
-      //       type: 'catch',
-      //       awaited: undefined,
-      //       task: onrejected,
-      //       options: undefined
-      //    })
-      // return new AsyncNode(this.oo)
-      return new AsyncNode(
-         this[INTERNAL].promise.catch(error => task?.(error, this[INTERNAL].$context?.())),
-         this[INTERNAL].$context
+      let output: TResult;
+      return new AsyncNode<P | TResult>(
+         series,
+         task
+            ? this.asPromise.catch(error => series.cancelled || (output = task(error, $piped())))
+            : this.asPromise,
+         () => output
       )
    }
 
-   finally(task?: ((context?: AnyObject) => void) | undefined | null): AsyncNode<C> {
-      // this.oo
-      //    //@ts-expect-error: private property
-      //    .series
-      //    .push({
-      //       type: 'finally',
-      //       awaited: undefined,
-      //       task: onSettled,
-      //       options: undefined
-      //    })
+   finally(task?: ((piped: P) => void) | undefined | null): AsyncNode<P> {
+      const { $piped, series } = this[INTERNAL]
+
       return new AsyncNode(
-         this[INTERNAL].promise.finally(() => task?.(this[INTERNAL].$context?.())),
-         this[INTERNAL].$context
+         series,
+         task
+            ? this.asPromise.finally(() => series.cancelled || task($piped()))
+            : this.asPromise,
+         $piped
       )
    }
 }
@@ -289,7 +315,7 @@ class AsyncNode<C> {
 export function Async<F extends (...args: any[]) => AsyncNode<any>>(fn: F): ReturnType<F> extends AsyncNode<infer T> ? (...args: Parameters<F>) => Promise<T> : never {
 
    function asyncFn(...args: any[]) {
-      return fn(...args)[INTERNAL].start()
+      return fn(...args).asPromise
    }
 
    return asyncFn as ReturnType<F> extends AsyncNode<infer T> ? (...args: Parameters<F>) => Promise<T> : never
