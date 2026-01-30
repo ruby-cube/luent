@@ -10,18 +10,27 @@ type HybridIonConfig<T = any> = {
 }
 
 export function createHybridIon(config: HybridIonConfig, props?: AnyObject) {
-   const { derive, initial } = config
-   const subject = config.watch ?? derive
-   const $state = Ion('initial' in config ? initial : derive(), {...props ?? {}, '@set'(e) {
-      console.log('+value', e)
-   }}) as MutableIon<any>
+   const { derive, initial, watch: $watched } = config
+   // const subject = config.watch ?? derive
+   // const $state = Ion('initial' in config ? initial : derive(), {...props ?? {}, '@set'(e) {
+   // }}) as MutableIon<any>
 
-   watch(subject, () => {
-      $state.value = derive()
-   }, { phase: 'SYNC' })
+   // watch(subject, () => {
+   //    $state.value = derive()
+   // }, { phase: 'SYNC' })
 
-   return $state;
+   const $derived = Ion($watched ? (() => ($watched(), derive())) : derive)
+   const $derive = Ion('initial' in config ? false : true)
+   const $state = Ion('initial' in config ? initial : derive())
+
+   return Ion(() => $derive() ? $derived() : $state(), {
+      '@set': (value) => {
+         $derive.value = false;
+         $state.value = value
+      }
+   })
 }
+
 
 // export function createHybridIon<T>(derive: Derivation<T>, initial?: T, props?: AnyObject) {
 //    const $derived = Ion(derive, { '#logAtoms': true })

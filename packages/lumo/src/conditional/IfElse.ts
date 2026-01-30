@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFl
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { $_derivation, $activeUpdate, Ion, popUpdate, PRELUDE, pushUpdate, queueInternalRender, queueTask, swiftUpdate, watchToRender } from "@rue/quarky";
+import { $_derivation, $activeUpdate, getSuspenseCount, Ion, popUpdate, PRELUDE, pushUpdate, queueInternalRender, queueTask, Suspense, swiftUpdate, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../context/context-stack";
@@ -11,8 +11,6 @@ import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
 import { createCommonsNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isPlainObject } from "@rue/utils";
-import { el } from "date-fns/locale";
-import { Suspense, SUSPENSE_QUARK } from "../boundaries/Suspense";
 
 
 export type ConditionalKit = {
@@ -20,7 +18,7 @@ export type ConditionalKit = {
    render: RenderFunction;
    type: ActivationType | undefined;
    $condition: MaybeIon<Booleanny>
-   pending: (() => Promise<any> | null) | undefined
+   pending: Suspense | undefined
    // discard: (() => void) | undefined
 }
 
@@ -34,12 +32,12 @@ export type DynamicConditionalRenderKit = {
    render: AsyncRender;
    transitionNodes: TransitionNode[];
    $condition: Ion<Booleanny> | undefined
-   pending: (() => Promise<any> | null) | undefined
+   pending: Suspense | undefined
    cache: JSXNode[] | undefined;
 }
 
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: (() => Promise<any> | null) | undefined): DynamicConditionalRenderKit {
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: Suspense | undefined): DynamicConditionalRenderKit {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
 
    const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
@@ -89,14 +87,14 @@ export class IfElseKit extends VineNode {
 
       watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
          if (activeIndex === prevIndex) return;
-         console.log('switch conditional!')
+         console.log('switch conditional!', activeIndex, this.kits)
          const kit = this.kits[activeIndex]
          if (kit.pending) {
             if (!kit.cache) {
-               const suspenseQuark = kit.pending[SUSPENSE_QUARK] as Suspense
-               const prevCount = suspenseQuark.quarkCount
+               // TODO: is there a better way of doing this?? Does this need to be wrapped in try{} finally{} ?
+               const prevCount = getSuspenseCount(kit.pending)
                const output = processJSXOutput(kit.render(flask, kit.$condition))
-               const count = suspenseQuark.quarkCount
+               const count = getSuspenseCount(kit.pending)
                if (count > prevCount) {
                   console.warn('YES AWAITED!!!')
                   kit.cache = output

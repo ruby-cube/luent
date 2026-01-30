@@ -13,9 +13,10 @@ import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { createStack, normalizeToArray, toError, UNDEFINED } from "@rue/utils";
-import { AsyncIon, Suspense, SUSPENSE_QUARK } from "./Suspense";
+import { AsyncIon, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
 import { INTERNAL_RENDER, POSTLUDE, PRELUDE, SYNC } from "../../../quarky/src/reactivity/RenderCycle";
 import { AsyncState } from "@rue/flask";
+import { Suspense } from "../../../quarky/src/async/Suspense";
 
 type AwaitKit = {
    $suspense: Suspense | undefined,
@@ -54,6 +55,9 @@ export function Await(renderOrSuspense: [...(AsyncIon<unknown> | Suspense)[], Re
          render = () => output
       }
    }
+   else {
+      $suspense = { get initial() { return !ions[0].loaded } } // TODO: makeshift solution for nonce
+   }
 
    return {
       $suspense,
@@ -74,7 +78,11 @@ export function Meanwhile(renderOrOptions: RenderFunction | RawJSXNode | { timeo
 }
 
 export function Nonce(renderPlaceholder: any) {
-   return Meanwhile(o => o.initial ? renderPlaceholder() : undefined)
+   console.log('Nonce')
+   return Meanwhile(o => {
+      console.log('o?', o)
+      return o.initial ? renderPlaceholder() : undefined
+   })
 }
 
 export function Catch(renderError: RenderError) {
@@ -125,6 +133,7 @@ export function unpackAwaitSeries(series:
    const renderPlaceholder = secondKit && 'renderPlaceholder' in secondKit ? $suspense ? wrapRenderPlaceholder(secondKit.renderPlaceholder) : secondKit.renderPlaceholder : (() => undefined);
    const renderError = secondKit && 'renderError' in secondKit ? secondKit.renderError : thirdKit?.renderError ?? (() => undefined);
    const timeout = secondKit && 'timeout' in secondKit ? secondKit.timeout : undefined
+   console.log('wrap placeholder?', $suspense, secondKit)
 
    function wrapRenderPlaceholder(renderPlaceholder: RenderFunction) {
       return () => {
@@ -148,16 +157,9 @@ export function unpackAwaitSeries(series:
 }
 
 
-export const [getAwaiting, suspenseStack] = AsyncState<Suspense>('Suspense')
-const pushAwaiting = (n: Suspense) => suspenseStack.push(n)
-const popAwaiting = () => suspenseStack.pop()
 
-// export const $awaiting = Ion(() => {
-//    console.trace('$awaiting')
-//   const $suspense = getAwaiting()
-//   if (!$suspense) throw new Error('Must be Awaited')
-//    return $suspense()
-// }, { get initial() { return getAwaiting()?.initial } })
+
+
 
 export function createAwaitSeries(
    series:
@@ -178,7 +180,6 @@ export function createAwaitSeries(
          //    console.log('*** A', $async.pending)
          //    return;
          // }
-         console.log('$promise changed!', SUSPENSE_QUARK in $promise, promis, previous)
          const pending = isPending()
          console.log('pending', pending)
          // if (pending) {

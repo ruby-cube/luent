@@ -1,9 +1,11 @@
 // @ts-nocheck
 import { FromTag, AsyncIon, If, Suspense } from "@rue/lumo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
-import { EACH, Ion, Ionic } from "@rue/quarky";
-import { AsyncAction } from "../../../../packages/lumo/src/boundaries/AsyncAction";
+import { EACH, instantUpdate, Ion, Ionic, IonicProxy, isIonicProxy } from "@rue/quarky";
+import { Action, REFETCH } from "../../../../packages/quarky/src/async/Action";
 import { toggleCompleted } from "./AsyncDemoLessons/data";
+import { AnyObject } from "@rue/types";
+import { isObject } from "@rue/utils";
 
 
 
@@ -12,21 +14,155 @@ const ENTER_KEY = 13;
 
 const generateId = () => Date.now().toString(36);
 
-const IonicTodo = (data) => {
-   // const todo = depot.get(data.id) ?? depot.create(() => Ionic(data))
-   return ionize(data, 'id', {
-      refetch: (id: string) => db.getTodo(id),
-      update: (todo, data) => {
-         todo.completed = data.completed
-         todo.doSomething(data.something)
-      }
-   })
+// const IonicTodo = (data) => asNestedAsync(data, data.id, data => Ionic(new Todo(data)), {
+//    refetch: () => db.getTodo(data.id),
+//    update(todo, data) { // custom updater
+//       return updateProperties(todo, {
+//          completed: data.completed,
+//          _likeCount: data.likeCount,
+//          obj: isPlainObject(data.obj) ? update(todo.obj, data.obj) : data.obj
+//       })
+//    }
+// })
 
-   // return ionize(data.id, data, data => Ionic(new Todo(data)))
+
+const asIonicTodo = AsNestedAsync(data => [data.id, Ionic(new Todo(data)), {
+   refetch: () => db.getTodo(data.id),
+   update(todo, data) { // custom updater
+      return updateProperties(todo, {
+         completed: data.completed,
+         _likeCount: data.likeCount,
+         obj: isPlainObject(data.obj) ? update(todo.obj, data.obj) : data.obj
+      })
+   }
+}])
+
+
+function AsyncModel<D extends AnyObject>(initialData: D, fetch: () => D, config: ModelMethods & { as?: (data: AnyObject) => AnyObject }) {
+   const { as: transform = data => data, refetch } = config
+   const model = transform(initialData)
+   const update = config.update ?? chooseUpdater(model)
+
+   watch(fetch, ({ current: promise }) => {
+      promise.then(data => {
+
+         instantUpdate(() => {
+            update(model, data)
+         })
+      })
+   }, { phase: PRELUDE, eager: true })
+
+   return model
 }
+
+
+
+
+const todos = Ionic([], {
+   '-fetch': () => db.getTodos($id()),
+   [EACH]: {
+      as: data => Ionic(data, {
+         '-refetch': () => db.getTodo(data.id)
+      })
+   }
+})
+
+const todos = Ionic([], {
+   '-fetch': () => db.getTodos($id()),
+   [EACH]: { as: IonicTodo },
+})
+
+function IonicTodo(data: AnyObject) {
+   return Ionic(data, {
+      '-refetch': () => db.getTodo(data.id)
+   })
+}
+
+
+
+
+const AS_ASYNC_MODEL = Symbol('asAsyncModel')
+
+class AsyncModel {
+   pods?: AnyObject[]
+   pendingFetch?: Promise<any> | null = null
+   pendingDispatches?: Promise<any>[]
+}
+
+function updateProperties(model: AnyObject, data: AnyObject) {
+   const keys = Object.keys(data)
+
+   for (const key of keys) {
+      model[key] = data[key]
+   }
+   return model
+}
+
+function updateArray(model: any[], data: any[]) {
+   const length = data.length
+   while (model.length > length) {
+      delete model[model.length - 1]
+   }
+
+   const nestedConfig = getNestedConfig(model)
+   const eachAsModel = nestedConfig?.[EACH]
+
+   if (eachAsModel) {
+      for (i = 0; i < length; i++) {
+         const value = data[i]
+         if (isObject(value)) {
+            model[i] = eachAsModel(value)
+         }
+         else if (value !== model[i]) {
+            model[i] = value
+         }
+      }
+   }
+   else {
+      for (i = 0; i < length; i++) {
+         model[i] = value
+      }
+   }
+}
+
+class IonicDepot {
+   entries = new Map<string | number, AnyObject>() // TODO: memory leak? 
+
+   get(uid: string | number, data: AnyObject) {
+      const model = this.entries.get(uid)
+      if (!model) return;
+      if ('update' in model) {
+         model.update(data)
+      }
+      else {
+         if (__DEV__) throw new Error('model must have update method')
+      }
+      return model
+   }
+
+   create(uid: string | number, data: AnyObject, create: (data: AnyObject) => AnyObject) {
+      const model = create(data)
+      this.entries.set(uid, model)
+      return model
+   }
+
+   destroy(uid: string | number) {
+      this.entries.delete(uid)
+   }
+}
+
+const depot = new IonicDepot()
+
+type ModelMethods = { refetch?: () => D, update?: (data: D) => T }
+
+function asNestedAsync<T extends AnyObject, M extends ModelMethods>(data: T, uid: string | number, create: (data: T) => M) {
+   return depot.get(uid, data) ?? depot.create(uid, data, create)
+}
+
 
 const IonicTodos = todos => Ionic(todos, { [EACH]: IonicTodo })
 
+function refetch() { return REFETCH }
 
 // TODO:
 // [] Race
@@ -43,17 +179,17 @@ export default function TodoApp() {
 
    const $todos = AsyncIon([], () => db.fetchTodos(), { to: IonicTodos })
 
-   const addTodo = AsyncAction((todo: Todo) => {
-      oo.await(db.addTodo(todo), () =>
-         $todos.refetch()
+   const addTodo = Action((todo: Todo) => (ooo
+      .await(db.addTodo(todo),
+         refetch
       )
-   })
+   ), $todos)
 
-   const removeTodo = AsyncAction((todoID: string) => {
-      oo.await(db.removeTodo(todoID), () =>
-         $todos.refetch()
+   const removeTodo = Action((todoID: string) => (ooo
+      .await(db.removeTodo(todoID),
+         refetch
       )
-   })
+   ), $todos)
 
    // // one-way overlap
    // definePartialRace($todos, [
@@ -195,7 +331,7 @@ function Todo({
       removeTodo(todo.id);
    };
 
-   const toggleCompleted = AsyncAction((completed: boolean) => {
+   const toggleCompleted = Action((completed: boolean) => {
       storeRollback({
          completed: todo.completed,
          modifiedDate: todo.modifiedDate

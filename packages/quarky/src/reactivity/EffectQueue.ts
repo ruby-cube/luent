@@ -1,6 +1,6 @@
 import { __DEV__unwrap, noop } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate } from "./IdleUpdate";
+import { catchCancelledUpdate } from "./x_IdleUpdate";
 import { Phase, SYNC, CycleProcess } from "./RenderCycle";
 import { $activeUpdate, Update, popUpdate, pushUpdate, tickUpdate } from "./Update";
 
@@ -88,9 +88,9 @@ export class EffectQueue {
             // }
             run(effect)
          }
-         catch (err) {
-            catchCancelledUpdate(err)
-         }
+         // catch (err) {
+         //    catchCancelledUpdate(err)
+         // }
          finally {
             effectStackCount--
             completed?.add(effect)

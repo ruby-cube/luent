@@ -8,7 +8,7 @@ import { asTrackedAtom } from "../reactivity/Atom";
 import { Ion } from "./Ion";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../reactivity/EffectQueue";
-import { SYNC, isIdleUpdate, $activeUpdate } from "../reactivity/IdleUpdate";
+import { SYNC, isIdleUpdate, $activeUpdate } from "../reactivity/x_IdleUpdate";
 import {  track } from "../reactivity/Compound";
 import { NULL } from "../reactivity/x_LazyState";
 

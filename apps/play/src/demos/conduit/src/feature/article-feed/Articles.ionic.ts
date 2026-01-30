@@ -145,7 +145,7 @@ function asIonicArticle(data: ArticleData) {
 
       })
 
-      doSomething = AsyncAction({
+      doSomething = Action({
          sync() {
             article.super.doSomething()
          },

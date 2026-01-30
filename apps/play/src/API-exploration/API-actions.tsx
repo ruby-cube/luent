@@ -2,9 +2,9 @@
 
 import { component } from "@rue/lumo"
 import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await"
-import { doAction } from "../../../../packages/quarky/src/action/Action"
+import { doAction } from "../../../../packages/quarky/src/x_action/Action"
 
-// AsyncAction() is about managing and coordinating async operations
+// Action() is about managing and coordinating async operations
 // - it batches updates across async scopes
 
 // Actions are about user intention, outermost action is considered the action
@@ -50,7 +50,7 @@ request
 
 function TodoWithSuspense() {
 
-   const toggleComplete = AsyncAction(({ ooo }) => () => {
+   const toggleComplete = Action(({ ooo }) => () => {
       mu: todo.complete = !todo.complete
 
       ooo.await(dispatch('...', todo.complete))

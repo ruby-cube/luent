@@ -1,8 +1,7 @@
-// @ts-nocheck
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
+
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -75,9 +74,10 @@ import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demos/TestAsyncSelect';
 import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './demos/TestAsyncMultiply';
 import { TestAsyncTabs } from './demos/TestAsyncTabs';
-import { Async, ooo } from '../../../packages/lumo/src/boundaries/ooo';
+import { Async, ooo } from '../../../packages/quarky/src/async/ooo';
 import { Counter } from './TestCounterB';
 import { fetchArticles } from './demos/conduit/src/feature/article-feed/Articles.ionic';
+import { TestMutableDerivation } from './demos/TestMutableDerivations';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -328,7 +328,7 @@ import { fetchArticles } from './demos/conduit/src/feature/article-feed/Articles
 //    })
 // }
 
-const app = createRoot(TestAsyncMultipliers)
+const app = createRoot(TestAsyncSelect)
 
 app.mount('#root')
 

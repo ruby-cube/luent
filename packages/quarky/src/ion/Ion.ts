@@ -8,6 +8,7 @@ import { isGetter } from "../reactivity/Substance";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { SimpleState } from "../reactivity/State";
 import { createHybridIon } from "./HybridIon";
+import { AsyncIon } from "../async/AsyncIon";
 
 /* API */
 export type Ion<T = unknown> = (() => T) & { '~ion': true }
@@ -174,16 +175,16 @@ export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, pr
    return (...args: A & any) => Ion(constructor(...args), proto) as MutableIon<T> & P
 }
 
-
+// TODO: Optimization: Use compiler to presort different types of ions
 function asIon(
    initialState: unknown | (() => unknown),
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      if (props && '+value' in props) {
-         const watch = props['+watch']
-         delete props['+value']
-         delete props['+watch']
+      if (props && '-writable' in props) {
+         const watch = props['-watch']
+         delete props['-writable']
+         delete props['-watch']
          return createHybridIon({ derive: initialState, watch }, props)
       }
       return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props))
@@ -192,12 +193,19 @@ function asIon(
    if (isIon(initialState)) {
       return initialState
    }
-   if (props && '+derive' in props) {
-      const derive = props['+derive']
-      const watch = props['+watch']
-      delete props['+derive']
-      delete props['+watch']
+   if (props && '-derive' in props) {
+      const derive = props['-derive']
+      const watch = props['-watch']
+      delete props['-derive']
+      delete props['-watch']
       return createHybridIon({ derive, initial: initialState, watch }, props)
+   }
+   if (props && '-fetch' in props) {
+      const fetch = props['-fetch']
+      const watch = props['-watch'] // TODO:
+      delete props['-fetch']
+      delete props['-watch']
+      return AsyncIon(initialState, fetch, props)
    }
    return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), props), props)) // TODO: add inert mark map
 }

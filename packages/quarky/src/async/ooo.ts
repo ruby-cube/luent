@@ -1,11 +1,8 @@
 
 // declare type PromiseConstructorLike = new <T>(executor: (resolve: (value: T | Promise<T>) => void, reject: (reason?: any) => void) => void) => Promise<T>;
 
-import { resolve } from "path"
-import { QUARK } from "../../../quarky/src/abstract/Quark"
-import { AnyObject } from "@rue/types"
 import { isFunction, isPlainObject } from "@rue/utils"
-import { instantUpdate, swiftUpdate } from "@rue/quarky"
+import { instantUpdate } from "../reactivity/Update"
 
 // interface Promise<T> {
 //    /**
@@ -57,7 +54,7 @@ type AwaitKit = {
 //    }
 // }
 
-type Resolved<T> = T extends PromiseLike<infer V> ? V : T extends () => PromiseLike<infer V> ? V : unknown
+export type Resolved<T> = T extends PromiseLike<infer V> ? V : T extends () => PromiseLike<infer V> ? V : unknown
 
 export const ooo = {
    await<T, F>(awaited: T, onFulfilled?: F & ((value: Resolved<T>) => any)) {

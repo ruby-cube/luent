@@ -2,7 +2,6 @@ import { component, For, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { EACH, Ionic } from "../../../packages/quarky/src/ionic/Ionic";
-import { Ion } from "@rue/quarky";
 
 
 const randomColor = useRandomColorGenerator()

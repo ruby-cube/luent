@@ -1,13 +1,24 @@
-import { instantUpdate, Ion } from "@rue/quarky";
-import { Suspense, SUSPENSE_QUARK } from "./Suspense";
 import { AsyncNode, AsyncSeries, INTERNAL } from "./ooo";
+import { AnyObject } from "@rue/types";
+import { isFunction, isObject } from "@rue/utils";
+import { addToSuspense, Suspense } from "./Suspense";
+import { Ion, isIon, MutableIon } from "../ion/Ion";
+import { instantUpdate } from "../reactivity/Update";
 
 // TODO: races
 // suspense
 
 // export let oo: { await<T>(dispatch: () => Promise<T>, onFulfilled?: (result: T) => unknown): Promise<void> } = { await() { } }
 
-export function AsyncAction<F extends (...args: any[]) => AsyncNode<unknown>>(dispatch: F, options?: { suspense: Suspense }): F & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
+// type DispatchAction<F extends (...args: any[]) => any> = ((...args: Parameters<F>) => Resolved<ReturnType<F>>) & { pending: Promise<unknown> | null, error: Error | null, retry(): void }
+
+type Ions<V> = V extends { [key: PropertyKey]: any } ? { [K in keyof V]: MutableIon<V[K]> } : MutableIon<V>
+
+export const REFETCH = Symbol('refetch')
+
+export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V>), toBeMutated: Ions<V>, options?: { suspense: Suspense }): ((...args: F extends (...args: infer P) => any ? P : never) => F extends (...args: any[]) => infer R ? R extends AsyncNode<infer V> ? Promise<V> : never : never) & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
+   const ions = (isIon(toBeMutated) ? undefined : toBeMutated) as AnyObject
+   const ionKeys = ions ? ions instanceof Array ? Array.from(ions.keys()) : Object.keys(ions) : undefined
    let resolve: ((value: any | PromiseLike<any>) => void) | null;
    let reject: ((reason?: any) => void) | null
    const $promise = Ion(null as Promise<unknown> | null)
@@ -17,7 +28,7 @@ export function AsyncAction<F extends (...args: any[]) => AsyncNode<unknown>>(di
    let pendingSeries: AsyncSeries | null = null
 
    function cancelIfFetching() {
-      if (pendingSeries){
+      if (pendingSeries) {
          pendingSeries.cancel()
          console.warn('CANCEL FETCH')
          pendingSeries = null
@@ -28,13 +39,14 @@ export function AsyncAction<F extends (...args: any[]) => AsyncNode<unknown>>(di
 
    const quark = { $promise, cancelIfFetching }
 
-   options?.suspense?.[SUSPENSE_QUARK].start(quark)
+   const suspense = options?.suspense
+   if (suspense) addToSuspense(suspense, quark)
 
    function dispatchAction(...args: any[]) {
       cancelIfFetching()
       if (!resolve) {
          $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-         if (!options?.suspense) {
+         if (!suspense) {
             $promise.value.catch(err => {
                if (err === 'cancelled') return;
                else throw err
@@ -72,6 +84,35 @@ export function AsyncAction<F extends (...args: any[]) => AsyncNode<unknown>>(di
                reject = null
             }
             instantUpdate(() => {
+               const updateIon = (ion: MutableIon<any>, value: any) => {
+                  if (value === REFETCH) {
+                     console.log('refetch :)')
+                     if (!('refetch' in ion) || !isFunction(ion.refetch)) {
+                        console.log('refetch :(')
+                        if (__DEV__) throw new Error('Refetch failed. Refetch method required in order to refetch')
+                     }
+                     else {
+                        ion.refetch()
+                     }
+                  }
+                  else ion.value = value
+               }
+
+               if (ionKeys) {
+                  console.log('ionKeys', ionKeys)
+                  for (const key of ionKeys) {
+                     if (isObject(value) && key in value) {
+                        updateIon(ions[key], value[key])
+                     }
+                     else if (__DEV__) {
+                        throw new Error('The keys of Action return type must match keys of toBeMutated argument')
+                     }
+                  }
+               }
+               else {
+                  updateIon(toBeMutated as MutableIon<any>, value)
+               }
+
                $promise.value = null
             })
          })
@@ -86,6 +127,7 @@ export function AsyncAction<F extends (...args: any[]) => AsyncNode<unknown>>(di
                $promise.value = null
                // $error.value = err
             })
+            throw err
          })
 
 
@@ -141,7 +183,7 @@ export function AsyncAction<F extends (...args: any[]) => AsyncNode<unknown>>(di
       //       if (err === 'cancelled') return;
       //       else throw err;
       //    })
-      // return output
+      return output
    }
 
    Object.defineProperties(dispatchAction, {
@@ -151,5 +193,5 @@ export function AsyncAction<F extends (...args: any[]) => AsyncNode<unknown>>(di
    })
 
 
-   return dispatchAction as F & { pending: Promise<unknown> | null, error: Error | null, retry(): void }
+   return dispatchAction as any
 }

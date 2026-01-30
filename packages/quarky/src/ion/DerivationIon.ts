@@ -74,6 +74,16 @@ export function createMemoizedDerivation(
    $derivedState[QUARK] = new DerivationIonQuark(substance)
 
    if (methods) {
+      const onSet = methods['@set']
+      const onGet = methods['@get']
+      if (onSet || onGet)
+         Object.defineProperty($derivedState, 'value', {
+            set: onSet,
+            get: onGet,
+         })
+   }
+
+   if (methods) {
       const descriptors = Object.getOwnPropertyDescriptors(methods)
       if (__DEV__ && !isPlainObject(methods)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
       if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')

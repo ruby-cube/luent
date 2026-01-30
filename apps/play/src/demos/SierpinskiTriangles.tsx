@@ -54,7 +54,7 @@ export function TriangleDemo() {
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
 
-   // const incrementSeconds = AsyncAction({
+   // const incrementSeconds = Action({
    //    meantime: () => $realSeconds.value = ($seconds() % 10) + 1,
    //    dispatch: () => $seconds.value = ($seconds() % 10) + 1
    // })

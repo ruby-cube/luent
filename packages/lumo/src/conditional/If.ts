@@ -1,10 +1,9 @@
 import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, resetGroupActivationType } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
-import { Ion, isGetter, isInertIon, isIon, toValue } from "@rue/quarky";
+import { getAwaiting, Ion, isGetter, isInertIon, isIon, toValue } from "@rue/quarky";
 import { ConditionalKit, IfElseKit, renderShowHideSeries, toDynamicConditionalKits } from "./IfElse";
 import { getFlask } from "@rue/flask";
 import { isFunction } from "@rue/utils";
-import { getAwaiting } from "../boundaries/Await";
 
 // let currentNodePodIndex: number | undefined = undefined
 
@@ -119,6 +118,7 @@ export function createIfSeries(kits: ConditionalKit[]) {
    if (activationType === 'show') {
       return renderShowHideSeries(kits)
    }
+   if (kits.at(-1)?.statementType !== 'else') kits.push(Else(()=>undefined))
    const dynamicKits = toDynamicConditionalKits(kits, activationType)
    return new IfElseKit(dynamicKits, getFlask())
 }

@@ -83,6 +83,7 @@ function isAwaitSeriesElement(node, seriesType) {
    return t.isCallExpression(node) && (
       node.callee.name === 'Await'
       || node.callee.name === 'Meanwhile'
+      || node.callee.name === 'Nonce'
       || node.callee.name === 'Catch' && seriesType === 'Await'
    )
 }

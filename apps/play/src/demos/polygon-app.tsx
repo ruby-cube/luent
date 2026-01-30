@@ -1,27 +1,13 @@
 import { component, For, FromTag, Style, } from "@rue/lumo"
-import { EACH, Ion, Ionic, ionic, ionize, Ionized } from "@rue/quarky"
-
-function mu<T>(obj: T) {
-   return obj
-}
+import { EACH, Ion, Ionic } from "@rue/quarky"
 
 type Stat = {
    label: string,
    value: number
 }
 
-
-
 export function PolygonApp() {
    const $newLabel = Ion('')
-   // const stats = Ionic([
-   //    Ionic({ label: 'A', value: 100 }),
-   //    Ionic({ label: 'B', value: 100 }),
-   //    Ionic({ label: 'C', value: 100 }),
-   //    Ionic({ label: 'D', value: 100 }),
-   //    Ionic({ label: 'E', value: 100 }),
-   //    Ionic({ label: 'F', value: 100 })
-   // ])
 
    const stats = Ionic([
       { label: 'A', value: 100 },
@@ -30,23 +16,22 @@ export function PolygonApp() {
       { label: 'D', value: 100 },
       { label: 'E', value: 100 },
       { label: 'F', value: 100 }
-   ], {
-      [EACH]: Ionic
-   })
+   ], { [EACH]: { as: Ionic } })
+
 
    function add(e: any) {
       e.preventDefault()
       if (!$newLabel()) return
-      mu(stats).push(Ionic({
+      mu: stats.push(Ionic({
          label: $newLabel(),
          value: 100
       }))
-      mu($newLabel).value = ''
+      mu: $newLabel.value = ''
    }
 
    function remove(stat: Ionized<Stat>) {
       if (stats.length > 3) {
-         mu(stats).splice(stats.indexOf(stat), 1)
+         mu: stats.splice(stats.indexOf(stat), 1)
       } else {
          alert("Can't delete more!")
       }

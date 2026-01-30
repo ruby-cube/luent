@@ -49,7 +49,7 @@ const $todos = AsyncIon({
       })
    },
 
-   addTodo: AsyncAction({
+   addTodo: Action({
       dispatch({ ooo }, todo) {
          ooo.await(db.addTodo(todo))
             .then(() => $data.refetch())
@@ -57,7 +57,7 @@ const $todos = AsyncIon({
       }
    }),
 
-   delTodo: AsyncAction({
+   delTodo: Action({
       dispatch({ ooo }, todo) {
          ooo.await(db.delTodo(todo))
             .then(() => $data.refetch())
@@ -65,7 +65,7 @@ const $todos = AsyncIon({
       }
    }),
 
-   deleteTodo: AsyncAction({
+   deleteTodo: Action({
       sync(index: number) {
          return $todos().deleteTodo(index, 1)
       },
@@ -75,7 +75,7 @@ const $todos = AsyncIon({
       },
    }),
 
-   removeTodo: AsyncAction({
+   removeTodo: Action({
       sync(index: number) {
          return $todos().deleteTodo(index, 1)
       },
@@ -85,7 +85,7 @@ const $todos = AsyncIon({
       },
    }),
 
-   complexOp: AsyncAction({
+   complexOp: Action({
       dispatch({ ooo, output }, index) {
          mu: $something.value = 0
 

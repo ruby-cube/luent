@@ -82,7 +82,7 @@ export class StateChangeEvent<S = unknown> {
 export type WatchSubjects = (Object | Ion)[]
 
 export function watch<
-   T extends Ionized<object> | Ion<any> | WatchSubjects
+   T extends Ionized<object> | Ion<any> | (()=> any) | WatchSubjects
 >(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
 
    options.retrack = options.retrack ?? true;

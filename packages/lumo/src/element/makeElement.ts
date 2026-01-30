@@ -187,7 +187,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    delete attributes['mu:checked'];
    attributes.checked = () => ion() === radioValue;
    if (!isIon(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion)
@@ -201,7 +201,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    delete attributes['mu:value'];
    attributes.value = ion;
    if (!isIon(ion)) {
-      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
+      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion)
@@ -237,7 +237,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isIon(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       element.addEventListener('change', e => {

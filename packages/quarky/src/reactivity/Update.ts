@@ -1,6 +1,6 @@
 import { createStack } from "@rue/utils";
 import { INTERNAL_RENDER, PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
-import { UpdateType } from "./IdleUpdate";
+import { UpdateType } from "./x_IdleUpdate";
 
 export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
 
@@ -152,7 +152,7 @@ export function SlowUpdate<T>(fn: (...args: any[]) => T): () => Promise<T> {
    }
 }
 
-// FIX: temporary ... I think we should just create LongUpdate or AsyncAction (should there be a distinction?)
+// FIX: temporary ... I think we should just create LongUpdate or Action (should there be a distinction?)
 export function slowUpdate(task: () => any): Promise<any> {
    return (getLazyUpdate() ?? createLazyUpdate()).queue(task)
 }

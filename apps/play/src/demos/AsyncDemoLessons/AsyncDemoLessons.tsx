@@ -4,7 +4,7 @@ import { AsyncIon, component, Else, For, FromTag, HandleEvent, If, RenderSlot, S
 import * as db from "./data/index"
 import { Ion } from "@rue/quarky";
 import { Await, Meanwhile, Nonce } from "../../../../../packages/lumo/src/boundaries/Await";
-import { AsyncAction } from "../../../../../packages/lumo/src/boundaries/AsyncAction";
+import { Action } from "../../../../../packages/quarky/src/async/Action";
 
 
 
@@ -194,7 +194,7 @@ export function SearchInput(input: FromTag<{ value: string, 'on:change': HandleE
 
 
 export function CompleteButton({ $completed }: FromTag<{ completed: Ion<boolean> }>) {
-   const toggleCompleted = AsyncAction((id: string) => {
+   const toggleCompleted = Action((id: string) => {
       storeRollback($completed(), prev => {
          $completed.value = prev
       })

@@ -1,9 +1,14 @@
 import { isFunction, toError } from "@rue/utils";
-import { Ion, MutableIon, watch, instantUpdate, queueIonicPrelude, swiftUpdate, PRELUDE, $_derivation, untracked, queueTask, runIonicTask, SYNC, TICK, $activeUpdate } from "@rue/quarky";
-import { getActiveFlask } from "@rue/flask";
-import { getAwaiting } from "./Await";
+import { AsyncState, getActiveFlask } from "@rue/flask";
+import { addToSuspense, Suspense } from "./Suspense";
+import { Ion, MutableIon } from "../ion/Ion";
+import { instantUpdate } from "../reactivity/Update";
+import { PRELUDE } from "../reactivity/RenderCycle";
+import { watch } from "../reactivity/Watcher";
 
-
+export const [getAwaiting, suspenseStack] = AsyncState<Suspense>('Suspense')
+export const pushAwaiting = (n: Suspense) => suspenseStack.push(n)
+export const popAwaiting = () => suspenseStack.pop()
 
 // export type SuspenseNodeInput = {
 //    timeout?: number,
@@ -37,9 +42,11 @@ export type $Async<T> = {
    loaded: boolean,
    fetching: boolean
    cancelFetch: () => void
+
    then: Promise<T>['then']
    catch: Promise<T>['then']
    finally: Promise<T>['then']
+
    refetch(): void
    // TODO: need a way to distinguish re'fetches' from initial 'fetch'
    // pending: boolean
@@ -48,36 +55,37 @@ export type $Async<T> = {
 }
 export type AsyncIon<T> = MutableIon<T> & $Async<T>
 export type Awaited<T> = MutableIon<T | undefined> & $Async<T>
-export type Resolved<T> = MutableIon<T> & {
-   [SUSPENSE_ION]: true,
-   pending: false,
-   loading: boolean,
-   fetching: boolean,
-   error: null, // different
-   onLoaded(initial: boolean): unknown
-   // cancel(): void
-   // onCancel(task: () => void): void
-}
+// export type Resolved<T> = MutableIon<T> & {
+//    [SUSPENSE_ION]: true,
+//    pending: false,
+//    loading: boolean,
+//    fetching: boolean,
+//    error: null, // different
+//    onLoaded(initial: boolean): unknown
+//    // cancel(): void
+//    // onCancel(task: () => void): void
+// }
 
 
-export function assertResolved<T>(ion: AsyncIon<T>): asserts ion is Resolved<T> {
-   if (ion instanceof Promise)
-      throw Error('suspense not resolved yet')
-   if (ion instanceof Error)
-      throw Error('suspense has errored')
-   return;
-}
+// export function assertResolved<T>(ion: AsyncIon<T>): asserts ion is Resolved<T> {
+//    if (ion instanceof Promise)
+//       throw Error('suspense not resolved yet')
+//    if (ion instanceof Error)
+//       throw Error('suspense has errored')
+//    return;
+// }
 
-export function isResolved<T>(ion: AsyncIon<T>): ion is Resolved<T> {
-   return !(ion.value instanceof Promise || ion.value instanceof Error)
-}
+// export function isResolved<T>(ion: AsyncIon<T>): ion is Resolved<T> {
+//    return !(ion.value instanceof Promise || ion.value instanceof Error)
+// }
 
 export function isPending(ion: AsyncIon<unknown>) {
    return ion.value instanceof Promise;
 }
 
 
-type AsyncIonOptions = {
+type AsyncIonOptions<T = any, U = any> = {
+   to: (value: T) => U,
    awaited?: true,
    suspense?: Suspense,
    debounced?: number
@@ -125,7 +133,7 @@ export function AsyncIon<
 ): OPT extends undefined ? AsyncIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : AsyncIon<T> {
    const { initialState, fetch, options } = unpackAsyncIonArgs(arg1, arg2, arg3)
 
-   let pendingStart: DOMHighResTimeStamp;
+   let pendingStart: DOMHighResTimeStamp | undefined;
    let resolve: ((value: T | PromiseLike<T>) => void) | null;
    let reject: ((reason?: any) => void) | null
    const $loaded = Ion(false)
@@ -140,7 +148,7 @@ export function AsyncIon<
 
    const $ion = Ion(initialState as unknown)
    const suspense = options?.suspense
-   const pendingState = options?.suspense?.[SUSPENSE_QUARK].pendingState
+   const pendingState = options?.suspense?.pendingState
 
    const $async = Ion(suspense && pendingState !== undefined ? () => suspense() ? pendingState : $ion() : () => $ion() as unknown, {
       [SUSPENSE_ION]: true,
@@ -210,9 +218,9 @@ export function AsyncIon<
    // else {
    const cancelledPromises = new Set()
 
-   suspense?.[SUSPENSE_QUARK].start(quark)
+   if (suspense) addToSuspense(suspense, quark)
    const awaiting = options?.awaited && getAwaiting()
-   awaiting?.[SUSPENSE_QUARK].start(quark)
+   if (awaiting) addToSuspense(awaiting, quark)
 
 
    // const inSuspense = suspense || awaiting
@@ -220,7 +228,8 @@ export function AsyncIon<
    let timeout: NodeJS.Timeout | undefined;
    let timeoutResolve: NodeJS.Timeout | undefined;
 
-   watch(fetch, ({ current: output }) => {
+   // TODO: optimization: handle fetch as promise outside of watch
+   watch(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
       cancelIfFetching()
 
       if (output instanceof Promise) {
@@ -250,7 +259,7 @@ export function AsyncIon<
             }
             else {
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-                pendingStart = performance.now()
+               pendingStart = performance.now()
                if (!options?.awaited && !options?.suspense) {
                   $promise.value.catch(err => {
                      if (err === 'cancelled') return;
@@ -374,14 +383,14 @@ export function AsyncIon<
    return $async as any as AsyncIon<T>;
 }
 
-export function asAsyncIon<T>(value: AsyncIon<T> | Promise<T>, options: { awaited: true }): AsyncIon<T> {
-   if (isAsyncIon(value)) return value;
-   return AsyncIon(undefined, value)
-}
+// export function asAsyncIon<T>(value: AsyncIon<T> | Promise<T>, options: { awaited: true }): AsyncIon<T> {
+//    if (isAsyncIon(value)) return value;
+//    return AsyncIon(undefined, value)
+// }
 
-function isAsyncIon(value: unknown): value is AsyncIon<unknown> {
-   return isFunction(value) && SUSPENSE_ION in value;
-}
+// function isAsyncIon(value: unknown): value is AsyncIon<unknown> {
+//    return isFunction(value) && SUSPENSE_ION in value;
+// }
 
 function Debouncer() {
    let id: NodeJS.Timeout;
@@ -397,166 +406,3 @@ function Debouncer() {
 }
 
 
-export type Suspense = Ion<Promise<void> | null> & {
-   initial: boolean
-   oo: Promise<unknown> | null
-   await(): void
-   retry(): void
-   [SUSPENSE_QUARK]: SuspenseQuark
-}
-
-type SuspenseQuark = {
-   start(quark: AsyncQuark): void
-   pendingState: any
-} & AsyncQuark
-
-export const SUSPENSE_QUARK = Symbol('suspense quark')
-
-type AsyncQuark = {
-   cancelIfFetching(): boolean
-   $promise: Ion<Promise<unknown> | null>
-}
-
-export function Suspense(pendingState?: unknown) {
-   const quarks = new Set<AsyncQuark>()
-   let resolve: (() => void) | null
-   let reject: ((reason?: any) => void) | null
-
-   const pendingPromises = new Set()
-
-   const isPending = () => {
-      for (const { $promise } of quarks) {
-         if ($promise()) return true
-      }
-      return false
-   }
-
-   let startTime = performance.now();
-   function timecheck() {
-      const delta = performance.now() - startTime
-      console.log('Suspense: suspense took', delta)
-   }
-
-   const $suspense = Ion(null as Promise<unknown> | null, {
-      initial: true,
-      get oo(): Promise<unknown> | null {
-         return $suspense()
-      },
-      await(): Suspense {
-         return $suspense()
-      },
-      retry() {
-         console.warn('NOT YET IMPLEMENTED')
-      },
-      [SUSPENSE_QUARK]: {
-         pendingState,
-         get $promise(): Ion<Promise<unknown> | null> {
-            return $suspense
-         },
-         get quarkCount() {
-            return quarks.size
-         },
-         cancelIfFetching() {
-            console.warn('group cancel if fetching')
-            let success = false
-            for (const { cancelIfFetching, $promise } of quarks) {
-               const cancelled = success = cancelIfFetching()
-               if (cancelled) pendingPromises.delete($promise()) // TODO: not sure if this is correct...
-            }
-            return success
-         },
-         start(quark: AsyncQuark) {
-            // console.log('start suspense', quark, quarks.size)
-            const { $promise } = quark
-            if ($promise() && !$suspense()) {
-               console.log('Suspense: ++ new promise')
-               $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
-               startTime = performance.now()
-            }
-            console.log('Suspense: starting suspense', $promise())
-            quarks.add(quark)
-            getActiveFlask().onDiscard(() => {
-               if (quark.cancelIfFetching()) pendingPromises.delete($promise())
-               console.log('Suspense: discarding quark')
-               quarks.delete(quark)
-            })
-
-            watch($promise, ({ current: promise, previous, eager }) => {
-               console.log('SUSPENSE: promise:', promise, 'prev:', previous)
-               if (!eager && promise === previous) {
-                  console.log('Suspense: same', promise)
-                  return;
-               }
-               pendingPromises.delete(previous)
-               if (promise === null) {
-                  if (!$suspense()) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
-                  if (!pendingPromises.has(previous)) console.warn('Suspense: previous not in pending promises', previous)
-                  console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
-                  if (pendingPromises.size === 0 && !isPending()) {
-                     if (resolve) {
-                        timecheck()
-                        resolve()
-                        resolve = null
-                        reject = null
-                     }
-                     console.log('Suspense RESOLVED: Suspense to NULL :D', $suspense.value)
-                     $suspense.value = null
-                     if ($suspense.initial) $suspense.initial = false
-                  }
-                  return;
-               }
-
-               pendingPromises.add(promise)
-               console.log('Suspense: +promise; pending promises:', pendingPromises.size)
-               if ($suspense.initial) $suspense.initial = false
-               if (!$suspense()) {
-                  startTime = performance.now()
-                  console.log('Suspense: ++ new suspense promise')
-                  $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
-               }
-
-               promise
-                  .catch(err => {
-                     pendingPromises.delete(promise)
-                     if (err === 'cancelled') {
-                        console.log('Suspense: catch canceled; delete promise', pendingPromises.size)
-                        return;
-                     }
-                     console.log('ERROR')
-                     if (reject) {
-                        reject(err)
-                        resolve = null
-                        reject = null
-                     }
-                     instantUpdate(() => {
-                        // $error.value = toError(err);
-                        $suspense.value = null
-                     })
-                  })
-            }, { phase: PRELUDE, eager: true })
-         }
-      }
-   })
-
-   return $suspense
-}
-
-
-// +++ FETCH () => db.fetchStates
-// +++ FETCH () => $activeState()
-// RENDER PLACEHOLDER
-// +++ FETCH () => $activeState()
-// +++ no promise () => $activeState()
-
-// RENDER PLACEHOLDER
-// +++ FETCH () => db.fetchStates
-// +++ promise () => db.fetchStates
-// +++ FETCH () => $activeState()
-// +++ no promise () => $activeState()
-// +++ resolved () => db.fetchStates
-// +++ FETCH () => $activeState()
-// +++ resolved () => $activeState()
-// *** C false null
-// RENDER RESOLVED
-// +++ FETCH async () => {    await $cities
-// +++ resolved async () => {    await $cities

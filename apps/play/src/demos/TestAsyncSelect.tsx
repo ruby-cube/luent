@@ -1,8 +1,8 @@
 //@ts-nocheck
 import { component, For, If, AsyncIon } from "@rue/lumo";
-import { Ion, PRELUDE, queueIonicTask, swiftUpdate, SYNC, watch } from "@rue/quarky";
+import { Ion, PRELUDE, queueIonicTask, swiftUpdate, SYNC, watch, ooo } from "@rue/quarky";
 import { normalizeToArray } from "@rue/utils";
-import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
+import { Await, Meanwhile, Nonce } from "../../../../packages/lumo/src/boundaries/Await";
 
 const WRITABLE = true
 
@@ -11,28 +11,40 @@ const WRITABLE = true
 // [] AsyncIon derivation shorthand
 // [] Replace If(($cities().length)) with Await($cities), hold, $suspense
 
+// const $activeState = Ion(null as null | string, { '-watch': $states, '-derive': () => $states()[0] })
 
+// const $activeCity = Ion(null, {
+//    '-watch': $cities,
+//    '-derive': () => $cities()[0]
+// })
+// const $state = Ion((prev: any) => $cities.pending ? prev : $activeState())
+// const $state = AsyncIon(async () => { await $cities.pending; return $activeState() })
+// const $some = AsyncIon({
+//    fetch: () => db.getSomething(),
+//    dispatch: value => db.setSomething(value),
+//    optimistic: true,
+//    awaited: true
+// })
 
 export function TestAsyncSelect() {
 
-   const $states = AsyncIon(() => db.fetchStates())
-   const $activeState = Ion(() => $states()?.[0], { '+value': true })
-   // const $activeState = Ion(null as null | string, { '+watch': $states, '+derive': () => $states()[0] })
+   const $states = Ion([], {
+      '-fetch': () => db.fetchStates()
+   })
+   const $activeState = Ion(() => $states()[0], { '-writable': true })
 
-   const $cities = AsyncIon(() => $activeState() ? db.fetchCities($activeState()!) : [])
-   const $activeCity = Ion(() => $cities()?.[0], { '+value': true })
-   // const $activeCity = Ion(null, { '+watch': $cities, '+derive': () => $cities()[0] })
-   // const $state = Ion((prev: any) => $cities.pending ? prev : $activeState())
-   const $state = AsyncIon(async () => { await $cities.pending; return $activeState() })
-   
-   // const $state = AsyncIon(() => { oo.await($cities, $activeState) })
 
-   // const $some = AsyncIon({
-   //    fetch: () => db.getSomething(),
-   //    dispatch: value => db.setSomething(value),
-   //    optimistic: true,
-   //    awaited: true
-   // })
+   const $cities = Ion([], {
+      '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : []
+   })
+   const $activeCity = Ion(() => $cities()[0], { '-writable': true })
+
+
+   const $state = Ion(undefined, {
+      '-fetch': async () => { await $cities.pending; return $activeState() }
+      // '-fetch': () => ooo.await($cities, $activeState)
+   })
+
 
    return component(
       <>
@@ -52,18 +64,19 @@ export function TestAsyncSelect() {
 
                <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
                   {/* {($cities.pending ? '' : $activeCity()+',')} {($cities.pending ? '...' : $activeState())} */}
-                  {/* Selection: {$activeCity}, {async () => { await $cities.pending; return $activeState() }} */}
                   Selection: {$activeCity}, {$state}
-                  {/* Selection: {$activeCity}, {(prev: any) => $cities.pending ? prev : $activeState()} */}
-                  {/* Selection: {$activeCity}, {(oo.await($cities, $activeState))} */}
-
-                  {/* Selection: {$activeCity}, {$Async((oo.await($cities, $activeState)))} */}
+                  {/* Selection: {$activeCity}, {(ooo.await($cities, $activeState))} */}
                </p>
             </>
          )}
-         {Meanwhile(
-            $cities.loaded ? undefined : 'loading...'
+         {Nonce(() =>
+            'loading...'
          )}
+
+         {/* {Meanwhile(o => {
+            console.log('o', o)
+            return $cities.loaded ? undefined : 'loading...'
+         } */}
       </>
    )
 }

@@ -38,9 +38,9 @@ const PROTO = Symbol('proto')
 
 const todos = Pion([] as Todo[], {
 
-   push: AsyncAction((todo: Todo) => via(Array, todos).push(todo)),
+   push: Action((todo: Todo) => via(Array, todos).push(todo)),
 
-   addTodo: AsyncAction((todo: Todo) => {
+   addTodo: Action((todo: Todo) => {
       via(Todos, todos).addTodo(todo)
    }),
 
@@ -77,7 +77,7 @@ function Ionizer<T, P>(obj: T, proto: (_super: T) => P & ThisType<Omit<T, keyof 
    return { ...obj, ...proto }
 }
 
-function AsyncAction<F>(fn: F) {
+function Action<F>(fn: F) {
    return fn
 }
 
