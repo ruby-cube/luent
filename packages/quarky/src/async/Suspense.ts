@@ -3,6 +3,7 @@ import { PRELUDE } from "../reactivity/RenderCycle"
 import { instantUpdate } from "../reactivity/Update"
 import { watch } from "../reactivity/Watcher"
 import { Ion } from "../ion/Ion"
+import { AsyncQuark } from "./AsyncIon"
 
 export type Suspense = Ion<Promise<void> | null> & {
    initial: boolean
@@ -20,10 +21,7 @@ type SuspenseQuark = {
 
 const SUSPENSE_QUARK = Symbol('suspense quark')
 
-type AsyncQuark = {
-   cancelIfFetching(): boolean
-   $promise: Ion<Promise<unknown> | null>
-}
+
 
 export function addToSuspense(suspense: Suspense, quark: AsyncQuark) {
    suspense[SUSPENSE_QUARK].start(quark)

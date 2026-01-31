@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, For, If, AsyncIon } from "@rue/lumo";
-import { Ion, PRELUDE, queueIonicTask, swiftUpdate, SYNC, watch, ooo } from "@rue/quarky";
+import { Ion, PRELUDE, queueIonicTask, swiftUpdate, SYNC, watch, ooo, isPending } from "@rue/quarky";
 import { normalizeToArray } from "@rue/utils";
 import { Await, Meanwhile, Nonce } from "../../../../packages/lumo/src/boundaries/Await";
 
@@ -56,13 +56,15 @@ export function TestAsyncSelect() {
                   )}
                </select>
 
-               <select mu:value={$activeCity} disabled={($cities.pending)}>
+               {/* <select mu:value={$activeCity} disabled={(isPending($cities))}> */}
+                  <select mu:value={$activeCity} disabled={($cities.pending)}>
                   {For($cities, city =>
                      <option>{city}</option>
                   )}
                </select>
 
-               <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
+               {/* <p style={{ color: (isPending($cities) ? 'gray' : 'black') }}> */}
+                  <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
                   {/* {($cities.pending ? '' : $activeCity()+',')} {($cities.pending ? '...' : $activeState())} */}
                   Selection: {$activeCity}, {$state}
                   {/* Selection: {$activeCity}, {(ooo.await($cities, $activeState))} */}

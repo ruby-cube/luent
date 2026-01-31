@@ -1,6 +1,7 @@
 import { $_derivation, Ion, MutableIon } from "./Ion"
 import { sync, watch } from "../reactivity/Watcher"
 import { AnyObject } from "@rue/types"
+import { $activeUpdate } from "../reactivity/Update"
 
 type HybridIonConfig<T = any> = {
    initial?: T,
@@ -18,6 +19,7 @@ export function createHybridIon(config: HybridIonConfig, props?: AnyObject) {
    //    $state.value = derive()
    // }, { phase: 'SYNC' })
    // return $state;
+   // $activeUpdate()
 
    const $derived = Ion($watched ? (() => ($watched(), derive())) : derive)
    const $state = Ion('initial' in config ? initial : derive())
@@ -25,7 +27,7 @@ export function createHybridIon(config: HybridIonConfig, props?: AnyObject) {
    let shouldDerive = 'initial' in config ? false : true
 
    watch($derived, () => {
-      shouldDerive = true
+      shouldDerive = true // QUESTION: should this be SimpleState??
    }, { phase: 'SYNC' })
 
    return Ion(() => {

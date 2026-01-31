@@ -1,4 +1,4 @@
-import { isFunction, toError } from "@rue/utils";
+import { isFunction, isObject, toError } from "@rue/utils";
 import { AsyncState, getActiveFlask } from "@rue/flask";
 import { addToSuspense, Suspense } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
@@ -9,6 +9,33 @@ import { watch } from "../reactivity/Watcher";
 export const [getAwaiting, suspenseStack] = AsyncState<Suspense>('Suspense')
 export const pushAwaiting = (n: Suspense) => suspenseStack.push(n)
 export const popAwaiting = () => suspenseStack.pop()
+
+export function isPending(...args: any[]) {
+   for (const entity of args) {
+      if (entity instanceof Object && ASYNC_QUARK in entity) {
+         if (entity[ASYNC_QUARK].$promise()) return true;
+      }
+   }
+   return false
+}
+
+export function hasError(...args: any[]) {
+   for (const entity of args) {
+      if (entity instanceof Object && ASYNC_QUARK in entity) {
+         if (entity[ASYNC_QUARK].$error()) return true;
+      }
+   }
+   return false
+}
+
+export function isLoaded(...args: any[]) {
+   for (const entity of args) {
+      if (entity instanceof Object && ASYNC_QUARK in entity) {
+         if (!entity[ASYNC_QUARK].$loaded()) return false;
+      }
+   }
+   return true
+}
 
 // export type SuspenseNodeInput = {
 //    timeout?: number,
@@ -22,7 +49,7 @@ export const popAwaiting = () => suspenseStack.pop()
 // QUESTION: should suspense boundaries be the default? No because you might not want to hold up rendering for something that is ok to be undefined
 // Should { awaited: true } be the default? or { renderUndefined: true } or { dontAwait } or 
 
-const SUSPENSE_ION = Symbol('suspense ion')
+const ASYNC_QUARK = Symbol('async quark')
 
 
 // RemoteIon({
@@ -33,21 +60,27 @@ const SUSPENSE_ION = Symbol('suspense ion')
 //       }, Math.random() * 2000);
 //    })
 // })
-
+export type AsyncQuark = {
+   cancelIfFetching(): boolean
+   $promise: Ion<Promise<unknown> | null>
+   $loaded: Ion<boolean>
+   $error: Ion<Error | null>
+   // status: 'pending' | 'error' | 'settled'
+}
 // TODO:
 export type $Async<T> = {
-   [SUSPENSE_ION]: true,
-   error: null | Error,
+   [ASYNC_QUARK]: AsyncQuark,
+   // error: null | Error,
    pending: Promise<T> | null,
    loaded: boolean,
-   fetching: boolean
-   cancelFetch: () => void
+   // fetching: boolean
+   // cancelFetch: () => void
 
-   then: Promise<T>['then']
-   catch: Promise<T>['then']
-   finally: Promise<T>['then']
+   // then: Promise<T>['then']
+   // catch: Promise<T>['then']
+   // finally: Promise<T>['then']
 
-   refetch(): void
+   // refetch(): void
    // TODO: need a way to distinguish re'fetches' from initial 'fetch'
    // pending: boolean
    // cancel(): void
@@ -79,9 +112,9 @@ export type Awaited<T> = MutableIon<T | undefined> & $Async<T>
 //    return !(ion.value instanceof Promise || ion.value instanceof Error)
 // }
 
-export function isPending(ion: AsyncIon<unknown>) {
-   return ion.value instanceof Promise;
-}
+// export function isPending(ion: AsyncIon<unknown>) {
+//    return ion.value instanceof Promise;
+// }
 
 
 type AsyncIonOptions<T = any, U = any> = {
@@ -137,6 +170,7 @@ export function AsyncIon<
    let resolve: ((value: T | PromiseLike<T>) => void) | null;
    let reject: ((reason?: any) => void) | null
    const $loaded = Ion(false)
+   const $error = Ion(null) // TODO:
    const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
    pendingStart = performance.now()
    if (!options?.awaited && !options?.suspense) {
@@ -149,17 +183,22 @@ export function AsyncIon<
    const $ion = Ion(initialState as unknown)
    const suspense = options?.suspense
    const pendingState = options?.suspense?.pendingState
-
+   const quark = {
+      $promise,
+      cancelIfFetching,
+      $loaded,
+      $error
+   }
    const $async = Ion(suspense && pendingState !== undefined ? () => suspense() ? pendingState : $ion() : () => $ion() as unknown, {
-      [SUSPENSE_ION]: true,
+      [ASYNC_QUARK]: quark,
       get pending() {
          return $promise()
       },
       get loaded() {
          return $loaded()
       },
-      $promise,
-      error: null as null | Error,
+      // $promise,
+      // error: null as null | Error,
    })
 
    // const pendingPromises = new Set()
@@ -185,7 +224,7 @@ export function AsyncIon<
       return false
    }
 
-   const quark = { $promise, cancelIfFetching }
+
 
    // const debounce = Debouncer()
 
@@ -344,7 +383,7 @@ export function AsyncIon<
                   reject = null
                }
                instantUpdate(() => {
-                  $async.error = toError(err)
+                  $error.value = toError(err)
                   $promise.value = null
                   $loaded.value = true
                })
