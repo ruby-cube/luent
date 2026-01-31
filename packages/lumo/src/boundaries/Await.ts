@@ -13,7 +13,7 @@ import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { createStack, normalizeToArray, toError, UNDEFINED } from "@rue/utils";
-import { AsyncIon, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
+import { AsyncIon, AsyncProps, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
 import { INTERNAL_RENDER, POSTLUDE, PRELUDE, SYNC } from "../../../quarky/src/reactivity/RenderCycle";
 import { AsyncState } from "@rue/flask";
 import { Suspense } from "../../../quarky/src/async/Suspense";
@@ -31,10 +31,10 @@ type MeanwhileKit = {
 
 
 
-export function Await(suspense: [...(AsyncIon<unknown> | Suspense)[], RenderFunction | RawJSXNode]): AwaitKit
+export function Await(suspense: [...any[], RenderFunction | RawJSXNode]): AwaitKit
 export function Await(renderResolved: RenderFunction | RawJSXNode): AwaitKit
-export function Await(suspense: AsyncIon<unknown> | Suspense | (AsyncIon<unknown> | Suspense)[], renderResolved: RenderFunction | RawJSXNode): AwaitKit
-export function Await(renderOrSuspense: [...(AsyncIon<unknown> | Suspense)[], RenderFunction | RawJSXNode] | RenderFunction | RawJSXNode | AsyncIon<unknown> | Suspense | (AsyncIon<unknown> | Suspense)[], renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
+export function Await(suspense: any | any[], renderResolved: RenderFunction | RawJSXNode): AwaitKit
+export function Await(renderOrSuspense: [...any[], RenderFunction | RawJSXNode] | RenderFunction | any | any[], renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
    const ions = (renderResolved ? normalizeToArray(renderOrSuspense) : []) as (AsyncIon<unknown> | Suspense)[];
    const _render = (renderResolved ? renderResolved : renderOrSuspense instanceof Array ? renderOrSuspense.pop() : renderOrSuspense) as RenderFunction;
    let render = _render;

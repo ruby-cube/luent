@@ -8,10 +8,10 @@ import { isGetter } from "../reactivity/Substance";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { SimpleState } from "../reactivity/State";
 import { createHybridIon } from "./HybridIon";
-import { AsyncIon } from "../async/AsyncIon";
+import { AsyncIon, AsyncProps } from "../async/AsyncIon";
 
 /* API */
-export type Ion<T = unknown> = (() => T) & { '~ion': true }
+export type Ion<T = unknown> = (() => T) /* & { '~ion': true } */
 
 // type MaybeInert<T = unknown> = IsIonized<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
@@ -82,10 +82,22 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
    return isFunction(maybeFn) && maybeFn.length === 0 ? maybeFn() : maybeFn as T extends () => infer R ? R : T;
 }
 
+type OptionKeys = '-writable' | '-fetch' | '-refetch' | '-watch' | '-derive'
 
-type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>] ? Ion<R> & M
-   : MutableIon<T> & M
+type IonMethods<M> = { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
+
+type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
+   ? T // [T] extends [AtomicIon] to prevent type-narrowing
+   : [T] extends [Derivation<infer R>]
+   ? M extends { '-writable': true }
+   ? MutableIon<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
+   : Ion<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
+   : M extends { '-fetch': any } | { '-refetch': any }
+   ? Ion<T> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] } & {
+      pending: Promise<T> | null;
+      loaded: boolean;
+   }
+   : MutableIon<T> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
 
 
 

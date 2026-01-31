@@ -13,8 +13,8 @@ function genId() {
 
 
 class ListItem {
-   id = genId()
    constructor(
+      public id: number,
       public content: string
    ) { }
 
@@ -23,20 +23,25 @@ class ListItem {
    }
 }
 
+type ItemData = { id: number, content: string }
 
+const IonicItem = (data: ItemData) => Ionic(new ListItem(data.id, data.content))
 
 export function List() {
 
    const list = Ionic([
-      new ListItem("frog"),
-      new ListItem("robin"),
-      new ListItem("fly"),
-      new ListItem("swamp")
+      { id: genId(), content: "frog" },
+      { id: genId(), content: "robin" },
+      { id: genId(), content: "fly" },
+      { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { as: Ionic },
+      [EACH]: { as: IonicItem }, // TODO: type
 
       insert(index: number) {
-         const item = Ionic(new ListItem((Math.random() * 100).toString()))
+         const item = IonicItem({
+            id: genId(),
+            content: (Math.random() * 100).toString()
+         })
          if (index === this.length) {
             this.push(item)
             return item;

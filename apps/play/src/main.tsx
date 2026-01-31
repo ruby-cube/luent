@@ -71,7 +71,7 @@ import { TestIonicList } from './TestIonicList';
 import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, queueIonicPostlude, queueIonicPrelude, queueIonicTask, RENDER, runIonicTask, untracked, watch } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
-import { TestAsyncSelect } from './demos/TestAsyncSelect';
+import { TestAsyncSelect } from './demo/TestAsyncSelect';
 import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './demos/TestAsyncMultiply';
 import { TestAsyncTabs } from './demos/TestAsyncTabs';
 import { Async, ooo } from '../../../packages/quarky/src/async/ooo';
@@ -328,7 +328,7 @@ import { TestMutableDerivation } from './demos/TestMutableDerivations';
 //    })
 // }
 
-const app = createRoot(TestAsyncTabs)
+const app = createRoot(List)
 
 app.mount('#root')
 

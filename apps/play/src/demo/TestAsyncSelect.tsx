@@ -1,24 +1,9 @@
-//@ts-nocheck
-import { component, For, If, AsyncIon } from "@rue/lumo";
-import { Ion, PRELUDE, queueIonicTask, swiftUpdate, SYNC, watch, ooo, o, isPending } from "@rue/quarky";
-import { normalizeToArray } from "@rue/utils";
+import { component, For } from "@rue/lumo";
+import { Ion, isPending, o } from "@rue/quarky";
 import { Await, Meanwhile, Nonce } from "../../../../packages/lumo/src/boundaries/Await";
 
-const WRITABLE = true
 
 // TODO:
-// [] AsyncIon undefined initial state overload
-// [] AsyncIon derivation shorthand
-// [] Replace If(($cities().length)) with Await($cities), hold, $suspense
-
-// const $activeState = Ion(null as null | string, { '-watch': $states, '-derive': () => $states()[0] })
-
-// const $activeCity = Ion(null, {
-//    '-watch': $cities,
-//    '-derive': () => $cities()[0]
-// })
-// const $state = Ion((prev: any) => $cities.pending ? prev : $activeState())
-// const $state = AsyncIon(async () => { await $cities.pending; return $activeState() })
 // const $some = AsyncIon({
 //    fetch: () => db.getSomething(),
 //    dispatch: value => db.setSomething(value),
@@ -29,13 +14,12 @@ const WRITABLE = true
 
 export function TestAsyncSelect() {
 
-   const $states = Ion([], {
-      '-fetch': () => db.fetchStates()
+   const $states = Ion(([] as string[]), {
+      '-fetch': () => db.fetchStates(),
    })
    const $activeState = Ion(() => $states()[0], { '-writable': true })
 
-
-   const $cities = Ion([], {
+   const $cities = Ion(([] as string[]), {
       '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : []
    })
    const $activeCity = Ion(() => $cities()[0], { '-writable': true })
@@ -50,14 +34,12 @@ export function TestAsyncSelect() {
                   )}
                </select>
 
-               {/* <select mu:value={$activeCity} disabled={(isPending($cities))}> */}
-               <select mu:value={$activeCity} disabled={($cities.pending)}>
+               <select mu:value={$activeCity} disabled={(!!$cities.pending)}>
                   {For($cities, city =>
                      <option>{city}</option>
                   )}
                </select>
 
-               {/* <p style={{ color: (isPending($cities) ? 'gray' : 'black') }}> */}
                <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
                   Selection: {$activeCity}, {(o.await($cities, $activeState))}
                </p>
@@ -67,10 +49,9 @@ export function TestAsyncSelect() {
             'loading...'
          )}
 
-         {/* {Meanwhile(o => {
-            console.log('o', o)
-            return $cities.loaded ? undefined : 'loading...'
-         } */}
+         {/* {Meanwhile(o =>  
+            $cities.loaded ? undefined : 'loading...'
+         )} */}
       </>
    )
 }
@@ -82,21 +63,6 @@ const stateCities: Record<string, string[]> = {
    'Texas': ['Houston', 'Dallas', 'Austin'],
    'Utah': ['Salt Lake City', 'Provo', 'West Valley City'],
 };
-
-function ready<T>($state: Ion<T>) {
-   return new Promise<T>(res => {
-      if ($state() === undefined) {
-         watch($state, ({ current }) => {
-            if (current === undefined) return;
-            res(current)
-         }, { phase: PRELUDE })
-      }
-      else if ('pending' in $state && $state.pending) {
-         return $state.pending
-      }
-      else res($state())
-   })
-}
 
 const db = {
    fetchStates() {

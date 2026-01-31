@@ -1,5 +1,5 @@
-import { component, FromTag, If, Else, For, fromGlobal, ContextKey } from "@rue/lumo";
-import { DeepIonized, defineDeepIonize, EACH, Ion,  Ionic, ionize, IonizeBy, Ionized, isIonicProxy,} from "@rue/quarky";
+import { component, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
+import { DeepIonized, EACH, Ion,  Ionic, Ionized, isIonicProxy,} from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 
 
@@ -114,7 +114,7 @@ function createTreeItem(data: TreeItemData): TreeItem {
 
 // # ionic factory
 function IonizedTreeItem(data: TreeItemData): $$TreeItem {
-   return ionize(createTreeItem(data), {
+   return Ionic(createTreeItem(data), {
       nested: { children: (items: TreeItem[]) => ionize(items.map(item => IonizedTreeItem(item))) }
    })
 }

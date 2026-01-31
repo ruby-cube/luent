@@ -1,8 +1,6 @@
-import { component, FromTag, atUnmount, AsyncIon, Suspense } from "@rue/lumo";
-import { Animation, Interval, Ion, swiftUpdate, SlowUpdate, queueTask, $_derivation, } from "@rue/quarky";
+import { component, FromTag, atUnmount } from "@rue/lumo";
+import { Animation, Interval, Ion, swiftUpdate, SlowUpdate, queueTask, Suspense, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
-import { Await } from "../../../../packages/lumo/src/boundaries/Await";
-import { resolve } from "path";
 
 // TODO:
 // - time warning for lazy update
@@ -136,34 +134,33 @@ function Triangle({ x, y, s, $seconds, $suspense }: FromTag<any>) {
    if (s <= TARGET) {
       return component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}
-            text={$seconds}
-            // text={$seconds}
-            // text={AsyncIon(0, () => { return $suspense() ? $suspense().then(() => $seconds()) : $seconds() })}
-            // text={AsyncIon(0, async () => { await $suspense() ; return $seconds() })}
+            // text={(o.await($suspense, $seconds))}
+         text={$seconds}
          ></Dot>
       );
    }
    s = s / 2;
 
    $slowCount++
-   const $slow = AsyncIon(0, () => {
-      const sec = $seconds()
-      // let id;
-      const worker = new Promise(resolve => {
-         // if (id) cancelIdleCallback(id)
-         // id = requestIdleCallback(() => {
-         //    var e = performance.now() + 0.8;
-         //    // Artificially long execution time.
-         //    while (performance.now() < e) { }
-         //    resolve(sec);
-         // })
-         setTimeout(() => {
-            resolve(sec);
-         }, Math.random() *100);
-      })
-      return worker
-   }, {
+   const $slow = Ion(0, {
       // awaited: true 
+      '-fetch': () => {
+         const sec = $seconds()
+         // let id;
+         const worker = new Promise(resolve => {
+            // if (id) cancelIdleCallback(id)
+            // id = requestIdleCallback(() => {
+            //    var e = performance.now() + 0.8;
+            //    // Artificially long execution time.
+            //    while (performance.now() < e) { }
+            //    resolve(sec);
+            // })
+            setTimeout(() => {
+               resolve(sec);
+            }, Math.random() * 100);
+         })
+         return worker
+      },
       '-suspense': $suspense
    })
 

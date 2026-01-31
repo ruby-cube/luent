@@ -67,10 +67,17 @@ export type AsyncQuark = {
    $error: Ion<Error | null>
    // status: 'pending' | 'error' | 'settled'
 }
+
+export type AsyncProps<T> = {
+      asPromise: Promise<T> | null
+   // error: null | Error,
+   pending: Promise<T> | null,
+   loaded: boolean,
+}
 // TODO:
 export type $Async<T> = {
    [ASYNC_QUARK]: AsyncQuark & { $loaded: Ion<boolean> },
-   asPromise: Promise<unknown> | null
+   asPromise: Promise<T> | null
    // error: null | Error,
    pending: Promise<T> | null,
    loaded: boolean,
