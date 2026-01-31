@@ -345,11 +345,27 @@ function transformJSXChildren(childrenPath) {
    return childrenPath;
 }
 
+function isAsyncIonShorthand(node) {
+   return t.isCallExpression(node) && t.isMemberExpression(node.callee) && node.callee.object.name === 'o' && node.callee.property.name === 'await'
+}
+
+function toAsyncIon(node) {
+    return t.callExpression(t.identifier('$$_createAsyncIon'), [t.arrowFunctionExpression([], t.blockStatement([
+      t.returnStatement(node) // Return the original expression
+   ]))])
+}
+
 function transformIfDerivationShorthand(path) {
    if (!path || !path.node) return;
-   if (isDerivationShorthand(path)) {
+   const node = path.node
+   if (isDerivationShorthand(node)) {
+      if (isAsyncIonShorthand(node)) {
+         path.replaceWith(toAsyncIon(node))
+      }
+      else {
+         path.replaceWith(toDerivationFunction(node))
+      }
       // transformLiterals(path.get('right'))
-      path.replaceWith(toDerivationFunction(path.node))
    }
    // else if (isDerivation(path)) {
    //    // console.log('isDerivation', path.node)
@@ -377,8 +393,7 @@ function transformLiterals(path) {
    })
 }
 
-function isDerivationShorthand(path) {
-   const node = path.node;
+function isDerivationShorthand(node) {
    return isParenthesized(node) && !t.isIdentifier(node);
    // if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && t.isExpression(node.right)) {
    //    return true;

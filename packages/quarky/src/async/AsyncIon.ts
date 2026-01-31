@@ -5,6 +5,7 @@ import { Ion, MutableIon } from "../ion/Ion";
 import { instantUpdate } from "../reactivity/Update";
 import { PRELUDE } from "../reactivity/RenderCycle";
 import { watch } from "../reactivity/Watcher";
+import { AsyncNode } from "./ooo";
 
 export const [getAwaiting, suspenseStack] = AsyncState<Suspense>('Suspense')
 export const pushAwaiting = (n: Suspense) => suspenseStack.push(n)
@@ -63,13 +64,13 @@ const ASYNC_QUARK = Symbol('async quark')
 export type AsyncQuark = {
    cancelIfFetching(): boolean
    $promise: Ion<Promise<unknown> | null>
-   $loaded: Ion<boolean>
    $error: Ion<Error | null>
    // status: 'pending' | 'error' | 'settled'
 }
 // TODO:
 export type $Async<T> = {
-   [ASYNC_QUARK]: AsyncQuark,
+   [ASYNC_QUARK]: AsyncQuark & { $loaded: Ion<boolean> },
+   asPromise: Promise<unknown> | null
    // error: null | Error,
    pending: Promise<T> | null,
    loaded: boolean,
@@ -115,13 +116,17 @@ export type Awaited<T> = MutableIon<T | undefined> & $Async<T>
 // export function isPending(ion: AsyncIon<unknown>) {
 //    return ion.value instanceof Promise;
 // }
-
+export function toPromise(awaited: any) {
+   if (awaited instanceof Promise) return awaited
+   if (awaited instanceof Object && 'asPromise' in awaited) return awaited.asPromise
+   return awaited
+}
 
 type AsyncIonOptions<T = any, U = any> = {
-   to: (value: T) => U,
-   awaited?: true,
-   suspense?: Suspense,
-   debounced?: number
+   '-as': (value: T) => U,
+   '-awaited'?: true,
+   '-suspense'?: Suspense,
+   '-debounced'?: number
 }
 
 function unpackAsyncIonArgs<T, OPT>(
@@ -138,12 +143,15 @@ function unpackAsyncIonArgs<T, OPT>(
    }
 }
 
+//@ts-expect-error
+window.$$_createAsyncIon = AsyncIon
+
 export function AsyncIon<
    T,
    B extends boolean,
    OPT = undefined
 >(
-   fetch: ((ion: AsyncIon<T>) => Promise<T> | T),
+   fetch: ((ion: AsyncIon<T>) => Promise<T> | AsyncNode<T> | T),
    options?: OPT & AsyncIonOptions
 ): OPT extends undefined ? AsyncIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : AsyncIon<T>
 export function AsyncIon<
@@ -170,10 +178,12 @@ export function AsyncIon<
    let resolve: ((value: T | PromiseLike<T>) => void) | null;
    let reject: ((reason?: any) => void) | null
    const $loaded = Ion(false)
-   const $error = Ion(null) // TODO:
+   const $error = Ion(null as Error | null) // TODO:
    const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
    pendingStart = performance.now()
-   if (!options?.awaited && !options?.suspense) {
+   const suspense = options?.['-suspense']
+   const awaited = options?.['-awaited']
+   if (!awaited && !suspense) {
       $promise.value!.catch(err => {
          if (err === 'cancelled') return;
          else throw err
@@ -181,8 +191,8 @@ export function AsyncIon<
    }
 
    const $ion = Ion(initialState as unknown)
-   const suspense = options?.suspense
-   const pendingState = options?.suspense?.pendingState
+
+   const pendingState = suspense?.pendingState
    const quark = {
       $promise,
       cancelIfFetching,
@@ -197,6 +207,9 @@ export function AsyncIon<
       get loaded() {
          return $loaded()
       },
+      get asPromise() {
+         return $promise()
+      }
       // $promise,
       // error: null as null | Error,
    })
@@ -258,7 +271,7 @@ export function AsyncIon<
    const cancelledPromises = new Set()
 
    if (suspense) addToSuspense(suspense, quark)
-   const awaiting = options?.awaited && getAwaiting()
+   const awaiting = awaited && getAwaiting()
    if (awaiting) addToSuspense(awaiting, quark)
 
 
@@ -270,9 +283,9 @@ export function AsyncIon<
    // TODO: optimization: handle fetch as promise outside of watch
    watch(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
       cancelIfFetching()
-
-      if (output instanceof Promise) {
-         pendingPromise = output
+      const awaited = toPromise(output)
+      if (awaited instanceof Promise) {
+         pendingPromise = awaited
 
          // It's me. Hi. I'm the problem it's me. 
          // When this was instantUpdate, it caused a weird double fetchCities, and breaks multiply rapid fire
@@ -287,7 +300,7 @@ export function AsyncIon<
                   instantUpdate(() => {
                      $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
                      pendingStart = performance.now()
-                     if (!options?.awaited && !options?.suspense) {
+                     if (!awaited && !suspense) {
                         $promise.value.catch(err => {
                            if (err === 'cancelled') return;
                            else throw err
@@ -299,7 +312,7 @@ export function AsyncIon<
             else {
                $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
                pendingStart = performance.now()
-               if (!options?.awaited && !options?.suspense) {
+               if (!awaited && !suspense) {
                   $promise.value.catch(err => {
                      if (err === 'cancelled') return;
                      else throw err
@@ -308,16 +321,16 @@ export function AsyncIon<
             }
          }
 
-         output
+         awaited
             .then(value => {
                if (timeout !== undefined) {
                   clearTimeout(timeout)
                   timeout = undefined
                }
 
-               if (cancelledPromises.has(output)) {
+               if (cancelledPromises.has(awaited)) {
 
-                  cancelledPromises.delete(output)
+                  cancelledPromises.delete(awaited)
                   if (reject) {
                      reject('cancelled')
                      resolve = null
@@ -403,7 +416,7 @@ export function AsyncIon<
          // }
          // queueTask(() => {
          instantUpdate(() => { // QUESTION: Why does async select break without this when it shouldn't need it?
-            $async.error = null
+            $error.value = null
             // $promise.value = null
             $ion.value = output
          })

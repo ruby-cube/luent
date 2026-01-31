@@ -27,15 +27,15 @@ export function TestAsyncMultiply() {
    // const { multiply: nx2, $product } = MultiplyKit($n, 2)
 
    const $nx2 = Ion(0, {
-      _fetch: () => db.multiply($n(), 2)
+      '-fetch': () => db.multiply($n(), 2)
    })
 
    return component(
       <div>
          <button on:click={e => {
             $n.increment();
-         }}>{$n} {(isPending($nx2) ? '...' : '')}</button>
-         <p>2 * {$n} = {(isPending($nx2) ? '...' : $nx2())}</p>
+         }}>{$n} {($nx2.pending ? '...' : '')}</button>
+         <p>2 * {$n} = {($nx2.pending ? '...' : $nx2())}</p>
 
       </div>
    )
@@ -63,8 +63,9 @@ export function TestAsyncMultipliers() {
 
       const multiply = Action(() => (ooo
          .await(db.multiply($n(), b))
-      ), $product, {
-         suspense: $suspense
+      ), {
+         target: $product,
+         '-suspense': $suspense
       })
 
       // const multiplyB = Action(() => db.multiply($n(), b), {
@@ -183,7 +184,10 @@ export function TestAsyncMultiplyDrop() {
    )
 }
 
-const AwaitedIon = (a: any) => AsyncIon(a, { awaited: true })
+const AwaitedIon = (a: any) => Ion(undefined, {
+   '-fetch': a,
+   '-awaited': true
+})
 const $Awaited = AwaitedIon
 
 export function TestAsyncMultiplyQueue() {
@@ -240,8 +244,8 @@ function MultiplyKit() {
    return {
       $Multiply($n: Ion<number>, o: number) {
          return Ion(0, {
-            _fetch: () => db.multiply($n(), o),
-            _suspense: $pending
+            '-fetch': () => db.multiply($n(), o),
+            '-suspense': $pending
          })
       },
       $pending

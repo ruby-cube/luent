@@ -87,11 +87,10 @@ const CONTENT = {
 
 function Tab(input: FromTag<{ page: keyof typeof CONTENT, count: Ion<number> }>) {
    const { page, $count } = input
-   const $time = AsyncIon(() => new Promise<number>((resolve) => {
-      const delay = Math.random() * 2000;
-      // const delay = Math.random() * 420 + 160;
-      setTimeout(() => resolve(delay), delay);
-   }), { awaited: true });
+   const $time = Ion(undefined, {
+      '-fetch': db.fetchTime,
+      '-awaited': true
+   });
 
    return component(<>
       {/* {Await($time, */}
@@ -105,3 +104,12 @@ function Tab(input: FromTag<{ page: keyof typeof CONTENT, count: Ion<number> }>)
    );
 };
 
+const db = {
+   fetchTime() {
+      return new Promise<number>((resolve) => {
+         const delay = Math.random() * 2000;
+         // const delay = Math.random() * 420 + 160;
+         setTimeout(() => resolve(delay), delay);
+      })
+   }
+}

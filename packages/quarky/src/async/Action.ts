@@ -4,6 +4,7 @@ import { isFunction, isObject } from "@rue/utils";
 import { addToSuspense, Suspense } from "./Suspense";
 import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { instantUpdate } from "../reactivity/Update";
+import { toPromise } from "./AsyncIon";
 
 // TODO: races
 // suspense
@@ -16,8 +17,21 @@ type Ions<V> = V extends { [key: PropertyKey]: any } ? { [K in keyof V]: Mutable
 
 export const REFETCH = Symbol('refetch')
 
-export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V>), toBeMutated: Ions<V>, options?: { suspense: Suspense }): ((...args: F extends (...args: infer P) => any ? P : never) => F extends (...args: any[]) => infer R ? R extends AsyncNode<infer V> ? Promise<V> : never : never) & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
-   const ions = (isIon(toBeMutated) ? undefined : toBeMutated) as AnyObject
+const cancelledPromises = new Set()
+
+function cancelPromise(promise: Promise<any> | AsyncSeries) {
+   if ('cancel' in promise) promise.cancel()
+   else cancelledPromises.add(promise)
+}
+
+function isCancelled(promise: Promise<any> | AsyncSeries) {
+   if ('cancelled' in promise) return promise.cancelled
+   return cancelledPromises.has(promise)
+}
+
+export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | Promise<V>), options: { target: Ions<V>, '-suspense'?: Suspense }): ((...args: F extends (...args: infer P) => any ? P : never) => F extends (...args: any[]) => infer R ? R extends AsyncNode<infer V> ? Promise<V> : never : never) & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
+   const target = options.target
+   const ions = (isIon(target) ? undefined : target) as AnyObject
    const ionKeys = ions ? ions instanceof Array ? Array.from(ions.keys()) : Object.keys(ions) : undefined
    let resolve: ((value: any | PromiseLike<any>) => void) | null;
    let reject: ((reason?: any) => void) | null
@@ -25,21 +39,21 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V>), t
    const $error = Ion(null)
    let retry: undefined | (() => void); // TODO:
 
-   let pendingSeries: AsyncSeries | null = null
+   let pendingPromise: AsyncSeries | Promise<any> | null = null
 
    function cancelIfFetching() {
-      if (pendingSeries) {
-         pendingSeries.cancel()
+      if (pendingPromise) {
+         cancelPromise(pendingPromise)
          console.warn('CANCEL FETCH')
-         pendingSeries = null
+         pendingPromise = null
          return true
       }
       return false
    }
 
-   const quark = { $promise, cancelIfFetching }
+   const quark = { $promise, $error, cancelIfFetching }
 
-   const suspense = options?.suspense
+   const suspense = options?.['-suspense']
    if (suspense) addToSuspense(suspense, quark)
 
    function dispatchAction(...args: any[]) {
@@ -54,11 +68,12 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V>), t
          }
       }
       const asyncNode = dispatch(...args)
-      const series = pendingSeries = asyncNode[INTERNAL].series
-      const output = asyncNode.asPromise
+      const promise = pendingPromise = INTERNAL in asyncNode ? asyncNode[INTERNAL].series : asyncNode
+      const output = toPromise(asyncNode)
       output
-         .then(value => {
-            if (series.cancelled) {
+         .then((value: any) => {
+            if (isCancelled(promise)) {
+               cancelledPromises.delete(promise)
                if (reject) {
                   reject('cancelled')
                   resolve = null
@@ -76,7 +91,7 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V>), t
             //    }
             //    return;
             // }
-            pendingSeries = null
+            pendingPromise = null
             console.log('resolve to:', value)
             if (resolve) {
                resolve(value)
@@ -110,14 +125,14 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V>), t
                   }
                }
                else {
-                  updateIon(toBeMutated as MutableIon<any>, value)
+                  updateIon(target as MutableIon<any>, value)
                }
 
                $promise.value = null
             })
          })
-         .catch(err => {
-            pendingSeries = null
+         .catch((err: any) => {
+            pendingPromise = null
             if (reject) {
                reject(err)
                resolve = null

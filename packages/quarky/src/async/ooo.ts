@@ -3,6 +3,7 @@
 
 import { isFunction, isPlainObject } from "@rue/utils"
 import { instantUpdate } from "../reactivity/Update"
+import { Ion } from "../ion/Ion"
 
 // interface Promise<T> {
 //    /**
@@ -56,10 +57,17 @@ type AwaitKit = {
 
 export type Resolved<T> = T extends PromiseLike<infer V> ? V : T extends () => PromiseLike<infer V> ? V : unknown
 
+
 export const ooo = {
    await<T, F>(awaited: T, onFulfilled?: F & ((value: Resolved<T>) => any)) {
 
-      const promise = toPromise(isFunction(awaited) ? awaited() : awaited) as Promise<any> // TODO: Function and Array cases and value (Promise.resolve())
+      const promise = toPromise(
+         awaited instanceof Object && 'asPromise' in awaited
+            ? awaited.asPromise
+            : isFunction(awaited)
+               ? awaited()
+               : awaited
+      ) as Promise<any> // TODO: Function and Array cases and value (Promise.resolve())
 
       const series = {
          cancelled: false,
@@ -83,7 +91,7 @@ export const ooo = {
 
 function toPromise(awaited: any) {
    if (awaited instanceof Promise) return awaited
-   if ('asPromise' in awaited) return awaited.asPromise
+   if (awaited instanceof Object && 'asPromise' in awaited) return awaited.asPromise
    else if (awaited instanceof Array) return Promise.all(toPromises(awaited))
    else return Promise.resolve(awaited)
 }
@@ -319,12 +327,13 @@ export function Async<F extends (...args: any[]) => AsyncNode<any>>(fn: F): Retu
    return asyncFn as ReturnType<F> extends AsyncNode<infer T> ? (...args: Parameters<F>) => Promise<T> : never
 }
 
-
-
-
-
-
-
+// for AsyncIon shorthand
+export const o = {
+   await<T, F>(awaited: T, onFulfilled?: F & ((value: Resolved<T>) => any)): Ion<Resolved<T>> {
+      // @ts-expect-error: compiler transforms this call into an AsyncIon
+      return ooo.await(awaited, onFulfilled)
+   }
+}
 
 
 

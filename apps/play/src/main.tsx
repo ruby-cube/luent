@@ -328,7 +328,7 @@ import { TestMutableDerivation } from './demos/TestMutableDerivations';
 //    })
 // }
 
-const app = createRoot(TestAsyncSelect)
+const app = createRoot(TestAsyncTabs)
 
 app.mount('#root')
 
