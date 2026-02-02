@@ -1,4 +1,4 @@
-import { delayedFetch } from "./debug.jsx";
+import { delayedFetch } from "./debug.js";
 
 // With suspense-enabled data fetching.
 // These use a cache for suspense-enabled data fetching.

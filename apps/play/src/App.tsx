@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { GetNode, component, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
+import { NodeRef, component, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/LazyComponent";
@@ -173,7 +173,7 @@ export function List() {
 
 
 function useModal() {
-    const $dialogBox = GetNode(DialogBox)
+    const $dialogBox = NodeRef(DialogBox)
 
     function openModal() {
         $dialogBox()!.open()
@@ -221,7 +221,7 @@ function Appo(
                 <button>click</button>
             )}
             {ElseIf($active, () => {
-                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || GetNode()
+                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || NodeRef()
 
                 return (
                     <Wrapper title={() => $dialogBox().title}>
@@ -278,7 +278,7 @@ function DialogBox({
     $button
 }: {
     model: DialogBoxState
-    $button?: GetNode
+    $button?: NodeRef
 }) {
 
     return component(

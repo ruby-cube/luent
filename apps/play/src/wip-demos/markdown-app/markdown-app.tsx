@@ -1,18 +1,19 @@
 import { marked } from 'marked'
-import { Ion, ionize, watch } from '@rue/quarky'
-import { component, FromTag, GetNode, atMounted, atUnmount } from '@rue/lumo'
+import { Ion, Ionic, watch } from '@rue/quarky'
+import { component, FromTag, NodeRef, atMounted, atUnmount } from '@rue/lumo'
+import '../../style.css'
 
 
 export function MarkdownApp(
-   input : FromTag<{
-      'mu:markdown'?: Ion<string>
-   }>
+   // input: FromTag<{
+   //    'mu:markdown'?: Ion<string>
+   // }>
 ) {
 
-   const { $markdown = Ion('# Hello World') } = input
-   // const $markdown = Ion('Hello World')
+   // const { $markdown = Ion('# Hello World') } = input
+   const $markdown = Ion('# Hello World')
 
-   const $output = Ion(() =>(marked($markdown())))
+   const $html = Ion(() => marked($markdown()) as string)
 
 
    // const update = (e: any) => {
@@ -20,9 +21,9 @@ export function MarkdownApp(
    //    $markdown.value = e.target.value
    // }
 
-   const $textArea = GetNode('textarea')
+   const $textArea = NodeRef('textarea')
 
-   const caretRange = ionize({
+   const caretRange = Ionic({
       selectionStart: undefined as undefined | number,
       selectionEnd: undefined as undefined | number,
    })
@@ -51,39 +52,22 @@ export function MarkdownApp(
       }
    })
 
+   const $doubleCount = Ion(() => $count() * 2)
 
-
-   const $doubleCount = Ion(() =>$count() * 2)
-
-   // watch($count, e => {
-   //    console.log(e.newState)
-   // })
-   // watch($markdown, e => {
-   //    console.log(e.newState)
-   // })
-
-   // watch($output, e => {
-   //    console.log(e.newState)
-   // })
-   //NOTE: There's actually no reason to pause and resume this watcher since it is watching local state. 
+   // NOTE: There's actually no reason to pause and resume this watcher since it is watching local state. 
    // Pausing and resuming is only helpful if state is shared across views
    // and state can be mutated outside of the hidden view
-
-
-
 
    return component(
       <>
          <div>local state: {$count}</div>
          <div>local state: {$doubleCount}</div>
-         <button on:click={e => $count.increment()}>increment</button>
+         <button on:click={e => $count.increment()}>+</button>
          <div class='editor'>
             <textarea class='input' node={$textArea} mu:value={$markdown}></textarea>
-            {/* <div class='output'>{$output}</div> */}
-            <div class='output'>{{ innerHTML: $output }}</div>
-            {/* <textarea>{$markdown}</textarea> */}
+            <div class='output' innerHTML={$html}></div>
          </div>
-         <o--link href='/src/demos/markdown-app/markdown-app.css' rel='stylesheet' />
+         <o--link href='/src/demo/markdown-app/markdown-app.css' rel='stylesheet' />
       </>
    )
 }

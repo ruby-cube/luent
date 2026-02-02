@@ -85,7 +85,7 @@ function ListBlock(attributes: {
     list: string[], // initial value
     color: string
 }) {
-    const $div = GetNode()
+    const $div = NodeRef()
     const $divs = NodesRef()
 
     onCreated(() => {
@@ -140,7 +140,7 @@ function ListBlock(attributes: {
 
     const $name = asPion(frog$, 'name') //$GetProp<string>
 
-    const $div = GetNode('div')
+    const $div = NodeRef('div')
 
     watch(PropsIon(frog$, [
         'name',
@@ -191,7 +191,7 @@ function ListBlock(attributes: {
 
     const $name = asPion(frog$, 'name') //$GetProp<string>
 
-    const $div = GetNode('div')
+    const $div = NodeRef('div')
 
     watch(propsIon(frog$, [
         'name',

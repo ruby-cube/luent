@@ -148,7 +148,9 @@ export class IfElseKit extends VineNode {
          const fragment = new DocumentFragment()
          mountDOMNodes(kit.nodes!, fragment)
          queueInternalRender(() => {
-            mountFragment(fragment, this.precedingLeaf, this.parent)
+            // document.startViewTransition(() => {
+               mountFragment(fragment, this.precedingLeaf, this.parent)
+            // })
          }, flask)
          kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
       })
@@ -186,7 +188,9 @@ export class IfElseKit extends VineNode {
       else kit.flask!.emitDemount()
 
       queueInternalRender(() => {
-         removeDOMNodes(prevNodes)
+         // document.startViewTransition(() => {
+            removeDOMNodes(prevNodes)
+         // })
       }, this.outerFlask)
       return kit;
    }

@@ -1,6 +1,6 @@
 import { RENDER } from "../../../packages/quarky/src/reactivity/RenderCycle";
 import { ion } from "../../../packages/quarky/src"
-import { GetNode } from "@rue/lumo";
+import { NodeRef } from "@rue/lumo";
 
 export function MainBlock() {
 
@@ -37,7 +37,7 @@ export function MainBlock() {
 
 
 
-   const mainContent = GetNode($MainContent)
+   const mainContent = NodeRef($MainContent)
 
    $mainContent.render('bye')
 

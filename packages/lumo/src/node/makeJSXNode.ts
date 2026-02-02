@@ -1,7 +1,7 @@
 import { Ion, isIon, isGetter } from "../../../quarky/src";
 import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
-import { $Node, $Nodes } from "./GetNode";
+import { $Node, $Nodes } from "./NodeRef";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
@@ -194,7 +194,7 @@ export function makeJSXNode(
    }
 }
 
-// export function _getNodeConfig(ref: GetNode | undefined) {
+// export function _getNodeConfig(ref: NodeRef | undefined) {
 //     if (ref) {
 //         const config = getNodeConfig(ref);
 //         if (isFunction(config)) {

@@ -30,6 +30,58 @@ type PickMethods = (...args: string[]) => ReinConfig
 
 type ReinConfig = { capsule: AnyObject, selectedMethods: string[] }
 
+
+type IonOptions<T, M> = M extends { '-fetch': any } ? { '-fetch': () => Promise<T> | T } : {}
+
+/**
+ * Creates an ion, ion capsule, or derivation ion, depending on parameters.
+ * 
+ * ##### ION:
+ * ```
+ * const $count = Ion(0)
+ * ```
+ * 
+ * ##### ION CAPSULE:
+ * ```
+ * const $count = Ion(0, {
+ *    increment() {
+ *       this.count++
+ *    },
+ *    decrement() {
+ *       this.count--
+ *    }
+ * })
+ * ```
+ * 
+ * ##### DERIVATION ION:
+ * 
+ * ```
+ * const $doubleCount = Ion(() =>$count() * 2)
+ * ```
+ * 
+ * 
+ * // TODO: what should happen when you pass an ion as the initial state?
+ * 
+ * @param initialState or pure getter for derivations
+ * @param methods optional
+ * @returns `Ion<T>`
+ */
+
+export function Ion<
+   T,
+   M
+>(initialState: T & (() => unknown), props?: M & ThisType<IonMethods<M>>): AsIon<T, M>
+export function Ion<
+   T,
+   M
+>(initialState: T, props?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M>
+export function Ion<
+   T,
+   M
+>(initialState: T & (() => unknown) | T, props?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M> {
+   return asIon(initialState, props) as AsIon<T, M>
+}
+
 export function isIon(value: unknown): value is Ion {
    return isFunction(value) &&
       // value.length === 0
@@ -101,54 +153,6 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
 
 
 
-/**
- * Creates an ion, ion capsule, or derivation ion, depending on parameters.
- * 
- * ##### ION:
- * ```
- * const $count = Ion(0)
- * ```
- * 
- * ##### ION CAPSULE:
- * ```
- * const $count = Ion(0, {
- *    increment() {
- *       this.count++
- *    },
- *    decrement() {
- *       this.count--
- *    }
- * })
- * ```
- * 
- * ##### DERIVATION ION:
- * 
- * ```
- * const $doubleCount = Ion(() =>$count() * 2)
- * ```
- * 
- * 
- * // TODO: what should happen when you pass an ion as the initial state?
- * 
- * @param initialState or pure getter for derivations
- * @param methods optional
- * @returns `Ion<T>`
- */
-
-export function Ion<
-   T,
-   M
->(initialState: T & (() => unknown), props?: M & ThisType<M>): AsIon<T, M>
-export function Ion<
-   T,
-   M
->(initialState: T, props?: M & ThisType<M & { value: T }>): AsIon<T, M>
-export function Ion<
-   T,
-   M
->(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { value: T }>): AsIon<T, M> {
-   return asIon(initialState, props) as AsIon<T, M>
-}
 
 // export const makeIon = ion
 // export const createIon = ion

@@ -1,6 +1,6 @@
 import { wrapWithCommons } from './context/Context'
 
-export * from './node/GetNode' 
+export * from './node/NodeRef' 
 export * from './node/NodeSetup' 
 export * from './component/Component' 
 export * from '../../quarky/src/async/AsyncIon' 

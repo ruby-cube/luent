@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
 import { Ion, toValue } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
-import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/GetNode";
+import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 import { setUpNodesArray } from "../node/GetNodes";

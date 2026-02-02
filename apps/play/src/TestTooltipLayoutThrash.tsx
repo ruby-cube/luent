@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { component, If, measureLayout, GetNode, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
+import { component, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
 import { Ion, MutableIon } from '@rue/quarky';
 import { AnyObject } from '@rue/types';
 
@@ -102,7 +102,7 @@ export function Tooltip(input: FromTag<{
 }>) {
    const { Slot, targetRect } = input
 
-   const $div = GetNode('div');
+   const $div = NodeRef('div');
    const $height = Ion(undefined as number | undefined)
 
    atMounted(() => ooo

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, GetNode } from "@rue/lumo"
+import { component, NodeRef } from "@rue/lumo"
 import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@rue/quarky"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/X_$setup"
 import { AnyObject } from "@rue/types"
@@ -275,7 +275,7 @@ export function TestCleanupScheduler({
    }>, isIonized]
 }, { all: toIon })) {
 
-   const $stopButton = GetNode('button')
+   const $stopButton = NodeRef('button')
 
    const $frog = ionize({
       name: 'kermit'

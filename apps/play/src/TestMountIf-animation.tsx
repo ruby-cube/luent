@@ -5,7 +5,7 @@ import { AnyObject } from "@rue/types";
 import "./style.css"
 
 
-export function MountIf() {
+export function MountIfAnimation() {
 
    const $count = Ion(0, {
       increment() {
@@ -86,7 +86,7 @@ export function MountIf() {
       }
       if (newClones.size) { // transitioning
          for (const newClone of newClones) {
-            newClone.classList.add('transition-in-from')
+            newClone.classList.add('reverse-animation')
             newClones.delete(newClone)
          }
       }
@@ -103,10 +103,10 @@ export function MountIf() {
       // - position prevClone
       prevClone.style.removeProperty('visibility')
       prevClone.style.setProperty('position', 'absolute')
-      prevClone.style.setProperty('top', rect.top+'px')
-      prevClone.style.setProperty('left', rect.left+'px')
-      prevClone.style.setProperty('width', rect.width+'px')
-      prevClone.style.setProperty('height', rect.height+'px')
+      prevClone.style.setProperty('top', rect.top + 'px')
+      prevClone.style.setProperty('left', rect.left + 'px')
+      prevClone.style.setProperty('width', rect.width + 'px')
+      prevClone.style.setProperty('height', rect.height + 'px')
 
       queueRender(() => {
          $container()!.appendChild(prevClone) // must happen before we read dims of new node ... why??
@@ -131,33 +131,29 @@ export function MountIf() {
          newClone.style.setProperty('width', rect.width + 'px')
          newClone.style.setProperty('height', rect.height + 'px')
 
-         // set starting transition state
-         newClone.classList.add('transition-in-from')
-         newClone.classList.add('may-transition-in')
          $container()?.appendChild(newClone)
 
-         prevClone.classList.add('may-transition-out')
+         prevClone.classList.add('animate-out')
 
-         requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
-            queueTask(() => {
+         // requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
+            // queueTask(() => {
                // trigger transition
-               prevClone.classList.add('transition-out-to')
-               newClone.classList.remove('transition-in-from')
+               newClone.classList.add('animate-in')
 
-               prevClone.addEventListener('transitionend', () => {
+               prevClone.addEventListener('animationend', () => {
                   console.log('transition ended')
                   prevClone.remove();
                })
 
-               newClone.addEventListener('transitionend', () => {
+               newClone.addEventListener('animationend', () => {
                   console.log('transition ended new')
                   newNode.style.removeProperty('visibility')
                   // newNode.style.removeProperty('display')
                   newClone.remove();
                   newClones.delete(newClone)
                })
-            })
-         })
+            // })
+         // })
 
          prevNode = newNode
       })
@@ -212,24 +208,37 @@ export function MountIf() {
          {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
          {Style`
 
-            .container {
-               overflow: hidden;
-            }
-            
-            .may-transition-out {
-               transition: opacity 1000ms ease;
-            }
 
-            .may-transition-in {
-               transition: opacity 2000ms ease;
-            }
+@keyframes fade-in {
+   from {
+      opacity: 0;
+   }
 
-            .transition-out-to {
-               opacity: 0
-            }
+   to {
+      opacity: 1;
+   }
+}
 
-            .transition-in-from {
-               opacity: 0
+@keyframes fade-out {
+   from {
+      opacity: 1;
+   }
+
+   to {
+      opacity: 0;
+   }
+}
+
+.animate-out {
+   animation: fade-out 1s ease-in;
+}
+
+.animate-in {
+   animation: fade-in 1s ease-in;
+}
+
+            .reverse-animation {
+               animation-direction: reverse
             }
 
          `}

@@ -43,10 +43,13 @@ type AsyncPhase =
 export const SYNC = 'SYNC'
 export const PRELUDE = 0
 export const INTERNAL_RENDER = 1
+
+// TODO: ??
 export const LAYOUT = 2
 export const RENDER = 3
 export const PRELUDE_II = 4
 export const INTERNAL_RENDER_II = 5
+
 export const POSTLUDE = 6
 export const TICK = 7
 
@@ -572,6 +575,7 @@ export function queueInternalRender(task: Task, flask: Flask) { // TODO: do othe
       task()
    }, INTERNAL_RENDER)
 }
+
 
 export function queueRender(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, RENDER)

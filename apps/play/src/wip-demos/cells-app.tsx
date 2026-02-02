@@ -1,4 +1,4 @@
-import { component, Else, For, FromTag, GetNode, If, Style } from "@rue/lumo"
+import { component, Else, For, FromTag, NodeRef, If, Style } from "@rue/lumo"
 import { Ion, ion, ionize } from "@rue/quarky"
 
 const COLS = 5

@@ -6,7 +6,7 @@ import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { getEventUpdater, isHTMLEvent } from "./attributes";
-import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/GetNode";
+import { initializeListRef, initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
@@ -48,7 +48,7 @@ export function makeElement(
       : XML_NS ? createNSElement(tagName, XML_NS)
          : document.createElement(tagName)
    if ($node) {
-      if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use GetNode or NodesRef as ref")
+      if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
       initializeRef($node, domNode)
    }
    if (nodes) {
@@ -724,6 +724,7 @@ function assignStyleProperty(style: AnyObject, property: string, value: string |
       const splitValue = typeof value === 'string' ? value.split(' !importan') : undefined; // ['red', 't'] 
       const _value = String(splitValue ? splitValue[0] : value);
       if (splitValue === undefined || splitValue.length === 1) {
+         console.log('!!! style key', key, _value)
          style.setProperty(key, _value)
       }
       else {

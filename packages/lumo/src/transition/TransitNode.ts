@@ -1,5 +1,5 @@
 import { TransitionNode } from "./TransitionNode";
-import { $Node } from "../node/GetNode";
+import { $Node } from "../node/NodeRef";
 import { makeElement } from "../element/makeElement";
 import { fromContext } from "../context/provide";
 import { Ion } from "@rue/quarky";

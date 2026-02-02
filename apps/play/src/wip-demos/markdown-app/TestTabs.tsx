@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ContextKey, component, For, fromContext, FromTag, If, GetNode } from "@rue/lumo";
+import { ContextKey, component, For, fromContext, FromTag, If, NodeRef } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -335,7 +335,7 @@ function SidebarFile(input : FromTag<{
    index: Ion<number>
 }>) {
    const { $index, file } = input
-   const $menu = GetNode(IfContextMenu)
+   const $menu = NodeRef(IfContextMenu)
 
    const { openFile } = fromContext(FILES_KIT)
 

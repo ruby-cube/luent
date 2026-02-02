@@ -9,51 +9,49 @@
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { TodoMVC } from './demos/todo-mvc';
-import { CircleApp, CRUDApp, SevenGUIs } from './demos/7-guis';
-import { CellsApp } from './demos/cells-app';
+import { TodoMVC } from './wip-demos/todo-mvc';
+import { CircleApp, CRUDApp, SevenGUIs } from './wip-demos/7-guis';
+import { CellsApp } from './wip-demos/cells-app';
 
-import { PolygonApp } from './demos/polygon-app';
-import { TrafficLight } from './demos/traffic-lights';
-import { View } from './demos/vue-data-fetching';
+import { PolygonApp } from './wip-demos/polygon-app';
+import { TrafficLight } from './wip-demos/traffic-lights';
+import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { AsyncIon, component, createRoot } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
-import { List } from './TestReactiveModel';
-import { MarkdownApp } from './demos/markdown-app/markdown-app';
-import { TabApp } from './demos/markdown-app/TestTabs';
-import { TreeApp } from './demos/tree-view';
-import { SortableTableApp } from './demos/sortable-table';
+import { TestListSelect } from './demo/TestListSelect';
+import { TabApp } from './wip-demos/markdown-app/TestTabs';
+import { TreeApp } from './wip-demos/tree-view';
+import { SortableTableApp } from './wip-demos/sortable-table';
 import { TestEffectCycle } from './TestEffectCycle';
 import { TestShow } from './TestShow';
 import { TestSetHas } from './TestSetHas';
 import { TestCustomRadioSelection } from './TestSelected';
 import { VideoPlayer } from './video-player';
-import { TestNested, TestNestedB } from './demos/TestNested';
+import { TestNested, TestNestedB } from './wip-demos/TestNested';
 import { TestViewFlasks } from './TestViewFlasks';
-import { TestAnimationController } from './demos/animation-controller';
+import { TestAnimationController } from './wip-demos/animation-controller';
 import { CounterModelApp, TestMutableCounter } from './TestCounterModel';
-import { Sidebar } from './demos/IfContextMenu';
-import { FBApp } from './demos/FBChatBug';
+import { Sidebar } from './wip-demos/IfContextMenu';
+import { FBApp } from './wip-demos/FBChatBug';
 import { PlainList } from './TestList';
 import { TestBox } from './TestBox';
 import { TestDerivedConditional } from './TestCreateMountShow';
 import { TestDerived } from './TestCumulativeDerivedIon';
-import { RoboFriendsApp } from './demos/robofriends/RoboFriends';
+import { RoboFriendsApp } from './wip-demos/robofriends/RoboFriends';
 import { getPublicTrace } from '../../../packages/flask/debug';
 import { TestPolymorph } from './TestPolymorph';
 import { TestTry } from './API-exploration/TestTry';
 import { TestAwait } from './TestAwait';
 import { TestTooltip } from './TestTooltipLayoutThrash';
-import { TriangleDemo } from './demos/SierpinskiTriangles';
-import { TestSyncEffects } from './demos/TestSyncEffects';
+import { TriangleDemo } from './wip-demos/SierpinskiTriangles';
+import { TestSyncEffects } from './wip-demos/TestSyncEffects';
 import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 import { TestTrackableOps } from './TestTrackableOps';
-import { SimpleCounter } from './SimpleCounter';
 import { TestNormalizeToRenderFunction } from './TestNormalizeToRenderFunction';
-import { TestIfElse } from './demos/TestIfElse';
+import { TestIfElse } from './wip-demos/TestIfElse';
 import { TestIonicTask } from './TestIonicTask';
 import { TestFiniteIon } from './TestFiniteIon';
 import { TestJSON } from './TestJSON';
@@ -61,9 +59,9 @@ import { TestNestedConditional } from './TestNestedConditional';
 import { DebugLeakyFlask } from './DebugLeakyFlask';
 import { TestVineNodes } from './TestVineNodes';
 import { For } from '../../../packages/lumo/src/iteratives/For';
-import { DateApp } from './demos/DateApp';
+import { DateApp } from './wip-demos/DateApp';
 import { installIonizedDate } from '../../../packages/quarky/src/ionic/$$Date';
-import { TestMultisetting } from './demos/TestMultisetting';
+import { TestMultisetting } from './wip-demos/TestMultisetting';
 import { TestStreamIon } from './TestStreamIon';
 import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
@@ -72,12 +70,15 @@ import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, qu
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demo/TestAsyncSelect';
-import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './demos/TestAsyncMultiply';
-import { TestAsyncTabs } from './demos/TestAsyncTabs';
+import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
+import { TestAsyncTabs } from './wip-demos/TestAsyncTabs';
 import { Async, ooo } from '../../../packages/quarky/src/async/ooo';
 import { Counter } from './TestCounterB';
-import { fetchArticles } from './demos/conduit/src/feature/article-feed/Articles.ionic';
-import { TestMutableDerivation } from './demos/TestMutableDerivations';
+import { fetchArticles } from './wip-demos/conduit/src/feature/article-feed/Articles.ionic';
+import { TestMutableDerivation } from './wip-demos/TestMutableDerivations';
+import { TestMarkdownApp } from './demo/markdown-app';
+import { TestListDragDrop } from './demo/TestListDragDrop';
+import { MountIfAnimation } from './TestMountIf-animation';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -328,7 +329,7 @@ import { TestMutableDerivation } from './demos/TestMutableDerivations';
 //    })
 // }
 
-const app = createRoot(List)
+const app = createRoot(MountIfAnimation)
 
 app.mount('#root')
 

@@ -4,22 +4,21 @@ import { Await, Meanwhile, Nonce } from "../../../../packages/lumo/src/boundarie
 
 
 // TODO:
-// const $some = AsyncIon({
-//    fetch: () => db.getSomething(),
-//    dispatch: value => db.setSomething(value),
-//    optimistic: true,
-//    awaited: true
+// const $something = Ion(null, {
+//    '-fetch': () => db.getSomething(),
+//    '-dispatch': value => db.setSomething(value),
+//    '-awaited': true
 // })
 
 
 export function TestAsyncSelect() {
 
-   const $states = Ion(([] as string[]), {
+   const $states = Ion((['']), {
       '-fetch': () => db.fetchStates(),
    })
    const $activeState = Ion(() => $states()[0], { '-writable': true })
 
-   const $cities = Ion(([] as string[]), {
+   const $cities = Ion((['']), {
       '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : []
    })
    const $activeCity = Ion(() => $cities()[0], { '-writable': true })
@@ -45,10 +44,9 @@ export function TestAsyncSelect() {
                </p>
             </>
          )}
-         {Nonce(() =>
+         {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state
             'loading...'
          )}
-
          {/* {Meanwhile(o =>  
             $cities.loaded ? undefined : 'loading...'
          )} */}
@@ -66,9 +64,9 @@ const stateCities: Record<string, string[]> = {
 
 const db = {
    fetchStates() {
-      return new Promise<string[]>((res) => setTimeout(() => res(Object.keys(stateCities)), 2000))
+      return new Promise<string[]>((res) => setTimeout(() => res(Object.keys(stateCities)), Math.random() * 1000))
    },
    fetchCities(selectedState: string) {
-      return new Promise<string[]>((res) => { setTimeout(() => res(stateCities[selectedState]), 2000) })
+      return new Promise<string[]>((res) => { setTimeout(() => res(stateCities[selectedState]), Math.random() * 1000) })
    }
 }

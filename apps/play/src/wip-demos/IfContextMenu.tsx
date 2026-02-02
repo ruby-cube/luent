@@ -1,4 +1,4 @@
-import { component, For, If, listen, GetNode, Portal, Style } from "@rue/lumo"
+import { component, For, If, listen, NodeRef, Portal, Style } from "@rue/lumo"
 import { FiniteState, ion, watch } from "@rue/quarky"
 
 //FIX: 
@@ -6,7 +6,7 @@ import { FiniteState, ion, watch } from "@rue/quarky"
 
 export function Sidebar() {
    const items = ['a', 'b', 'c']
-   const $contextMenu = GetNode(IfContextMenu)
+   const $contextMenu = NodeRef(IfContextMenu)
 
    return component(
       <>
@@ -43,7 +43,7 @@ export function Sidebar() {
 }
 
 function IfContextMenu() {
-   const $container = GetNode('div')
+   const $container = NodeRef('div')
 
    const $menu = FiniteState({
       'opened': {
@@ -96,7 +96,7 @@ function IfContextMenu() {
 
 
 function IfContextMenuB() {
-   const $container = GetNode('div')
+   const $container = NodeRef('div')
 
    const $open = Ion(false)
 
@@ -140,7 +140,7 @@ function IfContextMenuB() {
 }
 
 function IfContextMenuC() {
-   const $container = GetNode('div')
+   const $container = NodeRef('div')
 
    const $open = Ion(false)
 

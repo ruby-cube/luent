@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { queueRender, component, Else, For, FromTag, If, GetNode, POSTLUDE, PRELUDE, RENDER, fromApp, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/lumo";
+import { queueRender, component, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromApp, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/lumo";
 import { Ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -19,7 +19,7 @@ export function ChatWindow(input: FromTag<{
    chat: ChatKit;
 }>) {
    const { user, chat: { $messages, atMessagePosted, atMessageReceived, atErrorReceived, $error } } = input
-   const $messagesNode = GetNode('div')
+   const $messagesNode = NodeRef('div')
 
    const $newMessageMarker = Ion(null as null | HTMLDivElement)
    const $hasUnseenMessages = Ion(false)

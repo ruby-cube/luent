@@ -1,4 +1,4 @@
-import { $thisView, component, If, GetNode } from "@rue/lumo";
+import { $thisView, component, If, NodeRef } from "@rue/lumo";
 import {  ionize } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionic/notes/inert";
 
@@ -119,7 +119,7 @@ class AnimationAnimator {
 
 export function TestAnimationController() {
 
-   const $canvas = GetNode('canvas')
+   const $canvas = NodeRef('canvas')
 
    // const $animation = Ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
 

@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { List } from "./TestReactiveModel";
+import { List } from "./demo/TestListSelect";
 import { MountIf } from "./TestMountIf";
 import { TestDerivedConditional } from "./TestCreateMountShow";
 import { TestDerived } from "./TestCumulativeDerivedIon";

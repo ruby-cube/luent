@@ -1,4 +1,4 @@
-import { component, Else, EventHandler, FromTag, If, GetNode, Style } from "@rue/lumo";
+import { component, Else, EventHandler, FromTag, If, NodeRef, Style } from "@rue/lumo";
 import { FiniteState, Ion, ionize } from "@rue/quarky";
 import "./reset.css"
 
@@ -22,7 +22,7 @@ const obj2 = {
 
 export function VideoPlayer() {
 
-   const $video = GetNode("video")
+   const $video = NodeRef("video")
 
    const player = FiniteState({
       "isLoading": {

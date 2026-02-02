@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import { $_derivation, Ion, ionic, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
+import { $_derivation, Ion, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
@@ -130,7 +130,7 @@ export class ListKit extends VineNode {
             $index.dataLength = list.length;
             queueInternalRender(() => {
                const prevNodes = kit.nodes!
-               removeDOMNodes(prevNodes)
+                  removeDOMNodes(prevNodes)
                kit.nodes = undefined;
             }, this.flask)
             kit.flask.emitDiscard()
@@ -138,7 +138,7 @@ export class ListKit extends VineNode {
          else if (hasMoved(kit)) {
             queueInternalRender(() => {
                const prevNodes = kit.nodes!
-               removeDOMNodes(prevNodes)
+                  removeDOMNodes(prevNodes)
             }, this.flask)
             kit.hasMoved = true;
             hasMovedItems = true;
@@ -156,33 +156,32 @@ export class ListKit extends VineNode {
       }
 
       queueInternalRender(() => {
-
-         const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
-
-         // mount to fragment
-         if (hasNewItems || hasMovedItems) {
-            let fragment: DocumentFragment | null = null
-
-            for (let i = 0; i < kits.length; i++) {
-               const kit = kits[i]
-               if (!prevItems.has(kit) || kit.hasMoved) {
-                  if (!fragment) {
-                     fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
+            const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
+   
+            // mount to fragment
+            if (hasNewItems || hasMovedItems) {
+               let fragment: DocumentFragment | null = null
+   
+               for (let i = 0; i < kits.length; i++) {
+                  const kit = kits[i]
+                  if (!prevItems.has(kit) || kit.hasMoved) {
+                     if (!fragment) {
+                        fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
+                     }
+                     mountDOMNodes(kit.nodes!, fragment)
+                     kit.hasMoved = null;
                   }
-                  mountDOMNodes(kit.nodes!, fragment)
-                  kit.hasMoved = null;
-               }
-               else {
-                  fragment = null
+                  else {
+                     fragment = null
+                  }
                }
             }
-         }
-
-         if (fragments.length) {
-            for (const { fragment, precedingLeaf } of fragments) {
-               mountFragment(fragment, precedingLeaf, this.parent)
+   
+            if (fragments.length) {
+               for (const { fragment, precedingLeaf } of fragments) {
+                  mountFragment(fragment, precedingLeaf, this.parent)
+               }
             }
-         }
       }, this.flask)
 
       this.prevItems = currentItems

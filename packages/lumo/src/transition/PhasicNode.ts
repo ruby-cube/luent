@@ -3,7 +3,7 @@ import { makeElement } from "../element/makeElement";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
 import { fromContext } from "../context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
-import { $Node, GetNode } from "../node/GetNode";
+import { $Node, NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
 import type { Commons } from "../context/context-stack";
 import { Ion } from "@rue/quarky";

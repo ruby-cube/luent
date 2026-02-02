@@ -687,7 +687,7 @@ export function PlayingCard(input: FromTag<{
    const { $number, $suit, startFaceup = false, $cardBack } = input
 
    let $faceup = Ion(startFaceup)
-   const $div = GetNode('div')
+   const $div = NodeRef('div')
 
    return component(
       <div on:click={e => { $$: $faceup = !$faceup }} node={$div}>

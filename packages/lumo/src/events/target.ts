@@ -1,5 +1,5 @@
 import { isFunction } from "@rue/utils";
-import { $Node } from "../node/GetNode";
+import { $Node } from "../node/NodeRef";
 
 export function target(...args: [...(string | ((x: HTMLElement) => boolean) | $Node)[]]) {
    const e = args.pop() as object
