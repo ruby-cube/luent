@@ -51,8 +51,9 @@ export function makeElement(
 
    if ($node) {
       console.log('$node', $node)
-      if (INTERNAL in $node) {
-         setUpNodeRefs(domNode, $node[INTERNAL] as NodeRefsConfig)
+      if ($node instanceof Array) {
+         const [array, ...indices] = $node
+         setUpNodeRefs(domNode, array, indices)
       }
       else {
          if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs as ref")

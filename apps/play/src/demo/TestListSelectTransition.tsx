@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { atMounted, component, For, NodeRef, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
@@ -89,17 +90,15 @@ export function TestListSelectTransition() {
       )
    }
 
-   const $itemDivs = NodeRefs('div')
-
    function transitionExisting(removedIndex?: number) {
       console.log('+++itemDivs length', $itemDivs('length'))
-      const rects = []
-      const nodes = []
-      for (let i = 0; i < $itemDivs('length'); i++) {
+      const rects: DOMRect[] = []
+      const nodes: any[] = []
+      for (let i = 0; i < itemDivs.length; i++) {
          if (i === removedIndex) {
             continue;
          }
-         const node = $itemDivs(i)
+         const node = itemDivs[i]
          console.log('%%% node', node, i)
          const rect = node.getBoundingClientRect()
          rects.push(rect)
@@ -156,10 +155,11 @@ export function TestListSelectTransition() {
          clone.remove()
       })
    }
+
    const $container = NodeRef('div')
 
-   iteratorTests(list, selected)
-   let initial = true
+   const itemDivs = []
+
    return component(
       <>
          <h1>hello world</h1>
@@ -172,9 +172,11 @@ export function TestListSelectTransition() {
                <div ref={$container}>
                   {For(list, m => m.id, (item, $index) => (
                      <div
-                        ref={$itemDivs($index, 0)}
-                        at:mounted={node => { /* itemDivs.splice($index(), 0, node);  */transitionNew(node) }}
-                        at:unmount={node => { /* itemDivs.splice(itemDivs.indexOf(node), 1);  */transitionOut(node) }}
+                        // ref={$itemDivs.by($index)}
+
+                        ref={[itemDivs, $index]}
+                        at:mounted={node => { transitionNew(node) }}
+                        at:unmount={node => { transitionOut(node) }}
                      >
                         <div
                            on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
@@ -263,36 +265,6 @@ export function TestListSelectTransition() {
    )
 }
 
-function iteratorTests(list: any[], selected: Set<any>) {
-   // Testing ionic iterator access
-   console.log('$$$ list values', list.values().next())
-   console.log('$$$ list iterator', list[Symbol.iterator])
-
-
-   const values = list.values()
-   for (const value of values) {
-      console.log('$$$ value', value)
-   }
-
-   for (const value of list) {
-      console.log('$$$ value of list', value)
-   }
-
-   const ionizedValues = Ionic(list.values())
-   for (const value of ionizedValues) {
-      console.log('$$$ value of ionized values()', value)
-   }
-
-   try {
-      console.log('has it?', selected.has({}))
-   }
-   catch (err) {
-      console.error('EEP', err)
-   }
-
-   const vals = selected.values()
-   Array.from(selected)
-}
 
 const randomColor = useRandomColorGenerator()
 

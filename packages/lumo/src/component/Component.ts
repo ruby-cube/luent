@@ -104,8 +104,9 @@ export function makeComponent(
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.exposed ?? {}
    if (ref) {
-      if (INTERNAL in ref) {
-         setUpNodeRefs(publicComponent, ref[INTERNAL] as NodeRefsConfig)
+      if (ref instanceof Array) {
+         const [array, ...indices] = ref
+         setUpNodeRefs(publicComponent, array, indices)
       }
       else {
          initializeRef(ref, publicComponent)

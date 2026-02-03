@@ -43,7 +43,8 @@ export function CellsApp() {
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
    // const tds: HTMLTableCellElement[] = []
 
-   const $tds = NodeRefs('td', 2)
+   // const $tds = NodeRefs('td', 2)
+   const tds = []
 
    atMounted(() => {
       console.warn('node================')
@@ -51,7 +52,12 @@ export function CellsApp() {
       // console.log($tds(1)(0))
       // console.log($tds(2)(0))
 
-      console.log($tds(0)(1))
+      console.log(tds[0][0])
+      console.log(tds[1][0])
+      console.log(tds[2][0])
+      console.log(tds[0][1])
+      console.log(tds[1][1])
+      console.log(tds[2][1])
       // console.log($tds(1)(1))
       // console.log($tds(2)(1))
       console.warn('node============END')
@@ -73,7 +79,7 @@ export function CellsApp() {
                   <tr>
                      <th>{row}</th>
                      {For(cols, (_, $col) =>
-                        <td ref={$tds(() => row, 0)($col, 0)}>
+                        <td ref={[tds, row, $col]}>
                            <Cell row={row} column={$col()}></Cell>
                         </td>
                      )}

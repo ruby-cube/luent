@@ -65,8 +65,8 @@ export function NodeRefs<T>(type: T, levels: number = 1) {
 function createLevel(level: number, levels: number, array: any[]) {
    const $next: ((index: Index) => any)[] = []
 
-   return function $node(index: Ion<number> | number | 'length', set: 1 | 0 = 1) {
-      if (index === 'length'){
+   function $node(index: Ion<number> | number | 'length', set: 1 | 0 = 1) {
+      if (index === 'length') {
          return array.length;
       }
       if (set === 0) {
@@ -75,7 +75,8 @@ function createLevel(level: number, levels: number, array: any[]) {
             return { [INTERNAL]: [array, index] }
          }
          else {
-            return $next[i] = createLevel(level + 1, levels, array[i] ?? (array[i] = []))
+            const $node = $next[i] = createLevel(level + 1, levels, array[i] ?? (array[i] = []))
+            return (index: Ion<number> | number) => $node(index, 0)
          }
       }
       else {
@@ -87,28 +88,40 @@ function createLevel(level: number, levels: number, array: any[]) {
          }
       }
    }
+   if (level === 1) $node.by = (index: Ion<number> | number) => $node(index, 0)
+   return $node
 }
 
 export type NodeRefsConfig = [any[], Index]
 
-export function setUpNodeRefs(node: any, config: NodeRefsConfig) {
-   const [array, index] = config
-   setUpLevel(node, array, index)
-   // let prevArray;
-   // let i = configs.length
-   // const levels = i
-   // while (i--) {
-   //    if (i === 0) return;
-   //    const level = i + 1;
-   //    console.log('&&& setup level', i)
-   //    const [array, index] = configs[i]
-   //    if (level === levels) {
-   //    }
-   //    else {
-   //       setUpLevel(prevArray, array, index)
-   //    }
-   //    prevArray = array;
-   // }
+// export function setUpNodeRefs(node: any, config: NodeRefsConfig) {
+//    const [array, index] = config
+//    setUpLevel(node, array, index)
+//    // let prevArray;
+//    // let i = configs.length
+//    // const levels = i
+//    // while (i--) {
+//    //    if (i === 0) return;
+//    //    const level = i + 1;
+//    //    console.log('&&& setup level', i)
+//    //    const [array, index] = configs[i]
+//    //    if (level === levels) {
+//    //    }
+//    //    else {
+//    //       setUpLevel(prevArray, array, index)
+//    //    }
+//    //    prevArray = array;
+//    // }
+// }
+
+export function setUpNodeRefs(node: any, root: any[], indices: Index[]) {
+   let array = root;
+   for (let i = 0; i < indices.length; i++) {
+      const index = toValue(indices[i])
+      const nestedArray = array[index] ?? (array[index] = [])
+      setUpLevel(i === indices.length - 1 ? node : nestedArray, array, indices[i])
+      array =  nestedArray
+   }
 }
 
 function setUpLevel(referent: any, array: any[], index: Ion<number> | number) {
