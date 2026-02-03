@@ -175,7 +175,7 @@ export function ChatWindow(input: FromTag<{
             <div class='error'>{$error}</div>
          )}
          {Else(
-            <div class='messages' node={$messagesNode} on:scrollend={reScrollend} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
+            <div class='messages' ref={$messagesNode} on:scrollend={reScrollend} style={{ scrollBehavior: ($smoothScroll() ? 'smooth' : 'auto') }}>
                {For($messages, m => m.id, (message) => (
                   count = 0
                ) => (

@@ -1,11 +1,11 @@
 import { AnyObject } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
-import { Ion, toValue } from "@rue/quarky";
+import { INTERNAL, Ion, toValue } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
 import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
-import { setUpNodesArray } from "../node/GetNodes";
+import { NodeRefsConfig, setUpNodeRefs } from "../node/GetNodes";
 
 
 
@@ -96,17 +96,20 @@ export function makeComponent(
    tag: ComponentConfig,
    // $index: Ion<number> | undefined
 ): Component {
+   const { ref } = tag
    // TODO: component flask lifecycle hooks
    tag.Slot = Slot;
    const output = Component(toInput(tag))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.exposed ?? {}
-   if (tag.node)
-      initializeRef(tag.node, publicComponent)
-   if (tag.nodes) {
-      const [nodesArray, ...indices] = tag.nodes
-      setUpNodesArray(publicComponent, nodesArray, indices)
+   if (ref) {
+      if (INTERNAL in ref) {
+         setUpNodeRefs(publicComponent, ref[INTERNAL] as NodeRefsConfig)
+      }
+      else {
+         initializeRef(ref, publicComponent)
+      }
    }
 
    // if (tag['show-hide']) setUpConditionalDisplay()

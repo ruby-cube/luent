@@ -341,7 +341,7 @@ function SidebarFile(input : FromTag<{
 
    return component(
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
-         <IfContextMenu on:click={reMenuClick} node={$menu}></IfContextMenu>
+         <IfContextMenu on:click={reMenuClick} ref={$menu}></IfContextMenu>
          {file.$title}
       </div>
    )

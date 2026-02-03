@@ -1,10 +1,11 @@
-import { component, Else, For, FromTag, NodeRef, If, Style } from "@rue/lumo"
-import { Ion, ion, ionize } from "@rue/quarky"
+import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted } from "@rue/lumo"
+import { Ion, Ionic, isIon, PRELUDE, SYNC, toValue, watch } from "@rue/quarky"
+import { NodeRefs } from "../../../../packages/lumo/src/node/GetNodes"
 
-const COLS = 5
-const ROWS = 20
+const COLS = 2
+const ROWS = 3
 
-const cells = ionize(
+const cells = Ionic(
    Array.from(Array(COLS).keys()).map((i) =>
       Array.from(Array(ROWS).keys()).map((i) => '')
    )
@@ -36,9 +37,25 @@ function getCellValue(c: number, r: number) {
    return Number.isFinite(num) ? num : val
 }
 
+
+
 export function CellsApp() {
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
-   const tds: HTMLTableCellElement[] = []
+   // const tds: HTMLTableCellElement[] = []
+
+   const $tds = NodeRefs('td', 2)
+
+   atMounted(() => {
+      console.warn('node================')
+      // console.log($tds(0)(0))
+      // console.log($tds(1)(0))
+      // console.log($tds(2)(0))
+
+      console.log($tds(0)(1))
+      // console.log($tds(1)(1))
+      // console.log($tds(2)(1))
+      console.warn('node============END')
+   })
 
    return component(
       <>
@@ -52,12 +69,12 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For([...cells[0]], (_, $row) => (// TODO: allow numbers as input for For()
+               {For([...cells[0]], (_, row) => (// TODO: allow numbers as input for For()
                   <tr>
-                     <th>{$row}</th>
+                     <th>{row}</th>
                      {For(cols, (_, $col) =>
-                        <td nodes={[tds, $row, $col]}>
-                           <Cell row={$row()} column={$col()}></Cell>
+                        <td ref={$tds(() => row, 0)($col, 0)}>
+                           <Cell row={row} column={$col()}></Cell>
                         </td>
                      )}
                   </tr>

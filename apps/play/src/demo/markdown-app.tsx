@@ -14,7 +14,7 @@ export function TestMarkdownApp() {
    return component(
       <>
          <div class='editor'>
-            <textarea class='input' node={$textArea} mu:value={$markdown}></textarea>
+            <textarea class='input' ref={$textArea} mu:value={$markdown}></textarea>
             <div class='output' innerHTML={$html}></div>
          </div>
          <o--link href='/src/demo/markdown-app.css' rel='stylesheet' />

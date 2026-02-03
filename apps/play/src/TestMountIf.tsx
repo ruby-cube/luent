@@ -60,7 +60,8 @@ export function MountIf() {
       console.log('hi tick instant', getActiveUpdate())
    })
 
-   const $transitioning = Ion(false)
+
+
 
    const $div1 = NodeRef('div')
    const $div2 = NodeRef('div')
@@ -78,16 +79,16 @@ export function MountIf() {
       return $active() ? $div1 : $ready() ? $div2 : $div3
    }
 
-   const newClones = new Set<HTMLElement>()
+   const transitioningIn = new Set<HTMLElement>()
 
    function maybeTransition($div: $Node) {
       if (prevNode === $div()) {
          return;
       }
-      if (newClones.size) { // transitioning
-         for (const newClone of newClones) {
-            newClone.classList.add('transition-in-from')
-            newClones.delete(newClone)
+      if (transitioningIn.size) { // transitioning
+         for (const newClone of transitioningIn) {
+            newClone.classList.add('cancel-transition')
+            transitioningIn.delete(newClone)
          }
       }
 
@@ -103,10 +104,10 @@ export function MountIf() {
       // - position prevClone
       prevClone.style.removeProperty('visibility')
       prevClone.style.setProperty('position', 'absolute')
-      prevClone.style.setProperty('top', rect.top+'px')
-      prevClone.style.setProperty('left', rect.left+'px')
-      prevClone.style.setProperty('width', rect.width+'px')
-      prevClone.style.setProperty('height', rect.height+'px')
+      prevClone.style.setProperty('top', rect.top + 'px')
+      prevClone.style.setProperty('left', rect.left + 'px')
+      prevClone.style.setProperty('width', rect.width + 'px')
+      prevClone.style.setProperty('height', rect.height + 'px')
 
       queueRender(() => {
          $container()!.appendChild(prevClone) // must happen before we read dims of new node ... why??
@@ -114,14 +115,13 @@ export function MountIf() {
          const newNode = $div()!
 
          const newClone = newNode.cloneNode(true)
-         newClones.add(newClone)
+         transitioningIn.add(newClone)
 
          // - read dims of new node (must read before hiding new node)
          const rect = newNode!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
 
          console.log('prevNode parent', prevNode?.parentNode)
          newNode.style.setProperty('visibility', 'hidden')
-         // newNode.style.setProperty('display', 'none')
 
          // - position newClone
          newClone.style.removeProperty('visibility')
@@ -132,29 +132,29 @@ export function MountIf() {
          newClone.style.setProperty('height', rect.height + 'px')
 
          // set starting transition state
-         newClone.classList.add('transition-in-from')
-         newClone.classList.add('may-transition-in')
+         newClone.classList.add('fade-in-from-0')
          $container()?.appendChild(newClone)
 
-         prevClone.classList.add('may-transition-out')
 
          requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
             queueTask(() => {
                // trigger transition
-               prevClone.classList.add('transition-out-to')
-               newClone.classList.remove('transition-in-from')
+               prevClone.classList.add('fade-out-to-0')
 
                prevClone.addEventListener('transitionend', () => {
                   console.log('transition ended')
                   prevClone.remove();
                })
 
+               newClone.classList.add('fade-in-active')
+               newClone.classList.remove('fade-in-from-0')
+
                newClone.addEventListener('transitionend', () => {
-                  console.log('transition ended new')
+                  console.log('transition ended new clone removed')
                   newNode.style.removeProperty('visibility')
                   // newNode.style.removeProperty('display')
                   newClone.remove();
-                  newClones.delete(newClone)
+                  transitioningIn.delete(newClone)
                })
             })
          })
@@ -168,7 +168,12 @@ export function MountIf() {
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
    return component(
-      <div>
+      <div style={{
+         '--fade-in-duration': '2000ms',
+         '--fade-out-duration': '2000ms',
+         '--fade-in-timing': 'ease',
+         '--fade-out-timing': 'ease'
+      }}>
          <button on:click={() => ($color.change(), $name.value += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {$name}</h1>
          <button on:click={e => { $active.toggle(); maybeTransition(getActiveDivRef()) }}>toggle active</button>
@@ -177,9 +182,9 @@ export function MountIf() {
          {/* <Transition> */}
          {/* <show-hide> */}
          {/* <div style={{ width: ($transitioning() ? $width() : 'unset'), height: ($transitioning() ? $height() : 'unset'), }}> */}
-         <div class='container' node={$container}>
+         <div class='container' ref={$container}>
             {If($active,
-               <div class='holder' node={$div1}>
+               <div class='holder' ref={$div1}>
                   {/* <div> */}
                   oh
                   {/* <Transit with={slide({ x: -100, duration: 2200 })}> */}
@@ -194,13 +199,13 @@ export function MountIf() {
                </div>
             )}
             {ElseIf($ready,
-               <div class='holder' node={$div2}>
+               <div class='holder' ref={$div2}>
                   low
                   <h2>balloon</h2>
                </div>
             )}
             {Else(
-               <div class='holder' node={$div3}>
+               <div class='holder' ref={$div3}>
                   so
                   <h2>bye</h2>
                </div>
@@ -215,21 +220,23 @@ export function MountIf() {
             .container {
                overflow: hidden;
             }
-            
-            .may-transition-out {
-               transition: opacity 1000ms ease;
+
+            .fade-in-active {
+               transition: opacity var(--fade-in-duration) var(--fade-in-timing);
             }
 
-            .may-transition-in {
-               transition: opacity 2000ms ease;
+            .fade-out-to-0 {
+               opacity: 0;
+               transition: opacity var(--fade-out-duration) var(--fade-out-timing);
             }
 
-            .transition-out-to {
-               opacity: 0
+            .fade-in-from-0 {
+               opacity: 0;
             }
 
-            .transition-in-from {
-               opacity: 0
+            .cancel-transition {
+               opacity: 0;
+               transition: opacity 500ms;
             }
 
          `}
@@ -363,8 +370,8 @@ function ArticleBlock(setup: {
 
 //     return component(
 //         <>
-//             <div node={$countDiv}>{$count}</div>
-//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} node={$button}>increment</button >
+//             <div ref={$countDiv}>{$count}</div>
+//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} ref={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

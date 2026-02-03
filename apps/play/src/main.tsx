@@ -79,6 +79,8 @@ import { TestMutableDerivation } from './wip-demos/TestMutableDerivations';
 import { TestMarkdownApp } from './demo/markdown-app';
 import { TestListDragDrop } from './demo/TestListDragDrop';
 import { MountIfAnimation } from './TestMountIf-animation';
+import { TestListSelectTransition } from './demo/TestListSelectTransition';
+import { TestListTransit } from './wip-demos/TestListTransit';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -329,7 +331,7 @@ import { MountIfAnimation } from './TestMountIf-animation';
 //    })
 // }
 
-const app = createRoot(MountIfAnimation)
+const app = createRoot(TestListSelectTransition)
 
 app.mount('#root')
 

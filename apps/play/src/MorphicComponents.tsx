@@ -37,13 +37,13 @@ export function MainBlock() {
 
 
 
-   const mainContent = NodeRef($MainContent)
+   const $mainContent = NodeRef($MainContent)
 
    $mainContent.render('bye')
 
    return (
       <main>
-         <$MainContent as='hello' node={mainContent} />
+         <$MainContent as='hello' ref={$mainContent} />
          <$records_list />
          <button on:click={changeMainContent}>click</button>
       </main>

@@ -5,7 +5,7 @@ import { Ion } from "@rue/quarky"
 import { getActiveFlask, getFlask } from "@rue/flask"
 import { AnyObject } from "@rue/types"
 
-const INTERNAL = Symbol('internal')
+export const INTERNAL = Symbol('internal')
 
 type RefSource = HTMLTag | ((...args: any[]) => Component)
 

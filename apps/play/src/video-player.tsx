@@ -128,7 +128,7 @@ export function VideoPlayer() {
       <>
          <div class="container">
             <video
-               node={$video}
+               ref={$video}
                on:canplay={e => player.apply("init")}
                on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
                on:ended={e => track.apply("end")}

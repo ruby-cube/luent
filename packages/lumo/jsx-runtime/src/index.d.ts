@@ -154,7 +154,7 @@ declare namespace React {
     * Class components, built-in browser components (e.g. `div`) and forwardRef components can receive refs and automatically accept these props.
     * ```tsx
     * const Component = forwardRef(() => <div />);
-    * <Component node={(current) => console.log(current)} />
+    * <Component ref={(current) => console.log(current)} />
     * ```
     *
     * You only need this type if you manually author the types of props that need to be compatible with legacy refs.
@@ -190,7 +190,7 @@ declare namespace React {
        *
        * @see {@link https://react.dev/learn/referencing-values-with-refs#refs-and-the-dom React Docs}
        */
-      node?: Lumo.$Node | Lumo.$Nodes | undefined;
+      ref?: Lumo.$Node | Lumo.$Nodes | undefined;
    }
 
    /**
@@ -2554,7 +2554,7 @@ declare global {
 
       //$$$
       interface IntrinsicAttributes extends React.Attributes {
-         node?: $Node | $Nodes //#LUMO-EDIT
+         ref?: $Node | $Nodes //#LUMO-EDIT
          // children?: Lumo.InferSlot
       }
       interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }

@@ -1,0 +1,149 @@
+import { component, For, Style } from "@rue/lumo";
+import { Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
+import './TestListTransit.css'
+
+export function TestListTransit() {
+
+   const $todos = Ion(Ionic([
+      Ionic({ id: 1, done: false, description: 'write some docs' }),
+      Ionic({ id: 2, done: false, description: 'start writing blog post' }),
+      Ionic({ id: 3, done: true, description: 'buy some milk' }),
+      Ionic({ id: 4, done: false, description: 'mow the lawn' }),
+      Ionic({ id: 5, done: false, description: 'feed the turtle' }),
+      Ionic({ id: 6, done: false, description: 'fix some bugs' })
+   ]));
+
+   let uid = $todos().length + 1;
+
+   function remove(todo) {
+      const index = $todos().indexOf(todo);
+      $todos().splice(index, 1);
+   }
+   return component(
+      <div class="board">
+         <input
+            placeholder="what needs to be done?"
+            on:keydown={(e) => {
+               if (e.key !== 'Enter') return;
+
+               $todos().push(Ionic({
+                  id: uid++,
+                  done: false,
+                  description: e.currentTarget.value
+               }));
+
+               e.currentTarget.value = '';
+            }}
+         />
+
+         <div class="todo">
+            <h2>todo</h2>
+            <TodoList todos={($todos().filter((t) => !t.done))} can:remove={remove} />
+         </div>
+
+         <div class="done">
+            <h2>done</h2>
+            <TodoList todos={($todos().filter((t) => t.done))} can:remove={remove} />
+         </div>
+         {Style`
+
+            .board {
+      display: grid;
+   grid-template-columns: 1fr 1fr;
+   grid-column-gap: 1em;
+   max-width: 36em;
+   margin: 0 auto;
+	}
+
+	.board > input {
+      font - size: 1.4em;
+   grid-column: 1/3;
+   padding: 0.5em;
+   margin: 0 0 1rem 0;
+	}
+
+   h2 {
+      font - size: 2em;
+   font-weight: 200;
+	}
+
+             .transition-position {
+                  transition: transform 150ms ease-in-out;
+               }
+         `}
+      </div>
+   )
+}
+
+const sent = new Map()
+
+function send(id, node) {
+   const rect = node.getBoundingClientRect()
+   sent.set(id, rect)
+}
+
+function receive(id, node) {
+   const first = sent.get(id)
+   if (first) {
+      const last = node.getBoundingClientRect()
+      queueRender(() => {
+         const deltaY = first.top - last.top
+         const deltaX = first.left - last.left
+         if (deltaY || deltaX) {
+            node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
+            console.log('DELTA', 56)
+            requestAnimationFrame(() => {
+               queueTask(() => {
+                  node.classList.add('transition-position')
+                  node.style.setProperty('transform', `translate(${0}px, ${0}px)`)
+                  node.addEventListener('transitionend', () => {
+                     console.log('transition end')
+                     node.classList.remove('transition-position')
+                     node.style.removeProperty('transform')
+                  })
+               })
+            })
+         }
+      })
+   }
+}
+
+
+
+function TodoList(input) {
+   const { $todos, remove } = input
+   return component(
+      <ul class="todos">
+         {For($todos, m => m.id, todo => (
+            <li class={{ done: (todo.done) }} at:unmount={node => send(todo.id, node)} at:mounted={node => receive(todo.id, node)}>
+               <label>
+                  <input type="checkbox" mu:checked={todo.$done} />
+                  <span>{todo.description}</span>
+                  <button on:click={() => remove(todo)} aria-label="Remove">X</button>
+               </label>
+            </li>
+         ))}
+         {Style`
+   	label {
+		width: 100%;
+		height: 100%;
+		display: flex;
+	}
+
+	span {
+		flex: 1;
+	}
+
+   button {
+      border: none;
+      background-color: transparent
+   }
+   `}
+      </ul>
+   )
+}
+
+
+
+
+

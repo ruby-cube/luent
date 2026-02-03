@@ -1,7 +1,7 @@
 import { Ion, isIon, isGetter } from "../../../quarky/src";
 import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
-import { $Node, $Nodes } from "./NodeRef";
+import { $Node, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
@@ -85,8 +85,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 
 type NodesArray<T> = ReturnType<$Node<T>>[] | NodesArray<T>[]
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-   node?: $Node<T>,
-   nodes?: [NodesArray<T>, ...$Index[]]
+   ref?: $Node<T> | { [INTERNAL]: [NodesArray<T>, ...$Index[]] },
    provide?: Provided
 }
 
@@ -178,12 +177,12 @@ export function makeJSXNode(
 
       default:
          if (typeof nodeType === 'string') {
-               return makeElement(
-                  nodeType,
-                  Slot,
-                  <ElementConfig>config,
-                  // getCurrentIndex()
-               )
+            return makeElement(
+               nodeType,
+               Slot,
+               <ElementConfig>config,
+               // getCurrentIndex()
+            )
          }
          return makeComponent(
             nodeType,

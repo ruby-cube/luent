@@ -61,6 +61,8 @@ export function MountIfAnimation() {
    })
 
    const $transitioning = Ion(false)
+   const $startHeight = Ion(0)
+   const $endHeight = Ion(0)
 
    const $div1 = NodeRef('div')
    const $div2 = NodeRef('div')
@@ -86,8 +88,9 @@ export function MountIfAnimation() {
       }
       if (newClones.size) { // transitioning
          for (const newClone of newClones) {
-            newClone.classList.add('reverse-animation')
+            newClone.classList.add('cancel-transition') // FIX:
             newClones.delete(newClone)
+            // TODO: interrupt container transition
          }
       }
 
@@ -95,6 +98,8 @@ export function MountIfAnimation() {
    }
 
    function transition($div: $Node) {
+      // container
+      const first = $container()!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
       // - read dims of prev node
       const rect = prevNode!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
       const prevClone = prevNode!.cloneNode(true)
@@ -109,6 +114,16 @@ export function MountIfAnimation() {
       prevClone.style.setProperty('height', rect.height + 'px')
 
       queueRender(() => {
+         const last = $container()!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
+
+         // const deltaX = first.left - last.left;
+         // const deltaY = first.top - last.top;
+         // $container()!.style.setProperty('width', first.width + 'px')
+         $container()!.style.setProperty('height', first.height + 10 + 'px')
+         console.log('first height', first.height, 135.833,)
+         // TODO: transition container height
+         // TODO: figure out why there is a height discrepancy
+
          $container()!.appendChild(prevClone) // must happen before we read dims of new node ... why??
 
          const newNode = $div()!
@@ -133,27 +148,43 @@ export function MountIfAnimation() {
 
          $container()?.appendChild(newClone)
 
-         prevClone.classList.add('animate-out')
+         prevClone.classList.add('fade-out')
+         newClone.classList.add('fade-in')
 
-         // requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
-            // queueTask(() => {
-               // trigger transition
-               newClone.classList.add('animate-in')
-
-               prevClone.addEventListener('animationend', () => {
-                  console.log('transition ended')
-                  prevClone.remove();
+         requestAnimationFrame(() => {
+            queueTask(() => {
+               $container()!.style.setProperty('height', last.height + 10 + 'px')
+               $container()?.addEventListener('transitionend', () => {
+                  $container()?.style.removeProperty('height')
                })
+            })
+         })
+         // Play: animate the final element from its first bounds
+         // to its last bounds (which is no transform)
+         // $container()!.animate([{
+         //    transformOrigin: 'top left',
+         //    transform: `scale(${deltaW}, ${deltaH})`
+         // }, {
+         //    transformOrigin: 'top left',
+         //    transform: 'none'
+         // }], {
+         //    duration: 1000,
+         //    easing: 'ease-in',
+         //    fill: 'both'
+         // });
 
-               newClone.addEventListener('animationend', () => {
-                  console.log('transition ended new')
-                  newNode.style.removeProperty('visibility')
-                  // newNode.style.removeProperty('display')
-                  newClone.remove();
-                  newClones.delete(newClone)
-               })
-            // })
-         // })
+         prevClone.addEventListener('animationend', () => {
+            console.log('transition ended')
+            prevClone.remove();
+         })
+
+         newClone.addEventListener('animationend', () => {
+            console.log('transition ended new')
+            newNode.style.removeProperty('visibility')
+            // newNode.style.removeProperty('display')
+            newClone.remove();
+            newClones.delete(newClone)
+         })
 
          prevNode = newNode
       })
@@ -173,9 +204,9 @@ export function MountIfAnimation() {
          {/* <Transition> */}
          {/* <show-hide> */}
          {/* <div style={{ width: ($transitioning() ? $width() : 'unset'), height: ($transitioning() ? $height() : 'unset'), }}> */}
-         <div class='container' node={$container}>
+         <div class='container transition-container' ref={$container}>
             {If($active,
-               <div class='holder' node={$div1}>
+               <div class='holder' ref={$div1}>
                   {/* <div> */}
                   oh
                   {/* <Transit with={slide({ x: -100, duration: 2200 })}> */}
@@ -190,13 +221,13 @@ export function MountIfAnimation() {
                </div>
             )}
             {ElseIf($ready,
-               <div class='holder' node={$div2}>
+               <div class='holder' ref={$div2}>
                   low
                   <h2>balloon</h2>
                </div>
             )}
             {Else(
-               <div class='holder' node={$div3}>
+               <div class='holder' ref={$div3}>
                   so
                   <h2>bye</h2>
                </div>
@@ -204,47 +235,70 @@ export function MountIfAnimation() {
          </div>
          {/* </show-hide> */}
          {/* </Transition> */}
-
+         <hr></hr>
          {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
          {Style`
 
 
 @keyframes fade-in {
-   from {
+   0% {
       opacity: 0;
    }
 
-   to {
+   25% {
+      opacity: .25;
+   }
+
+   50% {
+      opacity: .5;
+   }
+
+   75% {
+      opacity: .75;
+   }
+
+   100% {
       opacity: 1;
    }
 }
 
 @keyframes fade-out {
-   from {
-      opacity: 1;
+from {
+   opacity: .2
+}
+   to {
+      opacity: 0;
    }
+}
+
+@keyframes cancel-out {
 
    to {
       opacity: 0;
    }
 }
 
-.animate-out {
-   animation: fade-out 1s ease-in;
+.fade-out {
+   animation: fade-out 2000ms ease-in forwards;
 }
 
-.animate-in {
-   animation: fade-in 1s ease-in;
+.fade-in {
+   animation: fade-in 2000ms ease-in forwards;
 }
 
-            .reverse-animation {
-               animation-direction: reverse
+            .cancel-transition {
+               animation: fade-in paused, cancel-out 500ms;
+            }
+
+            .transition-container {
+               transition: height 125ms ease-in;
             }
 
          `}
       </div>
    )
 }
+
 
 
 // function Child(input : FromTag({
@@ -372,8 +426,8 @@ function ArticleBlock(setup: {
 
 //     return component(
 //         <>
-//             <div node={$countDiv}>{$count}</div>
-//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} node={$button}>increment</button >
+//             <div ref={$countDiv}>{$count}</div>
+//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} ref={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

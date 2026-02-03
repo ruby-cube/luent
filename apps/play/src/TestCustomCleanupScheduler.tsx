@@ -436,7 +436,7 @@ export function TestCleanupScheduler({
 
          <input value={$frogName} />
 
-         <button node={$stopButton}>stop</button>
+         <button ref={$stopButton}>stop</button>
          <button on:click={initWatcher}>start</button>
          <div
             width={2}

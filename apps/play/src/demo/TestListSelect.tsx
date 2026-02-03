@@ -85,7 +85,7 @@ export function TestListSelect() {
                </div>
 
                {For(list, m => m.id, (item, $index) => (
-                  <div style={{ viewTransitionName: `item-${item.id}` }}>
+                  <div>
                      <div
                         on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
                         style={{
@@ -107,25 +107,14 @@ export function TestListSelect() {
                      <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
                         insert
                      </div>
-                     {Style`
-                        ::view-transition-group(item-${item.id}) {
-                           transition-timing-function: cubic-bezier(0, 1, 1, 1);
-                           animation-duration: 150ms;
-                        }
-                     `}
                   </div>
                ))}
-               <button style='view-transition-name: clear-btn' on:click={e => selected.clear()}>clear</button>
+               <button on:click={e => selected.clear()}>clear</button>
             </div>
 
             {/* <div style='width: 30%'>
                {For($listClone, (item, $index) =>
                   <div
-                     style={{
-                        viewTransitionName: `itemclone-${item.id}`,
-                        backgroundColor: randomColor.get()
-                     }}>
-
                      <li>
                         {item.$content}
                      </li>
@@ -133,12 +122,6 @@ export function TestListSelect() {
                   </div>
                )}
             </div> */}
-            {Style`
-               ::view-transition-group(clear-btn) {
-                  transition-timing-function: cubic-bezier(0, 1, 1, 1);
-                  animation-duration: 150ms;
-               }
-            `}
          </div>
       </>
    )

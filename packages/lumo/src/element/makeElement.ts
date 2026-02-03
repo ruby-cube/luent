@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue, INTERNAL } from "@rue/quarky";
 import { isFunction, isObject, isPlainObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -12,7 +12,8 @@ import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
-import { setUpNodesArray } from "../node/GetNodes";
+import { NodeRefsConfig, setUpNodeRefs, setUpNodesArray } from "../node/GetNodes";
+import { $Index } from "../iteratives/List";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -37,7 +38,7 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    config: ElementConfig,
 ): DOMNode {
-   const { class: classes, style: styles, 'show-hide': showIf, node: $node, nodes, ...other } = config;
+   const { class: classes, style: styles, 'show-hide': showIf, ref: $node, ...other } = config;
 
    const { attributes, events, hooks } = analyzeAttributes(other)
 
@@ -47,13 +48,16 @@ export function makeElement(
    const domNode = isHydrating() ? getElement()
       : XML_NS ? createNSElement(tagName, XML_NS)
          : document.createElement(tagName)
+
    if ($node) {
-      if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
-      initializeRef($node, domNode)
-   }
-   if (nodes) {
-      const [nodesArray, ...indices] = nodes
-      setUpNodesArray(domNode, nodesArray, indices)
+      console.log('$node', $node)
+      if (INTERNAL in $node) {
+         setUpNodeRefs(domNode, $node[INTERNAL] as NodeRefsConfig)
+      }
+      else {
+         if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs as ref")
+         initializeRef($node, domNode)
+      }
    }
 
    if (classes) setUpClasses(domNode, normalizeToArray(classes))

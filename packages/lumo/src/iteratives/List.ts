@@ -118,6 +118,7 @@ export class ListKit extends VineNode {
 
       console.log('qIR rerendering list')
       // TODO: Can we make this call more efficient??
+      
       // remove DOMNodes
       let i = prevKits.length;
       while (i--) {

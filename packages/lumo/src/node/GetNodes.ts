@@ -1,35 +1,137 @@
-import { watch } from "@rue/quarky";
+import { INTERNAL, Ion, isIon, PRELUDE, toValue, watch } from "@rue/quarky";
 import { $Index } from "../iteratives/List";
 import { AnyObject } from "@rue/types";
+import { atUnmount } from "../flask/flask-hooks";
+import { getFlask } from "@rue/flask";
+import { isFunction } from "@rue/utils";
 
 
 type Nodes = any[] | Nodes[]
 
-// <td nodes={[tds, $row, $cell]}></td>
+// <td ref={[tds, $row, $cell]}></td>
 // const [nodes, ...indices] = config.nodes
 
-export function setUpNodesArray(node: AnyObject, nodes: Nodes, indices: $Index[]) {
-   for (let i = 0; i < indices.length; i++) {
-      const $index = indices[i]
-      watch($index, () => {
-         if ($index() === -1) {
-            const array = traverseNodes(nodes, i, indices)
-            delete array[$index()]
-            array.length = $index.dataLength
+// export function setUpNodesArray(node: AnyObject, nodes: Nodes, indices: $Index[]) {
+//    console.log('setting up nodes array')
+//    for (let i = 0; i < indices.length; i++) {
+//       const $index = indices[i]
+//       watch($index, () => {
+//          if ($index() === -1) {
+//             const array = traverseNodes(nodes, i, indices)
+//             delete array[$index()]
+//             array.length = $index.dataLength
+//          }
+//          else {
+//             traverseNodes(nodes, i, indices)[$index()] = node
+//          }
+//       }, {eager: true})
+//    }
+// }
+
+// function traverseNodes(nodes: Nodes, depth: number, indices: $Index[]) {
+//    if (depth === 0) return nodes;
+//    let nestedArray = nodes
+//    for (let i = 0; i < depth; i++) {
+//       const $index = indices[i]
+//       nestedArray = nestedArray[$index()] ?? (nestedArray[$index()] = [] as Nodes)
+//    }
+//    return nestedArray;
+// }
+
+
+type Index = Ion<number> | number
+
+/**
+ * Returns a function that can be used to retreive node instance--whether DOM node or component.
+ * 
+ * @param type 
+ * @param levels 
+ * @returns 
+ */
+export function NodeRefs<T>(type: T, levels: number = 1) {
+   // let i = levels
+   // let $node: ((index: Index) => any) | undefined;
+   // let previousLevels: ([any[], Index][]) | undefined;
+   // while (i--) {
+   //    [$node, previousLevels] = createLevel(i + 1, levels, previousLevels, $node)
+   // }
+   // return $node
+
+   return createLevel(1, levels, [])
+}
+
+// [[td, td], [td, td], [td, td]]
+
+function createLevel(level: number, levels: number, array: any[]) {
+   const $next: ((index: Index) => any)[] = []
+
+   return function $node(index: Ion<number> | number | 'length', set: 1 | 0 = 1) {
+      if (index === 'length'){
+         return array.length;
+      }
+      if (set === 0) {
+         const i = toValue(index)
+         if (level === levels) {
+            return { [INTERNAL]: [array, index] }
          }
          else {
-            traverseNodes(nodes, i, indices)[$index()] = node
+            return $next[i] = createLevel(level + 1, levels, array[i] ?? (array[i] = []))
          }
-      })
+      }
+      else {
+         if (level === levels) {
+            return array[toValue(index)]
+         }
+         else {
+            return $next[toValue(index)]
+         }
+      }
    }
 }
 
-function traverseNodes(nodes: Nodes, depth: number, indices: $Index[]) {
-   if (depth === 0) return nodes;
-   let nestedArray = nodes
-   for (let i = 0; i < depth; i++) {
-      const $index = indices[i]
-      nestedArray = nestedArray[$index()] ?? (nestedArray[$index()] = [] as Nodes)
+export type NodeRefsConfig = [any[], Index]
+
+export function setUpNodeRefs(node: any, config: NodeRefsConfig) {
+   const [array, index] = config
+   setUpLevel(node, array, index)
+   // let prevArray;
+   // let i = configs.length
+   // const levels = i
+   // while (i--) {
+   //    if (i === 0) return;
+   //    const level = i + 1;
+   //    console.log('&&& setup level', i)
+   //    const [array, index] = configs[i]
+   //    if (level === levels) {
+   //    }
+   //    else {
+   //       setUpLevel(prevArray, array, index)
+   //    }
+   //    prevArray = array;
+   // }
+}
+
+function setUpLevel(referent: any, array: any[], index: Ion<number> | number) {
+   if (isFunction(index)) {
+      console.log('---set index', array, index(), referent)
+      update(index()) // manually call eager because PRELUDE is too late
+      console.log('array has td?', array)
+      watch(index, ({ current: i }) => {
+         console.warn('re set', array, i, referent)
+         update(i)
+      }, { phase: PRELUDE }) // TODO: fix: eager so that it will run even if PRELUDE has passed
+
+      function update(index: number) {
+         if (index === -1) {
+            array.pop()
+         }
+         else {
+            array[index] = referent
+         }
+      }
    }
-   return nestedArray;
+   else {
+      // TODO: update Thru()
+      array[index] = referent
+   }
 }

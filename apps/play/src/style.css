@@ -1,4 +1,5 @@
 :root {
+   box-sizing: border-box;
    /* Walling fonts */
    font-family: ProximaNova, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
    line-height: 1.5;
@@ -129,4 +130,3 @@ button:focus-visible {
    display: flow-root;
    /* background-color: aliceblue; */
 }
-

@@ -180,7 +180,7 @@ function useModal() {
     }
 
     teleportTo('body',
-        <DialogBox node={$dialogBox} />
+        <DialogBox ref={$dialogBox} />
     )
 
     return {
@@ -227,7 +227,7 @@ function Appo(
                     <Wrapper title={() => $dialogBox().title}>
                         {() => (
                             <div>
-                                <DialogBox node={$dialogBox} />
+                                <DialogBox ref={$dialogBox} />
                                 <button on:click={() => $dialogBox().open}>open</button>
                             </div>)
                         }
@@ -285,7 +285,7 @@ function DialogBox({
         teleportTo('body', (
             <dialog style="background-color: gray" open={$open}>
                 Stop
-                <button on:click={close} node={$button}>close</button>
+                <button on:click={close} ref={$button}>close</button>
             </dialog>
         ))).expose({
             $open,
