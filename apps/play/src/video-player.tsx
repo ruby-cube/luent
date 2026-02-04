@@ -1,48 +1,30 @@
-import { component, Else, EventHandler, FromTag, If, NodeRef, Style } from "@rue/lumo";
-import { Finitron, Ion, ionize } from "@rue/quarky";
+import { component, Else, Finitron, FromTag, If, NodeRef, Style } from "@rue/lumo";
+import { Ion } from "@rue/quarky";
 import "./reset.css"
-
-const $count = Ion(0)
-
-const obj = {
-   $count,
-   frog: Ion(0)
-}
-
-const _$frog = Ion(0)
-
-const obj2 = {
-   get frog() {
-      return _$frog()
-   },
-   set frog(v) {
-      _$frog.value = v
-   }
-}
 
 export function VideoPlayer() {
 
    const $video = NodeRef("video")
 
    const player = Finitron({
-      "isLoading": {
-         init: () => "x:isReady",
-         error: () => "x:hasFailed"
+      "loading": {
+         init: () => "x:ready",
+         error: () => "x:failed"
       },
-      "x:isReady": {},
-      "x:hasFailed": {}
+      "x:ready": {},
+      "x:failed": {}
    })
 
    const track = Finitron({
-      "isPaused": {
-         play: () => "isPlaying"
+      "paused": {
+         play: () => "playing"
       },
-      "isPlaying": {
-         pause: () => "isPaused",
-         end: () => "hasEnded"
+      "playing": {
+         pause: () => "paused",
+         end: () => "ended"
       },
-      "hasEnded": {
-         play: () => "isPlaying"
+      "ended": {
+         play: () => "playing"
       }
    })
 
@@ -85,17 +67,16 @@ export function VideoPlayer() {
    }
 
    const sound = Finitron({
-      "isOn": { toggle: () => "isMuted" },
-      "isMuted": { toggle: () => "isOn" }
+      "unmuted": { toggle: () => "muted" },
+      "muted": { toggle: () => "unmuted" }
    })
 
-   player.activate(() => "isLoading")
-      .nest({
-         "x:isReady": [
-            track.init(() => "isPaused"),
-            sound.init(() => "isOn")
-         ]
-      })
+   player.activate(() => "loading").nest({
+      "x:ready": [
+         track.init(() => "paused"),
+         sound.init(() => "unmuted")
+      ]
+   })
 
    // {
    //    init() {
@@ -113,13 +94,13 @@ export function VideoPlayer() {
    //    errorOut() {
    //       player.apply('error')
    //    },
-   //    isReady() {
+   //    ready() {
    //       player.is('x:ready')
    //    },
-   //    isPaused() {
+   //    paused() {
    //       track.is('paused')
    //    },
-   //    isPlaying() {
+   //    playing() {
    //       track.is('playing')
    //    },
    // }
@@ -134,7 +115,7 @@ export function VideoPlayer() {
                on:ended={e => track.apply("end")}
                on:error={e => player.apply("error")}
             >
-               <source src="/src/video-player-dance.mp4" type="video/mp4" />
+               <source src="https://developer.mozilla.org/shared-assets/videos/flower.mp4" type="video/mp4" />
             </video>
 
             {If((player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly

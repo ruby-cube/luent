@@ -14,7 +14,7 @@ import { CRUDApp, SevenGUIs } from './wip-demos/7-guis';
 import { CellsApp } from './demo/cells-app';
 
 import { PolygonApp } from './demo/polygon-app';
-import { TrafficLight } from './wip-demos/traffic-lights';
+import { TrafficLight } from './demo/traffic-light';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { AsyncIon, component, createRoot } from '@rue/lumo';
@@ -107,7 +107,7 @@ import { CircleApp } from './demo/CircleApp';
 // import { NestedPend } from './NestedPend';
 
 
-const app = createRoot(TestListSelectTransition)
+const app = createRoot(TrafficLight)
 
 app.mount('#root')
 

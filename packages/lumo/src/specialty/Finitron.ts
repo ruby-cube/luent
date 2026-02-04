@@ -1,5 +1,5 @@
 import { debug } from "@rue/utils";
-import { Ion, ion, QUARK } from "@rue/quarky";
+import { instantUpdate, Ion, ion, QUARK } from "@rue/quarky";
 
 
 // trafficLight.is('on') // reactive
@@ -27,7 +27,7 @@ import { Ion, ion, QUARK } from "@rue/quarky";
 // $color.change()
 
 
-// const $power = finiton('off', {
+// const $power = finitron('off', {
 //    'on': {
 //       toggle() { this.to('off') }
 //    },
@@ -85,15 +85,15 @@ import { Ion, ion, QUARK } from "@rue/quarky";
 // $power.extend('on', $trafficLight)
 
 
-// finiton existence
+// finitron existence
 // - create
 // - destroy
 
-// finiton activity
+// finitron activity
 // - activate
 // - deactivate
 
-// finiton state 
+// finitron state 
 // - initial state
 // - terminal state
 
@@ -114,8 +114,8 @@ import { Ion, ion, QUARK } from "@rue/quarky";
 // TODO: onTerminalized
 
 // nesting means nested state will be activated and deactivated based on the parents
-// QUESTION: If a finiton reaches final state what does that mean for it's parent(s) and children?
-// QUESTION: Can a finiton have more than one parent?
+// QUESTION: If a finitron reaches final state what does that mean for it's parent(s) and children?
+// QUESTION: Can a finitron have more than one parent?
 // 
 // $power.onEnterState({
 //    on: () => {
@@ -140,7 +140,7 @@ import { Ion, ion, QUARK } from "@rue/quarky";
 // })
 
 // $trafficLight.onTerminal(() =>
-//    $power.terminalize() //FIX: only when all nested finitons are terminalized and 
+//    $power.terminalize() //FIX: only when all nested finitrons are terminalized and 
 // )
 
 export const ANY_STATE = "any"
@@ -170,12 +170,12 @@ type TransitionKey<S extends _FiniteStates> = Exclude<AllKeys<S[keyof S]>, numbe
 
 
 export type Finitron<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = {
-   (): State<S>
+   state: State<S>
    is: (state: State<S>) => boolean
    on: (transition: TransitionKey<S>, task: () => void) => void
    apply: (transition: TransitionKey<S>) => void
    op: (transition: TransitionKey<S>) => boolean
-   onFinalState: (task: () => void) => void
+   atFinalState: (task: () => void) => void
    activate: (initializer: () => State<S>) => { nest: (config: { [key: string]: Nested[] }) => Nested }
    deactivate: () => void
    isActive: () => boolean
@@ -183,7 +183,7 @@ export type Finitron<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M 
 } & M
 
 type Nested = {
-   finiton: Finitron,
+   finitron: Finitron,
    initializer: Initializer,
 }
 
@@ -215,18 +215,20 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
 
    let activated = false;
 
-   const $state = (() => $currentState()) as unknown as Finitron
-
-   // }) as unknown as Finitron
-   $state.is = is
-   $state.apply = apply
-   $state.on = on
-   $state.can = can
-   $state.onFinalState = onFinalState
-   $state.activate = activate
-   $state.deactivate = deactivate
-   $state.init = init
-   $state.isActive = () => $currentState() !== undefined;
+   const finitron = {
+      is,
+      apply,
+      on,
+      can,
+      atFinalState,
+      activate,
+      deactivate,
+      init,
+      isActive: () => $currentState() !== undefined,
+      get state() {
+         return $currentState()
+      }
+   }
 
    // TODO: attach methods
 
@@ -234,7 +236,7 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
 
    function init(initializer: Initializer) {
       return {
-         finiton: $state,
+         finitron,
          initializer,
          nest: (nestedStates: { [key: string]: Nested[] }) => {
             if (_nestedStates) {
@@ -245,7 +247,7 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
             // updateNestedStates(initializer(undefined), 'activate') // TODO: should not activate if not activated
 
             return {
-               finiton: $state,
+               finitron,
                initializer,
             };
          }
@@ -254,11 +256,11 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
 
    function updateNestedStates(state: string, key: 'activate' | 'deactivate') {
       if (!_nestedStates) return;
-      const nestedFinitons = _nestedStates[state];
-      if (!nestedFinitons) return;
-      for (const entry of nestedFinitons) {
-         const { finiton, initializer } = entry
-         key === 'activate' ? finiton.activate(initializer as () => string) : finiton.deactivate()
+      const nestedFinitrons = _nestedStates[state];
+      if (!nestedFinitrons) return;
+      for (const entry of nestedFinitrons) {
+         const { finitron, initializer } = entry
+         key === 'activate' ? finitron.activate(initializer as () => string) : finitron.deactivate()
       }
    }
 
@@ -310,7 +312,7 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
       const transitionEvent = applyTransition(transition)
       if (transitionEvent) {
          runTransitionTasks(transition, transitionEvent)
-         if (isTerminal(transitionEvent.value)) {
+         if (isTerminal(transitionEvent.state)) {
             finalized = true;
             runFinalTasks()
          }
@@ -330,7 +332,7 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
 
    const finalTasks: Set<() => void> = new Set()
 
-   function onFinalState(task: () => void) {
+   function atFinalState(task: () => void) {
       finalTasks.add(task)
    }
 
@@ -383,8 +385,8 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
    function runEnterHooks(stateID: string, anyStateHooks: Hooks) {
       const nextStateHooks = getHooks(stateID)
 
-      nextStateHooks.onEnter?.apply($state)
-      anyStateHooks.onEnter?.apply($state)
+      nextStateHooks.onEnter?.apply(finitron)
+      anyStateHooks.onEnter?.apply(finitron)
 
       setUpTimeout(nextStateHooks.afterEnter)
       setUpTimeout(anyStateHooks.afterEnter)
@@ -393,8 +395,8 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
    }
 
    function runExitHooks(stateID: string, anyStateHooks: Hooks) {
-      getHooks(stateID).onExit?.apply($state)
-      anyStateHooks.onExit?.apply($state)
+      getHooks(stateID).onExit?.apply(finitron)
+      anyStateHooks.onExit?.apply(finitron)
 
       updateNestedStates(stateID, 'deactivate')
    }
@@ -405,14 +407,16 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
       if (!transition) return;
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => {
-         const transitionEvent = applyTransition(transition)
-         if (transitionEvent && isTerminal(transitionEvent.value)) {
-            runFinalTasks()
-         }
+         instantUpdate(() => {
+            const transitionEvent = applyTransition(transition)
+            if (transitionEvent && isTerminal(transitionEvent.state)) {
+               runFinalTasks()
+            }
+         })
       }, transition.timeout ?? 0)
    }
 
-   return $state as Finitron
+   return finitron
 }
 
 
