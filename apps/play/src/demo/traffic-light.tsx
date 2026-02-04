@@ -5,21 +5,15 @@ import "../style.css"
 export function TrafficLight() {
 
    const trafficLight = Finitron({
-      'on': {
-         switch: () => 'off',
-      },
-      'off': {
-         switch: () => 'on',
-      },
+      'on': { switch: () => 'off' },
+      'off': { switch: () => 'on' },
       'x:broken': {},
 
-      'any': {
-         break: () => 'x:broken',
-      },
+      any: { break: () => 'x:broken' },
    });
 
    const state = Finitron({
-      'initial': { switch: () => 'sleep' },
+      'fresh': { switch: () => 'sleep' },
       'awake': { switch: () => 'sleep' },
       'sleep': { switch: () => 'awake' },
    });
@@ -40,8 +34,8 @@ export function TrafficLight() {
    });
 
    trafficLight.activate(() => 'off').nest({
-      'on': [state.init(() => 'initial').nest({
-         'initial': [light.init(() => 'red')],
+      'on': [state.init(() => 'fresh').nest({
+         'fresh': [light.init(() => 'red')],
          'awake': [light.init((state) => state ?? 'red')],
       })],
    });

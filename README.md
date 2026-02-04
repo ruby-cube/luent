@@ -8,15 +8,24 @@
 
 ## Overview
 
-Hello world, I know you’re tired of JS frameworks. 
+Hello world, I know you’re tired of JS frameworks. You don’t need this framework, but at the very least what you’ll find here is:
+- an exploration of poetic abstractions and intuitive mental models that unify various aspects of reactivity and reduce cognitive load
+- an API that supports encapsulation and declarative code so you can create less spaghetti
+- attempts at ironing out rough API edges and bug-prone patterns encountered in the four major frameworks (React, Vue, Solid, and Svelte) so you can focus on building your app instead of wrestling with the framework
 
-You don’t need this framework, but at the very least what you’ll find here is:
-- an exploration of an abstraction and mental model that unifies various aspects of reactivity in a way that makes poetic sense. 
-- encapsulation 
+This is a framework that strives for eloquence by prioritizing clarity and consistency and seeks elegance that’s based on simple syntactic sweetness over magic. 
+
+Our current goal is to establish an intuitive API that feels lovely to work with. Once the API is stable, we can focus on more efficient implementations under the hood.
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+## Features
+Some special features include:
 - a reactivity system that’s compatible with domain models and data structures authored as JavaScript classes, regardless of the presence of private properties
-- attempts at ironing out rough API edges encountered in the four major frameworks (React, Vue, Solid, and Svelte)
+- readable async code
+- easy-to-write state machines
 
-This framework is a journey back to the foundations of language. It strives for eloquence by prioritizing clarity and consistency and seeks elegance that’s based on simple sweetness over magic. 
+
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
