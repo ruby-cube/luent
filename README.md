@@ -13,7 +13,7 @@ Hello world, I know you’re tired of JS frameworks. You don’t need this frame
 - an API that supports encapsulation and declarative code so you can create less spaghetti
 - attempts at ironing out rough API edges and bug-prone patterns encountered in the four major frameworks (React, Vue, Solid, and Svelte) so you can focus on building your app instead of wrestling with the framework
 
-This is a framework that strives for eloquence by prioritizing clarity and consistency and seeks elegance that’s based on simple syntactic sweetness over magic. 
+This is a framework that strives for eloquence by prioritizing clarity and consistency and seeks elegance that’s based on simple syntactic sweetness instead of magic. 
 
 Our current goal is to establish an intuitive API that feels lovely to work with. Once the API is stable, we can focus on more efficient implementations under the hood.
 
