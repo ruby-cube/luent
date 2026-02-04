@@ -1,7 +1,7 @@
 import { isObject } from "@rue/utils"
 import { DOMNode } from "../../../../packages/lumo/src/node/VineNode"
 import { getActiveFlask } from "@rue/flask"
-import { atMounted } from "@rue/lumo"
+import { atMounted, atUnmount, queueRender, queueTask } from "@rue/lumo"
 
 // class-based
 type VarKit = {
@@ -44,7 +44,7 @@ type TransitionConfig = {
    'transition-out'?: TransitionOutKit | TransitionOutKit[]
 }
 
-function setUpTransition(node: DOMNode, kits: TransitionInKit[],
+function setUpTransitionKits(node: DOMNode, kits: TransitionInKit[],
    setUpTransition: {
       withStyles: Function,
       withClasses: Function,
@@ -84,11 +84,6 @@ function setUpTransition(node: DOMNode, kits: TransitionInKit[],
    }
 }
 
-function setUpTransitionInClasses(node: DOMNode, kit: TransitionInClassKit) {
-   atMounted(() => {
-      
-   })
-}
 
 function toTransitionInClassKit(kit: PrefixKit): TransitionInClassKit {
    const { prefix, delay, duration, timing } = kit
@@ -132,6 +127,163 @@ function toAnimateOutClassKit(kit: PrefixKit): AnimationClassKit {
       timing
    }
 }
+
+type ActiveTransitionIn = {
+   trigger(): void;
+   setFromState(): void;
+   cancel(): void;
+}
+
+type ActiveTransitionOut = {
+   trigger(): void;
+   // setToState(): void;
+   // cancel(): void;
+}
+
+function useTransitionInByClasses(kit: TransitionInClassKit) {
+   return function createTransition(node: HTMLElement) {
+      const { active, from, delay, duration, timing, cancelTransition } = kit
+      let cancelled = false;
+      return {
+         trigger() {
+            if (cancelled) return;
+            node.classList.add(active)
+            if (duration) node.style.setProperty('transition-duration', duration)
+            if (delay) node.style.setProperty('transition-delay', delay)
+            if (timing) node.style.setProperty('transition-timing', timing)
+            node.classList.remove(from)
+         },
+         setFromState() {
+            node.classList.add(from)
+         },
+         cancel() {
+            if (cancelled) return;
+            cancelled = true;
+            cancelTransition(node)
+         }
+      }
+   }
+}
+
+function useTransitionOutByClasses(kit: TransitionOutClassKit) {
+   return function createTransition(node: HTMLElement) {
+      const { active, to, delay, duration, timing } = kit
+      return {
+         trigger() {
+            if (active) node.classList.add(active)
+               // TODO: or use var()???
+            if (duration) node.style.setProperty('transition-duration', duration)
+            if (delay) node.style.setProperty('transition-delay', delay)
+            if (timing) node.style.setProperty('transition-timing', timing)
+            node.classList.add(to)
+         }
+      }
+   }
+}
+
+
+
+export function setUpTransitions(node: HTMLElement, createTransitionIn: (clone: DOMNode) => ActiveTransitionIn, createTransitionOut: (clone: DOMNode) => ActiveTransitionOut) {
+   const transitioning = new Set<ActiveTransitionIn>()
+
+   atMounted(() => {
+      transitionIn(node, createTransitionIn, transitioning)
+   })
+
+   atUnmount(() => {
+      transitionOut(node, createTransitionOut, transitioning)
+   })
+}
+
+
+function transitionIn(node: HTMLElement, createTransition: (clone: DOMNode) => ActiveTransitionIn, transitioning: Set<ActiveTransitionIn>) {
+   console.log('transition in')
+
+   const clone = node.cloneNode(true) as HTMLElement
+
+
+   // - read dims of new node (must read before hiding new node)
+   const rect = node!.getBoundingClientRect()
+
+   node.style.setProperty('visibility', 'hidden')
+
+   const observer = new MutationObserver(() => {
+      observer.disconnect()
+      node.style.removeProperty('visibility')
+      clone.style.setProperty('visibility', 'hidden')
+   })
+   observer.observe(node, { childList: true, attributes: true, characterData: true, subtree: true })
+
+   // - position newClone
+   clone.style.removeProperty('visibility')
+   clone.style.setProperty('position', 'absolute')//TODO: fixed? absolute?
+   clone.style.setProperty('top', rect.top + 'px')
+   clone.style.setProperty('left', rect.left + 'px')
+   clone.style.setProperty('width', rect.width + 'px')
+   clone.style.setProperty('height', rect.height + 'px')
+
+   const transition = createTransition(clone)
+   transitioning.add(transition)
+   // set starting transition state
+   transition.setFromState()
+   // clone.classList.add(transition_in_from)
+
+   node.after(clone)
+
+   requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
+      queueTask(() => {
+         // trigger transition
+         transition.trigger()
+         // clone.classList.add(transition_in_active)
+         // clone.classList.remove(transition_in_from)
+
+
+         clone.addEventListener('transitionend', () => {
+            node.style.removeProperty('visibility')
+            clone.remove();
+            transitioning.delete(transition)
+            observer.disconnect()
+         })
+      })
+   })
+}
+
+function transitionOut(node: HTMLElement, createTransition: (clone: DOMNode) => ActiveTransitionOut, transitioning: Set<ActiveTransitionIn>) {
+   if (transitioning?.size) {
+      for (const transition of transitioning) {
+         transition.cancel()
+         transitioning.delete(transition)
+      }
+   }
+
+   // - read dims of prev node
+   const rect = node.getBoundingClientRect()
+   const parent = node.parentNode
+   const clone = node.cloneNode(true) as HTMLElement
+
+   queueRender(() => {
+      // - position clone
+      clone.style.removeProperty('visibility')
+      clone.style.setProperty('position', 'fixed')
+      clone.style.setProperty('top', rect.top + 'px')
+      clone.style.setProperty('left', rect.left + 'px')
+      clone.style.setProperty('width', rect.width + 'px')
+      clone.style.setProperty('height', rect.height + 'px')
+
+      parent?.appendChild(clone)
+
+      requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
+         queueTask(() => {
+            createTransition(clone).trigger()
+
+            clone.addEventListener('transitionend', () => {
+               clone.remove();
+            })
+         })
+      })
+   })
+}
+
 
 // prefix-classes
 // <div transition-in={{ prefix: 'fade', duration: '300ms'}}

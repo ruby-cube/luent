@@ -6,7 +6,7 @@ import { QUARK, quarkOf } from "../abstract/Quark";
 import { isIonicProxy, QuarkyIonicProxy } from "./ModelQuark";
 import { isObject } from "@rue/utils";
 
-
+export type Ionic<T> = T & { '~ionic-proxy': true }
 export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 
 export const INTERNAL_OP = "[[INTERNAL]]"
@@ -29,10 +29,9 @@ export function asIonic<T extends AnyObject>(target: T, config?: AnyObject): Ion
 
 export function Ionic<T extends AnyObject>(target: T, config?: AnyObject): IonicProxy & T {
    // console.trace('Ionic', target)
-   // if (isIonicProxy(target)) {
-   //    console.log(target)
-   //    throw Error('ALREADY')
-   // }
+   if (isIonicProxy(target)) {
+      return target
+   }
    if (!isObject(target)) return target;
    const proxy = createIonicModel(target, config ?? {})
    ionicModels.set(target, proxy)

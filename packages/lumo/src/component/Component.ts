@@ -5,7 +5,7 @@ import { isObject, normalizeToArray } from "@rue/utils";
 import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
-import { NodeRefsConfig, setUpNodeRefs } from "../node/GetNodes";
+import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 
 
 
@@ -104,9 +104,8 @@ export function makeComponent(
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.exposed ?? {}
    if (ref) {
-      if (ref instanceof Array) {
-         const [array, ...indices] = ref
-         setUpNodeRefs(publicComponent, array, indices)
+     if (isObject(ref) && 'arr' in ref) {
+         setUpNodeRefs(publicComponent, ref.arr, normalizeToArray(ref.i))
       }
       else {
          initializeRef(ref, publicComponent)

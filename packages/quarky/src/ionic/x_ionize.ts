@@ -14,7 +14,7 @@ import { MayBeMutableProxy } from "../mu";
  */
 
 
-
+// export type Ionic<T> = Ionized<T>
 /**
  * Ionized deeply
  */

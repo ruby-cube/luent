@@ -72,7 +72,15 @@ export class SimpleState implements PendableState {
       return lockState(this)
    }
 
-   pendingUpdate: Update | null = null
+   _pendingUpdate: Update | null = null
+
+   get pendingUpdate() {
+      return this._pendingUpdate
+   }
+
+   set pendingUpdate(value) {
+      this._pendingUpdate = value
+   }
 
    cancelUpdate(): void {
       this.pending = this.current

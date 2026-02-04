@@ -376,7 +376,9 @@ export class RenderCycle {
    }
 
    scheduleTask(task: Task, phase: Phase) {
-      this.useTaskQueue(phase).scheduleTask(task)
+      const adjustedPhase = this.adjustPhase(phase)
+      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      this.useTaskQueue(adjustedPhase).scheduleTask(task)
    }
 
    subphase: 'effects' | 'tasks' = 'effects'

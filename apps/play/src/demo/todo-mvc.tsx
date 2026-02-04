@@ -1,23 +1,5 @@
 import { component, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, toRaw, EACH, $_derivation } from "@rue/quarky"
-
-// entity.name.type.tsx
-// meta.type.annotation.tsx
-// meta.parameters.tsx
-// meta.arrow.tsx
-// meta.object.member.tsx
-// meta.objectliteral.tsx
-
-
-
-// variable.other.object.tsx
-// meta.function-call.tsx
-
-// entity.name.function.tsx
-// meta.function-call.tsx
-
-// foreground	
-// entity.name.function
+import { watch, queueIonicTask, Ion, Ionic, EACH, $_derivation } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -27,100 +9,25 @@ interface Todo {
 
 type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
-
-// TODO:
-// const frog = Ionized({
-//    name: absorb($name),
-//    canvas: inert(null)
-// })
-
-// const CountIon = defineIon({
-//    increment() {
-//       this.value++
-//    },
-//    decrement() {
-//       this.value--
-//    }
-// }, { value: 0 })
-
-// const increment_decrement = asIonMethods({
-//    increment() {
-//       this.value++
-//    },
-//    decrement() {
-//       this.value--
-//    }
-// })
-// const divStyle = jsx({
-
-// })
-
-// export function CounterA() {
-
-//    const $count = Ion(0, {
-//       increment() {
-//          this.value++
-//       },
-//       decrement() {
-//          this.value--
-//       }
-//    })
-
-//    return component(
-//       <>
-//          <div>{$count}</div>
-//          <button on:click={e => $count.increment()}>increment</button>
-//          <button on:click={e => $count.decrement()}>decrement</button>
-//       </>
-//    )
-// }
-
-// export function CounterB() {
-
-//    const $count = Ion(0)
-
-//    function incrementCount() {
-//       $count.value++
-//    }
-
-//    function decrementCount() {
-//       $count.value--
-//    }
-
-//    return component(
-//       <>
-//          <div>{$count}</div>
-//          <button on:click={incrementCount}>increment</button>
-//          <button on:click={decrementCount}>decrement</button>
-//       </>
-//    )
-// }
 type FilterKeys = 'all' | 'active' | 'completed'
+
+const IonicTodos = (todos: Todo[]) => Ionic(todos, {
+   [EACH]: { as: Ionic }
+})
 
 export function TodoMVC() {
 
-   const $todos = Ion(Ionic(getTodos(), { [EACH]: { as: Ionic } }))
+   const $todos = Ion(IonicTodos(getTodos()))
    const $view = Ion('all' as keyof typeof filters)
 
    const $filteredTodos = Ion(() => filters[$view()]($todos()))
-   const $remaining = Ion(() => {
-      'remaining';
-      // return filters.active($todos()).length
-      const todos = filters.active(
-         $todos()
-      )
-      // console.trace('remaining todos', todos)
-      return todos.length
-   }) // FIX: when this is memoized, it breaks
+   const $remaining = Ion(() => filters.active($todos()).length)
    const $todoCount = Ion(() => $todos().length)
 
    const filters = {
-      all: (todos: Ionized<Todo[]>) => todos,
-      active: (todos: Ionized<Todo[]>) => todos.filter(todo => {
-         console.log('is Proxy?', todo)
-         return !todo.completed
-      }),
-      completed: (todos: Ionized<Todo[]>) => todos.filter(todo => todo.completed)
+      all: (todos: Ionic<Todo[]>) => todos,
+      active: (todos: Ionic<Todo[]>) => todos.filter(todo => !todo.completed),
+      completed: (todos: Ionic<Todo[]>) => todos.filter(todo => todo.completed)
    }
 
 
@@ -153,23 +60,15 @@ export function TodoMVC() {
    // # todos methods
 
    function addTodo(title: string) {
-      const item = Ionic({
+      $todos().push(Ionic({
          id: Date.now(),
          title,
          completed: false
-      })
-      $todos().push(item)
-      // const lastItem = $todos().pop();
-      // $todos().push(lastItem!)
+      }))
    }
 
-   watch($todos, () => {
-      console.log('### todos changed')
-   })
-
-   function removeTodo(todo: Ionized<Todo>) {
+   function removeTodo(todo: Ionic<Todo>) {
       $todos().splice($todos().indexOf(todo), 1)
-      // $todos.value = Ionized($todos().filter(item => item !== todo))
    }
 
    function removeCompleted() {
@@ -237,8 +136,6 @@ export function TodoMVC() {
             </footer>
          </section>
 
-         {/* <Test message={'hi'} count={3}></Test> */}
-
          <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)
 }
@@ -246,12 +143,6 @@ export function TodoMVC() {
 {/* <style>
 @import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
 </style> */}
-
-// function Test({ message }, { count = 0 }) {
-//    return component(
-//       <div></div>
-//    )
-// }
 
 function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void }>) {
 
@@ -274,20 +165,10 @@ function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void
 }
 
 
-// INPUT TYPING
-// ------------
-// number (static)
-// Ion<number>
-// ToIon<number> (will normalize to ion)
-// Frog (static/data) (readonly, will copy before ionizing)
-// Ionized<Frog>
-// ToIonized<Frog> (will normalize ionized)
-// To<IonicFrog>
-
 
 function TodoList(input: FromTag<{
-   todos: Ion<Ionized<Todo[]>>,
-   'can:removeTodo': (todo: Ionized<Todo>) => void
+   todos: Ion<Ionic<Todo[]>>,
+   'can:removeTodo': (todo: Ionic<Todo>) => void
 }>) {
 
    const { $todos, removeTodo } = input
@@ -306,7 +187,7 @@ function TodoList(input: FromTag<{
       todo.title = beforeEditCache
    }
 
-   function doneEdit(todo: Ionized<Todo>) {
+   function doneEdit(todo: Ionic<Todo>) {
       if ($editedTodo()) {
          $editedTodo.value = null
          todo.title = todo.title.trim()
@@ -316,7 +197,7 @@ function TodoList(input: FromTag<{
 
    return component(
       <ul class="todo-list">
-         {For($todos, o => o.id, (todo) => {
+         {For($todos, m => m.id, (todo) => {
             const $isEditing = Ion(() => todo === $editedTodo());
 
             return (

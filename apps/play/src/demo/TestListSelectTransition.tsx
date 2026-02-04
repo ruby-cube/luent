@@ -1,11 +1,8 @@
-//@ts-nocheck
-import { atMounted, component, For, NodeRef, Style, target } from "@rue/lumo";
+import { atMounted, component, For, listen, NodeRef, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
 import { EACH, INTERNAL_OP, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";
-import { instantUpdate, INTERNAL_RENDER, Ion, POSTLUDE, PRELUDE, queueInternalRender, queuePrelude, queueRender, queueTask, RENDER, SYNC, watch } from "@rue/quarky";
-import { getActiveFlask } from "@rue/flask";
-import { NodeRefs } from "../../../../packages/lumo/src/node/GetNodes";
+import { Ion, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 
 class ListItem {
    constructor(
@@ -69,114 +66,58 @@ export function TestListSelectTransition() {
    const $listClone = Ion(() => list.slice())
 
    function insertItem(index: number) {
-      const item = list.insert(index)
+      list.insert(index)
+
       queuePrelude(() =>
-         transitionExisting(index)
+         transitionExisting(itemDivs, index)
       )
    }
 
    function moveSelectedItems(index: number) {
       moveUniqueItems(selected, list, index)
+
       queuePrelude(() =>
-         transitionExisting()
+         transitionExisting(itemDivs)
       )
    }
 
    function removeItem(index: number) {
       mu: selected.delete(list[index] as QItem) // TODO: remove type-casting once Ionic is properly typed
       mu: list.remove(index);
+
       queuePrelude(() =>
-         transitionExisting(index)
+         transitionExisting(itemDivs, index)
       )
    }
 
-   function transitionExisting(removedIndex?: number) {
-      console.log('+++itemDivs length', $itemDivs('length'))
-      const rects: DOMRect[] = []
-      const nodes: any[] = []
-      for (let i = 0; i < itemDivs.length; i++) {
-         if (i === removedIndex) {
-            continue;
-         }
-         const node = itemDivs[i]
-         console.log('%%% node', node, i)
-         const rect = node.getBoundingClientRect()
-         rects.push(rect)
-         nodes.push(node)
+   listen(window, 'click', e => {
+      if ((e.target as HTMLElement).closest('.list')) {
+         return;
       }
-
-      queueRender(() => {
-         console.warn('@$% transition existing')
-         for (let i = 0; i < nodes.length; i++) {
-            const node = nodes[i]
-            const last = node.getBoundingClientRect()
-            const first = rects[i]
-            const delta = first.top - last.top
-            if (delta) {
-               node.style.setProperty('transform', `translate(${first.left - last.left}px, ${delta}px)`)
-               console.log('DELTA', first.top - last.top)
-               requestAnimationFrame(() => {
-                  queueTask(() => {
-                     node.classList.add('transition-position')
-                     node.style.setProperty('transform', `translate(${0}px, ${0}px)`)
-                     node.addEventListener('transitionend', () => {
-                        node.classList.remove('transition-position')
-                        node.style.removeProperty('transform')
-                     })
-                  })
-               })
-            }
-         }
-      })
-   }
-
-   function transitionNew(node) {
-      node.classList.add('animate-in')
-      node.addEventListener('animationend', () => {
-         node.classList.remove('animate-in')
-      })
-   }
-
-   function transitionOut(node) {
-      console.log('transition out')
-      const rect = node.getBoundingClientRect()
-      const clone = node.cloneNode(true)
-      clone.style.setProperty('position', 'fixed')
-      clone.style.setProperty('top', rect.top - 16 + 'px')
-      clone.style.setProperty('left', rect.left + 'px')
-      clone.style.setProperty('width', rect.width + 'px')
-      clone.style.setProperty('height', rect.height + 'px')
-
-      $container()?.appendChild(clone)
-
-      clone.classList.add('animate-out')
-      clone.addEventListener('animationend', () => {
-         clone.classList.remove('animate-out')
-         clone.remove()
-      })
-   }
+      selected.clear()
+   })
 
    const $container = NodeRef('div')
 
-   const itemDivs = []
+   const itemDivs: HTMLElement[] = []
 
    return component(
       <>
          <h1>hello world</h1>
-         <button on:click={e => selected.clear()}>clear</button>
-         <div style='display: grid; grid-template-columns: 1fr 1fr; width: 100vw'>
-            <div style='width: 10vw'>
-               <div on:click={e => insertItem(0)} style="background-color: gray; cursor: pointer">
-                  +
-               </div>
-               <div ref={$container}>
+         <div style='display: grid; grid-template-columns: 1fr 1fr; width: 50vw; place-items: center; align-items: start'>
+            <div style='width: 20vw'>
+               <div ref={$container} class="list" style="list-style-type: none;">
+                  <div on:click={e => insertItem(0)} style="background-color: gray; cursor: pointer">
+                     +
+                  </div>
+                  <div on:click={e => moveSelectedItems(0)} style="background-color: white; cursor: pointer">
+                     insert
+                  </div>
                   {For(list, m => m.id, (item, $index) => (
                      <div
-                        // ref={$itemDivs.by($index)}
-
-                        ref={[itemDivs, $index]}
+                        ref={{ arr: itemDivs, i: $index }}
                         at:mounted={node => { transitionNew(node) }}
-                        at:unmount={node => { transitionOut(node) }}
+                        at:unmount={node => { transitionOut(node, $container()!) }}
                      >
                         <div
                            on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
@@ -211,21 +152,16 @@ export function TestListSelectTransition() {
 
             </div>
 
-            {/* <div style='width: 30%'>
+            <div style='width: 20vw; list-style-type: none;'>
                {For($listClone, (item, $index) =>
-                  <div
-                     style={{
-                        viewTransitionName: `itemclone-${item.id}`,
-                        backgroundColor: randomColor.get()
-                     }}>
-
+                  <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                      <li>
                         {item.$content}
                      </li>
                      <p>{$index}</p>
                   </div>
                )}
-            </div> */}
+            </div>
             {Style`
                .transition-position {
                   transition: transform 150ms ease-in-out;
@@ -273,34 +209,72 @@ function genId() {
    return id++;
 }
 
-// weird experiments
-/*
-   <button on:click={If($active, capture.once(clearSelection))}>clear</button>
-    <button
-        on:click={[increment, { until: onMount }]}
-    >
-        clear
-    </button>
-    <button
-        on:click={[
-            If($active, [
-                increment, runOnce.preventDefault, target(THIS_NODE)
-            ]),
-            Else(decrement)
-        ]}
-    >
-        clear
-    </button>
-    ))}
-            <button
-                on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
-            >
-                clear
-            </button> 
-         <ListBlock>
-                <ItemBlock content={$slot.$content()}></ItemBlock>
-            </ListBlock>
-*/
+//#region transitions
+
+function transitionExisting(itemDivs: HTMLElement[], removedIndex?: number) {
+   const rects: DOMRect[] = []
+   const nodes: any[] = []
+   for (let i = 0; i < itemDivs.length; i++) {
+      if (i === removedIndex) {
+         continue;
+      }
+      const node = itemDivs[i]
+      console.log('%%% node', node, i)
+      const rect = node.getBoundingClientRect()
+      rects.push(rect)
+      nodes.push(node)
+   }
+
+   queueRender(() => {
+      console.warn('@$% transition existing')
+      for (let i = 0; i < nodes.length; i++) {
+         const node = nodes[i]
+         const last = node.getBoundingClientRect()
+         const first = rects[i]
+         const delta = first.top - last.top
+         if (delta) {
+            node.style.setProperty('transform', `translate(${first.left - last.left}px, ${delta}px)`)
+            console.log('DELTA', first.top - last.top)
+            requestAnimationFrame(() => {
+               queueTask(() => {
+                  node.classList.add('transition-position')
+                  node.style.setProperty('transform', `translate(${0}px, ${0}px)`)
+                  node.addEventListener('transitionend', () => {
+                     node.classList.remove('transition-position')
+                     node.style.removeProperty('transform')
+                  })
+               })
+            })
+         }
+      }
+   })
+}
+
+function transitionNew(node: HTMLElement) {
+   node.classList.add('animate-in')
+   node.addEventListener('animationend', () => {
+      node.classList.remove('animate-in')
+   })
+}
+
+function transitionOut(node: HTMLElement, container: HTMLElement) {
+   console.log('transition out')
+   const rect = node.getBoundingClientRect()
+   const clone = node.cloneNode(true) as HTMLElement
+   clone.style.setProperty('position', 'fixed')
+   clone.style.setProperty('top', rect.top - 16 + 'px')
+   clone.style.setProperty('left', rect.left + 'px')
+   clone.style.setProperty('width', rect.width + 'px')
+   clone.style.setProperty('height', rect.height + 'px')
+
+   container.appendChild(clone)
+
+   clone.classList.add('animate-out')
+   clone.addEventListener('animationend', () => {
+      clone.classList.remove('animate-out')
+      clone.remove()
+   })
+}
 
 
 

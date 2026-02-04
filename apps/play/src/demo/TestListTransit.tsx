@@ -2,6 +2,8 @@ import { component, For, Style } from "@rue/lumo";
 import { EACH, Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 
+// Demo from Svelte
+
 export function TestListTransit() {
 
    const $todos = Ion(Ionic([

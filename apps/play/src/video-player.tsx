@@ -1,5 +1,5 @@
 import { component, Else, EventHandler, FromTag, If, NodeRef, Style } from "@rue/lumo";
-import { FiniteState, Ion, ionize } from "@rue/quarky";
+import { Finitron, Ion, ionize } from "@rue/quarky";
 import "./reset.css"
 
 const $count = Ion(0)
@@ -24,7 +24,7 @@ export function VideoPlayer() {
 
    const $video = NodeRef("video")
 
-   const player = FiniteState({
+   const player = Finitron({
       "isLoading": {
          init: () => "x:isReady",
          error: () => "x:hasFailed"
@@ -33,7 +33,7 @@ export function VideoPlayer() {
       "x:hasFailed": {}
    })
 
-   const track = FiniteState({
+   const track = Finitron({
       "isPaused": {
          play: () => "isPlaying"
       },
@@ -84,7 +84,7 @@ export function VideoPlayer() {
       $elapsedTime.value = time
    }
 
-   const sound = FiniteState({
+   const sound = Finitron({
       "isOn": { toggle: () => "isMuted" },
       "isMuted": { toggle: () => "isOn" }
    })

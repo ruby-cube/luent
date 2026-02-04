@@ -81,7 +81,7 @@ export function Nonce(renderPlaceholder: any) {
    console.log('Nonce')
    return Meanwhile(o => {
       console.log('o?', o)
-      return o.initial ? renderPlaceholder() : undefined
+      return o.initial && renderPlaceholder() 
    })
 }
 
@@ -202,7 +202,7 @@ export function createAwaitSeries(
 
    function shouldHold() {
       placeholder = renderPlaceholder()
-      if (placeholder === undefined) {
+      if (placeholder === false || placeholder === true) {
          // console.log('*** C1')
          return true;
       }
@@ -213,11 +213,12 @@ export function createAwaitSeries(
          }
          else {
             // console.log('*** C3')
-            return placeholder[0] === undefined
+            return placeholder[0] === false
          }
       }
+      if (__DEV__) console.error('possibly invalid placeholder return')
+      return true;
       // console.log('*** C4')
-      if (__DEV__) throw new Error('Invalid render function output')
    }
 
    function isPending() {

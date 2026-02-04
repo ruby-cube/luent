@@ -301,7 +301,7 @@ function fetchUser($id) {
 
 
 
-const videoPlayer = FiniteState({
+const videoPlayer = Finitron({
    'playing': { pause: () => 'paused' },
    'paused': { play: () => 'playing' }
 })

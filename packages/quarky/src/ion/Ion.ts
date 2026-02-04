@@ -33,6 +33,8 @@ type ReinConfig = { capsule: AnyObject, selectedMethods: string[] }
 
 type IonOptions<T, M> = M extends { '-fetch': any } ? { '-fetch': () => Promise<T> | T } : {}
 
+export const asIon = Ion
+
 /**
  * Creates an ion, ion capsule, or derivation ion, depending on parameters.
  * 
@@ -79,7 +81,7 @@ export function Ion<
    T,
    M
 >(initialState: T & (() => unknown) | T, props?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M> {
-   return asIon(initialState, props) as AsIon<T, M>
+   return _asIon(initialState, props) as AsIon<T, M>
 }
 
 export function isIon(value: unknown): value is Ion {
@@ -192,7 +194,7 @@ export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, pr
 }
 
 // TODO: Optimization: Use compiler to presort different types of ions
-function asIon(
+function _asIon(
    initialState: unknown | (() => unknown),
    props?: AnyObject,
 ) {

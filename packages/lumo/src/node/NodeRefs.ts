@@ -92,7 +92,7 @@ function createLevel(level: number, levels: number, array: any[]) {
    return $node
 }
 
-export type NodeRefsConfig = [any[], Index]
+export type NodeRefsConfig = { arr: any[], i: Index | Index[] }
 
 // export function setUpNodeRefs(node: any, config: NodeRefsConfig) {
 //    const [array, index] = config
@@ -120,28 +120,25 @@ export function setUpNodeRefs(node: any, root: any[], indices: Index[]) {
       const index = toValue(indices[i])
       const nestedArray = array[index] ?? (array[index] = [])
       setUpLevel(i === indices.length - 1 ? node : nestedArray, array, indices[i])
-      array =  nestedArray
+      array = nestedArray
    }
 }
 
 function setUpLevel(referent: any, array: any[], index: Ion<number> | number) {
    if (isFunction(index)) {
       console.log('---set index', array, index(), referent)
-      update(index()) // manually call eager because PRELUDE is too late
+      // update(index()) // manually call eager because PRELUDE is too late
       console.log('array has td?', array)
       watch(index, ({ current: i }) => {
          console.warn('re set', array, i, referent)
-         update(i)
-      }, { phase: PRELUDE }) // TODO: fix: eager so that it will run even if PRELUDE has passed
-
-      function update(index: number) {
-         if (index === -1) {
+         // update(i)
+         if (i === -1) {
             array.pop()
          }
          else {
-            array[index] = referent
+            array[i] = referent
          }
-      }
+      }, { eager: true, phase: PRELUDE }) // TODO: fix: eager so that it will run even if PRELUDE has passed
    }
    else {
       // TODO: update Thru()

@@ -1,6 +1,5 @@
 import { component, For, fromApp, fromContext, fromGlobal, FromTag, If, provideAppwide, provideGlobal } from "@rue/lumo";
 import { Morphable, Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
-import { ion, isIon } from "@rue/quarky";
 import "./style.css"
 
 type File = { name: string }

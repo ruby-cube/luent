@@ -1,6 +1,10 @@
 import { component, For, FromTag, Style, } from "@rue/lumo"
 import { EACH, Ion, Ionic } from "@rue/quarky"
 
+// Demo from Vue.js
+// features
+// - svg
+
 type Stat = {
    label: string,
    value: number
@@ -29,7 +33,7 @@ export function PolygonApp() {
       mu: $newLabel.value = ''
    }
 
-   function remove(stat: Ionized<Stat>) {
+   function remove(stat: Ionic<Stat>) {
       if (stats.length > 3) {
          mu: stats.splice(stats.indexOf(stat), 1)
       } else {

@@ -1,17 +1,17 @@
-// @ts-nocheck
-import { instantUpdate, Ion, swiftUpdate } from "@rue/quarky";
+import { instantUpdate, Ion, swiftUpdate, Interval } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { $awaiting, Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
+import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 import { AsyncIon, component, Else, ElseIf, FromTag, If } from "@rue/lumo";
+
+// Demo from Solid.js
 
 export function TestAsyncTabs() {
    const $tab = Ion(0);
    const $count = Ion(0);
-   setInterval(() => {
-      instantUpdate(() => {
-         $count.value++
-      })
-   }, 1000)
+
+   Interval(1000, () => {
+      $count.value++
+   })
 
    return component(<>
       <ul class="inline">
@@ -36,7 +36,6 @@ export function TestAsyncTabs() {
       </ul>
       {Await($suspense =>
          <div class={{ 'tab': true, 'pending': $suspense }}>
-            {/* <p>hi: {(o.oo ? 'loading...' : '')}</p> */}
             {If(($tab() === 0),
                <Tab page="Un" count={$count} />
             )}
@@ -58,7 +57,7 @@ export function TestAsyncTabs() {
          </div>
       )}
       {Meanwhile(o =>
-         o.initial ? "Loading..." : undefined // NOTE: `null` means show nothing, `undefined` means do nothing (hold whatever's on screen)
+         o.initial && "Loading..."
       )}
       {/* {Match($tab)}
             {Case(0, (o.oo),
@@ -107,7 +106,7 @@ function Tab(input: FromTag<{ page: keyof typeof CONTENT, count: Ion<number> }>)
 const db = {
    fetchTime() {
       return new Promise<number>((resolve) => {
-         const delay = Math.random() * 2000;
+         const delay = Math.random() * 500;
          // const delay = Math.random() * 420 + 160;
          setTimeout(() => resolve(delay), delay);
       })

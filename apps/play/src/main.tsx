@@ -9,19 +9,19 @@
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { TodoMVC } from './wip-demos/todo-mvc';
-import { CircleApp, CRUDApp, SevenGUIs } from './wip-demos/7-guis';
-import { CellsApp } from './wip-demos/cells-app';
+import { TodoMVC } from './demo/todo-mvc';
+import { CRUDApp, SevenGUIs } from './wip-demos/7-guis';
+import { CellsApp } from './demo/cells-app';
 
-import { PolygonApp } from './wip-demos/polygon-app';
+import { PolygonApp } from './demo/polygon-app';
 import { TrafficLight } from './wip-demos/traffic-lights';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { AsyncIon, component, createRoot } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
-import { MountIf } from './TestMountIf';
-import { TestListSelect } from './demo/TestListSelect';
+import { MountIf } from './demo/TestMountIf';
+import { TestListSelect } from './wip-demos/TestListSelect';
 import { TabApp } from './wip-demos/markdown-app/TestTabs';
 import { TreeApp } from './wip-demos/tree-view';
 import { SortableTableApp } from './wip-demos/sortable-table';
@@ -46,7 +46,7 @@ import { TestPolymorph } from './TestPolymorph';
 import { TestTry } from './API-exploration/TestTry';
 import { TestAwait } from './TestAwait';
 import { TestTooltip } from './TestTooltipLayoutThrash';
-import { TriangleDemo } from './wip-demos/SierpinskiTriangles';
+import { TriangleDemo } from './demo/SierpinskiTriangles';
 import { TestSyncEffects } from './wip-demos/TestSyncEffects';
 import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 import { TestTrackableOps } from './TestTrackableOps';
@@ -71,16 +71,18 @@ import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncSelect } from './demo/TestAsyncSelect';
 import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
-import { TestAsyncTabs } from './wip-demos/TestAsyncTabs';
+import { TestAsyncTabs } from './demo/TestAsyncTabs';
 import { Async, ooo } from '../../../packages/quarky/src/async/ooo';
 import { Counter } from './TestCounterB';
 import { fetchArticles } from './wip-demos/conduit/src/feature/article-feed/Articles.ionic';
 import { TestMutableDerivation } from './wip-demos/TestMutableDerivations';
 import { TestMarkdownApp } from './demo/markdown-app';
-import { TestListDragDrop } from './demo/TestListDragDrop';
+import { TestListDragDrop } from './wip-demos/TestListDragDrop';
 import { MountIfAnimation } from './TestMountIf-animation';
 import { TestListSelectTransition } from './demo/TestListSelectTransition';
-import { TestListTransit } from './wip-demos/TestListTransit';
+import { TestListTransit } from './demo/TestListTransit';
+import { List } from './App';
+import { CircleApp } from './demo/CircleApp';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -103,6 +105,11 @@ import { TestListTransit } from './wip-demos/TestListTransit';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
+
+
+const app = createRoot(TestListSelectTransition)
+
+app.mount('#root')
 
 
 // function TestApp2() {
@@ -330,10 +337,6 @@ import { TestListTransit } from './wip-demos/TestListTransit';
 //       }, time)
 //    })
 // }
-
-const app = createRoot(MountIf)
-
-app.mount('#root')
 
 
 // const frog = ionize({ name: 'sir robin' })

@@ -85,6 +85,7 @@ export function getState(this: AtomicIonQuark) {
 
 export function setState(this: AtomicIonQuark, value: unknown) {
    this.state.set(value)
+   console.log('setState', value)
    trigger(this, this.state.pendingUpdate!)
    return value;
 }

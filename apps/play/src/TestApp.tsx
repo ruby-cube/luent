@@ -1,6 +1,6 @@
 import { component } from "@rue/lumo";
-import { List } from "./demo/TestListSelect";
-import { MountIf } from "./TestMountIf";
+import { List } from "./wip-demos/TestListSelect";
+import { MountIf } from "./demo/TestMountIf";
 import { TestDerivedConditional } from "./TestCreateMountShow";
 import { TestDerived } from "./TestCumulativeDerivedIon";
 import { TestPropIons } from "./TestPropIons";

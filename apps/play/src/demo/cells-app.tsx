@@ -1,9 +1,10 @@
 import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted } from "@rue/lumo"
-import { Ion, Ionic, isIon, PRELUDE, SYNC, toValue, watch } from "@rue/quarky"
-import { NodeRefs } from "../../../../packages/lumo/src/node/GetNodes"
+import { Ion, Ionic } from "@rue/quarky"
 
-const COLS = 2
-const ROWS = 3
+// Demo from Vue.js
+
+const COLS = 6
+const ROWS = 10
 
 const cells = Ionic(
    Array.from(Array(COLS).keys()).map((i) =>
@@ -41,25 +42,16 @@ function getCellValue(c: number, r: number) {
 
 export function CellsApp() {
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
-   // const tds: HTMLTableCellElement[] = []
-
-   // const $tds = NodeRefs('td', 2)
-   const tds = []
+   const tds: HTMLTableCellElement[][] = []
 
    atMounted(() => {
       console.warn('node================')
-      // console.log($tds(0)(0))
-      // console.log($tds(1)(0))
-      // console.log($tds(2)(0))
-
       console.log(tds[0][0])
       console.log(tds[1][0])
       console.log(tds[2][0])
       console.log(tds[0][1])
       console.log(tds[1][1])
       console.log(tds[2][1])
-      // console.log($tds(1)(1))
-      // console.log($tds(2)(1))
       console.warn('node============END')
    })
 
@@ -75,11 +67,11 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For([...cells[0]], (_, row) => (// TODO: allow numbers as input for For()
+               {For([...cells[0]], (_, row) => (// TODO: allow number as input for For()
                   <tr>
                      <th>{row}</th>
                      {For(cols, (_, $col) =>
-                        <td ref={[tds, row, $col]}>
+                        <td ref={{ arr: tds, i: [row, $col] }}>
                            <Cell row={row} column={$col()}></Cell>
                         </td>
                      )}

@@ -25,6 +25,7 @@ export * from './transition/TransitionNode'
 export * from './flask/flask-hooks' 
 export * from './flask/ViewFlask' 
 export * from './specialty/Stream' 
+export * from './specialty/Finitron' 
 export * from './measureLayout'
 export * from '../../quarky/src/reactivity/RenderCycle'
 

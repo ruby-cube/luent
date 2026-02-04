@@ -185,25 +185,25 @@ defineIonicCollection(Array, {
       return Ionic(this.ionic.toSpliced(start, deleteCount, ...args))
    },
 
-   splice(...args) {
-      return Ionic(this.ionic.splice(...args))
-   },
+   // splice(...args) {
+   //    return Ionic(this.ionic.splice(...args))
+   // },
 
-   copyWithin(target, start, end) {
-      return Ionic(this.ionic.copyWithin(target, start, end))
-   },
+   // copyWithin(target, start, end) {
+   //    return Ionic(this.ionic.copyWithin(target, start, end))
+   // },
 
-   fill(value, start, end) {
-      return Ionic(this.ionic.fill(value, start, end))
-   },
+   // fill(value, start, end) {
+   //    return Ionic(this.ionic.fill(value, start, end))
+   // },
 
-   reverse() {
-      return Ionic(this.ionic.reverse())
-   },
+   // reverse() {
+   //    return Ionic(this.ionic.reverse())
+   // },
 
-   sort(compare) {
-      return Ionic(this.ionic.sort(compare))
-   },
+   // sort(compare) {
+   //    return Ionic(this.ionic.sort(compare))
+   // },
 
    toSorted(compare) {
       // this.trackModel()

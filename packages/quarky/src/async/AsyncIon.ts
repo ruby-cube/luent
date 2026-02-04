@@ -69,7 +69,7 @@ export type AsyncQuark = {
 }
 
 export type AsyncProps<T> = {
-      asPromise: Promise<T> | null
+   asPromise: Promise<T> | null
    // error: null | Error,
    pending: Promise<T> | null,
    loaded: boolean,
@@ -289,8 +289,13 @@ export function AsyncIon<
 
    // TODO: optimization: handle fetch as promise outside of watch
    watch(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
-      cancelIfFetching()
       const awaited = toPromise(output)
+      if (awaited === pendingPromise) {
+         console.warn('refetch', output, awaited, pendingPromise)
+         return;
+      }
+      console.warn('refetch', output, awaited, pendingPromise)
+      cancelIfFetching()
       if (awaited instanceof Promise) {
          pendingPromise = awaited
 
@@ -330,13 +335,15 @@ export function AsyncIon<
 
          awaited
             .then(value => {
+               console.log('awaited.then', value)
+
                if (timeout !== undefined) {
                   clearTimeout(timeout)
                   timeout = undefined
                }
 
                if (cancelledPromises.has(awaited)) {
-
+                  console.warn('canceleld awaited', awaited)
                   cancelledPromises.delete(awaited)
                   if (reject) {
                      reject('cancelled')
@@ -346,10 +353,11 @@ export function AsyncIon<
                   console.log('Ion: (CANCELED', $promise(), "'")
                   return;
                }
-
+               console.warn('RESOLVED TO', value)
+               pendingPromise = null;
 
                const elapsed = pendingStart ? performance.now() - pendingStart : undefined
-               pendingPromise = null;
+
                if (resolve) {
                   // console.log('resolve to:', value)
                   resolve(value)

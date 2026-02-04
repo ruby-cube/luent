@@ -1,13 +1,9 @@
-import { component, Style } from "@rue/lumo";
-import {
-   FiniteState,
-   ion,
-   ionic,
-} from "@rue/quarky";
+import { component, Style, Finitron } from "@rue/lumo";
+import { Ion } from "@rue/quarky";
 
 export function TrafficLight() {
 
-   const $power = FiniteState({
+   const $power = Finitron({
       on: {
          switch: () => "off",
       },
@@ -21,13 +17,13 @@ export function TrafficLight() {
       },
    });
 
-   const $state = FiniteState({
+   const $state = Finitron({
       on: { switch: () => "sleep" },
       awake: { switch: () => "sleep" },
       sleep: { switch: () => "awake" },
    });
 
-   const $trafficLight = FiniteState({
+   const $trafficLight = Finitron({
       red: {
          "after:2000": () => "yellow",
          change: () => "yellow",

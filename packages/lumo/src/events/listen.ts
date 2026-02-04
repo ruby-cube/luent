@@ -10,7 +10,7 @@ export type CustomCleanupSchedulerListenerOptions = {
 }
 
 type EventName<T> = T extends Document ? keyof DocumentEventMap :
-   T extends Window ? keyof DocumentEventMap :
+   T extends Window ? keyof DocumentEventMap |'hashchange' :
    keyof HTMLElementEventMap
 
 type EventHandler<T, K extends string> = T extends Document ? (event: K extends keyof DocumentEventMap ? DocumentEventMap[K] : Event) => void

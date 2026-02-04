@@ -11,6 +11,7 @@ import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
 import { $Index } from "../iteratives/List";
+import { NodeRefsConfig } from "./NodeRefs";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -85,7 +86,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 
 type NodesArray<T> = ReturnType<$Node<T>>[] | NodesArray<T>[]
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-   ref?: $Node<T> | { [INTERNAL]: [NodesArray<T>, ...$Index[]] },
+   ref?: $Node<T> | NodeRefsConfig,
    provide?: Provided
 }
 

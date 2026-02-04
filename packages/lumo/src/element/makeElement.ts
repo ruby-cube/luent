@@ -12,7 +12,7 @@ import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
-import { NodeRefsConfig, setUpNodeRefs, setUpNodesArray } from "../node/GetNodes";
+import { NodeRefsConfig, setUpNodeRefs, setUpNodesArray } from "../node/NodeRefs";
 import { $Index } from "../iteratives/List";
 
 
@@ -50,10 +50,8 @@ export function makeElement(
          : document.createElement(tagName)
 
    if ($node) {
-      console.log('$node', $node)
-      if ($node instanceof Array) {
-         const [array, ...indices] = $node
-         setUpNodeRefs(domNode, array, indices)
+      if (isObject($node) && 'arr' in $node) {
+         setUpNodeRefs(domNode, $node.arr, normalizeToArray($node.i))
       }
       else {
          if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs as ref")
