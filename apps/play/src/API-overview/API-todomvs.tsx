@@ -141,7 +141,7 @@ export function TodoMVC() {
                   })}
                </ul>
             </section >
-            <footer show-hide={($todos.length)} class="footer">
+            <footer show-if={($todos.length)} class="footer">
                <span class="todo-count">
                   <strong>{($remaining)}</strong>
                   <span>{($remaining === 1 ? ' item' : ' items')} left</span>

@@ -75,7 +75,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 {
    class?: ClassInput | ClassInput[],
    style?: StyleInput | StyleInput[],
-   'show-hide'?: Ion<Booleanny>
+   'show-if'?: Ion<Booleanny>
    // attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 
@@ -147,7 +147,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-remount' | 'show-hide' | any,
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-remount' | 'show-if' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -159,8 +159,8 @@ export function makeJSXNode(
             makeElement('link', undefined, <ElementConfig>config)
          );
 
-      case 'show-hide':
-         if (!Slot) throw new Error(`Extraneous <show-hide>`)
+      case 'show-if':
+         if (!Slot) throw new Error(`Extraneous <show-if>`)
          return callWithActivationType('show', Slot, config.provide);
 
       case 'mount-remount':

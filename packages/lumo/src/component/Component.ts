@@ -113,7 +113,7 @@ export function makeComponent(
       }
    }
 
-   // if (tag['show-hide']) setUpConditionalDisplay()
+   // if (tag['show-if']) setUpConditionalDisplay()
    return output
 }
 

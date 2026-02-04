@@ -109,7 +109,7 @@ export function TreeApp({ data = getTreeData() }) {
 //             )}
 //          </div>
 //          {If(%isFolder,
-//             <ul show-hide={%isOpen}>
+//             <ul show-if={%isOpen}>
 //                {For(item.children!, m => m, item => (
 //                   <TreeItem
 //                      item={item}

@@ -568,7 +568,7 @@ export function TodoMVC({
                   can:removeTodo={($todos.removeTodo)}
                ></TodoList>
             </section>
-            <footer show-hide={$todoCount} class="footer">
+            <footer show-if={$todoCount} class="footer">
                {RemainingCount($remaining)}
                <ul class="filters">
                   <li>
@@ -581,7 +581,7 @@ export function TodoMVC({
                      <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-hide={($todoCount() > $remaining())} class="clear-completed" on:click={e => $todos.removeCompleted()}>
+               <button show-if={($todoCount() > $remaining())} class="clear-completed" on:click={e => $todos.removeCompleted()}>
                   Clear completed
                </button>
             </footer>

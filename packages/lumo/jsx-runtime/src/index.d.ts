@@ -2593,7 +2593,7 @@ declare global {
          // 'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         'show-hide': { children: ConditionalRenderKit[] | ConditionalRenderKit };
+         'show-if': { children: ConditionalRenderKit[] | ConditionalRenderKit };
          'mount-remount': { children: ConditionalRenderKit[]; 'use:discard'?: () => void };
          'o--preserve': { children: ConditionalRenderKit[]; 'use:discard'?: () => void };
          'preserve-conditionals': { children: ConditionalRenderKit[]; 'use:discard'?: () => void };

@@ -1,6 +1,6 @@
 import { getActiveFlask } from "@rue/flask";
 import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
-import { debug, getActiveUpdate, instantUpdate, Ion, queueRender, queueTask, watch } from "@rue/quarky";
+import { debug, getActiveUpdate, instantUpdate, Ion, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import "./style.css"
 
@@ -60,111 +60,89 @@ export function MountIf() {
       console.log('hi tick instant', getActiveUpdate())
    })
 
-
-
-
-   const $div1 = NodeRef('div')
-   const $div2 = NodeRef('div')
-   const $div3 = NodeRef('div')
    const $container = NodeRef('div')
 
-   let prevNode: HTMLDivElement | undefined
+   const transitioningInMap = new WeakMap<HTMLElement, Set<HTMLElement>>()
 
-   atMounted(initial => {
-      if (!initial) return;
-      prevNode = getActiveDivRef()()
-   })
-
-   function getActiveDivRef() {
-      return $active() ? $div1 : $ready() ? $div2 : $div3
-   }
-
-   const transitioningIn = new Set<HTMLElement>()
-
-   function maybeTransition($div: $Node) {
-      if (prevNode === $div()) {
-         return;
-      }
-      if (transitioningIn.size) { // transitioning
-         for (const newClone of transitioningIn) {
-            newClone.classList.add('cancel-transition')
-            transitioningIn.delete(newClone)
-         }
-      }
-
-      transition($div)
-   }
-
-   function transition($div: $Node) {
-      // - read dims of prev node
-      const rect = prevNode!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
-      const prevClone = prevNode!.cloneNode(true)
-
-      console.log('rect.top', rect.top)
-      // - position prevClone
-      prevClone.style.removeProperty('visibility')
-      prevClone.style.setProperty('position', 'absolute')
-      prevClone.style.setProperty('top', rect.top + 'px')
-      prevClone.style.setProperty('left', rect.left + 'px')
-      prevClone.style.setProperty('width', rect.width + 'px')
-      prevClone.style.setProperty('height', rect.height + 'px')
-
+   function transitionIn(node: HTMLElement) {
+      console.log('transition in')
       queueRender(() => {
-         $container()!.appendChild(prevClone) // must happen before we read dims of new node ... why??
+         const transitioningIn = transitioningInMap.get(node) || new Set()
+         transitioningInMap.set(node, transitioningIn)
 
-         const newNode = $div()!
-
-         const newClone = newNode.cloneNode(true)
-         transitioningIn.add(newClone)
+         const clone = node.cloneNode(true) as HTMLElement
+         transitioningIn.add(clone)
 
          // - read dims of new node (must read before hiding new node)
-         const rect = newNode!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
+         const rect = node!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
 
-         console.log('prevNode parent', prevNode?.parentNode)
-         newNode.style.setProperty('visibility', 'hidden')
+         node.style.setProperty('visibility', 'hidden')
 
          // - position newClone
-         newClone.style.removeProperty('visibility')
-         newClone.style.setProperty('position', 'absolute')
-         newClone.style.setProperty('top', rect.top + 'px')
-         newClone.style.setProperty('left', rect.left + 'px')
-         newClone.style.setProperty('width', rect.width + 'px')
-         newClone.style.setProperty('height', rect.height + 'px')
+         clone.style.removeProperty('visibility')
+         clone.style.setProperty('position', 'absolute')
+         clone.style.setProperty('top', rect.top + 'px')
+         clone.style.setProperty('left', rect.left + 'px')
+         clone.style.setProperty('width', rect.width + 'px')
+         clone.style.setProperty('height', rect.height + 'px')
 
          // set starting transition state
-         newClone.classList.add('fade-in-from-0')
-         $container()?.appendChild(newClone)
+         clone.classList.add('fade-in-from-0')
+         $container()?.appendChild(clone)
 
 
          requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
             queueTask(() => {
                // trigger transition
-               prevClone.classList.add('fade-out-to-0')
+               clone.classList.add('fade-in-active')
+               clone.classList.remove('fade-in-from-0')
 
-               prevClone.addEventListener('transitionend', () => {
-                  console.log('transition ended')
-                  prevClone.remove();
-               })
-
-               newClone.classList.add('fade-in-active')
-               newClone.classList.remove('fade-in-from-0')
-
-               newClone.addEventListener('transitionend', () => {
-                  console.log('transition ended new clone removed')
-                  newNode.style.removeProperty('visibility')
-                  // newNode.style.removeProperty('display')
-                  newClone.remove();
-                  transitioningIn.delete(newClone)
+               clone.addEventListener('transitionend', () => {
+                  node.style.removeProperty('visibility')
+                  clone.remove();
+                  transitioningIn.delete(clone)
                })
             })
          })
-
-         prevNode = newNode
       })
-
    }
 
+   function transitionOut(node: HTMLElement) {
+      const transitioning = transitioningInMap.get(node)
+      if (transitioning?.size) {
+         for (const clone of transitioning) {
+            clone.classList.add('cancel-transition')
+            transitioning.delete(clone)
+         }
+      }
+      console.log('transition out!')
+      // - read dims of prev node
+      const rect = node.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
+      const clone = node.cloneNode(true) as HTMLElement
 
+      // - position prevClone
+      clone.style.removeProperty('visibility')
+      clone.style.setProperty('position', 'absolute')
+      clone.style.setProperty('top', rect.top + 'px')
+      clone.style.setProperty('left', rect.left + 'px')
+      clone.style.setProperty('width', rect.width + 'px')
+      clone.style.setProperty('height', rect.height + 'px')
+
+      queueRender(() => {
+         $container()?.appendChild(clone) // must happen before we read dims of new node ... why??
+
+         requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
+            queueTask(() => {
+               clone.classList.add('fade-out-to-0')
+
+               clone.addEventListener('transitionend', () => {
+                  console.log('transition ended')
+                  clone.remove();
+               })
+            })
+         })
+      })
+   }
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
    return component(
@@ -176,45 +154,33 @@ export function MountIf() {
       }}>
          <button on:click={() => ($color.change(), $name.value += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {$name}</h1>
-         <button on:click={e => { $active.toggle(); maybeTransition(getActiveDivRef()) }}>toggle active</button>
-         <button on:click={e => { $ready.toggle(); maybeTransition(getActiveDivRef()) }}>toggle ready</button>
+         <button on:click={e => { $active.toggle() }}>toggle active</button>
+         <button on:click={e => { $ready.toggle() }}>toggle ready</button>
          <hr></hr>
-         {/* <Transition> */}
-         {/* <show-hide> */}
-         {/* <div style={{ width: ($transitioning() ? $width() : 'unset'), height: ($transitioning() ? $height() : 'unset'), }}> */}
          <div class='container' ref={$container}>
             {If($active,
-               <div class='holder' ref={$div1}>
-                  {/* <div> */}
+               <div at:mounted={transitionIn} at:unmount={transitionOut}>
                   oh
-                  {/* <Transit with={slide({ x: -100, duration: 2200 })}> */}
                   <h2>hi</h2>
-                  {/* </Transit> */}
-                  {/* <Transit with={slide({ x: 100, duration: 2200 })}> */}
                   <h2>hope</h2>
-                  {/* </Transit> */}
                   {/* {If($ready,
                      <p>ready</p>
                   )} */}
                </div>
             )}
             {ElseIf($ready,
-               <div class='holder' ref={$div2}>
+               <div at:mounted={transitionIn} at:unmount={transitionOut}>
                   low
                   <h2>balloon</h2>
                </div>
             )}
             {Else(
-               <div class='holder' ref={$div3}>
+               <div at:mounted={transitionIn} at:unmount={transitionOut}>
                   so
                   <h2>bye</h2>
                </div>
             )}
          </div>
-         {/* </show-hide> */}
-         {/* </Transition> */}
-
-         {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
          {Style`
 
             .container {
@@ -238,6 +204,39 @@ export function MountIf() {
                opacity: 0;
                transition: opacity 500ms;
             }
+
+
+@keyframes fade-in {
+   from {
+      opacity: 0;
+   }
+
+   to {
+      opacity: 1;
+   }
+}
+
+@keyframes fade-out {
+   from {
+      opacity: 1;
+   }
+
+   to {
+      opacity: 0;
+   }
+}
+
+.animate-out {
+   animation: fade-out 2000ms ease-in;
+}
+
+.animate-in {
+   animation: fade-in 2000ms ease-in;
+}
+
+.cancel-animation {
+ animation: fade-out 500ms ease-in;
+}
 
          `}
       </div>

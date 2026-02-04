@@ -14,6 +14,11 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
             flask.onRemount(async () => { queueRender(()=>task(node, false))})
             break;
 
+         case 'at:mount':
+            flask.onInitialMount(() => task(node, false))
+            flask.onRemount(() => task(node, true))
+            break;
+
          case 'at:unmount':
             flask.onDemount(() => task(node, false))
             flask.onDiscard(() => task(node, true))
@@ -35,6 +40,7 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
 
 const flaskHooks = new Set([
    'at:mounted',
+   'at:mount',
    'at:unmount',
 ])
 

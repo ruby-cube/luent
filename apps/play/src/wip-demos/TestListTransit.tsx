@@ -1,17 +1,17 @@
 import { component, For, Style } from "@rue/lumo";
-import { Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
+import { EACH, Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 
 export function TestListTransit() {
 
    const $todos = Ion(Ionic([
-      Ionic({ id: 1, done: false, description: 'write some docs' }),
-      Ionic({ id: 2, done: false, description: 'start writing blog post' }),
-      Ionic({ id: 3, done: true, description: 'buy some milk' }),
-      Ionic({ id: 4, done: false, description: 'mow the lawn' }),
-      Ionic({ id: 5, done: false, description: 'feed the turtle' }),
-      Ionic({ id: 6, done: false, description: 'fix some bugs' })
-   ]));
+      { id: 1, done: false, description: 'write some docs' },
+      { id: 2, done: false, description: 'start writing blog post' },
+      { id: 3, done: true, description: 'buy some milk' },
+      { id: 4, done: false, description: 'mow the lawn' },
+      { id: 5, done: false, description: 'feed the turtle' },
+      { id: 6, done: false, description: 'fix some bugs' }
+   ], { [EACH]: { as: Ionic } }));
 
    let uid = $todos().length + 1;
 
@@ -112,6 +112,7 @@ function receive(id, node) {
 
 function TodoList(input) {
    const { $todos, remove } = input
+
    return component(
       <ul class="todos">
          {For($todos, m => m.id, todo => (

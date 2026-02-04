@@ -162,6 +162,7 @@ export class RenderCycle {
    }
 
    *runPhase(phase: Phase, genState?: { paused: boolean, gen: Generator }, onComplete: () => void = noop) {
+      console.log('running phase', phase)
       // if (this.update.timeMargin === 1000 && this.update.idle === false) 
       this.currentPhase = phase
       this.subphase = 'effects'

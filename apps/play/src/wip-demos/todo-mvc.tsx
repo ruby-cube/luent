@@ -1,9 +1,5 @@
 import { component, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
 import { watch, queueIonicTask, Ion, Ionic, toRaw, EACH, $_derivation } from "@rue/quarky"
-import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
-import { create } from "domain"
-import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
-import { QUARK } from "../../../../packages/quarky/src/abstract/Quark"
 
 // entity.name.type.tsx
 // meta.type.annotation.tsx
@@ -222,7 +218,7 @@ export function TodoMVC() {
                {ToggleAllButton()}
                <TodoList todos={$filteredTodos} can:removeTodo={removeTodo}></TodoList>
             </section>
-            <footer show-hide={$todoCount} class="footer">
+            <footer show-if={$todoCount} class="footer">
                {RemainingCount()}
                <ul class="filters">
                   <li>
@@ -235,7 +231,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-hide={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
+               <button show-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
                   Clear completed
                </button>
             </footer>

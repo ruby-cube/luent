@@ -331,7 +331,7 @@ import { TestListTransit } from './wip-demos/TestListTransit';
 //    })
 // }
 
-const app = createRoot(CellsApp)
+const app = createRoot(MountIf)
 
 app.mount('#root')
 

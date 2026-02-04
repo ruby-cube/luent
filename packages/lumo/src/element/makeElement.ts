@@ -38,7 +38,7 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    config: ElementConfig,
 ): DOMNode {
-   const { class: classes, style: styles, 'show-hide': showIf, ref: $node, ...other } = config;
+   const { class: classes, style: styles, 'show-if': showIf, ref: $node, ...other } = config;
 
    const { attributes, events, hooks } = analyzeAttributes(other)
 

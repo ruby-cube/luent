@@ -12,7 +12,7 @@ export function TestIfElse() {
       <div>
          <button on:click={e => $active.value = !$active()}>toggle</button>
          <button on:click={e => $ready.value = !$ready()}>toggle</button>
-         <show-hide>
+         <show-if>
             {If($active,
                <div>
                   <hr></hr>
@@ -31,7 +31,7 @@ export function TestIfElse() {
                   )}
                </>
             )}
-         </show-hide>
+         </show-if>
       </div>
    )
 }
