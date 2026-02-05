@@ -18,7 +18,7 @@ type ItemData = { id: number, content: string }
 
 const IonicItem = (data: ItemData) => Ionic(new ListItem(data.id, data.content))
 
-type QItem = ReturnType<typeof IonicItem>
+type IonicItem = ReturnType<typeof IonicItem>
 
 
 export function TestListSelectTransition() {
@@ -51,8 +51,8 @@ export function TestListSelectTransition() {
       }
    })
 
-   const selected = Ionic(new Set<QItem>(), {
-      toggle(item: QItem) {
+   const selected = Ionic(new Set<IonicItem>(), {
+      toggle(item: IonicItem) {
          if (this.has(item)) {
             this.delete(item)
          }
@@ -74,7 +74,7 @@ export function TestListSelectTransition() {
    }
 
    function removeItem(index: number) {
-      mu: selected.delete(list[index] as QItem) // TODO: remove type-casting once Ionic is properly typed
+      mu: selected.delete(list[index] as IonicItem) // TODO: remove type-casting once Ionic is properly typed
       mu: list.remove(index);
    }
 
@@ -141,12 +141,6 @@ export function TestListSelectTransition() {
                         >
                            insert
                         </div>
-                        {/* {Style`
-                        .transition {
-                           transition-timing-function: cubic-bezier(0, 1, 1, 1);
-                           animation-duration: 150ms;
-                        }
-                     `} */}
                      </div>
                   ))}
                </div>
