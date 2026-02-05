@@ -1,6 +1,6 @@
 import { component, Style, Finitron, withTimeout } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
-import "../style.css"
+import "./style.css"
 
 export function TrafficLight() {
 

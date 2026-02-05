@@ -126,12 +126,7 @@ export function setUpNodeRefs(node: any, root: any[], indices: Index[]) {
 
 function setUpLevel(referent: any, array: any[], index: Ion<number> | number) {
    if (isFunction(index)) {
-      console.log('---set index', array, index(), referent)
-      // update(index()) // manually call eager because PRELUDE is too late
-      console.log('array has td?', array)
       watch(index, ({ current: i }) => {
-         console.warn('re set', array, i, referent)
-         // update(i)
          if (i === -1) {
             array.pop()
          }

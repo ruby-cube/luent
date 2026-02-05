@@ -108,7 +108,7 @@ This syntax can likewise be used to access getters on object properties. Static 
 ```tsx
 function PlayerScoreBoard({ name }) {
 
-   const player = Ionized({
+   const player = Ionic({
       name: a,
       points: 0,
       addPoint () {

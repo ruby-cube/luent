@@ -1,8 +1,8 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, asIon, swiftUpdate, SlowUpdate, queueTask, Suspense, o, } from "@rue/quarky";
+import { Animation, Interval, Ion, swiftUpdate, SlowUpdate, queueTask, Suspense, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
-// Demo from Solid.js / React Fiber
+// Modified Demo from Solid.js / React Fiber
 
 // TODO:
 // - time warning for lazy update
@@ -13,17 +13,6 @@ import './SierpinskiTriangles.css'
 
 const TARGET = 25;
 
-
-
-// const updu1000 = useRenderer(1000)
-
-// function renderLazily(mutation: Function, deadline?: number) {
-
-// }
-
-// function renderAnimationFrame() {
-
-// }
 
 
 // Types of update delays
@@ -44,12 +33,12 @@ const TARGET = 25;
 
 
 export function TriangleDemo() {
-   const $elapsed = asIon(0)
-   const $seconds = asIon(0)
+   const $elapsed = Ion(0)
+   const $seconds = Ion(0)
    // const $realSeconds = Ion(0)
    // const $delta = Ion(() => ($realSeconds() - $seconds()))
 
-   const $scale = asIon(() => {
+   const $scale = Ion(() => {
       const e = ($elapsed() / 1000) % 10;
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
@@ -166,7 +155,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
    //    '-suspense': $suspense
    // })
 
-   const $slow = asIon(() => {
+   const $slow = Ion(() => {
       // console.time('a')
       var e = performance.now() + 0.8;
       // Artificially long execution time.
@@ -188,7 +177,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
 // 729 dots
 
 function Dot({ x, y, s, $text }: FromTag<any>) {
-   const $hover = asIon(false)
+   const $hover = Ion(false)
 
    return component(
       <div

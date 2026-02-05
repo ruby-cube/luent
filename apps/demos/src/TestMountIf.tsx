@@ -1,10 +1,10 @@
 import { getActiveFlask } from "@rue/flask";
 import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
 import { debug, getActiveUpdate, instantUpdate, Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
-import "../style.css"
+import "./style.css"
 
 
-export function MountIf() {
+export function TestMountIf() {
 
    const $active = Ion(true, {
       toggle() {

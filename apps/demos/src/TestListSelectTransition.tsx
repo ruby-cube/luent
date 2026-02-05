@@ -1,8 +1,7 @@
 import { atMounted, component, For, listen, NodeRef, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import '../style.css'
-import { EACH, INTERNAL_OP, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";
-import { Ion, queuePrelude, queueRender, queueTask } from "@rue/quarky";
+import './style.css'
+import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic } from "@rue/quarky";
 
 class ListItem {
    constructor(
@@ -68,14 +67,7 @@ export function TestListSelectTransition() {
    function insertItem(index: number) {
       list.insert(index)
 
-      queuePrelude(() =>
-         transitionExisting(itemDivs, index)
-      )
-   }
-
-   function moveSelectedItems(index: number) {
-      moveUniqueItems(selected, list, index)
-
+      // temporary till Transition API implemented
       queuePrelude(() =>
          transitionExisting(itemDivs)
       )
@@ -84,11 +76,17 @@ export function TestListSelectTransition() {
    function removeItem(index: number) {
       mu: selected.delete(list[index] as QItem) // TODO: remove type-casting once Ionic is properly typed
       mu: list.remove(index);
+   }
 
+   function moveSelectedItems(index: number) {
+      moveUniqueItems(selected, list, index)
+
+      // temporary till Transition API implemented
       queuePrelude(() =>
-         transitionExisting(itemDivs, index)
+         transitionExisting(itemDivs)
       )
    }
+
 
    listen(window, 'click', e => {
       if ((e.target as HTMLElement).closest('.list')) {
@@ -97,8 +95,8 @@ export function TestListSelectTransition() {
       selected.clear()
    })
 
+   // temporary till Transition API implemented
    const $container = NodeRef('div')
-
    const itemDivs: HTMLElement[] = []
 
    return component(
@@ -116,8 +114,8 @@ export function TestListSelectTransition() {
                   {For(list, m => m.id, (item, $index) => (
                      <div
                         ref={{ arr: itemDivs, i: $index }}
-                        at:mounted={node => { transitionNew(node) }}
-                        at:unmount={node => { transitionOut(node, $container()!) }}
+                        at:mounted={node => { transitionNew(node)}}
+                        at:unmount={node => { transitionOut(node, $container()!); transitionExisting(itemDivs, $index()) }}
                      >
                         <div
                            on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
@@ -137,7 +135,10 @@ export function TestListSelectTransition() {
                               +
                            </div>
                         </div>
-                        <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
+                        <div
+                           on:click={e => { moveSelectedItems($index() + 1) }}
+                           style="background-color: white; cursor: pointer"
+                        >
                            insert
                         </div>
                         {/* {Style`
@@ -167,34 +168,31 @@ export function TestListSelectTransition() {
                   transition: transform 150ms ease-in-out;
                }
 
+               @keyframes fade-in {
+                  from {
+                     opacity: .25;
+                  }
+                  to {
+                     opacity: 1;
+                  }
+               }
 
-@keyframes fade-in {
-   from {
-      opacity: .25;
-   }
+               @keyframes fade-out {
+                  from {
+                     opacity: 1;
+                  }
+                  to {
+                     opacity: 0;
+                  }
+               }
 
-   to {
-      opacity: 1;
-   }
-}
+               .animate-out {
+                  animation: fade-out 2ms ease-in;
+               }
 
-@keyframes fade-out {
-   from {
-      opacity: 1;
-   }
-
-   to {
-      opacity: 0;
-   }
-}
-
-.animate-out {
-   animation: fade-out 2ms ease-in;
-}
-
-.animate-in {
-   animation: fade-in 2ms ease-in;
-}
+               .animate-in {
+                  animation: fade-in 2ms ease-in;
+               }
             `}
          </div>
       </>
@@ -211,7 +209,7 @@ function genId() {
 
 //#region transitions
 
-function transitionExisting(itemDivs: HTMLElement[], removedIndex?: number) {
+export function transitionExisting(itemDivs: HTMLElement[], removedIndex?: number) {
    const rects: DOMRect[] = []
    const nodes: any[] = []
    for (let i = 0; i < itemDivs.length; i++) {

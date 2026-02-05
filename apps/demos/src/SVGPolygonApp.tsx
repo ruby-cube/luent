@@ -10,7 +10,7 @@ type Stat = {
    value: number
 }
 
-export function PolygonApp() {
+export function SVGPolygonApp() {
    const $newLabel = Ion('')
 
    const stats = Ionic([
@@ -64,32 +64,33 @@ export function PolygonApp() {
          <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
 
          {Style`
-         polygon {
-  fill: #42b983;
-  opacity: 0.75;
-}
+            polygon {
+              fill: #42b983;
+              opacity: 0.75;
+            }
 
-circle {
-  fill: transparent;
-  stroke: #999;
-}
+            circle {
+              fill: transparent;
+              stroke: #999;
+            }
 
-text {
-  font-size: 10px;
-  fill: #666;
-}
+            text {
+              font-size: 10px;
+              fill: #666;
+            }
 
-label {
-  display: inline-block;
-  margin-left: 10px;
-  width: 20px;
-}
+            label {
+              display: inline-block;
+              margin-left: 10px;
+              width: 20px;
+            }
 
-#raw {
-  position: absolute;
-  top: 0;
-  left: 300px;
-}`}
+            #raw {
+              position: absolute;
+              top: 0;
+              left: 300px;
+            }
+         `}
       </>
    )
 }

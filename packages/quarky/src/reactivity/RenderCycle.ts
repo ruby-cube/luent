@@ -1,6 +1,6 @@
 
 
-import { setImmediate } from "@rue/thread";
+import { setImmediate } from "../../../x-old/thread";
 import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update"
 import { Effect, EffectQueue, TaskQueue } from "./EffectQueue"
 import { Flask } from "@rue/flask"
@@ -23,8 +23,6 @@ type AsyncPhase =
    | typeof INTERNAL_RENDER
    | typeof LAYOUT
    | typeof RENDER
-   | typeof PRELUDE_II
-   | typeof INTERNAL_RENDER_II
    | typeof POSTLUDE
    | typeof TICK
 
@@ -45,13 +43,9 @@ export const PRELUDE = 0
 export const INTERNAL_RENDER = 1
 
 // TODO: ??
-export const LAYOUT = 2
-export const RENDER = 3
-export const PRELUDE_II = 4
-export const INTERNAL_RENDER_II = 5
-
-export const POSTLUDE = 6
-export const TICK = 7
+export const RENDER = 2
+export const POSTLUDE = 3
+export const TICK = 4
 
 
 type CyclePhase = {
@@ -86,10 +80,7 @@ export class RenderCycle {
    phases: Phase[] = [
       PRELUDE,
       INTERNAL_RENDER,
-      LAYOUT,
       RENDER,
-      PRELUDE_II,
-      INTERNAL_RENDER_II,
       POSTLUDE,
       TICK
    ]
@@ -162,7 +153,6 @@ export class RenderCycle {
    }
 
    *runPhase(phase: Phase, genState?: { paused: boolean, gen: Generator }, onComplete: () => void = noop) {
-      console.log('running phase', phase)
       // if (this.update.timeMargin === 1000 && this.update.idle === false) 
       this.currentPhase = phase
       this.subphase = 'effects'
@@ -330,12 +320,8 @@ export class RenderCycle {
       [PRELUDE]: undefined, // can be idle
       // --- commit ... synchronous from this point on
       [INTERNAL_RENDER]: undefined,
-      [LAYOUT]: undefined,
-
       [RENDER]: undefined,
 
-      [PRELUDE_II]: undefined, // TODO: Should we allow an infinite number of phases to be added? or keep it fixed to two rounds?
-      [INTERNAL_RENDER_II]: undefined,
 
       [POSTLUDE]: undefined,
       // --- queueTask, instant update

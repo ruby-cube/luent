@@ -1,36 +1,35 @@
 import { instantUpdate, Ion, swiftUpdate, Interval } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
-import { AsyncIon, component, Else, ElseIf, FromTag, If } from "@rue/lumo";
+import { Await, Meanwhile, component, Else, ElseIf, FromTag, If } from "@rue/lumo";
 
-// Demo from Solid.js
+// Demo from Solid.js 
 
 export function TestAsyncTabs() {
    const $tab = Ion(0);
    const $count = Ion(0);
 
    Interval(1000, () => {
-      $count.value++
+      mu: $count.value++
    })
 
    return component(<>
       <ul class="inline">
-         <li class={{ selected: ($tab() === 0) }} on:click={e => $tab.value = 0}>
+         <li class={{ selected: ($tab() === 0) }} on:click={e => { mu: $tab.value = 0 }}>
             Uno
          </li>
-         <li class={{ selected: ($tab() === 1) }} on:click={e => $tab.value = 1}>
+         <li class={{ selected: ($tab() === 1) }} on:click={e => { mu: $tab.value = 1 }}>
             Dos
          </li>
-         <li class={{ selected: ($tab() === 2) }} on:click={e => $tab.value = 2}>
+         <li class={{ selected: ($tab() === 2) }} on:click={e => { mu: $tab.value = 2 }}>
             Tres
          </li>
-         <li class={{ selected: ($tab() === 3) }} on:click={e => $tab.value = 3}>
+         <li class={{ selected: ($tab() === 3) }} on:click={e => { mu: $tab.value = 3 }}>
             Quatre
          </li>
-         <li class={{ selected: ($tab() === 4) }} on:click={e => $tab.value = 4}>
+         <li class={{ selected: ($tab() === 4) }} on:click={e => { mu: $tab.value = 4 }}>
             Cinq
          </li>
-         <li class={{ selected: ($tab() === 5) }} on:click={e => $tab.value = 5}>
+         <li class={{ selected: ($tab() === 5) }} on:click={e => { mu: $tab.value = 5 }}>
             Six
          </li>
       </ul>
@@ -60,13 +59,13 @@ export function TestAsyncTabs() {
          o.initial && "Loading..."
       )}
       {/* {Match($tab)}
-            {Case(0, (o.oo),
+            {Case(0,
                <Tab page="Uno" />
             ))}
-            {Case(1, (o.oo),
+            {Case(1,
                <Tab page="Dos" />
             )}
-            {Case(2, (o.oo),
+            {Case(2,
                <Tab page="Tres" />
             )} */}
    </>);

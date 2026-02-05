@@ -1,8 +1,7 @@
-import { component, For } from "@rue/lumo";
+import { Await, component, For, Meanwhile, Nonce } from "@rue/lumo";
 import { Ion, isPending, o } from "@rue/quarky";
-import { Await, Meanwhile, Nonce } from "../../../../packages/lumo/src/boundaries/Await";
 
-// Demo from Solid.js/Remix
+// based on Solid.js/Remix demo
 
 // TODO:
 // const $something = Ion(null, {
@@ -49,12 +48,12 @@ export function TestAsyncSelect() {
                </p>
             </>
          )}
-         {/* {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state
+         {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state
             'loading...'
-         )} */}
-         {Meanwhile(() =>
-            $cities.loaded || 'loading...'
          )}
+         {/* {Meanwhile(() =>
+            $cities.loaded || 'loading...'
+         )} */}
       </>
    )
 }

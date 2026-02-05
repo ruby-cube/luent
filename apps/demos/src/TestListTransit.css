@@ -15,7 +15,7 @@ html {
 	--fg-2: hsl(0, 0%, 20%);
 	--fg-2: hsl(0, 0%, 30%);
 	--link: hsl(208, 77%, 47%);
-	--link-hover: hsl(208, 77%, 55%);
+	--link-hover: hsla(204, 38%, 95%, 0.757);
 	--link-active: hsl(208, 77%, 40%);
 
 	&.dark {

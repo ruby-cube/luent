@@ -1,5 +1,5 @@
 import { Update } from "@rue/quarky";
-import { queueTask } from "@rue/thread";
+import { queueTask } from "../../../packages/x-old/thread";
 
 const BUFFER = 8.5
 

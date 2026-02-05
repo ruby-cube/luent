@@ -1,7 +1,7 @@
 import { component, For, If, Style } from "@rue/lumo"
 import { Ion, Ionic, EACH } from "@rue/quarky"
 
-// Demo from Vue.js
+// Modified Demo from Vue.js
 
 type Circle = { cx: number, cy: number, r: number }
 // type Ionic<T> = T & { '~ionic-proxy': true }
@@ -22,7 +22,7 @@ export function CircleApp() {
          return;
       }
 
-      if (target?.tagName !== 'circle') $selected.value = null
+      if (target?.tagName !== 'circle') mu: $selected.value = null
 
       if (!$selected()) {
          $circles().push(Ionic({
@@ -45,11 +45,11 @@ export function CircleApp() {
    }
 
    function undo() {
-      $circles.value = clone(history[--$index.value])
+      mu: $circles.value = clone(history[--$index.value])
    }
 
    function redo() {
-      $circles.value = clone(history[++$index.value])
+      mu: $circles.value = clone(history[++$index.value])
    }
 
    function clone(circles: Circle[]) {
@@ -72,7 +72,7 @@ export function CircleApp() {
                   cy={circle.cy}
                   r={circle.$r}
                   fill={(circle === $selected() ? '#ccc' : '#fff')}
-                  on:click={e => { $selected.value = circle }}
+                  on:click={e => { mu: $selected.value = circle }}
                   // on:click={e => { handleClick.circle(circle) }}
                   on:contextmenu={e => (e.preventDefault(), adjust(circle))}
                ></circle>)
@@ -94,58 +94,58 @@ export function CircleApp() {
             </div>
          )}
          {Style`
-body {
-   margin: 0;
-   overflow: hidden;
-}
-
-svg {
-  width: 100vw;
-  height: 100vh;
-  background-color: #eee;
-}
-
-circle {
-   stroke: #000;
-}
-
-.controls {
-   position: fixed;
-   top: 10px;
-   left: 0;
-   right: 0;
-   text-align: center;
-}
-
-.controls button + button {
-   margin-left: 6px;
-}
-
-.dialog {
-   position: fixed;
-   top: calc(50% - 50px);
-   left: calc(50% - 175px);
-   background: #fff;
-   width: 350px;
-   height: 100px;
-   padding: 5px 20px;
-   box-sizing: border-box;
-   border-radius: 4px;
-   text-align: center;
-   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
-}
-
-.dialog input {
-   display: block;
-   width: 200px;
-   margin: 0px auto;
-}
-
-.tip {
-   text-align: center;
-   padding: 0 50px;
-   color: #bbb;
-}`}
+            body {
+               margin: 0;
+               overflow: hidden;
+            }
+            
+            svg {
+              width: 100vw;
+              height: 100vh;
+              background-color: #eee;
+            }
+            
+            circle {
+               stroke: #000;
+            }
+            
+            .controls {
+               position: fixed;
+               top: 10px;
+               left: 0;
+               right: 0;
+               text-align: center;
+            }
+            
+            .controls button + button {
+               margin-left: 6px;
+            }
+            
+            .dialog {
+               position: fixed;
+               top: calc(50% - 50px);
+               left: calc(50% - 175px);
+               background: #fff;
+               width: 350px;
+               height: 100px;
+               padding: 5px 20px;
+               box-sizing: border-box;
+               border-radius: 4px;
+               text-align: center;
+               box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+            }
+            
+            .dialog input {
+               display: block;
+               width: 200px;
+               margin: 0px auto;
+            }
+            
+            .tip {
+               text-align: center;
+               padding: 0 50px;
+               color: #bbb;
+            }`}
       </>
    )
 }

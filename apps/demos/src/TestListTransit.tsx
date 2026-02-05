@@ -1,8 +1,14 @@
-import { component, For, Style } from "@rue/lumo";
-import { EACH, Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
+import { component, For, FromTag, Style } from "@rue/lumo";
+import { EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
+import { transitionExisting } from "./TestListSelectTransition";
 
-// Demo from Svelte
+// Modified Demo from Svelte
+type Todo = {
+   id: number;
+   done: boolean;
+   description: string;
+}
 
 export function TestListTransit() {
 
@@ -17,10 +23,11 @@ export function TestListTransit() {
 
    let uid = $todos().length + 1;
 
-   function remove(todo) {
+   function remove(todo: Todo) {
       const index = $todos().indexOf(todo);
       $todos().splice(index, 1);
    }
+
    return component(
       <div class="board">
          <input
@@ -48,30 +55,29 @@ export function TestListTransit() {
             <TodoList todos={($todos().filter((t) => t.done))} can:remove={remove} />
          </div>
          {Style`
-
             .board {
-      display: grid;
-   grid-template-columns: 1fr 1fr;
-   grid-column-gap: 1em;
-   max-width: 36em;
-   margin: 0 auto;
-	}
+               display: grid;
+               grid-template-columns: 1fr 1fr;
+               grid-column-gap: 1em;
+               max-width: 36em;
+               margin: 0 auto;
+	         }
 
-	.board > input {
-      font - size: 1.4em;
-   grid-column: 1/3;
-   padding: 0.5em;
-   margin: 0 0 1rem 0;
-	}
+	         .board > input {
+               font-size: 1.4em;
+               grid-column: 1/3;
+               padding: 0.5em;
+               margin: 0 0 1rem 0;
+	         }
 
-   h2 {
-      font - size: 2em;
-   font-weight: 200;
-	}
+            h2 {
+               font-size: 2em;
+               font-weight: 200;
+	         }
 
-             .transition-position {
-                  transition: transform 150ms ease-in-out;
-               }
+            .transition-position {
+               transition: transform 150ms ease-in-out;
+            }
          `}
       </div>
    )
@@ -112,13 +118,22 @@ function receive(id, node) {
 
 
 
-function TodoList(input) {
+function TodoList(input: FromTag<{
+   todos: Ion<Todo[]>,
+   'can:remove': (todo: Todo) => void
+}>) {
    const { $todos, remove } = input
+
+   const lis: HTMLElement[] = []
 
    return component(
       <ul class="todos">
-         {For($todos, m => m.id, todo => (
-            <li class={{ done: (todo.done) }} at:unmount={node => send(todo.id, node)} at:mounted={node => receive(todo.id, node)}>
+         {For($todos, m => m.id, (todo, $i) => (
+            <li class={{ done: (todo.done) }}
+               at:unmount={node => {send(todo.id, node); transitionExisting(lis, $i())}}
+               at:mounted={node => receive(todo.id, node)}
+               ref={{ arr: lis, i: $i }}
+            >
                <label>
                   <input type="checkbox" mu:checked={todo.$done} />
                   <span>{todo.description}</span>
@@ -127,21 +142,21 @@ function TodoList(input) {
             </li>
          ))}
          {Style`
-   	label {
-		width: 100%;
-		height: 100%;
-		display: flex;
-	}
+   	      label {
+            	width: 100%;
+            	height: 100%;
+            	display: flex;
+            }
 
-	span {
-		flex: 1;
-	}
+            span {
+            	flex: 1;
+            }
 
-   button {
-      border: none;
-      background-color: transparent
-   }
-   `}
+            button {
+               border: none;
+               background-color: transparent
+            }
+         `}
       </ul>
    )
 }

@@ -6,7 +6,7 @@
 // Parent: the parent node 
 
 import { AnyObject } from "@rue/types";
-import { isIterable } from "../utils/array";
+import { isIterable } from "../../utils/array";
 import { getKeyPathValue } from "@rue/utils";
 
 export const DONE = Symbol("exitTree")

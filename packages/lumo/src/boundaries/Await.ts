@@ -66,9 +66,9 @@ export function Await(renderOrSuspense: [...any[], RenderFunction | RawJSXNode] 
    }
 }
 
-export function Meanwhile(renderPlaceholder: RenderFunction | RawJSXNode): MeanwhileKit
+export function Meanwhile(renderPlaceholder: ((o: Suspense) => RawJSXNode) | RawJSXNode): MeanwhileKit
 export function Meanwhile(options: { timeout: number }): MeanwhileKit
-export function Meanwhile(renderOrOptions: RenderFunction | RawJSXNode | { timeout: number }, renderPlaceholder?: RenderFunction | RawJSXNode): MeanwhileKit {
+export function Meanwhile(renderOrOptions: ((o: Suspense) => RawJSXNode) | RawJSXNode | { timeout: number }, renderPlaceholder?: ((o: Suspense) => RawJSXNode) | RawJSXNode | RawJSXNode): MeanwhileKit {
    const timeout = renderPlaceholder ? (<{ timeout: number }>renderOrOptions).timeout : undefined
    const render = (renderPlaceholder ? renderPlaceholder : renderOrOptions) as RenderFunction
    return {
@@ -83,12 +83,6 @@ export function Nonce(renderPlaceholder: any) {
       console.log('o?', o)
       return o.initial && renderPlaceholder() 
    })
-}
-
-export function Catch(renderError: RenderError) {
-   return {
-      renderError
-   }
 }
 
 

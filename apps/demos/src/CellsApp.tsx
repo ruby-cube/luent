@@ -1,48 +1,44 @@
 import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted } from "@rue/lumo"
 import { Ion, Ionic } from "@rue/quarky"
 
-// Demo from Vue.js
-
-const COLS = 6
-const ROWS = 10
-
-const cells = Ionic(
-   Array.from(Array(COLS).keys()).map((i) =>
-      Array.from(Array(ROWS).keys()).map((i) => '')
-   )
-)
-
-function evalCell(exp: string) {
-   if (!exp.startsWith('=')) {
-      return exp
-   }
-
-   // = A1 + B2 ---> get(0,1) + get(1,2)
-   exp = exp
-      .slice(1)
-      .replace(
-         /\b([A-Z])(\d{1,2})\b/g,
-         (_, c, r) => `get(${c.charCodeAt(0) - 65},${r})`
-      )
-
-   try {
-      return new Function('get', `return ${exp}`)(getCellValue)
-   } catch (e) {
-      return `#ERROR ${e}`
-   }
-}
-
-function getCellValue(c: number, r: number) {
-   const val = evalCell(cells[c][r])
-   const num = Number(val)
-   return Number.isFinite(num) ? num : val
-}
-
-
+// Modified Demo from Vue.js
+// barebones cells app
 
 export function CellsApp() {
+   const COLS = 6
+   const ROWS = 10
+
+   const cells = Array.from(Array(COLS).keys()).map((i) =>
+      Array.from(Array(ROWS).keys()).map((i) => ''))
+
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
    const tds: HTMLTableCellElement[][] = []
+
+   function evalCell(exp: string) {
+      if (!exp.startsWith('=')) {
+         return exp
+      }
+
+      // = A1 + B2 ---> get(0,1) + get(1,2)
+      exp = exp
+         .slice(1)
+         .replace(
+            /\b([A-Z])(\d{1,2})\b/g,
+            (_, c, r) => `get(${c.charCodeAt(0) - 65},${r})`
+         )
+
+      try {
+         return new Function('get', `return ${exp}`)(getCellValue)
+      } catch (e) {
+         return `#ERROR ${e}`
+      }
+   }
+
+   function getCellValue(c: number, r: number) {
+      const val = evalCell(cells[c][r])
+      const num = Number(val)
+      return Number.isFinite(num) ? num : val
+   }
 
    atMounted(() => {
       console.warn('node================')
@@ -67,12 +63,16 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For([...cells[0]], (_, row) => (// TODO: allow number as input for For()
+               {For([...cells[0]], (_, row: any) => ( // TODO: allow number as input for For()
                   <tr>
                      <th>{row}</th>
-                     {For(cols, (_, $col) =>
-                        <td ref={{ arr: tds, i: [row, $col] }}>
-                           <Cell row={row} column={$col()}></Cell>
+                     {For(cols, (_, col: any) =>
+                        <td ref={{ arr: tds, i: [row, col] }}>
+                           <Cell
+                              value={(cells[col][row])}
+                              can:setCellValue={value => { mu: cells[col][row] = value }}
+                              can:calcCellValue={evalCell}
+                           ></Cell>
                         </td>
                      )}
                   </tr>
@@ -114,32 +114,33 @@ export function CellsApp() {
 }
 
 
-function Cell({ column, row }: FromTag<{
-   column: number,
-   row: number
+function Cell(input: FromTag<{
+   value: Ion<string>
+   'can:setCellValue': (value: string) => void
+   'can:calcCellValue': (value: string) => string
 }>) {
+   const { setCellValue, $value, calcCellValue } = input
 
    const $editing = Ion(false)
 
    function update(e: any) {
-      $editing.value = false
-      cells[column][row] = e.target.value.trim()
+      mu: $editing.value = false
+      mu: setCellValue(e.target.value.trim())
    }
-
 
    return component(
       <>
-         <div class="cell" title={cells[column][row]} on:click={e => { console.log('set editing'); $editing.value = true }}>
+         <div class="cell" title={$value} on:click={e => { mu: $editing.value = true }}>
             {If($editing,
                <input
-                  value={cells[column][row]}
+                  value={$value}
                   on:change={update}
                   on:blur={update}
                   at:mounted={el => el.focus()}
                />
             )}
             {Else(
-               <span>{evalCell(cells[column][row])}</span>
+               <span>{calcCellValue($value())}</span>
             )}
          </div >
 

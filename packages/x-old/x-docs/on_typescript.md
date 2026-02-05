@@ -52,8 +52,8 @@ setTimeout(() => {
 The `If()` and `ElseIf()` template functions will pass the type-narrowed condition to the render function:
 ```ts
    <>
-      {If($rect, ($rect) =>
-         <Tooltip rect={$rect()}>info</Tooltip>
+      {If($rect, $rect =>
+         <Tooltip rect={$rect}>info</Tooltip>
       )}
    </>
 ```
