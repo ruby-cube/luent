@@ -10,12 +10,10 @@
 
 Hello world, I know you’re tired of JS frameworks. You don’t need this framework, but at the very least what you’ll find here is:
 - an exploration of poetic abstractions and intuitive mental models that unify various aspects of reactivity and reduce cognitive load
-- an API that supports encapsulation and declarative code so you can create less spaghetti
-- attempts at ironing out rough API edges and bug-prone patterns encountered in the four major frameworks (React, Vue, Solid, and Svelte) so you can focus on building your app instead of wrestling with the framework
+- an API that supports encapsulation and declarative code so you create less spaghetti
+- attempts at ironing out rough edges and bug-prone patterns encountered in the four major frameworks (React, Vue, Solid, and Svelte) so you can focus on app logic instead of wrestling with the framework
 
-This is a framework that strives for eloquence by prioritizing clarity and consistency and seeks elegance that’s based on simple syntactic sweetness instead of magic. 
-
-Our current goal is to establish an intuitive API that feels lovely to work with. Once the API is stable, we can focus on more efficient implementations under the hood.
+Our current goal is to establish an intuitive API that feels pleasant to work with. Once the API is stable, we can focus on more efficient implementations under the hood.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
