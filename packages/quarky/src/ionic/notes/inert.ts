@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { IsIonized, isIonicProxy, withInertItems } from "../x_ionize";
+import { IsIonic, isIonicProxy, withInertItems } from "../x_ionize";
 import { isFunction } from "@rue/utils";
 import { InertCollectionType } from "../IonicModel";
 import { getIonizedModel } from "../Ionic";
@@ -18,14 +18,14 @@ export type IsInert<T> = keyof T extends never ? false : Inert<T> extends 'TypeE
 //    frog: undefined as undefined | Inert<Frog>
 // })
 
-function _inert<T>(obj: T): T extends Function ? T : IsIonized<T> extends true ? T : T extends object ? Inert<T> : T {
+function _inert<T>(obj: T): T extends Function ? T : IsIonic<T> extends true ? T : T extends object ? Inert<T> : T {
    if (!(obj instanceof Object)) throw new Error("[INVALID INPUT] Only objects can be marked as inert")
 
    if (getIonizedModel(obj)) throw new Error('[INVALID INPUT] Cannot mark a the raw object of an ionized model as inert')
    if (isIonicProxy(obj)) throw new Error('[INVALID INPUT] Cannot mark an ionized model as inert')
    if (isFunction(obj)) throw new Error(`[INVALID INPUT] Functions are inert by default`)
    inertObjects.add(obj)
-   return obj as T extends Function ? T : IsIonized<T> extends true ? T : T extends object ? Inert<T> : T
+   return obj as T extends Function ? T : IsIonic<T> extends true ? T : T extends object ? Inert<T> : T
 }
 
 _inert['~markInert'] = true as true

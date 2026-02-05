@@ -14,6 +14,6 @@ import { TodoMVC } from "./TodoMVC"
 import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
 
-const app = createRoot(TestListSelectTransition)
+const app = createRoot(SVGPolygonApp)
 
 app.mount('#root')

@@ -1,5 +1,5 @@
 import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted } from "@rue/lumo"
-import { Ion, Ionic } from "@rue/quarky"
+import { Ion } from "@rue/quarky"
 
 // Modified Demo from Vue.js
 // barebones cells app

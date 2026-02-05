@@ -1,7 +1,6 @@
-import { EACH, INTERNAL_OP, Ionic, IonicProxy } from "./Ionic";
+import { EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
 import { defineIonicCollection } from "./IonicDef";
 import { isIonicProxy, ProxyKey, toRaw } from "./ModelQuark";
-import { IonizeBy, ToRaw } from "./x_ionize";
 
 declare global {
    interface Array<T> {

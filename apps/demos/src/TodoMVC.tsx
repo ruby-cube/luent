@@ -11,9 +11,7 @@ type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 type FilterKeys = 'all' | 'active' | 'completed'
 
-const IonicTodos = (todos: Todo[]) => Ionic(todos, {
-   [EACH]: { as: Ionic }
-})
+const IonicTodos = (todos: Todo[]) => Ionic(todos, { [EACH]: { as: Ionic } })
 
 export function TodoMVC() {
 

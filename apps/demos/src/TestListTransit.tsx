@@ -19,11 +19,11 @@ export function TestListTransit() {
       { id: 4, done: false, description: 'mow the lawn' },
       { id: 5, done: false, description: 'feed the turtle' },
       { id: 6, done: false, description: 'fix some bugs' }
-   ], { [EACH]: { as: Ionic } }));
+   ], { [EACH]: { '-as': Ionic } }));
 
    let uid = $todos().length + 1;
 
-   function remove(todo: Todo) {
+   function remove(todo: Ionic<Todo>) {
       const index = $todos().indexOf(todo);
       $todos().splice(index, 1);
    }
@@ -85,12 +85,12 @@ export function TestListTransit() {
 
 const sent = new Map()
 
-function send(id, node) {
+function send(id: number, node: HTMLElement) {
    const rect = node.getBoundingClientRect()
    sent.set(id, rect)
 }
 
-function receive(id, node) {
+function receive(id: number, node: HTMLElement) {
    const first = sent.get(id)
    if (first) {
       const last = node.getBoundingClientRect()
@@ -119,8 +119,8 @@ function receive(id, node) {
 
 
 function TodoList(input: FromTag<{
-   todos: Ion<Todo[]>,
-   'can:remove': (todo: Todo) => void
+   todos: Ion<Ionic<Todo>[]>,
+   'can:remove': (todo: Ionic<Todo>) => void
 }>) {
    const { $todos, remove } = input
 
@@ -130,7 +130,7 @@ function TodoList(input: FromTag<{
       <ul class="todos">
          {For($todos, m => m.id, (todo, $i) => (
             <li class={{ done: (todo.done) }}
-               at:unmount={node => {send(todo.id, node); transitionExisting(lis, $i())}}
+               at:unmount={node => { send(todo.id, node); transitionExisting(lis, $i()) }}
                at:mounted={node => receive(todo.id, node)}
                ref={{ arr: lis, i: $i }}
             >

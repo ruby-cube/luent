@@ -7,7 +7,7 @@ import { withGetHook, withSetHook } from "../ion/AtomicIon"
 import { AnyObject } from "@rue/types"
 import { Constructor, CustomThis, getIonicDef, TrackableThis } from "./IonicDef"
 import { AtomicPionQuark, createAtomicPion, PropertyHooks, withTransform } from "./Pion"
-import { EACH, INTERNAL_OP, IonicProxy } from "./Ionic"
+import { EACH, INTERNAL_OP, Ionic, IonicProxy, ToRaw } from "./Ionic"
 import { $activeUpdate, Update } from "../reactivity/Update"
 import { TrackedOps } from "./TrackedOp"
 import { Traceable } from "../debug/Traceable"
@@ -114,8 +114,8 @@ export class ModelQuark implements Atom {
       const hooks = this.extension
       if (hooks && EACH in hooks && hooks[EACH]) {
          const each = hooks[EACH]
-         if ('as' in each && each.as) {
-            this.initEach(each.as)
+         if ('-as' in each && each['-as']) {
+            this.initEach(each['-as'])
             // delete each.as
          }
          if ('@get' in each || '@set' in each) this.overrideGetHooks()
@@ -143,7 +143,7 @@ export class ModelQuark implements Atom {
       return this.extension?.[key] as T extends "property" ? PropertyHooks | undefined : MethodHook | undefined
    }
 
-   private initEach(transform: (value: unknown) => unknown) {
+   private initEach(transform: (value: any) => unknown) {
       let obj = this.state.get(); // TODO: should this be target or state.get() ??
       do {
          const initEach = getIonicDef(obj.constructor as Constructor)?.config['@initEach']
@@ -339,7 +339,7 @@ export class ModelQuark implements Atom {
 
       const pionAccess = ionKey && !(ionKey in target) // makes sure not an absorbed ion
 
-      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target[valueKey], this, hooks), hooks?.as, !pionAccess)
+      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target[valueKey], this, hooks), hooks?.["-as"], !pionAccess)
 
       const state = {
          get: pion,
@@ -399,12 +399,12 @@ export class ModelQuark implements Atom {
          triggerAll
       }) : _setter;
 
-      const { as: transform, '@get': castGet, '@set': castSet } = (this.getHooks(valueKey) ?? {}) as PropertyHooks
+      const { '-as': transform, '@get': castGet, '@set': castSet } = (this.getHooks(valueKey) ?? {}) as PropertyHooks
 
       const getWithHook = castGet ? withGetHook(get, castGet) : get;
       const setWithHook = castSet ? withSetHook<boolean>(set, castSet, () => this.state.get()[valueKey]) : set;
 
-      const [getter, setter] = transform ? withTransform(transform, getWithHook, setWithHook) : [getWithHook, setWithHook]
+      const [getter, setter] = transform  ? withTransform(transform, getWithHook, setWithHook) : [getWithHook, setWithHook]
 
       const state = {
          get: getter,
@@ -613,7 +613,6 @@ export function isIonicProxy(value: any): value is QuarkyIonicProxy {
    return hasQuark(value) && quarkOf(value) instanceof ModelQuark;
 }
 
-type ToRaw<T> = T // FIX: STAND-IN
 
 export function toRaw<T>(obj: T): ToRaw<T> {
    if (obj instanceof ModelQuark) {

@@ -2,13 +2,13 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } 
 import { MaybeIon } from "../component/Input";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListItemKit, ListKit, toAsyncRenderItem } from "./List";
-import { Ion, IonizeBy, Ionized, isGetter, isInertIon, isIon, IsIonized, isIonicProxy, MaybeIonize, toIon, toValue } from "@rue/quarky";
+import { Ion, IonizeBy, isGetter, isInertIon, isIon, IsIonic, isIonicProxy, MaybeIonize, toIon, toValue } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 
 
 export type RenderItem<L> =
    L extends Ion<infer D> ? D extends Collection<infer I> ? (item: IonizeBy<D, I>, $i: Ion<number>) => RawJSXNode : 'frog'
-   : IsIonized<L> extends true ? L extends { [key: number]: infer I } ? (item: MaybeIonize<I>, $i: Ion<number>) => RawJSXNode : 'frog' // TODO: Sets and maps?
+   : IsIonic<L> extends true ? L extends { [key: number]: infer I } ? (item: MaybeIonize<I>, $i: Ion<number>) => RawJSXNode : 'frog' // TODO: Sets and maps?
    : L extends Collection<infer I> ? (item: IonizeBy<L, I>, $i: Ion<number>) => RawJSXNode
    : (item: any, $i: Ion<number>) => RawJSXNode
 // L extends Collection<infer I> | Ion<Collection<infer I>> ? ((item: I) => JSXNode) | ((item: I, $index: AtomicIon<number>) => JSXNode)

@@ -13,7 +13,7 @@ import { AsyncIon, AsyncProps } from "../async/AsyncIon";
 /* API */
 export type Ion<T = unknown> = (() => T) /* & { '~ion': true } */
 
-// type MaybeInert<T = unknown> = IsIonized<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
+// type MaybeInert<T = unknown> = IsIonic<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
 export type MutableIon<T> = Ion<T> & { value: T }
 

@@ -1,4 +1,4 @@
-import { atMounted, component, For, listen, NodeRef, Style, target } from "@rue/lumo";
+import { component, For, listen, NodeRef, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic } from "@rue/quarky";
@@ -29,7 +29,7 @@ export function TestListSelectTransition() {
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { '-as': IonicItem }, // TODO: type
+      [EACH]: { '-as': IonicItem },
 
       insert(index: number) {
          const item = IonicItem({

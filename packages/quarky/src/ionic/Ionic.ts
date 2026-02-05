@@ -23,7 +23,7 @@ export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 export type Expand<T> = T extends infer O ? O : never;
 
 
-type IonAccess<T extends AnyObject, M = {}> = Expand<{
+type IonAccess<T, M = {}> = Expand<{
    [K in keyof T as K extends `$${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never : `$${K}` : T[K] extends Function ? never : K extends string ? `$${K}` : never]:
    K extends `$${string}`
    ? T[K] extends Ion<infer V>
@@ -32,11 +32,12 @@ type IonAccess<T extends AnyObject, M = {}> = Expand<{
    : Ion<NestedType<K, M, T[K]>>
 }>
 
-type Methods<M> = Expand<{ 
-   [K in keyof M as M[K] extends Function ? K : never]: M[K] 
+type Methods<M> = Expand<{
+   [K in keyof M as M[K] extends Function ? K : never]: M[K]
 }>
 
-export type Ionic<T extends AnyObject, M extends AnyObject = {}> = T extends any[] ?
+// TODO: Ionizing types with non-object intersections
+export type Ionic<T, M = {}> = T extends any[] ?
    Ionize<Expand<{
       [K in keyof T]: NestedType<K, M, T[K]>
    } & IonAccess<T, M> & Methods<M>>>
@@ -45,10 +46,11 @@ export type Ionic<T extends AnyObject, M extends AnyObject = {}> = T extends any
    } & IonAccess<T, M> & Methods<M>>>>
 
 type NestedType<K, M, V> = K extends keyof M
-   ? M[K] extends { '-as': infer N } ? N extends ((args: any) => infer R) ? R : N : V
+   ? M[K] extends { '-as': infer N } ? N extends { '~ionizer': true } ? Ionic<V> : N extends ((args: any) => infer R) ? R : N
+   : V
    : K extends number
-   ? M extends { [EACH]: infer O } ? O extends { '-as': infer N }
-   ? N extends (arg: any) => infer R ? R : N
+   ? M extends { [EACH]: infer O }
+   ? O extends { '-as': infer N } ? N extends { '~ionizer': true } ? Ionic<V> : N extends (arg: any) => infer R ? R : N
    : V
    : V
    : V
@@ -59,7 +61,7 @@ export const EACH = Symbol('each')
 
 const ionicModels: WeakMap<AnyObject, QuarkyIonicProxy> = new WeakMap()
 
-export const asIonic = Ionic as <T>(obj: T) => IonicProxy & T
+
 
 // export function asIonic<T extends AnyObject>(target: T, config?: AnyObject): IonicProxy & T {
 //    if (isIonicProxy(target)) return target as any as IonicProxy & T;
@@ -83,7 +85,17 @@ type PropertiesOf<T> = {
 
 type Ionize<T> = T & { '~ionic': true }
 
-export function Ionic<T extends AnyObject, M>(target: T, config?: M & ThisType<T & M> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<T, M> {
+type IonicPropertyConfig<P = any> = {
+   '-as'?: (data: P) => AnyObject,
+   '@get'?: (value: P) => void, // TODO: needs to be ReturnType of '-as' function if there is an as function
+   '@set'?: (value: P) => void // TODO: needs to be ReturnType of '-as' function if there is an as function
+}
+type IonicConfig<T> = { [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I : never> }
+
+export const Ionic = _Ionic as typeof _Ionic & { '~ionizer': true }
+export const asIonic = Ionic as <T>(obj: T) => IonicProxy & T
+
+export function _Ionic<T extends AnyObject, M>(target: T, config?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<T, M> {
    if (isIonicProxy(target)) {
       return target as any
    }
@@ -100,8 +112,15 @@ export function Ionic<T extends AnyObject, M>(target: T, config?: M & ThisType<T
    return proxy as any
 }
 
+export type IsIonic<T> = keyof T extends never ? false : T extends { '~ionic': true } ? true : false
+/**
+ * Wrap the return of a method of an ionizable class with this type helper in order to 
+ * propagate any deep ionization that has been defined in the class's defineIonicCollective config
+ */
+export type IonizeBy<H, T> = IsIonic<H> extends true ?
+   (T extends object ? Ionic<T> : T) : T
 
 
-
+export type ToRaw<T> = IsIonic<T> extends true ? T extends Ionize<infer R> ? R : T : T
 
 const author = Ionic({ profile: { name: 'frog' } }, { profile: { '-as': Ionic } })

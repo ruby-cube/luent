@@ -20,7 +20,7 @@ export function SVGPolygonApp() {
       { label: 'D', value: 100 },
       { label: 'E', value: 100 },
       { label: 'F', value: 100 }
-   ], { [EACH]: { as: Ionic } })
+   ], { [EACH]: { '-as': Ionic } })
 
 
    function add(e: any) {
@@ -123,7 +123,7 @@ export function SVGPolygonApp() {
 
 
 function AxisLabel(input: FromTag<{
-   stat: Ionized<Stat>,
+   stat: Ionic<Stat>,
    index: Ion<number>,
    total: Ion<number>
 }>) {
@@ -141,7 +141,7 @@ function AxisLabel(input: FromTag<{
 
 
 function PolyGraph({ stats }: FromTag<{
-   stats: Ionized<Stat[]>
+   stats: Ionic<Stat[]>
 }>) {
 
    const $points = Ion(() => {

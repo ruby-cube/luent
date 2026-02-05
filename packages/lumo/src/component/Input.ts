@@ -336,7 +336,7 @@ type StaticInput<D> = {
    // MaybeMarkInert<D[K]>
 }
 
-// export type MaybeMarkInert<T> = IsIonized<ExcludePrimitives<T>> extends true ? T : T extends Function ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
+// export type MaybeMarkInert<T> = IsIonic<ExcludePrimitives<T>> extends true ? T : T extends Function ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
 type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, Primitive> extends Ion ? true : false
 

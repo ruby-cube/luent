@@ -4,11 +4,9 @@ import { Ion, Ionic, EACH } from "@rue/quarky"
 // Modified Demo from Vue.js
 
 type Circle = { cx: number, cy: number, r: number }
-// type Ionic<T> = T & { '~ionic-proxy': true }
-
 
 export function CircleApp() {
-   const history = Ionic([[]] as Circle[][], { [EACH]: { as: Ionic } })
+   const history = Ionic([Ionic([] as Ionic<Circle>[])])
    const $index = Ion(0)
    const $circles = Ion(Ionic([] as Circle[]))
    const $selected = Ion(undefined as undefined | null | Ionic<Circle>)
@@ -22,7 +20,7 @@ export function CircleApp() {
          return;
       }
 
-      if (target?.tagName !== 'circle') mu: $selected.value = null
+      if ((target as HTMLElement)?.tagName !== 'circle') mu: $selected.value = null
 
       if (!$selected()) {
          $circles().push(Ionic({
@@ -52,7 +50,7 @@ export function CircleApp() {
       mu: $circles.value = clone(history[++$index.value])
    }
 
-   function clone(circles: Circle[]) {
+   function clone(circles: Ionic<Circle[]>) {
       return circles.map((circle) => Ionic({ ...circle }))
    }
 
@@ -98,17 +96,17 @@ export function CircleApp() {
                margin: 0;
                overflow: hidden;
             }
-            
+
             svg {
               width: 100vw;
               height: 100vh;
               background-color: #eee;
             }
-            
+
             circle {
                stroke: #000;
             }
-            
+
             .controls {
                position: fixed;
                top: 10px;
@@ -116,11 +114,11 @@ export function CircleApp() {
                right: 0;
                text-align: center;
             }
-            
+
             .controls button + button {
                margin-left: 6px;
             }
-            
+
             .dialog {
                position: fixed;
                top: calc(50% - 50px);
@@ -134,13 +132,13 @@ export function CircleApp() {
                text-align: center;
                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
             }
-            
+
             .dialog input {
                display: block;
                width: 200px;
                margin: 0px auto;
             }
-            
+
             .tip {
                text-align: center;
                padding: 0 50px;

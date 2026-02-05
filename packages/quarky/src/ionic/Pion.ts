@@ -8,7 +8,7 @@ import { isObject } from "@rue/utils"
 
 
 export interface PropertyHooks extends IonHooks {
-   as?: (value: unknown) => unknown
+   '-as'?: (value: unknown) => unknown;
 }
 
 /**
@@ -19,7 +19,7 @@ export interface PropertyHooks extends IonHooks {
  */
 export function createAtomicPion<T = unknown>(
    quark: AtomicPionQuark,
-   transform: ((value: unknown) => unknown) | undefined,
+   transform: ((value: any) => unknown) | undefined,
    internal: boolean = false
 ): [() => T, (value: T) => T] {
    const get = quark.castGet ? withGetHook(getState.bind(quark), quark.castGet) : function () { return getState.apply(quark) }
@@ -45,7 +45,7 @@ export function createAtomicPion<T = unknown>(
    return [$state, setState] as [() => T, (value: T) => T]
 }
 
-export function withTransform<T>(transform: (value: unknown) => unknown, get: () => unknown, set: (value: unknown) => T) {
+export function withTransform<T>(transform: (value: any) => unknown, get: () => unknown, set: (value: unknown) => T) {
    let initialState = true;
 
    function $state() {

@@ -37,21 +37,20 @@ type InvertProperties<T, ROKeys> = {
 
 type IsAbsorbedIon<K, T> = K extends `$${string}` ? T extends Ion ? true : false : false
 type IsMethod<K, T> = K extends `$${string}` ? T extends Ion ? false : false : T extends Function ? true : false
-export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized': true } ? true : false
 // T extends Ion ? false : false : T extends Function ? true : false
 
 type MaybeIonizeProperty<K, T> =
-   IsIonized<T> extends true ? T
-   : IsAbsorbedIon<K, T> extends true ? T
-   : T extends Function ? MaybeIonizedMethod<T>
-   : T extends object ? Ionized<T>
-   : T
+IsIonic<T> extends true ? T
+: IsAbsorbedIon<K, T> extends true ? T
+: T extends Function ? MaybeIonizedMethod<T>
+: T extends object ? Ionized<T>
+: T
 
-export type MaybeIonize<T> = IsIonized<T> extends true ? T
-   : T extends Function ? T
-   // : IsInert<T> extends true ? T & { inerton: true }
-   : T extends object ? Ionized<T>
-   : T
+export type MaybeIonize<T> = IsIonic<T> extends true ? T
+: T extends Function ? T
+// : IsInert<T> extends true ? T & { inerton: true }
+: T extends object ? Ionized<T>
+: T
 
 
 
@@ -59,16 +58,17 @@ export type MaybeIonize<T> = IsIonized<T> extends true ? T
 // export const Ionic = ionize
 
 
-export type ToRaw<T> = IsIonized<T> extends true ? T extends Ionized<infer R> ? R : T : T
+type ToRaw<T> = IsIonic<T> extends true ? T extends Ionized<infer R> ? R : T : T
 
 type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args: any) => any ? (ThisType<U> & { method: M })['method'] : M
 
+export type IsIonic<T> = keyof T extends never ? false : T extends { '~ionized': true } ? true : false
 /**
  * Wrap the return of a method of an ionizable class with this type helper in order to 
  * propagate any deep ionization that has been defined in the class's defineIonicCollective config
  */
-export type IonizeBy<H, T> = IsIonized<H> extends true ?
-   (T extends AnyObject ? Ionized<T> : T) : T
+// export type IonizeBy<H, T> = IsIonic<H> extends true ?
+//    (T extends AnyObject ? Ionized<T> : T) : T
 
 export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T
 
