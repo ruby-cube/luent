@@ -1,5 +1,5 @@
 import { debug } from "@rue/utils";
-import { instantUpdate, Ion, ion, QUARK } from "@rue/quarky";
+import { instantUpdate, Ion } from "@rue/quarky";
 
 
 // trafficLight.is('on') // reactive

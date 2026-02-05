@@ -13,7 +13,7 @@ Hello world, I know you’re tired of JS frameworks. You don’t need this frame
 - an API that supports encapsulation and declarative code so you create less spaghetti
 - attempts at ironing out rough edges and bug-prone patterns encountered in the four major frameworks (React, Vue, Solid, and Svelte) so you can focus on app logic instead of wrestling with the framework
 
-Our current goal is to establish an intuitive API that feels pleasant to work with. Once the API is stable, we can focus on more efficient implementations under the hood.
+Our current goal is to establish an intuitive API that feels pleasant to work with. Once the API is stable, we can focus on more efficient implementations and performance optiminations under the hood.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

@@ -29,7 +29,7 @@ export function TestListSelectTransition() {
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { as: IonicItem }, // TODO: type
+      [EACH]: { '-as': IonicItem }, // TODO: type
 
       insert(index: number) {
          const item = IonicItem({

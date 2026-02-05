@@ -27,42 +27,6 @@ export function ChatWindow(input: FromTag<{
    const $smoothScroll = Ion(false)
 
    atRemounted(() => {
-      $smoothScroll.value = false;
-      $notifyNewMessages.value = false;
-
-      queuePostlude(() => {
-         scrollToNew()
-         queuePostlude(() => {
-            $smoothScroll.value = true;
-            console.log('A smooth true')
-         })
-      })
-   })
-
-   atRemounted(async () => {
-      mu: $smoothScroll.value = false;
-      mu: $notifyNewMessages.value = false;
-
-      await postlude()
-      scrollToNew()
-
-      await tick()
-      mu: $smoothScroll.value = true;
-   })
-
-   atRemounted(() => {
-      mu: $smoothScroll.value = false;
-      mu: $notifyNewMessages.value = false;
-
-      postlude.then(() => {
-         scrollToNew()
-      })
-      tick.then(() => {
-         mu: $smoothScroll.value = true
-      })
-   })
-
-   atRemounted(ooo => {
       mu: $smoothScroll.value = false;
       mu: $notifyNewMessages.value = false;
 
