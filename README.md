@@ -21,7 +21,7 @@ Our current goal is to establish an intuitive API that feels pleasant to work wi
 Some special features include:
 - a reactivity system that’s compatible with domain models and data structures authored as JavaScript classes, regardless of the presence of private properties
 - readable async code
-- simple state machines
+- simple-to-use state machines
 
 
 
