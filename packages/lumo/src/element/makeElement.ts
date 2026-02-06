@@ -244,7 +244,6 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    }
    else {
       element.addEventListener('change', e => {
-         console.log('&&& change event', ion())
          swiftUpdate(() => {
             updateIonWithInput(ion, e)
          })
@@ -727,7 +726,6 @@ function assignStyleProperty(style: AnyObject, property: string, value: string |
       const splitValue = typeof value === 'string' ? value.split(' !importan') : undefined; // ['red', 't'] 
       const _value = String(splitValue ? splitValue[0] : value);
       if (splitValue === undefined || splitValue.length === 1) {
-         console.log('!!! style key', key, _value)
          style.setProperty(key, _value)
       }
       else {

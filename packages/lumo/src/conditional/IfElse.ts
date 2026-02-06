@@ -77,7 +77,7 @@ export class IfElseKit extends VineNode {
       public outerFlask: Flask
    ) {
       super()
-      
+
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
 
@@ -87,7 +87,6 @@ export class IfElseKit extends VineNode {
 
       watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
          if (activeIndex === prevIndex) return;
-         console.log('switch conditional!', activeIndex, this.kits)
          const kit = this.kits[activeIndex]
          if (kit.pending) {
             if (!kit.cache) {
@@ -96,7 +95,6 @@ export class IfElseKit extends VineNode {
                const output = processJSXOutput(kit.render(flask, kit.$condition))
                const count = getSuspenseCount(kit.pending)
                if (count > prevCount) {
-                  console.warn('YES AWAITED!!!')
                   kit.cache = output
                   queueTask(() => {
                      const promise = kit.pending!()
@@ -115,7 +113,6 @@ export class IfElseKit extends VineNode {
                   })
                }
                else {
-                  console.warn('NOT AWAITED')
                   kit.cache = output
                   this.switchConditional(activeIndex, prevIndex, flask)
                }

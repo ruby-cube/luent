@@ -56,7 +56,7 @@
         "./packages/ciel/index.ts"
       ],
       "@rue/dev": [
-        "packages/x-old/dev/index.ts"
+        "./packages/x-old/dev/index.ts"
       ],
       "@rue/ephemr": [
         "./packages/ephemr/index.ts"
@@ -80,7 +80,7 @@
         "./packages/flask/index.ts"
       ],
       "@rue/thread": [
-        "packages/x-old/thread/index.ts"
+        "./packages/x-old/thread/index.ts"
       ],
       "@rue/turtledom": [
         "./packages/turtledom/index.ts"

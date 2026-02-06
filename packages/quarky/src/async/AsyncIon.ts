@@ -291,10 +291,8 @@ export function AsyncIon<
    watch(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
       const awaited = toPromise(output)
       if (awaited === pendingPromise) {
-         console.warn('refetch', output, awaited, pendingPromise)
          return;
       }
-      console.warn('refetch', output, awaited, pendingPromise)
       cancelIfFetching()
       if (awaited instanceof Promise) {
          pendingPromise = awaited
@@ -308,7 +306,6 @@ export function AsyncIon<
          if (!resolve) {
             if (!suspense && !awaiting) {
                timeout = setTimeout(() => {
-                  console.log('Ion: NEW PROMISE')
                   instantUpdate(() => {
                      $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
                      pendingStart = performance.now()
@@ -335,8 +332,6 @@ export function AsyncIon<
 
          awaited
             .then(value => {
-               console.log('awaited.then', value)
-
                if (timeout !== undefined) {
                   clearTimeout(timeout)
                   timeout = undefined
@@ -350,10 +345,8 @@ export function AsyncIon<
                      resolve = null
                      reject = null
                   }
-                  console.log('Ion: (CANCELED', $promise(), "'")
                   return;
                }
-               console.warn('RESOLVED TO', value)
                pendingPromise = null;
 
                const elapsed = pendingStart ? performance.now() - pendingStart : undefined
@@ -376,12 +369,10 @@ export function AsyncIon<
                   else {
                      $ion.value = value
                   }
-                  console.log('Ion: should null promise (resolve to)', value, $promise.value, elapsed)
 
                   if ($promise.value && (elapsed && elapsed >= 250 || !elapsed)) {
                      $promise.value = null;
                      pendingStart = undefined
-                     console.log('Ion: NULL immediately')
                   }
                   $loaded.value = true
                })
@@ -394,7 +385,6 @@ export function AsyncIon<
                   }
                   timeoutResolve = setTimeout(() => {
                      instantUpdate(() => {
-                        console.log('Ion: finally NULL')
                         $promise.value = null
                         pendingStart = undefined
                      })

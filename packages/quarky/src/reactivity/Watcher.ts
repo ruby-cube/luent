@@ -86,7 +86,6 @@ export function watch<
 >(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
 
    options.retrack = options.retrack ?? true;
-   if (effect.toString().includes('promis,')) console.log('retrack?', options.retrack)
 
    const substance = asWatchedSubstance(subject, options.retrack, Boolean(options.once))
    if (options?.traceTriggers) {

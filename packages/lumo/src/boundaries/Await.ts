@@ -78,9 +78,7 @@ export function Meanwhile(renderOrOptions: ((o: Suspense) => RawJSXNode) | RawJS
 }
 
 export function Nonce(renderPlaceholder: any) {
-   console.log('Nonce')
    return Meanwhile(o => {
-      console.log('o?', o)
       return o.initial && renderPlaceholder() 
    })
 }
@@ -127,7 +125,6 @@ export function unpackAwaitSeries(series:
    const renderPlaceholder = secondKit && 'renderPlaceholder' in secondKit ? $suspense ? wrapRenderPlaceholder(secondKit.renderPlaceholder) : secondKit.renderPlaceholder : (() => undefined);
    const renderError = secondKit && 'renderError' in secondKit ? secondKit.renderError : thirdKit?.renderError ?? (() => undefined);
    const timeout = secondKit && 'timeout' in secondKit ? secondKit.timeout : undefined
-   console.log('wrap placeholder?', $suspense, secondKit)
 
    function wrapRenderPlaceholder(renderPlaceholder: RenderFunction) {
       return () => {
@@ -175,7 +172,6 @@ export function createAwaitSeries(
          //    return;
          // }
          const pending = isPending()
-         console.log('pending', pending)
          // if (pending) {
          //    $renderPlaceholder.value = true
          // }
@@ -186,11 +182,9 @@ export function createAwaitSeries(
 
          const usePlaceholder = $renderPlaceholder()
          if (usePlaceholder === pending) {
-            console.warn('use placeholder', usePlaceholder)
             return;
          }
          $renderPlaceholder.value = pending && !shouldHold()
-         console.log('$renderPlaceholder', $renderPlaceholder())
       }, { phase: PRELUDE })
    }
 
@@ -219,7 +213,6 @@ export function createAwaitSeries(
       for (const ion of ions) {
          // NOTE: Do not try to simplify this control flow. This is the flow we need.
          if ('pending' in ion) {
-            console.log('yes pending in ion')
             if (ion.pending) return true
          }
          else {
