@@ -127,11 +127,9 @@ function TreeItemView(input: FromTag<{
          </div>
          {If($isFolder,
             <ul show-if={$isOpen}>
-               {/* FIX: without div, li gets moved above list when an item is added */}
                {For(item.children ?? [], m => m, item => (
-                     <TreeItemView item={item}></TreeItemView>
+                  <TreeItemView item={item}></TreeItemView>
                ))}
-               <div>hi</div>
                <li class='add' on:click={e => item.addChild(IonicTreeItem({ name: 'stuff' }))}>+</li>
             </ul>
          )}

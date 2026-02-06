@@ -155,11 +155,15 @@ function toString(value: any) {
 
 
 export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | null | undefined, parent: DOMParent | null | undefined) {
+   console.warn('mounting fragment')
    if (preceding && preceding !== parent) {
+      console.log('preceding | fragment')
       preceding.after(fragment)
    }
    else
-      parent?.append(fragment)
+      console.log('parent | fragment')
+   
+      parent?.prepend(fragment)
 }
 
 export type DOMParent = { appendChild(node: Node): Node, innerHTML: string, append: (...nodes: (Node | string)[]) => void } & DOMNode

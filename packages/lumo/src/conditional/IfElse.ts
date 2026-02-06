@@ -77,7 +77,7 @@ export class IfElseKit extends VineNode {
       public outerFlask: Flask
    ) {
       super()
-
+      
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
 

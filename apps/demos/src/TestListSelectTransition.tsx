@@ -148,6 +148,7 @@ export function TestListSelectTransition() {
             </div>
 
             <div style='width: 20vw; list-style-type: none;'>
+               <button>click me N</button>
                {For($listClone, (item, $index) =>
                   <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                      <li>
@@ -156,6 +157,7 @@ export function TestListSelectTransition() {
                      <p>{$index}</p>
                   </div>
                )}
+               <button>click me S</button>
             </div>
             {Style`
                .transition-position {

@@ -31,8 +31,10 @@ export class ListKit extends VineNode {
    ) {
       super()
       this.nodes = this.render($list(), renderItem);
+      console.log("LIST VINE NODE", this)
       watchToRender($list, ({ current: newList }) => {
          this.nodes = this.rerender(newList, renderItem)
+         console.log("LIST VINE NODE", this)
       })
    }
 
