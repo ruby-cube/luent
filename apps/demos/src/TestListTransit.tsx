@@ -54,33 +54,33 @@ export function TestListTransit() {
             <h2>done</h2>
             <TodoList todos={($todos().filter((t) => t.done))} can:remove={remove} />
          </div>
-         {Style`
-            .board {
-               display: grid;
-               grid-template-columns: 1fr 1fr;
-               grid-column-gap: 1em;
-               max-width: 36em;
-               margin: 0 auto;
-	         }
-
-	         .board > input {
-               font-size: 1.4em;
-               grid-column: 1/3;
-               padding: 0.5em;
-               margin: 0 0 1rem 0;
-	         }
-
-            h2 {
-               font-size: 2em;
-               font-weight: 200;
-	         }
-
-            .transition-position {
-               transition: transform 150ms ease-in-out;
-            }
-         `}
       </div>
    )
+      .css`
+         .board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-column-gap: 1em;
+            max-width: 36em;
+            margin: 0 auto;
+         }
+
+         .board > input {
+            font-size: 1.4em;
+            grid-column: 1/3;
+            padding: 0.5em;
+            margin: 0 0 1rem 0;
+         }
+
+         h2 {
+            font-size: 2em;
+            font-weight: 200;
+         }
+
+         .transition-position {
+            transition: transform 150ms ease-in-out;
+         }
+      `
 }
 
 const sent = new Map()
@@ -141,24 +141,24 @@ function TodoList(input: FromTag<{
                </label>
             </li>
          ))}
-         {Style`
-   	      label {
-            	width: 100%;
-            	height: 100%;
-            	display: flex;
-            }
-
-            span {
-            	flex: 1;
-            }
-
-            button {
-               border: none;
-               background-color: transparent
-            }
-         `}
       </ul>
    )
+      .css`
+   	   label {
+         	width: 100%;
+         	height: 100%;
+         	display: flex;
+         }
+
+         span {
+         	flex: 1;
+         }
+
+         button {
+            border: none;
+            background-color: transparent
+         }
+      `
 }
 
 

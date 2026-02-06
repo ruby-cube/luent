@@ -97,33 +97,32 @@ export function TrafficLight() {
          >
             break
          </button>
-
-         {Style`
-            *,
-            *::before,
-            *::after {
-              box-sizing: border-box;
-            }
-
-            button {
-               margin: 10px 5px
-            }
-
-            .traffic-light-container {
-               margin-top: 50px;
-              background-color: black; 
-              width: 100px; 
-              height: 300px;
-              padding: 10px;
-            }
-
-            .light {
-              width: 80px; 
-              height: 80px;
-              border-radius: 50%;
-              margin-bottom: 10px;
-            }
-         `}
       </div>
-   );
+   )
+      .css`
+         *,
+         *::before,
+         *::after {
+           box-sizing: border-box;
+         }
+         
+         button {
+            margin: 10px 5px
+         }
+         
+         .traffic-light-container {
+            margin-top: 50px;
+           background-color: black; 
+           width: 100px; 
+           height: 300px;
+           padding: 10px;
+         }
+         
+         .light {
+           width: 80px; 
+           height: 80px;
+           border-radius: 50%;
+           margin-bottom: 10px;
+         }
+      `
 }

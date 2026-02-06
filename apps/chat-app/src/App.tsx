@@ -36,16 +36,15 @@ export function FriendSite() {
          {If($connected,
             <RouteView as={$route}></RouteView>
          )}
-
-         {Style`
-            #app {
-              font-family: Avenir, Helvetica, Arial, sans-serif;
-              -webkit-font-smoothing: antialiased;
-              -moz-osx-font-smoothing: grayscale;
-            }
-         `}
       </>
    )
+      .css`
+         #app {
+           font-family: Avenir, Helvetica, Arial, sans-serif;
+           -webkit-font-smoothing: antialiased;
+           -moz-osx-font-smoothing: grayscale;
+         }
+      `
 }
 
 

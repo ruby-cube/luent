@@ -15,7 +15,7 @@ import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
 import { TreeApp } from "./TestTreeApp"
 
-const app = createRoot(TreeApp)
+const app = createRoot(TestListTransit)
 
 app.mount('#root')
 

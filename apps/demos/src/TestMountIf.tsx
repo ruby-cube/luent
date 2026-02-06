@@ -167,64 +167,59 @@ export function TestMountIf() {
                </div>
             )}
          </div>
-         {Style`
-
-            .container {
-               overflow: hidden;
-            }
-
-            .fade-in-active {
-               transition: opacity var(--fade-in-duration) var(--fade-in-timing);
-            }
-
-            .fade-out-to-0 {
-               opacity: 0;
-               transition: opacity var(--fade-out-duration) var(--fade-out-timing);
-            }
-
-            .fade-in-from-0 {
-               opacity: 0;
-            }
-
-            .cancel-transition {
-               opacity: 0;
-               transition: opacity 500ms;
-            }
-
-
-@keyframes fade-in {
-   from {
-      opacity: 0;
-   }
-
-   to {
-      opacity: 1;
-   }
-}
-
-@keyframes fade-out {
-   from {
-      opacity: 1;
-   }
-
-   to {
-      opacity: 0;
-   }
-}
-
-.animate-out {
-   animation: fade-out 2000ms ease-in;
-}
-
-.animate-in {
-   animation: fade-in 2000ms ease-in;
-}
-
-.cancel-animation {
- animation: fade-out 500ms ease-in;
-}
-
-         `}
       </div>
    )
+      .css`
+         .container {
+            overflow: hidden;
+         }
+
+         .fade-in-active {
+            transition: opacity var(--fade-in-duration) var(--fade-in-timing);
+         }
+
+         .fade-out-to-0 {
+            opacity: 0;
+            transition: opacity var(--fade-out-duration) var(--fade-out-timing);
+         }
+
+         .fade-in-from-0 {
+            opacity: 0;
+         }
+
+         .cancel-transition {
+            opacity: 0;
+            transition: opacity 500ms;
+         }
+
+         @keyframes fade-in {
+            from {
+               opacity: 0;
+            }
+            to {
+               opacity: 1;
+            }
+         }
+
+         @keyframes fade-out {
+            from {
+               opacity: 1;
+            }
+            to {
+               opacity: 0;
+            }
+         }
+
+         .animate-out {
+            animation: fade-out 2000ms ease-in;
+         }
+
+         .animate-in {
+            animation: fade-in 2000ms ease-in;
+         }
+
+         .cancel-animation {
+          animation: fade-out 500ms ease-in;
+         }
+      `
 }

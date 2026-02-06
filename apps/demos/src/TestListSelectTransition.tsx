@@ -159,40 +159,40 @@ export function TestListSelectTransition() {
                )}
                <button>click me S</button>
             </div>
-            {Style`
-               .transition-position {
-                  transition: transform 150ms ease-in-out;
-               }
-
-               @keyframes fade-in {
-                  from {
-                     opacity: .25;
-                  }
-                  to {
-                     opacity: 1;
-                  }
-               }
-
-               @keyframes fade-out {
-                  from {
-                     opacity: 1;
-                  }
-                  to {
-                     opacity: 0;
-                  }
-               }
-
-               .animate-out {
-                  animation: fade-out 2ms ease-in;
-               }
-
-               .animate-in {
-                  animation: fade-in 2ms ease-in;
-               }
-            `}
          </div>
       </>
    )
+      .css`
+         .transition-position {
+            transition: transform 150ms ease-in-out;
+         }
+         
+         @keyframes fade-in {
+            from {
+               opacity: .25;
+            }
+            to {
+               opacity: 1;
+            }
+         }
+         
+         @keyframes fade-out {
+            from {
+               opacity: 1;
+            }
+            to {
+               opacity: 0;
+            }
+         }
+         
+         .animate-out {
+            animation: fade-out 2ms ease-in;
+         }
+         
+         .animate-in {
+            animation: fade-in 2ms ease-in;
+         }
+      `
 }
 
 

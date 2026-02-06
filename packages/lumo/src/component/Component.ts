@@ -6,6 +6,7 @@ import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRe
 import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
+import { Style } from "./Style";
 
 
 
@@ -30,13 +31,22 @@ type JSXTemplate = RawJSXNode
 // compiler macro to transform jsx template into render function
 export function component(template: JSXTemplate) {
    const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
+   function ref<T extends AnyObject | undefined = AnyObject | undefined>(component: T) {
+      return {
+         exposed: component,
+         jsxNodes
+      }
+   }
    return {
       exposed: undefined, // TODO: make read only
       jsxNodes,
-      expose<T extends AnyObject | undefined = AnyObject | undefined>(exposed: T) {
+      ref,
+      css: (strings: TemplateStringsArray, ...values: string[]) => {
+         Style(strings, ...values)
          return {
-            exposed,
-            jsxNodes
+            exposed: undefined,
+            jsxNodes,
+            ref
          }
       }
    }
@@ -104,7 +114,7 @@ export function makeComponent(
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.exposed ?? {}
    if (ref) {
-     if (isObject(ref) && 'arr' in ref) {
+      if (isObject(ref) && 'arr' in ref) {
          setUpNodeRefs(publicComponent, ref.arr, normalizeToArray(ref.i))
       }
       else {

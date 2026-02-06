@@ -1,4 +1,4 @@
-import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted } from "@rue/lumo"
+import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
 
 // Modified Demo from Vue.js
@@ -79,38 +79,37 @@ export function CellsApp() {
                ))}
             </tbody>
          </table >
-
-         {Style`
-            body {
-               margin: 0;
-            }
-
-            table {
-               border - collapse: collapse;
-               table-layout: fixed;
-               width: 100%;
-            }
-
-            th {
-               background - color: #eee;
-            }
-
-            tr:first-of-type th {
-               width: 100px;
-            }
-
-            tr:first-of-type th:first-of-type {
-               width: 25px;
-            }
-
-            td {
-               border: 1px solid #ccc;
-               height: 1.5em;
-               overflow: hidden;
-            }
-         `}
       </>
    )
+      .css`
+         body {
+            margin: 0;
+         }
+
+         table {
+            border - collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
+         }
+
+         th {
+            background - color: #eee;
+         }
+
+         tr:first-of-type th {
+            width: 100px;
+         }
+
+         tr:first-of-type th:first-of-type {
+            width: 25px;
+         }
+
+         td {
+            border: 1px solid #ccc;
+            height: 1.5em;
+            overflow: hidden;
+         }
+      `
 }
 
 
@@ -129,39 +128,38 @@ function Cell(input: FromTag<{
    }
 
    return component(
-      <>
-         <div class="cell" title={$value} on:click={e => { mu: $editing.value = true }}>
-            {If($editing,
-               <input
-                  value={$value}
-                  on:change={update}
-                  on:blur={update}
-                  at:mounted={el => el.focus()}
-               />
-            )}
-            {Else(
-               <span>{calcCellValue($value())}</span>
-            )}
-         </div >
-
-         {Style`
-               .cell, .cell input {
-                  height: 1.5em;
-               line-height: 1.5;
-               font-size: 15px;
-   }
-
-               .cell span {
-                  padding: 0 6px;
-   }
-
-               .cell input {
-                  width: 100%;
-               box-sizing: border-box;
-   }`
+      <div class="cell" title={$value} on:click={e => { mu: $editing.value = true }}>
+         {If($editing,
+            <input
+               value={$value}
+               on:change={update}
+               on:blur={update}
+               at:mounted={el => el.focus()}
+            />
+         )}
+         {Else(
+            <span>{calcCellValue($value())}</span>
+         )}
+      </div >
+   )
+      .css`
+         .cell, .cell input {
+            height: 1.5em;
+            line-height: 1.5;
+            font-size: 15px;
          }
-      </>)
+
+         .cell span {
+            padding: 0 6px;
+         }
+
+         .cell input {
+            width: 100%;
+            box-sizing: border-box;
+         }
+      `
 }
+
 
 
 
