@@ -121,7 +121,6 @@ export function setUpNodeRefs(node: any, root: any[], indices: Index[]) {
       const index = toValue(indices[i])
 
       const nestedArray = i === indices.length - 1 ? undefined : array[index] ?? (array[index] = [])
-      console.warn('i', i, indices.length, i === indices.length - 1 )
       setUpLevel(i === indices.length - 1 ? node : nestedArray, array, indices[i])
       array = nestedArray
    }

@@ -102,7 +102,7 @@ export function TestListSelectTransition() {
    return component(
       <>
          <h1>hello world</h1>
-         <div style='display: grid; grid-template-columns: 1fr 1fr; width: 50vw; place-items: center; align-items: start'>
+         <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>
             <div style='width: 20vw'>
                <div ref={$container} class="list" style="list-style-type: none;">
                   <div on:click={e => insertItem(0)} style="background-color: gray; cursor: pointer">
@@ -148,7 +148,6 @@ export function TestListSelectTransition() {
             </div>
 
             <div style='width: 20vw; list-style-type: none;'>
-               <button>click me N</button>
                {For($listClone, (item, $index) =>
                   <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                      <li>
@@ -157,12 +156,15 @@ export function TestListSelectTransition() {
                      <p>{$index}</p>
                   </div>
                )}
-               <button>click me S</button>
             </div>
          </div>
       </>
    )
       .css`
+         body {
+            overflow-y: scroll
+         }
+
          .transition-position {
             transition: transform 150ms ease-in-out;
          }
