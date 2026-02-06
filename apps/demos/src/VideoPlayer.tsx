@@ -189,7 +189,7 @@ function ElapsedBar(input: FromTag<{
 
    return component(
       <div class="elapsed"
-         on:click={e => (console.log("click", emit("click", e)))}
+         on:click={e => emit("click", e)}
       >
          <div
             class="elapsed-bar"
