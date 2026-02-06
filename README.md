@@ -9,7 +9,7 @@
 ## Overview
 
 Hello world, I know you’re tired of JS frameworks. You don’t need this framework, but at the very least what you’ll find here is:
-- an exploration of poetic abstractions and intuitive mental models that unify various aspects of reactivity and reduce cognitive load
+- an exploration of intuitive abstractions and mental models that unify various aspects of reactivity and reduce cognitive load
 - an API that supports encapsulation and declarative code so you create less spaghetti
 - attempts at ironing out rough edges and bug-prone patterns encountered in the four major frameworks (React, Vue, Solid, and Svelte) so you can focus on app logic instead of wrestling with the framework
 
@@ -21,7 +21,7 @@ Our current goal is to establish an intuitive API that feels pleasant to work wi
 Some special features include:
 - a reactivity system that’s compatible with domain models and data structures authored as JavaScript classes, regardless of the presence of private properties
 - readable async code
-- easy-to-write state machines
+- simple state machines
 
 
 

@@ -2,11 +2,7 @@ import { component, fromGlobal, fromRoot, If, Style } from "@rue/lumo";
 import { Router } from "./router";
 import { Ion, Ionized } from "@rue/quarky";
 import { User } from "./commons/keys";
-import { WelcomeView } from "./components/WelcomeView";
-import { Chatroom } from "./components/Chatroom";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
-import { FriendApp } from "./components/FriendApp";
-import { getClosestCommons } from "../../../packages/lumo/src/context/context-stack";
 
 // TODO: Figure out how to provide user
 

@@ -1,5 +1,5 @@
 import { component, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
-import { EACH, Ion, Ionic, Nested, } from "@rue/quarky";
+import { as, EACH, Ion, Ionic, Nested, } from "@rue/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
 
@@ -53,15 +53,15 @@ type IonicTreeItem = Ionic<TreeItem, Nested<{ children: Ionic<IonicTreeItem[]> |
 
 function IonicTreeItem(item: TreeItemData | TreeItem) {
    if (item instanceof TreeItem) {
-      return Ionic(item, { children: { '-as': IonicChildren } })
+      return Ionic(item, { children: as(IonicChildren) })
    }
-   return Ionic(new TreeItem(item.name, TreeChildren(item.children)), { children: { '-as': IonicChildren } })
+   return Ionic(new TreeItem(item.name, TreeChildren(item.children)), { children: as(IonicChildren) })
 }
 
 function IonicChildren(children: TreeItem[] | undefined): Ionic<IonicTreeItem[]> | undefined {
    if (!children) return undefined;
    return Ionic(children, {
-      [EACH]: { '-as': IonicTreeItem }
+      [EACH]: as(IonicTreeItem)
    })
 }
 

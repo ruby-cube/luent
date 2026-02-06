@@ -1,5 +1,5 @@
 import { component, For, FromTag, Style } from "@rue/lumo";
-import { EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
+import { as, EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 import { transitionExisting } from "./TestListSelectTransition";
 
@@ -19,7 +19,7 @@ export function TestListTransit() {
       { id: 4, done: false, description: 'mow the lawn' },
       { id: 5, done: false, description: 'feed the turtle' },
       { id: 6, done: false, description: 'fix some bugs' }
-   ], { [EACH]: { '-as': Ionic } }));
+   ], { [EACH]: as(Ionic) }));
 
    let uid = $todos().length + 1;
 

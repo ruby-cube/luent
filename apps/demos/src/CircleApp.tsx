@@ -57,7 +57,6 @@ export function CircleApp() {
    return component(
       <>
          <svg on:click={e => reClick(e as any as MouseEvent)}>
-            {/* <svg on:click={(e) => { handleClick.svg(e) }}> */}
             <foreignObject x="0" y="40%" width="100%" height="200">
                <p class="tip">
                   Click on the canvas to draw a circle. Click on a circle to select it.
@@ -71,7 +70,6 @@ export function CircleApp() {
                   r={circle.$r}
                   fill={(circle === $selected() ? '#ccc' : '#fff')}
                   on:click={e => { mu: $selected.value = circle }}
-                  // on:click={e => { handleClick.circle(circle) }}
                   on:contextmenu={e => (e.preventDefault(), adjust(circle))}
                ></circle>)
             )}

@@ -1,5 +1,5 @@
 import { component, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, EACH, $_derivation } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH } from "@rue/quarky"
 
 interface Todo {
    id: number

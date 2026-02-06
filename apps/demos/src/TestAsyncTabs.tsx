@@ -2,7 +2,7 @@ import { instantUpdate, Ion, swiftUpdate, Interval } from "@rue/quarky";
 import "./TestAsyncTabs.css";
 import { Await, Meanwhile, component, Else, ElseIf, FromTag, If } from "@rue/lumo";
 
-// Demo from Solid.js 
+// Modified Demo from Solid.js 
 
 export function TestAsyncTabs() {
    const $tab = Ion(0);

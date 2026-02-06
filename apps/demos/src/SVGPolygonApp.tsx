@@ -20,7 +20,7 @@ export function SVGPolygonApp() {
       { label: 'D', value: 100 },
       { label: 'E', value: 100 },
       { label: 'F', value: 100 }
-   ], { [EACH]: { '-as': Ionic } })
+   ], { [EACH]: Ionic })
 
 
    function add(e: any) {
@@ -69,23 +69,23 @@ export function SVGPolygonApp() {
            fill: #42b983;
            opacity: 0.75;
          }
-      
+
          circle {
            fill: transparent;
            stroke: #999;
          }
-      
+
          text {
            font-size: 10px;
            fill: #666;
          }
-      
+
          label {
            display: inline-block;
            margin-left: 10px;
            width: 20px;
          }
-      
+
          #raw {
            position: absolute;
            top: 0;

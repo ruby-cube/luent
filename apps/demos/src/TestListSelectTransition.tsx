@@ -1,7 +1,7 @@
 import { component, For, listen, NodeRef, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
-import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic } from "@rue/quarky";
+import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic, as } from "@rue/quarky";
 
 class ListItem {
    constructor(
@@ -29,7 +29,7 @@ export function TestListSelectTransition() {
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { '-as': IonicItem },
+      [EACH]: as(IonicItem),
 
       insert(index: number) {
          const item = IonicItem({
@@ -166,7 +166,7 @@ export function TestListSelectTransition() {
          .transition-position {
             transition: transform 150ms ease-in-out;
          }
-         
+
          @keyframes fade-in {
             from {
                opacity: .25;
@@ -175,7 +175,7 @@ export function TestListSelectTransition() {
                opacity: 1;
             }
          }
-         
+
          @keyframes fade-out {
             from {
                opacity: 1;
@@ -184,11 +184,11 @@ export function TestListSelectTransition() {
                opacity: 0;
             }
          }
-         
+
          .animate-out {
             animation: fade-out 2ms ease-in;
          }
-         
+
          .animate-in {
             animation: fade-in 2ms ease-in;
          }
