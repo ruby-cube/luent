@@ -13,7 +13,10 @@ import { TestSimpleCounter } from "./TestSimpleCounter"
 import { TodoMVC } from "./TodoMVC"
 import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
+import { TreeApp } from "./TestTreeApp"
 
-const app = createRoot(SVGPolygonApp)
+const app = createRoot(TestListSelectTransition)
 
 app.mount('#root')
+
+

@@ -17,7 +17,7 @@ import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { TestListSelect } from './wip-demos/TestListSelect';
 import { TabApp } from './wip-demos/markdown-app/TestTabs';
-import { TreeApp } from './wip-demos/tree-view';
+import { TreeApp } from '../../demos/src/TestTreeApp';
 import { SortableTableApp } from './wip-demos/sortable-table';
 import { TestEffectCycle } from './TestEffectCycle';
 import { TestShow } from './TestShow';

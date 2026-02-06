@@ -36,6 +36,8 @@ type Methods<M> = Expand<{
    [K in keyof M as M[K] extends Function ? K : never]: M[K]
 }>
 
+export type Nested<T> = { [K in keyof T]: { '-as': () => T[K] } }
+
 // TODO: Ionizing types with non-object intersections
 export type Ionic<T, M = {}> = T extends any[] ?
    Ionize<Expand<{

@@ -4,6 +4,7 @@ import { AnyObject } from "@rue/types";
 import { atUnmount } from "../flask/flask-hooks";
 import { getFlask } from "@rue/flask";
 import { isFunction } from "@rue/utils";
+import { ro } from "date-fns/locale";
 
 
 type Nodes = any[] | Nodes[]
@@ -118,7 +119,9 @@ export function setUpNodeRefs(node: any, root: any[], indices: Index[]) {
    let array = root;
    for (let i = 0; i < indices.length; i++) {
       const index = toValue(indices[i])
-      const nestedArray = array[index] ?? (array[index] = [])
+
+      const nestedArray = i === indices.length - 1 ? undefined : array[index] ?? (array[index] = [])
+      console.warn('i', i, indices.length, i === indices.length - 1 )
       setUpLevel(i === indices.length - 1 ? node : nestedArray, array, indices[i])
       array = nestedArray
    }

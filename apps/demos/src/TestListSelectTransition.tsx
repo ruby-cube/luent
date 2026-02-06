@@ -69,7 +69,7 @@ export function TestListSelectTransition() {
 
       // temporary till Transition API implemented
       queuePrelude(() =>
-         transitionExisting(itemDivs)
+         transitionExisting(itemDivs, index)
       )
    }
 
@@ -114,7 +114,7 @@ export function TestListSelectTransition() {
                   {For(list, m => m.id, (item, $index) => (
                      <div
                         ref={{ arr: itemDivs, i: $index }}
-                        at:mounted={node => { transitionNew(node)}}
+                        at:mounted={node => { transitionNew(node) }}
                         at:unmount={node => { transitionOut(node, $container()!); transitionExisting(itemDivs, $index()) }}
                      >
                         <div
@@ -211,7 +211,6 @@ export function transitionExisting(itemDivs: HTMLElement[], removedIndex?: numbe
          continue;
       }
       const node = itemDivs[i]
-      console.log('%%% node', node, i)
       const rect = node.getBoundingClientRect()
       rects.push(rect)
       nodes.push(node)

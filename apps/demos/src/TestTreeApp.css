@@ -5,3 +5,6 @@
  .bold {
    font-weight: bold;
  }
+ #root {
+    text-align: left;
+ }
