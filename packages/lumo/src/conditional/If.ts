@@ -31,7 +31,6 @@ export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T
 export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, activationType: ActivationType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
 export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RenderConditional<T> | RawJSXNode | ActivationType | (() => Promise<any> | null), renderConditional?: RenderConditional<T> | RawJSXNode): ConditionalKit {
    const [render, type, pending] = getParams(typeOrRenderConditional, renderConditional)
-   console.log('>>> pending', pending)
    return {
       statementType: 'if',
       render,

@@ -7,9 +7,9 @@ import { isObject } from "@rue/utils"
 
 
 
-export interface PropertyHooks extends IonHooks {
+export type PropertyHooks = {
    '-as'?: (value: unknown) => unknown;
-}
+} & IonHooks
 
 /**
  * NOTE: We auto-transform only for initial values to 

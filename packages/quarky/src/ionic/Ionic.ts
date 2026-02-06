@@ -33,10 +33,10 @@ type IonAccess<T, M = {}> = Expand<{
 }>
 
 type Methods<M> = Expand<{
-   [K in keyof M as M[K] extends { '~ionizer': true } ? never : M[K] extends Function ? K : never]: M[K]
+   [K in keyof M as M[K] extends Function ? K : never]: M[K]
 }>
 
-export type Nested<T> = { [K in keyof T]: {'-as': (arg: any) => T[K] }}
+export type Nested<T> = { [K in keyof T]: { '-as': (arg: any) => T[K] } }
 
 // TODO: Ionizing types with non-object intersections
 export type Ionic<T, M = {}> = T extends any[] ?
@@ -48,15 +48,11 @@ export type Ionic<T, M = {}> = T extends any[] ?
    } & IonAccess<T, M> & Methods<M>>>>
 
 type NestedType<K, M, V> = K extends keyof M
-   ? M[K] extends { '~Ionic': true } ? Ionic<V>
-   : M[K] extends ((arg: any) => infer R) & { '~ionizer': true } ? R
-   : M[K] extends { '-as': infer N } ? N extends { '~Ionic': true } ? Ionic<V> : N extends ((arg: any) => infer R) ? R : N
+   ? M[K] extends { '-as': infer N } ? N extends { '~Ionic': true } ? Ionic<V> : N extends ((arg: any) => infer R) ? R : N
    : V
    : K extends number
    ? M extends { [EACH]: infer O }
-   ? O extends { '~Ionic': true } ? Ionic<V>
-   : O extends (arg: any) => infer R ? R
-   : O extends { '-as': infer N } ? N extends { '~Ionic': true } ? Ionic<V> : N extends (arg: any) => infer R ? R : N
+   ? O extends { '-as': infer N } ? N extends { '~Ionic': true } ? Ionic<V> : N extends (arg: any) => infer R ? R : N
    : V
    : V
    : V
@@ -67,8 +63,8 @@ type NestedType<K, M, V> = K extends keyof M
  * @param ionizer 
  * @returns 
  */
-export function as<T>(ionizer: T & ((data: any) => any)): T & { '~ionizer': true } {
-   return ionizer as T & { '~ionizer': true }
+export function as<T>(ionizer: T & ((data: any) => any)): { '-as': T } {
+   return { '-as': ionizer }
 }
 
 export const INTERNAL_OP = "[[INTERNAL]]"
@@ -106,9 +102,8 @@ type IonicPropertyConfig<P = any> = {
    '@get'?: (value: P) => void, // TODO: needs to be ReturnType of '-as' function if there is an as function
    '@set'?: (value: P) => void // TODO: needs to be ReturnType of '-as' function if there is an as function
 }
-type IonicConfig<T> = { [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I : never> | Ionizer<T extends (infer I)[] ? I : never> }
+type IonicConfig<T> = { [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I : never> }
 
-type Ionizer<T> = (data: T) => AnyObject
 
 export const Ionic = _Ionic as typeof _Ionic & { '~Ionic': true }
 export const asIonic = Ionic as <T>(obj: T) => IonicProxy & T

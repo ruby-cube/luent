@@ -120,14 +120,14 @@ function TreeItemView(input: FromTag<{
             on:click={e => $isOpen.toggle()}
             on:dblclick={changeType}
          >
-            {(item.name)}
+            {item.$name}
             {If($isFolder,
                <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
          </div>
          {If($isFolder,
             <ul show-if={$isOpen}>
-               {For(item.children ?? [], m => m, item => (
+               {For(item.children!, m => m, item => (
                   <TreeItemView item={item}></TreeItemView>
                ))}
                <li class='add' on:click={e => item.addChild(IonicTreeItem({ name: 'stuff' }))}>+</li>

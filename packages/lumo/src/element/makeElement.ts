@@ -12,7 +12,7 @@ import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
-import { NodeRefsConfig, setUpNodeRefs, setUpNodesArray } from "../node/NodeRefs";
+import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { $Index } from "../iteratives/List";
 
 
@@ -297,7 +297,6 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
       )
    }
    else if ('value' in ion) {
-      console.log('))) updateIonWithInput')
       ion.value =
          //@ts-expect-error
          e.currentTarget?.[key];
@@ -359,8 +358,9 @@ function setAttribute(node: AnyObject, attribute: string, value: any) {
 
    if (isBooleanAttribute(attribute)) {
       const _value = Boolean(value)
-      if (_value === false) node.removeAttribute(attribute)
-      else node.setAttribute(attribute, _value)
+      // if (_value === false) node.removeAttribute(attribute)
+      // else node.setAttribute(attribute, _value)
+         node[attribute] = _value
    }
    else if (node instanceof SVGElement || isAttributeOnly(attribute)) {
       node.setAttribute(attribute, toString(value) ?? '')
@@ -528,7 +528,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
                node.addEventListener(key, cb, options);
             },
             remove: (cb) => {
-               console.trace('^^^ removing inline event listener', handler)
+               // console.trace('^^^ removing inline event listener', handler)
                node.removeEventListener(key, cb, options);
             }
          })

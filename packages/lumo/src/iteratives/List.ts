@@ -31,10 +31,8 @@ export class ListKit extends VineNode {
    ) {
       super()
       this.nodes = this.render($list(), renderItem);
-      console.log("LIST VINE NODE", this)
       watchToRender($list, ({ current: newList }) => {
          this.nodes = this.rerender(newList, renderItem)
-         console.log("LIST VINE NODE", this)
       })
    }
 
@@ -55,7 +53,6 @@ export class ListKit extends VineNode {
 
    private rerender(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
       if (!list) list = []
-      console.log('rerendering list') // FIX: Why is this running twice?
       const prevItems = this.prevItems;
       const prevKits = this.nodes! as ListItemKit[];
       const kits: ListItemKit[] = []
@@ -84,7 +81,6 @@ export class ListKit extends VineNode {
          // existing item
          if (kit) {
             const { $index } = kit
-            console.log('existing item', $index.value, '=>', i)
             $index.value = i
             $index.dataLength = list.length;
             if (kit.preceding !== preceding || i === 0) {
@@ -114,11 +110,11 @@ export class ListKit extends VineNode {
 
       updateLCS(sequences.at(-1))
 
-      console.log('$$$@ lcsStart', lcsStart)
-      console.log('$$$@ lcsLength', lcsLength)
-      console.log('$$$@ sequences', sequences)
+      // console.log('$$$@ lcsStart', lcsStart)
+      // console.log('$$$@ lcsLength', lcsLength)
+      // console.log('$$$@ sequences', sequences)
 
-      console.log('qIR rerendering list')
+      // console.log('qIR rerendering list')
       // TODO: Can we make this call more efficient??
       
       // remove DOMNodes
@@ -128,7 +124,6 @@ export class ListKit extends VineNode {
          const uid = this.getUID(kit.item)
          if (!currentItems.has(uid)) {
             const { $index } = kit
-            console.log('existing item', $index.value, '=>', i)
             $index.value = -1;
             $index.dataLength = list.length;
             queueInternalRender(() => {

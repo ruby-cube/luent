@@ -1,5 +1,5 @@
 import { component, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, EACH } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH, as } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -11,21 +11,23 @@ type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 type FilterKeys = 'all' | 'active' | 'completed'
 
-const IonicTodos = (todos: Todo[]) => Ionic(todos, { [EACH]: { as: Ionic } })
+type IonicTodo = Ionic<Todo>
+
+const IonicTodos = (todos: Todo[]) => Ionic(todos, { [EACH]: as(Ionic) })
 
 export function TodoMVC() {
 
    const $todos = Ion(IonicTodos(getTodos()))
    const $view = Ion('all' as keyof typeof filters)
 
-   const $filteredTodos = Ion(() => filters[$view()]($todos()))
+   const $filteredTodos = Ion(() => IonicTodos(filters[$view()]($todos())))
    const $remaining = Ion(() => filters.active($todos()).length)
    const $todoCount = Ion(() => $todos().length)
 
    const filters = {
-      all: (todos: Ionic<Todo[]>) => todos,
-      active: (todos: Ionic<Todo[]>) => todos.filter(todo => !todo.completed),
-      completed: (todos: Ionic<Todo[]>) => todos.filter(todo => todo.completed)
+      all: (todos: Todo[]) => todos,
+      active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
+      completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
    }
 
 
@@ -70,7 +72,7 @@ export function TodoMVC() {
    }
 
    function removeCompleted() {
-      $todos.value = filters.active($todos())
+      $todos.value = IonicTodos(filters.active($todos()))
    }
 
 

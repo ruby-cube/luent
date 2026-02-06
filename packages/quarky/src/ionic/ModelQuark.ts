@@ -114,10 +114,10 @@ export class ModelQuark implements Atom {
       const hooks = this.extension
       if (hooks && EACH in hooks && hooks[EACH]) {
          const each = hooks[EACH]
-         if ('-as' in each && each['-as']) {
-            this.initEach(each['-as'])
-            // delete each.as
-         }
+         const transform = each['-as']
+         if (each instanceof Function) console.error(`Failed to ionize nested items. Must pass ionizer in config object, e.g. { '-as': Ionic } or use as() helper`)
+         if (transform) this.initEach(transform)
+         // delete each.as
          if ('@get' in each || '@set' in each) this.overrideGetHooks()
       }
    }
@@ -399,12 +399,16 @@ export class ModelQuark implements Atom {
          triggerAll
       }) : _setter;
 
-      const { '-as': transform, '@get': castGet, '@set': castSet } = (this.getHooks(valueKey) ?? {}) as PropertyHooks
+      const hooks = (this.getHooks(valueKey) ?? {}) as PropertyHooks
+      if (hooks instanceof Function) console.error(`Failed to ionize nested object, ${valueKey.toString()}. Must pass ionizer in config object, e.g. { '-as': Ionic } or use as() helper`)
+      const transform = hooks["-as"]
+      const castGet = hooks["@get"]
+      const castSet = hooks["@set"]
 
       const getWithHook = castGet ? withGetHook(get, castGet) : get;
       const setWithHook = castSet ? withSetHook<boolean>(set, castSet, () => this.state.get()[valueKey]) : set;
 
-      const [getter, setter] = transform  ? withTransform(transform, getWithHook, setWithHook) : [getWithHook, setWithHook]
+      const [getter, setter] = transform ? withTransform(transform, getWithHook, setWithHook) : [getWithHook, setWithHook]
 
       const state = {
          get: getter,
