@@ -99,12 +99,14 @@ export function TestListSelectTransition() {
    const $container = NodeRef('div')
    const itemDivs: HTMLElement[] = []
 
+   // {{ [m.list]: $active, '.': [m.dark, m.selectedList] }}
+
    return component(
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>
             <div style='width: 20vw'>
-               <div ref={$container} class="list" style="list-style-type: none;">
+               <div ref={$container} class='list' style="list-style-type: none;">
                   <div on:click={e => insertItem(0)} style="background-color: gray; cursor: pointer">
                      +
                   </div>
@@ -128,7 +130,7 @@ export function TestListSelectTransition() {
                            </p>
 
                            <li on:click={e => item.changeContent()}>
-                              {item.$content}
+                              {() => item.$content()}
                            </li>
                            <p>{$index}</p>
                            <div on:click={e => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">

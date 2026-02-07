@@ -24,21 +24,37 @@ function getState(state: PendableState) {
 function lockState(state: PendableState) {
    const update = $activeUpdate()
    if (!update) {
-      console.warn('nothing to lock to')
+      console.error('nothing to lock to')
       return;
    }
    // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
-   if (update.committed) {
-      return;
-   }
+   // if (update.committed) {
+   //    console.warn('update already committed')
+   //    update.race(state.pendingUpdate)
+   //    if (state.pendingUpdate === null) {
+   //       state.pendingUpdate = update
+   //       update.atComplete(() => {
+   //          state.pendingUpdate = null
+   //       })
+   //    }
+   //    state.commitUpdate()
+   //    return;
+   // }
    update.race(state.pendingUpdate)
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
-      update.atCommit(() => {
+      update.atComplete(() => {
+         console.warn('update atComplete', state.pending instanceof Array ? [...state.pending]: state.pending)
          state.pendingUpdate = null
       })
    }
-   queueCommit(update, state)
+   if (update.committed) {
+      console.warn('ALREADY COMMITTED', state.pending instanceof Array ? [...state.pending]: state.pending)
+      update.atComplete(() => {
+         state.commitUpdate()
+      })
+   }
+   else queueCommit(update, state)
 }
 
 

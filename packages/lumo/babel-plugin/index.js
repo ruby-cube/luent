@@ -405,7 +405,7 @@ function isDerivationShorthand(node) {
 
 
 function slotIsRenderFunction(paths) {
-   if (paths.length !== 1) return false;
+   // if (paths.length !== 1) return false;
    const child = paths[0].node;
    if (!t.isJSXExpressionContainer(child)) return false;
    const expression = child.expression

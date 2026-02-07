@@ -60,6 +60,7 @@ export class ListKit extends VineNode {
       let hasNewItems = false
       let hasMovedItems = false
       let preceding = this.preceding;
+      console.log('(1) preceding', preceding, [...kits], [...list])
 
       const sequences: { start: number, length: number }[] = []
 
@@ -83,12 +84,15 @@ export class ListKit extends VineNode {
             const { $index } = kit
             $index.value = i
             $index.dataLength = list.length;
+            console.log('(2 check)', kit.preceding, preceding)
             if (kit.preceding !== preceding || i === 0) {
                updateLCS(sequences.at(-1))
                sequences.push({ start: i, length: 1 })
                kit.preceding = preceding
+               console.log('(2) preceding', preceding, i)
             }
             else {
+               console.log("(2B) NAH", i)
                const seq = sequences.at(-1)!
                seq.length++
             }
@@ -99,6 +103,7 @@ export class ListKit extends VineNode {
             kit = new ListItemKit(item, $index, renderItem, this.flask)
             kit.parent = this.parent;
             kit.preceding = preceding;
+            console.log('(3) preceding', preceding, i)
             setUpNodeVine(kit.nodes!, this.parent!, preceding)
             hasNewItems = true;
          }
@@ -116,7 +121,7 @@ export class ListKit extends VineNode {
 
       // console.log('qIR rerendering list')
       // TODO: Can we make this call more efficient??
-      
+
       // remove DOMNodes
       let i = prevKits.length;
       while (i--) {
@@ -128,7 +133,7 @@ export class ListKit extends VineNode {
             $index.dataLength = list.length;
             queueInternalRender(() => {
                const prevNodes = kit.nodes!
-                  removeDOMNodes(prevNodes)
+               removeDOMNodes(prevNodes)
                kit.nodes = undefined;
             }, this.flask)
             kit.flask.emitDiscard()
@@ -136,7 +141,7 @@ export class ListKit extends VineNode {
          else if (hasMoved(kit)) {
             queueInternalRender(() => {
                const prevNodes = kit.nodes!
-                  removeDOMNodes(prevNodes)
+               removeDOMNodes(prevNodes)
             }, this.flask)
             kit.hasMoved = true;
             hasMovedItems = true;
@@ -154,32 +159,35 @@ export class ListKit extends VineNode {
       }
 
       queueInternalRender(() => {
-            const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
-   
-            // mount to fragment
-            if (hasNewItems || hasMovedItems) {
-               let fragment: DocumentFragment | null = null
-   
-               for (let i = 0; i < kits.length; i++) {
-                  const kit = kits[i]
-                  if (!prevItems.has(kit) || kit.hasMoved) {
-                     if (!fragment) {
-                        fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
-                     }
-                     mountDOMNodes(kit.nodes!, fragment)
-                     kit.hasMoved = null;
+         const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
+
+         // mount to fragment
+         if (hasNewItems || hasMovedItems) {
+            let fragment: DocumentFragment | null = null
+
+            for (let i = 0; i < kits.length; i++) {
+               const kit = kits[i]
+               if (!prevItems.has(kit) || kit.hasMoved) {
+                  if (!fragment) {
+                     console.log('listkit', this)
+                     console.log('itemkit', kit)
+                     console.log('kit.precedingLeaf', kit.precedingLeaf)
+                     fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
                   }
-                  else {
-                     fragment = null
-                  }
+                  mountDOMNodes(kit.nodes!, fragment)
+                  kit.hasMoved = null;
+               }
+               else {
+                  fragment = null
                }
             }
-   
-            if (fragments.length) {
-               for (const { fragment, precedingLeaf } of fragments) {
-                  mountFragment(fragment, precedingLeaf, this.parent)
-               }
+         }
+
+         if (fragments.length) {
+            for (const { fragment, precedingLeaf } of fragments) {
+               mountFragment(fragment, precedingLeaf, this.parent)
             }
+         }
       }, this.flask)
 
       this.prevItems = currentItems

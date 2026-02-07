@@ -21,7 +21,6 @@ export type Phase = typeof SYNC | AsyncPhase
 type AsyncPhase =
    typeof PRELUDE
    | typeof INTERNAL_RENDER
-   | typeof LAYOUT
    | typeof RENDER
    | typeof POSTLUDE
    | typeof TICK
@@ -185,7 +184,6 @@ export class RenderCycle {
                }
             }))
 
-
             if (genState && process.mustPause()) {
                popUpdate()
                process.prepOuterPause(genState, () => {
@@ -196,9 +194,29 @@ export class RenderCycle {
             batch.queued = queue.moreEffects?.length ? batch.requeued : false;
             // batch.requeued = false;
          }
+
          queue.effects = queue.moreEffects ?? []
          queue.moreEffects = undefined;
+
+         this.subphase = 'tasks'
+         const tasks = queue.tasks;
+
+         for (let i = 0; i < tasks.length; i++) {
+            tasks[i]()
+
+            if (genState && process.mustPause() && i + 1 !== tasks.length) {
+               popUpdate()
+               process.prepOuterPause(genState, () => {
+                  pushUpdate(update)
+               })
+               yield;
+            }
+         }
+
+         queue.tasks = []
+
          if (queue.effects.length) {
+            console.warn('RUN AGAIN', phase)
             i = 1
          }
       }
@@ -206,20 +224,9 @@ export class RenderCycle {
 
       // if (this.cancelled) return; // TODO: Manage cancellation with trycatch?
 
-      this.subphase = 'tasks'
-      const tasks = queue.tasks;
 
-      for (let i = 0; i < tasks.length; i++) {
-         tasks[i]()
 
-         if (genState && process.mustPause() && i + 1 !== tasks.length) {
-            popUpdate()
-            process.prepOuterPause(genState, () => {
-               pushUpdate(update)
-            })
-            yield;
-         }
-      }
+
       popUpdate()
 
       onComplete()
@@ -237,7 +244,7 @@ export class RenderCycle {
    scheduleTick() {
       requestAnimationFrame(() => {
          queueTask(() => {
-            this.process.runSync(() => this.runPhase(TICK))
+            this.process.runSync(() => this.runPhase(TICK)) //TODO: There should be new updates for each tick task.. right?
          })
       })
    }

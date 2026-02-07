@@ -524,10 +524,11 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
          $listen(withUpdate(handler, key), options ? (options.preserve = true, options) : { preserve: true }, {
             // preserve since there is no need to pause listener when it is unmounted--it will never be triggered
             enroll: (cb) => {
+               // console.warn('^^^ adding inline event listener', handler)
                node.addEventListener(key, cb, options);
             },
             remove: (cb) => {
-               // console.trace('^^^ removing inline event listener', handler)
+               // console.warn('^^^ removing inline event listener', handler)
                node.removeEventListener(key, cb, options);
             }
          })

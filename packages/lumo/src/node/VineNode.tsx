@@ -1,5 +1,5 @@
 import { debug, isObject, normalizeToArray } from "@rue/utils";
-import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, watchToRender} from "@rue/quarky";
+import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, watchToRender } from "@rue/quarky";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
@@ -101,7 +101,8 @@ export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent, preceding: JS
       if (node instanceof VineNode) {
          node.parent = parent
          node.preceding = preceding
-         if (node.nodes){
+         console.log('(A) preceding', preceding)
+         if (node.nodes) {
             setUpNodeVine(node.nodes, parent, preceding)
          }
       }
@@ -124,15 +125,15 @@ class DynamicTextNode extends VineNode {
       if (__DEV__) __DEV__checkIfTracked()
       const textNode = this.node = createTextNode($text())
       this.nodes = [textNode]
-
       watchToRender($text, ({ current, previous, flask }) => {
          // if (current === previous) return;
          queueInternalRender(() => {
-            textNode.data = toString($text()); 
+            console.log('$$$ internal render', $text())
+            textNode.data = toString($text());
          }, flask)
-            //NOTE: We call the ion instead of using the current value passed in because, 
-            // the time between PRELUDE and PAINT is long enough that the value may have changed already in cases of animation
-            // Passing in current can cause weird lags as seen in the Sierpinski Triangle
+         //NOTE: We call the ion instead of using the current value passed in because, 
+         // the time between PRELUDE and PAINT is long enough that the value may have changed already in cases of animation
+         // Passing in current can cause weird lags as seen in the Sierpinski Triangle
       });
    }
 
@@ -156,16 +157,18 @@ function toString(value: any) {
 
 export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | null | undefined, parent: DOMParent | null | undefined) {
    if (preceding && preceding !== parent) {
+      console.log('preceding', preceding)
       preceding.after(fragment)
    }
    else
-      parent?.prepend(fragment)
+      console.log('parent', parent)
+   parent?.prepend(fragment)
 }
 
-export type DOMParent = { 
-   appendChild(node: Node): Node, 
-   innerHTML: string, 
-   prepend: (...nodes: (Node | string)[]) => void 
+export type DOMParent = {
+   appendChild(node: Node): Node,
+   innerHTML: string,
+   prepend: (...nodes: (Node | string)[]) => void
 } & DOMNode
 
 export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragment) {

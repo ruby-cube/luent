@@ -31,7 +31,7 @@ import { Sidebar } from './wip-demos/IfContextMenu';
 import { FBApp } from './wip-demos/FBChatBug';
 import { PlainList } from './TestList';
 import { TestBox } from './TestBox';
-import { TestDerivedConditional } from './TestCreateMountShow';
+import { TestCreateMountShow, TestDerivedConditional } from './TestCreateMountShow';
 import { TestDerived } from './TestCumulativeDerivedIon';
 import { RoboFriendsApp } from './wip-demos/robofriends/RoboFriends';
 import { getPublicTrace } from '../../../packages/flask/debug';
@@ -68,6 +68,8 @@ import { TestMutableDerivation } from './wip-demos/TestMutableDerivations';
 import { TestListDragDrop } from './wip-demos/TestListDragDrop';
 import { MountIfAnimation } from './TestMountIf-animation';
 import { List } from './App';
+import { TestRenderFunctionSlot } from './TestRenderFunctionSlot';
+import { TestListMounting } from './TestListMounting';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -92,7 +94,7 @@ import { List } from './App';
 // import { NestedPend } from './NestedPend';
 
 
-const app = createRoot(TestListDragDrop)
+const app = createRoot(TestListMounting)
 
 app.mount('#root')
 

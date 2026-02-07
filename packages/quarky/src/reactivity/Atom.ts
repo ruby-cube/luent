@@ -65,9 +65,9 @@ export class TrackedAtom {
       (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase)).queue(effect);
    }
 
-
    triggerEffects(update: Update) { // the surrounding effect when original trigger happened
       const phases = this.phases
+      console.log('triggering effects', this.entity, phases)
       const cycle = update.cycle
       for (const phase of phases) {
          // console.warn('schedule effects', phase, this.effects.get(phase), this)

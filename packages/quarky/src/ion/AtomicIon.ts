@@ -8,6 +8,7 @@ import { MutableIon } from "./Ion";
 import { track } from "../reactivity/Compound";
 import { isPlainObject } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";
+import { $activeUpdate } from "../reactivity/Update";
 
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark, displayName: string }
 

@@ -6,7 +6,8 @@ import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance 
 import { Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
-import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, SYNC } from "./RenderCycle";
+import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, queuePrelude, SYNC } from "./RenderCycle";
+import { $activeUpdate } from "./Update";
 
 
 // watch(list.$length, list.$couch, sync(() => {
@@ -82,7 +83,7 @@ export class StateChangeEvent<S = unknown> {
 export type WatchSubjects = (Object | Ion)[]
 
 export function watch<
-   T extends Ionized<object> | Ion<any> | (()=> any) | WatchSubjects
+   T extends Ionized<object> | Ion<any> | (() => any) | WatchSubjects
 >(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
 
    options.retrack = options.retrack ?? true;
@@ -226,6 +227,8 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
       return;
    }
 
+
+
    let stale = false;
    let paused = false;
 
@@ -248,6 +251,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    }
 
    if (eager) {
+      const update = $activeUpdate()
       scheduleEagerEffect(_render, PRELUDE)
    }
 

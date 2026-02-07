@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { Ion, Ionic, watch } from '@rue/quarky'
-import { component, FromTag, NodeRef, atMounted, atUnmount } from '@rue/lumo'
+import { component, FromTag, NodeRef, atMounted, atUnmount, atDiscard, atCreated } from '@rue/lumo'
 import '../../style.css'
 
 
@@ -27,17 +27,15 @@ export function MarkdownApp(
       selectionStart: undefined as undefined | number,
       selectionEnd: undefined as undefined | number,
    })
-
-   atUnmount((final) => {
-      if (final) return;
+   // <create-view> <mount-remount>
+   atDiscard(() => {
       const textArea = $textArea()!
       const isActive = document.activeElement !== textArea
       caretRange.selectionStart = isActive ? textArea.selectionStart : undefined
       caretRange.selectionEnd = isActive ? textArea.selectionEnd : undefined
    })
 
-   atMounted((initial) => {
-      if (initial) return;
+   atCreated(() => {
       const textArea = $textArea()!
       const { selectionEnd, selectionStart } = caretRange
       if (selectionStart === undefined) return;

@@ -124,16 +124,19 @@ class MemoizedState extends SimpleState {
    override lock() {
       const update = $activeUpdate()
       if (!update) {
-         console.warn('nothing to lock to')
+         console.error('nothing to lock to')
          return;
       }
       // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
-      if (update.committed) return;
+      // if (update.committed) {
+      //    return;
+      // }
       update.race(this.pendingUpdate, this.derive, this.state)
       this.pendingUpdate = update // NOTE: It's important to do this even for race conditions, otherwise state becomes inaccurate
       update.atCommit(() => {
          this.pendingUpdate = null
       })
-      queueCommit(update, this)
+      if (update.committed) this.commitUpdate()
+      else queueCommit(update, this)
    }
 }

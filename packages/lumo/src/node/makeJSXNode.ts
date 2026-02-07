@@ -148,7 +148,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-remount' | 'show-if' | any,
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-remount' | 'show-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -160,21 +160,17 @@ export function makeJSXNode(
             makeElement('link', undefined, <ElementConfig>config)
          );
 
-      case 'show-if':
-         if (!Slot) throw new Error(`Extraneous <show-if>`)
+      case 'create-view':
+         if (!Slot) throw new Error(`Extraneous <create-view>`)
+         return callWithActivationType('create', Slot, config.provide);
+
+      case 'show-view':
+         if (!Slot) throw new Error(`Extraneous <show-view>`)
          return callWithActivationType('show', Slot, config.provide);
 
       case 'mount-remount':
          if (!Slot) throw new Error(`Extraneous <mount-remount>`)
          return callWithActivationType('mount', Slot, config.provide);
-
-      case Create:
-         if (!Slot) throw new Error(`<Create> must have children`)
-         return markActivationType('create', Slot);
-
-      case Remount:
-         if (!Slot) throw new Error(`<Remount> must have children`)
-         return markActivationType('mount', Slot, 'discard' in config ? config.discard : undefined);
 
       default:
          if (typeof nodeType === 'string') {

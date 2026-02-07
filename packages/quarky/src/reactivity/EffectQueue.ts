@@ -1,7 +1,7 @@
 import { __DEV__unwrap, noop } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
 import { catchCancelledUpdate } from "./x_IdleUpdate";
-import { Phase, SYNC, CycleProcess } from "./RenderCycle";
+import { Phase, SYNC, CycleProcess, RENDER } from "./RenderCycle";
 import { $activeUpdate, Update, popUpdate, pushUpdate, tickUpdate } from "./Update";
 
 
@@ -65,6 +65,7 @@ export class EffectQueue {
       // console.log('>>> running phase', phase, 'of', this.atom)
       for (let i = 0; i < limit; i++) {
          const effect = effects[i]
+         if (phase === RENDER) console.log('running render effect', effect)
          // if (cestLePromis(effect)) console.log('le promis is here')
          if (
             !effect.run
@@ -168,22 +169,22 @@ export class TaskQueue {
    }
 
    scheduleTask(task: () => void) {
-      this.tasks.push(task)
+         this.tasks.push(task)
    }
 
    scheduleEffects(effects: EffectQueue) {
       if (this.runningEffects && !effects.requeued) {
-         // console.warn('$$$ SCHEDULE EFFECTS while running')
+         console.warn('$$$ SCHEDULE EFFECTS while running')
          effects.requeued = true;
          const extension = this.moreEffects ?? (this.moreEffects = [])
          extension.push(effects)
       }
       else if (!effects.queued) {
-         // console.warn('$$$ SCHEDULE EFFECTS')
+         console.warn('$$$ SCHEDULE EFFECTS')
          this.effects.push(effects)
          effects.queued = true;
       }
-      // else console.warn('NOTHING', effects.queued, effects.requeued)
+      else console.warn('NOTHING', effects.queued, effects.requeued)
    }
 
    runningEffects: boolean = false

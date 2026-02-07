@@ -202,7 +202,6 @@ export function MountIfAnimation() {
          <button on:click={e => { $ready.toggle(); maybeTransition(getActiveDivRef()) }}>toggle ready</button>
          <hr></hr>
          {/* <Transition> */}
-         {/* <show-if> */}
          {/* <div style={{ width: ($transitioning() ? $width() : 'unset'), height: ($transitioning() ? $height() : 'unset'), }}> */}
          <div class='container transition-container' ref={$container}>
             {If($active,
@@ -233,7 +232,6 @@ export function MountIfAnimation() {
                </div>
             )}
          </div>
-         {/* </show-if> */}
          {/* </Transition> */}
          <hr></hr>
          {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}

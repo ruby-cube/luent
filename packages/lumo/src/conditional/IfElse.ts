@@ -139,17 +139,17 @@ export class IfElseKit extends VineNode {
 
    switchConditional(activeIndex: number, prevIndex: number, flask: Flask) {
       this.deactivateConditional(this.kits[prevIndex]);
-
-      this.activateConditional(this.kits[activeIndex], (kit) => {
+      this.activateConditional(this.kits[activeIndex], (kit, initial) => {
          setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
          const fragment = new DocumentFragment()
          mountDOMNodes(kit.nodes!, fragment)
          queueInternalRender(() => {
             // document.startViewTransition(() => {
-               mountFragment(fragment, this.precedingLeaf, this.parent)
+            mountFragment(fragment, this.precedingLeaf, this.parent)
             // })
          }, flask)
-         kit.type === 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
+         // kit.type == 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
+         initial ? kit.flask!.emitInitialMount() : (console.log('emit remount'),kit.flask!.emitRemount())
       })
 
    }
@@ -158,9 +158,9 @@ export class IfElseKit extends VineNode {
 
    // activeType?: ActivationType
 
-   activateConditional(kit: DynamicConditionalRenderKit | undefined, emitActivated: (kit: DynamicConditionalRenderKit) => void) {
+   activateConditional(kit: DynamicConditionalRenderKit | undefined, emitActivated: (kit: DynamicConditionalRenderKit, initial: boolean) => void) {
       if (!kit) return;
-
+      const initialMount = !kit.cache
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
          kit.pending && kit.cache ? kit.cache :
@@ -168,7 +168,7 @@ export class IfElseKit extends VineNode {
                (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
                : processJSXOutput(kit.render(flask, kit.$condition));
 
-      emitActivated(kit)
+      emitActivated(kit, initialMount)
    }
 
    deactivateConditional(kit: DynamicConditionalRenderKit | undefined) {
@@ -186,7 +186,7 @@ export class IfElseKit extends VineNode {
 
       queueInternalRender(() => {
          // document.startViewTransition(() => {
-            removeDOMNodes(prevNodes)
+         removeDOMNodes(prevNodes)
          // })
       }, this.outerFlask)
       return kit;

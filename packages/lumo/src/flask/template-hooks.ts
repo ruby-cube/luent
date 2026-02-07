@@ -1,6 +1,7 @@
 import { debug } from "@rue/utils";
 import { getFlask } from "@rue/flask";
 import { queueRender } from "../../../quarky/src/reactivity/RenderCycle";
+import { atMounted } from "./flask-hooks";
 
 type LifecycleTask = (element: Element, initialOrFinal?: boolean) => void;
 
@@ -10,8 +11,7 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
       const task = hooks[key]
       switch (key) {
          case 'at:mounted':
-            flask.onInitialMount(async () => { queueRender(()=>task(node, true)) })
-            flask.onRemount(async () => { queueRender(()=>task(node, false))})
+            atMounted((initial) => task(node, initial))
             break;
 
          case 'at:mount':
@@ -25,7 +25,7 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
             break;
 
          case 'at:remounted':
-            flask.onRemount(async () => { queueRender(()=>task(node))})
+            flask.onRemount(async () => { queueRender(() => task(node)) })
             break;
 
          case 'at:demount':
