@@ -43,19 +43,20 @@ function lockState(state: PendableState) {
    update.race(state.pendingUpdate)
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
+
       update.atComplete(() => {
-         console.warn('update atComplete: pending', state.pending instanceof Array ? [...state.pending]: state.pending)
-         console.warn('update atComplete: complete', state.pending instanceof Array ? [...state.current]: state.current)
+         console.warn('update atComplete: current', state.current instanceof Array ? [...state.current] : state.current)
+         console.warn('update atComplete: pending', state.pending instanceof Array ? [...state.pending] : state.pending)
          state.pendingUpdate = null
       })
    }
-   if (update.committed) {
-      console.warn('ALREADY COMMITTED', state.pending instanceof Array ? [...state.pending]: state.pending)
+   // if (update.committed) {
+      // console.warn('ALREADY COMMITTED', state.pending instanceof Array ? [...state.pending] : state.pending)
       update.atComplete(() => {
          state.commitUpdate()
       })
-   }
-   else queueCommit(update, state)
+   // }
+   // else queueCommit(update, state)
 }
 
 

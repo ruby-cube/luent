@@ -11,7 +11,7 @@ export function TestListMounting() {
 
    const logs = Ionic([] as string[])
 
-   const log = (msg:  string ) => { logs.push(msg); console.log('logs', [...logs]) }
+   const log = (msg: string) => { logs.push(msg); console.log('logs', [...logs]) }
 
    return component(
       <div>
@@ -24,11 +24,12 @@ export function TestListMounting() {
          )}
          <aside style="position: fixed; width: 500px; height: 1000px; background-color: #eee">
             LOGS:
-            <button on:click={e => logs.push('hi' + count++)}>click</button>
+            <button on:click={e => { logs.push({ msg: 'hi' + count++ }); logs.push({ msg: 'bye' + count++ }) }}>click</button>
+            {/* <button on:click={e => logs.push('hi' + count++)}>click</button> */}
             <ul>
-               {For(logs, log =>
+               {For(logs, m => m, log =>
                   <span style="font-size: x-small">
-                     - {log}<br />
+                     - {log.msg}<br />
                   </span>
                )}
             </ul>
@@ -43,10 +44,12 @@ function Counter(input: FromTag<{ 'can:log'?: (msg: string) => void }>) {
    return component(
       <div
          at:unmount={e => {
-            log?.('bye' + count++)
+            log?.({ msg: 'bye' + count++ })
+            // log?.('bye' + count++)
          }}
-         at:mount={e => {
-            log?.('hiya' + count++)
+         at:mounted={e => {
+            log?.({ msg: 'hiya' + count++ })
+            // log?.('hiya' + count++)
          }}
       >bye</div>
    )
