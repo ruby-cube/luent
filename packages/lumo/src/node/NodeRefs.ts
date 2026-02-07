@@ -1,5 +1,5 @@
 import { INTERNAL, Ion, isIon, PRELUDE, toValue, watch } from "@rue/quarky";
-import { $Index } from "../iteratives/List";
+import { $Index } from "../iteratives/ItemList";
 import { AnyObject } from "@rue/types";
 import { atUnmount } from "../flask/flask-hooks";
 import { getFlask } from "@rue/flask";

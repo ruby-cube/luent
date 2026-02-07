@@ -11,32 +11,16 @@ export function TestListMounting() {
 
    const logs = Ionic([] as string[])
 
-   const log = (msg: string) => logs.push(msg)
+   const log = (msg:  string ) => { logs.push(msg); console.log('logs', [...logs]) }
 
    return component(
       <div>
          <button on:click={e => $active.toggle()}>switch</button>
          {If($active,
-            // <div
-            //    at:unmount={e => {
-            //       log('bye' + count++)
-            //    }}
-            //    at:mount={e => {
-            //       log('hiya' + count++)
-            //    }}
-            // >bye</div>
-            <Counter can:log={msg => logs.push(msg)}></Counter>
+            <Counter can:log={log}></Counter>
          )}
          {ElseIf((!$active()), 'mount',
-            // <div
-            //    at:unmount={e => {
-            //       log('bye' + count++)
-            //    }}
-            //    at:mount={e => {
-            //       log('hiya' + count++)
-            //    }}
-            // >bye</div>
-            <Counter can:log={msg => logs.push(msg)}></Counter>
+            <Counter can:log={log}></Counter>
          )}
          <aside style="position: fixed; width: 500px; height: 1000px; background-color: #eee">
             LOGS:
@@ -44,7 +28,7 @@ export function TestListMounting() {
             <ul>
                {For(logs, log =>
                   <span style="font-size: x-small">
-                     - {log.msg}<br />
+                     - {log}<br />
                   </span>
                )}
             </ul>
@@ -53,16 +37,16 @@ export function TestListMounting() {
    )
 }
 
-function Counter(input: FromTag<{ 'can:log': (msg: string) => void }>) {
+function Counter(input: FromTag<{ 'can:log'?: (msg: string) => void }>) {
    let count = 0
    const { log } = input
    return component(
       <div
          at:unmount={e => {
-            log({msg: 'bye' + count++})
+            log?.('bye' + count++)
          }}
          at:mount={e => {
-            log({msg: 'hiya' + count++})
+            log?.('hiya' + count++)
          }}
       >bye</div>
    )

@@ -44,7 +44,8 @@ function lockState(state: PendableState) {
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
       update.atComplete(() => {
-         console.warn('update atComplete', state.pending instanceof Array ? [...state.pending]: state.pending)
+         console.warn('update atComplete: pending', state.pending instanceof Array ? [...state.pending]: state.pending)
+         console.warn('update atComplete: complete', state.pending instanceof Array ? [...state.current]: state.current)
          state.pendingUpdate = null
       })
    }

@@ -10,7 +10,7 @@ import { ActivationType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
-import { $Index } from "../iteratives/List";
+import { $Index } from "../iteratives/ItemList";
 import { NodeRefsConfig } from "./NodeRefs";
 
 // export function Fragment() {

@@ -3,10 +3,11 @@ import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, remov
 import { $_derivation, Ion, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
+import { RawJSXNode } from "../node/makeJSXNode";
 
 type UID = unknown
 
-export type $Index = MutableIon<number> & { dataLength: number }
+export type $Index = MutableIon<number>
 // let currentItem: any;
 // let $currentIndex: Ion<number> | undefined;
 
@@ -29,6 +30,7 @@ export class ListKit extends VineNode {
       public getUID: (item: unknown) => UID,
       public flask: Flask
    ) {
+      console.warn('flask', flask)
       super()
       this.nodes = this.render($list(), renderItem);
       watchToRender($list, ({ current: newList }) => {
@@ -40,15 +42,15 @@ export class ListKit extends VineNode {
 
    private render(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
       if (!list) return [];
-      const nodes: JSXNode[] = []
+      const kits: ListItemKit[] = []
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
-         const $index = Ion(i, { dataLength: list.length })
+         const $index = Ion(i)
          const kit = new ListItemKit(item, $index, renderItem, this.flask)
-         nodes.push(kit)
+         kits.push(kit)
          this.prevItems.set(this.getUID(item), kit)
       }
-      return nodes;
+      return kits;
    }
 
    private rerender(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
@@ -60,7 +62,6 @@ export class ListKit extends VineNode {
       let hasNewItems = false
       let hasMovedItems = false
       let preceding = this.preceding;
-      console.log('(1) preceding', preceding, [...kits], [...list])
 
       const sequences: { start: number, length: number }[] = []
 
@@ -83,27 +84,22 @@ export class ListKit extends VineNode {
          if (kit) {
             const { $index } = kit
             $index.value = i
-            $index.dataLength = list.length;
-            console.log('(2 check)', kit.preceding, preceding)
             if (kit.preceding !== preceding || i === 0) {
                updateLCS(sequences.at(-1))
                sequences.push({ start: i, length: 1 })
                kit.preceding = preceding
-               console.log('(2) preceding', preceding, i)
             }
             else {
-               console.log("(2B) NAH", i)
                const seq = sequences.at(-1)!
                seq.length++
             }
          }
          // new item!
          else {
-            const $index = Ion(i, { dataLength: list.length })
+            const $index = Ion(i)
             kit = new ListItemKit(item, $index, renderItem, this.flask)
             kit.parent = this.parent;
             kit.preceding = preceding;
-            console.log('(3) preceding', preceding, i)
             setUpNodeVine(kit.nodes!, this.parent!, preceding)
             hasNewItems = true;
          }
@@ -130,7 +126,6 @@ export class ListKit extends VineNode {
          if (!currentItems.has(uid)) {
             const { $index } = kit
             $index.value = -1;
-            $index.dataLength = list.length;
             queueInternalRender(() => {
                const prevNodes = kit.nodes!
                removeDOMNodes(prevNodes)
@@ -169,9 +164,6 @@ export class ListKit extends VineNode {
                const kit = kits[i]
                if (!prevItems.has(kit) || kit.hasMoved) {
                   if (!fragment) {
-                     console.log('listkit', this)
-                     console.log('itemkit', kit)
-                     console.log('kit.precedingLeaf', kit.precedingLeaf)
                      fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
                   }
                   mountDOMNodes(kit.nodes!, fragment)
@@ -195,9 +187,9 @@ export class ListKit extends VineNode {
    }
 }
 
-export function toAsyncRenderItem(renderItem: RenderItem<unknown>, context: ContextSnapshot = $_snap_context(), trace = __DEV__ ? __DEV__buildAsyncPath() : '') {
-   return function render(this: ListItemKit, item: unknown, $index: Ion<number>) {
-      return $_run_with_(context, () => renderItem(item, $index), {
+export function toAsyncRenderItem(renderItem: (item: unknown, index: unknown) => RawJSXNode, context: ContextSnapshot = $_snap_context(), trace = __DEV__ ? __DEV__buildAsyncPath() : '') {
+   return function render(this: ListItemKit, item: unknown, index: unknown) {
+      return $_run_with_(context, () => renderItem(item, index), {
          [FLASK]: this.flask,
          [TRACE]: trace
       })
@@ -211,12 +203,12 @@ export class ListItemKit extends VineNode {
    constructor(
       public item: unknown,
       public $index: $Index,
-      public render: RenderItem<unknown>,
+      public renderItem: RenderItem<unknown>,
       outerFlask: Flask
    ) {
       super()
       const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
-      this.nodes = processJSXOutput(this.render(item, $_derivation(() => $index())))
+      this.nodes = processJSXOutput(this.renderItem(item, $_derivation(() => $index())))
       flask.emitInitialMount()
    }
 

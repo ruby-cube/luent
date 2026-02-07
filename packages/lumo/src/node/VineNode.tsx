@@ -157,18 +157,17 @@ function toString(value: any) {
 
 export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | null | undefined, parent: DOMParent | null | undefined) {
    if (preceding && preceding !== parent) {
-      console.log('preceding', preceding)
       preceding.after(fragment)
    }
    else
-      console.log('parent', parent)
-   parent?.prepend(fragment)
+      parent?.prepend(fragment)
 }
 
 export type DOMParent = {
    appendChild(node: Node): Node,
    innerHTML: string,
    prepend: (...nodes: (Node | string)[]) => void
+   append: (...nodes: (Node | string)[]) => void
 } & DOMNode
 
 export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragment) {

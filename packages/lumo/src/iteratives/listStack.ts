@@ -1,5 +1,5 @@
 import { $listen, Flask, SustainedListenerOptions } from "@rue/flask";
-import { ListKit } from "./List";
+import { ListKit } from "./ItemList";
 
 const listSetupStack: ListKit[] = [];
 

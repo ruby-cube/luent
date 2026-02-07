@@ -13,7 +13,7 @@ import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace,
 import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
-import { $Index } from "../iteratives/List";
+import { $Index } from "../iteratives/ItemList";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

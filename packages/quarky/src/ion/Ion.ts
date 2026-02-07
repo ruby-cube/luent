@@ -92,7 +92,7 @@ export function isIon(value: unknown): value is Ion {
    // value.length === 0
 }
 
-export function $_derivation(fn: () => unknown) {
+export function $_derivation<T>(fn: () => T) {
    //@ts-expect-error
    fn[QUARK] = { inert: false };
    //@ts-expect-error
