@@ -13,6 +13,16 @@ export function TestListMounting() {
 
    const log = (msg: string) => { logs.push(msg); console.log('logs', [...logs]) }
 
+   function getEach(logs: any[]) {
+      const clone = []
+      console.log("clone =============")
+      for (let i = 0; i < logs.length; i++) {
+         clone[i] = logs[i]
+      }
+      console.log("clone end=============")
+      return clone
+   }
+
    return component(
       <div>
          <button on:click={e => $active.toggle()}>switch</button>
@@ -24,7 +34,7 @@ export function TestListMounting() {
          )}
          <aside style="position: fixed; width: 500px; height: 1000px; background-color: #eee">
             LOGS:
-            <button on:click={e => { logs.push({ msg: 'hi' + count++ }); logs.push({ msg: 'bye' + count++ }) }}>click</button>
+            <button on:click={e => { logs.push({ msg: 'hi' + count++ }); logs.push({ msg: 'bye' + count++ });console.log('logs', getEach(logs)) }}>click</button>
             {/* <button on:click={e => logs.push('hi' + count++)}>click</button> */}
             <ul>
                {For(logs, m => m, log =>
@@ -45,9 +55,9 @@ function Counter(input: FromTag<{ 'can:log'?: (msg: string) => void }>) {
       <div
          at:unmount={e => {
             log?.({ msg: 'bye' + count++ })
-            // log?.('bye' + count++)
+            log?.('bye' + count++)
          }}
-         at:mounted={e => {
+         at:mount={e => {
             log?.({ msg: 'hiya' + count++ })
             // log?.('hiya' + count++)
          }}

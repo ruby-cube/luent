@@ -37,7 +37,7 @@ export function installIonicSet() {
    }, {
       [Symbol.iterator]() {
          this.trackModel()
-         return Ionic(this.raw[Symbol.iterator]())
+         return Ionic(this.raw[Symbol.iterator]()) // TODO: Not sure yet, but the raw iterator may yield inconsistent current/pending state; however if this.ionic is used, the proxy receiver becomes invalid
       },
       forEach: SetlikeDef.forEach,
       keys: SetlikeDef.keys,

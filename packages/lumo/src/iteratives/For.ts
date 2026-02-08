@@ -4,7 +4,7 @@ import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListItemKit, ListKit, toAsyncRenderItem } from "./ItemList";
 import { Ion, Ionic, IonizeBy, isGetter, isInertIon, isIon, IsIonic, isIonicProxy, MaybeIonize, toIon, toValue } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { IndexedListKit } from "./IndexedList";
+import { ForIndex, IndexedListKit } from "./IndexedList";
 
 
 export type RenderItem<L> =
@@ -35,7 +35,8 @@ export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> |
       if (uidProvided) {
          return new ListKit(toIon(data), toAsyncRenderItem(_render), renderOrGetUID as (item: unknown) => unknown, getFlask())
       }
-      return new IndexedListKit(/* TODO: */ data as Ionic<any[]>, data.$length as Ion<number>, toAsyncRenderItem(_render), getFlask())
+      return ForIndex(data, toAsyncRenderItem(_render))
+      // new IndexedListKit(/* TODO: */ data as Ionic<any[]>, data.$length as Ion<number>, toAsyncRenderItem(_render), getFlask())
    }
    else {
       return renderStaticList(data, _render)

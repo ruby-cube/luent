@@ -164,7 +164,7 @@ export function TestCreateMountShow() {
                <code>{'<mount-remount>'}</code>
                <p>
                   {`This mounts, demounts, and remounts views of a conditional series, preserving state when demounted. 
-                  Remountable views can be manually destroyed.`}
+                  Remountable views can also be destroyed. (not yet implemented)`}
                </p>
                <div class='container'>
                   <button style="width: 5em" on:click={e => { mu: $tab.value = 1 }}>home</button>

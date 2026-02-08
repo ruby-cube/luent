@@ -55,14 +55,18 @@ function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
          if (!proto.has(key)) {
             return modelQuark.initProperty(key)?.get()
          }
-         return proto.get(key)!.get()
+         return proto.get(key)?.get()
       },
 
       set(_, key, newValue, receiver) {
          __DEV__assertNotPrototype(modelQuark.proxy, receiver)
          const proto = modelQuark.proto
          if (!proto.has(key) && !(key in modelQuark.state.get())) {
-            return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue)) // FIX: what if property was set in a preceding update that hasn't committed?
+            // FIX:
+            // - For items breaks without !proto.has(key)
+            // - setting new array index breaks with it..
+            return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue)) 
+            // FIX: what if property was set in a preceding update that hasn't committed?
          }
          const success = !proto.has(key)
             ? Boolean(modelQuark.initProperty(key)?.set(newValue))

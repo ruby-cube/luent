@@ -1,32 +1,47 @@
-import { $_derivation, Ion, Ionic, queueInternalRender, toValue, watchToRender } from "@rue/quarky";
+import { $_derivation, Ion, Ionic, isIonicProxy, PRELUDE, queueInternalRender, toValue, watch, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/Input";
 import { AnyObject } from "@rue/types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
-import { ListItemKit, ListKit } from "./ItemList";
-import { Flask } from "@rue/flask";
+import { Flask, getActiveFlask, getFlask } from "@rue/flask";
 
 type Nullish = null | undefined
 
 type RenderIndex = ($item: Ion<any>, index: number) => RawJSXNode
 
-export function ForIndex(list: MaybeIon<AnyObject | Nullish>, renderIndex: RenderIndex) {
-   // const items = list instanceof Array
-   //    ? list
-   //    : list instanceof Set
-   //       ? list.values()
-   //       : list instanceof Map
-   //          ? list.entries()
-   //          : Object.keys(list)
+export function ForIndex(input: MaybeIon<AnyObject | Nullish>, renderIndex: RenderIndex) {
+   const ionicList = isIonicProxy(input) ? input as any as Ionic<any[]> : Ionic([])
 
-   // const $length = Ion(() => {
-   //    // TODO:
-   //    return 0
-   // })
+   function reconcile(ionicList: any[], newList: any[]) {
+      for (let i = 0; i < newList.length; i++) {
+         const item = newList[i]
+         const oldItem = ionicList[i]
+         if (item !== oldItem) {
+            ionicList[i] = item
+         }
+      }
+      if (newList.length < ionicList.length) {
+         ionicList.splice(newList.length, ionicList.length - newList.length)
+      }
+   }
+
+   const $length = Ion(() => ionicList.length ?? 0)
+
+   watch(input, ({current}) => {
+    if (ionicList === input) {
+         return;
+      }
+      // const list = toValue(current)
+      if (!current) {
+         ionicList.length = 0
+         return ionicList;
+      }
+      const newArray = current instanceof Array ? current : Symbol.iterator in current ? Array.from(current as Set<any>) : Object.keys(current)
+      reconcile(ionicList, newArray)
+   }, {eager: true, phase: PRELUDE})
+
+   return new IndexedListKit(ionicList, $length, renderIndex, getFlask())
 }
-
-
-
 
 export class IndexedListKit extends VineNode {
    constructor(
@@ -39,33 +54,20 @@ export class IndexedListKit extends VineNode {
       this.nodes = this.render(list, renderIndex) as IndexKit[];
 
       watchToRender($length, ({ current, previous }) => {
-         console.log('*** currentLength', current)
-         console.log('*** previousLength', previous)
          const kits = this.nodes as IndexKit[]
-         console.log('*** kits', kits)
          if (current > previous) {
             let preceding = kits[previous - 1] ?? this.preceding
-            // add indexes
             const fragment: DocumentFragment | null = new DocumentFragment()
             for (let i = previous; i < current; i++) {
-               const $item = Ion(list![i])
-               const kit = new IndexKit($item, i, renderIndex, this.flask)
+               const $item = Ion(() => list[i])
+               const kit = new IndexKit(list, $item, i, renderIndex, this.flask)
                kit.parent = this.parent;
                kit.preceding = preceding;
                kits.push(kit)
-
-               watchToRender(() => list[i], ({ current: item }) => {
-                  $item.value = item
-               }, kit.flask)
-
                mountDOMNodes(kit.nodes!, fragment)
             }
-            console.log('*** precedingLeaf', kits[previous].precedingLeaf)
             queueInternalRender(() => {
                // mount to fragment
-               // for (let i = previous; i < current; i++) {
-               //    const kit = kits[i]
-               // }
                mountFragment(fragment, kits[previous].precedingLeaf, this.parent)
             }, this.flask)
          }
@@ -85,16 +87,13 @@ export class IndexedListKit extends VineNode {
 
    private render(list: Ionic<any[]>, renderIndex: RenderIndex) {
       const nodes: JSXNode[] = []
+      if (!list) return nodes;
 
       let index = 0
-
-      for (const item of list) {
-         const $item = Ion(item)
-         const kit = new IndexKit($item, index, renderIndex, this.flask)
+      while (index < list.length) {
+         const $item = Ion(() => list[index])
+         const kit = new IndexKit(list, $item, index, renderIndex, this.flask)
          nodes.push(kit)
-         watchToRender(() => list[index], ({ current: item }) => {
-            $item.value = item
-         }, kit.flask)
          index++
       }
       return nodes;
@@ -106,14 +105,15 @@ class IndexKit extends VineNode {
    flask: Flask
 
    constructor(
-      public $item: Ion,
+      public list: Ionic<any[]>,
+      public $item: Ion<any>,
       public index: number,
       public render: RenderIndex,
       outerFlask: Flask
    ) {
       super()
       const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
-      this.nodes = processJSXOutput(this.render($_derivation(() => $item()), index))
+      this.nodes = processJSXOutput(this.render($item, index))
       flask.emitInitialMount()
    }
 }

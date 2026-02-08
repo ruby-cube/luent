@@ -14,9 +14,15 @@ import { TodoMVC } from "./TodoMVC"
 import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
 import { TreeApp } from "./TestTreeApp"
+import { instantUpdate, Ionic } from "@rue/quarky"
 
 const app = createRoot(TestListSelectTransition)
 
 app.mount('#root')
 
+// const list = Ionic([])
+// instantUpdate(()=> {
+//    list[0] ={name: 'kermit'}
+//    console.log('list???', [...list], list[0], list.length)
 
+// })

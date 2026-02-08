@@ -133,10 +133,15 @@ class MemoizedState extends SimpleState {
       // }
       update.race(this.pendingUpdate, this.derive, this.state)
       this.pendingUpdate = update // NOTE: It's important to do this even for race conditions, otherwise state becomes inaccurate
-      update.atCommit(() => {
+      update.atComplete(() => {
          this.pendingUpdate = null
       })
-      if (update.committed) this.commitUpdate()
-      else queueCommit(update, this)
+      if (update.committed) {
+         update.atComplete(() => {
+            this.commitUpdate()
+         })
+      }
+      else
+         queueCommit(update, this)
    }
 }

@@ -51,6 +51,7 @@ export function TestListSelectTransition() {
       }
    })
 
+
    const selected = Ionic(new Set<IonicItem>(), {
       toggle(item: IonicItem) {
          if (this.has(item)) {
@@ -92,6 +93,7 @@ export function TestListSelectTransition() {
       if ((e.target as HTMLElement).closest('.list')) {
          return;
       }
+
       selected.clear()
    })
 
@@ -130,7 +132,7 @@ export function TestListSelectTransition() {
                            </p>
 
                            <li on:click={e => item.changeContent()}>
-                              {() => item.$content()}
+                              {item.$content}
                            </li>
                            <p>{$index}</p>
                            <div on:click={e => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">
@@ -150,12 +152,12 @@ export function TestListSelectTransition() {
             </div>
 
             <div style='width: 20vw; list-style-type: none;'>
-               {For($listClone, (item, $index) =>
+               {For($listClone, ($item, index) =>
                   <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                      <li>
-                        {item.$content}
+                        {($item()?.content)}
                      </li>
-                     <p>{$index}</p>
+                     <p>{index}</p>
                   </div>
                )}
             </div>

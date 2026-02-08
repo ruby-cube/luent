@@ -16,8 +16,10 @@ export interface PendableState {
 
 function getState(state: PendableState) {
    if (state.pendingUpdate && state.pendingUpdate === getActiveUpdate()) {
+      // console.trace('getting pending state', state.pending)
       return state.pending;
    }
+   // console.trace('getting current state', state.current)
    return state.current
 }
 
@@ -27,6 +29,7 @@ function lockState(state: PendableState) {
       console.error('nothing to lock to')
       return;
    }
+   // if (update.committed) return;
    // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
    // if (update.committed) {
    //    console.warn('update already committed')
@@ -40,23 +43,25 @@ function lockState(state: PendableState) {
    //    state.commitUpdate()
    //    return;
    // }
-   update.race(state.pendingUpdate)
+   const ok = update.race(state.pendingUpdate)
+   if (!ok) console.warn("*&^ RACE updates aren't the same")
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
 
       update.atComplete(() => {
-         console.warn('update atComplete: current', state.current instanceof Array ? [...state.current] : state.current)
-         console.warn('update atComplete: pending', state.pending instanceof Array ? [...state.pending] : state.pending)
+         // console.warn('update atComplete: current', state.current instanceof Array ? [...state.current] : state.current)
+         // console.warn('update atComplete: pending', state.pending instanceof Array ? [...state.pending] : state.pending)
          state.pendingUpdate = null
       })
    }
-   // if (update.committed) {
-      // console.warn('ALREADY COMMITTED', state.pending instanceof Array ? [...state.pending] : state.pending)
+   if (update.committed) {
+      console.warn('ALREADY COMMITTED', state.pending instanceof Array ? [...state.pending] : state.pending)
       update.atComplete(() => {
          state.commitUpdate()
       })
-   // }
-   // else queueCommit(update, state)
+   }
+   else
+      queueCommit(update, state)
 }
 
 
@@ -250,6 +255,7 @@ export class CollectiveState implements PendableState {
    }
 
    private applyMutations() {
+      console.log('apply mutations', this.mutations)
       for (const mutate of this.mutations) {
          mutate(this.current)
       }

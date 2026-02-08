@@ -12,8 +12,9 @@ import { $activeUpdate, Update } from "../reactivity/Update"
 import { TrackedOps } from "./TrackedOp"
 import { Traceable } from "../debug/Traceable"
 import { IonicModelHooks, MethodHook } from "./IonicModel"
+import { isIntegerKey } from "./$$Array"
 
-export type QuarkyIonicProxy = AnyObject & { [QUARK]: ModelQuark }
+export type QuarkyIonicProxy = Ionic<AnyObject> & { [QUARK]: ModelQuark }
 export type Proto = Map<ProxyKey, PropertyAccess>
 
 type PropertyAccess = {
@@ -213,12 +214,15 @@ export class ModelQuark implements Atom {
 
    // for cases where a property is read/tracked that might be added later, e.g. an array index
    initNonProperty(
-      key: ProxyKey
+      key: ProxyKey,
+      isNewProperty: boolean = false
    ) {
       if (!Object.isExtensible(this.target)) return { get: () => undefined, set: nowrite }
       const valueKey = isIonKey(key) ? key.slice(1) : key
       const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? '$' + key : undefined
-      return this.initPion(key, valueKey, ionKey, key === ionKey ? this.state.get()[valueKey] : undefined)
+      if (isNewProperty || ionKey && valueKey in this.state.get())
+         return this.initPion(key, valueKey, ionKey, key === ionKey ? this.state.get()[valueKey] : undefined)
+      return undefined
    }
 
 
@@ -226,6 +230,7 @@ export class ModelQuark implements Atom {
       key: ProxyKey,
       value: unknown
    ) {
+      console.log('>>> setNewProperty', key, value)
       if (!Object.isExtensible(this.target)) return { set: nowrite };
       if (isFunction(value)) {
          if (__DEV__) console.warn(`Adding new methods or absorbed ions to a proxy is not supported. You must add ${value} to the raw object before ionizing it`)
@@ -233,12 +238,17 @@ export class ModelQuark implements Atom {
       }
       const update = $activeUpdate()
       if (!update) return { set: nowrite };
-      const success = this.state.mutate(target => Reflect.set(target, key, value)) // TODO: Eliminate redundancy of setting pion as well as mutating the state
+      const success = this.state.mutate(target => {
+         return Reflect.set(target, key, value)
+      }) // TODO: Eliminate redundancy of setting pion as well as mutating the state
       if (!success) return { set: nowrite };
       triggerOp(this, INTERNAL_OP, 'ownKeys', update)
       triggerOp(this, '[[in]]', key, update)
       trigger(this, update)
-      return !this.proto.has(key) ? this.initNonProperty(key) : this.proto.get(key);
+      if (success && isIntegerKey(key)) {
+         this.proxy.length = this.state.pending.length
+      }
+      return !this.proto.has(key) ? this.initNonProperty(key, true) : this.proto.get(key);
    }
 
    protected _initProperty(
@@ -323,9 +333,6 @@ export class ModelQuark implements Atom {
          )
       }
    }
-
-
-
 
    protected initPion(
       key: ProxyKey,

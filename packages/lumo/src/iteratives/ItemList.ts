@@ -77,6 +77,7 @@ export class ListKit extends VineNode {
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
+         console.log('list', [...list], item)
          const uid = this.getUID(item)
          let kit = prevItems.get(uid)
 

@@ -129,8 +129,9 @@ export class Update {
 
    race(rival: Update | null, ...info: any[]) { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides
       if (rival === null || rival === this) {
-         return;
+         return true;
       }
+      return false
       if (rival) {
          // console.warn('[DEV RESEARCH] RACE CONDITION!!!!')
          console.log(...info)

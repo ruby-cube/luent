@@ -145,7 +145,7 @@ defineIonicCollection(Array, {
 }, {
    [Symbol.iterator]() {
       this.trackModel()
-      return Ionic(this.raw[Symbol.iterator]())
+      return Ionic(this.ionic[Symbol.iterator]())
    },
 
    at(index) {
@@ -226,7 +226,7 @@ export function isIonizedArray(target: any): target is IonicProxy {
    return false;
 }
 
-function isIntegerKey(key: ProxyKey) {
+export function isIntegerKey(key: ProxyKey) {
    if (typeof key === 'symbol') return false;
    const keyAsNumber = Number(key);
    if (isNaN(keyAsNumber)) return false;
