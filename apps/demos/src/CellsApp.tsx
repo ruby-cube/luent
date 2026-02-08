@@ -64,14 +64,14 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {Thru(cells[0].length, (_, $row: any) => (
+               {Thru(cells[0].length, (_, row: any) => (
                   <tr>
-                     <th>{$row}</th>
-                     {Thru(cols.length, (_, $col: any) =>
-                        <td ref={{ arr: tds, i: [$row, $col] }}>
+                     <th>{row}</th>
+                     {Thru(cols.length, (_, col: any) =>
+                        <td ref={{ arr: tds, i: [row, col] }}>
                            <Cell
-                              value={(cells[$col()][$row()])}
-                              can:setCellValue={value => { mu: cells[$col()][$row()] = value }}
+                              value={(cells[col][row])}
+                              can:setCellValue={value => { mu: cells[col][row] = value }}
                               can:calcCellValue={evalCell}
                            ></Cell>
                         </td>

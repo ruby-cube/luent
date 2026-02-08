@@ -148,16 +148,15 @@ export function TestListSelectTransition() {
                      </div>
                   ))}
                </div>
-
             </div>
 
             <div style='width: 20vw; list-style-type: none;'>
-               {For($listClone, ($item, index) =>
+               {For($listClone, m => m.id, (item, $index) =>
                   <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                      <li>
-                        {($item()?.content)}
+                        {item.$content}
                      </li>
-                     <p>{index}</p>
+                     <p>{$index}</p>
                   </div>
                )}
             </div>

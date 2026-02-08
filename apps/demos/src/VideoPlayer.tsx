@@ -1,5 +1,5 @@
 import { component, Else, Finitron, FromTag, If, NodeRef, Style } from "@rue/lumo";
-import { Ion } from "@rue/quarky";
+import { Ion, queueTask } from "@rue/quarky";
 import "./reset.css"
 
 export function VideoPlayer() {
@@ -60,8 +60,8 @@ export function VideoPlayer() {
       const video = $video()!
       const time = video.currentTime = video.duration * x / width
       if (track.is('playing')) {
-         track.apply("pause")
-         setTimeout(() => track.apply("play"), 0)
+         track.apply("pause") // FIX: clicking on elapsed bar breaks play/pause button
+         queueTask(() => track.apply("play")) 
       }
       $elapsedTime.value = time
    }
@@ -122,14 +122,14 @@ export function VideoPlayer() {
                <ElapsedBar elapsed={$elapsedTime} duration={$duration()} paused={(track.is("paused"))}
                   on:click={reClickElapsedBar}
                />
-               <mount-remount>
+               {/* <mount-remount> */}
                   {If((track.is("playing")),
                      <button on:click={e => track.apply("pause")}>‖</button>
                   )}
                   {Else(
                      <button on:click={e => track.apply("play")}>►</button>
                   )}
-               </mount-remount>
+               {/* </mount-remount> */}
                <Timer elapsed={$elapsedTime} duration={$duration()} />
             </div>
          )}

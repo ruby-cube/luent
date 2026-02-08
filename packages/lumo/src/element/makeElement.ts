@@ -79,6 +79,7 @@ export function makeElement(
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
          const rawOutput = normalizeToArray(Slot())
+         if (tagName === 'option') console.log('<option> children', rawOutput)
 
          // if (isInnerHTMLKit(rawOutput[0])) {
          //    const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
@@ -88,7 +89,6 @@ export function makeElement(
          const nodes = processJSXOutput(rawOutput)
          setUpNodeVine(nodes, domNode)
          mountDOMNodes(nodes, domNode)
-
       }, xml_ns)
 
 

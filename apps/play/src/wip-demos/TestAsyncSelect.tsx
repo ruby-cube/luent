@@ -33,13 +33,13 @@ export function TestAsyncSelect() {
             <>
                <select mu:value={$activeState}>
                   {For($states, $state =>
-                     <option>{$state()}</option>
+                     <option>{$state}</option>
                   )}
                </select>
 
                <select mu:value={$activeCity} disabled={(!!$cities.pending)}>
                   {For($cities, $city =>
-                     <option>{$city()}</option>
+                     <option>{$city}</option>
                   )}
                </select>
 
