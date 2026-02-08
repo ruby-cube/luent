@@ -17,7 +17,7 @@ import { TreeApp } from "./TestTreeApp"
 import { instantUpdate, Ionic } from "@rue/quarky"
 import { TestForKeys } from "./TestForKeys"
 
-const app = createRoot(CircleApp)
+const app = createRoot(TestAsyncSelect)
 
 app.mount('#root')
 
