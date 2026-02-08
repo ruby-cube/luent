@@ -1,5 +1,5 @@
 import { component, For, If, Style } from "@rue/lumo"
-import { Ion, Ionic, EACH } from "@rue/quarky"
+import { Ion, Ionic, EACH, as } from "@rue/quarky"
 
 // Modified Demo from Vue.js
 
@@ -8,7 +8,7 @@ type Circle = { cx: number, cy: number, r: number }
 export function CircleApp() {
    const history = Ionic([Ionic([] as Ionic<Circle>[])])
    const $index = Ion(0)
-   const $circles = Ion(Ionic([] as Circle[]))
+   const $circles = Ion(Ionic([] as Ionic<Circle>[]))
    const $selected = Ion(undefined as undefined | null | Ionic<Circle>)
    const $adjusting = Ion(false)
 
@@ -54,6 +54,8 @@ export function CircleApp() {
       return circles.map((circle) => Ionic({ ...circle }))
    }
 
+   const circle = $circles()[0]
+
    return component(
       <>
          <svg on:click={e => reClick(e as any as MouseEvent)}>
@@ -73,6 +75,16 @@ export function CircleApp() {
                   on:contextmenu={e => (e.preventDefault(), adjust(circle))}
                ></circle>)
             )}
+            {/* {For($circles, $circle => (
+               <circle
+                  cx={$circle().cx}
+                  cy={$circle().cy}
+                  r={($circle().r)}
+                  fill={($circle() === $selected() ? '#ccc' : '#fff')}
+                  on:click={e => { mu: $selected.value = $circle() }}
+                  on:contextmenu={e => (e.preventDefault(), adjust($circle()))}
+               ></circle>)
+            )} */}
          </svg>
 
          <div class="controls">

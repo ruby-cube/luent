@@ -55,16 +55,39 @@ export function installIonicMap() {
       set(key, value) {
          return asIonic(this.mutate(raw => raw.set(key, value), ({ op }) => {
             op.trigger('has', key)
+            op.trigger('get', key)
             op.trigger('[[get]]', 'size')
             op.triggerModel()
          }))
       },
 
+      get(key) {
+         this.track('get', key)
+         return this.raw.get(key)
+      },
+
       has: SetlikeDef.has,
 
-      clear: SetlikeDef.clear,
+      clear() {
+         if (this.raw.size === 0) return;
+         this.mutate(raw => raw.clear(), ({ op }) => {
+            op.triggerModel()
+            op.triggerAll('has')
+            op.triggerAll('get')
+            op.trigger('[[get]]', 'size')
+         })
+      },
 
-      delete: SetlikeDef.delete,
+      delete(key) {
+         return this.mutate(raw => raw.delete(key), ({ output: success, op }) => {
+            if (success) {
+               op.triggerModel()
+               op.trigger('has', key)
+               op.trigger('get', key)
+               op.trigger('[[get]]', 'size')
+            }
+         })
+      },
 
       size: SetlikeDef.size
 

@@ -1,6 +1,7 @@
+import { quarkOf } from "../abstract/Quark";
 import { EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
 import { defineIonicCollection } from "./IonicDef";
-import { isIonicProxy, ProxyKey, toRaw } from "./ModelQuark";
+import { isIonicProxy, ProxyKey, toRaw, triggerOp } from "./ModelQuark";
 
 declare global {
    interface Array<T> {
@@ -183,6 +184,11 @@ defineIonicCollection(Array, {
       // this.trackModel()
       return Ionic(this.ionic.toSpliced(start, deleteCount, ...args))
    },
+
+   // pop(){
+   //    const output = this.ionic.pop()
+   //    quarkOf(this.ionic).triggerAll('[[in]]')
+   // }
 
    // splice(...args) {
    //    return Ionic(this.ionic.splice(...args))

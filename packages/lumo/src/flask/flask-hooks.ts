@@ -1,23 +1,6 @@
 import { getFlask } from "@rue/flask";
 import { queueRender } from "../../../quarky/src/reactivity/RenderCycle";
-import { instantUpdate } from "@rue/quarky";
-
-
-// TODO: API
-
-// atMounted: initial mount       <div at:mounted={doSomething}> <div on:mountedremounted={doSomething}> 
-// atRemounted: subsequent mounts <div on:remounted={doSomething}>
-// atDemount: temporary unmount   <div on:demount={doSomething}> <div on:unmountdemount={doSomething}> 
-// atUnmount: permanent unmount on <div at:unmount={doSomething}>
-
-// atMounted.Remounted(()=>{
-// 
-// })
-
-// atUnmount.Demount(()=>{
-//
-// })
-
+import { queueTask } from "../../../x-old/thread";
 
 
 export function atCreate(task: () => void) {
@@ -30,11 +13,6 @@ export function atRemount(task: () => void) {
 export function atMount(task: (initial: boolean) => void) {
    getFlask().onInitialMount(() => task(true));
    getFlask().onRemount(() => task(false));
-   // getFlask().onInitialMount(() => { queueRender(() => instantUpdate(() => task(true))) });
-   // getFlask().onRemount(() => { queueRender(() => instantUpdate(() => task(false))) });
-
-   // getFlask().onInitialMount(() => task(true));
-   // getFlask().onRemount(() => task(false));
 }
 
 export function atCreated(task: () => void) {
@@ -47,12 +25,21 @@ export function atRemounted(task: () => void) {
 export function atMounted(task: (initial: boolean) => void) {
    getFlask().onInitialMount(() => { queueRender(() => task(true)) });
    getFlask().onRemount(() => { queueRender(() => task(false)) });
-   // getFlask().onInitialMount(() => { queueRender(() => instantUpdate(() => task(true))) });
-   // getFlask().onRemount(() => { queueRender(() => instantUpdate(() => task(false))) });
-
-   // getFlask().onInitialMount(() => task(true));
-   // getFlask().onRemount(() => task(false));
 }
+
+export function afterCreated(task: () => void) {
+   getFlask().onInitialMount(() => { queueTask(task) });
+}
+export function afterRemounted(task: () => void) {
+   getFlask().onRemount(() => { queueTask(task) });
+}
+
+export function afterMounted(task: (initial: boolean) => void) {
+   getFlask().onInitialMount(() => { queueTask(() => task(true)) });
+   getFlask().onRemount(() => { queueTask(() => task(false)) });
+}
+
+
 
 export function atDestroy(task: () => void) {
    getFlask().onDiscard(task);
@@ -65,6 +52,33 @@ export function atDemount(task: () => void) {
 export function atUnmount(task: (final: boolean) => void) {
    getFlask().onDiscard(() => task(true));
    getFlask().onDemount(() => task(false));
+}
+
+
+export function atDestroyed(task: () => void) {
+   getFlask().onDiscard(() => { queueRender(task) });
+}
+
+export function atDemounted(task: () => void) {
+   getFlask().onDemount(() => { queueRender(task) });
+}
+
+export function atUnmounted(task: (final: boolean) => void) {
+   getFlask().onDiscard(() => { queueRender(() => task(true)) });
+   getFlask().onDemount(() => { queueRender(() => task(false)) });
+}
+
+export function afterDestroyed(task: () => void) {
+   getFlask().onDiscard(() => { queueRender(task) });
+}
+
+export function afterDemounted(task: () => void) {
+   getFlask().onDemount(() => { queueRender(task) });
+}
+
+export function afterUnmounted(task: (final: boolean) => void) {
+   getFlask().onDiscard(() => { queueRender(() => task(true)) });
+   getFlask().onDemount(() => { queueRender(() => task(false)) });
 }
 
 

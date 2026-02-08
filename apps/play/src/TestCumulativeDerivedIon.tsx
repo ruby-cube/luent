@@ -28,15 +28,15 @@ export function TestDerived() {
 
    return component(
       <>
-         {For(counts, (n, $index) =>
-            <div class='count-box' style={`background-color: ${$count() === $index() ? 'beige' : 'unset'};`}>{n}</div>
+         {For(counts, ($n, index) =>
+            <div class='count-box' style={`background-color: ${$count() === index ? 'beige' : 'unset'};`}>{$n}</div>
          )}
-         {For(counts, (n, $index) =>
-            <div class='count-box' style={{ display: 'inline-block', padding: '10px', backgroundColor: ($count() === $index() ? 'beige' : 'unset') }}>{n}</div>
+         {For(counts, ($n, index) =>
+            <div class='count-box' style={{ display: 'inline-block', padding: '10px', backgroundColor: ($count() === index ? 'beige' : 'unset') }}>{$n}</div>
          )}
          <hr></hr>
-         {For(sequence, (n, $index) =>
-            <div style={{ display: 'inline-block', padding: '10px', backgroundColor: ($selectedColor($index())) }}>{n}</div>
+         {For(sequence, ($n, index) =>
+            <div style={{ display: 'inline-block', padding: '10px', backgroundColor: ($selectedColor(index)) }}>{$n}</div>
          )}
          <div>{$accumulate}</div>
          <button on:click={nextNumber}>next cumulative</button>

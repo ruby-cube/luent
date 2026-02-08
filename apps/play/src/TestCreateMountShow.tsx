@@ -302,9 +302,9 @@ export function TestCreateMountShow() {
                      <aside style="position: fixed; width: 180px; top: 0; left: 0; bottom: 0; background-color: #eee">
                         LOGS:
                         <ul>
-                           {For(logs, log =>
+                           {For(logs, $log =>
                               <span style="font-size: x-small">
-                                 - {log}<br />
+                                 - {$log}<br />
                               </span>
                            )}
                         </ul>

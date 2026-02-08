@@ -41,7 +41,7 @@ export function TestPolymorph() {
       ['/file', (file: File) =>
          <File file={file} />
       ]
-   ], {preserve: true})
+   ], { preserve: true })
 
    const pathMap = {
       '/': '/home',
@@ -94,7 +94,7 @@ export function TestPolymorph() {
          <button on:click={e => routeTo('/peas')}>Two Peas</button>
          {/* <button on:click={e => $main.as('happy')}>Happy</button>
          <button on:click={e => $main.as('peas')}>Two Peas</button> */}
-         {For(files, file =>
+         {For(files, m => m, file =>
             <>
                <button on:click={e => routeTo('/file', { input: file })}>{file.name}</button>
                <button on:click={e => { $main.discard('/file', file); routeTo('/home') }}>[X]</button>

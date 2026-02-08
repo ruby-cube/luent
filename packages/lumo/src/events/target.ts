@@ -38,7 +38,7 @@ function matchSelector(target: EventTarget & HTMLElement, selector: string): boo
       // return target.dataset[toCamelCase(selector.slice(2))] === 'true'; // TODO: toCamelCase
    }
    else {
-      return target.tagName === selector;
+      return target.tagName.toLowerCase() === selector;
    }
    return false;
 }

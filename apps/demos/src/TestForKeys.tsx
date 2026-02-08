@@ -14,8 +14,7 @@ export function TestForKeys() {
                <p>{key} - {(obj[key])}</p>
             )
          })}
-         <button on:click={e => obj.a = 'OHH'}>click</button>
+         <button on:click={e => obj.a = Infinity}>click</button>
       </div>
    )
 }
-

@@ -17,7 +17,15 @@ import { TreeApp } from "./TestTreeApp"
 import { instantUpdate, Ionic } from "@rue/quarky"
 import { TestForKeys } from "./TestForKeys"
 
-const app = createRoot(TestForKeys)
+const app = createRoot(CircleApp)
 
 app.mount('#root')
 
+
+// instantUpdate(() => {
+//    const arr = Ionic([1])
+//    console.log('key in?', '0' in arr)
+//    arr.pop()
+//    console.log("pop")
+//    console.log('key in?', '0' in arr)
+// })

@@ -1,5 +1,5 @@
 import { component, For, FromTag, Style, } from "@rue/lumo"
-import { EACH, Ion, Ionic } from "@rue/quarky"
+import { as, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
 // features
@@ -20,7 +20,7 @@ export function SVGPolygonApp() {
       { label: 'D', value: 100 },
       { label: 'E', value: 100 },
       { label: 'F', value: 100 }
-   ], { [EACH]: Ionic })
+   ], { [EACH]: as(Ionic) })
 
 
    function add(e: any) {
@@ -47,12 +47,12 @@ export function SVGPolygonApp() {
             <PolyGraph stats={stats}></PolyGraph>
          </svg >
 
-         {For(stats, stat =>
+         {For(stats, $stat =>
             <div>
-               <label>{stat.label}</label>
-               <input type="range" mu:value={stat.$value} min="0" max="100" />
-               <span>{stat.$value}</span>
-               <button on:click={e => remove(stat)} class="remove">X</button>
+               <label>{($stat().label)}</label>
+               <input type="range" mu:value={($stat().value)} min="0" max="100" />
+               <span>{($stat().value)}</span>
+               <button on:click={e => remove($stat())} class="remove">X</button>
             </div>
          )}
 
@@ -140,7 +140,7 @@ function AxisLabel(input: FromTag<{
 
 
 function PolyGraph({ stats }: FromTag<{
-   stats: Ionic<Stat[]>
+   stats: Ionic<Ionic<Stat>[]>
 }>) {
 
    const $points = Ion(() => {
@@ -157,10 +157,10 @@ function PolyGraph({ stats }: FromTag<{
       <g>
          <polygon points={$points}></polygon>
          <circle cx="100" cy="100" r="80"></circle>
-         {For(stats, (stat, $index) =>
+         {For(stats, ($stat, index) =>
             <AxisLabel
-               stat={stat}
-               index={$index}
+               stat={$stat()}
+               index={index}
                total={stats.$length}
             >
             </AxisLabel>

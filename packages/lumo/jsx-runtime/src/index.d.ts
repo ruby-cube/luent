@@ -673,8 +673,24 @@ declare namespace React {
    type LifecycleTask<T> = (element: T) => void
 
    interface LumoHooks<T> {
+      'at:create'?: LifecycleTask<T>
+      'at:mount'?: LifecycleTask<T>
+      'at:remount'?: LifecycleTask<T>
+      'at:created'?: LifecycleTask<T>
       'at:mounted'?: LifecycleTask<T>
+      'at:remounted'?: LifecycleTask<T>
+      'after:created'?: LifecycleTask<T>
+      'after:mounted'?: LifecycleTask<T>
+      'after:remounted'?: LifecycleTask<T>
+      'at:destroy'?: LifecycleTask<T>
       'at:unmount'?: LifecycleTask<T>
+      'at:demount'?: LifecycleTask<T>
+      'at:destroyed'?: LifecycleTask<T>
+      'at:unmounted'?: LifecycleTask<T>
+      'at:demounted'?: LifecycleTask<T>
+      'after:destroyed'?: LifecycleTask<T>
+      'after:unmounted'?: LifecycleTask<T>
+      'after:demounted'?: LifecycleTask<T>
    }
 
    //$$$

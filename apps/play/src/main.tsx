@@ -71,6 +71,7 @@ import { TestRenderFunctionSlot } from './TestRenderFunctionSlot';
 import { TestListMounting } from './TestListMounting';
 import { TestStyling } from './wip-demos/TestStyling';
 import { TestThru } from '../../demos/src/TestThru';
+import { TestForSetAndMap, TestForSetAndMapIons } from './wip-demos/TestForSetAndMap';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -95,7 +96,7 @@ import { TestThru } from '../../demos/src/TestThru';
 // import { NestedPend } from './NestedPend';
 
 
-const app = createRoot(TestThru)
+const app = createRoot(TestForSetAndMapIons)
 
 app.mount('#root')
 
