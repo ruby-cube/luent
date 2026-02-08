@@ -5,6 +5,7 @@ import { ListItemKit, ListKit, toAsyncRenderItem } from "./ItemList";
 import { Ion, Ionic, IonizeBy, isGetter, isInertIon, isIon, IsIonic, isIonicProxy, MaybeIonize, toIon, toValue } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { ForIndex, IndexedListKit } from "./IndexedList";
+import { isObject } from "@rue/utils";
 
 
 export type RenderItem<L> =
@@ -31,7 +32,7 @@ export function For<L extends ListData>(data: L, getUID: L extends Collection<in
 export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> | (L extends Collection<infer T> ? (item: T) => unknown : never), render?: RenderItem<L>): ListKit | undefined | RawJSXNode {
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
-   if (isGetter(data) || isIonicProxy(data) || isIonicProxy(toValue(data))) {
+   if (isGetter(data) || isIonicProxy(data) && isIterable(data)) {
       if (uidProvided) {
          return new ListKit(toIon(data), toAsyncRenderItem(_render), renderOrGetUID as (item: unknown) => unknown, getFlask())
       }
@@ -39,11 +40,14 @@ export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> |
       // new IndexedListKit(/* TODO: */ data as Ionic<any[]>, data.$length as Ion<number>, toAsyncRenderItem(_render), getFlask())
    }
    else {
+      console.log('render static list')
       return renderStaticList(data, _render)
    }
 }
 
-
+function isIterable(data: any) {
+   return Symbol.iterator in data
+}
 
 
 
@@ -59,7 +63,9 @@ function renderStaticList(data: undefined | unknown[] | Set<unknown> | Map<unkno
 
 function normalizeToArray(data: unknown[] | Set<unknown> | Map<unknown, unknown>) {
    if (Array.isArray(data)) return data;
-   return Array.from(data)
+   if (Symbol.iterator in data)
+      return Array.from(data)
+   return Object.keys(data)
 }
 
 

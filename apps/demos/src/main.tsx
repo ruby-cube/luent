@@ -15,8 +15,9 @@ import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
 import { TreeApp } from "./TestTreeApp"
 import { instantUpdate, Ionic } from "@rue/quarky"
+import { TestForKeys } from "./TestForKeys"
 
-const app = createRoot(CellsApp)
+const app = createRoot(TestForKeys)
 
 app.mount('#root')
 

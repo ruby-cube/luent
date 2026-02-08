@@ -126,6 +126,7 @@ class IonicProxySubject extends Compound implements WatchedSubstance {
    }
 
    getValue() {
+      console.log('ionic proxy subject')
       // TODO: retrack pions??
       return this.proxy
    }

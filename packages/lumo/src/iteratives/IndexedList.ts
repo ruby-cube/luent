@@ -10,7 +10,8 @@ type Nullish = null | undefined
 type RenderIndex = ($item: Ion<any>, index: number) => RawJSXNode
 
 export function ForIndex(input: MaybeIon<AnyObject | Nullish>, renderIndex: RenderIndex) {
-   const ionicList = isIonicProxy(input) ? input as any as Ionic<any[]> : Ionic([])
+   console.log('forIndex')
+   const ionicList = isIonicProxy(input) && input instanceof Array ? input as any as Ionic<any[]> : Ionic([])
 
    function reconcile(ionicList: any[], newList: any[]) {
       for (let i = 0; i < newList.length; i++) {
@@ -29,7 +30,7 @@ export function ForIndex(input: MaybeIon<AnyObject | Nullish>, renderIndex: Rend
 
    const flask = getFlask()
 
-   watchToRender(input, ({ current }) => {
+   watch(input, ({ current, previous }) => {
       if (ionicList === input) {
          return;
       }
@@ -39,7 +40,7 @@ export function ForIndex(input: MaybeIon<AnyObject | Nullish>, renderIndex: Rend
       }
       const newArray = current instanceof Array ? current : Symbol.iterator in current ? Array.from(current as Set<any>) : Object.keys(current)
       reconcile(ionicList, newArray)
-   }, flask, true)
+   }, { eager: true, phase: PRELUDE })
 
    return new IndexedListKit(ionicList, $length, renderIndex, flask)
 }

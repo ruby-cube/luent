@@ -70,7 +70,7 @@ import { List } from './App';
 import { TestRenderFunctionSlot } from './TestRenderFunctionSlot';
 import { TestListMounting } from './TestListMounting';
 import { TestStyling } from './wip-demos/TestStyling';
-import { TestThru } from './TestThru';
+import { TestThru } from '../../demos/src/TestThru';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
