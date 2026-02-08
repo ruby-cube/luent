@@ -31,6 +31,7 @@
         "@rue/vite-plugin-lumo": "workspace:*",
         "@types/babel__core": "^7.20.5",
         "@types/babel__traverse": "^7.20.6",
+        "typescript-plugin-css-modules": "^5.2.0",
         "vite": "^5.4.3"
     },
     "author": "Ruby Yi Wang",

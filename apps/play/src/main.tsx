@@ -69,6 +69,8 @@ import { MountIfAnimation } from './TestMountIf-animation';
 import { List } from './App';
 import { TestRenderFunctionSlot } from './TestRenderFunctionSlot';
 import { TestListMounting } from './TestListMounting';
+import { TestStyling } from './wip-demos/TestStyling';
+import { TestThru } from './TestThru';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -93,7 +95,7 @@ import { TestListMounting } from './TestListMounting';
 // import { NestedPend } from './NestedPend';
 
 
-const app = createRoot(TestCreateMountShow)
+const app = createRoot(TestThru)
 
 app.mount('#root')
 

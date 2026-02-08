@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+   "plugins": [{ "name": "typescript-plugin-css-modules" }],
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -31,12 +32,6 @@
       "@rue/utils": [
         "./packages/utils/index.ts"
       ],
-      "@rue/actionry": [
-        "./packages/actionry/index.ts"
-      ],
-      "@rue/literate": [
-        "./packages/literate/src/index.ts"
-      ],
       "@rue/lumo": [
         "./packages/lumo/src/index.ts"
       ],
@@ -49,47 +44,11 @@
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"
       ],
-      "@rue/archer": [
-        "./packages/archer/index.ts"
-      ],
-      "@rue/ciel": [
-        "./packages/ciel/index.ts"
-      ],
       "@rue/dev": [
         "./packages/x-old/dev/index.ts"
       ],
-      "@rue/ephemr": [
-        "./packages/ephemr/index.ts"
-      ],
-      "@rue/etre": [
-        "./packages/etre/index.ts"
-      ],
-      "@rue/modos": [
-        "./packages/modos/index.ts"
-      ],
-      "@rue/nautic": [
-        "./packages/nautic/index.ts"
-      ],
-      "@rue/paravue": [
-        "./packages/paravue/index.ts"
-      ],
-      "@rue/pecherie": [
-        "./packages/pecherie/index.ts"
-      ],
       "@rue/flask": [
         "./packages/flask/index.ts"
-      ],
-      "@rue/thread": [
-        "./packages/x-old/thread/index.ts"
-      ],
-      "@rue/turtledom": [
-        "./packages/turtledom/index.ts"
-      ],
-      "@rue/voile": [
-        "./packages/voile/index.ts"
-      ],
-      "@rue/watch": [
-        "./packages/watch/index.ts"
       ],
       "@rue/types": [
         "./packages/types/index.ts"

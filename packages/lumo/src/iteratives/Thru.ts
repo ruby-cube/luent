@@ -1,127 +1,93 @@
-import {  Ion, toIon, toValue } from "@rue/quarky"
-import { JSXNode } from "../node/makeJSXNode"
-import { MaybeIon } from "../component/Input"
-import { NodePod } from "../node/x_NodePod"
+import { Ion, isIon, queueInternalRender, watchToRender } from "@rue/quarky";
+import { MaybeIon } from "../component/Input";
+import { RawJSXNode } from "../node/makeJSXNode";
+import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
+import { Flask, getFlask } from "@rue/flask";
 
-type RenderEntry<S> = S extends MaybeIon<infer I> ?
-   I extends number ? (entry: number, index: number) => JSXNode
-   : I extends string ? ($entry: Ion<string>, index: number) => JSXNode
-   : I extends Array<infer E> | Set<infer E> ? ($entry: Ion<E>, index: number) => JSXNode
-   : I extends Map<infer K, infer V> ? ($entry: Ion<[K, V]>, index: number) => JSXNode
-   : I extends { [K in keyof S]: infer V } ? ($entry: Ion<[PropertyKey, V]>, index: number) => JSXNode
-   : never : never
-
-type Spreadable<K, V> = MaybeIon<number | string | Array<V> | Set<V> | Map<K, V> | { [key: PropertyKey]: V }>
-
-export function Spread<S extends Spreadable<any, any>>(spreadable: S, render: RenderEntry<S>) {
-   return new SpreadKit(spreadable, render)
+export function Thru(count: MaybeIon<number>, render: (count: number, index: number) => RawJSXNode) {
+   if (isIon(count)) {
+      return new ThruKit(count, render, getFlask())
+   }
+   else {
+      const nodes = []
+      for (let i = 0; i < count; i++) {
+         nodes.push(render(i + 1, i))
+      }
+      return nodes
+   }
 }
 
-class SpreadKit {
-   constructor(
-      private data: Spreadable<any, any>,
-      private renderEntry: RenderEntry<Spreadable<any, any>>
-   ) {
 
+
+type RenderCount = (count: number, index: number) => RawJSXNode
+
+
+export class ThruKit extends VineNode {
+   constructor(
+      $count: Ion<number>,
+      public renderCount: RenderCount,
+      public flask: Flask
+   ) {
+      super()
+      this.nodes = this.render($count(), renderCount) as ThruKit[];
+
+      watchToRender($count, ({ current, previous }) => {
+         const kits = this.nodes as CountKit[]
+         if (current > previous) {
+            let preceding = kits[previous - 1] ?? this.preceding
+            const fragment: DocumentFragment | null = new DocumentFragment()
+            for (let i = previous; i < current; i++) {
+               const kit = new CountKit(i + 1, i, renderCount, this.flask)
+               kit.parent = this.parent;
+               kit.preceding = preceding;
+               kits.push(kit)
+               mountDOMNodes(kit.nodes!, fragment)
+            }
+            queueInternalRender(() => {
+               // mount to fragment
+               mountFragment(fragment, kits[previous].precedingLeaf, this.parent)
+            }, this.flask)
+         }
+         else if (current < previous) {
+            // delete indexes
+            const removed = kits.splice(current, previous - current)
+            for (const kit of removed) {
+               queueInternalRender(() => {
+                  removeDOMNodes(kit.nodes!)
+                  kit.nodes = undefined;
+               }, this.flask)
+               kit.flask.emitDiscard()
+            }
+         }
+      }, flask)
    }
 
+   private render(count: number, renderCount: RenderCount) {
+      const nodes: JSXNode[] = []
 
-      setUp(
-         parent: Element,
-         outerNodePod: NodePod,
-      ) {
-         const data = this.data
-   
-         const _isIonizedModel = isIonicProxy(data)
-         const isDynamic = this.isDynamic = _isIonizedModel || isIon(data);
-         this.outerNodePod = outerNodePod;
-         const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendNodePod() : undefined;
-   
-         // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
-   
-         if (isDynamic) {
-            // set up watcher for updates
-            // const effectCycle = getCurrentEffectCylce();
-            const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
-            let clone = createClone(data, _data)
-            // let clone = isIon(data) && isIonicProxy(_data) ? shallowClone(toRaw(_data)) : undefined
-            // TODO: figure out typing for Set, Map, Object vs Array
-            let recording = isIonicProxy(_data) ? recordMutations(_data) : undefined
-   
-   
-            function createClone(subject: AnyObject, state: AnyObject){
-               return isIonicProxy(state) ? shallowClone(toRaw(state)) : undefined
-               // return isIon(subject) && isIonicProxy(state) ? shallowClone(toRaw(state)) : undefined
-            }
-   
-            function hasChanged(oldState: AnyObject, state: AnyObject){
-   
-            }
-   
-            watch(data, ({ current, previous }) => { // typecast as one of the options so that typescript won't complain
-               // if (recording && current === previous){
-               //    recording.stop()
-               //    console.log('updating list via MUTATIONS')
-               //    // TODO: this.applyMutations(recording.mutations)
-               //    recording = recordMutations(_data)
-               //    return;
-               // }
-               const _prevState = clone ?? toRaw(previous)
-               clone = createClone(data, current)
-               // clone = isIon(data) && isIonicProxy(state) ? shallowClone(_state) as any[] : undefined
-               const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
-               if (noChange) { // TODO: should we use hasChanged function in watch options instead?
-                  return;
-               }
-               if (dynamicNodePod!.length !== _prevState.length)
-                  throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
-   
-               this.castBeforeUpdate();
-               this.removeItems(indicesToRemove!);
-               try {
-                  this.insertAndMoveItems(insertAndMoveKit!, parent);
-               }
-               catch (err) {
-                  console.error(err, this.__DEV__asyncPath)
-               }
-               // console.log('updating list', state.length, _oldValue.length)
-            }, { phase: POSTEVENT })
-         }
-         // currentItem = undefined;
-         $currentIndex = undefined;
-         //   popList();
-         return this;
+      for (let i = 0; i < count; i++) {
+         const kit = new CountKit(i + 1, i, renderCount, this.flask)
+         nodes.push(kit)
       }
-   
-   
-      mount(
-         parent: Element ,
-         fragment?: DocumentFragment
-      ) {
-         const data = toValue(this.data);
-         const $list  = toIon(this.data);
-         const list = data instanceof Array ? data : data // TODO: need to implement for sets, maps, and objects
-         const listKit = this;
-         const isDynamic = this.isDynamic;
-         const dynamicNodePod = this.dynamicNodePod!;
-   
-         for (let i = 0; i < list.length; i++) {
-            const item = list[i]
-            const $index = Ion(()=>$list()?.indexOf(item))
-            $currentIndex = $index;
-            // this.indices.push($index)
-   
-            const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
-   
-            if (isDynamic) {
-               const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
-               listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-               flask.emitInitialMount()
-               flaskMap.set(nodePod, flask)
-            }
-            else {
-               listKit.renderItem(item, $index, parent, nodePod, fragment)
-            }
-         }
-      }
+      return nodes;
+   }
 }
+
+
+class CountKit extends VineNode {
+   flask: Flask
+
+   constructor(
+      public count: number,
+      public index: number,
+      public render: RenderCount,
+      outerFlask: Flask
+   ) {
+      super()
+      const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
+      this.nodes = processJSXOutput(this.render(count, index))
+      flask.emitInitialMount()
+   }
+}
+
+

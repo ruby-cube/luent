@@ -1,5 +1,6 @@
 import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
+import { Thru } from "../../../packages/lumo/src/iteratives/Thru"
 
 // Modified Demo from Vue.js
 // barebones cells app
@@ -63,10 +64,10 @@ export function CellsApp() {
                </tr>
             </thead>
             <tbody>
-               {For([...cells[0]], (_, row: any) => ( // TODO: allow number as input for For()
+               {Thru(cells[0].length, (_, row: any) => (
                   <tr>
                      <th>{row}</th>
-                     {For(cols, (_, col: any) =>
+                     {Thru(cols.length, (_, col: any) =>
                         <td ref={{ arr: tds, i: [row, col] }}>
                            <Cell
                               value={(cells[col][row])}

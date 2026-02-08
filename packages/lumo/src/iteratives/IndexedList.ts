@@ -27,20 +27,21 @@ export function ForIndex(input: MaybeIon<AnyObject | Nullish>, renderIndex: Rend
 
    const $length = Ion(() => ionicList.length ?? 0)
 
-   watch(input, ({current}) => {
-    if (ionicList === input) {
+   const flask = getFlask()
+
+   watchToRender(input, ({ current }) => {
+      if (ionicList === input) {
          return;
       }
-      // const list = toValue(current)
       if (!current) {
          ionicList.length = 0
          return ionicList;
       }
       const newArray = current instanceof Array ? current : Symbol.iterator in current ? Array.from(current as Set<any>) : Object.keys(current)
       reconcile(ionicList, newArray)
-   }, {eager: true, phase: PRELUDE})
+   }, flask, true)
 
-   return new IndexedListKit(ionicList, $length, renderIndex, getFlask())
+   return new IndexedListKit(ionicList, $length, renderIndex, flask)
 }
 
 export class IndexedListKit extends VineNode {
@@ -59,7 +60,7 @@ export class IndexedListKit extends VineNode {
             let preceding = kits[previous - 1] ?? this.preceding
             const fragment: DocumentFragment | null = new DocumentFragment()
             for (let i = previous; i < current; i++) {
-               const $item = Ion(() => list[i])
+               const $item = Ion(() => list[i]) // TODO: avoid having to add optional chaining $item()?.property when item is removed...
                const kit = new IndexKit(list, $item, i, renderIndex, this.flask)
                kit.parent = this.parent;
                kit.preceding = preceding;

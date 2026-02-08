@@ -16,7 +16,7 @@ import { TestMarkdownApp } from "./MarkdownApp"
 import { TreeApp } from "./TestTreeApp"
 import { instantUpdate, Ionic } from "@rue/quarky"
 
-const app = createRoot(CircleApp)
+const app = createRoot(CellsApp)
 
 app.mount('#root')
 

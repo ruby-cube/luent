@@ -1,0 +1,11 @@
+.container {
+   background-color: aquamarine;
+}
+
+.highlighted {
+   background-color: brown;
+}
+
+.active {
+   color: brown;
+}
