@@ -299,7 +299,7 @@ export function TestCreateMountShow() {
                            </div>
                         </div>
                      )}
-                     <aside style="position: fixed; width: 500px; height: 1000px; background-color: #eee">
+                     <aside style="position: fixed; width: 180px; top: 0; left: 0; bottom: 0; background-color: #eee">
                         LOGS:
                         <ul>
                            {For(logs, log =>

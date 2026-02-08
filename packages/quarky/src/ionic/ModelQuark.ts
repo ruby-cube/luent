@@ -230,7 +230,6 @@ export class ModelQuark implements Atom {
       key: ProxyKey,
       value: unknown
    ) {
-      console.log('>>> setNewProperty', key, value)
       if (!Object.isExtensible(this.target)) return { set: nowrite };
       if (isFunction(value)) {
          if (__DEV__) console.warn(`Adding new methods or absorbed ions to a proxy is not supported. You must add ${value} to the raw object before ionizing it`)
@@ -245,7 +244,7 @@ export class ModelQuark implements Atom {
       triggerOp(this, INTERNAL_OP, 'ownKeys', update)
       triggerOp(this, '[[in]]', key, update)
       trigger(this, update)
-      if (success && isIntegerKey(key)) {
+      if (success && isIntegerKey(key) && this.target instanceof Array) {
          this.proxy.length = this.state.pending.length
       }
       return !this.proto.has(key) ? this.initNonProperty(key, true) : this.proto.get(key);
