@@ -1,12 +1,13 @@
 import { Ion, isIon, queueInternalRender, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/Input";
 import { RawJSXNode } from "../node/makeJSXNode";
-import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
+import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
 import { Flask, getFlask } from "@rue/flask";
+import { toAsyncRenderItem } from "./ItemList";
 
 export function Thru(count: MaybeIon<number>, render: (count: number, index: number) => RawJSXNode) {
    if (isIon(count)) {
-      return new ThruKit(count, render, getFlask())
+      return new ThruKit(count, toAsyncRenderItem(render), getFlask())
    }
    else {
       const nodes = []
