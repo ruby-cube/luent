@@ -63,7 +63,7 @@ export function CircleApp() {
                   Right-click on the canvas to adjust the radius of the selected circle.
                </p>
             </foreignObject>
-            {For($circles, circle => (
+            {For($circles, m => m, circle => (
                <circle
                   cx={circle.cx}
                   cy={circle.cy}
