@@ -3,7 +3,7 @@ import { Ion, isIon, toValue } from "../ion/Ion";
 import { Ionized } from "../ionic/x_ionize";
 import { Effect } from "./EffectQueue";
 import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
-import { Glass } from "@rue/types";
+import { AnyObject, Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
 import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, queuePrelude, SYNC } from "./RenderCycle";
@@ -83,7 +83,7 @@ export class StateChangeEvent<S = unknown> {
 export type WatchSubjects = (Object | Ion)[]
 
 export function watch<
-   T extends Ionized<object> | Ion<any> | (() => any) | WatchSubjects
+   T extends Ionized<object> | Ion<any> | (() => any) | WatchSubjects | AnyObject
 >(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
 
    options.retrack = options.retrack ?? true;

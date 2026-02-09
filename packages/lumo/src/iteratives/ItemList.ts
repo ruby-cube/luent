@@ -41,6 +41,7 @@ export class ListKit extends VineNode {
    prevItems: Map<UID, ListItemKit> = new Map()
 
    private render(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
+      console.log('$$$ RENDER LIST')
       if (!list) return [];
       const kits: ListItemKit[] = []
       for (let i = 0; i < list.length; i++) {
@@ -54,6 +55,7 @@ export class ListKit extends VineNode {
    }
 
    private rerender(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
+       console.log('$$$ RERENDER LIST', list)
       if (!list) list = []
       const prevItems = this.prevItems;
       const prevKits = this.nodes! as ListItemKit[];
@@ -77,12 +79,12 @@ export class ListKit extends VineNode {
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
-         console.log('list', [...list], item)
          const uid = this.getUID(item)
          let kit = prevItems.get(uid)
 
          // existing item
          if (kit) {
+            console.log('&&& existing item!', item)
             const { $index } = kit
             $index.value = i
             if (kit.preceding !== preceding || i === 0) {
@@ -97,6 +99,7 @@ export class ListKit extends VineNode {
          }
          // new item!
          else {
+            console.log('&&& new item!', item)
             const $index = Ion(i)
             kit = new ListItemKit(item, $index, renderItem, this.flask)
             kit.parent = this.parent;
@@ -167,6 +170,7 @@ export class ListKit extends VineNode {
                   if (!fragment) {
                      fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
                   }
+                   console.log('$$$ MOUNT TO FRAGMENT')
                   mountDOMNodes(kit.nodes!, fragment)
                   kit.hasMoved = null;
                }
@@ -178,6 +182,7 @@ export class ListKit extends VineNode {
 
          if (fragments.length) {
             for (const { fragment, precedingLeaf } of fragments) {
+               console.log('$$$ MOUNT FRAGMENT')
                mountFragment(fragment, precedingLeaf, this.parent)
             }
          }

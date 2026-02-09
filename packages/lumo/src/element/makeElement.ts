@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue, INTERNAL } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue, INTERNAL, queueTask } from "@rue/quarky";
 import { isFunction, isObject, isPlainObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput, RawJSXNode } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -64,7 +64,6 @@ export function makeElement(
    if (showIf) setUpConditionalDisplay(domNode, showIf)
    setUpEvents(domNode, events);
    setUpHooks(domNode, hooks)
-
    bindView(domNode, attributes)
    setUpAttributes(domNode, attributes);
    //  if (dynamicAttributes)
@@ -79,7 +78,6 @@ export function makeElement(
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
          const rawOutput = normalizeToArray(Slot())
-         if (tagName === 'option') console.log('<option> children', rawOutput)
 
          // if (isInnerHTMLKit(rawOutput[0])) {
          //    const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
@@ -90,10 +88,8 @@ export function makeElement(
          setUpNodeVine(nodes, domNode)
          mountDOMNodes(nodes, domNode)
       }, xml_ns)
-
-
-      // }
    }
+
    return domNode;
 }
 
@@ -232,10 +228,16 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
       return;
    const ion = attributes['mu:value'];
    const flask = getFlask()
-   watchToRender(ion, ({ current, previous }) => {
-      // if (current === previous) return;
+   watchToRender(ion, () => {
       queueInternalRender(() => {
-         element.value = toString(toValue(ion))
+         console.log('$$$ select mu:value', toString(toValue(ion)))
+         for (const option of element.children){
+            console.log("$$$ OPTION", option.textContent)
+         }
+         queueTask(()=>{
+            element.value = toString(toValue(ion))
+         })
+         console.log('$$$ select mu:value-->', element, 'value', element.value)
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
@@ -365,6 +367,7 @@ function setAttribute(node: AnyObject, attribute: string, value: any) {
       node.setAttribute(attribute, toString(value) ?? '')
    }
    else {
+      if (attribute === 'textContent') console.log('$$$ SETTING TEXTCONTENT', value)
       node[toElementProperty(attribute)] = isNumberValue(attribute) ? toNumber(value) : toString(value) ?? '';
    }
 }

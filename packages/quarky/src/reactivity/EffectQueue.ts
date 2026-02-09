@@ -174,13 +174,11 @@ export class TaskQueue {
 
    scheduleEffects(effects: EffectQueue) {
       if (this.runningEffects && !effects.requeued) {
-         console.warn('$$$ SCHEDULE EFFECTS while running')
          effects.requeued = true;
          const extension = this.moreEffects ?? (this.moreEffects = [])
          extension.push(effects)
       }
       else if (!effects.queued) {
-         console.warn('$$$ SCHEDULE EFFECTS')
          this.effects.push(effects)
          effects.queued = true;
       }

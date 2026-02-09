@@ -19,7 +19,6 @@ export function createHybridIon(config: HybridIonConfig, props?: AnyObject) {
    //    $state.value = derive()
    // }, { phase: 'SYNC' })
    // return $state;
-   // $activeUpdate()
 
    const $derived = Ion($watched ? (() => ($watched(), derive())) : derive)
    const $state = Ion('initial' in config ? initial : derive())
