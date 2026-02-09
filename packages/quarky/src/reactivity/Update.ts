@@ -4,10 +4,19 @@ import { UpdateType } from "./x_IdleUpdate";
 
 export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
 
+let activeUpdate: Update | null;
 
 export function $activeUpdate() {
    const update = getActiveUpdate()
-   if (!update && __DEV__) throw new Error('Must be called within update context')
+   if (!update) {
+      if (activeUpdate) return activeUpdate
+      const update = activeUpdate = new Update(UpdateType.INSTANT, 100, false)
+      queueMicrotask(() => {
+         activeUpdate = null;
+         update.start()
+      })
+      return activeUpdate
+   }
    return update;
 }
 
@@ -243,6 +252,8 @@ function createSwiftUpdate() {
 // - atComplete: start() runs functions
 // - queue() run function
 
+
+
 export function instantUpdate(task: () => unknown) {
    return createInstantUpdate().queue(task).start()?.output
 }
@@ -256,7 +267,6 @@ function createInstantUpdate() {
 //    (getInstantUpdate() ?? createInstantUpdate()).queue(task)
 // }
 
-// let latestInstantUpdate: Update | null = null
 
 // function getInstantUpdate() {
 //    if (latestInstantUpdate) {
