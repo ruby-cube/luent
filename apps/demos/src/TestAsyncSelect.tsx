@@ -39,13 +39,13 @@ export function TestAsyncSelect() {
 
                <select mu:value={$activeCity} disabled={(!!$cities.pending)}>
                   {For($cities, $city =>
-                     <option textContent={$city}></option>
+                     <option>{$city}</option>
                   )}
                </select>
 
-               {/* <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
+               <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
                   Selection: {$activeCity}, {(o.await($cities, $activeState))}
-               </p> */}
+               </p>
             </>
          )}
          {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state

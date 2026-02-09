@@ -13,8 +13,9 @@ import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
 import { TreeApp } from "./TestTreeApp"
 import { TestForKeys } from "./TestForKeys"
+import { TestAsyncSelect } from "./TestAsyncSelect"
 
-const app = createRoot(TestListSelectTransition)
+const app = createRoot(TestAsyncSelect)
 
 app.mount('#root')
 
