@@ -431,6 +431,8 @@ const TemplateFunctions = {
    Meanwhile: transformTemplateArgToRenderFunction,
    For: transformTemplateArgToRenderFunction,
    Portal: transformTemplateArgToRenderFunction,
+   Default: transformTemplateArgToRenderFunction,
+   Case: (path) => {transformIfDerivationShorthand(path.get('arguments.0')); transformTemplateArgToRenderFunction(path)}
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],

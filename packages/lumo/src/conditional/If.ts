@@ -119,6 +119,7 @@ export function createIfSeries(kits: ConditionalKit[]) {
    }
    if (kits.at(-1)?.statementType !== 'else') kits.push(Else(()=>undefined))
    const dynamicKits = toDynamicConditionalKits(kits, activationType)
+console.warn('create dynamic if else')
    return new IfElseKit(dynamicKits, getFlask())
 }
 
@@ -127,7 +128,7 @@ export function createIfSeries(kits: ConditionalKit[]) {
 window._$$IfSeries = createIfSeries
 
 
-function renderStaticConditional(statements: ConditionalKit[]) {
+export function renderStaticConditional(statements: ConditionalKit[]) {
    for (const kit of statements) {
       if (!!toValue(kit.$condition) === true) {
          return kit.render()

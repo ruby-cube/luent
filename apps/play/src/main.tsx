@@ -98,11 +98,11 @@ import { initMonacoEditor } from './TestMonacoEditor';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-initMonacoEditor()
+// initMonacoEditor()
 
-// const app = createRoot(TestAsyncSelect)
+const app = createRoot(TestAsyncTabs)
 
-// app.mount('#root')
+app.mount('#root')
 
 
 // function TestApp2() {

@@ -1,6 +1,6 @@
 import { instantUpdate, Ion, swiftUpdate, Interval } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Await, Meanwhile, component, Else, ElseIf, FromTag, If } from "@rue/lumo";
+import { Await, Meanwhile, component, Else, ElseIf, FromTag, If, Switch, Case, Default } from "@rue/lumo";
 
 // Modified Demo from Solid.js 
 
@@ -8,9 +8,9 @@ export function TestAsyncTabs() {
    const $tab = Ion(0);
    const $count = Ion(0);
 
-   Interval(1000, () => {
-      $count.value++
-   }).start()
+   // Interval(1000, () => {
+   //    $count.value++
+   // }).start()
 
    return component(<>
       <ul class="inline">
@@ -33,41 +33,57 @@ export function TestAsyncTabs() {
             Six
          </li>
       </ul>
-      {Await($suspense =>
-         <div class={{ 'tab': true, 'pending': $suspense }}>
-            {If(($tab() === 0),
-               <Tab page="Un" count={$count} />
-            )}
-            {ElseIf(($tab() === 1),
-               <Tab page="Deux" count={$count} />
-            )}
-            {ElseIf(($tab() === 2),
-               <Tab page="Trois" count={$count} />
-            )}
-            {ElseIf(($tab() === 3),
-               <Tab page="Quatre" count={$count} />
-            )}
-            {ElseIf(($tab() === 4),
-               <Tab page="Cinq" count={$count} />
-            )}
-            {Else(
-               <Tab page="Six" count={$count} />
-            )}
+      {/* // <div class={{ 'tab': true, 'pending': $suspense }}>
+      //    {If(($tab() === 0),
+      //       <Tab page="Un" count={$count} />
+      //    )}
+      //    {ElseIf(($tab() === 1),
+      //       <Tab page="Deux" count={$count} />
+      //    )}
+      //    {ElseIf(($tab() === 2),
+      //       <Tab page="Trois" count={$count} />
+      //    )}
+      //    {ElseIf(($tab() === 3),
+      //       <Tab page="Quatre" count={$count} />
+      //    )}
+      //    {ElseIf(($tab() === 4),
+      //       <Tab page="Cinq" count={$count} />
+      //    )}
+      //    {Else(
+      //       <Tab page="Six" count={$count} />
+      //    )}
+      // </div> */}
+      {/* {Await($suspense => */}
+         <div class={{ 'tab': true, /* 'pending': $suspense */ }}>
+            <Switch x={$tab}>
+               {Case(0, 
+                  <Tab page="Un" count={$count} />
+               )}
+               {Case(1,
+                  <Tab page="Deux" count={$count} />
+               )}
+               {Case(2,
+                  <Tab page="Trois" count={$count} />
+               )}
+               {Case(3,
+                  <Tab page="Quatre" count={$count} />
+               )}
+               {Case(4,
+                  <Tab page="Cinq" count={$count} />
+               )}
+               {/* {Case(5,
+                  <Tab page="Six" count={$count} />
+               )} */}
+               {Default(
+                  <Tab page="Six" count={$count} />
+               )}
+            </Switch>
          </div>
-      )}
-      {Meanwhile(o =>
+      {/* )} */}
+      {/* {Meanwhile(o =>
          o.initial && "Loading..."
-      )}
-      {/* {Match($tab)}
-            {Case(0,
-               <Tab page="Uno" />
-            ))}
-            {Case(1,
-               <Tab page="Dos" />
-            )}
-            {Case(2,
-               <Tab page="Tres" />
-            )} */}
+      )} */}
+
    </>);
 };
 

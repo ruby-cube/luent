@@ -79,7 +79,7 @@ export class IfElseKit extends VineNode {
       super()
 
       this.$activeIndex = $ActiveIndex(getConditions(kits))
-
+      console.log('active index', this.$activeIndex())
 
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
          kit.flask!.emitInitialMount()

@@ -706,33 +706,66 @@ export function WeirdDice({ $number }) {
 
    return component(
       <div>
-         {Match(($number))}
-         {Case(1,
-            <div>1</div>
-         )}
-         {Case(2,
-            <div>II</div>
-         )}
-         {Case(3,
-            <>
-               <div>•</div>
-               <div>•</div>
-               <div>•</div>
-            </>
-         )}
-         {Case(4,
-            <div>....</div>
-         )}
-         {Case(5,
-            <div>V</div>
-         )}
-         {Case(6,
-            <div>:::</div>
-         )}
-         {Default(
-            <div>out of bounds</div>
-         )}
-      </div>
+         <Switch x={$number} match={(x, c) => x.includes(c)}>
+            {Case(1,
+               <div>1</div>
+            )}
+            {Case(1.5)}
+            {Case(2,
+               <div>II</div>
+            )}
+            {Case(3,
+               <article>
+                  <div>•</div>
+                  <div>•</div>
+                  <div>•</div>
+               </article>
+            )}
+            {Default(
+               <div>out of bounds</div>
+            )}
+         </Switch>
+
+         {Match($number, <>
+            {Case(1,
+               <div>1</div>
+            )}
+            {Case(1.5)}
+            {Case(2,
+               <div>II</div>
+            )}
+            {Case(3,
+               <article>
+                  <div>•</div>
+                  <div>•</div>
+                  <div>•</div>
+               </article>
+            )}
+            {Default(
+               <div>out of bounds</div>
+            )}
+         </>)}
+
+         {Match(($number))
+            .Case(1,
+               <div>1</div>
+            )
+            .Case(1.5)
+            .Case(2,
+               <div> II</div>
+            )
+            .Case(3,
+               <article>
+                  <div>•</div>
+                  <div>•</div>
+                  <div>•</div>
+               </article>
+            )
+            .Default(
+               <div>out of bounds</div>
+            )
+         }
+      </div >
    )
 }
 

@@ -164,6 +164,8 @@ export function toInput(attributes: AnyObject) {
       return handler(eventObject)
    }
 
+   // TODO: write a linter that disallows mutation unless variable comes from a property or nested property of the mu object
+   // TODO: also provide a input transform helper for non-component functions that mutate arguments
    const mu = new Proxy(attributes, {
       get(target, key) {
          if (typeof key !== 'string') return undefined
