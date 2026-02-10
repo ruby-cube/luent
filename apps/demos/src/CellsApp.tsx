@@ -71,8 +71,8 @@ export function CellsApp() {
                         <td ref={{ arr: tds, i: [row, col] }}>
                            <Cell
                               value={(cells[col][row])}
-                              can:setCellValue={value => { mu: cells[col][row] = value }}
-                              can:calcCellValue={evalCell}
+                              setCellValue={value => { cells[col][row] = value }}
+                              calcCellValue={evalCell}
                            ></Cell>
                         </td>
                      )}
@@ -116,20 +116,20 @@ export function CellsApp() {
 
 function Cell(input: FromTag<{
    value: Ion<string>
-   'can:setCellValue': (value: string) => void
-   'can:calcCellValue': (value: string) => string
+   setCellValue: (value: string) => void
+   calcCellValue: (value: string) => string
 }>) {
    const { setCellValue, $value, calcCellValue } = input
 
    const $editing = Ion(false)
 
    function update(e: any) {
-      mu: $editing.value = false
-      mu: setCellValue(e.target.value.trim())
+      $editing.value = false
+      setCellValue(e.target.value.trim())
    }
 
    return component(
-      <div class="cell" title={$value} on:click={e => { mu: $editing.value = true }}>
+      <div class="cell" title={$value} on:click={e => { $editing.value = true }}>
          {If($editing,
             <input
                value={$value}

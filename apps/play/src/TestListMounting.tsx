@@ -27,10 +27,10 @@ export function TestListMounting() {
       <div>
          <button on:click={e => $active.toggle()}>switch</button>
          {If($active,
-            <Counter can:log={log}></Counter>
+            <Counter log={log}></Counter>
          )}
          {ElseIf((!$active()), 'mount',
-            <Counter can:log={log}></Counter>
+            <Counter log={log}></Counter>
          )}
          <aside style="position: fixed; width: 500px; height: 1000px; background-color: #eee">
             LOGS:
@@ -48,7 +48,7 @@ export function TestListMounting() {
    )
 }
 
-function Counter(input: FromTag<{ 'can:log'?: (msg: string) => void }>) {
+function Counter(input: FromTag<{ log?: (msg: string) => void }>) {
    let count = 0
    const { log } = input
    return component(

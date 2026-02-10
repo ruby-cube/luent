@@ -7,6 +7,7 @@ import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
 import { Update } from "./Update";
 import { noop } from "@rue/utils";
+import { UpdateType } from "./x_IdleUpdate";
 
 
 export const queueTask = setImmediate;
@@ -130,7 +131,7 @@ export class RenderCycle {
       this.runPrecommit(() => {
          this.update.commit()
          this.runPostcommit()
-         this.scheduleTick()
+         // this.scheduleTick()
          this.update.complete()
          if (__DEV__) {
             requestAnimationFrame((time) =>
@@ -234,20 +235,23 @@ export class RenderCycle {
 
    runPostcommit() {
       const { phases } = this
-      for (let i = 1; i < TICK; i++) {
+      for (let i = 1; i < phases.length; i++) {
          const phase = phases[i]
          this.process.runSync(() => this.runPhase(phase))
          if (this.cancelled) return;
       }
    }
 
-   scheduleTick() {
-      requestAnimationFrame(() => {
-         queueTask(() => {
-            this.process.runSync(() => this.runPhase(TICK)) //TODO: There should be new updates for each tick task.. right?
-         })
-      })
-   }
+   // scheduleTick() {
+   //    const queue = this.effects[TICK]
+   //    if (!queue) return;
+   //    requestAnimationFrame(() => {
+   //       queueTask(() => {
+   //          queue.update.start()
+   //          this.process.runSync(() => this.runPhase(TICK)) //TODO: There should be new updates for each tick task.. right?
+   //       })
+   //    })
+   // }
 
 
    // private startTasks: (() => void)[] | undefined
@@ -346,8 +350,22 @@ export class RenderCycle {
 
    private createTickTaskQueue() {
       const { update } = this
-      const tick = new TaskQueue(update, TICK)
+
+      const tick = new TaskQueue(update, TICK) // TODO: should this be new update??
       tick.runEffect = (effect) => {
+         requestAnimationFrame(() => {
+            queueTask(() => {
+               if (!effect.run) return;
+               const _update = new Update(
+                  update.type,
+                  update.timeMargin,
+                  update.type === UpdateType.USER_INTERACTION ? false : update.idle // TODO: not sure about this
+               )
+               _update.queue(effect.run).start()
+            })
+         })
+
+         console.warn('run TICK effect', effect.run)
          if (!effect.run) return;
          tickUpdate(effect.run, update)
       }

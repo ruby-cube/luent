@@ -87,7 +87,7 @@ const $todos = AsyncIon({
 
    complexOp: Action({
       dispatch({ ooo, output }, index) {
-         mu: $something.value = 0
+         $something.value = 0
 
          ooo.await(db.deleteTodo(index))
             .catch(err => { })
@@ -183,6 +183,6 @@ const doSomething = Action(function () {
 
 })
 
-action(() => { mu: $seconds.value++ })
+action(() => { $seconds.value++ })
 
 

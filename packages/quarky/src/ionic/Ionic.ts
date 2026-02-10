@@ -22,6 +22,7 @@ export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 // **** THIS WORKS: I just need to figure out how to connect it to selective ionization config
 export type Expand<T> = T extends infer O ? O : never;
 
+type AbsorbIons<T> = T extends any[] ? T : { [K in keyof T as K extends `$${infer S}` ? T[K] extends () => any ? S : K : K]: K extends `$${infer S}` ? T[K] extends () => infer V ? V : T[K] : T[K] }
 
 type IonAccess<T, M = {}> = Expand<{
    [K in keyof T as K extends `$${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never : `$${K}` : T[K] extends Function ? never : K extends string ? `$${K}` : never]:
@@ -108,7 +109,7 @@ type IonicConfig<T> = { [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I :
 export const Ionic = _Ionic as typeof _Ionic & { '~Ionic': true }
 export const asIonic = Ionic as <T>(obj: T) => IonicProxy & T
 
-export function _Ionic<T extends AnyObject, M>(target: T, config?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<T, M> {
+export function _Ionic<T extends AnyObject, M>(target: T, config?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<AbsorbIons<T>, M> {
    if (isIonicProxy(target)) {
       return target as any
    }

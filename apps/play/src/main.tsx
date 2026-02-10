@@ -18,7 +18,7 @@ import { TestApp } from './TestApp';
 import { TestListSelect } from './wip-demos/TestListSelect';
 import { TabApp } from './wip-demos/markdown-app/TestTabs';
 import { TreeApp } from '../../demos/src/TestTreeApp';
-import { SortableTableApp } from './wip-demos/sortable-table';
+import { SortableTableApp } from '../../demos/src/SortableTable';
 import { TestEffectCycle } from './TestEffectCycle';
 import { TestShow } from './TestShow';
 import { TestSetHas } from './TestSetHas';
@@ -74,6 +74,7 @@ import { TestThru } from '../../demos/src/TestThru';
 import { TestForSetAndMap, TestForSetAndMapIons } from './wip-demos/TestForSetAndMap';
 import { TestAsyncSelect } from '../../demos/src/TestAsyncSelect';
 import { TestAsyncTabs } from './wip-demos/TestAsyncTabs';
+import { initMonacoEditor } from './TestMonacoEditor';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -97,10 +98,11 @@ import { TestAsyncTabs } from './wip-demos/TestAsyncTabs';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
+initMonacoEditor()
 
-const app = createRoot(TestAsyncSelect)
+// const app = createRoot(TestAsyncSelect)
 
-app.mount('#root')
+// app.mount('#root')
 
 
 // function TestApp2() {

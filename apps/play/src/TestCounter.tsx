@@ -87,11 +87,11 @@ export function TestCount() {
    })
 
    function increment() {
-      mu: $count.value++
+      $count.value++
    }
 
    function decrement() {
-      mu: $count.value--
+      $count.value--
    }
 
    // queueIonicTask(() => {

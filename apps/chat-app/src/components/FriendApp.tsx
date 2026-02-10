@@ -22,7 +22,7 @@ export function FriendApp(input: FromTag<{
 
    return component(
       <Context provide={[USER(user)]}>
-         <Navbar user={user} can:navigateHome={() => $main.as('home')}>
+         <Navbar user={user} navigateHome={() => $main.as('home')}>
             <button on:click={() => $main.as('chat')}>Chat</button>
          </Navbar>
          <$App as={$main}></$App>

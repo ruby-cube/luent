@@ -26,16 +26,16 @@ export function SVGPolygonApp() {
    function add(e: any) {
       e.preventDefault()
       if (!$newLabel()) return
-      mu: stats.push(Ionic({
+      stats.push(Ionic({
          label: $newLabel(),
          value: 100
       }))
-      mu: $newLabel.value = ''
+      $newLabel.value = ''
    }
 
    function remove(stat: Ionic<Stat>) {
       if (stats.length > 3) {
-         mu: stats.splice(stats.indexOf(stat), 1)
+         stats.splice(stats.indexOf(stat), 1)
       } else {
          alert("Can't delete more!")
       }

@@ -228,7 +228,7 @@ export default function TodoApp() {
             <div>
                <TodoList
                   todos={$todos}
-                  can:removeTodo={removeTodo}
+                  removeTodo={removeTodo}
                />
             </div>
          )}
@@ -309,7 +309,7 @@ function TodoList(input: FromTag<{
                <Todo
                   key={todo.id}
                   todo={todo}
-                  can:removeTodo={removeTodo}
+                  removeTodo={removeTodo}
                />
             ))}
          </ul>

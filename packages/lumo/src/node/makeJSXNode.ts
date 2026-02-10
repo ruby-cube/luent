@@ -135,8 +135,8 @@ export function callWithActivationType(type: GroupActivationType, Slot: RenderSl
 }
 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode) | RawJSXNode) {
-   if (isIon(slot)) return () => slot; //FIX: need to differentiate getter from render function
-   if (slot instanceof Function) { // distinguishes derivation functions from render functions
+   if (isIon(slot)) return () => slot;
+   if (slot instanceof Function) {
       return slot as (...args: any[]) => RawJSXNode;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
@@ -148,7 +148,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-remount' | 'show-view' | 'create-view' | any,
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-view' | 'show-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -168,8 +168,8 @@ export function makeJSXNode(
          if (!Slot) throw new Error(`Extraneous <show-view>`)
          return callWithActivationType('show', Slot, config.provide);
 
-      case 'mount-remount':
-         if (!Slot) throw new Error(`Extraneous <mount-remount>`)
+      case 'mount-view':
+         if (!Slot) throw new Error(`Extraneous <mount-view>`)
          return callWithActivationType('mount', Slot, config.provide);
 
       default:

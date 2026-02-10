@@ -338,7 +338,7 @@ export function TodoMVC({
                )}
                <TodoList
                   mu:todos={$filteredTodos}
-                  can:removeTodo={($todos.removeTodo)}
+                  removeTodo={($todos.removeTodo)}
                ></TodoList>
             </section>
             <footer show-if={$todoCount} class="footer">
@@ -419,8 +419,8 @@ type Mutable<T> = T
 
 
 function TodoList(input: FromTag<{
-   'mu:todos': $<$$TodoArray>,
-   'can:removeTodo': (todo: $$<Todo>) => void,
+   'mu:todos': Ion<$$TodoArray>,
+   removeTodo: (todo: Ionic<Todo>) => void,
 }>) {
    const { mu, $todos, removeTodo, } = input()
 

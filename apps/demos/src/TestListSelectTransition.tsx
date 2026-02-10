@@ -75,8 +75,8 @@ export function TestListSelectTransition() {
    }
 
    function removeItem(index: number) {
-      mu: selected.delete(list[index] as IonicItem) // TODO: remove type-casting once Ionic is properly typed
-      mu: list.remove(index);
+      selected.delete(list[index] as IonicItem) // TODO: remove type-casting once Ionic is properly typed
+      list.remove(index);
    }
 
    function moveSelectedItems(index: number) {

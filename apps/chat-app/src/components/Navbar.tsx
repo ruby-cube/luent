@@ -5,7 +5,7 @@ import { logOut } from "../database/firebase";
 
 export function Navbar(input: FromTag<{
    user: User,
-   'can:navigateHome': () => void,
+   navigateHome: () => void,
    Slot?: RenderSlot
 }>) {
    const { user, navigateHome, Slot } = input

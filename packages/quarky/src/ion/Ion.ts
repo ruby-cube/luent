@@ -84,7 +84,13 @@ export function Ion<
    return _asIon(initialState, props) as AsIon<T, M>
 }
 
+
 export function isIon(value: unknown): value is Ion {
+   const getter = isFunction(value) && value.length === 0
+   const realIon = isFunction(value) && QUARK in value
+
+   if (getter !== realIon) console.error('isGetter', getter, 'but isIon', realIon)
+
    return isFunction(value) &&
       // value.length === 0
       QUARK in value
@@ -145,6 +151,8 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
    : [T] extends [Derivation<infer R>]
    ? M extends { '-writable': boolean } // TODO: distinguish true vs false without requiring devs to write { '-writable': true as const}
    ? MutableIon<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
+   : M extends { '@set': Function }
+   ? MutableIon<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
    : Ion<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
    : M extends { '-fetch': any } | { '-refetch': any }
    ? Ion<T> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] } & {
@@ -198,6 +206,10 @@ function _asIon(
    initialState: unknown | (() => unknown),
    props?: AnyObject,
 ) {
+   if (isIon(initialState)) {
+      return initialState
+   }
+
    if (isFunction(initialState)) {
       if (props && '-writable' in props) {
          const watch = props['-watch']
@@ -208,9 +220,6 @@ function _asIon(
       return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props))
    }
 
-   if (isIon(initialState)) {
-      return initialState
-   }
    if (props && '-derive' in props) {
       const derive = props['-derive']
       const watch = props['-watch']

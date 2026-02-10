@@ -331,12 +331,12 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 }
 
 export function Remount(input: FromTag<{
-   'can:discard'?: () => void,
+   discard: Ion<boolean>,
    Slot: RenderSlot
 
 }>) {
-   const { discard, Slot } = input;
-   return markActivationType('mount', Slot, discard)
+   const { $discard, Slot } = input;
+   return markActivationType('mount', Slot, $discard)
 }
 
 export function Create(input: FromTag<{
@@ -351,14 +351,14 @@ export function Create(input: FromTag<{
 type ActivationKit = {
    activationType: ActivationType;
    render: RenderFunction;
-   discard: (() => void) | undefined;
+   $discard: (() => boolean) | undefined;
 }
 
-export function markActivationType(activationType: ActivationType, render: RenderFunction, discard?: (() => void) | undefined) {
+export function markActivationType(activationType: ActivationType, render: RenderFunction, $discard?: (() => boolean) | undefined) {
    return {
       activationType,
       render,
-      discard
+      $discard
    }
 }
 

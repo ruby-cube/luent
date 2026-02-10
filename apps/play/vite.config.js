@@ -2,6 +2,7 @@ import { resolve } from "path"
 import { defineConfig } from 'vite'
 import babelLumoTransform from '../../packages/lumo/babel-plugin/index.js'
 import * as babel from '@babel/core';
+// import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 
 export default defineConfig({
@@ -38,7 +39,8 @@ export default defineConfig({
                map: result.map
             };
          },
-      },
+      }
+      // monacoEditorPlugin()
       // {
       //    name: 'vite-lumo-plugin-post',
       //    async transform(code, id) {

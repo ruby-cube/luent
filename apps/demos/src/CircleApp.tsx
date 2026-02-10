@@ -20,7 +20,7 @@ export function CircleApp() {
          return;
       }
 
-      if ((target as HTMLElement)?.tagName !== 'circle') mu: $selected.value = null
+      if ((target as HTMLElement)?.tagName !== 'circle') $selected.value = null
 
       if (!$selected()) {
          $circles().push(Ionic({
@@ -43,11 +43,11 @@ export function CircleApp() {
    }
 
    function undo() {
-      mu: $circles.value = clone(history[--$index.value])
+      $circles.value = clone(history[--$index.value])
    }
 
    function redo() {
-      mu: $circles.value = clone(history[++$index.value])
+      $circles.value = clone(history[++$index.value])
    }
 
    function clone(circles: Ionic<Circle[]>) {
@@ -71,20 +71,10 @@ export function CircleApp() {
                   cy={circle.cy}
                   r={circle.$r}
                   fill={(circle === $selected() ? '#ccc' : '#fff')}
-                  on:click={e => { mu: $selected.value = circle }}
+                  on:click={e => { $selected.value = circle }}
                   on:contextmenu={e => (e.preventDefault(), adjust(circle))}
                ></circle>)
             )}
-            {/* {For($circles, $circle => (
-               <circle
-                  cx={$circle().cx}
-                  cy={$circle().cy}
-                  r={($circle().r)}
-                  fill={($circle() === $selected() ? '#ccc' : '#fff')}
-                  on:click={e => { mu: $selected.value = $circle() }}
-                  on:contextmenu={e => (e.preventDefault(), adjust($circle()))}
-               ></circle>)
-            )} */}
          </svg>
 
          <div class="controls">

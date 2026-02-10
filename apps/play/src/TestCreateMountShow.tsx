@@ -4,7 +4,7 @@ import "./style.css"
 
 function Counter(input: FromTag<{
    label: string,
-   'can:logHook'?: (msg: string) => void
+   logHook?: (msg: string) => void
 }>
 ) {
    const { label, logHook } = input
@@ -56,13 +56,13 @@ function Counter(input: FromTag<{
 export function TestCreateMountShow() {
    const $brave = Ion(true, {
       toggle() {
-         mu: this.value = !this.value
+         this.value = !this.value
       }
    })
 
    const $mood = Ion('happy' as "happy" | "sad", {
       toggle() {
-         mu: this.value = this.value === 'happy' ? 'sad' : 'happy'
+         this.value = this.value === 'happy' ? 'sad' : 'happy'
       }
    })
 
@@ -128,8 +128,8 @@ export function TestCreateMountShow() {
                   for further fine-grained configurations (see Mix and match activation types)`}
                </p>
                <div class='container'>
-                  <button style="width: 5em" on:click={e => { mu: $tab.value = 1 }}>home</button>
-                  <button style="width: 6em" on:click={e => { mu: $tab.value = 2 }}>garden</button>
+                  <button style="width: 5em" on:click={e => { $tab.value = 1 }}>home</button>
+                  <button style="width: 6em" on:click={e => { $tab.value = 2 }}>garden</button>
                   <div class='container' style="height: 160px">
                      {If(($tab() === 1),
                         <div>
@@ -161,16 +161,16 @@ export function TestCreateMountShow() {
             // const $tab1 = Remountable()
 
             return <>
-               <code>{'<mount-remount>'}</code>
+               <code>{'<mount-view>'}</code>
                <p>
                   {`This mounts, demounts, and remounts views of a conditional series, preserving state when demounted. 
                   Remountable views can also be destroyed. (not yet implemented)`}
                </p>
                <div class='container'>
-                  <button style="width: 5em" on:click={e => { mu: $tab.value = 1 }}>home</button>
-                  <button style="width: 6em" on:click={e => { mu: $tab.value = 2 }}>garden</button>
+                  <button style="width: 5em" on:click={e => { $tab.value = 1 }}>home</button>
+                  <button style="width: 6em" on:click={e => { $tab.value = 2 }}>garden</button>
                   <div class='container' style="height: 160px">
-                     <mount-remount>
+                     <mount-view>
                         {If(($tab() === 1), /* $tab1, */
                            <div>
                               <p>🏠</p>
@@ -188,7 +188,7 @@ export function TestCreateMountShow() {
                            </div>
                         )}
                         <aside>(state is preserved!!)</aside>
-                     </mount-remount>
+                     </mount-view>
                   </div>
                </div>
             </>
@@ -213,9 +213,9 @@ export function TestCreateMountShow() {
                   as the second to last parameter of the conditional function (If/ElseIf/Else)`}
                </p>
                <div class='container'>
-                  <button style="width: 5em" on:click={e => { mu: $tab.value = 1 }}>home</button>
-                  <button style="width: 6em" on:click={e => { mu: $tab.value = 2 }}>garden</button>
-                  <button style="width: 5em" on:click={e => { mu: $tab.value = 0 }}>door</button>
+                  <button style="width: 5em" on:click={e => { $tab.value = 1 }}>home</button>
+                  <button style="width: 6em" on:click={e => { $tab.value = 2 }}>garden</button>
+                  <button style="width: 5em" on:click={e => { $tab.value = 0 }}>door</button>
                   <div class='container' style="height: 160px">
                      {If(($tab() === 1),
                         <div>
@@ -278,14 +278,14 @@ export function TestCreateMountShow() {
                   lifecycle hooks and logs them. WARNING: There will be obnoxious dialog boxes popping up as you navigate the tabs`}
                </p>
                <div class='container'>
-                  <button style="width: 5em" on:click={e => { mu: $tab.value = 1 }}>home</button>
-                  <button style="width: 6em" on:click={e => { mu: $tab.value = 2 }}>garden</button>
+                  <button style="width: 5em" on:click={e => { $tab.value = 1 }}>home</button>
+                  <button style="width: 6em" on:click={e => { $tab.value = 2 }}>garden</button>
                   <div class='container' style="height: 160px">
                      {If(($tab() === 1),
                         <div>
                            <p>🏠</p>
                            <div style="font-size: x-small">
-                              <Counter label='home' can:logHook={log}></Counter>
+                              <Counter label='home' logHook={log}></Counter>
                               <aside>(created: state is NOT preserved!)</aside>
                            </div>
                         </div>
@@ -294,7 +294,7 @@ export function TestCreateMountShow() {
                         <div>
                            <p>🌺 🍄 🍀</p>
                            <div class="garden" style="font-size: x-small">
-                              <Counter label='garden' can:logHook={log}></Counter>
+                              <Counter label='garden' logHook={log}></Counter>
                               <aside>(mounted: state is preserved!!)</aside>
                            </div>
                         </div>

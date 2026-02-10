@@ -122,14 +122,14 @@ export function VideoPlayer() {
                <ElapsedBar elapsed={$elapsedTime} duration={$duration()} paused={(track.is("paused"))}
                   on:click={reClickElapsedBar}
                />
-               {/* <mount-remount> */}
+               {/* <mount-view> */}
                   {If((track.is("playing")),
                      <button on:click={e => track.apply("pause")}>‖</button>
                   )}
                   {Else(
                      <button on:click={e => track.apply("play")}>►</button>
                   )}
-               {/* </mount-remount> */}
+               {/* </mount-view> */}
                <Timer elapsed={$elapsedTime} duration={$duration()} />
             </div>
          )}

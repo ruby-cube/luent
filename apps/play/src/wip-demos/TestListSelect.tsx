@@ -30,7 +30,7 @@ export function TestListSelect() {
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { as: IonicItem }, // TODO: type
+      [EACH]: { '-as': IonicItem }, // TODO: type
 
       insert(index: number) {
          const item = IonicItem({
@@ -69,8 +69,8 @@ export function TestListSelect() {
    }
 
    function removeItem(index: number) {
-      mu: selected.delete(list[index] as QItem) // TODO: remove type-casting once Ionic is properly typed
-      mu: list.remove(index);
+      selected.delete(list[index] as QItem) // TODO: remove type-casting once Ionic is properly typed
+      list.remove(index);
    }
 
    iteratorTests(list, selected)

@@ -138,7 +138,7 @@ type HasMu<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C
 // }
 
 function assertFunction(value: unknown) {
-   if (!isFunction(value) || isIon(value)) throw new Error('Event handler must be a function')
+   if (!isFunction(value) || isIon(value)) throw new Error('Must be a function')
 }
 
 // TODO: Slots
@@ -172,13 +172,13 @@ export function toInput(attributes: AnyObject) {
          if (key === 'Slot') return target.children // TODO: Is this correct??
          if (isIonKey(key)) {
             const ionKeyToAttributeKey = (key: string) => key.slice(1)
-            const opKey = 'can:' + key
-            if (opKey in target) {
-               // case: can:$frog  (as shorthand for getFrog)
-               const op = target[opKey]
-               assertFunction(op)
-               return op;
-            }
+            // const opKey = 'can:' + key
+            // if (opKey in target) {
+            //    // case: can:$frog  (as shorthand for getFrog)
+            //    const op = target[opKey]
+            //    assertFunction(op)
+            //    return op;
+            // }
             const attributeKey = ionKeyToAttributeKey(key)
             if (attributeKey in target) {
                const value = target[attributeKey]
@@ -198,17 +198,18 @@ export function toInput(attributes: AnyObject) {
             assertIonicProxy(value)
             return MayBeMutableProxy(getIonicProxy(value));
          }
-         const opKey = 'can:' + key
-         if (opKey in target) {
-            const op = target[opKey]
-            assertFunction(op)
-            return op;
-         }
+         // const opKey = 'can:' + key
+         // if (opKey in target) {
+         //    const op = target[opKey]
+         //    assertFunction(op)
+         //    return op;
+         // }
          if (key in target) {
-            const value = target[key]
-            if (isFunction(value) && value.length !== 0)
-               debug.error('To pass a function as component input, prefix attribute with `can:`')
-            return toValue(target[key])
+            return target[key]
+            // const value = target[key]
+            // if (isFunction(value) && value.length !== 0)
+            //    debug.error('To pass a function as component input, prefix attribute with `can:`')
+            // return toValue(target[key])
          }
          return undefined
       },
@@ -229,7 +230,7 @@ type TagAttributes<D> =
    & MutableIonAttributes<D>
    & NonmutableIonAttributes<D>
    & TagEvents<D>
-   & OpAttribute<D>
+   // & OpAttribute<D>
    // & SeeAttribute<D>
    & TagSlot<D>
    & (D extends { provide: infer P } ? P : {})
@@ -251,7 +252,7 @@ type MaybeIonAttributes<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
    K extends `mu:${infer I}` ? never
-   : K extends `can:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' ? never
+   : K extends /* `can:${string}` | `see:${string}` | */ `on:${string}` | 'Slot' ? never
    : K extends string ? K
    : never
    : never]:
@@ -301,7 +302,7 @@ export type FromTag<D> =
    & MutableIonInput<D>
    & WithEmit<D>
    & WithMu<D>
-   & OpInput<D>
+   // & OpInput<D>
    // & SeeInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
    & (D extends { provide: infer S } ? { provide: S } : { provide: undefined })
@@ -315,22 +316,22 @@ type WithMu<D> = HasMu<D> extends true ? {
 type MuIon<I> = ExcludePrimitives<I> extends { value: any } ? I
    : ExcludePrimitives<I> & { value: ExcludePrimitives<I> extends Ion<infer S> ? S : never } | OnlyPrimitives<I>
 
-type OpInput<D> = {
-   [K in keyof D as K extends `can:${infer F}` ? F : never]: D[K]
-}
+// type OpInput<D> = {
+//    [K in keyof D as K extends `can:${infer F}` ? F : never]: D[K]
+// }
 // type SeeInput<D> = {
 //    [K in keyof D as K extends `see:${infer F}` ? F : never]: D[K]
 // }
-type OpAttribute<D> = {
-   [K in keyof D as K extends `can:${string}` ? K : never]: D[K]
-}
+// type OpAttribute<D> = {
+//    [K in keyof D as K extends `can:${string}` ? K : never]: D[K]
+// }
 // type SeeAttribute<D> = {
 //    [K in keyof D as K extends `see:${string}` ? K : never]: D[K]
 // }
 
 type StaticInput<D> = {
    [K in keyof D as IncludesIon<D[K]> extends true ? never
-   : K extends `mu:${string}` | `can:${string}`/*  | `see:${string}` */ | `on:${string}` | 'Slot' | 'provide' ? never
+   : K extends `mu:${string}` /* | `can:${string}` | `see:${string}`  */| `on:${string}` | 'Slot' | 'provide' ? never
    : K]:
    D[K]
    // MaybeMarkInert<D[K]>
@@ -343,7 +344,7 @@ type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, P
 type ReadonlyIonInput<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
-   K extends `mu:${string}` | `can:${string}` /* | `see:${string}` */ | `on:${string}` | 'Slot' ? never
+   K extends `mu:${string}` /* | `can:${string}`  *//* | `see:${string}` */ | `on:${string}` | 'Slot' ? never
    : K extends string ? `$${K}`
    : never
    : never

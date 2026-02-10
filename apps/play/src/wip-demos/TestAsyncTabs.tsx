@@ -9,27 +9,27 @@ export function TestAsyncTabs() {
    const $count = Ion(0);
 
    Interval(1000, () => {
-      mu: $count.value++
+      $count.value++
    }).start()
 
    return component(<>
       <ul class="inline">
-         <li class={{ selected: ($tab() === 0) }} on:click={e => { mu: $tab.value = 0 }}>
+         <li class={{ selected: ($tab() === 0) }} on:click={e => { $tab.value = 0 }}>
             Uno
          </li>
-         <li class={{ selected: ($tab() === 1) }} on:click={e => { mu: $tab.value = 1 }}>
+         <li class={{ selected: ($tab() === 1) }} on:click={e => { $tab.value = 1 }}>
             Dos
          </li>
-         <li class={{ selected: ($tab() === 2) }} on:click={e => { mu: $tab.value = 2 }}>
+         <li class={{ selected: ($tab() === 2) }} on:click={e => { $tab.value = 2 }}>
             Tres
          </li>
-         <li class={{ selected: ($tab() === 3) }} on:click={e => { mu: $tab.value = 3 }}>
+         <li class={{ selected: ($tab() === 3) }} on:click={e => { $tab.value = 3 }}>
             Quatre
          </li>
-         <li class={{ selected: ($tab() === 4) }} on:click={e => { mu: $tab.value = 4 }}>
+         <li class={{ selected: ($tab() === 4) }} on:click={e => { $tab.value = 4 }}>
             Cinq
          </li>
-         <li class={{ selected: ($tab() === 5) }} on:click={e => { mu: $tab.value = 5 }}>
+         <li class={{ selected: ($tab() === 5) }} on:click={e => { $tab.value = 5 }}>
             Six
          </li>
       </ul>

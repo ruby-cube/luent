@@ -51,7 +51,7 @@ request
 function TodoWithSuspense() {
 
    const toggleComplete = Action(({ ooo }) => () => {
-      mu: todo.complete = !todo.complete
+      todo.complete = !todo.complete
 
       ooo.await(dispatch('...', todo.complete))
    })
@@ -80,7 +80,7 @@ function TodoWithSuspense() {
 
 
 const markComplete = Action(({ ooo }) => () => {
-   mu: const something = todo.complete = true
+   const something = todo.complete = true
 
    ooo.await(cycle.tick)
    ooo.await((dispatch('...')))
@@ -147,7 +147,7 @@ function Todo() {
 
    // Optimistic
    const markComplete = RemoteAction(() => {
-      mu: todo.complete = true
+      todo.complete = true
 
       ooo.await(tick)
       ooo.await((db.dispatch('...')))

@@ -1,7 +1,9 @@
 
 import { component, Else, For, FromTag, If } from '@rue/lumo'
-import { Ion, ionic, ionize, watch } from '@rue/quarky'
+import { Ion, Ionic } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
+import "./style.css"
+import "./SortableTable.css"
 
 
 export function SortableTableApp() {
@@ -38,11 +40,9 @@ type SortableTableInput = FromTag<{
 function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
 
    const $sortKey = Ion('')
-   const sortOrders = ionize(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
+   const sortOrders = Ionic(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
 
-   console.log('sort orders', sortOrders)
-
-   const $filteredData = Ion(() =>{
+   const $filteredData = Ion(() => {
       let filteredData = data;
       let filterKey = $filterKey()
       const key = $sortKey()
@@ -92,10 +92,10 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
                   </tr>
                </thead>
                <tbody>
-                  {For($filteredData, entry => (
+                  {For($filteredData, $entry => (
                      <tr>
                         {For(columns, key => (
-                           <td>{entry[key]}</td>
+                           <td>{($entry()[key])}</td>
                         ))}
                      </tr>
                   ))}
@@ -106,27 +106,5 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
             <p>No matches found</p>
          )}
       </>
-
-      //    <table v-if="filteredData.length">
-      //       <thead>
-      //          <tr>
-      //             <th v-for="key in columns"
-      //           @click="sortBy(key)"
-      //             :class="{active: sortKey == key }">
-      //             {{ capitalize(key) }}
-      //             <span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
-      //          </span>
-      //       </th>
-      //    </tr>
-      //     </thead >
-      //    <tbody>
-      //       <tr v-for="entry in filteredData">
-      //          <td v-for="key in columns">
-      //             {{ entry[key]}}
-      //          </td>
-      //       </tr>
-      //    </tbody>
-      //   </table >
-      //    <p v-else>No matches found.</p>
    )
 }

@@ -27,14 +27,14 @@ export function ChatWindow(input: FromTag<{
    const $smoothScroll = Ion(false)
 
    atRemounted(() => {
-      mu: $smoothScroll.value = false;
-      mu: $notifyNewMessages.value = false;
+      $smoothScroll.value = false;
+      $notifyNewMessages.value = false;
 
       ooo.await(postlude, () => {
          scrollToNew()
       })
       ooo.await(tick, () => {
-         mu: $smoothScroll.value = true
+         $smoothScroll.value = true
       })
    })
 

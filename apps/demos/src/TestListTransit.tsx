@@ -47,12 +47,12 @@ export function TestListTransit() {
 
          <div class="todo">
             <h2>todo</h2>
-            <TodoList todos={($todos().filter((t) => !t.done))} can:remove={remove} />
+            <TodoList todos={($todos().filter((t) => !t.done))} remove={remove} />
          </div>
 
          <div class="done">
             <h2>done</h2>
-            <TodoList todos={($todos().filter((t) => t.done))} can:remove={remove} />
+            <TodoList todos={($todos().filter((t) => t.done))} remove={remove} />
          </div>
       </div>
    )
@@ -120,7 +120,8 @@ function receive(id: number, node: HTMLElement) {
 
 function TodoList(input: FromTag<{
    todos: Ion<Ionic<Todo>[]>,
-   'can:remove': (todo: Ionic<Todo>) => void
+   // 'can:remove': (todo: Ionic<Todo>) => void
+   remove: (todo: Ionic<Todo>) => void
 }>) {
    const { $todos, remove } = input
 

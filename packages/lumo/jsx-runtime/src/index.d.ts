@@ -2612,9 +2612,9 @@ declare global {
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit };
          'create-view': { children: ConditionalRenderKit[] };
-         'mount-remount': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
-         'o--preserve': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
-         'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
+         'mount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> };
+         // 'o--preserve': { children: ConditionalRenderKit[]; discard?: Ion<boolean> };
+         // 'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
          // 'Slot': {Slot: any}
 
          // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
