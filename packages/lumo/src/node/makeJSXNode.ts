@@ -93,7 +93,7 @@ type NodeSetup<T extends HTMLTag | ComponentSetup> = {
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
-type GroupActivationType = ActivationType | 'show'
+export type GroupActivationType = ActivationType | 'show'
 
 let groupActivationType: GroupActivationType | undefined = undefined
 let outerGroupActivationType: GroupActivationType | undefined = undefined
@@ -148,7 +148,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'mount-view' | 'show-view' | 'create-view' | any,
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-view' | 'show-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -168,9 +168,9 @@ export function makeJSXNode(
          if (!Slot) throw new Error(`Extraneous <show-view>`)
          return callWithActivationType('show', Slot, config.provide);
 
-      case 'mount-view':
-         if (!Slot) throw new Error(`Extraneous <mount-view>`)
-         return callWithActivationType('mount', Slot, config.provide);
+      case 'remount-view':
+         if (!Slot) throw new Error(`Extraneous <remount-view>`)
+         return callWithActivationType('remount', Slot, config.provide);
 
       default:
          if (typeof nodeType === 'string') {

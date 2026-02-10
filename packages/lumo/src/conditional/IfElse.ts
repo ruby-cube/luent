@@ -79,7 +79,6 @@ export class IfElseKit extends VineNode {
       super()
 
       this.$activeIndex = $ActiveIndex(getConditions(kits))
-      console.log('active index', this.$activeIndex())
 
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
          kit.flask!.emitInitialMount()
@@ -164,7 +163,7 @@ export class IfElseKit extends VineNode {
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
          kit.pending && kit.cache ? kit.cache :
-            kit.type === 'mount' ?
+            kit.type === 'remount' ?
                (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
                : processJSXOutput(kit.render(flask, kit.$condition));
 
@@ -336,7 +335,7 @@ export function Remount(input: FromTag<{
 
 }>) {
    const { discard, Slot } = input;
-   return markActivationType('mount', Slot, discard)
+   return markActivationType('remount', Slot, discard)
 }
 
 export function Create(input: FromTag<{

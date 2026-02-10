@@ -73,7 +73,7 @@ import { TestStyling } from './wip-demos/TestStyling';
 import { TestThru } from '../../demos/src/TestThru';
 import { TestForSetAndMap, TestForSetAndMapIons } from './wip-demos/TestForSetAndMap';
 import { TestAsyncSelect } from '../../demos/src/TestAsyncSelect';
-import { TestAsyncTabs } from './wip-demos/TestAsyncTabs';
+import { TestAsyncTabs } from '../../demos/src/TestAsyncTabs';
 import { initMonacoEditor } from './TestMonacoEditor';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';

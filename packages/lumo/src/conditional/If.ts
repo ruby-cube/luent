@@ -1,9 +1,10 @@
-import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, resetGroupActivationType } from "../node/makeJSXNode";
+import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, resetGroupActivationType, GroupActivationType } from "../node/makeJSXNode";
 import { Booleanny } from "@rue/types";
 import { getAwaiting, Ion, isGetter, isInertIon, isIon, toValue } from "@rue/quarky";
 import { ConditionalKit, IfElseKit, renderShowHideSeries, toDynamicConditionalKits } from "./IfElse";
 import { getFlask } from "@rue/flask";
 import { isFunction } from "@rue/utils";
+import { aC } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 
 // let currentNodePodIndex: number | undefined = undefined
 
@@ -11,7 +12,7 @@ import { isFunction } from "@rue/utils";
 //    currentNodePodIndex = index ?? undefined;
 // }
 
-export type ActivationType = 'create' | 'mount'
+export type ActivationType = 'create' | 'remount'
 
 export type RenderConditional<T = undefined> = (v: NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>> : T>) => RawJSXNode
 
@@ -109,17 +110,17 @@ function getParams(typeOrRenderConditional: RawJSXNode | RenderConditional | Act
 //    }
 // }
 
-export function createIfSeries(kits: ConditionalKit[]) {
+export function createIfSeries(kits: ConditionalKit[], viewBy?: GroupActivationType) {
    const condition = kits[0].$condition
    if (!isGetter(condition) || isInertIon(condition)) return renderStaticConditional(kits)
-   const activationType = getGroupActivationType()
+   const activationType = viewBy ?? getGroupActivationType()
    resetGroupActivationType()
    if (activationType === 'show') {
       return renderShowHideSeries(kits)
    }
-   if (kits.at(-1)?.statementType !== 'else') kits.push(Else(()=>undefined))
+   if (kits.at(-1)?.statementType !== 'else') kits.push(Else(() => undefined))
    const dynamicKits = toDynamicConditionalKits(kits, activationType)
-console.warn('create dynamic if else')
+console.log('activationTYpe', activationType)
    return new IfElseKit(dynamicKits, getFlask())
 }
 

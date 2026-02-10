@@ -161,7 +161,7 @@ export function TestCreateMountShow() {
             // const $tab1 = Remountable()
 
             return <>
-               <code>{'<mount-view>'}</code>
+               <code>{'<remount-view>'}</code>
                <p>
                   {`This mounts, demounts, and remounts views of a conditional series, preserving state when demounted. 
                   Remountable views can also be destroyed. (not yet implemented)`}
@@ -170,7 +170,7 @@ export function TestCreateMountShow() {
                   <button style="width: 5em" on:click={e => { $tab.value = 1 }}>home</button>
                   <button style="width: 6em" on:click={e => { $tab.value = 2 }}>garden</button>
                   <div class='container' style="height: 160px">
-                     <mount-view>
+                     <remount-view>
                         {If(($tab() === 1), /* $tab1, */
                            <div>
                               <p>🏠</p>
@@ -188,7 +188,7 @@ export function TestCreateMountShow() {
                            </div>
                         )}
                         <aside>(state is preserved!!)</aside>
-                     </mount-view>
+                     </remount-view>
                   </div>
                </div>
             </>
@@ -202,14 +202,14 @@ export function TestCreateMountShow() {
 
             return <>
                <code>
-                  <span class="bracket">{`{`}</span>{`If($condition, 'mount',`}<br />
+                  <span class="bracket">{`{`}</span>{`If($condition, 'remount',`}<br />
                   {`   <Component></Component>`}<br />
                   {`)`}<span class="bracket">{`}`}</span>
                </code>
                <p>
                   {`On rare occasions you may want to create-destroy most views 
                   in a series but preserve the state of a particular view. Activation
-                  types may be mixed and matched by passing 'create' or 'mount'
+                  types may be mixed and matched by passing 'create' or 'remount'
                   as the second to last parameter of the conditional function (If/ElseIf/Else)`}
                </p>
                <div class='container'>
@@ -226,7 +226,7 @@ export function TestCreateMountShow() {
                            </div>
                         </div>
                      )}
-                     {ElseIf(($tab() === 2), 'mount',
+                     {ElseIf(($tab() === 2), 'remount',
                         <div>
                            <p>🌺 🍄 🍀</p>
                            <div class="garden" style="font-size: x-small">
@@ -235,7 +235,7 @@ export function TestCreateMountShow() {
                            </div>
                         </div>
                      )}
-                     {Else('mount',
+                     {Else('remount',
                         <div>
                            <span class='emoji'>😳</span>
                            <p>nothing to see here ...</p>
@@ -290,7 +290,7 @@ export function TestCreateMountShow() {
                            </div>
                         </div>
                      )}
-                     {ElseIf(($tab() === 2), 'mount',
+                     {ElseIf(($tab() === 2), 'remount',
                         <div>
                            <p>🌺 🍄 🍀</p>
                            <div class="garden" style="font-size: x-small">
@@ -443,10 +443,10 @@ export function TestDerivedConditional() {
          {If(($doubleCount() > 3),
             <p>doublecount is greater than 3!</p>
          )}
-         {If(($doubleCount() > 0), 'mount',
+         {If(($doubleCount() > 0), 'remount',
             <p>doublecount is greater than 0!</p>
          )}
-         {If(($count() > 3), 'mount',
+         {If(($count() > 3), 'remount',
             <p>count is greater than 3!</p>
          )}
          {If(($count() > 0), 'show',
@@ -456,10 +456,10 @@ export function TestDerivedConditional() {
          {If(($doubleCount() > 3), 'create',
             <p>doublecount is greater than 3!</p>
          )}
-         {If(($doubleCount() > 0), 'mount',
+         {If(($doubleCount() > 0), 'remount',
             <p>doublecount is greater than 0!</p>
          )}
-         {If(($count() > 3), 'mount',
+         {If(($count() > 3), 'remount',
             <p>count is greater than 3!</p>
          )}
          {If(($count() > 0), 'show',
@@ -470,10 +470,10 @@ export function TestDerivedConditional() {
          {If($doubleCount() > 3, 'create',
             <p>doublecount is greater than 3!</p>
          )}
-         {If($doubleCount() > 0, 'mount',
+         {If($doubleCount() > 0, 'remount',
             <p>doublecount is greater than 0!</p>
          )}
-         {If($count() > 3, 'mount',
+         {If($count() > 3, 'remount',
             <p>count is greater than 3!</p>
          )}
          {If($count() > 0, 'show',
@@ -490,7 +490,7 @@ export function TestDerivedConditional() {
          {/* {If($aActive, 'create',
             <p>A ACTIVE</p>
          )}
-         {ElseIf($bActive, 'mount',
+         {ElseIf($bActive, 'remount',
             <p>A GONE f</p>
          )}
          {Else('show',
@@ -502,7 +502,7 @@ export function TestDerivedConditional() {
          {Else('create',
             <p>B GONE</p>
          )} */}
-         {/* {If($cActive, 'mount',
+         {/* {If($cActive, 'remount',
             <p>C ACTIVE</p>
          )}
          {If($dActive, 'show',

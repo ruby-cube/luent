@@ -1,5 +1,5 @@
 import { $_derivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@rue/quarky";
-import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
+import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ConditionalKit } from "./IfElse";
 import { ActivationType, createIfSeries } from "./If";
 import { isFunction } from "@rue/utils";
@@ -16,7 +16,7 @@ type SwitchCaseKit = {
 type CasesKit = {
    cases: any[],
    render: (() => RawJSXNode) | undefined
-   type: ActivationType | undefined
+   type?: ActivationType | undefined
 }
 
 type RawCaseKit = {
@@ -28,17 +28,18 @@ type RawCaseKit = {
 
 export function Switch(input: FromTag<{
    x: Ion<any>,
+   'view-type'?: GroupActivationType
    matches?: (target: any, _case: any) => boolean,
    Slot: RenderSlot
 }>) {
-   const { $x, matches = (x: any, c: any) => x === c, Slot } = input
+   const { $x, matches = (x: any, c: any) => x === c, Slot, "view-type": view } = input
    const kits = toConditionalKits({
       target: $x,
       cases: toCases(Slot() as RawCaseKit[]) as CasesKit[],
       matches
    })
    return component(
-      createIfSeries(kits)
+      createIfSeries(kits, view)
    )
 }
 
@@ -68,7 +69,7 @@ function toCases(raw: RawCaseKit[]): CasesKit[] {
 
 
 export function Case(c: any, typeOrRender?: ActivationType | RenderFunction | RawJSXNode, renderCase?: RenderFunction | RawJSXNode) {
-   const type = isFunction(typeOrRender) ? 'create' : typeOrRender
+   const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {
       case: c,
@@ -78,7 +79,7 @@ export function Case(c: any, typeOrRender?: ActivationType | RenderFunction | Ra
 }
 
 export function Default(typeOrRender: ActivationType | RenderFunction | RawJSXNode, renderCase?: RenderFunction | RawJSXNode) {
-   const type = isFunction(typeOrRender) ? 'create' : typeOrRender
+   const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {
       case: 'default',

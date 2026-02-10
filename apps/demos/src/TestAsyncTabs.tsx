@@ -8,8 +8,6 @@ export function TestAsyncTabs() {
    const $tab = Ion(0);
    const $count = Ion(0);
 
-
-
    setInterval(() => {
       $count.value++
    }, 1000)
@@ -37,17 +35,17 @@ export function TestAsyncTabs() {
       </ul>
       {Await($suspense =>
          <div class={{ 'tab': true, 'pending': $suspense }}>
-            <Switch x={$tab}>
-               {Case(0,
+            <Switch x={$tab} view-type='remount'>
+               {Case(0, 
                   <Tab page="Un" count={$count} />
                )}
-               {Case(1,
+               {Case(1, 
                   <Tab page="Deux" count={$count} />
                )}
-               {Case(2,
+               {Case(2, 
                   <Tab page="Trois" count={$count} />
                )}
-               {Case(3,
+               {Case(3, 
                   <Tab page="Quatre" count={$count} />
                )}
                {Case(4,

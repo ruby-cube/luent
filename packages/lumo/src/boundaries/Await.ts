@@ -231,7 +231,7 @@ export function createAwaitSeries(
          return placeholder
       }),
       ElseIf($error, () => renderError($error()!)),
-      Else('mount', renderResolved)
+      Else('remount', renderResolved)
    ])
 
    return awaitSeries

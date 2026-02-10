@@ -17,8 +17,9 @@ import { TestAsyncSelect } from "./TestAsyncSelect"
 import { CRUDApp } from "./TestCRUDApp"
 import { SortableTableApp } from "./SortableTable"
 import { TestSettableDerivation } from "./TestSettableDerivations"
+import { TestAsyncTabs } from "./TestAsyncTabs"
 
-const app = createRoot(TestSettableDerivation)
+const app = createRoot(TestAsyncTabs)
 
 app.mount('#root')
 

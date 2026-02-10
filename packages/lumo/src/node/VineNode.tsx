@@ -112,7 +112,7 @@ export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent, preceding: JS
 }
 
 // function isNodeKit(node: RawJSXNode): node is NodeKit {
-//    return isObject(node) && 'mount' in node
+//    return isObject(node) && 'remount' in node
 // }
 
 
