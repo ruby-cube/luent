@@ -41,7 +41,7 @@ export function afterMounted(task: (initial: boolean) => void) {
 
 
 
-export function atDestroy(task: () => void) {
+export function atDiscard(task: () => void) {
    getFlask().onDiscard(task);
 }
 
@@ -55,7 +55,7 @@ export function atUnmount(task: (final: boolean) => void) {
 }
 
 
-export function atDestroyed(task: () => void) {
+export function atDiscarded(task: () => void) {
    getFlask().onDiscard(() => { queueRender(task) });
 }
 
@@ -68,7 +68,7 @@ export function atUnmounted(task: (final: boolean) => void) {
    getFlask().onDemount(() => { queueRender(() => task(false)) });
 }
 
-export function afterDestroyed(task: () => void) {
+export function afterDiscarded(task: () => void) {
    getFlask().onDiscard(() => { queueRender(task) });
 }
 

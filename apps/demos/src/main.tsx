@@ -16,8 +16,9 @@ import { TestForKeys } from "./TestForKeys"
 import { TestAsyncSelect } from "./TestAsyncSelect"
 import { CRUDApp } from "./TestCRUDApp"
 import { SortableTableApp } from "./SortableTable"
+import { TestSettableDerivation } from "./TestSettableDerivations"
 
-const app = createRoot(SortableTableApp)
+const app = createRoot(TestSettableDerivation)
 
 app.mount('#root')
 

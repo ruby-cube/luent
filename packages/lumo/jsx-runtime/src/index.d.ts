@@ -682,13 +682,13 @@ declare namespace React {
       'after:created'?: LifecycleTask<T>
       'after:mounted'?: LifecycleTask<T>
       'after:remounted'?: LifecycleTask<T>
-      'at:destroy'?: LifecycleTask<T>
+      'at:discard'?: LifecycleTask<T>
       'at:unmount'?: LifecycleTask<T>
       'at:demount'?: LifecycleTask<T>
-      'at:destroyed'?: LifecycleTask<T>
+      'at:discarded'?: LifecycleTask<T>
       'at:unmounted'?: LifecycleTask<T>
       'at:demounted'?: LifecycleTask<T>
-      'after:destroyed'?: LifecycleTask<T>
+      'after:discarded'?: LifecycleTask<T>
       'after:unmounted'?: LifecycleTask<T>
       'after:demounted'?: LifecycleTask<T>
    }

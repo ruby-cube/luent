@@ -149,7 +149,7 @@ export class IfElseKit extends VineNode {
             // })
          }, flask)
          // kit.type == 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
-         initial ? kit.flask!.emitInitialMount() : (console.log('emit remount'),kit.flask!.emitRemount())
+         initial ? kit.flask!.emitInitialMount() : (console.log('emit remount'), kit.flask!.emitRemount())
       })
 
    }
@@ -331,12 +331,12 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 }
 
 export function Remount(input: FromTag<{
-   discard: Ion<boolean>,
+   discard: DiscardSignal,
    Slot: RenderSlot
 
 }>) {
-   const { $discard, Slot } = input;
-   return markActivationType('mount', Slot, $discard)
+   const { discard, Slot } = input;
+   return markActivationType('mount', Slot, discard)
 }
 
 export function Create(input: FromTag<{
@@ -347,18 +347,19 @@ export function Create(input: FromTag<{
    return markActivationType('create', Slot)
 }
 
+type DiscardSignal = (destroy: () => void) => void
 
 type ActivationKit = {
    activationType: ActivationType;
    render: RenderFunction;
-   $discard: (() => boolean) | undefined;
+   discard: DiscardSignal | undefined;
 }
 
-export function markActivationType(activationType: ActivationType, render: RenderFunction, $discard?: (() => boolean) | undefined) {
+export function markActivationType(activationType: ActivationType, render: RenderFunction, discard?: DiscardSignal | undefined) {
    return {
       activationType,
       render,
-      $discard
+      discard
    }
 }
 

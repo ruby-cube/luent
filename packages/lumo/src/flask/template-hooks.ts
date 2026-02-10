@@ -1,6 +1,6 @@
 import { debug } from "@rue/utils";
 import { getFlask } from "@rue/flask";
-import { afterCreated, afterDemounted, afterDestroyed, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDestroy, atDestroyed, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
+import { afterCreated, afterDemounted, afterDiscarded, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDiscard, atDiscarded, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
 
 type LifecycleTask = (element: Element, initialOrFinal?: boolean) => void;
 
@@ -45,8 +45,8 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
             afterRemounted(() => task(node))
             break;
 
-         case 'at:destroy':
-            atDestroy(() => task(node))
+         case 'at:discard':
+            atDiscard(() => task(node))
             break;
 
          case 'at:unmount':
@@ -57,8 +57,8 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
             atDemount(() => task(node))
             break;
 
-         case 'at:destroyed':
-            atDestroyed(() => task(node))
+         case 'at:discarded':
+            atDiscarded(() => task(node))
             break;
 
          case 'at:unmounted':
@@ -69,8 +69,8 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
             atDemounted(() => task(node))
             break;
 
-         case 'after:destroyed':
-            afterDestroyed(() => task(node))
+         case 'after:discarded':
+            afterDiscarded(() => task(node))
             break;
 
          case 'after:unmounted':
@@ -101,15 +101,15 @@ const flaskHooks = {
    'after:mounted': true,
    'after:remounted': true,
 
-   'at:destroy': true,
+   'at:discard': true,
    'at:unmount': true,
    'at:demount': true,
 
-   'at:destroyed': true,
+   'at:discarded': true,
    'at:unmounted': true,
    'at:demounted': true,
 
-   'after:destroyed': true,
+   'after:discarded': true,
    'after:unmounted': true,
    'after:demounted': true
 }

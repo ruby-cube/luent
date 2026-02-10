@@ -50,7 +50,7 @@ export function TodoMVC() {
       const STORAGE_KEY = 'vue-todomvc'
 
       queueIonicTask(() => {
-         localStorage.setItem(STORAGE_KEY, JSON.stringify($todos())) // FIX: Do can we eliminate toRaw()?
+         localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
       })
 
       return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []

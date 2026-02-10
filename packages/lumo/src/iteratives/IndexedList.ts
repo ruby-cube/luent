@@ -33,8 +33,7 @@ export class IndexedListKit extends VineNode {
    ) {
       super()
       const $list = Ion(() => this.toArray(toValue(input)))
-      let array = $list()
-
+      let array = [...$list()]
       
       // NOTE: IMPORTANT: We must set up the watcher BEFORE rendering
       // This ensure the order of effects run in such a way that
@@ -42,10 +41,8 @@ export class IndexedListKit extends VineNode {
       // to avoid cannot read property of undefined when removing an item
       
       watch(input, ({ current }) => {
-         console.log('$$$ need to reconcile')
-         const newArray = $list()
          this.reconcile(array, $list)
-         array = [...newArray]
+         array = [...$list()]
       }, { phase: PRELUDE })
       
       this.nodes = this.render($list) as IndexKit[];

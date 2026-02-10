@@ -365,7 +365,6 @@ export class RenderCycle {
             })
          })
 
-         console.warn('run TICK effect', effect.run)
          if (!effect.run) return;
          tickUpdate(effect.run, update)
       }

@@ -1,4 +1,4 @@
-import { If, component, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDestroy, For, atMount, atRemount } from "@rue/lumo";
+import { If, component, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount } from "@rue/lumo";
 import { instantUpdate, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
@@ -30,7 +30,7 @@ function Counter(input: FromTag<{
          logHook('remounted')
       })
 
-      atDestroy(() => {
+      atDiscard(() => {
          logHook('destroying view...')
       })
 
@@ -270,7 +270,7 @@ export function TestCreateMountShow() {
                      <li><code>atCreated</code> casted on the initial mount</li>
                      <li><code>atRemounted</code> casted when remounted</li>
                      <li><code>atMounted</code> casted on initial mount and remounts</li>
-                     <li><code>atDestroy</code> casted just before view is destroyed</li>
+                     <li><code>atDiscard</code> casted just before view is destroyed</li>
                      <li><code>atDemount</code> casted just before view unmounts but not when destroyed</li>
                      <li><code>atUnmount</code> casted just before view is destroyed or unmounted</li>
                   </ul>

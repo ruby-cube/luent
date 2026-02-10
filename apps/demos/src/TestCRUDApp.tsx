@@ -1,5 +1,5 @@
 import { component, For } from "@rue/lumo"
-import { Ion, Ionic, PRELUDE, queueIonicTask, SYNC, TICK, watch } from "@rue/quarky"
+import { Ion, Ionic, PRELUDE, watch } from "@rue/quarky"
 
 // Adapted from Vue's CRUDApp demo
 
