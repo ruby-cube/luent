@@ -193,7 +193,7 @@ export function SearchInput(input: FromTag<{ value: string, 'on:change': HandleE
 }
 
 
-export function CompleteButton({ $completed }: FromTag<{ completed: Ion<boolean> }>) {
+export function CompleteButton({ $completed }: FromTag<{ 'mu:completed': Ion<boolean> }>) {
    const toggleCompleted = Action((id: string) => {
       storeRollback($completed(), prev => {
          $completed.value = prev
