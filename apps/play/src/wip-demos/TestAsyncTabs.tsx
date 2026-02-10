@@ -1,4 +1,4 @@
-import { instantUpdate, Ion, swiftUpdate, Interval } from "@rue/quarky";
+import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate } from "@rue/quarky";
 import "./TestAsyncTabs.css";
 import { Await, Meanwhile, component, Else, ElseIf, FromTag, If, Switch, Case, Default } from "@rue/lumo";
 
@@ -8,9 +8,11 @@ export function TestAsyncTabs() {
    const $tab = Ion(0);
    const $count = Ion(0);
 
-   // Interval(1000, () => {
-   //    $count.value++
-   // }).start()
+
+
+   setInterval(() => {
+      $count.value++
+   }, 1000)
 
    return component(<>
       <ul class="inline">
@@ -33,30 +35,10 @@ export function TestAsyncTabs() {
             Six
          </li>
       </ul>
-      {/* // <div class={{ 'tab': true, 'pending': $suspense }}>
-      //    {If(($tab() === 0),
-      //       <Tab page="Un" count={$count} />
-      //    )}
-      //    {ElseIf(($tab() === 1),
-      //       <Tab page="Deux" count={$count} />
-      //    )}
-      //    {ElseIf(($tab() === 2),
-      //       <Tab page="Trois" count={$count} />
-      //    )}
-      //    {ElseIf(($tab() === 3),
-      //       <Tab page="Quatre" count={$count} />
-      //    )}
-      //    {ElseIf(($tab() === 4),
-      //       <Tab page="Cinq" count={$count} />
-      //    )}
-      //    {Else(
-      //       <Tab page="Six" count={$count} />
-      //    )}
-      // </div> */}
-      {/* {Await($suspense => */}
-         <div class={{ 'tab': true, /* 'pending': $suspense */ }}>
+      {Await($suspense =>
+         <div class={{ 'tab': true, 'pending': $suspense }}>
             <Switch x={$tab}>
-               {Case(0, 
+               {Case(0,
                   <Tab page="Un" count={$count} />
                )}
                {Case(1,
@@ -71,18 +53,15 @@ export function TestAsyncTabs() {
                {Case(4,
                   <Tab page="Cinq" count={$count} />
                )}
-               {/* {Case(5,
-                  <Tab page="Six" count={$count} />
-               )} */}
                {Default(
                   <Tab page="Six" count={$count} />
                )}
             </Switch>
          </div>
-      {/* )} */}
-      {/* {Meanwhile(o =>
+      )}
+      {Meanwhile(o =>
          o.initial && "Loading..."
-      )} */}
+      )}
 
    </>);
 };
@@ -110,13 +89,11 @@ function Tab(input: FromTag<{
    });
 
    return component(<>
-      {/* {Await($time, */}
       <div class="tab-content">
          <h3>{$count}</h3>
          This content is for page "{page}" after {($time()?.toFixed())}ms.
          <p>{CONTENT[page]}</p>
       </div>
-      {/* )} */}
    </>
    );
 };
@@ -124,8 +101,7 @@ function Tab(input: FromTag<{
 const db = {
    fetchTime() {
       return new Promise<number>((resolve) => {
-         const delay = Math.random() * 500;
-         // const delay = Math.random() * 420 + 160;
+         const delay = Math.random() * 2000;
          setTimeout(() => resolve(delay), delay);
       })
    }

@@ -181,13 +181,17 @@ export class RenderCycle {
             batch.requeued = false
             runProcess(() => batch.runEffects(queue.runEffect, completed, genState ? process : undefined, () => {
                if (genState) {
-                  process.resumeOuter(genState, () => pushUpdate(this.update))
+                  process.resumeOuter(genState, () => {
+                     if (update.completed) return;
+                     pushUpdate(this.update)
+                  })
                }
             }))
 
             if (genState && process.mustPause()) {
                popUpdate()
                process.prepOuterPause(genState, () => {
+                  if (update.completed) return;
                   pushUpdate(update)
                })
                yield;
@@ -208,6 +212,7 @@ export class RenderCycle {
             if (genState && process.mustPause() && i + 1 !== tasks.length) {
                popUpdate()
                process.prepOuterPause(genState, () => {
+                  if (update.completed) return;
                   pushUpdate(update)
                })
                yield;
@@ -224,10 +229,6 @@ export class RenderCycle {
       queue.runningEffects = false
 
       // if (this.cancelled) return; // TODO: Manage cancellation with trycatch?
-
-
-
-
       popUpdate()
 
       onComplete()
@@ -355,6 +356,7 @@ export class RenderCycle {
       tick.runEffect = (effect) => {
          requestAnimationFrame(() => {
             queueTask(() => {
+               console.log('#### TICK')
                if (!effect.run) return;
                const _update = new Update(
                   update.type,
@@ -364,9 +366,6 @@ export class RenderCycle {
                _update.queue(effect.run).start()
             })
          })
-
-         if (!effect.run) return;
-         tickUpdate(effect.run, update)
       }
       return tick
    }

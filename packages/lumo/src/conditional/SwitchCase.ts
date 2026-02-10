@@ -1,7 +1,7 @@
 import { $_derivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@rue/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ConditionalKit } from "./IfElse";
-import { ActivationType, createIfSeries, renderStaticConditional } from "./If";
+import { ActivationType, createIfSeries } from "./If";
 import { isFunction } from "@rue/utils";
 import { component } from "../component/Component";
 import { FromTag, RenderSlot } from "../component/Input";
@@ -37,7 +37,6 @@ export function Switch(input: FromTag<{
       cases: toCases(Slot() as RawCaseKit[]) as CasesKit[],
       matches
    })
-   console.log('SWITCH CASE KITS', kits)
    return component(
       createIfSeries(kits)
    )
@@ -106,7 +105,6 @@ function toConditionalKits(kit: SwitchCaseKit): ConditionalKit[] {
       })
       if (defaultCase) break;
    }
-   console.log('$$$kits!', kits)
    return kits
 }
 

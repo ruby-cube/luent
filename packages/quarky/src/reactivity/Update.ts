@@ -4,12 +4,29 @@ import { UpdateType } from "./x_IdleUpdate";
 
 export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
 
+// export function pushUpdate(update: Update) {
+//    if (update.timeMargin === 1700) console.warn('### pushUpdate', update)
+//    else console.log('### pushUpdate', update)
+//    _pushUpdate(update)
+// }
+
+// export function popUpdate() {
+//    const update = getActiveUpdate()
+//    if (update?.timeMargin === 1700) console.error('### popUpdate', update)
+//    else console.log('### popUpdate', update)
+//    _popUpdate()
+//    console.log('### after pop', getActiveUpdate())
+// }
+
 let activeUpdate: Update | null;
 
 export function $activeUpdate() {
    const update = getActiveUpdate()
    if (!update) {
-      if (activeUpdate) return activeUpdate
+      if (activeUpdate) {
+         console.warn('GETTING EXISTING ACTIVE UPDATE')
+         return activeUpdate
+      }
       const update = activeUpdate = new Update(UpdateType.INSTANT, 100, false)
       queueMicrotask(() => {
          activeUpdate = null;
@@ -200,9 +217,10 @@ function createLazyUpdate() {
 
 export let initialLoad: Update | null = null
 export let load = (task: () => unknown) => {
-   const update = initialLoad = new Update(undefined, 1000, true)
+   const update = initialLoad = new Update(undefined, 1700, true)
    update.queue(task)
    update.atComplete(() => {
+      console.log("#### initial load completed")
       load = (fn: Function) => fn()
       initialLoad = null;
    })

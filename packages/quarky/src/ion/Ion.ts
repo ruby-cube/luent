@@ -89,7 +89,7 @@ export function isIon(value: unknown): value is Ion {
    const getter = isFunction(value) && value.length === 0
    const realIon = isFunction(value) && QUARK in value
 
-   if (getter !== realIon) console.error('isGetter', getter, 'but isIon', realIon)
+   // if (getter !== realIon) console.error('isGetter', getter, 'but isIon', realIon)
 
    return isFunction(value) &&
       // value.length === 0

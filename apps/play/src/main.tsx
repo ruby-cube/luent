@@ -56,7 +56,7 @@ import { TestMultisetting } from './wip-demos/TestMultisetting';
 import { TestVanillaStream } from './TestStream-await';
 import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
-import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, queueIonicPostlude, queueIonicPrelude, queueIonicTask, RENDER, runIonicTask, untracked, watch } from '@rue/quarky';
+import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, PRELUDE, queueInternalRender, queueIonicPostlude, queueIonicPrelude, queueIonicTask, RENDER, runIonicTask, slowUpdate, untracked, watch, watchToRender } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
@@ -99,6 +99,29 @@ import { initMonacoEditor } from './TestMonacoEditor';
 // import { NestedPend } from './NestedPend';
 
 // initMonacoEditor()
+
+// const $count = Ion(0, {
+//    increment() {
+//       this.value++
+//    }
+// })
+
+// watchToRender($count, () => {
+//       console.log('Count is now', $count())
+// })
+
+// setInterval(() => {
+//    $count.increment()
+// }, 1000)
+
+// window.addEventListener('click', () => $count.increment())
+
+// slowUpdate(() => {
+//    let i = 1000000000
+//    // Artificially long execution time.
+//    while (i--) { }
+// })
+
 
 const app = createRoot(TestAsyncTabs)
 

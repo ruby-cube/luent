@@ -1,4 +1,4 @@
-import { $listen, Flask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
+import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { Ionized } from "../ionic/x_ionize";
 import { Effect } from "./EffectQueue";
@@ -216,7 +216,7 @@ export function InertWatcher() {
  * @param eager 
  * @returns 
  */
-export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getFlask(), eager: boolean = false) {
+export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getActiveFlask(), eager: boolean = false) {
    // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
    // return;
    const subject = new IonSubstance(() => toValue(ion())) // toValue in case of mutable ion getter
@@ -257,13 +257,13 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
 
    subject.linkEffect(effect)
 
-   flask.onDiscard(/* listener.stop */() => {
+   flask?.onDiscard(/* listener.stop */() => {
       effect.destroy()
    });
-   flask.onDemount(/* listener.pause */() => {
+   flask?.onDemount(/* listener.pause */() => {
       paused = true;
    });
-   flask.onRemount(/* listener.resume */() => {
+   flask?.onRemount(/* listener.resume */() => {
       paused = false;
       if (stale) {
          effect.run?.()
