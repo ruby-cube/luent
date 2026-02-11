@@ -2,21 +2,22 @@ import { createStack } from "@rue/utils";
 import { INTERNAL_RENDER, PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
 import { UpdateType } from "./x_IdleUpdate";
 
-export const [pushUpdate, popUpdate, getActiveUpdate] = createStack<Update>()
+export const [_pushUpdate, _popUpdate, getActiveUpdate] = createStack<Update>()
 
-// export function pushUpdate(update: Update) {
-//    if (update.timeMargin === 1700) console.warn('### pushUpdate', update)
-//    else console.log('### pushUpdate', update)
-//    _pushUpdate(update)
-// }
+export function pushUpdate(update: Update) {
+   // if (update.committed) return;
+   // if (update.timeMargin === 1700) console.warn('### pushUpdate', update)
+   // else console.log('### pushUpdate', update)
+   _pushUpdate(update)
+}
 
-// export function popUpdate() {
-//    const update = getActiveUpdate()
-//    if (update?.timeMargin === 1700) console.error('### popUpdate', update)
-//    else console.log('### popUpdate', update)
-//    _popUpdate()
-//    console.log('### after pop', getActiveUpdate())
-// }
+export function popUpdate() {
+   // const update = getActiveUpdate()
+   // if (update?.timeMargin === 1700) console.error('### popUpdate', update)
+   // else console.log('### popUpdate', update)
+   _popUpdate()
+   // console.log('### after pop', getActiveUpdate())
+}
 
 let activeUpdate: Update | null;
 
@@ -217,7 +218,7 @@ function createLazyUpdate() {
 
 export let initialLoad: Update | null = null
 export let load = (task: () => unknown) => {
-   const update = initialLoad = new Update(undefined, 1700, true)
+   const update = initialLoad = new Update(undefined, 1700)
    update.queue(task)
    update.atComplete(() => {
       console.log("#### initial load completed")

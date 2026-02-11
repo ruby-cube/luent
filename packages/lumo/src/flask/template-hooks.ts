@@ -1,4 +1,4 @@
-import { debug } from "@rue/utils";
+import { debug, isFunction } from "@rue/utils";
 import { getFlask } from "@rue/flask";
 import { afterCreated, afterDemounted, afterDiscarded, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDiscard, atDiscarded, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
 
@@ -8,6 +8,7 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
    const flask = getFlask()
    for (const key in hooks) {
       const task = hooks[key]
+      if (!isFunction(task))continue;
       switch (key) {
          case 'at:create':
             atCreate(() => task(node))

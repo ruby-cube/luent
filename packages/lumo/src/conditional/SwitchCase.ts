@@ -1,10 +1,12 @@
 import { $_derivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@rue/quarky";
 import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ConditionalKit } from "./IfElse";
-import { ActivationType, createIfSeries } from "./If";
+import { ActivationType, createIfSeries, RenderConditional } from "./If";
 import { isFunction } from "@rue/utils";
 import { component } from "../component/Component";
 import { FromTag, RenderSlot } from "../component/Input";
+import { ListKit } from "../iteratives/ItemList";
+import { IndexedListKit } from "../iteratives/IndexedList";
 
 
 type SwitchCaseKit = {
@@ -25,17 +27,18 @@ type RawCaseKit = {
    type?: ActivationType | undefined
 }
 
+type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
 
 export function Switch(input: FromTag<{
    x: Ion<any>,
-   'view-type'?: GroupActivationType
+   'view'?: GroupActivationType
    matches?: (target: any, _case: any) => boolean,
    Slot: RenderSlot
 }>) {
-   const { $x, matches = (x: any, c: any) => x === c, Slot, "view-type": view } = input
+   const { $x, matches = (x: any, c: any) => x === c, Slot, "view": view } = input
    const kits = toConditionalKits({
       target: $x,
-      cases: toCases(Slot() as RawCaseKit[]) as CasesKit[],
+      cases: toCases(Slot() as RawOutput[]) as CasesKit[],
       matches
    })
    return component(
@@ -43,7 +46,8 @@ export function Switch(input: FromTag<{
    )
 }
 
-function toCases(raw: RawCaseKit[]): CasesKit[] {
+function toCases(raw: RawOutput[]): CasesKit[] {
+   console.log('raw', raw)
    const kits: CasesKit[] = []
    for (const kit of raw) {
       const { case: c, render, type } = kit
@@ -68,7 +72,7 @@ function toCases(raw: RawCaseKit[]): CasesKit[] {
 }
 
 
-export function Case(c: any, typeOrRender?: ActivationType | RenderFunction | RawJSXNode, renderCase?: RenderFunction | RawJSXNode) {
+export function Case(c: any, typeOrRender?: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {
@@ -78,7 +82,7 @@ export function Case(c: any, typeOrRender?: ActivationType | RenderFunction | Ra
    }
 }
 
-export function Default(typeOrRender: ActivationType | RenderFunction | RawJSXNode, renderCase?: RenderFunction | RawJSXNode) {
+export function Default(typeOrRender: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {

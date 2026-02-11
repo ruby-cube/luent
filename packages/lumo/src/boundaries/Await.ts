@@ -15,8 +15,9 @@ import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { createStack, normalizeToArray, toError, UNDEFINED } from "@rue/utils";
 import { AsyncIon, AsyncProps, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
 import { INTERNAL_RENDER, POSTLUDE, PRELUDE, SYNC } from "../../../quarky/src/reactivity/RenderCycle";
-import { AsyncState } from "@rue/flask";
+import { $_snap_context, AsyncState } from "@rue/flask";
 import { Suspense } from "../../../quarky/src/async/Suspense";
+import { toAsyncRender } from "../node/VineNode";
 
 type AwaitKit = {
    $suspense: Suspense | undefined,
@@ -37,7 +38,7 @@ export function Await(suspense: any | any[], renderResolved: RenderFunction | Ra
 export function Await(renderOrSuspense: [...any[], RenderFunction | RawJSXNode] | RenderFunction | any | any[], renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
    const ions = (renderResolved ? normalizeToArray(renderOrSuspense) : []) as (AsyncIon<unknown> | Suspense)[];
    const _render = (renderResolved ? renderResolved : renderOrSuspense instanceof Array ? renderOrSuspense.pop() : renderOrSuspense) as RenderFunction;
-   let render = _render;
+   let render = _render
    let $suspense;
    // TODO: renderResolved needs suspense if part of any array
 

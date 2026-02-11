@@ -103,6 +103,7 @@ export class EffectQueue {
             if (update) {
                popUpdate()
                process.prepPause(() => {
+                  if (update.committed) return;
                   pushUpdate(update)
                })
             }

@@ -222,9 +222,9 @@ function isDOMNode(node: unknown): node is DOMNode & Node {
 
 export type AsyncRender = (flask: Flask, input?: Object) => RawJSXNode
 
-export function toAsyncRender(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, [COMMONS]: CommonsNode, [TRACE]: string }): AsyncRender {
-   return (flask: Flask, input?: Object) => {
+export function toAsyncRender(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, /* [COMMONS]: CommonsNode, */ [TRACE]: string }): AsyncRender {
+   return (flask: Flask, ...args: any[]) => {
       nestedContext[FLASK] = flask
-      return $_run_with_(context, () => render(input), nestedContext)
+      return $_run_with_(context, () => render(...args), nestedContext)
    }
 }

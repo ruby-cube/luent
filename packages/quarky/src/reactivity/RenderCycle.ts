@@ -222,7 +222,7 @@ export class RenderCycle {
          queue.tasks = []
 
          if (queue.effects.length) {
-            console.warn('RUN AGAIN', phase)
+            // console.warn('RUN AGAIN', phase)
             i = 1
          }
       }

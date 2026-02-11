@@ -14,7 +14,7 @@ import { aC } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 
 export type ActivationType = 'create' | 'remount'
 
-export type RenderConditional<T = undefined> = (v: NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>> : T>) => RawJSXNode
+export type RenderConditional<T = undefined> = (/* v: NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>> : T> */view: { discard(changeCondition?: () => void): void }) => RawJSXNode
 
 export function As<T>(value: T): asserts value is Exclude<T, null> {
 
@@ -120,7 +120,6 @@ export function createIfSeries(kits: ConditionalKit[], viewBy?: GroupActivationT
    }
    if (kits.at(-1)?.statementType !== 'else') kits.push(Else(() => undefined))
    const dynamicKits = toDynamicConditionalKits(kits, activationType)
-console.log('activationTYpe', activationType)
    return new IfElseKit(dynamicKits, getFlask())
 }
 

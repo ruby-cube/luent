@@ -75,6 +75,7 @@ import { TestForSetAndMap, TestForSetAndMapIons } from './wip-demos/TestForSetAn
 import { TestAsyncSelect } from '../../demos/src/TestAsyncSelect';
 import { TestAsyncTabs } from '../../demos/src/TestAsyncTabs';
 import { initMonacoEditor } from './TestMonacoEditor';
+import { TestCreate } from './TestCreate';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -123,7 +124,7 @@ import { initMonacoEditor } from './TestMonacoEditor';
 // })
 
 
-const app = createRoot(TestAsyncTabs)
+const app = createRoot(TestCreate)
 
 app.mount('#root')
 

@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFl
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ActivationType } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { $_derivation, $activeUpdate, getSuspenseCount, Ion, popUpdate, PRELUDE, pushUpdate, queueInternalRender, queueTask, Suspense, swiftUpdate, watchToRender } from "@rue/quarky";
+import { getSuspenseCount, Ion, Ionic, popUpdate, PRELUDE, pushUpdate, queueInternalRender, queueTask, Suspense, swiftUpdate, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../context/context-stack";
@@ -22,25 +22,40 @@ export type ConditionalKit = {
    // discard: (() => void) | undefined
 }
 
-
-export type DynamicConditionalRenderKit = {
-   // discard: (() => void) | undefined
+export type DynamicNodeKit = {
+   // cache
+   // nodes
+   // pending
+   // type
+   // render
+   // view
+   // flask
    nodes: (JSXNode[]) | null
+   cache: JSXNode[] | undefined;
+   pending: Suspense | undefined
    flask: Flask | undefined;
-   statementType: "if" | "elseIf" | "else";
    type: ActivationType | undefined;
    render: AsyncRender;
-   transitionNodes: TransitionNode[];
-   $condition: Ion<Booleanny> | undefined
-   pending: Suspense | undefined
-   cache: JSXNode[] | undefined;
+   view: { discard: () => void }
 }
 
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: Suspense | undefined): DynamicConditionalRenderKit {
-   const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
 
-   const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
+export type DynamicConditionalRenderKit = {
+   // discard: (() => void) | undefined
+   statementType: "if" | "elseIf" | "else";
+   // transitionNodes: TransitionNode[];
+   $condition: Ion<Booleanny> | undefined
+} & DynamicNodeKit
+
+
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: Suspense | undefined): DynamicConditionalRenderKit {
+   // const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
+
+   // const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
+
+   let _cache: JSXNode[] | undefined = undefined
+
    return {
       pending,
       nodes: null,
@@ -48,13 +63,24 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
       statementType: statementType as 'if' | 'elseIf' | 'else',
       render: toAsyncRender(render, context, {
          [FLASK]: undefined,
-         [COMMONS]: commons,
+         // [COMMONS]: commons,
          [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }),
       type: activationType,
-      transitionNodes,
+      // transitionNodes,
       $condition,
-      cache: undefined
+      get cache(): JSXNode[] | undefined {
+         return _cache
+      },
+      set cache(nodes: JSXNode[]) {
+         _cache = nodes
+      },
+      view: {
+         discard(changeCondition?: () => void) {
+            _cache = undefined
+            changeCondition?.()
+         }
+      }
    }
 }
 
@@ -87,90 +113,89 @@ export class IfElseKit extends VineNode {
       watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
          if (activeIndex === prevIndex) return;
          const kit = this.kits[activeIndex]
+         const prevKit = this.kits[prevIndex]
+
          if (kit.pending) {
-            if (!kit.cache) {
-               // TODO: is there a better way of doing this?? Does this need to be wrapped in try{} finally{} ?
-               const prevCount = getSuspenseCount(kit.pending)
-               const output = processJSXOutput(kit.render(flask, kit.$condition))
-               const count = getSuspenseCount(kit.pending)
-               if (count > prevCount) {
-                  kit.cache = output
-                  queueTask(() => {
-                     const promise = kit.pending!()
-                     if (promise) {
-                        promise.then(() => {
-                           swiftUpdate(() => {
-                              this.switchConditional(activeIndex, prevIndex, flask)
-                           })
-                        })
-                     }
-                     else {
-                        swiftUpdate(() => {
-                           this.switchConditional(activeIndex, prevIndex, flask)
-                        })
-                     }
-                  })
-               }
-               else {
-                  kit.cache = output
-                  this.switchConditional(activeIndex, prevIndex, flask)
-               }
-            }
-            else {
-               const promise = kit.pending()
-               if (promise) {
-                  promise.then(() => {
-                     swiftUpdate(() => {
-                        this.switchConditional(activeIndex, prevIndex, flask)
-                     })
-                  })
-               }
-               else {
-                  this.switchConditional(activeIndex, prevIndex, flask)
-               }
-            }
+            this.awaitPendingConditional(kit.pending, kit, prevKit, flask)
          }
          else {
-            this.switchConditional(activeIndex, prevIndex, flask)
+            this.switchConditional(kit, prevKit, flask)
          }
       })
    }
 
-   switchConditional(activeIndex: number, prevIndex: number, flask: Flask) {
-      this.deactivateConditional(this.kits[prevIndex]);
-      this.activateConditional(this.kits[activeIndex], (kit, initial) => {
+   awaitPendingConditional(suspense: Suspense, kit: DynamicNodeKit, prevKit: DynamicNodeKit, flask: Flask) {
+      if (!kit.cache) {
+         // TODO: is there a better way of doing this?? Does this need to be wrapped in try{} finally{} ?
+         const prevCount = getSuspenseCount(suspense)
+         const output = processJSXOutput(kit.render(flask, kit.view))
+         const count = getSuspenseCount(suspense)
+         if (count > prevCount) {
+            kit.cache = output
+            queueTask(() => {
+               const promise = suspense()
+               if (promise) {
+                  promise.then(() => {
+                     // swiftUpdate(() => {
+                     this.switchConditional(kit, prevKit, flask)
+                     // })
+                  })
+               }
+               else {
+                  // swiftUpdate(() => {
+                  this.switchConditional(kit, prevKit, flask)
+                  // })
+               }
+            })
+         }
+         else {
+            kit.cache = output
+            this.switchConditional(kit, prevKit, flask)
+         }
+      }
+      else {
+         const promise = suspense()
+         if (promise) {
+            promise.then(() => {
+               // swiftUpdate(() => {
+               this.switchConditional(kit, prevKit, flask)
+               // })
+            })
+         }
+         else {
+            this.switchConditional(kit, prevKit, flask)
+         }
+      }
+   }
+
+   switchConditional(activeKit: DynamicNodeKit, prevKit: DynamicNodeKit, flask: Flask) {
+      this.deactivateConditional(prevKit);
+      this.activateConditional(activeKit, (kit, initial) => {
          setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
          const fragment = new DocumentFragment()
          mountDOMNodes(kit.nodes!, fragment)
          queueInternalRender(() => {
-            // document.startViewTransition(() => {
             mountFragment(fragment, this.precedingLeaf, this.parent)
-            // })
          }, flask)
-         // kit.type == 'create' ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
-         initial ? kit.flask!.emitInitialMount() : (console.log('emit remount'), kit.flask!.emitRemount())
+         initial ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
       })
 
    }
 
-   phasicNode?: TransitionNode | null | undefined;
-
-   // activeType?: ActivationType
-
-   activateConditional(kit: DynamicConditionalRenderKit | undefined, emitActivated: (kit: DynamicConditionalRenderKit, initial: boolean) => void) {
+   activateConditional(kit: DynamicNodeKit | undefined, emitActivated: (kit: DynamicNodeKit, initial: boolean) => void) {
       if (!kit) return;
       const initialMount = !kit.cache
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
          kit.pending && kit.cache ? kit.cache :
             kit.type === 'remount' ?
-               (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.$condition))))
-               : processJSXOutput(kit.render(flask, kit.$condition));
+               (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.view)))) // TODO: pass the view instead
+               : processJSXOutput(kit.render(flask, kit.view)); // TODO: pass the view instead
 
       emitActivated(kit, initialMount)
    }
 
-   deactivateConditional(kit: DynamicConditionalRenderKit | undefined) {
+   deactivateConditional(kit: DynamicNodeKit | undefined) {
       if (!kit) return;
       const prevNodes = kit.nodes;
       if (!prevNodes) return;
@@ -184,9 +209,7 @@ export class IfElseKit extends VineNode {
       else kit.flask!.emitDemount()
 
       queueInternalRender(() => {
-         // document.startViewTransition(() => {
          removeDOMNodes(prevNodes)
-         // })
       }, this.outerFlask)
       return kit;
    }
@@ -224,6 +247,8 @@ function getConditions(statements: ConditionalStatement[]) {
    }
    return conditions
 }
+
+
 
 function $ActiveIndex(conditions: Ion<Booleanny>[]) {
    return Ion(() => {
