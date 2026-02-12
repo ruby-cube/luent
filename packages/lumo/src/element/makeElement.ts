@@ -21,7 +21,7 @@ export type HTMLTag = keyof HTMLElementTagNameMap
 // function makeElement(tag, Slot) {
 //    const element = document.createElement(tag)
 
-//    const nodes = Slot() as (VineNode & (NodeKit | DynamicNodeKit) | DOMNode)[]
+//    const nodes = Slot() as (VineNode & (NodeKit | CaseKit) | DOMNode)[]
 
 
 

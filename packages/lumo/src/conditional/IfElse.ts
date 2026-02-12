@@ -22,6 +22,7 @@ export type ConditionalKit = {
    // discard: (() => void) | undefined
 }
 
+
 export type DynamicNodeKit = {
    // cache
    // nodes
@@ -103,7 +104,7 @@ export class IfElseKit extends VineNode {
       public outerFlask: Flask
    ) {
       super()
-
+      console.log('creating ifelse kit')
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
@@ -111,6 +112,7 @@ export class IfElseKit extends VineNode {
       })
 
       watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
+         console.log('index changed!')
          if (activeIndex === prevIndex) return;
          const kit = this.kits[activeIndex]
          const prevKit = this.kits[prevIndex]
@@ -179,7 +181,6 @@ export class IfElseKit extends VineNode {
          }, flask)
          initial ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
       })
-
    }
 
    activateConditional(kit: DynamicNodeKit | undefined, emitActivated: (kit: DynamicNodeKit, initial: boolean) => void) {

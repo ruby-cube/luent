@@ -30,7 +30,6 @@ export class ListKit extends VineNode {
       public getUID: (item: unknown) => UID,
       public flask: Flask
    ) {
-      console.warn('flask', flask)
       super()
       this.nodes = this.render($list(), renderItem);
       watchToRender($list, ({ current: newList }) => {

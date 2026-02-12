@@ -7,6 +7,7 @@ import "./SortableTable.css"
 
 
 export function SortableTableApp() {
+   
    const $searchQuery = Ion('')
    const gridColumns = ['name', 'power']
    const gridData = [

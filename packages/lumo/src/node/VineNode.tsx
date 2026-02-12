@@ -55,7 +55,7 @@ export class VineNode {
 //    phasicNode?: TransitionNode | null
 // }
 
-// export interface DynamicNodeKit extends NodeKit {
+// export interface CaseKit extends NodeKit {
 //    // unmount(nodes: JSXNode[]): void
 // }
 

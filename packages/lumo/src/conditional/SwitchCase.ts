@@ -7,6 +7,7 @@ import { component } from "../component/Component";
 import { FromTag, RenderSlot } from "../component/Input";
 import { ListKit } from "../iteratives/ItemList";
 import { IndexedListKit } from "../iteratives/IndexedList";
+import { DEFAULT } from "./MatchCase";
 
 
 type SwitchCaseKit = {
@@ -30,7 +31,7 @@ type RawCaseKit = {
 type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
 
 export function Switch(input: FromTag<{
-   x: Ion<any>,
+   x: Ion<any>, // TODO: change to key ... but need to make sure JSX plays well with it
    'view'?: GroupActivationType
    matches?: (target: any, _case: any) => boolean,
    Slot: RenderSlot
@@ -38,7 +39,7 @@ export function Switch(input: FromTag<{
    const { $x, matches = (x: any, c: any) => x === c, Slot, "view": view } = input
    const kits = toConditionalKits({
       target: $x,
-      cases: toCases(Slot() as RawOutput[]) as CasesKit[],
+      cases: toCases(Slot() as RawCaseKit[]) as CasesKit[],
       matches
    })
    return component(
@@ -46,8 +47,7 @@ export function Switch(input: FromTag<{
    )
 }
 
-function toCases(raw: RawOutput[]): CasesKit[] {
-   console.log('raw', raw)
+function toCases(raw: RawCaseKit[]): CasesKit[] {
    const kits: CasesKit[] = []
    for (const kit of raw) {
       const { case: c, render, type } = kit
@@ -61,7 +61,7 @@ function toCases(raw: RawOutput[]): CasesKit[] {
       }
       else {
          const kit = {
-            cases: c === 'default' ? [] : [c],
+            cases: c === DEFAULT ? [] : [c],
             render,
             type
          }
@@ -82,11 +82,13 @@ export function Case(c: any, typeOrRender?: ActivationType | RenderConditional |
    }
 }
 
+
+
 export function Default(typeOrRender: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {
-      case: 'default',
+      case: DEFAULT,
       render,
       type
    }

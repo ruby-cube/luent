@@ -79,6 +79,10 @@ function isTrySeriesElement(node, seriesType) {
    return t.isCallExpression(node) && (node.callee.name === 'Try' || node.callee.name === 'Catch' && seriesType === 'Try')
 }
 
+function isAsSeriesElement(node, seriesType) {
+   return t.isCallExpression(node) && (node.callee.name === 'As' || node.callee.name === 'Default' && seriesType === 'As')
+}
+
 function isAwaitSeriesElement(node, seriesType) {
    return t.isCallExpression(node) && (
       node.callee.name === 'Await'
@@ -139,6 +143,10 @@ function createIfSeries(series) {
 
 function createTrySeries(series) {
    return t.callExpression(t.identifier('_$$TrySeries'), series)
+}
+
+function createAsSeries(series) {
+   return t.callExpression(t.identifier('_$$AsSeries'), series)
 }
 
 function createAwaitSeries(series) {
@@ -229,6 +237,10 @@ function transformJSXChildrenToArrayExpression(paths) {
                array.push(createTrySeries(series))
                break;
 
+            case 'As':
+               array.push(createAsSeries(series)) // TODO:
+               break;
+
             case 'Await':
                array.push(createAwaitSeries(series))
                break;
@@ -255,6 +267,17 @@ function transformJSXChildrenToArrayExpression(paths) {
          }
          else {
             series.push(node.expression)
+         }
+      }
+      else if (t.isJSXExpressionContainer(node) && isAsSeriesElement(node.expression, seriesType)) {
+         if (node.expression.callee.name === 'As') {
+            closeSeries()
+            seriesType = 'As'
+            series = [node.expression]
+         }
+         else if (node.expression.callee.name === 'Default') {
+            series.push(node.expression)
+            closeSeries()
          }
       }
       else if (t.isJSXExpressionContainer(node) && isTrySeriesElement(node.expression, seriesType)) {
@@ -350,7 +373,7 @@ function isAsyncIonShorthand(node) {
 }
 
 function toAsyncIon(node) {
-    return t.callExpression(t.identifier('$$_createAsyncIon'), [t.arrowFunctionExpression([], t.blockStatement([
+   return t.callExpression(t.identifier('$$_createAsyncIon'), [t.arrowFunctionExpression([], t.blockStatement([
       t.returnStatement(node) // Return the original expression
    ]))])
 }
@@ -432,7 +455,12 @@ const TemplateFunctions = {
    For: transformTemplateArgToRenderFunction,
    Portal: transformTemplateArgToRenderFunction,
    Default: transformTemplateArgToRenderFunction,
-   Case: (path) => {transformIfDerivationShorthand(path.get('arguments.0')); transformTemplateArgToRenderFunction(path)}
+   As: transformTemplateArgToRenderFunction,
+   Case: (path) => {
+      transformIfDerivationShorthand(path.get('arguments.0'));
+      if (path.node.arguments.length > 1)
+         transformTemplateArgToRenderFunction(path)
+   }
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],
