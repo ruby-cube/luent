@@ -1,5 +1,5 @@
 import { component, For, FromTag } from "@rue/lumo";
-import { $_derivation, Action, instantUpdate, Ion, Ionic, MutableIon, queueIonicTask, Suspense, swiftUpdate } from "@rue/quarky";
+import { $_derivation, Action, instantUpdate, Ion, Ionic, MutableIon, queueIonicTask, SuspenseIon, swiftUpdate } from "@rue/quarky";
 import { ooo } from "../../../../packages/quarky/src/async/ooo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 
@@ -58,7 +58,7 @@ export function TestAsyncMultipliers() {
       }
    })
 
-   function MultiplyKit($n: Ion<number>, b: number, $suspense: Suspense) {
+   function MultiplyKit($n: Ion<number>, b: number, $suspense: SuspenseIon) {
       const $product = Ion($n() * b)
 
       const multiply = Action(() => (ooo
@@ -80,7 +80,7 @@ export function TestAsyncMultipliers() {
    }
 
    function MultipliersKit() {
-      const $suspense = Suspense('...')
+      const $suspense = SuspenseIon('...')
       const multipliers: any[] = []
       const products: any[] = []
 
@@ -240,7 +240,7 @@ function Result(input: FromTag<{ n: number }>) {
 
 
 function MultiplyKit() {
-   const $pending = Suspense('...')
+   const $pending = SuspenseIon('...')
    return {
       $Multiply($n: Ion<number>, o: number) {
          return Ion(0, {

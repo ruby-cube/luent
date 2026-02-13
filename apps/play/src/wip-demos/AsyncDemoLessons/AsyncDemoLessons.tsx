@@ -1,6 +1,6 @@
 import "./index.css";
 import "./debugger.css";
-import { AsyncIon, component, Else, For, FromTag, HandleEvent, If, RenderSlot, Suspense } from "@rue/lumo";
+import { AsyncIon, component, Else, For, FromTag, HandleEvent, If, RenderSlot, SuspenseIon } from "@rue/lumo";
 import * as db from "./data/index"
 import { Ion } from "@rue/quarky";
 import { Await, Meanwhile, Nonce } from "../../../../../packages/lumo/src/boundaries/Await";
@@ -27,7 +27,7 @@ function Home() {
    // function tabAction(value) {
    //    router.setParams("tab", value);
    // }
-   const $suspense = Suspense()
+   const $suspense = SuspenseIon()
 
 
    return component(
@@ -72,7 +72,7 @@ export function TabList(input: FromTag<{
    activeTab: Ion<string>,
    'on:change': HandleEvent,
    Slot: RenderSlot,
-   contentPending: Suspense
+   contentPending: SuspenseIon
 }>) {
    const { $activeTab, emit, Slot, $contentPending } = input
 

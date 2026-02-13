@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFl
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ActivationType, If } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, pushAwaiting, pushUpdate, queueInternalRender, queueTask, Suspense, watch, watchToRender } from "@rue/quarky";
+import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, pushAwaiting, pushUpdate, queueInternalRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../context/context-stack";
@@ -19,7 +19,7 @@ export type ConditionalKit = {
    render: RenderFunction;
    type: ActivationType | undefined;
    $condition: MaybeIon<Booleanny>
-   pending: Suspense | undefined
+   pending: SuspenseIon | undefined
    // discard: (() => void) | undefined
 }
 
@@ -35,7 +35,7 @@ export type DynamicNodeKit = {
    nodes: (JSXNode[]) | null
    cache: JSXNode[] | undefined;
    awaitCache: RawJSXNode;
-   pending: Suspense | undefined
+   pending: SuspenseIon | undefined
    flask: Flask | undefined;
    type: ActivationType | undefined;
    render: AsyncRender;
@@ -52,7 +52,7 @@ export type DynamicConditionalRenderKit = {
 } & DynamicNodeKit
 
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: Suspense | undefined): DynamicConditionalRenderKit {
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: SuspenseIon | undefined): DynamicConditionalRenderKit {
    // const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
 
    // const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
@@ -143,7 +143,7 @@ export class IfElseKit extends VineNode {
    pendingSwitch: number | null = null;
    pendingDeactivatedKit: DynamicNodeKit | null | undefined = null
 
-   awaitPendingConditional(suspense: Suspense, kit: DynamicNodeKit, prevKit: DynamicNodeKit | undefined) {
+   awaitPendingConditional(suspense: SuspenseIon, kit: DynamicNodeKit, prevKit: DynamicNodeKit | undefined) {
       if (!kit.cache) {
          const prevCount = getSuspenseCount(suspense)
          kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
@@ -192,7 +192,7 @@ export class IfElseKit extends VineNode {
          else {
             // TODO: end suspense... need a way to do this without exposing .value to devs
             suspense.value = null
-            console.log('### C switch', prevKit && prevKit.nodes ? [...prevKit.nodes] : prevKit.nodes, this.pendingDeactivatedKit)
+            console.log('### C switch')
             kit.awaitCache = rawOutput
             this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
@@ -212,7 +212,7 @@ export class IfElseKit extends VineNode {
                   return;
                }
                this.pendingSwitch = null
-               console.log('### D promise switch')
+               console.log('### D promise switch', kit)
                this.deactivateConditional(prevKit);
                this.reactivateConditional(kit)
             })

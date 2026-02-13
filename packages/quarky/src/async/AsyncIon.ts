@@ -1,15 +1,15 @@
 import { isFunction, isObject, toError } from "@rue/utils";
 import { AsyncState, getActiveFlask } from "@rue/flask";
-import { addToSuspense, Suspense } from "./Suspense";
+import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
 import { instantUpdate } from "../reactivity/Update";
 import { PRELUDE } from "../reactivity/RenderCycle";
 import { watch } from "../reactivity/Watcher";
 import { AsyncNode } from "./ooo";
 
-export let $suspense: Suspense
-export const [getAwaiting, suspenseStack] = AsyncState<Suspense>('Suspense')
-export const pushAwaiting = (n: Suspense) => {$suspense = n; suspenseStack.push(n)}
+export let $suspense: SuspenseIon
+export const [getAwaiting, suspenseStack] = AsyncState<SuspenseIon>('Suspense')
+export const pushAwaiting = (n: SuspenseIon) => {$suspense = n; suspenseStack.push(n)}
 export const popAwaiting = () => {suspenseStack.pop(); $suspense = getAwaiting()}
 
 export function isPending(...args: any[]) {
@@ -135,7 +135,7 @@ export function toPromise(awaited: any) {
 type AsyncIonOptions<T = any, U = any> = {
    '-as': (value: T) => U,
    '-awaited'?: true,
-   '-suspense'?: Suspense,
+   '-suspense'?: SuspenseIon,
    '-debounced'?: number
 }
 

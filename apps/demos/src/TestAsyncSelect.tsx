@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { Await, component, For, Meanwhile, Nonce } from "@rue/lumo";
+import { Await, component, For, Meanwhile, Nonce, Suspense } from "@rue/lumo";
 import { Ion, isPending, o } from "@rue/quarky";
 
 // based on Solid.js/Remix demo
@@ -14,60 +13,15 @@ import { Ion, isPending, o } from "@rue/quarky";
 
 export function TestAsyncSelect() {
 
-   const $states = Ion((['']), {
-      '-fetch': () => db.fetchStates(),
-   })
-   const $activeState = Ion(() => $states()[0], {
-      '-writable': true
-   })
+   const $states = Ion((['']), { '-fetch': () => db.fetchStates() })
+   const $activeState = Ion(() => $states()[0], { '-writable': true })
 
-   const $cities = Ion((['']), {
-      '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : []
-   })
-   const $activeCity = Ion(() => $cities()[0], {
-      '-writable': true
-   })
+   const $cities = Ion((['']), { '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : [] })
+   const $activeCity = Ion(() => $cities()[0], { '-writable': true })
 
    return component(
       <>
-         {/* <render-view meanwhile={o => o.initial && 'loading...'} view={$suspense => <>
-            <select mu:value={$activeState}>
-               {For($states, $state =>
-                  <option>{$state}</option>
-               )}
-            </select>
-
-            <select mu:value={$activeCity} disabled={(!!$cities.pending)}>
-               {For($cities, $city =>
-                  <option>{$city}</option>
-               )}
-            </select>
-
-            <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
-               Selection: {$activeCity}, {(o.await($cities, $activeState))}
-            </p>
-         </>}
-         ></render-view> */}
-
-         <render-view await={$cities} meanwhile={o => o.initial && 'loading...'}>
-            <select mu:value={$activeState}>
-               {For($states, $state =>
-                  <option>{$state}</option>
-               )}
-            </select>
-
-            <select mu:value={$activeCity} disabled={(!!$cities.pending)}>
-               {For($cities, $city =>
-                  <option>{$city}</option>
-               )}
-            </select>
-
-            <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
-               Selection: {$activeCity}, {(o.await($cities, $activeState))}
-            </p>
-         </render-view>
-{/* 
-         {Await($cities, $suspense => (awaitingCities = $suspense,
+         {Await($cities,
             <>
                <select mu:value={$activeState}>
                   {For($states, $state =>
@@ -85,10 +39,10 @@ export function TestAsyncSelect() {
                   Selection: {$activeCity}, {(o.await($cities, $activeState))}
                </p>
             </>
-         ))}
+         )}
          {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state
             'loading...'
-         )} */}
+         )}
 
          {/* {Meanwhile(() =>
             $cities.loaded || 'loading...'

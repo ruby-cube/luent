@@ -1,4 +1,4 @@
-import { Ion, isIon, isGetter, Suspense, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
+import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
 import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { $Node, INTERNAL } from "./NodeRef";

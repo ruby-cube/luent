@@ -1,9 +1,14 @@
-import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, Suspense } from "@rue/quarky";
+//@ts-nocheck
+import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Await, Meanwhile, component, Else, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
+import { Await, Meanwhile, component, Suspense, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
 import { createAsSeries, As } from "../../../packages/lumo/src/conditional/As";
 
 // Modified Demo from Solid.js 
+
+function Loading() {
+   return component('loading...')
+}
 
 export function TestAsyncTabs() {
    const tabNames = ['Un', 'Deux', 'Trois', 'Quatre', 'Cinq', 'Six'] as const
@@ -27,8 +32,7 @@ export function TestAsyncTabs() {
    // setInterval(() => {
    //    $count.value++
    // }, 1000)
-
-   const $awaitingTab = Suspense()
+   const $tabSuspense = SuspenseIon()
 
    return component(<>
       <ul class="inline">
@@ -38,13 +42,13 @@ export function TestAsyncTabs() {
             </li>
          ))}
       </ul>
-      <button on:click={e => console.log('tab views', tabViews)}>print tab views</button>
       <hr></hr>
       <ul class="inline">
          {For(openTabs, m => m, tab => (
             <li class={{ selected: ($tab() === tab) }} on:click={e => { $tab.value = tab }}>
                {tabNames[tab]}
                <span style="padding: 1em" on:click={e => {
+                  console.log('discarding', tab, $tab())
                   tabViews[tab]?.discard()
                   const index = openTabs.indexOf(tab)
                   if ($tab() === tab) {
@@ -60,23 +64,25 @@ export function TestAsyncTabs() {
          <li on:click={e => $tab.value = 1.25}>1.25</li> */}
       </ul>
 
-      {/* {Await($suspense => */}
-      <div class={{ 'tab': true, 'pending': $awaitingTab }}>
-         <remount-view
-            suspense={$awaitingTab} meanwhile={o => o!.initial && 'loading...'}
-         >
-            {As($tab, (view) => (
-               <div at:mount={() => (tabViews[$tab()] = view)}>
-                  <Tab page={tabNames[$tab()]} count={$count} />
-               </div>
-            ))}
-            {Default(
-               <div>No tabs open</div>
-            )}
-         </remount-view>
-      </div>
+      {Await($suspense =>
+         <div class={{ 'tab': true, 'pending': $suspense }}>
+            <remount-view>
+               {As($tab, (view) => (
+                  <div at:mount={() => (tabViews[$tab()] = view)}>
+                     <Tab page={tabNames[$tab()]} count={$count} />
+                  </div>
+               ))}
+               {Default(
+                  <div>No tabs open</div>
+               )}
+            </remount-view>
+         </div>
+      )}
+      {Meanwhile(o => o.initial &&
+         <Loading></Loading>
+      )}
+
       {/* </> */}
-      {/* )} */}
       {/* {Meanwhile(o => o.initial && 'loading...')} */}
       {/* <Match x={$tab} view='remount'>
             {Case(0, view =>

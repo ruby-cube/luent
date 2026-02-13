@@ -6,7 +6,7 @@ import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"
 import { RawJSXNode } from "@rue/lumo"
 
-export type Suspense = Ion<Promise<void> | null> & {
+export type SuspenseIon = Ion<Promise<void> | null> & {
    initial: boolean
    oo: Promise<unknown> | null
    hold: RawJSXNode
@@ -25,16 +25,16 @@ export const SUSPENSE_QUARK = Symbol('suspense quark')
 
 
 
-export function addToSuspense(suspense: Suspense, quark: AsyncQuark) {
+export function addToSuspense(suspense: SuspenseIon, quark: AsyncQuark) {
    suspense[SUSPENSE_QUARK].include(quark)
 }
 
-export function getSuspenseCount(suspense: Suspense) {
+export function getSuspenseCount(suspense: SuspenseIon) {
    return suspense[SUSPENSE_QUARK].quarkCount
 }
 
 
-export function Suspense<P>(pendingState?: P): Suspense {
+export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
    const quarks = new Set<AsyncQuark>()
    let resolve: (() => void) | null
    let reject: ((reason?: any) => void) | null

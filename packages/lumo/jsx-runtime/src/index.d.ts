@@ -2610,10 +2610,10 @@ declare global {
          // 'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit } & Lumo.ViewConfig;
-         'create-view': { children: ConditionalRenderKit[] } & Lumo.ViewConfig;
-         'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> } & Lumo.ViewConfig;
-         'render-view': { children: Lumo.RawJSXNode } & Lumo.ViewConfig
+         'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit } 
+         'create-view': { children: ConditionalRenderKit[] } 
+         'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> } 
+         'render-view': { children: Lumo.RawJSXNode }
          // 'o--preserve': { children: ConditionalRenderKit[]; discard?: Ion<boolean> };
          // 'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
          // 'Slot': {Slot: any}

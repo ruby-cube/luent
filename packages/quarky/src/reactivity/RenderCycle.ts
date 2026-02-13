@@ -92,6 +92,7 @@ export class RenderCycle {
    constructor(
       public update: Update,
    ) {
+      console.log('(()) render cycle', update.idle)
       this.process = new CycleProcess(update)
       // const schedulePrerenderTasks = update.idle ? queueIdleTask : runTask // TODO: need to check deadline for queueSwiftTask
       // const scheduleInternalRender = update.idle ? queueTask : runTask

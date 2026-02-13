@@ -1,4 +1,4 @@
-import { cancelPromise, getAwaiting, Ion, Suspense, toValue, watchToRender } from "@rue/quarky";
+import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, watchToRender } from "@rue/quarky";
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ActivationType, RenderConditional } from "./If";
 import { isFunction, noop } from "@rue/utils";
@@ -99,7 +99,7 @@ type View = { discard: (arg: any) => void }
 
 export const DEFAULT = Symbol('default')
 
-export function createCasesKit(activationType: ActivationType | undefined, render: RenderCase | undefined, context: ContextSnapshot, pending: Suspense | undefined): CasesKit {
+export function createCasesKit(activationType: ActivationType | undefined, render: RenderCase | undefined, context: ContextSnapshot, pending: SuspenseIon | undefined): CasesKit {
 
    return {
       pending,
