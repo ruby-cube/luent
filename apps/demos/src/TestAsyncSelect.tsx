@@ -49,7 +49,7 @@ export function TestAsyncSelect() {
          </>}
          ></render-view> */}
 
-         <render-view meanwhile={o => o.initial && 'loading...'}>
+         <render-view await={$cities} meanwhile={o => o.initial && 'loading...'}>
             <select mu:value={$activeState}>
                {For($states, $state =>
                   <option>{$state}</option>
