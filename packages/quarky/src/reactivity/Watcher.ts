@@ -251,7 +251,6 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    }
 
    if (eager) {
-      const update = $activeUpdate()
       scheduleEagerEffect(_render, PRELUDE)
    }
 

@@ -40,7 +40,6 @@ export class ListKit extends VineNode {
    prevItems: Map<UID, ListItemKit> = new Map()
 
    private render(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
-      console.log('$$$ RENDER LIST')
       if (!list) return [];
       const kits: ListItemKit[] = []
       for (let i = 0; i < list.length; i++) {
@@ -54,7 +53,6 @@ export class ListKit extends VineNode {
    }
 
    private rerender(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
-       console.log('$$$ RERENDER LIST', list)
       if (!list) list = []
       const prevItems = this.prevItems;
       const prevKits = this.nodes! as ListItemKit[];

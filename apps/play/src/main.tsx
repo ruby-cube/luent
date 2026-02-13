@@ -9,7 +9,7 @@
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { CRUDApp, SevenGUIs } from './wip-demos/7-guis';
+import {  SevenGUIs } from './wip-demos/7-guis';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { AsyncIon, component, createRoot } from '@rue/lumo';
@@ -76,6 +76,7 @@ import { TestAsyncSelect } from '../../demos/src/TestAsyncSelect';
 import { TestAsyncTabs } from '../../demos/src/TestAsyncTabs';
 import { initMonacoEditor } from './TestMonacoEditor';
 import { TestCreate } from './TestCreate';
+import { TestAwaitConditional } from './TestAwaitConditional';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -124,7 +125,7 @@ import { TestCreate } from './TestCreate';
 // })
 
 
-const app = createRoot(TestCreate)
+const app = createRoot(TestAsyncMultiplyB)
 
 app.mount('#root')
 

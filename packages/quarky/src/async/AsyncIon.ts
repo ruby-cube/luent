@@ -284,8 +284,8 @@ export function AsyncIon<
 
    // const inSuspense = suspense || awaiting
 
-   let timeout: NodeJS.Timeout | undefined;
-   let timeoutResolve: NodeJS.Timeout | undefined;
+   // let timeout: NodeJS.Timeout | undefined;
+   // let timeoutResolve: NodeJS.Timeout | undefined;
 
    // TODO: optimization: handle fetch as promise outside of watch
    watch(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
@@ -304,38 +304,38 @@ export function AsyncIon<
          // NOTE: The solution should be NO UPDATE. It inherits the update from upstream... but why does so much behavior break?
          // The problem was rooted in effect queue scheduling. Effects failed to schedule because of queued and requeued flags. Solved by resetting requeued flag at the beginning of loop, not the end.
          if (!resolve) {
-            if (!suspense && !awaiting) {
-               timeout = setTimeout(() => {
-                  instantUpdate(() => {
-                     $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-                     pendingStart = performance.now()
-                     if (!awaited && !suspense) {
-                        $promise.value.catch(err => {
-                           if (err === 'cancelled') return;
-                           else throw err
-                        })
-                     }
-                  })
-               }, 50)
+            // if (!suspense && !awaiting) {
+            //    timeout = setTimeout(() => {
+            //       // instantUpdate(() => {
+            //          $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
+            //          pendingStart = performance.now()
+            //          if (!awaited && !suspense) {
+            //             $promise.value.catch(err => {
+            //                if (err === 'cancelled') return;
+            //                else throw err
+            //             })
+            //          }
+            //       // })
+            //    }, 50)
+            // }
+            // else {
+            $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
+            // pendingStart = performance.now()
+            if (!awaited && !suspense) {
+               $promise.value.catch(err => {
+                  if (err === 'cancelled') return;
+                  else throw err
+               })
             }
-            else {
-               $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-               pendingStart = performance.now()
-               if (!awaited && !suspense) {
-                  $promise.value.catch(err => {
-                     if (err === 'cancelled') return;
-                     else throw err
-                  })
-               }
-            }
+            // }
          }
 
          awaited
             .then(value => {
-               if (timeout !== undefined) {
-                  clearTimeout(timeout)
-                  timeout = undefined
-               }
+               // if (timeout !== undefined) {
+               //    clearTimeout(timeout)
+               //    timeout = undefined
+               // }
 
                if (cancelledPromises.has(awaited)) {
                   console.warn('canceleld awaited', awaited)
@@ -349,7 +349,7 @@ export function AsyncIon<
                }
                pendingPromise = null;
 
-               const elapsed = pendingStart ? performance.now() - pendingStart : undefined
+               // const elapsed = pendingStart ? performance.now() - pendingStart : undefined
 
                if (resolve) {
                   // console.log('resolve to:', value)
@@ -358,38 +358,38 @@ export function AsyncIon<
                   reject = null
                }
 
-               instantUpdate(() => {
-                  if (suspense?.() && pendingState === undefined) {
-                     suspense()?.then(() => {
-                        instantUpdate(() => {
-                           $ion.value = value
-                        })
-                     })
-                  }
-                  else {
+               // instantUpdate(() => {
+               if (suspense?.() && pendingState === undefined) {
+                  suspense()?.then(() => {
+                     // instantUpdate(() => {
                      $ion.value = value
-                  }
-
-                  if ($promise.value && (elapsed && elapsed >= 250 || !elapsed)) {
-                     $promise.value = null;
-                     pendingStart = undefined
-                  }
-                  $loaded.value = true
-               })
-               if ($promise.value && elapsed && elapsed < 250) {
-
-                  // FIX: I don't know where to put this
-                  if (timeoutResolve !== undefined) {
-                     clearTimeout(timeoutResolve)
-                     timeoutResolve = undefined
-                  }
-                  timeoutResolve = setTimeout(() => {
-                     instantUpdate(() => {
-                        $promise.value = null
-                        pendingStart = undefined
-                     })
-                  }, 250 - elapsed)
+                     // })
+                  })
                }
+               else {
+                  $ion.value = value
+               }
+
+               if ($promise.value) {
+                  $promise.value = null;
+                  // pendingStart = undefined
+               }
+               $loaded.value = true
+               // })
+               // if ($promise.value && elapsed && elapsed < 250) {
+
+               //    // FIX: I don't know where to put this
+               //    if (timeoutResolve !== undefined) {
+               //       clearTimeout(timeoutResolve)
+               //       timeoutResolve = undefined
+               //    }
+               //    timeoutResolve = setTimeout(() => {
+               //       // instantUpdate(() => {
+               //          $promise.value = null
+               //          pendingStart = undefined
+               //       // })
+               //    }, 250 - elapsed)
+               // }
             })
             .catch(err => {
                // pendingPromises.delete(output)
@@ -400,11 +400,11 @@ export function AsyncIon<
                   resolve = null
                   reject = null
                }
-               instantUpdate(() => {
-                  $error.value = toError(err)
-                  $promise.value = null
-                  $loaded.value = true
-               })
+               // instantUpdate(() => {
+               $error.value = toError(err)
+               $promise.value = null
+               $loaded.value = true
+               // })
                if (err === 'cancelled') return;
                else throw err;
             })
@@ -420,11 +420,11 @@ export function AsyncIon<
          //    }
          // }
          // queueTask(() => {
-         instantUpdate(() => { // QUESTION: Why does async select break without this when it shouldn't need it?
-            $error.value = null
-            // $promise.value = null
-            $ion.value = output
-         })
+         // instantUpdate(() => { // QUESTION: Why does async select break without this when it shouldn't need it?
+         $error.value = null
+         // $promise.value = null
+         $ion.value = output
+         // })
          // })
       }
    }, { phase: PRELUDE, eager: true })

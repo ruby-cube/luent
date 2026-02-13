@@ -4,10 +4,12 @@ import { instantUpdate } from "../reactivity/Update"
 import { watch } from "../reactivity/Watcher"
 import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"
+import { RawJSXNode } from "@rue/lumo"
 
 export type Suspense = Ion<Promise<void> | null> & {
    initial: boolean
    oo: Promise<unknown> | null
+   hold: RawJSXNode
    await(): void
    retry(): void
    pendingState: any
@@ -90,29 +92,28 @@ export function Suspense<P>(pendingState?: P): Suspense {
             // console.log('start suspense', quark, quarks.size)
             const { $promise } = quark
             if ($promise() && !$suspense()) {
-               console.log('Suspense: ++ new promise')
+               // console.log('Suspense: ++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                startTime = performance.now()
             }
-            console.log('Suspense: starting suspense', $promise())
+            // console.log('Suspense: starting suspense', $promise())
             quarks.add(quark)
             getActiveFlask().onDiscard(() => {
                if (quark.cancelIfFetching()) pendingPromises.delete($promise())
-               console.log('Suspense: discarding quark')
+               // console.log('Suspense: discarding quark')
                quarks.delete(quark)
             })
 
             watch($promise, ({ current: promise, previous, eager }) => {
-               console.log('SUSPENSE: promise:', promise, 'prev:', previous)
                if (!eager && promise === previous) {
-                  console.log('Suspense: same', promise)
+                  // console.log('Suspense: same', promise)
                   return;
                }
                pendingPromises.delete(previous)
                if (promise === null) {
                   if (!$suspense()) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
                   if (!pendingPromises.has(previous)) console.warn('Suspense: previous not in pending promises', previous)
-                  console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
+                  // console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
                   if (pendingPromises.size === 0 && !isPending()) {
                      if (resolve) {
                         timecheck()
@@ -120,7 +121,7 @@ export function Suspense<P>(pendingState?: P): Suspense {
                         resolve = null
                         reject = null
                      }
-                     console.log('Suspense RESOLVED: Suspense to NULL :D', $suspense.value)
+                     // console.log('Suspense RESOLVED: Suspense to NULL :D', $suspense.value)
                      $suspense.value = null
                      if ($suspense.initial) $suspense.initial = false
                   }
@@ -128,11 +129,11 @@ export function Suspense<P>(pendingState?: P): Suspense {
                }
 
                pendingPromises.add(promise)
-               console.log('Suspense: +promise; pending promises:', pendingPromises.size)
+               // console.log('Suspense: +promise; pending promises:', pendingPromises.size)
                if ($suspense.initial) $suspense.initial = false
                if (!$suspense()) {
                   startTime = performance.now()
-                  console.log('Suspense: ++ new suspense promise')
+                  // console.log('Suspense: ++ new suspense promise')
                   $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                }
 
@@ -149,10 +150,10 @@ export function Suspense<P>(pendingState?: P): Suspense {
                         resolve = null
                         reject = null
                      }
-                     instantUpdate(() => {
+                     // instantUpdate(() => {
                         // $error.value = toError(err);
                         $suspense.value = null
-                     })
+                     // })
                   })
             }, { phase: PRELUDE, eager: true })
          }

@@ -1,5 +1,5 @@
-import { getAwaiting, Ion, Suspense, toValue, watchToRender } from "@rue/quarky";
-import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
+import { cancelPromise, getAwaiting, Ion, Suspense, toValue, watchToRender } from "@rue/quarky";
+import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ActivationType, RenderConditional } from "./If";
 import { isFunction, noop } from "@rue/utils";
 import { component } from "../component/Component";
@@ -37,8 +37,9 @@ export function Match(input: FromTag<{
 }
 
 
-
 export function toCasesMap(raw: RawCaseKit[], groupActivationType: ActivationType | undefined): Map<any, CasesKit> {
+   const superGroupActivationType = getGroupActivationType()
+   const fallbackType = groupActivationType ?? superGroupActivationType === 'show' ? 'remount' : superGroupActivationType ?? 'create'
    const map: Map<any, CasesKit> = new Map()
    const context = $_snap_context()
    const pending = getAwaiting()
@@ -51,11 +52,11 @@ export function toCasesMap(raw: RawCaseKit[], groupActivationType: ActivationTyp
                [FLASK]: undefined,
                [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
             })
-            currentKit.type = type ?? groupActivationType ?? 'create'
+            currentKit.type = type ?? fallbackType
          }
       }
       else {
-         currentKit = createCasesKit(type ?? groupActivationType ?? 'create', render, context, pending)
+         currentKit = createCasesKit(type ?? fallbackType, render, context, pending)
       }
       map.set(c, currentKit)
       //@ts-expect-error
@@ -109,6 +110,7 @@ export function createCasesKit(activationType: ActivationType | undefined, rende
       }) : undefined,
       type: activationType,
       cache: undefined,
+      awaitCache: undefined,
       view: {
          discard: noop
       }
@@ -121,7 +123,6 @@ export class MatchKit extends VineNode {
 
    getKit(caseKey: any, cacheKey: any) {
       const protoKit = this.cases.get(caseKey) ?? this.cases.get(DEFAULT)
-      console.log('caseKey', caseKey, 'cacheKey', cacheKey, protoKit, this.cases)
       if (!protoKit) return;
       if (protoKit.type === 'create') return protoKit
       if (protoKit.type === 'remount') {
@@ -146,7 +147,7 @@ export class MatchKit extends VineNode {
          }
       }
       this.cached!.set(cacheKey, kit)
-      const flask = kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" })
+      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       flask.onDiscard(() => {
          this.cached?.delete(cacheKey)
       })
@@ -160,7 +161,7 @@ export class MatchKit extends VineNode {
    constructor(
       $key: Ion<any>,
       private cases: Map<Case, CasesKit>,
-      toCase: (key: any) => any = (key: any) => key == null ? DEFAULT : key
+      toCase: (key: any) => any = (key: any) => key == null ? DEFAULT : key,
    ) {
       super()
       const caseKey = toCase($key())
@@ -183,25 +184,36 @@ export class MatchKit extends VineNode {
          if (matchKey === previous) return;
 
          const kit = this.getKit(caseKey, matchKey)
-         const prevKit = this.getKit(prevCase, previous)
+         const prevKit = this.pendingDeactivatedKit ?? this.getKit(prevCase, previous)
+
+         if (this.pendingSwitch) {
+            console.log('>>> CANCEL PROMISE')
+            this.cancelledPendingSwitch.add(this.pendingSwitch)
+            this.pendingSwitch = null
+         }
 
          if (kit.pending) {
-            this.awaitPendingConditional(kit.pending, kit, prevKit, flask)
+            this.awaitPendingConditional(kit.pending, kit, prevKit)
          }
          else {
-            this.switchConditional(kit, prevKit, flask)
+            this.deactivateConditional(prevKit)
+            this.reactivateConditional(kit)
             if (kit.type == 'remount')
                kit.flask!.onDiscard(() => {
                   this.cached?.delete(matchKey)
                })
          }
       })
-
-
    }
 
+   cancelledPendingSwitch = new Set()
+
+   _pendingSwitchID = 0
+   pendingSwitch: number | null = null;
+   pendingDeactivatedKit: DynamicNodeKit | null = null
+
    awaitPendingConditional = IfElseKit.prototype.awaitPendingConditional
-   switchConditional = IfElseKit.prototype.switchConditional
+   reactivateConditional = IfElseKit.prototype.reactivateConditional
    activateConditional = IfElseKit.prototype.activateConditional
    deactivateConditional = IfElseKit.prototype.deactivateConditional
 }

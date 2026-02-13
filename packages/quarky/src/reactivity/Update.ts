@@ -25,7 +25,6 @@ export function $activeUpdate() {
    const update = getActiveUpdate()
    if (!update) {
       if (activeUpdate) {
-         console.warn('GETTING EXISTING ACTIVE UPDATE')
          return activeUpdate
       }
       const update = activeUpdate = new Update(UpdateType.INSTANT, 100, false)
@@ -218,7 +217,7 @@ function createLazyUpdate() {
 
 export let initialLoad: Update | null = null
 export let load = (task: () => unknown) => {
-   const update = initialLoad = new Update(undefined, 1700)
+   const update = initialLoad = new Update(undefined, 1700, false)
    update.queue(task)
    update.atComplete(() => {
       console.log("#### initial load completed")
@@ -229,7 +228,8 @@ export let load = (task: () => unknown) => {
 }
 
 export function swiftUpdate(task: () => unknown) {
-   (getSwiftUpdate() ?? createSwiftUpdate()).queue(task)
+   task()
+   // (getSwiftUpdate() ?? createSwiftUpdate()).queue(task)
 }
 
 let latestSwiftUpdate: Update | null = null
@@ -245,7 +245,7 @@ function getSwiftUpdate() {
 }
 
 function createSwiftUpdate() {
-   const update = new Update()
+   const update = new Update(UpdateType.USER_INTERACTION, 100)
    if (latestSwiftUpdate && !latestSwiftUpdate.completed) {
       // console.warn('queueing update')
       latestSwiftUpdate.atComplete(() => {

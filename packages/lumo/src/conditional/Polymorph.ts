@@ -141,6 +141,7 @@ function createDynamicRenderKit(render: RenderFunction, context: ContextSnapshot
       render: toAsyncRender(render, context, { [FLASK]: undefined, [COMMONS]: commons, [TRACE]: __DEV__ ? __DEV__buildAsyncPath() : '' }),
       transitionNodes,
       cache: undefined,
+      awaitCache: undefined,
       type: 'create',
       input: undefined,
       inputRequired: render.length !== 0

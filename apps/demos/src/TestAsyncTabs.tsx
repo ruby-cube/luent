@@ -1,4 +1,4 @@
-import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic } from "@rue/quarky";
+import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load } from "@rue/quarky";
 import "./TestAsyncTabs.css";
 import { Await, Meanwhile, component, Else, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
 import { createAsSeries, As } from "../../../packages/lumo/src/conditional/As";
@@ -27,6 +27,17 @@ export function TestAsyncTabs() {
    // setInterval(() => {
    //    $count.value++
    // }, 1000)
+   let initial = true;
+   let prevCache: any;
+   let _cache: any;
+
+   function cache(nodes: any) {
+      console.log('>>> caching...', nodes)
+      console.log('>>> (prev cache)', _cache)
+      if (_cache) prevCache = _cache;
+      _cache = nodes
+      return nodes
+   }
 
    return component(<>
       <ul class="inline">
@@ -58,17 +69,22 @@ export function TestAsyncTabs() {
          <li on:click={e => $tab.value = 1.25}>1.25</li>
       </ul>
 
-      {/* {Await($suspense => */}
-      <div class={{ 'tab': true, /* 'pending': $suspense */ }}>
-         {As($tab, 'remount', (view) => (
-            <div at:create={tabViews[$tab()] = view}>
-               <Tab page={tabNames[$tab()]} count={$count} />
+      {Await($suspense =>
+         <>
+            <div class={{ 'tab': true, 'pending': $suspense }}>
+               {As($tab, 'remount', (view) => (
+                  <div at:mount={() => (tabViews[$tab()] = view)}>
+                     <Tab page={tabNames[$tab()]} count={$count} />
+                  </div>
+               ))}
+               {Default(
+                  <div>No tabs open</div>
+               )}
             </div>
-         ))}
-         {Default(
-            <div>No tabs open</div>
-         )}
-         {/* <Match x={$tab} view='remount'>
+         </>
+      )}
+      {Meanwhile(o => o.initial && 'loading...')}
+      {/* <Match x={$tab} view='remount'>
             {Case(0, view =>
                <div at:create={() => tabViews[0] = view}>
                   <Tab page="Un" count={$count} />
@@ -108,7 +124,7 @@ export function TestAsyncTabs() {
                <div>No tabs open</div>
             )}
          </Match> */}
-         {/* <remount-view>
+      {/* <remount-view>
             {If(($tab() === 0), view =>
                <div at:create={() => tabViews[0] = view}>
                   <Tab page="Un" count={$count} />
@@ -146,8 +162,8 @@ export function TestAsyncTabs() {
                <div>No tabs open</div>
             )}
          </remount-view> */}
-      </div>
-      {/* )} */}
+
+      {/* // )} */}
       {/* {Meanwhile(o =>
          o.initial && "Loading..."
       )} */}
@@ -199,7 +215,7 @@ function Tab(input: FromTag<{
 const db = {
    fetchTime() {
       return new Promise<number>((resolve) => {
-         const delay = Math.random() * 2000;
+         const delay = 2000;
          setTimeout(() => resolve(delay), delay);
       })
    }

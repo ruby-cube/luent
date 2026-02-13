@@ -17,14 +17,14 @@ type Ions<V> = V extends { [key: PropertyKey]: any } ? { [K in keyof V]: Mutable
 
 export const REFETCH = Symbol('refetch')
 
-const cancelledPromises = new Set()
+export const cancelledPromises = new Set()
 
-function cancelPromise(promise: Promise<any> | AsyncSeries) {
+export function cancelPromise(promise: Promise<any> | AsyncSeries) {
    if ('cancel' in promise) promise.cancel()
    else cancelledPromises.add(promise)
 }
 
-function isCancelled(promise: Promise<any> | AsyncSeries) {
+export function isCancelled(promise: Promise<any> | AsyncSeries) {
    if ('cancelled' in promise) return promise.cancelled
    return cancelledPromises.has(promise)
 }
@@ -98,7 +98,7 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | P
                resolve = null
                reject = null
             }
-            instantUpdate(() => {
+            // instantUpdate(() => {
                const updateIon = (ion: MutableIon<any>, value: any) => {
                   if (value === REFETCH) {
                      console.log('refetch :)')
@@ -129,7 +129,7 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | P
                }
 
                $promise.value = null
-            })
+            // })
          })
          .catch((err: any) => {
             pendingPromise = null
@@ -138,10 +138,10 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | P
                resolve = null
                reject = null
             }
-            instantUpdate(() => {
+            // instantUpdate(() => {
                $promise.value = null
                // $error.value = err
-            })
+            // })
             throw err
          })
 

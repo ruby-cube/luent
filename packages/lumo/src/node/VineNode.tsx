@@ -101,7 +101,6 @@ export function setUpNodeVine(nodes: JSXNode[], parent: DOMParent, preceding: JS
       if (node instanceof VineNode) {
          node.parent = parent
          node.preceding = preceding
-         console.log('(A) preceding', preceding)
          if (node.nodes) {
             setUpNodeVine(node.nodes, parent, preceding)
          }
@@ -128,7 +127,6 @@ class DynamicTextNode extends VineNode {
       watchToRender($text, ({ current, previous, flask }) => {
          // if (current === previous) return;
          queueInternalRender(() => {
-            console.log('$$$ internal render', $text())
             textNode.data = toString($text());
          }, flask)
          //NOTE: We call the ion instead of using the current value passed in because, 

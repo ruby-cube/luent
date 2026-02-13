@@ -1,8 +1,8 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@rue/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
-import { ActivationType } from "./If";
+import { ActivationType, If } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
-import { getSuspenseCount, Ion, Ionic, popUpdate, PRELUDE, pushUpdate, queueInternalRender, queueTask, Suspense, swiftUpdate, watchToRender } from "@rue/quarky";
+import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, pushAwaiting, pushUpdate, queueInternalRender, queueTask, Suspense, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { COMMONS, CommonsNode } from "../context/context-stack";
@@ -11,6 +11,7 @@ import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
 import { createCommonsNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isPlainObject } from "@rue/utils";
+import { Await } from "../boundaries/Await";
 
 
 export type ConditionalKit = {
@@ -33,6 +34,7 @@ export type DynamicNodeKit = {
    // flask
    nodes: (JSXNode[]) | null
    cache: JSXNode[] | undefined;
+   awaitCache: RawJSXNode;
    pending: Suspense | undefined
    flask: Flask | undefined;
    type: ActivationType | undefined;
@@ -77,9 +79,8 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
          _cache = nodes
       },
       view: {
-         discard(changeCondition?: () => void) {
+         discard() {
             _cache = undefined
-            changeCondition?.()
          }
       }
    }
@@ -104,81 +105,131 @@ export class IfElseKit extends VineNode {
       public outerFlask: Flask
    ) {
       super()
-      console.log('creating ifelse kit')
       this.$activeIndex = $ActiveIndex(getConditions(kits))
+
 
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
          kit.flask!.emitInitialMount()
       })
 
-      watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex, flask }) => {
+      watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex }) => {
          console.log('index changed!')
          if (activeIndex === prevIndex) return;
          const kit = this.kits[activeIndex]
-         const prevKit = this.kits[prevIndex]
+         const prevKit = this.pendingDeactivatedKit ?? this.kits[prevIndex]
+
+         if (this.pendingSwitch) {
+            console.log('>>> CANCEL PROMISE')
+            this.cancelledPendingSwitch.add(this.pendingSwitch)
+            this.pendingSwitch = null
+         }
 
          if (kit.pending) {
-            this.awaitPendingConditional(kit.pending, kit, prevKit, flask)
+            this.awaitPendingConditional(kit.pending, kit, prevKit)
          }
          else {
-            this.switchConditional(kit, prevKit, flask)
+            this.deactivateConditional(prevKit);
+            this.reactivateConditional(kit)
          }
       })
    }
 
-   awaitPendingConditional(suspense: Suspense, kit: DynamicNodeKit, prevKit: DynamicNodeKit, flask: Flask) {
+   cancelledPendingSwitch = new Set()
+
+   _pendingSwitchID = 0
+   pendingSwitch: number | null = null;
+   pendingDeactivatedKit: DynamicNodeKit | null | undefined = null
+
+   awaitPendingConditional(suspense: Suspense, kit: DynamicNodeKit, prevKit: DynamicNodeKit | undefined) {
       if (!kit.cache) {
-         // TODO: is there a better way of doing this?? Does this need to be wrapped in try{} finally{} ?
          const prevCount = getSuspenseCount(suspense)
-         const output = processJSXOutput(kit.render(flask, kit.view))
+         kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
+         const rawOutput = kit.render(kit.flask, kit.view)
          const count = getSuspenseCount(suspense)
          if (count > prevCount) {
-            kit.cache = output
-            queueTask(() => {
-               const promise = suspense()
-               if (promise) {
-                  promise.then(() => {
-                     // swiftUpdate(() => {
-                     this.switchConditional(kit, prevKit, flask)
-                     // })
-                  })
-               }
-               else {
-                  // swiftUpdate(() => {
-                  this.switchConditional(kit, prevKit, flask)
-                  // })
-               }
-            })
+            kit.awaitCache = rawOutput
+            const promise = suspense()
+            if (promise) {
+               console.log('### B promise...', prevKit && prevKit.nodes ? [...prevKit.nodes] : prevKit.nodes)
+               const id = this.pendingSwitch = ++this._pendingSwitchID
+               this.pendingDeactivatedKit = prevKit
+               promise.then(() => {
+                  if (this.cancelledPendingSwitch.has(id)) {
+                     console.log('>>> (canceled) B')
+                     this.cancelledPendingSwitch.delete(id)
+                     return;
+                  }
+                  this.pendingSwitch = null
+                  console.log('### B promise switch')
+                  this.deactivateConditional(prevKit);
+                  this.reactivateConditional(kit)
+               })
+            }
+            else {
+               watch(suspense, ({ current: promise }) => {
+                  if (promise) {
+                     console.log('### A promise...', prevKit && prevKit.nodes ? [...prevKit.nodes] : prevKit.nodes)
+                     const id = this.pendingSwitch = ++this._pendingSwitchID
+                     this.pendingDeactivatedKit = prevKit
+                     promise.then(() => {
+                        if (this.cancelledPendingSwitch.has(id)) {
+                           console.log('>>> (canceled) A')
+                           this.cancelledPendingSwitch.delete(id)
+                           return;
+                        }
+                        this.pendingSwitch = null
+                        console.log('### A promise switch')
+                        this.deactivateConditional(prevKit);
+                        this.reactivateConditional(kit)
+                     })
+                  }
+               }, { phase: PRELUDE, once: true })
+            }
          }
          else {
-            kit.cache = output
-            this.switchConditional(kit, prevKit, flask)
+            // TODO: end suspense... need a way to do this without exposing .value to devs
+            suspense.value = null
+            console.log('### C switch', prevKit && prevKit.nodes ? [...prevKit.nodes] : prevKit.nodes, this.pendingDeactivatedKit)
+            kit.awaitCache = rawOutput
+            this.deactivateConditional(prevKit);
+            this.reactivateConditional(kit)
          }
       }
       else {
          const promise = suspense()
          if (promise) {
+            console.log('### D promise...')
+            const id = this.pendingSwitch = ++this._pendingSwitchID
+            this.pendingDeactivatedKit = prevKit
+
             promise.then(() => {
-               // swiftUpdate(() => {
-               this.switchConditional(kit, prevKit, flask)
-               // })
+               if (this.cancelledPendingSwitch.has(id)) {
+                  console.log('>>> (canceled) D')
+                  this.cancelledPendingSwitch.delete(id)
+                  return;
+               }
+               this.pendingSwitch = null
+               console.log('### D promise switch')
+               this.deactivateConditional(prevKit);
+               this.reactivateConditional(kit)
             })
          }
          else {
-            this.switchConditional(kit, prevKit, flask)
+            console.log('### E switch')
+            this.deactivateConditional(prevKit);
+            this.reactivateConditional(kit)
          }
       }
    }
 
-   switchConditional(activeKit: DynamicNodeKit, prevKit: DynamicNodeKit, flask: Flask) {
-      this.deactivateConditional(prevKit);
+   reactivateConditional(activeKit: DynamicNodeKit) {
       this.activateConditional(activeKit, (kit, initial) => {
          setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
          const fragment = new DocumentFragment()
          mountDOMNodes(kit.nodes!, fragment)
          queueInternalRender(() => {
             mountFragment(fragment, this.precedingLeaf, this.parent)
-         }, flask)
+         }, this.outerFlask)
          initial ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
       })
    }
@@ -188,22 +239,25 @@ export class IfElseKit extends VineNode {
       const initialMount = !kit.cache
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
-         kit.pending && kit.cache ? kit.cache :
-            kit.type === 'remount' ?
-               (kit.cache ?? (kit.cache = processJSXOutput(kit.render(flask, kit.view)))) // TODO: pass the view instead
-               : processJSXOutput(kit.render(flask, kit.view)); // TODO: pass the view instead
-
+         kit.type === 'remount' ?
+            (kit.cache ?? (kit.cache = processJSXOutput(kit.awaitCache ? kit.awaitCache : kit.render(flask, kit.view))))
+            : processJSXOutput(kit.awaitCache ? kit.awaitCache : kit.render(flask, kit.view));
+      kit.awaitCache = undefined
       emitActivated(kit, initialMount)
    }
 
    deactivateConditional(kit: DynamicNodeKit | undefined) {
+      console.log('))) deactivate A')
       if (!kit) return;
+      console.log('))) deactivate B')
       const prevNodes = kit.nodes;
+      this.pendingDeactivatedKit = null
       if (!prevNodes) return;
+      console.log('))) deactivate C')
       kit.nodes = null;
 
       if (kit.type === 'create') {
-         kit.cache = undefined
+         // kit.awaitCache = undefined
          kit.flask!.emitDiscard()
          kit.flask = undefined
       }

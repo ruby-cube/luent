@@ -127,7 +127,6 @@ window._$$IfSeries = createIfSeries
 
 
 export function renderStaticConditional(statements: ConditionalKit[]) {
-   console.log('renderStaticConditional')
    for (const kit of statements) {
       if (!!toValue(kit.$condition) === true) {
          return kit.render()

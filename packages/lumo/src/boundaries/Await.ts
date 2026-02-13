@@ -53,7 +53,7 @@ export function Await(renderOrSuspense: [...any[], RenderFunction | RawJSXNode] 
       }
       finally {
          popAwaiting()
-         render = () => output
+         render = () => { return output }
       }
    }
    else {
@@ -80,7 +80,7 @@ export function Meanwhile(renderOrOptions: ((o: Suspense) => RawJSXNode) | RawJS
 
 export function Nonce(renderPlaceholder: any) {
    return Meanwhile(o => {
-      return o.initial && renderPlaceholder() 
+      return o.initial && renderPlaceholder()
    })
 }
 
@@ -227,8 +227,6 @@ export function createAwaitSeries(
 
    const awaitSeries = createIfSeries([
       If($renderPlaceholder, () => {
-
-         // console.log('RENDER PLACEHOLDER')
          return placeholder
       }),
       ElseIf($error, () => renderError($error()!)),

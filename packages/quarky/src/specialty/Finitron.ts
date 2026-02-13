@@ -408,12 +408,12 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
       if (!transition) return;
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => {
-         instantUpdate(() => {
+         // instantUpdate(() => {
             const transitionEvent = applyTransition(transition)
             if (transitionEvent && isTerminal(transitionEvent.state)) {
                runFinalTasks()
             }
-         })
+         // })
       }, transition.timeout ?? 0)
    }
 

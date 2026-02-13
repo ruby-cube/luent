@@ -277,17 +277,17 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 
 function setUpCheckboxInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {
-      instantUpdate(() => {
+      // instantUpdate(() => {
          updateIonWithInput(ion, e, 'checked')
-      })
+      // })
    })
 }
 
 function setUpInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }, key: string = 'value') {
    element.addEventListener('input', e => {
-      instantUpdate(() => {
+      // instantUpdate(() => {
          updateIonWithInput(ion, e, key)
-      })
+      // })
    })
 }
 
