@@ -50,8 +50,10 @@ export function isLoaded(...args: any[]) {
 // QUESTION: should suspense boundaries be the default? No because you might not want to hold up rendering for something that is ok to be undefined
 // Should { awaited: true } be the default? or { renderUndefined: true } or { dontAwait } or 
 
-const ASYNC_QUARK = Symbol('async quark')
-
+export const ASYNC_QUARK = Symbol('async quark')
+export function isAsyncIon(value: any): value is AsyncIon<any> {
+   return value instanceof Object && ASYNC_QUARK in value
+}
 
 // RemoteIon({
 //    watch: $a,

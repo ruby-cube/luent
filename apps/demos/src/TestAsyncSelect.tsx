@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Await, component, For, Meanwhile, Nonce } from "@rue/lumo";
 import { Ion, isPending, o } from "@rue/quarky";
 
@@ -29,7 +30,44 @@ export function TestAsyncSelect() {
 
    return component(
       <>
-         {Await($cities,
+         {/* <render-view meanwhile={o => o.initial && 'loading...'} view={$suspense => <>
+            <select mu:value={$activeState}>
+               {For($states, $state =>
+                  <option>{$state}</option>
+               )}
+            </select>
+
+            <select mu:value={$activeCity} disabled={(!!$cities.pending)}>
+               {For($cities, $city =>
+                  <option>{$city}</option>
+               )}
+            </select>
+
+            <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
+               Selection: {$activeCity}, {(o.await($cities, $activeState))}
+            </p>
+         </>}
+         ></render-view> */}
+
+         <render-view meanwhile={o => o.initial && 'loading...'}>
+            <select mu:value={$activeState}>
+               {For($states, $state =>
+                  <option>{$state}</option>
+               )}
+            </select>
+
+            <select mu:value={$activeCity} disabled={(!!$cities.pending)}>
+               {For($cities, $city =>
+                  <option>{$city}</option>
+               )}
+            </select>
+
+            <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
+               Selection: {$activeCity}, {(o.await($cities, $activeState))}
+            </p>
+         </render-view>
+{/* 
+         {Await($cities, $suspense => (awaitingCities = $suspense,
             <>
                <select mu:value={$activeState}>
                   {For($states, $state =>
@@ -47,10 +85,11 @@ export function TestAsyncSelect() {
                   Selection: {$activeCity}, {(o.await($cities, $activeState))}
                </p>
             </>
-         )}
+         ))}
          {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state
             'loading...'
-         )}
+         )} */}
+
          {/* {Meanwhile(() =>
             $cities.loaded || 'loading...'
          )} */}

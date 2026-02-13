@@ -1,4 +1,4 @@
-import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load } from "@rue/quarky";
+import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting } from "@rue/quarky";
 import "./TestAsyncTabs.css";
 import { Await, Meanwhile, component, Else, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
 import { createAsSeries, As } from "../../../packages/lumo/src/conditional/As";
@@ -27,17 +27,7 @@ export function TestAsyncTabs() {
    // setInterval(() => {
    //    $count.value++
    // }, 1000)
-   let initial = true;
-   let prevCache: any;
-   let _cache: any;
 
-   function cache(nodes: any) {
-      console.log('>>> caching...', nodes)
-      console.log('>>> (prev cache)', _cache)
-      if (_cache) prevCache = _cache;
-      _cache = nodes
-      return nodes
-   }
 
    return component(<>
       <ul class="inline">
@@ -69,21 +59,22 @@ export function TestAsyncTabs() {
          <li on:click={e => $tab.value = 1.25}>1.25</li>
       </ul>
 
-      {Await($suspense =>
-         <>
-            <div class={{ 'tab': true, 'pending': $suspense }}>
-               {As($tab, 'remount', (view) => (
-                  <div at:mount={() => (tabViews[$tab()] = view)}>
-                     <Tab page={tabNames[$tab()]} count={$count} />
-                  </div>
-               ))}
-               {Default(
-                  <div>No tabs open</div>
-               )}
-            </div>
-         </>
-      )}
-      {Meanwhile(o => o.initial && 'loading...')}
+      {/* {Await($suspense => */}
+      {/* <render-view meanwhile={o => o!.initial && 'loading...'}>
+         <div at:create={console.log('getAwaiting', getAwaiting())} class={{ 'tab': true, 'pending': $suspense }}>
+            {As($tab, 'remount', (view) => (
+               <div at:create={console.log('getAwaiting?? in As', getAwaiting())} at:mount={() => (tabViews[$tab()] = view)}>
+                  <Tab page={tabNames[$tab()]} count={$count} />
+               </div>
+            ))}
+            {Default(
+               <div>No tabs open</div>
+            )}
+         </div>
+      </render-view> */}
+      {/* </> */}
+      {/* )} */}
+      {/* {Meanwhile(o => o.initial && 'loading...')} */}
       {/* <Match x={$tab} view='remount'>
             {Case(0, view =>
                <div at:create={() => tabViews[0] = view}>
@@ -124,44 +115,48 @@ export function TestAsyncTabs() {
                <div>No tabs open</div>
             )}
          </Match> */}
-      {/* <remount-view>
-            {If(($tab() === 0), view =>
-               <div at:create={() => tabViews[0] = view}>
-                  <Tab page="Un" count={$count} />
-               </div>
-            )}
-            {ElseIf(($tab() === 1), view => {
-               atMounted(() => console.log('atMounted'))
-               return (
-                  <div at:mounted={() => { console.log('### creating', 1), tabViews[1] = view }}>
-                     <Tab page="Deux" count={$count} />
+      <render-view meanwhile={o => o.initial && 'loading...'}>
+         <div at:create={console.log('getAwaiting', getAwaiting())} class={{ 'tab': true, /* 'pending': $suspense */ }}>
+            <remount-view>
+               {If(($tab() === 0), view =>
+                  <div at:create={() => tabViews[0] = view}>
+                     <Tab page="Un" count={$count} />
                   </div>
-               )
-            })}
-            {ElseIf(($tab() === 2), view =>
-               <div at:create={() => tabViews[2] = view}>
-                  <Tab page="Trois" count={$count} />
-               </div>
-            )}
-            {ElseIf(($tab() === 3), view =>
-               <div at:create={() => tabViews[3] = view}>
-                  <Tab page="Quatre" count={$count} />
-               </div>
-            )}
-            {ElseIf(($tab() === 4), view =>
-               <div at:create={() => tabViews[4] = view}>
-                  <Tab page="Cinq" count={$count} />
-               </div>
-            )}
-            {ElseIf(($tab() === 5), view =>
-               <div at:create={() => tabViews[5] = view}>
-                  <Tab page={tabNames[5]} count={$count} />
-               </div>
-            )}
-            {Else(
-               <div>No tabs open</div>
-            )}
-         </remount-view> */}
+               )}
+               {ElseIf(($tab() === 1), view => {
+                  atMounted(() => console.log('atMounted'))
+                  return (
+                     <div at:mounted={() => { console.log('### creating', 1), tabViews[1] = view }}>
+                        <Tab page="Deux" count={$count} />
+                     </div>
+                  )
+               })}
+               {ElseIf(($tab() === 2), view =>
+                  <div at:create={() => tabViews[2] = view}>
+                     <Tab page="Trois" count={$count} />
+                  </div>
+               )}
+               {ElseIf(($tab() === 3), view =>
+                  <div at:create={() => tabViews[3] = view}>
+                     <Tab page="Quatre" count={$count} />
+                  </div>
+               )}
+               {ElseIf(($tab() === 4), view =>
+                  <div at:create={() => tabViews[4] = view}>
+                     <Tab page="Cinq" count={$count} />
+                  </div>
+               )}
+               {ElseIf(($tab() === 5), view =>
+                  <div at:create={() => tabViews[5] = view}>
+                     <Tab page={tabNames[5]} count={$count} />
+                  </div>
+               )}
+               {Else(
+                  <div>No tabs open</div>
+               )}
+            </remount-view>
+         </div>
+      </render-view>
 
       {/* // )} */}
       {/* {Meanwhile(o =>

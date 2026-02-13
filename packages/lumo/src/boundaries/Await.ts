@@ -13,11 +13,14 @@ import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { createStack, normalizeToArray, toError, UNDEFINED } from "@rue/utils";
-import { AsyncIon, AsyncProps, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
+import { ASYNC_QUARK, AsyncIon, AsyncProps, isAsyncIon, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
 import { INTERNAL_RENDER, POSTLUDE, PRELUDE, SYNC } from "../../../quarky/src/reactivity/RenderCycle";
 import { $_snap_context, AsyncState } from "@rue/flask";
-import { Suspense } from "../../../quarky/src/async/Suspense";
+import { Suspense, SUSPENSE_QUARK } from "../../../quarky/src/async/Suspense";
 import { toAsyncRender } from "../node/VineNode";
+import { createHybridIon } from "../../../quarky/src/ion/HybridIon";
+
+type RenderAsync = (suspense: Suspense) => RawJSXNode
 
 type AwaitKit = {
    $suspense: Suspense | undefined,
@@ -123,21 +126,9 @@ export function unpackAwaitSeries(series:
    const { ions, $suspense, renderResolved } = awaitKit;
    const secondKit = series[1]
    const thirdKit = series[2]
-   const renderPlaceholder = secondKit && 'renderPlaceholder' in secondKit ? $suspense ? wrapRenderPlaceholder(secondKit.renderPlaceholder) : secondKit.renderPlaceholder : (() => undefined);
+   const renderPlaceholder = secondKit && 'renderPlaceholder' in secondKit ? $suspense ? wrapWithSuspense(secondKit.renderPlaceholder, $suspense) : secondKit.renderPlaceholder : (() => undefined);
    const renderError = secondKit && 'renderError' in secondKit ? secondKit.renderError : thirdKit?.renderError ?? (() => undefined);
    const timeout = secondKit && 'timeout' in secondKit ? secondKit.timeout : undefined
-
-   function wrapRenderPlaceholder(renderPlaceholder: RenderFunction) {
-      return () => {
-         try {
-            pushAwaiting($suspense!)
-            return renderPlaceholder($suspense)
-         }
-         finally {
-            popAwaiting()
-         }
-      }
-   }
 
    return {
       ions,
@@ -149,45 +140,143 @@ export function unpackAwaitSeries(series:
 }
 
 
+function wrapWithSuspense(render: RenderFunction, $suspense: Suspense) {
+   return () => {
+      try {
+         pushAwaiting($suspense!)
+         return render($suspense)
+      }
+      finally {
+         popAwaiting()
+      }
+   }
+}
 
 
+
+// if (arguments.length === 1) {
+//    $suspense = Suspense()
+//    ions.push($suspense)
+//    // console.log('IONS', ions)
+//    let output: RawJSXNode;
+//    try {
+//       pushAwaiting($suspense)
+//       output = render($suspense)
+//    }
+//    finally {
+//       popAwaiting()
+//       render = () => { return output }
+//    }
+// }
+// else {
+//    $suspense = { get initial() { return !ions[0].loaded } } // TODO: makeshift solution for nonce
+// }
+
+type Awaitable = AsyncIon<any> | Promise<any> | Ion<Promise<any>> | 'view'
+
+export type AwaitConfig = {
+   await?: true | Awaitable | Awaitable[]
+   suspense?: Suspense
+   meanwhile?: (suspense: Suspense) => RawJSXNode | false
+   'first:meanwhile'?: (suspense?: Suspense) => RawJSXNode | false
+   catch?: (error: Error) => RawJSXNode
+}
+
+export function wrapWithAwait(Slot: RenderFunction, config: AwaitConfig) {
+   const { await: _awaited, suspense, meanwhile: renderPlaceholder, 'first:meanwhile': renderLoading, catch: renderError } = config
+   const $suspense = suspense ?? Suspense()
+   console.log('wrap with await')
+   const renderSlot = collectAwaited($suspense, _awaited, Slot)
+   return () => {
+      return createAwaitSeries(renderSlot, renderPlaceholder ? wrapWithSuspense(renderPlaceholder, $suspense) : undefined, renderError, $suspense)
+   }
+}
+
+// Ion(0, {
+//    '-awaited': true
+// })
+
+
+function collectAwaited($suspense: Suspense, awaited: true | Awaitable | Awaitable[] | undefined, Slot: RenderFunction) {
+   let output: RawJSXNode;
+   let awaitsSlot = false;
+   const awaitables = normalizeToArray(awaited)
+   if (awaitables.length === 0) awaitables.push(true)
+   for (const awaitable of awaitables) {
+      if (awaitable === true || awaitable === 'view') {
+         try {
+            pushAwaiting($suspense)
+            output = Slot($suspense)
+         }
+         finally {
+            popAwaiting()
+         }
+      }
+      else if (isAsyncIon(awaitable)) {
+         $suspense[SUSPENSE_QUARK].include(awaitable[ASYNC_QUARK])
+      }
+      else if (awaitable instanceof Promise) {
+         $suspense[SUSPENSE_QUARK].include(AsyncIon(() => awaitable)[ASYNC_QUARK])
+      }
+   }
+   return awaitsSlot ? () => output : Slot
+}
 
 
 export function createAwaitSeries(
-   series:
-      [AwaitKit]
-      | [AwaitKit, { renderError: RenderError }]
-      | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }]
-      | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
+   renderResolved: RenderFunction,
+   renderPlaceholder: RenderFunction = () => false,
+   renderError: RenderError | undefined = () => undefined,
+   $suspense: Suspense
+   // ions
+
+
+   // series:
+   //    [AwaitKit]
+   //    | [AwaitKit, { renderError: RenderError }]
+   //    | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }]
+   //    | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
 ) {
-   const { renderError, renderPlaceholder, renderResolved, ions, timeout } = unpackAwaitSeries(series)
+   // const { renderError, renderPlaceholder, renderResolved, ions, timeout } = unpackAwaitSeries(series)
+
 
    const $error = Ion(undefined as undefined | Error);
-   const $renderPlaceholder = Ion(true as boolean | undefined);
+ 
+   // let prevSuspense = $suspense()
+   const $renderPlaceholder = Ion(true)
+   // const $renderPlaceholder = createHybridIon({
+   //    initial: true, derive: () => {
+   //       if (prevSuspense === $suspense()) return;
+   //       return $suspense() && !shouldHold()
+   //    }, watch: $suspense
+   // });
 
-   for (const ion of ions) {
-      const $promise = 'pending' in ion ? () => ion.pending : ion
-      watch($promise, ({ current: promis, previous }) => {
-         // if (previous === undefined) {
-         //    console.log('*** A', $async.pending)
-         //    return;
-         // }
-         const pending = isPending()
-         // if (pending) {
-         //    $renderPlaceholder.value = true
-         // }
-         // else {
-         //    $renderPlaceholder.value = false
-         // }
+   // watch($suspense, () => {
+   //    console.log('renderPlaceholder?', $renderPlaceholder())
+   // })
+   // for (const ion of ions) {
+   //    const $promise = 'pending' in ion ? () => ion.pending : ion
+   watch($suspense, ({ current: promis, previous }) => {
+      // if (previous === undefined) {
+      //    console.log('*** A', $async.pending)
+      //    return;
+      // }
+      // const pending = isPending()
+      // if (pending) {
+      //    $renderPlaceholder.value = true
+      // }
+      // else {
+      //    $renderPlaceholder.value = false
+      // }
 
 
-         const usePlaceholder = $renderPlaceholder()
-         if (usePlaceholder === pending) {
-            return;
-         }
-         $renderPlaceholder.value = pending && !shouldHold()
-      }, { phase: PRELUDE })
-   }
+      const usePlaceholder = $renderPlaceholder()
+      if (usePlaceholder === Boolean($suspense())) {
+         return;
+      }
+      $renderPlaceholder.value = Boolean($suspense()) && !shouldHold()
+   }, { phase: PRELUDE })
+   // }
 
    function shouldHold() {
       placeholder = renderPlaceholder()
@@ -205,7 +294,6 @@ export function createAwaitSeries(
             return placeholder[0] === false
          }
       }
-      if (__DEV__) console.error('possibly invalid placeholder return')
       return true;
       // console.log('*** C4')
    }
@@ -223,7 +311,8 @@ export function createAwaitSeries(
       return false;
    }
 
-   let placeholder = renderPlaceholder()
+     let placeholder = renderPlaceholder()
+
 
    const awaitSeries = createIfSeries([
       If($renderPlaceholder, () => {

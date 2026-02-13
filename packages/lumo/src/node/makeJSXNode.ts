@@ -1,4 +1,4 @@
-import { Ion, isIon, isGetter } from "../../../quarky/src";
+import { Ion, isIon, isGetter, Suspense, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
 import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { $Node, INTERNAL } from "./NodeRef";
@@ -12,6 +12,10 @@ import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
 import { $Index } from "../iteratives/ItemList";
 import { NodeRefsConfig } from "./NodeRefs";
+import { AwaitConfig, createAwaitSeries, Meanwhile, wrapWithAwait } from "../boundaries/Await";
+import { normalizeToArray, toError } from "@rue/utils";
+import { _ } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
+import { RenderError } from "../boundaries/Try";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -51,7 +55,7 @@ export type RawJSXNode =
 
 
 
-export type RenderFunction<Params = unknown> = (input?: Object) => RawJSXNode
+export type RenderFunction<Params = unknown> = (input?: any) => RawJSXNode
 
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
@@ -120,17 +124,21 @@ export function resetGroupActivationType() {
 //    }
 // }
 
-export function callWithActivationType(type: GroupActivationType, Slot: RenderSlot, provide: Provided | undefined) {
-   outerGroupActivationType = groupActivationType
-   groupActivationType = type;
-   try {
-      if (provide)
-         return callWithCommons(Slot, createCommonsNode(provide))
-      return Slot()
-   }
-   finally {
-      groupActivationType = outerGroupActivationType;
-      outerGroupActivationType = undefined
+export function wrapWithContext(Slot: RenderSlot, provide: Provided) {
+   return () => callWithCommons(Slot, createCommonsNode(provide))
+}
+
+export function wrapWithActivationType(type: GroupActivationType, Slot: RenderSlot) {
+   return () => {
+      outerGroupActivationType = groupActivationType
+      groupActivationType = type;
+      try {
+         return Slot()
+      }
+      finally {
+         groupActivationType = outerGroupActivationType;
+         outerGroupActivationType = undefined
+      }
    }
 }
 
@@ -143,7 +151,42 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
    return () => slot;
 }
 
+export type ViewConfig = AwaitConfig & ContextConfig
 
+
+
+type CatchConfig = {
+   catch?: (error: Error) => RawJSXNode
+}
+
+type ContextConfig = {
+   provide?: Provided,
+}
+
+type TransitionConfig = {
+   'transition-in'?: any // TODO:
+   'transition-out'?: any // TODO:
+}
+
+function makeView(Slot: RenderFunction, config: ViewConfig) {
+   const { provide, await: awaited, meanwhile: renderPlaceholder, catch: renderError } = config
+   Slot = provide ? wrapWithContext(Slot, provide) : Slot
+   Slot = awaited || renderPlaceholder ? wrapWithAwait(Slot, config) : renderError ? wrapWithTryCatch(Slot, renderError) : Slot
+   // TODO: transitions
+   return Slot()
+}
+
+
+function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
+   return () => {
+      try {
+         return Slot()
+      }
+      catch (error) {
+         return renderError(toError(error))
+      }
+   }
+}
 
 type SVGTag = keyof SVGElementTagNameMap
 
@@ -162,15 +205,19 @@ export function makeJSXNode(
 
       case 'create-view':
          if (!Slot) throw new Error(`Extraneous <create-view>`)
-         return callWithActivationType('create', Slot, config.provide);
+         return makeView(wrapWithActivationType('create', Slot), config);
 
       case 'show-view':
          if (!Slot) throw new Error(`Extraneous <show-view>`)
-         return callWithActivationType('show', Slot, config.provide);
+         return makeView(wrapWithActivationType('show', Slot), config);
 
       case 'remount-view':
          if (!Slot) throw new Error(`Extraneous <remount-view>`)
-         return callWithActivationType('remount', Slot, config.provide);
+         return makeView(wrapWithActivationType('remount', Slot), config);
+
+      case 'render-view':
+         if (!Slot) throw new Error(`Extraneous <render-view>`)
+         return makeView(Slot, config);
 
       default:
          if (typeof nodeType === 'string') {

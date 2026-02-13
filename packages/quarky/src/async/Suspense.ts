@@ -17,16 +17,16 @@ export type Suspense = Ion<Promise<void> | null> & {
 }
 
 type SuspenseQuark = {
-   start(quark: AsyncQuark): void
+   include(quark: AsyncQuark): void
    quarkCount: number
 } & AsyncQuark
 
-const SUSPENSE_QUARK = Symbol('suspense quark')
+export const SUSPENSE_QUARK = Symbol('suspense quark')
 
 
 
 export function addToSuspense(suspense: Suspense, quark: AsyncQuark) {
-   suspense[SUSPENSE_QUARK].start(quark)
+   suspense[SUSPENSE_QUARK].include(quark)
 }
 
 export function getSuspenseCount(suspense: Suspense) {
@@ -88,11 +88,11 @@ export function Suspense<P>(pendingState?: P): Suspense {
             }
             return success
          },
-         start(quark: AsyncQuark) {
-            // console.log('start suspense', quark, quarks.size)
+         include(quark: AsyncQuark) {
+            console.log('start suspense', quark, quarks.size)
             const { $promise } = quark
             if ($promise() && !$suspense()) {
-               // console.log('Suspense: ++ new promise')
+               console.log('Suspense: ++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                startTime = performance.now()
             }
@@ -106,7 +106,7 @@ export function Suspense<P>(pendingState?: P): Suspense {
 
             watch($promise, ({ current: promise, previous, eager }) => {
                if (!eager && promise === previous) {
-                  // console.log('Suspense: same', promise)
+                  console.log('Suspense: same', promise)
                   return;
                }
                pendingPromises.delete(previous)
@@ -121,7 +121,7 @@ export function Suspense<P>(pendingState?: P): Suspense {
                         resolve = null
                         reject = null
                      }
-                     // console.log('Suspense RESOLVED: Suspense to NULL :D', $suspense.value)
+                     console.log('Suspense RESOLVED: Suspense to NULL :D', $suspense.value)
                      $suspense.value = null
                      if ($suspense.initial) $suspense.initial = false
                   }
@@ -133,7 +133,7 @@ export function Suspense<P>(pendingState?: P): Suspense {
                if ($suspense.initial) $suspense.initial = false
                if (!$suspense()) {
                   startTime = performance.now()
-                  // console.log('Suspense: ++ new suspense promise')
+                  console.log('Suspense: ++ new suspense promise')
                   $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                }
 
@@ -156,6 +156,7 @@ export function Suspense<P>(pendingState?: P): Suspense {
                      // })
                   })
             }, { phase: PRELUDE, eager: true })
+            return this
          }
       }
    })

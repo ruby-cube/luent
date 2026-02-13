@@ -13,29 +13,48 @@ export function TestAwaitConditional() {
    let cache;
 
    return component(
-      <div>
-         <loadingBar loading={ooo} />
-         <button on:click={e => $active.toggle()}>CHANGE</button>
-         <create-view meanwhile={ooo => ooo.initial ? 'loading...' : ooo.hold}>
-            {If($active, <>
-               {Await(() => (cache =
+      <>
+         <div>
+            <loadingBar loading={ooo} />
+            <button on:click={e => $active.toggle()}>CHANGE</button>
+            <create-view
+               await={[$cities, 'view']} 
+               suspense={$awaitingTab} 
+               meanwhile={o => o.initial && 'loading...'}
+            >
+               {If($active,
                   <div at:create={() => console.log('CREATE A')}>
                      <Child state='awake'></Child>
                   </div>
-               )
                )}
-               {Meanwhile(o => o.initial ? 'loading...' : cache)}
-            </>)}
-            {Else(<>
-               {Await((cache =
+               {Else(
                   <div at:create={() => console.log('CREATE B')}>
                      <Child state='sleeping'></Child>
                   </div>
-               ))}
-               {Meanwhile(o => o.initial ? 'loading...' : cache)}
-            </>)}
-         </create-view>
-      </div>
+               )}
+            </create-view>
+         </div>
+
+         <div>
+            <loadingBar loading={ooo} />
+            <button on:click={e => $active.toggle()}>CHANGE</button>
+            <create-view
+               await={$suspense}
+               meanwhile={o => o.initial && 'loading...'}
+            >
+               {If($active,
+                  <div at:create={() => console.log('CREATE A')}>
+                     <Child state='awake'></Child>
+                  </div>
+               )}
+               {Else(
+                  <div at:create={() => console.log('CREATE B')}>
+                     <Child state='sleeping'></Child>
+                  </div>
+               )}
+            </create-view>
+         </div>
+      </>
    )
 }
 

@@ -43,6 +43,7 @@ export function toCasesMap(raw: RawCaseKit[], groupActivationType: ActivationTyp
    const map: Map<any, CasesKit> = new Map()
    const context = $_snap_context()
    const pending = getAwaiting()
+   console.log('awaiting??', pending)
    let currentKit;
    for (const rawKit of raw) {
       const { case: c, render, type } = rawKit
