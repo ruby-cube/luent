@@ -12,7 +12,6 @@ import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
 import { $Index } from "../iteratives/ItemList";
 import { NodeRefsConfig } from "./NodeRefs";
-import { AwaitConfig, createAwaitSeries, Meanwhile, wrapWithAwait } from "../boundaries/Await";
 import { normalizeToArray, toError } from "@rue/utils";
 import { _ } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 import { RenderError } from "../boundaries/Try";
@@ -171,7 +170,7 @@ type TransitionConfig = {
 function makeView(Slot: RenderFunction, config: ViewConfig) {
    const { provide, await: awaited, meanwhile: renderPlaceholder, catch: renderError } = config
    Slot = provide ? wrapWithContext(Slot, provide) : Slot
-   Slot = awaited || renderPlaceholder ? wrapWithAwait(Slot, config) : renderError ? wrapWithTryCatch(Slot, renderError) : Slot
+   // Slot = awaited || renderPlaceholder ? wrapWithAwait(Slot, config) : renderError ? wrapWithTryCatch(Slot, renderError) : Slot
    // TODO: transitions
    return Slot()
 }

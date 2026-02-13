@@ -24,12 +24,15 @@ let activeUpdate: Update | null;
 export function $activeUpdate() {
    const update = getActiveUpdate()
    if (!update) {
+      console.warn('no update')
       if (activeUpdate) {
          return activeUpdate
       }
       const update = activeUpdate = new Update(UpdateType.INSTANT, 100, false)
+      pushUpdate(update)
       queueMicrotask(() => {
          activeUpdate = null;
+         popUpdate()
          update.start()
       })
       return activeUpdate
@@ -228,7 +231,7 @@ export let load = (task: () => unknown) => {
 }
 
 export function swiftUpdate(task: () => unknown) {
-   task()
+   instantUpdate(task)
    // (getSwiftUpdate() ?? createSwiftUpdate()).queue(task)
 }
 

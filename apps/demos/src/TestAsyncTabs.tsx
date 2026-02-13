@@ -32,6 +32,7 @@ export function TestAsyncTabs() {
    // setInterval(() => {
    //    $count.value++
    // }, 1000)
+
    const $tabSuspense = SuspenseIon()
 
    return component(<>
@@ -48,20 +49,19 @@ export function TestAsyncTabs() {
             <li class={{ selected: ($tab() === tab) }} on:click={e => { $tab.value = tab }}>
                {tabNames[tab]}
                <span style="padding: 1em" on:click={e => {
-                  console.log('discarding', tab, $tab())
+                  console.log('discarding', tab, $tab(), $activeUpdate())
                   tabViews[tab]?.discard()
                   const index = openTabs.indexOf(tab)
+                  console.log('index of tab', index, [...openTabs])
                   if ($tab() === tab) {
                      $tab.value = openTabs[index + 1] ?? openTabs[index - 1]
-                     console.log('switch')
+                     console.log('switch', openTabs[index + 1], openTabs[index - 1], $tab.value)
                   }
                   closeTab(tab)
                   e.stopPropagation()
                }}>x</span>
             </li>
          ))}
-         {/* <li on:click={e => $tab.value = 1.5}>1.5</li>
-         <li on:click={e => $tab.value = 1.25}>1.25</li> */}
       </ul>
 
       {Await($suspense =>
@@ -72,7 +72,7 @@ export function TestAsyncTabs() {
                      <Tab page={tabNames[$tab()]} count={$count} />
                   </div>
                ))}
-               {Default(
+               {Default('remount',
                   <div>No tabs open</div>
                )}
             </remount-view>

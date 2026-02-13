@@ -182,7 +182,12 @@ export class MatchKit extends VineNode {
          const prevCase = toCase(previous)
          const caseKey = toCase($key())
          const matchKey = $key()
-         if (matchKey === previous) return;
+         console.log('prevCase', prevCase)
+         console.log('caseKey', caseKey)
+         if (matchKey === previous) {
+            console.warn('PREVIOUS MATCH', matchKey)
+            return;
+         }
 
          const kit = this.getKit(caseKey, matchKey)
          const prevKit = this.pendingDeactivatedKit ?? this.getKit(prevCase, previous)

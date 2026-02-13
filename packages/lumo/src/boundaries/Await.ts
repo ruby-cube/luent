@@ -22,15 +22,15 @@ import { createHybridIon } from "../../../quarky/src/ion/HybridIon";
 import { FromTag, RenderSlot } from "../component/Input";
 import { component } from "../component/Component";
 
-export function Suspense(input: FromTag<AwaitConfig>) {
-   const { await: _awaited, $as: suspense, provide, meanwhile: renderPlaceholder, catch: renderError, loading: renderLoading, Slot } = input
-   // TODO: renderLoading
-   const $suspense = suspense ?? SuspenseIon()
-   const renderSlot = collectAwaited($suspense, _awaited, Slot)
-   return component(
-      createAwaitSeries(renderSlot, renderPlaceholder ? wrapWithSuspense(renderPlaceholder, $suspense) : undefined, renderError, $suspense)
-   )
-}
+// export function Suspense(input: FromTag<AwaitConfig>) {
+//    const { await: _awaited, $as: suspense, provide, meanwhile: renderPlaceholder, catch: renderError, loading: renderLoading, Slot } = input
+//    // TODO: renderLoading
+//    const $suspense = suspense ?? SuspenseIon()
+//    const renderSlot = collectAwaited($suspense, _awaited, Slot)
+//    return component(
+//       createAwaitSeries(renderSlot, renderPlaceholder ? wrapWithSuspense(renderPlaceholder, $suspense) : undefined, renderError, $suspense)
+//    )
+// }
 
 
 
@@ -200,57 +200,57 @@ function wrapWithSuspense(render: RenderFunction, $suspense: SuspenseIon) {
 //    $suspense = { get initial() { return !ions[0].loaded } } // TODO: makeshift solution for nonce
 // }
 
-type Awaitable = AsyncIon<any> | Promise<any> | Ion<Promise<any>> | 'view'
+// type Awaitable = AsyncIon<any> | Promise<any> | Ion<Promise<any>> | 'view'
 
-export type AwaitConfig = {
-   await?: true | Awaitable | Awaitable[]
-   as?: SuspenseIon
-   meanwhile?: (suspense: SuspenseIon) => RawJSXNode | false
-   loading?: (suspense: SuspenseIon) => RawJSXNode | false
-   catch?: (error: Error) => RawJSXNode,
-   Slot: RenderSlot
-}
+// export type AwaitConfig = {
+//    await?: true | Awaitable | Awaitable[]
+//    as?: SuspenseIon
+//    meanwhile?: (suspense: SuspenseIon) => RawJSXNode | false
+//    loading?: (suspense: SuspenseIon) => RawJSXNode | false
+//    catch?: (error: Error) => RawJSXNode,
+//    Slot: RenderSlot
+// }
 
-export function wrapWithAwait(Slot: RenderFunction, config: AwaitConfig) {
-   const { await: _awaited, as: suspense, meanwhile: renderPlaceholder, catch: renderError, loading } = config
-   const $suspense = suspense ?? SuspenseIon()
-   console.log('wrap with await')
-   const renderSlot = collectAwaited($suspense, _awaited, Slot)
-   return () => {
-      return createAwaitSeries(renderSlot, renderPlaceholder ? wrapWithSuspense(renderPlaceholder, $suspense) : undefined, renderError, $suspense)
-   }
-}
+// export function wrapWithAwait(Slot: RenderFunction, config: AwaitConfig) {
+//    const { await: _awaited, as: suspense, meanwhile: renderPlaceholder, catch: renderError, loading } = config
+//    const $suspense = suspense ?? SuspenseIon()
+//    console.log('wrap with await')
+//    const renderSlot = collectAwaited($suspense, _awaited, Slot)
+//    return () => {
+//       return createAwaitSeries(renderSlot, renderPlaceholder ? wrapWithSuspense(renderPlaceholder, $suspense) : undefined, renderError, $suspense)
+//    }
+// }
 
 // Ion(0, {
 //    '-awaited': true
 // })
 
 
-function collectAwaited($suspense: SuspenseIon, awaited: true | Awaitable | Awaitable[] | undefined, Slot: RenderFunction) {
-   let output: RawJSXNode;
-   let awaitsSlot = false;
-   const awaitables = normalizeToArray(awaited)
-   if (awaitables.length === 0) awaitables.push(true)
-   for (const awaitable of awaitables) {
-      if (awaitable === true || awaitable === 'view') {
-         awaitsSlot = true;
-         try {
-            pushAwaiting($suspense)
-            output = Slot($suspense)
-         }
-         finally {
-            popAwaiting()
-         }
-      }
-      else if (isAsyncIon(awaitable)) {
-         $suspense[SUSPENSE_QUARK].include(awaitable[ASYNC_QUARK])
-      }
-      else if (awaitable instanceof Promise) {
-         $suspense[SUSPENSE_QUARK].include(AsyncIon(() => awaitable)[ASYNC_QUARK])
-      }
-   }
-   return awaitsSlot ? () => output : Slot
-}
+// function collectAwaited($suspense: SuspenseIon, awaited: true | Awaitable | Awaitable[] | undefined, Slot: RenderFunction) {
+//    let output: RawJSXNode;
+//    let awaitsSlot = false;
+//    const awaitables = normalizeToArray(awaited)
+//    if (awaitables.length === 0) awaitables.push(true)
+//    for (const awaitable of awaitables) {
+//       if (awaitable === true || awaitable === 'view') {
+//          awaitsSlot = true;
+//          try {
+//             pushAwaiting($suspense)
+//             output = Slot($suspense)
+//          }
+//          finally {
+//             popAwaiting()
+//          }
+//       }
+//       else if (isAsyncIon(awaitable)) {
+//          $suspense[SUSPENSE_QUARK].include(awaitable[ASYNC_QUARK])
+//       }
+//       else if (awaitable instanceof Promise) {
+//          $suspense[SUSPENSE_QUARK].include(AsyncIon(() => awaitable)[ASYNC_QUARK])
+//       }
+//    }
+//    return awaitsSlot ? () => output : Slot
+// }
 
 
 export function createAwaitSeries(

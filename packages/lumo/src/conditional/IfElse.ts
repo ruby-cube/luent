@@ -164,6 +164,7 @@ export class IfElseKit extends VineNode {
                   }
                   this.pendingSwitch = null
                   console.log('### B promise switch')
+                   if (prevKit !== kit)
                   this.deactivateConditional(prevKit);
                   this.reactivateConditional(kit)
                })
@@ -182,6 +183,7 @@ export class IfElseKit extends VineNode {
                         }
                         this.pendingSwitch = null
                         console.log('### A promise switch')
+                         if (prevKit !== kit)
                         this.deactivateConditional(prevKit);
                         this.reactivateConditional(kit)
                      })
@@ -194,6 +196,7 @@ export class IfElseKit extends VineNode {
             suspense.value = null
             console.log('### C switch')
             kit.awaitCache = rawOutput
+             if (prevKit !== kit)
             this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
          }
@@ -212,13 +215,15 @@ export class IfElseKit extends VineNode {
                   return;
                }
                this.pendingSwitch = null
-               console.log('### D promise switch', kit)
-               this.deactivateConditional(prevKit);
+               console.log('### D promise switch', prevKit === kit)
+               if (prevKit !== kit)
+                  this.deactivateConditional(prevKit);
                this.reactivateConditional(kit)
             })
          }
          else {
             console.log('### E switch')
+             if (prevKit !== kit)
             this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
          }
@@ -256,7 +261,7 @@ export class IfElseKit extends VineNode {
       const prevNodes = kit.nodes;
       this.pendingDeactivatedKit = null
       if (!prevNodes) return;
-      console.log('))) deactivate C')
+      console.log('))) deactivate C', ...kit.nodes)
       kit.nodes = null;
 
       if (kit.type === 'create') {

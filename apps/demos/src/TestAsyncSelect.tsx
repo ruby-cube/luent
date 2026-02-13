@@ -13,11 +13,19 @@ import { Ion, isPending, o } from "@rue/quarky";
 
 export function TestAsyncSelect() {
 
-   const $states = Ion((['']), { '-fetch': () => db.fetchStates() })
-   const $activeState = Ion(() => $states()[0], { '-writable': true })
+   const $states = Ion((['']), {
+      '-fetch': () => db.fetchStates()
+   })
+   const $activeState = Ion(() => $states()[0], {
+      '-writable': true
+   })
 
-   const $cities = Ion((['']), { '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : [] })
-   const $activeCity = Ion(() => $cities()[0], { '-writable': true })
+   const $cities = Ion((['']), {
+      '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : []
+   })
+   const $activeCity = Ion(() => $cities()[0], {
+      '-writable': true
+   })
 
    return component(
       <>
