@@ -204,6 +204,7 @@ function collectAwaited($suspense: Suspense, awaited: true | Awaitable | Awaitab
    if (awaitables.length === 0) awaitables.push(true)
    for (const awaitable of awaitables) {
       if (awaitable === true || awaitable === 'view') {
+         awaitsSlot = true;
          try {
             pushAwaiting($suspense)
             output = Slot($suspense)
@@ -240,22 +241,18 @@ export function createAwaitSeries(
    // const { renderError, renderPlaceholder, renderResolved, ions, timeout } = unpackAwaitSeries(series)
 
 
+
    const $error = Ion(undefined as undefined | Error);
- 
-   // let prevSuspense = $suspense()
    const $renderPlaceholder = Ion(true)
-   // const $renderPlaceholder = createHybridIon({
-   //    initial: true, derive: () => {
-   //       if (prevSuspense === $suspense()) return;
-   //       return $suspense() && !shouldHold()
-   //    }, watch: $suspense
-   // });
+
 
    // watch($suspense, () => {
    //    console.log('renderPlaceholder?', $renderPlaceholder())
    // })
    // for (const ion of ions) {
    //    const $promise = 'pending' in ion ? () => ion.pending : ion
+
+   // NOTE: DO NOT USE HYBRID ION... the scheduling is not correct
    watch($suspense, ({ current: promis, previous }) => {
       // if (previous === undefined) {
       //    console.log('*** A', $async.pending)
@@ -270,49 +267,49 @@ export function createAwaitSeries(
       // }
 
 
-      const usePlaceholder = $renderPlaceholder()
-      if (usePlaceholder === Boolean($suspense())) {
+      if ($renderPlaceholder() === Boolean($suspense())) {
          return;
       }
       $renderPlaceholder.value = Boolean($suspense()) && !shouldHold()
    }, { phase: PRELUDE })
    // }
 
+
+
    function shouldHold() {
       placeholder = renderPlaceholder()
       if (placeholder === false || placeholder === true) {
-         // console.log('*** C1')
+         console.log('*** C1')
          return true;
       }
       if (placeholder instanceof Array) {
          if (placeholder.length > 1) {
-            // console.log('*** C2')
+            console.log('*** C2')
             return false;
          }
          else {
-            // console.log('*** C3')
+            console.log('*** C3')
             return placeholder[0] === false
          }
       }
+      console.log('*** C4')
       return true;
-      // console.log('*** C4')
    }
 
-   function isPending() {
-      for (const ion of ions) {
-         // NOTE: Do not try to simplify this control flow. This is the flow we need.
-         if ('pending' in ion) {
-            if (ion.pending) return true
-         }
-         else {
-            if (ion()) return true
-         }
-      }
-      return false;
-   }
+   // function isPending() {
+   //    for (const ion of ions) {
+   //       // NOTE: Do not try to simplify this control flow. This is the flow we need.
+   //       if ('pending' in ion) {
+   //          if (ion.pending) return true
+   //       }
+   //       else {
+   //          if (ion()) return true
+   //       }
+   //    }
+   //    return false;
+   // }
 
-     let placeholder = renderPlaceholder()
-
+   let placeholder = renderPlaceholder()
 
    const awaitSeries = createIfSeries([
       If($renderPlaceholder, () => {

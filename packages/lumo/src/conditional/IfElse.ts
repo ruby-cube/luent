@@ -107,17 +107,18 @@ export class IfElseKit extends VineNode {
       super()
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
-
+      console.log('STARTING INDEX', this.$activeIndex())
       this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
          kit.flask!.emitInitialMount()
       })
 
-      watchToRender(this.$activeIndex, ({ current: activeIndex, previous: prevIndex }) => {
-         console.log('index changed!')
-         if (activeIndex === prevIndex) return;
-         const kit = this.kits[activeIndex]
+      watchToRender(this.$activeIndex, ({ previous: prevIndex }) => {
+         console.log('index changed!', this.$activeIndex(), prevIndex)
+         if (this.$activeIndex() === prevIndex) return;
+         const kit = this.kits[this.$activeIndex()]
          const prevKit = this.pendingDeactivatedKit ?? this.kits[prevIndex]
 
+         console.log('switch?')
          if (this.pendingSwitch) {
             console.log('>>> CANCEL PROMISE')
             this.cancelledPendingSwitch.add(this.pendingSwitch)
@@ -125,9 +126,11 @@ export class IfElseKit extends VineNode {
          }
 
          if (kit.pending) {
+            console.log('await pending switch')
             this.awaitPendingConditional(kit.pending, kit, prevKit)
          }
          else {
+            console.log('switch!')
             this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
          }

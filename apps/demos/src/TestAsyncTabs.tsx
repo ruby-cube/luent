@@ -1,4 +1,4 @@
-import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting } from "@rue/quarky";
+import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, Suspense } from "@rue/quarky";
 import "./TestAsyncTabs.css";
 import { Await, Meanwhile, component, Else, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
 import { createAsSeries, As } from "../../../packages/lumo/src/conditional/As";
@@ -28,6 +28,7 @@ export function TestAsyncTabs() {
    //    $count.value++
    // }, 1000)
 
+   const $awaitingTab = Suspense()
 
    return component(<>
       <ul class="inline">
@@ -55,23 +56,25 @@ export function TestAsyncTabs() {
                }}>x</span>
             </li>
          ))}
-         <li on:click={e => $tab.value = 1.5}>1.5</li>
-         <li on:click={e => $tab.value = 1.25}>1.25</li>
+         {/* <li on:click={e => $tab.value = 1.5}>1.5</li>
+         <li on:click={e => $tab.value = 1.25}>1.25</li> */}
       </ul>
 
       {/* {Await($suspense => */}
-      {/* <render-view meanwhile={o => o!.initial && 'loading...'}>
-         <div at:create={console.log('getAwaiting', getAwaiting())} class={{ 'tab': true, 'pending': $suspense }}>
-            {As($tab, 'remount', (view) => (
-               <div at:create={console.log('getAwaiting?? in As', getAwaiting())} at:mount={() => (tabViews[$tab()] = view)}>
+      <div class={{ 'tab': true, 'pending': $awaitingTab }}>
+         <remount-view
+            suspense={$awaitingTab} meanwhile={o => o!.initial && 'loading...'}
+         >
+            {As($tab, (view) => (
+               <div at:mount={() => (tabViews[$tab()] = view)}>
                   <Tab page={tabNames[$tab()]} count={$count} />
                </div>
             ))}
             {Default(
                <div>No tabs open</div>
             )}
-         </div>
-      </render-view> */}
+         </remount-view>
+      </div>
       {/* </> */}
       {/* )} */}
       {/* {Meanwhile(o => o.initial && 'loading...')} */}
@@ -115,8 +118,8 @@ export function TestAsyncTabs() {
                <div>No tabs open</div>
             )}
          </Match> */}
-      <render-view meanwhile={o => o.initial && 'loading...'}>
-         <div at:create={console.log('getAwaiting', getAwaiting())} class={{ 'tab': true, /* 'pending': $suspense */ }}>
+      {/* <render-view meanwhile={o => o.initial && 'loading...'}>
+         <div class={{ 'tab': true, 'pending': $suspense }}>
             <remount-view>
                {If(($tab() === 0), view =>
                   <div at:create={() => tabViews[0] = view}>
@@ -156,7 +159,7 @@ export function TestAsyncTabs() {
                )}
             </remount-view>
          </div>
-      </render-view>
+      </render-view> */}
 
       {/* // )} */}
       {/* {Meanwhile(o =>

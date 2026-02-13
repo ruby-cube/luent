@@ -7,9 +7,10 @@ import { PRELUDE } from "../reactivity/RenderCycle";
 import { watch } from "../reactivity/Watcher";
 import { AsyncNode } from "./ooo";
 
+export let $suspense: Suspense
 export const [getAwaiting, suspenseStack] = AsyncState<Suspense>('Suspense')
-export const pushAwaiting = (n: Suspense) => suspenseStack.push(n)
-export const popAwaiting = () => suspenseStack.pop()
+export const pushAwaiting = (n: Suspense) => {$suspense = n; suspenseStack.push(n)}
+export const popAwaiting = () => {suspenseStack.pop(); $suspense = getAwaiting()}
 
 export function isPending(...args: any[]) {
    for (const entity of args) {

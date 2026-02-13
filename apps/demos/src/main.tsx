@@ -19,7 +19,7 @@ import { SortableTableApp } from "./SortableTable"
 import { TestSettableDerivation } from "./TestSettableDerivations"
 import { TestAsyncTabs } from "./TestAsyncTabs"
 
-const app = createRoot(TestAsyncTabs)
+const app = createRoot(TestAsyncSelect)
 
 app.mount('#root')
 
