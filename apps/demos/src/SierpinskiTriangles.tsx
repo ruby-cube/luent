@@ -1,5 +1,5 @@
 import { component, FromTag, atUnmount } from "@rue/lumo";
-import { Animation, Interval, Ion, swiftUpdate, SlowUpdate, queueTask, Suspense, o, } from "@rue/quarky";
+import { Animation, Interval, Ion, swiftUpdate, HeavyUpdate, queueTask, Suspense, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // Modified Demo from Solid.js / React Fiber
@@ -52,7 +52,7 @@ export function TriangleDemo() {
    // incrementSeconds.dispatch()
 
 
-   const incrementSeconds = SlowUpdate(() =>
+   const incrementSeconds = HeavyUpdate(() =>
       $seconds.value = ($seconds() % 10) + 1
    )
 
@@ -82,9 +82,7 @@ export function TriangleDemo() {
       // dispatch(() => {
       //    $seconds.value = 0
       // }, { deadline: 1000 }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
-      swiftUpdate(() => {
          $seconds.value = 0
-      }) // TODO: reset is inconsistent without lazy update (solid.js has the same problem)
       secondsStream.start()
    }
    // const $suspense = Suspense()

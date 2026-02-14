@@ -1,7 +1,6 @@
-//@ts-nocheck
-import { instantUpdate, Ion, swiftUpdate, Interval, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon } from "@rue/quarky";
+import { Ion, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Await, Meanwhile, component, Suspense, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
+import { Await, Meanwhile, component, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
 import { createAsSeries, As } from "../../../packages/lumo/src/conditional/As";
 
 // Modified Demo from Solid.js 
@@ -72,7 +71,7 @@ export function TestAsyncTabs() {
                      <Tab page={tabNames[$tab()]} count={$count} />
                   </div>
                ))}
-               {Default('remount',
+               {Default(
                   <div>No tabs open</div>
                )}
             </remount-view>
@@ -219,7 +218,7 @@ function Tab(input: FromTag<{
 const db = {
    fetchTime() {
       return new Promise<number>((resolve) => {
-         const delay = 2000;
+         const delay = Math.random() * 1000;
          setTimeout(() => resolve(delay), delay);
       })
    }
