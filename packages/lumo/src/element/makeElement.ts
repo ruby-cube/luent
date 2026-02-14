@@ -170,7 +170,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    const ion = attributes['mu:checked'];
    delete attributes['mu:checked'];
    attributes.checked = ion;
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -185,7 +185,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
    attributes.checked = () => ion() === radioValue;
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -199,7 +199,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    const ion = attributes['mu:value'];
    delete attributes['mu:value'];
    attributes.value = ion;
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -241,7 +241,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
-   if (!isMutableIon(ion)) {
+   if (!isIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -292,12 +292,13 @@ function setUpInputListener(element: Element, ion: { value: any } | { set: (valu
 }
 
 function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, e: Event, key: string = 'value') {
-   if (isManagedDerivation(ion) && 'set' in ion) {
-      ion.set(
-         e.currentTarget?.[key]
-      )
-   }
-   else if ('value' in ion) {
+   // if (isManagedDerivation(ion) && 'set' in ion) {
+   //    ion.set(
+   //       e.currentTarget?.[key]
+   //    )
+   // }
+   // else 
+      if ('value' in ion) {
       ion.value =
          //@ts-expect-error
          e.currentTarget?.[key];

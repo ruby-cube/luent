@@ -1,5 +1,5 @@
 import { component, For, If, Style } from "@rue/lumo"
-import { Ion, Ionic, EACH, as } from "@rue/quarky"
+import { Ion, Ionic, EACH, as, swiftUpdate } from "@rue/quarky"
 
 // Modified Demo from Vue.js
 
@@ -15,12 +15,14 @@ export function CircleApp() {
    function reClick({ clientX: x, clientY: y, target }: MouseEvent) {
       if ($adjusting()) {
          $adjusting.value = false
+         if ($selected()?.r !== $selected()?.r)
+            push()
          $selected.value = null
-         push()
          return;
       }
 
-      if ((target as HTMLElement)?.tagName !== 'circle') $selected.value = null
+      if ((target as HTMLElement)?.tagName !== 'circle')
+         $selected.value = null
 
       if (!$selected()) {
          $circles().push(Ionic({

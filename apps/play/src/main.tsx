@@ -54,7 +54,6 @@ import { DateApp } from './wip-demos/DateApp';
 import { installIonizedDate } from '../../../packages/quarky/src/ionic/$$Date';
 import { TestMultisetting } from './wip-demos/TestMultisetting';
 import { TestVanillaStream } from './TestStream-await';
-import { TestSearchDebounce } from './TestSearchDebounce';
 import { TestIonicList } from './TestIonicList';
 import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, PRELUDE, queueInternalRender, queueIonicPostlude, queueIonicPrelude, queueIonicTask, RENDER, runIonicTask, slowUpdate, untracked, watch, watchToRender } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';

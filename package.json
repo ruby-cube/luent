@@ -29,6 +29,7 @@
     "ni:play": "pnpm -F @rue/play install",
     "ni:demos": "pnpm -F @rue/demos install",
     "dev": "pnpm -F @rue/play dev",
+    "dev-movies": "pnpm -F @rue/movies-app dev",
     "dev-demos": "pnpm -F @rue/demos dev",
     "dev-chat": "pnpm -F @rue/live-chat dev",
     "build-babel": "pnpm -F @rue/play build-babel",

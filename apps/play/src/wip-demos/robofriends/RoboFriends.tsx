@@ -1,5 +1,5 @@
-import { component, EventHandler, For, fromContext, FromTag, HandleEvent,} from "@rue/lumo";
-import {  Inert, ionize, Ion, Ionized } from "@rue/quarky";
+import { component, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/lumo";
+import { Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
 // TODO:
@@ -56,7 +56,7 @@ export function RoboFriendsApp() {
 // They would need to be two different frogs. You may have to sync them if they represent the same frog.
 
 
-export function RoboList(input : FromTag<{
+export function RoboList(input: FromTag<{
    robots: Ion<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
 }>) {
    const { $robots } = input; // TODO: type input such that $robots is defined
@@ -97,11 +97,16 @@ export function RoboList(input : FromTag<{
 
 
 
+// provide={MU(SWAMP)(swamp)}
 
-// provide={[MU_(SWAMP)(swamp)]}
+// <Context provide={MU(SWAMP)(swamp)}>
+//    ...
+//    <Comp mu:swamp={SWAMP} />
+
+//   const $swamp = $fromContext(MU(SWAMP))
 
 
-export function RoboCard(input : FromTag<{
+export function RoboCard(input: FromTag<{
    id: number;
    name: Ion<string>;
    email: Ion<string>;

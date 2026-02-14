@@ -179,36 +179,75 @@ importers:
         specifier: ^5.4.3
         version: 5.4.21(@types/node@22.19.8)
 
-  apps/other/live-chat-net-ninja:
+  apps/movies-app:
     dependencies:
-      core-js:
-        specifier: ^3.6.5
-        version: 3.48.0
-      date-fns:
-        specifier: ^2.16.1
-        version: 2.30.0
-      firebase:
-        specifier: ^8.0.1
-        version: 8.10.1
-      vue:
-        specifier: ^3.0.0-0
-        version: 3.5.27(typescript@5.9.3)
-      vue-router:
-        specifier: ^4.0.0-0
-        version: 4.6.4(vue@3.5.27)
+      '@rue/flask':
+        specifier: workspace:*
+        version: link:../../packages/flask
+      '@rue/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../packages/lumo/jsx-runtime
+      '@rue/lumo':
+        specifier: workspace:*
+        version: link:../../packages/lumo
+      '@rue/quarky':
+        specifier: workspace:*
+        version: link:../../packages/quarky
+      '@rue/thread':
+        specifier: workspace:*
+        version: link:../../packages/x-old/thread
+      '@rue/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
     devDependencies:
-      '@vue/cli-plugin-babel':
-        specifier: ~4.5.0
-        version: 4.5.19(@vue/cli-service@4.5.19)(core-js@3.48.0)(vue@3.5.27)
-      '@vue/cli-plugin-router':
-        specifier: ~4.5.0
-        version: 4.5.19(@vue/cli-service@4.5.19)
-      '@vue/cli-service':
-        specifier: ~4.5.0
-        version: 4.5.19(@vue/compiler-sfc@3.5.27)(typescript@5.9.3)(vue@3.5.27)
-      '@vue/compiler-sfc':
-        specifier: ^3.0.0-0
-        version: 3.5.27
+      '@babel/cli':
+        specifier: ^7.25.6
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/core':
+        specifier: ^7.25.2
+        version: 7.29.0
+      '@babel/plugin-syntax-jsx':
+        specifier: ^7.25.9
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/plugin-syntax-typescript':
+        specifier: ^7.25.9
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/plugin-transform-react-jsx':
+        specifier: ^7.25.2
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/preset-env':
+        specifier: ^7.26.0
+        version: 7.29.0(@babel/core@7.29.0)
+      '@babel/preset-react':
+        specifier: ^7.26.3
+        version: 7.28.5(@babel/core@7.29.0)
+      '@babel/preset-typescript':
+        specifier: ^7.26.0
+        version: 7.28.5(@babel/core@7.29.0)
+      '@babel/traverse':
+        specifier: ^7.26.4
+        version: 7.29.0
+      '@babel/types':
+        specifier: ^7.26.3
+        version: 7.29.0
+      '@rue/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@rue/vite-plugin-lumo':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-lumo
+      '@types/babel__core':
+        specifier: ^7.20.5
+        version: 7.20.5
+      '@types/babel__traverse':
+        specifier: ^7.20.6
+        version: 7.28.0
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      typescript-plugin-css-modules:
+        specifier: ^5.2.0
+        version: 5.2.0(typescript@5.9.3)
 
   apps/play:
     dependencies:
@@ -323,10 +362,6 @@ importers:
         specifier: ^3.0.0-0
         version: 3.5.27
 
-  packages/dev: {}
-
-  packages/dispatch: {}
-
   packages/flask:
     dependencies:
       '@rue/utils':
@@ -385,22 +420,6 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/thread:
-    dependencies:
-      '@rue/flask':
-        specifier: workspace:*
-        version: link:../flask
-      '@rue/utils':
-        specifier: workspace:*
-        version: link:../utils
-    devDependencies:
-      '@types/node':
-        specifier: ^22.5.4
-        version: 22.19.8
-      typescript:
-        specifier: ^5.5.4
-        version: 5.9.3
-
   packages/types:
     devDependencies:
       '@types/node':
@@ -427,12 +446,6 @@ importers:
       vite:
         specifier: ^5.4.3
         version: 5.4.21(@types/node@25.2.0)
-
-  packages/vine:
-    devDependencies:
-      '@rue/types':
-        specifier: workspace:*
-        version: link:../types
 
   packages/vite-plugin-lumo:
     dependencies:
@@ -12326,7 +12339,7 @@ packages:
       debug: 4.4.3(supports-color@6.1.0)
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 6.4.1(@types/node@22.19.8)
+      vite: 7.3.1(@types/node@22.19.8)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
