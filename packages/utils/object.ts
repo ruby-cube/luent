@@ -1,6 +1,3 @@
-
-/* PURE OPS */
-
 import { AnyObject } from "@rue/types";
 
 export function getSpreadableMethods(object: Object) {
@@ -40,7 +37,7 @@ export function deepClone<T extends Object>(obj: T) {
 }
 
 export function cloneWithAdditionalProps<T extends Object, P extends Object>(target: T, props: P) {
-   if (__DEV__) {
+   if ( __DEV__) {
       for (const key in props) {
          if (target.hasOwnProperty(key)) console.error(`Name collision: "${key}"`);
       }

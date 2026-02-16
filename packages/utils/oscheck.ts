@@ -1,10 +1,13 @@
+import { AnyObject } from "@rue/types";
+
 const macOSPlatforms = new Set(['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K']);
 const windowsPlatforms = new Set(['Win32', 'Win64', 'Windows', 'WinCE']);
 const iOSPlatforms = new Set(['iPhone', 'iPad', 'iContainer']);
 const androidPlatforms = new Set(["Android"]);
 const linuxPlatforms = new Set(["Linux"]);
 
-export function getOS() {
+export function getOS(some: AnyObject) {
+   console.log(some)
     let OS = window.navigator.platform || window.navigator.userAgent;
     if (macOSPlatforms.has(OS)) return 'Mac';
     if (iOSPlatforms.has(OS)) return 'iOS';

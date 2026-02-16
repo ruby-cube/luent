@@ -9,7 +9,7 @@ const frog = ionize({
    }
 })
 
-if (__DEV__) {
+if ( __DEV__) {
    onTriggered(frog, 'name', () => { // value set, may or may not have changed
    
    })

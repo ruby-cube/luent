@@ -166,9 +166,6 @@ importers:
       '@babel/types':
         specifier: ^7.26.3
         version: 7.29.0
-      '@playwright/test':
-        specifier: ^1.58.2
-        version: 1.58.2
       '@rue/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -491,6 +488,82 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../../types
+
+  tests:
+    dependencies:
+      '@babel/traverse':
+        specifier: ^7.26.4
+        version: 7.29.0
+      '@rue/flask':
+        specifier: workspace:*
+        version: link:../packages/flask
+      '@rue/jsx-runtime':
+        specifier: workspace:*
+        version: link:../packages/lumo/jsx-runtime
+      '@rue/lumo':
+        specifier: workspace:*
+        version: link:../packages/lumo
+      '@rue/quarky':
+        specifier: workspace:*
+        version: link:../packages/quarky
+      '@rue/thread':
+        specifier: workspace:*
+        version: link:../packages/x-old/thread
+      '@rue/utils':
+        specifier: workspace:*
+        version: link:../packages/utils
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.23
+      marked:
+        specifier: ^15.0.5
+        version: 15.0.12
+    devDependencies:
+      '@babel/cli':
+        specifier: ^7.25.6
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/core':
+        specifier: ^7.25.2
+        version: 7.29.0
+      '@babel/plugin-syntax-jsx':
+        specifier: ^7.25.9
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/plugin-syntax-typescript':
+        specifier: ^7.25.9
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/plugin-transform-react-jsx':
+        specifier: ^7.25.2
+        version: 7.28.6(@babel/core@7.29.0)
+      '@babel/preset-env':
+        specifier: ^7.26.0
+        version: 7.29.0(@babel/core@7.29.0)
+      '@babel/preset-react':
+        specifier: ^7.26.3
+        version: 7.28.5(@babel/core@7.29.0)
+      '@babel/preset-typescript':
+        specifier: ^7.26.0
+        version: 7.28.5(@babel/core@7.29.0)
+      '@babel/types':
+        specifier: ^7.26.3
+        version: 7.29.0
+      '@rue/types':
+        specifier: workspace:*
+        version: link:../packages/types
+      '@rue/vite-plugin-lumo':
+        specifier: workspace:*
+        version: link:../packages/vite-plugin-lumo
+      '@types/babel__core':
+        specifier: ^7.20.5
+        version: 7.20.5
+      '@types/babel__traverse':
+        specifier: ^7.20.6
+        version: 7.28.0
+      '@types/node':
+        specifier: ^25.2.3
+        version: 25.2.3
+      vite:
+        specifier: ^5.4.3
+        version: 5.4.21(@types/node@25.2.3)
 
 packages:
 
@@ -3295,7 +3368,7 @@ packages:
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.7.15
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: false
 
   /@grpc/proto-loader@0.6.13:
@@ -3887,7 +3960,7 @@ packages:
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: true
 
   /@types/chai@5.2.3:
@@ -3901,13 +3974,13 @@ packages:
     resolution: {integrity: sha512-n6Cr2xS1h4uAulPRdlw6Jl6s1oG8KrVilPN2yUITEs+K48EzMJJ3W1xy8K5eWuFvjp3R74AOIGSmp2UfBJ8HFw==}
     dependencies:
       '@types/express-serve-static-core': 5.1.1
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: true
 
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: true
 
   /@types/deep-eql@4.0.2:
@@ -3921,7 +3994,7 @@ packages:
   /@types/express-serve-static-core@5.1.1:
     resolution: {integrity: sha512-v4zIMr/cX7/d2BpAEX3KNKL/JrT1s43s96lLvvdTmza1oEvDudCqK9aF/djc/SWgy8Yh0h30TZx5VpzqFCxk5A==}
     dependencies:
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -3939,7 +4012,7 @@ packages:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 6.0.0
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: true
 
   /@types/http-errors@2.0.5:
@@ -3949,7 +4022,7 @@ packages:
   /@types/http-proxy@1.17.17:
     resolution: {integrity: sha512-ED6LB+Z1AVylNTu7hdzuBqOgMnvG/ld6wGCG8wFnAzKX5uyW2K3WD52v0gnLCTK/VLpXtKckgWuyScYK6cSPaw==}
     dependencies:
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: true
 
   /@types/jsdom@21.1.7:
@@ -3983,6 +4056,7 @@ packages:
     resolution: {integrity: sha512-ebO/Yl+EAvVe8DnMfi+iaAyIqYdK0q/q0y0rw82INWEKJOBe6b/P3YWE8NW7oOlF/nXFNrHwhARrN/hdgDkraA==}
     dependencies:
       undici-types: 6.21.0
+    dev: true
 
   /@types/node@25.2.0:
     resolution: {integrity: sha512-DZ8VwRFUNzuqJ5khrvwMXHmvPe+zGayJhr2CDNiKB1WBE1ST8Djl00D0IC4vvNmHMdj6DlbYRIaFE7WHjlDl5w==}
@@ -3994,7 +4068,6 @@ packages:
     resolution: {integrity: sha512-m0jEgYlYz+mDJZ2+F4v8D1AyQb+QzsNqRuI7xg1VQX/KlKS0qT9r1Mo16yo5F/MtifXFgaofIFsdFMox2SxIbQ==}
     dependencies:
       undici-types: 7.16.0
-    dev: true
 
   /@types/normalize-package-data@2.4.4:
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -4027,14 +4100,14 @@ packages:
   /@types/send@1.2.1:
     resolution: {integrity: sha512-arsCikDvlU99zl1g69TcAB3mzZPpxgw0UQnaHeC1Nwb015xp8bknZv5rIfri9xTOcMuaVgvabfIRA7PSZVuZIQ==}
     dependencies:
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: true
 
   /@types/serve-static@2.2.0:
     resolution: {integrity: sha512-8mam4H1NHLtu7nmtalF7eyBH14QyOASmcxHhSfEoRyr0nP/YdoesEtU+uSRvMe96TW/HPTtkoKqQLl53N7UXMQ==}
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
     dev: true
 
   /@types/source-list-map@0.1.6:
@@ -4075,7 +4148,7 @@ packages:
   /@types/webpack-sources@3.2.3:
     resolution: {integrity: sha512-4nZOdMwSPHZ4pTEZzSp0AsTM4K7Qmu40UKW4tJDiOVs20UzYF9l+qUe4s0ftfN0pin06n+5cWWDJXH+sbhAiDw==}
     dependencies:
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
       '@types/source-list-map': 0.1.6
       source-map: 0.7.6
     dev: true
@@ -4083,7 +4156,7 @@ packages:
   /@types/webpack@4.41.40:
     resolution: {integrity: sha512-u6kMFSBM9HcoTpUXnL6mt2HSzftqb3JgYV6oxIgL2dl6sX6aCa5k6SOkzv5DuZjBTPUE/dJltKtwwuqrkZHpfw==}
     dependencies:
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
       '@types/tapable': 1.0.12
       '@types/uglify-js': 3.17.5
       '@types/webpack-sources': 3.2.3
@@ -10550,7 +10623,7 @@ packages:
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
       '@types/long': 4.0.2
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
       long: 4.0.0
     dev: false
 
@@ -10569,7 +10642,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.19.8
+      '@types/node': 25.2.3
       long: 5.3.2
     dev: false
 
@@ -12152,10 +12225,10 @@ packages:
 
   /undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+    dev: true
 
   /undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
-    dev: true
 
   /unicode-canonical-property-names-ecmascript@2.0.1:
     resolution: {integrity: sha512-dA8WbNeb2a6oQzAQ55YlT5vQAWGV9WXOsi3SskE3bcCdM0P4SDd+24zS/OCacdRq5BkdsRj9q3Pg6YyQoxIGqg==}

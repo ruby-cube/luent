@@ -80,7 +80,7 @@ const ionicModels: WeakMap<AnyObject, QuarkyIonicProxy> = new WeakMap()
 //    if (isIonicProxy(target)) return target as any as IonicProxy & T;
 //    const existing = ionicModels.get(target)
 //    if (existing) {
-//       if (__DEV__ && config && quarkOf(existing).extension !== config) {
+//       if ( __DEV__ && config && quarkOf(existing).extension !== config) {
 //          console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by asIonic`)
 //       }
 //       return existing as any as IonicProxy & T
@@ -116,7 +116,7 @@ export function _Ionic<T extends AnyObject, M>(target: T, config?: M & ThisType<
    if (!isObject(target)) return target;
    const existing = ionicModels.get(target)
    if (existing) {
-      if (__DEV__ && config && quarkOf(existing).extension !== config) {
+      if ( __DEV__ && config && quarkOf(existing).extension !== config) {
          console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by asIonic`)
       }
       return existing as any

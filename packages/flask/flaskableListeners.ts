@@ -20,7 +20,7 @@ export function useCleanupScheduler(...args: any[]) {
 
 // allows custom clean up option like { until: [document, 'click'] }
 export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cleanup: CallbackRemover) => PausableListener) {
-   if (__DEV__ && _useCleanupScheduler) console.warn(`overriding custom cleanup scheduler`)
+   if ( __DEV__ && _useCleanupScheduler) console.warn(`overriding custom cleanup scheduler`)
    _useCleanupScheduler = scheduler;
 }
 
@@ -64,7 +64,7 @@ export function $schedule<
       enroll,
       remove,
       options: toListenerOptions(options),
-      __DEV__asyncPath: __DEV__ ? __DEV__buildAsyncPath() : undefined
+      __DEV__asyncPath:  __DEV__ ? __DEV__buildAsyncPath() : undefined
    })
 }
 

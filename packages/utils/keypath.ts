@@ -29,7 +29,7 @@ export function toKeyPathArray(array: KeyPathString[]) {
 export function getKeyPathValue(object: AnyObject, keyPath: string[]): any {
     let level = object;
     for (const key of keyPath) {
-        if (__DEV__ && !(key in level)) console.error(`getKeypathValue: key (${key}) in keypath (${keyPath}) does not exist on object`) //DEV
+        if ( __DEV__ && !(key in level)) console.error(`getKeypathValue: key (${key}) in keypath (${keyPath}) does not exist on object`) //DEV
         level = level[key];
     }
     return level;
@@ -41,9 +41,9 @@ export function setKeyPath(object: Mutable<AnyObject>, keyPath: string[], value:
     const key = _keyPath.pop();
     if (key == null) throw new Error("[keypath] `keyPath` is empty");
     for (const key of _keyPath) {
-        if (__DEV__ && !(key in level)) console.error(`getKeypathValue: key (${key}) in keypath (${keyPath}) does not exist on object`) //DEV
+        if ( __DEV__ && !(key in level)) console.error(`getKeypathValue: key (${key}) in keypath (${keyPath}) does not exist on object`) //DEV
         level = level[key];
     }
-    if (__DEV__ && !(key in level)) console.error(`getKeypathValue: key (${key}) in keypath (${keyPath}) does not exist on object`) //DEV
+    if ( __DEV__ && !(key in level)) console.error(`getKeypathValue: key (${key}) in keypath (${keyPath}) does not exist on object`) //DEV
     level[key] = value;
 }

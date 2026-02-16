@@ -37,7 +37,7 @@ type TriggerEvent = {
 }
 
 export function traceTriggers<T>(subject: T) {
-   if (!__DEV__) return;
+   if (! __DEV__) return;
    watch(subject, () => {
       const atom = getTriggeredAtoms($thisEffect()!)[0] as Atom // TODO: type casting is temporary
       const traceableAtom = __DEV__asTraceable(atom)

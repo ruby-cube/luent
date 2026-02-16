@@ -69,7 +69,7 @@ export function App() {
 export function List() {
 
     const $active = Ion(true)
-    if (__DEV__) __addDevName($active, '$active')
+    if ( __DEV__) __addDevName($active, '$active')
 
     const $list = Ion(ionize([
         { id: 0, content: "frog" },
@@ -78,7 +78,7 @@ export function List() {
         { id: 3, content: "swamp" }
     ]))
 
-    if (__DEV__) __addDevName($list, '$list')
+    if ( __DEV__) __addDevName($list, '$list')
 
     function changeContent(index: number) {
         const item$ = $list()[index];

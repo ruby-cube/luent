@@ -34,12 +34,12 @@ export default defineConfig({
    ],
    resolve: {
       alias: {
-         '@rue/jsx-dev-runtime': resolve(__dirname, '../../packages/lumo/jsx-runtime/src/index.ts')
+         '@rue/jsx-dev-runtime': resolve(import.meta.dirname, '../../packages/lumo/jsx-runtime/src/index.ts')
       }
    },
    define: {
+      __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
       __SSR__: false,
-      __DEV__: true,
       __TEST__: true,
       __DOCU__: false,
    }

@@ -171,7 +171,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    delete attributes['mu:checked'];
    attributes.checked = ion;
    if (!isIon(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
+      if ( __DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion, 'checked')
@@ -186,7 +186,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    delete attributes['mu:checked'];
    attributes.checked = () => ion() === radioValue;
    if (!isIon(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
+      if ( __DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion)
@@ -200,7 +200,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    delete attributes['mu:value'];
    attributes.value = ion;
    if (!isIon(ion)) {
-      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
+      if ( __DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion)
@@ -242,7 +242,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isIon(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
+      if ( __DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       element.addEventListener('change', e => {
@@ -267,7 +267,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 //       }, flask)
 //    }, flask, RUN_EAGERLY)
 //    if (!isMutableIon(ion)) {
-//       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
+//       if ( __DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
 //    }
 //    else {
 //       setUpInputListener(element, ion)
@@ -330,7 +330,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
    const flask = getFlask()
    for (const key in attributes) {
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
-      if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
+      if ( __DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
       // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
       const value = attributes[key]
       // TODO: only attributes that affect layout should be scheduled for render phase
@@ -591,7 +591,7 @@ function removePreviousClasses(prevValue: string | AnyObject, classList: DOMToke
          }
       }
    }
-   else if (__DEV__) {
+   else if ( __DEV__) {
       console.warn('DEV RESEARCH: Reactive class input has not been handled for', prevValue)
    }
 }
@@ -608,7 +608,7 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
       setUpClassesFromObject(value, classList, flask)
    }
    else {
-      if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
+      if ( __DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
    }
 }
 

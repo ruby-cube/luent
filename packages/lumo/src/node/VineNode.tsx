@@ -121,7 +121,7 @@ class DynamicTextNode extends VineNode {
 
    constructor(private $text: Ion<unknown>) {
       super()
-      if (__DEV__) __DEV__checkIfTracked()
+      if ( __DEV__) __DEV__checkIfTracked()
       const textNode = this.node = createTextNode($text())
       this.nodes = [textNode]
       watchToRender($text, ({ current, previous, flask }) => {
@@ -175,7 +175,7 @@ export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragme
       }
       // else if (isInnerHTMLKit(node)) {
       //    if (root instanceof DocumentFragment) {
-      //       if (__DEV__) console.error('Cannot append innerHTML to document fragment')
+      //       if ( __DEV__) console.error('Cannot append innerHTML to document fragment')
       //       return;
       //    }
       //    mountInnerHTML(node.innerHTML, root)

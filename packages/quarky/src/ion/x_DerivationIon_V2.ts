@@ -84,7 +84,7 @@ export function createManagedDerivation(
          return value;
       }
       else {
-         if (__DEV__) emitSignal();
+         if ( __DEV__) emitSignal();
          fn = getMemoizedState
          const update = $activeUpdate()
          ion.state.set(value, update)

@@ -69,9 +69,9 @@ export default defineConfig({
    ],
    resolve: {
       alias: {
-         // //   '@rue/utils': resolve(__dirname, 'packages/utils/index.ts'),
-         //   // '@rue/lumo/jsx-runtime': resolve(__dirname, 'packages/jsx-runtime/core/jsx-runtime.ts'),
-         '@rue/jsx-dev-runtime': resolve(__dirname, '../../packages/lumo/jsx-runtime/src/index.ts')
+         // //   '@rue/utils': resolve(import.meta.dirname, 'packages/utils/index.ts'),
+         //   // '@rue/lumo/jsx-runtime': resolve(import.meta.dirname, 'packages/jsx-runtime/core/jsx-runtime.ts'),
+         '@rue/jsx-dev-runtime': resolve(import.meta.dirname, '../../packages/lumo/jsx-runtime/src/index.ts')
       }
       // [
       //   {
@@ -81,15 +81,14 @@ export default defineConfig({
       // ]
    },
    define: {
+      __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
       __SSR__: false,
-      __DEV__: true,
-      __TEST__: true,
-      __DOCU__: false,
+      __TEST__: JSON.stringify(process.env.NODE_ENV === 'test'),
    },
    // build: {
    //   lib: {
    //     // Could also be a dictionary or array of multiple entry points
-   //     entry: resolve(__dirname, 'src/index.ts'),
+   //     entry: resolve(import.meta.url, 'src/index.ts'),
    //     name: '@rue',
    //     // the proper extensions will be added
    //     fileName: 'rue',

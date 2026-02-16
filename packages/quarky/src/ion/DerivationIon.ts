@@ -85,8 +85,8 @@ export function createMemoizedDerivation(
 
    if (methods) {
       const descriptors = Object.getOwnPropertyDescriptors(methods)
-      if (__DEV__ && !isPlainObject(methods)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
-      if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
+      if ( __DEV__ && !isPlainObject(methods)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
+      if ( __DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
       // TODO: this was copy pasted from atomic ion, fix any inconsistencies
       delete descriptors['@get'];
       delete descriptors['@set'];

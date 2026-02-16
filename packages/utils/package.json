@@ -2,6 +2,7 @@
     "name": "@rue/utils",
     "private": true,
     "description": "",
+    "type": "module",
     "devDependencies": {
         "@rue/types": "workspace:*",
         "@types/node": "latest",

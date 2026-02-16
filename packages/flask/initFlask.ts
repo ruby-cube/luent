@@ -29,9 +29,9 @@ export function configureFlask(config: {
     }
 }
 
-export const genIncrementalId = __DEV__ ? useIncrementalID() : undefined;
+export const genIncrementalId =  __DEV__ ? useIncrementalID() : undefined;
 
-export const setUpCleanupWarning = __DEV__ ? (listener: Listener, until: Until | undefined, flask: Flask | undefined) => {
+export const setUpCleanupWarning =  __DEV__ ? (listener: Listener, until: Until | undefined, flask: Flask | undefined) => {
     if (shouldWarnNoCleanup) {
         if (!flask && !until) {
             const listenerID = genIncrementalId!();

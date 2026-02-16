@@ -80,7 +80,7 @@ function createTransitionNode(
    const [transitionOut, animateOut] = normalizeToKitArrays(inputOut)
    const [transitionBoth, animateBoth] = normalizeToKitArrays(inputBoth ? inputBoth : (!inputIn && !inputOut) ? defaultFade : undefined)
 
-   if (__DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
+   if ( __DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
       console.warn(`The transition for 'both' will override transition for either 'in' or 'out'`)
 
    const transitionInProperties = undefined; // TODO:
@@ -444,12 +444,12 @@ function normalizeToKitArrays(
          }
       }
       if (defaultTransition) {
-         if (__DEV__ && transitionKits.length !== 1)
+         if ( __DEV__ && transitionKits.length !== 1)
             throw new Error('This should never happen. Default transitions should only consist of one transition. For-loop logic is wrong')
          transitionKits.push(defaultTransition)
       }
       if (defaultAnimation) {
-         if (__DEV__ && animationKits.length !== 1)
+         if ( __DEV__ && animationKits.length !== 1)
             throw new Error('This should never happen. Default transitions should only consist of one transition. For-loop logic is wrong')
          animationKits.push(defaultAnimation)
       }

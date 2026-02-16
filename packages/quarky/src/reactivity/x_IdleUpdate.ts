@@ -190,7 +190,7 @@ export class LazyUpdate implements Update {
             case UpdateType.USER_INTERACTION:
             case UpdateType.USER_ANIMATION:
             case UpdateType.BACKGROUND_ANIMATION:
-               if (__DEV__) throw new Error('This race condition should be made impossible by disabling UI interactions or unsharing state')
+               if ( __DEV__) throw new Error('This race condition should be made impossible by disabling UI interactions or unsharing state')
                else updateB.queueAfter(updateA)
                return true;
 
@@ -255,10 +255,10 @@ class UpdateCancelled extends Error {
 
 export function catchCancelledUpdate(error: unknown) {
    if (error instanceof UpdateCancelled) {
-      if (__DEV__) console.warn('update cancelled', error)
+      if ( __DEV__) console.warn('update cancelled', error)
    }
    else if (error === 'update cancelled') {
-      if (__DEV__) console.warn('update cancelled')
+      if ( __DEV__) console.warn('update cancelled')
       // effectsComplete promise cancelled
    }
    else {

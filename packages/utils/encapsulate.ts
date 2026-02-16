@@ -40,7 +40,7 @@ export type Encapulated<
 export function encapsulate<T extends AnyObject>(target: T): T {
     if (ENCAPSULATED in target) return target;
     if (!(target instanceof Object)) {
-        if (__DEV__) console.warn('Invalid input')
+        if ( __DEV__) console.warn('Invalid input')
         return target;
     }
 
@@ -58,14 +58,14 @@ export function encapsulate<T extends AnyObject>(target: T): T {
             }
             if (isFunction(value) && isMutatingMethod(DataStructure, key)) {
                 return (...args: any[]) => {
-                    if (__DEV__)
+                    if ( __DEV__)
                         throw new Error(`This object has be encapsulated and can only be mutated by its provided methods`)
                 };
             }
             return value instanceof Object ? encapsulate(value) : value;
         },
         set(target, key, value, receiver) {
-            if (__DEV__ && key !== ENCAPSULATED)
+            if ( __DEV__ && key !== ENCAPSULATED)
                 throw new Error(`This object has be encapsulated and can only be mutated by its provided methods`)
             Reflect.set(target, key, value, receiver)
             return true;

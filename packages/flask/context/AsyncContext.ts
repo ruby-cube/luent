@@ -67,7 +67,7 @@ interface StackNode<T> {
 export function getCurrentContext() {
    const contextNode = asyncContextStack.current
    if (!contextNode) {
-      if (__DEV__) throw Error('No context :( This should never happen')
+      if ( __DEV__) throw Error('No context :( This should never happen')
       return;
    }
    return contextNode.value

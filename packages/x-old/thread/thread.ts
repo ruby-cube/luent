@@ -34,27 +34,27 @@ export const thread = {
 
 // USAGE
 
-if (__DOCU__) {
-    queuePS(() => {
-        // code that will run after the original task/handlers 
-        // and previously queued microtasks finish running
-        // and before the next event loop task
-    })
+// if (__DOCU__) {
+//     queuePS(() => {
+//         // code that will run after the original task/handlers 
+//         // and previously queued microtasks finish running
+//         // and before the next event loop task
+//     })
 
-    queueTask(() => {
-        // code that will run after any previously 
-        // queued tasks/events in the event loop
-    })
+//     queueTask(() => {
+//         // code that will run after any previously 
+//         // queued tasks/events in the event loop
+//     })
 
-    beforeRepaint(() => {
-        // code that will after any previously queued rAF callbacks
-        // and before the next screen paint
-    })
+//     beforeRepaint(() => {
+//         // code that will after any previously queued rAF callbacks
+//         // and before the next screen paint
+//     })
 
-    onTimeout(500, () => {
-        // code that will run after 500ms
-    })
-}
+//     onTimeout(500, () => {
+//         // code that will run after 500ms
+//     })
+// }
 
 
 

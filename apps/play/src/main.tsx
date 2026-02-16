@@ -376,7 +376,7 @@ app.mount('#root')
 // const root = createRoot(document.getElementById('app'));
 // root.render(<h1>Hello, world</h1>);
 
-// if (__DEV__) configureFlask({
+// if ( __DEV__) configureFlask({
 //    warnNoCleanup: true
 // })
 

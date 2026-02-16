@@ -18,7 +18,7 @@ function isShallowEqual(collectionA: any[] | Set<any>, collectionB: any[] | Set<
     const original = toRaw(collectionA)
     if (original instanceof Array) return areShallowEqualArrays(<any[]>collectionA, <any[]>collectionB);
     if (original instanceof Set) return areEqualSets(<Set<any>>collectionA, <Set<any>>collectionB);
-    if (__DEV__) console.warn("Not yet implemented for Objects and Map")
+    if ( __DEV__) console.warn("Not yet implemented for Objects and Map")
 }
 
 function areEqualArrays(arrayA: any[], arrayB: any[]) {

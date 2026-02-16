@@ -87,7 +87,7 @@ function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
 
       defineProperty(_, key, descriptor) {
          if (key in modelQuark.state.get()) { // FIX: should this check both state.current and state.pending??
-            if (__DEV__) console.warn(`Redefining property of an ionic proxy not supported`)
+            if ( __DEV__) console.warn(`Redefining property of an ionic proxy not supported`)
             return false
          }
          const update = $activeUpdate()

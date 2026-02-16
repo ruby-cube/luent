@@ -59,7 +59,7 @@ export class Mutation {
          quarkOf(this.target).revertOp(this)
       }
       else {
-         if (__DEV__) console.warn('invalid mutation target')
+         if ( __DEV__) console.warn('invalid mutation target')
       }
    }
 }

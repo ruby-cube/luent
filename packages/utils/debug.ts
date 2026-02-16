@@ -22,35 +22,35 @@ export const debug = {
 const logs = [];
 
 function log(...details: any[]) {
-   if (__DEV__) console.log(...details)
+   if ( __DEV__) console.log(...details)
    else {
       logs.push({ type: 'log', details })
    }
 }
 
 function trace(...details: any[]) {
-   if (__DEV__) console.trace(...details)
+   if ( __DEV__) console.trace(...details)
    else {
       logs.push({ type: 'trace', details })
    }
 }
 
 function error(...details: any[]) {
-   if (__DEV__) console.error(...details)
+   if ( __DEV__) console.error(...details)
    else {
       logs.push({ type: 'error', details })
    }
 }
 
 function throwError(...details: any[]) {
-   if (__DEV__) console.error(...details)
+   if ( __DEV__) console.error(...details)
    else {
       logs.push({ type: 'error', details })
    }
 }
 
 function warn(...details: any[]) {
-   if (__DEV__) {
+   if ( __DEV__) {
       console.warn(...details)
       console.trace()
    }

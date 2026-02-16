@@ -146,7 +146,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
    if (slot instanceof Function) {
       return slot as (...args: any[]) => RawJSXNode;
    }
-   if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
+   if ( __DEV__) console.warn('jsx compiler failed to normalize slot to render function')
    return () => slot;
 }
 

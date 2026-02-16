@@ -135,7 +135,7 @@ class IonicDepot {
          model.update(data)
       }
       else {
-         if (__DEV__) throw new Error('model must have update method')
+         if ( __DEV__) throw new Error('model must have update method')
       }
       return model
    }

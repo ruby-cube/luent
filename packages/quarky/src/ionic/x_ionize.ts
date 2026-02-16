@@ -89,7 +89,7 @@ function getExistingIonizedModel(target: object, markMap?: object) {
    return existing
 }
 
-const protect = __DEV__ ? MayBeMutableProxy : (<T>(arg: T) => arg)
+const protect =  __DEV__ ? MayBeMutableProxy : (<T>(arg: T) => arg)
 
 export type DeepIonic<T, N> = Ionized<{ [P in Exclude<keyof T, keyof N>]: T[P]; }> & { [K in keyof N]: N[K] extends (...args: any[]) => infer R ? R : never }
 export type DeepIonized<T, N extends Partial<T>> = Ionized<{ [P in Exclude<keyof T, keyof N>]: T[P]; }> & N

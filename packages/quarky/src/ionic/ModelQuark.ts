@@ -152,7 +152,7 @@ export class ModelQuark implements Atom {
          if (initEach) {
             const collection = this.state.get() as any[]
             if (!(Symbol.iterator in collection)) {
-               if (__DEV__) console.warn(`Ionic collections must have a '[Symbol.iterator]()' method that returns an iterator.`)
+               if ( __DEV__) console.warn(`Ionic collections must have a '[Symbol.iterator]()' method that returns an iterator.`)
                return;
             }
 
@@ -232,7 +232,7 @@ export class ModelQuark implements Atom {
    ) {
       if (!Object.isExtensible(this.target)) return { set: nowrite };
       if (isFunction(value)) {
-         if (__DEV__) console.warn(`Adding new methods or absorbed ions to a proxy is not supported. You must add ${value} to the raw object before ionizing it`)
+         if ( __DEV__) console.warn(`Adding new methods or absorbed ions to a proxy is not supported. You must add ${value} to the raw object before ionizing it`)
          return { set: nowrite };
       }
       const update = $activeUpdate()
@@ -317,7 +317,7 @@ export class ModelQuark implements Atom {
          )
       }
       else if (key === valueKey && writable) {
-         if (__DEV__ && def) console.warn('Custom reactivity not supported for data properties (only accessor properties and methods).')
+         if ( __DEV__ && def) console.warn('Custom reactivity not supported for data properties (only accessor properties and methods).')
          return this.initPion(
             key,
             valueKey,
@@ -340,7 +340,7 @@ export class ModelQuark implements Atom {
       value: unknown
    ) {
       const { proto, target } = this
-      if (__DEV__) assertNotFunction(value)
+      if ( __DEV__) assertNotFunction(value)
       const hooks = this.getHooks<'property'>(valueKey)
 
       const pionAccess = ionKey && !(ionKey in target) // makes sure not an absorbed ion
@@ -489,7 +489,7 @@ export class ModelQuark implements Atom {
          return output;
       }
 
-      if (__DEV__) boundMethod.displayName = key
+      if ( __DEV__) boundMethod.displayName = key
 
       return () => boundMethod
    }
@@ -574,7 +574,7 @@ export class ModelQuark implements Atom {
       if (update) {
          triggerOp(this, op, key, update)
       }
-      else if (__DEV__) {
+      else if ( __DEV__) {
          throw new Error('must call state.mutate()')
       }
    }
@@ -584,7 +584,7 @@ export class ModelQuark implements Atom {
       if (update) {
          trigger(this, update)
       }
-      else if (__DEV__) {
+      else if ( __DEV__) {
          throw new Error('must call state.mutate()')
       }
    }
@@ -598,7 +598,7 @@ export class ModelQuark implements Atom {
             trigger(trackedOp, update)
          }
       }
-      else if (__DEV__) {
+      else if ( __DEV__) {
          throw new Error('must call state.mutate()')
       }
    }

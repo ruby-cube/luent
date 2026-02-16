@@ -4,6 +4,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
+    "allowSyntheticDefaultImports": true,
     "lib": [
       "ESNext",
       "DOM"
@@ -58,6 +59,7 @@
   "include": [
     "packages",
     "apps",
-    "**/src/*"
-  ]
+    "**/src/*", 
+    "tests"  
+   ]
 }

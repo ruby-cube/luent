@@ -4,8 +4,8 @@ import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { getIonicProxy, MayBeMutableProxy as _MayBeMutableProxy, ReadonlyProxy as _ReadonlyProxy } from "../../../quarky/src/mu";
 
-const MayBeMutableProxy = __DEV__ ? _MayBeMutableProxy : (arg: any) => arg
-const ReadonlyProxy = __DEV__ ? _ReadonlyProxy : (arg: any) => arg
+const MayBeMutableProxy =  __DEV__ ? _MayBeMutableProxy : (arg: any) => arg
+const ReadonlyProxy =  __DEV__ ? _ReadonlyProxy : (arg: any) => arg
 
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.

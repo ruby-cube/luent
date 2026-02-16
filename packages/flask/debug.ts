@@ -2,7 +2,7 @@ import { AsyncState } from "./context/AsyncContext";
 
 export const TRACE = 'trace'
 
-export const [getAsyncPath, __DEV__traceStack] = __DEV__ ? AsyncState<string>(TRACE) : [];
+export const [getAsyncPath, __DEV__traceStack] =  __DEV__ ? AsyncState<string>(TRACE) : [];
 
 const __INTERNAL_TRACE__ = false;
 

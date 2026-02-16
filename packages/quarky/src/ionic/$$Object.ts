@@ -21,13 +21,13 @@ export function isIonicObject(value: any): value is IonicProxy {
 //     const modelQuark = new ModelQuark(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
-//             if (__DEV__) emitSignal();
+//             if ( __DEV__) emitSignal();
 //             if (key === QUARK) return modelQuark;
 //             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
 //                 if (keys && !(key in keys)) {
-//                     if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
+//                     if ( __DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
 //                     return undefined;
 //                 }
 //             }

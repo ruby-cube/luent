@@ -1,6 +1,6 @@
 import { resolve } from "path"
 import { defineConfig } from 'vite'
-import babelLumoTransform from '../../packages/lumo/babel-plugin/index.js'
+import babelLumoTransform from '../packages/lumo/babel-plugin/index.js'
 import * as babel from '@babel/core';
 
 
@@ -71,7 +71,7 @@ export default defineConfig({
       alias: {
          // //   '@rue/utils': resolve(import.meta.dirname, 'packages/utils/index.ts'),
          //   // '@rue/lumo/jsx-runtime': resolve(import.meta.dirname, 'packages/jsx-runtime/core/jsx-runtime.ts'),
-         '@rue/jsx-dev-runtime': resolve(import.meta.dirname, '../../packages/lumo/jsx-runtime/src/index.ts')
+         '@rue/jsx-dev-runtime': resolve(import.meta.dirname, '../packages/lumo/jsx-runtime/src/index.ts')
       }
       // [
       //   {

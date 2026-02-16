@@ -14,10 +14,12 @@
     "ni:lumo": "pnpm -F @rue/lumo install",
     "ni:play": "pnpm -F @rue/play install",
     "ni:demos": "pnpm -F @rue/demos install",
-    "test-demos": "npx playwright test",
+    "ni:tests": "pnpm -F @rue/tests install",
+    "test-demos": "pnpm exec playwright test --project=chromium",
     "dev": "pnpm -F @rue/play dev",
     "dev-movies": "pnpm -F @rue/movies-app dev",
     "dev-demos": "pnpm -F @rue/demos dev",
+    "dev-tests": "pnpm -F @rue/tests dev",
     "dev-chat": "pnpm -F @rue/live-chat dev",
     "build-babel": "pnpm -F @rue/play build-babel",
     "ni:quarky": "pnpm -F @rue/quarky install"

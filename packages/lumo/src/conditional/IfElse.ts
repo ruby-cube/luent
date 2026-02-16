@@ -67,7 +67,7 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
       render: toAsyncRender(render, context, {
          [FLASK]: undefined,
          // [COMMONS]: commons,
-         [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
+         [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }),
       type: activationType,
       // transitionNodes,
@@ -296,15 +296,15 @@ function getConditions(statements: ConditionalStatement[]) {
          conditions.push($condition)
       }
       if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
-         if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
+         if ( __DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
          else continue;
       }
       if (!('statementType' in kit)) {
-         if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
+         if ( __DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
          else continue;
       }
       if (i !== statements.length - 1 && kit.statementType === 'else') {
-         if (__DEV__) throw new Error("Else must be the very last statement of a conditional series");
+         if ( __DEV__) throw new Error("Else must be the very last statement of a conditional series");
          else continue;
       }
    }
@@ -350,7 +350,7 @@ export function hideDOMNodes(nodes: JSXNode[]) {
          showIfMap.set(node, node.style.display)
          node.style.display = 'none'
       }
-      else if (__DEV__) {
+      else if ( __DEV__) {
          console.warn(`Unhandled node type ${node}`)
       }
    })

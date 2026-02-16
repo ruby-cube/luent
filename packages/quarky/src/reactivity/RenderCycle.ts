@@ -1,6 +1,5 @@
 
 
-import { setImmediate } from "../../../x-old/thread";
 import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update"
 import { Effect, EffectQueue, TaskQueue } from "./EffectQueue"
 import { Flask } from "@rue/flask"
@@ -10,7 +9,7 @@ import { noop } from "@rue/utils";
 import { UpdateType } from "./x_IdleUpdate";
 
 
-export const queueTask = setImmediate;
+export const queueTask = scheduler.postTask;
 
 // function queueSwiftTask(task: Task) {
 //    // console.trace('queueSwiftTask')
@@ -122,7 +121,7 @@ export class RenderCycle {
 
       this.effects[INTERNAL_RENDER] = new TaskQueue(update, INTERNAL_RENDER)
 
-      // if (__DEV__) assertSequentialPhases(this.phases)
+      // if ( __DEV__) assertSequentialPhases(this.phases)
    }
 
    started = false
@@ -134,7 +133,7 @@ export class RenderCycle {
          this.runPostcommit()
          // this.scheduleTick()
          this.update.complete()
-         if (__DEV__) {
+         if ( __DEV__) {
             requestAnimationFrame((time) =>
                this.timecheck(time)
             )
@@ -381,13 +380,13 @@ export class RenderCycle {
 
    scheduleEffects(effects: EffectQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      if ( __DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       this.useTaskQueue(adjustedPhase).scheduleEffects(effects)
    }
 
    scheduleTask(task: Task, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      if ( __DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       this.useTaskQueue(adjustedPhase).scheduleTask(task)
    }
 

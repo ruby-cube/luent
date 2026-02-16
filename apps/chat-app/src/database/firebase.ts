@@ -154,7 +154,7 @@ export function onLoggedIn(task: (user: User | null) => void) {
          if (pendingLogin) {
             await pendingLogin;
          }
-         if (__DEV__ && (!authorizedUser.displayName || !authorizedUser.email)) throw new Error('display name or email missing')
+         if ( __DEV__ && (!authorizedUser.displayName || !authorizedUser.email)) throw new Error('display name or email missing')
 
          const user = new User(authorizedUser.uid, authorizedUser.displayName!, authorizedUser.email!, db)
          task(user)

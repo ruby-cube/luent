@@ -104,7 +104,7 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | P
                      console.log('refetch :)')
                      if (!('refetch' in ion) || !isFunction(ion.refetch)) {
                         console.log('refetch :(')
-                        if (__DEV__) throw new Error('Refetch failed. Refetch method required in order to refetch')
+                        if ( __DEV__) throw new Error('Refetch failed. Refetch method required in order to refetch')
                      }
                      else {
                         ion.refetch()
@@ -119,7 +119,7 @@ export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | P
                      if (isObject(value) && key in value) {
                         updateIon(ions[key], value[key])
                      }
-                     else if (__DEV__) {
+                     else if ( __DEV__) {
                         throw new Error('The keys of Action return type must match keys of toBeMutated argument')
                      }
                   }

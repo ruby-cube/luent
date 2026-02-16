@@ -62,7 +62,7 @@ export function provideAppwide<K extends CommonsEntryKey>(key: K, value: Commons
    const commonsKey = toCommonsKey(key)
    markIfMuIon(key, value, appCommons)
    if (appEntries.has(commonsKey)) {
-      if (__DEV__) {
+      if ( __DEV__) {
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
          console.trace();
       }
@@ -103,7 +103,7 @@ export function provideGlobal<K extends CommonsEntryKey | string>(key: K, value:
    const commonsKey = toCommonsKey(key)
    markIfMuIon(key, value, globalCommons)
    if (globalEntries.has(commonsKey)) {
-      if (__DEV__) {
+      if ( __DEV__) {
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
          console.trace();
       }

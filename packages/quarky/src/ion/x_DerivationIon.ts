@@ -88,7 +88,7 @@ export function createManagedDerivation(
          return value;
       }
       else {
-         if (__DEV__) emitSignal();
+         if ( __DEV__) emitSignal();
          // getActiveTracker()?.track(ion)
          fn = getMemoizedState
          ion.state = value;

@@ -56,7 +56,7 @@ class AnimalB {
 
    isSomething(b) {
       // real-time checks
-      if (__DEV__) assertPure(doSomething)
+      if ( __DEV__) assertPure(doSomething)
       const a = doSomething(b)
       // linter checks for =, +=, ++, --, etc operations
    }

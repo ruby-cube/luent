@@ -138,7 +138,7 @@ function createDynamicRenderKit(render: RenderFunction, context: ContextSnapshot
 
    return {
       flask: undefined as Flask | undefined,
-      render: toAsyncRender(render, context, { [FLASK]: undefined, [COMMONS]: commons, [TRACE]: __DEV__ ? __DEV__buildAsyncPath() : '' }),
+      render: toAsyncRender(render, context, { [FLASK]: undefined, [COMMONS]: commons, [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() : '' }),
       transitionNodes,
       cache: undefined,
       awaitCache: undefined,
@@ -160,7 +160,7 @@ export class PolymorphKit extends VineNode {
    // setup essentials
    // dynamicPod: DynamicPod = new NodePod()
    // sharedNodePod: NodePod | undefined
-   __DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
+   __DEV__asyncPath =  __DEV__ ? __DEV__buildAsyncPath() : undefined
 
    constructor(
       public switchMap: Map<PolymorphKey, RenderFunction | PolymorphRenderKit | VariantMap>,
@@ -210,7 +210,7 @@ export class PolymorphKit extends VineNode {
 
       const kit = this.toKit(id)
       if (!kit) {
-         if (__DEV__) console.error('dynamic render kit missing')
+         if ( __DEV__) console.error('dynamic render kit missing')
          return;
       }
 

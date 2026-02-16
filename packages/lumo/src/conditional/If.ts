@@ -19,7 +19,7 @@ export type RenderConditional<T = undefined> = (/* v: NonNullable<T extends Ion<
 
 
 // if (!isActivationKit(jsx)) {
-//    if (__DEV__) console.error('compiler failed to tranform last argument to activation kit')
+//    if ( __DEV__) console.error('compiler failed to tranform last argument to activation kit')
 //    return createConditionalKit('if', 'create', () => jsx, $condition)
 // }
 
@@ -48,7 +48,7 @@ export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($conditio
 export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RawJSXNode | RenderConditional<T> | ActivationType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
    const [render, type, pending] = getParams(typeOrRenderConditional, renderConditional)
    // if (!isActivationKit(jsx)) {
-   //    if (__DEV__) console.error('compiler failed to tranform last argument to activation kit')
+   //    if ( __DEV__) console.error('compiler failed to tranform last argument to activation kit')
    //    return createConditionalKit('elseIf', 'create', () => jsx, $condition)
    // }
 
@@ -69,7 +69,7 @@ export function Else(activationType: ActivationType, renderConditional: RenderCo
 export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | ActivationType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
    const [render, type, pending] = getParams(typeOrRenderConditional, renderConditional)
    // if (!isActivationKit(jsx)) {
-   //    if (__DEV__) console.error('compiler failed to tranform last argument to activation kit')
+   //    if ( __DEV__) console.error('compiler failed to tranform last argument to activation kit')
    //    return createConditionalKit('else', 'create', () => jsx)
    // }
 

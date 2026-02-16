@@ -31,7 +31,7 @@ export function createAtomicPion<T = unknown>(
 
    const [$state, setState] = wrapped
 
-   if (__DEV__) {
+   if ( __DEV__) {
       // @ts-expect-error
       $state.displayName = 'getPropertyValue'
    }

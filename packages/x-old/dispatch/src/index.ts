@@ -14,7 +14,7 @@ const dispatchMap: Map<TypedKey<unknown>, DispatchConfig> = new Map()
 
 export function defineDispatch(key: TypedKey<any>, config: DispatchConfig) { // TODO: lazy define and clean up on unmounted (count subscribers and unmount on last unmount)
     if (dispatchMap.get(key)) {
-        if (__DEV__) throw new Error("Dispatch already defined for this key")
+        if ( __DEV__) throw new Error("Dispatch already defined for this key")
         return;
     }
     dispatchMap.set(key, config);
@@ -45,7 +45,7 @@ function _dispatch(type: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', key: Typed
     const config = dispatchMap.get(key)
     const op = config?.[type];
     if (!config || !op) {
-        if (__DEV__) throw new Error(`No dispatch config or ${type} function found for this key. Register key with 'defineDispatch'.`);
+        if ( __DEV__) throw new Error(`No dispatch config or ${type} function found for this key. Register key with 'defineDispatch'.`);
         return new Promise((resolve, reject) => {
             reject(`No dispatch config or ${type} function found for this key`)
         })

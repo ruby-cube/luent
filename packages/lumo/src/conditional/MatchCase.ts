@@ -51,7 +51,7 @@ export function toCasesMap(raw: RawCaseKit[], groupActivationType: ActivationTyp
          if (render) {
             currentKit.render = toAsyncRender(render as RenderFunction, context, {
                [FLASK]: undefined,
-               [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
+               [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
             })
             currentKit.type = type ?? fallbackType
          }
@@ -107,7 +107,7 @@ export function createCasesKit(activationType: ActivationType | undefined, rende
       flask: undefined,
       render: render ? toAsyncRender(render as RenderFunction, context, {
          [FLASK]: undefined,
-         [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
+         [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }) : undefined,
       type: activationType,
       cache: undefined,

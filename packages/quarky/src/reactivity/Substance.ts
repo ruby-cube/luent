@@ -214,10 +214,10 @@ export class FunctionalSubstance extends Compound implements Substance {
       }
       finally {
          popTracker();
-         if (__DEV__ && this.warnNoAtoms && this.particles.length === 0) {
+         if ( __DEV__ && this.warnNoAtoms && this.particles.length === 0) {
             console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
          }
-         if (__DEV__ && logAtoms) {
+         if ( __DEV__ && logAtoms) {
             console.log('ATOMS', this.particles)
          }
       }

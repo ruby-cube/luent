@@ -190,7 +190,7 @@ export class ListKit extends VineNode {
    }
 }
 
-export function toAsyncRenderItem(renderItem: (item: unknown, index: unknown) => RawJSXNode, context: ContextSnapshot = $_snap_context(), trace = __DEV__ ? __DEV__buildAsyncPath() : '') {
+export function toAsyncRenderItem(renderItem: (item: unknown, index: unknown) => RawJSXNode, context: ContextSnapshot = $_snap_context(), trace =  __DEV__ ? __DEV__buildAsyncPath() : '') {
    return function render(this: ListItemKit, item: unknown, index: unknown) {
       return $_run_with_(context, () => renderItem(item, index), {
          [FLASK]: this.flask,
