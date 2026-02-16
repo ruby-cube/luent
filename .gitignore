@@ -27,7 +27,7 @@ dist-ssr
 
 # Playwright
 /test-results/
-/*.ts-snapshots/
+**/*.ts-snapshots/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
