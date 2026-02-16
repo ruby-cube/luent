@@ -1,7 +1,7 @@
 import { component, For } from "@rue/lumo";
 import { Ionic } from "@rue/quarky";
 
-export function TestForKeys() {
+export function TestForObjectKeys() {
    const obj = Ionic({
       a: 1,
       b: 2,

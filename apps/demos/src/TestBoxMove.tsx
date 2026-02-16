@@ -1,16 +1,11 @@
 import { component, createRoot } from "@rue/lumo"
 import { Ion, Ionic } from "@rue/quarky"
 
-
-
-if (__TEST__) createRoot(TestMoveBox).mount('#root')
-
-
 /* 
 Tests:
 - Ionic model: set shallow property reactivity
 - Ionic model: extended methods
-- style updates
+- style update: style object, transform property
 - compiler derivation shorthand in styles object
 */
 
@@ -55,3 +50,5 @@ export function TestMoveBox() {
       </div>
    )
 }
+
+if (__TEST__) createRoot(TestMoveBox).mount('#root')

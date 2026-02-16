@@ -11,7 +11,6 @@ import { TodoMVC } from "./TodoMVC"
 import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
 import { TreeApp } from "./TestTreeApp"
-import { TestForKeys } from "./TestForKeys"
 import { TestAsyncSelect } from "./TestAsyncSelect"
 import { CRUDApp } from "./TestCRUDApp"
 import { SortableTableApp } from "./SortableTable"
@@ -19,9 +18,10 @@ import { TestSettableDerivation } from "./TestSettableDerivations"
 import { TestAsyncTabs } from "./TestAsyncTabs"
 import { TestCounter } from "./TestCounter"
 import { TestMoveBox } from "./TestBoxMove"
+import { TestListSelection } from "./TestListSelection"
 
 export function runDemo() {
-   const app = createRoot(TestSettableDerivation)
+   const app = createRoot(TestListSelection)
 
    app.mount('#root')
 }
