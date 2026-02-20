@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NodeRef, component, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
+import { NodeRef, template, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/LazyComponent";
@@ -110,7 +110,7 @@ export function List() {
 
     const $listLengthIsZero = () => $list().length === 0
 
-    return component({
+    return template({
         exposed: {
             $listLengthIsZero
         },
@@ -209,7 +209,7 @@ function Appo(
         $ready
     }
 
-    return component(
+    return template(
         <>
             {If($active, () => ((dialogBox) => (
                 <>
@@ -281,7 +281,7 @@ function DialogBox({
     $button?: NodeRef
 }) {
 
-    return component(
+    return template(
         teleportTo('body', (
             <dialog style="background-color: gray" open={$open}>
                 Stop

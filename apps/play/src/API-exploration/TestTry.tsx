@@ -1,9 +1,9 @@
-import { Catch, component, createTryCatch, FromTag, Try } from "@rue/lumo";
+import { Catch, template, createTryCatch, FromTag, Try } from "@rue/lumo";
 
 export function TestTry() {
    console.log('running TestTry')
 
-   return component(
+   return template(
       <div>
          <h2>Stubbon Child</h2>
          {Try(
@@ -20,7 +20,7 @@ export function TestTry() {
 function Child() {
    console.log('Running Child')
    throw 'I was born a restless child'
-   return component(
+   return template(
       <div>:)</div>
    )
 }
@@ -28,7 +28,7 @@ function Child() {
 function ErrorMessage({ message } : FromTag<{
    message: string
 }>) {
-   return component(
+   return template(
       <div>{message}</div>
    )
 }

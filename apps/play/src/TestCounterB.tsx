@@ -1,4 +1,4 @@
-import { component, Else, ElseIf, If } from "@rue/lumo";
+import { template, Else, ElseIf, If } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 
 export function Counter() {
@@ -12,7 +12,7 @@ export function Counter() {
    })
 
 
-   return component(
+   return template(
       <>
          <button on:click={e => $count.increment()}>+</button>
          <button on:click={e => $count.decrement()}>-</button>

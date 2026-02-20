@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 
 export function Comp() {
-   return component(
+   return template(
       <>
          <input
             class="edit"

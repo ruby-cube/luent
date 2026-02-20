@@ -1,4 +1,4 @@
-import { component, For, fromApp, fromContext, fromGlobal, FromTag, If, provideAppwide, provideGlobal } from "@rue/lumo";
+import { template, For, fromApp, fromContext, fromGlobal, FromTag, If, provideAppwide, provideGlobal } from "@rue/lumo";
 import { Morphable, Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
 import "./style.css"
 
@@ -82,7 +82,7 @@ export function TestPolymorph() {
       history.pushState(state ?? {}, "", key)
    }
 
-   return component(
+   return template(
       <>
          <div>
             {/* <$Main as={'peas'}></$Main> */}
@@ -105,7 +105,7 @@ export function TestPolymorph() {
 }
 
 function Home() {
-   return component(
+   return template(
       <>
          <h3>Tadaima</h3>
          <p>🏠</p>
@@ -116,7 +116,7 @@ function Home() {
 function Happy() {
    const $message = Ion('hi')
 
-   return component(
+   return template(
       <>
          <h3>Heee</h3>
          <p>☺️</p>
@@ -127,7 +127,7 @@ function Happy() {
 }
 
 function Peas() {
-   return component(
+   return template(
       <>
          <h3>Wanh-wah</h3>
          <p>🤢🤢</p>
@@ -136,7 +136,7 @@ function Peas() {
 }
 
 function Missing() {
-   return component(
+   return template(
       <>
          <h3>404</h3>
          <p>😩</p>
@@ -151,7 +151,7 @@ function File(input: FromTag<{
 }>) {
    const { file } = input
 
-   return component(
+   return template(
       <>
          <h3>File:</h3>
          <p>{file.name}</p>

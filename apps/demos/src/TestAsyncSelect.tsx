@@ -1,4 +1,4 @@
-import { Await, component, For, Meanwhile, Nonce, Suspense } from "@rue/lumo";
+import { Await, template, For, Meanwhile, Nonce, Suspense } from "@rue/lumo";
 import { Ion, isPending, o } from "@rue/quarky";
 
 // based on Solid.js/Remix demo
@@ -27,7 +27,7 @@ export function TestAsyncSelect() {
       '-writable': true
    })
 
-   return component(
+   return template(
       <>
          {Await($cities,
             <>

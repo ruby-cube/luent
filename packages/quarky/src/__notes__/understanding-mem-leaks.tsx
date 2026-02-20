@@ -6,7 +6,7 @@ function Parent() {
    const $count = Ion(0)
    const $child = NodeRef(Child)
 
-   return component(
+   return template(
       <>
          <div>{$child().$doubleCount()}</div>
          {/* $doubleCount is now initialized in a creation scope higher than the one it was created in */}
@@ -23,7 +23,7 @@ function Child({
    count: Ion
 }>) {
    const $doubleCount = Ion(() =>$count() * 2)
-   return component({
+   return template({
       $doubleCount
    },
       // If($ready,

@@ -29,7 +29,7 @@ type JSXTemplate = RawJSXNode
 
 // TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
-export function component(template: JSXTemplate) {
+export function template(template: JSXTemplate) {
    const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
    function ref<T extends AnyObject | undefined = AnyObject | undefined>(component: T) {
       return {
@@ -122,7 +122,7 @@ export function makeComponent(
       }
    }
 
-   // if (tag['show-if']) setUpConditionalDisplay()
+   // if (tag['display-if']) setUpConditionalDisplay()
    return output
 }
 

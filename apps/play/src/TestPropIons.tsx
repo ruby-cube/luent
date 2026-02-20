@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { ion, ionic, ionize } from "@rue/quarky";
 
 export function TestPropIons() {
@@ -19,7 +19,7 @@ export function TestPropIons() {
    })
 
 
-   return component(
+   return template(
       <>
          <h3>True prop ion</h3>
          <div>{frog.$name}</div>

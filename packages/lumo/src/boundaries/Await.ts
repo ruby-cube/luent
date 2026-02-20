@@ -20,14 +20,14 @@ import { SuspenseIon, SUSPENSE_QUARK } from "../../../quarky/src/async/Suspense"
 import { toAsyncRender } from "../node/VineNode";
 import { createHybridIon } from "../../../quarky/src/ion/HybridIon";
 import { FromTag, RenderSlot } from "../component/Input";
-import { component } from "../component/Component";
+import { template } from "../component/Component";
 
 // export function Suspense(input: FromTag<AwaitConfig>) {
 //    const { await: _awaited, $as: suspense, provide, meanwhile: renderPlaceholder, catch: renderError, loading: renderLoading, Slot } = input
 //    // TODO: renderLoading
 //    const $suspense = suspense ?? SuspenseIon()
 //    const renderSlot = collectAwaited($suspense, _awaited, Slot)
-//    return component(
+//    return template(
 //       createAwaitSeries(renderSlot, renderPlaceholder ? wrapWithSuspense(renderPlaceholder, $suspense) : undefined, renderError, $suspense)
 //    )
 // }

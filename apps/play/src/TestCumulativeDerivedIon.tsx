@@ -1,4 +1,4 @@
-import { component, For } from "@rue/lumo";
+import { template, For } from "@rue/lumo";
 import { Ion, ionize } from "@rue/quarky";
 
 export function TestDerived() {
@@ -26,7 +26,7 @@ export function TestDerived() {
       return $count() === index ? 'beige' : 'unset'
    }
 
-   return component(
+   return template(
       <>
          {For(counts, ($n, index) =>
             <div class='count-box' style={`background-color: ${$count() === index ? 'beige' : 'unset'};`}>{$n}</div>

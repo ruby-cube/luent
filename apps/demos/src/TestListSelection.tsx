@@ -1,4 +1,4 @@
-import { component, createRoot, For, listen, NodeRef, Style, target } from "@rue/lumo";
+import { template, createRoot, For, listen, NodeRef, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { Ion, EACH, Ionic, as } from "@rue/quarky";
@@ -102,7 +102,7 @@ export function TestListSelection() {
       selected.clear()
    })
 
-   return component(
+   return template(
       <div style='transform: scale(.5); transform-origin: top'>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>

@@ -1,12 +1,12 @@
 import { Ion, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Await, Meanwhile, component, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
+import { Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/lumo";
 import { As } from "../../../packages/lumo/src/conditional/As";
 
 // Modified Demo from Solid.js 
 
 function Loading() {
-   return component('loading...')
+   return template('loading...')
 }
 
 export function TestAsyncTabs() {
@@ -34,7 +34,7 @@ export function TestAsyncTabs() {
 
    const $tabSuspense = SuspenseIon()
 
-   return component(<>
+   return template(<>
       <ul class="inline">
          {For(allTabs, m => m, tab => (
             <li class={{ selected: ($tab() === tab) }} on:click={e => { openTab(tab) }}>
@@ -49,7 +49,7 @@ export function TestAsyncTabs() {
                {tabNames[tab]}
                <span style="padding: 1em" on:click={e => {
                   console.log('discarding', tab, $tab(), $activeUpdate())
-                  tabViews[tab]?.discard()
+                  tabViews[tab]?.markDiscard()
                   const index = openTabs.indexOf(tab)
                   console.log('index of tab', index, [...openTabs])
                   if ($tab() === tab) {
@@ -65,6 +65,16 @@ export function TestAsyncTabs() {
 
       {Await($suspense =>
          <div class={{ 'tab': true, 'pending': $suspense }}>
+            <remount-view>
+               {As($tab, tabViews[$tab()],
+                  <div>
+                     <Tab page={tabNames[$tab()]} count={$count} />
+                  </div>
+               )}
+               {Default(
+                  <div>No tabs open</div>
+               )}
+            </remount-view>
             <remount-view>
                {As($tab, (view) => (
                   <div at:mount={() => (tabViews[$tab()] = view)}>
@@ -203,7 +213,7 @@ function Tab(input: FromTag<{
       '-awaited': true
    });
 
-   return component(<>
+   return template(<>
       <div class="tab-content">
          <p style="font-size: xx-large">{CONTENT[page]}</p>
          This content is for page "{page}" after {($time()?.toFixed())}ms.

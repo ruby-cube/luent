@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, ContextKey, component, Else, ElseIf, For, fromContext, fromApp, FromTag, If, RenderSlot, AsyncIon } from "@rue/lumo";
+import { Commons, ContextKey, template, Else, ElseIf, For, fromContext, fromApp, FromTag, If, RenderSlot, AsyncIon } from "@rue/lumo";
 import { Ion, Ionized, watch } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";
@@ -33,7 +33,7 @@ export function ArticlesView(input: FromTag<{
    const $feed = Ion('global' as 'global' | 'user')
    const $tabs = Ion(['global', 'my-feed'])
 
-   return component(
+   return template(
       <>
          <ArticlesNav
             mu:activetab={$feed}
@@ -81,7 +81,7 @@ ArticlesNav.router = ContextKey<Router>()
 function ArticlesNav(input: FromTag<{}>) {
    const router = fromRoot(ArticlesNav.router)
 
-   return component(
+   return template(
       <div>
          hi
       </div>
@@ -108,7 +108,7 @@ export function ArticlePreview(input: FromTag<{
    const $author = Ion(() => article.author.username)
    const $authorImage = Ion(() => article.author.image)
 
-   return component(
+   return template(
       <div class="article-preview">
          <div class="article-meta">
             <RouterLink to="profile" params={{ username: $author }}>
@@ -172,7 +172,7 @@ function ArticlePagination(input: FromTag<{
 
    const $totalPages = Ion(() => Math.ceil($articleCount() / $articlesPerPage()))
 
-   return component(
+   return template(
       <ul class="pagination">
          {Thru($totalPages, (page) =>
             <li class={{ "active": $page() === page, "page-item": true }}>

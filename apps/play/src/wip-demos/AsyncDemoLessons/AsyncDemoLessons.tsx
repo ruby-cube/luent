@@ -1,6 +1,6 @@
 import "./index.css";
 import "./debugger.css";
-import { AsyncIon, component, Else, For, FromTag, HandleEvent, If, RenderSlot, SuspenseIon } from "@rue/lumo";
+import { AsyncIon, template, Else, For, FromTag, HandleEvent, If, RenderSlot, SuspenseIon } from "@rue/lumo";
 import * as db from "./data/index"
 import { Ion } from "@rue/quarky";
 import { Await, Meanwhile, Nonce } from "../../../../../packages/lumo/src/boundaries/Await";
@@ -9,7 +9,7 @@ import { Action } from "../../../../../packages/quarky/src/async/Action";
 
 
 export function AsyncDemoLessons() {
-   return component(
+   return template(
       <Home></Home>
    );
 }
@@ -30,7 +30,7 @@ function Home() {
    const $suspense = SuspenseIon()
 
 
-   return component(
+   return template(
       <>
          {/*
          Design.SearchInput is using the action prop pattern to automatically 
@@ -122,7 +122,7 @@ function LessonList({ $tab, $search, $pending }: FromTag<{ tab: Ion<string>, sea
 
    const $lessons = AsyncIon(() => db.getLessons($tab(), $search()), { suspense: $pending })
 
-   return component(
+   return template(
       <>
          {If(($lessons().length === 0),
             <EmptyList />

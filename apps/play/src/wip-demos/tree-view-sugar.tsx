@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, FromTag, If, Else, For } from "@rue/lumo";
+import { template, FromTag, If, Else, For } from "@rue/lumo";
 import { $from, defineDeepIonize, EACH, ion, Ionic, ionize, Ionized } from "@rue/quarky";
 
 
@@ -61,7 +61,7 @@ export function TreeApp({ data = getTreeData() }) {
 
    const root = ionizeItem(data)
 
-   return component(
+   return template(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItem item={root} can:addChildTo={addChildTo}></TreeItem>
@@ -96,7 +96,7 @@ export function TreeApp({ data = getTreeData() }) {
 //       }
 //    }
 
-//    return component(
+//    return template(
 //       <li class='item'>
 //          <div
 //             class={{ 'bold': %(isFolder && isOpen) }}
@@ -109,7 +109,7 @@ export function TreeApp({ data = getTreeData() }) {
 //             )}
 //          </div>
 //          {If(%isFolder,
-//             <ul show-if={%isOpen}>
+//             <ul display-if={%isOpen}>
 //                {For(item.children!, m => m, item => (
 //                   <TreeItem
 //                      item={item}

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, Stream } from "@rue/lumo";
+import { template, Stream } from "@rue/lumo";
 
 export function Chalkboard() {
 
@@ -11,7 +11,7 @@ export function Chalkboard() {
       await deleteText.doAction()
    }
 
-   return component(
+   return template(
       <div>
          {If(deleteText.$pending,
             <div></div>

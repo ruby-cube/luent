@@ -7,7 +7,7 @@ import { $Node, NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
 import type { Commons } from "../context/context-stack";
 import { Ion } from "@rue/quarky";
-import { component } from "../component/Component";
+import { template } from "../component/Component";
 import { createIfSeries, Else, If } from "../conditional/If";
 import { ContextKey } from "../context/ContextKey";
 import { RenderSlot } from "../component/Input";
@@ -44,7 +44,7 @@ export function renderPhasicNode(
 ) {
    if ($disable) {
       const output = Slot()
-      return component(createIfSeries([
+      return template(createIfSeries([
          If($disable, () =>
             output
          ),

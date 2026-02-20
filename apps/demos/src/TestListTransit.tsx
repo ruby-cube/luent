@@ -1,4 +1,4 @@
-import { component, For, FromTag, Style } from "@rue/lumo";
+import { template, For, FromTag, Style } from "@rue/lumo";
 import { as, EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 import { transitionExisting } from "./TestListSelectTransition";
@@ -28,7 +28,7 @@ export function TestListTransit() {
       $todos().splice(index, 1);
    }
 
-   return component(
+   return template(
       <div class="board">
          <input
             placeholder="what needs to be done?"
@@ -127,7 +127,7 @@ function TodoList(input: FromTag<{
 
    const lis: HTMLElement[] = []
 
-   return component(
+   return template(
       <ul class="todos">
          {For($todos, m => m.id, (todo, $i) => (
             <li class={{ done: (todo.done) }}

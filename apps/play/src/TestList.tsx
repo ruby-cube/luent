@@ -1,4 +1,4 @@
-import { component, For } from "@rue/lumo";
+import { template, For } from "@rue/lumo";
 import { ionize, watch } from "@rue/quarky";
 let id = 4;
 
@@ -29,7 +29,7 @@ export function PlainList() {
    })
 
 
-   return component(
+   return template(
       <>
          hello world
          {For(list, m => m.id, (item) =>

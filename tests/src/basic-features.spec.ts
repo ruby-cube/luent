@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import "../playwright.fixtures"
+import "../../playwright.fixtures"
 
 const LOCAL_HOST = 'http://localhost:5173/'
 
@@ -123,3 +123,111 @@ test('TestListSelection', async ({ page }) => {
    page.close()
 })
 
+
+test('TestIfElse', async ({ page }) => {
+   await page.goto(LOCAL_HOST);
+   await page.addScriptTag({ type: 'module', url: '/src/TestIfElse.tsx' })
+
+   // assert initial render
+   const initialView = await page.locator('.view').textContent()
+   expect(initialView).toBe('ohhi')
+
+   // toggle active
+   await page.locator('#toggle-active').click();
+   const activeFalseView = await page.locator('.view').textContent()
+   expect(activeFalseView).toBe('okbye')
+ 
+   // toggle active
+   await page.locator('#toggle-active').click();
+   const activeTrueView = await page.locator('.view').textContent()
+   expect(activeTrueView).toBe('ohhi')
+
+   // toggle ready
+   await page.locator('#toggle-ready').click();
+   const activeTrueReadyTrueView = await page.locator('.view').textContent()
+   expect(activeTrueReadyTrueView).toBe('ohhiready')
+
+   // toggle ready
+   await page.locator('#toggle-ready').click();
+   const activeTrueReadyFalseView = await page.locator('.view').textContent()
+   expect(activeTrueReadyFalseView).toBe('ohhi')
+   
+   await page.locator('#toggle-active').click();
+   await page.locator('#toggle-ready').click();
+   const activeFalseReadyTrueView = await page.locator('.view').textContent()
+   expect(activeFalseReadyTrueView).toBe('two peas in a pod🤢🤢')
+
+   page.close()
+})
+
+test('TestIfElse-RemountCreate', async ({ page }) => {
+   await page.goto(LOCAL_HOST);
+   await page.addScriptTag({ type: 'module', url: '/src/TestIfElse-RemountCreate.tsx' })
+
+   // assert initial render
+   const initialView = await page.locator('.view').textContent()
+   expect(initialView).toBe('ohhi')
+
+   // toggle active
+   await page.locator('#toggle-active').click();
+   const activeFalseView = await page.locator('.view').textContent()
+   expect(activeFalseView).toBe('okbye')
+ 
+   // toggle active
+   await page.locator('#toggle-active').click();
+   const activeTrueView = await page.locator('.view').textContent()
+   expect(activeTrueView).toBe('ohhi')
+
+   // toggle ready
+   await page.locator('#toggle-ready').click();
+   const activeTrueReadyTrueView = await page.locator('.view').textContent()
+   expect(activeTrueReadyTrueView).toBe('ohhiready')
+
+   // toggle ready
+   await page.locator('#toggle-ready').click();
+   const activeTrueReadyFalseView = await page.locator('.view').textContent()
+   expect(activeTrueReadyFalseView).toBe('ohhi')
+   
+   await page.locator('#toggle-active').click();
+   await page.locator('#toggle-ready').click();
+   const activeFalseReadyTrueView = await page.locator('.view').textContent()
+   expect(activeFalseReadyTrueView).toBe('two peas in a pod🤢🤢')
+
+   page.close()
+})
+
+test('TestIfElse-CreateRemount', async ({ page }) => {
+   await page.goto(LOCAL_HOST);
+   await page.addScriptTag({ type: 'module', url: '/src/TestIfElse-CreateRemount.tsx' })
+
+   // assert initial render
+   const initialView = await page.locator('.view').textContent()
+   expect(initialView).toBe('ohhi')
+
+   // toggle active
+   await page.locator('#toggle-active').click();
+   const activeFalseView = await page.locator('.view').textContent()
+   expect(activeFalseView).toBe('okbye')
+ 
+   // toggle active
+   await page.locator('#toggle-active').click();
+   const activeTrueView = await page.locator('.view').textContent()
+   expect(activeTrueView).toBe('ohhi')
+
+   // toggle ready
+   await page.locator('#toggle-ready').click();
+   const activeTrueReadyTrueView = await page.locator('.view').textContent()
+   expect(activeTrueReadyTrueView).toBe('ohhiready')
+
+   // toggle ready
+   await page.locator('#toggle-ready').click();
+   const activeTrueReadyFalseView = await page.locator('.view').textContent()
+   expect(activeTrueReadyFalseView).toBe('ohhi')
+   
+   await page.locator('#toggle-active').click();
+   await page.locator('#toggle-ready').click();
+   const activeFalseReadyTrueView = await page.locator('.view').textContent()
+   expect(activeFalseReadyTrueView).toBe('two peas in a pod🤢🤢')
+
+   page.close()
+})

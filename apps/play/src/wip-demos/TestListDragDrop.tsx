@@ -1,4 +1,4 @@
-import { component, For, listen, Style, target } from "@rue/lumo";
+import { template, For, listen, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
 import { EACH, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";
@@ -120,7 +120,7 @@ export function TestListDragDrop() {
       })
    }
 
-   return component(
+   return template(
       <>
          <h1>hello world</h1>
          <div style='user-select: none; display: grid; grid-template-columns: 1fr 1fr; width: 100vw'>

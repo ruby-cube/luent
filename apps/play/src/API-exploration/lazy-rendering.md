@@ -250,7 +250,7 @@ function MyComponent() {
       lazy: 1000
    })
 
-   return component(
+   return template(
       <>
          {$count}
          {If(countUpdate.posting,

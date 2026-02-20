@@ -3,7 +3,7 @@ import { $Node } from "../node/NodeRef";
 import { makeElement } from "../element/makeElement";
 import { fromContext } from "../context/provide";
 import { Ion } from "@rue/quarky";
-import { component } from "../component/Component";
+import { template } from "../component/Component";
 import { createIfSeries, Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 import { ContextKey } from "../context/ContextKey";
@@ -17,7 +17,7 @@ export function renderTransitNode(
 ) {
    if ($disable) {
       const output = isFunction(Slot) ? Slot() : Slot //QUESTION: is it necessary to call Slot here? Can we call it within conditional blocks?
-      return component(
+      return template(
          createIfSeries([
             If($disable, () =>
                output

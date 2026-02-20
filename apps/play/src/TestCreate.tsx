@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 
 
@@ -11,7 +11,7 @@ export function TestCreate() {
 
    const $activeTab = Ion(tabs[1])
 
-   return component(
+   return template(
       <div>
 
          <button on:click={e => $activeTab.value = tabs[1]}>1</button>
@@ -25,7 +25,7 @@ export function TestCreate() {
 function Tab({ $content }) {
    const $count = Ion(0)
 
-   return component(
+   return template(
       <div>
          <button on:click={e => $count.value++}>+</button>
          <button on:click={e => $count.value--}>-</button>

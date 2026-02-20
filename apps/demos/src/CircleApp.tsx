@@ -1,4 +1,4 @@
-import { component, For, If, Style } from "@rue/lumo"
+import { template, For, If, Style } from "@rue/lumo"
 import { Ion, Ionic, EACH, as, swiftUpdate } from "@rue/quarky"
 
 // Modified Demo from Vue.js
@@ -58,7 +58,7 @@ export function CircleApp() {
 
    const circle = $circles()[0]
 
-   return component(
+   return template(
       <>
          <svg on:click={e => reClick(e as any as MouseEvent)}>
             <foreignObject x="0" y="40%" width="100%" height="200">

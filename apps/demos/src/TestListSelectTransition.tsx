@@ -1,4 +1,4 @@
-import { component, For, listen, NodeRef, Style, target } from "@rue/lumo";
+import { template, For, listen, NodeRef, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic, as } from "@rue/quarky";
@@ -103,7 +103,7 @@ export function TestListSelectTransition() {
 
    // {{ [m.list]: $active, '.': [m.dark, m.selectedList] }}
 
-   return component(
+   return template(
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>

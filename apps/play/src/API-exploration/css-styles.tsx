@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 
 function App() {
 
-   return component(
+   return template(
       <>
          <div style={`
             min-width: ${$width()}px;

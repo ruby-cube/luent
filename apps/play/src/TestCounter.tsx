@@ -6,11 +6,11 @@
 // - derived signal with memo
 
 
-import { component, FromTag } from "@rue/lumo"
+import { template, FromTag } from "@rue/lumo"
 import { Ion, Ionic, } from "@rue/quarky"
 
 export function CounterApp() {
-   return component(
+   return template(
       <>
          <TestCount mu:apple={$apple}></TestCount>
          {/* <hr></hr> */}
@@ -42,7 +42,7 @@ function TestIonize() {
       console.log('new message', obj.message)
    }
 
-   return component(
+   return template(
       <>
          <div>{obj.$message}</div>
          <button on:click={changeMessage}>click</button>
@@ -61,7 +61,7 @@ function TestIon() {
       console.log('new message (call)', $message())
    }
 
-   return component(
+   return template(
       <>
          <div>{$message}</div>
          <button on:click={changeMessage}>click</button>
@@ -98,7 +98,7 @@ export function TestCount() {
    //    console.log('running ionic task', $count())
    // })
 
-   return component(
+   return template(
       <>
          <h3>mutable ion</h3>
          <div>{$count}</div>
@@ -135,7 +135,7 @@ export function TestThisCount() {
       $count.value--
    }
 
-   return component(
+   return template(
       <>
          <h3>mutable ion with methods</h3>
          <div>{$count}</div>
@@ -176,7 +176,7 @@ export function TestThisCount() {
 //       $count.value--
 //    }
 
-//    return component(
+//    return template(
 //       <>
 //          <h3>immutable ion with methods</h3>
 //          <div>{$count}</div>
@@ -217,7 +217,7 @@ export function TestThisCount() {
 //       $count.value--
 //    }
 
-//    return component(
+//    return template(
 //       <>
 //          <h3>readonly immutable ion with methods</h3>
 //          <div>{$count}</div>
@@ -256,7 +256,7 @@ export function TestThisCount() {
 //       $count.value--
 //    }
 
-//    return component(
+//    return template(
 //       <>
 //          <h3>readonly mutable ion with methods</h3>
 //          <div>{$count}</div>
@@ -298,7 +298,7 @@ export function TestThisCount() {
 //       $count.value--
 //    }
 
-//    return component(
+//    return template(
 //       <>
 //          <h3>reined mutable ion with methods</h3>
 //          <div>{$count}</div>
@@ -339,7 +339,7 @@ export function TestThisCount() {
 //       $count.value--
 //    }
 
-//    return component(
+//    return template(
 //       <>
 //          <h3>reined immutable ion with methods</h3>
 //          <div>{$count}</div>
@@ -377,7 +377,7 @@ export function TestThisCount() {
 //       $count.value--
 //    }
 
-//    return component(
+//    return template(
 //       <>
 //          <h3>reined mutable ion, no methods</h3>
 //          <div>{$count}</div>
@@ -414,7 +414,7 @@ export function TestCounterModel() {
    //    console.log('changed', state)
    // }, { eager: true, phase: RENDER })
 
-   return component(
+   return template(
       <>
          <div>{counter.$count}</div>
          <div>{$doubleCount}</div>

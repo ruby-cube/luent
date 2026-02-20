@@ -1,4 +1,4 @@
-import { component, For } from "@rue/lumo"
+import { template, For } from "@rue/lumo"
 import { Ion, Ionic, PRELUDE, watch } from "@rue/quarky"
 
 // Adapted from Vue's CRUDApp demo
@@ -51,7 +51,7 @@ export function CRUDApp() {
       return $first().trim() && $last().trim()
    }
 
-   return component(
+   return template(
       <>
          <div><input mu:value={$filterKey} placeholder="Filter" /></div>
 

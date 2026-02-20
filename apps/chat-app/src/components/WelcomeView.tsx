@@ -1,4 +1,4 @@
-import { component, Else, FromTag, If, Style } from "@rue/lumo";
+import { template, Else, FromTag, If, Style } from "@rue/lumo";
 import { SignupForm } from "./SignupForm";
 import { ion } from "@rue/quarky";
 import { LoginForm } from "./LoginForm";
@@ -10,7 +10,7 @@ export function WelcomeView(input: FromTag<{
    const { initialLoad } = input
    const $initialLoad = Ion(initialLoad)
 
-   return component(
+   return template(
       <>
          <div class="welcome container">
             {If($initialLoad,

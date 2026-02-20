@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, Stream } from "@rue/lumo"
+import { template, Stream } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
 import { AnyObject } from "@rue/types";
 import './TestStreamIon.css'
@@ -89,7 +89,7 @@ export function TestVanillaStream() {
       $running() ? $running() : $eye()
    )
 
-   return component(
+   return template(
       <>
          <div class="logo">
             <div class={['bg dragon', (`${$side()}${$frame()}`)]}></div>

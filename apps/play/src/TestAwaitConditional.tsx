@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Await, component, Else, FromTag, If, Meanwhile } from "@rue/lumo";
+import { Await, template, Else, FromTag, If, Meanwhile } from "@rue/lumo";
 import { Ion, Suspense } from "@rue/quarky";
 
 export function TestAwaitConditional() {
@@ -12,7 +12,7 @@ export function TestAwaitConditional() {
 
    let cache;
 
-   return component(
+   return template(
       <>
          <div>
             <loadingBar loading={ooo} />
@@ -65,7 +65,7 @@ export function Child(setup: FromTag<{ state: 'awake' | 'sleeping' }>) {
       '-fetch': () => db.fetchSomething(),
       '-awaited': true
    })
-   return component(
+   return template(
       <div>
          {state}
          {$something}

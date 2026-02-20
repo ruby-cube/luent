@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { getActiveFlask } from "@rue/flask";
-import { component, listen } from "@rue/lumo";
+import { template, listen } from "@rue/lumo";
 import { normalizeToArray } from "@rue/utils";
 
 
@@ -8,7 +8,7 @@ export function TempoPlayer() {
 
    listen(window, click(e => { doSomething() }))
 
-   return component(
+   return template(
       <>
          {If($active,
             <>

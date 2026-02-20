@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component } from "@rue/lumo"
+import { template } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
 
 type Todo = {
@@ -84,7 +84,7 @@ function Action<F>(fn: F) {
 const what = { ...Todos.prototype }
 
 // function Folder() {
-//    return component(
+//    return template(
 //       <>
 //          <div on:click=`e => doSomething` class=`{ active: $active }` style=`($store() + 1)` enabled="true">{$text}</div>
 

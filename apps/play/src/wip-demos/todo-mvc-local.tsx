@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, If, Else, FromTag, fromApp, ContextKey } from "@rue/lumo"
+import { template, For, If, Else, FromTag, fromApp, ContextKey } from "@rue/lumo"
 import { watch, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
@@ -63,7 +63,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 //       }
 //    })
 
-//    return component(
+//    return template(
 //       <>
 //          <div>{$count}</div>
 //          <button on:click={e => $count.increment()}>increment</button>
@@ -84,7 +84,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 //       $count.value--
 //    }
 
-//    return component(
+//    return template(
 //       <>
 //          <div>{$count}</div>
 //          <button on:click={incrementCount}>increment</button>
@@ -203,7 +203,7 @@ export function TodoMVC() {
    })
 
 
-   return component(
+   return template(
       <>
          <section class="todoapp">
             <header class="header">
@@ -214,7 +214,7 @@ export function TodoMVC() {
                {Checkbox(toggleAll, { $remaining })}
                {TodoList($filteredTodos, removeTodo)}
             </section>
-            <footer show-if={$todoCount} class="footer">
+            <footer display-if={$todoCount} class="footer">
                {RemainingCount($remaining)}
                <ul class="filters">
                   <li>
@@ -227,7 +227,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
+               <button display-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
                   Clear completed
                </button>
             </footer>

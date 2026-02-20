@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
 import { debug, getActiveUpdate, instantUpdate, Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -132,7 +132,7 @@ export function TestMountIf() {
    }
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
-   return component(
+   return template(
       <div style={{
          '--fade-in-duration': '2000ms',
          '--fade-out-duration': '2000ms',

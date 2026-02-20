@@ -12,7 +12,7 @@
 import {  SevenGUIs } from './wip-demos/7-guis';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { AsyncIon, component, createRoot } from '@rue/lumo';
+import { AsyncIon, template, createRoot } from '@rue/lumo';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { TestListSelect } from './wip-demos/TestListSelect';
@@ -130,7 +130,7 @@ app.mount('#root')
 
 
 // function TestApp2() {
-//    return component(
+//    return template(
 //       <div contenteditable on:beforeinput={e => (console.log('before input'), queueTask(()=>console.log('task!')))} on:input={e => console.log('input')}>
 //          hi
 //       </div>
@@ -457,7 +457,7 @@ app.mount('#root')
 //    const sList = JSON.stringify(list)
 
 //    console.log(sList)
-//    return component(<>hi</>)
+//    return template(<>hi</>)
 // }
 
 

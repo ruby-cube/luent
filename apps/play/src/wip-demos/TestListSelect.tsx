@@ -1,4 +1,4 @@
-import { component, For, Style, target } from "@rue/lumo";
+import { template, For, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
 import { EACH, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";
@@ -75,7 +75,7 @@ export function TestListSelect() {
 
    iteratorTests(list, selected)
    let initial = true
-   return component(
+   return template(
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; width: 100vw'>

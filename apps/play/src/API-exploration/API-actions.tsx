@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { component } from "@rue/lumo"
+import { template } from "@rue/lumo"
 import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await"
 import { doAction } from "../../../../packages/quarky/src/x_action/Action"
 
@@ -56,7 +56,7 @@ function TodoWithSuspense() {
       ooo.await(dispatch('...', todo.complete))
    })
 
-   return component(
+   return template(
       <div>
          Hello `'20%'` of people
          % '1%'
@@ -155,7 +155,7 @@ function Todo() {
          .catch(err => { this.rollback() })
    })
 
-   return component(
+   return template(
       <>
          {Await(
             <Article></Article>

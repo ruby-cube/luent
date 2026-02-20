@@ -5,7 +5,7 @@ import { Well, Wellerman } from "./Well";
 import { Commons } from "../../../packages/lumo/src/context/Context";
 
 function Swap() {
-   return component('')
+   return template('')
 }
 
 
@@ -139,7 +139,7 @@ export function IonAccess() {
 
    const res = list$.map((item, index, array) => item!.name)
 
-   return component(
+   return template(
       <>
          {If($x() > 10, 'remount',
             <p>{$x} is greater than 10</p>
@@ -174,7 +174,7 @@ function SvelteA() {
 
    const discard = DiscardRemountable()
 
-   return component(
+   return template(
       <>
          <remount-view discard={discard}>
             {If($x() > 10,
@@ -204,7 +204,7 @@ function SvelteA() {
 
    const discard = DiscardRemountable()
 
-   return component(
+   return template(
       <>
          <RemountDemount discard={discard}>
             {If($x() > 10,
@@ -234,7 +234,7 @@ function SvelteA() {
 
    const discard = DiscardRemountable()
 
-   return component(
+   return template(
       <>
          {If($x() > 10,
             $x
@@ -265,7 +265,7 @@ function SvelteA() {
    //@ts-ignore
    const $count = Ion(7)
 
-   return component(
+   return template(
       <div>
          {If($count, $count)}
       </div>
@@ -276,7 +276,7 @@ function SvelteA() {
    //@ts-ignore
    const $count = Ion(7)
 
-   return component(
+   return template(
       <div>
          {If($count, <>{$count}</>)}
       </div>
@@ -285,7 +285,7 @@ function SvelteA() {
 
 function ColumnB() {
 
-   return component(
+   return template(
       <SomeComponent name=''>
          {(o = SelectionKit()) =>
             <div>{o.name}</div>}
@@ -294,7 +294,7 @@ function ColumnB() {
 }
 
 export function HelloWorld() {
-   return component(
+   return template(
       // <h1>hello world</h1>
       <input m:value={value}></input>
 
@@ -333,7 +333,7 @@ function ListB() {
 
 function Column() {
 
-   return component(
+   return template(
       <div>
          <div>{function butterfly() { }}</div>
          <div>{0}</div>
@@ -345,14 +345,14 @@ function of(list: any) {
    return ['', 9] as [string, number]
 }
 // function For(input: {[key: string]: any, Slot: any[] }) {
-//    return component(
+//    return template(
 //       ''
 //    )
 // }
 
 function ColumnB() {
 
-   return component(
+   return template(
       <SomeComponent name=''>
          {(o = SelectionKit()) => <>
             <div>{o.name}</div>
@@ -363,7 +363,7 @@ function ColumnB() {
 }
 
 function SomeComponent(input: FromTag<{ name: string }>) {
-   return component(
+   return template(
       <></>
    )
 }
@@ -393,7 +393,7 @@ function ColumnBlock(
 ) {
    const { name } = prep(input)
 
-   return component(
+   return template(
       <div>{name}</div>
    )
 }
@@ -405,7 +405,7 @@ function ColumnBlock(
 // ) {
 //    const {  } = prep(input)
 
-//    return component(
+//    return template(
 
 //    )
 // }
@@ -413,7 +413,7 @@ function ColumnBlock(
 
 
 function SomeBlock(input: { name?: string | number, Slot?: ((input: any) => any | any[]) | any, let?: any }) {
-   return component(
+   return template(
       ''
    )
 }
@@ -433,7 +433,7 @@ function J(input: { for: any, Slot: any, params: any }) {
    // [ ] should mu() allow setting values? ... there's no way to indicate from the child component that you want to be writable...
    // also there's no way to write a setter to trace the set
 
-   return component({
+   return template({
       dog, // auto-reined
       door: 0
    },
@@ -463,7 +463,7 @@ function Comp(input: FromTag<{
          return frog.firstName + ' ' + frog.lastName
       }
    })
-   return component(
+   return template(
       <>
          <h1>{frog.fullname}</h1>
          <input v-model="frog.firstName" />

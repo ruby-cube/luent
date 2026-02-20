@@ -1,4 +1,4 @@
-import { component, FromTag, RenderSlot } from "@rue/lumo";
+import { template, FromTag, RenderSlot } from "@rue/lumo";
 import './navbar.css'
 import { User } from "../commons/keys";
 import { logOut } from "../database/firebase";
@@ -10,7 +10,7 @@ export function Navbar(input: FromTag<{
 }>) {
    const { user, navigateHome, Slot } = input
 
-   return component(
+   return template(
       <>
          <nav>
             <button on:click={navigateHome}>Home</button>

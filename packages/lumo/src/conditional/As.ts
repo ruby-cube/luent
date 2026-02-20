@@ -2,7 +2,7 @@ import { getAwaiting, Ion, queueIonicPrelude, toValue, watchToRender } from "@ru
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { JSXNode, processJSXOutput, toAsyncRender, VineNode } from "../node/VineNode";
 import { IfElseKit } from "./IfElse";
-import { ActivationType, RenderConditional } from "./If";
+import { ShowHideType, RenderConditional } from "./If";
 import { $_snap_context, ContextSnapshot, Flask, FLASK, getFlask } from "@rue/flask";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { DEFAULT, MatchKit, toCasesMap } from "./MatchCase";
@@ -39,18 +39,18 @@ import { isFunction } from "@rue/utils";
 
 type RenderCase = (view: View) => RawJSXNode;
 
-type View = { discard: () => void }
+type View = { markDiscard: () => void }
 
 type RawAsKit = {
    key: any;
    case: any;
    render: (view: View) => RawJSXNode;
-   type: ActivationType | undefined
+   type: ShowHideType | undefined
 }
 export function As(key: Ion<any>, renderCase: RenderConditional | RawJSXNode): RawAsKit
-export function As(key: Ion<any>, type: ActivationType, renderCase: RenderConditional | RawJSXNode): RawAsKit
-export function As(key: Ion<any>, typeOrRender: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode): RawAsKit {
-   const type = isFunction(typeOrRender) ? undefined : typeOrRender as ActivationType
+export function As(key: Ion<any>, type: ShowHideType, renderCase: RenderConditional | RawJSXNode): RawAsKit
+export function As(key: Ion<any>, typeOrRender: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode): RawAsKit {
+   const type = isFunction(typeOrRender) ? undefined : typeOrRender as ShowHideType
    const render = (isFunction(typeOrRender) ? typeOrRender : renderCase) as RenderConditional
    return {
       case: 'as',
@@ -63,7 +63,7 @@ export function As(key: Ion<any>, typeOrRender: ActivationType | RenderCondition
 export function createAsSeries(...series: [RawAsKit, {
    case: any;
    render: RenderFunction;
-   type: ActivationType;
+   type: ShowHideType;
 }]) {
    const [kit] = series
    return new MatchKit(kit.key, toCasesMap(series, undefined), (key) => key == null ? DEFAULT : 'as')

@@ -1,4 +1,4 @@
-import { component, For, NodeRef } from "@rue/lumo";
+import { template, For, NodeRef } from "@rue/lumo";
 import { Ion, Ionic } from "@rue/quarky";
 
 export function TestSettableDerivation() {
@@ -26,7 +26,7 @@ export function TestSettableDerivation() {
       console.log('names', names)
    }
 
-   return component(
+   return template(
       <div>
          <form ref={$form} on:submit={e => { reSubmit(e) }}>
             <label>first:</label><input type='text' mu:value={$first}></input>

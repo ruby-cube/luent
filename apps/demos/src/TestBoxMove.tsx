@@ -1,4 +1,4 @@
-import { component, createRoot } from "@rue/lumo"
+import { template, createRoot } from "@rue/lumo"
 import { Ion, Ionic } from "@rue/quarky"
 
 /* 
@@ -32,7 +32,7 @@ export function TestMoveBox() {
       }
    })
 
-   return component(
+   return template(
       <div data-test={JSON.stringify({ "INCREMENT": INCREMENT })}>
          <div style='display: grid; width: 100%; height: 500px; place-items: center'>
             <div id='box' style={{ backgroundColor: "#53D0F6", width: '50px', height: '50px', transform: (`translate(${box.x}px, ${box.y}px)`) }}></div>

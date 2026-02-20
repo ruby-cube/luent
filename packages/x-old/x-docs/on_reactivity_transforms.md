@@ -69,7 +69,7 @@ function Counter() {
    console.log('current state', count) // 0
    console.log('getter', @count) // () => { track(); return currentState; }
 
-   return component(
+   return template(
       <>
          <p>{@count}</p>
          <button on:click={e => @count.increment()}>+</button>
@@ -93,7 +93,7 @@ function Counter() {
    console.log('current state', $count()) // 0
    console.log('getter', $count) // () => { track(); return currentState; }
 
-   return component(
+   return template(
       <>
          <p>{$count}</p>
          <button on:click={e => $count.increment()}>+</button>
@@ -120,7 +120,7 @@ function PlayerScoreBoard({ name }) {
    })
 
    
-   return component(
+   return template(
       <p>{player.name}: <input mu:value={player.@points}/></p>
       <button on:click={e => player.addPoint()}>+</button>
       <button on:click={e => player.minusPoint()}>-</button>

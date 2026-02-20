@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, listen } from "@rue/lumo";
+import { template, listen } from "@rue/lumo";
 import { traceable, debug, ion, ionize, watch } from "@rue/quarky";
 import { $_run_with_, $_snap_context } from "../../../packages/flask/context/AsyncContext";
 import { getActiveFlask } from "@rue/flask";
@@ -108,7 +108,7 @@ export function TestDebugApp() {
    }
 
 
-   return component(
+   return template(
       <>
          <div>{$count}</div>
          <button on:click={e => incrementCount()}>increment</button>

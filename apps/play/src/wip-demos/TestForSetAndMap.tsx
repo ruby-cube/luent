@@ -1,4 +1,4 @@
-import { component, For, target } from "@rue/lumo";
+import { template, For, target } from "@rue/lumo";
 import { Ion, Ionic } from "@rue/quarky";
 
 let num = 0
@@ -18,7 +18,7 @@ export function TestForSetAndMap() {
       }
    })
 
-   return component(
+   return template(
       <div>
          <button on:click={e => map.setPair()}>+</button>
          {For(map, ([$key, $value], i) =>
@@ -58,7 +58,7 @@ export function TestForSetAndMapIons() {
       }
    })
 
-   return component(
+   return template(
       <div>
          <button on:click={e => $map.setPair()}>+</button>
          {For($map, ([$key, $value], i) =>

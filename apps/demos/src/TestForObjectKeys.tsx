@@ -1,4 +1,4 @@
-import { component, For } from "@rue/lumo";
+import { template, For } from "@rue/lumo";
 import { Ionic } from "@rue/quarky";
 
 export function TestForObjectKeys() {
@@ -7,7 +7,7 @@ export function TestForObjectKeys() {
       b: 2,
       c: 3
    })
-   return component(
+   return template(
       <div>
          {For(obj, (key) => {
             return (

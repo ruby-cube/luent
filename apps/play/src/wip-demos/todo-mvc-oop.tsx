@@ -1,4 +1,4 @@
-import { component, For, If, Else, FromTag, listen } from "@rue/lumo"
+import { template, For, If, Else, FromTag, listen } from "@rue/lumo"
 import { watch, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
 
 // PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)
@@ -130,7 +130,7 @@ export function TodoMVC() {
       app.setFilter(route) ?? (window.location.hash = '')
    }
 
-   return component(
+   return template(
       <>
          <section class="todoapp">
             <header class="header">
@@ -141,7 +141,7 @@ export function TodoMVC() {
                <CheckBox can:toggleAll={(app.toggleAll)} ctx={app}></CheckBox>
                {TodoList($filteredTodos, removeTodo, updateTodo)}
             </section>
-            <footer show-if={(app.todos.length)} class="footer">
+            <footer display-if={(app.todos.length)} class="footer">
                <Remaining count={(app.remaining)}></Remaining>
                <ul class="filters">
                   <li>
@@ -154,7 +154,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={{ 'selected': (app.filter === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={(app.removeCompleted)}>
+               <button display-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={(app.removeCompleted)}>
                   Clear completed
                </button>
             </footer>
@@ -186,7 +186,7 @@ function TodoInput(input: FromTag<{
       }
    }
 
-   return component(
+   return template(
       <input
          class="new-todo"
          autofocus
@@ -227,7 +227,7 @@ function TodoList(input: FromTag<{
       }
    }
 
-   return component(
+   return template(
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
             const $isEditing = Ion(() => todo === $editedTodo());
@@ -264,7 +264,7 @@ function CheckBox(input: FromTag<{
 }>) {
    const { toggleAll, ctx: { $remaining } } = input
 
-   return component(
+   return template(
       <>
          <input
             id="toggle-all"
@@ -283,7 +283,7 @@ function Remaining(input: FromTag<{
 }>) {
    const { $count } = input
 
-   return component(
+   return template(
       <span class="todo-count">
          <strong>{$count}</strong>
          <span>{($count() === 1 ? ' item' : ' items')} left</span>

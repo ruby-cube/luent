@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo"
+import { template } from "@rue/lumo"
 import { Ion, Ionic, watch } from "@rue/quarky"
 
 // TODO:
@@ -11,7 +11,7 @@ import { Ion, Ionic, watch } from "@rue/quarky"
 // [] deep ionize & inert() marker and inert map
 
 export function CounterModelApp() {
-   return component(
+   return template(
       <>
          <TestMutableCounter></TestMutableCounter>
          <hr></hr>
@@ -59,7 +59,7 @@ export function TestMutableCounter() {
    //    console.log('running ionic task', count.value)
    // })
 
-   return component(
+   return template(
       <>
          <h3>encapsulated model with methods</h3>
          <div>{(count.value)}</div>
@@ -109,7 +109,7 @@ export function TestEncapsulatedCounter() {
       count.value--
    }
 
-   return component(
+   return template(
       <>
          <h3>mutable ion with methods</h3>
          <div>{(count.value)}</div>

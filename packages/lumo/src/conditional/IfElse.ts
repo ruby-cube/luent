@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@rue/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
-import { ActivationType, If } from "./If";
+import { ShowHideType, If } from "./If";
 import { TransitionNode } from "../transition/TransitionNode";
 import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, pushAwaiting, pushUpdate, queueInternalRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
@@ -17,7 +17,7 @@ import { Await } from "../boundaries/Await";
 export type ConditionalKit = {
    statementType: "if" | "elseIf" | "else";
    render: RenderFunction;
-   type: ActivationType | undefined;
+   type: ShowHideType | undefined;
    $condition: MaybeIon<Booleanny>
    pending: SuspenseIon | undefined
    // discard: (() => void) | undefined
@@ -37,9 +37,9 @@ export type DynamicNodeKit = {
    awaitCache: RawJSXNode;
    pending: SuspenseIon | undefined
    flask: Flask | undefined;
-   type: ActivationType | undefined;
+   type: ShowHideType | undefined;
    render: AsyncRender;
-   view: { discard: () => void }
+   view: { markDiscard: () => void }
 }
 
 
@@ -52,7 +52,7 @@ export type DynamicConditionalRenderKit = {
 } & DynamicNodeKit
 
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: SuspenseIon | undefined): DynamicConditionalRenderKit {
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", showHideType: ShowHideType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: SuspenseIon | undefined): DynamicConditionalRenderKit {
    // const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
 
    // const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
@@ -69,7 +69,7 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
          // [COMMONS]: commons,
          [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }),
-      type: activationType,
+      type: showHideType,
       // transitionNodes,
       $condition,
       get cache(): JSXNode[] | undefined {
@@ -86,12 +86,12 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
    }
 }
 
-export function toDynamicConditionalKits(kits: ConditionalKit[], activationType: ActivationType = 'create'): DynamicConditionalRenderKit[] {
+export function toDynamicConditionalKits(kits: ConditionalKit[], showHideType: ShowHideType = 'create'): DynamicConditionalRenderKit[] {
    const context = $_snap_context()
    const dynamicKits = []
    for (const kit of kits) {
       if (!kit) continue;
-      const { $condition, render, statementType, type = activationType, pending } = kit
+      const { $condition, render, statementType, type = showHideType, pending } = kit
       dynamicKits.push(createDynamicConditionalKit(statementType, type, render, context, $condition, pending))
    }
    return dynamicKits;
@@ -255,16 +255,13 @@ export class IfElseKit extends VineNode {
    }
 
    deactivateConditional(kit: DynamicNodeKit | undefined) {
-      console.log('))) deactivate A')
       if (!kit) return;
-      console.log('))) deactivate B')
       const prevNodes = kit.nodes;
       this.pendingDeactivatedKit = null
       if (!prevNodes) return;
-      console.log('))) deactivate C', ...kit.nodes)
       kit.nodes = null;
 
-      if (kit.type === 'create') {
+      if (!kit.cache) {
          // kit.awaitCache = undefined
          kit.flask!.emitDiscard()
          kit.flask = undefined
@@ -283,7 +280,7 @@ export class IfElseKit extends VineNode {
 
 export type ConditionalStatement = {
    statementType: "if" | "elseIf" | "else";
-   type: ActivationType | undefined;
+   type: ShowHideType | undefined;
    $condition: MaybeIon<Booleanny>
 }
 
@@ -437,19 +434,19 @@ export function Create(input: FromTag<{
 type DiscardSignal = (destroy: () => void) => void
 
 type ActivationKit = {
-   activationType: ActivationType;
+   showHideType: ShowHideType;
    render: RenderFunction;
    discard: DiscardSignal | undefined;
 }
 
-export function markActivationType(activationType: ActivationType, render: RenderFunction, discard?: DiscardSignal | undefined) {
+export function markActivationType(showHideType: ShowHideType, render: RenderFunction, discard?: DiscardSignal | undefined) {
    return {
-      activationType,
+      showHideType,
       render,
       discard
    }
 }
 
 export function isActivationKit(value: unknown): value is ActivationKit {
-   return isPlainObject(value) && 'activationType' in value
+   return isPlainObject(value) && 'showHideType' in value
 }

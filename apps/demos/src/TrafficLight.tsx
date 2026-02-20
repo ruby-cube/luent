@@ -1,4 +1,4 @@
-import { component, Style, Finitron, withTimeout } from "@rue/lumo";
+import { template, Style, Finitron, withTimeout } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 import "./style.css"
 
@@ -57,7 +57,7 @@ export function TrafficLight() {
       });
    }
 
-   return component(
+   return template(
       <div style="place-items: center">
          <div class="traffic-light-container">
             <div

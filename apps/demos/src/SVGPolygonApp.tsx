@@ -1,4 +1,4 @@
-import { component, For, FromTag, Style, } from "@rue/lumo"
+import { template, For, FromTag, Style, } from "@rue/lumo"
 import { as, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
@@ -41,7 +41,7 @@ export function SVGPolygonApp() {
       }
    }
 
-   return component(
+   return template(
       <>
          <svg width="200" height="200">
             <PolyGraph stats={stats}></PolyGraph>
@@ -121,18 +121,18 @@ export function SVGPolygonApp() {
 //  }
 
 
-function AxisLabel(input: FromTag<{
+function AxisLabel(setup: FromTag<{
    stat: Ionic<Stat>,
    index: Ion<number>,
    total: Ion<number>
 }>) {
-   const { $index, stat, $total } = input
+   const { $index, stat, $total } = setup
 
    const $point = Ion(() =>
       valueToPoint(+stat.value + 10, $index(), $total())
    )
 
-   return component(
+   return template(
       <text x={($point().x)} y={($point().y)}>{stat.$label}</text>
 
    )
@@ -153,7 +153,7 @@ function PolyGraph({ stats }: FromTag<{
          .join(' ')
    })
 
-   return component(
+   return template(
       <g>
          <polygon points={$points}></polygon>
          <circle cx="100" cy="100" r="80"></circle>

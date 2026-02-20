@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, Else, If, v } from "@rue/lumo";
+import { template, Else, If, v } from "@rue/lumo";
 import {Ion } from "@rue/quarky";
 
 
@@ -29,7 +29,7 @@ export function List() {
       const [data, error] = await resolve(pendingData)
    }
 
-   return component(
+   return template(
       <>
          {Await($userPosts, { hold: Loading, catch: ErrorBlock },
             <div>{$userPosts()}</div>
@@ -57,7 +57,7 @@ function Suspense(...args: any[]) {
 
 }
 function Item(...args: any[]) {
-   return component(
+   return template(
       <></>
    )
 }

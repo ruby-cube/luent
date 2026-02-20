@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { Ion, Ionized } from "@rue/quarky";
 
 export function TestMultisetting() {
@@ -10,7 +10,7 @@ export function TestMultisetting() {
       // frog.name = 'sir robin the brave'
    }
 
-   return component(
+   return template(
       <>
          <p>{$frog}</p>
          <button on:click={changeName}>click</button>

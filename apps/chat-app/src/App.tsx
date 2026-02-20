@@ -1,4 +1,4 @@
-import { component, fromGlobal, fromRoot, If, Style } from "@rue/lumo";
+import { template, fromGlobal, fromRoot, If, Style } from "@rue/lumo";
 import { Router } from "./router";
 import { Ion, Ionized } from "@rue/quarky";
 import { User } from "./commons/keys";
@@ -27,7 +27,7 @@ export function FriendSite() {
       $user.value = null
    })
 
-   return component(
+   return template(
       <>
          {If($connected,
             <RouteView as={$route}></RouteView>

@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { ion, ionic, ionize, watch } from "@rue/quarky";
 
 
@@ -62,7 +62,7 @@ export function TestIonProp() {
         $fullName.set('SirRobin theBrave')
     }
 
-    return component(
+    return template(
         <>
             <div>{$firstName}</div>
             <div>{$lastName}</div>

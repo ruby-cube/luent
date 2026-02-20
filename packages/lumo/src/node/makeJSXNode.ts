@@ -6,7 +6,7 @@ import { AnyObject, Booleanny } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Provided, callWithCommons, createCommonsNode } from "../context/Context";
-import { ActivationType } from "../conditional/If";
+import { ShowHideType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
@@ -79,7 +79,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 {
    class?: ClassInput | ClassInput[],
    style?: StyleInput | StyleInput[],
-   'show-if'?: Ion<Booleanny>
+   'display-if'?: Ion<Booleanny>
    // attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 
@@ -96,7 +96,7 @@ type NodeSetup<T extends HTMLTag | ComponentSetup> = {
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
-export type GroupActivationType = ActivationType | 'show'
+export type GroupActivationType = ShowHideType | 'show'
 
 let groupActivationType: GroupActivationType | undefined = undefined
 let outerGroupActivationType: GroupActivationType | undefined = undefined
@@ -190,7 +190,7 @@ function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-view' | 'show-view' | 'create-view' | any,
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-view' | 'display-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -206,8 +206,8 @@ export function makeJSXNode(
          if (!Slot) throw new Error(`Extraneous <create-view>`)
          return makeView(wrapWithActivationType('create', Slot), config);
 
-      case 'show-view':
-         if (!Slot) throw new Error(`Extraneous <show-view>`)
+      case 'display-view':
+         if (!Slot) throw new Error(`Extraneous <display-view>`)
          return makeView(wrapWithActivationType('show', Slot), config);
 
       case 'remount-view':

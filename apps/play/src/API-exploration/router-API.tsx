@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, fromGlobal } from "@rue/lumo";
+import { template, fromGlobal } from "@rue/lumo";
 import { Polymorph } from "../../../../packages/lumo/src/conditional/Polymorph";
 
 // A: We provide route parameters via commons and tag
@@ -121,7 +121,7 @@ export function SomeChild() {
 
    }
 
-   return component(
+   return template(
       <div>
          <input mu:value={$searchTerm} />
          <button on:click={search}>SEARCH</button>

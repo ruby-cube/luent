@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
 import {  PRELUDE } from "../../../packages/quarky/src/reactivity/RenderCycle";
 
@@ -49,7 +49,7 @@ export function TestEffectCyclePhases() {
 
 
 
-   return component(
+   return template(
       <>
 
          <button on:click={e => $count.change()}>{$count}</button>

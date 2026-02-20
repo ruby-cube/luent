@@ -6,7 +6,7 @@ import { SVGPolygonApp } from "./SVGPolygonApp"
 import { TriangleDemo } from "./SierpinskiTriangles"
 import { TestListSelectTransition } from "./TestListSelectTransition"
 import { TestListTransit } from "./TestListTransit"
-import { TestMountIf } from "./TestMountIf"
+import { TestIfElse } from "./TestIfElse"
 import { TodoMVC } from "./TodoMVC"
 import { VideoPlayer } from "./VideoPlayer"
 import { TestMarkdownApp } from "./MarkdownApp"
@@ -19,9 +19,11 @@ import { TestAsyncTabs } from "./TestAsyncTabs"
 import { TestCounter } from "./TestCounter"
 import { TestMoveBox } from "./TestBoxMove"
 import { TestListSelection } from "./TestListSelection"
+import { TestConsecutiveIfElse } from "./TestConsecutiveIfElse"
+import { TestNestedIfElse } from "./TestNestedIfElse"
 
 export function runDemo() {
-   const app = createRoot(TestListSelection)
+   const app = createRoot(TestNestedIfElse)
 
    app.mount('#root')
 }

@@ -1,5 +1,5 @@
 import { jsxDEV } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/jsx-runtime/src/index.ts";
-import { component, If, Else, ElseIf } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
+import { template, If, Else, ElseIf } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
 import { Ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
 export function MountIf() {
    const $count = Ion(0, {
@@ -40,7 +40,7 @@ export function MountIf() {
             $color.value = "lim";
       }
    });
-   return component(
+   return template(
       [
          jsxDEV("button", {
             "on:click": () => ($color.change(),

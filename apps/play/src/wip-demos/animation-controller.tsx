@@ -1,4 +1,4 @@
-import { $thisView, component, If, NodeRef } from "@rue/lumo";
+import { $thisView, template, If, NodeRef } from "@rue/lumo";
 import {  ionize } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionic/notes/inert";
 
@@ -172,7 +172,7 @@ export function TestAnimationController() {
    setTimeout(initAnimation, 1)
 
 
-   return component(
+   return template(
       <>
          <div style="display: flex; flex-direction: column; align-items: flex-start">
             <canvas ref={$canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>

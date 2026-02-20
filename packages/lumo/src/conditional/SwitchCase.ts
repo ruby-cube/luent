@@ -1,9 +1,9 @@
 import { $_derivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@rue/quarky";
 import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ConditionalKit } from "./IfElse";
-import { ActivationType, createIfSeries, RenderConditional } from "./If";
+import { ShowHideType, createIfSeries, RenderConditional } from "./If";
 import { isFunction } from "@rue/utils";
-import { component } from "../component/Component";
+import { template } from "../component/Component";
 import { FromTag, RenderSlot } from "../component/Input";
 import { ListKit } from "../iteratives/ItemList";
 import { IndexedListKit } from "../iteratives/IndexedList";
@@ -19,13 +19,13 @@ type SwitchCaseKit = {
 type CasesKit = {
    cases: any[],
    render: (() => RawJSXNode) | undefined
-   type?: ActivationType | undefined
+   type?: ShowHideType | undefined
 }
 
 type RawCaseKit = {
    case: any,
    render?: () => RawJSXNode
-   type?: ActivationType | undefined
+   type?: ShowHideType | undefined
 }
 
 type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
@@ -42,7 +42,7 @@ export function Switch(input: FromTag<{
       cases: toCases(Slot() as RawCaseKit[]) as CasesKit[],
       matches
    })
-   return component(
+   return template(
       createIfSeries(kits, view)
    )
 }
@@ -72,7 +72,7 @@ function toCases(raw: RawCaseKit[]): CasesKit[] {
 }
 
 
-export function Case(c: any, typeOrRender?: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+export function Case(c: any, typeOrRender?: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {
@@ -84,7 +84,7 @@ export function Case(c: any, typeOrRender?: ActivationType | RenderConditional |
 
 
 
-export function Default(typeOrRender: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+export function Default(typeOrRender: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {

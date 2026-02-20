@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { component, FromTag } from "@rue/lumo";
+import { template, FromTag } from "@rue/lumo";
 
 function ColumnB() {
 
-   return component(
+   return template(
       <SomeComponent>
          {({ name } = SelectionKit()) =>
             <div>{name}</div>}
@@ -15,7 +15,7 @@ function ColumnB() {
    // NOTE: slotSetup is only needed if the slot is used in a conditional... 
    // [ ] how do you pass both slot input and slot setup??
    // [ ] what is the syntax for passing setup kit to a conditional render function? I want to avoid passing an options object to If() or For(). optional parameter + jsx transform
-   return component(
+   return template(
       <SomeComponent>
          {({ name }) => (o = SelectionKit(),
             <div>{name} and {o.slide}</div>)}
@@ -34,7 +34,7 @@ function ColumnB() {
 function SomeComponent(input : FromTag<{
    Slot: Slot
 }>) {
-   return component(
+   return template(
       ''
    )
 }

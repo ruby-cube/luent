@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { max } from "date-fns";
@@ -83,7 +83,7 @@ export function TestStream() {
    }
 
 
-   return component(
+   return template(
       <div>
          <p>{$count}</p>
          <button on:click={e => increment.start()}>start</button>

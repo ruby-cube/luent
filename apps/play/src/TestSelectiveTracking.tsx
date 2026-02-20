@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { DerivedIon, ion, ionic, ionize, isIon, watch, watchEffect } from "@rue/quarky";
 
 export function TestSelectiveTracking() {
@@ -61,7 +61,7 @@ export function TestSelectiveTracking() {
         console.log('frog name changed', name)
     })
 
-    return component(
+    return template(
         () =>
             <>
                 <div>{$count}</div>

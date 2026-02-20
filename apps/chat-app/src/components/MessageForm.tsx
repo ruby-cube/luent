@@ -1,6 +1,6 @@
 
 //@ts-nocheck
-import { component, FromTag, If } from "@rue/lumo";
+import { template, FromTag, If } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 import { User } from "../commons/keys";
 import './message-form.css'
@@ -34,7 +34,7 @@ export function MessageForm(input: FromTag<{
       $message.value = ''
    }
 
-   return component(
+   return template(
       <form class='message-form'>
          <textarea
             placeholder="Type a message and hit enter to send"

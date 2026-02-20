@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, FromTag, listen } from "@rue/lumo";
+import { template, FromTag, listen } from "@rue/lumo";
 
 
 function App(input : FromTag()) {
@@ -22,7 +22,7 @@ function App(input : FromTag()) {
    })
 
 
-   return component(
+   return template(
       <div></div>
    )
 }

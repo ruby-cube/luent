@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 
 export function TestMutableDerivation() {
@@ -11,7 +11,7 @@ export function TestMutableDerivation() {
    })
 
 
-   return component(
+   return template(
       <>
          <div>{$first} {$last}</div>
          <form on:submit={e => { e.preventDefault(); $fullname.value = e.target[0].value }}>

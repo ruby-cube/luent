@@ -1,11 +1,11 @@
 
 import { atMounted, For, If, Style } from "@rue/lumo"
-import { component, atUnmount } from "@rue/lumo"
+import { template, atUnmount } from "@rue/lumo"
 import {  Ion, Ionic, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
 import { quarkOf } from "../../../../packages/quarky/src/abstract/Quark"
 
 export function SevenGUIs() {
-   return component(
+   return template(
       <>
          {/* <CircleApp></CircleApp> */}
          <TemperatureApp></TemperatureApp>
@@ -42,7 +42,7 @@ function TemperatureApp() {
       // $f.value = v
    }
 
-   return component(
+   return template(
       <>
          <input type="number" value={$c} on:change={setC} /> Celsius =
          <input type="number" value={$f} on:change={setF} /> Fahrenheit
@@ -90,7 +90,7 @@ function FlightBooker() {
       return s.length < 2 ? `0${s}` : s
    }
 
-   return component(
+   return template(
       <>
          <select mu:value={$flightType}>
             <option value="one-way flight">One-way Flight</option>
@@ -176,7 +176,7 @@ function TimerApp() {
       cancelAnimationFrame(handle)
    })
 
-   return component(
+   return template(
       <>
          <label>Elapsed Time: <progress value={$progressRate}></progress></label>
 

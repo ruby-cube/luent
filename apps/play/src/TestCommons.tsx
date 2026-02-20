@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { Commons, component, fromContext } from "@rue/lumo";
+import { Commons, template, fromContext } from "@rue/lumo";
 import { Ion, watch } from "@rue/quarky";
 
 const Nub = Commons
@@ -10,7 +10,7 @@ export function TestCommons() {
 
    const $message = Ion('hello')
 
-   return component(
+   return template(
       <>
          <h1>Something</h1>
          <Nub provide={[['$message', $message]]}>
@@ -34,7 +34,7 @@ function Child() {
       console.log(fromContext('$message')())
    })
 
-   return component(
+   return template(
       <>
          <div>{$message}</div>
          <div>{$count}</div>

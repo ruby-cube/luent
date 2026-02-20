@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { Ion, Ionic, watch } from '@rue/quarky'
-import { component, FromTag, NodeRef, atMounted, atUnmount, atDiscard, atCreated } from '@rue/lumo'
+import { template, FromTag, NodeRef, atMounted, atUnmount, atDiscard, atCreated } from '@rue/lumo'
 import '../../style.css'
 
 
@@ -56,7 +56,7 @@ export function MarkdownApp(
    // Pausing and resuming is only helpful if state is shared across views
    // and state can be mutated outside of the hidden view
 
-   return component(
+   return template(
       <>
          <div>local state: {$count}</div>
          <div>local state: {$doubleCount}</div>

@@ -1,4 +1,4 @@
-import { $thisView, component, Else, If } from "@rue/lumo";
+import { $thisView, template, Else, If } from "@rue/lumo";
 import { getCurrentPhase, ion, watch } from "@rue/quarky";
 import { $thisScene } from "../../../packages/flask/Scene";
 
@@ -12,7 +12,7 @@ export function TestViewFlasks() {
       toggle() { $active.value = !$active() }
    })
 
-   return component(
+   return template(
       <>
          <div>hallo</div>
          <Parent></Parent>
@@ -28,7 +28,7 @@ function Parent() {
    const view = $thisView()
    console.log('>>> this view parent', view, rootView === view)
 
-   return component(
+   return template(
       <div>parent</div>
    )
 }
@@ -57,7 +57,7 @@ function DynamicParent() {
       }, { eager: true })
    }, { eager: true })
 
-   return component(
+   return template(
       <>
          <div>dynamic parent</div>
          <button on:click={e => $active.toggle()}>toggle active</button>
@@ -80,7 +80,7 @@ function DynamicChild() {
    const view = $thisView()
    // console.log('>>> this view dynamic child', view)
 
-   return component(
+   return template(
       <div>dynamic child</div>
    )
 }

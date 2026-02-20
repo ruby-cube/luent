@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { getActiveFlask } from "@rue/flask";
-import { component, fromContext, RENDER } from "@rue/lumo";
+import { template, fromContext, RENDER } from "@rue/lumo";
 import { queueIonicTask } from "@rue/quarky";
 
 
@@ -500,7 +500,7 @@ ionicPostTask(async ({ setup, useSelection, IonicTodo }) => {
 }, { contextualize: { useSelection, IonicTodo } })
 
 
-return component(<></>)
+return template(<></>)
 }
 
 type CleanupFn<T> = (...values: T | [undefined]) => void

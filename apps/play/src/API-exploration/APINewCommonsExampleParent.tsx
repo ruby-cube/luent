@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Commons, component } from "@rue/lumo"
+import { Commons, template } from "@rue/lumo"
 import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase"
 import { ArticlesView } from "../wip-demos/conduit/src/feature/article-feed/ArticlesView"
 import { ArticlePreview } from "./ArticlePreview"

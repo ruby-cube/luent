@@ -1,4 +1,4 @@
-import { component, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
+import { template, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
 import { DeepIonized, EACH, Ion,  Ionic, Ionized, isIonicProxy,} from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 
@@ -170,7 +170,7 @@ export function TreeApp(input: FromTag<{
 
    const root = IonizedTreeItem(data)
 
-   return component(
+   return template(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItemView item={root}></TreeItemView>
@@ -193,7 +193,7 @@ function Counter() {
 
    const frog = ionize({ name: 'kermit', age: NaN })
 
-   return component(
+   return template(
       <Child mu:count={$count}></Child>
    )
 }
@@ -216,7 +216,7 @@ function Child(input: FromTag<{
    // 'mu:frog': Frog
    // Mu<Frog, 'age', { qualities: Mu<Qualities[], 'brave'> }>
 }>) {
-   return component(
+   return template(
       <div></div>
    )
 }
@@ -265,7 +265,7 @@ function TreeItemView(input: FromTag<{
       }
    }
 
-   return component(
+   return template(
       <li class='item'>
          <div
             class={{ 'bold': $isFolder }}
@@ -278,7 +278,7 @@ function TreeItemView(input: FromTag<{
             )}
          </div>
          {If($isFolder,
-            <ul show-if={$isOpen}>
+            <ul display-if={$isOpen}>
                {For(item.children!, m => m, item => (
                   <TreeItemView mu:item={item}></TreeItemView>
                ))}

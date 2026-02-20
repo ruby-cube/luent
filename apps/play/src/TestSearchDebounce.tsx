@@ -1,4 +1,4 @@
-import { component, For, AsyncIon } from "@rue/lumo";
+import { template, For, AsyncIon } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 
@@ -13,7 +13,7 @@ export function TestSearchDebounce() {
       return fetchArticles($searchTerm(), { debounce: 100 })
    })
 
-   return component(
+   return template(
       <>
          <input id='search' value={$searchTerm} on:input={(e) => $searchTerm.value = e.currentTarget!.value}></input>
          {For($articles, m => m.id, (article) =>

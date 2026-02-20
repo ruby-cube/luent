@@ -1,4 +1,4 @@
-import { component, Else, If } from "@rue/lumo";
+import { template, Else, If } from "@rue/lumo";
 import { ion } from "@rue/quarky"; 
 
 // FIX: conditional is incorrectly mounted when
@@ -15,7 +15,7 @@ export function TestNestedConditionalB() {
    const $ready = Ion(true)
    const $open = Ion(true)
 
-   return component(
+   return template(
       <div>
          <button on:click={e=>$ready.value = !$ready()}>toggle ready</button>
          <button on:click={e=>$open.value = !$open()}>toggle open</button>
@@ -38,7 +38,7 @@ export function TestNestedConditional() {
    const $ready = Ion(true)
    const $open = Ion(true)
 
-   return component(
+   return template(
       <div>
          <button on:click={e=>$ready.value = !$ready()}>toggle ready</button>
          <button on:click={e=>$open.value = !$open()}>toggle open</button>

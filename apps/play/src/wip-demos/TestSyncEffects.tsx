@@ -1,6 +1,6 @@
 import { ion, SYNC, watch } from "@rue/quarky";
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle";
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 
 export function TestSyncEffects() {
 
@@ -39,7 +39,7 @@ export function TestSyncEffects() {
 
 
 
-   return component(
+   return template(
       <>
          <button on:click={e => { $count.increment() }}>increment</button>
       </>

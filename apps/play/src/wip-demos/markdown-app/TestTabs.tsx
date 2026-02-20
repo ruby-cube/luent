@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ContextKey, component, For, fromContext, FromTag, If, NodeRef } from "@rue/lumo";
+import { ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -18,7 +18,7 @@ export function TabApp() {
    })
    const $markdown = Ion('# Something Special')
 
-   return component(
+   return template(
       <>
          <button on:click={$open.toggle}>open/close</button>
          <button on:click={$active.toggle}>show/hide</button>
@@ -125,7 +125,7 @@ function LoadingApp() { //Stand in until I fix createRoot
    })
 
 
-   return component(
+   return template(
       // Await
       <App files={files}></App>
    )
@@ -252,7 +252,7 @@ function App(input : FromTag<{
    // MainView.discardAll()
    // MainView.discard('file', file)
 
-   return component(
+   return template(
       <>
          <Sidebar files={files} provide={[
             FILES_KIT({ addNewFile, deleteFile, openFile }),
@@ -305,7 +305,7 @@ export function List(input : FromTag<{
 		
 		$.pear = $.pear ?? fromContext(PEAR)
 
-		return component(<></>)
+		return template(<></>)
 }
 
 const $APPLE = ContextKey<Ion<string>>('$APPLE')
@@ -320,7 +320,7 @@ function Sidebar(input : FromTag<{
    const { files } = input
    const { addFile } = fromContext(FILES_KIT);
 
-   return component(
+   return template(
       <div>
          {For($files, file => file.id, (file, $index) => (
             <SidebarFile file={file} index={$index}></SidebarFile>
@@ -339,7 +339,7 @@ function SidebarFile(input : FromTag<{
 
    const { openFile } = fromContext(FILES_KIT)
 
-   return component(
+   return template(
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
          <IfContextMenu on:click={reMenuClick} ref={$menu}></IfContextMenu>
          {file.$title}
@@ -356,7 +356,7 @@ function SidebarFile(input : FromTag<{
 // })) {
 //    const { $files } = input
 
-//    return component(
+//    return template(
 //       <div>
 //          {For($files, file => file.id, (file, $index) => (
 //             <Tab file={file} index={$index}></Tab>
@@ -379,7 +379,7 @@ function Tab(input : FromTag<{
    const { file, tabManager = fromContext(TABS_KIT), $index = Ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 
-   return component(
+   return template(
       <div style={{ backgroundColor: (file.active ? 'red' : 'gray') }}
          on:click={e => focusFile($index())}
       >
@@ -392,7 +392,7 @@ function Tab(input : FromTag<{
 
 
 // function Home() {
-//    return component(
+//    return template(
 //       <div>
 
 //       </div>

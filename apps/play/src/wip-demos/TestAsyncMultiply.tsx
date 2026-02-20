@@ -1,4 +1,4 @@
-import { component, For, FromTag } from "@rue/lumo";
+import { template, For, FromTag } from "@rue/lumo";
 import { $_derivation, Action, instantUpdate, Ion, Ionic, MutableIon, queueIonicTask, SuspenseIon, swiftUpdate } from "@rue/quarky";
 import { ooo } from "../../../../packages/quarky/src/async/ooo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
@@ -30,7 +30,7 @@ export function TestAsyncMultiply() {
       '-fetch': () => db.multiply($n(), 2)
    })
 
-   return component(
+   return template(
       <div>
          <button on:click={e => {
             $n.increment();
@@ -102,7 +102,7 @@ export function TestAsyncMultipliers() {
    const [multiply, products, $pending] = MultipliersKit()
 
 
-   return component(
+   return template(
       <div>
          <button on:click={e => {
             $n.increment();
@@ -125,7 +125,7 @@ export function TestAsyncMultipliers() {
 //    const $nx2 = AsyncIon(async () => await multiply($n(), 2))
 //    const $nx3 = AsyncIon(async () => await multiply($n(), 3))
 
-//    return component(
+//    return template(
 //       <div>
 //          <button on:click={$n.increment}>+</button>
 //          {Await(
@@ -152,7 +152,7 @@ export function TestAsyncMultiplyB() {
    //    return multiply($n(), 2)
    // })
 
-   return component(
+   return template(
       <div>
          {/* <button on:click={e => $n.increment()}>{$n} {($product.pending ? '...' : '')}</button> */}
          <button on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
@@ -173,7 +173,7 @@ export function TestAsyncMultiplyDrop() {
 
    const { $Multiply, $pending } = MultiplyKit()
 
-   return component(
+   return template(
       <div>
          <button disabled={$pending} on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
          <p>1 * {$n} = {$Multiply($n, 1)}</p>
@@ -198,7 +198,7 @@ export function TestAsyncMultiplyQueue() {
 
    const nums = Ionic([1])
 
-   return component(
+   return template(
       <div>
          <button on:click={e => { $n.increment(); nums.push($n()) }}>{$n}</button>
          {For(nums, (num) => (
@@ -215,7 +215,7 @@ function Result(input: FromTag<{ n: number }>) {
       return AwaitedIon(() => db.multiply(n, o))
    }
 
-   return component(
+   return template(
       <div style="border: 1px solid gray; padding: 5px">
          {Await(<>
             <p>1 * {n} = {$Multiply(n, 1)}</p>

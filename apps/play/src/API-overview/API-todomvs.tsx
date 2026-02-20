@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, If, Else } from "@rue/lumo"
+import { template, For, If, Else } from "@rue/lumo"
 import { watch, ion, queueIonicTask, ionize, Ionized, ionic } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 
@@ -96,7 +96,7 @@ export function TodoMVC() {
       }
    }
 
-   return component(
+   return template(
       <>
          <section class="todoapp">
             <header class="header">
@@ -141,7 +141,7 @@ export function TodoMVC() {
                   })}
                </ul>
             </section >
-            <footer show-if={($todos.length)} class="footer">
+            <footer display-if={($todos.length)} class="footer">
                <span class="todo-count">
                   <strong>{($remaining)}</strong>
                   <span>{($remaining === 1 ? ' item' : ' items')} left</span>

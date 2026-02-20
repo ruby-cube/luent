@@ -8,7 +8,7 @@
  */
 
 import { getActiveFlask } from "@rue/flask";
-import { component, FromTag } from "@rue/lumo";
+import { template, FromTag } from "@rue/lumo";
 import { Ion, Ionic } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -40,7 +40,7 @@ function StatefulCounter(input: FromTag<{
       emit('decrement', { count: $count() })
    }
 
-   return component(
+   return template(
       <>
          <div>{$count}</div>
          <button on:click={incrementCount}>+</button>
@@ -59,7 +59,7 @@ function DumbCounter(input: FromTag<{
 }>) {
    const { $count, emit } = input
 
-   return component(
+   return template(
       <>
          <div>{$count}</div>
          <button on:click={e => emit('incrementClick')}>+</button>
@@ -77,7 +77,7 @@ function DumbCounterC(input: FromTag<{
 }>) {
    const { $count, incrementCount, decrementCount } = input
 
-   return component(
+   return template(
       <>
          <div>{$count}</div>
          <button on:click={e => incrementCount()}>+</button>
@@ -93,7 +93,7 @@ function DumbCounterB(input: FromTag<{
 }>) {
    const { $count, mu } = input
 
-   return component(
+   return template(
       <>
          <div>{$count}</div>
          <button on:click={e => mu($count).increment()}>+</button>
@@ -168,7 +168,7 @@ function Parent() {
 
    const product = Ionic(new Product({}))
 
-   return component(
+   return template(
       <>
          <Child
             can:atIncrementProductQty={getHook(product, 'incrementQty')}
@@ -249,7 +249,7 @@ function DumbProduct(input: FromTag<{
 }>) {
    const { product } = input
 
-   return component(
+   return template(
       <>
          <StatefulCounter
             on:decrement={e => product.qty = e.count}
@@ -265,7 +265,7 @@ function SmartProduct(input: FromTag<{
 }>) {
    const { product } = input
 
-   return component(
+   return template(
       <>
          <DumbCounterB
             mu:count={$(product.$qty, { increment: mu(product).incrementQty, decrement: mu(product).decrementQty })}

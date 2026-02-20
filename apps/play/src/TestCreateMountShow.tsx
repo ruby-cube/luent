@@ -1,4 +1,4 @@
-import { If, component, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount } from "@rue/lumo";
+import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount } from "@rue/lumo";
 import { instantUpdate, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
@@ -44,7 +44,7 @@ function Counter(input: FromTag<{
    }
 
 
-   return component(
+   return template(
       <div>
          <div>{label}: {$count}</div>
          <button on:click={e => $count.increment()}>+</button>
@@ -66,18 +66,18 @@ export function TestCreateMountShow() {
       }
    })
 
-   return component(
+   return template(
       <article style="width: 33vw">
          <h1>View Activation: Create/Show/Mount</h1>
 
          <hr></hr>
          <h3>Show/hide an element</h3>
          <section>
-            <code>{'<div show-if={$condition}>'}</code>
+            <code>{'<div display-if={$condition}>'}</code>
             <p>This toggles css <span class="code">display: none</span> on a single element</p>
             <div class='container'>
                <div class='container' style="height: 60px">
-                  <div show-if={$brave} class='emoji'>
+                  <div display-if={$brave} class='emoji'>
                      😳
                   </div>
                </div>
@@ -90,21 +90,21 @@ export function TestCreateMountShow() {
          <h3>Show/hide a view</h3>
          <section>
             <code>
-               {'<show-view>'}<br />
+               {'<display-view>'}<br />
                {'   '}<span class="bracket">{`{`}</span>{`If(...)`}<span class="bracket">{`}`}</span><br />
                {'   '}<span class="bracket">{`{`}</span>{'ElseIf(...)'}<span class="bracket">{`}`}</span>
             </code>
             <p>This toggles css <span class='code'>display: none</span> for a conditional series</p>
             <div class='container'>
                <div class='container' style="height: 60px">
-                  <show-view>
+                  <display-view>
                      {If(($mood() === 'happy'),
                         <span class='emoji'>😃</span>
                      )}
                      {Else(
                         <span class='emoji'>😞</span>
                      )}
-                  </show-view>
+                  </display-view>
                </div>
                <div style="font-size: x-small">{`(he's bipolar)`}</div>
                <button style="width: 9em" on:click={e => $mood.toggle()}>swing mood</button>
@@ -413,7 +413,7 @@ export function TestDerivedConditional() {
 
 
 
-   return component(
+   return template(
       <article>
          <div>{$count}</div>
          <div>{($count() + 1)}</div>

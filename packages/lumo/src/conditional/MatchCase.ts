@@ -1,8 +1,8 @@
 import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, watchToRender } from "@rue/quarky";
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { ActivationType, RenderConditional } from "./If";
+import { ShowHideType, RenderConditional } from "./If";
 import { isFunction, noop } from "@rue/utils";
-import { component } from "../component/Component";
+import { template } from "../component/Component";
 import { FromTag, RenderSlot } from "../component/Input";
 // import { createCasesKit, DEFAULT, MatchKit } from "./Switch";
 import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
@@ -15,7 +15,7 @@ type CaseKey = any
 type RawCaseKit = {
    case: any,
    render?: (view: View) => RawJSXNode
-   type?: ActivationType | undefined
+   type?: ShowHideType | undefined
 }
 
 export type CasesKit = {
@@ -26,18 +26,18 @@ type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
 
 export function Match(input: FromTag<{
    x: Ion<any>, // TODO: change to key ... but need to make sure JSX plays well with it
-   'view'?: ActivationType // TODO: allow 'show'?
+   'view'?: ShowHideType // TODO: allow 'show'?
    toCase?: (key: any) => any,
    Slot: RenderSlot
 }>) {
    const { $x, toCase = (key: any) => key, Slot, "view": view } = input
-   return component(
+   return template(
       new MatchKit($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)
    )
 }
 
 
-export function toCasesMap(raw: RawCaseKit[], groupActivationType: ActivationType | undefined): Map<any, CasesKit> {
+export function toCasesMap(raw: RawCaseKit[], groupActivationType: ShowHideType | undefined): Map<any, CasesKit> {
    const superGroupActivationType = getGroupActivationType()
    const fallbackType = groupActivationType ?? superGroupActivationType === 'show' ? 'remount' : superGroupActivationType ?? 'create'
    const map: Map<any, CasesKit> = new Map()
@@ -68,7 +68,7 @@ export function toCasesMap(raw: RawCaseKit[], groupActivationType: ActivationTyp
 }
 
 
-export function Case(c: any, typeOrRender?: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+export function Case(c: any, typeOrRender?: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {
@@ -78,8 +78,8 @@ export function Case(c: any, typeOrRender?: ActivationType | RenderConditional |
    }
 }
 
-export function Default(typeOrRender: ActivationType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
-   const type = (isFunction(typeOrRender) ? undefined : typeOrRender) as ActivationType
+export function Default(typeOrRender: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+   const type = (isFunction(typeOrRender) ? undefined : typeOrRender) as ShowHideType
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase as RenderConditional
    return {
       case: DEFAULT,
@@ -93,13 +93,13 @@ export function Default(typeOrRender: ActivationType | RenderConditional | RawJS
 
 type RenderCase = (view: View) => RawJSXNode;
 
-type View = { discard: (arg: any) => void }
+type View = { markDiscard: (arg: any) => void }
 
 
 
 export const DEFAULT = Symbol('default')
 
-export function createCasesKit(activationType: ActivationType | undefined, render: RenderCase | undefined, context: ContextSnapshot, pending: SuspenseIon | undefined): CasesKit {
+export function createCasesKit(showHideType: ShowHideType | undefined, render: RenderCase | undefined, context: ContextSnapshot, pending: SuspenseIon | undefined): CasesKit {
 
    return {
       pending,
@@ -109,11 +109,11 @@ export function createCasesKit(activationType: ActivationType | undefined, rende
          [FLASK]: undefined,
          [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }) : undefined,
-      type: activationType,
+      type: showHideType,
       cache: undefined,
       awaitCache: undefined,
       view: {
-         discard: noop
+         markDiscard: noop
       }
    }
 }

@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { Thru } from "../../../packages/lumo/src/iteratives/Thru";
 import { Ion } from "@rue/quarky";
 
@@ -12,7 +12,7 @@ export function TestThru() {
       }
    })
 
-   return component(
+   return template(
       <div>
          <button on:click={e => $count.increment()}>+</button>
          <button on:click={e => $count.decrement()}>-</button>

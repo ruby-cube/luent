@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
 import { RENDER } from "../../../packages/quarky/src/reactivity/RenderCycle";
 
@@ -40,7 +40,7 @@ export function TestEffectCycle() {
 
    },{})
 
-   return component(
+   return template(
       <>
          <p>{$count}</p>
          <p>{$doubleCount}</p>

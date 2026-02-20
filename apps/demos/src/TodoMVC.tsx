@@ -1,4 +1,4 @@
-import { component, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
+import { template, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
 import { watch, queueIonicTask, Ion, Ionic, EACH, as } from "@rue/quarky"
 
 interface Todo {
@@ -106,7 +106,7 @@ export function TodoMVC() {
    )
 
 
-   return component(
+   return template(
       <>
          <section class="todoapp">
             <header class="header">
@@ -117,7 +117,7 @@ export function TodoMVC() {
                {ToggleAllButton()}
                <TodoList todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
             </section>
-            <footer show-if={$todoCount} class="footer">
+            <footer display-if={$todoCount} class="footer">
                {RemainingCount()}
                <ul class="filters">
                   <li>
@@ -130,7 +130,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button show-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
+               <button display-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
                   Clear completed
                </button>
             </footer>
@@ -154,7 +154,7 @@ function TodoInput({ addTodo }: FromTag<{ addTodo: (title: string) => void }>) {
       }
    }
 
-   return component(
+   return template(
       <input
          class="new-todo"
          autofocus
@@ -195,7 +195,7 @@ function TodoList(input: FromTag<{
       }
    }
 
-   return component(
+   return template(
       <ul class="todo-list">
          {For($todos, m => m.id, (todo) => {
             const $isEditing = Ion(() => todo === $editedTodo());

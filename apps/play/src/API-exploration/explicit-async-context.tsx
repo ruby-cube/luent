@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { atMounted, component, FromTag, listen } from "@rue/lumo";
+import { atMounted, template, FromTag, listen } from "@rue/lumo";
 
 type ThisComponent = {
    context: any,

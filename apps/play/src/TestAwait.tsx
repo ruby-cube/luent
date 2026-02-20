@@ -1,4 +1,4 @@
-import { component, AsyncIon, Else, If, FromTag } from "@rue/lumo";
+import { template, AsyncIon, Else, If, FromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import {  Ion } from "@rue/quarky";
 
@@ -41,7 +41,7 @@ export function TestAwait() {
    const $name = Ion('sir robin the brave')
    const $brave = fetchNestedDataB($name)
 
-   return component(
+   return template(
       <>
          <button on:click={e => $name.value = $name() + '!'}>click</button>
          <p>{($brave()?.name)}</p>
@@ -76,7 +76,7 @@ export function TestAwait() {
 function ChildB() {
    const $kermit = fetchData({ awaited: true })
 
-   return component(
+   return template(
       <>
          {'B'}
          <div>{($kermit()?.name)}</div>
@@ -88,7 +88,7 @@ function ChildB() {
 function Child({ $name }: FromTag<{ name: string }>) {
    const $kermit = fetchData()
 
-   return component(
+   return template(
       <>
          <div>{($kermit()?.name)}</div>
          <div>Child :)</div>
@@ -102,7 +102,7 @@ function GrandChild({ $name }: FromTag<{ name: string }>) {
       awaited: 'load'
    })
 
-   return component(
+   return template(
       <div>
          {/* <div>{(JSON.stringify($robin.promise))}</div> */}
          <div>{($robin()?.name)}</div>
@@ -121,7 +121,7 @@ function GrandChild({ $name }: FromTag<{ name: string }>) {
 
 function Loading() {
    console.log('render loading view')
-   return component(
+   return template(
       <>
          <div>Loading...</div>
       </>
@@ -130,7 +130,7 @@ function Loading() {
 
 function ErrorView({ $error }: FromTag<{ error: Ion<Error> }>) {
    console.log('render error view')
-   return component(
+   return template(
       <>
          <div>{($error()?.message)}</div>
       </>

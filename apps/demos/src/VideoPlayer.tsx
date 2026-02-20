@@ -1,4 +1,4 @@
-import { component, Else, Finitron, FromTag, If, NodeRef, Style } from "@rue/lumo";
+import { template, Else, Finitron, FromTag, If, NodeRef, Style } from "@rue/lumo";
 import { Ion, queueTask } from "@rue/quarky";
 import "./reset.css"
 
@@ -105,7 +105,7 @@ export function VideoPlayer() {
    //    },
    // }
 
-   return component(
+   return template(
       <div class="container">
          <video
             ref={$video}
@@ -187,7 +187,7 @@ function ElapsedBar(input: FromTag<{
 }>) {
    const { $elapsed, duration, $paused, emit } = input
 
-   return component(
+   return template(
       <div class="elapsed"
          on:click={e => emit("click", e)}
       >
@@ -210,7 +210,7 @@ function Timer(input: FromTag<{
 }>) {
    const { $elapsed, duration } = input
 
-   return component(
+   return template(
       <span class="timer">
          {(asTime($elapsed()))} / {asTime(duration)}
       </span>

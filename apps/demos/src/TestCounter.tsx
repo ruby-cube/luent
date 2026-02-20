@@ -1,4 +1,4 @@
-import { component, createRoot } from "@rue/lumo"
+import { template, createRoot } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
 
 /* 
@@ -23,7 +23,7 @@ export function TestCounter() {
 
    const $doubleCount = Ion(() => $count() * 2)
 
-   return component(
+   return template(
       <div>
          <div id='count'>{$count}</div>
          <div id='double-count'>x2 = {$doubleCount}</div>

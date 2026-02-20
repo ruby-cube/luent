@@ -1,4 +1,4 @@
-import { component, Else, For, If} from "@rue/lumo"
+import { template, Else, For, If} from "@rue/lumo"
 import { ion, queueIonicTask } from "@rue/quarky"
 import { postlude} from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { $_run_with_, $_snap_context } from "@rue/flask"
@@ -73,7 +73,7 @@ export function View() {
       return v.replace(/T|Z/g, ' ')
    }
 
-   return component(
+   return template(
       <div style='width: 500px'>
          <h1>Latest Vue Core Commits</h1>
 

@@ -1,4 +1,4 @@
-import { component, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/lumo"
+import { template, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
 import { Thru } from "../../../packages/lumo/src/iteratives/Thru"
 
@@ -52,7 +52,7 @@ export function CellsApp() {
       console.warn('node============END')
    })
 
-   return component(
+   return template(
       <>
          <table>
             <thead>
@@ -128,7 +128,7 @@ function Cell(input: FromTag<{
       setCellValue(e.target.value.trim())
    }
 
-   return component(
+   return template(
       <div class="cell" title={$value} on:click={e => { $editing.value = true }}>
          {If($editing,
             <input

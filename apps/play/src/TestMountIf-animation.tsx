@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { component, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
 import { debug, getActiveUpdate, instantUpdate, Ion, queueRender, queueTask, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import "./style.css"
@@ -194,7 +194,7 @@ export function MountIfAnimation() {
 
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
-   return component(
+   return template(
       <div>
          <button on:click={() => ($color.change(), $name.value += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {$name}</h1>
@@ -307,7 +307,7 @@ from {
 // })) {
 //    const {Slot, emit } = input
 
-//    return component(
+//    return template(
 //       <div>child</div>
 //    )
 // }
@@ -317,7 +317,7 @@ from {
 //    '$:increment': v<() => void>
 // })) {
 //    // const { Slot } = input;
-//    return component(
+//    return template(
 //       ''
 //       // Slot()
 //    )
@@ -329,7 +329,7 @@ from {
 
 //     }
 
-//     return component(
+//     return template(
 //         <div on:click={e => { if (e.targets('x-select')) select() }}>
 //             <p x-select>{title}</p>
 //             <p contenteditable>{description}</p>
@@ -347,7 +347,7 @@ from {
 
 //     }
 
-//     return component(
+//     return template(
 //         <div on:click={'x-select', e => { if (e.targets('x-select')) select() }}>
 //             <p x-select>{title}</p>
 //             <p contenteditable>{description}</p>
@@ -422,7 +422,7 @@ function ArticleBlock(setup: {
 
 //     $count.value = 1)
 
-//     return component(
+//     return template(
 //         <>
 //             <div ref={$countDiv}>{$count}</div>
 //             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} ref={$button}>increment</button >
@@ -432,4 +432,4 @@ function ArticleBlock(setup: {
 // }
 
 
-// slot: renderfunction, component, readonly ion, primitive value
+// slot: renderfunction, template, readonly ion, primitive value

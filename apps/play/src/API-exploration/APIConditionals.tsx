@@ -12,7 +12,7 @@ export function TestCounterModel() {
       }
    })
 
-   return component(
+   return template(
       <>
          {/* <vvv:mount /> */}
          <div>{counter.$count}</div>
@@ -101,7 +101,7 @@ export function TestCounterModel() {
    )
 }
 
-import { component, If, Else, fade, ElseIf, slide, FromTag, v, target, prep, Ion } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, slide, FromTag, v, target, prep, Ion } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -167,7 +167,7 @@ export function MountIf() {
       }
    })
    //NOTE: if ooo-transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
-   return component(
+   return template(
       <>
          <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $ = $color() + 'e' }]}>shout</button>
          <h1>Hello {todos[0].name}</h1>

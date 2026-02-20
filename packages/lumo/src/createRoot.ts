@@ -9,6 +9,7 @@ import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
 import { normalizeToArray } from "@rue/utils";
 import { queueInternalRender } from "../../quarky/src/reactivity/RenderCycle";
+import { RenderFunction } from "./node/makeJSXNode";
 
 let appRoot: Element;
 
@@ -27,7 +28,7 @@ export function getAppRoot() {
 // }
 
 
-export function createRoot<T extends AnyObject, E extends Provided>(App: ComponentSetup<T>, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
+export function createRoot<T extends AnyObject, E extends Provided>(App: ComponentSetup<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
 
    // (1) instantiate developer's root component
    const appCommons = createAppCommons(config?.provide, config?.globalCommons)

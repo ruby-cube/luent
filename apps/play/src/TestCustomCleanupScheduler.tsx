@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, NodeRef } from "@rue/lumo"
+import { template, NodeRef } from "@rue/lumo"
 import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@rue/quarky"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/X_$setup"
 import { AnyObject } from "@rue/types"
@@ -32,7 +32,7 @@ export function Article({ content } = input({
    content: Type('?', String).default('hi')
 })) {
 
-   return component(
+   return template(
       <article>
          <p>{content}</p>
       </article>
@@ -115,7 +115,7 @@ export function Bog(setup: {
 
    // const _name = name ?? 'sir robin'
 
-   return component(
+   return template(
       <div>hi</div>
    )
 }
@@ -220,7 +220,7 @@ export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC 
 
    const priceCurrency = asCurrency(priceNum, 'USD')
 
-   return component(
+   return template(
       <p>{asCurrency(price)}</p>
    )
 }
@@ -390,7 +390,7 @@ export function TestCleanupScheduler({
       )
    )
 
-   return component(
+   return template(
       <>
          <div class={['storm active', $ = $editable() && 'editable']}
             style={[
@@ -467,7 +467,7 @@ function ChildBlock() {
 
 
 
-   return component(
+   return template(
       <div style color={text_color}></div>
    )
 }

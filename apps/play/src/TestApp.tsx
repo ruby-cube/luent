@@ -1,4 +1,4 @@
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 import { List } from "./wip-demos/TestListSelect";
 import { MountIf } from "./demo/TestMountIf";
 import { TestDerivedConditional } from "./TestCreateMountShow";
@@ -7,7 +7,7 @@ import { TestPropIons } from "./TestPropIons";
 
 
 export function TestApp(){
-   return component(
+   return template(
       <>
       {/* <h2>Counter: Ions and Derived</h2>
       <TestDerivedConditional></TestDerivedConditional> */}

@@ -1,4 +1,4 @@
-import { component, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
+import { template, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
 import { as, EACH, Ion, Ionic, Nested, } from "@rue/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
@@ -77,7 +77,7 @@ export function TreeApp() {
 
    console.log('root', root.children)
 
-   return component(
+   return template(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItemView item={root}></TreeItemView>
@@ -113,7 +113,7 @@ function TreeItemView(input: FromTag<{
    }
 
 
-   return component(
+   return template(
       <li class='item'>
          <div
             class={{ 'bold': $isFolder }}
@@ -126,7 +126,7 @@ function TreeItemView(input: FromTag<{
             )}
          </div>
          {If($isFolder,
-            <ul show-if={$isOpen}>
+            <ul display-if={$isOpen}>
                {For(item.children!, m => m, item => (
                   <TreeItemView item={item}></TreeItemView>
                ))}

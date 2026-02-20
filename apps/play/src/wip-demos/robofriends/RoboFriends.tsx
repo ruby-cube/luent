@@ -1,4 +1,4 @@
-import { component, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/lumo";
+import { template, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/lumo";
 import { Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
@@ -36,7 +36,7 @@ interface Robot {
 export function RoboFriendsApp() {
    const $robots = Ion(robots as Robot[])
 
-   return component(
+   return template(
       <>
          <h1>RoboFriends</h1>
          <RoboList
@@ -61,7 +61,7 @@ export function RoboList(input: FromTag<{
 }>) {
    const { $robots } = input; // TODO: type input such that $robots is defined
 
-   return component(
+   return template(
       <div class='robo-list'>
          {For($robots, m => m.id, robot => (
             <RoboCard
@@ -132,7 +132,7 @@ export function RoboCard(input: FromTag<{
    // }
 
 
-   return component(
+   return template(
       <>
          <div class='robot-card grow'>
             <img alt='robot' src={`https:robohash.org/${id}?size=200x200`} />

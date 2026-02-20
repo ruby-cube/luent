@@ -43,7 +43,7 @@ export type RenderError = (err: Error) => RawJSXNode
 //       }>()
 //    ) {
 
-//       return component(
+//       return template(
 //          createTryCatch(config.try, config.catch)
 //       )
 //    }

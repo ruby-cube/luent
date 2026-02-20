@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { component, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
+import { template, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
 import { Ion, MutableIon } from '@rue/quarky';
 import { AnyObject } from '@rue/types';
 
 
 export function TestTooltip() {
 
-   return component(
+   return template(
       <div>
          <ButtonWithTooltip>
             <Slot>
@@ -63,7 +63,7 @@ type ButtonWithTooltipInput = FromTag<{
 export function ButtonWithTooltip({ Slot }: ButtonWithTooltipInput) {
    const $targetRect = Ion(null as Rect | null)
 
-   return component(
+   return template(
       <>
          <button
             on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
@@ -256,7 +256,7 @@ export function Tooltip(input: FromTag<{
       return y < 0 ? targetRect.bottom : y;
    })
 
-   return component(
+   return template(
       Portal('body',
          <div
             style={{

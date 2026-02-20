@@ -1,4 +1,4 @@
-import { component, Else, ElseIf, For, FromTag, If } from "@rue/lumo";
+import { template, Else, ElseIf, For, FromTag, If } from "@rue/lumo";
 import { $activeUpdate, Ion, Ionic, PRELUDE, queueRender, queueTask, watch } from "@rue/quarky";
 
 export function TestListMounting() {
@@ -23,7 +23,7 @@ export function TestListMounting() {
       return clone
    }
 
-   return component(
+   return template(
       <div>
          <button on:click={e => $active.toggle()}>switch</button>
          {If($active,
@@ -51,7 +51,7 @@ export function TestListMounting() {
 function Counter(input: FromTag<{ log?: (msg: string) => void }>) {
    let count = 0
    const { log } = input
-   return component(
+   return template(
       <div
          at:unmount={e => {
             log?.({ msg: 'bye' + count++ })
@@ -77,7 +77,7 @@ function Counter(input: FromTag<{ log?: (msg: string) => void }>) {
 //       })
 //    }, { phase: PRELUDE })
 
-//    return component(
+//    return template(
 //       <>
 //          {/* <div>{$count}</div> */}
 //          <div>{$countB}</div>

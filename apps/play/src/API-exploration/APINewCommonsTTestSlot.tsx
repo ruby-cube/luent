@@ -1,11 +1,11 @@
 //@ts-nocheck
-import { Commons, ContextKey, component, fromContext, FromTag, RenderSlot } from "@rue/lumo";
+import { Commons, ContextKey, template, fromContext, FromTag, RenderSlot } from "@rue/lumo";
 import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase";
 
 // # via commons
 
 function Parent() {
-   return component(
+   return template(
       <div>
          <Context provide={[
             Content['something'](new Something()),
@@ -33,7 +33,7 @@ Content['something'] = ContextKey<string>()
 function Content() {
    const something = fromContext(Content['something'])
 
-   return component(
+   return template(
       <div>hi</div>
    )
 }
@@ -47,7 +47,7 @@ export function Button(input: FromTag<{
 }>) {
    const { Slot, Nested } = input
 
-   return component(
+   return template(
       <div>
          <Context provide={[Nested['something']('hello')]}>
             {Slot()}
@@ -62,7 +62,7 @@ export function Button(input: FromTag<{
 // # via slot input
 
 function ParentB() {
-   return component(
+   return template(
       <div>
          <ButtonB>{something =>
             <ContentB something={something}></ContentB>
@@ -80,7 +80,7 @@ ContentB['something'] = ContextKey<string>()
 function ContentB(input: FromTag<{ something?: string }>) {
    const { something = fromContext(Content['something']) } = input
 
-   return component(
+   return template(
       <div>hi</div>
    )
 }
@@ -93,7 +93,7 @@ export function ButtonB(input: FromTag<{
 }>) {
    const { Slot } = input
 
-   return component(
+   return template(
       <div>
          {Slot('hi')}
       </div>

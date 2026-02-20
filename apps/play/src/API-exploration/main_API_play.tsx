@@ -3,7 +3,7 @@ import { collectEffects, EffectFlask, getActiveFlask } from "@rue/flask";
 import { flaskablePromise } from "../../../packages/flask/flaskablePromises";
 import { watchEffect } from "@rue/quarky";
 import { abort } from "process";
-import { component } from "@rue/lumo";
+import { template } from "@rue/lumo";
 
 collectEffects(async () => {
     console.log(getActiveFlask())
@@ -136,7 +136,7 @@ function SideBar(
     })
 
 
-    return component(
+    return template(
         <ProviderBlock> // dog is provided here...
             <ChildBlock dog={slot.fromContext(_dog_)}>hi</ChildBlock>
         </ProviderBlock>

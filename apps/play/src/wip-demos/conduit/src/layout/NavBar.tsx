@@ -1,6 +1,6 @@
 import { ContextKey } from "../../../../../../../packages/lumo/src/context/ContextKey"
 import { fromRoot } from "../../../../../../../packages/lumo/src/context/provide"
-import { component } from "../../../../../../../packages/lumo/src/component/Component"
+import { template } from "../../../../../../../packages/lumo/src/component/Component"
 import { FromTag } from "../../../../../../../packages/lumo/src/component/Input"
 
 NavBar.router = ContextKey<Router>()
@@ -8,7 +8,7 @@ NavBar.router = ContextKey<Router>()
 function NavBar(input: FromTag<{}>) {
    const router = fromRoot(NavBar.router)
 
-   return component(
+   return template(
       <div>
          hi
       </div>
