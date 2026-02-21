@@ -1,6 +1,6 @@
 export type Rotation = 0 | 1 | 2 | 3
 
-export class BlokkState {
+export class BlokkModel {
     public shiftY: number
 
     constructor(
@@ -8,7 +8,7 @@ export class BlokkState {
         public shiftX: number,
         public rotation: Rotation
     ) {
-        this.shiftY = this.computeInitialShiftY(rotation)
+        this.shiftY = this.calcInitialShiftY(rotation)
     }
 
     moveDown() {
@@ -27,14 +27,8 @@ export class BlokkState {
         this.rotation = ((this.rotation + 1) % 4) as Rotation;
     }
 
-    getConstrainedShiftX(boardWidth: number) {
-        const bounds = this.getOccupiedBounds(this.rotation);
-        const minShiftX = -bounds.minC;
-        const maxShiftX = boardWidth - (bounds.maxC + 1);
-        return Math.min(Math.max(this.shiftX, minShiftX), maxShiftX);
-    }
-
     // # adjustments since not all shapes are flush to edge of base grid
+
     get rightEdge() {
         const b = this.getOccupiedBounds(this.rotation)
         return this.shiftX + (b.maxC + 1)
@@ -55,10 +49,9 @@ export class BlokkState {
         return this.shiftY + (b.maxR + 1)
     }
 
-    computeInitialShiftY(rotation: Rotation) {
-        // Use the shared rotation-aware bounds helper to avoid duplicated logic.
+    private calcInitialShiftY(rotation: Rotation) {
         const b = this.getOccupiedBounds(rotation);
-        // place so bottom-most filled cell's bottom is at y=0
+        // place so bottom-most filled cell's bottom is at y = 0
         return -(b.maxR + 1);
     }
 

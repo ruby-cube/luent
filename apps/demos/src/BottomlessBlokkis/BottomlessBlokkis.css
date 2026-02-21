@@ -52,7 +52,7 @@ button {
     background-color: rgb(229, 232, 233);
 }
 
-.move-btn-group {
+.console-btns {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto auto;

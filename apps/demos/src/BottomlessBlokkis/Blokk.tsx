@@ -1,6 +1,6 @@
 import { For, FromTag, template } from "@rue/lumo";
 import { Ionic } from "@rue/quarky";
-import { BlokkState } from "./BlokkState";
+import { BlokkModel } from "./BlokkState";
 import "./Blokk.css"
 
 const GAP = 1;
@@ -9,7 +9,7 @@ export const CELL_SIZE = 20;
 const degrees = [0, 270, 180, 90] as const
 
 export function Blokk(setup: FromTag<{
-    blokk: Ionic<BlokkState>
+    blokk: Ionic<BlokkModel>
 }>) {
     const { blokk } = setup
 

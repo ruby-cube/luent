@@ -3,7 +3,7 @@ import { atDiscard, atMount, atUnmount, createRoot, For, FromTag, If, template }
 import { Ion, Ionic, queueTask } from "@rue/quarky";
 import { As } from "../../../../packages/lumo/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
-import { BlokkState, Rotation } from "./BlokkState";
+import { BlokkModel, Rotation } from "./BlokkState";
 import './BottomlessBlokkis.css'
 
 const BOARD_COLUMNS = 20
@@ -18,7 +18,7 @@ export function BottomlessBlokkis() {
     })
 
     function createBlokk() {
-        return Ionic(new BlokkState(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
+        return Ionic(new BlokkModel(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
     }
 
     function randomShape() {
@@ -69,15 +69,15 @@ export function BottomlessBlokkis() {
         }
     }
 
-    function isFlushRight(blokk: Ionic<BlokkState>) {
+    function isFlushRight(blokk: Ionic<BlokkModel>) {
         return blokk.rightEdge === BOARD_COLUMNS
     }
 
-    function isBottomedOut(blokk: Ionic<BlokkState>) {
+    function isBottomedOut(blokk: Ionic<BlokkModel>) {
         return blokk.topEdge === BOARD_ROWS
     }
 
-    function isFlushLeft(blokk: Ionic<BlokkState>) {
+    function isFlushLeft(blokk: Ionic<BlokkModel>) {
         return blokk.leftEdge === 0
     }
 
@@ -85,7 +85,7 @@ export function BottomlessBlokkis() {
         <div class='container'>
             <div class='header'>
                 <h1>Bottomless Blokkis</h1>
-                The game where you never win or lose
+                ... where you can never win or lose
             </div>
             <div class='board' style={`
                 --board-columns: ${BOARD_COLUMNS};
@@ -100,7 +100,7 @@ export function BottomlessBlokkis() {
                 )}
             </div>
             <div class='console'>
-                <div class='move-btn-group'>
+                <div class='console-btns'>
                     <button class='rotate-btn' on:click={rotate}>⟲</button>
                     <button class='move-left' on:click={moveLeft}>{`◀`}</button>
                     <button class='move-right' on:click={moveRight}>{`▶`}</button>
