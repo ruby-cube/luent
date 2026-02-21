@@ -1,0 +1,17 @@
+.blokk-base {
+    width: var(--grid-size);
+    height: var(--grid-size);
+    display: grid;
+    grid-gap: var(--gap);
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+}
+
+.blokk-cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+}
+
+.blokk-cell.filled {
+    background-color: #564747;
+}

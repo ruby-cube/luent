@@ -1,1 +1,1 @@
-import './src/BottomlessBlokkis'
+import './src/BottomlessBlokkis/BottomlessBlokkis'

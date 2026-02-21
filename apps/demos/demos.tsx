@@ -21,7 +21,7 @@ import { TestMoveBox } from "./src/TestBoxMove"
 import { TestListSelection } from "./src/TestListSelection"
 import { TestConsecutiveIfElse } from "./src/TestConsecutiveIfElse"
 import { TestNestedIfElse } from "./src/TestNestedIfElse"
-import { BottomlessBlokkis } from "./src/BottomlessBlokkis"
+import { BottomlessBlokkis } from "./src/BottomlessBlokkis/BottomlessBlokkis"
 
 export function runDemo() {
    const app = createRoot(BottomlessBlokkis)
