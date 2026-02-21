@@ -663,7 +663,7 @@ declare namespace React {
 
 
    //$$$
-   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & Lumo.LumoHooks<T>
+   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & LumoHooks<T>
 
    //$$$
    interface _DOMAttributes<T> {
@@ -672,7 +672,26 @@ declare namespace React {
 
    type LifecycleTask<T> = (element: T) => void
 
-
+interface LumoHooks<T> {
+      'at:create'?: LifecycleTask<T> | any
+      'at:mount'?: LifecycleTask<T>
+      'at:remount'?: LifecycleTask<T>
+      'at:created'?: LifecycleTask<T>
+      'at:mounted'?: LifecycleTask<T>
+      'at:remounted'?: LifecycleTask<T>
+      'after:created'?: LifecycleTask<T>
+      'after:mounted'?: LifecycleTask<T>
+      'after:remounted'?: LifecycleTask<T>
+      'at:discard'?: LifecycleTask<T>
+      'at:unmount'?: LifecycleTask<T>
+      'at:demount'?: LifecycleTask<T>
+      'at:discarded'?: LifecycleTask<T>
+      'at:unmounted'?: LifecycleTask<T>
+      'at:demounted'?: LifecycleTask<T>
+      'after:discarded'?: LifecycleTask<T>
+      'after:unmounted'?: LifecycleTask<T>
+      'after:demounted'?: LifecycleTask<T>
+   }
 
    //$$$
    interface DOMEvents<T> {// Clipboard Events
@@ -2505,7 +2524,7 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
    : never;
 
 
-type LumoAttributes<C, P> = Lumo.LumoHooks & P extends { '~attributes'?: infer A } ? A : P
+type LumoAttributes<C, P> = P extends { '~attributes'?: infer A } ? A& Lumo.LumoHooks<C> : P & Lumo.LumoHooks<C>
 // C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
 // : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
 // : C extends { defaultProps: infer D } ? Defaultize<P, D>

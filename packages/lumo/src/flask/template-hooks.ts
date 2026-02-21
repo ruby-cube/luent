@@ -3,7 +3,7 @@ import { getFlask } from "@rue/flask";
 import { afterCreated, afterDemounted, afterDiscarded, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDiscard, atDiscarded, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
 import { AnyObject } from "@rue/types";
 
-type LifecycleTask = (element: AnyObject, initialOrFinal?: boolean) => void;
+type LifecycleTask<T = any> = (element: T, initialOrFinal?: boolean) => void;
 
 export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTask }) {
    const flask = getFlask()
@@ -90,24 +90,24 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
 }
 
    export interface LumoHooks<T> {
-      'at:create'?: LifecycleTask | any
-      'at:mount'?: LifecycleTask
-      'at:remount'?: LifecycleTask
-      'at:created'?: LifecycleTask
-      'at:mounted'?: LifecycleTask
-      'at:remounted'?: LifecycleTask
-      'after:created'?: LifecycleTask
-      'after:mounted'?: LifecycleTask
-      'after:remounted'?: LifecycleTask
-      'at:discard'?: LifecycleTask
-      'at:unmount'?: LifecycleTask
-      'at:demount'?: LifecycleTask
-      'at:discarded'?: LifecycleTask
-      'at:unmounted'?: LifecycleTask
-      'at:demounted'?: LifecycleTask
-      'after:discarded'?: LifecycleTask
-      'after:unmounted'?: LifecycleTask
-      'after:demounted'?: LifecycleTask
+      'at:create'?: LifecycleTask<T> | any
+      'at:mount'?: LifecycleTask<T>
+      'at:remount'?: LifecycleTask<T>
+      'at:created'?: LifecycleTask<T>
+      'at:mounted'?: LifecycleTask<T>
+      'at:remounted'?: LifecycleTask<T>
+      'after:created'?: LifecycleTask<T>
+      'after:mounted'?: LifecycleTask<T>
+      'after:remounted'?: LifecycleTask<T>
+      'at:discard'?: LifecycleTask<T>
+      'at:unmount'?: LifecycleTask<T>
+      'at:demount'?: LifecycleTask<T>
+      'at:discarded'?: LifecycleTask<T>
+      'at:unmounted'?: LifecycleTask<T>
+      'at:demounted'?: LifecycleTask<T>
+      'after:discarded'?: LifecycleTask<T>
+      'after:unmounted'?: LifecycleTask<T>
+      'after:demounted'?: LifecycleTask<T>
    }
 
 const flaskHooks = {
