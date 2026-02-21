@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "vite",
+    "dev-style": "NODE_ENV=style vite --open /index-style.html",
     "build-babel": "tsc --jsx react-jsx && babel src -d dist"
   },
   "dependencies": {

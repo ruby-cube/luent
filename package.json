@@ -19,6 +19,7 @@
     "dev": "pnpm -F @rue/play dev",
     "dev-movies": "pnpm -F @rue/movies-app dev",
     "dev-demos": "pnpm -F @rue/demos dev",
+    "dev-style": "pnpm -F @rue/demos dev-style",
     "dev-tests": "pnpm -F @rue/tests dev",
     "dev-chat": "pnpm -F @rue/live-chat dev",
     "build-babel": "pnpm -F @rue/play build-babel",

@@ -9,7 +9,7 @@ import { noop } from "@rue/utils";
 import { UpdateType } from "./x_IdleUpdate";
 
 
-export const queueTask = scheduler.postTask;
+export const queueTask = (task: () => void) => scheduler.postTask(task);
 
 // function queueSwiftTask(task: Task) {
 //    // console.trace('queueSwiftTask')
@@ -91,7 +91,7 @@ export class RenderCycle {
    constructor(
       public update: Update,
    ) {
-      console.log('(()) render cycle', update.idle)
+      // console.log('(()) render cycle', update.idle)
       this.process = new CycleProcess(update)
       // const schedulePrerenderTasks = update.idle ? queueIdleTask : runTask // TODO: need to check deadline for queueSwiftTask
       // const scheduleInternalRender = update.idle ? queueTask : runTask
@@ -133,7 +133,7 @@ export class RenderCycle {
          this.runPostcommit()
          // this.scheduleTick()
          this.update.complete()
-         if ( __DEV__) {
+         if (__DEV__) {
             requestAnimationFrame((time) =>
                this.timecheck(time)
             )
@@ -380,13 +380,13 @@ export class RenderCycle {
 
    scheduleEffects(effects: EffectQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
-      if ( __DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       this.useTaskQueue(adjustedPhase).scheduleEffects(effects)
    }
 
    scheduleTask(task: Task, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
-      if ( __DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       this.useTaskQueue(adjustedPhase).scheduleTask(task)
    }
 

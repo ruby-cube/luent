@@ -24,7 +24,7 @@ let activeUpdate: Update | null;
 export function $activeUpdate() {
    const update = getActiveUpdate()
    if (!update) {
-      console.warn('no update')
+      // console.warn('no update')
       if (activeUpdate) {
          return activeUpdate
       }

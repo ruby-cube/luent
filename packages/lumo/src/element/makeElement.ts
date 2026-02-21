@@ -121,7 +121,7 @@ export function makeElement(
 //     }
 // }
 
-function analyzeAttributes(entries: AnyObject) {
+export function analyzeAttributes(entries: AnyObject) {
    const events: AnyObject = {};
    const attributes: AnyObject = {};
    const hooks: AnyObject = {}
@@ -171,7 +171,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    delete attributes['mu:checked'];
    attributes.checked = ion;
    if (!isIon(ion)) {
-      if ( __DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion, 'checked')
@@ -186,7 +186,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    delete attributes['mu:checked'];
    attributes.checked = () => ion() === radioValue;
    if (!isIon(ion)) {
-      if ( __DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion)
@@ -200,7 +200,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    delete attributes['mu:value'];
    attributes.value = ion;
    if (!isIon(ion)) {
-      if ( __DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
+      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       setUpInputListener(element, ion)
@@ -231,10 +231,10 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    watchToRender(ion, () => {
       queueInternalRender(() => {
          console.log('$$$ select mu:value', toString(toValue(ion)))
-         for (const option of element.children){
+         for (const option of element.children) {
             console.log("$$$ OPTION", option.textContent)
          }
-         queueTask(()=>{
+         queueTask(() => {
             element.value = toString(toValue(ion))
          })
          console.log('$$$ select mu:value-->', element, 'value', element.value)
@@ -242,7 +242,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isIon(ion)) {
-      if ( __DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
       element.addEventListener('change', e => {
@@ -278,7 +278,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 function setUpCheckboxInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {
       // instantUpdate(() => {
-         updateIonWithInput(ion, e, 'checked')
+      updateIonWithInput(ion, e, 'checked')
       // })
    })
 }
@@ -286,7 +286,7 @@ function setUpCheckboxInputListener(element: Element, ion: { value: any } | { se
 function setUpInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }, key: string = 'value') {
    element.addEventListener('input', e => {
       // instantUpdate(() => {
-         updateIonWithInput(ion, e, key)
+      updateIonWithInput(ion, e, key)
       // })
    })
 }
@@ -298,7 +298,7 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
    //    )
    // }
    // else 
-      if ('value' in ion) {
+   if ('value' in ion) {
       ion.value =
          //@ts-expect-error
          e.currentTarget?.[key];
@@ -330,7 +330,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
    const flask = getFlask()
    for (const key in attributes) {
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
-      if ( __DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
+      if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
       // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
       const value = attributes[key]
       // TODO: only attributes that affect layout should be scheduled for render phase
@@ -362,7 +362,7 @@ function setAttribute(node: AnyObject, attribute: string, value: any) {
       const _value = Boolean(value)
       // if (_value === false) node.removeAttribute(attribute)
       // else node.setAttribute(attribute, _value)
-         node[attribute] = _value
+      node[attribute] = _value
    }
    else if (node instanceof SVGElement || isAttributeOnly(attribute)) {
       node.setAttribute(attribute, toString(value) ?? '')
@@ -591,7 +591,7 @@ function removePreviousClasses(prevValue: string | AnyObject, classList: DOMToke
          }
       }
    }
-   else if ( __DEV__) {
+   else if (__DEV__) {
       console.warn('DEV RESEARCH: Reactive class input has not been handled for', prevValue)
    }
 }
@@ -608,7 +608,7 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
       setUpClassesFromObject(value, classList, flask)
    }
    else {
-      if ( __DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
+      if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
    }
 }
 
@@ -641,7 +641,7 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
 function setUpClassesFromString(classString: string, classList: DOMTokenList) {
    const classes = classString.split(' ')
    for (const activeClass of classes) {
-      classList.add(activeClass)
+      if (activeClass) classList.add(activeClass)
    }
 }
 
@@ -701,11 +701,9 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
 function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, flask: Flask) {
    if (entry instanceof Object) {
       for (const key in entry) {
-
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isGetter(value)) {
-            watchToRender(value, ({ current, previous }) => {
-               // if (current === previous) return;
+            watchToRender(value, () => {
                queueInternalRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
                }, flask)
@@ -731,6 +729,7 @@ function assignStyleProperty(style: AnyObject, property: string, value: string |
       const splitValue = typeof value === 'string' ? value.split(' !importan') : undefined; // ['red', 't'] 
       const _value = String(splitValue ? splitValue[0] : value);
       if (splitValue === undefined || splitValue.length === 1) {
+         // if (key === 'transform') 
          style.setProperty(key, _value)
       }
       else {

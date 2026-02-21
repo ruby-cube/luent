@@ -221,7 +221,7 @@ test('TestIfElseDisplayView', async ({ page }) => {
 })
 
 
-test.only('TestConsecutiveIfElse', async ({ page }) => {
+test('TestConsecutiveIfElse', async ({ page }) => {
    await page.goto(LOCAL_HOST);
    await page.addScriptTag({ type: 'module', url: '/src/TestConsecutiveIfElse.tsx' })
 

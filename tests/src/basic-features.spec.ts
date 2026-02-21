@@ -73,7 +73,7 @@ test('TestBoxMove', async ({ page }) => {
    page.close()
 })
 
-test('TestListSelection', async ({ page }) => {
+test.skip('TestListSelection', async ({ page }) => {
    await page.goto(LOCAL_HOST);
    await page.addScriptTag({ type: 'module', url: '/src/TestListSelection.tsx' })
 

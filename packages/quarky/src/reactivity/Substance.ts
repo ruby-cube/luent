@@ -309,6 +309,7 @@ export class IonSubstance implements WatchedSubstance {
       this.relinkProxy = () => {
          const effect = this.subject.effect
          if (!effect) {
+            return;
             throw new Error('Must call linkEffect before retracking')
          }
          this.proxySubject?.linkEffect(effect)

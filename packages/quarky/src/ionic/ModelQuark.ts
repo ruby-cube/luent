@@ -394,7 +394,7 @@ export class ModelQuark implements Atom {
          get ionic() { return { get [key]() { return _getter.apply(proxy) } } },
          track,
          trackModel
-      }) : _getter;
+      }) : _getter.bind(proxy);
 
       const set = def?.set ? def.set.bind({
          config: extension,
@@ -403,7 +403,7 @@ export class ModelQuark implements Atom {
          trigger,
          triggerModel,
          triggerAll
-      }) : _setter;
+      }) : _setter.bind(proxy);
 
       const hooks = (this.getHooks(valueKey) ?? {}) as PropertyHooks
       if (hooks instanceof Function) console.error(`Failed to ionize nested object, ${valueKey.toString()}. Must pass ionizer in config object, e.g. { '-as': Ionic } or use as() helper`)

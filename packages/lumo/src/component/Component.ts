@@ -7,6 +7,8 @@ import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { Style } from "./Style";
+import { analyzeAttributes } from "../element/makeElement";
+import { setUpHooks } from "../flask/template-hooks";
 
 
 
@@ -41,7 +43,7 @@ export function template(template: JSXTemplate) {
       exposed: undefined, // TODO: make read only
       jsxNodes,
       ref,
-      css: (strings: TemplateStringsArray, ...values: string[]) => {
+      css: (strings: TemplateStringsArray, ...values: any[]) => {
          Style(strings, ...values)
          return {
             exposed: undefined,
@@ -106,7 +108,8 @@ export function makeComponent(
    tag: ComponentConfig,
    // $index: Ion<number> | undefined
 ): Component {
-   const { ref } = tag
+   const { ref, ...other } = tag
+   const {hooks} = analyzeAttributes(other)
    // TODO: component flask lifecycle hooks
    tag.Slot = Slot;
    const output = Component(toInput(tag))
@@ -121,6 +124,7 @@ export function makeComponent(
          initializeRef(ref, publicComponent)
       }
    }
+   setUpHooks(publicComponent, hooks)
 
    // if (tag['display-if']) setUpConditionalDisplay()
    return output

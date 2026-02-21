@@ -223,11 +223,9 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
 
    let prevState = subject.getValue()
 
-   if (!subject.reactive) {
+   if (!subject.reactive && !eager) {
       return;
    }
-
-
 
    let stale = false;
    let paused = false;
