@@ -1,33 +1,22 @@
-import { atDiscard, createRoot, template } from "@rue/lumo";
-import { Ion, Ionic } from "@rue/quarky";
+import { atDiscard, createRoot, NodeRef, State, template } from "@rue/lumo";
+import { Ion } from "@rue/quarky";
 import { As } from "../../../../packages/lumo/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
-import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
 import './BottomlessBlokkis.css'
 
 const BOARD_COLUMNS = 20
 const BOARD_ROWS = 20
+const BLOKK_GRID = 4
 
 export function BottomlessBlokkis() {
 
-    const $blokk = Ion(createBlokk(), {
+    const $activeBlokk = Ion(0, {
         next() {
-            this.value = createBlokk()
+            this.value = ($activeBlokk() + 1) % 2;
         }
     })
 
-    function createBlokk() {
-        return Ionic(makeBlokk(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
-    }
-
-    function randomShape() {
-        const index = Math.abs(Math.floor(Math.random() * shapes.length - 1))
-        return shapes[index]
-    }
-
-    function randomRotation() {
-        return Math.floor(Math.random() * 4) as Rotation;
-    }
+    const $blokk = NodeRef(Blokk)
 
     function dropBlock() {
         const id = setInterval(moveDown, 1000)
@@ -50,7 +39,7 @@ export function BottomlessBlokkis() {
         const blokk = $blokk()
         if (!blokk) return;
         if (isBottomedOut(blokk)) {
-            $blokk.next()
+            $activeBlokk.next()
             return;
         }
         blokk.moveDown()
@@ -68,15 +57,15 @@ export function BottomlessBlokkis() {
         }
     }
 
-    function isFlushRight(blokk: Ionic<BlokkModel>) {
+    function isFlushRight(blokk: State<typeof Blokk>) {
         return blokk.rightEdge === BOARD_COLUMNS
     }
 
-    function isBottomedOut(blokk: Ionic<BlokkModel>) {
+    function isBottomedOut(blokk: State<typeof Blokk>) {
         return blokk.topEdge === BOARD_ROWS
     }
 
-    function isFlushLeft(blokk: Ionic<BlokkModel>) {
+    function isFlushLeft(blokk: State<typeof Blokk>) {
         return blokk.leftEdge === 0
     }
 
@@ -91,13 +80,12 @@ export function BottomlessBlokkis() {
                 --board-rows: ${BOARD_ROWS};
                 --cell-size: ${CELL_SIZE}px;
             `}>
-                {As($blokk, blokk =>
+                {As($activeBlokk,
                     <Blokk
-                        at:create={dropBlock()}
-                        matrix={$blokk()!.matrix}
-                        shiftX={($blokk()!.shiftX)}
-                        shiftY={($blokk()!.shiftY)}
-                        rotation={($blokk()!.rotation)}
+                        at:create={blokk => blokk.initX(BOARD_COLUMNS / 2 - BLOKK_GRID / 2)}
+                        at:mount={dropBlock()}
+                        ref={$blokk}
+                        shapes={shapes}
                     ></Blokk>
                 )}
             </div>

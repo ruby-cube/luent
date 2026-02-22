@@ -1,14 +1,23 @@
 export type Rotation = 0 | 1 | 2 | 3
 
 export class BlokkModel {
+
+    public shiftX: number = 0
     public shiftY: number
 
     constructor(
         public matrix: (0 | 1)[][],
-        public shiftX: number,
         public rotation: Rotation
     ) {
         this.shiftY = this.calcInitialShiftY(rotation)
+    }
+
+    private initialized = false;
+
+    initX(x: number) {
+        if (this.initialized) return;
+        this.shiftX = x
+        this.initialized = true;
     }
 
     moveDown() {

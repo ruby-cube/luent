@@ -35,7 +35,7 @@ export type NodeReferent<
 //    // [INTERNAL]: MetaNodeRef;
 // }
 
-
+export type State<T extends RefSource> = NodeReferent<T>
 
 export type $Node<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
 
