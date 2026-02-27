@@ -1,4 +1,4 @@
-import { template, For } from "@rue/lumo"
+import { template, For, css } from "@rue/lumo"
 import { Ion, Ionic, PRELUDE, watch } from "@rue/quarky"
 
 // Adapted from Vue's CRUDApp demo
@@ -75,7 +75,7 @@ export function CRUDApp() {
          )}
       </>
    )
-      .css`
+      .style(css`
          * {
             font-size: inherit;
          }
@@ -98,5 +98,5 @@ export function CRUDApp() {
          button + button {
             margin-left: 5px;
          }
-      `
+      `)
 }

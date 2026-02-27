@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NodeRef, template, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
+import { NodeRef, template, COMPONENT, ComponentForge, If, Else, For, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/LazyComponent";
@@ -19,7 +19,7 @@ function genId() {
 // const SideBlock = lazyLoadComponent({
 //     load: () => {
 //         const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
-//         return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
+//         return new Promise((resolve: (SideBlock: ComponentForge) => void, reject) => {
 //             setTimeout(() => {
 //                 promise.then((SideBlock) => {
 //                     resolve(SideBlock)
@@ -34,7 +34,7 @@ function genId() {
 // const TestBox = lazyLoadComponent({
 //     load: () => {
 //         const promise = import('./TestBox').then(({ TestBox }) => TestBox)
-//         return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
+//         return new Promise((resolve: (SideBlock: ComponentForge) => void, reject) => {
 //             setTimeout(() => {
 //                 promise.then((SideBlock) => {
 //                     resolve(SideBlock)

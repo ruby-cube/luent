@@ -1,17 +1,17 @@
-import { ComponentSetup } from "./Component";
+import { ComponentForge } from "./Component";
 import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@rue/utils";
 import { ion } from "../../../quarky/src";
 import { AnyObject } from "@rue/types";
 
-const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new Map()
+const lazyComponents: Map<() => Promise<ComponentForge>, ComponentForge> = new Map()
 
 export function lazyLoadComponent<P extends AnyObject>(config: {
-    load: () => Promise<ComponentSetup<P>>,
+    load: () => Promise<ComponentForge<P>>,
     onIdle?: boolean
-    Placeholder?: ComponentSetup,
+    Placeholder?: ComponentForge,
     timeout?: number,
-    Error?: ComponentSetup<{ error: any }>,
+    Error?: ComponentForge<{ error: any }>,
 }) { // TODO: Idle load priorities
     const { load, Error, Placeholder, timeout, onIdle } = config;
     const $loading = Ion(true);
@@ -24,14 +24,14 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             loadComponent()
         })
     }
-    let Component: ComponentSetup
+    let Component: ComponentForge
     function loadComponent() {
         let timeoutID: any;
         if (idleID !== undefined) {
             cancelIdleCallback(idleID);
             idleID = undefined;
         }
-        Component = lazyComponents.get(load) || noop as ComponentSetup // if already loaded on idle, get from lazyComponents map
+        Component = lazyComponents.get(load) || noop as ComponentForge // if already loaded on idle, get from lazyComponents map
         if (Component === noop) {
             const pendingComponent = load();
             if (timeout) {

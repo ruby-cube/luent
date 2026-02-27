@@ -87,7 +87,7 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
                      {For(columns, key => (
                         <th on:click={e => sortBy(key)} class={{ active: ($sortKey() == key) }}>
                            {capitalize(key)}
-                           <span class={['arrow', (sortOrders[key] > 0 ? 'asc' : 'dsc')]}></span>
+                           <span class={(`arrow ${sortOrders[key] > 0 ? 'asc' : 'dsc'}`)}></span>
                         </th>
                      ))}
                   </tr>

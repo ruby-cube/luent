@@ -82,19 +82,19 @@ export function CellsApp() {
          </table >
       </>
    )
-      .css`
+      .style(css`
          body {
             margin: 0;
          }
 
          table {
-            border - collapse: collapse;
+            border-collapse: collapse;
             table-layout: fixed;
             width: 100%;
          }
 
          th {
-            background - color: #eee;
+            background-color: #eee;
          }
 
          tr:first-of-type th {
@@ -110,7 +110,7 @@ export function CellsApp() {
             height: 1.5em;
             overflow: hidden;
          }
-      `
+      `)
 }
 
 
@@ -143,7 +143,7 @@ function Cell(input: FromTag<{
          )}
       </div >
    )
-      .css`
+      .style(css`
          .cell, .cell input {
             height: 1.5em;
             line-height: 1.5;
@@ -158,7 +158,7 @@ function Cell(input: FromTag<{
             width: 100%;
             box-sizing: border-box;
          }
-      `
+      `)
 }
 
 

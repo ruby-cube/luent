@@ -4,13 +4,17 @@ import babelLumoTransform from '../../packages/lumo/babel-plugin/index.js'
 import * as babel from '@babel/core';
 
 
-export default defineConfig({
+export default defineConfig(async () => {
+   const { default: tailwindcss } = await import('@tailwindcss/vite')
+
+   return {
    server: {
       fs: {
          cachedChecks: false
       }
    },
    plugins: [ // TODO: replace with proper vite lumo plugin
+      tailwindcss(),
       {
          name: 'vite-lumo-plugin-pre',
          enforce: 'pre',
@@ -107,4 +111,5 @@ export default defineConfig({
    //   },
    // },
    // },
+   }
 })

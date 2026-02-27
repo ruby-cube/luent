@@ -175,7 +175,7 @@ function ArticlePagination(input: FromTag<{
    return template(
       <ul class="pagination">
          {Thru($totalPages, (page) =>
-            <li class={{ "active": $page() === page, "page-item": true }}>
+            <li class={`${$page() === page && 'active'} page-item`}>
                <a>{page}</a>
             </li>
          )}

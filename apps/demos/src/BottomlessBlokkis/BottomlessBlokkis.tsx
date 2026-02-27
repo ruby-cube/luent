@@ -16,6 +16,9 @@ export function BottomlessBlokkis() {
         }
     })
 
+    const BLOKK_COLOR = '#223344'
+    const $blokkColor = Ion(BLOKK_COLOR)
+
     function createBlokk() {
         return Ionic(makeBlokk(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
     }
@@ -86,11 +89,14 @@ export function BottomlessBlokkis() {
                 <h1>Bottomless Blokkis</h1>
                 ... where you can never win or lose
             </div>
-            <div class='board' style={`
-                --board-columns: ${BOARD_COLUMNS};
-                --board-rows: ${BOARD_ROWS};
-                --cell-size: ${CELL_SIZE}px;
-            `}>
+            <div
+                class='board'
+                style={`
+                    --board-columns: ${BOARD_COLUMNS};
+                    --board-rows: ${BOARD_ROWS};
+                    --cell-size: ${CELL_SIZE}px;
+                `}
+            >
                 {As($blokk, blokk =>
                     <Blokk
                         at:create={dropBlock()}
@@ -98,6 +104,10 @@ export function BottomlessBlokkis() {
                         shiftX={($blokk()!.shiftX)}
                         shiftY={($blokk()!.shiftY)}
                         rotation={($blokk()!.rotation)}
+                        color={$blokkColor}
+                        gap={1}
+                        on:mouseenter={e => $blokkColor.value = 'red'}
+                        on:mouseleave={e => $blokkColor.value = BLOKK_COLOR}
                     ></Blokk>
                 )}
             </div>
@@ -168,8 +178,8 @@ const shapes: (0 | 1)[][][] = [
 
 
 
-if (__STYLE__)
-    createRoot(() =>
-        <BottomlessBlokkis></BottomlessBlokkis>
-    ).mount('#root')
+// if (__STYLE__)
+//     createRoot(() =>
+//         <BottomlessBlokkis></BottomlessBlokkis>
+//     ).mount('#root')
 

@@ -1,0 +1,25 @@
+@reference "./index.css";
+
+.lessons .card {
+    @apply bg-amber-400
+}
+
+.lessons .blue-card {
+    @apply bg-blue-600
+}
+
+.lessons .dark-card {
+    @apply bg-amber-900
+}
+
+/* .card {
+    @apply bg-amber-400
+}
+
+.blue-card {
+    @apply bg-blue-600
+}
+
+.dark-card {
+    @apply bg-amber-900
+} */

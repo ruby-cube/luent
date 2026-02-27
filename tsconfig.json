@@ -54,7 +54,7 @@
       "@rue/types": [
         "./packages/types/index.ts"
       ]
-    },
+    }
   },
   "include": [
     "packages",

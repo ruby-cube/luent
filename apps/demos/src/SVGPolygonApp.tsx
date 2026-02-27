@@ -1,4 +1,4 @@
-import { template, For, FromTag, Style, } from "@rue/lumo"
+import { template, For, FromTag, Style, css, } from "@rue/lumo"
 import { as, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
@@ -64,7 +64,7 @@ export function SVGPolygonApp() {
          <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
       </>
    )
-      .css`
+      .style(css`
          polygon {
            fill: #42b983;
            opacity: 0.75;
@@ -91,7 +91,7 @@ export function SVGPolygonApp() {
            top: 0;
            left: 300px;
          }
-      `
+      `)
 }
 
 // const replacer = (_key: string, val: unknown): any => {

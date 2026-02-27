@@ -1,4 +1,4 @@
-import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount } from "@rue/lumo";
+import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, css } from "@rue/lumo";
 import { instantUpdate, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
@@ -316,7 +316,7 @@ export function TestCreateMountShow() {
          </section>
       </article >
    )
-      .css`
+      .style(css`
       hr {
          border: none;
          border-bottom: 1px solid #ddd;
@@ -368,7 +368,7 @@ export function TestCreateMountShow() {
          text-align: center;
          margin: .25em
       }
-   `
+   `)
 }
 
 

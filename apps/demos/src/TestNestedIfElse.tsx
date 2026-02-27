@@ -1,4 +1,4 @@
-import { template, If, Else, fade, ElseIf, NodeRef, createRoot } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, NodeRef, createRoot, css } from "@rue/lumo";
 import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -34,11 +34,11 @@ export function TestNestedIfElse() {
          </div>
       </div>
    )
-      .css`
+      .style(css`
          .container {
             overflow: hidden;
          }
-      `
+      `)
 }
 
 

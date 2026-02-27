@@ -121,13 +121,13 @@ export function TodoMVC() {
                {RemainingCount()}
                <ul class="filters">
                   <li>
-                     <a href="#/all" class={{ 'selected': ($view() === 'all') }}>All</a>
+                     <a href="#/all" class={($view() === 'all' && 'selected')}>All</a>
                   </li>
                   <li>
-                     <a href="#/active" class={{ 'selected': ($view() === 'active') }}>Active</a>
+                     <a href="#/active" class={($view() === 'active' && 'selected')}>Active</a>
                   </li>
                   <li>
-                     <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
+                     <a href="#/completed" class={($view() === 'completed' && 'selected')}>Completed</a>
                   </li>
                </ul>
                <button display-if={($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
@@ -201,7 +201,7 @@ function TodoList(input: FromTag<{
             const $isEditing = Ion(() => todo === $editedTodo());
 
             return (
-               <li class={["todo", { completed: (todo.completed), editing: $isEditing }]}>
+               <li class={(`todo ${todo.completed && 'completed'} ${$isEditing() && 'editing'}`)}>
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={todo.$completed} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>

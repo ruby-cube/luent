@@ -1,20 +1,20 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject, Falsey } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
-import { INTERNAL, Ion, toValue } from "@rue/quarky";
-import { isObject, normalizeToArray } from "@rue/utils";
-import { $Node, $Nodes, initializeListRef, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
-import { toInput } from "./Input";
+import { INTERNAL, Ion, isIon, PRELUDE, queueInternalRender, toValue, watch } from "@rue/quarky";
+import { isObject, normalizeToArray, Ref } from "@rue/utils";
+import { $Node, $Nodes, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
+import { MaybeIon, toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
-import { Style } from "./Style";
-import { analyzeAttributes } from "../element/makeElement";
+import { analyzeAttributes, createOverrideClasses } from "../element/makeElement";
 import { setUpHooks } from "../flask/template-hooks";
+import { getActiveFlask } from "@rue/flask";
 
 
 
 
 // export type Slot = JSXNode
-export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
+export type ComponentForge<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
 
 export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
@@ -43,8 +43,8 @@ export function template(template: JSXTemplate) {
       exposed: undefined, // TODO: make read only
       jsxNodes,
       ref,
-      css: (strings: TemplateStringsArray, ...values: any[]) => {
-         Style(strings, ...values)
+      style: (arg: any) => {
+         // Style(strings, ...values)
          return {
             exposed: undefined,
             jsxNodes,
@@ -87,7 +87,7 @@ export function isComponentKit(entity: unknown): entity is Component {
 
 
 
-export type InferSlot<T extends ComponentSetup = ComponentSetup> =
+export type InferSlot<T extends ComponentForge = ComponentForge> =
    T extends (setup?: infer P) => any ?
    P extends { Slot: infer S } ?
    S
@@ -102,17 +102,51 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
    (setup?: P) => JSXNode
 
 
+// function toTokenList(classString: MaybeIon<string | Falsey>) {
+//    if (!classString) return;
+//    const classes = createTokenList()
+//    if (isIon(classString)) {
+//       const flask = getActiveFlask()
+//       watch(classString, ({ previous, eager }) => {
+//          queueInternalRender(() => {
+//             const value = classString()
+//             if (!eager && previous === value) return;
+//             if (value) classes.value = value
+//          }, flask)
+//       }, { phase: PRELUDE, eager: true })
+
+//    }
+//    else {
+//       classes.value = classString
+//       return classes
+//    }
+// }
+
+// function createTokenList() {
+//    const div = document.createElement('div')
+//    return div.classList
+// }
+
+
+
+export type ComponentTag = (arg: any) => JSX.Element
+
 export function makeComponent(
-   Component: ComponentSetup,
+   Component: ComponentForge,
    Slot: InferSlot | undefined,
    tag: ComponentConfig,
    // $index: Ion<number> | undefined
 ): Component {
-   const { ref, ...other } = tag
-   const {hooks} = analyzeAttributes(other)
-   // TODO: component flask lifecycle hooks
-   tag.Slot = Slot;
-   const output = Component(toInput(tag))
+   const { ref, class: classes, style, ...other } = tag
+   const { hooks, events, attributes } = analyzeAttributes(other)
+
+   const output = Component(toInput({
+      ...other,
+      Slot,
+      classes: createOverrideClasses(classes)
+      // classes: classString
+      // styles: style ? toStyleDeclaration(style) : undefined // TODO:
+   }))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.exposed ?? {}

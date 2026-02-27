@@ -1,4 +1,4 @@
-import { template, Else, Finitron, FromTag, If, NodeRef, Style } from "@rue/lumo";
+import { template, Else, Finitron, FromTag, If, NodeRef, Style, css } from "@rue/lumo";
 import { Ion, queueTask } from "@rue/quarky";
 import "./reset.css"
 
@@ -135,7 +135,7 @@ export function VideoPlayer() {
          )}
       </div>
    )
-      .css`
+      .style(css`
          html {
            font-size: 18px;
            background-color: black;
@@ -175,7 +175,7 @@ export function VideoPlayer() {
            display: inline-block;
            margin-left: 5px;
          }
-      `
+      `)
 }
 
 

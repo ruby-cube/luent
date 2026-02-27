@@ -3,14 +3,16 @@ import { atUnmount } from "../flask/flask-hooks";
 
 const genUID = UIDGenerator(11)
 
+
 // TODO: dynamic styling?
-export function Style(strings: TemplateStringsArray, ...values: string[]) {
+export function Style(strings: TemplateStringsArray, ...values: any[]): string {
    const cssText = composeCSSText(strings, values)
    const id = genUID()
    const style = insertStyle(cssText, id)
    atUnmount(() => {
       style.remove();
    })
+   return ''
 }
 
 function insertStyle(cssText: string, id: string) {
@@ -22,6 +24,7 @@ function insertStyle(cssText: string, id: string) {
 }
 
 function composeCSSText(strings: TemplateStringsArray, values: string[]) {
+   console.log('values', values)
    return strings.reduce((cssText, string, i) => cssText + string + (i < values.length ? values[i] : ''), '')
 }
 

@@ -24,7 +24,7 @@ import { TestNestedIfElse } from "./src/TestNestedIfElse"
 import { BottomlessBlokkis } from "./src/BottomlessBlokkis/BottomlessBlokkis"
 
 export function runDemo() {
-   const app = createRoot(BottomlessBlokkis)
+   const app = createRoot(TestIfElse)
 
    app.mount('#root')
 }

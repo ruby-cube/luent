@@ -1,4 +1,4 @@
-import { template, createRoot, For, listen, NodeRef, Style, target } from "@rue/lumo";
+import { template, createRoot, For, listen, NodeRef, Style, target, css } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { Ion, EACH, Ionic, as } from "@rue/quarky";
@@ -158,11 +158,11 @@ export function TestListSelection() {
          </div>
       </div>
    )
-      .css`
+      .style(css`
          body {
             overflow-y: scroll
          }
-      `
+      `)
 }
 
 

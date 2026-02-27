@@ -1,19 +1,19 @@
-import { ComponentSetup } from "../component/Component";
-import { HTMLTag } from "../element/makeElement";
+import { ComponentForge } from "../component/Component";
+import { TagName } from "../element/makeElement";
 import { ListData } from "../iteratives/For";
 import { ComponentConfig, ElementConfig } from "./makeJSXNode";
 import {  Ion, ion } from "@rue/quarky";
 
 
 //NOTE: We use partial types so that we can split between spreading and directly passing values to template
-export type NodeSetup<T extends HTMLTag | ComponentSetup> =
-    T extends ComponentSetup ? Partial<ComponentConfig<T>>
-    : T extends HTMLTag ? Partial<ElementConfig<T>>
+export type NodeSetup<T extends TagName | ComponentForge> =
+    T extends ComponentForge ? Partial<ComponentConfig<T>>
+    : T extends TagName ? Partial<ElementConfig<T>>
     : never
 
-// T extends HTMLTag ? NodeSetupConfig : ComponentConfig<T extends ComponentSetup ? T : never> & NodeSetupConfig
+// T extends TagName ? NodeSetupConfig : ComponentConfig<T extends ComponentForge ? T : never> & NodeSetupConfig
 export type ItemNodeConfig<
-    T extends HTMLTag | ComponentSetup,
+    T extends TagName | ComponentForge,
     L extends ListData
 > =
     L extends (infer I)[] ?
@@ -22,13 +22,13 @@ export type ItemNodeConfig<
     (item?: I, $index?: Ion<number>) => Partial<NodeSetup<T>>
     : never
 
-export function setUpNode<T extends HTMLTag | ComponentSetup>(node: HTMLTag | ComponentSetup, setup: NodeSetup<T>): NodeSetup<T> {
+export function setUpNode<T extends TagName | ComponentForge>(node: TagName | ComponentForge, setup: NodeSetup<T>): NodeSetup<T> {
     return setup
 }
 
 export function setUpNodes<
-    T extends HTMLTag | ComponentSetup,
+    T extends TagName | ComponentForge,
     L extends ListData
->(listData: ListData, node: HTMLTag | ComponentSetup, setUpItem: ItemNodeConfig<T, L>): ItemNodeConfig<T, L> {
+>(listData: ListData, node: TagName | ComponentForge, setUpItem: ItemNodeConfig<T, L>): ItemNodeConfig<T, L> {
     return setUpItem;
 }

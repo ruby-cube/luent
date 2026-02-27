@@ -559,7 +559,7 @@ function transformJSXAttributes(jsxElementPath) {
    const attributes = jsxElementPath.get('openingElement.attributes');
    for (const attribute of attributes) {
       const node = attribute.node
-      const namespaceName = node.name.namespace && node.name.namespace.name
+      const namespaceName = node.name && node.name.namespace && node.name.namespace.name
       const value = node.value;
       if (!t.isJSXExpressionContainer(value)) continue;
       // if (t.isObjectExpression(value.expression)) {
@@ -571,9 +571,8 @@ function transformJSXAttributes(jsxElementPath) {
       // else 
       if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
          transformTargetCall(value.expression);
-
       }
-      else if (namespaceName !== 'on' && namespaceName !== 'm') {
+      else if (namespaceName !== 'on' && namespaceName !== 'mu') {
          transformIfDerivationShorthand(attribute.get('value.expression'))
       }
    }

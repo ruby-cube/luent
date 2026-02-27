@@ -1,5 +1,5 @@
 import { template, For } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { Ion } from "@rue/quarky";
 
 export function TestCustomRadioSelection() {
    const choices = [1, 2, 3]
@@ -11,7 +11,7 @@ export function TestCustomRadioSelection() {
 
    return template(
       For(choices, (item) =>
-         <p class={{ selected: (item === $selectedItem()) }} on:click={e => selectItem(item)}>
+         <p class={(item === $selectedItem() && 'selected')} on:click={e => selectItem(item)}>
             {item}
          </p>
       )

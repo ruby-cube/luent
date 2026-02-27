@@ -1,4 +1,4 @@
-import { template, Style, Finitron, withTimeout } from "@rue/lumo";
+import { template, Style, Finitron, withTimeout, css } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 import "./style.css"
 
@@ -99,7 +99,7 @@ export function TrafficLight() {
          </button>
       </div>
    )
-      .css`
+      .style(css`
          *,
          *::before,
          *::after {
@@ -124,5 +124,5 @@ export function TrafficLight() {
            border-radius: 50%;
            margin-bottom: 10px;
          }
-      `
+      `)
 }

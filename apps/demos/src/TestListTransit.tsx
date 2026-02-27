@@ -1,4 +1,4 @@
-import { template, For, FromTag, Style } from "@rue/lumo";
+import { template, For, FromTag, Style, css } from "@rue/lumo";
 import { as, EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 import { transitionExisting } from "./TestListSelectTransition";
@@ -56,7 +56,7 @@ export function TestListTransit() {
          </div>
       </div>
    )
-      .css`
+      .style(css`
          .board {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -80,7 +80,7 @@ export function TestListTransit() {
          .transition-position {
             transition: transform 150ms ease-in-out;
          }
-      `
+      `)
 }
 
 const sent = new Map()
@@ -130,7 +130,7 @@ function TodoList(input: FromTag<{
    return template(
       <ul class="todos">
          {For($todos, m => m.id, (todo, $i) => (
-            <li class={{ done: (todo.done) }}
+            <li class={(todo.done && 'done')}
                at:unmount={node => { send(todo.id, node); transitionExisting(lis, $i()) }}
                at:mounted={node => receive(todo.id, node)}
                ref={{ arr: lis, i: $i }}
@@ -144,7 +144,7 @@ function TodoList(input: FromTag<{
          ))}
       </ul>
    )
-      .css`
+      .style(css`
    	   label {
          	width: 100%;
          	height: 100%;
@@ -159,7 +159,7 @@ function TodoList(input: FromTag<{
             border: none;
             background-color: transparent
          }
-      `
+      `)
 }
 
 

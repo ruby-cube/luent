@@ -1,4 +1,4 @@
-import { template, If, Else, fade, ElseIf, NodeRef, createRoot, FromTag, ShowHideType } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, css } from "@rue/lumo";
 import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -49,11 +49,11 @@ export function TestIfElseRemountView(setup: FromTag<{ activation: [ShowHideType
          </div>
       </div>
    )
-      .css`
+      .style(css`
          .container {
             overflow: hidden;
          }
-      `
+      `)
 }
 
 if (__TEST__) createRoot(TestIfElseRemountView).mount('#root')

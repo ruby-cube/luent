@@ -13,5 +13,5 @@
 }
 
 .blokk-cell.filled {
-    background-color: #564747;
+    background-color: var(--background-color);
 }

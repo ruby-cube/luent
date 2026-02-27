@@ -1,11 +1,12 @@
 import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToIntersection } from "@rue/types";
-import { Ion, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, } from "@rue/quarky";
+import { Ion, Ionic, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, } from "@rue/quarky";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { getIonicProxy, MayBeMutableProxy as _MayBeMutableProxy, ReadonlyProxy as _ReadonlyProxy } from "../../../quarky/src/mu";
+import { OVERRIDE_LEVEL } from "../element/makeElement";
 
-const MayBeMutableProxy =  __DEV__ ? _MayBeMutableProxy : (arg: any) => arg
-const ReadonlyProxy =  __DEV__ ? _ReadonlyProxy : (arg: any) => arg
+const MayBeMutableProxy = __DEV__ ? _MayBeMutableProxy : (arg: any) => arg
+const ReadonlyProxy = __DEV__ ? _ReadonlyProxy : (arg: any) => arg
 
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.
@@ -211,6 +212,10 @@ export function toInput(attributes: AnyObject) {
 
    return new Proxy(attributes, {
       get(target, key) {
+         if (key === '$classes') {
+            console.log('attributes', attributes)
+            return attributes.classes
+         }
          if (key === 'mu') return mu
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return emit;
@@ -247,6 +252,7 @@ type TagAttributes<D> =
    & MutableIonAttributes<D>
    // & NonmutableIonAttributes<D>
    & TagEvents<D>
+   & { class?: MaybeIon<string>, style?: MaybeIon<string> }
    // & OpAttribute<D>
    // & SeeAttribute<D>
    & TagSlot<D>
@@ -261,8 +267,8 @@ type TagEvents<D> = {
 }
 
 type TagSlot<D> = D extends { Slot: infer S } ? {
-   children: RawJSXNode
-} : {}
+   children?: (() => RawJSXNode) | RawJSXNode
+} : { children?: (() => RawJSXNode) | RawJSXNode }
 
 
 type MaybeIonAttributes<D> = {
@@ -313,10 +319,17 @@ type ToMuIon<T> = ExcludePrimitives<T> extends { value: any } ? T
    : T extends Ion<infer S> ? MutableIon<S/* MaybeMarkInert<S> */> & IonMethods<T> : never
 
 
+// type Froggy = {hi: true} | 'div'
 
+// type What = FromTag<Froggy>
 
 // TODO: only allow 'mu:' for ions
-export type FromTag<D> =
+
+export type FromTag<T = {}, D = {}> =
+   T extends string
+   ? _FromTag<ElementAttributes<T> & D> : _FromTag<T>
+
+export type _FromTag<D> =
    StaticInput<D>
    & ReadonlyIonInput<D>
    & WithEmit<D>
@@ -325,8 +338,16 @@ export type FromTag<D> =
    // & SeeInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
    & (D extends { provide: infer S } ? { provide: S } : { provide: undefined })
+   & Styles
    & { '~attributes'?: TagAttributes<D> }
 
+
+type ElementAttributes<D> = D extends 'input' ? { value: any, type: any } : {}
+
+type Styles = {
+   styles: Ionic<CSSStyleDeclaration>
+   $classes: Ion<string>,
+}
 
 type WithMu<D> = HasMu<D> extends true ? {
    mu: {

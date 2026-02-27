@@ -1,4 +1,4 @@
-import { template, For, listen, NodeRef, Style, target } from "@rue/lumo";
+import { template, For, listen, NodeRef, Style, target, css } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic, as } from "@rue/quarky";
@@ -163,7 +163,7 @@ export function TestListSelectTransition() {
          </div>
       </>
    )
-      .css`
+      .style(css`
          body {
             overflow-y: scroll
          }
@@ -197,7 +197,7 @@ export function TestListSelectTransition() {
          .animate-in {
             animation: fade-in 2ms ease-in;
          }
-      `
+      `)
 }
 
 

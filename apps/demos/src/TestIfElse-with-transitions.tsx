@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { template, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node, css } from "@rue/lumo";
 import { debug, getActiveUpdate, instantUpdate, Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -169,7 +169,7 @@ export function TestMountIf() {
          </div>
       </div>
    )
-      .css`
+      .style(css`
          .container {
             overflow: hidden;
          }
@@ -221,5 +221,5 @@ export function TestMountIf() {
          .cancel-animation {
           animation: fade-out 500ms ease-in;
          }
-      `
+      `)
 }

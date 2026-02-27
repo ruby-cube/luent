@@ -6,6 +6,7 @@ export type RequireAll<T> = {
 };
 
 
+export type Falsey = undefined | null | false | ''
 
 export type AnyObject = { [key: string | symbol]: any }
 

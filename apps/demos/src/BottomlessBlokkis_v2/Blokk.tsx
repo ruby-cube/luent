@@ -1,7 +1,7 @@
 import { For, FromTag, template } from "@rue/lumo";
 import { Ionic } from "@rue/quarky";
 import { BlokkModel, Rotation } from "./BlokkModel";
-import "./Blokk.css"
+import m = "./Blokk.module.css"
 import { AnyObject } from "@rue/types";
 
 const GAP = 1;

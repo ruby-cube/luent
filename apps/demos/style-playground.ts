@@ -1,1 +1,1 @@
-import './src/BottomlessBlokkis/BottomlessBlokkis'
+import './src/ui-shadcn/examples/ImageCard'

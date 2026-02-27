@@ -1,10 +1,6 @@
+import { getActiveFlask, getFlask } from "@rue/flask";
 import { INTERNAL, Ion, isIon, PRELUDE, toValue, watch } from "@rue/quarky";
-import { $Index } from "../iteratives/ItemList";
-import { AnyObject } from "@rue/types";
-import { atUnmount } from "../flask/flask-hooks";
-import { getFlask } from "@rue/flask";
 import { isFunction } from "@rue/utils";
-import { ro } from "date-fns/locale";
 
 
 type Nodes = any[] | Nodes[]
@@ -124,6 +120,9 @@ export function setUpNodeRefs(node: any, root: any[], indices: Index[]) {
       setUpLevel(i === indices.length - 1 ? node : nestedArray, array, indices[i])
       array = nestedArray
    }
+   getActiveFlask()?.onDiscard(() => {
+      root.length = 0
+   })
 }
 
 function setUpLevel(referent: any, array: any[], index: Ion<number> | number) {

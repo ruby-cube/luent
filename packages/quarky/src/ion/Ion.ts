@@ -11,7 +11,7 @@ import { createHybridIon } from "./HybridIon";
 import { AsyncIon, AsyncProps } from "../async/AsyncIon";
 
 /* API */
-export type Ion<T = unknown> = (() => T) /* & { '~ion': true } */
+export type Ion<T = unknown> = (() => T) & { '~ion': true }
 
 // type MaybeInert<T = unknown> = IsIonic<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 

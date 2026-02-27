@@ -672,7 +672,7 @@ declare namespace React {
 
    type LifecycleTask<T> = (element: T) => void
 
-interface LumoHooks<T> {
+   interface LumoHooks<T> {
       'at:create'?: LifecycleTask<T> | any
       'at:mount'?: LifecycleTask<T>
       'at:remount'?: LifecycleTask<T>
@@ -2524,7 +2524,7 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
    : never;
 
 
-type LumoAttributes<C, P> = P extends { '~attributes'?: infer A } ? A& Lumo.LumoHooks<C> : P & Lumo.LumoHooks<C>
+type LumoAttributes<C, P> = P extends { '~attributes'?: infer A } ? A & Lumo.LumoHooks<C> : P & Lumo.LumoHooks<C>
 // C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
 // : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
 // : C extends { defaultProps: infer D } ? Defaultize<P, D>
@@ -2572,6 +2572,8 @@ declare global {
       //$$$
       interface IntrinsicAttributes extends React.Attributes {
          ref?: $Node | NodeRefsConfig //#LUMO-EDIT
+         class?: string | ClassInput | ClassInput[],
+         style?: string | StyleInput | StyleInput[],
          // children?: Lumo.InferSlot
       }
       interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
@@ -2610,9 +2612,9 @@ declare global {
          // 'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         'display-view': { children: ConditionalRenderKit[] | ConditionalRenderKit } 
-         'create-view': { children: ConditionalRenderKit[] } 
-         'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> } 
+         'display-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
+         'create-view': { children: ConditionalRenderKit[] }
+         'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> }
          'render-view': { children: Lumo.RawJSXNode }
          // 'o--preserve': { children: ConditionalRenderKit[]; discard?: Ion<boolean> };
          // 'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };

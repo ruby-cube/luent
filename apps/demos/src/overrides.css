@@ -1,0 +1,9 @@
+@reference "./index.css";
+
+.override0 .override1 .bg-amber-600 {
+  @apply bg-blue-600;
+}
+
+.override1 .bg-amber-900 {
+  @apply bg-amber-900;
+}

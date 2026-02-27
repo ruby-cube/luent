@@ -1,4 +1,4 @@
-import { template, For, If, Style } from "@rue/lumo"
+import { template, For, If, Style, css } from "@rue/lumo"
 import { Ion, Ionic, EACH, as, swiftUpdate } from "@rue/quarky"
 
 // Modified Demo from Vue.js
@@ -95,7 +95,7 @@ export function CircleApp() {
          )}
       </>
    )
-      .css`
+      .style(css`
          body {
             margin: 0;
             overflow: hidden;
@@ -148,5 +148,5 @@ export function CircleApp() {
             padding: 0 50px;
             color: #bbb;
          }
-      `
+      `)
 }

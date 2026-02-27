@@ -37,7 +37,7 @@ export function TestAsyncTabs() {
    return template(<>
       <ul class="inline">
          {For(allTabs, m => m, tab => (
-            <li class={{ selected: ($tab() === tab) }} on:click={e => { openTab(tab) }}>
+            <li class={($tab() === tab && 'selected')} on:click={e => { openTab(tab) }}>
                {tabNames[tab]}
             </li>
          ))}
@@ -45,7 +45,7 @@ export function TestAsyncTabs() {
       <hr></hr>
       <ul class="inline">
          {For(openTabs, m => m, tab => (
-            <li class={{ selected: ($tab() === tab) }} on:click={e => { $tab.value = tab }}>
+            <li class={($tab() === tab && 'selected')} on:click={e => { $tab.value = tab }}>
                {tabNames[tab]}
                <span style="padding: 1em" on:click={e => {
                   console.log('discarding', tab, $tab(), $activeUpdate())
@@ -64,7 +64,7 @@ export function TestAsyncTabs() {
       </ul>
 
       {Await($suspense =>
-         <div class={{ 'tab': true, 'pending': $suspense }}>
+         <div class={(`tab ${$suspense() && 'pending'}`)}>
             <remount-view>
                {As($tab, tabViews[$tab()],
                   <div>

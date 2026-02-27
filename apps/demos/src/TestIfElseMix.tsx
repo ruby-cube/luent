@@ -1,10 +1,10 @@
-import { template, If, Else, fade, ElseIf, NodeRef, createRoot, FromTag, ShowHideType } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, css } from "@rue/lumo";
 import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
 
-export function TestIfElseMix(setup: FromTag<{activation: [ShowHideType, ShowHideType]}>) {
-   const {activation} = setup
+export function TestIfElseMix(setup: FromTag<{ activation: [ShowHideType, ShowHideType] }>) {
+   const { activation } = setup
    const $active = Ion(true, {
       toggle() {
          $active.value = !$active()
@@ -47,11 +47,11 @@ export function TestIfElseMix(setup: FromTag<{activation: [ShowHideType, ShowHid
          </div>
       </div>
    )
-      .css`
+      .style(css`
          .container {
             overflow: hidden;
          }
-      `
+      `)
 }
 
 

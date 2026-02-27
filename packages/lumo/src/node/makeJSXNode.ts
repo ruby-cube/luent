@@ -1,8 +1,8 @@
 import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
-import { Component, ComponentSetup, InferSlot, makeComponent } from "../component/Component";
-import { HTMLTag, makeElement } from "../element/makeElement";
+import { Component, ComponentForge, InferSlot, makeComponent } from "../component/Component";
+import { TagName, makeElement } from "../element/makeElement";
 import { $Node, INTERNAL } from "./NodeRef";
-import { AnyObject, Booleanny } from "@rue/types";
+import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Provided, callWithCommons, createCommonsNode } from "../context/Context";
@@ -10,11 +10,12 @@ import { ShowHideType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
-import { $Index } from "../iteratives/ItemList";
 import { NodeRefsConfig } from "./NodeRefs";
 import { normalizeToArray, toError } from "@rue/utils";
 import { _ } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 import { RenderError } from "../boundaries/Try";
+
+export type TagType = ComponentForge | string
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -27,7 +28,7 @@ import { RenderError } from "../boundaries/Try";
 // }
 
 declare global {
-   function Slot<T>(input: { children: RawJSXNode } & { provide?: Provided } & AnyObject): T
+   function Slot<T>(input: { children?: RawJSXNode } & { provide?: Provided } & AnyObject): T
 }
 
 export type RawJSXNode =
@@ -69,18 +70,18 @@ export type EventsConfig = {
 //     other: { [key: string]: (any | DerivedIon<any>)[] }
 // }
 
-type Falsey = undefined | null | false
+
 export type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
-export type ClassInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<Booleanny> }>
+export type $Classes = Ion<ClassInput[]>
+export type ClassInput = MaybeIon<string | Falsey> | $Classes
 
-
-export type ElementConfig<K extends HTMLTag = HTMLTag> = {
+export type ElementConfig<K extends TagName = TagName> = {
    [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
-   class?: ClassInput | ClassInput[],
-   style?: StyleInput | StyleInput[],
+   // class?: ClassInput | ClassInput[],
+   // style?: StyleInput | StyleInput[],
    'display-if'?: Ion<Booleanny>
-   // attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
+   // attributes?: K extends TagName ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 
 // class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
@@ -88,11 +89,13 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 // attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
 type NodesArray<T> = ReturnType<$Node<T>>[] | NodesArray<T>[]
-type NodeSetup<T extends HTMLTag | ComponentSetup> = {
+type NodeSetup<T extends TagName | ComponentForge> = {
    ref?: $Node<T> | NodeRefsConfig,
-   provide?: Provided
+   provide?: Provided,
+   class?: ClassInput | ClassInput[],
+   style?: StyleInput | StyleInput[],
 }
-export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
+export type ComponentConfig<T extends ComponentForge = ComponentForge> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
 export type GroupActivationType = ShowHideType | 'show'
@@ -145,7 +148,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode)
    if (slot instanceof Function) {
       return slot as (...args: any[]) => RawJSXNode;
    }
-   if ( __DEV__) console.warn('jsx compiler failed to normalize slot to render function')
+   if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
    return () => slot;
 }
 
@@ -189,7 +192,7 @@ function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'remount-view' | 'display-view' | 'create-view' | any,
+   nodeType: SVGTag | TagName | ComponentForge | 'o--link' | 'remount-view' | 'display-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {

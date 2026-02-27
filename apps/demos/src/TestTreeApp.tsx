@@ -116,7 +116,7 @@ function TreeItemView(input: FromTag<{
    return template(
       <li class='item'>
          <div
-            class={{ 'bold': $isFolder }}
+            class={($isFolder() && 'bold')}
             on:click={e => $isOpen.toggle()}
             on:dblclick={changeType}
          >

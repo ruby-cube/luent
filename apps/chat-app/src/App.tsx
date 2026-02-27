@@ -1,4 +1,4 @@
-import { template, fromGlobal, fromRoot, If, Style } from "@rue/lumo";
+import { template, fromGlobal, fromRoot, If, Style, css } from "@rue/lumo";
 import { Router } from "./router";
 import { Ion, Ionized } from "@rue/quarky";
 import { User } from "./commons/keys";
@@ -34,13 +34,13 @@ export function FriendSite() {
          )}
       </>
    )
-      .css`
+      .style(css`
          #app {
            font-family: Avenir, Helvetica, Arial, sans-serif;
            -webkit-font-smoothing: antialiased;
            -moz-osx-font-smoothing: grayscale;
          }
-      `
+      `)
 }
 
 

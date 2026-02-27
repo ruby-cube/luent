@@ -28,7 +28,7 @@ export class Blokk {
             ((this.rotation + 1) % 4) as Rotation;
     }
 
-    // # adjustments since not all shapes are flush to edge of base grid
+    // # find the edges of the shape within base grid
 
     get rightEdge() {
         const b = this.getOccupiedBounds(this.rotation)

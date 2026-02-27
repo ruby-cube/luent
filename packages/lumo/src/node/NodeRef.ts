@@ -1,19 +1,18 @@
 import { Component, PublicComponent } from "../component/Component"
-import { HTMLTag } from "../element/makeElement"
-import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
+import { TagName } from "../element/makeElement"
 import { Ion } from "@rue/quarky"
 import { getActiveFlask, getFlask } from "@rue/flask"
 import { AnyObject } from "@rue/types"
 
 export const INTERNAL = Symbol('internal')
 
-type RefSource = HTMLTag | ((...args: any[]) => Component)
+type RefSource = TagName | ((...args: any[]) => Component)
 
 
 export type NodeReferent<
    T extends RefSource = RefSource
 > =
-   T extends HTMLTag ? HTMLElementTagNameMap[T] : // TODO: SVGs and Math elements
+   T extends TagName ? HTMLElementTagNameMap[T] : // TODO: SVGs and Math elements
    T extends (...args: any[]) => infer R ?
    R extends Component<infer I> ?
    I extends PublicComponent ? I
@@ -65,42 +64,21 @@ type RefReturn<T extends RefSource, A> = A extends never[] ? $Nodes<T> : $Node<T
 export function NodeRef<
    T extends RefSource,
    A,
->(source: T, array?: A & never[]): A extends never[] ? $Nodes<T> : $Node<T> {
-   const $node = createNodeRef(array)
-   if (array) {
-      const ref = $node[INTERNAL] as MetaListRef
+>(source: T): $Node<T> {
+   return createNodeRef()
 
-      const flask = getFlask()
-      flask.onDiscard(() => {
-         ref.value = [] // clear nodes
-      })
-
-      // TODO: there has to be a better way T_T
-      if (isSettingUpList()) {
-         onBeforeListUpdate(() => {
-            ref.prepUpdate();
-         }, flask)
-
-         onListUpdated((toFromIndices) => {
-            ref.update(toFromIndices)
-         }, flask)
-      }
-   }
-   return $node as unknown as RefReturn<T, A>
 }
 
 type ExposedNode = AnyObject
 
-export function createNodeRef<A extends ExposedNode[] | undefined>(
-   array: A,
-): A extends ExposedNode[] ? InternalRef<$Nodes> : InternalRef<$Node> {
-   const ref = array ? new MetaListRef($value, array) : new MetaRef($value)
+export function createNodeRef(): InternalRef<$Node> {
+   const ref = new MetaRef($value)
    function $value() {
       return ref.value;
    }
    $value[INTERNAL] = ref
 
-   return $value as A extends ExposedNode[] ? InternalRef<$Nodes> : InternalRef<$Node>
+   return $value
 }
 
 export class MetaRef {
@@ -111,49 +89,6 @@ export class MetaRef {
    public value: unknown
 }
 
-export class MetaListRef {
-   constructor(
-      readonly $value: () => unknown[],
-      public value: unknown[],
-   ) {
-
-   }
-
-   assignIndex($index: Ion<number>, item: unknown) {
-      const list = this.value
-      list[$index()] = item;
-   }
-
-   prevValue?: unknown[]
-
-   prepUpdate() {
-      this.prevValue = this.value
-      this.value = []
-   }
-
-   update(toFromIndices: [number, number][]) {
-      const prev = this.prevValue;
-      if (!prev) throw new Error('prevNodes were not store, must call prepUpdate before list update')
-      const newList = this.value;
-      for (const indices of toFromIndices) {
-         const [to, from] = indices
-         const node = prev[from];
-         newList[to] = node;
-      }
-      this.prevValue = undefined;
-   }
-}
-
-export function initializeListRef( // should this be initialize ref?
-   $nodes: InternalRef<$Nodes>,
-   value: NodeReferent | undefined,
-   $index: Ion<number>
-) {
-   const ref = $nodes[INTERNAL]
-   if (value) {
-      ref.assignIndex($index, value);
-   }
-}
 
 export function initializeRef($node: InternalRef<$Node>, value: any | undefined) {
    const ref = $node[INTERNAL]
@@ -161,8 +96,7 @@ export function initializeRef($node: InternalRef<$Node>, value: any | undefined)
       throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
    if (value) {
       ref.value = value;
-      const flask = getActiveFlask()
-      flask?.onDiscard(() => {
+      getActiveFlask()?.onDiscard(() => {
          ref.value = undefined
       })
    }
