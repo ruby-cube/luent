@@ -16,7 +16,7 @@ export function fromContext<K extends ContextEntryKey | string, OPT>(key: K, opt
 export function $fromContext<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT & '?'): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {
    const value = _fromContext(key, optional)
    if (optional && value === undefined) return undefined;
-   return isIon(value) ? value() : value
+   return toIon(value)
 }
 
 export function _fromContext<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {

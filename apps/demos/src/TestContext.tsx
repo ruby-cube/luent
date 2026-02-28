@@ -1,4 +1,4 @@
-import { Context, ContextEntryKey, ContextKey, createRoot, fromContext, fromRoot, FromTag, mapContextKeys, mergeContextKeys, template } from "@rue/lumo"
+import { $fromContext, Context, ContextEntryKey, ContextKey, createRoot, fromContext, fromRoot, FromTag, mergeContextKeys, template } from "@rue/lumo"
 import { Ion } from "@rue/quarky"
 import './TestContext.css'
 
@@ -39,8 +39,8 @@ import './TestContext.css'
 
 function TestRootContext() {
    const rootMsg = fromRoot(ROOT_MESSAGE)
-   const adamsMsg = 'I come from Adam'
-   const evesMsg = 'I come from Eve'
+   const $adamsMsg = Ion('I come from Adam')
+   const $evesMsg = Ion('I come from Eve')
 
    return template(
       <div class='container bg-cyan-200'>
@@ -51,11 +51,13 @@ function TestRootContext() {
          {/* <h6>Reactive</h6>
          <p>from root: {$rootMsg}</p>
          <hr></hr> */}
-         <Context provide={[GREAT_MESSAGE(adamsMsg)]}>
+         <Context provide={[GREAT_MESSAGE($adamsMsg)]}>
             <GreatGrandparent name='Adam'></GreatGrandparent>
+            <input mu:value={$adamsMsg}></input>
          </Context>
-         <Context provide={[GREAT_MESSAGE(evesMsg)]}>
+         <Context provide={[GREAT_MESSAGE($evesMsg)]}>
             <GreatGrandparent name='Eve'></GreatGrandparent>
+             <input mu:value={$evesMsg}></input>
          </Context>
          {/* 
          <GreatGrandparent name='Adam' provide={[ROOT_MESSAGE(adamsMsg)]}></GreatGrandparent>
@@ -137,21 +139,22 @@ function Parent() {
    )
 }
 
-const GREAT_MESSAGE = Child.GREAT_MESSAGE = ContextKey<string>('great')
+const GREAT_MESSAGE = Child.GREAT_MESSAGE = ContextKey<Ion<string>>('great')
 const ROOT_MESSAGE = Child.ROOT_MESSAGE = ContextKey<string>('root')
 const GRAND_MESSAGE = Child.GRAND_MESSAGE = ContextKey<string>('grand')
 
 function Child() {
    const rootMsg = fromRoot(ROOT_MESSAGE)
-   const greatMsg = fromContext(GREAT_MESSAGE)
+   const $greatMsg = $fromContext(GREAT_MESSAGE)
    const grandMsg = fromContext(GRAND_MESSAGE)
+   console.log('$greatMsg', $greatMsg)
 
    return template(
       <div class='container bg-amber-500'>
          <h5>Child</h5>
          <h6>Static</h6>
          <p>from root: {rootMsg}</p>
-         <p>from great grandparent: {greatMsg}</p>
+         <p>from great grandparent: {$greatMsg}</p>
          <p>from grandparent: {grandMsg}</p>
          {/* <hr></hr>
          <h6>Reactive</h6>
