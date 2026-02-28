@@ -50,7 +50,7 @@ export function Button(input: FromTag<{
    return template(
       <div>
          <Context provide={[Nested['something']('hello')]}>
-            {Slot()}
+            {Slot}
          </Context>
       </div>
    )

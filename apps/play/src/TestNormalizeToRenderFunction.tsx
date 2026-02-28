@@ -23,6 +23,6 @@ function Child(input : FromTag<{Slot: RenderSlot}>){
    const {Slot} = input
    console.log('Slot', Slot)
    return template(
-      <div>{Slot()}</div>
+      <div>{Slot}</div>
    )
 }

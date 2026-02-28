@@ -141,12 +141,12 @@ export function wrapWithActivationType(type: GroupActivationType, Slot: RenderSl
 }
 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode) | RawJSXNode) {
-   if (isIon(slot)) return () => slot;
+   if (isIon(slot)) return function renderSlot() { return slot };
    if (slot instanceof Function) {
-      return slot as (...args: any[]) => RawJSXNode;
+      return function renderSlot() { return slot() };
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
-   return () => slot;
+   return function renderSlot() { return slot };
 }
 
 export type ViewConfig = AwaitConfig & ContextConfig
@@ -204,6 +204,7 @@ export function makeJSXNode(
       case 'o--body':
          return Portal('body', Slot);
 
+      // deprecated??
       case 'create-view':
          if (!Slot) throw new Error(`Extraneous <create-view>`)
          return makeView(wrapWithActivationType('create', Slot), config);

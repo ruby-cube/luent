@@ -2,7 +2,7 @@ import { ComponentForge } from "../component/Component";
 import { TagName } from "../element/makeElement";
 import { ListData } from "../iteratives/For";
 import { ComponentConfig, ElementConfig } from "./makeJSXNode";
-import {  Ion, ion } from "@rue/quarky";
+import {  Ion } from "@rue/quarky";
 
 
 //NOTE: We use partial types so that we can split between spreading and directly passing values to template

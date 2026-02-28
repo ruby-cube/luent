@@ -99,7 +99,7 @@ export function TabList(input: FromTag<{
                </TabsTrigger>
             </TabsList>
          </div>
-         {Slot()}
+         {Slot}
       </Tabs>
    );
 }

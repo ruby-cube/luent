@@ -268,7 +268,7 @@ export function Tooltip(input: FromTag<{
             }}
          >
             <div ref={$div} class="tooltip">
-               {Slot()}
+               {Slot}
             </div>
          </div>
       )

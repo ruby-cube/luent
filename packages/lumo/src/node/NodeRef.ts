@@ -97,6 +97,7 @@ export function initializeRef($node: InternalRef<$Node>, value: any | undefined)
       return;
    }
    if (value) {
+      console.log('initializing ref', value, toValue(value))
       ref.value = toValue(value);
       getActiveFlask()?.onDiscard(() => {
          ref.value = undefined

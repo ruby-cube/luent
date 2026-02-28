@@ -1,4 +1,4 @@
-import { debug, isObject, normalizeToArray } from "@rue/utils";
+import { debug, isFunction, isObject, normalizeToArray } from "@rue/utils";
 import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, watchToRender } from "@rue/quarky";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
@@ -70,11 +70,15 @@ export function processJSXOutput(rawJSX: RawJSXNode) {
  */
 function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
    for (const node of jsxNodes) {
+
       if (node instanceof Array) {
          _processJSXOutput(node, flattened)
       }
       else if (isComponentKit(node)) {
          _processJSXOutput(node.jsxNodes, flattened)
+      }
+      else if (isFunction(node) && node.name === 'renderSlot') {
+         _processJSXOutput(node(), flattened)
       }
       else if (isGetter(node)) {
          flattened.push(new DynamicTextNode(node))
@@ -121,7 +125,7 @@ class DynamicTextNode extends VineNode {
 
    constructor(private $text: Ion<unknown>) {
       super()
-      if ( __DEV__) __DEV__checkIfTracked()
+      if (__DEV__) __DEV__checkIfTracked()
       const textNode = this.node = createTextNode($text())
       this.nodes = [textNode]
       watchToRender($text, ({ current, previous, flask }) => {
@@ -157,7 +161,7 @@ export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | n
    if (preceding && preceding !== parent) {
       preceding.after(fragment)
    }
-   else{
+   else {
       console.log('PREPEND')
       parent?.prepend(fragment)
    }
@@ -173,7 +177,6 @@ export type DOMParent = {
 export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragment) {
    for (const node of nodes) {
       if (node instanceof Node) { // Node type from Web API
-         console.log('appendChild', root, node)
          root.appendChild(node)
       }
       // else if (isInnerHTMLKit(node)) {
@@ -223,7 +226,7 @@ function isDOMNode(node: unknown): node is DOMNode & Node {
 
 export type AsyncRender = (flask: Flask, input?: Object) => RawJSXNode
 
-export function toAsyncRender(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, /* [CONTEXT]: ContextNode, */ [TRACE]: string }): AsyncRender {
+export function toAsyncRender(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, /* [CONTEXT]: ContextNode, */[TRACE]: string }): AsyncRender {
    return (flask: Flask, ...args: any[]) => {
       nestedContext[FLASK] = flask
       return $_run_with_(context, () => render(...args), nestedContext)

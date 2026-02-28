@@ -34,6 +34,7 @@ type JSXTemplate = RawJSXNode
 export function template(template: JSXTemplate) {
    const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
    function ref<T extends AnyObject | undefined = AnyObject | undefined>(component: T) {
+      console.log('ref()', component)
       return {
          exposed: component,
          jsxNodes
@@ -143,14 +144,14 @@ export function makeComponent(
    const output = Component(toInput({
       ...other,
       Slot,
-      classes: createOverrideClasses(classes),
-      ref
+      classes: createOverrideClasses(classes)
       // classes: classString
       // styles: style ? toStyleDeclaration(style) : undefined // TODO:
    }))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.exposed ?? {}
+   console.log('public', publicComponent, ref)
    if (ref) {
       if (isObject(ref) && 'arr' in ref) {
          setUpNodeRefs(publicComponent, ref.arr, normalizeToArray(ref.i))

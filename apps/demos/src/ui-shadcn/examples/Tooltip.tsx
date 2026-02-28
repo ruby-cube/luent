@@ -1,4 +1,4 @@
-import { ContextKey, createRoot, css, Finitron, fromContext, FromTag, If, listen, NodeRef, queueRender, RenderSlot, template } from "@rue/lumo"
+import { atCreate, atMounted, ContextKey, createRoot, css, Finitron, fromContext, FromTag, If, listen, NodeRef, queueRender, RenderSlot, template } from "@rue/lumo"
 import { Button } from "../Button"
 import { mergeTailwind } from "../../utils/utils"
 import { Ion, queueTask, watch } from "@rue/quarky"
@@ -11,14 +11,14 @@ import { Ion, queueTask, watch } from "@rue/quarky"
 
 // anchor
 // trigger
-const demoBox = "relative flex h-72 w-full justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0"
+const demoBoxStyle = "relative flex h-72 w-full justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0"
 
 export function TooltipDemo() {
-   const { $tooltip, asTooltipTrigger, asTooltipAnchor } = TooltipKit()
+   const { $tooltip, asTooltipAnchor } = TooltipKit()
 
    return template(
-      <div data-align='center' class={demoBox}>
-         <Button at:create={btn => { asTooltipTrigger(btn); asTooltipAnchor(btn) }} variant="outline">
+      <div data-align='center' class={demoBoxStyle}>
+         <Button at:create={asTooltipAnchor} variant="outline">
             Hover
          </Button>
          <Tooltip ref={$tooltip}>
@@ -33,8 +33,7 @@ function TooltipKit() {
 
    return {
       $tooltip,
-      asTooltipTrigger(node: HTMLElement) {
-
+      asTooltipTrigger: function asTooltipTrigger(node: HTMLElement) {
          listen(node, 'mouseenter', () => {
             $tooltip()?.show()
          })
@@ -43,13 +42,12 @@ function TooltipKit() {
             $tooltip()?.hide()
          })
       },
-      asTooltipAnchor(node: HTMLElement) {
-         node.style.anchorName = '--tooltip-anchor' + 0 // id
-
-         queueRender(() => {
-            console.log('tootlitp?', $tooltip())
-            $tooltip()?.anchor('--tooltip-anchor' + 0)
-         })
+      asTooltipAnchor(node: HTMLElement, asTrigger = false) {
+         if (asTrigger) this.asTooltipTrigger(node)
+         // console.log('asTooltipAnchor', node)
+         // console.log('asTooltipAnchor: $tooltip (expect TooltipContent instance)', $tooltip())
+         // node.style.anchorName = '--tooltip-anchor' + 0 // id
+         $tooltip()?.anchor('--tooltip-anchor' + 0)
       }
    }
 }
@@ -82,6 +80,14 @@ function TooltipKit() {
 //    return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 // }
 
+const transitionInStyles = "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95"
+
+const transitionOutStyles = "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+
+const transitionInSlide = "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+
+const radixPositionOrigin = "origin-(--radix-tooltip-content-transform-origin)"
+
 function Tooltip({
    $classes,
    sideOffset = 0,
@@ -97,12 +103,12 @@ function Tooltip({
             data-slot="tooltip-content"
             sideOffset={sideOffset}
             class={mergeTailwind(
-               "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin)",
+               "rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs",
                $classes()
             )}
             {...props}
          >
-            {Slot()}
+            {Slot}
             <TooltipArrow class="size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50 translate-y-[calc(-50%_-_2px)]" />
          </TooltipContent>
       </o--body>
@@ -136,7 +142,7 @@ function TooltipContent({
       'closed': { 'reset': () => 'open' }
    })
    const $div = NodeRef('div')
-   let anchorName: string;
+   const $anchorName = Ion('')
 
    tooltip.activate(() => 'open')
 
@@ -158,7 +164,7 @@ function TooltipContent({
                data-open={(tooltip.is('open'))}
                data-closed={(tooltip.is('closed'))}
                class={'tooltip ' + $classes()}
-               style={`--tooltip-anchor: ${anchorName};`}
+               style={(`--tooltip-anchor: ${$anchorName()};`)}
                {...attributes}
             ></div>
          )}
@@ -181,7 +187,7 @@ function TooltipContent({
             $show.value = false
          },
          anchor(name: string) {
-            anchorName = name
+            $anchorName.value = name
          }
       })
 }
