@@ -2609,9 +2609,10 @@ declare global {
 
       interface LumoElements {
          'i--i': {}; //comments
-         // 'o--portal': PortalNodeInput & { children: Lumo.Slot }
+         'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
+         'o--body': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
          'display-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
          'create-view': { children: ConditionalRenderKit[] }
          'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> }

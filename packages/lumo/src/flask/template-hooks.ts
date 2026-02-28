@@ -2,6 +2,7 @@ import { debug, isFunction } from "@rue/utils";
 import { getFlask } from "@rue/flask";
 import { afterCreated, afterDemounted, afterDiscarded, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDiscard, atDiscarded, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
 import { AnyObject } from "@rue/types";
+import { toValue } from "@rue/quarky";
 
 type LifecycleTask<T = any> = (element: T, initialOrFinal?: boolean) => void;
 
@@ -9,78 +10,78 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
    const flask = getFlask()
    for (const key in hooks) {
       const task = hooks[key]
-      if (!isFunction(task))continue;
+      if (!isFunction(task)) continue;
       switch (key) {
          case 'at:create':
-            atCreate(() => task(node))
+            atCreate(() => task(toValue(node)))
             break;
 
          case 'at:mount':
-            atMount((initial) => task(node, initial))
+            atMount((initial) => task(toValue(node), initial))
             break;
 
          case 'at:remount':
-            atRemount(() => task(node))
+            atRemount(() => task(toValue(node)))
             break;
 
          case 'at:created':
-            atCreated(() => task(node))
+            atCreated(() => task(toValue(node)))
             break;
 
          case 'at:mounted':
-            atMounted((initial) => task(node, initial))
+            atMounted((initial) => task(toValue(node), initial))
             break;
 
          case 'at:remounted':
-            atRemounted(() => task(node))
+            atRemounted(() => task(toValue(node)))
             break;
 
          case 'after:created':
-            afterCreated(() => task(node))
+            afterCreated(() => task(toValue(node)))
             break;
 
          case 'after:mounted':
-            afterMounted((initial) => task(node, initial))
+            afterMounted((initial) => task(toValue(node), initial))
             break;
 
          case 'after:remounted':
-            afterRemounted(() => task(node))
+            afterRemounted(() => task(toValue(node)))
             break;
 
          case 'at:discard':
-            atDiscard(() => task(node))
+            atDiscard(() => task(toValue(node)))
             break;
 
          case 'at:unmount':
-            atUnmount((initial) => task(node, initial))
+            atUnmount((initial) => task(toValue(node), initial))
             break;
 
          case 'at:demount':
-            atDemount(() => task(node))
+            atDemount(() => task(toValue(node)))
             break;
 
          case 'at:discarded':
-            atDiscarded(() => task(node))
+            atDiscarded(() => task(toValue(node)))
             break;
 
          case 'at:unmounted':
-            atUnmounted((initial) => task(node, initial))
+            atUnmounted((initial) => task(toValue(node), initial))
             break;
 
          case 'at:demounted':
-            atDemounted(() => task(node))
+            atDemounted(() => task(toValue(node)))
             break;
 
          case 'after:discarded':
-            afterDiscarded(() => task(node))
+            afterDiscarded(() => task(toValue(node)))
             break;
 
          case 'after:unmounted':
-            afterUnmounted((initial) => task(node, initial))
+            afterUnmounted((initial) => task(toValue(node), initial))
             break;
 
          case 'after:demounted':
-            afterDemounted(() => task(node))
+            afterDemounted(() => task(toValue(node)))
             break;
 
          default:
@@ -89,26 +90,26 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
    }
 }
 
-   export interface LumoHooks<T> {
-      'at:create'?: LifecycleTask<T> | any
-      'at:mount'?: LifecycleTask<T>
-      'at:remount'?: LifecycleTask<T>
-      'at:created'?: LifecycleTask<T>
-      'at:mounted'?: LifecycleTask<T>
-      'at:remounted'?: LifecycleTask<T>
-      'after:created'?: LifecycleTask<T>
-      'after:mounted'?: LifecycleTask<T>
-      'after:remounted'?: LifecycleTask<T>
-      'at:discard'?: LifecycleTask<T>
-      'at:unmount'?: LifecycleTask<T>
-      'at:demount'?: LifecycleTask<T>
-      'at:discarded'?: LifecycleTask<T>
-      'at:unmounted'?: LifecycleTask<T>
-      'at:demounted'?: LifecycleTask<T>
-      'after:discarded'?: LifecycleTask<T>
-      'after:unmounted'?: LifecycleTask<T>
-      'after:demounted'?: LifecycleTask<T>
-   }
+export interface LumoHooks<T> {
+   'at:create'?: LifecycleTask<T> | any
+   'at:mount'?: LifecycleTask<T>
+   'at:remount'?: LifecycleTask<T>
+   'at:created'?: LifecycleTask<T>
+   'at:mounted'?: LifecycleTask<T>
+   'at:remounted'?: LifecycleTask<T>
+   'after:created'?: LifecycleTask<T>
+   'after:mounted'?: LifecycleTask<T>
+   'after:remounted'?: LifecycleTask<T>
+   'at:discard'?: LifecycleTask<T>
+   'at:unmount'?: LifecycleTask<T>
+   'at:demount'?: LifecycleTask<T>
+   'at:discarded'?: LifecycleTask<T>
+   'at:unmounted'?: LifecycleTask<T>
+   'at:demounted'?: LifecycleTask<T>
+   'after:discarded'?: LifecycleTask<T>
+   'after:unmounted'?: LifecycleTask<T>
+   'after:demounted'?: LifecycleTask<T>
+}
 
 const flaskHooks = {
    'at:create': true,

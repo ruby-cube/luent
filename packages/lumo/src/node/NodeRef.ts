@@ -1,6 +1,6 @@
 import { Component, PublicComponent } from "../component/Component"
 import { TagName } from "../element/makeElement"
-import { Ion } from "@rue/quarky"
+import { Ion, toValue } from "@rue/quarky"
 import { getActiveFlask, getFlask } from "@rue/flask"
 import { AnyObject } from "@rue/types"
 
@@ -92,10 +92,12 @@ export class MetaRef {
 
 export function initializeRef($node: InternalRef<$Node>, value: any | undefined) {
    const ref = $node[INTERNAL]
-   if (ref.value)
-      throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
+   if (ref.value) {
+      console.warn("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
+      return;
+   }
    if (value) {
-      ref.value = value;
+      ref.value = toValue(value);
       getActiveFlask()?.onDiscard(() => {
          ref.value = undefined
       })

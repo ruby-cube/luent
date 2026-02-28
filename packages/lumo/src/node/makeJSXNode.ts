@@ -201,6 +201,9 @@ export function makeJSXNode(
             makeElement('link', undefined, <ElementConfig>config)
          );
 
+      case 'o--body':
+         return Portal('body', Slot);
+
       case 'create-view':
          if (!Slot) throw new Error(`Extraneous <create-view>`)
          return makeView(wrapWithActivationType('create', Slot), config);

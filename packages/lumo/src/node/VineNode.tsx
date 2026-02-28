@@ -157,8 +157,10 @@ export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | n
    if (preceding && preceding !== parent) {
       preceding.after(fragment)
    }
-   else
+   else{
+      console.log('PREPEND')
       parent?.prepend(fragment)
+   }
 }
 
 export type DOMParent = {
@@ -171,6 +173,7 @@ export type DOMParent = {
 export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragment) {
    for (const node of nodes) {
       if (node instanceof Node) { // Node type from Web API
+         console.log('appendChild', root, node)
          root.appendChild(node)
       }
       // else if (isInnerHTMLKit(node)) {

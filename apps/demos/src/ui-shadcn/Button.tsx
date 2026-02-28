@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ComponentTag, FromTag, makeElement } from "@rue/lumo"
+import { ComponentTag, FromTag, makeElement, NodeRef, template } from "@rue/lumo"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 import { VariantProps } from "class-variance-authority"
 
@@ -43,7 +43,9 @@ function Button({
    as?: ComponentTag | string
 } & VariantProps<typeof buttonVariants>>) {
 
-   return (
+   const $node = NodeRef(Comp)
+
+   return template(
       <Comp
          data-slot="button"
          data-variant={variant}
@@ -52,7 +54,7 @@ function Button({
          // class={[buttonVariants({ variant, size }), $classes]}
          {...attributes}
       ></Comp>
-   )
+   ).ref($node)
 }
 
 export { Button, buttonVariants }

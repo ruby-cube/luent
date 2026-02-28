@@ -143,7 +143,8 @@ export function makeComponent(
    const output = Component(toInput({
       ...other,
       Slot,
-      classes: createOverrideClasses(classes)
+      classes: createOverrideClasses(classes),
+      ref
       // classes: classString
       // styles: style ? toStyleDeclaration(style) : undefined // TODO:
    }))
@@ -158,7 +159,7 @@ export function makeComponent(
          initializeRef(ref, publicComponent)
       }
    }
-   setUpHooks(publicComponent, hooks)
+   setUpHooks(publicComponent ?? ref, hooks)
 
    // if (tag['display-if']) setUpConditionalDisplay()
    return output
