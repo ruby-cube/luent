@@ -5,8 +5,8 @@ import { queueIonicTask } from "@rue/quarky";
 
 
 
-// [ ] async context - commons
-//     - nested functions needing commons like IonicTodo
+// [ ] async context - context
+//     - nested functions needing context like IonicTodo
 // [X] flask cleanup
 
 // A) make async context as invisible as possible (with compiler, etc) <<----THIS.. it's too ugly to be visible T_T ... but how do we know what to transform?

@@ -1,11 +1,11 @@
-import { Commons as createCommons } from "../context/Context";
+import { Context as createContext } from "../context/Context";
 import { makeElement } from "../element/makeElement";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
 import { fromContext } from "../context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { $Node, NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
-import type { Commons } from "../context/context-stack";
+import type { Context } from "../context/context-stack";
 import { Ion } from "@rue/quarky";
 import { template } from "../component/Component";
 import { createIfSeries, Else, If } from "../conditional/If";
@@ -22,7 +22,7 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 const GET_PHASIC_NODE = ContextKey<() => TransitionNode | null>('GET_PHASIC_NODE')
 
 // declare module '@rue/lumo' {
-//     interface CommonsKeyMap {
+//     interface ContextKeyMap {
 //         [GET_PHASIC_NODE]: typeof getPhasicNodeDef
 //     }
 // }
@@ -77,7 +77,7 @@ function createPhasicNode(
       return _phaseNode
    }
 
-   return createCommons({
+   return createContext({
       Slot: () => (
          makeElement('div', Slot, { get: $div, class: 'phasic' }, undefined)
       ),
@@ -85,8 +85,8 @@ function createPhasicNode(
    })
 }
 
-export function getPhasicNode(commons?: Commons) {
-   const phasicNode = fromContext(GET_PHASIC_NODE, '?', commons)?.()
+export function getPhasicNode(context?: Context) {
+   const phasicNode = fromContext(GET_PHASIC_NODE, '?', context)?.()
    return phasicNode
 }
 

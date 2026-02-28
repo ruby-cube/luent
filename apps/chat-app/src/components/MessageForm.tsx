@@ -2,7 +2,7 @@
 //@ts-nocheck
 import { template, FromTag, If } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
-import { User } from "../commons/keys";
+import { User } from "../context/keys";
 import './message-form.css'
 import { Timestamp } from "firebase/firestore";
 import { Message } from "../database/database";

@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { template, fromGlobal } from "@rue/lumo";
-import { Polymorph } from "../../../../packages/lumo/src/conditional/Polymorph";
+import { template, fromGround } from "@rue/lumo";
+import { Polymorph } from "../../../../packages/lumo/src/conditional/x_Polymorph";
 
-// A: We provide route parameters via commons and tag
+// A: We provide route parameters via context and tag
 // B: We allow access to a global route ion where you can access route parameters
 
 
@@ -236,7 +236,7 @@ export function SomeChild() {
             routes: []
          }) // { $route, RouteView, $RouteView } optional $RouteView component if config passed into createRouter
       
-         const { $route, RouteView } = getRouter() // calls `fromGlobal(ROUTER)` internally
+         const { $route, RouteView } = getRouter() // calls `fromGround(ROUTER)` internally
       
 
 

@@ -1,5 +1,5 @@
 import { template, fromContext, FromTag } from "@rue/lumo";
-import { USER, User } from '../commons/keys'
+import { USER, User } from '../context/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";
 import { ChatKit } from "../database/database";

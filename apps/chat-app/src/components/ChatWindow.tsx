@@ -1,10 +1,10 @@
 //@ts-nocheck
-import { queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromApp, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/lumo";
+import { queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/lumo";
 import { Ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
-import { User } from '../commons/keys'
+import { User } from '../context/keys'
 
 // TODO: 
 // [ ] only scroll to newest message if scrolled to bottom

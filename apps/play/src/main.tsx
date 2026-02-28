@@ -82,7 +82,6 @@ import { TestAwaitConditional } from './TestAwaitConditional';
 // import { TestDerivedConditional } from './testDerived';
 // import { TestDebugApp } from './TestDebugTools';
 // import { Transformers } from './jsx-$transform';
-// import { TestCommons } from './TestCommons';
 // import { TestApp } from './TestApp';
 // import { MarkdownApp } from './demos/markdown-app/markdown-app';
 // import { TabApp } from './demos/markdown-app/TestTabs';
@@ -367,7 +366,7 @@ app.mount('#root')
 // })
 
 
-// const rootContext = createGlobalCommons()
+// const rootContext = createGroundContext()
 
 // import { frog } from './TestReadonly';
 
@@ -380,7 +379,7 @@ app.mount('#root')
 //    warnNoCleanup: true
 // })
 
-// const globalCommons = createGlobalCommons([
+// const groundContext = createGroundContext([
 //    m(DOOR, () => doSomething())
 // ])
 
@@ -478,7 +477,7 @@ app.mount('#root')
 
 
 // app.initialize('#app', {
-//    globalCommons,
+//    groundContext,
 //    provide: []
 // })
 

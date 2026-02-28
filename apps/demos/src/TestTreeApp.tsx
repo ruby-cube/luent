@@ -1,4 +1,4 @@
-import { template, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
+import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround } from "@rue/lumo";
 import { as, EACH, Ion, Ionic, Nested, } from "@rue/quarky";
 import "./style.css"
 import "./TestTreeApp.css"

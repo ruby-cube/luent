@@ -1,15 +1,15 @@
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { Component, unnestComponent } from "../component/Component";
 import { RawJSXNode } from "../node/makeJSXNode";
-import { Commons, createCommonsNode, NodeCommons, Provided } from "../context/Context";
+import { Context, createContextNode, NodeContext, Provided } from "../context/Context";
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { FromTag } from "../component/Input";
 import { Ion, isGetter, isIon, MutableIon, PRELUDE, queueInternalRender, toValue, watch, watchToRender } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
-import { getPhasicNode } from "../transition/PhasicNode";
+import { getPhasicNode } from "../transition/x_PhasicNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { COMMONS, getClosestCommons } from "../context/context-stack";
+import { CONTEXT, getClosestContext } from "../context/context-stack";
 import { AsyncRender, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode";
 
 
@@ -57,7 +57,7 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: {
             exposed: undefined,
             jsxNodes: normalizeToArray(
                provide ?
-                  Commons({ provide, Slot: () => unnestComponent(switchMap.get(activeKey)!(inputObj!)) })
+                  Context({ provide, Slot: () => unnestComponent(switchMap.get(activeKey)!(inputObj!)) })
                   : unnestComponent(switchMap.get(activeKey)!(inputObj!)))
          }
       }
@@ -130,15 +130,15 @@ function createDynamicRenderKitOrMap(render: RenderFunction, input: Object | und
    return createDynamicRenderKit(render, context)
 }
 
-function createDynamicRenderKit(render: RenderFunction, context: ContextSnapshot): PolymorphRenderKit {
-   console.log('^^^ context', context)
+function createDynamicRenderKit(render: RenderFunction, asyncContext: ContextSnapshot): PolymorphRenderKit {
+   console.log('^^^ context', asyncContext)
 
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
-   const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)], getClosestCommons(context))
+   const context = createContextNode([REGISTER_TRANSITION_NODE(registerTransitionNode)], getClosestContext(asyncContext))
 
    return {
       flask: undefined as Flask | undefined,
-      render: toAsyncRender(render, context, { [FLASK]: undefined, [COMMONS]: commons, [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() : '' }),
+      render: toAsyncRender(render, context, { [FLASK]: undefined, [CONTEXT]: context, [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() : '' }),
       transitionNodes,
       cache: undefined,
       awaitCache: undefined,

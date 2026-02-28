@@ -60,7 +60,7 @@ export function renderTransitNode(
 const REGISTER_TRANSITION_NODE = ContextKey<(transitionNode: TransitionNode) => void>('REGISTER_TRANSITION_NODE')
 
 // declare module '@rue/lumo' {
-//     interface CommonsKeyMap {
+//     interface ContextKeyMap {
 //         [REGISTER_TRANSITION_NODE]: typeof pushTransitionNode
 //     }
 // }

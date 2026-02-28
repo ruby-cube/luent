@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { fromApp, fromContext, createGlobalCommons, fromGlobal } from '../provide';
+import { fromRoot, fromContext, createGroundContext, fromGround } from '../provide';
 import { template, makeComponent } from '../../component/Component';
 import { createRoot } from '../../createRoot';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
-import { Commons, createCommons } from '../Context';
+import { Context, createContext } from '../Context';
 import { ContextKey } from '../ContextKey';
 import { Ion, Ionized, MaybeIon, v } from '../../component/Input';
 import { ion, ionize, isIon, isIonicProxy } from '@rue/quarky';
@@ -34,14 +34,14 @@ describe('Integration tests the Context API', () => {
             let frogE;
 
             function App() {
-                frogA = fromApp(_frog_)
+                frogA = fromRoot(_frog_)
                 return template(
                   makeComponent(Parent, undefined, {}, undefined)
                )
             }
 
             function Parent() {
-                frogB = fromApp(_frog_)
+                frogB = fromRoot(_frog_)
 
                 return template(
                     makeElement('div', () => [
@@ -52,7 +52,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frogC = fromApp(_frog_)
+                frogC = fromRoot(_frog_)
                 frogD = fromContext(_frog_)
 
                 return template(
@@ -61,7 +61,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = fromApp(_frog_)
+                frogE = fromRoot(_frog_)
 
                 return template(
                     makeElement('div', () => ['sibling'], {}, undefined)
@@ -84,8 +84,8 @@ describe('Integration tests the Context API', () => {
             let frogB;
 
             function App() {
-                frog = fromApp(_frog_)
-                frogB = fromGlobal(_frog_)
+                frog = fromRoot(_frog_)
+                frogB = fromGround(_frog_)
 
                 return template(
                     makeElement('div', () => ['hi'], {}, undefined)
@@ -97,14 +97,14 @@ describe('Integration tests the Context API', () => {
 
             expect(frog).toBe(value)
             expect(frogB).toBeUndefined()
-            expect(() => fromApp(_frog_)).toThrow()
+            expect(() => fromRoot(_frog_)).toThrow()
         })
 
         it('should return undefined if value not provided', () => {
             const value = 'sir robin'
             let cat;
             function App() {
-                cat = fromApp('cat')
+                cat = fromRoot('cat')
                 return template(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
@@ -119,7 +119,7 @@ describe('Integration tests the Context API', () => {
         it('should return undefined if no entries provided', () => {
             let frog;
             function App() {
-                frog = fromApp(_frog_)
+                frog = fromRoot(_frog_)
                 return template(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
@@ -131,52 +131,52 @@ describe('Integration tests the Context API', () => {
         })
     });
 
-    describe('createGlobalCommons()', () => {
+    describe('createGroundContext()', () => {
         it('should create a trans-app context accessible across the application', () => {
             const value = 'sir robin'
-            const globalCommons = createGlobalCommons({ [_frog_]: value });
+            const groundContext = createGroundContext({ [_frog_]: value });
 
             let frog;
             let frogB;
 
             function App() {
-                frog = fromApp(_frog_)
-                frogB = fromGlobal(_frog_)
+                frog = fromRoot(_frog_)
+                frogB = fromGround(_frog_)
 
                 return template(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createRoot(App, { globalCommons });
+            const app = createRoot(App, { groundContext });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
-            expect(globalCommons).toBeDefined();
+            expect(groundContext).toBeDefined();
             expect(frog).toBe(value)
             expect(frogB).toBe(value)
-            expect(() => fromGlobal(_frog_)).toThrow()
+            expect(() => fromGround(_frog_)).toThrow()
 
         });
 
         it('should create a trans-app context accessible across the application', () => {
-            const globalCommons = createGlobalCommons();
-            expect(globalCommons).toBeDefined();
+            const groundContext = createGroundContext();
+            expect(groundContext).toBeDefined();
         });
     });
 
-    // describe('provideGlobal() and global()', () => {
+    // describe('provideGround() and global()', () => {
     //     it('should provide a global value accessible from anywhere in the application', () => {
-    //         const globalCommons = createGlobalCommons();
-    //         provideGlobal(globalCommons, 'globalConfig', { theme: 'dark' });
-    //         const config = global(globalCommons, 'globalConfig');
+    //         const groundContext = createGroundContext();
+    //         provideGround(groundContext, 'globalConfig', { theme: 'dark' });
+    //         const config = global(groundContext, 'globalConfig');
     //         expect(config).toEqual({ theme: 'dark' });
     //     });
 
     //     it('should override global values if provided again', () => {
-    //         const globalCommons = createGlobalCommons();
-    //         provideGlobal(globalCommons, 'globalConfig', { theme: 'dark' });
-    //         provideGlobal(globalCommons, 'globalConfig', { theme: 'light' });
-    //         const config = global(globalCommons, 'globalConfig');
+    //         const groundContext = createGroundContext();
+    //         provideGround(groundContext, 'globalConfig', { theme: 'dark' });
+    //         provideGround(groundContext, 'globalConfig', { theme: 'light' });
+    //         const config = global(groundContext, 'globalConfig');
     //         expect(config).toEqual({ theme: 'light' });
     //     });
     // });
@@ -192,16 +192,16 @@ describe('Integration tests the Context API', () => {
             let frogE;
 
             function App() {
-                frogA = fromApp(_frog_)
+                frogA = fromRoot(_frog_)
                 return template(
-                    Commons({ Slot: () => [
+                    Context({ Slot: () => [
                      makeComponent(Parent, undefined, {}, undefined)
                  ],provide: { [_frog_]: value } })
                 )
             }
 
             function Parent() {
-                frogB = fromApp(_frog_)
+                frogB = fromRoot(_frog_)
                 frogC = fromContext(_frog_)
 
                 return template(
@@ -249,7 +249,7 @@ describe('Integration tests the Context API', () => {
 
                 return template(
                     makeElement('div', () => [
-                        createCommons(() => [
+                        createContext(() => [
                             makeComponent(Child, undefined, {}, undefined),
                         ], { provide: { [_frog_]: value } }),
                         makeComponent(Sibling, undefined, {}, undefined)
@@ -302,7 +302,7 @@ describe('Integration tests the Context API', () => {
             function App() {
 
                 return template(
-                    createCommons(() => [
+                    createContext(() => [
                         makeComponent(Parent, undefined, {}, undefined)
                     ], { provide: { [APP_CONTEXTUAL_FROG]: appContextualValue } })
                 )
@@ -312,7 +312,7 @@ describe('Integration tests the Context API', () => {
 
                 return template(
                     makeElement('div', () => [
-                        createCommons(() => [
+                        createContext(() => [
                             makeComponent(Child, undefined, {}, undefined),
                         ], { provide: { [CONTEXTUAL_FROG]: contextualValue } })
                     ], {}, undefined)
@@ -320,8 +320,8 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frogA = fromGlobal(GLOBAL_FROG)
-                frogB = fromApp(APP_FROG)
+                frogA = fromGround(GLOBAL_FROG)
+                frogB = fromRoot(APP_FROG)
 
                 frogC = fromContext(GLOBAL_FROG)
                 frogD = fromContext(APP_FROG)
@@ -333,8 +333,8 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const globalCommons = createGlobalCommons({ [GLOBAL_FROG]: globalValue })
-            const app = createRoot(App, { with: { [APP_FROG]: appValue }, globalCommons });
+            const groundContext = createGroundContext({ [GLOBAL_FROG]: globalValue })
+            const app = createRoot(App, { with: { [APP_FROG]: appValue }, groundContext });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -365,7 +365,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return template(
-                    createCommons(() => [
+                    createContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { provide: { [_frog_]: value } })
                 )
@@ -462,7 +462,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return template(
-                    createCommons(() => [
+                    createContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { provide: { [_frog_]: value } })
                 )
@@ -493,7 +493,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return template(
-                    createCommons(() => [
+                    createContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { provide: { [_frog_]: value } })
                 )
@@ -533,7 +533,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return template(
-                    createCommons(() => [
+                    createContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { provide: { [_frog_]: value } })
                 )
@@ -573,7 +573,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return template(
-                    createCommons(() => [
+                    createContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { provide: { [_frog_]: Ion(value) } })
                 )
@@ -604,7 +604,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return template(
-                    createCommons(() => [
+                    createContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { provide: { [_frog_]: ionize(value) } })
                 )

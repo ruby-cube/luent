@@ -37,13 +37,13 @@ collectEffects(async () => {
 - provideIfNeeded
 
 - provideFromRoot
-- provideGlobal
+- provideGround
 - constAppState/Global
 - letAppState/Global
 
 - fromContext
-- fromGlobal
-- fromApp
+- fromGround
+- fromRoot
 
 Dynamic node
 - flask?
@@ -63,7 +63,7 @@ context.app.get()
 const _this = $this()
 const { onCreated, fromContext } = _this;
 
-const dog = _this.fromGlobal(_dog_)
+const dog = _this.fromGround(_dog_)
 
 watch($list, async () => {
 

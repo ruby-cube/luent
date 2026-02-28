@@ -1,6 +1,6 @@
 import { Component, ComponentForge } from "./component/Component";
 import { AnyObject } from "@rue/types";
-import { AppCommons, createAppCommons } from "./context/provide";
+import { RootContext, createRootContext } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
 import { instantUpdate, load } from "@rue/quarky";
@@ -28,11 +28,11 @@ export function getAppRoot() {
 // }
 
 
-export function createRoot<T extends AnyObject, E extends Provided>(App: ComponentForge<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
+export function createRoot<T extends AnyObject, E extends Provided>(App: ComponentForge<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, groundContext?: RootContext, setup?: T }) {
 
    // (1) instantiate developer's root component
-   const appCommons = createAppCommons(config?.provide, config?.globalCommons)
-   // console.trace('appCommons', appCommons, config)
+   const rootContext = createRootContext(config?.provide, config?.groundContext)
+   // console.trace('rootContext', rootContext, config)
    const remountable = config?.remountable
    const flask = new Flask({ type: 'view' });
 
@@ -53,7 +53,7 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
 
          load(() => { // FIX: Error are being swallowed up here despite being rethrown
             flaskStack.push(flask)
-            pushContext(appCommons)
+            pushContext(rootContext)
             let nodes: JSXNode[]
             try {
                nodes = this.nodes = processJSXOutput(App(toInput(attributes)))

@@ -3,7 +3,7 @@ import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueIn
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
-import { COMMONS, CommonsNode } from "../context/context-stack";
+import { CONTEXT, ContextNode } from "../context/context-stack";
 import { TRACE } from "../../../flask/debug";
 
 export type JSXNode = DOMNode | VineNode
@@ -220,7 +220,7 @@ function isDOMNode(node: unknown): node is DOMNode & Node {
 
 export type AsyncRender = (flask: Flask, input?: Object) => RawJSXNode
 
-export function toAsyncRender(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, /* [COMMONS]: CommonsNode, */ [TRACE]: string }): AsyncRender {
+export function toAsyncRender(render: RenderFunction, context: ContextSnapshot, nestedContext: { [FLASK]: Flask | undefined, /* [CONTEXT]: ContextNode, */ [TRACE]: string }): AsyncRender {
    return (flask: Flask, ...args: any[]) => {
       nestedContext[FLASK] = flask
       return $_run_with_(context, () => render(...args), nestedContext)

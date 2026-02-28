@@ -1,7 +1,7 @@
-import { template, fromGlobal, fromRoot, If, Style, css } from "@rue/lumo";
+import { template, fromGround, fromRoot, If, Style, css } from "@rue/lumo";
 import { Router } from "./router";
 import { Ion, Ionized } from "@rue/quarky";
-import { User } from "./commons/keys";
+import { User } from "./context/keys";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
 
 // TODO: Figure out how to provide user

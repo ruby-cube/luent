@@ -1,46 +1,48 @@
 import { isFunction } from "@rue/utils";
 
-export function MU_<K extends CommonsEntryKey | string>(key: K): CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown> {
-   const commonsKey = toCommonsKey(key)
-   const name = 'MU_' + commonsKey;
+export function MU_<K extends ContextEntryKey | string>(key: K): ContextEntryKey<K extends ContextEntryKey<infer T> ? T : unknown> {
+   const contextKey = toContextKey(key)
+   const name = 'MU_' + contextKey;
    const fnKey = function (value: unknown) {
       return [name, value]
    };
    Object.defineProperty(fnKey, "name", { value: name });
-   Object.defineProperty(fnKey, "commonsKey", { value: commonsKey });
-   return fnKey as CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown>
+   Object.defineProperty(fnKey, "contextKey", { value: contextKey });
+   return fnKey as ContextEntryKey<K extends ContextEntryKey<infer T> ? T : unknown>
 }
 
-export type CommonsEntryKey<T = any> = (value: T) => [CommonsEntryKey<T>, T]
+export type ContextEntryKey<T = any> = ((value: T) => [ContextEntryKey<T>, T]) & { defaultValue: any, optional: boolean }
 
-type FnKey = CommonsEntryKey & { commonsKey: string }
+type FnKey = ContextEntryKey & { contextKey: string | ContextEntryKey }
 
-export function mapCommonsKeys(map: { [key: string]: CommonsEntryKey[] }) {
-   for (const key in map) {
-      const fnKeys = map[key];
-      for (const fnKey of fnKeys) {
-         (fnKey as FnKey).commonsKey = key
-      }
+export function mergeContextKeys(...keys: ContextEntryKey[]) {
+   const mergedKey = ContextKey()
+   for (const fnKey of keys){
+       (fnKey as FnKey).contextKey = mergedKey
    }
+   return mergedKey
 }
 
 export function isMuKey(key: unknown) {
    return isFunction(key) && key.name.startsWith('MU_')
 }
 
-export function toCommonsKey(key: CommonsEntryKey | string): string {
+export function toContextKey(key: ContextEntryKey | string): string | Function {
    if (typeof key === 'string') return key;
-   if ('commonsKey' in key)
-      return key.commonsKey as string
-   return key.name
+   if ('contextKey' in key)
+      return key.contextKey as string
+   return key.name === 'context-key' ? key : key.name
 }
 
-export function ContextKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
+export function ContextKey<T>(key: string = 'context-key'): ContextEntryKey<T> {
+   // const { default: defaultValue, key = 'context-key', optional = false } = options ?? {}
    const fnKey = function (v: T) {
       return [fnKey, v]
    }
    Object.defineProperty(fnKey, 'name', { value: key })
-   return fnKey as CommonsEntryKey<T>
+   // Object.defineProperty(fnKey, 'defaultValue', { value: defaultValue })
+   // Object.defineProperty(fnKey, 'optional', { value: !!options?.default || optional })
+   return fnKey as ContextEntryKey<T>
 }
 
 // export function isOpKey(key: string) {
@@ -106,13 +108,13 @@ export function ContextKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
 //    : never : never : never
 
 // provide
-// function $U<S extends symbol & CommonsTypeConfig>(key: ExcludeMutableKey<S>) {
+// function $U<S extends symbol & ContextTypeConfig>(key: ExcludeMutableKey<S>) {
 //    return (input: ImmutableInput<S>) => {
 //       return [key, input]
 //    }
 // }
 
-// function $M<S extends symbol & CommonsTypeConfig>(key: ExcludeMutableKey<S>) {
+// function $M<S extends symbol & ContextTypeConfig>(key: ExcludeMutableKey<S>) {
 //    return (input: ImmutableInput<S> & ((...args: any[]) => any)) => {
 //       return [key, input]
 //    }
@@ -120,7 +122,7 @@ export function ContextKey<T>(key: string = 'commons-key'): CommonsEntryKey<T> {
 
 // $U(HELLO)({ dog: 'skd' })
 
-// function $MU<S extends symbol & CommonsTypeConfig>(key: S, input: S['required'] extends true ? S['key'] extends string ? Input<S> : never : never) {
+// function $MU<S extends symbol & ContextTypeConfig>(key: S, input: S['required'] extends true ? S['key'] extends string ? Input<S> : never : never) {
 
 // }
 

@@ -1,4 +1,4 @@
-import { fromGlobal, Polymorph, provideGlobal } from "@rue/lumo"
+import { fromGround, Polymorph, provideGround } from "@rue/lumo"
 
 export function Router(config: Parameters<typeof Polymorph>[0]) {
 
@@ -16,15 +16,15 @@ export function Router(config: Parameters<typeof Polymorph>[0]) {
    }
 
 
-   provideGlobal('$route', () => $route())
-   provideGlobal('routeTo', routeTo)
+   provideGround('$route', () => $route())
+   provideGround('routeTo', routeTo)
 
    return { $View, $route, routeTo }
 }
 
 export function useRouter() {
    return {
-      get $route() { return fromGlobal('$route') },
-      get routeTo() { return fromGlobal('routeTo') },
+      get $route() { return fromGround('$route') },
+      get routeTo() { return fromGround('routeTo') },
    }
 }

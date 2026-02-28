@@ -17,7 +17,7 @@
 // and therefore it seems to make more sense to write a separate function toggleChatApp(), instead of adding a toggle() method.
 // maybe it's just cutting encapsulation corners... But it feels much cleaner that way anyway. Cleaner means more readability.
 
-// I suspect deciding whether a commons object should be mutable or not is going to be a pain.
+// I suspect deciding whether a context object should be mutable or not is going to be a pain.
 // I kinda want to just scrap the mu: stuff
 // Also I just realized, it's the parent who decides whether to mu or not. While the child can say mu?: or require mu:
 // should i make it opt-in? But mu: is useful for two-way binding for elements... for the parent to decide if they want two-way binding.
@@ -27,7 +27,7 @@
 // Passing an ion with methods is essentially two-way binding..., just a bit more controlled
 
 
-import { Commons, ContextKey, template, For, fromContext, If, Ion, Ionized, v } from "@rue/lumo";
+import { Context, ContextKey, template, For, fromContext, If, Ion, Ionized, v } from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
 
 class Message {

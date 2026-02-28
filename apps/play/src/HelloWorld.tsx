@@ -1,8 +1,8 @@
-import { Component, Else, ElseIf, For, If, provideAppwide } from "@rue/lumo";
+import { Component, Else, ElseIf, For, If, provideRoot } from "@rue/lumo";
 import { Ion, ionize } from "@rue/quarky";
 import { inert } from "../../../packages/quarky/src/ionic/notes/inert";
 import { Well, Wellerman } from "./Well";
-import { Commons } from "../../../packages/lumo/src/context/Context";
+import { Context } from "../../../packages/lumo/src/context/Context";
 
 function Swap() {
    return template('')
@@ -427,8 +427,8 @@ function SelectionKit() {
 function J(input: { for: any, Slot: any, params: any }) {
    const $msg = Ion('hi')
 
-   provideAppwide(_appwide_dog_, mu(dog, 'set::setValue')) // auto-readonly unless marked with m
-   provideGlobal(_global_dog_, dog) // auto-readonly unless marked with
+   provideRoot(_appwide_dog_, mu(dog, 'set::setValue')) // auto-readonly unless marked with m
+   provideGround(_global_dog_, dog) // auto-readonly unless marked with
 
    // [ ] should mu() allow setting values? ... there's no way to indicate from the child component that you want to be writable...
    // also there's no way to write a setter to trace the set

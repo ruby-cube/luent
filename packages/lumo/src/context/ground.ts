@@ -1,12 +1,12 @@
-import { fromGlobal, provideGlobal } from "./provide"
+import { fromGround, provideGround } from "./provide"
 
 export function provideGlobalFunction(fn: Function, implementation: Function){
-   provideGlobal(fn, implementation)
+   provideGround(fn, implementation)
 }
 
 export function useGlobalFunction(fn: Function){
    const _fn = function(){
-      const func = fromGlobal(fn) ?? fn
+      const func = fromGround(fn) ?? fn
       return func()
    }
 

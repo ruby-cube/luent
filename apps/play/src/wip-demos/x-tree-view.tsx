@@ -1,4 +1,4 @@
-import { template, FromTag, If, Else, For, fromGlobal, ContextKey, provideGlobal } from "@rue/lumo";
+import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround } from "@rue/lumo";
 import { DeepIonized, EACH, Ion,  Ionic, Ionized, isIonicProxy,} from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 
@@ -9,7 +9,7 @@ type DeepIonic<D extends (...args: any[]) => any, M = {}> = Omit<ReturnType<D>, 
 function asGlobal<T>(value: T) {
    const key = ContextKey('global')
    function $GlobalValue(): T {
-      const _value = fromGlobal(key) ?? provideGlobal(key, value);
+      const _value = fromGround(key) ?? provideGround(key, value);
       return _value
    }
 

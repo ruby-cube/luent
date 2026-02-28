@@ -1,4 +1,4 @@
-import { wrapWithCommons } from './context/Context'
+import { wrapWithContext } from './context/Context'
 
 export * from './node/NodeRef' 
 export * from './node/NodeSetup' 
@@ -15,7 +15,6 @@ export * from './flask/template-hooks'
 export * from './element/makeElement' 
 export * from './conditional/If' 
 export * from './conditional/MatchCase' 
-export * from './conditional/Polymorph' 
 export * from './context/provide' 
 export * from './context/ContextKey'
 export * from './context/Context' 
@@ -33,22 +32,22 @@ export * from './measureLayout'
 export * from '../../quarky/src/reactivity/RenderCycle'
 
 //@ts-expect-error
-window._$$wrapWithCommons = wrapWithCommons;
+window._$$wrapWithContext = wrapWithContext;
 
 
 
 /**
- *  App developers can extend CommonsKeyMap interface like so:
+ *  App developers can extend ContextKeyMap interface like so:
  *  
  *  export const Frog = Symbol('frog')
  * 
  *  const frogType = ContextKey(FROG, v<string>)
  *  
  *  declare module '@rue/lumo' {
- *     interface CommonsKeyMap {
+ *     interface ContextKeyMap {
  *        [_dog_]: typeof frogType
  *     }
  *  }
  * 
  */
-export interface CommonsKeyMap { }
+export interface ContextKeyMap { }

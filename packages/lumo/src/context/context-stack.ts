@@ -1,12 +1,11 @@
 import { AsyncState } from "../../../flask/context/AsyncContext";
-import { NodeCommons } from "./Context";
-import { AppCommons } from "./provide";
+import { NodeContext, RootContext } from "./Context";
 
-export type CommonsNode = NodeCommons | AppCommons
+export type ContextNode = NodeContext | RootContext
 
-// manage commons stack
-// let currentContext: Commons | undefined;
-// let previousContext: Commons | undefined;
+// manage context stack
+// let currentContext: Context | undefined;
+// let previousContext: Context | undefined;
 
 // export function getCurrentContext() {
 //    return currentContext;
@@ -14,31 +13,31 @@ export type CommonsNode = NodeCommons | AppCommons
 
 // NOTE: 
 // Async render functions (e.g. for conditionals or iteratives) 
-// must be wrapped with its commons with push and pop for when they run asynchronously
-// However, it must NOT push and pop commons for its initial render.
+// must be wrapped with its context with push and pop for when they run asynchronously
+// However, it must NOT push and pop context for its initial render.
 
-export function pushContext(commons: CommonsNode | undefined) {
-   if (!commons) throw new Error(`Provider is undefined`)
+export function pushContext(context: ContextNode | undefined) {
+   if (!context) throw new Error(`Provider is undefined`)
    // previousContext = currentContext;
-   // currentContext = commons;
-   commonsStack.push(commons)
+   // currentContext = context;
+   contextStack.push(context)
 }
 
 export function popContext() {
-   commonsStack.pop()
+   contextStack.pop()
    // currentContext = previousContext;
    // previousContext = previousContext?.parent
 }
 
-export function getCommons() {
-   const commons = getClosestCommons()
-   if (!commons) throw new Error('No commons found')
-   return commons;
+export function getContext() {
+   const context = getClosestContext()
+   if (!context) throw new Error('No context found')
+   return context;
 }
 
-export const COMMONS = 'commons'
+export const CONTEXT = 'context'
 
-export const [getClosestCommons, commonsStack] = AsyncState<CommonsNode>(COMMONS)
+export const [getClosestContext, contextStack] = AsyncState<ContextNode>(CONTEXT)
 
 
 

@@ -5,7 +5,7 @@ import { $Node, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
-import { Provided, callWithCommons, createCommonsNode } from "../context/Context";
+import { Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ShowHideType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
@@ -125,9 +125,6 @@ export function resetGroupActivationType() {
 //    }
 // }
 
-export function wrapWithContext(Slot: RenderSlot, provide: Provided) {
-   return () => callWithCommons(Slot, createCommonsNode(provide))
-}
 
 export function wrapWithActivationType(type: GroupActivationType, Slot: RenderSlot) {
    return () => {

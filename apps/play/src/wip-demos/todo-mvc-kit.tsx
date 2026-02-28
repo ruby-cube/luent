@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, For, If, Else, FromTag, fromApp, ContextKey, CommonsEntryKey, fromGlobal } from "@rue/lumo"
+import { template, For, If, Else, FromTag, fromRoot, ContextKey, ContextEntryKey, fromGround } from "@rue/lumo"
 import { watch,  queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
@@ -267,10 +267,10 @@ function TodoAppKit(todos: Todo[]) {
    }
 }
 
-type FromAbove<T> = T extends CommonsEntryKey<infer I> ? I : never
+type FromAbove<T> = T extends ContextEntryKey<infer I> ? I : never
 
 
-// TODO: fromGlobal (checks appwide first then global) only (no fromApp), provideGlobal, and provideAppwide
+// TODO: fromGround (checks appwide first then global) only (no fromRoot), provideGround, and provideRoot
 
 const USE_TODO_APP = ContextKey<typeof TodoAppKit>('useTodoApp')
 

@@ -1,5 +1,5 @@
-import { template, For, fromApp, fromContext, fromGlobal, FromTag, If, provideAppwide, provideGlobal } from "@rue/lumo";
-import { Morphable, Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
+import { template, For, fromRoot, fromContext, fromGround, FromTag, If, provideRoot, provideGround } from "@rue/lumo";
+import { Morphable, Polymorph } from "../../../packages/lumo/src/conditional/x_Polymorph";
 import "./style.css"
 
 type File = { name: string }

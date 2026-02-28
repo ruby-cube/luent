@@ -26,7 +26,7 @@ function MessageForm(this: ThisView, {
 
    })
 
-   const files = this.fromApp(FILES)
+   const files = this.fromRoot(FILES)
    const files = this.fromContext(FILES)
 
    const { $text } = thus.TextKit(files)

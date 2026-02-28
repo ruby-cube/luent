@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { Commons, template, fromApp, fromContext, FromTag, If, Polymorph } from "@rue/lumo";
-import { USER, User } from "../commons/keys";
+import { Context, template, fromRoot, fromContext, FromTag, If, Polymorph } from "@rue/lumo";
+import { USER, User } from "../context/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";
 

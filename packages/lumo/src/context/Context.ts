@@ -1,87 +1,96 @@
 import { template, unnestComponent } from "../component/Component";
-import { CommonsNode, getClosestCommons, popContext, pushContext } from "./context-stack";
-import { AppCommons, markIfMuIon } from "./provide";
+import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
+import { RootContext, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
-import { CommonsEntryKey, toCommonsKey } from "./ContextKey";
+import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderSlot } from "../component/Input";
 
-export interface NodeCommons {
+export interface NodeContext {
    entries: Map<string, unknown>;
-   parent: NodeCommons | AppCommons,
-   app: AppCommons,
-   global?: AppCommons,
+   parent: NodeContext | RootContext,
+   root: RootContext,
+   ground?: RootContext,
    muIons: Set<Ion> | undefined
 }
 
-export type Provided = [CommonsEntryKey | string, any][]
+export interface RootContext {
+   entries?: Map<string, any>;
+   parent?: RootContext,
+   root: RootContext,
+   ground?: RootContext,
+   muIons: Set<Ion> | undefined
+}
+
+
+export type Provided = [ContextEntryKey | string, any][]
 
 //API
 
-export function Commons(
+export function Context(
    { Slot, provide }: FromTag<{
       provide: Provided,
       Slot: RenderSlot
    }>
 ) {
    if (!Slot) debug.warn(`Extraneous <Context>`)
-   return template(callWithCommons(Slot, createCommonsNode(provide)))
+   return template(callWithContext(Slot, createContextNode(provide)))
 }
 
-export function createCommonsNode(
+export function createContextNode(
    provide: Provided,
-   parentCommons: CommonsNode | undefined = getClosestCommons(),
+   parentContext: ContextNode | undefined = getClosestContext(),
 ) {
-   if (!parentCommons) {
+   if (!parentContext) {
       debug.traceAsyncPath()
-      throw new Error(`no commons found :( This should never happen`)
+      throw new Error(`no context found :( This should never happen`)
    }
-   const [entries, muIons] = toCommonsEntries(provide)
-   const commons: NodeCommons = {
+   const [entries, muIons] = toContextEntries(provide)
+   const context: NodeContext = {
       entries,
-      parent: parentCommons,
-      app: parentCommons?.app,
-      global: parentCommons?.global,
+      parent: parentContext,
+      root: parentContext?.root,
+      ground: parentContext?.ground,
       muIons
    }
-   return commons;
+   return context;
 }
 
 
-export function callWithCommons(
+export function callWithContext(
    Slot: RenderSlot,
-   commons: CommonsNode
+   context: ContextNode
 ) {
 
-   pushContext(commons)
+   pushContext(context)
    const nodeEntities = Slot()
    popContext()
    return unnestComponent(nodeEntities)
 }
 
-export function wrapWithCommons(
+export function wrapWithContext(
    Slot: RenderSlot,
    provide: Provided) {
-   const commons = createCommonsNode(provide)
+   const context = createContextNode(provide)
    return (arg: any) => {
-      return callWithCommons(() => Slot(arg), commons)
+      return callWithContext(() => Slot(arg), context)
    }
 }
 
-export function toCommonsEntries(provided: [CommonsEntryKey | string, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
-   const commons = { muIons: undefined }
+export function toContextEntries(provided: [ContextEntryKey | string, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
+   const context = { muIons: undefined }
    const entries: Map<string, unknown> = new Map()
    for (const [key, value] of provided) {
-      markIfMuIon(key, value, commons)
-      entries.set(toCommonsKey(key), value)
+      markIfMuIon(key, value, context)
+      entries.set(toContextKey(key), value)
    }
-   return [entries, commons.muIons]
+   return [entries, context.muIons]
 }
 
-// export function createCommons(
+// export function createContext(
 //     Slot: () => JSXNode,
 //     config: ComponentConfig,
 // ) {
-//    return Commons({ Slot, provide: config.provide })
+//    return Context({ Slot, provide: config.provide })
 // }
 
 

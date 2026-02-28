@@ -10,7 +10,7 @@ import * as Lumo from "@rue/lumo";
 import * as Quarky from "@rue/quarky";
 import { $Node } from "../../src/node/NodeRef";
 import { NodeRefsConfig } from "../../src/node/NodeRefs";
-import { COMPONENT_ATTRIBUTES, CommonsKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
+import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../../src/boundaries/Portal";
 
@@ -2598,12 +2598,12 @@ declare global {
 
 
 
-      // type CommonsEntries<T> = {
-      //     [K in keyof T]: K extends keyof CommonsKeyMap ? _ContextInputType<CommonsKeyMap[K]> : any;
+      // type ContextEntries<T> = {
+      //     [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
       // }
 
       // type ContextNodeInput<T> = {
-      //     with: T & CommonsEntries<T>,
+      //     with: T & ContextEntries<T>,
       //     Slot: (() => JSXNode) | JSXNode
       // }
 

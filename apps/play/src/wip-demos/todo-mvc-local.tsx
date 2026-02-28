@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, For, If, Else, FromTag, fromApp, ContextKey } from "@rue/lumo"
+import { template, For, If, Else, FromTag, fromRoot, ContextKey } from "@rue/lumo"
 import { watch, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/RenderCycle"
 import { create } from "domain"
@@ -142,7 +142,7 @@ const ionizeTodo = defineDeepIonize(() =>({
 
 
 export function TodoMVC() {
-   const { getTodos, storeTodos } = fromApp(TODO_DB_KIT)
+   const { getTodos, storeTodos } = fromRoot(TODO_DB_KIT)
 
    // # state
 

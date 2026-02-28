@@ -1,4 +1,4 @@
-import { renderPhasicNode, TransitionConfig } from "./PhasicNode";
+import { renderPhasicNode, TransitionConfig } from "./x_PhasicNode";
 import { createTransitionStyleSheet, getTransitionStylesheet, TransitionClasses, TransitionFunction, TransitionKit } from "./defineTransition";
 import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimation";
 import { renderTransitNode } from "./TransitNode";

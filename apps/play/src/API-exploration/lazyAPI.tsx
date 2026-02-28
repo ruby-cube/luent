@@ -1,7 +1,7 @@
 //@ts-nocheck
 // You're filtering a large list based on a search input.
 
-import { AsyncIon, template, For, fromGlobal, provideGlobal } from "@rue/lumo";
+import { AsyncIon, template, For, fromGround, provideGround } from "@rue/lumo";
 import { Ion,queueIonicTask } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
 

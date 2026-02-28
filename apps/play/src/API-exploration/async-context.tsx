@@ -10,7 +10,7 @@ function App(input : FromTag()) {
 
    // thisView atMounted atUnmount (flask)
 
-   // thisCommons 
+   // thisContext 
 
    listen(document, 'click', () => {
 

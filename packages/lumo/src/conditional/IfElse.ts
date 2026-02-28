@@ -5,10 +5,10 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, pushAwaiting, pushUpdate, queueInternalRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { COMMONS, CommonsNode } from "../context/context-stack";
+import { CONTEXT, ContextNode } from "../context/context-stack";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
-import { createCommonsNode } from "../context/Context";
+import { createContextNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isPlainObject } from "@rue/utils";
 import { Await } from "../boundaries/Await";
@@ -55,7 +55,7 @@ export type DynamicConditionalRenderKit = {
 function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", showHideType: ShowHideType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: SuspenseIon | undefined): DynamicConditionalRenderKit {
    // const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
 
-   // const commons = createCommonsNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
+   // const context = createContextNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
 
    let _cache: JSXNode[] | undefined = undefined
 
@@ -66,7 +66,7 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", sh
       statementType: statementType as 'if' | 'elseIf' | 'else',
       render: toAsyncRender(render, context, {
          [FLASK]: undefined,
-         // [COMMONS]: commons,
+         // [CONTEXT]: context,
          [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }),
       type: showHideType,

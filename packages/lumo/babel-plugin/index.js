@@ -671,7 +671,7 @@ function wrapIfProvides(renderfunction, node) {
    if (!node) return renderfunction;
    const provided = getProvided(node)
    if (provided) {
-      return t.callExpression(t.identifier('_$$wrapWithCommons'), [renderfunction, provided])
+      return t.callExpression(t.identifier('_$$wrapWithContext'), [renderfunction, provided])
    }
    return renderfunction
 }

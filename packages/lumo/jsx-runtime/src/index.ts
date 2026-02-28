@@ -1,4 +1,4 @@
-import { ComponentForge, TagName, makeJSXNode, normalizeToRenderFunction, RenderSlot, Commons, RawJSXNode } from "@rue/lumo";
+import { ComponentForge, TagName, makeJSXNode, normalizeToRenderFunction, RenderSlot, Context, RawJSXNode } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
 import { isPlainObject, normalizeToArray } from "@rue/utils";
 
@@ -14,8 +14,8 @@ export const jsxs = jsx;
 
 export function jsx(nodeType: TagName | ComponentForge, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
    const Slot = processSlot(config.children);
-   if (nodeType === Commons) {
-      return Commons({Slot: config.children, provide: config.provide} as any)
+   if (nodeType === Context) {
+      return Context({Slot: config.children, provide: config.provide} as any)
    }
    if (nodeType === Fragment) {
       return normalizeToArray(config.children)

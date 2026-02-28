@@ -1,0 +1,9 @@
+@reference './index.css';
+
+.container {
+   @apply p-4 border rounded-md border-gray-400 my-2
+}
+
+hr {
+   @apply my-5 border-0 border-b border-gray-400
+}

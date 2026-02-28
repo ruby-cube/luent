@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { Commons, ContextKey, template, fromContext, FromTag, RenderSlot } from "@rue/lumo";
+import { Context, ContextKey, template, fromContext, FromTag, RenderSlot } from "@rue/lumo";
 import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase";
 
-// # via commons
+// # via context
 
 function Parent() {
    return template(
@@ -20,7 +20,7 @@ function Parent() {
 }
 
 const Nested = {
-   'something': mergeNubKeys(
+   'something': mergeContextKeys(
       Content['something'],
       Deeper['something']
    )

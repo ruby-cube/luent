@@ -1,11 +1,11 @@
-import { fromApp, fromGlobal, provideAppwide, provideGlobal } from "./provide";
+import { fromRoot, fromGround, provideRoot, provideGround } from "./provide";
 
 export function defineAppwide<F extends (...args: any[]) => any>(key: string, factory: F): F {
-   return defineCentralized(key, factory, fromApp, provideAppwide)
+   return defineCentralized(key, factory, fromRoot, provideRoot)
 }
 
 export function defineGlobal<F extends (...args: any[]) => any>(key: string, factory: F): F {
-   return defineCentralized(key, factory, fromGlobal, provideGlobal)
+   return defineCentralized(key, factory, fromGround, provideGround)
 }
 
 function defineCentralized<F extends (...args: any[]) => any>(key: string, factory: F, fromCentral: Function, provideCentral: Function): F {

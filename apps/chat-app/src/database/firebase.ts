@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
 import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
-import { atUnmount, fromGlobal, POSTLUDE, PRELUDE, provideGlobal } from "@rue/lumo";
+import { atUnmount, fromGround, POSTLUDE, PRELUDE, provideGround } from "@rue/lumo";
 import { Ion, ionize, Ionized, SYNC, watch } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need
@@ -22,8 +22,8 @@ export function initDatabaseConnection() {
 
    const auth = getAuth(app)
 
-   provideGlobal('auth', auth)
-   provideGlobal('db', db)
+   provideGround('auth', auth)
+   provideGround('db', db)
 
    const $connected = Ion(false)
 
@@ -40,17 +40,17 @@ type UserData = {
    lastSeenMessageID: string | null
 }
 
-function createUserData(id: string, db = fromGlobal('db') as Firestore) {
+function createUserData(id: string, db = fromGround('db') as Firestore) {
    return setDoc(doc(db, "users", id), {
       lastSeenMessageID: null
    });
 }
 
-function getUserData(id: string, db = fromGlobal('db') as Firestore) {
+function getUserData(id: string, db = fromGround('db') as Firestore) {
    return getDoc(doc(db, 'users', id))
 }
 
-function updateUserData(id: string, data: Partial<UserData>, db = fromGlobal('db') as Firestore) {
+function updateUserData(id: string, data: Partial<UserData>, db = fromGround('db') as Firestore) {
    return updateDoc(doc(db, 'users', id), data) as unknown as Promise<UserData> //FIX:
 }
 
@@ -91,7 +91,7 @@ export class User {
 let pendingLogin: Promise<{ error: string | null }> | null = null
 
 export function signUp(email: string, password: string, username: string) {
-   const auth = fromGlobal('auth') as Auth // TODO: easy typing, throw error if not provided
+   const auth = fromGround('auth') as Auth // TODO: easy typing, throw error if not provided
 
    return pendingLogin = createUserWithEmailAndPassword(auth, email, password)
       .then(async ({ user }) => {
@@ -115,7 +115,7 @@ export function signUp(email: string, password: string, username: string) {
 }
 
 export function logIn(email: string, password: string) {
-   const auth = fromGlobal('auth') as Auth
+   const auth = fromGround('auth') as Auth
 
    return pendingLogin = signInWithEmailAndPassword(auth, email, password)
       .then(({ user }) => (
@@ -133,7 +133,7 @@ export function logIn(email: string, password: string) {
 }
 
 export function logOut() {
-   const auth = fromGlobal('auth') as Auth
+   const auth = fromGround('auth') as Auth
 
    return signOut(auth)
       .then(() => (
@@ -146,8 +146,8 @@ export function logOut() {
 
 
 export function onLoggedIn(task: (user: User | null) => void) {
-   const auth = fromGlobal('auth') as Auth
-   const db = fromGlobal('db') as Firestore
+   const auth = fromGround('auth') as Auth
+   const db = fromGround('db') as Firestore
 
    const unsub = onAuthStateChanged(auth, async (authorizedUser) => {
       if (authorizedUser) {
@@ -168,7 +168,7 @@ export function onLoggedIn(task: (user: User | null) => void) {
 }
 
 export function onLoggedOut(task: () => void) {
-   const auth = fromGlobal('auth') as Auth
+   const auth = fromGround('auth') as Auth
    const unsub = onAuthStateChanged(auth, (user) => {
       if (!user) task()
    })
@@ -205,7 +205,7 @@ type MessageError = {
 export type ChatKit = ReturnType<typeof ChatKit>
 
 export function ChatKit() {
-   const db = fromGlobal('db') as Firestore
+   const db = fromGround('db') as Firestore
 
    const unsavedMessages = ionize([] as Message[])
    const unsavedSet = new Set<string>()

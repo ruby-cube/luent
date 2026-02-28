@@ -5,7 +5,7 @@
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
 import { template, FromTag, NodeRef, Slot } from "@rue/lumo";
-import { MorphicNode as Polymorph } from "../../../../packages/lumo/src/conditional/Polymorph";
+import { MorphicNode as Polymorph } from "../../../../packages/lumo/src/conditional/x_Polymorph";
 import { Finitron, finiton, ion } from "@rue/quarky";
 
 // data

@@ -45,7 +45,7 @@ export type Readonly<T> = {
 }
 
 // two types of component input
-// - commons input
+// - context input
 // - tag input
 
 // TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
@@ -256,7 +256,7 @@ type TagAttributes<D> =
    // & OpAttribute<D>
    // & SeeAttribute<D>
    & TagSlot<D>
-   & (D extends { provide: infer P } ? P : {})
+   // & (D extends { provide: infer P } ? P : {})
 // [] mu ---> {mu:name: MutableIon<string>}
 // [] mu? --> {mu:name: MutableIon<string>}  and {frog: MaybeIon<string>}
 // [] Ion --> MaybeIon<string>
@@ -337,7 +337,7 @@ export type _FromTag<D> =
    // & OpInput<D>
    // & SeeInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
-   & (D extends { provide: infer S } ? { provide: S } : { provide: undefined })
+   // & (D extends { provide: infer S } ? { provide: S } : { provide: undefined })
    & Styles
    & { '~attributes'?: TagAttributes<D> }
 
@@ -379,9 +379,9 @@ type MuIon<I> = ExcludePrimitives<I> extends { value: any } ? I
 // }
 
 type StaticInput<D> = {
-   [K in keyof D as IncludesIon<D[K]> extends true ? never
-   : K extends `mu:${string}` /* | `can:${string}` | `see:${string}`  */ | `on:${string}` | 'Slot' | 'provide' ? never
-   : K]:
+   [K in keyof D as K extends `mu:${string}` /* | `can:${string}` | `see:${string}`  */ | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
+   : K]: D[K] extends Ion<infer V> ? V 
+   : 
    D[K]
 }
 
