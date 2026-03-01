@@ -220,7 +220,7 @@ export function toInput(attributes: AnyObject) {
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return emit;
          if (key === '_raw_') return { ...attributes };
-         if (key === 'Slot') return target.children // TODO: Is this correct??
+         if (key === 'Slot') return target.Slot // TODO: Is this correct??
          if (isIonKey(key)) {
             const ionKeyToAttributeKey = (key: string) => key.slice(1)
             const attributeKey = ionKeyToAttributeKey(key)

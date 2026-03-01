@@ -119,7 +119,7 @@ export function TestListSelectTransition() {
                      <div
                         ref={{ arr: itemDivs, i: $index }}
                         at:mounted={node => { transitionNew(node) }}
-                        at:unmount={node => { transitionOut(node, $container()!); transitionExisting(itemDivs, $index()) }}
+                        at:unmount={node => { animateOut(node, $container()!); transitionExisting(itemDivs, $index()) }}
                      >
                         <div
                            on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
@@ -255,8 +255,7 @@ function transitionNew(node: HTMLElement) {
    })
 }
 
-function transitionOut(node: HTMLElement, container: HTMLElement) {
-   console.log('transition out')
+function animateOut(node: HTMLElement, container: HTMLElement) {
    const rect = node.getBoundingClientRect()
    const clone = node.cloneNode(true) as HTMLElement
    clone.style.setProperty('position', 'fixed')

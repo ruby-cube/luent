@@ -139,10 +139,11 @@ export function makeComponent(
    // $index: Ion<number> | undefined
 ): Component {
    const { ref, class: classes, style, ...other } = tag
-   const { hooks, events, attributes } = analyzeAttributes(other)
+   const { hooks, events, attributes, transitions } = analyzeAttributes(other)
 
    const output = Component(toInput({
-      ...other,
+      ...attributes,
+      ...transitions,
       Slot,
       classes: createOverrideClasses(classes)
       // classes: classString

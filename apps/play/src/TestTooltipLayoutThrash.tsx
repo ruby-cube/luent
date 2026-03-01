@@ -8,54 +8,51 @@ export function TestTooltip() {
 
    return template(
       <div>
-         <ButtonWithTooltip>
-            <Slot>
-               Hover over me (tooltip below)
-            </Slot>
-
-            <Slot Tooltip>
+         <ButtonWithTooltip>{{
+            Content: () => (
+               'Hover over me (tooltip below)'
+            ),
+            Tooltip: () => (
                <div>
                   This tooltip does not fit above the button.
                   <br />
                   This is why it's displayed below instead!
                </div>
-            </Slot>
-         </ButtonWithTooltip>
+            )
+         }}</ButtonWithTooltip>
 
          <div style={{ height: '100px' }} />
 
-         <ButtonWithTooltip>
-            <Slot>
-               Hover over me (tooltip above)
-            </Slot>
-
-            <Slot Tooltip>
+         <ButtonWithTooltip>{{
+            Content: () => (
+               'Hover over me (tooltip above)'
+            ),
+            Tooltip: () => (
                <div>
                   This tooltip fits above the button.
                </div>
-            </Slot>
-         </ButtonWithTooltip>
+            )
+         }}</ButtonWithTooltip>
 
          <div style={{ height: '100px' }} ></div>
 
-         <ButtonWithTooltip>
-            <Slot>
-               Hover over me (tooltip above)
-            </Slot>
-
-            <Slot Tooltip>
+         <ButtonWithTooltip>{{
+            Content: () => (
+               'Hover over me (tooltip above)'
+            ),
+            Tooltip: () => (
                <div>
                   This tooltip fits above the button.
                </div>
-            </Slot>
-         </ButtonWithTooltip>
+            )
+         }}</ButtonWithTooltip>
       </div>
    );
 }
 
 type ButtonWithTooltipInput = FromTag<{
    Slot: {
-      Default: RenderSlot,
+      Content: RenderSlot,
       Tooltip: RenderSlot
    }
 }>
@@ -69,12 +66,12 @@ export function ButtonWithTooltip({ Slot }: ButtonWithTooltipInput) {
             on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
             on:pointerleave={e => { $targetRect.value = null }}
          >
-            {Slot.Default()}
+            {Slot.Content}
          </button>
 
          {If($targetRect, $targetRect =>
             <Tooltip targetRect={$targetRect()}>
-               {Slot.Tooltip()}
+               {Slot.Tooltip}
             </Tooltip>
          )}
       </>
@@ -114,116 +111,6 @@ export function Tooltip(input: FromTag<{
       })
    )
 
-   // atMounted(({ ooo }) => {
-   //    ooo.await($layout)
-   //       .then(() => $div()?.getBoundingClientRect().height)
-   //       .await($render)
-   //       .then(hg => { if (hg != null) $height.value = hg; })
-   //       .await(tick, () => {
-   //       console.log('this runs after tick resolves which is awaited once layout resolves')
-   //    })
-   // })
-
-   async function doSomething() {
-      const res = await fetchCities()
-      const cities = await res.JSON()
-      const id = doSomething(cities)
-      const [cats] = await Promise.all([cities.store.fetchOther(id), $render()])
-      console.log(cats)
-   }
-
-
-   const doSomething = Async(() => {
-      return (
-         oo.await(fetchCities, res => res.JSON())
-            .then(o => (doSomething(o), o))
-            .await(o => [o.JSON(), $render()], ([cats]) => {
-               console.log(cats)
-            })
-      )
-   })
-
-   const doSomething = Async(() => ooo
-      .await(fetchCities, res => ({
-         res
-      }))
-      .await(c => c.res.JSON(), (cities, c, co = {}) => (
-         co.ash = console.log('context', c),
-         co.store = console.log('context', c),
-         {
-            id: doSomething(cities, co.ash),
-            cities
-         }
-      ))
-      .await(c => c.res.JSON(), (cities, c) => (
-         console.log('context', c),
-         {
-            ...c,
-            id: doSomething(cities),
-            cities
-         }
-      ))
-      .await(c => [c.cities.store.fetchOther(c.id), $render()], ([cats], c) => (
-         console.log(cats), c
-      ))
-      .await($render, (_, c) => c.cities)
-   )
-
-   const doSomething = Async(() => ooo
-      .await(fetchCities)
-      .await(res => res.JSON(), cities =>
-         [...cities, 'o']
-      )
-   )
-
-
-
-
-
-
-   const doSomething = Async(() => ooo
-      .await(fetchCities)
-      .await(res => res.JSON(), cities => ({
-         id: doSomething(cities),
-         cities
-      }))
-      .await(co => [co.cities.store.fetchOther(co.id), co.$render()], ([cats], co) => {
-         console.log(cats, co.id)
-      })
-      .await($tick, (x, co) => {
-         console.log(co.cities)
-      })
-   )
-
-
-   const doSomething = Async(() => {
-      return (
-         ooo.await(fetchCities)
-            .await(res => res.JSON(), cities => ({
-               id: doSomething(cities), cities
-            }))
-            .await(o => [o.cities.store.fetchOther(o.id), $render()], ([cats], o) => {
-               console.log(cats)
-            })
-      )
-   })
-
-
-   const doSomething = Async(() => {
-
-
-      return ooo
-         .await(fetchCities, res => ({
-            res
-         }))
-         .await(co => co.res.JSON(), cities => ({
-            cities
-         }))
-         .await($render)
-         .await($tick, (x, o) =>
-            console.log(o.cities)
-         )
-   })
 
 
    atMounted(Async(() => ooo
@@ -274,3 +161,105 @@ export function Tooltip(input: FromTag<{
       )
    )
 }
+
+
+// async function doSomething() {
+//    const res = await fetchCities()
+//    const cities = await res.JSON()
+//    const id = doSomething(cities)
+//    const [cats] = await Promise.all([cities.store.fetchOther(id), $render()])
+//    console.log(cats)
+// }
+
+
+// const doSomething = Async(() => {
+//    return (
+//       oo.await(fetchCities, res => res.JSON())
+//          .then(o => (doSomething(o), o))
+//          .await(o => [o.JSON(), $render()], ([cats]) => {
+//             console.log(cats)
+//          })
+//    )
+// })
+
+// const doSomething = Async(() => ooo
+//    .await(fetchCities, res => ({
+//       res
+//    }))
+//    .await(c => c.res.JSON(), (cities, c, co = {}) => (
+//       co.ash = console.log('context', c),
+//       co.store = console.log('context', c),
+//       {
+//          id: doSomething(cities, co.ash),
+//          cities
+//       }
+//    ))
+//    .await(c => c.res.JSON(), (cities, c) => (
+//       console.log('context', c),
+//       {
+//          ...c,
+//          id: doSomething(cities),
+//          cities
+//       }
+//    ))
+//    .await(c => [c.cities.store.fetchOther(c.id), $render()], ([cats], c) => (
+//       console.log(cats), c
+//    ))
+//    .await($render, (_, c) => c.cities)
+// )
+
+// const doSomething = Async(() => ooo
+//    .await(fetchCities)
+//    .await(res => res.JSON(), cities =>
+//       [...cities, 'o']
+//    )
+// )
+
+
+
+
+
+
+// const doSomething = Async(() => ooo
+//    .await(fetchCities)
+//    .await(res => res.JSON(), cities => ({
+//       id: doSomething(cities),
+//       cities
+//    }))
+//    .await(co => [co.cities.store.fetchOther(co.id), co.$render()], ([cats], co) => {
+//       console.log(cats, co.id)
+//    })
+//    .await($tick, (x, co) => {
+//       console.log(co.cities)
+//    })
+// )
+
+
+// const doSomething = Async(() => {
+//    return (
+//       ooo.await(fetchCities)
+//          .await(res => res.JSON(), cities => ({
+//             id: doSomething(cities), cities
+//          }))
+//          .await(o => [o.cities.store.fetchOther(o.id), $render()], ([cats], o) => {
+//             console.log(cats)
+//          })
+//    )
+// })
+
+
+// const doSomething = Async(() => {
+
+
+//    return ooo
+//       .await(fetchCities, res => ({
+//          res
+//       }))
+//       .await(co => co.res.JSON(), cities => ({
+//          cities
+//       }))
+//       .await($render)
+//       .await($tick, (x, o) =>
+//          console.log(o.cities)
+//       )
+// })

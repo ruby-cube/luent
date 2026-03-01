@@ -78,6 +78,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
          _processJSXOutput(node.jsxNodes, flattened)
       }
       else if (isFunction(node) && node.name === 'renderSlot') {
+         console.log('RENDER SLOT', node)
          _processJSXOutput(node(), flattened)
       }
       else if (isGetter(node)) {

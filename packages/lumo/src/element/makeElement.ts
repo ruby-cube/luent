@@ -14,6 +14,7 @@ import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { $Index } from "../iteratives/ItemList";
+import { setUpTransitions } from "./transitions";
 
 
 export type TagName = keyof HTMLElementTagNameMap
@@ -40,7 +41,7 @@ export function makeElement(
 ): DOMNode {
    const { class: classes, style: styles, 'display-if': showIf, ref: $node, ...other } = config;
 
-   const { attributes, events, hooks } = analyzeAttributes(other)
+   const { attributes, events, hooks, transitions } = analyzeAttributes(other)
 
    let newXML_NS: string | undefined;
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
@@ -66,6 +67,8 @@ export function makeElement(
    setUpHooks(domNode, hooks)
    bindView(domNode, attributes)
    setUpAttributes(domNode, attributes);
+   setUpTransitions(domNode as HTMLElement, transitions) // TODO: transition-in etc
+
    //  if (dynamicAttributes)
    //      setUpDynamicAttributes(
    //          domNode,
@@ -121,16 +124,34 @@ export function makeElement(
 //     }
 // }
 
+const transitionAttributes = {
+   'animate-in': true,
+   'animate-out': true,
+   'transition-in-from': true,
+   'transition-in': true,
+   'transition-out-to': true,
+   'transition-out': true, // ?? TODO:
+   'cancel-transition': true, // ??? TODO:
+}
+
+function isTransition(key: string) {
+   return key in transitionAttributes
+}
+
 export function analyzeAttributes(entries: AnyObject) {
+   const transitions: AnyObject = {};
    const events: AnyObject = {};
-   const attributes: AnyObject = {};
    const hooks: AnyObject = {}
+   const attributes: AnyObject = {};
    for (const key in entries) {
       if (key === "children") {
          continue;
       }
       else if (isHTMLEvent(key)) {
          events[key.slice(3)] = entries[key]; // on:
+      }
+      else if (isTransition(key)) {
+         transitions[key] = entries[key] // at:
       }
       else if (isFlaskLifecycleHook(key)) {
          hooks[key] = entries[key] // at:
@@ -143,6 +164,7 @@ export function analyzeAttributes(entries: AnyObject) {
       attributes,
       events,
       hooks,
+      transitions
       // jsxProps
    }
 }
@@ -230,14 +252,9 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    const flask = getFlask()
    watchToRender(ion, () => {
       queueInternalRender(() => {
-         console.log('$$$ select mu:value', toString(toValue(ion)))
-         for (const option of element.children) {
-            console.log("$$$ OPTION", option.textContent)
-         }
          queueTask(() => {
             element.value = toString(toValue(ion))
          })
-         console.log('$$$ select mu:value-->', element, 'value', element.value)
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];

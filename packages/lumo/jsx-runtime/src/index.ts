@@ -14,11 +14,13 @@ export const jsxs = jsx;
 
 export function jsx(nodeType: TagName | ComponentForge, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
    const Slot = processSlot(config.children);
+   config.Slot = Slot;
+   console.log('Slot name, jsx', Slot)
    if (nodeType === Context) {
-      return Context({Slot: config.children, provide: config.provide} as any)
+      return Context({Slot, provide: config.provide} as any)
    }
    if (nodeType === Fragment) {
-      return normalizeToArray(config.children)
+      return normalizeToArray(Slot())
    }
    return makeJSXNode(
       nodeType,
@@ -30,10 +32,11 @@ export function jsx(nodeType: TagName | ComponentForge, config: { children: Rend
 function processSlot(Slot: Slot | { mu: AnyObject } | { [key: string]: Slot } | undefined) {
    if (Slot === undefined) return undefined;
    if (isPlainObject(Slot)) {
+      console.log('plain obj slot', Slot)
       // named slots, innerHTML kit, or two-way binding
       return Slot;
    }
-   return normalizeToRenderFunction(<Slot>Slot)
+   return normalizeToRenderFunction(Slot)
 }
 
 

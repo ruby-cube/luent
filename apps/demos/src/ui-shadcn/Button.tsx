@@ -38,6 +38,7 @@ function Button({
    variant = "default",
    size = "default",
    as: Comp = "button",
+   Slot,
    ...attributes
 }: FromTag<'button', {
    as?: ComponentTag | string
@@ -47,14 +48,16 @@ function Button({
 
    return template(
       <Comp
+         ref={$node}
          data-slot="button"
          data-variant={variant}
          data-size={size}
          class={(mergeTailwind(buttonVariants({ variant, size }), $classes()))}
          // class={[buttonVariants({ variant, size }), $classes]}
          {...attributes}
-      ></Comp>
-   ).ref($node)
+      >{Slot}</Comp>
+   )
+      .ref($node)
 }
 
 export { Button, buttonVariants }

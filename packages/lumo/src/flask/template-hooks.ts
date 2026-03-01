@@ -7,6 +7,7 @@ import { toValue } from "@rue/quarky";
 type LifecycleTask<T = any> = (element: T, initialOrFinal?: boolean) => void;
 
 export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTask }) {
+   console.log('setUpHooks: node', node)
    const flask = getFlask()
    for (const key in hooks) {
       const task = hooks[key]

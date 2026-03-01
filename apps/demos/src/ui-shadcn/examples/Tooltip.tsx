@@ -1,7 +1,7 @@
-import { atCreate, atMounted, ContextKey, createRoot, css, Finitron, fromContext, FromTag, If, listen, NodeRef, queueRender, RenderSlot, template } from "@rue/lumo"
+import { atCreate, atMounted, ComponentTag, Context, ContextKey, createRoot, css, Finitron, fromContext, FromTag, If, listen, NodeRef, queueRender, RenderSlot, TagName, template } from "@rue/lumo"
 import { Button } from "../Button"
 import { mergeTailwind } from "../../utils/utils"
-import { Ion, queueTask, watch } from "@rue/quarky"
+import { Ion, Ionic, queueTask, watch } from "@rue/quarky"
 
 // import {
 //    Tooltip,
@@ -9,47 +9,116 @@ import { Ion, queueTask, watch } from "@rue/quarky"
 //    TooltipTrigger,
 // } from "../Tooltip"
 
+// [X] anchoring
+// [] responsive re-anchoring
+// [X] show-hide
+// [X] show-hide with delay
+// [] show-hide with transitions
+
+
 // anchor
 // trigger
 const demoBoxStyle = "relative flex h-72 w-full justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0"
 
 export function TooltipDemo() {
-   const { $tooltip, asTooltipAnchor } = TooltipKit()
+   const { $tooltip, asTooltipAnchor, tooltip } = TooltipKit()
 
    return template(
+      // <Context provide={[TOOLTIP_CONFIG({ delay: 600, closeDelay: 600 })]}>
       <div data-align='center' class={demoBoxStyle}>
          <Button at:create={asTooltipAnchor} variant="outline">
             Hover
          </Button>
-         <Tooltip ref={$tooltip}>
+         <Tooltip ref={$tooltip} tooltip={tooltip}>
             <p>Add to library</p>
          </Tooltip>
       </div>
+      // </Context>
    )
 }
 
-function TooltipKit() {
-   const $tooltip = NodeRef(TooltipContent);
+type TooltipConfig = Readonly<{
+   delay?: number,
+   closeDelay?: number,
+   timeout?: number
+}>
 
-   return {
-      $tooltip,
-      asTooltipTrigger: function asTooltipTrigger(node: HTMLElement) {
+const TOOLTIP_CONFIG = ContextKey<TooltipConfig>()
+
+type Placement = 'above' | 'below' | 'left' | 'right'
+function TooltipKit(options?: { placement: Placement }) {
+   const $tooltip = NodeRef(TooltipContent);
+   const $placement = Ion(options?.placement ?? 'above')
+
+   function asTooltipTrigger(node: HTMLElement, options?: TooltipConfig) {
+      const config = fromContext(TOOLTIP_CONFIG, '?')
+      const delay = config?.delay ?? options?.delay
+      const closeDelay = config?.closeDelay ?? options?.closeDelay
+      let closeTimeout: NodeJS.Timeout
+      if (delay) {
+         let timeout: NodeJS.Timeout;
+         listen(node, 'mouseenter', () => {
+            if (closeTimeout) clearTimeout(closeTimeout)
+            timeout = setTimeout(() => {
+               $tooltip()?.show()
+               listen(node, 'mouseleave', () => {
+                  closeTooltip()
+               })
+            }, delay)
+         })
+
+         listen(node, 'mouseleave', () => {
+            if (timeout) {
+               clearTimeout(timeout)
+            }
+         })
+      }
+      else {
          listen(node, 'mouseenter', () => {
             $tooltip()?.show()
          })
 
          listen(node, 'mouseleave', () => {
-            $tooltip()?.hide()
+            closeTooltip()
          })
-      },
-      asTooltipAnchor(node: HTMLElement, asTrigger = false) {
-         if (asTrigger) this.asTooltipTrigger(node)
-         // console.log('asTooltipAnchor', node)
-         // console.log('asTooltipAnchor: $tooltip (expect TooltipContent instance)', $tooltip())
-         // node.style.anchorName = '--tooltip-anchor' + 0 // id
-         $tooltip()?.anchor('--tooltip-anchor' + 0)
+      }
+      function closeTooltip() {
+         if (closeDelay) {
+            closeTimeout = setTimeout(() => {
+               $tooltip()?.hide()
+            }, closeDelay)
+         }
+         else {
+            $tooltip()?.hide()
+         }
       }
    }
+
+   const tooltip = Ionic({
+      get above() { return $placement() === 'above' },
+      get below() { return $placement() === 'below' },
+      get leftside() { return $placement() === 'left' },
+      get rightside() { return $placement() === 'right' },
+   })
+
+   return {
+      $tooltip,
+      asTooltipTrigger,
+      asTooltipAnchor(node: HTMLElement, asTrigger = true) {
+         if (asTrigger) asTooltipTrigger(node)
+         //@ts-expect-error
+         node.style.anchorName = '--tooltip-anchor' + 0 // id
+         $tooltip()?.anchor('--tooltip-anchor' + 0)
+      },
+      tooltip
+   }
+}
+
+type TooltipState = {
+   readonly above: boolean;
+   readonly below: boolean;
+   readonly leftside: boolean;
+   readonly rightside: boolean;
 }
 
 
@@ -88,12 +157,14 @@ const transitionInSlide = "data-[side=bottom]:slide-in-from-top-2 data-[side=lef
 
 const radixPositionOrigin = "origin-(--radix-tooltip-content-transform-origin)"
 
+
 function Tooltip({
    $classes,
-   sideOffset = 0,
+   tooltip,
+   gap = .75,
    Slot,
    ...props
-}: FromTag<{ Slot: RenderSlot, sideOffset?: number }>) {
+}: FromTag<{ Slot: RenderSlot, gap?: number, tooltip: Ionic<TooltipState> }>) {
    const $tooltip = NodeRef(TooltipContent)
 
    return template(
@@ -101,29 +172,35 @@ function Tooltip({
          <TooltipContent
             ref={$tooltip}
             data-slot="tooltip-content"
-            sideOffset={sideOffset}
+            gap={gap}
             class={mergeTailwind(
                "rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs",
                $classes()
             )}
+            animate-in={`animate-in fade-in-0 zoom-in-95 ${tooltip.above ? 'slide-in-from-bottom-2' : tooltip.below ? 'slide-in-from-top-2' : tooltip.leftside ? 'slide-in-from-right-2' : 'slide-in-from-left-2'}`}
+            animate-out='animate-out fade-out-0 zoom-out-95'
             {...props}
          >
             {Slot}
-            <TooltipArrow class="size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50 translate-y-[calc(-50%_-_2px)]" />
+            <TooltipArrow class="justify-self-center size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50" />
          </TooltipContent>
       </o--body>
    )
       .ref($tooltip)
+
 }
 
 export { Tooltip }
 
 // Base
 
-function TooltipArrow({ $classes }: FromTag<{}>) {
+function TooltipArrow({
+   $classes,
+   as: Comp = 'div'
+}: FromTag<{ as?: ComponentTag | string }>) {
 
    return template(
-      <div class={$classes}></div>
+      <Comp class={(mergeTailwind('absolute', $classes()))}></Comp>
    )
 }
 
@@ -133,40 +210,43 @@ const POPOVER_ID = ContextKey<string>()
 
 function TooltipContent({
    $classes,
-   sideOffset,
+   gap = 0,
+   Slot,
    ...attributes
-}: FromTag<{ Slot: RenderSlot, sideOffset?: number }>) {
-   const $show = Ion(true)
-   const tooltip = Finitron({
-      'open': { 'close': () => 'closed' },
-      'closed': { 'reset': () => 'open' }
-   })
+}: FromTag<{ Slot: RenderSlot, gap?: number }>) {
+   const $show = Ion(false)
+   // const tooltip = Finitron({
+   //    'open': { 'close': () => 'closed' },
+   //    'closed': { 'reset': () => 'open' }
+   // })
    const $div = NodeRef('div')
    const $anchorName = Ion('')
 
-   tooltip.activate(() => 'open')
+   console.log('### Tooltip Content attributes', attributes)
+
+   // tooltip.activate(() => 'open')
 
    return template(
       <>
          {If($show,
             <div
-               at:create={node => { // TODO: ref should be available
-                  // watch(() => tooltip.state, ({ previous }) => {
-                  //    if (previous === 'open') {
-                  //       listen(node, 'transitionend', () => {
-                  //          $show.value = false;
-                  //          tooltip.apply('reset')
-                  //       })
-                  //    }
-                  // })
-               }}
+               // at:create={node => {
+               //    // watch(() => tooltip.state, ({ previous }) => {
+               //    //    if (previous === 'open') {
+               //    //       listen(node, 'transitionend', () => {
+               //    //          $show.value = false;
+               //    //          tooltip.apply('reset')
+               //    //       })
+               //    //    }
+               //    // })
+               // }}
                ref={$div}
-               data-open={(tooltip.is('open'))}
-               data-closed={(tooltip.is('closed'))}
+               // data-open={(tooltip.is('open'))}
+               // data-closed={(tooltip.is('closed'))}
                class={'tooltip ' + $classes()}
                style={(`--tooltip-anchor: ${$anchorName()};`)}
                {...attributes}
-            ></div>
+            >{Slot}</div>
          )}
       </>
    )
@@ -175,15 +255,17 @@ function TooltipContent({
             position: absolute;
             position-anchor: var(--tooltip-anchor);
             isolation: isolate;
+            justify-self: anchor-center;
+            bottom: calc(anchor(top) + ${gap}rem);
          }
       `)
       .ref({
          show() {
             $show.value = true;
-            tooltip.apply('reset')
+            // tooltip.apply('reset')
          },
          hide() {
-            tooltip!.apply('close')
+            // tooltip!.apply('close')
             $show.value = false
          },
          anchor(name: string) {
@@ -191,6 +273,8 @@ function TooltipContent({
          }
       })
 }
+
+
 
 // export enum CommonPopupDataAttributes {
 //   /**
@@ -228,3 +312,4 @@ function TooltipContent({
 if (__STYLE__) {
    createRoot(TooltipDemo).mount('#root')
 }
+

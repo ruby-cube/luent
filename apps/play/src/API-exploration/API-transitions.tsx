@@ -12,14 +12,14 @@ type VarKit = {
 
 type PrefixKit = {
    as?: 'transition' | 'animation'
-   prefix: string
+   name: string
 } & VarKit
 
 // ---
 
 type TransitionInClassKit = {
-   active: string,
-   from: string
+   active: string, // fade-in
+   from: string // 
 } & VarKit
 
 type TransitionOutClassKit = {
@@ -57,7 +57,7 @@ function setUpTransitionKits(node: DOMNode, kits: TransitionInKit[],
    }
 ) {
    for (const kit of kits) {
-      if ('prefix' in kit) {
+      if ('name' in kit) {
          if ('as' in kit && kit.as === 'animation') {
             setUpTransition.withAnimationClass(node, toClassKit.animation(kit))
          }
@@ -86,10 +86,10 @@ function setUpTransitionKits(node: DOMNode, kits: TransitionInKit[],
 
 
 function toTransitionInClassKit(kit: PrefixKit): TransitionInClassKit {
-   const { prefix, delay, duration, timing } = kit
+   const { name, delay, duration, timing } = kit
    return {
-      active: prefix + '-in-active',
-      from: prefix + '-in-from',
+      active: name + '-in-active',
+      from: name + '-in-from',
       delay,
       duration,
       timing
@@ -97,10 +97,10 @@ function toTransitionInClassKit(kit: PrefixKit): TransitionInClassKit {
 }
 
 function toTransitionOutClassKit(kit: PrefixKit): TransitionOutClassKit {
-   const { prefix, delay, duration, timing } = kit
+   const { name, delay, duration, timing } = kit
    return {
-      active: prefix + '-out-active',
-      to: prefix + '-out-to',
+      active: name + '-out-active',
+      to: name + '-out-to',
       delay,
       duration,
       timing
@@ -109,9 +109,9 @@ function toTransitionOutClassKit(kit: PrefixKit): TransitionOutClassKit {
 
 
 function toAnimateInClassKit(kit: PrefixKit): AnimationClassKit {
-   const { prefix, delay, duration, timing } = kit
+   const { name, delay, duration, timing } = kit
    return {
-      class: prefix + '-in',
+      class: name + '-in',
       delay,
       duration,
       timing
@@ -119,9 +119,9 @@ function toAnimateInClassKit(kit: PrefixKit): AnimationClassKit {
 }
 
 function toAnimateOutClassKit(kit: PrefixKit): AnimationClassKit {
-   const { prefix, delay, duration, timing } = kit
+   const { name, delay, duration, timing } = kit
    return {
-      class: prefix + '-out',
+      class: name + '-out',
       delay,
       duration,
       timing
@@ -130,7 +130,7 @@ function toAnimateOutClassKit(kit: PrefixKit): AnimationClassKit {
 
 type ActiveTransitionIn = {
    trigger(): void;
-   setFromState(): void;
+   setStartingState(): void;
    cancel(): void;
 }
 
@@ -153,7 +153,7 @@ function useTransitionInByClasses(kit: TransitionInClassKit) {
             if (timing) node.style.setProperty('transition-timing', timing)
             node.classList.remove(from)
          },
-         setFromState() {
+         setStartingState() {
             node.classList.add(from)
          },
          cancel() {
@@ -180,6 +180,9 @@ function useTransitionOutByClasses(kit: TransitionOutClassKit) {
       }
    }
 }
+
+
+
 
 
 
@@ -225,7 +228,7 @@ function transitionIn(node: HTMLElement, createTransition: (clone: DOMNode) => A
    const transition = createTransition(clone)
    transitioning.add(transition)
    // set starting transition state
-   transition.setFromState()
+   transition.setStartingState()
    // clone.classList.add(transition_in_from)
 
    node.after(clone)
@@ -286,7 +289,7 @@ function transitionOut(node: HTMLElement, createTransition: (clone: DOMNode) => 
 
 
 // prefix-classes
-// <div transition-in={{ prefix: 'fade', duration: '300ms'}}
+// <div transition-in={{ name: 'fade', duration: '300ms'}}
 
 // classes
 // <div transition-in={{ delay: '30ms', active: 'fade-in-active', from: 'fade-in-from', duration: '300ms'}}
