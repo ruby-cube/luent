@@ -25,7 +25,7 @@ import { BottomlessBlokkis } from "./src/BottomlessBlokkis/BottomlessBlokkis"
 import { TestCanvas } from "./src/CanvasApp/TestCanvas"
 
 export function runDemo() {
-   const app = createRoot(TestListSelectTransition)
+   const app = createRoot(TestListTransit)
 
    app.mount('#root')
 }

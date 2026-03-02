@@ -129,6 +129,9 @@ export function makeElement(
 const transitionAttributes = {
    'initial:appear': true,
    'transition-item': true,
+   'transit-class': true,
+   'transit-key': true,
+   'transit-port': true,
    'animate-in': true,
    'animate-out': true,
    'transition-in-from': true,

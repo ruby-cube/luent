@@ -10,6 +10,7 @@ class ListItem {
    ) { }
 
    changeContent() {
+      console.log('change content')
       this.content = 'something else'
    }
 }
@@ -155,7 +156,7 @@ export function TestListSelectTransition() {
                         </div>
                         <div
                            on:click={e => { moveSelectedItems($index() + 1) }}
-                           style="background-color: white; cursor: pointer"
+                           style="background-color: transparent; cursor: pointer"
                         >
                            insert
                         </div>

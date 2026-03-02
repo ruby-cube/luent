@@ -43,14 +43,14 @@ type RenderIndex<L> = IsReactive<L> extends false ? RenderStatic<L> : RenderDyna
 
 type ToValue<T> = T extends Ion<infer V> ? V : T
 
+
+
+
+// for List transitions:
 const [pushList, popList, getList] = createStack<any>()
 
 export function atListChanged(task: () => void) {
-   console.log('@@@ list?', getList())
-   watch(getList(), () => {
-      console.log('@@@@ list changed')
-      task()
-   }, { phase: PRELUDE })
+   watch(getList(), task, { phase: PRELUDE })
 }
 
 function wrapWithList(renderItem: RenderItem<any>, list: any) {
@@ -64,6 +64,9 @@ function wrapWithList(renderItem: RenderItem<any>, list: any) {
       }
    }
 }
+
+
+
 
 export function For<L, U>(data: L & MaybeIon<Ionic<any[]> | any[] | Nullish>, getKey: GetKey<ToValue<L>>, render: RenderItem<ToValue<L>>): ListKit | undefined | RawJSXNode
 export function For<L, U>(data: L & ListData, render: RenderIndex<L>): ListKit | undefined | RawJSXNode

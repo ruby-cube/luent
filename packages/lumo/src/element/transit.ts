@@ -1,7 +1,9 @@
-import { queueRender, queueTask, toValue } from "@rue/quarky";
+import { getActiveUpdate, queueRender, queueTask, toValue } from "@rue/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/Input";
+import { Flask, getFlask } from "@rue/flask";
+import { atMounted, atUnmount } from "../flask/flask-hooks";
 
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
    atListChanged(() => {
@@ -30,4 +32,64 @@ export function startTransitionItem(node: HTMLElement, first: DOMRect, last: DOM
          })
       })
    }
+}
+
+let ports: Ports | undefined
+
+function usePorts() {
+   return ports ?? (ports = new Ports())
+}
+
+
+class Ports {
+   ports: Map<any, Map<any, any>> = new Map()
+
+   addPort(port: any) {
+      if (this.ports.has(port)) return;
+      this.ports.set(port, new Map())
+      getFlask()?.outer?.onDiscard(() => {
+         this.ports.delete(port)
+      })
+   }
+
+   sendToPort(portKey: any, key: any, rect: DOMRect) {
+      const port = this.ports.get(portKey)
+      if (!port) throw new Error('Port is missing, this should never happen')
+      port?.set(key, rect)
+   }
+
+   getFromPort(portKey: any, key: any) {
+      return this.ports.get(portKey)?.get(key)
+   }
+
+   deleteFromPort(portKey: any, key: any){
+      this.ports.get(portKey)?.delete(key)
+   }
+}
+
+function send(key: any, node: HTMLElement, port: any) {
+   const rect = node.getBoundingClientRect()
+   usePorts().sendToPort(port, key, rect)
+   getActiveUpdate()?.atComplete(() => {
+      usePorts().deleteFromPort(port, key)
+   })
+}
+
+function receive(key: any, node: HTMLElement, port: any, classes: string[]) {
+   const first = usePorts().getFromPort(port, key)
+   if (!first) return;
+   startTransitionItem(node, first, node.getBoundingClientRect(), classes)
+}
+
+const ANY_PORT = Symbol('any port')
+export function setUpTransit(node: HTMLElement, key: any, port: any = ANY_PORT, transitClasses: MaybeIon<string> = 'transition-position') {
+   usePorts().addPort(port)
+
+   atMounted(() => {
+      receive(key, node, port, toClassNames(toValue(transitClasses)))
+   })
+
+   atUnmount(() => {
+      send(key, node, port)
+   })
 }

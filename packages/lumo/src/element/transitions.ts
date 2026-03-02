@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types"
 import { MaybeIon } from "../component/Input"
 import { atMounted, atUnmount } from "../flask/flask-hooks"
 import { getTransition } from "./Transition"
-import { setUpPositionTransition } from "./transit"
+import { setUpPositionTransition, setUpTransit } from "./transit"
 
 const END_EVENT_FALLBACK_BUFFER_MS = 50
 
@@ -37,6 +37,9 @@ export type TransitionConfigs = {
    'initial:appear'?: boolean
    'animate-item'?: MaybeIon<string>
    'transition-item'?: MaybeIon<string>
+   'transit-class'?: MaybeIon<string>
+   'transit-key'?: any
+   'transit-port'?: any
    'animate-in'?: MaybeIon<string>
    'animate-out'?: MaybeIon<string>
    'transition-in-from'?: MaybeIon<string>
@@ -49,6 +52,9 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
    const transitioning = new Set<ActiveTransitionIn>()
 
    const transitionItemClasses = transitions['transition-item'] ?? transitionConfig?.["transition-item"]
+   const transitClasses = transitions['transit-class']
+   const transitKey = transitions['transit-key']
+   const transitPort = transitions['transit-port']
    const animateInClasses = transitions['animate-in'] ?? transitionConfig?.["animate-in"]
    const transitionInClasses = transitions['transition-in'] ?? transitionConfig?.["transition-in"]
    const fromClasses = transitions['transition-in-from'] ?? transitionConfig?.["transition-in-from"]
@@ -124,9 +130,11 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
          }, transitioning)
       })
    }
-   console.log('@@@ pass 1', transitionItemClasses)
    if (transitionItemClasses) {
       setUpPositionTransition(node, transitionItemClasses)
+   }
+   if (transitKey) {
+      setUpTransit(node, transitKey, transitPort, transitClasses)
    }
 }
 
