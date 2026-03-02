@@ -24,23 +24,23 @@ export function TooltipDemo() {
    const { $tooltip, asTooltipAnchor, tooltip } = TooltipKit()
 
    return template(
-      // <Context provide={[TOOLTIP_CONFIG({ delay: 600, closeDelay: 600 })]}>
-      <div data-align='center' class={demoBoxStyle}>
-         <Button at:create={asTooltipAnchor} variant="outline">
-            Hover
-         </Button>
-         <Tooltip ref={$tooltip} tooltip={tooltip}>
-            <p>Add to library</p>
-         </Tooltip>
-      </div>
-      // </Context>
+      <Context provide={[TOOLTIP_CONFIG({ delay: 600 })]}>
+         <div data-align='center' class={demoBoxStyle}>
+            <Button at:create={asTooltipAnchor} variant="outline">
+               Hover
+            </Button>
+            <Tooltip ref={$tooltip} tooltip={tooltip}>
+               <p>Add to library</p>
+            </Tooltip>
+         </div>
+      </Context>
    )
 }
 
 type TooltipConfig = Readonly<{
    delay?: number,
    closeDelay?: number,
-   timeout?: number
+   undelayed?: number
 }>
 
 const TOOLTIP_CONFIG = ContextKey<TooltipConfig>()
@@ -215,34 +215,14 @@ function TooltipContent({
    ...attributes
 }: FromTag<{ Slot: RenderSlot, gap?: number }>) {
    const $show = Ion(false)
-   // const tooltip = Finitron({
-   //    'open': { 'close': () => 'closed' },
-   //    'closed': { 'reset': () => 'open' }
-   // })
    const $div = NodeRef('div')
    const $anchorName = Ion('')
-
-   console.log('### Tooltip Content attributes', attributes)
-
-   // tooltip.activate(() => 'open')
 
    return template(
       <>
          {If($show,
             <div
-               // at:create={node => {
-               //    // watch(() => tooltip.state, ({ previous }) => {
-               //    //    if (previous === 'open') {
-               //    //       listen(node, 'transitionend', () => {
-               //    //          $show.value = false;
-               //    //          tooltip.apply('reset')
-               //    //       })
-               //    //    }
-               //    // })
-               // }}
                ref={$div}
-               // data-open={(tooltip.is('open'))}
-               // data-closed={(tooltip.is('closed'))}
                class={'tooltip ' + $classes()}
                style={(`--tooltip-anchor: ${$anchorName()};`)}
                {...attributes}
@@ -262,10 +242,8 @@ function TooltipContent({
       .ref({
          show() {
             $show.value = true;
-            // tooltip.apply('reset')
          },
          hide() {
-            // tooltip!.apply('close')
             $show.value = false
          },
          anchor(name: string) {

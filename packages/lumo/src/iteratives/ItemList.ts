@@ -4,6 +4,7 @@ import { $_derivation, Ion, MaybeIonized, MutableIon, queueInternalRender, watch
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { RawJSXNode } from "../node/makeJSXNode";
+import { createStack } from "@rue/utils";
 
 type UID = unknown
 
@@ -45,6 +46,7 @@ export class ListKit extends VineNode {
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
          const $index = Ion(i)
+
          const kit = new ListItemKit(item, $index, renderItem, this.flask)
          kits.push(kit)
          this.prevItems.set(this.getUID(item), kit)
@@ -167,7 +169,7 @@ export class ListKit extends VineNode {
                   if (!fragment) {
                      fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
                   }
-                   console.log('$$$ MOUNT TO FRAGMENT')
+                  console.log('$$$ MOUNT TO FRAGMENT')
                   mountDOMNodes(kit.nodes!, fragment)
                   kit.hasMoved = null;
                }
@@ -190,9 +192,11 @@ export class ListKit extends VineNode {
    }
 }
 
-export function toAsyncRenderItem(renderItem: (item: unknown, index: unknown) => RawJSXNode, context: ContextSnapshot = $_snap_context(), trace =  __DEV__ ? __DEV__buildAsyncPath() : '') {
+export function toAsyncRenderItem(renderItem: (item: unknown, index: unknown) => RawJSXNode, context: ContextSnapshot = $_snap_context(), trace = __DEV__ ? __DEV__buildAsyncPath() : '') {
    return function render(this: ListItemKit, item: unknown, index: unknown) {
-      return $_run_with_(context, () => renderItem(item, index), {
+      return $_run_with_(context, () => {
+            return renderItem(item, index)
+      }, {
          [FLASK]: this.flask,
          [TRACE]: trace
       })

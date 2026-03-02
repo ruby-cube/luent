@@ -15,6 +15,7 @@ import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { $Index } from "../iteratives/ItemList";
 import { setUpTransitions } from "./transitions";
+import { getTransition } from "./Transition";
 
 
 export type TagName = keyof HTMLElementTagNameMap
@@ -67,7 +68,8 @@ export function makeElement(
    setUpHooks(domNode, hooks)
    bindView(domNode, attributes)
    setUpAttributes(domNode, attributes);
-   setUpTransitions(domNode as HTMLElement, transitions) // TODO: transition-in etc
+   const transitionConfig = getTransition()
+   setUpTransitions(domNode as HTMLElement, transitions, transitionConfig) // TODO: transition-in etc
 
    //  if (dynamicAttributes)
    //      setUpDynamicAttributes(
@@ -125,6 +127,8 @@ export function makeElement(
 // }
 
 const transitionAttributes = {
+   'initial:appear': true,
+   'transition-item': true,
    'animate-in': true,
    'animate-out': true,
    'transition-in-from': true,

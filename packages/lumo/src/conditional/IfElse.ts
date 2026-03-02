@@ -12,6 +12,8 @@ import { createContextNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isPlainObject } from "@rue/utils";
 import { Await } from "../boundaries/Await";
+import { TransitionConfigs } from "../element/transitions";
+import { setTransition } from "../element/Transition";
 
 
 export type ConditionalKit = {
@@ -52,7 +54,7 @@ export type DynamicConditionalRenderKit = {
 } & DynamicNodeKit
 
 
-function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", showHideType: ShowHideType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: SuspenseIon | undefined): DynamicConditionalRenderKit {
+function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", showHideType: ShowHideType | undefined, render: RenderFunction, context: ContextSnapshot, $condition: Ion<Booleanny>, pending: SuspenseIon | undefined, transitions: TransitionConfigs | undefined): DynamicConditionalRenderKit {
    // const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // TODO:
 
    // const context = createContextNode([REGISTER_TRANSITION_NODE(registerTransitionNode)])
@@ -64,10 +66,18 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", sh
       nodes: null,
       flask: undefined,
       statementType: statementType as 'if' | 'elseIf' | 'else',
-      render: toAsyncRender(render, context, {
+      render: toAsyncRender((...args: any[]) => {
+         try {
+            setTransition(transitions)
+            return render(...args)
+         }
+         finally {
+            setTransition(undefined)
+         }
+      }, context, {
          [FLASK]: undefined,
          // [CONTEXT]: context,
-         [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
+         [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }),
       type: showHideType,
       // transitionNodes,
@@ -86,13 +96,13 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", sh
    }
 }
 
-export function toDynamicConditionalKits(kits: ConditionalKit[], showHideType: ShowHideType = 'create'): DynamicConditionalRenderKit[] {
+export function toDynamicConditionalKits(kits: ConditionalKit[], showHideType: ShowHideType = 'create', transitions: TransitionConfigs | undefined): DynamicConditionalRenderKit[] {
    const context = $_snap_context()
    const dynamicKits = []
    for (const kit of kits) {
       if (!kit) continue;
       const { $condition, render, statementType, type = showHideType, pending } = kit
-      dynamicKits.push(createDynamicConditionalKit(statementType, type, render, context, $condition, pending))
+      dynamicKits.push(createDynamicConditionalKit(statementType, type, render, context, $condition, pending, transitions))
    }
    return dynamicKits;
 }
@@ -164,8 +174,8 @@ export class IfElseKit extends VineNode {
                   }
                   this.pendingSwitch = null
                   console.log('### B promise switch')
-                   if (prevKit !== kit)
-                  this.deactivateConditional(prevKit);
+                  if (prevKit !== kit)
+                     this.deactivateConditional(prevKit);
                   this.reactivateConditional(kit)
                })
             }
@@ -183,8 +193,8 @@ export class IfElseKit extends VineNode {
                         }
                         this.pendingSwitch = null
                         console.log('### A promise switch')
-                         if (prevKit !== kit)
-                        this.deactivateConditional(prevKit);
+                        if (prevKit !== kit)
+                           this.deactivateConditional(prevKit);
                         this.reactivateConditional(kit)
                      })
                   }
@@ -196,8 +206,8 @@ export class IfElseKit extends VineNode {
             suspense.value = null
             console.log('### C switch')
             kit.awaitCache = rawOutput
-             if (prevKit !== kit)
-            this.deactivateConditional(prevKit);
+            if (prevKit !== kit)
+               this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
          }
       }
@@ -223,8 +233,8 @@ export class IfElseKit extends VineNode {
          }
          else {
             console.log('### E switch')
-             if (prevKit !== kit)
-            this.deactivateConditional(prevKit);
+            if (prevKit !== kit)
+               this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
          }
       }
@@ -293,15 +303,15 @@ function getConditions(statements: ConditionalStatement[]) {
          conditions.push($condition)
       }
       if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
-         if ( __DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
+         if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
          else continue;
       }
       if (!('statementType' in kit)) {
-         if ( __DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
+         if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
          else continue;
       }
       if (i !== statements.length - 1 && kit.statementType === 'else') {
-         if ( __DEV__) throw new Error("Else must be the very last statement of a conditional series");
+         if (__DEV__) throw new Error("Else must be the very last statement of a conditional series");
          else continue;
       }
    }
@@ -347,7 +357,7 @@ export function hideDOMNodes(nodes: JSXNode[]) {
          showIfMap.set(node, node.style.display)
          node.style.display = 'none'
       }
-      else if ( __DEV__) {
+      else if (__DEV__) {
          console.warn(`Unhandled node type ${node}`)
       }
    })

@@ -114,7 +114,7 @@ export function TestListSelection() {
                   <div on:click={e => moveSelectedItems(0)} style="background-color: white; cursor: pointer">
                      insert
                   </div>
-                  {For(list, m => m.id, (item, $index) => (
+                  {For(list, m => m.id, (item, $index) => (console.log('### item', item),
                      <div>
                         <div
                            on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
@@ -127,7 +127,7 @@ export function TestListSelection() {
                            </p>
 
                            <li on:click={e => item.changeContent()}>
-                              {item.$content}
+                              {item?.$content}
                            </li>
                            <p>{$index}</p>
                            <div on:click={e => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">

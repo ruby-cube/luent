@@ -22,7 +22,7 @@ export interface RootContext {
 }
 
 
-export type Provided = [ContextEntryKey | string, any][]
+export type Provided = { 0: ContextEntryKey | string, 1: any }[] | { 0: ContextEntryKey | string, 1: any }
 
 //API
 
@@ -79,7 +79,7 @@ export function wrapWithContext(
 export function toContextEntries(provided: [ContextEntryKey | string, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
    const context = { muIons: undefined }
    const entries: Map<string, unknown> = new Map()
-   for (const [key, value] of provided) {
+   for (const { 0: key, 1: value } of provided) {
       markIfMuIon(key, value, context)
       entries.set(toContextKey(key), value)
    }

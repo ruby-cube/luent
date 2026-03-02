@@ -48,6 +48,8 @@ export class ThisFlask {
       flask.thisFlask = this;
    }
 
+   
+
    // get onInitialMount() {
    //    return this.flask.onInitialMount;
    // }
@@ -89,6 +91,8 @@ export class Flask {
    outer?: Flask
    type?: string
    creationScopeID: string
+
+   initialLoad: boolean = true;
 
    constructor(config: {
       outer?: Flask,

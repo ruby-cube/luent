@@ -663,7 +663,7 @@ declare namespace React {
 
 
    //$$$
-   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & LumoHooks<T>
+   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & LumoHooks<T> & { 'initial:appear'?: boolean}
 
    //$$$
    interface _DOMAttributes<T> {

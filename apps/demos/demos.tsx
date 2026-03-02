@@ -22,9 +22,10 @@ import { TestListSelection } from "./src/TestListSelection"
 import { TestConsecutiveIfElse } from "./src/TestConsecutiveIfElse"
 import { TestNestedIfElse } from "./src/TestNestedIfElse"
 import { BottomlessBlokkis } from "./src/BottomlessBlokkis/BottomlessBlokkis"
+import { TestCanvas } from "./src/CanvasApp/TestCanvas"
 
 export function runDemo() {
-   const app = createRoot(TestIfElse)
+   const app = createRoot(TestListSelectTransition)
 
    app.mount('#root')
 }

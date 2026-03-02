@@ -2,10 +2,10 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } 
 import { MaybeIon } from "../component/Input";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListItemKit, ListKit, toAsyncRenderItem } from "./ItemList";
-import { Ion, Ionic, IonizeBy, isGetter, isInertIon, isIon, IsIonic, isIonicProxy, toIon, toValue } from "@rue/quarky";
+import { Ion, Ionic, IonizeBy, isGetter, isInertIon, isIon, IsIonic, isIonicProxy, PRELUDE, toIon, toValue, watch } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { ForIndex, IndexedListKit, Nullish } from "./IndexedList";
-import { isObject } from "@rue/utils";
+import { createStack, isObject } from "@rue/utils";
 import { AnyObject } from "@rue/types";
 
 
@@ -43,6 +43,27 @@ type RenderIndex<L> = IsReactive<L> extends false ? RenderStatic<L> : RenderDyna
 
 type ToValue<T> = T extends Ion<infer V> ? V : T
 
+const [pushList, popList, getList] = createStack<any>()
+
+export function atListChanged(task: () => void) {
+   console.log('@@@ list?', getList())
+   watch(getList(), () => {
+      console.log('@@@@ list changed')
+      task()
+   }, { phase: PRELUDE })
+}
+
+function wrapWithList(renderItem: RenderItem<any>, list: any) {
+   return (item: any, index: any) => {
+      try {
+         pushList(list)
+         return renderItem(item, index)
+      }
+      finally {
+         popList()
+      }
+   }
+}
 
 export function For<L, U>(data: L & MaybeIon<Ionic<any[]> | any[] | Nullish>, getKey: GetKey<ToValue<L>>, render: RenderItem<ToValue<L>>): ListKit | undefined | RawJSXNode
 export function For<L, U>(data: L & ListData, render: RenderIndex<L>): ListKit | undefined | RawJSXNode
@@ -52,7 +73,7 @@ export function For<L, U>(data: L & ListData, renderOrGetUID: GetKey<ToValue<L>>
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID);
    if (isGetter(data) || isIonicProxy(data) && isIterable(data)) {
       if (uidProvided) {
-         return new ListKit(toIon(data), toAsyncRenderItem(_render), renderOrGetUID as (item: unknown) => unknown, getFlask())
+         return new ListKit(toIon(data), toAsyncRenderItem(wrapWithList(_render, data)), renderOrGetUID as (item: unknown) => unknown, getFlask())
       }
       return ForIndex(data, toAsyncRenderItem(_render))
    }

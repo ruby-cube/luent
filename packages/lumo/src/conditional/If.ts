@@ -5,6 +5,7 @@ import { ConditionalKit, IfElseKit, renderShowHideSeries, toDynamicConditionalKi
 import { getFlask } from "@rue/flask";
 import { isFunction } from "@rue/utils";
 import { aC } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
+import { getTransition } from "../element/Transition";
 
 // let currentNodePodIndex: number | undefined = undefined
 
@@ -113,11 +114,12 @@ export function createIfSeries(kits: ConditionalKit[], viewBy?: GroupActivationT
    if (!isGetter(condition) || isInertIon(condition)) return renderStaticConditional(kits)
    const showHideType = viewBy ?? getGroupActivationType()
    resetGroupActivationType()
+   const transitions = getTransition()
    if (showHideType === 'show') {
       return renderShowHideSeries(kits)
    }
    if (kits.at(-1)?.statementType !== 'else') kits.push(Else(() => undefined))
-   const dynamicKits = toDynamicConditionalKits(kits, showHideType)
+   const dynamicKits = toDynamicConditionalKits(kits, showHideType, transitions)
    return new IfElseKit(dynamicKits, getFlask())
 }
 

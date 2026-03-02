@@ -2,6 +2,8 @@ import { queueRender, queueTask, toValue } from "@rue/quarky"
 import { AnyObject } from "@rue/types"
 import { MaybeIon } from "../component/Input"
 import { atMounted, atUnmount } from "../flask/flask-hooks"
+import { getTransition } from "./Transition"
+import { setUpPositionTransition } from "./transit"
 
 const END_EVENT_FALLBACK_BUFFER_MS = 50
 
@@ -31,35 +33,39 @@ const END_EVENT_FALLBACK_BUFFER_MS = 50
 // }
 
 
-type TransitionConfigs = {
+export type TransitionConfigs = {
+   'initial:appear'?: boolean
+   'animate-item'?: MaybeIon<string>
+   'transition-item'?: MaybeIon<string>
    'animate-in'?: MaybeIon<string>
    'animate-out'?: MaybeIon<string>
    'transition-in-from'?: MaybeIon<string>
    'transition-in'?: MaybeIon<string>
    'transition-out-to'?: MaybeIon<string> // ?? TODO:
    'transition-out'?: MaybeIon<string> // ?? TODO:
-   'cancel-transition'?: MaybeIon<string> // ??? TODO:
 } & AnyObject
 
-export function setUpTransitions(node: HTMLElement, transitions: TransitionConfigs) {
+export function setUpTransitions(node: HTMLElement, transitions: TransitionConfigs, transitionConfig: TransitionConfigs | undefined) {
    const transitioning = new Set<ActiveTransitionIn>()
 
-   const animateInClasses = transitions['animate-in']
-   const transitionInClasses = transitions['transition-in']
-   const fromClasses = transitions['transition-in-from']
-   const animateOutClasses = transitions['animate-out']
-   const transitionOutClasses = transitions['transition-out'] // TODO: ?? not sure
-   const toClasses = transitions['transition-out-to'] // TODO: ??? not sure
+   const transitionItemClasses = transitions['transition-item'] ?? transitionConfig?.["transition-item"]
+   const animateInClasses = transitions['animate-in'] ?? transitionConfig?.["animate-in"]
+   const transitionInClasses = transitions['transition-in'] ?? transitionConfig?.["transition-in"]
+   const fromClasses = transitions['transition-in-from'] ?? transitionConfig?.["transition-in-from"]
+   const animateOutClasses = transitions['animate-out'] ?? transitionConfig?.["animate-out"]
+   const transitionOutClasses = transitions['transition-out'] ?? transitionConfig?.["transition-out"]// TODO: ?? not sure
+   const toClasses = transitions['transition-out-to'] ?? transitionConfig?.["transition-out-to"]// TODO: ??? not sure
 
    if (animateInClasses || transitionInClasses) {
       atMounted(() => {
 
          transitionIn(node, (clone) => {
             let endTransition: () => void
+            let cancelTransition: () => void
 
             return {
                cancel() {
-                  // TODO:
+                  cancelTransition()
                },
                start() {
                   let transitionCount = 0
@@ -80,6 +86,9 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
                },
                onEnd(task: () => void) {
                   endTransition = task
+               },
+               onCancel(task: () => void) {
+                  cancelTransition = task;
                }
             }
          }, transitioning)
@@ -100,7 +109,7 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
                      transitionCount++
                      startTransitionOut(clone, toClassNames(toValue(transitionOutClasses)), onEnd)
                   }
-                  
+
                   function onEnd() {
                      transitionCount--
                      if (transitionCount === 0) {
@@ -115,7 +124,10 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
          }, transitioning)
       })
    }
-
+   console.log('@@@ pass 1', transitionItemClasses)
+   if (transitionItemClasses) {
+      setUpPositionTransition(node, transitionItemClasses)
+   }
 }
 
 function positionClone(clone: HTMLElement, rect: DOMRect) {
@@ -126,10 +138,69 @@ function positionClone(clone: HTMLElement, rect: DOMRect) {
    clone.style.setProperty('height', rect.height + 'px')
 }
 
+
+// function getVisualAnchorRect(root: HTMLElement) {
+//    let top = Number.POSITIVE_INFINITY
+//    let left = Number.POSITIVE_INFINITY
+
+//    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT)
+//    let current = walker.currentNode as Element
+
+//    while (current) {
+//       const el = current as HTMLElement
+//       const rect = el.getBoundingClientRect()
+//       if (rect.width > 0 || rect.height > 0) {
+//          if (rect.top < top) top = rect.top
+//          if (rect.left < left) left = rect.left
+//       }
+//       current = walker.nextNode() as Element
+//    }
+
+//    const fallback = root.getBoundingClientRect()
+//    return {
+//       top: Number.isFinite(top) ? top : fallback.top,
+//       left: Number.isFinite(left) ? left : fallback.left,
+//    }
+// }
+
+
+// export function cloneForTransition(node: HTMLElement) {
+//    const sourceRect = node.getBoundingClientRect()
+//    const sourceAnchor = getVisualAnchorRect(node)
+//    const sourceTop = sourceRect.top + window.scrollY
+//     const sourceLeft = sourceRect.left + window.scrollX
+
+//    const clone = node.cloneNode(true) as HTMLElement;
+//    clone.style.setProperty('position', 'absolute')
+//    clone.style.setProperty('top', sourceTop + 'px')
+//    clone.style.setProperty('left', sourceLeft + 'px')
+//    clone.style.setProperty('width', sourceRect.width + 'px')
+//    clone.style.setProperty('height', sourceRect.height + 'px')
+//    clone.style.setProperty('margin', '0')
+//    clone.style.setProperty('box-sizing', 'border-box')
+//    clone.style.setProperty('pointer-events', 'none')
+//    clone.style.setProperty('z-index', '2147483647')
+
+//    // node.after(clone)
+//    document.body.append(clone)
+
+//    const cloneAnchor = getVisualAnchorRect(clone)
+//    const topCorrection = sourceAnchor.top - cloneAnchor.top
+//    const leftCorrection = sourceAnchor.left - cloneAnchor.left
+
+//    if (topCorrection || leftCorrection) {
+//       clone.style.setProperty('top', sourceRect.top + topCorrection + 'px')
+//       clone.style.setProperty('left', sourceRect.left + leftCorrection + 'px')
+//    }
+
+//    return clone
+// }
+
 type ActiveTransitionIn = {
    start(): void;
    cancel(): void;
    onEnd(task: () => void): void;
+   onCancel(task: () => void): void;
 }
 
 type ActiveTransitionOut = {
@@ -137,25 +208,50 @@ type ActiveTransitionOut = {
    onEnd(task: () => void): void;
 }
 
+// function transitionIn(node: HTMLElement, createTransition: (clone: HTMLElement) => ActiveTransitionIn, transitioning: Set<ActiveTransitionIn>) {
+
+// }
+
 
 function transitionIn(node: HTMLElement, createTransition: (clone: HTMLElement) => ActiveTransitionIn, transitioning: Set<ActiveTransitionIn>) {
+   // -------
+   const transition = createTransition(node)
+   transitioning.add(transition)
+
+   // ----
+
+   transition.start()
+   // set starting transition state
+   // clone.classList.add(transition_in_from)
+
+   transition.onEnd(() => {
+      transitioning.delete(transition)
+      // observer.disconnect()
+   })
+   transition.onCancel(() => {
+      transitioning.delete(transition)
+   })
+}
+
+function _transitionIn(node: HTMLElement, createTransition: (clone: HTMLElement) => ActiveTransitionIn, transitioning: Set<ActiveTransitionIn>) {
    const clone = node.cloneNode(true) as HTMLElement
 
    // - read dims of new node (must read before hiding new node)
    const rect = node!.getBoundingClientRect()
 
-   node.style.setProperty('visibility', 'hidden')
 
-   const observer = new MutationObserver(() => {
-      observer.disconnect()
-      node.style.removeProperty('visibility')
-      clone.style.setProperty('visibility', 'hidden')
-   })
-   observer.observe(node, { childList: true, attributes: true, characterData: true, subtree: true })
+   // I forget why I have this... I think it has to do with cancelling transitions?
+   // const observer = new MutationObserver(() => {
+   //    observer.disconnect()
+   //    node.style.removeProperty('visibility')
+   //    clone.style.setProperty('visibility', 'hidden')
+   // })
+   // observer.observe(node, { childList: true, attributes: true, characterData: true, subtree: true })
 
    // - position newClone
-   clone.style.removeProperty('visibility')
+   // const clone =cloneForTransition(node)
    positionClone(clone, rect)
+
 
 
    // -------
@@ -164,6 +260,7 @@ function transitionIn(node: HTMLElement, createTransition: (clone: HTMLElement) 
 
    // ----
    node.after(clone)
+   node.style.setProperty('visibility', 'hidden') // TODO: restore
 
    transition.start()
    // set starting transition state
@@ -173,7 +270,11 @@ function transitionIn(node: HTMLElement, createTransition: (clone: HTMLElement) 
       node.style.removeProperty('visibility')
       clone.remove();
       transitioning.delete(transition)
-      observer.disconnect()
+      // observer.disconnect()
+   })
+   transition.onCancel(() => {
+      clone.remove();
+      transitioning.delete(transition)
    })
 }
 
@@ -187,19 +288,13 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
 
    // - read dims of prev node
    const rect = node.getBoundingClientRect()
-   const parent = node.parentNode
    const clone = node.cloneNode(true) as HTMLElement
+   node.after(clone)
+   // - position clone
+   positionClone(clone, rect)
+   clone.style.removeProperty('visibility')
 
    queueRender(() => {
-      // - position clone
-      clone.style.removeProperty('visibility')
-      clone.style.setProperty('position', 'absolute')
-      clone.style.setProperty('top', rect.top + 'px')
-      clone.style.setProperty('left', rect.left + 'px')
-      clone.style.setProperty('width', rect.width + 'px')
-      clone.style.setProperty('height', rect.height + 'px')
-
-      parent?.appendChild(clone)
 
       const transition = createTransition(clone)
       transition.start()
@@ -210,7 +305,7 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
    })
 }
 
-function toClassNames(classString: string) {
+export function toClassNames(classString: string) {
    const classNames: string[] = []
    classString.split(' ').forEach(c => {
       const className = c.trim()
@@ -244,7 +339,7 @@ function getLongestTimingMs(durations: string, delays: string) {
    return longest
 }
 
-function runOnAnimationEndOrTimeout(node: HTMLElement, done: () => void) {
+function onAnimationEnd(node: HTMLElement, done: () => void) {
    const styles = getComputedStyle(node)
    const timeoutMs = getLongestTimingMs(styles.animationDuration, styles.animationDelay) + END_EVENT_FALLBACK_BUFFER_MS
    let completed = false
@@ -265,10 +360,10 @@ function runOnAnimationEndOrTimeout(node: HTMLElement, done: () => void) {
       done()
    }
 
-   node.addEventListener('animationend', onEnd)
+   node.addEventListener('animationend', onEnd, { once: true })
 }
 
-function runOnTransitionEndOrTimeout(node: HTMLElement, done: () => void) {
+function onTransitionEnd(node: HTMLElement, done: () => void) {
    const styles = getComputedStyle(node)
    const timeoutMs = getLongestTimingMs(styles.transitionDuration, styles.transitionDelay) + END_EVENT_FALLBACK_BUFFER_MS
    let completed = false
@@ -289,12 +384,12 @@ function runOnTransitionEndOrTimeout(node: HTMLElement, done: () => void) {
       done()
    }
 
-   node.addEventListener('transitionend', onEnd)
+   node.addEventListener('transitionend', onEnd, { once: true })
 }
 
 function startAnimateIn(clone: HTMLElement, classes: string[], emitAnimationEnd: () => void) {
    classes.forEach(className => clone.classList.add(className))
-   runOnAnimationEndOrTimeout(clone, () => {
+   onAnimationEnd(clone, () => {
       classes.forEach(className => clone.classList.remove(className))
       emitAnimationEnd()
    })
@@ -302,7 +397,7 @@ function startAnimateIn(clone: HTMLElement, classes: string[], emitAnimationEnd:
 
 function startAnimateOut(clone: HTMLElement, classes: string[], emitAnimationEnd: () => void) {
    classes.forEach(className => clone.classList.add(className))
-   runOnAnimationEndOrTimeout(clone, () => {
+   onAnimationEnd(clone, () => {
       classes.forEach(className => clone.classList.remove(className))
       emitAnimationEnd()
    })
@@ -317,7 +412,7 @@ function startTransitionIn(clone: HTMLElement, startClasses: string[], classes: 
          classes.forEach(className => clone.classList.add(className))
          startClasses.forEach(className => clone.classList.remove(className))
 
-         runOnTransitionEndOrTimeout(clone, () => {
+         onTransitionEnd(clone, () => {
             emitTransitionEnd()
          })
       })
@@ -328,7 +423,7 @@ function startTransitionOut(clone: HTMLElement, classes: string[], emitTransitio
    requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
       queueTask(() => {
          classes.forEach(className => clone.classList.add(className))
-         runOnTransitionEndOrTimeout(clone, () => {
+         onTransitionEnd(clone, () => {
             classes.forEach(className => clone.classList.remove(className))
             emitTransitionEnd()
          })

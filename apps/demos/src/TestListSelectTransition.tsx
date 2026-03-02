@@ -69,23 +69,31 @@ export function TestListSelectTransition() {
       list.insert(index)
 
       // temporary till Transition API implemented
-      queuePrelude(() =>
-         transitionExisting(itemDivs, index)
-      )
+      // const divs = [...itemDivs]
+      // queuePrelude(() =>
+      //    transitionExisting(divs)
+      // )
    }
 
    function removeItem(index: number) {
       selected.delete(list[index] as IonicItem) // TODO: remove type-casting once Ionic is properly typed
       list.remove(index);
+      // list.insert(Math.floor(Math.random() * list.length-1))
+
+      // temporary till Transition API implemented
+      // const divs = [...itemDivs]
+      // queuePrelude(() =>
+      //    transitionExisting(divs)
+      // )
    }
 
    function moveSelectedItems(index: number) {
       moveUniqueItems(selected, list, index)
 
       // temporary till Transition API implemented
-      queuePrelude(() =>
-         transitionExisting(itemDivs)
-      )
+      // queuePrelude(() =>
+      //    transitionExisting(itemDivs)
+      // )
    }
 
 
@@ -115,11 +123,17 @@ export function TestListSelectTransition() {
                   <div on:click={e => moveSelectedItems(0)} style="background-color: white; cursor: pointer">
                      insert
                   </div>
+
                   {For(list, m => m.id, (item, $index) => (
                      <div
                         ref={{ arr: itemDivs, i: $index }}
-                        at:mounted={node => { transitionNew(node) }}
-                        at:unmount={node => { animateOut(node, $container()!); transitionExisting(itemDivs, $index()) }}
+                        animate-in='fade-in'
+                        animate-out='fade-out'
+                        transition-item='transition-item'
+                        // transit-key={item.id}
+                     // transit-key={item.id}
+                     // at:mounted={node => { transitionNew(node) }}
+                     // at:unmount={node => { animateOut(node, $container()!)}}
                      >
                         <div
                            on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
@@ -127,9 +141,9 @@ export function TestListSelectTransition() {
                               backgroundColor: randomColor.get(),
                               outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
                            }}>
-                           <p on:click={e => removeItem($index())} style="cursor: pointer">
+                           <button class='delete-btn' on:click={e => removeItem($index())} style="cursor: pointer">
                               X
-                           </p>
+                           </button>
 
                            <li on:click={e => item.changeContent()}>
                               {item.$content}
@@ -147,6 +161,7 @@ export function TestListSelectTransition() {
                         </div>
                      </div>
                   ))}
+
                </div>
             </div>
 
@@ -168,16 +183,26 @@ export function TestListSelectTransition() {
             overflow-y: scroll
          }
 
-         .transition-position {
-            transition: transform 150ms ease-in-out;
+         .delete-btn {
+            background-color: transparent;
+            margin-bottom: 1rem;
+            border: none;
          }
+
+         .delete-btn:hover {
+            border: none;
+         }
+
+   
 
          @keyframes fade-in {
             from {
-               opacity: .25;
+               opacity: 0;
+               transform: scaleY(0.01) translate(30px, 0);
             }
             to {
                opacity: 1;
+               transform: scaleY(1) translate(0px, 0px);
             }
          }
 
@@ -190,12 +215,19 @@ export function TestListSelectTransition() {
             }
          }
 
-         .animate-out {
-            animation: fade-out 2ms ease-in;
+         .fade-out {
+            // transform-origin: top center;
+            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
+            z-index: -1;
          }
 
-         .animate-in {
-            animation: fade-in 2ms ease-in;
+         .fade-in {
+            // transform-origin: top center;
+            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
+         }
+
+         .transition-item {
+            transition: transform 500ms ease-in-out;
          }
       `)
 }
@@ -210,13 +242,12 @@ function genId() {
 
 //#region transitions
 
-export function transitionExisting(itemDivs: HTMLElement[], removedIndex?: number) {
+
+
+export function transitionExisting(itemDivs: HTMLElement[]) {
    const rects: DOMRect[] = []
    const nodes: any[] = []
    for (let i = 0; i < itemDivs.length; i++) {
-      if (i === removedIndex) {
-         continue;
-      }
       const node = itemDivs[i]
       const rect = node.getBoundingClientRect()
       rects.push(rect)
@@ -224,7 +255,6 @@ export function transitionExisting(itemDivs: HTMLElement[], removedIndex?: numbe
    }
 
    queueRender(() => {
-      console.warn('@$% transition existing')
       for (let i = 0; i < nodes.length; i++) {
          const node = nodes[i]
          const last = node.getBoundingClientRect()
@@ -232,7 +262,6 @@ export function transitionExisting(itemDivs: HTMLElement[], removedIndex?: numbe
          const delta = first.top - last.top
          if (delta) {
             node.style.setProperty('transform', `translate(${first.left - last.left}px, ${delta}px)`)
-            console.log('DELTA', first.top - last.top)
             requestAnimationFrame(() => {
                queueTask(() => {
                   node.classList.add('transition-position')
@@ -240,7 +269,7 @@ export function transitionExisting(itemDivs: HTMLElement[], removedIndex?: numbe
                   node.addEventListener('transitionend', () => {
                      node.classList.remove('transition-position')
                      node.style.removeProperty('transform')
-                  })
+                  }, { once: true })
                })
             })
          }
@@ -248,28 +277,37 @@ export function transitionExisting(itemDivs: HTMLElement[], removedIndex?: numbe
    })
 }
 
+
 function transitionNew(node: HTMLElement) {
-   node.classList.add('animate-in')
+   node.classList.add('fade-in')
    node.addEventListener('animationend', () => {
-      node.classList.remove('animate-in')
+      node.classList.remove('fade-in')
    })
 }
 
 function animateOut(node: HTMLElement, container: HTMLElement) {
    const rect = node.getBoundingClientRect()
-   const clone = node.cloneNode(true) as HTMLElement
-   clone.style.setProperty('position', 'fixed')
-   clone.style.setProperty('top', rect.top - 16 + 'px')
-   clone.style.setProperty('left', rect.left + 'px')
-   clone.style.setProperty('width', rect.width + 'px')
-   clone.style.setProperty('height', rect.height + 'px')
-
-   container.appendChild(clone)
-
-   clone.classList.add('animate-out')
+   const clone = node.cloneNode() as HTMLElement
+   const cloneContent = node.cloneNode(true) as HTMLElement
+   // clone.style.setProperty('position', 'fixed')
+   // clone.style.setProperty('top', rect.top + 'px') // FIX:
+   // clone.style.setProperty('left', rect.left + 'px')
+   // clone.style.setProperty('width', rect.width + 'px')
+   // clone.style.setProperty('height', rect.height + 'px')
+   clone.style.setProperty('width', 0 + 'px')
+   clone.style.setProperty('height', 0 + 'px')
+   cloneContent.style.setProperty('width', rect.width + 'px')
+   cloneContent.style.setProperty('height', rect.height + 'px')
+   console.log('parent', node.parentElement)
+   // container.appendChild(clone)
+   clone.style.setProperty('overflow', 'visible')
+   cloneContent.style.setProperty('margin', '0')
+   node.before(clone)
+   clone.appendChild(cloneContent)
+   clone.classList.add('fade-out')
    clone.addEventListener('animationend', () => {
-      clone.classList.remove('animate-out')
-      clone.remove()
+      clone.classList.remove('fade-out')
+      // clone.remove()
    })
 }
 

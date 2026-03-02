@@ -17,8 +17,8 @@ type FnKey = ContextEntryKey & { contextKey: string | ContextEntryKey }
 
 export function mergeContextKeys(...keys: ContextEntryKey[]) {
    const mergedKey = ContextKey()
-   for (const fnKey of keys){
-       (fnKey as FnKey).contextKey = mergedKey
+   for (const fnKey of keys) {
+      (fnKey as FnKey).contextKey = mergedKey
    }
    return mergedKey
 }
@@ -37,7 +37,7 @@ export function toContextKey(key: ContextEntryKey | string): string | Function {
 export function ContextKey<T>(key: string = 'context-key'): ContextEntryKey<T> {
    // const { default: defaultValue, key = 'context-key', optional = false } = options ?? {}
    const fnKey = function (v: T) {
-      return [fnKey, v]
+      return { 0: fnKey, 1: v }
    }
    Object.defineProperty(fnKey, 'name', { value: key })
    // Object.defineProperty(fnKey, 'defaultValue', { value: defaultValue })
