@@ -128,13 +128,7 @@ export function TestListSelectTransition() {
                   {For(list, m => m.id, (item, $index) => (
                      <div
                         ref={{ arr: itemDivs, i: $index }}
-                        animate-in='fade-in'
-                        animate-out='fade-out'
-                        transition-item='transition-item'
-                        // transit-key={item.id}
-                     // transit-key={item.id}
-                     // at:mounted={node => { transitionNew(node) }}
-                     // at:unmount={node => { animateOut(node, $container()!)}}
+                        animate-in animate-out transition-item
                      >
                         <div
                            on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
@@ -217,13 +211,13 @@ export function TestListSelectTransition() {
          }
 
          .fade-out {
-            // transform-origin: top center;
+            transform-origin: top center;
             animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
             z-index: -1;
          }
 
          .fade-in {
-            // transform-origin: top center;
+            transform-origin: top center;
             animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
          }
 

@@ -12,7 +12,7 @@ import { createContextNode } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { isPlainObject } from "@rue/utils";
 import { Await } from "../boundaries/Await";
-import { TransitionConfigs } from "../element/transitions";
+import { unmarkInitialRender, markInitialRender, TransitionConfigs } from "../element/transitions";
 import { setTransition } from "../element/Transition";
 
 
@@ -117,34 +117,38 @@ export class IfElseKit extends VineNode {
       super()
       this.$activeIndex = $ActiveIndex(getConditions(kits))
 
-      console.log('STARTING INDEX', this.$activeIndex())
-      this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
-         kit.flask!.emitInitialMount()
-      })
-
-      watchToRender(this.$activeIndex, ({ previous: prevIndex }) => {
-         console.log('index changed!', this.$activeIndex(), prevIndex)
-         if (this.$activeIndex() === prevIndex) return;
-         const kit = this.kits[this.$activeIndex()]
-         const prevKit = this.pendingDeactivatedKit ?? this.kits[prevIndex]
-
-         console.log('switch?')
-         if (this.pendingSwitch) {
-            console.log('>>> CANCEL PROMISE')
-            this.cancelledPendingSwitch.add(this.pendingSwitch)
-            this.pendingSwitch = null
-         }
-
-         if (kit.pending) {
-            console.log('await pending switch')
-            this.awaitPendingConditional(kit.pending, kit, prevKit)
-         }
-         else {
-            console.log('switch!')
-            this.deactivateConditional(prevKit);
-            this.reactivateConditional(kit)
-         }
-      })
+      try {
+         markInitialRender(true)
+         this.activateConditional(this.kits[this.$activeIndex()], (kit) => {
+            kit.flask!.emitInitialMount()
+         })
+      }
+      finally {
+         unmarkInitialRender()
+         watchToRender(this.$activeIndex, ({ previous: prevIndex }) => {
+            console.log('index changed!', this.$activeIndex(), prevIndex)
+            if (this.$activeIndex() === prevIndex) return;
+            const kit = this.kits[this.$activeIndex()]
+            const prevKit = this.pendingDeactivatedKit ?? this.kits[prevIndex]
+   
+            console.log('switch?')
+            if (this.pendingSwitch) {
+               console.log('>>> CANCEL PROMISE')
+               this.cancelledPendingSwitch.add(this.pendingSwitch)
+               this.pendingSwitch = null
+            }
+   
+            if (kit.pending) {
+               console.log('await pending switch')
+               this.awaitPendingConditional(kit.pending, kit, prevKit)
+            }
+            else {
+               console.log('switch!')
+               this.deactivateConditional(prevKit);
+               this.reactivateConditional(kit)
+            }
+         })
+      }
    }
 
    cancelledPendingSwitch = new Set()

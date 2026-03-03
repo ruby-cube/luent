@@ -5,6 +5,7 @@ import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { createStack } from "@rue/utils";
+import { unmarkInitialRender, markInitialRender } from "../element/transitions";
 
 type UID = unknown
 
@@ -32,26 +33,37 @@ export class ListKit extends VineNode {
       public flask: Flask
    ) {
       super()
-      this.nodes = this.render($list(), renderItem);
-      watchToRender($list, ({ current: newList }) => {
-         this.nodes = this.rerender(newList, renderItem)
-      })
+      try {
+
+         this.nodes = this.render($list(), renderItem);
+      }
+      finally {
+         watchToRender($list, ({ current: newList }) => {
+            this.nodes = this.rerender(newList, renderItem)
+         })
+      }
    }
 
    prevItems: Map<UID, ListItemKit> = new Map()
 
    private render(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
       if (!list) return [];
-      const kits: ListItemKit[] = []
-      for (let i = 0; i < list.length; i++) {
-         const item = list[i]
-         const $index = Ion(i)
+      try {
+         markInitialRender(true)
+         const kits: ListItemKit[] = []
+         for (let i = 0; i < list.length; i++) {
+            const item = list[i]
+            const $index = Ion(i)
 
-         const kit = new ListItemKit(item, $index, renderItem, this.flask)
-         kits.push(kit)
-         this.prevItems.set(this.getUID(item), kit)
+            const kit = new ListItemKit(item, $index, renderItem, this.flask)
+            kits.push(kit)
+            this.prevItems.set(this.getUID(item), kit)
+         }
+         return kits;
       }
-      return kits;
+      finally {
+         unmarkInitialRender()
+      }
    }
 
    private rerender(list: unknown[] | undefined, renderItem: RenderItem<unknown>) {
@@ -195,7 +207,7 @@ export class ListKit extends VineNode {
 export function toAsyncRenderItem(renderItem: (item: unknown, index: unknown) => RawJSXNode, context: ContextSnapshot = $_snap_context(), trace = __DEV__ ? __DEV__buildAsyncPath() : '') {
    return function render(this: ListItemKit, item: unknown, index: unknown) {
       return $_run_with_(context, () => {
-            return renderItem(item, index)
+         return renderItem(item, index)
       }, {
          [FLASK]: this.flask,
          [TRACE]: trace

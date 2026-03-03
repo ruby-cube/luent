@@ -133,8 +133,8 @@ function TodoList(input: FromTag<{
       <ul class="todos">
          {For($todos, m => m.id, (todo, $i) => (
             <li
-               transition-item='transition-item'
-               transit-key={todo.id} transit-port='todos' transit-class='transition-position'
+               transit-key={todo.id}
+               transition-item
                class={(todo.done && 'done')}
                ref={{ arr: lis, i: $i }}
             >

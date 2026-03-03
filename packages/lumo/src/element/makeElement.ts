@@ -132,6 +132,7 @@ const transitionAttributes = {
    'transit-class': true,
    'transit-key': true,
    'transit-port': true,
+   'animate-load': true,
    'animate-in': true,
    'animate-out': true,
    'transition-in-from': true,
