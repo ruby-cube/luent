@@ -14,8 +14,8 @@ import { RenderSlot, MaybeIon } from "../component/Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { $Index } from "../iteratives/ItemList";
-import { setUpTransitions } from "./transitions";
-import { getTransition } from "./Transition";
+import { setUpTransitions } from "../transitions/transitions";
+import { getTransition, setTransition } from "../transitions/Transition";
 
 
 export type TagName = keyof HTMLElementTagNameMap
@@ -94,7 +94,7 @@ export function makeElement(
          mountDOMNodes(nodes, domNode)
       }, xml_ns)
    }
-
+   setTransition(transitionConfig) // makes transition config available to siblings
    return domNode;
 }
 

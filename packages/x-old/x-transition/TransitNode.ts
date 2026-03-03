@@ -1,13 +1,13 @@
 import { TransitionNode } from "./TransitionNode";
-import { $Node } from "../node/NodeRef";
-import { makeElement } from "../element/makeElement";
-import { fromContext } from "../context/provide";
+import { $Node } from "../../lumo/src/node/NodeRef";
+import { makeElement } from "../../lumo/src/element/makeElement";
+import { fromContext } from "../../lumo/src/context/provide";
 import { Ion } from "@rue/quarky";
-import { template } from "../component/Component";
-import { createIfSeries, Else, If } from "../conditional/If";
+import { template } from "../../lumo/src/component/Component";
+import { createIfSeries, Else, If } from "../../lumo/src/conditional/If";
 import { isFunction } from "@rue/utils";
-import { ContextKey } from "../context/ContextKey";
-import { RenderSlot } from "../component/Input";
+import { ContextKey } from "../../lumo/src/context/ContextKey";
+import { RenderSlot } from "../../lumo/src/component/Input";
 
 export function renderTransitNode(
    $div: $Node<'div'>,

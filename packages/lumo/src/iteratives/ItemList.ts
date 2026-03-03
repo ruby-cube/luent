@@ -5,7 +5,7 @@ import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { createStack } from "@rue/utils";
-import { unmarkInitialRender, markInitialRender } from "../element/transitions";
+import { unmarkInitialRender, markInitialRender } from "../transitions/transitions";
 
 type UID = unknown
 
@@ -34,10 +34,11 @@ export class ListKit extends VineNode {
    ) {
       super()
       try {
-
+         markInitialRender(true)
          this.nodes = this.render($list(), renderItem);
       }
       finally {
+         unmarkInitialRender()
          watchToRender($list, ({ current: newList }) => {
             this.nodes = this.rerender(newList, renderItem)
          })

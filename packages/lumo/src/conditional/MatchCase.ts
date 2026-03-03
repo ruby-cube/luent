@@ -9,6 +9,7 @@ import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/fl
 import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode";
 import { DynamicNodeKit, IfElseKit } from "./IfElse";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
+import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
 type CaseKey = any
 
@@ -51,7 +52,7 @@ export function toCasesMap(raw: RawCaseKit[], groupActivationType: ShowHideType 
          if (render) {
             currentKit.render = toAsyncRender(render as RenderFunction, context, {
                [FLASK]: undefined,
-               [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
+               [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
             })
             currentKit.type = type ?? fallbackType
          }
@@ -107,7 +108,7 @@ export function createCasesKit(showHideType: ShowHideType | undefined, render: R
       flask: undefined,
       render: render ? toAsyncRender(render as RenderFunction, context, {
          [FLASK]: undefined,
-         [TRACE]:  __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
+         [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
       }) : undefined,
       type: showHideType,
       cache: undefined,
@@ -169,13 +170,19 @@ export class MatchKit extends VineNode {
 
       const kit = this.getKit(caseKey, $key())
       if (kit) {
-         this.activateConditional(kit, (kit) => {
-            kit.flask!.emitInitialMount()
-            if (kit.type == 'remount')
-               kit.flask!.onDiscard(() => {
-                  this.cached?.delete(caseKey)
-               })
-         })
+         try {
+            markInitialRender(true)
+            this.activateConditional(kit, (kit) => {
+               kit.flask!.emitInitialMount()
+               if (kit.type == 'remount')
+                  kit.flask!.onDiscard(() => {
+                     this.cached?.delete(caseKey)
+                  })
+            })
+         }
+         finally {
+            unmarkInitialRender()
+         }
       }
 
       watchToRender($key, ({ previous, flask }) => {

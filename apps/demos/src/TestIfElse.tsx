@@ -1,7 +1,7 @@
 import { template, If, Else, fade, ElseIf, NodeRef, createRoot, css } from "@rue/lumo";
 import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
-import { Transition } from "../../../packages/lumo/src/element/Transition";
+import { Transition } from "../../../packages/lumo/src/transitions/Transition";
 
 
 export function TestIfElse() {

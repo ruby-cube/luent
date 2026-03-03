@@ -5,6 +5,7 @@ import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
 import { Flask, getActiveFlask, getFlask } from "@rue/flask";
 import { quarkOf } from "../../../quarky/src/abstract/Quark";
+import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
 export type Nullish = null | undefined
 
@@ -45,7 +46,13 @@ export class IndexedListKit extends VineNode {
          array = [...$list()]
       }, { phase: PRELUDE })
       
-      this.nodes = this.render($list) as IndexKit[];
+      try{
+         markInitialRender(true)
+         this.nodes = this.render($list) as IndexKit[];
+      }
+      finally{
+         unmarkInitialRender()
+      }
    }
 
    toArray(input: AnyObject | Nullish) {

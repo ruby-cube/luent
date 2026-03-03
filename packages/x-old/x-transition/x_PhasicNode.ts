@@ -1,16 +1,16 @@
-import { Context as createContext } from "../context/Context";
-import { makeElement } from "../element/makeElement";
+import { Context as createContext } from "../../lumo/src/context/Context";
+import { makeElement } from "../../lumo/src/element/makeElement";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
-import { fromContext } from "../context/provide";
+import { fromContext } from "../../lumo/src/context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
-import { $Node, NodeRef } from "../node/NodeRef";
+import { $Node, NodeRef } from "../../lumo/src/node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
-import type { Context } from "../context/context-stack";
+import type { Context } from "../../lumo/src/context/context-stack";
 import { Ion } from "@rue/quarky";
-import { template } from "../component/Component";
-import { createIfSeries, Else, If } from "../conditional/If";
-import { ContextKey } from "../context/ContextKey";
-import { RenderSlot } from "../component/Input";
+import { template } from "../../lumo/src/component/Component";
+import { createIfSeries, Else, If } from "../../lumo/src/conditional/If";
+import { ContextKey } from "../../lumo/src/context/ContextKey";
+import { RenderSlot } from "../../lumo/src/component/Input";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 

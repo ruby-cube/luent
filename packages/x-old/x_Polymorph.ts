@@ -5,9 +5,9 @@ import { Context, createContextNode, NodeContext, Provided } from "../context/Co
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { FromTag } from "../component/Input";
 import { Ion, isGetter, isIon, MutableIon, PRELUDE, queueInternalRender, toValue, watch, watchToRender } from "@rue/quarky";
-import { useTransitionNodes } from "../transition/TransitNode";
-import { TransitionNode } from "../transition/TransitionNode";
-import { getPhasicNode } from "../transition/x_PhasicNode";
+import { useTransitionNodes } from "../../../x-old/x-transition/TransitNode";
+import { TransitionNode } from "../../../x-old/x-transition/TransitionNode";
+import { getPhasicNode } from "../../../x-old/x-transition/x_PhasicNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { CONTEXT, getClosestContext } from "../context/context-stack";
 import { AsyncRender, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode";

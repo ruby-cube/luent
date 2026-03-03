@@ -4,6 +4,7 @@ import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
 import { Flask, getFlask } from "@rue/flask";
 import { toAsyncRenderItem } from "./ItemList";
+import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
 export function Thru(count: MaybeIon<number>, render: (count: number, index: number) => RawJSXNode) {
    if (isIon(count)) {
@@ -30,37 +31,43 @@ export class ThruKit extends VineNode {
       public flask: Flask
    ) {
       super()
-      this.nodes = this.render($count(), renderCount) as ThruKit[];
-
-      watchToRender($count, ({ current, previous }) => {
-         const kits = this.nodes as CountKit[]
-         if (current > previous) {
-            let preceding = kits[previous - 1] ?? this.preceding
-            const fragment: DocumentFragment | null = new DocumentFragment()
-            for (let i = previous; i < current; i++) {
-               const kit = new CountKit(i + 1, i, renderCount, this.flask)
-               kit.parent = this.parent;
-               kit.preceding = preceding;
-               kits.push(kit)
-               mountDOMNodes(kit.nodes!, fragment)
-            }
-            queueInternalRender(() => {
-               // mount to fragment
-               mountFragment(fragment, kits[previous].precedingLeaf, this.parent)
-            }, this.flask)
-         }
-         else if (current < previous) {
-            // delete indexes
-            const removed = kits.splice(current, previous - current)
-            for (const kit of removed) {
+      try {
+         markInitialRender(true)
+         this.nodes = this.render($count(), renderCount) as ThruKit[];
+      }
+      finally {
+         unmarkInitialRender()
+         watchToRender($count, ({ current, previous }) => {
+            const kits = this.nodes as CountKit[]
+            if (current > previous) {
+               let preceding = kits[previous - 1] ?? this.preceding
+               const fragment: DocumentFragment | null = new DocumentFragment()
+               for (let i = previous; i < current; i++) {
+                  const kit = new CountKit(i + 1, i, renderCount, this.flask)
+                  kit.parent = this.parent;
+                  kit.preceding = preceding;
+                  kits.push(kit)
+                  mountDOMNodes(kit.nodes!, fragment)
+               }
                queueInternalRender(() => {
-                  removeDOMNodes(kit.nodes!)
-                  kit.nodes = undefined;
+                  // mount to fragment
+                  mountFragment(fragment, kits[previous].precedingLeaf, this.parent)
                }, this.flask)
-               kit.flask.emitDiscard()
             }
-         }
-      }, flask)
+            else if (current < previous) {
+               // delete indexes
+               const removed = kits.splice(current, previous - current)
+               for (const kit of removed) {
+                  queueInternalRender(() => {
+                     removeDOMNodes(kit.nodes!)
+                     kit.nodes = undefined;
+                  }, this.flask)
+                  kit.flask.emitDiscard()
+               }
+            }
+         }, flask)
+      }
+
    }
 
    private render(count: number, renderCount: RenderCount) {

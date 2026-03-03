@@ -5,8 +5,8 @@ import { renderTransitNode } from "./TransitNode";
 import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
-import { NodeRef } from "../node/NodeRef";
-import { RenderSlot, FromTag } from "../component/Input";
+import { NodeRef } from "../../lumo/src/node/NodeRef";
+import { RenderSlot, FromTag } from "../../lumo/src/component/Input";
 
 export type TransitionHook = {
    phase: 'in' | 'out'
