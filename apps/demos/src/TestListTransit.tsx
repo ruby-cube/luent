@@ -134,7 +134,7 @@ function TodoList(input: FromTag<{
          {For($todos, m => m.id, (todo, $i) => (
             <li
                transit-key={todo.id}
-               transition-item
+               animate-item
                class={(todo.done && 'done')}
                ref={{ arr: lis, i: $i }}
             >

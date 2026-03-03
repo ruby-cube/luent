@@ -176,8 +176,8 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
          }, transitioning)
       })
    }
-   if (transitionItem) {
-      setUpPositionTransition(node, transitionItemClasses as MaybeIon<string>)
+   if (transitionItemClasses) { // must check transitionItemClasses instead of transitionItem in order to include animateItem
+      setUpPositionTransition(node, transitionItemClasses)
    }
    if (transitKey) {
       setUpTransit(node, transitKey, transitPort, transitClasses)
