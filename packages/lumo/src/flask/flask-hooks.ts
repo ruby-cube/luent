@@ -1,6 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@rue/flask";
-import { queueRender } from "../../../quarky/src/reactivity/RenderCycle";
-import { queueTask } from "../../../x-old/thread";
+import { queueRender, queueTask } from "../../../quarky/src/reactivity/RenderCycle";
 
 
 export function atCreate(task: () => void) {

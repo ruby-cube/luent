@@ -1,24 +1,26 @@
-import { getActiveFlask, ThisFlask } from "./Flask";
+import { Flask, getActiveFlask } from "./Flask";
 
 
-
-export function $thisScene() {
-   const flask = getActiveFlask();
-   if (!flask) throw new Error('No flask found. Must call within the scope of a flask')
-   if (flask.type !== 'scene') throw new Error('$thisScene() may only be called directly within a scene scope--e.g. the callbacks of listen() and watch()')
-   return flask.thisFlask || new ThisScene(flask);
+export function atEnd(task: () => void) {
+   getActiveFlask()?.onDiscard(task)
 }
 
-
-class ThisScene extends ThisFlask {
+class ThisScene {
+   constructor(private flask: Flask) { }
    end() {
       this.flask.emitDiscard()
    }
 }
 
-
-
-
+export function Scene(sceneSetup: (scene: ThisScene) => void, options?: { detached: boolean }): ThisScene {
+   const detached = options?.detached
+   const flaskConfig = { type: 'scene', creationScope: true }
+   const enclosingFlask = getActiveFlask()
+   const flask = detached ? new Flask(flaskConfig) : enclosingFlask?.spawn(flaskConfig) || new Flask(flaskConfig)
+   const scene = new ThisScene(flask)
+   sceneSetup(scene);
+   return scene
+}
 
 
 
