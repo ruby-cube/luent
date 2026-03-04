@@ -76,6 +76,7 @@ import { TestAsyncTabs } from '../../demos/src/TestAsyncTabs';
 import { initMonacoEditor } from './TestMonacoEditor';
 import { TestCreate } from './TestCreate';
 import { TestAwaitConditional } from './TestAwaitConditional';
+import { LuexCounter } from './Counter.luex';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -123,7 +124,7 @@ import { TestAwaitConditional } from './TestAwaitConditional';
 // })
 
 
-const app = createRoot(TestAsyncMultiplyB)
+const app = createRoot(LuexCounter)
 
 app.mount('#root')
 

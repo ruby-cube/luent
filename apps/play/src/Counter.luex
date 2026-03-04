@@ -1,7 +1,7 @@
 import { Ion } from "@rue/quarky";
 import { FromTag, If, template } from "@rue/lumo";
 
-function Counter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
+export function LuexCounter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
 
    get count = Ion(0, {
       increment() {
@@ -19,11 +19,14 @@ function Counter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
    doSomething(count)
 
    function other(count: number) {
-      console.log('counter', cout)
+      console.log('counter',
+         //@ts-expect-error
+         cout
+      )
    }
    other(count)
 
-   
+
 
 
    return template(

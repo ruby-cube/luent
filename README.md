@@ -34,6 +34,14 @@ If IntelliSense in `.luex`/`.lue` files is missing or slow in VS Code:
 2. Restart TypeScript server (`TypeScript: Restart TS Server`).
 3. If behavior is stale, run `Developer: Reload Window` once.
 
+### TS pipeline for `.luex` imports
+
+- `.lue`/`.luex` are resolved through the Quarky TS pipeline as virtual transformed `.ts`/`.tsx` modules.
+- This enables typed imports like `import { Counter } from "./Counter.luex"` from regular `.ts`/`.tsx` files without manual per-file declaration stubs.
+- Typecheck entrypoint in this repo is `pnpm run typecheck` (backed by `quarky-tsc`), not plain `tsc`.
+- After changing plugin internals (`packages/quarky-tsserver-plugin`), run `TypeScript: Restart TS Server` once to refresh editor diagnostics.
+- If diagnostics still look stale after restart, run `Developer: Reload Window`.
+
 ### Performance knobs
 
 - `semanticCooldownMs` (in `tsconfig.json` plugin config)

@@ -45,6 +45,169 @@ function init(modules) {
     const parsedConfigCache = new Map()
     const discoveredSugarFilesCache = new Map()
     const transientDocumentRegistry = ts.createDocumentRegistry()
+    const globalOriginalToVirtual = new Map()
+    const globalVirtualToOriginal = new Map()
+    const globalTransformCache = new Map()
+
+    function registerGlobalSugarFile(originalPath) {
+      const normalizedOriginal = normalizeAbsolute(originalPath)
+      const existing = globalOriginalToVirtual.get(normalizedOriginal)
+      if (existing) return existing
+
+      const virtualPath = normalizedOriginal + getVirtualExtension(normalizedOriginal)
+      globalOriginalToVirtual.set(normalizedOriginal, virtualPath)
+      globalVirtualToOriginal.set(virtualPath, normalizedOriginal)
+      return virtualPath
+    }
+
+    function getGlobalTransformForOriginal(originalPath) {
+      const normalizedOriginal = normalizeAbsolute(originalPath)
+      const sourceText = getSnapshotText(normalizedOriginal)
+      const source = typeof sourceText === 'string'
+        ? sourceText
+        : (ts.sys.readFile(normalizedOriginal) || '')
+      const cached = globalTransformCache.get(normalizedOriginal)
+      if (cached && cached.originalCode === source) return cached
+
+      const result = profile(`global-transform:${path.basename(normalizedOriginal)}`, () => transformQuarkySugar({
+        code: source,
+        fileName: normalizedOriginal,
+      }))
+
+      const enrichedResult = {
+        ...result,
+        originalCode: source,
+      }
+
+      globalTransformCache.set(normalizedOriginal, enrichedResult)
+      return enrichedResult
+    }
+
+    function resolveSugarModule(moduleName, containingFile, compilerOptions) {
+      if (!moduleName || typeof moduleName !== 'string') return undefined
+
+      const moduleResolutionHost = {
+        fileExists: (candidate) => {
+          if (globalVirtualToOriginal.has(candidate)) return true
+          return ts.sys.fileExists(candidate)
+        },
+        readFile: (candidate) => {
+          const original = globalVirtualToOriginal.get(candidate)
+          if (original) return getGlobalTransformForOriginal(original).code
+          return ts.sys.readFile(candidate)
+        },
+        directoryExists: ts.sys.directoryExists,
+        getDirectories: ts.sys.getDirectories,
+        realpath: ts.sys.realpath,
+        getCurrentDirectory: () => host.getCurrentDirectory(),
+        useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
+      }
+
+      const defaultResolution = ts.resolveModuleName(
+        moduleName,
+        containingFile,
+        compilerOptions || project.getCompilationSettings(),
+        moduleResolutionHost,
+      ).resolvedModule
+
+      if (defaultResolution) return defaultResolution
+
+      if (!moduleName.startsWith('.') && !moduleName.startsWith('/')) {
+        return undefined
+      }
+
+      const containingOriginal = globalVirtualToOriginal.get(containingFile) || containingFile
+      const containingDir = path.dirname(containingOriginal)
+
+      const probeCandidates = []
+      if (moduleName.endsWith('.lue') || moduleName.endsWith('.luex')) {
+        probeCandidates.push(moduleName)
+      } else {
+        probeCandidates.push(`${moduleName}.lue`, `${moduleName}.luex`)
+      }
+
+      for (const candidate of probeCandidates) {
+        const absoluteCandidate = normalizeAbsolute(path.resolve(containingDir, candidate))
+        if (!ts.sys.fileExists(absoluteCandidate)) continue
+
+        const resolvedVirtual = registerGlobalSugarFile(absoluteCandidate)
+        return {
+          resolvedFileName: resolvedVirtual,
+          extension: resolvedVirtual.endsWith('.tsx') ? ts.Extension.Tsx : ts.Extension.Ts,
+          isExternalLibraryImport: false,
+        }
+      }
+
+      return undefined
+    }
+
+    const originalHostFileExists = typeof host.fileExists === 'function'
+      ? host.fileExists.bind(host)
+      : undefined
+    const originalHostReadFile = typeof host.readFile === 'function'
+      ? host.readFile.bind(host)
+      : undefined
+    const originalHostGetScriptSnapshot = typeof host.getScriptSnapshot === 'function'
+      ? host.getScriptSnapshot.bind(host)
+      : undefined
+    const originalHostGetScriptVersion = typeof host.getScriptVersion === 'function'
+      ? host.getScriptVersion.bind(host)
+      : undefined
+    const originalHostResolveModuleNames = typeof host.resolveModuleNames === 'function'
+      ? host.resolveModuleNames.bind(host)
+      : undefined
+
+    host.fileExists = (fileName) => {
+      if (globalVirtualToOriginal.has(fileName)) return true
+      if (originalHostFileExists) return originalHostFileExists(fileName)
+      return ts.sys.fileExists(fileName)
+    }
+
+    host.readFile = (fileName) => {
+      const original = globalVirtualToOriginal.get(fileName)
+      if (original) {
+        return getGlobalTransformForOriginal(original).code
+      }
+
+      if (originalHostReadFile) return originalHostReadFile(fileName)
+      return ts.sys.readFile(fileName)
+    }
+
+    host.getScriptSnapshot = (fileName) => {
+      const original = globalVirtualToOriginal.get(fileName)
+      if (original) {
+        const transformed = getGlobalTransformForOriginal(original).code
+        return ts.ScriptSnapshot.fromString(transformed)
+      }
+
+      if (originalHostGetScriptSnapshot) return originalHostGetScriptSnapshot(fileName)
+
+      const text = ts.sys.readFile(fileName)
+      if (typeof text !== 'string') return undefined
+      return ts.ScriptSnapshot.fromString(text)
+    }
+
+    host.getScriptVersion = (fileName) => {
+      const original = globalVirtualToOriginal.get(fileName)
+      if (original && originalHostGetScriptVersion) {
+        return originalHostGetScriptVersion(original)
+      }
+
+      if (originalHostGetScriptVersion) return originalHostGetScriptVersion(fileName)
+      return '0'
+    }
+
+    host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
+      const prior = originalHostResolveModuleNames
+        ? originalHostResolveModuleNames(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions)
+        : []
+
+      return moduleNames.map((moduleName, index) => {
+        const priorResolved = Array.isArray(prior) ? prior[index] : undefined
+        if (priorResolved) return priorResolved
+        return resolveSugarModule(moduleName, containingFile, compilerOptions)
+      })
+    }
 
     function evictStaleFileCacheEntries(cache, cachePrefix, onDelete) {
       for (const [entryKey, entryValue] of cache.entries()) {
