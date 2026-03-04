@@ -2,6 +2,7 @@
     "name": "@rue/lumo",
     "private": true,
     "description": "",
+    "main": "./src/index",
     "module": "./src/index",
     "dependencies": {
         "@rue/flask": "workspace:*",

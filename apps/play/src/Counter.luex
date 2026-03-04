@@ -1,0 +1,47 @@
+import { Ion } from "@rue/quarky";
+import { FromTag, If, template } from "@rue/lumo";
+
+function Counter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
+
+   get count = Ion(0, {
+      increment() {
+         count++
+      }
+   })
+   get doubleCount = Ion((count * 2))
+
+   const { halfCount@, thirdCount@ } = FractionKit(count@)
+
+   function doSomething(count: number) {
+      console.log('count', count)
+   }
+
+   doSomething(count)
+
+   function other(count: number) {
+      console.log('counter', cout)
+   }
+   other(count)
+
+   return template(
+      <div>
+         <button on:click={e => count@.increment()}>+</button>
+         <p>start: {count}</p>
+         <p>count: {count@}</p>
+         <p>doubleCount: {doubleCount@}</p>
+         <p>tripleCount: {(count * 3)}</p>
+         {If(showFractions@, (
+            <hr></hr>
+            <p>halfCount: {halfCount@}</p>
+            <p>thirdCount: {thirdCount@}</p>
+         ))}
+      </div>
+   )
+}
+
+function FractionKit(count@: Ion<number>) {
+   return {
+      get halfCount: Ion((count / 2)),
+      get thirdCount: Ion((count / 3))
+   }
+}

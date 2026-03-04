@@ -17,7 +17,7 @@ export default defineConfig({
          name: 'vite-lumo-plugin-pre',
          enforce: 'pre',
          async transform(code, id) {
-            if (!id.endsWith('.jsx') && !id.endsWith('.tsx')) return;
+            if (!id.endsWith('.jsx') && !id.endsWith('.tsx') && !id.endsWith('.luex')) return;
 
             const result = await babel.transformAsync(code, {
                // ['@babel/plugin-transform-react-jsx', { 

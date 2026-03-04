@@ -23,6 +23,30 @@ Some special features include:
 - readable async code
 - simple-to-use state machines
 
+## `.luex` IntelliSense
+
+If IntelliSense in `.luex`/`.lue` files is missing or slow in VS Code:
+
+1. Ensure workspace settings include:
+	 - `typescript.tsdk: node_modules/typescript/lib`
+	 - `typescript.tsserver.pluginPaths: ["./packages/quarky-tsserver-plugin"]`
+	 - `files.associations` for `*.luex -> typescriptreact` and `*.lue -> typescript`
+2. Restart TypeScript server (`TypeScript: Restart TS Server`).
+3. If behavior is stale, run `Developer: Reload Window` once.
+
+### Performance knobs
+
+- `semanticCooldownMs` (in `tsconfig.json` plugin config)
+	- Higher values reduce semantic-diagnostic churn while typing.
+	- Lower values increase immediacy of semantic updates.
+- Recommended default in this repo: `500`.
+
+For temporary profiling, you can set plugin options:
+- `profile: true`
+- `slowMs: <threshold>`
+
+Then inspect `TypeScript: Open TS Server Log` for `[quarky-tsserver-plugin] [perf]` lines.
+
 
 
 

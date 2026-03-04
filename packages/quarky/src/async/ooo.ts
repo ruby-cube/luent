@@ -4,6 +4,12 @@
 import { isFunction, isPlainObject } from "@rue/utils"
 import { instantUpdate } from "../reactivity/Update"
 import { Ion } from "../ion/Ion"
+import { $_snap_context } from "@rue/flask"
+
+// TODO:
+// [ ] wrap with context
+// [ ] contain in flask
+// [ ] how does flask relate to cancelling or aborting?
 
 // interface Promise<T> {
 //    /**
@@ -77,6 +83,9 @@ export const ooo = {
       }
 
       let output: any;
+
+      const context = $_snap_context()
+
 
       return new AsyncNode<F extends (...args: any[]) => infer R ? R : Resolved<T>>(
          series,

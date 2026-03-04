@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
-   "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "plugins": [
+     { "name": "typescript-plugin-css-modules" },
+      { "name": "@rue/quarky-tsserver-plugin", "semanticCooldownMs": 500 }
+    ],
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",

@@ -4,6 +4,11 @@
     "description": "",
     "module": "./src/index",
     "main": "./src/index",
+    "scripts": {
+        "typecheck": "node ./scripts/quarky-tsc.mjs -p ../../tsconfig.json",
+        "debug:sugar": "node ./scripts/quarky-sugar-debug.mjs ./src/sugar/Counter.luex -p ../../tsconfig.json",
+        "debug:sugar:json": "node ./scripts/quarky-sugar-debug.mjs ./src/sugar/Counter.luex -p ../../tsconfig.json --json --no-code"
+    },
     "dependencies": {
         "@rue/flask": "workspace:*",
         "@rue/thread": "workspace:*",

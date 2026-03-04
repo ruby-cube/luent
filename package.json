@@ -4,7 +4,8 @@
   "description": "A collection of TypeScript-enhanced libraries to manage complexity. Covers event-driven architecture, composition, tree structures, and control flow",
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
+    "build": "pnpm run typecheck && vite build",
+    "typecheck": "pnpm run typecheck:quarky",
     "preview": "vite preview",
     "test": "vitest --run --reporter verbose",
     "ni:flask": "pnpm -F @rue/flask install",
@@ -23,12 +24,20 @@
     "dev-tests": "pnpm -F @rue/tests dev",
     "dev-chat": "pnpm -F @rue/live-chat dev",
     "build-babel": "pnpm -F @rue/play build-babel",
-    "ni:quarky": "pnpm -F @rue/quarky install"
+    "ni:quarky": "pnpm -F @rue/quarky install",
+    "mu-lint": "pnpm exec tsc apps/play/mu-linting/mu-mutation-linter.ts apps/play/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir apps/play/mu-linting/.tmp-run && node apps/play/mu-linting/.tmp-run/run-mu-mutation-lint.js",
+    "lint:mu-eslint": "pnpm exec eslint \"apps/play/mu-linting/**/*.{ts,tsx}\"",
+    "typecheck:quarky": "pnpm exec node packages/quarky/scripts/quarky-tsc.mjs -p tsconfig.json",
+    "debug:quarky-sugar": "pnpm exec node packages/quarky/scripts/quarky-sugar-debug.mjs packages/quarky/src/sugar/Counter.luex -p tsconfig.json",
+    "debug:quarky-sugar:json": "pnpm exec node packages/quarky/scripts/quarky-sugar-debug.mjs packages/quarky/src/sugar/Counter.luex -p tsconfig.json --json --no-code"
   },
   "devDependencies": {
+    "@rue/quarky-tsserver-plugin": "workspace:*",
+    "@typescript-eslint/parser": "^8.46.0",
     "@playwright/test": "^1.58.2",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^22.13.1",
+    "eslint": "^9.38.0",
     "typescript": "^5.7.3",
     "typescript-plugin-css-modules": "^5.2.0",
     "vite": "^6.1.0",
