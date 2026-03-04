@@ -32,8 +32,10 @@ function Counter({ showFractions@ }) {
 
 function FractionKit(count@) {
    return {
-      get halfCount: Ion((count / 2)),
-      get thirdCount: Ion((count / 3))
+      // get halfCount: Ion((count / 2)),
+      // get thirdCount: Ion((count / 3))
+      halfCount@: Ion((count / 2)),
+      thirdCount@: Ion((count / 3))
    }
 }
 
@@ -88,7 +90,6 @@ Pre-ESLint/TSLint transforms
 - transform reassignments of `get` variables: `$variable++` --> `$variable.value++`, `$variable = value` --> `$variable.value = value`, etc
 - transform reads of `get` variables: `variable` --> `$variable()`
 - transform variables ending with `@`: `variable@` --> $variable`
-- transform get accessors that are not assigned with a function expression: `{ get property: nonFunctionExpression }` --> `{ $property: nonFunctionExpression }`
 - transform jsx templates encased in extraneous parentheses: 
 ```
 (
@@ -115,18 +116,11 @@ Typechecking pipeline (`quarky-tsc`)
 - `.lue` and `.luex` files are virtualized as transformed `.ts`/`.tsx` for TypeScript typechecking.
 - Authored sugar files are never rewritten on disk.
 - Diagnostics are remapped from transformed virtual positions back to original sugar locations.
-- Current transform entrypoint: `packages/quarky/scripts/transform-quarky-sugar.mjs`.
+- Transformer single source of truth: `packages/quarky/scripts/transform-quarky-sugar.shared.cjs`.
+- Quarky script entrypoint wrapper: `packages/quarky/scripts/transform-quarky-sugar.mjs`.
+- TS Server plugin wrapper: `packages/quarky-tsserver-plugin/transform-quarky-sugar.cjs`.
 - Run from root: `pnpm typecheck:quarky`
 - Run from package: `pnpm -F @rue/quarky typecheck`
-
-Debugging transform + mapped diagnostics (`quarky-sugar-debug`)
-- Prints transformed virtual code for a single `.lue`/`.luex` file.
-- Prints TypeScript diagnostics for that transformed file with both transformed and original ranges.
-- Run default sample from root: `pnpm debug:quarky-sugar`
-- JSON mode from root: `pnpm debug:quarky-sugar:json`
-- Run specific file from root: `pnpm exec node packages/quarky/scripts/quarky-sugar-debug.mjs packages/quarky/src/sugar/Counter.luex -p tsconfig.json`
-- Hide transformed code block output: add `--no-code`
-- Machine-readable output: add `--json` (exit code remains `1` if diagnostics exist)
 
 Linting
 - allow get accessors to be defined with arrow functions or call expressions that return a function
