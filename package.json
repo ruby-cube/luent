@@ -27,9 +27,7 @@
     "ni:quarky": "pnpm -F @rue/quarky install",
     "mu-lint": "pnpm exec tsc apps/play/mu-linting/mu-mutation-linter.ts apps/play/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir apps/play/mu-linting/.tmp-run && node apps/play/mu-linting/.tmp-run/run-mu-mutation-lint.js",
     "lint:mu-eslint": "pnpm exec eslint \"apps/play/mu-linting/**/*.{ts,tsx}\"",
-    "typecheck:quarky": "pnpm exec node packages/quarky/scripts/quarky-tsc.mjs -p tsconfig.json",
-    "debug:quarky-sugar": "pnpm exec node packages/quarky/scripts/quarky-sugar-debug.mjs packages/quarky/src/sugar/Counter.luex -p tsconfig.json",
-    "debug:quarky-sugar:json": "pnpm exec node packages/quarky/scripts/quarky-sugar-debug.mjs packages/quarky/src/sugar/Counter.luex -p tsconfig.json --json --no-code"
+    "typecheck:quarky": "pnpm exec node packages/quarky/scripts/quarky-tsc.mjs -p tsconfig.json"
   },
   "devDependencies": {
     "@rue/quarky-tsserver-plugin": "workspace:*",

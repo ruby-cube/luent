@@ -7,7 +7,8 @@ function Counter({ showFractions@ }) {
 
    get count = Ion(0, {
       increment() {
-         count++
+         count++ // should throw linting error
+         count@.value++
       }
    })
    get doubleCount = Ion((count * 2))
@@ -32,8 +33,6 @@ function Counter({ showFractions@ }) {
 
 function FractionKit(count@) {
    return {
-      // get halfCount: Ion((count / 2)),
-      // get thirdCount: Ion((count / 3))
       halfCount@: Ion((count / 2)),
       thirdCount@: Ion((count / 3))
    }
@@ -87,7 +86,6 @@ function FractionKit($count: Ion<number>) {
 Pre-ESLint/TSLint transforms
 - transform get declarations: `get variable =` --> `const $variable`
 - transform all usages of `get` variables to `$variable`
-- transform reassignments of `get` variables: `$variable++` --> `$variable.value++`, `$variable = value` --> `$variable.value = value`, etc
 - transform reads of `get` variables: `variable` --> `$variable()`
 - transform variables ending with `@`: `variable@` --> $variable`
 - transform jsx templates encased in extraneous parentheses: 

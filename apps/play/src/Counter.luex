@@ -5,7 +5,7 @@ function Counter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
 
    get count = Ion(0, {
       increment() {
-         count++
+         count@.value++
       }
    })
    get doubleCount = Ion((count * 2))
@@ -22,6 +22,9 @@ function Counter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
       console.log('counter', cout)
    }
    other(count)
+
+   
+
 
    return template(
       <div>
@@ -41,7 +44,7 @@ function Counter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
 
 function FractionKit(count@: Ion<number>) {
    return {
-      get halfCount: Ion((count / 2)),
-      get thirdCount: Ion((count / 3))
+      halfCount@: Ion((count / 2)),
+      thirdCount@: Ion((count / 3))
    }
 }

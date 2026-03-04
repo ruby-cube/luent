@@ -437,6 +437,7 @@ function init(modules) {
       const transformedStart = Math.max(0, span.start)
       const transformedLength = Math.max(0, span.length)
       return mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength)
+        || mapTextSpanToOriginal(span, transformResult)
     }
 
     function mapEncodedClassificationsToOriginal(classifications, transformResult) {
@@ -453,8 +454,12 @@ function init(modules) {
           transformResult,
           transformedStart,
           transformedLength,
-        )
-        if (!mappedSpan) continue
+        ) || mapTextSpanToOriginal({
+          start: transformedStart,
+          length: transformedLength,
+        }, transformResult)
+
+        if (!mappedSpan || mappedSpan.length <= 0) continue
 
         mappedSpans.push(mappedSpan.start, mappedSpan.length, classification)
       }
@@ -694,6 +699,7 @@ function init(modules) {
 
     function createTransientLanguageService(fileName) {
       const normalizedFile = normalizeAbsolute(fileName)
+      const scriptVersion = host.getScriptVersion(normalizedFile) || host.getScriptVersion(fileName) || ''
       const configPath = getConfigPath()
       if (!configPath) return undefined
 
@@ -705,7 +711,13 @@ function init(modules) {
       const configSignature = `${normalizeAbsolute(configPath)}:${parsedConfigResult.mtimeMs}`
 
       const cached = transientLsCache.get(normalizedFile)
-      if (cached && cached.configSignature === configSignature) return cached
+      if (
+        cached
+        && cached.configSignature === configSignature
+        && cached.scriptVersion === scriptVersion
+      ) {
+        return cached
+      }
 
       const sourceText = getSnapshotText(fileName)
       if (typeof sourceText !== 'string') return undefined
@@ -732,10 +744,10 @@ function init(modules) {
           return scriptFileNames
         },
         getScriptVersion(scriptName) {
-          if (normalizeAbsolute(scriptName) === normalizedFile) return host.getScriptVersion(normalizedFile) || ''
+          if (normalizeAbsolute(scriptName) === normalizedFile) return scriptVersion
           const originalForVirtual = lueContext.virtualToOriginal.get(scriptName)
           if (originalForVirtual && normalizeAbsolute(originalForVirtual) === normalizedFile) {
-            return host.getScriptVersion(normalizedFile) || ''
+            return scriptVersion
           }
           return '0'
         },
@@ -854,6 +866,7 @@ function init(modules) {
         lueContext,
         virtualFileName,
         configSignature,
+        scriptVersion,
         get transformResult() {
           return lueContext.getTransformForOriginal(normalizedFile)
         },
@@ -1022,42 +1035,101 @@ function init(modules) {
 
     proxy.getSemanticClassifications = (fileName, span) => {
       if (typeof languageService.getSemanticClassifications !== 'function') {
-        return languageService.getSemanticClassifications
-          ? languageService.getSemanticClassifications(fileName, span)
-          : []
+        return []
       }
 
-      return languageService.getSemanticClassifications(fileName, span)
+      if (!isSugarFile(fileName)) {
+        return languageService.getSemanticClassifications(fileName, span)
+      }
+
+      const transient = createTransientLanguageService(fileName)
+      if (!transient) {
+        return languageService.getSemanticClassifications(fileName, span)
+      }
+
+      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
+      const classifications = transient.languageService.getSemanticClassifications(
+        transient.virtualFileName,
+        transformedSpan,
+      )
+
+      return mapClassifiedSpansToOriginal(classifications, transient.transformResult) || []
     }
 
     proxy.getSyntacticClassifications = (fileName, span) => {
       if (typeof languageService.getSyntacticClassifications !== 'function') {
-        return languageService.getSyntacticClassifications
-          ? languageService.getSyntacticClassifications(fileName, span)
-          : []
+        return []
       }
 
-      return languageService.getSyntacticClassifications(fileName, span)
+      if (!isSugarFile(fileName)) {
+        return languageService.getSyntacticClassifications(fileName, span)
+      }
+
+      const transient = createTransientLanguageService(fileName)
+      if (!transient) {
+        return languageService.getSyntacticClassifications(fileName, span)
+      }
+
+      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
+      const classifications = transient.languageService.getSyntacticClassifications(
+        transient.virtualFileName,
+        transformedSpan,
+      )
+
+      return mapClassifiedSpansToOriginal(classifications, transient.transformResult) || []
     }
 
     proxy.getEncodedSemanticClassifications = (fileName, span, format) => {
       if (typeof languageService.getEncodedSemanticClassifications !== 'function') {
-        return languageService.getEncodedSemanticClassifications
-          ? languageService.getEncodedSemanticClassifications(fileName, span, format)
-          : { spans: [], endOfLineState: ts.EndOfLineState.None }
+        return { spans: [], endOfLineState: ts.EndOfLineState.None }
       }
 
-      return languageService.getEncodedSemanticClassifications(fileName, span, format)
+      if (!isSugarFile(fileName)) {
+        return languageService.getEncodedSemanticClassifications(fileName, span, format)
+      }
+
+      const transient = createTransientLanguageService(fileName)
+      if (!transient) {
+        return languageService.getEncodedSemanticClassifications(fileName, span, format)
+      }
+
+      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
+      const classifications = transient.languageService.getEncodedSemanticClassifications(
+        transient.virtualFileName,
+        transformedSpan,
+        format,
+      )
+
+      return mapEncodedClassificationsToOriginal(classifications, transient.transformResult) || {
+        spans: [],
+        endOfLineState: ts.EndOfLineState.None,
+      }
     }
 
     proxy.getEncodedSyntacticClassifications = (fileName, span) => {
       if (typeof languageService.getEncodedSyntacticClassifications !== 'function') {
-        return languageService.getEncodedSyntacticClassifications
-          ? languageService.getEncodedSyntacticClassifications(fileName, span)
-          : { spans: [], endOfLineState: ts.EndOfLineState.None }
+        return { spans: [], endOfLineState: ts.EndOfLineState.None }
       }
 
-      return languageService.getEncodedSyntacticClassifications(fileName, span)
+      if (!isSugarFile(fileName)) {
+        return languageService.getEncodedSyntacticClassifications(fileName, span)
+      }
+
+      const transient = createTransientLanguageService(fileName)
+      if (!transient) {
+        return languageService.getEncodedSyntacticClassifications(fileName, span)
+      }
+
+      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
+      const classifications = transient.languageService.getEncodedSyntacticClassifications(
+        transient.virtualFileName,
+        transformedSpan,
+      )
+
+      return mapEncodedClassificationsToOriginal(classifications, transient.transformResult) || {
+        spans: [],
+        endOfLineState: ts.EndOfLineState.None,
+      }
     }
 
     proxy.getQuickInfoAtPosition = (fileName, position) => {
