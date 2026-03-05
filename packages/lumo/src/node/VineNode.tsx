@@ -1,5 +1,5 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@rue/utils";
-import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, watchToRender } from "@rue/quarky";
+import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, watchToRender, Ø } from "@rue/quarky";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
@@ -81,7 +81,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
          console.log('RENDER SLOT', node)
          _processJSXOutput(node(), flattened)
       }
-      else if (isGetter(node)) {
+      else if (isFunction(node) && node.length === 0) {
          flattened.push(new DynamicTextNode(node))
       }
       else if (node == null || node === '') {
@@ -124,7 +124,7 @@ class DynamicTextNode extends VineNode {
 
    private node
 
-   constructor(private $text: Ion<unknown>) {
+   constructor(private $text: Ø<unknown>) {
       super()
       if (__DEV__) __DEV__checkIfTracked()
       const textNode = this.node = createTextNode($text())

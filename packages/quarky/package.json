@@ -5,7 +5,8 @@
     "module": "./src/index",
     "main": "./src/index",
     "scripts": {
-        "typecheck": "node ./scripts/quarky-tsc.mjs -p ../../tsconfig.json"
+        "typecheck": "node ./scripts/quarky-tsc.mjs -p ../../tsconfig.json",
+        "test:position-mapping": "pnpm exec vitest run src/sugar/__tests__/position-mapping.test.ts"
     },
     "dependencies": {
         "@rue/flask": "workspace:*",

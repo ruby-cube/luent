@@ -13,7 +13,7 @@ acheive queue and yield behavior?
 // TODO:
 // [X] sync effects
 // [X] preventing infinite loop chains, but allow effects to be triggered further down the pipeline with updated state
-//     - prevention should be stopped at '$ion.value = x', do not allow effects that trigger previously triggered state by that effect chain to run
+//     - prevention should be stopped at 'øion.value = x', do not allow effects that trigger previously triggered state by that effect chain to run
 // [X] Set up base rendering effect cycle
 // [ ] doAction integration
 // [ ] state locks

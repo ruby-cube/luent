@@ -2,7 +2,7 @@ import { ContextNode, getClosestContext } from "./context-stack";
 import { NodeContext, RootContext, toContextEntries } from "./Context";
 import { ContextEntryKey, isMuKey, toContextKey } from "./ContextKey";
 import { assertMutableIon } from "../component/Input";
-import { Ion, isIon, toIon, toValue } from "@rue/quarky";
+import { Ion, toIon, toValue } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 
 // TODO: trace provider
@@ -10,7 +10,7 @@ import { isFunction } from "@rue/utils";
 
 export function fromContext<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT & '?'): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {
    const value = _fromContext(key, optional)
-   return isIon(value) ? value() : value
+   return toValue(value)
 }
 
 export function $fromContext<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT & '?'): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {
@@ -81,7 +81,7 @@ export function fromRoot<K extends ContextEntryKey | string, OPT>(key: K, option
    const context = getClosestContext();
    // const optional = isFunction(key) ? key.optional : false
    const value = _fromRoot(key, optional, context)
-   return (isIon(value) ? value() : value) as OPT extends string ? ContextValue<K> | undefined : ContextValue<K>
+   return toValue(value) as OPT extends string ? ContextValue<K> | undefined : ContextValue<K>
 }
 
 
@@ -144,7 +144,7 @@ export function provideGround<K extends ContextEntryKey | string>(key: K, value:
 
 export function fromGround<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT & "?"): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {
    const value = _fromGround(key, optional, getClosestContext())
-   return (isIon(value) ? value() : value) as OPT extends string ? ContextValue<K> | undefined : ContextValue<K>
+   return toValue(value) as OPT extends string ? ContextValue<K> | undefined : ContextValue<K>
 }
 
 export function $fromGround<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT & '?'): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {

@@ -18,11 +18,11 @@ function parseArgs(argv) {
 }
 
 function isLueFile(fileName) {
-  return fileName.endsWith('.lue') || fileName.endsWith('.luex')
+  return fileName.endsWith('.lue') || fileName.endsWith('.qrx')
 }
 
 function getVirtualExtension(fileName) {
-  return fileName.endsWith('.luex') ? '.tsx' : '.ts'
+  return fileName.endsWith('.qrx') ? '.tsx' : '.ts'
 }
 
 function getScriptKindFromFileName(fileName) {
@@ -65,7 +65,7 @@ function createLueCompilerContext(configPath, parsedConfig) {
 
   const discoveredLueFiles = ts.sys.readDirectory(
     configDirectory,
-    ['.lue', '.luex'],
+    ['.lue', '.qrx'],
     excludePatterns,
     includePatterns,
   )
@@ -104,7 +104,7 @@ function createLueCompilerContext(configPath, parsedConfig) {
       originalCode,
       ts.ScriptTarget.Latest,
       true,
-      getScriptKindFromFileName(normalizedOriginal.endsWith('.luex') ? normalizedOriginal + '.tsx' : normalizedOriginal + '.ts'),
+      getScriptKindFromFileName(normalizedOriginal.endsWith('.qrx') ? normalizedOriginal + '.tsx' : normalizedOriginal + '.ts'),
     )
 
     originalSourceFileCache.set(normalizedOriginal, sourceFile)
@@ -241,10 +241,10 @@ function run() {
         const containingDir = path.dirname(containingOriginal)
 
         const probeCandidates = []
-        if (moduleName.endsWith('.lue') || moduleName.endsWith('.luex')) {
+        if (moduleName.endsWith('.lue') || moduleName.endsWith('.qrx')) {
           probeCandidates.push(moduleName)
         } else {
-          probeCandidates.push(`${moduleName}.lue`, `${moduleName}.luex`)
+          probeCandidates.push(`${moduleName}.lue`, `${moduleName}.qrx`)
         }
 
         for (const candidate of probeCandidates) {

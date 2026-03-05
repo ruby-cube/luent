@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import tsParser from '@typescript-eslint/parser'
-import { createLuexProcessor } from './packages/quarky/scripts/eslint-luex-processor.mjs'
+import { createQrxProcessor } from './packages/quarky/scripts/eslint-qrx-processor.mjs'
 
 const require = createRequire(import.meta.url)
 const muRules = require('./eslint-mu-rules.cjs')
@@ -15,7 +15,7 @@ const defaultIgnores = [
 
 export default [
   {
-    files: ['**/*.luex'],
+    files: ['**/*.qrx'],
     ignores: defaultIgnores,
     languageOptions: {
       parser: tsParser,
@@ -24,7 +24,7 @@ export default [
         ecmaFeatures: { jsx: true },
       },
     },
-    processor: createLuexProcessor(),
+    processor: createQrxProcessor(),
     rules: {},
   },
   {

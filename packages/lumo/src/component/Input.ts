@@ -354,7 +354,7 @@ type WithMu<D> = HasMu<D> extends true ? {
       [K in keyof D as K extends `mu:${infer N}` ? N : K extends `mu?:${infer M}` ? M : never]: D[K] extends Ion<infer V> ? V : D[K]
    } & {
       // ion access
-      [K in keyof D as K extends `mu:${infer N}` ? D[K] extends Ion<any> ? `$${N}` : K extends `mu?:${infer M}` ? D[K] extends Ion<any> ? `$${M}` : never : never : never]: D[K] extends Ion<infer V> ? D[K] & { value: V } : never
+      [K in keyof D as K extends `mu:${infer N}` ? D[K] extends Ion<any> ? `ø${N}` : K extends `mu?:${infer M}` ? D[K] extends Ion<any> ? `ø${M}` : never : never : never]: D[K] extends Ion<infer V> ? D[K] & { value: V } : never
    }
 } : {}
 
@@ -393,7 +393,7 @@ type ReadonlyIonInput<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
    K extends `mu:${string}` | `on:${string}` | 'Slot' ? never
-   : K extends string ? `$${K}`
+   : K extends string ? `ø${K}`
    : never
    : never
    ]:
@@ -405,7 +405,7 @@ type ReadonlyIonInput<D> = {
 // type MutableIonInput<D> = {
 //    [K in keyof D
 //    as   IncludesIon<D[K]> extends true ?
-//    K extends `mu:${infer I}` ? `$${I}`
+//    K extends `mu:${infer I}` ? `ø${I}`
 //    : never
 //    : never]:
 //    (NonlocalIon<ExcludePrimitives<D[K]>> & { '~mu:': true } | OnlyPrimitives<D[K]>)

@@ -1,39 +1,42 @@
 import { FromTag, If, template } from "@rue/lumo"
-import { Ion } from "../ion/Ion"
+import { Ion, ø } from "@rue/quarky"
 
 // transpiled
-function Counter({ $showFractions }: FromTag<{ showFractions: Ion<boolean> }>) {
+function Counter({ øshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) {
 
-   const $count = Ion(0, {
+   const øcount = Ion(0, {
       increment() {
-         $count.value++
+         øcount.value++
       }
    })
-   const $doubleCount = Ion(() => $count() * 2)
+   const ødoubleCount = Ion(() => øcount() * 2)
 
-   const { $halfCount, $thirdCount } = FractionKit($count)
+   const { øhalfCount, øthirdCount } = FractionKit(øcount)
 
    return template(
       <div>
-         <button on:click={e => $count.increment()}>+</button>
-         <p>start: {$count()}</p>
-         <p>count: {$count}</p>
-         <p>doubleCount: {$doubleCount}</p>
-         <p>tripleCount: {($count() * 3)}</p>
-         {If($showFractions, 
+         <button on:click={e => øcount.increment()}>+</button>
+         <p>start: {øcount()}</p>
+         <p>count: {øcount}</p>
+         <p>doubleCount: {ødoubleCount}</p>
+         <p>tripleCount: {ø(() => øcount() * 3)}</p>
+         {If(øshowFractions, 
             <>
                <hr></hr>
-               <p>halfCount: {$halfCount}</p>
-               <p>thirdCount: {$thirdCount}</p>
+               <p>halfCount: {øhalfCount}</p>
+               <p>thirdCount: {øthirdCount}</p>
             </>
          )}
       </div>
    )
 }
 
-function FractionKit($count: Ion<number>) {
+function FractionKit(øcount: Ion<number>) {
+   const øhalfCount = Ion(() => øcount() / 2)
+   const øthirdCount = Ion(() => øcount() / 3)
+
    return {
-      $halfCount: Ion(() => $count() / 2),
-      $thirdCount: Ion(() => $count() / 3)
+      get halfCount() { return øhalfCount() },
+      get thirdCount() { return øthirdCount() },
    }
 }

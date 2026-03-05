@@ -1,5 +1,5 @@
 import { template } from "@rue/lumo";
-import { DerivedIon, ion, ionic, ionize, isIon, watch, watchEffect } from "@rue/quarky";
+import { DerivedIon, ion, ionic, ionize, watch, watchEffect } from "@rue/quarky";
 
 export function TestSelectiveTracking() {
 

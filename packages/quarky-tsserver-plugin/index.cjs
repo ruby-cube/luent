@@ -1,15 +1,17 @@
 const path = require('node:path')
 const { transformQuarkySugar } = require('./transform-quarky-sugar.cjs')
 
+const SUGAR_IDENTIFIER_RE = /^ø[A-Za-z_$][\w$]*$/
+
 function init(modules) {
   const ts = modules.typescript
 
   function isSugarFile(fileName) {
-    return fileName.endsWith('.lue') || fileName.endsWith('.luex')
+    return fileName.endsWith('.lue') || fileName.endsWith('.qrx')
   }
 
   function getVirtualExtension(fileName) {
-    return fileName.endsWith('.luex') ? '.tsx' : '.ts'
+    return fileName.endsWith('.qrx') ? '.tsx' : '.ts'
   }
 
   function getScriptKindFromFileName(fileName) {
@@ -120,10 +122,10 @@ function init(modules) {
       const containingDir = path.dirname(containingOriginal)
 
       const probeCandidates = []
-      if (moduleName.endsWith('.lue') || moduleName.endsWith('.luex')) {
+      if (moduleName.endsWith('.lue') || moduleName.endsWith('.qrx')) {
         probeCandidates.push(moduleName)
       } else {
-        probeCandidates.push(`${moduleName}.lue`, `${moduleName}.luex`)
+        probeCandidates.push(`${moduleName}.lue`, `${moduleName}.qrx`)
       }
 
       for (const candidate of probeCandidates) {
@@ -308,7 +310,7 @@ function init(modules) {
 
       const files = ts.sys.readDirectory(
         configDirectory,
-        ['.lue', '.luex'],
+        ['.lue', '.qrx'],
         excludePatterns,
         includePatterns,
       )
@@ -384,7 +386,7 @@ function init(modules) {
             originalCode,
             ts.ScriptTarget.Latest,
             true,
-            getScriptKindFromFileName(normalizedOriginal.endsWith('.luex') ? `${normalizedOriginal}.tsx` : `${normalizedOriginal}.ts`),
+            getScriptKindFromFileName(normalizedOriginal.endsWith('.qrx') ? `${normalizedOriginal}.tsx` : `${normalizedOriginal}.ts`),
           )
         }
 
@@ -397,7 +399,7 @@ function init(modules) {
           originalCode,
           ts.ScriptTarget.Latest,
           true,
-          getScriptKindFromFileName(normalizedOriginal.endsWith('.luex') ? `${normalizedOriginal}.tsx` : `${normalizedOriginal}.ts`),
+          getScriptKindFromFileName(normalizedOriginal.endsWith('.qrx') ? `${normalizedOriginal}.tsx` : `${normalizedOriginal}.ts`),
         )
 
         originalSourceFileCache.set(normalizedOriginal, sourceFile)
@@ -410,18 +412,24 @@ function init(modules) {
         const originalPath = virtualToOriginal.get(diagnostic.file.fileName)
         if (!originalPath) return diagnostic
 
-        const start = diagnostic.start || 0
-        const length = diagnostic.length || 0
-
         const transformResult = getTransformForOriginal(originalPath)
-        const mappedStart = Math.max(0, transformResult.mapper.toOriginalPos(start))
-        const mappedEnd = Math.max(mappedStart, transformResult.mapper.toOriginalPos(start + length))
+        const hasSpan = typeof diagnostic.start === 'number' && typeof diagnostic.length === 'number'
+        const mappedSpan = hasSpan
+          ? mapDiagnosticSpanToOriginal({ start: diagnostic.start, length: diagnostic.length }, transformResult)
+          : null
+
+        const relatedInformation = Array.isArray(diagnostic.relatedInformation)
+          ? diagnostic.relatedInformation.map((relatedDiagnostic) => remapDiagnostic(relatedDiagnostic))
+          : diagnostic.relatedInformation
 
         return {
           ...diagnostic,
           file: getOriginalSourceFile(originalPath),
-          start: mappedStart,
-          length: mappedEnd - mappedStart,
+          ...(mappedSpan ? {
+            start: mappedSpan.start,
+            length: mappedSpan.length,
+          } : {}),
+          ...(relatedInformation ? { relatedInformation } : {}),
         }
       }
 
@@ -476,6 +484,35 @@ function init(modules) {
       return positions
     }
 
+    function mapDiagnosticSpanToOriginal(span, transformResult) {
+      if (!span) return span
+
+      const transformedStart = Math.max(0, span.start || 0)
+      const transformedLength = Math.max(0, span.length || 0)
+      const transformedCode = transformResult && typeof transformResult.code === 'string'
+        ? transformResult.code
+        : ''
+      const originalCode = transformResult && typeof transformResult.originalCode === 'string'
+        ? transformResult.originalCode
+        : ''
+      const transformedSlice = transformedCode.slice(transformedStart, transformedStart + transformedLength)
+
+      const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
+        originalCode,
+        transformedSlice,
+        transformResult.mapper.toOriginalPos(transformedStart),
+      )
+      if (correctedIdentifierRange) {
+        return correctedIdentifierRange
+      }
+
+      return mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength)
+        || mapTextSpanToOriginal({
+          start: transformedStart,
+          length: transformedLength,
+        }, transformResult)
+    }
+
     function mapTextSpanToOriginal(span, transformResult) {
       if (!span) return span
 
@@ -490,16 +527,16 @@ function init(modules) {
       const transformedStart = Math.max(0, span.start)
       const transformedEnd = transformedStart + Math.max(0, span.length)
 
-      let minOriginal = Number.POSITIVE_INFINITY
-      let maxOriginal = Number.NEGATIVE_INFINITY
+      let firstMapped = null
+      let lastMapped = null
 
       for (let transformedPos = transformedStart; transformedPos < transformedEnd; transformedPos += 1) {
         const mappedOriginal = transformResult.mapper.toOriginalPos(transformedPos)
-        if (mappedOriginal < minOriginal) minOriginal = mappedOriginal
-        if (mappedOriginal > maxOriginal) maxOriginal = mappedOriginal
+        if (firstMapped == null) firstMapped = mappedOriginal
+        lastMapped = mappedOriginal
       }
 
-      if (!Number.isFinite(minOriginal) || !Number.isFinite(maxOriginal)) {
+      if (firstMapped == null || lastMapped == null) {
         const start = transformResult.mapper.toOriginalPos(span.start)
         const end = transformResult.mapper.toOriginalPos(span.start + span.length)
         return {
@@ -508,9 +545,12 @@ function init(modules) {
         }
       }
 
+      const mappedStart = Math.min(firstMapped, lastMapped)
+      const mappedEnd = Math.max(firstMapped, lastMapped)
+
       return {
-        start: minOriginal,
-        length: Math.max(1, maxOriginal - minOriginal + 1),
+        start: mappedStart,
+        length: Math.max(1, mappedEnd - mappedStart + 1),
       }
     }
 
@@ -554,7 +594,47 @@ function init(modules) {
       }
     }
 
-    function mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength) {
+    function findBestNearbyOriginalIdentifierRange(originalCode, transformedSlice, approximateStart) {
+      if (typeof transformedSlice !== 'string') return null
+      if (!SUGAR_IDENTIFIER_RE.test(transformedSlice)) return null
+
+      const identifier = transformedSlice.slice(1)
+      const windowStart = Math.max(0, approximateStart - 80)
+      const windowEnd = Math.min(originalCode.length, approximateStart + 80)
+      const candidates = []
+
+      function collect(token, includeAt) {
+        let index = originalCode.indexOf(token, windowStart)
+        while (index >= 0 && index < windowEnd) {
+          candidates.push({
+            start: index,
+            length: includeAt ? identifier.length + 1 : identifier.length,
+            distance: Math.abs(index - approximateStart),
+            priority: includeAt ? 0 : 1,
+          })
+          index = originalCode.indexOf(token, index + 1)
+        }
+      }
+
+      collect(`${identifier}@`, true)
+      collect(identifier, false)
+
+      if (candidates.length === 0) return null
+
+      candidates.sort((left, right) => {
+        if (left.priority !== right.priority) return left.priority - right.priority
+        if (left.distance !== right.distance) return left.distance - right.distance
+        return left.start - right.start
+      })
+
+      const best = candidates[0]
+      return {
+        start: best.start,
+        length: best.length,
+      }
+    }
+
+    function mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength, options = {}) {
       if (transformedLength <= 0) {
         return {
           start: transformResult.mapper.toOriginalPos(transformedStart),
@@ -562,11 +642,15 @@ function init(modules) {
         }
       }
 
+      const minMatchRatio = Number.isFinite(options.minMatchRatio)
+        ? Math.max(0, Math.min(1, options.minMatchRatio))
+        : 0
+
       const { transformedCode, originalCode } = getTransformSourcePair(transformResult)
       const transformedEnd = transformedStart + transformedLength
 
-      let minOriginal = Number.POSITIVE_INFINITY
-      let maxOriginal = Number.NEGATIVE_INFINITY
+      let firstMapped = null
+      let lastMapped = null
       let matchedCount = 0
 
       for (let transformedPos = transformedStart; transformedPos < transformedEnd; transformedPos += 1) {
@@ -580,17 +664,34 @@ function init(modules) {
         if (transformedChar !== originalChar) continue
 
         matchedCount += 1
-        if (mappedOriginal < minOriginal) minOriginal = mappedOriginal
-        if (mappedOriginal > maxOriginal) maxOriginal = mappedOriginal
+        if (firstMapped == null) firstMapped = mappedOriginal
+        lastMapped = mappedOriginal
       }
 
-      if (matchedCount === 0 || !Number.isFinite(minOriginal) || !Number.isFinite(maxOriginal)) {
+      if (matchedCount === 0 || firstMapped == null || lastMapped == null) {
         return null
       }
 
+      if (transformedLength > 0 && (matchedCount / transformedLength) < minMatchRatio) {
+        return null
+      }
+
+      const mappedStart = Math.min(firstMapped, lastMapped)
+      let mappedEnd = Math.max(firstMapped, lastMapped)
+
+      const transformedSlice = transformedCode.slice(transformedStart, transformedEnd)
+      const transformedLooksLikeSugarIdentifier = SUGAR_IDENTIFIER_RE.test(transformedSlice)
+      if (
+        transformedLooksLikeSugarIdentifier
+        && mappedEnd + 1 < originalCode.length
+        && originalCode[mappedEnd + 1] === '@'
+      ) {
+        mappedEnd += 1
+      }
+
       return {
-        start: minOriginal,
-        length: Math.max(1, maxOriginal - minOriginal + 1),
+        start: mappedStart,
+        length: Math.max(1, mappedEnd - mappedStart + 1),
       }
     }
 
@@ -599,8 +700,9 @@ function init(modules) {
 
       const transformedStart = Math.max(0, span.start)
       const transformedLength = Math.max(0, span.length)
-      return mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength)
-        || mapTextSpanToOriginal(span, transformResult)
+      return mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength, {
+        minMatchRatio: 0.5,
+      })
     }
 
     function mapEncodedClassificationsToOriginal(classifications, transformResult) {
@@ -617,10 +719,10 @@ function init(modules) {
           transformResult,
           transformedStart,
           transformedLength,
-        ) || mapTextSpanToOriginal({
-          start: transformedStart,
-          length: transformedLength,
-        }, transformResult)
+          {
+            minMatchRatio: 0.5,
+          },
+        )
 
         if (!mappedSpan || mappedSpan.length <= 0) continue
 
@@ -786,6 +888,35 @@ function init(modules) {
       }
     }
 
+    function mapDocumentHighlightsToOriginal(documentHighlights, lueContext) {
+      if (!Array.isArray(documentHighlights)) return documentHighlights
+
+      return documentHighlights.map((highlightEntry) => {
+        if (!highlightEntry || typeof highlightEntry.fileName !== 'string') return highlightEntry
+
+        const originalFile = lueContext.virtualToOriginal.get(highlightEntry.fileName)
+        if (!originalFile) return highlightEntry
+
+        const transformResult = lueContext.getTransformForOriginal(originalFile)
+        const highlightSpans = Array.isArray(highlightEntry.highlightSpans)
+          ? highlightEntry.highlightSpans.map((highlightSpan) => {
+            if (!highlightSpan || !highlightSpan.textSpan) return highlightSpan
+            return {
+              ...highlightSpan,
+              textSpan: mapTextSpanToOriginal(highlightSpan.textSpan, transformResult),
+              contextSpan: mapTextSpanToOriginal(highlightSpan.contextSpan, transformResult),
+            }
+          })
+          : highlightEntry.highlightSpans
+
+        return {
+          ...highlightEntry,
+          fileName: originalFile,
+          highlightSpans,
+        }
+      })
+    }
+
     function getSourceTextForFile(fileName) {
       const snapshot = host.getScriptSnapshot(fileName)
       if (snapshot) return snapshot.getText(0, snapshot.getLength())
@@ -798,7 +929,7 @@ function init(modules) {
       let start = safePos
       while (start > 0) {
         const ch = text.charCodeAt(start - 1)
-        const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+        const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36 || ch === 968
         if (!isWord) break
         start -= 1
       }
@@ -807,16 +938,16 @@ function init(modules) {
 
     function remapCompletionEntriesToSugar(entries, originalPrefix) {
       if (!Array.isArray(entries)) return entries
-      if (typeof originalPrefix === 'string' && originalPrefix.startsWith('$')) return entries
+      if (typeof originalPrefix === 'string' && originalPrefix.startsWith('ø')) return entries
 
       return entries.map((entry) => {
         if (!entry || typeof entry.name !== 'string') return entry
-        if (!entry.name.startsWith('$')) return entry
-        if (!/^\$[A-Za-z_$][\w$]*$/.test(entry.name)) return entry
+        if (!entry.name.startsWith('ø')) return entry
+        if (!SUGAR_IDENTIFIER_RE.test(entry.name)) return entry
 
         const sugarName = `${entry.name.slice(1)}@`
         const insertText = typeof entry.insertText === 'string'
-          ? entry.insertText.replace(/^\$([A-Za-z_$][\w$]*)$/, '$1@')
+          ? entry.insertText.replace(/^ø([A-Za-z_$][\w$]*)$/, '$1@')
           : sugarName
 
         return {
@@ -996,10 +1127,10 @@ function init(modules) {
             const containingDir = path.dirname(containingOriginal)
 
             const probeCandidates = []
-            if (moduleName.endsWith('.lue') || moduleName.endsWith('.luex')) {
+            if (moduleName.endsWith('.lue') || moduleName.endsWith('.qrx')) {
               probeCandidates.push(moduleName)
             } else {
-              probeCandidates.push(`${moduleName}.lue`, `${moduleName}.luex`)
+              probeCandidates.push(`${moduleName}.lue`, `${moduleName}.qrx`)
             }
 
             for (const candidate of probeCandidates) {
@@ -1094,14 +1225,13 @@ function init(modules) {
           const diagnostics = (transformedSourceFile.parseDiagnostics || []).map((diag) => {
             const start = diag.start || 0
             const length = diag.length || 0
-            const mappedStart = Math.max(0, transformResult.mapper.toOriginalPos(start))
-            const mappedEnd = Math.max(mappedStart, transformResult.mapper.toOriginalPos(start + length))
+            const mappedSpan = mapDiagnosticSpanToOriginal({ start, length }, transformResult)
 
             return {
               ...diag,
               file: originalSourceFile,
-              start: mappedStart,
-              length: mappedEnd - mappedStart,
+              start: mappedSpan.start,
+              length: mappedSpan.length,
             }
           })
 
@@ -1478,14 +1608,14 @@ function init(modules) {
       const transformedPosition = toTransformedPos(transient.transformResult, position)
       let transformedEntryName = entryName
       if (typeof transformedEntryName === 'string' && /[A-Za-z_$][\w$]*@$/.test(transformedEntryName)) {
-        transformedEntryName = `$${transformedEntryName.slice(0, -1)}`
+        transformedEntryName = `ø${transformedEntryName.slice(0, -1)}`
       }
 
       let transformedData = data
       if (transformedData && typeof transformedData === 'object' && typeof transformedData.name === 'string' && /[A-Za-z_$][\w$]*@$/.test(transformedData.name)) {
         transformedData = {
           ...transformedData,
-          name: `$${transformedData.name.slice(0, -1)}`,
+          name: `ø${transformedData.name.slice(0, -1)}`,
         }
       }
 
@@ -1587,6 +1717,59 @@ function init(modules) {
 
       if (!references) return references
       return references.map((reference) => mapReferenceEntryToOriginal(reference, transient.lueContext))
+    }
+
+    proxy.getDocumentHighlights = (fileName, position, filesToSearch) => {
+      if (typeof languageService.getDocumentHighlights !== 'function') {
+        return []
+      }
+
+      if (!isSugarFile(fileName)) {
+        return languageService.getDocumentHighlights(fileName, position, filesToSearch)
+      }
+
+      const transient = createTransientLanguageService(fileName)
+      if (!transient) return languageService.getDocumentHighlights(fileName, position, filesToSearch)
+
+      const transformedPosition = toTransformedPos(transient.transformResult, position)
+      const transformedFilesToSearch = Array.isArray(filesToSearch)
+        ? filesToSearch.map((searchFile) => {
+          if (!isSugarFile(searchFile)) return searchFile
+          const normalized = normalizeAbsolute(searchFile)
+          return transient.lueContext.originalToVirtual.get(normalized)
+            || transient.lueContext.registerLueFile(normalized)
+        })
+        : filesToSearch
+
+      const highlights = transient.languageService.getDocumentHighlights(
+        transient.virtualFileName,
+        transformedPosition,
+        transformedFilesToSearch,
+      )
+
+      return mapDocumentHighlightsToOriginal(highlights, transient.lueContext)
+    }
+
+    proxy.getOccurrencesAtPosition = (fileName, position) => {
+      if (typeof languageService.getOccurrencesAtPosition !== 'function') {
+        return []
+      }
+
+      if (!isSugarFile(fileName)) {
+        return languageService.getOccurrencesAtPosition(fileName, position)
+      }
+
+      const transient = createTransientLanguageService(fileName)
+      if (!transient) return languageService.getOccurrencesAtPosition(fileName, position)
+
+      const transformedPosition = toTransformedPos(transient.transformResult, position)
+      const occurrences = transient.languageService.getOccurrencesAtPosition(
+        transient.virtualFileName,
+        transformedPosition,
+      )
+
+      if (!occurrences) return occurrences
+      return occurrences.map((occurrence) => mapReferenceEntryToOriginal(occurrence, transient.lueContext))
     }
 
     proxy.findRenameLocations = (fileName, position, findInStrings, findInComments, preferences) => {
@@ -1711,7 +1894,7 @@ function init(modules) {
     const includePatterns = Array.isArray(parsed.raw && parsed.raw.include) ? parsed.raw.include : undefined
     const excludePatterns = Array.isArray(parsed.raw && parsed.raw.exclude) ? parsed.raw.exclude : undefined
 
-    return ts.sys.readDirectory(path.dirname(configPath), ['.lue', '.luex'], excludePatterns, includePatterns)
+    return ts.sys.readDirectory(path.dirname(configPath), ['.lue', '.qrx'], excludePatterns, includePatterns)
   }
 
   return {

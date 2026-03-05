@@ -2,9 +2,10 @@ import { AsyncNode, AsyncSeries, INTERNAL } from "./ooo";
 import { AnyObject } from "@rue/types";
 import { isFunction, isObject } from "@rue/utils";
 import { addToSuspense, SuspenseIon } from "./Suspense";
-import { Ion, isIon, MutableIon } from "../ion/Ion";
+import { Ion, MutableIon } from "../ion/Ion";
 import { instantUpdate } from "../reactivity/Update";
 import { toPromise } from "./AsyncIon";
+import { isGetter } from "../reactivity/Substance";
 
 // TODO: races
 // suspense
@@ -31,7 +32,7 @@ export function isCancelled(promise: Promise<any> | AsyncSeries) {
 
 export function Action<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | Promise<V>), options: { target: Ions<V>, '-suspense'?: SuspenseIon }): ((...args: F extends (...args: infer P) => any ? P : never) => F extends (...args: any[]) => infer R ? R extends AsyncNode<infer V> ? Promise<V> : never : never) & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
    const target = options.target
-   const ions = (isIon(target) ? undefined : target) as AnyObject
+   const ions = (isGetter(target) ? undefined : target) as AnyObject
    const ionKeys = ions ? ions instanceof Array ? Array.from(ions.keys()) : Object.keys(ions) : undefined
    let resolve: ((value: any | PromiseLike<any>) => void) | null;
    let reject: ((reason?: any) => void) | null

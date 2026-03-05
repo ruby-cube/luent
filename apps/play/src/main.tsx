@@ -76,7 +76,7 @@ import { TestAsyncTabs } from '../../demos/src/TestAsyncTabs';
 import { initMonacoEditor } from './TestMonacoEditor';
 import { TestCreate } from './TestCreate';
 import { TestAwaitConditional } from './TestAwaitConditional';
-import { LuexCounter } from './Counter.luex';
+import { QrxCounter } from './Counter.qrx';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -124,7 +124,7 @@ import { LuexCounter } from './Counter.luex';
 // })
 
 
-const app = createRoot(LuexCounter)
+const app = createRoot(() =><QrxCounter showFractions={Ion(true)}></QrxCounter>)
 
 app.mount('#root')
 

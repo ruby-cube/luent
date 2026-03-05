@@ -11,11 +11,20 @@ import { createHybridIon } from "./HybridIon";
 import { AsyncIon, AsyncProps } from "../async/AsyncIon";
 
 /* API */
-export type Ion<T = unknown> = (() => T) & { '~ion': true }
+export interface Ion<T = unknown> {
+   (): T
+   '~ion': true
+}
+
+export interface Ø<T = unknown> {
+   (): T
+}
 
 // type MaybeInert<T = unknown> = IsIonic<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
-export type MutableIon<T> = Ion<T> & { value: T }
+export interface MutableIon<T> extends Ion<T> {
+   value: T
+}
 
 
 // NOTE: deprecating NonVoid because extending generic as NonVoid causes type-narrowing
@@ -40,12 +49,12 @@ export const asIon = Ion
  * 
  * ##### ION:
  * ```
- * const $count = Ion(0)
+ * const øcount = Ion(0)
  * ```
  * 
  * ##### ION CAPSULE:
  * ```
- * const $count = Ion(0, {
+ * const øcount = Ion(0, {
  *    increment() {
  *       this.count++
  *    },
@@ -58,7 +67,7 @@ export const asIon = Ion
  * ##### DERIVATION ION:
  * 
  * ```
- * const $doubleCount = Ion(() =>$count() * 2)
+ * const ødoubleCount = Ion(() =>øcount() * 2)
  * ```
  * 
  * 
@@ -98,12 +107,26 @@ export function isIon(value: unknown): value is Ion {
    // value.length === 0
 }
 
+/**
+ * Important for 
+ * - distinguishing render function from ion in normalizeToRenderFunction
+ * @param fn 
+ * @returns 
+ */
 export function $_derivation<T>(fn: () => T) {
-   //@ts-expect-error
+   // @ts-expect-error
    fn[QUARK] = { inert: false };
    //@ts-expect-error
    fn.displayName = 'getState'
    return fn
+}
+
+export const ø = $_derivation
+
+export function øø<T, K extends keyof T>(obj: T, key: K): Ion<T[K]> {
+   const descriptor = Object.getOwnPropertyDescriptor(obj, key)
+   console.log('chicken feet', obj, key, descriptor)
+   return descriptor?.get?.bind(obj) ?? (() => obj[key]) as Ion<T[K]>
 }
 
 //@ts-expect-error
@@ -253,25 +276,25 @@ function _asIon(
 // isReined
 
 
-// const $count = Ion(0)
+// const øcount = Ion(0)
 
-// const $doublecount = Ion(() =>{if (isIon($count)) return $count() * 2}, {
+// const ødoublecount = Ion(() =>{if (isIon(øcount)) return øcount() * 2}, {
 //    doSomething(){}
 // })
 
-// const $countB = Ion((prev?: number) => (prev ?? 0) + 2)
+// const øcountB = Ion((prev?: number) => (prev ?? 0) + 2)
 
-// const $active = Ion('frog', {
+// const øactive = Ion('frog', {
 //    toggle() {
 
 //    }
 // })
 
-// const $actived = Ion(false, {
+// const øactived = Ion(false, {
 //    toggler() { }
 // })
 
-// $actived.value = true
+// øactived.value = true
 
 // function som<T>(value: T): T {
 //    return null as T;

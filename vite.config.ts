@@ -1,25 +1,10 @@
-import { resolve } from "path"
 import { defineConfig } from 'vite'
-import babel from "vite-plugin-babel"
+// import lumoPlugin from './packages/vite-plugin-lumo/index.js'
 
 export default defineConfig({
-   server: {
-      fs: {
-         cachedChecks: false
-      }
-   },
    plugins: [
-      //  babel()
+      // ...lumoPlugin()
    ],
-   resolve: {
-      alias:
-      {
-         //   // '@rue/utils': resolve(import.meta.url, 'packages/utils/index.ts'),
-         //   '@rue/jsx-runtime': resolve(import.meta.url, 'packages/jsx-runtime/src/index.ts'),
-         // '@rue/jsx-dev-runtime': resolve(import.meta.url, 'packages/jsx-runtime/jsx-runtime.ts')
-      }
-
-   },
    define: {
       __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
       __SSR__: false,

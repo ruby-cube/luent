@@ -201,7 +201,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    const ion = attributes['mu:checked'];
    delete attributes['mu:checked'];
    attributes.checked = ion;
-   if (!isIon(ion)) {
+   if (!isGetter(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -216,7 +216,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
    attributes.checked = () => ion() === radioValue;
-   if (!isIon(ion)) {
+   if (!isGetter(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -230,7 +230,7 @@ function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attribut
    const ion = attributes['mu:value'];
    delete attributes['mu:value'];
    attributes.value = ion;
-   if (!isIon(ion)) {
+   if (!isGetter(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -267,7 +267,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
       }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
-   if (!isIon(ion)) {
+   if (!isGetter(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
    }
    else {
@@ -355,6 +355,7 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
 function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
    const flask = getFlask()
    for (const key in attributes) {
+      if (key === 'Slot') return;
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
       if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
       // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid

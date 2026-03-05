@@ -1,5 +1,5 @@
 import { getActiveFlask, getFlask } from "@rue/flask";
-import { INTERNAL, Ion, isIon, PRELUDE, toValue, watch } from "@rue/quarky";
+import { INTERNAL, Ion, PRELUDE, toValue, watch } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 
 

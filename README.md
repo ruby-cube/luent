@@ -23,21 +23,21 @@ Some special features include:
 - readable async code
 - simple-to-use state machines
 
-## `.luex` IntelliSense
+## `.qrx` IntelliSense
 
-If IntelliSense in `.luex`/`.lue` files is missing or slow in VS Code:
+If IntelliSense in `.qrx`/`.lue` files is missing or slow in VS Code:
 
 1. Ensure workspace settings include:
 	 - `typescript.tsdk: node_modules/typescript/lib`
 	 - `typescript.tsserver.pluginPaths: ["./packages/quarky-tsserver-plugin"]`
-	 - `files.associations` for `*.luex -> typescriptreact` and `*.lue -> typescript`
+	 - `files.associations` for `*.qrx -> typescriptreact` and `*.lue -> typescript`
 2. Restart TypeScript server (`TypeScript: Restart TS Server`).
 3. If behavior is stale, run `Developer: Reload Window` once.
 
-### TS pipeline for `.luex` imports
+### TS pipeline for `.qrx` imports
 
-- `.lue`/`.luex` are resolved through the Quarky TS pipeline as virtual transformed `.ts`/`.tsx` modules.
-- This enables typed imports like `import { Counter } from "./Counter.luex"` from regular `.ts`/`.tsx` files without manual per-file declaration stubs.
+- `.lue`/`.qrx` are resolved through the Quarky TS pipeline as virtual transformed `.ts`/`.tsx` modules.
+- This enables typed imports like `import { Counter } from "./Counter.qrx"` from regular `.ts`/`.tsx` files without manual per-file declaration stubs.
 - Typecheck entrypoint in this repo is `pnpm run typecheck` (backed by `quarky-tsc`), not plain `tsc`.
 - After changing plugin internals (`packages/quarky-tsserver-plugin`), run `TypeScript: Restart TS Server` once to refresh editor diagnostics.
 - If diagnostics still look stale after restart, run `Developer: Reload Window`.

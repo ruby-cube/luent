@@ -12,7 +12,6 @@ import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
 import { NodeRefsConfig } from "./NodeRefs";
 import { normalizeToArray, toError } from "@rue/utils";
-import { _ } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 import { RenderError } from "../boundaries/Try";
 
 export type TagType = ComponentForge | string

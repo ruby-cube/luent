@@ -2,7 +2,7 @@ import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } 
 import { MaybeIon } from "../component/Input";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListItemKit, ListKit, toAsyncRenderItem } from "./ItemList";
-import { Ion, Ionic, IonizeBy, isGetter, isInertIon, isIon, IsIonic, isIonicProxy, PRELUDE, toIon, toValue, watch } from "@rue/quarky";
+import { Ion, Ionic, IonizeBy, isGetter, isIonicProxy, PRELUDE, toIon, toValue, watch } from "@rue/quarky";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { ForIndex, IndexedListKit, Nullish } from "./IndexedList";
 import { createStack, isObject } from "@rue/utils";

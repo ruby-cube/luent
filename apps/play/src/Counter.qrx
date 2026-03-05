@@ -1,8 +1,7 @@
 import { Ion } from "@rue/quarky";
 import { FromTag, If, template } from "@rue/lumo";
 
-export function LuexCounter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> }>) {
-
+export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> & { value: boolean } }>) {
    get count = Ion(0, {
       increment() {
          count@.value++
@@ -10,7 +9,10 @@ export function LuexCounter({ showFractions@ }: FromTag<{ showFractions: Ion<boo
    })
    get doubleCount = Ion((count * 2))
 
-   const { halfCount@, thirdCount@ } = FractionKit(count@)
+   // const { halfCount@, thirdCount@ } = FractionKit(count@)
+   const kit = FractionKit(count@)
+   get halfCount = kit.halfCount@
+   const thirdCount@ = kit.thirdCount@
 
    function doSomething(count: number) {
       console.log('count', count)
@@ -24,10 +26,7 @@ export function LuexCounter({ showFractions@ }: FromTag<{ showFractions: Ion<boo
          cout
       )
    }
-   other(count)
-
-
-
+   // other(count)
 
    return template(
       <div>
@@ -36,6 +35,7 @@ export function LuexCounter({ showFractions@ }: FromTag<{ showFractions: Ion<boo
          <p>count: {count@}</p>
          <p>doubleCount: {doubleCount@}</p>
          <p>tripleCount: {(count * 3)}</p>
+         <button on:click={e => showFractions@.value = !showFractions}>{(showFractions ? 'hide' : 'show')} fractions</button>
          {If(showFractions@, (
             <hr></hr>
             <p>halfCount: {halfCount@}</p>

@@ -1,6 +1,6 @@
 import { AnyObject, Falsey } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
-import { INTERNAL, Ion, isIon, PRELUDE, queueInternalRender, toValue, watch } from "@rue/quarky";
+import { toValue, watch } from "@rue/quarky";
 import { isObject, normalizeToArray, Ref } from "@rue/utils";
 import { $Node, $Nodes, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { MaybeIon, toInput } from "./Input";
