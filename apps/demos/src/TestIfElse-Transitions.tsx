@@ -1,6 +1,7 @@
 import { template, If, Else, ElseIf, NodeRef, createRoot, css } from "@rue/lumo";
 import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
+import { Transition } from "../../../packages/lumo/src/transitions/Transition";
 
 
 export function TestIfElse() {
@@ -23,12 +24,14 @@ export function TestIfElse() {
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
          <hr></hr>
          <div class='container view'>
+            <Transition animate-in animate-out>
+            {/* <Transition animate-in='fade-in' animate-out='fade-out'> */}
                {If($active,
                   <div>
                      oh
                      <h2>hi</h2>
                      {If($ready,
-                        <p>ready</p>
+                        <p animate-load animate-in='fade-in' animate-out='fade-out'>ready</p>
                      )}
                   </div>
                )}
@@ -44,6 +47,7 @@ export function TestIfElse() {
                      <h2>bye</h2>
                   </div>
                )}
+            </Transition>
          </div>
       </div>
    )

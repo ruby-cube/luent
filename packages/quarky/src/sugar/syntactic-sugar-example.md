@@ -1,4 +1,6 @@
-const øfrog = {name: 'kermit'}
+const frogø = {name: 'kermit'}
+const frogØ = {name: 'kermit'}
+const frog· = {name: 'kermit'}
 
 I'd like to extend ts and tsx (as lue and qrx) with the following syntactic sugar:
 

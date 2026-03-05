@@ -1,5 +1,5 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@rue/utils";
-import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, watchToRender, Ø } from "@rue/quarky";
+import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, untracked, watch, watchToRender, Ø } from "@rue/quarky";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
@@ -69,6 +69,7 @@ export function processJSXOutput(rawJSX: RawJSXNode) {
  * @param jsxNodes 
  */
 function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
+   console.log('jsxNodes', jsxNodes)
    for (const node of jsxNodes) {
 
       if (node instanceof Array) {
@@ -77,13 +78,23 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
       else if (isComponentKit(node)) {
          _processJSXOutput(node.jsxNodes, flattened)
       }
-      else if (isFunction(node) && node.name === 'renderSlot') {
-         console.log('RENDER SLOT', node)
-         _processJSXOutput(node(), flattened)
+      else if (isFunction(node)) {
+         if (node.length !== 0) throw new Error('render functions must have no parameters')
+         const output = untracked(node)
+         if (typeof output === 'string' || typeof output === 'number' || typeof output === 'boolean') {
+            flattened.push(new DynamicTextNode(node))
+         }
+         else {
+            _processJSXOutput(normalizeToArray(node()), flattened)
+         }
       }
-      else if (isFunction(node) && node.length === 0) {
-         flattened.push(new DynamicTextNode(node))
-      }
+      // else if (isFunction(node) && node.name === 'renderSlot') {
+      //    console.log('RENDER SLOT', node)
+      //    _processJSXOutput(node(), flattened)
+      // }
+      // else if (isFunction(node) && node.length === 0) {
+      //    flattened.push(new DynamicTextNode(node))
+      // }
       else if (node == null || node === '') {
          continue;
       }

@@ -23,9 +23,11 @@ import { TestConsecutiveIfElse } from "./src/TestConsecutiveIfElse"
 import { TestNestedIfElse } from "./src/TestNestedIfElse"
 import { BottomlessBlokkis } from "./src/BottomlessBlokkis/BottomlessBlokkis"
 import { TestCanvas } from "./src/CanvasApp/TestCanvas"
+import { TestIfElseRemountView } from "./src/TestIfElseRemountView"
+import { TestNamedSlots } from "./src/TestNamedSlots"
 
 export function runDemo() {
-   const app = createRoot(TestListTransit)
+   const app = createRoot(TestNamedSlots)
 
    app.mount('#root')
 }

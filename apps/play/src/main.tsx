@@ -9,7 +9,7 @@
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import {  SevenGUIs } from './wip-demos/7-guis';
+import { SevenGUIs } from './wip-demos/7-guis';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { AsyncIon, template, createRoot } from '@rue/lumo';
@@ -77,6 +77,7 @@ import { initMonacoEditor } from './TestMonacoEditor';
 import { TestCreate } from './TestCreate';
 import { TestAwaitConditional } from './TestAwaitConditional';
 import { QrxCounter } from './Counter.qrx';
+import { TestRenderFunctionAsIon } from './TestRenderFunctionAsIon';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -123,8 +124,33 @@ import { QrxCounter } from './Counter.qrx';
 //    while (i--) { }
 // })
 
+function App() {
+   const $count = Ion(0, {
+      increment() {
+         $count.value++
+      }
+   })
 
-const app = createRoot(() =><QrxCounter showFractions={Ion(true)}></QrxCounter>)
+   function renderFunction() {
+
+      watch($count, () => {
+         console.log('INNER: count is now', $count())
+      }, {phase: PRELUDE})
+   }
+
+   watch(renderFunction, () => {
+      console.log('OUTER: count', $count())
+   }, {phase: PRELUDE})
+
+   return template(
+      <>
+         <div>{$count}</div>
+         <button on:click={e => $count.increment()}>+</button>
+      </>
+   )
+}
+
+const app = createRoot(App)
 
 app.mount('#root')
 

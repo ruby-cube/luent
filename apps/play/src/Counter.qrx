@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Ion } from "@rue/quarky";
 import { FromTag, If, template } from "@rue/lumo";
 
@@ -47,7 +48,10 @@ export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: Ion<bool
 
 function FractionKit(count@: Ion<number>) {
    return {
-      halfCount@: Ion((count / 2)),
+      halfCount@:   Ion((count    /       2)),
       thirdCount@: Ion((count / 3))
+   
+   
+   
    }
 }

@@ -591,15 +591,17 @@ function transformJSXSlot(path) {
    const children = path.get('children')
    if (children.length === 0) return;
    if (hasNamedSlot(children)) {
-      path.node.children = [transformToNamedSlots(children)]
+      return;
    }
    else {
+      // console.log('not hasNamedSlot', path.node)
       transformJSXChildren(children)
       path.node.children = [normalizeSlotToRenderFunction(children)]
    }
 }
 
 function hasNamedSlot(childPaths) {
+   if (childPaths.length !== 1) return false;
    for (const path of childPaths) {
       if (isNamedSlot(path.node))
          return true;
@@ -608,10 +610,12 @@ function hasNamedSlot(childPaths) {
 }
 
 function isNamedSlot(node) {
-   if (!t.isJSXElement(node)) return false;
-   const openingElement = node.openingElement
-   const attribute = openingElement.attributes[0]
-   return openingElement.name.name === 'Slot' && attribute && attribute.name.name !== 'provide'
+   if (!t.isJSXExpressionContainer(node)) return false;
+   if (!node.expression) return false;
+   // const openingElement = node.openingElement
+   // const attribute = openingElement.attributes[0]
+   return t.isObjectExpression(node.expression)
+   // return openingElement.name.name === 'Slot' && attribute && attribute.name.name !== 'provide'
 }
 
 function transformToNamedSlots(childPaths) {
