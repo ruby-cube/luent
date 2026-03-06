@@ -1,18 +1,47 @@
-import { Ion } from "@rue/quarky";
+import { Ion, MutableIon } from "@rue/quarky";
 import { FromTag, If, template } from "@rue/lumo";
 
-export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: Ion<boolean> & { value: boolean } }>) {
+
+
+function FractionKit(count@: Ion<number>) {
+   
+   return {
+      get halfCount: Ion((count / 2)),
+      get thirdCount: Ion((count / 3))
+   }
+}
+
+function FractionKitB(count@: Ion<number>) {
+   const halfCount@ = Ion((count / 2))
+   const thirdCount@ = Ion((count / 3))
+   
+   return {
+      get halfCount(){ return halfCount@ },
+      get thirdCount() { return thirdCount@ } 
+   }
+}
+
+function FractionKitC(count@: Ion<number>) {
+   
+   return {
+      halfCount@: Ion((count / 2)),
+      thirdCount@: Ion((count / 3))
+   }
+}
+
+export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableIon<boolean> }>) {
+
    get count = Ion(0, {
       increment() {
          count@.value++
       }
    })
    get doubleCount = Ion((count * 2))
-   // const triple@ = Ion((count * 3)) // should throw linting error
-   const { halfCount@, thirdCount@ } = FractionKit(count@)
+   const { halfCountA@, thirdCountA@ } = FractionKit(count@)
+   
    const kit = FractionKit(count@);
-   // get halfCount = kit.halfCount
-   // get thirdCount = kit.thirdCount
+   get halfCount = kit.halfCount@
+   get thirdCount = kit.thirdCount@
 
    function doSomething(count: number) {
       console.log('count', count)
@@ -44,17 +73,3 @@ export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: Ion<bool
    )
 }
 
-// function FractionKit(count@: Ion<number>) {
-//    return {
-//       get halfCount: Ion((count / 2)),
-//       get thirdCount: Ion((count / 3))
-//    }
-// }
-
-function FractionKit(count@: Ion<number>) {
-   
-   return {
-      get halfCount: Ion((count / 2)),
-      get thirdCount: Ion((count / 3)),
-   }
-}

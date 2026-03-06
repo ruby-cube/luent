@@ -2,6 +2,89 @@ const path = require('node:path')
 const { transformQuarkySugar } = require('./transform-quarky-sugar.cjs')
 
 const SUGAR_IDENTIFIER_RE = /^ø[A-Za-z_$][\w$]*$/
+const HIDDEN_HELPER_IDENTIFIERS = ['destructureØ', 'absorbØ']
+
+function isIdentifierChar(ch) {
+  if (typeof ch !== 'string' || ch.length === 0) return false
+  return /[A-Za-z0-9_$]/.test(ch)
+}
+
+function rangesIntersect(startA, endA, startB, endB) {
+  return startA < endB && startB < endA
+}
+
+function hasWordBoundaries(text, start, length) {
+  if (typeof text !== 'string') return false
+  if (!Number.isFinite(start) || !Number.isFinite(length)) return false
+  const safeStart = Math.max(0, Math.floor(start))
+  const safeLength = Math.max(0, Math.floor(length))
+  const safeEnd = safeStart + safeLength
+  const before = safeStart > 0 ? text[safeStart - 1] : ''
+  const after = safeEnd < text.length ? text[safeEnd] : ''
+  return !isIdentifierChar(before) && !isIdentifierChar(after)
+}
+
+function findHiddenHelperTransformedRange(transformedCode, start, length) {
+  if (typeof transformedCode !== 'string' || transformedCode.length === 0) return null
+
+  const spanStart = Math.max(0, Number.isFinite(start) ? Math.floor(start) : 0)
+  const rawEnd = spanStart + Math.max(0, Number.isFinite(length) ? Math.floor(length) : 0)
+  const spanEnd = Math.max(spanStart + 1, rawEnd)
+
+  const probeStart = Math.max(0, spanStart - 32)
+  const probeEnd = Math.min(transformedCode.length, spanEnd + 32)
+
+  for (const helperName of HIDDEN_HELPER_IDENTIFIERS) {
+    let helperIndex = transformedCode.indexOf(helperName, probeStart)
+    while (helperIndex >= 0 && helperIndex < probeEnd) {
+      const helperEnd = helperIndex + helperName.length
+      const before = helperIndex > 0 ? transformedCode[helperIndex - 1] : ''
+      const after = helperEnd < transformedCode.length ? transformedCode[helperEnd] : ''
+      const bounded = !isIdentifierChar(before) && !isIdentifierChar(after)
+      if (bounded && rangesIntersect(spanStart, spanEnd, helperIndex, helperEnd)) {
+        return { start: helperIndex, end: helperEnd }
+      }
+      helperIndex = transformedCode.indexOf(helperName, helperIndex + 1)
+    }
+  }
+
+  let callIndex = transformedCode.indexOf('ø(', probeStart)
+  while (callIndex >= 0 && callIndex < probeEnd) {
+    const callEnd = callIndex + 2
+    if (rangesIntersect(spanStart, spanEnd, callIndex, callEnd)) {
+      return { start: callIndex, end: callEnd }
+    }
+    callIndex = transformedCode.indexOf('ø(', callIndex + 1)
+  }
+
+  return null
+}
+
+function findSyntheticArrowWrapperTransformedRange(transformedCode, start, length) {
+  if (typeof transformedCode !== 'string' || transformedCode.length === 0) return null
+
+  const spanStart = Math.max(0, Number.isFinite(start) ? Math.floor(start) : 0)
+  const rawEnd = spanStart + Math.max(0, Number.isFinite(length) ? Math.floor(length) : 0)
+  const spanEnd = Math.max(spanStart + 1, rawEnd)
+
+  const probeStart = Math.max(0, spanStart - 8)
+  const probeEnd = Math.min(transformedCode.length, spanEnd + 8)
+  let probe = transformedCode.indexOf('() => ', probeStart)
+
+  while (probe >= 0 && probe < probeEnd) {
+    const wrapperStart = probe
+    const wrapperEnd = probe + 6
+    if (rangesIntersect(spanStart, spanEnd, wrapperStart, wrapperEnd)) {
+      return {
+        start: wrapperStart,
+        end: wrapperEnd,
+      }
+    }
+    probe = transformedCode.indexOf('() => ', probe + 1)
+  }
+
+  return null
+}
 
 function init(modules) {
   const ts = modules.typescript
@@ -523,7 +606,7 @@ function init(modules) {
       }
 
       return mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength)
-        || mapTextSpanToOriginal({
+        || mapTextSpanToOriginalCore({
           start: transformedStart,
           length: transformedLength,
         }, transformResult)
@@ -532,6 +615,89 @@ function init(modules) {
     function mapTextSpanToOriginal(span, transformResult) {
       if (!span) return span
 
+      const transformedStart = Math.max(0, span.start || 0)
+      const transformedLength = Math.max(0, span.length || 0)
+      const transformedCode = transformResult && typeof transformResult.code === 'string'
+        ? transformResult.code
+        : ''
+      const originalCode = transformResult && typeof transformResult.originalCode === 'string'
+        ? transformResult.originalCode
+        : ''
+
+      const hiddenHelperRange = findHiddenHelperTransformedRange(
+        transformedCode,
+        transformedStart,
+        transformedLength,
+      )
+      if (hiddenHelperRange) {
+        return {
+          start: transformResult.mapper.toOriginalPos(hiddenHelperRange.start),
+          length: 0,
+        }
+      }
+
+      function mapSyntheticArrowWrapperToOriginalParen(wrapperRange) {
+        if (!wrapperRange) return null
+
+        const anchor = transformResult.mapper.toOriginalPos(wrapperRange.start)
+        const searchStart = Math.max(0, anchor - 6)
+        const searchEnd = Math.min(originalCode.length, anchor + 8)
+
+        for (let originalPos = anchor; originalPos < searchEnd; originalPos += 1) {
+          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
+            return {
+              start: originalPos,
+              length: 1,
+            }
+          }
+        }
+
+        for (let originalPos = anchor - 1; originalPos >= searchStart; originalPos -= 1) {
+          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
+            return {
+              start: originalPos,
+              length: 1,
+            }
+          }
+        }
+
+        return {
+          start: anchor,
+          length: 0,
+        }
+      }
+
+      const syntheticArrowWrapperRange = findSyntheticArrowWrapperTransformedRange(
+        transformedCode,
+        transformedStart,
+        transformedLength,
+      )
+      if (syntheticArrowWrapperRange) {
+        let allCollapsed = true
+        const anchor = transformResult.mapper.toOriginalPos(syntheticArrowWrapperRange.start)
+        for (let pos = syntheticArrowWrapperRange.start; pos < syntheticArrowWrapperRange.end; pos += 1) {
+          if (transformResult.mapper.toOriginalPos(pos) !== anchor) {
+            allCollapsed = false
+            break
+          }
+        }
+
+        if (allCollapsed) {
+          return mapSyntheticArrowWrapperToOriginalParen(syntheticArrowWrapperRange)
+        }
+      }
+
+      const transformedEnd = transformedStart + transformedLength
+      const transformedSlice = transformedCode.slice(transformedStart, transformedEnd)
+      const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
+        originalCode,
+        transformedSlice,
+        transformResult.mapper.toOriginalPos(transformedStart),
+      )
+      if (correctedIdentifierRange) {
+        return correctedIdentifierRange
+      }
+
       if (span.length <= 0) {
         const start = transformResult.mapper.toOriginalPos(span.start)
         return {
@@ -539,9 +705,6 @@ function init(modules) {
           length: 0,
         }
       }
-
-      const transformedStart = Math.max(0, span.start)
-      const transformedEnd = transformedStart + Math.max(0, span.length)
 
       let firstMapped = null
       let lastMapped = null
@@ -589,7 +752,7 @@ function init(modules) {
       for (const classifiedSpan of spans) {
         if (!classifiedSpan || !classifiedSpan.textSpan) continue
         const mappedTextSpan = mapClassificationTextSpanToOriginal(classifiedSpan.textSpan, transformResult)
-        if (!mappedTextSpan) continue
+        if (!mappedTextSpan || mappedTextSpan.length <= 0) continue
         mapped.push({
           ...classifiedSpan,
           textSpan: mappedTextSpan,
@@ -612,9 +775,12 @@ function init(modules) {
 
     function findBestNearbyOriginalIdentifierRange(originalCode, transformedSlice, approximateStart) {
       if (typeof transformedSlice !== 'string') return null
-      if (!SUGAR_IDENTIFIER_RE.test(transformedSlice)) return null
+      const sugarMatch = transformedSlice.match(/^ø([A-Za-z_$][\w$]*)$/)
+      const plainMatch = transformedSlice.match(/^([A-Za-z_$][\w$]*)$/)
+      if (!sugarMatch && !plainMatch) return null
 
-      const identifier = transformedSlice.slice(1)
+      const identifier = sugarMatch ? sugarMatch[1] : plainMatch[1]
+      const includeReactiveSuffix = Boolean(sugarMatch)
       const windowStart = Math.max(0, approximateStart - 80)
       const windowEnd = Math.min(originalCode.length, approximateStart + 80)
       const candidates = []
@@ -622,24 +788,39 @@ function init(modules) {
       function collect(token, includeAt) {
         let index = originalCode.indexOf(token, windowStart)
         while (index >= 0 && index < windowEnd) {
+          const candidateLength = includeAt ? identifier.length + 1 : identifier.length
+          if (!hasWordBoundaries(originalCode, index, candidateLength)) {
+            index = originalCode.indexOf(token, index + 1)
+            continue
+          }
+
           candidates.push({
             start: index,
-            length: includeAt ? identifier.length + 1 : identifier.length,
+            length: candidateLength,
             distance: Math.abs(index - approximateStart),
-            priority: includeAt ? 0 : 1,
+            priority: includeAt ? 1 : 0,
           })
           index = originalCode.indexOf(token, index + 1)
         }
       }
 
-      collect(`${identifier}@`, true)
+      if (includeReactiveSuffix) {
+        collect(`${identifier}@`, true)
+      }
       collect(identifier, false)
 
       if (candidates.length === 0) return null
 
       candidates.sort((left, right) => {
-        if (left.priority !== right.priority) return left.priority - right.priority
         if (left.distance !== right.distance) return left.distance - right.distance
+        if (left.priority !== right.priority) return left.priority - right.priority
+
+        const leftIsForward = left.start >= approximateStart
+        const rightIsForward = right.start >= approximateStart
+        if (leftIsForward !== rightIsForward) {
+          return leftIsForward ? -1 : 1
+        }
+
         return left.start - right.start
       })
 
@@ -651,6 +832,74 @@ function init(modules) {
     }
 
     function mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength, options = {}) {
+      const { transformedCode, originalCode } = getTransformSourcePair(transformResult)
+
+      function mapSyntheticArrowWrapperToOriginalParen(wrapperRange) {
+        if (!wrapperRange) return null
+
+        const anchor = transformResult.mapper.toOriginalPos(wrapperRange.start)
+        const searchStart = Math.max(0, anchor - 6)
+        const searchEnd = Math.min(originalCode.length, anchor + 8)
+
+        for (let originalPos = anchor; originalPos < searchEnd; originalPos += 1) {
+          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
+            return {
+              start: originalPos,
+              length: 1,
+            }
+          }
+        }
+
+        for (let originalPos = anchor - 1; originalPos >= searchStart; originalPos -= 1) {
+          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
+            return {
+              start: originalPos,
+              length: 1,
+            }
+          }
+        }
+
+        return {
+          start: anchor,
+          length: 0,
+        }
+      }
+
+      const hiddenHelperRange = findHiddenHelperTransformedRange(
+        transformedCode,
+        transformedStart,
+        transformedLength,
+      )
+      if (hiddenHelperRange) {
+        return {
+          start: transformResult.mapper.toOriginalPos(hiddenHelperRange.start),
+          length: 0,
+        }
+      }
+
+      function findSyntheticArrowWrapperRange() {
+        const candidate = findSyntheticArrowWrapperTransformedRange(
+          transformedCode,
+          transformedStart,
+          transformedLength,
+        )
+        if (!candidate) return null
+
+        const anchor = transformResult.mapper.toOriginalPos(candidate.start)
+        for (let pos = candidate.start; pos < candidate.end; pos += 1) {
+          if (transformResult.mapper.toOriginalPos(pos) !== anchor) {
+            return null
+          }
+        }
+
+        return candidate
+      }
+
+      const syntheticArrowWrapperRange = findSyntheticArrowWrapperRange()
+      if (syntheticArrowWrapperRange) {
+        return mapSyntheticArrowWrapperToOriginalParen(syntheticArrowWrapperRange)
+      }
+
       if (transformedLength <= 0) {
         return {
           start: transformResult.mapper.toOriginalPos(transformedStart),
@@ -662,8 +911,17 @@ function init(modules) {
         ? Math.max(0, Math.min(1, options.minMatchRatio))
         : 0
 
-      const { transformedCode, originalCode } = getTransformSourcePair(transformResult)
       const transformedEnd = transformedStart + transformedLength
+      const transformedSlice = transformedCode.slice(transformedStart, transformedEnd)
+
+      const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
+        originalCode,
+        transformedSlice,
+        transformResult.mapper.toOriginalPos(transformedStart),
+      )
+      if (correctedIdentifierRange) {
+        return correctedIdentifierRange
+      }
 
       let firstMapped = null
       let lastMapped = null
@@ -695,7 +953,6 @@ function init(modules) {
       const mappedStart = Math.min(firstMapped, lastMapped)
       let mappedEnd = Math.max(firstMapped, lastMapped)
 
-      const transformedSlice = transformedCode.slice(transformedStart, transformedEnd)
       const transformedLooksLikeSugarIdentifier = SUGAR_IDENTIFIER_RE.test(transformedSlice)
       if (
         transformedLooksLikeSugarIdentifier
@@ -712,13 +969,14 @@ function init(modules) {
     }
 
     function mapClassificationTextSpanToOriginal(span, transformResult) {
-      if (!span || span.length <= 0) return mapTextSpanToOriginal(span, transformResult)
+      if (!span || span.length <= 0) return mapTextSpanToOriginalCore(span, transformResult)
 
       const transformedStart = Math.max(0, span.start)
       const transformedLength = Math.max(0, span.length)
-      return mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength, {
+      const mapped = mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength, {
         minMatchRatio: 0.5,
       })
+      return mapped || mapTextSpanToOriginalCore(span, transformResult)
     }
 
     function mapEncodedClassificationsToOriginal(classifications, transformResult) {
@@ -738,6 +996,12 @@ function init(modules) {
           {
             minMatchRatio: 0.5,
           },
+        ) || mapTextSpanToOriginalCore(
+          {
+            start: transformedStart,
+            length: transformedLength,
+          },
+          transformResult,
         )
 
         if (!mappedSpan || mappedSpan.length <= 0) continue
@@ -872,9 +1136,9 @@ function init(modules) {
       return {
         ...definition,
         fileName: originalFile,
-        textSpan: mapTextSpanToOriginal(definition.textSpan, transformResult),
-        contextSpan: mapTextSpanToOriginal(definition.contextSpan, transformResult),
-        originalTextSpan: mapTextSpanToOriginal(definition.originalTextSpan, transformResult),
+        textSpan: mapTextSpanToOriginalCore(definition.textSpan, transformResult),
+        contextSpan: mapTextSpanToOriginalCore(definition.contextSpan, transformResult),
+        originalTextSpan: mapTextSpanToOriginalCore(definition.originalTextSpan, transformResult),
       }
     }
 
@@ -886,8 +1150,8 @@ function init(modules) {
       return {
         ...referenceEntry,
         fileName: originalFile,
-        textSpan: mapTextSpanToOriginal(referenceEntry.textSpan, transformResult),
-        contextSpan: mapTextSpanToOriginal(referenceEntry.contextSpan, transformResult),
+        textSpan: mapTextSpanToOriginalCore(referenceEntry.textSpan, transformResult),
+        contextSpan: mapTextSpanToOriginalCore(referenceEntry.contextSpan, transformResult),
       }
     }
 
@@ -899,8 +1163,8 @@ function init(modules) {
       return {
         ...location,
         fileName: originalFile,
-        textSpan: mapTextSpanToOriginal(location.textSpan, transformResult),
-        contextSpan: mapTextSpanToOriginal(location.contextSpan, transformResult),
+        textSpan: mapTextSpanToOriginalCore(location.textSpan, transformResult),
+        contextSpan: mapTextSpanToOriginalCore(location.contextSpan, transformResult),
       }
     }
 
@@ -919,8 +1183,8 @@ function init(modules) {
             if (!highlightSpan || !highlightSpan.textSpan) return highlightSpan
             return {
               ...highlightSpan,
-              textSpan: mapTextSpanToOriginal(highlightSpan.textSpan, transformResult),
-              contextSpan: mapTextSpanToOriginal(highlightSpan.contextSpan, transformResult),
+              textSpan: mapTextSpanToOriginalCore(highlightSpan.textSpan, transformResult),
+              contextSpan: mapTextSpanToOriginalCore(highlightSpan.contextSpan, transformResult),
             }
           })
           : highlightEntry.highlightSpans
@@ -931,6 +1195,79 @@ function init(modules) {
           highlightSpans,
         }
       })
+    }
+
+    function toOriginalPosViaRemapTable(remapTable, transformedPos) {
+      if (!remapTable || !Array.isArray(remapTable.runs) || remapTable.runs.length === 0) {
+        return undefined
+      }
+
+      const maxPos = Number.isFinite(remapTable.transformedLength) ? remapTable.transformedLength : transformedPos
+      const safePos = Math.max(0, Math.min(maxPos, transformedPos || 0))
+
+      let low = 0
+      let high = remapTable.runs.length - 1
+      while (low <= high) {
+        const mid = (low + high) >> 1
+        const run = remapTable.runs[mid]
+        if (safePos < run.transformedStart) {
+          high = mid - 1
+          continue
+        }
+        if (safePos >= run.transformedEnd) {
+          low = mid + 1
+          continue
+        }
+
+        const delta = safePos - run.transformedStart
+        return run.originalStart + (delta * run.step)
+      }
+
+      return undefined
+    }
+
+    function toOriginalPosCore(transformResult, transformedPos) {
+      const viaTable = toOriginalPosViaRemapTable(transformResult && transformResult.remapTable, transformedPos)
+      if (typeof viaTable === 'number') return viaTable
+      return transformResult.mapper.toOriginalPos(transformedPos)
+    }
+
+    function mapTextSpanToOriginalCore(span, transformResult) {
+      if (!span) return span
+
+      const transformedStart = Math.max(0, span.start || 0)
+      const transformedLength = Math.max(0, span.length || 0)
+      if (transformedLength <= 0) {
+        return {
+          start: toOriginalPosCore(transformResult, transformedStart),
+          length: 0,
+        }
+      }
+
+      const transformedEnd = transformedStart + transformedLength
+      let firstMapped = null
+      let lastMapped = null
+      for (let transformedPos = transformedStart; transformedPos < transformedEnd; transformedPos += 1) {
+        const mappedOriginal = toOriginalPosCore(transformResult, transformedPos)
+        if (firstMapped == null) firstMapped = mappedOriginal
+        lastMapped = mappedOriginal
+      }
+
+      if (firstMapped == null || lastMapped == null) {
+        const start = toOriginalPosCore(transformResult, transformedStart)
+        const end = toOriginalPosCore(transformResult, transformedEnd)
+        return {
+          start,
+          length: Math.max(0, end - start),
+        }
+      }
+
+      const mappedStart = Math.min(firstMapped, lastMapped)
+      const mappedEnd = Math.max(firstMapped, lastMapped)
+      return {
+        start: mappedStart,
+        length: Math.max(1, mappedEnd - mappedStart + 1),
+      }
     }
 
     function getSourceTextForFile(fileName) {
@@ -952,27 +1289,211 @@ function init(modules) {
       return text.slice(start, safePos)
     }
 
+    function getIdentifierTokenAtPosition(text, position) {
+      const bounds = getIdentifierBoundsAtPosition(text, position)
+      if (!bounds) return ''
+      return text.slice(bounds.start, bounds.start + bounds.length)
+    }
+
+    function getIdentifierBoundsAtPosition(text, position) {
+      if (typeof text !== 'string') return null
+
+      function isWordCode(ch) {
+        return (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+      }
+
+      function extractBounds(atPos) {
+        const safePos = Math.max(0, Math.min(text.length, atPos))
+        let start = safePos
+        let end = safePos
+
+        while (start > 0) {
+          const ch = text.charCodeAt(start - 1)
+          if (!isWordCode(ch)) break
+          start -= 1
+        }
+
+        while (end < text.length) {
+          const ch = text.charCodeAt(end)
+          if (!isWordCode(ch)) break
+          end += 1
+        }
+
+        if (start === end) return null
+        return {
+          start,
+          length: end - start,
+        }
+      }
+
+      const primary = extractBounds(position)
+      if (primary) return primary
+
+      const left = extractBounds(position - 1)
+      if (left) return left
+
+      const right = extractBounds(position + 1)
+      if (right) return right
+
+      return null
+    }
+
+    function spanContainsPosition(span, position) {
+      if (!span || typeof span.start !== 'number' || typeof span.length !== 'number') return false
+      if (span.length <= 0) return span.start === position
+      return position >= span.start && position < (span.start + span.length)
+    }
+
+    function spansEqual(left, right) {
+      if (!left || !right) return false
+      return left.start === right.start && left.length === right.length
+    }
+
+    function spanOverlapLength(left, right) {
+      if (!left || !right) return 0
+      if (typeof left.start !== 'number' || typeof left.length !== 'number') return 0
+      if (typeof right.start !== 'number' || typeof right.length !== 'number') return 0
+
+      const leftStart = left.start
+      const leftEnd = left.start + Math.max(0, left.length)
+      const rightStart = right.start
+      const rightEnd = right.start + Math.max(0, right.length)
+
+      const overlapStart = Math.max(leftStart, rightStart)
+      const overlapEnd = Math.min(leftEnd, rightEnd)
+      return Math.max(0, overlapEnd - overlapStart)
+    }
+
+    function quickInfoMentionsIdentifier(quickInfo, identifier) {
+      if (!quickInfo || !identifier) return false
+
+      const chunks = []
+      if (Array.isArray(quickInfo.displayParts)) {
+        for (const part of quickInfo.displayParts) {
+          if (part && typeof part.text === 'string') chunks.push(part.text)
+        }
+      }
+      if (Array.isArray(quickInfo.documentation)) {
+        for (const part of quickInfo.documentation) {
+          if (part && typeof part.text === 'string') chunks.push(part.text)
+        }
+      }
+
+      if (chunks.length === 0) return false
+
+      const text = chunks.join(' ')
+      const escapedIdentifier = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const wordBoundaryPattern = new RegExp(`(^|[^A-Za-z0-9_$])${escapedIdentifier}([^A-Za-z0-9_$]|$)`)
+      return wordBoundaryPattern.test(text)
+    }
+
+    function getQuickInfoDisplayText(quickInfo) {
+      if (!quickInfo || !Array.isArray(quickInfo.displayParts)) return ''
+      const chunks = []
+      for (const part of quickInfo.displayParts) {
+        if (part && typeof part.text === 'string') chunks.push(part.text)
+      }
+      return chunks.join(' ')
+    }
+
+    function getQuickInfoPrimarySymbolName(quickInfo) {
+      const text = getQuickInfoDisplayText(quickInfo)
+      if (!text) return ''
+
+      const patterns = [
+        /\(alias\)\s+(?:const|let|var|function|class|interface|type|enum|namespace)\s+([A-Za-z_$][\w$]*)/,
+        /\b(?:const|let|var|function|class|interface|type|enum|namespace)\s+([A-Za-z_$][\w$]*)\b/,
+        /\(property\)\s+[A-Za-z_$][\w$]*\.([A-Za-z_$][\w$]*)/,
+      ]
+
+      for (const pattern of patterns) {
+        const match = text.match(pattern)
+        if (match && match[1]) return match[1]
+      }
+
+      return ''
+    }
+
+    function scoreQuickInfoCandidate(candidate, options) {
+      const {
+        transformedPosition,
+        originalPosition,
+        originalIdentifier,
+        sourceText,
+      } = options
+
+      const mappedSpan = candidate.mappedTextSpan
+      const containsCursor = spanContainsPosition(mappedSpan, originalPosition)
+      const distance = Math.abs(candidate.transformedCandidatePos - transformedPosition)
+      const spanLength = mappedSpan && typeof mappedSpan.length === 'number'
+        ? mappedSpan.length
+        : Number.POSITIVE_INFINITY
+
+      let identifierMatch = false
+      if (originalIdentifier && mappedSpan && mappedSpan.length > 0 && typeof sourceText === 'string') {
+        const spanText = sourceText.slice(mappedSpan.start, mappedSpan.start + mappedSpan.length)
+        const cleanedSpanText = spanText.replace(/@$/u, '')
+        identifierMatch = cleanedSpanText === originalIdentifier
+      }
+
+      const payloadIdentifierMatch = originalIdentifier
+        ? quickInfoMentionsIdentifier(candidate.quickInfo, originalIdentifier)
+        : false
+
+      return {
+        containsCursor,
+        identifierMatch,
+        payloadIdentifierMatch,
+        distance,
+        spanLength,
+      }
+    }
+
     function remapCompletionEntriesToSugar(entries, originalPrefix) {
       if (!Array.isArray(entries)) return entries
       if (typeof originalPrefix === 'string' && originalPrefix.startsWith('ø')) return entries
 
-      return entries.map((entry) => {
-        if (!entry || typeof entry.name !== 'string') return entry
-        if (!entry.name.startsWith('ø')) return entry
-        if (!SUGAR_IDENTIFIER_RE.test(entry.name)) return entry
+      const remappedEntries = []
+
+      for (const entry of entries) {
+        if (!entry || typeof entry.name !== 'string') {
+          remappedEntries.push(entry)
+          continue
+        }
+
+        if (entry.name === 'destructureØ' || entry.name === 'absorbØ' || entry.name === 'ø' || entry.name === 'πø') {
+          continue
+        }
+
+        if (!entry.name.startsWith('ø') || !SUGAR_IDENTIFIER_RE.test(entry.name)) {
+          remappedEntries.push(entry)
+          continue
+        }
 
         const sugarName = `${entry.name.slice(1)}@`
         const insertText = typeof entry.insertText === 'string'
           ? entry.insertText.replace(/^ø([A-Za-z_$][\w$]*)$/, '$1@')
           : sugarName
 
-        return {
+        remappedEntries.push({
           ...entry,
           name: sugarName,
           insertText,
           filterText: sugarName,
-        }
-      })
+        })
+      }
+
+      return remappedEntries
+    }
+
+    function isSyntheticQuickInfo(quickInfo, transformResult) {
+      if (!quickInfo || !quickInfo.textSpan) return false
+      const span = quickInfo.textSpan
+      return Boolean(findHiddenHelperTransformedRange(
+        transformResult && typeof transformResult.code === 'string' ? transformResult.code : '',
+        Math.max(0, span.start || 0),
+        Math.max(0, span.length || 0),
+      ))
     }
 
     function isLikelyDestructuringContext(text, position) {
@@ -1467,27 +1988,189 @@ function init(modules) {
 
       const transformedPosition = toTransformedPos(transient.transformResult, position)
       const sourceText = getSnapshotText(fileName) || ''
-      const originalPrefix = getIdentifierPrefixAtPosition(sourceText, position)
+      const originalIdentifier = getIdentifierTokenAtPosition(sourceText, position)
+      const originalIdentifierBounds = getIdentifierBoundsAtPosition(sourceText, position)
       const nearbyPositions = withNearbyPositions(
         transformedPosition,
         transient.transformResult.code.length,
         24,
       )
+      const transformedCodeLength = transient.transformResult.code.length
+      const lockedIdentifierCandidatePositions = []
+      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
+        const originalStart = originalIdentifierBounds.start
+        const originalEnd = originalStart + originalIdentifierBounds.length
+        const windowStart = Math.max(0, transformedPosition - 260)
+        const windowEnd = Math.min(transformedCodeLength, transformedPosition + 260)
 
-      let quickInfo
-      for (const candidatePos of nearbyPositions) {
-        quickInfo = transient.languageService.getQuickInfoAtPosition(
+        for (let transformedPos = windowStart; transformedPos <= windowEnd; transformedPos += 1) {
+          const mappedOriginal = toOriginalPosCore(transient.transformResult, transformedPos)
+          if (mappedOriginal >= originalStart && mappedOriginal < originalEnd) {
+            lockedIdentifierCandidatePositions.push(transformedPos)
+          }
+        }
+      }
+
+      const candidatePositions = []
+      const seenCandidatePositions = new Set()
+      function addCandidatePosition(pos) {
+        const safePos = Math.max(0, Math.min(transient.transformResult.code.length, pos))
+        if (seenCandidatePositions.has(safePos)) return
+        seenCandidatePositions.add(safePos)
+        candidatePositions.push(safePos)
+      }
+
+      if (lockedIdentifierCandidatePositions.length > 0) {
+        for (const candidatePos of lockedIdentifierCandidatePositions) {
+          addCandidatePosition(candidatePos)
+          addCandidatePosition(candidatePos - 1)
+          addCandidatePosition(candidatePos + 1)
+        }
+      } else {
+        for (const candidatePos of nearbyPositions) {
+          addCandidatePosition(candidatePos)
+        }
+      }
+
+      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
+        const identifierStart = originalIdentifierBounds.start
+        const identifierEnd = originalIdentifierBounds.start + originalIdentifierBounds.length
+        for (let originalPos = identifierStart; originalPos < identifierEnd; originalPos += 1) {
+          const transformedFromIdentifier = toTransformedPos(transient.transformResult, originalPos)
+          addCandidatePosition(transformedFromIdentifier)
+          addCandidatePosition(transformedFromIdentifier - 1)
+          addCandidatePosition(transformedFromIdentifier + 1)
+        }
+      }
+
+      candidatePositions.sort((left, right) => Math.abs(left - transformedPosition) - Math.abs(right - transformedPosition))
+
+      let quickInfoCandidates = []
+      for (const candidatePos of candidatePositions) {
+        const candidateQuickInfo = transient.languageService.getQuickInfoAtPosition(
           transient.virtualFileName,
           candidatePos,
         )
-        if (quickInfo) break
+        if (!candidateQuickInfo) continue
+        if (isSyntheticQuickInfo(candidateQuickInfo, transient.transformResult)) continue
+
+        const mappedTextSpan = mapTextSpanToOriginalCore(candidateQuickInfo.textSpan, transient.transformResult)
+        if (!mappedTextSpan || mappedTextSpan.length <= 0) continue
+
+        quickInfoCandidates.push({
+          quickInfo: candidateQuickInfo,
+          transformedCandidatePos: candidatePos,
+          mappedTextSpan,
+        })
       }
 
-      if (!quickInfo) return quickInfo
+      if (quickInfoCandidates.length === 0) return undefined
+
+      if (lockedIdentifierCandidatePositions.length > 0) {
+        const lockedSet = new Set(lockedIdentifierCandidatePositions)
+        const lockedCandidates = quickInfoCandidates.filter((candidate) => lockedSet.has(candidate.transformedCandidatePos))
+        if (lockedCandidates.length > 0) {
+          quickInfoCandidates = lockedCandidates
+        }
+      }
+
+      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
+        const exactSpanCandidates = quickInfoCandidates.filter((candidate) => spansEqual(candidate.mappedTextSpan, originalIdentifierBounds))
+        if (exactSpanCandidates.length > 0) {
+          quickInfoCandidates = exactSpanCandidates
+        }
+      }
+
+      if (originalIdentifier) {
+        const exactSymbolNameCandidates = quickInfoCandidates.filter((candidate) => {
+          const symbolName = getQuickInfoPrimarySymbolName(candidate.quickInfo)
+          return symbolName === originalIdentifier || symbolName === `ø${originalIdentifier}`
+        })
+        if (exactSymbolNameCandidates.length > 0) {
+          quickInfoCandidates = exactSymbolNameCandidates
+        } else {
+          const spanTextMatchedCandidates = quickInfoCandidates.filter((candidate) => {
+            const span = candidate.mappedTextSpan
+            if (!span || span.length <= 0) return false
+            const spanText = sourceText.slice(span.start, span.start + span.length).replace(/@$/u, '')
+            return spanText === originalIdentifier
+          })
+          if (spanTextMatchedCandidates.length > 0) {
+            quickInfoCandidates = spanTextMatchedCandidates
+          }
+        }
+      }
+
+      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
+        const overlappingCandidates = quickInfoCandidates.filter((candidate) => {
+          return spanOverlapLength(candidate.mappedTextSpan, originalIdentifierBounds) > 0
+        })
+        if (overlappingCandidates.length > 0) {
+          quickInfoCandidates = overlappingCandidates
+        }
+      }
+
+      if (originalIdentifier) {
+        const payloadMatchedCandidates = quickInfoCandidates.filter((candidate) => {
+          return quickInfoMentionsIdentifier(candidate.quickInfo, originalIdentifier)
+        })
+        if (payloadMatchedCandidates.length > 0 && !originalIdentifierBounds) {
+          quickInfoCandidates = payloadMatchedCandidates
+        } else if (!originalIdentifierBounds) {
+          const spanTextMatchedCandidates = quickInfoCandidates.filter((candidate) => {
+            const span = candidate.mappedTextSpan
+            if (!span || span.length <= 0) return false
+            const spanText = sourceText.slice(span.start, span.start + span.length).replace(/@$/u, '')
+            return spanText === originalIdentifier
+          })
+          if (spanTextMatchedCandidates.length > 0) {
+            quickInfoCandidates = spanTextMatchedCandidates
+          }
+        }
+      }
+
+      quickInfoCandidates.sort((left, right) => {
+        const leftScore = scoreQuickInfoCandidate(left, {
+          transformedPosition,
+          originalPosition: position,
+          originalIdentifier,
+          sourceText,
+        })
+        const rightScore = scoreQuickInfoCandidate(right, {
+          transformedPosition,
+          originalPosition: position,
+          originalIdentifier,
+          sourceText,
+        })
+
+        if (leftScore.payloadIdentifierMatch !== rightScore.payloadIdentifierMatch) {
+          return leftScore.payloadIdentifierMatch ? -1 : 1
+        }
+
+        if (leftScore.containsCursor !== rightScore.containsCursor) {
+          return leftScore.containsCursor ? -1 : 1
+        }
+
+        if (leftScore.identifierMatch !== rightScore.identifierMatch) {
+          return leftScore.identifierMatch ? -1 : 1
+        }
+
+        if (leftScore.distance !== rightScore.distance) {
+          return leftScore.distance - rightScore.distance
+        }
+
+        return leftScore.spanLength - rightScore.spanLength
+      })
+
+      const bestCandidate = quickInfoCandidates[0]
+      const quickInfo = bestCandidate.quickInfo
+      const resolvedTextSpan = originalIdentifierBounds && originalIdentifier
+        ? originalIdentifierBounds
+        : bestCandidate.mappedTextSpan
 
       return {
         ...quickInfo,
-        textSpan: mapTextSpanToOriginal(quickInfo.textSpan, transient.transformResult),
+        textSpan: resolvedTextSpan,
       }
     }
 
@@ -1527,7 +2210,7 @@ function init(modules) {
 
       return {
         ...value,
-        textSpan: mapTextSpanToOriginal(value.textSpan, transient.transformResult),
+        textSpan: mapTextSpanToOriginalCore(value.textSpan, transient.transformResult),
         definitions: value.definitions
           ? value.definitions.map((definition) => mapDefinitionToOriginal(definition, transient.qrkContext))
           : value.definitions,
@@ -1584,14 +2267,14 @@ function init(modules) {
 
       if (bestCompletions) {
         const mappedOptionalReplacementSpan = bestCompletions.optionalReplacementSpan
-          ? mapTextSpanToOriginal(bestCompletions.optionalReplacementSpan, transient.transformResult)
+          ? mapTextSpanToOriginalCore(bestCompletions.optionalReplacementSpan, transient.transformResult)
           : bestCompletions.optionalReplacementSpan
 
         const mappedEntries = Array.isArray(bestCompletions.entries)
           ? bestCompletions.entries.map((entry) => ({
             ...entry,
             replacementSpan: entry.replacementSpan
-              ? mapTextSpanToOriginal(entry.replacementSpan, transient.transformResult)
+              ? mapTextSpanToOriginalCore(entry.replacementSpan, transient.transformResult)
               : entry.replacementSpan,
           }))
           : bestCompletions.entries
@@ -1846,7 +2529,7 @@ function init(modules) {
 
       return {
         ...renameInfo,
-        triggerSpan: mapTextSpanToOriginal(renameInfo.triggerSpan, transient.transformResult),
+        triggerSpan: mapTextSpanToOriginalCore(renameInfo.triggerSpan, transient.transformResult),
       }
     }
 
@@ -1869,7 +2552,7 @@ function init(modules) {
 
       return {
         ...signatureHelp,
-        applicableSpan: mapTextSpanToOriginal(signatureHelp.applicableSpan, transient.transformResult),
+        applicableSpan: mapTextSpanToOriginalCore(signatureHelp.applicableSpan, transient.transformResult),
       }
     }
 

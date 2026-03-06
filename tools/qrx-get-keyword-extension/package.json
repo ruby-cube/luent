@@ -1,0 +1,25 @@
+{
+  "name": "qrx-get-keyword-highlighting",
+  "displayName": "QRX Get Keyword Highlighting",
+  "description": "Highlights qrx-style `get` declarations as keywords in TS/TSX tokenization.",
+  "version": "0.0.6",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "grammars": [
+      {
+        "path": "./syntaxes/qrx-get.injection.tmLanguage.json",
+        "scopeName": "qrx.get.injection",
+        "injectTo": [
+          "source.tsx",
+          "source.ts"
+        ]
+      }
+    ]
+  }
+}

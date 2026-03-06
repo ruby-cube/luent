@@ -101,18 +101,18 @@ class MutableCode {
     const lower = Math.max(0, upper - 1)
 
     if (this.map[upper] === originalPos) {
-      let rightmost = upper
-      while (rightmost + 1 <= lastIndex && this.map[rightmost + 1] === originalPos) {
-        rightmost += 1
+      let leftmost = upper
+      while (leftmost - 1 >= 0 && this.map[leftmost - 1] === originalPos) {
+        leftmost -= 1
       }
-      return rightmost
+      return leftmost
     }
 
     const upperDistance = Math.abs(this.map[upper] - originalPos)
     const lowerDistance = Math.abs(this.map[lower] - originalPos)
 
     if (lowerDistance === upperDistance) {
-      return upper
+      return lower
     }
 
     return lowerDistance < upperDistance ? lower : upper
@@ -964,6 +964,125 @@ function runLexicalPass(state, getVars, tsxLike) {
   }
 }
 
+function buildRemapTableFromMap(map, originalLength, transformedLength) {
+  const safeMap = Array.isArray(map) ? map : []
+  const runs = []
+
+  if (safeMap.length === 0) {
+    return {
+      version: 1,
+      originalLength: Math.max(0, originalLength || 0),
+      transformedLength: Math.max(0, transformedLength || 0),
+      runs,
+    }
+  }
+
+  let runStart = 0
+  while (runStart < safeMap.length) {
+    const initialStep = runStart + 1 < safeMap.length
+      ? safeMap[runStart + 1] - safeMap[runStart]
+      : 0
+
+    let runEnd = runStart + 1
+    while (runEnd < safeMap.length - 1) {
+      const nextStep = safeMap[runEnd + 1] - safeMap[runEnd]
+      if (nextStep !== initialStep) break
+      runEnd += 1
+    }
+
+    runs.push({
+      transformedStart: runStart,
+      transformedEnd: runEnd + 1,
+      originalStart: safeMap[runStart],
+      step: initialStep,
+    })
+
+    runStart = runEnd + 1
+  }
+
+  return {
+    version: 1,
+    originalLength: Math.max(0, originalLength || 0),
+    transformedLength: Math.max(0, transformedLength || 0),
+    runs,
+  }
+}
+
+function findRemapRunForPos(remapTable, transformedPos) {
+  if (!remapTable || !Array.isArray(remapTable.runs) || remapTable.runs.length === 0) return null
+
+  const safePos = Math.max(0, Math.min(remapTable.transformedLength || 0, transformedPos || 0))
+  let low = 0
+  let high = remapTable.runs.length - 1
+
+  while (low <= high) {
+    const mid = (low + high) >> 1
+    const run = remapTable.runs[mid]
+    if (safePos < run.transformedStart) {
+      high = mid - 1
+      continue
+    }
+    if (safePos >= run.transformedEnd) {
+      low = mid + 1
+      continue
+    }
+    return run
+  }
+
+  return null
+}
+
+function toOriginalPosFromRemapTable(remapTable, transformedPos) {
+  if (!remapTable) return 0
+
+  const safePos = Math.max(0, Math.min(remapTable.transformedLength || 0, transformedPos || 0))
+  const run = findRemapRunForPos(remapTable, safePos)
+  if (!run) return 0
+
+  const delta = safePos - run.transformedStart
+  return run.originalStart + (delta * run.step)
+}
+
+function mapTextSpanFromRemapTable(remapTable, span) {
+  if (!span) return span
+
+  const transformedStart = Math.max(0, span.start || 0)
+  const transformedLength = Math.max(0, span.length || 0)
+
+  if (transformedLength <= 0) {
+    return {
+      start: toOriginalPosFromRemapTable(remapTable, transformedStart),
+      length: 0,
+    }
+  }
+
+  const transformedEnd = transformedStart + transformedLength
+  let firstMapped = null
+  let lastMapped = null
+
+  for (let transformedPos = transformedStart; transformedPos < transformedEnd; transformedPos += 1) {
+    const mappedOriginal = toOriginalPosFromRemapTable(remapTable, transformedPos)
+    if (firstMapped == null) firstMapped = mappedOriginal
+    lastMapped = mappedOriginal
+  }
+
+  if (firstMapped == null || lastMapped == null) {
+    const start = toOriginalPosFromRemapTable(remapTable, transformedStart)
+    const end = toOriginalPosFromRemapTable(remapTable, transformedEnd)
+    return {
+      start,
+      length: Math.max(0, end - start),
+    }
+  }
+
+  const mappedStart = Math.min(firstMapped, lastMapped)
+  const mappedEnd = Math.max(firstMapped, lastMapped)
+  return {
+    start: mappedStart,
+    length: Math.max(1, mappedEnd - mappedStart + 1),
+  }
+}
+
 function transformQuarkySugarShared(input, options = {}) {
   const { includeToTransformedPos = false } = options
   const { code, fileName } = input
@@ -991,12 +1110,18 @@ function transformQuarkySugarShared(input, options = {}) {
     }
   }
 
+  const remapTable = buildRemapTableFromMap(state.map, code.length, state.code.length)
+
   return {
     code: state.code,
     mapper,
+    remapTable,
   }
 }
 
 module.exports = {
+  buildRemapTableFromMap,
+  mapTextSpanFromRemapTable,
+  toOriginalPosFromRemapTable,
   transformQuarkySugarShared,
 }
