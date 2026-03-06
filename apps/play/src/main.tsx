@@ -65,7 +65,6 @@ import { fetchArticles } from './wip-demos/conduit/src/feature/article-feed/Arti
 import { TestMutableDerivation } from './wip-demos/TestMutableDerivations';
 import { TestListDragDrop } from './wip-demos/TestListDragDrop';
 import { MountIfAnimation } from './TestMountIf-animation';
-import { List } from './App';
 import { TestRenderFunctionSlot } from './TestRenderFunctionSlot';
 import { TestListMounting } from './TestListMounting';
 import { TestStyling } from './wip-demos/TestStyling';
@@ -124,33 +123,34 @@ import { TestRenderFunctionAsIon } from './TestRenderFunctionAsIon';
 //    while (i--) { }
 // })
 
-function App() {
-   const $count = Ion(0, {
-      increment() {
-         $count.value++
-      }
-   })
+// function App() {
+//    const $count = Ion(0, {
+//       increment() {
+//          $count.value++
+//       }
+//    })
 
-   function renderFunction() {
+//    function renderFunction() {
 
-      watch($count, () => {
-         console.log('INNER: count is now', $count())
-      }, {phase: PRELUDE})
-   }
+//       watch($count, () => {
+//          console.log('INNER: count is now', $count())
+//       }, {phase: PRELUDE})
+//    }
 
-   watch(renderFunction, () => {
-      console.log('OUTER: count', $count())
-   }, {phase: PRELUDE})
+//    watch(renderFunction, () => {
+//       console.log('OUTER: count', $count())
+//    }, {phase: PRELUDE})
 
-   return template(
-      <>
-         <div>{$count}</div>
-         <button on:click={e => $count.increment()}>+</button>
-      </>
-   )
-}
+//    return template(
+//       <>
+//          <div>{$count}</div>
+//          <button on:click={e => $count.increment()}>+</button>
+//       </>
+//    )
+// }
 
-const app = createRoot(App)
+// const app = createRoot(TestThru)
+const app = createRoot(() =><QrxCounter showFractions={Ion(true)}></QrxCounter>)
 
 app.mount('#root')
 

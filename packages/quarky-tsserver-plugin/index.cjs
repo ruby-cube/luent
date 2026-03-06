@@ -7,7 +7,7 @@ function init(modules) {
   const ts = modules.typescript
 
   function isSugarFile(fileName) {
-    return fileName.endsWith('.lue') || fileName.endsWith('.qrx')
+    return fileName.endsWith('.qrk') || fileName.endsWith('.qrx')
   }
 
   function getVirtualExtension(fileName) {
@@ -122,10 +122,10 @@ function init(modules) {
       const containingDir = path.dirname(containingOriginal)
 
       const probeCandidates = []
-      if (moduleName.endsWith('.lue') || moduleName.endsWith('.qrx')) {
+      if (moduleName.endsWith('.qrk') || moduleName.endsWith('.qrx')) {
         probeCandidates.push(moduleName)
       } else {
-        probeCandidates.push(`${moduleName}.lue`, `${moduleName}.qrx`)
+        probeCandidates.push(`${moduleName}.qrk`, `${moduleName}.qrx`)
       }
 
       for (const candidate of probeCandidates) {
@@ -154,6 +154,9 @@ function init(modules) {
       : undefined
     const originalHostGetScriptVersion = typeof host.getScriptVersion === 'function'
       ? host.getScriptVersion.bind(host)
+      : undefined
+    const originalHostGetProjectVersion = typeof host.getProjectVersion === 'function'
+      ? host.getProjectVersion.bind(host)
       : undefined
     const originalHostResolveModuleNames = typeof host.resolveModuleNames === 'function'
       ? host.resolveModuleNames.bind(host)
@@ -256,6 +259,19 @@ function init(modules) {
       return snapshot.getText(0, snapshot.getLength())
     }
 
+    function getProjectVersion() {
+      let value
+
+      if (originalHostGetProjectVersion) {
+        value = originalHostGetProjectVersion()
+      } else if (project && typeof project.getProjectVersion === 'function') {
+        value = project.getProjectVersion()
+      }
+
+      if (value === undefined || value === null) return ''
+      return String(value)
+    }
+
     function getConfigMtimeMs(configPath) {
       if (typeof ts.sys.getModifiedTime !== 'function') return -1
       const modified = ts.sys.getModifiedTime(configPath)
@@ -310,7 +326,7 @@ function init(modules) {
 
       const files = ts.sys.readDirectory(
         configDirectory,
-        ['.lue', '.qrx'],
+        ['.qrk', '.qrx'],
         excludePatterns,
         includePatterns,
       )
@@ -324,14 +340,14 @@ function init(modules) {
       return files
     }
 
-    function createLueCompilerContext(configPath, parsedConfig, discoveredLueFiles, targetPath, getTargetSourceText) {
+    function createQrkCompilerContext(configPath, parsedConfig, discoveredQrkFiles, targetPath, getTargetSourceText) {
       const normalizedTarget = normalizeAbsolute(targetPath)
       const originalToVirtual = new Map()
       const virtualToOriginal = new Map()
       const transformCache = new Map()
       const originalSourceFileCache = new Map()
 
-      function registerLueFile(originalPath) {
+      function registerQrkFile(originalPath) {
         const normalizedOriginal = normalizeAbsolute(originalPath)
         const existing = originalToVirtual.get(normalizedOriginal)
         if (existing) return existing
@@ -342,11 +358,11 @@ function init(modules) {
         return virtualPath
       }
 
-      for (const fileName of discoveredLueFiles) {
-        registerLueFile(fileName)
+      for (const fileName of discoveredQrkFiles) {
+        registerQrkFile(fileName)
       }
 
-      registerLueFile(normalizedTarget)
+      registerQrkFile(normalizedTarget)
 
       function getOriginalSourceText(originalPath) {
         const normalized = normalizeAbsolute(originalPath)
@@ -436,7 +452,7 @@ function init(modules) {
       return {
         originalToVirtual,
         virtualToOriginal,
-        registerLueFile,
+        registerQrkFile,
         getTransformForOriginal,
         remapDiagnostic,
       }
@@ -848,11 +864,11 @@ function init(modules) {
       return nonOverlapping
     }
 
-    function mapDefinitionToOriginal(definition, lueContext) {
-      const originalFile = lueContext.virtualToOriginal.get(definition.fileName)
+    function mapDefinitionToOriginal(definition, qrkContext) {
+      const originalFile = qrkContext.virtualToOriginal.get(definition.fileName)
       if (!originalFile) return definition
 
-      const transformResult = lueContext.getTransformForOriginal(originalFile)
+      const transformResult = qrkContext.getTransformForOriginal(originalFile)
       return {
         ...definition,
         fileName: originalFile,
@@ -862,11 +878,11 @@ function init(modules) {
       }
     }
 
-    function mapReferenceEntryToOriginal(referenceEntry, lueContext) {
-      const originalFile = lueContext.virtualToOriginal.get(referenceEntry.fileName)
+    function mapReferenceEntryToOriginal(referenceEntry, qrkContext) {
+      const originalFile = qrkContext.virtualToOriginal.get(referenceEntry.fileName)
       if (!originalFile) return referenceEntry
 
-      const transformResult = lueContext.getTransformForOriginal(originalFile)
+      const transformResult = qrkContext.getTransformForOriginal(originalFile)
       return {
         ...referenceEntry,
         fileName: originalFile,
@@ -875,11 +891,11 @@ function init(modules) {
       }
     }
 
-    function mapRenameLocationToOriginal(location, lueContext) {
-      const originalFile = lueContext.virtualToOriginal.get(location.fileName)
+    function mapRenameLocationToOriginal(location, qrkContext) {
+      const originalFile = qrkContext.virtualToOriginal.get(location.fileName)
       if (!originalFile) return location
 
-      const transformResult = lueContext.getTransformForOriginal(originalFile)
+      const transformResult = qrkContext.getTransformForOriginal(originalFile)
       return {
         ...location,
         fileName: originalFile,
@@ -888,16 +904,16 @@ function init(modules) {
       }
     }
 
-    function mapDocumentHighlightsToOriginal(documentHighlights, lueContext) {
+    function mapDocumentHighlightsToOriginal(documentHighlights, qrkContext) {
       if (!Array.isArray(documentHighlights)) return documentHighlights
 
       return documentHighlights.map((highlightEntry) => {
         if (!highlightEntry || typeof highlightEntry.fileName !== 'string') return highlightEntry
 
-        const originalFile = lueContext.virtualToOriginal.get(highlightEntry.fileName)
+        const originalFile = qrkContext.virtualToOriginal.get(highlightEntry.fileName)
         if (!originalFile) return highlightEntry
 
-        const transformResult = lueContext.getTransformForOriginal(originalFile)
+        const transformResult = qrkContext.getTransformForOriginal(originalFile)
         const highlightSpans = Array.isArray(highlightEntry.highlightSpans)
           ? highlightEntry.highlightSpans.map((highlightSpan) => {
             if (!highlightSpan || !highlightSpan.textSpan) return highlightSpan
@@ -994,6 +1010,7 @@ function init(modules) {
     function createTransientLanguageService(fileName) {
       const normalizedFile = normalizeAbsolute(fileName)
       const scriptVersion = host.getScriptVersion(normalizedFile) || host.getScriptVersion(fileName) || ''
+      const projectVersion = getProjectVersion()
       const configPath = getConfigPath()
       if (!configPath) return undefined
 
@@ -1001,7 +1018,7 @@ function init(modules) {
       if (!parsedConfigResult) return undefined
 
       const parsedConfig = parsedConfigResult.parsedConfig
-      const discoveredLueFiles = getDiscoveredSugarFiles(configPath, parsedConfig)
+      const discoveredQrkFiles = getDiscoveredSugarFiles(configPath, parsedConfig)
       const configSignature = `${normalizeAbsolute(configPath)}:${parsedConfigResult.mtimeMs}`
 
       const cached = transientLsCache.get(normalizedFile)
@@ -1009,6 +1026,7 @@ function init(modules) {
         cached
         && cached.configSignature === configSignature
         && cached.scriptVersion === scriptVersion
+        && cached.projectVersion === projectVersion
       ) {
         return cached
       }
@@ -1016,14 +1034,14 @@ function init(modules) {
       const sourceText = getSnapshotText(fileName)
       if (typeof sourceText !== 'string') return undefined
 
-      const lueContext = createLueCompilerContext(
+      const qrkContext = createQrkCompilerContext(
         configPath,
         parsedConfig,
-        discoveredLueFiles,
+        discoveredQrkFiles,
         normalizedFile,
         () => getSnapshotText(normalizedFile),
       )
-      const virtualFileName = lueContext.originalToVirtual.get(normalizedFile)
+      const virtualFileName = qrkContext.originalToVirtual.get(normalizedFile)
       if (!virtualFileName) return undefined
 
       const compilerOptions = {
@@ -1038,17 +1056,23 @@ function init(modules) {
           return scriptFileNames
         },
         getScriptVersion(scriptName) {
-          if (normalizeAbsolute(scriptName) === normalizedFile) return scriptVersion
-          const originalForVirtual = lueContext.virtualToOriginal.get(scriptName)
+          const normalizedScriptName = normalizeAbsolute(scriptName)
+          if (normalizedScriptName === normalizedFile) return scriptVersion
+          const originalForVirtual = qrkContext.virtualToOriginal.get(scriptName)
           if (originalForVirtual && normalizeAbsolute(originalForVirtual) === normalizedFile) {
             return scriptVersion
           }
-          return '0'
+
+          if (originalForVirtual) {
+            return host.getScriptVersion(originalForVirtual) || '0'
+          }
+
+          return host.getScriptVersion(scriptName) || '0'
         },
         getScriptSnapshot(scriptName) {
-          const original = lueContext.virtualToOriginal.get(scriptName)
+          const original = qrkContext.virtualToOriginal.get(scriptName)
           if (original) {
-            const transformed = lueContext.getTransformForOriginal(original).code
+            const transformed = qrkContext.getTransformForOriginal(original).code
             return ts.ScriptSnapshot.fromString(transformed)
           }
 
@@ -1072,7 +1096,7 @@ function init(modules) {
           return ts.sys.readFile(filePath)
         },
         fileExists(filePath) {
-          if (lueContext.virtualToOriginal.has(filePath)) return true
+          if (qrkContext.virtualToOriginal.has(filePath)) return true
           return ts.sys.fileExists(filePath)
         },
         readDirectory(rootDir, extensions, excludes, includes, depth) {
@@ -1093,12 +1117,12 @@ function init(modules) {
         resolveModuleNames(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptionsInner) {
           const moduleResolutionHost = {
             fileExists: (candidate) => {
-              if (lueContext.virtualToOriginal.has(candidate)) return true
+              if (qrkContext.virtualToOriginal.has(candidate)) return true
               return ts.sys.fileExists(candidate)
             },
             readFile: (candidate) => {
-              const original = lueContext.virtualToOriginal.get(candidate)
-              if (original) return lueContext.getTransformForOriginal(original).code
+              const original = qrkContext.virtualToOriginal.get(candidate)
+              if (original) return qrkContext.getTransformForOriginal(original).code
               return ts.sys.readFile(candidate)
             },
             directoryExists: ts.sys.directoryExists,
@@ -1123,21 +1147,21 @@ function init(modules) {
               return undefined
             }
 
-            const containingOriginal = lueContext.virtualToOriginal.get(containingFile) || containingFile
+            const containingOriginal = qrkContext.virtualToOriginal.get(containingFile) || containingFile
             const containingDir = path.dirname(containingOriginal)
 
             const probeCandidates = []
-            if (moduleName.endsWith('.lue') || moduleName.endsWith('.qrx')) {
+            if (moduleName.endsWith('.qrk') || moduleName.endsWith('.qrx')) {
               probeCandidates.push(moduleName)
             } else {
-              probeCandidates.push(`${moduleName}.lue`, `${moduleName}.qrx`)
+              probeCandidates.push(`${moduleName}.qrk`, `${moduleName}.qrx`)
             }
 
             for (const candidate of probeCandidates) {
               const absoluteCandidate = normalizeAbsolute(path.resolve(containingDir, candidate))
               if (!ts.sys.fileExists(absoluteCandidate)) continue
 
-              const resolvedVirtual = lueContext.registerLueFile(absoluteCandidate)
+              const resolvedVirtual = qrkContext.registerQrkFile(absoluteCandidate)
               return {
                 resolvedFileName: resolvedVirtual,
                 extension: resolvedVirtual.endsWith('.tsx') ? ts.Extension.Tsx : ts.Extension.Ts,
@@ -1157,12 +1181,13 @@ function init(modules) {
 
       const entry = {
         languageService: languageServiceForTransforms,
-        lueContext,
+        qrkContext,
         virtualFileName,
         configSignature,
         scriptVersion,
+        projectVersion,
         get transformResult() {
-          return lueContext.getTransformForOriginal(normalizedFile)
+          return qrkContext.getTransformForOriginal(normalizedFile)
         },
       }
 
@@ -1177,7 +1202,8 @@ function init(modules) {
     function getTransformedDiagnosticsByKind(fileName, kind) {
       const normalizedFile = normalizeAbsolute(fileName)
       const scriptVersion = host.getScriptVersion(fileName) || ''
-      const cacheKey = `${kind}:${normalizedFile}:${scriptVersion}`
+      const projectVersion = getProjectVersion()
+      const cacheKey = `${kind}:${normalizedFile}:${scriptVersion}:${projectVersion}`
       const cached = diagnosticsCache.get(cacheKey)
       if (cached) return cached
 
@@ -1187,6 +1213,7 @@ function init(modules) {
         if (
           lastSemantic
           && Array.isArray(lastSemantic.diagnostics)
+          && lastSemantic.projectVersion === projectVersion
           && now - lastSemantic.computedAt < semanticDiagnosticsCooldownMs
         ) {
           return lastSemantic.diagnostics
@@ -1266,7 +1293,7 @@ function init(modules) {
           }
 
           return rawDiagnostics
-            .map((diag) => transient.lueContext.remapDiagnostic(diag))
+            .map((diag) => transient.qrkContext.remapDiagnostic(diag))
             .filter((diag) => {
               if (!diag.file) return false
               return normalizeAbsolute(diag.file.fileName) === normalizedFile
@@ -1281,6 +1308,7 @@ function init(modules) {
           semanticDiagnosticsState.set(normalizedFile, {
             diagnostics,
             computedAt: Date.now(),
+            projectVersion,
           })
         }
         return diagnostics
@@ -1292,7 +1320,11 @@ function init(modules) {
         diagnosticsCache.set(cacheKey, [])
         if (kind === 'semantic') {
           const lastSemantic = semanticDiagnosticsState.get(normalizedFile)
-          if (lastSemantic && Array.isArray(lastSemantic.diagnostics)) {
+          if (
+            lastSemantic
+            && Array.isArray(lastSemantic.diagnostics)
+            && lastSemantic.projectVersion === projectVersion
+          ) {
             return lastSemantic.diagnostics
           }
         }
@@ -1474,7 +1506,7 @@ function init(modules) {
       )
 
       if (!definitions) return definitions
-      return definitions.map((definition) => mapDefinitionToOriginal(definition, transient.lueContext))
+      return definitions.map((definition) => mapDefinitionToOriginal(definition, transient.qrkContext))
     }
 
     proxy.getDefinitionAndBoundSpan = (fileName, position) => {
@@ -1497,7 +1529,7 @@ function init(modules) {
         ...value,
         textSpan: mapTextSpanToOriginal(value.textSpan, transient.transformResult),
         definitions: value.definitions
-          ? value.definitions.map((definition) => mapDefinitionToOriginal(definition, transient.lueContext))
+          ? value.definitions.map((definition) => mapDefinitionToOriginal(definition, transient.qrkContext))
           : value.definitions,
       }
     }
@@ -1716,7 +1748,7 @@ function init(modules) {
       )
 
       if (!references) return references
-      return references.map((reference) => mapReferenceEntryToOriginal(reference, transient.lueContext))
+      return references.map((reference) => mapReferenceEntryToOriginal(reference, transient.qrkContext))
     }
 
     proxy.getDocumentHighlights = (fileName, position, filesToSearch) => {
@@ -1736,8 +1768,8 @@ function init(modules) {
         ? filesToSearch.map((searchFile) => {
           if (!isSugarFile(searchFile)) return searchFile
           const normalized = normalizeAbsolute(searchFile)
-          return transient.lueContext.originalToVirtual.get(normalized)
-            || transient.lueContext.registerLueFile(normalized)
+          return transient.qrkContext.originalToVirtual.get(normalized)
+            || transient.qrkContext.registerQrkFile(normalized)
         })
         : filesToSearch
 
@@ -1747,7 +1779,7 @@ function init(modules) {
         transformedFilesToSearch,
       )
 
-      return mapDocumentHighlightsToOriginal(highlights, transient.lueContext)
+      return mapDocumentHighlightsToOriginal(highlights, transient.qrkContext)
     }
 
     proxy.getOccurrencesAtPosition = (fileName, position) => {
@@ -1769,7 +1801,7 @@ function init(modules) {
       )
 
       if (!occurrences) return occurrences
-      return occurrences.map((occurrence) => mapReferenceEntryToOriginal(occurrence, transient.lueContext))
+      return occurrences.map((occurrence) => mapReferenceEntryToOriginal(occurrence, transient.qrkContext))
     }
 
     proxy.findRenameLocations = (fileName, position, findInStrings, findInComments, preferences) => {
@@ -1792,7 +1824,7 @@ function init(modules) {
       )
 
       if (!locations) return locations
-      return locations.map((location) => mapRenameLocationToOriginal(location, transient.lueContext))
+      return locations.map((location) => mapRenameLocationToOriginal(location, transient.qrkContext))
     }
 
     proxy.getRenameInfo = (fileName, position, options) => {
@@ -1856,7 +1888,7 @@ function init(modules) {
       )
 
       if (!implementations) return implementations
-      return implementations.map((implementation) => mapDefinitionToOriginal(implementation, transient.lueContext))
+      return implementations.map((implementation) => mapDefinitionToOriginal(implementation, transient.qrkContext))
     }
 
     proxy.getTypeDefinitionAtPosition = (fileName, position) => {
@@ -1874,7 +1906,7 @@ function init(modules) {
       )
 
       if (!typeDefinitions) return typeDefinitions
-      return typeDefinitions.map((typeDefinition) => mapDefinitionToOriginal(typeDefinition, transient.lueContext))
+      return typeDefinitions.map((typeDefinition) => mapDefinitionToOriginal(typeDefinition, transient.qrkContext))
     }
 
     log('initialized')
@@ -1894,7 +1926,7 @@ function init(modules) {
     const includePatterns = Array.isArray(parsed.raw && parsed.raw.include) ? parsed.raw.include : undefined
     const excludePatterns = Array.isArray(parsed.raw && parsed.raw.exclude) ? parsed.raw.exclude : undefined
 
-    return ts.sys.readDirectory(path.dirname(configPath), ['.lue', '.qrx'], excludePatterns, includePatterns)
+    return ts.sys.readDirectory(path.dirname(configPath), ['.qrk', '.qrx'], excludePatterns, includePatterns)
   }
 
   return {

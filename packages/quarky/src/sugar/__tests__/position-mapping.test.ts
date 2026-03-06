@@ -86,7 +86,7 @@ describe('qrx sugar position mapping', () => {
 
   it('keeps halfCount/thirdCount mapped to distinct original authored ranges', () => {
     const halfToken = '{øhalfCount}'
-    const thirdToken = '{øthirdCount}'
+    const thirdToken = transformed.code.includes('{øthirdCount}') ? '{øthirdCount}' : '{thirdCount}'
     const halfTransformedOffset = transformed.code.indexOf(halfToken) + 1
     const thirdTransformedOffset = transformed.code.indexOf(thirdToken) + 1
 

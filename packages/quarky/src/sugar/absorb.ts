@@ -1,0 +1,72 @@
+import { Glass } from "@rue/types"
+import { isFunction } from "@rue/utils"
+import { Ion } from "../ion/Ion"
+import { NoExpand } from "../ionic/x_ionize"
+
+type Absorbant<T> = {
+   [K in keyof T as K extends `πø${infer S}` ? S : K extends `ø${infer S}` ? S : K]:
+   K extends `πø${string}` ? T[K] extends Ion<infer V> ? V : never
+   : K extends `ø${string}` ? T[K] extends Ion<infer V> ? V : never
+   : T[K]
+} &{ [K in keyof T as K extends `πø${infer S}` ? `ø${S}` : K]: T[K] }
+
+
+export function absorbØ<T>(obj: T, keys: (keyof T)[]): Glass<Absorbant<T>> {
+   const absorbant = {} as T
+   for (const key of (<string[]>keys)) {
+      const value = obj[key as keyof T]
+      if (key.startsWith('πø')) { // accessor property assignment
+         if (!isFunction(value)) {
+            throw new Error('A `get` property can only be initialized with a function')
+         }
+         absorbant[key.slice(1)] = value;
+         Object.defineProperty(absorbant, key.slice(2), {
+            get: value
+         })
+      }
+      else if (key[0] === 'ø') { // get property assignment
+         if (!isFunction(value)) {
+            throw new Error('A `get` property can only be initialized with a function')
+         }
+         if ('value' in value) {
+            absorbant[key] = value
+            Object.defineProperty(absorbant, key.slice(1), {
+               get: value,
+               set: Object.getOwnPropertyDescriptor(value, 'value')?.set
+            })
+         }
+         else {
+            absorbant[key] = value
+            Object.defineProperty(absorbant, key.slice(1), {
+               get: value
+            })
+         }
+      }
+      else {
+         absorbant[key as keyof T] = value
+      }
+   }
+   console.log('absorbant', absorbant)
+   return absorbant as Absorbant<T>
+}
+
+type Destructured<T, P extends PropertyKey> = {
+   [K in P]: 
+   K extends keyof T ? T[K] : 
+   K extends `ø${infer S}` ? S extends keyof T ? T[S] : never : K extends keyof T ? T[K] : never
+}
+
+export function destructureØ<T, P extends PropertyKey[]>(obj: T, ...keys: P): Destructured<T, P[number]> {
+   const destructured = {} as T
+   for (const key of keys) {
+      if (typeof key === 'string' && key[0] === 'ø') {
+         destructured[key] = obj[key]
+         // destructured[key] = Object.getOwnPropertyDescriptor(obj, key.slice(1))?.get as any
+      }
+      else {
+         destructured[key as keyof T] = obj[key as keyof T]
+      }
+   }
+   console.log('destructured', destructured)
+   return destructured as Destructured<T, P[number]>
+}

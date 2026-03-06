@@ -35,13 +35,19 @@ export default function lumoPlugin() {
                ],
                filename: fileName,
                sourceMaps: true,
+               generatorOpts: {
+                  jsescOption: {
+                     minimal: true
+                  }
+               }
             })
 
             const normalized = await transformWithEsbuild(result.code, fileName, {
                loader: 'tsx',
                jsx: 'automatic',
                jsxImportSource: '@rue',
-               sourcemap: true
+               sourcemap: true,
+               charset: 'utf8'
             })
 
             return {
@@ -64,6 +70,11 @@ export default function lumoPlugin() {
                ],
                filename: fileName,
                sourceMaps: true,
+               generatorOpts: {
+                  jsescOption: {
+                     minimal: true
+                  }
+               }
             })
 
             return {

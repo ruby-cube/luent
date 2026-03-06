@@ -17,8 +17,8 @@ function parseArgs(argv) {
   return { projectPath }
 }
 
-function isLueFile(fileName) {
-  return fileName.endsWith('.lue') || fileName.endsWith('.qrx')
+function isQrkFile(fileName) {
+  return fileName.endsWith('.qrk') || fileName.endsWith('.qrx')
 }
 
 function getVirtualExtension(fileName) {
@@ -38,13 +38,13 @@ function normalizeAbsolute(filePath) {
   return path.resolve(filePath)
 }
 
-function createLueCompilerContext(configPath, parsedConfig) {
+function createQrkCompilerContext(configPath, parsedConfig) {
   const originalToVirtual = new Map()
   const virtualToOriginal = new Map()
   const transformCache = new Map()
   const originalSourceFileCache = new Map()
 
-  function registerLueFile(originalPath) {
+  function registerQrkFile(originalPath) {
     const normalizedOriginal = normalizeAbsolute(originalPath)
     const existing = originalToVirtual.get(normalizedOriginal)
     if (existing) return existing
@@ -63,15 +63,15 @@ function createLueCompilerContext(configPath, parsedConfig) {
     ? parsedConfig.raw.exclude
     : undefined
 
-  const discoveredLueFiles = ts.sys.readDirectory(
+  const discoveredQrkFiles = ts.sys.readDirectory(
     configDirectory,
-    ['.lue', '.qrx'],
+    ['.qrk', '.qrx'],
     excludePatterns,
     includePatterns,
   )
 
-  for (const fileName of discoveredLueFiles) {
-    registerLueFile(fileName)
+  for (const fileName of discoveredQrkFiles) {
+    registerQrkFile(fileName)
   }
 
   function getTransformForOriginal(originalPath) {
@@ -137,15 +137,13 @@ function createLueCompilerContext(configPath, parsedConfig) {
   return {
     originalToVirtual,
     virtualToOriginal,
-    registerLueFile,
+    registerQrkFile,
     getTransformForOriginal,
     remapDiagnostic,
   }
 }
 
-function run() {
-  const { projectPath } = parseArgs(process.argv.slice(2))
-
+function resolveConfigPath(projectPath) {
   const configPath = projectPath
     ? normalizeAbsolute(projectPath)
     : ts.findConfigFile(process.cwd(), ts.sys.fileExists, 'tsconfig.json')
@@ -155,6 +153,10 @@ function run() {
     process.exit(1)
   }
 
+  return configPath
+}
+
+function readAndParseConfig(configPath) {
   const configFile = ts.readConfigFile(configPath, ts.sys.readFile)
   if (configFile.error) {
     const host = {
@@ -163,7 +165,7 @@ function run() {
       getNewLine: () => ts.sys.newLine,
     }
     console.error(ts.formatDiagnosticsWithColorAndContext([configFile.error], host))
-    process.exit(1)
+    return { ok: false }
   }
 
   const parsedConfig = ts.parseJsonConfigFileContent(
@@ -179,10 +181,19 @@ function run() {
       getNewLine: () => ts.sys.newLine,
     }
     console.error(ts.formatDiagnosticsWithColorAndContext(parsedConfig.errors, host))
-    process.exit(1)
+    return { ok: false }
   }
 
-  const lueContext = createLueCompilerContext(configPath, parsedConfig)
+  return { ok: true, parsedConfig }
+}
+
+function runTypecheck(configPath) {
+  const parsed = readAndParseConfig(configPath)
+  if (!parsed.ok) return false
+
+  const { parsedConfig } = parsed
+
+  const qrkContext = createQrkCompilerContext(configPath, parsedConfig)
 
   const options = {
     ...parsedConfig.options,
@@ -194,23 +205,23 @@ function run() {
   const host = {
     ...baseHost,
     fileExists(fileName) {
-      if (lueContext.virtualToOriginal.has(fileName)) return true
+      if (qrkContext.virtualToOriginal.has(fileName)) return true
       return baseHost.fileExists(fileName)
     },
     readFile(fileName) {
-      const original = lueContext.virtualToOriginal.get(fileName)
+      const original = qrkContext.virtualToOriginal.get(fileName)
       if (original) {
-        return lueContext.getTransformForOriginal(original).code
+        return qrkContext.getTransformForOriginal(original).code
       }
       return baseHost.readFile(fileName)
     },
     getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile) {
-      const original = lueContext.virtualToOriginal.get(fileName)
+      const original = qrkContext.virtualToOriginal.get(fileName)
       if (!original) {
         return baseHost.getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile)
       }
 
-      const transformed = lueContext.getTransformForOriginal(original).code
+      const transformed = qrkContext.getTransformForOriginal(original).code
       return ts.createSourceFile(
         fileName,
         transformed,
@@ -237,21 +248,21 @@ function run() {
           return undefined
         }
 
-        const containingOriginal = lueContext.virtualToOriginal.get(containingFile) ?? containingFile
+        const containingOriginal = qrkContext.virtualToOriginal.get(containingFile) ?? containingFile
         const containingDir = path.dirname(containingOriginal)
 
         const probeCandidates = []
-        if (moduleName.endsWith('.lue') || moduleName.endsWith('.qrx')) {
+        if (moduleName.endsWith('.qrk') || moduleName.endsWith('.qrx')) {
           probeCandidates.push(moduleName)
         } else {
-          probeCandidates.push(`${moduleName}.lue`, `${moduleName}.qrx`)
+          probeCandidates.push(`${moduleName}.qrk`, `${moduleName}.qrx`)
         }
 
         for (const candidate of probeCandidates) {
           const absoluteCandidate = normalizeAbsolute(path.resolve(containingDir, candidate))
           if (!ts.sys.fileExists(absoluteCandidate)) continue
 
-          const virtualFileName = lueContext.registerLueFile(absoluteCandidate)
+          const virtualFileName = qrkContext.registerQrkFile(absoluteCandidate)
           return {
             resolvedFileName: virtualFileName,
             extension: virtualFileName.endsWith('.tsx') ? ts.Extension.Tsx : ts.Extension.Ts,
@@ -266,7 +277,7 @@ function run() {
 
   const rootNames = [
     ...parsedConfig.fileNames,
-    ...Array.from(lueContext.virtualToOriginal.keys()),
+    ...Array.from(qrkContext.virtualToOriginal.keys()),
   ]
 
   const program = ts.createProgram({
@@ -277,7 +288,7 @@ function run() {
   })
 
   const diagnostics = ts.getPreEmitDiagnostics(program)
-  const remappedDiagnostics = diagnostics.map(lueContext.remapDiagnostic)
+  const remappedDiagnostics = diagnostics.map(qrkContext.remapDiagnostic)
 
   if (remappedDiagnostics.length > 0) {
     const formatHost = {
@@ -287,10 +298,21 @@ function run() {
     }
 
     console.error(ts.formatDiagnosticsWithColorAndContext(remappedDiagnostics, formatHost))
-    process.exit(1)
+    return false
   }
 
   console.log('quarky-tsc: no type errors')
+  return true
+}
+
+function run() {
+  const { projectPath } = parseArgs(process.argv.slice(2))
+  const configPath = resolveConfigPath(projectPath)
+
+  const ok = runTypecheck(configPath)
+  if (!ok) {
+    process.exit(1)
+  }
 }
 
 run()

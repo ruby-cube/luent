@@ -6,6 +6,9 @@ export default defineConfig(async () => {
    const { default: tailwindcss } = await import('@tailwindcss/vite')
 
    return {
+   esbuild: {
+      charset: 'utf8'
+   },
    server: {
       fs: {
          cachedChecks: false

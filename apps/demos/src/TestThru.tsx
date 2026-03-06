@@ -3,7 +3,7 @@ import { Thru } from "../../../packages/lumo/src/iteratives/Thru";
 import { Ion } from "@rue/quarky";
 
 export function TestThru() {
-   const $count = Ion(0, {
+   const øcount = Ion(1, {
       increment() {
          this.value++
       },
@@ -14,9 +14,9 @@ export function TestThru() {
 
    return template(
       <div>
-         <button on:click={e => $count.increment()}>+</button>
-         <button on:click={e => $count.decrement()}>-</button>
-         {Thru($count, (count) =>
+         <button on:click={e => øcount.increment()}>+</button>
+         <button on:click={e => øcount.decrement()}>-</button>
+         {Thru(øcount, (count) =>
             <div>{count}</div>
          )}
       </div>

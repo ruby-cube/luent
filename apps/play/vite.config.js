@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import lumoPlugin from '../../packages/vite-plugin-lumo/index.js'
 
 export default defineConfig({
+   esbuild: {
+      charset: 'utf8'
+   },
    server: {
       fs: {
          cachedChecks: false

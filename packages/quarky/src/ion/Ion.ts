@@ -123,7 +123,7 @@ export function $_derivation<T>(fn: () => T) {
 
 export const ø = $_derivation
 
-export function øø<T, K extends keyof T>(obj: T, key: K): Ion<T[K]> {
+export function πø<T, K extends keyof T>(obj: T, key: K): Ion<T[K]> {
    const descriptor = Object.getOwnPropertyDescriptor(obj, key)
    console.log('chicken feet', obj, key, descriptor)
    return descriptor?.get?.bind(obj) ?? (() => obj[key]) as Ion<T[K]>
