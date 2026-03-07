@@ -29,7 +29,9 @@
     "lint:mu-eslint": "pnpm exec eslint \"apps/play/mu-linting/**/*.{ts,tsx}\"",
     "typecheck:quarky": "pnpm exec node packages/quarky/scripts/quarky-tsc.mjs -p tsconfig.json",
     "test:position-mapping": "pnpm -F @rue/quarky run test:position-mapping",
-    "emit:quarky-transform": "pnpm exec node packages/quarky/scripts/emit-transformed-quarky.mjs"
+    "emit:quarky-transform": "pnpm exec node packages/quarky/scripts/emit-transformed-quarky.mjs",
+    "emit:counter-transform": "pnpm exec node packages/quarky/scripts/emit-transformed-quarky.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx",
+    "watch:counter-transform": "pnpm exec node packages/quarky/scripts/watch-transformed-quarky.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx"
   },
   "devDependencies": {
     "@rue/quarky-tsserver-plugin": "workspace:*",

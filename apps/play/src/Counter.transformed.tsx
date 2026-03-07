@@ -39,8 +39,8 @@ export function QrxCounter({ øshowFractions }: FromTag<{ showFractions: Mutable
 const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øhalfCountA', 'øthirdCountA');
 
    const kit = FractionKit(øcount);
-   const øhalfCount = πø(kit, 'halfCount')
-   const øthirdCount = πø(kit, 'thirdCount')
+   const øhalfCount = (kit.øhalfCount, πø(kit, 'halfCount'))
+   const øthirdCount = (kit.øthirdCount, πø(kit, 'thirdCount'))
 
    function doSomething(count: number) {
       console.log('count', count)
@@ -55,6 +55,26 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
       )
    }
 
+   let dog;
+
+   const øobj = Ion({name: 'kermit'} as {name: string} | undefined)
+
+   function doSomethingElse() {
+      if (dog){
+
+      }
+      else if (øobj()) {
+         const name = øobj()!.name
+         console.log('name', øobj()!, name)
+      }
+      else {
+         øobj().name 
+         console.log('nothing')
+      }
+   }
+
+   doSomethingElse()
+
    return template(
       <div>
          <button on:click={e => øcount.increment()}>+</button>
@@ -63,6 +83,24 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
          <p>doubleCount: {ødoubleCount}</p>
          <p>tripleCount: {ø(() => øcount() * 3)}</p>
          <button on:click={e => øshowFractions.value = !øshowFractions()}>{ø(() => øshowFractions() ? 'hide' : 'show')} fractions</button>
+         {If(øobj(), 
+            <div>{øobj()!.name}</div>
+         )}
+         {If(øobj(), 
+            <div>{ø(() => øobj()!.name)}</div>
+         )}
+         {If(øobj(), () =>
+            <div>{øobj()!.name}</div>
+         )}
+         {If(øobj, 
+            <div>{øobj()!.name}</div>
+         )}
+         {If(øobj, 
+            <div>{ø(() => øobj()!.name)}</div>
+         )}
+         {If(øobj, () =>
+            <div>{øobj()!.name}</div>
+         )}
          {If(øshowFractions, <>
             <hr></hr>
             <p>halfCount: {øhalfCount}</p>

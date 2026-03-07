@@ -18,6 +18,20 @@ function Counter({ showFractions@ }) {
 
    get halfCountB = FractionKit(count@).halfCount@
 
+   get obj = Ion({name: 'kermit'} as {name: string} | undefined)
+
+   function doSomethingElse() {
+      if (obj) {
+         console.log('name', obj.name) // should throw: Object is possibly 'undefined'.ts(2532)
+         watch(obj@, () => {
+            console.log('nothing', obj.name) // should throw: Object is possibly 'undefined'.ts(2532)
+         })
+      }
+      else {
+         console.log('nothing', obj.name) // should throw: Object is possibly 'undefined'.ts(2532)
+      }
+   }
+
    return template(
       <div>
          <button on:click={e => count@.increment()}>+</button>
@@ -51,6 +65,20 @@ function Counter({ øshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) 
 
   const { øhalfCount, øthirdCount } = destructureØ(FractionKit(øcount), 'øhalfCount', 'øthirdCount');
 
+   const øobj = Ion({ name: 'kermit' } as {name: string} | undefined)
+
+   function doSomethingElse() {
+      if (øobj()) {
+         console.log('name', øobj()!.name)
+         watch(øobj, () => {
+            console.log('nothing', øobj().name) // should throw: Object is possibly 'undefined'.ts(2532)
+         })
+      }
+      else {
+         console.log('nothing', øobj().name) // should throw: Object is possibly 'undefined'.ts(2532)
+      }
+   }
+
   return template(
     <div>
       <button on:click={(e) => øcount.increment()}>+</button>
@@ -62,7 +90,6 @@ function Counter({ øshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) 
       {If(øshowFractions,
         <>
           <hr></hr>
-          <p>{(øshowFractions()!.toString())}</p>
           <p>halfCount: {() => øhalfCount() + '!'}</p>
           <p>thirdCount: {øthirdCount}</p>
         </>
@@ -273,15 +300,18 @@ function FractionKit(øcount) {
 - transform all variables with the `@` suffix to `øvariable`: `variable@` --> `øvariable`
 - transform all usages of `get`/`@`suffix variables without `@` suffix: `variable` --> `øvariable()`
    - pm: `<span:v>variable</span:v>` --> `<span:v>øvariable</span:v>()`
-* transform dot notation with `@` suffix:
+   + transform when accessing a property from the `get`/`@`suffix variable: 
+   `get obj = Ion({ property: value }); obj.property` --> `const øobj = Ion({ property: value }); øobj().property`
+   `const obj@ = Ion({ property: value }); obj.property` --> `const øobj = Ion({ property: value }); øobj().property`
+- transform dot notation with `@` suffix:
   `get property = obj.property@` --> `const øproperty = (obj.øproperty, πø(obj, 'property'));`
-  * pm: `get <span:p>property</span:p> = <span:o>obj</span:o>.<span:a>property@</span:a>` --> `const <span:p>øproperty</span:p> = (<span:a>obj.øproperty</span:a>, πø(<span:o>obj</span:o>, 'property'));`
+  - pm: `get <span:p>property</span:p> = <span:o>obj</span:o>.<span:a>property@</span:a>` --> `const <span:p>øproperty</span:p> = (<span:a>obj.øproperty</span:a>, πø(<span:o>obj</span:o>, 'property'));`
   - import the getter access helper `πø` from '@rue/quarky' if it hasn't been imported yet
-  * chained property access:
+  - chained property access:
   `get property = obj.a.b.c.property@` --> `const øproperty = (obj.a.b.c.øproperty, πø(obj.a.b.c, 'property'))`
   `get property = obj.a@.b@.c@.property@` --> `const øproperty = (obj.øa.øb.øc.øproperty, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
-  * pm: `get <span:v>property</span:v> = <span:p>obj.a.b.c.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.a.b.c.property@</span:p>, πø(obj.a.b.c, 'property'))`
-  * pm: `get <span:v>property</span:v> = <span:p>obj.a@.b@.c@.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.øa.øb.øc.øproperty</span:p>, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
+  - pm: `get <span:v>property</span:v> = <span:p>obj.a.b.c.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.a.b.c.property@</span:p>, πø(obj.a.b.c, 'property'))`
+  - pm: `get <span:v>property</span:v> = <span:p>obj.a@.b@.c@.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.øa.øb.øc.øproperty</span:p>, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
 
 ### JSX fragment shorthand
 - transform jsx templates encased in extraneous parentheses (make sure transform is comment-safe):
@@ -326,6 +356,30 @@ function FractionKit(øcount) {
    - computed property access with `@` is unsupported (`obj[key]@`, `obj?.[key]@`).
    - for chained `@` access, preserve short-circuit behavior and evaluation order.
 
+### Type guards
++ Typescript should call out when the value of an `get` variable is possibly undefined when accessing via the transformed `øvariable()` and add a `!` after synchronous reads that are proven guarded.
++ Supported synchronous guard forms for `!` emission include:
+   - `if (obj) { ...obj.name... }`
+   - `if (!obj) { ... } else { ...obj.name... }`
+   - `obj && obj.name`
+   - `obj ? obj.name : fallback`
+   - `!obj ? fallback : obj.name`
+   - loop-guarded bodies:
+      - `while (obj) { ...obj.name... }`
+      - `do { ...obj.name... } while (obj)`
+      - `for (; obj; ) { ...obj.name... }`
+   - nested conditionals where the active branch implies `obj` is truthy
+   - explicit nullish comparisons:
+      - truthy branch of `obj != null`, `obj !== undefined`, `obj !== null`
+      - false/else branch of `obj == null`, `obj === undefined`, `obj === null`
+   - template conditional helpers in JSX templates:
+      - `If(condition, branch)` / `ElseIf(condition, branch)` guarded branches
+      - `Else(branch)` when prior `If`/`ElseIf` conditions imply truthiness in the else path (e.g. `If(!obj, ...)` + `Else(...)`)
+      - render-function branch scopes are treated as synchronous guarded scopes when the branch condition implies truthiness:
+         - `If(condition, () => ...)`, `ElseIf(condition, () => ...)`, `Else(() => ...)`
+         - `IfElse(condition, whenTrue, whenFalse)` for `whenTrue` scope
++ Synchronous guard assertions do **not** flow into nested function/callback bodies (e.g. `watch(..., () => obj.name)`), so TypeScript can still report possible-undefined reads there.
+
 ### Conformance checklist
 | Area | Example input | Expected transform behavior | Must diagnostic? |
 |---|---|---|---|
@@ -339,6 +393,8 @@ function FractionKit(øcount) {
 | Object literal `get` sugar | mixed `get` sugar + getters + shorthand + plain props | preserves order and behavior | No |
 | `@` property access | `obj.prop@` | rewrites to tuple form (`(obj.øprop, πø(obj, 'prop'))`) | No |
 | `@` property access | chained/optional/computed forms | preserves short-circuiting and evaluation order | No |
+| Type guards | `if/else`, ternary, logical, explicit nullish comparisons | emits `øx()!` only in guarded synchronous branches | No |
+| Type guards | `If()/ElseIf()/Else()` template branches | emits `øx()!` in guarded template branches; keeps unguarded reads diagnostic | No |
 | JSX shorthand | parenthesized multi-node JSX | rewrites to fragment shorthand; comments preserved | No |
 | Derivation shorthand | allowed parenthesized value positions | rewrites only in allowed positions from spec | No |
 | Imports/helpers | helper-required transforms | imports added only when needed; deduped; stably ordered; conflict-safe | No |
@@ -350,6 +406,7 @@ function FractionKit(øcount) {
 ### Minimum test vectors
 | ID | Input (sugar) | Expected output / behavior | Diagnostic? |
 |---|---|---|---|
+| **Declarations** |  |  |  |
 | TV-01 | `get count = Ion(0)` | `const øcount = Ion(0)` | No |
 | TV-02 | `const count@ = Ion(0)` | `const øcount = Ion(0)` | No |
 | TV-03 | `let count@ = Ion(0)` | `let øcount = Ion(0)` | No |
@@ -357,16 +414,68 @@ function FractionKit(øcount) {
 | TV-05 | `const { a@, b, c@ } = src` | `const { øa, b, øc } = destructureØ(src, 'øa', 'b', 'øc')` | No |
 | TV-06 | `get { a, b } = src` | `const { øa, øb } = destructureØ(src, 'øa', 'øb')` | No |
 | TV-07 | `{ get value: Ion(0) }` | `absorbØ({ øvalue: Ion(0) }, ['øvalue'])` | No |
+| **Access** |  |  |  |
 | TV-08 | `get item = obj.prop@` | `const øitem = (obj.øprop, πø(obj, 'prop'))` | No |
 | TV-09 | `get item = obj.a@.b@.c@` | `const øitem = (obj.øa.øb.øc, πø(πø(πø(obj, 'a'), 'b'), 'c'))` | No |
 | TV-10 | `get item = obj?.a@` | preserves optional-chain short-circuit semantics in emitted access helper form | No |
+| **JSX/Derivation** |  |  |  |
 | TV-13 | `((<A></A><B></B>))` (multi-node JSX wrapped in parens) | fragment shorthand rewrite with comments preserved | No |
 | TV-14 | `{ value: (a + 1) }` | `{ value: () => a + 1 }` | No |
 | TV-15 | `doSomething((a + 1))` | `doSomething(() => a + 1)` | No |
 | TV-16 | `[(a), (b)]` | `[() => a, () => b]` | No |
 | TV-17 | `<Comp value={(a + 1)} />` | `<Comp value={() => a + 1} />` | No |
+| **Safety** |  |  |  |
 | TV-18 | `"count@" // get x = y` | no rewrites inside string/comment text | No |
 | TV-19 | `import type { count@ } from 'x'` | no value-level rewrite inside type-only/import specifier contexts | Yes (if unsupported syntax) |
+| **Type Guards (Control Flow)** |  |  |  |
+| TV-20 | `if (!obj) {} else { obj.name }` | else-branch read transforms with guarded assertion (`øobj()!.name`) | No |
+| TV-21 | `!obj ? fallback : obj.name` | false-branch read transforms with guarded assertion (`øobj()!.name`) | No |
+| TV-22 | `if (obj != null) { obj.name }` / `if (obj == null) {} else { obj.name }` | guarded branch read transforms with guarded assertion (`øobj()!.name`) | No |
+| TV-25 | `while (obj) { obj.name }` / `do { obj.name } while (obj)` / `for (; obj; ) { obj.name }` | loop-body guarded reads transform with guarded assertion (`øobj()!.name`) | No |
+| **Type Guards (Template Branches)** |  |  |  |
+| TV-23 | `{If(obj, <p>{obj.name}</p>)} {ElseIf(obj !== undefined, <p>{obj.name}</p>)}` | guarded template-branch reads transform with guarded assertion | No |
+| TV-24 | `{If(!obj, <p>missing</p>)} {Else(<p>{obj.name}</p>)}` | guarded `Else` template-branch read transforms with guarded assertion | No |
+| **Type Guards (Render Functions)** |  |  |  |
+| TV-26 | `{If(obj, () => <p>{obj.name}</p>)} {ElseIf(obj !== undefined, () => <p>{obj.name}</p>)}` | guarded render-function branch reads transform with guarded assertion | No |
+| TV-27 | `{If(!obj, () => <p>missing</p>)} {Else(() => <p>{obj.name}</p>)}` | guarded `Else` render-function branch read transforms with guarded assertion | No |
+| TV-28 | `IfElse(obj, () => obj.name, () => fallback)` | truthy render-function scope read transforms with guarded assertion | No |
+
+### Implemented status (current)
+- Transform assertions for type-guarded `!` emission are covered in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
+- Diagnostic/remap behavior (guarded reads clean, unguarded reads still produce TS2532 at authored positions) is covered in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- Covered guard families include:
+   - `if/else` truthy and negated conditions.
+   - logical `&&` guarded reads.
+   - conditional (`?:`) guarded branches, including negated and nested conditionals.
+   - loop-guarded bodies (`while`, `do...while`, `for` condition).
+   - explicit null/undefined comparisons (`==/!= null`, `===/!== undefined|null`).
+   - template conditional helpers `If()/ElseIf()/Else()` in JSX templates.
+   - synchronous render-function branch scopes for `If()/ElseIf()/Else()` and `IfElse()` truthy callbacks.
+- `TV-25` traceability:
+   - transform coverage: `adds non-null assertion inside while/do-while/for loop bodies guarded by condition` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps loop-body reads clean for while/do-while/for guarded conditions while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- `TV-23` traceability:
+   - transform coverage: `adds non-null assertion inside If and ElseIf template conditional branches` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps If and ElseIf template branch reads clean while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- `TV-24` traceability:
+   - transform coverage: `adds non-null assertion inside Else template branch when paired with negated If` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps Else template branch reads clean when paired with negated If while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- `TV-26` traceability:
+   - transform coverage: `adds non-null assertion inside If/ElseIf render-function branch scopes` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps If/ElseIf render-function branch reads clean while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- `TV-27` traceability:
+   - transform coverage: `adds non-null assertion inside Else render-function branch when paired with negated If` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps Else render-function branch reads clean when paired with negated If while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- `TV-28` traceability:
+   - transform coverage: `adds non-null assertion inside IfElse truthy render-function scope` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps IfElse truthy render-function reads clean while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- Cross-cutting sugar regression coverage remains in `packages/quarky/src/sugar/__tests__/position-mapping.test.ts`, `packages/quarky/src/sugar/__tests__/remap-table-hover.test.ts`, and `packages/quarky/src/sugar/__tests__/tsserver-hover-integration.test.ts`.
+
+### Known gaps / future vectors
+- `||`-heavy compound conditions are intentionally conservative and may need dedicated branch-precision tests.
+- Optional-chain-based boolean guards (`if (obj?.name)`) need explicit policy for whether object-level truthiness should imply safe `obj` member reads.
+- Control-flow constructs beyond direct conditionals (e.g., `switch`-style narrowing, assertion-function-based narrowing) are not yet modeled for `øx()!` emission.
+- Async boundaries remain conservative by design; add explicit vectors if future behavior should carry/restore narrowing across specific async patterns.
 
 ### Typechecking pipeline (`quarky-tsc`)
 

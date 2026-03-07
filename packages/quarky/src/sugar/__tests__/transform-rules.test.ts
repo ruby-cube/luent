@@ -20,6 +20,19 @@ function Demo() {
     expect(transformed).toContain('return øcount()')
   })
 
+  it('rewrites reactive call-root reads to double-call form', () => {
+    const input = `
+function Demo() {
+  get count = Ion(() => 1)
+  return count()
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrk' }).code
+    expect(transformed).toContain('const øcount = Ion(() => 1)')
+    expect(transformed).toContain('return øcount()()')
+  })
+
   it('rewrites destructuring sugar and getter access sugar', () => {
     const input = `
 function Demo(obj: any) {
@@ -107,6 +120,244 @@ function Demo(obj: any, key: string) {
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain("const øa = obj == null ? undefined : πø(obj, 'value')")
+  })
+
+  it('rewrites property access from get declaration variables to call-form member access', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ property: 1 })
+  return obj.property
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('const øobj = Ion({ property: 1 })')
+    expect(transformed).toContain('return øobj().property')
+  })
+
+  it('rewrites property access from const @ variables to call-form member access', () => {
+    const input = `
+function Demo() {
+  const obj@ = Ion({ property: 1 })
+  return obj.property
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('const øobj = Ion({ property: 1 })')
+    expect(transformed).toContain('return øobj().property')
+  })
+
+  it('adds non-null assertion for synchronous guarded reads but not nested callback reads', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+
+  if (obj) {
+    console.log(obj.name)
+    watch(obj@, () => {
+      console.log(obj.name)
+    })
+  }
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain("if (øobj())")
+    expect(transformed).toContain("console.log(øobj()!.name)")
+    expect(transformed).toContain("watch(øobj, () => {")
+    expect(transformed).toContain("console.log(øobj().name)")
+  })
+
+  it('adds non-null assertion in else branch when guard is negated', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+
+  if (!obj) {
+    console.log('missing')
+  } else {
+    console.log(obj.name)
+  }
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('if (!øobj())')
+    expect(transformed).toContain("console.log(øobj()!.name)")
+  })
+
+  it('adds non-null assertion in ternary false branch for negated guard', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  const value = !obj ? 'none' : obj.name
+  return value
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain("const value = !øobj() ? 'none' : øobj()!.name")
+  })
+
+  it('adds non-null assertion for explicit non-nullish comparison guards', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+
+  if (obj != null) {
+    console.log(obj.name)
+  }
+
+  if (obj !== undefined) {
+    console.log(obj.name)
+  }
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('if (øobj() != null)')
+    expect(transformed).toContain('if (øobj() !== undefined)')
+    expect(transformed).toContain('console.log(øobj()!.name)')
+  })
+
+  it('adds non-null assertion in else branch for explicit nullish equality guards', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+
+  if (obj == null) {
+    console.log('missing')
+  } else {
+    console.log(obj.name)
+  }
+
+  if (obj === undefined) {
+    console.log('missing too')
+  } else {
+    console.log(obj.name)
+  }
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('if (øobj() == null)')
+    expect(transformed).toContain('if (øobj() === undefined)')
+    expect(transformed).toContain('console.log(øobj()!.name)')
+  })
+
+  it('adds non-null assertion inside while/do-while/for loop bodies guarded by condition', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+
+  while (obj) {
+    console.log(obj.name)
+    break
+  }
+
+  do {
+    console.log(obj.name)
+    break
+  } while (obj)
+
+  for (; obj; ) {
+    console.log(obj.name)
+    break
+  }
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('while (øobj())')
+    expect(transformed).toContain('} while (øobj())')
+    expect(transformed).toContain('for (; øobj(); )')
+    expect(transformed).toContain('console.log(øobj()!.name)')
+  })
+
+  it('adds non-null assertion inside If and ElseIf template conditional branches', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  return template(
+    <div>
+      {If(obj, <p>{obj.name}</p>)}
+      {ElseIf(obj !== undefined, <p>{obj.name}</p>)}
+    </div>
+  )
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('If(øobj(), <p>{øobj()!.name}</p>)')
+    expect(transformed).toContain('ElseIf(øobj() !== undefined, <p>{øobj()!.name}</p>)')
+  })
+
+  it('adds non-null assertion inside Else template branch when paired with negated If', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  return template(
+    <div>
+      {If(!obj, <p>missing</p>)}
+      {Else(<p>{obj.name}</p>)}
+    </div>
+  )
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('If(!øobj(), <p>missing</p>)')
+    expect(transformed).toContain('Else(<p>{øobj()!.name}</p>)')
+  })
+
+  it('adds non-null assertion inside If/ElseIf render-function branch scopes', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  return template(
+    <div>
+      {If(obj, () => <p>{obj.name}</p>)}
+      {ElseIf(obj !== undefined, () => <p>{obj.name}</p>)}
+    </div>
+  )
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('If(øobj(), () => <p>{øobj()!.name}</p>)')
+    expect(transformed).toContain('ElseIf(øobj() !== undefined, () => <p>{øobj()!.name}</p>)')
+  })
+
+  it('adds non-null assertion inside Else render-function branch when paired with negated If', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  return template(
+    <div>
+      {If(!obj, () => <p>missing</p>)}
+      {Else(() => <p>{obj.name}</p>)}
+    </div>
+  )
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('If(!øobj(), () => <p>missing</p>)')
+    expect(transformed).toContain('Else(() => <p>{øobj()!.name}</p>)')
+  })
+
+  it('adds non-null assertion inside IfElse truthy render-function scope', () => {
+    const input = `
+function Demo() {
+  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  const value = IfElse(obj, () => obj.name, () => 'none')
+  return value
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain("const value = IfElse(øobj(), () => øobj()!.name, () => 'none')")
   })
 
   it('does not rewrite computed @ access forms', () => {

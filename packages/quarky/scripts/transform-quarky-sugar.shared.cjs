@@ -1214,6 +1214,255 @@ function classifyGetVarUsage(node, getVars) {
   return 'read'
 }
 
+function expressionReferencesIdentifier(expression, identifierName) {
+  let found = false
+
+  function visit(node) {
+    if (found || !node) return
+    if (ts.isIdentifier(node) && node.text === identifierName) {
+      if (!isDeclarationName(node) && !isPropertyNamePosition(node)) {
+        found = true
+        return
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+
+  visit(expression)
+  return found
+}
+
+function conditionImpliesIdentifierTruthy(expression, identifierName, whenConditionTruthy) {
+  if (!expression) return false
+
+  if (ts.isParenthesizedExpression(expression)) {
+    return conditionImpliesIdentifierTruthy(expression.expression, identifierName, whenConditionTruthy)
+  }
+
+  if (ts.isPrefixUnaryExpression(expression) && expression.operator === ts.SyntaxKind.ExclamationToken) {
+    return conditionImpliesIdentifierTruthy(expression.operand, identifierName, !whenConditionTruthy)
+  }
+
+
+  // Recognize both direct identifier and getter access (øobj or obj@) as guards
+  if (ts.isIdentifier(expression)) {
+    if (expression.text === identifierName) return whenConditionTruthy;
+    // Also match ø-prefixed identifier (for obj@ rewritten to øobj)
+    if (expression.text === `ø${identifierName}`) return whenConditionTruthy;
+  }
+
+  if (ts.isBinaryExpression(expression)) {
+    const op = expression.operatorToken.kind
+    const left = expression.left
+    const right = expression.right
+
+    const isIdentifierOperand = (operand) => ts.isIdentifier(operand) && operand.text === identifierName
+    const isNullOrUndefinedOperand = (operand) => {
+      if (operand.kind === ts.SyntaxKind.NullKeyword) return true
+      if (ts.isIdentifier(operand) && operand.text === 'undefined') return true
+      return false
+    }
+
+    const comparisonInvolvesTargetAndNullish = (
+      (isIdentifierOperand(left) && isNullOrUndefinedOperand(right))
+      || (isIdentifierOperand(right) && isNullOrUndefinedOperand(left))
+    )
+
+    if (comparisonInvolvesTargetAndNullish) {
+      if (op === ts.SyntaxKind.ExclamationEqualsEqualsToken || op === ts.SyntaxKind.ExclamationEqualsToken) {
+        return whenConditionTruthy
+      }
+      if (op === ts.SyntaxKind.EqualsEqualsEqualsToken || op === ts.SyntaxKind.EqualsEqualsToken) {
+        return !whenConditionTruthy
+      }
+    }
+  }
+
+  if (ts.isBinaryExpression(expression) && expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
+    if (!whenConditionTruthy) return false
+    return (
+      conditionImpliesIdentifierTruthy(expression.left, identifierName, true)
+      || conditionImpliesIdentifierTruthy(expression.right, identifierName, true)
+      || expressionReferencesIdentifier(expression, identifierName)
+    )
+  }
+
+  if (ts.isBinaryExpression(expression) && expression.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
+    if (whenConditionTruthy) {
+      return (
+        conditionImpliesIdentifierTruthy(expression.left, identifierName, true)
+        || conditionImpliesIdentifierTruthy(expression.right, identifierName, true)
+      )
+    }
+    return false
+  }
+
+  return whenConditionTruthy && expressionReferencesIdentifier(expression, identifierName)
+}
+
+function getIdentifierCallName(expression) {
+  if (ts.isIdentifier(expression)) return expression.text
+  return null
+}
+
+function isTemplateConditionalCallName(name) {
+  return name === 'If' || name === 'ElseIf' || name === 'Else' || name === 'IfElse'
+}
+
+function isWhitespaceJsxText(node) {
+  return ts.isJsxText(node) && !node.getText().trim()
+}
+
+function getConditionalCallFromJsxChild(node) {
+  if (!ts.isJsxExpression(node) || !node.expression) return null
+  if (!ts.isCallExpression(node.expression)) return null
+  const callName = getIdentifierCallName(node.expression.expression)
+  if (!callName || !isTemplateConditionalCallName(callName)) return null
+  return {
+    name: callName,
+    call: node.expression,
+  }
+}
+
+function inferElseChainTruthyGuard(callExpression, identifierName) {
+  const parentJsxExpression = callExpression.parent
+  if (!ts.isJsxExpression(parentJsxExpression)) return false
+
+  const jsxContainer = parentJsxExpression.parent
+  if (!jsxContainer || (!ts.isJsxElement(jsxContainer) && !ts.isJsxFragment(jsxContainer))) return false
+
+  const children = jsxContainer.children || []
+  const selfIndex = children.indexOf(parentJsxExpression)
+  if (selfIndex <= 0) return false
+
+  const precedingConditions = []
+  for (let index = selfIndex - 1; index >= 0; index -= 1) {
+    const child = children[index]
+    if (isWhitespaceJsxText(child)) continue
+
+    const conditionalCall = getConditionalCallFromJsxChild(child)
+    if (!conditionalCall) break
+    if (conditionalCall.name === 'Else') break
+    if (conditionalCall.name === 'If' || conditionalCall.name === 'ElseIf') {
+      const condition = conditionalCall.call.arguments[0]
+      if (condition) precedingConditions.push(condition)
+      continue
+    }
+    break
+  }
+
+  if (precedingConditions.length === 0) return false
+  return precedingConditions.some((condition) => conditionImpliesIdentifierTruthy(condition, identifierName, false))
+}
+
+function inferTruthyGuardFromTemplateConditionalCall(callExpression, argumentNode, identifierName) {
+  const callName = getIdentifierCallName(callExpression.expression)
+  if (!callName || !isTemplateConditionalCallName(callName)) return false
+
+  const argumentIndex = callExpression.arguments.findIndex((argument) => argument === argumentNode)
+  if (argumentIndex < 0) return false
+
+  const lastArgumentIndex = callExpression.arguments.length - 1
+
+  if (callName === 'If' || callName === 'ElseIf') {
+    if (argumentIndex !== lastArgumentIndex) return false
+    const condition = callExpression.arguments[0]
+    return conditionImpliesIdentifierTruthy(condition, identifierName, true)
+  }
+
+  if (callName === 'Else') {
+    if (argumentIndex !== lastArgumentIndex) return false
+    return inferElseChainTruthyGuard(callExpression, identifierName)
+  }
+
+  if (callName === 'IfElse') {
+    if (argumentIndex !== 1) return false
+    const condition = callExpression.arguments[0]
+    return conditionImpliesIdentifierTruthy(condition, identifierName, true)
+  }
+
+  return false
+}
+
+function hasSynchronousTruthyGuard(node, identifierName) {
+  if (!node || !node.parent) return false
+
+  let current = node
+  while (current && current.parent) {
+    const parent = current.parent
+
+    // 1. Render function branch: If(obj, () => ...)
+    if (ts.isFunctionLike(parent) && parent.body && current === parent.body) {
+      const callExpression = parent.parent
+      if (ts.isCallExpression(callExpression)) {
+        const guardedRenderFunctionScope = inferTruthyGuardFromTemplateConditionalCall(callExpression, parent, identifierName)
+        if (guardedRenderFunctionScope) return true
+      }
+      return false
+    }
+
+    // 2. Direct JSX element branch: If(obj, <div>...</div>)
+    if (ts.isCallExpression(parent)) {
+      // Check if current is the last argument and is a JSX element or fragment
+      const callName = getIdentifierCallName(parent.expression)
+      if (callName && isTemplateConditionalCallName(callName)) {
+        const argIndex = parent.arguments.findIndex(arg => arg === current)
+        const lastArgIndex = parent.arguments.length - 1
+        if (argIndex === lastArgIndex && (ts.isJsxElement(current) || ts.isJsxFragment(current))) {
+          // Synthesize a guard as if this were a render function
+          const condition = parent.arguments[0]
+          if (conditionImpliesIdentifierTruthy(condition, identifierName, true)) return true
+        }
+      }
+      // Fallback: original logic for render function
+      const templateGuard = inferTruthyGuardFromTemplateConditionalCall(parent, current, identifierName)
+      if (templateGuard) return true
+    }
+
+    if (ts.isIfStatement(parent)) {
+      if (current === parent.thenStatement) {
+        return conditionImpliesIdentifierTruthy(parent.expression, identifierName, true)
+      }
+      if (current === parent.elseStatement) {
+        return conditionImpliesIdentifierTruthy(parent.expression, identifierName, false)
+      }
+    }
+
+    if (ts.isConditionalExpression(parent)) {
+      if (current === parent.whenTrue) {
+        return conditionImpliesIdentifierTruthy(parent.condition, identifierName, true)
+      }
+      if (current === parent.whenFalse) {
+        return conditionImpliesIdentifierTruthy(parent.condition, identifierName, false)
+      }
+    }
+
+    if (
+      ts.isBinaryExpression(parent)
+      && parent.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+      && current === parent.right
+    ) {
+      return conditionImpliesIdentifierTruthy(parent.left, identifierName, true)
+    }
+
+    if (ts.isWhileStatement(parent) && current === parent.statement) {
+      return conditionImpliesIdentifierTruthy(parent.expression, identifierName, true)
+    }
+
+    if (ts.isDoStatement(parent) && current === parent.statement) {
+      return conditionImpliesIdentifierTruthy(parent.expression, identifierName, true)
+    }
+
+    if (ts.isForStatement(parent) && current === parent.statement && parent.condition) {
+      return conditionImpliesIdentifierTruthy(parent.condition, identifierName, true)
+    }
+
+    current = parent
+  }
+
+  return false
+}
+
 function rewriteReactiveReads(state, getVars) {
   if (getVars.size === 0) return
 
@@ -1228,11 +1477,68 @@ function rewriteReactiveReads(state, getVars) {
     return false
   }
 
-  function visit(node) {
+
+  function visit(node, jsxGuardContext) {
     let pushedScope = false
     if (createsScope(node)) {
       scopeStack.push(collectScopeDeclarations(node))
       pushedScope = true
+    }
+
+    // If this is a JSXElement/JSXFragment or JsxExpression wrapping one, as argument to If/ElseIf, treat as guarded context
+    let nextJsxGuardContext = jsxGuardContext
+    // Handle JsxExpression wrapping JSXElement/JSXFragment
+    if (ts.isJsxExpression(node) && node.expression && (ts.isJsxElement(node.expression) || ts.isJsxFragment(node.expression))) {
+      const parent = node.parent
+      if (parent && ts.isCallExpression(parent)) {
+        const callExpr = parent
+        const callName = getIdentifierCallName(callExpr.expression)
+        if (callName && isTemplateConditionalCallName(callName)) {
+          const argIndex = callExpr.arguments.findIndex(arg => arg === node)
+          const lastArgIndex = callExpr.arguments.length - 1
+          if (argIndex === lastArgIndex) {
+            nextJsxGuardContext = callExpr.arguments[0]
+          }
+        }
+      }
+    } else if ((ts.isJsxElement(node) || ts.isJsxFragment(node)) && node.parent && ts.isCallExpression(node.parent)) {
+      const callExpr = node.parent
+      const callName = getIdentifierCallName(callExpr.expression)
+      if (callName && isTemplateConditionalCallName(callName)) {
+        const argIndex = callExpr.arguments.findIndex(arg => arg === node)
+        const lastArgIndex = callExpr.arguments.length - 1
+        if (argIndex === lastArgIndex) {
+          // Synthesize a guard context for this JSX branch
+          nextJsxGuardContext = callExpr.arguments[0]
+        }
+      }
+    }
+
+    // If in a guarded JSX branch, propagate guard context to JSX children and derivation shorthand
+    if (nextJsxGuardContext && (ts.isJsxElement(node) || ts.isJsxFragment(node))) {
+      // Visit children with guard context
+      if (node.children) {
+        for (const child of node.children) {
+          // For JsxExpression children, propagate guard context
+          if (ts.isJsxExpression(child) && child.expression) {
+            // If child is a parenthesized expression (derivation shorthand), propagate guard context into it
+            if (ts.isParenthesizedExpression(child.expression)) {
+              // Simulate the transform: parenthesized expression becomes () => expr
+              // Visit the body of the arrow function with the guard context
+              visit(child.expression.expression, nextJsxGuardContext)
+            } else {
+              visit(child.expression, nextJsxGuardContext)
+            }
+          } else {
+            visit(child, nextJsxGuardContext)
+          }
+        }
+        // Do not double-visit children below
+        if (pushedScope) {
+          scopeStack.pop()
+        }
+        return
+      }
     }
 
     if (ts.isIdentifier(node)) {
@@ -1241,20 +1547,35 @@ function rewriteReactiveReads(state, getVars) {
         const start = node.getStart(sourceFile)
         const end = node.getEnd()
         const originalIdentStart = state.toOriginalPos(start)
-        if (usage === 'member-root' || usage === 'call-root') {
-          // `name` -> `øname`: `ø` maps to name start; identifier chars map 1:1
-          const replacement = `${IDENTIFIER_PREFIX}${node.text}`
+        // If in a guarded JSX branch, treat as guarded
+        let shouldAssertNonNull = hasSynchronousTruthyGuard(node, node.text)
+        if (!shouldAssertNonNull && nextJsxGuardContext) {
+          if (conditionImpliesIdentifierTruthy(nextJsxGuardContext, node.text, true)) {
+            shouldAssertNonNull = true
+          }
+        }
+        const callSuffix = shouldAssertNonNull ? '()!' : '()'
+        if (usage === 'member-root') {
+          const originalEndPos = state.toOriginalPos(end)
+          const replacement = `${IDENTIFIER_PREFIX}${node.text}${callSuffix}`
           const mapping = buildPrefixedIdentifierMapping(
-            IDENTIFIER_PREFIX, node.text, '',
-            originalIdentStart, originalIdentStart, originalIdentStart
+            IDENTIFIER_PREFIX, node.text, callSuffix,
+            originalIdentStart, originalIdentStart, originalEndPos
+          )
+          edits.push({ start, end, replacement, anchor: originalIdentStart, mapping })
+        } else if (usage === 'call-root') {
+          const originalEndPos = state.toOriginalPos(end)
+          const replacement = `${IDENTIFIER_PREFIX}${node.text}${callSuffix}`
+          const mapping = buildPrefixedIdentifierMapping(
+            IDENTIFIER_PREFIX, node.text, callSuffix,
+            originalIdentStart, originalIdentStart, originalEndPos
           )
           edits.push({ start, end, replacement, anchor: originalIdentStart, mapping })
         } else if (usage === 'read') {
-          // `name` -> `øname()`: `ø` maps to name start; identifier chars map 1:1; `()` maps to original end
           const originalEndPos = state.toOriginalPos(end)
-          const replacement = `${IDENTIFIER_PREFIX}${node.text}()`
+          const replacement = `${IDENTIFIER_PREFIX}${node.text}${callSuffix}`
           const mapping = buildPrefixedIdentifierMapping(
-            IDENTIFIER_PREFIX, node.text, '()',
+            IDENTIFIER_PREFIX, node.text, callSuffix,
             originalIdentStart, originalIdentStart, originalEndPos
           )
           edits.push({ start, end, replacement, anchor: originalIdentStart, mapping })
@@ -1262,14 +1583,14 @@ function rewriteReactiveReads(state, getVars) {
       }
     }
 
-    ts.forEachChild(node, visit)
+    ts.forEachChild(node, child => visit(child, nextJsxGuardContext))
 
     if (pushedScope) {
       scopeStack.pop()
     }
   }
 
-  visit(sourceFile)
+  visit(sourceFile, null)
   if (edits.length > 0) {
     state.applyEdits(edits)
   }

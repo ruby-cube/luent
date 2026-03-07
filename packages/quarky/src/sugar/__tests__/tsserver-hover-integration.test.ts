@@ -20,7 +20,11 @@ function quickInfoDisplayText(quickInfo: import('typescript').QuickInfo | undefi
   return (quickInfo?.displayParts || []).map((part) => part.text).join('')
 }
 
-function createPluginLanguageService(fileName: string, source: string) {
+function createPluginLanguageService(
+  fileName: string,
+  source: string,
+  compilerOptions: import('typescript').CompilerOptions = {},
+) {
   const dummyFile = '/virtual/dummy.ts'
   const files = new Map<string, string>([
     [fileName, source],
@@ -28,7 +32,13 @@ function createPluginLanguageService(fileName: string, source: string) {
   ])
 
   const host: import('typescript').LanguageServiceHost = {
-    getCompilationSettings: () => ({ target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.Preserve, noEmit: true }),
+    getCompilationSettings: () => ({
+      target: ts.ScriptTarget.ESNext,
+      module: ts.ModuleKind.ESNext,
+      jsx: ts.JsxEmit.Preserve,
+      noEmit: true,
+      ...compilerOptions,
+    }),
     getScriptFileNames: () => [dummyFile, fileName],
     getScriptVersion: () => '0',
     getScriptSnapshot: (name) => {
@@ -101,7 +111,7 @@ function ConstReactiveDeclHover() {
 }
 `
 
-    const service = createPluginLanguageService(fileName, source)
+    const service = createPluginLanguageService(fileName, source, { strictNullChecks: true })
     try {
       const hoverPos = offsetAt(source, 'const count@ =') + 7
       const quickInfo = service.languageService.getQuickInfoAtPosition(fileName, hoverPos)
@@ -478,4 +488,5 @@ function AbsorbRename(count@: Ion<number>) {
       service.dispose()
     }
   })
+
 })
