@@ -33,7 +33,7 @@ function Demo(obj: any) {
     expect(transformed).toContain('destructureØ')
     expect(transformed).toContain('πø')
     expect(transformed).toContain("const { øa, b } = destructureØ(obj, 'øa', 'b')")
-    expect(transformed).toContain("const øpicked = πø(obj, 'value')")
+    expect(transformed).toContain("const øpicked = (obj.øvalue, πø(obj, 'value'))")
     expect(transformed).toContain('return [øa, b, øpicked()]')
   })
 
@@ -83,32 +83,46 @@ function View(value: number) {
     expect(transformed).toContain('value={ø(() => value + 1)}')
   })
 
-  it('rewrites chained @ access via πø nesting', () => {
+  it('rewrites chained dot-notation @ access via tuple form and πø nesting', () => {
     const input = `
 function Demo(obj: any) {
-  get item = obj.a@.b@.c@
-  return item
+  get one = obj.a.b.c.property@
+  get two = obj.a@.b@.c@.property@
+  return [one, two]
 }
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain("const øitem = πø(πø(πø(obj, 'a'), 'b'), 'c')")
+    expect(transformed).toContain("const øone = (obj.a.b.c.øproperty, πø(obj.a.b.c, 'property'))")
+    expect(transformed).toContain("const øtwo = (obj.øa.øb.øc.øproperty, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))")
   })
 
-  it('rewrites optional/computed @ access forms', () => {
+  it('rewrites optional dot-property @ access forms', () => {
     const input = `
 function Demo(obj: any, key: string) {
   get a = obj?.value@
-  get b = obj[key]@
-  get c = obj?.[key]@
-  return [a, b, c]
+  return [a, key]
 }
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain("const øa = obj == null ? undefined : πø(obj, 'value')")
-    expect(transformed).toContain('const øb = πø(obj, key)')
-    expect(transformed).toContain('const øc = obj == null ? undefined : πø(obj, key)')
+  })
+
+  it('does not rewrite computed @ access forms', () => {
+    const input = `
+function Demo(obj: any, key: string) {
+  get a = obj[key]@
+  get b = obj?.[key]@
+  return [a, b]
+}
+`
+
+    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    expect(transformed).toContain('const øa = obj[key]@')
+    expect(transformed).toContain('const øb = obj?.[key]@')
+    expect(transformed).not.toContain('πø(obj, key)')
+    expect(transformed).not.toContain('obj == null ? undefined : πø(obj, key)')
   })
 
   it('keeps nested destructuring syntax stable while still transforming marked bindings', () => {

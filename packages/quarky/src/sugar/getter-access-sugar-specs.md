@@ -62,6 +62,7 @@ function Counter({ øshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) 
       {If(øshowFractions,
         <>
           <hr></hr>
+          <p>{(øshowFractions()!.toString())}</p>
           <p>halfCount: {() => øhalfCount() + '!'}</p>
           <p>thirdCount: {øthirdCount}</p>
         </>
@@ -272,15 +273,15 @@ function FractionKit(øcount) {
 - transform all variables with the `@` suffix to `øvariable`: `variable@` --> `øvariable`
 - transform all usages of `get`/`@`suffix variables without `@` suffix: `variable` --> `øvariable()`
    - pm: `<span:v>variable</span:v>` --> `<span:v>øvariable</span:v>()`
-- transform dot notation with `@` suffix:
-  `get property = obj.property@` --> `const øproperty = πø(obj, 'property');`
-  - pm: `get <span:p>property</span:p> = <span:o>obj</span:o>.<span:a>property@</span:a>` --> `const <span:p>øproperty</span:p> = (<span:a>obj.øproperty</span:a>, πø(<span:o>obj</span:o>, 'property'));`
+* transform dot notation with `@` suffix:
+  `get property = obj.property@` --> `const øproperty = (obj.øproperty, πø(obj, 'property'));`
+  * pm: `get <span:p>property</span:p> = <span:o>obj</span:o>.<span:a>property@</span:a>` --> `const <span:p>øproperty</span:p> = (<span:a>obj.øproperty</span:a>, πø(<span:o>obj</span:o>, 'property'));`
   - import the getter access helper `πø` from '@rue/quarky' if it hasn't been imported yet
-  - chained property access:
-  `get property = obj.a.b.c.property@` --> `const øproperty = πø(obj.a.b.c, 'property')`
-  `get property = obj.a@.b@.c@.property@` --> `const øproperty = πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property')`
-  - pm: `get <span:v>property</span:v> = <span:p>obj.a.b.c.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.a.b.c.property@</span:p>, πø(obj.a.b.c, 'property'))`
-  - pm: `get <span:v>property</span:v> = <span:p>obj.a@.b@.c@.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.a@.b@.c@.property@</span:p>, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
+  * chained property access:
+  `get property = obj.a.b.c.property@` --> `const øproperty = (obj.a.b.c.øproperty, πø(obj.a.b.c, 'property'))`
+  `get property = obj.a@.b@.c@.property@` --> `const øproperty = (obj.øa.øb.øc.øproperty, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
+  * pm: `get <span:v>property</span:v> = <span:p>obj.a.b.c.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.a.b.c.property@</span:p>, πø(obj.a.b.c, 'property'))`
+  * pm: `get <span:v>property</span:v> = <span:p>obj.a@.b@.c@.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.øa.øb.øc.øproperty</span:p>, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
 
 ### JSX fragment shorthand
 - transform jsx templates encased in extraneous parentheses (make sure transform is comment-safe):
@@ -321,7 +322,8 @@ function FractionKit(øcount) {
    - support nested patterns (`{ a: { b@ } }`, `[first@, ...rest]`), aliases (`{ source@: target }`-style equivalents), defaults, and rest elements.
    - preserve source order and defaults behavior exactly.
 - `@` access with advanced syntax:
-   - support optional chaining and computed access where valid (`obj?.a@`, `obj[key]@`, `obj?.[key]@`).
+   - support optional chaining for dot-property access (`obj?.a@`).
+   - computed property access with `@` is unsupported (`obj[key]@`, `obj?.[key]@`).
    - for chained `@` access, preserve short-circuit behavior and evaluation order.
 
 ### Conformance checklist
@@ -335,7 +337,7 @@ function FractionKit(øcount) {
 | Destructuring | mixed marked/unmarked bindings | rewrites only bindings covered by rules | No |
 | Object literal `get` sugar | `{ get key: value }` | normalizes through `absorbØ(...)` | No |
 | Object literal `get` sugar | mixed `get` sugar + getters + shorthand + plain props | preserves order and behavior | No |
-| `@` property access | `obj.prop@` | rewrites via `πø(obj, 'prop')` | No |
+| `@` property access | `obj.prop@` | rewrites to tuple form (`(obj.øprop, πø(obj, 'prop'))`) | No |
 | `@` property access | chained/optional/computed forms | preserves short-circuiting and evaluation order | No |
 | JSX shorthand | parenthesized multi-node JSX | rewrites to fragment shorthand; comments preserved | No |
 | Derivation shorthand | allowed parenthesized value positions | rewrites only in allowed positions from spec | No |
@@ -355,8 +357,8 @@ function FractionKit(øcount) {
 | TV-05 | `const { a@, b, c@ } = src` | `const { øa, b, øc } = destructureØ(src, 'øa', 'b', 'øc')` | No |
 | TV-06 | `get { a, b } = src` | `const { øa, øb } = destructureØ(src, 'øa', 'øb')` | No |
 | TV-07 | `{ get value: Ion(0) }` | `absorbØ({ øvalue: Ion(0) }, ['øvalue'])` | No |
-| TV-08 | `get item = obj.prop@` | `const øitem = πø(obj, 'prop')` | No |
-| TV-09 | `get item = obj.a@.b@.c@` | `const øitem = πø(πø(πø(obj, 'a'), 'b'), 'c')` | No |
+| TV-08 | `get item = obj.prop@` | `const øitem = (obj.øprop, πø(obj, 'prop'))` | No |
+| TV-09 | `get item = obj.a@.b@.c@` | `const øitem = (obj.øa.øb.øc, πø(πø(πø(obj, 'a'), 'b'), 'c'))` | No |
 | TV-10 | `get item = obj?.a@` | preserves optional-chain short-circuit semantics in emitted access helper form | No |
 | TV-13 | `((<A></A><B></B>))` (multi-node JSX wrapped in parens) | fragment shorthand rewrite with comments preserved | No |
 | TV-14 | `{ value: (a + 1) }` | `{ value: () => a + 1 }` | No |

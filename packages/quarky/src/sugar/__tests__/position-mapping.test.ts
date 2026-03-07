@@ -61,4 +61,49 @@ function Counter({ show@ }) {
     expect(transformed.code).toContain('value={ø(() => øcount() + 2)}')
     expect(transformed.code).toContain('{øcount()}')
   })
+
+  it('keeps mapping stable inside absorbØ initializer expressions', () => {
+    const absorbSource = `
+function Kit(value: number) {
+  return {
+    get count: Ion((value + 1)),
+    normalProperty: value
+  }
+}
+`
+
+    const absorbTransformed = transformQuarkySugarShared(
+      { code: absorbSource, fileName: 'Kit.qrx' },
+      { includeToTransformedPos: true },
+    )
+
+    const originalOffset = offsetAt(absorbSource, 'value + 1') + 3
+    const transformedOffset = absorbTransformed.mapper.toTransformedPos(originalOffset)
+    const remappedOriginalOffset = absorbTransformed.mapper.toOriginalPos(transformedOffset)
+
+    expect(Math.abs(remappedOriginalOffset - originalOffset)).toBeLessThanOrEqual(2)
+  })
+
+  it('keeps mapping stable for JSX sibling-parens fragment rewrites', () => {
+    const jsxFragmentSource = `
+function View() {
+  get count = Ion(0)
+  return (
+    <Label value={(count + 1)} />
+    <Label value={(count + 2)} />
+  )
+}
+`
+
+    const jsxFragmentTransformed = transformQuarkySugarShared(
+      { code: jsxFragmentSource, fileName: 'View.qrx' },
+      { includeToTransformedPos: true },
+    )
+
+    const originalOffset = offsetAt(jsxFragmentSource, '(count + 2)') + 2
+    const transformedOffset = jsxFragmentTransformed.mapper.toTransformedPos(originalOffset)
+    const remappedOriginalOffset = jsxFragmentTransformed.mapper.toOriginalPos(transformedOffset)
+
+    expect(Math.abs(remappedOriginalOffset - originalOffset)).toBeLessThanOrEqual(2)
+  })
 })

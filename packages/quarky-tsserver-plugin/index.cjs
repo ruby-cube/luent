@@ -28,7 +28,7 @@ function init(modules) {
     const languageService = info.languageService
     const host = info.languageServiceHost
     const transformCache = new Map()
-    const HIDDEN_HELPERS = ['absorbØ', 'destructureØ', 'πø']
+    const HIDDEN_HELPERS = ['absorbØ', 'destructureØ', 'πø', 'ø']
 
     const proxy = Object.create(null)
     for (const key of Object.keys(languageService)) {
@@ -98,6 +98,11 @@ function init(modules) {
         }
       }
 
+      const spanText = transformedCode.slice(spanStart, spanEnd)
+      if (/^(?:ø|πø)[A-Za-z_$][\w$]*$/.test(spanText)) {
+        return false
+      }
+
       return transformedSpanIntersectsSyntheticSegment(sourceMap, spanStart, spanEnd - spanStart)
     }
 
@@ -140,6 +145,250 @@ function init(modules) {
       return text.slice(start, safePos)
     }
 
+    function getIdentifierAtPosition(text, position) {
+      if (typeof text !== 'string') return ''
+      const safePos = Math.max(0, Math.min(text.length, position))
+      let start = safePos
+      let end = safePos
+
+      while (start > 0) {
+        const ch = text.charCodeAt(start - 1)
+        const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36 || ch === 968
+        if (!isWord) break
+        start -= 1
+      }
+
+      while (end < text.length) {
+        const ch = text.charCodeAt(end)
+        const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36 || ch === 968
+        if (!isWord) break
+        end += 1
+      }
+
+      return text.slice(start, end)
+    }
+
+    function getIdentifierSpanAtPosition(text, position) {
+      if (typeof text !== 'string' || text.length === 0) return null
+
+      const maxIndex = Math.max(0, text.length - 1)
+      let cursor = Math.max(0, Math.min(maxIndex, position))
+      if (text[cursor] === '@' && cursor > 0) cursor -= 1
+
+      const isWordAt = (index) => {
+        if (index < 0 || index >= text.length) return false
+        const ch = text.charCodeAt(index)
+        return (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+      }
+
+      if (!isWordAt(cursor)) return null
+
+      let start = cursor
+      let end = cursor + 1
+
+      while (start > 0 && isWordAt(start - 1)) start -= 1
+      while (end < text.length && isWordAt(end)) end += 1
+
+      return {
+        start,
+        length: end - start,
+      }
+    }
+
+    function getDeclarationTokenSpanAtPosition(text, position) {
+      if (typeof text !== 'string' || text.length === 0) return null
+      const identifierSpan = getIdentifierSpanAtPosition(text, position)
+      if (!identifierSpan || identifierSpan.length <= 0) return null
+
+      const identStart = identifierSpan.start
+      const identEnd = identStart + identifierSpan.length
+      const before = text.slice(Math.max(0, identStart - 64), identStart)
+
+      if (/\bget\s*$/.test(before)) {
+        return identifierSpan
+      }
+
+      if (/\b(?:const|let|var)\s*$/.test(before)) {
+        if (text[identEnd] === '@') {
+          return {
+            start: identStart,
+            length: identifierSpan.length + 1,
+          }
+        }
+        return identifierSpan
+      }
+
+      return null
+    }
+
+    function quickInfoLooksLikeArrowFunction(quickInfo) {
+      if (!quickInfo) return false
+      const displayText = Array.isArray(quickInfo.displayParts)
+        ? quickInfo.displayParts.map((part) => (part && typeof part.text === 'string' ? part.text : '')).join('')
+        : ''
+      return /=>/.test(displayText)
+    }
+
+    function collectDerivationArrowProbePositions(transformed, originalPos, centerPos) {
+      if (!transformed || typeof transformed.code !== 'string' || transformed.code.length === 0) return []
+      if (!Number.isFinite(originalPos)) return []
+
+      const transformedCode = transformed.code
+      const transformedLength = transformedCode.length
+      const safeCenter = Math.max(0, Math.min(transformedLength, Number.isFinite(centerPos) ? Math.floor(centerPos) : 0))
+      const windowRadius = 160
+      const scanStart = Math.max(0, safeCenter - windowRadius)
+      const scanEnd = Math.min(transformedLength - 1, safeCenter + windowRadius)
+
+      const output = []
+      const seen = new Set()
+      const add = (pos) => {
+        const safePos = Math.max(0, Math.min(transformedLength, pos))
+        if (seen.has(safePos)) return
+        seen.add(safePos)
+        output.push(safePos)
+      }
+
+      for (let index = scanStart; index < scanEnd; index += 1) {
+        if (transformedCode[index] !== '=' || transformedCode[index + 1] !== '>') continue
+        const mappedLeft = toOriginalPos(transformed, index)
+        const mappedRight = toOriginalPos(transformed, index + 1)
+        if (mappedLeft !== originalPos && mappedRight !== originalPos) continue
+
+        add(index)
+        add(index + 1)
+        add(index - 1)
+        add(index + 2)
+      }
+
+      return output
+    }
+
+    function quickInfoMatchesDerivationArrowProbe(quickInfo, transformedCode, derivationArrowProbeSet) {
+      if (!quickInfo || !quickInfo.textSpan || !(derivationArrowProbeSet instanceof Set) || derivationArrowProbeSet.size === 0) {
+        return false
+      }
+
+      const start = Math.max(0, quickInfo.textSpan.start || 0)
+      const length = Math.max(0, quickInfo.textSpan.length || 0)
+      const end = Math.max(start, start + length)
+
+      for (const probePos of derivationArrowProbeSet) {
+        if (probePos >= start && probePos < end) return true
+      }
+
+      if (typeof transformedCode === 'string' && length > 0) {
+        const spanText = transformedCode.slice(start, end)
+        if (spanText.includes('=>')) return true
+      }
+
+      return false
+    }
+
+    function createDerivationArrowDisplayParts(quickInfo) {
+      const fallback = [{ kind: 'text', text: '() => …' }]
+      if (!quickInfo || !Array.isArray(quickInfo.displayParts) || quickInfo.displayParts.length === 0) {
+        return fallback
+      }
+
+      const text = quickInfo.displayParts
+        .map((part) => (part && typeof part.text === 'string' ? part.text : ''))
+        .join('')
+      const returnTypeMatch = text.match(/:\s*([^\n]+)$/)
+      if (returnTypeMatch && returnTypeMatch[1]) {
+        return [{ kind: 'text', text: `() => ${returnTypeMatch[1].trim()}` }]
+      }
+
+      return fallback
+    }
+
+    function isCursorOnReactiveToken(text, position) {
+      if (typeof text !== 'string' || text.length === 0) return false
+      const safePos = Math.max(0, Math.min(text.length, position))
+      if (text[safePos] === '@') return true
+
+      let start = safePos
+      let end = safePos
+
+      while (start > 0) {
+        const ch = text.charCodeAt(start - 1)
+        const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+        if (!isWord) break
+        start -= 1
+      }
+
+      while (end < text.length) {
+        const ch = text.charCodeAt(end)
+        const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+        if (!isWord) break
+        end += 1
+      }
+
+      return end < text.length && text[end] === '@' && safePos >= start && safePos <= end
+    }
+
+    function normalizeReactiveHoverSpan(span, sourceText) {
+      if (!span || typeof span.start !== 'number' || typeof span.length !== 'number') return span
+      if (typeof sourceText !== 'string' || sourceText.length === 0) return span
+
+      const spanStart = Math.max(0, Math.min(sourceText.length, span.start))
+      const spanEnd = Math.max(spanStart, Math.min(sourceText.length, span.start + span.length))
+      let start = spanStart
+      let end = spanEnd
+
+      if (start < end && sourceText[start] === '.') start += 1
+      if (end <= sourceText.length && sourceText[end - 1] !== '@' && end < sourceText.length && sourceText[end] === '@') {
+        end += 1
+      }
+
+      const length = Math.max(0, end - start)
+      return {
+        start,
+        length,
+      }
+    }
+
+    function getReactiveTokenSpanAtPosition(text, position) {
+      if (typeof text !== 'string' || text.length === 0) return null
+
+      const safePos = Math.max(0, Math.min(text.length, position))
+      let identStart = safePos
+      let identEnd = safePos
+
+      if (safePos > 0 && text[safePos] === '@') {
+        identEnd = safePos
+        identStart = safePos
+        while (identStart > 0) {
+          const ch = text.charCodeAt(identStart - 1)
+          const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+          if (!isWord) break
+          identStart -= 1
+        }
+      } else {
+        while (identStart > 0) {
+          const ch = text.charCodeAt(identStart - 1)
+          const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+          if (!isWord) break
+          identStart -= 1
+        }
+
+        while (identEnd < text.length) {
+          const ch = text.charCodeAt(identEnd)
+          const isWord = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+          if (!isWord) break
+          identEnd += 1
+        }
+      }
+
+      if (identStart >= identEnd) return null
+      if (identEnd >= text.length || text[identEnd] !== '@') return null
+
+      return {
+        start: identStart,
+        length: (identEnd - identStart) + 1,
+      }
+    }
+
     function toOriginalPos(transformed, transformedPos) {
       if (!transformed || !transformed.sourceMap) return Math.max(0, transformedPos || 0)
       return toOriginalPosFromSourceMap(transformed.sourceMap, transformedPos)
@@ -172,7 +421,7 @@ function init(modules) {
 
       let bestPos = basePos
       let bestOriginalDistance = Math.abs(toOriginalPos(transformed, basePos) - safeOriginalPos)
-      let bestTransformedDistance = 0
+      let bestTransformedDistance = Number.POSITIVE_INFINITY
 
       const radius = 96
       for (let delta = 1; delta <= radius; delta += 1) {
@@ -672,50 +921,144 @@ function init(modules) {
       if (!isSugarFile(fileName)) return languageService.getQuickInfoAtPosition(fileName, position)
 
       return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const sourceText = getSnapshotText(fileName)
+        const originalPrefix = getIdentifierPrefixAtPosition(sourceText, position)
+        const originalIdentifier = getIdentifierAtPosition(sourceText, position)
+        const declarationTokenSpan = getDeclarationTokenSpanAtPosition(sourceText, position)
+        const sourceChar = typeof sourceText === 'string' ? sourceText[position] : ''
+        const cursorOnDerivationOpenParen = sourceChar === '('
+        const cursorOnReactiveToken = isCursorOnReactiveToken(sourceText, position)
+        const reactiveTokenSpan = cursorOnReactiveToken ? getReactiveTokenSpanAtPosition(sourceText, position) : null
         const transformedPosition = toTransformedPos(transformed, position)
-        const candidatePositions = withNearbyPositions(
+        const baseCandidatePositions = withNearbyPositions(
           transformedPosition,
           transformed && typeof transformed.code === 'string' ? transformed.code.length : transformedPosition,
-          24,
+          96,
         )
+        const derivationArrowProbePositions = cursorOnDerivationOpenParen
+          ? collectDerivationArrowProbePositions(transformed, position, transformedPosition)
+          : []
+        const derivationArrowProbeSet = new Set(derivationArrowProbePositions)
+        const isDerivationParenHover = cursorOnDerivationOpenParen && derivationArrowProbePositions.length > 0
+        const candidatePositions = [
+          ...derivationArrowProbePositions,
+          ...baseCandidatePositions,
+        ]
 
         const candidates = []
         for (const candidatePos of candidatePositions) {
           const quickInfo = ls.getQuickInfoAtPosition(virtualFileName, candidatePos)
           if (!quickInfo || !quickInfo.textSpan) continue
+          const isDirectDerivationProbe = cursorOnDerivationOpenParen && derivationArrowProbeSet.has(candidatePos)
+          const isDerivationArrowCandidate = cursorOnDerivationOpenParen
+            && (isDirectDerivationProbe || quickInfoMatchesDerivationArrowProbe(quickInfo, transformed.code, derivationArrowProbeSet))
           if (transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, quickInfo.textSpan.start, quickInfo.textSpan.length)) {
-            continue
+            if (cursorOnDerivationOpenParen && (quickInfoLooksLikeArrowFunction(quickInfo) || isDerivationArrowCandidate)) {
+              // allow synthetic arrow-function quick info when hovering derivation shorthand '('
+            } else {
+              continue
+            }
           }
 
           const mappedTextSpan = mapTextSpanToOriginal(quickInfo.textSpan, transformed)
           if (!mappedTextSpan) continue
 
+          const mappedText = typeof sourceText === 'string'
+            ? sourceText.slice(mappedTextSpan.start, mappedTextSpan.start + mappedTextSpan.length)
+            : ''
+          const prefixMatches = originalPrefix.length === 0 || mappedText.includes(originalPrefix)
+          const displayText = Array.isArray(quickInfo.displayParts)
+            ? quickInfo.displayParts.map((part) => (part && typeof part.text === 'string' ? part.text : '')).join('')
+            : ''
+          const displayMatchesPrefix = originalPrefix.length === 0 || displayText.includes(originalPrefix)
+          const mappedMatchesIdentifier = originalIdentifier.length > 0 && mappedText.includes(originalIdentifier)
+          const displayMatchesIdentifier = originalIdentifier.length > 0
+            && (displayText.includes(originalIdentifier) || displayText.includes(`ø${originalIdentifier}`) || displayText.includes(`${originalIdentifier}@`))
+          const identifierMatches = mappedMatchesIdentifier || displayMatchesIdentifier
+          const mappedEnd = mappedTextSpan.start + mappedTextSpan.length
+          const mapsToReactiveToken = mappedText.includes('@') || sourceText[mappedEnd] === '@'
+          const normalizedSpan = cursorOnReactiveToken && mapsToReactiveToken
+            ? normalizeReactiveHoverSpan(mappedTextSpan, sourceText)
+            : mappedTextSpan
+          const matchesReactiveTokenSpan = !!(
+            reactiveTokenSpan
+            && normalizedSpan
+            && normalizedSpan.start === reactiveTokenSpan.start
+            && normalizedSpan.length === reactiveTokenSpan.length
+          )
+          const isArrowFunctionQuickInfo = quickInfoLooksLikeArrowFunction(quickInfo) || isDerivationArrowCandidate
+
           candidates.push({
             quickInfo,
-            mappedTextSpan,
+            mappedTextSpan: normalizedSpan,
+            prefixMatches,
+            displayMatchesPrefix,
+            identifierMatches,
+            mapsToReactiveToken,
+            matchesReactiveTokenSpan,
+            isArrowFunctionQuickInfo,
+            isDerivationArrowCandidate,
             distance: Math.abs(candidatePos - transformedPosition),
-            containsCursor: spanContainsPosition(mappedTextSpan, position),
+            containsCursor: spanContainsPosition(normalizedSpan, position),
           })
         }
 
         if (candidates.length === 0) return undefined
 
         candidates.sort((left, right) => {
+          if (cursorOnDerivationOpenParen && left.isArrowFunctionQuickInfo !== right.isArrowFunctionQuickInfo) {
+            return left.isArrowFunctionQuickInfo ? -1 : 1
+          }
+          if (cursorOnDerivationOpenParen && left.isDerivationArrowCandidate !== right.isDerivationArrowCandidate) {
+            return left.isDerivationArrowCandidate ? -1 : 1
+          }
+          if (left.identifierMatches !== right.identifierMatches) {
+            return left.identifierMatches ? -1 : 1
+          }
+          if (cursorOnReactiveToken && left.matchesReactiveTokenSpan !== right.matchesReactiveTokenSpan) {
+            return left.matchesReactiveTokenSpan ? -1 : 1
+          }
+          if (cursorOnReactiveToken && left.mapsToReactiveToken !== right.mapsToReactiveToken) {
+            return left.mapsToReactiveToken ? -1 : 1
+          }
           if (left.containsCursor !== right.containsCursor) {
             return left.containsCursor ? -1 : 1
+          }
+          if (left.displayMatchesPrefix !== right.displayMatchesPrefix) {
+            return left.displayMatchesPrefix ? -1 : 1
+          }
+          if (left.prefixMatches !== right.prefixMatches) {
+            return left.prefixMatches ? -1 : 1
           }
           if (left.distance !== right.distance) {
             return left.distance - right.distance
           }
-          return (left.mappedTextSpan.length || 0) - (right.mappedTextSpan.length || 0)
+          const leftLength = left.mappedTextSpan.length || 0
+          const rightLength = right.mappedTextSpan.length || 0
+          const leftZeroLength = leftLength <= 0
+          const rightZeroLength = rightLength <= 0
+          if (leftZeroLength !== rightZeroLength) {
+            return leftZeroLength ? 1 : -1
+          }
+          return leftLength - rightLength
         })
 
         const best = candidates[0]
+        const finalTextSpan = cursorOnReactiveToken && reactiveTokenSpan
+          ? reactiveTokenSpan
+          : declarationTokenSpan
+            ? declarationTokenSpan
+          : isDerivationParenHover
+            ? { start: position, length: 1 }
+            : best.mappedTextSpan
+        const finalDisplayParts = isDerivationParenHover
+          ? createDerivationArrowDisplayParts(best.quickInfo)
+          : remapDisplayPartsToSugar(best.quickInfo.displayParts)
         return {
           ...best.quickInfo,
-          displayParts: remapDisplayPartsToSugar(best.quickInfo.displayParts),
+          displayParts: finalDisplayParts,
           documentation: remapDisplayPartsToSugar(best.quickInfo.documentation),
-          textSpan: best.mappedTextSpan,
+          textSpan: finalTextSpan,
         }
       })
     }

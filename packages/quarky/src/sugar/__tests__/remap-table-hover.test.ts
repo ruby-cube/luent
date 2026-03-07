@@ -255,4 +255,33 @@ function Counter(count@: Ion<number>) {
     }
   })
 
+  it('treats Ø/ø/π as single UTF-16 units for mapping purposes', () => {
+    expect('Ø'.length).toBe(1)
+    expect('ø'.length).toBe(1)
+    expect('π'.length).toBe(1)
+
+    const unicodeSource = `
+function Counter(count@: Ion<number>) {
+  return { get value: Ion((count / 2)) }
+}
+`
+
+    const unicodeTransformed = transformQuarkySugarShared(
+      { code: unicodeSource, fileName: 'Counter.qrx' },
+      { includeToTransformedPos: true },
+    )
+
+    const presentHelpers = ['absorbØ', 'πø'].filter((helperName) => unicodeTransformed.code.includes(helperName))
+    expect(presentHelpers.length).toBeGreaterThan(0)
+
+    for (const helperName of presentHelpers) {
+      const helperIndex = unicodeTransformed.code.indexOf(helperName)
+      expect(helperIndex).toBeGreaterThanOrEqual(0)
+
+      const anchor = toOriginalPosFromSourceMap(unicodeTransformed.sourceMap, helperIndex)
+      const end = toOriginalPosFromSourceMap(unicodeTransformed.sourceMap, helperIndex + helperName.length - 1)
+      expect(end).toBe(anchor)
+    }
+  })
+
 })

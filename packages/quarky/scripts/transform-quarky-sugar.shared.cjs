@@ -451,11 +451,9 @@ function rewriteGetterAccessSugar(state) {
   const identBody = '[\\w$øπ]*'
   const exprPrefix = `(${identStart}${identBody}(?:\\([^\\n\\r)]*\\)|\\[[^\\n\\r\\]]*\\]|\\.${identStart}${identBody})*)`
   const prop = `(${identStart}${identBody})`
-  const propertyRegex = new RegExp(`${exprPrefix}\\.${prop}@`, 'g')
+  const dotChainPropertyRegex = new RegExp(`(${identStart}${identBody}(?:\\.${identStart}${identBody}@?)*)\\.${prop}@`, 'g')
   const callResultPropertyRegex = new RegExp(`(${identStart}${identBody}\\([^\\n\\r]*\\))\\.${prop}@`, 'g')
   const optionalPropertyRegex = new RegExp(`${exprPrefix}\\?\\.${prop}@`, 'g')
-  const computedRegex = new RegExp(`${exprPrefix}\\[([^\\n\\r\\]]+)\\]@`, 'g')
-  const optionalComputedRegex = new RegExp(`${exprPrefix}\\?\\.\\[([^\\n\\r\\]]+)\\]@`, 'g')
 
   let helperUsed = false
 
@@ -488,25 +486,44 @@ function rewriteGetterAccessSugar(state) {
     return false
   }
 
+  function buildDotChainPropertyReplacement(receiverExpr, key) {
+    const parts = receiverExpr.split('.')
+    const root = parts[0] || ''
+    const segments = parts.slice(1)
+
+    const leftParts = [root]
+    let helperReceiver = root
+
+    for (const segment of segments) {
+      const markedMatch = segment.match(/^([A-Za-z_$øπ][\\w$øπ]*)@$/)
+      if (markedMatch && markedMatch[1]) {
+        const markedName = markedMatch[1]
+        leftParts.push(`${IDENTIFIER_PREFIX}${markedName}`)
+        helperReceiver = `${GETTER_ACCESS_HELPER}(${helperReceiver}, '${markedName}')`
+        continue
+      }
+
+      leftParts.push(segment)
+      helperReceiver = `${helperReceiver}.${segment}`
+    }
+
+    leftParts.push(`${IDENTIFIER_PREFIX}${key}`)
+    return `(${leftParts.join('.')}, ${GETTER_ACCESS_HELPER}(${helperReceiver}, '${key}'))`
+  }
+
   let changed = false
   let iteration = 0
   do {
     changed = false
     iteration += 1
 
-    if (collectEdits(optionalComputedRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, ${key})`)) {
-      changed = true
-    }
     if (collectEdits(optionalPropertyRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
-      changed = true
-    }
-    if (collectEdits(computedRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, ${key})`)) {
       changed = true
     }
     if (collectEdits(callResultPropertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
       changed = true
     }
-    if (collectEdits(propertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
+    if (collectEdits(dotChainPropertyRegex, (targetExpr, key) => buildDotChainPropertyReplacement(targetExpr, key))) {
       changed = true
     }
   } while (changed && iteration < 8)
@@ -815,9 +832,10 @@ function rewriteObjectLiteralsWithAbsorb(state) {
         // `ø` -> invisible prefix on identOriginalPos; propName chars -> 1:1; `: ` and initializer -> map to their positions
         const colonAndInitAbsStart = identAbsStart + propName.length
         const colonOriginalPos = state.toOriginalPos(colonAndInitAbsStart)
-        // For initializer chars: map each char proportionally from original
-        const initializerInTrimmed = trimmed.slice(trimmed.indexOf(':') + 1).trimStart()
-        const initializerAbsStart = propAbsStart + trimmed.indexOf(':') + 1 + (trimmed.length - trimmed.trimStart().length <= 0 ? 1 : 1)
+        const colonIndex = trimmed.indexOf(':')
+        const afterColon = colonIndex >= 0 ? trimmed.slice(colonIndex + 1) : ''
+        const initializerLeadingWhitespace = afterColon.length - afterColon.trimStart().length
+        const initializerAbsStart = propAbsStart + Math.max(0, colonIndex) + 1 + initializerLeadingWhitespace
         const outText = `${IDENTIFIER_PREFIX}${propName}: ${initializer}`
         const outMapping = []
         // ø -> identOriginalPos
@@ -827,8 +845,10 @@ function rewriteObjectLiteralsWithAbsorb(state) {
         // `: ` -> colonOriginalPos
         outMapping.push(colonOriginalPos)
         outMapping.push(colonOriginalPos)
-        // initializer chars -> anchor (best effort; the content is preserved verbatim)
-        for (let i = 0; i < initializer.length; i += 1) outMapping.push(colonOriginalPos + 2 + i < colonOriginalPos + 2 + initializer.length ? colonOriginalPos + 2 : colonOriginalPos)
+        // initializer chars -> map each character to the corresponding original position
+        for (let i = 0; i < initializer.length; i += 1) {
+          outMapping.push(state.toOriginalPos(initializerAbsStart + i))
+        }
         rewrittenEntries.push({ text: outText, mapping: outMapping })
         keyEntries.push(`'${IDENTIFIER_PREFIX}${propName}'`)
         continue
@@ -1056,11 +1076,27 @@ function rewriteJsxSiblingParensToFragment(state) {
         const closeEnd = scanner.getTextPos()
         const inner = state.code.slice(openPos + 1, closeEnd - 1)
         if (hasMultipleTopLevelJsxRoots(inner)) {
+          const openAnchor = state.toOriginalPos(openPos)
+          const closeAnchor = state.toOriginalPos(closeEnd - 1)
+          const mapping = []
+
+          mapping.push(openAnchor)
+          mapping.push(openAnchor)
+
+          for (let i = 0; i < inner.length; i += 1) {
+            mapping.push(state.toOriginalPos(openPos + 1 + i))
+          }
+
+          mapping.push(closeAnchor)
+          mapping.push(closeAnchor)
+          mapping.push(closeAnchor)
+
           edits.push({
             start: openPos,
             end: closeEnd,
             replacement: `<>${inner}</>`,
-            anchor: state.toOriginalPos(openPos),
+            anchor: openAnchor,
+            mapping,
           })
         }
       }
@@ -1274,6 +1310,7 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
 
   function rewriteParenthesized(node) {
     if (!ts.isParenthesizedExpression(node)) return
+    if (ts.isBinaryExpression(node.expression) && node.expression.operatorToken.kind === ts.SyntaxKind.CommaToken) return
     const start = node.getStart(sourceFile)
     const end = node.getEnd()
     edits.push({ start, end: start + 1, replacement: '() => ', anchor: state.toOriginalPos(start) })
@@ -1285,11 +1322,22 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
     const start = node.getStart(sourceFile)
     const end = node.getEnd()
     const inner = state.code.slice(start + 1, end - 1)
+    const anchor = state.toOriginalPos(start)
+    const closeAnchor = state.toOriginalPos(end - 1)
+    const prefix = `${DERIVATION_HELPER}(() => `
+    const suffix = ')'
+    const mapping = []
+
+    for (let i = 0; i < prefix.length; i += 1) mapping.push(anchor)
+    for (let i = 0; i < inner.length; i += 1) mapping.push(state.toOriginalPos(start + 1 + i))
+    for (let i = 0; i < suffix.length; i += 1) mapping.push(closeAnchor)
+
     edits.push({
       start,
       end,
-      replacement: `${DERIVATION_HELPER}(() => ${inner})`,
-      anchor: state.toOriginalPos(start),
+      replacement: `${prefix}${inner}${suffix}`,
+      anchor,
+      mapping,
     })
     derivationHelperUsed = true
   }
