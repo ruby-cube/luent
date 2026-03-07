@@ -64,11 +64,11 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
 
       }
       else if (øobj()) {
-         const name = øobj()!.name
+         const name = øobj()?.name
          console.log('name', øobj()!, name)
       }
       else {
-         øobj().name 
+         øobj()?.name 
          console.log('nothing')
       }
    }
@@ -82,24 +82,24 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
          <p>count: {øcount}</p>
          <p>doubleCount: {ødoubleCount}</p>
          <p>tripleCount: {ø(() => øcount() * 3)}</p>
-         <button on:click={e => øshowFractions.value = !øshowFractions()}>{ø(() => øshowFractions() ? 'hide' : 'show')} fractions</button>
+         <button on:click={e => {øshowFractions.value = !øshowFractions(); øobj.value = undefined}}>{ø(() => øshowFractions() ? 'hide' : 'show')} fractions</button>
          {If(øobj(), 
-            <div>{øobj()!.name}</div>
+            <div>{øobj()?.name}</div>
          )}
          {If(øobj(), 
-            <div>{ø(() => øobj()!.name)}</div>
+            <div>{ø(() => øobj()?.name)}</div>
          )}
          {If(øobj(), () =>
-            <div>{øobj()!.name}</div>
+            <div>{øobj()?.name}</div>
          )}
          {If(øobj, 
-            <div>{øobj()!.name}</div>
+            <div>{øobj()?.name}</div>
          )}
          {If(øobj, 
-            <div>{ø(() => øobj()!.name)}</div>
+            <div>{ø(() => øobj()?.name)}</div>
          )}
          {If(øobj, () =>
-            <div>{øobj()!.name}</div>
+            <div>{øobj()?.name}</div>
          )}
          {If(øshowFractions, <>
             <hr></hr>

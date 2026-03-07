@@ -1512,6 +1512,14 @@ function rewriteReactiveReads(state, getVars) {
           nextJsxGuardContext = callExpr.arguments[0]
         }
       }
+    } else if (ts.isArrowFunction(node) && node.parent && ts.isCallExpression(node.parent)) {
+      // Handle render function case: If(obj, () => <div>{obj.name}</div>)
+      const callExpr = node.parent;
+      const callName = getIdentifierCallName(callExpr.expression);
+      if (callName && isTemplateConditionalCallName(callName)) {
+        // The first argument is the guard
+        nextJsxGuardContext = callExpr.arguments[0];
+      }
     }
 
     // If in a guarded JSX branch, propagate guard context to JSX children and derivation shorthand
@@ -1549,15 +1557,27 @@ function rewriteReactiveReads(state, getVars) {
         const originalIdentStart = state.toOriginalPos(start)
         // If in a guarded JSX branch, treat as guarded
         let shouldAssertNonNull = hasSynchronousTruthyGuard(node, node.text)
-        if (!shouldAssertNonNull && nextJsxGuardContext) {
-          if (conditionImpliesIdentifierTruthy(nextJsxGuardContext, node.text, true)) {
-            shouldAssertNonNull = true
+        let shouldUseOptionalChaining = false;
+        // If the guard is a getter access (If(obj@, ...)), use optional chaining
+        if (nextJsxGuardContext) {
+          // If the guard is a call to the getter (øobj())
+          if (ts.isCallExpression(nextJsxGuardContext) && ts.isIdentifier(nextJsxGuardContext.expression)) {
+            if (nextJsxGuardContext.expression.text === `ø${node.text}`) {
+              shouldUseOptionalChaining = true;
+              shouldAssertNonNull = false;
+            }
+          } else if (!shouldUseOptionalChaining && conditionImpliesIdentifierTruthy(nextJsxGuardContext, node.text, true)) {
+            shouldAssertNonNull = true;
           }
         }
-        const callSuffix = shouldAssertNonNull ? '()!' : '()'
+        let callSuffix = '()';
+        if (shouldUseOptionalChaining) callSuffix = '()?.';
+        else if (shouldAssertNonNull) callSuffix = '()!';
         if (usage === 'member-root') {
           const originalEndPos = state.toOriginalPos(end)
-          const replacement = `${IDENTIFIER_PREFIX}${node.text}${callSuffix}`
+          let replacement;
+          // Always emit optional chaining for all guarded branches
+          replacement = `${IDENTIFIER_PREFIX}${node.text}()?`;
           const mapping = buildPrefixedIdentifierMapping(
             IDENTIFIER_PREFIX, node.text, callSuffix,
             originalIdentStart, originalIdentStart, originalEndPos

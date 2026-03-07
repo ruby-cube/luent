@@ -82,7 +82,7 @@ export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableI
          <p>count: {count@}</p>
          <p>doubleCount: {doubleCount@}</p>
          <p>tripleCount: {(count * 3)}</p>
-         <button on:click={e => showFractions@.value = !showFractions}>{(showFractions ? 'hide' : 'show')} fractions</button>
+         <button on:click={e => {showFractions@.value = !showFractions; showFractions ? obj@.value = undefined : obj@.value = {name: 'sir robin'}}}>{(showFractions ? 'hide' : 'show')} fractions</button>
          {If(obj, 
             <div>{obj.name}</div>
          )}
