@@ -17,10 +17,6 @@ function parseArgs(argv) {
   return { projectPath }
 }
 
-function isQrkFile(fileName) {
-  return fileName.endsWith('.qrk') || fileName.endsWith('.qrx')
-}
-
 function getVirtualExtension(fileName) {
   return fileName.endsWith('.qrx') ? '.tsx' : '.ts'
 }
@@ -76,21 +72,26 @@ function createQrkCompilerContext(configPath, parsedConfig) {
 
   function getTransformForOriginal(originalPath) {
     const normalizedOriginal = normalizeAbsolute(originalPath)
-    const cached = transformCache.get(normalizedOriginal)
-    if (cached) return cached
-
     const source = ts.sys.readFile(normalizedOriginal)
     if (source == null) {
       throw new Error(`Unable to read source: ${normalizedOriginal}`)
     }
 
-    const result = transformQuarkySugar({
+    const cached = transformCache.get(normalizedOriginal)
+    if (cached && cached.originalCode === source) return cached
+
+    const transformed = transformQuarkySugar({
       code: source,
       fileName: normalizedOriginal,
     })
 
-    transformCache.set(normalizedOriginal, result)
-    return result
+    const enriched = {
+      ...transformed,
+      originalCode: source,
+    }
+
+    transformCache.set(normalizedOriginal, enriched)
+    return enriched
   }
 
   function getOriginalSourceFile(originalPath) {
@@ -104,7 +105,7 @@ function createQrkCompilerContext(configPath, parsedConfig) {
       originalCode,
       ts.ScriptTarget.Latest,
       true,
-      getScriptKindFromFileName(normalizedOriginal.endsWith('.qrx') ? normalizedOriginal + '.tsx' : normalizedOriginal + '.ts'),
+      getScriptKindFromFileName(normalizedOriginal.endsWith('.qrx') ? `${normalizedOriginal}.tsx` : `${normalizedOriginal}.ts`),
     )
 
     originalSourceFileCache.set(normalizedOriginal, sourceFile)
@@ -124,14 +125,15 @@ function createQrkCompilerContext(configPath, parsedConfig) {
     const mappedStart = Math.max(0, transformResult.mapper.toOriginalPos(start))
     const mappedEnd = Math.max(mappedStart, transformResult.mapper.toOriginalPos(start + length))
 
-    const remapped = {
+    return {
       ...diagnostic,
       file: getOriginalSourceFile(originalPath),
       start: mappedStart,
       length: mappedEnd - mappedStart,
+      relatedInformation: Array.isArray(diagnostic.relatedInformation)
+        ? diagnostic.relatedInformation.map(remapDiagnostic)
+        : diagnostic.relatedInformation,
     }
-
-    return remapped
   }
 
   return {
@@ -192,7 +194,6 @@ function runTypecheck(configPath) {
   if (!parsed.ok) return false
 
   const { parsedConfig } = parsed
-
   const qrkContext = createQrkCompilerContext(configPath, parsedConfig)
 
   const options = {
@@ -240,9 +241,7 @@ function runTypecheck(configPath) {
           redirectedReference,
         ).resolvedModule
 
-        if (defaultResolution) {
-          return defaultResolution
-        }
+        if (defaultResolution) return defaultResolution
 
         if (!moduleName.startsWith('.') && !moduleName.startsWith('/')) {
           return undefined

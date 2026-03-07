@@ -1,7 +1,5 @@
 import { transformQuarkySugar } from './transform-quarky-sugar.mjs'
 
-const SUGAR_IDENTIFIER_RE = /^ø[A-Za-z_$][\w$]*$/
-
 function getLineStarts(text) {
   const starts = [0]
 
@@ -57,110 +55,22 @@ function locFromOffset(lineStarts, textLength, offset) {
   }
 }
 
-function findBestNearbyOriginalIdentifierRange(source, transformedSlice, approximateStart) {
-  if (typeof transformedSlice !== 'string') return null
-  if (!SUGAR_IDENTIFIER_RE.test(transformedSlice)) return null
-
-  const identifier = transformedSlice.slice(1)
-  const windowStart = Math.max(0, approximateStart - 80)
-  const windowEnd = Math.min(source.length, approximateStart + 80)
-  const candidates = []
-
-  function collect(token, includeAt) {
-    let index = source.indexOf(token, windowStart)
-    while (index >= 0 && index < windowEnd) {
-      candidates.push({
-        start: index,
-        length: includeAt ? identifier.length + 1 : identifier.length,
-        distance: Math.abs(index - approximateStart),
-        priority: includeAt ? 0 : 1,
-      })
-      index = source.indexOf(token, index + 1)
-    }
-  }
-
-  collect(`${identifier}@`, true)
-  collect(identifier, false)
-
-  if (candidates.length === 0) return null
-
-  candidates.sort((left, right) => {
-    if (left.priority !== right.priority) return left.priority - right.priority
-    if (left.distance !== right.distance) return left.distance - right.distance
-    return left.start - right.start
-  })
-
-  const best = candidates[0]
-  return [best.start, Math.min(source.length, best.start + best.length)]
-}
-
 function mapOffsetRangeToOriginal(entry, transformedStart, transformedEnd) {
-  const safeTransformedStart = Math.max(0, Math.min(entry.transformedCode.length, transformedStart))
-  const safeTransformedEnd = Math.max(safeTransformedStart, Math.min(entry.transformedCode.length, transformedEnd))
-  const transformedSlice = entry.transformedCode.slice(safeTransformedStart, safeTransformedEnd)
+  const safeStart = Math.max(0, Math.min(entry.transformedCode.length, transformedStart))
+  const safeEnd = Math.max(safeStart, Math.min(entry.transformedCode.length, transformedEnd))
 
-  const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
-    entry.source,
-    transformedSlice,
-    entry.mapper.toOriginalPos(safeTransformedStart),
-  )
-  if (correctedIdentifierRange) {
-    return correctedIdentifierRange
-  }
-
-  if (safeTransformedEnd <= safeTransformedStart) {
-    const point = entry.mapper.toOriginalPos(safeTransformedStart)
+  if (safeEnd <= safeStart) {
+    const point = entry.mapper.toOriginalPos(safeStart)
     return [point, point]
   }
 
-  let firstMapped = null
-  let lastMapped = null
-  let matchedCount = 0
+  const mappedStart = entry.mapper.toOriginalPos(safeStart)
+  const mappedEnd = entry.mapper.toOriginalPos(safeEnd)
 
-  for (let transformedPos = safeTransformedStart; transformedPos < safeTransformedEnd; transformedPos += 1) {
-    const transformedChar = entry.transformedCode[transformedPos]
-    if (typeof transformedChar !== 'string') continue
-
-    const mappedOriginal = entry.mapper.toOriginalPos(transformedPos)
-    if (mappedOriginal < 0 || mappedOriginal >= entry.source.length) continue
-
-    if (entry.source[mappedOriginal] !== transformedChar) continue
-
-    matchedCount += 1
-    if (firstMapped == null) firstMapped = mappedOriginal
-    lastMapped = mappedOriginal
-  }
-
-  if (matchedCount > 0 && firstMapped != null && lastMapped != null) {
-    const mappedStart = Math.min(firstMapped, lastMapped)
-    let mappedEnd = Math.max(firstMapped, lastMapped)
-    const transformedLooksLikeSugarIdentifier = SUGAR_IDENTIFIER_RE.test(transformedSlice)
-    if (
-      transformedLooksLikeSugarIdentifier
-      && mappedEnd + 1 < entry.source.length
-      && entry.source[mappedEnd + 1] === '@'
-    ) {
-      mappedEnd += 1
-    }
-
-    const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
-      entry.source,
-      transformedSlice,
-      mappedStart,
-    )
-    if (correctedIdentifierRange) {
-      return correctedIdentifierRange
-    }
-
-    return [mappedStart, Math.min(entry.source.length, mappedEnd + 1)]
-  }
-
-  const mappedStart = entry.mapper.toOriginalPos(safeTransformedStart)
-  const mappedEnd = entry.mapper.toOriginalPos(safeTransformedEnd)
-  const rangeStart = Math.max(0, Math.min(entry.source.length, Math.min(mappedStart, mappedEnd)))
-  const rangeEnd = Math.max(rangeStart, Math.min(entry.source.length, Math.max(mappedStart, mappedEnd)))
-
-  return [rangeStart, rangeEnd]
+  return [
+    Math.max(0, Math.min(entry.source.length, Math.min(mappedStart, mappedEnd))),
+    Math.max(0, Math.min(entry.source.length, Math.max(mappedStart, mappedEnd))),
+  ]
 }
 
 export function createQrxProcessor() {

@@ -1,10 +1,10 @@
 const ts = require('typescript')
 
 const IDENTIFIER_PREFIX = 'ø'
-const DERIVATION_HELPER = 'ø'
 const GETTER_ACCESS_HELPER = 'πø'
 const DESTRUCTURE_HELPER = 'destructureØ'
 const ABSORB_HELPER = 'absorbØ'
+const DERIVATION_HELPER = 'ø'
 
 function isAssignmentOperatorAt(text, index) {
   const operatorCandidates = ['&&=', '||=', '??=', '>>>=', '<<=', '>>=', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '=']
@@ -27,41 +27,184 @@ function isLikelyAssignmentTarget(text, endPos) {
   return false
 }
 
-function extractSimpleObjectKey(entry) {
-  let trimmed = entry.trim()
-  if (!trimmed) return null
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
-  let removedComment = true
-  while (removedComment && trimmed) {
-    removedComment = false
+function splitTopLevelCommaList(text) {
+  const parts = []
+  let start = 0
+  let parenDepth = 0
+  let bracketDepth = 0
+  let braceDepth = 0
+  let inSingle = false
+  let inDouble = false
+  let inTemplate = false
 
-    if (trimmed.startsWith('//')) {
-      const newlineIndex = trimmed.indexOf('\n')
-      trimmed = newlineIndex >= 0 ? trimmed.slice(newlineIndex + 1).trimStart() : ''
-      removedComment = true
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i]
+    const prev = i > 0 ? text[i - 1] : ''
+
+    if (!inDouble && !inTemplate && ch === '\'' && prev !== '\\') {
+      inSingle = !inSingle
       continue
     }
+    if (!inSingle && !inTemplate && ch === '"' && prev !== '\\') {
+      inDouble = !inDouble
+      continue
+    }
+    if (!inSingle && !inDouble && ch === '`' && prev !== '\\') {
+      inTemplate = !inTemplate
+      continue
+    }
+    if (inSingle || inDouble || inTemplate) continue
 
-    if (trimmed.startsWith('/*')) {
-      const closeIndex = trimmed.indexOf('*/')
-      trimmed = closeIndex >= 0 ? trimmed.slice(closeIndex + 2).trimStart() : ''
-      removedComment = true
+    if (ch === '(') parenDepth += 1
+    else if (ch === ')') parenDepth = Math.max(0, parenDepth - 1)
+    else if (ch === '[') bracketDepth += 1
+    else if (ch === ']') bracketDepth = Math.max(0, bracketDepth - 1)
+    else if (ch === '{') braceDepth += 1
+    else if (ch === '}') braceDepth = Math.max(0, braceDepth - 1)
+    else if (ch === ',' && parenDepth === 0 && bracketDepth === 0 && braceDepth === 0) {
+      parts.push(text.slice(start, i))
+      start = i + 1
     }
   }
 
+  parts.push(text.slice(start))
+  return parts
+}
+
+function findMatchingBrace(text, openBraceIndex) {
+  if (openBraceIndex < 0 || openBraceIndex >= text.length || text[openBraceIndex] !== '{') return -1
+
+  let depth = 0
+  let inSingle = false
+  let inDouble = false
+  let inTemplate = false
+
+  for (let index = openBraceIndex; index < text.length; index += 1) {
+    const ch = text[index]
+    const prev = index > 0 ? text[index - 1] : ''
+
+    if (!inDouble && !inTemplate && ch === '\'' && prev !== '\\') {
+      inSingle = !inSingle
+      continue
+    }
+    if (!inSingle && !inTemplate && ch === '"' && prev !== '\\') {
+      inDouble = !inDouble
+      continue
+    }
+    if (!inSingle && !inDouble && ch === '`' && prev !== '\\') {
+      inTemplate = !inTemplate
+      continue
+    }
+
+    if (inSingle || inDouble || inTemplate) continue
+
+    if (ch === '{') depth += 1
+    else if (ch === '}') {
+      depth -= 1
+      if (depth === 0) return index
+    }
+  }
+
+  return -1
+}
+
+function findMatchingParen(text, openParenIndex) {
+  if (openParenIndex < 0 || openParenIndex >= text.length || text[openParenIndex] !== '(') return -1
+
+  let depth = 0
+  let inSingle = false
+  let inDouble = false
+  let inTemplate = false
+
+  for (let index = openParenIndex; index < text.length; index += 1) {
+    const ch = text[index]
+    const prev = index > 0 ? text[index - 1] : ''
+
+    if (!inDouble && !inTemplate && ch === '\'' && prev !== '\\') {
+      inSingle = !inSingle
+      continue
+    }
+    if (!inSingle && !inTemplate && ch === '"' && prev !== '\\') {
+      inDouble = !inDouble
+      continue
+    }
+    if (!inSingle && !inDouble && ch === '`' && prev !== '\\') {
+      inTemplate = !inTemplate
+      continue
+    }
+
+    if (inSingle || inDouble || inTemplate) continue
+
+    if (ch === '(') depth += 1
+    else if (ch === ')') {
+      depth -= 1
+      if (depth === 0) return index
+    }
+  }
+
+  return -1
+}
+
+function findTopLevelCommaInParens(text, openParenIndex, closeParenIndex) {
+  let parenDepth = 0
+  let bracketDepth = 0
+  let braceDepth = 0
+  let inSingle = false
+  let inDouble = false
+  let inTemplate = false
+
+  for (let index = openParenIndex + 1; index < closeParenIndex; index += 1) {
+    const ch = text[index]
+    const prev = index > 0 ? text[index - 1] : ''
+
+    if (!inDouble && !inTemplate && ch === '\'' && prev !== '\\') {
+      inSingle = !inSingle
+      continue
+    }
+    if (!inSingle && !inTemplate && ch === '"' && prev !== '\\') {
+      inDouble = !inDouble
+      continue
+    }
+    if (!inSingle && !inDouble && ch === '`' && prev !== '\\') {
+      inTemplate = !inTemplate
+      continue
+    }
+
+    if (inSingle || inDouble || inTemplate) continue
+
+    if (ch === '(') parenDepth += 1
+    else if (ch === ')') parenDepth = Math.max(0, parenDepth - 1)
+    else if (ch === '[') bracketDepth += 1
+    else if (ch === ']') bracketDepth = Math.max(0, bracketDepth - 1)
+    else if (ch === '{') braceDepth += 1
+    else if (ch === '}') braceDepth = Math.max(0, braceDepth - 1)
+    else if (ch === ',' && parenDepth === 0 && bracketDepth === 0 && braceDepth === 0) {
+      return index
+    }
+  }
+
+  return -1
+}
+
+function extractSimpleObjectKey(entry) {
+  const trimmed = entry.trim()
   if (!trimmed) return null
 
-  const shorthandMatch = trimmed.match(/^([A-Za-z_$][\w$]*)$/)
-  if (shorthandMatch?.[1]) return shorthandMatch[1]
+  const shorthand = trimmed.match(/^([A-Za-z_$][\w$]*)$/)
+  if (shorthand && shorthand[1]) return shorthand[1]
 
-  const propertyMatch = trimmed.match(/^([A-Za-z_$][\w$]*)\s*:/)
-  if (propertyMatch?.[1]) return propertyMatch[1]
+  const property = trimmed.match(/^([A-Za-z_$][\w$]*)\s*:/)
+  if (property && property[1]) return property[1]
 
-  const methodMatch = trimmed.match(/^([A-Za-z_$][\w$]*)\s*\(/)
-  if (methodMatch?.[1]) return methodMatch[1]
+  const method = trimmed.match(/^([A-Za-z_$][\w$]*)\s*\(/)
+  if (method && method[1]) return method[1]
 
-  const quotedMatch = trimmed.match(/^["']([^"']+)["']\s*:/)
-  if (quotedMatch?.[1]) return quotedMatch[1]
+  const quoted = trimmed.match(/^["']([^"']+)["']\s*:/)
+  if (quoted && quoted[1]) return quoted[1]
 
   return null
 }
@@ -110,18 +253,13 @@ class MutableCode {
 
     const upperDistance = Math.abs(this.map[upper] - originalPos)
     const lowerDistance = Math.abs(this.map[lower] - originalPos)
-
-    if (lowerDistance === upperDistance) {
-      return lower
-    }
-
-    return lowerDistance < upperDistance ? lower : upper
+    return lowerDistance <= upperDistance ? lower : upper
   }
 
-  replaceRange(start, end, replacement, anchor) {
+  replaceRange(start, end, replacement, anchor, explicitMapping) {
     const safeStart = Math.max(0, start)
     const safeEnd = Math.max(safeStart, end)
-    const anchorPos = anchor ?? this.toOriginalPos(safeStart)
+    const anchorPos = anchor != null ? anchor : this.toOriginalPos(safeStart)
     const replacedOriginalSlice = this.code.slice(safeStart, safeEnd)
 
     const beforeCode = this.code.slice(0, safeStart)
@@ -134,7 +272,9 @@ class MutableCode {
     const originalSpanLength = Math.max(0, safeEnd - safeStart)
 
     if (replacement.length > 0) {
-      if (originalSpanLength === 0) {
+      if (Array.isArray(explicitMapping) && explicitMapping.length === replacement.length) {
+        for (let i = 0; i < replacement.length; i += 1) replacementMap[i] = explicitMapping[i]
+      } else if (originalSpanLength === 0) {
         for (let i = 0; i < replacement.length; i += 1) replacementMap[i] = anchorPos
       } else {
         const originalStartPos = this.toOriginalPos(safeStart)
@@ -149,7 +289,7 @@ class MutableCode {
   applyEdits(edits) {
     const sorted = [...edits].sort((a, b) => b.start - a.start)
     for (const edit of sorted) {
-      this.replaceRange(edit.start, edit.end, edit.replacement, edit.anchor)
+      this.replaceRange(edit.start, edit.end, edit.replacement, edit.anchor, edit.mapping)
     }
   }
 }
@@ -189,7 +329,7 @@ function buildAlignedReplacementMap(originalText, replacementText, originalStart
   }
 
   const alignmentRatio = replacementText.length > 0 ? matchedCount / replacementText.length : 1
-  if (alignmentRatio < 0.35) {
+  if (alignmentRatio < 0.3) {
     return buildProportionalReplacementMap(originalText.length, replacementText.length, originalStartPos)
   }
 
@@ -216,116 +356,72 @@ function buildProportionalReplacementMap(originalLength, replacementLength, orig
   return result
 }
 
-function isTsxLike(fileName) {
-  return fileName.endsWith('.qrx') || fileName.endsWith('.tsx') || fileName.endsWith('.jsx')
+function isIdentifierBoundaryChar(ch) {
+  if (typeof ch !== 'string' || ch.length === 0) return true
+  return !/[A-Za-z0-9_$]/.test(ch)
 }
 
-function isDeclarationName(node) {
-  const parent = node.parent
-  if (!parent) return false
-  if (ts.isVariableDeclaration(parent) && parent.name === node) return true
-  if (ts.isParameter(parent) && parent.name === node) return true
-  if (ts.isFunctionDeclaration(parent) && parent.name === node) return true
-  if (ts.isMethodDeclaration(parent) && parent.name === node) return true
-  if (ts.isClassDeclaration(parent) && parent.name === node) return true
-  if (ts.isInterfaceDeclaration(parent) && parent.name === node) return true
-  if (ts.isTypeAliasDeclaration(parent) && parent.name === node) return true
-  if (ts.isImportClause(parent) && parent.name === node) return true
-  if (ts.isImportSpecifier(parent) && (parent.name === node || parent.propertyName === node)) return true
-  if (ts.isExportSpecifier(parent) && (parent.name === node || parent.propertyName === node)) return true
-  if (ts.isBindingElement(parent) && parent.name === node) return true
-  return false
+/**
+ * Build a precise per-character position mapping for a replacement of the form
+ * `<syntheticPrefix><identifier>` where the identifier chars map 1:1 to the
+ * original identifier (starting at `originalIdentStart`) and any synthetic
+ * prefix chars (e.g. "ø" or "const " or "let ") map to `prefixAnchor`.
+ *
+ * @param {string} syntheticPrefix - Text before the identifier in replacement (e.g. "const ø" or "ø")
+ * @param {string} identifierName  - The identifier characters in the replacement
+ * @param {string} suffix          - Text after the identifier (e.g. " =" or "()"); mapped to `suffixAnchor`
+ * @param {number} prefixAnchor    - Original position that all synthetic prefix chars map to
+ * @param {number} originalIdentStart - Original position of the first char of the identifier
+ * @param {number} suffixAnchor    - Original position that all suffix chars map to
+ * @returns {number[]}
+ */
+function buildPrefixedIdentifierMapping(syntheticPrefix, identifierName, suffix, prefixAnchor, originalIdentStart, suffixAnchor) {
+  const mapping = []
+  for (let i = 0; i < syntheticPrefix.length; i += 1) mapping.push(prefixAnchor)
+  for (let i = 0; i < identifierName.length; i += 1) mapping.push(originalIdentStart + i)
+  for (let i = 0; i < suffix.length; i += 1) mapping.push(suffixAnchor)
+  return mapping
 }
 
-function isPropertyNamePosition(node) {
-  const parent = node.parent
-  if (!parent) return false
-  if (ts.isPropertyAssignment(parent) && parent.name === node) return true
-  if (ts.isPropertySignature(parent) && parent.name === node) return true
-  if (ts.isShorthandPropertyAssignment(parent) && parent.name === node) return true
-  if (ts.isPropertyDeclaration(parent) && parent.name === node) return true
-  if (ts.isGetAccessorDeclaration(parent) && parent.name === node) return true
-  if (ts.isSetAccessorDeclaration(parent) && parent.name === node) return true
-  if (ts.isMethodSignature(parent) && parent.name === node) return true
-  if (ts.isMethodDeclaration(parent) && parent.name === node) return true
-  if (ts.isPropertyAccessExpression(parent) && parent.name === node) return true
-  return false
-}
+function collapseHiddenHelperMappings(state) {
+  if (!state || typeof state.code !== 'string' || !Array.isArray(state.map) || state.map.length === 0) return
 
-function collectBindingNames(nameNode, targetSet) {
-  if (!nameNode) return
-  if (ts.isIdentifier(nameNode)) {
-    targetSet.add(nameNode.text)
-    return
-  }
-  if (ts.isObjectBindingPattern(nameNode) || ts.isArrayBindingPattern(nameNode)) {
-    for (const element of nameNode.elements) {
-      if (ts.isBindingElement(element)) {
-        collectBindingNames(element.name, targetSet)
+  const helperNames = [GETTER_ACCESS_HELPER, DESTRUCTURE_HELPER, ABSORB_HELPER, DERIVATION_HELPER]
+  const code = state.code
+
+  for (const helperName of helperNames) {
+    let index = code.indexOf(helperName)
+    while (index >= 0) {
+      const start = index
+      const end = index + helperName.length
+      const before = start > 0 ? code[start - 1] : ''
+      const after = end < code.length ? code[end] : ''
+      const bounded = isIdentifierBoundaryChar(before) && isIdentifierBoundaryChar(after)
+
+      if (bounded) {
+        const anchor = state.map[start] != null ? state.map[start] : (start > 0 ? state.map[start - 1] : 0)
+        for (let pos = start; pos < end; pos += 1) {
+          state.map[pos] = anchor
+        }
+
+        let cursor = end
+        while (cursor < code.length && /\s/.test(code[cursor])) cursor += 1
+        if (cursor < code.length && code[cursor] === '(') {
+          const closeParenIndex = findMatchingParen(code, cursor)
+          if (closeParenIndex > cursor) {
+            const firstCommaIndex = findTopLevelCommaInParens(code, cursor, closeParenIndex)
+            if (firstCommaIndex > cursor) {
+              for (let pos = firstCommaIndex; pos <= closeParenIndex; pos += 1) {
+                state.map[pos] = anchor
+              }
+            }
+          }
+        }
       }
+
+      index = code.indexOf(helperName, index + 1)
     }
   }
-}
-
-function collectScopeDeclarations(scopeNode) {
-  const names = new Set()
-
-  if (ts.isFunctionLike(scopeNode)) {
-    for (const parameter of scopeNode.parameters) {
-      collectBindingNames(parameter.name, names)
-    }
-  }
-
-  if (ts.isFunctionDeclaration(scopeNode) && scopeNode.name) {
-    names.add(scopeNode.name.text)
-  }
-
-  function collectFromNode(node) {
-    if (ts.isVariableDeclaration(node)) {
-      collectBindingNames(node.name, names)
-      return
-    }
-    if (ts.isFunctionDeclaration(node) && node.name) {
-      names.add(node.name.text)
-      return
-    }
-    if (ts.isClassDeclaration(node) && node.name) {
-      names.add(node.name.text)
-      return
-    }
-
-    ts.forEachChild(node, collectFromNode)
-  }
-
-  if (ts.isSourceFile(scopeNode) || ts.isBlock(scopeNode) || ts.isModuleBlock(scopeNode)) {
-    for (const statement of scopeNode.statements) {
-      collectFromNode(statement)
-    }
-  }
-
-  return names
-}
-
-function createsScope(node) {
-  return ts.isSourceFile(node) || ts.isBlock(node) || ts.isFunctionLike(node) || ts.isModuleBlock(node)
-}
-
-function classifyGetVarUsage(node, getVars) {
-  if (!getVars.has(node.text)) return null
-  if (isDeclarationName(node) || isPropertyNamePosition(node)) return null
-
-  const parent = node.parent
-  if (!parent) return null
-
-  if (ts.isPropertyAccessExpression(parent) && parent.expression === node) return 'member-root'
-  if (ts.isElementAccessExpression(parent) && parent.expression === node) return 'member-root'
-  if (ts.isCallExpression(parent) && parent.expression === node) return 'call-root'
-
-  return 'read'
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function ensureNamedImportFromQuarky(state, importName) {
@@ -334,14 +430,14 @@ function ensureNamedImportFromQuarky(state, importName) {
 
   if (match) {
     const full = match[0]
-    const named = match[1] ?? ''
+    const named = match[1] || ''
     const importNameRegex = new RegExp(`(^|\\s|,)${escapeRegExp(importName)}(\\s|,|$)`)
     if (importNameRegex.test(named)) return
 
     const insertionPoint = full.lastIndexOf('}')
     if (insertionPoint < 0) return
 
-    const absoluteStart = (match.index ?? 0) + insertionPoint
+    const absoluteStart = (match.index || 0) + insertionPoint
     const prefix = named.trim().length === 0 ? '' : ', '
     state.replaceRange(absoluteStart, absoluteStart, `${prefix}${importName}`, state.toOriginalPos(absoluteStart))
     return
@@ -350,389 +446,440 @@ function ensureNamedImportFromQuarky(state, importName) {
   state.replaceRange(0, 0, `import { ${importName} } from "@rue/quarky"\n`, 0)
 }
 
-function rewriteGetVarUsages(state, getVars) {
-  const sourceFile = ts.createSourceFile('virtual.tsx', state.code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
-  const edits = []
-  const scopeStack = []
+function rewriteGetterAccessSugar(state) {
+  const identStart = '[A-Za-z_$øπ]'
+  const identBody = '[\\w$øπ]*'
+  const exprPrefix = `(${identStart}${identBody}(?:\\([^\\n\\r)]*\\)|\\[[^\\n\\r\\]]*\\]|\\.${identStart}${identBody})*)`
+  const prop = `(${identStart}${identBody})`
+  const propertyRegex = new RegExp(`${exprPrefix}\\.${prop}@`, 'g')
+  const callResultPropertyRegex = new RegExp(`(${identStart}${identBody}\\([^\\n\\r]*\\))\\.${prop}@`, 'g')
+  const optionalPropertyRegex = new RegExp(`${exprPrefix}\\?\\.${prop}@`, 'g')
+  const computedRegex = new RegExp(`${exprPrefix}\\[([^\\n\\r\\]]+)\\]@`, 'g')
+  const optionalComputedRegex = new RegExp(`${exprPrefix}\\?\\.\\[([^\\n\\r\\]]+)\\]@`, 'g')
 
-  function isShadowed(name) {
-    for (let i = scopeStack.length - 1; i >= 0; i -= 1) {
-      if (scopeStack[i].has(name)) return true
+  let helperUsed = false
+
+  function collectEdits(regex, makeReplacement) {
+    const edits = []
+    for (const match of state.code.matchAll(regex)) {
+      const full = match[0]
+      const targetExpr = match[1]
+      const key = match[2]
+      if (!full || !targetExpr || !key) continue
+
+      const start = match.index || 0
+      const end = start + full.length
+      if (isLikelyAssignmentTarget(state.code, end)) continue
+
+      edits.push({
+        start,
+        end,
+        replacement: makeReplacement(targetExpr, key),
+        anchor: state.toOriginalPos(start),
+      })
     }
+
+    if (edits.length > 0) {
+      helperUsed = true
+      state.applyEdits(edits)
+      return true
+    }
+
     return false
   }
 
-  function visit(node) {
-    let pushedScope = false
-    if (createsScope(node)) {
-      scopeStack.push(collectScopeDeclarations(node))
-      pushedScope = true
+  let changed = false
+  let iteration = 0
+  do {
+    changed = false
+    iteration += 1
+
+    if (collectEdits(optionalComputedRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, ${key})`)) {
+      changed = true
     }
-
-    if (ts.isIdentifier(node)) {
-      const usage = classifyGetVarUsage(node, getVars)
-      if (usage && !isShadowed(node.text)) {
-        const start = node.getStart(sourceFile)
-        const end = node.getEnd()
-        if (usage === 'member-root' || usage === 'call-root') {
-          edits.push({ start, end, replacement: `${IDENTIFIER_PREFIX}${node.text}`, anchor: state.toOriginalPos(start) })
-        } else if (usage === 'read') {
-          edits.push({ start, end, replacement: `${IDENTIFIER_PREFIX}${node.text}()`, anchor: state.toOriginalPos(start) })
-        }
-      }
+    if (collectEdits(optionalPropertyRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
+      changed = true
     }
-
-    ts.forEachChild(node, visit)
-
-    if (pushedScope) {
-      scopeStack.pop()
+    if (collectEdits(computedRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, ${key})`)) {
+      changed = true
     }
-  }
-
-  visit(sourceFile)
-  state.applyEdits(edits)
-}
-
-function rewriteParenthesizedSugar(state, tsxLike) {
-  const sourceFile = ts.createSourceFile('virtual.tsx', state.code, ts.ScriptTarget.Latest, true, tsxLike ? ts.ScriptKind.TSX : ts.ScriptKind.TS)
-  const edits = []
-  let needsDerivationImport = false
-
-  function visit(node) {
-    if (tsxLike && ts.isJsxExpression(node) && node.expression && ts.isParenthesizedExpression(node.expression)) {
-      const gapStart = node.expression.pos
-      const start = node.expression.getStart(sourceFile)
-      if (gapStart < start) {
-        const gapText = state.code.slice(gapStart, start)
-        const prevChar = gapStart > 0 ? state.code[gapStart - 1] : ''
-        if (/^\s+$/.test(gapText) && prevChar === '{') {
-          edits.push({ start: gapStart, end: start, replacement: '', anchor: state.toOriginalPos(gapStart) })
-        }
-      }
-      edits.push({
-        start,
-        end: start + 1,
-        replacement: `${DERIVATION_HELPER}(() => `,
-        anchor: state.toOriginalPos(start),
-      })
-      needsDerivationImport = true
+    if (collectEdits(callResultPropertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
+      changed = true
     }
-
-    if (ts.isCallExpression(node)) {
-      for (const arg of node.arguments) {
-        if (ts.isParenthesizedExpression(arg)) {
-          const gapStart = arg.pos
-          const start = arg.getStart(sourceFile)
-          const end = arg.getEnd()
-          if (gapStart < start) {
-            const gapText = state.code.slice(gapStart, start)
-            const prevChar = gapStart > 0 ? state.code[gapStart - 1] : ''
-            if (/^\s+$/.test(gapText) && prevChar === '(') {
-              edits.push({ start: gapStart, end: start, replacement: '', anchor: state.toOriginalPos(gapStart) })
-            }
-          }
-          edits.push({ start, end: start + 1, replacement: '() => ', anchor: state.toOriginalPos(start) })
-          edits.push({ start: end - 1, end, replacement: '', anchor: state.toOriginalPos(end - 1) })
-        }
-      }
+    if (collectEdits(propertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
+      changed = true
     }
+  } while (changed && iteration < 8)
 
-    if (ts.isPropertyAssignment(node) && ts.isParenthesizedExpression(node.initializer)) {
-      const gapStart = node.initializer.pos
-      const start = node.initializer.getStart(sourceFile)
-      const end = node.initializer.getEnd()
-      if (gapStart < start) {
-        const gapText = state.code.slice(gapStart, start)
-        const prevChar = gapStart > 0 ? state.code[gapStart - 1] : ''
-        if (/^\s+$/.test(gapText) && prevChar === ':') {
-          edits.push({ start: gapStart, end: start, replacement: ' ', anchor: state.toOriginalPos(gapStart) })
-        }
-      }
-      edits.push({ start, end: start + 1, replacement: '() => ', anchor: state.toOriginalPos(start) })
-      edits.push({ start: end - 1, end, replacement: '', anchor: state.toOriginalPos(end - 1) })
-    }
-
-    if (ts.isArrayLiteralExpression(node)) {
-      for (const element of node.elements) {
-        if (ts.isParenthesizedExpression(element)) {
-          const gapStart = element.pos
-          const start = element.getStart(sourceFile)
-          const end = element.getEnd()
-          if (gapStart < start) {
-            const gapText = state.code.slice(gapStart, start)
-            const prevChar = gapStart > 0 ? state.code[gapStart - 1] : ''
-            if (/^\s+$/.test(gapText) && prevChar === '[') {
-              edits.push({ start: gapStart, end: start, replacement: '', anchor: state.toOriginalPos(gapStart) })
-            }
-          }
-          edits.push({ start, end: start + 1, replacement: '() => ', anchor: state.toOriginalPos(start) })
-          edits.push({ start: end - 1, end, replacement: '', anchor: state.toOriginalPos(end - 1) })
-        }
-      }
-    }
-
-    ts.forEachChild(node, visit)
-  }
-
-  visit(sourceFile)
-  state.applyEdits(edits)
-
-  if (needsDerivationImport) {
-    ensureNamedImportFromQuarky(state, DERIVATION_HELPER)
-  }
-}
-
-function rewriteGetterDotAccessSugar(state) {
-  const dotAccessRegex = /([A-Za-z_$][\w$]*(?:\([^\n\r)]*\)|\[[^\n\r\]]*\]|\.[A-Za-z_$][\w$]*)*)\.([A-Za-z_$][\w$]*)@/g
-  const edits = []
-
-  for (const match of state.code.matchAll(dotAccessRegex)) {
-    const full = match[0]
-    const targetExpr = match[1]
-    const property = match[2]
-    if (!full || !targetExpr || !property) continue
-
-    const start = match.index ?? 0
-    const end = start + full.length
-    if (isLikelyAssignmentTarget(state.code, end)) continue
-    edits.push({
-      start,
-      end,
-      replacement: `${GETTER_ACCESS_HELPER}(${targetExpr}, '${property}')`,
-      anchor: state.toOriginalPos(start),
-    })
-  }
-
-  if (edits.length > 0) {
-    state.applyEdits(edits)
+  if (helperUsed) {
     ensureNamedImportFromQuarky(state, GETTER_ACCESS_HELPER)
   }
 }
 
-function splitTopLevelCommaList(text) {
-  const parts = []
-  let start = 0
-  let parenDepth = 0
-  let bracketDepth = 0
-  let braceDepth = 0
-  let inSingle = false
-  let inDouble = false
-  let inTemplate = false
-
-  for (let i = 0; i < text.length; i += 1) {
-    const ch = text[i]
-    const prev = i > 0 ? text[i - 1] : ''
-
-    if (!inDouble && !inTemplate && ch === '\'' && prev !== '\\') {
-      inSingle = !inSingle
-      continue
-    }
-    if (!inSingle && !inTemplate && ch === '"' && prev !== '\\') {
-      inDouble = !inDouble
-      continue
-    }
-    if (!inSingle && !inDouble && ch === '`' && prev !== '\\') {
-      inTemplate = !inTemplate
-      continue
-    }
-    if (inSingle || inDouble || inTemplate) continue
-
-    if (ch === '(') parenDepth += 1
-    else if (ch === ')') parenDepth = Math.max(0, parenDepth - 1)
-    else if (ch === '[') bracketDepth += 1
-    else if (ch === ']') bracketDepth = Math.max(0, bracketDepth - 1)
-    else if (ch === '{') braceDepth += 1
-    else if (ch === '}') braceDepth = Math.max(0, braceDepth - 1)
-    else if (ch === ',' && parenDepth === 0 && bracketDepth === 0 && braceDepth === 0) {
-      parts.push(text.slice(start, i))
-      start = i + 1
-    }
-  }
-
-  parts.push(text.slice(start))
-  return parts
-}
-
-function rewriteDestructuredGetterBindings(state, getVars) {
-  const declarationRegex = /(^|\n)([ \t]*)(const|let|var)\s*\{([^{}]*)\}\s*=\s*([^;\n]+)(;?)/g
+function rewriteDestructuredBindings(state, getVars) {
+  const declarationRegex = /(^|\n)([ \t]*)(const|let|var|get)\s*\{([^{}]*)\}\s*=\s*([^;\n]+)(;?)/g
   const edits = []
-  let shouldImportDestructureHelper = false
+  let shouldImport = false
 
   for (const match of state.code.matchAll(declarationRegex)) {
-    const full = match[0]
-    const lineStart = match[1] ?? ''
-    const indent = match[2] ?? ''
+    const lineStart = match[1] || ''
+    const indent = match[2] || ''
     const declKind = match[3]
-    const patternBody = match[4] ?? ''
-    const rhs = match[5] ?? ''
-    const semi = match[6] ?? ''
-    if (!full || !declKind || !rhs) continue
+    const patternBody = match[4] || ''
+    const rhs = match[5] || ''
+    const semi = match[6] || ''
 
-    const absoluteStart = (match.index ?? 0) + lineStart.length
-    const linePrefix = state.code.slice((match.index ?? 0), absoluteStart)
-    const lineWithIndentStart = absoluteStart - indent.length
-    const fullLinePrefix = state.code.slice(Math.max(0, lineWithIndentStart - 2), absoluteStart)
-    if (fullLinePrefix.trimStart().startsWith('//')) continue
+    if (!declKind || !rhs) continue
+
+    // Compute absolute start of this declaration (skip lineStart newline)
+    const absoluteStart = (match.index || 0) + lineStart.length
+    // The matched text without the leading newline
+    const matchedText = match[0].slice(lineStart.length)
+
+    // Find the offset of patternBody within matchedText (after `declKind\s*{`)
+    const patternBodyOffsetInMatch = matchedText.indexOf(patternBody)
 
     const properties = splitTopLevelCommaList(patternBody)
     const bindingEntries = []
     const keyEntries = []
+    // Each binding entry gets a mapping: array of [name, originalPos] for precise ø-prefix mapping
+    // We track: for each output binding token, the original absolute position of its identifier start
+    const bindingMappingData = [] // { name: string, originalIdentAbsPos: number, isTransformed: boolean }
     let changed = false
-    let canTransform = true
+
+    // Track cursor within patternBody to find each property's position
+    let patternCursor = 0
 
     for (const property of properties) {
       const trimmed = property.trim()
+      // Find this property's position within patternBody
+      const propOffsetInPattern = patternBody.indexOf(property, patternCursor)
+      patternCursor = propOffsetInPattern + property.length
+
       if (!trimmed) continue
 
-      const getterMatch = trimmed.match(/^([A-Za-z_$][\w$]*)@$/)
-      if (getterMatch?.[1]) {
-        const getterName = getterMatch[1]
-        getVars.add(getterName)
-        bindingEntries.push(`${IDENTIFIER_PREFIX}${getterName}`)
-        keyEntries.push(`'${IDENTIFIER_PREFIX}${getterName}'`)
+      // Absolute position of the trimmed identifier start in the original code
+      const trimOffset = property.indexOf(trimmed)
+      const propAbsoluteStart = absoluteStart + (patternBodyOffsetInMatch >= 0 ? patternBodyOffsetInMatch : 0) + (propOffsetInPattern >= 0 ? propOffsetInPattern : 0) + trimOffset
+      const originalIdentAbsPos = state.toOriginalPos(propAbsoluteStart)
+
+      const getterMarked = trimmed.match(/^([A-Za-z_$][\w$]*)@$/)
+      const plainIdentifier = trimmed.match(/^([A-Za-z_$][\w$]*)$/)
+
+      if (getterMarked && getterMarked[1]) {
+        const name = getterMarked[1]
+        getVars.add(name)
+        bindingEntries.push(`${IDENTIFIER_PREFIX}${name}`)
+        keyEntries.push(`'${IDENTIFIER_PREFIX}${name}'`)
+        bindingMappingData.push({ name, originalIdentAbsPos, isTransformed: true })
         changed = true
+        continue
+      }
+
+      if (declKind === 'get' && plainIdentifier && plainIdentifier[1]) {
+        const name = plainIdentifier[1]
+        getVars.add(name)
+        bindingEntries.push(`${IDENTIFIER_PREFIX}${name}`)
+        keyEntries.push(`'${IDENTIFIER_PREFIX}${name}'`)
+        bindingMappingData.push({ name, originalIdentAbsPos, isTransformed: true })
+        changed = true
+        continue
+      }
+
+      bindingEntries.push(trimmed)
+      bindingMappingData.push({ name: trimmed, originalIdentAbsPos, isTransformed: false })
+
+      const aliasMatch = trimmed.match(/^([A-Za-z_$][\w$]*)\s*:/)
+      const keyName = aliasMatch && aliasMatch[1]
+        ? aliasMatch[1]
+        : plainIdentifier && plainIdentifier[1]
+          ? plainIdentifier[1]
+          : null
+      if (keyName) keyEntries.push(`'${keyName}'`)
+    }
+
+    if (!changed) continue
+
+    // Build replacement string
+    const replacement = `const { ${bindingEntries.join(', ')} } = ${DESTRUCTURE_HELPER}(${rhs}, ${keyEntries.join(', ')})${semi || ';'}`
+
+    // Build explicit character mapping for the replacement
+    // Anchor for structural parts (keywords, helpers, synthetic args) = start of the declaration
+    const anchor = state.toOriginalPos(absoluteStart)
+    // Find offset of rhs in matchedText to compute original rhs position
+    const rhsOffsetInMatch = matchedText.lastIndexOf(rhs)
+    const originalRhsAbsPos = rhsOffsetInMatch >= 0 ? state.toOriginalPos(absoluteStart + rhsOffsetInMatch) : anchor
+
+    // Build explicit mapping character by character
+    const mapping = []
+
+    // Helper to push `count` copies of `pos`
+    function pushN(pos, count) { for (let i = 0; i < count; i += 1) mapping.push(pos) }
+
+    // `const { ` prefix (8 chars)
+    pushN(anchor, 'const { '.length)
+
+    // For each binding entry, separated by `, `
+    for (let bi = 0; bi < bindingEntries.length; bi += 1) {
+      if (bi > 0) pushN(anchor, ', '.length)
+      const token = bindingEntries[bi]
+      const data = bindingMappingData[bi]
+      if (data && data.isTransformed) {
+        // `ø` prefix -> invisible (maps to identifier start), then identifier chars 1:1
+        pushN(data.originalIdentAbsPos, IDENTIFIER_PREFIX.length)
+        for (let ci = 0; ci < data.name.length; ci += 1) mapping.push(data.originalIdentAbsPos + ci)
       } else {
-        if (trimmed.startsWith('...')) {
-          canTransform = false
-          break
-        }
-
-        bindingEntries.push(trimmed)
-
-        const aliasMatch = trimmed.match(/^([A-Za-z_$][\w$]*)\s*:/)
-        const simpleMatch = trimmed.match(/^([A-Za-z_$][\w$]*)$/)
-        const keyName = aliasMatch?.[1] ?? simpleMatch?.[1] ?? null
-        if (!keyName) {
-          canTransform = false
-          break
-        }
-        keyEntries.push(`'${keyName}'`)
+        // Untransformed binding: map each char to its original position
+        for (let ci = 0; ci < token.length; ci += 1) mapping.push(data ? data.originalIdentAbsPos + ci : anchor)
       }
     }
 
-    if (!changed || !canTransform) continue
+    // ` } = destructureØ(` -> anchor (synthetic)
+    const midPart = ` } = ${DESTRUCTURE_HELPER}(`
+    pushN(anchor, midPart.length)
 
-    const start = absoluteStart
-    const end = start + (full.length - lineStart.length)
-    const statement = `${declKind} { ${bindingEntries.join(', ')} } = ${DESTRUCTURE_HELPER}(${rhs}, ${keyEntries.join(', ')})${semi || ';'}`
+    // rhs chars: map each char to original rhs position
+    for (let ci = 0; ci < rhs.length; ci += 1) mapping.push(originalRhsAbsPos + ci)
 
-    edits.push({
-      start,
-      end,
-      replacement: statement,
-      anchor: state.toOriginalPos(start),
-    })
-    shouldImportDestructureHelper = true
+    // synthetic args `, 'økey', ...` and closing `)` and semi -> anchor
+    const syntheticTail = `, ${keyEntries.join(', ')})${semi || ';'}`
+    pushN(anchor, syntheticTail.length)
+
+    const absoluteEnd = absoluteStart + matchedText.length
+
+    edits.push({ start: absoluteStart, end: absoluteEnd, replacement, anchor, mapping })
+
+    shouldImport = true
   }
 
   if (edits.length > 0) {
     state.applyEdits(edits)
   }
 
-  if (shouldImportDestructureHelper) {
+  if (shouldImport) {
     ensureNamedImportFromQuarky(state, DESTRUCTURE_HELPER)
   }
 }
 
-function findMatchingBrace(text, openBraceIndex) {
-  if (openBraceIndex < 0 || openBraceIndex >= text.length || text[openBraceIndex] !== '{') return -1
+function rewriteGetAndReactiveDeclarations(state, getVars) {
+  const declarationEdits = []
 
-  let depth = 0
-  let inSingle = false
-  let inDouble = false
-  let inTemplate = false
+  // `get varname =` --> `const øvarname =`
+  // pm: synthetic `const ø` maps to anchor of `get`, identifier chars map 1:1 to original identifier, ` =` maps to original ` =`
+  const getDeclRegex = /(^|[^\w$])get\s+([A-Za-z_$][\w$]*)\s*(=)/gm
+  for (const match of state.code.matchAll(getDeclRegex)) {
+    const prefix = match[1] || ''
+    const varName = match[2]
+    if (!varName) continue
 
-  for (let index = openBraceIndex; index < text.length; index += 1) {
-    const ch = text[index]
-    const prev = index > 0 ? text[index - 1] : ''
+    getVars.add(varName)
 
-    if (!inDouble && !inTemplate && ch === '\'' && prev !== '\\') {
-      inSingle = !inSingle
-      continue
-    }
-    if (!inSingle && !inTemplate && ch === '"' && prev !== '\\') {
-      inDouble = !inDouble
-      continue
-    }
-    if (!inSingle && !inDouble && ch === '`' && prev !== '\\') {
-      inTemplate = !inTemplate
-      continue
-    }
-
-    if (inSingle || inDouble || inTemplate) continue
-
-    if (ch === '{') depth += 1
-    else if (ch === '}') {
-      depth -= 1
-      if (depth === 0) return index
-    }
+    const fullStart = match.index || 0
+    const start = fullStart + prefix.length
+    // Find the identifier start: indexOf(varName) within the matched text after the prefix
+    const matchedText = match[0].slice(prefix.length)
+    const getKwEnd = matchedText.indexOf(varName)
+    const originalIdentStart = state.toOriginalPos(start + getKwEnd)
+    // The `=` is the last character of the matched text (match[3]='=')
+    const end = start + matchedText.length
+    const originalEqPos = state.toOriginalPos(end - 1)
+    const replacement = `const ${IDENTIFIER_PREFIX}${varName} =`
+    // `const ø` (7 chars) -> anchor; identifier (varName.length chars) -> 1:1; ` =` (2 chars) -> eq pos
+    const syntheticPrefix = `const ${IDENTIFIER_PREFIX}`
+    const mapping = buildPrefixedIdentifierMapping(
+      syntheticPrefix, varName, ' =',
+      state.toOriginalPos(start), originalIdentStart, originalEqPos
+    )
+    declarationEdits.push({ start, end, replacement, anchor: state.toOriginalPos(start), mapping })
   }
 
-  return -1
+  // `const|let varname@ =` --> `const|let øvarname =`
+  // pm: `const ` / `let ` maps to anchor; `ø` (prefix) maps to identifier start; identifier chars 1:1; ` =` maps to original `@ =` position
+  const constLetRegex = /\b(const|let)\s+([A-Za-z_$][\w$]*)@(\s*=)/g
+  for (const match of state.code.matchAll(constLetRegex)) {
+    const decl = match[1]
+    const varName = match[2]
+    const eqPart = match[3]
+    if (!decl || !varName || !eqPart) continue
+
+    getVars.add(varName)
+    const start = match.index || 0
+    const end = start + match[0].length
+    // Positions in original: decl keyword at `start`, identifier at `start + decl.length + 1`
+    const originalDeclAnchor = state.toOriginalPos(start)
+    const originalIdentStart = state.toOriginalPos(start + decl.length + 1)
+    // `@` is at start + decl.length + 1 + varName.length; ` =` follows
+    const originalAtPos = state.toOriginalPos(start + decl.length + 1 + varName.length) // the `@` char, dropped
+    const replacement = `${decl} ${IDENTIFIER_PREFIX}${varName}${eqPart}`
+    // `decl + ' ' + ø` -> anchor for decl+space, then ø also anchors to identStart;
+    // then identifier chars -> 1:1; then eqPart -> original @-and-eq position
+    const syntheticPrefix = `${decl} ${IDENTIFIER_PREFIX}`
+    const mapping = buildPrefixedIdentifierMapping(
+      syntheticPrefix, varName, eqPart,
+      originalDeclAnchor, originalIdentStart, originalAtPos
+    )
+    declarationEdits.push({ start, end, replacement, anchor: originalDeclAnchor, mapping })
+  }
+
+  // `varname@` in param position --> `øvarname`
+  // pm: `ø` -> varname start; identifier chars -> 1:1
+  const reactiveParamRegex = /([\(,\{]\s*)([A-Za-z_$][\w$]*)@(?=\s*[:?,\)\}])/gm
+  for (const match of state.code.matchAll(reactiveParamRegex)) {
+    const full = match[0]
+    const pfx = match[1] || ''
+    const varName = match[2]
+    if (!full || !varName) continue
+
+    getVars.add(varName)
+    const start = (match.index || 0) + pfx.length
+    const end = start + varName.length + 1 // +1 for `@`
+    const originalIdentStart = state.toOriginalPos(start)
+    // `ø` prefix -> maps to identifier start; identifier chars -> 1:1
+    const replacement = `${IDENTIFIER_PREFIX}${varName}`
+    const mapping = buildPrefixedIdentifierMapping(
+      IDENTIFIER_PREFIX, varName, '',
+      originalIdentStart, originalIdentStart, originalIdentStart
+    )
+    declarationEdits.push({ start, end, replacement, anchor: originalIdentStart, mapping })
+  }
+
+  if (declarationEdits.length > 0) {
+    state.applyEdits(declarationEdits)
+  }
 }
 
 function rewriteObjectLiteralsWithAbsorb(state) {
   const candidateRegex = /return\s*\{|=\s*\{/g
   const edits = []
-  let shouldImportAbsorbHelper = false
+  let shouldImport = false
 
-  function buildAbsorbReplacement(body) {
+  /**
+   * Build the text and explicit per-character mapping for an absorb replacement.
+   * Returns { body, keys, bodyMapping, keysMapping } where bodyMapping/keysMapping
+   * are parallel arrays of original-position values for each character in body/keys.
+   *
+   * @param {string} body - content between { and } of the object literal
+   * @param {number} bodyAbsoluteStart - absolute position in state.code where body starts (i.e. openBraceIndex + 1)
+   * @param {number} anchor - fallback anchor for synthetic characters
+   */
+  function buildAbsorbReplacement(body, bodyAbsoluteStart, anchor) {
     const properties = splitTopLevelCommaList(body)
-    const rewrittenEntries = []
-    const keyEntries = []
-    let changed = false
+
+    const shouldAbsorb = properties.some((property) => {
+      const trimmed = property.trim()
+      if (!trimmed) return false
+      return /^get\s+([A-Za-z_$][\w$]*)\s*:\s*([\s\S]+)$/.test(trimmed)
+    })
+
+    if (!shouldAbsorb) return null
+
+    const rewrittenEntries = [] // { text: string, mapping: number[] }
+    const keyEntries = [] // string
+
+    let propertyCursor = 0
 
     for (const property of properties) {
       const trimmed = property.trim()
+      // Find where this property token starts within body
+      const propOffsetInBody = body.indexOf(property, propertyCursor)
+      propertyCursor = propOffsetInBody + property.length
+
       if (!trimmed) continue
 
+      // Absolute position in state.code of the start of the trimmed property text
+      const trimOffset = property.indexOf(trimmed)
+      const propAbsStart = bodyAbsoluteStart + (propOffsetInBody >= 0 ? propOffsetInBody : 0) + trimOffset
+      const propOriginalPos = state.toOriginalPos(propAbsStart)
+
       const shorthandGetterMatch = trimmed.match(/^([A-Za-z_$][\w$]*)@$/)
-      if (shorthandGetterMatch?.[1]) {
+      if (shorthandGetterMatch && shorthandGetterMatch[1]) {
         const propName = shorthandGetterMatch[1]
-        rewrittenEntries.push(`${IDENTIFIER_PREFIX}${propName}`)
+        const outText = `${IDENTIFIER_PREFIX}${propName}`
+        // `ø` -> propOriginalPos (invisible prefix); identifier chars -> 1:1
+        const outMapping = buildPrefixedIdentifierMapping(
+          IDENTIFIER_PREFIX, propName, '', propOriginalPos, propOriginalPos, propOriginalPos
+        )
+        rewrittenEntries.push({ text: outText, mapping: outMapping })
         keyEntries.push(`'${IDENTIFIER_PREFIX}${propName}'`)
-        changed = true
         continue
       }
 
       const invalidGetPropertyMatch = trimmed.match(/^get\s+([A-Za-z_$][\w$]*)\s*:\s*([\s\S]+)$/)
-      if (invalidGetPropertyMatch?.[1] && invalidGetPropertyMatch[2]) {
+      if (invalidGetPropertyMatch && invalidGetPropertyMatch[1] && invalidGetPropertyMatch[2]) {
         const propName = invalidGetPropertyMatch[1]
         const initializer = invalidGetPropertyMatch[2].trim()
-        rewrittenEntries.push(`${IDENTIFIER_PREFIX}${propName}: ${initializer}`)
+        // `get ` prefix is 4 chars; identifier follows
+        const identAbsStart = propAbsStart + 4 // skip `get `
+        const identOriginalPos = state.toOriginalPos(identAbsStart)
+        // Build outText as `øpropName: initializer`
+        // `ø` -> invisible prefix on identOriginalPos; propName chars -> 1:1; `: ` and initializer -> map to their positions
+        const colonAndInitAbsStart = identAbsStart + propName.length
+        const colonOriginalPos = state.toOriginalPos(colonAndInitAbsStart)
+        // For initializer chars: map each char proportionally from original
+        const initializerInTrimmed = trimmed.slice(trimmed.indexOf(':') + 1).trimStart()
+        const initializerAbsStart = propAbsStart + trimmed.indexOf(':') + 1 + (trimmed.length - trimmed.trimStart().length <= 0 ? 1 : 1)
+        const outText = `${IDENTIFIER_PREFIX}${propName}: ${initializer}`
+        const outMapping = []
+        // ø -> identOriginalPos
+        for (let i = 0; i < IDENTIFIER_PREFIX.length; i += 1) outMapping.push(identOriginalPos)
+        // propName chars -> 1:1
+        for (let i = 0; i < propName.length; i += 1) outMapping.push(identOriginalPos + i)
+        // `: ` -> colonOriginalPos
+        outMapping.push(colonOriginalPos)
+        outMapping.push(colonOriginalPos)
+        // initializer chars -> anchor (best effort; the content is preserved verbatim)
+        for (let i = 0; i < initializer.length; i += 1) outMapping.push(colonOriginalPos + 2 + i < colonOriginalPos + 2 + initializer.length ? colonOriginalPos + 2 : colonOriginalPos)
+        rewrittenEntries.push({ text: outText, mapping: outMapping })
         keyEntries.push(`'${IDENTIFIER_PREFIX}${propName}'`)
-        changed = true
         continue
       }
 
       const getterMethodMatch = trimmed.match(/^get\s+([A-Za-z_$][\w$]*)\s*\(\s*\)\s*\{([\s\S]*)\}$/)
-      if (getterMethodMatch?.[1]) {
+      if (getterMethodMatch && getterMethodMatch[1]) {
         const propName = getterMethodMatch[1]
-        const body = getterMethodMatch[2] ?? ''
-        rewrittenEntries.push(`${GETTER_ACCESS_HELPER}${propName}: function ${propName}() {${body}}`)
+        const bodyText = getterMethodMatch[2] || ''
+        // `πø` prefix is synthetic/invisible; `propName: function propName() { bodyText }` maps to original
+        const identAbsStart = propAbsStart + 4 // skip `get `
+        const identOriginalPos = state.toOriginalPos(identAbsStart)
+        const outText = `${GETTER_ACCESS_HELPER}${propName}: function ${propName}() {${bodyText}}`
+        const outMapping = []
+        // πø -> anchor (invisible, will be collapsed by collapseHiddenHelperMappings)
+        for (let i = 0; i < GETTER_ACCESS_HELPER.length; i += 1) outMapping.push(identOriginalPos)
+        // propName chars (key position) -> identOriginalPos 1:1
+        for (let i = 0; i < propName.length; i += 1) outMapping.push(identOriginalPos + i)
+        // `: function ` -> colonOriginalPos
+        const colonOriginalPos = state.toOriginalPos(identAbsStart + propName.length)
+        const interlude = `: function ${propName}() {`
+        for (let i = 0; i < interlude.length; i += 1) outMapping.push(colonOriginalPos)
+        // bodyText chars -> map each to original (best effort: offset within trimmed body)
+        const bodyStartInTrimmed = trimmed.indexOf('{') + 1
+        for (let i = 0; i < bodyText.length; i += 1) {
+          const origPos = state.toOriginalPos(propAbsStart + bodyStartInTrimmed + i)
+          outMapping.push(origPos)
+        }
+        // closing `}` -> map to closing brace in original
+        const closingOrigPos = state.toOriginalPos(propAbsStart + trimmed.length - 1)
+        outMapping.push(closingOrigPos)
+        rewrittenEntries.push({ text: outText, mapping: outMapping })
         keyEntries.push(`'${GETTER_ACCESS_HELPER}${propName}'`)
-        changed = true
         continue
       }
 
-      rewrittenEntries.push(trimmed)
+      // Plain/untransformed property: map each char to its original position
+      const outMapping = []
+      for (let i = 0; i < trimmed.length; i += 1) {
+        outMapping.push(state.toOriginalPos(propAbsStart + i))
+      }
+      rewrittenEntries.push({ text: trimmed, mapping: outMapping })
       const key = extractSimpleObjectKey(trimmed)
       if (key) keyEntries.push(`'${key}'`)
     }
 
-    if (!changed) return null
-    return {
-      objectLiteralBody: rewrittenEntries.join(',\n'),
-      keysLiteral: keyEntries.join(', '),
-    }
+    return { entries: rewrittenEntries, keys: keyEntries.join(', ') }
   }
 
   for (const match of state.code.matchAll(candidateRegex)) {
-    const token = match[0] ?? ''
-    const tokenStart = match.index ?? 0
-    if (!token) continue
-    if (token.startsWith('=') && state.code[tokenStart + 1] === '>') continue
-
+    const tokenStart = match.index || 0
     const openBraceIndex = state.code.indexOf('{', tokenStart)
     if (openBraceIndex < 0) continue
 
@@ -740,33 +887,46 @@ function rewriteObjectLiteralsWithAbsorb(state) {
     if (closeBraceIndex < 0) continue
 
     const body = state.code.slice(openBraceIndex + 1, closeBraceIndex)
-    const absorbReplacement = buildAbsorbReplacement(body)
-    if (!absorbReplacement) continue
+    const anchor = state.toOriginalPos(tokenStart)
+    const absorb = buildAbsorbReplacement(body, openBraceIndex + 1, anchor)
+    if (!absorb) continue
 
-    if (token.startsWith('return')) {
-      edits.push({
-        start: tokenStart,
-        end: closeBraceIndex + 1,
-        replacement: `return ${ABSORB_HELPER}({\n${absorbReplacement.objectLiteralBody}\n}, [${absorbReplacement.keysLiteral}])`,
-        anchor: state.toOriginalPos(tokenStart),
-      })
-    } else {
-      edits.push({
-        start: openBraceIndex,
-        end: closeBraceIndex + 1,
-        replacement: `${ABSORB_HELPER}({\n${absorbReplacement.objectLiteralBody}\n}, [${absorbReplacement.keysLiteral}])`,
-        anchor: state.toOriginalPos(openBraceIndex),
-      })
+    // Join entries with `,\n`
+    const bodyText = absorb.entries.map(e => e.text).join(',\n')
+    const bodyMapping = []
+    for (let ei = 0; ei < absorb.entries.length; ei += 1) {
+      if (ei > 0) { bodyMapping.push(anchor); bodyMapping.push(anchor) } // `,\n`
+      for (const pos of absorb.entries[ei].mapping) bodyMapping.push(pos)
     }
 
-    shouldImportAbsorbHelper = true
+    const isReturn = (match[0] || '').startsWith('return')
+    const prefix = isReturn ? `return ${ABSORB_HELPER}({\n` : `${ABSORB_HELPER}({\n`
+    const suffix = `\n}, [${absorb.keys}])`
+    const replacementText = `${prefix}${bodyText}${suffix}`
+
+    // Build full mapping
+    const fullMapping = []
+    for (let i = 0; i < prefix.length; i += 1) fullMapping.push(anchor)
+    for (const pos of bodyMapping) fullMapping.push(pos)
+    for (let i = 0; i < suffix.length; i += 1) fullMapping.push(anchor)
+
+    const editStart = isReturn ? tokenStart : openBraceIndex
+    edits.push({
+      start: editStart,
+      end: closeBraceIndex + 1,
+      replacement: replacementText,
+      anchor,
+      mapping: fullMapping,
+    })
+
+    shouldImport = true
   }
 
   if (edits.length > 0) {
     state.applyEdits(edits)
   }
 
-  if (shouldImportAbsorbHelper) {
+  if (shouldImport) {
     ensureNamedImportFromQuarky(state, ABSORB_HELPER)
   }
 }
@@ -909,58 +1069,265 @@ function rewriteJsxSiblingParensToFragment(state) {
     token = scanner.scan()
   }
 
-  state.applyEdits(edits)
+  if (edits.length > 0) {
+    state.applyEdits(edits)
+  }
 }
 
-function runLexicalPass(state, getVars, tsxLike) {
-  rewriteGetterDotAccessSugar(state)
-  rewriteDestructuredGetterBindings(state, getVars)
+function isDeclarationName(node) {
+  const parent = node.parent
+  if (!parent) return false
+  if (ts.isVariableDeclaration(parent) && parent.name === node) return true
+  if (ts.isParameter(parent) && parent.name === node) return true
+  if (ts.isFunctionDeclaration(parent) && parent.name === node) return true
+  if (ts.isMethodDeclaration(parent) && parent.name === node) return true
+  if (ts.isClassDeclaration(parent) && parent.name === node) return true
+  if (ts.isInterfaceDeclaration(parent) && parent.name === node) return true
+  if (ts.isTypeAliasDeclaration(parent) && parent.name === node) return true
+  if (ts.isImportClause(parent) && parent.name === node) return true
+  if (ts.isImportSpecifier(parent) && (parent.name === node || parent.propertyName === node)) return true
+  if (ts.isExportSpecifier(parent) && (parent.name === node || parent.propertyName === node)) return true
+  if (ts.isBindingElement(parent) && parent.name === node) return true
+  return false
+}
 
-  const declarationRegex = /(^|[^\w$])get\s+([A-Za-z_$][\w$]*)\s*=/gm
-  const declarationEdits = []
-  for (const match of state.code.matchAll(declarationRegex)) {
-    const full = match[0]
-    const prefix = match[1] ?? ''
-    const varName = match[2]
-    if (!varName) continue
+function isPropertyNamePosition(node) {
+  const parent = node.parent
+  if (!parent) return false
+  if (ts.isPropertyAssignment(parent) && parent.name === node) return true
+  if (ts.isPropertySignature(parent) && parent.name === node) return true
+  if (ts.isShorthandPropertyAssignment(parent) && parent.name === node) return true
+  if (ts.isPropertyDeclaration(parent) && parent.name === node) return true
+  if (ts.isGetAccessorDeclaration(parent) && parent.name === node) return true
+  if (ts.isSetAccessorDeclaration(parent) && parent.name === node) return true
+  if (ts.isMethodSignature(parent) && parent.name === node) return true
+  if (ts.isMethodDeclaration(parent) && parent.name === node) return true
+  if (ts.isPropertyAccessExpression(parent) && parent.name === node) return true
+  return false
+}
 
-    getVars.add(varName)
-
-    const fullStart = match.index ?? 0
-    const start = fullStart + prefix.length
-    const end = fullStart + full.length
-    declarationEdits.push({
-      start,
-      end,
-      replacement: `const ${IDENTIFIER_PREFIX}${varName} =`,
-      anchor: state.toOriginalPos(start),
-    })
+function collectBindingNames(nameNode, targetSet) {
+  if (!nameNode) return
+  if (ts.isIdentifier(nameNode)) {
+    targetSet.add(nameNode.text)
+    return
   }
-  state.applyEdits(declarationEdits)
+  if (ts.isObjectBindingPattern(nameNode) || ts.isArrayBindingPattern(nameNode)) {
+    for (const element of nameNode.elements) {
+      if (ts.isBindingElement(element)) {
+        collectBindingNames(element.name, targetSet)
+      }
+    }
+  }
+}
 
-  const reactiveParamRegex = /(^|[(,{]\s*)([A-Za-z_$][\w$]*)@(?=\s*[,)=}])/gm
-  for (const match of state.code.matchAll(reactiveParamRegex)) {
-    const varName = match[2]
-    if (varName) getVars.add(varName)
+function collectScopeDeclarations(scopeNode) {
+  const names = new Set()
+
+  if (ts.isFunctionLike(scopeNode)) {
+    for (const parameter of scopeNode.parameters) {
+      collectBindingNames(parameter.name, names)
+    }
   }
 
-  rewriteObjectLiteralsWithAbsorb(state)
+  if (ts.isFunctionDeclaration(scopeNode) && scopeNode.name) {
+    names.add(scopeNode.name.text)
+  }
 
-  const atSugarRegex = /\b([A-Za-z_$][\w$]*)@/g
-  const atEdits = []
-  for (const match of state.code.matchAll(atSugarRegex)) {
-    const varName = match[1]
-    if (!varName) continue
-    if (!getVars.has(varName)) continue
-    const start = match.index ?? 0
+  function collectFromNode(node) {
+    if (ts.isVariableDeclaration(node)) {
+      collectBindingNames(node.name, names)
+      return
+    }
+    if (ts.isFunctionDeclaration(node) && node.name) {
+      names.add(node.name.text)
+      return
+    }
+    if (ts.isClassDeclaration(node) && node.name) {
+      names.add(node.name.text)
+      return
+    }
+
+    ts.forEachChild(node, collectFromNode)
+  }
+
+  if (ts.isSourceFile(scopeNode) || ts.isBlock(scopeNode) || ts.isModuleBlock(scopeNode)) {
+    for (const statement of scopeNode.statements) {
+      collectFromNode(statement)
+    }
+  }
+
+  return names
+}
+
+function createsScope(node) {
+  return ts.isSourceFile(node) || ts.isBlock(node) || ts.isFunctionLike(node) || ts.isModuleBlock(node)
+}
+
+function classifyGetVarUsage(node, getVars) {
+  if (!getVars.has(node.text)) return null
+  if (isDeclarationName(node) || isPropertyNamePosition(node)) return null
+
+  const parent = node.parent
+  if (!parent) return null
+
+  if (ts.isPropertyAccessExpression(parent) && parent.expression === node) return 'member-root'
+  if (ts.isElementAccessExpression(parent) && parent.expression === node) return 'member-root'
+  if (ts.isCallExpression(parent) && parent.expression === node) return 'call-root'
+
+  return 'read'
+}
+
+function rewriteReactiveReads(state, getVars) {
+  if (getVars.size === 0) return
+
+  const sourceFile = ts.createSourceFile('virtual.tsx', state.code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const edits = []
+  const scopeStack = []
+
+  function isShadowed(name) {
+    for (let i = scopeStack.length - 1; i >= 0; i -= 1) {
+      if (scopeStack[i].has(name)) return true
+    }
+    return false
+  }
+
+  function visit(node) {
+    let pushedScope = false
+    if (createsScope(node)) {
+      scopeStack.push(collectScopeDeclarations(node))
+      pushedScope = true
+    }
+
+    if (ts.isIdentifier(node)) {
+      const usage = classifyGetVarUsage(node, getVars)
+      if (usage && !isShadowed(node.text)) {
+        const start = node.getStart(sourceFile)
+        const end = node.getEnd()
+        const originalIdentStart = state.toOriginalPos(start)
+        if (usage === 'member-root' || usage === 'call-root') {
+          // `name` -> `øname`: `ø` maps to name start; identifier chars map 1:1
+          const replacement = `${IDENTIFIER_PREFIX}${node.text}`
+          const mapping = buildPrefixedIdentifierMapping(
+            IDENTIFIER_PREFIX, node.text, '',
+            originalIdentStart, originalIdentStart, originalIdentStart
+          )
+          edits.push({ start, end, replacement, anchor: originalIdentStart, mapping })
+        } else if (usage === 'read') {
+          // `name` -> `øname()`: `ø` maps to name start; identifier chars map 1:1; `()` maps to original end
+          const originalEndPos = state.toOriginalPos(end)
+          const replacement = `${IDENTIFIER_PREFIX}${node.text}()`
+          const mapping = buildPrefixedIdentifierMapping(
+            IDENTIFIER_PREFIX, node.text, '()',
+            originalIdentStart, originalIdentStart, originalEndPos
+          )
+          edits.push({ start, end, replacement, anchor: originalIdentStart, mapping })
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit)
+
+    if (pushedScope) {
+      scopeStack.pop()
+    }
+  }
+
+  visit(sourceFile)
+  if (edits.length > 0) {
+    state.applyEdits(edits)
+  }
+}
+
+function rewriteReactiveAtAccess(state, getVars) {
+  const regex = /\b([A-Za-z_$][\w$]*)@/g
+  const edits = []
+
+  for (const match of state.code.matchAll(regex)) {
+    const name = match[1]
+    if (!name) continue
+    if (!getVars.has(name)) continue
+
+    const start = match.index || 0
     const end = start + match[0].length
     if (isLikelyAssignmentTarget(state.code, end)) continue
-    atEdits.push({ start, end, replacement: `${IDENTIFIER_PREFIX}${varName}`, anchor: state.toOriginalPos(start) })
-  }
-  state.applyEdits(atEdits)
 
-  if (tsxLike) {
-    rewriteJsxSiblingParensToFragment(state)
+    // `name@` -> `øname`: `ø` maps to name start; identifier chars map 1:1
+    const originalIdentStart = state.toOriginalPos(start)
+    const replacement = `${IDENTIFIER_PREFIX}${name}`
+    const mapping = buildPrefixedIdentifierMapping(
+      IDENTIFIER_PREFIX, name, '',
+      originalIdentStart, originalIdentStart, originalIdentStart
+    )
+    edits.push({ start, end, replacement, anchor: originalIdentStart, mapping })
+  }
+
+  if (edits.length > 0) {
+    state.applyEdits(edits)
+  }
+}
+
+function rewriteParenthesizedDerivations(state, tsxLike) {
+  const sourceFile = ts.createSourceFile('virtual.tsx', state.code, ts.ScriptTarget.Latest, true, tsxLike ? ts.ScriptKind.TSX : ts.ScriptKind.TS)
+  const edits = []
+  let derivationHelperUsed = false
+
+  function rewriteParenthesized(node) {
+    if (!ts.isParenthesizedExpression(node)) return
+    const start = node.getStart(sourceFile)
+    const end = node.getEnd()
+    edits.push({ start, end: start + 1, replacement: '() => ', anchor: state.toOriginalPos(start) })
+    edits.push({ start: end - 1, end, replacement: '', anchor: state.toOriginalPos(end - 1) })
+  }
+
+  function rewriteParenthesizedJsxExpression(node) {
+    if (!ts.isParenthesizedExpression(node)) return
+    const start = node.getStart(sourceFile)
+    const end = node.getEnd()
+    const inner = state.code.slice(start + 1, end - 1)
+    edits.push({
+      start,
+      end,
+      replacement: `${DERIVATION_HELPER}(() => ${inner})`,
+      anchor: state.toOriginalPos(start),
+    })
+    derivationHelperUsed = true
+  }
+
+  function visit(node) {
+    if (tsxLike && ts.isJsxExpression(node) && node.expression && ts.isParenthesizedExpression(node.expression)) {
+      rewriteParenthesizedJsxExpression(node.expression)
+    }
+
+    if (ts.isCallExpression(node)) {
+      for (const arg of node.arguments) {
+        if (ts.isParenthesizedExpression(arg)) rewriteParenthesized(arg)
+      }
+    }
+
+    if (ts.isPropertyAssignment(node) && ts.isParenthesizedExpression(node.initializer)) {
+      rewriteParenthesized(node.initializer)
+    }
+
+    if (ts.isArrayLiteralExpression(node)) {
+      for (const element of node.elements) {
+        if (ts.isParenthesizedExpression(element)) rewriteParenthesized(element)
+      }
+    }
+
+    if (ts.isVariableDeclaration(node) && node.initializer && ts.isParenthesizedExpression(node.initializer)) {
+      rewriteParenthesized(node.initializer)
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  if (edits.length > 0) {
+    state.applyEdits(edits)
+  }
+  if (derivationHelperUsed) {
+    ensureNamedImportFromQuarky(state, DERIVATION_HELPER)
   }
 }
 
@@ -1008,8 +1375,8 @@ function buildRemapTableFromMap(map, originalLength, transformedLength) {
   }
 }
 
-function findRemapRunForPos(remapTable, transformedPos) {
-  if (!remapTable || !Array.isArray(remapTable.runs) || remapTable.runs.length === 0) return null
+function toOriginalPosFromRemapTable(remapTable, transformedPos) {
+  if (!remapTable || !Array.isArray(remapTable.runs) || remapTable.runs.length === 0) return 0
 
   const safePos = Math.max(0, Math.min(remapTable.transformedLength || 0, transformedPos || 0))
   let low = 0
@@ -1026,21 +1393,12 @@ function findRemapRunForPos(remapTable, transformedPos) {
       low = mid + 1
       continue
     }
-    return run
+
+    const delta = safePos - run.transformedStart
+    return run.originalStart + (delta * run.step)
   }
 
-  return null
-}
-
-function toOriginalPosFromRemapTable(remapTable, transformedPos) {
-  if (!remapTable) return 0
-
-  const safePos = Math.max(0, Math.min(remapTable.transformedLength || 0, transformedPos || 0))
-  const run = findRemapRunForPos(remapTable, safePos)
-  if (!run) return 0
-
-  const delta = safePos - run.transformedStart
-  return run.originalStart + (delta * run.step)
+  return 0
 }
 
 function mapTextSpanFromRemapTable(remapTable, span) {
@@ -1083,20 +1441,215 @@ function mapTextSpanFromRemapTable(remapTable, span) {
   }
 }
 
-function transformQuarkySugarShared(input, options = {}) {
-  const { includeToTransformedPos = false } = options
-  const { code, fileName } = input
-  const state = new MutableCode(code)
-  const tsxLike = isTsxLike(fileName)
+function buildPositionSourceMapFromRemapTable(remapTable, sourceFileName) {
+  const safeTable = remapTable && Array.isArray(remapTable.runs)
+    ? remapTable
+    : { originalLength: 0, transformedLength: 0, runs: [] }
 
-  const getVars = new Set()
-  runLexicalPass(state, getVars, tsxLike)
+  return {
+    version: 1,
+    kind: 'quarky-position-map',
+    source: typeof sourceFileName === 'string' ? sourceFileName : 'virtual.qrx',
+    originalLength: Math.max(0, safeTable.originalLength || 0),
+    generatedLength: Math.max(0, safeTable.transformedLength || 0),
+    segments: safeTable.runs.map((run) => ({
+      generatedStart: run.transformedStart,
+      generatedEnd: run.transformedEnd,
+      originalStart: run.originalStart,
+      step: run.step,
+    })),
+  }
+}
 
-  if (getVars.size > 0) {
-    rewriteGetVarUsages(state, getVars)
+function toOriginalPosFromSourceMap(sourceMap, generatedPos) {
+  if (!sourceMap || !Array.isArray(sourceMap.segments) || sourceMap.segments.length === 0) return 0
+
+  const generatedLength = Math.max(0, sourceMap.generatedLength || 0)
+  const safePos = Math.max(0, Math.min(generatedLength, generatedPos || 0))
+  let low = 0
+  let high = sourceMap.segments.length - 1
+
+  while (low <= high) {
+    const mid = (low + high) >> 1
+    const segment = sourceMap.segments[mid]
+    if (safePos < segment.generatedStart) {
+      high = mid - 1
+      continue
+    }
+    if (safePos >= segment.generatedEnd) {
+      low = mid + 1
+      continue
+    }
+
+    const delta = safePos - segment.generatedStart
+    return segment.originalStart + (delta * segment.step)
   }
 
-  rewriteParenthesizedSugar(state, tsxLike)
+  return 0
+}
+
+function toTransformedPosFromSourceMap(sourceMap, originalPos) {
+  if (!sourceMap || !Array.isArray(sourceMap.segments) || sourceMap.segments.length === 0) return 0
+
+  const originalLength = Math.max(0, sourceMap.originalLength || 0)
+  const safeOriginalPos = Math.max(0, Math.min(originalLength, originalPos || 0))
+
+  let bestGeneratedPos = 0
+  let bestDistance = Number.POSITIVE_INFINITY
+  let bestUsesSyntheticSegment = true
+
+  for (const segment of sourceMap.segments) {
+    if (!segment || typeof segment.generatedStart !== 'number' || typeof segment.generatedEnd !== 'number') continue
+
+    const generatedStart = Math.max(0, segment.generatedStart)
+    const generatedEnd = Math.max(generatedStart, segment.generatedEnd)
+    const generatedLength = generatedEnd - generatedStart
+    if (generatedLength <= 0) continue
+
+    const step = typeof segment.step === 'number' ? segment.step : 0
+    const usesSyntheticSegment = step === 0
+    const originalStart = typeof segment.originalStart === 'number' ? segment.originalStart : 0
+
+    let candidateGeneratedPos = generatedStart
+    let candidateOriginalPos = originalStart
+
+    if (step > 0) {
+      const maxDelta = generatedLength - 1
+      const originalEnd = originalStart + (maxDelta * step)
+
+      if (safeOriginalPos <= originalStart) {
+        candidateGeneratedPos = generatedStart
+        candidateOriginalPos = originalStart
+      } else if (safeOriginalPos >= originalEnd) {
+        candidateGeneratedPos = generatedEnd - 1
+        candidateOriginalPos = originalEnd
+      } else {
+        const rawDelta = Math.round((safeOriginalPos - originalStart) / step)
+        const clampedDelta = Math.max(0, Math.min(maxDelta, rawDelta))
+        candidateGeneratedPos = generatedStart + clampedDelta
+        candidateOriginalPos = originalStart + (clampedDelta * step)
+      }
+    }
+
+    const distance = Math.abs(candidateOriginalPos - safeOriginalPos)
+    if (
+      distance < bestDistance
+      || (distance === bestDistance && bestUsesSyntheticSegment && !usesSyntheticSegment)
+      || (distance === bestDistance && bestUsesSyntheticSegment === usesSyntheticSegment && candidateGeneratedPos < bestGeneratedPos)
+    ) {
+      bestDistance = distance
+      bestGeneratedPos = candidateGeneratedPos
+      bestUsesSyntheticSegment = usesSyntheticSegment
+      if (distance === 0 && !usesSyntheticSegment) break
+    }
+  }
+
+  return bestGeneratedPos
+}
+
+function mapTextSpanFromSourceMap(sourceMap, span) {
+  if (!span) return span
+
+  const generatedStart = Math.max(0, span.start || 0)
+  const generatedLength = Math.max(0, span.length || 0)
+
+  if (generatedLength <= 0) {
+    return {
+      start: toOriginalPosFromSourceMap(sourceMap, generatedStart),
+      length: 0,
+    }
+  }
+
+  const generatedEnd = generatedStart + generatedLength
+  let firstMapped = null
+  let lastMapped = null
+
+  for (let generatedPos = generatedStart; generatedPos < generatedEnd; generatedPos += 1) {
+    const mappedOriginal = toOriginalPosFromSourceMap(sourceMap, generatedPos)
+    if (firstMapped == null) firstMapped = mappedOriginal
+    lastMapped = mappedOriginal
+  }
+
+  if (firstMapped == null || lastMapped == null) {
+    const start = toOriginalPosFromSourceMap(sourceMap, generatedStart)
+    const end = toOriginalPosFromSourceMap(sourceMap, generatedEnd)
+    return {
+      start,
+      length: Math.max(0, end - start),
+    }
+  }
+
+  const mappedStart = Math.min(firstMapped, lastMapped)
+  const mappedEnd = Math.max(firstMapped, lastMapped)
+  return {
+    start: mappedStart,
+    length: Math.max(1, mappedEnd - mappedStart + 1),
+  }
+}
+
+function isTsxLike(fileName) {
+  return fileName.endsWith('.qrx') || fileName.endsWith('.tsx') || fileName.endsWith('.jsx')
+}
+
+/**
+ * Collect semantic token positions from the original (untransformed) source.
+ *
+ * Each token is `{ type, start, length }` where `start` is a character offset
+ * into the original code.
+ *
+ * Token types:
+ *   - `'keyword'`  — the `get` word in a `get varname =` declaration
+ *   - `'operator'` — every `@` marker attached to an identifier
+ *
+ * @param {string} code
+ * @returns {{ type: 'keyword' | 'operator', start: number, length: number }[]}
+ */
+function collectSugarTokens(code) {
+  const tokens = []
+
+  // `get varname =` declarations — mark the `get` word as a keyword.
+  // Uses the same pattern as rewriteGetAndReactiveDeclarations.
+  const getDeclRegex = /(^|[^\w$])get\s+([A-Za-z_$][\w$]*)\s*=/gm
+  for (const match of code.matchAll(getDeclRegex)) {
+    const prefix = match[1] || ''
+    const getStart = (match.index || 0) + prefix.length
+    tokens.push({ type: 'keyword', start: getStart, length: 3 })
+  }
+
+  // Every `identifier@` — mark the trailing `@` as an operator.
+  // Covers: `param@`, `varname@`, `obj.prop@`, `const varname@ =`, etc.
+  const atRegex = /[A-Za-z_$][\w$]*@/g
+  for (const match of code.matchAll(atRegex)) {
+    const atStart = (match.index || 0) + match[0].length - 1
+    tokens.push({ type: 'operator', start: atStart, length: 1 })
+  }
+
+  return tokens.sort((a, b) => a.start - b.start)
+}
+
+function transformQuarkySugarShared(input, options = {}) {
+  const includeToTransformedPos = Boolean(options && options.includeToTransformedPos)
+  const includeTokens = Boolean(options && options.includeTokens)
+  const code = input && typeof input.code === 'string' ? input.code : ''
+  const fileName = input && typeof input.fileName === 'string' ? input.fileName : 'virtual.qrx'
+
+  const state = new MutableCode(code)
+  const reactiveNames = /** @type {Set<string>} */ (new Set())
+  const tsxLike = isTsxLike(fileName)
+
+  rewriteGetterAccessSugar(state)
+  rewriteDestructuredBindings(state, reactiveNames)
+  rewriteGetAndReactiveDeclarations(state, reactiveNames)
+  rewriteObjectLiteralsWithAbsorb(state)
+  rewriteReactiveAtAccess(state, reactiveNames)
+
+  if (tsxLike) {
+    rewriteJsxSiblingParensToFragment(state)
+  }
+
+  rewriteReactiveReads(state, reactiveNames)
+  rewriteParenthesizedDerivations(state, tsxLike)
+  collapseHiddenHelperMappings(state)
 
   const mapper = {
     toOriginalPos(pos) {
@@ -1104,24 +1657,33 @@ function transformQuarkySugarShared(input, options = {}) {
     },
   }
 
+  const remapTable = buildRemapTableFromMap(state.map, code.length, state.code.length)
+  const sourceMap = buildPositionSourceMapFromRemapTable(remapTable, fileName)
+
   if (includeToTransformedPos) {
     mapper.toTransformedPos = function toTransformedPos(pos) {
-      return state.toTransformedPos(pos)
+      return toTransformedPosFromSourceMap(sourceMap, pos)
     }
   }
-
-  const remapTable = buildRemapTableFromMap(state.map, code.length, state.code.length)
 
   return {
     code: state.code,
     mapper,
     remapTable,
+    sourceMap,
+    reactiveNames,
+    tokens: includeTokens ? collectSugarTokens(code) : undefined,
   }
 }
 
 module.exports = {
+  buildPositionSourceMapFromRemapTable,
   buildRemapTableFromMap,
+  collectSugarTokens,
+  mapTextSpanFromSourceMap,
   mapTextSpanFromRemapTable,
+  toTransformedPosFromSourceMap,
+  toOriginalPosFromSourceMap,
   toOriginalPosFromRemapTable,
   transformQuarkySugarShared,
 }

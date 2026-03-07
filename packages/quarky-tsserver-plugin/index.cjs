@@ -1,90 +1,10 @@
 const path = require('node:path')
-const { transformQuarkySugar } = require('./transform-quarky-sugar.cjs')
-
-const SUGAR_IDENTIFIER_RE = /^ø[A-Za-z_$][\w$]*$/
-const HIDDEN_HELPER_IDENTIFIERS = ['destructureØ', 'absorbØ']
-
-function isIdentifierChar(ch) {
-  if (typeof ch !== 'string' || ch.length === 0) return false
-  return /[A-Za-z0-9_$]/.test(ch)
-}
-
-function rangesIntersect(startA, endA, startB, endB) {
-  return startA < endB && startB < endA
-}
-
-function hasWordBoundaries(text, start, length) {
-  if (typeof text !== 'string') return false
-  if (!Number.isFinite(start) || !Number.isFinite(length)) return false
-  const safeStart = Math.max(0, Math.floor(start))
-  const safeLength = Math.max(0, Math.floor(length))
-  const safeEnd = safeStart + safeLength
-  const before = safeStart > 0 ? text[safeStart - 1] : ''
-  const after = safeEnd < text.length ? text[safeEnd] : ''
-  return !isIdentifierChar(before) && !isIdentifierChar(after)
-}
-
-function findHiddenHelperTransformedRange(transformedCode, start, length) {
-  if (typeof transformedCode !== 'string' || transformedCode.length === 0) return null
-
-  const spanStart = Math.max(0, Number.isFinite(start) ? Math.floor(start) : 0)
-  const rawEnd = spanStart + Math.max(0, Number.isFinite(length) ? Math.floor(length) : 0)
-  const spanEnd = Math.max(spanStart + 1, rawEnd)
-
-  const probeStart = Math.max(0, spanStart - 32)
-  const probeEnd = Math.min(transformedCode.length, spanEnd + 32)
-
-  for (const helperName of HIDDEN_HELPER_IDENTIFIERS) {
-    let helperIndex = transformedCode.indexOf(helperName, probeStart)
-    while (helperIndex >= 0 && helperIndex < probeEnd) {
-      const helperEnd = helperIndex + helperName.length
-      const before = helperIndex > 0 ? transformedCode[helperIndex - 1] : ''
-      const after = helperEnd < transformedCode.length ? transformedCode[helperEnd] : ''
-      const bounded = !isIdentifierChar(before) && !isIdentifierChar(after)
-      if (bounded && rangesIntersect(spanStart, spanEnd, helperIndex, helperEnd)) {
-        return { start: helperIndex, end: helperEnd }
-      }
-      helperIndex = transformedCode.indexOf(helperName, helperIndex + 1)
-    }
-  }
-
-  let callIndex = transformedCode.indexOf('ø(', probeStart)
-  while (callIndex >= 0 && callIndex < probeEnd) {
-    const callEnd = callIndex + 2
-    if (rangesIntersect(spanStart, spanEnd, callIndex, callEnd)) {
-      return { start: callIndex, end: callEnd }
-    }
-    callIndex = transformedCode.indexOf('ø(', callIndex + 1)
-  }
-
-  return null
-}
-
-function findSyntheticArrowWrapperTransformedRange(transformedCode, start, length) {
-  if (typeof transformedCode !== 'string' || transformedCode.length === 0) return null
-
-  const spanStart = Math.max(0, Number.isFinite(start) ? Math.floor(start) : 0)
-  const rawEnd = spanStart + Math.max(0, Number.isFinite(length) ? Math.floor(length) : 0)
-  const spanEnd = Math.max(spanStart + 1, rawEnd)
-
-  const probeStart = Math.max(0, spanStart - 8)
-  const probeEnd = Math.min(transformedCode.length, spanEnd + 8)
-  let probe = transformedCode.indexOf('() => ', probeStart)
-
-  while (probe >= 0 && probe < probeEnd) {
-    const wrapperStart = probe
-    const wrapperEnd = probe + 6
-    if (rangesIntersect(spanStart, spanEnd, wrapperStart, wrapperEnd)) {
-      return {
-        start: wrapperStart,
-        end: wrapperEnd,
-      }
-    }
-    probe = transformedCode.indexOf('() => ', probe + 1)
-  }
-
-  return null
-}
+const {
+  mapTextSpanFromSourceMap,
+  toTransformedPosFromSourceMap,
+  toOriginalPosFromSourceMap,
+  transformQuarkySugar,
+} = require('./transform-quarky-sugar.cjs')
 
 function init(modules) {
   const ts = modules.typescript
@@ -101,466 +21,84 @@ function init(modules) {
     if (fileName.endsWith('.tsx')) return ts.ScriptKind.TSX
     if (fileName.endsWith('.jsx')) return ts.ScriptKind.JSX
     if (fileName.endsWith('.js')) return ts.ScriptKind.JS
-    if (fileName.endsWith('.mjs')) return ts.ScriptKind.JS
-    if (fileName.endsWith('.cjs')) return ts.ScriptKind.JS
     return ts.ScriptKind.TS
-  }
-
-  function normalizeAbsolute(filePath) {
-    return path.resolve(filePath)
   }
 
   function create(info) {
     const languageService = info.languageService
     const host = info.languageServiceHost
-    const project = info.project
+    const transformCache = new Map()
+    const HIDDEN_HELPERS = ['absorbØ', 'destructureØ', 'πø']
 
-    const logger = project.projectService.logger
-    const pluginConfig = info.config || {}
-    const profilingEnabled = Boolean(pluginConfig.profile)
-    const slowOperationThresholdMs = Number.isFinite(pluginConfig.slowMs)
-      ? Math.max(0, Number(pluginConfig.slowMs))
-      : 12
-    const semanticDiagnosticsCooldownMs = Number.isFinite(pluginConfig.semanticCooldownMs)
-      ? Math.max(0, Number(pluginConfig.semanticCooldownMs))
-      : 300
-    const diagnosticsCache = new Map()
-    const transientLsCache = new Map()
-    const semanticDiagnosticsState = new Map()
-    const parsedConfigCache = new Map()
-    const discoveredSugarFilesCache = new Map()
-    const transientDocumentRegistry = ts.createDocumentRegistry()
-    const globalOriginalToVirtual = new Map()
-    const globalVirtualToOriginal = new Map()
-    const globalTransformCache = new Map()
-
-    function registerGlobalSugarFile(originalPath) {
-      const normalizedOriginal = normalizeAbsolute(originalPath)
-      const existing = globalOriginalToVirtual.get(normalizedOriginal)
-      if (existing) return existing
-
-      const virtualPath = normalizedOriginal + getVirtualExtension(normalizedOriginal)
-      globalOriginalToVirtual.set(normalizedOriginal, virtualPath)
-      globalVirtualToOriginal.set(virtualPath, normalizedOriginal)
-      return virtualPath
-    }
-
-    function getGlobalTransformForOriginal(originalPath) {
-      const normalizedOriginal = normalizeAbsolute(originalPath)
-      const sourceText = getSnapshotText(normalizedOriginal)
-      const source = typeof sourceText === 'string'
-        ? sourceText
-        : (ts.sys.readFile(normalizedOriginal) || '')
-      const cached = globalTransformCache.get(normalizedOriginal)
-      if (cached && cached.originalCode === source) return cached
-
-      const result = profile(`global-transform:${path.basename(normalizedOriginal)}`, () => transformQuarkySugar({
-        code: source,
-        fileName: normalizedOriginal,
-      }))
-
-      const enrichedResult = {
-        ...result,
-        originalCode: source,
-      }
-
-      globalTransformCache.set(normalizedOriginal, enrichedResult)
-      return enrichedResult
-    }
-
-    function resolveSugarModule(moduleName, containingFile, compilerOptions) {
-      if (!moduleName || typeof moduleName !== 'string') return undefined
-
-      const moduleResolutionHost = {
-        fileExists: (candidate) => {
-          if (globalVirtualToOriginal.has(candidate)) return true
-          return ts.sys.fileExists(candidate)
-        },
-        readFile: (candidate) => {
-          const original = globalVirtualToOriginal.get(candidate)
-          if (original) return getGlobalTransformForOriginal(original).code
-          return ts.sys.readFile(candidate)
-        },
-        directoryExists: ts.sys.directoryExists,
-        getDirectories: ts.sys.getDirectories,
-        realpath: ts.sys.realpath,
-        getCurrentDirectory: () => host.getCurrentDirectory(),
-        useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-      }
-
-      const defaultResolution = ts.resolveModuleName(
-        moduleName,
-        containingFile,
-        compilerOptions || project.getCompilationSettings(),
-        moduleResolutionHost,
-      ).resolvedModule
-
-      if (defaultResolution) return defaultResolution
-
-      if (!moduleName.startsWith('.') && !moduleName.startsWith('/')) {
-        return undefined
-      }
-
-      const containingOriginal = globalVirtualToOriginal.get(containingFile) || containingFile
-      const containingDir = path.dirname(containingOriginal)
-
-      const probeCandidates = []
-      if (moduleName.endsWith('.qrk') || moduleName.endsWith('.qrx')) {
-        probeCandidates.push(moduleName)
-      } else {
-        probeCandidates.push(`${moduleName}.qrk`, `${moduleName}.qrx`)
-      }
-
-      for (const candidate of probeCandidates) {
-        const absoluteCandidate = normalizeAbsolute(path.resolve(containingDir, candidate))
-        if (!ts.sys.fileExists(absoluteCandidate)) continue
-
-        const resolvedVirtual = registerGlobalSugarFile(absoluteCandidate)
-        return {
-          resolvedFileName: resolvedVirtual,
-          extension: resolvedVirtual.endsWith('.tsx') ? ts.Extension.Tsx : ts.Extension.Ts,
-          isExternalLibraryImport: false,
-        }
-      }
-
-      return undefined
-    }
-
-    const originalHostFileExists = typeof host.fileExists === 'function'
-      ? host.fileExists.bind(host)
-      : undefined
-    const originalHostReadFile = typeof host.readFile === 'function'
-      ? host.readFile.bind(host)
-      : undefined
-    const originalHostGetScriptSnapshot = typeof host.getScriptSnapshot === 'function'
-      ? host.getScriptSnapshot.bind(host)
-      : undefined
-    const originalHostGetScriptVersion = typeof host.getScriptVersion === 'function'
-      ? host.getScriptVersion.bind(host)
-      : undefined
-    const originalHostGetProjectVersion = typeof host.getProjectVersion === 'function'
-      ? host.getProjectVersion.bind(host)
-      : undefined
-    const originalHostResolveModuleNames = typeof host.resolveModuleNames === 'function'
-      ? host.resolveModuleNames.bind(host)
-      : undefined
-
-    host.fileExists = (fileName) => {
-      if (globalVirtualToOriginal.has(fileName)) return true
-      if (originalHostFileExists) return originalHostFileExists(fileName)
-      return ts.sys.fileExists(fileName)
-    }
-
-    host.readFile = (fileName) => {
-      const original = globalVirtualToOriginal.get(fileName)
-      if (original) {
-        return getGlobalTransformForOriginal(original).code
-      }
-
-      if (originalHostReadFile) return originalHostReadFile(fileName)
-      return ts.sys.readFile(fileName)
-    }
-
-    host.getScriptSnapshot = (fileName) => {
-      const original = globalVirtualToOriginal.get(fileName)
-      if (original) {
-        const transformed = getGlobalTransformForOriginal(original).code
-        return ts.ScriptSnapshot.fromString(transformed)
-      }
-
-      if (originalHostGetScriptSnapshot) return originalHostGetScriptSnapshot(fileName)
-
-      const text = ts.sys.readFile(fileName)
-      if (typeof text !== 'string') return undefined
-      return ts.ScriptSnapshot.fromString(text)
-    }
-
-    host.getScriptVersion = (fileName) => {
-      const original = globalVirtualToOriginal.get(fileName)
-      if (original && originalHostGetScriptVersion) {
-        return originalHostGetScriptVersion(original)
-      }
-
-      if (originalHostGetScriptVersion) return originalHostGetScriptVersion(fileName)
-      return '0'
-    }
-
-    host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
-      const prior = originalHostResolveModuleNames
-        ? originalHostResolveModuleNames(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions)
-        : []
-
-      return moduleNames.map((moduleName, index) => {
-        const priorResolved = Array.isArray(prior) ? prior[index] : undefined
-        if (priorResolved) return priorResolved
-        return resolveSugarModule(moduleName, containingFile, compilerOptions)
-      })
-    }
-
-    function evictStaleFileCacheEntries(cache, cachePrefix, onDelete) {
-      for (const [entryKey, entryValue] of cache.entries()) {
-        if (!entryKey.startsWith(cachePrefix)) continue
-        cache.delete(entryKey)
-        if (typeof onDelete === 'function') {
-          try {
-            onDelete(entryValue)
-          } catch {
-            // ignore cleanup failures
-          }
-        }
-      }
-    }
-
-    function log(message) {
-      logger.info(`[quarky-tsserver-plugin] ${message}`)
-    }
-
-    function profile(label, fn) {
-      if (!profilingEnabled) return fn()
-      const start = Date.now()
-      try {
-        return fn()
-      } finally {
-        const duration = Date.now() - start
-        if (duration >= slowOperationThresholdMs) {
-          log(`[perf] ${label} ${duration}ms`)
-        }
-      }
-    }
-
-    function getConfigPath() {
-      const projectName = project.getProjectName && project.getProjectName()
-      if (projectName && projectName.endsWith('.json')) {
-        return normalizeAbsolute(projectName)
-      }
-      return ts.findConfigFile(host.getCurrentDirectory(), ts.sys.fileExists, 'tsconfig.json')
+    const proxy = Object.create(null)
+    for (const key of Object.keys(languageService)) {
+      proxy[key] = (...args) => languageService[key](...args)
     }
 
     function getSnapshotText(fileName) {
       const snapshot = host.getScriptSnapshot(fileName)
-      if (!snapshot) return undefined
+      if (!snapshot) return ''
       return snapshot.getText(0, snapshot.getLength())
     }
 
-    function getProjectVersion() {
-      let value
-
-      if (originalHostGetProjectVersion) {
-        value = originalHostGetProjectVersion()
-      } else if (project && typeof project.getProjectVersion === 'function') {
-        value = project.getProjectVersion()
-      }
-
-      if (value === undefined || value === null) return ''
-      return String(value)
+    function toOriginalSugarFileName(fileName) {
+      if (typeof fileName !== 'string') return fileName
+      if (fileName.endsWith('.qrx.tsx')) return fileName.slice(0, -4)
+      if (fileName.endsWith('.qrk.ts')) return fileName.slice(0, -3)
+      return fileName
     }
 
-    function getConfigMtimeMs(configPath) {
-      if (typeof ts.sys.getModifiedTime !== 'function') return -1
-      const modified = ts.sys.getModifiedTime(configPath)
-      if (!modified) return -1
-      return modified.valueOf()
+    function isIdentifierChar(ch) {
+      if (typeof ch !== 'string' || ch.length === 0) return false
+      return /[A-Za-z0-9_$]/.test(ch)
     }
 
-    function getParsedConfigForPath(configPath) {
-      const normalizedConfigPath = normalizeAbsolute(configPath)
-      const mtimeMs = getConfigMtimeMs(normalizedConfigPath)
-      const cached = parsedConfigCache.get(normalizedConfigPath)
-      if (cached && (mtimeMs === -1 || cached.mtimeMs === mtimeMs)) {
-        return cached
-      }
-
-      const configFile = ts.readConfigFile(normalizedConfigPath, ts.sys.readFile)
-      if (configFile.error) return undefined
-
-      const parsedConfig = ts.parseJsonConfigFileContent(
-        configFile.config,
-        ts.sys,
-        path.dirname(normalizedConfigPath),
-      )
-
-      if (parsedConfig.errors.length > 0) return undefined
-
-      const parsed = {
-        parsedConfig,
-        mtimeMs,
-      }
-
-      parsedConfigCache.set(normalizedConfigPath, parsed)
-      return parsed
+    function rangesIntersect(startA, endA, startB, endB) {
+      return startA < endB && startB < endA
     }
 
-    function getDiscoveredSugarFiles(configPath, parsedConfig) {
-      const normalizedConfigPath = normalizeAbsolute(configPath)
-      const configDirectory = path.dirname(normalizedConfigPath)
-      const includePatterns = Array.isArray(parsedConfig.raw && parsedConfig.raw.include)
-        ? parsedConfig.raw.include
-        : undefined
-      const excludePatterns = Array.isArray(parsedConfig.raw && parsedConfig.raw.exclude)
-        ? parsedConfig.raw.exclude
-        : undefined
-      const signature = `${JSON.stringify(includePatterns || [])}|${JSON.stringify(excludePatterns || [])}`
-      const mtimeMs = getConfigMtimeMs(normalizedConfigPath)
+    function transformedSpanIntersectsSyntheticSegment(sourceMap, start, length) {
+      if (!sourceMap || !Array.isArray(sourceMap.segments) || sourceMap.segments.length === 0) return false
 
-      const cached = discoveredSugarFilesCache.get(normalizedConfigPath)
-      if (cached && cached.signature === signature && (mtimeMs === -1 || cached.mtimeMs === mtimeMs)) {
-        return cached.files
+      const spanStart = Math.max(0, Number.isFinite(start) ? Math.floor(start) : 0)
+      const rawEnd = spanStart + Math.max(0, Number.isFinite(length) ? Math.floor(length) : 0)
+      const spanEnd = Math.max(spanStart + 1, rawEnd)
+
+      for (const segment of sourceMap.segments) {
+        if (!segment || segment.step !== 0) continue
+        const generatedStart = Math.max(0, Number.isFinite(segment.generatedStart) ? Math.floor(segment.generatedStart) : 0)
+        const generatedEnd = Math.max(generatedStart, Number.isFinite(segment.generatedEnd) ? Math.floor(segment.generatedEnd) : generatedStart)
+        if (rangesIntersect(spanStart, spanEnd, generatedStart, generatedEnd)) return true
       }
 
-      const files = ts.sys.readDirectory(
-        configDirectory,
-        ['.qrk', '.qrx'],
-        excludePatterns,
-        includePatterns,
-      )
-
-      discoveredSugarFilesCache.set(normalizedConfigPath, {
-        files,
-        signature,
-        mtimeMs,
-      })
-
-      return files
+      return false
     }
 
-    function createQrkCompilerContext(configPath, parsedConfig, discoveredQrkFiles, targetPath, getTargetSourceText) {
-      const normalizedTarget = normalizeAbsolute(targetPath)
-      const originalToVirtual = new Map()
-      const virtualToOriginal = new Map()
-      const transformCache = new Map()
-      const originalSourceFileCache = new Map()
+    function transformedSpanIntersectsHiddenHelper(transformedCode, sourceMap, start, length) {
+      if (typeof transformedCode !== 'string' || transformedCode.length === 0) return false
 
-      function registerQrkFile(originalPath) {
-        const normalizedOriginal = normalizeAbsolute(originalPath)
-        const existing = originalToVirtual.get(normalizedOriginal)
-        if (existing) return existing
+      const spanStart = Math.max(0, Number.isFinite(start) ? Math.floor(start) : 0)
+      const rawEnd = spanStart + Math.max(0, Number.isFinite(length) ? Math.floor(length) : 0)
+      const spanEnd = Math.max(spanStart + 1, rawEnd)
 
-        const virtualPath = normalizedOriginal + getVirtualExtension(normalizedOriginal)
-        originalToVirtual.set(normalizedOriginal, virtualPath)
-        virtualToOriginal.set(virtualPath, normalizedOriginal)
-        return virtualPath
-      }
+      const probeStart = Math.max(0, spanStart - 64)
+      const probeEnd = Math.min(transformedCode.length, spanEnd + 64)
 
-      for (const fileName of discoveredQrkFiles) {
-        registerQrkFile(fileName)
-      }
-
-      registerQrkFile(normalizedTarget)
-
-      function getOriginalSourceText(originalPath) {
-        const normalized = normalizeAbsolute(originalPath)
-        if (normalized === normalizedTarget && typeof getTargetSourceText === 'function') {
-          const targetText = getTargetSourceText()
-          if (typeof targetText === 'string') return targetText
-        }
-        return ts.sys.readFile(normalized) || ''
-      }
-
-      function getTransformForOriginal(originalPath) {
-        const normalizedOriginal = normalizeAbsolute(originalPath)
-        const cached = transformCache.get(normalizedOriginal)
-        const source = getOriginalSourceText(normalizedOriginal)
-        if (cached && cached.originalCode === source) return cached
-
-        const result = profile(`transform:${path.basename(normalizedOriginal)}`, () => transformQuarkySugar({
-          code: source,
-          fileName: normalizedOriginal,
-        }))
-
-        const enrichedResult = {
-          ...result,
-          originalCode: source,
-        }
-
-        transformCache.set(normalizedOriginal, enrichedResult)
-        return enrichedResult
-      }
-
-      function getOriginalSourceFile(originalPath) {
-        const normalizedOriginal = normalizeAbsolute(originalPath)
-        if (normalizedOriginal === normalizedTarget) {
-          const originalCode = getOriginalSourceText(normalizedOriginal)
-          return ts.createSourceFile(
-            normalizedOriginal,
-            originalCode,
-            ts.ScriptTarget.Latest,
-            true,
-            getScriptKindFromFileName(normalizedOriginal.endsWith('.qrx') ? `${normalizedOriginal}.tsx` : `${normalizedOriginal}.ts`),
-          )
-        }
-
-        const cached = originalSourceFileCache.get(normalizedOriginal)
-        if (cached) return cached
-
-        const originalCode = getOriginalSourceText(normalizedOriginal)
-        const sourceFile = ts.createSourceFile(
-          normalizedOriginal,
-          originalCode,
-          ts.ScriptTarget.Latest,
-          true,
-          getScriptKindFromFileName(normalizedOriginal.endsWith('.qrx') ? `${normalizedOriginal}.tsx` : `${normalizedOriginal}.ts`),
-        )
-
-        originalSourceFileCache.set(normalizedOriginal, sourceFile)
-        return sourceFile
-      }
-
-      function remapDiagnostic(diagnostic) {
-        if (!diagnostic.file) return diagnostic
-
-        const originalPath = virtualToOriginal.get(diagnostic.file.fileName)
-        if (!originalPath) return diagnostic
-
-        const transformResult = getTransformForOriginal(originalPath)
-        const hasSpan = typeof diagnostic.start === 'number' && typeof diagnostic.length === 'number'
-        const mappedSpan = hasSpan
-          ? mapDiagnosticSpanToOriginal({ start: diagnostic.start, length: diagnostic.length }, transformResult)
-          : null
-
-        const relatedInformation = Array.isArray(diagnostic.relatedInformation)
-          ? diagnostic.relatedInformation.map((relatedDiagnostic) => remapDiagnostic(relatedDiagnostic))
-          : diagnostic.relatedInformation
-
-        return {
-          ...diagnostic,
-          file: getOriginalSourceFile(originalPath),
-          ...(mappedSpan ? {
-            start: mappedSpan.start,
-            length: mappedSpan.length,
-          } : {}),
-          ...(relatedInformation ? { relatedInformation } : {}),
+      for (const helperName of HIDDEN_HELPERS) {
+        let helperIndex = transformedCode.indexOf(helperName, probeStart)
+        while (helperIndex >= 0 && helperIndex < probeEnd) {
+          const helperEnd = helperIndex + helperName.length
+          const before = helperIndex > 0 ? transformedCode[helperIndex - 1] : ''
+          const after = helperEnd < transformedCode.length ? transformedCode[helperEnd] : ''
+          const bounded = !isIdentifierChar(before) && !isIdentifierChar(after)
+          if (bounded && rangesIntersect(spanStart, spanEnd, helperIndex, helperEnd)) {
+            return true
+          }
+          helperIndex = transformedCode.indexOf(helperName, helperIndex + 1)
         }
       }
 
-      return {
-        originalToVirtual,
-        virtualToOriginal,
-        registerQrkFile,
-        getTransformForOriginal,
-        remapDiagnostic,
-      }
-    }
-
-    function toTransformedPos(transformResult, originalPos) {
-      if (transformResult && transformResult.mapper && typeof transformResult.mapper.toTransformedPos === 'function') {
-        return transformResult.mapper.toTransformedPos(originalPos)
-      }
-
-      const codeLength = transformResult.code.length
-      let bestPos = 0
-      let bestDistance = Number.POSITIVE_INFINITY
-
-      for (let transformedPos = 0; transformedPos <= codeLength; transformedPos += 1) {
-        const mappedOriginal = transformResult.mapper.toOriginalPos(transformedPos)
-        const distance = Math.abs(mappedOriginal - originalPos)
-        if (distance < bestDistance) {
-          bestDistance = distance
-          bestPos = transformedPos
-          if (distance === 0) break
-        }
-      }
-
-      return bestPos
+      return transformedSpanIntersectsSyntheticSegment(sourceMap, spanStart, spanEnd - spanStart)
     }
 
     function withNearbyPositions(centerPos, maxPos, radius) {
@@ -583,697 +121,10 @@ function init(modules) {
       return positions
     }
 
-    function mapDiagnosticSpanToOriginal(span, transformResult) {
-      if (!span) return span
-
-      const transformedStart = Math.max(0, span.start || 0)
-      const transformedLength = Math.max(0, span.length || 0)
-      const transformedCode = transformResult && typeof transformResult.code === 'string'
-        ? transformResult.code
-        : ''
-      const originalCode = transformResult && typeof transformResult.originalCode === 'string'
-        ? transformResult.originalCode
-        : ''
-      const transformedSlice = transformedCode.slice(transformedStart, transformedStart + transformedLength)
-
-      const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
-        originalCode,
-        transformedSlice,
-        transformResult.mapper.toOriginalPos(transformedStart),
-      )
-      if (correctedIdentifierRange) {
-        return correctedIdentifierRange
-      }
-
-      return mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength)
-        || mapTextSpanToOriginalCore({
-          start: transformedStart,
-          length: transformedLength,
-        }, transformResult)
-    }
-
-    function mapTextSpanToOriginal(span, transformResult) {
-      if (!span) return span
-
-      const transformedStart = Math.max(0, span.start || 0)
-      const transformedLength = Math.max(0, span.length || 0)
-      const transformedCode = transformResult && typeof transformResult.code === 'string'
-        ? transformResult.code
-        : ''
-      const originalCode = transformResult && typeof transformResult.originalCode === 'string'
-        ? transformResult.originalCode
-        : ''
-
-      const hiddenHelperRange = findHiddenHelperTransformedRange(
-        transformedCode,
-        transformedStart,
-        transformedLength,
-      )
-      if (hiddenHelperRange) {
-        return {
-          start: transformResult.mapper.toOriginalPos(hiddenHelperRange.start),
-          length: 0,
-        }
-      }
-
-      function mapSyntheticArrowWrapperToOriginalParen(wrapperRange) {
-        if (!wrapperRange) return null
-
-        const anchor = transformResult.mapper.toOriginalPos(wrapperRange.start)
-        const searchStart = Math.max(0, anchor - 6)
-        const searchEnd = Math.min(originalCode.length, anchor + 8)
-
-        for (let originalPos = anchor; originalPos < searchEnd; originalPos += 1) {
-          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
-            return {
-              start: originalPos,
-              length: 1,
-            }
-          }
-        }
-
-        for (let originalPos = anchor - 1; originalPos >= searchStart; originalPos -= 1) {
-          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
-            return {
-              start: originalPos,
-              length: 1,
-            }
-          }
-        }
-
-        return {
-          start: anchor,
-          length: 0,
-        }
-      }
-
-      const syntheticArrowWrapperRange = findSyntheticArrowWrapperTransformedRange(
-        transformedCode,
-        transformedStart,
-        transformedLength,
-      )
-      if (syntheticArrowWrapperRange) {
-        let allCollapsed = true
-        const anchor = transformResult.mapper.toOriginalPos(syntheticArrowWrapperRange.start)
-        for (let pos = syntheticArrowWrapperRange.start; pos < syntheticArrowWrapperRange.end; pos += 1) {
-          if (transformResult.mapper.toOriginalPos(pos) !== anchor) {
-            allCollapsed = false
-            break
-          }
-        }
-
-        if (allCollapsed) {
-          return mapSyntheticArrowWrapperToOriginalParen(syntheticArrowWrapperRange)
-        }
-      }
-
-      const transformedEnd = transformedStart + transformedLength
-      const transformedSlice = transformedCode.slice(transformedStart, transformedEnd)
-      const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
-        originalCode,
-        transformedSlice,
-        transformResult.mapper.toOriginalPos(transformedStart),
-      )
-      if (correctedIdentifierRange) {
-        return correctedIdentifierRange
-      }
-
-      if (span.length <= 0) {
-        const start = transformResult.mapper.toOriginalPos(span.start)
-        return {
-          start,
-          length: 0,
-        }
-      }
-
-      let firstMapped = null
-      let lastMapped = null
-
-      for (let transformedPos = transformedStart; transformedPos < transformedEnd; transformedPos += 1) {
-        const mappedOriginal = transformResult.mapper.toOriginalPos(transformedPos)
-        if (firstMapped == null) firstMapped = mappedOriginal
-        lastMapped = mappedOriginal
-      }
-
-      if (firstMapped == null || lastMapped == null) {
-        const start = transformResult.mapper.toOriginalPos(span.start)
-        const end = transformResult.mapper.toOriginalPos(span.start + span.length)
-        return {
-          start,
-          length: Math.max(0, end - start),
-        }
-      }
-
-      const mappedStart = Math.min(firstMapped, lastMapped)
-      const mappedEnd = Math.max(firstMapped, lastMapped)
-
-      return {
-        start: mappedStart,
-        length: Math.max(1, mappedEnd - mappedStart + 1),
-      }
-    }
-
-    function toTransformedTextSpan(transformResult, span) {
-      if (!span) return span
-      const transformedStart = toTransformedPos(transformResult, span.start)
-      const transformedEnd = toTransformedPos(transformResult, span.start + span.length)
-      const start = Math.min(transformedStart, transformedEnd)
-      const end = Math.max(transformedStart, transformedEnd)
-      return {
-        start,
-        length: Math.max(0, end - start),
-      }
-    }
-
-    function mapClassifiedSpansToOriginal(spans, transformResult) {
-      if (!Array.isArray(spans)) return spans
-
-      const mapped = []
-      for (const classifiedSpan of spans) {
-        if (!classifiedSpan || !classifiedSpan.textSpan) continue
-        const mappedTextSpan = mapClassificationTextSpanToOriginal(classifiedSpan.textSpan, transformResult)
-        if (!mappedTextSpan || mappedTextSpan.length <= 0) continue
-        mapped.push({
-          ...classifiedSpan,
-          textSpan: mappedTextSpan,
-        })
-      }
-
-      return mapped
-    }
-
-    function getTransformSourcePair(transformResult) {
-      return {
-        transformedCode: transformResult && typeof transformResult.code === 'string'
-          ? transformResult.code
-          : '',
-        originalCode: transformResult && typeof transformResult.originalCode === 'string'
-          ? transformResult.originalCode
-          : '',
-      }
-    }
-
-    function findBestNearbyOriginalIdentifierRange(originalCode, transformedSlice, approximateStart) {
-      if (typeof transformedSlice !== 'string') return null
-      const sugarMatch = transformedSlice.match(/^ø([A-Za-z_$][\w$]*)$/)
-      const plainMatch = transformedSlice.match(/^([A-Za-z_$][\w$]*)$/)
-      if (!sugarMatch && !plainMatch) return null
-
-      const identifier = sugarMatch ? sugarMatch[1] : plainMatch[1]
-      const includeReactiveSuffix = Boolean(sugarMatch)
-      const windowStart = Math.max(0, approximateStart - 80)
-      const windowEnd = Math.min(originalCode.length, approximateStart + 80)
-      const candidates = []
-
-      function collect(token, includeAt) {
-        let index = originalCode.indexOf(token, windowStart)
-        while (index >= 0 && index < windowEnd) {
-          const candidateLength = includeAt ? identifier.length + 1 : identifier.length
-          if (!hasWordBoundaries(originalCode, index, candidateLength)) {
-            index = originalCode.indexOf(token, index + 1)
-            continue
-          }
-
-          candidates.push({
-            start: index,
-            length: candidateLength,
-            distance: Math.abs(index - approximateStart),
-            priority: includeAt ? 1 : 0,
-          })
-          index = originalCode.indexOf(token, index + 1)
-        }
-      }
-
-      if (includeReactiveSuffix) {
-        collect(`${identifier}@`, true)
-      }
-      collect(identifier, false)
-
-      if (candidates.length === 0) return null
-
-      candidates.sort((left, right) => {
-        if (left.distance !== right.distance) return left.distance - right.distance
-        if (left.priority !== right.priority) return left.priority - right.priority
-
-        const leftIsForward = left.start >= approximateStart
-        const rightIsForward = right.start >= approximateStart
-        if (leftIsForward !== rightIsForward) {
-          return leftIsForward ? -1 : 1
-        }
-
-        return left.start - right.start
-      })
-
-      const best = candidates[0]
-      return {
-        start: best.start,
-        length: best.length,
-      }
-    }
-
-    function mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength, options = {}) {
-      const { transformedCode, originalCode } = getTransformSourcePair(transformResult)
-
-      function mapSyntheticArrowWrapperToOriginalParen(wrapperRange) {
-        if (!wrapperRange) return null
-
-        const anchor = transformResult.mapper.toOriginalPos(wrapperRange.start)
-        const searchStart = Math.max(0, anchor - 6)
-        const searchEnd = Math.min(originalCode.length, anchor + 8)
-
-        for (let originalPos = anchor; originalPos < searchEnd; originalPos += 1) {
-          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
-            return {
-              start: originalPos,
-              length: 1,
-            }
-          }
-        }
-
-        for (let originalPos = anchor - 1; originalPos >= searchStart; originalPos -= 1) {
-          if (originalCode[originalPos] === '(' || originalCode[originalPos] === ')') {
-            return {
-              start: originalPos,
-              length: 1,
-            }
-          }
-        }
-
-        return {
-          start: anchor,
-          length: 0,
-        }
-      }
-
-      const hiddenHelperRange = findHiddenHelperTransformedRange(
-        transformedCode,
-        transformedStart,
-        transformedLength,
-      )
-      if (hiddenHelperRange) {
-        return {
-          start: transformResult.mapper.toOriginalPos(hiddenHelperRange.start),
-          length: 0,
-        }
-      }
-
-      function findSyntheticArrowWrapperRange() {
-        const candidate = findSyntheticArrowWrapperTransformedRange(
-          transformedCode,
-          transformedStart,
-          transformedLength,
-        )
-        if (!candidate) return null
-
-        const anchor = transformResult.mapper.toOriginalPos(candidate.start)
-        for (let pos = candidate.start; pos < candidate.end; pos += 1) {
-          if (transformResult.mapper.toOriginalPos(pos) !== anchor) {
-            return null
-          }
-        }
-
-        return candidate
-      }
-
-      const syntheticArrowWrapperRange = findSyntheticArrowWrapperRange()
-      if (syntheticArrowWrapperRange) {
-        return mapSyntheticArrowWrapperToOriginalParen(syntheticArrowWrapperRange)
-      }
-
-      if (transformedLength <= 0) {
-        return {
-          start: transformResult.mapper.toOriginalPos(transformedStart),
-          length: 0,
-        }
-      }
-
-      const minMatchRatio = Number.isFinite(options.minMatchRatio)
-        ? Math.max(0, Math.min(1, options.minMatchRatio))
-        : 0
-
-      const transformedEnd = transformedStart + transformedLength
-      const transformedSlice = transformedCode.slice(transformedStart, transformedEnd)
-
-      const correctedIdentifierRange = findBestNearbyOriginalIdentifierRange(
-        originalCode,
-        transformedSlice,
-        transformResult.mapper.toOriginalPos(transformedStart),
-      )
-      if (correctedIdentifierRange) {
-        return correctedIdentifierRange
-      }
-
-      let firstMapped = null
-      let lastMapped = null
-      let matchedCount = 0
-
-      for (let transformedPos = transformedStart; transformedPos < transformedEnd; transformedPos += 1) {
-        const transformedChar = transformedCode[transformedPos]
-        if (typeof transformedChar !== 'string') continue
-
-        const mappedOriginal = transformResult.mapper.toOriginalPos(transformedPos)
-        if (mappedOriginal < 0 || mappedOriginal >= originalCode.length) continue
-
-        const originalChar = originalCode[mappedOriginal]
-        if (transformedChar !== originalChar) continue
-
-        matchedCount += 1
-        if (firstMapped == null) firstMapped = mappedOriginal
-        lastMapped = mappedOriginal
-      }
-
-      if (matchedCount === 0 || firstMapped == null || lastMapped == null) {
-        return null
-      }
-
-      if (transformedLength > 0 && (matchedCount / transformedLength) < minMatchRatio) {
-        return null
-      }
-
-      const mappedStart = Math.min(firstMapped, lastMapped)
-      let mappedEnd = Math.max(firstMapped, lastMapped)
-
-      const transformedLooksLikeSugarIdentifier = SUGAR_IDENTIFIER_RE.test(transformedSlice)
-      if (
-        transformedLooksLikeSugarIdentifier
-        && mappedEnd + 1 < originalCode.length
-        && originalCode[mappedEnd + 1] === '@'
-      ) {
-        mappedEnd += 1
-      }
-
-      return {
-        start: mappedStart,
-        length: Math.max(1, mappedEnd - mappedStart + 1),
-      }
-    }
-
-    function mapClassificationTextSpanToOriginal(span, transformResult) {
-      if (!span || span.length <= 0) return mapTextSpanToOriginalCore(span, transformResult)
-
-      const transformedStart = Math.max(0, span.start)
-      const transformedLength = Math.max(0, span.length)
-      const mapped = mapMatchingTransformedRangeToOriginal(transformResult, transformedStart, transformedLength, {
-        minMatchRatio: 0.5,
-      })
-      return mapped || mapTextSpanToOriginalCore(span, transformResult)
-    }
-
-    function mapEncodedClassificationsToOriginal(classifications, transformResult) {
-      if (!classifications || !Array.isArray(classifications.spans)) return classifications
-
-      const mappedSpans = []
-      const inputSpans = classifications.spans
-      for (let index = 0; index + 2 < inputSpans.length; index += 3) {
-        const transformedStart = inputSpans[index]
-        const transformedLength = inputSpans[index + 1]
-        const classification = inputSpans[index + 2]
-
-        const mappedSpan = mapMatchingTransformedRangeToOriginal(
-          transformResult,
-          transformedStart,
-          transformedLength,
-          {
-            minMatchRatio: 0.5,
-          },
-        ) || mapTextSpanToOriginalCore(
-          {
-            start: transformedStart,
-            length: transformedLength,
-          },
-          transformResult,
-        )
-
-        if (!mappedSpan || mappedSpan.length <= 0) continue
-
-        mappedSpans.push(mappedSpan.start, mappedSpan.length, classification)
-      }
-
-      return {
-        ...classifications,
-        spans: mappedSpans,
-      }
-    }
-
-    function removeWhitespace(value) {
-      return typeof value === 'string' ? value.replace(/\s+/g, '') : ''
-    }
-
-    function reflowWhitespacePattern(sourceText, patternText) {
-      const source = typeof sourceText === 'string' ? sourceText : ''
-      const pattern = typeof patternText === 'string' ? patternText : ''
-
-      const sourceNonWhitespaceChars = []
-      for (const char of source) {
-        if (!/\s/.test(char)) sourceNonWhitespaceChars.push(char)
-      }
-
-      const chunks = []
-      let currentWhitespace = ''
-      for (const char of pattern) {
-        if (/\s/.test(char)) {
-          currentWhitespace += char
-        } else {
-          chunks.push(currentWhitespace)
-          currentWhitespace = ''
-        }
-      }
-      chunks.push(currentWhitespace)
-
-      const patternNonWhitespaceLength = Math.max(0, chunks.length - 1)
-      if (sourceNonWhitespaceChars.length !== patternNonWhitespaceLength) return null
-
-      let result = chunks[0] || ''
-      for (let index = 0; index < sourceNonWhitespaceChars.length; index += 1) {
-        result += sourceNonWhitespaceChars[index]
-        result += chunks[index + 1] || ''
-      }
-
-      return result
-    }
-
-    function mapFormattingChangeToOriginal(change, transformResult) {
-      if (!change || !change.span) return null
-
-      const transformedStart = change.span.start
-      const transformedLength = Math.max(0, change.span.length)
-      const transformedEnd = transformedStart + transformedLength
-      const transformedOldText = transformResult.code.slice(transformedStart, transformedEnd)
-      const transformedNewText = typeof change.newText === 'string' ? change.newText : ''
-
-      const nonWhitespaceOld = removeWhitespace(transformedOldText)
-      const nonWhitespaceNew = removeWhitespace(transformedNewText)
-      if (nonWhitespaceOld !== nonWhitespaceNew) return null
-
-      let mappedSpan = mapMatchingTransformedRangeToOriginal(
-        transformResult,
-        transformedStart,
-        transformedLength,
-      )
-
-      if (!mappedSpan) {
-        const fallbackStart = transformResult.mapper.toOriginalPos(transformedStart)
-        const fallbackEnd = transformResult.mapper.toOriginalPos(transformedEnd)
-        mappedSpan = {
-          start: Math.min(fallbackStart, fallbackEnd),
-          length: Math.max(0, Math.abs(fallbackEnd - fallbackStart)),
-        }
-      }
-
-      const originalStart = mappedSpan.start
-      const originalEnd = originalStart + mappedSpan.length
-      const originalOldText = transformResult.originalCode.slice(originalStart, originalEnd)
-
-      const reflowed = reflowWhitespacePattern(originalOldText, transformedNewText)
-      if (reflowed === null) return null
-
-      if (removeWhitespace(originalOldText) !== nonWhitespaceOld) return null
-
-      return {
-        span: {
-          start: originalStart,
-          length: mappedSpan.length,
-        },
-        newText: reflowed,
-      }
-    }
-
-    function mapFormattingChangesToOriginal(changes, transformResult) {
-      if (!Array.isArray(changes) || changes.length === 0) return []
-
-      const mapped = []
-      for (const change of changes) {
-        const mappedChange = mapFormattingChangeToOriginal(change, transformResult)
-        if (!mappedChange) continue
-        mapped.push(mappedChange)
-      }
-
-      if (mapped.length <= 1) return mapped
-
-      mapped.sort((left, right) => {
-        if (left.span.start !== right.span.start) return left.span.start - right.span.start
-        return left.span.length - right.span.length
-      })
-
-      const nonOverlapping = []
-      let lastEnd = -1
-      for (const change of mapped) {
-        const start = change.span.start
-        const end = start + change.span.length
-        if (start < lastEnd) continue
-        nonOverlapping.push(change)
-        lastEnd = end
-      }
-
-      return nonOverlapping
-    }
-
-    function mapDefinitionToOriginal(definition, qrkContext) {
-      const originalFile = qrkContext.virtualToOriginal.get(definition.fileName)
-      if (!originalFile) return definition
-
-      const transformResult = qrkContext.getTransformForOriginal(originalFile)
-      return {
-        ...definition,
-        fileName: originalFile,
-        textSpan: mapTextSpanToOriginalCore(definition.textSpan, transformResult),
-        contextSpan: mapTextSpanToOriginalCore(definition.contextSpan, transformResult),
-        originalTextSpan: mapTextSpanToOriginalCore(definition.originalTextSpan, transformResult),
-      }
-    }
-
-    function mapReferenceEntryToOriginal(referenceEntry, qrkContext) {
-      const originalFile = qrkContext.virtualToOriginal.get(referenceEntry.fileName)
-      if (!originalFile) return referenceEntry
-
-      const transformResult = qrkContext.getTransformForOriginal(originalFile)
-      return {
-        ...referenceEntry,
-        fileName: originalFile,
-        textSpan: mapTextSpanToOriginalCore(referenceEntry.textSpan, transformResult),
-        contextSpan: mapTextSpanToOriginalCore(referenceEntry.contextSpan, transformResult),
-      }
-    }
-
-    function mapRenameLocationToOriginal(location, qrkContext) {
-      const originalFile = qrkContext.virtualToOriginal.get(location.fileName)
-      if (!originalFile) return location
-
-      const transformResult = qrkContext.getTransformForOriginal(originalFile)
-      return {
-        ...location,
-        fileName: originalFile,
-        textSpan: mapTextSpanToOriginalCore(location.textSpan, transformResult),
-        contextSpan: mapTextSpanToOriginalCore(location.contextSpan, transformResult),
-      }
-    }
-
-    function mapDocumentHighlightsToOriginal(documentHighlights, qrkContext) {
-      if (!Array.isArray(documentHighlights)) return documentHighlights
-
-      return documentHighlights.map((highlightEntry) => {
-        if (!highlightEntry || typeof highlightEntry.fileName !== 'string') return highlightEntry
-
-        const originalFile = qrkContext.virtualToOriginal.get(highlightEntry.fileName)
-        if (!originalFile) return highlightEntry
-
-        const transformResult = qrkContext.getTransformForOriginal(originalFile)
-        const highlightSpans = Array.isArray(highlightEntry.highlightSpans)
-          ? highlightEntry.highlightSpans.map((highlightSpan) => {
-            if (!highlightSpan || !highlightSpan.textSpan) return highlightSpan
-            return {
-              ...highlightSpan,
-              textSpan: mapTextSpanToOriginalCore(highlightSpan.textSpan, transformResult),
-              contextSpan: mapTextSpanToOriginalCore(highlightSpan.contextSpan, transformResult),
-            }
-          })
-          : highlightEntry.highlightSpans
-
-        return {
-          ...highlightEntry,
-          fileName: originalFile,
-          highlightSpans,
-        }
-      })
-    }
-
-    function toOriginalPosViaRemapTable(remapTable, transformedPos) {
-      if (!remapTable || !Array.isArray(remapTable.runs) || remapTable.runs.length === 0) {
-        return undefined
-      }
-
-      const maxPos = Number.isFinite(remapTable.transformedLength) ? remapTable.transformedLength : transformedPos
-      const safePos = Math.max(0, Math.min(maxPos, transformedPos || 0))
-
-      let low = 0
-      let high = remapTable.runs.length - 1
-      while (low <= high) {
-        const mid = (low + high) >> 1
-        const run = remapTable.runs[mid]
-        if (safePos < run.transformedStart) {
-          high = mid - 1
-          continue
-        }
-        if (safePos >= run.transformedEnd) {
-          low = mid + 1
-          continue
-        }
-
-        const delta = safePos - run.transformedStart
-        return run.originalStart + (delta * run.step)
-      }
-
-      return undefined
-    }
-
-    function toOriginalPosCore(transformResult, transformedPos) {
-      const viaTable = toOriginalPosViaRemapTable(transformResult && transformResult.remapTable, transformedPos)
-      if (typeof viaTable === 'number') return viaTable
-      return transformResult.mapper.toOriginalPos(transformedPos)
-    }
-
-    function mapTextSpanToOriginalCore(span, transformResult) {
-      if (!span) return span
-
-      const transformedStart = Math.max(0, span.start || 0)
-      const transformedLength = Math.max(0, span.length || 0)
-      if (transformedLength <= 0) {
-        return {
-          start: toOriginalPosCore(transformResult, transformedStart),
-          length: 0,
-        }
-      }
-
-      const transformedEnd = transformedStart + transformedLength
-      let firstMapped = null
-      let lastMapped = null
-      for (let transformedPos = transformedStart; transformedPos < transformedEnd; transformedPos += 1) {
-        const mappedOriginal = toOriginalPosCore(transformResult, transformedPos)
-        if (firstMapped == null) firstMapped = mappedOriginal
-        lastMapped = mappedOriginal
-      }
-
-      if (firstMapped == null || lastMapped == null) {
-        const start = toOriginalPosCore(transformResult, transformedStart)
-        const end = toOriginalPosCore(transformResult, transformedEnd)
-        return {
-          start,
-          length: Math.max(0, end - start),
-        }
-      }
-
-      const mappedStart = Math.min(firstMapped, lastMapped)
-      const mappedEnd = Math.max(firstMapped, lastMapped)
-      return {
-        start: mappedStart,
-        length: Math.max(1, mappedEnd - mappedStart + 1),
-      }
-    }
-
-    function getSourceTextForFile(fileName) {
-      const snapshot = host.getScriptSnapshot(fileName)
-      if (snapshot) return snapshot.getText(0, snapshot.getLength())
-      return ts.sys.readFile(fileName)
+    function spanContainsPosition(span, position) {
+      if (!span || typeof span.start !== 'number' || typeof span.length !== 'number') return false
+      if (span.length <= 0) return span.start === position
+      return position >= span.start && position < (span.start + span.length)
     }
 
     function getIdentifierPrefixAtPosition(text, position) {
@@ -1289,164 +140,463 @@ function init(modules) {
       return text.slice(start, safePos)
     }
 
-    function getIdentifierTokenAtPosition(text, position) {
-      const bounds = getIdentifierBoundsAtPosition(text, position)
-      if (!bounds) return ''
-      return text.slice(bounds.start, bounds.start + bounds.length)
+    function toOriginalPos(transformed, transformedPos) {
+      if (!transformed || !transformed.sourceMap) return Math.max(0, transformedPos || 0)
+      return toOriginalPosFromSourceMap(transformed.sourceMap, transformedPos)
     }
 
-    function getIdentifierBoundsAtPosition(text, position) {
-      if (typeof text !== 'string') return null
+    function getTransformForSugarFile(fileName) {
+      const source = getSnapshotText(fileName)
+      const cached = transformCache.get(fileName)
+      if (cached && cached.source === source) return cached.transformed
 
-      function isWordCode(ch) {
-        return (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch === 95 || ch === 36
+      const transformedCore = transformQuarkySugar({ code: source, fileName })
+      const transformed = {
+        ...transformedCore,
+        originalCode: source,
+      }
+      transformCache.set(fileName, { source, transformed })
+      return transformed
+    }
+
+    function toTransformedPos(transformed, originalPos) {
+      if (!transformed || !transformed.sourceMap) return Math.max(0, originalPos || 0)
+
+      const safeOriginalPos = Math.max(0, originalPos || 0)
+      const transformedLength = transformed && typeof transformed.code === 'string' ? transformed.code.length : 0
+      const basePos = Math.max(0, Math.min(transformedLength, toTransformedPosFromSourceMap(transformed.sourceMap, safeOriginalPos)))
+
+      if (!transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, basePos, 1)) {
+        return basePos
       }
 
-      function extractBounds(atPos) {
-        const safePos = Math.max(0, Math.min(text.length, atPos))
-        let start = safePos
-        let end = safePos
+      let bestPos = basePos
+      let bestOriginalDistance = Math.abs(toOriginalPos(transformed, basePos) - safeOriginalPos)
+      let bestTransformedDistance = 0
 
-        while (start > 0) {
-          const ch = text.charCodeAt(start - 1)
-          if (!isWordCode(ch)) break
-          start -= 1
+      const radius = 96
+      for (let delta = 1; delta <= radius; delta += 1) {
+        const candidates = [basePos - delta, basePos + delta]
+        for (const candidate of candidates) {
+          if (candidate < 0 || candidate > transformedLength) continue
+          if (transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, candidate, 1)) continue
+
+          const originalDistance = Math.abs(toOriginalPos(transformed, candidate) - safeOriginalPos)
+          const transformedDistance = Math.abs(candidate - basePos)
+          if (
+            originalDistance < bestOriginalDistance
+            || (originalDistance === bestOriginalDistance && transformedDistance < bestTransformedDistance)
+          ) {
+            bestPos = candidate
+            bestOriginalDistance = originalDistance
+            bestTransformedDistance = transformedDistance
+          }
         }
+      }
 
-        while (end < text.length) {
-          const ch = text.charCodeAt(end)
-          if (!isWordCode(ch)) break
-          end += 1
-        }
+      return bestPos
+    }
 
-        if (start === end) return null
+    function toTransformedTextSpan(transformed, span) {
+      if (!span) return span
+      const transformedStart = toTransformedPos(transformed, span.start)
+      const transformedEnd = toTransformedPos(transformed, span.start + span.length)
+      const start = Math.min(transformedStart, transformedEnd)
+      const end = Math.max(transformedStart, transformedEnd)
+      return {
+        start,
+        length: Math.max(0, end - start),
+      }
+    }
+
+    function mapTextSpanToOriginal(span, transformed) {
+      if (!span) return span
+
+      const transformedStart = Math.max(0, span.start || 0)
+      const transformedLength = Math.max(0, span.length || 0)
+      if (transformedLength <= 0) {
         return {
-          start,
-          length: end - start,
+          start: toOriginalPos(transformed, transformedStart),
+          length: 0,
         }
       }
 
-      const primary = extractBounds(position)
-      if (primary) return primary
+      const transformedCode = transformed && typeof transformed.code === 'string' ? transformed.code : ''
+      const transformedSlice = transformedCode.slice(transformedStart, transformedStart + transformedLength)
 
-      const left = extractBounds(position - 1)
-      if (left) return left
-
-      const right = extractBounds(position + 1)
-      if (right) return right
-
-      return null
-    }
-
-    function spanContainsPosition(span, position) {
-      if (!span || typeof span.start !== 'number' || typeof span.length !== 'number') return false
-      if (span.length <= 0) return span.start === position
-      return position >= span.start && position < (span.start + span.length)
-    }
-
-    function spansEqual(left, right) {
-      if (!left || !right) return false
-      return left.start === right.start && left.length === right.length
-    }
-
-    function spanOverlapLength(left, right) {
-      if (!left || !right) return 0
-      if (typeof left.start !== 'number' || typeof left.length !== 'number') return 0
-      if (typeof right.start !== 'number' || typeof right.length !== 'number') return 0
-
-      const leftStart = left.start
-      const leftEnd = left.start + Math.max(0, left.length)
-      const rightStart = right.start
-      const rightEnd = right.start + Math.max(0, right.length)
-
-      const overlapStart = Math.max(leftStart, rightStart)
-      const overlapEnd = Math.min(leftEnd, rightEnd)
-      return Math.max(0, overlapEnd - overlapStart)
-    }
-
-    function quickInfoMentionsIdentifier(quickInfo, identifier) {
-      if (!quickInfo || !identifier) return false
-
-      const chunks = []
-      if (Array.isArray(quickInfo.displayParts)) {
-        for (const part of quickInfo.displayParts) {
-          if (part && typeof part.text === 'string') chunks.push(part.text)
-        }
-      }
-      if (Array.isArray(quickInfo.documentation)) {
-        for (const part of quickInfo.documentation) {
-          if (part && typeof part.text === 'string') chunks.push(part.text)
+      if (/\b(?:destructureØ|absorbØ|πø)\b/.test(transformedSlice)) {
+        return {
+          start: toOriginalPos(transformed, transformedStart),
+          length: 0,
         }
       }
 
-      if (chunks.length === 0) return false
-
-      const text = chunks.join(' ')
-      const escapedIdentifier = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const wordBoundaryPattern = new RegExp(`(^|[^A-Za-z0-9_$])${escapedIdentifier}([^A-Za-z0-9_$]|$)`)
-      return wordBoundaryPattern.test(text)
-    }
-
-    function getQuickInfoDisplayText(quickInfo) {
-      if (!quickInfo || !Array.isArray(quickInfo.displayParts)) return ''
-      const chunks = []
-      for (const part of quickInfo.displayParts) {
-        if (part && typeof part.text === 'string') chunks.push(part.text)
-      }
-      return chunks.join(' ')
-    }
-
-    function getQuickInfoPrimarySymbolName(quickInfo) {
-      const text = getQuickInfoDisplayText(quickInfo)
-      if (!text) return ''
-
-      const patterns = [
-        /\(alias\)\s+(?:const|let|var|function|class|interface|type|enum|namespace)\s+([A-Za-z_$][\w$]*)/,
-        /\b(?:const|let|var|function|class|interface|type|enum|namespace)\s+([A-Za-z_$][\w$]*)\b/,
-        /\(property\)\s+[A-Za-z_$][\w$]*\.([A-Za-z_$][\w$]*)/,
-      ]
-
-      for (const pattern of patterns) {
-        const match = text.match(pattern)
-        if (match && match[1]) return match[1]
+      if (!transformed || !transformed.sourceMap) {
+        return {
+          start: transformedStart,
+          length: transformedLength,
+        }
       }
 
-      return ''
-    }
+      const mapped = mapTextSpanFromSourceMap(transformed.sourceMap, {
+        start: transformedStart,
+        length: transformedLength,
+      })
 
-    function scoreQuickInfoCandidate(candidate, options) {
-      const {
-        transformedPosition,
-        originalPosition,
-        originalIdentifier,
-        sourceText,
-      } = options
-
-      const mappedSpan = candidate.mappedTextSpan
-      const containsCursor = spanContainsPosition(mappedSpan, originalPosition)
-      const distance = Math.abs(candidate.transformedCandidatePos - transformedPosition)
-      const spanLength = mappedSpan && typeof mappedSpan.length === 'number'
-        ? mappedSpan.length
-        : Number.POSITIVE_INFINITY
-
-      let identifierMatch = false
-      if (originalIdentifier && mappedSpan && mappedSpan.length > 0 && typeof sourceText === 'string') {
-        const spanText = sourceText.slice(mappedSpan.start, mappedSpan.start + mappedSpan.length)
-        const cleanedSpanText = spanText.replace(/@$/u, '')
-        identifierMatch = cleanedSpanText === originalIdentifier
+      // Extend span to include a trailing '@' in the original source.
+      // Reactive sugar identifiers appear as 'øname' in transformed code and 'name@' in the original.
+      // The '@' is not part of the TS token, so mapped spans stop one char short of it.
+      const originalCode = transformed && transformed.originalCode ? transformed.originalCode : ''
+      if (mapped && typeof mapped.start === 'number' && typeof mapped.length === 'number' && mapped.length > 0) {
+        const spanEnd = mapped.start + mapped.length
+        if (originalCode[spanEnd] === '@') {
+          return { start: mapped.start, length: mapped.length + 1 }
+        }
       }
 
-      const payloadIdentifierMatch = originalIdentifier
-        ? quickInfoMentionsIdentifier(candidate.quickInfo, originalIdentifier)
-        : false
+      return mapped
+    }
+
+    function clampMappedSpanToOriginal(span, transformed) {
+      if (!span || typeof span.start !== 'number' || typeof span.length !== 'number') return null
+      const originalLength = transformed && transformed.originalCode ? transformed.originalCode.length : 0
+      const safeStart = Math.max(0, Math.min(originalLength, span.start))
+      const safeEnd = Math.max(safeStart, Math.min(originalLength, span.start + span.length))
+      const safeLength = Math.max(0, safeEnd - safeStart)
+      if (safeLength <= 0) return null
+      return {
+        start: safeStart,
+        length: safeLength,
+      }
+    }
+
+    function remapFileAndSpan(fileName, span, defaultOriginalFileName, defaultTransformed) {
+      const mappedFileName = toOriginalSugarFileName(fileName)
+      if (!isSugarFile(mappedFileName)) {
+        return {
+          fileName,
+          textSpan: span,
+        }
+      }
+
+      const transformed = mappedFileName === defaultOriginalFileName
+        ? defaultTransformed
+        : getTransformForSugarFile(mappedFileName)
 
       return {
-        containsCursor,
-        identifierMatch,
-        payloadIdentifierMatch,
-        distance,
-        spanLength,
+        fileName: mappedFileName,
+        textSpan: mapTextSpanToOriginal(span, transformed),
       }
+    }
+
+    function withTransientLanguageService(fileName, fn) {
+      const transformed = getTransformForSugarFile(fileName)
+      const virtualFileName = fileName + getVirtualExtension(fileName)
+
+      const compilerOptions = {
+        ...(typeof host.getCompilationSettings === 'function' ? host.getCompilationSettings() : {}),
+        noEmit: true,
+      }
+
+      const transientHost = {
+        getScriptFileNames() {
+          return [virtualFileName]
+        },
+        getScriptVersion() {
+          return (typeof host.getScriptVersion === 'function' ? host.getScriptVersion(fileName) : '0') || '0'
+        },
+        getScriptSnapshot(scriptName) {
+          if (scriptName === virtualFileName) {
+            return ts.ScriptSnapshot.fromString(transformed.code)
+          }
+
+          const originalSugarFile = toOriginalSugarFileName(scriptName)
+          if (isSugarFile(originalSugarFile)) {
+            const sugarTransformed = getTransformForSugarFile(originalSugarFile)
+            return ts.ScriptSnapshot.fromString(sugarTransformed.code)
+          }
+
+          const snapshot = typeof host.getScriptSnapshot === 'function' ? host.getScriptSnapshot(scriptName) : undefined
+          if (snapshot) return snapshot
+          const text = ts.sys.readFile(scriptName)
+          return typeof text === 'string' ? ts.ScriptSnapshot.fromString(text) : undefined
+        },
+        getCurrentDirectory() {
+          return typeof host.getCurrentDirectory === 'function' ? host.getCurrentDirectory() : process.cwd()
+        },
+        getCompilationSettings() {
+          return compilerOptions
+        },
+        getDefaultLibFileName(options) {
+          return ts.getDefaultLibFilePath(options)
+        },
+        useCaseSensitiveFileNames() {
+          return ts.sys.useCaseSensitiveFileNames
+        },
+        readFile(filePath) {
+          const originalSugarFile = toOriginalSugarFileName(filePath)
+          if (isSugarFile(originalSugarFile)) {
+            return getTransformForSugarFile(originalSugarFile).code
+          }
+          return ts.sys.readFile(filePath)
+        },
+        fileExists(filePath) {
+          if (filePath === virtualFileName) return true
+          if (isSugarFile(toOriginalSugarFileName(filePath))) return true
+          return ts.sys.fileExists(filePath)
+        },
+        readDirectory(rootDir, extensions, excludes, includes, depth) {
+          return ts.sys.readDirectory(rootDir, extensions, excludes, includes, depth)
+        },
+        directoryExists(dirPath) {
+          return ts.sys.directoryExists(dirPath)
+        },
+        getDirectories(dirPath) {
+          return ts.sys.getDirectories(dirPath)
+        },
+        realpath(p) {
+          return ts.sys.realpath ? ts.sys.realpath(p) : p
+        },
+        getNewLine() {
+          return ts.sys.newLine
+        },
+        resolveModuleNames(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) {
+          if (typeof host.resolveModuleNames === 'function') {
+            const resolved = host.resolveModuleNames(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions)
+            if (Array.isArray(resolved)) return resolved
+          }
+
+          return moduleNames.map((moduleName) => {
+            const resolutionHost = {
+              fileExists: (candidate) => {
+                if (isSugarFile(toOriginalSugarFileName(candidate))) return true
+                return ts.sys.fileExists(candidate)
+              },
+              readFile: (candidate) => {
+                const originalSugarFile = toOriginalSugarFileName(candidate)
+                if (isSugarFile(originalSugarFile)) return getTransformForSugarFile(originalSugarFile).code
+                return ts.sys.readFile(candidate)
+              },
+              directoryExists: ts.sys.directoryExists,
+              getDirectories: ts.sys.getDirectories,
+              realpath: ts.sys.realpath,
+              getCurrentDirectory: () => (typeof host.getCurrentDirectory === 'function' ? host.getCurrentDirectory() : process.cwd()),
+              useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
+            }
+
+            return ts.resolveModuleName(
+              moduleName,
+              containingFile,
+              compilerOptions || {},
+              resolutionHost,
+              redirectedReference,
+            ).resolvedModule
+          })
+        },
+      }
+
+      const ls = ts.createLanguageService(transientHost)
+      try {
+        return fn({ ls, transformed, virtualFileName })
+      } finally {
+        ls.dispose()
+      }
+    }
+
+    function remapDiagnostic(diagnostic, originalFileName, sourceText, transformed) {
+      if (!diagnostic) return diagnostic
+      const start = typeof diagnostic.start === 'number' ? diagnostic.start : 0
+      const length = typeof diagnostic.length === 'number' ? diagnostic.length : 0
+      const mappedStart = toOriginalPos(transformed, start)
+      const mappedEnd = toOriginalPos(transformed, start + length)
+
+      const originalSource = ts.createSourceFile(
+        originalFileName,
+        sourceText,
+        ts.ScriptTarget.Latest,
+        true,
+        getScriptKindFromFileName(originalFileName.endsWith('.qrx') ? `${originalFileName}.tsx` : `${originalFileName}.ts`),
+      )
+
+      return {
+        ...diagnostic,
+        file: originalSource,
+        start: mappedStart,
+        length: Math.max(0, mappedEnd - mappedStart),
+        relatedInformation: Array.isArray(diagnostic.relatedInformation)
+          ? diagnostic.relatedInformation.map((item) => remapDiagnostic(item, originalFileName, sourceText, transformed))
+          : diagnostic.relatedInformation,
+      }
+    }
+
+    function remapDefinitionLike(entry, originalFileName, transformed) {
+      if (!entry || typeof entry.fileName !== 'string') return entry
+      if (entry.fileName === `${originalFileName}${getVirtualExtension(originalFileName)}` && transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, entry.textSpan && entry.textSpan.start, entry.textSpan && entry.textSpan.length)) {
+        return null
+      }
+      const remapped = remapFileAndSpan(entry.fileName, entry.textSpan, originalFileName, transformed)
+      return {
+        ...entry,
+        fileName: remapped.fileName,
+        textSpan: remapped.textSpan,
+        contextSpan: mapTextSpanToOriginal(entry.contextSpan, transformed),
+        originalTextSpan: mapTextSpanToOriginal(entry.originalTextSpan, transformed),
+      }
+    }
+
+    function remapReferenceLike(entry, originalFileName, transformed) {
+      if (!entry || typeof entry.fileName !== 'string') return entry
+      if (entry.fileName === `${originalFileName}${getVirtualExtension(originalFileName)}` && transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, entry.textSpan && entry.textSpan.start, entry.textSpan && entry.textSpan.length)) {
+        return null
+      }
+      const remapped = remapFileAndSpan(entry.fileName, entry.textSpan, originalFileName, transformed)
+      return {
+        ...entry,
+        fileName: remapped.fileName,
+        textSpan: remapped.textSpan,
+        contextSpan: mapTextSpanToOriginal(entry.contextSpan, transformed),
+      }
+    }
+
+    function remapRenameLocation(entry, originalFileName, transformed) {
+      if (!entry || typeof entry.fileName !== 'string') return entry
+      if (entry.fileName === `${originalFileName}${getVirtualExtension(originalFileName)}` && transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, entry.textSpan && entry.textSpan.start, entry.textSpan && entry.textSpan.length)) {
+        return null
+      }
+      const remapped = remapFileAndSpan(entry.fileName, entry.textSpan, originalFileName, transformed)
+      return {
+        ...entry,
+        fileName: remapped.fileName,
+        textSpan: remapped.textSpan,
+        contextSpan: mapTextSpanToOriginal(entry.contextSpan, transformed),
+      }
+    }
+
+    function remapClassifiedSpansToOriginal(spans, transformed) {
+      if (!Array.isArray(spans)) return spans
+      const mapped = []
+      for (const item of spans) {
+        if (!item || !item.textSpan) continue
+        const { start, length } = item.textSpan
+        const spanText = typeof transformed.code === 'string'
+          ? transformed.code.slice(start, start + length)
+          : ''
+        // ø-prefixed reactive identifiers: the ø is a synthetic prefix char that
+        // maps to a step=0 segment, so the full span would be filtered by the
+        // hidden-helper check. Instead, remap just the identifier chars (skip ø).
+        if (/^ø[A-Za-z_$][\w$]*$/.test(spanText)) {
+          const textSpan = clampMappedSpanToOriginal(
+            mapTextSpanToOriginal({ start: start + 1, length: length - 1 }, transformed),
+            transformed,
+          )
+          if (!textSpan) continue
+          mapped.push({ ...item, textSpan })
+          continue
+        }
+        if (transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, start, length)) continue
+        const textSpan = clampMappedSpanToOriginal(
+          mapTextSpanToOriginal(item.textSpan, transformed),
+          transformed,
+        )
+        if (!textSpan) continue
+        mapped.push({
+          ...item,
+          textSpan,
+        })
+      }
+      mapped.sort((left, right) => {
+        if (left.textSpan.start !== right.textSpan.start) {
+          return left.textSpan.start - right.textSpan.start
+        }
+        return left.textSpan.length - right.textSpan.length
+      })
+      return mapped
+    }
+
+    function remapEncodedClassificationsToOriginal(classifications, transformed) {
+      if (!classifications || !Array.isArray(classifications.spans)) return classifications
+      const outputEntries = []
+      for (let index = 0; index + 2 < classifications.spans.length; index += 3) {
+        const start = classifications.spans[index]
+        const length = classifications.spans[index + 1]
+        const kind = classifications.spans[index + 2]
+        const spanText = typeof transformed.code === 'string'
+          ? transformed.code.slice(start, start + length)
+          : ''
+        // ø-prefixed reactive identifiers: the ø is a synthetic prefix char that
+        // maps to a step=0 segment, so the full span would be filtered by the
+        // hidden-helper check. Instead, remap just the identifier chars (skip ø).
+        if (/^ø[A-Za-z_$][\w$]*$/.test(spanText)) {
+          const mapped = clampMappedSpanToOriginal(
+            mapTextSpanToOriginal({ start: start + 1, length: length - 1 }, transformed),
+            transformed,
+          )
+          if (mapped) outputEntries.push({ start: mapped.start, length: mapped.length, kind })
+          continue
+        }
+        if (transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, start, length)) continue
+        const mapped = clampMappedSpanToOriginal(
+          mapTextSpanToOriginal({ start, length }, transformed),
+          transformed,
+        )
+        if (!mapped) continue
+        outputEntries.push({ start: mapped.start, length: mapped.length, kind })
+      }
+      outputEntries.sort((left, right) => {
+        if (left.start !== right.start) return left.start - right.start
+        return left.length - right.length
+      })
+      const outputSpans = []
+      for (const entry of outputEntries) {
+        outputSpans.push(entry.start, entry.length, entry.kind)
+      }
+      return {
+        ...classifications,
+        spans: outputSpans,
+      }
+    }
+
+    // Remap TypeScript display-part arrays: strip 'ø' prefix from identifiers, add '@' suffix for
+    // reactive references, and change 'const'/'let'/'var' to 'get' for reactive declarations.
+    function remapDisplayPartsToSugar(displayParts) {
+      if (!Array.isArray(displayParts)) return displayParts
+      const result = []
+      let nextIdentIsDeclaration = false
+      for (let i = 0; i < displayParts.length; i += 1) {
+        const part = displayParts[i]
+        if (!part || typeof part.text !== 'string') {
+          nextIdentIsDeclaration = false
+          result.push(part)
+          continue
+        }
+        // Change 'const'/'let'/'var' to 'get' when the next part is an ø-prefixed identifier
+        if (
+          (part.text === 'const' || part.text === 'let' || part.text === 'var') &&
+          i + 1 < displayParts.length &&
+          typeof displayParts[i + 1].text === 'string' &&
+          /^ø[A-Za-z_$][\w$]*$/.test(displayParts[i + 1].text)
+        ) {
+          result.push({ ...part, text: 'get' })
+          nextIdentIsDeclaration = true
+          continue
+        }
+        // Handle a bare ø-prefixed identifier
+        if (/^ø[A-Za-z_$][\w$]*$/.test(part.text)) {
+          const baseName = part.text.slice(1)
+          // Declarations use 'get name' (no '@'); references use 'name@'
+          result.push({ ...part, text: nextIdentIsDeclaration ? baseName : baseName + '@' })
+          nextIdentIsDeclaration = false
+          continue
+        }
+        // Handle ø embedded in longer text (e.g. "(property) øcount" in a single text chunk)
+        const remappedText = part.text.replace(/ø([A-Za-z_$][\w$]*)/g, (_, name) => {
+          if (nextIdentIsDeclaration) { nextIdentIsDeclaration = false; return name }
+          return name + '@'
+        })
+        result.push(remappedText !== part.text ? { ...part, text: remappedText } : part)
+        nextIdentIsDeclaration = false
+      }
+      return result
     }
 
     function remapCompletionEntriesToSugar(entries, originalPrefix) {
@@ -1461,11 +611,11 @@ function init(modules) {
           continue
         }
 
-        if (entry.name === 'destructureØ' || entry.name === 'absorbØ' || entry.name === 'ø' || entry.name === 'πø') {
+        if (entry.name === 'ø' || HIDDEN_HELPERS.includes(entry.name)) {
           continue
         }
 
-        if (!entry.name.startsWith('ø') || !SUGAR_IDENTIFIER_RE.test(entry.name)) {
+        if (!entry.name.startsWith('ø') || !/^ø[A-Za-z_$][\w$]*$/.test(entry.name)) {
           remappedEntries.push(entry)
           continue
         }
@@ -1486,1005 +636,276 @@ function init(modules) {
       return remappedEntries
     }
 
-    function isSyntheticQuickInfo(quickInfo, transformResult) {
-      if (!quickInfo || !quickInfo.textSpan) return false
-      const span = quickInfo.textSpan
-      return Boolean(findHiddenHelperTransformedRange(
-        transformResult && typeof transformResult.code === 'string' ? transformResult.code : '',
-        Math.max(0, span.start || 0),
-        Math.max(0, span.length || 0),
-      ))
-    }
-
-    function isLikelyDestructuringContext(text, position) {
-      if (typeof text !== 'string') return false
-      const safePos = Math.max(0, Math.min(text.length, position))
-      const before = text.slice(Math.max(0, safePos - 200), safePos)
-      const after = text.slice(safePos, Math.min(text.length, safePos + 140))
-      if (!/\b(const|let|var)\s*\{[^}]*$/.test(before)) return false
-      if (!after.includes('}')) return false
-      if (!after.includes('=')) return false
-      return true
-    }
-
-    function selectClosestNonEmptyCompletion(candidates, centerPos) {
-      const valid = candidates.filter((candidate) => candidate && candidate.completions && Array.isArray(candidate.completions.entries) && candidate.completions.entries.length > 0)
-      if (valid.length === 0) return undefined
-
-      valid.sort((left, right) => {
-        const leftDistance = Math.abs(left.position - centerPos)
-        const rightDistance = Math.abs(right.position - centerPos)
-        if (leftDistance !== rightDistance) return leftDistance - rightDistance
-        return right.completions.entries.length - left.completions.entries.length
-      })
-
-      return valid[0].completions
-    }
-
-    function prioritizeDestructuredSugarEntries(entries) {
-      if (!Array.isArray(entries)) return entries
-      const sugarEntries = entries.filter((entry) => entry && typeof entry.name === 'string' && entry.name.endsWith('@'))
-      if (sugarEntries.length === 0) return entries
-      return sugarEntries
-    }
-
-    function createTransientLanguageService(fileName) {
-      const normalizedFile = normalizeAbsolute(fileName)
-      const scriptVersion = host.getScriptVersion(normalizedFile) || host.getScriptVersion(fileName) || ''
-      const projectVersion = getProjectVersion()
-      const configPath = getConfigPath()
-      if (!configPath) return undefined
-
-      const parsedConfigResult = getParsedConfigForPath(configPath)
-      if (!parsedConfigResult) return undefined
-
-      const parsedConfig = parsedConfigResult.parsedConfig
-      const discoveredQrkFiles = getDiscoveredSugarFiles(configPath, parsedConfig)
-      const configSignature = `${normalizeAbsolute(configPath)}:${parsedConfigResult.mtimeMs}`
-
-      const cached = transientLsCache.get(normalizedFile)
-      if (
-        cached
-        && cached.configSignature === configSignature
-        && cached.scriptVersion === scriptVersion
-        && cached.projectVersion === projectVersion
-      ) {
-        return cached
-      }
-
-      const sourceText = getSnapshotText(fileName)
-      if (typeof sourceText !== 'string') return undefined
-
-      const qrkContext = createQrkCompilerContext(
-        configPath,
-        parsedConfig,
-        discoveredQrkFiles,
-        normalizedFile,
-        () => getSnapshotText(normalizedFile),
-      )
-      const virtualFileName = qrkContext.originalToVirtual.get(normalizedFile)
-      if (!virtualFileName) return undefined
-
-      const compilerOptions = {
-        ...parsedConfig.options,
-        noEmit: true,
-      }
-
-      const scriptFileNames = [virtualFileName]
-
-      const languageServiceHost = {
-        getScriptFileNames() {
-          return scriptFileNames
-        },
-        getScriptVersion(scriptName) {
-          const normalizedScriptName = normalizeAbsolute(scriptName)
-          if (normalizedScriptName === normalizedFile) return scriptVersion
-          const originalForVirtual = qrkContext.virtualToOriginal.get(scriptName)
-          if (originalForVirtual && normalizeAbsolute(originalForVirtual) === normalizedFile) {
-            return scriptVersion
-          }
-
-          if (originalForVirtual) {
-            return host.getScriptVersion(originalForVirtual) || '0'
-          }
-
-          return host.getScriptVersion(scriptName) || '0'
-        },
-        getScriptSnapshot(scriptName) {
-          const original = qrkContext.virtualToOriginal.get(scriptName)
-          if (original) {
-            const transformed = qrkContext.getTransformForOriginal(original).code
-            return ts.ScriptSnapshot.fromString(transformed)
-          }
-
-          const text = getSourceTextForFile(scriptName)
-          if (typeof text !== 'string') return undefined
-          return ts.ScriptSnapshot.fromString(text)
-        },
-        getCurrentDirectory() {
-          return host.getCurrentDirectory()
-        },
-        getCompilationSettings() {
-          return compilerOptions
-        },
-        getDefaultLibFileName(options) {
-          return ts.getDefaultLibFilePath(options)
-        },
-        useCaseSensitiveFileNames() {
-          return ts.sys.useCaseSensitiveFileNames
-        },
-        readFile(filePath) {
-          return ts.sys.readFile(filePath)
-        },
-        fileExists(filePath) {
-          if (qrkContext.virtualToOriginal.has(filePath)) return true
-          return ts.sys.fileExists(filePath)
-        },
-        readDirectory(rootDir, extensions, excludes, includes, depth) {
-          return ts.sys.readDirectory(rootDir, extensions, excludes, includes, depth)
-        },
-        directoryExists(dirPath) {
-          return ts.sys.directoryExists(dirPath)
-        },
-        getDirectories(dirPath) {
-          return ts.sys.getDirectories(dirPath)
-        },
-        realpath(p) {
-          return ts.sys.realpath ? ts.sys.realpath(p) : p
-        },
-        getNewLine() {
-          return ts.sys.newLine
-        },
-        resolveModuleNames(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptionsInner) {
-          const moduleResolutionHost = {
-            fileExists: (candidate) => {
-              if (qrkContext.virtualToOriginal.has(candidate)) return true
-              return ts.sys.fileExists(candidate)
-            },
-            readFile: (candidate) => {
-              const original = qrkContext.virtualToOriginal.get(candidate)
-              if (original) return qrkContext.getTransformForOriginal(original).code
-              return ts.sys.readFile(candidate)
-            },
-            directoryExists: ts.sys.directoryExists,
-            getDirectories: ts.sys.getDirectories,
-            realpath: ts.sys.realpath,
-            getCurrentDirectory: () => host.getCurrentDirectory(),
-            useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-          }
-
-          return moduleNames.map((moduleName) => {
-            const defaultResolution = ts.resolveModuleName(
-              moduleName,
-              containingFile,
-              compilerOptionsInner,
-              moduleResolutionHost,
-              redirectedReference,
-            ).resolvedModule
-
-            if (defaultResolution) return defaultResolution
-
-            if (!moduleName.startsWith('.') && !moduleName.startsWith('/')) {
-              return undefined
-            }
-
-            const containingOriginal = qrkContext.virtualToOriginal.get(containingFile) || containingFile
-            const containingDir = path.dirname(containingOriginal)
-
-            const probeCandidates = []
-            if (moduleName.endsWith('.qrk') || moduleName.endsWith('.qrx')) {
-              probeCandidates.push(moduleName)
-            } else {
-              probeCandidates.push(`${moduleName}.qrk`, `${moduleName}.qrx`)
-            }
-
-            for (const candidate of probeCandidates) {
-              const absoluteCandidate = normalizeAbsolute(path.resolve(containingDir, candidate))
-              if (!ts.sys.fileExists(absoluteCandidate)) continue
-
-              const resolvedVirtual = qrkContext.registerQrkFile(absoluteCandidate)
-              return {
-                resolvedFileName: resolvedVirtual,
-                extension: resolvedVirtual.endsWith('.tsx') ? ts.Extension.Tsx : ts.Extension.Ts,
-                isExternalLibraryImport: false,
-              }
-            }
-
-            return undefined
-          })
-        },
-      }
-
-      const languageServiceForTransforms = profile(`create-ls:${path.basename(normalizedFile)}`, () => ts.createLanguageService(
-        languageServiceHost,
-        transientDocumentRegistry,
-      ))
-
-      const entry = {
-        languageService: languageServiceForTransforms,
-        qrkContext,
-        virtualFileName,
-        configSignature,
-        scriptVersion,
-        projectVersion,
-        get transformResult() {
-          return qrkContext.getTransformForOriginal(normalizedFile)
-        },
-      }
-
-      if (cached && cached.languageService && typeof cached.languageService.dispose === 'function') {
-        cached.languageService.dispose()
-      }
-
-      transientLsCache.set(normalizedFile, entry)
-      return entry
-    }
-
-    function getTransformedDiagnosticsByKind(fileName, kind) {
-      const normalizedFile = normalizeAbsolute(fileName)
-      const scriptVersion = host.getScriptVersion(fileName) || ''
-      const projectVersion = getProjectVersion()
-      const cacheKey = `${kind}:${normalizedFile}:${scriptVersion}:${projectVersion}`
-      const cached = diagnosticsCache.get(cacheKey)
-      if (cached) return cached
-
-      if (kind === 'semantic') {
-        const lastSemantic = semanticDiagnosticsState.get(normalizedFile)
-        const now = Date.now()
-        if (
-          lastSemantic
-          && Array.isArray(lastSemantic.diagnostics)
-          && lastSemantic.projectVersion === projectVersion
-          && now - lastSemantic.computedAt < semanticDiagnosticsCooldownMs
-        ) {
-          return lastSemantic.diagnostics
-        }
-      }
-
-      const sourceText = getSnapshotText(fileName)
-      if (typeof sourceText !== 'string') {
-        return []
-      }
-
-      if (kind === 'syntactic') {
-        try {
-          const transformResult = profile(`transform:syntactic:${path.basename(normalizedFile)}`, () => transformQuarkySugar({
-            code: sourceText,
-            fileName: normalizedFile,
-          }))
-
-          const virtualFileName = normalizedFile + getVirtualExtension(normalizedFile)
-          const transformedSourceFile = profile(`parse:syntactic:${path.basename(normalizedFile)}`, () => ts.createSourceFile(
-            virtualFileName,
-            transformResult.code,
-            ts.ScriptTarget.Latest,
-            true,
-            getScriptKindFromFileName(virtualFileName),
-          ))
-
-          const originalSourceFile = ts.createSourceFile(
-            normalizedFile,
-            sourceText,
-            ts.ScriptTarget.Latest,
-            true,
-            getScriptKindFromFileName(virtualFileName),
-          )
-
-          const diagnostics = (transformedSourceFile.parseDiagnostics || []).map((diag) => {
-            const start = diag.start || 0
-            const length = diag.length || 0
-            const mappedSpan = mapDiagnosticSpanToOriginal({ start, length }, transformResult)
-
-            return {
-              ...diag,
-              file: originalSourceFile,
-              start: mappedSpan.start,
-              length: mappedSpan.length,
-            }
-          })
-
-          evictStaleFileCacheEntries(diagnosticsCache, `syntactic:${normalizedFile}:`)
-          diagnosticsCache.set(cacheKey, diagnostics)
-          return diagnostics
-        } catch (error) {
-          log(`syntactic diagnostics failed for ${fileName}: ${error && error.message ? error.message : String(error)}`)
-          evictStaleFileCacheEntries(diagnosticsCache, `syntactic:${normalizedFile}:`)
-          diagnosticsCache.set(cacheKey, [])
-          return []
-        }
-      }
-
-      try {
-        const transient = createTransientLanguageService(fileName)
-        if (!transient) {
-          diagnosticsCache.set(cacheKey, [])
-          return []
-        }
-
-        const diagnostics = profile(`diagnostics:${kind}:${path.basename(normalizedFile)}`, () => {
-          let rawDiagnostics = []
-          if (kind === 'syntactic') {
-            rawDiagnostics = transient.languageService.getSyntacticDiagnostics(transient.virtualFileName) || []
-          } else if (kind === 'semantic') {
-            rawDiagnostics = transient.languageService.getSemanticDiagnostics(transient.virtualFileName) || []
-          } else if (kind === 'suggestion') {
-            rawDiagnostics = transient.languageService.getSuggestionDiagnostics
-              ? transient.languageService.getSuggestionDiagnostics(transient.virtualFileName) || []
-              : []
-          }
-
-          return rawDiagnostics
-            .map((diag) => transient.qrkContext.remapDiagnostic(diag))
-            .filter((diag) => {
-              if (!diag.file) return false
-              return normalizeAbsolute(diag.file.fileName) === normalizedFile
-            })
-        })
-
-        evictStaleFileCacheEntries(diagnosticsCache, `syntactic:${normalizedFile}:`)
-        evictStaleFileCacheEntries(diagnosticsCache, `semantic:${normalizedFile}:`)
-        evictStaleFileCacheEntries(diagnosticsCache, `suggestion:${normalizedFile}:`)
-        diagnosticsCache.set(cacheKey, diagnostics)
-        if (kind === 'semantic') {
-          semanticDiagnosticsState.set(normalizedFile, {
-            diagnostics,
-            computedAt: Date.now(),
-            projectVersion,
-          })
-        }
-        return diagnostics
-      } catch (error) {
-        log(`transform diagnostics failed for ${fileName}: ${error && error.message ? error.message : String(error)}`)
-        evictStaleFileCacheEntries(diagnosticsCache, `syntactic:${normalizedFile}:`)
-        evictStaleFileCacheEntries(diagnosticsCache, `semantic:${normalizedFile}:`)
-        evictStaleFileCacheEntries(diagnosticsCache, `suggestion:${normalizedFile}:`)
-        diagnosticsCache.set(cacheKey, [])
-        if (kind === 'semantic') {
-          const lastSemantic = semanticDiagnosticsState.get(normalizedFile)
-          if (
-            lastSemantic
-            && Array.isArray(lastSemantic.diagnostics)
-            && lastSemantic.projectVersion === projectVersion
-          ) {
-            return lastSemantic.diagnostics
-          }
-        }
-        return []
-      }
-    }
-
-    const proxy = Object.create(null)
-    for (const key of Object.keys(languageService)) {
-      proxy[key] = (...args) => languageService[key](...args)
-    }
-
     proxy.getSyntacticDiagnostics = (fileName) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getSyntacticDiagnostics(fileName)
-      }
-      return getTransformedDiagnosticsByKind(fileName, 'syntactic')
+      if (!isSugarFile(fileName)) return languageService.getSyntacticDiagnostics(fileName)
+
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const sourceText = getSnapshotText(fileName)
+        const diagnostics = ls.getSyntacticDiagnostics(virtualFileName) || []
+        return diagnostics.map((diag) => remapDiagnostic(diag, fileName, sourceText, transformed))
+      })
     }
 
     proxy.getSemanticDiagnostics = (fileName) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getSemanticDiagnostics(fileName)
-      }
-      return getTransformedDiagnosticsByKind(fileName, 'semantic')
+      if (!isSugarFile(fileName)) return languageService.getSemanticDiagnostics(fileName)
+
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const sourceText = getSnapshotText(fileName)
+        const diagnostics = ls.getSemanticDiagnostics(virtualFileName) || []
+        return diagnostics.map((diag) => remapDiagnostic(diag, fileName, sourceText, transformed))
+      })
     }
 
     proxy.getSuggestionDiagnostics = (fileName) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getSuggestionDiagnostics(fileName)
-      }
-      return getTransformedDiagnosticsByKind(fileName, 'suggestion')
-    }
+      if (!isSugarFile(fileName)) return languageService.getSuggestionDiagnostics(fileName)
 
-    proxy.getSemanticClassifications = (fileName, span) => {
-      if (typeof languageService.getSemanticClassifications !== 'function') {
-        return []
-      }
-
-      if (!isSugarFile(fileName)) {
-        return languageService.getSemanticClassifications(fileName, span)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getSemanticClassifications(fileName, span)
-      }
-
-      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
-      const classifications = transient.languageService.getSemanticClassifications(
-        transient.virtualFileName,
-        transformedSpan,
-      )
-
-      return mapClassifiedSpansToOriginal(classifications, transient.transformResult) || []
-    }
-
-    proxy.getSyntacticClassifications = (fileName, span) => {
-      if (typeof languageService.getSyntacticClassifications !== 'function') {
-        return []
-      }
-
-      if (!isSugarFile(fileName)) {
-        return languageService.getSyntacticClassifications(fileName, span)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getSyntacticClassifications(fileName, span)
-      }
-
-      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
-      const classifications = transient.languageService.getSyntacticClassifications(
-        transient.virtualFileName,
-        transformedSpan,
-      )
-
-      return mapClassifiedSpansToOriginal(classifications, transient.transformResult) || []
-    }
-
-    proxy.getEncodedSemanticClassifications = (fileName, span, format) => {
-      if (typeof languageService.getEncodedSemanticClassifications !== 'function') {
-        return { spans: [], endOfLineState: ts.EndOfLineState.None }
-      }
-
-      if (!isSugarFile(fileName)) {
-        return languageService.getEncodedSemanticClassifications(fileName, span, format)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getEncodedSemanticClassifications(fileName, span, format)
-      }
-
-      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
-      const classifications = transient.languageService.getEncodedSemanticClassifications(
-        transient.virtualFileName,
-        transformedSpan,
-        format,
-      )
-
-      return mapEncodedClassificationsToOriginal(classifications, transient.transformResult) || {
-        spans: [],
-        endOfLineState: ts.EndOfLineState.None,
-      }
-    }
-
-    proxy.getEncodedSyntacticClassifications = (fileName, span) => {
-      if (typeof languageService.getEncodedSyntacticClassifications !== 'function') {
-        return { spans: [], endOfLineState: ts.EndOfLineState.None }
-      }
-
-      if (!isSugarFile(fileName)) {
-        return languageService.getEncodedSyntacticClassifications(fileName, span)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getEncodedSyntacticClassifications(fileName, span)
-      }
-
-      const transformedSpan = toTransformedTextSpan(transient.transformResult, span)
-      const classifications = transient.languageService.getEncodedSyntacticClassifications(
-        transient.virtualFileName,
-        transformedSpan,
-      )
-
-      return mapEncodedClassificationsToOriginal(classifications, transient.transformResult) || {
-        spans: [],
-        endOfLineState: ts.EndOfLineState.None,
-      }
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const sourceText = getSnapshotText(fileName)
+        const diagnostics = typeof ls.getSuggestionDiagnostics === 'function'
+          ? ls.getSuggestionDiagnostics(virtualFileName) || []
+          : []
+        return diagnostics.map((diag) => remapDiagnostic(diag, fileName, sourceText, transformed))
+      })
     }
 
     proxy.getQuickInfoAtPosition = (fileName, position) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getQuickInfoAtPosition(fileName, position)
-      }
+      if (!isSugarFile(fileName)) return languageService.getQuickInfoAtPosition(fileName, position)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getQuickInfoAtPosition(fileName, position)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const sourceText = getSnapshotText(fileName) || ''
-      const originalIdentifier = getIdentifierTokenAtPosition(sourceText, position)
-      const originalIdentifierBounds = getIdentifierBoundsAtPosition(sourceText, position)
-      const nearbyPositions = withNearbyPositions(
-        transformedPosition,
-        transient.transformResult.code.length,
-        24,
-      )
-      const transformedCodeLength = transient.transformResult.code.length
-      const lockedIdentifierCandidatePositions = []
-      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
-        const originalStart = originalIdentifierBounds.start
-        const originalEnd = originalStart + originalIdentifierBounds.length
-        const windowStart = Math.max(0, transformedPosition - 260)
-        const windowEnd = Math.min(transformedCodeLength, transformedPosition + 260)
-
-        for (let transformedPos = windowStart; transformedPos <= windowEnd; transformedPos += 1) {
-          const mappedOriginal = toOriginalPosCore(transient.transformResult, transformedPos)
-          if (mappedOriginal >= originalStart && mappedOriginal < originalEnd) {
-            lockedIdentifierCandidatePositions.push(transformedPos)
-          }
-        }
-      }
-
-      const candidatePositions = []
-      const seenCandidatePositions = new Set()
-      function addCandidatePosition(pos) {
-        const safePos = Math.max(0, Math.min(transient.transformResult.code.length, pos))
-        if (seenCandidatePositions.has(safePos)) return
-        seenCandidatePositions.add(safePos)
-        candidatePositions.push(safePos)
-      }
-
-      if (lockedIdentifierCandidatePositions.length > 0) {
-        for (const candidatePos of lockedIdentifierCandidatePositions) {
-          addCandidatePosition(candidatePos)
-          addCandidatePosition(candidatePos - 1)
-          addCandidatePosition(candidatePos + 1)
-        }
-      } else {
-        for (const candidatePos of nearbyPositions) {
-          addCandidatePosition(candidatePos)
-        }
-      }
-
-      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
-        const identifierStart = originalIdentifierBounds.start
-        const identifierEnd = originalIdentifierBounds.start + originalIdentifierBounds.length
-        for (let originalPos = identifierStart; originalPos < identifierEnd; originalPos += 1) {
-          const transformedFromIdentifier = toTransformedPos(transient.transformResult, originalPos)
-          addCandidatePosition(transformedFromIdentifier)
-          addCandidatePosition(transformedFromIdentifier - 1)
-          addCandidatePosition(transformedFromIdentifier + 1)
-        }
-      }
-
-      candidatePositions.sort((left, right) => Math.abs(left - transformedPosition) - Math.abs(right - transformedPosition))
-
-      let quickInfoCandidates = []
-      for (const candidatePos of candidatePositions) {
-        const candidateQuickInfo = transient.languageService.getQuickInfoAtPosition(
-          transient.virtualFileName,
-          candidatePos,
-        )
-        if (!candidateQuickInfo) continue
-        if (isSyntheticQuickInfo(candidateQuickInfo, transient.transformResult)) continue
-
-        const mappedTextSpan = mapTextSpanToOriginalCore(candidateQuickInfo.textSpan, transient.transformResult)
-        if (!mappedTextSpan || mappedTextSpan.length <= 0) continue
-
-        quickInfoCandidates.push({
-          quickInfo: candidateQuickInfo,
-          transformedCandidatePos: candidatePos,
-          mappedTextSpan,
-        })
-      }
-
-      if (quickInfoCandidates.length === 0) return undefined
-
-      if (lockedIdentifierCandidatePositions.length > 0) {
-        const lockedSet = new Set(lockedIdentifierCandidatePositions)
-        const lockedCandidates = quickInfoCandidates.filter((candidate) => lockedSet.has(candidate.transformedCandidatePos))
-        if (lockedCandidates.length > 0) {
-          quickInfoCandidates = lockedCandidates
-        }
-      }
-
-      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
-        const exactSpanCandidates = quickInfoCandidates.filter((candidate) => spansEqual(candidate.mappedTextSpan, originalIdentifierBounds))
-        if (exactSpanCandidates.length > 0) {
-          quickInfoCandidates = exactSpanCandidates
-        }
-      }
-
-      if (originalIdentifier) {
-        const exactSymbolNameCandidates = quickInfoCandidates.filter((candidate) => {
-          const symbolName = getQuickInfoPrimarySymbolName(candidate.quickInfo)
-          return symbolName === originalIdentifier || symbolName === `ø${originalIdentifier}`
-        })
-        if (exactSymbolNameCandidates.length > 0) {
-          quickInfoCandidates = exactSymbolNameCandidates
-        } else {
-          const spanTextMatchedCandidates = quickInfoCandidates.filter((candidate) => {
-            const span = candidate.mappedTextSpan
-            if (!span || span.length <= 0) return false
-            const spanText = sourceText.slice(span.start, span.start + span.length).replace(/@$/u, '')
-            return spanText === originalIdentifier
-          })
-          if (spanTextMatchedCandidates.length > 0) {
-            quickInfoCandidates = spanTextMatchedCandidates
-          }
-        }
-      }
-
-      if (originalIdentifierBounds && originalIdentifierBounds.length > 0) {
-        const overlappingCandidates = quickInfoCandidates.filter((candidate) => {
-          return spanOverlapLength(candidate.mappedTextSpan, originalIdentifierBounds) > 0
-        })
-        if (overlappingCandidates.length > 0) {
-          quickInfoCandidates = overlappingCandidates
-        }
-      }
-
-      if (originalIdentifier) {
-        const payloadMatchedCandidates = quickInfoCandidates.filter((candidate) => {
-          return quickInfoMentionsIdentifier(candidate.quickInfo, originalIdentifier)
-        })
-        if (payloadMatchedCandidates.length > 0 && !originalIdentifierBounds) {
-          quickInfoCandidates = payloadMatchedCandidates
-        } else if (!originalIdentifierBounds) {
-          const spanTextMatchedCandidates = quickInfoCandidates.filter((candidate) => {
-            const span = candidate.mappedTextSpan
-            if (!span || span.length <= 0) return false
-            const spanText = sourceText.slice(span.start, span.start + span.length).replace(/@$/u, '')
-            return spanText === originalIdentifier
-          })
-          if (spanTextMatchedCandidates.length > 0) {
-            quickInfoCandidates = spanTextMatchedCandidates
-          }
-        }
-      }
-
-      quickInfoCandidates.sort((left, right) => {
-        const leftScore = scoreQuickInfoCandidate(left, {
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const candidatePositions = withNearbyPositions(
           transformedPosition,
-          originalPosition: position,
-          originalIdentifier,
-          sourceText,
-        })
-        const rightScore = scoreQuickInfoCandidate(right, {
-          transformedPosition,
-          originalPosition: position,
-          originalIdentifier,
-          sourceText,
-        })
-
-        if (leftScore.payloadIdentifierMatch !== rightScore.payloadIdentifierMatch) {
-          return leftScore.payloadIdentifierMatch ? -1 : 1
-        }
-
-        if (leftScore.containsCursor !== rightScore.containsCursor) {
-          return leftScore.containsCursor ? -1 : 1
-        }
-
-        if (leftScore.identifierMatch !== rightScore.identifierMatch) {
-          return leftScore.identifierMatch ? -1 : 1
-        }
-
-        if (leftScore.distance !== rightScore.distance) {
-          return leftScore.distance - rightScore.distance
-        }
-
-        return leftScore.spanLength - rightScore.spanLength
-      })
-
-      const bestCandidate = quickInfoCandidates[0]
-      const quickInfo = bestCandidate.quickInfo
-      const resolvedTextSpan = originalIdentifierBounds && originalIdentifier
-        ? originalIdentifierBounds
-        : bestCandidate.mappedTextSpan
-
-      return {
-        ...quickInfo,
-        textSpan: resolvedTextSpan,
-      }
-    }
-
-    proxy.getDefinitionAtPosition = (fileName, position) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getDefinitionAtPosition(fileName, position)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getDefinitionAtPosition(fileName, position)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const definitions = transient.languageService.getDefinitionAtPosition(
-        transient.virtualFileName,
-        transformedPosition,
-      )
-
-      if (!definitions) return definitions
-      return definitions.map((definition) => mapDefinitionToOriginal(definition, transient.qrkContext))
-    }
-
-    proxy.getDefinitionAndBoundSpan = (fileName, position) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getDefinitionAndBoundSpan(fileName, position)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getDefinitionAndBoundSpan(fileName, position)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const value = transient.languageService.getDefinitionAndBoundSpan(
-        transient.virtualFileName,
-        transformedPosition,
-      )
-
-      if (!value) return value
-
-      return {
-        ...value,
-        textSpan: mapTextSpanToOriginalCore(value.textSpan, transient.transformResult),
-        definitions: value.definitions
-          ? value.definitions.map((definition) => mapDefinitionToOriginal(definition, transient.qrkContext))
-          : value.definitions,
-      }
-    }
-
-    proxy.getCompletionsAtPosition = (fileName, position, options, formattingSettings) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getCompletionsAtPosition(fileName, position, options, formattingSettings)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getCompletionsAtPosition(fileName, position, options, formattingSettings)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const sourceText = getSnapshotText(fileName) || ''
-      const originalPrefix = getIdentifierPrefixAtPosition(sourceText, position)
-      const inDestructuringContext = isLikelyDestructuringContext(sourceText, position)
-
-      const exactCompletions = profile(`completions:${path.basename(normalizeAbsolute(fileName))}`, () => transient.languageService.getCompletionsAtPosition(
-        transient.virtualFileName,
-        transformedPosition,
-        options,
-        formattingSettings,
-      ))
-
-      let bestCompletions = exactCompletions
-      const exactEntryCount = bestCompletions && Array.isArray(bestCompletions.entries)
-        ? bestCompletions.entries.length
-        : 0
-
-      if (exactEntryCount === 0) {
-        const searchRadius = inDestructuringContext ? 10 : 24
-        const nearbyPositions = withNearbyPositions(
-          transformedPosition,
-          transient.transformResult.code.length,
-          searchRadius,
+          transformed && typeof transformed.code === 'string' ? transformed.code.length : transformedPosition,
+          24,
         )
 
         const candidates = []
-        for (const candidatePos of nearbyPositions) {
-          if (candidatePos === transformedPosition) continue
-          const completions = profile(`completions:${path.basename(normalizeAbsolute(fileName))}`, () => transient.languageService.getCompletionsAtPosition(
-            transient.virtualFileName,
-            candidatePos,
-            options,
-            formattingSettings,
-          ))
-          candidates.push({ position: candidatePos, completions })
+        for (const candidatePos of candidatePositions) {
+          const quickInfo = ls.getQuickInfoAtPosition(virtualFileName, candidatePos)
+          if (!quickInfo || !quickInfo.textSpan) continue
+          if (transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, quickInfo.textSpan.start, quickInfo.textSpan.length)) {
+            continue
+          }
+
+          const mappedTextSpan = mapTextSpanToOriginal(quickInfo.textSpan, transformed)
+          if (!mappedTextSpan) continue
+
+          candidates.push({
+            quickInfo,
+            mappedTextSpan,
+            distance: Math.abs(candidatePos - transformedPosition),
+            containsCursor: spanContainsPosition(mappedTextSpan, position),
+          })
         }
 
-        bestCompletions = selectClosestNonEmptyCompletion(candidates, transformedPosition)
-      }
+        if (candidates.length === 0) return undefined
 
-      if (bestCompletions) {
-        const mappedOptionalReplacementSpan = bestCompletions.optionalReplacementSpan
-          ? mapTextSpanToOriginalCore(bestCompletions.optionalReplacementSpan, transient.transformResult)
-          : bestCompletions.optionalReplacementSpan
+        candidates.sort((left, right) => {
+          if (left.containsCursor !== right.containsCursor) {
+            return left.containsCursor ? -1 : 1
+          }
+          if (left.distance !== right.distance) {
+            return left.distance - right.distance
+          }
+          return (left.mappedTextSpan.length || 0) - (right.mappedTextSpan.length || 0)
+        })
 
-        const mappedEntries = Array.isArray(bestCompletions.entries)
-          ? bestCompletions.entries.map((entry) => ({
+        const best = candidates[0]
+        return {
+          ...best.quickInfo,
+          displayParts: remapDisplayPartsToSugar(best.quickInfo.displayParts),
+          documentation: remapDisplayPartsToSugar(best.quickInfo.documentation),
+          textSpan: best.mappedTextSpan,
+        }
+      })
+    }
+
+    proxy.getCompletionsAtPosition = (fileName, position, options, formattingSettings) => {
+      if (!isSugarFile(fileName)) return languageService.getCompletionsAtPosition(fileName, position, options, formattingSettings)
+
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const sourceText = getSnapshotText(fileName)
+        const originalPrefix = getIdentifierPrefixAtPosition(sourceText, position)
+        const completions = ls.getCompletionsAtPosition(virtualFileName, transformedPosition, options, formattingSettings)
+        if (!completions) return completions
+
+        const mappedEntries = Array.isArray(completions.entries)
+          ? completions.entries.map((entry) => ({
             ...entry,
-            replacementSpan: entry.replacementSpan
-              ? mapTextSpanToOriginalCore(entry.replacementSpan, transient.transformResult)
-              : entry.replacementSpan,
+            replacementSpan: mapTextSpanToOriginal(entry.replacementSpan, transformed),
           }))
-          : bestCompletions.entries
+          : completions.entries
 
         const remappedEntries = remapCompletionEntriesToSugar(mappedEntries, originalPrefix)
-        const contextEntries = inDestructuringContext
-          ? prioritizeDestructuredSugarEntries(remappedEntries)
-          : remappedEntries
 
         return {
-          ...bestCompletions,
-          optionalReplacementSpan: mappedOptionalReplacementSpan,
-          entries: contextEntries,
+          ...completions,
+          optionalReplacementSpan: mapTextSpanToOriginal(completions.optionalReplacementSpan, transformed),
+          entries: remappedEntries,
         }
-      }
-
-      return languageService.getCompletionsAtPosition(fileName, position, options, formattingSettings)
+      })
     }
 
     proxy.getCompletionEntryDetails = (fileName, position, entryName, formatOptions, source, preferences, data) => {
       if (!isSugarFile(fileName)) {
-        return languageService.getCompletionEntryDetails(
-          fileName,
-          position,
-          entryName,
-          formatOptions,
-          source,
-          preferences,
-          data,
-        )
+        return languageService.getCompletionEntryDetails(fileName, position, entryName, formatOptions, source, preferences, data)
       }
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getCompletionEntryDetails(
-          fileName,
-          position,
-          entryName,
-          formatOptions,
-          source,
-          preferences,
-          data,
-        )
-      }
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
 
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      let transformedEntryName = entryName
-      if (typeof transformedEntryName === 'string' && /[A-Za-z_$][\w$]*@$/.test(transformedEntryName)) {
-        transformedEntryName = `ø${transformedEntryName.slice(0, -1)}`
-      }
-
-      let transformedData = data
-      if (transformedData && typeof transformedData === 'object' && typeof transformedData.name === 'string' && /[A-Za-z_$][\w$]*@$/.test(transformedData.name)) {
-        transformedData = {
-          ...transformedData,
-          name: `ø${transformedData.name.slice(0, -1)}`,
+        let transformedEntryName = entryName
+        if (typeof transformedEntryName === 'string' && /[A-Za-z_$][\w$]*@$/.test(transformedEntryName)) {
+          transformedEntryName = `ø${transformedEntryName.slice(0, -1)}`
         }
-      }
 
-      return transient.languageService.getCompletionEntryDetails(
-        transient.virtualFileName,
-        transformedPosition,
-        transformedEntryName,
-        formatOptions,
-        source,
-        preferences,
-        transformedData,
-      )
+        const transformedData = data && typeof data === 'object' && typeof data.name === 'string' && /[A-Za-z_$][\w$]*@$/.test(data.name)
+          ? {
+            ...data,
+            name: `ø${data.name.slice(0, -1)}`,
+          }
+          : data
+
+        const details = ls.getCompletionEntryDetails(
+          virtualFileName,
+          transformedPosition,
+          transformedEntryName,
+          formatOptions,
+          source,
+          preferences,
+          transformedData,
+        )
+        if (!details) return details
+        return {
+          ...details,
+          displayParts: remapDisplayPartsToSugar(details.displayParts),
+          documentation: remapDisplayPartsToSugar(details.documentation),
+        }
+      })
     }
 
-    proxy.getFormattingEditsForDocument = (fileName, formatOptions, preferences) => {
-      if (!isSugarFile(fileName) || typeof languageService.getFormattingEditsForDocument !== 'function') {
-        return languageService.getFormattingEditsForDocument
-          ? languageService.getFormattingEditsForDocument(fileName, formatOptions, preferences)
-          : []
-      }
+    proxy.getDefinitionAtPosition = (fileName, position) => {
+      if (!isSugarFile(fileName)) return languageService.getDefinitionAtPosition(fileName, position)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getFormattingEditsForDocument(fileName, formatOptions, preferences)
-      }
-
-      const edits = transient.languageService.getFormattingEditsForDocument(
-        transient.virtualFileName,
-        formatOptions,
-        preferences,
-      )
-
-      return mapFormattingChangesToOriginal(edits, transient.transformResult)
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const definitions = ls.getDefinitionAtPosition(virtualFileName, transformedPosition)
+        if (!definitions) return definitions
+        return definitions
+          .map((entry) => remapDefinitionLike(entry, fileName, transformed))
+          .filter(Boolean)
+      })
     }
 
-    proxy.getFormattingEditsForRange = (fileName, start, end, formatOptions, preferences) => {
-      if (!isSugarFile(fileName) || typeof languageService.getFormattingEditsForRange !== 'function') {
-        return languageService.getFormattingEditsForRange
-          ? languageService.getFormattingEditsForRange(fileName, start, end, formatOptions, preferences)
-          : []
-      }
+    proxy.getDefinitionAndBoundSpan = (fileName, position) => {
+      if (!isSugarFile(fileName)) return languageService.getDefinitionAndBoundSpan(fileName, position)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getFormattingEditsForRange(fileName, start, end, formatOptions, preferences)
-      }
-
-      const transformedStart = toTransformedPos(transient.transformResult, start)
-      const transformedEnd = toTransformedPos(transient.transformResult, end)
-
-      const edits = transient.languageService.getFormattingEditsForRange(
-        transient.virtualFileName,
-        Math.min(transformedStart, transformedEnd),
-        Math.max(transformedStart, transformedEnd),
-        formatOptions,
-        preferences,
-      )
-
-      return mapFormattingChangesToOriginal(edits, transient.transformResult)
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const value = ls.getDefinitionAndBoundSpan(virtualFileName, transformedPosition)
+        if (!value) return value
+        return {
+          ...value,
+          textSpan: mapTextSpanToOriginal(value.textSpan, transformed),
+          definitions: Array.isArray(value.definitions)
+            ? value.definitions
+              .map((entry) => remapDefinitionLike(entry, fileName, transformed))
+              .filter(Boolean)
+            : value.definitions,
+        }
+      })
     }
 
-    proxy.getFormattingEditsAfterKeystroke = (fileName, position, key, formatOptions, preferences) => {
-      if (!isSugarFile(fileName) || typeof languageService.getFormattingEditsAfterKeystroke !== 'function') {
-        return languageService.getFormattingEditsAfterKeystroke
-          ? languageService.getFormattingEditsAfterKeystroke(fileName, position, key, formatOptions, preferences)
-          : []
-      }
+    proxy.getTypeDefinitionAtPosition = (fileName, position) => {
+      if (!isSugarFile(fileName)) return languageService.getTypeDefinitionAtPosition(fileName, position)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.getFormattingEditsAfterKeystroke(fileName, position, key, formatOptions, preferences)
-      }
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const definitions = ls.getTypeDefinitionAtPosition(virtualFileName, transformedPosition)
+        if (!definitions) return definitions
+        return definitions
+          .map((entry) => remapDefinitionLike(entry, fileName, transformed))
+          .filter(Boolean)
+      })
+    }
 
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const edits = transient.languageService.getFormattingEditsAfterKeystroke(
-        transient.virtualFileName,
-        transformedPosition,
-        key,
-        formatOptions,
-        preferences,
-      )
+    proxy.getImplementationAtPosition = (fileName, position) => {
+      if (!isSugarFile(fileName)) return languageService.getImplementationAtPosition(fileName, position)
 
-      return mapFormattingChangesToOriginal(edits, transient.transformResult)
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const implementations = ls.getImplementationAtPosition(virtualFileName, transformedPosition)
+        if (!implementations) return implementations
+        return implementations
+          .map((entry) => remapDefinitionLike(entry, fileName, transformed))
+          .filter(Boolean)
+      })
     }
 
     proxy.getReferencesAtPosition = (fileName, position) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getReferencesAtPosition(fileName, position)
-      }
+      if (!isSugarFile(fileName)) return languageService.getReferencesAtPosition(fileName, position)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getReferencesAtPosition(fileName, position)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const references = transient.languageService.getReferencesAtPosition(
-        transient.virtualFileName,
-        transformedPosition,
-      )
-
-      if (!references) return references
-      return references.map((reference) => mapReferenceEntryToOriginal(reference, transient.qrkContext))
-    }
-
-    proxy.getDocumentHighlights = (fileName, position, filesToSearch) => {
-      if (typeof languageService.getDocumentHighlights !== 'function') {
-        return []
-      }
-
-      if (!isSugarFile(fileName)) {
-        return languageService.getDocumentHighlights(fileName, position, filesToSearch)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getDocumentHighlights(fileName, position, filesToSearch)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const transformedFilesToSearch = Array.isArray(filesToSearch)
-        ? filesToSearch.map((searchFile) => {
-          if (!isSugarFile(searchFile)) return searchFile
-          const normalized = normalizeAbsolute(searchFile)
-          return transient.qrkContext.originalToVirtual.get(normalized)
-            || transient.qrkContext.registerQrkFile(normalized)
-        })
-        : filesToSearch
-
-      const highlights = transient.languageService.getDocumentHighlights(
-        transient.virtualFileName,
-        transformedPosition,
-        transformedFilesToSearch,
-      )
-
-      return mapDocumentHighlightsToOriginal(highlights, transient.qrkContext)
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const references = ls.getReferencesAtPosition(virtualFileName, transformedPosition)
+        if (!references) return references
+        return references
+          .map((entry) => remapReferenceLike(entry, fileName, transformed))
+          .filter(Boolean)
+      })
     }
 
     proxy.getOccurrencesAtPosition = (fileName, position) => {
-      if (typeof languageService.getOccurrencesAtPosition !== 'function') {
-        return []
-      }
+      if (typeof languageService.getOccurrencesAtPosition !== 'function') return []
+      if (!isSugarFile(fileName)) return languageService.getOccurrencesAtPosition(fileName, position)
 
-      if (!isSugarFile(fileName)) {
-        return languageService.getOccurrencesAtPosition(fileName, position)
-      }
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const occurrences = ls.getOccurrencesAtPosition(virtualFileName, transformedPosition)
+        if (!occurrences) return occurrences
+        return occurrences
+          .map((entry) => remapReferenceLike(entry, fileName, transformed))
+          .filter(Boolean)
+      })
+    }
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getOccurrencesAtPosition(fileName, position)
+    proxy.getDocumentHighlights = (fileName, position, filesToSearch) => {
+      if (typeof languageService.getDocumentHighlights !== 'function') return []
+      if (!isSugarFile(fileName)) return languageService.getDocumentHighlights(fileName, position, filesToSearch)
 
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const occurrences = transient.languageService.getOccurrencesAtPosition(
-        transient.virtualFileName,
-        transformedPosition,
-      )
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const highlights = ls.getDocumentHighlights(virtualFileName, transformedPosition, filesToSearch)
+        if (!highlights) return highlights
+        return highlights.map((group) => ({
+          ...group,
+          fileName: toOriginalSugarFileName(group.fileName),
+          highlightSpans: Array.isArray(group.highlightSpans)
+            ? group.highlightSpans
+              .filter((span) => !transformedSpanIntersectsHiddenHelper(transformed.code, transformed.sourceMap, span && span.textSpan && span.textSpan.start, span && span.textSpan && span.textSpan.length))
+              .map((span) => ({
+                ...span,
+                textSpan: mapTextSpanToOriginal(span.textSpan, transformed),
+                contextSpan: mapTextSpanToOriginal(span.contextSpan, transformed),
+              }))
+            : group.highlightSpans,
+        }))
+      })
+    }
 
-      if (!occurrences) return occurrences
-      return occurrences.map((occurrence) => mapReferenceEntryToOriginal(occurrence, transient.qrkContext))
+    proxy.getRenameInfo = (fileName, position, options) => {
+      if (!isSugarFile(fileName)) return languageService.getRenameInfo(fileName, position, options)
+
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const renameInfo = ls.getRenameInfo(virtualFileName, transformedPosition, options)
+        if (!renameInfo || !renameInfo.canRename) return renameInfo
+        return {
+          ...renameInfo,
+          triggerSpan: mapTextSpanToOriginal(renameInfo.triggerSpan, transformed),
+        }
+      })
     }
 
     proxy.findRenameLocations = (fileName, position, findInStrings, findInComments, preferences) => {
@@ -2492,107 +913,78 @@ function init(modules) {
         return languageService.findRenameLocations(fileName, position, findInStrings, findInComments, preferences)
       }
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) {
-        return languageService.findRenameLocations(fileName, position, findInStrings, findInComments, preferences)
-      }
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const locations = transient.languageService.findRenameLocations(
-        transient.virtualFileName,
-        transformedPosition,
-        findInStrings,
-        findInComments,
-        preferences,
-      )
-
-      if (!locations) return locations
-      return locations.map((location) => mapRenameLocationToOriginal(location, transient.qrkContext))
-    }
-
-    proxy.getRenameInfo = (fileName, position, options) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getRenameInfo(fileName, position, options)
-      }
-
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getRenameInfo(fileName, position, options)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const renameInfo = transient.languageService.getRenameInfo(
-        transient.virtualFileName,
-        transformedPosition,
-        options,
-      )
-
-      if (!renameInfo || !renameInfo.canRename) return renameInfo
-
-      return {
-        ...renameInfo,
-        triggerSpan: mapTextSpanToOriginalCore(renameInfo.triggerSpan, transient.transformResult),
-      }
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const locations = ls.findRenameLocations(virtualFileName, transformedPosition, findInStrings, findInComments, preferences)
+        if (!locations) return locations
+        return locations
+          .map((entry) => remapRenameLocation(entry, fileName, transformed))
+          .filter(Boolean)
+      })
     }
 
     proxy.getSignatureHelpItems = (fileName, position, options) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getSignatureHelpItems(fileName, position, options)
-      }
+      if (!isSugarFile(fileName)) return languageService.getSignatureHelpItems(fileName, position, options)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getSignatureHelpItems(fileName, position, options)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const signatureHelp = transient.languageService.getSignatureHelpItems(
-        transient.virtualFileName,
-        transformedPosition,
-        options,
-      )
-
-      if (!signatureHelp) return signatureHelp
-
-      return {
-        ...signatureHelp,
-        applicableSpan: mapTextSpanToOriginalCore(signatureHelp.applicableSpan, transient.transformResult),
-      }
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedPosition = toTransformedPos(transformed, position)
+        const signature = ls.getSignatureHelpItems(virtualFileName, transformedPosition, options)
+        if (!signature) return signature
+        return {
+          ...signature,
+          applicableSpan: mapTextSpanToOriginal(signature.applicableSpan, transformed),
+        }
+      })
     }
 
-    proxy.getImplementationAtPosition = (fileName, position) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getImplementationAtPosition(fileName, position)
-      }
+    proxy.getSyntacticClassifications = (fileName, span) => {
+      if (typeof languageService.getSyntacticClassifications !== 'function') return []
+      if (!isSugarFile(fileName)) return languageService.getSyntacticClassifications(fileName, span)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getImplementationAtPosition(fileName, position)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const implementations = transient.languageService.getImplementationAtPosition(
-        transient.virtualFileName,
-        transformedPosition,
-      )
-
-      if (!implementations) return implementations
-      return implementations.map((implementation) => mapDefinitionToOriginal(implementation, transient.qrkContext))
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedSpan = toTransformedTextSpan(transformed, span)
+        const classifications = ls.getSyntacticClassifications(virtualFileName, transformedSpan)
+        return remapClassifiedSpansToOriginal(classifications, transformed)
+      })
     }
 
-    proxy.getTypeDefinitionAtPosition = (fileName, position) => {
-      if (!isSugarFile(fileName)) {
-        return languageService.getTypeDefinitionAtPosition(fileName, position)
-      }
+    proxy.getSemanticClassifications = (fileName, span) => {
+      if (typeof languageService.getSemanticClassifications !== 'function') return []
+      if (!isSugarFile(fileName)) return languageService.getSemanticClassifications(fileName, span)
 
-      const transient = createTransientLanguageService(fileName)
-      if (!transient) return languageService.getTypeDefinitionAtPosition(fileName, position)
-
-      const transformedPosition = toTransformedPos(transient.transformResult, position)
-      const typeDefinitions = transient.languageService.getTypeDefinitionAtPosition(
-        transient.virtualFileName,
-        transformedPosition,
-      )
-
-      if (!typeDefinitions) return typeDefinitions
-      return typeDefinitions.map((typeDefinition) => mapDefinitionToOriginal(typeDefinition, transient.qrkContext))
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedSpan = toTransformedTextSpan(transformed, span)
+        const classifications = ls.getSemanticClassifications(virtualFileName, transformedSpan)
+        return remapClassifiedSpansToOriginal(classifications, transformed)
+      })
     }
 
-    log('initialized')
+    proxy.getEncodedSyntacticClassifications = (fileName, span) => {
+      if (typeof languageService.getEncodedSyntacticClassifications !== 'function') {
+        return { spans: [], endOfLineState: ts.EndOfLineState.None }
+      }
+      if (!isSugarFile(fileName)) return languageService.getEncodedSyntacticClassifications(fileName, span)
+
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedSpan = toTransformedTextSpan(transformed, span)
+        const classifications = ls.getEncodedSyntacticClassifications(virtualFileName, transformedSpan)
+        return remapEncodedClassificationsToOriginal(classifications, transformed)
+      })
+    }
+
+    proxy.getEncodedSemanticClassifications = (fileName, span, format) => {
+      if (typeof languageService.getEncodedSemanticClassifications !== 'function') {
+        return { spans: [], endOfLineState: ts.EndOfLineState.None }
+      }
+      if (!isSugarFile(fileName)) return languageService.getEncodedSemanticClassifications(fileName, span, format)
+
+      return withTransientLanguageService(fileName, ({ ls, transformed, virtualFileName }) => {
+        const transformedSpan = toTransformedTextSpan(transformed, span)
+        const classifications = ls.getEncodedSemanticClassifications(virtualFileName, transformedSpan, format)
+        return remapEncodedClassificationsToOriginal(classifications, transformed)
+      })
+    }
+
     return proxy
   }
 

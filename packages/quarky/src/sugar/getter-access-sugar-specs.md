@@ -190,9 +190,9 @@ function FractionKit(øcount) {
    - example: if `count` is re-declared in an inner block/function, only references bound to the transformed `øcount` declaration should become `øcount()`.
 - transform only in value-level code: never rewrite inside comments, string literals, template string text, import/export specifiers, type-only nodes, or property keys that are not identifier references.
 - helper import policy:
-   - helpers (`πø`, `absorbØ`, `destructureØ`) are auto-imported only when used by transforms.
+   - helpers (`πø`, `absorbØ`, `destructureØ`, and `ø`) are auto-imported only when used by transforms.
    - imports are deduped, stably ordered, and conflict-safe (if local symbols already exist, use deterministic aliasing strategy).
-   - helper should be invisible to Intellisense
+   - helper should be invisible to Intellisense and syntax highlighting
 - transform idempotence: running the transform repeatedly on already transformed virtual source should not produce additional semantic changes.
 - comment and formatting stability:
    - preserve comments around transformed nodes and maintain stable formatting to avoid editor/linter churn.
@@ -307,7 +307,8 @@ function FractionKit(øcount) {
       -pm: `{ property: <span:p>(</span:p><span:v>value</span:v>) }` --> `{ property: () <span:p>=></span:p> <span:v>value</span:v> }`
    - an argument: `doSomething((argument))` --> `doSomething(() => argument)`
    - an item in an array literal: `[(item), (itemB)]` --> `[() => item, () => itemB]`
-   - an expression within a JSX expression container: `<Comp value={(value + 1)}></Comp>` --> `<Comp value={() => value + 1}>`
+   * an expression within a JSX expression container: `<Comp value={(value + 1)}></Comp>` --> `<Comp value={ø(() => value + 1)}>`
+      + import the derivation helper, `ø`, from '@rue/quarky' if it is not already imported
    - when passed as an argument, assigned to a value or property, an item in an array literal, an expression within a JSX expression container:
       - the final expression of a sequence expression
       - the consequent or alternate of a conditional expression

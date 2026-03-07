@@ -3,15 +3,15 @@
   "injectionSelector": "L:source.tsx -comment -string, L:source.ts -comment -string",
   "patterns": [
     {
-      "name": "storage.type.qrx-get",
+      "name": "storage.type",
       "match": "\\bget(?=\\s+[A-Za-z_$][\\w$]*\\s*=)"
     },
     {
-      "name": "storage.type.qrx-get",
+      "name": "storage.type",
       "match": "\\bget(?=\\s+[A-Za-z_$][\\w$]*\\s*:)"
     },
     {
-      "name": "storage.type.qrx-get",
+      "name": "storage.type",
       "match": "\\bget(?=\\s+[A-Za-z_$][\\w$]*\\s*\\()"
     }
   ]

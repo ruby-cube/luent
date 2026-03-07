@@ -1,16 +1,28 @@
 {
   "name": "qrx-get-keyword-highlighting",
   "displayName": "QRX Get Keyword Highlighting",
-  "description": "Highlights qrx-style `get` declarations as keywords in TS/TSX tokenization.",
-  "version": "0.0.6",
+  "description": "Highlights qrx-style `get` declarations as keywords and `@` markers as operators in TS/TSX files.",
+  "version": "0.1.0",
   "publisher": "local",
+  "main": "./extension.js",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
     "Programming Languages"
   ],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
+  ],
   "contributes": {
+    "semanticTokenTypes": [
+      {
+        "id": "qrxRefAccess",
+        "superType": "operator",
+        "description": "The `@` ref-access marker in qrx sugar syntax."
+      }
+    ],
     "grammars": [
       {
         "path": "./syntaxes/qrx-get.injection.tmLanguage.json",

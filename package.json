@@ -28,7 +28,8 @@
     "mu-lint": "pnpm exec tsc apps/play/mu-linting/mu-mutation-linter.ts apps/play/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir apps/play/mu-linting/.tmp-run && node apps/play/mu-linting/.tmp-run/run-mu-mutation-lint.js",
     "lint:mu-eslint": "pnpm exec eslint \"apps/play/mu-linting/**/*.{ts,tsx}\"",
     "typecheck:quarky": "pnpm exec node packages/quarky/scripts/quarky-tsc.mjs -p tsconfig.json",
-    "test:position-mapping": "pnpm -F @rue/quarky run test:position-mapping"
+    "test:position-mapping": "pnpm -F @rue/quarky run test:position-mapping",
+    "emit:quarky-transform": "pnpm exec node packages/quarky/scripts/emit-transformed-quarky.mjs"
   },
   "devDependencies": {
     "@rue/quarky-tsserver-plugin": "workspace:*",
