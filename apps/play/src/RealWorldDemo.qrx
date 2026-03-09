@@ -1,79 +1,72 @@
 
 import { Ion, Ionic } from "@rue/quarky";
-import { template } from "@rue/lumo";
+import { For, template } from "@rue/lumo";
 
 type Todo = { title: string; completed: boolean };
 
-function TodoItem(title: string): Todo {
-  return { title, completed: false };
+function IonicTodoItem(title: string) {
+   return (
+      Ionic({ title, completed: false })
+   )
 }
 
-export function RealWorldDemo() {
-  // Reactive array of todos
-  const todos = Ionic([
-    TodoItem("Learn Rue"),
-    TodoItem("Build a demo"),
-  ]);
+export function QrxTodo() {
+   get todos = Ion(Ionic([
+      IonicTodoItem("Learn Rue"),
+      IonicTodoItem("Build a demo"),
+   ], {
+      add() {
+         if (newTodo.trim()) {
+            todos.push(IonicTodoItem(newTodo));
+            newTodo@.value = "";
+         }
+      },
+      remove(todo: Ionic<Todo>) {
+         const idx = todos.indexOf(todo);
+         if (idx !== -1) todos.splice(idx, 1);
+      }
+   }))
+   get activeTodos = Ion(() => todos.filter(todo => !todo.completed));
+   get completedTodos = Ion(() => todos.filter(todo => todo.completed));
 
-  // Atomic ion for new todo input
-  get newTodo = Ion("");
+   get newTodo = Ion("");
+   get filter = Ion("all" as 'all' | 'active' | 'completed');
 
-  // Reactive object for filter state
-  const filter = Ionic({ value: "all" });
+   const filters = {
+      all: todos@,
+      active: activeTodos@,
+      completed: completedTodos@
+   }
 
-  // Derivation ions for filtered todos
-  get activeTodos = Ion(() => todos.filter((todo: Todo) => !todo.completed));
-  get completedTodos = Ion(() => todos.filter((todo: Todo) => todo.completed));
+   get filteredTodos = Ion(() => filters[filter]())
 
-  function addTodo() {
-    if (newTodo.trim()) {
-      todos.push(TodoItem(newTodo));
-      newTodo@.value = "";
-    }
-  }
-
-  function toggle(todo: Todo) {
-    todo.completed = !todo.completed;
-  }
-
-  function remove(todo: Todo) {
-    const idx = todos.indexOf(todo);
-    if (idx !== -1) todos.splice(idx, 1);
-  }
-
-  function filteredTodos() {
-    if (filter.value === "active") return activeTodos@;
-    if (filter.value === "completed") return completedTodos@;
-    return todos;
-  }
-
-  return template(
-    <div>
-      <h2>RealWorld Todo Demo (.qrx)</h2>
-      <input
-        value={newTodo@}
-        on:input={e => newTodo@.value = e.target.value}
-        placeholder="Add a todo..."
-      />
-      <button on:click={addTodo}>Add</button>
+   return template(
       <div>
-        <button on:click={() => (filter@.value = "all")}>All</button>
-        <button on:click={() => (filter@.value = "active")}>Active</button>
-        <button on:click={() => (filter@.value = "completed")}>Completed</button>
+         <h2>Todos</h2>
+         <input
+            mu:value={newTodo@}
+            placeholder="Add a todo..."
+         />
+         <button on:click={todos.add}>Add</button>
+         <div>
+            <button on:click={() => (filter@.value = "all")}>All</button>
+            <button on:click={() => (filter@.value = "active")}>Active</button>
+            <button on:click={() => (filter@.value = "completed")}>Completed</button>
+         </div>
+         <ul>
+            {For(filteredTodos@, t => t, todo => (
+               <li>
+                  <input type="checkbox" mu:checked={todo.completed@} />
+                  <span style={(`text-decoration: ${todo.completed ? "line-through" : "none"} `)}>{todo.title}</span>
+                  <button on:click={() => todos.remove(todo)}>x</button>
+               </li>
+            ))}
+         </ul>
+         <div>
+            <span>{(activeTodos.length)} left</span>
+            <span> / {todos.length} total</span>
+         </div>
       </div>
-      <ul>
-        {filteredTodos().map((todo: Todo) => (
-          <li>
-            <input type="checkbox" checked={todo.completed} on:change={() => toggle(todo)} />
-            <span style={{ textDecoration: todo.completed ? "line-through" : "none" }}>{todo.title}</span>
-            <button on:click={() => remove(todo)}>x</button>
-          </li>
-        ))}
-      </ul>
-      <div>
-        <span>{activeTodos@.length} left</span>
-        <span> / {todos@.length} total</span>
-      </div>
-    </div>
-  );
+   );
 }
+

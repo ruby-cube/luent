@@ -1232,10 +1232,18 @@ function expressionReferencesIdentifier(expression, identifierName) {
   return found
 }
 
+function isDerivationShorthand(expression) {
+   return ts.isParenthesizedExpression(expression) && isCommaExpression(expression)
+}
+
+function isCommaExpression(expression){
+   return ts.isBinaryExpression(expression) && expression.operatorToken === ts.SyntaxKind.CommaToken
+}
+
 function conditionImpliesIdentifierTruthy(expression, identifierName, whenConditionTruthy) {
   if (!expression) return false
 
-  if (ts.isParenthesizedExpression(expression)) {
+  if (isDerivationShorthand(expression)) {
     return conditionImpliesIdentifierTruthy(expression.expression, identifierName, whenConditionTruthy)
   }
 
@@ -1530,7 +1538,7 @@ function rewriteReactiveReads(state, getVars) {
           // For JsxExpression children, propagate guard context
           if (ts.isJsxExpression(child) && child.expression) {
             // If child is a parenthesized expression (derivation shorthand), propagate guard context into it
-            if (ts.isParenthesizedExpression(child.expression)) {
+            if (isDerivationShorthand(child.expression)) {
               // Simulate the transform: parenthesized expression becomes () => expr
               // Visit the body of the arrow function with the guard context
               visit(child.expression.expression, nextJsxGuardContext)
@@ -1650,7 +1658,7 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
   let derivationHelperUsed = false
 
   function rewriteParenthesized(node) {
-    if (!ts.isParenthesizedExpression(node)) return
+    if (!isDerivationShorthand(node)) return
     if (ts.isBinaryExpression(node.expression) && node.expression.operatorToken.kind === ts.SyntaxKind.CommaToken) return
     const start = node.getStart(sourceFile)
     const end = node.getEnd()
@@ -1659,7 +1667,7 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
   }
 
   function rewriteParenthesizedJsxExpression(node) {
-    if (!ts.isParenthesizedExpression(node)) return
+    if (!isDerivationShorthand(node)) return
     const start = node.getStart(sourceFile)
     const end = node.getEnd()
     const inner = state.code.slice(start + 1, end - 1)
@@ -1684,27 +1692,29 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
   }
 
   function visit(node) {
-    if (tsxLike && ts.isJsxExpression(node) && node.expression && ts.isParenthesizedExpression(node.expression)) {
+   
+    if (tsxLike && ts.isJsxExpression(node) && node.expression && isDerivationShorthand(node.expression)) {
+      console.log(node.expression)
       rewriteParenthesizedJsxExpression(node.expression)
     }
 
     if (ts.isCallExpression(node)) {
       for (const arg of node.arguments) {
-        if (ts.isParenthesizedExpression(arg)) rewriteParenthesized(arg)
+        if (isDerivationShorthand(arg)) rewriteParenthesized(arg)
       }
     }
 
-    if (ts.isPropertyAssignment(node) && ts.isParenthesizedExpression(node.initializer)) {
+    if (ts.isPropertyAssignment(node) && isDerivationShorthand(node.initializer)) {
       rewriteParenthesized(node.initializer)
     }
 
     if (ts.isArrayLiteralExpression(node)) {
       for (const element of node.elements) {
-        if (ts.isParenthesizedExpression(element)) rewriteParenthesized(element)
+        if (isDerivationShorthand(element)) rewriteParenthesized(element)
       }
     }
 
-    if (ts.isVariableDeclaration(node) && node.initializer && ts.isParenthesizedExpression(node.initializer)) {
+    if (ts.isVariableDeclaration(node) && node.initializer && isDerivationShorthand(node.initializer)) {
       rewriteParenthesized(node.initializer)
     }
 

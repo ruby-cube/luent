@@ -77,6 +77,7 @@ import { TestCreate } from './TestCreate';
 import { TestAwaitConditional } from './TestAwaitConditional';
 import { QrxCounter } from './Counter.qrx';
 import { TestRenderFunctionAsIon } from './TestRenderFunctionAsIon';
+import { QrxTodo } from './RealWorldDemo.qrx';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -150,7 +151,7 @@ import { TestRenderFunctionAsIon } from './TestRenderFunctionAsIon';
 // }
 
 // const app = createRoot(TestThru)
-const app = createRoot(() =><QrxCounter showFractions={Ion(true)}></QrxCounter>)
+const app = createRoot(QrxTodo)
 
 app.mount('#root')
 

@@ -199,6 +199,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    if (!('mu:checked' in attributes))
       return;
    const ion = attributes['mu:checked'];
+   console.log('checkbox input', ion)
    delete attributes['mu:checked'];
    attributes.checked = ion;
    if (!isGetter(ion)) {
@@ -355,7 +356,7 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
 function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
    const flask = getFlask()
    for (const key in attributes) {
-      if (key === 'Slot') return;
+      if (key === 'Slot') continue;
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
       if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
       // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid

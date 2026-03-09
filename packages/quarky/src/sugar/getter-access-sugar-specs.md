@@ -344,6 +344,7 @@ function FractionKit(øcount) {
       - the final expression of a sequence expression
       - the consequent or alternate of a conditional expression
       - the left and right of a logical expression
+   + NOTE: extraneous parentheses means parentheses that are not used for grouping or for sequence expressions
    - NOTE: browser DevTools pretty-print may visually show `fn( () => ...)`; verify raw transformed output (`?import`) for exact emitted spacing
 
 

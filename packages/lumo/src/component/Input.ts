@@ -29,7 +29,7 @@ export function assertIonicProxy(value: unknown): asserts value is MutableIon<un
 
 
 
-export type MaybeIon<T> = T | Ion<T>
+export type MaybeIon<T> = T | (() => T)
 
 
 /**

@@ -131,7 +131,7 @@ function TodoList(input: FromTag<{
 
    return template(
       <ul class="todos">
-         {For($todos, m => m.id, (todo, $i) => (
+         {For($todos, t => t.id, (todo, $i) => (
             <li
                transit-key={todo.id}
                animate-item

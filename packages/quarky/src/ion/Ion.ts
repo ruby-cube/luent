@@ -113,7 +113,7 @@ export function isIon(value: unknown): value is Ion {
  * @param fn 
  * @returns 
  */
-export function $_derivation<T>(fn: () => T) {
+export function $_derivation<T>(fn: () => T): Ion<T> {
    // @ts-expect-error
    fn[QUARK] = { inert: false };
    //@ts-expect-error
