@@ -14,11 +14,11 @@ export function Blokk(setup: FromTag<{
     color?: Ion<string>,
     gap?: number
 }>) {
-    const { matrix, ørotation, øshiftX, øshiftY, øcolor = Ion('#564747'), gap = 1, emit } = setup
+    const { matrix, rotationæ, shiftXæ, øshiftY, øcolor = Ion('#564747'), gap = 1, emit } = setup
 
     const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 
-    const $translate = () => `translate(${øshiftX() * CELL_SIZE}px, ${øshiftY() * CELL_SIZE}px)`
+    const $translate = () => `translate(${shiftXæ() * CELL_SIZE}px, ${øshiftY() * CELL_SIZE}px)`
     const $rotate = () => `rotate(${degrees[ørotation()]}deg)`
 
     return template(

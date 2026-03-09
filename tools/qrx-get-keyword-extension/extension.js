@@ -56,8 +56,11 @@ const provider = {
 }
 
 // ── Activation ────────────────────────────────────────────────────────────────
-/** @param {vscode.ExtensionContext} _ctx */
-function activate(_ctx) {
+// /** @param {vscode.ExtensionContext} _ctx */
+
+// const QrxDocumentFormatter = require('./qrx-formatter.js')
+
+function activate() {
   // Register for all TS/TSX files (covers .ts, .tsx, and .qrx files that the
   // user has associated with typescriptreact, which is the typical setup).
   const selector = [
@@ -65,9 +68,17 @@ function activate(_ctx) {
     { language: 'typescriptreact', scheme: 'file' },
     { language: 'typescript', scheme: 'untitled' },
     { language: 'typescriptreact', scheme: 'untitled' },
+    { language: 'typescriptreact', pattern: '**/*.qrx' },
   ]
-
   vscode.languages.registerDocumentSemanticTokensProvider(selector, provider, LEGEND)
+
+  // Register formatter for .qrx files
+//   ctx.subscriptions.push(
+//     vscode.languages.registerDocumentFormattingEditProvider(
+//       { language: 'typescriptreact', pattern: '**/*.qrx' },
+//       new QrxDocumentFormatter()
+//     )
+//   )
 }
 
 function deactivate() {}

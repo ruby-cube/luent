@@ -1,4 +1,4 @@
-import { isFunction } from "@rue/utils";
+import { isFunction, isObject } from "@rue/utils";
 import { Inert } from "./Get";
 import { AtomicIonQuark, createAtomicIon } from "./AtomicIon";
 import { AnyObject } from "@rue/types";
@@ -122,11 +122,16 @@ export function $_derivation<T>(fn: () => T) {
 }
 
 export const ø = $_derivation
+const GETTER_PREFIX = 'ø'
 
-export function πø<T, K extends keyof T>(obj: T, key: K): Ion<T[K]> {
+
+export function πø<T, K>(obj: T, getterKey: K): K extends keyof T ? T[K] : K extends `ø${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K {
+   if (typeof getterKey !== 'string' || !getterKey.startsWith(GETTER_PREFIX)) throw new Error(`getterKey must be a string that starts with ${GETTER_PREFIX}`)
+   if (!isObject(obj)) throw new Error('obj must be an object')
+   if (getterKey in obj) return obj[getterKey];
+   const key = getterKey.slice(1)
    const descriptor = Object.getOwnPropertyDescriptor(obj, key)
-   console.log('chicken feet', obj, key, descriptor)
-   return descriptor?.get?.bind(obj) ?? (() => obj[key]) as Ion<T[K]>
+   return (descriptor?.get?.bind(obj) ?? (() => obj[key])) as K extends keyof T ? T[K] : K extends `ø${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K
 }
 
 //@ts-expect-error

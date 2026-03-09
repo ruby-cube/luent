@@ -1,32 +1,25 @@
 import { Ion, MutableIon } from "@rue/quarky";
 import { FromTag, If, template } from "@rue/lumo";
 
+// TODO: formatter adds tab between get keyword and variable
 function FractionKit(count@: Ion<number>) {
-   
-   return {
-      get halfCount: Ion(() => count / 2),
-      get thirdCount: Ion(() => count / 3)
-   }
-}
 
-function FractionKitB(count@: Ion<number>) {
-   get halfCount = Ion((count / 2))
-   get thirdCount = Ion((count / 3))
-   
-   return {
-      get halfCount() { return halfCount },
-      get thirdCount() { return thirdCount } 
-   }
+      return {
+         get halfCount: Ion(() => count / 2),
+         get thirdCount: Ion(() => count / 3)
+      }
 }
 
 
-function FractionKitC(count@: Ion<number>) {
-   
-   return {
-      halfCount@: Ion((count / 2)),
-      thirdCount@: Ion((count / 3))
-   }
-}
+// function FractionKit(count@: Ion<number>) {
+
+//    return {
+//       // halfCount@: Ion((count / 2)),
+//       // thirdCount@: Ion((count / 3))
+//       halfCount: 2,
+//       thirdCount: 3,
+//    }
+// }
 
 export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableIon<boolean> }>) {
 
@@ -35,8 +28,7 @@ export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableI
          count@.value++
       }
    })
-   get doubleCount = Ion((count * 2))
-   const { halfCountA@, thirdCountA@ } = FractionKit(count@)
+   get doubleCount = Ion(() => count * 2)
 
    const kit = FractionKit(count@);
    get halfCount = kit.halfCount@
@@ -57,10 +49,10 @@ export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableI
 
    let dog;
 
-   get obj = Ion({name: 'kermit'} as {name: string} | undefined)
+   get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
 
    function doSomethingElse() {
-      if (dog){
+      if (dog) {
 
       }
       else if (obj) {
@@ -68,7 +60,7 @@ export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableI
          console.log('name', obj, name)
       }
       else {
-         obj.name 
+         obj.name
          console.log('nothing')
       }
    }
@@ -82,31 +74,39 @@ export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableI
          <p>count: {count@}</p>
          <p>doubleCount: {doubleCount@}</p>
          <p>tripleCount: {(count * 3)}</p>
-         <button on:click={e => {showFractions@.value = !showFractions; showFractions ? obj@.value = undefined : obj@.value = {name: 'sir robin'}}}>{(showFractions ? 'hide' : 'show')} fractions</button>
-         {If(obj, 
+         <button on:click={e => { showFractions@.value = !showFractions; showFractions ? obj@.value = undefined : obj@.value = { name: 'sir robin' } }}>{(showFractions ? 'hide' : 'show')} fractions</button>
+         {/* {If(obj,
             <div>{obj.name}</div>
          )}
-         {If(obj, 
+         {If(obj,
             <div>{(obj.name)}</div>
          )}
          {If(obj, () =>
             <div>{obj.name}</div>
          )}
-         {If(obj@, 
+         {If(obj@,
             <div>{obj.name}</div>
          )}
-         {If(obj@, 
+         {If(obj@,
             <div>{(obj.name)}</div>
          )}
          {If(obj@, () =>
             <div>{obj.name}</div>
-         )}
+         )} */}
          {If(showFractions@, (
             <hr></hr>
-            <p>halfCount: {halfCount@}</p>
-            <p>thirdCount: {thirdCount@}</p>
+            <p> halfCount: {halfCount@}</p>
+            <p> thirdCount: {thirdCount@}</p>
          ))}
-      </div>
+      </div >
+   )
+}
+
+
+export function TodoApp() {
+   
+   return template(
+      <div></div>
    )
 }
 

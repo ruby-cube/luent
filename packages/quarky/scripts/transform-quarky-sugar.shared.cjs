@@ -499,7 +499,7 @@ function rewriteGetterAccessSugar(state) {
       if (markedMatch && markedMatch[1]) {
         const markedName = markedMatch[1]
         leftParts.push(`${IDENTIFIER_PREFIX}${markedName}`)
-        helperReceiver = `${GETTER_ACCESS_HELPER}(${helperReceiver}, '${markedName}')`
+        helperReceiver = `${GETTER_ACCESS_HELPER}(${helperReceiver}, '${IDENTIFIER_PREFIX+markedName}')`
         continue
       }
 
@@ -508,7 +508,7 @@ function rewriteGetterAccessSugar(state) {
     }
 
     leftParts.push(`${IDENTIFIER_PREFIX}${key}`)
-    return `(${leftParts.join('.')}, ${GETTER_ACCESS_HELPER}(${helperReceiver}, '${key}'))`
+    return `(${leftParts.join('.')}, ${GETTER_ACCESS_HELPER}(${helperReceiver}, '${IDENTIFIER_PREFIX+key}'))`
   }
 
   let changed = false
@@ -517,10 +517,10 @@ function rewriteGetterAccessSugar(state) {
     changed = false
     iteration += 1
 
-    if (collectEdits(optionalPropertyRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
+    if (collectEdits(optionalPropertyRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, '${IDENTIFIER_PREFIX+key}')`)) {
       changed = true
     }
-    if (collectEdits(callResultPropertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
+    if (collectEdits(callResultPropertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${IDENTIFIER_PREFIX+key}')`)) {
       changed = true
     }
     if (collectEdits(dotChainPropertyRegex, (targetExpr, key) => buildDotChainPropertyReplacement(targetExpr, key))) {

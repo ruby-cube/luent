@@ -1,27 +1,27 @@
-import { Ion, MutableIon , πø, destructureØ, absorbØ, ø} from "@rue/quarky";
+import { Ion, MutableIon , πø, destructureØ, ø} from "@rue/quarky";
 import { FromTag, If, template } from "@rue/lumo";
 
-function FractionKit(øcount: Ion<number>) {
-   
-   return absorbØ({
-øhalfCount: Ion(() => øcount() / 2),
-øthirdCount: Ion(() => øcount() / 3)
-}, ['øhalfCount', 'øthirdCount'])
-}
+// function FractionKit(øcount: Ion<number>) {
+
+//       return {
+//          get halfCount: Ion(() => count / 2),
+//          get thirdCount: Ion(() => count / 3)
+//       }
+// }
 
 function FractionKitB(øcount: Ion<number>) {
    const øhalfCount = Ion(() => øcount() / 2)
    const øthirdCount = Ion(() => øcount() / 3)
-   
+
    return {
       get halfCount() { return øhalfCount() },
-      get thirdCount() { return øthirdCount() } 
+      get thirdCount() { return øthirdCount() }
    }
 }
 
 
-function FractionKitC(øcount: Ion<number>) {
-   
+function FractionKit(øcount: Ion<number>) {
+
    return {
       øhalfCount: Ion(() => øcount() / 2),
       øthirdCount: Ion(() => øcount() / 3)
@@ -57,10 +57,10 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
 
    let dog;
 
-   const øobj = Ion({name: 'kermit'} as {name: string} | undefined)
+   const øobj = Ion({ name: 'kermit' } as { name: string } | undefined)
 
    function doSomethingElse() {
-      if (dog){
+      if (dog) {
 
       }
       else if (øobj()) {
@@ -68,7 +68,7 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
          console.log('name', øobj()!, name)
       }
       else {
-         øobj()?.name 
+         øobj()?.name
          console.log('nothing')
       }
    }
@@ -82,20 +82,20 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
          <p>count: {øcount}</p>
          <p>doubleCount: {ødoubleCount}</p>
          <p>tripleCount: {ø(() => øcount() * 3)}</p>
-         <button on:click={e => {øshowFractions.value = !øshowFractions(); øobj.value = undefined}}>{ø(() => øshowFractions() ? 'hide' : 'show')} fractions</button>
-         {If(øobj(), 
+         <button on:click={e => { øshowFractions.value = !øshowFractions(); øshowFractions() ? øobj.value = undefined : øobj.value = { name: 'sir robin' } }}>{ø(() => øshowFractions() ? 'hide' : 'show')} fractions</button>
+         {If(øobj(),
             <div>{øobj()?.name}</div>
          )}
-         {If(øobj(), 
+         {If(øobj(),
             <div>{ø(() => øobj()?.name)}</div>
          )}
          {If(øobj(), () =>
             <div>{øobj()?.name}</div>
          )}
-         {If(øobj, 
+         {If(øobj,
             <div>{øobj()?.name}</div>
          )}
-         {If(øobj, 
+         {If(øobj,
             <div>{ø(() => øobj()?.name)}</div>
          )}
          {If(øobj, () =>
@@ -103,10 +103,10 @@ const { øhalfCountA, øthirdCountA } = destructureØ(FractionKit(øcount), 'øh
          )}
          {If(øshowFractions, <>
             <hr></hr>
-            <p>halfCount: {øhalfCount}</p>
-            <p>thirdCount: {øthirdCount}</p>
+            <p> halfCount: {øhalfCount}</p>
+            <p> thirdCount: {øthirdCount}</p>
          </>)}
-      </div>
+      </div >
    )
 }
 

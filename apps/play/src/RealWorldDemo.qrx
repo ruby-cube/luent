@@ -1,0 +1,79 @@
+
+import { Ion, Ionic } from "@rue/quarky";
+import { template } from "@rue/lumo";
+
+type Todo = { title: string; completed: boolean };
+
+function TodoItem(title: string): Todo {
+  return { title, completed: false };
+}
+
+export function RealWorldDemo() {
+  // Reactive array of todos
+  const todos = Ionic([
+    TodoItem("Learn Rue"),
+    TodoItem("Build a demo"),
+  ]);
+
+  // Atomic ion for new todo input
+  get newTodo = Ion("");
+
+  // Reactive object for filter state
+  const filter = Ionic({ value: "all" });
+
+  // Derivation ions for filtered todos
+  get activeTodos = Ion(() => todos.filter((todo: Todo) => !todo.completed));
+  get completedTodos = Ion(() => todos.filter((todo: Todo) => todo.completed));
+
+  function addTodo() {
+    if (newTodo.trim()) {
+      todos.push(TodoItem(newTodo));
+      newTodo@.value = "";
+    }
+  }
+
+  function toggle(todo: Todo) {
+    todo.completed = !todo.completed;
+  }
+
+  function remove(todo: Todo) {
+    const idx = todos.indexOf(todo);
+    if (idx !== -1) todos.splice(idx, 1);
+  }
+
+  function filteredTodos() {
+    if (filter.value === "active") return activeTodos@;
+    if (filter.value === "completed") return completedTodos@;
+    return todos;
+  }
+
+  return template(
+    <div>
+      <h2>RealWorld Todo Demo (.qrx)</h2>
+      <input
+        value={newTodo@}
+        on:input={e => newTodo@.value = e.target.value}
+        placeholder="Add a todo..."
+      />
+      <button on:click={addTodo}>Add</button>
+      <div>
+        <button on:click={() => (filter@.value = "all")}>All</button>
+        <button on:click={() => (filter@.value = "active")}>Active</button>
+        <button on:click={() => (filter@.value = "completed")}>Completed</button>
+      </div>
+      <ul>
+        {filteredTodos().map((todo: Todo) => (
+          <li>
+            <input type="checkbox" checked={todo.completed} on:change={() => toggle(todo)} />
+            <span style={{ textDecoration: todo.completed ? "line-through" : "none" }}>{todo.title}</span>
+            <button on:click={() => remove(todo)}>x</button>
+          </li>
+        ))}
+      </ul>
+      <div>
+        <span>{activeTodos@.length} left</span>
+        <span> / {todos@.length} total</span>
+      </div>
+    </div>
+  );
+}
