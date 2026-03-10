@@ -14,16 +14,16 @@ export function Blokk(setup: FromTag<{
     color?: Ion<string>,
     gap?: number
 }>) {
-    const { matrix, rotationæ, shiftXæ, øshiftY, øcolor = Ion('#564747'), gap = 1, emit } = setup
+    const { matrix, ærotation, æshiftX, æshiftY, æcolor = Ion('#564747'), gap = 1, emit } = setup
 
     const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 
-    const $translate = () => `translate(${shiftXæ() * CELL_SIZE}px, ${øshiftY() * CELL_SIZE}px)`
-    const $rotate = () => `rotate(${degrees[ørotation()]}deg)`
+    const $translate = () => `translate(${æshiftX() * CELL_SIZE}px, ${æshiftY() * CELL_SIZE}px)`
+    const $rotate = () => `rotate(${degrees[ærotation()]}deg)`
 
     return template(
         <div class='blokk-base' style={(`
-            --background-color: ${øcolor()};
+            --background-color: ${æcolor()};
             --cell-size: ${CELL_SIZE}px;
             --grid-size: ${GRID_SIZE}px;
             --grid-gap: ${gap}px;

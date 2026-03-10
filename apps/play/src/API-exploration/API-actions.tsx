@@ -2,7 +2,7 @@
 
 import { template } from "@rue/lumo"
 import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await"
-import { doAction } from "../../../../packages/quarky/src/x_action/Action"
+import { doAction } from "../../../../packages/x-old/x_action/Action"
 
 // Action() is about managing and coordinating async operations
 // - it batches updates across async scopes

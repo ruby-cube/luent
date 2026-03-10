@@ -1,7 +1,7 @@
 import { AnyObject, Falsey } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
 import { toValue, watch } from "@rue/quarky";
-import { isObject, normalizeToArray, Ref } from "@rue/utils";
+import { isObject, normalizeToArray } from "@rue/utils";
 import { $Node, $Nodes, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { MaybeIon, toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";

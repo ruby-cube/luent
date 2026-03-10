@@ -1,6 +1,6 @@
 import { createStack } from "@rue/utils";
 import { INTERNAL_RENDER, PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
-import { UpdateType } from "./x_IdleUpdate";
+import { UpdateType } from "../../../x-old/x_IdleUpdate";
 
 export const [_pushUpdate, _popUpdate, getActiveUpdate] = createStack<Update>()
 

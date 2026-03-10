@@ -1,8 +1,8 @@
-import { Ion, MutableIon , πø, ø} from "@rue/quarky";
+import { Ion, MutableIon , πæ, æ} from "@rue/quarky";
 import { FromTag, If, template } from "@rue/lumo";
 
 // TODO: formatter adds tab between get keyword and variable
-// function FractionKit(øcount: Ion<number>) {
+// function FractionKit(æcount: Ion<number>) {
 
 //       return {
 //          get halfCount: Ion(() => count / 2),
@@ -11,32 +11,32 @@ import { FromTag, If, template } from "@rue/lumo";
 // }
 
 
-function FractionKit(øcount: Ion<number>) {
+function FractionKit(æcount: Ion<number>) {
 
    return {
-      øhalfCount: Ion(() => øcount() / 2),
-      øthirdCount: Ion(() => øcount() / 3)
+      æhalfCount: Ion(() => æcount() / 2),
+      æthirdCount: Ion(() => æcount() / 3)
    }
 }
 
-export function QrxCounter({ øshowFractions }: FromTag<{ showFractions: MutableIon<boolean> }>) {
+export function QrxCounter({ æshowFractions }: FromTag<{ showFractions: MutableIon<boolean> }>) {
 
-   const øcount = Ion(0, {
+   const æcount = Ion(0, {
       increment() {
-         øcount.value++
+         æcount.value++
       }
    })
-   const ødoubleCount = Ion(() => øcount() * 2)
+   const ædoubleCount = Ion(() => æcount() * 2)
 
-   const kit = FractionKit(øcount);
-   const øhalfCount = (kit.øhalfCount, πø(kit, 'øhalfCount'))
-   const øthirdCount = (kit.øthirdCount, πø(kit, 'øthirdCount'))
+   const kit = FractionKit(æcount);
+   const æhalfCount = (kit.æhalfCount, πæ(kit, 'æhalfCount'))
+   const æthirdCount = (kit.æthirdCount, πæ(kit, 'æthirdCount'))
 
    function doSomething(count: number) {
       console.log('count', count)
    }
 
-   doSomething(øcount())
+   doSomething(æcount())
 
    function other(count: number) {
       console.log('counter',
@@ -47,18 +47,18 @@ export function QrxCounter({ øshowFractions }: FromTag<{ showFractions: Mutable
 
    let dog;
 
-   const øobj = Ion({ name: 'kermit' } as { name: string } | undefined)
+   const æobj = Ion({ name: 'kermit' } as { name: string } | undefined)
 
    function doSomethingElse() {
       if (dog) {
 
       }
-      else if (øobj()) {
-         const name = øobj()?.name
-         console.log('name', øobj()!, name)
+      else if (æobj()) {
+         const name = æobj()?.name
+         console.log('name', æobj()!, name)
       }
       else {
-         øobj()?.name
+         æobj()?.name
          console.log('nothing')
       }
    }
@@ -67,12 +67,12 @@ export function QrxCounter({ øshowFractions }: FromTag<{ showFractions: Mutable
 
    return template(
       <div>
-         <button on:click={e => øcount.increment()}>+</button>
-         <p>start: {øcount()}</p>
-         <p>count: {øcount}</p>
-         <p>doubleCount: {ødoubleCount}</p>
-         <p>tripleCount: {ø(() => øcount() * 3)}</p>
-         <button on:click={e => { øshowFractions.value = !øshowFractions(); øshowFractions() ? øobj.value = undefined : øobj.value = { name: 'sir robin' } }}>{ø(() => øshowFractions() ? 'hide' : 'show')} fractions</button>
+         <button on:click={e => æcount.increment()}>+</button>
+         <p>start: {æcount()}</p>
+         <p>count: {æcount}</p>
+         <p>doubleCount: {ædoubleCount}</p>
+         <p>tripleCount: {æ(() => æcount() * 3)}</p>
+         <button on:click={e => { æshowFractions.value = !æshowFractions(); æshowFractions() ? æobj.value = undefined : æobj.value = { name: 'sir robin' } }}>{æ(() => æshowFractions() ? 'hide' : 'show')} fractions</button>
          {/* {If(obj,
             <div>{obj.name}</div>
          )}
@@ -82,19 +82,19 @@ export function QrxCounter({ øshowFractions }: FromTag<{ showFractions: Mutable
          {If(obj, () =>
             <div>{obj.name}</div>
          )}
-         {If(øobj,
+         {If(æobj,
             <div>{obj.name}</div>
          )}
-         {If(øobj,
+         {If(æobj,
             <div>{(obj.name)}</div>
          )}
-         {If(øobj, () =>
+         {If(æobj, () =>
             <div>{obj.name}</div>
          )} */}
-         {If(øshowFractions, <>
+         {If(æshowFractions, <>
             <hr></hr>
-            <p> halfCount: {øhalfCount}</p>
-            <p> thirdCount: {øthirdCount}</p>
+            <p> halfCount: {æhalfCount}</p>
+            <p> thirdCount: {æthirdCount}</p>
          </>)}
       </div >
    )
@@ -124,19 +124,19 @@ export function RealWorldDemo() {
   ]);
 
   // Atomic ion for new todo input
-  const ønewTodo = Ion("");
+  const ænewTodo = Ion("");
 
   // Reactive object for filter state
   const filter = Ionic({ value: "all" });
 
   // Derivation ions for filtered todos
-  const øactiveTodos = Ion(() => todos.filter((todo: Todo) => !todo.completed));
-  const øcompletedTodos = Ion(() => todos.filter((todo: Todo) => todo.completed));
+  const æactiveTodos = Ion(() => todos.filter((todo: Todo) => !todo.completed));
+  const æcompletedTodos = Ion(() => todos.filter((todo: Todo) => todo.completed));
 
   function addTodo() {
-    if (ønewTodo()?.trim()) {
-      todos.push(TodoItem(ønewTodo()!));
-      ønewTodo.value = "";
+    if (ænewTodo()?.trim()) {
+      todos.push(TodoItem(ænewTodo()!));
+      ænewTodo.value = "";
     }
   }
 
@@ -150,8 +150,8 @@ export function RealWorldDemo() {
   }
 
   function filteredTodos() {
-    if (filter.value === "active") return øactiveTodos;
-    if (filter.value === "completed") return øcompletedTodos;
+    if (filter.value === "active") return æactiveTodos;
+    if (filter.value === "completed") return æcompletedTodos;
     return todos;
   }
 
@@ -159,8 +159,8 @@ export function RealWorldDemo() {
     <div>
       <h2>RealWorld Todo Demo (.qrx)</h2>
       <input
-        value={ønewTodo}
-        on:input={e => ønewTodo.value = e.target.value}
+        value={ænewTodo}
+        on:input={e => ænewTodo.value = e.target.value}
         placeholder="Add a todo..."
       />
       <button on:click={addTodo}>Add</button>
@@ -179,7 +179,7 @@ export function RealWorldDemo() {
         ))}
       </ul>
       <div>
-        <span>{øactiveTodos.length} left</span>
+        <span>{æactiveTodos.length} left</span>
         <span> / {todos@.length} total</span>
       </div>
     </div>

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { AnyObject } from "@rue/types"
-import { Inert, inert, markInertProps } from "../../../../packages/quarky/src/ionic/notes/inert"
+import { Inert, inert, markInertProps } from "../../../../packages/x-old/x_inert"
 import { ionize, MARKED, shallow } from "@rue/quarky"
 
 // TODO:

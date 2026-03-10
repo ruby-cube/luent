@@ -16,8 +16,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrk' }).code
-    expect(transformed).toContain('const øcount = Ion(0)')
-    expect(transformed).toContain('return øcount()')
+    expect(transformed).toContain('const æcount = Ion(0)')
+    expect(transformed).toContain('return æcount()')
   })
 
   it('rewrites reactive call-root reads to double-call form', () => {
@@ -29,8 +29,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrk' }).code
-    expect(transformed).toContain('const øcount = Ion(() => 1)')
-    expect(transformed).toContain('return øcount()()')
+    expect(transformed).toContain('const æcount = Ion(() => 1)')
+    expect(transformed).toContain('return æcount()()')
   })
 
   it('rewrites destructuring sugar and getter access sugar', () => {
@@ -44,10 +44,10 @@ function Demo(obj: any) {
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('destructureØ')
-    expect(transformed).toContain('πø')
-    expect(transformed).toContain("const { øa, b } = destructureØ(obj, 'øa', 'b')")
-    expect(transformed).toContain("const øpicked = (obj.øvalue, πø(obj, 'value'))")
-    expect(transformed).toContain('return [øa, b, øpicked()]')
+    expect(transformed).toContain('πæ')
+    expect(transformed).toContain("const { æa, b } = destructureØ(obj, 'æa', 'b')")
+    expect(transformed).toContain("const æpicked = (obj.ævalue, πæ(obj, 'value'))")
+    expect(transformed).toContain('return [æa, b, æpicked()]')
   })
 
   it('rewrites invalid object literal get sugar through absorbØ', () => {
@@ -62,8 +62,8 @@ function Kit() {
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('absorbØ')
-    expect(transformed).toContain('øcount: Ion(0)')
-    expect(transformed).toContain("['øcount', 'normalProperty']")
+    expect(transformed).toContain('æcount: Ion(0)')
+    expect(transformed).toContain("['æcount', 'normalProperty']")
   })
 
   it('rewrites derivation shorthand for calls, arrays and jsx containers', () => {
@@ -77,14 +77,14 @@ function View() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('const value = () => øcount() + 1')
-    expect(transformed).toContain('const list = [ () => øcount() + 2 ]')
-    expect(transformed).toContain('value={ø(() => øcount() + 3)}')
-    expect(transformed).toContain('doThing(() => øcount() + 4)')
-    expect(transformed).toContain('import { ø } from "@rue/quarky"')
+    expect(transformed).toContain('const value = () => æcount() + 1')
+    expect(transformed).toContain('const list = [ () => æcount() + 2 ]')
+    expect(transformed).toContain('value={æ(() => æcount() + 3)}')
+    expect(transformed).toContain('doThing(() => æcount() + 4)')
+    expect(transformed).toContain('import { æ } from "@rue/quarky"')
   })
 
-  it('rewrites JSX expression-container derivation with ø helper', () => {
+  it('rewrites JSX expression-container derivation with æ helper', () => {
     const input = `
 function View(value: number) {
   return <Comp value={(value + 1)}></Comp>
@@ -92,11 +92,11 @@ function View(value: number) {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('import { ø } from "@rue/quarky"')
-    expect(transformed).toContain('value={ø(() => value + 1)}')
+    expect(transformed).toContain('import { æ } from "@rue/quarky"')
+    expect(transformed).toContain('value={æ(() => value + 1)}')
   })
 
-  it('rewrites chained dot-notation @ access via tuple form and πø nesting', () => {
+  it('rewrites chained dot-notation @ access via tuple form and πæ nesting', () => {
     const input = `
 function Demo(obj: any) {
   get one = obj.a.b.c.property@
@@ -106,8 +106,8 @@ function Demo(obj: any) {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain("const øone = (obj.a.b.c.øproperty, πø(obj.a.b.c, 'property'))")
-    expect(transformed).toContain("const øtwo = (obj.øa.øb.øc.øproperty, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))")
+    expect(transformed).toContain("const æone = (obj.a.b.c.æproperty, πæ(obj.a.b.c, 'property'))")
+    expect(transformed).toContain("const ætwo = (obj.æa.æb.æc.æproperty, πæ(πæ(πæ(πæ(obj, 'a'), 'b'), 'c'), 'property'))")
   })
 
   it('rewrites optional dot-property @ access forms', () => {
@@ -119,7 +119,7 @@ function Demo(obj: any, key: string) {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain("const øa = obj == null ? undefined : πø(obj, 'value')")
+    expect(transformed).toContain("const æa = obj == null ? undefined : πæ(obj, 'value')")
   })
 
   it('rewrites property access from get declaration variables to call-form member access', () => {
@@ -131,8 +131,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('const øobj = Ion({ property: 1 })')
-    expect(transformed).toContain('return øobj().property')
+    expect(transformed).toContain('const æobj = Ion({ property: 1 })')
+    expect(transformed).toContain('return æobj().property')
   })
 
   it('rewrites property access from const @ variables to call-form member access', () => {
@@ -144,8 +144,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('const øobj = Ion({ property: 1 })')
-    expect(transformed).toContain('return øobj().property')
+    expect(transformed).toContain('const æobj = Ion({ property: 1 })')
+    expect(transformed).toContain('return æobj().property')
   })
 
   it('adds non-null assertion for synchronous guarded reads but not nested callback reads', () => {
@@ -163,10 +163,10 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain("if (øobj())")
-    expect(transformed).toContain("console.log(øobj()!.name)")
-    expect(transformed).toContain("watch(øobj, () => {")
-    expect(transformed).toContain("console.log(øobj().name)")
+    expect(transformed).toContain("if (æobj())")
+    expect(transformed).toContain("console.log(æobj()!.name)")
+    expect(transformed).toContain("watch(æobj, () => {")
+    expect(transformed).toContain("console.log(æobj().name)")
   })
 
   it('adds non-null assertion in else branch when guard is negated', () => {
@@ -183,8 +183,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('if (!øobj())')
-    expect(transformed).toContain("console.log(øobj()!.name)")
+    expect(transformed).toContain('if (!æobj())')
+    expect(transformed).toContain("console.log(æobj()!.name)")
   })
 
   it('adds non-null assertion in ternary false branch for negated guard', () => {
@@ -197,7 +197,7 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain("const value = !øobj() ? 'none' : øobj()!.name")
+    expect(transformed).toContain("const value = !æobj() ? 'none' : æobj()!.name")
   })
 
   it('adds non-null assertion for explicit non-nullish comparison guards', () => {
@@ -216,9 +216,9 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('if (øobj() != null)')
-    expect(transformed).toContain('if (øobj() !== undefined)')
-    expect(transformed).toContain('console.log(øobj()!.name)')
+    expect(transformed).toContain('if (æobj() != null)')
+    expect(transformed).toContain('if (æobj() !== undefined)')
+    expect(transformed).toContain('console.log(æobj()!.name)')
   })
 
   it('adds non-null assertion in else branch for explicit nullish equality guards', () => {
@@ -241,9 +241,9 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('if (øobj() == null)')
-    expect(transformed).toContain('if (øobj() === undefined)')
-    expect(transformed).toContain('console.log(øobj()!.name)')
+    expect(transformed).toContain('if (æobj() == null)')
+    expect(transformed).toContain('if (æobj() === undefined)')
+    expect(transformed).toContain('console.log(æobj()!.name)')
   })
 
   it('adds non-null assertion inside while/do-while/for loop bodies guarded by condition', () => {
@@ -269,10 +269,10 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('while (øobj())')
-    expect(transformed).toContain('} while (øobj())')
-    expect(transformed).toContain('for (; øobj(); )')
-    expect(transformed).toContain('console.log(øobj()!.name)')
+    expect(transformed).toContain('while (æobj())')
+    expect(transformed).toContain('} while (æobj())')
+    expect(transformed).toContain('for (; æobj(); )')
+    expect(transformed).toContain('console.log(æobj()!.name)')
   })
 
   it('adds non-null assertion inside If and ElseIf template conditional branches', () => {
@@ -289,8 +289,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('If(øobj(), <p>{øobj()!.name}</p>)')
-    expect(transformed).toContain('ElseIf(øobj() !== undefined, <p>{øobj()!.name}</p>)')
+    expect(transformed).toContain('If(æobj(), <p>{æobj()!.name}</p>)')
+    expect(transformed).toContain('ElseIf(æobj() !== undefined, <p>{æobj()!.name}</p>)')
   })
 
   it('adds non-null assertion inside Else template branch when paired with negated If', () => {
@@ -307,8 +307,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('If(!øobj(), <p>missing</p>)')
-    expect(transformed).toContain('Else(<p>{øobj()!.name}</p>)')
+    expect(transformed).toContain('If(!æobj(), <p>missing</p>)')
+    expect(transformed).toContain('Else(<p>{æobj()!.name}</p>)')
   })
 
   it('adds non-null assertion inside If/ElseIf render-function branch scopes', () => {
@@ -325,8 +325,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('If(øobj(), () => <p>{øobj()!.name}</p>)')
-    expect(transformed).toContain('ElseIf(øobj() !== undefined, () => <p>{øobj()!.name}</p>)')
+    expect(transformed).toContain('If(æobj(), () => <p>{æobj()!.name}</p>)')
+    expect(transformed).toContain('ElseIf(æobj() !== undefined, () => <p>{æobj()!.name}</p>)')
   })
 
   it('adds non-null assertion inside Else render-function branch when paired with negated If', () => {
@@ -343,8 +343,8 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('If(!øobj(), () => <p>missing</p>)')
-    expect(transformed).toContain('Else(() => <p>{øobj()!.name}</p>)')
+    expect(transformed).toContain('If(!æobj(), () => <p>missing</p>)')
+    expect(transformed).toContain('Else(() => <p>{æobj()!.name}</p>)')
   })
 
   it('adds non-null assertion inside IfElse truthy render-function scope', () => {
@@ -357,7 +357,7 @@ function Demo() {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain("const value = IfElse(øobj(), () => øobj()!.name, () => 'none')")
+    expect(transformed).toContain("const value = IfElse(æobj(), () => æobj()!.name, () => 'none')")
   })
 
   it('does not rewrite computed @ access forms', () => {
@@ -370,10 +370,10 @@ function Demo(obj: any, key: string) {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('const øa = obj[key]@')
-    expect(transformed).toContain('const øb = obj?.[key]@')
-    expect(transformed).not.toContain('πø(obj, key)')
-    expect(transformed).not.toContain('obj == null ? undefined : πø(obj, key)')
+    expect(transformed).toContain('const æa = obj[key]@')
+    expect(transformed).toContain('const æb = obj?.[key]@')
+    expect(transformed).not.toContain('πæ(obj, key)')
+    expect(transformed).not.toContain('obj == null ? undefined : πæ(obj, key)')
   })
 
   it('keeps nested destructuring syntax stable while still transforming marked bindings', () => {
@@ -385,8 +385,8 @@ function Demo(src: any) {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('const { øtop, nested: { ødeep } } = src')
-    expect(transformed).toContain('return øtop')
+    expect(transformed).toContain('const { ætop, nested: { ædeep } } = src')
+    expect(transformed).toContain('return ætop')
   })
 
   it('is idempotent across repeated transform passes', () => {
@@ -412,8 +412,8 @@ function FractionKitB(count@: Ion<number>) {
 `
 
     const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    expect(transformed).toContain('function FractionKitB(øcount: Ion<number>)')
-    expect(transformed).toContain('const øhalfCount = Ion(() => øcount() / 2)')
-    expect(transformed).toContain('return { get halfCount() { return øhalfCount() } }')
+    expect(transformed).toContain('function FractionKitB(æcount: Ion<number>)')
+    expect(transformed).toContain('const æhalfCount = Ion(() => æcount() / 2)')
+    expect(transformed).toContain('return { get halfCount() { return æhalfCount() } }')
   })
 })

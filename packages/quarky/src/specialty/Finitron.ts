@@ -1,6 +1,11 @@
-import { debug } from "@rue/utils";
+import { createStack, debug } from "@rue/utils";
 import { Ion } from "../ion/Ion";
-import { instantUpdate } from "../reactivity/Update";
+import { watch } from "../reactivity/Watcher";
+import { queueTask, SYNC } from "../reactivity/RenderCycle";
+import { FunctionalSubstance } from "../reactivity/Substance";
+import { QUARK } from "../abstract/Quark";
+import { UnionToIntersection } from "@rue/types";
+import { untracked } from "../reactivity/Compound";
 
 
 // trafficLight.is('on') // reactive
@@ -145,7 +150,7 @@ import { instantUpdate } from "../reactivity/Update";
 // )
 
 export const ANY_STATE = "any"
-type _FiniteStates = {[key: string]: any}
+type _FiniteStates = { [key: PropertyKey]: any }
 
 type FiniteStates<S extends _FiniteStates = _FiniteStates> = { [key: string]: StateDefinition<S> } & {
    [ANY_STATE]?: StateDefinition<S>
@@ -153,10 +158,10 @@ type FiniteStates<S extends _FiniteStates = _FiniteStates> = { [key: string]: St
 
 type Transition<S extends _FiniteStates = _FiniteStates> = () => State<S> | undefined | false | null | void
 
+type Task = () => void
 
 
-type A = keyof ({ a: boolean } | { b: boolean })
-
+const [pushFinitron, popFinitron, getFinitron] = createStack<Finitron>()
 
 // TODO: should on:enter apply to intitial state?
 type StateDefinition<S extends _FiniteStates = _FiniteStates> = {
@@ -169,24 +174,32 @@ type AllKeys<T> = T extends T ? keyof T : never;
 type State<S extends _FiniteStates> = Exclude<keyof S, typeof ANY_STATE | number>
 type TransitionKey<S extends _FiniteStates> = Exclude<AllKeys<S[keyof S]>, number | symbol>
 
+type Init = () => void
 
 export type Finitron<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = {
-   state: State<S>
-   is: (state: State<S>) => boolean
+   state: State<S> | undefined
+   is: (state: State<S> | undefined) => boolean
    on: (transition: TransitionKey<S>, task: () => void) => void
-   apply: (transition: TransitionKey<S>) => void
-   op: (transition: TransitionKey<S>) => boolean
+   can: (transition: TransitionKey<S>) =>boolean
+   // apply: (transition: TransitionKey<S>) => void
+   // op: (transition: TransitionKey<S>) => boolean
    atFinalState: (task: () => void) => void
-   activate: (initializer: () => State<S>) => { nest: (config: { [key: string]: Nested[] }) => Nested }
+   // activate: (initializer: () => State<S>) => { nest: (config: { [key: string]: Nested[] }) => Nested }
+   init: (state: State<S> | undefined, nested?: { [K in keyof Partial<S>]: Init }) => void
    deactivate: () => void
    isActive: () => boolean
-   init: (initializer: Initializer) => Nested & { nest: (config: { [key: string]: Nested[] }) => Nested }
-} & M
+   lastState: State<S> | undefined
+   onDeactivated: (task: () => void) => void
+   // init: (initializer: Initializer) => Nested & { nest: (config: { [key: string]: Nested[] }) => Nested }
+} & M & TransitionMethods<S>
 
-type Nested = {
-   finitron: Finitron,
-   initializer: Initializer,
-}
+type TransitionMethods<S> = UnionToIntersection<S[keyof S]>
+
+
+// type Nested = {
+//    finitron: Finitron,
+//    initializer: Initializer,
+// }
 
 type Initializer = (prevState: string | undefined) => string
 
@@ -201,7 +214,7 @@ type Hooks = {
    afterEnter: Transition | undefined
 }
 
-type NestedStates = { [key: string]: Nested[] }
+// type NestedStates = { [key: string]: Nested[] }
 
 export function withTimeout(ms: number, transition: Transition) {
    //@ts-expect-error
@@ -211,77 +224,124 @@ export function withTimeout(ms: number, transition: Transition) {
 }
 
 //TODO: implement as custom ionized object
-export function Finitron<S extends FiniteStates, M extends Methods>(states: S, methods?: M): Finitron<S, M> {
+export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Methods): Finitron<S, M> {
    const $currentState = Ion(undefined as undefined | string);
 
    let activated = false;
 
-   const finitron = {
+   const _finitron: Finitron = {
       is,
-      apply,
       on,
       can,
       atFinalState,
-      activate,
+      // activate,
       deactivate,
+      // init,
       init,
       isActive: () => $currentState() !== undefined,
       get state() {
          return $currentState()
-      }
+      },
+      get lastState() {
+         return prevState
+      },
+      onDeactivated,
    }
+
+   const finitron = new Proxy(_finitron, {
+      get(target, key) {
+         if (key in _finitron) {
+            return _finitron[key]
+         }
+         return () => apply(key)
+      }
+   })
 
    // TODO: attach methods
 
-   let _nestedStates: NestedStates;
+   // let _nestedStates: NestedStates;
 
-   function init(initializer: Initializer) {
-      return {
-         finitron,
-         initializer,
-         nest: (nestedStates: { [key: string]: Nested[] }) => {
-            if (_nestedStates) {
-               debug.error('Cannot redefine nested states')
-               return;
-            }
-            _nestedStates = nestedStates
-            // updateNestedStates(initializer(undefined), 'activate') // TODO: should not activate if not activated
+   // function init(initializer: Initializer) {
+   //    return {
+   //       finitron,
+   //       initializer,
+   //       nest: (nestedStates: { [key: string]: Nested[] }) => {
+   //          if (_nestedStates) {
+   //             debug.error('Cannot redefine nested states')
+   //             return;
+   //          }
+   //          _nestedStates = nestedStates
+   //          // updateNestedStates(initializer(undefined), 'activate') // TODO: should not activate if not activated
 
-            return {
-               finitron,
-               initializer,
-            };
-         }
-      };
-   }
+   //          return {
+   //             finitron,
+   //             initializer,
+   //          };
+   //       }
+   //    };
+   // }
 
-   function updateNestedStates(state: string, key: 'activate' | 'deactivate') {
-      if (!_nestedStates) return;
-      const nestedFinitrons = _nestedStates[state];
-      if (!nestedFinitrons) return;
-      for (const entry of nestedFinitrons) {
-         const { finitron, initializer } = entry
-         key === 'activate' ? finitron.activate(initializer as () => string) : finitron.deactivate()
-      }
-   }
+   // function updateNestedStates(state: string, key: 'activate' | 'deactivate') {
+   //    if (!_nestedStates) return;
+   //    const nestedFinitrons = _nestedStates[state];
+   //    if (!nestedFinitrons) return;
+   //    for (const entry of nestedFinitrons) {
+   //       const { finitron, initializer } = entry
+   //       key === 'activate' ? finitron.activate(initializer as () => string) : finitron.deactivate()
+   //    }
+   // }
 
    let prevState: string | undefined;
 
-   function activate(initializer: (prevState: string | undefined) => string) {
+   // function activate(initializer: (prevState: string | undefined) => string) {
+   //    if (activated) return;
+   //    activated = true;
+   //    const state = $currentState.value = initializer(prevState);
+   //    runEnterHooks(state, getHooks(ANY_STATE))
+   //    return {
+   //       nest: (nestedStates: { [key: string]: Nested[] }) => {
+   //          if (_nestedStates) {
+   //             debug.error('Cannot redefine nested states')
+   //             return;
+   //          }
+   //          _nestedStates = nestedStates
+   //          updateNestedStates(state, 'activate')
+   //       }
+   //    }
+   // }
+
+   let onEnter: { [K in State<S>]: Init } | undefined
+
+   function init(initialState: State<S> | undefined, nested?: { [K in State<S>]: Init }) {
       if (activated) return;
       activated = true;
-      const state = $currentState.value = initializer(prevState);
-      runEnterHooks(state, getHooks(ANY_STATE))
-      return {
-         nest: (nestedStates: { [key: string]: Nested[] }) => {
-            if (_nestedStates) {
-               debug.error('Cannot redefine nested states')
-               return;
-            }
-            _nestedStates = nestedStates
-            updateNestedStates(state, 'activate')
-         }
+      const state = $currentState.value = initialState
+      const parent = getFinitron()
+      if (parent) {
+         queueTask(() => {
+            watch(() => parent.state, ({ previous }) => { // FIX: why doesn't this work when it is sync??
+               finitron.deactivate()
+            }, { phase: SYNC, once: true })
+         })
+         // parent.onDeactivated(() => finitron.deactivate()) // QUESTION: is this needed?
       }
+      if (nested) {
+         onEnter = nested
+      }
+      runEnterHooks(state as string, getHooks(ANY_STATE))
+   }
+
+   let deactivationTasks: Task[] = []
+
+   function onDeactivated(task: Task) {
+      deactivationTasks.push(task)
+   }
+
+   function runDeactivationTasks() {
+      for (const task of deactivationTasks) {
+         task()
+      }
+      deactivationTasks = []
    }
 
    function deactivate() {
@@ -289,11 +349,13 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
       activated = false;
       if (timeout) clearTimeout(timeout);
       const prevStateID = prevState = $currentState.value
+      console.log('deactivate', states, prevStateID)
       runExitHooks(prevStateID!, getHooks(ANY_STATE))
       $currentState.value = undefined;
+      runDeactivationTasks()
    }
 
-   function is(state: string) {
+   function is(state: string | undefined) {
       return $currentState() === state;
    }
 
@@ -318,6 +380,7 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
             runFinalTasks()
          }
       }
+      return untracked($currentState)
    }
 
    function runTransitionTasks(transition: string, transitionEvent: TransitionEvent) {
@@ -374,6 +437,7 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
       }
 
       $currentState.value = nextStateID;
+      console.log('next state', nextStateID, $currentState[QUARK])
 
       runEnterHooks(nextStateID, anyStateHooks) // TODO: should I pass the prev state to the enter hook?
 
@@ -384,6 +448,11 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
    }
 
    function runEnterHooks(stateID: string, anyStateHooks: Hooks) {
+      if (onEnter && stateID in onEnter) {
+         pushFinitron(finitron)
+         onEnter[stateID]()
+         popFinitron()
+      }
       const nextStateHooks = getHooks(stateID)
 
       nextStateHooks.onEnter?.apply(finitron)
@@ -392,14 +461,14 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
       setUpTimeout(nextStateHooks.afterEnter)
       setUpTimeout(anyStateHooks.afterEnter)
 
-      updateNestedStates(stateID, 'activate')
+      // updateNestedStates(stateID, 'activate')
    }
 
    function runExitHooks(stateID: string, anyStateHooks: Hooks) {
       getHooks(stateID).onExit?.apply(finitron)
       anyStateHooks.onExit?.apply(finitron)
 
-      updateNestedStates(stateID, 'deactivate')
+      // updateNestedStates(stateID, 'deactivate')
    }
 
    let timeout: any | undefined;
@@ -408,12 +477,10 @@ export function Finitron<S extends FiniteStates, M extends Methods>(states: S, m
       if (!transition) return;
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => {
-         // instantUpdate(() => {
-            const transitionEvent = applyTransition(transition)
-            if (transitionEvent && isTerminal(transitionEvent.state)) {
-               runFinalTasks()
-            }
-         // })
+         const transitionEvent = applyTransition(transition)
+         if (transitionEvent && isTerminal(transitionEvent.state)) {
+            runFinalTasks()
+         }
       }, transition.timeout ?? 0)
    }
 
@@ -433,9 +500,9 @@ function extractHooks(state: StateDefinition) {
    }
 }
 
-function extractTimedTransition(state: StateDefinition){
-   for (const key in state){
-      if (key.startsWith("after:")){
+function extractTimedTransition(state: StateDefinition) {
+   for (const key in state) {
+      if (key.startsWith("after:")) {
          return withTimeout(parseInt(key.slice(6)), state[key])
       }
    }

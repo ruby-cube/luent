@@ -1,6 +1,6 @@
 import { $thisView, template, If, NodeRef } from "@rue/lumo";
 import {  ionize } from "@rue/quarky";
-import { inert } from "../../../../packages/quarky/src/ionic/notes/inert";
+import { inert } from "../../../../packages/x-old/x_inert";
 
 class AnimationAnimator {
    canvas: HTMLCanvasElement;

@@ -2,6 +2,76 @@ import { $_run_with_, $_snap_context, $_wrap_with_context } from "@rue/flask";
 import { initialLoad, instantUpdate } from "./Update";
 
 
+export function Interval(interval: number, fn: () => void) {
+
+   let timeout: undefined | NodeJS.Timeout = undefined
+   let stopped = true;
+   const fnWithContext = $_wrap_with_context(() => instantUpdate(fn))
+
+   return {
+      stop() {
+         stopped = true;
+         if (timeout) clearInterval(timeout)
+      },
+      start() {
+         if (!stopped) return this;
+         if (initialLoad) {
+            initialLoad.atComplete(() => {
+               stopped = false;
+               timeout = setInterval(fnWithContext, interval)
+            })
+         }
+         else {
+            stopped = false;
+            timeout = setInterval(fnWithContext, interval)
+         }
+         return this;
+      }
+   }
+}
+
+export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
+
+   let nextFrame: undefined | number = undefined
+   let stopped = true;
+   const context = $_snap_context()
+
+   function renderFrame(time: DOMHighResTimeStamp) {
+      instantUpdate(() => prepFrame(time))
+   }
+
+   function prepFrame(time: DOMHighResTimeStamp | undefined) {
+      try {
+         $_run_with_(context, () => fn(time))
+      }
+      finally {
+         if (stopped) return;
+         nextFrame = requestAnimationFrame(renderFrame)
+      }
+   }
+
+   return {
+      stop() {
+         stopped = true;
+         if (nextFrame) cancelAnimationFrame(nextFrame)
+      },
+      start() {
+         if (!stopped) return this;
+         if (initialLoad) {
+            initialLoad.atComplete(() => {
+               stopped = false;
+               requestAnimationFrame(renderFrame)
+            })
+         }
+         else {
+            stopped = false;
+            requestAnimationFrame(renderFrame)
+         }
+         return this;
+      }
+   }
+}
+
 /**
  * Throttle by animation frame across mouse events like mouse enter and mouse leave
 //  */
@@ -136,73 +206,3 @@ import { initialLoad, instantUpdate } from "./Update";
 //    };
 // }
 
-
-export function Interval(interval: number, fn: () => void) {
-
-   let timeout: undefined | NodeJS.Timeout = undefined
-   let stopped = true;
-   const fnWithContext = $_wrap_with_context(() => instantUpdate(fn))
-
-   return {
-      stop() {
-         stopped = true;
-         if (timeout) clearInterval(timeout)
-      },
-      start() {
-         if (!stopped) return this;
-         if (initialLoad) {
-            initialLoad.atComplete(() => {
-               stopped = false;
-               timeout = setInterval(fnWithContext, interval)
-            })
-         }
-         else {
-            stopped = false;
-            timeout = setInterval(fnWithContext, interval)
-         }
-         return this;
-      }
-   }
-}
-
-export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
-
-   let nextFrame: undefined | number = undefined
-   let stopped = true;
-   const context = $_snap_context()
-
-   function renderFrame(time: DOMHighResTimeStamp) {
-      instantUpdate(() => prepFrame(time))
-   }
-
-   function prepFrame(time: DOMHighResTimeStamp | undefined) {
-      try {
-         $_run_with_(context, () => fn(time))
-      }
-      finally {
-         if (stopped) return;
-         nextFrame = requestAnimationFrame(renderFrame)
-      }
-   }
-
-   return {
-      stop() {
-         stopped = true;
-         if (nextFrame) cancelAnimationFrame(nextFrame)
-      },
-      start() {
-         if (!stopped) return this;
-         if (initialLoad) {
-            initialLoad.atComplete(() => {
-               stopped = false;
-               requestAnimationFrame(renderFrame)
-            })
-         }
-         else {
-            stopped = false;
-            requestAnimationFrame(renderFrame)
-         }
-         return this;
-      }
-   }
-}

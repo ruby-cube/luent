@@ -4,11 +4,8 @@ import { MutableIon } from "./Ion";
 
 
 
-// const $count = Get(0, {
-//    increment() {
+// get count = Get(0)
 
-//    }
-// })
 
 
 
@@ -17,7 +14,6 @@ export function Get<T, M>(initialState: T, props?: M & object): MutableIon<T> & 
 }
 
 
-// TODO: I don't know how I should handle read-only, and traceability for neutrons.
 /** INTERNAL */
 export type $AtomicNeutronState = MutableIon<unknown> & {
    [QUARK]: {

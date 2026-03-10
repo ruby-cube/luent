@@ -2,11 +2,10 @@ import { AnyObject } from "@rue/types";
 import { Effect } from "./EffectQueue"
 import { quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
-import { isFunction, noop } from "@rue/utils";
-import { Ionized } from "../ionic/x_ionize";
-import { Ion, isIon, toValue } from "../ion/Ion";
+import { isFunction, isObject, noop } from "@rue/utils";
+import { isIon, toValue } from "../ion/Ion";
 import { WatchSubjects } from "./Watcher";
-import { Compound, Particle, popTracker, pushTracker } from "./Compound";
+import { Compound, popTracker, pushTracker } from "./Compound";
 import { isIonicProxy, QuarkyIonicProxy } from "../ionic/ModelQuark";
 
 
@@ -28,20 +27,20 @@ export function multisubject<S extends unknown[]>(...subject: S) {
 // watch collection
 // watch properties -- must specify which properties to watch in multi subject: absorbed ions and derivation ions
 
-export function asWatchedSubstance(subject: Ionized<object> | Ion<any> | WatchSubjects, retrack: boolean, once: boolean): WatchedSubstance | AnyObject {
+export function asWatchedSubstance(subject: unknown, retrack: boolean, once: boolean): WatchedSubstance | AnyObject {
    return isMultisubject(subject) ? new Multisubstance(subject, retrack, once)
       : asMonosubstance(subject, retrack, once)
 }
 
-function asMonosubstance(subject: Ionized<object> | Ion<any> | AnyObject, retrack: boolean, once: boolean) {
+function asMonosubstance(subject: unknown, retrack: boolean, once: boolean) {
    // TODO: do not retrack if effect runs once
    return isIonicProxy(subject) ? new IonicProxySubject(subject)
       : isFunction(subject) ? new IonSubstance(subject, retrack)
          : { reactive: false, getValue() { return subject }, linkEffect(effect: Effect) { } }  //non-ionized object
 }
 
-function isMultisubject(subject: AnyObject): subject is WatchSubjects {
-   return MULTISUBSTANCE in subject;
+function isMultisubject(subject: unknown): subject is WatchSubjects {
+   return isObject(subject) &&  MULTISUBSTANCE in subject;
 }
 
 

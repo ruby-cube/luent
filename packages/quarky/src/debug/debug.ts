@@ -59,7 +59,7 @@ export function __DEV__trace(type: string, label: string | undefined, origin: st
 
 
 // TODO:
-// debug.logDefinitionSource(øcount)
+// debug.logDefinitionSource(æcount)
 // debug.traceTriggers('# animation', animation, { 
 //    canvas: true 
 // })
@@ -308,13 +308,13 @@ export type TraceableQuark = {
 // // Will not work for stand alone functions or non-ionized objects
 
 // // How about ions?? must be true ions. Will not work with derivations.
-// debug.traceTriggers(øcount)
-// debug.traceAsyncPath(øcount) // [[ set ]]
-// debug.traceTrackers(øcount)
+// debug.traceTriggers(æcount)
+// debug.traceAsyncPath(æcount) // [[ set ]]
+// debug.traceTrackers(æcount)
 
 // // Derivations
-// debug.traceTriggers(ødoubleCount) // logs when any of its particles are triggered
-// debug.traceTrackers(øcount) // logs particles
+// debug.traceTriggers(ædoubleCount) // logs when any of its particles are triggered
+// debug.traceTrackers(æcount) // logs particles
 
 
 
@@ -326,12 +326,12 @@ export type TraceableQuark = {
 // // but it will trace any activity that happens in any component
 // // the traceable object is passed to
 
-// ___DEV__debug.traceAtoms(ødoubleCount) // eager
+// ___DEV__debug.traceAtoms(ædoubleCount) // eager
 // // atom count
 // // atom origin trace
 // // atom values
 
-// watch(øfrog, () => {
+// watch(æfrog, () => {
 
 // }, {
 //    traceTriggers: true,

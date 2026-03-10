@@ -1,5 +1,5 @@
-import { template, Style, Finitron, withTimeout, css } from "@rue/lumo";
-import { Ion } from "@rue/quarky";
+import { template, Finitron, css } from "@rue/lumo";
+import { Ion, SYNC, watch } from "@rue/quarky";
 import "./style.css"
 
 export function TrafficLight() {
@@ -7,10 +7,10 @@ export function TrafficLight() {
    const trafficLight = Finitron({
       'on': { switch: () => 'off' },
       'off': { switch: () => 'on' },
-      'x:broken': {},
-
+      'x:broken': { },
       any: { break: () => 'x:broken' },
    });
+
 
    const state = Finitron({
       'fresh': { switch: () => 'sleep' },
@@ -33,12 +33,13 @@ export function TrafficLight() {
       },
    });
 
-   trafficLight.activate(() => 'off').nest({
-      'on': [state.init(() => 'fresh').nest({
-         'fresh': [light.init(() => 'red')],
-         'awake': [light.init((state) => state ?? 'red')],
-      })],
-   });
+
+   trafficLight.init('off', {
+      'on': () => state.init('fresh', {
+         'fresh': () => light.init('red'),
+         'awake': () => light.init(light.lastState ?? 'red')
+      })
+   })
 
    trafficLight.atFinalState(() => {
       console.log("TRAFFIC LIGHT BROKED X__X");
@@ -74,25 +75,25 @@ export function TrafficLight() {
             ></div>
          </div>
          <button
-            on:click={(e) => trafficLight.apply("switch")}
+            on:click={(e) => trafficLight.switch()}
             disabled={(trafficLight.is('x:broken'))}
          >
             {(trafficLight.is("on") ? "turn off" : "turn on")}
          </button>
          <button
-            on:click={(e) => { if (state.is('sleep')) state.apply("switch"); light.apply("change") }}
+            on:click={(e) => { if (state.is('sleep')) state.switch(); light.change() }}
             disabled={(trafficLight.is('x:broken') || !state.isActive())}
          >
             change
          </button>
          <button
-            on:click={(e) => state.apply("switch")}
+            on:click={(e) => state.switch()}
             disabled={(trafficLight.is('x:broken') || !state.isActive())}
          >
             {(state.is("sleep") ? "awaken" : "sleep")}
          </button>
          <button
-            on:click={(e) => trafficLight.apply("break")}
+            on:click={(e) => trafficLight.break()}
             disabled={(trafficLight.is('x:broken') || !trafficLight.is('on'))}
          >
             break

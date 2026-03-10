@@ -22,11 +22,11 @@ export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 // **** THIS WORKS: I just need to figure out how to connect it to selective ionization config
 export type Expand<T> = T extends infer O ? O : never;
 
-type AbsorbIons<T> = T extends any[] ? T : { [K in keyof T as K extends `ø${infer S}` ? T[K] extends () => any ? S : K : K]: K extends `ø${infer S}` ? T[K] extends () => infer V ? V : T[K] : T[K] }
+type AbsorbIons<T> = T extends any[] ? T : { [K in keyof T as K extends `æ${infer S}` ? T[K] extends () => any ? S : K : K]: K extends `æ${infer S}` ? T[K] extends () => infer V ? V : T[K] : T[K] }
 
 type IonAccess<T, M = {}> = Expand<{
-   [K in keyof T as K extends `ø${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never : `ø${K}` : T[K] extends Function ? never : K extends string ? `ø${K}` : never]:
-   K extends `ø${string}`
+   [K in keyof T as K extends `æ${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never : `æ${K}` : T[K] extends Function ? never : K extends string ? `æ${K}` : never]:
+   K extends `æ${string}`
    ? T[K] extends Ion<infer V>
    ? NestedType<K, M, V>
    : Ion<NestedType<K, M, T[K]>>

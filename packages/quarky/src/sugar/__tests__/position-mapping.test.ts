@@ -57,9 +57,9 @@ function Counter({ show@ }) {
   })
 
   it('emits transformed reactive helpers', () => {
-    expect(transformed.code).toContain('const øcount = Ion(0)')
-    expect(transformed.code).toContain('value={ø(() => øcount() + 2)}')
-    expect(transformed.code).toContain('{øcount()}')
+    expect(transformed.code).toContain('const æcount = Ion(0)')
+    expect(transformed.code).toContain('value={æ(() => æcount() + 2)}')
+    expect(transformed.code).toContain('{æcount()}')
   })
 
   it('keeps mapping stable inside absorbØ initializer expressions', () => {

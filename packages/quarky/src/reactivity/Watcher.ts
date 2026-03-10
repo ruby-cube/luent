@@ -1,13 +1,11 @@
 import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, toValue } from "../ion/Ion";
-import { Ionized } from "../ionic/x_ionize";
 import { Effect } from "./EffectQueue";
 import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
 import { AnyObject, Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
 import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, queuePrelude, SYNC } from "./RenderCycle";
-import { $activeUpdate } from "./Update";
 
 
 // watch(list.$length, list.$couch, sync(() => {
@@ -74,7 +72,7 @@ type SubjectValue<T> = T extends () => infer R ? R : T
 export class StateChangeEvent<S = unknown> {
    // trace?: string;
    constructor(
-      public previous: S,
+      public previous: S | undefined,
       public current: S,
       public eager: boolean
    ) { }
@@ -82,25 +80,22 @@ export class StateChangeEvent<S = unknown> {
 
 export type WatchSubjects = (Object | Ion)[]
 
-export function watch<
-   T extends Ionized<object> | Ion<any> | (() => any) | WatchSubjects | AnyObject
->(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
-
+export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
    options.retrack = options.retrack ?? true;
-
+   
    const substance = asWatchedSubstance(subject, options.retrack, Boolean(options.once))
    if (options?.traceTriggers) {
       // TODO:
    }
-
+   
    if (!isWatchedSubstance(substance)) { // plain object
       console.log('inert A')
       if (options?.eager) effect(new StateChangeEvent(undefined, subject, true))
-      return InertWatcher()
+         return InertWatcher()
    }
-
+   
    const prevState = new SimpleState(substance.getValue()) // tracking
-
+   
    if (!substance.reactive) {
       if (options?.eager) {
          console.log('inert B')
@@ -108,7 +103,7 @@ export function watch<
       }
       return InertWatcher()
    }
-
+   
    function wrappedEffect() {
       const newState = substance.getValue() // retracking
       // console.log('effect!!!', prevState.get(), newState)

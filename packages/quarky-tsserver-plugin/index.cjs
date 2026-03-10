@@ -28,7 +28,7 @@ const {
    transformQuarkySugar,
 } = require('./transform-quarky-sugar.cjs')
 
-const SUGAR_IDENTIFIER_RE = /^ø[A-Za-z_$][\w$]*$/
+const SUGAR_IDENTIFIER_RE = /^æ[A-Za-z_$][\w$]*$/
 
 function init(modules) {
    const ts = modules.typescript
@@ -56,7 +56,7 @@ function init(modules) {
       const languageService = info.languageService
       const host = info.languageServiceHost
       const transformCache = new Map()
-      const HIDDEN_HELPERS = ['absorbØ', 'destructureØ', 'πø', 'ø']
+      const HIDDEN_HELPERS = ['absorbØ', 'destructureØ', 'πæ', 'æ']
       const project = info.project
       const parsedConfigCache = new Map()
       const discoveredSugarFilesCache = new Map()
@@ -536,7 +536,7 @@ function init(modules) {
          }
 
          const spanText = transformedCode.slice(spanStart, spanEnd)
-         if (/^(?:ø|πø)[A-Za-z_$][\w$]*$/.test(spanText)) {
+         if (/^(?:æ|πæ)[A-Za-z_$][\w$]*$/.test(spanText)) {
             return false
          }
 
@@ -739,7 +739,7 @@ function init(modules) {
          return fallback
       }
 
-      function isCursorOnReactiveToken(text, position) {
+      function isCursorOnAccessorToken(text, position) {
          if (typeof text !== 'string' || text.length === 0) return false
          const safePos = Math.max(0, Math.min(text.length, position))
          if (text[safePos] === '@') return true
@@ -764,7 +764,7 @@ function init(modules) {
          return end < text.length && text[end] === '@' && safePos >= start && safePos <= end
       }
 
-      function normalizeReactiveHoverSpan(span, sourceText) {
+      function normalizeAccessorHoverSpan(span, sourceText) {
          if (!span || typeof span.start !== 'number' || typeof span.length !== 'number') return span
          if (typeof sourceText !== 'string' || sourceText.length === 0) return span
 
@@ -785,7 +785,7 @@ function init(modules) {
          }
       }
 
-      function getReactiveTokenSpanAtPosition(text, position) {
+      function getAccessorTokenSpanAtPosition(text, position) {
          if (typeof text !== 'string' || text.length === 0) return null
 
          const safePos = Math.max(0, Math.min(text.length, position))
@@ -910,7 +910,7 @@ function init(modules) {
          const transformedCode = transformed && typeof transformed.code === 'string' ? transformed.code : ''
          const transformedSlice = transformedCode.slice(transformedStart, transformedStart + transformedLength)
 
-         if (/\b(?:destructureØ|absorbØ|πø)\b/.test(transformedSlice)) {
+         if (/\b(?:destructureØ|absorbØ|πæ)\b/.test(transformedSlice)) {
             return {
                start: toOriginalPos(transformed, transformedStart),
                length: 0,
@@ -930,7 +930,7 @@ function init(modules) {
          })
 
          // Extend span to include a trailing '@' in the original source.
-         // Reactive sugar identifiers appear as 'øname' in transformed code and 'name@' in the original.
+         // Accessor sugar identifiers appear as 'æname' in transformed code and 'name@' in the original.
          // The '@' is not part of the TS token, so mapped spans stop one char short of it.
          const originalCode = transformed && transformed.originalCode ? transformed.originalCode : ''
          if (mapped && typeof mapped.start === 'number' && typeof mapped.length === 'number' && mapped.length > 0) {
@@ -1167,10 +1167,10 @@ function init(modules) {
             const spanText = typeof transformed.code === 'string'
                ? transformed.code.slice(start, start + length)
                : ''
-            // ø-prefixed reactive identifiers: the ø is a synthetic prefix char that
+            // æ-prefixed accessor identifiers: the æ is a synthetic prefix char that
             // maps to a step=0 segment, so the full span would be filtered by the
-            // hidden-helper check. Instead, remap just the identifier chars (skip ø).
-            if (/^ø[A-Za-z_$][\w$]*$/.test(spanText)) {
+            // hidden-helper check. Instead, remap just the identifier chars (skip æ).
+            if (/^æ[A-Za-z_$][\w$]*$/.test(spanText)) {
                const textSpan = clampMappedSpanToOriginal(
                   mapTextSpanToOriginal({ start: start + 1, length: length - 1 }, transformed),
                   transformed,
@@ -1209,10 +1209,10 @@ function init(modules) {
             const spanText = typeof transformed.code === 'string'
                ? transformed.code.slice(start, start + length)
                : ''
-            // ø-prefixed reactive identifiers: the ø is a synthetic prefix char that
+            // æ-prefixed accessor identifiers: the æ is a synthetic prefix char that
             // maps to a step=0 segment, so the full span would be filtered by the
-            // hidden-helper check. Instead, remap just the identifier chars (skip ø).
-            if (/^ø[A-Za-z_$][\w$]*$/.test(spanText)) {
+            // hidden-helper check. Instead, remap just the identifier chars (skip æ).
+            if (/^æ[A-Za-z_$][\w$]*$/.test(spanText)) {
                const mapped = clampMappedSpanToOriginal(
                   mapTextSpanToOriginal({ start: start + 1, length: length - 1 }, transformed),
                   transformed,
@@ -1242,8 +1242,8 @@ function init(modules) {
          }
       }
 
-      // Remap TypeScript display-part arrays: strip 'ø' prefix from identifiers, add '@' suffix for
-      // reactive references, and change 'const'/'let'/'var' to 'get' for reactive declarations.
+      // Remap TypeScript display-part arrays: strip 'æ' prefix from identifiers, add '@' suffix for
+      // accessor references, and change 'const'/'let'/'var' to 'get' for accessor declarations.
       function remapDisplayPartsToSugar(displayParts) {
          if (!Array.isArray(displayParts)) return displayParts
          const result = []
@@ -1255,27 +1255,27 @@ function init(modules) {
                result.push(part)
                continue
             }
-            // Change 'const'/'let'/'var' to 'get' when the next part is an ø-prefixed identifier
+            // Change 'const'/'let'/'var' to 'get' when the next part is an æ-prefixed identifier
             if (
                (part.text === 'const' || part.text === 'let' || part.text === 'var') &&
                i + 1 < displayParts.length &&
                typeof displayParts[i + 1].text === 'string' &&
-               /^ø[A-Za-z_$][\w$]*$/.test(displayParts[i + 1].text)
+               /^æ[A-Za-z_$][\w$]*$/.test(displayParts[i + 1].text)
             ) {
                result.push({ ...part, text: 'get' })
                nextIdentIsDeclaration = true
                continue
             }
-            // Handle a bare ø-prefixed identifier
-            if (/^ø[A-Za-z_$][\w$]*$/.test(part.text)) {
+            // Handle a bare æ-prefixed identifier
+            if (/^æ[A-Za-z_$][\w$]*$/.test(part.text)) {
                const baseName = part.text.slice(1)
                // Declarations use 'get name' (no '@'); references use 'name@'
                result.push({ ...part, text: nextIdentIsDeclaration ? baseName : baseName + '@' })
                nextIdentIsDeclaration = false
                continue
             }
-            // Handle ø embedded in longer text (e.g. "(property) øcount" in a single text chunk)
-            const remappedText = part.text.replace(/ø([A-Za-z_$][\w$]*)/g, (_, name) => {
+            // Handle æ embedded in longer text (e.g. "(property) æcount" in a single text chunk)
+            const remappedText = part.text.replace(/æ([A-Za-z_$][\w$]*)/g, (_, name) => {
                if (nextIdentIsDeclaration) { nextIdentIsDeclaration = false; return name }
                return name + '@'
             })
@@ -1287,7 +1287,7 @@ function init(modules) {
 
       function remapCompletionEntriesToSugar(entries, originalPrefix) {
          if (!Array.isArray(entries)) return entries
-         if (typeof originalPrefix === 'string' && originalPrefix.startsWith('ø')) return entries
+         if (typeof originalPrefix === 'string' && originalPrefix.startsWith('æ')) return entries
 
          const remappedEntries = []
 
@@ -1297,18 +1297,18 @@ function init(modules) {
                continue
             }
 
-            if (entry.name === 'ø' || HIDDEN_HELPERS.includes(entry.name)) {
+            if (entry.name === 'æ' || HIDDEN_HELPERS.includes(entry.name)) {
                continue
             }
 
-            if (!entry.name.startsWith('ø') || !/^ø[A-Za-z_$][\w$]*$/.test(entry.name)) {
+            if (!entry.name.startsWith('æ') || !/^æ[A-Za-z_$][\w$]*$/.test(entry.name)) {
                remappedEntries.push(entry)
                continue
             }
 
             const sugarName = `${entry.name.slice(1)}@`
             const insertText = typeof entry.insertText === 'string'
-               ? entry.insertText.replace(/^ø([A-Za-z_$][\w$]*)$/, '$1@')
+               ? entry.insertText.replace(/^æ([A-Za-z_$][\w$]*)$/, '$1@')
                : sugarName
 
             remappedEntries.push({
@@ -1548,8 +1548,8 @@ function init(modules) {
             const declarationTokenSpan = getDeclarationTokenSpanAtPosition(sourceText, position)
             const sourceChar = typeof sourceText === 'string' ? sourceText[position] : ''
             const cursorOnDerivationOpenParen = sourceChar === '('
-            const cursorOnReactiveToken = isCursorOnReactiveToken(sourceText, position)
-            const reactiveTokenSpan = cursorOnReactiveToken ? getReactiveTokenSpanAtPosition(sourceText, position) : null
+            const cursorOnAccessorToken = isCursorOnAccessorToken(sourceText, position)
+            const accessorTokenSpan = cursorOnAccessorToken ? getAccessorTokenSpanAtPosition(sourceText, position) : null
             const transformedPosition = toTransformedPos(transformed, position)
             const baseCandidatePositions = withNearbyPositions(
                transformedPosition,
@@ -1594,18 +1594,18 @@ function init(modules) {
                const displayMatchesPrefix = originalPrefix.length === 0 || displayText.includes(originalPrefix)
                const mappedMatchesIdentifier = originalIdentifier.length > 0 && mappedText.includes(originalIdentifier)
                const displayMatchesIdentifier = originalIdentifier.length > 0
-                  && (displayText.includes(originalIdentifier) || displayText.includes(`ø${originalIdentifier}`) || displayText.includes(`${originalIdentifier}@`))
+                  && (displayText.includes(originalIdentifier) || displayText.includes(`æ${originalIdentifier}`) || displayText.includes(`${originalIdentifier}@`))
                const identifierMatches = mappedMatchesIdentifier || displayMatchesIdentifier
                const mappedEnd = mappedTextSpan.start + mappedTextSpan.length
-               const mapsToReactiveToken = mappedText.includes('@') || sourceText[mappedEnd] === '@'
-               const normalizedSpan = cursorOnReactiveToken && mapsToReactiveToken
-                  ? normalizeReactiveHoverSpan(mappedTextSpan, sourceText)
+               const mapsToAccessorToken = mappedText.includes('@') || sourceText[mappedEnd] === '@'
+               const normalizedSpan = cursorOnAccessorToken && mapsToAccessorToken
+                  ? normalizeAccessorHoverSpan(mappedTextSpan, sourceText)
                   : mappedTextSpan
-               const matchesReactiveTokenSpan = !!(
-                  reactiveTokenSpan
+               const matchesAccessorTokenSpan = !!(
+                  accessorTokenSpan
                   && normalizedSpan
-                  && normalizedSpan.start === reactiveTokenSpan.start
-                  && normalizedSpan.length === reactiveTokenSpan.length
+                  && normalizedSpan.start === accessorTokenSpan.start
+                  && normalizedSpan.length === accessorTokenSpan.length
                )
                const isArrowFunctionQuickInfo = quickInfoLooksLikeArrowFunction(quickInfo) || isDerivationArrowCandidate
 
@@ -1615,8 +1615,8 @@ function init(modules) {
                   prefixMatches,
                   displayMatchesPrefix,
                   identifierMatches,
-                  mapsToReactiveToken,
-                  matchesReactiveTokenSpan,
+                  mapsToAccessorToken,
+                  matchesAccessorTokenSpan,
                   isArrowFunctionQuickInfo,
                   isDerivationArrowCandidate,
                   distance: Math.abs(candidatePos - transformedPosition),
@@ -1636,11 +1636,11 @@ function init(modules) {
                if (left.identifierMatches !== right.identifierMatches) {
                   return left.identifierMatches ? -1 : 1
                }
-               if (cursorOnReactiveToken && left.matchesReactiveTokenSpan !== right.matchesReactiveTokenSpan) {
-                  return left.matchesReactiveTokenSpan ? -1 : 1
+               if (cursorOnAccessorToken && left.matchesAccessorTokenSpan !== right.matchesAccessorTokenSpan) {
+                  return left.matchesAccessorTokenSpan ? -1 : 1
                }
-               if (cursorOnReactiveToken && left.mapsToReactiveToken !== right.mapsToReactiveToken) {
-                  return left.mapsToReactiveToken ? -1 : 1
+               if (cursorOnAccessorToken && left.mapsToAccessorToken !== right.mapsToAccessorToken) {
+                  return left.mapsToAccessorToken ? -1 : 1
                }
                if (left.containsCursor !== right.containsCursor) {
                   return left.containsCursor ? -1 : 1
@@ -1665,8 +1665,8 @@ function init(modules) {
             })
 
             const best = candidates[0]
-            const finalTextSpan = cursorOnReactiveToken && reactiveTokenSpan
-               ? reactiveTokenSpan
+            const finalTextSpan = cursorOnAccessorToken && accessorTokenSpan
+               ? accessorTokenSpan
                : declarationTokenSpan
                   ? declarationTokenSpan
                   : isDerivationParenHover
@@ -1721,13 +1721,13 @@ function init(modules) {
 
             let transformedEntryName = entryName
             if (typeof transformedEntryName === 'string' && /[A-Za-z_$][\w$]*@$/.test(transformedEntryName)) {
-               transformedEntryName = `ø${transformedEntryName.slice(0, -1)}`
+               transformedEntryName = `æ${transformedEntryName.slice(0, -1)}`
             }
 
             const transformedData = data && typeof data === 'object' && typeof data.name === 'string' && /[A-Za-z_$][\w$]*@$/.test(data.name)
                ? {
                   ...data,
-                  name: `ø${data.name.slice(0, -1)}`,
+                  name: `æ${data.name.slice(0, -1)}`,
                }
                : data
 

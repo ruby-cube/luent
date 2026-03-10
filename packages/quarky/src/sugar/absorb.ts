@@ -1,21 +1,20 @@
 import { Glass } from "@rue/types"
 import { isFunction } from "@rue/utils"
 import { Ion } from "../ion/Ion"
-import { NoExpand } from "../ionic/x_ionize"
 
 type Absorbant<T> = {
-   [K in keyof T as K extends `πø${infer S}` ? S : K extends `ø${infer S}` ? S : K]:
-   K extends `πø${string}` ? T[K] extends Ion<infer V> ? V : never
-   : K extends `ø${string}` ? T[K] extends Ion<infer V> ? V : never
+   [K in keyof T as K extends `πæ${infer S}` ? S : K extends `æ${infer S}` ? S : K]:
+   K extends `πæ${string}` ? T[K] extends Ion<infer V> ? V : never
+   : K extends `æ${string}` ? T[K] extends Ion<infer V> ? V : never
    : T[K]
-} &{ [K in keyof T as K extends `πø${infer S}` ? `ø${S}` : K]: T[K] }
+} &{ [K in keyof T as K extends `πæ${infer S}` ? `æ${S}` : K]: T[K] }
 
 
 export function absorbØ<T>(obj: T, keys: (keyof T)[]): Glass<Absorbant<T>> {
    const absorbant = {} as T
    for (const key of (<string[]>keys)) {
       const value = obj[key as keyof T]
-      if (key.startsWith('πø')) { // accessor property assignment
+      if (key.startsWith('πæ')) { // accessor property assignment
          if (!isFunction(value)) {
             throw new Error('A `get` property can only be initialized with a function')
          }
@@ -24,7 +23,7 @@ export function absorbØ<T>(obj: T, keys: (keyof T)[]): Glass<Absorbant<T>> {
             get: value
          })
       }
-      else if (key[0] === 'ø') { // get property assignment
+      else if (key[0] === 'æ') { // get property assignment
          if (!isFunction(value)) {
             throw new Error('A `get` property can only be initialized with a function')
          }
@@ -53,13 +52,13 @@ export function absorbØ<T>(obj: T, keys: (keyof T)[]): Glass<Absorbant<T>> {
 type Destructured<T, P extends PropertyKey> = {
    [K in P]: 
    K extends keyof T ? T[K] : 
-   K extends `ø${infer S}` ? S extends keyof T ? T[S] : never : K extends keyof T ? T[K] : never
+   K extends `æ${infer S}` ? S extends keyof T ? T[S] : never : K extends keyof T ? T[K] : never
 }
 
 export function destructureØ<T, P extends PropertyKey[]>(obj: T, ...keys: P): Destructured<T, P[number]> {
    const destructured = {} as T
    for (const key of keys) {
-      if (typeof key === 'string' && key[0] === 'ø') {
+      if (typeof key === 'string' && key[0] === 'æ') {
          destructured[key] = obj[key]
          // destructured[key] = Object.getOwnPropertyDescriptor(obj, key.slice(1))?.get as any
       }

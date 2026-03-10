@@ -1,6 +1,6 @@
 import { __DEV__unwrap, noop } from "@rue/utils";
 import { TrackedAtom } from "./Atom";
-import { catchCancelledUpdate } from "./x_IdleUpdate";
+import { catchCancelledUpdate } from "../../../x-old/x_IdleUpdate";
 import { Phase, SYNC, CycleProcess, RENDER } from "./RenderCycle";
 import { $activeUpdate, Update, popUpdate, pushUpdate, tickUpdate } from "./Update";
 

@@ -1,7 +1,6 @@
-import { $_derivation, Ion, MutableIon } from "./Ion"
-import { sync, watch } from "../reactivity/Watcher"
+import { Ion } from "./Ion"
+import { watch } from "../reactivity/Watcher"
 import { AnyObject } from "@rue/types"
-import { $activeUpdate } from "../reactivity/Update"
 import { untracked } from "../reactivity/Compound"
 
 type HybridIonConfig<T = any> = {
@@ -21,7 +20,7 @@ export function createHybridIon(config: HybridIonConfig, props?: AnyObject) {
    // }, { phase: 'SYNC' })
    // return $state;
 
-   let _prev;
+   let _prev: any; // should this be SimpleState?
 
    const $derived = Ion($watched ? (() => ($watched(), untracked(() => derive(_prev)))) : derive)
    const $state = Ion('initial' in config ? initial : derive(_prev))
@@ -34,26 +33,11 @@ export function createHybridIon(config: HybridIonConfig, props?: AnyObject) {
 
    return Ion((prev: any) => {
       _prev = prev
-      const derived = $derived();
-      const state = $state();
-      return shouldDerive ? derived : state
+      return shouldDerive ? $derived() : $state()
    }, {
-      '@set': (value) => {
+      '@set': (value: any) => {
          shouldDerive = false;
          $state.value = value
       }
    })
 }
-
-
-// export function createHybridIon<T>(derive: Derivation<T>, initial?: T, props?: AnyObject) {
-//    const $derived = Ion(derive, { '#logAtoms': true })
-//    const $state = Ion(initial ?? $derived(), props) as MutableIon<T>
-
-//    watch($derived, () => {
-//       $state.value = $derived()
-//    }, { phase: 'SYNC'})
-
-//    return $state;
-// }
-

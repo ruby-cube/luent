@@ -1,10 +1,10 @@
 const ts = require('typescript')
 
-const IDENTIFIER_PREFIX = 'ø'
-const GETTER_ACCESS_HELPER = 'πø'
+const IDENTIFIER_PREFIX = 'æ'
+const GETTER_ACCESS_HELPER = 'πæ'
 const DESTRUCTURE_HELPER = 'destructureØ'
 const ABSORB_HELPER = 'absorbØ'
-const DERIVATION_HELPER = 'ø'
+const DERIVATION_HELPER = 'æ'
 
 function isAssignmentOperatorAt(text, index) {
   const operatorCandidates = ['&&=', '||=', '??=', '>>>=', '<<=', '>>=', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '=']
@@ -365,9 +365,9 @@ function isIdentifierBoundaryChar(ch) {
  * Build a precise per-character position mapping for a replacement of the form
  * `<syntheticPrefix><identifier>` where the identifier chars map 1:1 to the
  * original identifier (starting at `originalIdentStart`) and any synthetic
- * prefix chars (e.g. "ø" or "const " or "let ") map to `prefixAnchor`.
+ * prefix chars (e.g. "æ" or "const " or "let ") map to `prefixAnchor`.
  *
- * @param {string} syntheticPrefix - Text before the identifier in replacement (e.g. "const ø" or "ø")
+ * @param {string} syntheticPrefix - Text before the identifier in replacement (e.g. "const æ" or "æ")
  * @param {string} identifierName  - The identifier characters in the replacement
  * @param {string} suffix          - Text after the identifier (e.g. " =" or "()"); mapped to `suffixAnchor`
  * @param {number} prefixAnchor    - Original position that all synthetic prefix chars map to
@@ -447,8 +447,8 @@ function ensureNamedImportFromQuarky(state, importName) {
 }
 
 function rewriteGetterAccessSugar(state) {
-  const identStart = '[A-Za-z_$øπ]'
-  const identBody = '[\\w$øπ]*'
+  const identStart = '[A-Za-z_$æπ]'
+  const identBody = '[\\w$æπ]*'
   const exprPrefix = `(${identStart}${identBody}(?:\\([^\\n\\r)]*\\)|\\[[^\\n\\r\\]]*\\]|\\.${identStart}${identBody})*)`
   const prop = `(${identStart}${identBody})`
   const dotChainPropertyRegex = new RegExp(`(${identStart}${identBody}(?:\\.${identStart}${identBody}@?)*)\\.${prop}@`, 'g')
@@ -495,7 +495,7 @@ function rewriteGetterAccessSugar(state) {
     let helperReceiver = root
 
     for (const segment of segments) {
-      const markedMatch = segment.match(/^([A-Za-z_$øπ][\\w$øπ]*)@$/)
+      const markedMatch = segment.match(/^([A-Za-z_$æπ][\\w$æπ]*)@$/)
       if (markedMatch && markedMatch[1]) {
         const markedName = markedMatch[1]
         leftParts.push(`${IDENTIFIER_PREFIX}${markedName}`)
@@ -559,7 +559,7 @@ function rewriteDestructuredBindings(state, getVars) {
     const properties = splitTopLevelCommaList(patternBody)
     const bindingEntries = []
     const keyEntries = []
-    // Each binding entry gets a mapping: array of [name, originalPos] for precise ø-prefix mapping
+    // Each binding entry gets a mapping: array of [name, originalPos] for precise æ-prefix mapping
     // We track: for each output binding token, the original absolute position of its identifier start
     const bindingMappingData = [] // { name: string, originalIdentAbsPos: number, isTransformed: boolean }
     let changed = false
@@ -642,7 +642,7 @@ function rewriteDestructuredBindings(state, getVars) {
       const token = bindingEntries[bi]
       const data = bindingMappingData[bi]
       if (data && data.isTransformed) {
-        // `ø` prefix -> invisible (maps to identifier start), then identifier chars 1:1
+        // `æ` prefix -> invisible (maps to identifier start), then identifier chars 1:1
         pushN(data.originalIdentAbsPos, IDENTIFIER_PREFIX.length)
         for (let ci = 0; ci < data.name.length; ci += 1) mapping.push(data.originalIdentAbsPos + ci)
       } else {
@@ -658,7 +658,7 @@ function rewriteDestructuredBindings(state, getVars) {
     // rhs chars: map each char to original rhs position
     for (let ci = 0; ci < rhs.length; ci += 1) mapping.push(originalRhsAbsPos + ci)
 
-    // synthetic args `, 'økey', ...` and closing `)` and semi -> anchor
+    // synthetic args `, 'ækey', ...` and closing `)` and semi -> anchor
     const syntheticTail = `, ${keyEntries.join(', ')})${semi || ';'}`
     pushN(anchor, syntheticTail.length)
 
@@ -681,8 +681,8 @@ function rewriteDestructuredBindings(state, getVars) {
 function rewriteGetAndReactiveDeclarations(state, getVars) {
   const declarationEdits = []
 
-  // `get varname =` --> `const øvarname =`
-  // pm: synthetic `const ø` maps to anchor of `get`, identifier chars map 1:1 to original identifier, ` =` maps to original ` =`
+  // `get varname =` --> `const ævarname =`
+  // pm: synthetic `const æ` maps to anchor of `get`, identifier chars map 1:1 to original identifier, ` =` maps to original ` =`
   const getDeclRegex = /(^|[^\w$])get\s+([A-Za-z_$][\w$]*)\s*(=)/gm
   for (const match of state.code.matchAll(getDeclRegex)) {
     const prefix = match[1] || ''
@@ -701,7 +701,7 @@ function rewriteGetAndReactiveDeclarations(state, getVars) {
     const end = start + matchedText.length
     const originalEqPos = state.toOriginalPos(end - 1)
     const replacement = `const ${IDENTIFIER_PREFIX}${varName} =`
-    // `const ø` (7 chars) -> anchor; identifier (varName.length chars) -> 1:1; ` =` (2 chars) -> eq pos
+    // `const æ` (7 chars) -> anchor; identifier (varName.length chars) -> 1:1; ` =` (2 chars) -> eq pos
     const syntheticPrefix = `const ${IDENTIFIER_PREFIX}`
     const mapping = buildPrefixedIdentifierMapping(
       syntheticPrefix, varName, ' =',
@@ -710,8 +710,8 @@ function rewriteGetAndReactiveDeclarations(state, getVars) {
     declarationEdits.push({ start, end, replacement, anchor: state.toOriginalPos(start), mapping })
   }
 
-  // `const|let varname@ =` --> `const|let øvarname =`
-  // pm: `const ` / `let ` maps to anchor; `ø` (prefix) maps to identifier start; identifier chars 1:1; ` =` maps to original `@ =` position
+  // `const|let varname@ =` --> `const|let ævarname =`
+  // pm: `const ` / `let ` maps to anchor; `æ` (prefix) maps to identifier start; identifier chars 1:1; ` =` maps to original `@ =` position
   const constLetRegex = /\b(const|let)\s+([A-Za-z_$][\w$]*)@(\s*=)/g
   for (const match of state.code.matchAll(constLetRegex)) {
     const decl = match[1]
@@ -728,7 +728,7 @@ function rewriteGetAndReactiveDeclarations(state, getVars) {
     // `@` is at start + decl.length + 1 + varName.length; ` =` follows
     const originalAtPos = state.toOriginalPos(start + decl.length + 1 + varName.length) // the `@` char, dropped
     const replacement = `${decl} ${IDENTIFIER_PREFIX}${varName}${eqPart}`
-    // `decl + ' ' + ø` -> anchor for decl+space, then ø also anchors to identStart;
+    // `decl + ' ' + æ` -> anchor for decl+space, then æ also anchors to identStart;
     // then identifier chars -> 1:1; then eqPart -> original @-and-eq position
     const syntheticPrefix = `${decl} ${IDENTIFIER_PREFIX}`
     const mapping = buildPrefixedIdentifierMapping(
@@ -738,8 +738,8 @@ function rewriteGetAndReactiveDeclarations(state, getVars) {
     declarationEdits.push({ start, end, replacement, anchor: originalDeclAnchor, mapping })
   }
 
-  // `varname@` in param position --> `øvarname`
-  // pm: `ø` -> varname start; identifier chars -> 1:1
+  // `varname@` in param position --> `ævarname`
+  // pm: `æ` -> varname start; identifier chars -> 1:1
   const reactiveParamRegex = /([\(,\{]\s*)([A-Za-z_$][\w$]*)@(?=\s*[:?,\)\}])/gm
   for (const match of state.code.matchAll(reactiveParamRegex)) {
     const full = match[0]
@@ -751,7 +751,7 @@ function rewriteGetAndReactiveDeclarations(state, getVars) {
     const start = (match.index || 0) + pfx.length
     const end = start + varName.length + 1 // +1 for `@`
     const originalIdentStart = state.toOriginalPos(start)
-    // `ø` prefix -> maps to identifier start; identifier chars -> 1:1
+    // `æ` prefix -> maps to identifier start; identifier chars -> 1:1
     const replacement = `${IDENTIFIER_PREFIX}${varName}`
     const mapping = buildPrefixedIdentifierMapping(
       IDENTIFIER_PREFIX, varName, '',
@@ -812,7 +812,7 @@ function rewriteObjectLiteralsWithAbsorb(state) {
       if (shorthandGetterMatch && shorthandGetterMatch[1]) {
         const propName = shorthandGetterMatch[1]
         const outText = `${IDENTIFIER_PREFIX}${propName}`
-        // `ø` -> propOriginalPos (invisible prefix); identifier chars -> 1:1
+        // `æ` -> propOriginalPos (invisible prefix); identifier chars -> 1:1
         const outMapping = buildPrefixedIdentifierMapping(
           IDENTIFIER_PREFIX, propName, '', propOriginalPos, propOriginalPos, propOriginalPos
         )
@@ -828,8 +828,8 @@ function rewriteObjectLiteralsWithAbsorb(state) {
         // `get ` prefix is 4 chars; identifier follows
         const identAbsStart = propAbsStart + 4 // skip `get `
         const identOriginalPos = state.toOriginalPos(identAbsStart)
-        // Build outText as `øpropName: initializer`
-        // `ø` -> invisible prefix on identOriginalPos; propName chars -> 1:1; `: ` and initializer -> map to their positions
+        // Build outText as `æpropName: initializer`
+        // `æ` -> invisible prefix on identOriginalPos; propName chars -> 1:1; `: ` and initializer -> map to their positions
         const colonAndInitAbsStart = identAbsStart + propName.length
         const colonOriginalPos = state.toOriginalPos(colonAndInitAbsStart)
         const colonIndex = trimmed.indexOf(':')
@@ -838,7 +838,7 @@ function rewriteObjectLiteralsWithAbsorb(state) {
         const initializerAbsStart = propAbsStart + Math.max(0, colonIndex) + 1 + initializerLeadingWhitespace
         const outText = `${IDENTIFIER_PREFIX}${propName}: ${initializer}`
         const outMapping = []
-        // ø -> identOriginalPos
+        // æ -> identOriginalPos
         for (let i = 0; i < IDENTIFIER_PREFIX.length; i += 1) outMapping.push(identOriginalPos)
         // propName chars -> 1:1
         for (let i = 0; i < propName.length; i += 1) outMapping.push(identOriginalPos + i)
@@ -858,12 +858,12 @@ function rewriteObjectLiteralsWithAbsorb(state) {
       if (getterMethodMatch && getterMethodMatch[1]) {
         const propName = getterMethodMatch[1]
         const bodyText = getterMethodMatch[2] || ''
-        // `πø` prefix is synthetic/invisible; `propName: function propName() { bodyText }` maps to original
+        // `πæ` prefix is synthetic/invisible; `propName: function propName() { bodyText }` maps to original
         const identAbsStart = propAbsStart + 4 // skip `get `
         const identOriginalPos = state.toOriginalPos(identAbsStart)
         const outText = `${GETTER_ACCESS_HELPER}${propName}: function ${propName}() {${bodyText}}`
         const outMapping = []
-        // πø -> anchor (invisible, will be collapsed by collapseHiddenHelperMappings)
+        // πæ -> anchor (invisible, will be collapsed by collapseHiddenHelperMappings)
         for (let i = 0; i < GETTER_ACCESS_HELPER.length; i += 1) outMapping.push(identOriginalPos)
         // propName chars (key position) -> identOriginalPos 1:1
         for (let i = 0; i < propName.length; i += 1) outMapping.push(identOriginalPos + i)
@@ -1252,11 +1252,11 @@ function conditionImpliesIdentifierTruthy(expression, identifierName, whenCondit
   }
 
 
-  // Recognize both direct identifier and getter access (øobj or obj@) as guards
+  // Recognize both direct identifier and getter access (æobj or obj@) as guards
   if (ts.isIdentifier(expression)) {
     if (expression.text === identifierName) return whenConditionTruthy;
-    // Also match ø-prefixed identifier (for obj@ rewritten to øobj)
-    if (expression.text === `ø${identifierName}`) return whenConditionTruthy;
+    // Also match æ-prefixed identifier (for obj@ rewritten to æobj)
+    if (expression.text === `æ${identifierName}`) return whenConditionTruthy;
   }
 
   if (ts.isBinaryExpression(expression)) {
@@ -1558,6 +1558,7 @@ function rewriteReactiveReads(state, getVars) {
     }
 
     if (ts.isIdentifier(node)) {
+      if (ts.isJsxAttribute(node.parent) || ts.isJsxOpeningElement(node.parent) || ts.isJsxClosingElement(node.parent)) return;
       const usage = classifyGetVarUsage(node, getVars)
       if (usage && !isShadowed(node.text)) {
         const start = node.getStart(sourceFile)
@@ -1568,9 +1569,9 @@ function rewriteReactiveReads(state, getVars) {
         let shouldUseOptionalChaining = false;
         // If the guard is a getter access (If(obj@, ...)), use optional chaining
         if (nextJsxGuardContext) {
-          // If the guard is a call to the getter (øobj())
+          // If the guard is a call to the getter (æobj())
           if (ts.isCallExpression(nextJsxGuardContext) && ts.isIdentifier(nextJsxGuardContext.expression)) {
-            if (nextJsxGuardContext.expression.text === `ø${node.text}`) {
+            if (nextJsxGuardContext.expression.text === `æ${node.text}`) {
               shouldUseOptionalChaining = true;
               shouldAssertNonNull = false;
             }
@@ -1585,7 +1586,7 @@ function rewriteReactiveReads(state, getVars) {
           const originalEndPos = state.toOriginalPos(end)
           let replacement;
           // Always emit optional chaining for all guarded branches
-          replacement = `${IDENTIFIER_PREFIX}${node.text}()?`;
+          replacement = `${IDENTIFIER_PREFIX}${node.text}${callSuffix}`;
           const mapping = buildPrefixedIdentifierMapping(
             IDENTIFIER_PREFIX, node.text, callSuffix,
             originalIdentStart, originalIdentStart, originalEndPos
@@ -1637,7 +1638,7 @@ function rewriteReactiveAtAccess(state, getVars) {
     const end = start + match[0].length
     if (isLikelyAssignmentTarget(state.code, end)) continue
 
-    // `name@` -> `øname`: `ø` maps to name start; identifier chars map 1:1
+    // `name@` -> `æname`: `æ` maps to name start; identifier chars map 1:1
     const originalIdentStart = state.toOriginalPos(start)
     const replacement = `${IDENTIFIER_PREFIX}${name}`
     const mapping = buildPrefixedIdentifierMapping(
@@ -1987,7 +1988,7 @@ function mapTextSpanFromSourceMap(sourceMap, span) {
 }
 
 function isTsxLike(fileName) {
-  return fileName.endsWith('.qrx') || fileName.endsWith('.tsx') || fileName.endsWith('.jsx')
+  return fileName.endsWith('.qrx')  || fileName.endsWith('.tsx') || fileName.endsWith('.jsx')
 }
 
 /**

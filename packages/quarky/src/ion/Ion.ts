@@ -2,7 +2,6 @@ import { isFunction, isObject } from "@rue/utils";
 import { Inert } from "./Get";
 import { AtomicIonQuark, createAtomicIon } from "./AtomicIon";
 import { AnyObject } from "@rue/types";
-import { initializeSnapshots } from "../ionic/x_TimeTraveler";
 import { QUARK } from "../abstract/Quark";
 import { isGetter } from "../reactivity/Substance";
 import { createMemoizedDerivation } from "./DerivationIon";
@@ -49,12 +48,12 @@ export const asIon = Ion
  * 
  * ##### ION:
  * ```
- * const øcount = Ion(0)
+ * const æcount = Ion(0)
  * ```
  * 
  * ##### ION CAPSULE:
  * ```
- * const øcount = Ion(0, {
+ * const æcount = Ion(0, {
  *    increment() {
  *       this.count++
  *    },
@@ -67,7 +66,7 @@ export const asIon = Ion
  * ##### DERIVATION ION:
  * 
  * ```
- * const ødoubleCount = Ion(() =>øcount() * 2)
+ * const ædoubleCount = Ion(() =>æcount() * 2)
  * ```
  * 
  * 
@@ -121,17 +120,17 @@ export function $_derivation<T>(fn: () => T): Ion<T> {
    return fn
 }
 
-export const ø = $_derivation
-const GETTER_PREFIX = 'ø'
+export const æ = $_derivation
+const GETTER_PREFIX = 'æ'
 
 
-export function πø<T, K>(obj: T, getterKey: K): K extends keyof T ? T[K] : K extends `ø${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K {
+export function πæ<T, K>(obj: T, getterKey: K): K extends keyof T ? T[K] : K extends `æ${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K {
    if (typeof getterKey !== 'string' || !getterKey.startsWith(GETTER_PREFIX)) throw new Error(`getterKey must be a string that starts with ${GETTER_PREFIX}`)
    if (!isObject(obj)) throw new Error('obj must be an object')
    if (getterKey in obj) return obj[getterKey];
    const key = getterKey.slice(1)
    const descriptor = Object.getOwnPropertyDescriptor(obj, key)
-   return (descriptor?.get?.bind(obj) ?? (() => obj[key])) as K extends keyof T ? T[K] : K extends `ø${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K
+   return (descriptor?.get?.bind(obj) ?? (() => obj[key])) as K extends keyof T ? T[K] : K extends `æ${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K
 }
 
 //@ts-expect-error
@@ -245,7 +244,7 @@ function _asIon(
          delete props['-watch']
          return createHybridIon({ derive: initialState, watch }, props)
       }
-      return initializeSnapshots(createMemoizedDerivation(<Derivation>initialState, props))
+      return createMemoizedDerivation(<Derivation>initialState, props)
    }
 
    if (props && '-derive' in props) {
@@ -262,7 +261,7 @@ function _asIon(
       delete props['-watch']
       return AsyncIon(initialState, fetch, props)
    }
-   return initializeSnapshots(createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), props), props)) // TODO: add inert mark map
+   return createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), props), props)
 }
 
 
@@ -281,25 +280,25 @@ function _asIon(
 // isReined
 
 
-// const øcount = Ion(0)
+// const æcount = Ion(0)
 
-// const ødoublecount = Ion(() =>{if (isIon(øcount)) return øcount() * 2}, {
+// const ædoublecount = Ion(() =>{if (isIon(æcount)) return æcount() * 2}, {
 //    doSomething(){}
 // })
 
-// const øcountB = Ion((prev?: number) => (prev ?? 0) + 2)
+// const æcountB = Ion((prev?: number) => (prev ?? 0) + 2)
 
-// const øactive = Ion('frog', {
+// const æactive = Ion('frog', {
 //    toggle() {
 
 //    }
 // })
 
-// const øactived = Ion(false, {
+// const æactived = Ion(false, {
 //    toggler() { }
 // })
 
-// øactived.value = true
+// æactived.value = true
 
 // function som<T>(value: T): T {
 //    return null as T;

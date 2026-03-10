@@ -166,7 +166,7 @@ function FractionKit(count@) {
   })
 
   it('maps transformed span into authored source span', () => {
-    const transformedNeedle = 'øhalfCount'
+    const transformedNeedle = 'æhalfCount'
     const transformedNeedleIndex = transformed.code.indexOf(transformedNeedle)
     expect(transformedNeedleIndex).toBeGreaterThanOrEqual(0)
 
@@ -180,7 +180,7 @@ function FractionKit(count@) {
   })
 
   it('maps transformed span into authored source span via source map', () => {
-    const transformedNeedle = 'øhalfCount'
+    const transformedNeedle = 'æhalfCount'
     const transformedNeedleIndex = transformed.code.indexOf(transformedNeedle)
     expect(transformedNeedleIndex).toBeGreaterThanOrEqual(0)
 
@@ -207,7 +207,7 @@ function Counter(count@: Ion<number>) {
       { includeToTransformedPos: true },
     )
 
-    for (const helperName of ['destructureØ', 'πø', 'absorbØ']) {
+    for (const helperName of ['destructureØ', 'πæ', 'absorbØ']) {
       const helperIndex = helperTransformed.code.indexOf(helperName)
       expect(helperIndex).toBeGreaterThanOrEqual(0)
 
@@ -237,7 +237,7 @@ function Counter(count@: Ion<number>) {
       { includeToTransformedPos: true },
     )
 
-    const syntheticNeedles = [", 'øthirdCountA')", ", 'halfCount')", ", ['øvalue'])"]
+    const syntheticNeedles = [", 'æthirdCountA')", ", 'halfCount')", ", ['ævalue'])"]
 
     for (const needle of syntheticNeedles) {
       const start = helperTransformed.code.indexOf(needle)
@@ -255,9 +255,9 @@ function Counter(count@: Ion<number>) {
     }
   })
 
-  it('treats Ø/ø/π as single UTF-16 units for mapping purposes', () => {
+  it('treats Ø/æ/π as single UTF-16 units for mapping purposes', () => {
     expect('Ø'.length).toBe(1)
-    expect('ø'.length).toBe(1)
+    expect('æ'.length).toBe(1)
     expect('π'.length).toBe(1)
 
     const unicodeSource = `
@@ -271,7 +271,7 @@ function Counter(count@: Ion<number>) {
       { includeToTransformedPos: true },
     )
 
-    const presentHelpers = ['absorbØ', 'πø'].filter((helperName) => unicodeTransformed.code.includes(helperName))
+    const presentHelpers = ['absorbØ', 'πæ'].filter((helperName) => unicodeTransformed.code.includes(helperName))
     expect(presentHelpers.length).toBeGreaterThan(0)
 
     for (const helperName of presentHelpers) {

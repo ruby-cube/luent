@@ -1,10 +1,10 @@
-import { Ion } from "../ion/Ion"
-import { Quark, quarkOf } from "../abstract/Quark"
-import { IonicProxy } from "./Ionic"
-import { ModelQuark } from "./IonicModel"
+import { Ion } from "../quarky/src/ion/Ion"
+import { Quark, quarkOf } from "../quarky/src/abstract/Quark"
+import { IonicProxy } from "../quarky/src/ionic/Ionic"
+import { ModelQuark } from "../quarky/src/ionic/IonicModel"
 import { debug } from "@rue/utils"
 import { AnyObject } from "@rue/types"
-import { PionState } from "../ion/AtomicIon"
+import { PionState } from "../quarky/src/ion/AtomicIon"
 
 // export type PionQuark = Quark<string | symbol, $AtomicPionState | $DerivedPionState>
 

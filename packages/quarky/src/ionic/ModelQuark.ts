@@ -615,7 +615,7 @@ function assertNotFunction(value: unknown) {
 }
 
 export function isIonKey(key: PropertyKey): key is string {
-   return typeof key === 'string' && /^\ø[a-z]/.test(key)
+   return typeof key === 'string' && /^\æ[a-z]/.test(key)
 }
 
 export function isIonicProxy(value: any): value is QuarkyIonicProxy {

@@ -386,7 +386,7 @@ function AbsorbCases(count@: Ion<number>) {
       expect(displays.some((text) => text.includes('echoed'))).toBe(true)
       expect(displays.some((text) => text.includes('absorbØ'))).toBe(false)
       expect(displays.some((text) => text.includes('destructureØ'))).toBe(false)
-      expect(displays.some((text) => text.includes('πø'))).toBe(false)
+      expect(displays.some((text) => text.includes('πæ'))).toBe(false)
     } finally {
       service.dispose()
     }
@@ -415,10 +415,10 @@ function View() {
       expect(quickInfos.length).toBeGreaterThan(0)
       const displays = quickInfos.map((info) => quickInfoDisplayText(info))
       expect(displays.some((text) => text.includes('superCounter'))).toBe(true)
-      expect(displays.some((text) => text.includes('import ø'))).toBe(false)
+      expect(displays.some((text) => text.includes('import æ'))).toBe(false)
       expect(displays.some((text) => text.includes('absorbØ'))).toBe(false)
       expect(displays.some((text) => text.includes('destructureØ'))).toBe(false)
-      expect(displays.some((text) => text.includes('πø'))).toBe(false)
+      expect(displays.some((text) => text.includes('πæ'))).toBe(false)
     } finally {
       service.dispose()
     }

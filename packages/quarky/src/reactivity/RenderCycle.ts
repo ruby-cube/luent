@@ -6,7 +6,7 @@ import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
 import { Update } from "./Update";
 import { noop } from "@rue/utils";
-import { UpdateType } from "./x_IdleUpdate";
+import { UpdateType } from "../../../x-old/x_IdleUpdate";
 
 
 export const queueTask = (task: () => void) => scheduler.postTask(task);

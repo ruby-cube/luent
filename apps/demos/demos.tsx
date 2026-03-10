@@ -8,7 +8,7 @@ import { TestListSelectTransition } from "./src/TestListSelectTransition"
 import { TestListTransit } from "./src/TestListTransit"
 import { TestIfElse } from "./src/TestIfElse"
 import { TodoMVC } from "./src/TodoMVC"
-import { VideoPlayer } from "./src/VideoPlayer"
+import { VideoPlayer } from "./src/VideoPlayer.qrx"
 import { TestMarkdownApp } from "./src/MarkdownApp"
 import { TreeApp } from "./src/TestTreeApp"
 import { TestAsyncSelect } from "./src/TestAsyncSelect"
@@ -27,7 +27,7 @@ import { TestIfElseRemountView } from "./src/TestIfElseRemountView"
 import { TestNamedSlots } from "./src/TestNamedSlots"
 
 export function runDemo() {
-   const app = createRoot(TestNamedSlots)
+   const app = createRoot(TrafficLight)
 
    app.mount('#root')
 }

@@ -1,10 +1,10 @@
 import { template, Else, Finitron, FromTag, If, NodeRef, Style, css } from "@rue/lumo";
-import { Ion, queueTask } from "@rue/quarky";
+import { Ion, queueTask , destructureØ} from "@rue/quarky";
 import "./reset.css"
 
 export function VideoPlayer() {
 
-   const $video = NodeRef("video")
+   const ævideo = NodeRef("video")
 
    const player = Finitron({
       "loading": {
@@ -28,27 +28,26 @@ export function VideoPlayer() {
       }
    })
 
-   const $duration = () => $video()?.duration ?? 0
+   const æduration = () => ævideo()?.duration ?? 0
 
    // player.on("init", () => {
    //    duration = $video()?.duration ?? 0
    // })
 
    track.on("play", () => {
-      const video = $video()
-      if (!video) return;
-      if (track.is("ended")) $elapsedTime.value = video.currentTime = 0;
-      $video()?.play()
+      if (!ævideo()) return;
+      if (track.is("ended")) æelapsedTime.value = ævideo()?.currentTime = 0;
+      ævideo()?.play()
    })
 
    track.on("pause", () => {
-      $video()?.pause()
+      ævideo()?.pause()
    })
 
-   const $elapsedTime = Ion(0);
+   const æelapsedTime = Ion(0);
 
    function updateTime(currentTime: number) {
-      $elapsedTime.value = currentTime;
+      æelapsedTime.value = currentTime;
    }
 
    function reClickElapsedBar(e: { currentTarget: (EventTarget & HTMLDivElement) | null } & MouseEvent) {
@@ -57,13 +56,12 @@ export function VideoPlayer() {
    }
 
    function setTime(width: number, x: number) {
-      const video = $video()!
-      const time = video.currentTime = video.duration * x / width
+      const time = ævideo()!.currentTime = ævideo()!.duration * x / width
       if (track.is('playing')) {
-         track.apply("pause") // FIX: clicking on elapsed bar breaks play/pause button
-         queueTask(() => track.apply("play")) 
+         track.pause() // FIX: clicking on elapsed bar breaks play/pause button
+         queueTask(() => track.play())
       }
-      $elapsedTime.value = time
+      æelapsedTime.value = time
    }
 
    const sound = Finitron({
@@ -71,66 +69,40 @@ export function VideoPlayer() {
       "muted": { toggle: () => "unmuted" }
    })
 
-   player.activate(() => "loading").nest({
-      "x:ready": [
-         track.init(() => "paused"),
-         sound.init(() => "unmuted")
-      ]
+   player.init("loading", {
+      "x:ready": () => {
+         track.init("paused")
+         sound.init("unmuted")
+      }
    })
 
-   // {
-   //    init() {
-   //       player.apply('init')
-   //    },
-   //    end() {
-   //       track.apply('end')
-   //    },
-   //    play() {
-   //       track.apply('play')
-   //    },
-   //    pause() {
-   //       track.apply('pause')
-   //    },
-   //    errorOut() {
-   //       player.apply('error')
-   //    },
-   //    ready() {
-   //       player.is('x:ready')
-   //    },
-   //    paused() {
-   //       track.is('paused')
-   //    },
-   //    playing() {
-   //       track.is('playing')
-   //    },
-   // }
 
    return template(
       <div class="container">
-         <video
-            ref={$video}
-            on:canplay={e => player.apply("init")}
+         <ævideo()
+            ref={ævideo}
+            on:canplay={e => player.init()}
             on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
-            on:ended={e => track.apply("end")}
-            on:error={e => player.apply("error")}
+            on:ended={e => track.end()}
+            on:error={e => player.error()}
          >
             <source src="https://developer.mozilla.org/shared-assets/videos/flower.mp4" type="video/mp4" />
-         </video>
+         </ævideo()>
 
          {If((player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
             <div>
-               <ElapsedBar elapsed={$elapsedTime} duration={$duration()} paused={(track.is("paused"))}
+               <ElapsedBar æelapsed()={æelapsedTime} æduration()={æduration()} æpaused()={(track.is("paused"))}
                   on:click={reClickElapsedBar}
                />
                {/* <remount-view> */}
-                  {If((track.is("playing")),
-                     <button on:click={e => track.apply("pause")}>‖</button>
-                  )}
-                  {Else(
-                     <button on:click={e => track.apply("play")}>►</button>
-                  )}
+               {If((track.is("playing")),
+                  <button on:click={e => track.pause()}>‖</button>
+               )}
+               {Else(
+                  <button on:click={e => track.play()}>►</button>
+               )}
                {/* </remount-view> */}
-               <Timer elapsed={$elapsedTime} duration={$duration()} />
+               <Timer æelapsed()={æelapsedTime} æduration()={æduration()} />
             </div>
          )}
       </div>
@@ -185,7 +157,7 @@ function ElapsedBar(input: FromTag<{
    paused: Ion<boolean>
    "on:click": MouseEvent
 }>) {
-   const { $elapsed, duration, $paused, emit } = input
+const { æelapsed, duration, æpaused, emit } = destructureØ(input, 'æelapsed', 'duration', 'æpaused', 'emit');
 
    return template(
       <div class="elapsed"
@@ -194,8 +166,8 @@ function ElapsedBar(input: FromTag<{
          <div
             class="elapsed-bar"
             style={{
-               width: ($elapsed() === 0 ? `0%` : $paused() ? `${percentage(duration, $elapsed())}%` : `100%`),
-               transition: ($elapsed() === 0 || $paused() ? undefined : `width ${duration - $elapsed()}s linear`)
+               width: (æelapsed() === 0 ? `0%` : æpaused() ? `${percentage(duration, æelapsed())}%` : `100%`),
+               transition: (æelapsed() === 0 || æpaused() ? undefined : `width ${duration - æelapsed()}s linear`)
             }}
          />
       </div>
@@ -208,11 +180,11 @@ function Timer(input: FromTag<{
    elapsed: Ion<number>,
    duration: number
 }>) {
-   const { $elapsed, duration } = input
+const { æelapsed, duration } = destructureØ(input, 'æelapsed', 'duration');
 
    return template(
       <span class="timer">
-         {(asTime($elapsed()))} / {asTime(duration)}
+         {(asTime(æelapsed()))} / {asTime(duration)}
       </span>
    )
 };

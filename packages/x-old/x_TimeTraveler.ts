@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isFunction } from "@rue/utils";
-import { isIon } from "../ion/Ion";
-import { ionize } from "./x_ionize";
+import { isIon } from "../quarky/src/ion/Ion";
+import { ionize } from "../quarky/src/ionic/x_ionize";
 
 //NOTE: Temporarily pause development of this until usefulness is confirmed
 // Currently, for snapshots to work, we need to take a snapshot of every piece of state created upon initialization with $ or ionize

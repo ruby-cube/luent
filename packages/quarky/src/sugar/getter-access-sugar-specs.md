@@ -53,45 +53,47 @@ function Counter({ showFractions@ }) {
 The above code should be transformed to the following as virtual source for the linter:
 
 ```tsx
-import { ø, πø, destructureØ } from "@rue/quarky";
+import { æ, πæ, destructureØ } from "@rue/quarky";
 
-function Counter({ øshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) {
-  const øcount = Ion(0, {
+function Counter({ æshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) {
+  const showFractions = æshowFractions
+
+  const æcount = Ion(0, {
     increment() {
-      øcount.value++;
+      æcount.value++;
     },
-  });
-  const ødoubleCount = Ion(() => øcount() * 2);
+  }), count = æcount;
+  const ædoubleCount = Ion(() => æcount() * 2), doubleCount = ædoubleCount;
 
-  const { øhalfCount, øthirdCount } = destructureØ(FractionKit(øcount), 'øhalfCount', 'øthirdCount');
+  const { æhalfCount, æthirdCount } = destructureØ(FractionKit(æcount), 'æhalfCount', 'æthirdCount'), halfCount = æhalfCount, thirdCount = æthirdCount;
 
-   const øobj = Ion({ name: 'kermit' } as {name: string} | undefined)
+   const æobj = Ion({ name: 'kermit' } as {name: string} | undefined), obj = æobj;
 
    function doSomethingElse() {
-      if (øobj()) {
-         console.log('name', øobj()!.name)
-         watch(øobj, () => {
-            console.log('nothing', øobj().name) // should throw: Object is possibly 'undefined'.ts(2532)
+      if (æobj()) {
+         console.log('name', æobj()!.name)
+         watch(æobj, () => {
+            console.log('nothing', æobj().name) // should throw: Object is possibly 'undefined'.ts(2532)
          })
       }
       else {
-         console.log('nothing', øobj().name) // should throw: Object is possibly 'undefined'.ts(2532)
+         console.log('nothing', æobj().name) // should throw: Object is possibly 'undefined'.ts(2532)
       }
    }
 
   return template(
     <div>
-      <button on:click={(e) => øcount.increment()}>+</button>
-      <p>start: {øcount()}</p>
-      <p>count: {øcount}</p>
-      <p>doubleCount: {ødoubleCount}</p>
-      <p>tripleCount: {() => øcount() * 3}</p>
-      <button>{() => øshowFractions() ? "hide" : "show"} fractions</button>
-      {If(øshowFractions,
+      <button on:click={(e) => æcount.increment()}>+</button>
+      <p>start: {æcount()}</p>
+      <p>count: {æcount}</p>
+      <p>doubleCount: {ædoubleCount}</p>
+      <p>tripleCount: {() => æcount() * 3}</p>
+      <button>{() => æshowFractions() ? "hide" : "show"} fractions</button>
+      {If(æshowFractions,
         <>
           <hr></hr>
-          <p>halfCount: {() => øhalfCount() + '!'}</p>
-          <p>thirdCount: {øthirdCount}</p>
+          <p>halfCount: {() => æhalfCount() + '!'}</p>
+          <p>thirdCount: {æthirdCount}</p>
         </>
       )}
     </div>
@@ -115,10 +117,10 @@ function CounterKit() {
 Compiled:
 ```tsx
 function CounterKit() {
-  const øcount = Ion(0);
+  const æcount = Ion(0), count = æcount;
 
   return {
-      øcount,
+      æcount,
       // comment
     };
 }
@@ -139,8 +141,8 @@ Compiled:
 ```tsx
 function CounterKit() {
   return absorbØ({
-      øcount: Ion(0),
-    }, ["øcount"]);
+      æcount: Ion(0),
+    }, ["æcount"]);
 }
 ```
 
@@ -161,13 +163,13 @@ function FractionKit(count@) {
 
 Compiled:
 ```tsx
-function FractionKit(øcount) {
-  const øhalfCount = Ion(() => øcount() / 2);
-  const øthirdCount = Ion(() => øcount() / 3);
+function FractionKit(æcount) {
+  const æhalfCount = Ion(() => æcount() / 2), halfCount = æhalfCount;
+  const æthirdCount = Ion(() => æcount() / 3), thirdCount = æthirdCount;
 
    return {
-      øhalfCount,
-      øthirdCount,
+      æhalfCount,
+      æthirdCount,
       normalProperty: 0
    }
 }
@@ -192,33 +194,33 @@ function FractionKit(count@) {
 
 Compiled:
 ```tsx
-function FractionKit(øcount) {
+function FractionKit(æcount) {
 
    return absorbØ({
-      øhalfCount: Ion((øcount() / 2)),
-      øthirdCount: Ion((øcount() / 3)),
-      πøsomething: function something() {
+      æhalfCount: Ion((æcount() / 2)),
+      æthirdCount: Ion((æcount() / 3)),
+      πæsomething: function something() {
          return 4;
       },
-      øcount,
+      æcount,
       normalProperty: 0
-   }, ['øhalfCount', 'øthirdCount', 'πøsomething', 'øcount', 'normalProperty'])
+   }, ['æhalfCount', 'æthirdCount', 'πæsomething', 'æcount', 'normalProperty'])
 }
 ```
 
 
 ## Pre-ESLint/TSC transforms
 ### General notes
-- use robust strategies for mapping positions from original source to transformed source. See position mapping (marked 'pm:') notes for additional notes.
+- use robust strategies for mapping positions from original source to transformed source.
 - source-map/position-mapping guarantees:
    - diagnostics, hover, completions, go-to-definition, rename, and formatting ranges map back to authored sugar accurately.
    - syntax highlighting, formatting, linting, and Intellisense are efficient, performant, and responsive to authored source code changes
    - mappings remain stable after incremental edits (insert/delete lines above transformed regions).
 - scope awareness: rewrites must be lexical-scope-aware and avoid touching shadowed identifiers in nested scopes.
-   - example: if `count` is re-declared in an inner block/function, only references bound to the transformed `øcount` declaration should become `øcount()`.
+   - example: if `count` is re-declared in an inner block/function, only references bound to the transformed `æcount` declaration should become `æcount()`.
 - transform only in value-level code: never rewrite inside comments, string literals, template string text, import/export specifiers, type-only nodes, or property keys that are not identifier references.
 - helper import policy:
-   - helpers (`πø`, `absorbØ`, `destructureØ`, and `ø`) are auto-imported only when used by transforms.
+   - helpers (`πæ`, `absorbØ`, `destructureØ`, and `æ`) are auto-imported only when used by transforms.
    - imports are deduped, stably ordered, and conflict-safe (if local symbols already exist, use deterministic aliasing strategy).
    - helper should be invisible to Intellisense and syntax highlighting
 - transform idempotence: running the transform repeatedly on already transformed virtual source should not produce additional semantic changes.
@@ -227,18 +229,14 @@ function FractionKit(øcount) {
    - make sure all multi-line transforms are comment-safe (i.e. will not be broken by adding extra comment lines)
 
 ### Declaration and assignment transforms
-- transform `get` declarations: `get variable =` --> `const øvariable =`
-   - pm: `get <span:v>variable</span:v> =` --> `const <span:v>øvariable</span:v> =`
-- transform `let` and `const` declarations of variables with `@` suffix: `const variable@ =` --> `const øvariable =`
-   - pm: `const <span:v>variable@</span:v> =` --> `const <span:v>øvariable</span:v> =`
-- transform destructuring that contains at least one variable with the `@` suffix: `const { propertyA@, propertyB@, property } = obj` --> `const { øpropertyA, øpropertyB, property } = destructureØ(obj, 'øpropertyA', 'øpropertyB', 'property')`
-   - pm: `const { <span:a>propertyA@</span:a>, <span:b>propertyB@</span:b>, <span:c>property</span:c> } = <span:o>obj</span:o>` --> `const { <span:a>øpropertyA</span:a>, <span:b>øpropertyB</span:b>, <span:c>property</span:c> } = destructureØ(<span:o>obj</span:o>, 'øpropertyA', 'øpropertyB', 'property')`
-- transform destructuring with `get` declaration:
-   `get { propertyA, propertyB } = obj` --> `const { øpropertyA, øpropertyB } = destructureØ(obj, 'øpropertyA', 'øpropertyB')`
-   - pm: `get { <span:a>propertyA</span:a>, <span:b>propertyB</span:b> } = <span:o>obj</span:o>` --> `const { <span:a>øpropertyA</span:a>, <span:b>øpropertyB</span:b> } = destructureØ(<span:o>obj</span:o>, 'øpropertyA', 'øpropertyB')`
-- transform object literals containing at least one 'invalid' `get` property declaration (`{ get property: value }`): 
-`const obj = { get property: value }` --> `const obj = absorbØ({ øproperty: value }, ['øproperty'])`
-   - with mixed property types:
+* transform `get` declarations: `get variable = value` --> `const ævariable = value, variable = ævariable`
+- transform `let` and `const` declarations of variables with `@` suffix: `const variable@ = value` --> `const ævariable = value`
+- transform destructuring that contains at least one variable with the `@` suffix: `const { propertyA@, propertyB@, property } = obj` --> `const { æpropertyA, æpropertyB, property } = destructureØ(obj, 'æpropertyA', 'æpropertyB', 'property')`
+* transform destructuring with `get` declaration:
+   `get { propertyA, propertyB } = obj` --> `const { æpropertyA, æpropertyB } = destructureØ(obj, 'æpropertyA', 'æpropertyB'), propertyA = æpropertyA, propertyB = æpropertyB`
+* transform object literals containing at least one 'invalid' `get` property declaration (`{ get property: value }`): 
+`const obj = { get property: value }` --> `const obj = absorbØ({ æproperty: value, property: 'æ' }, ['æproperty'])`
+   * with mixed property types:
       ```tsx
       function FractionKit(count@) {
          return {
@@ -254,64 +252,34 @@ function FractionKit(øcount) {
       ```
       -->
       ```tsx
-      function FractionKit(øcount) {
+      function FractionKit(æcount) {
          return absorbØ({
-            øhalfCount: Ion(() => øcount() / 2),
-            øthirdCount: Ion(() => øcount() / 3),
-            πøsomething: function something() {
+            æhalfCount: Ion(() => æcount() / 2),
+            æthirdCount: Ion(() => æcount() / 3),
+            halfCount: 'æ',
+            thirdCount: 'æ',
+            πæsomething: function something() {
                return 4;
             },
-            øcount,
+            æcount,
             normalProperty: 0
-         }, ['øhalfCount', 'øthirdCount', 'πøsomething', 'øcount', 'normalProperty'])
-      }
-      ```
-      - pm: 
-      ```tsx
-      function FractionKit(<span:p>count@</span:p>) {
-         return {
-            get <span:a>halfCount</span:a>: Ion(() => count / 2),
-            get <span:b>thirdCount</span:b>: Ion(() => count / 3),
-            get <span:c>something() {
-               return 4;
-            }</span:c>,
-            <span:d>count@</span:d>,
-            normalProperty: 0
-         }
-      }
-      ```
-      -->
-      ```tsx
-      function FractionKit(<span:p>øcount</span:p>) {
-         return absorbØ({
-            <span:a>øhalfCount</span:a>: Ion(() => øcount() / 2),
-            <span:b>øthirdCount</span:b>: Ion(() => øcount() / 3),
-            πøsomething: <span:c>function something() {
-               return 4;
-            }</span:c>,
-            <span:d>øcount</span:d>,
-            normalProperty: 0
-         }, ['øhalfCount', 'øthirdCount', 'πøsomething', 'øcount', 'normalProperty'])
+         }, ['æhalfCount', 'æthirdCount', 'πæsomething', 'æcount', 'normalProperty'])
       }
       ```
    - import the getter absorber helper `absorbØ` from '@rue/quarky' if it hasn't been imported yet.
 
 ### Access transforms
-- transform all variables with the `@` suffix to `øvariable`: `variable@` --> `øvariable`
-- transform all usages of `get`/`@`suffix variables without `@` suffix: `variable` --> `øvariable()`
-   - pm: `<span:v>variable</span:v>` --> `<span:v>øvariable</span:v>()`
+- transform all variables with the `@` suffix to `ævariable`: `variable@` --> `ævariable`
+- transform all usages of `get`/`@`suffix variables without `@` suffix: `variable` --> `ævariable()`
    + transform when accessing a property from the `get`/`@`suffix variable: 
-   `get obj = Ion({ property: value }); obj.property` --> `const øobj = Ion({ property: value }); øobj().property`
-   `const obj@ = Ion({ property: value }); obj.property` --> `const øobj = Ion({ property: value }); øobj().property`
+   `get obj = Ion({ property: value }); obj.property` --> `const æobj = Ion({ property: value }), obj = æobj; æobj().property`
+   `const obj@ = Ion({ property: value }); obj.property` --> `const æobj = Ion({ property: value }); æobj().property`
 - transform dot notation with `@` suffix:
-  `get property = obj.property@` --> `const øproperty = (obj.øproperty, πø(obj, 'property'));`
-  - pm: `get <span:p>property</span:p> = <span:o>obj</span:o>.<span:a>property@</span:a>` --> `const <span:p>øproperty</span:p> = (<span:a>obj.øproperty</span:a>, πø(<span:o>obj</span:o>, 'property'));`
-  - import the getter access helper `πø` from '@rue/quarky' if it hasn't been imported yet
+  `get property = obj.property@` --> `const æproperty = (obj.æproperty, πæ(obj, 'property')), property = æproperty;`
+  - import the getter access helper `πæ` from '@rue/quarky' if it hasn't been imported yet
   - chained property access:
-  `get property = obj.a.b.c.property@` --> `const øproperty = (obj.a.b.c.øproperty, πø(obj.a.b.c, 'property'))`
-  `get property = obj.a@.b@.c@.property@` --> `const øproperty = (obj.øa.øb.øc.øproperty, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
-  - pm: `get <span:v>property</span:v> = <span:p>obj.a.b.c.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.a.b.c.property@</span:p>, πø(obj.a.b.c, 'property'))`
-  - pm: `get <span:v>property</span:v> = <span:p>obj.a@.b@.c@.property@</span:p>` --> `const <span:v>øproperty</span:v> = (<span:p>obj.øa.øb.øc.øproperty</span:p>, πø(πø(πø(πø(obj, 'a'), 'b'), 'c'), 'property'))`
+  `get property = obj.a.b.c.property@` --> `const æproperty = (obj.a.b.c.æproperty, πæ(obj.a.b.c, 'property')), property = æproperty`
+  `get property = obj.a@.b@.c@.property@` --> `const æproperty = (obj.æa.æb.æc.æproperty, πæ(πæ(πæ(πæ(obj, 'a'), 'b'), 'c'), 'property')), property = æproperty`
 
 ### JSX fragment shorthand
 - transform jsx templates encased in extraneous parentheses (make sure transform is comment-safe):
@@ -335,11 +303,10 @@ function FractionKit(øcount) {
 ### Derivation shorthand
 - transform extraneous parentheses surrounding any of the following:
    - the value of a property or variable: `{ property: (value) }` --> `{ property: () => value }`, `const variable = (value)` --> `const variable = () => value`
-      -pm: `{ property: <span:p>(</span:p><span:v>value</span:v>) }` --> `{ property: () <span:p>=></span:p> <span:v>value</span:v> }`
    - an argument: `doSomething((argument))` --> `doSomething(() => argument)`
    - an item in an array literal: `[(item), (itemB)]` --> `[() => item, () => itemB]`
-   * an expression within a JSX expression container: `<Comp value={(value + 1)}></Comp>` --> `<Comp value={ø(() => value + 1)}>`
-      + import the derivation helper, `ø`, from '@rue/quarky' if it is not already imported
+   * an expression within a JSX expression container: `<Comp value={(value + 1)}></Comp>` --> `<Comp value={æ(() => value + 1)}>`
+      + import the derivation helper, `æ`, from '@rue/quarky' if it is not already imported
    - when passed as an argument, assigned to a value or property, an item in an array literal, an expression within a JSX expression container:
       - the final expression of a sequence expression
       - the consequent or alternate of a conditional expression
@@ -358,7 +325,7 @@ function FractionKit(øcount) {
    - for chained `@` access, preserve short-circuit behavior and evaluation order.
 
 ### Type guards
-+ Typescript should call out when the value of an `get` variable is possibly undefined when accessing via the transformed `øvariable()` and add a `!` after synchronous reads that are proven guarded.
++ Typescript should call out when the value of an `get` variable is possibly undefined when accessing via the transformed `ævariable()` and add a `!` after synchronous reads that are proven guarded.
 + Supported synchronous guard forms for `!` emission include:
    - `if (obj) { ...obj.name... }`
    - `if (!obj) { ... } else { ...obj.name... }`
@@ -384,18 +351,18 @@ function FractionKit(øcount) {
 ### Conformance checklist
 | Area | Example input | Expected transform behavior | Must diagnostic? |
 |---|---|---|---|
-| Declarations | `get x = expr` | rewrites to `const øx = expr`; diagnostics map to authored `x` | No |
-| Declarations | `const x@ = expr` / `let x@ = expr` | rewrites to `const|let øx = expr` | No |
-| Identifier usage | value-read of transformed binding | rewrites to call form (`øx()`) where applicable | No |
-| Identifier usage | `x@` usage | rewrites to `øx` without adding extra calls | No |
+| Declarations | `get x = expr` | rewrites to `const æx = expr, x = æx`; diagnostics map to authored `x` | No |
+| Declarations | `const x@ = expr` / `let x@ = expr` | rewrites to `const|let æx = expr` | No |
+| Identifier usage | value-read of transformed binding | rewrites to call form (`æx()`) where applicable | No |
+| Identifier usage | `x@` usage | rewrites to `æx` without adding extra calls | No |
 | Destructuring | nested/alias/default/rest patterns | preserves runtime semantics and source order | No |
 | Destructuring | mixed marked/unmarked bindings | rewrites only bindings covered by rules | No |
 | Object literal `get` sugar | `{ get key: value }` | normalizes through `absorbØ(...)` | No |
 | Object literal `get` sugar | mixed `get` sugar + getters + shorthand + plain props | preserves order and behavior | No |
-| `@` property access | `obj.prop@` | rewrites to tuple form (`(obj.øprop, πø(obj, 'prop'))`) | No |
+| `@` property access | `obj.prop@` | rewrites to tuple form (`(obj.æprop, πæ(obj, 'prop'))`) | No |
 | `@` property access | chained/optional/computed forms | preserves short-circuiting and evaluation order | No |
-| Type guards | `if/else`, ternary, logical, explicit nullish comparisons | emits `øx()!` only in guarded synchronous branches | No |
-| Type guards | `If()/ElseIf()/Else()` template branches | emits `øx()!` in guarded template branches; keeps unguarded reads diagnostic | No |
+| Type guards | `if/else`, ternary, logical, explicit nullish comparisons | emits `æx()!` only in guarded synchronous branches | No |
+| Type guards | `If()/ElseIf()/Else()` template branches | emits `æx()!` in guarded template branches; keeps unguarded reads diagnostic | No |
 | JSX shorthand | parenthesized multi-node JSX | rewrites to fragment shorthand; comments preserved | No |
 | Derivation shorthand | allowed parenthesized value positions | rewrites only in allowed positions from spec | No |
 | Imports/helpers | helper-required transforms | imports added only when needed; deduped; stably ordered; conflict-safe | No |
@@ -408,16 +375,16 @@ function FractionKit(øcount) {
 | ID | Input (sugar) | Expected output / behavior | Diagnostic? |
 |---|---|---|---|
 | **Declarations** |  |  |  |
-| TV-01 | `get count = Ion(0)` | `const øcount = Ion(0)` | No |
-| TV-02 | `const count@ = Ion(0)` | `const øcount = Ion(0)` | No |
-| TV-03 | `let count@ = Ion(0)` | `let øcount = Ion(0)` | No |
-| TV-04 | `get double = Ion((count * 2))` | `const ødouble = Ion(() => øcount() * 2)` | No |
-| TV-05 | `const { a@, b, c@ } = src` | `const { øa, b, øc } = destructureØ(src, 'øa', 'b', 'øc')` | No |
-| TV-06 | `get { a, b } = src` | `const { øa, øb } = destructureØ(src, 'øa', 'øb')` | No |
-| TV-07 | `{ get value: Ion(0) }` | `absorbØ({ øvalue: Ion(0) }, ['øvalue'])` | No |
+| TV-01 | `get count = Ion(0)` | `const æcount = Ion(0), count = æcount` | No |
+| TV-02 | `const count@ = Ion(0)` | `const æcount = Ion(0)` | No |
+| TV-03 | `let count@ = Ion(0)` | `let æcount = Ion(0)` | No |
+| TV-04 | `get double = Ion((count * 2))` | `const ædouble = Ion(() => æcount() * 2)` | No |
+| TV-05 | `const { a@, b, c@ } = src` | `const { æa, b, æc } = destructureØ(src, 'æa', 'b', 'æc')` | No |
+| TV-06 | `get { a, b } = src` | `const { æa, æb } = destructureØ(src, 'æa', 'æb'), a = æa, b = æb` | No |
+| TV-07 | `{ get value: Ion(0) }` | `absorbØ({ ævalue: Ion(0) }, ['ævalue'])` | No |
 | **Access** |  |  |  |
-| TV-08 | `get item = obj.prop@` | `const øitem = (obj.øprop, πø(obj, 'prop'))` | No |
-| TV-09 | `get item = obj.a@.b@.c@` | `const øitem = (obj.øa.øb.øc, πø(πø(πø(obj, 'a'), 'b'), 'c'))` | No |
+| TV-08 | `get item = obj.prop@` | `const æitem = (obj.æprop, πæ(obj, 'prop'))` | No |
+| TV-09 | `get item = obj.a@.b@.c@` | `const æitem = (obj.æa.æb.æc, πæ(πæ(πæ(obj, 'a'), 'b'), 'c'))` | No |
 | TV-10 | `get item = obj?.a@` | preserves optional-chain short-circuit semantics in emitted access helper form | No |
 | **JSX/Derivation** |  |  |  |
 | TV-13 | `((<A></A><B></B>))` (multi-node JSX wrapped in parens) | fragment shorthand rewrite with comments preserved | No |
@@ -429,10 +396,10 @@ function FractionKit(øcount) {
 | TV-18 | `"count@" // get x = y` | no rewrites inside string/comment text | No |
 | TV-19 | `import type { count@ } from 'x'` | no value-level rewrite inside type-only/import specifier contexts | Yes (if unsupported syntax) |
 | **Type Guards (Control Flow)** |  |  |  |
-| TV-20 | `if (!obj) {} else { obj.name }` | else-branch read transforms with guarded assertion (`øobj()!.name`) | No |
-| TV-21 | `!obj ? fallback : obj.name` | false-branch read transforms with guarded assertion (`øobj()!.name`) | No |
-| TV-22 | `if (obj != null) { obj.name }` / `if (obj == null) {} else { obj.name }` | guarded branch read transforms with guarded assertion (`øobj()!.name`) | No |
-| TV-25 | `while (obj) { obj.name }` / `do { obj.name } while (obj)` / `for (; obj; ) { obj.name }` | loop-body guarded reads transform with guarded assertion (`øobj()!.name`) | No |
+| TV-20 | `if (!obj) {} else { obj.name }` | else-branch read transforms with guarded assertion (`æobj()!.name`) | No |
+| TV-21 | `!obj ? fallback : obj.name` | false-branch read transforms with guarded assertion (`æobj()!.name`) | No |
+| TV-22 | `if (obj != null) { obj.name }` / `if (obj == null) {} else { obj.name }` | guarded branch read transforms with guarded assertion (`æobj()!.name`) | No |
+| TV-25 | `while (obj) { obj.name }` / `do { obj.name } while (obj)` / `for (; obj; ) { obj.name }` | loop-body guarded reads transform with guarded assertion (`æobj()!.name`) | No |
 | **Type Guards (Template Branches)** |  |  |  |
 | TV-23 | `{If(obj, <p>{obj.name}</p>)} {ElseIf(obj !== undefined, <p>{obj.name}</p>)}` | guarded template-branch reads transform with guarded assertion | No |
 | TV-24 | `{If(!obj, <p>missing</p>)} {Else(<p>{obj.name}</p>)}` | guarded `Else` template-branch read transforms with guarded assertion | No |
@@ -475,7 +442,7 @@ function FractionKit(øcount) {
 ### Known gaps / future vectors
 - `||`-heavy compound conditions are intentionally conservative and may need dedicated branch-precision tests.
 - Optional-chain-based boolean guards (`if (obj?.name)`) need explicit policy for whether object-level truthiness should imply safe `obj` member reads.
-- Control-flow constructs beyond direct conditionals (e.g., `switch`-style narrowing, assertion-function-based narrowing) are not yet modeled for `øx()!` emission.
+- Control-flow constructs beyond direct conditionals (e.g., `switch`-style narrowing, assertion-function-based narrowing) are not yet modeled for `æx()!` emission.
 - Async boundaries remain conservative by design; add explicit vectors if future behavior should carry/restore narrowing across specific async patterns.
 
 ### Typechecking pipeline (`quarky-tsc`)

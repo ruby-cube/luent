@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
-import { IsIonic, isIonicProxy, withInertItems } from "../x_ionize";
+import { IsIonic, isIonicProxy, withInertItems } from "../quarky/src/ionic/x_ionize";
 import { isFunction } from "@rue/utils";
-import { InertCollectionType } from "../IonicModel";
-import { getIonizedModel } from "../Ionic";
+import { InertCollectionType } from "../quarky/src/ionic/IonicModel";
+import { getIonizedModel } from "../quarky/src/ionic/Ionic";
 
 const inertObjects: WeakSet<AnyObject> = new WeakSet()
 

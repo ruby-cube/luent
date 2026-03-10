@@ -1,4 +1,4 @@
-import { atCreate, atMounted, ComponentTag, Context, ContextKey, createRoot, css, Finitron, fromContext, FromTag, If, listen, NodeRef, queueRender, RenderSlot, TagName, template } from "@rue/lumo"
+import { atCreate, atMounted, ComponentTag, Context, ContextKey, createRoot, css, fromContext, FromTag, If, listen, NodeRef, queueRender, RenderSlot, TagName, template } from "@rue/lumo"
 import { Button } from "../Button"
 import { mergeTailwind } from "../../utils/utils"
 import { Ion, Ionic, queueTask, watch } from "@rue/quarky"

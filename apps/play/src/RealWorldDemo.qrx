@@ -12,20 +12,21 @@ function IonicTodoItem(title: string) {
 
 export function QrxTodo() {
    get todos = Ion(Ionic([
-      IonicTodoItem("Learn Rue"),
+      IonicTodoItem("Learn Luent"),
       IonicTodoItem("Build a demo"),
    ], {
-      add() {
-         if (newTodo.trim()) {
-            todos.push(IonicTodoItem(newTodo));
+      add(title: string) {
+         if (title) {
+            todos.push(IonicTodoItem(title));
             newTodo@.value = "";
          }
       },
       remove(todo: Ionic<Todo>) {
-         const idx = todos.indexOf(todo);
-         if (idx !== -1) todos.splice(idx, 1);
+         const i = todos.indexOf(todo);
+         if (i !== -1) todos.splice(i, 1);
       }
    }))
+
    get activeTodos = Ion(() => todos.filter(todo => !todo.completed));
    get completedTodos = Ion(() => todos.filter(todo => todo.completed));
 
@@ -39,26 +40,27 @@ export function QrxTodo() {
    }
 
    get filteredTodos = Ion(() => filters[filter]())
-
+   const filteredTodos = 0
    return template(
       <div>
          <h2>Todos</h2>
          <input
             mu:value={newTodo@}
             placeholder="Add a todo..."
+            on:submit={e => todos.add(newTodo.trim())}
          />
-         <button on:click={todos.add}>Add</button>
+         <button on:click={e => todos.add(newTodo.trim())}>Add</button>
          <div>
-            <button on:click={() => (filter@.value = "all")}>All</button>
-            <button on:click={() => (filter@.value = "active")}>Active</button>
-            <button on:click={() => (filter@.value = "completed")}>Completed</button>
+            <button on:click={e => (filter@.value = "all")}>All</button>
+            <button on:click={e => (filter@.value = "active")}>Active</button>
+            <button on:click={e => (filter@.value = "completed")}>Completed</button>
          </div>
          <ul>
             {For(filteredTodos@, t => t, todo => (
                <li>
                   <input type="checkbox" mu:checked={todo.completed@} />
                   <span style={(`text-decoration: ${todo.completed ? "line-through" : "none"} `)}>{todo.title}</span>
-                  <button on:click={() => todos.remove(todo)}>x</button>
+                  <button on:click={e => todos.remove(todo)}>x</button>
                </li>
             ))}
          </ul>

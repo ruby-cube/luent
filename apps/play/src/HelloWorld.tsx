@@ -1,6 +1,6 @@
 import { Component, Else, ElseIf, For, If, provideRoot } from "@rue/lumo";
 import { Ion, ionize } from "@rue/quarky";
-import { inert } from "../../../packages/quarky/src/ionic/notes/inert";
+import { inert } from "../../../packages/x-old/x_inert";
 import { Well, Wellerman } from "./Well";
 import { Context } from "../../../packages/lumo/src/context/Context";
 
