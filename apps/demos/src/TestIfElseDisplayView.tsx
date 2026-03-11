@@ -23,7 +23,7 @@ export function TestIfElseRemountView(setup: FromTag<{ activation: [ShowHideType
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
          <hr></hr>
          <div class='container view'>
-            <display-view>
+            <show-view>
                {If($active,
                   <div id='active'>
                      oh
@@ -45,7 +45,7 @@ export function TestIfElseRemountView(setup: FromTag<{ activation: [ShowHideType
                      <h2>bye</h2>
                   </div>
                )}
-            </display-view>
+            </show-view>
          </div>
       </div>
    )

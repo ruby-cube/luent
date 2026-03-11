@@ -40,7 +40,7 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    config: ElementConfig,
 ): DOMNode {
-   const { class: classes, style: styles, 'display-if': showIf, ref: $node, ...other } = config;
+   const { class: classes, style: styles, 'show-if': showIf, ref: $node, ...other } = config;
 
    const { attributes, events, hooks, transitions } = analyzeAttributes(other)
 
@@ -127,7 +127,6 @@ export function makeElement(
 // }
 
 const transitionAttributes = {
-   'initial:appear': true,
    'transition-item': true,
    'animate-item': true,
    'transit-class': true,
@@ -573,171 +572,102 @@ export function withUpdate(handler: Function, event: string) {
    return (e: any) => update(() => handler(e))
 }
 
-type OverrideClassesIon = Ion<string | Falsey> & {
-   [OVERRIDE_LEVEL]: number;
+
+
+
+type DynamicClassesConfig = {
+   [key: string]: MaybeIon<Booleanny>;
 }
 
-export const OVERRIDE_LEVEL = Symbol('override-level')
-
-export function createOverrideClasses(classes: ClassInput | ClassInput[]) {
-   const $classes = Ion((() => {
-      if ($classes[OVERRIDE_LEVEL]) {
-         return toOverrideClasses(normalizeToArray(classes), $classes[OVERRIDE_LEVEL])
-      }
-      console.log('override', classes)
-      return classes;
-   }) as ClassInput | ClassInput[], {
-      [OVERRIDE_LEVEL]: 0
-   })
-
-   return $classes;
-}
-
-// TODO: add css rules
-function toOverrideClasses(classes: ClassInput[], level: number) {
-   return classes.map(input => {
-      if (!input) return;
-      if (isOverrideClasses(input)) {
-         return input();
-      }
-      else {
-         const value = toValue(input)
-         if (!value) return;
-         if (typeof value !== 'string') throw new Error('This should never happen. $classes should have been handled by preceding if-block')
-         const classes = value.split(' ')
-         return classes.reduce((classString) => {
-            return 'ovrrd' + level + '-' + classString.trim() + ' '
-         }, '')
-      }
-   })
-}
-
-
-function isOverrideClasses(value: any): value is OverrideClassesIon {
-   return isIon(value) && OVERRIDE_LEVEL in value
-}
-
-
-// MaybeIon<string | false | null | undefined> | $Classes
-
-class Classes {
-   private classesToRemove: undefined | Set<string>
-   flask = getFlask()
-
-   constructor(
-      public classList: DOMTokenList,
-      public rawClasses: ClassInput[]
-   ) {
-   }
-
-   useClassesToRemove() {
-      return this.classesToRemove ?? (this.classesToRemove = new Set())
-   }
-
-   addStaticClasses(classString: string) {
-      queueInternalRender(() => {
-         this.toClassNames(classString).forEach(className => {
-            if (className)
-               this.classList.add(className)
-         })
-      }, this.flask)
-   }
-
-   markRemoval(classString: string) {
-      this.toClassNames(classString).forEach(className =>
-         this.useClassesToRemove().add(className)
-      )
-   }
-
-   addDynamicClasses(classString: string) {
-      this.toClassNames(classString).forEach(className => {
-         queueInternalRender(() => {
-            if (className)
-               this.classList.add(className)
-         }, this.flask)
-      })
-   }
-
-   toClassNames(classString: string) {
-      return classString.split(' ').map(c => c.trim())
-   }
-
-   updateClassList() {
-      queueIonicPrelude(() => {
-         const currentClasses = this.getCurrentClasses()
-         const classesToRemove = this.classesToRemove
-         if (classesToRemove) {
-            queueInternalRender(() => {
-               for (const className of classesToRemove) {
-                  if (currentClasses.has(className)) continue;
-                  this.classList.remove(className)
-               }
-            }, this.flask)
-            classesToRemove.clear()
-         }
-      })
-   }
-
-   getCurrentClasses() {
-      const currentClasses = new Set()
-      const queue = [this.rawClasses]
-      for (let i = 0; i < queue.length; i++) {
-         const rawClasses = queue[0]
-         for (const entry of rawClasses) {
-            const value = toValue(entry)
-            if (!value) continue;
-            if (typeof value === 'string') {
-               this.toClassNames(value).forEach((className) => currentClasses.add(className))
-            }
-            else {
-               queue.push(value)
-            }
-         }
-      }
-      return currentClasses
-   }
-
-   update(next: string | Falsey | ClassInput[], prev: string | Falsey | ClassInput[]) {
-      if (next instanceof Array) {
-         this.processClassInput(next)
-      }
-      else if (!prev && typeof next === 'string') {
-         this.addStaticClasses(next)
-      }
-      else if (typeof prev === 'string' && !next) {
-         this.markRemoval(prev)
-      }
-      else if (typeof prev === 'string' && typeof next === 'string') {
-         this.markRemoval(prev)
-         this.addDynamicClasses(next)
-      }
-      else {
-         if (next) console.error('Mismatch of previous and current class ion values', prev, next)
-      }
-   }
-
-
-   processClassInput(rawClasses = this.rawClasses, level = 0) {
-      for (const entry of rawClasses) {
-         if (!entry) continue;
-         if (isGetter(entry)) {
-            watchToRender(entry as Ion<string | Falsey | ClassInput[]>, ({ previous }) => {
-               this.update(entry(), previous) // TODO: set up override rules
-            }, this.flask, RUN_EAGERLY)
-         }
-         else if (entry) {
-            this.addStaticClasses(entry)
-         }
-      }
-   }
-}
-
-function setUpClasses(node: Element, rawClasses: ClassInput[]) {
-   console.log('rawClasses', rawClasses)
+type Falsey = undefined | null | false | ''
+function setUpClasses(node: Element, classes: ClassInput[]) {
+   const flask = getFlask()
    const classList = node.classList
-   const classes = new Classes(classList, rawClasses)
-   classes.processClassInput()
-   classes.updateClassList()
+
+   for (const entry of classes) {
+      if (isGetter(entry)) {
+         watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+            // if (current === previous) return;
+            queueInternalRender(() => {
+               if (previous) removePreviousClasses(previous, classList)
+               if (entry()) addClasses(entry(), classList, flask)
+            }, flask)
+         }, flask, RUN_EAGERLY)
+      }
+      else if (entry) {
+         addClasses(entry, classList, flask)
+      }
+   }
+}
+
+function removePreviousClasses(prevValue: string | AnyObject, classList: DOMTokenList) {
+   if (isString(prevValue)) {
+      const prevClasses = prevValue && prevValue.split(' ')
+      if (prevClasses)
+         for (const prevClass of prevClasses) {
+            classList.remove(prevClass);
+         }
+   }
+   else if (isObject(prevValue)) {
+      for (const key in prevValue) {
+         const value = prevValue[key]
+         if (value) {
+            classList.remove(key)
+         }
+      }
+   }
+   else if (__DEV__) {
+      console.warn('DEV RESEARCH: Reactive class input has not been handled for', prevValue)
+   }
+}
+
+
+function addClasses(value: string | Falsey | { [key: string]: Booleanny }, classList: DOMTokenList, flask: Flask) {
+   if (!value) {
+      return;
+   }
+   else if (isString(value)) {
+      setUpClassesFromString(value, classList)
+   }
+   else if (isObject(value)) {
+      setUpClassesFromObject(value, classList, flask)
+   }
+   else {
+      if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
+   }
+}
+
+// let __debug__=false;
+// // export function initDebugger(){
+// // __debug__ = true
+// // }
+
+function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList, flask: Flask) {
+   for (const key in entry) {
+      const value = entry[key]
+      if (isGetter(value)) {
+         watchToRender(value, ({ current, previous }) => {
+            // if (current === previous) return
+            queueInternalRender(() => {
+               if (value()) classList.add(key)
+               else if (previous) classList.remove(key)
+            }, flask)
+         }, flask, RUN_EAGERLY)
+      }
+      else if (value) {
+         classList.add(key)
+      }
+      else {
+         classList.remove(key)
+      }
+   }
+}
+
+function setUpClassesFromString(classString: string, classList: DOMTokenList) {
+   const classes = classString.split(' ')
+   for (const activeClass of classes) {
+      if (activeClass) classList.add(activeClass)
+   }
 }
 
 

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { transformQuarkySugarShared } = require('../../../scripts/transform-quarky-sugar.shared.cjs') as {
-  transformQuarkySugarShared: (
+const { transformQRXSugarShared } = require('../../../scripts/transform-qrx-sugar.shared.cjs') as {
+  transformQRXSugarShared: (
     input: { code: string; fileName: string },
     options?: { includeToTransformedPos?: boolean },
   ) => {
@@ -30,7 +30,7 @@ function Counter({ show@ }) {
 }
 `
 
-  const transformed = transformQuarkySugarShared(
+  const transformed = transformQRXSugarShared(
     { code: source, fileName: 'Counter.qrx' },
     { includeToTransformedPos: true },
   )
@@ -72,7 +72,7 @@ function Kit(value: number) {
 }
 `
 
-    const absorbTransformed = transformQuarkySugarShared(
+    const absorbTransformed = transformQRXSugarShared(
       { code: absorbSource, fileName: 'Kit.qrx' },
       { includeToTransformedPos: true },
     )
@@ -95,7 +95,7 @@ function View() {
 }
 `
 
-    const jsxFragmentTransformed = transformQuarkySugarShared(
+    const jsxFragmentTransformed = transformQRXSugarShared(
       { code: jsxFragmentSource, fileName: 'View.qrx' },
       { includeToTransformedPos: true },
     )

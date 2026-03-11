@@ -424,8 +424,8 @@ function collapseHiddenHelperMappings(state) {
   }
 }
 
-function ensureNamedImportFromQuarky(state, importName) {
-  const namedImportRegex = /import\s*\{([^}]*)\}\s*from\s*['"]@rue\/quarky['"]/m
+function ensureNamedImportFromModule(state, importName, module='quarky') {
+  const namedImportRegex = new RegExp(`import\s*\{([^}]*)\}\s*from\s*['"]@rue\/${module}['"]`, 'm')
   const match = state.code.match(namedImportRegex)
 
   if (match) {
@@ -443,7 +443,7 @@ function ensureNamedImportFromQuarky(state, importName) {
     return
   }
 
-  state.replaceRange(0, 0, `import { ${importName} } from "@rue/quarky"\n`, 0)
+  state.replaceRange(0, 0, `import { ${importName} } from "@rue/${module}"\n`, 0)
 }
 
 function rewriteGetterAccessSugar(state) {
@@ -529,7 +529,7 @@ function rewriteGetterAccessSugar(state) {
   } while (changed && iteration < 8)
 
   if (helperUsed) {
-    ensureNamedImportFromQuarky(state, GETTER_ACCESS_HELPER)
+    ensureNamedImportFromModule(state, GETTER_ACCESS_HELPER)
   }
 }
 
@@ -674,7 +674,7 @@ function rewriteDestructuredBindings(state, getVars) {
   }
 
   if (shouldImport) {
-    ensureNamedImportFromQuarky(state, DESTRUCTURE_HELPER)
+    ensureNamedImportFromModule(state, DESTRUCTURE_HELPER, 'qrx')
   }
 }
 
@@ -947,7 +947,7 @@ function rewriteObjectLiteralsWithAbsorb(state) {
   }
 
   if (shouldImport) {
-    ensureNamedImportFromQuarky(state, ABSORB_HELPER)
+    ensureNamedImportFromModule(state, ABSORB_HELPER, 'qrx')
   }
 }
 
@@ -1727,7 +1727,7 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
     state.applyEdits(edits)
   }
   if (derivationHelperUsed) {
-    ensureNamedImportFromQuarky(state, DERIVATION_HELPER)
+    ensureNamedImportFromModule(state, DERIVATION_HELPER)
   }
 }
 
@@ -1848,7 +1848,7 @@ function buildPositionSourceMapFromRemapTable(remapTable, sourceFileName) {
 
   return {
     version: 1,
-    kind: 'quarky-position-map',
+    kind: 'qrx-position-map',
     source: typeof sourceFileName === 'string' ? sourceFileName : 'virtual.qrx',
     originalLength: Math.max(0, safeTable.originalLength || 0),
     generatedLength: Math.max(0, safeTable.transformedLength || 0),
@@ -2027,7 +2027,7 @@ function collectSugarTokens(code) {
   return tokens.sort((a, b) => a.start - b.start)
 }
 
-function transformQuarkySugarShared(input, options = {}) {
+function transformQRXSugarShared(input, options = {}) {
   const includeToTransformedPos = Boolean(options && options.includeToTransformedPos)
   const includeTokens = Boolean(options && options.includeTokens)
   const code = input && typeof input.code === 'string' ? input.code : ''
@@ -2085,5 +2085,5 @@ module.exports = {
   toTransformedPosFromSourceMap,
   toOriginalPosFromSourceMap,
   toOriginalPosFromRemapTable,
-  transformQuarkySugarShared,
+  transformQRXSugarShared,
 }

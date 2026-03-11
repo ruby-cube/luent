@@ -71,15 +71,16 @@ export type EventsConfig = {
 
 
 export type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
-export type $Classes = Ion<ClassInput[]>
-export type ClassInput = MaybeIon<string | Falsey> | $Classes
+// export type $Classes = Ion<ClassInput[]>
+// export type ClassInput = MaybeIon<string | Falsey> | $Classes
+export type ClassInput = MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | ClassInput)[]
 
 export type ElementConfig<K extends TagName = TagName> = {
    [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
    // class?: ClassInput | ClassInput[],
    // style?: StyleInput | StyleInput[],
-   'display-if'?: Ion<Booleanny>
+   'show-if'?: Ion<Booleanny>
    // attributes?: K extends TagName ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 
@@ -188,7 +189,7 @@ function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | TagName | ComponentForge | 'o--link' | 'remount-view' | 'display-view' | 'create-view' | any,
+   nodeType: SVGTag | TagName | ComponentForge | 'o--link' | 'remount-view' | 'show-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -208,8 +209,8 @@ export function makeJSXNode(
          if (!Slot) throw new Error(`Extraneous <create-view>`)
          return makeView(wrapWithActivationType('create', Slot), config);
 
-      case 'display-view':
-         if (!Slot) throw new Error(`Extraneous <display-view>`)
+      case 'show-view':
+         if (!Slot) throw new Error(`Extraneous <show-view>`)
          return makeView(wrapWithActivationType('show', Slot), config);
 
       case 'remount-view':

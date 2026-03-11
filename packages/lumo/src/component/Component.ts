@@ -6,7 +6,7 @@ import { $Node, $Nodes, initializeRef, InternalRef, isNodesRef } from "../node/N
 import { MaybeIon, toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
-import { analyzeAttributes, createOverrideClasses } from "../element/makeElement";
+import { analyzeAttributes } from "../element/makeElement";
 import { setUpHooks } from "../flask/template-hooks";
 import { getActiveFlask } from "@rue/flask";
 
@@ -145,7 +145,7 @@ export function makeComponent(
       ...attributes,
       ...transitions,
       Slot,
-      classes: createOverrideClasses(classes)
+      classes
       // classes: classString
       // styles: style ? toStyleDeclaration(style) : undefined // TODO:
    }))
@@ -163,7 +163,7 @@ export function makeComponent(
    }
    setUpHooks(publicComponent ?? ref, hooks)
 
-   // if (tag['display-if']) setUpConditionalDisplay()
+   // if (tag['show-if']) setUpConditionalDisplay()
    return output
 }
 

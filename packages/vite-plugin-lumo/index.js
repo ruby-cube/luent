@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { transformWithEsbuild } from 'vite'
 import * as babel from '@babel/core'
 import babelLumoTransform from '../lumo/babel-plugin/index.js'
-import { transformQuarkySugar } from '../quarky/scripts/transform-quarky-sugar.mjs'
+import { transformQRXSugar } from '../qrx/scripts/transform-qrx-sugar.mjs'
 
 const jsxRuntimePath = fileURLToPath(new URL('../lumo/jsx-runtime/src/index.ts', import.meta.url))
 
@@ -27,7 +27,7 @@ export default function lumoPlugin() {
             if (!fileName.endsWith('.qrx')) return
 
             const code = await readFile(fileName, 'utf8')
-            const sugaredCode = transformQuarkySugar({ code, fileName }).code
+            const sugaredCode = transformQRXSugar({ code, fileName }).code
             const result = await babel.transformAsync(sugaredCode, {
                plugins: [
                   babelLumoTransform,

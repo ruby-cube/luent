@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import tsParser from '@typescript-eslint/parser'
-import { createQrxProcessor } from './packages/quarky/scripts/eslint-qrx-processor.mjs'
+import { createQrxProcessor } from './packages/qrx/scripts/eslint-qrx-processor.mjs'
 
 const require = createRequire(import.meta.url)
 const muRules = require('./eslint-mu-rules.cjs')

@@ -1,5 +1,5 @@
 {
-  "name": "@rue/quarky-tsserver-plugin",
+  "name": "@rue/qrx-tsserver-plugin",
   "private": true,
   "version": "0.0.0",
   "main": "./index.cjs",

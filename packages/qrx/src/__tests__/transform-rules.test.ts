@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { transformQuarkySugarShared } = require('../../../scripts/transform-quarky-sugar.shared.cjs') as {
-  transformQuarkySugarShared: (input: { code: string; fileName: string }) => { code: string }
+const { transformQRXSugarShared } = require('../../../scripts/transform-qrx-sugar.shared.cjs') as {
+  transformQRXSugarShared: (input: { code: string; fileName: string }) => { code: string }
 }
 
 describe('quarky sugar transforms', () => {
@@ -15,7 +15,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrk' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrk' }).code
     expect(transformed).toContain('const æcount = Ion(0)')
     expect(transformed).toContain('return æcount()')
   })
@@ -28,7 +28,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrk' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrk' }).code
     expect(transformed).toContain('const æcount = Ion(() => 1)')
     expect(transformed).toContain('return æcount()()')
   })
@@ -42,7 +42,7 @@ function Demo(obj: any) {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('destructureØ')
     expect(transformed).toContain('πæ')
     expect(transformed).toContain("const { æa, b } = destructureØ(obj, 'æa', 'b')")
@@ -60,7 +60,7 @@ function Kit() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('absorbØ')
     expect(transformed).toContain('æcount: Ion(0)')
     expect(transformed).toContain("['æcount', 'normalProperty']")
@@ -76,7 +76,7 @@ function View() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('const value = () => æcount() + 1')
     expect(transformed).toContain('const list = [ () => æcount() + 2 ]')
     expect(transformed).toContain('value={æ(() => æcount() + 3)}')
@@ -91,7 +91,7 @@ function View(value: number) {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('import { æ } from "@rue/quarky"')
     expect(transformed).toContain('value={æ(() => value + 1)}')
   })
@@ -105,7 +105,7 @@ function Demo(obj: any) {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain("const æone = (obj.a.b.c.æproperty, πæ(obj.a.b.c, 'property'))")
     expect(transformed).toContain("const ætwo = (obj.æa.æb.æc.æproperty, πæ(πæ(πæ(πæ(obj, 'a'), 'b'), 'c'), 'property'))")
   })
@@ -118,7 +118,7 @@ function Demo(obj: any, key: string) {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain("const æa = obj == null ? undefined : πæ(obj, 'value')")
   })
 
@@ -130,7 +130,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('const æobj = Ion({ property: 1 })')
     expect(transformed).toContain('return æobj().property')
   })
@@ -143,7 +143,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('const æobj = Ion({ property: 1 })')
     expect(transformed).toContain('return æobj().property')
   })
@@ -162,7 +162,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain("if (æobj())")
     expect(transformed).toContain("console.log(æobj()!.name)")
     expect(transformed).toContain("watch(æobj, () => {")
@@ -182,7 +182,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('if (!æobj())')
     expect(transformed).toContain("console.log(æobj()!.name)")
   })
@@ -196,7 +196,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain("const value = !æobj() ? 'none' : æobj()!.name")
   })
 
@@ -215,7 +215,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('if (æobj() != null)')
     expect(transformed).toContain('if (æobj() !== undefined)')
     expect(transformed).toContain('console.log(æobj()!.name)')
@@ -240,7 +240,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('if (æobj() == null)')
     expect(transformed).toContain('if (æobj() === undefined)')
     expect(transformed).toContain('console.log(æobj()!.name)')
@@ -268,7 +268,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('while (æobj())')
     expect(transformed).toContain('} while (æobj())')
     expect(transformed).toContain('for (; æobj(); )')
@@ -288,7 +288,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('If(æobj(), <p>{æobj()!.name}</p>)')
     expect(transformed).toContain('ElseIf(æobj() !== undefined, <p>{æobj()!.name}</p>)')
   })
@@ -306,7 +306,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('If(!æobj(), <p>missing</p>)')
     expect(transformed).toContain('Else(<p>{æobj()!.name}</p>)')
   })
@@ -324,7 +324,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('If(æobj(), () => <p>{æobj()!.name}</p>)')
     expect(transformed).toContain('ElseIf(æobj() !== undefined, () => <p>{æobj()!.name}</p>)')
   })
@@ -342,7 +342,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('If(!æobj(), () => <p>missing</p>)')
     expect(transformed).toContain('Else(() => <p>{æobj()!.name}</p>)')
   })
@@ -356,7 +356,7 @@ function Demo() {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain("const value = IfElse(æobj(), () => æobj()!.name, () => 'none')")
   })
 
@@ -369,7 +369,7 @@ function Demo(obj: any, key: string) {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('const æa = obj[key]@')
     expect(transformed).toContain('const æb = obj?.[key]@')
     expect(transformed).not.toContain('πæ(obj, key)')
@@ -384,7 +384,7 @@ function Demo(src: any) {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('const { ætop, nested: { ædeep } } = src')
     expect(transformed).toContain('return ætop')
   })
@@ -398,8 +398,8 @@ function Demo(obj: any) {
 }
 `
 
-    const once = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
-    const twice = transformQuarkySugarShared({ code: once, fileName: 'demo.qrx' }).code
+    const once = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const twice = transformQRXSugarShared({ code: once, fileName: 'demo.qrx' }).code
     expect(twice).toBe(once)
   })
 
@@ -411,7 +411,7 @@ function FractionKitB(count@: Ion<number>) {
 }
 `
 
-    const transformed = transformQuarkySugarShared({ code: input, fileName: 'demo.qrx' }).code
+    const transformed = transformQRXSugarShared({ code: input, fileName: 'demo.qrx' }).code
     expect(transformed).toContain('function FractionKitB(æcount: Ion<number>)')
     expect(transformed).toContain('const æhalfCount = Ion(() => æcount() / 2)')
     expect(transformed).toContain('return { get halfCount() { return æhalfCount() } }')

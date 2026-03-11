@@ -73,11 +73,11 @@ export function TestCreateMountShow() {
          <hr></hr>
          <h3>Show/hide an element</h3>
          <section>
-            <code>{'<div display-if={$condition}>'}</code>
+            <code>{'<div show-if={$condition}>'}</code>
             <p>This toggles css <span class="code">display: none</span> on a single element</p>
             <div class='container'>
                <div class='container' style="height: 60px">
-                  <div display-if={$brave} class='emoji'>
+                  <div show-if={$brave} class='emoji'>
                      😳
                   </div>
                </div>
@@ -90,21 +90,21 @@ export function TestCreateMountShow() {
          <h3>Show/hide a view</h3>
          <section>
             <code>
-               {'<display-view>'}<br />
+               {'<show-view>'}<br />
                {'   '}<span class="bracket">{`{`}</span>{`If(...)`}<span class="bracket">{`}`}</span><br />
                {'   '}<span class="bracket">{`{`}</span>{'ElseIf(...)'}<span class="bracket">{`}`}</span>
             </code>
             <p>This toggles css <span class='code'>display: none</span> for a conditional series</p>
             <div class='container'>
                <div class='container' style="height: 60px">
-                  <display-view>
+                  <show-view>
                      {If(($mood() === 'happy'),
                         <span class='emoji'>😃</span>
                      )}
                      {Else(
                         <span class='emoji'>😞</span>
                      )}
-                  </display-view>
+                  </show-view>
                </div>
                <div style="font-size: x-small">{`(he's bipolar)`}</div>
                <button style="width: 9em" on:click={e => $mood.toggle()}>swing mood</button>

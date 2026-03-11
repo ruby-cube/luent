@@ -6,10 +6,10 @@ const {
   mapTextSpanFromSourceMap,
   toTransformedPosFromSourceMap,
   toOriginalPosFromSourceMap,
-  transformQuarkySugarShared,
+  transformQRXSugarShared,
   toOriginalPosFromRemapTable,
   mapTextSpanFromRemapTable,
-} = require('../../../scripts/transform-quarky-sugar.shared.cjs') as {
+} = require('../../../scripts/transform-qrx-sugar.shared.cjs') as {
   mapTextSpanFromSourceMap: (
     sourceMap: {
       version: number
@@ -58,7 +58,7 @@ const {
     },
     originalPos: number,
   ) => number
-  transformQuarkySugarShared: (
+  transformQRXSugarShared: (
     input: { code: string; fileName: string },
     options?: { includeToTransformedPos?: boolean },
   ) => {
@@ -130,7 +130,7 @@ function FractionKit(count@) {
 }
 `
 
-  const transformed = transformQuarkySugarShared(
+  const transformed = transformQRXSugarShared(
     { code: source, fileName: 'FractionKit.qrx' },
     { includeToTransformedPos: true },
   )
@@ -202,7 +202,7 @@ function Counter(count@: Ion<number>) {
 }
 `
 
-    const helperTransformed = transformQuarkySugarShared(
+    const helperTransformed = transformQRXSugarShared(
       { code: helperSource, fileName: 'Counter.qrx' },
       { includeToTransformedPos: true },
     )
@@ -232,7 +232,7 @@ function Counter(count@: Ion<number>) {
 }
 `
 
-    const helperTransformed = transformQuarkySugarShared(
+    const helperTransformed = transformQRXSugarShared(
       { code: helperSource, fileName: 'Counter.qrx' },
       { includeToTransformedPos: true },
     )
@@ -266,7 +266,7 @@ function Counter(count@: Ion<number>) {
 }
 `
 
-    const unicodeTransformed = transformQuarkySugarShared(
+    const unicodeTransformed = transformQRXSugarShared(
       { code: unicodeSource, fileName: 'Counter.qrx' },
       { includeToTransformedPos: true },
     )

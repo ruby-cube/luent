@@ -3,8 +3,8 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const ts = require('typescript') as typeof import('typescript')
-const { transformQuarkySugarShared } = require('../../../scripts/transform-quarky-sugar.shared.cjs') as {
-  transformQuarkySugarShared: (input: { code: string; fileName: string }) => {
+const { transformQRXSugarShared } = require('../../../scripts/transform-qrx-sugar.shared.cjs') as {
+  transformQRXSugarShared: (input: { code: string; fileName: string }) => {
     code: string
     mapper: {
       toOriginalPos(pos: number): number
@@ -26,7 +26,7 @@ function offsetAt(source: string, needle: string) {
 }
 
 function collectRemappedDiagnostics(source: string, fileName: string) {
-  const transformed = transformQuarkySugarShared({ code: source, fileName })
+  const transformed = transformQRXSugarShared({ code: source, fileName })
   const virtualFileName = `${fileName}.tsx`
 
   const compilerOptions: import('typescript').CompilerOptions = {

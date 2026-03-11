@@ -25,8 +25,8 @@ const {
    mapTextSpanFromSourceMap,
    toTransformedPosFromSourceMap,
    toOriginalPosFromSourceMap,
-   transformQuarkySugar,
-} = require('./transform-quarky-sugar.cjs')
+   transformQRXSugar,
+} = require('./transform-qrx-sugar.cjs')
 
 const SUGAR_IDENTIFIER_RE = /^æ[A-Za-z_$][\w$]*$/
 
@@ -248,7 +248,7 @@ function init(modules) {
             const source = getOriginalSourceText(normalizedOriginal)
             if (cached && cached.originalCode === source) return cached
 
-            const result = profile(`transform:${path.basename(normalizedOriginal)}`, () => transformQuarkySugar({
+            const result = profile(`transform:${path.basename(normalizedOriginal)}`, () => transformQRXSugar({
                code: source,
                fileName: normalizedOriginal,
             }))
@@ -836,7 +836,7 @@ function init(modules) {
          const cached = transformCache.get(fileName)
          if (cached && cached.source === source) return cached.transformed
 
-         const transformedCore = transformQuarkySugar({ code: source, fileName })
+         const transformedCore = transformQRXSugar({ code: source, fileName })
          const transformed = {
             ...transformedCore,
             originalCode: source,

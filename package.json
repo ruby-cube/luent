@@ -27,14 +27,14 @@
     "ni:quarky": "pnpm -F @rue/quarky install",
     "mu-lint": "pnpm exec tsc apps/play/mu-linting/mu-mutation-linter.ts apps/play/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir apps/play/mu-linting/.tmp-run && node apps/play/mu-linting/.tmp-run/run-mu-mutation-lint.js",
     "lint:mu-eslint": "pnpm exec eslint \"apps/play/mu-linting/**/*.{ts,tsx}\"",
-    "typecheck:quarky": "pnpm exec node packages/quarky/scripts/quarky-tsc.mjs -p tsconfig.json",
-    "test:position-mapping": "pnpm -F @rue/quarky run test:position-mapping",
-    "emit:quarky-transform": "pnpm exec node packages/quarky/scripts/emit-transformed-quarky.mjs",
-    "emit:counter-transform": "pnpm exec node packages/quarky/scripts/emit-transformed-quarky.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx",
-    "watch:counter-transform": "pnpm exec node packages/quarky/scripts/watch-transformed-quarky.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx"
+    "typecheck:qrx": "pnpm exec node packages/qrx/scripts/qrx-tsc.mjs -p tsconfig.json",
+    "test:position-mapping": "pnpm -F @rue/qrx run test:position-mapping",
+    "emit:qrx-transform": "pnpm exec node packages/qrx/scripts/emit-transformed-qrx.mjs",
+    "emit:counter-transform": "pnpm exec node packages/qrx/scripts/emit-transformed-qrx.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx",
+    "watch:counter-transform": "pnpm exec node packages/qrx/scripts/watch-transformed-qrx.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx"
   },
   "devDependencies": {
-    "@rue/quarky-tsserver-plugin": "workspace:*",
+    "@rue/qrx-tsserver-plugin": "workspace:*",
     "@typescript-eslint/parser": "^8.46.0",
     "@playwright/test": "^1.58.2",
     "@types/jsdom": "^21.1.7",

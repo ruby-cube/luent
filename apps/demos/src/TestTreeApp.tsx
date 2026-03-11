@@ -126,7 +126,7 @@ function TreeItemView(input: FromTag<{
             )}
          </div>
          {If($isFolder,
-            <ul display-if={$isOpen}>
+            <ul show-if={$isOpen}>
                {For(item.children!, m => m, item => (
                   <TreeItemView item={item}></TreeItemView>
                ))}

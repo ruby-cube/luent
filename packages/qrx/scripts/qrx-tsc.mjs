@@ -1,7 +1,7 @@
 import path from 'node:path'
 import process from 'node:process'
 import * as ts from 'typescript'
-import { transformQuarkySugar } from './transform-quarky-sugar.mjs'
+import { transformQRXSugar } from './transform-qrx-sugar.mjs'
 
 function parseArgs(argv) {
   let projectPath
@@ -80,7 +80,7 @@ function createQrkCompilerContext(configPath, parsedConfig) {
     const cached = transformCache.get(normalizedOriginal)
     if (cached && cached.originalCode === source) return cached
 
-    const transformed = transformQuarkySugar({
+    const transformed = transformQRXSugar({
       code: source,
       fileName: normalizedOriginal,
     })
@@ -151,7 +151,7 @@ function resolveConfigPath(projectPath) {
     : ts.findConfigFile(process.cwd(), ts.sys.fileExists, 'tsconfig.json')
 
   if (!configPath) {
-    console.error('quarky-tsc: tsconfig not found. Use -p <path>.')
+    console.error('qrx-tsc: tsconfig not found. Use -p <path>.')
     process.exit(1)
   }
 
@@ -300,7 +300,7 @@ function runTypecheck(configPath) {
     return false
   }
 
-  console.log('quarky-tsc: no type errors')
+  console.log('qrx-tsc: no type errors')
   return true
 }
 

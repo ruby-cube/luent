@@ -4,11 +4,11 @@ const {
   toTransformedPosFromSourceMap,
   toOriginalPosFromRemapTable,
   toOriginalPosFromSourceMap,
-  transformQuarkySugarShared,
-} = require('../quarky/scripts/transform-quarky-sugar.shared.cjs')
+  transformQRXSugarShared,
+} = require('../qrx/scripts/transform-qrx-sugar.shared.cjs')
 
-function transformQuarkySugar(input) {
-  return transformQuarkySugarShared(input, { includeToTransformedPos: true })
+function transformQRXSugar(input) {
+  return transformQRXSugarShared(input, { includeToTransformedPos: true })
 }
 
 module.exports = {
@@ -17,5 +17,5 @@ module.exports = {
   toTransformedPosFromSourceMap,
   toOriginalPosFromRemapTable,
   toOriginalPosFromSourceMap,
-  transformQuarkySugar,
+  transformQRXSugar,
 }

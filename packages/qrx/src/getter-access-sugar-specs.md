@@ -53,7 +53,7 @@ function Counter({ showFractions@ }) {
 The above code should be transformed to the following as virtual source for the linter:
 
 ```tsx
-import { æ, πæ, destructureØ } from "@rue/quarky";
+import { æ, πæ, destructureØ } from "@rue/qrx";
 
 function Counter({ æshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) {
   const showFractions = æshowFractions
@@ -266,7 +266,7 @@ function FractionKit(æcount) {
          }, ['æhalfCount', 'æthirdCount', 'πæsomething', 'æcount', 'normalProperty'])
       }
       ```
-   - import the getter absorber helper `absorbØ` from '@rue/quarky' if it hasn't been imported yet.
+   - import the getter absorber helper `absorbØ` from '@rue/qrx' if it hasn't been imported yet.
 
 ### Access transforms
 - transform all variables with the `@` suffix to `ævariable`: `variable@` --> `ævariable`
@@ -410,8 +410,8 @@ function FractionKit(æcount) {
 | TV-28 | `IfElse(obj, () => obj.name, () => fallback)` | truthy render-function scope read transforms with guarded assertion | No |
 
 ### Implemented status (current)
-- Transform assertions for type-guarded `!` emission are covered in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
-- Diagnostic/remap behavior (guarded reads clean, unguarded reads still produce TS2532 at authored positions) is covered in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+- Transform assertions for type-guarded `!` emission are covered in `packages/qrx/src/__tests__/transform-rules.test.ts`.
+- Diagnostic/remap behavior (guarded reads clean, unguarded reads still produce TS2532 at authored positions) is covered in `packages/qrx/src/__tests__/typecheck-diagnostics.test.ts`.
 - Covered guard families include:
    - `if/else` truthy and negated conditions.
    - logical `&&` guarded reads.
@@ -421,24 +421,24 @@ function FractionKit(æcount) {
    - template conditional helpers `If()/ElseIf()/Else()` in JSX templates.
    - synchronous render-function branch scopes for `If()/ElseIf()/Else()` and `IfElse()` truthy callbacks.
 - `TV-25` traceability:
-   - transform coverage: `adds non-null assertion inside while/do-while/for loop bodies guarded by condition` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
-   - diagnostics/remap coverage: `keeps loop-body reads clean for while/do-while/for guarded conditions while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+   - transform coverage: `adds non-null assertion inside while/do-while/for loop bodies guarded by condition` in `packages/qrx/src/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps loop-body reads clean for while/do-while/for guarded conditions while flagging later unguarded reads` in `packages/qrx/src/__tests__/typecheck-diagnostics.test.ts`.
 - `TV-23` traceability:
-   - transform coverage: `adds non-null assertion inside If and ElseIf template conditional branches` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
-   - diagnostics/remap coverage: `keeps If and ElseIf template branch reads clean while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+   - transform coverage: `adds non-null assertion inside If and ElseIf template conditional branches` in `packages/qrx/src/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps If and ElseIf template branch reads clean while flagging later unguarded reads` in `packages/qrx/src/__tests__/typecheck-diagnostics.test.ts`.
 - `TV-24` traceability:
-   - transform coverage: `adds non-null assertion inside Else template branch when paired with negated If` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
-   - diagnostics/remap coverage: `keeps Else template branch reads clean when paired with negated If while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+   - transform coverage: `adds non-null assertion inside Else template branch when paired with negated If` in `packages/qrx/src/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps Else template branch reads clean when paired with negated If while flagging later unguarded reads` in `packages/qrx/src/__tests__/typecheck-diagnostics.test.ts`.
 - `TV-26` traceability:
-   - transform coverage: `adds non-null assertion inside If/ElseIf render-function branch scopes` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
-   - diagnostics/remap coverage: `keeps If/ElseIf render-function branch reads clean while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+   - transform coverage: `adds non-null assertion inside If/ElseIf render-function branch scopes` in `packages/qrx/src/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps If/ElseIf render-function branch reads clean while flagging later unguarded reads` in `packages/qrx/src/__tests__/typecheck-diagnostics.test.ts`.
 - `TV-27` traceability:
-   - transform coverage: `adds non-null assertion inside Else render-function branch when paired with negated If` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
-   - diagnostics/remap coverage: `keeps Else render-function branch reads clean when paired with negated If while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
+   - transform coverage: `adds non-null assertion inside Else render-function branch when paired with negated If` in `packages/qrx/src/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps Else render-function branch reads clean when paired with negated If while flagging later unguarded reads` in `packages/qrx/src/__tests__/typecheck-diagnostics.test.ts`.
 - `TV-28` traceability:
-   - transform coverage: `adds non-null assertion inside IfElse truthy render-function scope` in `packages/quarky/src/sugar/__tests__/transform-rules.test.ts`.
-   - diagnostics/remap coverage: `keeps IfElse truthy render-function reads clean while flagging later unguarded reads` in `packages/quarky/src/sugar/__tests__/typecheck-diagnostics.test.ts`.
-- Cross-cutting sugar regression coverage remains in `packages/quarky/src/sugar/__tests__/position-mapping.test.ts`, `packages/quarky/src/sugar/__tests__/remap-table-hover.test.ts`, and `packages/quarky/src/sugar/__tests__/tsserver-hover-integration.test.ts`.
+   - transform coverage: `adds non-null assertion inside IfElse truthy render-function scope` in `packages/qrx/src/__tests__/transform-rules.test.ts`.
+   - diagnostics/remap coverage: `keeps IfElse truthy render-function reads clean while flagging later unguarded reads` in `packages/qrx/src/__tests__/typecheck-diagnostics.test.ts`.
+- Cross-cutting sugar regression coverage remains in `packages/qrx/src/__tests__/position-mapping.test.ts`, `packages/qrx/src/__tests__/remap-table-hover.test.ts`, and `packages/qrx/src/__tests__/tsserver-hover-integration.test.ts`.
 
 ### Known gaps / future vectors
 - `||`-heavy compound conditions are intentionally conservative and may need dedicated branch-precision tests.
@@ -446,13 +446,13 @@ function FractionKit(æcount) {
 - Control-flow constructs beyond direct conditionals (e.g., `switch`-style narrowing, assertion-function-based narrowing) are not yet modeled for `æx()!` emission.
 - Async boundaries remain conservative by design; add explicit vectors if future behavior should carry/restore narrowing across specific async patterns.
 
-### Typechecking pipeline (`quarky-tsc`)
+### Typechecking pipeline (`qrx-tsc`)
 
 * `.qrk` and `.qrx` files are virtualized as transformed `.ts`/`.tsx` for TypeScript typechecking.
 - Authored sugar files are never rewritten on disk.
 - Diagnostics are remapped from transformed virtual positions back to original sugar locations.
-- Transformer single source of truth: `packages/quarky/scripts/transform-quarky-sugar.shared.cjs`.
-- Quarky script entrypoint wrapper: `packages/quarky/scripts/transform-quarky-sugar.mjs`.
-- TS Server plugin wrapper: `packages/quarky-tsserver-plugin/transform-quarky-sugar.cjs`.
-- To run from root: `pnpm typecheck:quarky`
-- To run from package: `pnpm -F @rue/quarky typecheck`
+- Transformer single source of truth: `packages/qrx/scripts/transform-qrx-sugar.shared.cjs`.
+- Quarky script entrypoint wrapper: `packages/qrx/scripts/transform-qrx-sugar.mjs`.
+- TS Server plugin wrapper: `packages/qrx-tsserver-plugin/transform-qrx-sugar.cjs`.
+- To run from root: `pnpm typecheck:qrx`
+- To run from package: `pnpm -F @rue/qrx typecheck`

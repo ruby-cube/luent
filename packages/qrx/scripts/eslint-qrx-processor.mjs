@@ -1,4 +1,4 @@
-import { transformQuarkySugar } from './transform-quarky-sugar.mjs'
+import { transformQRXSugar } from './transform-qrx-sugar.mjs'
 
 function getLineStarts(text) {
   const starts = [0]
@@ -85,7 +85,7 @@ export function createQrxProcessor() {
       }
 
       try {
-        const transformed = transformQuarkySugar({
+        const transformed = transformQRXSugar({
           code: text,
           fileName: filename,
         })

@@ -247,8 +247,9 @@ export function toInput(attributes: AnyObject) {
 
 
 type TagAttributes<D> =
-   StaticInput<D>
-   & MaybeIonAttributes<D>
+   Attributes<D>
+   // StaticInput<D>
+   // & MaybeIonAttributes<D>
    & MutableIonAttributes<D>
    // & NonmutableIonAttributes<D>
    & TagEvents<D>
@@ -261,6 +262,10 @@ type TagAttributes<D> =
 // [] mu? --> {mu:name: MutableIon<string>}  and {frog: MaybeIon<string>}
 // [] Ion --> MaybeIon<string>
 // [] Inert --> 
+
+type Attributes<D> = {
+   [K in keyof D as K extends 'Slot' ? never : K extends `on:${string}` ? never : K extends `mu:${string}` ? never : K] : D[K] extends Ion<infer S> ? S | D[K] : D[K]
+}
 
 type TagEvents<D> = {
    [K in keyof D as K extends `on:${string}` ? K : never]: (event: D[K]) => void
@@ -280,12 +285,15 @@ type MaybeIonAttributes<D> = {
    : K extends string ? K
    : never
    : never]:
-   (ExcludePrimitives<D[K]>) |
-   (ExcludePrimitives<D[K]> extends Ion<infer S> ?
-      S
-      // MaybeMarkInert<S>
-      : never)
-   | (OnlyPrimitives<D[K]>)
+      // 'frog'
+      D[K]
+      // D[K] extends Ion<infer T> ? T | D[K] : D[K]
+   // (ExcludePrimitives<D[K]>) |
+   // (ExcludePrimitives<D[K]> extends Ion<infer S> ?
+   //    S
+   //    // MaybeMarkInert<S>
+   //    : never)
+   // | (OnlyPrimitives<D[K]>)
 }
 // type NonmutableIonAttributes<D> = {
 //    [K in keyof D
@@ -334,10 +342,7 @@ export type _FromTag<D> =
    & ReadonlyIonInput<D>
    & WithEmit<D>
    & WithMu<D>
-   // & OpInput<D>
-   // & SeeInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
-   // & (D extends { provide: infer S } ? { provide: S } : { provide: undefined })
    & Styles
    & { '~attributes'?: TagAttributes<D> }
 

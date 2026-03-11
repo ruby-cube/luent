@@ -497,8 +497,8 @@ for one-time listeners and impromptu listeners
 ### Style Binding<!-- {"fold":true} -->
 #### CSS Modules
 ### Show/Hide<!-- {"fold":true} -->
-<display-view>
-display-if attribute
+<show-view>
+show-if attribute
 
 ### Transitions
 ### 

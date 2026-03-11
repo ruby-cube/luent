@@ -1,4 +1,4 @@
-import { template, For, If, Else, FromTag, listen, isMutableIon } from "@rue/lumo"
+import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/lumo"
 import { watch, queueIonicTask, Ion, Ionic, EACH, as } from "@rue/quarky"
 
 interface Todo {
@@ -105,19 +105,22 @@ export function TodoMVC() {
       </span>
    )
 
+   const $todoList = NodeRef('div')
+
+   const $h1 = NodeRef('h1')
 
    return template(
       <>
          <section class="todoapp">
             <header class="header">
-               <h1>Todos</h1>
+               <h1 ref={$h1}>Todos</h1>
                <TodoInput addTodo={addTodo}></TodoInput>
             </header>
             <section class="main">
                {ToggleAllButton()}
-               <TodoList todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
+               <TodoList ref={$todoList} todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
             </section>
-            <footer display-if={ætodoCount} class="footer">
+            <footer show-if={ætodoCount} class="footer">
                {RemainingCount()}
                <ul class="filters">
                   <li>
@@ -130,7 +133,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={(æview() === 'completed' && 'selected')}>Completed</a>
                   </li>
                </ul>
-               <button display-if={(ætodoCount() > æremaining())} class="clear-completed" on:click={removeCompleted}>
+               <button show-if={(ætodoCount() > æremaining())} class="clear-completed" on:click={removeCompleted}>
                   Clear completed
                </button>
             </footer>
@@ -202,7 +205,7 @@ function TodoList(input: FromTag<{
             const æisEditing = Ion(() => todo === æeditedTodo());
 
             return (
-               <li class={(`todo ${todo.completed && 'completed'} ${æisEditing() && 'editing'}`)}>
+               <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={todo.æcompleted} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
@@ -223,6 +226,9 @@ function TodoList(input: FromTag<{
          })}
       </ul>
    )
+   .ref({
+      message: 'hi'
+   })
 }
 
 

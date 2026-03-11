@@ -129,7 +129,7 @@ export function TodoMVC() {
                <CheckBox can:toggleAll={(app.toggleAll)} ctx={app}></CheckBox>
                {TodoList($filteredTodos, removeTodo, updateTodo)}
             </section>
-            <footer display-if={(app.todos.length)} class="footer">
+            <footer show-if={(app.todos.length)} class="footer">
                <Remaining count={(app.remaining)}></Remaining>
                <ul class="filters">
                   <li>
@@ -142,7 +142,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={{ 'selected': (app.filter === 'completed') }}>Completed</a>
                   </li>
                </ul>
-               <button display-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={(app.removeCompleted)}>
+               <button show-if={(app.todos.length > app.remaining)} class="clear-completed" on:click={(app.removeCompleted)}>
                   Clear completed
                </button>
             </footer>

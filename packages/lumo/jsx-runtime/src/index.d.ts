@@ -1,11 +1,6 @@
-// NOTE: Users of the `experimental` builds of React should add a reference
-// to 'react/experimental' in their project. See experimental.d.ts's top comment
-// for reference and documentation on how exactly to do it.
-
 /// <reference path="global.d.ts" />
 
 import * as CSS from "csstype";
-// import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import * as Quarky from "@rue/quarky";
 import { $Node } from "../../src/node/NodeRef";
@@ -13,16 +8,6 @@ import { NodeRefsConfig } from "../../src/node/NodeRefs";
 import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../../src/boundaries/Portal";
-
-// export function jsxDEV(): "frog"
-// export function jsx(): "frog"
-
-// #LUMO-EDIT
-// Replaced all ReactNode --> JSXNode
-// Dunno if replacement will cause problems for:
-// - Iterable<JSXNode>
-// - ReadonlyArray<JSXNode>
-// - NodeEntityArray
 
 //$$$
 type NativeAnimationEvent = AnimationEvent;
@@ -50,17 +35,11 @@ type Booleanish = boolean | "true" | "false";
  */
 type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
 
-// eslint-disable-next-line @definitelytyped/export-just-namespace
-// export = React;
-// export as namespace React;
+
 
 declare namespace React {
-   //
-   // React Elements
-   // ----------------------------------------------------------------------
-
    // /**
-   //  * Represents any user-defined component, either as a function or a class.
+   //  * Represents any user-defined component
    //  *
    //  * Similar to {@link JSXElementConstructor}, but with extra properties like
    //  * {@link FunctionComponent.defaultProps defaultProps } and
@@ -122,34 +101,11 @@ declare namespace React {
    type JSXElementConstructor<P, O> = (
       input: P,
       optionals: O
-   ) => Component
+   ) => Lumo.Component
 
 
 
-   /**
-    * A value which uniquely identifies a node among items in an array.
-    *
-    * @see {@link https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key React Docs}
-    */
-   type Key = string | number | bigint;
 
-   /**
-    * @internal The props any component can receive.
-    * You don't have to add this type. All components automatically accept these props.
-    * ```tsx
-    * const Component = () => <div />;
-    * <Component key="one" />
-    * ```
-    *
-    * WARNING: The implementation of a component will never have access to these attributes.
-    * The following example would be incorrect usage because {@link Component} would never have access to `key`:
-    * ```tsx
-    * const Component = (props: React.Attributes) => props.key;
-    * ```
-    */
-   interface Attributes { //NOTE: Important for components and elements
-      key?: Key | null | undefined;
-   }
    /**
     * The props any component accepting refs can receive.
     * Class components, built-in browser components (e.g. `div`) and forwardRef components can receive refs and automatically accept these props.
@@ -183,15 +139,13 @@ declare namespace React {
     * ```
     */
    //$$$ Important
-   interface RefAttributes<T> extends Attributes { //NOTE: Important
+   interface RefAttributes<T> {
       /**
-       * Allows getting a ref to the component instance.
-       * Once the component unmounts, React will set `ref.current` to `null`
-       * (or call the ref with `null` if you passed a callback ref).
-       *
-       * @see {@link https://react.dev/learn/referencing-values-with-refs#refs-and-the-dom React Docs}
+       * Access the DOM element or component instance via NodeRef or node refs config object.
+       * Once the view unmounts, the ref value will be set to `null`
        */
-      ref?: Lumo.$Node | NodeRefsConfig | undefined;
+      ref?: T
+      // ref?: Lumo.$Node | NodeRefsConfig | undefined;
    }
 
    /**
@@ -223,147 +177,21 @@ declare namespace React {
    }
 
 
-
-   /**
-    * @deprecated - This type is not relevant when using React. Inline the type instead to make the intent clear.
-    */
-   type ReactText = string | number;
-   /**
-    * @deprecated - This type is not relevant when using React. Inline the type instead to make the intent clear.
-    */
-   type ReactChild = ReactElement | string | number;
-
-   /**
-    * @deprecated Use either `Lumo.JSXNode[]` if you need an array or `Iterable<Lumo.JSXNode>` if its passed to a host component.
-    */
-   interface NodeEntityArray extends ReadonlyArray<Lumo.JSXNode> { }
-   /**
-    * WARNING: Not related to `React.Fragment`.
-    * @deprecated This type is not relevant when using React. Inline the type instead to make the intent clear.
-    */
-   type ReactFragment = Iterable<Lumo.JSXNode>;
-
-   /**
-    * Different release channels declare additional types of JSXNode this particular release channel accepts.
-    * App or library types should never augment this interface.
-    */
-   // interface DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES { }
-
-   /**
-    * Represents all of the things React can render.
-    *
-    * Where {@link ReactElement} only represents JSX, `Lumo.JSXNode` represents everything that can be rendered.
-    *
-    * @see {@link https://react-typescript-cheatsheet.netlify.app/docs/react-types/reactnode/ React TypeScript Cheatsheet}
-    *
-    * @example
-    *
-    * ```tsx
-    * // Typing Slot
-    * type Props = { Slot: Lumo.JSXNode }
-    *
-    * const Component = ({ Slot }: Props) => <div>{Slot}</div>
-    *
-    * <Component>hello</Component>
-    * ```
-    *
-    * @example
-    *
-    * ```tsx
-    * // Typing a custom element
-    * type Props = { customElement: Lumo.JSXNode }
-    *
-    * const Component = ({ customElement }: Props) => <div>{customElement}</div>
-    *
-    * <Component customElement={<div>hello</div>} />
-    * ```
-    */
-   // non-thenables need to be kept in sync with AwaitedNodeEntity
-
-   // EDITED BY LUMO: ReactNode --> JSXNode
-   // type ReactNode =
-   //     | ReactElement
-   //     | string
-   //     | number
-   //     | Iterable<Lumo.JSXNode>
-   //     | ReactPortal
-   //     | boolean
-   //     | null
-   //     | undefined
-   //     | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES[
-   //         keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES
-   //     ];
-
-   //
-   // Top Level API
-   // ----------------------------------------------------------------------
-
-   // DOM Elements
-   // /** @deprecated */
-   // function createFactory<T extends HTMLElement>(
-   //     type: keyof ReactHTML,
-   // ): HTMLFactory<T>;
-   // /** @deprecated */
-   // function createFactory(
-   //     type: keyof ReactSVG,
-   // ): SVGFactory;
-   // /** @deprecated */
-   // function createFactory<P extends DOMAttributes<T>, T extends Element>(
-   //     type: string,
-   // ): DOMFactory<P, T>;
-
-   // Custom components
-   // /** @deprecated */
-   // function createFactory<P>(type: FunctionComponent<P>): FunctionComponentFactory<P>;
-   // /** @deprecated */
-   // function createFactory<P, T extends Component<P, ComponentState>, C extends ComponentClass<P>>(
-   //     type: ClassType<P, T, C>,
-   // ): CFactory<P, T>;
-   // /** @deprecated */
-   // function createFactory<P>(type: ComponentClass<P>): Factory<P>;
-
-   // DOM Elements
-   // TODO: generalize this to everything in `keyof ReactHTML`, not just "input"
-   // function createElement(
-   //     type: "input",
-   //     props?: InputHTMLAttributes<HTMLInputElement> & ClassAttributes<HTMLInputElement> | null,
-   //     ...Slot: Lumo.JSXNode[]
-   // ): DetailedReactHTMLElement<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-   // function createElement<P extends HTMLAttributes<T>, T extends HTMLElement>(
-   //     type: keyof ReactHTML,
-   //     props?: { frog: true } & ClassAttributes<T> & P | null,
-   //     ...Slot: Lumo.JSXNode[]
-   // ): DetailedReactHTMLElement<P, T>;
-   // function createElement<P extends SVGAttributes<T>, T extends SVGElement>(
-   //     type: keyof ReactSVG,
-   //     props?: { frog: true } & ClassAttributes<T> & P | null,
-   //     ...Slot: Lumo.JSXNode[]
-   // ): ReactSVGElement;
-   // function createElement<P extends DOMAttributes<T>, T extends Element>(
-   //     type: string,
-   //     props?: { frog: true } & ClassAttributes<T> & P | null,
-   //     ...Slot: Lumo.JSXNode[]
-   // ): DOMElement<P, T>;
-
-   // Custom components
-
-
-
-   /**
-    * An object masquerading as a component. These are created by functions
-    * like {@link forwardRef}, {@link memo}, and {@link createContext}.
-    *
-    * In order to make TypeScript work, we pretend that they are normal
-    * components.
-    *
-    * But they are, in fact, not callable - instead, they are objects which
-    * are treated specially by the renderer.
-    *
-    * @template P The props the component accepts.
-    */
+   // /**
+   //  * An object masquerading as a component. These are created by functions
+   //  * like {@link forwardRef}, {@link memo}, and {@link createContext}.
+   //  *
+   //  * In order to make TypeScript work, we pretend that they are normal
+   //  * components.
+   //  *
+   //  * But they are, in fact, not callable - instead, they are objects which
+   //  * are treated specially by the renderer.
+   //  *
+   //  * @template P The props the component accepts.
+   //  */
    //$$$
    interface ExoticComponent<P = {}> {
-      (props: P & { frog: 'blog' }): Lumo.JSXNode;
+      (props: P): Lumo.JSXNode;
       readonly $$typeof: symbol;
    }
 
@@ -394,57 +222,8 @@ declare namespace React {
     * ```
     */
    //$$$
-   type CustomComponentPropsWithRef<T extends ComponentType> = T extends (new (props: infer P) => Component<any, any>)
-      ? (PropsWithoutRef<P> & RefAttributes<InstanceType<T>>)
-      : T extends ((props: infer P, legacyContext?: any) => Lumo.JSXNode) ? PropsWithRef<P>
+   type CustomComponentPropsWithRef<T extends ComponentType> = T extends ((props: infer P) => Lumo.JSXNode) ? PropsWithRef<P>
       : never;
-
-   /**
-    * Used to retrieve the props a component accepts without its ref. Can either be
-    * passed a string, indicating a DOM element (e.g. 'div', 'span', etc.) or the
-    * type of a React component.
-    *
-    * @see {@link https://react-typescript-cheatsheet.netlify.app/docs/react-types/componentprops/ React TypeScript Cheatsheet}
-    *
-    * @example
-    *
-    * ```tsx
-    * // Retrieves the props an 'input' element accepts
-    * type InputProps = React.ComponentPropsWithoutRef<'input'>;
-    * ```
-    *
-    * @example
-    *
-    * ```tsx
-    * const MyComponent = (props: { foo: number, bar: string }) => <div />;
-    *
-    * // Retrieves the props 'MyComponent' accepts
-    * type MyComponentPropsWithoutRef = React.ComponentPropsWithoutRef<typeof MyComponent>;
-    * ```
-    */
-   // type ComponentPropsWithoutRef<T extends ElementType> = PropsWithoutRef<ComponentProps<T>>;
-
-   // type ComponentRef<T extends ElementType> = T extends NamedExoticComponent<
-   //     ComponentPropsWithoutRef<T> & RefAttributes<infer Method>
-   // > ? Method
-   //     : ComponentPropsWithRef<T> extends RefAttributes<infer Method> ? Method
-   //     : never;
-
-   // will show `Memo(${Component.displayName || Component.name})` in devtools by default,
-   // but can be given its own specific name
-
-   //$$$
-   type MemoExoticComponent<T extends ComponentType<any>> = NamedExoticComponent<CustomComponentPropsWithRef<T>> & {
-      readonly type: T;
-   };
-
-   //$$$
-   interface LazyExoticComponent<T extends ComponentType<any>>
-      extends ExoticComponent<CustomComponentPropsWithRef<T>> {
-      readonly _result: T;
-   }
-
-
 
 
    //
@@ -663,7 +442,7 @@ declare namespace React {
 
 
    //$$$
-   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & LumoHooks<T> & { 'initial:appear'?: boolean}
+   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & LumoHooks<T>
 
    //$$$
    interface _DOMAttributes<T> {
@@ -673,11 +452,11 @@ declare namespace React {
    type LifecycleTask<T> = (element: T) => void
 
    interface LumoHooks<T> {
-      'at:create'?: LifecycleTask<T> | any
+      'at:create'?: LifecycleTask<T>
       'at:mount'?: LifecycleTask<T>
       'at:remount'?: LifecycleTask<T>
       'at:created'?: LifecycleTask<T>
-      'at:mounted'?: LifecycleTask<T>
+      'at:mounted'?: LifecycleTask<Exclude<T, Function>>
       'at:remounted'?: LifecycleTask<T>
       'after:created'?: LifecycleTask<T>
       'after:mounted'?: LifecycleTask<T>
@@ -2362,75 +2141,6 @@ declare namespace React {
    interface ReactDOM extends ReactHTML, ReactSVG { }
 
    //
-   // React.PropTypes
-   // ----------------------------------------------------------------------
-
-   /**
-    * @deprecated Use `Validator` from the ´prop-types` instead.
-    */
-   type Validator<T> = PropTypes.Validator<T>;
-
-   /**
-    * @deprecated Use `Requireable` from the ´prop-types` instead.
-    */
-   type Requireable<T> = PropTypes.Requireable<T>;
-
-   /**
-    * @deprecated Use `ValidationMap` from the ´prop-types` instead.
-    */
-   type ValidationMap<T> = PropTypes.ValidationMap<T>;
-
-   /**
-    * @deprecated Use `WeakValidationMap` from the ´prop-types` instead.
-    */
-   type WeakValidationMap<T> = {
-      [K in keyof T]?: null extends T[K] ? Validator<T[K] | null | undefined>
-      : undefined extends T[K] ? Validator<T[K] | null | undefined>
-      : Validator<T[K]>;
-   };
-
-   /**
-    * @deprecated Use `PropTypes.*` where `PropTypes` comes from `import * as PropTypes from 'prop-types'` instead.
-    */
-   interface ReactPropTypes {
-      any: typeof PropTypes.any;
-      array: typeof PropTypes.array;
-      bool: typeof PropTypes.bool;
-      func: typeof PropTypes.func;
-      number: typeof PropTypes.number;
-      object: typeof PropTypes.object;
-      string: typeof PropTypes.string;
-      node: typeof PropTypes.node;
-      element: typeof PropTypes.element;
-      instanceOf: typeof PropTypes.instanceOf;
-      oneOf: typeof PropTypes.oneOf;
-      oneOfType: typeof PropTypes.oneOfType;
-      arrayOf: typeof PropTypes.arrayOf;
-      objectOf: typeof PropTypes.objectOf;
-      shape: typeof PropTypes.shape;
-      exact: typeof PropTypes.exact;
-   }
-
-   //
-   // React.Children
-   // ----------------------------------------------------------------------
-
-   /**
-    * @deprecated - Use `typeof React.Children` instead.
-    */
-   // Sync with type of `const Children`.
-   // interface ReactChildren {
-   //    map<T, C>(
-   //       Slot: C | readonly C[],
-   //       fn: (child: C, index: number) => T,
-   //    ): C extends null | undefined ? C : Array<Exclude<T, boolean | null | undefined>>;
-   //    forEach<C>(Slot: C | readonly C[], fn: (child: C, index: number) => void): void;
-   //    count(Slot: any): number;
-   //    only<C>(Slot: C): C extends any[] ? never : C;
-   //    toArray(Slot: Lumo.JSXNode | Lumo.JSXNode[]): Array<Exclude<Lumo.JSXNode, boolean | null | undefined>>;
-   // }
-
-   //
    // Browser Interfaces
    // https://github.com/nikeee/2048-typescript/blob/master/2048/js/touch.d.ts
    // ----------------------------------------------------------------------
@@ -2532,11 +2242,7 @@ type LumoAttributes<C, P> = P extends { '~attributes'?: infer A } ? A & Lumo.Lum
 
 
 declare global {
-   let $s;
-   let $;
-   /**
-    * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
-    */
+
    namespace JSX {
       // We don't just alias React.ElementType because React.ElementType
       // historically does more than we need it to.
@@ -2560,20 +2266,13 @@ declare global {
       }
 
       //$$$ important for converting component input types to attribute types
-      // We can't recurse forever because `type` can't be self-referential;
-      // let's assume it's reasonable to do a single React.lazy() around a single React.memo() / vice-versa
-      type LibraryManagedAttributes<C, P> =
-         C extends React.MemoExoticComponent<infer T> | React.LazyExoticComponent<infer T> ?
-         T extends React.MemoExoticComponent<infer U> | React.LazyExoticComponent<infer U> ?
-         LumoAttributes<U, P>
-         : LumoAttributes<T, P>
-         : LumoAttributes<C, P>;
+      type LibraryManagedAttributes<C, P> = LumoAttributes<C, P>;
 
       //$$$
-      interface IntrinsicAttributes extends React.Attributes {
+      interface IntrinsicAttributes {
          ref?: $Node | NodeRefsConfig //#LUMO-EDIT
-         class?: string | ClassInput | ClassInput[],
-         style?: string | StyleInput | StyleInput[],
+         class?: ClassInput | ClassInput[],
+         style?: StyleInput | StyleInput[],
          // children?: Lumo.InferSlot
       }
       interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
@@ -2584,7 +2283,7 @@ declare global {
 
       type StyleInput = Lumo.MaybeIon<string | Falsey> | Lumo.MaybeIon<{ [K in keyof Partial<CSSProperties>]: Lumo.MaybeIon<CSSProperties[K]> }>
 
-      type ClassInput = Lumo.MaybeIon<{ [key: string]: Lumo.MaybeIon<Booleanny> }>
+      type ClassInput = Lumo.MaybeIon<string> | Lumo.MaybeIon<{ [key: string]: Lumo.MaybeIon<Booleanny> }>
 
       type MaybeIonAttributes<T> = { [K in keyof T]: T[K] extends Object ? { [P in keyof T[K]]: T[K][P] extends Function | undefined ? T[K][P] : Lumo.MaybeIon<T[K][P]> } : T[K] }
 
@@ -2613,7 +2312,7 @@ declare global {
 
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          'o--body': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
-         'display-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
+         'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
          'create-view': { children: ConditionalRenderKit[] }
          'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> }
          'render-view': { children: Lumo.RawJSXNode }

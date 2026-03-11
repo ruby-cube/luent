@@ -13,6 +13,7 @@
     "@rue/jsx-runtime": "workspace:*",
     "@rue/lumo": "workspace:*",
     "@rue/quarky": "workspace:*",
+    "@rue/qrx": "workspace:*",
     "@rue/thread": "workspace:*",
     "@rue/utils": "workspace:*",
     "class-variance-authority": "^0.7.1",

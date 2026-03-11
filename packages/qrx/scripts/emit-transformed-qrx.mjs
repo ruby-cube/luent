@@ -1,14 +1,14 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import { transformQuarkySugar } from './transform-quarky-sugar.mjs'
+import { transformQRXSugar } from './transform-qrx-sugar.mjs'
 
 function usage() {
-  console.log('Usage: node packages/quarky/scripts/emit-transformed-quarky.mjs <input.qrk|input.qrx> [--out <output-file>] [--stdout]')
+  console.log('Usage: node packages/qrx/scripts/emit-transformed-qrx.mjs <input.qrk|input.qrx> [--out <output-file>] [--stdout]')
   console.log('Examples:')
-  console.log('  node packages/quarky/scripts/emit-transformed-quarky.mjs apps/play/src/Counter.qrx')
-  console.log('  node packages/quarky/scripts/emit-transformed-quarky.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx')
-  console.log('  node packages/quarky/scripts/emit-transformed-quarky.mjs apps/play/src/Counter.qrx --stdout')
+  console.log('  node packages/qrx/scripts/emit-transformed-qrx.mjs apps/play/src/Counter.qrx')
+  console.log('  node packages/qrx/scripts/emit-transformed-qrx.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx')
+  console.log('  node packages/qrx/scripts/emit-transformed-qrx.mjs apps/play/src/Counter.qrx --stdout')
 }
 
 function parseArgs(argv) {
@@ -76,7 +76,7 @@ async function run() {
   }
 
   const source = await fs.readFile(absoluteInputPath, 'utf8')
-  const transformed = transformQuarkySugar({
+  const transformed = transformQRXSugar({
     code: source,
     fileName: absoluteInputPath,
   })
