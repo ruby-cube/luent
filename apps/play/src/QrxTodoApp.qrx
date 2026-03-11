@@ -2,52 +2,38 @@
 import { Ion, Ionic } from "@rue/quarky";
 import { For, template } from "@rue/lumo";
 
-type Todo = { title: string; completed: boolean };
+function QrxTodo() {
 
-function IonicTodoItem(title: string) {
-   return (
-      Ionic({ title, completed: false })
-   )
-}
-
-export function QrxTodo() {
-   get todos = Ion(Ionic([
-      IonicTodoItem("Learn Luent"),
-      IonicTodoItem("Build a demo"),
-   ], {
+   const todos = Ionic([] as Ionic<Todo>[], {
       add(title: string) {
-         if (title) {
-            todos.push(IonicTodoItem(title));
-            newTodo@.value = "";
-         }
+         this.push(IonicTodo(title));
+         newTodo@.value = "";
       },
       remove(todo: Ionic<Todo>) {
-         const i = todos.indexOf(todo);
-         if (i !== -1) todos.splice(i, 1);
+         const i = this.indexOf(todo);
+         if (i !== -1) this.splice(i, 1);
       }
-   }))
-
-   get activeTodos = Ion(() => todos.filter(todo => !todo.completed));
-   get completedTodos = Ion(() => todos.filter(todo => todo.completed));
+   })
 
    get newTodo = Ion("");
+   get activeTodos = Ion(() => todos.filter(todo => !todo.completed));
+   get completedTodos = Ion(() => todos.filter(todo => todo.completed));
    get filter = Ion("all" as 'all' | 'active' | 'completed');
+   get filteredTodos = Ion(() => filters[filter]);
 
    const filters = {
-      all: todos@,
-      active: activeTodos@,
-      completed: completedTodos@
+      get all: () => todos,
+      get active: activeTodos@,
+      get completed: completedTodos@
    }
 
-   get filteredTodos = Ion(() => filters[filter]())
-   const filteredTodos = 0
    return template(
       <div>
          <h2>Todos</h2>
          <input
             mu:value={newTodo@}
             placeholder="Add a todo..."
-            on:submit={e => todos.add(newTodo.trim())}
+            on:submit={e => { e.preventDefault(); todos.add(newTodo.trim()) }}
          />
          <button on:click={e => todos.add(newTodo.trim())}>Add</button>
          <div>
@@ -72,3 +58,19 @@ export function QrxTodo() {
    );
 }
 
+class Todo {
+   constructor(
+      public title: string,
+      public completed: boolean = false
+   ) { }
+};
+
+function IonicTodo(title: string) {
+   return (
+      Ionic(new Todo(title))
+   )
+}
+
+export {
+   QrxTodo
+}

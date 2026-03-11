@@ -329,6 +329,7 @@ function FractionKit(æcount) {
 + Supported synchronous guard forms for `!` emission include:
    - `if (obj) { ...obj.name... }`
    - `if (!obj) { ... } else { ...obj.name... }`
+   + `if (!obj) return; obj.name`
    - `obj && obj.name`
    - `obj ? obj.name : fallback`
    - `!obj ? fallback : obj.name`

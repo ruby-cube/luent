@@ -5,7 +5,7 @@ import "./reset.css"
 
 // FIX:
 // [] additional optional chaining?
-// [] jsx tag and attributes are being transformed
+// [] if (!x) return; type guards
 
 
 export function VideoPlayer() {

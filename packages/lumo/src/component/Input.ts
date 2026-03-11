@@ -358,25 +358,6 @@ type WithMu<D> = HasMu<D> extends true ? {
    }
 } : {}
 
-// type WithMu<C> = C extends AnyObject ? HasEvent<C> extends true ? {
-//    emit: <K extends EventNames<C>>(...event: WithEventObject<K, C[`on:${K}`]>) => void
-// } : {} : {}
-
-type MuIon<I> = ExcludePrimitives<I> extends { value: any } ? I
-   : ExcludePrimitives<I> & { value: ExcludePrimitives<I> extends Ion<infer S> ? S : never } | OnlyPrimitives<I>
-
-// type OpInput<D> = {
-//    [K in keyof D as K extends `can:${infer F}` ? F : never]: D[K]
-// }
-// type SeeInput<D> = {
-//    [K in keyof D as K extends `see:${infer F}` ? F : never]: D[K]
-// }
-// type OpAttribute<D> = {
-//    [K in keyof D as K extends `can:${string}` ? K : never]: D[K]
-// }
-// type SeeAttribute<D> = {
-//    [K in keyof D as K extends `see:${string}` ? K : never]: D[K]
-// }
 
 type StaticInput<D> = {
    [K in keyof D as K extends `mu:${string}` /* | `can:${string}` | `see:${string}`  */ | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
@@ -384,8 +365,6 @@ type StaticInput<D> = {
    : 
    D[K]
 }
-
-// export type MaybeMarkInert<T> = IsIonic<ExcludePrimitives<T>> extends true ? T : T extends Function ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
 type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, Primitive> extends Ion ? true : false
 

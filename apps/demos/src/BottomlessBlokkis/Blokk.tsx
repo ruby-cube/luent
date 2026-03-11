@@ -18,8 +18,8 @@ export function Blokk(setup: FromTag<{
 
     const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 
-    const $translate = () => `translate(${æshiftX() * CELL_SIZE}px, ${æshiftY() * CELL_SIZE}px)`
-    const $rotate = () => `rotate(${degrees[ærotation()]}deg)`
+    const ætranslate = () => `translate(${æshiftX() * CELL_SIZE}px, ${æshiftY() * CELL_SIZE}px)`
+    const ærotate = () => `rotate(${degrees[ærotation()]}deg)`
 
     return template(
         <div class='blokk-base' style={(`
@@ -27,7 +27,7 @@ export function Blokk(setup: FromTag<{
             --cell-size: ${CELL_SIZE}px;
             --grid-size: ${GRID_SIZE}px;
             --grid-gap: ${gap}px;
-            transform: ${$translate()} ${$rotate()};
+            transform: ${ætranslate()} ${ærotate()};
         `)}
             on:mouseenter={e => { console.log('ENTER'); emit('mouseenter', e) }}
             on:mouseleave={e => { console.log('LEAVE'); emit('mouseleave', e) }}

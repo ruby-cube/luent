@@ -30,10 +30,10 @@ export function ChatWindow(input: FromTag<{
       $smoothScroll.value = false;
       $notifyNewMessages.value = false;
 
-      ooo.await(postlude, () => {
+      await(postlude, () => {
          scrollToNew()
       })
-      ooo.await(tick, () => {
+      await(tick, () => {
          $smoothScroll.value = true
       })
    })

@@ -77,7 +77,7 @@ import { TestCreate } from './TestCreate';
 import { TestAwaitConditional } from './TestAwaitConditional';
 import { QrxCounter } from './Counter.qrx';
 import { TestRenderFunctionAsIon } from './TestRenderFunctionAsIon';
-import { QrxTodo } from './RealWorldDemo.qrx';
+import { QrxTodo } from './QrxTodoApp.qrx';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';

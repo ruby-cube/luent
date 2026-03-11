@@ -27,7 +27,7 @@ import { TestIfElseRemountView } from "./src/TestIfElseRemountView"
 import { TestNamedSlots } from "./src/TestNamedSlots"
 
 export function runDemo() {
-   const app = createRoot(TrafficLight)
+   const app = createRoot(TodoMVC)
 
    app.mount('#root')
 }

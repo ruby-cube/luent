@@ -57,7 +57,7 @@ function TestRootContext() {
          </Context>
          <Context provide={[GREAT_MESSAGE($evesMsg)]}>
             <GreatGrandparent name='Eve'></GreatGrandparent>
-             <input mu:value={$evesMsg}></input>
+            <input mu:value={$evesMsg}></input>
          </Context>
          {/* 
          <GreatGrandparent name='Adam' provide={[ROOT_MESSAGE(adamsMsg)]}></GreatGrandparent>
@@ -96,7 +96,9 @@ type GrandparentInput = {
    name: string
 }
 
-const ROOT_MESSAGE_GREAT = Grandparent.ROOT_MESSAGE = ContextKey<string>('root')
+const ROOT_MESSAGE_GREAT
+   = Grandparent.ROOT_MESSAGE
+   = ContextKey<string>('root')
 
 function Grandparent({ name }: FromTag<GrandparentInput>) {
    const msg = fromContext(GREAT_MESSAGE)
