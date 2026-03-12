@@ -441,6 +441,13 @@ importers:
         version: link:../../types
 
   packages/qrx:
+    dependencies:
+      '@rue/quarky':
+        specifier: workspace:*
+        version: link:../quarky
+      '@rue/utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       '@rue/types':
         specifier: workspace:*

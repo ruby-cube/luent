@@ -1,5 +1,4 @@
 import { createRoot } from "@rue/lumo"
-import { TrafficLight } from "./src/TrafficLight"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
@@ -7,8 +6,9 @@ import { TriangleDemo } from "./src/SierpinskiTriangles"
 import { TestListSelectTransition } from "./src/TestListSelectTransition"
 import { TestListTransit } from "./src/TestListTransit"
 import { TestIfElse } from "./src/TestIfElse"
-import { TodoMVC } from "./src/TodoMVCqrx"
+import { TodoMVC } from "./src/TodoMVC"
 // import { } from "./src/TodoMVC"
+import { TrafficLight } from "./src/TrafficLight.qrx"
 import { VideoPlayer } from "./src/VideoPlayer.qrx"
 import { TestMarkdownApp } from "./src/MarkdownApp"
 import { TreeApp } from "./src/TestTreeApp"
@@ -30,7 +30,7 @@ import { TestDerivationA } from "./src/TestDerivation"
 import { TestSyncEffects } from "./src/TestSyncEffects"
 
 export function runDemo() {
-   const app = createRoot(TodoMVC)
+   const app = createRoot(VideoPlayer)
 
    app.mount('#root')
 }

@@ -1,17 +1,21 @@
 {
-    "name": "@rue/qrx",
-    "private": true,
-    "description": "",
-    "module": "./src/index",
-    "main": "./src/index",
-    "scripts": {
-        "typecheck": "node ./scripts/qrx-tsc.mjs -p ../../tsconfig.json",
-        "test:position-mapping": "pnpm exec vitest run src/__tests__/position-mapping.test.ts",
-        "emit:transform": "node ./scripts/emit-transformed-qrx.mjs"
-    },
-    "devDependencies": {
-        "@rue/types": "workspace:*"
-    },
-    "author": "Ruby Yi Wang",
-    "license": "MIT"
+   "name": "@rue/qrx",
+   "private": true,
+   "description": "",
+   "module": "./src/index",
+   "main": "./src/index",
+   "scripts": {
+      "typecheck": "node ./scripts/qrx-tsc.mjs -p ../../tsconfig.json",
+      "test:position-mapping": "pnpm exec vitest run src/__tests__/position-mapping.test.ts",
+      "emit:transform": "node ./scripts/emit-transformed-qrx.mjs"
+   },
+   "dependencies": {
+      "@rue/quarky": "workspace:*",
+      "@rue/utils": "workspace:*"
+   },
+   "devDependencies": {
+      "@rue/types": "workspace:*"
+   },
+   "author": "Ruby Yi Wang",
+   "license": "MIT"
 }

@@ -4,7 +4,7 @@ import { watch } from "../reactivity/Watcher";
 import { queueTask, SYNC } from "../reactivity/RenderCycle";
 import { FunctionalSubstance } from "../reactivity/Substance";
 import { QUARK } from "../abstract/Quark";
-import { UnionToIntersection } from "@rue/types";
+import { AnyObject, UnionToIntersection } from "@rue/types";
 import { untracked } from "../reactivity/Compound";
 
 
@@ -167,7 +167,7 @@ const [pushFinitron, popFinitron, getFinitron] = createStack<Finitron>()
 type StateDefinition<S extends _FiniteStates = _FiniteStates> = {
    'on:enter'?: (this: Finitron) => void
    'on:exit'?: (this: Finitron) => void
-} & { [key: string | symbol]: Transition<S> }
+} & { [key: string | symbol]: Transition<S> } & {[K in keyof FinitronProperties<S>]?: never}
 
 type AllKeys<T> = T extends T ? keyof T : never;
 
@@ -176,7 +176,7 @@ type TransitionKey<S extends _FiniteStates> = Exclude<AllKeys<S[keyof S]>, numbe
 
 type Init = () => void
 
-export type Finitron<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = {
+type FinitronProperties<S extends FiniteStates<S>> = {
    state: State<S> | undefined
    is: (state: State<S> | undefined) => boolean
    on: (transition: TransitionKey<S>, task: () => void) => void
@@ -190,8 +190,9 @@ export type Finitron<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M 
    isActive: () => boolean
    lastState: State<S> | undefined
    onDeactivated: (task: () => void) => void
-   // init: (initializer: Initializer) => Nested & { nest: (config: { [key: string]: Nested[] }) => Nested }
-} & M & TransitionMethods<S>
+}
+
+export type Finitron<S extends FiniteStates<S> = FiniteStates<_FiniteStates>, M extends Methods = {}> = FinitronProperties<S>& M & TransitionMethods<S>
 
 type TransitionMethods<S> = UnionToIntersection<S[keyof S]>
 
@@ -204,7 +205,7 @@ type TransitionMethods<S> = UnionToIntersection<S[keyof S]>
 type Initializer = (prevState: string | undefined) => string
 
 
-type Methods = { [key: string | symbol]: (...args: unknown[]) => unknown }
+type Methods<S> = { [key: string | symbol]: (...args: unknown[]) => unknown } & {[K in keyof FinitronProperties<S>]?: never}
 
 type TransitionEvent = { state: string | undefined, prevState: string | undefined }
 
@@ -224,12 +225,12 @@ export function withTimeout(ms: number, transition: Transition) {
 }
 
 //TODO: implement as custom ionized object
-export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Methods): Finitron<S, M> {
+export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Methods<S>): Finitron<S, M> {
    const $currentState = Ion(undefined as undefined | string);
 
    let activated = false;
 
-   const _finitron: Finitron = {
+   const _finitron: FinitronProperties<S> = {
       is,
       on,
       can,
@@ -313,7 +314,7 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
    let onEnter: { [K in State<S>]: Init } | undefined
 
    function init(initialState: State<S> | undefined, nested?: { [K in State<S>]: Init }) {
-      if (activated) return;
+      if (activated) return finitron;
       activated = true;
       const state = $currentState.value = initialState
       const parent = getFinitron()
@@ -329,6 +330,7 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
          onEnter = nested
       }
       runEnterHooks(state as string, getHooks(ANY_STATE))
+      return finitron;
    }
 
    let deactivationTasks: Task[] = []

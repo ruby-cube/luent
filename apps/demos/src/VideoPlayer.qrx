@@ -1,5 +1,5 @@
 import { template, Else, Finitron, FromTag, If, NodeRef, Style, css } from "@rue/lumo";
-import { Ion, queueTask } from "@rue/quarky";
+import { Ion, queueTask, watch } from "@rue/quarky";
 import "./reset.css"
 
 
@@ -14,7 +14,7 @@ export function VideoPlayer() {
 
    const player = Finitron({
       "loading": {
-         init: () => "x:ready",
+         initialize: () => "x:ready",
          error: () => "x:failed"
       },
       "x:ready": {},
@@ -36,8 +36,8 @@ export function VideoPlayer() {
 
    get duration = () => video?.duration ?? 0
 
-   // player.on("init", () => {
-   //    duration = $video()?.duration ?? 0
+   // player.on("initialize", () => {
+   //    duration = video?.duration ?? 0
    // })
 
    track.on("play", () => {
@@ -57,6 +57,7 @@ export function VideoPlayer() {
    }
 
    function reClickElapsedBar(e: { currentTarget: (EventTarget & HTMLDivElement) | null } & MouseEvent) {
+      console.log('### set Time')
       const rect = e.currentTarget!.getBoundingClientRect()
       setTime(rect.width, e.clientX - rect.left)
    }
@@ -65,8 +66,10 @@ export function VideoPlayer() {
       if (!video) return;
       const time = video.currentTime = video.duration * x / width
       if (track.is('playing')) {
-         track.pause() // FIX: clicking on elapsed bar breaks play/pause button
-         queueTask(() => track.play())
+         track.pause()
+         queueTask(() =>
+            track.play()
+         )
       }
       elapsedTime@.value = time
    }
@@ -83,12 +86,17 @@ export function VideoPlayer() {
       }
    })
 
+   watch(() => player.is('x:ready'), () => {
+      console.log('@@@ ready!!')
+   })
+
+
 
    return template(
       <div class="container">
          <video
             ref={video@}
-            on:canplay={e => player.init()}
+            on:canplay={e => player.initialize()}
             on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
             on:ended={e => track.end()}
             on:error={e => player.error()}
@@ -100,15 +108,16 @@ export function VideoPlayer() {
             <div>
                <ElapsedBar elapsed={elapsedTime@} duration={duration} paused={(track.is("paused"))}
                   on:click={reClickElapsedBar}
+                  onClick={reClickElapsedBar}
                />
-               {/* <remount-view> */}
-               {If((track.is("playing")),
-                  <button on:click={e => track.pause()}>‖</button>
-               )}
-               {Else(
-                  <button on:click={e => track.play()}>►</button>
-               )}
-               {/* </remount-view> */}
+               <remount-view>
+                  {If((track.is("playing")),
+                     <button on:click={e => track.pause()}>‖</button>
+                  )}
+                  {Else(
+                     <button on:click={e => track.play()}>►</button>
+                  )}
+               </remount-view>
                <Timer elapsed={elapsedTime@} duration={duration} />
             </div>
          )}
@@ -161,14 +170,16 @@ export function VideoPlayer() {
 function ElapsedBar(input: FromTag<{
    elapsed: Ion<number>,
    duration: number,
-   paused: Ion<boolean>
+   paused: Ion<boolean>,
+   onClick: Function,
    "on:click": MouseEvent
 }>) {
-      const { elapsed@, duration, paused@, emit } = input
+      const { elapsed@, duration, paused@, emit, onClick } = input
 
    return template(
       <div class="elapsed"
-         on:click={e => emit("click", e)}
+         on:click={onClick}
+      // on:click={e => emit("click", e)}
       >
          <div
             class="elapsed-bar"
@@ -187,7 +198,7 @@ function Timer(input: FromTag<{
    elapsed: Ion<number>,
    duration: number
 }>) {
-      const { elapsed@, duration } = input
+                  const { elapsed@, duration } = input
 
    return template(
       <span class="timer">

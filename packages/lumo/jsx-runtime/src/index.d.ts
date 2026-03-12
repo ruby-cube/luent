@@ -3,7 +3,7 @@
 import * as CSS from "csstype";
 import * as Lumo from "@rue/lumo";
 import * as Quarky from "@rue/quarky";
-import { $Node } from "../../src/node/NodeRef";
+import { NodeRef } from "../../src/node/NodeRef";
 import { NodeRefsConfig } from "../../src/node/NodeRefs";
 import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject, Booleanny } from "@rue/types";
@@ -67,7 +67,7 @@ declare namespace Luent {
       persist(): void;
       timeStamp: number;
       type: string;
-      targets(...args: (string | $Node)[]): boolean // Lumo edit
+      targets(...args: (string | NodeRef)[]): boolean // Lumo edit
    }
 
    /**
@@ -250,10 +250,7 @@ declare namespace Luent {
    // ----------------------------------------------------------------------
 
    //$$$
-   type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & {
-      class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
-      style?: StyleInput | StyleInput[];
-   }
+   type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & Lumo.LumoHooks<T>
 
    interface SVGProps<T> extends SVGAttributes<T>, RefAttributes<T> {
    }
@@ -263,12 +260,11 @@ declare namespace Luent {
 
 
    //$$$
-   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & Lumo.LumoHooks<T>
-
-   //$$$
-   interface _DOMAttributes<T> {
+   type DOMAttributes<T> = {
       children?: Lumo.JSXNode | undefined | null;
-   }
+   } & DOMEvents<T>
+
+
 
    //$$$
    interface DOMEvents<T> {// Clipboard Events
@@ -810,6 +806,9 @@ declare namespace Luent {
 
    //$$$
    interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+      class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
+      style?: StyleInput | StyleInput[];
+
       // React-specific Attributes
       defaultChecked?: Lumo.MaybeIon<boolean | undefined>;
       defaultValue?: Lumo.MaybeIon<string | number | readonly string[] | undefined>;
@@ -1968,7 +1967,7 @@ type LumoAttributes<C, P> =
    : P
 
 type LumoComponentAttributes<C> = {
-   ref?: $Node<C>
+   ref?: NodeRef<C>
    class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
    style?: StyleInput | StyleInput[];
 }

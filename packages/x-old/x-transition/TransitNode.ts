@@ -1,5 +1,5 @@
 import { TransitionNode } from "./TransitionNode";
-import { $Node } from "../../lumo/src/node/NodeRef";
+import { NodeRef } from "../../lumo/src/node/NodeRef";
 import { makeElement } from "../../lumo/src/element/makeElement";
 import { fromContext } from "../../lumo/src/context/provide";
 import { Ion } from "@rue/quarky";
@@ -10,7 +10,7 @@ import { ContextKey } from "../../lumo/src/context/ContextKey";
 import { RenderSlot } from "../../lumo/src/component/Input";
 
 export function renderTransitNode(
-   $div: $Node<'div'>,
+   $div: NodeRef<'div'>,
    Slot: RenderSlot,
    transitionNode: TransitionNode,
    $disable: false | undefined | Ion<boolean>

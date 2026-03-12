@@ -1,18 +1,18 @@
-import { $Node } from '@rue/lumo';
+import { NodeRef } from '@rue/lumo';
 import type { ContextMenuRoot } from './ContextMenuRoot';
 
 export interface ContextMenuRootContext {
   anchor: { getBoundingClientRect: () => DOMRect };
   setAnchor: React.Dispatch<React.SetStateAction<ContextMenuRootContext['anchor']>>;
 
-  $backdrop: $Node<'div'>;
-  $internalBackdrop: $Node<'div'>;
+  $backdrop: NodeRef<'div'>;
+  $internalBackdrop: NodeRef<'div'>;
 
   actionsRef: React.RefObject<{
     setOpen: (nextOpen: boolean, eventDetails: ContextMenuRoot.ChangeEventDetails) => void;
   } | null>;
 
-  $positioner: $Node<'div'>;
+  $positioner: NodeRef<'div'>;
   allowMouseUpTriggerRef: React.RefObject<boolean>;
   initialCursorPointRef: React.RefObject<{ x: number; y: number } | null>;
   rootId: string | undefined;

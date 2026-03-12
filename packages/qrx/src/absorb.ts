@@ -1,6 +1,6 @@
+import { Ion } from "@rue/quarky"
 import { Glass } from "@rue/types"
 import { isFunction } from "@rue/utils"
-import { Ion } from "../ion/Ion"
 
 type Absorbant<T> = {
    [K in keyof T as K extends `πæ${infer S}` ? S : K extends `æ${infer S}` ? S : K]:

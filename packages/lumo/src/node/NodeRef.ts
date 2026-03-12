@@ -36,7 +36,7 @@ export type NodeReferent<
 
 export type State<T extends RefSource> = NodeReferent<T>
 
-export type $Node<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
+export type NodeRef<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
 
 export type $Nodes<T extends RefSource = RefSource> = () => NodeReferent<T>[]
 
@@ -45,7 +45,7 @@ export type InternalRef<T> = T & { [INTERNAL]: T extends $Nodes ? MetaListRef : 
 /**
  * @internal
 */
-export function isAnyNodeRef(value: any): value is InternalRef<$Node | $Nodes> {
+export function isAnyNodeRef(value: any): value is InternalRef<NodeRef | $Nodes> {
    return value instanceof Object && INTERNAL in value
 }
 
@@ -56,21 +56,21 @@ export function isNodesRef(value: any): value is InternalRef<$Nodes> {
    return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaListRef
 }
 
-type RefReturn<T extends RefSource> = $Node<T>
+type RefReturn<T extends RefSource> = NodeRef<T>
 
 /**
  * @public
  */
 export function NodeRef<
    T extends RefSource
->(source: T): $Node<T> {
+>(source: T): NodeRef<T> {
    return createNodeRef()
 
 }
 
 type ExposedNode = AnyObject
 
-export function createNodeRef(): InternalRef<$Node> {
+export function createNodeRef(): InternalRef<NodeRef> {
    const ref = new MetaRef($value)
    function $value() {
       return ref.value;
@@ -89,7 +89,7 @@ export class MetaRef {
 }
 
 
-export function initializeRef($node: InternalRef<$Node>, value: any | undefined) {
+export function initializeRef($node: InternalRef<NodeRef>, value: any | undefined) {
    const ref = $node[INTERNAL]
    if (ref.value) {
       console.warn("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")

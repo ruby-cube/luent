@@ -3,7 +3,7 @@ import { makeElement } from "../../lumo/src/element/makeElement";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
 import { fromContext } from "../../lumo/src/context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
-import { $Node, NodeRef } from "../../lumo/src/node/NodeRef";
+import { NodeRef, NodeRef } from "../../lumo/src/node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
 import type { Context } from "../../lumo/src/context/context-stack";
 import { Ion } from "@rue/quarky";
@@ -37,7 +37,7 @@ export type PhasicNode = {
 
 
 export function renderPhasicNode(
-   $div: $Node<'div'>,
+   $div: NodeRef<'div'>,
    Slot: RenderSlot,
    transitionNode: TransitionNode,
    $disable: false | undefined | Ion<boolean>
@@ -65,7 +65,7 @@ export function renderPhasicNode(
 }
 
 function createPhasicNode(
-   $div: $Node<'div'>,
+   $div: NodeRef<'div'>,
    Slot: RenderSlot,
    transitionNode: TransitionNode,
 ) {

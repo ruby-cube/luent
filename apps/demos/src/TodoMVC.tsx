@@ -106,7 +106,6 @@ export function TodoMVC() {
    )
 
    const $todoList = NodeRef(TodoList)
-
    const $h1 = NodeRef('h1')
 
    return template(
@@ -118,7 +117,7 @@ export function TodoMVC() {
             </header>
             <section class="main">
                {ToggleAllButton()}
-               <TodoList class={'hi'} ref={$todoList} todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
+               <TodoList ref={$todoList} todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
             </section>
             <footer show-if={ætodoCount} class="footer">
                {RemainingCount()}
@@ -216,7 +215,7 @@ function TodoList(input: FromTag<{
                <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={todo.æcompleted} />
-                     <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
+                     <label on:dblclick={(console.log(), e => editTodo(todo))}>{(todo.title)}</label>
                      <button class="destroy" on:click={e => removeTodo(todo)}></button>
                   </div>
                   {If(æisEditing,

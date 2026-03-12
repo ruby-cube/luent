@@ -1,7 +1,7 @@
 import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
 import { Component, ComponentForge, InferSlot, makeComponent } from "../component/Component";
 import { TagName, makeElement } from "../element/makeElement";
-import { $Node, INTERNAL } from "./NodeRef";
+import { NodeRef, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
@@ -86,9 +86,9 @@ export type ElementConfig<K extends TagName = TagName> = {
 // style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
 // attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
-type NodesArray<T> = ReturnType<$Node<T>>[] | NodesArray<T>[]
+type NodesArray<T> = ReturnType<NodeRef<T>>[] | NodesArray<T>[]
 type NodeSetup<T extends TagName | ComponentForge> = {
-   // ref?: $Node<T> | NodeRefsConfig,
+   // ref?: NodeRef<T> | NodeRefsConfig,
    // provide?: Provided,
    // class?: ClassInput | ClassInput[],
    // style?: StyleInput | StyleInput[]

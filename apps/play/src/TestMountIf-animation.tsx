@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { template, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, $Node } from "@rue/lumo";
+import { template, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, NodeRef } from "@rue/lumo";
 import { debug, getActiveUpdate, instantUpdate, Ion, queueRender, queueTask, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import "./style.css"
@@ -82,7 +82,7 @@ export function MountIfAnimation() {
 
    const newClones = new Set<HTMLElement>()
 
-   function maybeTransition($div: $Node) {
+   function maybeTransition($div: NodeRef) {
       if (prevNode === $div()) {
          return;
       }
@@ -97,7 +97,7 @@ export function MountIfAnimation() {
       transition($div)
    }
 
-   function transition($div: $Node) {
+   function transition($div: NodeRef) {
       // container
       const first = $container()!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
       // - read dims of prev node
