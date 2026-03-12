@@ -25,9 +25,10 @@ import { BottomlessBlokkis } from "./src/BottomlessBlokkis/BottomlessBlokkis"
 import { TestCanvas } from "./src/CanvasApp/TestCanvas"
 import { TestIfElseRemountView } from "./src/TestIfElseRemountView"
 import { TestNamedSlots } from "./src/TestNamedSlots"
+import { TestDerivationA } from "./src/TestDerivation"
 
 export function runDemo() {
-   const app = createRoot(TodoMVC)
+   const app = createRoot(TestDerivationA)
 
    app.mount('#root')
 }

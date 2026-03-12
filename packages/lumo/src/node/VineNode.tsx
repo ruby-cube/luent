@@ -82,10 +82,12 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
          if (node.length !== 0) throw new Error('render functions must have no parameters')
          const output = untracked(node)
          if (typeof output === 'string' || typeof output === 'number' || typeof output === 'boolean') {
+            console.log('### is ion', output, node)
             flattened.push(new DynamicTextNode(node))
          }
          else {
-            _processJSXOutput(normalizeToArray(node()), flattened)
+            console.log('### is render function', output, node)
+            _processJSXOutput(normalizeToArray(output), flattened)
          }
       }
       // else if (isFunction(node) && node.name === 'renderSlot') {
@@ -105,6 +107,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
          flattened.push(node)
       }
       else {
+            console.log('### is text', node)
          flattened.push(createTextNode(node))
       }
    }

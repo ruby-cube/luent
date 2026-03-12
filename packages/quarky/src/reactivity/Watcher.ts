@@ -81,6 +81,7 @@ export class StateChangeEvent<S = unknown> {
 export type WatchSubjects = (Object | Ion)[]
 
 export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
+   console.log('watching', subject)
    options.retrack = options.retrack ?? true;
    
    const substance = asWatchedSubstance(subject, options.retrack, Boolean(options.once))

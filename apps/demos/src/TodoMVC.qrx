@@ -144,6 +144,7 @@ export function TodoMVC() {
 @import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
 </style> */}
 
+
 function TodoInput({ addTodo }: FromTag<{ addTodo: (title: string) => void }>) {
 
    function submitTodo(e: InputEvent) {
@@ -164,32 +165,30 @@ function TodoInput({ addTodo }: FromTag<{ addTodo: (title: string) => void }>) {
    )
 }
 
-
-
-function TodoList(input: FromTag<{
+interface TodoListInput {
    todos: Ion<Ionic<Ionic<Todo>[]>>,
    removeTodo: (todo: Ionic<Todo>) => void
-}>) {
+}
 
-      const { removeTodo, todos@ } = input
+function TodoList({ removeTodo, todos@ }: FromTag<TodoListInput>) {
 
-   const $editedTodo = Ion(null as Todo | null)
+   get editedTodo = Ion(null as Todo | null)
 
    let beforeEditCache = ''
 
    function editTodo(todo: Todo) {
       beforeEditCache = todo.title
-      $editedTodo.value = todo
+      editedTodo@.value = todo
    }
 
    function cancelEdit(todo: Todo) {
-      $editedTodo.value = null
+      editedTodo@.value = null
       todo.title = beforeEditCache
    }
 
    function doneEdit(todo: Ionic<Todo>) {
-      if ($editedTodo()) {
-         $editedTodo.value = null
+      if (editedTodo) {
+         editedTodo@.value = null
          todo.title = todo.title.trim()
          if (!todo.title) removeTodo(todo)
       }
@@ -198,16 +197,16 @@ function TodoList(input: FromTag<{
    return template(
       <ul class="todo-list">
          {For(todos@, m => m.id, (todo) => {
-            const $isEditing = Ion(() => todo === $editedTodo());
+            get isEditing = Ion(() => todo === editedTodo);
 
             return (
-               <li class={(`todo ${todo.completed && 'completed'} ${$isEditing() && 'editing'}`)}>
+               <li class={['todo', { 'completed': (todo.completed), 'editing': isEditing@ }]}>
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={todo.completed@} />
                      <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
                      <button class="destroy" on:click={e => removeTodo(todo)}></button>
                   </div>
-                  {If($isEditing,
+                  {If(isEditing@,
                      <input
                         class="edit"
                         type="text"

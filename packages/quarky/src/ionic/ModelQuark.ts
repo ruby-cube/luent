@@ -186,6 +186,7 @@ export class ModelQuark implements Atom {
    initProperty(
       key: ProxyKey
    ) {
+      // const valueKey = isIonKey(key) ? key.slice(1) : key
       if (!(key in this.state.get())) {
          const extension = this.extension;
          if (extension && key in extension) {
@@ -253,6 +254,7 @@ export class ModelQuark implements Atom {
    protected _initProperty(
       key: ProxyKey
    ) {
+      // const valueKey = isIonKey(key) ? key.slice(1) : key
       let obj = this.state.get(); // TODO: should this be target or state.get() ??
       do {
          const descriptor = Object.getOwnPropertyDescriptor(obj, key)
@@ -271,7 +273,7 @@ export class ModelQuark implements Atom {
       def: AnyObject | undefined// TODO:
    ) {
       const valueKey = isIonKey(key) ? key.slice(1) : key
-      const ionKey = key === valueKey && typeof key === 'string' ? '$' + key : undefined
+      const ionKey = key === valueKey && typeof key === 'string' ? 'æ' + key : undefined
       if ('value' in descriptor) {
          return this.initValueProperty(
             key,
@@ -359,7 +361,9 @@ export class ModelQuark implements Atom {
          set: nowrite
       } : undefined
 
-      if (pionAccess) proto.set(ionKey, $state!)
+      if (pionAccess) {
+         proto.set(ionKey, $state!)
+      }
       return key === ionKey ? $state : state
    }
 

@@ -1,5 +1,5 @@
 import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, EACH, as } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH, as, isIon, isGetter, PRELUDE, $_derivation } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -204,6 +204,14 @@ function TodoList(input: FromTag<{
          {For(ætodos, m => m.id, (todo) => {
             const æisEditing = Ion(() => todo === æeditedTodo());
 
+            // watch(todo.ætitle, () => {
+            //    console.log('$$$ pion title', todo.title)
+            // }, { phase: PRELUDE })
+
+            // watch($_derivation(() => todo.title), () => {
+            //    console.log('$$$ derivation title', todo.title)
+            // }, { phase: PRELUDE })
+
             return (
                <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>
                   <div class="view">
@@ -226,9 +234,9 @@ function TodoList(input: FromTag<{
          })}
       </ul>
    )
-   .ref({
-      message: 'hi'
-   })
+      .ref({
+         message: 'hi'
+      })
 }
 
 
