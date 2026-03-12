@@ -105,7 +105,7 @@ export function TodoMVC() {
       </span>
    )
 
-   const $todoList = NodeRef('div')
+   const $todoList = NodeRef(TodoList)
 
    const $h1 = NodeRef('h1')
 
@@ -118,7 +118,7 @@ export function TodoMVC() {
             </header>
             <section class="main">
                {ToggleAllButton()}
-               <TodoList ref={$todoList} todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
+               <TodoList class={'hi'} ref={$todoList} todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
             </section>
             <footer show-if={ætodoCount} class="footer">
                {RemainingCount()}

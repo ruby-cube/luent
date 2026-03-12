@@ -212,8 +212,7 @@ export function toInput(attributes: AnyObject) {
 
    return new Proxy(attributes, {
       get(target, key) {
-         if (key === '$classes') {
-            console.log('attributes', attributes)
+         if (key === 'æclasses') {
             return attributes.classes
          }
          if (key === 'mu') return mu
@@ -253,18 +252,18 @@ type TagAttributes<D> =
    & MutableIonAttributes<D>
    // & NonmutableIonAttributes<D>
    & TagEvents<D>
-   & { class?: MaybeIon<string>, style?: MaybeIon<string> }
+   // & { class?: MaybeIon<string>, style?: MaybeIon<string> }
    // & OpAttribute<D>
    // & SeeAttribute<D>
    & TagSlot<D>
-   // & (D extends { provide: infer P } ? P : {})
+// & (D extends { provide: infer P } ? P : {})
 // [] mu ---> {mu:name: MutableIon<string>}
 // [] mu? --> {mu:name: MutableIon<string>}  and {frog: MaybeIon<string>}
 // [] Ion --> MaybeIon<string>
 // [] Inert --> 
 
 type Attributes<D> = {
-   [K in keyof D as K extends 'Slot' ? never : K extends `on:${string}` ? never : K extends `mu:${string}` ? never : K] : D[K] extends Ion<infer S> ? S | D[K] : D[K]
+   [K in keyof D as K extends 'Slot' ? never : K extends `on:${string}` ? never : K extends `mu:${string}` ? never : K]: D[K] extends Ion<infer S> ? S | D[K] : D[K]
 }
 
 type TagEvents<D> = {
@@ -281,13 +280,11 @@ type MaybeIonAttributes<D> = {
    as IncludesIon<D[K]> extends true ?
    K extends `mu:${string}` ? never
    : K extends `mu?:${infer I}` ? I
-   : K extends /* `can:${string}` | `see:${string}` | */ `on:${string}` | 'Slot' ? never
+   : K extends `on:${string}` | 'Slot' ? never
    : K extends string ? K
    : never
-   : never]:
-      // 'frog'
-      D[K]
-      // D[K] extends Ion<infer T> ? T | D[K] : D[K]
+   : never]: D[K]
+   // D[K] extends Ion<infer T> ? T | D[K] : D[K]
    // (ExcludePrimitives<D[K]>) |
    // (ExcludePrimitives<D[K]> extends Ion<infer S> ?
    //    S
@@ -366,8 +363,8 @@ type WithMu<D> = HasMu<D> extends true ? {
 
 type StaticInput<D> = {
    [K in keyof D as K extends `mu:${string}` /* | `can:${string}` | `see:${string}`  */ | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
-   : K]: D[K] extends Ion<infer V> ? V 
-   : 
+   : K]: D[K] extends Ion<infer V> ? V
+   :
    D[K]
 }
 

@@ -92,7 +92,7 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
 }
 
 export interface LumoHooks<T> {
-   'at:create'?: LifecycleTask<T> | any
+   'at:create'?: LifecycleTask<T>
    'at:mount'?: LifecycleTask<T>
    'at:remount'?: LifecycleTask<T>
    'at:created'?: LifecycleTask<T>

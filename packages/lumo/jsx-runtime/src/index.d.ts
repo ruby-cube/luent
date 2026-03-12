@@ -37,200 +37,21 @@ type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
 
 
 
-declare namespace React {
-   // /**
-   //  * Represents any user-defined component
-   //  *
-   //  * Similar to {@link JSXElementConstructor}, but with extra properties like
-   //  * {@link FunctionComponent.defaultProps defaultProps } and
-   //  * {@link ComponentClass.contextTypes contextTypes}.
-   //  *
-   //  * @template P The props the component accepts.
-   //  *
-   //  * @see {@link ComponentClass}
-   //  * @see {@link FunctionComponent}
-   //  */
-   //important???
-   type ComponentType<P = {}> = FunctionComponent<P>;
-
-
-   /**
-    * Represents the type of a function component. Can optionally
-    * receive a type argument that represents the props the component
-    * accepts.
-    *
-    * @template P The props the component accepts.
-    * @see {@link https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/function_components React TypeScript Cheatsheet}
-    *
-    * @example
-    *
-    * ```tsx
-    * // With props:
-    * type Props = { name: string }
-    *
-    * const MyComponent: FunctionComponent<Props> = (props) => {
-    *  return <div>{props.name}</div>
-    * }
-    * ```
-    *
-    * @example
-    *
-    * ```tsx
-    * // Without props:
-    * const MyComponentWithoutProps: FunctionComponent = () => {
-    *   return <div>MyComponentWithoutProps</div>
-    * }
-    * ```
-    */
-   interface FunctionComponent<P> {
-      (
-         props: P
-      ): Component;
-   }
-
-   /**
-    * Represents any user-defined component, either as a function or a class.
-    *
-    * Similar to {@link ComponentType}, but without extra properties like
-    * {@link FunctionComponent.defaultProps defaultProps } and
-    * {@link ComponentClass.contextTypes contextTypes}.
-    *
-    * @template P The props the component accepts.
-    */
-   //$$$ important for component
-   type JSXElementConstructor<P, O> = (
-      input: P,
-      optionals: O
-   ) => Lumo.Component
-
-
-
-
-   /**
-    * The props any component accepting refs can receive.
-    * Class components, built-in browser components (e.g. `div`) and forwardRef components can receive refs and automatically accept these props.
-    * ```tsx
-    * const Component = forwardRef(() => <div />);
-    * <Component ref={(current) => console.log(current)} />
-    * ```
-    *
-    * You only need this type if you manually author the types of props that need to be compatible with legacy refs.
-    * ```tsx
-    * interface Props extends React.RefAttributes<HTMLDivElement> {}
-    * declare const Component: React.FunctionComponent<Props>;
-    * ```
-    *
-    * Otherwise it's simpler to directly use {@link Ref} since you can safely use the
-    * props type to describe to props that a consumer can pass to the component
-    * as well as describing the props the implementation of a component "sees".
-    * {@link RefAttributes} is generally not safe to describe both consumer and seen props.
-    *
-    * ```tsx
-    * interface Props extends {
-    *   ref?: React.Ref<HTMLDivElement> | undefined;
-    * }
-    * declare const Component: React.FunctionComponent<Props>;
-    * ```
-    *
-    * WARNING: The implementation of a component will not have access to the same type in versions of React supporting string refs.
-    * The following example would be incorrect usage because {@link Component} would never have access to a `ref` with type `string`
-    * ```tsx
-    * const Component = (props: React.RefAttributes) => props.ref;
-    * ```
-    */
+declare namespace Luent {
    //$$$ Important
    interface RefAttributes<T> {
       /**
-       * Access the DOM element or component instance via NodeRef or node refs config object.
+       * Access the DOM element via NodeRef or node refs config object.
        * Once the view unmounts, the ref value will be set to `null`
        */
-      ref?: T
-      // ref?: Lumo.$Node | NodeRefsConfig | undefined;
+      ref?: () => T | undefined // TODO: add NodeRefsConfig
    }
-
-   /**
-    * Represents the built-in attributes available to class components.
-   */
-   //$$$
-   interface ClassAttributes<T> extends RefAttributes<T> { //NOTE: Important for elements
-   }
-
-
-
-
-
-   // interface FunctionComponentElement<P> extends ReactElement<P, FunctionComponent<P>> {
-   //    ref?: ("ref" extends keyof P ? P extends { ref?: infer R | undefined } ? R : never : never) | undefined;
-   // }
-
-
-   // ReactHTML for ReactHTMLElement
-   interface ReactHTMLElement<T extends HTMLElement> extends DetailedReactHTMLElement<AllHTMLAttributes<T>, T> { }
-
-   interface DetailedReactHTMLElement<P extends HTMLAttributes<T>, T extends HTMLElement> extends DOMElement<P, T> {
-      type: keyof ReactHTML;
-   }
-
-   // ReactSVG for ReactSVGElement
-   interface ReactSVGElement extends DOMElement<SVGAttributes<SVGElement>, SVGElement> {
-      type: keyof ReactSVG;
-   }
-
-
-   // /**
-   //  * An object masquerading as a component. These are created by functions
-   //  * like {@link forwardRef}, {@link memo}, and {@link createContext}.
-   //  *
-   //  * In order to make TypeScript work, we pretend that they are normal
-   //  * components.
-   //  *
-   //  * But they are, in fact, not callable - instead, they are objects which
-   //  * are treated specially by the renderer.
-   //  *
-   //  * @template P The props the component accepts.
-   //  */
-   //$$$
-   interface ExoticComponent<P = {}> {
-      (props: P): Lumo.JSXNode;
-      readonly $$typeof: symbol;
-   }
-
-   //$$$
-   /**
-    * An {@link ExoticComponent} with a `displayName` property applied to it.
-    *
-    * @template P The props the component accepts.
-    */
-   interface NamedExoticComponent<P = {}> extends ExoticComponent<P> { }
-
-
-
-   /**
-    * Used to retrieve the props a custom component accepts with its ref.
-    *
-    * Unlike {@link ComponentPropsWithRef}, this only works with custom
-    * components, i.e. components you define yourself. This is to improve
-    * type-checking performance.
-    *
-    * @example
-    *
-    * ```tsx
-    * const MyComponent = (props: { foo: number, bar: string }) => <div />;
-    *
-    * // Retrieves the props 'MyComponent' accepts
-    * type MyComponentPropsWithRef = React.CustomComponentPropsWithRef<typeof MyComponent>;
-    * ```
-    */
-   //$$$
-   type CustomComponentPropsWithRef<T extends ComponentType> = T extends ((props: infer P) => Lumo.JSXNode) ? PropsWithRef<P>
-      : never;
 
 
    //
    // Event System
    // ----------------------------------------------------------------------
-   // TODO: change any to unknown when moving to TS v3
-   interface BaseSyntheticEvent<E = object, C = any, T = any> {
+   interface BaseSyntheticEvent<E = object, C = unknown, T = unknown> {
       nativeEvent: E;
       currentTarget: C;
       target: T;
@@ -405,7 +226,7 @@ declare namespace React {
    // $$$ Event Handler Types
    // ----------------------------------------------------------------------
 
-   type EventHandler<E extends SyntheticEvent<any>> = { bivarianceHack(event: E): void }["bivarianceHack"];
+   type EventHandler<E extends SyntheticEvent<unknown>> = { bivarianceHack(event: E): void }["bivarianceHack"];
 
    type ReactEventHandler<T = Element> = EventHandler<SyntheticEvent<T>>;
 
@@ -428,13 +249,13 @@ declare namespace React {
    // Props / DOM Attributes
    // ----------------------------------------------------------------------
 
-   interface HTMLProps<T> extends AllHTMLAttributes<T>, ClassAttributes<T> {
+   //$$$
+   type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & {
+      class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
+      style?: StyleInput | StyleInput[];
    }
 
-   //$$$
-   type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = ClassAttributes<T> & E;
-
-   interface SVGProps<T> extends SVGAttributes<T>, ClassAttributes<T> {
+   interface SVGProps<T> extends SVGAttributes<T>, RefAttributes<T> {
    }
 
    interface SVGLineElementAttributes<T> extends SVGProps<T> { }
@@ -442,39 +263,16 @@ declare namespace React {
 
 
    //$$$
-   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & LumoHooks<T>
+   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & Lumo.LumoHooks<T>
 
    //$$$
    interface _DOMAttributes<T> {
       children?: Lumo.JSXNode | undefined | null;
    }
 
-   type LifecycleTask<T> = (element: T) => void
-
-   interface LumoHooks<T> {
-      'at:create'?: LifecycleTask<T>
-      'at:mount'?: LifecycleTask<T>
-      'at:remount'?: LifecycleTask<T>
-      'at:created'?: LifecycleTask<T>
-      'at:mounted'?: LifecycleTask<Exclude<T, Function>>
-      'at:remounted'?: LifecycleTask<T>
-      'after:created'?: LifecycleTask<T>
-      'after:mounted'?: LifecycleTask<T>
-      'after:remounted'?: LifecycleTask<T>
-      'at:discard'?: LifecycleTask<T>
-      'at:unmount'?: LifecycleTask<T>
-      'at:demount'?: LifecycleTask<T>
-      'at:discarded'?: LifecycleTask<T>
-      'at:unmounted'?: LifecycleTask<T>
-      'at:demounted'?: LifecycleTask<T>
-      'after:discarded'?: LifecycleTask<T>
-      'after:unmounted'?: LifecycleTask<T>
-      'after:demounted'?: LifecycleTask<T>
-   }
-
    //$$$
    interface DOMEvents<T> {// Clipboard Events
-      'on'?: any;
+      'on'?: unknown;
       'on:copy'?: ClipboardEventHandler<T>;
       'on:cut'?: ClipboardEventHandler<T>;
       'on:paste'?: ClipboardEventHandler<T>;
@@ -1013,92 +811,90 @@ declare namespace React {
    //$$$
    interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
       // React-specific Attributes
-      defaultChecked?: boolean | undefined;
-      defaultValue?: string | number | readonly string[] | undefined;
-      // suppressContentEditableWarning?: boolean | undefined;
-      // suppressHydrationWarning?: boolean | undefined;
+      defaultChecked?: Lumo.MaybeIon<boolean | undefined>;
+      defaultValue?: Lumo.MaybeIon<string | number | readonly string[] | undefined>;
+      // suppressContentEditableWarning?: Lumo.MaybeIon<boolean | undefined>;
+      // suppressHydrationWarning?: Lumo.MaybeIon<boolean | undefined>;
 
       // Standard HTML Attributes
-      // class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[]; // #LUMO-EDIT
-      // style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[]; // #LUMO-EDIT
-      contenteditable?: Booleanish | "inherit" | "plaintext-only" | undefined;
-      contextmenu?: string | undefined;
-      draggable?: Booleanish | undefined;
-      id?: string | undefined;
-      is?: string | undefined;
-      slot?: string | undefined;
-      spellcheck?: Booleanish | undefined;
-      translate?: "yes" | "no" | undefined;
-      lang?: string | undefined; // Specifies the language of the element's content
-      nonce?: string | undefined; // A cryptographic nonce for inline scripts
-      part?: string | undefined; // Specifies parts of the element for styling
-      tabindex?: number | undefined; // Defines the tab order of the element
-      title?: string | undefined; // Additional information displayed as a tooltip
-      inert?: boolean | undefined; // Prevents user interaction with the element
-      itemid?: string | undefined; // Defines the item's ID in microdata
-      itemprop?: string | undefined; // Specifies the item's property in microdata
-      itemref?: string | undefined; // References additional microdata items
-      itemscope?: boolean | undefined; // Declares the scope of an item
-      itemtype?: string | undefined; // Specifies the type of an item in microdata
+      contenteditable?: Lumo.MaybeIon<Booleanish | "inherit" | "plaintext-only" | undefined>;
+      contextmenu?: Lumo.MaybeIon<string | undefined>;
+      draggable?: Lumo.MaybeIon<Booleanish | undefined>;
+      id?: Lumo.MaybeIon<string | undefined>;
+      is?: Lumo.MaybeIon<string | undefined>;
+      slot?: Lumo.MaybeIon<string | undefined>;
+      spellcheck?: Lumo.MaybeIon<Booleanish | undefined>;
+      translate?: Lumo.MaybeIon<"yes" | "no" | undefined>;
+      lang?: Lumo.MaybeIon<string | undefined>; // Specifies the language of the element's content
+      nonce?: Lumo.MaybeIon<string | undefined>; // A cryptographic nonce for inline scripts
+      part?: Lumo.MaybeIon<string | undefined>; // Specifies parts of the element for styling
+      tabindex?: Lumo.MaybeIon<number | undefined>; // Defines the tab order of the element
+      title?: Lumo.MaybeIon<string | undefined>; // Additional information displayed as a tooltip
+      inert?: Lumo.MaybeIon<boolean | undefined>; // Prevents user interaction with the element
+      itemid?: Lumo.MaybeIon<string | undefined>; // Defines the item's ID in microdata
+      itemprop?: Lumo.MaybeIon<string | undefined>; // Specifies the item's property in microdata
+      itemref?: Lumo.MaybeIon<string | undefined>; // References additional microdata items
+      itemscope?: Lumo.MaybeIon<boolean | undefined>; // Declares the scope of an item
+      itemtype?: Lumo.MaybeIon<string | undefined>; // Specifies the type of an item in microdata
 
-      accesskey?: string | undefined; // Defines a keyboard shortcut to activate/focus an element
-      autocapitalize?: "off" | "none" | "on" | "sentences" | "words" | "characters" | undefined; // Controls capitalization behavior
-      autofocus?: boolean | undefined; // Automatically focuses the element
-      dir?: "ltr" | "rtl" | "auto" | undefined; // Specifies the text direction
-      enterkeyhint?:
-      "enter"
-      | "done"
-      | "go"
-      | "next"
-      | "previous"
-      | "search"
-      | "send"
-      | undefined; // Hint for virtual keyboards
-      hidden?: boolean | "until-found" | undefined; // Hides the element
+      accesskey?: Lumo.MaybeIon<string | undefined>; // Defines a keyboard shortcut to activate/focus an element
+      autocapitalize?: Lumo.MaybeIon<"off" | "none" | "on" | "sentences" | "words" | "characters" | undefined>; // Controls capitalization behavior
+      autofocus?: Lumo.MaybeIon<boolean | undefined>; // Automatically focuses the element
+      dir?: Lumo.MaybeIon<"ltr" | "rtl" | "auto" | undefined>; // Specifies the text direction
+      enterkeyhint?: Lumo.MaybeIon<
+         "enter"
+         | "done"
+         | "go"
+         | "next"
+         | "previous"
+         | "search"
+         | "send"
+         | undefined>; // Hint for virtual keyboards
+      hidden?: Lumo.MaybeIon<boolean | "until-found" | undefined>; // Hides the element
 
       // Unknown
-      // radiogroup?: string | undefined; // <command>, <menuitem>
+      // radiogroup?: Lumo.MaybeIon<string | undefined>; // <command>, <menuitem>
 
       // WAI-ARIA
-      role?: AriaRole | undefined;
+      role?: Lumo.MaybeIon<AriaRole | undefined>;
 
       // RDFa Attributes
-      about?: string | undefined;
-      content?: string | undefined;
-      datatype?: string | undefined;
-      inlist?: any;
-      prefix?: string | undefined;
-      property?: string | undefined;
-      rel?: string | undefined;
-      resource?: string | undefined;
-      rev?: string | undefined;
-      typeof?: string | undefined;
-      vocab?: string | undefined;
+      about?: Lumo.MaybeIon<string | undefined>;
+      content?: Lumo.MaybeIon<string | undefined>;
+      datatype?: Lumo.MaybeIon<string | undefined>;
+      inlist?: Lumo.MaybeIon<unknown>;
+      prefix?: Lumo.MaybeIon<string | undefined>;
+      property?: Lumo.MaybeIon<string | undefined>;
+      rel?: Lumo.MaybeIon<string | undefined>;
+      resource?: Lumo.MaybeIon<string | undefined>;
+      rev?: Lumo.MaybeIon<string | undefined>;
+      typeof?: Lumo.MaybeIon<string | undefined>;
+      vocab?: Lumo.MaybeIon<string | undefined>;
 
       // Non-standard Attributes
-      autocorrect?: string | undefined;
-      autosave?: string | undefined;
-      color?: string | undefined;
-      results?: number | undefined;
-      security?: string | undefined;
-      unselectable?: "on" | "off" | undefined;
+      autocorrect?: Lumo.MaybeIon<string | undefined>;
+      autosave?: Lumo.MaybeIon<string | undefined>;
+      color?: Lumo.MaybeIon<string | undefined>;
+      results?: Lumo.MaybeIon<number | undefined>;
+      security?: Lumo.MaybeIon<string | undefined>;
+      unselectable?: Lumo.MaybeIon<"on" | "off" | undefined>;
 
       // Living Standard
       /**
        * Hints at the type of data that might be entered by the user while editing the element or its contents
        * @see {@link https://html.spec.whatwg.org/multipage/interaction.html#input-modalities:-the-inputmode-attribute}
        */
-      inputmode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined;
+      inputmode?: Lumo.MaybeIon<"none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined>;
       /**
        * Specify that a standard HTML element should behave like a defined custom built-in element
        * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is}
        */
 
       // added
-      scrolltop?: number | undefined;
-      scrollleft?: number | undefined;
+      scrolltop?: Lumo.MaybeIon<number | undefined>;
+      scrollleft?: Lumo.MaybeIon<number | undefined>;
 
-      innerHTML?: Lumo.MaybeIon<string>
+      innerHTML?: Lumo.MaybeIon<string>;
    }
 
    /**
@@ -1109,113 +905,108 @@ declare namespace React {
 
    interface AllHTMLAttributes<T> extends HTMLAttributes<T> {
       // Standard HTML Attributes
-      accept?: string | undefined;
-      acceptCharset?: string | undefined;
-      action?:
-      | string
-      | undefined
-      ;
-      allowFullScreen?: boolean | undefined;
-      allowTransparency?: boolean | undefined;
-      alt?: string | undefined;
-      as?: string | undefined;
-      async?: boolean | undefined;
-      autoComplete?: string | undefined;
-      autoPlay?: boolean | undefined;
-      capture?: boolean | "user" | "environment" | undefined;
-      cellPadding?: number | string | undefined;
-      cellSpacing?: number | string | undefined;
-      charSet?: string | undefined;
-      challenge?: string | undefined;
-      checked?: boolean | undefined;
-      cite?: string | undefined;
-      classID?: string | undefined;
-      cols?: number | undefined;
-      colSpan?: number | undefined;
-      controls?: boolean | undefined;
-      coords?: string | undefined;
-      crossOrigin?: CrossOrigin;
-      data?: string | undefined;
-      dateTime?: string | undefined;
-      default?: boolean | undefined;
-      defer?: boolean | undefined;
-      disabled?: boolean | undefined;
-      download?: any;
-      encType?: string | undefined;
-      form?: string | undefined;
-      formAction?:
-      | string
-      | undefined;
-      formEncType?: string | undefined;
-      formMethod?: string | undefined;
-      formNoValidate?: boolean | undefined;
-      formTarget?: string | undefined;
-      frameBorder?: number | string | undefined;
-      headers?: string | undefined;
-      height?: number | string | undefined;
-      high?: number | undefined;
-      href?: string | undefined;
-      hrefLang?: string | undefined;
-      htmlFor?: string | undefined;
-      httpEquiv?: string | undefined;
-      integrity?: string | undefined;
-      keyParams?: string | undefined;
-      keyType?: string | undefined;
-      kind?: string | undefined;
-      label?: string | undefined;
-      list?: string | undefined;
-      loop?: boolean | undefined;
-      low?: number | undefined;
-      manifest?: string | undefined;
-      marginHeight?: number | undefined;
-      marginWidth?: number | undefined;
-      max?: number | string | undefined;
-      maxLength?: number | undefined;
-      media?: string | undefined;
-      mediaGroup?: string | undefined;
-      method?: string | undefined;
-      min?: number | string | undefined;
-      minLength?: number | undefined;
-      multiple?: boolean | undefined;
-      muted?: boolean | undefined;
-      name?: string | undefined;
-      noValidate?: boolean | undefined;
-      open?: boolean | undefined;
-      optimum?: number | undefined;
-      pattern?: string | undefined;
-      placeholder?: string | undefined;
-      playsInline?: boolean | undefined;
-      poster?: string | undefined;
-      preload?: string | undefined;
-      readOnly?: boolean | undefined;
-      required?: boolean | undefined;
-      reversed?: boolean | undefined;
-      rows?: number | undefined;
-      rowSpan?: number | undefined;
-      sandbox?: string | undefined;
-      scope?: string | undefined;
-      scoped?: boolean | undefined;
-      scrolling?: string | undefined;
-      seamless?: boolean | undefined;
-      selected?: boolean | undefined;
-      shape?: string | undefined;
-      size?: number | undefined;
-      sizes?: string | undefined;
-      span?: number | undefined;
-      src?: string | undefined;
-      srcDoc?: string | undefined;
-      srcLang?: string | undefined;
-      srcSet?: string | undefined;
-      start?: number | undefined;
-      step?: number | string | undefined;
-      summary?: string | undefined;
-      target?: string | undefined;
-      type?: string | undefined;
-      useMap?: string | undefined;
-      value?: string | readonly string[] | number | undefined;
-      width?: number | string | undefined;
-      wmode?: string | undefined;
-      wrap?: string | undefined;
+      accept?: Lumo.MaybeIon<string | undefined>;
+      acceptCharset?: Lumo.MaybeIon<string | undefined>;
+      action?: Lumo.MaybeIon<string | undefined>;
+      allowFullScreen?: Lumo.MaybeIon<boolean | undefined>;
+      allowTransparency?: Lumo.MaybeIon<boolean | undefined>;
+      alt?: Lumo.MaybeIon<string | undefined>;
+      as?: Lumo.MaybeIon<string | undefined>;
+      async?: Lumo.MaybeIon<boolean | undefined>;
+      autoComplete?: Lumo.MaybeIon<string | undefined>;
+      autoPlay?: Lumo.MaybeIon<boolean | undefined>;
+      capture?: Lumo.MaybeIon<boolean | "user" | "environment" | undefined>;
+      cellPadding?: Lumo.MaybeIon<number | string | undefined>;
+      cellSpacing?: Lumo.MaybeIon<number | string | undefined>;
+      charSet?: Lumo.MaybeIon<string | undefined>;
+      challenge?: Lumo.MaybeIon<string | undefined>;
+      checked?: Lumo.MaybeIon<boolean | undefined>;
+      cite?: Lumo.MaybeIon<string | undefined>;
+      classID?: Lumo.MaybeIon<string | undefined>;
+      cols?: Lumo.MaybeIon<number | undefined>;
+      colSpan?: Lumo.MaybeIon<number | undefined>;
+      controls?: Lumo.MaybeIon<boolean | undefined>;
+      coords?: Lumo.MaybeIon<string | undefined>;
+      crossOrigin?: Lumo.MaybeIon<CrossOrigin>;
+      data?: Lumo.MaybeIon<string | undefined>;
+      dateTime?: Lumo.MaybeIon<string | undefined>;
+      default?: Lumo.MaybeIon<boolean | undefined>;
+      defer?: Lumo.MaybeIon<boolean | undefined>;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      download?: Lumo.MaybeIon<unknown>;
+      encType?: Lumo.MaybeIon<string | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      formAction?: Lumo.MaybeIon<string | undefined>;
+      formEncType?: Lumo.MaybeIon<string | undefined>;
+      formMethod?: Lumo.MaybeIon<string | undefined>;
+      formNoValidate?: Lumo.MaybeIon<boolean | undefined>;
+      formTarget?: Lumo.MaybeIon<string | undefined>;
+      frameBorder?: Lumo.MaybeIon<number | string | undefined>;
+      headers?: Lumo.MaybeIon<string | undefined>;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      high?: Lumo.MaybeIon<number | undefined>;
+      href?: Lumo.MaybeIon<string | undefined>;
+      hrefLang?: Lumo.MaybeIon<string | undefined>;
+      htmlFor?: Lumo.MaybeIon<string | undefined>;
+      httpEquiv?: Lumo.MaybeIon<string | undefined>;
+      integrity?: Lumo.MaybeIon<string | undefined>;
+      keyParams?: Lumo.MaybeIon<string | undefined>;
+      keyType?: Lumo.MaybeIon<string | undefined>;
+      kind?: Lumo.MaybeIon<string | undefined>;
+      label?: Lumo.MaybeIon<string | undefined>;
+      list?: Lumo.MaybeIon<string | undefined>;
+      loop?: Lumo.MaybeIon<boolean | undefined>;
+      low?: Lumo.MaybeIon<number | undefined>;
+      manifest?: Lumo.MaybeIon<string | undefined>;
+      marginHeight?: Lumo.MaybeIon<number | undefined>;
+      marginWidth?: Lumo.MaybeIon<number | undefined>;
+      max?: Lumo.MaybeIon<number | string | undefined>;
+      maxLength?: Lumo.MaybeIon<number | undefined>;
+      media?: Lumo.MaybeIon<string | undefined>;
+      mediaGroup?: Lumo.MaybeIon<string | undefined>;
+      method?: Lumo.MaybeIon<string | undefined>;
+      min?: Lumo.MaybeIon<number | string | undefined>;
+      minLength?: Lumo.MaybeIon<number | undefined>;
+      multiple?: Lumo.MaybeIon<boolean | undefined>;
+      muted?: Lumo.MaybeIon<boolean | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      noValidate?: Lumo.MaybeIon<boolean | undefined>;
+      open?: Lumo.MaybeIon<boolean | undefined>;
+      optimum?: Lumo.MaybeIon<number | undefined>;
+      pattern?: Lumo.MaybeIon<string | undefined>;
+      placeholder?: Lumo.MaybeIon<string | undefined>;
+      playsInline?: Lumo.MaybeIon<boolean | undefined>;
+      poster?: Lumo.MaybeIon<string | undefined>;
+      preload?: Lumo.MaybeIon<string | undefined>;
+      readOnly?: Lumo.MaybeIon<boolean | undefined>;
+      required?: Lumo.MaybeIon<boolean | undefined>;
+      reversed?: Lumo.MaybeIon<boolean | undefined>;
+      rows?: Lumo.MaybeIon<number | undefined>;
+      rowSpan?: Lumo.MaybeIon<number | undefined>;
+      sandbox?: Lumo.MaybeIon<string | undefined>;
+      scope?: Lumo.MaybeIon<string | undefined>;
+      scoped?: Lumo.MaybeIon<boolean | undefined>;
+      scrolling?: Lumo.MaybeIon<string | undefined>;
+      seamless?: Lumo.MaybeIon<boolean | undefined>;
+      selected?: Lumo.MaybeIon<boolean | undefined>;
+      shape?: Lumo.MaybeIon<string | undefined>;
+      size?: Lumo.MaybeIon<number | undefined>;
+      sizes?: Lumo.MaybeIon<string | undefined>;
+      span?: Lumo.MaybeIon<number | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      srcDoc?: Lumo.MaybeIon<string | undefined>;
+      srcLang?: Lumo.MaybeIon<string | undefined>;
+      srcSet?: Lumo.MaybeIon<string | undefined>;
+      start?: Lumo.MaybeIon<number | undefined>;
+      step?: Lumo.MaybeIon<number | string | undefined>;
+      summary?: Lumo.MaybeIon<string | undefined>;
+      target?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
+      useMap?: Lumo.MaybeIon<string | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
+      wmode?: Lumo.MaybeIon<string | undefined>;
+      wrap?: Lumo.MaybeIon<string | undefined>;
    }
 
    type HTMLAttributeReferrerPolicy =
@@ -1237,166 +1028,156 @@ declare namespace React {
       | (string & {});
 
    interface AnchorHTMLAttributes<T> extends HTMLAttributes<T> {
-      download?: any;
-      href?: string | undefined;
-      hrefLang?: string | undefined;
-      media?: string | undefined;
-      ping?: string | undefined;
-      target?: HTMLAttributeAnchorTarget | undefined;
-      type?: string | undefined;
-      referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
+      download?: Lumo.MaybeIon<unknown>;
+      href?: Lumo.MaybeIon<string | undefined>;
+      hrefLang?: Lumo.MaybeIon<string | undefined>;
+      media?: Lumo.MaybeIon<string | undefined>;
+      ping?: Lumo.MaybeIon<string | undefined>;
+      target?: Lumo.MaybeIon<HTMLAttributeAnchorTarget | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
+      referrerPolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
    }
 
    interface AudioHTMLAttributes<T> extends MediaHTMLAttributes<T> { }
 
    interface AreaHTMLAttributes<T> extends HTMLAttributes<T> {
-      alt?: string | undefined;
-      coords?: string | undefined;
-      download?: any;
-      href?: string | undefined;
-      hrefLang?: string | undefined;
-      media?: string | undefined;
-      referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
-      shape?: string | undefined;
-      target?: string | undefined;
+      alt?: Lumo.MaybeIon<string | undefined>;
+      coords?: Lumo.MaybeIon<string | undefined>;
+      download?: Lumo.MaybeIon<unknown>;
+      href?: Lumo.MaybeIon<string | undefined>;
+      hrefLang?: Lumo.MaybeIon<string | undefined>;
+      media?: Lumo.MaybeIon<string | undefined>;
+      referrerPolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+      shape?: Lumo.MaybeIon<string | undefined>;
+      target?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface BaseHTMLAttributes<T> extends HTMLAttributes<T> {
-      href?: string | undefined;
-      target?: string | undefined;
+      href?: Lumo.MaybeIon<string | undefined>;
+      target?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface BlockquoteHTMLAttributes<T> extends HTMLAttributes<T> {
-      cite?: string | undefined;
+      cite?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface ButtonHTMLAttributes<T> extends HTMLAttributes<T> {
-      disabled?: boolean | undefined;
-      form?: string | undefined;
-      formAction?:
-      | string
-      | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-      keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-      ]
-      | undefined;
-      formEncType?: string | undefined;
-      formMethod?: string | undefined;
-      formNoValidate?: boolean | undefined;
-      formTarget?: string | undefined;
-      name?: string | undefined;
-      type?: "submit" | "reset" | "button" | undefined;
-      value?: string | readonly string[] | number | undefined;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      formAction?: Lumo.MaybeIon<string | undefined>;
+      formEncType?: Lumo.MaybeIon<string | undefined>;
+      formMethod?: Lumo.MaybeIon<string | undefined>;
+      formNoValidate?: Lumo.MaybeIon<boolean | undefined>;
+      formTarget?: Lumo.MaybeIon<string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<"submit" | "reset" | "button" | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
    }
 
    interface CanvasHTMLAttributes<T> extends HTMLAttributes<T> {
-      height?: number | string | undefined;
-      width?: number | string | undefined;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
    }
 
    interface ColHTMLAttributes<T> extends HTMLAttributes<T> {
-      span?: number | undefined;
-      width?: number | string | undefined;
+      span?: Lumo.MaybeIon<number | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
    }
 
    interface ColgroupHTMLAttributes<T> extends HTMLAttributes<T> {
-      span?: number | undefined;
+      span?: Lumo.MaybeIon<number | undefined>;
    }
 
    interface DataHTMLAttributes<T> extends HTMLAttributes<T> {
-      value?: string | readonly string[] | number | undefined;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
    }
 
    interface DetailsHTMLAttributes<T> extends HTMLAttributes<T> {
-      open?: boolean | undefined;
+      open?: Lumo.MaybeIon<boolean | undefined>;
       onToggle?: ReactEventHandler<T> | undefined;
-      name?: string | undefined;
+      name?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface DelHTMLAttributes<T> extends HTMLAttributes<T> {
-      cite?: string | undefined;
-      dateTime?: string | undefined;
+      cite?: Lumo.MaybeIon<string | undefined>;
+      dateTime?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface DialogHTMLAttributes<T> extends HTMLAttributes<T> {
       onCancel?: ReactEventHandler<T> | undefined;
       onClose?: ReactEventHandler<T> | undefined;
-      open?: boolean | undefined;
+      open?: Lumo.MaybeIon<boolean | undefined>;
    }
 
    interface EmbedHTMLAttributes<T> extends HTMLAttributes<T> {
-      height?: number | string | undefined;
-      src?: string | undefined;
-      type?: string | undefined;
-      width?: number | string | undefined;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
    }
 
    interface FieldsetHTMLAttributes<T> extends HTMLAttributes<T> {
-      disabled?: boolean | undefined;
-      form?: string | undefined;
-      name?: string | undefined;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface FormHTMLAttributes<T> extends HTMLAttributes<T> {
-      acceptCharset?: string | undefined;
-      action?:
-      | string
-      | undefined
-      | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-      keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-      ];
-      autoComplete?: string | undefined;
-      encType?: string | undefined;
-      method?: string | undefined;
-      name?: string | undefined;
-      noValidate?: boolean | undefined;
-      target?: string | undefined;
+      acceptCharset?: Lumo.MaybeIon<string | undefined>;
+      action?: Lumo.MaybeIon<string | undefined>;
+      autoComplete?: Lumo.MaybeIon<string | undefined>;
+      encType?: Lumo.MaybeIon<string | undefined>;
+      method?: Lumo.MaybeIon<string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      noValidate?: Lumo.MaybeIon<boolean | undefined>;
+      target?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface HtmlHTMLAttributes<T> extends HTMLAttributes<T> {
-      manifest?: string | undefined;
+      manifest?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface IframeHTMLAttributes<T> extends HTMLAttributes<T> {
-      allow?: string | undefined;
-      allowFullScreen?: boolean | undefined;
-      allowTransparency?: boolean | undefined;
+      allow?: Lumo.MaybeIon<string | undefined>;
+      allowFullScreen?: Lumo.MaybeIon<boolean | undefined>;
+      allowTransparency?: Lumo.MaybeIon<boolean | undefined>;
       /** @deprecated */
-      frameBorder?: number | string | undefined;
-      height?: number | string | undefined;
-      loading?: "eager" | "lazy" | undefined;
+      frameBorder?: Lumo.MaybeIon<number | string | undefined>;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      loading?: Lumo.MaybeIon<"eager" | "lazy" | undefined>;
       /** @deprecated */
-      marginHeight?: number | undefined;
+      marginHeight?: Lumo.MaybeIon<number | undefined>;
       /** @deprecated */
-      marginWidth?: number | undefined;
-      name?: string | undefined;
-      referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
-      sandbox?: string | undefined;
+      marginWidth?: Lumo.MaybeIon<number | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      referrerPolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+      sandbox?: Lumo.MaybeIon<string | undefined>;
       /** @deprecated */
-      scrolling?: string | undefined;
-      seamless?: boolean | undefined;
-      src?: string | undefined;
-      srcDoc?: string | undefined;
-      width?: number | string | undefined;
+      scrolling?: Lumo.MaybeIon<string | undefined>;
+      seamless?: Lumo.MaybeIon<boolean | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      srcDoc?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
    }
 
    interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
-      alt?: string | undefined;
-      crossOrigin?: CrossOrigin;
-      decoding?: "async" | "auto" | "sync" | undefined;
-      fetchPriority?: "high" | "low" | "auto";
-      height?: number | string | undefined;
-      loading?: "eager" | "lazy" | undefined;
-      referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
-      sizes?: string | undefined;
-      src?: string | undefined;
-      srcSet?: string | undefined;
-      useMap?: string | undefined;
-      width?: number | string | undefined;
+      alt?: Lumo.MaybeIon<string | undefined>;
+      crossOrigin?: Lumo.MaybeIon<CrossOrigin>;
+      decoding?: Lumo.MaybeIon<"async" | "auto" | "sync" | undefined>;
+      fetchPriority?: Lumo.MaybeIon<"high" | "low" | "auto">;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      loading?: Lumo.MaybeIon<"eager" | "lazy" | undefined>;
+      referrerPolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+      sizes?: Lumo.MaybeIon<string | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      srcSet?: Lumo.MaybeIon<string | undefined>;
+      useMap?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
    }
 
    interface InsHTMLAttributes<T> extends HTMLAttributes<T> {
-      cite?: string | undefined;
-      dateTime?: string | undefined;
+      cite?: Lumo.MaybeIon<string | undefined>;
+      dateTime?: Lumo.MaybeIon<string | undefined>;
    }
 
    type HTMLInputTypeAttribute =
@@ -1487,284 +1268,284 @@ declare namespace React {
    type HTMLInputAutoCompleteAttribute = AutoFill | (string & {});
 
    interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
-      accept?: string | undefined;
-      alt?: string | undefined;
-      autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
-      capture?: boolean | "user" | "environment" | undefined; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
-      checked?: boolean | undefined;
-      disabled?: boolean | undefined;
-      enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send" | undefined;
-      form?: string | undefined;
-      formAction?: string | undefined;
-      formEncType?: string | undefined;
-      formMethod?: string | undefined;
-      formNoValidate?: boolean | undefined;
-      formTarget?: string | undefined;
-      height?: number | string | undefined;
-      list?: string | undefined;
-      max?: number | string | undefined;
-      maxLength?: number | undefined;
-      min?: number | string | undefined;
-      minLength?: number | undefined;
-      multiple?: boolean | undefined;
-      name?: string | undefined;
-      pattern?: string | undefined;
-      placeholder?: string | undefined;
-      readOnly?: boolean | undefined;
-      required?: boolean | undefined;
-      size?: number | undefined;
-      src?: string | undefined;
-      step?: number | string | undefined;
-      type?: HTMLInputTypeAttribute | undefined;
-      value?: string | readonly string[] | number | undefined;
-      width?: number | string | undefined;
+      accept?: Lumo.MaybeIon<string | undefined>;
+      alt?: Lumo.MaybeIon<string | undefined>;
+      autoComplete?: Lumo.MaybeIon<HTMLInputAutoCompleteAttribute | undefined>;
+      capture?: Lumo.MaybeIon<boolean | "user" | "environment" | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
+      checked?: Lumo.MaybeIon<boolean | undefined>;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      enterKeyHint?: Lumo.MaybeIon<"enter" | "done" | "go" | "next" | "previous" | "search" | "send" | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      formAction?: Lumo.MaybeIon<string | undefined>;
+      formEncType?: Lumo.MaybeIon<string | undefined>;
+      formMethod?: Lumo.MaybeIon<string | undefined>;
+      formNoValidate?: Lumo.MaybeIon<boolean | undefined>;
+      formTarget?: Lumo.MaybeIon<string | undefined>;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      list?: Lumo.MaybeIon<string | undefined>;
+      max?: Lumo.MaybeIon<number | string | undefined>;
+      maxLength?: Lumo.MaybeIon<number | undefined>;
+      min?: Lumo.MaybeIon<number | string | undefined>;
+      minLength?: Lumo.MaybeIon<number | undefined>;
+      multiple?: Lumo.MaybeIon<boolean | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      pattern?: Lumo.MaybeIon<string | undefined>;
+      placeholder?: Lumo.MaybeIon<string | undefined>;
+      readOnly?: Lumo.MaybeIon<boolean | undefined>;
+      required?: Lumo.MaybeIon<boolean | undefined>;
+      size?: Lumo.MaybeIon<number | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      step?: Lumo.MaybeIon<number | string | undefined>;
+      type?: Lumo.MaybeIon<HTMLInputTypeAttribute | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
 
-      'mu:value'?: Quarky.AtomicIon<any, { value: any; }> | Quarky.Ion<any, { set: (value: any) => unknown }>
+      'mu:value'?: Quarky.AtomicIon<unknown, { value: unknown; }> | Quarky.Ion<unknown, { set: (value: unknown) => unknown }>
       'mu:checked'?: Quarky.AtomicIon<Booleanny, { value: Booleanny; }> | Quarky.Ion<Booleanny, { set: (value: Booleanny) => unknown }>
    }
 
 
    interface KeygenHTMLAttributes<T> extends HTMLAttributes<T> {
-      challenge?: string | undefined;
-      disabled?: boolean | undefined;
-      form?: string | undefined;
-      keyType?: string | undefined;
-      keyParams?: string | undefined;
-      name?: string | undefined;
+      challenge?: Lumo.MaybeIon<string | undefined>;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      keyType?: Lumo.MaybeIon<string | undefined>;
+      keyParams?: Lumo.MaybeIon<string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface LabelHTMLAttributes<T> extends HTMLAttributes<T> {
-      form?: string | undefined;
-      for?: string | undefined;
+      form?: Lumo.MaybeIon<string | undefined>;
+      for?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface LiHTMLAttributes<T> extends HTMLAttributes<T> {
-      value?: string | readonly string[] | number | undefined;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
    }
 
    interface LinkHTMLAttributes<T> extends HTMLAttributes<T> {
-      as?: string | undefined;
-      crossOrigin?: CrossOrigin;
-      fetchPriority?: "high" | "low" | "auto";
-      href?: string | undefined;
-      hrefLang?: string | undefined;
-      integrity?: string | undefined;
-      media?: string | undefined;
-      imageSrcSet?: string | undefined;
-      imageSizes?: string | undefined;
-      referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
-      sizes?: string | undefined;
-      type?: string | undefined;
-      charSet?: string | undefined;
+      as?: Lumo.MaybeIon<string | undefined>;
+      crossOrigin?: Lumo.MaybeIon<CrossOrigin>;
+      fetchPriority?: Lumo.MaybeIon<"high" | "low" | "auto">;
+      href?: Lumo.MaybeIon<string | undefined>;
+      hrefLang?: Lumo.MaybeIon<string | undefined>;
+      integrity?: Lumo.MaybeIon<string | undefined>;
+      media?: Lumo.MaybeIon<string | undefined>;
+      imageSrcSet?: Lumo.MaybeIon<string | undefined>;
+      imageSizes?: Lumo.MaybeIon<string | undefined>;
+      referrerPolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+      sizes?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
+      charSet?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface MapHTMLAttributes<T> extends HTMLAttributes<T> {
-      name?: string | undefined;
+      name?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface MenuHTMLAttributes<T> extends HTMLAttributes<T> {
-      type?: string | undefined;
+      type?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface MediaHTMLAttributes<T> extends HTMLAttributes<T> {
-      autoPlay?: boolean | undefined;
-      controls?: boolean | undefined;
-      controlsList?: string | undefined;
-      crossOrigin?: CrossOrigin;
-      loop?: boolean | undefined;
-      mediaGroup?: string | undefined;
-      muted?: boolean | undefined;
-      playsInline?: boolean | undefined;
-      preload?: string | undefined;
-      src?: string | undefined;
+      autoPlay?: Lumo.MaybeIon<boolean | undefined>;
+      controls?: Lumo.MaybeIon<boolean | undefined>;
+      controlsList?: Lumo.MaybeIon<string | undefined>;
+      crossOrigin?: Lumo.MaybeIon<CrossOrigin>;
+      loop?: Lumo.MaybeIon<boolean | undefined>;
+      mediaGroup?: Lumo.MaybeIon<string | undefined>;
+      muted?: Lumo.MaybeIon<boolean | undefined>;
+      playsInline?: Lumo.MaybeIon<boolean | undefined>;
+      preload?: Lumo.MaybeIon<string | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface MetaHTMLAttributes<T> extends HTMLAttributes<T> {
-      charSet?: string | undefined;
-      content?: string | undefined;
-      httpEquiv?: string | undefined;
-      media?: string | undefined;
-      name?: string | undefined;
+      charSet?: Lumo.MaybeIon<string | undefined>;
+      content?: Lumo.MaybeIon<string | undefined>;
+      httpEquiv?: Lumo.MaybeIon<string | undefined>;
+      media?: Lumo.MaybeIon<string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface MeterHTMLAttributes<T> extends HTMLAttributes<T> {
-      form?: string | undefined;
-      high?: number | undefined;
-      low?: number | undefined;
-      max?: number | string | undefined;
-      min?: number | string | undefined;
-      optimum?: number | undefined;
-      value?: string | readonly string[] | number | undefined;
+      form?: Lumo.MaybeIon<string | undefined>;
+      high?: Lumo.MaybeIon<number | undefined>;
+      low?: Lumo.MaybeIon<number | undefined>;
+      max?: Lumo.MaybeIon<number | string | undefined>;
+      min?: Lumo.MaybeIon<number | string | undefined>;
+      optimum?: Lumo.MaybeIon<number | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
    }
 
    interface QuoteHTMLAttributes<T> extends HTMLAttributes<T> {
-      cite?: string | undefined;
+      cite?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface ObjectHTMLAttributes<T> extends HTMLAttributes<T> {
-      classID?: string | undefined;
-      data?: string | undefined;
-      form?: string | undefined;
-      height?: number | string | undefined;
-      name?: string | undefined;
-      type?: string | undefined;
-      useMap?: string | undefined;
-      width?: number | string | undefined;
-      wmode?: string | undefined;
+      classID?: Lumo.MaybeIon<string | undefined>;
+      data?: Lumo.MaybeIon<string | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
+      useMap?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
+      wmode?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface OlHTMLAttributes<T> extends HTMLAttributes<T> {
-      reversed?: boolean | undefined;
-      start?: number | undefined;
-      type?: "1" | "a" | "A" | "i" | "I" | undefined;
+      reversed?: Lumo.MaybeIon<boolean | undefined>;
+      start?: Lumo.MaybeIon<number | undefined>;
+      type?: Lumo.MaybeIon<"1" | "a" | "A" | "i" | "I" | undefined>;
    }
 
    interface OptgroupHTMLAttributes<T> extends HTMLAttributes<T> {
-      disabled?: boolean | undefined;
-      label?: string | undefined;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      label?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface OptionHTMLAttributes<T> extends HTMLAttributes<T> {
-      disabled?: boolean | undefined;
-      label?: string | undefined;
-      selected?: boolean | undefined;
-      value?: string | readonly string[] | number | undefined;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      label?: Lumo.MaybeIon<string | undefined>;
+      selected?: Lumo.MaybeIon<boolean | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
    }
 
    interface OutputHTMLAttributes<T> extends HTMLAttributes<T> {
-      form?: string | undefined;
-      htmlFor?: string | undefined;
-      name?: string | undefined;
+      form?: Lumo.MaybeIon<string | undefined>;
+      htmlFor?: Lumo.MaybeIon<string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface ParamHTMLAttributes<T> extends HTMLAttributes<T> {
-      name?: string | undefined;
-      value?: string | readonly string[] | number | undefined;
+      name?: Lumo.MaybeIon<string | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
    }
 
    interface ProgressHTMLAttributes<T> extends HTMLAttributes<T> {
-      max?: number | string | undefined;
-      value?: string | readonly string[] | number | undefined;
+      max?: Lumo.MaybeIon<number | string | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
    }
 
    interface SlotHTMLAttributes<T> extends HTMLAttributes<T> {
-      name?: string | undefined;
+      name?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface ScriptHTMLAttributes<T> extends HTMLAttributes<T> {
-      async?: boolean | undefined;
+      async?: Lumo.MaybeIon<boolean | undefined>;
       /** @deprecated */
-      charSet?: string | undefined;
-      crossOrigin?: CrossOrigin;
-      defer?: boolean | undefined;
-      integrity?: string | undefined;
-      noModule?: boolean | undefined;
-      referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
-      src?: string | undefined;
-      type?: string | undefined;
+      charSet?: Lumo.MaybeIon<string | undefined>;
+      crossOrigin?: Lumo.MaybeIon<CrossOrigin>;
+      defer?: Lumo.MaybeIon<boolean | undefined>;
+      integrity?: Lumo.MaybeIon<string | undefined>;
+      noModule?: Lumo.MaybeIon<boolean | undefined>;
+      referrerPolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface SelectHTMLAttributes<T> extends HTMLAttributes<T> {
-      autoComplete?: string | undefined;
-      disabled?: boolean | undefined;
-      form?: string | undefined;
-      multiple?: boolean | undefined;
-      name?: string | undefined;
-      required?: boolean | undefined;
-      size?: number | undefined;
-      value?: string | readonly string[] | number | undefined;
+      autoComplete?: Lumo.MaybeIon<string | undefined>;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      multiple?: Lumo.MaybeIon<boolean | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      required?: Lumo.MaybeIon<boolean | undefined>;
+      size?: Lumo.MaybeIon<number | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
       'on:change'?: ChangeEventHandler<T> | undefined;
       'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, { set: (value: string) => unknown }>
    }
 
    interface SourceHTMLAttributes<T> extends HTMLAttributes<T> {
-      height?: number | string | undefined;
-      media?: string | undefined;
-      sizes?: string | undefined;
-      src?: string | undefined;
-      srcSet?: string | undefined;
-      type?: string | undefined;
-      width?: number | string | undefined;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      media?: Lumo.MaybeIon<string | undefined>;
+      sizes?: Lumo.MaybeIon<string | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      srcSet?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
    }
 
    interface StyleHTMLAttributes<T> extends HTMLAttributes<T> {
-      media?: string | undefined;
-      scoped?: boolean | undefined;
-      type?: string | undefined;
+      media?: Lumo.MaybeIon<string | undefined>;
+      scoped?: Lumo.MaybeIon<boolean | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface TableHTMLAttributes<T> extends HTMLAttributes<T> {
-      align?: "left" | "center" | "right" | undefined;
-      bgcolor?: string | undefined;
-      border?: number | undefined;
-      cellPadding?: number | string | undefined;
-      cellSpacing?: number | string | undefined;
-      frame?: boolean | undefined;
-      rules?: "none" | "groups" | "rows" | "columns" | "all" | undefined;
-      summary?: string | undefined;
-      width?: number | string | undefined;
+      align?: Lumo.MaybeIon<"left" | "center" | "right" | undefined>;
+      bgcolor?: Lumo.MaybeIon<string | undefined>;
+      border?: Lumo.MaybeIon<number | undefined>;
+      cellPadding?: Lumo.MaybeIon<number | string | undefined>;
+      cellSpacing?: Lumo.MaybeIon<number | string | undefined>;
+      frame?: Lumo.MaybeIon<boolean | undefined>;
+      rules?: Lumo.MaybeIon<"none" | "groups" | "rows" | "columns" | "all" | undefined>;
+      summary?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
    }
 
    interface TextareaHTMLAttributes<T> extends HTMLAttributes<T> {
-      autoComplete?: string | undefined;
-      cols?: number | undefined;
-      dirName?: string | undefined;
-      disabled?: boolean | undefined;
-      form?: string | undefined;
-      maxLength?: number | undefined;
-      minLength?: number | undefined;
-      name?: string | undefined;
-      placeholder?: string | undefined;
-      readOnly?: boolean | undefined;
-      required?: boolean | undefined;
-      rows?: number | undefined;
-      value?: string | readonly string[] | number | undefined;
-      wrap?: string | undefined;
+      autoComplete?: Lumo.MaybeIon<string | undefined>;
+      cols?: Lumo.MaybeIon<number | undefined>;
+      dirName?: Lumo.MaybeIon<string | undefined>;
+      disabled?: Lumo.MaybeIon<boolean | undefined>;
+      form?: Lumo.MaybeIon<string | undefined>;
+      maxLength?: Lumo.MaybeIon<number | undefined>;
+      minLength?: Lumo.MaybeIon<number | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      placeholder?: Lumo.MaybeIon<string | undefined>;
+      readOnly?: Lumo.MaybeIon<boolean | undefined>;
+      required?: Lumo.MaybeIon<boolean | undefined>;
+      rows?: Lumo.MaybeIon<number | undefined>;
+      value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+      wrap?: Lumo.MaybeIon<string | undefined>;
 
       'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, { set: (value: string) => unknown }>
       'on:change'?: ChangeEventHandler<T> | undefined;
    }
 
    interface TdHTMLAttributes<T> extends HTMLAttributes<T> {
-      align?: "left" | "center" | "right" | "justify" | "char" | undefined;
-      colSpan?: number | undefined;
-      headers?: string | undefined;
-      rowSpan?: number | undefined;
-      scope?: string | undefined;
-      abbr?: string | undefined;
-      height?: number | string | undefined;
-      width?: number | string | undefined;
-      valign?: "top" | "middle" | "bottom" | "baseline" | undefined;
+      align?: Lumo.MaybeIon<"left" | "center" | "right" | "justify" | "char" | undefined>;
+      colSpan?: Lumo.MaybeIon<number | undefined>;
+      headers?: Lumo.MaybeIon<string | undefined>;
+      rowSpan?: Lumo.MaybeIon<number | undefined>;
+      scope?: Lumo.MaybeIon<string | undefined>;
+      abbr?: Lumo.MaybeIon<string | undefined>;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
+      valign?: Lumo.MaybeIon<"top" | "middle" | "bottom" | "baseline" | undefined>;
    }
 
    interface ThHTMLAttributes<T> extends HTMLAttributes<T> {
-      align?: "left" | "center" | "right" | "justify" | "char" | undefined;
-      colSpan?: number | undefined;
-      headers?: string | undefined;
-      rowSpan?: number | undefined;
-      scope?: string | undefined;
-      abbr?: string | undefined;
+      align?: Lumo.MaybeIon<"left" | "center" | "right" | "justify" | "char" | undefined>;
+      colSpan?: Lumo.MaybeIon<number | undefined>;
+      headers?: Lumo.MaybeIon<string | undefined>;
+      rowSpan?: Lumo.MaybeIon<number | undefined>;
+      scope?: Lumo.MaybeIon<string | undefined>;
+      abbr?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface TimeHTMLAttributes<T> extends HTMLAttributes<T> {
-      dateTime?: string | undefined;
+      dateTime?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface TrackHTMLAttributes<T> extends HTMLAttributes<T> {
-      default?: boolean | undefined;
-      kind?: string | undefined;
-      label?: string | undefined;
-      src?: string | undefined;
-      srcLang?: string | undefined;
+      default?: Lumo.MaybeIon<boolean | undefined>;
+      kind?: Lumo.MaybeIon<string | undefined>;
+      label?: Lumo.MaybeIon<string | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      srcLang?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface VideoHTMLAttributes<T> extends MediaHTMLAttributes<T> {
-      height?: number | string | undefined;
-      playsInline?: boolean | undefined;
-      poster?: string | undefined;
-      width?: number | string | undefined;
-      disablePictureInPicture?: boolean | undefined;
-      disableRemotePlayback?: boolean | undefined;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      playsInline?: Lumo.MaybeIon<boolean | undefined>;
+      poster?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
+      disablePictureInPicture?: Lumo.MaybeIon<boolean | undefined>;
+      disableRemotePlayback?: Lumo.MaybeIon<boolean | undefined>;
    }
 
    // this list is "complete" in that it contains every SVG attribute
@@ -1777,306 +1558,306 @@ declare namespace React {
    //   - union of string literals
    interface SVGAttributes<T> extends AriaAttributes, DOMAttributes<T> {
       // React-specific Attributes
-      suppressHydrationWarning?: boolean | undefined;
+      suppressHydrationWarning?: Lumo.MaybeIon<boolean | undefined>;
 
       // Attributes which also defined in HTMLAttributes
       // See comment in SVGDOMPropertyConfig.js
-      className?: string | undefined;
-      color?: string | undefined;
-      height?: number | string | undefined;
-      id?: string | undefined;
-      lang?: string | undefined;
-      max?: number | string | undefined;
-      media?: string | undefined;
-      method?: string | undefined;
-      min?: number | string | undefined;
-      name?: string | undefined;
-      style?: CSSProperties | undefined;
-      target?: string | undefined;
-      type?: string | undefined;
-      width?: number | string | undefined;
+      className?: Lumo.MaybeIon<string | undefined>;
+      color?: Lumo.MaybeIon<string | undefined>;
+      height?: Lumo.MaybeIon<number | string | undefined>;
+      id?: Lumo.MaybeIon<string | undefined>;
+      lang?: Lumo.MaybeIon<string | undefined>;
+      max?: Lumo.MaybeIon<number | string | undefined>;
+      media?: Lumo.MaybeIon<string | undefined>;
+      method?: Lumo.MaybeIon<string | undefined>;
+      min?: Lumo.MaybeIon<number | string | undefined>;
+      name?: Lumo.MaybeIon<string | undefined>;
+      style?: Lumo.MaybeIon<CSSProperties | undefined>;
+      target?: Lumo.MaybeIon<string | undefined>;
+      type?: Lumo.MaybeIon<string | undefined>;
+      width?: Lumo.MaybeIon<number | string | undefined>;
 
       // Other HTML properties supported by SVG elements in browsers
-      role?: AriaRole | undefined;
-      tabIndex?: number | undefined;
-      crossOrigin?: CrossOrigin;
+      role?: Lumo.MaybeIon<AriaRole | undefined>;
+      tabIndex?: Lumo.MaybeIon<number | undefined>;
+      crossOrigin?: Lumo.MaybeIon<CrossOrigin>;
 
       // SVG Specific attributes
-      accentHeight?: number | string | undefined;
-      accumulate?: "none" | "sum" | undefined;
-      additive?: "replace" | "sum" | undefined;
-      alignmentBaseline?:
-      | "auto"
-      | "baseline"
-      | "before-edge"
-      | "text-before-edge"
-      | "middle"
-      | "central"
-      | "after-edge"
-      | "text-after-edge"
-      | "ideographic"
-      | "alphabetic"
-      | "hanging"
-      | "mathematical"
-      | "inherit"
-      | undefined;
-      allowReorder?: "no" | "yes" | undefined;
-      alphabetic?: number | string | undefined;
-      amplitude?: number | string | undefined;
-      arabicForm?: "initial" | "medial" | "terminal" | "isolated" | undefined;
-      ascent?: number | string | undefined;
-      attributeName?: string | undefined;
-      attributeType?: string | undefined;
-      autoReverse?: Booleanish | undefined;
-      azimuth?: number | string | undefined;
-      baseFrequency?: number | string | undefined;
-      baselineShift?: number | string | undefined;
-      baseProfile?: number | string | undefined;
-      bbox?: number | string | undefined;
-      begin?: number | string | undefined;
-      bias?: number | string | undefined;
-      by?: number | string | undefined;
-      calcMode?: number | string | undefined;
-      capHeight?: number | string | undefined;
-      clip?: number | string | undefined;
-      clipPath?: string | undefined;
-      clipPathUnits?: number | string | undefined;
-      clipRule?: number | string | undefined;
-      colorInterpolation?: number | string | undefined;
-      colorInterpolationFilters?: "auto" | "sRGB" | "linearRGB" | "inherit" | undefined;
-      colorProfile?: number | string | undefined;
-      colorRendering?: number | string | undefined;
-      contentScriptType?: number | string | undefined;
-      contentStyleType?: number | string | undefined;
-      cursor?: number | string | undefined;
-      cx?: number | string | undefined;
-      cy?: number | string | undefined;
-      d?: string | undefined;
-      decelerate?: number | string | undefined;
-      descent?: number | string | undefined;
-      diffuseConstant?: number | string | undefined;
-      direction?: number | string | undefined;
-      display?: number | string | undefined;
-      divisor?: number | string | undefined;
-      dominantBaseline?: number | string | undefined;
-      dur?: number | string | undefined;
-      dx?: number | string | undefined;
-      dy?: number | string | undefined;
-      edgeMode?: number | string | undefined;
-      elevation?: number | string | undefined;
-      enableBackground?: number | string | undefined;
-      end?: number | string | undefined;
-      exponent?: number | string | undefined;
-      externalResourcesRequired?: Booleanish | undefined;
-      fill?: string | undefined;
-      fillOpacity?: number | string | undefined;
-      fillRule?: "nonzero" | "evenodd" | "inherit" | undefined;
-      filter?: string | undefined;
-      filterRes?: number | string | undefined;
-      filterUnits?: number | string | undefined;
-      floodColor?: number | string | undefined;
-      floodOpacity?: number | string | undefined;
-      focusable?: Booleanish | "auto" | undefined;
-      fontFamily?: string | undefined;
-      fontSize?: number | string | undefined;
-      fontSizeAdjust?: number | string | undefined;
-      fontStretch?: number | string | undefined;
-      fontStyle?: number | string | undefined;
-      fontVariant?: number | string | undefined;
-      fontWeight?: number | string | undefined;
-      format?: number | string | undefined;
-      fr?: number | string | undefined;
-      from?: number | string | undefined;
-      fx?: number | string | undefined;
-      fy?: number | string | undefined;
-      g1?: number | string | undefined;
-      g2?: number | string | undefined;
-      glyphName?: number | string | undefined;
-      glyphOrientationHorizontal?: number | string | undefined;
-      glyphOrientationVertical?: number | string | undefined;
-      glyphRef?: number | string | undefined;
-      gradientTransform?: string | undefined;
-      gradientUnits?: string | undefined;
-      hanging?: number | string | undefined;
-      horizAdvX?: number | string | undefined;
-      horizOriginX?: number | string | undefined;
-      href?: string | undefined;
-      ideographic?: number | string | undefined;
-      imageRendering?: number | string | undefined;
-      in2?: number | string | undefined;
-      in?: string | undefined;
-      intercept?: number | string | undefined;
-      k1?: number | string | undefined;
-      k2?: number | string | undefined;
-      k3?: number | string | undefined;
-      k4?: number | string | undefined;
-      k?: number | string | undefined;
-      kernelMatrix?: number | string | undefined;
-      kernelUnitLength?: number | string | undefined;
-      kerning?: number | string | undefined;
-      keyPoints?: number | string | undefined;
-      keySplines?: number | string | undefined;
-      keyTimes?: number | string | undefined;
-      lengthAdjust?: number | string | undefined;
-      letterSpacing?: number | string | undefined;
-      lightingColor?: number | string | undefined;
-      limitingConeAngle?: number | string | undefined;
-      local?: number | string | undefined;
-      markerEnd?: string | undefined;
-      markerHeight?: number | string | undefined;
-      markerMid?: string | undefined;
-      markerStart?: string | undefined;
-      markerUnits?: number | string | undefined;
-      markerWidth?: number | string | undefined;
-      mask?: string | undefined;
-      maskContentUnits?: number | string | undefined;
-      maskUnits?: number | string | undefined;
-      mathematical?: number | string | undefined;
-      mode?: number | string | undefined;
-      numOctaves?: number | string | undefined;
-      offset?: number | string | undefined;
-      opacity?: number | string | undefined;
-      operator?: number | string | undefined;
-      order?: number | string | undefined;
-      orient?: number | string | undefined;
-      orientation?: number | string | undefined;
-      origin?: number | string | undefined;
-      overflow?: number | string | undefined;
-      overlinePosition?: number | string | undefined;
-      overlineThickness?: number | string | undefined;
-      paintOrder?: number | string | undefined;
-      panose1?: number | string | undefined;
-      path?: string | undefined;
-      pathLength?: number | string | undefined;
-      patternContentUnits?: string | undefined;
-      patternTransform?: number | string | undefined;
-      patternUnits?: string | undefined;
-      pointerEvents?: number | string | undefined;
-      points?: string | undefined;
-      pointsAtX?: number | string | undefined;
-      pointsAtY?: number | string | undefined;
-      pointsAtZ?: number | string | undefined;
-      preserveAlpha?: Booleanish | undefined;
-      preserveAspectRatio?: string | undefined;
-      primitiveUnits?: number | string | undefined;
-      r?: number | string | undefined;
-      radius?: number | string | undefined;
-      refX?: number | string | undefined;
-      refY?: number | string | undefined;
-      renderingIntent?: number | string | undefined;
-      repeatCount?: number | string | undefined;
-      repeatDur?: number | string | undefined;
-      requiredExtensions?: number | string | undefined;
-      requiredFeatures?: number | string | undefined;
-      restart?: number | string | undefined;
-      result?: string | undefined;
-      rotate?: number | string | undefined;
-      rx?: number | string | undefined;
-      ry?: number | string | undefined;
-      scale?: number | string | undefined;
-      seed?: number | string | undefined;
-      shapeRendering?: number | string | undefined;
-      slope?: number | string | undefined;
-      spacing?: number | string | undefined;
-      specularConstant?: number | string | undefined;
-      specularExponent?: number | string | undefined;
-      speed?: number | string | undefined;
-      spreadMethod?: string | undefined;
-      startOffset?: number | string | undefined;
-      stdDeviation?: number | string | undefined;
-      stemh?: number | string | undefined;
-      stemv?: number | string | undefined;
-      stitchTiles?: number | string | undefined;
-      stopColor?: string | undefined;
-      stopOpacity?: number | string | undefined;
-      strikethroughPosition?: number | string | undefined;
-      strikethroughThickness?: number | string | undefined;
-      string?: number | string | undefined;
-      stroke?: string | undefined;
-      strokeDasharray?: string | number | undefined;
-      strokeDashoffset?: string | number | undefined;
-      strokeLinecap?: "butt" | "round" | "square" | "inherit" | undefined;
-      strokeLinejoin?: "miter" | "round" | "bevel" | "inherit" | undefined;
-      strokeMiterlimit?: number | string | undefined;
-      strokeOpacity?: number | string | undefined;
-      strokeWidth?: number | string | undefined;
-      surfaceScale?: number | string | undefined;
-      systemLanguage?: number | string | undefined;
-      tableValues?: number | string | undefined;
-      targetX?: number | string | undefined;
-      targetY?: number | string | undefined;
-      textAnchor?: string | undefined;
-      textDecoration?: number | string | undefined;
-      textLength?: number | string | undefined;
-      textRendering?: number | string | undefined;
-      to?: number | string | undefined;
-      transform?: string | undefined;
-      u1?: number | string | undefined;
-      u2?: number | string | undefined;
-      underlinePosition?: number | string | undefined;
-      underlineThickness?: number | string | undefined;
-      unicode?: number | string | undefined;
-      unicodeBidi?: number | string | undefined;
-      unicodeRange?: number | string | undefined;
-      unitsPerEm?: number | string | undefined;
-      vAlphabetic?: number | string | undefined;
-      values?: string | undefined;
-      vectorEffect?: number | string | undefined;
-      version?: string | undefined;
-      vertAdvY?: number | string | undefined;
-      vertOriginX?: number | string | undefined;
-      vertOriginY?: number | string | undefined;
-      vHanging?: number | string | undefined;
-      vIdeographic?: number | string | undefined;
-      viewBox?: string | undefined;
-      viewTarget?: number | string | undefined;
-      visibility?: number | string | undefined;
-      vMathematical?: number | string | undefined;
-      widths?: number | string | undefined;
-      wordSpacing?: number | string | undefined;
-      writingMode?: number | string | undefined;
-      x1?: number | string | undefined;
-      x2?: number | string | undefined;
-      x?: number | string | undefined;
-      xChannelSelector?: string | undefined;
-      xHeight?: number | string | undefined;
-      xlinkActuate?: string | undefined;
-      xlinkArcrole?: string | undefined;
-      xlinkHref?: string | undefined;
-      xlinkRole?: string | undefined;
-      xlinkShow?: string | undefined;
-      xlinkTitle?: string | undefined;
-      xlinkType?: string | undefined;
-      xmlBase?: string | undefined;
-      xmlLang?: string | undefined;
-      xmlns?: string | undefined;
-      xmlnsXlink?: string | undefined;
-      xmlSpace?: string | undefined;
-      y1?: number | string | undefined;
-      y2?: number | string | undefined;
-      y?: number | string | undefined;
-      yChannelSelector?: string | undefined;
-      z?: number | string | undefined;
-      zoomAndPan?: string | undefined;
+      accentHeight?: Lumo.MaybeIon<number | string | undefined>;
+      accumulate?: Lumo.MaybeIon<"none" | "sum" | undefined>;
+      additive?: Lumo.MaybeIon<"replace" | "sum" | undefined>;
+      alignmentBaseline?: Lumo.MaybeIon<
+         | "auto"
+         | "baseline"
+         | "before-edge"
+         | "text-before-edge"
+         | "middle"
+         | "central"
+         | "after-edge"
+         | "text-after-edge"
+         | "ideographic"
+         | "alphabetic"
+         | "hanging"
+         | "mathematical"
+         | "inherit"
+         | undefined>;
+      allowReorder?: Lumo.MaybeIon<"no" | "yes" | undefined>;
+      alphabetic?: Lumo.MaybeIon<number | string | undefined>;
+      amplitude?: Lumo.MaybeIon<number | string | undefined>;
+      arabicForm?: Lumo.MaybeIon<"initial" | "medial" | "terminal" | "isolated" | undefined>;
+      ascent?: Lumo.MaybeIon<number | string | undefined>;
+      attributeName?: Lumo.MaybeIon<string | undefined>;
+      attributeType?: Lumo.MaybeIon<string | undefined>;
+      autoReverse?: Lumo.MaybeIon<Booleanish | undefined>;
+      azimuth?: Lumo.MaybeIon<number | string | undefined>;
+      baseFrequency?: Lumo.MaybeIon<number | string | undefined>;
+      baselineShift?: Lumo.MaybeIon<number | string | undefined>;
+      baseProfile?: Lumo.MaybeIon<number | string | undefined>;
+      bbox?: Lumo.MaybeIon<number | string | undefined>;
+      begin?: Lumo.MaybeIon<number | string | undefined>;
+      bias?: Lumo.MaybeIon<number | string | undefined>;
+      by?: Lumo.MaybeIon<number | string | undefined>;
+      calcMode?: Lumo.MaybeIon<number | string | undefined>;
+      capHeight?: Lumo.MaybeIon<number | string | undefined>;
+      clip?: Lumo.MaybeIon<number | string | undefined>;
+      clipPath?: Lumo.MaybeIon<string | undefined>;
+      clipPathUnits?: Lumo.MaybeIon<number | string | undefined>;
+      clipRule?: Lumo.MaybeIon<number | string | undefined>;
+      colorInterpolation?: Lumo.MaybeIon<number | string | undefined>;
+      colorInterpolationFilters?: Lumo.MaybeIon<"auto" | "sRGB" | "linearRGB" | "inherit" | undefined>;
+      colorProfile?: Lumo.MaybeIon<number | string | undefined>;
+      colorRendering?: Lumo.MaybeIon<number | string | undefined>;
+      contentScriptType?: Lumo.MaybeIon<number | string | undefined>;
+      contentStyleType?: Lumo.MaybeIon<number | string | undefined>;
+      cursor?: Lumo.MaybeIon<number | string | undefined>;
+      cx?: Lumo.MaybeIon<number | string | undefined>;
+      cy?: Lumo.MaybeIon<number | string | undefined>;
+      d?: Lumo.MaybeIon<string | undefined>;
+      decelerate?: Lumo.MaybeIon<number | string | undefined>;
+      descent?: Lumo.MaybeIon<number | string | undefined>;
+      diffuseConstant?: Lumo.MaybeIon<number | string | undefined>;
+      direction?: Lumo.MaybeIon<number | string | undefined>;
+      display?: Lumo.MaybeIon<number | string | undefined>;
+      divisor?: Lumo.MaybeIon<number | string | undefined>;
+      dominantBaseline?: Lumo.MaybeIon<number | string | undefined>;
+      dur?: Lumo.MaybeIon<number | string | undefined>;
+      dx?: Lumo.MaybeIon<number | string | undefined>;
+      dy?: Lumo.MaybeIon<number | string | undefined>;
+      edgeMode?: Lumo.MaybeIon<number | string | undefined>;
+      elevation?: Lumo.MaybeIon<number | string | undefined>;
+      enableBackground?: Lumo.MaybeIon<number | string | undefined>;
+      end?: Lumo.MaybeIon<number | string | undefined>;
+      exponent?: Lumo.MaybeIon<number | string | undefined>;
+      externalResourcesRequired?: Lumo.MaybeIon<Booleanish | undefined>;
+      fill?: Lumo.MaybeIon<string | undefined>;
+      fillOpacity?: Lumo.MaybeIon<number | string | undefined>;
+      fillRule?: Lumo.MaybeIon<"nonzero" | "evenodd" | "inherit" | undefined>;
+      filter?: Lumo.MaybeIon<string | undefined>;
+      filterRes?: Lumo.MaybeIon<number | string | undefined>;
+      filterUnits?: Lumo.MaybeIon<number | string | undefined>;
+      floodColor?: Lumo.MaybeIon<number | string | undefined>;
+      floodOpacity?: Lumo.MaybeIon<number | string | undefined>;
+      focusable?: Lumo.MaybeIon<Booleanish | "auto" | undefined>;
+      fontFamily?: Lumo.MaybeIon<string | undefined>;
+      fontSize?: Lumo.MaybeIon<number | string | undefined>;
+      fontSizeAdjust?: Lumo.MaybeIon<number | string | undefined>;
+      fontStretch?: Lumo.MaybeIon<number | string | undefined>;
+      fontStyle?: Lumo.MaybeIon<number | string | undefined>;
+      fontVariant?: Lumo.MaybeIon<number | string | undefined>;
+      fontWeight?: Lumo.MaybeIon<number | string | undefined>;
+      format?: Lumo.MaybeIon<number | string | undefined>;
+      fr?: Lumo.MaybeIon<number | string | undefined>;
+      from?: Lumo.MaybeIon<number | string | undefined>;
+      fx?: Lumo.MaybeIon<number | string | undefined>;
+      fy?: Lumo.MaybeIon<number | string | undefined>;
+      g1?: Lumo.MaybeIon<number | string | undefined>;
+      g2?: Lumo.MaybeIon<number | string | undefined>;
+      glyphName?: Lumo.MaybeIon<number | string | undefined>;
+      glyphOrientationHorizontal?: Lumo.MaybeIon<number | string | undefined>;
+      glyphOrientationVertical?: Lumo.MaybeIon<number | string | undefined>;
+      glyphRef?: Lumo.MaybeIon<number | string | undefined>;
+      gradientTransform?: Lumo.MaybeIon<string | undefined>;
+      gradientUnits?: Lumo.MaybeIon<string | undefined>;
+      hanging?: Lumo.MaybeIon<number | string | undefined>;
+      horizAdvX?: Lumo.MaybeIon<number | string | undefined>;
+      horizOriginX?: Lumo.MaybeIon<number | string | undefined>;
+      href?: Lumo.MaybeIon<string | undefined>;
+      ideographic?: Lumo.MaybeIon<number | string | undefined>;
+      imageRendering?: Lumo.MaybeIon<number | string | undefined>;
+      in2?: Lumo.MaybeIon<number | string | undefined>;
+      in?: Lumo.MaybeIon<string | undefined>;
+      intercept?: Lumo.MaybeIon<number | string | undefined>;
+      k1?: Lumo.MaybeIon<number | string | undefined>;
+      k2?: Lumo.MaybeIon<number | string | undefined>;
+      k3?: Lumo.MaybeIon<number | string | undefined>;
+      k4?: Lumo.MaybeIon<number | string | undefined>;
+      k?: Lumo.MaybeIon<number | string | undefined>;
+      kernelMatrix?: Lumo.MaybeIon<number | string | undefined>;
+      kernelUnitLength?: Lumo.MaybeIon<number | string | undefined>;
+      kerning?: Lumo.MaybeIon<number | string | undefined>;
+      keyPoints?: Lumo.MaybeIon<number | string | undefined>;
+      keySplines?: Lumo.MaybeIon<number | string | undefined>;
+      keyTimes?: Lumo.MaybeIon<number | string | undefined>;
+      lengthAdjust?: Lumo.MaybeIon<number | string | undefined>;
+      letterSpacing?: Lumo.MaybeIon<number | string | undefined>;
+      lightingColor?: Lumo.MaybeIon<number | string | undefined>;
+      limitingConeAngle?: Lumo.MaybeIon<number | string | undefined>;
+      local?: Lumo.MaybeIon<number | string | undefined>;
+      markerEnd?: Lumo.MaybeIon<string | undefined>;
+      markerHeight?: Lumo.MaybeIon<number | string | undefined>;
+      markerMid?: Lumo.MaybeIon<string | undefined>;
+      markerStart?: Lumo.MaybeIon<string | undefined>;
+      markerUnits?: Lumo.MaybeIon<number | string | undefined>;
+      markerWidth?: Lumo.MaybeIon<number | string | undefined>;
+      mask?: Lumo.MaybeIon<string | undefined>;
+      maskContentUnits?: Lumo.MaybeIon<number | string | undefined>;
+      maskUnits?: Lumo.MaybeIon<number | string | undefined>;
+      mathematical?: Lumo.MaybeIon<number | string | undefined>;
+      mode?: Lumo.MaybeIon<number | string | undefined>;
+      numOctaves?: Lumo.MaybeIon<number | string | undefined>;
+      offset?: Lumo.MaybeIon<number | string | undefined>;
+      opacity?: Lumo.MaybeIon<number | string | undefined>;
+      operator?: Lumo.MaybeIon<number | string | undefined>;
+      order?: Lumo.MaybeIon<number | string | undefined>;
+      orient?: Lumo.MaybeIon<number | string | undefined>;
+      orientation?: Lumo.MaybeIon<number | string | undefined>;
+      origin?: Lumo.MaybeIon<number | string | undefined>;
+      overflow?: Lumo.MaybeIon<number | string | undefined>;
+      overlinePosition?: Lumo.MaybeIon<number | string | undefined>;
+      overlineThickness?: Lumo.MaybeIon<number | string | undefined>;
+      paintOrder?: Lumo.MaybeIon<number | string | undefined>;
+      panose1?: Lumo.MaybeIon<number | string | undefined>;
+      path?: Lumo.MaybeIon<string | undefined>;
+      pathLength?: Lumo.MaybeIon<number | string | undefined>;
+      patternContentUnits?: Lumo.MaybeIon<string | undefined>;
+      patternTransform?: Lumo.MaybeIon<number | string | undefined>;
+      patternUnits?: Lumo.MaybeIon<string | undefined>;
+      pointerEvents?: Lumo.MaybeIon<number | string | undefined>;
+      points?: Lumo.MaybeIon<string | undefined>;
+      pointsAtX?: Lumo.MaybeIon<number | string | undefined>;
+      pointsAtY?: Lumo.MaybeIon<number | string | undefined>;
+      pointsAtZ?: Lumo.MaybeIon<number | string | undefined>;
+      preserveAlpha?: Lumo.MaybeIon<Booleanish | undefined>;
+      preserveAspectRatio?: Lumo.MaybeIon<string | undefined>;
+      primitiveUnits?: Lumo.MaybeIon<number | string | undefined>;
+      r?: Lumo.MaybeIon<number | string | undefined>;
+      radius?: Lumo.MaybeIon<number | string | undefined>;
+      refX?: Lumo.MaybeIon<number | string | undefined>;
+      refY?: Lumo.MaybeIon<number | string | undefined>;
+      renderingIntent?: Lumo.MaybeIon<number | string | undefined>;
+      repeatCount?: Lumo.MaybeIon<number | string | undefined>;
+      repeatDur?: Lumo.MaybeIon<number | string | undefined>;
+      requiredExtensions?: Lumo.MaybeIon<number | string | undefined>;
+      requiredFeatures?: Lumo.MaybeIon<number | string | undefined>;
+      restart?: Lumo.MaybeIon<number | string | undefined>;
+      result?: Lumo.MaybeIon<string | undefined>;
+      rotate?: Lumo.MaybeIon<number | string | undefined>;
+      rx?: Lumo.MaybeIon<number | string | undefined>;
+      ry?: Lumo.MaybeIon<number | string | undefined>;
+      scale?: Lumo.MaybeIon<number | string | undefined>;
+      seed?: Lumo.MaybeIon<number | string | undefined>;
+      shapeRendering?: Lumo.MaybeIon<number | string | undefined>;
+      slope?: Lumo.MaybeIon<number | string | undefined>;
+      spacing?: Lumo.MaybeIon<number | string | undefined>;
+      specularConstant?: Lumo.MaybeIon<number | string | undefined>;
+      specularExponent?: Lumo.MaybeIon<number | string | undefined>;
+      speed?: Lumo.MaybeIon<number | string | undefined>;
+      spreadMethod?: Lumo.MaybeIon<string | undefined>;
+      startOffset?: Lumo.MaybeIon<number | string | undefined>;
+      stdDeviation?: Lumo.MaybeIon<number | string | undefined>;
+      stemh?: Lumo.MaybeIon<number | string | undefined>;
+      stemv?: Lumo.MaybeIon<number | string | undefined>;
+      stitchTiles?: Lumo.MaybeIon<number | string | undefined>;
+      stopColor?: Lumo.MaybeIon<string | undefined>;
+      stopOpacity?: Lumo.MaybeIon<number | string | undefined>;
+      strikethroughPosition?: Lumo.MaybeIon<number | string | undefined>;
+      strikethroughThickness?: Lumo.MaybeIon<number | string | undefined>;
+      string?: Lumo.MaybeIon<number | string | undefined>;
+      stroke?: Lumo.MaybeIon<string | undefined>;
+      strokeDasharray?: Lumo.MaybeIon<string | number | undefined>;
+      strokeDashoffset?: Lumo.MaybeIon<string | number | undefined>;
+      strokeLinecap?: Lumo.MaybeIon<"butt" | "round" | "square" | "inherit" | undefined>;
+      strokeLinejoin?: Lumo.MaybeIon<"miter" | "round" | "bevel" | "inherit" | undefined>;
+      strokeMiterlimit?: Lumo.MaybeIon<number | string | undefined>;
+      strokeOpacity?: Lumo.MaybeIon<number | string | undefined>;
+      strokeWidth?: Lumo.MaybeIon<number | string | undefined>;
+      surfaceScale?: Lumo.MaybeIon<number | string | undefined>;
+      systemLanguage?: Lumo.MaybeIon<number | string | undefined>;
+      tableValues?: Lumo.MaybeIon<number | string | undefined>;
+      targetX?: Lumo.MaybeIon<number | string | undefined>;
+      targetY?: Lumo.MaybeIon<number | string | undefined>;
+      textAnchor?: Lumo.MaybeIon<string | undefined>;
+      textDecoration?: Lumo.MaybeIon<number | string | undefined>;
+      textLength?: Lumo.MaybeIon<number | string | undefined>;
+      textRendering?: Lumo.MaybeIon<number | string | undefined>;
+      to?: Lumo.MaybeIon<number | string | undefined>;
+      transform?: Lumo.MaybeIon<string | undefined>;
+      u1?: Lumo.MaybeIon<number | string | undefined>;
+      u2?: Lumo.MaybeIon<number | string | undefined>;
+      underlinePosition?: Lumo.MaybeIon<number | string | undefined>;
+      underlineThickness?: Lumo.MaybeIon<number | string | undefined>;
+      unicode?: Lumo.MaybeIon<number | string | undefined>;
+      unicodeBidi?: Lumo.MaybeIon<number | string | undefined>;
+      unicodeRange?: Lumo.MaybeIon<number | string | undefined>;
+      unitsPerEm?: Lumo.MaybeIon<number | string | undefined>;
+      vAlphabetic?: Lumo.MaybeIon<number | string | undefined>;
+      values?: Lumo.MaybeIon<string | undefined>;
+      vectorEffect?: Lumo.MaybeIon<number | string | undefined>;
+      version?: Lumo.MaybeIon<string | undefined>;
+      vertAdvY?: Lumo.MaybeIon<number | string | undefined>;
+      vertOriginX?: Lumo.MaybeIon<number | string | undefined>;
+      vertOriginY?: Lumo.MaybeIon<number | string | undefined>;
+      vHanging?: Lumo.MaybeIon<number | string | undefined>;
+      vIdeographic?: Lumo.MaybeIon<number | string | undefined>;
+      viewBox?: Lumo.MaybeIon<string | undefined>;
+      viewTarget?: Lumo.MaybeIon<number | string | undefined>;
+      visibility?: Lumo.MaybeIon<number | string | undefined>;
+      vMathematical?: Lumo.MaybeIon<number | string | undefined>;
+      widths?: Lumo.MaybeIon<number | string | undefined>;
+      wordSpacing?: Lumo.MaybeIon<number | string | undefined>;
+      writingMode?: Lumo.MaybeIon<number | string | undefined>;
+      x1?: Lumo.MaybeIon<number | string | undefined>;
+      x2?: Lumo.MaybeIon<number | string | undefined>;
+      x?: Lumo.MaybeIon<number | string | undefined>;
+      xChannelSelector?: Lumo.MaybeIon<string | undefined>;
+      xHeight?: Lumo.MaybeIon<number | string | undefined>;
+      xlinkActuate?: Lumo.MaybeIon<string | undefined>;
+      xlinkArcrole?: Lumo.MaybeIon<string | undefined>;
+      xlinkHref?: Lumo.MaybeIon<string | undefined>;
+      xlinkRole?: Lumo.MaybeIon<string | undefined>;
+      xlinkShow?: Lumo.MaybeIon<string | undefined>;
+      xlinkTitle?: Lumo.MaybeIon<string | undefined>;
+      xlinkType?: Lumo.MaybeIon<string | undefined>;
+      xmlBase?: Lumo.MaybeIon<string | undefined>;
+      xmlLang?: Lumo.MaybeIon<string | undefined>;
+      xmlns?: Lumo.MaybeIon<string | undefined>;
+      xmlnsXlink?: Lumo.MaybeIon<string | undefined>;
+      xmlSpace?: Lumo.MaybeIon<string | undefined>;
+      y1?: Lumo.MaybeIon<number | string | undefined>;
+      y2?: Lumo.MaybeIon<number | string | undefined>;
+      y?: Lumo.MaybeIon<number | string | undefined>;
+      yChannelSelector?: Lumo.MaybeIon<string | undefined>;
+      z?: Lumo.MaybeIon<number | string | undefined>;
+      zoomAndPan?: Lumo.MaybeIon<string | undefined>;
    }
 
    interface WebViewHTMLAttributes<T> extends HTMLAttributes<T> {
-      allowFullScreen?: boolean | undefined;
-      allowpopups?: boolean | undefined;
-      autosize?: boolean | undefined;
-      blinkfeatures?: string | undefined;
-      disableblinkfeatures?: string | undefined;
-      disableguestresize?: boolean | undefined;
-      disablewebsecurity?: boolean | undefined;
-      guestinstance?: string | undefined;
-      httpreferrer?: string | undefined;
-      nodeintegration?: boolean | undefined;
-      partition?: string | undefined;
-      plugins?: boolean | undefined;
-      preload?: string | undefined;
-      src?: string | undefined;
-      useragent?: string | undefined;
-      webpreferences?: string | undefined;
+      allowFullScreen?: Lumo.MaybeIon<boolean | undefined>;
+      allowpopups?: Lumo.MaybeIon<boolean | undefined>;
+      autosize?: Lumo.MaybeIon<boolean | undefined>;
+      blinkfeatures?: Lumo.MaybeIon<string | undefined>;
+      disableblinkfeatures?: Lumo.MaybeIon<string | undefined>;
+      disableguestresize?: Lumo.MaybeIon<boolean | undefined>;
+      disablewebsecurity?: Lumo.MaybeIon<boolean | undefined>;
+      guestinstance?: Lumo.MaybeIon<string | undefined>;
+      httpreferrer?: Lumo.MaybeIon<string | undefined>;
+      nodeintegration?: Lumo.MaybeIon<boolean | undefined>;
+      partition?: Lumo.MaybeIon<string | undefined>;
+      plugins?: Lumo.MaybeIon<boolean | undefined>;
+      preload?: Lumo.MaybeIon<string | undefined>;
+      src?: Lumo.MaybeIon<string | undefined>;
+      useragent?: Lumo.MaybeIon<string | undefined>;
+      webpreferences?: Lumo.MaybeIon<string | undefined>;
    }
 
 
@@ -2138,7 +1919,6 @@ declare namespace React {
       view: SVGFactory;
    }
 
-   interface ReactDOM extends ReactHTML, ReactSVG { }
 
    //
    // Browser Interfaces
@@ -2178,106 +1958,33 @@ declare namespace React {
       componentStack?: string | null;
       digest?: string | null;
    }
-
-   //$$$
-   // Keep in sync with JSX namespace in ./jsx-runtime.d.ts and ./jsx-dev-runtime.d.ts
-   namespace JSX {
-      type ElementType = GlobalJSXElementType;
-      // interface Element extends GlobalJSXElement { }
-      interface ElementClass extends GlobalJSXElementClass { }
-      interface ElementAttributesProperty extends GlobalJSXElementAttributesProperty { }
-      interface ElementChildrenAttribute extends GlobalJSXElementChildrenAttribute { }
-
-      type LibraryManagedAttributes<C, P> = GlobalJSXLibraryManagedAttributes<C, P>;
-
-      interface IntrinsicAttributes extends GlobalJSXIntrinsicAttributes { }
-      interface IntrinsicClassAttributes<T> extends GlobalJSXIntrinsicClassAttributes<T> { }
-      interface IntrinsicElements extends GlobalJSXIntrinsicElements { }
-   }
 }
 
-// naked 'any' type in a conditional type will short circuit and union both the then/else branches
-// so boolean is only resolved for T = any
-type IsExactlyAny<T> = boolean extends (T extends never ? true : false) ? true : false;
 
-type ExactlyAnyPropertyKeys<T> = { [K in keyof T]: IsExactlyAny<T[K]> extends true ? K : never }[keyof T];
-type NotExactlyAnyPropertyKeys<T> = Exclude<keyof T, ExactlyAnyPropertyKeys<T>>;
+// IMPORTANT Components and elements
+type LumoAttributes<C, P> =
+   P extends { '~attributes'?: infer A }
+   ? A & Lumo.LumoHooks<C> & LumoAttributesWithRef<C> // Component Attributes
+   : P
 
-// Try to resolve ill-defined props like for JS users: props can be any, or sometimes objects with properties of type any
-type MergePropTypes<P, T> =
-   // Distribute over P in case it is a union type
-   P extends any
-   // If props is type any, use propTypes definitions
-   ? IsExactlyAny<P> extends true ? T
-   // If declared props have indexed properties, ignore inferred props entirely as keyof gets widened
-   : string extends keyof P ? P
-   // Prefer declared types which are not exactly any
-   :
-   & Pick<P, NotExactlyAnyPropertyKeys<P>>
-   // For props which are exactly any, use the type inferred from propTypes if present
-   & Pick<T, Exclude<keyof T, NotExactlyAnyPropertyKeys<P>>>
-   // Keep leftover props not specified in propTypes
-   & Pick<P, Exclude<keyof P, keyof T>>
-   : never;
-
-type InexactPartial<T> = { [K in keyof T]?: T[K] | undefined };
-
-// Any prop that has a default prop becomes optional, but its type is unchanged
-// Undeclared default props are augmented into the resulting allowable attributes
-// If declared props have indexed properties, ignore default props entirely as keyof gets widened
-// Wrap in an outer-level conditional type to allow distribution over props that are unions
-type Defaultize<P, D> = P extends any ? string extends keyof P ? P
-   :
-   & Pick<P, Exclude<keyof P, keyof D>>
-   & InexactPartial<Pick<P, Extract<keyof P, keyof D>>>
-   & InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>
-   : never;
-
-
-type LumoAttributes<C, P> = P extends { '~attributes'?: infer A } ? A & Lumo.LumoHooks<C> : P & Lumo.LumoHooks<C>
-// C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
-// : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
-// : C extends { defaultProps: infer D } ? Defaultize<P, D>
-// : P;
-
+type LumoComponentAttributes<C> = {
+   ref?: $Node<C>
+   class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
+   style?: StyleInput | StyleInput[];
+}
 
 declare global {
 
    namespace JSX {
-      // We don't just alias React.ElementType because React.ElementType
-      // historically does more than we need it to.
-      // E.g. it also contains .propTypes and so TS also verifies the declared
-      // props type does match the declared .propTypes.
-      // But if libraries declared their .propTypes but not props type,
-      // or they mismatch, you won't be able to use the class component
-      // as a JSX.ElementType.
-      // We could fix this everywhere but we're ultimately not interested in
-      // .propTypes assignability so we might as well drop it entirely here to
-      //  reduce the work of the type-checker.
-
-      //$$$ Important
-      type ElementType = string | React.JSXElementConstructor<any>;
-      interface Element { }
-      interface ElementAttributesProperty {
-         props: {};
-      }
-      interface ElementChildrenAttribute {
-         children: {};
-      }
-
       //$$$ important for converting component input types to attribute types
       type LibraryManagedAttributes<C, P> = LumoAttributes<C, P>;
 
-      //$$$
+      //$$$ Components and html elements
       interface IntrinsicAttributes {
-         ref?: $Node | NodeRefsConfig //#LUMO-EDIT
-         class?: ClassInput | ClassInput[],
-         style?: StyleInput | StyleInput[],
-         // children?: Lumo.InferSlot
-      }
-      interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
 
-      type CSSProperties = React.CSSProperties
+      }
+
+      type CSSProperties = Luent.CSSProperties
 
       type Falsey = undefined | null | false;
 
@@ -2285,252 +1992,217 @@ declare global {
 
       type ClassInput = Lumo.MaybeIon<string> | Lumo.MaybeIon<{ [key: string]: Lumo.MaybeIon<Booleanny> }>
 
-      type MaybeIonAttributes<T> = { [K in keyof T]: T[K] extends Object ? { [P in keyof T[K]]: T[K][P] extends Function | undefined ? T[K][P] : Lumo.MaybeIon<T[K][P]> } : T[K] }
+      type IntrinsicElements = JSX._IntrinsicElements & LumoElements
 
-      type IntrinsicElements = {
-         [K in keyof JSX._IntrinsicElements]: MaybeIonAttributes<JSX._IntrinsicElements>[K] & {
-            class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
-            style?: StyleInput | StyleInput[];
-            attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
-         }
-      } & LumoElements
-
-
-
-      // type ContextEntries<T> = {
-      //     [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
-      // }
-
-      // type ContextNodeInput<T> = {
-      //     with: T & ContextEntries<T>,
-      //     Slot: (() => JSXNode) | JSXNode
-      // }
 
       interface LumoElements {
          'i--i': {}; //comments
          'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
-         'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         'o--body': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
+         'o--link': Luent.DetailedHTMLProps<Luent.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
+         'o--body': Luent.DetailedHTMLProps<Luent.LinkHTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
          'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
          'create-view': { children: ConditionalRenderKit[] }
          'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<boolean> }
          'render-view': { children: Lumo.RawJSXNode }
          // 'o--preserve': { children: ConditionalRenderKit[]; discard?: Ion<boolean> };
          // 'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
-         // 'Slot': {Slot: any}
+         // 'Slot': {Slot: unknown}
 
          // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
          // 'o--try': TryNodeInput & { children: Lumo.Slot };
 
-         // 'ooo-transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
-         // 'ooo-transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
-         'o--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         // 'ooo-transit': Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         // 'ooo-transition': Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
+         'o--dock': Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
       }
 
 
 
       interface _IntrinsicElements {
          // HTML
-         a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
-         abbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         address: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         area: React.DetailedHTMLProps<React.AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
-         article: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         aside: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         audio: React.DetailedHTMLProps<React.AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
-         b: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         base: React.DetailedHTMLProps<React.BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
-         bdi: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         bdo: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         big: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         blockquote: React.DetailedHTMLProps<React.BlockquoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
-         body: React.DetailedHTMLProps<React.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
-         br: React.DetailedHTMLProps<React.HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
-         button: React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
-         canvas: React.DetailedHTMLProps<React.CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
-         caption: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         center: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         cite: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         code: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         col: React.DetailedHTMLProps<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-         colgroup: React.DetailedHTMLProps<React.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-         data: React.DetailedHTMLProps<React.DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
-         datalist: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
-         dd: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         del: React.DetailedHTMLProps<React.DelHTMLAttributes<HTMLModElement>, HTMLModElement>;
-         details: React.DetailedHTMLProps<React.DetailsHTMLAttributes<HTMLDetailsElement>, HTMLDetailsElement>;
-         dfn: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         dialog: React.DetailedHTMLProps<React.DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
-         div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
-         dl: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
-         dt: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         em: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         embed: React.DetailedHTMLProps<React.EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
-         fieldset: React.DetailedHTMLProps<React.FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
-         figcaption: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         figure: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         footer: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         form: React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
-         h1: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-         h2: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-         h3: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-         h4: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-         h5: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-         h6: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-         head: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
-         header: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         hgroup: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         hr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
-         html: React.DetailedHTMLProps<React.HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
-         i: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         iframe: React.DetailedHTMLProps<React.IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
-         img: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
-         input: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-         ins: React.DetailedHTMLProps<React.InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
-         kbd: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         keygen: React.DetailedHTMLProps<React.KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
-         label: React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
-         legend: React.DetailedHTMLProps<React.HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
-         li: React.DetailedHTMLProps<React.LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
-         link: React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
-         main: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         map: React.DetailedHTMLProps<React.MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
-         mark: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         menu: React.DetailedHTMLProps<React.MenuHTMLAttributes<HTMLElement>, HTMLElement>;
-         menuitem: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         meta: React.DetailedHTMLProps<React.MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
-         meter: React.DetailedHTMLProps<React.MeterHTMLAttributes<HTMLMeterElement>, HTMLMeterElement>;
-         nav: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         noindex: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         noscript: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         object: React.DetailedHTMLProps<React.ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
-         ol: React.DetailedHTMLProps<React.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
-         optgroup: React.DetailedHTMLProps<React.OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
-         option: React.DetailedHTMLProps<React.OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
-         output: React.DetailedHTMLProps<React.OutputHTMLAttributes<HTMLOutputElement>, HTMLOutputElement>;
-         p: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
-         param: React.DetailedHTMLProps<React.ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
-         picture: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         pre: React.DetailedHTMLProps<React.HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
-         progress: React.DetailedHTMLProps<React.ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
-         q: React.DetailedHTMLProps<React.QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
-         rp: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         rt: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         ruby: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         s: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         samp: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         search: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         slot: React.DetailedHTMLProps<React.SlotHTMLAttributes<HTMLSlotElement>, HTMLSlotElement>;
-         script: React.DetailedHTMLProps<React.ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
-         section: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         select: React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
-         small: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         source: React.DetailedHTMLProps<React.SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
-         span: React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
-         strong: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         style: React.DetailedHTMLProps<React.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
-         sub: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         summary: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         sup: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         table: React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
-         template: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
-         tbody: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-         td: React.DetailedHTMLProps<React.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
-         textarea: React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
-         tfoot: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-         th: React.DetailedHTMLProps<React.ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
-         thead: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-         time: React.DetailedHTMLProps<React.TimeHTMLAttributes<HTMLTimeElement>, HTMLTimeElement>;
-         title: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
-         tr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
-         track: React.DetailedHTMLProps<React.TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
-         u: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         ul: React.DetailedHTMLProps<React.HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
-         "var": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         video: React.DetailedHTMLProps<React.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
-         wbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-         webview: React.DetailedHTMLProps<React.WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
+         a: Luent.DetailedHTMLProps<Luent.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+         abbr: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         address: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         area: Luent.DetailedHTMLProps<Luent.AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
+         article: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         aside: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         audio: Luent.DetailedHTMLProps<Luent.AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
+         b: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         base: Luent.DetailedHTMLProps<Luent.BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
+         bdi: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         bdo: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         big: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         blockquote: Luent.DetailedHTMLProps<Luent.BlockquoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+         body: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
+         br: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
+         button: Luent.DetailedHTMLProps<Luent.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+         canvas: Luent.DetailedHTMLProps<Luent.CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
+         caption: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         center: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         cite: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         code: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         col: Luent.DetailedHTMLProps<Luent.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+         colgroup: Luent.DetailedHTMLProps<Luent.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+         data: Luent.DetailedHTMLProps<Luent.DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
+         datalist: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
+         dd: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         del: Luent.DetailedHTMLProps<Luent.DelHTMLAttributes<HTMLModElement>, HTMLModElement>;
+         details: Luent.DetailedHTMLProps<Luent.DetailsHTMLAttributes<HTMLDetailsElement>, HTMLDetailsElement>;
+         dfn: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         dialog: Luent.DetailedHTMLProps<Luent.DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
+         div: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+         dl: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
+         dt: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         em: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         embed: Luent.DetailedHTMLProps<Luent.EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
+         fieldset: Luent.DetailedHTMLProps<Luent.FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
+         figcaption: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         figure: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         footer: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         form: Luent.DetailedHTMLProps<Luent.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
+         h1: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+         h2: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+         h3: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+         h4: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+         h5: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+         h6: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+         head: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
+         header: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         hgroup: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         hr: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
+         html: Luent.DetailedHTMLProps<Luent.HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
+         i: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         iframe: Luent.DetailedHTMLProps<Luent.IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
+         img: Luent.DetailedHTMLProps<Luent.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
+         input: Luent.DetailedHTMLProps<Luent.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
+         ins: Luent.DetailedHTMLProps<Luent.InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
+         kbd: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         keygen: Luent.DetailedHTMLProps<Luent.KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
+         label: Luent.DetailedHTMLProps<Luent.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
+         legend: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
+         li: Luent.DetailedHTMLProps<Luent.LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
+         link: Luent.DetailedHTMLProps<Luent.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
+         main: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         map: Luent.DetailedHTMLProps<Luent.MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
+         mark: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         menu: Luent.DetailedHTMLProps<Luent.MenuHTMLAttributes<HTMLElement>, HTMLElement>;
+         menuitem: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         meta: Luent.DetailedHTMLProps<Luent.MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
+         meter: Luent.DetailedHTMLProps<Luent.MeterHTMLAttributes<HTMLMeterElement>, HTMLMeterElement>;
+         nav: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         noindex: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         noscript: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         object: Luent.DetailedHTMLProps<Luent.ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
+         ol: Luent.DetailedHTMLProps<Luent.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
+         optgroup: Luent.DetailedHTMLProps<Luent.OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
+         option: Luent.DetailedHTMLProps<Luent.OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
+         output: Luent.DetailedHTMLProps<Luent.OutputHTMLAttributes<HTMLOutputElement>, HTMLOutputElement>;
+         p: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
+         param: Luent.DetailedHTMLProps<Luent.ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
+         picture: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         pre: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
+         progress: Luent.DetailedHTMLProps<Luent.ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
+         q: Luent.DetailedHTMLProps<Luent.QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+         rp: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         rt: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         ruby: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         s: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         samp: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         search: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         slot: Luent.DetailedHTMLProps<Luent.SlotHTMLAttributes<HTMLSlotElement>, HTMLSlotElement>;
+         script: Luent.DetailedHTMLProps<Luent.ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
+         section: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         select: Luent.DetailedHTMLProps<Luent.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+         small: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         source: Luent.DetailedHTMLProps<Luent.SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
+         span: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
+         strong: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         style: Luent.DetailedHTMLProps<Luent.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
+         sub: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         summary: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         sup: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         table: Luent.DetailedHTMLProps<Luent.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
+         template: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
+         tbody: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+         td: Luent.DetailedHTMLProps<Luent.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
+         textarea: Luent.DetailedHTMLProps<Luent.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
+         tfoot: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+         th: Luent.DetailedHTMLProps<Luent.ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
+         thead: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+         time: Luent.DetailedHTMLProps<Luent.TimeHTMLAttributes<HTMLTimeElement>, HTMLTimeElement>;
+         title: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
+         tr: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
+         track: Luent.DetailedHTMLProps<Luent.TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
+         u: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         ul: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
+         "var": Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         video: Luent.DetailedHTMLProps<Luent.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
+         wbr: Luent.DetailedHTMLProps<Luent.HTMLAttributes<HTMLElement>, HTMLElement>;
+         webview: Luent.DetailedHTMLProps<Luent.WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
 
          // SVG
-         svg: React.SVGProps<SVGSVGElement>;
+         svg: Luent.SVGProps<SVGSVGElement>;
 
-         animate: React.SVGProps<SVGElement>; // TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
-         animateMotion: React.SVGProps<SVGElement>;
-         animateTransform: React.SVGProps<SVGElement>; // TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
-         circle: React.SVGProps<SVGCircleElement>;
-         clipPath: React.SVGProps<SVGClipPathElement>;
-         defs: React.SVGProps<SVGDefsElement>;
-         desc: React.SVGProps<SVGDescElement>;
-         ellipse: React.SVGProps<SVGEllipseElement>;
-         feBlend: React.SVGProps<SVGFEBlendElement>;
-         feColorMatrix: React.SVGProps<SVGFEColorMatrixElement>;
-         feComponentTransfer: React.SVGProps<SVGFEComponentTransferElement>;
-         feComposite: React.SVGProps<SVGFECompositeElement>;
-         feConvolveMatrix: React.SVGProps<SVGFEConvolveMatrixElement>;
-         feDiffuseLighting: React.SVGProps<SVGFEDiffuseLightingElement>;
-         feDisplacementMap: React.SVGProps<SVGFEDisplacementMapElement>;
-         feDistantLight: React.SVGProps<SVGFEDistantLightElement>;
-         feDropShadow: React.SVGProps<SVGFEDropShadowElement>;
-         feFlood: React.SVGProps<SVGFEFloodElement>;
-         feFuncA: React.SVGProps<SVGFEFuncAElement>;
-         feFuncB: React.SVGProps<SVGFEFuncBElement>;
-         feFuncG: React.SVGProps<SVGFEFuncGElement>;
-         feFuncR: React.SVGProps<SVGFEFuncRElement>;
-         feGaussianBlur: React.SVGProps<SVGFEGaussianBlurElement>;
-         feImage: React.SVGProps<SVGFEImageElement>;
-         feMerge: React.SVGProps<SVGFEMergeElement>;
-         feMergeNode: React.SVGProps<SVGFEMergeNodeElement>;
-         feMorphology: React.SVGProps<SVGFEMorphologyElement>;
-         feOffset: React.SVGProps<SVGFEOffsetElement>;
-         fePointLight: React.SVGProps<SVGFEPointLightElement>;
-         feSpecularLighting: React.SVGProps<SVGFESpecularLightingElement>;
-         feSpotLight: React.SVGProps<SVGFESpotLightElement>;
-         feTile: React.SVGProps<SVGFETileElement>;
-         feTurbulence: React.SVGProps<SVGFETurbulenceElement>;
-         filter: React.SVGProps<SVGFilterElement>;
-         foreignObject: React.SVGProps<SVGForeignObjectElement>;
-         g: React.SVGProps<SVGGElement>;
-         image: React.SVGProps<SVGImageElement>;
-         line: React.SVGLineElementAttributes<SVGLineElement>;
-         linearGradient: React.SVGProps<SVGLinearGradientElement>;
-         marker: React.SVGProps<SVGMarkerElement>;
-         mask: React.SVGProps<SVGMaskElement>;
-         metadata: React.SVGProps<SVGMetadataElement>;
-         mpath: React.SVGProps<SVGElement>;
-         path: React.SVGProps<SVGPathElement>;
-         pattern: React.SVGProps<SVGPatternElement>;
-         polygon: React.SVGProps<SVGPolygonElement>;
-         polyline: React.SVGProps<SVGPolylineElement>;
-         radialGradient: React.SVGProps<SVGRadialGradientElement>;
-         rect: React.SVGProps<SVGRectElement>;
-         set: React.SVGProps<SVGSetElement>;
-         stop: React.SVGProps<SVGStopElement>;
-         switch: React.SVGProps<SVGSwitchElement>;
-         symbol: React.SVGProps<SVGSymbolElement>;
-         text: React.SVGTextElementAttributes<SVGTextElement>;
-         textPath: React.SVGProps<SVGTextPathElement>;
-         tspan: React.SVGProps<SVGTSpanElement>;
-         use: React.SVGProps<SVGUseElement>;
-         view: React.SVGProps<SVGViewElement>;
-
+         animate: Luent.SVGProps<SVGElement>; // TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
+         animateMotion: Luent.SVGProps<SVGElement>;
+         animateTransform: Luent.SVGProps<SVGElement>; // TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
+         circle: Luent.SVGProps<SVGCircleElement>;
+         clipPath: Luent.SVGProps<SVGClipPathElement>;
+         defs: Luent.SVGProps<SVGDefsElement>;
+         desc: Luent.SVGProps<SVGDescElement>;
+         ellipse: Luent.SVGProps<SVGEllipseElement>;
+         feBlend: Luent.SVGProps<SVGFEBlendElement>;
+         feColorMatrix: Luent.SVGProps<SVGFEColorMatrixElement>;
+         feComponentTransfer: Luent.SVGProps<SVGFEComponentTransferElement>;
+         feComposite: Luent.SVGProps<SVGFECompositeElement>;
+         feConvolveMatrix: Luent.SVGProps<SVGFEConvolveMatrixElement>;
+         feDiffuseLighting: Luent.SVGProps<SVGFEDiffuseLightingElement>;
+         feDisplacementMap: Luent.SVGProps<SVGFEDisplacementMapElement>;
+         feDistantLight: Luent.SVGProps<SVGFEDistantLightElement>;
+         feDropShadow: Luent.SVGProps<SVGFEDropShadowElement>;
+         feFlood: Luent.SVGProps<SVGFEFloodElement>;
+         feFuncA: Luent.SVGProps<SVGFEFuncAElement>;
+         feFuncB: Luent.SVGProps<SVGFEFuncBElement>;
+         feFuncG: Luent.SVGProps<SVGFEFuncGElement>;
+         feFuncR: Luent.SVGProps<SVGFEFuncRElement>;
+         feGaussianBlur: Luent.SVGProps<SVGFEGaussianBlurElement>;
+         feImage: Luent.SVGProps<SVGFEImageElement>;
+         feMerge: Luent.SVGProps<SVGFEMergeElement>;
+         feMergeNode: Luent.SVGProps<SVGFEMergeNodeElement>;
+         feMorphology: Luent.SVGProps<SVGFEMorphologyElement>;
+         feOffset: Luent.SVGProps<SVGFEOffsetElement>;
+         fePointLight: Luent.SVGProps<SVGFEPointLightElement>;
+         feSpecularLighting: Luent.SVGProps<SVGFESpecularLightingElement>;
+         feSpotLight: Luent.SVGProps<SVGFESpotLightElement>;
+         feTile: Luent.SVGProps<SVGFETileElement>;
+         feTurbulence: Luent.SVGProps<SVGFETurbulenceElement>;
+         filter: Luent.SVGProps<SVGFilterElement>;
+         foreignObject: Luent.SVGProps<SVGForeignObjectElement>;
+         g: Luent.SVGProps<SVGGElement>;
+         image: Luent.SVGProps<SVGImageElement>;
+         line: Luent.SVGLineElementAttributes<SVGLineElement>;
+         linearGradient: Luent.SVGProps<SVGLinearGradientElement>;
+         marker: Luent.SVGProps<SVGMarkerElement>;
+         mask: Luent.SVGProps<SVGMaskElement>;
+         metadata: Luent.SVGProps<SVGMetadataElement>;
+         mpath: Luent.SVGProps<SVGElement>;
+         path: Luent.SVGProps<SVGPathElement>;
+         pattern: Luent.SVGProps<SVGPatternElement>;
+         polygon: Luent.SVGProps<SVGPolygonElement>;
+         polyline: Luent.SVGProps<SVGPolylineElement>;
+         radialGradient: Luent.SVGProps<SVGRadialGradientElement>;
+         rect: Luent.SVGProps<SVGRectElement>;
+         set: Luent.SVGProps<SVGSetElement>;
+         stop: Luent.SVGProps<SVGStopElement>;
+         switch: Luent.SVGProps<SVGSwitchElement>;
+         symbol: Luent.SVGProps<SVGSymbolElement>;
+         text: Luent.SVGTextElementAttributes<SVGTextElement>;
+         textPath: Luent.SVGProps<SVGTextPathElement>;
+         tspan: Luent.SVGProps<SVGTSpanElement>;
+         use: Luent.SVGProps<SVGUseElement>;
+         view: Luent.SVGProps<SVGViewElement>;
       }
    }
 }
 
-//$$$
-// React.JSX needs to point to global.JSX to keep global module augmentations intact.
-// But we can't access global.JSX so we need to create these aliases instead.
-// Once the global JSX namespace will be removed we replace React.JSX with the contents of global.JSX
-type GlobalJSXElementType = JSX.ElementType;
-interface GlobalJSXElement extends JSX.Element { }
-interface GlobalJSXElementClass extends JSX.ElementClass { }
-interface GlobalJSXElementAttributesProperty extends JSX.ElementAttributesProperty { }
-interface GlobalJSXElementChildrenAttribute extends JSX.ElementChildrenAttribute { }
-
-type GlobalJSXLibraryManagedAttributes<C, P> = JSX.LibraryManagedAttributes<C, P>;
-
-interface GlobalJSXIntrinsicAttributes extends JSX.IntrinsicAttributes { }
-interface GlobalJSXIntrinsicClassAttributes<T> extends JSX.IntrinsicClassAttributes<T> { }
-
-interface GlobalJSXIntrinsicElements extends JSX.IntrinsicElements { }

@@ -7,7 +7,8 @@ import { TriangleDemo } from "./src/SierpinskiTriangles"
 import { TestListSelectTransition } from "./src/TestListSelectTransition"
 import { TestListTransit } from "./src/TestListTransit"
 import { TestIfElse } from "./src/TestIfElse"
-import { TodoMVC } from "./src/TodoMVC"
+import { TodoMVC } from "./src/TodoMVCqrx"
+// import { } from "./src/TodoMVC"
 import { VideoPlayer } from "./src/VideoPlayer.qrx"
 import { TestMarkdownApp } from "./src/MarkdownApp"
 import { TreeApp } from "./src/TestTreeApp"
@@ -29,9 +30,8 @@ import { TestDerivationA } from "./src/TestDerivation"
 import { TestSyncEffects } from "./src/TestSyncEffects"
 
 export function runDemo() {
-   const app = createRoot(TestSyncEffects)
+   const app = createRoot(TodoMVC)
 
    app.mount('#root')
 }
-
 

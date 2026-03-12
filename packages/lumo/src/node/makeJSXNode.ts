@@ -78,8 +78,6 @@ export type ClassInput = MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> 
 export type ElementConfig<K extends TagName = TagName> = {
    [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
-   // class?: ClassInput | ClassInput[],
-   // style?: StyleInput | StyleInput[],
    'show-if'?: Ion<Booleanny>
    // attributes?: K extends TagName ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
@@ -90,10 +88,10 @@ export type ElementConfig<K extends TagName = TagName> = {
 
 type NodesArray<T> = ReturnType<$Node<T>>[] | NodesArray<T>[]
 type NodeSetup<T extends TagName | ComponentForge> = {
-   ref?: $Node<T> | NodeRefsConfig,
+   // ref?: $Node<T> | NodeRefsConfig,
    // provide?: Provided,
-   class?: ClassInput | ClassInput[],
-   style?: StyleInput | StyleInput[]
+   // class?: ClassInput | ClassInput[],
+   // style?: StyleInput | StyleInput[]
 }
 export type ComponentConfig<T extends ComponentForge = ComponentForge> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never

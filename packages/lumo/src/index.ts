@@ -34,18 +34,3 @@ window._$$wrapWithContext = wrapWithContext;
 
 
 
-/**
- *  App developers can extend ContextKeyMap interface like so:
- *  
- *  export const Frog = Symbol('frog')
- * 
- *  const frogType = ContextKey(FROG, v<string>)
- *  
- *  declare module '@rue/lumo' {
- *     interface ContextKeyMap {
- *        [_dog_]: typeof frogType
- *     }
- *  }
- * 
- */
-export interface ContextKeyMap { }

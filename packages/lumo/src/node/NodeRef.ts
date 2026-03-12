@@ -56,14 +56,13 @@ export function isNodesRef(value: any): value is InternalRef<$Nodes> {
    return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaListRef
 }
 
-type RefReturn<T extends RefSource, A> = A extends never[] ? $Nodes<T> : $Node<T>
+type RefReturn<T extends RefSource> = $Node<T>
 
 /**
  * @public
  */
 export function NodeRef<
-   T extends RefSource,
-   A,
+   T extends RefSource
 >(source: T): $Node<T> {
    return createNodeRef()
 
