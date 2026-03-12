@@ -812,7 +812,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
 }
 
 function toStylePropertyName(key: string) {
-   return key.startsWith('$') ? key.slice(1) : key;
+   return key.startsWith('æ') ? key.slice(1) : key;
 }
 
 function assignStyleProperty(style: AnyObject, property: string, value: string | number | Falsey) {

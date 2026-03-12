@@ -26,9 +26,10 @@ import { TestCanvas } from "./src/CanvasApp/TestCanvas"
 import { TestIfElseRemountView } from "./src/TestIfElseRemountView"
 import { TestNamedSlots } from "./src/TestNamedSlots"
 import { TestDerivationA } from "./src/TestDerivation"
+import { TestSyncEffects } from "./src/TestSyncEffects"
 
 export function runDemo() {
-   const app = createRoot(TestDerivationA)
+   const app = createRoot(TestSyncEffects)
 
    app.mount('#root')
 }

@@ -220,7 +220,7 @@ export class ModelQuark implements Atom {
    ) {
       if (!Object.isExtensible(this.target)) return { get: () => undefined, set: nowrite }
       const valueKey = isIonKey(key) ? key.slice(1) : key
-      const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? '$' + key : undefined
+      const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? 'æ' + key : undefined
       if (isNewProperty || ionKey && valueKey in this.state.get())
          return this.initPion(key, valueKey, ionKey, key === ionKey ? this.state.get()[valueKey] : undefined)
       return undefined

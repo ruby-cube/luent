@@ -62,31 +62,24 @@ export class EffectQueue {
       const sync = phase === SYNC
 
       const limit = effects.length
-      // console.log('>>> running phase', phase, 'of', this.atom)
+      console.log('>>> running phase', phase, 'of', this.atom, '# of effects:', limit)
       for (let i = 0; i < limit; i++) {
          const effect = effects[i]
-         if (phase === RENDER) console.log('running render effect', effect)
-         // if (cestLePromis(effect)) console.log('le promis is here')
          if (
             !effect.run
             || this.atom && !effect.isLinked(this.atom) // weeds out effects that have been unlinked due to retracking
          ) {
-            // if (cestLePromis(effect)) console.warn('NO RUN')
             continue;
          }
          // prevent repeats within queue (but not across extended queues and phases)
          if (completed?.has(effect)) {
             this.retain(effect)
-            // if (cestLePromis(effect)) console.warn('ALREADY RUN')
             continue;
          }
 
          try {
             effectStackCount++
             if (effectStackCount > 100_000) throw new Error('Infinite loop detected')
-            // if (cestLePromis(effect)) {
-            //    console.warn('>>> run le promis!')
-            // }
             run(effect)
          }
          // catch (err) {
@@ -95,7 +88,7 @@ export class EffectQueue {
          finally {
             effectStackCount--
             completed?.add(effect)
-            this.retain(effect)
+            if (phase !== SYNC) this.retain(effect)
          }
 
          if (process && process.mustPause() && i + 1 < limit) {
@@ -170,7 +163,7 @@ export class TaskQueue {
    }
 
    scheduleTask(task: () => void) {
-         this.tasks.push(task)
+      this.tasks.push(task)
    }
 
    scheduleEffects(effects: EffectQueue) {
