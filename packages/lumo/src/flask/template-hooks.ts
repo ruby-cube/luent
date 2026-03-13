@@ -92,8 +92,8 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
 }
 
 export interface LumoHooks<T> {
-   'at:create'?: LifecycleTask<T>
-   'at:mount'?: LifecycleTask<T>
+   'at:create'?: LifecycleTask<T> | any // allows functions to be called in the JSX expression space
+   'at:mount'?: LifecycleTask<T> | any
    'at:remount'?: LifecycleTask<T>
    'at:created'?: LifecycleTask<T>
    'at:mounted'?: LifecycleTask<T>

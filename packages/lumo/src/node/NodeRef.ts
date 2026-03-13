@@ -2,21 +2,21 @@ import { Component, PublicComponent } from "../component/Component"
 import { TagName } from "../element/makeElement"
 import { Ion, toValue } from "@rue/quarky"
 import { getActiveFlask, getFlask } from "@rue/flask"
-import { AnyObject } from "@rue/types"
+import { AnyObject, Glass } from "@rue/types"
 
 export const INTERNAL = Symbol('internal')
 
-type RefSource = TagName | ((...args: any[]) => Component)
+type RefSource = TagName | ((...args: any[]) => {exposed: unknown})
 
 
 export type NodeReferent<
    T extends RefSource = RefSource
 > =
    T extends TagName ? HTMLElementTagNameMap[T] : // TODO: SVGs and Math elements
-   T extends (...args: any[]) => infer R ?
-   R extends Component<infer I> ?
-   I extends PublicComponent ? I
-   : never : never : never
+   T
+
+export type ComponentRef<C> = C extends (...args: any[]) => infer R ?
+   R extends { exposed: infer E } ? E : never : never
 /* 
 * NodeRef property:
 * - undefined means ref has not been set or has been removed from the DOM
@@ -34,18 +34,16 @@ export type NodeReferent<
 //    // [INTERNAL]: MetaNodeRef;
 // }
 
-export type State<T extends RefSource> = NodeReferent<T>
+// export type State<T extends RefSource> = NodeReferent<T>
 
-export type NodeRef<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
+export type NodeRef<T extends RefSource = RefSource> = { (): NodeReferent<T> | undefined }
 
-export type $Nodes<T extends RefSource = RefSource> = () => NodeReferent<T>[]
-
-export type InternalRef<T> = T & { [INTERNAL]: T extends $Nodes ? MetaListRef : MetaRef }
+export type InternalRef<T> = T & { [INTERNAL]: MetaRef }
 
 /**
  * @internal
 */
-export function isAnyNodeRef(value: any): value is InternalRef<NodeRef | $Nodes> {
+export function isAnyNodeRef(value: any): value is InternalRef<NodeRef> {
    return value instanceof Object && INTERNAL in value
 }
 
@@ -63,7 +61,7 @@ type RefReturn<T extends RefSource> = NodeRef<T>
  */
 export function NodeRef<
    T extends RefSource
->(source: T): NodeRef<T> {
+>(source: T): T extends string ? NodeRef<T> : NodeRef<ComponentRef<T>> {
    return createNodeRef()
 
 }

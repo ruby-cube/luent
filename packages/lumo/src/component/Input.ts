@@ -3,7 +3,6 @@ import { Ion, Ionic, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, 
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { getIonicProxy, MayBeMutableProxy as _MayBeMutableProxy, ReadonlyProxy as _ReadonlyProxy } from "../../../quarky/src/mu";
-import { OVERRIDE_LEVEL } from "../element/makeElement";
 
 const MayBeMutableProxy = __DEV__ ? _MayBeMutableProxy : (arg: any) => arg
 const ReadonlyProxy = __DEV__ ? _ReadonlyProxy : (arg: any) => arg
@@ -58,9 +57,13 @@ export type Readonly<T> = {
 
 type HasEvent<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C, `on:${string}`>> extends never ? false : true
 
-type WithEmit<C> = C extends AnyObject ? HasEvent<C> extends true ? {
-   emit: <K extends EventNames<C>>(...event: WithEventObject<K, C[`on:${K}`]>) => void
-} : {} : {}
+type WithEmit<C> = { emit: { [K in keyof C as K extends `on:${infer E}` ? E : never]: C[K] } &  { [K in keyof DOMEvents<HTMLElement> as K extends `on:${infer E}` ? E : never]: DOMEvents<HTMLElement>[K] }  }
+
+
+// C extends AnyObject ? HasEvent<C> extends true ? {
+//    emit: {[K in C[`on:${string}`]: C[] ]}
+//    // <K extends EventNames<C>>(...event: WithEventObject<K, C[`on:${K}`]>) => void
+// } : {} : {}
 
 
 
@@ -157,14 +160,9 @@ function assertFunction(value: unknown) {
 //    return muIons
 // }
 
-export function toInput(attributes: AnyObject) {
-   function emit(event: string, eventObject: object) {
-      const handler = attributes['on:' + event]
-      if (!handler) return;
-      assertFunction(handler)
-      return handler(eventObject)
-   }
 
+
+export function toInput(attributes: AnyObject, events: AnyObject) {
    // TODO: write a linter that disallows mutation unless variable comes from a property or nested property of the mu object
    // TODO: also provide a input transform helper for non-component functions that mutate arguments
    const mu = new Proxy(attributes, {
@@ -217,7 +215,7 @@ export function toInput(attributes: AnyObject) {
          }
          if (key === 'mu') return mu
          if (typeof key !== 'string') return undefined;
-         if (key === 'emit') return emit;
+         if (key === 'emit') return events;
          if (key === '_raw_') return { ...attributes };
          if (key === 'Slot') return target.Slot // TODO: Is this correct??
          if (isIonKey(key)) {

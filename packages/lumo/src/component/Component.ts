@@ -1,8 +1,8 @@
 import { AnyObject, Falsey } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
-import { toValue, watch } from "@rue/quarky";
+import { Expand, toValue, watch } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
-import { NodeRef, $Nodes, initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
+import { initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { MaybeIon, toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
@@ -20,23 +20,28 @@ export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
 
 
-
-export interface Component<T extends AnyObject | undefined = AnyObject | undefined> {
-   exposed: T extends AnyObject ? PublicComponent<T> : undefined;
+type StyledComponent<T = {}> = {
+   exposed: T;
    jsxNodes: RawJSXNode[];
-   // morphicRenderKit?: PolymorphKit
+   ref: T extends {} ? <C>(referent: C) => Component<C> : never,
+}
+
+export interface Component<T = {}> {
+   exposed: T;
+   jsxNodes: RawJSXNode[];
+   ref: T extends {} ? <C>(referent: C) => Component<C> : never,
+   style: (css: string) => StyledComponent<T>
 }
 
 type JSXTemplate = RawJSXNode
 
 // TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
-export function template(template: JSXTemplate) {
+export function template(template: JSXTemplate): Component {
    const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
-   function ref<T extends AnyObject | undefined = AnyObject | undefined>(component: T) {
-      console.log('ref()', component)
+   function ref<T>(model: T): Component<T> {
       return {
-         exposed: component,
+         exposed: model,
          jsxNodes
       }
    }
@@ -145,10 +150,11 @@ export function makeComponent(
       ...attributes,
       ...transitions,
       Slot,
-      classes
+      classes,
+      ref
       // classes: classString
       // styles: style ? toStyleDeclaration(style) : undefined // TODO:
-   }))
+   }, events))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.exposed ?? {}

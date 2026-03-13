@@ -1,4 +1,4 @@
-import { atDiscard, createRoot, NodeRef, State, template } from "@rue/lumo";
+import { atDiscard, ComponentRef, createRoot, NodeRef, template } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 import { As } from "../../../../packages/lumo/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
@@ -57,15 +57,15 @@ export function BottomlessBlokkis() {
         }
     }
 
-    function isFlushRight(blokk: State<typeof Blokk>) {
+    function isFlushRight(blokk: ComponentRef<typeof Blokk>) {
         return blokk.rightEdge === BOARD_COLUMNS
     }
 
-    function isBottomedOut(blokk: State<typeof Blokk>) {
+    function isBottomedOut(blokk: ComponentRef<typeof Blokk>) {
         return blokk.topEdge === BOARD_ROWS
     }
 
-    function isFlushLeft(blokk: State<typeof Blokk>) {
+    function isFlushLeft(blokk: ComponentRef<typeof Blokk>) {
         return blokk.leftEdge === 0
     }
 
@@ -82,10 +82,10 @@ export function BottomlessBlokkis() {
             `}>
                 {As($activeBlokk,
                     <Blokk
-                        at:create={blokk => blokk.initX(BOARD_COLUMNS / 2 - BLOKK_GRID / 2)}
                         at:mount={dropBlock()}
                         ref={$blokk}
                         shapes={shapes}
+                        initialX={BOARD_COLUMNS / 2 - BLOKK_GRID / 2}
                     ></Blokk>
                 )}
             </div>

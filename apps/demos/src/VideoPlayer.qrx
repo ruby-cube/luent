@@ -1,4 +1,4 @@
-import { template, Else, Finitron, FromTag, If, NodeRef, Style, css } from "@rue/lumo";
+import { template, Else, Finitron, FromTag, If, NodeRef, Style, css, HandleEvent } from "@rue/lumo";
 import { Ion, queueTask, watch } from "@rue/quarky";
 import "./reset.css"
 
@@ -14,7 +14,7 @@ export function VideoPlayer() {
 
    const player = Finitron({
       "loading": {
-         initialize: () => "x:ready",
+         markReady: () => "x:ready",
          error: () => "x:failed"
       },
       "x:ready": {},
@@ -56,7 +56,7 @@ export function VideoPlayer() {
       elapsedTime@.value = currentTime;
    }
 
-   function reClickElapsedBar(e: { currentTarget: (EventTarget & HTMLDivElement) | null } & MouseEvent) {
+   function reClickElapsedBar(e: any) {
       console.log('### set Time')
       const rect = e.currentTarget!.getBoundingClientRect()
       setTime(rect.width, e.clientX - rect.left)
@@ -96,7 +96,7 @@ export function VideoPlayer() {
       <div class="container">
          <video
             ref={video@}
-            on:canplay={e => player.initialize()}
+            on:canplay={e => player.markReady()}
             on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
             on:ended={e => track.end()}
             on:error={e => player.error()}
@@ -106,9 +106,11 @@ export function VideoPlayer() {
 
          {If((player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
             <div>
-               <ElapsedBar elapsed={elapsedTime@} duration={duration} paused={(track.is("paused"))}
+               <ElapsedBar
+                  elapsed={elapsedTime@}
+                  duration={duration}
+                  paused={(track.is("paused"))}
                   on:click={reClickElapsedBar}
-                  onClick={reClickElapsedBar}
                />
                <remount-view>
                   {If((track.is("playing")),
@@ -170,16 +172,13 @@ export function VideoPlayer() {
 function ElapsedBar(input: FromTag<{
    elapsed: Ion<number>,
    duration: number,
-   paused: Ion<boolean>,
-   onClick: Function,
-   "on:click": MouseEvent
+   paused: Ion<boolean>
 }>) {
-      const { elapsed@, duration, paused@, emit, onClick } = input
+   const { elapsed@, duration, paused@, emit } = input
 
    return template(
       <div class="elapsed"
-         on:click={onClick}
-      // on:click={e => emit("click", e)}
+         on:event={emit}
       >
          <div
             class="elapsed-bar"
@@ -198,7 +197,7 @@ function Timer(input: FromTag<{
    elapsed: Ion<number>,
    duration: number
 }>) {
-                  const { elapsed@, duration } = input
+   const { elapsed@, duration } = input
 
    return template(
       <span class="timer">

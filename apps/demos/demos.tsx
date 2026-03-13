@@ -28,9 +28,10 @@ import { TestIfElseRemountView } from "./src/TestIfElseRemountView"
 import { TestNamedSlots } from "./src/TestNamedSlots"
 import { TestDerivationA } from "./src/TestDerivation"
 import { TestSyncEffects } from "./src/TestSyncEffects"
+import { StyledComp } from "./src/TestForwardRef"
 
 export function runDemo() {
-   const app = createRoot(VideoPlayer)
+   const app = createRoot(StyledComp)
 
    app.mount('#root')
 }

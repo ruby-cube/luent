@@ -38,16 +38,6 @@ type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
 
 
 declare namespace Luent {
-   //$$$ Important
-   interface RefAttributes<T> {
-      /**
-       * Access the DOM element via NodeRef or node refs config object.
-       * Once the view unmounts, the ref value will be set to `null`
-       */
-      ref?: () => T | undefined // TODO: add NodeRefsConfig
-   }
-
-
    //
    // Event System
    // ----------------------------------------------------------------------
@@ -245,30 +235,11 @@ declare namespace Luent {
    type AnimationEventHandler<T = Element> = EventHandler<AnimationEvent<T>>;
    type TransitionEventHandler<T = Element> = EventHandler<TransitionEvent<T>>;
 
-   //
-   // Props / DOM Attributes
-   // ----------------------------------------------------------------------
-
-   //$$$
-   type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & Lumo.LumoHooks<T>
-
-   interface SVGProps<T> extends SVGAttributes<T>, RefAttributes<T> {
-   }
-
-   interface SVGLineElementAttributes<T> extends SVGProps<T> { }
-   interface SVGTextElementAttributes<T> extends SVGProps<T> { }
-
-
-   //$$$
-   type DOMAttributes<T> = {
-      children?: Lumo.JSXNode | undefined | null;
-   } & DOMEvents<T>
 
 
 
    //$$$
    interface DOMEvents<T> {// Clipboard Events
-      'on'?: unknown;
       'on:copy'?: ClipboardEventHandler<T>;
       'on:cut'?: ClipboardEventHandler<T>;
       'on:paste'?: ClipboardEventHandler<T>;
@@ -1957,31 +1928,62 @@ declare namespace Luent {
       componentStack?: string | null;
       digest?: string | null;
    }
+
+   // DOM Attributes
+   // ----------------------------------------------------------------------
+
+   interface RefAttributes<T> {
+      /**
+       * Access the DOM element via NodeRef or node refs config object.
+       * Once the view unmounts, the ref value will be set to `null`
+       */
+      ref?: () => T | undefined // TODO: add NodeRefsConfig
+   }
+
+   //$$$
+   type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & Lumo.LumoHooks<P>& LumoCommonAttributes
+
+   interface SVGProps<T> extends SVGAttributes<T>, RefAttributes<T> {
+   }
+
+   interface SVGLineElementAttributes<T> extends SVGProps<T> { }
+   interface SVGTextElementAttributes<T> extends SVGProps<T> { }
+
+
+   //$$$
+   type DOMAttributes<T> = {
+      children?: Lumo.JSXNode | undefined | null;
+   } & DOMEvents<T>
 }
 
 
+
 // IMPORTANT Components and elements
-type LumoAttributes<C, P> =
+// N = (props: P) => JSX.Element
+type LumoAttributes<F, P> =
    P extends { '~attributes'?: infer A }
-   ? A & Lumo.LumoHooks<C> & LumoAttributesWithRef<C> // Component Attributes
-   : P
+   ? A & Lumo.LumoHooks<Lumo.ComponentRef<F>> & LumoComponentAttributes<F> & LumoCommonAttributes & Luent.DOMEvents<Lumo.ComponentRef<F>>// Component Attributes
+   : P // Element attributes must be added to DetailedHTMLProps
 
 type LumoComponentAttributes<C> = {
-   ref?: NodeRef<C>
+   ref?: NodeRef<Lumo.ComponentRef<C>>
    class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
    style?: StyleInput | StyleInput[];
 }
 
+type LumoCommonAttributes = {
+   'on:event'?: {[key: string]: Function };
+}
+
+
+
 declare global {
+
+   type DOMEvents<T> = Luent.DOMEvents<T>
 
    namespace JSX {
       //$$$ important for converting component input types to attribute types
       type LibraryManagedAttributes<C, P> = LumoAttributes<C, P>;
-
-      //$$$ Components and html elements
-      interface IntrinsicAttributes {
-
-      }
 
       type CSSProperties = Luent.CSSProperties
 

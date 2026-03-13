@@ -6,6 +6,7 @@ const pointerUpdate = instantUpdate
 // ThrottlePointer()
 
 const htmlEvents = {
+   event: swiftUpdate,
    // Mouse Events
    click: swiftUpdate,  // vvv user interaction
    dblclick: swiftUpdate,

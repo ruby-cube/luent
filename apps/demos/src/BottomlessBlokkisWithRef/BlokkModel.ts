@@ -6,18 +6,12 @@ export class BlokkModel {
     public shiftY: number
 
     constructor(
-        public matrix: (0 | 1)[][],
-        public rotation: Rotation
+       public matrix: (0 | 1)[][],
+       public rotation: Rotation,
+       public initialX: number
     ) {
         this.shiftY = this.calcInitialShiftY(rotation)
-    }
-
-    private initialized = false;
-
-    initX(x: number) {
-        if (this.initialized) return;
-        this.shiftX = x
-        this.initialized = true;
+        this.shiftX = initialX
     }
 
     moveDown() {

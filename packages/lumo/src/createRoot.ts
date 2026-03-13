@@ -43,20 +43,16 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
          if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
          appRoot = root!;
 
-         let component: Component = { exposed: undefined, jsxNodes: [] }
+         // let component: Component = { exposed: undefined, jsxNodes: [] }
          // (2) attach developer's root component to root element
          // flask.containCall(function mountRootComponent() {
-
-         const attributes = {
-            ...config?.setup || {},
-         }
 
          load(() => { // FIX: Error are being swallowed up here despite being rethrown
             flaskStack.push(flask)
             pushContext(rootContext)
             let nodes: JSXNode[]
             try {
-               nodes = this.nodes = processJSXOutput(App(toInput(attributes)))
+               nodes = this.nodes = processJSXOutput(App())
                setUpNodeVine(nodes, appRoot)
                queueInternalRender(() => {
                   mountDOMNodes(nodes, appRoot)

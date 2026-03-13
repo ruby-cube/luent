@@ -1,10 +1,10 @@
 import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue, INTERNAL, queueTask, queueIonicTask, queueIonicPrelude } from "@rue/quarky";
 import { isFunction, isObject, isPlainObject, isString, noop, normalizeToArray } from "@rue/utils";
-import { ClassInput, ElementConfig, StyleInput, RawJSXNode, $Classes } from "../node/makeJSXNode";
+import { ClassInput, ElementConfig, StyleInput } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
-import { AnyObject, Booleanny, Falsey } from "@rue/types";
+import { AnyObject, Booleanny } from "@rue/types";
 import { getEventUpdater, isHTMLEvent } from "./attributes";
 import { initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
@@ -57,6 +57,7 @@ export function makeElement(
       }
       else {
          if (!isAnyNodeRef($node)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs as ref")
+         console.log('initializing element ref', tagName)
          initializeRef($node, domNode)
       }
    }
@@ -548,22 +549,32 @@ function toString(value: any) {
 
 // TODO: figure out how to incorporate options into inline events
 function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, options?: SustainedListenerOptions & AddEventListenerOptions) {
-
    for (const key in events) {
-      const handlers = normalizeToArray(events[key]);
-      for (const handler of handlers) {
-         $listen(withUpdate(handler, key), options ? (options.preserve = true, options) : { preserve: true }, {
-            // preserve since there is no need to pause listener when it is unmounted--it will never be triggered
-            enroll: (cb) => {
-               // console.warn('^^^ adding inline event listener', handler)
-               node.addEventListener(key, cb, options);
-            },
-            remove: (cb) => {
-               // console.warn('^^^ removing inline event listener', handler)
-               node.removeEventListener(key, cb, options);
-            }
-         })
+      if (key === 'event') {
+         const batchEvents = events.event
+         for (const key in batchEvents) {
+            setUpListener(node, batchEvents, key, options)
+         }
+         continue;
       }
+      setUpListener(node, events, key, options)
+   }
+}
+
+function setUpListener(node: Element, events: AnyObject, key: string, options?: SustainedListenerOptions & AddEventListenerOptions) {
+   const handlers = normalizeToArray(events[key]);
+   for (const handler of handlers) {
+      $listen(withUpdate(handler, key), options ? (options.preserve = true, options) : { preserve: true }, {
+         // preserve since there is no need to pause listener when it is unmounted--it will never be triggered
+         enroll: (cb) => {
+            // console.warn('^^^ adding inline event listener', handler)
+            node.addEventListener(key, cb, options);
+         },
+         remove: (cb) => {
+            // console.warn('^^^ removing inline event listener', handler)
+            node.removeEventListener(key, cb, options);
+         }
+      })
    }
 }
 

@@ -117,7 +117,7 @@ export function TodoMVC() {
             </header>
             <section class="main">
                {ToggleAllButton()}
-               <TodoList ref={$todoList} todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
+               <TodoList ref={$todoList} at:mounted={node => node} todos={æfilteredTodos} removeTodo={removeTodo}></TodoList>
             </section>
             <footer show-if={ætodoCount} class="footer">
                {RemainingCount()}
@@ -168,12 +168,10 @@ function TodoInput({ addTodo }: FromTag<{ addTodo: (title: string) => void }>) {
 
 
 
-function TodoList(input: FromTag<{
+function TodoList({ ætodos, removeTodo }: FromTag<{
    todos: Ion<Ionic<Ionic<Todo>[]>>,
    removeTodo: (todo: Ionic<Todo>) => void
 }>) {
-
-   const { ætodos, removeTodo } = input
 
    const æeditedTodo = Ion(null as Todo | null)
 

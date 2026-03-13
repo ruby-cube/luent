@@ -97,13 +97,14 @@ export function BottomlessBlokkis() {
                     --cell-size: ${CELL_SIZE}px;
                 `}
             >
-                {As($blokk, blokk =>
+                {As($blokk,
                     <Blokk
-                        at:create={dropBlock()}
+                        at:create={dropBlock}
                         matrix={$blokk()!.matrix}
                         shiftX={($blokk()!.shiftX)}
                         shiftY={($blokk()!.shiftY)}
                         rotation={($blokk()!.rotation)}
+
                         color={$blokkColor}
                         gap={1}
                         on:mouseenter={e => $blokkColor.value = 'red'}
