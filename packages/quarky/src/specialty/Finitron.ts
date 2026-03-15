@@ -2,7 +2,6 @@ import { createStack, debug } from "@rue/utils";
 import { Ion } from "../ion/Ion";
 import { watch } from "../reactivity/Watcher";
 import { queueTask, SYNC } from "../reactivity/RenderCycle";
-import { FunctionalSubstance } from "../reactivity/Substance";
 import { QUARK } from "../abstract/Quark";
 import { AnyObject, UnionToIntersection } from "@rue/types";
 import { untracked } from "../reactivity/Compound";
@@ -224,7 +223,7 @@ export function withTimeout(ms: number, transition: Transition) {
    return transition;
 }
 
-//TODO: implement as custom ionized object
+// TODO: Traceability
 export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Methods<S>): Finitron<S, M> {
    const $currentState = Ion(undefined as undefined | string);
 

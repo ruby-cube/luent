@@ -1,6 +1,6 @@
 import { Effect } from "../reactivity/EffectQueue";
-import { FunctionalSubstance } from "../reactivity/Substance";
-import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
+import { FunctionSubject } from "../reactivity/Subject";
+import { QUARK } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
 import { SYNC } from "../reactivity/RenderCycle";
@@ -10,43 +10,56 @@ import { queueCommit, SimpleState } from "../reactivity/State";
 import { isPlainObject } from "@rue/utils";
 
 
-class DerivationIonQuark {
-   __DEV__asTraceable = new Traceable()
-   quarkType = DERIVATION_ION
+export class DerivationIonQuark extends FunctionSubject implements Stateful {
+   // quarkType = DERIVATION_ION
 
    constructor(
-      private substance: FunctionalSubstance
-   ) { }
+      fn: () => unknown,
+      retrack: boolean,
+      warnNoAtoms?: boolean
+   ) {
+      super(
+         fn,
+         retrack,
+         warnNoAtoms
+      )
+   }
+
+   getState(): unknown {
+      return this.trackedCall()
+   }
 
    get inert() {
-      return !this.substance.reactive
+      return !this.reactive
    }
 }
 
-export const DERIVATION_ION = Symbol('Derivation Ion')
+// export const DERIVATION_ION = Symbol('Derivation Ion')
 
-export function isManagedDerivation(value: unknown) {
-   return hasQuark(value) && quarkOf(value).quarkType === DERIVATION_ION
-}
+// export function isManagedDerivation(value: unknown) {
+//    return hasQuark(value) && quarkOf(value).quarkType === DERIVATION_ION
+// }
 
 const STALE = Symbol('stale')
 
 export function createMemoizedDerivation(
    derive: (prev?: unknown) => unknown,
-   methods?: AnyObject, // TODO:
+   setup?: AnyObject,
    retrack: boolean = true,
 ) {
    const state = new SimpleState(STALE) // FIX: ?
 
-   const substance = new FunctionalSubstance(() => {
-      return derive(state.current === STALE ? state.previous : state.current) // FIX: figure out how to store previous state
-   }, retrack, undefined, methods?.['#logAtoms'])
+   let previous: unknown;
+
+   const quark = new DerivationIonQuark(() => {
+      return derive(state.current === STALE ? previous : state.current) // FIX: figure out how to store previous state
+   }, retrack, undefined)
 
    let trackCall = () => {
       // initial call
       const value = trackedCall()
-      substance.linkEffect(new Effect(() => {
-         state.previous = state.current === STALE ? state.previous : state.current
+      quark.linkEffect(new Effect(() => {
+         previous = state.current === STALE ? previous : state.current
          state.set(STALE);
       }, SYNC))
       // subsequent calls
@@ -55,11 +68,11 @@ export function createMemoizedDerivation(
    }
 
    function trackedCall() {
-      return substance.trackedCall()
+      return quark.trackedCall()
    }
 
    function $derivedState() {
-      track(substance)
+      track(quark)
       if (state.get() === STALE) {
          return state.set(trackCall())
       }
@@ -69,13 +82,13 @@ export function createMemoizedDerivation(
    }
 
 
-
    $derivedState['~ion'] = true as const;
-   $derivedState[QUARK] = new DerivationIonQuark(substance)
+   $derivedState[QUARK] = quark
+   if (__DEV__) quark.asTraceable = new Traceable(setup?.devName)
 
-   if (methods) {
-      const onSet = methods['@set']
-      const onGet = methods['@get']
+   if (setup) {
+      const onSet = setup['@set']
+      const onGet = setup['@get']
       if (onSet || onGet)
          Object.defineProperty($derivedState, 'value', {
             set: onSet,
@@ -83,10 +96,10 @@ export function createMemoizedDerivation(
          })
    }
 
-   if (methods) {
-      const descriptors = Object.getOwnPropertyDescriptors(methods)
-      if ( __DEV__ && !isPlainObject(methods)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
-      if ( __DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
+   if (setup) {
+      const descriptors = Object.getOwnPropertyDescriptors(setup)
+      if (__DEV__ && !isPlainObject(setup)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
+      if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
       // TODO: this was copy pasted from atomic ion, fix any inconsistencies
       delete descriptors['@get'];
       delete descriptors['@set'];

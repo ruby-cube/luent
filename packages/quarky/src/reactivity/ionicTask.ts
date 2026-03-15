@@ -2,7 +2,7 @@ import { $listen, SustainedListenerOptions } from "@rue/flask";
 import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./Watcher";
 import { Glass } from "@rue/types";
 import { Effect } from "./EffectQueue";
-import { FunctionalSubstance } from "./Substance";
+import { FunctionSubject } from "./Subject";
 import { Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 
 
@@ -30,7 +30,7 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
       }
    }
 
-   const subject = new FunctionalSubstance(wrappedEffect, retrack)
+   const subject = new FunctionSubject(wrappedEffect, retrack)
 
 
    // TODO: options.preserve means non-pausable watcher

@@ -1,11 +1,14 @@
 import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
-import { Ion, toValue } from "../ion/Ion";
 import { Effect } from "./EffectQueue";
-import { asWatchedSubstance, IonSubstance, isWatchedSubstance, WatchedSubstance } from "./Substance";
+import { asSubject, IonSubject, isSubject, Subject } from "./Subject";
 import { AnyObject, Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
-import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, queuePrelude, SYNC } from "./RenderCycle";
+import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, queuePrelude, queueTask, SYNC } from "./RenderCycle";
+import { dev, logAtoms } from "../debug/dev";
+import { Traceable } from "../debug/Traceable";
+import { Ion, toValue } from "../ion/Ion";
+import { hasQuark, quarkOf } from "../abstract/Quark";
 
 
 // watch(list.$length, list.$couch, sync(() => {
@@ -34,8 +37,9 @@ export type EffectOptions = {
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
 export type WatchDebugOptions = {
-   logAtoms?: boolean,
-   traceTriggers?: boolean
+   devName?: string,
+   'dev.logAtoms'?: boolean,
+   'dev.traceTriggers'?: boolean
 }
 
 export type EffectTask<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
@@ -81,32 +85,49 @@ export class StateChangeEvent<S = unknown> {
 export type WatchSubjects = (Object | Ion)[]
 
 export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
-   console.log('watching', subject)
+   console.log('*** watching', subject)
    options.retrack = options.retrack ?? true;
-   
-   const substance = asWatchedSubstance(subject, options.retrack, Boolean(options.once))
-   if (options?.traceTriggers) {
-      // TODO:
+
+   const target = asSubject(subject, options.retrack, Boolean(options.once))
+
+   if (__DEV__ && options?.["dev.logAtoms"]) {
+      const target = Ion(() => subject(), {
+         devName: options?.devName
+      })
+
+      watch(target, () => {
+         logAtoms(quarkOf(target))
+      }, {
+         eager: true,
+         once: true
+      })
+      watch(target, () => {
+         logAtoms(quarkOf(target))
+      }, {
+         once: options.once
+      })
+      // dev.logAtoms(Ion(() => subject(), {
+      //    devName: options?.devName
+      // })) //TODO: ionic proxy cases      
    }
-   
-   if (!isWatchedSubstance(substance)) { // plain object
+   if (!isSubject(target)) { // plain object
       console.log('inert A')
       if (options?.eager) effect(new StateChangeEvent(undefined, subject, true))
-         return InertWatcher()
+      return InertWatcher()
    }
-   
-   const prevState = new SimpleState(substance.getValue()) // tracking
-   
-   if (!substance.reactive) {
+
+   const prevState = new SimpleState(target.getState()) // tracking
+
+   if (!target.reactive) {
       if (options?.eager) {
          console.log('inert B')
          effect(new StateChangeEvent(undefined, prevState.get(), true))
       }
       return InertWatcher()
    }
-   
+
    function wrappedEffect() {
-      const newState = substance.getValue() // retracking
+      const newState = target.getState() // retracking
       // console.log('effect!!!', prevState.get(), newState)
 
       try {
@@ -121,7 +142,7 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
    wrappedEffect.__DEV__fn = effect
 
    return setUpWatcher(
-      substance,
+      target,
       wrappedEffect,
       options,
    )
@@ -143,7 +164,7 @@ export function sync<F>(fn: F): F {
 
 
 export function setUpWatcher(
-   subject: WatchedSubstance,
+   subject: Subject,
    task: Task,
    options: EffectOptions,
 ) {
@@ -157,6 +178,10 @@ export function setUpWatcher(
    // if (eager) {
    //    scheduleEagerEffect(task, phase)
    // }
+   if (options?.["dev.traceTriggers"]) {
+
+   }
+
 
    return $listen(task, options || {}, {
       enroll(_task) {
@@ -164,7 +189,6 @@ export function setUpWatcher(
          effect.__DEV__fn = task.__DEV__fn
          subject.linkEffect(effect)
          if (eager) {
-            // console.log('eager', effect)
             scheduleEagerEffect(_task, phase)
          }
          return effect;
@@ -215,9 +239,9 @@ export function InertWatcher() {
 export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getActiveFlask(), eager: boolean = false) {
    // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
    // return;
-   const subject = new IonSubstance(() => toValue(ion())) // toValue in case of mutable ion getter
+   const subject = new IonSubject(() => toValue(ion())) // toValue in case of mutable ion getter
 
-   let prevState = subject.getValue()
+   let prevState = subject.getState()
 
    if (!subject.reactive && !eager) {
       return;
@@ -238,7 +262,7 @@ export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, prev
    let eagerRun = eager;
 
    function _render() {
-      const newState = subject.getValue()
+      const newState = subject.getState()
       render({ current: newState, previous: prevState, flask, eagerRun })
       eagerRun = false;
       prevState = newState;

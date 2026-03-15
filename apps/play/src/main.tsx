@@ -78,6 +78,7 @@ import { TestAwaitConditional } from './TestAwaitConditional';
 import { QrxCounter } from './Counter.qrx';
 import { TestRenderFunctionAsIon } from './TestRenderFunctionAsIon';
 import { QrxTodo } from './QrxTodoApp.qrx';
+import { TestDev } from './TestDev';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -151,7 +152,7 @@ import { QrxTodo } from './QrxTodoApp.qrx';
 // }
 
 // const app = createRoot(TestThru)
-const app = createRoot(QrxTodo)
+const app = createRoot(TestDev)
 
 app.mount('#root')
 

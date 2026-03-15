@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types"
 import { Quark, QUARK, quarkOf } from "./abstract/Quark"
-import { isIonicProxy } from "./ionic/ModelQuark"
+import { isIonicProxy } from "./ionic/utils"
 
 // NOTE: This file tightly couples Lumo with Quarky... need to decide whether to keep Quarky decoupled from Lumo
 

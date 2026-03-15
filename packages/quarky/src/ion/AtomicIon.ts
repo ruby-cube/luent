@@ -1,14 +1,14 @@
 import { AnyObject } from "@rue/types";
-import { __DEV__getTrace, } from "../../../flask/debug";
+import { __DEV__getTrace, traceAsyncPath, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { Quark, QUARK } from "../abstract/Quark";
 import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
-import { Traceable } from "../debug/Traceable";
+import { TraceableMutable, TraceableEntity } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { track } from "../reactivity/Compound";
 import { isPlainObject } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";
-import { $activeUpdate } from "../reactivity/Update";
+import { traceMutation } from "../debug/dev";
 
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark, displayName: string }
 
@@ -20,24 +20,30 @@ export interface IonHooks {
 }
 
 
-const ATOMIC_ION = Symbol('atomic ion')
 
-export class AtomicIonQuark implements Atom, Quark {
-   quarkType: string | symbol = ATOMIC_ION
+// export const ATOMIC_ION = Symbol('atomic ion')
+
+export class AtomicIonQuark implements Atom, Stateful, TraceableEntity {
+   // quarkType: string | symbol = ATOMIC_ION
    asTrackedAtom: TrackedAtom | undefined;
 
    castGet: ((value: unknown) => void) | undefined
    castSet: ((event: { value: unknown; previous: unknown; }) => void) | undefined;
-   castInit: (() =>void) | undefined
+   castInit: (() => void) | undefined
+
+   asTraceable?: TraceableMutable
 
    constructor(
       public state: SimpleState,
       hooks: IonHooks | undefined,
-      public __DEV__asTraceable: Traceable = new Traceable()
    ) {
       this.castGet = hooks?.["@get"]
       this.castSet = hooks?.["@set"]
       this.castInit = hooks?.["@init"]
+   }
+
+   getState(): unknown {
+      return this.state.get()
    }
 }
 
@@ -55,13 +61,14 @@ export function createAtomicIon(
    ) as QuarkyAtomicIon
 
    $state[QUARK] = quark
-   if ( __DEV__) $state.displayName = 'getState'
+   if (__DEV__) $state.displayName = 'getState'
+   if (__DEV__) quark.asTraceable = new TraceableMutable(props?.devName)
 
 
    if (props) {
       const descriptors = Object.getOwnPropertyDescriptors(props)
-      if ( __DEV__ && !isPlainObject(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
-      if ( __DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
+      if (__DEV__ && !isPlainObject(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
+      if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
       delete descriptors['@get'];
       delete descriptors['@set'];
       delete descriptors['@init'];
@@ -85,8 +92,9 @@ export function getState(this: AtomicIonQuark) {
 }
 
 export function setState(this: AtomicIonQuark, value: unknown) {
+   if (__DEV__) traceMutation(this.asTraceable, this.state.get(), value)
    this.state.set(value)
-   trigger(this, this.state.pendingUpdate!)
+   trigger(this)
    return value;
 }
 

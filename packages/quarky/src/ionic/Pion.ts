@@ -1,10 +1,10 @@
 import { SimpleState } from "../reactivity/State"
-import { AtomicIonQuark, getState, IonHooks, setState, withGetHook, withSetHook } from "../ion/AtomicIon"
+import { traceMutation } from "../debug/dev"
 import { trigger } from "../reactivity/Atom"
 import { QUARK } from "../abstract/Quark"
 import { ModelQuark } from "./ModelQuark"
 import { isObject } from "@rue/utils"
-import { $activeUpdate } from "../reactivity/Update"
+import { AtomicIonQuark, getState, IonHooks, setState, withGetHook, withSetHook } from "../ion/AtomicIon"
 
 
 
@@ -31,7 +31,7 @@ export function createAtomicPion<T = unknown>(
 
    const [$state, setState] = wrapped
 
-   if ( __DEV__) {
+   if (__DEV__) {
       // @ts-expect-error
       $state.displayName = 'getPropertyValue'
    }
@@ -67,8 +67,9 @@ export function withTransform<T>(transform: (value: any) => unknown, get: () => 
 
 
 export function setPion(this: AtomicPionQuark, value: unknown) {
+   if (__DEV__) traceMutation(this.asTraceable, this.state.get(), value)
    setState.apply(this, [value])
-   trigger(this.modelQuark, this.state.pendingUpdate!)
+   trigger(this.modelQuark)
    return value;
 }
 
@@ -79,33 +80,6 @@ export class AtomicPionQuark extends AtomicIonQuark {
       public modelQuark: ModelQuark,
       hooks: PropertyHooks | undefined
    ) {
-      super(new SimpleState(initialValue), hooks, modelQuark.__DEV__asTraceable)
+      super(new SimpleState(initialValue), hooks)
    }
 }
-
-// export class CollectivePionQuark extends AtomicIonQuark {
-//    constructor(
-//       target: AnyObject,
-//       key: PropertyKey,
-//       public modelQuark: ModelQuark,
-//       hooks: PropertyHooks | undefined
-//    ) {
-//       const collectiveState = modelQuark.state
-//       super(new PionState(target[key], (value) => { 
-//          return collectiveState.mutate(target => target[key] = value); // FIX: should this be mutateSync?
-//          // collectiveState.commitUpdate() 
-//       }), hooks, modelQuark.__DEV__asTraceable)
-//    }
-// }
-
-
-// export class InternalPionQuark extends AtomicIonQuark {
-//    constructor(
-//       initialValue: unknown,
-//       public modelQuark: ModelQuark,
-//       hooks: PropertyHooks | undefined
-//    ) {
-//       super(new SimpleState(initialValue), hooks)
-//    }
-// }
-

@@ -158,7 +158,7 @@ class MemoizedIonQuark implements IonicCompound, Particle, TrackedAtom, Quark<Me
    triggerEffects: () => void
    entity: MemoizedIon
    trigger() {
-      if (this.isWatched) this.triggerEffects()
+      if (this.isSubject) this.triggerEffects()
    }
 }
 

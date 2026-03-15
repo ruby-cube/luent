@@ -3,7 +3,7 @@ import { Inert } from "./Get";
 import { AtomicIonQuark, createAtomicIon } from "./AtomicIon";
 import { AnyObject } from "@rue/types";
 import { QUARK } from "../abstract/Quark";
-import { isGetter } from "../reactivity/Substance";
+import { isGetter } from "../reactivity/Subject";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { SimpleState } from "../reactivity/State";
 import { createHybridIon } from "./HybridIon";
@@ -80,16 +80,16 @@ export const asIon = Ion
 export function Ion<
    T,
    M
->(initialState: T & (() => unknown), props?: M & ThisType<IonMethods<M>>): AsIon<T, M>
+>(initialState: T & (() => unknown), setup?: M & ThisType<IonMethods<M>>): AsIon<T, M>
 export function Ion<
    T,
    M
->(initialState: T, props?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M>
+>(initialState: T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M>
 export function Ion<
    T,
    M
->(initialState: T & (() => unknown) | T, props?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M> {
-   return _asIon(initialState, props) as AsIon<T, M>
+>(initialState: T & (() => unknown) | T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M> {
+   return _asIon(initialState, setup) as AsIon<T, M>
 }
 
 
@@ -163,11 +163,10 @@ export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
    return (isGetter(value) ? value : Inert(value)) as T extends Ion ? T : Ion<T>
 }
 
-
-
 export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
    return isFunction(maybeFn) && maybeFn.length === 0 ? maybeFn() : maybeFn as T extends () => infer R ? R : T;
 }
+
 
 type OptionKeys = '-writable' | '-fetch' | '-refetch' | '-watch' | '-derive'
 
@@ -224,44 +223,41 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
 
 
 
-export function defineIon<T, A, P, O>(constructor: (...args: A & any[]) => T, proto?: P & ThisType<P & { value: T }> & { '~pure'?: () => (keyof P)[] }, protoOptions?: { pure: string }) {
-   return (...args: A & any) => Ion(constructor(...args), proto) as MutableIon<T> & P
-}
 
 // TODO: Optimization: Use compiler to presort different types of ions
 function _asIon(
    initialState: unknown | (() => unknown),
-   props?: AnyObject,
+   setup?: AnyObject,
 ) {
    if (isIon(initialState)) {
       return initialState
    }
 
    if (isFunction(initialState)) {
-      if (props && '-writable' in props) {
-         const watch = props['-watch']
-         delete props['-writable']
-         delete props['-watch']
-         return createHybridIon({ derive: initialState, watch }, props)
+      if (setup && '-writable' in setup) {
+         const watch = setup['-watch']
+         delete setup['-writable']
+         delete setup['-watch']
+         return createHybridIon({ derive: initialState, watch }, setup)
       }
-      return createMemoizedDerivation(<Derivation>initialState, props)
+      return createMemoizedDerivation(<Derivation>initialState, setup)
    }
 
-   if (props && '-derive' in props) {
-      const derive = props['-derive']
-      const watch = props['-watch']
-      delete props['-derive']
-      delete props['-watch']
-      return createHybridIon({ derive, initial: initialState, watch }, props)
+   if (setup && '-derive' in setup) {
+      const derive = setup['-derive']
+      const watch = setup['-watch']
+      delete setup['-derive']
+      delete setup['-watch']
+      return createHybridIon({ derive, initial: initialState, watch }, setup)
    }
-   if (props && '-fetch' in props) {
-      const fetch = props['-fetch']
-      const watch = props['-watch'] // TODO:
-      delete props['-fetch']
-      delete props['-watch']
-      return AsyncIon(initialState, fetch, props)
+   if (setup && '-fetch' in setup) {
+      const fetch = setup['-fetch']
+      const watch = setup['-watch'] // TODO:
+      delete setup['-fetch']
+      delete setup['-watch']
+      return AsyncIon(initialState, fetch, setup)
    }
-   return createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), props), props)
+   return createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), setup), setup)
 }
 
 

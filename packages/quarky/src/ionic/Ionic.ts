@@ -3,9 +3,10 @@ import { __DEV__asTraceable, emitSignal } from "../debug/debug";
 import { createIonicModel, MethodHook } from "./IonicModel";
 import { __DEV__trace } from "../debug/debug";
 import { QUARK, quarkOf } from "../abstract/Quark";
-import { isIonicProxy, QuarkyIonicProxy } from "./ModelQuark";
+import type{ QuarkyIonicProxy } from "./ModelQuark";
 import { isObject } from "@rue/utils";
 import { Ion } from "../ion/Ion";
+import { isIonicProxy } from "./utils";
 
 export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 
@@ -109,19 +110,19 @@ type IonicConfig<T> = { [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I :
 export const Ionic = _Ionic as typeof _Ionic & { '~Ionic': true }
 export const asIonic = Ionic as <T>(obj: T) => IonicProxy & T
 
-export function _Ionic<T extends AnyObject, M>(target: T, config?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<AbsorbIons<T>, M> {
+export function _Ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<AbsorbIons<T>, M> {
    if (isIonicProxy(target)) {
       return target as any
    }
    if (!isObject(target)) return target;
    const existing = ionicModels.get(target)
    if (existing) {
-      if ( __DEV__ && config && quarkOf(existing).extension !== config) {
+      if ( __DEV__ && setup && quarkOf(existing).extension !== setup) {
          console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by asIonic`)
       }
       return existing as any
    }
-   const proxy = createIonicModel(target, config ?? {})
+   const proxy = createIonicModel(target, setup ?? {})
    ionicModels.set(target, proxy)
    return proxy as any
 }

@@ -1,8 +1,8 @@
-import { isObject, __DEV__unwrap } from "@rue/utils";
+import { __DEV__unwrap } from "@rue/utils";
 import { Effect, EffectQueue } from "./EffectQueue";
-import { hasQuark, Quark, QUARK } from "../abstract/Quark";
+import { hasQuark, QUARK } from "../abstract/Quark";
 import { Phase, SYNC } from "./RenderCycle";
-import { Update } from "./Update";
+import { $activeUpdate, Update } from "./Update";
 
 
 export type Atom = {
@@ -18,15 +18,14 @@ export type Atom = {
  * @param preopData 
  */
 export function trigger(
-   atom: Atom | undefined,
-   update: Update
+   atom: Atom | undefined
 ) {
    if (!atom) return;
-   atom.asTrackedAtom?.triggerEffects(update)
+   atom.asTrackedAtom?.triggerEffects($activeUpdate())
 }
 
 
-export function isTrackableAtom(value: unknown): value is { [QUARK]: Atom & Quark } {
+export function isTrackableAtom(value: unknown): value is { [QUARK]: Atom } {
    return hasQuark(value) && 'asTrackedAtom' in value[QUARK];
 }
 

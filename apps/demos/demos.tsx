@@ -31,7 +31,7 @@ import { TestSyncEffects } from "./src/TestSyncEffects"
 import { StyledComp } from "./src/TestForwardRef"
 
 export function runDemo() {
-   const app = createRoot(StyledComp)
+   const app = createRoot(TestIfElseRemountView)
 
    app.mount('#root')
 }

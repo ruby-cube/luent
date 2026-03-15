@@ -7,6 +7,7 @@ import { PropertyHooks } from "./Pion"
 import { debug } from "@rue/utils"
 import { $activeUpdate } from "../reactivity/Update"
 import { ModelQuark, ProxyKey, QuarkyIonicProxy, trackOp, triggerOp } from "./ModelQuark"
+import { MUTABLE, Traceable, TraceableMutable } from "../debug/Traceable"
 
 
 export type MethodHook = { '@call': (event: { input: unknown[], output: unknown }) => unknown; }
@@ -30,10 +31,11 @@ type Extender = (proxy: AnyObject) => IonicModelHooks & Overrides
 
 export function createIonicModel(
    target: AnyObject,
-   config: IonicModelHooks | undefined,
+   setup: AnyObject | IonicModelHooks | undefined,
    // extender: Function | undefined
 ) {
-   const modelQuark = new ModelQuark(target, config)
+   const modelQuark = new ModelQuark(target, setup)
+   if (__DEV__) modelQuark.asTraceable = new TraceableMutable(setup?.devName)
 
    const proxy = new Proxy(target, useTraps(modelQuark)) as any as QuarkyIonicProxy
 
@@ -90,42 +92,39 @@ function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
             if ( __DEV__) console.warn(`Redefining property of an ionic proxy not supported`)
             return false
          }
-         const update = $activeUpdate()
-         if (!update) return false;
+         // const update = $activeUpdate()
+         // if (!update) return false;
 
          // FIX: what if property was set in a preceding update that hasn't committed?
          const success = modelQuark.state.mutate(target => Reflect.defineProperty(target, key, descriptor))
          if (!success) return false;
 
-         trigger(modelQuark, update)
-         triggerOp(modelQuark, INTERNAL_OP, 'ownKeys', update)
-         triggerOp(modelQuark, '[[in]]', key, update)
+         trigger(modelQuark)
+         triggerOp(modelQuark, INTERNAL_OP, 'ownKeys')
+         triggerOp(modelQuark, '[[in]]', key)
 
          modelQuark.proto.get(key)?.set(descriptor.value)
          return true;
       },
 
       deleteProperty(_, key) {
-         const update = $activeUpdate()
-         if (!update) return false;
-
          const success = modelQuark.state.mutate(target => Reflect.deleteProperty(target, key))
          if (!success) return false;
-
+         
          const proto = modelQuark.proto
          if (proto.has(key)) {
             // set/trigger pion
             proto.get(key)!.set(undefined)
-
+            
             // update proto
-            update.atCommit(() => {
+            $activeUpdate().atCommit(() => {
                proto.delete(key)
             })
          }
 
-         trigger(modelQuark, update)
-         triggerOp(modelQuark, INTERNAL_OP, 'ownKeys', update)
-         triggerOp(modelQuark, '[[in]]', key, update)
+         trigger(modelQuark)
+         triggerOp(modelQuark, INTERNAL_OP, 'ownKeys')
+         triggerOp(modelQuark, '[[in]]', key)
 
          return true;
       },

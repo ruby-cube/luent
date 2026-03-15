@@ -1,3 +1,4 @@
+import { TraceableEntity } from "../debug/Traceable";
 import { Atom } from "./Atom"
 import { createStack, isObject } from "@rue/utils"
 
@@ -29,7 +30,7 @@ export function inTrackedScope() {
 
 
 
-export type Particle = Atom | Compound
+export type Particle = (Atom | Compound) & TraceableEntity & Stateful
 
 /**
  * INTERNAL
@@ -38,7 +39,7 @@ export class Compound {
 
    private _particles: Set<Particle> = new Set()
 
-   protected particles: Particle[] = []
+   particles: Particle[] = []
 
    track(particle: Particle) {
       if (this._particles.has(particle)) return particle

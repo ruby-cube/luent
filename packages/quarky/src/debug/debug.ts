@@ -70,7 +70,7 @@ export const debug = {
    // traceTriggers,
    // traceCalls,
 
-   logAtoms, // deeply? or shallowly?
+   logAtoms, // deeply? as a tree? or shallowly?
    // logDefinitionSource, // TODO:
    // traceable, // for tracing plain objects
 
@@ -83,12 +83,16 @@ export type TraceableSubject = {
    // labelName?: string
 }
 
+
+
+
+
 // export type TraceableQuark = { __DEV__asTraceable?: Traceable; }
 
 
 export function __DEV__asTraceable(subject: TraceableSubject): Traceable {
    const traceable = quarkOf(subject).__DEV__asTraceable
-   if (!traceable) throw new Error('Substance is not traceable')
+   if (!traceable) throw new Error('Subject is not traceable')
    return traceable;
 }
 

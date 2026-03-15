@@ -1,6 +1,6 @@
 import { debug } from "@rue/utils";
 import { Quark } from "../abstract/Quark";
-import { Traceable } from "../debug/Traceable";
+import { Traceable, TraceableEntity } from "../debug/Traceable";
 import { Atom, TrackedAtom } from "../reactivity/Atom";
 import { ModelQuark } from "./ModelQuark";
 
@@ -10,11 +10,11 @@ type Tracked = Map<EntryKey, TrackedOpQuark>
 
 type EntryKey = any
 
-const ATOMIC_ACCESSOR = Symbol('atomic op')
+// const ATOMIC_ACCESSOR = Symbol('atomic op')
 
-export class TrackedOpQuark implements Atom, Quark {
-   __DEV__asTraceable: Traceable
-   quarkType: string | symbol = ATOMIC_ACCESSOR
+export class TrackedOpQuark implements Atom, Stateful, TraceableEntity {
+   asTraceable?: Traceable | undefined;
+   // quarkType: string | symbol = ATOMIC_ACCESSOR
    asTrackedAtom: TrackedAtom | undefined;
 
    constructor(
@@ -22,7 +22,9 @@ export class TrackedOpQuark implements Atom, Quark {
       public op: PropertyKey,
       public key: EntryKey,
    ) {
-      this.__DEV__asTraceable = modelQuark.__DEV__asTraceable
+   }
+   getState(): unknown {
+      return this.modelQuark.getState()[this.op](this.key)
    }
 }
 
@@ -40,6 +42,8 @@ export class TrackedOps {
 
 
    private register(op: PropertyKey, key: any, trackedOp: TrackedOpQuark) {
+      const traceableModel = this.modelQuark.asTraceable!
+      trackedOp.asTraceable = new Traceable(traceableModel.name + ' ' + op.toString() + key, traceableModel.origin)
       const ops = this.tracked.get(op) ?? new Map();
       if (!(ops instanceof Map)) {
          debug.error(`${String(op)} is not an op`)

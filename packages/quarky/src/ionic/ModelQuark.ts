@@ -1,8 +1,8 @@
 import { isFunction, isObject } from "@rue/utils"
-import { asTrackedAtom, Atom, TrackedAtom, trigger } from "../reactivity/Atom"
+import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { getActiveTracker, track } from "../reactivity/Compound"
 import { CollectiveState } from "../reactivity/State"
-import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
+import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark"
 import { withGetHook, withSetHook } from "../ion/AtomicIon"
 import { AnyObject } from "@rue/types"
 import { Constructor, CustomThis, getIonicDef, TrackableThis } from "./IonicDef"
@@ -10,7 +10,7 @@ import { AtomicPionQuark, createAtomicPion, PropertyHooks, withTransform } from 
 import { EACH, INTERNAL_OP, Ionic, IonicProxy, ToRaw } from "./Ionic"
 import { $activeUpdate, Update } from "../reactivity/Update"
 import { TrackedOps } from "./TrackedOp"
-import { Traceable } from "../debug/Traceable"
+import { TraceableMutable, TraceableEntity } from "../debug/Traceable"
 import { IonicModelHooks, MethodHook } from "./IonicModel"
 import { isIntegerKey } from "./$$Array"
 
@@ -24,7 +24,7 @@ type PropertyAccess = {
 
 export type ProxyKey = string | symbol
 
-const IONIZED_MODEL = 'ionized model' as const
+// const IONIZED_MODEL = 'ionized model' as const
 
 function nowrite(value: unknown) {
    return false;
@@ -51,11 +51,14 @@ function nowrite(value: unknown) {
 //    }
 // }
 
+// TODO: trace mutations
+
 type GetHooks = <T extends "property" | "method">(key: ProxyKey) => T extends "property" ? PropertyHooks | undefined : MethodHook | undefined
 
-export class ModelQuark implements Atom {
-   __DEV__asTraceable: Traceable = new Traceable()
-   quarkType = IONIZED_MODEL
+export class ModelQuark implements Atom, Stateful, TraceableEntity {
+   asTraceable?: TraceableMutable | undefined;
+
+   // quarkType = IONIZED_MODEL
    asTrackedAtom: TrackedAtom | undefined
    proto: Proto
    proxy!: QuarkyIonicProxy
@@ -92,6 +95,10 @@ export class ModelQuark implements Atom {
       this.ops = new TrackedOps(this)
 
       this.initCollection()
+   }
+
+   getState(): AnyObject {
+      return this.state.get()
    }
 
    private getCloner() {
@@ -152,7 +159,7 @@ export class ModelQuark implements Atom {
          if (initEach) {
             const collection = this.state.get() as any[]
             if (!(Symbol.iterator in collection)) {
-               if ( __DEV__) console.warn(`Ionic collections must have a '[Symbol.iterator]()' method that returns an iterator.`)
+               if (__DEV__) console.warn(`Ionic collections must have a '[Symbol.iterator]()' method that returns an iterator.`)
                return;
             }
 
@@ -233,18 +240,18 @@ export class ModelQuark implements Atom {
    ) {
       if (!Object.isExtensible(this.target)) return { set: nowrite };
       if (isFunction(value)) {
-         if ( __DEV__) console.warn(`Adding new methods or absorbed ions to a proxy is not supported. You must add ${value} to the raw object before ionizing it`)
+         if (__DEV__) console.warn(`Adding new methods or absorbed ions to a proxy is not supported. You must add ${value} to the raw object before ionizing it`)
          return { set: nowrite };
       }
-      const update = $activeUpdate()
-      if (!update) return { set: nowrite };
+      // const update = $activeUpdate()
+      // if (!update) return { set: nowrite };
       const success = this.state.mutate(target => {
          return Reflect.set(target, key, value)
       }) // TODO: Eliminate redundancy of setting pion as well as mutating the state
       if (!success) return { set: nowrite };
-      triggerOp(this, INTERNAL_OP, 'ownKeys', update)
-      triggerOp(this, '[[in]]', key, update)
-      trigger(this, update)
+      triggerOp(this, INTERNAL_OP, 'ownKeys')
+      triggerOp(this, '[[in]]', key)
+      trigger(this)
       if (success && isIntegerKey(key) && this.target instanceof Array) {
          this.proxy.length = this.state.pending.length
       }
@@ -319,7 +326,7 @@ export class ModelQuark implements Atom {
          )
       }
       else if (key === valueKey && writable) {
-         if ( __DEV__ && def) console.warn('Custom reactivity not supported for data properties (only accessor properties and methods).')
+         if (__DEV__ && def) console.warn('Custom reactivity not supported for data properties (only accessor properties and methods).')
          return this.initPion(
             key,
             valueKey,
@@ -342,7 +349,7 @@ export class ModelQuark implements Atom {
       value: unknown
    ) {
       const { proto, target } = this
-      if ( __DEV__) assertNotFunction(value)
+      if (__DEV__) assertNotFunction(value)
       const hooks = this.getHooks<'property'>(valueKey)
 
       const pionAccess = ionKey && !(ionKey in target) // makes sure not an absorbed ion
@@ -493,7 +500,7 @@ export class ModelQuark implements Atom {
          return output;
       }
 
-      if ( __DEV__) boundMethod.displayName = key
+      if (__DEV__) boundMethod.displayName = key
 
       return () => boundMethod
    }
@@ -574,37 +581,37 @@ export class ModelQuark implements Atom {
    }
 
    private trigger = (op: ProxyKey, key: unknown) => {
-      const update = this.state.pendingUpdate
-      if (update) {
-         triggerOp(this, op, key, update)
-      }
-      else if ( __DEV__) {
-         throw new Error('must call state.mutate()')
-      }
+      // const update = this.state.pendingUpdate
+      // if (update) {
+      triggerOp(this, op, key)
+      // }
+      // else if ( __DEV__) {
+      //    throw new Error('must call state.mutate()')
+      // }
    }
 
    private triggerModel = () => {
-      const update = this.state.pendingUpdate
-      if (update) {
-         trigger(this, update)
-      }
-      else if ( __DEV__) {
-         throw new Error('must call state.mutate()')
-      }
+      // const update = this.state.pendingUpdate
+      // if (update) {
+      trigger(this)
+      // }
+      // else if ( __DEV__) {
+      //    throw new Error('must call state.mutate()')
+      // }
    }
 
    private triggerAll = (op: ProxyKey) => {
       const ops = this.ops.getAllTracked(op)
       if (!ops) return;
-      const update = this.state.pendingUpdate
-      if (update) {
-         for (const [_, trackedOp] of ops) {
-            trigger(trackedOp, update)
-         }
+      // const update = this.state.pendingUpdate
+      // if (update) {
+      for (const [_, trackedOp] of ops) {
+         trigger(trackedOp)
       }
-      else if ( __DEV__) {
-         throw new Error('must call state.mutate()')
-      }
+      // }
+      // else if ( __DEV__) {
+      //    throw new Error('must call state.mutate()')
+      // }
    }
 }
 
@@ -622,21 +629,6 @@ export function isIonKey(key: PropertyKey): key is string {
    return typeof key === 'string' && /^\æ[a-z]/.test(key)
 }
 
-export function isIonicProxy(value: any): value is QuarkyIonicProxy {
-   if (!isObject(value)) return false;
-   return hasQuark(value) && quarkOf(value) instanceof ModelQuark;
-}
-
-
-export function toRaw<T>(obj: T): ToRaw<T> {
-   if (obj instanceof ModelQuark) {
-      return obj.target as ToRaw<T>;
-   }
-   if (isIonicProxy(obj)) {
-      return quarkOf(obj).target as ToRaw<T>;
-   }
-   return obj as ToRaw<T>; // already raw target
-}
 
 export function trackOp(
    quark: ModelQuark,
@@ -650,7 +642,6 @@ export function triggerOp(
    quark: ModelQuark,
    op: ProxyKey,
    key: unknown,
-   update: Update
 ) {
-   trigger(quark.ops.getTracked(op, key), update)
+   trigger(quark.ops.getTracked(op, key))
 }

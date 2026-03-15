@@ -1,10 +1,9 @@
-import { template, If, Else, fade, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, css } from "@rue/lumo";
+import { template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, css } from "@rue/lumo";
 import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
 
-export function TestIfElseRemountView(setup: FromTag<{ activation: [ShowHideType, ShowHideType] }>) {
-   const { activation } = setup
+export function TestIfElseRemountView(setup: FromTag<{}>) {
    const $active = Ion(true, {
       toggle() {
          $active.value = !$active()

@@ -5,7 +5,7 @@ import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
 import { instantUpdate } from "../reactivity/Update";
 import { toPromise } from "./AsyncIon";
-import { isGetter } from "../reactivity/Substance";
+import { isGetter } from "../reactivity/Subject";
 
 // TODO: races
 // suspense
