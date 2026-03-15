@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import { isIonicProxy } from "../ionic/utils"
+import { isIonicProxy } from "../ionic/IonicModel"
 
 // TODO: check environment for global object
 window.console = new Proxy(console, {

@@ -1,8 +1,8 @@
 import { quarkOf } from "../abstract/Quark";
 import { EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
 import { defineIonicCollection } from "./IonicDef";
+import { isIonicProxy, toRaw } from "./IonicModel";
 import type{  ProxyKey, triggerOp } from "./ModelQuark";
-import { isIonicProxy, toRaw } from "./utils";
 
 declare global {
    interface Array<T> {

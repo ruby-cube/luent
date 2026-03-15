@@ -1,6 +1,6 @@
 import { isFunction } from "@rue/utils";
 import { IonicProxy } from "./Ionic";
-import { isIonicProxy, toRaw } from "./utils"
+import { isIonicProxy, toRaw } from "./IonicModel";
 
 // export const runningIonicObject = true;
 

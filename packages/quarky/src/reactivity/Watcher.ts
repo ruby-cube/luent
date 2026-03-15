@@ -31,7 +31,6 @@ import { hasQuark, quarkOf } from "../abstract/Quark";
  */
 export type EffectOptions = {
    phase?: Phase;
-   eager?: boolean;
    preserve?: boolean;
    retrack?: boolean;
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
@@ -88,7 +87,8 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
    console.log('*** watching', subject)
    options.retrack = options.retrack ?? true;
 
-   const target = asSubject(subject, options.retrack, Boolean(options.once))
+   const target = asSubject(subject, options.retrack)
+   target.asTraceable = new Traceable(options?.devName ?? 'watch' + subject)
 
    if (__DEV__ && options?.["dev.logAtoms"]) {
       const target = Ion(() => subject(), {
@@ -99,16 +99,9 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
          logAtoms(quarkOf(target))
       }, {
          eager: true,
-         once: true
-      })
-      watch(target, () => {
-         logAtoms(quarkOf(target))
-      }, {
          once: options.once
       })
-      // dev.logAtoms(Ion(() => subject(), {
-      //    devName: options?.devName
-      // })) //TODO: ionic proxy cases      
+      //TODO: ionic proxy cases      
    }
    if (!isSubject(target)) { // plain object
       console.log('inert A')

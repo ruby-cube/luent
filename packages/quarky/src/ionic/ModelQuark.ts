@@ -2,7 +2,7 @@ import { isFunction, isObject } from "@rue/utils"
 import { Atom, TrackedAtom, trigger } from "../reactivity/Atom"
 import { getActiveTracker, track } from "../reactivity/Compound"
 import { CollectiveState } from "../reactivity/State"
-import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark"
+import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
 import { withGetHook, withSetHook } from "../ion/AtomicIon"
 import { AnyObject } from "@rue/types"
 import { Constructor, CustomThis, getIonicDef, TrackableThis } from "./IonicDef"
@@ -55,7 +55,7 @@ function nowrite(value: unknown) {
 
 type GetHooks = <T extends "property" | "method">(key: ProxyKey) => T extends "property" ? PropertyHooks | undefined : MethodHook | undefined
 
-export class ModelQuark implements Atom, Stateful, TraceableEntity {
+export class ModelQuark implements Atom {
    asTraceable?: TraceableMutable | undefined;
 
    // quarkType = IONIZED_MODEL
@@ -206,7 +206,7 @@ export class ModelQuark implements Atom, Stateful, TraceableEntity {
       return this._initProperty(key)
    }
 
-   initExtension(key: ProxyKey, value: unknown) {
+   initExtension(key: ProxyKey, value: Function) {
       // TODO: AsyncIon
       return this.initExtensionMethod(key, value)
    }

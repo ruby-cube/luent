@@ -3,11 +3,13 @@ import { Effect, EffectQueue } from "./EffectQueue";
 import { hasQuark, QUARK } from "../abstract/Quark";
 import { Phase, SYNC } from "./RenderCycle";
 import { $activeUpdate, Update } from "./Update";
+import { TraceableEntity } from "../debug/Traceable";
+import { Stateful } from "../abstract/Stateful";
 
 
 export type Atom = {
    asTrackedAtom: TrackedAtom | undefined;
-}
+} & TraceableEntity & Stateful
 
 
 /**

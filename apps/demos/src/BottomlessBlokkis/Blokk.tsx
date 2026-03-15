@@ -7,36 +7,36 @@ export const CELL_SIZE = 20;
 const degrees = [0, 270, 180, 90] as const
 
 export function Blokk(setup: FromTag<{
-    matrix: (1 | 0)[][],
-    shiftX: Ion<number>,
-    shiftY: Ion<number>,
-    rotation: Ion<number>,
-    color?: Ion<string>,
-    gap?: number
+   matrix: (1 | 0)[][],
+   shiftX: Ion<number>,
+   shiftY: Ion<number>,
+   rotation: Ion<number>,
+   color?: Ion<string>,
+   gap?: number
 }>) {
-    const { matrix, ærotation, æshiftX, æshiftY, æcolor = Ion('#564747'), gap = 1, emit } = setup
+   const { matrix, ærotation, æshiftX, æshiftY, æcolor = Ion('#564747'), gap = 1, emit } = setup
 
-    const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
+   const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 
-    const ætranslate = () => `translate(${æshiftX() * CELL_SIZE}px, ${æshiftY() * CELL_SIZE}px)`
-    const ærotate = () => `rotate(${degrees[ærotation()]}deg)`
+   const ætranslate = () => `translate(${æshiftX() * CELL_SIZE}px, ${æshiftY() * CELL_SIZE}px)`
+   const ærotate = () => `rotate(${degrees[ærotation()]}deg)`
 
-    return template(
-        <div class='blokk-base' style={(`
+   return template(
+      <div class='blokk-base' style={(`
             --background-color: ${æcolor()};
             --cell-size: ${CELL_SIZE}px;
             --grid-size: ${GRID_SIZE}px;
             --grid-gap: ${gap}px;
             transform: ${ætranslate()} ${ærotate()};
         `)}
-            on:mouseenter={e => { console.log('ENTER'); emit('mouseenter', e) }}
-            on:mouseleave={e => { console.log('LEAVE'); emit('mouseleave', e) }}
-        >
-            {For(matrix, row =>
-                For(row, col => (
-                    <div class={`blokk-cell ${col ? 'filled' : ''}`}></div>
-                ))
-            )}
-        </div>
-    )
+         on:mouseenter={e => { console.log('ENTER'); emit.mouseenter?.(e) }}
+         on:mouseleave={e => { console.log('LEAVE'); emit.mouseleave?.(e) }}
+      >
+         {For(matrix, row =>
+            For(row, col => (
+               <div class={`blokk-cell ${col ? 'filled' : ''}`}></div>
+            ))
+         )}
+      </div>
+   )
 }

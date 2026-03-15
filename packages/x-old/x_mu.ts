@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types"
-import { Quark, QUARK, quarkOf } from "./abstract/Quark"
-import { isIonicProxy } from "./ionic/utils"
+import { QUARK, quarkOf } from "./abstract/Quark"
+import { isIonicProxy } from "./ionic/IonicModel"
 
 // NOTE: This file tightly couples Lumo with Quarky... need to decide whether to keep Quarky decoupled from Lumo
 
@@ -8,7 +8,7 @@ type MayBeMutable<T> = T & { '~mu': true }
 
 type ReadonlyProxy<T> = T
 
-type IonicProxy = AnyObject & { [QUARK]: Quark & { pureMethods: Set<string | symbol> } }
+type IonicProxy = AnyObject & { [QUARK]: { pureMethods: Set<string | symbol> } }
 
 export function ReadonlyProxy(target: IonicProxy) {
 

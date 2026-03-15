@@ -19,6 +19,7 @@ export * from "./reactivity/Compound"
 export * from "./reactivity/Subject" 
 export * from "./reactivity/EffectQueue" 
 export * from "./ionic/Ionic" 
+export * from "./ionic/IonicModel" 
 export * from "./ionic/ModelQuark" 
 export * from "./ionic/$$Array" 
 export * from "./ionic/$$Iterator" 
@@ -27,7 +28,6 @@ export * from "./reactivity/IonicTask"
 export * from "./reactivity/Update" 
 export * from "./reactivity/animation" 
 export * from "./debug/dev" 
-export * from "./ionic/utils" 
 
 // installIonicArray()
 installIonicSet()

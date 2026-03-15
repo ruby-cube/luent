@@ -18,8 +18,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@rue",
     "types": [
-      "./packages/lumo/jsx-runtime/src/index",
-      "./packages/lumo/jsx-runtime/jsx-dev-runtime.d.ts"
+      "./packages/lumo/jsx-runtime/src/index"
     ],
     "resolveJsonModule": true,
     "isolatedModules": true,

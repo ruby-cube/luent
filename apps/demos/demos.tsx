@@ -29,9 +29,10 @@ import { TestNamedSlots } from "./src/TestNamedSlots"
 import { TestDerivationA } from "./src/TestDerivation"
 import { TestSyncEffects } from "./src/TestSyncEffects"
 import { StyledComp } from "./src/TestForwardRef"
+import { TestOnceEager } from "./src/TestOnceEager"
 
 export function runDemo() {
-   const app = createRoot(TestIfElseRemountView)
+   const app = createRoot(TestOnceEager)
 
    app.mount('#root')
 }

@@ -1,3 +1,4 @@
+import { Stateful } from "../abstract/Stateful";
 import { TraceableEntity } from "../debug/Traceable";
 import { Atom } from "./Atom"
 import { createStack, isObject } from "@rue/utils"
@@ -30,7 +31,7 @@ export function inTrackedScope() {
 
 
 
-export type Particle = (Atom | Compound) & TraceableEntity & Stateful
+export type Particle = Atom | Compound & TraceableEntity & Stateful
 
 /**
  * INTERNAL

@@ -24,17 +24,17 @@ export function TestDev() {
    })
 
    // dev.logAtoms($quadruple)
-   dev.traceTriggers($quadruple)
+   // dev.traceMutations($quadruple)
 
-   // watch(() => $quadruple(), () => {
-   //    console.log('*** heheh')
-   // }, {
-   //    phase: SYNC,
-   //    once: true,
-   //    devName: 'watch: () => $quadruple()',
-   //    // 'dev.traceTriggers': true,
-   //    'dev.logAtoms': true
-   // })
+   watch(() => $quadruple(), () => {
+      console.log('*** heheh')
+   }, {
+      // phase: SYNC,
+      // once: true,
+      devName: 'watch: () => $quadruple()',
+      // 'dev.traceTriggers': true,
+      'dev.logAtoms': true
+   })
 
    return template(
       <div on:click={e => $count.increment()}>{$count}</div>

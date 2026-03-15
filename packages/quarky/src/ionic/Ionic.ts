@@ -1,12 +1,11 @@
 import { AnyObject, Glass } from "@rue/types";
 import { __DEV__asTraceable, emitSignal } from "../debug/debug";
-import { createIonicModel, MethodHook } from "./IonicModel";
+import { createIonicModel, isIonicProxy, MethodHook } from "./IonicModel";
 import { __DEV__trace } from "../debug/debug";
 import { QUARK, quarkOf } from "../abstract/Quark";
 import type{ QuarkyIonicProxy } from "./ModelQuark";
 import { isObject } from "@rue/utils";
 import { Ion } from "../ion/Ion";
-import { isIonicProxy } from "./utils";
 
 export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 

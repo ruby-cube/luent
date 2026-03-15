@@ -2,6 +2,7 @@
 
 // Atom { asTrackedAtom?: TrackedAtom }
 // Compound { particles }
+// Particles (Atom | Compound) & TraceableEntities & Stateful
 
 // *Subject extends Compound (directly watched)
 // - FunctionSubject
@@ -29,22 +30,6 @@
 // - Ionic Subject (model compound)
 
 // - Ionic Task (compound) (functional compound, no state)
-
-
-
-interface Stateful { // Used in Watch and Traceable
-   getState(): unknown
-}
-
-interface Traceable {
-   name: string;
-   origin: string;
-}
-
-interface TraceableMutable extends Traceable {
-   traceMutation: boolean
-   logTrigger: (() => void) | boolean
-}
 
 
 

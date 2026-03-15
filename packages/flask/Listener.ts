@@ -52,6 +52,7 @@ export type SchedulerOptions = {
 } & ListenerOptions
 
 export type ListenerOptions = {
+   eager?: boolean;
    within?: ThisFlask | null //| 'outlive',
 }
 
@@ -79,6 +80,7 @@ export function toListenerOptions(options: SchedulerOptions | undefined) {
    if (!options) return { once: true }
    return {
       once: true,
+      eager: options.eager,
       until: options.cancel,
       within: options.within
    }
@@ -90,7 +92,7 @@ export function makeScheduler<E extends (wrappedCB: Callback) => void | Callback
 ): Listener {
    const { enroll, remove, callback, options } = config;
    if (!callback) {
-      if ( __DEV__) console.warn("No callback was passed into makeListener")
+      if (__DEV__) console.warn("No callback was passed into makeListener")
       return {
          stop() { return false; }
       };
@@ -99,12 +101,14 @@ export function makeScheduler<E extends (wrappedCB: Callback) => void | Callback
    const listener = {
       stop
    }
+   let eager = Boolean(options?.eager)
 
    const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
       run: (...args: any[]) => {
          if (!effect.run) return;
          const returnVal = runCallback(args)
-         stop()
+         if (!eager) stop()
+         eager = false;
          return returnVal
       }
    }
@@ -150,7 +154,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
 ): Listener {
    const { enroll, remove, callback, options } = config;
    if (!callback) {
-      if ( __DEV__) console.warn("No callback was passed into makeListener")
+      if (__DEV__) console.warn("No callback was passed into makeListener")
       return {
          stop() { return false; }
       };
@@ -205,7 +209,7 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
 ): PausableListener {
    const { enroll, remove, callback, options } = config;
    if (!callback) {
-      if ( __DEV__) console.warn("No callback was passed into makeListener")
+      if (__DEV__) console.warn("No callback was passed into makeListener")
 
       return {
          stop: noOp,
@@ -282,7 +286,7 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
 
 function setUpCleanup(until: Until | undefined, stop: CallbackRemover, listener: Listener, flask: Flask | null | undefined, enclosingFlask: Flask | undefined) {
    const success = _setUpCleanup(until, stop)
-   if ( __DEV__ && (flask !== null || success)) setUpCleanupWarning!(listener, until, enclosingFlask)
+   if (__DEV__ && (flask !== null || success)) setUpCleanupWarning!(listener, until, enclosingFlask)
 }
 
 function _setUpCleanup(until: Until | undefined, stop: CallbackRemover) {
@@ -324,7 +328,7 @@ type Effect = { run: null | Callback }
 function stopListener(listener: Listener, effect: Effect, remove: () => void, unbind: (() => void) | undefined) {
    if (!effect.run) return false;
    remove();
-   if ( __DEV__) unmarkNoCleanup(listener);
+   if (__DEV__) unmarkNoCleanup(listener);
    unbind?.();
    effect.run = null;
    return true;
@@ -353,7 +357,7 @@ function wrapTask(callback: Callback, config: {
       })
       stop()
    }
-   if ( __DEV__) wrapped.__DEV__fn = __DEV__unwrap(callback)
+   if (__DEV__) wrapped.__DEV__fn = __DEV__unwrap(callback)
    return wrapped
 }
 

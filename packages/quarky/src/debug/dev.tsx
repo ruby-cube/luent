@@ -1,5 +1,5 @@
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
-import { Traceable, TraceableEntity } from "./Traceable";
+import { Traceable, TraceableEntity, TraceableMutable } from "./Traceable";
 import { Ion, MutableIon } from "../ion/Ion";
 import { __DEV__getTrace, getAsyncPath, traceAsyncPath } from "../../../flask/debug";
 import { PRELUDE, queuePrelude } from "../reactivity/RenderCycle";
@@ -7,6 +7,8 @@ import { Compound, Particle } from "../reactivity/Compound";
 import { watch } from "../reactivity/Watcher";
 import { isFunction, isObject } from "@rue/utils";
 import { DerivationIonQuark } from "../ion/DerivationIon";
+import { Stateful } from "../abstract/Stateful";
+import { isIonicProxy } from "../ionic/IonicModel";
 
 function isTraceableCompound(quark: Object): quark is TraceableCompound {
    if (!('asTraceable' in quark)) {
@@ -46,43 +48,29 @@ export const dev = {
    logCompounds(target: unknown) {
       throw new Error('logCompounds not yet implemented')
    },
-   /**
-    * Performs an async trace
-    */
-   traceTriggers(target: Function) {
-      const quark = hasQuark(target) ? quarkOf(target) : quarkOf(toTraceableDerivation(target))
-      if (!(quark instanceof DerivationIonQuark)) {
-         // TODO: handle atomic ion and impromptu derivation ion?
-         return;
-      }
-      if (quark.particles.length === 0) target() // induces tracking
-      markTriggers(quark.particles)
 
-      watch(target, () => {
-         logTriggers(quark)
-      }, {
-         phase: PRELUDE
-      })
-   },
    /**
-    * Turns on mutation tracing of an mutable ion or ionic model.
+    * - Turns on mutation tracing of an mutable ion or ionic model
+    * - traces triggers of derivations
     */
-   traceMutation(mutable: unknown) {
-      if (!hasQuark(mutable)) {
-         console.warn('Cannot trace mutation of', mutable, '--no quark')
+   traceMutations(target: unknown) {
+      const quark = hasQuark(target) ? quarkOf(target) : isFunction(target) ? quarkOf(target = toTraceableDerivation(target)) : undefined
+      if (!quark) {
+         console.warn('Cannot trace mutation of', target, '--not traceable')
          return;
       }
-      const quark = quarkOf(mutable)
       if (!('asTraceable' in quark)) {
-         console.warn('Cannot trace mutation of', mutable, '--not traceable')
+         console.warn('Cannot trace mutation of', target, '--not traceable')
          return;
       }
       const traceable = quark.asTraceable as Traceable
-      if (!('traceMutation' in traceable)) {
-         console.warn('Cannot trace mutation of', mutable, '--not mutable')
-         return;
+      if ('traceMutation' in traceable) {
+         traceable.traceMutation = true;
+         // TODO: Hybrid ions
       }
-      traceable.traceMutation = true;
+      else if (isFunction(target)) {
+         traceTriggers(target)
+      }
    }
 }
 
@@ -114,6 +102,27 @@ export function traceMutation(traceable: TraceableMutable | undefined, previous:
          traceable.logTrigger = true
       }
    }
+}
+
+
+
+/**
+ * Traces triggers of derivations and effects
+ */
+function traceTriggers(target: Function) {
+   const quark = hasQuark(target) ? quarkOf(target) : undefined
+   if (!quark || !isTraceableCompound(quark)) {
+      console.warn('Cannot trace', target)
+      return;
+   }
+   if (quark.particles.length === 0) target() // induces tracking
+   markTriggers(quark.particles)
+
+   watch(target, () => {
+      logTriggers(quark)
+   }, {
+      phase: PRELUDE
+   })
 }
 
 

@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, traceAsyncPath, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
-import { Quark, QUARK } from "../abstract/Quark";
+import { QUARK } from "../abstract/Quark";
 import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
 import { TraceableMutable, TraceableEntity } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
@@ -9,6 +9,7 @@ import { track } from "../reactivity/Compound";
 import { isPlainObject } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";
 import { traceMutation } from "../debug/dev";
+import { Stateful } from "../abstract/Stateful";
 
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark, displayName: string }
 
@@ -23,7 +24,7 @@ export interface IonHooks {
 
 // export const ATOMIC_ION = Symbol('atomic ion')
 
-export class AtomicIonQuark implements Atom, Stateful, TraceableEntity {
+export class AtomicIonQuark implements Atom {
    // quarkType: string | symbol = ATOMIC_ION
    asTrackedAtom: TrackedAtom | undefined;
 

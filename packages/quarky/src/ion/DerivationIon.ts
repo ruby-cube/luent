@@ -8,10 +8,10 @@ import { $activeUpdate } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
 import { queueCommit, SimpleState } from "../reactivity/State";
 import { isPlainObject } from "@rue/utils";
+import { Stateful } from "../abstract/Stateful";
 
 
 export class DerivationIonQuark extends FunctionSubject implements Stateful {
-   // quarkType = DERIVATION_ION
 
    constructor(
       fn: () => unknown,

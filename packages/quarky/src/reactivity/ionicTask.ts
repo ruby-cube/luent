@@ -4,6 +4,7 @@ import { Glass } from "@rue/types";
 import { Effect } from "./EffectQueue";
 import { FunctionSubject } from "./Subject";
 import { Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
+import { Traceable } from "../debug/Traceable";
 
 
 type _IonicTaskOptions = {
@@ -31,6 +32,7 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
    }
 
    const subject = new FunctionSubject(wrappedEffect, retrack)
+   subject.asTraceable = new Traceable('ionic task:' + options?.devName) // TODO: add phase details
 
 
    // TODO: options.preserve means non-pausable watcher

@@ -25,7 +25,7 @@ export function listen<
    element: T,
    event: EventName<T>,
    handler: CB & EventHandler<T, EventName<T>>,
-   options?: EventListenerOptions & { eager?: true }
+   options?: EventListenerOptions
 ) {
    if (options?.eager) handler()
    return $listen(withUpdate(handler, event), <SustainedListenerOptions>options || {}, {

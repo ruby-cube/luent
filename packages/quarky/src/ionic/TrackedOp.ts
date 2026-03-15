@@ -1,6 +1,5 @@
 import { debug } from "@rue/utils";
-import { Quark } from "../abstract/Quark";
-import { Traceable, TraceableEntity } from "../debug/Traceable";
+import { Traceable } from "../debug/Traceable";
 import { Atom, TrackedAtom } from "../reactivity/Atom";
 import { ModelQuark } from "./ModelQuark";
 
@@ -10,11 +9,9 @@ type Tracked = Map<EntryKey, TrackedOpQuark>
 
 type EntryKey = any
 
-// const ATOMIC_ACCESSOR = Symbol('atomic op')
 
-export class TrackedOpQuark implements Atom, Stateful, TraceableEntity {
+export class TrackedOpQuark implements Atom {
    asTraceable?: Traceable | undefined;
-   // quarkType: string | symbol = ATOMIC_ACCESSOR
    asTrackedAtom: TrackedAtom | undefined;
 
    constructor(
