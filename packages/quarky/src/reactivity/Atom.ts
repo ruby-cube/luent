@@ -68,7 +68,7 @@ export class TrackedAtom {
 
    isLinked(effect: Effect) {
       const effects = (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase))
-      return effects.nextEffects.indexOf(effect) !== -1
+      return effects.nextLinkedEffects.has(effect)
    }
 
    triggerEffects(update: Update) { // the surrounding effect when original trigger happened

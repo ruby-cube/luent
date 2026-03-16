@@ -47,19 +47,18 @@ export function createMemoizedDerivation(
    setup?: AnyObject,
    retrack: boolean = true,
 ) {
-   const state = new SimpleState(STALE) // FIX: ?
-
-   let previous: unknown;
+   const previous = new SimpleState(undefined)
+   const state = new SimpleState(STALE)
 
    const quark = new DerivationIonQuark(() => {
-      return derive(state.current === STALE ? previous : state.current) // FIX: figure out how to store previous state
+      return derive(previous.get())
    }, retrack, undefined)
 
    let trackCall = () => {
       // initial call
       const value = trackedCall()
       quark.linkEffect(new Effect(() => {
-         previous = state.current === STALE ? previous : state.current
+         if (state.get() !== STALE) previous.set(state.get())
          state.set(STALE);
       }, SYNC))
       // subsequent calls

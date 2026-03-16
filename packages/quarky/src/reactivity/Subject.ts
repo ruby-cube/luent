@@ -4,13 +4,15 @@ import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction, isObject, noop } from "@rue/utils";
 import { isIon, MutableIon, toValue } from "../ion/Ion";
-import { WatchSubjects } from "./Watcher";
+import { watch, WatchSubjects } from "./Watcher";
 import { Compound, Particle, popTracker, pushTracker } from "./Compound";
 import type { QuarkyIonicProxy } from "../ionic/ModelQuark";
 import { Traceable, TraceableEntity } from "../debug/Traceable";
 import { Stateful } from "../abstract/Stateful";
 import { isIonicProxy } from "../ionic/IonicModel";
 import { AtomicIonQuark } from "../ion/AtomicIon";
+import { SimpleState } from "./State";
+import { queueTask, SYNC } from "./RenderCycle";
 
 
 export function isSubject(value: AnyObject): value is Subject {
@@ -168,13 +170,22 @@ class ProxySubject extends Compound implements StatefulSubject, TraceableEntity 
    }
 }
 
-
+// const STALE = Symbol('stale')
+// TODO: currently we are retracking every single subject even if they are identical to another functional subject that has been retrack.
+// To make things more efficient, we need to somehow share functional subjects if they track the same ion and only retrack if they are stale.
 
 /**
  * Primitive subject for derivation ions and ionic tasks.
  */
 export class FunctionSubject extends Compound implements Subject, TraceableEntity {
    reactive: boolean = true;
+
+   // get stale() {
+   //    return this.state.get() === STALE
+   // }
+
+   // previous = new SimpleState(undefined)
+   // state = new SimpleState(STALE)
 
    asTraceable?: Traceable | undefined;
 
@@ -184,13 +195,23 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
       private warnNoAtoms = true
    ) {
       super()
+      // watch(fn, () => {
+      // }, {phase: SYNC})
+      // queueMicrotask(() => {
+      //    this.linkEffect(new Effect(() => {
+      //       console.log('### markStale')
+      //       if (this.state.get() !== STALE) this.previous.set(this.state.get())
+      //       this.state.set(STALE);
+      //    }, SYNC))
+      // // })
    }
 
    private call = () => {
-      this.call = () => this.retrackedCall();
-      return this.trackAtoms(this.fn) // toValue in case of mutable ion getters
+      // (toValue in case of mutable ion getters)
+      this.call = () => toValue(this.retrackedCall());
+      return toValue(this.trackAtoms(this.fn))
+      // return toValue(this.state.set(this.trackAtoms(this.fn)))
    }
-
 
    trackedCall() {
       const value = this.call()
@@ -201,7 +222,12 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
    effect: Effect | undefined
 
    private retrackedCall() { // TODO: retrack call only if stale
-      if (!this.retrack || !this.reactive) return toValue(this.fn())
+      if (!this.retrack || !this.reactive)
+         return this.fn()
+      // if (!this.stale) {
+      //    console.log('### not stale')
+      //    return this.state.get()
+      // }
       const effect = this.effect
       if (!effect) throw new Error('Must call linkEffect before retracking')
       console.log('retrack call', this.fn)
@@ -211,6 +237,7 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
       this.forEachAtom(atom => {
          linkEffectToAtom(atom, effect)
       })
+      // this.state.set(output)
       return output;
    }
 

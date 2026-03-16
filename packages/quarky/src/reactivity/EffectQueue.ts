@@ -9,7 +9,7 @@ type TaskFn = (...args: any[]) => unknown
 
 export class Effect {
    fn: TaskFn | null;
-   
+
    constructor(
       public run: TaskFn | null,
       public phase: Phase
@@ -17,30 +17,30 @@ export class Effect {
       this.fn = run;
    }
 
-   private atoms: Set<TrackedAtom> = new Set()
+   // private atoms: Set<TrackedAtom> = new Set()
 
-   isLinked(atom: TrackedAtom) {
-      return this.atoms.has(atom)
-   }
+   // isLinked(atom: TrackedAtom) {
+   //    return this.atoms.has(atom)
+   // }
 
    link(atom: TrackedAtom) {
-      if (this.isLinked(atom)) return;
+      // if (this.isLinked(atom)) return;
       this.run = this.fn // relink
-      this.atoms.add(atom);
+      // this.atoms.add(atom);
       if (!atom.isLinked(this)) {
-         atom.link(this) // PREVENT RELINKING
+         atom.link(this)
       }
    }
 
    destroy() {
       this.unlinkAtoms()
       this.fn = null;
-      this.run = null;
+      // this.run = null;
    }
 
    unlinkAtoms() {
       this.run = null
-      this.atoms.clear()
+      // this.atoms.clear()
    }
 }
 
@@ -50,6 +50,7 @@ let effectStackCount = 0;
 export class EffectQueue {
    effects: Effect[] | undefined;
    nextEffects: Effect[] = []
+   nextLinkedEffects: Set<Effect> = new Set()
    retained: Set<Effect> = new Set()
 
    constructor(
@@ -62,6 +63,7 @@ export class EffectQueue {
    *runEffects(run: (effect: Effect) => void, completed: Set<Effect> | undefined, process?: CycleProcess, onComplete: () => void = noop) {
       const effects = this.nextEffects
       this.nextEffects = []
+      this.nextLinkedEffects = new Set()
       const phase = this.phase
       const sync = phase === SYNC
 
@@ -70,8 +72,7 @@ export class EffectQueue {
       for (let i = 0; i < limit; i++) {
          const effect = effects[i]
          if (
-            !effect.run
-            || this.atom && !effect.isLinked(this.atom) // weeds out effects that have been unlinked due to retracking
+            !effect.run // weeds out effects that have been unlinked due to retracking
          ) {
             continue;
          }
@@ -122,8 +123,9 @@ export class EffectQueue {
    }
 
    retain(effect: Effect) {
-      if (this.retained.has(effect) || !effect.run || this.atom && !effect.isLinked(this.atom)) return;
+      if (this.retained.has(effect) || !effect.run) return;
       this.nextEffects.push(effect)
+      this.nextLinkedEffects.add(effect)
       this.retained.add(effect)
    }
 
@@ -132,6 +134,7 @@ export class EffectQueue {
    * @param effect 
    */
    queue(effect: Effect) {
+      this.nextLinkedEffects.add(effect)
       this.nextEffects.push(effect)
    }
 
