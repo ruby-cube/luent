@@ -90,14 +90,15 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
    const target = asSubject(subject, options.retrack)
    target.asTraceable = new Traceable(options?.devName ?? 'watch' + subject)
 
-   if (__DEV__ && options?.["dev.logAtoms"]) {
+   if (__DEV__ && options["dev.logAtoms"]) {
       const target = Ion(() => subject(), {
-         devName: options?.devName
+         devName: options.devName
       })
-
       watch(target, () => {
+         console.log('hi')
          logAtoms(quarkOf(target))
       }, {
+         phase: options.phase,
          eager: true,
          once: options.once
       })

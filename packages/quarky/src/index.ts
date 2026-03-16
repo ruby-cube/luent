@@ -3,7 +3,7 @@ import { installIonicMap } from "./ionic/$$Map"
 import { installIonicSet } from "./ionic/$$Set"
 
 // TODO: limit exports to public api
-export * from "./debug/debug" 
+export * from "./debug/x_debug" 
 export * from "./async/AsyncIon" 
 export * from "./async/Suspense" 
 export * from "./async/ooo" 

@@ -32,10 +32,14 @@ export class Effect {
 
    unlink(atom: TrackedAtom) {
       if (!this.isLinked(atom)) return;
+      atom.unlink(this)
       this.atoms.delete(atom)
    }
 
    unlinkAtoms() {
+      for (const atom of this.atoms) {
+         atom.unlink(this)
+      }
       this.atoms.clear()
    }
 }
@@ -131,14 +135,15 @@ export class EffectQueue {
       this.nextEffects.push(effect)
    }
 
+   dequeue(effect: Effect) {
+      this.nextEffects.splice(this.nextEffects.indexOf(effect), 1) // TODO: Is there a more efficient way??
+   }
+
    requeued: boolean = false;
    queued: boolean = false
 }
 
 
-export function cestLePromis(effect: Effect) {
-   return effect.__DEV__fn && effect.__DEV__fn.toString().includes('current: promise,')
-}
 
 /**
  * Belongs to the current effect cycle.

@@ -32,7 +32,7 @@ import { StyledComp } from "./src/TestForwardRef"
 import { TestOnceEager } from "./src/TestOnceEager"
 
 export function runDemo() {
-   const app = createRoot(TestOnceEager)
+   const app = createRoot(TrafficLight)
 
    app.mount('#root')
 }

@@ -1,7 +1,7 @@
 import { createStack, debug } from "@rue/utils";
 import { Ion } from "../ion/Ion";
 import { watch } from "../reactivity/Watcher";
-import { queueTask, SYNC } from "../reactivity/RenderCycle";
+import { PRELUDE, queueTask, SYNC } from "../reactivity/RenderCycle";
 import { QUARK } from "../abstract/Quark";
 import { AnyObject, UnionToIntersection } from "@rue/types";
 import { untracked } from "../reactivity/Compound";

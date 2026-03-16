@@ -1,6 +1,5 @@
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, traceAsyncPath, } from "../../../flask/debug";
-import { __DEV__trace } from "../debug/debug";
 import { QUARK } from "../abstract/Quark";
 import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
 import { TraceableMutable, TraceableEntity } from "../debug/Traceable";
