@@ -3,8 +3,8 @@ import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./Watcher";
 import { Glass } from "@rue/types";
 import { Effect } from "./EffectQueue";
 import { FunctionSubject } from "./Subject";
-import { Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 import { Traceable } from "../debug/Traceable";
+import { Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 
 
 type _IonicTaskOptions = {
