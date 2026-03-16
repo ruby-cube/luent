@@ -1,7 +1,6 @@
 import { getActiveFlask } from "@rue/flask";
-import { template, If, Else, fade, ElseIf, slide, Transition, Transit, SYNC, tick, Style, NodeRef, atMounted, NodeRef } from "@rue/lumo";
-import { debug, getActiveUpdate, instantUpdate, Ion, queueRender, queueTask, watch } from "@rue/quarky";
-import { AnyObject } from "@rue/types";
+import { template, If, Else,  ElseIf,Style, NodeRef, atMounted } from "@rue/lumo";
+import { getActiveUpdate, Ion, queueRender, queueTask, watch } from "@rue/quarky";
 import "./style.css"
 
 

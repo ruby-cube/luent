@@ -1,9 +1,10 @@
 import { template, unnestComponent } from "../component/Component";
 import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
-import { RootContext, markIfMuIon } from "./provide";
-import { debug, Ion } from "@rue/quarky";
+import { markIfMuIon } from "./provide";
+import { Ion } from "@rue/quarky";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderSlot } from "../component/Input";
+import { debug } from "@rue/utils";
 
 export interface NodeContext {
    entries: Map<string, unknown>;
@@ -41,7 +42,6 @@ export function createContextNode(
    parentContext: ContextNode | undefined = getClosestContext(),
 ) {
    if (!parentContext) {
-      debug.traceAsyncPath()
       throw new Error(`no context found :( This should never happen`)
    }
    const [entries, muIons] = toContextEntries(provide)

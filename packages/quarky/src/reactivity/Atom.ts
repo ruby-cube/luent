@@ -66,10 +66,6 @@ export class TrackedAtom {
       (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase)).queue(effect);
    }
 
-   unlink(effect: Effect) {
-       (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase)).dequeue(effect);
-   }
-
    triggerEffects(update: Update) { // the surrounding effect when original trigger happened
       const phases = this.phases
       const cycle = update.cycle

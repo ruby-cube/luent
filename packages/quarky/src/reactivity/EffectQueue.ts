@@ -20,26 +20,28 @@ export class Effect {
    }
 
    link(atom: TrackedAtom) {
-      if (this.isLinked(atom)) return;
+      if (!this.run){
+         this.run = this.fn
+      }
+      if (this.isLinked(atom)) {
+         return;
+      }
       atom.link(this)
       this.atoms.add(atom);
    }
 
    destroy() {
-      this.run = null;
       this.unlinkAtoms()
+      this.fn = null;
+      this.run = null;
    }
 
-   unlink(atom: TrackedAtom) {
-      if (!this.isLinked(atom)) return;
-      atom.unlink(this)
-      this.atoms.delete(atom)
-   }
+   fn: TaskFn | null = null
 
    unlinkAtoms() {
-      for (const atom of this.atoms) {
-         atom.unlink(this)
-      }
+      if (!this.run) console.warn('^^^ NO RUN FN') // NOTE: if this never runs, we can remove `?? this.fn`
+      this.fn = this.run/*  ?? this.fn */
+      this.run = null
       this.atoms.clear()
    }
 }
@@ -133,10 +135,6 @@ export class EffectQueue {
    */
    queue(effect: Effect) {
       this.nextEffects.push(effect)
-   }
-
-   dequeue(effect: Effect) {
-      this.nextEffects.splice(this.nextEffects.indexOf(effect), 1) // TODO: Is there a more efficient way??
    }
 
    requeued: boolean = false;

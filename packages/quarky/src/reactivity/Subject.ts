@@ -200,11 +200,11 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
 
    effect: Effect | undefined
 
-   private retrackedCall() {
+   private retrackedCall() { // TODO: retrack call only if stale
       if (!this.retrack || !this.reactive) return toValue(this.fn())
-      const fn = this.fn
       const effect = this.effect
       if (!effect) throw new Error('Must call linkEffect before retracking')
+      console.log('retrack call', this.fn)
       effect.unlinkAtoms()
       this.untrackAtoms()
       const output = this.trackAtoms(this.fn)

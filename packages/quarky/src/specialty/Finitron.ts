@@ -5,6 +5,7 @@ import { PRELUDE, queueTask, SYNC } from "../reactivity/RenderCycle";
 import { QUARK } from "../abstract/Quark";
 import { AnyObject, UnionToIntersection } from "@rue/types";
 import { untracked } from "../reactivity/Compound";
+import { getActiveUpdate } from "../reactivity/Update";
 
 
 // trafficLight.is('on') // reactive
@@ -318,12 +319,13 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
       const state = $currentState.value = initialState
       const parent = getFinitron()
       if (parent) {
-         queueTask(() => {
-            watch(() => parent.state, ({ previous }) => { // FIX: why doesn't this work when it is sync??
+         console.log('*&* init', initialState, getActiveUpdate()?.cycle.currentPhase)
+         queueTask(() => { // must queue because parent.state has not been set yet and will trigger effect early when set
+            watch(() => parent.state, ({ previous }) => {
+               console.log('*&* deactivating finitron', finitron.state)
                finitron.deactivate()
-            }, { phase: SYNC, once: true })
+            }, { phase: PRELUDE, once: true })
          })
-         // parent.onDeactivated(() => finitron.deactivate()) // QUESTION: is this needed?
       }
       if (nested) {
          onEnter = nested
