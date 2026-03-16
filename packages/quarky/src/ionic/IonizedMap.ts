@@ -1,5 +1,5 @@
 import { defineIonicCollection } from "./IonicDef";
-import { SetlikeDef } from "./$$Set";
+import { SetlikeDef } from "./IonizedSet";
 import { asIonic, Ionic } from "./Ionic";
 
 // declare global {

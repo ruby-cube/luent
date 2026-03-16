@@ -12,7 +12,7 @@ import { $activeUpdate, Update } from "../reactivity/Update"
 import { TrackedOps } from "./TrackedOp"
 import { TraceableMutable, TraceableEntity } from "../debug/Traceable"
 import { IonicModelHooks, MethodHook } from "./IonicModel"
-import { isIntegerKey } from "./$$Array"
+import { isIntegerKey } from "./IonizedArray"
 
 export type QuarkyIonicProxy = Ionic<AnyObject> & { [QUARK]: ModelQuark }
 export type Proto = Map<ProxyKey, PropertyAccess>

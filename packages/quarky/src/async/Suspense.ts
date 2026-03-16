@@ -1,6 +1,5 @@
 import { getActiveFlask } from "@rue/flask"
 import { PRELUDE } from "../reactivity/RenderCycle"
-import { instantUpdate } from "../reactivity/Update"
 import { watch } from "../reactivity/Watcher"
 import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"

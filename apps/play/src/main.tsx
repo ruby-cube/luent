@@ -51,7 +51,7 @@ import { DebugLeakyFlask } from './DebugLeakyFlask';
 import { TestVineNodes } from './TestVineNodes';
 import { For } from '../../../packages/lumo/src/iteratives/For';
 import { DateApp } from './wip-demos/DateApp';
-import { installIonizedDate } from '../../../packages/quarky/src/ionic/$$Date';
+import { installIonizedDate } from '../../../packages/quarky/src/ionic/IonizedDate';
 import { TestMultisetting } from './wip-demos/TestMultisetting';
 import { TestVanillaStream } from './TestStream-await';
 import { TestIonicList } from './TestIonicList';

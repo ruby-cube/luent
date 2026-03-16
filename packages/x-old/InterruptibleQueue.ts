@@ -1,4 +1,4 @@
-import { queueTask } from "../../../x-old/thread";
+import { queueTask } from "./thread";
 
 export class InterruptibleQueue {
    tasks: (() => void)[] = []

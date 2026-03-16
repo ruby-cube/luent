@@ -1,5 +1,4 @@
 import { AnyObject, Glass } from "@rue/types";
-import { __DEV__asTraceable, emitSignal } from "../debug/x_debug";
 import { createIonicModel, isIonicProxy, MethodHook } from "./IonicModel";
 import { QUARK, quarkOf } from "../abstract/Quark";
 import type{ QuarkyIonicProxy } from "./ModelQuark";

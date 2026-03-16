@@ -1,5 +1,5 @@
 import { isEqual } from "@rue/utils";
-import { isIonicObject } from "../ionic/$$Object";
+import { isIonicObject } from "../ionic/IonizedObject";
 import { AnyObject } from "@rue/types";
 
 export function areEqual(newValue: any, oldValue: any) { // TODO: this is really tricky.. do I do a shallow diff or a deep diff for arrays?? I think it should be shallow diff because if you are watching an array, you typically care about the order
