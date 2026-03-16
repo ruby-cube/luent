@@ -33,17 +33,17 @@ export function TestDev() {
       // once: true,
       devName: 'watch: () => $quadruple()',
       // 'dev.traceTriggers': true,
-      // 'dev.logAtoms': true
+      'dev.logAtoms': true
    })
-   watch($count, () => {
-      console.log('*** heheh B')
-   }, {
-      phase: SYNC,
-      // once: true,
-      devName: 'watch: () => $quadruple()',
-      // 'dev.traceTriggers': true,
-      // 'dev.logAtoms': true
-   })
+   // watch($count, () => {
+   //    console.log('*** heheh B')
+   // }, {
+   //    phase: SYNC,
+   //    // once: true,
+   //    devName: 'watch: () => $quadruple()',
+   //    // 'dev.traceTriggers': true,
+   //    // 'dev.logAtoms': true
+   // })
 
    // watch(() => $quadruple(), () => {
    //    console.log('*** heheh')

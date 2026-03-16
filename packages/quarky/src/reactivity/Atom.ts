@@ -66,6 +66,11 @@ export class TrackedAtom {
       (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase)).queue(effect);
    }
 
+   isLinked(effect: Effect) {
+      const effects = (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase))
+      return effects.nextEffects.indexOf(effect) !== -1
+   }
+
    triggerEffects(update: Update) { // the surrounding effect when original trigger happened
       const phases = this.phases
       const cycle = update.cycle

@@ -8,10 +8,14 @@ import { $activeUpdate, Update, popUpdate, pushUpdate, tickUpdate } from "./Upda
 type TaskFn = (...args: any[]) => unknown
 
 export class Effect {
+   fn: TaskFn | null;
+   
    constructor(
       public run: TaskFn | null,
       public phase: Phase
-   ) { }
+   ) {
+      this.fn = run;
+   }
 
    private atoms: Set<TrackedAtom> = new Set()
 
@@ -20,14 +24,12 @@ export class Effect {
    }
 
    link(atom: TrackedAtom) {
-      if (!this.run){
-         this.run = this.fn
-      }
-      if (this.isLinked(atom)) {
-         return;
-      }
-      atom.link(this)
+      if (this.isLinked(atom)) return;
+      this.run = this.fn // relink
       this.atoms.add(atom);
+      if (!atom.isLinked(this)) {
+         atom.link(this) // PREVENT RELINKING
+      }
    }
 
    destroy() {
@@ -36,11 +38,7 @@ export class Effect {
       this.run = null;
    }
 
-   fn: TaskFn | null = null
-
    unlinkAtoms() {
-      if (!this.run) console.warn('^^^ NO RUN FN') // NOTE: if this never runs, we can remove `?? this.fn`
-      this.fn = this.run/*  ?? this.fn */
       this.run = null
       this.atoms.clear()
    }
