@@ -51,9 +51,6 @@
       "@rue/qrx": [
         "./packages/qrx/src/index.ts"
       ],
-      "@rue/dev": [
-        "./packages/x-old/dev/index.ts"
-      ],
       "@rue/flask": [
         "./packages/flask/index.ts"
       ],

@@ -11,7 +11,6 @@
     "ni:flask": "pnpm -F @rue/flask install",
     "ni:thread": "pnpm -F @rue/thread install",
     "ni:utils": "pnpm -F @rue/utils install",
-    "ni:dev": "pnpm -F @rue/dev install",
     "ni:lumo": "pnpm -F @rue/lumo install",
     "ni:play": "pnpm -F @rue/play install",
     "ni:demos": "pnpm -F @rue/demos install",

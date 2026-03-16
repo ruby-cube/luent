@@ -6,7 +6,6 @@
       "@rue/utils": "workspace:*"
     },
     "devDependencies": {
-      "@rue/dev": "workspace:*",
       "@rue/types": "workspace:*"
     },
     "author": "Ruby Yi Wang",
