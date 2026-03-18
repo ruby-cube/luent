@@ -1,4 +1,4 @@
-import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue, INTERNAL, queueTask, queueIonicTask, queueIonicPrelude } from "@rue/quarky";
+import { isIon, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue, INTERNAL, queueTask, queueIonicTask, queueIonicPrelude } from "@rue/quarky";
 import { isFunction, isObject, isPlainObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -40,10 +40,9 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    config: ElementConfig,
 ): DOMNode {
-   const { class: classes, style: styles, 'show-if': showIf, ref: $node, ...other } = config;
+   const { class: classes, style: styles, 'show-if': showIf, ref: $node, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, ...other } = config;
 
    const { attributes, events, hooks, transitions } = analyzeAttributes(other)
-
    let newXML_NS: string | undefined;
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 
@@ -65,12 +64,12 @@ export function makeElement(
    if (classes) setUpClasses(domNode, normalizeToArray(classes))
    if (styles) setUpStyles(domNode, normalizeToArray(styles))
    if (showIf) setUpConditionalDisplay(domNode, showIf)
-   setUpEvents(domNode, events);
-   setUpHooks(domNode, hooks)
+   setUpEvents(domNode, { ...events, ...forwardEvents });
+   setUpHooks(domNode, { ...hooks, ...forwardHooks })
    bindView(domNode, attributes)
    setUpAttributes(domNode, attributes);
    const transitionConfig = getTransition()
-   setUpTransitions(domNode as HTMLElement, transitions, transitionConfig) // TODO: transition-in etc
+   setUpTransitions(domNode as HTMLElement, {...transitions, ...forwardTransitions}, transitionConfig) // TODO: transition-in etc
 
    //  if (dynamicAttributes)
    //      setUpDynamicAttributes(

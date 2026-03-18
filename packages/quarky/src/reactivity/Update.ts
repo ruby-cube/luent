@@ -178,7 +178,7 @@ export class Update {
 
 export function HeavyUpdate<T>(fn: (...args: any[]) => T): () => Promise<T> {
    return (...args) => {
-      return slowUpdate(fn)
+      return slowUpdate(() => fn(...args))
    }
 }
 

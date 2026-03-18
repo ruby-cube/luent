@@ -2,7 +2,7 @@ import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { isFunction, isObject, normalizeToArray } from "@rue/utils";
 import { atMounted, atUnmount, atRemounted } from "../flask/flask-hooks";
 import { queueInternalRender } from "../../../quarky/src/reactivity/RenderCycle";
-import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput } from "../node/VineNode";
+import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@rue/flask";
 
 export type MorphConfig = {}
@@ -35,6 +35,7 @@ type SelectorString = string
 //    return undefined;
 // }
 
+let _portalMap: Map<any, any> | undefined;
 
 export function Portal(container: SelectorString | Element, render: RenderFunction | RawJSXNode) {
    if (!(isFunction(render))) throw new Error('Compiler failed to turn JSX into render function')
@@ -43,6 +44,12 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
    if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
 
    const nodes = processJSXOutput(render())
+
+   if (nodes[0] instanceof VineNode) {
+      const portalMap = _portalMap ?? (_portalMap = new Map())
+      const comment = portalMap.get(element) ?? (portalMap.set(element, document.createComment('portal')), portalMap.get(element))
+      nodes.unshift(comment)
+   }
 
    setUpNodeVine(nodes, element)
    const flask = getFlask()

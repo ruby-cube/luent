@@ -208,7 +208,7 @@ export function toInput(attributes: AnyObject, events: AnyObject) {
    return new Proxy(attributes, {
       get(target, key) {
          if (key === 'æclasses') {
-            return attributes.classes
+            return toIon(attributes.classes)
          }
          if (key === 'mu') return mu
          if (typeof key !== 'string') return undefined;
@@ -343,7 +343,7 @@ type ElementAttributes<D> = D extends 'input' ? { value: any, type: any } : {}
 
 type Styles = {
    styles: Ionic<CSSStyleDeclaration>
-   $classes: Ion<string>,
+   æclasses: Ion<string>,
 }
 
 type WithMu<D> = HasMu<D> extends true ? {

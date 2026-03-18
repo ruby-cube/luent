@@ -16,7 +16,7 @@ export function TestMarkdownApp() {
             <textarea class='input' mu:value={$markdown}></textarea>
             <div class='output' innerHTML={$html}></div>
          </div>
-         <o--link href='/src/MarkdownApp.css' rel='stylesheet' />
+         <o--link href='/src/MarkdownApp.css' rel='stylesheet'/>
       </>
    )
 }

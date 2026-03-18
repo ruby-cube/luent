@@ -1,1 +1,1 @@
-import './src/ui-shadcn/examples/Tooltip'
+import './src/ui-shadcn/examples/TooltipDemo'

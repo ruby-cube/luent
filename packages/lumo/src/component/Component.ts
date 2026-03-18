@@ -140,15 +140,22 @@ export type ComponentTag = (arg: any) => JSX.Element
 export function makeComponent(
    Component: ComponentForge,
    Slot: InferSlot | undefined,
-   tag: ComponentConfig,
+   fromTag: ComponentConfig,
    // $index: Ion<number> | undefined
 ): Component {
-   const { ref, class: classes, style, ...other } = tag
+   const { ref, class: classes, style, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, ...other } = fromTag
    const { hooks, events, attributes, transitions } = analyzeAttributes(other)
+   console.log('component tag config', fromTag)
+   console.log('component hooks', hooks)
+   console.log('component events', events)
+   console.log('component attributes', attributes)
+   console.log('component transitions', transitions)
 
    const output = Component(toInput({
+      events: {...events, ...forwardEvents},
+      hooks: {...hooks, ...forwardHooks},
       ...attributes,
-      ...transitions,
+      transitions: {...transitions, ...forwardTransitions},
       Slot,
       classes,
       ref
@@ -157,9 +164,9 @@ export function makeComponent(
    }, events))
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
-   const publicComponent = output.exposed ?? {}
+   const publicComponent = output.exposed
    console.log('public', publicComponent, ref)
-   if (ref) {
+   if (ref && publicComponent) {
       if (isObject(ref) && 'arr' in ref) {
          setUpNodeRefs(publicComponent, ref.arr, normalizeToArray(ref.i))
       }
@@ -167,7 +174,10 @@ export function makeComponent(
          initializeRef(ref, publicComponent)
       }
    }
-   setUpHooks(publicComponent ?? ref, hooks)
+   if (publicComponent) {
+      // TODO: throw error if hooks have already been attached?
+      setUpHooks(publicComponent, hooks)
+   }
 
    // if (tag['show-if']) setUpConditionalDisplay()
    return output

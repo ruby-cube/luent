@@ -171,8 +171,9 @@ class ProxySubject extends Compound implements StatefulSubject, TraceableEntity 
 }
 
 // const STALE = Symbol('stale')
+
 // TODO: currently we are retracking every single subject even if they are identical to another functional subject that has been retrack.
-// To make things more efficient, we need to somehow share functional subjects if they track the same ion and only retrack if they are stale.
+// To make things more efficient, we need to share/reuse functional subjects if they track the same ion and only retrack if they are stale.
 
 /**
  * Primitive subject for derivation ions and ionic tasks.

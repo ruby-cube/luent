@@ -1997,10 +1997,11 @@ declare global {
 
 
       interface LumoElements {
-         'i--i': {}; //comments
+         '!--': {}; //comments
          'o--portal': PortalNodeInput & { children: Lumo.Slot }
 
-         'o--link': Luent.DetailedHTMLProps<Luent.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
+         'o--link': Luent.DetailedHTMLProps<Luent.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> & {'portal-to'?: 'body'|'head'}
+         'o--head': Luent.DetailedHTMLProps<Luent.LinkHTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
          'o--body': Luent.DetailedHTMLProps<Luent.LinkHTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
          'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
          'create-view': { children: ConditionalRenderKit[] }

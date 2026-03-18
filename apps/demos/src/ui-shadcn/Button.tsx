@@ -34,30 +34,31 @@ const buttonVariants = defineVariants(
 )
 
 function Button({
-   $classes,
+   æclasses,
+   ref,
    variant = "default",
    size = "default",
    as: Comp = "button",
    Slot,
-   ...attributes
+   ...other
 }: FromTag<'button', {
-   as?: ComponentTag | string
+   as?: ComponentTag | string,
+   ref?: NodeRef<any>
 } & VariantProps<typeof buttonVariants>>) {
-
-   const $node = NodeRef(Comp)
+   console.log('button attributes', other)
+   console.log('æclasses', æclasses)
 
    return template(
       <Comp
-         ref={$node}
+         ref={ref}
          data-slot="button"
          data-variant={variant}
          data-size={size}
-         class={(mergeTailwind(buttonVariants({ variant, size }), $classes()))}
-         // class={[buttonVariants({ variant, size }), $classes]}
-         {...attributes}
+         class={(mergeTailwind(buttonVariants({ variant, size }), æclasses()))}
+         // class={[buttonVariants({ variant, size }), æclasses]}
+         {...other}
       >{Slot}</Comp>
    )
-      .ref($node)
 }
 
 export { Button, buttonVariants }

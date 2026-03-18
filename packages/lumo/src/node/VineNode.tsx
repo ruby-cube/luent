@@ -5,6 +5,7 @@ import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { CONTEXT, ContextNode } from "../context/context-stack";
 import { TRACE } from "../../../flask/debug";
+import { RenderSlot } from "../component/Input";
 
 export type JSXNode = DOMNode | VineNode
 
@@ -58,6 +59,13 @@ export class VineNode {
 // export interface CaseKit extends NodeKit {
 //    // unmount(nodes: JSXNode[]): void
 // }
+
+export function mountToFragment(Slot: RenderSlot) {
+   const fragment = new DocumentFragment()
+   const output = processJSXOutput(Slot())
+   mountDOMNodes(output, fragment)
+   return fragment
+}
 
 export function processJSXOutput(rawJSX: RawJSXNode) {
    return _processJSXOutput(normalizeToArray(rawJSX))

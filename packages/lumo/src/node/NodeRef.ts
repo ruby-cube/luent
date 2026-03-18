@@ -90,7 +90,7 @@ export class MetaRef {
 export function initializeRef($node: InternalRef<NodeRef>, value: any | undefined) {
    const ref = $node[INTERNAL]
    if (ref.value) {
-      console.warn("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
+      console.warn("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance", ref.value)
       return;
    }
    if (value) {

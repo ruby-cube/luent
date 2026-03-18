@@ -187,7 +187,7 @@ function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | TagName | ComponentForge | 'o--link' | 'remount-view' | 'show-view' | 'create-view' | any,
+   nodeType: SVGTag | TagName | ComponentForge | 'o--link' | 'o--body' | 'o--portal' | 'remount-view' | 'show-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -195,13 +195,15 @@ export function makeJSXNode(
    switch (nodeType) {
 
       case 'o--link':
-         return Portal('head', () =>
+         return Portal(config['portal-to'] ?? 'head', () =>
             makeElement('link', undefined, <ElementConfig>config)
          );
 
       case 'o--body':
          return Portal('body', Slot);
 
+      case 'o--portal':
+         return Portal(config.to, Slot)
       // deprecated??
       case 'create-view':
          if (!Slot) throw new Error(`Extraneous <create-view>`)
