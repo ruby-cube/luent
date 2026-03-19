@@ -4,18 +4,21 @@ import { Tooltip } from "../Tooltip"
 import { TOOLTIP_CONFIG, createTooltip } from "../../ui-base/tooltip/Tooltip"
 
 // [X] anchoring
-// [] responsive re-anchoring
+// [] responsive flip
+// [X] responsive shift
 // [] placement
+// [] hover across triggers (don't close tooltip)
 // [] close delay window
 // [] tooltip default anchor
 // [] tooltip default trigger (no info)
-// [] show-hide arrow
+// [x] show-hide arrow
 // [X] show-hide
 // [X] show-hide with delay
 // [X] show-hide with transitions
 
 
-const demoBoxStyle = "relative flex h-72 w-full justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0"
+const demoBoxStyle = ""
+// "relative flex h-72 w-full justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0"
 
 export function TooltipDemo() {
    const tooltip = createTooltip({
@@ -24,7 +27,7 @@ export function TooltipDemo() {
       // placement: 'right',
       // placement: 'below',
       info: {
-         bold: 'Bold',
+         bold: 'Bold Bold Bold Bold',
          italic: 'Italic',
          underline: 'Underline'
       }
@@ -49,8 +52,11 @@ export function TooltipDemo() {
             </Button>
             <Tooltip tooltip={tooltip}>
                <p>{(tooltip.info)}</p>
+               <p>{(tooltip.info)}</p>
+               <p>{(tooltip.info)}</p>
             </Tooltip>
          </div>
+         <button class='mt-70' on:click={e => tooltip.hide()}>hide tooltip</button>
       </Context>
    )
 }

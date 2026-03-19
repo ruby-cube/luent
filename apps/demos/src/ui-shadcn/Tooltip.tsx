@@ -30,34 +30,28 @@ function Tooltip(setup: FromTag<{
       ...props
    } = setup
 
-   const slideIn = `${tooltip.above ? 'slide-in-from-bottom-2' : tooltip.below ? 'slide-in-from-top-2' : tooltip.leftside ? 'slide-in-from-right-2' : 'slide-in-from-left-2'}`
+   const slideIn = () =>`${tooltip.above ? 'slide-in-from-bottom-2' : tooltip.below ? 'slide-in-from-top-2' : tooltip.leftside ? 'slide-in-from-right-2' : 'slide-in-from-left-2'}`
    const animateIn = `animate-in fade-in-0 zoom-in-95`
    const animateOut = `animate-out fade-out-0 zoom-out-95`
 
    return template(
       <o--body>
-         <TooltipRoot tooltip={tooltip}>
+         <TooltipRoot
+            animate-in={(animateIn + ' ' + slideIn())}
+            animate-out={animateOut}
+            tooltip={tooltip}>
             <TooltipContent
-               animate-in={animateIn + ' ' + slideIn}
-               animate-out={animateOut}
-               class={mergeTailwind(
-                  `${tooltip.rightside? 'origin-left' : tooltip.leftside? 'origin-right' : tooltip.above ? 'origin-bottom' : 'origin-top'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
+               class={(mergeTailwind(
+                  `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.leftside ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
                   æclasses()
-               )}
+               ))}
                {...props}
             >
                {Slot}
             </TooltipContent>
             <TooltipTail
-               animate-in={animateIn + ' ' + slideIn}
-               animate-out={animateOut}
-               class={`size-2.5 ${tooltip.rightside? 'origin-right' : tooltip.leftside? 'origin-left' : tooltip.above ? 'origin-top' : 'origin-bottom'}`}
+               class={`size-2.5`}
                shape:class='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'
-               style={(/* prevent visible overlap when fading in and out */
-                  tooltip.above ? `clip-path: polygon(0% 100%, 100% 100%, 100% 200%, 0% 200%, 0% 100%);`
-                     : tooltip.below ? `clip-path: polygon(0% 0%, 0% -100%, 100% -100%, 100% 0%, 0% 0%);`
-                        : tooltip.leftside ? `clip-path: polygon(100% 0%, 200% 0%, 200% 100%, 100% 100%, 100% 0%)`
-                           : `clip-path: polygon(0% 0%, 0% 100%, -100% 100%, -100% 0%, 0% 0%)`)}
             >
             </TooltipTail>
          </TooltipRoot>
