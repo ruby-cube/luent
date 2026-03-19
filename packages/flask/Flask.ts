@@ -167,6 +167,7 @@ export class Flask {
    onRemount(task: Task) {
       return this.on(LifecycleHook.REMOUNT, task)
    }
+
    onDiscard(task: Task) {
       return this.on(LifecycleHook.DISCARD, task)
    }
@@ -174,8 +175,8 @@ export class Flask {
    discarded = false
 
    emitDiscard() {
-      this.discarded = true;
       this.emit(LifecycleHook.DISCARD)
+      this.discarded = true;
       this.tasks.delete(LifecycleHook.INITIAL_MOUNT);
       this.tasks.delete(LifecycleHook.REMOUNT);
       this.tasks.delete(LifecycleHook.DEMOUNT);

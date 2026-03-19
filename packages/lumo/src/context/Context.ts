@@ -4,7 +4,7 @@ import { markIfMuIon } from "./provide";
 import { Ion } from "@rue/quarky";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderSlot } from "../component/Input";
-import { debug } from "@rue/utils";
+import { debug, normalizeToArray } from "@rue/utils";
 
 export interface NodeContext {
    entries: Map<string, unknown>;
@@ -44,7 +44,7 @@ export function createContextNode(
    if (!parentContext) {
       throw new Error(`no context found :( This should never happen`)
    }
-   const [entries, muIons] = toContextEntries(provide)
+   const [entries, muIons] = toContextEntries(normalizeToArray(provide))
    const context: NodeContext = {
       entries,
       parent: parentContext,
@@ -76,7 +76,7 @@ export function wrapWithContext(
    }
 }
 
-export function toContextEntries(provided: [ContextEntryKey | string, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
+export function toContextEntries(provided: [ContextEntryKey, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
    const context = { muIons: undefined }
    const entries: Map<string, unknown> = new Map()
    for (const { 0: key, 1: value } of provided) {

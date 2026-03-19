@@ -210,6 +210,9 @@ export function toInput(attributes: AnyObject, events: AnyObject) {
          if (key === 'æclasses') {
             return toIon(attributes.classes)
          }
+         if (key === 'æstyles') {
+            return toIon(attributes.styles)
+         }
          if (key === 'mu') return mu
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return events;

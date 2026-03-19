@@ -1,5 +1,8 @@
 import { UIDGenerator } from "@rue/utils";
-import { atUnmount } from "../flask/flask-hooks";
+import { atDiscard, atUnmount } from "../flask/flask-hooks";
+import { isTransitioningOut } from "../transitions/transitions";
+import { getFlask } from "@rue/flask";
+import { queueTask } from "@rue/quarky";
 
 const genUID = UIDGenerator(11)
 
@@ -9,8 +12,17 @@ export function Style(strings: TemplateStringsArray, ...values: any[]): string {
    const cssText = composeCSSText(strings, values)
    const id = genUID()
    const style = insertStyle(cssText, id)
-   atUnmount(() => {
-      style.remove();
+   const flask = getFlask()
+   atDiscard(() => {
+      if (isTransitioningOut(flask)) {
+         queueTask(() => {
+            flask.onDiscard(() => {
+               style.remove()
+            })
+         })
+         return;
+      }
+      style.remove(); // TODO: wait till end of transition to remove
    })
    return ''
 }

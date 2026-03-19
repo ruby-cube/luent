@@ -5,8 +5,14 @@ import { atMounted, atUnmount } from "../flask/flask-hooks"
 import { getTransition } from "./Transition"
 import { setUpPositionTransition, setUpTransit } from "./transit"
 import { createStack } from "@rue/utils"
+import { Flask, getActiveFlask, getFlask } from "@rue/flask"
 
 const END_EVENT_FALLBACK_BUFFER_MS = 50
+
+const transitioningOut: Set<Flask> = new Set()
+export function isTransitioningOut(flask: Flask) {
+   return transitioningOut.has(flask)
+}
 
 export type TransitionConfigs = {
    'animate-item'?: boolean | MaybeIon<string>
@@ -147,7 +153,11 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
       })
    }
    if (animateOutClasses || transitionOutClasses) {
+      const flask = getFlask()
+
       atUnmount(() => {
+         transitioningOut.add(flask)
+
          transitionOut(node, (clone) => {
             let endTransition: () => void
             return {
@@ -165,6 +175,8 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
                   function onEnd() {
                      transitionCount--
                      if (transitionCount === 0) {
+                        flask.emitDiscard()
+                        transitioningOut.delete(flask)
                         endTransition()
                      }
                   }
@@ -348,8 +360,9 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
    positionClone(clone, rect)
    clone.style.removeProperty('visibility')
 
-   queueRender(() => {
+   console.log('transition out clone', clone.childNodes[0])
 
+   queueRender(() => {
       const transition = createTransition(clone)
       transition.start()
 

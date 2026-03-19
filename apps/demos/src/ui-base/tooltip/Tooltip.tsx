@@ -1,47 +1,170 @@
-import { ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, template } from "@rue/lumo"
+import { ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/lumo"
 import { mergeTailwind } from "../../utils/utils"
-import { Ionic, queueTask } from "@rue/quarky"
-import { AnyObject } from "@rue/types";
+import { Ion, Ionic, queueTask, toIon } from "@rue/quarky"
 
-function TooltipArrow({
-   æclasses,
-   as: Comp = 'div'
-}: FromTag<{ as?: ComponentTag | string }>) {
 
+
+function TooltipTail(setup: FromTag<{
+   as?: ComponentTag | string;
+   offset?: Ion<number>
+   'shape:class'?: Ion<string>
+   'shape:style'?: Ion<string>
+}>) {
+   const {
+      æclasses,
+      æstyles,
+      "æshape:class": æshapeClasses = toIon(''),
+      "æshape:style": æshapeStyles = toIon(''),
+      æoffset = toIon('-30%'),
+      as: Comp = 'div',
+      ...attributes
+   } = setup
+
+   const tooltip = fromContext(TOOLTIP)
+   const { gap, placement } = tooltip
+   console.log('styles', æstyles())
    return template(
-      <Comp class={(mergeTailwind('absolute', æclasses()))}></Comp>
+      <div
+         class={'arrow-root ' + placement + ' ' + æclasses()}
+         style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
+         {...attributes}
+      >
+         <Comp
+            class={(`arrow ${placement} ${æshapeClasses()}`)}
+            style={æshapeStyles}
+         ></Comp>
+      </div>
    )
+      .style(css`
+         .arrow-root {
+            position: absolute;
+            position-anchor: var(--tooltip-anchor);
+            isolation: isolate;
+         }
+
+         .arrow-root.above {
+            justify-self: anchor-center;
+            bottom: calc(anchor(top) + ${gap}rem);
+         }
+
+         .arrow-root.below {
+            justify-self: anchor-center;
+            top: calc(anchor(bottom) + ${gap}rem);
+            clip-path: polygon(0% 0%, 0% -100%, 100% -100%, 100% 0%, 0% 0%)
+         }
+
+         .arrow-root.left {
+            align-self: anchor-center;
+            right: calc(anchor(left) + ${gap}rem);
+         }
+
+         .arrow-root.right {
+            align-self: anchor-center;
+            left: calc(anchor(right) + ${gap}rem);
+         }
+
+         .arrow {
+            position: absolute;
+         }
+
+         .arrow.above {
+            bottom: ${æoffset()};
+         }
+
+         .arrow.below {
+            top: ${æoffset()};
+         }
+
+         .arrow.left {
+            right:${æoffset()};
+         }
+
+         .arrow.right {
+            left: ${æoffset()};
+         }
+      `)
 }
 
-function TooltipContent({
-   ref,
-   æclasses,
-   gap = 0,
-   Slot,
-   tooltip,
-   ...attributes
-}: FromTag<{ ref?: NodeRef<'div'>; Slot: RenderSlot, gap?: number, tooltip: Ionic<TooltipModel> }>) {
+const TOOLTIP = ContextKey<Ionic<TooltipModel>>()
+
+
+function TooltipRoot(setup: FromTag<{
+   ref?: NodeRef<'div'>;
+   Slot: RenderSlot;
+   tooltip: Ionic<TooltipModel>
+}>) {
+   const {
+      ref,
+      æclasses,
+      æstyles,
+      // gap = 0,
+      Slot,
+      tooltip,
+      ...attributes
+   } = setup
+
+   console.log('attributes?', attributes)
 
    return template(
       <>
          {If((tooltip.visible),
-            <div
-               at:create={console.log('@@@ SHOW!')}
-               ref={ref}
-               class={'tooltip ' + æclasses()}
-               style={(`--tooltip-anchor: ${tooltip.anchorName};`)}
-               {...attributes}
-            >{Slot}</div>
+            <Context provide={TOOLTIP(tooltip)}>
+               {Slot()}
+            </Context>
          )}
       </>
+   )
+
+}
+
+function TooltipContent(setup: FromTag<{
+   ref?: NodeRef<'div'>;
+   Slot: RenderSlot;
+}>) {
+   const {
+      ref,
+      æclasses,
+      æstyles,
+      Slot,
+      ...attributes
+   } = setup
+
+   const tooltip = fromContext(TOOLTIP)
+   const { placement, gap } = tooltip;
+
+   return template(
+      <div
+         ref={ref}
+         class={('tooltip ' + placement + ' ' + æclasses())}
+         style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
+         {...attributes}
+      >{Slot}</div>
    )
       .style(css`
          .tooltip {
             position: absolute;
             position-anchor: var(--tooltip-anchor);
             isolation: isolate;
+         }
+
+         .tooltip.above {
             justify-self: anchor-center;
             bottom: calc(anchor(top) + ${gap}rem);
+         }
+
+         .tooltip.below {
+            justify-self: anchor-center;
+            top: calc(anchor(bottom) + ${gap}rem);
+         }
+
+         .tooltip.left {
+            align-self: anchor-center;
+            right: calc(anchor(left) + ${gap}rem);
+         }
+
+         .tooltip.right {
+            align-self: anchor-center;
+            left: calc(anchor(right) + ${gap}rem);
          }
       `)
 }
@@ -92,13 +215,18 @@ type Placement = 'above' | 'below' | 'left' | 'right'
 
 
 
-function createTooltip<O>(options?: O & { placement?: Placement, info?: { [key: string]: unknown } }) {
+function createTooltip<O>(options?: O & {
+   gap?: number,
+   placement?: Placement,
+   info?: { [key: string]: unknown }
+}) {
    const tooltip = Ionic(new InternalTooltipModel(
       options?.placement ?? 'above',
-      (options?.info ?? {}) as O extends {info: infer I } ? I : {}
+      options?.gap ?? .75,
+      (options?.info ?? {}) as O extends { info: infer I } ? I : {}
    ))
 
-   return tooltip as unknown as Readonly<Ionic<InternalTooltipModel<O extends {info: infer I } ? I : {}>>>
+   return tooltip as unknown as Readonly<Ionic<InternalTooltipModel<O extends { info: infer I } ? I : {}>>>
 }
 
 type AsTooltipTrigger = (node: HTMLElement) => void
@@ -127,7 +255,8 @@ class InternalTooltipModel<T = {}> {
    info!: T[keyof T]
 
    constructor(
-      private placement: Placement,
+      public placement: Placement,
+      public gap: number,
       private config: T
    ) {
    }
@@ -191,7 +320,7 @@ class InternalTooltipModel<T = {}> {
 
          const showTooltip = () => {
             this.setAnchor(key) // TODO: assuming trigger is the same as anchor
-            this.show(info)
+            queueTask(() => this.show(info))
          }
 
          const hideTooltip = () => {
@@ -240,7 +369,8 @@ export type TooltipModel = Readonly<InternalTooltipModel<any>>
 
 export {
    TooltipContent,
-   TooltipArrow,
+   TooltipTail,
+   TooltipRoot,
    createTooltip,
    TOOLTIP_CONFIG
 }

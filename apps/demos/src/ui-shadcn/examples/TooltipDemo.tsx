@@ -2,7 +2,6 @@ import { Context, createRoot, template } from "@rue/lumo"
 import { Button } from "../Button"
 import { Tooltip } from "../Tooltip"
 import { TOOLTIP_CONFIG, createTooltip } from "../../ui-base/tooltip/Tooltip"
-import { watch } from "@rue/quarky"
 
 // [X] anchoring
 // [] responsive re-anchoring
@@ -10,6 +9,7 @@ import { watch } from "@rue/quarky"
 // [] close delay window
 // [] tooltip default anchor
 // [] tooltip default trigger (no info)
+// [] show-hide arrow
 // [X] show-hide
 // [X] show-hide with delay
 // [X] show-hide with transitions
@@ -20,6 +20,9 @@ const demoBoxStyle = "relative flex h-72 w-full justify-center p-10 data-[align=
 export function TooltipDemo() {
    const tooltip = createTooltip({
       placement: 'above',
+      // placement: 'left',
+      // placement: 'right',
+      // placement: 'below',
       info: {
          bold: 'Bold',
          italic: 'Italic',

@@ -143,7 +143,7 @@ export function makeComponent(
    fromTag: ComponentConfig,
    // $index: Ion<number> | undefined
 ): Component {
-   const { ref, class: classes, style, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, ...other } = fromTag
+   const { ref, class: classes, style: styles, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, ...other } = fromTag
    const { hooks, events, attributes, transitions } = analyzeAttributes(other)
    console.log('component tag config', fromTag)
    console.log('component hooks', hooks)
@@ -158,6 +158,7 @@ export function makeComponent(
       transitions: {...transitions, ...forwardTransitions},
       Slot,
       classes,
+      styles,
       ref
       // classes: classString
       // styles: style ? toStyleDeclaration(style) : undefined // TODO:
