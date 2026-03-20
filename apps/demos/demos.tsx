@@ -30,12 +30,12 @@ import { TestDerivationA } from "./src/TestDerivation"
 import { TestSyncEffects } from "./src/TestSyncEffects"
 import { StyledComp } from "./src/TestForwardRef"
 import { TestOnceEager } from "./src/TestOnceEager"
-import { TestPortal } from "./src/TestPortal"
+import { TestPortal, TestPortalB } from "./src/TestPortal"
 import { TooltipDemo } from "./src/ui-shadcn/examples/TooltipDemo"
 import { TestIfElseMix } from "./src/TestIfElseMix"
 
 export function runDemo() {
-   const app = createRoot(TooltipDemo)
+   const app = createRoot(TestPortalB)
 
    app.mount('#root')
 }

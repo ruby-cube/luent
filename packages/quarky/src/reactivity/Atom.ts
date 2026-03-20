@@ -78,6 +78,7 @@ export class TrackedAtom {
          // console.warn('schedule effects', phase, this.effects.get(phase), this)
          cycle.scheduleEffects(this.effects.get(phase)!, phase)
          if (phase === SYNC) {
+            console.log('run sync effects')
             cycle.runSyncEffects()
          }
       }

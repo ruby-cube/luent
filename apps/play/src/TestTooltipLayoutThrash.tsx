@@ -1,7 +1,5 @@
-// @ts-nocheck
-import { template, If, measureLayout, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
-import { Ion, MutableIon } from '@rue/quarky';
-import { AnyObject } from '@rue/types';
+import { template, If, NodeRef, atMounted, Portal, RenderSlot, FromTag } from '@rue/lumo';
+import { Ion, queueRender } from '@rue/quarky';
 
 
 export function TestTooltip() {
@@ -66,12 +64,12 @@ export function ButtonWithTooltip({ Slot }: ButtonWithTooltipInput) {
             on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
             on:pointerleave={e => { $targetRect.value = null }}
          >
-            {Slot.Content}
+            {Slot.Content()}
          </button>
 
-         {If($targetRect, $targetRect =>
-            <Tooltip targetRect={$targetRect()}>
-               {Slot.Tooltip}
+         {If($targetRect,
+            <Tooltip targetRect={$targetRect()!}>
+               {Slot.Tooltip()}
             </Tooltip>
          )}
       </>
@@ -102,37 +100,18 @@ export function Tooltip(input: FromTag<{
    const $div = NodeRef('div');
    const $height = Ion(undefined as number | undefined)
 
-   atMounted(() => ooo
-      .await($layout, () => (
-         $div()?.getBoundingClientRect().height
-      ))
-      .await($render, height => {
-         if (height != null) $height.value = height;
-      })
-   )
-
-
-
-   atMounted(Async(() => ooo
-      .await($layout, () => ({
-         height: $div()?.getBoundingClientRect().height
-      }))
-      .await($render, (x, { height }) => {
-         if (height != null) $height.value = height;
-      })
-      .await($tick, () => {
-         console.log('this runs after tick resolves which is awaited once layout resolves')
-      })
-   ))
-
+   // atMounted(() => {
+   //    const height = $div()?.getBoundingClientRect().height
+   //    if (height != null) $height.value = height;
+   // })
 
    // prevent looped layout thrashing w/ measureLayout
-   atMounted(async () => {
-      const height = await layout(() =>
-         $div()?.getBoundingClientRect().height
-      )
-      if (height != null) $height.value = height;
-   })
+   // atMounted(async () => {
+   //    const height = await layout(() =>
+   //       $div()?.getBoundingClientRect().height
+   //    )
+   //    if (height != null) $height.value = height;
+   // })
 
    const shiftX = targetRect.left
 
@@ -155,7 +134,7 @@ export function Tooltip(input: FromTag<{
             }}
          >
             <div ref={$div} class="tooltip">
-               {Slot}
+               {Slot()}
             </div>
          </div>
       )

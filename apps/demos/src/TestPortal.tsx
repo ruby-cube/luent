@@ -15,3 +15,18 @@ export function TestPortal() {
       </div>
    )
 }
+
+export function TestPortalB() {
+   const $show = Ion(false)
+
+   return template(
+      <div>
+         <div on:click={e => $show.value = !$show()}>This is not teleported</div>
+         {If($show,
+            <o--portal to='body'>
+               <div>hello I teleported</div>
+            </o--portal>
+         )}
+      </div>
+   )
+}

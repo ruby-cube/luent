@@ -154,12 +154,14 @@ export class RenderCycle {
 
    *runPhase(phase: Phase, genState?: { paused: boolean, gen: Generator }, onComplete: () => void = noop) {
       // if (this.update.timeMargin === 1000 && this.update.idle === false) 
+      console.log('runPhase', phase)
       this.currentPhase = phase
       this.subphase = 'effects'
       const { process } = this
 
       const queue = this.effects[phase]
       if (!queue) {
+         console.log('no queue', phase)
          onComplete()
          return;
       }
@@ -177,7 +179,9 @@ export class RenderCycle {
       while (i--) {
          const queues = queue.effects;
          const completed = phase === SYNC ? undefined : new Set<Effect>()
+         console.log('batches', phase, queues)
          for (const batch of queues) {
+            console.log('run batch', phase)
             batch.requeued = false
             runProcess(() => batch.runEffects(queue.runEffect, completed, genState ? process : undefined, () => {
                if (genState) {
@@ -374,13 +378,10 @@ export class RenderCycle {
       // this.$effectsComplete(TICK).then(fn)
    }
 
-   // $effectsComplete(phase: Phase) {
-   //    return this.useTaskQueue(phase).effectsComplete;
-   // }
-
    scheduleEffects(effects: EffectQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
       if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      console.log('scheduleEffects', phase, '-->', adjustedPhase, effects)
       this.useTaskQueue(adjustedPhase).scheduleEffects(effects)
    }
 

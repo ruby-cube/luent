@@ -68,7 +68,13 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
       mountDOMNodes(nodes, element)
    })
 
-   return null;
+   return new PortalKit(nodes);
+}
+
+class PortalKit extends VineNode {
+   constructor(public nodes: JSXNode[]){
+      super()
+   }
 }
 
 // export function isPortal(value: unknown) {

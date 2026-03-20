@@ -264,20 +264,28 @@ export class IfElseKit extends VineNode {
    }
 
    deactivateConditional(kit: DynamicNodeKit | undefined) {
+      console.log('deactivateConditional A')
       if (!kit) return;
+      console.log('deactivateConditional B')
       const prevNodes = kit.nodes;
       this.pendingDeactivatedKit = null
       if (!prevNodes) return;
+      console.log('deactivateConditional C')
       kit.nodes = null;
-
+      
       if (!kit.cache) {
+         console.log('deactivateConditional D')
          // kit.awaitCache = undefined
          kit.flask!.emitDiscard()
          kit.flask = undefined
       }
-      else kit.flask!.emitDemount()
-
+      else {
+         console.log('deactivateConditional E')
+         kit.flask!.emitDemount()
+      }
+      
       queueInternalRender(() => {
+         console.log('deactivateConditional F', prevNodes)
          removeDOMNodes(prevNodes)
       }, this.outerFlask)
       return kit;

@@ -74,10 +74,12 @@ export class EffectQueue {
          if (
             !effect.run // weeds out effects that have been unlinked due to retracking
          ) {
+            console.log('!effect.run', effect.fn)
             continue;
          }
          // prevent repeats within queue (but not across extended queues and phases)
          if (completed?.has(effect)) {
+            console.log('completed?.has(effect)', effect.fn)
             this.retain(effect)
             continue;
          }

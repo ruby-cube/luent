@@ -176,7 +176,9 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
                      transitionCount--
                      if (transitionCount === 0) {
                         flask.emitDiscard()
-                        transitioningOut.delete(flask)
+                        // queueTask(() => {
+                           transitioningOut.delete(flask)
+                        // })
                         endTransition()
                      }
                   }

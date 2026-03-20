@@ -130,14 +130,14 @@ function _logAtoms(particles: Particle[]) {
    for (const particle of particles) {
       const traceable = particle.asTraceable!
       if ('particles' in particle) {
-         console.group(`${traceable.name}:`, particle.getState())
-         console.log(traceable.origin)
+         console.group(`${traceable?.name}:`, particle.getState())
+         console.log(traceable?.origin)
          _logAtoms(particle.particles)
          console.groupEnd()
       }
       else {
-         console.group(`${traceable.name}:`, particle.getState())
-         console.log(traceable.origin)
+         console.group(`${traceable?.name}:`, particle.getState())
+         console.log(traceable?.origin)
          console.groupEnd()
       }
    }
@@ -225,7 +225,7 @@ type TraceableCompound = TraceableEntity & Compound & (Stateful | {})
 export function logAtoms(subject: TraceableCompound) {
    const traceable = subject.asTraceable as Traceable
    console.log('')
-   console.groupCollapsed(`%cAtoms of \`${traceable.name}\``, "background-color: lightblue; padding-inline: .5em; color: black")
+   console.groupCollapsed(`%cAtoms of \`${traceable?.name}\``, "background-color: lightblue; padding-inline: .5em; color: black")
    if ('getState' in subject) console.log('value:', subject.getState())
    _logAtoms(subject.particles)
    console.groupEnd()

@@ -79,6 +79,8 @@ import { QrxCounter } from './Counter.qrx';
 import { TestRenderFunctionAsIon } from './TestRenderFunctionAsIon';
 import { QrxTodo } from './QrxTodoApp.qrx';
 import { TestDev } from './TestDev';
+import { TestRenderEffects } from './TestRenderEffects';
+import { TestTooltip2 } from './TestTooltip';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -152,7 +154,7 @@ import { TestDev } from './TestDev';
 // }
 
 // const app = createRoot(TestThru)
-const app = createRoot(TestDev)
+const app = createRoot(TestTooltip2)
 
 app.mount('#root')
 

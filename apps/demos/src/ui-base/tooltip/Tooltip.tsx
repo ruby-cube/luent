@@ -1,7 +1,8 @@
 import { atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/lumo"
-import { Ion, Ionic, queueTask, toIon } from "@rue/quarky"
+import { dev, getActiveUpdate, Ion, Ionic, queueTask, toIon } from "@rue/quarky"
 import { computePosition, arrow, offset, autoUpdate } from "@floating-ui/dom"
 import { vi } from "vitest";
+import { quarkOf } from "../../../../../packages/quarky/src/abstract/Quark";
 
 
 
@@ -103,6 +104,10 @@ function TooltipRoot(setup: FromTag<{
    console.log('attributes?', attributes)
    const { gap } = tooltip
 
+   // dev.logAtoms(Ion(() => tooltip.placement, {
+   //    devName: 'tooltip.placement'
+   // }))
+
    return template(
       <>
          {If((tooltip.visible),
@@ -110,7 +115,7 @@ function TooltipRoot(setup: FromTag<{
                <div
                   at:create={node => tooltip.setTooltip(node)}
                   ref={ref}
-                  class={('tooltip ' + tooltip.placement)}
+                  class={Ion(() =>(console.log('>>> tooltip classes', tooltip.placement, getActiveUpdate()?.cycle.currentPhase), 'tooltip ' + tooltip.placement))}
                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
                   {...attributes}
                >
@@ -167,61 +172,10 @@ function TooltipContent(setup: FromTag<{
    const { gap } = tooltip;
 
    return template(
-      <div class={('tooltip-content ' + tooltip.placement + ' ' + æclasses())}>
+      <div class={æclasses}>
          {Slot}
       </div>
    )
-      .style(css`
-         .tooltip-shift {
-            position: fixed;
-         }
-
-         .tooltip-shift.above {
-            justify-self: anchor-center;
-            bottom: calc(anchor(top) + ${gap}rem);
-         }
-
-         .tooltip-shift.below {
-            justify-self: anchor-center;
-            top: calc(anchor(bottom) + ${gap}rem);
-         }
-
-         .tooltip-shift.left {
-            align-self: anchor-center;
-            right: calc(anchor(left) + ${gap}rem);
-         }
-
-         .tooltip-shift.right {
-            align-self: anchor-center;
-            left: calc(anchor(right) + ${gap}rem);
-         }
-
-         // .tooltip-content {
-         //    position: absolute;
-         //    position-anchor: var(--tooltip-anchor);
-         //    isolation: isolate;
-         // }
-
-         // .tooltip-content.above {
-         //    justify-self: anchor-center;
-         //    bottom: calc(anchor(top) + ${gap}rem);
-         // }
-
-         // .tooltip-content.below {
-         //    justify-self: anchor-center;
-         //    top: calc(anchor(bottom) + ${gap}rem);
-         // }
-
-         // .tooltip-content.left {
-         //    align-self: anchor-center;
-         //    right: calc(anchor(left) + ${gap}rem);
-         // }
-
-         // .tooltip-content.right {
-         //    align-self: anchor-center;
-         //    left: calc(anchor(right) + ${gap}rem);
-         // }
-      `)
 }
 
 // type RenderTooltip = (data: { tooltip: string }) => RawJSXNode
@@ -279,7 +233,9 @@ function createTooltip<O>(options?: O & {
       options?.placement ?? 'above',
       options?.gap ?? .75,
       (options?.info ?? {}) as O extends { info: infer I } ? I : {}
-   ))
+   ), {
+      devName: 'tooltip'
+   })
 
    return tooltip as unknown as Readonly<Ionic<InternalTooltipModel<O extends { info: infer I } ? I : {}>>>
 }
@@ -313,11 +269,8 @@ class InternalTooltipModel<T = {}> {
       this.tooltipNode = tooltipNode
       atMounted(() => {
          if (tooltipNode.getBoundingClientRect().top < 0) { 
+            console.log('!!!! flip!', quarkOf(this.æflipped).asTrackedAtom)
             this.flip() 
-            // this.hide()
-            // queueTask(() => {
-            //    this.show()
-            // })
          }
       })
    }
@@ -329,6 +282,7 @@ class InternalTooltipModel<T = {}> {
    private flipped: boolean = false;
 
    flip() {
+      console.log('>>> flip!', getActiveUpdate()?.cycle.currentPhase)
       this.flipped = !this.flipped
    }
 
