@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { Effect } from "./EffectQueue"
+import { Effect } from "./Effect"
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction, isObject, noop } from "@rue/utils";
@@ -10,9 +10,6 @@ import type { QuarkyIonicProxy } from "../ionic/ModelQuark";
 import { Traceable, TraceableEntity } from "../debug/Traceable";
 import { Stateful } from "../abstract/Stateful";
 import { isIonicProxy } from "../ionic/IonicModel";
-import { AtomicIonQuark } from "../ion/AtomicIon";
-import { SimpleState } from "./State";
-import { queueTask, SYNC } from "./RenderCycle";
 
 
 export function isSubject(value: AnyObject): value is Subject {
@@ -232,7 +229,7 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
       const effect = this.effect
       if (!effect) throw new Error('Must call linkEffect before retracking')
       console.log('retrack call', this.fn)
-      effect.unlinkAtoms()
+      effect.unlink()
       this.untrackAtoms()
       const output = this.trackAtoms(this.fn)
       this.forEachAtom(atom => {
@@ -368,7 +365,7 @@ export class IonSubject implements StatefulSubject, TraceableEntity {
 //    private retrackedCall() {
 //       const retrack = this.retrack;
 //       if (retrack) {
-//          this.effect.unlinkAtoms()
+//          this.effect.unlink()
 //          const value = detachedCall(() => this.retrackCall(this.ion))
 //          if (isIonicProxy(value)) {
 //             trackAbsorbedIons(this, value)

@@ -3,12 +3,10 @@ import { AnyObject } from "@rue/types";
 import { RootContext, createRootContext } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { instantUpdate, load } from "@rue/quarky";
+import { instantUpdate, load, queueRender } from "@rue/quarky";
 import { Provided } from "./context/Context";
 import { toInput } from "./component/Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
-import { normalizeToArray } from "@rue/utils";
-import { queueInternalRender } from "../../quarky/src/reactivity/RenderCycle";
 import { RenderFunction } from "./node/makeJSXNode";
 
 let appRoot: Element;
@@ -54,9 +52,9 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
             try {
                nodes = this.nodes = processJSXOutput(App())
                setUpNodeVine(nodes, appRoot)
-               queueInternalRender(() => {
+               queueRender(() => {
                   mountDOMNodes(nodes, appRoot)
-               }, flask)
+               })
 
                flask.emitInitialMount()
             }

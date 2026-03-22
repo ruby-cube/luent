@@ -44,7 +44,7 @@ function lockState(state: PendableState) {
    //    return;
    // }
    const ok = update.race(state.pendingUpdate)
-   if (!ok) console.warn("*&^ RACE updates aren't the same")
+   if (!ok) console.warn("*&^ RACE updates aren't the same", update, state.pendingUpdate)
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
 
@@ -110,6 +110,7 @@ export class SimpleState implements PendableState {
    }
 
    commitUpdate() {
+      console.log('commit update', this.current, this.pending)
       return this.current = this.pending
    }
 

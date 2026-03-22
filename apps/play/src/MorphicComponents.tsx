@@ -1,5 +1,4 @@
-import { RENDER } from "../../../packages/quarky/src/reactivity/RenderCycle";
-import { ion } from "../../../packages/quarky/src"
+import { RENDER } from "../../../packages/quarky/src/reactivity/x_RenderCycle";
 import { NodeRef } from "@rue/lumo";
 
 export function MainBlock() {

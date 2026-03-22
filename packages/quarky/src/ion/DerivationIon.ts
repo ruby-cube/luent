@@ -1,14 +1,14 @@
-import { Effect } from "../reactivity/EffectQueue";
+import { Effect } from "../reactivity/Effect";
 import { FunctionSubject } from "../reactivity/Subject";
 import { QUARK } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
 import { Traceable } from "../debug/Traceable";
-import { SYNC } from "../reactivity/RenderCycle";
 import { $activeUpdate } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
 import { queueCommit, SimpleState } from "../reactivity/State";
 import { isPlainObject } from "@rue/utils";
 import { Stateful } from "../abstract/Stateful";
+import { SYNC } from "../reactivity/RenderCycle";
 
 
 export class DerivationIonQuark extends FunctionSubject implements Stateful {

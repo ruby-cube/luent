@@ -1,5 +1,5 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@rue/utils";
-import { __DEV__checkIfTracked, INTERNAL_RENDER, Ion, isGetter, PRELUDE, queueInternalRender, untracked, watch, watchToRender, Ø } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, queueRender, untracked, watch, watchToRender, Ø } from "@rue/quarky";
 import { isComponentKit } from "../component/Component";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
@@ -153,9 +153,9 @@ class DynamicTextNode extends VineNode {
       this.nodes = [textNode]
       watchToRender($text, ({ current, previous, flask }) => {
          // if (current === previous) return;
-         queueInternalRender(() => {
+         queueRender(() => {
             textNode.data = toString($text());
-         }, flask)
+         })
          //NOTE: We call the ion instead of using the current value passed in because, 
          // the time between PRELUDE and PAINT is long enough that the value may have changed already in cases of animation
          // Passing in current can cause weird lags as seen in the Sierpinski Triangle

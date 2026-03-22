@@ -1,9 +1,9 @@
 import { getActiveFlask } from "@rue/flask"
-import { PRELUDE } from "../reactivity/RenderCycle"
 import { watch } from "../reactivity/Watcher"
 import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"
 import { RawJSXNode } from "@rue/lumo"
+import { PRELUDE } from "../reactivity/RenderCycle"
 
 export type SuspenseIon = Ion<Promise<void> | null> & {
    initial: boolean

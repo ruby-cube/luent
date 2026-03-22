@@ -1,324 +1,113 @@
+import { Effects } from "./Atom";
+import { Effect } from "./Effect";
+import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, Update } from "./Update";
+
+export const queueTask = (task: () => void) =>
+   //@ts-expect-error
+   scheduler
+      .postTask(task);
 
 
-import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, tickUpdate } from "./Update"
-import { Effect, EffectQueue, TaskQueue } from "./EffectQueue"
-import { Flask } from "@rue/flask"
-import { getInternalTrace } from "../../../flask/debug"
-import { Update } from "./Update";
-import { noop } from "@rue/utils";
-import { UpdateType } from "../../../x-old/x_IdleUpdate";
+type Task = () => void
 
+// [X] run sync effects
+// [X] skip effects that have already been run *** (completed.has(effect) for each round)
+// [X] make sure Effects of TrackedAtoms don't get queued multiple times
+// [X] run tick effects
+// [X] phase management
+// [X] initialize lazily
+// --
+// [] manage precommit vs postcommit + generator
+// [] infinite loop detection/prevention
 
-export const queueTask = (task: () => void) => scheduler.postTask(task);
-
-// function queueSwiftTask(task: Task) {
-//    // console.trace('queueSwiftTask')
-//    return requestIdleCallback(task, { timeout: 17 })
-// }
-
-export type Phase = typeof SYNC | AsyncPhase
-
-type AsyncPhase =
-   typeof PRELUDE
-   | typeof INTERNAL_RENDER
-   | typeof RENDER
-   | typeof POSTLUDE
-   | typeof TICK
-
-//    enum Phase {
-//       PRELUDE = 0,
-//       INTERNAL_RENDER,
-//       LAYOUT,
-//       RENDER,
-//       PRELUDE_II,
-//       INTERNAL_RENDER_II,
-//       POSTLUDE,
-//       TICK,
-//       SYNC = 'SYNC'
-// }
-
-export const SYNC = 'SYNC'
-export const PRELUDE = 0
-export const INTERNAL_RENDER = 1
-
-// TODO: ??
-export const RENDER = 2
-export const POSTLUDE = 3
-export const TICK = 4
-
-
-type CyclePhase = {
-   phase: AsyncPhase;
-   scheduleEffects: (task: Task) => void;
-   // scheduleTasks: (task: Task) => void;
+export enum Phase {
+   SYNC = 's',
+   PRELUDE = 'p',
+   RENDER = 'r',
+   LAYOUT = 'l',
+   TICK = 't'
 }
 
+export const { LAYOUT, PRELUDE, RENDER, SYNC, TICK } = Phase
 
-function assertSequentialPhases(phases: CyclePhase[]) {
-   let i = phases.length
-   while (i--) {
-      if (phases[i].phase !== i) {
-         throw new Error('[RUE INTERNAL ERROR] phase numbers incorrect')
-      }
+export const phaseKeys = [SYNC, PRELUDE, RENDER, LAYOUT, TICK]
+
+
+export function createPhaseMap(): { [K in typeof phaseKeys[number]]: undefined } {
+   const map = Object.create(null)
+   for (const phase of phaseKeys) {
+      map[phase] = undefined
    }
+   return map
 }
 
-function runTask(fn: Function) {
-   fn()
-}
 
-const queueIdleTask = (task: IdleRequestCallback) => requestIdleCallback(task, { timeout: 1 })
-
-/**
- * @internal
- */
 export class RenderCycle {
 
-   currentPhase: Phase = SYNC
+   currentPhase = SYNC
 
-   phases: Phase[] = [
-      PRELUDE,
-      INTERNAL_RENDER,
-      RENDER,
-      POSTLUDE,
-      TICK
-   ]
+   phases: { [K in typeof phaseKeys[number]]?: InstanceType<typeof phaseClasses[K]> } = createPhaseMap()
 
-   startTime = performance.now()
+   getPhase(phase: Phase) {
+      return (this.phases[phase] ?? (this.phases[phase] = this.createPhase(phase)))
+   }
 
-   process: CycleProcess
+   createPhase(phase: Phase): BasePhase & CycledPhase {
+      return new phaseClasses[phase](phase) as BasePhase & CycledPhase
+   }
 
-   constructor(
-      public update: Update,
-   ) {
-      // console.log('(()) render cycle', update.idle)
-      this.process = new CycleProcess(update)
-      // const schedulePrerenderTasks = update.idle ? queueIdleTask : runTask // TODO: need to check deadline for queueSwiftTask
-      // const scheduleInternalRender = update.idle ? queueTask : runTask
+   constructor(private update: Update) {
 
-      // this.phases = [{
-      //    phase: PRELUDE,
-      //    // scheduleEffects: queueTask,
-      //    scheduleEffects: update.idle ? queueIdleTask : runTask, // TODO: can I get rid of this microtask?
-      //    // scheduleTasks: schedulePrerenderTasks,
-      // }, {
-      //    phase: INTERNAL_RENDER,
-      //    scheduleEffects: (runEffects) => { this.update.commit(); runEffects() },
-      //    // scheduleTasks: runTask
-      // }, {
-      //    phase: RENDER,
-      //    scheduleEffects: runTask,
-      //    // scheduleTasks: runTask,
-      // }, {
-      //    phase: POSTLUDE,
-      //    scheduleEffects: runTask,
-      //    // scheduleTasks: runTask,
-      // }, {
-      //    phase: TICK,
-      //    scheduleEffects: queueTask,
-      //    // scheduleTasks: queueTask,
-      // }]
+   }
 
-      this.effects[INTERNAL_RENDER] = new TaskQueue(update, INTERNAL_RENDER)
-
-      // if ( __DEV__) assertSequentialPhases(this.phases)
+   get more() {
+      return this.phases[PRELUDE]?.more || this.phases[RENDER]?.more || this.phases[LAYOUT]?.more
    }
 
    started = false
 
+   loop = 0;
+
    start() {
-      if (this.cancelled === true) return;
-      this.runPrecommit(() => {
-         this.update.commit()
-         this.runPostcommit()
-         // this.scheduleTick()
-         this.update.complete()
-         if (__DEV__) {
-            requestAnimationFrame((time) =>
-               this.timecheck(time)
-            )
-         }
-      })
-      // ---- DO NOT WRITE CYCLE BEHAVIOR AFTER THIS LINE: GENERATOR MAY BE PAUSED ----
-   }
+      this.started = true;
+      while (this.more) {
+         this.loop++;
+         console.log('@@@ this.loop', this.loop)
 
-   runPrecommit(onComplete: () => void) {
-      const genState: { paused: boolean, gen: Generator } = { paused: false, gen: undefined! }
-      if (this.update.idle) {
-         this.process.start(() => this.runPhase(PRELUDE, genState, onComplete), genState)
-      }
-      else {
-         this.process.runSync(() => this.runPhase(PRELUDE, undefined, onComplete))
-      }
-   }
+         console.log('@@@ prelude---')
+         this.currentPhase = PRELUDE
+         const prelude = this.phases[PRELUDE]
+         if (prelude) this.runPhase(prelude)
 
-   *runPhase(phase: Phase, genState?: { paused: boolean, gen: Generator }, onComplete: () => void = noop) {
-      // if (this.update.timeMargin === 1000 && this.update.idle === false) 
-      console.log('runPhase', phase)
-      this.currentPhase = phase
-      this.subphase = 'effects'
-      const { process } = this
-
-      const queue = this.effects[phase]
-      if (!queue) {
-         console.log('no queue', phase)
-         onComplete()
-         return;
-      }
-
-      const { update } = queue
-      const runProcess =
-         phase === PRELUDE && update.idle ? (fn: () => Generator) => process.runNext(fn) :
-            (fn: () => Generator) => process.runSync(fn)
-
-      queue.started = true;
-      pushUpdate(update)
-
-      queue.runningEffects = true
-      let i = 1
-      while (i--) {
-         const queues = queue.effects;
-         const completed = phase === SYNC ? undefined : new Set<Effect>()
-         console.log('batches', phase, queues)
-         for (const batch of queues) {
-            console.log('run batch', phase)
-            batch.requeued = false
-            runProcess(() => batch.runEffects(queue.runEffect, completed, genState ? process : undefined, () => {
-               if (genState) {
-                  process.resumeOuter(genState, () => {
-                     if (update.completed) return;
-                     pushUpdate(this.update)
-                  })
-               }
-            }))
-
-            if (genState && process.mustPause()) {
-               popUpdate()
-               process.prepOuterPause(genState, () => {
-                  if (update.completed) return;
-                  pushUpdate(update)
-               })
-               yield;
-            }
-            batch.queued = queue.moreEffects?.length ? batch.requeued : false;
-            // batch.requeued = false;
+         if (this.loop === 1) {
+            this.update.commit()
          }
 
-         queue.effects = queue.moreEffects ?? []
-         queue.moreEffects = undefined;
+         console.log('@@@ render---')
+         this.currentPhase = RENDER
+         const render = this.phases[RENDER]
+         if (render) this.runPhase(render)
 
-         this.subphase = 'tasks'
-         const tasks = queue.tasks;
-
-         for (let i = 0; i < tasks.length; i++) {
-            tasks[i]()
-
-            if (genState && process.mustPause() && i + 1 !== tasks.length) {
-               popUpdate()
-               process.prepOuterPause(genState, () => {
-                  if (update.completed) return;
-                  pushUpdate(update)
-               })
-               yield;
-            }
-         }
-
-         queue.tasks = []
-
-         if (queue.effects.length) {
-            // console.warn('RUN AGAIN', phase)
-            i = 1
-         }
+         console.log('@@@ layout---')
+         this.currentPhase = LAYOUT
+         const layout = this.phases[LAYOUT]
+         if (layout) this.runPhase(layout)
       }
-      queue.runningEffects = false
+      if (!this.update.committed) this.update.commit()
 
-      // if (this.cancelled) return; // TODO: Manage cancellation with trycatch?
-      popUpdate()
+      console.log('@@@ tick---')
+      this.currentPhase = TICK
+      this.runTickEffects()
 
-      onComplete()
-   }
-
-   runPostcommit() {
-      const { phases } = this
-      for (let i = 1; i < phases.length; i++) {
-         const phase = phases[i]
-         this.process.runSync(() => this.runPhase(phase))
-         if (this.cancelled) return;
+      this.update.complete()
+      if (__DEV__) {
+         requestAnimationFrame((time) =>
+            this.timecheck(time)
+         )
       }
    }
 
-   // scheduleTick() {
-   //    const queue = this.effects[TICK]
-   //    if (!queue) return;
-   //    requestAnimationFrame(() => {
-   //       queueTask(() => {
-   //          queue.update.start()
-   //          this.process.runSync(() => this.runPhase(TICK)) //TODO: There should be new updates for each tick task.. right?
-   //       })
-   //    })
-   // }
-
-
-   // private startTasks: (() => void)[] | undefined
-
-   // private runStartTasks() {
-   //    const startTasks = this.startTasks
-   //    if (startTasks)
-   //       for (const task of startTasks) {
-   //          task()
-   //       }
-   // }
-
-   // onStart(fn: () => void) {
-   //    if (this.started) {
-   //       fn()
-   //    }
-   //    else {
-   //       const startTasks = this.startTasks ?? (this.startTasks = [])
-   //       startTasks.push(fn)
-   //    }
-   // }
-
-   // schedulePhase({ phase, scheduleEffects }: CyclePhase) {
-   //    scheduleEffects(() => {
-   //       if (this.cancelled) return;
-   //       this.currentPhase = phase
-   //       this.subphase = 'effects'
-
-   //       // pushUpdate(this.update)
-   //       this.runEffects(phase, (runTasks) => {
-   //          if (this.cancelled) return;
-   //          this.subphase = 'tasks'
-   //          runTasks(() =>
-   //             this.closePhase(phase)
-   //          )
-   //       })
-   //       // popUpdate()
-   //    })
-   // }
-
-   runSyncEffects() {
-      this.process.runSync(() => this.runPhase(SYNC))
-      this.effects[SYNC] = undefined
-   }
-
-   idleIDs: number[] = []
-
-   cancelled: boolean = false;
-
-   cancel() {
-      // try {
-      this.idleIDs.forEach((id) => cancelIdleCallback(id))
-      let i = this.phases.length
-      while (i--) {
-         this.effects[i]?.cancel()
-      }
-      this.cancelled = true;
-      // }
-      // catch (error) {
-      //    console.log('CATCH', error)
-      // }
-   }
+   startTime = performance.now()
 
    timecheck(now: DOMHighResTimeStamp) {
       const delta = now - this.startTime
@@ -331,157 +120,127 @@ export class RenderCycle {
       }
    }
 
-   effects: { [key: number | string]: TaskQueue | undefined } = {
-      [SYNC]: undefined,
-      [PRELUDE]: undefined, // can be idle
-      // --- commit ... synchronous from this point on
-      [INTERNAL_RENDER]: undefined,
-      [RENDER]: undefined,
+   runPhase(phase: CycledPhase) {
+      let effects = phase.effects
+      phase.effects = []
 
+      let tasks: Task[] = phase.tasks
+      phase.tasks = []
 
-      [POSTLUDE]: undefined,
-      // --- queueTask, instant update
-      [TICK]: undefined
-   }
-
-   useTaskQueue(phase: Phase) {
-      return this.effects[phase]
-         ?? (this.effects[phase] =
-            phase === TICK
-               ? this.createTickTaskQueue()
-               : new TaskQueue(this.update, phase)
-         )
-   }
-
-   private createTickTaskQueue() {
-      const { update } = this
-
-      const tick = new TaskQueue(update, TICK) // TODO: should this be new update??
-      tick.runEffect = (effect) => {
-         requestAnimationFrame(() => {
-            queueTask(() => {
-               console.log('#### TICK')
-               if (!effect.run) return;
-               const _update = new Update(
-                  update.type,
-                  update.timeMargin,
-                  update.type === UpdateType.USER_INTERACTION ? false : update.idle // TODO: not sure about this
-               )
-               _update.queue(effect.run).start()
-            })
-         })
+      pushUpdate(this.update)
+      let loop = 0
+      while (effects.length || tasks.length) {
+         loop++
+         const ran: Set<Effect> = new Set()
+         for (const queue of effects) {
+            queue.runEffects(ran, this.update)
+         }
+         for (const task of tasks) {
+            task()
+         }
+         effects = phase.effects
+         tasks = phase.tasks
+         phase.effects = []
+         phase.tasks = []
       }
-      return tick
+
+      popUpdate()
    }
 
-   onCompleted(task: () => void) { // TODO: tick tasks
-      // this.$effectsComplete(TICK).then(fn)
+   scheduleEffects(effects: Effects, phase: Phase) {
+      this.getPhase(phase).scheduleEffects(effects)
    }
 
-   scheduleEffects(effects: EffectQueue, phase: Phase) {
-      const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
-      console.log('scheduleEffects', phase, '-->', adjustedPhase, effects)
-      this.useTaskQueue(adjustedPhase).scheduleEffects(effects)
+   scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER) {
+      (this.getPhase(phase) as CycledPhase).scheduleTask(task)
    }
 
-   scheduleTask(task: Task, phase: Phase) {
-      const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
-      this.useTaskQueue(adjustedPhase).scheduleTask(task)
+   runSyncEffects() {
+      const phase = this.phases[SYNC]
+      if (!phase) return;
+      let effects = phase.effects
+      phase.effects = []
+
+      while (effects.length) {
+         const ran: Set<Effect> = new Set()
+         for (const queue of effects) {
+            queue.runEffects(ran, this.update)
+         }
+         effects = phase.effects
+         phase.effects = []
+      }
    }
 
-   subphase: 'effects' | 'tasks' = 'effects'
+   runTickEffects() {
+      const phase = this.phases[TICK]
+      if (!phase) return;
+      let effects = phase.effects
+      phase.effects = []
 
-   adjustPhase(phase: Phase) {
-      return this.currentPhase === phase ? phase
-         : phase === SYNC ? this.currentPhase
-            : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase
-      // TODO: phase adjustment for tick may be different... also, need to consider tasks that trigger effects and use subphases to adjust
+      while (effects.length) {
+         const ran: Set<Effect> = new Set()
+         for (const queue of effects) {
+            queue.runEffects(ran, this.update)
+         }
+         effects = phase.effects
+         phase.effects = []
+      }
    }
 }
 
 
+class BasePhase {
+   effects: Effects[] = []
 
-/**
- * Manages pausing and resuming of effects to prevent render-blocking
- */
-export class CycleProcess {
+   get more() {
+      return this.effects.length
+   }
+
    constructor(
-      private update: Update,
-   ) {
+      public phase: Phase
+   ) { }
 
-   }
-
-   private gen!: Generator
-
-   timeLeft() {
-      return 5
-   }
-
-   resetTime() {
-      const startTime = performance.now()
-      this.timeLeft = () => {
-         return 5 - (performance.now() - startTime)
+   scheduleEffects(effects: Effects) {
+      console.log('@@@ schedule effects', this.effects, 'queued?', this.queued(effects))
+      if (!this.queued(effects)) {
+         this.effects.push(effects)
       }
    }
 
-   start(fn: () => Generator, genState: { paused: boolean, gen: Generator } = { paused: false, gen: undefined! }) {
-      queueTask(() => {
-         this.resetTime()
-         this.runOuter(fn, genState)
-      })
-   }
-
-   runSync(fn: () => Generator) {
-      fn().next()
-   }
-
-   runOuter(fn: () => Generator, genState: { paused: boolean, gen: Generator }) {
-      genState.gen = this.gen = fn()
-      this.gen.next()
-   }
-
-   runNext(fn: () => Generator) {
-      this.gen = fn()
-      this.gen.next()
-   }
-
-   mustPause() {
-      return this.timeLeft() < 0
-   }
-
-   prepOuterPause(genState: { paused: boolean, gen: Generator }, onResume: () => void) {
-      genState.paused = true;
-      if (this.gen === genState.gen) {
-         // requestAnimationFrame(() => {
-         genState.paused = false;
-         this.resume(onResume)
-         // })
-      }
-   }
-
-   resumeOuter(genState: { paused: boolean, gen: Generator }, onResume: () => void) {
-      this.gen = genState.gen;
-      if (genState.paused)
-         // requestAnimationFrame(() => {
-         genState.paused = false;
-      this.resume(onResume)
-      // })
-   }
-
-   prepPause(onResume: () => void) {
-      this.resume(onResume)
-   }
-
-   resume(onResume: () => void) {
-      queueTask(() => {
-         this.resetTime()
-         onResume()
-         this.gen.next()
-      })
+   queued(effects: Effects) {
+      return this.effects.indexOf(effects) > -1
    }
 }
+
+class CycledPhase extends BasePhase {
+   tasks: Task[] = []
+
+   get more() {
+      console.log('this.effects.length', this.effects.length)
+      return this.effects.length || this.tasks.length
+   }
+
+   constructor(
+      public phase: Phase
+   ) {
+      super(phase)
+   }
+
+   scheduleTask(task: Task) {
+      this.tasks.push(task)
+   }
+}
+
+const phaseClasses = {
+   [SYNC]: BasePhase,
+
+   [PRELUDE]: CycledPhase,
+   [RENDER]: CycledPhase,
+   [LAYOUT]: CycledPhase,
+
+   [TICK]: BasePhase,
+}
+
 
 
 
@@ -507,11 +266,10 @@ export function getCurrentPhase() {
    return update.cycle.currentPhase;
 }
 
-type Task = () => void
 
 let _prelude: Promise<void> | undefined = undefined
 let _render: Promise<void> | undefined = undefined
-let _postlude: Promise<void> | undefined = undefined
+let _layout: Promise<void> | undefined = undefined
 let _tick: Promise<void> | undefined = undefined
 
 
@@ -543,19 +301,8 @@ export function renderphase() {
    return update.cycle.$effectsComplete(RENDER)
 }
 
-export function postlude() {
-   const update = $activeUpdate()
-   if (!update) return _postlude ?? (_postlude = new Promise<void>(resolve => {
-      renderphase().then(() => {
-         queueMicrotask(() => {
-            _postlude = undefined
-            resolve()
-         })
-      })
-   }))
-   return update.cycle.$effectsComplete(POSTLUDE)
-}
 
+// TODO: LAYOUT
 
 export function tick() {
    const update = $activeUpdate()
@@ -573,291 +320,10 @@ export function queuePrelude(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
 }
 
-export function queueInternalRender(task: Task, flask: Flask) { // TODO: do other task schedulers also need flask??
-   task
-      //@ts-expect-error
-      .__DEVName
-      = 'queueInternalRender'
-   task
-      //@ts-expect-error
-      .__DEVTrace
-      = getInternalTrace('internal render')
-
-   $activeUpdate()?.cycle.scheduleTask(() => {
-      if (flask.discarded) return;
-      task()
-   }, INTERNAL_RENDER)
-}
-
-
 export function queueRender(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, RENDER)
 }
 
-export function queuePostlude(task: Task) {
-   $activeUpdate()?.cycle.scheduleTask(task, POSTLUDE)
+export function queueLayout(task: Task) {
+   $activeUpdate()?.cycle.scheduleTask(task, LAYOUT)
 }
-
-export function onTick(task: Task) {
-   $activeUpdate()?.cycle.scheduleTask(task, TICK)
-}
-
-
-
-
-// export const queueInternalRender = (fn: Function) => {
-//    console.log('running internal render'),
-//    fn()
-// }
-
-
-// export const queueInternalRender = useUpdateCycleScheduler(INTERNAL_RENDER)
-// export const queueInternalPostrenderTask = useUpdateCycleScheduler(INTERNAL_POSTRENDER)
-// export const queuePostlude = (task: () => void) => {
-//    queueInternalPostrenderTask(postcycleTask(task))
-// }
-
-
-//NOTE: there may be multiple effect cycles per event
-// queueEffect (onPrerender)
-// afterEffects 
-// 
-
-
-// export function afterEffects<T extends (() => void) | undefined = undefined>(task?: T): T extends () => void ? void : Promise<void> {
-//    if (task) {
-//       onEventCycleEnd(task)
-//       return undefined as T extends () => void ? void : Promise<void>
-//    }
-//    return effectsComplete() as T extends () => void ? void : Promise<void>
-// }
-
-
-
-// watch($active, async () => {
-//    const { width } = measureWidth()
-
-//    await renderphase()
-//    column.width = width;
-
-//    await postlude()
-//    updateDatabase()
-
-// })
-
-// watch($active, () => {
-//    const { width } = measureWidth()
-
-//    onRender(() => {
-//       column.width = width;
-//    })
-
-//    onPostlude(() => {
-//       updateDatabase()
-//    })
-// })
-
-
-
-
-// // await is good if you need to share state and 
-// watch($active)
-//    .beforeRender(() => {
-
-//       const { width } = measureWidth()
-
-//       await onRender()
-
-//       column.width = width;
-
-//       if (!something) return;
-
-//       await afterRender()
-
-//       updateDatabase()
-//    })
-
-// watch(() => {
-//    if (!$active()) return;
-
-//    const { width } = measureWidth()
-
-//    await renderphase()
-//    column.width = width;
-
-//    if (!something) return;
-
-//    await postlude()
-//    updateDatabase()
-// })
-
-// watch($active, async () => {
-//    await postlude()
-//    doSomething()
-// })
-
-
-
-// watch($active, async () => {
-//    const { width } = measureWidth()
-
-//    watch($count, async () => {
-//       await postlude({ cancel: onAbort })
-//       column.width = width;
-//    })
-// }) // TODO: { sync: true } with batched as default, no phases. Phases will be the responsibility of the ui framework
-
-// watch($active).beforeRender(() => {
-//    const { width } = measureWidth()
-
-//    await watch($count).afterRender()
-
-//    column.width = width;
-// })
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const $todoID = Ion('kldk')
-// const $data = Ion()
-
-// queueIonicTask(async w => {
-//    await postlude()
-
-//    if (w($active)) {
-
-//    }
-//    else {
-
-//    }
-
-//    const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${w($todoID)}`)
-//    $data.value = await response.json()
-// })
-
-
-
-
-
-
-// export const [
-//    SYNC,
-//    PRELUDE,
-//    RENDER,
-//    POSTLUDE,
-//    COMPLETION
-// ] = useReactivity([ //(default to queueTask for all phases)
-//    definePhase('PRELUDE', (runPhase: VoidFunction) => queueMicrotask(() => queueMicrotask(runPhase))), // allows devs room to use queueMicrotask 
-//    definePhase('RENDER', requestAnimationFrame),
-//    definePhase('POSTLUDE', queueMicrotask)
-// ])
-
-
-
-// const PRELUDE = 'PRELUDE'
-// const RENDER = 'RENDER'
-// const POSTLUDE = 'POSTLUDE'
-
-
-
-// watch($count, async () => {
-//    await $render_phase();
-
-//    await prelude(); // this would schedule to the next event's prelude? which may or may not be before or after the next render (depending on )
-// })
-
-// // TODO:
-// // default phase: post-event
-// // must use sync: true for sync
-
-// watch($dog, async ({ state }) => {
-//    const width = catEl.width + state
-
-//    await $renderphase();
-//    petsEl.width = width;
-
-//    await postlude();
-//    petsEl.focus()
-// })
-
-// queueIonicTask((w, initial) => {
-
-// }, { phase: RENDER })
-
-// // TODO: figure out updating ui vs updating database, e.g. animating drag, then posting final position to db
-
-// function reMouseDown() {
-//    listen('mousemove', e => {
-//       doAction(UPDATE_POSITION, [e.clientX, e.clientY])
-//    })
-
-//    listen('mouseup', () => {
-//       doAction(UPDATE_POSITION, [e.clientX, e.clientY])
-//       const success = await dispatch(POST_POSITION, { x, y })
-//       if (!success)
-//          doAction(UPDATE_POSITION, [prevX, prevY])
-//    })
-// }
-
-// watch($dog, async ({ state }) => {
-//    const width = catEl.width + state
-
-//    await $updatephase('db');
-//    petsEl.width = width;
-
-//    await $postupdate();
-//    petsEl.focus()
-
-//    await $updatecomplete();
-
-// })
-
-// watch($dog, async ({ state }) => {
-//    const width = catEl.width + state
-
-//    await $updatephase('db');
-//    petsEl.width = width;
-
-//    await $postupdate();
-//    petsEl.focus()
-// })
-
-// const INSERT_TEXT = defineAction({
-//    do(action) {
-//       return (document, word, index) => {
-//          action.snapshot(document, DEEP);
-//          return document.insertText(word, index)
-//       }
-//    },
-//    catch(err, action) {
-//       action.rollback()
-//    }
-// })
-
-
-
-
-
-// function reKeydown() {
-//    const output = doAction(INSERT_TEXT, [2])
-// }
-
-// const INSERT_TEXT = defineAction({
-//    name: 'insert-text',
-//    do(action, document, word, index) {
-//       action.snapshot(document, DEEP);
-//       return document.insertText(word, index)
-//    },
-//    catch(err, action) {
-//       action.rollback()
-//    }
-// })

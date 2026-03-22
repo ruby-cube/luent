@@ -1,11 +1,11 @@
 import { createStack, debug } from "@rue/utils";
 import { Ion } from "../ion/Ion";
 import { watch } from "../reactivity/Watcher";
-import { PRELUDE, queueTask, SYNC } from "../reactivity/RenderCycle";
 import { QUARK } from "../abstract/Quark";
 import { AnyObject, UnionToIntersection } from "@rue/types";
 import { untracked } from "../reactivity/Compound";
 import { getActiveUpdate } from "../reactivity/Update";
+import { PRELUDE, queueTask } from "../reactivity/RenderCycle";
 
 
 // trafficLight.is('on') // reactive

@@ -86,6 +86,21 @@ function getCities()  {
       console.log(res);
 }
 
+function Tooltip() {
+
+   async {
+      await ($layout() ...):
+         const height = $div()?.getBoundingClientRect().height;
+      
+      await ($render() ...):
+         if (height != null) $height.value = height
+   }
+
+   return template(
+      
+   )
+}
+
 // function getCities()  {
 //    await (fetchCities() ... res) {
 //       console.log(res)

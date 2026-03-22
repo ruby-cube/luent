@@ -1,10 +1,10 @@
 import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
-import { Effect } from "./EffectQueue";
+import { Effect } from "./Effect";
 import { asSubject, IonSubject, isSubject, Subject } from "./Subject";
 import { AnyObject, Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
 import { SimpleState } from "./State";
-import { $currentCycle, getDefaultPhase, INTERNAL_RENDER, Phase, PRELUDE, queuePrelude, queueTask, SYNC } from "./RenderCycle";
+import { $currentCycle, getDefaultPhase, Phase, PRELUDE, SYNC } from "./RenderCycle";
 import { dev, logAtoms } from "../debug/dev";
 import { Traceable } from "../debug/Traceable";
 import { Ion, toValue } from "../ion/Ion";

@@ -1,6 +1,16 @@
 import { createStack } from "@rue/utils";
-import { INTERNAL_RENDER, PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
-import { UpdateType } from "../../../x-old/x_IdleUpdate";
+import { PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
+
+export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
+
+export const UpdateType = {
+   USER_ANIMATION: 0,
+   USER_INTERACTION: 1,
+   BACKGROUND_ANIMATION: 2,
+   SERVER_RESPONSE: 3,
+   INSTANT: 4, // Catch-all for any unknown update type
+   IDLE: 5, // Catch-all for any unknown update type
+}
 
 export const [_pushUpdate, _popUpdate, getActiveUpdate] = createStack<Update>()
 
@@ -151,9 +161,7 @@ export class Update {
 
    // disallows new update tasks
    get closed() {
-      const taskqueues = this.cycle.effects
-      if (taskqueues[PRELUDE]) return taskqueues[PRELUDE].started
-      return taskqueues[INTERNAL_RENDER]!.started
+      return this.started;
    }
 
    race(rival: Update | null, ...info: any[]) { // TODO: use algorithim based on type of update to determine whether to queue, drop, override. Currently this overrides

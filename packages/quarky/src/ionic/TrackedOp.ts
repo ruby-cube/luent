@@ -25,6 +25,11 @@ export class TrackedOpQuark implements Atom {
    }
 }
 
+function toString(value: any) {
+   if (typeof value === 'symbol') return value.description
+   if (typeof value === 'object') return JSON.stringify(value)
+   return value.toString()
+}
 
 export class TrackedOps {
 
@@ -40,7 +45,7 @@ export class TrackedOps {
 
    private register(op: PropertyKey, key: any, trackedOp: TrackedOpQuark) {
       const traceableModel = this.modelQuark.asTraceable!
-      trackedOp.asTraceable = new Traceable(traceableModel.name + ' ' + op.toString() + key, traceableModel.origin)
+      trackedOp.asTraceable = new Traceable(traceableModel.name + ' ' + toString(op) + toString(key), traceableModel.origin)
       const ops = this.tracked.get(op) ?? new Map();
       if (!(ops instanceof Map)) {
          debug.error(`${String(op)} is not an op`)

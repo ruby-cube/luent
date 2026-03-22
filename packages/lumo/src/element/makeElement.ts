@@ -1,4 +1,4 @@
-import { isIon, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueInternalRender, PRELUDE, toValue, INTERNAL, queueTask, queueIonicTask, queueIonicPrelude } from "@rue/quarky";
+import { isIon, Ion, MutableIon, getCurrentPhase, $_derivation, isGetter, swiftUpdate, instantUpdate, watchToRender, RUN_EAGERLY, queueRender, PRELUDE, toValue, INTERNAL, queueTask, queueIonicTask, queueIonicPrelude } from "@rue/quarky";
 import { isFunction, isObject, isPlainObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, StyleInput } from "../node/makeJSXNode";
 import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
@@ -260,11 +260,11 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    const ion = attributes['mu:value'];
    const flask = getFlask()
    watchToRender(ion, () => {
-      queueInternalRender(() => {
+      queueRender(() => {
          queueTask(() => {
             element.value = toString(toValue(ion))
          })
-      }, flask)
+      })
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isGetter(ion)) {
@@ -364,9 +364,9 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
-            queueInternalRender(() => {
+            queueRender(() => {
                setAttribute(node, _key, toValue(value())) // toValue for mu getters
-            }, flask)
+            })
          }, flask, RUN_EAGERLY)
       }
       // else if (isViewBindingKit(value)) {
@@ -598,10 +598,10 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             // if (current === previous) return;
-            queueInternalRender(() => {
+            queueRender(() => {
                if (previous) removePreviousClasses(previous, classList)
                if (entry()) addClasses(entry(), classList, flask)
-            }, flask)
+            })
          }, flask, RUN_EAGERLY)
       }
       else if (entry) {
@@ -658,10 +658,10 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return
-            queueInternalRender(() => {
+            queueRender(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
-            }, flask)
+            })
          }, flask, RUN_EAGERLY)
       }
       else if (value) {
@@ -764,20 +764,20 @@ function setUpConditionalDisplay(node: Element, $show: Ion<Booleanny>) {
    watchToRender($show, ({ flask, current: shouldShow, previous, eagerRun }) => {
       if (!eagerRun && shouldShow === previous) return;
       if (shouldShow) {
-         queueInternalRender(() => {
+         queueRender(() => {
             if (!display) {
                node.style.removeProperty('display');
             }
             else {
                node.style.display = display
             }
-         }, flask)
+         })
       }
       else {
          display = node.style.display
-         queueInternalRender(() => {
+         queueRender(() => {
             node.style.display = 'none'
-         }, flask)
+         })
       }
    }, getFlask(), RUN_EAGERLY)
 }
@@ -789,9 +789,9 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
-            queueInternalRender(() => {
+            queueRender(() => {
                setUpStyleEntry(style, entry(), flask);
-            }, flask)
+            })
          }, flask, RUN_EAGERLY)
       }
       else {
@@ -806,9 +806,9 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isGetter(value)) {
             watchToRender(value, () => {
-               queueInternalRender(() => {
+               queueRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
-               }, flask)
+               })
             }, flask, RUN_EAGERLY)
          }
          else {

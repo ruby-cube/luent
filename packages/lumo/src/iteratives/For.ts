@@ -28,7 +28,7 @@ type RenderDynamicIndex<L> = L extends (infer I)[] ? ($item: Ion<I>, index: numb
    : L extends object ? (key: keyof L, index: number) => RawJSXNode
    : never
 
-type RenderItem<L> = L extends (infer I)[] ? (item: I, $index: Ion<number>) => RawJSXNode
+export type RenderItem<L> = L extends (infer I)[] ? (item: I, $index: Ion<number>) => RawJSXNode
    : never
 
 type RenderStatic<L> = L extends (infer I)[] ? (item: I, index: number) => RawJSXNode

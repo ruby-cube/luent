@@ -1,10 +1,10 @@
 import { $listen, SustainedListenerOptions } from "@rue/flask";
 import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./Watcher";
 import { Glass } from "@rue/types";
-import { Effect } from "./EffectQueue";
+import { Effect } from "./Effect";
 import { FunctionSubject } from "./Subject";
 import { Traceable } from "../debug/Traceable";
-import { Phase, POSTLUDE, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
+import { Phase, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 
 
 type _IonicTaskOptions = {
@@ -69,9 +69,9 @@ export function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: RENDER })
 }
 
-export function queueIonicPostlude(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
-}
+// export function queueIonicPostlude(task: IonicTask, options?: IonicTaskOptions) {
+//    return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
+// }
 
 export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: TICK })

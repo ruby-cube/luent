@@ -55,7 +55,6 @@ import { installIonizedDate } from '../../../packages/quarky/src/ionic/IonizedDa
 import { TestMultisetting } from './wip-demos/TestMultisetting';
 import { TestVanillaStream } from './TestStream-await';
 import { TestIonicList } from './TestIonicList';
-import { $activeUpdate, Animation, instantUpdate, INTERNAL_RENDER, Ion, load, PRELUDE, queueInternalRender, queueIonicPostlude, queueIonicPrelude, queueIonicTask, RENDER, runIonicTask, slowUpdate, untracked, watch, watchToRender } from '@rue/quarky';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
 import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
@@ -154,7 +153,7 @@ import { TestTooltip2 } from './TestTooltip';
 // }
 
 // const app = createRoot(TestThru)
-const app = createRoot(TestTooltip2)
+const app = createRoot(TestRenderEffects)
 
 app.mount('#root')
 

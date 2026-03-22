@@ -1,7 +1,7 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@rue/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ShowHideType, If } from "./If";
-import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, pushAwaiting, pushUpdate, queueInternalRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
+import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, queueRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -121,7 +121,7 @@ export class IfElseKit extends VineNode {
       finally {
          unmarkInitialRender()
          watchToRender(this.$activeIndex, ({ previous: prevIndex }) => {
-            console.log('index changed!', this.$activeIndex(), prevIndex)
+            console.log('@@@ index changed!', this.$activeIndex(), prevIndex)
             if (this.$activeIndex() === prevIndex) return;
             const kit = this.kits[this.$activeIndex()]
             const prevKit = this.pendingDeactivatedKit ?? this.kits[prevIndex]
@@ -138,7 +138,7 @@ export class IfElseKit extends VineNode {
                this.awaitPendingConditional(kit.pending, kit, prevKit)
             }
             else {
-               console.log('switch!')
+               console.log('@@@ switch!')
                this.deactivateConditional(prevKit);
                this.reactivateConditional(kit)
             }
@@ -244,9 +244,9 @@ export class IfElseKit extends VineNode {
          setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
          const fragment = new DocumentFragment()
          mountDOMNodes(kit.nodes!, fragment)
-         queueInternalRender(() => {
+         queueRender(() => {
             mountFragment(fragment, this.precedingLeaf, this.parent)
-         }, this.outerFlask)
+         })
          initial ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
       })
    }
@@ -264,30 +264,24 @@ export class IfElseKit extends VineNode {
    }
 
    deactivateConditional(kit: DynamicNodeKit | undefined) {
-      console.log('deactivateConditional A')
       if (!kit) return;
-      console.log('deactivateConditional B')
       const prevNodes = kit.nodes;
       this.pendingDeactivatedKit = null
       if (!prevNodes) return;
-      console.log('deactivateConditional C')
       kit.nodes = null;
       
       if (!kit.cache) {
-         console.log('deactivateConditional D')
          // kit.awaitCache = undefined
          kit.flask!.emitDiscard()
          kit.flask = undefined
       }
       else {
-         console.log('deactivateConditional E')
          kit.flask!.emitDemount()
       }
       
-      queueInternalRender(() => {
-         console.log('deactivateConditional F', prevNodes)
+      queueRender(() => {
          removeDOMNodes(prevNodes)
-      }, this.outerFlask)
+      })
       return kit;
    }
 }
@@ -416,14 +410,14 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
       watchToRender($match, ({ current: isActive, previous: wasActive, flask }) => {
          if (isActive === wasActive) return;
          if ($match()) {
-            queueInternalRender(() => {
+            queueRender(() => {
                showDOMNodes(nodes)
-            }, flask)
+            })
          }
          else if (wasActive) {
-            queueInternalRender(() => {
+            queueRender(() => {
                hideDOMNodes(nodes)
-            }, flask)
+            })
          }
       })
    }

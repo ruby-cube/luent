@@ -1,6 +1,6 @@
 import { Ion } from "../quarky/src/ion/Ion";
 import { instantUpdate, popUpdate, pushUpdate, Update } from "../quarky/src/reactivity/Update";
-import { RenderCycle } from "../quarky/src/reactivity/RenderCycle";
+import { RenderCycle } from "../quarky/src/reactivity/x_RenderCycle";
 
 
 

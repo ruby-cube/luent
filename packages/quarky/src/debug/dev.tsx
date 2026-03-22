@@ -2,12 +2,12 @@ import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { Traceable, TraceableEntity, TraceableMutable } from "./Traceable";
 import { Ion, MutableIon } from "../ion/Ion";
 import { __DEV__getTrace, getAsyncPath, traceAsyncPath } from "../../../flask/debug";
-import { PRELUDE } from "../reactivity/RenderCycle";
 import { Compound, Particle } from "../reactivity/Compound";
 import { watch } from "../reactivity/Watcher";
 import { isFunction, isObject } from "@rue/utils";
 import { DerivationIonQuark } from "../ion/DerivationIon";
 import { Stateful } from "../abstract/Stateful";
+import { PRELUDE } from "../reactivity/RenderCycle";
 
 function isTraceableCompound(quark: Object): quark is TraceableCompound {
    if (!('asTraceable' in quark)) {

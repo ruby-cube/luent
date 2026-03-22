@@ -23,27 +23,27 @@ export function TestIfElse() {
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
          <hr></hr>
          <div class='container view'>
-               {If($active,
-                  <div>
-                     oh
-                     <h2>hi</h2>
-                     {If($ready,
-                        <p>ready</p>
-                     )}
-                  </div>
-               )}
-               {ElseIf($ready,
-                  <div>
-                     two peas in a pod
-                     <h2>🤢🤢</h2>
-                  </div>
-               )}
-               {Else(
-                  <div>
-                     ok
-                     <h2>bye</h2>
-                  </div>
-               )}
+            {If($active,
+               <div>
+                  oh
+                  <h2>hi</h2>
+                  {If($ready,
+                     <p>ready</p>
+                  )}
+               </div>
+            )}
+            {ElseIf($ready,
+               <div>
+                  two peas in a pod
+                  <h2>🤢🤢</h2>
+               </div>
+            )}
+            {Else(
+               <div>
+                  ok
+                  <h2>bye</h2>
+               </div>
+            )}
          </div>
       </div>
    )

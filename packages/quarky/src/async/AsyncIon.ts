@@ -2,10 +2,9 @@ import { isFunction, isObject, toError } from "@rue/utils";
 import { AsyncState, getActiveFlask } from "@rue/flask";
 import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
-import { instantUpdate } from "../reactivity/Update";
-import { PRELUDE } from "../reactivity/RenderCycle";
 import { watch } from "../reactivity/Watcher";
 import { AsyncNode } from "./ooo";
+import { PRELUDE } from "../reactivity/RenderCycle";
 
 export let $suspense: SuspenseIon
 export const [getAwaiting, suspenseStack] = AsyncState<SuspenseIon>('Suspense')

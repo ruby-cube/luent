@@ -1,4 +1,4 @@
-import { $_derivation, Ion, Ionic, isIonicProxy, PRELUDE, queueInternalRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
+import { $_derivation, Ion, Ionic, isIonicProxy, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/Input";
 import { AnyObject } from "@rue/types";
 import { RawJSXNode } from "../node/makeJSXNode";
@@ -107,10 +107,10 @@ export class IndexedListKit extends VineNode {
             kit.preceding = preceding;
             mountDOMNodes(kit.nodes!, fragment)
          }
-         queueInternalRender(() => {
+         queueRender(() => {
             // mount to fragment
             mountFragment(fragment, kits[previousLength].precedingLeaf, this.parent)
-         }, this.flask)
+         })
       }
       else if (length < previousLength) {
          // for (let i = length; i < previousLength; i++) {
@@ -121,10 +121,10 @@ export class IndexedListKit extends VineNode {
          const removed = kits.splice(length, previousLength - length)
 
          for (const kit of removed) {
-            queueInternalRender(() => {
+            queueRender(() => {
                removeDOMNodes(kit.nodes!)
                kit.nodes = undefined;
-            }, this.flask)
+            })
             kit.flask.emitDiscard()
          }
       }

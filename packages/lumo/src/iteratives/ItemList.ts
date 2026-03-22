@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import { $_derivation, Ion, MaybeIonized, MutableIon, queueInternalRender, watchToRender } from "@rue/quarky";
+import { $_derivation, Ion, MaybeIonized, MutableIon, queueRender, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { RawJSXNode } from "../node/makeJSXNode";
@@ -142,18 +142,18 @@ export class ListKit extends VineNode {
          if (!currentItems.has(uid)) {
             const { $index } = kit
             $index.value = -1;
-            queueInternalRender(() => {
+            queueRender(() => {
                const prevNodes = kit.nodes!
                removeDOMNodes(prevNodes)
                kit.nodes = undefined;
-            }, this.flask)
+            })
             kit.flask.emitDiscard()
          }
          else if (hasMoved(kit)) {
-            queueInternalRender(() => {
+            queueRender(() => {
                const prevNodes = kit.nodes!
                removeDOMNodes(prevNodes)
-            }, this.flask)
+            })
             kit.hasMoved = true;
             hasMovedItems = true;
          }
@@ -169,7 +169,7 @@ export class ListKit extends VineNode {
          return index >= lcsStart && index < lcsLength
       }
 
-      queueInternalRender(() => {
+      queueRender(() => {
          const fragments: { fragment: DocumentFragment, precedingLeaf: DOMNode | null }[] = []
 
          // mount to fragment
@@ -198,7 +198,7 @@ export class ListKit extends VineNode {
                mountFragment(fragment, precedingLeaf, this.parent)
             }
          }
-      }, this.flask)
+      })
 
       this.prevItems = currentItems
       return kits;
