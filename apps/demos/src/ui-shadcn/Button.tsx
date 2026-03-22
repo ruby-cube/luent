@@ -42,8 +42,7 @@ function Button({
    Slot,
    ...other
 }: FromTag<'button', {
-   as?: ComponentTag | string,
-   ref?: NodeRef<any>
+   as?: ComponentTag | string
 } & VariantProps<typeof buttonVariants>>) {
    console.log('button attributes', other)
    console.log('æclasses', æclasses)

@@ -1,9 +1,10 @@
 import { atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/lumo"
-import { dev, getActiveUpdate, Ion, Ionic, queueTask, toIon } from "@rue/quarky"
+import { dev, getActiveUpdate, Ion, Ionic, queueLayout, queueRender, queueTask, toIon } from "@rue/quarky"
 import { computePosition, arrow, offset, autoUpdate } from "@floating-ui/dom"
-import { vi } from "vitest";
-import { quarkOf } from "../../../../../packages/quarky/src/abstract/Quark";
 
+// TODO:
+// [] hideDelay should never be greater than delay, clamp hideDelay to delay if it is greater
+// [] if the tooltip blocks the trigger hover, we end up with a weird toggling the tooltip on-off-on-off situation
 
 
 function TooltipTail(setup: FromTag<{
@@ -115,7 +116,7 @@ function TooltipRoot(setup: FromTag<{
                <div
                   at:create={node => tooltip.setTooltip(node)}
                   ref={ref}
-                  class={Ion(() =>(console.log('>>> tooltip classes', tooltip.placement, getActiveUpdate()?.cycle.currentPhase), 'tooltip ' + tooltip.placement))}
+                  class={Ion(() => (console.log('>>> tooltip classes', tooltip.placement, getActiveUpdate()?.cycle.currentPhase), 'tooltip ' + tooltip.placement))}
                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
                   {...attributes}
                >
@@ -168,8 +169,8 @@ function TooltipContent(setup: FromTag<{
       ...attributes
    } = setup
 
-   const tooltip = fromContext(TOOLTIP)
-   const { gap } = tooltip;
+   // const tooltip = fromContext(TOOLTIP)
+   // const { gap } = tooltip;
 
    return template(
       <div class={æclasses}>
@@ -214,7 +215,7 @@ function TooltipContent(setup: FromTag<{
 
 type TooltipConfig = Readonly<{
    delay?: number,
-   closeDelay?: number,
+   hideDelay?: number,
    undelayed?: number
 }>
 
@@ -259,7 +260,7 @@ class InternalTooltipModel<T = {}> {
       return this.triggers ?? (this.triggers = this.TooltipTriggerSetup(this.config))
    }
 
-   get anchor(): { [K in keyof T]: AsTooltipAnchor } {
+   get anchor(): { [K in keyof T | 'default']: AsTooltipAnchor } {
       return this.anchors ?? (this.anchors = this.TooltipAnchorSetup(this.config))
    }
 
@@ -267,10 +268,16 @@ class InternalTooltipModel<T = {}> {
 
    setTooltip(tooltipNode: HTMLElement) {
       this.tooltipNode = tooltipNode
-      atMounted(() => {
-         if (tooltipNode.getBoundingClientRect().top < 0) { 
-            console.log('!!!! flip!', quarkOf(this.æflipped).asTrackedAtom)
-            this.flip() 
+      queueLayout(() => {
+         
+         const tooltip = tooltipNode.getBoundingClientRect()
+         if (
+            this.placement === 'above' && tooltip.top < 0 
+            || this.placement === 'below' && tooltip.bottom > document.documentElement.clientHeight
+            || this.placement === 'left' && tooltip.left < 0
+            || this.placement === 'right' && tooltip.right > document.documentElement.clientWidth
+         ) {
+            this.flip()
          }
       })
    }
@@ -282,7 +289,6 @@ class InternalTooltipModel<T = {}> {
    private flipped: boolean = false;
 
    flip() {
-      console.log('>>> flip!', getActiveUpdate()?.cycle.currentPhase)
       this.flipped = !this.flipped
    }
 
@@ -301,6 +307,7 @@ class InternalTooltipModel<T = {}> {
             const inset = axis === 'y' ? x : y
             const tooltip = this.tooltipNode
             if (!tooltip) return;
+            // hide arrow if tooltip is greatly misaligned due to collision shift
             if (inset < 10 || tooltip[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 10) {
                if (visibility === null) visibility = arrowNode.style.visibility
                arrowNode.style.visibility = 'hidden'
@@ -360,14 +367,20 @@ class InternalTooltipModel<T = {}> {
       for (const key in config) {
          anchor[key] = this.AsTooltipAnchor(key)
       }
+      anchor.default = this.AsTooltipAnchor('default')
+      // (node: HTMLElement) => {
+      //    this.hasDefaultAnchor = true;
+      //    setDefaultAnchor(node)
+      // }
       return anchor
    }
 
+   private explicitAnchors = new Set()
+
    private AsTooltipAnchor(key: string) {
-      let set = false;
       return (node: HTMLElement) => {
-         if (set) return;
-         set = true;
+         if (this.explicitAnchors.has(key)) return;
+         this.explicitAnchors.add(key)
          // @ts-expect-error
          node.style.anchorName
             = this.anchorRoot + '-' + key
@@ -390,19 +403,20 @@ class InternalTooltipModel<T = {}> {
 
       return (node: HTMLElement) => {
          queueTask(() => {
+            if (this.explicitAnchors.has('default') || this.explicitAnchors.has(key)) return;
             this.anchor[key as keyof T](node)
          })
 
          const showTooltip = () => {
-            this.setAnchor(key) // TODO: assuming trigger is the same as anchor
+            this.setAnchor(this.explicitAnchors.has(key) ? key : this.explicitAnchors.has('default') ? 'default' : key)
             queueTask(() => this.show(info))
          }
 
          const hideTooltip = () => {
-            if (closeDelay) {
+            if (hideDelay) {
                closeTimeout = setTimeout(() => {
                   this.hide()
-               }, closeDelay)
+               }, hideDelay)
             }
             else {
                this.hide()
@@ -411,7 +425,7 @@ class InternalTooltipModel<T = {}> {
 
          const config = fromContext(TOOLTIP_CONFIG, '?')
          const delay = config?.delay ?? /* options?.delay */ 0
-         const closeDelay = config?.closeDelay ?? /* options?.closeDelay */ 0
+         const hideDelay = config?.hideDelay ?? /* options?.hideDelay */ 0
          let closeTimeout: NodeJS.Timeout
          if (delay) {
             let timeout: NodeJS.Timeout;

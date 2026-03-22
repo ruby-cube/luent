@@ -1,5 +1,6 @@
-import { template, If, NodeRef, Portal, RenderSlot, FromTag } from '@rue/lumo';
-import { Ion, queueLayout } from '@rue/quarky';
+//@ts-nocheck
+import { template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/lumo';
+import { $layout, Ion, queueLayout } from '@rue/quarky';
 import './TestTooltip.css'
 
 
@@ -8,17 +9,36 @@ export function TestTooltip() {
    return template(
       <div>
          <ButtonWithTooltip>{{
-            Content: () => (
+            Content: (
                'Hover over me (tooltip below)'
             ),
-            Tooltip: () => (
+            Tooltip: (
                <div>
                   This tooltip does not fit above the button.
                   <br />
                   This is why it's displayed below instead!
                </div>
+            ),
+            Description: (
+               <p>{description}</p>
             )
          }}</ButtonWithTooltip>
+
+         {/* <ButtonWithTooltip
+            Slot:Description={(
+               <p>{description}</p>
+            )}
+            Slot:Tooltip={(
+               <div>
+                  This tooltip does not fit above the button.
+                  <br />
+                  This is why it's displayed below instead!
+               </div>
+            )}
+            Slot={(
+               'Hover over me (tooltip below)'
+            )}
+         ></ButtonWithTooltip> */}
 
          <div style={{ height: '100px' }} />
 
@@ -101,7 +121,14 @@ export function Tooltip(input: FromTag<{
    const $div = NodeRef('div');
    const $height = Ion(undefined as number | undefined)
 
-   queueLayout(() => {
+   // queueLayout(() => {
+   //    const height = $div()?.getBoundingClientRect().height
+   //    if (height != null) $height.value = height;
+   // })
+
+   atCreate(async () => {
+      await $layout()
+      console.log('reading layout')
       const height = $div()?.getBoundingClientRect().height
       if (height != null) $height.value = height;
    })

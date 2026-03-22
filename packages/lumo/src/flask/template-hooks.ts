@@ -1,4 +1,4 @@
-import { debug, isFunction } from "@rue/utils";
+import { debug, isFunction, normalizeToArray } from "@rue/utils";
 import { getFlask } from "@rue/flask";
 import { afterCreated, afterDemounted, afterDiscarded, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDiscard, atDiscarded, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
 import { AnyObject } from "@rue/types";
@@ -6,83 +6,138 @@ import { toValue } from "@rue/quarky";
 
 type LifecycleTask<T = any> = (element: T, initialOrFinal?: boolean) => void;
 
-export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTask }) {
+export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTask | LifecycleTask[] }) {
    console.log('setUpHooks: node', node)
    const flask = getFlask()
    for (const key in hooks) {
-      const task = hooks[key]
-      if (!isFunction(task)) continue;
+      const value = hooks[key]
+      if (!isFunction(value) && !(value instanceof Array)) continue;
+      const tasks = normalizeToArray(value)
       switch (key) {
          case 'at:create':
-            atCreate(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atCreate(() => task(toValue(node)))
+            }
             break;
 
          case 'at:mount':
-            atMount((initial) => task(toValue(node), initial))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atMount((initial) => task(toValue(node), initial))
+            }
             break;
 
          case 'at:remount':
-            atRemount(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atRemount(() => task(toValue(node)))
+            }
             break;
 
          case 'at:created':
-            atCreated(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atCreated(() => task(toValue(node)))
+            }
             break;
 
          case 'at:mounted':
-            atMounted((initial) => task(toValue(node), initial))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atMounted((initial) => task(toValue(node), initial))
+            }
             break;
 
          case 'at:remounted':
-            atRemounted(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atRemounted(() => task(toValue(node)))
+            }
             break;
 
          case 'after:created':
-            afterCreated(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               afterCreated(() => task(toValue(node)))
+            }
             break;
 
          case 'after:mounted':
-            afterMounted((initial) => task(toValue(node), initial))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               afterMounted((initial) => task(toValue(node), initial))
+            }
             break;
 
          case 'after:remounted':
-            afterRemounted(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               afterRemounted(() => task(toValue(node)))
+            }
             break;
 
          case 'at:discard':
-            atDiscard(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atDiscard(() => task(toValue(node)))
+            }
             break;
 
          case 'at:unmount':
-            atUnmount((initial) => task(toValue(node), initial))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atUnmount((initial) => task(toValue(node), initial))
+            }
             break;
 
          case 'at:demount':
-            atDemount(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atDemount(() => task(toValue(node)))
+            }
             break;
 
          case 'at:discarded':
-            atDiscarded(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atDiscarded(() => task(toValue(node)))
+            }
             break;
 
          case 'at:unmounted':
-            atUnmounted((initial) => task(toValue(node), initial))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atUnmounted((initial) => task(toValue(node), initial))
+            }
             break;
 
          case 'at:demounted':
-            atDemounted(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atDemounted(() => task(toValue(node)))
+            }
             break;
 
          case 'after:discarded':
-            afterDiscarded(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               afterDiscarded(() => task(toValue(node)))
+            }
             break;
 
          case 'after:unmounted':
-            afterUnmounted((initial) => task(toValue(node), initial))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               afterUnmounted((initial) => task(toValue(node), initial))
+            }
             break;
 
          case 'after:demounted':
-            afterDemounted(() => task(toValue(node)))
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               afterDemounted(() => task(toValue(node)))
+            }
             break;
 
          default:
@@ -91,25 +146,27 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
    }
 }
 
+
+
 export interface LumoHooks<T> {
-   'at:create'?: LifecycleTask<T> | any // allows functions to be called in the JSX expression space
-   'at:mount'?: LifecycleTask<T> | any
-   'at:remount'?: LifecycleTask<T>
-   'at:created'?: LifecycleTask<T>
-   'at:mounted'?: LifecycleTask<T>
-   'at:remounted'?: LifecycleTask<T>
-   'after:created'?: LifecycleTask<T>
-   'after:mounted'?: LifecycleTask<T>
-   'after:remounted'?: LifecycleTask<T>
-   'at:discard'?: LifecycleTask<T>
-   'at:unmount'?: LifecycleTask<T>
-   'at:demount'?: LifecycleTask<T>
-   'at:discarded'?: LifecycleTask<T>
-   'at:unmounted'?: LifecycleTask<T>
-   'at:demounted'?: LifecycleTask<T>
-   'after:discarded'?: LifecycleTask<T>
-   'after:unmounted'?: LifecycleTask<T>
-   'after:demounted'?: LifecycleTask<T>
+   'at:create'?: LifecycleTask<T> | LifecycleTask<T>[]| void // allows functions to be called in the JSX expression space
+   'at:mount'?: LifecycleTask<T> | LifecycleTask<T>[]| void
+   'at:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:created'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:mounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:remounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'after:created'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'after:mounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'after:remounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:discard'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:unmount'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:demount'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:discarded'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:unmounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:demounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'after:discarded'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'after:unmounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'after:demounted'?: LifecycleTask<T>| LifecycleTask<T>[]
 }
 
 const flaskHooks = {

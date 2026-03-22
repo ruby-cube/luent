@@ -1,20 +1,24 @@
-import { Context, createRoot, template } from "@rue/lumo"
+import { Context, createRoot, NodeRef, template } from "@rue/lumo"
 import { Button } from "../Button"
 import { Tooltip } from "../Tooltip"
 import { TOOLTIP_CONFIG, createTooltip } from "../../ui-base/tooltip/Tooltip"
 
+// Basic:
 // [X] anchoring
-// [] responsive flip
+// [X] responsive flip
 // [X] responsive shift
-// [] placement
-// [] hover across triggers (don't close tooltip)
-// [] close delay window
-// [] tooltip default anchor
+// [X] placement
+// [X] close delay window
+// [X] tooltip default anchor
 // [] tooltip default trigger (no info)
 // [x] show-hide arrow
 // [X] show-hide
 // [X] show-hide with delay
 // [X] show-hide with transitions
+
+// Fancy:
+// [] align start instead of center
+// [] transition across triggers (don't close tooltip)
 
 
 const demoBoxStyle = ""
@@ -22,8 +26,8 @@ const demoBoxStyle = ""
 
 export function TooltipDemo() {
    const tooltip = createTooltip({
-      placement: 'above',
-      // placement: 'left',
+      // placement: 'above',
+      placement: 'left',
       // placement: 'right',
       // placement: 'below',
       info: {
@@ -34,20 +38,20 @@ export function TooltipDemo() {
    })
 
    return template(
-      <Context provide={[TOOLTIP_CONFIG({ delay: 600 })]}>
+      <Context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 500 })]}>
          <div data-align='center' class={demoBoxStyle}>
 
-            {/* <div at:create={tooltip.anchor.bold}>b</div>
-         <div at:create={tooltip.anchor.italic}>i</div>
-         <div at:create={tooltip.anchor.underline}>u</div> */}
-            {/* <div at:create={tooltip.anchor.default}>o</div> */}
+            {/* <div style='background-color: lightblue' at:create={tooltip.anchor.bold}>b</div> */}
+            <div style='background-color: lightblue' at:create={tooltip.anchor.italic}>i</div>
+            {/* <div style='background-color: lightblue' at:create={tooltip.anchor.underline}>u</div> */}
+            <Button at:create={tooltip.anchor.default} variant='outline'>o</Button>
             <Button at:create={tooltip.trigger.bold} variant="outline">
                B
             </Button>
             <Button at:create={tooltip.trigger.italic} variant="outline">
                I
             </Button>
-            <Button at:create={tooltip.trigger.underline} variant="outline">
+            <Button at:create={[tooltip.trigger.underline, tooltip.anchor.underline]} variant="outline">
                U
             </Button>
             <Tooltip tooltip={tooltip}>

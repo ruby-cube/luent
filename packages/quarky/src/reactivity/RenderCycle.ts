@@ -8,7 +8,7 @@ export const queueTask = (task: () => void) =>
       .postTask(task);
 
 
-type Task = () => void
+type Task = () => void | Promise<void>
 
 // [X] run sync effects
 // [X] skip effects that have already been run *** (completed.has(effect) for each round)
@@ -69,7 +69,7 @@ export class RenderCycle {
 
    loop = 0;
 
-   start() {
+   async start() {
       this.started = true;
       while (this.more) {
          this.loop++;
@@ -78,7 +78,7 @@ export class RenderCycle {
          console.log('@@@ prelude---')
          this.currentPhase = PRELUDE
          const prelude = this.phases[PRELUDE]
-         if (prelude) this.runPhase(prelude)
+         if (prelude) await this.runPhase(prelude)
 
          if (this.loop === 1) {
             this.update.commit()
@@ -87,12 +87,12 @@ export class RenderCycle {
          console.log('@@@ render---')
          this.currentPhase = RENDER
          const render = this.phases[RENDER]
-         if (render) this.runPhase(render)
+         if (render) await this.runPhase(render)
 
          console.log('@@@ layout---')
          this.currentPhase = LAYOUT
          const layout = this.phases[LAYOUT]
-         if (layout) this.runPhase(layout)
+         if (layout) await this.runPhase(layout)
       }
       if (!this.update.committed) this.update.commit()
 
@@ -121,7 +121,7 @@ export class RenderCycle {
       }
    }
 
-   runPhase(phase: CycledPhase) {
+   async runPhase(phase: CycledPhase) {
       let effects = phase.effects
       phase.effects = []
 
@@ -137,7 +137,10 @@ export class RenderCycle {
             queue.runEffects(ran, this.update)
          }
          for (const task of tasks) {
-            task()
+            const output = task()
+            if (output instanceof Promise) {
+               await output;
+            }
          }
          effects = phase.effects
          tasks = phase.tasks
@@ -273,50 +276,51 @@ let _render: Promise<void> | undefined = undefined
 let _layout: Promise<void> | undefined = undefined
 let _tick: Promise<void> | undefined = undefined
 
-
-
-
-
-export function prelude() {
-   const update = $activeUpdate()
-   if (!update) return _prelude ?? (_prelude = new Promise<void>(resolve => {
-      queueMicrotask(() => {
+export function $prelude() {
+   return _prelude ?? (_prelude = new Promise<void>(resolve => {
+      queuePrelude(() => {
+         const prelude = _prelude
          _prelude = undefined
          resolve()
+         return prelude;
       })
    }))
-   return update.cycle.$effectsComplete(PRELUDE)
 }
 
-
-export function renderphase() {
-   const update = $activeUpdate()
-   if (!update) return _render ?? (_render = new Promise<void>(resolve => {
-      prelude().then(() => {
-         queueMicrotask(() => {
-            _render = undefined
-            resolve()
-         })
+export function $render() {
+   return _render ?? (_render = new Promise<void>(resolve => {
+      queueRender(() => {
+         const render = _render
+         _render = undefined
+         resolve()
+         return render;
       })
    }))
-   return update.cycle.$effectsComplete(RENDER)
 }
 
+export function $layout() {
+   return _layout ?? (_layout = new Promise<void>(resolve => {
+      queueLayout(() => {
+         const layout = _layout
+         _layout = undefined
+         resolve()
+         return layout;
+      })
+   }))
+}
 
-// TODO: LAYOUT
-
-export function tick() {
-   // const update = $activeUpdate()
-   // if (!update) return _tick ?? (_tick = 
-   return new Promise<void>(resolve => {
+export function $tick() {
+   return _tick ?? (_tick = new Promise<void>(resolve => {
       queueTask(() => {
+         const tick = _tick
          _tick = undefined
          resolve()
+         return tick;
       })
-   })
-   // }))
-   // return update.cycle.$effectsComplete(TICK)
+   }))
 }
+
+
 
 
 export function queuePrelude(task: Task) {
