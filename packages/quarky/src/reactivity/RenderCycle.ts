@@ -125,10 +125,9 @@ export class RenderCycle {
       let effects = phase.effects
       phase.effects = []
 
-      let tasks: Task[] = phase.tasks
+      let tasks: WrappedTask[] = phase.tasks
       phase.tasks = []
 
-      pushUpdate(this.update)
       let loop = 0
       while (effects.length || tasks.length) {
          loop++
@@ -137,7 +136,7 @@ export class RenderCycle {
             queue.runEffects(ran, this.update)
          }
          for (const task of tasks) {
-            const output = task()
+            const output = task(this.update)
             if (output instanceof Promise) {
                await output;
             }
@@ -148,7 +147,6 @@ export class RenderCycle {
          phase.tasks = []
       }
 
-      popUpdate()
    }
 
    scheduleEffects(effects: Effects, phase: Phase) {
@@ -216,8 +214,10 @@ class BasePhase {
    }
 }
 
+type WrappedTask = (update: Update) => Promise<void> | void
+
 class CycledPhase extends BasePhase {
-   tasks: Task[] = []
+   tasks: WrappedTask[] = []
 
    get more() {
       console.log('this.effects.length', this.effects.length)
@@ -231,7 +231,15 @@ class CycledPhase extends BasePhase {
    }
 
    scheduleTask(task: Task) {
-      this.tasks.push(task)
+      this.tasks.push((update: Update) => {
+         try {
+            pushUpdate(update)
+            return task()
+         }
+         finally {
+            popUpdate()
+         }
+      })
    }
 }
 

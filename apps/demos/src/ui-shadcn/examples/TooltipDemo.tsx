@@ -17,7 +17,7 @@ import { TOOLTIP_CONFIG, createTooltip } from "../../ui-base/tooltip/Tooltip"
 // [X] show-hide with transitions
 
 // Fancy:
-// [] align start instead of center
+// [] 'align' start instead of center
 // [] transition across triggers (don't close tooltip)
 
 
@@ -27,9 +27,9 @@ const demoBoxStyle = ""
 export function TooltipDemo() {
    const tooltip = createTooltip({
       // placement: 'above',
-      placement: 'left',
+      // placement: 'left',
       // placement: 'right',
-      // placement: 'below',
+      placement: 'below',
       info: {
          bold: 'Bold Bold Bold Bold',
          italic: 'Italic',
@@ -38,20 +38,20 @@ export function TooltipDemo() {
    })
 
    return template(
-      <Context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 500 })]}>
+      <Context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 600 })]}>
          <div data-align='center' class={demoBoxStyle}>
 
             {/* <div style='background-color: lightblue' at:create={tooltip.anchor.bold}>b</div> */}
-            <div style='background-color: lightblue' at:create={tooltip.anchor.italic}>i</div>
+            {/* <div style='background-color: lightblue' at:create={tooltip.anchor.italic}>i</div> */}
             {/* <div style='background-color: lightblue' at:create={tooltip.anchor.underline}>u</div> */}
-            <Button at:create={tooltip.anchor.default} variant='outline'>o</Button>
+            {/* <Button at:create={tooltip.anchor.default} variant='outline'>o</Button> */}
             <Button at:create={tooltip.trigger.bold} variant="outline">
                B
             </Button>
             <Button at:create={tooltip.trigger.italic} variant="outline">
                I
             </Button>
-            <Button at:create={[tooltip.trigger.underline, tooltip.anchor.underline]} variant="outline">
+            <Button at:create={tooltip.trigger.underline} variant="outline">
                U
             </Button>
             <Tooltip tooltip={tooltip}>

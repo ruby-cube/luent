@@ -1,7 +1,7 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { Effect } from "./Effect";
 import { hasQuark, QUARK } from "../abstract/Quark";
-import { $activeUpdate, Update, UpdateType } from "./Update";
+import { $activeUpdate, popUpdate, pushUpdate, Update, UpdateType } from "./Update";
 import { TraceableEntity } from "../debug/Traceable";
 import { Stateful } from "../abstract/Stateful";
 import { createPhaseMap, LAYOUT, Phase, phaseKeys, PRELUDE, queueTask, RENDER, RenderCycle, SYNC, TICK } from "./RenderCycle";
@@ -92,7 +92,15 @@ export class Effects {
 
    constructor(
       public phase: Phase,
-      private runEffect = (effect: Effect, update: Update) => effect.run!()
+      private runEffect = (effect: Effect, update: Update) => {
+         try {
+            pushUpdate(update)
+            effect.run!()
+         }
+         finally {
+            popUpdate()
+         }
+      }
    ) {
 
    }
