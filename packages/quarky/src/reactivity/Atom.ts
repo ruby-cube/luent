@@ -182,7 +182,7 @@ export class TrackedAtom {
       const syncEffects = this.effects[SYNC]
       if (syncEffects) {
          cycle.scheduleEffects(syncEffects, SYNC)
-         cycle.runSyncEffects()
+         cycle.runEffects(SYNC)
       }
    }
 }

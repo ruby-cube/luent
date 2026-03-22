@@ -18,6 +18,7 @@ type Task = () => void
 // [X] initialize lazily
 // --
 // [] manage precommit vs postcommit + generator
+// [] phases as promises
 // [] infinite loop detection/prevention
 
 export enum Phase {
@@ -97,7 +98,7 @@ export class RenderCycle {
 
       console.log('@@@ tick---')
       this.currentPhase = TICK
-      this.runTickEffects()
+      this.runEffects(TICK)
 
       this.update.complete()
       if (__DEV__) {
@@ -155,8 +156,8 @@ export class RenderCycle {
       (this.getPhase(phase) as CycledPhase).scheduleTask(task)
    }
 
-   runSyncEffects() {
-      const phase = this.phases[SYNC]
+   runEffects(phaseKey: Phase.SYNC | Phase.TICK) {
+      const phase = this.phases[phaseKey]
       if (!phase) return;
       let effects = phase.effects
       phase.effects = []
@@ -171,21 +172,21 @@ export class RenderCycle {
       }
    }
 
-   runTickEffects() {
-      const phase = this.phases[TICK]
-      if (!phase) return;
-      let effects = phase.effects
-      phase.effects = []
+   // runTickEffects() {
+   //    const phase = this.phases[TICK]
+   //    if (!phase) return;
+   //    let effects = phase.effects
+   //    phase.effects = []
 
-      while (effects.length) {
-         const ran: Set<Effect> = new Set()
-         for (const queue of effects) {
-            queue.runEffects(ran, this.update)
-         }
-         effects = phase.effects
-         phase.effects = []
-      }
-   }
+   //    while (effects.length) {
+   //       const ran: Set<Effect> = new Set()
+   //       for (const queue of effects) {
+   //          queue.runEffects(ran, this.update)
+   //       }
+   //       effects = phase.effects
+   //       phase.effects = []
+   //    }
+   // }
 }
 
 
@@ -305,14 +306,16 @@ export function renderphase() {
 // TODO: LAYOUT
 
 export function tick() {
-   const update = $activeUpdate()
-   if (!update) return _tick ?? (_tick = new Promise<void>(resolve => {
+   // const update = $activeUpdate()
+   // if (!update) return _tick ?? (_tick = 
+   return new Promise<void>(resolve => {
       queueTask(() => {
          _tick = undefined
          resolve()
       })
-   }))
-   return update.cycle.$effectsComplete(TICK)
+   })
+   // }))
+   // return update.cycle.$effectsComplete(TICK)
 }
 
 

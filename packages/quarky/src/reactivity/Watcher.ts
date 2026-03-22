@@ -199,7 +199,7 @@ export function scheduleEagerEffect(task: Task, phase: Phase) {
    const cycle = $currentCycle()
    cycle.scheduleTask(task, phase)
    if (phase === SYNC) {
-      cycle.runSyncEffects()
+      cycle.runEffects(SYNC)
    }
 }
 

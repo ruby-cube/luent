@@ -35,7 +35,7 @@ import { TooltipDemo } from "./src/ui-shadcn/examples/TooltipDemo"
 import { TestIfElseMix } from "./src/TestIfElseMix"
 
 export function runDemo() {
-   const app = createRoot(TestListSelection)
+   const app = createRoot(TooltipDemo)
 
    app.mount('#root')
 }

@@ -1,5 +1,6 @@
-import { template, If, NodeRef, atMounted, Portal, RenderSlot, FromTag, atMount } from '@rue/lumo';
-import { Ion, queueRender } from '@rue/quarky';
+import { template, If, NodeRef, Portal, RenderSlot, FromTag } from '@rue/lumo';
+import { Ion, queueLayout } from '@rue/quarky';
+import './TestTooltip.css'
 
 
 export function TestTooltip() {
@@ -102,17 +103,15 @@ export function Tooltip(input: FromTag<{
 
    queueLayout(() => {
       const height = $div()?.getBoundingClientRect().height
-      queueRender(() => {
-         if (height != null) $height.value = height;
-      })
+      if (height != null) $height.value = height;
    })
 
 
-   async {
-      await $layout() ...:
-         const height = $div()?.getBoundingClientRect().height;
-         if (height != null) $height.value = height
-   }
+   // async {
+   //    await $layout() ...:
+   //       const height = $div()?.getBoundingClientRect().height;
+   //       if (height != null) $height.value = height
+   // }
 
    // prevent looped layout thrashing w/ measureLayout
    // atMounted(async () => {

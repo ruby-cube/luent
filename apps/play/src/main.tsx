@@ -153,7 +153,7 @@ import { TestTooltip2 } from './TestTooltip';
 // }
 
 // const app = createRoot(TestThru)
-const app = createRoot(TestRenderEffects)
+const app = createRoot(TestTooltip)
 
 app.mount('#root')
 
