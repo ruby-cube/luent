@@ -1966,7 +1966,7 @@ type LumoAttributes<F, P> =
    : P // Element attributes must be added to DetailedHTMLProps
 
 type LumoComponentAttributes<C> = {
-   ref?: NodeRef<Lumo.ComponentRef<C>>
+   ref?: () => Lumo.ComponentRef<C> | undefined
    class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
    style?: StyleInput | StyleInput[];
 }

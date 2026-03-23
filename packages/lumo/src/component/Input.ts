@@ -2,6 +2,7 @@ import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToInterse
 import { Ion, Ionic, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, } from "@rue/quarky";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
+import { NodeRef, RefSource } from "../node/NodeRef";
 
 
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
@@ -54,7 +55,7 @@ export type Readonly<T> = {
 
 type HasEvent<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C, `on:${string}`>> extends never ? false : true
 
-type WithEmit<C> = { emit: { [K in keyof C as K extends `on:${infer E}` ? E : never]: C[K] } &  { [K in keyof DOMEvents<HTMLElement> as K extends `on:${infer E}` ? E : never]: DOMEvents<HTMLElement>[K] }  }
+type WithEmit<C> = { emit: { [K in keyof C as K extends `on:${infer E}` ? E : never]: C[K] } & { [K in keyof DOMEvents<HTMLElement> as K extends `on:${infer E}` ? E : never]: DOMEvents<HTMLElement>[K] } }
 
 
 // C extends AnyObject ? HasEvent<C> extends true ? {
@@ -329,8 +330,8 @@ type ToMuIon<T> = ExcludePrimitives<T> extends { value: any } ? T
 // TODO: only allow 'mu:' for ions
 
 export type FromTag<T = {}, D = {}> =
-   T extends string
-   ? _FromTag<ElementAttributes<T> & D> : _FromTag<T>
+   T extends RefSource
+   ? _FromTag<ElementAttributes<T> & D> & { ref?: NodeRef<T> } : _FromTag<T>
 
 export type _FromTag<D> =
    StaticInput<D>
@@ -342,7 +343,8 @@ export type _FromTag<D> =
    & { '~attributes'?: TagAttributes<D> }
 
 
-type ElementAttributes<D> = D extends 'input' ? { value: any, type: any } : {}
+type ElementAttributes<D> =
+   D extends 'input' ? { value: any, type: any } : {}
 
 type Styles = {
    styles: Ionic<CSSStyleDeclaration>

@@ -33,9 +33,10 @@ import { TestOnceEager } from "./src/TestOnceEager"
 import { TestPortal, TestPortalB } from "./src/TestPortal"
 import { TooltipDemo } from "./src/ui-shadcn/examples/TooltipDemo"
 import { TestIfElseMix } from "./src/TestIfElseMix"
+import { TestHookForwarding } from "./src/TestHookForwarding"
 
 export function runDemo() {
-   const app = createRoot(TooltipDemo)
+   const app = createRoot(TestHookForwarding)
 
    app.mount('#root')
 }

@@ -44,8 +44,6 @@ function Button({
 }: FromTag<'button', {
    as?: ComponentTag | string
 } & VariantProps<typeof buttonVariants>>) {
-   console.log('button attributes', other)
-   console.log('æclasses', æclasses)
 
    return template(
       <Comp

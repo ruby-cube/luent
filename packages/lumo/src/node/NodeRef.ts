@@ -6,7 +6,7 @@ import { AnyObject, Glass } from "@rue/types"
 
 export const INTERNAL = Symbol('internal')
 
-type RefSource = TagName | ((...args: any[]) => {exposed: unknown})
+export type RefSource = TagName | ((...args: any[]) => { exposed: unknown })
 
 
 export type NodeReferent<
@@ -15,8 +15,8 @@ export type NodeReferent<
    T extends TagName ? HTMLElementTagNameMap[T] : // TODO: SVGs and Math elements
    T
 
-export type ComponentRef<C> = C extends (...args: any[]) => infer R ?
-   R extends { exposed: infer E } ? E : never : never
+export type ComponentRef<C> = C extends (setup: infer S) => infer R ?
+   S extends { ref?: () => infer F } ? NonNullable<F> : R extends { exposed: infer E } ? E : never : never
 /* 
 * NodeRef property:
 * - undefined means ref has not been set or has been removed from the DOM

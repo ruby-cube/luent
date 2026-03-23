@@ -1,14 +1,15 @@
 import { debug, isFunction, normalizeToArray } from "@rue/utils";
-import { getFlask } from "@rue/flask";
+import { Flask, getFlask } from "@rue/flask";
 import { afterCreated, afterDemounted, afterDiscarded, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDiscard, atDiscarded, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
 import { AnyObject } from "@rue/types";
 import { toValue } from "@rue/quarky";
 
 type LifecycleTask<T = any> = (element: T, initialOrFinal?: boolean) => void;
 
-export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTask | LifecycleTask[] }) {
+export function setUpHooks(node: AnyObject, hooks: { flask: Flask } & { [key: string]: LifecycleTask | LifecycleTask[] }) {
    console.log('setUpHooks: node', node)
-   const flask = getFlask()
+   if (hooks.flask && hooks.flask !== getFlask()) 
+      debug.error('forwarded hooks must be attached to component or element within the same dynamic boundary')
    for (const key in hooks) {
       const value = hooks[key]
       if (!isFunction(value) && !(value instanceof Array)) continue;
@@ -149,24 +150,24 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
 
 
 export interface LumoHooks<T> {
-   'at:create'?: LifecycleTask<T> | LifecycleTask<T>[]| void // allows functions to be called in the JSX expression space
-   'at:mount'?: LifecycleTask<T> | LifecycleTask<T>[]| void
+   'at:create'?: LifecycleTask<T> | LifecycleTask<T>[] | void // allows functions to be called in the JSX expression space
+   'at:mount'?: LifecycleTask<T> | LifecycleTask<T>[] | void
    'at:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:created'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:mounted'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:remounted'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'after:created'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'after:mounted'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'after:remounted'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:discard'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:unmount'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:demount'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:discarded'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:unmounted'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'at:demounted'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'after:discarded'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'after:unmounted'?: LifecycleTask<T>| LifecycleTask<T>[]
-   'after:demounted'?: LifecycleTask<T>| LifecycleTask<T>[]
+   'at:created'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:mounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:remounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:created'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:mounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:remounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:discard'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:discarded'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:unmounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:demounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:discarded'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:unmounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:demounted'?: LifecycleTask<T> | LifecycleTask<T>[]
 }
 
 const flaskHooks = {

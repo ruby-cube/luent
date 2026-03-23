@@ -1,3 +1,4 @@
+```ts
 // @ts-nocheck
 import { FromTag, AsyncIon, If, Suspense } from "@rue/lumo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
@@ -185,18 +186,19 @@ export default function TodoApp() {
       )
    ), $todos)
 
-   const addTodo = Action(async (todo: Todo) => {
-      await db.addTodo(todo)
+   const addTodo = Action(async (todo: Todo) => (
+      await db.addTodo(todo);
       refetch()
-   }, $todos)
+   ), $todos)
 
-   const addTodo = Action((todo: Todo) => {
-      async {
-         await db.addTodo(todo) ...:
-            refetch();
-            return;
-      }
-   }, $todos)
+   const addTodo = Action((todo: Todo) => (
+      await db.addTodo(todo) ...: refetch()
+   ), $todos)
+
+   const addTodo = Action((todo: Todo) => (
+      await db.addTodo(todo) ...:
+         refetch()
+   ), $todos)
 
 const removeTodo = Action((todoID: string) => (ooo
    .await(db.removeTodo(todoID),
@@ -440,3 +442,4 @@ function saveTodos(todos: Todo[]) {
    localStorage.setItem('TODOS', JSON.stringify(todos));
    return delay(undefined, 400);
 }
+```

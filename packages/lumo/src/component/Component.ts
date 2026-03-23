@@ -8,7 +8,7 @@ import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { analyzeAttributes } from "../element/makeElement";
 import { setUpHooks } from "../flask/template-hooks";
-import { getActiveFlask } from "@rue/flask";
+import { getActiveFlask, getFlask } from "@rue/flask";
 
 
 
@@ -152,10 +152,10 @@ export function makeComponent(
    console.log('component transitions', transitions)
 
    const output = Component(toInput({
-      events: {...events, ...forwardEvents},
-      hooks: {...hooks, ...forwardHooks},
+      events: { ...events, ...forwardEvents },
+      hooks: { flask: getFlask(), ...hooks, ...forwardHooks },
       ...attributes,
-      transitions: {...transitions, ...forwardTransitions},
+      transitions: { ...transitions, ...forwardTransitions },
       Slot,
       classes,
       styles,

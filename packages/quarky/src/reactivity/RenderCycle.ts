@@ -319,11 +319,13 @@ export function $layout() {
 
 export function $tick() {
    return _tick ?? (_tick = new Promise<void>(resolve => {
-      queueTask(() => {
-         const tick = _tick
-         _tick = undefined
-         resolve()
-         return tick;
+      requestAnimationFrame(() => {
+         queueTask(() => {
+            const tick = _tick
+            _tick = undefined
+            resolve()
+            return tick;
+         })
       })
    }))
 }
@@ -341,4 +343,10 @@ export function queueRender(task: Task) {
 
 export function queueLayout(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, LAYOUT)
+}
+
+export function queueTick(task: Task) {
+   requestAnimationFrame(() => {
+      queueTask(task)
+   })
 }
