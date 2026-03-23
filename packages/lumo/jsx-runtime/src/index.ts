@@ -8,6 +8,13 @@ import { isPlainObject, normalizeToArray } from "@rue/utils";
 // with custom jsx compiler
 
 
+isEqual({} as any as Luent._TransitionEvent, {} as any as Luent.TransitionEvent)
+
+function isEqual(x: Luent.TransitionEvent, y: Luent._TransitionEvent) {
+
+}
+
+
 export const jsxDEV = jsx;
 
 export const jsxs = jsx;
@@ -17,7 +24,7 @@ export function jsx(nodeType: TagName | ComponentForge, config: { children: Rend
    config.Slot = Slot;
    console.log('Slot name, jsx', Slot, config.children)
    if (nodeType === Context) {
-      return Context({Slot, provide: config.provide} as any)
+      return Context({ Slot, provide: config.provide } as any)
    }
    if (nodeType === Fragment) {
       return normalizeToArray(Slot())

@@ -3,6 +3,7 @@ import { Ion, Ionic, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, 
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { NodeRef, RefSource } from "../node/NodeRef";
+import { LumoHooks } from "../flask/template-hooks";
 
 
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
@@ -344,7 +345,7 @@ export type _FromTag<D> =
 
 
 type ElementAttributes<D> =
-   D extends 'input' ? { value: any, type: any } : {}
+   D extends keyof JSX.IntrinsicElements ? Omit<JSX.IntrinsicElements[D], 'ref' | keyof LumoHooks<any>> : {} // TODO: use Attributes from index.d.ts
 
 type Styles = {
    styles: Ionic<CSSStyleDeclaration>

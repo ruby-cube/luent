@@ -1,0 +1,500 @@
+[
+   {
+      "name": "Html",
+      "attributes": {
+         "manifest": true
+      }
+   },
+   {
+      "name": "Base",
+      "void": true,
+      "attributes": {
+         "href": true,
+         "target": true
+      }
+   },
+   {
+      "name": "Link",
+      "void": true,
+      "attributes": {
+         "href": true,
+         "crossorigin": true,
+         "rel": true,
+         "media": true,
+         "hreflang": true,
+         "type": true,
+         "sizes": true
+      }
+   },
+   {
+      "name": "Meta",
+      "void": true,
+      "attributes": {
+         "name": true,
+         "http-equiv": true,
+         "content": true,
+         "charset": true
+      }
+   },
+   {
+      "name": "Style",
+      "attributes": {
+         "media": true,
+         "nonce": true,
+         "type": true,
+         "scoped": true
+      }
+   },
+   {
+      "name": "Body",
+      "attributes": {
+         "onafterprint": true,
+         "onbeforeprint": true,
+         "onbeforeunload": true,
+         "onhashchange": true,
+         "onlanguagechange": true,
+         "onmessage": true,
+         "onoffline": true,
+         "ononline": true,
+         "onpagehide": true,
+         "onpageshow": true,
+         "onpopstate": true,
+         "onstorage": true,
+         "onunload": true
+      }
+   },
+   {
+      "name": "Blockquote",
+      "attributes": {
+         "cite": true
+      }
+   },
+   {
+      "name": "Ol",
+      "attributes": {
+         "reversed": true,
+         "start": true,
+         "type": true
+      }
+   },
+   {
+      "name": "Li",
+      "attributes": {
+         "value": true
+      }
+   },
+   {
+      "name": "A",
+      "attributes": {
+         "download": true,
+         "href": true,
+         "hreflang": true,
+         "ping": true,
+         "target": true,
+         "type": true,
+         "rel": true 
+      }
+   },
+   {
+      "name": "Q",
+      "attributes": {
+         "cite": true
+      }
+   },
+   {
+      "name": "Time",
+      "attributes": {
+         "datetime": true
+      }
+   },
+   {
+      "name": "Del",
+      "attributes": {
+         "cite": true,
+         "datetime": true
+      }
+   },
+   {
+      "name": "Img",
+      "void": true,
+      "attributes": {
+         "alt": true,
+         "crossorigin": true,
+         "ismap": true,
+         "decoding": true,
+         "fetchpriority": true,
+         "height": true,
+         "loading": true,
+         "referrerpolicy": true,
+         "sizes": true,
+         "src": true,
+         "srcset": true,
+         "usemap": true,
+         "width": true
+      }
+   },
+   {
+      "name": "Iframe",
+      "attributes": {
+         "allowfullscreen": true,
+         "height": true,
+         "name": true,
+         "sandbox": true,
+         "seamless": true,
+         "src": true,
+         "srcdoc": true,
+         "width": true
+      }
+   },
+   {
+      "name": "Embed",
+      "void": true,
+      "attributes": {
+         "src": true,
+         "type": true,
+         "width": true,
+         "height": true
+      }
+   },
+   {
+      "name": "Object",
+      "attributes": {
+         "data": true,
+         "form": true,
+         "height": true,
+         "name": true,
+         "type": true,
+         "usemap": true,
+         "width": true,
+         "typemustmatch": true,
+      }
+   },
+   {
+      "name": "Param",
+      "void": true,
+      "attributes": {
+         "name": true,
+         "value": true
+      }
+   },
+   {
+      "name": "Video",
+      "attributes": {
+         "src": true,
+         "crossorigin": true,
+         "poster": true,
+         "preload": true,
+         "autoplay": true,
+         "mediagroup": true,
+         "loop": true,
+         "muted": true,
+         "controls": true,
+         "width": true,
+         "height": true
+      }
+   },
+   {
+      "name": "Audio",
+      "attributes": {
+         "autoplay": true,
+         "controls": true,
+         "crossorigin": true,
+         "loop": true,
+         "mediagroup": true,
+         "muted": true,
+
+         "preload": true,
+         "src": true
+      }
+   },
+   {
+      "name": "Source",
+      "void": true,
+      "attributes": {
+         "src": true,
+         "type": true
+      }
+   },
+   {
+      "name": "Track",
+      "void": true,
+      "attributes": {
+         "default": true,
+         "kind": true,
+         "label": true,
+         "src": true,
+         "srclang": true
+      }
+   },
+   {
+      "name": "Map",
+      "attributes": {
+         "name": true
+      }
+   },
+   {
+      "name": "Area",
+      "void": true,
+      "attributes": {
+         "alt": true,
+         "coords": true,
+         "download": true,
+         "href": true,
+         "hreflang": true,
+
+         "shape": true,
+         "target": true,
+
+         "ping": true,
+         "rel": true,
+         "type": true
+      }
+   },
+   {
+      "name": "Table",
+      "attributes": {
+         "border": true
+      }
+   },
+   {
+      "name": "Colgroup",
+      "attributes": {
+         "span": true
+      }
+   },
+   {
+      "name": "Col",
+      "void": true,
+      "attributes": {
+         "span": true
+      }
+   },
+   {
+      "name": "Td",
+      "attributes": {
+         "colspan": true,
+         "rowspan": true,
+         "headers": true
+      }
+   },
+   {
+      "name": "Th",
+      "attributes": {
+         "colspan": true,
+         "rowspan": true,
+         "headers": true,
+         "scope": true,
+         "sorted": true,
+         "abbr": true
+      }
+   },
+   {
+      "name": "Form",
+      "attributes": {
+         "accept-charset": true,
+         "action": true,
+         "autocomplete": true,
+         "enctype": true,
+         "method": true,
+         "name": true,
+         "novalidate": true,
+         "target": true
+      }
+   },
+   {
+      "name": "Label",
+      "attributes": {
+         "form": true,
+         "for": true
+      }
+   },
+   {
+      "name": "Input",
+      "void": true,
+      "attributes": {
+         "accept": true,
+         "alt": true,
+         "autocomplete": true,
+         "autofocus": true,
+         "checked": true,
+         "dirname": true,
+         "disabled": true,
+         "form": true,
+         "formaction": true,
+         "formenctype": true,
+         "formmethod": true,
+         "formnovalidate": true,
+         "formtarget": true,
+         "height": true,
+         "list": true,
+         "max": true,
+         "maxlength": true,
+         "min": true,
+         "minlength": true,
+         "multiple": true,
+         "name": true,
+         "pattern": true,
+         "placeholder": true,
+         "popovertarget": true,
+         "popovertargetaction": true,
+         "readonly": true,
+         "required": true,
+         "size": true,
+         "src": true,
+         "step": true,
+         "type": true,
+         "value": true,
+         "width": true
+      }
+   },
+   {
+      "name": "Button",
+      "attributes": {
+         "autofocus": true,
+
+         "disabled": true,
+         "form": true,
+         "formaction": true,
+         "formenctype": true,
+         "formmethod": true,
+         "formnovalidate": true,
+         "formtarget": true,
+         "name": true,
+
+         "popovertarget": true,
+         "popovertargetaction": true,
+
+         "type": true,
+         "value": true
+      }
+   },
+   {
+      "name": "Select",
+      "attributes": {
+         "autocomplete": true,
+         "autofocus": true,
+         "disabled": true,
+         "form": true,
+         "multiple": true,
+         "name": true,
+         "required": true,
+         "size": true
+      }
+   },
+   {
+      "name": "Optgroup",
+      "attributes": {
+         "disabled": true,
+         "label": true
+      }
+   },
+   {
+      "name": "Option",
+      "attributes": {
+         "disabled": true,
+         "label": true,
+         "selected": true,
+         "value": true
+      }
+   },
+   {
+      "name": "Textarea",
+      "attributes": {
+         "autocomplete": true,
+         "autofocus": true,
+         "cols": true,
+         "dirname": true,
+         "disabled": true,
+         "form": true,
+         // "inputmode": true,
+         "maxlength": true,
+         "minlength": true,
+         "name": true,
+         "placeholder": true,
+         "readonly": true,
+         "required": true,
+         "rows": true,
+         "wrap": true
+      }
+   },
+   {
+      "name": "Output",
+      "attributes": {
+         "for": true,
+         "form": true,
+         "name": true
+      }
+   },
+   {
+      "name": "Progress",
+      "attributes": {
+         "value": true,
+         "max": true
+      }
+   },
+   {
+      "name": "Meter",
+      "attributes": {
+         "value": true,
+         "min": true,
+         "max": true,
+         "low": true,
+         "high": true,
+         "optimum": true
+      }
+   },
+   {
+      "name": "Fieldset",
+      "attributes": {
+         "disabled": true,
+         "form": true,
+         "name": true
+      }
+   },
+   {
+      "name": "Details",
+      "attributes": {
+         "open": true,
+         "name": true
+      }
+   },
+   {
+      "name": "Script",
+      "attributes": {
+         "async": true,
+         "crossorigin": true,
+         "defer": true,
+         "src": true,
+         "type": true,
+         "charset": true,
+         "nonce": true
+      }
+   },
+   {
+      "name": "Canvas",
+      "attributes": {
+         "width": true,
+         "height": true
+      }
+   },
+   {
+      "name": "Slot",
+      "attributes": {
+         "name": true
+      }
+   },
+   {
+      "name": "Data",
+      "attributes": {
+         "value": true
+      }
+   },
+   {
+      "name": "Fencedframe",
+      "attributes": {
+         "allow": true,
+         "height": true,
+         "width": true
+      }
+   }
+]

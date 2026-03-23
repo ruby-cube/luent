@@ -386,7 +386,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
 function setAttribute(node: AnyObject, attribute: string, value: any) {
 
    if (isBooleanAttribute(attribute)) {
-      const _value = Boolean(value)
+      const _value = value === 'true' ? true : value === 'false' ? false : Boolean(value)
       // if (_value === false) node.removeAttribute(attribute)
       // else node.setAttribute(attribute, _value)
       node[attribute] = _value
@@ -478,7 +478,7 @@ function toElementProperty(attribute: string) {
    return attributeToPropertyMap[attribute] ?? attribute;
 }
 
-const booleanAttributes = {
+const booleanAttributes = { // TODO: there are so many more boolean attributes
    async: true,
    autofocus: true,
    autoplay: true,

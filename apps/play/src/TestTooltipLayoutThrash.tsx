@@ -82,6 +82,7 @@ export function ButtonWithTooltip({ Slot }: ButtonWithTooltipInput) {
    return template(
       <>
          <button
+            innerHTML={}
             on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
             on:pointerleave={e => { $targetRect.value = null }}
          >

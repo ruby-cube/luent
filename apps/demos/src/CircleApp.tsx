@@ -12,7 +12,7 @@ export function CircleApp() {
    const $selected = Ion(undefined as undefined | null | Ionic<Circle>)
    const $adjusting = Ion(false)
 
-   function reClick({ clientX: x, clientY: y, target }: MouseEvent) {
+   function reClick({ clientX: x, clientY: y, target }: JSX.MouseEvent<SVGSVGElement>) {
       if ($adjusting()) {
          $adjusting.value = false
          if ($selected()?.r !== $selected()?.r)
@@ -60,7 +60,7 @@ export function CircleApp() {
 
    return template(
       <>
-         <svg on:click={e => reClick(e as any as MouseEvent)}>
+         <svg on:click={reClick}>
             <foreignObject x="0" y="40%" width="100%" height="200">
                <p class="tip">
                   Click on the canvas to draw a circle. Click on a circle to select it.
