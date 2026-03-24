@@ -1532,12 +1532,11 @@ declare global {
       }
 
       interface ThHTMLAttributes<T> extends HTMLAttributes<T> {
-         // align?: Lumo.MaybeIon<"left" | "center" | "right" | "justify" | "char" | undefined>;
          colspan?: Lumo.MaybeIon<number | undefined>;
          headers?: Lumo.MaybeIon<string | undefined>;
          rowspan?: Lumo.MaybeIon<number | undefined>;
-         // scope?: Lumo.MaybeIon<string | undefined>;
-         // abbr?: Lumo.MaybeIon<string | undefined>;
+         scope?: Lumo.MaybeIon<string | undefined>;
+         abbr?: Lumo.MaybeIon<string | undefined>;
       }
 
       interface TimeHTMLAttributes<T> extends HTMLAttributes<T> {
@@ -1575,11 +1574,11 @@ declare global {
 
          height?: Lumo.MaybeIon<number | string | undefined>;
          width?: Lumo.MaybeIon<number | string | undefined>;
+
          crossorigin?: Lumo.MaybeIon<CrossOrigin>;
          fetchpriority?: Lumo.MaybeIon<"high" | "low" | "auto">;
 
          // SVG Specific attributes
-         // DEPRECATED accentHeight?: Lumo.MaybeIon<number | string | undefined>;
          accumulate?: Lumo.MaybeIon<"none" | "sum" | undefined>;
          additive?: Lumo.MaybeIon<"replace" | "sum" | undefined>;
          'alignment-baseline'?: Lumo.MaybeIon<
@@ -1601,37 +1600,28 @@ declare global {
          alphabetic?: Lumo.MaybeIon<number | string | undefined>;
          amplitude?: Lumo.MaybeIon<number | string | undefined>;
          'arabic-form'?: Lumo.MaybeIon<"initial" | "medial" | "terminal" | "isolated" | undefined>;
-         // DEPRECATED ascent?: Lumo.MaybeIon<number | string | undefined>;
          attributeName?: Lumo.MaybeIon<string | undefined>;
          attributeType?: Lumo.MaybeIon<string | undefined>;
          autoReverse?: Lumo.MaybeIon<Booleanish | undefined>;
          azimuth?: Lumo.MaybeIon<number | string | undefined>;
          baseFrequency?: Lumo.MaybeIon<number | string | undefined>;
          'baseline-shift'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED baseProfile?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED bbox?: Lumo.MaybeIon<number | string | undefined>;
          begin?: Lumo.MaybeIon<number | string | undefined>;
          bias?: Lumo.MaybeIon<number | string | undefined>;
          by?: Lumo.MaybeIon<number | string | undefined>;
          calcMode?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED cap-height?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED clip?: Lumo.MaybeIon<number | string | undefined>;
          clipPathUnits?: Lumo.MaybeIon<number | string | undefined>;
          'clip-path'?: Lumo.MaybeIon<string | undefined>;
          'clip-rule'?: Lumo.MaybeIon<number | string | undefined>;
          color?: Lumo.MaybeIon<string | undefined>;
          'color-interpolation'?: Lumo.MaybeIon<number | string | undefined>;
          'color-interpolation-filters'?: Lumo.MaybeIon<"auto" | "sRGB" | "linearRGB" | "inherit" | undefined>;
-         // DEPRECATED colorProfile?: Lumo.MaybeIon<number | string | undefined>;
          'color-rendering'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED contentScriptType?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED contentStyleType?: Lumo.MaybeIon<number | string | undefined>;
          cursor?: Lumo.MaybeIon<number | string | undefined>;
          cx?: Lumo.MaybeIon<number | string | undefined>;
          cy?: Lumo.MaybeIon<number | string | undefined>;
          d?: Lumo.MaybeIon<string | undefined>;
          decelerate?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED descent?: Lumo.MaybeIon<number | string | undefined>;
          diffuseConstant?: Lumo.MaybeIon<number | string | undefined>;
          direction?: Lumo.MaybeIon<number | string | undefined>;
          display?: Lumo.MaybeIon<number | string | undefined>;
@@ -1642,15 +1632,12 @@ declare global {
          dy?: Lumo.MaybeIon<number | string | undefined>;
          edgeMode?: Lumo.MaybeIon<number | string | undefined>;
          elevation?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED enableBackground?: Lumo.MaybeIon<number | string | undefined>;
          end?: Lumo.MaybeIon<number | string | undefined>;
          exponent?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED externalResourcesRequired?: Lumo.MaybeIon<Booleanish | undefined>;
          fill?: Lumo.MaybeIon<string | undefined>;
          'fill-opacity'?: Lumo.MaybeIon<number | string | undefined>;
          'fill-rule'?: Lumo.MaybeIon<"nonzero" | "evenodd" | "inherit" | undefined>;
          filter?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED filterRes?: Lumo.MaybeIon<number | string | undefined>;
          filterUnits?: Lumo.MaybeIon<number | string | undefined>;
          'flood-color'?: Lumo.MaybeIon<number | string | undefined>;
          'flood-opacity'?: Lumo.MaybeIon<number | string | undefined>;
@@ -1658,27 +1645,15 @@ declare global {
          'font-family'?: Lumo.MaybeIon<string | undefined>;
          'font-size'?: Lumo.MaybeIon<number | string | undefined>;
          'font-size-adjust'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED fontStretch?: Lumo.MaybeIon<number | string | undefined>;
          'font-style'?: Lumo.MaybeIon<number | string | undefined>;
          'font-variant'?: Lumo.MaybeIon<number | string | undefined>;
          'font-weight'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED format?: Lumo.MaybeIon<number | string | undefined>;
          fr?: Lumo.MaybeIon<number | string | undefined>;
          from?: Lumo.MaybeIon<number | string | undefined>;
          fx?: Lumo.MaybeIon<number | string | undefined>;
          fy?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED g1?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED g2?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED glyphName?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED glyphOrientationHorizontal?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED glyphOrientationVertical?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED glyphRef?: Lumo.MaybeIon<number | string | undefined>;
          gradientTransform?: Lumo.MaybeIon<string | undefined>;
          gradientUnits?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED hanging?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED horizAdvX?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED horizOriginX?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED ideographic?: Lumo.MaybeIon<number | string | undefined>;
          'image-rendering'?: Lumo.MaybeIon<number | string | undefined>;
          in2?: Lumo.MaybeIon<number | string | undefined>;
          in?: Lumo.MaybeIon<string | undefined>;
@@ -1687,10 +1662,8 @@ declare global {
          k2?: Lumo.MaybeIon<number | string | undefined>;
          k3?: Lumo.MaybeIon<number | string | undefined>;
          k4?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED k?: Lumo.MaybeIon<number | string | undefined>;
          kernelMatrix?: Lumo.MaybeIon<number | string | undefined>;
          kernelUnitLength?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED kerning?: Lumo.MaybeIon<number | string | undefined>;
          keyPoints?: Lumo.MaybeIon<number | string | undefined>;
          keySplines?: Lumo.MaybeIon<number | string | undefined>;
          keyTimes?: Lumo.MaybeIon<number | string | undefined>;
@@ -1709,8 +1682,7 @@ declare global {
          maskUnits?: Lumo.MaybeIon<number | string | undefined>;
          max?: Lumo.MaybeIon<number | string | undefined>;
          min?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED mathematical?: Lumo.MaybeIon<number | string | undefined>;
-         
+
          /**
           * The method attribute indicates the method by which text should be rendered along the path of a <textPath> element.
           * 
@@ -1727,13 +1699,11 @@ declare global {
          operator?: Lumo.MaybeIon<number | string | undefined>;
          order?: Lumo.MaybeIon<number | string | undefined>;
          orient?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED orientation?: Lumo.MaybeIon<number | string | undefined>;
          origin?: Lumo.MaybeIon<number | string | undefined>;
          overflow?: Lumo.MaybeIon<number | string | undefined>;
          'overline-position'?: Lumo.MaybeIon<number | string | undefined>;
          'overline-thickness'?: Lumo.MaybeIon<number | string | undefined>;
          'paint-order'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED panose1?: Lumo.MaybeIon<number | string | undefined>;
          path?: Lumo.MaybeIon<string | undefined>;
          pathLength?: Lumo.MaybeIon<number | string | undefined>;
          patternContentUnits?: Lumo.MaybeIon<string | undefined>;
@@ -1755,7 +1725,6 @@ declare global {
          repeatCount?: Lumo.MaybeIon<number | string | undefined>;
          repeatDur?: Lumo.MaybeIon<number | string | undefined>;
          requiredExtensions?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED requiredFeatures?: Lumo.MaybeIon<number | string | undefined>;
          restart?: Lumo.MaybeIon<number | string | undefined>;
          result?: Lumo.MaybeIon<string | undefined>;
          rotate?: Lumo.MaybeIon<number | string | undefined>;
@@ -1779,14 +1748,11 @@ declare global {
          spreadMethod?: Lumo.MaybeIon<string | undefined>;
          startOffset?: Lumo.MaybeIon<number | string | undefined>;
          stdDeviation?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED stemh?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED stemv?: Lumo.MaybeIon<number | string | undefined>;
          stitchTiles?: Lumo.MaybeIon<number | string | undefined>;
          'stop-color'?: Lumo.MaybeIon<string | undefined>;
          'stop-opacity'?: Lumo.MaybeIon<number | string | undefined>;
          'strikethrough-Position'?: Lumo.MaybeIon<number | string | undefined>;
          'strikethrough-Thickness'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED string?: Lumo.MaybeIon<number | string | undefined>;
          stroke?: Lumo.MaybeIon<string | undefined>;
          'stroke-dasharray'?: Lumo.MaybeIon<string | number | undefined>;
          'stroke-dashoffset'?: Lumo.MaybeIon<string | number | undefined>;
@@ -1811,28 +1777,13 @@ declare global {
          to?: Lumo.MaybeIon<number | string | undefined>;
          transform?: Lumo.MaybeIon<string | undefined>;
          'transform-origin'?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED u1?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED u2?: Lumo.MaybeIon<number | string | undefined>;
          'underline-position'?: Lumo.MaybeIon<number | string | undefined>;
          'underline-thickness'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED unicode?: Lumo.MaybeIon<number | string | undefined>;
          'unicode-bidi'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED unicodeRange?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED unitsPerEm?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED vAlphabetic?: Lumo.MaybeIon<number | string | undefined>;
          values?: Lumo.MaybeIon<string | undefined>;
          'vector-effect'?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED version?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED vertAdvY?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED vertOriginX?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED vertOriginY?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED vHanging?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED vIdeographic?: Lumo.MaybeIon<number | string | undefined>;
          viewBox?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED viewTarget?: Lumo.MaybeIon<number | string | undefined>;
          visibility?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED vMathematical?: Lumo.MaybeIon<number | string | undefined>;
-         // DEPRECATED widths?: Lumo.MaybeIon<number | string | undefined>;
          'white-space'?: Lumo.MaybeIon<'normal' | 'pre' | 'nowrap' | 'pre-wrap' | 'break-space' | 'pre-line'>;
          'word-spacing'?: Lumo.MaybeIon<number | string | undefined>;
          'writing-mode'?: Lumo.MaybeIon<number | string | undefined>;
@@ -1840,19 +1791,10 @@ declare global {
          x2?: Lumo.MaybeIon<number | string | undefined>;
          x?: Lumo.MaybeIon<number | string | undefined>;
          xChannelSelector?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xHeight?: Lumo.MaybeIon<number | string | undefined>;
          'xlink:actuate'?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xlinkArcrole?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xlinkHref?: Lumo.MaybeIon<string | undefined>;
          'xlink:role'?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xlinkShow?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xlinkTitle?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xlinkType?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED mlBase?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xmlLang?: Lumo.MaybeIon<string | undefined>;
          xmlns?: Lumo.MaybeIon<string | undefined>;
          'xmlns:xlink'?: Lumo.MaybeIon<string | undefined>;
-         // DEPRECATED xmlSpace?: Lumo.MaybeIon<string | undefined>;
          y1?: Lumo.MaybeIon<number | string | undefined>;
          y2?: Lumo.MaybeIon<number | string | undefined>;
          y?: Lumo.MaybeIon<number | string | undefined>;
@@ -1949,10 +1891,6 @@ declare global {
 
 
    namespace JSX {
-      type MouseEvent<T = Element> = L.MouseEvent<T>
-
-
-
 
       // important for converting component input types to attribute types
       type LibraryManagedAttributes<C, P> = LumoAttributes<C, P>;
