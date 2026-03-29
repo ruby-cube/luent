@@ -101,7 +101,11 @@ type IonicPropertyConfig<P = any> = {
    '@get'?: (value: P) => void, // TODO: needs to be ReturnType of '-as' function if there is an as function
    '@set'?: (value: P) => void // TODO: needs to be ReturnType of '-as' function if there is an as function
 }
-type IonicConfig<T> = { [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I : never> }
+type IonicConfig<T> = { 
+   [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I : never> 
+   '-devName'?: string
+}
+
 
 
 export const Ionic = _Ionic as typeof _Ionic & { '~Ionic': true }

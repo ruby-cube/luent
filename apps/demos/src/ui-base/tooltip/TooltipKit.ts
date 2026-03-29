@@ -1,8 +1,6 @@
-import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { atDiscard, ContextKey, fromContext, fromRoot, listen, NodeRef, provideRoot } from "@rue/lumo"
-import { Expand, Ion, Ionic, queueLayout, queueTask } from "@rue/quarky"
+import { ContextKey, fromContext, listen } from "@rue/lumo"
+import { Ionic, queueTask } from "@rue/quarky"
 import { AnyObject } from "@rue/types"
-import { debug, isObject } from "@rue/utils"
 import { DATA_ATTRIBUTE_POPOVER, Placement, Popover } from "../popover/Popover"
 
 
@@ -40,7 +38,8 @@ type AsAnchor = (node: HTMLElement) => void
 
 let tooltipID = 0
 
-function TooltipKit<I extends object>(options?: {
+
+function TooltipKit<I extends { [key: string]: any }>(options?: {
    gap?: number,
    placement?: Placement,
    info?: I
@@ -48,12 +47,13 @@ function TooltipKit<I extends object>(options?: {
    const anchorRoot = '--tooltip-anchor-' + tooltipID++
    const info = options?.info
 
-   const tooltip = Ionic(new Popover(
+   const tooltip = Ionic(new TooltipModel(
       options?.placement ?? 'above',
       options?.gap ?? .75
    ), {
-      devName: 'tooltip'
+      '-devName': 'tooltip'
    })
+
 
    const asTrigger = TriggerSetup(tooltip, info)
    const asAnchor = AnchorSetup(info)
@@ -61,11 +61,9 @@ function TooltipKit<I extends object>(options?: {
 
    const explicitAnchors = new Set()
 
-   function AnchorSetup<T>(info: T) {
-      if (!isObject(info)) {
-
-      }
+   function AnchorSetup(info: I | undefined): { [K in keyof I]: AsAnchor } {
       const anchor = Object.create(null)
+      if (!info) return anchor;
       for (const key in info) {
          anchor[key] = AsAnchor(key)
       }
@@ -84,9 +82,9 @@ function TooltipKit<I extends object>(options?: {
       }
    }
 
-   function TriggerSetup(tooltip: Ionic<Popover>, info: I | undefined) {
-      if (!info) return;
+   function TriggerSetup(tooltip: Ionic<TooltipModel>, info: I | undefined): { [K in keyof I]: AsTrigger } {
       const trigger = Object.create(null)
+      if (!info) return trigger;
       for (const key in info) {
          trigger[key] = AsTrigger(key, info[key], tooltip)
       }
@@ -94,7 +92,7 @@ function TooltipKit<I extends object>(options?: {
    }
 
 
-   function AsTrigger(key: string, info: any | undefined, tooltip: Ionic<Popover>) {
+   function AsTrigger(key: keyof I & string, info: any | undefined, tooltip: Ionic<TooltipModel>) {
 
       return (node: HTMLElement) => {
          queueTask(() => {
@@ -105,7 +103,10 @@ function TooltipKit<I extends object>(options?: {
          const showTooltip = () => {
             const anchorKey = explicitAnchors.has(key) ? key : explicitAnchors.has('default') ? 'default' : key
             tooltip.anchorName = anchorRoot + '-' + anchorKey
-            queueTask(() => tooltip.show(info))
+            queueTask(() => {
+               tooltip.info = info
+               tooltip.show()
+            })
          }
 
          const hideTooltip = () => {
@@ -147,15 +148,19 @@ function TooltipKit<I extends object>(options?: {
    }
 
    return {
-      tooltip,
-      asAnchor,
-      asTrigger
+      tooltip: tooltip as unknown as IonicTooltip<I>,
+      asTooltipAnchor: asAnchor,
+      asTooltipTrigger: asTrigger
    }
+}
+
+class TooltipModel<T extends object = AnyObject> extends Popover {
+   info: T[keyof T] | undefined
 }
 
 
 
-export type IonicTooltip<T = undefined> = Ionic<Readonly<Popover<T>>>
+export type IonicTooltip<T extends { [key: string]: any } = AnyObject> = Ionic<Readonly<TooltipModel<T>>>
 
 
 export {

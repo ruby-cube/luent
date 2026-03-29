@@ -4,7 +4,7 @@ import { atDiscard, NodeRef, queueLayout } from "@rue/lumo"
 export type Placement = 'above' | 'below' | 'left' | 'right'
 
 
-export class Popover<T = undefined> {
+export class Popover {
    anchorName = ''
 
    constructor(
@@ -33,12 +33,9 @@ export class Popover<T = undefined> {
       this.flipped = !this.flipped
    }
 
-   info: T[keyof T] | undefined
-
    visible = false
 
-   show(info: T[keyof T] | undefined) {
-      if (info !== undefined) this.info = info;
+   show() {
       this.visible = true
    }
 
