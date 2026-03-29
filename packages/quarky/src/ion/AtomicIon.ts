@@ -8,6 +8,7 @@ import { isPlainObject } from "@rue/utils";
 import { SimpleState } from "../reactivity/State";
 import { traceMutation } from "../debug/dev";
 
+
 export type QuarkyAtomicIon = MutableIon<unknown> & { [QUARK]: AtomicIonQuark, displayName: string }
 
 export interface IonHooks {
@@ -48,9 +49,10 @@ export class AtomicIonQuark implements Atom {
 
 
 export function createAtomicIon(
-   quark: AtomicIonQuark,
-   props?: AnyObject
+   initialState: unknown,
+   setup?: AnyObject
 ) {
+   const quark = new AtomicIonQuark(new SimpleState(initialState), setup)
 
    const $state = (
       quark.castGet
@@ -60,12 +62,12 @@ export function createAtomicIon(
 
    $state[QUARK] = quark
    if (__DEV__) $state.displayName = 'getState'
-   if (__DEV__) quark.asTraceable = new TraceableMutable(props?.devName)
+   if (__DEV__) quark.asTraceable = new TraceableMutable(setup?.devName)
 
 
-   if (props) {
-      const descriptors = Object.getOwnPropertyDescriptors(props)
-      if (__DEV__ && !isPlainObject(props)) throw new Error('additional ion props and methods must be defined in an object literal') // TODO: allow classes and prototypes?
+   if (setup) {
+      const descriptors = Object.getOwnPropertyDescriptors(setup)
+      if (__DEV__ && !isPlainObject(setup)) throw new Error('additional ion setup and methods must be defined in an object literal') // TODO: allow classes and prototypes?
       if (__DEV__ && 'value' in descriptors) throw new Error('Overriding .value property disallowed. Use @get and @set hooks to add behavior')
       delete descriptors['@get'];
       delete descriptors['@set'];

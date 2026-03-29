@@ -23,7 +23,7 @@ export type Expand<T> = T extends infer O ? O : never;
 type AbsorbIons<T> = T extends any[] ? T : { [K in keyof T as K extends `æ${infer S}` ? T[K] extends () => any ? S : K : K]: K extends `æ${infer S}` ? T[K] extends () => infer V ? V : T[K] : T[K] }
 
 type IonAccess<T, M = {}> = Expand<{
-   [K in keyof T as K extends `æ${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never : `æ${K}` : T[K] extends Function ? never : K extends string ? `æ${K}` : never]:
+   [K in keyof T as K extends '~ionic' ? never :K extends `æ${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never :`æ${K}` : T[K] extends Function ? never : K extends string ? `æ${K}` : never]:
    K extends `æ${string}`
    ? T[K] extends Ion<infer V>
    ? NestedType<K, M, V>

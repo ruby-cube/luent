@@ -79,7 +79,7 @@ function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
          __DEV__assertNotPrototype(modelQuark.proxy, receiver)
          const proto = modelQuark.proto
          if (!proto.has(key) && !(key in modelQuark.state.get())) {
-            return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue)) 
+            return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue))
             // FIX: what if property was set in a preceding update that hasn't committed?
          }
          const success = !proto.has(key)
@@ -104,7 +104,7 @@ function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
 
       defineProperty(_, key, descriptor) {
          if (key in modelQuark.state.get()) { // FIX: should this check both state.current and state.pending??
-            if ( __DEV__) console.warn(`Redefining property of an ionic proxy not supported`)
+            if (__DEV__) console.warn(`Redefining property of an ionic proxy not supported`)
             return false
          }
          // const update = $activeUpdate()
@@ -125,12 +125,12 @@ function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
       deleteProperty(_, key) {
          const success = modelQuark.state.mutate(target => Reflect.deleteProperty(target, key))
          if (!success) return false;
-         
+
          const proto = modelQuark.proto
          if (proto.has(key)) {
             // set/trigger pion
             proto.get(key)!.set(undefined)
-            
+
             // update proto
             $activeUpdate().atCommit(() => {
                proto.delete(key)

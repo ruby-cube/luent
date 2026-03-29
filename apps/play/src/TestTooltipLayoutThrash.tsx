@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/lumo';
 import { $layout, Ion, queueLayout } from '@rue/quarky';
 import './TestTooltip.css'
@@ -8,26 +7,7 @@ export function TestTooltip() {
 
    return template(
       <div>
-         <ButtonWithTooltip>{{
-            Content: (
-               'Hover over me (tooltip below)'
-            ),
-            Tooltip: (
-               <div>
-                  This tooltip does not fit above the button.
-                  <br />
-                  This is why it's displayed below instead!
-               </div>
-            ),
-            Description: (
-               <p>{description}</p>
-            )
-         }}</ButtonWithTooltip>
-
-         {/* <ButtonWithTooltip
-            Slot:Description={(
-               <p>{description}</p>
-            )}
+         <ButtonWithTooltip
             Slot:Tooltip={(
                <div>
                   This tooltip does not fit above the button.
@@ -35,58 +15,51 @@ export function TestTooltip() {
                   This is why it's displayed below instead!
                </div>
             )}
-            Slot={(
-               'Hover over me (tooltip below)'
-            )}
-         ></ButtonWithTooltip> */}
+         >
+            Hover over me (tooltip below)
+         </ButtonWithTooltip>
 
          <div style={{ height: '100px' }} />
 
-         <ButtonWithTooltip>{{
-            Content: () => (
-               'Hover over me (tooltip above)'
-            ),
-            Tooltip: () => (
+         <ButtonWithTooltip
+            Slot:Tooltip={(
                <div>
                   This tooltip fits above the button.
                </div>
-            )
-         }}</ButtonWithTooltip>
+            )}
+         >Hover over me (tooltip above)</ButtonWithTooltip>
 
          <div style={{ height: '100px' }} ></div>
 
-         <ButtonWithTooltip>{{
-            Content: () => (
-               'Hover over me (tooltip above)'
-            ),
-            Tooltip: () => (
+         <ButtonWithTooltip
+            Slot:Tooltip={(
                <div>
                   This tooltip fits above the button.
                </div>
-            )
-         }}</ButtonWithTooltip>
+            )}
+         >
+            Hover over me (tooltip above)
+         </ButtonWithTooltip>
       </div>
    );
 }
 
-type ButtonWithTooltipInput = FromTag<{
-   Slot: {
-      Content: RenderSlot,
-      Tooltip: RenderSlot
-   }
-}>
 
-export function ButtonWithTooltip({ Slot }: ButtonWithTooltipInput) {
+
+export function ButtonWithTooltip(setup: FromTag<{
+   Slot: RenderSlot,
+   'Slot:Tooltip': RenderSlot
+}>) {
+   const { Slot } = setup
    const $targetRect = Ion(null as Rect | null)
 
    return template(
       <>
          <button
-            innerHTML={}
             on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
             on:pointerleave={e => { $targetRect.value = null }}
          >
-            {Slot.Content()}
+            {Slot()}
          </button>
 
          {If($targetRect,
@@ -129,7 +102,6 @@ export function Tooltip(input: FromTag<{
 
    atCreate(async () => {
       await $layout()
-      console.log('reading layout')
       const height = $div()?.getBoundingClientRect().height
       if (height != null) $height.value = height;
    })

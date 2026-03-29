@@ -164,6 +164,7 @@ function assertFunction(value: unknown) {
 export function toInput(attributes: AnyObject, events: AnyObject) {
    // TODO: write a linter that disallows mutation unless variable comes from a property or nested property of the mu object
    // TODO: also provide a input transform helper for non-component functions that mutate arguments
+
    const mu = new Proxy(attributes, {
       get(target, key) {
          if (typeof key !== 'string') return undefined
@@ -219,7 +220,7 @@ export function toInput(attributes: AnyObject, events: AnyObject) {
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return events;
          if (key === '_raw_') return { ...attributes };
-         if (key === 'Slot') return target.Slot // TODO: Is this correct??
+         if (key === 'Slot') return target.Slot
          if (isIonKey(key)) {
             const ionKeyToAttributeKey = (key: string) => key.slice(1)
             const attributeKey = ionKeyToAttributeKey(key)
@@ -263,7 +264,8 @@ type TagAttributes<D> =
 // [] Inert --> 
 
 type Attributes<D> = {
-   [K in keyof D as K extends 'Slot' ? never : K extends `on:${string}` ? never : K extends `mu:${string}` ? never : K]: D[K] extends Ion<infer S> ? S | D[K] : D[K]
+   [K in keyof D as K extends 'Slot' ? never : K extends `on:${string}` ? never : K extends `mu:${string}` ? never : K]:
+   K extends `Slot:${string}` ? D[K] extends () => RawJSXNode ? RawJSXNode : D[K] : D[K] extends Ion<infer S> ? S | D[K] : D[K]
 }
 
 type TagEvents<D> = {
@@ -339,9 +341,12 @@ export type _FromTag<D> =
    & ReadonlyIonInput<D>
    & WithEmit<D>
    & WithMu<D>
-   & (D extends { Slot: infer S } ? { Slot: S } : {})
+   & WithSlot<D>
    & Styles
    & { '~attributes'?: TagAttributes<D> }
+
+type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S & WithNamedSlots<D> } : { Slot: WithNamedSlots<D> }
+type WithNamedSlots<D> = { [K in keyof D as K extends `Slot:${infer N}` ? N : never]: D[K] }
 
 
 type ElementAttributes<D> =

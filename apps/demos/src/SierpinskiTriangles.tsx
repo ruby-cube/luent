@@ -150,7 +150,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
    //       })
    //       return worker
    //    },
-   //    '-suspense': $suspense
+   //    '-suspend': $suspense
    // })
 
    const $slow = Ion(() => {

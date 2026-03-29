@@ -5,11 +5,16 @@ import { Ion, MutableIon } from "../ion/Ion";
 import { watch } from "../reactivity/Watcher";
 import { AsyncNode } from "./ooo";
 import { PRELUDE } from "../reactivity/RenderCycle";
+import { AnyObject } from "@rue/types";
+import { createAsyncAtomicIon } from "./AsyncAtomicIon";
+import { createAsyncDerivation } from "./AsyncDerivation";
+import { createAtomicIon } from "../ion/AtomicIon";
+import { createMemoizedDerivation } from "../ion/DerivationIon";
 
 export let $suspense: SuspenseIon
 export const [getAwaiting, suspenseStack] = AsyncState<SuspenseIon>('Suspense')
-export const pushAwaiting = (n: SuspenseIon) => {$suspense = n; suspenseStack.push(n)}
-export const popAwaiting = () => {suspenseStack.pop(); $suspense = getAwaiting()}
+export const pushAwaiting = (n: SuspenseIon) => { $suspense = n; suspenseStack.push(n) }
+export const popAwaiting = () => { suspenseStack.pop(); $suspense = getAwaiting() }
 
 export function isPending(...args: any[]) {
    for (const entity of args) {
@@ -134,7 +139,7 @@ export function toPromise(awaited: any) {
 type AsyncIonOptions<T = any, U = any> = {
    '-as': (value: T) => U,
    '-awaited'?: true,
-   '-suspense'?: SuspenseIon,
+   '-suspend'?: SuspenseIon,
    '-debounced'?: number
 }
 
@@ -154,6 +159,26 @@ function unpackAsyncIonArgs<T, OPT>(
 
 //@ts-expect-error
 window.$$_createAsyncIon = AsyncIon
+
+// export function _AsyncIon(initialState: unknown, setup?: AnyObject) {
+//    if (initialState instanceof Promise) {
+//       if (setup && '-standin' in setup) {
+//          const standin = setup.standin
+//          delete setup['-standin']
+//          return createAsyncAtomicIon(initialState, standin, setup)
+//       }
+//       return createAsyncAtomicIon(initialState, undefined, setup)
+//    }
+//    if (isFunction(initialState)) {
+//       if (setup && '-standin' in setup) {
+//          const standin = setup.standin
+//          delete setup['-standin']
+//          return createAsyncDerivation({ fetch: initialState, standin }, setup)
+//       }
+//       return createAsyncDerivation({ fetch: initialState, standin: undefined }, setup)
+//    }
+//    return createAtomicIon(initialState, setup)
+// }
 
 export function AsyncIon<
    T,
@@ -182,7 +207,6 @@ export function AsyncIon<
    arg3?: OPT & AsyncIonOptions
 ): OPT extends undefined ? AsyncIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : AsyncIon<T> {
    const { initialState, fetch, options } = unpackAsyncIonArgs(arg1, arg2, arg3)
-
    let pendingStart: DOMHighResTimeStamp | undefined;
    let resolve: ((value: T | PromiseLike<T>) => void) | null;
    let reject: ((reason?: any) => void) | null
@@ -190,9 +214,9 @@ export function AsyncIon<
    const $error = Ion(null as Error | null) // TODO:
    const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
    pendingStart = performance.now()
-   const suspense = options?.['-suspense']
-   const awaited = options?.['-awaited']
-   if (!awaited && !suspense) {
+   const suspense = options?.['-suspend']
+   // const awaited = options?.['-awaited']
+   if (/* !awaited &&  */!suspense) {
       $promise.value!.catch(err => {
          if (err === 'cancelled') return;
          else throw err
@@ -208,7 +232,15 @@ export function AsyncIon<
       $loaded,
       $error
    }
-   const $async = Ion(suspense && pendingState !== undefined ? () => suspense() ? pendingState : $ion() : () => $ion() as unknown, {
+   const $async = createMemoizedDerivation(suspense && pendingState !== undefined
+      ? () => suspense()
+         ? pendingState
+         : $ion() // FIX:
+      : () => {
+         const awaiting = getAwaiting()
+         if (awaiting) addToSuspense(awaiting, quark)
+         return $ion()
+      }, {
       [ASYNC_QUARK]: quark,
       get pending() {
          return $promise()
@@ -229,6 +261,7 @@ export function AsyncIon<
    function isFetching() {
       return Boolean(pendingPromise)
    }
+
    function cancelFetch() {
       console.warn('CANCEL FETCH')
       // for (const promise of pendingPromises){
@@ -280,8 +313,7 @@ export function AsyncIon<
    const cancelledPromises = new Set()
 
    if (suspense) addToSuspense(suspense, quark)
-   const awaiting = awaited && getAwaiting()
-   if (awaiting) addToSuspense(awaiting, quark)
+
 
 
    // const inSuspense = suspense || awaiting
@@ -291,13 +323,13 @@ export function AsyncIon<
 
    // TODO: optimization: handle fetch as promise outside of watch
    watch(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
-      const awaited = toPromise(output)
-      if (awaited === pendingPromise) {
+      const maybePromise = toPromise(output)
+      if (maybePromise === pendingPromise) {
          return;
       }
       cancelIfFetching()
-      if (awaited instanceof Promise) {
-         pendingPromise = awaited
+      if (maybePromise instanceof Promise) {
+         pendingPromise = maybePromise
 
          // It's me. Hi. I'm the problem it's me. 
          // When this was instantUpdate, it caused a weird double fetchCities, and breaks multiply rapid fire
@@ -323,7 +355,7 @@ export function AsyncIon<
             // else {
             $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
             // pendingStart = performance.now()
-            if (!awaited && !suspense) {
+            if (/* !awaited &&  */!suspense) {
                $promise.value.catch(err => {
                   if (err === 'cancelled') return;
                   else throw err
@@ -332,16 +364,16 @@ export function AsyncIon<
             // }
          }
 
-         awaited
+         maybePromise
             .then(value => {
                // if (timeout !== undefined) {
                //    clearTimeout(timeout)
                //    timeout = undefined
                // }
 
-               if (cancelledPromises.has(awaited)) {
-                  console.warn('canceleld awaited', awaited)
-                  cancelledPromises.delete(awaited)
+               if (cancelledPromises.has(maybePromise)) {
+                  console.warn('canceleld awaited', maybePromise)
+                  cancelledPromises.delete(maybePromise)
                   if (reject) {
                      reject('cancelled')
                      resolve = null
@@ -413,32 +445,18 @@ export function AsyncIon<
 
       }
       else {
-         // if (cancelledPromises.has(output)) {
-         //    cancelledPromises.delete(output)
-         //    if (reject) {
-         //       reject('cancelled')
-         //       resolve = null
-         //       reject = null
-         //    }
-         // }
-         // queueTask(() => {
-         // instantUpdate(() => { // QUESTION: Why does async select break without this when it shouldn't need it?
+         console.log('*** no promise', resolve, $promise())
+         if (resolve) {
+            resolve(output)
+            resolve = null
+            reject = null
+         }
          $error.value = null
-         // $promise.value = null
+         $promise.value = null
          $ion.value = output
-         // })
-         // })
       }
    }, { phase: PRELUDE, eager: true })
-   // }
 
-   // if (options?.awaited) {
-   //    const promise = $promise()
-   //    if (promise) pend(promise)
-   //    if (options?.awaited === true) {
-   //       pendReload($promise)
-   //    }
-   // }
    return $async as any as AsyncIon<T>;
 }
 

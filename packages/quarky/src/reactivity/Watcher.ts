@@ -106,7 +106,9 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
    }
    if (!isSubject(target)) { // plain object
       console.log('inert A')
-      if (options?.eager) effect(new StateChangeEvent(undefined, subject, true))
+      if (options?.eager) {
+         scheduleEagerEffect(() =>effect(new StateChangeEvent(undefined, subject, true)), getPhase(options))
+      }
       return InertWatcher()
    }
 
@@ -115,7 +117,7 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
    if (!target.reactive) {
       if (options?.eager) {
          console.log('inert B')
-         effect(new StateChangeEvent(undefined, prevState.get(), true))
+         scheduleEagerEffect(() => effect(new StateChangeEvent(undefined, prevState.get(), true)), getPhase(options))
       }
       return InertWatcher()
    }

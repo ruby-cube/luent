@@ -1,7 +1,7 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@rue/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ShowHideType, If } from "./If";
-import { cancelledPromises, cancelPromise, getSuspenseCount, Ion, Ionic, isCancelled, popAwaiting, popUpdate, PRELUDE, queueRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
+import {  getSuspenseCount, Ion, PRELUDE, queueRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -84,7 +84,8 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", sh
          _cache = nodes
       },
       view: {
-         discard() {
+         markDiscard() {
+            console.log('@$@ marking discard')
             _cache = undefined
          }
       }

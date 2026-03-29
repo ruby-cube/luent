@@ -5,7 +5,7 @@ import { EACH, instantUpdate, Ion, Ionic, IonicProxy, isIonicProxy } from "@rue/
 import { Action, REFETCH } from "../../../../packages/quarky/src/async/Action";
 import { toggleCompleted } from "./AsyncDemoLessons/data";
 import { AnyObject } from "@rue/types";
-import { isObject } from "@rue/utils";
+import { isObject, noop } from "@rue/utils";
 
 
 
@@ -72,58 +72,12 @@ const todos = Ionic([], {
    [EACH]: { as: IonicTodo },
 })
 
-function IonicTodo(data: AnyObject) {
-   return Ionic(data, {
-      '-refetch': () => db.getTodo(data.id)
-   })
-}
 
 
 
 
 const AS_ASYNC_MODEL = Symbol('asAsyncModel')
 
-class AsyncModel {
-   pods?: AnyObject[]
-   pendingFetch?: Promise<any> | null = null
-   pendingDispatches?: Promise<any>[]
-}
-
-function updateProperties(model: AnyObject, data: AnyObject) {
-   const keys = Object.keys(data)
-
-   for (const key of keys) {
-      model[key] = data[key]
-   }
-   return model
-}
-
-function updateArray(model: any[], data: any[]) {
-   const length = data.length
-   while (model.length > length) {
-      delete model[model.length - 1]
-   }
-
-   const nestedConfig = getNestedConfig(model)
-   const eachAsModel = nestedConfig?.[EACH]
-
-   if (eachAsModel) {
-      for (i = 0; i < length; i++) {
-         const value = data[i]
-         if (isObject(value)) {
-            model[i] = eachAsModel(value)
-         }
-         else if (value !== model[i]) {
-            model[i] = value
-         }
-      }
-   }
-   else {
-      for (i = 0; i < length; i++) {
-         model[i] = value
-      }
-   }
-}
 
 class IonicDepot {
    entries = new Map<string | number, AnyObject>() // TODO: memory leak? 
@@ -160,9 +114,9 @@ function asNestedAsync<T extends AnyObject, M extends ModelMethods>(data: T, uid
 }
 
 
-const IonicTodos = todos => Ionic(todos, { [EACH]: IonicTodo })
 
-function refetch() { return REFETCH }
+
+
 
 // TODO:
 // [] Race
@@ -175,81 +129,209 @@ function refetch() { return REFETCH }
 // identical: set todos or set all properties
 // partial overlap: set some properties, some may overlap
 
+function IonicTodos(data: Todo[]) {
+   return Ionic(data, {
+      [EACH]: IonicTodo,
+      '-patch': patchIonicArray
+   })
+}
+
+function patchIonicArray(data) {
+   // // lost-and-found
+   // const map: Map<string, { item?: AnyObject, dataItem?: AnyObject }> = new Map()
+   // const indices: number[] = []
+
+   const length = data.length > this.length ? data.length : this.length
+
+   for (let i = 0; i < length; i++) {
+      const item = this[i]
+      const dataItem = data[i]
+      const id = getID(item)
+      const dataID = getID(data)
+      if (id) {
+         if (id === dataID) {
+            item.update(dataItem)
+         }
+         else {
+            array[i] = this[EACH](dataItem) // TODO: standin code
+
+            // indices.push(i)
+            // const itemPair = map.get(id)
+            // const dataPair = map.get(dataID)
+
+            // if (itemPair) itemPair.item = item
+            // else map.set(id, { item, dataItem: undefined })
+
+            // if (dataPair) dataPair.data = dataItem
+            // else map.set(dataID, { dataItem, item: undefined })
+         }
+      }
+      else {
+         item.update(dataItem)
+      }
+   }
+
+   // for (const i of indices) {
+   //    const { item, dataItem } = map.get(getID(data[i]))
+   //    if (item && dataItem) {
+   //       this[i] = item.patch(dataItem)
+   //    }
+   //    else if (dataItem) {
+   //       // new item
+   //       this[i] = this[EACH](dataItem) // TODO: standin code
+   //    }
+   // }
+
+   if (this.length > data.length) {
+      // remove items
+      this.splice(data.length)
+   }
+   return this
+}
+
+
+function IonicTodo(data: AnyObject) {
+   return Ionic(data, {
+      '-wrap': data => new Todo(data),
+      '-getID': n => n.id,
+      '-refetch': () => db.getTodo(data.id),
+      '-patch': patchObject,
+      profile: { '-as': IonicProfile },
+   })
+}
+
+// depot.get(data.id).patch(data)
+
+function patchObject(data: AnyObject | null | undefined) {
+   if (!data) return data;
+   const keys = Object.getOwnPropertyNames(this)
+   for (const key of keys) {
+      const value = this[key]
+      const as = this[AS] // TODO: standin code
+      if (as) {
+         this[key] = this.patchNested(this[key], data[key], as)
+      }
+      else {
+         this[key] = data[key]
+      }
+   }
+}
+
+function patchNested(this: AnyObject, obj: AnyObject | undefined, data: AnyObject | undefined, as: (data: AnyObject) => AnyObject) {
+   if (obj && data) {
+      const id = getID(obj)
+      const dataID = getID(data)
+      if (id && id === dataID || !id) {
+         return obj.patch(data)
+      }
+   }
+   if (data) {
+      return as(data)
+   }
+   return data;
+}
+
+function IonicTodosIon() {
+   return Ion([], {
+      '-as': IonicTodos,
+      '-fetch': () => db.fetchTodos(),
+      '-patch': patchDeepIon,
+   })
+}
+
+function patchDeepIon(data: any) {
+   if (!data) return this.value = data;
+
+   const value = this.value;
+   const id = getID(value);
+   const dataID = getID(data)
+   if (id) {
+
+   }
+      return this.value = this.value.patch(data)
+}
+
 export default function TodoApp() {
 
-   const $todos = AsyncIon([], () => db.fetchTodos(), { to: IonicTodos })
+   const $todos = IonicTodosIon()
 
-   const addTodo = Action((todo: Todo) => (ooo
-      .await(db.addTodo(todo),
+   // const addTodo = Action((todo: Todo) => (ooo
+   //    .await(db.addTodo(todo),
+   //       refetch
+   //    )
+   // ), $todos)
+
+   const addTodo = Action(async ($todos: Ionic<IonicTodos>, todo: Todo) => {
+      $todos.unfetch()
+
+      await db.addTodo(todo)
+      return $todos.refetch()
+   }, {
+      catch(error) {
+
+      }
+   })
+
+   // const addTodo = Action((todo: Todo) => {
+   //    async {
+   //       await db.addTodo(todo) ...:
+   //          refetch();
+   //          return;
+   //    }
+   // }, $todos)
+
+   const removeTodo = Action((todoID: string) => (ooo
+      .await(db.removeTodo(todoID),
          refetch
       )
    ), $todos)
 
-   const addTodo = Action(async (todo: Todo) => {
-      await db.addTodo(todo)
-      refetch()
-   }, $todos)
-
-   const addTodo = Action((todo: Todo) => {
-      async {
-         await db.addTodo(todo) ...:
-            refetch();
-            return;
-      }
-   }, $todos)
-
-const removeTodo = Action((todoID: string) => (ooo
-   .await(db.removeTodo(todoID),
-      refetch
-   )
-), $todos)
-
-// // one-way overlap
-// definePartialRace($todos, [
-//    ToggleCompleted,
-//    SetHighlighted
-// ])
+   // // one-way overlap
+   // definePartialRace($todos, [
+   //    ToggleCompleted,
+   //    SetHighlighted
+   // ])
 
 
-// // two-way overlap
-// definePartialRace(
-//    toggleCompleted, // This should be in Todo component
-//    setHighlighted
-// )
+   // // two-way overlap
+   // definePartialRace(
+   //    toggleCompleted, // This should be in Todo component
+   //    setHighlighted
+   // )
 
-// // complete overlap
-// defineRace($todos, $sameTodos)
-
-
-// function AsyncTodoKit(todo: Todo) {
-//    const $todos = fromContext($TODOS)
+   // // complete overlap
+   // defineRace($todos, $sameTodos)
 
 
-//    return {
-//       toggleCompleted,
-//       setHighlighted
-//    }
-// }
+   // function AsyncTodoKit(todo: Todo) {
+   //    const $todos = fromContext($TODOS)
 
-return (
-   <section class="todoapp">
-      <header class="header">
-         <h1>todos</h1>
-      </header>
-      <TodoInput addTodo={addTodo} />
-      {Await($todos,
-         <div>
-            <TodoList
-               todos={$todos}
-               removeTodo={removeTodo}
-            />
-         </div>
-      )}
-      {Meanwhile(
-         <div class="loading">Loading...</div>
-      )}
-   </section>
-);
+
+   //    return {
+   //       toggleCompleted,
+   //       setHighlighted
+   //    }
+   // }
+
+   return (
+      <section class="todoapp">
+         <header class="header">
+            <h1>todos</h1>
+         </header>
+         <TodoInput addTodo={addTodo} />
+         {Await($todos,
+            <div>
+               <TodoList
+                  todos={$todos}
+                  removeTodo={removeTodo}
+               />
+            </div>
+         )}
+         {Meanwhile(
+            <div class="loading">Loading...</div>
+         )}
+      </section>
+   );
 }
 
 function TodoInput(input: FromTag<{
@@ -344,58 +426,75 @@ function Todo({
       removeTodo(todo.id);
    };
 
-   const toggleCompleted = Action((completed: boolean) => {
-      storeRollback({
-         completed: todo.completed,
-         modifiedDate: todo.modifiedDate
-      }, prev => {
-         todo.completed = prev.completed
-         todo.modifiedDate = prev.modifiedDate
-      })
+   const toggleCompleted = Action(async (todo: IonicTodo, completed: boolean) => {
+      todo.unfetch()
 
       todo.completed = completed;
       todo.modifiedDate = Date.now()
 
-      return oo.await(db.toggleTodo(todo.id, completed), () => {
-         todo.refetch()
-      })
+      return await db.toggleTodo(todo.id, completed)
+   }, {
+      '@success'(updatedTodo) {
+         todo.completed = updatedTodo.completed
+         todo.modifiedDate = updatedTodo.modifiedDate
+      },
+      '-optimistic': true
    })
 
-   // FIX: avoid having to pass down a reference to $todos, can we auto-establish race via For() ?
-   // one-way overlap
-   // definePartialRace($todos, [
-   //    toggleCompleted,
-   //    setHighlighted
-   // ])
+   const toggleCompleted = Action((todo: IonicTodo, completed: boolean) => {
+      // storeRollback({ // TODO: can this be done under the hood?
+      //    completed: todo.completed,
+      //    modifiedDate: todo.modifiedDate
+      // }, prev => {
+      //    todo.completed = prev.completed
+      //    todo.modifiedDate = prev.modifiedDate
+      // })
 
-   // definePartialRace(
-   //    toggleCompleted,
-   //    setHighlighted
-   // )
+      todo.completed = completed;
+      todo.modifiedDate = Date.now()
 
-   return (
-      <li
-         class={('todo' + (todo.completed ? ' completed' : ''))}
-         style={{ opacity: ($isRemoving() ? 0.3 : 1) }}
-      >
-         <div class="view">
-            <input
-               class="toggle"
-               type="checkbox"
-               checked={(todo.completed)}
-               on:change={e => toggleCompleted(todo, e.target.checked)}
-            />
-            {If((toggleCompleted.error),
-               <div>failed.
-                  <span on:click={e => toggleCompleted.retry()}>retry?</span>
-                  <span on:click={e => toggleCompleted.rollback()}>retry?</span>
-               </div>
-            )}
-            <label>{todo.title}</label>
-            <button class="destroy" on:click={reRemoveBtnClick} />
-         </div>
-      </li>
-   );
+      async {
+         await db.toggleTodo(todo.id, completed) ...updatedTodo:
+      todo.completed = updatedTodo.completed
+            todo.modifiedDate = updatedTodo.modifiedDate
+      }
+   })
+
+// FIX: avoid having to pass down a reference to $todos, can we auto-establish race via For() ?
+// one-way overlap
+// definePartialRace($todos, [
+//    toggleCompleted,
+//    setHighlighted
+// ])
+
+// definePartialRace(
+//    toggleCompleted,
+//    setHighlighted
+// )
+
+return (
+   <li
+      class={('todo' + (todo.completed ? ' completed' : ''))}
+      style={{ opacity: ($isRemoving() ? 0.3 : 1) }}
+   >
+      <div class="view">
+         <input
+            class="toggle"
+            type="checkbox"
+            checked={(todo.completed)}
+            on:change={e => toggleCompleted(todo, e.target.checked)}
+         />
+         {If((toggleCompleted.error),
+            <div>failed.
+               <span on:click={e => toggleCompleted.retry()}>retry?</span>
+               <span on:click={e => toggleCompleted.rollback()}>retry?</span>
+            </div>
+         )}
+         <label>{todo.title}</label>
+         <button class="destroy" on:click={reRemoveBtnClick} />
+      </div>
+   </li>
+);
 }
 
 

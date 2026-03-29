@@ -2,6 +2,10 @@ import { Ion, MutableIon } from "./Ion"
 import { watch } from "../reactivity/Watcher"
 import { AnyObject } from "@rue/types"
 import { untracked } from "../reactivity/Compound"
+import { SimpleState } from "../reactivity/State"
+import { SYNC } from "../reactivity/RenderCycle"
+import { createAtomicIon } from "./AtomicIon"
+import { createMemoizedDerivation } from "./DerivationIon"
 
 type HybridIonConfig<T = any> = {
    initial?: T,
@@ -14,32 +18,39 @@ type HybridIonConfig<T = any> = {
 
 export function createHybridIon(config: HybridIonConfig, setup?: AnyObject) {
    const { derive, initial, watch: $watched } = config
-   const subject = config.watch ?? derive
+   const subject = $watched ?? derive
    const $state = Ion('initial' in config ? initial : derive(undefined), setup) as MutableIon<any>
 
    watch(subject, ({previous}) => {
       $state.value = derive(previous)
-   }, { phase: 'SYNC' })
+   }, { phase: SYNC })
    return $state;
 
-   // let _prev: any; // should this be SimpleState?
 
-   // const $derived = Ion($watched ? (() => ($watched(), untracked(() => derive(_prev)))) : derive)
-   // const $state = Ion('initial' in config ? initial : derive(_prev), { devName: setup?.devName })
+   // const previous = new SimpleState(undefined)
 
-   // let shouldDerive = 'initial' in config ? false : true
+   // const $derived = createMemoizedDerivation($watched ? (() => ($watched(), untracked(() => derive(previous.get())))) : derive)
+   // const $state = createAtomicIon('initial' in config ? initial : derive(previous.get()), { devName: setup?.devName })
 
+   // const shouldDerive = new SimpleState('initial' in config ? false : true)
+
+   
    // watch($derived, () => {
-   //    shouldDerive = true // QUESTION: should this be SimpleState??
-   // }, { phase: 'SYNC' })
-
+   //    // $shouldDerive.value = true
+   //    shouldDerive.set(true)
+   // }, { phase: SYNC })
+   
    // return Ion((prev: any) => {
-   //    _prev = prev
-   //    return shouldDerive ? $derived() : $state()
+   //    previous.set(prev)
+   //    return shouldDerive.get() ? $derived() : $state()
    // }, {
    //    '@set': (value: any) => {
-   //       shouldDerive = false;
+   //       shouldDerive.set(false)
+   //       // $shouldDerive.value =false
    //       $state.value = value
    //    }
    // })
 }
+
+
+

@@ -63,6 +63,7 @@ type AwaitKit = {
 
 export type Resolved<T> = T extends PromiseLike<infer V> ? V : T extends () => PromiseLike<infer V> ? V : unknown
 
+export type Await = <T, F>(awaited: T, onFulfilled?: F & ((value: Resolved<T>) => any)) => AsyncNode<F extends (...args: any[]) => infer R ? R : Resolved<T>>;
 
 export const ooo = {
    await<T, F>(awaited: T, onFulfilled?: F & ((value: Resolved<T>) => any)) {

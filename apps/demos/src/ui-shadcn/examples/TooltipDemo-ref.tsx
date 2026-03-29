@@ -37,6 +37,8 @@ export function TooltipDemo() {
       }
    })
 
+   const $tooltip = NodeRef(Tooltip)
+
    return template(
       <Context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 600 })]}>
          <div data-align='center' class={demoBoxStyle}>
@@ -45,19 +47,19 @@ export function TooltipDemo() {
             {/* <div style='background-color: lightblue' at:create={tooltip.anchor.italic}>i</div> */}
             {/* <div style='background-color: lightblue' at:create={tooltip.anchor.underline}>u</div> */}
             {/* <Button at:create={tooltip.anchor.default} variant='outline'>o</Button> */}
-            <Button at:create={tooltip.trigger.bold} variant="outline">
+            <Button at:create={$tooltip()!.trigger.bold} variant="outline">
                B
             </Button>
-            <Button at:create={tooltip.trigger.italic} variant="outline">
+            <Button at:create={$tooltip()!.trigger.italic} variant="outline">
                I
             </Button>
-            <Button at:create={tooltip.trigger.underline} variant="outline">
+            <Button at:create={$tooltip()!.trigger.underline} variant="outline">
                U
             </Button>
-            <Tooltip tooltip={tooltip}>
-               <p>{(tooltip.info)}</p>
-               <p>{(tooltip.info)}</p>
-               <p>{(tooltip.info)}</p>
+            <Tooltip ref={$tooltip}>
+               <p>{($tooltip()!.info)}</p>
+               <p>{($tooltip()!.info)}</p>
+               <p>{($tooltip()!.info)}</p>
             </Tooltip>
          </div>
          <button class='mt-70' on:click={e => tooltip.hide()}>hide tooltip</button>

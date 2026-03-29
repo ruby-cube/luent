@@ -572,10 +572,28 @@ function transformJSXAttributes(jsxElementPath) {
       if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
          transformTargetCall(value.expression);
       }
-      else if (namespaceName !== 'on' && namespaceName !== 'mu') {
+      else if (namespaceName !== 'on' && namespaceName !== 'mu' && namespaceName !== 'Slot') {
          transformIfDerivationShorthand(attribute.get('value.expression'))
       }
+      else {
+         transformIfSlotShorthand(attribute.get('value.expression'))
+      }
    }
+}
+
+
+function transformIfSlotShorthand(path) {
+   if (!path || !path.node) return;
+   const node = path.node
+   if (isDerivationShorthand(node)) {
+      path.replaceWith(toArrowFunction(node))
+   }
+}
+
+function toArrowFunction(node) {
+   return t.arrowFunctionExpression([], t.blockStatement([
+      t.returnStatement(node) // Return the original expression
+   ]))
 }
 
 function transformTargetCall(eventListenerNode) {
@@ -590,37 +608,37 @@ function transformTargetCall(eventListenerNode) {
 function transformJSXSlot(path) {
    const children = path.get('children')
    if (children.length === 0) return;
-   if (hasNamedSlot(children)) {
-      return;
-   }
-   else {
-      // console.log('not hasNamedSlot', path.node)
-      transformJSXChildren(children)
-      path.node.children = [normalizeSlotToRenderFunction(children)]
-   }
+   // if (hasNamedSlot(children)) {
+   //    return;
+   // }
+   // else {
+   // console.log('not hasNamedSlot', path.node)
+   transformJSXChildren(children)
+   path.node.children = [normalizeSlotToRenderFunction(children)]
+   // }
 }
 
-function hasNamedSlot(childPaths) {
-   if (childPaths.length !== 1) return false;
-   for (const path of childPaths) {
-      if (isNamedSlot(path.node))
-         return true;
-   }
-   return false;
-}
+// function hasNamedSlot(childPaths) {
+//    if (childPaths.length !== 1) return false;
+//    for (const path of childPaths) {
+//       if (isNamedSlot(path.node))
+//          return true;
+//    }
+//    return false;
+// }
 
-function isNamedSlot(node) {
-   if (!t.isJSXExpressionContainer(node)) return false;
-   if (!node.expression) return false;
-   // const openingElement = node.openingElement
-   // const attribute = openingElement.attributes[0]
-   return t.isObjectExpression(node.expression)
-   // return openingElement.name.name === 'Slot' && attribute && attribute.name.name !== 'provide'
-}
+// function isNamedSlot(node) {
+//    if (!t.isJSXExpressionContainer(node)) return false;
+//    if (!node.expression) return false;
+//    // const openingElement = node.openingElement
+//    // const attribute = openingElement.attributes[0]
+//    return t.isObjectExpression(node.expression)
+//    // return openingElement.name.name === 'Slot' && attribute && attribute.name.name !== 'provide'
+// }
 
-function transformToNamedSlots(childPaths) {
-   return t.jsxExpressionContainer(t.objectExpression(createNamedSlotProperties(childPaths)))
-}
+// function transformToNamedSlots(childPaths) {
+//    return t.jsxExpressionContainer(t.objectExpression(createNamedSlotProperties(childPaths)))
+// }
 
 function isProvider(node) {
    if (!t.isJSXElement(node)) return false;
@@ -632,44 +650,44 @@ function isProvider(node) {
    return false;
 }
 
-function createNamedSlotProperties(childPaths) {
-   const defaultSlotChildren = [];
-   const namedSlotProperties = [];
-   let defaultNode;
-   for (const path of childPaths) {
-      const node = path.node
+// function createNamedSlotProperties(childPaths) {
+//    const defaultSlotChildren = [];
+//    const namedSlotProperties = [];
+//    let defaultNode;
+//    for (const path of childPaths) {
+//       const node = path.node
 
-      if (isDefaultSlot(node)) {
-         if (!defaultNode) defaultNode = node
-         defaultSlotChildren.push(...path.get('children'))
-      }
-      else if (isNamedSlot(node)) {
-         namedSlotProperties.push(
-            t.objectProperty(
-               t.identifier(getSlotName(node)),
-               wrapIfProvides(t.arrowFunctionExpression(
-                  [],
-                  transformJSXChildrenToArrayExpression(path.get('children'))
-               ), node)
-            ))
-      }
-      else {
-         defaultSlotChildren.push(path)
-      }
-   }
-   if (defaultSlotChildren.length) {
-      namedSlotProperties.push(
-         t.objectProperty(
-            t.identifier('Default'),
-            wrapIfProvides(t.arrowFunctionExpression(
-               [],
-               transformJSXChildrenToArrayExpression(defaultSlotChildren)
-            ), defaultNode)
-         )
-      )
-   }
-   return namedSlotProperties
-}
+//       if (isDefaultSlot(node)) {
+//          if (!defaultNode) defaultNode = node
+//          defaultSlotChildren.push(...path.get('children'))
+//       }
+//       else if (isNamedSlot(node)) {
+//          namedSlotProperties.push(
+//             t.objectProperty(
+//                t.identifier(getSlotName(node)),
+//                wrapIfProvides(t.arrowFunctionExpression(
+//                   [],
+//                   transformJSXChildrenToArrayExpression(path.get('children'))
+//                ), node)
+//             ))
+//       }
+//       else {
+//          defaultSlotChildren.push(path)
+//       }
+//    }
+//    if (defaultSlotChildren.length) {
+//       namedSlotProperties.push(
+//          t.objectProperty(
+//             t.identifier('Default'),
+//             wrapIfProvides(t.arrowFunctionExpression(
+//                [],
+//                transformJSXChildrenToArrayExpression(defaultSlotChildren)
+//             ), defaultNode)
+//          )
+//       )
+//    }
+//    return namedSlotProperties
+// }
 
 function wrapIfProvides(renderfunction, node) {
    if (!node) return renderfunction;
@@ -694,17 +712,17 @@ function getProvided(node) {
    return undefined;
 }
 
-function getSlotName(node) {
-   const name = node.openingElement.attributes[0].name.name;
-   return name;
-}
+// function getSlotName(node) {
+//    const name = node.openingElement.attributes[0].name.name;
+//    return name;
+// }
 
-function isDefaultSlot(node) {
-   if (!t.isJSXElement(node)) return false;
-   const openingElement = node.openingElement
-   const attribute = openingElement.attributes[0]
-   return openingElement.name.name === 'Slot' && (attribute === undefined) || (attribute.name.name === 'provide')
-}
+// function isDefaultSlot(node) {
+//    if (!t.isJSXElement(node)) return false;
+//    const openingElement = node.openingElement
+//    const attribute = openingElement.attributes[0]
+//    return openingElement.name.name === 'Slot' && (attribute === undefined) || (attribute.name.name === 'provide')
+// }
 
 
 /*
@@ -839,17 +857,17 @@ function isParenthesized(node) {
    return 'extra' in node && node.extra.parenthesized === true;
 }
 
-function hasNonIonMemberExpression(path) {
-   const node = path.node
-   if (t.isMemberExpression(node) && !node.property.name.startsWith('$'))
-      return true;
-   let found = false;
-   path.traverse({
-      MemberExpression(path) {
-         if (path.node.property.name.startsWith('$')) return;
-         found = true;
-         path.stop()
-      }
-   })
-   return found;
-}
+// function hasNonIonMemberExpression(path) {
+//    const node = path.node
+//    if (t.isMemberExpression(node) && !node.property.name.startsWith('$'))
+//       return true;
+//    let found = false;
+//    path.traverse({
+//       MemberExpression(path) {
+//          if (path.node.property.name.startsWith('$')) return;
+//          found = true;
+//          path.stop()
+//       }
+//    })
+//    return found;
+// }

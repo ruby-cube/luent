@@ -57,7 +57,7 @@ import { TestVanillaStream } from './TestStream-await';
 import { TestIonicList } from './TestIonicList';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
-import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
+import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyA, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
 import { Async, ooo } from '../../../packages/quarky/src/async/ooo';
 import { Counter } from './TestCounterB';
 import { fetchArticles } from './wip-demos/conduit/src/feature/article-feed/Articles.ionic';
@@ -80,6 +80,11 @@ import { QrxTodo } from './QrxTodoApp.qrx';
 import { TestDev } from './TestDev';
 import { TestRenderEffects } from './TestRenderEffects';
 import { TestTooltip2 } from './TestTooltip';
+import { Frog, IonicFrog, IonicSuperFrog } from './API-exploration/API-IntrinsicIonic';
+import { Ionic, watch } from '@rue/quarky';
+import { TooltipDemo } from '../../demos/src/ui-shadcn/examples/TooltipDemo';
+import { TestAsyncDerivation } from './TestAsyncDerivation';
+import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -153,10 +158,29 @@ import { TestTooltip2 } from './TestTooltip';
 // }
 
 // const app = createRoot(TestThru)
-const app = createRoot(TestAsyncMultiplyB)
+const app = createRoot(TestAsyncMultipliers)
 
 app.mount('#root')
 
+// const frog = new IonicFrog('kermit')
+
+// console.log('frog', frog)
+
+// watch(() => frog.name, () => {
+//    console.log('frog name changed', frog.name)
+// })
+
+// setTimeout(() => {
+//    frog.changeName()
+// }, 3000)
+
+// watch(() => frog.location, () => {
+//    console.log('frog location changed', frog.location)
+// })
+
+// setTimeout(() => {
+//    frog.changelocation()
+// }, 4000)
 
 // function TestApp2() {
 //    return template(

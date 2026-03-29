@@ -225,6 +225,7 @@ export class ModelQuark implements Atom {
       key: ProxyKey,
       isNewProperty: boolean = false
    ) {
+    
       if (!Object.isExtensible(this.target)) return { get: () => undefined, set: nowrite }
       const valueKey = isIonKey(key) ? key.slice(1) : key
       const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? 'æ' + key : undefined

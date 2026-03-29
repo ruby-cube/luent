@@ -54,7 +54,7 @@ function Button({
          class={(mergeTailwind(buttonVariants({ variant, size }), æclasses()))}
          // class={[buttonVariants({ variant, size }), æclasses]}
          {...other}
-      >{Slot}</Comp>
+      >{Slot()}</Comp>
    )
 }
 

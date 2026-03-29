@@ -1,6 +1,6 @@
 import { isFunction, isObject } from "@rue/utils";
 import { Inert } from "./Get";
-import { AtomicIonQuark, createAtomicIon } from "./AtomicIon";
+import { createAtomicIon } from "./AtomicIon";
 import { AnyObject } from "@rue/types";
 import { QUARK } from "../abstract/Quark";
 import { isGetter } from "../reactivity/Subject";
@@ -8,6 +8,8 @@ import { createMemoizedDerivation } from "./DerivationIon";
 import { SimpleState } from "../reactivity/State";
 import { createHybridIon } from "./HybridIon";
 import { AsyncIon, AsyncProps } from "../async/AsyncIon";
+import { createAsyncAtomicIon } from "../async/AsyncAtomicIon";
+import { createAsyncDerivation } from "../async/AsyncDerivation";
 
 /* API */
 export interface Ion<T = unknown> {
@@ -257,7 +259,7 @@ function _asIon(
       delete setup['-watch']
       return AsyncIon(initialState, fetch, setup)
    }
-   return createAtomicIon(new AtomicIonQuark(new SimpleState(initialState), setup), setup)
+   return createAtomicIon(initialState, setup)
 }
 
 

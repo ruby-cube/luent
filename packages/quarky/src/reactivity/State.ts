@@ -44,7 +44,7 @@ function lockState(state: PendableState) {
    //    return;
    // }
    const ok = update.race(state.pendingUpdate)
-   if (!ok) console.warn("*&^ RACE updates aren't the same", update, state.pendingUpdate)
+   if (!ok) console.warn("*&^ RACE updates aren't the same", update, state.pendingUpdate, state.get())
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
 

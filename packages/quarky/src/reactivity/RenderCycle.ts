@@ -82,6 +82,7 @@ export class RenderCycle {
 
          if (this.loop === 1) {
             this.update.commit()
+            pushUpdate(this.update)
          }
 
          console.log('@@@ render---')
@@ -101,6 +102,7 @@ export class RenderCycle {
       this.runEffects(TICK)
 
       this.update.complete()
+      popUpdate()
       if (__DEV__) {
          requestAnimationFrame((time) =>
             this.timecheck(time)

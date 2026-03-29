@@ -144,7 +144,7 @@ export function makeComponent(
    // $index: Ion<number> | undefined
 ): Component {
    const { ref, class: classes, style: styles, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, ...other } = fromTag
-   const { hooks, events, attributes, transitions } = analyzeAttributes(other)
+   const { hooks, events, attributes, transitions, namedSlots } = analyzeAttributes(other)
    console.log('component tag config', fromTag)
    console.log('component hooks', hooks)
    console.log('component events', events)

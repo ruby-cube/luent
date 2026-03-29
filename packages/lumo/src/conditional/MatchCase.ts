@@ -114,7 +114,7 @@ export function createCasesKit(showHideType: ShowHideType | undefined, render: R
       cache: undefined,
       awaitCache: undefined,
       view: {
-         markDiscard: noop
+         markDiscard: () => {console.log('@$@ noop'); noop()}
       }
    }
 }
@@ -143,7 +143,8 @@ export class MatchKit extends VineNode {
             _cache = nodes
          },
          view: {
-            discard() {
+            markDiscard() {
+               console.log('@$@ markDiscard')
                _cache = undefined
             }
          }

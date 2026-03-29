@@ -146,11 +146,16 @@ function isTransition(key: string) {
    return key in transitionAttributes
 }
 
+function isNamedSlot(key: string) {
+   return key.startsWith('Slot:')
+}
+
 export function analyzeAttributes(entries: AnyObject) {
    const transitions: AnyObject = {};
    const events: AnyObject = {};
    const hooks: AnyObject = {}
    const attributes: AnyObject = {};
+   const namedSlots: AnyObject = entries.Slot
    for (const key in entries) {
       if (key === "children") {
          continue;
@@ -163,6 +168,9 @@ export function analyzeAttributes(entries: AnyObject) {
       }
       else if (isFlaskLifecycleHook(key)) {
          hooks[key] = entries[key] // at:
+      }
+      else if (isNamedSlot(key)) {
+         namedSlots[key.slice(5)] = entries[key]
       }
       else {
          attributes[key] = entries[key];

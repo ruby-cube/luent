@@ -1,7 +1,8 @@
 import { template, For, FromTag } from "@rue/lumo";
-import { $_derivation, Action, instantUpdate, Ion, Ionic, MutableIon, queueIonicTask, SuspenseIon, swiftUpdate } from "@rue/quarky";
-import { ooo } from "../../../../packages/quarky/src/async/ooo";
+import { $_derivation, Action, instantUpdate, Ion, Ionic, isPending, MutableIon, queueIonicTask, SuspenseIon, swiftUpdate } from "@rue/quarky";
+import { o, ooo } from "../../../../packages/quarky/src/async/ooo";
 import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
+import { Dispatch } from "../../../../packages/quarky/src/async/Dispatch";
 
 
 export function TestAsyncMultiply() {
@@ -58,56 +59,32 @@ export function TestAsyncMultipliers() {
       }
    })
 
-   function MultiplyKit($n: Ion<number>, b: number, $suspense: SuspenseIon) {
-      const $product = Ion($n() * b)
+   const $pending = SuspenseIon('...')
+   const multipliers: any[] = []
+   const products: any[] = []
 
-      const multiply = Action(() => (ooo
-         .await(db.multiply($n(), b))
-      ), {
-         target: $product,
-         '-suspense': $suspense
+   for (let i = 1; i < 5; i++) {
+      const $product = Ion($n() * i)
+
+      const multiply = Dispatch(() => db.multiply($n(), i), {
+         // '-presume': () => $product.value = $n() * i,
+         '-then': [[$product, (res) => $product.value = res]], // TODO: .value and setting pions should cancel pending dispatches
+         '-suspend': $pending
       })
 
-      // const multiplyB = Action(() => db.multiply($n(), b), {
-      //    mutable: $product,
-      //    suspense: $suspense
-      // })
-
-      return {
-         multiply,
-         $product: $_derivation(() => ($suspense() ? '...' : $product()))
-      }
+      multipliers.push(multiply)
+      products.push(Ion(() => $pending() ? '...' : $product()))
    }
 
-   function MultipliersKit() {
-      const $suspense = SuspenseIon('...')
-      const multipliers: any[] = []
-      const products: any[] = []
-
-      for (let i = 1; i < 5; i++) {
-         const { multiply, $product } = MultiplyKit($n, i, $suspense)
-         multipliers.push(multiply)
-         products.push($product)
+   function multiply() {
+      for (const multiplier of multipliers) {
+         multiplier()
       }
-
-      function multiply() {
-         for (const multiplier of multipliers) {
-            multiplier()
-         }
-      }
-
-      return [multiply, products, $suspense] as const
    }
-
-   const [multiply, products, $pending] = MultipliersKit()
-
 
    return template(
       <div>
-         <button on:click={e => {
-            $n.increment();
-            multiply()
-         }}>{$n} {($pending() ? '...' : '')}</button>
+         <button on:click={e => { $n.increment(); multiply() }}>{$n} {($pending() ? '...' : '')}</button>
          {For(products, ($product, i) =>
             <p>{i + 1} * {$n} = {$product}</p>
          )}
@@ -140,7 +117,6 @@ export function TestAsyncMultipliers() {
 // }
 
 
-
 export function TestAsyncMultiplyB() {
 
    const $n = Ion(1, {
@@ -148,9 +124,6 @@ export function TestAsyncMultiplyB() {
    })
 
    const { $Multiply, $pending } = MultiplyKit()
-   // const $product = AsyncIon(() => {
-   //    return multiply($n(), 2)
-   // })
 
    return template(
       <div>
@@ -239,13 +212,23 @@ function Result(input: FromTag<{ n: number }>) {
 }
 
 
+function MultiplyKitA() {
+   return {
+      $Multiply($n: Ion<number>, o: number) {
+         return Ion(0, {
+            '-fetch': () => db.multiply($n(), o)
+         })
+      }
+   }
+}
+
 function MultiplyKit() {
    const $pending = SuspenseIon('...')
    return {
       $Multiply($n: Ion<number>, o: number) {
          return Ion(0, {
             '-fetch': () => db.multiply($n(), o),
-            '-suspense': $pending
+            '-suspend': $pending
          })
       },
       $pending

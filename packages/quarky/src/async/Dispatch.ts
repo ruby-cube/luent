@@ -1,22 +1,28 @@
-import { AsyncNode, AsyncSeries, Await, INTERNAL, O, ooo } from "./ooo";
-import { AnyObject } from "@rue/types";
-import { isFunction, isObject } from "@rue/utils";
-import { addToSuspense, SuspenseIon } from "./Suspense";
-import { Ion, MutableIon } from "../ion/Ion";
-import { instantUpdate } from "../reactivity/Update";
-import { toPromise } from "./AsyncIon";
-import { isGetter } from "../reactivity/Subject";
 
-// TODO: races
-// suspense
+import { Ion } from "../ion/Ion"
+import { toPromise } from "./AsyncIon"
+import { AsyncNode, AsyncSeries, INTERNAL } from "./ooo"
+import { addToSuspense, SuspenseIon } from "./Suspense"
 
-// export let oo: { await<T>(dispatch: () => Promise<T>, onFulfilled?: (result: T) => unknown): Promise<void> } = { await() { } }
 
-// type DispatchAction<F extends (...args: any[]) => any> = ((...args: Parameters<F>) => Resolved<ReturnType<F>>) & { pending: Promise<unknown> | null, error: Error | null, retry(): void }
+// API example
+// 
+// const multiply = Dispatch(() => db.multiply($n(), i), {
+//    '-presume': () => $product.value = $n() * i,
+//    '@success': [[$product, res => $product.patch(res)]],
+//    '-suspend': $pending
+// })
 
-type Ions<V> = V extends { [key: PropertyKey]: any } ? { [K in keyof V]: MutableIon<V[K]> } : MutableIon<V>
+type AsyncState = {
+   patch(data: unknown): void,
+   refetch(): void
+}
 
-export const REFETCH = Symbol('refetch')
+type DispatchOptions<R> = {
+   '-presume'?: () => void,
+   '-then'?: [AsyncState, (result: R) => void][]
+   '-suspend'?: SuspenseIon
+}
 
 export const cancelledPromises = new Set()
 
@@ -30,7 +36,7 @@ export function isCancelled(promise: Promise<any> | AsyncSeries) {
    return cancelledPromises.has(promise)
 }
 
-export function Action<F, V>(dispatch: F & ((o: { await: Await }, ...args: any[]) => AsyncNode<V> | Promise<V>), options: { '-suspend'?: SuspenseIon }): ((...args: F extends (...args: infer P) => any ? P : never) => F extends (...args: any[]) => infer R ? R extends AsyncNode<infer V> ? Promise<V> : never : never) & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
+export function Dispatch<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> | Promise<V>), options: DispatchOptions<V>): ((...args: F extends (...args: infer P) => any ? P : never) => F extends (...args: any[]) => infer R ? R extends AsyncNode<infer V> ? Promise<V> : never : never) & { pending: Promise<unknown> | null, error: Error | null, retry(): void } {
    // const target = options.target
    // const ions = (isGetter(target) ? undefined : target) as AnyObject
    // const ionKeys = ions ? ions instanceof Array ? Array.from(ions.keys()) : Object.keys(ions) : undefined
@@ -68,7 +74,7 @@ export function Action<F, V>(dispatch: F & ((o: { await: Await }, ...args: any[]
             })
          }
       }
-      const asyncNode = dispatch(ooo, ...args)
+      const asyncNode = dispatch(...args)
       const promise = pendingPromise = INTERNAL in asyncNode ? asyncNode[INTERNAL].series : asyncNode
       const output = toPromise(asyncNode)
       output
@@ -82,16 +88,7 @@ export function Action<F, V>(dispatch: F & ((o: { await: Await }, ...args: any[]
                }
                return;
             }
-            // if (cancelledPromises.has(output)) {
-            //    cancelledPromises.delete(output)
-            //    console.log('cancel value', value)
-            //    if (reject) {
-            //       reject('cancelled')
-            //       resolve = null
-            //       reject = null
-            //    }
-            //    return;
-            // }
+
             pendingPromise = null
             console.log('resolve to:', value)
             if (resolve) {
@@ -132,73 +129,17 @@ export function Action<F, V>(dispatch: F & ((o: { await: Await }, ...args: any[]
             $promise.value = null
             // })
          })
-         .catch((err: any) => {
+         .catch((error: any) => {
             pendingPromise = null
             if (reject) {
-               reject(err)
+               reject(error)
                resolve = null
                reject = null
             }
-            // instantUpdate(() => {
             $promise.value = null
-            // $error.value = err
-            // })
-            throw err
+            throw error
          })
 
-
-
-
-
-
-      // if (!resolve) {
-      //    $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
-      //    if (!options?.suspense) {
-      //       $promise.value.catch(err => {
-      //          if (err === 'cancelled') return;
-      //          else throw err
-      //       })
-      //    }
-      // }
-
-      // output
-      //    .then(value => {
-
-      //       // if (cancelledPromises.has(output)) {
-      //       //    cancelledPromises.delete(output)
-      //       //    console.log('cancel value', value)
-      //       //    if (reject) {
-      //       //       reject('cancelled')
-      //       //       resolve = null
-      //       //       reject = null
-      //       //    }
-      //       //    return;
-      //       // }
-      //       // pendingPromise = null
-      //       // console.log('resolve to:', value)
-      //       // if (resolve) {
-      //       //    resolve(value)
-      //       //    resolve = null
-      //       //    reject = null
-      //       // }
-      //       instantUpdate(() => {
-      //          // onSettled(value)
-      //          $promise.value = null
-      //       })
-      //    })
-      //    .catch(err => {
-      //       // pendingPromise = null
-      //       if (reject) {
-      //          reject(err)
-      //          resolve = null
-      //          reject = null
-      //       }
-      //       instantUpdate(() => {
-      //          $promise.value = null
-      //       })
-      //       if (err === 'cancelled') return;
-      //       else throw err;
-      //    })
       return output
    }
 

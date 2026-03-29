@@ -34,9 +34,10 @@ import { TestPortal, TestPortalB } from "./src/TestPortal"
 import { TooltipDemo } from "./src/ui-shadcn/examples/TooltipDemo"
 import { TestIfElseMix } from "./src/TestIfElseMix"
 import { TestHookForwarding } from "./src/TestHookForwarding"
+import { TestUndefinedTextNode } from "./src/TestUndefinedTextNode"
 
 export function runDemo() {
-   const app = createRoot(TestHookForwarding)
+   const app = createRoot(TestAsyncMultiplyB)
 
    app.mount('#root')
 }
