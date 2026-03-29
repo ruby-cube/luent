@@ -1,6 +1,7 @@
 import { FromTag, If, NodeRef, RenderSlot, template } from "@rue/lumo"
-import { IonicTooltip, TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
+import { TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
 import { mergeTailwind } from "../utils/utils"
+import { IonicTooltip } from "../ui-base/tooltip/Tooltip.model";
 
 // const transitionInStyles = "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95"
 

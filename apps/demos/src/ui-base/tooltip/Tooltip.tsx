@@ -1,90 +1,15 @@
-import { atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/lumo"
+import { $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/lumo"
 import { dev, getActiveUpdate, Ion, Ionic, queueLayout, queueRender, queueTask, toIon } from "@rue/quarky"
 import { IonicTooltip } from "./Tooltip.model";
+import { debug } from "@rue/utils";
+import { autoUpdate, computePosition } from "@floating-ui/dom";
 
 // TODO:
 // [] hideDelay should never be greater than delay, clamp hideDelay to delay if it is greater
 // [] if the tooltip blocks the trigger hover, we end up with a weird toggling the tooltip on-off-on-off situation
 
-
-function TooltipTail(setup: FromTag<{
-   as?: ComponentTag | string;
-   offset?: Ion<number>
-   'shape:class'?: Ion<string>
-   'shape:style'?: Ion<string>
-}>) {
-   const {
-      æclasses,
-      æstyles,
-      "æshape:class": æshapeClasses = toIon(''),
-      "æshape:style": æshapeStyles = toIon(''),
-      æoffset = toIon('-30%'),
-      as: Comp = 'div',
-      ...attributes
-   } = setup
-
-   const tooltip = fromContext(TOOLTIP)
-
-   return template(
-      <div
-         at:mounted={node => tooltip.positionTail(node)}
-         class={('tail-root ' + tooltip.placement + ' ' + æclasses())}
-         {...attributes}
-      >
-         <Comp
-            class={(`tail ${tooltip.placement} ${æshapeClasses()}`)}
-            style={æshapeStyles}
-         ></Comp>
-      </div>
-   )
-      .style(css`
-         .tail-root {
-            position: absolute;
-         }
-
-         .tail-root.above {
-            bottom: 0px;
-         }
-
-         .tail-root.below {
-            top: 0px;
-         }
-
-         .tail-root.left {
-            right: 0px;
-            // top: 50%;
-         }
-
-         .tail-root.right {
-            left: 0px;
-            // top: 50%;
-         }
-
-         .tail {
-            position: absolute;
-         }
-
-         .tail.above {
-            bottom: ${æoffset()};
-         }
-
-         .tail.below {
-            top: ${æoffset()};
-         }
-
-         .tail.left {
-            right:${æoffset()};
-            // top: -50%;
-         }
-
-         .tail.right {
-            left: ${æoffset()};
-            // top: -50%;
-         }
-      `)
-}
-
 const TOOLTIP = ContextKey<IonicTooltip>()
+const TOOLTIP_NODE = ContextKey<NodeRef<'div'>>()
 
 
 function TooltipRoot(setup: FromTag<{
@@ -93,7 +18,7 @@ function TooltipRoot(setup: FromTag<{
    tooltip: IonicTooltip
 }>) {
    const {
-      ref,
+      ref: $tooltip = NodeRef('div'),
       æclasses,
       æstyles,
       // gap = 0,
@@ -106,17 +31,29 @@ function TooltipRoot(setup: FromTag<{
    const { gap } = tooltip
 
    queueLayout(() => {
-      tooltip.reposition()
+      const node = $tooltip()
+      if (!node) {
+         debug.error('Must set tooltip node with setTooltip before repositioning tooltip')
+         return;
+      }
+      const rect = node.getBoundingClientRect()
+      if (
+         tooltip.placement === 'above' && rect.top < 0
+         || tooltip.placement === 'below' && rect.bottom > document.documentElement.clientHeight
+         || tooltip.placement === 'left' && rect.left < 0
+         || tooltip.placement === 'right' && rect.right > document.documentElement.clientWidth
+      ) {
+         tooltip.flip()
+      }
    })
 
    return template(
       <>
          {If((tooltip.visible),
-            <Context provide={TOOLTIP(tooltip)}>
+            <Context provide={[TOOLTIP(tooltip), TOOLTIP_NODE($tooltip)]}>
                <div
-                  at:create={node => { tooltip.setTooltip(node) }}
-                  ref={ref}
-                  class={Ion(() => (console.log('>>> tooltip classes', tooltip.placement, getActiveUpdate()?.cycle.currentPhase), 'tooltip ' + tooltip.placement))}
+                  ref={$tooltip}
+                  class={('tooltip ' + tooltip.placement)}
                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
                   {...attributes}
                >
@@ -179,36 +116,136 @@ function TooltipContent(setup: FromTag<{
    )
 }
 
-// type RenderTooltip = (data: { tooltip: string }) => RawJSXNode
-// const TOOLTIP = ContextKey<Ionic<TooltipModel>>()
 
-// function TooltipPod(setup: FromTag<{
-//    tooltip: RenderTooltip,
-//    Slot: RenderSlot
-// }>) {
-//    const { Slot, tooltip: renderTooltip } = setup
-//    const tooltip = Ionic(new TooltipModel('above'))
-//    const renderSlot = collectTriggers(Slot, tooltip)
+function TooltipTail(setup: FromTag<{
+   as?: ComponentTag | string;
+   offset?: Ion<number>
+   'shape:class'?: Ion<string>
+   'shape:style'?: Ion<string>
+}>) {
+   const {
+      æclasses,
+      æstyles,
+      "æshape:class": æshapeClasses = toIon(''),
+      "æshape:style": æshapeStyles = toIon(''),
+      æoffset = toIon('-30%'),
+      as: Comp = 'div',
+      ...attributes
+   } = setup
 
-//    return template(
-//       <Context provide={TOOLTIP(tooltip)}>
-//          {renderSlot}
-//          {If(tooltip.ævisible, () =>
-//             renderTooltip(tooltip.data)
-//          )}
-//       </Context>
-//    )
-// }
+   const tooltip = fromContext(TOOLTIP)
+   const $tooltip = $fromContext(TOOLTIP_NODE)
+   
+   console.log('$tooltip', $tooltip)
 
-// function collectTriggers(Slot: RenderSlot, tooltip: Ionic<TooltipModel>) {
-//    return function renderSlot() {
-//       const fragment = mountToFragment(Slot)
-//       const triggers = fragment.querySelectorAll('data-tooltip')
+   /**
+    * centers tail with anchor
+    * 
+    * @param node 
+    * @param tooltip 
+    * @returns 
+    */
+   function positionTail(node: HTMLElement) {
+      const anchor = document.querySelector(`[data-tooltip-anchor='${tooltip.anchorName}']`)
+      if (!anchor) return;
 
-//       tooltip.setUpTriggers(triggers)
-//       return fragment
-//    }
-// }
+      let visibility: string | null = null
+
+      const placeArrow = () => {
+         if (!anchor) return;
+         const axis = tooltip.axis
+         const placement = axis === 'y' ? 'bottom' : 'left'// tail's placement on the other axis is handled by the tooltip container so we only care about one axis
+
+         computePosition(anchor, node, {
+            placement,
+         }).then(({ x, y }) => {
+            const inset = axis === 'y' ? x : y
+            const tooltipNode = $tooltip()
+            if (!tooltipNode) {
+               console.error('tooltipNode is missing')
+               return;
+            }
+            // hide tail if tooltip is greatly misaligned due to collision shift
+            if (inset < 10 || tooltipNode[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 10) {
+               if (visibility === null) visibility = node.style.visibility
+               node.style.visibility = 'hidden'
+            }
+            else {
+               if (typeof visibility === 'string') {
+                  node.style.visibility = visibility
+                  visibility = null
+               }
+               node.style[axis === 'y' ? 'left' : 'top'] = `${inset}px`
+            }
+         });
+      }
+
+      const cleanup = autoUpdate(
+         anchor,
+         node,
+         placeArrow,
+      );
+      atDiscard(cleanup)
+   }
+
+   return template(
+      <div
+         at:mounted={positionTail}
+         class={('tail-root ' + tooltip.placement + ' ' + æclasses())}
+         {...attributes}
+      >
+         <Comp
+            class={(`tail ${tooltip.placement} ${æshapeClasses()}`)}
+            style={æshapeStyles}
+         ></Comp>
+      </div>
+   )
+      .style(css`
+         .tail-root {
+            position: absolute;
+         }
+
+         .tail-root.above {
+            bottom: 0px;
+         }
+
+         .tail-root.below {
+            top: 0px;
+         }
+
+         .tail-root.left {
+            right: 0px;
+            // top: 50%;
+         }
+
+         .tail-root.right {
+            left: 0px;
+            // top: 50%;
+         }
+
+         .tail {
+            position: absolute;
+         }
+
+         .tail.above {
+            bottom: ${æoffset()};
+         }
+
+         .tail.below {
+            top: ${æoffset()};
+         }
+
+         .tail.left {
+            right:${æoffset()};
+            // top: -50%;
+         }
+
+         .tail.right {
+            left: ${æoffset()};
+            // top: -50%;
+         }
+      `)
+}
 
 
 

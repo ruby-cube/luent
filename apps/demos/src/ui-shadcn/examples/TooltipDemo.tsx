@@ -1,7 +1,7 @@
 import { Context, createRoot, NodeRef, template } from "@rue/lumo"
 import { Button } from "../Button"
 import { Tooltip } from "../Tooltip"
-import { IonicTooltip, TOOLTIP_CONFIG } from "../../ui-base/tooltip/Tooltip.model"
+import { IonicTooltip, TOOLTIP_CONFIG, TooltipKit } from "../../ui-base/tooltip/Tooltip.model"
 
 // Basic:
 // [X] anchoring
@@ -25,7 +25,7 @@ const demoBoxStyle = ""
 // "relative flex h-72 w-full justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0"
 
 export function TooltipDemo() {
-   const tooltip = IonicTooltip({
+   const { tooltip, asTrigger } = TooltipKit({
       // placement: 'above',
       // placement: 'left',
       // placement: 'right',
@@ -45,13 +45,13 @@ export function TooltipDemo() {
             {/* <div style='background-color: lightblue' at:create={tooltip.anchor.italic}>i</div> */}
             {/* <div style='background-color: lightblue' at:create={tooltip.anchor.underline}>u</div> */}
             {/* <Button at:create={tooltip.anchor.default} variant='outline'>o</Button> */}
-            <Button at:create={tooltip.trigger.bold} variant="outline">
+            <Button at:create={asTrigger.bold} variant="outline">
                B
             </Button>
-            <Button at:create={tooltip.trigger.italic} variant="outline">
+            <Button at:create={asTrigger.italic} variant="outline">
                I
             </Button>
-            <Button at:create={tooltip.trigger.underline} variant="outline">
+            <Button at:create={asTrigger.underline} variant="outline">
                U
             </Button>
             <Tooltip tooltip={tooltip}>
