@@ -1,7 +1,7 @@
 import { Context, createRoot, NodeRef, template } from "@rue/lumo"
 import { Button } from "../Button"
 import { Tooltip } from "../Tooltip"
-import { IonicTooltip, TOOLTIP_CONFIG, TooltipKit } from "../../ui-base/tooltip/Tooltip.model"
+import { IonicTooltip, TOOLTIP_CONFIG, TooltipKit } from "../../ui-base/tooltip/TooltipKit"
 
 // Basic:
 // [X] anchoring
@@ -26,10 +26,10 @@ const demoBoxStyle = ""
 
 export function TooltipDemo() {
    const { tooltip, asTrigger } = TooltipKit({
-      // placement: 'above',
+      placement: 'above',
       // placement: 'left',
       // placement: 'right',
-      placement: 'below',
+      // placement: 'below',
       info: {
          bold: 'Bold Bold Bold Bold',
          italic: 'Italic',

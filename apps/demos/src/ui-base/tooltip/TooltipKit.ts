@@ -2,7 +2,8 @@ import { autoUpdate, computePosition } from "@floating-ui/dom"
 import { atDiscard, ContextKey, fromContext, fromRoot, listen, NodeRef, provideRoot } from "@rue/lumo"
 import { Expand, Ion, Ionic, queueLayout, queueTask } from "@rue/quarky"
 import { AnyObject } from "@rue/types"
-import { debug } from "@rue/utils"
+import { debug, isObject } from "@rue/utils"
+import { DATA_ATTRIBUTE_POPOVER, Placement, Popover } from "../popover/Popover"
 
 
 type TooltipConfig = Readonly<{
@@ -13,7 +14,7 @@ type TooltipConfig = Readonly<{
 
 const TOOLTIP_CONFIG = ContextKey<TooltipConfig>()
 
-type Placement = 'above' | 'below' | 'left' | 'right'
+
 
 
 
@@ -33,63 +34,67 @@ type Placement = 'above' | 'below' | 'left' | 'right'
 //    })) as O extends { info: infer I } ? IonicTooltip<I> : IonicTooltip
 // }
 
-type AsTooltipTrigger = (node: HTMLElement) => void
-type AsTooltipAnchor = (node: HTMLElement) => void
+type AsTrigger = (node: HTMLElement) => void
+type AsAnchor = (node: HTMLElement) => void
 
 
 let tooltipID = 0
 
-function TooltipKit<O>(options?: O & {
+function TooltipKit<I extends object>(options?: {
    gap?: number,
    placement?: Placement,
-   info?: { [key: string]: unknown }
+   info?: I
 }) {
    const anchorRoot = '--tooltip-anchor-' + tooltipID++
-   const info = (options?.info ?? {}) as O extends { info: infer I } ? I : {}
+   const info = options?.info
 
-   const tooltip = Ionic(new TooltipModel(
+   const tooltip = Ionic(new Popover(
       options?.placement ?? 'above',
       options?.gap ?? .75
    ), {
       devName: 'tooltip'
    })
 
-   const asTrigger = TooltipTriggerSetup(tooltip, info)
-   const asAnchor = TooltipAnchorSetup(info)
+   const asTrigger = TriggerSetup(tooltip, info)
+   const asAnchor = AnchorSetup(info)
 
 
    const explicitAnchors = new Set()
 
-   function TooltipAnchorSetup<T>(config: T) {
-      const anchor = Object.create(null)
-      for (const key in config) {
-         anchor[key] = AsTooltipAnchor(key)
+   function AnchorSetup<T>(info: T) {
+      if (!isObject(info)) {
+
       }
-      anchor.default = AsTooltipAnchor('default')
+      const anchor = Object.create(null)
+      for (const key in info) {
+         anchor[key] = AsAnchor(key)
+      }
+      anchor.default = AsAnchor('default')
       return anchor
    }
 
-   function AsTooltipAnchor(key: string) {
+   function AsAnchor(key: string) {
       return (node: HTMLElement) => {
          if (explicitAnchors.has(key)) return;
          explicitAnchors.add(key)
          // @ts-expect-error
          node.style.anchorName
             = anchorRoot + '-' + key
-         node.setAttribute('data-tooltip-anchor', anchorRoot + '-' + key)
+         node.setAttribute(DATA_ATTRIBUTE_POPOVER, anchorRoot + '-' + key)
       }
    }
 
-   function TooltipTriggerSetup<T>(tooltip: Ionic<TooltipModel>, config: T) {
+   function TriggerSetup(tooltip: Ionic<Popover>, info: I | undefined) {
+      if (!info) return;
       const trigger = Object.create(null)
-      for (const key in config) {
-         trigger[key] = AsTooltipTrigger(key, config[key], tooltip)
+      for (const key in info) {
+         trigger[key] = AsTrigger(key, info[key], tooltip)
       }
       return trigger
    }
 
 
-   function AsTooltipTrigger<T>(key: string, info: T[keyof T] | undefined, tooltip: Ionic<TooltipModel>) {
+   function AsTrigger(key: string, info: any | undefined, tooltip: Ionic<Popover>) {
 
       return (node: HTMLElement) => {
          queueTask(() => {
@@ -148,51 +153,9 @@ function TooltipKit<O>(options?: O & {
    }
 }
 
-class TooltipModel<T = {}> {
-   anchorName = ''
-
-   constructor(
-      public configuredPlacement: Placement,
-      public gap: number
-   ) {
-   }
-
-   get placement() {
-      return this.flipped ? this.configuredPlacement === 'above' ? 'below' : this.configuredPlacement === 'below' ? 'above' : this.configuredPlacement === 'left' ? 'right' : 'right' : this.configuredPlacement
-   }
-
-   get axis() {
-      return this.placement === 'above' || this.placement === 'below' ? 'y' : 'x'
-   }
-
-   get above() { return this.placement === 'above' }
-   get below() { return this.placement === 'below' }
-   get leftside() { return this.placement === 'left' }
-   get rightside() { return this.placement === 'right' }
 
 
-   private flipped: boolean = false;
-
-   flip() {
-      this.flipped = !this.flipped
-   }
-
-   info!: T[keyof T]
-
-   visible = false
-
-   show(info: (T[keyof T]) | undefined) {
-      if (info !== undefined) this.info = info;
-      this.visible = true
-   }
-
-   hide() {
-      this.visible = false
-   }
-}
-
-
-export type IonicTooltip<T = {}> = Ionic<Readonly<TooltipModel<T>>>
+export type IonicTooltip<T = undefined> = Ionic<Readonly<Popover<T>>>
 
 
 export {

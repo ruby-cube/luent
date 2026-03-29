@@ -1,8 +1,7 @@
 import { $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/lumo"
-import { dev, getActiveUpdate, Ion, Ionic, queueLayout, queueRender, queueTask, toIon } from "@rue/quarky"
-import { IonicTooltip } from "./Tooltip.model";
-import { debug } from "@rue/utils";
-import { autoUpdate, computePosition } from "@floating-ui/dom";
+import { Ion, toIon } from "@rue/quarky"
+import { IonicTooltip } from "./TooltipKit";
+import { maybeFlip, positionTail } from "../popover/Popover";
 
 // TODO:
 // [] hideDelay should never be greater than delay, clamp hideDelay to delay if it is greater
@@ -10,6 +9,8 @@ import { autoUpdate, computePosition } from "@floating-ui/dom";
 
 const TOOLTIP = ContextKey<IonicTooltip>()
 const TOOLTIP_NODE = ContextKey<NodeRef<'div'>>()
+
+
 
 
 function TooltipRoot(setup: FromTag<{
@@ -27,31 +28,16 @@ function TooltipRoot(setup: FromTag<{
       ...attributes
    } = setup
 
-   console.log('attributes?', attributes)
    const { gap } = tooltip
 
-   queueLayout(() => {
-      const node = $tooltip()
-      if (!node) {
-         debug.error('Must set tooltip node with setTooltip before repositioning tooltip')
-         return;
-      }
-      const rect = node.getBoundingClientRect()
-      if (
-         tooltip.placement === 'above' && rect.top < 0
-         || tooltip.placement === 'below' && rect.bottom > document.documentElement.clientHeight
-         || tooltip.placement === 'left' && rect.left < 0
-         || tooltip.placement === 'right' && rect.right > document.documentElement.clientWidth
-      ) {
-         tooltip.flip()
-      }
-   })
+
 
    return template(
       <>
          {If((tooltip.visible),
             <Context provide={[TOOLTIP(tooltip), TOOLTIP_NODE($tooltip)]}>
                <div
+                  at:create={node => maybeFlip(node, tooltip)}
                   ref={$tooltip}
                   class={('tooltip ' + tooltip.placement)}
                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
@@ -135,62 +121,10 @@ function TooltipTail(setup: FromTag<{
 
    const tooltip = fromContext(TOOLTIP)
    const $tooltip = $fromContext(TOOLTIP_NODE)
-   
-   console.log('$tooltip', $tooltip)
-
-   /**
-    * centers tail with anchor
-    * 
-    * @param node 
-    * @param tooltip 
-    * @returns 
-    */
-   function positionTail(node: HTMLElement) {
-      const anchor = document.querySelector(`[data-tooltip-anchor='${tooltip.anchorName}']`)
-      if (!anchor) return;
-
-      let visibility: string | null = null
-
-      const placeArrow = () => {
-         if (!anchor) return;
-         const axis = tooltip.axis
-         const placement = axis === 'y' ? 'bottom' : 'left'// tail's placement on the other axis is handled by the tooltip container so we only care about one axis
-
-         computePosition(anchor, node, {
-            placement,
-         }).then(({ x, y }) => {
-            const inset = axis === 'y' ? x : y
-            const tooltipNode = $tooltip()
-            if (!tooltipNode) {
-               console.error('tooltipNode is missing')
-               return;
-            }
-            // hide tail if tooltip is greatly misaligned due to collision shift
-            if (inset < 10 || tooltipNode[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 10) {
-               if (visibility === null) visibility = node.style.visibility
-               node.style.visibility = 'hidden'
-            }
-            else {
-               if (typeof visibility === 'string') {
-                  node.style.visibility = visibility
-                  visibility = null
-               }
-               node.style[axis === 'y' ? 'left' : 'top'] = `${inset}px`
-            }
-         });
-      }
-
-      const cleanup = autoUpdate(
-         anchor,
-         node,
-         placeArrow,
-      );
-      atDiscard(cleanup)
-   }
 
    return template(
       <div
-         at:mounted={positionTail}
+         at:mounted={node => positionTail(node, tooltip, $tooltip)}
          class={('tail-root ' + tooltip.placement + ' ' + æclasses())}
          {...attributes}
       >

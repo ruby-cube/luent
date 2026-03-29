@@ -1,0 +1,114 @@
+import { autoUpdate, computePosition } from "@floating-ui/dom"
+import { atDiscard, NodeRef, queueLayout } from "@rue/lumo"
+
+export type Placement = 'above' | 'below' | 'left' | 'right'
+
+
+export class Popover<T = undefined> {
+   anchorName = ''
+
+   constructor(
+      public configuredPlacement: Placement, // TODO: alignment
+      public gap: number
+   ) {
+   }
+
+   get placement() {
+      return this.flipped ? this.configuredPlacement === 'above' ? 'below' : this.configuredPlacement === 'below' ? 'above' : this.configuredPlacement === 'left' ? 'right' : 'right' : this.configuredPlacement
+   }
+
+   get axis() {
+      return this.placement === 'above' || this.placement === 'below' ? 'y' : 'x'
+   }
+
+   get above() { return this.placement === 'above' }
+   get below() { return this.placement === 'below' }
+   get leftside() { return this.placement === 'left' }
+   get rightside() { return this.placement === 'right' }
+
+
+   flipped: boolean = false;
+
+   flip() {
+      this.flipped = !this.flipped
+   }
+
+   info: T[keyof T] | undefined
+
+   visible = false
+
+   show(info: T[keyof T] | undefined) {
+      if (info !== undefined) this.info = info;
+      this.visible = true
+   }
+
+   hide() {
+      this.visible = false
+   }
+}
+
+export function maybeFlip(node: HTMLElement, popover: Popover) {
+   queueLayout(() => {
+      const rect = node.getBoundingClientRect()
+      if (
+         popover.placement === 'above' && rect.top < 0
+         || popover.placement === 'below' && rect.bottom > document.documentElement.clientHeight
+         || popover.placement === 'left' && rect.left < 0
+         || popover.placement === 'right' && rect.right > document.documentElement.clientWidth
+      ) {
+         popover.flip()
+      }
+   })
+}
+
+export const DATA_ATTRIBUTE_POPOVER = 'data-popover-anchor'
+
+/**
+ * centers tail with anchor
+ * 
+ * @param node 
+ * @param popover 
+ * @returns 
+ */
+export function positionTail(node: HTMLElement, popover: Popover, $popover: NodeRef<'div'>) {
+   const anchor = document.querySelector(`[${DATA_ATTRIBUTE_POPOVER}='${popover.anchorName}']`)
+   if (!anchor) return;
+
+   let visibility: string | null = null
+
+   const placeArrow = () => {
+      if (!anchor) return;
+      const axis = popover.axis
+      const placement = axis === 'y' ? 'bottom' : 'left'// tail's placement on the other axis is handled by the tooltip container so we only care about one axis
+
+      computePosition(anchor, node, {
+         placement,
+      }).then(({ x, y }) => {
+         const inset = axis === 'y' ? x : y
+         const popoverNode = $popover()
+         if (!popoverNode) {
+            console.error('popoverNode is missing')
+            return;
+         }
+         // hide tail if popover is greatly misaligned due to collision shift
+         if (inset < 10 || popoverNode[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 10) {
+            if (visibility === null) visibility = node.style.visibility
+            node.style.visibility = 'hidden'
+         }
+         else {
+            if (typeof visibility === 'string') {
+               node.style.visibility = visibility
+               visibility = null
+            }
+            node.style[axis === 'y' ? 'left' : 'top'] = `${inset}px`
+         }
+      });
+   }
+
+   const cleanup = autoUpdate(
+      anchor,
+      node,
+      placeArrow,
+   );
+   atDiscard(cleanup)
+}
