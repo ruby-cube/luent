@@ -155,8 +155,9 @@ export class RenderCycle {
       this.getPhase(phase).scheduleEffects(effects)
    }
 
-   scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER) {
-      (this.getPhase(phase) as CycledPhase).scheduleTask(task)
+   scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER | Phase.TICK) {
+      if (phase === TICK) queueTask(task)
+      else this.getPhase(phase).scheduleTask(task)
    }
 
    runEffects(phaseKey: Phase.SYNC | Phase.TICK) {

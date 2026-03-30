@@ -37,7 +37,7 @@ import { TestHookForwarding } from "./src/TestHookForwarding"
 import { TestUndefinedTextNode } from "./src/TestUndefinedTextNode"
 
 export function runDemo() {
-   const app = createRoot(TestAsyncMultiplyB)
+   const app = createRoot(TodoMVC)
 
    app.mount('#root')
 }

@@ -141,7 +141,7 @@ export function TestListSelectTransition() {
                            </button>
 
                            <li on:click={e => item.changeContent()}>
-                              {item.$content}
+                              {item.æcontent}
                            </li>
                            <p>{$index}</p>
                            <div on:click={e => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">
@@ -164,7 +164,7 @@ export function TestListSelectTransition() {
                {For($listClone, ($item, index) =>
                   <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                      <li>
-                        {($item().content)}
+                        {($item()?.content)}
                      </li>
                      <p>{index}</p>
                   </div>
@@ -190,40 +190,40 @@ export function TestListSelectTransition() {
 
    
 
-         @keyframes fade-in {
-            from {
-               opacity: 0;
-               transform: scaleY(0.01) translate(30px, 0);
-            }
-            to {
-               opacity: 1;
-               transform: scaleY(1) translate(0px, 0px);
-            }
-         }
+         // @keyframes fade-in {
+         //    from {
+         //       opacity: 0;
+         //       transform: scaleY(0.01) translate(30px, 0);
+         //    }
+         //    to {
+         //       opacity: 1;
+         //       transform: scaleY(1) translate(0px, 0px);
+         //    }
+         // }
 
-         @keyframes fade-out {
-            from {
-               opacity: 1;
-            }
-            to {
-               opacity: 0;
-            }
-         }
+         // @keyframes fade-out {
+         //    from {
+         //       opacity: 1;
+         //    }
+         //    to {
+         //       opacity: 0;
+         //    }
+         // }
 
-         .fade-out {
-            transform-origin: top center;
-            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
-            z-index: -1;
-         }
+         // .fade-out {
+         //    transform-origin: top center;
+         //    animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
+         //    z-index: -1;
+         // }
 
-         .fade-in {
-            transform-origin: top center;
-            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
-         }
+         // .fade-in {
+         //    transform-origin: top center;
+         //    animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
+         // }
 
-         .transition-item {
-            transition: transform 500ms ease-in-out;
-         }
+         // .transition-item {
+         //    transition: transform 500ms ease-in-out;
+         // }
       `)
 }
 

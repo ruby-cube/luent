@@ -194,12 +194,15 @@ function TodoList({ ætodos, removeTodo }: FromTag<{
          if (!todo.title) removeTodo(todo)
       }
    }
-
+            watch(æeditedTodo, () => {
+               console.log('isEditing?', æeditedTodo())
+            })
 
    return template(
       <ul class="todo-list">
          {For(ætodos, m => m.id, (todo) => {
             const æisEditing = Ion(() => todo === æeditedTodo());
+
 
             // watch(todo.ætitle, () => {
             //    console.log('$$$ pion title', todo.title)
@@ -213,7 +216,7 @@ function TodoList({ ætodos, removeTodo }: FromTag<{
                <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={todo.æcompleted} />
-                     <label on:dblclick={(console.log(), e => editTodo(todo))}>{(todo.title)}</label>
+                     <label on:dblclick={(console.log('double click'), e => editTodo(todo))}>{(todo.title)}</label>
                      <button class="destroy" on:click={e => removeTodo(todo)}></button>
                   </div>
                   {If(æisEditing,

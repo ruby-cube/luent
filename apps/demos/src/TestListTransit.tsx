@@ -1,7 +1,6 @@
 import { template, For, FromTag, Style, css } from "@rue/lumo";
 import { as, EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
-import { transitionExisting } from "./TestListSelectTransition";
 
 // Modified Demo from Svelte
 type Todo = {
@@ -125,13 +124,13 @@ function TodoList(input: FromTag<{
    // 'can:remove': (todo: Ionic<Todo>) => void
    remove: (todo: Ionic<Todo>) => void
 }>) {
-   const { $todos, remove } = input
+   const {ætodos, remove } = input
 
    const lis: HTMLElement[] = []
 
    return template(
       <ul class="todos">
-         {For($todos, t => t.id, (todo, $i) => (
+         {For(ætodos, t => t.id, (todo, $i) => (
             <li
                transit-key={todo.id}
                animate-item
@@ -139,7 +138,7 @@ function TodoList(input: FromTag<{
                ref={{ arr: lis, i: $i }}
             >
                <label>
-                  <input type="checkbox" mu:checked={todo.$done} />
+                  <input type="checkbox" mu:checked={todo.ædone} />
                   <span>{todo.description}</span>
                   <button on:click={() => remove(todo)} aria-label="Remove">X</button>
                </label>

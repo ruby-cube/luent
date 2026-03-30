@@ -40,6 +40,8 @@ function Tooltip(setup: FromTag<{
          <TooltipRoot
             animate-in={(animateIn + ' ' + slideIn())}
             animate-out={animateOut}
+            // transit-key='tooltip'
+            // animate-item
             tooltip={tooltip}>
             <TooltipContent
                class={(mergeTailwind( 
