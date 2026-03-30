@@ -53,7 +53,7 @@ export function createAtomicIon(
    setup?: AnyObject
 ) {
    const quark = new AtomicIonQuark(new SimpleState(initialState), setup)
-
+console.log('createAtomicIon', initialState)
    const $state = (
       quark.castGet
          ? withGetHook(getState.bind(quark), quark.castGet)

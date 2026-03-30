@@ -1,5 +1,5 @@
 import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, EACH, as, isIon, isGetter, PRELUDE, $_derivation } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH, as, isIon, isGetter, PRELUDE, $_derivation, dev } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -20,16 +20,24 @@ export function TodoMVC() {
    const ætodos = Ion(IonicTodos(getTodos()))
    const æview = Ion('all' as keyof typeof filters)
 
-   const æfilteredTodos = Ion(() => IonicTodos(filters[æview()](ætodos())))
-   const æremaining = Ion(() => filters.active(ætodos()).length)
-   const ætodoCount = Ion(() => ætodos().length)
-
    const filters = {
       all: (todos: Todo[]) => todos,
       active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
       completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
    }
 
+   const æfilteredTodos = Ion(() => IonicTodos(filters[æview()](ætodos())))
+   const æremaining = Ion(() => filters.active(ætodos()).length)
+   const ætodoCount = Ion(() => ætodos().length)
+
+   // dev.logAtoms(æremaining)
+   
+   watch(ætodoCount, () => {
+      console.log('@&@ todoCount', ætodoCount())
+   })
+   watch(æremaining, () => {
+      console.log('@&@ remaining', æremaining())
+   })
 
    // # handle routing
 
@@ -179,6 +187,7 @@ function TodoList({ ætodos, removeTodo }: FromTag<{
 
    function editTodo(todo: Todo) {
       beforeEditCache = todo.title
+      // debugger;
       æeditedTodo.value = todo
    }
 
@@ -194,29 +203,20 @@ function TodoList({ ætodos, removeTodo }: FromTag<{
          if (!todo.title) removeTodo(todo)
       }
    }
-            watch(æeditedTodo, () => {
-               console.log('isEditing?', æeditedTodo())
-            })
+   watch(æeditedTodo, () => {
+      console.log('isEditing?', æeditedTodo())
+   })
 
    return template(
       <ul class="todo-list">
          {For(ætodos, m => m.id, (todo) => {
             const æisEditing = Ion(() => todo === æeditedTodo());
 
-
-            // watch(todo.ætitle, () => {
-            //    console.log('$$$ pion title', todo.title)
-            // }, { phase: PRELUDE })
-
-            // watch($_derivation(() => todo.title), () => {
-            //    console.log('$$$ derivation title', todo.title)
-            // }, { phase: PRELUDE })
-
             return (
                <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>
                   <div class="view">
                      <input class="toggle" type="checkbox" mu:checked={todo.æcompleted} />
-                     <label on:dblclick={(console.log('double click'), e => editTodo(todo))}>{(todo.title)}</label>
+                     <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
                      <button class="destroy" on:click={e => removeTodo(todo)}></button>
                   </div>
                   {If(æisEditing,

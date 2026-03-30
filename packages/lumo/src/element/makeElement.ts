@@ -319,23 +319,16 @@ function setUpCheckboxInputListener(element: Element, ion: { value: any } | { se
 
 function setUpInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }, key: string = 'value') {
    element.addEventListener('input', e => {
-      // instantUpdate(() => {
       updateIonWithInput(ion, e, key)
-      // })
    })
 }
 
 function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, e: Event, key: string = 'value') {
-   // if (isManagedDerivation(ion) && 'set' in ion) {
-   //    ion.set(
-   //       e.currentTarget?.[key]
-   //    )
-   // }
-   // else 
    if ('value' in ion) {
       ion.value =
          //@ts-expect-error
          e.currentTarget?.[key];
+         console.log('@&@ e.currentTarget?.[key]', key, e.currentTarget?.[key])
    }
    else {
       const maybeIon = ion()

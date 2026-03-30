@@ -72,13 +72,14 @@ export function setPion(this: AtomicPionQuark, value: unknown) {
    trigger(this.modelQuark)
    return value;
 }
-
+ 
 
 export class AtomicPionQuark extends AtomicIonQuark {
    constructor(
       initialValue: unknown,
       public modelQuark: ModelQuark,
-      hooks: PropertyHooks | undefined
+      hooks: PropertyHooks | undefined,
+      public key: string // for DEV
    ) {
       super(new SimpleState(initialValue), hooks)
    }

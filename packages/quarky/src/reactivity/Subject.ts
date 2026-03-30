@@ -228,11 +228,12 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
       // }
       const effect = this.effect
       if (!effect) throw new Error('Must call linkEffect before retracking')
-      console.log('retrack call', this.fn)
+      console.log('@&@ retrack call', this.fn)
       effect.unlink()
       this.untrackAtoms()
       const output = this.trackAtoms(this.fn)
       this.forEachAtom(atom => {
+         if ('key' in atom && 'modelQuark' in atom && atom.key === 'completed') console.log('@&@ link effect', atom)
          linkEffectToAtom(atom, effect)
       })
       // this.state.set(output)

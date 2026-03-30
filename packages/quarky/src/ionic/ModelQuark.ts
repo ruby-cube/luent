@@ -355,7 +355,7 @@ export class ModelQuark implements Atom {
 
       const pionAccess = ionKey && !(ionKey in target) // makes sure not an absorbed ion
 
-      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target[valueKey], this, hooks), hooks?.["-as"], !pionAccess)
+      const [pion, setPion] = createAtomicPion(new AtomicPionQuark(target[valueKey], this, hooks, valueKey), hooks?.["-as"], !pionAccess)
 
       const state = {
          get: pion,
