@@ -17,9 +17,9 @@ export class Effect {
 
    link(atom: TrackedAtom) {
       this.run = this.fn // relink
-      if (!atom.isLinked(this)) {
+      // if (!atom.isLinked(this)) {
          atom.link(this)
-      }
+      // }
    }
 
    destroy() {

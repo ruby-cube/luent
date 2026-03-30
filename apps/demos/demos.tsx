@@ -36,6 +36,7 @@ import { TestIfElseMix } from "./src/TestIfElseMix"
 import { TestHookForwarding } from "./src/TestHookForwarding"
 import { TestUndefinedTextNode } from "./src/TestUndefinedTextNode"
 import { TestNullIon } from "./src/TestNullIon"
+import { TestRetracking } from "./src/TestRetracking"
 
 export function runDemo() {
    const app = createRoot(TodoMVC)

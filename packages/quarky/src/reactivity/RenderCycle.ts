@@ -156,8 +156,8 @@ export class RenderCycle {
    }
 
    scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER | Phase.TICK) {
-      if (phase === TICK) queueTask(task)
-      else this.getPhase(phase).scheduleTask(task)
+      if (phase === TICK) requestAnimationFrame(() => queueTask(task))
+      else (this.getPhase(phase) as CycledPhase).scheduleTask(task)
    }
 
    runEffects(phaseKey: Phase.SYNC | Phase.TICK) {

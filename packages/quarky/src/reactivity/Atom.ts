@@ -86,7 +86,6 @@ export function asTrackedAtom(watchable: Atom) {
 // }
 
 
-
 export class Effects {
    effects: Set<Effect> = new Set()
 
@@ -107,13 +106,15 @@ export class Effects {
 
    runEffects(ran: Set<Effect>, update: Update) {
       const effects = this.effects;
-      this.effects = new Set()
 
       for (const effect of effects) {
-         if (!effect.run || ran.has(effect)) {
+         if (!effect.run) {
             continue;
          }
-
+         if (ran.has(effect)) {
+            this.effects.add(effect)
+            continue;
+         }
          ran.add(effect)
          this.runEffect(effect, update)
 
@@ -172,9 +173,13 @@ export class TrackedAtom {
       console.log('link effect', effect, effect.phase, this.effects)
    }
 
-   isLinked(effect: Effect) {
-      return this.getEffects(effect.phase).effects.has(effect)
-   }
+   // unlink(effect: Effect) {
+   //    this.getEffects(effect.phase).delete(effect)
+   // }
+
+   // isLinked(effect: Effect) {
+   //    return this.getEffects(effect.phase).effects.has(effect)
+   // }
 
    triggerEffects() {
       const phases = this.phases
