@@ -2,6 +2,7 @@ import { autoUpdate, computePosition } from "@floating-ui/dom"
 import { atDiscard, NodeRef, queueLayout } from "@rue/lumo"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
+export type Alignment = 'start' | 'center' | 'end'
 
 
 export class Popover {
@@ -9,6 +10,7 @@ export class Popover {
 
    constructor(
       public configuredPlacement: Placement, // TODO: alignment
+      public alignment: Alignment,
       public gap: number
    ) {
    }
@@ -88,7 +90,7 @@ export function positionTail(node: HTMLElement, popover: Popover, $popover: Node
             return;
          }
          // hide tail if popover is greatly misaligned due to collision shift
-         if (inset < 10 || popoverNode[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 10) {
+         if (inset < 5 || popoverNode[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 5) {
             if (visibility === null) visibility = node.style.visibility
             node.style.visibility = 'hidden'
          }

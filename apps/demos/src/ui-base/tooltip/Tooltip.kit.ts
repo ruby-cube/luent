@@ -1,7 +1,7 @@
 import { ContextKey, fromContext, listen } from "@rue/lumo"
 import { Ionic, queueTask } from "@rue/quarky"
 import { AnyObject } from "@rue/types"
-import { DATA_ATTRIBUTE_POPOVER, Placement, Popover } from "../popover/Popover"
+import { Alignment, DATA_ATTRIBUTE_POPOVER, Placement, Popover } from "../popover/Popover.kit"
 
 
 type TooltipConfig = Readonly<{
@@ -42,6 +42,7 @@ let tooltipID = 0
 function TooltipKit<I extends { [key: string]: any }>(options?: {
    gap?: number,
    placement?: Placement,
+   alignment?: Alignment
    info?: I
 }) {
    const anchorRoot = '--tooltip-anchor-' + tooltipID++
@@ -49,6 +50,7 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
 
    const tooltip = Ionic(new TooltipModel(
       options?.placement ?? 'above',
+      options?.alignment ?? 'center',
       options?.gap ?? .75
    ), {
       '-devName': 'tooltip'

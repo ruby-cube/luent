@@ -1,7 +1,7 @@
 import { $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/lumo"
 import { Ion, toIon } from "@rue/quarky"
-import { IonicTooltip } from "./TooltipKit";
-import { maybeFlip, positionTail } from "../popover/Popover";
+import { IonicTooltip } from "./Tooltip.kit";
+import { maybeFlip, positionTail } from "../popover/Popover.kit";
 
 // TODO:
 // [] hideDelay should never be greater than delay, clamp hideDelay to delay if it is greater
@@ -39,7 +39,7 @@ function TooltipRoot(setup: FromTag<{
                <div
                   at:create={node => maybeFlip(node, tooltip)}
                   ref={$tooltip}
-                  class={('tooltip ' + tooltip.placement)}
+                  class={(`tooltip ${tooltip.placement} ${tooltip.alignment}`)}
                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
                   {...attributes}
                >
@@ -57,23 +57,45 @@ function TooltipRoot(setup: FromTag<{
             isolation: isolate;
          }
 
-         .tooltip.above {
+         .tooltip.center.above, tooltip.center.below {
             justify-self: anchor-center;
+         }
+         
+         .tooltip.center.left, tooltip.center.right {
+            align-self: anchor-center;
+         }
+         
+         .tooltip.above.start, .tooltip.below.start {
+            left: anchor(left)
+         }
+ 
+         .tooltip.above.end, .tooltip.below.end {
+            right: anchor(right)
+         }
+
+         .tooltip.left.start, .tooltip.right.start {
+            top: anchor(top)
+         }
+
+         .tooltip.left.end, .tooltip.right.end {
+            bottom: anchor(bottom)
+         }
+
+
+         .tooltip.above {
             bottom: calc(anchor(top) + ${gap}rem);
          }
 
          .tooltip.below {
-            justify-self: anchor-center;
             top: calc(anchor(bottom) + ${gap}rem);
          }
 
          .tooltip.left {
-            align-self: anchor-center;
+            left: unset;
             right: calc(anchor(left) + ${gap}rem);
          }
 
          .tooltip.right {
-            align-self: anchor-center;
             left: calc(anchor(right) + ${gap}rem);
          }
       `)
@@ -96,7 +118,7 @@ function TooltipContent(setup: FromTag<{
    // const { gap } = tooltip;
 
    return template(
-      <div class={æclasses}>
+      <div class={æclasses()} style={æstyles()} {...attributes}>
          {Slot()}
       </div>
    )
