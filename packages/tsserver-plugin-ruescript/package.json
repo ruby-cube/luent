@@ -1,5 +1,5 @@
 {
-  "name": "@rue/rxs-tsserver-plugin",
+  "name": "@rue/tsserver-plugin-ruescript",
   "private": true,
   "version": "0.0.0",
   "main": "./index.cjs",

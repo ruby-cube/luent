@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { createRequire } from 'node:module'
-import { transformWithEsbuild } from 'vite'
+import { transformWithOxc } from 'vite'
 import * as babel from '@babel/core'
 import BabelLuentPlugin from '@rue/babel-plugin-luent'
 import { transformRXSSugar } from '@rue/ruescript/transform'
@@ -51,12 +51,12 @@ export default function LuentPlugin() {
                }
             })
 
-            const normalized = await transformWithEsbuild(result.code, fileName, {
-               loader: 'tsx',
-               jsx: 'automatic',
-               jsxImportSource: '@rue/luent',
-               sourcemap: true,
-               charset: 'utf8'
+            const normalized = await transformWithOxc(result.code, fileName.replace(/\.rxs$/, '.tsx'), {
+               jsx: {
+                  runtime: 'automatic',
+                  importSource: '@rue/luent'
+               },
+               sourcemap: true
             })
 
             return {

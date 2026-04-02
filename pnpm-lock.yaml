@@ -11,9 +11,9 @@ importers:
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.59.1
-      '@rue/rxs-tsserver-plugin':
+      '@rue/tsserver-plugin-ruescript':
         specifier: workspace:*
-        version: link:packages/rxs-tsserver-plugin
+        version: link:packages/tsserver-plugin-ruescript
       '@types/jsdom':
         specifier: ^28.0.1
         version: 28.0.1
@@ -449,7 +449,7 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/rxs-tsserver-plugin: {}
+  packages/tsserver-plugin-ruescript: {}
 
   packages/types:
     devDependencies:

@@ -17,6 +17,7 @@ import { $Index } from "../iteratives/ItemList";
 import { setUpTransitions } from "../transitions/transitions";
 import { getTransition, setTransition } from "../transitions/Transition";
 import { matchEventTarget } from "../events/target";
+import { setUpInnerHTML } from "../node/InnerHTML";
 
 
 export type TagName = keyof HTMLElementTagNameMap
@@ -358,6 +359,10 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
 function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
    const flask = getFlask()
    for (const key in attributes) {
+      if (key === 'innerHTML') {
+         setUpInnerHTML({ innerHTML: attributes.innerHTML }, node)
+         continue;
+      }
       if (key === 'Slot') continue;
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
       if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)

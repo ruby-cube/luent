@@ -32,7 +32,7 @@
     "watch:counter-transform": "pnpm exec node packages/ruescript/scripts/watch-transformed-rxs.mjs apps/play/src/Counter.rxs --out apps/play/src/Counter.transformed.tsx"
   },
   "devDependencies": {
-    "@rue/rxs-tsserver-plugin": "workspace:*",
+    "@rue/tsserver-plugin-ruescript": "workspace:*",
     "@typescript-eslint/parser": "^8.46.0",
     "@playwright/test": "^1.58.2",
     "@types/jsdom": "^28.0.1",
