@@ -1,4 +1,4 @@
-import { template, For, NodeRef } from "@rue/lumo";
+import { template, For, NodeRef } from "@rue/luent";
 import { asIonic, Ion, Ionic } from "@rue/quarky";
 
 export function TestSettableDerivation() {

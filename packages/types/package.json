@@ -5,7 +5,7 @@
     "devDependencies": {
         "@types/node": "^22.5.4",
         "typescript": "^5.5.4",
-        "vite": "^5.4.3"
+        "vite": "^8.0.3"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"

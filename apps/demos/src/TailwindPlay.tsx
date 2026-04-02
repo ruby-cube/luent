@@ -1,4 +1,4 @@
-import { createRoot, css, template } from "@rue/lumo";
+import { createRoot, css, template } from "@rue/luent";
 import "./index.css"
 import "./TailwindPlay-card.css"
 import ".overrides.css" // transpiler

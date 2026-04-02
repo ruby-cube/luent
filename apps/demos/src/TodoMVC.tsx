@@ -1,4 +1,4 @@
-import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/lumo"
+import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/luent"
 import { watch, queueIonicTask, Ion, Ionic, EACH, asIonic } from "@rue/quarky"
 
 interface Todo {

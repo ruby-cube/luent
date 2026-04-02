@@ -1,4 +1,4 @@
-import { FromTag, template } from "@rue/lumo"
+import { FromTag, template } from "@rue/luent"
 import { asIonic, Ion, Ionic } from "@rue/quarky"
 import { Something } from "./external-file"
 

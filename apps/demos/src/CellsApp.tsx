@@ -1,6 +1,6 @@
-import { template, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/lumo"
+import { template, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/luent"
 import { Ion } from "@rue/quarky"
-import { Thru } from "../../../packages/lumo/src/iteratives/Thru"
+import { Thru } from "../../../packages/luent/src/iteratives/Thru"
 
 // Modified Demo from Vue.js
 // barebones cells app

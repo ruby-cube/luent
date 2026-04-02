@@ -1,8 +1,8 @@
-import { Component, Else, ElseIf, For, If, provideRoot } from "@rue/lumo";
+import { Component, Else, ElseIf, For, If, provideRoot } from "@rue/luent";
 import { Ion, ionize } from "@rue/quarky";
 import { inert } from "../../../packages/x-old/x_inert";
 import { Well, Wellerman } from "./Well";
-import { Context } from "../../../packages/lumo/src/context/Context";
+import { Context } from "../../../packages/luent/src/context/Context";
 
 function Swap() {
    return template('')

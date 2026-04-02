@@ -1,7 +1,7 @@
 //@ts-nocheck
 // COMPONENTS
 
-import { template, POSTLUDE, PRELUDE } from "@rue/lumo"
+import { template, POSTLUDE, PRELUDE } from "@rue/luent"
 import { ion, ionize } from "@rue/quarky"
 import { sub } from "date-fns"
 

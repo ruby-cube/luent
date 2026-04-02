@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { template, For } from "@rue/lumo";
+import { template, For } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 function App() {

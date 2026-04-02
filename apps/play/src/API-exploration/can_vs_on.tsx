@@ -8,7 +8,7 @@
  */
 
 import { getActiveFlask } from "@rue/flask";
-import { template, FromTag } from "@rue/lumo";
+import { template, FromTag } from "@rue/luent";
 import { Ion, Ionic } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 

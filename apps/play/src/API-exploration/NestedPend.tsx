@@ -1,6 +1,6 @@
 import { ion } from "../../../../packages/quarky/src"
-import { pend, Suspense } from "../../../packages/lumo/src/componentSuspense"
-import { template } from "@rue/lumo"
+import { pend, Suspense } from "../../../packages/luent/src/componentSuspense"
+import { template } from "@rue/luent"
 
 
 

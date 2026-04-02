@@ -1,4 +1,4 @@
-import { template, For } from "@rue/lumo";
+import { template, For } from "@rue/luent";
 import { asIonic, Ion, Ionic } from "@rue/quarky";
 
 let num = 0

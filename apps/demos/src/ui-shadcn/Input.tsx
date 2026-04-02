@@ -1,4 +1,4 @@
-import { FromTag } from "@rue/lumo"
+import { FromTag } from "@rue/luent"
 import { twMerge as mergeClasses } from "tailwind-merge"
 
 function Input({ æclasses, type, ...attributes }: FromTag<'input'>) {

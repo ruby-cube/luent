@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/lumo";
+import { queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/luent";
 import { Ion, ionic } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";

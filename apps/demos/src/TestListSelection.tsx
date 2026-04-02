@@ -1,4 +1,4 @@
-import { template, createRoot, For, listen, NodeRef, Style, target, css } from "@rue/lumo";
+import { template, createRoot, For, listen, NodeRef, Style, target, css } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { Ion, EACH, Ionic, as, asIonic } from "@rue/quarky";

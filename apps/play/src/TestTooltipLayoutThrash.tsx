@@ -1,4 +1,4 @@
-import { template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/lumo';
+import { template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/luent';
 import { $layout, Ion, queueLayout } from '@rue/quarky';
 import './TestTooltip.css'
 

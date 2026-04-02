@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, FromTag } from "@rue/lumo";
+import { template, FromTag } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 

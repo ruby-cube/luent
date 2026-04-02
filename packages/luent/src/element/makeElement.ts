@@ -354,6 +354,7 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
 //    return 'fromInput' in value;
 // }
 
+// TODO: innerHTML
 function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
    const flask = getFlask()
    for (const key in attributes) {

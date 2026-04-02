@@ -1,4 +1,4 @@
-import { NodeRef } from '@rue/lumo';
+import { NodeRef } from '@rue/luent';
 import type { ContextMenuRoot } from './ContextMenuRoot';
 
 export interface ContextMenuRootContext {

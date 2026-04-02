@@ -1,6 +1,6 @@
 
 //@ts-nocheck
-import { template, FromTag, If } from "@rue/lumo";
+import { template, FromTag, If } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { User } from "../context/keys";
 import './message-form.css'

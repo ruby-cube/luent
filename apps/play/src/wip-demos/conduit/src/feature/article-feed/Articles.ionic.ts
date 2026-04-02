@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ContextKey, fromRoot, AsyncIon } from "@rue/lumo";
+import { ContextKey, fromRoot, AsyncIon } from "@rue/luent";
 import { $from, dispatch, Ion } from "@rue/quarky";
 import { ArticleData, ArticleDatabase, ArticleResponse } from "../../db/ArticleDatabase";
 

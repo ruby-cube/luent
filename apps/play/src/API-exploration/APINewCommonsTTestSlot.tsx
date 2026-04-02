@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Context, ContextKey, template, fromContext, FromTag, RenderSlot } from "@rue/lumo";
+import { Context, ContextKey, template, fromContext, FromTag, RenderSlot } from "@rue/luent";
 import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase";
 
 // # via context

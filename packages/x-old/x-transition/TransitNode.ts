@@ -1,13 +1,13 @@
 import { TransitionNode } from "./TransitionNode";
-import { NodeRef } from "../../lumo/src/node/NodeRef";
-import { makeElement } from "../../lumo/src/element/makeElement";
-import { fromContext } from "../../lumo/src/context/provide";
+import { NodeRef } from "../../luent/src/node/NodeRef";
+import { makeElement } from "../../luent/src/element/makeElement";
+import { fromContext } from "../../luent/src/context/provide";
 import { Ion } from "@rue/quarky";
-import { template } from "../../lumo/src/component/Component";
-import { createIfSeries, Else, If } from "../../lumo/src/conditional/If";
+import { template } from "../../luent/src/component/Component";
+import { createIfSeries, Else, If } from "../../luent/src/conditional/If";
 import { isFunction } from "@rue/utils";
-import { ContextKey } from "../../lumo/src/context/ContextKey";
-import { RenderSlot } from "../../lumo/src/component/Input";
+import { ContextKey } from "../../luent/src/context/ContextKey";
+import { RenderSlot } from "../../luent/src/component/Input";
 
 export function renderTransitNode(
    $div: NodeRef<'div'>,
@@ -59,7 +59,7 @@ export function renderTransitNode(
 
 const REGISTER_TRANSITION_NODE = ContextKey<(transitionNode: TransitionNode) => void>('REGISTER_TRANSITION_NODE')
 
-// declare module '@rue/lumo' {
+// declare module '@rue/luent' {
 //     interface ContextKeyMap {
 //         [REGISTER_TRANSITION_NODE]: typeof pushTransitionNode
 //     }

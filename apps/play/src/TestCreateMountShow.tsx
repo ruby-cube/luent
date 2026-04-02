@@ -1,4 +1,4 @@
-import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, css } from "@rue/lumo";
+import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, css } from "@rue/luent";
 import { asIonic, instantUpdate, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, Stream } from "@rue/lumo";
+import { template, Stream } from "@rue/luent";
 
 export function Chalkboard() {
 

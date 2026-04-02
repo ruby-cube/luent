@@ -1,4 +1,4 @@
-import { template, Else, If } from "@rue/lumo";
+import { template, Else, If } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestShow() {

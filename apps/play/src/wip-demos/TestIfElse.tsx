@@ -1,5 +1,5 @@
 import { getActiveFlask, getFlask } from "@rue/flask";
-import { template, Else, ElseIf, If } from "@rue/lumo";
+import { template, Else, ElseIf, If } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 export function TestIfElse() {

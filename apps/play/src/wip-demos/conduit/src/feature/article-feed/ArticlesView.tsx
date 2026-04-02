@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Context, ContextKey, template, Else, ElseIf, For, fromContext, fromRoot, FromTag, If, RenderSlot, AsyncIon } from "@rue/lumo";
+import { Context, ContextKey, template, Else, ElseIf, For, fromContext, fromRoot, FromTag, If, RenderSlot, AsyncIon } from "@rue/luent";
 import { Ion, Ionized, watch } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";

@@ -1,6 +1,6 @@
-import { atDiscard, createRoot, template } from "@rue/lumo";
+import { atDiscard, createRoot, template } from "@rue/luent";
 import { asIonic, Ion, Ionic } from "@rue/quarky";
-import { As } from "../../../../packages/lumo/src/conditional/As";
+import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
 import './BottomlessBlokkis.css'

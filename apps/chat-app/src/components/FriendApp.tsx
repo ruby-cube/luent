@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Context, template, fromRoot, fromContext, FromTag, If, Polymorph } from "@rue/lumo";
+import { Context, template, fromRoot, fromContext, FromTag, If, Polymorph } from "@rue/luent";
 import { USER, User } from "../context/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";

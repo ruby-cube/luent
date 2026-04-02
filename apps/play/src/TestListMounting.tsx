@@ -1,4 +1,4 @@
-import { template, Else, ElseIf, For, FromTag, If } from "@rue/lumo";
+import { template, Else, ElseIf, For, FromTag, If } from "@rue/luent";
 import { $activeUpdate, asIonic, Ion, Ionic, PRELUDE, queueRender, queueTask, watch } from "@rue/quarky";
 
 export function TestListMounting() {

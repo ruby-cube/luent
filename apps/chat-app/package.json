@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "typescript": "~5.9.2",
-    "vite": "^7.1.4",
+    "vite": "^8.0.3",
       "@babel/traverse": "^7.28.3",
 
    "@babel/cli": "^7.28.3",
@@ -31,8 +31,7 @@
     "firebase": "^12.2.1",
    "date-fns": "^4.1.0",
     "@rue/flask": "workspace:*",
-    "@rue/jsx-runtime": "workspace:*",
-    "@rue/lumo": "workspace:*",
+    "@rue/luent": "workspace:*",
     "@rue/quarky": "workspace:*",
     "@rue/thread": "workspace:*",
     "@rue/utils": "workspace:*"

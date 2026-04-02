@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, FromTag, If, Else, For } from "@rue/lumo";
+import { template, FromTag, If, Else, For } from "@rue/luent";
 import { $from, defineDeepIonize, EACH, ion, Ionic, ionize, Ionized } from "@rue/quarky";
 
 

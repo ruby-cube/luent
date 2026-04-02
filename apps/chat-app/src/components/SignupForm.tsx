@@ -1,4 +1,4 @@
-import { template } from '@rue/lumo'
+import { template } from '@rue/luent'
 import { ion } from '@rue/quarky'
 import { signUp } from '../database/database'
 

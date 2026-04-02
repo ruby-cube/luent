@@ -1,4 +1,4 @@
-import { createRoot, template } from "@rue/lumo";
+import { createRoot, template } from "@rue/luent";
 import "./ui/card.css"
 
 export function TestCardStyle() {

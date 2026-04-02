@@ -1,4 +1,4 @@
-import { template, If, RenderSlot, FromTag } from "@rue/lumo";
+import { template, If, RenderSlot, FromTag } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestNormalizeToRenderFunction(){

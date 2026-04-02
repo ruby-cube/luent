@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "@rue/lumo";
+import { ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "@rue/luent";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ionize, Ionized, watch } from "@rue/quarky";
 

@@ -1,4 +1,4 @@
-import { template, Else, FromTag, If, Style, css } from "@rue/lumo";
+import { template, Else, FromTag, If, Style, css } from "@rue/luent";
 import { SignupForm } from "./SignupForm";
 import { ion } from "@rue/quarky";
 import { LoginForm } from "./LoginForm";

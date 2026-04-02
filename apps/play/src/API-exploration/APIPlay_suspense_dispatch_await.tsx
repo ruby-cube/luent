@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template } from '@rue/lumo'
+import { template } from '@rue/luent'
 // function LoadingApp() {
 //    const $data = fromCloud(MARKDOWN_FILES) // Data | undefined
 

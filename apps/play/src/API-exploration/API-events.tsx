@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { getActiveFlask } from "@rue/flask";
-import { template, listen } from "@rue/lumo";
+import { template, listen } from "@rue/luent";
 import { normalizeToArray } from "@rue/utils";
 
 

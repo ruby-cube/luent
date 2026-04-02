@@ -3,7 +3,7 @@ import { collectEffects, EffectFlask, getActiveFlask } from "@rue/flask";
 import { flaskablePromise } from "../../../packages/flask/flaskablePromises";
 import { watchEffect } from "@rue/quarky";
 import { abort } from "process";
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 
 collectEffects(async () => {
     console.log(getActiveFlask())

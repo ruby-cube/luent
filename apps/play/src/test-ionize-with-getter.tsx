@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, v } from "@rue/lumo"
+import { template, v } from "@rue/luent"
 import { ionize } from "@rue/quarky"
 
 function Board() {

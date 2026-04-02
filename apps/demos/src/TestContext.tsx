@@ -1,4 +1,4 @@
-import { $fromContext, Context, ContextEntryKey, ContextKey, createRoot, fromContext, fromRoot, FromTag, mergeContextKeys, template } from "@rue/lumo"
+import { $fromContext, Context, ContextEntryKey, ContextKey, createRoot, fromContext, fromRoot, FromTag, mergeContextKeys, template } from "@rue/luent"
 import { Ion } from "@rue/quarky"
 import './TestContext.css'
 

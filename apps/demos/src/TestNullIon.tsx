@@ -1,4 +1,4 @@
-import { If, template } from "@rue/lumo";
+import { If, template } from "@rue/luent";
 import { Ion, PRELUDE, SYNC, watch } from "@rue/quarky";
 
 export function TestNullIon() {

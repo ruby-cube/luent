@@ -1,7 +1,7 @@
-import { ContextKey } from "../../../../../../../packages/lumo/src/context/ContextKey"
-import { fromRoot } from "../../../../../../../packages/lumo/src/context/provide"
-import { template } from "../../../../../../../packages/lumo/src/component/Component"
-import { FromTag } from "../../../../../../../packages/lumo/src/component/Input"
+import { ContextKey } from "../../../../../../../packages/luent/src/context/ContextKey"
+import { fromRoot } from "../../../../../../../packages/luent/src/context/provide"
+import { template } from "../../../../../../../packages/luent/src/component/Component"
+import { FromTag } from "../../../../../../../packages/luent/src/component/Input"
 
 NavBar.router = ContextKey<Router>()
 

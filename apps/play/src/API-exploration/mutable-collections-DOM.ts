@@ -1,6 +1,6 @@
 // collection mutation to array mutation
 
-import { JSXNode, NodePod } from "@rue/lumo";
+import { JSXNode, NodePod } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 // mutable structure: Set

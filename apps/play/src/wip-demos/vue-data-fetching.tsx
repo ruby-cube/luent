@@ -1,4 +1,4 @@
-import { template, Else, For, If} from "@rue/lumo"
+import { template, Else, For, If} from "@rue/luent"
 import { Ion, queueIonicTask } from "@rue/quarky"
 
 type Commit = {

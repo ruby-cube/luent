@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import { createAsyncDerivation } from "../../../packages/quarky/src/async/AsyncDerivation";
 
 export function TestAsyncDerivation() {

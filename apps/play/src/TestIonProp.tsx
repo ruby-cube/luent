@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import { ion, ionic, ionize, watch } from "@rue/quarky";
 
 

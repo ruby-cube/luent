@@ -1,18 +1,8 @@
-// // import {jsx} from '@rue/jsx-dev-runtime'
-// // console.log(jsx)
-// // import { App } from './App';
 
-// import './demos/robofriends/robofriends.css'
-// import './demos/tree-view.css'
-// import {TreeApp} from './demos/tree-view'
-// import { TestCounter } from './TestCounter';
-// import { TestBox } from './TestBox';
-// import { App } from './App';
-// import { TestConditional } from './TestConditional';
 import { SevenGUIs } from './wip-demos/7-guis';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { AsyncIon, template, createRoot } from '@rue/lumo';
+import { AsyncIon, template, createRoot } from '@rue/luent';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { TestListSelect } from './wip-demos/TestListSelect';
@@ -49,7 +39,7 @@ import { TestJSON } from './TestJSON';
 import { TestNestedConditional } from './TestNestedConditional';
 import { DebugLeakyFlask } from './DebugLeakyFlask';
 import { TestVineNodes } from './TestVineNodes';
-import { For } from '../../../packages/lumo/src/iteratives/For';
+import { For } from '../../../packages/luent/src/iteratives/For';
 import { DateApp } from './wip-demos/DateApp';
 import { installIonizedDate } from '../../../packages/quarky/src/ionic/IonizedDate';
 import { TestMultisetting } from './wip-demos/TestMultisetting';

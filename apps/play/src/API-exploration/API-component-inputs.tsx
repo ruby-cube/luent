@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, FromTag } from "@rue/lumo";
+import { template, FromTag } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 

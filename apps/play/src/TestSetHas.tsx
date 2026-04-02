@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import { ionize, watch } from "@rue/quarky";
 
 export function TestSetHas() {

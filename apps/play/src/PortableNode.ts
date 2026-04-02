@@ -1,4 +1,4 @@
-import { Collection, For } from "@rue/lumo"
+import { Collection, For } from "@rue/luent"
 import { AtomicIon, Ion, Ionized, ion } from "../../../packages/quarky/src"
 
 class PortableNode {

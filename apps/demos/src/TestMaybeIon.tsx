@@ -1,4 +1,4 @@
-import { FromTag, template } from "@rue/lumo";
+import { FromTag, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 function TestMaybeIon() {

@@ -17,7 +17,7 @@
 
 
 
-import { FromTag, If, NodeRef, template } from "@rue/lumo";
+import { FromTag, If, NodeRef, template } from "@rue/luent";
 import { Ion, Ionic } from "@rue/quarky";
 
 // Case 1: Child maintains local state but is completedly controlled by Parent via ref

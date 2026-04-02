@@ -16,9 +16,9 @@
     ],
     "strict": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@rue",
+    "jsxImportSource": "@rue/luent",
     "types": [
-      "./packages/lumo/jsx-runtime/src/index"
+      "./packages/luent/jsx-runtime/index"
     ],
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -29,21 +29,21 @@
     "noImplicitReturns": false,
     "skipLibCheck": true,
     "paths": {
-      "react/jsx-runtime": ["./packages/lumo/jsx-runtime"],
-      "react-dom": ["./packages/lumo/jsx-runtime"],
-      "react-dom/*": ["./packages/lumo/jsx-runtime/*"],
+      "react/jsx-runtime": ["./packages/luent/jsx-runtime"],
+      "react-dom": ["./packages/luent/jsx-runtime"],
+      "react-dom/*": ["./packages/luent/jsx-runtime/*"],
 
       "@rue/utils": [
         "./packages/utils/index.ts"
       ],
-      "@rue/lumo": [
-        "./packages/lumo/src/index.ts"
+      "@rue/luent": [
+        "./packages/luent/src/index.ts"
       ],
-      "@rue/jsx-runtime": [
-        "./packages/lumo/jsx-runtime/src/index.ts"
+      "@rue/luent/jsx-runtime": [
+        "./packages/luent/jsx-runtime/index.ts"
       ],
-      "@rue/jsx-dev-runtime": [
-        "./packages/lumo/jsx-runtime/src/index.ts"
+      "@rue/luent/jsx-dev-runtime": [
+        "./packages/luent/jsx-runtime/index.ts"
       ],
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"

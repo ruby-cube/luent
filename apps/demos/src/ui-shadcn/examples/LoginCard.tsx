@@ -1,4 +1,4 @@
-import { createRoot } from "@rue/lumo"
+import { createRoot } from "@rue/luent"
 import { Button } from "../Button"
 import {
    Card,

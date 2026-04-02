@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ComponentTag, FromTag, makeElement, NodeRef, template } from "@rue/lumo"
+import { ComponentTag, FromTag, makeElement, NodeRef, template } from "@rue/luent"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 import { VariantProps } from "class-variance-authority"
 

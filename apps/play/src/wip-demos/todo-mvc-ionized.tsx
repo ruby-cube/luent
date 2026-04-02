@@ -1,4 +1,4 @@
-import { template, For, If, Else, FromTag } from "@rue/lumo"
+import { template, For, If, Else, FromTag } from "@rue/luent"
 import { watch,  queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"

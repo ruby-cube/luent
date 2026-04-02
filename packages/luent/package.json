@@ -1,5 +1,5 @@
 {
-    "name": "@rue/lumo",
+    "name": "@rue/luent",
     "private": true,
     "description": "",
     "main": "./src/index",
@@ -7,7 +7,8 @@
     "dependencies": {
         "@rue/flask": "workspace:*",
         "@rue/quarky": "workspace:*",
-        "@rue/utils": "workspace:*"
+        "@rue/utils": "workspace:*",
+        "dompurify": "^3.3.2"
     },
     "devDependencies": {
         "@rue/types": "workspace:*",

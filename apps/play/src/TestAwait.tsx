@@ -1,5 +1,5 @@
-import { template, AsyncIon, Else, If, FromTag } from "@rue/lumo";
-import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
+import { template, AsyncIon, Else, If, FromTag } from "@rue/luent";
+import { Await, Meanwhile, Catch } from "../../../packages/luent/src/boundaries/Await";
 import {  Ion } from "@rue/quarky";
 
 

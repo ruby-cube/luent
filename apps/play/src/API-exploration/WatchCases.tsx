@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { Else, If } from "@rue/lumo";
+import { Else, If } from "@rue/luent";
 
 function ListBlock() {
 

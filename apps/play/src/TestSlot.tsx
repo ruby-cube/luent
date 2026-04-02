@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { FromTag, RenderSlot, template } from "@rue/lumo";
+import { FromTag, RenderSlot, template } from "@rue/luent";
 
 // [x] Distinguishing getter from render function
 //    - static analysis of functions defined in template (arrow functions) ---> function SlotA() { return }

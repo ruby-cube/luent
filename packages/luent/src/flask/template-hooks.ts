@@ -149,7 +149,7 @@ export function setUpHooks(node: AnyObject, hooks: { flask: Flask } & { [key: st
 
 
 
-export interface LumoHooks<T> {
+export interface LuentHooks<T> {
    'at:create'?: LifecycleTask<T> | LifecycleTask<T>[] | void // allows functions to be called in the JSX expression space
    'at:mount'?: LifecycleTask<T> | LifecycleTask<T>[] | void
    'at:remount'?: LifecycleTask<T> | LifecycleTask<T>[]

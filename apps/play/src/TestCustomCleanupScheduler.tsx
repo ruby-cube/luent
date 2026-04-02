@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { template, NodeRef } from "@rue/lumo"
+import { template, NodeRef } from "@rue/luent"
 import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@rue/quarky"
-import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/X_$setup"
+import { or, $setup, is, isDefined, isAny, not } from "../../../packages/luent/src/component/X_$setup"
 import { AnyObject } from "@rue/types"
-import { toIonicProps } from "../../../packages/lumo/src/component/X_normalizeProps"
+import { toIonicProps } from "../../../packages/luent/src/component/X_normalizeProps"
 
 // optional and default
 // normalize
@@ -53,7 +53,7 @@ export function Bog(setup: {
    name?: MaybeIon<string>,
    date: v<Date>,
    msg: v<string>,
-   address: MaybeIonized<{ // must not have methods, will be auto-protected by Lumo
+   address: MaybeIonized<{ // must not have methods, will be auto-protected by Luent
       street: string,
       zip: number
    }>,

@@ -1,4 +1,4 @@
-import { Else, ElseIf, If } from "@rue/lumo"
+import { Else, ElseIf, If } from "@rue/luent"
 import { ion } from "../../../packages/quarky/src"
 
 export function ConditionalFlaskTest() {

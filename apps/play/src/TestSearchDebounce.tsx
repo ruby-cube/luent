@@ -1,4 +1,4 @@
-import { template, For, AsyncIon } from "@rue/lumo";
+import { template, For, AsyncIon } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 

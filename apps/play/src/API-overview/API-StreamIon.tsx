@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { atMounted, atUnmount, template } from "@rue/lumo";
+import { atMounted, atUnmount, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { resolve } from "path";
 

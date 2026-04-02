@@ -1,7 +1,7 @@
 
 // composability only
 
-import { template } from "@rue/lumo"
+import { template } from "@rue/luent"
 import { Ion } from "@rue/quarky"
 
 

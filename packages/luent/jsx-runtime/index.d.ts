@@ -1,13 +1,13 @@
 /// <reference path="global.d.ts" />
 
 import * as CSS from "csstype";
-import * as Lumo from "@rue/lumo";
+import * as Luent from "@rue/luent";
 import * as Quarky from "@rue/quarky";
-import { NodeRef } from "../../src/node/NodeRef";
-import { NodeRefsConfig } from "../../src/node/NodeRefs";
-import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
+import { NodeRef } from "../src/node/NodeRef";
+import { NodeRefsConfig } from "../src/node/NodeRefs";
+import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/luent";
 import { AnyObject, Booleanny } from "@rue/types";
-import { PortalNodeInput } from "../../src/boundaries/Portal";
+import { PortalNodeInput } from "../src/boundaries/Portal";
 
 type NativeAnimationEvent = AnimationEvent;
 type NativeClipboardEvent = ClipboardEvent;
@@ -53,7 +53,7 @@ declare global {
          */
          currentTarget: EventTarget & T
 
-         by: typeof Lumo.matchEventTarget
+         by: typeof Luent.matchEventTarget
       }
 
 
@@ -772,16 +772,16 @@ declare global {
       // ===================================================================  
 
       interface GlobalAttributes {
-         class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
+         class?: ClassInput | Luent.MaybeIon<string | Falsey> | (Luent.MaybeIon<string | Falsey> | ClassInput)[];
          style?: StyleInput | StyleInput[];
 
-         autofocus?: Lumo.MaybeIon<Booleanish | undefined>; // Automatically focuses the element
-         lang?: Lumo.MaybeIon<string | undefined>; // Specifies the language of the element's content
-         id?: Lumo.MaybeIon<string | undefined>;
-         tabindex?: Lumo.MaybeIon<number | undefined>; // Defines the tab order of the element
+         autofocus?: Luent.MaybeIon<Booleanish | undefined>; // Automatically focuses the element
+         lang?: Luent.MaybeIon<string | undefined>; // Specifies the language of the element's content
+         id?: Luent.MaybeIon<string | undefined>;
+         tabindex?: Luent.MaybeIon<number | undefined>; // Defines the tab order of the element
 
          // WAI-ARIA
-         role?: Lumo.MaybeIon<AriaRole | undefined>;
+         role?: Luent.MaybeIon<AriaRole | undefined>;
       }
 
       interface GlobalURLAttributes {
@@ -792,27 +792,27 @@ declare global {
       interface HTMLAttributes<T> extends AriaAttributes, GlobalAttributes, DOMAttributes<T> {
 
          // Standard HTML Attributes
-         contenteditable?: Lumo.MaybeIon<Booleanish | "inherit" | "plaintext-only" | undefined>;
-         contextmenu?: Lumo.MaybeIon<string | undefined>;
-         draggable?: Lumo.MaybeIon<Booleanish | undefined>;
-         is?: Lumo.MaybeIon<string | undefined>;
-         slot?: Lumo.MaybeIon<string | undefined>;
-         spellcheck?: Lumo.MaybeIon<Booleanish | undefined>;
-         translate?: Lumo.MaybeIon<"yes" | "no" | undefined>;
-         nonce?: Lumo.MaybeIon<string | undefined>; // A cryptographic nonce for inline scripts
-         part?: Lumo.MaybeIon<string | undefined>; // Specifies parts of the element for styling
-         title?: Lumo.MaybeIon<string | undefined>; // Additional information displayed as a tooltip
-         inert?: Lumo.MaybeIon<Booleanish | undefined>; // Prevents user interaction with the element
-         itemid?: Lumo.MaybeIon<string | undefined>; // Defines the item's ID in microdata
-         itemprop?: Lumo.MaybeIon<string | undefined>; // Specifies the item's property in microdata
-         itemref?: Lumo.MaybeIon<string | undefined>; // References additional microdata items
-         itemscope?: Lumo.MaybeIon<Booleanish | undefined>; // Declares the scope of an item
-         itemtype?: Lumo.MaybeIon<string | undefined>; // Specifies the type of an item in microdata
+         contenteditable?: Luent.MaybeIon<Booleanish | "inherit" | "plaintext-only" | undefined>;
+         contextmenu?: Luent.MaybeIon<string | undefined>;
+         draggable?: Luent.MaybeIon<Booleanish | undefined>;
+         is?: Luent.MaybeIon<string | undefined>;
+         slot?: Luent.MaybeIon<string | undefined>;
+         spellcheck?: Luent.MaybeIon<Booleanish | undefined>;
+         translate?: Luent.MaybeIon<"yes" | "no" | undefined>;
+         nonce?: Luent.MaybeIon<string | undefined>; // A cryptographic nonce for inline scripts
+         part?: Luent.MaybeIon<string | undefined>; // Specifies parts of the element for styling
+         title?: Luent.MaybeIon<string | undefined>; // Additional information displayed as a tooltip
+         inert?: Luent.MaybeIon<Booleanish | undefined>; // Prevents user interaction with the element
+         itemid?: Luent.MaybeIon<string | undefined>; // Defines the item's ID in microdata
+         itemprop?: Luent.MaybeIon<string | undefined>; // Specifies the item's property in microdata
+         itemref?: Luent.MaybeIon<string | undefined>; // References additional microdata items
+         itemscope?: Luent.MaybeIon<Booleanish | undefined>; // Declares the scope of an item
+         itemtype?: Luent.MaybeIon<string | undefined>; // Specifies the type of an item in microdata
 
-         accesskey?: Lumo.MaybeIon<string | undefined>; // Defines a keyboard shortcut to activate/focus an element
-         autocapitalize?: Lumo.MaybeIon<"off" | "none" | "on" | "sentences" | "words" | "characters" | undefined>; // Controls capitalization behavior
-         dir?: Lumo.MaybeIon<"ltr" | "rtl" | "auto" | undefined>; // Specifies the text direction
-         enterkeyhint?: Lumo.MaybeIon<
+         accesskey?: Luent.MaybeIon<string | undefined>; // Defines a keyboard shortcut to activate/focus an element
+         autocapitalize?: Luent.MaybeIon<"off" | "none" | "on" | "sentences" | "words" | "characters" | undefined>; // Controls capitalization behavior
+         dir?: Luent.MaybeIon<"ltr" | "rtl" | "auto" | undefined>; // Specifies the text direction
+         enterkeyhint?: Luent.MaybeIon<
             "enter"
             | "done"
             | "go"
@@ -821,51 +821,51 @@ declare global {
             | "search"
             | "send"
             | undefined>; // Hint for virtual keyboards
-         elementtiming?: Lumo.MaybeIon<string>;
-         hidden?: Lumo.MaybeIon<Booleanish | "until-found" | undefined>; // Hides the element
-         enterkeyhint?: Lumo.MaybeIon<"enter" | "done" | "go" | "next" | "previous" | "search" | "send" | undefined>;
+         elementtiming?: Luent.MaybeIon<string>;
+         hidden?: Luent.MaybeIon<Booleanish | "until-found" | undefined>; // Hides the element
+         enterkeyhint?: Luent.MaybeIon<"enter" | "done" | "go" | "next" | "previous" | "search" | "send" | undefined>;
 
          // RDFa Attributes
-         about?: Lumo.MaybeIon<string | undefined>;
-         content?: Lumo.MaybeIon<string | undefined>;
-         datatype?: Lumo.MaybeIon<string | undefined>;
-         inlist?: Lumo.MaybeIon<unknown>;
-         prefix?: Lumo.MaybeIon<string | undefined>;
-         property?: Lumo.MaybeIon<string | undefined>;
-         rel?: Lumo.MaybeIon<string | undefined>;
-         resource?: Lumo.MaybeIon<string | undefined>;
-         rev?: Lumo.MaybeIon<string | undefined>;
-         typeof?: Lumo.MaybeIon<string | undefined>;
-         vocab?: Lumo.MaybeIon<string | undefined>;
+         about?: Luent.MaybeIon<string | undefined>;
+         content?: Luent.MaybeIon<string | undefined>;
+         datatype?: Luent.MaybeIon<string | undefined>;
+         inlist?: Luent.MaybeIon<unknown>;
+         prefix?: Luent.MaybeIon<string | undefined>;
+         property?: Luent.MaybeIon<string | undefined>;
+         rel?: Luent.MaybeIon<string | undefined>;
+         resource?: Luent.MaybeIon<string | undefined>;
+         rev?: Luent.MaybeIon<string | undefined>;
+         typeof?: Luent.MaybeIon<string | undefined>;
+         vocab?: Luent.MaybeIon<string | undefined>;
 
          /**
           * Non-standard attribute
           */
-         autocorrect?: Lumo.MaybeIon<string | undefined>;
+         autocorrect?: Luent.MaybeIon<string | undefined>;
          /**
           * Non-standard attribute
           */
-         autosave?: Lumo.MaybeIon<string | undefined>;
+         autosave?: Luent.MaybeIon<string | undefined>;
          /**
           * Non-standard attribute
           */
-         color?: Lumo.MaybeIon<string | undefined>;
+         color?: Luent.MaybeIon<string | undefined>;
          /**
           * Non-standard attribute
           */
-         results?: Lumo.MaybeIon<number | undefined>;
+         results?: Luent.MaybeIon<number | undefined>;
          /**
           * Non-standard attribute
           */
-         security?: Lumo.MaybeIon<string | undefined>;
+         security?: Luent.MaybeIon<string | undefined>;
          /**
           * Non-standard attribute
           */
-         unselectable?: Lumo.MaybeIon<"on" | "off" | undefined>;
+         unselectable?: Luent.MaybeIon<"on" | "off" | undefined>;
          /**
           * Non-standard attribute
           */
-         anchor?: Lumo.MaybeIon<string>;
+         anchor?: Luent.MaybeIon<string>;
 
 
 
@@ -875,35 +875,35 @@ declare global {
           * Hints at the type of data that might be entered by the user while editing the element or its contents
           * @see {@link https://html.spec.whatwg.org/multipage/interaction.html#input-modalities:-the-inputmode-attribute}
           */
-         inputmode?: Lumo.MaybeIon<"none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined>;
+         inputmode?: Luent.MaybeIon<"none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined>;
          /**
           * Specify that a standard HTML element should behave like a defined custom built-in element
           * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is}
           */
 
-         exportparts?: Lumo.MaybeIon<string>;
-         popover?: Lumo.MaybeIon<'auto' | 'hint' | 'manual' | true>;
-         writingsuggestions?: Lumo.MaybeIon<Booleanish>;
+         exportparts?: Luent.MaybeIon<string>;
+         popover?: Luent.MaybeIon<'auto' | 'hint' | 'manual' | true>;
+         writingsuggestions?: Luent.MaybeIon<Booleanish>;
 
          /**
           * Experimental
           */
-         virtualkeyboardpolicyExperimental?: Lumo.MaybeIon<'auto' | 'manual'>;
+         virtualkeyboardpolicyExperimental?: Luent.MaybeIon<'auto' | 'manual'>;
 
          /**
           * DOM Property
           */
-         scrollTop?: Lumo.MaybeIon<number | undefined>;
+         scrollTop?: Luent.MaybeIon<number | undefined>;
 
          /**
           * DOM Property
           */
-         scrollLeft?: Lumo.MaybeIon<number | undefined>;
+         scrollLeft?: Luent.MaybeIon<number | undefined>;
 
          /**
           * DOM Property
           */
-         innerHTML?: Lumo.MaybeIon<string>;
+         innerHTML?: Luent.MaybeIon<string>;
       }
 
 
@@ -915,108 +915,108 @@ declare global {
 
       // interface AllHTMLAttributes<T> extends HTMLAttributes<T> {
       //    // Standard HTML Attributes
-      //    accept?: Lumo.MaybeIon<string | undefined>;
-      //    acceptCharset?: Lumo.MaybeIon<string | undefined>;
-      //    action?: Lumo.MaybeIon<string | undefined>;
-      //    allowFullScreen?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    allowTransparency?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    alt?: Lumo.MaybeIon<string | undefined>;
-      //    as?: Lumo.MaybeIon<string | undefined>;
-      //    async?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    autoComplete?: Lumo.MaybeIon<string | undefined>;
-      //    autoPlay?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    capture?: Lumo.MaybeIon<Booleanish | "user" | "environment" | undefined>;
-      //    cellPadding?: Lumo.MaybeIon<number | string | undefined>;
-      //    cellSpacing?: Lumo.MaybeIon<number | string | undefined>;
-      //    charSet?: Lumo.MaybeIon<string | undefined>;
-      //    challenge?: Lumo.MaybeIon<string | undefined>;
-      //    checked?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    cite?: Lumo.MaybeIon<string | undefined>;
-      //    classID?: Lumo.MaybeIon<string | undefined>;
-      //    cols?: Lumo.MaybeIon<number | undefined>;
-      //    colSpan?: Lumo.MaybeIon<number | undefined>;
-      //    controls?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    coords?: Lumo.MaybeIon<string | undefined>;
-      //    crossorigin?: Lumo.MaybeIon<CrossOrigin>;
-      //    data?: Lumo.MaybeIon<string | undefined>;
-      //    dateTime?: Lumo.MaybeIon<string | undefined>;
-      //    default?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    defer?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    download?: Lumo.MaybeIon<unknown>;
-      //    encType?: Lumo.MaybeIon<string | undefined>;
-      //    form?: Lumo.MaybeIon<string | undefined>;
-      //    formAction?: Lumo.MaybeIon<string | undefined>;
-      //    formEncType?: Lumo.MaybeIon<string | undefined>;
-      //    formMethod?: Lumo.MaybeIon<string | undefined>;
-      //    formNoValidate?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    formTarget?: Lumo.MaybeIon<string | undefined>;
-      //    frameBorder?: Lumo.MaybeIon<number | string | undefined>;
-      //    headers?: Lumo.MaybeIon<string | undefined>;
-      //    height?: Lumo.MaybeIon<number | string | undefined>;
-      //    high?: Lumo.MaybeIon<number | undefined>;
-      //    href?: Lumo.MaybeIon<string | undefined>;
-      //    hrefLang?: Lumo.MaybeIon<string | undefined>;
-      //    htmlFor?: Lumo.MaybeIon<string | undefined>;
-      //    httpEquiv?: Lumo.MaybeIon<string | undefined>;
-      //    integrity?: Lumo.MaybeIon<string | undefined>;
-      //    keyParams?: Lumo.MaybeIon<string | undefined>;
-      //    keyType?: Lumo.MaybeIon<string | undefined>;
-      //    kind?: Lumo.MaybeIon<string | undefined>;
-      //    label?: Lumo.MaybeIon<string | undefined>;
-      //    list?: Lumo.MaybeIon<string | undefined>;
-      //    loop?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    low?: Lumo.MaybeIon<number | undefined>;
-      //    manifest?: Lumo.MaybeIon<string | undefined>;
-      //    marginHeight?: Lumo.MaybeIon<number | undefined>;
-      //    marginWidth?: Lumo.MaybeIon<number | undefined>;
-      //    max?: Lumo.MaybeIon<number | string | undefined>;
-      //    maxLength?: Lumo.MaybeIon<number | undefined>;
-      //    media?: Lumo.MaybeIon<string | undefined>;
-      //    mediaGroup?: Lumo.MaybeIon<string | undefined>;
-      //    method?: Lumo.MaybeIon<string | undefined>;
-      //    min?: Lumo.MaybeIon<number | string | undefined>;
-      //    minLength?: Lumo.MaybeIon<number | undefined>;
-      //    multiple?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    muted?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    name?: Lumo.MaybeIon<string | undefined>;
-      //    noValidate?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    open?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    optimum?: Lumo.MaybeIon<number | undefined>;
-      //    pattern?: Lumo.MaybeIon<string | undefined>;
-      //    placeholder?: Lumo.MaybeIon<string | undefined>;
-      //    playsInline?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    poster?: Lumo.MaybeIon<string | undefined>;
-      //    preload?: Lumo.MaybeIon<string | undefined>;
-      //    readOnly?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    required?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    reversed?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    rows?: Lumo.MaybeIon<number | undefined>;
-      //    rowSpan?: Lumo.MaybeIon<number | undefined>;
-      //    sandbox?: Lumo.MaybeIon<string | undefined>;
-      //    scope?: Lumo.MaybeIon<string | undefined>;
-      //    scoped?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    scrolling?: Lumo.MaybeIon<string | undefined>;
-      //    seamless?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    selected?: Lumo.MaybeIon<Booleanish | undefined>;
-      //    shape?: Lumo.MaybeIon<string | undefined>;
-      //    size?: Lumo.MaybeIon<number | undefined>;
-      //    sizes?: Lumo.MaybeIon<string | undefined>;
-      //    span?: Lumo.MaybeIon<number | undefined>;
-      //    src?: Lumo.MaybeIon<string | undefined>;
-      //    srcDoc?: Lumo.MaybeIon<string | undefined>;
-      //    srcLang?: Lumo.MaybeIon<string | undefined>;
-      //    srcSet?: Lumo.MaybeIon<string | undefined>;
-      //    start?: Lumo.MaybeIon<number | undefined>;
-      //    step?: Lumo.MaybeIon<number | string | undefined>;
-      //    summary?: Lumo.MaybeIon<string | undefined>;
-      //    target?: Lumo.MaybeIon<string | undefined>;
-      //    type?: Lumo.MaybeIon<string | undefined>;
-      //    useMap?: Lumo.MaybeIon<string | undefined>;
-      //    value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
-      //    width?: Lumo.MaybeIon<number | string | undefined>;
-      //    wmode?: Lumo.MaybeIon<string | undefined>;
-      //    wrap?: Lumo.MaybeIon<string | undefined>;
+      //    accept?: Luent.MaybeIon<string | undefined>;
+      //    acceptCharset?: Luent.MaybeIon<string | undefined>;
+      //    action?: Luent.MaybeIon<string | undefined>;
+      //    allowFullScreen?: Luent.MaybeIon<Booleanish | undefined>;
+      //    allowTransparency?: Luent.MaybeIon<Booleanish | undefined>;
+      //    alt?: Luent.MaybeIon<string | undefined>;
+      //    as?: Luent.MaybeIon<string | undefined>;
+      //    async?: Luent.MaybeIon<Booleanish | undefined>;
+      //    autoComplete?: Luent.MaybeIon<string | undefined>;
+      //    autoPlay?: Luent.MaybeIon<Booleanish | undefined>;
+      //    capture?: Luent.MaybeIon<Booleanish | "user" | "environment" | undefined>;
+      //    cellPadding?: Luent.MaybeIon<number | string | undefined>;
+      //    cellSpacing?: Luent.MaybeIon<number | string | undefined>;
+      //    charSet?: Luent.MaybeIon<string | undefined>;
+      //    challenge?: Luent.MaybeIon<string | undefined>;
+      //    checked?: Luent.MaybeIon<Booleanish | undefined>;
+      //    cite?: Luent.MaybeIon<string | undefined>;
+      //    classID?: Luent.MaybeIon<string | undefined>;
+      //    cols?: Luent.MaybeIon<number | undefined>;
+      //    colSpan?: Luent.MaybeIon<number | undefined>;
+      //    controls?: Luent.MaybeIon<Booleanish | undefined>;
+      //    coords?: Luent.MaybeIon<string | undefined>;
+      //    crossorigin?: Luent.MaybeIon<CrossOrigin>;
+      //    data?: Luent.MaybeIon<string | undefined>;
+      //    dateTime?: Luent.MaybeIon<string | undefined>;
+      //    default?: Luent.MaybeIon<Booleanish | undefined>;
+      //    defer?: Luent.MaybeIon<Booleanish | undefined>;
+      //    disabled?: Luent.MaybeIon<Booleanish | undefined>;
+      //    download?: Luent.MaybeIon<unknown>;
+      //    encType?: Luent.MaybeIon<string | undefined>;
+      //    form?: Luent.MaybeIon<string | undefined>;
+      //    formAction?: Luent.MaybeIon<string | undefined>;
+      //    formEncType?: Luent.MaybeIon<string | undefined>;
+      //    formMethod?: Luent.MaybeIon<string | undefined>;
+      //    formNoValidate?: Luent.MaybeIon<Booleanish | undefined>;
+      //    formTarget?: Luent.MaybeIon<string | undefined>;
+      //    frameBorder?: Luent.MaybeIon<number | string | undefined>;
+      //    headers?: Luent.MaybeIon<string | undefined>;
+      //    height?: Luent.MaybeIon<number | string | undefined>;
+      //    high?: Luent.MaybeIon<number | undefined>;
+      //    href?: Luent.MaybeIon<string | undefined>;
+      //    hrefLang?: Luent.MaybeIon<string | undefined>;
+      //    htmlFor?: Luent.MaybeIon<string | undefined>;
+      //    httpEquiv?: Luent.MaybeIon<string | undefined>;
+      //    integrity?: Luent.MaybeIon<string | undefined>;
+      //    keyParams?: Luent.MaybeIon<string | undefined>;
+      //    keyType?: Luent.MaybeIon<string | undefined>;
+      //    kind?: Luent.MaybeIon<string | undefined>;
+      //    label?: Luent.MaybeIon<string | undefined>;
+      //    list?: Luent.MaybeIon<string | undefined>;
+      //    loop?: Luent.MaybeIon<Booleanish | undefined>;
+      //    low?: Luent.MaybeIon<number | undefined>;
+      //    manifest?: Luent.MaybeIon<string | undefined>;
+      //    marginHeight?: Luent.MaybeIon<number | undefined>;
+      //    marginWidth?: Luent.MaybeIon<number | undefined>;
+      //    max?: Luent.MaybeIon<number | string | undefined>;
+      //    maxLength?: Luent.MaybeIon<number | undefined>;
+      //    media?: Luent.MaybeIon<string | undefined>;
+      //    mediaGroup?: Luent.MaybeIon<string | undefined>;
+      //    method?: Luent.MaybeIon<string | undefined>;
+      //    min?: Luent.MaybeIon<number | string | undefined>;
+      //    minLength?: Luent.MaybeIon<number | undefined>;
+      //    multiple?: Luent.MaybeIon<Booleanish | undefined>;
+      //    muted?: Luent.MaybeIon<Booleanish | undefined>;
+      //    name?: Luent.MaybeIon<string | undefined>;
+      //    noValidate?: Luent.MaybeIon<Booleanish | undefined>;
+      //    open?: Luent.MaybeIon<Booleanish | undefined>;
+      //    optimum?: Luent.MaybeIon<number | undefined>;
+      //    pattern?: Luent.MaybeIon<string | undefined>;
+      //    placeholder?: Luent.MaybeIon<string | undefined>;
+      //    playsInline?: Luent.MaybeIon<Booleanish | undefined>;
+      //    poster?: Luent.MaybeIon<string | undefined>;
+      //    preload?: Luent.MaybeIon<string | undefined>;
+      //    readOnly?: Luent.MaybeIon<Booleanish | undefined>;
+      //    required?: Luent.MaybeIon<Booleanish | undefined>;
+      //    reversed?: Luent.MaybeIon<Booleanish | undefined>;
+      //    rows?: Luent.MaybeIon<number | undefined>;
+      //    rowSpan?: Luent.MaybeIon<number | undefined>;
+      //    sandbox?: Luent.MaybeIon<string | undefined>;
+      //    scope?: Luent.MaybeIon<string | undefined>;
+      //    scoped?: Luent.MaybeIon<Booleanish | undefined>;
+      //    scrolling?: Luent.MaybeIon<string | undefined>;
+      //    seamless?: Luent.MaybeIon<Booleanish | undefined>;
+      //    selected?: Luent.MaybeIon<Booleanish | undefined>;
+      //    shape?: Luent.MaybeIon<string | undefined>;
+      //    size?: Luent.MaybeIon<number | undefined>;
+      //    sizes?: Luent.MaybeIon<string | undefined>;
+      //    span?: Luent.MaybeIon<number | undefined>;
+      //    src?: Luent.MaybeIon<string | undefined>;
+      //    srcDoc?: Luent.MaybeIon<string | undefined>;
+      //    srcLang?: Luent.MaybeIon<string | undefined>;
+      //    srcSet?: Luent.MaybeIon<string | undefined>;
+      //    start?: Luent.MaybeIon<number | undefined>;
+      //    step?: Luent.MaybeIon<number | string | undefined>;
+      //    summary?: Luent.MaybeIon<string | undefined>;
+      //    target?: Luent.MaybeIon<string | undefined>;
+      //    type?: Luent.MaybeIon<string | undefined>;
+      //    useMap?: Luent.MaybeIon<string | undefined>;
+      //    value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
+      //    width?: Luent.MaybeIon<number | string | undefined>;
+      //    wmode?: Luent.MaybeIon<string | undefined>;
+      //    wrap?: Luent.MaybeIon<string | undefined>;
       // }
 
       type HTMLAttributeReferrerPolicy =
@@ -1039,158 +1039,158 @@ declare global {
 
 
       interface BaseHTMLAttributes<T> extends HTMLAttributes<T> {
-         href?: Lumo.MaybeIon<string | undefined>;
-         target?: Lumo.MaybeIon<string | undefined>;
+         href?: Luent.MaybeIon<string | undefined>;
+         target?: Luent.MaybeIon<string | undefined>;
       }
 
       interface AnchorHTMLAttributes<T> extends HTMLAttributes<T> {
-         download?: Lumo.MaybeIon<unknown>;
-         href?: Lumo.MaybeIon<string | undefined>;
-         hreflang?: Lumo.MaybeIon<string | undefined>;
-         media?: Lumo.MaybeIon<string | undefined>;
-         ping?: Lumo.MaybeIon<string | undefined>;
-         target?: Lumo.MaybeIon<HTMLAttributeAnchorTarget | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
-         referrerpolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+         download?: Luent.MaybeIon<unknown>;
+         href?: Luent.MaybeIon<string | undefined>;
+         hreflang?: Luent.MaybeIon<string | undefined>;
+         media?: Luent.MaybeIon<string | undefined>;
+         ping?: Luent.MaybeIon<string | undefined>;
+         target?: Luent.MaybeIon<HTMLAttributeAnchorTarget | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
+         referrerpolicy?: Luent.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
       }
 
       interface AudioHTMLAttributes<T> extends MediaHTMLAttributes<T> { }
 
       interface AreaHTMLAttributes<T> extends HTMLAttributes<T> {
-         alt?: Lumo.MaybeIon<string | undefined>;
-         coords?: Lumo.MaybeIon<string | undefined>;
-         download?: Lumo.MaybeIon<unknown>;
-         href?: Lumo.MaybeIon<string | undefined>;
-         hreflang?: Lumo.MaybeIon<string | undefined>;
-         media?: Lumo.MaybeIon<string | undefined>;
-         referrerpolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-         shape?: Lumo.MaybeIon<string | undefined>;
-         target?: Lumo.MaybeIon<string | undefined>;
-         ping?: Lumo.MaybeIon<string | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
+         alt?: Luent.MaybeIon<string | undefined>;
+         coords?: Luent.MaybeIon<string | undefined>;
+         download?: Luent.MaybeIon<unknown>;
+         href?: Luent.MaybeIon<string | undefined>;
+         hreflang?: Luent.MaybeIon<string | undefined>;
+         media?: Luent.MaybeIon<string | undefined>;
+         referrerpolicy?: Luent.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+         shape?: Luent.MaybeIon<string | undefined>;
+         target?: Luent.MaybeIon<string | undefined>;
+         ping?: Luent.MaybeIon<string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
       }
 
       interface BlockquoteHTMLAttributes<T> extends HTMLAttributes<T> {
-         cite?: Lumo.MaybeIon<string | undefined>;
+         cite?: Luent.MaybeIon<string | undefined>;
       }
 
       interface ButtonHTMLAttributes<T> extends HTMLAttributes<T> {
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         form?: Lumo.MaybeIon<string | undefined>;
-         formaction?: Lumo.MaybeIon<string | undefined>;
-         formenctype?: Lumo.MaybeIon<string | undefined>;
-         formmethod?: Lumo.MaybeIon<string | undefined>;
-         formnovalidate?: Lumo.MaybeIon<Booleanish | undefined>;
-         formtarget?: Lumo.MaybeIon<string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         popovertarget?: Lumo.MaybeIon<string>;
-         popovertargetaction?: Lumo.MaybeIon<string>;
-         type?: Lumo.MaybeIon<"submit" | "reset" | "button" | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         formaction?: Luent.MaybeIon<string | undefined>;
+         formenctype?: Luent.MaybeIon<string | undefined>;
+         formmethod?: Luent.MaybeIon<string | undefined>;
+         formnovalidate?: Luent.MaybeIon<Booleanish | undefined>;
+         formtarget?: Luent.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         popovertarget?: Luent.MaybeIon<string>;
+         popovertargetaction?: Luent.MaybeIon<string>;
+         type?: Luent.MaybeIon<"submit" | "reset" | "button" | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
       }
 
       interface CanvasHTMLAttributes<T> extends HTMLAttributes<T> {
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface ColHTMLAttributes<T> extends HTMLAttributes<T> {
-         span?: Lumo.MaybeIon<number | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         span?: Luent.MaybeIon<number | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface ColgroupHTMLAttributes<T> extends HTMLAttributes<T> {
-         span?: Lumo.MaybeIon<number | undefined>;
+         span?: Luent.MaybeIon<number | undefined>;
       }
 
       interface DataHTMLAttributes<T> extends HTMLAttributes<T> {
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
       }
 
       interface DetailsHTMLAttributes<T> extends HTMLAttributes<T> {
-         open?: Lumo.MaybeIon<Booleanish | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
+         open?: Luent.MaybeIon<Booleanish | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
       }
 
       interface DelHTMLAttributes<T> extends HTMLAttributes<T> {
-         cite?: Lumo.MaybeIon<string | undefined>;
-         datetime?: Lumo.MaybeIon<string | undefined>;
+         cite?: Luent.MaybeIon<string | undefined>;
+         datetime?: Luent.MaybeIon<string | undefined>;
       }
 
       interface DialogHTMLAttributes<T> extends HTMLAttributes<T> {
-         open?: Lumo.MaybeIon<Booleanish | undefined>;
-         closedby?: Lumo.MaybeIon<'any' | 'closerequest' | 'none'>
+         open?: Luent.MaybeIon<Booleanish | undefined>;
+         closedby?: Luent.MaybeIon<'any' | 'closerequest' | 'none'>
          'on:cancel'?: HandleEvent<T> | undefined;
          'on:close'?: HandleEvent<T> | undefined;
       }
 
       interface EmbedHTMLAttributes<T> extends HTMLAttributes<T> {
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface FieldsetHTMLAttributes<T> extends HTMLAttributes<T> {
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         form?: Lumo.MaybeIon<string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
       }
 
       interface FormHTMLAttributes<T> extends HTMLAttributes<T> {
          /**
           * DOM Property
           */
-         acceptCharset?: Lumo.MaybeIon<string | undefined>;
-         action?: Lumo.MaybeIon<string | undefined>;
-         autocomplete?: Lumo.MaybeIon<string | undefined>;
-         enctype?: Lumo.MaybeIon<string | undefined>;
-         method?: Lumo.MaybeIon<string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         novalidate?: Lumo.MaybeIon<Booleanish | undefined>;
-         target?: Lumo.MaybeIon<string | undefined>;
+         acceptCharset?: Luent.MaybeIon<string | undefined>;
+         action?: Luent.MaybeIon<string | undefined>;
+         autocomplete?: Luent.MaybeIon<string | undefined>;
+         enctype?: Luent.MaybeIon<string | undefined>;
+         method?: Luent.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         novalidate?: Luent.MaybeIon<Booleanish | undefined>;
+         target?: Luent.MaybeIon<string | undefined>;
       }
 
       interface HtmlHTMLAttributes<T> extends HTMLAttributes<T> {
-         manifest?: Lumo.MaybeIon<string | undefined>;
+         manifest?: Luent.MaybeIon<string | undefined>;
       }
 
       interface IframeHTMLAttributes<T> extends HTMLAttributes<T> {
-         allow?: Lumo.MaybeIon<string | undefined>;
-         allowfullscreen?: Lumo.MaybeIon<Booleanish | undefined>;
-         height?: Lumo.MaybeIon<number | string | undefined>;
+         allow?: Luent.MaybeIon<string | undefined>;
+         allowfullscreen?: Luent.MaybeIon<Booleanish | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
          /**
           * DOM Property
           */
-         loading?: Lumo.MaybeIon<"eager" | "lazy" | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         referrerpolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-         sandbox?: Lumo.MaybeIon<string | undefined>;
-         seamless?: Lumo.MaybeIon<Booleanish | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         srcdoc?: Lumo.MaybeIon<string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         loading?: Luent.MaybeIon<"eager" | "lazy" | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         referrerpolicy?: Luent.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+         sandbox?: Luent.MaybeIon<string | undefined>;
+         seamless?: Luent.MaybeIon<Booleanish | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         srcdoc?: Luent.MaybeIon<string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
-         alt?: Lumo.MaybeIon<string | undefined>;
-         crossorigin?: Lumo.MaybeIon<CrossOrigin>;
-         ismap?: Lumo.MaybeIon<Booleanish>
-         decoding?: Lumo.MaybeIon<"async" | "auto" | "sync" | undefined>;
-         fetchpriority?: Lumo.MaybeIon<"high" | "low" | "auto">;
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         loading?: Lumo.MaybeIon<"eager" | "lazy" | undefined>;
-         referrerpolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-         sizes?: Lumo.MaybeIon<string | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         srcset?: Lumo.MaybeIon<string | undefined>;
-         usemap?: Lumo.MaybeIon<string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         alt?: Luent.MaybeIon<string | undefined>;
+         crossorigin?: Luent.MaybeIon<CrossOrigin>;
+         ismap?: Luent.MaybeIon<Booleanish>
+         decoding?: Luent.MaybeIon<"async" | "auto" | "sync" | undefined>;
+         fetchpriority?: Luent.MaybeIon<"high" | "low" | "auto">;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         loading?: Luent.MaybeIon<"eager" | "lazy" | undefined>;
+         referrerpolicy?: Luent.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+         sizes?: Luent.MaybeIon<string | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         srcset?: Luent.MaybeIon<string | undefined>;
+         usemap?: Luent.MaybeIon<string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface InsHTMLAttributes<T> extends HTMLAttributes<T> {
-         cite?: Lumo.MaybeIon<string | undefined>;
-         datetime?: Lumo.MaybeIon<string | undefined>;
+         cite?: Luent.MaybeIon<string | undefined>;
+         datetime?: Luent.MaybeIon<string | undefined>;
       }
 
       type HTMLInputTypeAttribute =
@@ -1281,39 +1281,39 @@ declare global {
       type HTMLInputAutoCompleteAttribute = AutoFill | (string & {});
 
       interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
-         accept?: Lumo.MaybeIon<string | undefined>;
-         alt?: Lumo.MaybeIon<string | undefined>;
-         autocomplete?: Lumo.MaybeIon<HTMLInputAutoCompleteAttribute | undefined>;
-         capture?: Lumo.MaybeIon<Booleanish | "user" | "environment" | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
-         checked?: Lumo.MaybeIon<Booleanish | undefined>;
-         dirname?: Lumo.MaybeIon<string | undefined>;
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         form?: Lumo.MaybeIon<string | undefined>;
-         formaction?: Lumo.MaybeIon<string | undefined>;
-         formenctype?: Lumo.MaybeIon<string | undefined>;
-         formmethod?: Lumo.MaybeIon<string | undefined>;
-         formnovalidate?: Lumo.MaybeIon<Booleanish | undefined>;
-         formtarget?: Lumo.MaybeIon<string | undefined>;
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         list?: Lumo.MaybeIon<string | undefined>;
-         max?: Lumo.MaybeIon<number | string | undefined>;
-         maxlength?: Lumo.MaybeIon<number | undefined>;
-         min?: Lumo.MaybeIon<number | string | undefined>;
-         minlength?: Lumo.MaybeIon<number | undefined>;
-         multiple?: Lumo.MaybeIon<Booleanish | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         pattern?: Lumo.MaybeIon<string | undefined>;
-         placeholder?: Lumo.MaybeIon<string | undefined>;
-         popovertarget?: Lumo.MaybeIon<string>;
-         popovertargetaction?: Lumo.MaybeIon<string>;
-         readonly?: Lumo.MaybeIon<Booleanish | undefined>;
-         required?: Lumo.MaybeIon<Booleanish | undefined>;
-         size?: Lumo.MaybeIon<number | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         step?: Lumo.MaybeIon<number | string | undefined>;
-         type?: Lumo.MaybeIon<HTMLInputTypeAttribute | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         accept?: Luent.MaybeIon<string | undefined>;
+         alt?: Luent.MaybeIon<string | undefined>;
+         autocomplete?: Luent.MaybeIon<HTMLInputAutoCompleteAttribute | undefined>;
+         capture?: Luent.MaybeIon<Booleanish | "user" | "environment" | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
+         checked?: Luent.MaybeIon<Booleanish | undefined>;
+         dirname?: Luent.MaybeIon<string | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         formaction?: Luent.MaybeIon<string | undefined>;
+         formenctype?: Luent.MaybeIon<string | undefined>;
+         formmethod?: Luent.MaybeIon<string | undefined>;
+         formnovalidate?: Luent.MaybeIon<Booleanish | undefined>;
+         formtarget?: Luent.MaybeIon<string | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         list?: Luent.MaybeIon<string | undefined>;
+         max?: Luent.MaybeIon<number | string | undefined>;
+         maxlength?: Luent.MaybeIon<number | undefined>;
+         min?: Luent.MaybeIon<number | string | undefined>;
+         minlength?: Luent.MaybeIon<number | undefined>;
+         multiple?: Luent.MaybeIon<Booleanish | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         pattern?: Luent.MaybeIon<string | undefined>;
+         placeholder?: Luent.MaybeIon<string | undefined>;
+         popovertarget?: Luent.MaybeIon<string>;
+         popovertargetaction?: Luent.MaybeIon<string>;
+         readonly?: Luent.MaybeIon<Booleanish | undefined>;
+         required?: Luent.MaybeIon<Booleanish | undefined>;
+         size?: Luent.MaybeIon<number | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         step?: Luent.MaybeIon<number | string | undefined>;
+         type?: Luent.MaybeIon<HTMLInputTypeAttribute | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
 
          'mu:value'?: Quarky.AtomicIon<unknown, { value: unknown; }> | Quarky.Ion<unknown, { set: (value: unknown) => unknown }>
          'mu:checked'?: Quarky.AtomicIon<Booleanny, { value: Booleanny; }> | Quarky.Ion<Booleanny, { set: (value: Booleanny) => unknown }>
@@ -1324,266 +1324,266 @@ declare global {
        * DEPRECATED
        */
       interface KeygenHTMLAttributes<T> extends HTMLAttributes<T> {
-         challenge?: Lumo.MaybeIon<string | undefined>;
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         form?: Lumo.MaybeIon<string | undefined>;
-         keytype?: Lumo.MaybeIon<string | undefined>;
-         keyparams?: Lumo.MaybeIon<string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
+         challenge?: Luent.MaybeIon<string | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         keytype?: Luent.MaybeIon<string | undefined>;
+         keyparams?: Luent.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
       }
 
       interface LabelHTMLAttributes<T> extends HTMLAttributes<T> {
-         form?: Lumo.MaybeIon<string | undefined>;
-         for?: Lumo.MaybeIon<string | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         for?: Luent.MaybeIon<string | undefined>;
       }
 
       interface LiHTMLAttributes<T> extends HTMLAttributes<T> {
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
       }
 
       interface LinkHTMLAttributes<T> extends HTMLAttributes<T> {
-         as?: Lumo.MaybeIon<string | undefined>;
-         blocking?: Lumo.MaybeIon<string | undefined>;
-         crossorigin?: Lumo.MaybeIon<CrossOrigin>;
-         fetchpriority?: Lumo.MaybeIon<"high" | "low" | "auto">;
-         href?: Lumo.MaybeIon<string | undefined>;
-         hreflang?: Lumo.MaybeIon<string | undefined>;
-         integrity?: Lumo.MaybeIon<string | undefined>;
-         media?: Lumo.MaybeIon<string | undefined>;
-         imagesrcset?: Lumo.MaybeIon<string | undefined>;
-         imagesizes?: Lumo.MaybeIon<string | undefined>;
-         referrerpolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-         sizes?: Lumo.MaybeIon<string | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
-         charset?: Lumo.MaybeIon<string | undefined>;
+         as?: Luent.MaybeIon<string | undefined>;
+         blocking?: Luent.MaybeIon<string | undefined>;
+         crossorigin?: Luent.MaybeIon<CrossOrigin>;
+         fetchpriority?: Luent.MaybeIon<"high" | "low" | "auto">;
+         href?: Luent.MaybeIon<string | undefined>;
+         hreflang?: Luent.MaybeIon<string | undefined>;
+         integrity?: Luent.MaybeIon<string | undefined>;
+         media?: Luent.MaybeIon<string | undefined>;
+         imagesrcset?: Luent.MaybeIon<string | undefined>;
+         imagesizes?: Luent.MaybeIon<string | undefined>;
+         referrerpolicy?: Luent.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+         sizes?: Luent.MaybeIon<string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
+         charset?: Luent.MaybeIon<string | undefined>;
       }
 
       interface MapHTMLAttributes<T> extends HTMLAttributes<T> {
-         name?: Lumo.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
       }
 
       interface MenuHTMLAttributes<T> extends HTMLAttributes<T> {
-         type?: Lumo.MaybeIon<string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
       }
 
 
       interface MediaHTMLAttributes<T> extends HTMLAttributes<T> {
-         autoplay?: Lumo.MaybeIon<Booleanish | undefined>;
-         controls?: Lumo.MaybeIon<Booleanish | undefined>;
-         crossorigin?: Lumo.MaybeIon<CrossOrigin>;
-         loop?: Lumo.MaybeIon<Booleanish | undefined>;
-         mediagroup?: Lumo.MaybeIon<string | undefined>;
-         muted?: Lumo.MaybeIon<Booleanish | undefined>;
-         preload?: Lumo.MaybeIon<string | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
+         autoplay?: Luent.MaybeIon<Booleanish | undefined>;
+         controls?: Luent.MaybeIon<Booleanish | undefined>;
+         crossorigin?: Luent.MaybeIon<CrossOrigin>;
+         loop?: Luent.MaybeIon<Booleanish | undefined>;
+         mediagroup?: Luent.MaybeIon<string | undefined>;
+         muted?: Luent.MaybeIon<Booleanish | undefined>;
+         preload?: Luent.MaybeIon<string | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
       }
 
       interface MetaHTMLAttributes<T> extends HTMLAttributes<T> {
-         charset?: Lumo.MaybeIon<string | undefined>;
-         content?: Lumo.MaybeIon<string | undefined>;
-         'http-equiv'?: Lumo.MaybeIon<string | undefined>;
-         media?: Lumo.MaybeIon<string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
+         charset?: Luent.MaybeIon<string | undefined>;
+         content?: Luent.MaybeIon<string | undefined>;
+         'http-equiv'?: Luent.MaybeIon<string | undefined>;
+         media?: Luent.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
       }
 
       interface MeterHTMLAttributes<T> extends HTMLAttributes<T> {
-         form?: Lumo.MaybeIon<string | undefined>;
-         high?: Lumo.MaybeIon<number | undefined>;
-         low?: Lumo.MaybeIon<number | undefined>;
-         max?: Lumo.MaybeIon<number | string | undefined>;
-         min?: Lumo.MaybeIon<number | string | undefined>;
-         optimum?: Lumo.MaybeIon<number | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         high?: Luent.MaybeIon<number | undefined>;
+         low?: Luent.MaybeIon<number | undefined>;
+         max?: Luent.MaybeIon<number | string | undefined>;
+         min?: Luent.MaybeIon<number | string | undefined>;
+         optimum?: Luent.MaybeIon<number | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
       }
 
       interface QuoteHTMLAttributes<T> extends HTMLAttributes<T> {
-         cite?: Lumo.MaybeIon<string | undefined>;
+         cite?: Luent.MaybeIon<string | undefined>;
       }
 
       interface ObjectHTMLAttributes<T> extends HTMLAttributes<T> {
-         data?: Lumo.MaybeIon<string | undefined>;
-         form?: Lumo.MaybeIon<string | undefined>;
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
-         usemap?: Lumo.MaybeIon<string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         data?: Luent.MaybeIon<string | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
+         usemap?: Luent.MaybeIon<string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface OlHTMLAttributes<T> extends HTMLAttributes<T> {
-         reversed?: Lumo.MaybeIon<Booleanish | undefined>;
-         start?: Lumo.MaybeIon<number | undefined>;
-         type?: Lumo.MaybeIon<"1" | "a" | "A" | "i" | "I" | undefined>;
+         reversed?: Luent.MaybeIon<Booleanish | undefined>;
+         start?: Luent.MaybeIon<number | undefined>;
+         type?: Luent.MaybeIon<"1" | "a" | "A" | "i" | "I" | undefined>;
       }
 
       interface OptgroupHTMLAttributes<T> extends HTMLAttributes<T> {
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         label?: Lumo.MaybeIon<string | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         label?: Luent.MaybeIon<string | undefined>;
       }
 
       interface OptionHTMLAttributes<T> extends HTMLAttributes<T> {
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         label?: Lumo.MaybeIon<string | undefined>;
-         selected?: Lumo.MaybeIon<Booleanish | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         label?: Luent.MaybeIon<string | undefined>;
+         selected?: Luent.MaybeIon<Booleanish | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
       }
 
       interface OutputHTMLAttributes<T> extends HTMLAttributes<T> {
-         form?: Lumo.MaybeIon<string | undefined>;
-         for?: Lumo.MaybeIon<string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         for?: Luent.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
       }
 
       interface ParamHTMLAttributes<T> extends HTMLAttributes<T> {
-         name?: Lumo.MaybeIon<string | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
       }
 
       interface ProgressHTMLAttributes<T> extends HTMLAttributes<T> {
-         max?: Lumo.MaybeIon<number | string | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         max?: Luent.MaybeIon<number | string | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
       }
 
       interface SlotHTMLAttributes<T> extends HTMLAttributes<T> {
-         name?: Lumo.MaybeIon<string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
       }
 
       interface ScriptHTMLAttributes<T> extends HTMLAttributes<T> {
-         async?: Lumo.MaybeIon<Booleanish | undefined>;
-         crossorigin?: Lumo.MaybeIon<CrossOrigin>;
-         defer?: Lumo.MaybeIon<Booleanish | undefined>;
-         integrity?: Lumo.MaybeIon<string | undefined>;
-         nomodule?: Lumo.MaybeIon<Booleanish | undefined>;
-         referrerpolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
+         async?: Luent.MaybeIon<Booleanish | undefined>;
+         crossorigin?: Luent.MaybeIon<CrossOrigin>;
+         defer?: Luent.MaybeIon<Booleanish | undefined>;
+         integrity?: Luent.MaybeIon<string | undefined>;
+         nomodule?: Luent.MaybeIon<Booleanish | undefined>;
+         referrerpolicy?: Luent.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
       }
 
       interface SelectHTMLAttributes<T> extends HTMLAttributes<T> {
-         autocomplete?: Lumo.MaybeIon<string | undefined>;
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         form?: Lumo.MaybeIon<string | undefined>;
-         multiple?: Lumo.MaybeIon<Booleanish | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         required?: Lumo.MaybeIon<Booleanish | undefined>;
-         size?: Lumo.MaybeIon<number | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
+         autocomplete?: Luent.MaybeIon<string | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         multiple?: Luent.MaybeIon<Booleanish | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         required?: Luent.MaybeIon<Booleanish | undefined>;
+         size?: Luent.MaybeIon<number | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
          'on:change'?: HandleChangeEvent<T> | undefined;
          'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, { set: (value: string) => unknown }>
       }
 
       interface SourceHTMLAttributes<T> extends HTMLAttributes<T> {
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         media?: Lumo.MaybeIon<string | undefined>;
-         sizes?: Lumo.MaybeIon<string | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         srcset?: Lumo.MaybeIon<string | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         media?: Luent.MaybeIon<string | undefined>;
+         sizes?: Luent.MaybeIon<string | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         srcset?: Luent.MaybeIon<string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface StyleHTMLAttributes<T> extends HTMLAttributes<T> {
-         media?: Lumo.MaybeIon<string | undefined>;
-         scoped?: Lumo.MaybeIon<Booleanish | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
+         media?: Luent.MaybeIon<string | undefined>;
+         scoped?: Luent.MaybeIon<Booleanish | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
       }
 
       interface TableHTMLAttributes<T> extends HTMLAttributes<T> {
          // ALL DEPRECATED
-         // align?: Lumo.MaybeIon<"left" | "center" | "right" | undefined>;
-         // bgcolor?: Lumo.MaybeIon<string | undefined>;
-         // border?: Lumo.MaybeIon<number | undefined>;
-         // cellPadding?: Lumo.MaybeIon<number | string | undefined>;
-         // cellSpacing?: Lumo.MaybeIon<number | string | undefined>;
-         // frame?: Lumo.MaybeIon<Booleanish | undefined>;
-         // rules?: Lumo.MaybeIon<"none" | "groups" | "rows" | "columns" | "all" | undefined>;
-         // summary?: Lumo.MaybeIon<string | undefined>;
-         // width?: Lumo.MaybeIon<number | string | undefined>;
+         // align?: Luent.MaybeIon<"left" | "center" | "right" | undefined>;
+         // bgcolor?: Luent.MaybeIon<string | undefined>;
+         // border?: Luent.MaybeIon<number | undefined>;
+         // cellPadding?: Luent.MaybeIon<number | string | undefined>;
+         // cellSpacing?: Luent.MaybeIon<number | string | undefined>;
+         // frame?: Luent.MaybeIon<Booleanish | undefined>;
+         // rules?: Luent.MaybeIon<"none" | "groups" | "rows" | "columns" | "all" | undefined>;
+         // summary?: Luent.MaybeIon<string | undefined>;
+         // width?: Luent.MaybeIon<number | string | undefined>;
       }
 
       interface TextareaHTMLAttributes<T> extends HTMLAttributes<T> {
-         autocomplete?: Lumo.MaybeIon<string | undefined>;
-         cols?: Lumo.MaybeIon<number | undefined>;
-         dirname?: Lumo.MaybeIon<string | undefined>;
-         disabled?: Lumo.MaybeIon<Booleanish | undefined>;
-         form?: Lumo.MaybeIon<string | undefined>;
-         maxlength?: Lumo.MaybeIon<number | undefined>;
-         minlength?: Lumo.MaybeIon<number | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         placeholder?: Lumo.MaybeIon<string | undefined>;
-         readonly?: Lumo.MaybeIon<Booleanish | undefined>;
-         required?: Lumo.MaybeIon<Booleanish | undefined>;
-         rows?: Lumo.MaybeIon<number | undefined>;
-         value?: Lumo.MaybeIon<string | readonly string[] | number | undefined>;
-         wrap?: Lumo.MaybeIon<string | undefined>;
+         autocomplete?: Luent.MaybeIon<string | undefined>;
+         cols?: Luent.MaybeIon<number | undefined>;
+         dirname?: Luent.MaybeIon<string | undefined>;
+         disabled?: Luent.MaybeIon<Booleanish | undefined>;
+         form?: Luent.MaybeIon<string | undefined>;
+         maxlength?: Luent.MaybeIon<number | undefined>;
+         minlength?: Luent.MaybeIon<number | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         placeholder?: Luent.MaybeIon<string | undefined>;
+         readonly?: Luent.MaybeIon<Booleanish | undefined>;
+         required?: Luent.MaybeIon<Booleanish | undefined>;
+         rows?: Luent.MaybeIon<number | undefined>;
+         value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
+         wrap?: Luent.MaybeIon<string | undefined>;
 
          'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, { set: (value: string) => unknown }>
          'on:change'?: HandleChangeEvent<T> | undefined;
       }
 
       interface TdHTMLAttributes<T> extends HTMLAttributes<T> {
-         align?: Lumo.MaybeIon<"left" | "center" | "right" | "justify" | "char" | undefined>;
-         colSpan?: Lumo.MaybeIon<number | undefined>;
-         headers?: Lumo.MaybeIon<string | undefined>;
-         rowSpan?: Lumo.MaybeIon<number | undefined>;
-         scope?: Lumo.MaybeIon<string | undefined>;
-         abbr?: Lumo.MaybeIon<string | undefined>;
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
-         valign?: Lumo.MaybeIon<"top" | "middle" | "bottom" | "baseline" | undefined>;
+         align?: Luent.MaybeIon<"left" | "center" | "right" | "justify" | "char" | undefined>;
+         colSpan?: Luent.MaybeIon<number | undefined>;
+         headers?: Luent.MaybeIon<string | undefined>;
+         rowSpan?: Luent.MaybeIon<number | undefined>;
+         scope?: Luent.MaybeIon<string | undefined>;
+         abbr?: Luent.MaybeIon<string | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
+         valign?: Luent.MaybeIon<"top" | "middle" | "bottom" | "baseline" | undefined>;
       }
 
       interface ThHTMLAttributes<T> extends HTMLAttributes<T> {
-         colspan?: Lumo.MaybeIon<number | undefined>;
-         headers?: Lumo.MaybeIon<string | undefined>;
-         rowspan?: Lumo.MaybeIon<number | undefined>;
-         scope?: Lumo.MaybeIon<string | undefined>;
-         abbr?: Lumo.MaybeIon<string | undefined>;
+         colspan?: Luent.MaybeIon<number | undefined>;
+         headers?: Luent.MaybeIon<string | undefined>;
+         rowspan?: Luent.MaybeIon<number | undefined>;
+         scope?: Luent.MaybeIon<string | undefined>;
+         abbr?: Luent.MaybeIon<string | undefined>;
       }
 
       interface TimeHTMLAttributes<T> extends HTMLAttributes<T> {
-         datetime?: Lumo.MaybeIon<string | undefined>;
+         datetime?: Luent.MaybeIon<string | undefined>;
       }
 
       interface TrackHTMLAttributes<T> extends HTMLAttributes<T> {
-         default?: Lumo.MaybeIon<Booleanish | undefined>;
-         kind?: Lumo.MaybeIon<string | undefined>;
-         label?: Lumo.MaybeIon<string | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         srclang?: Lumo.MaybeIon<string | undefined>;
+         default?: Luent.MaybeIon<Booleanish | undefined>;
+         kind?: Luent.MaybeIon<string | undefined>;
+         label?: Luent.MaybeIon<string | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         srclang?: Luent.MaybeIon<string | undefined>;
       }
 
       interface VideoHTMLAttributes<T> extends MediaHTMLAttributes<T> {
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         controlslist?: Lumo.MaybeIon<string | undefined>;
-         playsinline?: Lumo.MaybeIon<Booleanish | undefined>;
-         poster?: Lumo.MaybeIon<string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
-         disablepictureinpicture?: Lumo.MaybeIon<Booleanish | undefined>;
-         disableremoteplayback?: Lumo.MaybeIon<Booleanish | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         controlslist?: Luent.MaybeIon<string | undefined>;
+         playsinline?: Luent.MaybeIon<Booleanish | undefined>;
+         poster?: Luent.MaybeIon<string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
+         disablepictureinpicture?: Luent.MaybeIon<Booleanish | undefined>;
+         disableremoteplayback?: Luent.MaybeIon<Booleanish | undefined>;
       }
 
 
       interface SVGAttributes<T> extends AriaAttributes, GlobalAttributes, DOMAttributes<T> {
          // Attributes which also defined in HTMLAttributes
-         href?: Lumo.MaybeIon<string | undefined>;
-         hreflang?: Lumo.MaybeIon<string | undefined>;
-         media?: Lumo.MaybeIon<string | undefined>;
-         ping?: Lumo.MaybeIon<string | undefined>;
-         target?: Lumo.MaybeIon<HTMLAttributeAnchorTarget | string | undefined>;
-         type?: Lumo.MaybeIon<string | undefined>;
-         referrerpolicy?: Lumo.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+         href?: Luent.MaybeIon<string | undefined>;
+         hreflang?: Luent.MaybeIon<string | undefined>;
+         media?: Luent.MaybeIon<string | undefined>;
+         ping?: Luent.MaybeIon<string | undefined>;
+         target?: Luent.MaybeIon<HTMLAttributeAnchorTarget | string | undefined>;
+         type?: Luent.MaybeIon<string | undefined>;
+         referrerpolicy?: Luent.MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
 
-         height?: Lumo.MaybeIon<number | string | undefined>;
-         width?: Lumo.MaybeIon<number | string | undefined>;
+         height?: Luent.MaybeIon<number | string | undefined>;
+         width?: Luent.MaybeIon<number | string | undefined>;
 
-         crossorigin?: Lumo.MaybeIon<CrossOrigin>;
-         fetchpriority?: Lumo.MaybeIon<"high" | "low" | "auto">;
+         crossorigin?: Luent.MaybeIon<CrossOrigin>;
+         fetchpriority?: Luent.MaybeIon<"high" | "low" | "auto">;
 
          // SVG Specific attributes
-         accumulate?: Lumo.MaybeIon<"none" | "sum" | undefined>;
-         additive?: Lumo.MaybeIon<"replace" | "sum" | undefined>;
-         'alignment-baseline'?: Lumo.MaybeIon<
+         accumulate?: Luent.MaybeIon<"none" | "sum" | undefined>;
+         additive?: Luent.MaybeIon<"replace" | "sum" | undefined>;
+         'alignment-baseline'?: Luent.MaybeIon<
             | "auto"
             | "baseline"
             | "before-edge"
@@ -1598,92 +1598,92 @@ declare global {
             | "mathematical"
             | "inherit"
             | undefined>;
-         allowReorder?: Lumo.MaybeIon<"no" | "yes" | undefined>;
-         alphabetic?: Lumo.MaybeIon<number | string | undefined>;
-         amplitude?: Lumo.MaybeIon<number | string | undefined>;
-         'arabic-form'?: Lumo.MaybeIon<"initial" | "medial" | "terminal" | "isolated" | undefined>;
-         attributeName?: Lumo.MaybeIon<string | undefined>;
-         attributeType?: Lumo.MaybeIon<string | undefined>;
-         autoReverse?: Lumo.MaybeIon<Booleanish | undefined>;
-         azimuth?: Lumo.MaybeIon<number | string | undefined>;
-         baseFrequency?: Lumo.MaybeIon<number | string | undefined>;
-         'baseline-shift'?: Lumo.MaybeIon<number | string | undefined>;
-         begin?: Lumo.MaybeIon<number | string | undefined>;
-         bias?: Lumo.MaybeIon<number | string | undefined>;
-         by?: Lumo.MaybeIon<number | string | undefined>;
-         calcMode?: Lumo.MaybeIon<number | string | undefined>;
-         clipPathUnits?: Lumo.MaybeIon<number | string | undefined>;
-         'clip-path'?: Lumo.MaybeIon<string | undefined>;
-         'clip-rule'?: Lumo.MaybeIon<number | string | undefined>;
-         color?: Lumo.MaybeIon<string | undefined>;
-         'color-interpolation'?: Lumo.MaybeIon<number | string | undefined>;
-         'color-interpolation-filters'?: Lumo.MaybeIon<"auto" | "sRGB" | "linearRGB" | "inherit" | undefined>;
-         'color-rendering'?: Lumo.MaybeIon<number | string | undefined>;
-         cursor?: Lumo.MaybeIon<number | string | undefined>;
-         cx?: Lumo.MaybeIon<number | string | undefined>;
-         cy?: Lumo.MaybeIon<number | string | undefined>;
-         d?: Lumo.MaybeIon<string | undefined>;
-         decelerate?: Lumo.MaybeIon<number | string | undefined>;
-         diffuseConstant?: Lumo.MaybeIon<number | string | undefined>;
-         direction?: Lumo.MaybeIon<number | string | undefined>;
-         display?: Lumo.MaybeIon<number | string | undefined>;
-         divisor?: Lumo.MaybeIon<number | string | undefined>;
-         'dominant-baseline'?: Lumo.MaybeIon<number | string | undefined>;
-         dur?: Lumo.MaybeIon<number | string | undefined>;
-         dx?: Lumo.MaybeIon<number | string | undefined>;
-         dy?: Lumo.MaybeIon<number | string | undefined>;
-         edgeMode?: Lumo.MaybeIon<number | string | undefined>;
-         elevation?: Lumo.MaybeIon<number | string | undefined>;
-         end?: Lumo.MaybeIon<number | string | undefined>;
-         exponent?: Lumo.MaybeIon<number | string | undefined>;
-         fill?: Lumo.MaybeIon<string | undefined>;
-         'fill-opacity'?: Lumo.MaybeIon<number | string | undefined>;
-         'fill-rule'?: Lumo.MaybeIon<"nonzero" | "evenodd" | "inherit" | undefined>;
-         filter?: Lumo.MaybeIon<string | undefined>;
-         filterUnits?: Lumo.MaybeIon<number | string | undefined>;
-         'flood-color'?: Lumo.MaybeIon<number | string | undefined>;
-         'flood-opacity'?: Lumo.MaybeIon<number | string | undefined>;
-         focusable?: Lumo.MaybeIon<Booleanish | "auto" | undefined>;
-         'font-family'?: Lumo.MaybeIon<string | undefined>;
-         'font-size'?: Lumo.MaybeIon<number | string | undefined>;
-         'font-size-adjust'?: Lumo.MaybeIon<number | string | undefined>;
-         'font-style'?: Lumo.MaybeIon<number | string | undefined>;
-         'font-variant'?: Lumo.MaybeIon<number | string | undefined>;
-         'font-weight'?: Lumo.MaybeIon<number | string | undefined>;
-         fr?: Lumo.MaybeIon<number | string | undefined>;
-         from?: Lumo.MaybeIon<number | string | undefined>;
-         fx?: Lumo.MaybeIon<number | string | undefined>;
-         fy?: Lumo.MaybeIon<number | string | undefined>;
-         gradientTransform?: Lumo.MaybeIon<string | undefined>;
-         gradientUnits?: Lumo.MaybeIon<string | undefined>;
-         'image-rendering'?: Lumo.MaybeIon<number | string | undefined>;
-         in2?: Lumo.MaybeIon<number | string | undefined>;
-         in?: Lumo.MaybeIon<string | undefined>;
-         intercept?: Lumo.MaybeIon<number | string | undefined>;
-         k1?: Lumo.MaybeIon<number | string | undefined>;
-         k2?: Lumo.MaybeIon<number | string | undefined>;
-         k3?: Lumo.MaybeIon<number | string | undefined>;
-         k4?: Lumo.MaybeIon<number | string | undefined>;
-         kernelMatrix?: Lumo.MaybeIon<number | string | undefined>;
-         kernelUnitLength?: Lumo.MaybeIon<number | string | undefined>;
-         keyPoints?: Lumo.MaybeIon<number | string | undefined>;
-         keySplines?: Lumo.MaybeIon<number | string | undefined>;
-         keyTimes?: Lumo.MaybeIon<number | string | undefined>;
-         lengthAdjust?: Lumo.MaybeIon<number | string | undefined>;
-         'letter-spacing'?: Lumo.MaybeIon<number | string | undefined>;
-         'lighting-color'?: Lumo.MaybeIon<number | string | undefined>;
-         limitingConeAngle?: Lumo.MaybeIon<number | string | undefined>;
-         'marker-end'?: Lumo.MaybeIon<string | undefined>;
-         'marker-mid'?: Lumo.MaybeIon<string | undefined>;
-         'marker-start'?: Lumo.MaybeIon<string | undefined>;
-         markerHeight?: Lumo.MaybeIon<number | string | undefined>;
-         markerUnits?: Lumo.MaybeIon<number | string | undefined>;
-         markerWidth?: Lumo.MaybeIon<number | string | undefined>;
-         mask?: Lumo.MaybeIon<string | undefined>;
-         maskContentUnits?: Lumo.MaybeIon<number | string | undefined>;
-         maskUnits?: Lumo.MaybeIon<number | string | undefined>;
-         max?: Lumo.MaybeIon<number | string | undefined>;
-         min?: Lumo.MaybeIon<number | string | undefined>;
+         allowReorder?: Luent.MaybeIon<"no" | "yes" | undefined>;
+         alphabetic?: Luent.MaybeIon<number | string | undefined>;
+         amplitude?: Luent.MaybeIon<number | string | undefined>;
+         'arabic-form'?: Luent.MaybeIon<"initial" | "medial" | "terminal" | "isolated" | undefined>;
+         attributeName?: Luent.MaybeIon<string | undefined>;
+         attributeType?: Luent.MaybeIon<string | undefined>;
+         autoReverse?: Luent.MaybeIon<Booleanish | undefined>;
+         azimuth?: Luent.MaybeIon<number | string | undefined>;
+         baseFrequency?: Luent.MaybeIon<number | string | undefined>;
+         'baseline-shift'?: Luent.MaybeIon<number | string | undefined>;
+         begin?: Luent.MaybeIon<number | string | undefined>;
+         bias?: Luent.MaybeIon<number | string | undefined>;
+         by?: Luent.MaybeIon<number | string | undefined>;
+         calcMode?: Luent.MaybeIon<number | string | undefined>;
+         clipPathUnits?: Luent.MaybeIon<number | string | undefined>;
+         'clip-path'?: Luent.MaybeIon<string | undefined>;
+         'clip-rule'?: Luent.MaybeIon<number | string | undefined>;
+         color?: Luent.MaybeIon<string | undefined>;
+         'color-interpolation'?: Luent.MaybeIon<number | string | undefined>;
+         'color-interpolation-filters'?: Luent.MaybeIon<"auto" | "sRGB" | "linearRGB" | "inherit" | undefined>;
+         'color-rendering'?: Luent.MaybeIon<number | string | undefined>;
+         cursor?: Luent.MaybeIon<number | string | undefined>;
+         cx?: Luent.MaybeIon<number | string | undefined>;
+         cy?: Luent.MaybeIon<number | string | undefined>;
+         d?: Luent.MaybeIon<string | undefined>;
+         decelerate?: Luent.MaybeIon<number | string | undefined>;
+         diffuseConstant?: Luent.MaybeIon<number | string | undefined>;
+         direction?: Luent.MaybeIon<number | string | undefined>;
+         display?: Luent.MaybeIon<number | string | undefined>;
+         divisor?: Luent.MaybeIon<number | string | undefined>;
+         'dominant-baseline'?: Luent.MaybeIon<number | string | undefined>;
+         dur?: Luent.MaybeIon<number | string | undefined>;
+         dx?: Luent.MaybeIon<number | string | undefined>;
+         dy?: Luent.MaybeIon<number | string | undefined>;
+         edgeMode?: Luent.MaybeIon<number | string | undefined>;
+         elevation?: Luent.MaybeIon<number | string | undefined>;
+         end?: Luent.MaybeIon<number | string | undefined>;
+         exponent?: Luent.MaybeIon<number | string | undefined>;
+         fill?: Luent.MaybeIon<string | undefined>;
+         'fill-opacity'?: Luent.MaybeIon<number | string | undefined>;
+         'fill-rule'?: Luent.MaybeIon<"nonzero" | "evenodd" | "inherit" | undefined>;
+         filter?: Luent.MaybeIon<string | undefined>;
+         filterUnits?: Luent.MaybeIon<number | string | undefined>;
+         'flood-color'?: Luent.MaybeIon<number | string | undefined>;
+         'flood-opacity'?: Luent.MaybeIon<number | string | undefined>;
+         focusable?: Luent.MaybeIon<Booleanish | "auto" | undefined>;
+         'font-family'?: Luent.MaybeIon<string | undefined>;
+         'font-size'?: Luent.MaybeIon<number | string | undefined>;
+         'font-size-adjust'?: Luent.MaybeIon<number | string | undefined>;
+         'font-style'?: Luent.MaybeIon<number | string | undefined>;
+         'font-variant'?: Luent.MaybeIon<number | string | undefined>;
+         'font-weight'?: Luent.MaybeIon<number | string | undefined>;
+         fr?: Luent.MaybeIon<number | string | undefined>;
+         from?: Luent.MaybeIon<number | string | undefined>;
+         fx?: Luent.MaybeIon<number | string | undefined>;
+         fy?: Luent.MaybeIon<number | string | undefined>;
+         gradientTransform?: Luent.MaybeIon<string | undefined>;
+         gradientUnits?: Luent.MaybeIon<string | undefined>;
+         'image-rendering'?: Luent.MaybeIon<number | string | undefined>;
+         in2?: Luent.MaybeIon<number | string | undefined>;
+         in?: Luent.MaybeIon<string | undefined>;
+         intercept?: Luent.MaybeIon<number | string | undefined>;
+         k1?: Luent.MaybeIon<number | string | undefined>;
+         k2?: Luent.MaybeIon<number | string | undefined>;
+         k3?: Luent.MaybeIon<number | string | undefined>;
+         k4?: Luent.MaybeIon<number | string | undefined>;
+         kernelMatrix?: Luent.MaybeIon<number | string | undefined>;
+         kernelUnitLength?: Luent.MaybeIon<number | string | undefined>;
+         keyPoints?: Luent.MaybeIon<number | string | undefined>;
+         keySplines?: Luent.MaybeIon<number | string | undefined>;
+         keyTimes?: Luent.MaybeIon<number | string | undefined>;
+         lengthAdjust?: Luent.MaybeIon<number | string | undefined>;
+         'letter-spacing'?: Luent.MaybeIon<number | string | undefined>;
+         'lighting-color'?: Luent.MaybeIon<number | string | undefined>;
+         limitingConeAngle?: Luent.MaybeIon<number | string | undefined>;
+         'marker-end'?: Luent.MaybeIon<string | undefined>;
+         'marker-mid'?: Luent.MaybeIon<string | undefined>;
+         'marker-start'?: Luent.MaybeIon<string | undefined>;
+         markerHeight?: Luent.MaybeIon<number | string | undefined>;
+         markerUnits?: Luent.MaybeIon<number | string | undefined>;
+         markerWidth?: Luent.MaybeIon<number | string | undefined>;
+         mask?: Luent.MaybeIon<string | undefined>;
+         maskContentUnits?: Luent.MaybeIon<number | string | undefined>;
+         maskUnits?: Luent.MaybeIon<number | string | undefined>;
+         max?: Luent.MaybeIon<number | string | undefined>;
+         min?: Luent.MaybeIon<number | string | undefined>;
 
          /**
           * The method attribute indicates the method by which text should be rendered along the path of a <textPath> element.
@@ -1692,49 +1692,49 @@ declare global {
           * 
           * source: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/method
           */
-         method?: Lumo.MaybeIon<'align' | 'stretch'>;
-         mode?: Lumo.MaybeIon<number | string | undefined>;
-         name?: Lumo.MaybeIon<string | undefined>;
-         numOctaves?: Lumo.MaybeIon<number | string | undefined>;
-         offset?: Lumo.MaybeIon<number | string | undefined>;
-         opacity?: Lumo.MaybeIon<number | string | undefined>;
-         operator?: Lumo.MaybeIon<number | string | undefined>;
-         order?: Lumo.MaybeIon<number | string | undefined>;
-         orient?: Lumo.MaybeIon<number | string | undefined>;
-         origin?: Lumo.MaybeIon<number | string | undefined>;
-         overflow?: Lumo.MaybeIon<number | string | undefined>;
-         'overline-position'?: Lumo.MaybeIon<number | string | undefined>;
-         'overline-thickness'?: Lumo.MaybeIon<number | string | undefined>;
-         'paint-order'?: Lumo.MaybeIon<number | string | undefined>;
-         path?: Lumo.MaybeIon<string | undefined>;
-         pathLength?: Lumo.MaybeIon<number | string | undefined>;
-         patternContentUnits?: Lumo.MaybeIon<string | undefined>;
-         patternTransform?: Lumo.MaybeIon<number | string | undefined>;
-         patternUnits?: Lumo.MaybeIon<string | undefined>;
-         'pointer-events'?: Lumo.MaybeIon<number | string | undefined>;
-         points?: Lumo.MaybeIon<string | undefined>;
-         pointsAtX?: Lumo.MaybeIon<number | string | undefined>;
-         pointsAtY?: Lumo.MaybeIon<number | string | undefined>;
-         pointsAtZ?: Lumo.MaybeIon<number | string | undefined>;
-         preserveAlpha?: Lumo.MaybeIon<Booleanish | undefined>;
-         preserveAspectRatio?: Lumo.MaybeIon<string | undefined>;
-         primitiveUnits?: Lumo.MaybeIon<number | string | undefined>;
-         r?: Lumo.MaybeIon<number | string | undefined>;
-         radius?: Lumo.MaybeIon<number | string | undefined>;
-         refX?: Lumo.MaybeIon<number | string | undefined>;
-         refY?: Lumo.MaybeIon<number | string | undefined>;
-         renderingIntent?: Lumo.MaybeIon<number | string | undefined>;
-         repeatCount?: Lumo.MaybeIon<number | string | undefined>;
-         repeatDur?: Lumo.MaybeIon<number | string | undefined>;
-         requiredExtensions?: Lumo.MaybeIon<number | string | undefined>;
-         restart?: Lumo.MaybeIon<number | string | undefined>;
-         result?: Lumo.MaybeIon<string | undefined>;
-         rotate?: Lumo.MaybeIon<number | string | undefined>;
-         rx?: Lumo.MaybeIon<number | string | undefined>;
-         ry?: Lumo.MaybeIon<number | string | undefined>;
-         scale?: Lumo.MaybeIon<number | string | undefined>;
-         seed?: Lumo.MaybeIon<number | string | undefined>;
-         'shape-rendering'?: Lumo.MaybeIon<number | string | undefined>;
+         method?: Luent.MaybeIon<'align' | 'stretch'>;
+         mode?: Luent.MaybeIon<number | string | undefined>;
+         name?: Luent.MaybeIon<string | undefined>;
+         numOctaves?: Luent.MaybeIon<number | string | undefined>;
+         offset?: Luent.MaybeIon<number | string | undefined>;
+         opacity?: Luent.MaybeIon<number | string | undefined>;
+         operator?: Luent.MaybeIon<number | string | undefined>;
+         order?: Luent.MaybeIon<number | string | undefined>;
+         orient?: Luent.MaybeIon<number | string | undefined>;
+         origin?: Luent.MaybeIon<number | string | undefined>;
+         overflow?: Luent.MaybeIon<number | string | undefined>;
+         'overline-position'?: Luent.MaybeIon<number | string | undefined>;
+         'overline-thickness'?: Luent.MaybeIon<number | string | undefined>;
+         'paint-order'?: Luent.MaybeIon<number | string | undefined>;
+         path?: Luent.MaybeIon<string | undefined>;
+         pathLength?: Luent.MaybeIon<number | string | undefined>;
+         patternContentUnits?: Luent.MaybeIon<string | undefined>;
+         patternTransform?: Luent.MaybeIon<number | string | undefined>;
+         patternUnits?: Luent.MaybeIon<string | undefined>;
+         'pointer-events'?: Luent.MaybeIon<number | string | undefined>;
+         points?: Luent.MaybeIon<string | undefined>;
+         pointsAtX?: Luent.MaybeIon<number | string | undefined>;
+         pointsAtY?: Luent.MaybeIon<number | string | undefined>;
+         pointsAtZ?: Luent.MaybeIon<number | string | undefined>;
+         preserveAlpha?: Luent.MaybeIon<Booleanish | undefined>;
+         preserveAspectRatio?: Luent.MaybeIon<string | undefined>;
+         primitiveUnits?: Luent.MaybeIon<number | string | undefined>;
+         r?: Luent.MaybeIon<number | string | undefined>;
+         radius?: Luent.MaybeIon<number | string | undefined>;
+         refX?: Luent.MaybeIon<number | string | undefined>;
+         refY?: Luent.MaybeIon<number | string | undefined>;
+         renderingIntent?: Luent.MaybeIon<number | string | undefined>;
+         repeatCount?: Luent.MaybeIon<number | string | undefined>;
+         repeatDur?: Luent.MaybeIon<number | string | undefined>;
+         requiredExtensions?: Luent.MaybeIon<number | string | undefined>;
+         restart?: Luent.MaybeIon<number | string | undefined>;
+         result?: Luent.MaybeIon<string | undefined>;
+         rotate?: Luent.MaybeIon<number | string | undefined>;
+         rx?: Luent.MaybeIon<number | string | undefined>;
+         ry?: Luent.MaybeIon<number | string | undefined>;
+         scale?: Luent.MaybeIon<number | string | undefined>;
+         seed?: Luent.MaybeIon<number | string | undefined>;
+         'shape-rendering'?: Luent.MaybeIon<number | string | undefined>;
          /**
           * EXPERIMENTAL
           * 
@@ -1742,88 +1742,88 @@ declare global {
           * 
           * https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/side
           */
-         side?: Lumo.MaybeIon<'left' | 'right'>;
-         slope?: Lumo.MaybeIon<number | string | undefined>;
-         spacing?: Lumo.MaybeIon<number | string | undefined>;
-         specularConstant?: Lumo.MaybeIon<number | string | undefined>;
-         specularExponent?: Lumo.MaybeIon<number | string | undefined>;
-         spreadMethod?: Lumo.MaybeIon<string | undefined>;
-         startOffset?: Lumo.MaybeIon<number | string | undefined>;
-         stdDeviation?: Lumo.MaybeIon<number | string | undefined>;
-         stitchTiles?: Lumo.MaybeIon<number | string | undefined>;
-         'stop-color'?: Lumo.MaybeIon<string | undefined>;
-         'stop-opacity'?: Lumo.MaybeIon<number | string | undefined>;
-         'strikethrough-Position'?: Lumo.MaybeIon<number | string | undefined>;
-         'strikethrough-Thickness'?: Lumo.MaybeIon<number | string | undefined>;
-         stroke?: Lumo.MaybeIon<string | undefined>;
-         'stroke-dasharray'?: Lumo.MaybeIon<string | number | undefined>;
-         'stroke-dashoffset'?: Lumo.MaybeIon<string | number | undefined>;
-         'stroke-linecap'?: Lumo.MaybeIon<"butt" | "round" | "square" | "inherit" | undefined>;
-         'stroke-linejoin'?: Lumo.MaybeIon<"miter" | "round" | "bevel" | "inherit" | undefined>;
-         'stroke-miterlimit'?: Lumo.MaybeIon<number | string | undefined>;
-         'stroke-opacity'?: Lumo.MaybeIon<number | string | undefined>;
-         'stroke-width'?: Lumo.MaybeIon<number | string | undefined>;
-         surfaceScale?: Lumo.MaybeIon<number | string | undefined>;
-         systemLanguage?: Lumo.MaybeIon<number | string | undefined>;
-         tableValues?: Lumo.MaybeIon<number | string | undefined>;
-         targetX?: Lumo.MaybeIon<number | string | undefined>;
-         targetY?: Lumo.MaybeIon<number | string | undefined>;
-         'text-anchor'?: Lumo.MaybeIon<string | undefined>;
-         'text-decoration'?: Lumo.MaybeIon<number | string | undefined>;
+         side?: Luent.MaybeIon<'left' | 'right'>;
+         slope?: Luent.MaybeIon<number | string | undefined>;
+         spacing?: Luent.MaybeIon<number | string | undefined>;
+         specularConstant?: Luent.MaybeIon<number | string | undefined>;
+         specularExponent?: Luent.MaybeIon<number | string | undefined>;
+         spreadMethod?: Luent.MaybeIon<string | undefined>;
+         startOffset?: Luent.MaybeIon<number | string | undefined>;
+         stdDeviation?: Luent.MaybeIon<number | string | undefined>;
+         stitchTiles?: Luent.MaybeIon<number | string | undefined>;
+         'stop-color'?: Luent.MaybeIon<string | undefined>;
+         'stop-opacity'?: Luent.MaybeIon<number | string | undefined>;
+         'strikethrough-Position'?: Luent.MaybeIon<number | string | undefined>;
+         'strikethrough-Thickness'?: Luent.MaybeIon<number | string | undefined>;
+         stroke?: Luent.MaybeIon<string | undefined>;
+         'stroke-dasharray'?: Luent.MaybeIon<string | number | undefined>;
+         'stroke-dashoffset'?: Luent.MaybeIon<string | number | undefined>;
+         'stroke-linecap'?: Luent.MaybeIon<"butt" | "round" | "square" | "inherit" | undefined>;
+         'stroke-linejoin'?: Luent.MaybeIon<"miter" | "round" | "bevel" | "inherit" | undefined>;
+         'stroke-miterlimit'?: Luent.MaybeIon<number | string | undefined>;
+         'stroke-opacity'?: Luent.MaybeIon<number | string | undefined>;
+         'stroke-width'?: Luent.MaybeIon<number | string | undefined>;
+         surfaceScale?: Luent.MaybeIon<number | string | undefined>;
+         systemLanguage?: Luent.MaybeIon<number | string | undefined>;
+         tableValues?: Luent.MaybeIon<number | string | undefined>;
+         targetX?: Luent.MaybeIon<number | string | undefined>;
+         targetY?: Luent.MaybeIon<number | string | undefined>;
+         'text-anchor'?: Luent.MaybeIon<string | undefined>;
+         'text-decoration'?: Luent.MaybeIon<number | string | undefined>;
          /**
           * *default*: 'clip'
           */
-         'text-overflow'?: Lumo.MaybeIon<'clip' | 'ellipses'>;
-         'text-rendering'?: Lumo.MaybeIon<number | string | undefined>;
-         textLength?: Lumo.MaybeIon<number | string | undefined>;
-         to?: Lumo.MaybeIon<number | string | undefined>;
-         transform?: Lumo.MaybeIon<string | undefined>;
-         'transform-origin'?: Lumo.MaybeIon<string | undefined>;
-         'underline-position'?: Lumo.MaybeIon<number | string | undefined>;
-         'underline-thickness'?: Lumo.MaybeIon<number | string | undefined>;
-         'unicode-bidi'?: Lumo.MaybeIon<number | string | undefined>;
-         values?: Lumo.MaybeIon<string | undefined>;
-         'vector-effect'?: Lumo.MaybeIon<number | string | undefined>;
-         viewBox?: Lumo.MaybeIon<string | undefined>;
-         visibility?: Lumo.MaybeIon<number | string | undefined>;
-         'white-space'?: Lumo.MaybeIon<'normal' | 'pre' | 'nowrap' | 'pre-wrap' | 'break-space' | 'pre-line'>;
-         'word-spacing'?: Lumo.MaybeIon<number | string | undefined>;
-         'writing-mode'?: Lumo.MaybeIon<number | string | undefined>;
-         x1?: Lumo.MaybeIon<number | string | undefined>;
-         x2?: Lumo.MaybeIon<number | string | undefined>;
-         x?: Lumo.MaybeIon<number | string | undefined>;
-         xChannelSelector?: Lumo.MaybeIon<string | undefined>;
-         'xlink:actuate'?: Lumo.MaybeIon<string | undefined>;
-         'xlink:role'?: Lumo.MaybeIon<string | undefined>;
-         xmlns?: Lumo.MaybeIon<string | undefined>;
-         'xmlns:xlink'?: Lumo.MaybeIon<string | undefined>;
-         y1?: Lumo.MaybeIon<number | string | undefined>;
-         y2?: Lumo.MaybeIon<number | string | undefined>;
-         y?: Lumo.MaybeIon<number | string | undefined>;
-         yChannelSelector?: Lumo.MaybeIon<string | undefined>;
-         z?: Lumo.MaybeIon<number | string | undefined>;
-         zoomAndPan?: Lumo.MaybeIon<string | undefined>;
+         'text-overflow'?: Luent.MaybeIon<'clip' | 'ellipses'>;
+         'text-rendering'?: Luent.MaybeIon<number | string | undefined>;
+         textLength?: Luent.MaybeIon<number | string | undefined>;
+         to?: Luent.MaybeIon<number | string | undefined>;
+         transform?: Luent.MaybeIon<string | undefined>;
+         'transform-origin'?: Luent.MaybeIon<string | undefined>;
+         'underline-position'?: Luent.MaybeIon<number | string | undefined>;
+         'underline-thickness'?: Luent.MaybeIon<number | string | undefined>;
+         'unicode-bidi'?: Luent.MaybeIon<number | string | undefined>;
+         values?: Luent.MaybeIon<string | undefined>;
+         'vector-effect'?: Luent.MaybeIon<number | string | undefined>;
+         viewBox?: Luent.MaybeIon<string | undefined>;
+         visibility?: Luent.MaybeIon<number | string | undefined>;
+         'white-space'?: Luent.MaybeIon<'normal' | 'pre' | 'nowrap' | 'pre-wrap' | 'break-space' | 'pre-line'>;
+         'word-spacing'?: Luent.MaybeIon<number | string | undefined>;
+         'writing-mode'?: Luent.MaybeIon<number | string | undefined>;
+         x1?: Luent.MaybeIon<number | string | undefined>;
+         x2?: Luent.MaybeIon<number | string | undefined>;
+         x?: Luent.MaybeIon<number | string | undefined>;
+         xChannelSelector?: Luent.MaybeIon<string | undefined>;
+         'xlink:actuate'?: Luent.MaybeIon<string | undefined>;
+         'xlink:role'?: Luent.MaybeIon<string | undefined>;
+         xmlns?: Luent.MaybeIon<string | undefined>;
+         'xmlns:xlink'?: Luent.MaybeIon<string | undefined>;
+         y1?: Luent.MaybeIon<number | string | undefined>;
+         y2?: Luent.MaybeIon<number | string | undefined>;
+         y?: Luent.MaybeIon<number | string | undefined>;
+         yChannelSelector?: Luent.MaybeIon<string | undefined>;
+         z?: Luent.MaybeIon<number | string | undefined>;
+         zoomAndPan?: Luent.MaybeIon<string | undefined>;
       }
 
       interface WebViewHTMLAttributes<T> extends HTMLAttributes<T> {
-         allowfullscreen?: Lumo.MaybeIon<Booleanish | undefined>;
-         allowpopups?: Lumo.MaybeIon<Booleanish | undefined>;
-         autosize?: Lumo.MaybeIon<Booleanish | undefined>;
-         blinkfeatures?: Lumo.MaybeIon<string | undefined>;
-         enableblinkfeatures?: Lumo.MaybeIon<string | undefined>;
-         disableblinkfeatures?: Lumo.MaybeIon<string | undefined>;
-         disableguestresize?: Lumo.MaybeIon<Booleanish | undefined>;
-         disablewebsecurity?: Lumo.MaybeIon<Booleanish | undefined>;
-         guestinstance?: Lumo.MaybeIon<string | undefined>;
-         httpreferrer?: Lumo.MaybeIon<string | undefined>;
-         nodeintegration?: Lumo.MaybeIon<Booleanish | undefined>;
-         nodeintegrationinsubframes?: Lumo.MaybeIon<Booleanish | undefined>;
-         partition?: Lumo.MaybeIon<string | undefined>;
-         plugins?: Lumo.MaybeIon<Booleanish | undefined>;
-         preload?: Lumo.MaybeIon<string | undefined>;
-         src?: Lumo.MaybeIon<string | undefined>;
-         useragent?: Lumo.MaybeIon<string | undefined>;
-         webpreferences?: Lumo.MaybeIon<string | undefined>;
+         allowfullscreen?: Luent.MaybeIon<Booleanish | undefined>;
+         allowpopups?: Luent.MaybeIon<Booleanish | undefined>;
+         autosize?: Luent.MaybeIon<Booleanish | undefined>;
+         blinkfeatures?: Luent.MaybeIon<string | undefined>;
+         enableblinkfeatures?: Luent.MaybeIon<string | undefined>;
+         disableblinkfeatures?: Luent.MaybeIon<string | undefined>;
+         disableguestresize?: Luent.MaybeIon<Booleanish | undefined>;
+         disablewebsecurity?: Luent.MaybeIon<Booleanish | undefined>;
+         guestinstance?: Luent.MaybeIon<string | undefined>;
+         httpreferrer?: Luent.MaybeIon<string | undefined>;
+         nodeintegration?: Luent.MaybeIon<Booleanish | undefined>;
+         nodeintegrationinsubframes?: Luent.MaybeIon<Booleanish | undefined>;
+         partition?: Luent.MaybeIon<string | undefined>;
+         plugins?: Luent.MaybeIon<Booleanish | undefined>;
+         preload?: Luent.MaybeIon<string | undefined>;
+         src?: Luent.MaybeIon<string | undefined>;
+         useragent?: Luent.MaybeIon<string | undefined>;
+         webpreferences?: Luent.MaybeIon<string | undefined>;
       }
 
 
@@ -1851,7 +1851,7 @@ declare global {
          ref?: () => T | undefined // TODO: add NodeRefsConfig
       }
 
-      type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & Lumo.LumoHooks<P> & LumoCommonAttributes
+      type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & Luent.LuentHooks<P> & LuentCommonAttributes
 
       interface SVGProps<T> extends SVGAttributes<T>, RefAttributes<T> {
       }
@@ -1861,7 +1861,7 @@ declare global {
 
 
       type DOMAttributes<T> = {
-         children?: Lumo.JSXNode | undefined | null;
+         children?: Luent.JSXNode | undefined | null;
       } & Events<T>
    }
 }
@@ -1870,18 +1870,18 @@ declare global {
 
 // IMPORTANT Components and elements
 // N = (props: P) => JSX.Element
-type LumoAttributes<F, P> =
+type LuentAttributes<F, P> =
    P extends { '~attributes'?: infer A }
-   ? A & Lumo.LumoHooks<Lumo.ComponentRef<F>> & LumoComponentAttributes<F> & LumoCommonAttributes & L.Events<Lumo.ComponentRef<F>>// Component Attributes
+   ? A & Luent.LuentHooks<Luent.ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<Luent.ComponentRef<F>>// Component Attributes
    : P // Element attributes must be added to DetailedHTMLProps
 
-type LumoComponentAttributes<C> = {
-   ref?: () => Lumo.ComponentRef<C> | undefined
-   class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
+type LuentComponentAttributes<C> = {
+   ref?: () => Luent.ComponentRef<C> | undefined
+   class?: ClassInput | Luent.MaybeIon<string | Falsey> | (Luent.MaybeIon<string | Falsey> | ClassInput)[];
    style?: StyleInput | StyleInput[];
 }
 
-type LumoCommonAttributes = {
+type LuentCommonAttributes = {
    'on:event'?: { [key: string]: Function };
 }
 
@@ -1895,22 +1895,22 @@ declare global {
    namespace JSX {
 
       // important for converting component input types to attribute types
-      type LibraryManagedAttributes<C, P> = LumoAttributes<C, P>;
+      type LibraryManagedAttributes<C, P> = LuentAttributes<C, P>;
 
       type CSSProperties = L.CSSProperties
 
       type Falsey = undefined | null | false;
 
-      type StyleInput = Lumo.MaybeIon<string | Falsey> | Lumo.MaybeIon<{ [K in keyof Partial<CSSProperties>]: Lumo.MaybeIon<CSSProperties[K]> }>
+      type StyleInput = Luent.MaybeIon<string | Falsey> | Luent.MaybeIon<{ [K in keyof Partial<CSSProperties>]: Luent.MaybeIon<CSSProperties[K]> }>
 
-      type ClassInput = Lumo.MaybeIon<string> | Lumo.MaybeIon<{ [key: string]: Lumo.MaybeIon<Booleanny> }>
+      type ClassInput = Luent.MaybeIon<string> | Luent.MaybeIon<{ [key: string]: Luent.MaybeIon<Booleanny> }>
 
-      type IntrinsicElements = JSX._IntrinsicElements & LumoElements
+      type IntrinsicElements = JSX._IntrinsicElements & LuentElements
 
 
-      interface LumoElements {
+      interface LuentElements {
          '!--': {}; //comments
-         'o--portal': PortalNodeInput & { children: Lumo.Slot }
+         'o--portal': PortalNodeInput & { children: Luent.Slot }
 
          'o--link': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
          'o--head': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
@@ -1918,13 +1918,13 @@ declare global {
          'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
          'create-view': { children: ConditionalRenderKit[] }
          'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<Booleanish> }
-         'render-view': { children: Lumo.RawJSXNode }
+         'render-view': { children: Luent.RawJSXNode }
          // 'o--preserve': { children: ConditionalRenderKit[]; discard?: Ion<Booleanish> };
          // 'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
          // 'Slot': {Slot: unknown}
 
-         // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
-         // 'o--try': TryNodeInput & { children: Lumo.Slot };
+         // 'o--suspense': SuspenseNodeInput & { children: Luent.Slot };
+         // 'o--try': TryNodeInput & { children: Luent.Slot };
 
          // 'ooo-transit': L.DetailedHTMLProps<L.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          // 'ooo-transition': L.DetailedHTMLProps<L.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>

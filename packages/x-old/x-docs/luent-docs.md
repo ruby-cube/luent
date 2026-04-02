@@ -62,7 +62,7 @@ watch(ion, () => {
 ```
 
 #### Fine-grained Reactivity
-The compiled code above reveals that reactivity in Lumo is fine-grained. That is to say, when state changes, only the affected parts of the template are updated. Components and templates run only once to set everything up, and from then on, ion watchers take care of updates.
+The compiled code above reveals that reactivity in Luent is fine-grained. That is to say, when state changes, only the affected parts of the template are updated. Components and templates run only once to set everything up, and from then on, ion watchers take care of updates.
 
 > Related article: (LINK: see comparison with Solid.js)
 
@@ -93,7 +93,7 @@ While the framework encourages $-prefixing, ultimately, it is a matter of prefer
 
 If you do use $-prefixing, you’ll want to configure your IDE to select the $-character as part of a word.
 
-> Note that the $ prefix does NOT represent reactivity. A function that is not prefixed with a $ may very well be reactive if it calls ions internally. Similarly, a function prefixed with a $ may simply be a non-reactive getter. For example, [[Node Refs|node refs]] in Lumo are non-reactive getters.
+> Note that the $ prefix does NOT represent reactivity. A function that is not prefixed with a $ may very well be reactive if it calls ions internally. Similarly, a function prefixed with a $ may simply be a non-reactive getter. For example, [[Node Refs|node refs]] in Luent are non-reactive getters.
 
 #### Cleaner Templates
 Despite their benefits, $-prefixing and ion calling do add visual clutter to the template making it less readable. For more readable templates, it’s helpful to configure your IDE’s syntax highlighting to dim any visual clutter. This way you get can maintain technical clarity while gaining slightly more visual clarity.
@@ -260,7 +260,7 @@ function moveRight() {
 
 
 ### Ionic Models<!-- {"fold":true} -->
-For those who prefer a more intuitive, concise way of updating data structures, Lumo provides another type of ionic compound called ionic models. To create an ionic model, we call the `Ionic` function and pass in the object to be tracked. This will ‘ionize’ the object, turning all its properties into ions, in the form of a JavaScript proxy. Once an object is ionized, mutating it will trigger its effects:
+For those who prefer a more intuitive, concise way of updating data structures, Luent provides another type of ionic compound called ionic models. To create an ionic model, we call the `Ionic` function and pass in the object to be tracked. This will ‘ionize’ the object, turning all its properties into ions, in the form of a JavaScript proxy. Once an object is ionized, mutating it will trigger its effects:
 
 ```jsx
 const box = Ionic({ x: 0, y: 0 })
@@ -303,7 +303,7 @@ const box = Ionic(new Box())
 <button on:click={e => box.moveRight()}>{`>`}</button>
 ```
 
-Lumo also supports ionizing class instances that contain private properties. See here [LINK]
+Luent also supports ionizing class instances that contain private properties. See here [LINK]
 
 #### Extending Models
 Models may be extended with methods that are more specific to the instance. Here an array that models a basket is extended with an `insertItem` method:
@@ -474,7 +474,7 @@ Alternatively, if you never need to discard a view and simply need to show/hide 
 ### Lifecycle hooks<!-- {"fold":true} -->
 The instance created by a  are is 
 
-In Lumo, lifecycle hooks are associated with dynamic views rather than components, since components are more or less arbitrary building blocks for your app, while dynamic views are the relevant unit that goes through a cycle of creation and disposal.
+In Luent, lifecycle hooks are associated with dynamic views rather than components, since components are more or less arbitrary building blocks for your app, while dynamic views are the relevant unit that goes through a cycle of creation and disposal.
 
 #### atCleanup
 #### The Render Cycle
@@ -616,24 +616,24 @@ atCleanup
 ### From Solid<!-- {"fold":true} -->
 - Yes! Ions are essentially signals. The original fine-grained implementation of reactivity was created before the framework author was aware of Solid.js. It was, embarrassingly enough, based on a mistaken understanding of how Vue’s reactivity system worked. (I tried my hand at recreating Vue’s reactivity system and was puzzled to find that there was no need to diff a virtual DOM). State getters was influenced by my study of Quill’s codebase.
 - independently of work done by other frameworks.   Ryan Carniato is 
-- However, since Lumo has been significantly influenced by the brilliant   and insightful articles has helped to shape    
+- However, since Luent has been significantly influenced by the brilliant   and insightful articles has helped to shape    
   - normalization of component input
   - derivations need not be special entities, they can simply be functions
 
 - The term “signal” didn’t quite resonate with ‘track’ and ‘trigger’ functions are signals, but the entity that app developers actually touch—the getter and setter and just that—getters and setters. 
 - calling signals in template vs passing ion to the template
-For those coming from Solid.js, you may be wondering why, in Solid, we call signals in the template while, in Lumo, we pass ions to the template without calling them (in order to render reactively).  This difference boils down to how each framework has decided to compile JSX. Lumo compiles JSX children in the same way React does, which allows for destructuring of component input (props). 
+For those coming from Solid.js, you may be wondering why, in Solid, we call signals in the template while, in Luent, we pass ions to the template without calling them (in order to render reactively).  This difference boils down to how each framework has decided to compile JSX. Luent compiles JSX children in the same way React does, which allows for destructuring of component input (props). 
 
 Solid compiles JSX children into a props object of getters, in order to provide an extra conceptual protective measure against mutating component input, the tradeoff being, the inability to destructure component props. 
 
 a different philosophical stance on mutating component input:
-Mutating component input is not an evil thing, **as long as the mutation can be tracked at compile-time and traced at runtime**. Lumo provides ways to track and trace mutations as well as protective measures against untracked mutations. [LINK] 
+Mutating component input is not an evil thing, **as long as the mutation can be tracked at compile-time and traced at runtime**. Luent provides ways to track and trace mutations as well as protective measures against untracked mutations. [LINK] 
 
 The are benefits to mutating component input. 
 - more concise, readable code
 - more intuitive than passing in a setter
 
-Solid’s compiler also creates visual consistency between derivations and atomic signals in the template. Lumo, on the other hand, embraces the visual distinction between atomic ions and derivation ions. This distinction mirrors the way you would pass atomic ions into a regular JavaScript function, providing logical consistency of passing in arguments, whether to a template or a function.
+Solid’s compiler also creates visual consistency between derivations and atomic signals in the template. Luent, on the other hand, embraces the visual distinction between atomic ions and derivation ions. This distinction mirrors the way you would pass atomic ions into a regular JavaScript function, providing logical consistency of passing in arguments, whether to a template or a function.
 
 
 

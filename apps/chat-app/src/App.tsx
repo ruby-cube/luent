@@ -1,4 +1,4 @@
-import { template, fromGround, fromRoot, If, Style, css } from "@rue/lumo";
+import { template, fromGround, fromRoot, If, Style, css } from "@rue/luent";
 import { Router } from "./router";
 import { Ion, Ionized } from "@rue/quarky";
 import { User } from "./context/keys";

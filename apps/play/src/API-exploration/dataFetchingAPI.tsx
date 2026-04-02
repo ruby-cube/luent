@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, Else, If, v } from "@rue/lumo";
+import { template, Else, If, v } from "@rue/luent";
 import {Ion } from "@rue/quarky";
 
 

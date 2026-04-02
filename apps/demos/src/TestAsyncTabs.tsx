@@ -1,7 +1,7 @@
 import { Ion, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon, asIonic } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If, target } from "@rue/lumo";
-import { As } from "../../../packages/lumo/src/conditional/As";
+import { Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If, target } from "@rue/luent";
+import { As } from "../../../packages/luent/src/conditional/As";
 
 // Modified Demo from Solid.js 
 

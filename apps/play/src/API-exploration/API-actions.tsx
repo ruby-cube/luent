@@ -1,7 +1,7 @@
 //@ts-nocheck
 
-import { template } from "@rue/lumo"
-import { Meanwhile } from "../../../../packages/lumo/src/boundaries/Await"
+import { template } from "@rue/luent"
+import { Meanwhile } from "../../../../packages/luent/src/boundaries/Await"
 import { doAction } from "../../../../packages/x-old/x_action/Action"
 
 // Action() is about managing and coordinating async operations

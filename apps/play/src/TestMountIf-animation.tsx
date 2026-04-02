@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { template, If, Else,  ElseIf,Style, NodeRef, atMounted } from "@rue/lumo";
+import { template, If, Else,  ElseIf,Style, NodeRef, atMounted } from "@rue/luent";
 import { getActiveUpdate, Ion, queueRender, queueTask, watch } from "@rue/quarky";
 import "./style.css"
 

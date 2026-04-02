@@ -1,11 +1,19 @@
 import { readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+import { createRequire } from 'node:module'
 import { transformWithEsbuild } from 'vite'
 import * as babel from '@babel/core'
-import babelLumoTransform from '@rue/babel-plugin-luent'
+import BabelLuentPlugin from '@rue/babel-plugin-luent'
 import { transformRXSSugar } from '@rue/ruescript/transform'
 
-const jsxRuntimePath = fileURLToPath(new URL('../lumo/jsx-runtime/src/index.ts', import.meta.url))
+const require = createRequire(import.meta.url)
+
+function resolveLuentJsxRuntimePath() {
+   const luentPackageJsonPath = require.resolve('@rue/luent/package.json')
+   return join(dirname(luentPackageJsonPath), 'jsx-runtime/index.ts')
+}
+
+let jsxRuntimePath
 
 export default function LuentPlugin() {
    /** @type {import('vite').PluginOption[]} */
@@ -14,7 +22,8 @@ export default function LuentPlugin() {
          name: 'vite-luent-runtime-resolver',
          enforce: 'pre',
          resolveId(id) {
-            if (id === '@rue/jsx-runtime' || id === '@rue/jsx-dev-runtime') {
+            if (id === '@rue/luent/jsx-runtime' || id === '@rue/luent/jsx-dev-runtime') {
+               jsxRuntimePath ??= resolveLuentJsxRuntimePath()
                return jsxRuntimePath
             }
          }
@@ -30,7 +39,7 @@ export default function LuentPlugin() {
             const sugaredCode = transformRXSSugar({ code, fileName }).code
             const result = await babel.transformAsync(sugaredCode, {
                plugins: [
-                  babelLumoTransform,
+                  BabelLuentPlugin,
                   ['@babel/plugin-syntax-typescript', { isTSX: true }]
                ],
                filename: fileName,
@@ -45,7 +54,7 @@ export default function LuentPlugin() {
             const normalized = await transformWithEsbuild(result.code, fileName, {
                loader: 'tsx',
                jsx: 'automatic',
-               jsxImportSource: '@rue',
+               jsxImportSource: '@rue/luent',
                sourcemap: true,
                charset: 'utf8'
             })
@@ -57,7 +66,7 @@ export default function LuentPlugin() {
          }
       },
       {
-         name: 'vite-lumo-plugin-pre',
+         name: 'vite-luent-plugin-pre',
          enforce: 'pre',
          async transform(code, id) {
             const fileName = id.split('?')[0]
@@ -65,7 +74,7 @@ export default function LuentPlugin() {
 
             const result = await babel.transformAsync(code, {
                plugins: [
-                  babelLumoTransform,
+                  BabelLuentPlugin,
                   ['@babel/plugin-syntax-typescript', { isTSX: true }]
                ],
                filename: fileName,

@@ -1,5 +1,5 @@
 
-import { template, If, JSXNode, FromTag, } from "@rue/lumo";
+import { template, If, JSXNode, FromTag, } from "@rue/luent";
 
 // - [ ]  transform slot to render function for:
 

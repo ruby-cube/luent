@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { getViewFlask } from "../../../lumo/src/flask/ViewFlask";
+import { getViewFlask } from "../../../luent/src/flask/ViewFlask";
 
 /**
  * 

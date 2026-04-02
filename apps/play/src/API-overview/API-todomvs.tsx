@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, For, If, Else } from "@rue/lumo"
+import { template, For, If, Else } from "@rue/luent"
 import { watch, ion, queueIonicTask, ionize, Ionized, ionic } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 

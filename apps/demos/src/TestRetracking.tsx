@@ -1,4 +1,4 @@
-import { css, For, template } from "@rue/lumo";
+import { css, For, template } from "@rue/luent";
 import { asIonic, Ion, Ionic } from "@rue/quarky";
 import { watch } from "fs";
 

@@ -1,4 +1,4 @@
-import { template, FromTag, atUnmount } from "@rue/lumo";
+import { template, FromTag, atUnmount } from "@rue/luent";
 import { Animation, Interval, Ion, swiftUpdate, HeavyUpdate, queueTask, Suspense, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 

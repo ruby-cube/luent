@@ -1,7 +1,7 @@
-import { template, For, FromTag } from "@rue/lumo";
+import { template, For, FromTag } from "@rue/luent";
 import {Ion, Ionic,SuspenseIon, swiftUpdate } from "@rue/quarky";
 import { o, ooo } from "../../../../packages/quarky/src/async/ooo";
-import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
+import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 import { Dispatch } from "../../../../packages/quarky/src/async/Dispatch";
 
 

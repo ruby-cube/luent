@@ -1,4 +1,4 @@
-import { NodeRef, css, template } from "@rue/lumo";
+import { NodeRef, css, template } from "@rue/luent";
 
 
 export function TestCanvas() {

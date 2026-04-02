@@ -1,5 +1,5 @@
 
-import { template, For, fromRoot, AsyncIon } from "@rue/lumo";
+import { template, For, fromRoot, AsyncIon } from "@rue/luent";
 import { EACH, Ion, Ionic } from "@rue/quarky";
 import { prototype } from "events";
 import { UseShared } from "../../../../packages/utils/UseShared";

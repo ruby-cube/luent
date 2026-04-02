@@ -1,4 +1,4 @@
-import { For, FromTag, HandleEvent, template } from "@rue/lumo";
+import { For, FromTag, HandleEvent, template } from "@rue/luent";
 import { Ion, Ionic } from "@rue/quarky";
 import "./Blokk.css"
 

@@ -1,4 +1,4 @@
-import { Context, createRoot, NodeRef, template } from "@rue/lumo"
+import { Context, createRoot, NodeRef, template } from "@rue/luent"
 import { Button } from "../Button"
 import { Tooltip } from "../Tooltip"
 import { IonicTooltip, TOOLTIP_CONFIG, TooltipKit } from "../../ui-base/tooltip/Tooltip.kit"

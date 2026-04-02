@@ -1,4 +1,4 @@
-import { template, pend, Suspense } from "@rue/lumo"
+import { template, pend, Suspense } from "@rue/luent"
 import { ion } from "@rue/quarky"
 
 

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, Stream } from "@rue/lumo"
+import { template, Stream } from "@rue/luent"
 import { Ion } from "@rue/quarky"
 import { AnyObject } from "@rue/types";
 import './TestStreamIon.css'

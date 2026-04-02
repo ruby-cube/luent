@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { NodeRef, template, COMPONENT, ComponentForge, If, Else, For, teleportTo } from "@rue/lumo";
+import { NodeRef, template, COMPONENT, ComponentForge, If, Else, For, teleportTo } from "@rue/luent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
-import { lazyLoadComponent } from "../../../packages/lumo/src/component/LazyComponent";
-import { ElseIf } from "../../../packages/lumo/src/conditional/If";
+import { lazyLoadComponent } from "../../../packages/luent/src/component/LazyComponent";
+import { ElseIf } from "../../../packages/luent/src/conditional/If";
 import { AnyObject } from "@rue/types";
 
 

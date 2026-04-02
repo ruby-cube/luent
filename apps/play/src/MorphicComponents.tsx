@@ -1,5 +1,5 @@
 import { RENDER } from "../../../packages/quarky/src/reactivity/x_RenderCycle";
-import { NodeRef } from "@rue/lumo";
+import { NodeRef } from "@rue/luent";
 
 export function MainBlock() {
 

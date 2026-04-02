@@ -1,4 +1,4 @@
-import { template, For, FromTag, Style, css } from "@rue/lumo";
+import { template, For, FromTag, Style, css } from "@rue/luent";
 import { as, asIonic, EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 

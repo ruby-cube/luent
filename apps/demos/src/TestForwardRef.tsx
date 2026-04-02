@@ -1,4 +1,4 @@
-import { FromTag, NodeRef, template } from "@rue/lumo"
+import { FromTag, NodeRef, template } from "@rue/luent"
 
 export function StyledComp() {
    const ædiv = NodeRef('div')

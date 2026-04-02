@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { getActiveFlask } from "@rue/flask";
-import { template, fromContext, RENDER } from "@rue/lumo";
+import { template, fromContext, RENDER } from "@rue/luent";
 import { queueIonicTask } from "@rue/quarky";
 
 

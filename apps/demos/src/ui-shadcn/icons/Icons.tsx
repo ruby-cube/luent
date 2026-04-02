@@ -1,4 +1,4 @@
-import { FromTag, template } from "@rue/lumo";
+import { FromTag, template } from "@rue/luent";
 
 export function CreateIcon(icon: string) {
    return function Icon(attributes: FromTag) {

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Context, template } from "@rue/lumo"
+import { Context, template } from "@rue/luent"
 import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase"
 import { ArticlesView } from "../wip-demos/conduit/src/feature/article-feed/ArticlesView"
 import { ArticlePreview } from "./ArticlePreview"

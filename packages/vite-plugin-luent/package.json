@@ -5,12 +5,14 @@
    "type": "module",
    "module": "./index",
    "dependencies": {
-         "@rue/babel-plugin-luent": "workspace:*",
-       "@rue/lumo": "workspace:*",
+      "@rue/babel-plugin-luent": "workspace:*",
+       "@rue/luent": "workspace:*",
        "@rue/ruescript": "workspace:*"
    },
    "devDependencies": {
-      "@babel/core": "^7.25.2"
+      "@babel/core": "^7.25.2",
+      "@babel/plugin-syntax-typescript": "^7.25.9",
+      "vite": "^8.0.3"
    },
    "author": "Ruby Yi Wang",
    "license": "MIT"

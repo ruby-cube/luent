@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $render, atCreate, atCreated, template } from "@rue/lumo";
+import { $render, atCreate, atCreated, template } from "@rue/luent";
 
 function doSomething() { }
 

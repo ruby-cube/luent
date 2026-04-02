@@ -1,5 +1,5 @@
 import './index.css'
-import { createRoot, FromTag, RenderSlot, template } from "@rue/lumo";
+import { createRoot, FromTag, RenderSlot, template } from "@rue/luent";
 
 export function TestNamedSlots() {
 

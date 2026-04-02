@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, For, If, Else, FromTag, listen } from "@rue/lumo"
+import { template, For, If, Else, FromTag, listen } from "@rue/luent"
 import { watch,  queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
 
 

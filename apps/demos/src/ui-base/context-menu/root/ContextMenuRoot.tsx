@@ -4,7 +4,7 @@ import { MenuRootContext } from '../../menu/root/MenuRootContext';
 import type { BaseUIChangeEventDetails } from '../../types';
 import type { MenuRoot } from '../../menu/root/MenuRoot';
 import { UIDGenerator } from '@rue/utils';
-import { NodeRef } from '@rue/lumo';
+import { NodeRef } from '@rue/luent';
 import { Ion } from '@rue/quarky';
 
 const genUID = UIDGenerator(11)

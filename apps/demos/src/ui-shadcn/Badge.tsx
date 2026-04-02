@@ -1,4 +1,4 @@
-import { FromTag, TagName, TagType, template } from "@rue/lumo"
+import { FromTag, TagName, TagType, template } from "@rue/luent"
 import { type VariantProps } from "class-variance-authority"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 

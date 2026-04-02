@@ -1,7 +1,7 @@
 ```ts
 // @ts-nocheck
-import { FromTag, AsyncIon, If, Suspense } from "@rue/lumo";
-import { Await, Meanwhile } from "../../../../packages/lumo/src/boundaries/Await";
+import { FromTag, AsyncIon, If, Suspense } from "@rue/luent";
+import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 import { EACH, instantUpdate, Ion, Ionic, IonicProxy, isIonicProxy } from "@rue/quarky";
 import { Action, REFETCH } from "../../../../packages/quarky/src/async/Action";
 import { toggleCompleted } from "./AsyncDemoLessons/data";

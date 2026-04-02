@@ -1,4 +1,4 @@
-import { atUnmount, template } from "@rue/lumo";
+import { atUnmount, template } from "@rue/luent";
 import { queueIonicTask, Ion, Ionized, SYNC, watch } from "@rue/quarky";
 
 export function DateApp() {

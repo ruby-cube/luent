@@ -1,4 +1,4 @@
-import { template, Else, If, Polymorph } from "@rue/lumo";
+import { template, Else, If, Polymorph } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 // Bug conditions

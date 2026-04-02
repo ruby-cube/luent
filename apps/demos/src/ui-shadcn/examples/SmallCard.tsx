@@ -1,4 +1,4 @@
-import { createRoot, template } from "@rue/lumo"
+import { createRoot, template } from "@rue/luent"
 import {
    Card,
    CardContent,

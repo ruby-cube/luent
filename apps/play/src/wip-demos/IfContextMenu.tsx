@@ -1,4 +1,4 @@
-import { template, For, If, listen, NodeRef, Portal, Style } from "@rue/lumo"
+import { template, For, If, listen, NodeRef, Portal, Style } from "@rue/luent"
 import { Finitron, ion, watch } from "@rue/quarky"
 
 //FIX: 

@@ -1,4 +1,4 @@
-import { template, createRoot } from "@rue/lumo"
+import { template, createRoot } from "@rue/luent"
 import { Ion } from "@rue/quarky"
 
 /* 

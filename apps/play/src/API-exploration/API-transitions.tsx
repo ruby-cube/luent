@@ -1,7 +1,7 @@
 import { isObject } from "@rue/utils"
-import { DOMNode } from "../../../../packages/lumo/src/node/VineNode"
+import { DOMNode } from "../../../../packages/luent/src/node/VineNode"
 import { getActiveFlask } from "@rue/flask"
-import { atMounted, atUnmount, queueRender, queueTask } from "@rue/lumo"
+import { atMounted, atUnmount, queueRender, queueTask } from "@rue/luent"
 
 // class-based
 type VarKit = {

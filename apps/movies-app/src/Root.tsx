@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import m from "./Root.module.css"
 
 export function Root(){

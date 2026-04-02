@@ -1,4 +1,4 @@
-import { Await, template, For, Meanwhile, Nonce, createRoot } from "@rue/lumo";
+import { Await, template, For, Meanwhile, Nonce, createRoot } from "@rue/luent";
 import { AsyncIon, Ion, isPending, o, SuspenseIon } from "@rue/quarky";
 
 // based on Solid.js/Remix demo

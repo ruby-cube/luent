@@ -1,4 +1,4 @@
-import { createRoot, css, template } from "@rue/lumo";
+import { createRoot, css, template } from "@rue/luent";
 import "./TestStyleOverride-classes.css"
 import { AnyObject } from "@rue/types";
 

@@ -11,8 +11,7 @@
     "@babel/traverse": "^7.26.4",
     "@floating-ui/dom": "^1.7.6",
     "@rue/flask": "workspace:*",
-    "@rue/jsx-runtime": "workspace:*",
-    "@rue/lumo": "workspace:*",
+    "@rue/luent": "workspace:*",
     "@rue/ruescript": "workspace:*",
     "@rue/quarky": "workspace:*",
     "@rue/thread": "workspace:*",
@@ -41,7 +40,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/babel__traverse": "^7.20.6",
     "@types/node": "^25.2.3",
-    "vite": "^5.4.3"
+    "vite": "^8.0.3"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"

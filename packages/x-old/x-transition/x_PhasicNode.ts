@@ -1,16 +1,16 @@
-import { Context as createContext } from "../../lumo/src/context/Context";
-import { makeElement } from "../../lumo/src/element/makeElement";
+import { Context as createContext } from "../../luent/src/context/Context";
+import { makeElement } from "../../luent/src/element/makeElement";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
-import { fromContext } from "../../lumo/src/context/provide";
+import { fromContext } from "../../luent/src/context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
-import { NodeRef, NodeRef } from "../../lumo/src/node/NodeRef";
+import { NodeRef, NodeRef } from "../../luent/src/node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
-import type { Context } from "../../lumo/src/context/context-stack";
+import type { Context } from "../../luent/src/context/context-stack";
 import { Ion } from "@rue/quarky";
-import { template } from "../../lumo/src/component/Component";
-import { createIfSeries, Else, If } from "../../lumo/src/conditional/If";
-import { ContextKey } from "../../lumo/src/context/ContextKey";
-import { RenderSlot } from "../../lumo/src/component/Input";
+import { template } from "../../luent/src/component/Component";
+import { createIfSeries, Else, If } from "../../luent/src/conditional/If";
+import { ContextKey } from "../../luent/src/context/ContextKey";
+import { RenderSlot } from "../../luent/src/component/Input";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 
@@ -21,7 +21,7 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 
 const GET_PHASIC_NODE = ContextKey<() => TransitionNode | null>('GET_PHASIC_NODE')
 
-// declare module '@rue/lumo' {
+// declare module '@rue/luent' {
 //     interface ContextKeyMap {
 //         [GET_PHASIC_NODE]: typeof getPhasicNodeDef
 //     }

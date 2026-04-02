@@ -1,4 +1,4 @@
-import { template, For, If, Style, css } from "@rue/lumo"
+import { template, For, If, Style, css } from "@rue/luent"
 import { Ion, Ionic, EACH, as, swiftUpdate, asIonic } from "@rue/quarky"
 
 // Modified Demo from Vue.js

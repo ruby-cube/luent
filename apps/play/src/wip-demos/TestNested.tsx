@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import { finiton, ion, watch } from "@rue/quarky";
 
 export function TestNested() {

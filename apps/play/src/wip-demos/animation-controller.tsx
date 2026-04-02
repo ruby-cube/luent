@@ -1,4 +1,4 @@
-import { $thisView, template, If, NodeRef } from "@rue/lumo";
+import { $thisView, template, If, NodeRef } from "@rue/luent";
 import {  ionize } from "@rue/quarky";
 import { inert } from "../../../../packages/x-old/x_inert";
 

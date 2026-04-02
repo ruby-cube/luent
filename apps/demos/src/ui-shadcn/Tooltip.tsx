@@ -1,4 +1,4 @@
-import { FromTag, If, NodeRef, RenderSlot, template } from "@rue/lumo"
+import { FromTag, If, NodeRef, RenderSlot, template } from "@rue/luent"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
 import { mergeTailwind } from "../utils/utils"
 import { IonicTooltip } from "../ui-base/tooltip/Tooltip.kit";

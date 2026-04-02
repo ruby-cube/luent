@@ -1,5 +1,5 @@
-import { template } from "@rue/lumo";
-import { Thru } from "../../../packages/lumo/src/iteratives/Thru";
+import { template } from "@rue/luent";
+import { Thru } from "../../../packages/luent/src/iteratives/Thru";
 import { Ion } from "@rue/quarky";
 
 export function TestThru() {

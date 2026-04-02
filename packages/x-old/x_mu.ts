@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types"
 import { QUARK, quarkOf } from "./abstract/Quark"
 import { isIonicProxy } from "./ionic/IonicModel"
 
-// NOTE: This file tightly couples Lumo with Quarky... need to decide whether to keep Quarky decoupled from Lumo
+// NOTE: This file tightly couples Luent with Quarky... need to decide whether to keep Quarky decoupled from Luent
 
 type MayBeMutable<T> = T & { '~mu': true }
 

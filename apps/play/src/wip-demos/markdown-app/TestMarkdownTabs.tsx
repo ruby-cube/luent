@@ -1,4 +1,4 @@
-import { template, For, FromTag } from "@rue/lumo";
+import { template, For, FromTag } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 
 let id = 1;

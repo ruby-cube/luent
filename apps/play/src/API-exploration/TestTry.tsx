@@ -1,4 +1,4 @@
-import { Catch, template, createTryCatch, FromTag, Try } from "@rue/lumo";
+import { Catch, template, createTryCatch, FromTag, Try } from "@rue/luent";
 
 export function TestTry() {
    console.log('running TestTry')

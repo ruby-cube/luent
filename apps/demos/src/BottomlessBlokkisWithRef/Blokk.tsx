@@ -1,4 +1,4 @@
-import { For, FromTag, template } from "@rue/lumo";
+import { For, FromTag, template } from "@rue/luent";
 import { asIonic, Ionic } from "@rue/quarky";
 import { BlokkModel, Rotation } from "./BlokkModel";
 

@@ -1,4 +1,4 @@
-import { template, For } from "@rue/lumo";
+import { template, For } from "@rue/luent";
 import { ion, ionic, ionize } from "@rue/quarky";
 
 export function TestTrackableOps() {

@@ -1,6 +1,6 @@
 
-import { atMounted, For, If, Style } from "@rue/lumo"
-import { template, atUnmount } from "@rue/lumo"
+import { atMounted, For, If, Style } from "@rue/luent"
+import { template, atUnmount } from "@rue/luent"
 import {  Ion, Ionic, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
 import { quarkOf } from "../../../../packages/quarky/src/abstract/Quark"
 

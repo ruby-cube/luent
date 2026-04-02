@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
 import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
-import { atUnmount, fromGround, POSTLUDE, PRELUDE, provideGround } from "@rue/lumo";
+import { atUnmount, fromGround, POSTLUDE, PRELUDE, provideGround } from "@rue/luent";
 import { Ion, ionize, Ionized, SYNC, watch } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need

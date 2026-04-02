@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { template, fromGround } from "@rue/lumo";
-import { Polymorph } from "../../../../packages/lumo/src/conditional/x_Polymorph";
+import { template, fromGround } from "@rue/luent";
+import { Polymorph } from "../../../../packages/luent/src/conditional/x_Polymorph";
 
 // A: We provide route parameters via context and tag
 // B: We allow access to a global route ion where you can access route parameters

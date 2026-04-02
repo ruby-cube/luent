@@ -3,7 +3,7 @@ import { Ion, Ionic, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, 
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { NodeRef, RefSource } from "../node/NodeRef";
-import { LumoHooks } from "../flask/template-hooks";
+import { LuentHooks } from "../flask/template-hooks";
 
 
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
@@ -350,7 +350,7 @@ type WithNamedSlots<D> = { [K in keyof D as K extends `Slot:${infer N}` ? N : ne
 
 
 type ElementAttributes<D> =
-   D extends keyof JSX.IntrinsicElements ? Omit<JSX.IntrinsicElements[D], 'ref' | keyof LumoHooks<any>> : {} // TODO: use Attributes from index.d.ts
+   D extends keyof JSX.IntrinsicElements ? Omit<JSX.IntrinsicElements[D], 'ref' | keyof LuentHooks<any>> : {} // TODO: use Attributes from index.d.ts
 
 type Styles = {
    styles: Ionic<CSSStyleDeclaration>

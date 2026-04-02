@@ -1,6 +1,6 @@
 
 import { asIonic, Ion, Ionic } from "@rue/quarky";
-import { For, template } from "@rue/lumo";
+import { For, template } from "@rue/luent";
 
 function RXSTodo() {
 

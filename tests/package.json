@@ -9,12 +9,11 @@
   "dependencies": {
     "@babel/traverse": "^7.26.4",
     "@rue/flask": "workspace:*",
-    "@rue/jsx-runtime": "workspace:*",
-    "@rue/lumo": "workspace:*",
+    "@rue/luent": "workspace:*",
     "@rue/quarky": "workspace:*",
     "@rue/thread": "workspace:*",
     "@rue/utils": "workspace:*",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.18.1",
     "marked": "^15.0.5"
   },
   "devDependencies": {
@@ -32,7 +31,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/babel__traverse": "^7.20.6",
     "@types/node": "^25.2.3",
-    "vite": "^5.4.3"
+    "vite": "^8.0.3"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"

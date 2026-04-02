@@ -1,9 +1,9 @@
 import "./index.css";
 import "./debugger.css";
-import { AsyncIon, template, Else, For, FromTag, HandleEvent, If, RenderSlot, SuspenseIon } from "@rue/lumo";
+import { AsyncIon, template, Else, For, FromTag, HandleEvent, If, RenderSlot, SuspenseIon } from "@rue/luent";
 import * as db from "./data/index"
 import { Ion } from "@rue/quarky";
-import { Await, Meanwhile, Nonce } from "../../../../../packages/lumo/src/boundaries/Await";
+import { Await, Meanwhile, Nonce } from "../../../../../packages/luent/src/boundaries/Await";
 import { Action } from "../../../../../packages/quarky/src/async/Action";
 
 

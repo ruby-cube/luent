@@ -1,5 +1,5 @@
 
-import { template, Else, For, FromTag, If } from '@rue/lumo'
+import { template, Else, For, FromTag, If } from '@rue/luent'
 import { asIonic, Ion, Ionic } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 import "./style.css"

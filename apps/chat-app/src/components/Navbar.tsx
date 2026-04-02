@@ -1,4 +1,4 @@
-import { template, FromTag, RenderSlot } from "@rue/lumo";
+import { template, FromTag, RenderSlot } from "@rue/luent";
 import './navbar.css'
 import { User } from "../context/keys";
 import { logOut } from "../database/firebase";

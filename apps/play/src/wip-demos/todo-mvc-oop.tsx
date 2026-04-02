@@ -1,4 +1,4 @@
-import { template, For, If, Else, FromTag, listen } from "@rue/lumo"
+import { template, For, If, Else, FromTag, listen } from "@rue/luent"
 import { watch, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
 
 // PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)

@@ -1,4 +1,4 @@
-import { template, For } from "@rue/lumo";
+import { template, For } from "@rue/luent";
 import { ionize, watch } from "@rue/quarky";
 let id = 4;
 

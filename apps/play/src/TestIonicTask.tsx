@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import { ion, ionic, queueIonicTask } from "@rue/quarky";
 
 export function TestIonicTask() {

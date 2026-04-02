@@ -1,5 +1,5 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { atDiscard, NodeRef, queueLayout } from "@rue/lumo"
+import { atDiscard, NodeRef, queueLayout } from "@rue/luent"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'

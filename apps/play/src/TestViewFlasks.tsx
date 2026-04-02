@@ -1,4 +1,4 @@
-import { $thisView, template, Else, If } from "@rue/lumo";
+import { $thisView, template, Else, If } from "@rue/luent";
 import { getCurrentPhase, ion, watch } from "@rue/quarky";
 import { $thisScene } from "../../../packages/flask/Scene";
 

@@ -1,4 +1,4 @@
-import { FromTag, If, template } from "@rue/lumo";
+import { FromTag, If, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 export function TestHookForwarding() {

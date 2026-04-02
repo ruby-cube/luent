@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { max } from "date-fns";

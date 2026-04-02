@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo"
+import { template } from "@rue/luent"
 import { asIonic, Ion, Ionic, watch } from "@rue/quarky"
 
 // TODO:

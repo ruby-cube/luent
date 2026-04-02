@@ -1,4 +1,4 @@
-import { template } from "@rue/lumo";
+import { template } from "@rue/luent";
 import { dev, Ion, PRELUDE, SYNC, watch } from "@rue/quarky";
 
 // COMPOUNDS

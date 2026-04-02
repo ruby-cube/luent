@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { template, NodeRef } from "@rue/lumo";
-import { MorphicNode } from "../../../packages/lumo/src/morphic/MorphicNode";
+import { template, NodeRef } from "@rue/luent";
+import { MorphicNode } from "../../../packages/luent/src/morphic/MorphicNode";
 
 export function TestMorphic() {
 

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Flask, getActiveFlask } from "@rue/flask"
-import { FromTag, Ion } from "@rue/lumo"
+import { FromTag, Ion } from "@rue/luent"
 
 function Parent() {
    const $count = Ion(0)

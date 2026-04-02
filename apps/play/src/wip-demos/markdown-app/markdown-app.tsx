@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { Ion, Ionic, watch } from '@rue/quarky'
-import { template, FromTag, NodeRef, atMounted, atUnmount, atDiscard, atCreated } from '@rue/lumo'
+import { template, FromTag, NodeRef, atMounted, atUnmount, atDiscard, atCreated } from '@rue/luent'
 import '../../style.css'
 
 

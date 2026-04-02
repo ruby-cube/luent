@@ -1,4 +1,4 @@
-import { For, template } from "@rue/lumo";
+import { For, template } from "@rue/luent";
 import { asIonic, Ion, Ionic, PRELUDE, SYNC, watch } from "@rue/quarky";
 
 

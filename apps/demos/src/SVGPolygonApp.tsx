@@ -1,4 +1,4 @@
-import { template, For, FromTag, Style, css, } from "@rue/lumo"
+import { template, For, FromTag, Style, css, } from "@rue/luent"
 import { as, asIonic, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js

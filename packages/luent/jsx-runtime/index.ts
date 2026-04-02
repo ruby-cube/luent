@@ -1,4 +1,4 @@
-import { ComponentForge, TagName, makeJSXNode, normalizeToRenderFunction, RenderSlot, Context, RawJSXNode } from "@rue/lumo";
+import { TagName, makeJSXNode, RenderSlot, Context, RawJSXNode, ComponentTag } from "../src/index";
 import { AnyObject } from "@rue/types";
 import { isPlainObject, normalizeToArray } from "@rue/utils";
 
@@ -19,7 +19,7 @@ export const jsxDEV = jsx;
 
 export const jsxs = jsx;
 
-export function jsx(nodeType: TagName | ComponentForge, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
+export function jsx(nodeType: TagName | ComponentTag, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
    const Slot = config.children;
    delete config.children
    config.Slot = Slot ?? config.Slot;

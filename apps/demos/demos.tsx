@@ -1,4 +1,4 @@
-import { createRoot } from "@rue/lumo"
+import { createRoot } from "@rue/luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"

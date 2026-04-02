@@ -1,4 +1,4 @@
-import { template, fromContext, FromTag } from "@rue/lumo";
+import { template, fromContext, FromTag } from "@rue/luent";
 import { USER, User } from '../context/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";

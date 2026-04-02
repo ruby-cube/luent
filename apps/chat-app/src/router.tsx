@@ -1,4 +1,4 @@
-import { fromGround, Polymorph, provideGround } from "@rue/lumo"
+import { fromGround, Polymorph, provideGround } from "@rue/luent"
 
 export function Router(config: Parameters<typeof Polymorph>[0]) {
 

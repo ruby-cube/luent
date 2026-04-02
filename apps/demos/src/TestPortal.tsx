@@ -1,4 +1,4 @@
-import { If, Portal, template } from "@rue/lumo";
+import { If, Portal, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 export function TestPortal() {

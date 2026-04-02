@@ -1,5 +1,5 @@
 import { Ion, Ionic, MutableIon } from "@rue/quarky";
-import { FromTag, If, template } from "@rue/lumo";
+import { FromTag, If, template } from "@rue/luent";
 
 // TODO: formatter adds tab between get keyword and variable
 // function FractionKit(count@: Ion<number>) {

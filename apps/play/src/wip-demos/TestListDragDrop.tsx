@@ -1,4 +1,4 @@
-import { template, For, listen, Style, target } from "@rue/lumo";
+import { template, For, listen, Style, target } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
 import { asIonic, EACH, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";

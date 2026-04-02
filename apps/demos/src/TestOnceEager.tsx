@@ -1,4 +1,4 @@
-import { listen, template } from "@rue/lumo";
+import { listen, template } from "@rue/luent";
 import { Ion, watch } from "@rue/quarky";
 
 export function TestOnceEager() {

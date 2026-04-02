@@ -1,4 +1,4 @@
-import { createRoot, createGroundContext } from "@rue/lumo";
+import { createRoot, createGroundContext } from "@rue/luent";
 import { FriendSite } from "./App";
 import './assets/main.css'
 

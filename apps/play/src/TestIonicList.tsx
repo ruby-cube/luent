@@ -1,4 +1,4 @@
-import { template, For } from "@rue/lumo";
+import { template, For } from "@rue/luent";
 import { asIonic, Ionic } from "@rue/quarky";
 
 export function TestIonicList() {

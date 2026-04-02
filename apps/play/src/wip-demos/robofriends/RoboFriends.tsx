@@ -1,4 +1,4 @@
-import { template, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/lumo";
+import { template, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/luent";
 import { Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
