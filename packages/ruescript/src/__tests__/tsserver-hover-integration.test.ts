@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const ts = require('typescript') as typeof import('typescript')
-const initPlugin = require('../../../../rxs-tsserver-plugin/index.cjs') as (modules: { typescript: typeof import('typescript') }) => {
+const initPlugin = require('../../../rxs-tsserver-plugin/index.cjs') as (modules: { typescript: typeof import('typescript') }) => {
   create: (info: {
     languageService: import('typescript').LanguageService
     languageServiceHost: import('typescript').LanguageServiceHost

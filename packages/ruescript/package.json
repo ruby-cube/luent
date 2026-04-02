@@ -21,7 +21,6 @@
       "emit:transform": "node ./scripts/emit-transformed-rxs.mjs"
    },
    "dependencies": {
-      "@rue/quarky": "workspace:*",
       "@rue/utils": "workspace:*"
    },
    "devDependencies": {

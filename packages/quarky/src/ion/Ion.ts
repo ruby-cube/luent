@@ -14,7 +14,7 @@ import { createAsyncDerivation } from "../async/AsyncDerivation";
 /* API */
 export interface Ion<T = unknown> {
    (): T
-   '~ion': true
+   // '~ion': true
 }
 
 export interface Ø<T = unknown> {
@@ -108,35 +108,13 @@ export function isIon(value: unknown): value is Ion {
    // value.length === 0
 }
 
-/**
- * Important for 
- * - distinguishing render function from ion in normalizeToRenderFunction
- * @param fn 
- * @returns 
- */
-export function $_derivation<T>(fn: () => T): Ion<T> {
-   // @ts-expect-error
-   // fn[QUARK] = { inert: false };
-   //@ts-expect-error
-   // fn.displayName = 'getState'
-   return fn
-}
-
-export const æ = $_derivation
-const GETTER_PREFIX = 'æ'
 
 
-export function πæ<T, K>(obj: T, getterKey: K): K extends keyof T ? T[K] : K extends `æ${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K {
-   if (typeof getterKey !== 'string' || !getterKey.startsWith(GETTER_PREFIX)) throw new Error(`getterKey must be a string that starts with ${GETTER_PREFIX}`)
-   if (!isObject(obj)) throw new Error('obj must be an object')
-   if (getterKey in obj) return obj[getterKey];
-   const key = getterKey.slice(1)
-   const descriptor = Object.getOwnPropertyDescriptor(obj, key)
-   return (descriptor?.get?.bind(obj) ?? (() => obj[key])) as K extends keyof T ? T[K] : K extends `æ${infer S}` ? S extends keyof T ? Ion<T[S]> : K : K
-}
 
-//@ts-expect-error
-window.$_derivation = $_derivation;
+
+
+
+
 
 // window.$_value = $_value;
 

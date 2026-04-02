@@ -53,7 +53,7 @@ function Counter({ showFractions@ }) {
 The above code should be transformed to the following as virtual source for the linter:
 
 ```tsx
-import { æ, πæ, destructureØ } from "@rue/ruescript";
+import { πæ, destructureØ } from "@rue/ruescript";
 
 function Counter({ æshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) {
   const showFractions = æshowFractions
@@ -220,7 +220,7 @@ function FractionKit(æcount) {
    - example: if `count` is re-declared in an inner block/function, only references bound to the transformed `æcount` declaration should become `æcount()`.
 - transform only in value-level code: never rewrite inside comments, string literals, template string text, import/export specifiers, type-only nodes, or property keys that are not identifier references.
 - helper import policy:
-   - helpers (`πæ`, `absorbØ`, `destructureØ`, and `æ`) are auto-imported only when used by transforms.
+   - helpers (`πæ`, `absorbØ`, `destructureØ`) are auto-imported only when used by transforms.
    - imports are deduped, stably ordered, and conflict-safe (if local symbols already exist, use deterministic aliasing strategy).
    - helper should be invisible to Intellisense and syntax highlighting
 - transform idempotence: running the transform repeatedly on already transformed virtual source should not produce additional semantic changes.
@@ -276,37 +276,18 @@ function FractionKit(æcount) {
    `const obj@ = Ion({ property: value }); obj.property` --> `const æobj = Ion({ property: value }); æobj().property`
 - transform dot notation with `@` suffix:
   `get property = obj.property@` --> `const æproperty = (obj.æproperty, πæ(obj, 'property')), property = æproperty;`
-  - import the getter access helper `πæ` from '@rue/quarky' if it hasn't been imported yet
+  - import the getter access helper `πæ` from '@rue/ruescript' if it hasn't been imported yet
   - chained property access:
   `get property = obj.a.b.c.property@` --> `const æproperty = (obj.a.b.c.æproperty, πæ(obj.a.b.c, 'property')), property = æproperty`
   `get property = obj.a@.b@.c@.property@` --> `const æproperty = (obj.æa.æb.æc.æproperty, πæ(πæ(πæ(πæ(obj, 'a'), 'b'), 'c'), 'property')), property = æproperty`
 
-### JSX fragment shorthand
-- transform jsx templates encased in extraneous parentheses (make sure transform is comment-safe):
-
-```
-(
-   <div></div>
-   <div></div>
-)
-```
-
--->
-
-```
-<>
-   <div></div>
-   <div></div>
-</>
-```
 
 ### Derivation shorthand
 - transform extraneous parentheses surrounding any of the following:
    - the value of a property or variable: `{ property: (value) }` --> `{ property: () => value }`, `const variable = (value)` --> `const variable = () => value`
    - an argument: `doSomething((argument))` --> `doSomething(() => argument)`
    - an item in an array literal: `[(item), (itemB)]` --> `[() => item, () => itemB]`
-   * an expression within a JSX expression container: `<Comp value={(value + 1)}></Comp>` --> `<Comp value={æ(() => value + 1)}>`
-      + import the derivation helper, `æ`, from '@rue/quarky' if it is not already imported
+   * an expression within a JSX expression container: `<Comp value={(value + 1)}></Comp>` --> `<Comp value={() => value + 1}>`
    - when passed as an argument, assigned to a value or property, an item in an array literal, an expression within a JSX expression container:
       - the final expression of a sequence expression
       - the consequent or alternate of a conditional expression
@@ -364,7 +345,6 @@ function FractionKit(æcount) {
 | `@` property access | chained/optional/computed forms | preserves short-circuiting and evaluation order | No |
 | Type guards | `if/else`, ternary, logical, explicit nullish comparisons | emits `æx()!` only in guarded synchronous branches | No |
 | Type guards | `If()/ElseIf()/Else()` template branches | emits `æx()!` in guarded template branches; keeps unguarded reads diagnostic | No |
-| JSX shorthand | parenthesized multi-node JSX | rewrites to fragment shorthand; comments preserved | No |
 | Derivation shorthand | allowed parenthesized value positions | rewrites only in allowed positions from spec | No |
 | Imports/helpers | helper-required transforms | imports added only when needed; deduped; stably ordered; conflict-safe | No |
 | Mapping/editor behavior | diagnostics/hover/completion/rename/goto/formatting | maps back to authored positions | No |

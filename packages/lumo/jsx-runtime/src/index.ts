@@ -20,7 +20,8 @@ export const jsxDEV = jsx;
 export const jsxs = jsx;
 
 export function jsx(nodeType: TagName | ComponentForge, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
-   const Slot = processSlot(config.children);
+   const Slot = config.children;
+   delete config.children
    config.Slot = Slot ?? config.Slot;
    console.log('Slot name, jsx', Slot, config.children)
    if (nodeType === Context) {
@@ -36,15 +37,15 @@ export function jsx(nodeType: TagName | ComponentForge, config: { children: Rend
    );
 }
 
-function processSlot(Slot: Slot | { mu: AnyObject } | { [key: string]: Slot } | undefined) {
-   if (Slot === undefined) return undefined;
-   if (isPlainObject(Slot)) {
-      console.log('plain obj slot', Slot)
-      // named slots, innerHTML kit, or two-way binding
-      return Slot;
-   }
-   return normalizeToRenderFunction(Slot)
-}
+// function processSlot(Slot: Slot | { mu: AnyObject } | { [key: string]: Slot } | undefined) {
+//    if (Slot === undefined) return undefined;
+//    if (isPlainObject(Slot)) {
+//       console.log('plain obj slot', Slot)
+//       // named slots, innerHTML kit, or two-way binding
+//       return Slot;
+//    }
+//    return normalizeToRenderFunction(Slot)
+// }
 
 
 export function Fragment() { }

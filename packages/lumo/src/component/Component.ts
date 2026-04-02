@@ -135,7 +135,7 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 
 
 
-export type ComponentTag = (arg: any) => JSX.Element
+export type ComponentTag = ComponentForge
 
 export function makeComponent(
    Component: ComponentForge,

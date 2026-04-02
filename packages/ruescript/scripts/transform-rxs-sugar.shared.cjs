@@ -4,7 +4,6 @@ const IDENTIFIER_PREFIX = 'æ'
 const GETTER_ACCESS_HELPER = 'πæ'
 const DESTRUCTURE_HELPER = 'destructureØ'
 const ABSORB_HELPER = 'absorbØ'
-const DERIVATION_HELPER = 'æ'
 
 function isAssignmentOperatorAt(text, index) {
   const operatorCandidates = ['&&=', '||=', '??=', '>>>=', '<<=', '>>=', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '=']
@@ -386,7 +385,7 @@ function buildPrefixedIdentifierMapping(syntheticPrefix, identifierName, suffix,
 function collapseHiddenHelperMappings(state) {
   if (!state || typeof state.code !== 'string' || !Array.isArray(state.map) || state.map.length === 0) return
 
-  const helperNames = [GETTER_ACCESS_HELPER, DESTRUCTURE_HELPER, ABSORB_HELPER, DERIVATION_HELPER]
+  const helperNames = [GETTER_ACCESS_HELPER, DESTRUCTURE_HELPER, ABSORB_HELPER]
   const code = state.code
 
   for (const helperName of helperNames) {
@@ -499,7 +498,7 @@ function rewriteGetterAccessSugar(state) {
       if (markedMatch && markedMatch[1]) {
         const markedName = markedMatch[1]
         leftParts.push(`${IDENTIFIER_PREFIX}${markedName}`)
-        helperReceiver = `${GETTER_ACCESS_HELPER}(${helperReceiver}, '${IDENTIFIER_PREFIX+markedName}')`
+        helperReceiver = `${GETTER_ACCESS_HELPER}(${helperReceiver}, '${markedName}')`
         continue
       }
 
@@ -508,7 +507,7 @@ function rewriteGetterAccessSugar(state) {
     }
 
     leftParts.push(`${IDENTIFIER_PREFIX}${key}`)
-    return `(${leftParts.join('.')}, ${GETTER_ACCESS_HELPER}(${helperReceiver}, '${IDENTIFIER_PREFIX+key}'))`
+    return `(${leftParts.join('.')}, ${GETTER_ACCESS_HELPER}(${helperReceiver}, '${key}'))`
   }
 
   let changed = false
@@ -517,10 +516,10 @@ function rewriteGetterAccessSugar(state) {
     changed = false
     iteration += 1
 
-    if (collectEdits(optionalPropertyRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, '${IDENTIFIER_PREFIX+key}')`)) {
+    if (collectEdits(optionalPropertyRegex, (targetExpr, key) => `${targetExpr} == null ? undefined : ${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
       changed = true
     }
-    if (collectEdits(callResultPropertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${IDENTIFIER_PREFIX+key}')`)) {
+    if (collectEdits(callResultPropertyRegex, (targetExpr, key) => `${GETTER_ACCESS_HELPER}(${targetExpr}, '${key}')`)) {
       changed = true
     }
     if (collectEdits(dotChainPropertyRegex, (targetExpr, key) => buildDotChainPropertyReplacement(targetExpr, key))) {
@@ -529,7 +528,7 @@ function rewriteGetterAccessSugar(state) {
   } while (changed && iteration < 8)
 
   if (helperUsed) {
-    ensureNamedImportFromModule(state, GETTER_ACCESS_HELPER, 'quarky')
+    ensureNamedImportFromModule(state, GETTER_ACCESS_HELPER)
   }
 }
 
@@ -1232,12 +1231,24 @@ function expressionReferencesIdentifier(expression, identifierName) {
   return found
 }
 
-function isDerivationShorthand(expression) {
-   return ts.isParenthesizedExpression(expression) && isCommaExpression(expression)
-}
+// TODO: check comma expression logic
+// NOTE: (from agent) isDerivationShorthand always returned false 
+// — ts.isParenthesizedExpression(e) && isCommaExpression(e) was 
+// a logical impossibility (a ParenthesizedExpression can never be 
+// a BinaryExpression). Fixed to simply ts.isParenthesizedExpression(e). 
+// The sequence-expression exclusion is already handled inside rewriteParenthesized.
+//
+// function isDerivationShorthand(expression) {
+//    return ts.isParenthesizedExpression(expression) && isCommaExpression(expression)
+// }
 
-function isCommaExpression(expression){
-   return ts.isBinaryExpression(expression) && expression.operatorToken === ts.SyntaxKind.CommaToken
+// function isCommaExpression(expression){
+//    return ts.isBinaryExpression(expression) && expression.operatorToken === ts.SyntaxKind.CommaToken
+// }
+
+
+function isDerivationShorthand(expression) {
+   return ts.isParenthesizedExpression(expression)
 }
 
 function conditionImpliesIdentifierTruthy(expression, identifierName, whenConditionTruthy) {
@@ -1656,7 +1667,6 @@ function rewriteReactiveAtAccess(state, getVars) {
 function rewriteParenthesizedDerivations(state, tsxLike) {
   const sourceFile = ts.createSourceFile('virtual.tsx', state.code, ts.ScriptTarget.Latest, true, tsxLike ? ts.ScriptKind.TSX : ts.ScriptKind.TS)
   const edits = []
-  let derivationHelperUsed = false
 
   function rewriteParenthesized(node) {
     if (!isDerivationShorthand(node)) return
@@ -1667,36 +1677,10 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
     edits.push({ start: end - 1, end, replacement: '', anchor: state.toOriginalPos(end - 1) })
   }
 
-  function rewriteParenthesizedJsxExpression(node) {
-    if (!isDerivationShorthand(node)) return
-    const start = node.getStart(sourceFile)
-    const end = node.getEnd()
-    const inner = state.code.slice(start + 1, end - 1)
-    const anchor = state.toOriginalPos(start)
-    const closeAnchor = state.toOriginalPos(end - 1)
-    const prefix = `${DERIVATION_HELPER}(() => `
-    const suffix = ')'
-    const mapping = []
-
-    for (let i = 0; i < prefix.length; i += 1) mapping.push(anchor)
-    for (let i = 0; i < inner.length; i += 1) mapping.push(state.toOriginalPos(start + 1 + i))
-    for (let i = 0; i < suffix.length; i += 1) mapping.push(closeAnchor)
-
-    edits.push({
-      start,
-      end,
-      replacement: `${prefix}${inner}${suffix}`,
-      anchor,
-      mapping,
-    })
-    derivationHelperUsed = true
-  }
-
   function visit(node) {
    
     if (tsxLike && ts.isJsxExpression(node) && node.expression && isDerivationShorthand(node.expression)) {
-      console.log(node.expression)
-      rewriteParenthesizedJsxExpression(node.expression)
+      rewriteParenthesized(node.expression)
     }
 
     if (ts.isCallExpression(node)) {
@@ -1725,9 +1709,6 @@ function rewriteParenthesizedDerivations(state, tsxLike) {
   visit(sourceFile)
   if (edits.length > 0) {
     state.applyEdits(edits)
-  }
-  if (derivationHelperUsed) {
-    ensureNamedImportFromModule(state, DERIVATION_HELPER, 'quarky')
   }
 }
 

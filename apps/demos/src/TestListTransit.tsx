@@ -130,7 +130,7 @@ function TodoList(input: FromTag<{
 
    return template(
       <ul class="todos">
-         {For(ætodos, t => t.id, (todo, $i) => (
+         {For(ætodos, t => t.id, (todo, $i) =>
             <li
                transit-key={todo.id}
                animate-item
@@ -140,10 +140,10 @@ function TodoList(input: FromTag<{
                <label>
                   <input type="checkbox" mu:checked={todo.ædone} />
                   <span>{todo.description}</span>
-                  <button on:click={() => remove(todo)} aria-label="Remove">X</button>
+                  <button on:click={() => remove(todo)} aria-label="Remove">{'X'}</button>
                </label>
             </li>
-         ))}
+         )}
       </ul>
    )
       .style(css`

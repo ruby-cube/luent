@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const ts = require('typescript') as typeof import('typescript')
-const { transformRXSSugarShared } = require('../../../scripts/transform-rxs-sugar.shared.cjs') as {
+const { transformRXSSugarShared } = require('../../scripts/transform-rxs-sugar.shared.cjs') as {
   transformRXSSugarShared: (input: { code: string; fileName: string }) => {
     code: string
     mapper: {

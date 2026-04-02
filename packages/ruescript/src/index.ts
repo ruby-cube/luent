@@ -1,1 +1,1 @@
-export * from "./absorb"
+export * from "./accessor-properties"

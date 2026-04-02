@@ -9,7 +9,7 @@ const {
   transformRXSSugarShared,
   toOriginalPosFromRemapTable,
   mapTextSpanFromRemapTable,
-} = require('../../../scripts/transform-rxs-sugar.shared.cjs') as {
+} = require('../../scripts/transform-rxs-sugar.shared.cjs') as {
   mapTextSpanFromSourceMap: (
     sourceMap: {
       version: number

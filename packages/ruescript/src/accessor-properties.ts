@@ -1,11 +1,10 @@
-import { Ion } from "@rue/quarky"
 import { Glass } from "@rue/types"
-import { isFunction } from "@rue/utils"
+import { isFunction, isObject } from "@rue/utils"
 
 type Absorbant<T> = {
    [K in keyof T as K extends `πæ${infer S}` ? S : K extends `æ${infer S}` ? S : K]:
-   K extends `πæ${string}` ? T[K] extends Ion<infer V> ? V : never
-   : K extends `æ${string}` ? T[K] extends Ion<infer V> ? V : never
+   K extends `πæ${string}` ? T[K] extends Get<infer V> ? V : never
+   : K extends `æ${string}` ? T[K] extends Get<infer V> ? V : never
    : T[K]
 } &{ [K in keyof T as K extends `πæ${infer S}` ? `æ${S}` : K]: T[K] }
 
@@ -68,4 +67,19 @@ export function destructureØ<T, P extends PropertyKey[]>(obj: T, ...keys: P): D
    }
    console.log('destructured', destructured)
    return destructured as Destructured<T, P[number]>
+}
+
+
+
+export type Get<T> = () => T
+
+const GETTER_PREFIX = 'æ'
+
+export function πæ<T, K>(obj: T, getterKey: K): K extends keyof T ? T[K] : K extends `æ${infer S}` ? S extends keyof T ? Get<T[S]> : K : K {
+   if (typeof getterKey !== 'string' || !getterKey.startsWith(GETTER_PREFIX)) throw new Error(`getterKey must be a string that starts with ${GETTER_PREFIX}`)
+   if (!isObject(obj)) throw new Error('obj must be an object')
+   if (getterKey in obj) return obj[getterKey];
+   const key = getterKey.slice(1)
+   const descriptor = Object.getOwnPropertyDescriptor(obj, key)
+   return (descriptor?.get?.bind(obj) ?? (() => obj[key])) as K extends keyof T ? T[K] : K extends `æ${infer S}` ? S extends keyof T ? Get<T[S]> : K : K
 }

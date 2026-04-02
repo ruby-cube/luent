@@ -32,7 +32,6 @@ declare global {
 
 export type RawJSXNode =
    RawJSXNode[]
-   | JSX.Element
    | DOMNode
    | string
    | Ion
@@ -41,7 +40,6 @@ export type RawJSXNode =
    | InnerHTMLKit
    | null
    | undefined
-// | MutableKit
 
 // export type JSXNode =
 //    | JSX.Element
@@ -138,13 +136,15 @@ export function wrapWithActivationType(type: GroupActivationType, Slot: RenderSl
    }
 }
 
-export function normalizeToRenderFunction(slot: ((...args: any[]) => RawJSXNode) | RawJSXNode) {
-   if (isIon(slot)) return function renderSlot() { return slot };
-   if (slot instanceof Function) {
-      return function renderSlot(...args: any[]) { return slot(...args) };
-   }
-   if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
-   return function renderSlot() { return slot };
+/**
+ * normalizes the last argument of template functions to render function
+ * @param lastArg 
+ * @returns 
+ */
+export function normalizeToRenderFunction(lastArg: ((...args: any[]) => RawJSXNode) | RawJSXNode) {
+   if (lastArg instanceof Function)
+      return lastArg;
+   return function render() { return lastArg };
 }
 
 export type ViewConfig = AwaitConfig & ContextConfig

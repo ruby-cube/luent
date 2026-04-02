@@ -1,5 +1,5 @@
 import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, EACH, as, isIon, isGetter, PRELUDE, $_derivation, dev, asIonic } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH, asIonic } from "@rue/quarky"
 
 interface Todo {
    id: number

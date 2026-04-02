@@ -56,7 +56,7 @@ function init(modules) {
       const languageService = info.languageService
       const host = info.languageServiceHost
       const transformCache = new Map()
-      const HIDDEN_HELPERS = ['absorbØ', 'destructureØ', 'πæ', 'æ']
+      const HIDDEN_HELPERS = ['absorbØ', 'destructureØ', 'πæ']
       const project = info.project
       const parsedConfigCache = new Map()
       const discoveredSugarFilesCache = new Map()
@@ -1296,7 +1296,7 @@ function init(modules) {
                continue
             }
 
-            if (entry.name === 'æ' || HIDDEN_HELPERS.includes(entry.name)) {
+            if (HIDDEN_HELPERS.includes(entry.name)) {
                continue
             }
 

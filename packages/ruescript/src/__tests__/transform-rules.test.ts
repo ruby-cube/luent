@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { transformRXSSugarShared } = require('../../../scripts/transform-rxs-sugar.shared.cjs') as {
+const { transformRXSSugarShared } = require('../../scripts/transform-rxs-sugar.shared.cjs') as {
   transformRXSSugarShared: (input: { code: string; fileName: string }) => { code: string }
 }
 
@@ -79,12 +79,11 @@ function View() {
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
     expect(transformed).toContain('const value = () => æcount() + 1')
     expect(transformed).toContain('const list = [ () => æcount() + 2 ]')
-    expect(transformed).toContain('value={æ(() => æcount() + 3)}')
+    expect(transformed).toContain('value={() => æcount() + 3}')
     expect(transformed).toContain('doThing(() => æcount() + 4)')
-    expect(transformed).toContain('import { æ } from "@rue/quarky"')
   })
 
-  it('rewrites JSX expression-container derivation with æ helper', () => {
+  it('rewrites JSX expression-container derivation as arrow function', () => {
     const input = `
 function View(value: number) {
   return <Comp value={(value + 1)}></Comp>
@@ -92,8 +91,7 @@ function View(value: number) {
 `
 
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
-    expect(transformed).toContain('import { æ } from "@rue/quarky"')
-    expect(transformed).toContain('value={æ(() => value + 1)}')
+    expect(transformed).toContain('value={() => value + 1}')
   })
 
   it('rewrites chained dot-notation @ access via tuple form and πæ nesting', () => {

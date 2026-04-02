@@ -1,1 +1,1 @@
-export * from './src/absorb.ts'
+export * from './src/accessor-properties.ts'

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { transformRXSSugarShared } = require('../../../scripts/transform-rxs-sugar.shared.cjs') as {
+const { transformRXSSugarShared } = require('../../scripts/transform-rxs-sugar.shared.cjs') as {
   transformRXSSugarShared: (
     input: { code: string; fileName: string },
     options?: { includeToTransformedPos?: boolean },
@@ -58,7 +58,7 @@ function Counter({ show@ }) {
 
   it('emits transformed reactive helpers', () => {
     expect(transformed.code).toContain('const æcount = Ion(0)')
-    expect(transformed.code).toContain('value={æ(() => æcount() + 2)}')
+    expect(transformed.code).toContain('value={() => æcount() + 2}')
     expect(transformed.code).toContain('{æcount()}')
   })
 
