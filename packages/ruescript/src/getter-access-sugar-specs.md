@@ -433,6 +433,6 @@ function FractionKit(æcount) {
 - Diagnostics are remapped from transformed virtual positions back to original sugar locations.
 - Transformer single source of truth: `packages/rxs/scripts/transform-rxs-sugar.shared.cjs`.
 - RueScript entrypoint wrapper: `packages/rxs/scripts/transform-rxs-sugar.mjs`.
-- TS Server plugin wrapper: `packages/tsserver-plugin-ruescript/transform-rxs-sugar.cjs`.
+- TS Server plugin wrapper: `plugins/tsserver-plugin-ruescript/transform-rxs-sugar.cjs`.
 - To run from root: `pnpm typecheck:rxs`
 - To run from package: `pnpm -F @rue/ruescript typecheck`

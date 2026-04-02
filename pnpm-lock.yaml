@@ -13,7 +13,7 @@ importers:
         version: 1.59.1
       '@rue/tsserver-plugin-ruescript':
         specifier: workspace:*
-        version: link:packages/tsserver-plugin-ruescript
+        version: link:plugins/tsserver-plugin-ruescript
       '@types/jsdom':
         specifier: ^28.0.1
         version: 28.0.1
@@ -101,7 +101,7 @@ importers:
         version: link:../../packages/types
       '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-luent
+        version: link:../../plugins/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -195,7 +195,7 @@ importers:
         version: link:../../packages/types
       '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-luent
+        version: link:../../plugins/vite-plugin-luent
       '@tailwindcss/vite':
         specifier: ^4.2.1
         version: 4.2.2(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.0)(esbuild@0.27.7)(jiti@2.6.1)(less@4.6.4)(sass@1.98.0)(stylus@0.62.0))
@@ -265,7 +265,7 @@ importers:
         version: link:../../packages/types
       '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-luent
+        version: link:../../plugins/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -341,7 +341,7 @@ importers:
         version: link:../../packages/types
       '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-luent
+        version: link:../../plugins/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -388,8 +388,6 @@ importers:
       '@vue/compiler-sfc':
         specifier: ^3.0.0-0
         version: 3.5.31
-
-  packages/babel-plugin-luent: {}
 
   packages/flask:
     dependencies:
@@ -449,8 +447,6 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/tsserver-plugin-ruescript: {}
-
   packages/types:
     devDependencies:
       '@types/node':
@@ -474,28 +470,6 @@ importers:
       typescript:
         specifier: ^5.5.4
         version: 5.9.3
-      vite:
-        specifier: ^8.0.3
-        version: 8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.0)(esbuild@0.27.7)(jiti@2.6.1)(less@4.6.4)(sass@1.98.0)(stylus@0.62.0)
-
-  packages/vite-plugin-luent:
-    dependencies:
-      '@rue/babel-plugin-luent':
-        specifier: workspace:*
-        version: link:../babel-plugin-luent
-      '@rue/luent':
-        specifier: workspace:*
-        version: link:../luent
-      '@rue/ruescript':
-        specifier: workspace:*
-        version: link:../ruescript
-    devDependencies:
-      '@babel/core':
-        specifier: ^7.25.2
-        version: 7.29.0
-      '@babel/plugin-syntax-typescript':
-        specifier: ^7.25.9
-        version: 7.28.6(@babel/core@7.29.0)
       vite:
         specifier: ^8.0.3
         version: 8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.0)(esbuild@0.27.7)(jiti@2.6.1)(less@4.6.4)(sass@1.98.0)(stylus@0.62.0)
@@ -525,6 +499,32 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../../types
+
+  plugins/babel-plugin-luent: {}
+
+  plugins/tsserver-plugin-ruescript: {}
+
+  plugins/vite-plugin-luent:
+    dependencies:
+      '@rue/babel-plugin-luent':
+        specifier: workspace:*
+        version: link:../babel-plugin-luent
+      '@rue/luent':
+        specifier: workspace:*
+        version: link:../../packages/luent
+      '@rue/ruescript':
+        specifier: workspace:*
+        version: link:../../packages/ruescript
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.25.2
+        version: 7.29.0
+      '@babel/plugin-syntax-typescript':
+        specifier: ^7.25.9
+        version: 7.28.6(@babel/core@7.29.0)
+      vite:
+        specifier: ^8.0.3
+        version: 8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.0)(esbuild@0.27.7)(jiti@2.6.1)(less@4.6.4)(sass@1.98.0)(stylus@0.62.0)
 
   tests:
     dependencies:
@@ -585,7 +585,7 @@ importers:
         version: link:../packages/types
       '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../packages/vite-plugin-luent
+        version: link:../plugins/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5

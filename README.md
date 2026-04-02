@@ -29,7 +29,7 @@ If IntelliSense in `.rxs` files is missing or slow in VS Code:
 
 1. Ensure workspace settings include:
 	 - `typescript.tsdk: node_modules/typescript/lib`
-	 - `typescript.tsserver.pluginPaths: ["./packages/tsserver-plugin-ruescript"]`
+	 - `typescript.tsserver.pluginPaths: ["./plugins/tsserver-plugin-ruescript"]`
 	 - `files.associations` for `*.rxs -> typescriptreact`
 2. Restart TypeScript server (`TypeScript: Restart TS Server`).
 3. If behavior is stale, run `Developer: Reload Window` once.
@@ -39,7 +39,7 @@ If IntelliSense in `.rxs` files is missing or slow in VS Code:
 - `.rxs` are resolved through the RueScript TS pipeline as virtual transformed `.ts`/`.tsx` modules.
 - This enables typed imports like `import { Counter } from "./Counter.rxs"` from regular `.ts`/`.tsx` files without manual per-file declaration stubs.
 - Typecheck entrypoint in this repo is `pnpm run typecheck` (backed by `rxs-tsc`), not plain `tsc`.
-- After changing plugin internals (`packages/tsserver-plugin-ruescript`), run `TypeScript: Restart TS Server` once to refresh editor diagnostics.
+- After changing plugin internals (`plugins/tsserver-plugin-ruescript`), run `TypeScript: Restart TS Server` once to refresh editor diagnostics.
 - If diagnostics still look stale after restart, run `Developer: Reload Window`.
 - Browser DevTools pretty-print can visually reformat transformed calls (for example showing `fn( () => ...)`); use raw module output (e.g. Vite `?import`) to verify exact emitted spacing.
 
