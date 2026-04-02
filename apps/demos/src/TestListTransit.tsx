@@ -1,5 +1,5 @@
 import { template, For, FromTag, Style, css } from "@rue/lumo";
-import { as, EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
+import { as, asIonic, EACH, Ion, Ionic, queuePrelude, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 
 // Modified Demo from Svelte
@@ -11,14 +11,14 @@ type Todo = {
 
 export function TestListTransit() {
 
-   const $todos = Ion(Ionic([
+   const $todos = Ion(asIonic([
       { id: 1, done: false, description: 'write some docs' },
       { id: 2, done: false, description: 'start writing blog post' },
       { id: 3, done: true, description: 'buy some milk' },
       { id: 4, done: false, description: 'mow the lawn' },
       { id: 5, done: false, description: 'feed the turtle' },
       { id: 6, done: false, description: 'fix some bugs' }
-   ], { [EACH]: as(Ionic) }));
+   ], { [EACH]: { '-as': asIonic } }));
 
    let uid = $todos().length + 1;
 
@@ -34,7 +34,7 @@ export function TestListTransit() {
             on:keydown={(e) => {
                if (e.key !== 'Enter') return;
 
-               $todos().push(Ionic({
+               $todos().push(asIonic({
                   id: uid++,
                   done: false,
                   description: e.currentTarget.value
@@ -124,7 +124,7 @@ function TodoList(input: FromTag<{
    // 'can:remove': (todo: Ionic<Todo>) => void
    remove: (todo: Ionic<Todo>) => void
 }>) {
-   const {ætodos, remove } = input
+   const { ætodos, remove } = input
 
    const lis: HTMLElement[] = []
 

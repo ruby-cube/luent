@@ -137,7 +137,7 @@ type $$Product = ReturnType<typeof IonicProduct>
 function IonicProduct(data: ProductData) {
 
 
-   return Ionic(new Product(data), {
+   return asIonic(new Product(data), {
       '@incrementQty'() {
 
       },
@@ -166,7 +166,7 @@ hook(product, {
 
 function Parent() {
 
-   const product = Ionic(new Product({}))
+   const product = asIonic(new Product({}))
 
    return template(
       <>

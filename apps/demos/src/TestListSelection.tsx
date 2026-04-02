@@ -1,7 +1,7 @@
 import { template, createRoot, For, listen, NodeRef, Style, target, css } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
-import { Ion, EACH, Ionic, as } from "@rue/quarky";
+import { Ion, EACH, Ionic, as, asIonic } from "@rue/quarky";
 
 class ListItem {
    constructor(
@@ -16,9 +16,9 @@ class ListItem {
 
 type ItemData = { id: number, content: string }
 
-const IonicItem = (data: ItemData) => Ionic(new ListItem(data.id, data.content))
+const asIonicItem = (data: ItemData) => asIonic(new ListItem(data.id, data.content))
 
-type IonicItem = ReturnType<typeof IonicItem>
+type IonicItem = ReturnType<typeof asIonicItem>
 
 // tests:
 // - IonicArray.push()
@@ -36,16 +36,16 @@ let newItemCount = 0;
 
 export function TestListSelection() {
 
-   const list = Ionic([
+   const list = asIonic([
       { id: genId(), content: "frog" },
       { id: genId(), content: "robin" },
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: as(IonicItem),
+      [EACH]: { '-as': asIonicItem },
 
       insert(index: number) {
-         const item = IonicItem({
+         const item = asIonicItem({
             id: genId(),
             content: 'new item ' + ++newItemCount
          })
@@ -67,7 +67,7 @@ export function TestListSelection() {
       }
    })
 
-   const selected = Ionic(new Set<IonicItem>(), {
+   const selected = asIonic(new Set<IonicItem>(), {
       toggle(item: IonicItem) {
          if (this.has(item)) {
             this.delete(item)
@@ -117,7 +117,7 @@ export function TestListSelection() {
                   {For(list, m => m.id, (item, $index) => (console.log('### item', item),
                      <div>
                         <div
-                           on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
+                           on:click={e => !e.by('style.cursor:pointer') && selected.toggle(item)}
                            style={{
                               'background-color': __TEST__ ? 'unset' : randomColor.get(),
                               outline: (selected.has(item) ? 'thick solid blue' : 'solid gray 1px'),

@@ -1,5 +1,5 @@
 import { FromTag, template } from "@rue/lumo"
-import { Ion, Ionic } from "@rue/quarky"
+import { asIonic, Ion, Ionic } from "@rue/quarky"
 import { Something } from "./external-file"
 
 type Frog = { name: string }
@@ -37,7 +37,7 @@ function Compo({ dog, something, list, mu: { frog } }: FromTag<CompoInput>) {
       if (frog) frog.name = 'sir robin' // OK
       dog.name = 'spot' // ERROR: Mutating external objects disallowed
       something.changeSomething() // ERROR: Mutating external objects disallowed
-      something.push()
+      something.push() // ERROR: Mutating external objects disallowed
       const s = something.readSomething() // OK
       something.getA()
       something.aboo
@@ -51,7 +51,7 @@ function Compo({ dog, something, list, mu: { frog } }: FromTag<CompoInput>) {
 
 function CompoB({ dog, mu }: FromTag<CompoInput>) {
 
-   const localObj = Ionic({ name: 'local', store: 9 })
+   const localObj = asIonic({ name: 'local', store: 9 })
 
    function doSomething() {
       mu.frog.name = 'sir robin' // OK
@@ -67,7 +67,7 @@ function CompoB({ dog, mu }: FromTag<CompoInput>) {
 
 function App() {
    const $count = Ion(0)
-   const frog = Ionic({ name: 'kermit' })
+   const frog = asIonic({ name: 'kermit' })
    const something = new Something()
 
    return template(

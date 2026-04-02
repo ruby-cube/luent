@@ -23,23 +23,23 @@ Some special features include:
 - readable async code
 - simple-to-use state machines
 
-## `.qrx` IntelliSense
+## `.rxs` IntelliSense
 
-If IntelliSense in `.qrx`/`.qrk` files is missing or slow in VS Code:
+If IntelliSense in `.rxs` files is missing or slow in VS Code:
 
 1. Ensure workspace settings include:
 	 - `typescript.tsdk: node_modules/typescript/lib`
-	 - `typescript.tsserver.pluginPaths: ["./packages/qrx-tsserver-plugin"]`
-	 - `files.associations` for `*.qrx -> typescriptreact` and `*.qrk -> typescript`
+	 - `typescript.tsserver.pluginPaths: ["./packages/rxs-tsserver-plugin"]`
+	 - `files.associations` for `*.rxs -> typescriptreact`
 2. Restart TypeScript server (`TypeScript: Restart TS Server`).
 3. If behavior is stale, run `Developer: Reload Window` once.
 
-### TS pipeline for `.qrx` imports
+### TS pipeline for `.rxs` imports
 
-- `.qrk`/`.qrx` are resolved through the Quarky TS pipeline as virtual transformed `.ts`/`.tsx` modules.
-- This enables typed imports like `import { Counter } from "./Counter.qrx"` from regular `.ts`/`.tsx` files without manual per-file declaration stubs.
-- Typecheck entrypoint in this repo is `pnpm run typecheck` (backed by `qrx-tsc`), not plain `tsc`.
-- After changing plugin internals (`packages/qrx-tsserver-plugin`), run `TypeScript: Restart TS Server` once to refresh editor diagnostics.
+- `.rxs` are resolved through the RueScript TS pipeline as virtual transformed `.ts`/`.tsx` modules.
+- This enables typed imports like `import { Counter } from "./Counter.rxs"` from regular `.ts`/`.tsx` files without manual per-file declaration stubs.
+- Typecheck entrypoint in this repo is `pnpm run typecheck` (backed by `rxs-tsc`), not plain `tsc`.
+- After changing plugin internals (`packages/rxs-tsserver-plugin`), run `TypeScript: Restart TS Server` once to refresh editor diagnostics.
 - If diagnostics still look stale after restart, run `Developer: Reload Window`.
 - Browser DevTools pretty-print can visually reformat transformed calls (for example showing `fn( () => ...)`); use raw module output (e.g. Vite `?import`) to verify exact emitted spacing.
 
@@ -48,13 +48,13 @@ If IntelliSense in `.qrx`/`.qrk` files is missing or slow in VS Code:
 - `semanticCooldownMs` (in `tsconfig.json` plugin config)
 	- Higher values reduce semantic-diagnostic churn while typing.
 	- Lower values increase immediacy of semantic updates.
-- Recommended default in this repo: `500`.
+- Current setting in this repo: `0` (for immediate semantic updates).
 
 For temporary profiling, you can set plugin options:
 - `profile: true`
 - `slowMs: <threshold>`
 
-Then inspect `TypeScript: Open TS Server Log` for `[qrx-tsserver-plugin] [perf]` lines.
+Then inspect `TypeScript: Open TS Server Log` for `[rxs-tsserver-plugin] [perf]` lines.
 
 
 

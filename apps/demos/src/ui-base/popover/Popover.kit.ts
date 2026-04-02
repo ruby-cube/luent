@@ -4,6 +4,11 @@ import { atDiscard, NodeRef, queueLayout } from "@rue/lumo"
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'
 
+let popoverID = 0
+
+export function getPopoverID() {
+   return popoverID++;
+}
 
 export class Popover {
    anchorName = ''
@@ -13,6 +18,25 @@ export class Popover {
       public alignment: Alignment,
       public gap: number
    ) {
+   }
+
+   configure(config: {
+      placement?: Placement, // TODO: alignment
+      alignment?: Alignment,
+      gap?: number
+   }) {
+      if (config.placement) {
+         console.log('#@# Placement')
+         this.configuredPlacement = config.placement
+      }
+      if (config.alignment) {
+         console.log('#@# Alignment')
+         this.alignment = config.alignment
+      }
+      if (config.gap) {
+         console.log('#@# Gap')
+         this.gap = config.gap
+      }
    }
 
    get placement() {
@@ -25,8 +49,8 @@ export class Popover {
 
    get above() { return this.placement === 'above' }
    get below() { return this.placement === 'below' }
-   get leftside() { return this.placement === 'left' }
-   get rightside() { return this.placement === 'right' }
+   get left() { return this.placement === 'left' }
+   get right() { return this.placement === 'right' }
 
 
    flipped: boolean = false;

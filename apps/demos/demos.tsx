@@ -8,8 +8,8 @@ import { TestListTransit } from "./src/TestListTransit"
 import { TestIfElse } from "./src/TestIfElse"
 import { TodoMVC } from "./src/TodoMVC"
 // import { } from "./src/TodoMVC"
-import { TrafficLight } from "./src/TrafficLight.qrx"
-import { VideoPlayer } from "./src/VideoPlayer.qrx"
+import { TrafficLight } from "./src/TrafficLight.rxs"
+import { VideoPlayer } from "./src/VideoPlayer.rxs"
 import { TestMarkdownApp } from "./src/MarkdownApp"
 import { TreeApp } from "./src/TestTreeApp"
 import { TestAsyncSelect } from "./src/TestAsyncSelect"
@@ -39,7 +39,7 @@ import { TestNullIon } from "./src/TestNullIon"
 import { TestRetracking } from "./src/TestRetracking"
 
 export function runDemo() {
-   const app = createRoot(TodoMVC)
+   const app = createRoot(VideoPlayer)
 
    app.mount('#root')
 }

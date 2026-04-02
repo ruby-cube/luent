@@ -1,18 +1,18 @@
-import { template, For, target } from "@rue/lumo";
-import { Ion, Ionic } from "@rue/quarky";
+import { template, For } from "@rue/lumo";
+import { asIonic, Ion, Ionic } from "@rue/quarky";
 
 let num = 0
 
 
 export function TestForSetAndMap() {
 
-   const set = Ionic(new Set(), {
+   const set = asIonic(new Set(), {
       addNumber() {
          this.add(num++)
       }
    })
 
-   const map = Ionic(new Map(), {
+   const map = asIonic(new Map(), {
       setPair() {
          this.set(num++, 'B' + num)
       }
@@ -22,7 +22,7 @@ export function TestForSetAndMap() {
       <div>
          <button on:click={e => map.setPair()}>+</button>
          {For(map, ([$key, $value], i) =>
-            <p on:click={e => !target('span') && map.delete($key())}>
+            <p on:click={e => !e.by('span') && map.delete($key())}>
                ({i}) {$key} - <span on:click={e => { console.log('clicked'); map.set($key(), "A" + $value()) }}>{$value}</span>
             </p>
          )}
@@ -37,7 +37,7 @@ export function TestForSetAndMap() {
 
 export function TestForSetAndMapIons() {
 
-   const $set = Ion(Ionic(new Set()), {
+   const $set = Ion(asIonic(new Set()), {
       addNumber() {
          this.value.add(num++)
       },
@@ -46,7 +46,7 @@ export function TestForSetAndMapIons() {
       }
    })
 
-   const $map = Ion(Ionic(new Map()), {
+   const $map = Ion(asIonic(new Map()), {
       setPair() {
          this.value.set(num++, 'B' + num)
       },
@@ -62,7 +62,7 @@ export function TestForSetAndMapIons() {
       <div>
          <button on:click={e => $map.setPair()}>+</button>
          {For($map, ([$key, $value], i) =>
-            <p on:click={e => !target('span') && $map.delete($key())}>
+            <p on:click={e => !e.by('span') && $map.delete($key())}>
                ({i}) {$key} - <span on:click={e => { console.log('clicked'); $map.set($key(), "A" + $value()) }}>{$value}</span>
             </p>
          )}

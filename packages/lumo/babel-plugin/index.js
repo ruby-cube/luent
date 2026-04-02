@@ -346,7 +346,7 @@ function transformTemplateCallExpressions(path) {
 
 
 function normalizeSlotToRenderFunction(paths) { // returns jsxExpressionContainer with arrowFunctionExpression
-   if (slotIsRenderFunction(paths)) return paths[0].node; // TODO: still need to transform return of renderfunction if is derivation 
+   // if (slotIsRenderFunction(paths)) return paths[0].node; // TODO: still need to transform return of renderfunction if is derivation 
    return transformChildrenToRenderFunction(paths)
 }
 
@@ -427,16 +427,16 @@ function isDerivationShorthand(node) {
 
 
 
-function slotIsRenderFunction(paths) {
-   // if (paths.length !== 1) return false;
-   const child = paths[0].node;
-   if (!t.isJSXExpressionContainer(child)) return false;
-   const expression = child.expression
-   if (t.isArrowFunctionExpression(expression))
-      // || t.isFunctionExpression(expression) && !expression.id.name.startsWith('$drv'))
-      return true;
-   return false;
-}
+// function slotIsRenderFunction(paths) {
+//    // if (paths.length !== 1) return false;
+//    const child = paths[0].node;
+//    if (!t.isJSXExpressionContainer(child)) return false;
+//    const expression = child.expression
+//    if (t.isArrowFunctionExpression(expression))
+//       // || t.isFunctionExpression(expression) && !expression.id.name.startsWith('$drv'))
+//       return true;
+//    return false;
+// }
 
 function isJSXRoot(node) {
    return t.isJSXFragment(node) || t.isJSXElement(node)
@@ -569,10 +569,11 @@ function transformJSXAttributes(jsxElementPath) {
       //    transformArrayElements(attribute.get('value.expression.elements'))
       // }
       // else 
-      if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
-         transformTargetCall(value.expression);
-      }
-      else if (namespaceName !== 'on' && namespaceName !== 'mu' && namespaceName !== 'Slot') {
+      // if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
+      //    transformTargetCall(value.expression);
+      // }
+      // else 
+      if (namespaceName !== 'on' && namespaceName !== 'mu' && namespaceName !== 'Slot') {
          transformIfDerivationShorthand(attribute.get('value.expression'))
       }
       else {
@@ -608,14 +609,8 @@ function transformTargetCall(eventListenerNode) {
 function transformJSXSlot(path) {
    const children = path.get('children')
    if (children.length === 0) return;
-   // if (hasNamedSlot(children)) {
-   //    return;
-   // }
-   // else {
-   // console.log('not hasNamedSlot', path.node)
    transformJSXChildren(children)
    path.node.children = [normalizeSlotToRenderFunction(children)]
-   // }
 }
 
 // function hasNamedSlot(childPaths) {
@@ -784,17 +779,17 @@ function transformObjectProperties(paths) {
 
 
 
-function hasTargetedEvent(value) {
-   return t.isArrowFunctionExpression(value) &&
-      t.isLogicalExpression(value.body) &&
-      (isTargetCall(value.body.left) ||
-         t.isUnaryExpression(value.body.left, { operator: '!' }) &&
-         isTargetCall(value.body.left.argument))
-}
+// function hasTargetedEvent(value) {
+//    return t.isArrowFunctionExpression(value) &&
+//       t.isLogicalExpression(value.body) &&
+//       (isTargetCall(value.body.left) ||
+//          t.isUnaryExpression(value.body.left, { operator: '!' }) &&
+//          isTargetCall(value.body.left.argument))
+// }
 
-function isTargetCall(node) {
-   return t.isCallExpression(node) && node.callee.name === 'target'
-}
+// function isTargetCall(node) {
+//    return t.isCallExpression(node) && node.callee.name === 'target'
+// }
 
 function toRenderFunction(node) {
    return t.arrowFunctionExpression(

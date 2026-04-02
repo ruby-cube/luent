@@ -143,8 +143,8 @@ export function makeComponent(
    fromTag: ComponentConfig,
    // $index: Ion<number> | undefined
 ): Component {
-   const { ref, class: classes, style: styles, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, ...other } = fromTag
-   const { hooks, events, attributes, transitions, namedSlots } = analyzeAttributes(other)
+   const { ref, class: classes, style: styles, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, Slot: forwardSlot, ...other } = fromTag
+   const { hooks, events, attributes, transitions } = analyzeAttributes(other)
    console.log('component tag config', fromTag)
    console.log('component hooks', hooks)
    console.log('component events', events)
@@ -156,7 +156,7 @@ export function makeComponent(
       hooks: { flask: getFlask(), ...hooks, ...forwardHooks },
       ...attributes,
       transitions: { ...transitions, ...forwardTransitions },
-      Slot,
+      Slot: Slot ?? forwardSlot,
       classes,
       styles,
       ref

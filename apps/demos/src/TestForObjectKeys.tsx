@@ -1,8 +1,8 @@
 import { template, For } from "@rue/lumo";
-import { Ionic } from "@rue/quarky";
+import { asIonic, Ionic } from "@rue/quarky";
 
 export function TestForObjectKeys() {
-   const obj = Ionic({
+   const obj = asIonic({
       a: 1,
       b: 2,
       c: 3

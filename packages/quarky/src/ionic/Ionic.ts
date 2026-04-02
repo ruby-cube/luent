@@ -109,7 +109,7 @@ type IonicConfig<T> = {
 
 
 export const Ionic = _Ionic as typeof _Ionic & { '~Ionic': true }
-export const asIonic = Ionic as <T>(obj: T) => IonicProxy & T
+export const asIonic = Ionic
 
 export function _Ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<AbsorbIons<T>, M> {
    if (isIonicProxy(target)) {

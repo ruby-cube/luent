@@ -7,7 +7,7 @@ export default defineConfig(async () => {
 
    return {
       resolve: {
-         extensions: ['.ts', '.tsx', '.qrx'],
+         extensions: ['.ts', '.tsx', '.rxs'],
       },
       esbuild: {
          charset: 'utf8'

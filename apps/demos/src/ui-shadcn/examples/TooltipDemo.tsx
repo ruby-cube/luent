@@ -26,13 +26,7 @@ const demoBoxStyle = ""
 
 export function TooltipDemo() {
    const { tooltip, asTooltipTrigger } = TooltipKit({
-      placement: 'above',
-      // placement: 'below',
-      // placement: 'left',
-      // placement: 'right',
-      // alignment: 'end',
-      alignment: 'start',
-      info: {
+      info: { // TODO: remove info?
          bold: 'Bold Bold Bold Bold',
          italic: 'Italic',
          underline: 'Underline'
@@ -58,7 +52,7 @@ export function TooltipDemo() {
             <Button at:create={asTooltipTrigger.underline} variant="outline">
                U
             </Button>
-            <Tooltip tooltip={tooltip}>
+            <Tooltip tooltip={tooltip} place="above" align="center">
                <p>{(tooltip.info)}</p>
                <p>{(tooltip.info)}</p>
                <p>{(tooltip.info)}</p>

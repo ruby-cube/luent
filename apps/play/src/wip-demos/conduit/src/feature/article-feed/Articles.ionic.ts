@@ -126,7 +126,7 @@ function asIonicArticle(data: ArticleData) {
    return depot.getIonic(data.slug) ?? depot.createIonic(() => {
       const db = fromRoot(fetchArticles.db)
 
-      return Ionic(asArticle(data), article => ({
+      return asIonic(asArticle(data), article => ({
          $author: AsyncIon({
             initial: asIonicProfile(article.super.author),
             sync: true,

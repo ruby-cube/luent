@@ -1,5 +1,5 @@
 import { template, FromTag } from "@rue/lumo"
-import { Ion, Ionic, watch } from "@rue/quarky"
+import { asIonic, Ion, Ionic, watch } from "@rue/quarky"
 
 // absorbed ions
 // get something 
@@ -90,7 +90,7 @@ function fetchUser(id: Ion<string>) {
 }
 
 
-const animal = Ionic({
+const animal = asIonic({
    name: "creature",
 
    // absorbed ion

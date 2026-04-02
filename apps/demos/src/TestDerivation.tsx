@@ -1,10 +1,10 @@
 import { For, template } from "@rue/lumo";
-import { Ion, Ionic, PRELUDE, SYNC, watch } from "@rue/quarky";
+import { asIonic, Ion, Ionic, PRELUDE, SYNC, watch } from "@rue/quarky";
 
 
 
 export function TestDerivation() {
-   const count = Ionic({
+   const count = asIonic({
       balue: 0
    })
 
@@ -18,7 +18,7 @@ export function TestDerivation() {
 }
 
 export function TestDerivationA() {
-   const count = Ionic({
+   const count = asIonic({
       balue: 0
    })
 
@@ -36,7 +36,7 @@ export function TestDerivationA() {
 }
 
 export function TestDerivationB() {
-   const count = Ionic({
+   const count = asIonic({
       balue: 0
    })
 
@@ -58,7 +58,7 @@ export function TestDerivationB() {
 }
 
 export function TestDerivationD() {
-   const count = Ionic({
+   const count = asIonic({
       balue: 0
    })
 
@@ -81,7 +81,7 @@ export function TestDerivationD() {
 
 
 export function TestDerivationC() {
-   const count = Ionic({
+   const count = asIonic({
       balue: 0
    })
 

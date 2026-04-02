@@ -173,14 +173,6 @@ export class TrackedAtom {
       console.log('link effect', effect, effect.phase, this.effects)
    }
 
-   // unlink(effect: Effect) {
-   //    this.getEffects(effect.phase).delete(effect)
-   // }
-
-   // isLinked(effect: Effect) {
-   //    return this.getEffects(effect.phase).effects.has(effect)
-   // }
-
    triggerEffects() {
       const phases = this.phases
       const cycle = $activeUpdate().cycle as unknown as RenderCycle

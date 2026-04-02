@@ -19,7 +19,7 @@ function FractionKit(count@: Ion<number>) {
    }
 }
 
-export function QrxCounter({ showFractions@ }: FromTag<{ showFractions: MutableIon<boolean> }>) {
+export function RXSCounter({ showFractions@ }: FromTag<{ showFractions: MutableIon<boolean> }>) {
 
    get count = Ion(0, {
       increment() {

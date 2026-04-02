@@ -1,5 +1,5 @@
 import { template, For, FromTag, Style, css, } from "@rue/lumo"
-import { as, EACH, Ion, Ionic } from "@rue/quarky"
+import { as, asIonic, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
 // features
@@ -13,20 +13,20 @@ type Stat = {
 export function SVGPolygonApp() {
    const $newLabel = Ion('')
 
-   const stats = Ionic([
+   const stats = asIonic([
       { label: 'A', value: 100 },
       { label: 'B', value: 100 },
       { label: 'C', value: 100 },
       { label: 'D', value: 100 },
       { label: 'E', value: 100 },
       { label: 'F', value: 100 }
-   ], { [EACH]: as(Ionic) })
+   ], { [EACH]: { '-as': Ionic } })
 
 
    function add(e: any) {
       e.preventDefault()
       if (!$newLabel()) return
-      stats.push(Ionic({
+      stats.push(asIonic({
          label: $newLabel(),
          value: 100
       }))

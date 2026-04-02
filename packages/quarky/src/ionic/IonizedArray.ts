@@ -1,5 +1,5 @@
 import { quarkOf } from "../abstract/Quark";
-import { EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
+import { asIonic, EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
 import { defineIonicCollection } from "./IonicDef";
 import { isIonicProxy, toRaw } from "./IonicModel";
 import type{  ProxyKey, triggerOp } from "./ModelQuark";
@@ -147,7 +147,7 @@ defineIonicCollection(Array, {
 }, {
    [Symbol.iterator]() {
       this.trackModel()
-      return Ionic(this.ionic[Symbol.iterator]())
+      return asIonic(this.ionic[Symbol.iterator]())
    },
 
    at(index) {
@@ -156,17 +156,17 @@ defineIonicCollection(Array, {
 
    concat(...args: any[]) {
       // this.trackModel()
-      return Ionic(this.ionic.concat(...args))
+      return asIonic(this.ionic.concat(...args))
    },
 
    filter(predicate, thisArg) {
       // this.trackModel()
-      return Ionic(this.ionic.filter(predicate, thisArg))
+      return asIonic(this.ionic.filter(predicate, thisArg))
    },
 
    map(callback, thisArg) {
       // this.trackModel()
-      return Ionic(this.ionic.map(callback, thisArg))
+      return asIonic(this.ionic.map(callback, thisArg))
    },
 
    keys() {
@@ -177,13 +177,13 @@ defineIonicCollection(Array, {
 
    slice(start?, end?) {
       // this.trackModel()
-      return Ionic(this.ionic.slice(start, end))
+      return asIonic(this.ionic.slice(start, end))
    },
 
    // TODO: test if this functions properly
    toSpliced(start, deleteCount, ...args) {
       // this.trackModel()
-      return Ionic(this.ionic.toSpliced(start, deleteCount, ...args))
+      return asIonic(this.ionic.toSpliced(start, deleteCount, ...args))
    },
 
    // pop(){
@@ -213,17 +213,17 @@ defineIonicCollection(Array, {
 
    toSorted(compare) {
       // this.trackModel()
-      return Ionic(this.ionic.toSorted(compare))
+      return asIonic(this.ionic.toSorted(compare))
    },
 
    toReversed() {
       // this.trackModel()
-      return Ionic(this.ionic.toReversed())
+      return asIonic(this.ionic.toReversed())
    },
 
    with(index, value) {
       // this.trackModel()
-      return Ionic(this.ionic.with(index, value))
+      return asIonic(this.ionic.with(index, value))
    }
 })
 

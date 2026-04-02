@@ -1,6 +1,6 @@
 
 import { template, Else, For, FromTag, If } from '@rue/lumo'
-import { Ion, Ionic } from '@rue/quarky'
+import { asIonic, Ion, Ionic } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 import "./style.css"
 import "./SortableTable.css"
@@ -41,7 +41,7 @@ type SortableTableInput = FromTag<{
 function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
 
    const $sortKey = Ion('')
-   const sortOrders = Ionic(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
+   const sortOrders = asIonic(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
 
    const $filteredData = Ion(() => {
       let filteredData = data;

@@ -1,5 +1,5 @@
 import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround } from "@rue/lumo";
-import { as, EACH, Ion, Ionic, Nested, } from "@rue/quarky";
+import { as, asIonic, EACH, Ion, Ionic, Nested, } from "@rue/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
 
@@ -48,20 +48,23 @@ class TreeItem {
 
 // # Ionizers
 
-
 type IonicTreeItem = Ionic<TreeItem, Nested<{ children: Ionic<IonicTreeItem[]> | undefined }>>
 
-function IonicTreeItem(item: TreeItemData | TreeItem) {
+function asIonicTreeItem(item: TreeItemData | TreeItem) {
    if (item instanceof TreeItem) {
-      return Ionic(item, { children: as(IonicChildren) })
+      return asIonic(item, {
+         children: { '-as': asIonicChildren }
+      })
    }
-   return Ionic(new TreeItem(item.name, TreeChildren(item.children)), { children: as(IonicChildren) })
+   return asIonic(new TreeItem(item.name, TreeChildren(item.children)), {
+      children: { '-as': asIonicChildren }
+   })
 }
 
-function IonicChildren(children: TreeItem[] | undefined): Ionic<IonicTreeItem[]> | undefined {
+function asIonicChildren(children: TreeItem[] | undefined): Ionic<IonicTreeItem[]> | undefined {
    if (!children) return undefined;
-   return Ionic(children, {
-      [EACH]: as(IonicTreeItem)
+   return asIonic(children, {
+      [EACH]: { '-as': asIonicTreeItem }
    })
 }
 
@@ -73,7 +76,7 @@ function TreeChildren(children?: TreeItemData[]): TreeItem[] | undefined {
 // # Tree App
 
 export function TreeApp() {
-   const root = IonicTreeItem(getTreeItemData())
+   const root = asIonicTreeItem(getTreeItemData())
 
    console.log('root', root.children)
 
@@ -106,8 +109,8 @@ function TreeItemView(input: FromTag<{
    function changeType() {
       console.log('change type')
       if (!$isFolder()) {
-         item.children = IonicChildren([])
-         item.addChild(IonicTreeItem({ name: 'stuff' }))
+         item.children = asIonicChildren([])
+         item.addChild(asIonicTreeItem({ name: 'stuff' }))
          $isOpen.value = true
       }
    }
@@ -120,7 +123,7 @@ function TreeItemView(input: FromTag<{
             on:click={e => $isOpen.toggle()}
             on:dblclick={changeType}
          >
-            {item.$name}
+            {item.æname}
             {If($isFolder,
                <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
@@ -130,7 +133,7 @@ function TreeItemView(input: FromTag<{
                {For(item.children!, m => m, item => (
                   <TreeItemView item={item}></TreeItemView>
                ))}
-               <li class='add' on:click={e => item.addChild(IonicTreeItem({ name: 'stuff' }))}>+</li>
+               <li class='add' on:click={e => item.addChild(asIonicTreeItem({ name: 'stuff' }))}>+</li>
             </ul>
          )}
       </li>

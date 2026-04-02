@@ -10,7 +10,7 @@ type Todo = {
    completed: boolean
 }
 
-const ionicTodos = (todos: Todo[]) => Ionic(todos, { [EACH]: as(Ionic) })
+const ionicTodos = (todos: Todo[]) => Ionic(todos, { [EACH]: { '-as': Ionic } })
 
 describe('remaining tracking', () => {
    it('keeps tracking every todo.completed after toggle-all on then off', () => {

@@ -26,7 +26,7 @@ const generateId = () => Date.now().toString(36);
 // })
 
 
-const asIonicTodo = AsNestedAsync(data => [data.id, Ionic(new Todo(data)), {
+const asIonicTodo = AsNestedAsync(data => [data.id, asIonic(new Todo(data)), {
    refetch: () => db.getTodo(data.id),
    update(todo, data) { // custom updater
       return updateProperties(todo, {
@@ -58,18 +58,18 @@ function AsyncModel<D extends AnyObject>(initialData: D, fetch: () => D, config:
 
 
 
-const todos = Ionic([], {
+const todos = asIonic([], {
    '-fetch': () => db.getTodos($id()),
    [EACH]: {
-      as: data => Ionic(data, {
+      '-as': data => asIonic(data, {
          '-refetch': () => db.getTodo(data.id)
       })
    }
 })
 
-const todos = Ionic([], {
+const todos = asIonic([], {
    '-fetch': () => db.getTodos($id()),
-   [EACH]: { as: IonicTodo },
+   [EACH]: { '-as': asIonicTodo },
 })
 
 
@@ -129,9 +129,9 @@ function asNestedAsync<T extends AnyObject, M extends ModelMethods>(data: T, uid
 // identical: set todos or set all properties
 // partial overlap: set some properties, some may overlap
 
-function IonicTodos(data: Todo[]) {
-   return Ionic(data, {
-      [EACH]: IonicTodo,
+function asIonicTodos(data: Todo[]) {
+   return asIonic(data, {
+      [EACH]: { '-as': asIonicTodo },
       '-patch': patchIonicArray
    })
 }
@@ -190,13 +190,13 @@ function patchIonicArray(data) {
 }
 
 
-function IonicTodo(data: AnyObject) {
-   return Ionic(data, {
+function asIonicTodo(data: AnyObject) {
+   return asIonic(data, {
       '-wrap': data => new Todo(data),
       '-getID': n => n.id,
       '-refetch': () => db.getTodo(data.id),
       '-patch': patchObject,
-      profile: { '-as': IonicProfile },
+      profile: { '-as': asIonicProfile },
    })
 }
 
@@ -248,7 +248,7 @@ function patchDeepIon(data: any) {
    if (id) {
 
    }
-      return this.value = this.value.patch(data)
+   return this.value = this.value.patch(data)
 }
 
 export default function TodoApp() {

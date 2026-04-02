@@ -1,5 +1,5 @@
 import { atDiscard, createRoot, template } from "@rue/lumo";
-import { Ion, Ionic } from "@rue/quarky";
+import { asIonic, Ion, Ionic } from "@rue/quarky";
 import { As } from "../../../../packages/lumo/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
@@ -20,7 +20,7 @@ export function BottomlessBlokkis() {
     const $blokkColor = Ion(BLOKK_COLOR)
 
     function createBlokk() {
-        return Ionic(makeBlokk(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
+        return asIonic(makeBlokk(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
     }
 
     function randomShape() {

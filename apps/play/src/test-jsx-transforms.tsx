@@ -1,6 +1,5 @@
 
 import { template, If, JSXNode, FromTag, } from "@rue/lumo";
-import { ion } from "@rue/quarky";
 
 // - [ ]  transform slot to render function for:
 
@@ -262,7 +261,6 @@ export default function (babel) {
 }
 
 
-// - [ ]  add `e` argument to `target()`
 // - [ ]  transform default input value to a getter function `v<string>('??')('dog')`
 
 

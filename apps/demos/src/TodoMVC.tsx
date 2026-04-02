@@ -1,5 +1,5 @@
 import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/lumo"
-import { watch, queueIonicTask, Ion, Ionic, EACH, as, isIon, isGetter, PRELUDE, $_derivation, dev } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH, as, isIon, isGetter, PRELUDE, $_derivation, dev, asIonic } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -13,11 +13,11 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 type IonicTodo = Ionic<Todo>
 
-const IonicTodos = (todos: Todo[]) => Ionic(todos, { [EACH]: as(Ionic) })
+const asIonicTodos = (todos: Todo[]) => asIonic(todos, { [EACH]: { '-as': asIonic } })
 
 export function TodoMVC() {
 
-   const ætodos = Ion(IonicTodos(getTodos()))
+   const ætodos = Ion(asIonicTodos(getTodos()))
    const æview = Ion('all' as keyof typeof filters)
 
    const filters = {
@@ -26,7 +26,7 @@ export function TodoMVC() {
       completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
    }
 
-   const æfilteredTodos = Ion(() => IonicTodos(filters[æview()](ætodos())))
+   const æfilteredTodos = Ion(() => asIonicTodos(filters[æview()](ætodos())))
    const æremaining = Ion(() => filters.active(ætodos()).length)
    const ætodoCount = Ion(() => ætodos().length)
 
@@ -68,7 +68,7 @@ export function TodoMVC() {
    // # todos methods
 
    function addTodo(title: string) {
-      ætodos().push(Ionic({
+      ætodos().push(asIonic({
          id: Date.now(),
          title,
          completed: false
@@ -80,7 +80,7 @@ export function TodoMVC() {
    }
 
    function removeCompleted() {
-      ætodos.value = IonicTodos(filters.active(ætodos()))
+      ætodos.value = asIonicTodos(filters.active(ætodos()))
    }
 
 

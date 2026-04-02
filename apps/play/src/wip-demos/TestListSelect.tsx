@@ -1,7 +1,7 @@
 import { template, For, Style, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
-import { EACH, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";
+import { asIonic, EACH, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";
 import { instantUpdate, Ion, queueTask } from "@rue/quarky";
 
 class ListItem {
@@ -17,23 +17,23 @@ class ListItem {
 
 type ItemData = { id: number, content: string }
 
-const IonicItem = (data: ItemData) => Ionic(new ListItem(data.id, data.content))
+const asIonicItem = (data: ItemData) => asIonic(new ListItem(data.id, data.content))
 
-type QItem = ReturnType<typeof IonicItem>
+type QItem = ReturnType<typeof asIonicItem>
 
 
 export function TestListSelect() {
 
-   const list = Ionic([
+   const list = asIonic([
       { id: genId(), content: "frog" },
       { id: genId(), content: "robin" },
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { '-as': IonicItem }, // TODO: type
+      [EACH]: { '-as': asIonicItem }, // TODO: type
 
       insert(index: number) {
-         const item = IonicItem({
+         const item = asIonicItem({
             id: genId(),
             content: (Math.random() * 100).toString()
          })
@@ -51,7 +51,7 @@ export function TestListSelect() {
       }
    })
 
-   const selected = Ionic(new Set<QItem>(), {
+   const selected = asIonic(new Set<QItem>(), {
       toggle(item: QItem) {
          if (this.has(item)) {
             this.delete(item)
@@ -87,7 +87,7 @@ export function TestListSelect() {
                {For(list, m => m.id, (item, $index) => (
                   <div>
                      <div
-                        on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
+                        on:click={e => !e.by('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
                         style={{
                            backgroundColor: randomColor.get(),
                            outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
@@ -142,7 +142,7 @@ function iteratorTests(list: any[], selected: Set<any>) {
       console.log('$$$ value of list', value)
    }
 
-   const ionizedValues = Ionic(list.values())
+   const ionizedValues = asIonic(list.values())
    for (const value of ionizedValues) {
       console.log('$$$ value of ionized values()', value)
    }

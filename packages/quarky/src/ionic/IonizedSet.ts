@@ -37,7 +37,7 @@ export function installIonicSet() {
    }, {
       [Symbol.iterator]() {
          this.trackModel()
-         return Ionic(this.raw[Symbol.iterator]()) // TODO: Not sure yet, but the raw iterator may yield inconsistent current/pending state; however if this.ionic is used, the proxy receiver becomes invalid
+         return asIonic(this.raw[Symbol.iterator]()) // TODO: Not sure yet, but the raw iterator may yield inconsistent current/pending state; however if this.ionic is used, the proxy receiver becomes invalid
       },
       forEach: SetlikeDef.forEach,
       keys: SetlikeDef.keys,
@@ -46,22 +46,22 @@ export function installIonicSet() {
 
       difference(other) {
          this.trackModel()
-         return Ionic(this.raw.difference(other))
+         return asIonic(this.raw.difference(other))
       }, // newSet = difference(otherSet) 
 
       union(other) {
          this.trackModel()
-         return Ionic(this.raw.union(other))
+         return asIonic(this.raw.union(other))
       },
 
       intersection(other) {
          this.trackModel()
-         return Ionic(this.raw.intersection(other))
+         return asIonic(this.raw.intersection(other))
       },
       
       symmetricDifference(other) {
          this.trackModel()
-         return Ionic(this.raw.symmetricDifference(other))
+         return asIonic(this.raw.symmetricDifference(other))
       },
 
       isSubsetOf(other) {
@@ -128,17 +128,17 @@ export const SetlikeDef: IonicDef<Setlike<unknown>> = {
 
    keys() {
       this.trackModel()
-      return Ionic(this.raw.keys())
+      return asIonic(this.raw.keys())
    },
 
    values() {
       this.trackModel()
-      return Ionic(this.raw.values())
+      return asIonic(this.raw.values())
    },
 
    entries() {
       this.trackModel()
-      return Ionic(this.raw.entries())
+      return asIonic(this.raw.entries())
    },
 
    has(key) {

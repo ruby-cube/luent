@@ -1,11 +1,11 @@
 import { template, For, css } from "@rue/lumo"
-import { Ion, Ionic, PRELUDE, watch } from "@rue/quarky"
+import { asIonic, Ion, Ionic, PRELUDE, watch } from "@rue/quarky"
 
 // Adapted from Vue's CRUDApp demo
 
 export function CRUDApp() {
 
-   const names = Ionic(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
+   const names = asIonic(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
    const $selected = Ion('')
    const $filterKey = Ion('')
    const $first = Ion('')

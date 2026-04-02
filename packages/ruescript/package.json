@@ -1,0 +1,32 @@
+{
+   "name": "@rue/ruescript",
+   "private": true,
+   "description": "",
+   "module": "./index.mjs",
+   "main": "./index.cjs",
+   "exports": {
+      ".": {
+         "import": "./index.mjs",
+         "require": "./index.cjs",
+         "default": "./index.mjs"
+      },
+      "./transform": {
+         "import": "./scripts/transform-rxs-sugar.mjs",
+         "require": "./index.cjs"
+      }
+   },
+   "scripts": {
+      "typecheck": "node ./scripts/rxs-tsc.mjs -p ../../tsconfig.json",
+      "test:position-mapping": "pnpm exec vitest run src/__tests__/position-mapping.test.ts",
+      "emit:transform": "node ./scripts/emit-transformed-rxs.mjs"
+   },
+   "dependencies": {
+      "@rue/quarky": "workspace:*",
+      "@rue/utils": "workspace:*"
+   },
+   "devDependencies": {
+      "@rue/types": "workspace:*"
+   },
+   "author": "Ruby Yi Wang",
+   "license": "MIT"
+}

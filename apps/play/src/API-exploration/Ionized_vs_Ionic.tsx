@@ -2,8 +2,8 @@
 
 // WINNER:
 export function List() {
-   const list = Ionic([])
-   const user = Ionic({
+   const list = asIonic([])
+   const user = asIonic({
       id: 0,
       name: 'john'
    })

@@ -13,7 +13,7 @@
     "@rue/flask": "workspace:*",
     "@rue/jsx-runtime": "workspace:*",
     "@rue/lumo": "workspace:*",
-    "@rue/qrx": "workspace:*",
+    "@rue/ruescript": "workspace:*",
     "@rue/quarky": "workspace:*",
     "@rue/thread": "workspace:*",
     "@rue/utils": "workspace:*",

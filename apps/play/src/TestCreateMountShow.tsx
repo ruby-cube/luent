@@ -1,5 +1,5 @@
 import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, css } from "@rue/lumo";
-import { instantUpdate, Ion, Ionic } from "@rue/quarky";
+import { asIonic, instantUpdate, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
 function Counter(input: FromTag<{
@@ -251,7 +251,7 @@ export function TestCreateMountShow() {
          <h3>View Lifecycle Hooks</h3>
          <section>{() => {
             const $tab = Ion(1)
-            const logs = Ionic([] as string[])
+            const logs = asIonic([] as string[])
 
             function log(msg: string) {
                logs.push(msg)

@@ -2,6 +2,7 @@ import { FromTag, If, NodeRef, RenderSlot, template } from "@rue/lumo"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
 import { mergeTailwind } from "../utils/utils"
 import { IonicTooltip } from "../ui-base/tooltip/Tooltip.kit";
+import { Alignment, Placement } from "../ui-base/popover/Popover.kit";
 
 // const transitionInStyles = "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95"
 
@@ -19,7 +20,10 @@ function Tooltip(setup: FromTag<{
    ref?: NodeRef<'div'>;
    Slot: RenderSlot,
    tail?: RenderSlot,
-   tooltip: IonicTooltip
+   tooltip: IonicTooltip,
+   gap?: number,
+   place?: Placement,
+   align?: Alignment
 }>) {
    const {
       ref,
@@ -27,11 +31,17 @@ function Tooltip(setup: FromTag<{
       tooltip,
       tail = true,
       Slot,
+      place,
+      align,
+      gap,
       ...props
    } = setup
 
+   tooltip.configure({ placement: place, alignment: align, gap })
+
    /* FIX: flipping happens AFTER transition origin and slide in is already determined, so tooltip slides in from wrong direction if tooltip is flipped. How do we delay transition until after the flip? */
-   const slideIn = () =>`${tooltip.above ? 'slide-in-from-bottom-2' : tooltip.below ? 'slide-in-from-top-2' : tooltip.leftside ? 'slide-in-from-right-2' : 'slide-in-from-left-2'}`
+   // TODO: fix tailwind class intellisense
+   const slideIn = () => `${tooltip.above ? 'slide-in-from-bottom-2' : tooltip.below ? 'slide-in-from-top-2' : tooltip.left ? 'slide-in-from-right-2' : 'slide-in-from-left-2'}`
    const animateIn = `animate-in fade-in-0 zoom-in-95`
    const animateOut = `animate-out fade-out-0 zoom-out-95`
 
@@ -44,8 +54,8 @@ function Tooltip(setup: FromTag<{
             // animate-item
             tooltip={tooltip}>
             <TooltipContent
-               class={(mergeTailwind( 
-                  `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.leftside ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
+               class={(mergeTailwind(
+                  `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
                   æclasses()
                ))}
                {...props}

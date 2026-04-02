@@ -1,18 +1,18 @@
 import { template, For, If, Style, css } from "@rue/lumo"
-import { Ion, Ionic, EACH, as, swiftUpdate } from "@rue/quarky"
+import { Ion, Ionic, EACH, as, swiftUpdate, asIonic } from "@rue/quarky"
 
 // Modified Demo from Vue.js
 
 type Circle = { cx: number, cy: number, r: number }
 
 export function CircleApp() {
-   const history = Ionic([Ionic([] as Ionic<Circle>[])])
+   const history = asIonic([asIonic([] as Ionic<Circle>[])])
    const $index = Ion(0)
-   const $circles = Ion(Ionic([] as Ionic<Circle>[]))
+   const $circles = Ion(asIonic([] as Ionic<Circle>[]))
    const $selected = Ion(undefined as undefined | null | Ionic<Circle>)
    const $adjusting = Ion(false)
 
-   function reClick({ clientX: x, clientY: y, target }: JSX.MouseEvent<SVGSVGElement>) {
+   function reClick({ clientX: x, clientY: y, target }: MouseEvent) {
       if ($adjusting()) {
          $adjusting.value = false
          if ($selected()?.r !== $selected()?.r)
@@ -25,7 +25,7 @@ export function CircleApp() {
          $selected.value = null
 
       if (!$selected()) {
-         $circles().push(Ionic({
+         $circles().push(asIonic({
             cx: x,
             cy: y,
             r: 50
@@ -53,7 +53,7 @@ export function CircleApp() {
    }
 
    function clone(circles: Ionic<Circle[]>) {
-      return circles.map((circle) => Ionic({ ...circle }))
+      return circles.map((circle) => asIonic({ ...circle }))
    }
 
    const circle = $circles()[0]

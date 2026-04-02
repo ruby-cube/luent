@@ -1,10 +1,10 @@
 
-import { Ion, Ionic } from "@rue/quarky";
+import { asIonic, Ion, Ionic } from "@rue/quarky";
 import { For, template } from "@rue/lumo";
 
-function QrxTodo() {
+function RXSTodo() {
 
-   const todos = Ionic([] as Ionic<Todo>[], {
+   const todos = asIonic([] as Ionic<Todo>[], {
       add(title: string) {
          this.push(IonicTodo(title));
          newTodo@.value = "";
@@ -67,10 +67,10 @@ class Todo {
 
 function IonicTodo(title: string) {
    return (
-      Ionic(new Todo(title))
+      asIonic(new Todo(title))
    )
 }
 
 export {
-   QrxTodo
+   RXSTodo
 }

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "plugins": [
      { "name": "typescript-plugin-css-modules" },
-      { "name": "@rue/qrx-tsserver-plugin", "semanticCooldownMs": 0 }
+      { "name": "@rue/rxs-tsserver-plugin", "semanticCooldownMs": 0 }
     ],
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -48,8 +48,8 @@
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"
       ],
-      "@rue/qrx": [
-        "./packages/qrx/src/index.ts"
+      "@rue/ruescript": [
+        "./packages/ruescript/src/index.ts"
       ],
       "@rue/flask": [
         "./packages/flask/index.ts"

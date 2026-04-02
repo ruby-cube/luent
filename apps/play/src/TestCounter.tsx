@@ -7,7 +7,7 @@
 
 
 import { template, FromTag } from "@rue/lumo"
-import { Ion, Ionic, } from "@rue/quarky"
+import { asIonic, Ion, Ionic, } from "@rue/quarky"
 
 export function CounterApp() {
    return template(
@@ -396,7 +396,7 @@ export function TestThisCount() {
 
 export function TestCounterModel() {
 
-   const counter = Ionic({
+   const counter = asIonic({
       count: 0,
       increment() {
          this.count++

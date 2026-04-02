@@ -6,7 +6,7 @@ import { AnyObject } from "@rue/types";
 // NOTE: IonicModel works, but I worry about performance
 class IonicModel implements Ionic<{}> {
    constructor() {
-      return Ionic(this)
+      return asIonic(this)
    }
 
    '~ionic': true;

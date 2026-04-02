@@ -1,8 +1,8 @@
 import { template, For, NodeRef } from "@rue/lumo";
-import { Ion, Ionic } from "@rue/quarky";
+import { asIonic, Ion, Ionic } from "@rue/quarky";
 
 export function TestSettableDerivation() {
-   const names = Ionic([] as string[])
+   const names = asIonic([] as string[])
    const $first = Ion("")
    const $last = Ion("")
    const $fullname = Ion(() => $first() + " " + $last(), {

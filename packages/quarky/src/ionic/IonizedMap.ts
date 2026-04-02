@@ -44,7 +44,7 @@ export function installIonicMap() {
    }, {
       [Symbol.iterator]() {
          this.trackModel()
-         return Ionic(this.raw[Symbol.iterator]()) // TODO: see note in $$Set
+         return asIonic(this.raw[Symbol.iterator]()) // TODO: see note in $$Set
       },
 
       forEach: SetlikeDef.forEach,

@@ -116,9 +116,9 @@ export function isIon(value: unknown): value is Ion {
  */
 export function $_derivation<T>(fn: () => T): Ion<T> {
    // @ts-expect-error
-   fn[QUARK] = { inert: false };
+   // fn[QUARK] = { inert: false };
    //@ts-expect-error
-   fn.displayName = 'getState'
+   // fn.displayName = 'getState'
    return fn
 }
 
@@ -138,12 +138,11 @@ export function πæ<T, K>(obj: T, getterKey: K): K extends keyof T ? T[K] : K e
 //@ts-expect-error
 window.$_derivation = $_derivation;
 
-//@ts-expect-error
-window.$_value = $_value;
+// window.$_value = $_value;
 
-function $_value(value: any) {
-   return $_is_ref(value) ? value() : value;
-}
+// function $_value(value: any) {
+//    return $_is_ref(value) ? value() : value;
+// }
 
 //@ts-expect-error
 window.$_is_mutable = $_is_mutable;
@@ -152,14 +151,13 @@ function $_is_mutable(value: Function) {
    return 'value' in value
 }
 
-//@ts-expect-error
-window.$_is_ref = $_is_ref;
+// window.$_is_ref = $_is_ref;
 
-function $_is_ref(value: AnyObject) {
-   return isFunction(value) &&
-      //@ts-expect-error
-      value.displayName === 'getState'
-}
+// function $_is_ref(value: AnyObject) {
+//    return isFunction(value) &&
+//       //@ts-expect-error
+//       value.displayName === 'getState'
+// }
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
    return (isGetter(value) ? value : Inert(value)) as T extends Ion ? T : Ion<T>

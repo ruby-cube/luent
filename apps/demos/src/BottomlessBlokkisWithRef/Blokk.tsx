@@ -1,5 +1,5 @@
 import { For, FromTag, template } from "@rue/lumo";
-import { Ionic } from "@rue/quarky";
+import { asIonic, Ionic } from "@rue/quarky";
 import { BlokkModel, Rotation } from "./BlokkModel";
 
 const GAP = 1;
@@ -12,7 +12,7 @@ export function Blokk(input: FromTag<{
    initialX: number
 }>) {
    const { shapes, initialX } = input
-   const blokk = Ionic(new BlokkModel(randomShape(), randomRotation(), initialX))
+   const blokk = asIonic(new BlokkModel(randomShape(), randomRotation(), initialX))
 
    function randomShape() {
       const index = Math.abs(Math.floor(Math.random() * shapes.length - 1))

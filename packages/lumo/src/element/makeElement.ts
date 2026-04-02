@@ -16,6 +16,7 @@ import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { $Index } from "../iteratives/ItemList";
 import { setUpTransitions } from "../transitions/transitions";
 import { getTransition, setTransition } from "../transitions/Transition";
+import { matchEventTarget } from "../events/target";
 
 
 export type TagName = keyof HTMLElementTagNameMap
@@ -69,7 +70,7 @@ export function makeElement(
    bindView(domNode, attributes)
    setUpAttributes(domNode, attributes);
    const transitionConfig = getTransition()
-   setUpTransitions(domNode as HTMLElement, {...transitions, ...forwardTransitions}, transitionConfig) // TODO: transition-in etc
+   setUpTransitions(domNode as HTMLElement, { ...transitions, ...forwardTransitions }, transitionConfig) // TODO: transition-in etc
 
    //  if (dynamicAttributes)
    //      setUpDynamicAttributes(
@@ -328,7 +329,7 @@ function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, 
       ion.value =
          //@ts-expect-error
          e.currentTarget?.[key];
-         console.log('@&@ e.currentTarget?.[key]', key, e.currentTarget?.[key])
+      console.log('@&@ e.currentTarget?.[key]', key, e.currentTarget?.[key])
    }
    else {
       const maybeIon = ion()
@@ -580,8 +581,13 @@ function setUpListener(node: Element, events: AnyObject, key: string, options?: 
 
 export function withUpdate(handler: Function, event: string) {
    const update = getEventUpdater(event) ?? swiftUpdate
-   return (e: any) => update(() => handler(e))
+   return (e: any) => update(() => {
+      e.by = matchEventTarget
+      handler(e)
+   })
 }
+
+
 
 
 

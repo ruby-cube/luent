@@ -52,6 +52,8 @@ declare global {
          * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
          */
          currentTarget: EventTarget & T
+
+         by: typeof Lumo.matchEventTarget
       }
 
 

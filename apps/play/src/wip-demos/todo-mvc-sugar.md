@@ -128,7 +128,7 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 export function TodoMVC() {
 
-   get todos = Ion(Ionic(getTodos(), { [EACH]: as(IonicTodo) }))
+   get todos = Ion(Ionic(getTodos(), { [EACH]: { '-as': IonicTodo } }))
    get view = Ion('all' as keyof typeof filters)
 
    get filteredTodos = Ion(() => filters[view](todos))

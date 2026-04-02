@@ -97,7 +97,7 @@ const markComplete = Action(({ ooo }) => () => {
 })
 
 // TODO: how to return output of an action?
-const todo = Ionic(data, todo => ({
+const todo = asIonic(data, todo => ({
    markComplete: Action(function () {
       const output = todo.markComplete()
       this.await(db.dispatch('...'))
@@ -106,7 +106,7 @@ const todo = Ionic(data, todo => ({
 }))
 
 //TODO: canceling action vs canceling dispatches are two different things
-const todo = Ionic(data, todo => ({
+const todo = asIonic(data, todo => ({
    markComplete: Action({
       presume: () => todo.markComplete(),
       dispatch() {

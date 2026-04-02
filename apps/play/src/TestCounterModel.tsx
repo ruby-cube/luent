@@ -1,5 +1,5 @@
 import { template } from "@rue/lumo"
-import { Ion, Ionic, watch } from "@rue/quarky"
+import { asIonic, Ion, Ionic, watch } from "@rue/quarky"
 
 // TODO:
 // [x] private this access in methods and typing
@@ -24,7 +24,7 @@ export function CounterModelApp() {
 
 export function TestMutableCounter() {
 
-   const count = Ionic({
+   const count = asIonic({
       value: 0,
       increment() {
          this.value++

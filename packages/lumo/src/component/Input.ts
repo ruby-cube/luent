@@ -142,9 +142,9 @@ type HasMu<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C
 //    // return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject
 // }
 
-function assertFunction(value: unknown) {
-   if (!isFunction(value) || isIon(value)) throw new Error('Must be a function')
-}
+// function assertFunction(value: unknown) {
+//    if (!isFunction(value) || isIon(value)) throw new Error('Must be a function')
+// }
 
 // TODO: Slots
 // function getMuIons(attributes: AnyObject) {
@@ -345,7 +345,7 @@ export type _FromTag<D> =
    & Styles
    & { '~attributes'?: TagAttributes<D> }
 
-type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S & WithNamedSlots<D> } : { Slot: WithNamedSlots<D> }
+type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S & WithNamedSlots<D> } : { Slot: WithNamedSlots<D> & RenderSlot }
 type WithNamedSlots<D> = { [K in keyof D as K extends `Slot:${infer N}` ? N : never]: D[K] }
 
 

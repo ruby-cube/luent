@@ -1,5 +1,5 @@
 import { template, Else, ElseIf, For, FromTag, If } from "@rue/lumo";
-import { $activeUpdate, Ion, Ionic, PRELUDE, queueRender, queueTask, watch } from "@rue/quarky";
+import { $activeUpdate, asIonic, Ion, Ionic, PRELUDE, queueRender, queueTask, watch } from "@rue/quarky";
 
 export function TestListMounting() {
    let count = 0
@@ -9,7 +9,7 @@ export function TestListMounting() {
       }
    })
 
-   const logs = Ionic([] as string[])
+   const logs = asIonic([] as string[])
 
    const log = (msg: string) => { logs.push(msg); console.log('logs', [...logs]) }
 

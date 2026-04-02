@@ -1,4 +1,4 @@
-import { Ion, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon } from "@rue/quarky";
+import { Ion, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon, asIonic } from "@rue/quarky";
 import "./TestAsyncTabs.css";
 import { Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If, target } from "@rue/lumo";
 import { As } from "../../../packages/lumo/src/conditional/As";
@@ -13,7 +13,7 @@ export function TestAsyncTabs() {
    const tabNames = ['Un', 'Deux', 'Trois', 'Quatre', 'Cinq', 'Six'] as const
    const tabViews: any[] = []
    const allTabs = [0, 1, 2, 3, 4, 5]
-   const openTabs = Ionic([0, 1, 2, 3, 4, 5])
+   const openTabs = asIonic([0, 1, 2, 3, 4, 5])
    const $tab = Ion(0);
    const $count = Ion(0);
 
@@ -50,7 +50,7 @@ export function TestAsyncTabs() {
       <hr></hr>
       <ul class="inline">
          {For(openTabs, m => m, tab => (
-            <li class={($tab() === tab && 'selected')} on:click={e => { !target('span', e) && ($tab.value = tab) }}>
+            <li class={($tab() === tab && 'selected')} on:click={e => { !e.by('span') && ($tab.value = tab) }}>
                {tabNames[tab]}
                <span style="padding: 1em" on:click={e => closeTab(tab)}>x</span>
             </li>

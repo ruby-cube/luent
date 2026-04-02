@@ -1,7 +1,7 @@
-import { template, For, listen, NodeRef, Style, target, css } from "@rue/lumo";
+import { template, For, listen, NodeRef, css } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
-import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic, as } from "@rue/quarky";
+import { Ion, queuePrelude, queueRender, queueTask, EACH, Ionic, as, asIonic } from "@rue/quarky";
 
 class ListItem {
    constructor(
@@ -17,23 +17,24 @@ class ListItem {
 
 type ItemData = { id: number, content: string }
 
-const IonicItem = (data: ItemData) => Ionic(new ListItem(data.id, data.content))
 
-type IonicItem = ReturnType<typeof IonicItem>
+const asIonicItem = (data: ItemData) => asIonic(new ListItem(data.id, data.content))
+
+type IonicItem = ReturnType<typeof asIonicItem>
 
 
 export function TestListSelectTransition() {
 
-   const list = Ionic([
+   const list = asIonic([
       { id: genId(), content: "frog" },
       { id: genId(), content: "robin" },
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: as(IonicItem),
+      [EACH]: { '-as': asIonicItem },
 
       insert(index: number) {
-         const item = IonicItem({
+         const item = asIonicItem({
             id: genId(),
             content: (Math.random() * 100).toString()
          })
@@ -53,7 +54,7 @@ export function TestListSelectTransition() {
    })
 
 
-   const selected = Ionic(new Set<IonicItem>(), {
+   const selected = asIonic(new Set<IonicItem>(), {
       toggle(item: IonicItem) {
          if (this.has(item)) {
             this.delete(item)
@@ -131,7 +132,7 @@ export function TestListSelectTransition() {
                         animate-in animate-out transition-item
                      >
                         <div
-                           on:click={e => !target('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
+                           on:click={e => !e.by('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
                            style={{
                               backgroundColor: randomColor.get(),
                               outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
@@ -190,40 +191,40 @@ export function TestListSelectTransition() {
 
    
 
-         // @keyframes fade-in {
-         //    from {
-         //       opacity: 0;
-         //       transform: scaleY(0.01) translate(30px, 0);
-         //    }
-         //    to {
-         //       opacity: 1;
-         //       transform: scaleY(1) translate(0px, 0px);
-         //    }
-         // }
+         @keyframes fade-in {
+            from {
+               opacity: 0;
+               transform: scaleY(0.01) translate(30px, 0);
+            }
+            to {
+               opacity: 1;
+               transform: scaleY(1) translate(0px, 0px);
+            }
+         }
 
-         // @keyframes fade-out {
-         //    from {
-         //       opacity: 1;
-         //    }
-         //    to {
-         //       opacity: 0;
-         //    }
-         // }
+         @keyframes fade-out {
+            from {
+               opacity: 1;
+            }
+            to {
+               opacity: 0;
+            }
+         }
 
-         // .fade-out {
-         //    transform-origin: top center;
-         //    animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
-         //    z-index: -1;
-         // }
+         .fade-out {
+            transform-origin: top center;
+            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
+            z-index: -1;
+         }
 
-         // .fade-in {
-         //    transform-origin: top center;
-         //    animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
-         // }
+         .fade-in {
+            transform-origin: top center;
+            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
+         }
 
-         // .transition-item {
-         //    transition: transform 500ms ease-in-out;
-         // }
+         .transition-item {
+            transition: transform 500ms ease-in-out;
+         }
       `)
 }
 

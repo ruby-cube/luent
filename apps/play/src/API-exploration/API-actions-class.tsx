@@ -4,8 +4,8 @@ import { Ionic } from "@rue/quarky";
 
 
 
-function IonicTodos(data: Todo[], { refetch }) {
-   return Ionic(data, {
+function asIonicTodos(data: Todo[], { refetch }) {
+   return asIonic(data, {
       [EACH]: { as: asIonicTodo }
    })
 }
@@ -41,7 +41,7 @@ function _(...args: any[]) { }
 
 const $todos = AsyncIon({
    initial: [],
-   fetch: () => IonicTodos(db.fetchTodos())
+   fetch: () => asIonicTodos(db.fetchTodos())
 }, ($data, $todos) => ({
    '@init'() {
       onTodosUpdated(applyMutations => { // TODO: How do you coordinate these real-time updates with everything else?
@@ -97,8 +97,8 @@ const $todos = AsyncIon({
 }))
 
 
-function IonicTodo(data: Todo) {
-   const todo = Ionic(new Todo(data), {
+function asIonicTodo(data: Todo) {
+   const todo = asIonic(new Todo(data), {
 
       author: {
          as: IonicProfile,
@@ -115,7 +115,7 @@ function IonicTodo(data: Todo) {
             return (undefined)
          }
          else {
-            return (IonicProfile(output))
+            return (asIonicProfile(output))
          }
       },
 
@@ -125,7 +125,7 @@ function IonicTodo(data: Todo) {
                return (undefined)
             }
             else {
-               return (IonicProfile(output))
+               return (asIonicProfile(output))
             }
          }
       },

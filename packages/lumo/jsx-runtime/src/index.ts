@@ -21,7 +21,7 @@ export const jsxs = jsx;
 
 export function jsx(nodeType: TagName | ComponentForge, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
    const Slot = processSlot(config.children);
-   config.Slot = Slot;
+   config.Slot = Slot ?? config.Slot;
    console.log('Slot name, jsx', Slot, config.children)
    if (nodeType === Context) {
       return Context({ Slot, provide: config.provide } as any)

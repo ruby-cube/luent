@@ -1,5 +1,4 @@
 import { $listen, PausableListener, CallbackRemover, defineCustomCleanupScheduler, SustainedListenerOptions, ScheduleStop } from '@rue/flask';
-import { swiftUpdate } from '@rue/quarky';
 import { withUpdate } from '../element/makeElement';
 
 
@@ -18,6 +17,8 @@ type EventHandler<T, K extends string> = T extends Document ? (event: K extends 
    : T extends HTMLElement ? (event: K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K] : Event) => void
    : EventListener
 
+
+
 export function listen<
    T extends EventTarget,
    CB
@@ -27,7 +28,7 @@ export function listen<
    handler: CB & EventHandler<T, EventName<T>>,
    options?: EventListenerOptions
 ) {
-   if (options?.eager) handler()
+   if (options?.eager) withUpdate(handler, event)(new Event(event))
    return $listen(withUpdate(handler, event), <SustainedListenerOptions>options || {}, {
       enroll(cb) {
          element.addEventListener(event, cb, options)

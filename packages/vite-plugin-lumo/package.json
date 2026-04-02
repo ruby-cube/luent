@@ -5,7 +5,8 @@
    "type": "module",
    "module": "./index",
    "dependencies": {
-       "@rue/lumo": "workspace:*"
+       "@rue/lumo": "workspace:*",
+       "@rue/ruescript": "workspace:*"
    },
    "devDependencies": {
       "@babel/core": "^7.25.2"

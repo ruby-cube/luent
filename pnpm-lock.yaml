@@ -11,9 +11,9 @@ importers:
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
-      '@rue/qrx-tsserver-plugin':
+      '@rue/rxs-tsserver-plugin':
         specifier: workspace:*
-        version: link:packages/qrx-tsserver-plugin
+        version: link:packages/rxs-tsserver-plugin
       '@types/jsdom':
         specifier: ^21.1.7
         version: 21.1.7
@@ -135,12 +135,12 @@ importers:
       '@rue/lumo':
         specifier: workspace:*
         version: link:../../packages/lumo
-      '@rue/qrx':
-        specifier: workspace:*
-        version: link:../../packages/qrx
       '@rue/quarky':
         specifier: workspace:*
         version: link:../../packages/quarky
+      '@rue/ruescript':
+        specifier: workspace:*
+        version: link:../../packages/ruescript
       '@rue/thread':
         specifier: workspace:*
         version: link:../../packages/x-old/thread
@@ -440,21 +440,6 @@ importers:
         specifier: workspace:*
         version: link:../../types
 
-  packages/qrx:
-    dependencies:
-      '@rue/quarky':
-        specifier: workspace:*
-        version: link:../quarky
-      '@rue/utils':
-        specifier: workspace:*
-        version: link:../utils
-    devDependencies:
-      '@rue/types':
-        specifier: workspace:*
-        version: link:../types
-
-  packages/qrx-tsserver-plugin: {}
-
   packages/quarky:
     dependencies:
       '@rue/flask':
@@ -470,6 +455,21 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../types
+
+  packages/ruescript:
+    dependencies:
+      '@rue/quarky':
+        specifier: workspace:*
+        version: link:../quarky
+      '@rue/utils':
+        specifier: workspace:*
+        version: link:../utils
+    devDependencies:
+      '@rue/types':
+        specifier: workspace:*
+        version: link:../types
+
+  packages/rxs-tsserver-plugin: {}
 
   packages/types:
     devDependencies:
@@ -503,6 +503,9 @@ importers:
       '@rue/lumo':
         specifier: workspace:*
         version: link:../lumo
+      '@rue/ruescript':
+        specifier: workspace:*
+        version: link:../ruescript
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2

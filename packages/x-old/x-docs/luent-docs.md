@@ -453,7 +453,7 @@ function closeTab(tab: number) {
 <ul class="inline">
    {For(openTabs, m => m, tab => (
       <li class={{ selected: ($tab() === tab) }} 
-         on:click={e => { !target('.close-btn') && $tab.value = tab }}
+         on:click={e => { !e.by('.close-btn') && $tab.value = tab }}
       >
          {tabNames[tab]}
          <span class='close-btn' on:click={closeTab}>x</span>
