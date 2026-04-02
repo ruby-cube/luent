@@ -1,10 +1,11 @@
 {
-   "name": "@rue/vite-plugin-lumo",
+   "name": "@rue/vite-plugin-luent",
    "private": true,
    "description": "",
    "type": "module",
    "module": "./index",
    "dependencies": {
+         "@rue/babel-plugin-luent": "workspace:*",
        "@rue/lumo": "workspace:*",
        "@rue/ruescript": "workspace:*"
    },

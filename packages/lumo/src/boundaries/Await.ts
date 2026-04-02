@@ -8,7 +8,7 @@
 //    <div>{err}</div>
 // )}
 
-import { $_derivation, Ion, isIon, PRELUDE, watch } from "@rue/quarky";
+import { Ion, isIon, PRELUDE, watch } from "@rue/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";

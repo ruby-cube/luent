@@ -1,4 +1,4 @@
-import { $_derivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@rue/quarky";
+import {createMemoizedDerivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@rue/quarky";
 import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ConditionalKit } from "./IfElse";
 import { ShowHideType, createIfSeries, RenderConditional } from "./If";
@@ -107,7 +107,7 @@ function toConditionalKits(kit: SwitchCaseKit): ConditionalKit[] {
          statementType: kits.length === 0 ? 'if' : defaultCase ? 'else' : 'elseIf',
          render: render!,
          type: type,
-         $condition: defaultCase ? undefined : cases.length === 1 ? $_derivation(() => matches(toValue(target), toValue(cases[0]))) : toCondition(target, cases, matches),
+         $condition: defaultCase ? undefined : cases.length === 1 ? createMemoizedDerivation(() => matches(toValue(target), toValue(cases[0]))) : toCondition(target, cases, matches),
          pending: getAwaiting()
       })
       if (defaultCase) break;
@@ -116,7 +116,7 @@ function toConditionalKits(kit: SwitchCaseKit): ConditionalKit[] {
 }
 
 function toCondition(target: any, cases: any[], matches: (target: any, _case: any) => boolean) {
-   return $_derivation(() => {
+   return createMemoizedDerivation(() => {
       for (const _case of cases) {
          if (matches(toValue(target), toValue(_case)))
             return true;

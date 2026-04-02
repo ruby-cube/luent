@@ -29,8 +29,8 @@
     "typecheck:rxs": "pnpm exec node packages/ruescript/scripts/rxs-tsc.mjs -p tsconfig.json",
     "test:position-mapping": "pnpm -F @rue/ruescript run test:position-mapping",
     "emit:rxs-transform": "pnpm exec node packages/ruescript/scripts/emit-transformed-rxs.mjs",
-    "emit:counter-transform": "pnpm exec node packages/ruescript/scripts/emit-transformed-rxs.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx",
-    "watch:counter-transform": "pnpm exec node packages/ruescript/scripts/watch-transformed-rxs.mjs apps/play/src/Counter.qrx --out apps/play/src/Counter.transformed.tsx"
+    "emit:counter-transform": "pnpm exec node packages/ruescript/scripts/emit-transformed-rxs.mjs apps/play/src/Counter.rxs --out apps/play/src/Counter.transformed.tsx",
+    "watch:counter-transform": "pnpm exec node packages/ruescript/scripts/watch-transformed-rxs.mjs apps/play/src/Counter.rxs --out apps/play/src/Counter.transformed.tsx"
   },
   "devDependencies": {
     "@rue/rxs-tsserver-plugin": "workspace:*",

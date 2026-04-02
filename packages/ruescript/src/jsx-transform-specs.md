@@ -221,6 +221,27 @@ Note: Use cases are extremely rare--only useful for component slots that render 
 </li>
 ```
 
+### Namespaced attributes (Babel transform)
+```tsx
+<div mu:value={something} mu:frog={frog}>
+```
+-->
+```tsx
+<div mu:ø={{ value: something, frog: frog }}>
+```
+
+
+### Attribute shorthand
+```tsx
+const frog;
+<div {frog}></div>
+```
+-->
+```tsx
+const frog;
+<div frog={frog}></div>
+```
+
 ### Conformance checklist
 | Area | Example input | Expected transform behavior | Must diagnostic? |
 |---|---|---|---|

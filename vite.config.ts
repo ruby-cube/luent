@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite'
-// import lumoPlugin from './packages/vite-plugin-lumo/index.js'
+// import LuentPlugin from './packages/vite-plugin-luent/index.js'
 
 export default defineConfig({
    esbuild: {
       charset: 'utf8'
    },
    plugins: [
-      // ...lumoPlugin()
+      // ...LuentPlugin()
    ],
    define: {
       __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),

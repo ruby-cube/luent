@@ -1,6 +1,14 @@
-import exp from "constants";
-
 let t; // TODO: import from @babel/types
+
+
+// TSC PLUGIN: for transforms that impact type-checking, linting, syntax highlighting
+// - derivation shorthand
+// - async shorthand
+
+// BABEL PLUGIN: for transforms that don't impact type-checking and linting
+// - dynamic template render function
+// - template series
+// - slot to render function
 
 
 export default function lumoPreTransform({ types }) {
@@ -10,34 +18,6 @@ export default function lumoPreTransform({ types }) {
    return {
       name: "lumo-pre-transform",
       visitor: {
-         // Program: {
-         //    enter(path) {
-         //       path.traverse({
-         //          ImportDeclaration(path) {
-         //             // prevent name collisions
-         //             // storeLocalNameOfImport(path, 'watch', this.localWatchNames)
-         //             // storeLocalNameOfImport(path, 'queueIonicTask', this.localIonicTaskNames)
-         //          },
-
-         //          CallExpression(path) {
-         //             transformWatchCalls(path, this.localWatchNames) // TODO: MultiSubject watch calls
-         //             // transformIonicTaskCalls(path, this.localIonicTaskNames)
-         //          }
-         //       }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
-         //    }
-         // },
-         // Identifier: {
-         //    enter(path) {
-         //       if (path.visited || path.node.created) return;
-         //       transformIdentifier(path)
-         //       path.visited = true;
-         //    }
-         // },
-         // VariableDeclarator: {
-         //    enter(path) {
-         //       transformIfDerivationShorthand(path.get('init'))
-         //    }
-         // },
          CallExpression: {
             enter(path) {
                transformTemplateCallExpressions(path)
@@ -46,17 +26,17 @@ export default function lumoPreTransform({ types }) {
          JSXFragment: {
             enter(path) {
                // transformConditionalSeries(path)
-               transformLiterals(path)
-               transformTemplateCallExpressions(path)
-               transformJSXFragment(path)
+               transformLiterals(path) // derivation shorthand
+               transformTemplateCallExpressions(path) // derivation shorthand & last arg to render function
+               transformJSXFragment(path) // derivation shorthand + async shorthand + transform series
             }
          },
          JSXElement: {
             enter(path) {
                // transformConditionalSeries(path)
-               transformLiterals(path)
+               transformLiterals(path) // for derivation shorthand
                transformTemplateCallExpressions(path)
-               transformJSXElement(path)
+               transformJSXElement(path) // slot to render function
             }
          }
       }
@@ -418,10 +398,6 @@ function transformLiterals(path) {
 
 function isDerivationShorthand(node) {
    return isParenthesized(node) && !t.isIdentifier(node);
-   // if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && t.isExpression(node.right)) {
-   //    return true;
-   // }
-   // return false;
 }
 
 
@@ -438,9 +414,9 @@ function isDerivationShorthand(node) {
 //    return false;
 // }
 
-function isJSXRoot(node) {
-   return t.isJSXFragment(node) || t.isJSXElement(node)
-}
+// function isJSXRoot(node) {
+//    return t.isJSXFragment(node) || t.isJSXElement(node)
+// }
 
 
 
@@ -448,7 +424,7 @@ function isJSXRoot(node) {
 const TemplateFunctions = {
    If: transformIfCall,
    ElseIf: transformIfCall,
-   Else: transformConditionalJSX,
+   Else: transformTemplateArgToRenderFunction,
    Try: transformTemplateArgToRenderFunction,
    Await: transformTemplateArgToRenderFunction,
    Meanwhile: transformTemplateArgToRenderFunction,
@@ -480,34 +456,11 @@ function transformTemplateFnCall(name, path) {
    TemplateFunctions[name](path);
 }
 
-function transformConditionalJSX(path) {
-   const lastArg = path.get('arguments').at(-1)
-   if (t.isArrowFunctionExpression(lastArg.node)) {
-      removeConditionAssertionTypeHelper(lastArg)
-   }
+function transformIfCall(path) {
+   transformIfDerivationShorthand(path.get('arguments.0'))
    transformTemplateArgToRenderFunction(path)
 }
 
-function transformIfCall(path) {
-   transformIfDerivationShorthand(path.get('arguments.0'))
-   transformConditionalJSX(path)
-
-}
-
-function removeConditionAssertionTypeHelper(path) {
-   const params = path.node.params
-   if (!params.length) return;
-   if (params[0].name === 'v') {
-      path.traverse({
-         CallExpression(path) {
-            if (path.node.callee.name !== 'v') return;
-            if (path.node.arguments.length !== 1) return;
-            const arg = path.get('arguments.0');
-            path.replaceWith(arg.node)
-         }
-      })
-   }
-}
 
 function transformTemplateArgToRenderFunction(path) {
    const args = path.node.arguments
@@ -522,16 +475,15 @@ function transformTemplateArgToRenderFunction(path) {
    }
 }
 
-let derivationCount = 0;
+// let derivationCount = 0;
 
-// TODO: import $_derivation
 function toDerivationFunction(node) {
    // return t.arrowFunctionExpression([], t.blockStatement([
    //    t.returnStatement(node) // Return the original expression
    // ]))
-   return t.callExpression(t.identifier('$_derivation'), [t.arrowFunctionExpression([], t.blockStatement([
+   return t.arrowFunctionExpression([], t.blockStatement([
       t.returnStatement(node) // Return the original expression
-   ]))])
+   ]))
    // return t.functionExpression(
    //    t.identifier('$drv' + ++derivationCount),
    //    [], // No parameters
@@ -568,16 +520,11 @@ function transformJSXAttributes(jsxElementPath) {
       // else if (t.isArrayExpression(value.expression)) {
       //    transformArrayElements(attribute.get('value.expression.elements'))
       // }
-      // else 
-      // if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
-      //    transformTargetCall(value.expression);
-      // }
-      // else 
       if (namespaceName !== 'on' && namespaceName !== 'mu' && namespaceName !== 'Slot') {
          transformIfDerivationShorthand(attribute.get('value.expression'))
       }
       else {
-         transformIfSlotShorthand(attribute.get('value.expression'))
+         transformIfSlotShorthand(attribute.get('value.expression')) // TODO: slot shorthand is same as derivation shorthand
       }
    }
 }
@@ -597,14 +544,6 @@ function toArrowFunction(node) {
    ]))
 }
 
-function transformTargetCall(eventListenerNode) {
-   const paramNode = eventListenerNode.params[0]
-   const eventParameter = paramNode && paramNode.name || 'e';
-   if (!paramNode) eventListenerNode.params.push(t.identifier('e'))
-   const left = eventListenerNode.body.left
-   const targetCallArgs = t.isCallExpression(left) ? left.arguments : left.argument.arguments;
-   targetCallArgs.push(t.identifier(eventParameter))
-}
 
 function transformJSXSlot(path) {
    const children = path.get('children')
@@ -613,135 +552,6 @@ function transformJSXSlot(path) {
    path.node.children = [normalizeSlotToRenderFunction(children)]
 }
 
-// function hasNamedSlot(childPaths) {
-//    if (childPaths.length !== 1) return false;
-//    for (const path of childPaths) {
-//       if (isNamedSlot(path.node))
-//          return true;
-//    }
-//    return false;
-// }
-
-// function isNamedSlot(node) {
-//    if (!t.isJSXExpressionContainer(node)) return false;
-//    if (!node.expression) return false;
-//    // const openingElement = node.openingElement
-//    // const attribute = openingElement.attributes[0]
-//    return t.isObjectExpression(node.expression)
-//    // return openingElement.name.name === 'Slot' && attribute && attribute.name.name !== 'provide'
-// }
-
-// function transformToNamedSlots(childPaths) {
-//    return t.jsxExpressionContainer(t.objectExpression(createNamedSlotProperties(childPaths)))
-// }
-
-function isProvider(node) {
-   if (!t.isJSXElement(node)) return false;
-   const openingElement = node.openingElement
-   const attributes = openingElement.attributes
-   for (const attribute of attributes) {
-      if (attribute.name.name === 'provide') return true;
-   }
-   return false;
-}
-
-// function createNamedSlotProperties(childPaths) {
-//    const defaultSlotChildren = [];
-//    const namedSlotProperties = [];
-//    let defaultNode;
-//    for (const path of childPaths) {
-//       const node = path.node
-
-//       if (isDefaultSlot(node)) {
-//          if (!defaultNode) defaultNode = node
-//          defaultSlotChildren.push(...path.get('children'))
-//       }
-//       else if (isNamedSlot(node)) {
-//          namedSlotProperties.push(
-//             t.objectProperty(
-//                t.identifier(getSlotName(node)),
-//                wrapIfProvides(t.arrowFunctionExpression(
-//                   [],
-//                   transformJSXChildrenToArrayExpression(path.get('children'))
-//                ), node)
-//             ))
-//       }
-//       else {
-//          defaultSlotChildren.push(path)
-//       }
-//    }
-//    if (defaultSlotChildren.length) {
-//       namedSlotProperties.push(
-//          t.objectProperty(
-//             t.identifier('Default'),
-//             wrapIfProvides(t.arrowFunctionExpression(
-//                [],
-//                transformJSXChildrenToArrayExpression(defaultSlotChildren)
-//             ), defaultNode)
-//          )
-//       )
-//    }
-//    return namedSlotProperties
-// }
-
-function wrapIfProvides(renderfunction, node) {
-   if (!node) return renderfunction;
-   const provided = getProvided(node)
-   if (provided) {
-      return t.callExpression(t.identifier('_$$wrapWithContext'), [renderfunction, provided])
-   }
-   return renderfunction
-}
-
-function getProvided(node) {
-   const attributes = node.openingElement.attributes
-   for (const attribute of attributes) {
-      if (attribute.name.name === 'provide') {
-         const value = attribute.value
-         if (t.isJSXExpressionContainer(value)) {
-            return value.expression
-         }
-         return undefined;
-      }
-   }
-   return undefined;
-}
-
-// function getSlotName(node) {
-//    const name = node.openingElement.attributes[0].name.name;
-//    return name;
-// }
-
-// function isDefaultSlot(node) {
-//    if (!t.isJSXElement(node)) return false;
-//    const openingElement = node.openingElement
-//    const attribute = openingElement.attributes[0]
-//    return openingElement.name.name === 'Slot' && (attribute === undefined) || (attribute.name.name === 'provide')
-// }
-
-
-/*
-Component with Slot:
-
-   <ButtonWithTooltip>
-      Hover over me (tooltip below
-      <Slot tooltip>
-         <div>
-         </div>
-      </Slot>
-   </ButtonWithTooltip>
-
-transforms to:
-
-   jsxDEV(ButtonWithTooltip, {
-      children: {
-         default: () => ["Hover over me (tooltip below)"],
-         tooltip: () => [
-            jsxDEV("div", {})
-         ]
-      }
-   }),
-*/
 
 
 function transformArrayElements(paths) {
@@ -779,18 +589,6 @@ function transformObjectProperties(paths) {
 
 
 
-// function hasTargetedEvent(value) {
-//    return t.isArrowFunctionExpression(value) &&
-//       t.isLogicalExpression(value.body) &&
-//       (isTargetCall(value.body.left) ||
-//          t.isUnaryExpression(value.body.left, { operator: '!' }) &&
-//          isTargetCall(value.body.left.argument))
-// }
-
-// function isTargetCall(node) {
-//    return t.isCallExpression(node) && node.callee.name === 'target'
-// }
-
 function toRenderFunction(node) {
    return t.arrowFunctionExpression(
       [], // No parameters
@@ -810,59 +608,8 @@ function normalizeToArrayExpression(node) {
    return arrayExpression
 }
 
-// function isDerivation(path) {
-//    const node = path.node;
-//    if (!node || !t.isExpression(node))
-//       return false;
-//    if (t.isArrowFunctionExpression(node)
-//       || t.isFunctionExpression(node)
-//       || t.isObjectExpression(node)
-//       || t.isArrayExpression(node)
-//       || t.isIdentifier(node)
-//       || t.isCallExpression(node) && isTemplateFunction(node.callee.name)) {
-//       return false;
-//    }
-//    if (hasIonicCallExpression(path)) {
-//       return true;
-//    }
-//    return false;
-// }
-
-// function hasIonicCallExpression(path) {
-//    if (isIonicCallExpression(path.node))
-//       return true;
-//    let found = false;
-//    path.traverse({
-//       CallExpression(path) {
-//          if (isIonicCallExpression(path.node)) {
-//             found = true;
-//             path.stop()
-//          }
-//       }
-//    })
-//    return found;
-// }
-
-
-// function isIonicCallExpression(node) {
-//    return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0 && !isParenthesized(node)
-// }
 
 function isParenthesized(node) {
    return 'extra' in node && node.extra.parenthesized === true;
 }
 
-// function hasNonIonMemberExpression(path) {
-//    const node = path.node
-//    if (t.isMemberExpression(node) && !node.property.name.startsWith('$'))
-//       return true;
-//    let found = false;
-//    path.traverse({
-//       MemberExpression(path) {
-//          if (path.node.property.name.startsWith('$')) return;
-//          found = true;
-//          path.stop()
-//       }
-//    })
-//    return found;
-// }

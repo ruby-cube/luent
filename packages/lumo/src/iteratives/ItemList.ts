@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import { $_derivation, Ion, MaybeIonized, MutableIon, queueRender, watchToRender } from "@rue/quarky";
+import {Ion, MaybeIonized, MutableIon, queueRender, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { RawJSXNode } from "../node/makeJSXNode";
@@ -228,7 +228,7 @@ export class ListItemKit extends VineNode {
    ) {
       super()
       const flask = this.flask = outerFlask.spawn({ type: 'view', creationScope: true })
-      this.nodes = processJSXOutput(this.renderItem(item, $_derivation(() => $index())))
+      this.nodes = processJSXOutput(this.renderItem(item, () => $index()))
       flask.emitInitialMount()
    }
 

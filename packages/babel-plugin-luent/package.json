@@ -1,0 +1,10 @@
+{
+  "name": "@rue/babel-plugin-luent",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "author": "Ruby Yi Wang",
+  "license": "MIT"
+}

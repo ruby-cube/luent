@@ -1,4 +1,4 @@
-import { $_derivation, Ion, Ionic, isIonicProxy, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
+import { Ion, Ionic, isIonicProxy, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/Input";
 import { AnyObject } from "@rue/types";
 import { RawJSXNode } from "../node/makeJSXNode";

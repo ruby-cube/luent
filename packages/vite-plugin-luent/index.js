@@ -2,16 +2,16 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { transformWithEsbuild } from 'vite'
 import * as babel from '@babel/core'
-import babelLumoTransform from '../lumo/babel-plugin/index.js'
+import babelLumoTransform from '@rue/babel-plugin-luent'
 import { transformRXSSugar } from '@rue/ruescript/transform'
 
 const jsxRuntimePath = fileURLToPath(new URL('../lumo/jsx-runtime/src/index.ts', import.meta.url))
 
-export default function lumoPlugin() {
+export default function LuentPlugin() {
    /** @type {import('vite').PluginOption[]} */
    const plugins = [
       {
-         name: 'vite-lumo-runtime-resolver',
+         name: 'vite-luent-runtime-resolver',
          enforce: 'pre',
          resolveId(id) {
             if (id === '@rue/jsx-runtime' || id === '@rue/jsx-dev-runtime') {
@@ -24,7 +24,7 @@ export default function lumoPlugin() {
          enforce: 'pre',
          async load(id) {
             const fileName = id.split('?')[0]
-            if (!fileName.endsWith('.rxs') && !fileName.endsWith('.qrx')) return
+            if (!fileName.endsWith('.rxs')) return
 
             const code = await readFile(fileName, 'utf8')
             const sugaredCode = transformRXSSugar({ code, fileName }).code

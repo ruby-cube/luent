@@ -102,9 +102,9 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@rue/vite-plugin-lumo':
+      '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-lumo
+        version: link:../../packages/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -199,9 +199,9 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@rue/vite-plugin-lumo':
+      '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-lumo
+        version: link:../../packages/vite-plugin-luent
       '@tailwindcss/vite':
         specifier: ^4.2.1
         version: 4.2.1(vite@5.4.21(@types/node@25.3.0)(less@4.5.1)(lightningcss@1.31.1)(sass@1.97.3)(stylus@0.62.0))
@@ -272,9 +272,9 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@rue/vite-plugin-lumo':
+      '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-lumo
+        version: link:../../packages/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -351,9 +351,9 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@rue/vite-plugin-lumo':
+      '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../../packages/vite-plugin-lumo
+        version: link:../../packages/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -400,6 +400,8 @@ importers:
       '@vue/compiler-sfc':
         specifier: ^3.0.0-0
         version: 3.5.28
+
+  packages/babel-plugin-luent: {}
 
   packages/flask:
     dependencies:
@@ -458,9 +460,6 @@ importers:
 
   packages/ruescript:
     dependencies:
-      '@rue/quarky':
-        specifier: workspace:*
-        version: link:../quarky
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils
@@ -498,8 +497,11 @@ importers:
         specifier: ^5.4.3
         version: 5.4.21(@types/node@25.3.0)(less@4.5.1)(lightningcss@1.31.1)(sass@1.97.3)(stylus@0.62.0)
 
-  packages/vite-plugin-lumo:
+  packages/vite-plugin-luent:
     dependencies:
+      '@rue/babel-plugin-luent':
+        specifier: workspace:*
+        version: link:../babel-plugin-luent
       '@rue/lumo':
         specifier: workspace:*
         version: link:../lumo
@@ -597,9 +599,9 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../packages/types
-      '@rue/vite-plugin-lumo':
+      '@rue/vite-plugin-luent':
         specifier: workspace:*
-        version: link:../packages/vite-plugin-lumo
+        version: link:../packages/vite-plugin-luent
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
