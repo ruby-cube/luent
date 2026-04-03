@@ -11,6 +11,9 @@ importers:
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.59.1
+      '@rue/eslint-plugin-mu':
+        specifier: workspace:*
+        version: link:plugins/eslint-plugin-mu
       '@rue/tsserver-plugin-ruescript':
         specifier: workspace:*
         version: link:plugins/tsserver-plugin-ruescript
@@ -502,6 +505,12 @@ importers:
 
   plugins/babel-plugin-luent: {}
 
+  plugins/eslint-plugin-mu:
+    dependencies:
+      typescript:
+        specifier: '*'
+        version: 5.9.3
+
   plugins/tsserver-plugin-ruescript: {}
 
   plugins/vite-plugin-luent:
@@ -525,6 +534,8 @@ importers:
       vite:
         specifier: ^8.0.3
         version: 8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.0)(esbuild@0.27.7)(jiti@2.6.1)(less@4.6.4)(sass@1.98.0)(stylus@0.62.0)
+
+  plugins/vscode-ruescript: {}
 
   tests:
     dependencies:

@@ -3,7 +3,7 @@ import tsParser from '@typescript-eslint/parser'
 import { createRXSProcessor } from './packages/ruescript/scripts/eslint-rxs-processor.mjs'
 
 const require = createRequire(import.meta.url)
-const muRules = require('./eslint-mu-rules.cjs')
+const muRules = require('@rue/eslint-plugin-mu')
 
 const defaultIgnores = [
   '**/node_modules/**',

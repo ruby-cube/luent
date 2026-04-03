@@ -1,6 +1,6 @@
 {
-  "name": "rxs-get-keyword-highlighting",
-  "displayName": "RueScript Get Keyword Highlighting",
+  "name": "vscode-ruescript",
+  "displayName": "RueScript for VSCode",
   "description": "Highlights RueScript `get` declarations as keywords and `@` markers as operators in TS/TSX files.",
   "version": "0.1.0",
   "publisher": "local",
