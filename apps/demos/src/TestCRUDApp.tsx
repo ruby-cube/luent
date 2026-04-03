@@ -1,22 +1,22 @@
 import { template, For, css } from "@rue/luent"
-import { asIonic, Ion, Ionic, PRELUDE, watch } from "@rue/quarky"
+import { ionic, ion, PRELUDE, watch } from "@rue/quarky"
 
 // Adapted from Vue's CRUDApp demo
 
 export function CRUDApp() {
 
-   const names = asIonic(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
-   const $selected = Ion('')
-   const $filterKey = Ion('')
-   const $first = Ion('')
-   const $last = Ion('')
-   const $fullName = Ion(() => `${$last()}, ${$first()}`)
+   const names = ionic(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
+   const $selected = ion('')
+   const $filterKey = ion('')
+   const $first = ion('')
+   const $last = ion('')
+   const $fullName = ion(() => `${$last()}, ${$first()}`)
 
    watch($selected, ({ current }) => {
       [$last.value, $first.value] = current.split(', ')
    }, { phase: PRELUDE })
 
-   const $filteredNames = Ion(() => names.filter((n) =>
+   const $filteredNames = ion(() => names.filter((n) =>
       n.toLowerCase().indexOf($filterKey().toLowerCase()) > -1
    ))
 

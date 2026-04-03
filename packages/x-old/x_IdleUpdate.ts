@@ -6,7 +6,7 @@ import { RenderCycle } from "../quarky/src/reactivity/x_RenderCycle";
 
 
 
-export const $cancelCount = Ion(0)
+export const $cancelCount = ion(0)
 
 type RaceHandled = boolean
 

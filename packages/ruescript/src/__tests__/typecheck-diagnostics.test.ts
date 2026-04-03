@@ -97,7 +97,7 @@ declare function Ion<T>(value: T): Reactive<T>
 declare function watch<T>(value: Reactive<T>, callback: () => void): void
 
 function UndefinedGuardedRead() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (obj) {
     console.log(obj.name)
@@ -143,7 +143,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedElseBranch() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (obj) {
     console.log(obj.name)
@@ -184,7 +184,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedLogicalAnd() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   obj && console.log(obj.name)
   console.log(obj.name)
@@ -222,7 +222,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedConditional() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const label = obj ? obj.name : 'none'
   console.log(label)
@@ -261,7 +261,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedNestedConditional(flag: boolean) {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const label = flag ? (obj ? obj.name : 'missing') : 'fallback'
   console.log(label)
@@ -300,7 +300,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedNegatedIfElse() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (!obj) {
     console.log('missing')
@@ -343,7 +343,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedNegatedTernary() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const label = !obj ? 'none' : obj.name
   console.log(label)
@@ -382,7 +382,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedExplicitNonNullishComparison() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (obj != null) {
     console.log(obj.name)
@@ -430,7 +430,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedExplicitNullishEquality() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (obj == null) {
     console.log('missing')
@@ -490,7 +490,7 @@ declare namespace JSX {
 }
 
 function UndefinedTemplateIfElseIf() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const view = <div>
     {If(obj, <p>{obj.name}</p>)}
@@ -544,7 +544,7 @@ declare namespace JSX {
 }
 
 function UndefinedTemplateElse() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const view = <div>
     {If(!obj, <p>missing</p>)}
@@ -587,7 +587,7 @@ type Reactive<T> = {
 declare function Ion<T>(value: T): Reactive<T>
 
 function UndefinedLoopGuards() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   while (obj) {
     console.log(obj.name)
@@ -653,7 +653,7 @@ declare namespace JSX {
 }
 
 function UndefinedTemplateRenderFunctions() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const view = <div>
     {If(obj, () => <p>{obj.name}</p>)}
@@ -707,7 +707,7 @@ declare namespace JSX {
 }
 
 function UndefinedTemplateElseRenderFunction() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const view = <div>
     {If(!obj, () => <p>missing</p>)}
@@ -751,7 +751,7 @@ declare function Ion<T>(value: T): Reactive<T>
 declare function IfElse(condition: any, whenTrue: () => any, whenFalse: () => any): any
 
 function UndefinedIfElseRenderFunction() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   const label = IfElse(obj, () => obj.name, () => 'none')
   console.log(label)

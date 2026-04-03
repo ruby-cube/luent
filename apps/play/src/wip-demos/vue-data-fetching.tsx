@@ -1,5 +1,5 @@
 import { template, Else, For, If} from "@rue/luent"
-import { Ion, queueIonicTask } from "@rue/quarky"
+import { ion, queueIonicTask } from "@rue/quarky"
 
 type Commit = {
    commit: {
@@ -23,8 +23,8 @@ export function View() {
    const API_URL = `https://api.github.com/repos/vuejs/core/commits?per_page=3&sha=`
    const branches = ['main', 'minor']
 
-   const $currentBranch = Ion(branches[0])
-   const $commits = Ion([] as Commit[])
+   const $currentBranch = ion(branches[0])
+   const $commits = ion([] as Commit[])
 
 
    // const context = $_snap_context()

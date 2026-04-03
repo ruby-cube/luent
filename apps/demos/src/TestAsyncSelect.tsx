@@ -1,10 +1,10 @@
 import { Await, template, For, Meanwhile, Nonce, createRoot } from "@rue/luent";
-import { AsyncIon, Ion, isPending, o, SuspenseIon } from "@rue/quarky";
+import { AsyncIon, Ion, isPending, o, ion } from "@rue/quarky";
 
 // based on Solid.js/Remix demo
 
 // TODO:
-// const $something = Ion(null, {
+// const $something = ion(null, {
 //    '-fetch': () => db.getSomething(),
 //    '-dispatch': value => db.setSomething(value),
 //    '-awaited': true
@@ -17,17 +17,17 @@ const TEST_LATENCY_1 = 500
 
 export function TestAsyncSelect() {
 
-   const $states = Ion([], {
+   const $states = ion([], {
       '-fetch': () => db.fetchStates()
    })
-   const $activeState = Ion(() => $states()[0], {
+   const $activeState = ion(() => $states()[0], {
       '-writable': true
    })
 
-   const $cities = Ion([], {
+   const $cities = ion([], {
       '-fetch': () => $activeState() ? db.fetchCities($activeState()!) : []
    })
-   const $activeCity = Ion(() => $cities()[0], {
+   const $activeCity = ion(() => $cities()[0], {
       '-writable': true
    })
 

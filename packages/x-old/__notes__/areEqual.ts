@@ -29,13 +29,7 @@ function areEqualArrays(arrayA: any[], arrayB: any[]) {
     return true;
 }
 
-export function areShallowEqualArrays(arrayA: any[], arrayB: any[], getUID: (item: unknown)=>unknown = i=>i) {
-    if (arrayA.length !== arrayB.length) return false;
-    for (let i = 0; i < arrayA.length; i++) {
-        if (getUID(arrayA[i]) !== getUID(arrayB[i])) return false;
-    }
-    return true;
-}
+
 
 
 function reactivePropsAreEqual(reactiveA: IonicProxy, reactiveB: IonicProxy) {

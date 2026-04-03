@@ -4,6 +4,7 @@ import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"
 import { RawJSXNode } from "@rue/luent"
 import { PRELUDE } from "../reactivity/RenderCycle"
+import { createAtomicIon } from "../ion/AtomicIon"
 
 export type SuspenseIon = Ion<Promise<void> | null> & {
    initial: boolean
@@ -37,7 +38,7 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
    const quarks = new Set<AsyncQuark>()
    let resolve: (() => void) | null
    let reject: ((reason?: any) => void) | null
-   const $pendingState = Ion(pendingState)
+   const $pendingState = createAtomicIon(pendingState)
 
    const pendingPromises = new Set()
 
@@ -54,7 +55,7 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
       console.log('Suspense: suspense took', delta)
    }
 
-   const $suspense = Ion(null as Promise<unknown> | null, {
+   const $suspense = createAtomicIon(null as Promise<unknown> | null, {
       initial: true,
       get oo(): Promise<unknown> | null {
          return $suspense()

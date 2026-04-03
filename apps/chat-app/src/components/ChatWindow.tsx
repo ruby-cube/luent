@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/luent";
-import { Ion, ionic } from "@rue/quarky";
+import { Ion, ionic, ion } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'
@@ -21,10 +21,10 @@ export function ChatWindow(input: FromTag<{
    const { user, chat: { $messages, atMessagePosted, atMessageReceived, atErrorReceived, $error } } = input
    const $messagesNode = NodeRef('div')
 
-   const $newMessageMarker = Ion(null as null | HTMLDivElement)
-   const $hasUnseenMessages = Ion(false)
-   const $notifyNewMessages = Ion(false)
-   const $smoothScroll = Ion(false)
+   const $newMessageMarker = ion(null as null | HTMLDivElement)
+   const $hasUnseenMessages = ion(false)
+   const $notifyNewMessages = ion(false)
+   const $smoothScroll = ion(false)
 
    atRemounted(() => {
       $smoothScroll.value = false;
@@ -126,7 +126,7 @@ export function ChatWindow(input: FromTag<{
 
 
    function $ShowNewMessageMarker(message: Message) {
-      return Ion(() => {
+      return ion(() => {
          const lastMessage = $messages().at(-1)
          const newMessageMarker = $newMessageMarker()
          return ($hasUnseenMessages() && user.lastSeenMessageID === message.id || newMessageMarker && newMessageMarker.getAttribute('data-messageID') === message.id) && lastMessage && lastMessage.id !== message.id

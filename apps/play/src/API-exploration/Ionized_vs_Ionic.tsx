@@ -2,13 +2,13 @@
 
 // WINNER:
 export function List() {
-   const list = asIonic([])
-   const user = asIonic({
+   const list = ionic([])
+   const user = ionic({
       id: 0,
       name: 'john'
    })
    const selected = IonicSet()
-   const tree = IonicTree({})   // Ionic(new Tree()) under the hood
+   const tree = IonicTree({})   // ionic(new Tree()) under the hood
 }
 
 

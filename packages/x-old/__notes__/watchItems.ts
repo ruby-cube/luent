@@ -2,7 +2,7 @@ import { PausableListener } from "@rue/flask";
 import { OnChangeHandler, watch, WatchOptions } from "../reactivity/Watcher";
 import { isIntegerKey } from "../ionic/IonizedArray";
 import { AnyObject } from "@rue/types";
-import { shallowClone } from "../../../x-old/x_TimeTraveler";
+import { shallowClone } from "../x_TimeTraveler";
 
 type WatchersMap = Map<AnyObject | ReactiveGet, PausableListener>
 

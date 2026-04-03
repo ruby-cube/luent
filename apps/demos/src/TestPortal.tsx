@@ -2,7 +2,7 @@ import { If, Portal, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 export function TestPortal() {
-   const $show = Ion(false)
+   const $show = ion(false)
 
    return template(
       <div>
@@ -17,7 +17,7 @@ export function TestPortal() {
 }
 
 export function TestPortalB() {
-   const $show = Ion(false)
+   const $show = ion(false)
 
    return template(
       <div>

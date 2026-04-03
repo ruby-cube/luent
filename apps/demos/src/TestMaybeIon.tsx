@@ -1,8 +1,8 @@
 import { FromTag, template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 function TestMaybeIon() {
-   const $msg = Ion('hi')
+   const $msg = ion('hi')
    return template(
       <Child msg={$msg}></Child>
    )

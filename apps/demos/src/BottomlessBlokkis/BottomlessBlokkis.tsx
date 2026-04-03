@@ -1,26 +1,28 @@
 import { atDiscard, createRoot, template } from "@rue/luent";
-import { asIonic, Ion, Ionic } from "@rue/quarky";
+import { ionic, Ion, Ionic } from "@rue/quarky";
 import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
 import './BottomlessBlokkis.css'
+
+const ion = Ion
 
 const BOARD_COLUMNS = 20
 const BOARD_ROWS = 20
 
 export function BottomlessBlokkis() {
 
-    const $blokk = Ion(createBlokk(), {
+    const $blokk = ion(createBlokk(), {
         next() {
             this.value = createBlokk()
         }
     })
 
     const BLOKK_COLOR = '#223344'
-    const $blokkColor = Ion(BLOKK_COLOR)
+    const $blokkColor = ion(BLOKK_COLOR)
 
     function createBlokk() {
-        return asIonic(makeBlokk(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
+        return ionic(makeBlokk(randomShape(), BOARD_COLUMNS / 2 - 2, randomRotation()))
     }
 
     function randomShape() {

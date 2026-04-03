@@ -1,12 +1,12 @@
-import { Ion, Ionic, MutableIon } from "@rue/quarky";
+import { ion, Ion, Ionic, MutableIon } from "@rue/quarky";
 import { FromTag, If, template } from "@rue/luent";
 
 // TODO: formatter adds tab between get keyword and variable
 // function FractionKit(count@: Ion<number>) {
 
 //       return {
-//          get halfCount: Ion(() => count / 2),
-//          get thirdCount: Ion(() => count / 3)
+//          get halfCount: ion(() => count / 2),
+//          get thirdCount: ion(() => count / 3)
 //       }
 // }
 
@@ -14,19 +14,19 @@ import { FromTag, If, template } from "@rue/luent";
 function FractionKit(count@: Ion<number>) {
 
    return {
-      halfCount@: Ion((count / 2)),
-      thirdCount@: Ion((count / 3))
+      halfCount@: ion((count / 2)),
+      thirdCount@: ion((count / 3))
    }
 }
 
 export function RXSCounter({ showFractions@ }: FromTag<{ showFractions: MutableIon<boolean> }>) {
 
-   get count = Ion(0, {
+   get count = ion(0, {
       increment() {
          count@.value++
       }
    })
-   get doubleCount = Ion(() => count * 2)
+   get doubleCount = ion(() => count * 2)
 
    const kit = FractionKit(count@);
    get halfCount = kit.halfCount@
@@ -47,7 +47,7 @@ export function RXSCounter({ showFractions@ }: FromTag<{ showFractions: MutableI
 
    let dog;
 
-   get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+   get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
    function doSomethingElse() {
       if (dog) {

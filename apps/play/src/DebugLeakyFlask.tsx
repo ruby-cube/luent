@@ -1,4 +1,4 @@
-import { template, Else, If, Polymorph } from "@rue/luent";
+import { template, Else, If } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 // Bug conditions
@@ -8,8 +8,8 @@ import { ion } from "@rue/quarky";
 
 export function DebugLeakyFlask() {
 
-   const $ready = Ion(true)
-   const $active = Ion(true)
+   const $ready = ion(true)
+   const $active = ion(true)
 
    return template(
       <>

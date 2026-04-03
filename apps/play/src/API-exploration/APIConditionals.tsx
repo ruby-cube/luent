@@ -110,7 +110,7 @@ import { AnyObject } from "@rue/types";
 
 export function MountIf() {
 
-   const $count = Ion(0,
+   const $count = ion(0,
       {
          increment() {
             this.value++
@@ -133,19 +133,19 @@ export function MountIf() {
       }
    })
 
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() {
          this.value = !this.value
       }
    })
 
-   const $ready = Ion(true, {
+   const $ready = ion(true, {
       toggle() {
          $ready.value = !$ready()
       }
    })
 
-   const $isMobile = Ion(false, {
+   const $isMobile = ion(false, {
       toggle() {
          $isMobile.value = !$isMobile()
       }
@@ -158,7 +158,7 @@ export function MountIf() {
    // function $hi() {
    // return ""
    // }
-   const $color = Ion('lim', {
+   const $color = ion('lim', {
       change() {
          if ($color() === 'lim')
             $color.value = 'blu'
@@ -210,6 +210,6 @@ export function MountIf() {
 
 function CounterKit() {
    return {
-      $count: Ion(0)
+      $count: ion(0)
    }
 }

@@ -5,13 +5,13 @@ import { PRELUDE } from "../../../../packages/luent/src/render-cycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/compound/Compound"
 
-get count = Ion(0, {
+get count = ion(0, {
    increment() {
       count++
    }
 })
 
-// const count = Ion(0, {
+// const count = ion(0, {
 //    increment() {
 //       count.value++
 //    }
@@ -75,7 +75,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterA() {
 
-//    const $count = Ion(0, {
+//    const $count = ion(0, {
 //       increment() {
 //          this.value++
 //       },
@@ -95,7 +95,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterB() {
 
-//    const $count = Ion(0)
+//    const $count = ion(0)
 
 //    function incrementCount() {
 //       $count.value++
@@ -128,12 +128,12 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 export function TodoMVC() {
 
-   get todos = Ion(Ionic(getTodos(), { [EACH]: { '-as': IonicTodo } }))
-   get view = Ion('all' as keyof typeof filters)
+   get todos = ion(ionic(getTodos(), { [EACH]: { '-as': IonicTodo } }))
+   get view = ion('all' as keyof typeof filters)
 
-   get filteredTodos = Ion(() => filters[view](todos))
-   get remaining = Ion(() => filters.active(todos).length)
-   get todoCount = Ion(() => todos.length)
+   get filteredTodos = ion(() => filters[view](todos))
+   get remaining = ion(() => filters.active(todos).length)
+   get todoCount = ion(() => todos.length)
 
    const filters = {
       all: (todos: Ionic<Todo[]>) => todos,
@@ -283,7 +283,7 @@ function TodoInput(addTodo: (title: string) => void }>) {
 
 function TodoList(todos@: Ionic<Todo[]>, removeTodo: (todo: Ionic<Todo>) => void }) {
 
-   let editedTodo = Ion(null as Todo | null)
+   let editedTodo = ion(null as Todo | null)
 
    let beforeEditCache = ''
 
@@ -308,7 +308,7 @@ function TodoList(todos@: Ionic<Todo[]>, removeTodo: (todo: Ionic<Todo>) => void
    return (
       <ul class="todo-list">
          {For(todos@, o => o.id, (todo) => {
-            get isEditing = Ion(() => todo === editedTodo);
+            get isEditing = ion(() => todo === editedTodo);
 
             todos@.addItem(new Todo())
 
@@ -366,7 +366,7 @@ function TodoList({ todos@, removeTodo }: FromTag<{
    'can:removeTodo': (todo: Ionic<Todo>) => void
 }>) {
 
-   get editedTodo = Ion(null as Todo | null)
+   get editedTodo = ion(null as Todo | null)
 
    let beforeEditCache = ''
 
@@ -391,7 +391,7 @@ function TodoList({ todos@, removeTodo }: FromTag<{
    return template(
       <ul class="todo-list">
          {For(todos@, o => o.id, (todo) => {
-            get isEditing = Ion(() => todo === editedTodo);
+            get isEditing = ion(() => todo === editedTodo);
 
             return (
                <li class={{ todo: true, completed: todo.completed@, editing: isEditing@ }}>

@@ -1,5 +1,5 @@
 import { template, createRoot } from "@rue/luent"
-import { Ion } from "@rue/quarky"
+import { ion } from "@rue/quarky"
 
 /* 
 Tests:
@@ -12,7 +12,7 @@ Tests:
 
 export function TestCounter() {
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -21,7 +21,7 @@ export function TestCounter() {
       }
    })
 
-   const $doubleCount = Ion(() => $count() * 2)
+   const $doubleCount = ion(() => $count() * 2)
 
    return template(
       <div>

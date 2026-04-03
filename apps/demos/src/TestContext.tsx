@@ -1,5 +1,5 @@
 import { $fromContext, Context, ContextEntryKey, ContextKey, createRoot, fromContext, fromRoot, FromTag, mergeContextKeys, template } from "@rue/luent"
-import { Ion } from "@rue/quarky"
+import { Ion, ion } from "@rue/quarky"
 import './TestContext.css'
 
 // Context Keys
@@ -39,8 +39,8 @@ import './TestContext.css'
 
 function TestRootContext() {
    const rootMsg = fromRoot(ROOT_MESSAGE)
-   const $adamsMsg = Ion('I come from Adam')
-   const $evesMsg = Ion('I come from Eve')
+   const $adamsMsg = ion('I come from Adam')
+   const $evesMsg = ion('I come from Eve')
 
    return template(
       <div class='container bg-cyan-200'>

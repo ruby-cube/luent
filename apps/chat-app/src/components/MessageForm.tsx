@@ -1,7 +1,7 @@
 
 //@ts-nocheck
 import { template, FromTag, If } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { Ion, ion } from "@rue/quarky";
 import { User } from "../context/keys";
 import './message-form.css'
 import { Timestamp } from "firebase/firestore";
@@ -15,7 +15,7 @@ export function MessageForm(input: FromTag<{
 
    const { user, postMessage } = input()
 
-   const $message = Ion('')
+   const $message = ion('')
 
    async function reKeydown(e: KeyboardEvent & any) {
       if (e.key !== 'Enter') {

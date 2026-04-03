@@ -5,9 +5,6 @@ import { Ion, MutableIon } from "../ion/Ion";
 import { watch } from "../reactivity/Watcher";
 import { AsyncNode } from "./ooo";
 import { PRELUDE } from "../reactivity/RenderCycle";
-import { AnyObject } from "@rue/types";
-import { createAsyncAtomicIon } from "./AsyncAtomicIon";
-import { createAsyncDerivation } from "./AsyncDerivation";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { createMemoizedDerivation } from "../ion/DerivationIon";
 
@@ -137,7 +134,7 @@ export function toPromise(awaited: any) {
 }
 
 type AsyncIonOptions<T = any, U = any> = {
-   '-as': (value: T) => U,
+   '-as'?: (value: T) => U,
    '-awaited'?: true,
    '-suspend'?: SuspenseIon,
    '-debounced'?: number
@@ -210,9 +207,9 @@ export function AsyncIon<
    let pendingStart: DOMHighResTimeStamp | undefined;
    let resolve: ((value: T | PromiseLike<T>) => void) | null;
    let reject: ((reason?: any) => void) | null
-   const $loaded = Ion(false)
-   const $error = Ion(null as Error | null) // TODO:
-   const $promise = Ion(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
+   const $loaded = createAtomicIon(false)
+   const $error = createAtomicIon(null as Error | null) // TODO:
+   const $promise = createAtomicIon(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
    pendingStart = performance.now()
    const suspense = options?.['-suspend']
    // const awaited = options?.['-awaited']
@@ -223,7 +220,7 @@ export function AsyncIon<
       })
    }
 
-   const $ion = Ion(initialState as unknown)
+   const $ion = createAtomicIon(initialState as unknown)
 
    const pendingState = suspense?.pendingState
    const quark = {

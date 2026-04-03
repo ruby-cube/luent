@@ -1,5 +1,6 @@
 import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToIntersection } from "@rue/types";
-import { Ion, Ionic, isIon, isIonicProxy, isIonKey, MutableIon, toIon, toValue, } from "@rue/quarky";
+import { Ion, Ionic, isIon, isIonKey, MutableIon, toIon, toValue, } from "@rue/quarky";
+import {isIonicProxy} from "@rue/quarky/core"
 import { debug, isFunction, isObject } from "@rue/utils";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { NodeRef, RefSource } from "../node/NodeRef";

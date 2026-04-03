@@ -1,11 +1,8 @@
-import { AsyncNode, AsyncSeries, Await, INTERNAL, O, ooo } from "./ooo";
-import { AnyObject } from "@rue/types";
-import { isFunction, isObject } from "@rue/utils";
+import { AsyncNode, AsyncSeries, Await, INTERNAL, ooo } from "./ooo";
 import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
-import { instantUpdate } from "../reactivity/Update";
 import { toPromise } from "./AsyncIon";
-import { isGetter } from "../reactivity/Subject";
+import { createAtomicIon } from "../ion/AtomicIon";
 
 // TODO: races
 // suspense
@@ -36,8 +33,8 @@ export function Action<F, V>(dispatch: F & ((o: { await: Await }, ...args: any[]
    // const ionKeys = ions ? ions instanceof Array ? Array.from(ions.keys()) : Object.keys(ions) : undefined
    let resolve: ((value: any | PromiseLike<any>) => void) | null;
    let reject: ((reason?: any) => void) | null
-   const $promise = Ion(null as Promise<unknown> | null)
-   const $error = Ion(null)
+   const $promise = createAtomicIon(null as Promise<unknown> | null)
+   const $error = createAtomicIon(null)
    let retry: undefined | (() => void); // TODO:
 
    let pendingPromise: AsyncSeries | Promise<any> | null = null

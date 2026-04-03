@@ -2,7 +2,7 @@ import "./index.css";
 import "./debugger.css";
 import { AsyncIon, template, Else, For, FromTag, HandleEvent, If, RenderSlot, SuspenseIon } from "@rue/luent";
 import * as db from "./data/index"
-import { Ion } from "@rue/quarky";
+import { Ion, ion } from "@rue/quarky";
 import { Await, Meanwhile, Nonce } from "../../../../../packages/luent/src/boundaries/Await";
 import { Action } from "../../../../../packages/quarky/src/async/Action";
 
@@ -17,8 +17,8 @@ export function AsyncDemoLessons() {
 
 function Home() {
 
-   const $searchTerm = Ion("")
-   const $tab = Ion("")
+   const $searchTerm = ion("")
+   const $tab = ion("")
 
    // function searchAction(value) {
    //    router.setParams("q", value);

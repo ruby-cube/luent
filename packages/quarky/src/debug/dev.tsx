@@ -1,11 +1,10 @@
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { Traceable, TraceableEntity, TraceableMutable } from "./Traceable";
-import { Ion, MutableIon } from "../ion/Ion";
 import { __DEV__getTrace, getAsyncPath, traceAsyncPath } from "../../../flask/debug";
 import { Compound, Particle } from "../reactivity/Compound";
 import { watch } from "../reactivity/Watcher";
 import { isFunction, isObject } from "@rue/utils";
-import { DerivationIonQuark } from "../ion/DerivationIon";
+import { createMemoizedDerivation, DerivationIonQuark } from "../ion/DerivationIon";
 import { Stateful } from "../abstract/Stateful";
 import { PRELUDE } from "../reactivity/RenderCycle";
 
@@ -20,7 +19,7 @@ function isTraceableCompound(quark: Object): quark is TraceableCompound {
 }
 
 function toTraceableDerivation(fn: Function): { [QUARK]: DerivationIonQuark } {
-   return Ion(fn, {
+   return createMemoizedDerivation(fn, {
       devName: fn.name ?? fn // TODO: origin should be unknown
    }) as any as { [QUARK]: DerivationIonQuark }
 }
@@ -158,13 +157,13 @@ function _logAtoms(particles: Particle[]) {
 
 // - seeing before and after state
 
-// const $count = Ion(0, { __devName: '$count' })
+// const $count = ion(0, { __devName: '$count' })
 
 // // --
 
-// const $doubleCount = Ion(() => $count() * 2)
+// const $doubleCount = ion(() => $count() * 2)
 
-// const $doubleCountLessOne = Ion(() => $doubleCount() - 1)
+// const $doubleCountLessOne = ion(() => $doubleCount() - 1)
 
 // dev.logAtoms($doubleCountLessOne) // queue to prelude of render cycle to batch
 

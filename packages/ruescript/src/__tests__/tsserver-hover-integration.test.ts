@@ -77,7 +77,7 @@ describe('tsserver plugin hover integration', () => {
     const fileName = '/virtual/GetDeclHover.rxs'
     const source = `
 function GetDeclHover() {
-  get count = Ion(0)
+  get count = ion(0)
   return count
 }
 `
@@ -106,7 +106,7 @@ function GetDeclHover() {
     const fileName = '/virtual/ConstReactiveDeclHover.rxs'
     const source = `
 function ConstReactiveDeclHover() {
-  const count@ = Ion(0)
+  const count@ = ion(0)
   return count@
 }
 `
@@ -200,7 +200,7 @@ function DerivationJsxHover(expression: number) {
     const fileName = '/virtual/DerivationArgHover.rxs'
     const source = `
 function DerivationArgHover(expression: number) {
-  return Ion((expression + 1))
+  return ion((expression + 1))
 }
 `
 
@@ -233,12 +233,12 @@ function DerivationArgHover(expression: number) {
     const source = `
 function FractionKit(count@: Ion<number>) {
   return {
-    get halfCount: Ion(() => count / 2)
+    get halfCount: ion(() => count / 2)
   }
 }
 
 function Counter() {
-  const kit = FractionKit(Ion(0))
+  const kit = FractionKit(ion(0))
   get halfCount = kit.halfCount@
   return halfCount
 }
@@ -333,7 +333,7 @@ function Optional(obj: any) {
     const source = `
 function Counter(value: number) {
   return {
-    get count: Ion((value + 1)),
+    get count: ion((value + 1)),
     label: value
   }
 }
@@ -362,7 +362,7 @@ function Counter(value: number) {
 function AbsorbCases(count@: Ion<number>) {
   return {
     count@,
-    get doubled: Ion((count * 2)),
+    get doubled: ion((count * 2)),
     get echoed() { return count }
   }
 }
@@ -396,7 +396,7 @@ function AbsorbCases(count@: Ion<number>) {
     const fileName = '/virtual/View.rxs'
     const source = `
 function View() {
-  get superCounter = Ion(0)
+  get superCounter = ion(0)
   return (
     <Label>{superCounter + 1}</Label>
     <Label>{superCounter + 2}</Label>

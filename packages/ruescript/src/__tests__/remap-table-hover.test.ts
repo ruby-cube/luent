@@ -125,8 +125,8 @@ const {
 describe('remap table', () => {
   const source = `
 function FractionKit(count@) {
-  get halfCount = Ion((count / 2))
-  return { get halfCount: Ion((count / 2)) }
+  get halfCount = ion((count / 2))
+  return { get halfCount: ion((count / 2)) }
 }
 `
 
@@ -198,7 +198,7 @@ function FractionKit(count@) {
 function Counter(count@: Ion<number>) {
   const { halfCountA@, thirdCountA@ } = FractionKit(count@)
   get picked = FractionKit(count@).halfCount@
-  return { get value: Ion((count / 2)), picked@ }
+  return { get value: ion((count / 2)), picked@ }
 }
 `
 
@@ -228,7 +228,7 @@ function Counter(count@: Ion<number>) {
 function Counter(count@: Ion<number>) {
   const { halfCountA@, thirdCountA@ } = FractionKit(count@)
   get picked = FractionKit(count@).halfCount@
-  return { get value: Ion((count / 2)), picked@ }
+  return { get value: ion((count / 2)), picked@ }
 }
 `
 
@@ -262,7 +262,7 @@ function Counter(count@: Ion<number>) {
 
     const unicodeSource = `
 function Counter(count@: Ion<number>) {
-  return { get value: Ion((count / 2)) }
+  return { get value: ion((count / 2)) }
 }
 `
 

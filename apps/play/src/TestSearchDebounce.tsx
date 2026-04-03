@@ -1,5 +1,5 @@
 import { template, For, AsyncIon } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 
 type Article = { id: number, word: string }
@@ -7,7 +7,7 @@ type Article = { id: number, word: string }
 
 export function TestSearchDebounce() {
 
-   const $searchTerm = Ion('')
+   const $searchTerm = ion('')
 
    const $articles = AsyncIon([] as Article[], () => {
       return fetchArticles($searchTerm(), { debounce: 100 })

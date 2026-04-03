@@ -3,7 +3,7 @@ import { Flask, getActiveFlask } from "@rue/flask"
 import { FromTag, Ion } from "@rue/luent"
 
 function Parent() {
-   const $count = Ion(0)
+   const $count = ion(0)
    const $child = NodeRef(Child)
 
    return template(
@@ -22,7 +22,7 @@ function Child({
 } : FromTag<{
    count: Ion
 }>) {
-   const $doubleCount = Ion(() =>$count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
    return template({
       $doubleCount
    },

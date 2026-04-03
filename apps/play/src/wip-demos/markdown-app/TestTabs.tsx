@@ -1,22 +1,22 @@
 //@ts-nocheck
 import { ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "@rue/luent";
 import { MarkdownApp } from "./markdown-app";
-import { Ion, ionize, Ionized, watch } from "@rue/quarky";
+import { Ion, ionize, Ionized, watch, ion } from "@rue/quarky";
 
 export function TabApp() {
 
    // const data = ionize({ id: 0, markdown: '# Sunny Day' })
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() {
          $active.value = !$active()
       }
    })
-   const $open = Ion(true, {
+   const $open = ion(true, {
       toggle() {
          $open.value = !$open()
       }
    })
-   const $markdown = Ion('# Something Special')
+   const $markdown = ion('# Something Special')
 
    return template(
       <>
@@ -212,7 +212,7 @@ function App(input : FromTag<{
 
    let prevActiveFile: File | undefined;
 
-   const $activeFile = Ion(undefined as File | undefined, {
+   const $activeFile = ion(undefined as File | undefined, {
       as(file: File) {
          prevActiveFile = $activeFile.value;
          $activeFile = file;
@@ -376,7 +376,7 @@ function Tab(input : FromTag<{
    file: Ionized<File>,
    tabManager?: TabManager,
 }>) {
-   const { file, tabManager = fromContext(TABS_KIT), $index = Ion('hi') } = input
+   const { file, tabManager = fromContext(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 
    return template(

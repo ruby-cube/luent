@@ -1,9 +1,9 @@
 import { getFlask } from "@rue/flask";
 import { atMounted, template } from "@rue/luent";
-import { Ion, LAYOUT, PRELUDE, queuePrelude, queueRender, queueTask, RENDER, SYNC, TICK, watch } from "@rue/quarky";
+import { ion, LAYOUT, PRELUDE, queuePrelude, queueRender, queueTask, RENDER, SYNC, TICK, watch } from "@rue/quarky";
 
 export function TestRenderEffects() {
-   const $count = Ion(0)
+   const $count = ion(0)
 
    watch($count, () => {
       console.log('@@@SYNC $count changed', $count())

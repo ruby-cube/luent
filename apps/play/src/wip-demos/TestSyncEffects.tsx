@@ -1,9 +1,9 @@
-import { Ion, SYNC, watch } from "@rue/quarky";
+import { ion, SYNC, watch } from "@rue/quarky";
 import { template } from "@rue/luent";
 
 export function TestSyncEffects() {
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          console.log('start increment')
          this.value++;
@@ -12,7 +12,7 @@ export function TestSyncEffects() {
    })
 
 
-   const $count2 = Ion(0)
+   const $count2 = ion(0)
 
    watch($count, () => {
       console.log('$$$ ---effect')

@@ -1,9 +1,9 @@
 import { template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function TestRenderFunctionAsIon() {
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          $count.value++
       }

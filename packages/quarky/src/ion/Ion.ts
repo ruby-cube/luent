@@ -1,24 +1,15 @@
 import { isFunction, isObject } from "@rue/utils";
-import { Inert } from "./Get";
 import { createAtomicIon } from "./AtomicIon";
-import { AnyObject } from "@rue/types";
-import { QUARK } from "../abstract/Quark";
-import { isGetter } from "../reactivity/Subject";
 import { createMemoizedDerivation } from "./DerivationIon";
-import { SimpleState } from "../reactivity/State";
 import { createHybridIon } from "./HybridIon";
-import { AsyncIon, AsyncProps } from "../async/AsyncIon";
-import { createAsyncAtomicIon } from "../async/AsyncAtomicIon";
-import { createAsyncDerivation } from "../async/AsyncDerivation";
+import { AnyObject } from "@rue/types";
+import { AsyncIon } from "../async/AsyncIon";
+import { isIon } from "./utils";
 
 /* API */
 export interface Ion<T = unknown> {
    (): T
    // '~ion': true
-}
-
-export interface Ø<T = unknown> {
-   (): T
 }
 
 // type MaybeInert<T = unknown> = IsIonic<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
@@ -31,183 +22,92 @@ export interface MutableIon<T> extends Ion<T> {
 // NOTE: deprecating NonVoid because extending generic as NonVoid causes type-narrowing
 // export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
 
-type Derivation<R = unknown> = (prevValue?: R) => R
-
-export type Methods = AnyObject
-// { [key: PropertyKey]: (...args: any) => any }
-
-type PickMethods = (...args: string[]) => ReinConfig
-
-type ReinConfig = { capsule: AnyObject, selectedMethods: string[] }
-
+type Derivation<R = unknown> = (previous?: R) => R
 
 type IonOptions<T, M> = M extends { '-fetch': any } ? { '-fetch': () => Promise<T> | T } : {}
 
-export const asIon = Ion
 
 /**
- * Creates an ion, ion capsule, or derivation ion, depending on parameters.
+ * Creates an ion, ion capsule, derivation ion, or async ion, depending on parameters. 
+ * If an ion is passed in with no additional setup, the same ion will be returned
  * 
+ * ---
  * ##### ION:
  * ```
- * const æcount = Ion(0)
+ * const count = ion(0)
+ * 
  * ```
+ * ---
  * 
  * ##### ION CAPSULE:
  * ```
- * const æcount = Ion(0, {
+ * const count = ion(0, {
  *    increment() {
- *       this.count++
+ *       this.value++
  *    },
  *    decrement() {
- *       this.count--
+ *       this.value--
  *    }
  * })
- * ```
  * 
+ * ```
+ * ---
  * ##### DERIVATION ION:
  * 
  * ```
- * const ædoubleCount = Ion(() =>æcount() * 2)
+ * const doubleCount = ion(() => count() * 2)
+ * 
  * ```
- * 
- * 
- * // TODO: what should happen when you pass an ion as the initial state?
- * 
+ * ---
  * @param initialState or pure getter for derivations
  * @param methods optional
  * @returns `Ion<T>`
  */
 
-export function Ion<
+export function ion<
    T,
    M
 >(initialState: T & (() => unknown), setup?: M & ThisType<IonMethods<M>>): AsIon<T, M>
-export function Ion<
+export function ion<
    T,
    M
 >(initialState: T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M>
-export function Ion<
+export function ion<
    T,
    M
 >(initialState: T & (() => unknown) | T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M> {
-   return _asIon(initialState, setup) as AsIon<T, M>
-}
-
-
-export function isIon(value: unknown): value is Ion {
-   const getter = isFunction(value) && value.length === 0
-   const realIon = isFunction(value) && QUARK in value
-
-   // if (getter !== realIon) console.error('isGetter', getter, 'but isIon', realIon)
-
-   return isFunction(value) &&
-      // value.length === 0
-      QUARK in value
-   // /^\$[a-z]/.test(value.name) && 
-   // value.length === 0
+   return asIon(initialState, setup) as AsIon<T, M>
 }
 
 
 
+type OptionFlags = '-writable' | '-fetch' | '-refetch' | '-watch' | '-derive'
 
-
-
-
-
-
-// window.$_value = $_value;
-
-// function $_value(value: any) {
-//    return $_is_ref(value) ? value() : value;
-// }
-
-//@ts-expect-error
-window.$_is_mutable = $_is_mutable;
-
-function $_is_mutable(value: Function) {
-   return 'value' in value
-}
-
-// window.$_is_ref = $_is_ref;
-
-// function $_is_ref(value: AnyObject) {
-//    return isFunction(value) &&
-//       //@ts-expect-error
-//       value.displayName === 'getState'
-// }
-
-export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-   return (isGetter(value) ? value : Inert(value)) as T extends Ion ? T : Ion<T>
-}
-
-export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
-   return isFunction(maybeFn) && maybeFn.length === 0 ? maybeFn() : maybeFn as T extends () => infer R ? R : T;
-}
-
-
-type OptionKeys = '-writable' | '-fetch' | '-refetch' | '-watch' | '-derive'
-
-type IonMethods<M> = { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
+type IonMethods<M> = { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
 
 type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
    ? T // [T] extends [AtomicIon] to prevent type-narrowing
    : [T] extends [Derivation<infer R>]
    ? M extends { '-writable': boolean } // TODO: distinguish true vs false without requiring devs to write { '-writable': true as const}
-   ? MutableIon<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
+   ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
    : M extends { '@set': Function }
-   ? MutableIon<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
-   : Ion<R> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
+   ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
+   : Ion<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
    : M extends { '-fetch': any } | { '-refetch': any }
-   ? Ion<T> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] } & {
+   ? Ion<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] } & {
       pending: Promise<T> | null;
       loaded: boolean;
    }
-   : MutableIon<T> & { [K in keyof M as K extends OptionKeys ? never : K]: M[K] }
-
-
-
-
-// export const makeIon = ion
-// export const createIon = ion
-
-// Ion.Ionized = createIonizedIon
-// makeIon.Ionized = createIonizedIon
-// createIon.Ionized = createIonizedIon
-
-// function createIonizedIon<
-//    T extends Record<string, unknown>,
-//    M
-// >(initialStateDefinition: T, methods: M & Methods): AsMutableIon<T, M> {
-//    return asIon(initialStateDefinition, MUTABLE, IONIZED, methods) as AsMutableIon<T, M>
-// }
-
-// type State<D> = [D] extends [StateDef<infer T>] ? T : D
-
-// ion.Ionized = createIonizedIon
-// ion.ionize = createIonizedIon
-// ion.mu = createMutableIon
-// createMutableIon.ionize = createMutableIonizedIon
-// createMutableIonizedIon.mu = createDeepMutableIonizedIon
-
-
-// function createIonizedIon<
-//    T,
-//    M
-// >(initialState: T, options?: IonizeOptions & { set?: Function, get?: Function }): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> { // TODO: inert marks
-//    return asIon(initialState, IONIZED, options) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> // TODO: add inert marks
-// }
-
-
+   : MutableIon<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
 
 
 
 // TODO: Optimization: Use compiler to presort different types of ions
-function _asIon(
+function asIon(
    initialState: unknown | (() => unknown),
    setup?: AnyObject,
 ) {
-   if (isIon(initialState)) {
+   if (isIon(initialState) && !setup) {
       return initialState
    }
 
@@ -254,21 +154,21 @@ function _asIon(
 // isReined
 
 
-// const æcount = Ion(0)
+// const æcount = ion(0)
 
-// const ædoublecount = Ion(() =>{if (isIon(æcount)) return æcount() * 2}, {
+// const ædoublecount = ion(() =>{if (isIon(æcount)) return æcount() * 2}, {
 //    doSomething(){}
 // })
 
-// const æcountB = Ion((prev?: number) => (prev ?? 0) + 2)
+// const æcountB = ion((prev?: number) => (prev ?? 0) + 2)
 
-// const æactive = Ion('frog', {
+// const æactive = ion('frog', {
 //    toggle() {
 
 //    }
 // })
 
-// const æactived = Ion(false, {
+// const æactived = ion(false, {
 //    toggler() { }
 // })
 

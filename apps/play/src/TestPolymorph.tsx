@@ -1,5 +1,4 @@
 import { template, For, fromRoot, fromContext, fromGround, FromTag, If, provideRoot, provideGround } from "@rue/luent";
-import { Morphable, Polymorph } from "../../../packages/luent/src/conditional/x_Polymorph";
 import "./style.css"
 
 type File = { name: string }
@@ -114,7 +113,7 @@ function Home() {
 }
 
 function Happy() {
-   const $message = Ion('hi')
+   const $message = ion('hi')
 
    return template(
       <>

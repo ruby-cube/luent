@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { asIonic, Ionic } from "./Ionic";
+import { ionic, Ionic } from "./Ionic";
 import { defineIonicCollection, IonicDef } from "./IonicDef";
 import { trigger } from "../reactivity/Atom";
 
@@ -37,7 +37,7 @@ export function installIonicSet() {
    }, {
       [Symbol.iterator]() {
          this.trackModel()
-         return asIonic(this.raw[Symbol.iterator]()) // TODO: Not sure yet, but the raw iterator may yield inconsistent current/pending state; however if this.ionic is used, the proxy receiver becomes invalid
+         return ionic(this.raw[Symbol.iterator]()) // TODO: Not sure yet, but the raw iterator may yield inconsistent current/pending state; however if this.ionic is used, the proxy receiver becomes invalid
       },
       forEach: SetlikeDef.forEach,
       keys: SetlikeDef.keys,
@@ -46,22 +46,22 @@ export function installIonicSet() {
 
       difference(other) {
          this.trackModel()
-         return asIonic(this.raw.difference(other))
+         return ionic(this.raw.difference(other))
       }, // newSet = difference(otherSet) 
 
       union(other) {
          this.trackModel()
-         return asIonic(this.raw.union(other))
+         return ionic(this.raw.union(other))
       },
 
       intersection(other) {
          this.trackModel()
-         return asIonic(this.raw.intersection(other))
+         return ionic(this.raw.intersection(other))
       },
       
       symmetricDifference(other) {
          this.trackModel()
-         return asIonic(this.raw.symmetricDifference(other))
+         return ionic(this.raw.symmetricDifference(other))
       },
 
       isSubsetOf(other) {
@@ -80,8 +80,8 @@ export function installIonicSet() {
       }, // boolean = isDisjointFrom(otherSet)
 
       add(value) {
-         if (this.raw.has(value)) return asIonic(this.raw);
-         return asIonic(this.mutate(raw => {
+         if (this.raw.has(value)) return ionic(this.raw);
+         return ionic(this.mutate(raw => {
             return raw.add(value)
          }, ({ op }) => {
             op.trigger('has', value)
@@ -128,17 +128,17 @@ export const SetlikeDef: IonicDef<Setlike<unknown>> = {
 
    keys() {
       this.trackModel()
-      return asIonic(this.raw.keys())
+      return ionic(this.raw.keys())
    },
 
    values() {
       this.trackModel()
-      return asIonic(this.raw.values())
+      return ionic(this.raw.values())
    },
 
    entries() {
       this.trackModel()
-      return asIonic(this.raw.entries())
+      return ionic(this.raw.entries())
    },
 
    has(key) {

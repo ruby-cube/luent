@@ -1,18 +1,18 @@
 import { template, If, Else, ElseIf, NodeRef, createRoot, css } from "@rue/luent";
-import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
+import { ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 import { Transition } from "../../../packages/luent/src/transitions/Transition";
 
 
 export function TestIfElse() {
 
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() {
          $active.value = !$active()
       }
    })
 
-   const $ready = Ion(false, {
+   const $ready = ion(false, {
       toggle() {
          $ready.value = !$ready()
       }

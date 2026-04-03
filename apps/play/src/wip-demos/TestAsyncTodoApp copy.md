@@ -15,7 +15,7 @@ const ENTER_KEY = 13;
 
 const generateId = () => Date.now().toString(36);
 
-// const IonicTodo = (data) => asNestedAsync(data, data.id, data => Ionic(new Todo(data)), {
+// const IonicTodo = (data) => asNestedAsync(data, data.id, data => ionic(new Todo(data)), {
 //    refetch: () => db.getTodo(data.id),
 //    update(todo, data) { // custom updater
 //       return updateProperties(todo, {
@@ -27,7 +27,7 @@ const generateId = () => Date.now().toString(36);
 // })
 
 
-const asIonicTodo = AsNestedAsync(data => [data.id, Ionic(new Todo(data)), {
+const ionicTodo = AsNestedAsync(data => [data.id, ionic(new Todo(data)), {
    refetch: () => db.getTodo(data.id),
    update(todo, data) { // custom updater
       return updateProperties(todo, {
@@ -59,22 +59,22 @@ function AsyncModel<D extends AnyObject>(initialData: D, fetch: () => D, config:
 
 
 
-const todos = Ionic([], {
+const todos = ionic([], {
    '-fetch': () => db.getTodos($id()),
    [EACH]: {
-      as: data => Ionic(data, {
+      as: data => ionic(data, {
          '-refetch': () => db.getTodo(data.id)
       })
    }
 })
 
-const todos = Ionic([], {
+const todos = ionic([], {
    '-fetch': () => db.getTodos($id()),
    [EACH]: { as: IonicTodo },
 })
 
 function IonicTodo(data: AnyObject) {
-   return Ionic(data, {
+   return ionic(data, {
       '-refetch': () => db.getTodo(data.id)
    })
 }
@@ -161,7 +161,7 @@ function asNestedAsync<T extends AnyObject, M extends ModelMethods>(data: T, uid
 }
 
 
-const IonicTodos = todos => Ionic(todos, { [EACH]: IonicTodo })
+const IonicTodos = todos => ionic(todos, { [EACH]: IonicTodo })
 
 function refetch() { return REFETCH }
 
@@ -339,7 +339,7 @@ function Todo({
    todo: Todo;
    removeTodo: (id: string) => Promise<void>;
 }>) {
-   const $isRemoving = Ion(false);
+   const $isRemoving = ion(false);
 
    const reRemoveBtnClick = () => {
       $isRemoving.value = true;

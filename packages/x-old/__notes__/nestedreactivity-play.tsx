@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import ""
-import { watchEffect, ionize, onEffectCycleComplete, afterRender } from ".."
+import { watchEffect, ionize, onEffectCycleComplete, afterRender } from "../../quarky/src"
 
 const $frog = ionize({
     name: "sir robin",
@@ -19,8 +19,8 @@ const $frog = ionize({
 
 const $tripleCount = () => $count() * 3 // derived without memoization
 
-const $count = Ion(0)
-const $doubleCount = Ion(() =>$count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
+const $count = ion(0)
+const $doubleCount = ion(() =>$count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
 
 const counter = ionize({
     $count,
@@ -34,7 +34,7 @@ const $frogName = asPion($frog, 'name')
 
 watch(PropsIon($frog, ['name', 'store']))
 
-watch(Ion(() =>$count() * 2), (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
+watch(ion(() =>$count() * 2), (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
 
 })
 
@@ -113,23 +113,23 @@ function ListBlock(attributes: {
     }
 
 
-    const $count = Ion(0) // $SettableGet<number>
+    const $count = ion(0) // $SettableGet<number>
 
     const $list = ionize([1, 2, 3]);
 
-    const $doubleCount = Ion(() =>$count() * 2) // Get<number>
+    const $doubleCount = ion(() =>$count() * 2) // Get<number>
 
     const $div = ViewIon('div')
 
     const $frog = IonizedModel(frog)
 
-    const $frog = Ion(IonizedModel({
+    const $frog = ion(IonizedModel({
         a: "djjf",
         bouat: 0,
         cucumber
     }))
 
-    const $frog = Ion(ionicModel({
+    const $frog = ion(ionicModel({
         a: "djjf",
         bouat: 0,
         cucumber
@@ -158,7 +158,7 @@ function ListBlock(attributes: {
 
     //-----
 
-    const $count = Ion(0) // $SettableGet<number>
+    const $count = ion(0) // $SettableGet<number>
 
     quarky.registerIonizableClass(Frog)
 
@@ -179,13 +179,13 @@ function ListBlock(attributes: {
 
     const list$ = ionize([1, 2, 3]);
 
-    const $doubleCount = Ion(() =>$count * 2) // Get<number>
+    const $doubleCount = ion(() =>$count * 2) // Get<number>
 
     const $frog = ionize(frog)
 
-    const $frog = Ion(ionize(frog))
+    const $frog = ion(ionize(frog))
 
-    const $frog = Ion(ionize(frog))
+    const $frog = ion(ionize(frog))
 
     const $frog = ionize(new Frog())
 

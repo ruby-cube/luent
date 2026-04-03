@@ -1,8 +1,8 @@
 import { template } from "@rue/luent";
-import { Ion, Ionized } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function TestMultisetting() {
-   const $frog = Ion('kermit')
+   const $frog = ion('kermit')
 
    function changeName() {
       $frog.value = 'sir robin'

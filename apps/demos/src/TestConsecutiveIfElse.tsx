@@ -1,17 +1,17 @@
-import { template, If, Else, fade, ElseIf, NodeRef, createRoot, css } from "@rue/luent";
-import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
+import { template, If, Else, createRoot, css } from "@rue/luent";
+import { ion } from "@rue/quarky";
 import "./style.css"
 
 
 export function TestConsecutiveIfElse() {
 
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() {
          $active.value = !$active()
       }
    })
 
-   const $ready = Ion(false, {
+   const $ready = ion(false, {
       toggle() {
          $ready.value = !$ready()
       }

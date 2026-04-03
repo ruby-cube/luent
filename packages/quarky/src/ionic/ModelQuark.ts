@@ -123,7 +123,7 @@ export class ModelQuark implements Atom {
       if (hooks && EACH in hooks && hooks[EACH]) {
          const each = hooks[EACH]
          const transform = each['-as']
-         if (each instanceof Function) console.error(`Failed to ionize nested items. Must pass ionizer in config object, e.g. { '-as': Ionic } or use as() helper`)
+         if (each instanceof Function) console.error(`Failed to ionize nested items. Must pass ionizer in config object, e.g. { '-as': ionic } or use as() helper`)
          if (transform) this.initEach(transform)
          // delete each.as
          if ('@get' in each || '@set' in each) this.overrideGetHooks()
@@ -418,7 +418,7 @@ export class ModelQuark implements Atom {
       }) : _setter.bind(proxy);
 
       const hooks = (this.getHooks(valueKey) ?? {}) as PropertyHooks
-      if (hooks instanceof Function) console.error(`Failed to ionize nested object, ${valueKey.toString()}. Must pass ionizer in config object, e.g. { '-as': Ionic } or use as() helper`)
+      if (hooks instanceof Function) console.error(`Failed to ionize nested object, ${valueKey.toString()}. Must pass ionizer in config object, e.g. { '-as': ionic } or use as() helper`)
       const transform = hooks["-as"]
       const castGet = hooks["@get"]
       const castSet = hooks["@set"]

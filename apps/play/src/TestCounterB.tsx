@@ -1,8 +1,8 @@
 import { template, Else, ElseIf, If } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function Counter() {
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },

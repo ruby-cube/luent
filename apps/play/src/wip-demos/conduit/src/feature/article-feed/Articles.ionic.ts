@@ -30,7 +30,7 @@ export function fetchArticles(
 type IonicArticleResponse = { articles: $$<Article>[], articleCount: number }
 
 function toIonicArticleResponse(articleResponse: ArticleResponse): IonicArticleResponse {
-   return articleResponse.map(({ articles, articleCount }) => { articles: asIonicArticle(article), articleCount })
+   return articleResponse.map(({ articles, articleCount }) => { articles: ionicArticle(article), articleCount })
 }
 
 
@@ -116,19 +116,19 @@ function asProfile(data) {
 // data type
 // class declaration
 // asClass
-// asIonic
+// ionic
 
-function asIonicArticle(data: ArticleData) {
-   // NOTE: Ionic and asIonic can take two types of configs: an object config and an extender function
+function ionicArticle(data: ArticleData) {
+   // NOTE: Ionic and ionic can take two types of configs: an object config and an extender function
    // - object config hooks into ionic model
    // - extender function extends the ionic model with the provided properties and methods
 
    return depot.getIonic(data.slug) ?? depot.createIonic(() => {
       const db = fromRoot(fetchArticles.db)
 
-      return asIonic(asArticle(data), article => ({
+      return ionic(asArticle(data), article => ({
          $author: AsyncIon({
-            initial: asIonicProfile(article.super.author),
+            initial: ionicProfile(article.super.author),
             sync: true,
             dispatch() {
 
@@ -223,7 +223,7 @@ function asIonicArticle(data: ArticleData) {
          },
 
          author: {
-            ionize: asIonicProfile
+            ionize: ionicProfile
          }
       })
 }
@@ -385,8 +385,8 @@ class AsyncIon<T> {
 
 
 function asArticle(data: ArticleData) {
-   const Article = fromRoot(asIonicArticle.Article)
-   const Profile = fromRoot(asIonicArticle.Profile)
+   const Article = fromRoot(ionicArticle.Article)
+   const Profile = fromRoot(ionicArticle.Profile)
 
    const profile = as(Profile)(data.author).uid(data.author.id) // TODO: refactor as() to this format
 
@@ -394,10 +394,10 @@ function asArticle(data: ArticleData) {
 }
 
 
-function asIonicArticle(data: ArticleData, refetchArticles: () => void) {
+function ionicArticle(data: ArticleData, refetchArticles: () => void) {
    const db = fromRoot(fetchArticles.db)
 
-   const article = asIonic(asArticle(data), {
+   const article = ionic(asArticle(data), {
       $favorited: AsyncIon({
          uid: data.slug, // used for caching such that if articles is refetched by another part of the app, stale state etc won't be overwritten
          initial: data.favorited,
@@ -444,7 +444,7 @@ function asIonicArticle(data: ArticleData, refetchArticles: () => void) {
          }
       }),
 
-      author: { as: asIonicProfile }
+      author: { as: ionicProfile }
    })
 
    return article

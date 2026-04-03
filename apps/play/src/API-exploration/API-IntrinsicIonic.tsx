@@ -1,12 +1,11 @@
-import { asIonic, Ion, Ionic, toRaw } from "@rue/quarky";
-import { AnyObject } from "@rue/types";
+import { ionic, Ion, Ionic, toRaw } from "@rue/quarky";
 
 
 
 // NOTE: IonicModel works, but I worry about performance
 class IonicModel implements Ionic<{}> {
    constructor() {
-      return asIonic(this)
+      return ionic(this)
    }
 
    '~ionic': true;
@@ -33,7 +32,7 @@ export class Frog {
 }
 
 function ionicBind<T>(obj: T, fn: (this: Ionic<T>, ...args: any) => any) {
-   return fn.bind(Ionic(obj))
+   return fn.bind(ionic(obj))
 }
 
 

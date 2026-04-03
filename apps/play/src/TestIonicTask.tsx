@@ -3,7 +3,7 @@ import { ion, ionic, queueIonicTask } from "@rue/quarky";
 
 export function TestIonicTask() {
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -12,7 +12,7 @@ export function TestIonicTask() {
       }
    })
 
-   const $doubleCount = Ion(() => $count() * 2)
+   const $doubleCount = ion(() => $count() * 2)
 
    queueIonicTask(() => {
       console.log('count:', $count())

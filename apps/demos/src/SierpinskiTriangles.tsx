@@ -1,5 +1,5 @@
 import { template, FromTag, atUnmount } from "@rue/luent";
-import { Animation, Interval, Ion, swiftUpdate, HeavyUpdate, queueTask, Suspense, o, } from "@rue/quarky";
+import { Animation, Interval, Ion, swiftUpdate, HeavyUpdate, queueTask, ion, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // Modified Demo from Solid.js / React Fiber
@@ -33,12 +33,12 @@ const TARGET = 25;
 
 
 export function TriangleDemo() {
-   const $elapsed = Ion(0)
-   const $seconds = Ion(0)
-   // const $realSeconds = Ion(0)
-   // const $delta = Ion(() => ($realSeconds() - $seconds()))
+   const $elapsed = ion(0)
+   const $seconds = ion(0)
+   // const $realSeconds = ion(0)
+   // const $delta = ion(() => ($realSeconds() - $seconds()))
 
-   const $scale = Ion(() => {
+   const $scale = ion(() => {
       const e = ($elapsed() / 1000) % 10;
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
@@ -131,7 +131,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
    s = s / 2;
 
    $slowCount++
-   // const $slow = Ion(0, {
+   // const $slow = ion(0, {
    //    // awaited: true 
    //    '-fetch': () => {
    //       const sec = $seconds()
@@ -153,7 +153,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
    //    '-suspend': $suspense
    // })
 
-   const $slow = Ion(() => {
+   const $slow = ion(() => {
       // console.time('a')
       var e = performance.now() + 0.8;
       // Artificially long execution time.
@@ -175,7 +175,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
 // 729 dots
 
 function Dot({ x, y, s, $text }: FromTag<any>) {
-   const $hover = Ion(false)
+   const $hover = ion(false)
 
    return template(
       <div

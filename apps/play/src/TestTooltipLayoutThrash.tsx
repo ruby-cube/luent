@@ -1,5 +1,5 @@
 import { template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/luent';
-import { $layout, Ion, queueLayout } from '@rue/quarky';
+import { $layout, ion, queueLayout } from '@rue/quarky';
 import './TestTooltip.css'
 
 
@@ -51,7 +51,7 @@ export function ButtonWithTooltip(setup: FromTag<{
    'Slot:Tooltip': RenderSlot
 }>) {
    const { Slot } = setup
-   const $targetRect = Ion(null as Rect | null)
+   const $targetRect = ion(null as Rect | null)
 
    return template(
       <>
@@ -93,7 +93,7 @@ export function Tooltip(input: FromTag<{
    const { Slot, targetRect } = input
 
    const $div = NodeRef('div');
-   const $height = Ion(undefined as number | undefined)
+   const $height = ion(undefined as number | undefined)
 
    // queueLayout(() => {
    //    const height = $div()?.getBoundingClientRect().height
@@ -123,7 +123,7 @@ export function Tooltip(input: FromTag<{
 
    const shiftX = targetRect.left
 
-   const $shiftY = Ion(() => {
+   const $shiftY = ion(() => {
       const height = $height()
       if (height === undefined) return 0;
       const y = targetRect.top - height;

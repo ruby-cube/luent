@@ -1,6 +1,6 @@
 import { AnyObject, Falsey } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
-import { Expand, toValue, watch } from "@rue/quarky";
+import {  toValue, watch } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
 import { initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { MaybeIon, toInput } from "./Input";
@@ -14,7 +14,7 @@ import { getActiveFlask, getFlask } from "@rue/flask";
 
 
 // export type Slot = JSXNode
-export type ComponentForge<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
+export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component | StyledComponent : (setup?: P) => Component|StyledComponent
 
 export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
@@ -93,7 +93,7 @@ export function isComponentKit(entity: unknown): entity is Component {
 
 
 
-export type InferSlot<T extends ComponentForge = ComponentForge> =
+export type InferSlot<T extends ComponentTag = ComponentTag> =
    T extends (setup?: infer P) => any ?
    P extends { Slot: infer S } ?
    S
@@ -135,10 +135,9 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 
 
 
-export type ComponentTag = ComponentForge
 
 export function makeComponent(
-   Component: ComponentForge,
+   Component: ComponentTag,
    Slot: InferSlot | undefined,
    fromTag: ComponentConfig,
    // $index: Ion<number> | undefined

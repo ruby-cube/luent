@@ -209,14 +209,14 @@ function init(modules) {
       }
 
 
-      function createLueCompilerContext(configPath, parsedConfig, discoveredLueFiles, targetPath, getTargetSourceText) {
+      function createRXSCompilerContext(configPath, parsedConfig, discoveredRXSFiles, targetPath, getTargetSourceText) {
          const normalizedTarget = normalizeAbsolute(targetPath)
          const originalToVirtual = new Map()
          const virtualToOriginal = new Map()
          const transformCache = new Map()
          const originalSourceFileCache = new Map()
 
-         function registerLueFile(originalPath) {
+         function registerRXSFile(originalPath) {
             const normalizedOriginal = normalizeAbsolute(originalPath)
             const existing = originalToVirtual.get(normalizedOriginal)
             if (existing) return existing
@@ -227,11 +227,11 @@ function init(modules) {
             return virtualPath
          }
 
-         for (const fileName of discoveredLueFiles) {
-            registerLueFile(fileName)
+         for (const fileName of discoveredRXSFiles) {
+            registerRXSFile(fileName)
          }
 
-         registerLueFile(normalizedTarget)
+         registerRXSFile(normalizedTarget)
 
          function getOriginalSourceText(originalPath) {
             const normalized = normalizeAbsolute(originalPath)
@@ -321,7 +321,7 @@ function init(modules) {
          return {
             originalToVirtual,
             virtualToOriginal,
-            registerLueFile,
+            registerRXSFile,
             getTransformForOriginal,
             remapDiagnostic,
          }
@@ -472,6 +472,26 @@ function init(modules) {
          return parsed
       }
 
+      function getTransientScriptFileNames(configPath, extraVirtualFileNames) {
+         const normalizedExtraFiles = Array.isArray(extraVirtualFileNames)
+            ? extraVirtualFileNames.map((fileName) => normalizeAbsolute(fileName))
+            : []
+
+         if (!configPath) return normalizedExtraFiles
+
+         const parsedConfigResult = getParsedConfigForPath(configPath)
+         if (!parsedConfigResult) return normalizedExtraFiles
+
+         const rootFileNames = Array.isArray(parsedConfigResult.parsedConfig.fileNames)
+            ? parsedConfigResult.parsedConfig.fileNames.map((fileName) => normalizeAbsolute(fileName))
+            : []
+
+         return Array.from(new Set([
+            ...rootFileNames,
+            ...normalizedExtraFiles,
+         ]))
+      }
+
       function getSnapshotText(fileName) {
          const snapshot = host.getScriptSnapshot(fileName)
          if (!snapshot) return ''
@@ -482,6 +502,65 @@ function init(modules) {
          if (typeof fileName !== 'string') return fileName
          if (fileName.endsWith('.rxs.tsx')) return fileName.slice(0, -4)
          return fileName
+      }
+
+      function getSyntheticAssetDeclarationFileName(fileName) {
+         return `${normalizeAbsolute(fileName)}.__rue_asset__.d.ts`
+      }
+
+      function toOriginalAssetFileName(fileName) {
+         if (typeof fileName !== 'string') return fileName
+         if (fileName.endsWith('.__rue_asset__.d.ts')) {
+            return fileName.slice(0, -'.__rue_asset__.d.ts'.length)
+         }
+         return fileName
+      }
+
+      function isSyntheticAssetDeclarationFile(fileName) {
+         return typeof fileName === 'string' && fileName.endsWith('.__rue_asset__.d.ts')
+      }
+
+      function getSyntheticAssetDeclarationSource() {
+         return 'declare const assetUrl: string\nexport default assetUrl\n'
+      }
+
+      function isKnownCodeFile(fileName) {
+         if (typeof fileName !== 'string') return false
+         return fileName.endsWith('.ts')
+            || fileName.endsWith('.tsx')
+            || fileName.endsWith('.js')
+            || fileName.endsWith('.jsx')
+            || fileName.endsWith('.mjs')
+            || fileName.endsWith('.mts')
+            || fileName.endsWith('.cjs')
+            || fileName.endsWith('.cts')
+            || fileName.endsWith('.json')
+            || fileName.endsWith('.d.ts')
+            || fileName.endsWith('.d.mts')
+            || fileName.endsWith('.d.cts')
+            || fileName.endsWith('.rxs')
+      }
+
+      function resolveArbitraryAssetModule(moduleName, containingFile, compilerOptions) {
+         if (!compilerOptions || !compilerOptions.allowArbitraryExtensions) return undefined
+         if (!moduleName.startsWith('.') && !moduleName.startsWith('/')) return undefined
+
+         const containingOriginal = toOriginalSugarFileName(containingFile)
+         const containingDir = path.dirname(containingOriginal)
+         const absoluteCandidate = normalizeAbsolute(
+            moduleName.startsWith('/')
+               ? moduleName
+               : path.resolve(containingDir, moduleName),
+         )
+
+         if (!ts.sys.fileExists(absoluteCandidate)) return undefined
+         if (isKnownCodeFile(absoluteCandidate)) return undefined
+
+         return {
+            resolvedFileName: getSyntheticAssetDeclarationFileName(absoluteCandidate),
+            extension: ts.Extension.Dts,
+            isExternalLibraryImport: false,
+         }
       }
 
       function isIdentifierChar(ch) {
@@ -977,15 +1056,18 @@ function init(modules) {
       function withTransientLanguageService(fileName, fn) {
          const transformed = getTransformForSugarFile(fileName)
          const virtualFileName = fileName + getVirtualExtension(fileName)
+         const configPath = getConfigPath()
 
          const compilerOptions = {
             ...(typeof host.getCompilationSettings === 'function' ? host.getCompilationSettings() : {}),
             noEmit: true,
          }
 
+         const scriptFileNames = getTransientScriptFileNames(configPath, [virtualFileName])
+
          const transientHost = {
             getScriptFileNames() {
-               return [virtualFileName]
+               return scriptFileNames
             },
             getScriptVersion() {
                return (typeof host.getScriptVersion === 'function' ? host.getScriptVersion(fileName) : '0') || '0'
@@ -993,6 +1075,10 @@ function init(modules) {
             getScriptSnapshot(scriptName) {
                if (scriptName === virtualFileName) {
                   return ts.ScriptSnapshot.fromString(transformed.code)
+               }
+
+               if (isSyntheticAssetDeclarationFile(scriptName)) {
+                  return ts.ScriptSnapshot.fromString(getSyntheticAssetDeclarationSource())
                }
 
                const originalSugarFile = toOriginalSugarFileName(scriptName)
@@ -1019,6 +1105,10 @@ function init(modules) {
                return ts.sys.useCaseSensitiveFileNames
             },
             readFile(filePath) {
+               if (isSyntheticAssetDeclarationFile(filePath)) {
+                  return getSyntheticAssetDeclarationSource()
+               }
+
                const originalSugarFile = toOriginalSugarFileName(filePath)
                if (isSugarFile(originalSugarFile)) {
                   return getTransformForSugarFile(originalSugarFile).code
@@ -1027,6 +1117,9 @@ function init(modules) {
             },
             fileExists(filePath) {
                if (filePath === virtualFileName) return true
+               if (isSyntheticAssetDeclarationFile(filePath)) {
+                  return ts.sys.fileExists(toOriginalAssetFileName(filePath))
+               }
                if (isSugarFile(toOriginalSugarFileName(filePath))) return true
                return ts.sys.fileExists(filePath)
             },
@@ -1075,7 +1168,7 @@ function init(modules) {
                      compilerOptions || {},
                      resolutionHost,
                      redirectedReference,
-                  ).resolvedModule
+                  ).resolvedModule || resolveArbitraryAssetModule(moduleName, containingFile, compilerOptions || {})
                })
             },
          }
@@ -1332,7 +1425,7 @@ function init(modules) {
          if (!parsedConfigResult) return undefined
 
          const parsedConfig = parsedConfigResult.parsedConfig
-         const discoveredLueFiles = getDiscoveredSugarFiles(configPath, parsedConfig)
+         const discoveredRXSFiles = getDiscoveredSugarFiles(configPath, parsedConfig)
          const configSignature = `${normalizeAbsolute(configPath)}:${parsedConfigResult.mtimeMs}`
 
          const cached = transientLsCache.get(normalizedFile)
@@ -1347,14 +1440,14 @@ function init(modules) {
          const sourceText = getSnapshotText(fileName)
          if (typeof sourceText !== 'string') return undefined
 
-         const lueContext = createLueCompilerContext(
+         const rxsContext = createRXSCompilerContext(
             configPath,
             parsedConfig,
-            discoveredLueFiles,
+            discoveredRXSFiles,
             normalizedFile,
             () => getSnapshotText(normalizedFile),
          )
-         const virtualFileName = lueContext.originalToVirtual.get(normalizedFile)
+         const virtualFileName = rxsContext.originalToVirtual.get(normalizedFile)
          if (!virtualFileName) return undefined
 
          const compilerOptions = {
@@ -1362,7 +1455,10 @@ function init(modules) {
             noEmit: true,
          }
 
-         const scriptFileNames = [virtualFileName]
+         const scriptFileNames = getTransientScriptFileNames(
+            configPath,
+            Array.from(rxsContext.virtualToOriginal.keys()),
+         )
 
          const languageServiceHost = {
             getScriptFileNames() {
@@ -1370,17 +1466,21 @@ function init(modules) {
             },
             getScriptVersion(scriptName) {
                if (normalizeAbsolute(scriptName) === normalizedFile) return scriptVersion
-               const originalForVirtual = lueContext.virtualToOriginal.get(scriptName)
+               const originalForVirtual = rxsContext.virtualToOriginal.get(scriptName)
                if (originalForVirtual && normalizeAbsolute(originalForVirtual) === normalizedFile) {
                   return scriptVersion
                }
                return '0'
             },
             getScriptSnapshot(scriptName) {
-               const original = lueContext.virtualToOriginal.get(scriptName)
+               const original = rxsContext.virtualToOriginal.get(scriptName)
                if (original) {
-                  const transformed = lueContext.getTransformForOriginal(original).code
+                  const transformed = rxsContext.getTransformForOriginal(original).code
                   return ts.ScriptSnapshot.fromString(transformed)
+               }
+
+               if (isSyntheticAssetDeclarationFile(scriptName)) {
+                  return ts.ScriptSnapshot.fromString(getSyntheticAssetDeclarationSource())
                }
 
                const text = getSourceTextForFile(scriptName)
@@ -1400,10 +1500,17 @@ function init(modules) {
                return ts.sys.useCaseSensitiveFileNames
             },
             readFile(filePath) {
+               if (isSyntheticAssetDeclarationFile(filePath)) {
+                  return getSyntheticAssetDeclarationSource()
+               }
+
                return ts.sys.readFile(filePath)
             },
             fileExists(filePath) {
-               if (lueContext.virtualToOriginal.has(filePath)) return true
+               if (isSyntheticAssetDeclarationFile(filePath)) {
+                  return ts.sys.fileExists(toOriginalAssetFileName(filePath))
+               }
+               if (rxsContext.virtualToOriginal.has(filePath)) return true
                return ts.sys.fileExists(filePath)
             },
             readDirectory(rootDir, extensions, excludes, includes, depth) {
@@ -1424,12 +1531,18 @@ function init(modules) {
             resolveModuleNames(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptionsInner) {
                const moduleResolutionHost = {
                   fileExists: (candidate) => {
-                     if (lueContext.virtualToOriginal.has(candidate)) return true
+                     if (isSyntheticAssetDeclarationFile(candidate)) {
+                        return ts.sys.fileExists(toOriginalAssetFileName(candidate))
+                     }
+                     if (rxsContext.virtualToOriginal.has(candidate)) return true
                      return ts.sys.fileExists(candidate)
                   },
                   readFile: (candidate) => {
-                     const original = lueContext.virtualToOriginal.get(candidate)
-                     if (original) return lueContext.getTransformForOriginal(original).code
+                     if (isSyntheticAssetDeclarationFile(candidate)) {
+                        return getSyntheticAssetDeclarationSource()
+                     }
+                     const original = rxsContext.virtualToOriginal.get(candidate)
+                     if (original) return rxsContext.getTransformForOriginal(original).code
                      return ts.sys.readFile(candidate)
                   },
                   directoryExists: ts.sys.directoryExists,
@@ -1450,11 +1563,14 @@ function init(modules) {
 
                   if (defaultResolution) return defaultResolution
 
+                  const arbitraryAssetResolution = resolveArbitraryAssetModule(moduleName, containingFile, compilerOptionsInner)
+                  if (arbitraryAssetResolution) return arbitraryAssetResolution
+
                   if (!moduleName.startsWith('.') && !moduleName.startsWith('/')) {
                      return undefined
                   }
 
-                  const containingOriginal = lueContext.virtualToOriginal.get(containingFile) || containingFile
+                  const containingOriginal = rxsContext.virtualToOriginal.get(containingFile) || containingFile
                   const containingDir = path.dirname(containingOriginal)
 
                   const probeCandidates = []
@@ -1468,7 +1584,7 @@ function init(modules) {
                      const absoluteCandidate = normalizeAbsolute(path.resolve(containingDir, candidate))
                      if (!ts.sys.fileExists(absoluteCandidate)) continue
 
-                     const resolvedVirtual = lueContext.registerLueFile(absoluteCandidate)
+                     const resolvedVirtual = rxsContext.registerRXSFile(absoluteCandidate)
                      return {
                         resolvedFileName: resolvedVirtual,
                         extension: resolvedVirtual.endsWith('.tsx') ? ts.Extension.Tsx : ts.Extension.Ts,
@@ -1488,12 +1604,12 @@ function init(modules) {
 
          const entry = {
             languageService: languageServiceForTransforms,
-            lueContext,
+            rxsContext,
             virtualFileName,
             configSignature,
             scriptVersion,
             get transformResult() {
-               return lueContext.getTransformForOriginal(normalizedFile)
+               return rxsContext.getTransformForOriginal(normalizedFile)
             },
          }
 

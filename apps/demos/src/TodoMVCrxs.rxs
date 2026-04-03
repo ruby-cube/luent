@@ -1,5 +1,5 @@
 import { template, For, If, Else, FromTag, listen, isMutableIon } from "@rue/luent"
-import { watch, queueIonicTask, Ion, Ionic, EACH, as, asIonic } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH, as, ion, ionic } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -13,16 +13,16 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 type IonicTodo = Ionic<Todo>
 
-const asIonicTodos = (todos: Todo[]) => asIonic(todos, { [EACH]: { '-as': asIonic } })
+const ionicTodos = (todos: Todo[]) => ionic(todos, { [EACH]: { '-as': ionic } })
 
 export function TodoMVC() {
 
-   get todos = Ion(asIonicTodos(getTodos()))
-   get view = Ion('all' as keyof typeof filters)
+   get todos = ion(ionicTodos(getTodos()))
+   get view = ion('all' as keyof typeof filters)
 
-   get filteredTodos = Ion(() => asIonicTodos(filters[view](todos)))
-   get remaining = Ion(() => filters.active(todos).length)
-   get todoCount = Ion(() => todos.length)
+   get filteredTodos = ion(() => ionicTodos(filters[view](todos)))
+   get remaining = ion(() => filters.active(todos).length)
+   get todoCount = ion(() => todos.length)
 
    const filters = {
       all: (todos: Todo[]) => todos,
@@ -60,7 +60,7 @@ export function TodoMVC() {
    // # todos methods
 
    function addTodo(title: string) {
-      todos.push(asIonic({
+      todos.push(ionic({
          id: Date.now(),
          title,
          completed: false
@@ -72,7 +72,7 @@ export function TodoMVC() {
    }
 
    function removeCompleted() {
-      todos@.value = asIonicTodos(filters.active(todos))
+      todos@.value = ionicTodos(filters.active(todos))
    }
 
 
@@ -172,7 +172,7 @@ interface TodoListInput {
 
 function TodoList({ removeTodo, todos@ }: FromTag<TodoListInput>) {
 
-   get editedTodo = Ion(null as Todo | null)
+   get editedTodo = ion(null as Todo | null)
 
    let beforeEditCache = ''
 
@@ -197,7 +197,7 @@ function TodoList({ removeTodo, todos@ }: FromTag<TodoListInput>) {
    return template(
       <ul class="todo-list">
          {For(todos@, m => m.id, (todo) => {
-            get isEditing = Ion(() => todo === editedTodo);
+            get isEditing = ion(() => todo === editedTodo);
 
             return (
                <li class={['todo', { 'completed': (todo.completed), 'editing': isEditing@ }]}>

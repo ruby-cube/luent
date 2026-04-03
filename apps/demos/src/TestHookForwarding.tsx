@@ -1,5 +1,5 @@
 import { FromTag, If, template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function TestHookForwarding() {
    return template(
@@ -10,7 +10,7 @@ export function TestHookForwarding() {
 function Comp(setup: FromTag<'div'>) {
    const { ...other } = setup
 
-   const $active = Ion(true)
+   const $active = ion(true)
 
    return template(
       <div {...other}>

@@ -1,5 +1,5 @@
 import { For, FromTag, HandleEvent, template } from "@rue/luent";
-import { Ion, Ionic } from "@rue/quarky";
+import { Ion, ion } from "@rue/quarky";
 import "./Blokk.css"
 
 export const CELL_SIZE = 20;
@@ -14,7 +14,7 @@ export function Blokk(setup: FromTag<{
    color?: Ion<string>,
    gap?: number
 }>) {
-   const { matrix, ærotation, æshiftX, æshiftY, æcolor = Ion('#564747'), gap = 1, emit } = setup
+   const { matrix, ærotation, æshiftX, æshiftY, æcolor = ion('#564747'), gap = 1, emit } = setup
 
    const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 

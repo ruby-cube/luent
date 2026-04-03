@@ -1,10 +1,9 @@
-import { Ion, Ionic, isIonicProxy, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
+import { createMemoizedDerivation, Ion, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/Input";
 import { AnyObject } from "@rue/types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
 import { Flask, getActiveFlask, getFlask } from "@rue/flask";
-import { quarkOf } from "../../../quarky/src/abstract/Quark";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
 export type Nullish = null | undefined
@@ -18,8 +17,8 @@ export function ForIndex(input: Ion<AnyObject | Nullish> | AnyObject, renderInde
       renderIndex,
       getFlask(),
       toValue(input) instanceof Map ? ($entry: Ion<any>) => {
-         const $key = Ion(() => $entry()?.[0]);
-         const $value = Ion(() => toValue(input)?.get($key()))
+         const $key = createMemoizedDerivation(() => $entry()?.[0]);
+         const $value = createMemoizedDerivation(() => toValue(input)?.get($key()))
          return [$key, $value]
       } : undefined)
 }
@@ -33,7 +32,7 @@ export class IndexedListKit extends VineNode {
       private transformItem?: ($item: Ion<any>) => any
    ) {
       super()
-      const $list = Ion(() => this.toArray(toValue(input)))
+      const $list = createMemoizedDerivation(() => this.toArray(toValue(input)))
       let array = [...$list()]
       
       // NOTE: IMPORTANT: We must set up the watcher BEFORE rendering
@@ -73,7 +72,7 @@ export class IndexedListKit extends VineNode {
 
    createNewItem($list: Ion<any[]>, index: number) {
       let cache: any;
-      const $item = Ion(() => {
+      const $item = createMemoizedDerivation(() => {
          return $list()[index]
          // $list()
          // if (this.removedIndices.has(index)) {

@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
 import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
-import { atUnmount, fromGround, POSTLUDE, PRELUDE, provideGround } from "@rue/luent";
-import { Ion, ionize, Ionized, SYNC, watch } from "@rue/quarky";
+import { atUnmount, fromGround, provideGround } from "@rue/luent";
+import {  ion, watch } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -25,7 +25,7 @@ export function initDatabaseConnection() {
    provideGround('auth', auth)
    provideGround('db', db)
 
-   const $connected = Ion(false)
+   const $connected = ion(false)
 
    const unsubscribe = onAuthStateChanged(auth, () => {
       $connected.value = true
@@ -211,7 +211,7 @@ export function ChatKit() {
    const unsavedSet = new Set<string>()
 
    const $messages = ion.ionize([] as Message[])
-   const $errorCount = Ion(0)
+   const $errorCount = ion(0)
 
    function atMessagePosted(task: () => void) {
       watch(unsavedMessages.$length, (e) => {
@@ -239,7 +239,7 @@ export function ChatKit() {
       watch($errorCount, task, { phase: PRELUDE })
    }
 
-   const $error = Ion(null as null | string)
+   const $error = ion(null as null | string)
    const messagesQuery = query(collection(db, 'messages'), orderBy('createdAt'))
 
    const unsub = onSnapshot(messagesQuery, (snap) => {

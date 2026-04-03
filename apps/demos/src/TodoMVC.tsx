@@ -1,5 +1,5 @@
 import { template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/luent"
-import { watch, queueIonicTask, Ion, Ionic, EACH, asIonic } from "@rue/quarky"
+import { watch, queueIonicTask, Ion, Ionic, EACH, ionic, ion } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -13,12 +13,12 @@ type FilterKeys = 'all' | 'active' | 'completed'
 
 type IonicTodo = Ionic<Todo>
 
-const asIonicTodos = (todos: Todo[]) => asIonic(todos, { [EACH]: { '-as': asIonic } })
+const ionicTodos = (todos: Todo[]) => ionic(todos, { [EACH]: { '-as': ionic } })
 
 export function TodoMVC() {
 
-   const ætodos = Ion(asIonicTodos(getTodos()))
-   const æview = Ion('all' as keyof typeof filters)
+   const ætodos = ion(ionicTodos(getTodos()))
+   const æview = ion('all' as keyof typeof filters)
 
    const filters = {
       all: (todos: Todo[]) => todos,
@@ -26,9 +26,9 @@ export function TodoMVC() {
       completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
    }
 
-   const æfilteredTodos = Ion(() => asIonicTodos(filters[æview()](ætodos())))
-   const æremaining = Ion(() => filters.active(ætodos()).length)
-   const ætodoCount = Ion(() => ætodos().length)
+   const æfilteredTodos = ion(() => ionicTodos(filters[æview()](ætodos())))
+   const æremaining = ion(() => filters.active(ætodos()).length)
+   const ætodoCount = ion(() => ætodos().length)
 
    // dev.logAtoms(æremaining)
    
@@ -68,7 +68,7 @@ export function TodoMVC() {
    // # todos methods
 
    function addTodo(title: string) {
-      ætodos().push(asIonic({
+      ætodos().push(ionic({
          id: Date.now(),
          title,
          completed: false
@@ -80,7 +80,7 @@ export function TodoMVC() {
    }
 
    function removeCompleted() {
-      ætodos.value = asIonicTodos(filters.active(ætodos()))
+      ætodos.value = ionicTodos(filters.active(ætodos()))
    }
 
 
@@ -181,7 +181,7 @@ function TodoList({ ætodos, removeTodo }: FromTag<{
    removeTodo: (todo: Ionic<Todo>) => void
 }>) {
 
-   const æeditedTodo = Ion(null as Todo | null)
+   const æeditedTodo = ion(null as Todo | null)
 
    let beforeEditCache = ''
 
@@ -210,7 +210,7 @@ function TodoList({ ætodos, removeTodo }: FromTag<{
    return template(
       <ul class="todo-list">
          {For(ætodos, m => m.id, (todo) => {
-            const æisEditing = Ion(() => todo === æeditedTodo());
+            const æisEditing = ion(() => todo === æeditedTodo());
 
             return (
                <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>

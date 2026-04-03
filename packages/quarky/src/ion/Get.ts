@@ -1,11 +1,6 @@
-import { hasQuark, Quark, QUARK, quarkOf } from "../abstract/Quark";
+import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
-
-
-
-// get count = Get(0)
-
 
 
 
@@ -20,7 +15,7 @@ export type $AtomicNeutronState = MutableIon<unknown> & {
       inert: true;
       value: any,
       ionized: boolean, // TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
-   } & Quark<typeof INERT_ION, $AtomicNeutronState>
+   }
 }
 
 /** 

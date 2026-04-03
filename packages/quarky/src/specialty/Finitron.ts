@@ -1,11 +1,11 @@
 import { createStack, debug } from "@rue/utils";
-import { Ion } from "../ion/Ion";
 import { watch } from "../reactivity/Watcher";
 import { QUARK } from "../abstract/Quark";
-import { AnyObject, UnionToIntersection } from "@rue/types";
+import { UnionToIntersection } from "@rue/types";
 import { untracked } from "../reactivity/Compound";
 import { getActiveUpdate } from "../reactivity/Update";
 import { PRELUDE, queueTask } from "../reactivity/RenderCycle";
+import { createAtomicIon } from "../ion/AtomicIon";
 
 
 // trafficLight.is('on') // reactive
@@ -226,7 +226,7 @@ export function withTimeout(ms: number, transition: Transition) {
 
 // TODO: Traceability
 export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Methods<S>): Finitron<S, M> {
-   const $currentState = Ion(undefined as undefined | string);
+   const $currentState = createAtomicIon(undefined as undefined | string);
 
    let activated = false;
 

@@ -73,7 +73,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterA() {
 
-//    const $count = Ion(0, {
+//    const $count = ion(0, {
 //       increment() {
 //          this.value++
 //       },
@@ -93,7 +93,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterB() {
 
-//    const $count = Ion(0)
+//    const $count = ion(0)
 
 //    function incrementCount() {
 //       $count.value++
@@ -195,7 +195,7 @@ type $$Todo = ReturnType<typeof ionizeTodo>
 //QUESTION: while create an ionizedTodos function instead of a $TodoArray function?
 
 // function IonicTodoArray(todos: Todo[]) {
-//    return Ionic(todos, {
+//    return ionic(todos, {
 //       '@setup'() {
 
 //       },
@@ -204,7 +204,7 @@ type $$Todo = ReturnType<typeof ionizeTodo>
 // }
 
 // function IonicTodo(todo: Todo) {
-//    return Ionic(todo, {
+//    return ionic(todo, {
 //       '@set': {
 //          title: () => console.trace('set title!')
 //       },
@@ -230,7 +230,7 @@ type $$Todo = ReturnType<typeof ionizeTodo>
 // - I'm fine with coupling the IonicTodoArray and IonicArray, the Todo class and db still need to be passed in
 
 function IonicTodoArray(todos: Todo[]) {
-   return Ionic(todos, {
+   return ionic(todos, {
       [EACH]: { init: IonicTodo }
    })
 }
@@ -240,7 +240,7 @@ IonicTodo.db = RootContextKey<TodosDatabase>()
 function IonicTodo(todo: Todo) {
    const db = fromRoot(IonicTodo.db)
 
-   return Ionic(todo, {
+   return ionic(todo, {
       title: {
          '@set'(value) { console.trace('set title!', value) },
       },
@@ -258,7 +258,7 @@ function IonicTodo(todo: Todo) {
 
 // function IonicTodo(todo: Todo) {
 
-//    return Ionic(todo, mod => ({
+//    return ionic(todo, mod => ({
 //       title: mod({
 //          '@set'(value) { console.trace('set title!', value) },
 //       }),
@@ -450,16 +450,16 @@ type TodoAppKit = typeof TodoAppKit
 function TodoAppKit(todos: Todo[]) {
 
    const $todos = TodosIon(todos)
-   const $view = Ion('all' as keyof typeof filters)
+   const $view = ion('all' as keyof typeof filters)
 
-   const $filteredTodos = Ion(() => filters[$view()]($todos()))
-   const $remaining = Ion(() => filters.active($todos()).length)
-   const $todoCount = Ion(() => $todos().length)
+   const $filteredTodos = ion(() => filters[$view()]($todos()))
+   const $remaining = ion(() => filters.active($todos()).length)
+   const $todoCount = ion(() => $todos().length)
 
    const filters = {
       all: (todos: $$TodoArray) => todos,
-      active: (todos: $$TodoArray) => Ionic(todos.filter(todo => !todo.completed)),
-      completed: (todos: $$TodoArray) => Ionic(todos.filter(todo => todo.completed))
+      active: (todos: $$TodoArray) => ionic(todos.filter(todo => !todo.completed)),
+      completed: (todos: $$TodoArray) => ionic(todos.filter(todo => todo.completed))
    }
 
    function createTodo(title: string) {
@@ -652,7 +652,7 @@ function TodoList(input: FromTag<{
 }>) {
    const { mu, $todos, removeTodo, } = input()
 
-   const $editedTodo = Ion(null as Todo | null)
+   const $editedTodo = ion(null as Todo | null)
 
    let beforeEditCache = ''
 
@@ -677,7 +677,7 @@ function TodoList(input: FromTag<{
    return (
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
-            const $isEditing = Ion(() => todo === $editedTodo());
+            const $isEditing = ion(() => todo === $editedTodo());
 
             return (
                <li class={{ todo: true, completed: (todo.completed), editing: $isEditing }}>

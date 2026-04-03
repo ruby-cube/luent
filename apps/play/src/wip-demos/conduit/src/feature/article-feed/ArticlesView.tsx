@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Context, ContextKey, template, Else, ElseIf, For, fromContext, fromRoot, FromTag, If, RenderSlot, AsyncIon } from "@rue/luent";
-import { Ion, Ionized, watch } from "@rue/quarky";
+import { Ion, Ionized, watch, ion } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";
 import { ArticleDatabase } from "../../db/ArticleDatabase";
@@ -24,14 +24,14 @@ export function ArticlesView(input: FromTag<{
       db = fromRoot(ArticlesView['db'])
    } = input()
 
-   const $page = Ion(0)
+   const $page = ion(0)
    const $result = fetchArticles($articlesMeta, $page, $articlesPerPage)
 
-   const $articles = Ion(() => $result().articles)
-   const $articleCount = Ion(() => $result().articleCount)
+   const $articles = ion(() => $result().articles)
+   const $articleCount = ion(() => $result().articleCount)
 
-   const $feed = Ion('global' as 'global' | 'user')
-   const $tabs = Ion(['global', 'my-feed'])
+   const $feed = ion('global' as 'global' | 'user')
+   const $tabs = ion(['global', 'my-feed'])
 
    return template(
       <>
@@ -105,8 +105,8 @@ export function ArticlePreview(input: FromTag<{
    const { article, mu } = input as unknown as { article: Ionized<Article>, mu: <T>(arg: T) => T }
    const db = fromContext(ArticlePreview.db)
 
-   const $author = Ion(() => article.author.username)
-   const $authorImage = Ion(() => article.author.image)
+   const $author = ion(() => article.author.username)
+   const $authorImage = ion(() => article.author.image)
 
    return template(
       <div class="article-preview">
@@ -170,7 +170,7 @@ function ArticlePagination(input: FromTag<{
 }>) {
    const { $page, $articleCount, $articlesPerPage } = input
 
-   const $totalPages = Ion(() => Math.ceil($articleCount() / $articlesPerPage()))
+   const $totalPages = ion(() => Math.ceil($articleCount() / $articlesPerPage()))
 
    return template(
       <ul class="pagination">

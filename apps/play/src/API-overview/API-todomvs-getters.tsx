@@ -25,13 +25,13 @@ export function TodoMVC() {
 
    // get state
    let $todos: Ionized<Inert<Todo>[]> = ion.ionize([], { mark: { [EACH]: inert } })
-   let $view: keyof typeof filters = Ion('all')
-   let $editedTodo: Todo | null = Ion(null)
+   let $view: keyof typeof filters = ion('all')
+   let $editedTodo: Todo | null = ion(null)
 
    // derived state
-   const $filteredTodos = Ion(() => filters[$view()]($todos()))
+   const $filteredTodos = ion(() => filters[$view()]($todos()))
 
-   const $remaining = Ion(() => filters.active($todos()).length)
+   const $remaining = ion(() => filters.active($todos()).length)
 
    // handle routing
    window.addEventListener('hashchange', onHashChange)

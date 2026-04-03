@@ -18,7 +18,7 @@ import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 
 // function Counter() {
 
-//    get count = Ion(0, {
+//    get count = ion(0, {
 //       increment() {
 //          this.value++
 //       },
@@ -27,7 +27,7 @@ import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 //       }
 //    })
 
-//    get doubleCount = Ion(() => count * 2)
+//    get doubleCount = ion(() => count * 2)
 
 //    return (
 //       <div>
@@ -49,7 +49,7 @@ import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 
 let timeout;
 
-const count = Ion(0, {
+const count = ion(0, {
    increment() {
 
    },
@@ -70,7 +70,7 @@ const count = Ion(0, {
 
 // TODO:
 // settable derivation
-const $doubleCount = Ion(() => $count() * 2, {
+const $doubleCount = ion(() => $count() * 2, {
    '@set'(num: number) {
       $count.value = num / 2
    }
@@ -101,7 +101,7 @@ const $shippingMethod = HybridIon(() => $shippingOptions()[0])
 // Hybrid ion: three ways:
 
 // (1)
-const $quantity = Ion(1, {
+const $quantity = ion(1, {
    '@init'() {
       watch($selectedproduct, () => { this.value = 1 })
    },
@@ -114,11 +114,11 @@ const $quantity = Ion(1, {
 })
 
 // (2)
-const $shippingMethod = Ion(() => $shippingOptions()[0], { value: undefined })
+const $shippingMethod = ion(() => $shippingOptions()[0], { value: undefined })
 
 
 // (3)
-const $shippingMethod = Ion(null, { value: () => $shippingOptions()[0] })
+const $shippingMethod = ion(null, { value: () => $shippingOptions()[0] })
 
 
 // Async Ion
@@ -146,7 +146,7 @@ const $liked = AsyncIon({
 
 // Optimistic
 
-const $liked = Ion(false, {
+const $liked = ion(false, {
    toggle() {
       this.value = !this.value
    },
@@ -164,40 +164,40 @@ const markLiked = AsyncOp((liked) => {
 
 
 // cases where you want to start with an initial value
-// const $quantity = Ion(null, {
+// const $quantity = ion(null, {
 //    '@init'({ watch }) { watch($selectedProduct, () => 1) }
 // })
 
-// const $quantity = Ion(null, {
+// const $quantity = ion(null, {
 //    watch: [$selectedProduct, () => 1]
 // })
 
-// const $quantity = Ion(null, {
+// const $quantity = ion(null, {
 //    watch: $selectedProduct,
 //    derive: () => 1
 // })
 
-// const $shippingMethod = Ion(null, {
+// const $shippingMethod = ion(null, {
 //    derive: () => $shippingOptions()[0]
 // })
 
-// const $quantity = Ion(null, {
+// const $quantity = ion(null, {
 //    '@init'() { watch($selectedProduct, sync(() => this.value = 1)) }
 // })
 
-// const $shippingMethod = Ion(null, {
+// const $shippingMethod = ion(null, {
 //    '@init'({ watch }) { watch($shippingOptions, ({ current }) => current[0]) }
 // })
 
-// const $shippingMethod = Ion(null, {
+// const $shippingMethod = ion(null, {
 //    '@init'({ derive }) { derive(() => $shippingOptions()[0]) }
 // })
 
-// const $shippingMethod = Ion(null, {
+// const $shippingMethod = ion(null, {
 //    '@init'() { runIonicTask(() => this.value = $shippingOptions()[0]) }
 // })
 
-// const $shippingMethod = Ion(null, {
+// const $shippingMethod = ion(null, {
 //    '@init'({ watch }) { watch($shippingOptions, ({ current, previous }) => options.find(opt => opt.id === prev.id) ?? options[0]) }
 // })
 
@@ -278,8 +278,8 @@ list.push(Ionized(new Frog('kermit')))
 
 
 
-// const $firstName = Ion('')
-// const $lastName = Ion('')
+// const $firstName = ion('')
+// const $lastName = ion('')
 
 // const fullname = ionize({
 //    get value() {
@@ -308,7 +308,7 @@ const videoPlayer = Finitron({
 
 const $door = AsyncIon(fetchDoor)
 
-const $userId = Ion('')
+const $userId = ion('')
 
 const $user = AsyncIon(async () => {
    const res = await fetchUser($userId)
@@ -329,7 +329,7 @@ export function App() {
 }
 
 export function Counter() {
-   let $count = Ion(0)
+   let $count = ion(0)
 
    return template(
       <div>
@@ -373,7 +373,7 @@ function reset($count) {
 }
 
 export function Counter() {
-   let $count = Ion(0)
+   let $count = ion(0)
 
    console.log('count is', $count)
 
@@ -394,7 +394,7 @@ export function Counter() {
 // // ION WITH METHODS
 
 // export function Counter() {
-//    const count = Ion(0, {
+//    const count = ion(0, {
 //       increment() {
 //          count++
 //       },
@@ -415,7 +415,7 @@ export function Counter() {
 // DERIVATION ION
 
 export function DoubleCounter() {
-   let $count = Ion(0)
+   let $count = ion(0)
    let $doubleCount = ionic(($count * 2))
 
    return template(
@@ -430,7 +430,7 @@ export function DoubleCounter() {
 // DERIVATION SHORTHAND IN THE TEMPLATE
 
 export function DoubleCounter() {
-   let $count = Ion(0)
+   let $count = ion(0)
 
    return template(
       <div>
@@ -443,10 +443,10 @@ export function DoubleCounter() {
 
 // DERIVATIONS WITH METHODS
 
-let $firstName = Ion('')
-let $lastName = Ion('')
+let $firstName = ion('')
+let $lastName = ion('')
 
-let $fullName = Ion(($firstName + ' ' + $lastName), {
+let $fullName = ion(($firstName + ' ' + $lastName), {
    set(name: string) {
       $$: [$firstName, $lastName] = name.split(' ')
    }
@@ -460,7 +460,7 @@ function makeAnonymous() {
 // STATIC VALUES IN THE TEMPLATE
 
 export function Counter() {
-   let $count = Ion(0)
+   let $count = ion(0)
 
    return template(
       <div>
@@ -565,7 +565,7 @@ function FruitBasket({ $selectedFruit, fruitStore }) {
 // watch ions
 
 export function Counter() {
-   let $count = Ion(0)
+   let $count = ion(0)
 
    watch(($count), () => {
       console.log('count is now', $count())
@@ -651,7 +651,7 @@ function ScoreBoard({ a, b }) {
 
 // absorbed ions
 
-const $username = Ion('John Doe')
+const $username = ion('John Doe')
 
 const player = ionize({
    name: $username,
@@ -686,7 +686,7 @@ export function PlayingCard(input: FromTag<{
 }>) {
    const { $number, $suit, startFaceup = false, $cardBack } = input
 
-   let $faceup = Ion(startFaceup)
+   let $faceup = ion(startFaceup)
    const $div = NodeRef('div')
 
    return template(
@@ -777,7 +777,7 @@ export function TodoList() {
    let id = 0
 
    const todos = ionize([], { for: 'id' })
-   const $input = Ion('')
+   const $input = ion('')
 
    function remove(index: number) {
       $$: todos.splice(index, 1)

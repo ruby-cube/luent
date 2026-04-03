@@ -2,7 +2,7 @@ import { template } from "@rue/luent";
 import { ion, watch } from "@rue/quarky";
 
 export function TestEffectCycle() {
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          $count.value++
       },
@@ -11,7 +11,7 @@ export function TestEffectCycle() {
       }
    })
 
-   const $doubleCount = Ion(() =>$count() * 2)
+   const $doubleCount = ion(() =>$count() * 2)
 
    watch($doubleCount, () => {
       console.log("&% watch $doubleCount 0")

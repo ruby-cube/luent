@@ -1,5 +1,5 @@
-import { template, Else, Finitron, FromTag, If, NodeRef, Style, css, HandleEvent } from "@rue/luent";
-import { Ion, queueTask, watch } from "@rue/quarky";
+import { template, Else, FromTag, If, NodeRef, css } from "@rue/luent";
+import { Ion, ion, queueTask, watch, Finitron } from "@rue/quarky";
 import "./reset.css"
 
 
@@ -50,7 +50,7 @@ export function VideoPlayer() {
       video?.pause()
    })
 
-   get elapsedTime = Ion(0);
+   get elapsedTime = ion(0);
 
    function updateTime(currentTime: number) {
       elapsedTime@.value = currentTime;

@@ -2,11 +2,11 @@
 // composability only
 
 import { template } from "@rue/luent"
-import { Ion } from "@rue/quarky"
+import { ion } from "@rue/quarky"
 
 
 function TestVanillaStream() {
-   const $eye = Ion(1, {
+   const $eye = ion(1, {
       bug() { this.value = 2 },
       reset() { this.value = 1 },
       toggle() { this.value = this.value === 1 ? 2 : 1 }
@@ -26,7 +26,7 @@ function TestVanillaStream() {
       }, 500)
    }
 
-   const $side = Ion('l' as 'l' | 'r')
+   const $side = ion('l' as 'l' | 'r')
 
    function side() {
       $side.value = 'r'
@@ -42,7 +42,7 @@ function TestVanillaStream() {
       }, 1000)
    }
 
-   const $legrun = Ion(false as false | 3 | 4)
+   const $legrun = ion(false as false | 3 | 4)
 
    function legrun() {
       $legrun.value = 3
@@ -63,7 +63,7 @@ function TestVanillaStream() {
    }
 
 
-   const $frame = Ion(() =>
+   const $frame = ion(() =>
       $eye()
          ? 2
          : $legrun()

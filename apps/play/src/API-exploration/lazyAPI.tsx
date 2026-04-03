@@ -99,7 +99,7 @@ type AsyncIon<T> = {
 function App() {
    const $searchTerm = ion.debounced('', 100)
 
-   const $items = Ion(largeList)
+   const $items = ion(largeList)
 
    const lazyBatch = useLazyBatch()
 

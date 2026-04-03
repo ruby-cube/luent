@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { FromTag, AsyncIon, If, Suspense } from "@rue/luent";
 import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
-import { EACH, instantUpdate, Ion, Ionic, IonicProxy, isIonicProxy } from "@rue/quarky";
+import { EACH, instantUpdate, Ion, Ionic, ionic, IonicProxy, isIonicProxy } from "@rue/quarky";
 import { Action, REFETCH } from "../../../../packages/quarky/src/async/Action";
 import { toggleCompleted } from "./AsyncDemoLessons/data";
 import { AnyObject } from "@rue/types";
@@ -14,7 +14,7 @@ const ENTER_KEY = 13;
 
 const generateId = () => Date.now().toString(36);
 
-// const IonicTodo = (data) => asNestedAsync(data, data.id, data => Ionic(new Todo(data)), {
+// const IonicTodo = (data) => asNestedAsync(data, data.id, data => ionic(new Todo(data)), {
 //    refetch: () => db.getTodo(data.id),
 //    update(todo, data) { // custom updater
 //       return updateProperties(todo, {
@@ -26,7 +26,7 @@ const generateId = () => Date.now().toString(36);
 // })
 
 
-const asIonicTodo = AsNestedAsync(data => [data.id, asIonic(new Todo(data)), {
+const ionicTodo = AsNestedAsync(data => [data.id, ionic(new Todo(data)), {
    refetch: () => db.getTodo(data.id),
    update(todo, data) { // custom updater
       return updateProperties(todo, {
@@ -58,18 +58,18 @@ function AsyncModel<D extends AnyObject>(initialData: D, fetch: () => D, config:
 
 
 
-const todos = asIonic([], {
+const todos = ionic([], {
    '-fetch': () => db.getTodos($id()),
    [EACH]: {
-      '-as': data => asIonic(data, {
+      '-as': data => ionic(data, {
          '-refetch': () => db.getTodo(data.id)
       })
    }
 })
 
-const todos = asIonic([], {
+const todos = ionic([], {
    '-fetch': () => db.getTodos($id()),
-   [EACH]: { '-as': asIonicTodo },
+   [EACH]: { '-as': ionicTodo },
 })
 
 
@@ -129,9 +129,9 @@ function asNestedAsync<T extends AnyObject, M extends ModelMethods>(data: T, uid
 // identical: set todos or set all properties
 // partial overlap: set some properties, some may overlap
 
-function asIonicTodos(data: Todo[]) {
-   return asIonic(data, {
-      [EACH]: { '-as': asIonicTodo },
+function ionicTodos(data: Todo[]) {
+   return ionic(data, {
+      [EACH]: { '-as': ionicTodo },
       '-patch': patchIonicArray
    })
 }
@@ -190,13 +190,13 @@ function patchIonicArray(data) {
 }
 
 
-function asIonicTodo(data: AnyObject) {
-   return asIonic(data, {
+function ionicTodo(data: AnyObject) {
+   return ionic(data, {
       '-wrap': data => new Todo(data),
       '-getID': n => n.id,
       '-refetch': () => db.getTodo(data.id),
       '-patch': patchObject,
-      profile: { '-as': asIonicProfile },
+      profile: { '-as': ionicProfile },
    })
 }
 
@@ -232,7 +232,7 @@ function patchNested(this: AnyObject, obj: AnyObject | undefined, data: AnyObjec
 }
 
 function IonicTodosIon() {
-   return Ion([], {
+   return ion([], {
       '-as': IonicTodos,
       '-fetch': () => db.fetchTodos(),
       '-patch': patchDeepIon,
@@ -419,7 +419,7 @@ function Todo({
    todo: Todo;
    removeTodo: (id: string) => Promise<void>;
 }>) {
-   const $isRemoving = Ion(false);
+   const $isRemoving = ion(false);
 
    const reRemoveBtnClick = () => {
       $isRemoving.value = true;

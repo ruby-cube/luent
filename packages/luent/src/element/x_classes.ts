@@ -7,7 +7,7 @@ type OverrideClassesIon = Ion<string | Falsey> & {
 export const OVERRIDE_LEVEL = Symbol('override-level')
 
 export function createOverrideClasses(classes: ClassInput | ClassInput[]) {
-   const æclasses = Ion((() => {
+   const æclasses = ion((() => {
       if (æclasses[OVERRIDE_LEVEL]) {
          return toOverrideClasses(normalizeToArray(classes), æclasses[OVERRIDE_LEVEL])
       }

@@ -1,16 +1,15 @@
 import { css, For, template } from "@rue/luent";
-import { asIonic, Ion, Ionic } from "@rue/quarky";
-import { watch } from "fs";
+import { ionic, ion } from "@rue/quarky";
 
 export function TestRetracking() {
    
-   const $todos = Ion(asIonic([
-      asIonic({ id: 1, title: 'kermit', completed: false }),
-      asIonic({ id: 2, title: 'sir robin', completed: false })
+   const $todos = ion(ionic([
+      ionic({ id: 1, title: 'kermit', completed: false }),
+      ionic({ id: 2, title: 'sir robin', completed: false })
    ]))
-   const $activeTodos = Ion(() => $todos().filter(todo => !todo.completed))
+   const $activeTodos = ion(() => $todos().filter(todo => !todo.completed))
 
-   const $remaining = Ion(() => $activeTodos().length)
+   const $remaining = ion(() => $activeTodos().length)
 
    function checkAll() {
       $todos().forEach(todo => todo.completed = true)

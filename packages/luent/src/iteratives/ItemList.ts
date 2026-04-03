@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import {Ion, MaybeIonized, MutableIon, queueRender, watchToRender } from "@rue/quarky";
+import {createAtomicIon, Ion, MaybeIonized, MutableIon, queueRender, watchToRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { RawJSXNode } from "../node/makeJSXNode";
@@ -54,7 +54,7 @@ export class ListKit extends VineNode {
          const kits: ListItemKit[] = []
          for (let i = 0; i < list.length; i++) {
             const item = list[i]
-            const $index = Ion(i)
+            const $index = createAtomicIon(i)
 
             const kit = new ListItemKit(item, $index, renderItem, this.flask)
             kits.push(kit)
@@ -112,7 +112,7 @@ export class ListKit extends VineNode {
          // new item!
          else {
             console.log('&&& new item!', item)
-            const $index = Ion(i)
+            const $index = createAtomicIon(i)
             kit = new ListItemKit(item, $index, renderItem, this.flask)
             kit.parent = this.parent;
             kit.preceding = preceding;

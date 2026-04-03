@@ -1,5 +1,5 @@
 import { marked } from 'marked'
-import { Ion, Ionic, watch } from '@rue/quarky'
+import { Ion, Ionic, ion } from '@rue/quarky'
 import { template, FromTag, NodeRef, atMounted, atUnmount, atDiscard, atCreated } from '@rue/luent'
 import '../../style.css'
 
@@ -10,10 +10,10 @@ export function MarkdownApp(
    // }>
 ) {
 
-   // const { $markdown = Ion('# Hello World') } = input
-   const $markdown = Ion('# Hello World')
+   // const { $markdown = ion('# Hello World') } = input
+   const $markdown = ion('# Hello World')
 
-   const $html = Ion(() => marked($markdown()) as string)
+   const $html = ion(() => marked($markdown()) as string)
 
 
    // const update = (e: any) => {
@@ -23,7 +23,7 @@ export function MarkdownApp(
 
    const $textArea = NodeRef('textarea')
 
-   const caretRange = Ionic({
+   const caretRange = ionic({
       selectionStart: undefined as undefined | number,
       selectionEnd: undefined as undefined | number,
    })
@@ -44,13 +44,13 @@ export function MarkdownApp(
       textArea.selectionEnd = selectionEnd!
    })
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          $count.value++
       }
    })
 
-   const $doubleCount = Ion(() => $count() * 2)
+   const $doubleCount = ion(() => $count() * 2)
 
    // NOTE: There's actually no reason to pause and resume this watcher since it is watching local state. 
    // Pausing and resuming is only helpful if state is shared across views

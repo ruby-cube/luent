@@ -1,10 +1,10 @@
 
 
-import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, tickUpdate, UpdateType } from "./Update"
-import { Effect, EffectQueue, TaskQueue } from "./Effect"
+import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, tickUpdate, UpdateType } from "../quarky/src/reactivity/Update"
+import { Effect, EffectQueue, TaskQueue } from "../quarky/src/reactivity/Effect"
 import { Flask } from "@rue/flask"
 import { getInternalTrace } from "../../../flask/debug"
-import { Update } from "./Update";
+import { Update } from "../quarky/src/reactivity/Update";
 import { noop } from "@rue/utils";
 
 
@@ -724,8 +724,8 @@ export function onTick(task: Task) {
 
 
 
-// const $todoID = Ion('kldk')
-// const $data = Ion()
+// const $todoID = ion('kldk')
+// const $data = ion()
 
 // queueIonicTask(async w => {
 //    await postlude()

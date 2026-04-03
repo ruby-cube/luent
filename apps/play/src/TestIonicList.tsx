@@ -1,8 +1,8 @@
 import { template, For } from "@rue/luent";
-import { asIonic, Ionic } from "@rue/quarky";
+import { ionic, Ionic } from "@rue/quarky";
 
 export function TestIonicList() {
-   const list = asIonic([1, 2, 3])
+   const list = ionic([1, 2, 3])
    return template(
       <div>
          <button on:click={e => list.push((list.at(-1) ?? 0) + 1)}>add</button>

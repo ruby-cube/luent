@@ -19,11 +19,7 @@ export interface IonHooks {
 }
 
 
-
-// export const ATOMIC_ION = Symbol('atomic ion')
-
 export class AtomicIonQuark implements Atom {
-   // quarkType: string | symbol = ATOMIC_ION
    asTrackedAtom: TrackedAtom | undefined;
 
    castGet: ((value: unknown) => void) | undefined
@@ -46,14 +42,11 @@ export class AtomicIonQuark implements Atom {
    }
 }
 
-
-
 export function createAtomicIon(
    initialState: unknown,
    setup?: AnyObject
 ) {
    const quark = new AtomicIonQuark(new SimpleState(initialState), setup)
-console.log('createAtomicIon', initialState)
    const $state = (
       quark.castGet
          ? withGetHook(getState.bind(quark), quark.castGet)

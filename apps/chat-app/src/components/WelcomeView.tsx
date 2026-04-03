@@ -8,7 +8,7 @@ export function WelcomeView(input: FromTag<{
    initialLoad: boolean
 }>) {
    const { initialLoad } = input
-   const $initialLoad = Ion(initialLoad)
+   const $initialLoad = ion(initialLoad)
 
    return template(
       <>

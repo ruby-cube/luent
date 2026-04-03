@@ -2,6 +2,10 @@
     "name": "@rue/quarky",
     "private": true,
     "description": "",
+    "exports": {
+        ".": "./src/index.ts",
+        "./core": "./src/core/index.ts"
+    },
     "module": "./src/index",
     "main": "./src/index",
     "dependencies": {

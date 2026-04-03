@@ -1,6 +1,6 @@
-import { Ionic } from "@rue/quarky"
+import { Ionic, ionic } from "@rue/quarky"
 
-const arr = Ionic([1])
+const arr = ionic([1])
 console.log('key in?', '0' in arr)
 arr.pop()
 console.log("pop")

@@ -1,5 +1,5 @@
 import { template, Else, For, FromTag, NodeRef, If, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/luent"
-import { Ion } from "@rue/quarky"
+import { Ion, ion } from "@rue/quarky"
 import { Thru } from "../../../packages/luent/src/iteratives/Thru"
 
 // Modified Demo from Vue.js
@@ -121,7 +121,7 @@ function Cell(input: FromTag<{
 }>) {
    const { setCellValue, $value, calcCellValue } = input
 
-   const $editing = Ion(false)
+   const $editing = ion(false)
 
    function update(e: any) {
       $editing.value = false

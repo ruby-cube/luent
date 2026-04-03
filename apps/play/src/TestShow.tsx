@@ -2,7 +2,7 @@ import { template, Else, If } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestShow() {
-   const $active = Ion(false, {
+   const $active = ion(false, {
       toggle() {
          $active.value = !$active.value
       }

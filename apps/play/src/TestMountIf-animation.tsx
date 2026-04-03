@@ -1,12 +1,12 @@
 import { getActiveFlask } from "@rue/flask";
 import { template, If, Else,  ElseIf,Style, NodeRef, atMounted } from "@rue/luent";
-import { getActiveUpdate, Ion, queueRender, queueTask, watch } from "@rue/quarky";
+import { getActiveUpdate, ion, queueRender, queueTask, watch } from "@rue/quarky";
 import "./style.css"
 
 
 export function MountIfAnimation() {
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          $count.value = $count() + 1
       }
@@ -19,25 +19,25 @@ export function MountIfAnimation() {
    //    }
    // })
 
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() {
          $active.value = !$active()
       }
    })
 
-   const $ready = Ion(false, {
+   const $ready = ion(false, {
       toggle() {
          $ready.value = !$ready()
       }
    })
 
-   const $isMobile = Ion(false, {
+   const $isMobile = ion(false, {
       toggle() {
          $isMobile.value = !$isMobile()
       }
    })
 
-   const $name = Ion('Dobby')
+   const $name = ion('Dobby')
    // const todos = ionize([{ name: 'bubby', date: 0 }] as { name: string, date: number }[])
 
    // const removed = todos.splice(0, 2)
@@ -46,7 +46,7 @@ export function MountIfAnimation() {
    // return ""
    // }
 
-   const $color = Ion('lim', {
+   const $color = ion('lim', {
       change() {
          if ($color() === 'lim')
             $color.value = 'blu'
@@ -59,9 +59,9 @@ export function MountIfAnimation() {
       console.log('hi tick instant', getActiveUpdate())
    })
 
-   const $transitioning = Ion(false)
-   const $startHeight = Ion(0)
-   const $endHeight = Ion(0)
+   const $transitioning = ion(false)
+   const $startHeight = ion(0)
+   const $endHeight = ion(0)
 
    const $div1 = NodeRef('div')
    const $div2 = NodeRef('div')
@@ -360,7 +360,7 @@ from {
 
 function CounterKit() {
    return {
-      $count: Ion(0)
+      $count: ion(0)
    }
 }
 
@@ -372,7 +372,7 @@ function ArticleBlock(setup: {
 }
 // function Counter() {
 //     const _this = $thisComponent()
-//     const $count = Ion(0)
+//     const $count = ion(0)
 
 //     const $button = NodeRef('button')
 //     const $countDiv = NodeRef('div')

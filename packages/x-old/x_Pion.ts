@@ -1,5 +1,5 @@
 import { Ion } from "../quarky/src/ion/Ion"
-import { Quark, quarkOf } from "../quarky/src/abstract/Quark"
+import { Quark, quarkOf } from "../quarky/src/core/abstract/Quark"
 import { IonicProxy } from "../quarky/src/ionic/Ionic"
 import { ModelQuark } from "../quarky/src/ionic/IonicModel"
 import { debug } from "@rue/utils"

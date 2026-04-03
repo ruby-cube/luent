@@ -5,7 +5,7 @@ import { Ion } from "@rue/quarky";
 function App() {
 
    const $states = fetchStates();
-   const $selectedState = Ion($states()[0]);
+   const $selectedState = ion($states()[0]);
 
    const $cities = fetchCities($selectedState);
    const $selectedCity = HybridIon(() => $cities()[0]);

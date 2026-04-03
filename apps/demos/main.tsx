@@ -1,11 +1,11 @@
-import { Ion, LAYOUT, PRELUDE, RENDER, swiftUpdate, SYNC, TICK, watch } from "@rue/quarky";
+import { ion, LAYOUT, PRELUDE, RENDER, swiftUpdate, SYNC, TICK, watch } from "@rue/quarky";
 
 if (process.env.NODE_ENV === 'development') {
    // lazy import to prevent imports from affecting tests
    import('./demos').then(res => res.runDemo())
 }
 
-// const $count = Ion(0)
+// const $count = ion(0)
 
 // document.addEventListener('click', () => {
 //    swiftUpdate(() => {

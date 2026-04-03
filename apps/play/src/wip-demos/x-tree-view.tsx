@@ -114,7 +114,7 @@ function createTreeItem(data: TreeItemData): TreeItem {
 
 // # ionic factory
 function IonizedTreeItem(data: TreeItemData): $$TreeItem {
-   return Ionic(createTreeItem(data), {
+   return ionic(createTreeItem(data), {
       nested: { children: (items: TreeItem[]) => ionize(items.map(item => IonizedTreeItem(item))) }
    })
 }
@@ -182,7 +182,7 @@ export function TreeApp(input: FromTag<{
 }
 
 function Counter() {
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -250,8 +250,8 @@ function TreeItemView(input: FromTag<{
 }>) {
    const { item } = input()
 
-   const $isFolder = Ion(() => !!item.children?.length)
-   const $isOpen = Ion($isFolder(), {
+   const $isFolder = ion(() => !!item.children?.length)
+   const $isOpen = ion($isFolder(), {
       toggle() {
          this.value = !this.value
       }

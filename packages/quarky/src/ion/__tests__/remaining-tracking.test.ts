@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from 'vitest'
-import { Ion, Ionic, as, EACH } from '../../index'
 import { quarkOf } from '../../abstract/Quark'
+import { EACH, ionic } from '../../ionic/Ionic'
+import { ion } from '../Ion'
 
 type Todo = {
    id: number
@@ -10,7 +11,7 @@ type Todo = {
    completed: boolean
 }
 
-const ionicTodos = (todos: Todo[]) => Ionic(todos, { [EACH]: { '-as': Ionic } })
+const ionicTodos = (todos: Todo[]) => ionic(todos, { [EACH]: { '-as': ionic } })
 
 describe('remaining tracking', () => {
    it('keeps tracking every todo.completed after toggle-all on then off', () => {
@@ -22,7 +23,7 @@ describe('remaining tracking', () => {
 
       ;(quarkOf(todos) as any).asTraceable = { name: 'todos', origin: undefined }
 
-      const remaining = Ion(() => todos.filter(todo => !todo.completed).length)
+      const remaining = ion(() => todos.filter(todo => !todo.completed).length)
 
       expect(remaining()).toBe(2)
 

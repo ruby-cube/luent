@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { NodeRef, template, COMPONENT, ComponentForge, If, Else, For, teleportTo } from "@rue/luent";
+import { NodeRef, template, COMPONENT, ComponentTag, If, Else, For, teleportTo } from "@rue/luent";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
+import { __addDevName, Ion, ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/luent/src/component/LazyComponent";
 import { ElseIf } from "../../../packages/luent/src/conditional/If";
 import { AnyObject } from "@rue/types";
@@ -21,7 +21,7 @@ function genId() {
 // const SideBlock = lazyLoadComponent({
 //     load: () => {
 //         const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
-//         return new Promise((resolve: (SideBlock: ComponentForge) => void, reject) => {
+//         return new Promise((resolve: (SideBlock: ComponentTag) => void, reject) => {
 //             setTimeout(() => {
 //                 promise.then((SideBlock) => {
 //                     resolve(SideBlock)
@@ -36,7 +36,7 @@ function genId() {
 // const TestBox = lazyLoadComponent({
 //     load: () => {
 //         const promise = import('./TestBox').then(({ TestBox }) => TestBox)
-//         return new Promise((resolve: (SideBlock: ComponentForge) => void, reject) => {
+//         return new Promise((resolve: (SideBlock: ComponentTag) => void, reject) => {
 //             setTimeout(() => {
 //                 promise.then((SideBlock) => {
 //                     resolve(SideBlock)
@@ -70,10 +70,10 @@ export function App() {
 
 export function List() {
 
-    const $active = Ion(true)
+    const $active = ion(true)
     if ( __DEV__) __addDevName($active, '$active')
 
-    const $list = Ion(ionize([
+    const $list = ion(ionize([
         { id: 0, content: "frog" },
         { id: 1, content: "dog" },
         { id: 2, content: "fly" },
@@ -104,7 +104,7 @@ export function List() {
 
     const { openModal } = useModal();
 
-    const $showSideBlock = Ion(false)
+    const $showSideBlock = ion(false)
 
     function showSideBlock() {
         $showSideBlock.value = true
@@ -203,8 +203,8 @@ function Appo(
         kdj: string
     }
 ) {
-    const $active = Ion(true)
-    const $ready = Ion(true)
+    const $active = ion(true)
+    const $ready = ion(true)
 
     const exposed = {
         $active,
@@ -296,7 +296,7 @@ function DialogBox({
 }
 
 function useDialogBox(config: { initialState: 'open' | 'closed' }) {
-    const $open = Ion(false)
+    const $open = ion(false)
     __addDevName($open, '$open')
 
     function open() {

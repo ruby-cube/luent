@@ -1,5 +1,4 @@
 import { AnyObject } from "@rue/types"
-import { isFunction } from "@rue/utils"
 
 export type Stream = {
    start(): Promise<void>

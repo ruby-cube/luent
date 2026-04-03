@@ -1,6 +1,6 @@
 import { AnyObject, Glass } from "@rue/types";
 import { createIonicModel, isIonicProxy, MethodHook } from "./IonicModel";
-import { QUARK, quarkOf } from "../abstract/Quark";
+import { quarkOf } from "../abstract/Quark";
 import type{ QuarkyIonicProxy } from "./ModelQuark";
 import { isObject } from "@rue/utils";
 import { Ion } from "../ion/Ion";
@@ -74,16 +74,16 @@ const ionicModels: WeakMap<AnyObject, QuarkyIonicProxy> = new WeakMap()
 
 
 
-// export function asIonic<T extends AnyObject>(target: T, config?: AnyObject): IonicProxy & T {
+// export function ionic<T extends AnyObject>(target: T, config?: AnyObject): IonicProxy & T {
 //    if (isIonicProxy(target)) return target as any as IonicProxy & T;
 //    const existing = ionicModels.get(target)
 //    if (existing) {
 //       if ( __DEV__ && config && quarkOf(existing).extension !== config) {
-//          console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by asIonic`)
+//          console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by ionic`)
 //       }
 //       return existing as any as IonicProxy & T
 //    }
-//    return Ionic(target, config)
+//    return ionic(target, config)
 // }
 
 type PropertiesOf<T> = {
@@ -108,10 +108,9 @@ type IonicConfig<T> = {
 
 
 
-export const Ionic = _Ionic as typeof _Ionic & { '~Ionic': true }
-export const asIonic = Ionic
+export const Ionic = ionic as typeof ionic & { '~Ionic': true }
 
-export function _Ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<AbsorbIons<T>, M> {
+export function ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<AbsorbIons<T>, M> {
    if (isIonicProxy(target)) {
       return target as any
    }
@@ -119,7 +118,7 @@ export function _Ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T
    const existing = ionicModels.get(target)
    if (existing) {
       if ( __DEV__ && setup && quarkOf(existing).extension !== setup) {
-         console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by asIonic`)
+         console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by ionic`)
       }
       return existing as any
    }
@@ -139,4 +138,4 @@ export type IonizeBy<H, T> = IsIonic<H> extends true ?
 
 export type ToRaw<T> = IsIonic<T> extends true ? T extends Ionize<infer R> ? R : T : T
 
-const author = Ionic({ profile: { name: 'frog' } }, { profile: { '-as': Ionic } })
+// const author = ionic({ profile: { name: 'frog' } }, { profile: { '-as': ionic } })

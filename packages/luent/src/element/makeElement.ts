@@ -299,7 +299,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 //    const flask = getFlask()
 //    watchToRender(ion, () => {
 //       queueInternalRender(() => {
-//          element.value = toString(Ion())
+//          element.value = toString(ion())
 //       }, flask)
 //    }, flask, RUN_EAGERLY)
 //    if (!isMutableIon(ion)) {

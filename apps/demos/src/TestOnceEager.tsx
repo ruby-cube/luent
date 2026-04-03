@@ -1,8 +1,8 @@
 import { listen, template } from "@rue/luent";
-import { Ion, watch } from "@rue/quarky";
+import { ion, watch } from "@rue/quarky";
 
 export function TestOnceEager() {
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() { $count.value++ }
    })
    

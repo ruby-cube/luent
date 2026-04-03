@@ -1,5 +1,6 @@
 
-import { template, If, JSXNode, FromTag, } from "@rue/luent";
+import { template, If, JSXNode, FromTag } from "@rue/luent";
+import {ion} from '@rue/quarky'
 
 // - [ ]  transform slot to render function for:
 
@@ -14,7 +15,7 @@ function CompA() {
 
 // ion
 function CompB() {
-   const $hello = Ion('hi')
+   const $hello = ion('hi')
 
    return template(
       <div>{$hello}</div>
@@ -23,7 +24,7 @@ function CompB() {
 
 // interpolated (to array)
 function CompC() {
-   const $hello = Ion('hi')
+   const $hello = ion('hi')
 
    return template(
       <div>greeting: {$hello}</div>
@@ -34,7 +35,7 @@ function CompC() {
 
 // derived ion
 function CompD() {
-   const $hello = Ion('hi')
+   const $hello = ion('hi')
 
    return template(
       <div>{$hello() + '!'}</div>
@@ -43,7 +44,7 @@ function CompD() {
 
 // transformed derived ion slot
 function CompDTransform() {
-   const $hello = Ion('hi')
+   const $hello = ion('hi')
 
    return template(
       <div>{() => function $() { return $hello() + '!' }}</div>
@@ -52,7 +53,7 @@ function CompDTransform() {
 
 // another element
 function CompE() {
-   const $hello = Ion('hi')
+   const $hello = ion('hi')
 
    return template(
       <div><p>{$hello() + '!'}</p></div>
@@ -69,7 +70,7 @@ function CompG() {
 
 // other elements
 function CompF() {
-   const $hello = Ion('hi')
+   const $hello = ion('hi')
 
    return template(
       <div>
@@ -185,7 +186,7 @@ function ParentF() {
 
 // Template function
 function ParentG() {
-   const $active = Ion(true);
+   const $active = ion(true);
 
    return template(
       <div>
@@ -198,7 +199,7 @@ function ParentG() {
 
 // Template function: with fragment
 function ParentG3() {
-   const $active = Ion(true);
+   const $active = ion(true);
 
    return template(
       <div>
@@ -213,7 +214,7 @@ function ParentG3() {
 
 // Template function: with sequence expression
 function ParentG2() {
-   const $active = Ion(true);
+   const $active = ion(true);
 
    return template(
       <div>

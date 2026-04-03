@@ -1,14 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
-import { areShallowEqualArrays, isIonicProxy } from "../../../quarky/src";
 import { UniqueItem } from "./For";
-import { quarkOf } from "../../../quarky/src/abstract/Quark";
+import { toRaw } from "@rue/quarky";
 
 
 // TODO: implementation for sets, objects, and maps
 export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) =i=>i, prevMap: Map<unknown, number> | undefined) {
    // const [newArr, oldArr] = makeItemsUnique(newArray, oldArray, getUID);
-   const rawNewArray = isIonicProxy(newArray) ? quarkOf(newArray).state.current as any[] : newArray
+   const rawNewArray = toRaw(newArray)
    if (areShallowEqualArrays(rawNewArray, oldArray, getUID)) return { noChange: true };
 
    const newMap = toUIDMap(rawNewArray, getUID);
@@ -76,6 +75,14 @@ function toUIDMap(target: AnyObject[], getUID: (item: unknown) => unknown) {
       map.set(getUID(item), i)
    }
    return map;
+}
+
+export function areShallowEqualArrays(arrayA: any[], arrayB: any[], getUID: (item: unknown)=>unknown = i=>i) {
+    if (arrayA.length !== arrayB.length) return false;
+    for (let i = 0; i < arrayA.length; i++) {
+        if (getUID(arrayA[i]) !== getUID(arrayB[i])) return false;
+    }
+    return true;
 }
 
 function toUIDSet(target: AnyObject[], getUID: (item: unknown) => unknown) {

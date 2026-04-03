@@ -7,18 +7,18 @@ Sugar:
 // example with syntactic sugar
 function Counter({ showFractions@ }) {
 
-   get count = Ion(0, {
+   get count = ion(0, {
       increment() {
          count@.value++
       }
    })
-   get doubleCount = Ion((count * 2))
+   get doubleCount = ion((count * 2))
 
    const { halfCount@, thirdCount@ } = FractionKit(count@)
 
    get halfCountB = FractionKit(count@).halfCount@
 
-   get obj = Ion({name: 'kermit'} as {name: string} | undefined)
+   get obj = ion({name: 'kermit'} as {name: string} | undefined)
 
    function doSomethingElse() {
       if (obj) {
@@ -58,16 +58,16 @@ import { πæ, destructureØ } from "@rue/ruescript";
 function Counter({ æshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) {
   const showFractions = æshowFractions
 
-  const æcount = Ion(0, {
+  const æcount = ion(0, {
     increment() {
       æcount.value++;
     },
   }), count = æcount;
-  const ædoubleCount = Ion(() => æcount() * 2), doubleCount = ædoubleCount;
+  const ædoubleCount = ion(() => æcount() * 2), doubleCount = ædoubleCount;
 
   const { æhalfCount, æthirdCount } = destructureØ(FractionKit(æcount), 'æhalfCount', 'æthirdCount'), halfCount = æhalfCount, thirdCount = æthirdCount;
 
-   const æobj = Ion({ name: 'kermit' } as {name: string} | undefined), obj = æobj;
+   const æobj = ion({ name: 'kermit' } as {name: string} | undefined), obj = æobj;
 
    function doSomethingElse() {
       if (æobj()) {
@@ -105,7 +105,7 @@ function Counter({ æshowFractions }: FromTag<{ showFractions: Ion<boolean> }>) 
 Sugar:
 ```tsx
 function CounterKit() {
-   get count = Ion(0)
+   get count = ion(0)
 
    return {
       count@
@@ -117,7 +117,7 @@ function CounterKit() {
 Compiled:
 ```tsx
 function CounterKit() {
-  const æcount = Ion(0), count = æcount;
+  const æcount = ion(0), count = æcount;
 
   return {
       æcount,
@@ -132,7 +132,7 @@ Sugar:
 function CounterKit() {
 
    return {
-      get count: Ion(0)
+      get count: ion(0)
    }
 }
 ```
@@ -141,7 +141,7 @@ Compiled:
 ```tsx
 function CounterKit() {
   return absorbØ({
-      æcount: Ion(0),
+      æcount: ion(0),
     }, ["æcount"]);
 }
 ```
@@ -150,8 +150,8 @@ function CounterKit() {
 Sugar:
 ```tsx
 function FractionKit(count@) {
-   get halfCount = Ion((count / 2))
-   get thirdCount = Ion((count / 3))
+   get halfCount = ion((count / 2))
+   get thirdCount = ion((count / 3))
 
    return {
       halfCount@,
@@ -164,8 +164,8 @@ function FractionKit(count@) {
 Compiled:
 ```tsx
 function FractionKit(æcount) {
-  const æhalfCount = Ion(() => æcount() / 2), halfCount = æhalfCount;
-  const æthirdCount = Ion(() => æcount() / 3), thirdCount = æthirdCount;
+  const æhalfCount = ion(() => æcount() / 2), halfCount = æhalfCount;
+  const æthirdCount = ion(() => æcount() / 3), thirdCount = æthirdCount;
 
    return {
       æhalfCount,
@@ -181,8 +181,8 @@ Sugar:
 function FractionKit(count@) {
 
    return {
-      get halfCount: Ion((count / 2)),
-      get thirdCount: Ion((count / 3)),
+      get halfCount: ion((count / 2)),
+      get thirdCount: ion((count / 3)),
       get something() {
          return 4;
       },
@@ -197,8 +197,8 @@ Compiled:
 function FractionKit(æcount) {
 
    return absorbØ({
-      æhalfCount: Ion((æcount() / 2)),
-      æthirdCount: Ion((æcount() / 3)),
+      æhalfCount: ion((æcount() / 2)),
+      æthirdCount: ion((æcount() / 3)),
       πæsomething: function something() {
          return 4;
       },
@@ -240,8 +240,8 @@ function FractionKit(æcount) {
       ```tsx
       function FractionKit(count@) {
          return {
-            get halfCount: Ion(() => count / 2),
-            get thirdCount: Ion(() => count / 3),
+            get halfCount: ion(() => count / 2),
+            get thirdCount: ion(() => count / 3),
             get something() {
                return 4;
             },
@@ -254,8 +254,8 @@ function FractionKit(æcount) {
       ```tsx
       function FractionKit(æcount) {
          return absorbØ({
-            æhalfCount: Ion(() => æcount() / 2),
-            æthirdCount: Ion(() => æcount() / 3),
+            æhalfCount: ion(() => æcount() / 2),
+            æthirdCount: ion(() => æcount() / 3),
             halfCount: 'æ',
             thirdCount: 'æ',
             πæsomething: function something() {
@@ -272,8 +272,8 @@ function FractionKit(æcount) {
 - transform all variables with the `@` suffix to `ævariable`: `variable@` --> `ævariable`
 - transform all usages of `get`/`@`suffix variables without `@` suffix: `variable` --> `ævariable()`
    + transform when accessing a property from the `get`/`@`suffix variable: 
-   `get obj = Ion({ property: value }); obj.property` --> `const æobj = Ion({ property: value }), obj = æobj; æobj().property`
-   `const obj@ = Ion({ property: value }); obj.property` --> `const æobj = Ion({ property: value }); æobj().property`
+   `get obj = ion({ property: value }); obj.property` --> `const æobj = ion({ property: value }), obj = æobj; æobj().property`
+   `const obj@ = ion({ property: value }); obj.property` --> `const æobj = ion({ property: value }); æobj().property`
 - transform dot notation with `@` suffix:
   `get property = obj.property@` --> `const æproperty = (obj.æproperty, πæ(obj, 'property')), property = æproperty;`
   - import the getter access helper `πæ` from '@rue/ruescript' if it hasn't been imported yet
@@ -356,13 +356,13 @@ function FractionKit(æcount) {
 | ID | Input (sugar) | Expected output / behavior | Diagnostic? |
 |---|---|---|---|
 | **Declarations** |  |  |  |
-| TV-01 | `get count = Ion(0)` | `const æcount = Ion(0), count = æcount` | No |
-| TV-02 | `const count@ = Ion(0)` | `const æcount = Ion(0)` | No |
-| TV-03 | `let count@ = Ion(0)` | `let æcount = Ion(0)` | No |
-| TV-04 | `get double = Ion((count * 2))` | `const ædouble = Ion(() => æcount() * 2)` | No |
+| TV-01 | `get count = ion(0)` | `const æcount = ion(0), count = æcount` | No |
+| TV-02 | `const count@ = ion(0)` | `const æcount = ion(0)` | No |
+| TV-03 | `let count@ = ion(0)` | `let æcount = ion(0)` | No |
+| TV-04 | `get double = ion((count * 2))` | `const ædouble = ion(() => æcount() * 2)` | No |
 | TV-05 | `const { a@, b, c@ } = src` | `const { æa, b, æc } = destructureØ(src, 'æa', 'b', 'æc')` | No |
 | TV-06 | `get { a, b } = src` | `const { æa, æb } = destructureØ(src, 'æa', 'æb'), a = æa, b = æb` | No |
-| TV-07 | `{ get value: Ion(0) }` | `absorbØ({ ævalue: Ion(0) }, ['ævalue'])` | No |
+| TV-07 | `{ get value: ion(0) }` | `absorbØ({ ævalue: ion(0) }, ['ævalue'])` | No |
 | **Access** |  |  |  |
 | TV-08 | `get item = obj.prop@` | `const æitem = (obj.æprop, πæ(obj, 'prop'))` | No |
 | TV-09 | `get item = obj.a@.b@.c@` | `const æitem = (obj.æa.æb.æc, πæ(πæ(πæ(obj, 'a'), 'b'), 'c'))` | No |
@@ -431,8 +431,9 @@ function FractionKit(æcount) {
 * `.rxs` files are virtualized as transformed `.tsx` for TypeScript typechecking.
 - Authored sugar files are never rewritten on disk.
 - Diagnostics are remapped from transformed virtual positions back to original sugar locations.
-- Transformer single source of truth: `packages/rxs/scripts/transform-rxs-sugar.shared.cjs`.
-- RueScript entrypoint wrapper: `packages/rxs/scripts/transform-rxs-sugar.mjs`.
+- Transformer single source of truth: `packages/ruescript/scripts/transform-rxs-sugar.shared.cjs`.
+- RueScript entrypoint wrapper: `packages/ruescript/scripts/transform-rxs-sugar.mjs`.
+- TS Server package export: `@rue/ruescript/tsserver` via `packages/ruescript/tsserver.cjs`.
 - TS Server plugin wrapper: `plugins/tsserver-plugin-ruescript/transform-rxs-sugar.cjs`.
 - To run from root: `pnpm typecheck:rxs`
 - To run from package: `pnpm -F @rue/ruescript typecheck`

@@ -12,8 +12,8 @@ What are the expected behaviors
    - Do we want to allow non-blocking infinite loops?
 */
 
-const $message = Ion('hi')
-const $count = Ion(0)
+const $message = ion('hi')
+const $count = ion(0)
 
 /**
  * Should prefer dervations over this method, 
@@ -52,7 +52,7 @@ This way effects will be run more efficiently instead of having to run the same 
  * Nested Watchers
  */
 
-const $active = Ion(false)
+const $active = ion(false)
 
 watch($message, ({ current: msg }) => {
    watch($active, () => {

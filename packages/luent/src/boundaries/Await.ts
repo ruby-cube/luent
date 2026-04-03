@@ -8,7 +8,7 @@
 //    <div>{err}</div>
 // )}
 
-import { Ion, isIon, PRELUDE, watch } from "@rue/quarky";
+import { createAtomicIon, Ion, isIon, PRELUDE, watch } from "@rue/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
@@ -220,7 +220,7 @@ function wrapWithSuspense(render: RenderFunction, $suspense: SuspenseIon) {
 //    }
 // }
 
-// Ion(0, {
+// ion(0, {
 //    '-awaited': true
 // })
 
@@ -266,8 +266,8 @@ export function createAwaitSeries(
       | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
 ) {
    const { renderError, renderPlaceholder, renderResolved, $suspense, timeout } = unpackAwaitSeries(series)
-   const $error = Ion(undefined as undefined | Error);
-   const $renderPlaceholder = Ion(true)
+   const $error = createAtomicIon(undefined as undefined | Error);
+   const $renderPlaceholder = createAtomicIon(true)
 
    // NOTE: DO NOT USE HYBRID ION... the scheduling is not correct
    watch($suspense, () => {
@@ -310,8 +310,8 @@ export function createAwaitSeries(
    return awaitSeries
 
    // const awaitStack = getAwaitStack()
-   // const $pending = Ion(true);
-   // const $error = Ion(undefined as undefined | Error);
+   // const $pending = ion(true);
+   // const $error = ion(undefined as undefined | Error);
 
    // let timeoutID: any;
    // if (timeout) {

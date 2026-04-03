@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { Ion, ion } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { max } from "date-fns";
 
@@ -61,7 +61,7 @@ const bugeye = Stream(async ({ interval }) => {
 export function TestStream() {
 
 
-   const $count = Ion(0)
+   const $count = ion(0)
 
    const increment = Stream(async ({ timeout }) => {
       await timeout(500)

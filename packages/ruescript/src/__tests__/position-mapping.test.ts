@@ -24,7 +24,7 @@ function offsetAt(source: string, needle: string) {
 describe('rxs sugar position mapping', () => {
   const source = `
 function Counter({ show@ }) {
-  get count = Ion(0)
+  get count = ion(0)
   const value = (count + 1)
   return <Comp value={(count + 2)} hidden={(show ? false : true)}>{count}</Comp>
 }
@@ -57,7 +57,7 @@ function Counter({ show@ }) {
   })
 
   it('emits transformed reactive helpers', () => {
-    expect(transformed.code).toContain('const æcount = Ion(0)')
+    expect(transformed.code).toContain('const æcount = ion(0)')
     expect(transformed.code).toContain('value={() => æcount() + 2}')
     expect(transformed.code).toContain('{æcount()}')
   })
@@ -66,7 +66,7 @@ function Counter({ show@ }) {
     const absorbSource = `
 function Kit(value: number) {
   return {
-    get count: Ion((value + 1)),
+    get count: ion((value + 1)),
     normalProperty: value
   }
 }
@@ -87,7 +87,7 @@ function Kit(value: number) {
   it('keeps mapping stable for JSX sibling-parens fragment rewrites', () => {
     const jsxFragmentSource = `
 function View() {
-  get count = Ion(0)
+  get count = ion(0)
   return (
     <Label value={(count + 1)} />
     <Label value={(count + 2)} />

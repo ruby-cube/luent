@@ -1,20 +1,19 @@
 import { template, For, FromTag } from "@rue/luent";
-import {Ion, Ionic,SuspenseIon, swiftUpdate } from "@rue/quarky";
-import { o, ooo } from "../../../../packages/quarky/src/async/ooo";
+import { Ion, ion,ionic, Ionic, SuspenseIon, swiftUpdate } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 import { Dispatch } from "../../../../packages/quarky/src/async/Dispatch";
 
 
 export function TestAsyncMultiply() {
 
-   const $n = Ion(1, {
+   const $n = ion(1, {
       increment() {
          this.value++
       }
    })
 
    // function MultiplyKit($n: Ion<number>, b: number) {
-   //    const $product = Ion($n() * b)
+   //    const $product = ion($n() * b)
    //    const $nxb = $_derivation(() => (multiply.pending ? '...' : $product()))
    //    const multiply = Action(async () => {
    //       const res = await db.multiply($n(), b)
@@ -27,7 +26,7 @@ export function TestAsyncMultiply() {
 
    // const { multiply: nx2, $product } = MultiplyKit($n, 2)
 
-   const $nx2 = Ion(0, {
+   const $nx2 = ion(0, {
       '-fetch': () => db.multiply($n(), 2)
    })
 
@@ -53,7 +52,7 @@ function Async(fn: (...args: any[]) => Promise<unknown> | unknown) {
 
 export function TestAsyncMultipliers() {
 
-   const $n = Ion(1, {
+   const $n = ion(1, {
       increment() {
          this.value++
       }
@@ -64,7 +63,7 @@ export function TestAsyncMultipliers() {
    const products: any[] = []
 
    for (let i = 1; i < 5; i++) {
-      const $product = Ion($n() * i)
+      const $product = ion($n() * i)
 
       const multiply = Dispatch(() => db.multiply($n(), i), {
          // '-presume': () => $product.value = $n() * i,
@@ -73,7 +72,7 @@ export function TestAsyncMultipliers() {
       })
 
       multipliers.push(multiply)
-      products.push(Ion(() => $pending() ? '...' : $product()))
+      products.push(ion(() => $pending() ? '...' : $product()))
    }
 
    function multiply() {
@@ -94,7 +93,7 @@ export function TestAsyncMultipliers() {
 
 // export function TestAsyncMultiplyA() {
 
-//    const $n = Ion(1, {
+//    const $n = ion(1, {
 //       increment() { this.value++ }
 //    })
 
@@ -119,7 +118,7 @@ export function TestAsyncMultipliers() {
 
 export function TestAsyncMultiplyB() {
 
-   const $n = Ion(1, {
+   const $n = ion(1, {
       increment() { console.log('))) increment'); this.value++ }
    })
 
@@ -140,7 +139,7 @@ export function TestAsyncMultiplyB() {
 
 export function TestAsyncMultiplyDrop() {
 
-   const $n = Ion(1, {
+   const $n = ion(1, {
       increment() { this.value++ }
    })
 
@@ -157,7 +156,7 @@ export function TestAsyncMultiplyDrop() {
    )
 }
 
-const AwaitedIon = (a: any) => Ion(undefined, {
+const AwaitedIon = (a: any) => ion(undefined, {
    '-fetch': a,
    '-awaited': true
 })
@@ -165,11 +164,11 @@ const $Awaited = AwaitedIon
 
 export function TestAsyncMultiplyQueue() {
 
-   const $n = Ion((1 as null | number), {
+   const $n = ion((1 as null | number), {
       increment() { this.value++ }
    })
 
-   const nums = Ionic([1])
+   const nums = ionic([1])
 
    return template(
       <div>
@@ -215,7 +214,7 @@ function Result(input: FromTag<{ n: number }>) {
 function MultiplyKitA() {
    return {
       $Multiply($n: Ion<number>, o: number) {
-         return Ion(0, {
+         return ion(0, {
             '-fetch': () => db.multiply($n(), o)
          })
       }
@@ -226,7 +225,7 @@ function MultiplyKit() {
    const $pending = SuspenseIon('...')
    return {
       $Multiply($n: Ion<number>, o: number) {
-         return Ion(0, {
+         return ion(0, {
             '-fetch': () => db.multiply($n(), o),
             '-suspend': $pending
          })

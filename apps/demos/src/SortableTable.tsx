@@ -1,6 +1,6 @@
 
 import { template, Else, For, FromTag, If } from '@rue/luent'
-import { asIonic, Ion, Ionic } from '@rue/quarky'
+import { ionic, Ion, ion } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 import "./style.css"
 import "./SortableTable.css"
@@ -8,7 +8,7 @@ import "./SortableTable.css"
 
 export function SortableTableApp() {
    
-   const $searchQuery = Ion('')
+   const $searchQuery = ion('')
    const gridColumns = ['name', 'power']
    const gridData = [
       { name: 'Chuck Norris', power: Infinity },
@@ -40,10 +40,10 @@ type SortableTableInput = FromTag<{
 
 function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
 
-   const $sortKey = Ion('')
-   const sortOrders = asIonic(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
+   const $sortKey = ion('')
+   const sortOrders = ionic(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
 
-   const $filteredData = Ion(() => {
+   const $filteredData = ion(() => {
       let filteredData = data;
       let filterKey = $filterKey()
       const key = $sortKey()

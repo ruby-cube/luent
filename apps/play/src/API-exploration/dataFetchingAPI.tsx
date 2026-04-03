@@ -15,7 +15,7 @@ const USER_POSTS = defineFetch({
 })
 
 export function List() {
-   const $userId = Ion('')
+   const $userId = ion('')
 
    const $userPosts = fromCloud(USER_POSTS, { $userId })
 
@@ -63,7 +63,7 @@ function Item(...args: any[]) {
 }
 
 function dispatch(request: { get: symbol, with: Ion }) {
-   return Ion('hi', {
+   return ion('hi', {
       loading() {
          return true;
       }

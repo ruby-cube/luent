@@ -54,7 +54,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterA() {
 
-//    const $count = Ion(0, {
+//    const $count = ion(0, {
 //       increment() {
 //          this.value++
 //       },
@@ -74,7 +74,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterB() {
 
-//    const $count = Ion(0)
+//    const $count = ion(0)
 
 //    function incrementCount() {
 //       $count.value++
@@ -146,12 +146,12 @@ export function TodoMVC() {
 
    // # state
 
-   const $todos = Ion(ionizeTodos(getTodos()))
-   const $view = Ion('all' as keyof typeof filters)
+   const $todos = ion(ionizeTodos(getTodos()))
+   const $view = ion('all' as keyof typeof filters)
 
-   const $filteredTodos = Ion(() => filters[$view()]($todos()))
-   const $remaining = Ion(() => filters.active($todos()).length)
-   const $todoCount = Ion(() => $todos().length)
+   const $filteredTodos = ion(() => filters[$view()]($todos()))
+   const $remaining = ion(() => filters.active($todos()).length)
+   const $todoCount = ion(() => $todos().length)
 
    const filters = {
       all: (todos: Ionized<Todo[]>) => todos,
@@ -290,7 +290,7 @@ function TodoInput(addTodo: (title: string) => void) {
 
 function TodoList($todos: Ion<Ionized<Todo[]>>, removeTodo: (todo: Ionized<Todo>) => void) {
 
-   const $editedTodo = Ion(null as Todo | null)
+   const $editedTodo = ion(null as Todo | null)
 
    let beforeEditCache = ''
 
@@ -315,7 +315,7 @@ function TodoList($todos: Ion<Ionized<Todo[]>>, removeTodo: (todo: Ionized<Todo>
    return (
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
-            const $isEditing = Ion(() => todo === $editedTodo());
+            const $isEditing = ion(() => todo === $editedTodo());
 
             return (
                <li class={["todo", { completed: (todo.completed), editing: $isEditing }]}>

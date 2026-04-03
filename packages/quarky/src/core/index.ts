@@ -1,0 +1,1 @@
+export { isIonicProxy } from "../ionic/IonicModel"

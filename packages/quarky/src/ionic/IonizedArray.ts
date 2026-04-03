@@ -1,5 +1,4 @@
-import { quarkOf } from "../abstract/Quark";
-import { asIonic, EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
+import { ionic, EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
 import { defineIonicCollection } from "./IonicDef";
 import { isIonicProxy, toRaw } from "./IonicModel";
 import type{  ProxyKey, triggerOp } from "./ModelQuark";
@@ -147,7 +146,7 @@ defineIonicCollection(Array, {
 }, {
    [Symbol.iterator]() {
       this.trackModel()
-      return asIonic(this.ionic[Symbol.iterator]())
+      return ionic(this.ionic[Symbol.iterator]())
    },
 
    at(index) {
@@ -156,17 +155,17 @@ defineIonicCollection(Array, {
 
    concat(...args: any[]) {
       // this.trackModel()
-      return asIonic(this.ionic.concat(...args))
+      return ionic(this.ionic.concat(...args))
    },
 
    filter(predicate, thisArg) {
       // this.trackModel()
-      return asIonic(this.ionic.filter(predicate, thisArg))
+      return ionic(this.ionic.filter(predicate, thisArg))
    },
 
    map(callback, thisArg) {
       // this.trackModel()
-      return asIonic(this.ionic.map(callback, thisArg))
+      return ionic(this.ionic.map(callback, thisArg))
    },
 
    keys() {
@@ -177,13 +176,13 @@ defineIonicCollection(Array, {
 
    slice(start?, end?) {
       // this.trackModel()
-      return asIonic(this.ionic.slice(start, end))
+      return ionic(this.ionic.slice(start, end))
    },
 
    // TODO: test if this functions properly
    toSpliced(start, deleteCount, ...args) {
       // this.trackModel()
-      return asIonic(this.ionic.toSpliced(start, deleteCount, ...args))
+      return ionic(this.ionic.toSpliced(start, deleteCount, ...args))
    },
 
    // pop(){
@@ -192,38 +191,38 @@ defineIonicCollection(Array, {
    // }
 
    // splice(...args) {
-   //    return Ionic(this.ionic.splice(...args))
+   //    return ionic(this.ionic.splice(...args))
    // },
 
    // copyWithin(target, start, end) {
-   //    return Ionic(this.ionic.copyWithin(target, start, end))
+   //    return ionic(this.ionic.copyWithin(target, start, end))
    // },
 
    // fill(value, start, end) {
-   //    return Ionic(this.ionic.fill(value, start, end))
+   //    return ionic(this.ionic.fill(value, start, end))
    // },
 
    // reverse() {
-   //    return Ionic(this.ionic.reverse())
+   //    return ionic(this.ionic.reverse())
    // },
 
    // sort(compare) {
-   //    return Ionic(this.ionic.sort(compare))
+   //    return ionic(this.ionic.sort(compare))
    // },
 
    toSorted(compare) {
       // this.trackModel()
-      return asIonic(this.ionic.toSorted(compare))
+      return ionic(this.ionic.toSorted(compare))
    },
 
    toReversed() {
       // this.trackModel()
-      return asIonic(this.ionic.toReversed())
+      return ionic(this.ionic.toReversed())
    },
 
    with(index, value) {
       // this.trackModel()
-      return asIonic(this.ionic.with(index, value))
+      return ionic(this.ionic.with(index, value))
    }
 })
 

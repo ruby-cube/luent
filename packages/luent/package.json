@@ -1,19 +1,19 @@
 {
-    "name": "@rue/luent",
-    "private": true,
-    "description": "",
-    "main": "./src/index",
-    "module": "./src/index",
-    "dependencies": {
-        "@rue/flask": "workspace:*",
-        "@rue/quarky": "workspace:*",
-        "@rue/utils": "workspace:*",
-        "dompurify": "^3.3.2"
-    },
-    "devDependencies": {
-        "@rue/types": "workspace:*",
-            "jsdom": "^25.0.1"
-    },
-    "author": "Ruby Yi Wang",
-    "license": "MIT"
+   "name": "@rue/luent",
+   "private": true,
+   "description": "",
+   "main": "./src/index",
+   "module": "./src/index",
+   "dependencies": {
+      "@rue/flask": "workspace:*",
+      "@rue/quarky": "workspace:*",
+      "@rue/utils": "workspace:*",
+      "dompurify": "^3.3.2"
+   },
+   "devDependencies": {
+      "@rue/types": "workspace:*",
+      "jsdom": "^25.0.1"
+   },
+   "author": "Ruby Yi Wang",
+   "license": "MIT"
 }

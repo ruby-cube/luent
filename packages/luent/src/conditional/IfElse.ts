@@ -1,7 +1,7 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@rue/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ShowHideType, If } from "./If";
-import {  getSuspenseCount, Ion, PRELUDE, queueRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
+import {  createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, queueRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -323,7 +323,7 @@ function getConditions(statements: ConditionalStatement[]) {
 
 
 function $ActiveIndex(conditions: Ion<Booleanny>[]) {
-   return Ion(() => {
+   return createMemoizedDerivation(() => {
       for (let i = 0; i < conditions.length; i++) {
          const $condition = conditions[i]
          if ($condition()) {
@@ -406,7 +406,7 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 
       seriesNodes.push(nodes)
 
-      const $match = Ion(() => $activeIndex() === i)
+      const $match = createMemoizedDerivation(() => $activeIndex() === i)
 
       watchToRender($match, ({ current: isActive, previous: wasActive, flask }) => {
          if (isActive === wasActive) return;

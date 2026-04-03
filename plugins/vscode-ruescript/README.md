@@ -1,4 +1,4 @@
-# RXS Get Keyword Highlighting
+# RueScript For VS Code
 
 Local VS Code extension that provides syntax highlighting for RueScript sugar in TS/TSX files.
 
@@ -6,7 +6,7 @@ Local VS Code extension that provides syntax highlighting for RueScript sugar in
 
 **Via semantic tokens** (primary — works for all themes):
 
-- `get` in `get count = Ion(0)` — classified as `keyword`
+- `get` in `get count = ion(0)` — classified as `keyword`
 - Trailing `@` on reactive identifiers (`count@`, `showFractions@`, `kit.halfCount@`) — classified as `operator`
 
 **Via TextMate grammar injection** (fallback for themes without semantic token support):
@@ -18,7 +18,7 @@ Local VS Code extension that provides syntax highlighting for RueScript sugar in
 1. Package the extension:
 
 ```bash
-cd tools/rxs-get-keyword-extension
+cd plugins/vscode-ruescript
 npx @vscode/vsce package --allow-missing-repository
 ```
 

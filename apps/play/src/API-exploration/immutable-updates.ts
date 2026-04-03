@@ -1,6 +1,6 @@
 import { Ion } from "@rue/quarky"
 
-Ion(0)
+ion(0)
 
 const todos = [{
    id: 0,

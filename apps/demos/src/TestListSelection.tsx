@@ -1,7 +1,7 @@
-import { template, createRoot, For, listen, NodeRef, Style, target, css } from "@rue/luent";
+import { template, createRoot, For, listen, NodeRef, Style, css } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
-import { Ion, EACH, Ionic, as, asIonic } from "@rue/quarky";
+import { ion, EACH, ionic } from "@rue/quarky";
 
 class ListItem {
    constructor(
@@ -16,9 +16,9 @@ class ListItem {
 
 type ItemData = { id: number, content: string }
 
-const asIonicItem = (data: ItemData) => asIonic(new ListItem(data.id, data.content))
+const ionicItem = (data: ItemData) => ionic(new ListItem(data.id, data.content))
 
-type IonicItem = ReturnType<typeof asIonicItem>
+type IonicItem = ReturnType<typeof ionicItem>
 
 // tests:
 // - IonicArray.push()
@@ -36,16 +36,16 @@ let newItemCount = 0;
 
 export function TestListSelection() {
 
-   const list = asIonic([
+   const list = ionic([
       { id: genId(), content: "frog" },
       { id: genId(), content: "robin" },
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { '-as': asIonicItem },
+      [EACH]: { '-as': ionicItem },
 
       insert(index: number) {
-         const item = asIonicItem({
+         const item = ionicItem({
             id: genId(),
             content: 'new item ' + ++newItemCount
          })
@@ -67,7 +67,7 @@ export function TestListSelection() {
       }
    })
 
-   const selected = asIonic(new Set<IonicItem>(), {
+   const selected = ionic(new Set<IonicItem>(), {
       toggle(item: IonicItem) {
          if (this.has(item)) {
             this.delete(item)
@@ -78,7 +78,7 @@ export function TestListSelection() {
       }
    })
 
-   const $listClone = Ion(() => list.slice())
+   const $listClone = ion(() => list.slice())
 
    function insertItem(index: number) {
       list.insert(index)

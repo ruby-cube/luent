@@ -575,7 +575,7 @@ describe('Integration tests the Context API', () => {
                 return template(
                     createContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { provide: { [_frog_]: Ion(value) } })
+                    ], { provide: { [_frog_]: ion(value) } })
                 )
             }
 

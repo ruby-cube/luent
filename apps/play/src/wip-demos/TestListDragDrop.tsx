@@ -1,8 +1,7 @@
-import { template, For, listen, Style, target } from "@rue/luent";
+import { template, For, listen, Style } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
-import { asIonic, EACH, Ionic } from "../../../../packages/quarky/src/ionic/Ionic";
-import { instantUpdate, Ion, queueTask } from "@rue/quarky";
+import { instantUpdate,  ionic, EACH, ion} from "@rue/quarky";
 import { $thisFlask, Flask, getActiveFlask } from "@rue/flask";
 
 class ListItem {
@@ -18,23 +17,23 @@ class ListItem {
 
 type ItemData = { id: number, content: string }
 
-const asIonicItem = (data: ItemData) => asIonic(new ListItem(data.id, data.content))
+const ionicItem = (data: ItemData) => ionic(new ListItem(data.id, data.content))
 
-type QItem = ReturnType<typeof asIonicItem>
+type QItem = ReturnType<typeof ionicItem>
 
 
 export function TestListDragDrop() {
 
-   const list = asIonic([
+   const list = ionic([
       { id: genId(), content: "frog" },
       { id: genId(), content: "robin" },
       { id: genId(), content: "fly" },
       { id: genId(), content: "swamp" },
    ], {
-      [EACH]: { '-as': asIonicItem }, // TODO: type
+      [EACH]: { '-as': ionicItem }, // TODO: type
 
       insert(index: number) {
-         const item = asIonicItem({
+         const item = ionicItem({
             id: genId(),
             content: (Math.random() * 100).toString()
          })
@@ -52,7 +51,7 @@ export function TestListDragDrop() {
       }
    })
 
-   const selected = asIonic(new Set<QItem>(), {
+   const selected = ionic(new Set<QItem>(), {
       toggle(item: QItem) {
          if (this.has(item)) {
             this.delete(item)
@@ -72,9 +71,9 @@ export function TestListDragDrop() {
       list.remove(index);
    }
 
-   const $dragging = Ion(false)
-   const $x = Ion(0)
-   const $y = Ion(0)
+   const $dragging = ion(false)
+   const $x = ion(0)
+   const $y = ion(0)
 
    function initDrag(e) {
       console.log('INIT DRAG')
@@ -218,7 +217,7 @@ function iteratorTests(list: any[], selected: Set<any>) {
       console.log('$$$ value of list', value)
    }
 
-   const ionizedValues = asIonic(list.values())
+   const ionizedValues = ionic(list.values())
    for (const value of ionizedValues) {
       console.log('$$$ value of ionized values()', value)
    }

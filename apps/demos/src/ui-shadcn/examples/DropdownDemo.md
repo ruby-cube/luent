@@ -5,14 +5,14 @@ export function DropdownMenuDemo() {
       <DropdownMenu Slot:Face={menu => (
          ``` 
             const menu = MenuKit();
-            get other = Ion(() => count + price);
+            get other = ion(() => count + price);
 
          ```
          <Button on:click={e => menu.open()} at:create={menu.anchor} variant="outline">Open</Button>
       )}>
          ```
             const menu = MenuKit();
-            get other = Ion(() => count + price);
+            get other = ion(() => count + price);
             
          ```
          <Dropdown class="w-40" align="start">

@@ -3,25 +3,25 @@ import { DerivedIon, ion, ionic, ionize, watch, watchEffect } from "@rue/quarky"
 
 export function TestSelectiveTracking() {
 
-    const $active = Ion(false, {
+    const $active = ion(false, {
         toggle() {
             $active.value = !$active()
         }
     })
 
-    const $ready = Ion(true, {
+    const $ready = ion(true, {
         toggle() {
             $ready.value = !$ready()
         }
     })
 
-    const $count = Ion(0, {
+    const $count = ion(0, {
         increment() {
             $count.value = $count() + 1
         }
     })
 
-    const $doubleCount = Ion(() =>$count() * 2)
+    const $doubleCount = ion(() =>$count() * 2)
 
     const $frog = ionize({
         name: 'kermit'

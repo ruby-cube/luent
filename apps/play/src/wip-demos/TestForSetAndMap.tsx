@@ -1,18 +1,18 @@
 import { template, For } from "@rue/luent";
-import { asIonic, Ion, Ionic } from "@rue/quarky";
+import { ionic, ion, Ionic } from "@rue/quarky";
 
 let num = 0
 
 
 export function TestForSetAndMap() {
 
-   const set = asIonic(new Set(), {
+   const set = ionic(new Set(), {
       addNumber() {
          this.add(num++)
       }
    })
 
-   const map = asIonic(new Map(), {
+   const map = ionic(new Map(), {
       setPair() {
          this.set(num++, 'B' + num)
       }
@@ -37,7 +37,7 @@ export function TestForSetAndMap() {
 
 export function TestForSetAndMapIons() {
 
-   const $set = Ion(asIonic(new Set()), {
+   const $set = ion(ionic(new Set()), {
       addNumber() {
          this.value.add(num++)
       },
@@ -46,7 +46,7 @@ export function TestForSetAndMapIons() {
       }
    })
 
-   const $map = Ion(asIonic(new Map()), {
+   const $map = ion(ionic(new Map()), {
       setPair() {
          this.value.set(num++, 'B' + num)
       },

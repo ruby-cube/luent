@@ -1,11 +1,8 @@
 import { Ion, MutableIon } from "./Ion"
 import { watch } from "../reactivity/Watcher"
 import { AnyObject } from "@rue/types"
-import { untracked } from "../reactivity/Compound"
-import { SimpleState } from "../reactivity/State"
 import { SYNC } from "../reactivity/RenderCycle"
 import { createAtomicIon } from "./AtomicIon"
-import { createMemoizedDerivation } from "./DerivationIon"
 
 type HybridIonConfig<T = any> = {
    initial?: T,
@@ -19,11 +16,12 @@ type HybridIonConfig<T = any> = {
 export function createHybridIon(config: HybridIonConfig, setup?: AnyObject) {
    const { derive, initial, watch: $watched } = config
    const subject = $watched ?? derive
-   const $state = Ion('initial' in config ? initial : derive(undefined), setup) as MutableIon<any>
+   const $state = createAtomicIon('initial' in config ? initial : derive(undefined), setup) as MutableIon<any>
 
    watch(subject, ({previous}) => {
       $state.value = derive(previous)
    }, { phase: SYNC })
+
    return $state;
 
 
@@ -40,7 +38,7 @@ export function createHybridIon(config: HybridIonConfig, setup?: AnyObject) {
    //    shouldDerive.set(true)
    // }, { phase: SYNC })
    
-   // return Ion((prev: any) => {
+   // return ion((prev: any) => {
    //    previous.set(prev)
    //    return shouldDerive.get() ? $derived() : $state()
    // }, {

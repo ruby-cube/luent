@@ -4,12 +4,8 @@ const {
   toTransformedPosFromSourceMap,
   toOriginalPosFromRemapTable,
   toOriginalPosFromSourceMap,
-  transformRXSSugarShared,
-} = require('../ruescript/scripts/transform-rxs-sugar.shared.cjs')
-
-function transformRXSSugar(input) {
-  return transformRXSSugarShared(input, { includeToTransformedPos: true })
-}
+  transformRXSSugar,
+} = require('@rue/ruescript/tsserver')
 
 module.exports = {
   mapTextSpanFromRemapTable,

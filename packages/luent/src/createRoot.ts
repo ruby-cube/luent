@@ -1,4 +1,4 @@
-import { Component, ComponentForge } from "./component/Component";
+import { Component, ComponentTag } from "./component/Component";
 import { AnyObject } from "@rue/types";
 import { RootContext, createRootContext } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
@@ -26,7 +26,7 @@ export function getAppRoot() {
 // }
 
 
-export function createRoot<T extends AnyObject, E extends Provided>(App: ComponentForge<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, groundContext?: RootContext, setup?: T }) {
+export function createRoot<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, groundContext?: RootContext, setup?: T }) {
 
    // (1) instantiate developer's root component
    const rootContext = createRootContext(config?.provide, config?.groundContext)

@@ -1,8 +1,6 @@
 import { watch } from "../reactivity/Watcher"
 import { AnyObject } from "@rue/types"
-import { Ion, MutableIon } from "../ion/Ion"
-import { untracked } from "../reactivity/Compound"
-import { SimpleState } from "../reactivity/State"
+import { MutableIon } from "../ion/Ion"
 import { createAtomicIon } from "../ion/AtomicIon"
 import { createMemoizedDerivation } from "../ion/DerivationIon"
 import { PRELUDE, SYNC } from "../reactivity/RenderCycle"
@@ -70,7 +68,7 @@ export function createAsyncDerivation(config: AsyncDerivationConfig, setup?: Any
       }
    }
 
-   const $state = Ion(standin, {
+   const $state = createAtomicIon(standin, {
       devName: setup?.devName,
       get pending() {
          return $pending?.()

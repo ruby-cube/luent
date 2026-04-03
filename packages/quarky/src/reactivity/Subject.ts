@@ -1,11 +1,11 @@
 import { AnyObject } from "@rue/types";
 import { Effect } from "./Effect"
-import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
+import { hasQuark, quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction, isObject, noop } from "@rue/utils";
-import { isIon, MutableIon, toValue } from "../ion/Ion";
-import { watch, WatchSubjects } from "./Watcher";
-import { Compound, Particle, popTracker, pushTracker } from "./Compound";
+import { isIon, toValue } from "../ion/utils";
+import { WatchSubjects } from "./Watcher";
+import { Compound, popTracker, pushTracker } from "./Compound";
 import type { QuarkyIonicProxy } from "../ionic/ModelQuark";
 import { Traceable, TraceableEntity } from "../debug/Traceable";
 import { Stateful } from "../abstract/Stateful";
@@ -100,11 +100,7 @@ class Multisubject implements StatefulSubject, TraceableEntity {
    }
 }
 
-export function isGetter(value: unknown): value is () => any {
-   if (value instanceof Function && value.length === 0 !== isIon(value)) 
-      console.warn(value, 'isGetter', !isIon(value), 'isIon', isIon(value))
-   return value instanceof Function && value.length === 0;
-}
+
 
 
 export interface Subject {
@@ -379,7 +375,7 @@ export class IonSubject implements StatefulSubject, TraceableEntity {
 //          return value;
 //       }
 //       else {
-//          const value = this.Ion()
+//          const value = this.ion()
 //          if (isIonicProxy(value)) {
 //             trackAbsorbedIons(this, value)
 //          }

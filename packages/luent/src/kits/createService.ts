@@ -1,4 +1,3 @@
-import { getActiveFlask } from "@rue/flask";
 import { getViewFlask } from "../../../luent/src/flask/ViewFlask";
 
 /**

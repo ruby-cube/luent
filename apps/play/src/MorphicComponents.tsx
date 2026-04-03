@@ -1,5 +1,5 @@
-import { RENDER } from "../../../packages/quarky/src/reactivity/x_RenderCycle";
 import { NodeRef } from "@rue/luent";
+import {ion} from "@rue/quarky"
 
 export function MainBlock() {
 
@@ -20,7 +20,7 @@ export function MainBlock() {
       ]
    ], $hello) // if using directly in template
 
-   const $list = Ion(['ho'])
+   const $list = ion(['ho'])
 
    const $records_list = $ListPort($records, (record) => (
       <h1>{record.content}</h1>
@@ -67,8 +67,8 @@ function $MorphicNode() {
 
 function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; as: (key: string) => any } {
 
-   const $key = Ion(initialKey)
-   const renderphase = Ion(switchMap[$key()])
+   const $key = ion(initialKey)
+   const renderphase = ion(switchMap[$key()])
 
    watch($key, (key) => {
       renderphase.update(switchMap[key])
@@ -85,7 +85,7 @@ function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: st
 
 function MainContent() {
 
-   const $mainContent = Ion(() =>
+   const $mainContent = ion(() =>
       <div>hello</div>)
 
    function changeMainContent() {

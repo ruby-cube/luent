@@ -1,22 +1,22 @@
-import { ComponentForge } from "./Component";
+import { ComponentTag } from "./Component";
 import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@rue/utils";
-import { ion } from "../../../quarky/src";
+import { createAtomicIon, ion } from "../../../quarky/src";
 import { AnyObject } from "@rue/types";
 
-const lazyComponents: Map<() => Promise<ComponentForge>, ComponentForge> = new Map()
+const lazyComponents: Map<() => Promise<ComponentTag>, ComponentTag> = new Map()
 
 export function lazyLoadComponent<P extends AnyObject>(config: {
-    load: () => Promise<ComponentForge<P>>,
+    load: () => Promise<ComponentTag<P>>,
     onIdle?: boolean
-    Placeholder?: ComponentForge,
+    Placeholder?: ComponentTag,
     timeout?: number,
-    Error?: ComponentForge<{ error: any }>,
+    Error?: ComponentTag<{ error: any }>,
 }) { // TODO: Idle load priorities
     const { load, Error, Placeholder, timeout, onIdle } = config;
-    const $loading = Ion(true);
-    const $error = Ion("");
-    const $loaded = Ion(false);
+    const $loading = createAtomicIon(true);
+    const $error = createAtomicIon("");
+    const $loaded = createAtomicIon(false);
     let idleID: number | undefined;
     if (onIdle) {
         idleID = requestIdleCallback(() => {
@@ -24,14 +24,14 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             loadComponent()
         })
     }
-    let Component: ComponentForge
+    let Component: ComponentTag
     function loadComponent() {
         let timeoutID: any;
         if (idleID !== undefined) {
             cancelIdleCallback(idleID);
             idleID = undefined;
         }
-        Component = lazyComponents.get(load) || noop as ComponentForge // if already loaded on idle, get from lazyComponents map
+        Component = lazyComponents.get(load) || noop as ComponentTag // if already loaded on idle, get from lazyComponents map
         if (Component === noop) {
             const pendingComponent = load();
             if (timeout) {

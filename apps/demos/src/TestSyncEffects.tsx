@@ -1,8 +1,8 @@
 import { template } from "@rue/luent";
-import { Ion, SYNC, watch } from "@rue/quarky";
+import { ion, SYNC, watch } from "@rue/quarky";
 
 export function TestSyncEffects() {
-   const $count = Ion(0)
+   const $count = ion(0)
    watch($count, () => {
       console.log('count', $count())
    }, { phase: SYNC })

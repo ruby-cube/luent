@@ -1,6 +1,6 @@
 
 import { template, For, fromRoot, AsyncIon } from "@rue/luent";
-import { EACH, Ion, Ionic } from "@rue/quarky";
+import { EACH, Ion, Ionic, ionic } from "@rue/quarky";
 import { prototype } from "events";
 import { UseShared } from "../../../../packages/utils/UseShared";
 import { getActiveFlask } from "@rue/flask";
@@ -32,7 +32,7 @@ class Todos {
 
 // #region: Ionic Model
 function IonicTodos(data: Todos[]) {
-   return Ionic(data, {
+   return ionic(data, {
       [EACH]: {
          '@init': Ionic
       }
@@ -91,7 +91,7 @@ const fetchTodos = UseShared(($userID: Ion<string>) => {
 
 
 
-// const todos = Ion([], Todos, {
+// const todos = ion([], Todos, {
 
 // })
 

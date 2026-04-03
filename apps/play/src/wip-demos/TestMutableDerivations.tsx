@@ -1,10 +1,10 @@
 import { template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function TestMutableDerivation() {
-   const $first = Ion('Jon')
-   const $last = Ion('Doe')
-   const $fullname = Ion(() => $first() + ' ' + $last(), {
+   const $first = ion('Jon')
+   const $last = ion('Doe')
+   const $fullname = ion(() => $first() + ' ' + $last(), {
       '@set'(name: string) {
          [$first.value, $last.value] = name.split(' ')
       }

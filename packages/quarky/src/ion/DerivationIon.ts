@@ -34,11 +34,6 @@ export class DerivationIonQuark extends FunctionSubject implements Stateful {
    }
 }
 
-// export const DERIVATION_ION = Symbol('Derivation Ion')
-
-// export function isManagedDerivation(value: unknown) {
-//    return hasQuark(value) && quarkOf(value).quarkType === DERIVATION_ION
-// }
 
 const STALE = Symbol('stale')
 

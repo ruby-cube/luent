@@ -1,9 +1,9 @@
-import { asIonic, Ionic, queueTask, toRaw } from "@rue/quarky"
+import { ionic, Ionic, queueTask, toRaw } from "@rue/quarky"
 import { DATA_ATTRIBUTE_POPOVER, getPopoverID, Popover } from "../popover/Popover.kit"
 
 
 function DropdownKit<I extends { [key: string]: any }>() {
-   const dropdown = asIonic(new DropdownModel(
+   const dropdown = ionic(new DropdownModel(
       'below',
       'start',
       .75

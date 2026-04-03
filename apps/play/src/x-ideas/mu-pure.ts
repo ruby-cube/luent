@@ -32,7 +32,7 @@ function takeIn<F>(pure: F & { pure: true }) {
 }
 
 
-const $count = Ion(0, class {
+const $count = ion(0, class {
 
    @_ increment() {
 

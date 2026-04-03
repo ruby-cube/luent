@@ -2,10 +2,7 @@ import { Effects } from "./Atom";
 import { Effect } from "./Effect";
 import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, Update } from "./Update";
 
-export const queueTask = (task: () => void) =>
-   //@ts-expect-error
-   scheduler
-      .postTask(task);
+export const queueTask = (task: () => void) => scheduler.postTask(task);
 
 
 type Task = () => void | Promise<void>

@@ -1,5 +1,5 @@
 import { marked } from 'marked'
-import { Ion, Ionic, watch } from '@rue/quarky'
+import { ion } from '@rue/quarky'
 import { template, FromTag, NodeRef, atMounted, atUnmount } from '@rue/luent'
 import './style.css'
 
@@ -7,8 +7,8 @@ import './style.css'
 
 export function TestMarkdownApp() {
 
-   const $markdown = Ion('# Hello World')
-   const $html = Ion(() => marked($markdown()) as string)
+   const $markdown = ion('# Hello World')
+   const $html = ion(() => marked($markdown()) as string)
 
    return template(
       <>

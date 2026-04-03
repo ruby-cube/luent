@@ -1,5 +1,5 @@
 import { template } from "@rue/luent";
-import { dev, Ion, PRELUDE, SYNC, watch } from "@rue/quarky";
+import { dev, ion, PRELUDE, SYNC, watch } from "@rue/quarky";
 
 // COMPOUNDS
 // [] multisubject
@@ -8,18 +8,18 @@ import { dev, Ion, PRELUDE, SYNC, watch } from "@rue/quarky";
 // [] functional subject (ionic task) (derivation)
 
 export function TestDev() {
-   const $count = Ion(1, {
+   const $count = ion(1, {
       devName: '$count',
       increment() {
          $count.value++
       }
    })
 
-   const $doubleCount = Ion(() => $count() * 2, {
+   const $doubleCount = ion(() => $count() * 2, {
       devName: '$doubleCount'
    })
 
-   const $quadruple = Ion(() => $doubleCount() * 2, {
+   const $quadruple = ion(() => $doubleCount() * 2, {
       devName: '$quadruple'
    })
 

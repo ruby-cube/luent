@@ -1,8 +1,8 @@
-import { Ion, Ionic } from "@rue/quarky"
+import { ion, ionic } from "@rue/quarky"
 
-const æcount = Ion(0)
+const æcount = ion(0)
 
-const frog = Ionic({
+const frog = ionic({
    name: 'kermit',
    get fullname() {
       return this.name + 'the frog'

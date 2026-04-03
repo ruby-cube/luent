@@ -1,8 +1,8 @@
 import { If, template } from "@rue/luent";
-import { Ion, PRELUDE, SYNC, watch } from "@rue/quarky";
+import { ion, PRELUDE, SYNC, watch } from "@rue/quarky";
 
 export function TestNullIon() {
-   const $frog = Ion(null)
+   const $frog = ion(null)
 
    watch($frog, () => {
       console.log('@@@frog', $frog())

@@ -1,5 +1,5 @@
 import { Component, Else, ElseIf, For, If, provideRoot } from "@rue/luent";
-import { Ion, ionize } from "@rue/quarky";
+import { Ion, ionic, ion } from "@rue/quarky";
 import { inert } from "../../../packages/x-old/x_inert";
 import { Well, Wellerman } from "./Well";
 import { Context } from "../../../packages/luent/src/context/Context";
@@ -12,7 +12,7 @@ function Swap() {
 
 export function IonAccess() {
 
-   const $x = Ion(7, {
+   const $x = ion(7, {
       increment() {
          $x.value = $x() + 1
       },
@@ -169,7 +169,7 @@ if (x === true) {
 
 function SvelteA() {
    //@ts-ignore
-   const $x = Ion(7)
+   const $x = ion(7)
    let $s: any;
 
    const discard = DiscardRemountable()
@@ -199,7 +199,7 @@ function SvelteA() {
 
 function SvelteA() {
    //@ts-ignore
-   const $x = Ion(7)
+   const $x = ion(7)
    let $s: any;
 
    const discard = DiscardRemountable()
@@ -229,7 +229,7 @@ function SvelteA() {
 
 function SvelteA() {
    //@ts-ignore
-   const $x = Ion(7)
+   const $x = ion(7)
    let $s: any;
 
    const discard = DiscardRemountable()
@@ -263,7 +263,7 @@ function SvelteA() {
 
 function SvelteA() {
    //@ts-ignore
-   const $count = Ion(7)
+   const $count = ion(7)
 
    return template(
       <div>
@@ -274,7 +274,7 @@ function SvelteA() {
 
 function SvelteA() {
    //@ts-ignore
-   const $count = Ion(7)
+   const $count = ion(7)
 
    return template(
       <div>
@@ -425,7 +425,7 @@ function SelectionKit() {
 }
 
 function J(input: { for: any, Slot: any, params: any }) {
-   const $msg = Ion('hi')
+   const $msg = ion('hi')
 
    provideRoot(_appwide_dog_, mu(dog, 'set::setValue')) // auto-readonly unless marked with m
    provideGround(_global_dog_, dog) // auto-readonly unless marked with

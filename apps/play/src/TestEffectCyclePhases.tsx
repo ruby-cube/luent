@@ -1,21 +1,21 @@
 import { template } from "@rue/luent";
-import { watch } from "@rue/quarky";
+import { watch, ion } from "@rue/quarky";
 
 export function TestEffectCyclePhases() {
 
-   const $frog = Ion('sir robin', {
+   const $frog = ion('sir robin', {
       sing() {
          this.value += '!'
       }
    })
 
-   const $frogB = Ion('kermit', {
+   const $frogB = ion('kermit', {
       sing() {
          this.value += '!'
       }
    })
 
-   const $count = Ion({
+   const $count = ion({
       frog: $frog
    }, {
       change() {

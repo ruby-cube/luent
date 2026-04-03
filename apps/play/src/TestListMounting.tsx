@@ -1,15 +1,15 @@
 import { template, Else, ElseIf, For, FromTag, If } from "@rue/luent";
-import { $activeUpdate, asIonic, Ion, Ionic, PRELUDE, queueRender, queueTask, watch } from "@rue/quarky";
+import { $activeUpdate, ionic, ion, Ionic, PRELUDE, queueRender, queueTask, watch } from "@rue/quarky";
 
 export function TestListMounting() {
    let count = 0
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() {
          this.value = !this.value
       }
    })
 
-   const logs = asIonic([] as string[])
+   const logs = ionic([] as string[])
 
    const log = (msg: string) => { logs.push(msg); console.log('logs', [...logs]) }
 
@@ -66,8 +66,8 @@ function Counter(input: FromTag<{ log?: (msg: string) => void }>) {
 }
 
 // export function TestUpdateAfterCommitted() {
-//    const $count = Ion(0)
-//    const $countB = Ion('B0')
+//    const $count = ion(0)
+//    const $countB = ion('B0')
 
 //    watch($count, () => {
 //       queueRender(() => {

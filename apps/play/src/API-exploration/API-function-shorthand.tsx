@@ -1,12 +1,12 @@
 import { template, FromTag } from "@rue/luent"
-import { asIonic, Ion, Ionic, watch } from "@rue/quarky"
+import { ionic, Ion, Ionic, watch } from "@rue/quarky"
 
 // absorbed ions
 // get something 
 // derivation shorthand
 
 // QUESTION: should ions be branded? determined by name? any function? ... I think any function for now
-// QUESTION: But if ions can be any function, then Ion(() => $count() * 2) is pointless (unless adding methods) and should be called MemoizedIon or MemoIon or CachedIon
+// QUESTION: But if ions can be any function, then ion(() => $count() * 2) is pointless (unless adding methods) and should be called MemoizedIon or MemoIon or CachedIon
 
 // NOTE: parentheses cannot be used as a shorthand to bind
 
@@ -36,8 +36,8 @@ function via<O extends object>(obj: O): O {
 // NOTE: derivation shorthands only work because parameters/attributes are typed as MaybeIon or ToIon. If parameters are Ion, typescript will also not be happy
 
 
-const $count = Ion(0)
-const $doubleCount = Ion(() => $count() * 2)
+const $count = ion(0)
+const $doubleCount = ion(() => $count() * 2)
 
 class Animal {
    name: string = "creature"
@@ -60,10 +60,10 @@ class Animal {
 }
 
 //@ts-expect-error
-fetchUser(Ion(($userID() + 0)))
+fetchUser(ion(($userID() + 0)))
 
 //@ts-expect-error
-fetchUser(Ion($ => $userID() + 0))
+fetchUser(ion($ => $userID() + 0))
 
 // WINNER
 //@ts-expect-error
@@ -90,7 +90,7 @@ function fetchUser(id: Ion<string>) {
 }
 
 
-const animal = asIonic({
+const animal = ionic({
    name: "creature",
 
    // absorbed ion
@@ -104,7 +104,7 @@ const animal = asIonic({
       return $count() * 4
    },
 
-   location: Ion('swamp'), // QUESTION: should this throw? Not sure ... need more experience/research ... for now, throw, other possibilities is to treat like a method
+   location: ion('swamp'), // QUESTION: should this throw? Not sure ... need more experience/research ... for now, throw, other possibilities is to treat like a method
 
    tripleCount: () => $count() * 2, // this will be treated like a method
 
@@ -116,7 +116,7 @@ const animal = asIonic({
 
 
 function Appo() {
-   const $active = Ion(true)
+   const $active = ion(true)
    return template(
       <div class={{ active: $active, inactive: (!$active()) }}>
          <Child disabled={(!$active())}></Child>
@@ -126,7 +126,7 @@ function Appo() {
 function Child(input: FromTag<{
    disabled: Ion<boolean>
 }>) {
-   const $active = Ion(true)
+   const $active = ion(true)
 
    return template(
       <div class={{ active: $active, inactive: (!$active()) }}>

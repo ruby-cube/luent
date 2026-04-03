@@ -21,7 +21,7 @@ function TestingStuff(
 
    const { $count } = CounterKit($thisNode())
 
-   const $songBird = Ion('')
+   const $songBird = ion('')
 
    onDismantle(() => {
       $songBird.value = fromCoop(_song_bird_)
@@ -43,7 +43,7 @@ function doSomething(context: ThisNode) {
 
 function CounterKit(context: ThisNode) {
 
-   const $count = Ion(0)
+   const $count = ion(0)
 
    //@ts-ignore
    watch($count, e => {

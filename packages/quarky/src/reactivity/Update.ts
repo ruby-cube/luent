@@ -1,5 +1,5 @@
 import { createStack } from "@rue/utils";
-import { PRELUDE, queueTask, RenderCycle } from "./RenderCycle";
+import { queueTask, RenderCycle } from "./RenderCycle";
 
 export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
 

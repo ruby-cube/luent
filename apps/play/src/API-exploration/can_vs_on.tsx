@@ -21,7 +21,7 @@ function StatefulCounter(input: FromTag<{
 }>) {
    const { emit } = input
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -137,7 +137,7 @@ type $$Product = ReturnType<typeof IonicProduct>
 function IonicProduct(data: ProductData) {
 
 
-   return asIonic(new Product(data), {
+   return ionic(new Product(data), {
       '@incrementQty'() {
 
       },
@@ -166,7 +166,7 @@ hook(product, {
 
 function Parent() {
 
-   const product = asIonic(new Product({}))
+   const product = ionic(new Product({}))
 
    return template(
       <>
@@ -296,13 +296,13 @@ function SmartProduct(input: FromTag<{
             on:derementClick={e => mu(product).decrementQty()}
          ></DumbCounter>
          <DumbCounterB
-            mu:count={Ion(product.$qty, {
+            mu:count={ion(product.$qty, {
                increment() { mu(product).incrementQty() },
                decrement() { mu(product).decrementQty() }
             })}
          ></DumbCounterB>
          <DumbCounterB
-            mu:count={Ion(product.$qty, {
+            mu:count={ion(product.$qty, {
                increment: mu(product).incrementQty,
                decrement: mu(product).decrementQty
             })}

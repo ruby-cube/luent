@@ -1,4 +1,4 @@
-import { Ion, watch } from "@rue/quarky";
+import { ion, watch } from "@rue/quarky";
 import { describe, expect, it, vi } from "vitest";
 
 //NOTE: Infinite loops should be eliminated from an app, not supported. Infinite loop prevention is for debugging and tracking down loops.
@@ -9,7 +9,7 @@ describe('infinite loop prevention', () => {
       const callMeOnceA = vi.fn()
       const callMeOnceB = vi.fn()
 
-      const $count = Ion(0, {
+      const $count = ion(0, {
          increment() {
             console.log('===start increment')
             this.value++;
@@ -17,7 +17,7 @@ describe('infinite loop prevention', () => {
          }
       })
 
-      const $something = Ion('')
+      const $something = ion('')
 
       watch($count, () => {
          console.log('--start effect increment')
@@ -62,7 +62,7 @@ describe('infinite loop prevention', () => {
       const callMeOnceA = vi.fn()
       const callMeOnceB = vi.fn()
 
-      const $count = Ion(0, {
+      const $count = ion(0, {
          increment() {
             console.log('===start increment')
             this.value++;
@@ -118,7 +118,7 @@ describe('infinite loop prevention', () => {
       const callMeOnceB = vi.fn()
       const callMeOnceC = vi.fn()
 
-      const $count = Ion(0, {
+      const $count = ion(0, {
          increment() {
             console.log('>>>start increment')
             this.value++;
@@ -126,7 +126,7 @@ describe('infinite loop prevention', () => {
          }
       })
 
-      const $count2 = Ion(0)
+      const $count2 = ion(0)
 
       watch($count, () => {
          console.log('--start effect increment')
@@ -174,7 +174,7 @@ describe('infinite loop prevention', () => {
       const callMeOnceB = vi.fn()
       const callMeOnceC = vi.fn()
 
-      const $count = Ion(0, {
+      const $count = ion(0, {
          increment() {
             console.log('>>>start increment')
             this.value++;
@@ -182,7 +182,7 @@ describe('infinite loop prevention', () => {
          }
       })
 
-      const $count2 = Ion(0)
+      const $count2 = ion(0)
 
       watch($count, () => {
          console.log('---effect')
@@ -238,7 +238,7 @@ describe('infinite loop prevention', () => {
 
       let count = 0;
 
-      const $count = Ion(0, {
+      const $count = ion(0, {
          increment() {
             console.log('start increment')
             this.value++;
@@ -314,7 +314,7 @@ describe('infinite loop prevention', () => {
 
       let count = 0;
 
-      const $count = Ion(0, {
+      const $count = ion(0, {
          increment() {
             console.log('start increment')
             this.value++;
@@ -402,7 +402,7 @@ describe('infinite loop prevention', () => {
       let count = 0;
 
 
-      const $count = Ion(0, {
+      const $count = ion(0, {
          increment() {
             console.log('>>>start increment')
             this.value++;
@@ -410,7 +410,7 @@ describe('infinite loop prevention', () => {
          }
       })
 
-      const $count2 = Ion(0)
+      const $count2 = ion(0)
 
       watch($count, () => {
          console.log('--start effect increment')

@@ -32,7 +32,7 @@ function ControllingParent() {
 }
 
 function Controlled() {
-   get open = Ion(false, {
+   get open = ion(false, {
       toggle() {
          open@.value = !open
       }
@@ -64,7 +64,7 @@ function SharedControllingParent() {
 function SharedControlled(input: FromTag<{
    'on:close': () => void
 }>) {
-   get open = Ion(false, {
+   get open = ion(false, {
       toggle() {
          open@.value = !open
       }

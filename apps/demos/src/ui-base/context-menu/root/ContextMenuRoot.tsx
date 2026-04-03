@@ -5,7 +5,7 @@ import type { BaseUIChangeEventDetails } from '../../types';
 import type { MenuRoot } from '../../menu/root/MenuRoot';
 import { UIDGenerator } from '@rue/utils';
 import { NodeRef } from '@rue/luent';
-import { Ion } from '@rue/quarky';
+import { ion } from '@rue/quarky';
 
 const genUID = UIDGenerator(11)
 /**
@@ -15,7 +15,7 @@ const genUID = UIDGenerator(11)
  * Documentation: [Base UI Context Menu](https://base-ui.com/react/components/context-menu)
  */
 export function ContextMenuRoot(props: ContextMenuRoot.Props) {
-   const $anchor = Ion({
+   const $anchor = ion({
     getBoundingClientRect() {
       return DOMRect.fromRect({ width: 0, height: 0, x: 0, y: 0 });
     },

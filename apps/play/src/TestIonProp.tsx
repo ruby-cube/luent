@@ -3,7 +3,7 @@ import { ion, ionic, ionize, watch } from "@rue/quarky";
 
 
 export function TestIonProp() {
-    const $count = Ion(0, {
+    const $count = ion(0, {
         increment() {
             $count.value = $count() + 1
         }
@@ -22,7 +22,7 @@ export function TestIonProp() {
     const $bigBirdSleep = asPion($bigBird, 'sleep')
     console.log($bigBirdSleep)
 
-    const $doubleCount = Ion(
+    const $doubleCount = ion(
         () => $count() * 2
     )
 
@@ -42,14 +42,14 @@ export function TestIonProp() {
         console.log('$counter mutated', mutations)
     })
 
-    const $firstName = Ion('Kermit', {
+    const $firstName = ion('Kermit', {
         set(name: string) {
             $firstName.value = name
         }
     })
-    const $lastName = Ion('The Frog')
+    const $lastName = ion('The Frog')
 
-    const $fullName = Ion(() =>$firstName() + " " + $lastName(), {
+    const $fullName = ion(() =>$firstName() + " " + $lastName(), {
         set(name: string) {
             const splitName = name.split(" ");
             $firstName.value = splitName[0]

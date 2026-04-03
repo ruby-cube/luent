@@ -1,5 +1,5 @@
-import { template, Finitron, css } from "@rue/luent";
-import { Ion, SYNC, watch } from "@rue/quarky";
+import { template, css } from "@rue/luent";
+import { ion, SYNC, watch, Finitron } from "@rue/quarky";
 import "./style.css"
 
 export function TrafficLight() {
@@ -47,7 +47,7 @@ export function TrafficLight() {
 
 
    function $LightOpacity(color: typeof light.state) {
-      return Ion(() => {
+      return ion(() => {
          return trafficLight.is("on") && !state.is("sleep")
             ? trafficLight.is("x:broken")
                ? 0

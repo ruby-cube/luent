@@ -3,5 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "main": "./index.cjs",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "@rue/ruescript": "workspace:*"
+  }
 }

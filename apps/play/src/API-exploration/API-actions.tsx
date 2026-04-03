@@ -97,7 +97,7 @@ const markComplete = Action(({ ooo }) => () => {
 })
 
 // TODO: how to return output of an action?
-const todo = asIonic(data, todo => ({
+const todo = ionic(data, todo => ({
    markComplete: Action(function () {
       const output = todo.markComplete()
       this.await(db.dispatch('...'))
@@ -106,7 +106,7 @@ const todo = asIonic(data, todo => ({
 }))
 
 //TODO: canceling action vs canceling dispatches are two different things
-const todo = asIonic(data, todo => ({
+const todo = ionic(data, todo => ({
    markComplete: Action({
       presume: () => todo.markComplete(),
       dispatch() {
@@ -143,7 +143,7 @@ function Todo() {
       fetch: () => db.fetchArticles($searchTerm(), { debounce: 100 })
    })
 
-   const $articles = RemoteIon(() => asIonicArticles(db.fetchArticles($searchTerm(), { debounce: 100 })))
+   const $articles = RemoteIon(() => ionicArticles(db.fetchArticles($searchTerm(), { debounce: 100 })))
 
    // Optimistic
    const markComplete = RemoteAction(() => {

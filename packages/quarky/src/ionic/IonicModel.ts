@@ -1,5 +1,5 @@
 import type { AnyObject } from "@rue/types"
-import { __DEV__getTrace } from "../../../flask/debug"
+import { __DEV__getTrace } from "../../../../flask/debug"
 import { EACH, ToRaw } from "./Ionic"
 import { trigger } from "../reactivity/Atom"
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark"
@@ -14,13 +14,13 @@ export function isIonicProxy(value: any): value is QuarkyIonicProxy {
    return hasQuark(value) && quarkOf(value) instanceof ModelQuark;
 }
 
-
+ 
 export function toRaw<T>(obj: T): ToRaw<T> {
    if (obj instanceof ModelQuark) {
-      return obj.target as ToRaw<T>;
+      return obj.state.get() as ToRaw<T>;
    }
    if (isIonicProxy(obj)) {
-      return quarkOf(obj).target as ToRaw<T>;
+      return quarkOf(obj).state.get() as ToRaw<T>;
    }
    return obj as ToRaw<T>; // already raw target
 }

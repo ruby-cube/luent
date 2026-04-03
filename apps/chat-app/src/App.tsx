@@ -1,6 +1,5 @@
 import { template, fromGround, fromRoot, If, Style, css } from "@rue/luent";
-import { Router } from "./router";
-import { Ion, Ionized } from "@rue/quarky";
+import { Ion, ion } from "@rue/quarky";
 import { User } from "./context/keys";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
 
@@ -12,7 +11,7 @@ import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/data
 
 export function FriendSite() {
    const $connected = initDatabaseConnection();
-   const $user = Ion(null as User | null)
+   const $user = ion(null as User | null)
    let initialLoad = true;
    const $route = getRouter()
 

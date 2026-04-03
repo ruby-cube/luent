@@ -47,7 +47,7 @@ function asFiles(data: FileData[]) {
 }
 
 function resolvedDispatch(args: any) {
-   return Ion(asFiles(data));
+   return ion(asFiles(data));
 }
 
 const GET_FILES = ""

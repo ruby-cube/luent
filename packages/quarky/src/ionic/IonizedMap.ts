@@ -1,6 +1,6 @@
 import { defineIonicCollection } from "./IonicDef";
 import { SetlikeDef } from "./IonizedSet";
-import { asIonic, Ionic } from "./Ionic";
+import { ionic, Ionic } from "./Ionic";
 
 // declare global {
 //    interface Map<K, V> {
@@ -29,8 +29,8 @@ import { asIonic, Ionic } from "./Ionic";
 // Trackable keys is about tracking the property
 // trackable ops is about tracking the get op or the whole ionic model (depending on the type of operation)
 
-// Ionic(new Map(), {
-//    [EACH]: { as: ([key, value]) => [Ionic(key), Ionic(value)] }
+// ionic(new Map(), {
+//    [EACH]: { as: ([key, value]) => [ionic(key), ionic(value)] }
 // })
 
 export function installIonicMap() {
@@ -44,7 +44,7 @@ export function installIonicMap() {
    }, {
       [Symbol.iterator]() {
          this.trackModel()
-         return asIonic(this.raw[Symbol.iterator]()) // TODO: see note in $$Set
+         return ionic(this.raw[Symbol.iterator]()) // TODO: see note in $$Set
       },
 
       forEach: SetlikeDef.forEach,
@@ -53,7 +53,7 @@ export function installIonicMap() {
       entries: SetlikeDef.entries,
 
       set(key, value) {
-         return asIonic(this.mutate(raw => raw.set(key, value), ({ op }) => {
+         return ionic(this.mutate(raw => raw.set(key, value), ({ op }) => {
             op.trigger('has', key)
             op.trigger('get', key)
             op.trigger('[[get]]', 'size')

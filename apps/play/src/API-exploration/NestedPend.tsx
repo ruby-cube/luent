@@ -23,7 +23,7 @@ const PendingTextArea = Suspense({
 
 
 export function NestedPend() {
-   const $count = Ion(0)
+   const $count = ion(0)
 
    return template(
       () =>
@@ -53,7 +53,7 @@ function ListBlock() {
 }
 
 function TextArea() {
-   const $word = Ion("not ready")
+   const $word = ion("not ready")
 
    pend(
       simFetchC("pomp")
@@ -70,7 +70,7 @@ function TextArea() {
 
 
 function ItemBlockA() {
-   const $word = Ion("not ready")
+   const $word = ion("not ready")
 
    pend(simFetch("calico"))
       .then(word => $word.value = word)
@@ -81,7 +81,7 @@ function ItemBlockA() {
 }
 
 function ItemBlockB() {
-   const $word = Ion("not ready")
+   const $word = ion("not ready")
 
    pend(simLongFetch("basset"))
       .then(word => $word.value = word)
@@ -92,7 +92,7 @@ function ItemBlockB() {
 }
 
 function ItemBlockC() {
-   const $word = Ion("not ready")
+   const $word = ion("not ready")
 
    pend(simFetchB("cerulean"))
       .then(word => $word.value = word)
@@ -103,7 +103,7 @@ function ItemBlockC() {
 }
 
 function ItemBlockD() {
-   const $word = Ion("not ready")
+   const $word = ion("not ready")
 
    pend(simLongFetchB("tilted"))
       .then(word => $word.value = word)

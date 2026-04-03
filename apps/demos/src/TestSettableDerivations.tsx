@@ -1,11 +1,11 @@
 import { template, For, NodeRef } from "@rue/luent";
-import { asIonic, Ion, Ionic } from "@rue/quarky";
+import { ionic, ion } from "@rue/quarky";
 
 export function TestSettableDerivation() {
-   const names = asIonic([] as string[])
-   const $first = Ion("")
-   const $last = Ion("")
-   const $fullname = Ion(() => $first() + " " + $last(), {
+   const names = ionic([] as string[])
+   const $first = ion("")
+   const $last = ion("")
+   const $fullname = ion(() => $first() + " " + $last(), {
       '@set'(value: string) {
          if (value === "") { $first.value = $last.value = "" }
          else {

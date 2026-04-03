@@ -1,5 +1,5 @@
 import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
-import { Component, ComponentForge, InferSlot, makeComponent } from "../component/Component";
+import { Component, ComponentTag, InferSlot, makeComponent } from "../component/Component";
 import { TagName, makeElement } from "../element/makeElement";
 import { NodeRef, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
@@ -14,7 +14,7 @@ import { NodeRefsConfig } from "./NodeRefs";
 import { normalizeToArray, toError } from "@rue/utils";
 import { RenderError } from "../boundaries/Try";
 
-export type TagType = ComponentForge | string
+export type TagType = ComponentTag | string
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -85,13 +85,13 @@ export type ElementConfig<K extends TagName = TagName> = {
 // attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
 type NodesArray<T> = ReturnType<NodeRef<T>>[] | NodesArray<T>[]
-type NodeSetup<T extends TagName | ComponentForge> = {
+type NodeSetup<T extends TagName | ComponentTag> = {
    // ref?: NodeRef<T> | NodeRefsConfig,
    // provide?: Provided,
    // class?: ClassInput | ClassInput[],
    // style?: StyleInput | StyleInput[]
 }
-export type ComponentConfig<T extends ComponentForge = ComponentForge> =
+export type ComponentConfig<T extends ComponentTag = ComponentTag> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
 export type GroupActivationType = ShowHideType | 'show'
@@ -187,7 +187,7 @@ function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | TagName | ComponentForge | 'o--link' | 'o--body' | 'o--portal' | 'remount-view' | 'show-view' | 'create-view' | any,
+   nodeType: SVGTag | TagName | ComponentTag | 'o--link' | 'o--body' | 'o--portal' | 'remount-view' | 'show-view' | 'create-view' | any,
    Slot: undefined | (() => RawJSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {

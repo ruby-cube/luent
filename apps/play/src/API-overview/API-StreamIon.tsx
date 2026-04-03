@@ -6,13 +6,13 @@ import { resolve } from "path";
 export function DinoLogo() {
    // # init animation
 
-   const $active = Ion({ active: false }, {
+   const $active = ion({ active: false }, {
       set(value) {
 
       }
    })
 
-   const $count = Ion(0,
+   const $count = ion(0,
       {
          get double() {
             return this() * 2
@@ -25,7 +25,7 @@ export function DinoLogo() {
          }
       })
 
-   const $count = Ion({ count: 0 }, {
+   const $count = ion({ count: 0 }, {
       increment() {
          this.count++
       },
@@ -34,11 +34,11 @@ export function DinoLogo() {
       }
    })
 
-   const $todos = Ion({ todos: ionize([] as Todo[]) })
+   const $todos = ion({ todos: ionize([] as Todo[]) })
 
-   const $todos = Ion(ionize([] as Todo[]))
+   const $todos = ion(ionize([] as Todo[]))
 
-   const $todos = Ion({ todos: ionize([] as Todo[]) }, {
+   const $todos = ion({ todos: ionize([] as Todo[]) }, {
       addTodo(todo: Todo) {
          this.todos.push(todo)
       },
@@ -47,7 +47,7 @@ export function DinoLogo() {
       }
    })
 
-   const $todos = Ion(ionize([] as Todo[]), {
+   const $todos = ion(ionize([] as Todo[]), {
       addTodo(todo: Todo) {
          this.todos.push(todo)
       },
@@ -306,8 +306,8 @@ export function DinoLogo() {
       })
    }
 
-   const $running = Ion(false)
-   const $side = Ion('l' as 'l' | 'r')
+   const $running = ion(false)
+   const $side = ion('l' as 'l' | 'r')
 
    function run() {
       return new Promise<void>(end => {

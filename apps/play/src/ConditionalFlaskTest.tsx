@@ -11,7 +11,7 @@ export function ConditionalFlaskTest() {
 }
 
 function ComponentA() {
-   const $pending = Ion(true);
+   const $pending = ion(true);
 
    setTimeout(() => {
       $pending.value = false
@@ -26,8 +26,8 @@ function ComponentA() {
 }
 
 function ComponentB() {
-   const $pending = Ion(true);
-   const $error = Ion(false);
+   const $pending = ion(true);
+   const $error = ion(false);
 
    setTimeout(() => {
       $pending.value = false

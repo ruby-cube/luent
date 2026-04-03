@@ -2,13 +2,13 @@ import { template } from "@rue/luent";
 import { finiton, ion, watch } from "@rue/quarky";
 
 export function TestNested() {
-   const $isActive = Ion(true, {
+   const $isActive = ion(true, {
       toggle() {
          $isActive.value = !$isActive()
       }
    })
 
-   const $isHappy = Ion(true, {
+   const $isHappy = ion(true, {
       toggle() {
          $isHappy.value = !$isHappy()
       }
@@ -75,7 +75,7 @@ export function TestNestedB() {
 
    // $hasColor.activate()
 
-   const $hasColor = Ion(true, {
+   const $hasColor = ion(true, {
       toggle() {
          $hasColor.value = !$hasColor()
       }

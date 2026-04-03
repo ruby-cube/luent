@@ -11,12 +11,12 @@ The intuitiveness of frameworks like Vue and Svelte.
 ## Reactive State
 Reactivity refers to state changes that trigger tasks, such as view updates. Tasks triggered by state changes are called effects. We link a view update effect to reactive state by binding it to a view template, which under the hood links a DOM-updating function to the reactive state.
 ### Ions<!-- {"fold":true} -->
-Ions are the primary source of reactivity in Luent. There are two main types of ions: atomic ions and derivation ions. To create an atomic ion, we call the `Ion()` function and pass in the ion’s initial state. This gives us an ion—a state getter function with a value property. To access state, we call the ion. To set the state, we set its `value` property. To render it to the view reactively, we simply pass it to the template.
+Ions are the primary source of reactivity in Luent. There are two main types of ions: atomic ions and derivation ions. To create an atomic ion, we call the `ion()` function and pass in the ion’s initial state. This gives us an ion—a state getter function with a value property. To access state, we call the ion. To set the state, we set its `value` property. To render it to the view reactively, we simply pass it to the template.
 
 ```jsx
 function Counter() {
 
-   const $count = Ion(0)
+   const $count = ion(0)
    
    console.log($count()) // 0
    
@@ -111,7 +111,7 @@ providing a level of state encapsulation. [TODO:]
 ```jsx
 function Counter() {
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -133,11 +133,11 @@ function Counter() {
 [TODO] encapsulation and mutation tracking
 
 ### Derivation Ion<!-- {"fold":true} -->
-So far, we’ve only seen atomic ions in action. Ions can also form ionic compounds where state is derived from other ions. To create a derivation ion, we call the `Ion()` function, passing in a derivation function instead of an initial state.
+So far, we’ve only seen atomic ions in action. Ions can also form ionic compounds where state is derived from other ions. To create a derivation ion, we call the `ion()` function, passing in a derivation function instead of an initial state.
 
 ```typescript
-const $count = Ion(0)
-const $doubleCount = Ion(() => $count() * 2)
+const $count = ion(0)
+const $doubleCount = ion(() => $count() * 2)
 ```
 
 Now, whenever `$count`’s state changes, `$doubleCount`’s state will also change. 
@@ -146,8 +146,8 @@ Derivations are a simple and concise way to keep state consistent with each othe
 
 ```typescript
 // ❌ avoid syncing state like this this:
-const $count = Ion(0)
-const $doubleCount = Ion(0)
+const $count = ion(0)
+const $doubleCount = ion(0)
 
 watch($count, () => {
    $doubleCount.value = $count
@@ -158,7 +158,7 @@ watch($count, () => {
 By default, derivation ions memoize state so that computations do not need to be rerun every time you call the derivation ion. This is typically the most efficient behavior. To opt out, pass in the option `'-memoize': false`.
 
 ```typescript
-const $doubleCount = Ion(() => $count() * 2, { '-memoize': false })
+const $doubleCount = ion(() => $count() * 2, { '-memoize': false })
 ```
 
 > You’ll notice that options for reactive entities are prefixed with a dash. This is to differentiate options from methods.
@@ -167,7 +167,7 @@ const $doubleCount = Ion(() => $count() * 2, { '-memoize': false })
 Derivation may also be created impromptu within the template via a special syntax—the ‘pointless’ parentheses. In the template, parentheses that surround expressions for no apparent reason will be compiled to an arrow function.
 
 ```jsx
-const $count = Ion(0)
+const $count = ion(0)
 
 <p>{$count} x 2 = {($count() * 2)}</p>
 ```
@@ -208,7 +208,7 @@ To pass a derivation function to the template, we would wrap the entire expressi
 #### Non-Ion Derivations
 As seen above, derivations do not necessarily have to be ions. The following `$doubleCount` is equally valid as a reactive derivation:
 ```typescript
-const $count = Ion(0)
+const $count = ion(0)
 const $doubleCount = () => $count() * 2
 ```
 
@@ -224,8 +224,8 @@ Special types of derivations is covered in More Reactivity: Derivations
 #### Deriving based on previous state
 Whenever the derivation function is called, it receives the previous state, which can be useful for determining the next state.
 ```typescript
-const $count = Ion(0)
-const $doubleCount = Ion(prev => $count() * 2) [[ TODO: need an example ]]
+const $count = ion(0)
+const $doubleCount = ion(prev => $count() * 2) [[ TODO: need an example ]]
 ```
 
 prev state
@@ -240,7 +240,7 @@ Often it makes more sense to model state through a data structure rather than a 
 Since ions only trigger effects if the new state is not strictly equal to the previous state, we must create a new object containing the new nested state and set it as the ion’s value. Note that mutating the object will NOT trigger updates:
 
 ```typescript
-const $box = Ion({ x: 0, y: 0 })
+const $box = ion({ x: 0, y: 0 })
 
 function moveRight() {
    $box.value = { ...$box(), x: $box().x + 10 }
@@ -263,7 +263,7 @@ function moveRight() {
 For those who prefer a more intuitive, concise way of updating data structures, Luent provides another type of ionic compound called ionic models. To create an ionic model, we call the `Ionic` function and pass in the object to be tracked. This will ‘ionize’ the object, turning all its properties into ions, in the form of a JavaScript proxy. Once an object is ionized, mutating it will trigger its effects:
 
 ```jsx
-const box = Ionic({ x: 0, y: 0 })
+const box = ionic({ x: 0, y: 0 })
 
 function moveRight() {
    box.x += 10
@@ -296,7 +296,7 @@ class Box {
 
 ---
 
-const box = Ionic(new Box())
+const box = ionic(new Box())
 
 ---
 
@@ -308,13 +308,13 @@ Luent also supports ionizing class instances that contain private properties. Se
 #### Extending Models
 Models may be extended with methods that are more specific to the instance. Here an array that models a basket is extended with an `insertItem` method:
 ```typescript
-const basket = Ionic(['🍄'], {
+const basket = ionic(['🍄'], {
    insertItem(item: string, index: number) {
       this.splice(index, 0, item)
    }
 })
 
-const $selectedItem = Ion('Choose an item')
+const $selectedItem = ion('Choose an item')
 
 const items = ['🍀', '🍄', '🌰']
 
@@ -356,7 +356,7 @@ class Swamp {
 }
 
 // auto-deep-ionize
-const swamp = Ionic(new Swamp())
+const swamp = ionic(new Swamp())
 
 const frog = swamp.frog // Ionic
 const 
@@ -436,7 +436,7 @@ We could alternatively pass the render type into the conditional template functi
 Remountable views may be manually discarded. Conditional render functions receive the view instance as the first parameter. When the discard method of the view instance is called, the cache is cleared and the next time the view mounts, it will be recreated.
 
 ```jsx
-const $tab = Ion(0)
+const $tab = ion(0)
 const tabViews = []
 
 function closeTab(tab: number) {
@@ -524,7 +524,7 @@ Defaults
 ##### Ion Access [EXPERIMENTAL]
 
 ```jsx
-const article = Ionic(getArticle())
+const article = ionic(getArticle())
 
 ---
 <h1>{(article.title)}</h1>
@@ -532,7 +532,7 @@ const article = Ionic(getArticle())
 ```
 
 ```jsx
-const article = Ionic(getArticle())
+const article = ionic(getArticle())
 
 ---
 <h1>{article.$title}</h1>
@@ -645,7 +645,7 @@ We’ve seen that Now this may seem like a verbose way to access state. There’
 We are looking into the possibility of code transformations to add more visual clarity as well as to further unify the syntax of ‘variable getters’ and property getters. The proposed syntax:
 
 ```typescript
-get count = Ion(0)
+get count = ion(0)
 ```
 ```jsx
 <p>{(count)}</p>
@@ -655,7 +655,7 @@ get count = Ion(0)
 
 But we could also provide a different ‘state has changed’ checker 
 ```typescript
-const $box = Ion({ x: 0, y: 0 }, {
+const $box = ion({ x: 0, y: 0 }, {
    '@set'({ newValue, value }) {
       return diffProperties(newValue, value)
    }
@@ -670,7 +670,7 @@ function moveRight() {
 For better performance, avoid passing objects where methods are the object’s “own property”. Instead, methods should be in the object’s prototype chain. In other words, ionize class instances or object literals without methods. This 
 ```typescript
 // ❌ avoid object literals with methods
-const box = Ionic({ 
+const box = ionic({ 
    x: 0,
    y: 0,
 

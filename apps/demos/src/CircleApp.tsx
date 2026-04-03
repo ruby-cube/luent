@@ -1,16 +1,16 @@
 import { template, For, If, Style, css } from "@rue/luent"
-import { Ion, Ionic, EACH, as, swiftUpdate, asIonic } from "@rue/quarky"
+import { Ionic, ionic } from "@rue/quarky"
 
 // Modified Demo from Vue.js
 
 type Circle = { cx: number, cy: number, r: number }
 
 export function CircleApp() {
-   const history = asIonic([asIonic([] as Ionic<Circle>[])])
-   const $index = Ion(0)
-   const $circles = Ion(asIonic([] as Ionic<Circle>[]))
-   const $selected = Ion(undefined as undefined | null | Ionic<Circle>)
-   const $adjusting = Ion(false)
+   const history = ionic([ionic([] as Ionic<Circle>[])])
+   const $index = ion(0)
+   const $circles = ion(ionic([] as Ionic<Circle>[]))
+   const $selected = ion(undefined as undefined | null | Ionic<Circle>)
+   const $adjusting = ion(false)
 
    function reClick({ clientX: x, clientY: y, target }: MouseEvent) {
       if ($adjusting()) {
@@ -25,7 +25,7 @@ export function CircleApp() {
          $selected.value = null
 
       if (!$selected()) {
-         $circles().push(asIonic({
+         $circles().push(ionic({
             cx: x,
             cy: y,
             r: 50
@@ -53,7 +53,7 @@ export function CircleApp() {
    }
 
    function clone(circles: Ionic<Circle[]>) {
-      return circles.map((circle) => asIonic({ ...circle }))
+      return circles.map((circle) => ionic({ ...circle }))
    }
 
    const circle = $circles()[0]

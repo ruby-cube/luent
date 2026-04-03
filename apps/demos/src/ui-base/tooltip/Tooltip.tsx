@@ -1,5 +1,5 @@
 import { $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
-import { Ion, toIon } from "@rue/quarky"
+import { ion, toIon } from "@rue/quarky"
 import { IonicTooltip } from "./Tooltip.kit";
 import { Alignment, maybeFlip, Placement, positionTail } from "../popover/Popover.kit";
 import { PopoverRoot } from "../popover/Popover";

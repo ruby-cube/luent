@@ -1,5 +1,5 @@
 import { template, createRoot } from "@rue/luent"
-import { asIonic, Ion, Ionic } from "@rue/quarky"
+import { ionic } from "@rue/quarky"
 
 /* 
 Tests:
@@ -13,7 +13,7 @@ Tests:
 export function TestMoveBox() {
    const INCREMENT = 10
 
-   const box = asIonic({ x: 0, y: 0 }, {
+   const box = ionic({ x: 0, y: 0 }, {
       reset() {
          this.x = 0;
          this.y = 0;

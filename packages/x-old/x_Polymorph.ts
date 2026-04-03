@@ -72,7 +72,7 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][], options?: {
       return switchMap.has(key);
    }
    $Polymorph.Morphable = function Morphable(initialKey: PolymorphKey | null, input?: Object): Morphable {
-      const morphable = Ion(input ? [initialKey, input] : initialKey, {
+      const morphable = ion(input ? [initialKey, input] : initialKey, {
          as(key: PolymorphKey | null, input?: Object) {
             if (input) {
                if (Array.isArray(this.value) && this.value[0] === key && this.value[1] === input)

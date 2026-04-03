@@ -1,17 +1,17 @@
 import { template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, css } from "@rue/luent";
-import { Ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
+import { ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
 
 export function TestIfElseMix(setup: FromTag<{ activation: [ShowHideType, ShowHideType] }>) {
    const { activation } = setup
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() {
          $active.value = !$active()
       }
    })
 
-   const $ready = Ion(false, {
+   const $ready = ion(false, {
       toggle() {
          $ready.value = !$ready()
       }

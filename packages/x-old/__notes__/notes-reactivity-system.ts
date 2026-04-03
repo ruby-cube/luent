@@ -62,7 +62,7 @@
 * */
 
 import { Particle, ParticleMorph } from "../compound/x_Particle"
-import { Quark, QuarkyEntity } from "../abstract/Quark"
+import { Quark, QuarkyEntity } from "../../quarky/src/abstract/Quark"
 
 //ABSTRACT
 

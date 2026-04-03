@@ -7,7 +7,7 @@ import { ion } from "@rue/quarky";
 
 
 function Parent() {
-   const $count = Ion(0)
+   const $count = ion(0)
 
    return template(
       <>
@@ -18,7 +18,7 @@ function Parent() {
 
 function Child({ $count } : FromTag<{ count: number }>) {
 
-   const $doubleCount = Ion(() =>)
+   const $doubleCount = ion(() =>)
 
       return template(
       <>

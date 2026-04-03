@@ -1,5 +1,5 @@
 import { template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 
 export function TestCreate() {
@@ -9,7 +9,7 @@ export function TestCreate() {
       3: { content: 'bye' },
    }
 
-   const $activeTab = Ion(tabs[1])
+   const $activeTab = ion(tabs[1])
 
    return template(
       <div>
@@ -23,7 +23,7 @@ export function TestCreate() {
 }
 
 function Tab({ $content }) {
-   const $count = Ion(0)
+   const $count = ion(0)
 
    return template(
       <div>

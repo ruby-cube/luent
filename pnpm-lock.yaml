@@ -511,7 +511,11 @@ importers:
         specifier: '*'
         version: 5.9.3
 
-  plugins/tsserver-plugin-ruescript: {}
+  plugins/tsserver-plugin-ruescript:
+    dependencies:
+      '@rue/ruescript':
+        specifier: workspace:*
+        version: link:../../packages/ruescript
 
   plugins/vite-plugin-luent:
     dependencies:

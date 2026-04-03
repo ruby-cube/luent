@@ -1,5 +1,5 @@
 import { template, For, FromTag, Style, css, } from "@rue/luent"
-import { as, asIonic, EACH, Ion, Ionic } from "@rue/quarky"
+import { as, ion, ionic, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
 // features
@@ -11,22 +11,22 @@ type Stat = {
 }
 
 export function SVGPolygonApp() {
-   const $newLabel = Ion('')
+   const $newLabel = ion('')
 
-   const stats = asIonic([
+   const stats = ionic([
       { label: 'A', value: 100 },
       { label: 'B', value: 100 },
       { label: 'C', value: 100 },
       { label: 'D', value: 100 },
       { label: 'E', value: 100 },
       { label: 'F', value: 100 }
-   ], { [EACH]: { '-as': Ionic } })
+   ], { [EACH]: { '-as': ionic } })
 
 
    function add(e: any) {
       e.preventDefault()
       if (!$newLabel()) return
-      stats.push(asIonic({
+      stats.push(ionic({
          label: $newLabel(),
          value: 100
       }))
@@ -128,7 +128,7 @@ function AxisLabel(setup: FromTag<{
 }>) {
    const { $index, stat, $total } = setup
 
-   const $point = Ion(() =>
+   const $point = ion(() =>
       valueToPoint(+stat.value + 10, $index(), $total())
    )
 
@@ -143,7 +143,7 @@ function PolyGraph({ stats }: FromTag<{
    stats: Ionic<Ionic<Stat>[]>
 }>) {
 
-   const $points = Ion(() => {
+   const $points = ion(() => {
       const total = stats.length
       return stats
          .map((stat, i) => {

@@ -1,5 +1,5 @@
 import { FromTag, template } from "@rue/luent"
-import { asIonic, Ion, Ionic } from "@rue/quarky"
+import { ionic, Ion, Ionic, ion } from "@rue/quarky"
 import { Something } from "./external-file"
 
 type Frog = { name: string }
@@ -51,7 +51,7 @@ function Compo({ dog, something, list, mu: { frog } }: FromTag<CompoInput>) {
 
 function CompoB({ dog, mu }: FromTag<CompoInput>) {
 
-   const localObj = asIonic({ name: 'local', store: 9 })
+   const localObj = ionic({ name: 'local', store: 9 })
 
    function doSomething() {
       mu.frog.name = 'sir robin' // OK
@@ -66,8 +66,8 @@ function CompoB({ dog, mu }: FromTag<CompoInput>) {
 }
 
 function App() {
-   const $count = Ion(0)
-   const frog = asIonic({ name: 'kermit' })
+   const $count = ion(0)
+   const frog = ionic({ name: 'kermit' })
    const something = new Something()
 
    return template(

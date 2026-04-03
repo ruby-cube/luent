@@ -1,18 +1,18 @@
 import { template, For } from "@rue/luent";
-import { Ion, ionize } from "@rue/quarky";
+import { ion, ionize } from "@rue/quarky";
 
 export function TestDerived() {
 
    const counts = ionize([0])
    const sequence = ionize([0])
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          $count.value = $count() + 1
       }
    });
 
-   const $accumulate = Ion((prev?: number) =>
+   const $accumulate = ion((prev?: number) =>
       (prev ?? 0) + $count()
    )
 

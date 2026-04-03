@@ -1,10 +1,10 @@
 
-import { asIonic, Ion, Ionic } from "@rue/quarky";
+import { ionic, ion, Ion, Ionic } from "@rue/quarky";
 import { For, template } from "@rue/luent";
 
 function RXSTodo() {
 
-   const todos = asIonic([] as Ionic<Todo>[], {
+   const todos = ionic([] as Ionic<Todo>[], {
       add(title: string) {
          this.push(IonicTodo(title));
          newTodo@.value = "";
@@ -15,11 +15,11 @@ function RXSTodo() {
       }
    })
 
-   get newTodo = Ion("");
-   get activeTodos = Ion(() => todos.filter(todo => !todo.completed));
-   get completedTodos = Ion(() => todos.filter(todo => todo.completed));
-   get filter = Ion("all" as 'all' | 'active' | 'completed');
-   get filteredTodos = Ion(() => filters[filter]);
+   get newTodo = ion("");
+   get activeTodos = ion(() => todos.filter(todo => !todo.completed));
+   get completedTodos = ion(() => todos.filter(todo => todo.completed));
+   get filter = ion("all" as 'all' | 'active' | 'completed');
+   get filteredTodos = ion(() => filters[filter]);
 
    const filters = {
       get all: () => todos,
@@ -67,7 +67,7 @@ class Todo {
 
 function IonicTodo(title: string) {
    return (
-      asIonic(new Todo(title))
+      ionic(new Todo(title))
    )
 }
 

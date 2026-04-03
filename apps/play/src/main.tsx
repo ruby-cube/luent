@@ -2,7 +2,7 @@
 import { SevenGUIs } from './wip-demos/7-guis';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { AsyncIon, template, createRoot } from '@rue/luent';
+import { createRoot } from '@rue/luent';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { TestListSelect } from './wip-demos/TestListSelect';
@@ -47,7 +47,7 @@ import { TestVanillaStream } from './TestStream-await';
 import { TestIonicList } from './TestIonicList';
 import { compareTaskPromise } from './TestMicrotask';
 import { startCycle } from './TestGenerators';
-import { TestAsyncMultipliers, TestAsyncMultiply, TestAsyncMultiplyA, TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
+import { TestAsyncMultipliers,TestAsyncMultiplyB, TestAsyncMultiplyDrop, TestAsyncMultiplyQueue } from './wip-demos/TestAsyncMultiply';
 import { Async, ooo } from '../../../packages/quarky/src/async/ooo';
 import { Counter } from './TestCounterB';
 import { fetchArticles } from './wip-demos/conduit/src/feature/article-feed/Articles.ionic';
@@ -99,7 +99,7 @@ import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises
 
 // initMonacoEditor()
 
-// const $count = Ion(0, {
+// const $count = ion(0, {
 //    increment() {
 //       this.value++
 //    }
@@ -122,7 +122,7 @@ import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises
 // })
 
 // function App() {
-//    const $count = Ion(0, {
+//    const $count = ion(0, {
 //       increment() {
 //          $count.value++
 //       }
@@ -202,7 +202,7 @@ app.mount('#root')
 //    })
 // })
 // instantUpdate(() => {
-//    const $count = Ion(0)
+//    const $count = ion(0)
 
 //    queueIonicPostlude(() => {
 //       console.log('ionic task')
@@ -216,8 +216,8 @@ app.mount('#root')
 
 
 // load(() => {
-//    const $count = Ion(0)
-//    // const $other = Ion(true)
+//    const $count = ion(0)
+//    // const $other = ion(true)
 
 //    const $suspense = Suspense()
 
@@ -487,7 +487,7 @@ app.mount('#root')
 
 
 
-// const $frog = Ion('kermit')
+// const $frog = ion('kermit')
 
 // const obj = {
 //    frog: $frog
@@ -549,7 +549,7 @@ app.mount('#root')
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)
 //     const unrelated = true;
-//     const $count = Ion(0)
+//     const $count = ion(0)
 //     function increment() {
 //         $count.set(c => c + 1)
 //     }

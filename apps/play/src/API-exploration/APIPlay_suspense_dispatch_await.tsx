@@ -50,8 +50,8 @@ const ZZ = LazyModule(() => import('./MarkdownPreview.js'), {
 });
 
 export default function MarkdownEditor() {
-   const $showPreview = Ion(false);
-   const $markdown = Ion('Hello, **world**!');
+   const $showPreview = ion(false);
+   const $markdown = ion('Hello, **world**!');
 
    return (
       <>
@@ -86,8 +86,8 @@ export default function MarkdownEditor() {
 const MarkdownPreview = Lazy(() => import('./MarkdownPreview.js'));
 
 export default function MarkdownEditor() {
-   const $showPreview = Ion(false);
-   const $markdown = Ion('Hello, **world**!');
+   const $showPreview = ion(false);
+   const $markdown = ion('Hello, **world**!');
 
    return (
       <>
@@ -117,8 +117,8 @@ export default function MarkdownEditor() {
 
 
 export default function MarkdownEditor() {
-   const $showPreview = Ion(false);
-   const $markdown = Ion('Hello, **world**!');
+   const $showPreview = ion(false);
+   const $markdown = ion('Hello, **world**!');
 
    const Await = useAwait({
       Suspense:
@@ -223,7 +223,7 @@ function LoadingApp() {
 const MARKDOWN_FILES = defineDBSync(() => {
    const $data = dispatch({ get: '...' }, [])
 
-   const $files = Ion(() =>ionize($data().map(file => new File(file.id, file.markdown)),
+   const $files = ion(() =>ionize($data().map(file => new File(file.id, file.markdown)),
       {
          remove(index: number) {
             files.splice(index, 1);
@@ -245,7 +245,7 @@ const MARKDOWN_FILES = defineDBSync(() => {
 function App(input : FromTag()) {
    const $files = fromCloud(MARKDOWN_FILES, [])
 
-   const $openedFiles = Ion(() =>$files().filter((file) => file.opened))
+   const $openedFiles = ion(() =>$files().filter((file) => file.opened))
 
    const $MainView = Polymorph({
       'home':

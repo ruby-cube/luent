@@ -193,7 +193,7 @@ function TodoList(input: FromTag<{
 }>) {
    const { $todos, removeTodo, updateTodo } = input;
 
-   const $editedTodo = Ion(null as Todo | null)
+   const $editedTodo = ion(null as Todo | null)
 
    let titleCache = ''
 
@@ -218,7 +218,7 @@ function TodoList(input: FromTag<{
    return template(
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
-            const $isEditing = Ion(() => todo === $editedTodo());
+            const $isEditing = ion(() => todo === $editedTodo());
 
             return (
                <li class={{ todo: true, completed: (todo.completed), editing: $isEditing }}>

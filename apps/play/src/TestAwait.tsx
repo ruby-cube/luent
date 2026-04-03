@@ -1,6 +1,6 @@
 import { template, AsyncIon, Else, If, FromTag } from "@rue/luent";
 import { Await, Meanwhile, Catch } from "../../../packages/luent/src/boundaries/Await";
-import {  Ion } from "@rue/quarky";
+import {  Ion, ion } from "@rue/quarky";
 
 
 
@@ -38,7 +38,7 @@ function fetchNestedDataB($name: Ion<string>) {
 }
 
 export function TestAwait() {
-   const $name = Ion('sir robin the brave')
+   const $name = ion('sir robin the brave')
    const $brave = fetchNestedDataB($name)
 
    return template(

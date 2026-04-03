@@ -82,7 +82,7 @@ function numbersOnly(str: string) {
 
 export function SomeChild() {
 
-   const $searchTerm = Ion('')
+   const $searchTerm = ion('')
 
    $route.path.username
    $route.query.username
@@ -180,7 +180,7 @@ export function SomeChild() {
          as
       }
    
-      const $hash = Ion('#chapter-1')
+      const $hash = ion('#chapter-1')
    
       $route.as(`/home#chapter-one`)
    
@@ -201,7 +201,7 @@ export function SomeChild() {
 
       
          function getfiles() {
-            const $state = Ion(undefined);
+            const $state = ion(undefined);
       
             queueIonicTask(() => {
                const res = await fetch(`files/${$id()}`)

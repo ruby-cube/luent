@@ -1,8 +1,7 @@
 
 import { atMounted, For, If, Style } from "@rue/luent"
 import { template, atUnmount } from "@rue/luent"
-import {  Ion, Ionic, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
-import { quarkOf } from "../../../../packages/quarky/src/abstract/Quark"
+import {  Ion, ion, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
 
 export function SevenGUIs() {
    return template(
@@ -22,8 +21,8 @@ export function SevenGUIs() {
 
 //FIX:
 function TemperatureApp() {
-   const $c = Ion(0)
-   const $f = Ion(() => $c() * (9 / 5 + 32),
+   const $c = ion(0)
+   const $f = ion(() => $c() * (9 / 5 + 32),
       {
          // set state(v: number) {
          //    $c.value = (v - 32) * (5 / 9)
@@ -52,13 +51,13 @@ function TemperatureApp() {
 
 function FlightBooker() {
 
-   const $flightType = Ion('one-way flight')
-   const $departureDate = Ion(dateToString(new Date()))
-   const $returnDate = Ion($departureDate())
+   const $flightType = ion('one-way flight')
+   const $departureDate = ion(dateToString(new Date()))
+   const $returnDate = ion($departureDate())
 
-   const $isReturn = Ion(() => $flightType() === 'return flight')
+   const $isReturn = ion(() => $flightType() === 'return flight')
 
-   const $canBook = Ion(() =>
+   const $canBook = ion(() =>
       !$isReturn() ||
       stringToDate($returnDate()) > stringToDate($departureDate())
    )
@@ -145,8 +144,8 @@ function FlightBooker() {
 // `
 
 function TimerApp() {
-   const $duration = Ion(15 * 1000)
-   const $elapsed = Ion(0)
+   const $duration = ion(15 * 1000)
+   const $elapsed = ion(0)
 
    let lastTime: DOMHighResTimeStamp;
    let handle: number;
@@ -166,7 +165,7 @@ function TimerApp() {
       update()
    }
 
-   const $progressRate = Ion(() =>
+   const $progressRate = ion(() =>
       Math.min($elapsed() / $duration(), 1)
    )
 

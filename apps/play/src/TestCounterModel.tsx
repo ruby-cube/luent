@@ -1,5 +1,5 @@
 import { template } from "@rue/luent"
-import { asIonic, Ion, Ionic, watch } from "@rue/quarky"
+import { ionic, ion, Ionic, watch } from "@rue/quarky"
 
 // TODO:
 // [x] private this access in methods and typing
@@ -24,7 +24,7 @@ export function CounterModelApp() {
 
 export function TestMutableCounter() {
 
-   const count = asIonic({
+   const count = ionic({
       value: 0,
       increment() {
          this.value++
@@ -46,7 +46,7 @@ export function TestMutableCounter() {
 
    // console.log('is it in count', 'increment' in count)
 
-   const $doubleCount = Ion(() =>count.value * 2)
+   const $doubleCount = ion(() =>count.value * 2)
 
    function increment() {
       count.value++
@@ -100,7 +100,7 @@ export function TestEncapsulatedCounter() {
 
    console.log('is it in count', 'increment' in count)
 
-   const $doubleCount = Ion(() =>count.value * 2)
+   const $doubleCount = ion(() =>count.value * 2)
 
    function increment() {
       count.value++

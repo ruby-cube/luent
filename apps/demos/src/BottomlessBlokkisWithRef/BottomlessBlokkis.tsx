@@ -1,5 +1,5 @@
 import { atDiscard, ComponentRef, createRoot, NodeRef, template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import './BottomlessBlokkis.css'
@@ -10,7 +10,7 @@ const BLOKK_GRID = 4
 
 export function BottomlessBlokkis() {
 
-    const $activeBlokk = Ion(0, {
+    const $activeBlokk = ion(0, {
         next() {
             this.value = ($activeBlokk() + 1) % 2;
         }

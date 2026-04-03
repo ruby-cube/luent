@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { template, Stream } from "@rue/luent"
-import { Ion } from "@rue/quarky"
+import { Ion, ion } from "@rue/quarky"
 import { AnyObject } from "@rue/types";
 import './TestStreamIon.css'
 
@@ -11,7 +11,7 @@ function encase<T>(fn: () => T) {
 
 export function TestVanillaStream() {
 
-   const $eye = Ion(1, {
+   const $eye = ion(1, {
       bug() { this.value = 2 },
       reset() { this.value = 1 },
       toggle() { this.value = this.value === 1 ? 2 : 1 }
@@ -37,7 +37,7 @@ export function TestVanillaStream() {
          .do(x => 1)
    }, { '@stop': x => 1 })
 
-   const $side = Ion('l' as 'l' | 'r')
+   const $side = ion('l' as 'l' | 'r')
 
    const turning = Stream(ooo => {
       ooo.do(() => $side.value = 'r')
@@ -54,7 +54,7 @@ export function TestVanillaStream() {
    }, { '@stop': x => 'l' })
 
 
-   const $running = Ion(false as false | 3 | 4)
+   const $running = ion(false as false | 3 | 4)
 
    const running = Stream(ooo => {
       ooo.do(() => $running.value = 3)
@@ -85,7 +85,7 @@ export function TestVanillaStream() {
       })
    })
 
-   const $frame = Ion(() =>
+   const $frame = ion(() =>
       $running() ? $running() : $eye()
    )
 

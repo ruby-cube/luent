@@ -48,6 +48,9 @@
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"
       ],
+      "@rue/quarky/core": [
+        "./packages/quarky/src/core/index.ts"
+      ],
       "@rue/ruescript": [
         "./packages/ruescript/src/index.ts"
       ],

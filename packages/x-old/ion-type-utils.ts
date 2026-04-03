@@ -1,4 +1,4 @@
-import { Ion, isIon, MutableIon } from "./Ion";
+import { Ion, isIon, MutableIon } from "../quarky/src/ion/Ion";
 
 // export function isNonNull<T>(value: T): value is NonNullable<T extends Ion<infer V> ? NonNullable<V> : T> {
 //    if (isIon(value)) return value() != null;
@@ -14,7 +14,7 @@ import { Ion, isIon, MutableIon } from "./Ion";
 //   return value != null;
 // }
 
-// const $target = Ion(null as { hi: 'hi' } | null, {
+// const $target = ion(null as { hi: 'hi' } | null, {
 //    other() {
 
 //    }

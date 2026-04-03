@@ -65,7 +65,7 @@ Also, actions are not stateful. They are procedures.
 
 ```ts
 // const [lazyRender, cancelLazyRender] = useLazyRender()
-// const $pending = Ion(false)
+// const $pending = ion(false)
 
 // lazyRender(() => $count.value++, { $pending, limit: 1000 }) // wraps in an action
 

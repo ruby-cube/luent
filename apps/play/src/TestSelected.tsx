@@ -1,9 +1,9 @@
 import { template, For } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function TestCustomRadioSelection() {
    const choices = [1, 2, 3]
-   const $selectedItem = Ion(undefined as number | undefined)
+   const $selectedItem = ion(undefined as number | undefined)
 
    function selectItem(item: number) {
       $selectedItem.value = item;

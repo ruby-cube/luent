@@ -1,6 +1,6 @@
-import { Ion, $activeUpdate, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon, asIonic } from "@rue/quarky";
+import { Ion, ion, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon, ionic } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If, target } from "@rue/luent";
+import { Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/luent";
 import { As } from "../../../packages/luent/src/conditional/As";
 
 // Modified Demo from Solid.js 
@@ -13,9 +13,9 @@ export function TestAsyncTabs() {
    const tabNames = ['Un', 'Deux', 'Trois', 'Quatre', 'Cinq', 'Six'] as const
    const tabViews: any[] = []
    const allTabs = [0, 1, 2, 3, 4, 5]
-   const openTabs = asIonic([0, 1, 2, 3, 4, 5])
-   const $tab = Ion(0);
-   const $count = Ion(0);
+   const openTabs = ionic([0, 1, 2, 3, 4, 5])
+   const $tab = ion(0);
+   const $count = ion(0);
 
    function openTab(tab: number) {
       if (openTabs.indexOf(tab) === -1) {
@@ -95,13 +95,13 @@ function Tab(input: FromTag<{
 }>) {
    const { page, $count } = input
 
-   const $localCount = Ion(0, {
+   const $localCount = ion(0, {
       increment() {
          this.value++
       }
    })
 
-   const $time = Ion(undefined, {
+   const $time = ion(undefined, {
       '-fetch': db.fetchTime,
       // '-awaited': true
    });

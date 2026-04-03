@@ -1,5 +1,5 @@
 import { $thisView, template, If, NodeRef } from "@rue/luent";
-import {  ionize } from "@rue/quarky";
+import {  ion } from "@rue/quarky";
 import { inert } from "../../../../packages/x-old/x_inert";
 
 class AnimationAnimator {
@@ -121,11 +121,11 @@ export function TestAnimationController() {
 
    const $canvas = NodeRef('canvas')
 
-   // const $animation = Ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
+   // const $animation = ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
 
-   const $elapsed = Ion(() =>$animation()?.$elapsed() ?? 0)
-   const $isPlaying = Ion(() =>$animation()?.$isPlaying() ?? false)
-   const $animation = Ion(undefined)
+   const $elapsed = ion(() =>$animation()?.$elapsed() ?? 0)
+   const $isPlaying = ion(() =>$animation()?.$isPlaying() ?? false)
+   const $animation = ion(undefined)
 
    function playPause() {
       const animation = $animation()

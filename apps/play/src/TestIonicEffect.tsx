@@ -3,7 +3,7 @@ import {  ion, queueIonicTask, SYNC } from "@rue/quarky"
 
 
 export function TestIonicEffect() {
-    const $count = Ion(0, {
+    const $count = ion(0, {
         increment() {
             console.log("incrementing")
             $count.value = $count() + 1

@@ -6,24 +6,24 @@
 With getters and setters established as reactive conduits, I envision a superset of JavaScript that allows using the `get` keyword to declare a variable with underlying getters and setters. The variable must be assigned a value satisfying the type interface of `<T>() => T`.
 
 ```ts
-get count = Ion(0)
+get count = ion(0)
 
 // compiles to:
-const $count = Ion(0)
+const $count = ion(0)
 ```
 
 ### State access
 As with getters and setters on objects, the variable would return whatever the function assigned to it returns. In the case of ions, it would return the current state of the ion.
 
 ```ts
-get count = Ion(0)
+get count = ion(0)
 
 function logCurrentCount() {
    console.log('current count', count)
 }
 
 // compiles to:
-const $count = Ion(0)
+const $count = ion(0)
 
 function logCurrentCount() {
    console.log('current count', $count())
@@ -34,8 +34,8 @@ function logCurrentCount() {
 If the getter assigned to a `get` variable has a `value` property setter, that setter will be used as the setter for the `get` variable. It is otherwise read-only.
 
 ```ts
-get count = Ion(0)
-get doubleCount = Ion(() => count * 2) // read-only
+get count = ion(0)
+get doubleCount = ion(() => count * 2) // read-only
 
 function increment() {
    count++  // calls setter
@@ -43,8 +43,8 @@ function increment() {
 
 // compiles to:
 
-const $count = Ion(0)
-const $doubleCount = Ion(() => $count() * 2) // read-only
+const $count = ion(0)
+const $doubleCount = ion(() => $count() * 2) // read-only
 
 function increment() {
    $count.value++  // calls setter
@@ -57,7 +57,7 @@ We also need syntax to access the getter function itself in order to pass the re
 ```tsx
 function Counter() {
 
-   get count = Ion(0, {
+   get count = ion(0, {
       increment() {
          count++
       },
@@ -81,7 +81,7 @@ function Counter() {
 // compiles to:
 function Counter() {
 
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -108,7 +108,7 @@ This syntax can likewise be used to access getters on object properties. Static 
 ```tsx
 function PlayerScoreBoard({ name }) {
 
-   const player = Ionic({
+   const player = ionic({
       name: a,
       points: 0,
       addPoint () {

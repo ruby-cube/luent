@@ -1,9 +1,9 @@
 import { template } from "@rue/luent";
 import { Thru } from "../../../packages/luent/src/iteratives/Thru";
-import { Ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function TestThru() {
-   const æcount = Ion(1, {
+   const æcount = ion(1, {
       increment() {
          this.value++
       },

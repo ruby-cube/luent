@@ -60,7 +60,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterA() {
 
-//    const $count = Ion(0, {
+//    const $count = ion(0, {
 //       increment() {
 //          this.value++
 //       },
@@ -80,7 +80,7 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 // export function CounterB() {
 
-//    const $count = Ion(0)
+//    const $count = ion(0)
 
 //    function incrementCount() {
 //       $count.value++
@@ -266,7 +266,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
    removeTodo: (todo: Ionized<Todo>) => void
 }>) {
 
-   const $editedTodo = Ion(null as Todo | null)
+   const $editedTodo = ion(null as Todo | null)
 
    let beforeEditCache = ''
 
@@ -291,7 +291,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
    return template(
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
-            const $isEditing = Ion(() => todo === $editedTodo());
+            const $isEditing = ion(() => todo === $editedTodo());
 
             return (
                <li class={["todo", { completed: (todo.completed), editing: $isEditing }]}>

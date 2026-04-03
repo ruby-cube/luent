@@ -1,5 +1,5 @@
 
-import { Ion } from "../ion/Ion"
+import { createAtomicIon } from "../ion/AtomicIon"
 import { toPromise } from "./AsyncIon"
 import { AsyncNode, AsyncSeries, INTERNAL } from "./ooo"
 import { addToSuspense, SuspenseIon } from "./Suspense"
@@ -42,8 +42,8 @@ export function Dispatch<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> |
    // const ionKeys = ions ? ions instanceof Array ? Array.from(ions.keys()) : Object.keys(ions) : undefined
    let resolve: ((value: any | PromiseLike<any>) => void) | null;
    let reject: ((reason?: any) => void) | null
-   const $promise = Ion(null as Promise<unknown> | null)
-   const $error = Ion(null)
+   const $promise = createAtomicIon(null as Promise<unknown> | null)
+   const $error = createAtomicIon(null)
    let retry: undefined | (() => void); // TODO:
 
    let pendingPromise: AsyncSeries | Promise<any> | null = null

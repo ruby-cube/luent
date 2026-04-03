@@ -10,26 +10,26 @@ describe('RueScript sugar transforms', () => {
   it('rewrites get declarations and reactive reads', () => {
     const input = `
 function Demo() {
-  get count = Ion(0)
+  get count = ion(0)
   return count
 }
 `
 
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
-    expect(transformed).toContain('const æcount = Ion(0)')
+    expect(transformed).toContain('const æcount = ion(0)')
     expect(transformed).toContain('return æcount()')
   })
 
   it('rewrites reactive call-root reads to double-call form', () => {
     const input = `
 function Demo() {
-  get count = Ion(() => 1)
+  get count = ion(() => 1)
   return count()
 }
 `
 
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
-    expect(transformed).toContain('const æcount = Ion(() => 1)')
+    expect(transformed).toContain('const æcount = ion(() => 1)')
     expect(transformed).toContain('return æcount()()')
   })
 
@@ -54,7 +54,7 @@ function Demo(obj: any) {
     const input = `
 function Kit() {
   return {
-    get count: Ion(0),
+    get count: ion(0),
     normalProperty: 1
   }
 }
@@ -62,14 +62,14 @@ function Kit() {
 
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
     expect(transformed).toContain('absorbØ')
-    expect(transformed).toContain('æcount: Ion(0)')
+    expect(transformed).toContain('æcount: ion(0)')
     expect(transformed).toContain("['æcount', 'normalProperty']")
   })
 
   it('rewrites derivation shorthand for calls, arrays and jsx containers', () => {
     const input = `
 function View() {
-  get count = Ion(0)
+  get count = ion(0)
   const value = (count + 1)
   const list = [ (count + 2) ]
   return <Comp value={(count + 3)} x={doThing((count + 4))} list={list} value2={value} />
@@ -123,33 +123,33 @@ function Demo(obj: any, key: string) {
   it('rewrites property access from get declaration variables to call-form member access', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ property: 1 })
+  get obj = ion({ property: 1 })
   return obj.property
 }
 `
 
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
-    expect(transformed).toContain('const æobj = Ion({ property: 1 })')
+    expect(transformed).toContain('const æobj = ion({ property: 1 })')
     expect(transformed).toContain('return æobj().property')
   })
 
   it('rewrites property access from const @ variables to call-form member access', () => {
     const input = `
 function Demo() {
-  const obj@ = Ion({ property: 1 })
+  const obj@ = ion({ property: 1 })
   return obj.property
 }
 `
 
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
-    expect(transformed).toContain('const æobj = Ion({ property: 1 })')
+    expect(transformed).toContain('const æobj = ion({ property: 1 })')
     expect(transformed).toContain('return æobj().property')
   })
 
   it('adds non-null assertion for synchronous guarded reads but not nested callback reads', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (obj) {
     console.log(obj.name)
@@ -170,7 +170,7 @@ function Demo() {
   it('adds non-null assertion in else branch when guard is negated', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (!obj) {
     console.log('missing')
@@ -188,7 +188,7 @@ function Demo() {
   it('adds non-null assertion in ternary false branch for negated guard', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
   const value = !obj ? 'none' : obj.name
   return value
 }
@@ -201,7 +201,7 @@ function Demo() {
   it('adds non-null assertion for explicit non-nullish comparison guards', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (obj != null) {
     console.log(obj.name)
@@ -222,7 +222,7 @@ function Demo() {
   it('adds non-null assertion in else branch for explicit nullish equality guards', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   if (obj == null) {
     console.log('missing')
@@ -247,7 +247,7 @@ function Demo() {
   it('adds non-null assertion inside while/do-while/for loop bodies guarded by condition', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
 
   while (obj) {
     console.log(obj.name)
@@ -276,7 +276,7 @@ function Demo() {
   it('adds non-null assertion inside If and ElseIf template conditional branches', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
   return template(
     <div>
       {If(obj, <p>{obj.name}</p>)}
@@ -294,7 +294,7 @@ function Demo() {
   it('adds non-null assertion inside Else template branch when paired with negated If', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
   return template(
     <div>
       {If(!obj, <p>missing</p>)}
@@ -312,7 +312,7 @@ function Demo() {
   it('adds non-null assertion inside If/ElseIf render-function branch scopes', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
   return template(
     <div>
       {If(obj, () => <p>{obj.name}</p>)}
@@ -330,7 +330,7 @@ function Demo() {
   it('adds non-null assertion inside Else render-function branch when paired with negated If', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
   return template(
     <div>
       {If(!obj, () => <p>missing</p>)}
@@ -348,7 +348,7 @@ function Demo() {
   it('adds non-null assertion inside IfElse truthy render-function scope', () => {
     const input = `
 function Demo() {
-  get obj = Ion({ name: 'kermit' } as { name: string } | undefined)
+  get obj = ion({ name: 'kermit' } as { name: string } | undefined)
   const value = IfElse(obj, () => obj.name, () => 'none')
   return value
 }
@@ -390,7 +390,7 @@ function Demo(src: any) {
   it('is idempotent across repeated transform passes', () => {
     const input = `
 function Demo(obj: any) {
-  get count = Ion(0)
+  get count = ion(0)
   get picked = obj.value@
   return <Comp value={(count + 1)} picked={picked}></Comp>
 }
@@ -404,14 +404,14 @@ function Demo(obj: any) {
   it('rewrites typed reactive params and their reads in local scope', () => {
     const input = `
 function FractionKitB(count@: Ion<number>) {
-  const halfCount@ = Ion((count / 2))
+  const halfCount@ = ion((count / 2))
   return { get halfCount() { return halfCount } }
 }
 `
 
     const transformed = transformRXSSugarShared({ code: input, fileName: 'demo.rxs' }).code
     expect(transformed).toContain('function FractionKitB(æcount: Ion<number>)')
-    expect(transformed).toContain('const æhalfCount = Ion(() => æcount() / 2)')
+    expect(transformed).toContain('const æhalfCount = ion(() => æcount() / 2)')
     expect(transformed).toContain('return { get halfCount() { return æhalfCount() } }')
   })
 })

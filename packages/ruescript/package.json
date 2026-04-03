@@ -10,6 +10,10 @@
          "require": "./index.cjs",
          "default": "./index.mjs"
       },
+      "./tsserver": {
+         "require": "./tsserver.cjs",
+         "default": "./tsserver.cjs"
+      },
       "./transform": {
          "import": "./scripts/transform-rxs-sugar.mjs",
          "require": "./index.cjs"

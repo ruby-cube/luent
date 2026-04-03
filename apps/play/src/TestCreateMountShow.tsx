@@ -1,5 +1,5 @@
 import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, css } from "@rue/luent";
-import { asIonic, instantUpdate, Ion, Ionic } from "@rue/quarky";
+import { ionic, ion, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
 function Counter(input: FromTag<{
@@ -8,7 +8,7 @@ function Counter(input: FromTag<{
 }>
 ) {
    const { label, logHook } = input
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -54,13 +54,13 @@ function Counter(input: FromTag<{
 }
 
 export function TestCreateMountShow() {
-   const $brave = Ion(true, {
+   const $brave = ion(true, {
       toggle() {
          this.value = !this.value
       }
    })
 
-   const $mood = Ion('happy' as "happy" | "sad", {
+   const $mood = ion('happy' as "happy" | "sad", {
       toggle() {
          this.value = this.value === 'happy' ? 'sad' : 'happy'
       }
@@ -114,7 +114,7 @@ export function TestCreateMountShow() {
          <hr></hr>
          <h3>Create/destroy a view</h3>
          <section>{() => {
-            const $tab = Ion(1)
+            const $tab = ion(1)
 
             return <>
                <code>
@@ -157,7 +157,7 @@ export function TestCreateMountShow() {
          <hr></hr>
          <h3>Mount/Demount a view</h3>
          <section>{() => {
-            const $tab = Ion(1)
+            const $tab = ion(1)
             // const $tab1 = Remountable()
 
             return <>
@@ -198,7 +198,7 @@ export function TestCreateMountShow() {
          <hr></hr>
          <h3>Mix and match activation types</h3>
          <section>{() => {
-            const $tab = Ion(1)
+            const $tab = ion(1)
 
             return <>
                <code>
@@ -250,8 +250,8 @@ export function TestCreateMountShow() {
          <hr></hr>
          <h3>View Lifecycle Hooks</h3>
          <section>{() => {
-            const $tab = Ion(1)
-            const logs = asIonic([] as string[])
+            const $tab = ion(1)
+            const logs = ionic([] as string[])
 
             function log(msg: string) {
                logs.push(msg)
@@ -374,7 +374,7 @@ export function TestCreateMountShow() {
 
 
 export function TestDerivedConditional() {
-   const $count = Ion(0, {
+   const $count = ion(0, {
       increment() {
          this.value++
       },
@@ -383,29 +383,29 @@ export function TestDerivedConditional() {
       }
 
    })
-   const $doubleCount = Ion(() => $count() * 2)
+   const $doubleCount = ion(() => $count() * 2)
 
-   const $aActive = Ion(true, {
+   const $aActive = ion(true, {
       toggle() {
          $aActive.value = !$aActive.value
       }
    })
 
-   const $bActive = Ion(true, {
+   const $bActive = ion(true, {
       toggle() {
          $bActive.value = !$bActive.value
       }
    })
 
 
-   const $cActive = Ion(false, {
+   const $cActive = ion(false, {
       toggle() {
          $cActive.value = !$cActive.value
       }
    })
 
 
-   const $dActive = Ion(false, {
+   const $dActive = ion(false, {
       toggle() {
          $dActive.value = !$dActive.value
       }

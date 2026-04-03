@@ -1,8 +1,8 @@
 import { template } from "@rue/luent";
-import { ion, ionic, ionize } from "@rue/quarky";
+import { ion, ionic } from "@rue/quarky";
 
 export function TestPropIons() {
-   const frog = ionize({
+   const frog = ionic({
       name: 'sir robin',
       quality: 'valiant',
       setName(name: string) {
@@ -14,7 +14,7 @@ export function TestPropIons() {
       }
    })
 
-   const $frogName = Ion(() =>frog.name, {
+   const $frogName = ion(() =>frog.name, {
       set: frog.setName
    })
 

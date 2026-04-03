@@ -8,7 +8,7 @@ export function TestViewFlasks() {
    const view = rootView = $thisView()
    console.log('>>> this view root', view)
 
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() { $active.value = !$active() }
    })
 
@@ -37,11 +37,11 @@ let dynamicParentView: any;
 
 function DynamicParent() {
 
-   const $active = Ion(true, {
+   const $active = ion(true, {
       toggle() { $active.value = !$active() }
    })
 
-   const $happy = Ion(true, {
+   const $happy = ion(true, {
       toggle() { $happy.value = !$happy() }
    })
 

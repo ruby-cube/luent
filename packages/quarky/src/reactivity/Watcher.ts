@@ -7,8 +7,9 @@ import { SimpleState } from "./State";
 import { $currentCycle, getDefaultPhase, Phase, PRELUDE, SYNC } from "./RenderCycle";
 import { dev, logAtoms } from "../debug/dev";
 import { Traceable } from "../debug/Traceable";
-import { Ion, toValue } from "../ion/Ion";
+import { Ion } from "../ion/Ion";
 import { hasQuark, quarkOf } from "../abstract/Quark";
+import { toValue } from "../ion/utils";
 
 
 // watch(list.$length, list.$couch, sync(() => {
@@ -91,7 +92,7 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
    target.asTraceable = new Traceable(options?.devName ?? 'watch' + subject)
 
    if (__DEV__ && options["dev.logAtoms"]) {
-      const target = Ion(() => subject(), {
+      const target = ion(() => subject(), {
          devName: options.devName
       })
       watch(target, () => {
