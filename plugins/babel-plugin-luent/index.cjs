@@ -6,9 +6,12 @@ let t; // TODO: import from @babel/types
 // - async shorthand
 
 // BABEL PLUGIN: for transforms that don't impact type-checking and linting
+// - derivation shorthand
+// - async shorthand
 // - dynamic template render function
 // - template series
 // - slot to render function
+// + namespaced objects 
 
 
 function luentPreTransform({ types }) {
@@ -25,7 +28,6 @@ function luentPreTransform({ types }) {
          },
          JSXFragment: {
             enter(path) {
-               // transformConditionalSeries(path)
                transformLiterals(path) // derivation shorthand
                transformTemplateCallExpressions(path) // derivation shorthand & last arg to render function
                transformJSXFragment(path) // derivation shorthand + async shorthand + transform series
@@ -33,7 +35,6 @@ function luentPreTransform({ types }) {
          },
          JSXElement: {
             enter(path) {
-               // transformConditionalSeries(path)
                transformLiterals(path) // for derivation shorthand
                transformTemplateCallExpressions(path)
                transformJSXElement(path) // slot to render function
@@ -72,50 +73,6 @@ function isAwaitSeriesElement(node, seriesType) {
    )
 }
 
-// function transformConditionalSeries(path) {
-//    const children = path.node.children
-//    if (children.length === 0) return;
-//    path.node.children = consolidateSeries(children)
-// }
-
-// function consolidateSeries(children) {
-//    const newChildren = []
-//    let conditionalSeries;
-//    for (const node of children) {
-//       if (t.isJSXExpressionContainer(node) && isIfSeriesElement(node.expression)) {
-//          if (node.expression.callee.name === 'If') {
-//             if (conditionalSeries) newChildren.push(createIfSeriesElement(conditionalSeries))
-//             conditionalSeries = [node.expression]
-//          }
-//          else {
-//             conditionalSeries.push(node.expression)
-//          }
-//       }
-//       else if (t.isJSXText(node)) {
-//          const stringLiteral = transformJSXText(node)
-//          if (stringLiteral) {
-//             if (conditionalSeries) {
-//                newChildren.push(createIfSeriesElement(conditionalSeries))
-//                conditionalSeries = undefined;
-//             }
-//             newChildren.push(stringLiteral)
-//          }
-//       }
-//       else if (conditionalSeries) {
-//          console.log('uh oh', node)
-//          newChildren.push(createIfSeriesElement(conditionalSeries))
-//          conditionalSeries = undefined;
-//          newChildren.push(node)
-//       } else {
-//          newChildren.push(node)
-//       }
-//    }
-//    if (conditionalSeries) newChildren.push(createIfSeriesElement(conditionalSeries))
-//    console.log('oldchildren', children.length)
-//    console.log('newChildren', newChildren.length)
-//    // return children
-//    return newChildren;
-// }
 
 function createIfSeries(series) {
    return t.callExpression(t.identifier('_$$IfSeries'), [t.ArrayExpression(series)])

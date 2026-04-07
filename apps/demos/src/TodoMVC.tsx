@@ -15,10 +15,20 @@ type IonicTodo = Ionic<Todo>
 
 const ionicTodos = (todos: Todo[]) => ionic(todos, { [EACH]: { '-as': ionic } })
 
+function Hi() {
+   const something = ionicTodos([]);
+   (
+      <div></div>
+      <div></div>
+   )
+}
+
+
 export function TodoMVC() {
 
    const ætodos = ion(ionicTodos(getTodos()))
    const æview = ion('all' as keyof typeof filters)
+
 
    const filters = {
       all: (todos: Todo[]) => todos,
@@ -31,7 +41,7 @@ export function TodoMVC() {
    const ætodoCount = ion(() => ætodos().length)
 
    // dev.logAtoms(æremaining)
-   
+
    watch(ætodoCount, () => {
       console.log('@&@ todoCount', ætodoCount())
    })

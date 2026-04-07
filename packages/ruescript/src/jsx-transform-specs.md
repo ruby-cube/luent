@@ -1,4 +1,6 @@
- - [ ] Render functions that are block bodied will auto-return root level jsx expressions
+### Render function implicit return
+Render functions are functions that contain jsx expressions at the root level (not assigned to a variable or passed into an argument).
+- [ ] Render functions that are block bodied will auto-return root level jsx expressions
 
  ```tsx
 const renderTodo = (todo) => {
@@ -13,13 +15,6 @@ const renderTodo = (todo) => {
    return <li>
       {something}
    </li>
-}
-
-const renderTodo = (todo) => {
-   const something = getSomething();
-   return makeElement('li', {
-      children: something
-   })
 }
 ```
 
@@ -43,38 +38,10 @@ const renderTodo = (todo) => {
       {something}
    </li>
 }
-
-const renderTodo = (todo) => {
-   const something = getSomething();
-   return makeElement('li', {
-      children: something
-   })
-   return makeElement('li', {
-      children: something
-   })
-}
 ```
 
 
-### JSX fragment shorthand
-- transform jsx templates encased in extraneous parentheses (make sure transform is comment-safe):
-
-```
-(
-   <div></div>
-   <div></div>
-)
-```
-
--->
-
-```
-<>
-   <div></div>
-   <div></div>
-</>
-```
-
+### Slot transform
 - slots are transformed into render functions-- all expressions are auto wrapped in a jsx-fragment
 ```tsx
 
@@ -100,7 +67,8 @@ const renderTodo = (todo) => {
 
 ```
 
-- statments are wrapped in double curly braces
+### JSX Statements
+- statements are wrapped in double curly braces
 - statements cannot appear after jsx expressions
 Note: Use cases are extremely rare--only useful for component slots that render slot conditionally
 ```tsx
@@ -157,10 +125,7 @@ Note: Use cases are extremely rare--only useful for component slots that render 
       </label>
    </>
 }} />
-
-
 ```
-
 
 ```tsx
 <li>
@@ -180,12 +145,52 @@ Note: Use cases are extremely rare--only useful for component slots that render 
 }} />
 ```
 
-- the last argument of template functions are normalized to render functions
+### Implicit Template Render Functions & JSX Fragment
+- [ ] the last argument of template functions are normalized to render functions with jsx fragment as root
 ```tsx
 <li>
    {If(something,
       <div></div>
+      <div></div>
    )}
+</li>
+
+<li>
+   {If(something, () => {
+      return <><div></div>
+         <div></div>
+      </>
+   })}
+</li>
+```
+
+```tsx
+<li>
+   {If(something, 
+      hello world
+   )}
+</li>
+
+<li>
+   {If(something, () => {
+      return <>hello world</>
+   })}
+</li>
+
+<li>
+   {If(something, 
+      {If(other,
+         <div>hi</div>
+      )}
+   )}
+</li>
+
+<li>
+   {If(something, () => {
+      return <>{If(other,
+         <div>hi</div>
+      )}</>
+   })}
 </li>
 
 <li>
@@ -193,41 +198,6 @@ Note: Use cases are extremely rare--only useful for component slots that render 
       return <div></div>
    })}
 </li>
-```
-```tsx
-<li>
-   {If(something, () =>
-      <div></div>
-   )}
-</li>
-
-(no transform needed)
-```
-
-- last argument wrapped in parentheses are transformed into jsx fragments
-```tsx
-<li>
-   {If(something, (
-      <div></div>
-   ))}
-</li>
-
-<li>
-   {If(something, () => {
-      return <>
-         <div></div>
-      </>
-   })}
-</li>
-```
-
-### Namespaced attributes (Babel transform)
-```tsx
-<div mu:value={something} mu:frog={frog}>
-```
--->
-```tsx
-<div mu:ø={{ value: something, frog: frog }}>
 ```
 
 
@@ -242,7 +212,47 @@ const frog;
 <div frog={frog}></div>
 ```
 
+### Component Tag
+```tsx
+function Compo() {
+   <Component as={exposed}>
+      <div></div>
+   </Component>
+}
+
+function Compo() {
+   return Component.as(exposed)(<>
+      <div></div>
+   </>)
+}
+```
+
+
 ### Conformance checklist
 | Area | Example input | Expected transform behavior | Must diagnostic? |
 |---|---|---|---|
 | JSX shorthand | parenthesized multi-node JSX | rewrites to fragment shorthand; comments preserved | No |
+
+
+
+### Cancelled
+
+---
+
+### JSX fragment shorthand
+- [ ] transform jsx templates encased in extraneous parentheses (make sure transform is comment-safe):
+```
+(
+   <div></div>
+   <div></div>
+)
+```
+
+-->
+
+```
+<>
+   <div></div>
+   <div></div>
+</>
+```

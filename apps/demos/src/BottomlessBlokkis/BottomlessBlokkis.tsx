@@ -1,11 +1,10 @@
-import { atDiscard, createRoot, template } from "@rue/luent";
-import { ionic, Ion, Ionic } from "@rue/quarky";
+import { atDiscard, Component } from "@rue/luent";
+import { ionic, ion, Ionic } from "@rue/quarky";
 import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
 import './BottomlessBlokkis.css'
 
-const ion = Ion
 
 const BOARD_COLUMNS = 20
 const BOARD_ROWS = 20
@@ -72,7 +71,7 @@ export function BottomlessBlokkis() {
             blokk.moveRight()
         }
     }
-
+    
     function isFlushRight(blokk: Ionic<BlokkModel>) {
         return blokk.rightEdge === BOARD_COLUMNS
     }
@@ -85,7 +84,7 @@ export function BottomlessBlokkis() {
         return blokk.leftEdge === 0
     }
 
-    return template(
+    return Component(
         <div class='container'>
             <div class='header'>
                 <h1>Bottomless Blokkis</h1>

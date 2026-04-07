@@ -1,4 +1,4 @@
-import { template, css } from "@rue/luent";
+import { Component, css } from "@rue/luent";
 import { ion, SYNC, watch, Finitron } from "@rue/quarky";
 import "./style.css"
 
@@ -58,7 +58,7 @@ export function TrafficLight() {
       });
    }
 
-   return template(
+   return Component(
       <div style="place-items: center">
          <div class="traffic-light-container">
             <div

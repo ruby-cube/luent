@@ -498,6 +498,17 @@ function init(modules) {
          return snapshot.getText(0, snapshot.getLength())
       }
 
+      function getSourceTextForFile(fileName) {
+         const normalized = normalizeAbsolute(fileName)
+         if (typeof host.getScriptSnapshot === 'function') {
+            const snapshot = host.getScriptSnapshot(normalized) || host.getScriptSnapshot(fileName)
+            if (snapshot) {
+               return snapshot.getText(0, snapshot.getLength())
+            }
+         }
+         return ts.sys.readFile(normalized) || ts.sys.readFile(fileName) || ''
+      }
+
       function toOriginalSugarFileName(fileName) {
          if (typeof fileName !== 'string') return fileName
          if (fileName.endsWith('.rxs.tsx')) return fileName.slice(0, -4)
@@ -1054,6 +1065,15 @@ function init(modules) {
       }
 
       function withTransientLanguageService(fileName, fn) {
+         const transient = createTransientLanguageService(fileName)
+         if (transient && transient.languageService && transient.virtualFileName) {
+            return fn({
+               ls: transient.languageService,
+               transformed: transient.transformResult,
+               virtualFileName: transient.virtualFileName,
+            })
+         }
+
          const transformed = getTransformForSugarFile(fileName)
          const virtualFileName = fileName + getVirtualExtension(fileName)
          const configPath = getConfigPath()

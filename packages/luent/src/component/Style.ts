@@ -8,23 +8,8 @@ const genUID = UIDGenerator(11)
 
 
 // TODO: dynamic styling?
-export function Style(strings: TemplateStringsArray, ...values: any[]): string {
-   const cssText = composeCSSText(strings, values)
-   const id = genUID()
-   const style = insertStyle(cssText, id)
-   const flask = getFlask()
-   atDiscard(() => {
-      if (isTransitioningOut(flask)) {
-         queueTask(() => {
-            flask.onDiscard(() => {
-               style.remove()
-            })
-         })
-         return;
-      }
-      style.remove(); // TODO: wait till end of transition to remove
-   })
-   return ''
+function declareStyles(strings: TemplateStringsArray, ...values: any[]): string {
+   return composeCSSText(strings, values)
 }
 
 function insertStyle(cssText: string, id: string) {
@@ -40,5 +25,22 @@ function composeCSSText(strings: TemplateStringsArray, values: string[]) {
    return strings.reduce((cssText, string, i) => cssText + string + (i < values.length ? values[i] : ''), '')
 }
 
-export const css = Style
-export const style = Style
+export const css = declareStyles
+export const style = declareStyles
+
+export function Style(cssText: string) {
+   const id = genUID()
+   const style = insertStyle(cssText, id)
+   const flask = getFlask()
+   atDiscard(() => {
+      if (isTransitioningOut(flask)) {
+         queueTask(() => {
+            flask.onDiscard(() => {
+               style.remove()
+            })
+         })
+         return;
+      }
+      style.remove(); // TODO: wait till end of transition to remove
+   })
+}

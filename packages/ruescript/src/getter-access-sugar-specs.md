@@ -22,7 +22,7 @@ function Counter({ showFractions@ }) {
 
    function doSomethingElse() {
       if (obj) {
-         console.log('name', obj.name) // should throw: Object is possibly 'undefined'.ts(2532)
+         console.log('name', obj.name)
          watch(obj@, () => {
             console.log('nothing', obj.name) // should throw: Object is possibly 'undefined'.ts(2532)
          })

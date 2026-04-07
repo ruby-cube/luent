@@ -10,7 +10,6 @@
     "main": "./src/index",
     "dependencies": {
         "@rue/flask": "workspace:*",
-        "@rue/thread": "workspace:*",
         "@rue/utils": "workspace:*"
     },
     "devDependencies": {

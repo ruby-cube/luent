@@ -1,4 +1,5 @@
-import { Await, template, For, Meanwhile, Nonce, createRoot } from "@rue/luent";
+// @ts-nocheck
+import { Await, For, Meanwhile, Nonce, createRoot } from "@rue/luent";
 import { AsyncIon, Ion, isPending, o, ion } from "@rue/quarky";
 
 // based on Solid.js/Remix demo
@@ -48,7 +49,8 @@ export function TestAsyncSelect() {
                </select>
 
                <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
-                  Selection: {$activeCity}, {(o.await($cities, $activeState))}
+                  {/* Selection: {$activeCity}, {(o.await($cities, $activeState))} */}
+                  Selection: {$activeCity}, {(await $cities.pending, $activeState())}
                </p>
             </>
          )}

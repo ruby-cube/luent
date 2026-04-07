@@ -1,4 +1,4 @@
-import { For, FromTag, HandleEvent, template } from "@rue/luent";
+import { Component, For, FromTag } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 import "./Blokk.css"
 
@@ -21,14 +21,14 @@ export function Blokk(setup: FromTag<{
    const ætranslate = () => `translate(${æshiftX() * CELL_SIZE}px, ${æshiftY() * CELL_SIZE}px)`
    const ærotate = () => `rotate(${degrees[ærotation()]}deg)`
 
-   return template(
+   return Component(
       <div class='blokk-base' style={(`
             --background-color: ${æcolor()};
             --cell-size: ${CELL_SIZE}px;
             --grid-size: ${GRID_SIZE}px;
             --grid-gap: ${gap}px;
             transform: ${ætranslate()} ${ærotate()};
-        `)}
+            `)}
          on:mouseenter={e => { console.log('ENTER'); emit.mouseenter?.(e) }}
          on:mouseleave={e => { console.log('LEAVE'); emit.mouseleave?.(e) }}
       >

@@ -39,7 +39,7 @@ declare global {
    type Booleanish = boolean | "true" | "false";
 
    namespace L {
-
+     
       // ----------------------------------------------------------------------
       // #region: Event Objects
       // ----------------------------------------------------------------------
@@ -1863,6 +1863,9 @@ declare global {
       type DOMAttributes<T> = {
          children?: Luent.JSXNode | undefined | null;
       } & Events<T>
+
+
+
    }
 }
 
@@ -1893,6 +1896,7 @@ declare global {
 
 
    namespace JSX {
+      interface Element { }
 
       // important for converting component input types to attribute types
       type LibraryManagedAttributes<C, P> = LuentAttributes<C, P>;
@@ -1911,10 +1915,11 @@ declare global {
       interface LuentElements {
          '!--': {}; //comments
          'o--portal': PortalNodeInput & { children: Luent.Slot }
-
+         
+         'o--style': L.DetailedHTMLProps<L.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', text: string }
          'o--link': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
-         'o--head': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
-         'o--body': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
+         'o--head': L.DetailedHTMLProps<L.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
+         'o--body': L.DetailedHTMLProps<L.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
          'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
          'create-view': { children: ConditionalRenderKit[] }
          'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<Booleanish> }
@@ -2120,3 +2125,19 @@ declare global {
    }
 }
 
+//$$$
+// React.JSX needs to point to global.JSX to keep global module augmentations intact.
+// But we can't access global.JSX so we need to create these aliases instead.
+// Once the global JSX namespace will be removed we replace React.JSX with the contents of global.JSX
+type GlobalJSXElementType = JSX.ElementType;
+interface GlobalJSXElement extends JSX.Element { }
+// interface GlobalJSXElementClass extends JSX.ElementClass { }
+// interface GlobalJSXElementAttributesProperty extends JSX.ElementAttributesProperty { }
+// interface GlobalJSXElementChildrenAttribute extends JSX.ElementChildrenAttribute { }
+
+// type GlobalJSXLibraryManagedAttributes<C, P> = JSX.LibraryManagedAttributes<C, P>;
+
+// interface GlobalJSXIntrinsicAttributes extends JSX.IntrinsicAttributes { }
+// interface GlobalJSXIntrinsicClassAttributes<T> extends JSX.IntrinsicClassAttributes<T> { }
+
+// interface GlobalJSXIntrinsicElements extends JSX.IntrinsicElements { }

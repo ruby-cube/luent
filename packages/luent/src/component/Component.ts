@@ -1,65 +1,70 @@
-import { AnyObject, Falsey } from "@rue/types";
+import { AnyObject } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
-import {  toValue, watch } from "@rue/quarky";
+import { toValue, watch } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
 import { initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
-import { MaybeIon, toInput } from "./Input";
+import { toInput } from "./Input";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { analyzeAttributes } from "../element/makeElement";
 import { setUpHooks } from "../flask/template-hooks";
-import { getActiveFlask, getFlask } from "@rue/flask";
+import { getFlask } from "@rue/flask";
 
 
 
 
 // export type Slot = JSXNode
-export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component | StyledComponent : (setup?: P) => Component|StyledComponent
+export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
 
 export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
 
 
-type StyledComponent<T = {}> = {
-   exposed: T;
-   jsxNodes: RawJSXNode[];
-   ref: T extends {} ? <C>(referent: C) => Component<C> : never,
-}
+// type StyledComponent<T = {}> = {
+//    exposed: T;
+//    jsxNodes: RawJSXNode[];
+//    ref: T extends {} ? <C>(referent: C) => Component<C> : never,
+// }
 
-export interface Component<T = {}> {
+export type Component<T = {}> ={
    exposed: T;
    jsxNodes: RawJSXNode[];
-   ref: T extends {} ? <C>(referent: C) => Component<C> : never,
-   style: (css: string) => StyledComponent<T>
+   // ref: T extends {} ? <C>(referent: C) => Component<C> : never,
+   // style: (css: string) => StyledComponent<T>
 }
 
 type JSXTemplate = RawJSXNode
 
 // TODO: accept a third paramenter for mountTeleported
-// compiler macro to transform jsx template into render function
-export function template(template: JSXTemplate): Component {
+export function Component(template: JSX.Element): Component {
    const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
-   function ref<T>(model: T): Component<T> {
-      return {
-         exposed: model,
-         jsxNodes
-      }
-   }
-   return {
-      exposed: undefined, // TODO: make read only
-      jsxNodes,
-      ref,
-      style: (arg: any) => {
-         // Style(strings, ...values)
-         return {
-            exposed: undefined,
-            jsxNodes,
-            ref
-         }
-      }
-   }
 
+   return {
+      get exposed() { return undefined },
+      jsxNodes,
+   }
 }
+
+Component.as = function expose<T>(exposed: T) {
+   return function Component(template: JSX.Element): Component<T> {
+      const jsxNodes = normalizeToArray(toValue(template ? unnestComponent(template) : undefined)) as RawJSXNode[]
+
+      return {
+         get exposed() { return exposed as T },
+         jsxNodes,
+      }
+   }
+}
+
+
+
+// export function Component<T>(setup: FromTag<{ as?: T }>): Component<T> {
+//    const { Slot, as } = setup
+//    return {
+//       exposed: as as T,
+//       jsxNodes: normalizeToArray(toValue(Slot ? unnestComponent(Slot()) : undefined)) as RawJSXNode[]
+//    }
+// }
 
 
 

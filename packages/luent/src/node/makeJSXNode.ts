@@ -40,6 +40,7 @@ export type RawJSXNode =
    | InnerHTMLKit
    | null
    | undefined
+   | JSX.Element
 
 // export type JSXNode =
 //    | JSX.Element
