@@ -2,18 +2,8 @@
    "name": "@rue/ruescript",
    "private": true,
    "description": "",
-   "exports": {
-      ".": {
-         "default": "./src/index.ts"
-      },
-      "./compile": {
-         "import": "./src/index.ts",
-         "require": "./compile.cjs",
-         "default": "./src/index.ts"
-      }
-   },
-   "scripts": {
-   },
+   "main": "./src/index",
+   "module": "./src/index",
    "dependencies": {
       "@rue/utils": "workspace:*",
       "@types/estree": "^1.0.8",

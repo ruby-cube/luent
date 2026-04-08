@@ -125,7 +125,7 @@ class RXSPreprocessor {
    }
 }
 
-export function unwriteGetVariableDeclarations(string: string, edits: Edit[] = []) {
+export function unwriteGetDeclarations(string: string, edits: Edit[] = []) {
    let result = string
    for (let i = edits.length - 1; i >= 0; i--) {
       const edit = edits[i]
@@ -134,14 +134,6 @@ export function unwriteGetVariableDeclarations(string: string, edits: Edit[] = [
    return result
 }
 
-export function unwriteGetPropertyColonNotation(string: string, edits: Edit[] = []) {
-   let result = string
-   for (let i = edits.length - 1; i >= 0; i--) {
-      const edit = edits[i]
-      result = result.slice(0, edit.pos) + edit.original + result.slice(edit.pos + edit.original.length)
-   }
-   return result
-}
 
 
 

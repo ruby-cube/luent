@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "plugins": [
-      { "name": "typescript-plugin-css-modules" },
-      { "name": "@rue/tsserver-plugin-ruescript" }
+      { "name": "typescript-plugin-css-modules" }
     ],
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -71,6 +70,7 @@
     "packages",
     "apps",
     "**/src/*", 
-    "tests"  
-, "plugins/mu-linting"   ]
+    "tests",
+    "plugins"
+   ]
 }

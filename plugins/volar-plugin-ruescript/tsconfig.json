@@ -1,0 +1,10 @@
+{
+	"extends": "../tsconfig.language-server.json",
+	"compilerOptions": {
+		"outDir": "out",
+		"rootDir": "src"
+	},
+	"include": [
+		"src"
+	],
+}

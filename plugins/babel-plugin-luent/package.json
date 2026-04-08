@@ -3,15 +3,8 @@
   "private": true,
   "description": "",
   "type": "module",
-  "main": "./index.cjs",
+  "main": "./index.js",
   "module": "./index.js",
-  "exports": {
-    ".": {
-      "require": "./index.cjs",
-      "import": "./index.js",
-      "default": "./index.js"
-    }
-  },
   "author": "Ruby Yi Wang",
   "license": "MIT"
 }

@@ -18,7 +18,7 @@
   "contributes": {
     "semanticTokenTypes": [
       {
-        "id": "rxsRefAccess",
+        "id": "rxsGetterAccess",
         "superType": "operator",
         "description": "The `@` ref-access marker in rxs sugar syntax."
       }

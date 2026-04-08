@@ -1,53 +1,54 @@
 {
-  "name": "vscode-ruescript",
-  "displayName": "RueScript for VS Code",
-  "description": "RueScript language support via Volar TS plugin plus syntax highlighting for Rue-specific tokens.",
-  "version": "0.2.0",
-  "publisher": "local",
-  "main": "./extension.js",
-  "engines": {
-    "vscode": "^1.90.0"
-  },
-  "categories": [
-    "Programming Languages"
-  ],
-  "activationEvents": [
-    "onLanguage:typescript",
-    "onLanguage:typescriptreact"
-  ],
-  "contributes": {
-    "typescriptServerPlugins": [
-      {
-        "name": "@rue/tsserver-plugin-ruescript",
-        "enableForWorkspaceTypeScriptVersions": true,
-        "languages": [
-          "typescript",
-          "typescriptreact"
-        ]
-      }
-    ],
-    "semanticTokenTypes": [
-      {
-        "id": "rxsRefAccess",
-        "superType": "operator",
-        "description": "The @ ref-access marker in RueScript syntax."
-      }
-    ],
-    "grammars": [
-      {
-        "path": "./syntaxes/rxs-get.injection.tmLanguage.json",
-        "scopeName": "rxs.get.injection",
-        "injectTo": [
-          "source.tsx",
-          "source.ts"
-        ]
-      }
-    ]
-  },
-  "extensionDependencies": [
-    "vscode.typescript-language-features"
-  ],
-  "dependencies": {
-    "@rue/tsserver-plugin-ruescript": "workspace:*"
-  }
+   "name": "vscode-ruescript",
+   "displayName": "RueScript for VS Code",
+   "description": "RueScript language support via Volar TS plugin plus syntax highlighting for Rue-specific tokens.",
+   "version": "0.2.0",
+   "publisher": "local",
+   "main": "./extension.js",
+   "engines": {
+      "vscode": "^1.90.0"
+   },
+   "categories": [
+      "Programming Languages"
+   ],
+   "activationEvents": [
+      "onLanguage:typescript",
+      "onLanguage:typescriptreact"
+   ],
+   "contributes": {
+      "languages": [
+         {
+            "id": "ruescript",
+            "extensions": [
+               ".rxs"
+            ]
+         }
+      ],
+      "semanticTokecnTypes": [
+         {
+            "id": "rxsGetterAccess",
+            "superType": "operator",
+            "description": "The @ getter-access operator in RueScript syntax."
+         }
+      ],
+      "grammars": [
+         {
+            "path": "./syntaxes/rxs-get.injection.tmLanguage.json",
+            "scopeName": "rxs.get.injection",
+            "injectTo": [
+               "source.tsx",
+               "source.ts"
+            ]
+         }
+      ]
+   },
+   "extensionDependencies": [
+      "vscode.typescript-language-features"
+   ],
+   "dependencies": {
+      "@types/vscode": "^1.115.0",
+      "@volar/language-server": "~2.4.28",
+      "@volar/vscode": "^2.4.28",
+      "vscode-languageclient": "^9.0.1"
+   }
 }

@@ -28,7 +28,6 @@
   },
   "devDependencies": {
     "@rue/eslint-plugin-mu": "workspace:*",
-    "@rue/tsserver-plugin-ruescript": "workspace:*",
     "@typescript-eslint/parser": "^8.46.0",
     "@playwright/test": "^1.58.2",
     "@types/jsdom": "^28.0.1",

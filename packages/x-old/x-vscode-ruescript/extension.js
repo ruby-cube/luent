@@ -30,11 +30,11 @@ function collectAtTokens(code) {
 }
 
 // ── Legend ────────────────────────────────────────────────────────────────────
-//   'rxsRefAccess' → custom type for the `@` ref-access marker; default colour
+//   'rxsGetterAccess' → custom type for the `@` ref-access marker; default colour
 //                    is set in the workspace's .vscode/settings.json via
 //                    editor.semanticTokenColorCustomizations
 //
-const LEGEND = new vscode.SemanticTokensLegend(['rxsRefAccess'], [])
+const LEGEND = new vscode.SemanticTokensLegend(['rxsGetterAccess'], [])
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 /** @type {vscode.DocumentSemanticTokensProvider} */
@@ -48,7 +48,7 @@ const provider = {
     for (const t of atTokens) {
       const startPos = document.positionAt(t.start)
       const endPos = document.positionAt(t.start + t.length)
-      builder.push(new vscode.Range(startPos, endPos), 'rxsRefAccess', [])
+      builder.push(new vscode.Range(startPos, endPos), 'rxsGetterAccess', [])
     }
 
     return builder.build()

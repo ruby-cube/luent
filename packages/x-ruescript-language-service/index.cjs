@@ -1,5 +1,4 @@
-const { compileRueScript } = require('@rue/ruescript/compile')
-
+// FIX: AI Slop
 const FULL_FEATURES = {
   verification: true,
   completion: true,
@@ -37,7 +36,7 @@ function createSnapshot(text) {
 }
 
 function transformRueScriptForLanguageService(source) {
-  const compiled = compileRueScript('virtual.rxs', source)
+  const compiled = transpileRueScript('virtual.rxs', source)
   if (compiled && typeof compiled.code === 'string') {
     return compiled.code
   }
