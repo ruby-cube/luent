@@ -1,5 +1,7 @@
 packages:
  - 'packages/**'
+ - '!packages/x-old/x-tsserver-plugin-ruescript/**'
+ - '!packages/x-old/x-vscode-ruescript/**'
  - 'plugins/**'
  - 'apps/**'
  - 'tests/**'

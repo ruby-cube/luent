@@ -2,30 +2,25 @@
    "name": "@rue/ruescript",
    "private": true,
    "description": "",
-   "module": "./index.mjs",
-   "main": "./index.cjs",
    "exports": {
       ".": {
-         "import": "./index.mjs",
-         "require": "./index.cjs",
-         "default": "./index.mjs"
+         "default": "./src/index.ts"
       },
-      "./tsserver": {
-         "require": "./tsserver.cjs",
-         "default": "./tsserver.cjs"
-      },
-      "./transform": {
-         "import": "./scripts/transform-rxs-sugar.mjs",
-         "require": "./index.cjs"
+      "./compile": {
+         "import": "./src/index.ts",
+         "require": "./compile.cjs",
+         "default": "./src/index.ts"
       }
    },
    "scripts": {
-      "typecheck": "node ./scripts/rxs-tsc.mjs -p ../../tsconfig.json",
-      "test:position-mapping": "pnpm exec vitest run src/__tests__/position-mapping.test.ts",
-      "emit:transform": "node ./scripts/emit-transformed-rxs.mjs"
    },
    "dependencies": {
-      "@rue/utils": "workspace:*"
+      "@rue/utils": "workspace:*",
+      "@types/estree": "^1.0.8",
+      "@types/estree-jsx": "^1.0.5",
+      "esrap": "^2.2.4",
+      "oxc-parser": "^0.124.0",
+      "zimmerframe": "^1.1.4"
    },
    "devDependencies": {
       "@rue/types": "workspace:*"

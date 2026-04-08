@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import tsParser from '@typescript-eslint/parser'
-import { createRXSProcessor } from './packages/ruescript/scripts/eslint-rxs-processor.mjs'
+// import { createRXSProcessor } from './packages/ruescript/scripts/eslint-rxs-processor.mjs'
 
 const require = createRequire(import.meta.url)
 const muRules = require('@rue/eslint-plugin-mu')
@@ -14,19 +14,19 @@ const defaultIgnores = [
 ]
 
 export default [
-  {
-    files: ['**/*.rxs'],
-    ignores: defaultIgnores,
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        sourceType: 'module',
-        ecmaFeatures: { jsx: true },
-      },
-    },
-    processor: createRXSProcessor(),
-    rules: {},
-  },
+//   {
+//     files: ['**/*.rxs'],
+//     ignores: defaultIgnores,
+//     languageOptions: {
+//       parser: tsParser,
+//       parserOptions: {
+//         sourceType: 'module',
+//         ecmaFeatures: { jsx: true },
+//       },
+//     },
+//     processor: createRXSProcessor(),
+//     rules: {},
+//   },
   {
     files: ['apps/play/mu-linting/**/*.{ts,tsx}'],
     ignores: [...defaultIgnores, 'apps/play/mu-linting/.tmp-run/**'],

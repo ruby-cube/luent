@@ -1,6 +1,8 @@
 ## RueScript Preprocessing Specs
 Transforms invalid JavaScript to valid JavaScript in preparation for parsing and AST transforms
 
+Note: We do not check if patterns are in strings, comments, or JSXText at this stage. If transform occurs in one of these contexts, they will be reverted in postprocess. We do this to avoid implementing a custom parser for invalid tsx.
+
 ### `get` variable declaration transform
 
 - search for the pattern: get[1][2][3]=

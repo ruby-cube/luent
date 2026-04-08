@@ -2,12 +2,14 @@
   "compilerOptions": {
     "plugins": [
       { "name": "typescript-plugin-css-modules" },
-      { "name": "@rue/tsserver-plugin-ruescript", "semanticCooldownMs": 0 }
+      { "name": "@rue/tsserver-plugin-ruescript" }
     ],
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "allowArbitraryExtensions": true,
     "allowSyntheticDefaultImports": true,
     "lib": [
@@ -52,6 +54,9 @@
         "./packages/quarky/src/core/index.ts"
       ],
       "@rue/ruescript": [
+        "./packages/ruescript/src/index.ts"
+      ],
+      "@rue/ruescript/compile": [
         "./packages/ruescript/src/index.ts"
       ],
       "@rue/flask": [

@@ -1,27 +1,19 @@
-# RueScript For VS Code
+# RueScript for VS Code
 
-Local VS Code extension that provides syntax highlighting for RueScript sugar in TS/TSX files.
+This extension wires RueScript language support into TypeScript using a Volar-based TS Server plugin.
 
-## What it highlights
+## Capabilities
 
-**Via semantic tokens** (primary — works for all themes):
+- TypeScript language features for `.rxs` files through Volar + TS Server plugin:
+  - hover
+  - completion
+  - go to definition / references
+  - rename
+  - diagnostics
+- Semantic token for RueScript `@` ref access markers.
+- TextMate injection for `get` keyword highlighting in RueScript patterns.
 
-- `get` in `get count = ion(0)` — classified as `keyword`
-- Trailing `@` on reactive identifiers (`count@`, `showFractions@`, `kit.halfCount@`) — classified as `operator`
+## Notes
 
-**Via TextMate grammar injection** (fallback for themes without semantic token support):
-
-- `get` in `get varname =`, `get varname:`, and `get varname(...)` forms
-
-## Install
-
-1. Package the extension:
-
-```bash
-cd plugins/vscode-ruescript
-npx @vscode/vsce package --allow-missing-repository
-```
-
-2. In VS Code: **Extensions** panel → `...` menu → **Install from VSIX...**
-3. Pick the generated `.vsix` file.
-4. Reload VS Code window.
+- Formatting and linting integration are intentionally not provided yet.
+- Use workspace TypeScript (`typescript.tsdk`) for best results.

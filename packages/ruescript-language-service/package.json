@@ -1,0 +1,16 @@
+{
+  "name": "@rue/ruescript-language-service",
+  "private": true,
+  "version": "0.0.0",
+  "type": "commonjs",
+  "main": "./index.cjs",
+  "dependencies": {
+    "@rue/ruescript": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "require": "./index.cjs",
+      "default": "./index.cjs"
+    }
+  }
+}

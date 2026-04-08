@@ -1,8 +1,8 @@
 {
   "name": "vscode-ruescript",
-  "displayName": "RueScript for VSCode",
-  "description": "Highlights RueScript `get` declarations as keywords and `@` markers as operators in TS/TSX files.",
-  "version": "0.1.0",
+  "displayName": "RueScript for VS Code",
+  "description": "RueScript language support via Volar TS plugin plus syntax highlighting for Rue-specific tokens.",
+  "version": "0.2.0",
   "publisher": "local",
   "main": "./extension.js",
   "engines": {
@@ -16,11 +16,21 @@
     "onLanguage:typescriptreact"
   ],
   "contributes": {
+    "typescriptServerPlugins": [
+      {
+        "name": "@rue/tsserver-plugin-ruescript",
+        "enableForWorkspaceTypeScriptVersions": true,
+        "languages": [
+          "typescript",
+          "typescriptreact"
+        ]
+      }
+    ],
     "semanticTokenTypes": [
       {
         "id": "rxsRefAccess",
         "superType": "operator",
-        "description": "The `@` ref-access marker in rxs sugar syntax."
+        "description": "The @ ref-access marker in RueScript syntax."
       }
     ],
     "grammars": [
@@ -33,5 +43,11 @@
         ]
       }
     ]
+  },
+  "extensionDependencies": [
+    "vscode.typescript-language-features"
+  ],
+  "dependencies": {
+    "@rue/tsserver-plugin-ruescript": "workspace:*"
   }
 }

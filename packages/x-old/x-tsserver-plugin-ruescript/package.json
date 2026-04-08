@@ -5,7 +5,6 @@
   "main": "./index.cjs",
   "type": "commonjs",
   "dependencies": {
-    "@rue/ruescript-language-service": "workspace:*",
-    "@volar/typescript": "^2.4.28"
+    "@rue/ruescript": "workspace:*"
   }
 }
