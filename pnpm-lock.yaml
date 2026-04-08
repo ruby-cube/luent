@@ -567,6 +567,9 @@ importers:
 
   plugins/volar-plugin-ruescript:
     dependencies:
+      '@rue/ruescript':
+        specifier: workspace:*
+        version: link:../../packages/ruescript
       '@volar/language-core':
         specifier: ~2.4.0
         version: 2.4.28

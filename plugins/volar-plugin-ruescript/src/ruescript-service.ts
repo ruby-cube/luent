@@ -34,7 +34,7 @@ export function createRueScriptService(): LanguageServicePlugin {
 //                         return;
 //                      }
 //                      const virtualCode = context.language.scripts.get(decoded[0])?.generated?.embeddedCodes.get(decoded[1]);
-//                      if (!(virtualCode instanceof Html1VirtualCode)) {
+//                      if (!(virtualCode instanceof RueScriptVirtualCode)) {
 //                         return;
 //                      }
 //                      const styleNodes = virtualCode.htmlDocument.roots.filter(root => root.tag === 'style');

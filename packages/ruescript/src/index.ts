@@ -5,7 +5,12 @@ import { printTSX } from "./4-generate"
 
 export function transpileRueScript(file: string, source: string) {
    const { code, edits } = preprocessRXS(source)
-   const ast = parseRXS(file, code)
-   const tsxTree = transformRXS(ast.program, edits)
-   return printTSX(tsxTree)
+   const preTree = parseRXS(file, code)
+   const transformedTree = transformRXS(preTree.program, edits)
+   const generated = printTSX(transformedTree)
+   return {
+      source,
+      transpiled: { ast: transformedTree, code: generated.code },
+      map: generated.map
+   }
 }

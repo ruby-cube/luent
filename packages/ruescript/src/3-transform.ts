@@ -38,6 +38,11 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
          }
       }
    })
+
+   // - adjust positions to source positions
+   // - unwrite invalid preprocessing
+   postprocess(transformed, edits) 
+
    console.log('ast', ast)
    console.log('transformed === ast', transformed === ast)
    return transformed

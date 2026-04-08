@@ -4,8 +4,7 @@ import { create as createEmmetService } from 'volar-service-emmet';
 import { create as createHtmlService } from 'volar-service-html';
 import { create as createTypeScriptServices } from 'volar-service-typescript';
 import {createRueScriptService} from './ruescript-service'
-import { URI } from 'vscode-uri';
-import { ruescriptLanguagePlugin } from './languagePlugin';
+import { ruescriptLanguagePlugin } from './language-plugin';
 
 // FIX: Volar starter
 

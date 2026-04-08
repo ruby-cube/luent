@@ -18,6 +18,7 @@
 		"volar-service-emmet": "volar-2.4",
 		"volar-service-html": "volar-2.4",
 		"volar-service-typescript": "volar-2.4",
-		"vscode-uri": "^3.0.8"
+		"vscode-uri": "^3.0.8",
+      "@rue/ruescript": "workspace:*"
 	}
 }
