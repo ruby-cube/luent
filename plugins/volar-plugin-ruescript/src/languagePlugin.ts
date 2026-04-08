@@ -1,12 +1,11 @@
 import { CodeMapping, forEachEmbeddedCode, LanguagePlugin, VirtualCode } from '@volar/language-core';
 import type { TypeScriptExtraServiceScript } from '@volar/typescript';
 import type * as ts from 'typescript';
-import * as html from 'vscode-html-languageservice';
 import { URI } from 'vscode-uri';
 
 // FIX: Volar starter
 
-export const html1LanguagePlugin: LanguagePlugin<URI> = {
+export const ruescriptLanguagePlugin: LanguagePlugin<URI> = {
 	getLanguageId(uri) {
 		if (uri.path.endsWith('.html1')) {
 			return 'html1';

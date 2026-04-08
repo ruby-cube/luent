@@ -14,9 +14,6 @@ importers:
       '@rue/eslint-plugin-mu':
         specifier: workspace:*
         version: link:plugins/eslint-plugin-mu
-      '@rue/tsserver-plugin-ruescript':
-        specifier: workspace:*
-        version: link:plugins/tsserver-plugin-ruescript
       '@types/jsdom':
         specifier: ^28.0.1
         version: 28.0.1
@@ -462,12 +459,6 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/ruescript-language-service:
-    dependencies:
-      '@rue/ruescript':
-        specifier: workspace:*
-        version: link:../ruescript
-
   packages/types:
     devDependencies:
       '@types/node':
@@ -515,11 +506,34 @@ importers:
         specifier: ^5.5.4
         version: 5.9.3
 
+  packages/x-old/tsserver-plugin-ruescript:
+    dependencies:
+      '@rue/ruescript-language-service':
+        specifier: workspace:*
+        version: link:../../x-ruescript-language-service
+      '@volar/typescript':
+        specifier: ^2.4.28
+        version: 2.4.28
+
   packages/x-old/vine:
     devDependencies:
       '@rue/types':
         specifier: workspace:*
         version: link:../../types
+
+  packages/x-old/x-tsserver-plugin-ruescript:
+    dependencies:
+      '@rue/ruescript':
+        specifier: workspace:*
+        version: link:../../ruescript
+
+  packages/x-old/x-vscode-ruescript: {}
+
+  packages/x-ruescript-language-service:
+    dependencies:
+      '@rue/ruescript':
+        specifier: workspace:*
+        version: link:../ruescript
 
   plugins/babel-plugin-luent: {}
 
@@ -528,15 +542,6 @@ importers:
       typescript:
         specifier: '*'
         version: 5.9.3
-
-  plugins/tsserver-plugin-ruescript:
-    dependencies:
-      '@rue/ruescript-language-service':
-        specifier: workspace:*
-        version: link:../../packages/ruescript-language-service
-      '@volar/typescript':
-        specifier: ^2.4.28
-        version: 2.4.28
 
   plugins/vite-plugin-luent:
     dependencies:
@@ -583,18 +588,12 @@ importers:
       volar-service-typescript:
         specifier: volar-2.4
         version: 0.0.68(@volar/language-service@2.4.28)
-      vscode-html-languageservice:
-        specifier: ^5.3.1
-        version: 5.6.2
       vscode-uri:
         specifier: ^3.0.8
         version: 3.1.0
 
   plugins/vscode-ruescript:
     dependencies:
-      '@rue/tsserver-plugin-ruescript':
-        specifier: workspace:*
-        version: link:../tsserver-plugin-ruescript
       '@types/vscode':
         specifier: ^1.115.0
         version: 1.115.0
