@@ -5,9 +5,9 @@ export function createRueScriptService(): LanguageServicePlugin {
       name: 'ruescript-service', // used to identify the service in the logs and in Volar Labs
       create(context): LanguageServicePluginInstance {
          return {
-            provideHover(document, position, token) {
-               // Implement hover support here
-            },
+            // provideHover(document, position, token) {
+            //    // Implement hover support here
+            // },
             // More methods...
          };
       },

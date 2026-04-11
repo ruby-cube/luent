@@ -1,7 +1,5 @@
 import { createConnection, createServer, createTypeScriptProject, Diagnostic, loadTsdkByPath } from '@volar/language-server/node';
 import { create as createCssService } from 'volar-service-css';
-import { create as createEmmetService } from 'volar-service-emmet';
-import { create as createHtmlService } from 'volar-service-html';
 import { create as createTypeScriptServices } from 'volar-service-typescript';
 import {createRueScriptService} from './ruescript-service'
 import { ruescriptLanguagePlugin } from './language-plugin';
@@ -21,9 +19,7 @@ connection.onInitialize(params => {
          languagePlugins: [ruescriptLanguagePlugin],
       })),
       [
-         createHtmlService(),
          createCssService(),
-         createEmmetService(),
          ...createTypeScriptServices(tsdk.typescript),
          createRueScriptService(),
       ],

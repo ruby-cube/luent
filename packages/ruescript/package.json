@@ -10,7 +10,8 @@
       "@types/estree-jsx": "^1.0.5",
       "esrap": "^2.2.4",
       "oxc-parser": "^0.124.0",
-      "zimmerframe": "^1.1.4"
+      "zimmerframe": "^1.1.4",
+            "@volar/language-core": "~2.4.0"
    },
    "devDependencies": {
       "@rue/types": "workspace:*"

@@ -19,7 +19,7 @@ export const ruescriptLanguagePlugin: LanguagePlugin<URI> = {
       }
    },
    typescript: {
-      extraFileExtensions: [{ extension: 'ruescript', isMixedContent: true, scriptKind: 4 satisfies ts.ScriptKind.TSX }],
+      extraFileExtensions: [{ extension: 'rxs', isMixedContent: true, scriptKind: 4 satisfies ts.ScriptKind.TSX }],
       getServiceScript() {
          return undefined;
       },

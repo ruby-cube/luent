@@ -3,45 +3,94 @@ import { ExpressionStatement, Program, Visitor, Node as ASTNode, AssignmentExpre
 import { Edit } from './1-preprocess';
 
 const GET_VARIABLE_SUFFIX = 'ª'
-
+/**
+ *  - unwrite invalid rewrites
+ *  - adjust positions to source positions
+ *  - transform
+ * 
+ * @param ast 
+ * @param edits 
+ * @returns 
+ */
 export function transformRXS(ast: ASTNode, edits: Edit[]) {
-   let lastIndex = 0;
+   let offset = 0;
+
+   // TODO: build offsets from edits
 
    const transformed = walk(ast, null, {
+
+      // Literal(node) {
+      //    const edit = findEdit(node.start, edits)
+      //    if (!edit) return;
+      //    const delta = edit.transformed.length - edit.original.length
+      //    if (delta) {
+      //       // unwrite insert
+      //       return {
+      //          type: 'Literal',
+      //          start: offset + node.start,
+      //          end: offset + node.end - delta,  // TODO: what about nested edits?
+      //          value: unwriteEdit(node.value, edit),
+      //          raw: unwriteEdit(node.raw, edit)
+      //       }
+      //    }
+      //    // unwrite edit
+      //    return {
+      //       type: 'Literal',
+      //       start: offset + node.start,
+      //       end: offset + node.end,
+      //       value: unwriteEdit(node.value, edit),
+      //       raw: unwriteEdit(node.raw, edit)
+      //    }
+      // },
       ExpressionStatement(node) {
          if (node.expression.type !== 'AssignmentExpression') return;
+         console.log('*** node', node)
+         /**
+          * get variable = expression
+          * gÆt_variable = expression
+          */
          if (isPreGetVariableDeclaration(node.expression)) {
-            const result = findEdit(node.start, edits, lastIndex)
-            if (!result) throw new Error('missing edit')
-            const { edit, index } = result
-            edit.valid = true
-            lastIndex = index
+            const edit = findEdit(node.start, edits)
+            if (!edit) throw new Error('missing edit')
 
+            const identifier = edit.identifier + GET_VARIABLE_SUFFIX;
+            const identifierStart = node.expression.start + 'const'.length + 1
+            const initializer = node.expression.right // TODO: need to visit and transform; offsets need to be adjusted on exit
+
+            // const variableª = assertª(expression)
             return {
                type: 'VariableDeclaration',
+               start: offset + node.expression.start,
+               end: offset + node.expression.end,
                kind: 'const',
                declarations: [{
                   type: 'VariableDeclarator',
-                  init: node.expression.right,
+                  start: offset + identifierStart,
+                  end: offset + node.expression.end,
                   id: {
                      type: 'Identifier',
-                     name: edit.identifier + GET_VARIABLE_SUFFIX,
-                     start: node.expression.start, // standin
-                     end: node.expression.end
+                     start: offset + identifierStart,
+                     end: offset + identifierStart + identifier.length,
+                     name: identifier,
                   },
-                  start: node.expression.start,
-                  end: node.expression.end
+                  init: {
+                     type: 'CallExpression',
+                     start: offset + initializer.start,
+                     end: offset + initializer.end,
+                     callee: {
+                        type: 'Identifier',
+                        start: offset + initializer.start,
+                        end: offset + initializer.end,
+                        name: 'assertª',
+                     },
+                     arguments: [initializer],
+                     optional: false
+                  },
                }],
-               start: node.expression.start,
-               end: node.expression.end
             }
          }
       }
    })
-
-   // - adjust positions to source positions
-   // - unwrite invalid preprocessing
-   postprocess(transformed, edits) 
 
    console.log('ast', ast)
    console.log('transformed === ast', transformed === ast)
@@ -49,17 +98,18 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
 }
 
 
-function findEdit(pos: number, edits: Edit[], start: number = 0) {
+
+let lastIndex = 0;
+
+function findEdit(pos: number, edits: Edit[]) {
    const limit = edits.length;
-   for (let i = start; i < limit; i++) {
+   for (let i = lastIndex; i < limit; i++) {
       const edit = edits[i]
       console.log('edit', edit)
       console.log('pos', pos)
       if (pos >= edit.pos && pos < edit.original.length) //TODO: should this be replacement or original length?
-         return {
-            edit,
-            index: i
-         }
+         lastIndex = i;
+      return edit
    }
 }
 

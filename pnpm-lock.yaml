@@ -445,6 +445,9 @@ importers:
       '@types/estree-jsx':
         specifier: ^1.0.5
         version: 1.0.5
+      '@volar/language-core':
+        specifier: ~2.4.0
+        version: 2.4.28
       esrap:
         specifier: ^2.2.4
         version: 2.2.4
@@ -565,11 +568,17 @@ importers:
         specifier: ^8.0.3
         version: 8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.0)(esbuild@0.27.7)(jiti@2.6.1)(less@4.6.4)(sass@1.98.0)(stylus@0.62.0)
 
-  plugins/volar-plugin-ruescript:
+  plugins/volar-ruescript:
     dependencies:
       '@rue/ruescript':
         specifier: workspace:*
         version: link:../../packages/ruescript
+      '@types/estree':
+        specifier: ^1.0.8
+        version: 1.0.8
+      '@types/estree-jsx':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@volar/language-core':
         specifier: ~2.4.0
         version: 2.4.28
@@ -579,6 +588,9 @@ importers:
       '@volar/typescript':
         specifier: ~2.4.0
         version: 2.4.28
+      oxc-parser:
+        specifier: ^0.124.0
+        version: 0.124.0(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
       volar-service-css:
         specifier: volar-2.4
         version: 0.0.68(@volar/language-service@2.4.28)
@@ -594,6 +606,9 @@ importers:
       vscode-uri:
         specifier: ^3.0.8
         version: 3.1.0
+      zimmerframe:
+        specifier: ^1.1.4
+        version: 1.1.4
 
   plugins/vscode-ruescript:
     dependencies:

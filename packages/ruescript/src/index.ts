@@ -1,13 +1,14 @@
 import { preprocessRXS } from "./1-preprocess"
 import { parseRXS } from "./2-parse"
 import { transformRXS } from "./3-transform"
-import { printTSX } from "./4-generate"
+import { printTSX } from "./5-generate"
 
 export function transpileRueScript(file: string, source: string) {
    const { code, edits } = preprocessRXS(source)
    const preTree = parseRXS(file, code)
-   const transformedTree = transformRXS(preTree.program, edits)
+   const transformedTree = transformRXS(preTree.program, edits) as typeof preTree.program
    const generated = printTSX(transformedTree)
+
    return {
       source,
       transpiled: { ast: transformedTree, code: generated.code },

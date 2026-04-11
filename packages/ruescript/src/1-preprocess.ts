@@ -15,7 +15,7 @@ export type GetDeclarationEdit = {
    gap: string
 } & BaseEdit
 
-function encodeDeclarationGap(group: string): string {
+function encodeGap(group: string): string {
    return group
       .replace(/[ \t]/g, '_')
       .replace(/\/\*/g, 'ƒº')
@@ -45,8 +45,7 @@ function applyEdits(code: string, edits: Edit[]): string {
 }
 
 class RXSPreprocessor {
-   edits: GetDeclarationEdit[] = []
-   inserts: Edit[] = [] // edits that change length of source
+   edits: Edit[] = []
    code: string = ''
 
    constructor(readonly source: string) {
@@ -78,7 +77,7 @@ class RXSPreprocessor {
          const gap = match[1]
          const identifier = match[2]
          const postGap = match[3]
-         const transformed = 'gÆt' + encodeDeclarationGap(gap) + identifier + postGap
+         const transformed = 'gÆt' + encodeGap(gap) + identifier + postGap
 
          this.edits.push({
             type: 'GetDeclaration',
@@ -110,7 +109,7 @@ class RXSPreprocessor {
          const gap = match[1]
          const identifier = match[2]
          const postGap = match[3]
-         const transformed = 'gÆt' + encodeDeclarationGap(gap) + identifier + postGap
+         const transformed = 'gÆt' + encodeGap(gap) + identifier + postGap
 
          this.edits.push({
             type: 'GetDeclaration',
@@ -125,14 +124,14 @@ class RXSPreprocessor {
    }
 }
 
-export function unwriteGetDeclarations(string: string, edits: Edit[] = []) {
-   let result = string
-   for (let i = edits.length - 1; i >= 0; i--) {
-      const edit = edits[i]
-      result = result.slice(0, edit.pos) + edit.original + result.slice(edit.pos + edit.original.length)
-   }
-   return result
-}
+// export function unwriteGetDeclarations(string: string, edits: Edit[] = []) {
+//    let result = string
+//    for (let i = edits.length - 1; i >= 0; i--) {
+//       const edit = edits[i]
+//       result = result.slice(0, edit.pos) + edit.original + result.slice(edit.pos + edit.original.length)
+//    }
+//    return result
+// }
 
 
 
@@ -142,7 +141,9 @@ export function unwriteGetDeclarations(string: string, edits: Edit[] = []) {
  * Preprocess rxs source into valid tsx
  */
 export function preprocessRXS(source: string) {
-   return new RXSPreprocessor(source).transform()
+   // (1) TODO: pre-parser // tree of string, regex, code leaf nodes, and object literals, template literals, JSXText
+   // (2) walk tree and rewrite code to valid jsx
+   return new RXSPreprocessor(source).transform() // walks rough ast for preprocessing
 }
 
 

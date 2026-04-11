@@ -6,6 +6,6 @@ export function parseRXS(file: string, code: string) {
       astType: 'ts',
       lang: 'tsx',
       preserveParens: true,
-      sourceType: 'module'
+      sourceType: 'module',
    })
 }
