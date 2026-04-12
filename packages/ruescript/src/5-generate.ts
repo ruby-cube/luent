@@ -103,7 +103,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          cursor.enterScope()
          cursor.visitEach(node.body)
          cursor.exitScope()
-         cursor.write('}')
+         cursor.write('}\n')
       },
 
       /**
@@ -148,7 +148,19 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * class Box<T> {}
        */
       ClassDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         if (node.declare) cursor.write('declare ')
+         if (node.abstract) cursor.write('abstract ')
+         cursor.write('class ')
+         if (node.id) cursor.visit(node.id)
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         if (node.superClass) {
+            cursor.write(' extends ')
+            cursor.visit(node.superClass)
+            if (node.superTypeArguments) cursor.visit(node.superTypeArguments)
+         }
+         cursor.write(' ')
+         cursor.visit(node.body)
       },
 
       /**
@@ -397,10 +409,11 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       },
 
       /**
-       * debugger
+       * debugger;
        */
       DebuggerStatement(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('debugger;\n')
       },
 
       /**
@@ -574,7 +587,29 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * const fn = function () {}
        */
       FunctionExpression(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.async) cursor.write('async ')
+         cursor.write('function')
+         if (node.generator) cursor.write('*')
+         if (node.id) {
+            cursor.write(' ')
+            cursor.visit(node.id)
+         }
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (node.returnType) cursor.visit(node.returnType)
+         if (node.body) {
+            cursor.write(' ')
+            cursor.visit(node.body)
+         }
+         else {
+            cursor.write(' { }')
+         }
       },
 
       /**
@@ -698,7 +733,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * import("pkg")
        */
       ImportExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('import(')
+         cursor.visit(node.source)
+         if (node.options) {
+            cursor.write(', ')
+            cursor.visit(node.options)
+         }
+         cursor.write(')')
       },
 
       /**
@@ -724,105 +765,137 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * <Comp disabled />
        */
       JSXAttribute(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.name)
+         if (node.value) {
+            cursor.write('=')
+            cursor.visit(node.value)
+         }
       },
 
       /**
        * </Comp>
        */
       JSXClosingElement(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('</')
+         cursor.visit(node.name)
+         cursor.write('>')
       },
 
       /**
        * </>
        */
       JSXClosingFragment(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('</>')
       },
 
       /**
        * <Comp prop={value} />
        */
       JSXElement(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.openingElement)
+         const children = node.children ?? []
+         for (let i = 0; i < children.length; i++) {
+            cursor.visit(children[i])
+         }
+         if (node.closingElement) cursor.visit(node.closingElement)
       },
 
-      /**
-       * {}
-       */
-      JSXEmptyExpression(node, cursor) {
-         cursor.visitFallback(node)
-      },
+
 
       /**
        * {value}
        */
       JSXExpressionContainer(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{')
+         if (node.expression.type !== 'JSXEmptyExpression') {
+            cursor.visit(node.expression)
+         }
+         cursor.write('}')
       },
 
       /**
        * <><Item /></>
        */
       JSXFragment(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.openingFragment)
+         const children = node.children ?? []
+         for (let i = 0; i < children.length; i++) {
+            cursor.visit(children[i])
+         }
+         cursor.visit(node.closingFragment)
       },
 
       /**
        * Comp
        */
       JSXIdentifier(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write(node.name)
       },
 
       /**
        * UI.Button
        */
       JSXMemberExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.object)
+         cursor.write('.')
+         cursor.visit(node.property)
       },
 
       /**
        * svg:path
        */
       JSXNamespacedName(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.namespace)
+         cursor.write(':')
+         cursor.visit(node.name)
       },
 
       /**
        * <Comp>
        */
       JSXOpeningElement(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('<')
+         cursor.visit(node.name)
+         if (node.typeArguments) cursor.visit(node.typeArguments)
+         const attributes = node.attributes ?? []
+         for (let i = 0; i < attributes.length; i++) {
+            cursor.write(' ')
+            cursor.visit(attributes[i])
+         }
+         if (node.selfClosing) cursor.write(' />')
+         else cursor.write('>')
       },
 
       /**
        * <>
        */
       JSXOpeningFragment(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('<>')
       },
 
       /**
        * <Comp {...props} />
        */
       JSXSpreadAttribute(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{...')
+         cursor.visit(node.argument)
+         cursor.write('}')
       },
 
       /**
        * {...items}
        */
       JSXSpreadChild(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{...')
+         cursor.visit(node.expression)
+         cursor.write('}')
       },
 
       /**
        * hello
        */
       JSXText(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write(node.raw ?? node.value)
       },
 
       /**
@@ -833,13 +906,15 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       },
 
       /**
-       * obj.value
+       * obj?.value
+       * obj[value]
+       * obj?.[value]
        */
       MemberExpression(node, cursor) {
          cursor.visit(node.object)
          if (node.optional) cursor.write('?.')
-         else if (node.computed) cursor.write('[')
-         else cursor.write('.')
+         if (node.computed) cursor.write('[')
+         else if (!node.optional) cursor.write('.')
 
          cursor.visit(node.property)
          if (node.computed) cursor.write(']')
@@ -911,11 +986,23 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
 
       /**
        * { key: value }
+       * { [key]: value }
        */
       Property(node, cursor) {
+         const writeKey = () => {
+            if (node.computed) {
+               cursor.write('[')
+               cursor.visit(node.key)
+               cursor.write(']')
+            }
+            else {
+               cursor.visit(node.key)
+            }
+         }
+
          if (node.kind === 'init') {
-            cursor.visit(node.key)
-            if (!node.shorthand) {
+            writeKey()
+            if (!(node.shorthand && !node.computed)) {
                cursor.write(': ')
                cursor.visit(node.value)
             }
@@ -925,7 +1012,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          if (node.kind === 'get' || node.kind === 'set') {
             const value = node.value as unknown as { params?: ASTNode[], body?: ASTNode }
             cursor.write(`${node.kind} `)
-            cursor.visit(node.key)
+            writeKey()
             cursor.write('(')
             const params = value.params ?? []
             for (let i = 0; i < params.length; i++) {
@@ -938,7 +1025,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             return
          }
 
-         cursor.visit(node.key)
+         writeKey()
          cursor.write(': ')
          cursor.visit(node.value)
       },
@@ -1060,7 +1147,8 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * tag`hello ${name}`
        */
       TaggedTemplateExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.tag)
+         cursor.visit(node.quasi)
       },
 
       /**
@@ -1074,7 +1162,20 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * `sum: ${a + b}`
        */
       TemplateLiteral(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('`')
+         const quasis = node.quasis ?? []
+         const expressions = node.expressions ?? []
+         for (let i = 0; i < quasis.length; i++) {
+            const quasi = quasis[i] as unknown as { value?: { raw?: string }, raw?: string }
+            const raw = quasi.value?.raw ?? quasi.raw ?? ''
+            cursor.write(raw)
+            if (i < expressions.length) {
+               cursor.write('${')
+               cursor.visit(expressions[i])
+               cursor.write('}')
+            }
+         }
+         cursor.write('`')
       },
 
       /**
@@ -1651,7 +1752,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       /**
        * A | B | C
        */
-      TSUnionType() { }
+      TSUnionType(node, cursor) {
+         const types = node.types ?? []
+         for (let i = 0; i < types.length; i++) {
+            if (i > 0) cursor.write(' | ')
+            cursor.visit(types[i])
+         }
+      }
    })
 
    file.visit(program)
@@ -1679,7 +1786,7 @@ function OperatorExpression(node: AssignmentExpression | PrivateInExpression | L
    cursor.visit(node.right)
 }
 
-function writeLoopBody(node: ForOfStatement |ForInStatement | ForStatement | WhileStatement, cursor: CodePrinter) {
+function writeLoopBody(node: ForOfStatement | ForInStatement | ForStatement | WhileStatement, cursor: CodePrinter) {
    if (node.body.type === 'BlockStatement') {
       cursor.write(' ')
       cursor.visit(node.body)
