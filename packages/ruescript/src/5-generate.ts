@@ -60,6 +60,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
 
       /**
        * function id<T>(a: A, b: B = 0): Return { body }
+       * declare function id<T>(a: A, b: B): Return
        */
       FunctionDeclaration(node, cursor) {
          cursor.indentScope()
@@ -70,15 +71,17 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          if (node.id) cursor.visit(node.id)
          if (node.typeParameters) cursor.visit(node.typeParameters)
          cursor.write('(')
-         for (const param of node.params) {
-            cursor.visit(param)
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
          }
          cursor.write(')')
          if (node.returnType) {
             cursor.visit(node.returnType)
          }
          if (node.body) cursor.visit(node.body)
-         else cursor.write('{ }')
+         else if (!node.declare) cursor.write('{ }')
       },
 
       /**
@@ -98,17 +101,23 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * x = 10
        */
       AssignmentPattern(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.left)
+         cursor.write(' = ')
+         cursor.visit(node.right)
       },
 
       /**
        * { body }
        */
       BlockStatement(node, cursor) {
-         cursor.write('{')
+         const parent = cursor.currentParent
+         const isStatement = parent?.type === 'BlockStatement' || parent?.type === 'Program'
+         if (isStatement) cursor.indentScope()
+         cursor.write('{\n')
          cursor.enterScope()
          cursor.visitEach(node.body)
          cursor.exitScope()
+         cursor.indentScope()
          cursor.write('}\n')
       },
 
@@ -146,8 +155,8 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          if (node.definite) cursor.write('!')
          if (node.id.typeAnnotation) cursor.visit(node.id.typeAnnotation)
          cursor.write(' = ')
-         if (!node.init) throw new SyntaxError('')
-         cursor.visit(node.init)
+         if (node.init)
+            cursor.visit(node.init)
       },
 
       /**
@@ -164,6 +173,24 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             cursor.write(' extends ')
             cursor.visit(node.superClass)
             if (node.superTypeArguments) cursor.visit(node.superTypeArguments)
+         }
+         const impls = node.implements ?? []
+         if (impls.length > 0) {
+            cursor.write(' implements ')
+            for (let i = 0; i < impls.length; i++) {
+               if (i > 0) cursor.write(', ')
+               const impl = impls[i] as unknown as {
+                  expression?: ASTNode
+                  typeArguments?: ASTNode
+               }
+               if (impl.expression) {
+                  cursor.visit(impl.expression)
+                  if (impl.typeArguments) cursor.visit(impl.typeArguments)
+               }
+               else {
+                  cursor.visit(impls[i] as unknown as ASTNode)
+               }
+            }
          }
          cursor.write(' ')
          cursor.visit(node.body)
@@ -265,12 +292,11 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       CallExpression(node, cursor) {
          cursor.visit(node.callee)
+         if (node.optional) cursor.write('?.')
          if (node.typeArguments) {
             cursor.visit(node.typeArguments)
          }
-         node.optional
-            ? cursor.write('?.(')
-            : cursor.write('(')
+         cursor.write('(')
          const args = node.arguments
          for (let i = 0; i < args.length; i++) {
             const arg = args[i]
@@ -283,10 +309,34 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       },
 
       /**
-       * get value() { return 0 }
+       * accessor value = 1 
        */
       AccessorProperty(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         if (node.static) cursor.write('static ')
+         if (node.declare) cursor.write('declare ')
+         if (node.override) cursor.write('override ')
+         if (node.readonly) cursor.write('readonly ')
+         if (node.accessibility) cursor.write(`${node.accessibility} `)
+         cursor.write('accessor ')
+
+         if (node.computed) {
+            cursor.write('[')
+            cursor.visit(node.key)
+            cursor.write(']')
+         }
+         else {
+            cursor.visit(node.key)
+         }
+
+         if (node.optional) cursor.write('?')
+         if (node.definite) cursor.write('!')
+         if (node.typeAnnotation) cursor.visit(node.typeAnnotation)
+         if (node.value) {
+            cursor.write(' = ')
+            cursor.visit(node.value)
+         }
+         cursor.write(';\n')
       },
 
       /**
@@ -373,21 +423,53 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * obj?.deep?.value
        */
       ChainExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.expression)
       },
 
       /**
        * class C { method() {} }
        */
       ClassBody(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write(' {\n')
+         cursor.enterScope()
+         const body = node.body ?? []
+         cursor.visitEach(body)
+         cursor.exitScope()
+         cursor.indentScope()
+         cursor.write('}\n')
       },
 
       /**
        * const C = class {}
        */
       ClassExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('class ')
+         if (node.id) cursor.visit(node.id)
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         if (node.superClass) {
+            cursor.write(' extends ')
+            cursor.visit(node.superClass)
+            if (node.superTypeArguments) cursor.visit(node.superTypeArguments)
+         }
+         const impls = node.implements ?? []
+         if (impls.length > 0) {
+            cursor.write(' implements ')
+            for (let i = 0; i < impls.length; i++) {
+               if (i > 0) cursor.write(', ')
+               const impl = impls[i] as unknown as {
+                  expression?: ASTNode
+                  typeArguments?: ASTNode
+               }
+               if (impl.expression) {
+                  cursor.visit(impl.expression)
+                  if (impl.typeArguments) cursor.visit(impl.typeArguments)
+               }
+               else {
+                  cursor.visit(impls[i] as unknown as ASTNode)
+               }
+            }
+         }
+         cursor.visit(node.body)
       },
 
       /**
@@ -426,7 +508,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * @sealed
        */
       Decorator(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('@')
+         cursor.visit(node.expression)
+         cursor.write('\n')
       },
 
       /**
@@ -445,7 +530,8 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * ;
        */
       EmptyStatement(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write(';')
       },
 
       /**
@@ -492,8 +578,18 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       ExportNamedDeclaration(node, cursor) {
          cursor.indentScope()
          cursor.write('export ')
+         if (node.exportKind === 'type') cursor.write('type ')
          if (node.declaration) {
             cursor.visit(node.declaration)
+            if (cursor.code.endsWith('\n')) {
+               return
+            }
+            if (cursor.code.endsWith(';')) {
+               cursor.write('\n')
+            }
+            else {
+               cursor.write(';\n')
+            }
             return
          }
 
@@ -523,8 +619,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * bar as baz
        */
       ExportSpecifier(node, cursor) {
+         if (node.exportKind === 'type') cursor.write('type ')
+         const same = node.local.type === 'Identifier'
+            && node.exported.type === 'Identifier'
+            && node.local.name === node.exported.name
+
          cursor.visit(node.local)
-         if (node.exported) {
+         if (node.exported && !same) {
             cursor.write(' as ')
             cursor.visit(node.exported)
          }
@@ -622,7 +723,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * #!/usr/bin/env node
        */
       Hashbang(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('#!')
+         const value = (node as unknown as { value: string }).value
+         cursor.write(value)
+         cursor.write('\n')
       },
 
       /**
@@ -682,37 +786,47 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       ImportDeclaration(node, cursor) {
          cursor.indentScope()
          cursor.write('import ')
-
+         if (node.importKind === 'type') cursor.write('type ')
          const specifiers = node.specifiers ?? []
-         const defaultSpecifier = specifiers.find((s) => s.type === 'ImportDefaultSpecifier')
-         const namespaceSpecifier = specifiers.find((s) => s.type === 'ImportNamespaceSpecifier')
-         const namedSpecifiers = specifiers.filter((s) => s.type === 'ImportSpecifier')
-
-         let wroteSpecifier = false
-         if (defaultSpecifier) {
-            cursor.visit(defaultSpecifier)
-            wroteSpecifier = true
-         }
-         if (namespaceSpecifier) {
-            if (wroteSpecifier) cursor.write(', ')
-            cursor.visit(namespaceSpecifier)
-            wroteSpecifier = true
-         }
-         if (namedSpecifiers.length > 0) {
-            if (wroteSpecifier) cursor.write(', ')
-            cursor.write('{ ')
-            for (let i = 0; i < namedSpecifiers.length; i++) {
-               if (i > 0) cursor.write(', ')
-               cursor.visit(namedSpecifiers[i])
-            }
-            cursor.write(' }')
-            wroteSpecifier = true
-         }
-
-         if (!wroteSpecifier) {
+         if (specifiers.length === 0) {
             cursor.visit(node.source)
+            if (node.attributes && node.attributes.length > 0) {
+               cursor.write(' with { ')
+               for (let i = 0; i < node.attributes.length; i++) {
+                  if (i > 0) cursor.write(', ')
+                  cursor.visit(node.attributes[i])
+               }
+               cursor.write(' }')
+            }
             cursor.write(';\n')
             return
+         }
+
+         let openedNamedGroup = false
+         for (let i = 0; i < specifiers.length; i++) {
+            const specifier = specifiers[i]
+            if (specifier.type === 'ImportSpecifier') {
+               const prev = specifiers[i - 1]
+               if (!openedNamedGroup) {
+                  if (i > 0) cursor.write(', ')
+                  cursor.write('{ ')
+                  openedNamedGroup = true
+               }
+               else if (prev?.type === 'ImportSpecifier') {
+                  cursor.write(', ')
+               }
+               cursor.visit(specifier)
+
+               const next = specifiers[i + 1]
+               if (!next || next.type !== 'ImportSpecifier') {
+                  cursor.write(' }')
+                  openedNamedGroup = false
+               }
+            }
+            else {
+               if (i > 0) cursor.write(', ')
+               cursor.visit(specifier)
+            }
          }
 
          cursor.write(' from ')
@@ -729,7 +843,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       },
 
       /**
-       * React
+       * ModuleName
        */
       ImportDefaultSpecifier(node, cursor) {
          cursor.visit(node.local)
@@ -760,10 +874,18 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * foo as bar
        */
       ImportSpecifier(node, cursor) {
+         if (node.importKind === 'type') cursor.write('type ')
          cursor.visit(node.imported)
-         if (node.local) {
+         const imported = node.imported
+         const local = node.local
+         const same = !!local
+            && imported.type === 'Identifier'
+            && local.type === 'Identifier'
+            && imported.name === local.name
+
+         if (local && !same) {
             cursor.write(' as ')
-            cursor.visit(node.local)
+            cursor.visit(local)
          }
       },
 
@@ -908,7 +1030,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * loop: for (;;) { break loop }
        */
       LabeledStatement(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.visit(node.label)
+         cursor.write(': ')
+         cursor.visit(node.body)
       },
 
       /**
@@ -930,7 +1055,46 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * class C { m() {} }
        */
       MethodDefinition(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         if (node.static) cursor.write('static ')
+         const kind = (node as unknown as { kind: string }).kind
+         if (kind === 'constructor') {
+            cursor.write('constructor')
+         } else if (kind === 'get' || kind === 'set') {
+            cursor.write(kind + ' ')
+            if (node.computed) {
+               cursor.write('[')
+               cursor.visit(node.key)
+               cursor.write(']')
+            } else {
+               cursor.visit(node.key)
+            }
+         } else {
+            if (node.computed) {
+               cursor.write('[')
+               cursor.visit(node.key)
+               cursor.write(']')
+            } else {
+               cursor.visit(node.key)
+            }
+         }
+         const value = node.value as unknown as { params?: ASTNode[], returnType?: ASTNode, body?: ASTNode, typeParameters?: ASTNode }
+         if (value.typeParameters) cursor.visit(value.typeParameters)
+         cursor.write('(')
+         const params = value.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (value.returnType) cursor.visit(value.returnType)
+         if (value.body) {
+            cursor.write(' ')
+            cursor.visit(value.body)
+         } else {
+            cursor.write(' { }')
+         }
+         cursor.write('\n')
       },
 
       /**
@@ -980,7 +1144,9 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * (a + b)
        */
       ParenthesizedExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('(')
+         cursor.visit(node.expression)
+         cursor.write(')')
       },
 
       /**
@@ -1112,7 +1278,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * class C { static { init() } }
        */
       StaticBlock(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('static {')
+         cursor.enterScope()
+         cursor.visitEach(node.body)
+         cursor.exitScope()
+         cursor.indentScope()
+         cursor.write('}\n')
       },
 
       /**
@@ -1161,7 +1333,9 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * `hello ${name}`
        */
       TemplateElement(node, cursor) {
-         cursor.visitFallback(node)
+         const value = (node as unknown as { value?: { raw?: string }, raw?: string })
+         const raw = value.value?.raw ?? value.raw ?? ''
+         cursor.write(raw)
       },
 
       /**
@@ -1244,7 +1418,16 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * %DebugPrint(value)
        */
       V8IntrinsicExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('%')
+         const name = (node as unknown as { name: string }).name
+         cursor.write(name)
+         cursor.write('(')
+         const args = (node as unknown as { arguments?: ASTNode[] }).arguments ?? []
+         for (let i = 0; i < args.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(args[i])
+         }
+         cursor.write(')')
       },
 
       /**
@@ -1262,14 +1445,32 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * with (obj) { x = 1 }
        */
       WithStatement(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('with (')
+         cursor.visit(node.object)
+         cursor.write(')')
+         if (node.body.type === 'BlockStatement') {
+            cursor.write(' ')
+            cursor.visit(node.body)
+         } else {
+            cursor.write('\n')
+            cursor.enterScope()
+            cursor.visit(node.body)
+            cursor.exitScope()
+         }
       },
 
       /**
        * yield value
        */
       YieldExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('yield')
+         const delegate = (node as unknown as { delegate: boolean }).delegate
+         if (delegate) cursor.write('*')
+         if (node.argument) {
+            cursor.write(' ')
+            cursor.visit(node.argument)
+         }
       },
 
       /**
@@ -1889,7 +2090,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          }
          cursor.write(')')
          if (node.returnType) cursor.visit(node.returnType)
-         cursor.write(';')
+         cursor.write(';\n')
       },
 
       /**
@@ -1901,7 +2102,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          cursor.visitEach(node.body)
          cursor.exitScope()
          cursor.indentScope()
-         cursor.write('}')
+         cursor.write('}\n')
       },
 
       /**
@@ -2217,8 +2418,6 @@ export type Visitor<T> = (node: T, cursor: CodePrinter) => void;
 
 export type Visitors<T extends BaseNode = BaseNode> = {
    [K in T['type']]?: Visitor<NodeOf<K, T>>;
-} & {
-   enter?: (node: T, cursor: CodePrinter, visit: (node: T) => void) => void
 };
 
 type FD = FunctionDeclaration['type']
@@ -2252,22 +2451,20 @@ class CodePrinter {
       this.write(TAB)
    }
 
-   // get currentParent() { // TODO: we may not need this anymore
-   //    return this.getParent()
-   // }
-   // private pushParent
-   // private popParent
-   // private getParent
+   get currentParent() {
+      return this.getParent()
+   }
+   private pushParent
+   private popParent
+   private getParent
 
    constructor(
       private visitors: Visitors<ASTNode>
    ) {
-
-      visitors.FunctionDeclaration
-      // const [pushParent, popParent, getParent] = createStack<BaseNode>()
-      // this.pushParent = pushParent
-      // this.popParent = popParent
-      // this.getParent = getParent
+      const [pushParent, popParent, getParent] = createStack<BaseNode>()
+      this.pushParent = pushParent
+      this.popParent = popParent
+      this.getParent = getParent
    }
 
    write(text: string, src?: { start: number, end: number, capabilities: CodeMapping['data'] }) {
@@ -2288,56 +2485,58 @@ class CodePrinter {
       }
    }
 
-   visited = new Set()
+   private activeNodes = new Set<ASTNode>()
 
    private visitNode(node: ASTNode) {
-      if (this.visited.has(node))
-         return;
-      this.visited.add(node)
+      if (this.activeNodes.has(node)) {
+         throw new InternalError('Cycle detected while visiting AST')
+      }
+
+      this.activeNodes.add(node)
       const visit = (this.visitors as Visitors)[node.type]
       if (!visit) throw new InternalError(`Visitor not yet implemented for ${node.type}`)
-      if (this.visitors.enter) {
-         this.visitors.enter(node, this, (node) => visit(node, this))
-      }
-      else {
+      try {
          visit(node, this)
+      }
+      finally {
+         this.activeNodes.delete(node)
       }
    }
 
    visit(node: ASTNode, parent?: ASTNode) {
-      // if (parent) this.pushParent(parent)
+      if (parent) this.pushParent(parent)
       this.visitNode(node)
-      // if (parent) this.popParent()
+      if (parent) this.popParent()
    }
 
 
    visitEach(nodes: ASTNode[], parent?: ASTNode) {
-      // if (parent) this.pushParent(parent)
+      if (parent) this.pushParent(parent)
       for (const node of nodes) {
          this.visitNode(node)
       }
-      // if (parent) this.popParent()
+      if (parent) this.popParent()
    }
 
-   visitFallback(node: ASTNode) {
-      for (const value of Object.values(node as unknown as Record<string, unknown>)) {
-         if (!value) continue
-         if (Array.isArray(value)) {
-            for (const item of value) {
-               if (this.isNode(item)) this.visitNode(item)
-            }
-         }
-         else if (this.isNode(value)) {
-            this.visitNode(value)
-         }
-      }
-   }
+   // visitFallback(node: ASTNode) {
+   //    for (const value of Object.values(node as unknown as Record<string, unknown>)) {
+   //       if (!value) continue
+   //       if (Array.isArray(value)) {
+   //          for (const item of value) {
+   //             if (this.isNode(item)) this.visitNode(item)
+   //          }
+   //       }
+   //       else if (this.isNode(value)) {
+   //          this.visitNode(value)
+   //       }
+   //    }
+   // }
 
-   private isNode(value: unknown): value is ASTNode {
-      return !!value
-         && typeof value === 'object'
-         && 'type' in (value as Record<string, unknown>)
-         && typeof (value as Record<string, unknown>).type === 'string'
-   }
+   // private isNode(value: unknown): value is ASTNode {
+   //    return !!value
+   //       && typeof value === 'object'
+   //       && 'type' in (value as Record<string, unknown>)
+   //       && typeof (value as Record<string, unknown>).type === 'string'
+   // }
 }
 
