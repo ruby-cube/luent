@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { parseRXS } from './2-parse'
-import { printTSX } from './5-generate'
+import { parseRXS } from '../src/2-parse'
+import { printTSX } from '../src/5-generate'
 
 function parseProgram(code: string) {
    return parseRXS('imports-test.tsx', code).program
 }
 
 describe('printTSX import visitors', () => {
+   it('prints named imports', () => {
+      const program = parseProgram('import { x, y, z } from "module"')
+      const output = printTSX(program).code
+      expect(output).toBe('import { x, y, z } from "module";\n')
+   })
+
    it('prints side-effect import attributes', () => {
       const program = parseProgram('import "./data.json" with { type: "json" }')
       const output = printTSX(program).code

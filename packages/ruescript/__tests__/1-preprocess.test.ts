@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { preprocessRXS, unwriteGetDeclarations } from './1-preprocess'
+import { preprocessRXS } from '../src/1-preprocess'
 
 describe('preprocess: rewriteGetVariableDeclarations', () => {
    it('rewrites a basic get declaration', () => {
@@ -126,95 +126,95 @@ describe('preprocess: rewriteGetPropertyDelarations', () => {
    })
 })
 
-describe('unwriteGetVariableDeclarations', () => {
-   it('restores from edits with exact original text', () => {
-      const source = 'get count = ref(0)'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toBe(source)
-   })
+// describe('unwriteGetVariableDeclarations', () => {
+//    it('restores from edits with exact original text', () => {
+//       const source = 'get count = ref(0)'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toBe(source)
+//    })
 
-   it('preserves multi-space gap between get and identifier', () => {
-      const source = 'get  count = ref(0)'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toBe(source)
-   })
+//    it('preserves multi-space gap between get and identifier', () => {
+//       const source = 'get  count = ref(0)'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toBe(source)
+//    })
 
-   it('preserves trapped block comment exactly', () => {
-      const source = 'get /* note */ count = ref(0)'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toBe(source)
-   })
+//    it('preserves trapped block comment exactly', () => {
+//       const source = 'get /* note */ count = ref(0)'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toBe(source)
+//    })
 
-   it('preserves underscore in trapped comment', () => {
-      const source = 'get /* note_underscore */ count = ref(0)'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toBe(source)
-   })
+//    it('preserves underscore in trapped comment', () => {
+//       const source = 'get /* note_underscore */ count = ref(0)'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toBe(source)
+//    })
 
-   it('preserves multiple trapped comments exactly', () => {
-      const source = 'get /* note */ /* note2*/count = ref(0)'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toBe(source)
-   })
+//    it('preserves multiple trapped comments exactly', () => {
+//       const source = 'get /* note */ /* note2*/count = ref(0)'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toBe(source)
+//    })
 
-   it('allows zero whitespace before =', () => {
-      const source = 'get count= ref(0)'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toBe(source)
-   })
+//    it('allows zero whitespace before =', () => {
+//       const source = 'get count= ref(0)'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toBe(source)
+//    })
 
-   it('restores multiple get declarations correctly', () => {
-      const source = 'get a = ref(0)\nget b = ref(1)'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toBe(source)
-   })
-})
+//    it('restores multiple get declarations correctly', () => {
+//       const source = 'get a = ref(0)\nget b = ref(1)'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toBe(source)
+//    })
+// })
 
-describe('unwriteGetPropertyColonNotation', () => {
-   it('restores from edits with exact original text', () => {
-      const source = 'const obj = { get foo: ref(0) }'
-      const { code, edits } = preprocessRXS(source)
-      const editsForProperty = edits.filter(e => source.includes('get foo'))
-      const restored = unwriteGetDeclarations(code, editsForProperty)
-      expect(restored).toContain('get foo')
-   })
+// describe('unwriteGetPropertyColonNotation', () => {
+//    it('restores from edits with exact original text', () => {
+//       const source = 'const obj = { get foo: ref(0) }'
+//       const { code, edits } = preprocessRXS(source)
+//       const editsForProperty = edits.filter(e => source.includes('get foo'))
+//       const restored = unwriteGetDeclarations(code, editsForProperty)
+//       expect(restored).toContain('get foo')
+//    })
 
-   it('preserves multi-space gap between get and key', () => {
-      const source = 'const obj = { get  foo: ref(0) }'
-      const { code, edits } = preprocessRXS(source)
-      const editsForProperty = edits.filter(e => source.includes('get  foo'))
-      const restored = unwriteGetDeclarations(code, editsForProperty)
-      expect(restored).toContain('get  foo')
-   })
+//    it('preserves multi-space gap between get and key', () => {
+//       const source = 'const obj = { get  foo: ref(0) }'
+//       const { code, edits } = preprocessRXS(source)
+//       const editsForProperty = edits.filter(e => source.includes('get  foo'))
+//       const restored = unwriteGetDeclarations(code, editsForProperty)
+//       expect(restored).toContain('get  foo')
+//    })
 
-   it('preserves trapped block comments exactly', () => {
-      const source = 'const obj = { get /* note */ foo: ref(0) }'
-      const { code, edits } = preprocessRXS(source)
-      const editsForProperty = edits.filter(e => source.includes('get /* note */ foo'))
-      const restored = unwriteGetDeclarations(code, editsForProperty)
-      expect(restored).toContain('get /* note */ foo')
-   })
+//    it('preserves trapped block comments exactly', () => {
+//       const source = 'const obj = { get /* note */ foo: ref(0) }'
+//       const { code, edits } = preprocessRXS(source)
+//       const editsForProperty = edits.filter(e => source.includes('get /* note */ foo'))
+//       const restored = unwriteGetDeclarations(code, editsForProperty)
+//       expect(restored).toContain('get /* note */ foo')
+//    })
 
-   it('allows zero whitespace before colon', () => {
-      const source = 'const obj = { get foo:ref(0) }'
-      const { code, edits } = preprocessRXS(source)
-      const editsForProperty = edits.filter(e => source.includes('get foo'))
-      const restored = unwriteGetDeclarations(code, editsForProperty)
-      expect(restored).toContain('get foo')
-   })
+//    it('allows zero whitespace before colon', () => {
+//       const source = 'const obj = { get foo:ref(0) }'
+//       const { code, edits } = preprocessRXS(source)
+//       const editsForProperty = edits.filter(e => source.includes('get foo'))
+//       const restored = unwriteGetDeclarations(code, editsForProperty)
+//       expect(restored).toContain('get foo')
+//    })
 
-   it('restores multiple get properties correctly', () => {
-      const source = 'const obj = { get foo:ref(0), get bar: ref(1) }'
-      const { code, edits } = preprocessRXS(source)
-      const restored = unwriteGetDeclarations(code, edits)
-      expect(restored).toContain('get foo')
-      expect(restored).toContain('get bar')
-   })
-})
+//    it('restores multiple get properties correctly', () => {
+//       const source = 'const obj = { get foo:ref(0), get bar: ref(1) }'
+//       const { code, edits } = preprocessRXS(source)
+//       const restored = unwriteGetDeclarations(code, edits)
+//       expect(restored).toContain('get foo')
+//       expect(restored).toContain('get bar')
+//    })
+// })

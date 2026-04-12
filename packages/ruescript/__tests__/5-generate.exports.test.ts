@@ -1,12 +1,24 @@
 import { describe, expect, it } from 'vitest'
-import { parseRXS } from './2-parse'
-import { printTSX } from './5-generate'
+import { parseRXS } from '../src/2-parse'
+import { printTSX } from '../src/5-generate'
 
 function parseProgram(code: string) {
    return parseRXS('exports-test.tsx', code).program
 }
 
 describe('printTSX export visitors', () => {
+   it('prints export all', () => {
+      const program = parseProgram('export * from "module"')
+      const output = printTSX(program).code
+      expect(output).toBe('export * from "module";\n')
+   })
+
+   it('prints export named exports', () => {
+      const program = parseProgram('export {x, y, z} from "module"')
+      const output = printTSX(program).code
+      expect(output).toBe('export { x, y, z } from "module";\n')
+   })
+
    it('prints export specifier in local-as-exported order', () => {
       const program = parseProgram('export { foo as bar }')
       const output = printTSX(program).code
