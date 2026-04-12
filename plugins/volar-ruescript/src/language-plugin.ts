@@ -59,6 +59,6 @@ export class RueScriptVirtualCode implements VirtualCode {
       const length = snapshot.getLength()
       const source = snapshot.getText(0, length)
       const result = transpileRueScript('virtual.rxs'/* FIX:? */, source)
-      this.mappings = generateMappings(source, result.transpiled, result.map) // { source, transpiled: { ast, code }, map }
+      this.mappings = result.map
    }
 }

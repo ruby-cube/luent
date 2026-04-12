@@ -10,38 +10,38 @@ const something = function () {
 }
 
 
-export function generateMappings(source: string, transpiled: { ast: Node, code: string }, map: Segment[][]): CodeMapping[] {
-   const mappings = []
+// export function generateMappings(source: string, transpiled: { ast: Node, code: string }, map: Segment[][]): CodeMapping[] {
+//    const mappings = []
 
-   walk(transpiled.ast, null, {
-      Identifier(node) {
-         mappings.push({
-            sourceOffsets: [node.start],
-            generatedOffsets: [],
-            lengths: [node.name.length],
-            data: {
-               completion: true,
-               format: true, 
-               navigation: true, // goto definition, references, rename
-               semantic: true, // hover, type info, symbol relationships, semantic highlighting
-               structure: true, // outline view, code folding regions, breadcrumbs, document symbols 
-               verification: true, // type errors, syntax errors, etc
-            },
-         })
-      },
-      FunctionDeclaration() {
+//    walk(transpiled.ast, null, {
+//       Identifier(node) {
+//          mappings.push({
+//             sourceOffsets: [node.start],
+//             generatedOffsets: [],
+//             lengths: [node.name.length],
+//             data: {
+//                completion: true,
+//                format: true, 
+//                navigation: true, // goto definition, references, rename
+//                semantic: true, // hover, type info, symbol relationships, semantic highlighting
+//                structure: true, // outline view, code folding regions, breadcrumbs, document symbols 
+//                verification: true, // type errors, syntax errors, etc
+//             },
+//          })
+//       },
+//       FunctionDeclaration() {
 
-      },
-      FunctionExpression() {
+//       },
+//       FunctionExpression() {
 
-      },
-      ArrowFunctionExpression() {
+//       },
+//       ArrowFunctionExpression() {
 
-      }
-   })
+//       }
+//    })
 
-   return [] as any as CodeMapping[]
-}
+//    return [] as any as CodeMapping[]
+// }
 
 // this.mappings = [{
 //    sourceOffsets: [0],
