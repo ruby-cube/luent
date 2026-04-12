@@ -85,7 +85,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * <T, U extends string>
        */
       TSTypeParameterDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('<')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write('>')
       },
 
       /**
@@ -1270,483 +1276,881 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * any
        */
       TSAnyKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('any')
       },
 
       /**
        * bigint
        */
       TSBigIntKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('bigint')
       },
 
       /**
        * boolean
        */
       TSBooleanKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('boolean')
       },
 
       /**
        * intrinsic
        */
       TSIntrinsicKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('intrinsic')
       },
 
       /**
        * ?
        */
       TSJSDocUnknownType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('?')
       },
 
       /**
        * never
        */
       TSNeverKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('never')
       },
 
       /**
        * null
        */
       TSNullKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('null')
       },
 
       /**
        * number
        */
       TSNumberKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('number')
       },
 
       /**
        * object
        */
       TSObjectKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('object')
       },
 
       /**
        * string
        */
       TSStringKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('string')
       },
 
       /**
        * symbol
        */
       TSSymbolKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('symbol')
       },
 
       /**
        * this
        */
       TSThisType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('this')
       },
 
       /**
        * undefined
        */
       TSUndefinedKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('undefined')
       },
 
       /**
        * unknown
        */
       TSUnknownKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('unknown')
       },
 
       /**
        * void
        */
       TSVoidKeyword(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('void')
       },
 
       /**
        * abstract accessor value: number
        */
       TSAbstractAccessorProperty(node, cursor) {
-         cursor.visitFallback(node)
+         const n = node as unknown as {
+            static?: boolean
+            accessibility?: string | null
+            key: ASTNode
+            computed?: boolean
+            optional?: boolean
+            typeAnnotation?: ASTNode | null
+            value?: ASTNode | null
+         }
+         cursor.indentScope()
+         cursor.write('abstract ')
+         if (n.static) cursor.write('static ')
+         if (n.accessibility) cursor.write(`${n.accessibility} `)
+         cursor.write('accessor ')
+         if (n.computed) {
+            cursor.write('[')
+            cursor.visit(n.key)
+            cursor.write(']')
+         }
+         else cursor.visit(n.key)
+         if (n.optional) cursor.write('?')
+         if (n.typeAnnotation) cursor.visit(n.typeAnnotation)
+         if (n.value) {
+            cursor.write(' = ')
+            cursor.visit(n.value)
+         }
+         cursor.write(';\n')
       },
 
       /**
        * abstract run(): void
        */
       TSAbstractMethodDefinition(node, cursor) {
-         cursor.visitFallback(node)
+         const n = node as unknown as {
+            static?: boolean
+            key: ASTNode
+            computed?: boolean
+            optional?: boolean
+            kind?: string
+            value?: { typeParameters?: ASTNode | null, params?: ASTNode[], returnType?: ASTNode | null }
+         }
+         cursor.indentScope()
+         cursor.write('abstract ')
+         if (n.static) cursor.write('static ')
+         if (n.kind === 'get' || n.kind === 'set') cursor.write(`${n.kind} `)
+         if (n.computed) {
+            cursor.write('[')
+            cursor.visit(n.key)
+            cursor.write(']')
+         }
+         else cursor.visit(n.key)
+         if (n.optional) cursor.write('?')
+         if (n.value?.typeParameters) cursor.visit(n.value.typeParameters)
+         cursor.write('(')
+         const params = n.value?.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (n.value?.returnType) cursor.visit(n.value.returnType)
+         cursor.write(';\n')
       },
 
       /**
        * abstract value: number
        */
       TSAbstractPropertyDefinition(node, cursor) {
-         cursor.visitFallback(node)
+         const n = node as unknown as {
+            static?: boolean
+            accessibility?: string | null
+            readonly?: boolean
+            key: ASTNode
+            computed?: boolean
+            optional?: boolean
+            definite?: boolean
+            typeAnnotation?: ASTNode | null
+            value?: ASTNode | null
+         }
+         cursor.indentScope()
+         cursor.write('abstract ')
+         if (n.static) cursor.write('static ')
+         if (n.accessibility) cursor.write(`${n.accessibility} `)
+         if (n.readonly) cursor.write('readonly ')
+         if (n.computed) {
+            cursor.write('[')
+            cursor.visit(n.key)
+            cursor.write(']')
+         }
+         else cursor.visit(n.key)
+         if (n.optional) cursor.write('?')
+         if (n.definite) cursor.write('!')
+         if (n.typeAnnotation) cursor.visit(n.typeAnnotation)
+         if (n.value) {
+            cursor.write(' = ')
+            cursor.visit(n.value)
+         }
+         cursor.write(';\n')
       },
 
       /**
        * string[]
        */
       TSArrayType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.elementType)
+         cursor.write('[]')
       },
 
       /**
        * (a: A) => B
        */
       TSCallSignatureDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (node.returnType) cursor.visit(node.returnType)
+         cursor.write(';')
       },
 
       /**
        * implements Serializable
        */
       TSClassImplements(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('implements ')
+         cursor.visit(node.expression)
+         if (node.typeArguments) cursor.visit(node.typeArguments)
       },
 
       /**
        * T extends U ? X : Y
        */
       TSConditionalType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.checkType)
+         cursor.write(' extends ')
+         cursor.visit(node.extendsType)
+         cursor.write(' ? ')
+         cursor.visit(node.trueType)
+         cursor.write(' : ')
+         cursor.visit(node.falseType)
       },
 
       /**
        * new (a: A) => B
        */
       TSConstructSignatureDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('new ')
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (node.returnType) cursor.visit(node.returnType)
+         cursor.write(';')
       },
 
       /**
        * new () => Date
        */
       TSConstructorType(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.abstract) cursor.write('abstract ')
+         cursor.write('new ')
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(') => ')
+         cursor.visit(node.returnType.typeAnnotation)
       },
 
       /**
        * declare function id<T>(x: T): T
        */
       TSDeclareFunction(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('declare function')
+         if (node.id) {
+            cursor.write(' ')
+            cursor.visit(node.id)
+         }
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (node.returnType) cursor.visit(node.returnType)
+         cursor.write(';\n')
       },
 
       /**
        * declare function fn(a: A): B
        */
       TSEmptyBodyFunctionExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('function')
+         if (node.id) {
+            cursor.write(' ')
+            cursor.visit(node.id)
+         }
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (node.returnType) cursor.visit(node.returnType)
       },
 
       /**
        * enum E { A, B }
        */
       TSEnumBody(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{')
+         const members = node.members ?? []
+         if (members.length > 0) cursor.write(' ')
+         for (let i = 0; i < members.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(members[i])
+         }
+         if (members.length > 0) cursor.write(' ')
+         cursor.write('}')
       },
 
       /**
        * enum E { A, B }
        */
       TSEnumDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         if (node.declare) cursor.write('declare ')
+         const n = node as unknown as { const?: boolean }
+         if (n.const) cursor.write('const ')
+         cursor.write('enum ')
+         cursor.visit(node.id)
+         cursor.write(' ')
+         cursor.visit(node.body)
+         cursor.write('\n')
       },
 
       /**
        * A = 1
        */
       TSEnumMember(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.id)
+         if (node.initializer) {
+            cursor.write(' = ')
+            cursor.visit(node.initializer)
+         }
       },
 
       /**
        * export = value
        */
       TSExportAssignment(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('export = ')
+         cursor.visit(node.expression)
+         cursor.write(';\n')
       },
 
       /**
        * require("fs")
        */
       TSExternalModuleReference(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('require(')
+         cursor.visit(node.expression)
+         cursor.write(')')
       },
 
       /**
        * (a: A) => B
        */
       TSFunctionType(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(') => ')
+         cursor.visit(node.returnType.typeAnnotation)
       },
 
       /**
        * import fs = require("fs")
        */
       TSImportEqualsDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('import ')
+         if (node.importKind === 'type') cursor.write('type ')
+         cursor.visit(node.id)
+         cursor.write(' = ')
+         cursor.visit(node.moduleReference)
+         cursor.write(';\n')
       },
 
       /**
        * import("pkg").Type
        */
       TSImportType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('import(')
+         cursor.visit(node.source)
+         if (node.options) {
+            cursor.write(', ')
+            cursor.visit(node.options)
+         }
+         cursor.write(')')
+         if (node.qualifier) {
+            cursor.write('.')
+            cursor.visit(node.qualifier)
+         }
+         if (node.typeArguments) cursor.visit(node.typeArguments)
       },
 
       /**
        * [k: string]: number
        */
       TSIndexSignature(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.readonly) cursor.write('readonly ')
+         cursor.write('[')
+         const params = node.parameters ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(']')
+         cursor.visit(node.typeAnnotation)
+         cursor.write(';')
       },
 
       /**
        * User["id"]
        */
       TSIndexedAccessType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.objectType)
+         cursor.write('[')
+         cursor.visit(node.indexType)
+         cursor.write(']')
       },
 
       /**
        * infer U
        */
       TSInferType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('infer ')
+         cursor.visit(node.typeParameter)
       },
 
       /**
        * fn<number>(1)
        */
       TSInstantiationExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.expression)
+         cursor.visit(node.typeArguments)
       },
 
       /**
        * interface A { x: number }
        */
       TSInterfaceBody(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{')
+         const members = node.body ?? []
+         if (members.length > 0) cursor.write(' ')
+         for (let i = 0; i < members.length; i++) {
+            if (i > 0) cursor.write(' ')
+            cursor.visit(members[i])
+         }
+         if (members.length > 0) cursor.write(' ')
+         cursor.write('}')
       },
 
       /**
        * interface A { x: number }
        */
       TSInterfaceDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         if (node.declare) cursor.write('declare ')
+         cursor.write('interface ')
+         cursor.visit(node.id)
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         const heritage = node.extends ?? []
+         if (heritage.length > 0) {
+            cursor.write(' extends ')
+            for (let i = 0; i < heritage.length; i++) {
+               if (i > 0) cursor.write(', ')
+               cursor.visit(heritage[i])
+            }
+         }
+         cursor.write(' ')
+         cursor.visit(node.body)
+         cursor.write('\n')
       },
 
       /**
        * extends Base
        */
       TSInterfaceHeritage(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.expression)
+         if (node.typeArguments) cursor.visit(node.typeArguments)
       },
 
       /**
        * A & B
        */
       TSIntersectionType(node, cursor) {
-         cursor.visitFallback(node)
+         const types = node.types ?? []
+         for (let i = 0; i < types.length; i++) {
+            if (i > 0) cursor.write(' & ')
+            cursor.visit(types[i])
+         }
       },
 
       /**
        * !string
        */
       TSJSDocNonNullableType(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.postfix) {
+            cursor.visit(node.typeAnnotation)
+            cursor.write('!')
+         }
+         else {
+            cursor.write('!')
+            cursor.visit(node.typeAnnotation)
+         }
       },
 
       /**
        * ?string
        */
       TSJSDocNullableType(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.postfix) {
+            cursor.visit(node.typeAnnotation)
+            cursor.write('?')
+         }
+         else {
+            cursor.write('?')
+            cursor.visit(node.typeAnnotation)
+         }
       },
 
       /**
-       * "on"
+       * "word"
        */
       TSLiteralType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.literal)
       },
 
       /**
        * { [K in Keys]: T[K] }
        */
       TSMappedType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{ ')
+         if (node.readonly === true) cursor.write('readonly ')
+         else if (node.readonly === '+' || node.readonly === '-') cursor.write(`${node.readonly}readonly `)
+         cursor.write('[')
+         cursor.visit(node.key)
+         cursor.write(' in ')
+         cursor.visit(node.constraint)
+         cursor.write(']')
+         if (node.nameType) {
+            cursor.write(' as ')
+            cursor.visit(node.nameType)
+         }
+         if (node.optional === true) cursor.write('?')
+         else if (node.optional === '+' || node.optional === '-') cursor.write(`${node.optional}?`)
+         if (node.typeAnnotation) {
+            cursor.write(': ')
+            cursor.visit(node.typeAnnotation)
+         }
+         cursor.write(' }')
       },
 
       /**
        * run(a: A): B
        */
       TSMethodSignature(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.readonly) cursor.write('readonly ')
+         if (node.kind === 'get' || node.kind === 'set') cursor.write(`${node.kind} `)
+         if (node.computed) {
+            cursor.write('[')
+            cursor.visit(node.key)
+            cursor.write(']')
+         }
+         else cursor.visit(node.key)
+         if (node.optional) cursor.write('?')
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write('(')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write(')')
+         if (node.returnType) cursor.visit(node.returnType)
+         cursor.write(';')
       },
 
       /**
        * declare module "x" { export const y: number }
        */
       TSModuleBlock(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{')
+         cursor.enterScope()
+         cursor.visitEach(node.body)
+         cursor.exitScope()
+         cursor.indentScope()
+         cursor.write('}')
       },
 
       /**
        * declare module "x" {}
        */
       TSModuleDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         if (node.declare) cursor.write('declare ')
+         if (node.global) cursor.write('global ')
+         else cursor.write(`${node.kind} `)
+         cursor.visit(node.id)
+         if (node.body) {
+            cursor.write(' ')
+            cursor.visit(node.body)
+         }
+         else {
+            cursor.write(';')
+         }
+         cursor.write('\n')
       },
 
       /**
        * name: string
        */
       TSNamedTupleMember(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.label)
+         if (node.optional) cursor.write('?')
+         cursor.write(': ')
+         cursor.visit(node.elementType)
       },
 
       /**
        * export as namespace Lib
        */
       TSNamespaceExportDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         cursor.write('export as namespace ')
+         cursor.visit(node.id)
+         cursor.write(';\n')
       },
 
       /**
        * value!
        */
       TSNonNullExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.expression)
+         cursor.write('!')
       },
 
       /**
        * T?
        */
       TSOptionalType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.typeAnnotation)
+         cursor.write('?')
       },
 
       /**
        * constructor(public id: number) {}
        */
       TSParameterProperty(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.accessibility) cursor.write(`${node.accessibility} `)
+         if (node.readonly) cursor.write('readonly ')
+         if (node.override) cursor.write('override ')
+         if (node.static) cursor.write('static ')
+         cursor.visit(node.parameter)
       },
 
       /**
        * (A | B)
        */
       TSParenthesizedType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('(')
+         cursor.visit(node.typeAnnotation)
+         cursor.write(')')
       },
 
       /**
        * id?: number
        */
       TSPropertySignature(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.readonly) cursor.write('readonly ')
+         if (node.computed) {
+            cursor.write('[')
+            cursor.visit(node.key)
+            cursor.write(']')
+         }
+         else cursor.visit(node.key)
+         if (node.optional) cursor.write('?')
+         if (node.typeAnnotation) cursor.visit(node.typeAnnotation)
+         cursor.write(';')
       },
 
       /**
        * ns.Type
        */
       TSQualifiedName(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.left)
+         cursor.write('.')
+         cursor.visit(node.right)
       },
 
       /**
        * ...T[]
        */
       TSRestType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('...')
+         cursor.visit(node.typeAnnotation)
       },
 
       /**
        * value satisfies Schema
        */
       TSSatisfiesExpression(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.visit(node.expression)
+         cursor.write(' satisfies ')
+         cursor.visit(node.typeAnnotation)
       },
 
       /**
        * `id-${number}`
        */
       TSTemplateLiteralType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('`')
+         const quasis = node.quasis ?? []
+         const types = node.types ?? []
+         for (let i = 0; i < quasis.length; i++) {
+            const quasi = quasis[i] as unknown as { value?: { raw?: string }, raw?: string }
+            const raw = quasi.value?.raw ?? quasi.raw ?? ''
+            cursor.write(raw)
+            if (i < types.length) {
+               cursor.write('${')
+               cursor.visit(types[i])
+               cursor.write('}')
+            }
+         }
+         cursor.write('`')
       },
 
       /**
        * [number, string]
        */
       TSTupleType(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('[')
+         const elements = node.elementTypes ?? []
+         for (let i = 0; i < elements.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(elements[i])
+         }
+         cursor.write(']')
       },
 
       /**
        * type ID = string | number
        */
       TSTypeAliasDeclaration(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.indentScope()
+         if (node.declare) cursor.write('declare ')
+         cursor.write('type ')
+         cursor.visit(node.id)
+         if (node.typeParameters) cursor.visit(node.typeParameters)
+         cursor.write(' = ')
+         cursor.visit(node.typeAnnotation)
+         cursor.write(';\n')
       },
 
       /**
        * <Foo>value
        */
       TSTypeAssertion(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('<')
+         cursor.visit(node.typeAnnotation)
+         cursor.write('>')
+         cursor.visit(node.expression)
       },
 
       /**
        * { a: string; b?: number }
        */
       TSTypeLiteral(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('{')
+         const members = node.members ?? []
+         if (members.length > 0) cursor.write(' ')
+         for (let i = 0; i < members.length; i++) {
+            if (i > 0) cursor.write(' ')
+            cursor.visit(members[i])
+         }
+         if (members.length > 0) cursor.write(' ')
+         cursor.write('}')
       },
 
       /**
        * keyof T
        */
       TSTypeOperator(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write(`${node.operator} `)
+         cursor.visit(node.typeAnnotation)
       },
 
       /**
        * T extends Base = Default
        */
       TSTypeParameter(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.const) cursor.write('const ')
+         if (node.in) cursor.write('in ')
+         if (node.out) cursor.write('out ')
+         cursor.visit(node.name)
+         if (node.constraint) {
+            cursor.write(' extends ')
+            cursor.visit(node.constraint)
+         }
+         if (node.default) {
+            cursor.write(' = ')
+            cursor.visit(node.default)
+         }
       },
 
       /**
        * <string, number>
        */
       TSTypeParameterInstantiation(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('<')
+         const params = node.params ?? []
+         for (let i = 0; i < params.length; i++) {
+            if (i > 0) cursor.write(', ')
+            cursor.visit(params[i])
+         }
+         cursor.write('>')
       },
 
       /**
        * x is Foo
        */
       TSTypePredicate(node, cursor) {
-         cursor.visitFallback(node)
+         if (node.asserts) cursor.write('asserts ')
+         cursor.visit(node.parameterName)
+         if (node.typeAnnotation) {
+            cursor.write(' is ')
+            cursor.visit(node.typeAnnotation.typeAnnotation)
+         }
       },
 
       /**
        * typeof value
        */
       TSTypeQuery(node, cursor) {
-         cursor.visitFallback(node)
+         cursor.write('typeof ')
+         cursor.visit(node.exprName)
+         if (node.typeArguments) cursor.visit(node.typeArguments)
       },
 
       /**
