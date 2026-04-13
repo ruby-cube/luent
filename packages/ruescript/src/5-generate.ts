@@ -1,4 +1,4 @@
-import type { ArrayExpression, AssignmentExpression, Node as ASTNode, BinaryExpression, ForInStatement, ForOfStatement, ForStatement, WhileStatement, LogicalExpression, PrivateInExpression, Program, ArrayPattern } from 'oxc-parser'
+import type { ArrayExpression, AssignmentExpression, Node as ASTNode, BinaryExpression, ForInStatement, ForOfStatement, ForStatement, WhileStatement, LogicalExpression, PrivateInExpression, Program, ArrayPattern, BlockStatement, TSModuleBlock, StaticBlock } from 'oxc-parser'
 import { CodeMapping } from "@volar/language-core";
 import { createStack } from '@rue/utils';
 import { FunctionDeclaration } from 'typescript';
@@ -533,16 +533,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             cursor.write(' implements ')
             for (let i = 0; i < impls.length; i++) {
                if (i > 0) cursor.write(', ')
-               const impl = impls[i] as unknown as {
-                  expression?: ASTNode
-                  typeArguments?: ASTNode
-               }
+               const impl = impls[i]
                if (impl.expression) {
                   cursor.visit(impl.expression)
                   if (impl.typeArguments) cursor.visit(impl.typeArguments)
                }
                else {
-                  cursor.visit(impls[i] as unknown as ASTNode)
+                  cursor.visit(impls[i])
                }
             }
          }
@@ -672,7 +669,15 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          const properties = node.properties ?? []
          if (properties.length > 0) cursor.write(' ')
          for (let i = 0; i < properties.length; i++) {
-            if (i > 0) cursor.write(', ')
+            if (i > 0) {
+               if (cursor.code.endsWith('\n')) {
+                  cursor.code = cursor.code.slice(0, -1)
+                  cursor.write(',\n')
+               }
+               else {
+                  cursor.write(', ')
+               }
+            }
             cursor.visit(properties[i])
          }
          if (properties.length > 0) cursor.write(' ')
@@ -683,13 +688,15 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * { a, b: c } = obj
        */
       ObjectPattern(node, cursor) {
-         cursor.write('{ ')
          const properties = node.properties ?? []
+         cursor.write('{')
+         if (properties.length > 0) cursor.write(' ')
          for (let i = 0; i < properties.length; i++) {
             if (i > 0) cursor.write(', ')
             cursor.visit(properties[i])
          }
-         cursor.write(' }')
+         if (properties.length > 0) cursor.write(' ')
+         cursor.write('}')
       },
 
       /**
@@ -815,10 +822,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       V8IntrinsicExpression(node, cursor) {
          cursor.write('%')
-         const name = (node as unknown as { name: string }).name
-         cursor.write(name)
+         const name = node.name
+         cursor.visit(name)
          cursor.write('(')
-         const args = (node as unknown as { arguments?: ASTNode[] }).arguments ?? []
+         const args = node.arguments ?? []
          for (let i = 0; i < args.length; i++) {
             if (i > 0) cursor.write(', ')
             cursor.visit(args[i])
@@ -831,7 +838,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       YieldExpression(node, cursor) {
          cursor.write('yield')
-         const delegate = (node as unknown as { delegate: boolean }).delegate
+         const delegate = node.delegate
          if (delegate) cursor.write('*')
          if (node.argument) {
             cursor.write(' ')
@@ -843,8 +850,11 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * const C = class {}
        */
       ClassExpression(node, cursor) {
-         cursor.write('class ')
-         if (node.id) cursor.visit(node.id)
+         cursor.write('class')
+         if (node.id) {
+            cursor.write(' ')
+            cursor.visit(node.id)
+         }
          if (node.typeParameters) cursor.visit(node.typeParameters)
          if (node.superClass) {
             cursor.write(' extends ')
@@ -856,16 +866,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             cursor.write(' implements ')
             for (let i = 0; i < impls.length; i++) {
                if (i > 0) cursor.write(', ')
-               const impl = impls[i] as unknown as {
-                  expression?: ASTNode
-                  typeArguments?: ASTNode
-               }
+               const impl = impls[i]
                if (impl.expression) {
                   cursor.visit(impl.expression)
                   if (impl.typeArguments) cursor.visit(impl.typeArguments)
                }
                else {
-                  cursor.visit(impls[i] as unknown as ASTNode)
+                  cursor.visit(impls[i])
                }
             }
          }
@@ -886,6 +893,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       // #endregion
 
       // #region: basics
+
       /**
        * x = 10
        */
@@ -912,12 +920,39 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       Literal(leaf, cursor) {
          if (leaf.raw) {
             cursor.write(leaf.raw, leaf)
+            return
          }
+
+         const literal = leaf as unknown as {
+            value?: unknown
+            regex?: { pattern?: string, flags?: string }
+            bigint?: string
+         }
+
+         if (literal.regex) {
+            const pattern = literal.regex.pattern ?? ''
+            const flags = literal.regex.flags ?? ''
+            cursor.write(`/${pattern}/${flags}`)
+            return
+         }
+
+         if (typeof literal.bigint === 'string') {
+            cursor.write(`${literal.bigint}n`)
+            return
+         }
+
+         if (typeof literal.value === 'string') {
+            cursor.write(JSON.stringify(literal.value))
+            return
+         }
+
+         cursor.write(String(literal.value))
       },
 
       /**
        * { key: value }
        * { [key]: value }
+       * { key() {} }
        */
       Property(node, cursor) {
          const writeKey = () => {
@@ -932,8 +967,52 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          }
 
          if (node.kind === 'init') {
+            if (node.method) {
+               const value = node.value as unknown as {
+                  async?: boolean
+                  generator?: boolean
+                  params?: ASTNode[]
+                  body?: ASTNode
+                  typeParameters?: ASTNode
+                  returnType?: ASTNode
+               }
+
+               if (value.async) cursor.write('async ')
+               if (value.generator) cursor.write('*')
+               writeKey()
+               if (value.typeParameters) cursor.visit(value.typeParameters)
+               cursor.write('(')
+               const params = value.params ?? []
+               for (let i = 0; i < params.length; i++) {
+                  if (i > 0) cursor.write(', ')
+                  cursor.visit(params[i])
+               }
+               cursor.write(')')
+               if (value.returnType) cursor.visit(value.returnType)
+               cursor.write(' ')
+               if (value.body) cursor.visit(value.body)
+               else cursor.write('{ }')
+               return
+            }
+
             writeKey()
-            if (!(node.shorthand && !node.computed)) {
+            let handledShorthand = false
+            if (node.shorthand && !node.computed && node.key.type === 'Identifier') {
+               if (node.value.type === 'Identifier' && node.key.name === node.value.name) {
+                  handledShorthand = true
+               }
+               else if (
+                  node.value.type === 'AssignmentPattern'
+                  && node.value.left.type === 'Identifier'
+                  && node.value.left.name === node.key.name
+               ) {
+                  cursor.write(' = ')
+                  cursor.visit(node.value.right)
+                  handledShorthand = true
+               }
+            }
+
+            if (!handledShorthand) {
                cursor.write(': ')
                cursor.visit(node.value)
             }
@@ -941,7 +1020,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          }
 
          if (node.kind === 'get' || node.kind === 'set') {
-            const value = node.value as unknown as { params?: ASTNode[], body?: ASTNode }
+            const value = node.value as unknown as { params?: ASTNode[], body?: ASTNode, returnType?: ASTNode }
             cursor.write(`${node.kind} `)
             writeKey()
             cursor.write('(')
@@ -950,7 +1029,9 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
                if (i > 0) cursor.write(', ')
                cursor.visit(params[i])
             }
-            cursor.write(') ')
+            cursor.write(')')
+            if (value.returnType) cursor.visit(value.returnType)
+            cursor.write(' ')
             if (value.body) cursor.visit(value.body)
             else cursor.write('{ }')
             return
@@ -1011,25 +1092,22 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * class C { static { init() } }
        */
       StaticBlock(node, cursor) {
-         cursor.indentScope()
-         cursor.write('static {')
-         cursor.enterScope()
-         cursor.visitEach(node.body)
-         cursor.exitScope()
-         cursor.indentScope()
-         cursor.write('}\n')
+         if (cursor.code.at(-1) === '\n') cursor.indentScope()
+         cursor.write('static ')
+         writeBlockBody(node, cursor)
       },
 
       /**
        * class C { value = 1 }
        */
       PropertyDefinition(node, cursor) {
+         writeDecorators(node, cursor)
          cursor.indentScope()
+         if (node.accessibility) cursor.write(`${node.accessibility} `)
          if (node.static) cursor.write('static ')
          if (node.declare) cursor.write('declare ')
          if (node.override) cursor.write('override ')
          if (node.readonly) cursor.write('readonly ')
-         if (node.accessibility) cursor.write(`${node.accessibility} `)
 
          if (node.computed) {
             cursor.write('[')
@@ -1054,9 +1132,14 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * class C { m() {} }
        */
       MethodDefinition(node, cursor) {
+         writeDecorators(node, cursor)
          cursor.indentScope()
+         if (node.accessibility) cursor.write(`${node.accessibility} `)
          if (node.static) cursor.write('static ')
-         const kind = (node as unknown as { kind: string }).kind
+         if ((node as unknown as { declare: boolean }).declare) cursor.write('declare ')
+         if (node.override) cursor.write('override ')
+         const kind = node.kind
+         const value = node.value ?? {}
          if (kind === 'constructor') {
             cursor.write('constructor')
          } else if (kind === 'get' || kind === 'set') {
@@ -1069,6 +1152,8 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
                cursor.visit(node.key)
             }
          } else {
+            if (value.async) cursor.write('async ')
+            if (value.generator) cursor.write('*')
             if (node.computed) {
                cursor.write('[')
                cursor.visit(node.key)
@@ -1077,7 +1162,6 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
                cursor.visit(node.key)
             }
          }
-         const value = node.value as unknown as { params?: ASTNode[], returnType?: ASTNode, body?: ASTNode, typeParameters?: ASTNode }
          if (value.typeParameters) cursor.visit(value.typeParameters)
          cursor.write('(')
          const params = value.params ?? []
@@ -1091,9 +1175,9 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             cursor.write(' ')
             cursor.visit(value.body)
          } else {
-            cursor.write(' { }')
+            cursor.write(';')
          }
-         cursor.write('\n')
+         if (cursor.code.at(-1) !== '\n') cursor.write('\n')
       },
 
       /**
@@ -1121,12 +1205,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * accessor value = 1 
        */
       AccessorProperty(node, cursor) {
+         writeDecorators(node, cursor)
          cursor.indentScope()
+         if (node.accessibility) cursor.write(`${node.accessibility} `)
          if (node.static) cursor.write('static ')
          if (node.declare) cursor.write('declare ')
          if (node.override) cursor.write('override ')
          if (node.readonly) cursor.write('readonly ')
-         if (node.accessibility) cursor.write(`${node.accessibility} `)
          cursor.write('accessor ')
 
          if (node.computed) {
@@ -1159,7 +1244,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       ForInStatement(node, cursor) {
          cursor.indentScope()
          cursor.write('for (')
-         cursor.visit(node.left)
+         writeForBinding(node.left, cursor)
          cursor.write(' in ')
          cursor.visit(node.right)
          cursor.write(')')
@@ -1173,7 +1258,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          cursor.indentScope()
          if (node.await) cursor.write('for await (')
          else cursor.write('for (')
-         cursor.visit(node.left)
+         writeForBinding(node.left, cursor)
          cursor.write(' of ')
          cursor.visit(node.right)
          cursor.write(')')
@@ -1228,9 +1313,19 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       DoWhileStatement(node, cursor) {
          cursor.indentScope()
-         cursor.write('do ')
-         cursor.visit(node.body)
-         cursor.write(' while (')
+         cursor.write('do')
+         if (node.body.type === 'BlockStatement') {
+            cursor.write(' ')
+            cursor.visit(node.body)
+         }
+         else {
+            cursor.write('\n')
+            cursor.enterScope()
+            cursor.visit(node.body)
+            cursor.exitScope()
+         }
+         cursor.indentScope()
+         cursor.write('while (')
          cursor.visit(node.test)
          cursor.write(');\n')
       },
@@ -1322,7 +1417,11 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       JSXExpressionContainer(node, cursor) {
          cursor.write('{')
-         if (node.expression.type !== 'JSXEmptyExpression') {
+         if (node.expression.type === 'JSXEmptyExpression') {
+            // Oxc does not surface JSX comment text here; emit a valid empty JSX comment placeholder.
+            cursor.write('/* */')
+         }
+         else {
             cursor.visit(node.expression)
          }
          cursor.write('}')
@@ -1410,7 +1509,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * hello
        */
       JSXText(node, cursor) {
-         cursor.write(node.raw ?? node.value)
+         if (typeof node.raw === 'string') {
+            cursor.write(node.raw)
+            return
+         }
+
+         const value = typeof node.value === 'string' ? node.value : ''
+         cursor.write(escapeJSXTextValue(value))
       },
 
       // #endregion
@@ -1587,10 +1692,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * abstract accessor value: number
        */
       TSAbstractAccessorProperty(node, cursor) {
+         writeDecorators(node, cursor)
          cursor.indentScope()
          cursor.write('abstract ')
          if (node.static) cursor.write('static ')
          if (node.accessibility) cursor.write(`${node.accessibility} `)
+         if (node.override) cursor.write('override ')
+         if (node.readonly) cursor.write('readonly ')
          cursor.write('accessor ')
          if (node.computed) {
             cursor.write('[')
@@ -1611,34 +1719,29 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * abstract run(): void
        */
       TSAbstractMethodDefinition(node, cursor) {
-         const n = node as unknown as {
-            static?: boolean
-            key: ASTNode
-            computed?: boolean
-            optional?: boolean
-            kind?: string
-            value?: { typeParameters?: ASTNode | null, params?: ASTNode[], returnType?: ASTNode | null }
-         }
+         writeDecorators(node, cursor)
          cursor.indentScope()
          cursor.write('abstract ')
-         if (n.static) cursor.write('static ')
-         if (n.kind === 'get' || n.kind === 'set') cursor.write(`${n.kind} `)
-         if (n.computed) {
+         if (node.static) cursor.write('static ')
+         if (node.accessibility) cursor.write(`${node.accessibility} `)
+         if (node.override) cursor.write('override ')
+         if (node.kind === 'get' || node.kind === 'set') cursor.write(`${node.kind} `)
+         if (node.computed) {
             cursor.write('[')
-            cursor.visit(n.key)
+            cursor.visit(node.key)
             cursor.write(']')
          }
-         else cursor.visit(n.key)
-         if (n.optional) cursor.write('?')
-         if (n.value?.typeParameters) cursor.visit(n.value.typeParameters)
+         else cursor.visit(node.key)
+         if (node.optional) cursor.write('?')
+         if (node.value?.typeParameters) cursor.visit(node.value.typeParameters)
          cursor.write('(')
-         const params = n.value?.params ?? []
+         const params = node.value?.params ?? []
          for (let i = 0; i < params.length; i++) {
             if (i > 0) cursor.write(', ')
             cursor.visit(params[i])
          }
          cursor.write(')')
-         if (n.value?.returnType) cursor.visit(n.value.returnType)
+         if (node.value?.returnType) cursor.visit(node.value.returnType)
          cursor.write(';\n')
       },
 
@@ -1646,34 +1749,25 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * abstract value: number
        */
       TSAbstractPropertyDefinition(node, cursor) {
-         const n = node as unknown as {
-            static?: boolean
-            accessibility?: string | null
-            readonly?: boolean
-            key: ASTNode
-            computed?: boolean
-            optional?: boolean
-            definite?: boolean
-            typeAnnotation?: ASTNode | null
-            value?: ASTNode | null
-         }
+         writeDecorators(node, cursor)
          cursor.indentScope()
          cursor.write('abstract ')
-         if (n.static) cursor.write('static ')
-         if (n.accessibility) cursor.write(`${n.accessibility} `)
-         if (n.readonly) cursor.write('readonly ')
-         if (n.computed) {
+         if (node.static) cursor.write('static ')
+         if (node.accessibility) cursor.write(`${node.accessibility} `)
+         if (node.override) cursor.write('override ')
+         if (node.readonly) cursor.write('readonly ')
+         if (node.computed) {
             cursor.write('[')
-            cursor.visit(n.key)
+            cursor.visit(node.key)
             cursor.write(']')
          }
-         else cursor.visit(n.key)
-         if (n.optional) cursor.write('?')
-         if (n.definite) cursor.write('!')
-         if (n.typeAnnotation) cursor.visit(n.typeAnnotation)
-         if (n.value) {
+         else cursor.visit(node.key)
+         if (node.optional) cursor.write('?')
+         if (node.definite) cursor.write('!')
+         if (node.typeAnnotation) cursor.visit(node.typeAnnotation)
+         if (node.value) {
             cursor.write(' = ')
-            cursor.visit(n.value)
+            cursor.visit(node.value)
          }
          cursor.write(';\n')
       },
@@ -1821,8 +1915,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       TSEnumDeclaration(node, cursor) {
          cursor.indentScope()
          if (node.declare) cursor.write('declare ')
-         const n = node as unknown as { const?: boolean }
-         if (n.const) cursor.write('const ')
+         if (node.const) cursor.write('const ')
          cursor.write('enum ')
          cursor.visit(node.id)
          cursor.write(' ')
@@ -2086,19 +2179,14 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          }
          cursor.write(')')
          if (node.returnType) cursor.visit(node.returnType)
-         cursor.write(';\n')
+         cursor.write(';')
       },
 
       /**
        * declare module "x" { export const y: number }
        */
       TSModuleBlock(node, cursor) {
-         cursor.write('{')
-         cursor.enterScope()
-         cursor.visitEach(node.body)
-         cursor.exitScope()
-         cursor.indentScope()
-         cursor.write('}\n')
+         writeBlockBody(node, cursor)
       },
 
       /**
@@ -2226,7 +2314,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          const quasis = node.quasis ?? []
          const types = node.types ?? []
          for (let i = 0; i < quasis.length; i++) {
-            const quasi = quasis[i] as unknown as { value?: { raw?: string }, raw?: string }
+            const quasi = quasis[i]/*  as unknown as { value?: { raw?: string }, raw?: string } */
             const raw = quasi.value?.raw ?? quasi.raw ?? ''
             cursor.write(raw)
             if (i < types.length) {
@@ -2255,9 +2343,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * type ID = string | number
        */
       TSTypeAliasDeclaration(node, cursor) {
-         cursor.indentScope()
+         const continuingExportType = /\bexport type[ \t]*$/.test(cursor.code)
+         if (!continuingExportType) cursor.indentScope()
          if (node.declare) cursor.write('declare ')
-         cursor.write('type ')
+         if (!continuingExportType) cursor.write('type ')
          cursor.visit(node.id)
          if (node.typeParameters) cursor.visit(node.typeParameters)
          cursor.write(' = ')
@@ -2390,6 +2479,9 @@ function ArrayExpression(node: ArrayExpression | ArrayPattern, cursor: CodePrint
       if (i > 0) cursor.write(', ')
       if (element) cursor.visit(element)
    }
+   if (elements.length > 0 && !elements[elements.length - 1]) {
+      cursor.write(',')
+   }
    cursor.write(']')
 }
 
@@ -2397,6 +2489,22 @@ function OperatorExpression(node: AssignmentExpression | PrivateInExpression | L
    cursor.visit(node.left)
    cursor.write(` ${node.operator} `)
    cursor.visit(node.right)
+}
+
+function writeForBinding(node: ASTNode, cursor: CodePrinter) {
+   if (node.type === 'VariableDeclaration') {
+      if (node.declare) cursor.write('declare ')
+      cursor.write(node.kind)
+      cursor.write(' ')
+      const declarations = node.declarations ?? []
+      for (let i = 0; i < declarations.length; i++) {
+         if (i > 0) cursor.write(', ')
+         cursor.visit(declarations[i])
+      }
+      return
+   }
+
+   cursor.visit(node)
 }
 
 function writeLoopBody(node: ForOfStatement | ForInStatement | ForStatement | WhileStatement, cursor: CodePrinter) {
@@ -2410,6 +2518,31 @@ function writeLoopBody(node: ForOfStatement | ForInStatement | ForStatement | Wh
       cursor.visit(node.body)
       cursor.exitScope()
    }
+}
+
+function writeBlockBody(node: BlockStatement | TSModuleBlock | StaticBlock, cursor: CodePrinter) {
+   cursor.write('{\n')
+   cursor.enterScope()
+   cursor.visitEach(node.body)
+   cursor.exitScope()
+   if (cursor.code.at(-1) === '\n') cursor.indentScope()
+   cursor.write('}\n')
+}
+
+function writeDecorators(node: { decorators?: ASTNode[] | null }, cursor: CodePrinter) {
+   const decorators = node.decorators ?? []
+   for (let i = 0; i < decorators.length; i++) {
+      cursor.visit(decorators[i])
+   }
+}
+
+function escapeJSXTextValue(value: string) {
+   return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('{', '&#123;')
+      .replaceAll('}', '&#125;')
 }
 
 

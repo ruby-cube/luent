@@ -43,6 +43,18 @@ describe('printTSX statement visitors', () => {
       expect(output).toBe('throw err;\n')
    })
 
+   it('prints return statement with value', () => {
+      const program = parseProgram('function f() { return value }')
+      const output = printTSX(program).code
+      expect(output).toBe('function f(){\n\treturn value;\n}\n')
+   })
+
+   it('prints bare return statement', () => {
+      const program = parseProgram('function f() { return }')
+      const output = printTSX(program).code
+      expect(output).toBe('function f(){\n\treturn;\n}\n')
+   })
+
    it('prints try/catch statements', () => {
       const program = parseProgram('try { run() } catch (err) { handle(err) }')
       const output = printTSX(program).code
@@ -77,5 +89,50 @@ describe('printTSX statement visitors', () => {
       const program = parseProgram('debugger;\n;')
       const output = printTSX(program).code
       expect(output).toBe('debugger;\n;\n')
+   })
+
+   it('prints for-in loops with declaration left side', () => {
+      const program = parseProgram('for (const key in obj) { use(key) }')
+      const output = printTSX(program).code
+      expect(output).toBe('for (const key in obj) {\n\tuse(key);\n}\n')
+   })
+
+   it('prints for-of loops and for-await-of in async function bodies', () => {
+      const program = parseProgram('for (const value of list) value\nasync function read() { for await (const chunk of stream) { consume(chunk) } }')
+      const output = printTSX(program).code
+      expect(output).toBe('for (const value of list)\n\tvalue;\nasync function read(){\n\tfor await (const chunk of stream) {\n\t\tconsume(chunk);\n\t}\n}\n')
+   })
+
+   it('prints classic for loops with initializer, test, and update', () => {
+      const program = parseProgram('for (let i = 0; i < n; i++) { tick(i) }')
+      const output = printTSX(program).code
+      expect(output).toBe('for (let i = 0; i < n; i++) {\n\ttick(i);\n}\n')
+   })
+
+   it('prints while and do-while loops in common forms', () => {
+      const program = parseProgram('while (ready) step()\ndo { move() } while (keepGoing)')
+      const output = printTSX(program).code
+      expect(output).toBe('while (ready)\n\tstep();\ndo {\n\tmove();\n}\nwhile (keepGoing);\n')
+   })
+
+   it('prints non-block do-while from AST nodes', () => {
+      const program = parseProgram('while (ready) step()')
+      const whileStmt = program.body[0] as unknown as { body: unknown, test: unknown }
+      program.body[0] = {
+         type: 'DoWhileStatement',
+         body: whileStmt.body,
+         test: whileStmt.test,
+         start: 0,
+         end: 0,
+      } as unknown as typeof program.body[number]
+
+      const output = printTSX(program).code
+      expect(output).toBe('do\n\tstep();\nwhile (ready);\n')
+   })
+
+   it('prints labeled loops with labeled continue and break statements', () => {
+      const program = parseProgram('loop: while (ok) { continue loop; break loop }')
+      const output = printTSX(program).code
+      expect(output).toBe('loop: while (ok) {\n\tcontinue loop;\n\tbreak loop;\n}\n')
    })
 })
