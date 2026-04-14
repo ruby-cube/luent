@@ -12,12 +12,12 @@ describe('transform', () => {
       const { code, edits } = preprocessRXS('get count = ref(0)')
       expect(code).toBe('gÆt_count = ref(0)')
       const ast = parseRXS('test.rxs', code)
-      const tsxTree = transformRXS(ast.program, edits)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
-      expect(generated.code).toBe('const countª = assertª(ref(0));')
+      expect(generated.code).toBe('import { assertª } from "@rue/ruescript";\nconst countª = assertª(ref(0));')
    })
 
-   it.only('preserves parentheses', () => {
+   it('preserves parentheses', () => {
       const ast = parseRXS('test.tsx', `#!/usr/bin/env node\nconst node /* hi */ = <div value={(count + 1)}>Hello</div>`)
       console.log('ast', ast.program)
       assertChildKeysDev(CHILD_KEYS)

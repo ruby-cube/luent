@@ -1,64 +1,79 @@
 import { transpileRueScript } from '@rue/ruescript';
-import { CodeMapping, forEachEmbeddedCode, LanguagePlugin, VirtualCode } from '@volar/language-core';
-import type { TypeScriptExtraServiceScript } from '@volar/typescript';
+import { CodeMapping, LanguagePlugin, VirtualCode } from '@volar/language-core';
 import type * as ts from 'typescript';
 import { URI } from 'vscode-uri';
-import { generateMappings } from './mappings';
 
 // FIX: Volar starter
 
-export const ruescriptLanguagePlugin: LanguagePlugin<URI> = {
-   getLanguageId(uri) {
-      if (uri.path.endsWith('.rxs')) {
+type ScriptId = URI | string;
+
+function scriptPath(id: ScriptId | undefined) {
+   if (!id) return '';
+   if (typeof id === 'string') return id;
+   return id.path;
+}
+
+function isRueScriptFile(id: ScriptId | undefined, languageId: string) {
+   const path = scriptPath(id);
+   return languageId === 'ruescript' || path.endsWith('.rxs');
+}
+
+function isRueScriptVirtualCode(code: VirtualCode) {
+   return code.id === 'root' && code.languageId === 'typescriptreact';
+}
+
+export const ruescriptLanguagePlugin: LanguagePlugin<ScriptId> = {
+   getLanguageId(scriptId) {
+      if (scriptPath(scriptId).endsWith('.rxs')) {
          return 'ruescript';
       }
    },
-   createVirtualCode(_uri, languageId, snapshot) {
-      if (languageId === 'ruescript') {
-         return new RueScriptVirtualCode(snapshot);
+   createVirtualCode(scriptId, languageId, snapshot) {
+      if (isRueScriptFile(scriptId, languageId)) {
+         return new RueScriptVirtualCode(scriptPath(scriptId), snapshot);
       }
    },
    typescript: {
       extraFileExtensions: [{ extension: 'rxs', isMixedContent: true, scriptKind: 4 satisfies ts.ScriptKind.TSX }],
-      getServiceScript() {
-         return undefined;
-      },
-      getExtraServiceScripts(fileName, root) {
-         // TODO:
-         const scripts: TypeScriptExtraServiceScript[] = [];
-         for (const code of forEachEmbeddedCode(root)) {
-            if (code.languageId === 'javascript') {
-               scripts.push({
-                  fileName: fileName + '.' + code.id + '.js',
-                  code,
-                  extension: '.js',
-                  scriptKind: 1 satisfies ts.ScriptKind.JS,
-               });
-            }
-            else if (code.languageId === 'typescript') {
-               scripts.push({
-                  fileName: fileName + '.' + code.id + '.ts',
-                  code,
-                  extension: '.ts',
-                  scriptKind: 3 satisfies ts.ScriptKind.TS,
-               });
-            }
+      getServiceScript(root) {
+         if (isRueScriptVirtualCode(root)) {
+            return {
+               code: root,
+               extension: '.tsx',
+               scriptKind: 4 satisfies ts.ScriptKind.TSX,
+            };
          }
-         return scripts;
       },
    },
 };
 
 
+function createSnapshot(text: string): ts.IScriptSnapshot {
+   return {
+      getText(start, end) {
+         return text.slice(start, end);
+      },
+      getLength() {
+         return text.length;
+      },
+      getChangeRange() {
+         return undefined;
+      },
+   };
+}
+
+
 export class RueScriptVirtualCode implements VirtualCode {
    id = 'root';
-   languageId = 'ruescript';
+   languageId = 'typescriptreact';
    mappings: CodeMapping[] = []
+   snapshot: ts.IScriptSnapshot
 
-   constructor(public snapshot: ts.IScriptSnapshot) {
-      const length = snapshot.getLength()
-      const source = snapshot.getText(0, length)
-      const result = transpileRueScript('virtual.rxs'/* FIX:? */, source)
+   constructor(filePath: string, sourceSnapshot: ts.IScriptSnapshot) {
+      const length = sourceSnapshot.getLength()
+      const source = sourceSnapshot.getText(0, length)
+      const result = transpileRueScript(filePath || 'virtual.rxs', source)
+      this.snapshot = createSnapshot(result.transpiled.code)
       this.mappings = result.map
    }
 }

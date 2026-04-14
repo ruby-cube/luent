@@ -7,7 +7,6 @@ const TAB = '\t'
 class InternalError extends Error { }
 
 export function printTSX(program: Program): { code: string, map: CodeMapping[] } {
-
    const file = new CodePrinter({
       /**
        * const answer = 42
@@ -2568,6 +2567,15 @@ class CodePrinter {
    code = ''
    map: CodeMapping[] = []
 
+   private static readonly DEFAULT_MAPPING_CAPABILITIES = {
+      verification: true,
+      completion: true,
+      semantic: true,
+      navigation: true,
+      structure: true,
+      format: false,
+   }
+
    private depth = 0;
 
    enterScope() {
@@ -2597,16 +2605,17 @@ class CodePrinter {
    write(text: string, src?: { start: number, end: number }) {
       const start = this.code.length
       this.code += text
-      if (src && hasCapabilities(src)) {
+      if (src) {
          const end = this.code.length
          const length = end - start
-         if (length !== src.end - src.start)
-            throw new InternalError('source-generated segment mismatch')
+         if (length !== src.end - src.start) {
+            return
+         }
 
          this.map.push({
             sourceOffsets: [src.start],
             generatedOffsets: [start],
-            data: src.capabilities,
+            data: hasCapabilities(src) ? src.capabilities : CodePrinter.DEFAULT_MAPPING_CAPABILITIES,
             lengths: [length]
          })
       }
