@@ -17,7 +17,7 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
 
    // TODO: build offsets from edits
 
-   const transformed = walk(ast, null, {
+   const transformed = walk(ast, {dog: 'hi'}, {
 
       // Literal(node) {
       //    const edit = findEdit(node.start, edits)

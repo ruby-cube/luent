@@ -1,7 +1,5 @@
 import type { ArrayExpression, AssignmentExpression, Node as ASTNode, BinaryExpression, ForInStatement, ForOfStatement, ForStatement, WhileStatement, LogicalExpression, PrivateInExpression, Program, ArrayPattern, BlockStatement, TSModuleBlock, StaticBlock } from 'oxc-parser'
 import { CodeMapping } from "@volar/language-core";
-import { createStack } from '@rue/utils';
-import { FunctionDeclaration } from 'typescript';
 import { Capabilities } from './capabilities';
 
 const TAB = '\t'
@@ -2314,7 +2312,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          const quasis = node.quasis ?? []
          const types = node.types ?? []
          for (let i = 0; i < quasis.length; i++) {
-            const quasi = quasis[i]/*  as unknown as { value?: { raw?: string }, raw?: string } */
+            const quasi = quasis[i] as unknown as { value?: { raw?: string }, raw?: string }
             const raw = quasi.value?.raw ?? quasi.raw ?? ''
             cursor.write(raw)
             if (i < types.length) {
@@ -2555,13 +2553,12 @@ export type BaseNode = {
 
 type NodeOf<K extends string, X> = X extends { type: infer T } ? K extends T ? X : never : never;
 
-export type Visitor<T> = (node: T, cursor: CodePrinter) => void;
+export type Visit<T> = (node: T, cursor: CodePrinter) => void;
 
 export type Visitors<T extends BaseNode = BaseNode> = {
-   [K in T['type']]?: Visitor<NodeOf<K, T>>;
+   [K in T['type']]?: Visit<NodeOf<K, T>>;
 };
 
-type FD = FunctionDeclaration['type']
 
 // #endregion
 

@@ -3,8 +3,8 @@ interface StackNode<T> {
    prev: StackNode<T> | undefined;
 }
 
-type Push<T> = (value: T) => void
-type Pop = () => void
+type Push<T> = (value: T) => T
+type Pop<T> = () => void
 type GetCurrent<T> = () => T | undefined
 
 export function createStack<T>(): [Push<T>, Pop, GetCurrent<T>] {
@@ -13,6 +13,7 @@ export function createStack<T>(): [Push<T>, Pop, GetCurrent<T>] {
 
    function push(value: T) {
       stack = { value: value, prev: stack }
+      return value;
    }
 
    function pop() {

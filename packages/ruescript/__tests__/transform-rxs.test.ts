@@ -3,6 +3,8 @@ import { preprocessRXS } from '../src/1-preprocess'
 import { parseRXS } from '../src/2-parse'
 import { transformRXS } from '../src/3-transform'
 import { printTSX } from '../src/5-generate'
+import { visitorKeys } from 'oxc-parser'
+import { assertChildKeysDev, CHILD_KEYS } from '../src/ast'
 
 
 describe('transform', () => {
@@ -13,5 +15,13 @@ describe('transform', () => {
       const tsxTree = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe('const countª = assertª(ref(0));')
+   })
+
+   it.only('preserves parentheses', () => {
+      const ast = parseRXS('test.tsx', `#!/usr/bin/env node\nconst node /* hi */ = <div value={(count + 1)}>Hello</div>`)
+      console.log('ast', ast.program)
+      assertChildKeysDev(CHILD_KEYS)
+      // console.log('ChildKeys', visitorKeys)
+      // console.log('My ChildKeys', CHILD_KEYS)
    })
 })

@@ -538,7 +538,11 @@ importers:
         specifier: workspace:*
         version: link:../ruescript
 
-  plugins/babel-plugin-luent: {}
+  plugins/babel-plugin-luent:
+    dependencies:
+      '@babel/types':
+        specifier: 7.29.0
+        version: 7.29.0
 
   plugins/eslint-plugin-mu:
     dependencies:

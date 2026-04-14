@@ -1,10 +1,13 @@
 {
-  "name": "@rue/babel-plugin-luent",
-  "private": true,
-  "description": "",
-  "type": "module",
-  "main": "./index.js",
-  "module": "./index.js",
-  "author": "Ruby Yi Wang",
-  "license": "MIT"
+   "name": "@rue/babel-plugin-luent",
+   "private": true,
+   "description": "",
+   "type": "module",
+   "main": "./index.js",
+   "module": "./index.js",
+   "author": "Ruby Yi Wang",
+   "license": "MIT",
+   "dependencies": {
+      "@babel/types": "7.29.0"
+   }
 }
