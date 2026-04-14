@@ -12,6 +12,10 @@ import { traverse } from './traverse';
 // (2) queue transforms pass
 // (3) apply transforms
 
+type Context = {
+   program?: Program
+}
+
 export function transform(ast: ASTNode, edits: Edit[]) {
 
    const {
@@ -26,14 +30,14 @@ export function transform(ast: ASTNode, edits: Edit[]) {
    //    // add offsets (based on edits)
    // })
 
-   return traverse(ast, {}, {
+   return traverse(ast, {} as Context, {
       Program(node, context) {
          node.body.forEach(statement => {
-            this.visit(statement)
+            this.visit(statement, { program: node })
          })
       },
 
-      ExpressionStatement(node, context) {
+      ExpressionStatement(node, { program }) {
          /**
           * get variable = expression
           * gÆt_variable = expression 
@@ -49,8 +53,7 @@ export function transform(ast: ASTNode, edits: Edit[]) {
                   // TODO: insert assertª to import statement
                }
                else {
-                  const program = cursor.context.program
-                  program.body.push(createAssertGetterImport())
+                  program?.body.push(createAssertGetterImport())
                }
             })
 

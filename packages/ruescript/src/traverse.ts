@@ -1,5 +1,6 @@
 import { createStack } from "@rue/utils";
 import { CHILD_KEYS } from "./ast";
+import { AnyObject } from "@rue/types";
 
 // #region: Types adapted from @svelte/zimmerframe
 
@@ -9,12 +10,14 @@ type BaseNode = {
    path?: [string] | [string, string] // key, index
 };
 
+type BaseNodeProxy = BaseNode & { [PROXY]: boolean }
+
 type NodeOf<K extends string, X> = X extends { type: infer T } ? K extends T ? X : never : never;
 
 type Visitors<T extends BaseNode, C> = {
    [K in T['type']]?: Visit<NodeOf<K, T>, C>;
 };
-type Visit<T extends BaseNode, C> = (this: Cursor<C, T>, node: T, context: C) => void;
+type Visit<T extends BaseNode, C> = (this: Cursor<T, C>, node: T, context: C) => void;
 
 // #endregion
 
@@ -23,72 +26,14 @@ class InternalError extends Error { }
 
 export function traverse<T extends BaseNode, C>(ast: T, context: C & object, visitors: Visitors<T, C>) {
 
-   const proxyMap = new Map<BaseNode | BaseNode[], BaseNode | BaseNode[]>()
-   const missingChildKeysWarnings = new Set<string>()
    const cursor = new Cursor(visitors, CHILD_KEYS, context)
-   
+
    cursor.enterScope()
    try {
-      cursor.visit(NodeProxy(ast), context)
+      cursor.visit(ast, context)
    }
    finally {
       cursor.exitScope()
-   }
-   
-   function NodeProxy(node: BaseNode, parent?: BaseNode, path?: [string] | [string, string]) {
-      if (proxyMap.has(node)) return proxyMap.get(node) as BaseNode
-      const proxy = new Proxy(node, {
-         get(target, key) {
-            if (key === PROXY) return true;
-            if (key === 'parent') return parent;
-            if (key === 'path') return path;
-            const value = target[key as keyof BaseNode]
-            if (typeof key !== 'string') return value;
-            if (isNode(value)) {
-               return NodeProxy(value, target, [key])
-            }
-            // NOTE: 'Property' and 'key' are just examples to suppress ts errors
-            const keys = CHILD_KEYS[target.type as 'Property']
-            if (!keys) {
-               if (!missingChildKeysWarnings.has(target.type)) {
-                  missingChildKeysWarnings.add(target.type)
-                  console.warn('child keys do not exist for', target.type)
-               }
-               // fallback
-               if (isNode(value)) {
-                  return NodeProxy(value, target, [key])
-               }
-               if (value instanceof Array && value.some(isNode)) {
-                  return NodeListProxy(value as unknown as BaseNode[], target, key)
-               }
-               return value;
-            }
-            if (keys.indexOf(key as 'key') !== -1 && value instanceof Array) {
-               return NodeListProxy(value as unknown as BaseNode[], target, key)
-            }
-            return value
-         }
-      })
-      proxyMap.set(node, proxy)
-      return proxy
-   }
-
-   function NodeListProxy(nodes: BaseNode[], parent: BaseNode, key: string) {
-      if (proxyMap.has(nodes)) return proxyMap.get(nodes)!
-      const proxy = new Proxy(nodes, {
-         get(target, index) {
-            if (index === PROXY) return true;
-            if (index === 'parent') return parent;
-            const value = target[index as keyof any[]]
-            if (typeof index !== 'string') return value;
-            if (isNode(value)) {
-               return NodeProxy(value, parent, [key, index])
-            }
-            return value
-         }
-      })
-      proxyMap.set(nodes, proxy)
-      return proxy
    }
 
    return {
@@ -96,11 +41,6 @@ export function traverse<T extends BaseNode, C>(ast: T, context: C & object, vis
       transformed: cursor.applyTransformations()
    }
 }
-
-
-const PROXY = Symbol('proxy')
-
-
 
 
 
@@ -126,10 +66,13 @@ interface ScopeStack {
    get(): Scope | undefined
 }
 
+
+const PROXY = Symbol('proxy')
+
 /**
  * This implementation assumes each node in the ast is a unique object
  */
-class Cursor<C, T extends BaseNode> {
+class Cursor<T extends BaseNode, C> {
    private pushContext: (value: C) => C;
    private popContext: () => void;
    private getContext: () => C | undefined;
@@ -153,8 +96,7 @@ class Cursor<C, T extends BaseNode> {
    constructor(
       private visitors: Visitors<T, C>,
       private childKeys: { [key: string]: string[] },
-      private context: C,
-      private visited = new Set()
+      private context: C
    ) {
       const [pushScope, popScope, getScope] = createStack<Scope>()
       const [pushContext, popContext, getContext] = createStack<C>()
@@ -168,7 +110,10 @@ class Cursor<C, T extends BaseNode> {
       this.getContext = getContext;
    }
 
-   visit<N>(node: N & BaseNode, context?: C) {
+   private visited = new Set()
+
+   visit(node: T, context?: C) {
+      if (!(node as BaseNodeProxy & T)[PROXY]) node = this.NodeProxy(node)
       if (this.visited.has(node)) {
          console.warn('node has already been visited', node)
          return;
@@ -178,10 +123,10 @@ class Cursor<C, T extends BaseNode> {
          const visit = (this.visitors as Visitors<BaseNode, C>)[node.type]
          if (context) this.pushContext(context)
          if (visit) {
-            visit.apply(this, [node, context ?? this.getContext() ?? this.context])
+            visit.apply(this, [node, this.getContext() ?? this.context])
          }
          else {
-            this.autovisit(node, this)
+            this.autovisit(node, this.getContext() ?? this.context)
          }
       }
       finally {
@@ -189,30 +134,28 @@ class Cursor<C, T extends BaseNode> {
       }
    }
 
-   autovisit(node: BaseNode, cursor: Cursor<C, T>) {
-      const childKeys = this.childKeys[node.type]
-      if (!childKeys) {
-         console.warn('child keys do not exist for', node.type)
-         return;
-      }
+   private autovisit(node: T, context: C) {
+      const childKeys = this.childKeys[node.type] ?? Object.keys(node)
       for (const key of childKeys) {
-         const nested = node[key as keyof BaseNode] as BaseNode | BaseNode[]
-         if (nested instanceof Array) {
+         const nested = node[key as keyof T] as T | T[]
+         if (nested instanceof Array && nested.some(isNode)) {
             for (const node of nested) {
-               cursor.visit(node)
+               if (isNode(nested)) {
+                  this.visit(node)
+               }
             }
          }
          else if (isNode(nested)) {
-            cursor.visit(nested)
+            this.visit(nested)
          }
       }
    }
 
    private transforms: (() => void)[] = []
 
-   private getParentAndPath(node: BaseNode) {
+   private getParentAndPath(node: T) {
       const path = node.path
-      const parent = node.parent as BaseNode & { [key: string]: BaseNode | BaseNode[] | null }
+      const parent = node.parent as T & { [key: string]: T | T[] | null }
       if (!parent) throw new InternalError('Parent is missing')
       if (!path) throw new InternalError('Path is missing')
       return { parent, path }
@@ -227,14 +170,18 @@ class Cursor<C, T extends BaseNode> {
 
    /**
     * Queues replacement for after tree has been fully traversed. Must be called synchronously to visitor.
-    * Should not be called from a parent of node being replaced (use willMutate instead). Node be replaced must be directly visited.
     */
-   willReplace(node: BaseNode, other: BaseNode | BaseNode[]) {
+   willReplace(node: T, other: T | T[]) {
+      const proxy = this.asProxy(node)
+      if (!proxy) {
+         console.warn('Only nodes on the original ast as passed in through the visitor may be replaced. Use `willMutate` instead.')
+         return;
+      }
       this.transforms.push(() => {
          const { parent, path } = this.getParentAndPath(node)
          const [key, index] = path
          if (index) {
-            const array = parent[key] as BaseNode[]
+            const array = parent[key] as T[]
             if (other instanceof Array) {
                array.splice(parseInt(index), 1, ...other)
             }
@@ -243,7 +190,7 @@ class Cursor<C, T extends BaseNode> {
             }
          }
          else {
-            parent[key] = other
+            (parent as { [key: string]: T | T[] })[key] = other
          }
       })
    }
@@ -251,25 +198,30 @@ class Cursor<C, T extends BaseNode> {
    /**
     * Queues removal for after tree has been fully traversed. Must be called synchronously to visitor.
     */
-   willRemove(node: BaseNode) {
+   willRemove(node: T) {
+      const proxy = this.asProxy(node)
+      if (!proxy) {
+         console.warn('Only nodes on the original AST (as passed in through the visitor) may be removed. Use `willMutate` instead.')
+         return;
+      }
       this.transforms.push(() => {
-         const { parent, path } = this.getParentAndPath(node)
+         const { parent, path } = this.getParentAndPath(proxy)
          const [key, index] = path
          if (index) {
-            const array = parent[key] as BaseNode[]
+            const array = parent[key] as T[]
             array.splice(parseInt(index), 1)
          }
          else {
-            parent[key] = null
+            (parent as { [key: string]: T | T[] | null })[key] = null
          }
       })
    }
 
-   private insert(node: BaseNode, other: BaseNode | BaseNode[], offset: 1 | 0 = 0) {
+   private insert(node: T, other: T | T[], offset: 1 | 0 = 0) {
       const { parent, path } = this.getParentAndPath(node)
       const [key, index] = path
       if (index) {
-         const array = parent[key] as BaseNode[]
+         const array = parent[key] as T[]
          if (other instanceof Array) {
             array.splice(parseInt(index) + offset, 0, ...other)
          }
@@ -284,20 +236,36 @@ class Cursor<C, T extends BaseNode> {
    /**
     * Queues insertion for before tree has been fully traversed. Must be called synchronously to visitor.
     */
-   willInsertBefore(node: BaseNode, other: BaseNode | BaseNode[]) {
+   willInsertBefore(node: T, other: T | T[]) {
+      const proxy = this.asProxy(node)
+      if (!proxy) {
+         console.warn('Nodes may only be inserted relative to nodes on the original AST (as passed in through the visitor). Use `willMutate` instead.')
+         return;
+      }
       this.transforms.push(() => {
-         this.insert(node, other)
+         this.insert(proxy, other)
       })
-
    }
 
    /**
     * Queues insertion for after tree has been fully traversed. Must be called synchronously to visitor.
     */
-   willInsertAfter(node: BaseNode, other: BaseNode | BaseNode[]) {
+   willInsertAfter(node: T, other: T | T[]) {
+      const proxy = this.asProxy(node)
+      if (!proxy) {
+         console.warn('Nodes may only be inserted relative to nodes on the original AST (as passed in through the visitor). Use `willMutate` instead.')
+         return;
+      }
       this.transforms.push(() => {
-         this.insert(node, other, 1)
+         this.insert(proxy, other, 1)
       })
+   }
+
+   private asProxy(node: T) {
+      if (!(node as BaseNodeProxy & T)[PROXY]) {
+         return this.proxyMap.get(node) as T
+      }
+      return node;
    }
 
    applyTransformations(): boolean {
@@ -310,9 +278,70 @@ class Cursor<C, T extends BaseNode> {
 
       return true;
    }
+
+   private proxyMap = new Map<T | T[], T | T[]>()
+   private missingChildKeys = new Set<string>()
+
+   private NodeProxy(node: T, parent?: T, path?: [string] | [string, string]) {
+      if (this.proxyMap.has(node)) return this.proxyMap.get(node) as T
+      const cursor = this;
+      const proxy = new Proxy(node, {
+         get(target, key) {
+            if (key === PROXY) return true;
+            if (key === 'parent') return parent;
+            if (key === 'path') return path;
+            const value = target[key as keyof T]
+            if (typeof key !== 'string') return value;
+            if (isNode<T>(value)) {
+               return cursor.NodeProxy(value, target, [key])
+            }
+            // NOTE: 'Property' and 'key' are just examples to suppress ts errors
+            const keys = cursor.childKeys[target.type as 'Property']
+            if (!keys) {
+               if (!cursor.missingChildKeys.has(target.type)) {
+                  cursor.missingChildKeys.add(target.type)
+                  console.warn('child keys do not exist for', target.type)
+               }
+               // fallback
+               if (isNode<T>(value)) {
+                  return cursor.NodeProxy(value, target, [key])
+               }
+               if (value instanceof Array && value.some(isNode)) {
+                  return cursor.NodeListProxy(value, target, key)
+               }
+               return value;
+            }
+            if (keys.indexOf(key as 'key') !== -1 && value instanceof Array) {
+               return cursor.NodeListProxy(value, target, key)
+            }
+            return value
+         }
+      })
+      this.proxyMap.set(node, proxy)
+      return proxy
+   }
+
+   private NodeListProxy(nodes: T[], parent: T, key: string) {
+      if (this.proxyMap.has(nodes)) return this.proxyMap.get(nodes)!
+      const cursor = this;
+      const proxy = new Proxy(nodes, {
+         get(target, index) {
+            if (index === PROXY) return true;
+            if (index === 'parent') return parent;
+            const value = target[index as keyof any[]]
+            if (typeof index !== 'string') return value;
+            if (isNode(value)) {
+               return cursor.NodeProxy(value, parent, [key, index])
+            }
+            return value
+         }
+      })
+      this.proxyMap.set(nodes, proxy)
+      return proxy
+   }
 }
 
 
-function isNode(value: unknown): value is BaseNode {
+function isNode<T extends BaseNode>(value: unknown): value is T {
    return !!value && typeof value === 'object' && 'type' in value
 }
