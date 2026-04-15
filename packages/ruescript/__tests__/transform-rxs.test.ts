@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { preprocessRXS } from '../src/1-preprocess'
 import { parseRXS } from '../src/2-parse'
 import { transformRXS } from '../src/3-transform'
-import { printTSX } from '../src/5-generate'
+import { printTSX } from '../src/4-generate'
 import { visitorKeys } from 'oxc-parser'
 import { assertChildKeysDev, CHILD_KEYS } from '../src/ast'
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseRXS } from '../src/2-parse'
-import { printTSX } from '../src/5-generate'
+import { printTSX } from '../src/4-generate'
 
 function parseProgram(code: string) {
    return parseRXS('statements-test.tsx', code).program
