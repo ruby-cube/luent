@@ -28231,7 +28231,7 @@ function encodeGap(group) {
 }
 function applyEdits(code, edits) {
   if (edits.length === 0) {
-    console.log("*** early return");
+    console.log("*** early return", code);
     return code;
   }
   let result = code;
@@ -28251,6 +28251,7 @@ var RXSPreprocessor = class {
     this.rewriteGetVariableDeclarations();
     this.rewriteGetPropertyColonNotation();
     const edits = this.edits = this.edits.toSorted((a, b) => b.pos - a.pos);
+    console.log("edits", edits.length);
     this.code = applyEdits(this.source, edits);
     return this;
   }
@@ -29666,7 +29667,7 @@ function createImportSpecifier(name) {
   };
 }
 
-// ../../packages/ruescript/src/5-generate.ts
+// ../../packages/ruescript/src/4-generate.ts
 var TAB = "	";
 var InternalError2 = class extends Error {
 };
@@ -30071,9 +30072,12 @@ function printTSX(program) {
       if (node.returnType) {
         cursor.visit(node.returnType);
       }
-      if (node.body) cursor.visit(node.body);
-      else if (!node.declare) cursor.write("{ }");
+      if (node.body) {
+        cursor.write(" ");
+        cursor.visit(node.body);
+      } else if (!node.declare) cursor.write(" { }");
       if (cursor.code.at(-1) !== "\n") cursor.write("\n");
+      cursor.write("\n");
     },
     /**
      * const a: A = 1,
@@ -30093,7 +30097,7 @@ function printTSX(program) {
         }
         cursor.visit(declarations[i], node);
         if (i === limit - 1) {
-          cursor.write(";");
+          cursor.write(";\n");
         } else {
           cursor.write(",");
         }
@@ -31954,17 +31958,15 @@ var CodePrinter = class _CodePrinter {
   write(text, src) {
     const start = this.code.length;
     this.code += text;
-    if (src) {
+    if (src && hasCapabilities(src)) {
       const end = this.code.length;
       const length = end - start;
-      if (length !== src.end - src.start) {
-        return;
-      }
       this.map.push({
         sourceOffsets: [src.start],
         generatedOffsets: [start],
         data: hasCapabilities(src) ? src.capabilities : _CodePrinter.DEFAULT_MAPPING_CAPABILITIES,
-        lengths: [length]
+        lengths: [src.end - src.start],
+        generatedLengths: [length]
       });
     }
   }
@@ -32003,6 +32005,7 @@ function transpileRueScript(file, source) {
   const preTree = parseRXS(file, code);
   const { ast: transformedTree } = transformRXS(preTree.program, edits);
   const generated = printTSX(transformedTree);
+  console.log("map:", generated.map);
   return {
     source,
     transpiled: { ast: transformedTree, code: generated.code },

@@ -459,9 +459,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          if (node.returnType) {
             cursor.visit(node.returnType)
          }
-         if (node.body) cursor.visit(node.body)
-         else if (!node.declare) cursor.write('{ }')
+         if (node.body){
+            cursor.write(' ')
+             cursor.visit(node.body)
+            }
+         else if (!node.declare) cursor.write(' { }')
          if (cursor.code.at(-1) !== '\n') cursor.write('\n')
+            cursor.write('\n')
       },
 
       /**
@@ -482,7 +486,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             }
             cursor.visit(declarations[i], node)
             if (i === limit - 1) {
-               cursor.write(';')
+               cursor.write(';\n')
             }
             else {
                cursor.write(',')
@@ -2605,18 +2609,19 @@ class CodePrinter {
    write(text: string, src?: { start: number, end: number }) {
       const start = this.code.length
       this.code += text
-      if (src) {
+      if (src && hasCapabilities(src)) {
          const end = this.code.length
          const length = end - start
-         if (length !== src.end - src.start) {
-            return
-         }
+         // if (length !== src.end - src.start) {
+         //    return
+         // }
 
          this.map.push({
             sourceOffsets: [src.start],
             generatedOffsets: [start],
             data: hasCapabilities(src) ? src.capabilities : CodePrinter.DEFAULT_MAPPING_CAPABILITIES,
-            lengths: [length]
+            lengths: [src.end - src.start],
+            generatedLengths: [length]
          })
       }
    }

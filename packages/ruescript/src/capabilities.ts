@@ -2,6 +2,8 @@ import type { CodeMapping } from "@volar/language-core/lib/types"
 
 export type Capabilities = CodeMapping['data']
 
+
+
 export type BaseCapabilities = {
    completion: true,
    navigation: true,

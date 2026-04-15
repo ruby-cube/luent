@@ -14,7 +14,16 @@ describe('transform', () => {
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
-      expect(generated.code).toBe('import { assertª } from "@rue/ruescript";\nconst countª = assertª(ref(0));')
+      expect(generated.code).toBe('import { assertª } from "@rue/ruescript";\nconst countª = assertª(ref(0));\n')
+   })
+
+   it('works with new lines', () => {
+      const { code, edits } = preprocessRXS('function ref(a: number){\n}\n\nfunction frog() {\n   get count = ref(0);\n   return;\n}\n\nconst count = 0')
+      expect(code).toBe('function ref(a: number){\n}\n\nfunction frog() {\n   gÆt_count = ref(0);\n   return;\n}\n\nconst count = 0')
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe('import { assertª } from "@rue/ruescript";\nfunction ref(a: number) {\n}\n\nfunction frog() {\n\tconst countª = assertª(ref(0));\n\treturn;\n}\n\nconst count = 0;\n')
    })
 
    it('preserves parentheses', () => {

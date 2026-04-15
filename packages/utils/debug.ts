@@ -1,5 +1,6 @@
 let prefix = "@%"
 
+
 export const debug = {
    action(action: string, ...details: any[][]) {
       log(prefix)

@@ -9,6 +9,8 @@ export function transpileRueScript(file: string, source: string) {
    const { ast: transformedTree } = transformRXS(preTree.program, edits)
    const generated = printTSX(transformedTree)
 
+   console.log('map:', generated.map)
+
    return {
       source,
       transpiled: { ast: transformedTree, code: generated.code },

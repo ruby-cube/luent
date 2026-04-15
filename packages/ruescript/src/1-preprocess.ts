@@ -31,7 +31,7 @@ function encodeGap(group: string): string {
  */
 function applyEdits(code: string, edits: Edit[]): string {
    if (edits.length === 0) {
-      console.log('*** early return')
+      console.log('*** early return', code)
       return code
    }
 
@@ -40,7 +40,6 @@ function applyEdits(code: string, edits: Edit[]): string {
    for (const edit of edits) {
       result = result.slice(0, edit.pos) + edit.transformed + result.slice(edit.pos + edit.original.length)
    }
-
    return result
 }
 
@@ -50,11 +49,12 @@ class RXSPreprocessor {
 
    constructor(readonly source: string) {
    }
-
+   
    transform() {
       this.rewriteGetVariableDeclarations()
       this.rewriteGetPropertyColonNotation()
       const edits = this.edits = this.edits.toSorted((a, b) => b.pos - a.pos)
+      console.log('edits', edits.length)
       this.code = applyEdits(this.source, edits)
       return this
    }
@@ -78,7 +78,7 @@ class RXSPreprocessor {
          const identifier = match[2]
          const postGap = match[3]
          const transformed = 'gÆt' + encodeGap(gap) + identifier + postGap
-
+         
          this.edits.push({
             type: 'GetDeclaration',
             pos: index,
