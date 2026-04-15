@@ -1,6 +1,6 @@
 import type { ArrayExpression, AssignmentExpression, Node as ASTNode, BinaryExpression, ForInStatement, ForOfStatement, ForStatement, WhileStatement, LogicalExpression, PrivateInExpression, Program, ArrayPattern, BlockStatement, TSModuleBlock, StaticBlock } from 'oxc-parser'
-import { CodeMapping } from "@volar/language-core";
-import { Capabilities } from './capabilities';
+import { CodeInformation, CodeMapping } from "@volar/language-core";
+import { BASE_CAPABILITIES, Capabilities } from './capabilities';
 
 const TAB = '\t'
 
@@ -252,12 +252,18 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       BlockStatement(node, cursor) {
          if (cursor.code.at(-1) === '\n') cursor.indentScope()
-         cursor.write('{\n')
+         cursor.write('{\n', {
+            span: { start: node.start, end: node.start + 2 },
+            capabilities: { structure: true }
+         })
          cursor.enterScope()
          cursor.visitEach(node.body)
          cursor.exitScope()
          cursor.indentScope()
-         cursor.write('}\n')
+         cursor.write('}\n', {
+            span: { start: node.end - 2, end: node.end - 1 },
+            capabilities: { structure: true }
+         })
       },
 
       /**
@@ -459,13 +465,13 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
          if (node.returnType) {
             cursor.visit(node.returnType)
          }
-         if (node.body){
+         if (node.body) {
             cursor.write(' ')
-             cursor.visit(node.body)
-            }
+            cursor.visit(node.body)
+         }
          else if (!node.declare) cursor.write(' { }')
          if (cursor.code.at(-1) !== '\n') cursor.write('\n')
-            cursor.write('\n')
+         cursor.write('\n')
       },
 
       /**
@@ -499,7 +505,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       VariableDeclarator(node, cursor) {
          if (node.id.type === 'Identifier') {
-            cursor.write(node.id.name, node.id)
+            cursor.write(node.id.name, {
+               span: node.id,
+               capabilities: BASE_CAPABILITIES
+            })
             if (node.id.optional) cursor.write('?')
             if (node.definite) cursor.write('!')
             if (node.id.typeAnnotation) cursor.visit(node.id.typeAnnotation)
@@ -666,7 +675,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * { a: 1, b }
        */
       ObjectExpression(node, cursor) {
-         cursor.write('{')
+         cursor.write('{\n', {
+            span: { start: node.start, end: node.start + 2 },
+            capabilities: { structure: true }
+         })
          const properties = node.properties ?? []
          if (properties.length > 0) cursor.write(' ')
          for (let i = 0; i < properties.length; i++) {
@@ -682,7 +694,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             cursor.visit(properties[i])
          }
          if (properties.length > 0) cursor.write(' ')
-         cursor.write('}')
+         cursor.write('}', {
+            span: { start: node.end - 1, end: node.end },
+            capabilities: { structure: true }
+         })
       },
 
       /**
@@ -908,7 +923,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * foo
        */
       Identifier(node, cursor) {
-         cursor.write(node.name, node)
+         cursor.write(node.name, {
+            span: node,
+            capabilities: BASE_CAPABILITIES
+         })
          if (node.optional) cursor.write('?')
          if (node.typeAnnotation) cursor.visit(node.typeAnnotation)
       },
@@ -920,7 +938,7 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        */
       Literal(leaf, cursor) {
          if (leaf.raw) {
-            cursor.write(leaf.raw, leaf)
+            cursor.write(leaf.raw)
             return
          }
 
@@ -1444,7 +1462,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
        * Comp
        */
       JSXIdentifier(node, cursor) {
-         cursor.write(node.name)
+         cursor.write(node.name, {
+            span: node,
+            capabilities: BASE_CAPABILITIES
+         })
       },
 
       /**
@@ -2606,21 +2627,22 @@ class CodePrinter {
    ) {
    }
 
-   write(text: string, src?: { start: number, end: number }) {
+   write(text: string, map?: { span: { start: number, end: number }, capabilities?: CodeInformation }) {
       const start = this.code.length
       this.code += text
-      if (src && hasCapabilities(src)) {
+      if (map) {
+         const { span, capabilities } = map
+         if (span.start === 0 && span.end === 0) return; // synthetic node
+
          const end = this.code.length
          const length = end - start
-         // if (length !== src.end - src.start) {
-         //    return
-         // }
 
          this.map.push({
-            sourceOffsets: [src.start],
+            _DEV_: span.name,
+            sourceOffsets: [span.start],
             generatedOffsets: [start],
-            data: hasCapabilities(src) ? src.capabilities : CodePrinter.DEFAULT_MAPPING_CAPABILITIES,
-            lengths: [src.end - src.start],
+            data: capabilities ?? {},
+            lengths: [span.end - span.start],
             generatedLengths: [length]
          })
       }

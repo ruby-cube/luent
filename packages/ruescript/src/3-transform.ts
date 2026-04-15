@@ -99,8 +99,8 @@ function GetVariableTransformKit() {
    }
 
    function toGetVariableDeclaration(name: string, node: { expression: AssignmentExpression }): VariableDeclaration {
-      const identifier = name + GET_VARIABLE_SUFFIX;
-      const identifierStart = node.expression.start + 'const'.length + 1
+      const identifier = name;
+      const identifierStart = node.expression.start + 'get'.length + 1
       const initializer = node.expression.right
 
       return {
@@ -120,12 +120,12 @@ function GetVariableTransformKit() {
             },
             init: {
                type: 'CallExpression',
-               start: initializer.start,
-               end: initializer.end,
+               start: 0,
+               end: 0,
                callee: {
                   type: 'Identifier',
-                  start: initializer.start,
-                  end: initializer.end,
+                  start: 0,
+                  end: 0,
                   name: 'assertª',
                },
                arguments: [initializer],

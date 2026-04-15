@@ -1,9 +1,5 @@
-function ref(a: number){
-}
+get count = ref(0);
 
-function frog() {
-   get count = ref(0);
-   return;
+function ref(a: number) {
+   return () => a
 }
-
-const count = 0

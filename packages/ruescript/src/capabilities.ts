@@ -18,35 +18,35 @@ export type NoCapabilities = {
    verification: false
 }
 
-const BASE_CAPABILITIES = {
+export const BASE_CAPABILITIES = {
    verification: true,
    semantic: true,
    navigation: true,
    completion: true,
 };
 
-const NO_CAPABILITIES = {
+export const NO_CAPABILITIES = {
    verification: false,
    completion: false,
    semantic: false,
    navigation: false,
 };
 
-const SEMANTIC_ONLY = {
+export const SEMANTIC_ONLY = {
   verification: true,
   semantic: true,
   navigation: true,
   completion: false,
 };
 
-const COMPLETION_ONLY = {
-   completion: true,
+export const COMPLETION_ONLY = {
+  completion: true,
   verification: false,
   semantic: false,
   navigation: false,
 };
 
-const STRUCTURE_ONLY = {
+export const STRUCTURE_ONLY = {
   verification: false,
   completion: false,
   semantic: false,

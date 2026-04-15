@@ -29556,15 +29556,14 @@ function getEdit(pos, edits) {
   if (!edit) throw new Error("missing edit");
   return edit;
 }
-var GET_VARIABLE_SUFFIX = "\xAA";
 function GetVariableTransformKit() {
   function isGetVariableDeclaration(node) {
     const expression = node.expression;
     return expression.type === "AssignmentExpression" && expression.left.type === "Identifier" && expression.left.name.startsWith("g\xC6t_");
   }
   function toGetVariableDeclaration(name, node) {
-    const identifier = name + GET_VARIABLE_SUFFIX;
-    const identifierStart = node.expression.start + "const".length + 1;
+    const identifier = name;
+    const identifierStart = node.expression.start + "get".length + 1;
     const initializer = node.expression.right;
     return {
       type: "VariableDeclaration",
@@ -29583,12 +29582,12 @@ function GetVariableTransformKit() {
         },
         init: {
           type: "CallExpression",
-          start: initializer.start,
-          end: initializer.end,
+          start: 0,
+          end: 0,
           callee: {
             type: "Identifier",
-            start: initializer.start,
-            end: initializer.end,
+            start: 0,
+            end: 0,
             name: "assert\xAA"
           },
           arguments: [initializer],
@@ -29666,6 +29665,14 @@ function createImportSpecifier(name) {
     importKind: "value"
   };
 }
+
+// ../../packages/ruescript/src/capabilities.ts
+var BASE_CAPABILITIES = {
+  verification: true,
+  semantic: true,
+  navigation: true,
+  completion: true
+};
 
 // ../../packages/ruescript/src/4-generate.ts
 var TAB = "	";
@@ -29887,12 +29894,18 @@ function printTSX(program) {
      */
     BlockStatement(node, cursor) {
       if (cursor.code.at(-1) === "\n") cursor.indentScope();
-      cursor.write("{\n");
+      cursor.write("{\n", {
+        span: { start: node.start, end: node.start + 2 },
+        capabilities: { structure: true }
+      });
       cursor.enterScope();
       cursor.visitEach(node.body);
       cursor.exitScope();
       cursor.indentScope();
-      cursor.write("}\n");
+      cursor.write("}\n", {
+        span: { start: node.end - 2, end: node.end - 1 },
+        capabilities: { structure: true }
+      });
     },
     /**
      * if (ok) { run() } else { stop() }
@@ -30108,7 +30121,10 @@ function printTSX(program) {
      */
     VariableDeclarator(node, cursor) {
       if (node.id.type === "Identifier") {
-        cursor.write(node.id.name, node.id);
+        cursor.write(node.id.name, {
+          span: node.id,
+          capabilities: BASE_CAPABILITIES
+        });
         if (node.id.optional) cursor.write("?");
         if (node.definite) cursor.write("!");
         if (node.id.typeAnnotation) cursor.visit(node.id.typeAnnotation);
@@ -30257,7 +30273,10 @@ function printTSX(program) {
      * { a: 1, b }
      */
     ObjectExpression(node, cursor) {
-      cursor.write("{");
+      cursor.write("{\n", {
+        span: { start: node.start, end: node.start + 2 },
+        capabilities: { structure: true }
+      });
       const properties = node.properties ?? [];
       if (properties.length > 0) cursor.write(" ");
       for (let i = 0; i < properties.length; i++) {
@@ -30272,7 +30291,10 @@ function printTSX(program) {
         cursor.visit(properties[i]);
       }
       if (properties.length > 0) cursor.write(" ");
-      cursor.write("}");
+      cursor.write("}", {
+        span: { start: node.end - 1, end: node.end },
+        capabilities: { structure: true }
+      });
     },
     /**
      * { a, b: c } = obj
@@ -30476,7 +30498,10 @@ function printTSX(program) {
      * foo
      */
     Identifier(node, cursor) {
-      cursor.write(node.name, node);
+      cursor.write(node.name, {
+        span: node,
+        capabilities: BASE_CAPABILITIES
+      });
       if (node.optional) cursor.write("?");
       if (node.typeAnnotation) cursor.visit(node.typeAnnotation);
     },
@@ -30487,7 +30512,7 @@ function printTSX(program) {
      */
     Literal(leaf, cursor) {
       if (leaf.raw) {
-        cursor.write(leaf.raw, leaf);
+        cursor.write(leaf.raw);
         return;
       }
       const literal = leaf;
@@ -30936,7 +30961,10 @@ function printTSX(program) {
      * Comp
      */
     JSXIdentifier(node, cursor) {
-      cursor.write(node.name);
+      cursor.write(node.name, {
+        span: node,
+        capabilities: BASE_CAPABILITIES
+      });
     },
     /**
      * UI.Button
@@ -31924,7 +31952,7 @@ function writeDecorators(node, cursor) {
 function escapeJSXTextValue(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("{", "&#123;").replaceAll("}", "&#125;");
 }
-var CodePrinter = class _CodePrinter {
+var CodePrinter = class {
   constructor(visitors) {
     this.visitors = visitors;
   }
@@ -31955,17 +31983,20 @@ var CodePrinter = class _CodePrinter {
   indent() {
     this.write(TAB);
   }
-  write(text, src) {
+  write(text, map) {
     const start = this.code.length;
     this.code += text;
-    if (src && hasCapabilities(src)) {
+    if (map) {
+      const { span, capabilities } = map;
+      if (span.start === 0 && span.end === 0) return;
       const end = this.code.length;
       const length = end - start;
       this.map.push({
-        sourceOffsets: [src.start],
+        _DEV_: span.name,
+        sourceOffsets: [span.start],
         generatedOffsets: [start],
-        data: hasCapabilities(src) ? src.capabilities : _CodePrinter.DEFAULT_MAPPING_CAPABILITIES,
-        lengths: [src.end - src.start],
+        data: capabilities ?? {},
+        lengths: [span.end - span.start],
         generatedLengths: [length]
       });
     }
@@ -31995,9 +32026,6 @@ var CodePrinter = class _CodePrinter {
     }
   }
 };
-function hasCapabilities(node) {
-  return "capabilities" in node;
-}
 
 // ../../packages/ruescript/src/index.ts
 function transpileRueScript(file, source) {
