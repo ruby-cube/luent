@@ -2639,13 +2639,15 @@ class CodePrinter {
       }
    }
 
-   visit(node: ASTNode, parent?: ASTNode) {
+   visit(node: ASTNode | null | undefined, parent?: ASTNode) {
+      if (!node) return
       this.visitNode(node)
    }
 
 
-   visitEach(nodes: ASTNode[], parent?: ASTNode) {
+   visitEach(nodes: (ASTNode | null | undefined)[], parent?: ASTNode) {
       for (const node of nodes) {
+         if (!node) continue
          this.visitNode(node)
       }
    }

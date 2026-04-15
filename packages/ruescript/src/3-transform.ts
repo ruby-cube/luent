@@ -75,10 +75,9 @@ function findEdit(pos: number, edits: Edit[]) {
    const limit = edits.length;
    for (let i = lastIndex; i < limit; i++) {
       const edit = edits[i]
-      console.log('edit', edit)
-      console.log('pos', pos)
-      if (pos >= edit.pos && pos < edit.original.length) //TODO: should this be replacement or original length?
+      if (pos >= edit.pos && pos < edit.pos + edit.original.length) { // TODO: should this be replacement or original length?
          lastIndex = i;
+      }
       return edit
    }
 }

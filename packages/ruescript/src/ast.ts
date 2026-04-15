@@ -44,16 +44,22 @@ export type ChildKeyTuplesByNodeType<AllNodes extends BaseNode> = {
 export type OxcChildKeyTuplesByNodeType = ChildKeyTuplesByNodeType<ASTNode>
 
 // TODO: visitorKeys from oxc is missing 'hashbang' for Program; maybe missing other keys
-export const CHILD_KEYS: OxcChildKeyTuplesByNodeType = visitorKeys as OxcChildKeyTuplesByNodeType
+export const CHILD_KEYS: OxcChildKeyTuplesByNodeType = visitorKeys
 
-CHILD_KEYS.Program.push('hashbang')
+// {
+//    ...(visitorKeys as OxcChildKeyTuplesByNodeType),
+//    Program: [...(visitorKeys.Program ?? []), 'hashbang'] as OxcChildKeyTuplesByNodeType['Program'],
+// }
 
 const IS_DEV =
    (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV !== "production"
 
 export function assertChildKeysDev(map: OxcChildKeyTuplesByNodeType) {
    for (const [nodeType, keys] of Object.entries(map)) {
-      const canonicalKeys = visitorKeys[nodeType] ?? []
+      const canonicalKeys = [...(visitorKeys[nodeType] ?? [])]
+      if (nodeType === 'Program' && !canonicalKeys.includes('hashbang')) {
+         canonicalKeys.push('hashbang')
+      }
 
       for (let i = 0; i < keys.length; i++) {
          const key = keys[i]

@@ -29191,220 +29191,484 @@ function parseRXS(file, code) {
   });
 }
 
-// ../../node_modules/.pnpm/zimmerframe@1.1.4/node_modules/zimmerframe/src/walk.js
-function walk(node, state, visitors) {
-  const universal = visitors._;
-  let stopped = false;
-  function default_visitor(_, { next, state: state2 }) {
-    next(state2);
+// ../../packages/utils/Stack.ts
+function createStack() {
+  let stack = void 0;
+  function push(value) {
+    stack = { value, prev: stack };
+    return value;
   }
-  function visit(node2, path, state2) {
-    if (stopped) return;
-    if (!node2.type) return;
-    let result;
-    const mutations = {};
-    const context = {
-      path,
-      state: state2,
-      next: (next_state = state2) => {
-        path.push(node2);
-        for (const key in node2) {
-          if (key === "type") continue;
-          const child_node = node2[key];
-          if (child_node && typeof child_node === "object") {
-            if (Array.isArray(child_node)) {
-              const array_mutations = {};
-              const len = child_node.length;
-              let mutated = false;
-              for (let i = 0; i < len; i++) {
-                const node3 = child_node[i];
-                if (node3 && typeof node3 === "object") {
-                  const result2 = visit(node3, path, next_state);
-                  if (result2) {
-                    array_mutations[i] = result2;
-                    mutated = true;
-                  }
-                }
-              }
-              if (mutated) {
-                mutations[key] = child_node.map(
-                  (node3, i) => array_mutations[i] ?? node3
-                );
-              }
-            } else {
-              const result2 = visit(
-                /** @type {T} */
-                child_node,
-                path,
-                next_state
-              );
-              if (result2) {
-                mutations[key] = result2;
-              }
-            }
+  function pop() {
+    if (stack) stack = stack.prev;
+  }
+  function getCurrent() {
+    return stack?.value;
+  }
+  return [push, pop, getCurrent];
+}
+
+// ../../packages/ruescript/src/ast.ts
+var CHILD_KEYS = keys_default;
+var IS_DEV = globalThis.process?.env?.NODE_ENV !== "production";
+function assertChildKeysDev(map) {
+  for (const [nodeType, keys] of Object.entries(map)) {
+    const canonicalKeys = [...keys_default[nodeType] ?? []];
+    if (nodeType === "Program" && !canonicalKeys.includes("hashbang")) {
+      canonicalKeys.push("hashbang");
+    }
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (key === "parent") {
+        throw new Error(`CHILD_KEYS[${nodeType}] must not include "parent"`);
+      }
+      if (!canonicalKeys.includes(key)) {
+        throw new Error(`CHILD_KEYS[${nodeType}] includes unknown child key "${key}"`);
+      }
+    }
+  }
+}
+if (IS_DEV) {
+  assertChildKeysDev(CHILD_KEYS);
+}
+
+// ../../packages/ruescript/src/traverse.ts
+function traverse(ast, context, visitors) {
+  const cursor = new Cursor(visitors, CHILD_KEYS, context);
+  cursor.enterScope();
+  try {
+    cursor.visit(ast, context);
+  } finally {
+    cursor.exitScope();
+  }
+  return {
+    ast,
+    transformed: cursor.applyTransformations()
+  };
+}
+var Scope = class {
+  variables;
+  constructor(parent) {
+    this.variables = new Set(parent?.variables);
+  }
+  addVariable(name) {
+    this.variables.add(name);
+  }
+  has(name) {
+    return this.variables.has(name);
+  }
+};
+var PROXY = /* @__PURE__ */ Symbol("proxy");
+var Cursor = class {
+  constructor(visitors, childKeys, context) {
+    this.visitors = visitors;
+    this.childKeys = childKeys;
+    this.context = context;
+    const [pushScope, popScope, getScope] = createStack();
+    const [pushContext, popContext, getContext] = createStack();
+    this.scopeStack = {
+      push: pushScope,
+      pop: popScope,
+      get: getScope
+    };
+    this.pushContext = pushContext;
+    this.popContext = popContext;
+    this.getContext = getContext;
+  }
+  visitors;
+  childKeys;
+  context;
+  pushContext;
+  popContext;
+  getContext;
+  enterScope() {
+    return this.scopeStack.push(new Scope(this.scopeStack.get()));
+  }
+  exitScope() {
+    return this.scopeStack.pop();
+  }
+  get scope() {
+    const scope = this.scopeStack.get();
+    if (!scope) throw new InternalError("no scope :(");
+    return scope;
+  }
+  scopeStack;
+  visited = /* @__PURE__ */ new Set();
+  visit(node, context) {
+    if (!node[PROXY]) node = this.NodeProxy(node);
+    if (this.visited.has(node)) {
+      console.warn("node has already been visited", node);
+      return;
+    }
+    this.visited.add(node);
+    try {
+      const visit = this.visitors[node.type];
+      if (context) this.pushContext(context);
+      if (visit) {
+        visit.apply(this, [node, this.getContext() ?? this.context]);
+      } else {
+        this.autovisit(node, this.getContext() ?? this.context);
+      }
+    } finally {
+      if (context) this.popContext();
+    }
+  }
+  autovisit(node, context) {
+    const childKeys = this.childKeys[node.type] ?? Object.keys(node);
+    for (const key of childKeys) {
+      const nested = node[key];
+      if (nested instanceof Array && nested.some(isNode)) {
+        for (const child of nested) {
+          if (isNode(child)) {
+            this.visit(child);
           }
         }
-        path.pop();
-        if (Object.keys(mutations).length > 0) {
-          return apply_mutations(node2, mutations);
+      } else if (isNode(nested)) {
+        this.visit(nested);
+      }
+    }
+  }
+  // #region: transforms
+  transforms = [];
+  getParentAndPath(node) {
+    const path = node.path;
+    const parent = node.parent;
+    if (!parent) throw new InternalError("Parent is missing");
+    if (!path) throw new InternalError("Path is missing");
+    return { parent, path };
+  }
+  /**
+   * Queues mutation for after tree has been fully traversed. Must be called synchronously to visitor.
+   */
+  willMutate(mutation) {
+    this.transforms.push(mutation);
+  }
+  /**
+   * Queues replacement for after tree has been fully traversed. Must be called synchronously to visitor.
+   */
+  willReplace(node, other) {
+    const proxy = this.asProxy(node);
+    if (!proxy) {
+      console.warn("Only nodes on the original ast as passed in through the visitor may be replaced. Use `willMutate` instead.");
+      return;
+    }
+    this.transforms.push(() => {
+      const { parent, path } = this.getParentAndPath(node);
+      const [key, index] = path;
+      if (index) {
+        const array = parent[key];
+        if (other instanceof Array) {
+          array.splice(parseInt(index), 1, ...other);
+        } else {
+          array[index] = other;
         }
-      },
-      stop: () => {
-        stopped = true;
-      },
-      visit: (next_node, next_state = state2) => {
-        path.push(node2);
-        const result2 = visit(next_node, path, next_state) ?? next_node;
-        path.pop();
-        return result2;
+      } else {
+        parent[key] = other;
       }
-    };
-    let visitor = (
-      /** @type {Visitor<T, U, T>} */
-      visitors[
-        /** @type {T['type']} */
-        node2.type
-      ] ?? default_visitor
-    );
-    if (universal) {
-      let inner_result;
-      result = universal(node2, {
-        ...context,
-        /** @param {U} next_state */
-        next: (next_state = state2) => {
-          state2 = next_state;
-          inner_result = visitor(node2, {
-            ...context,
-            state: next_state
-          });
-          return inner_result;
+    });
+  }
+  /**
+   * Queues removal for after tree has been fully traversed. Must be called synchronously to visitor.
+   */
+  willRemove(node) {
+    const proxy = this.asProxy(node);
+    if (!proxy) {
+      console.warn("Only nodes on the original AST (as passed in through the visitor) may be removed. Use `willMutate` instead.");
+      return;
+    }
+    this.transforms.push(() => {
+      const { parent, path } = this.getParentAndPath(proxy);
+      const [key, index] = path;
+      if (index) {
+        const array = parent[key];
+        array.splice(parseInt(index), 1);
+      } else {
+        parent[key] = null;
+      }
+    });
+  }
+  insert(node, other, offset = 0) {
+    const { parent, path } = this.getParentAndPath(node);
+    const [key, index] = path;
+    if (index) {
+      const array = parent[key];
+      if (other instanceof Array) {
+        array.splice(parseInt(index) + offset, 0, ...other);
+      } else {
+        array.splice(parseInt(index) + offset, 0, other);
+      }
+      return;
+    }
+    console.warn("Cannot insert before node that is not an array element", node);
+  }
+  /**
+   * Queues insertion for before tree has been fully traversed. Must be called synchronously to visitor.
+   */
+  willInsertBefore(node, other) {
+    const proxy = this.asProxy(node);
+    if (!proxy) {
+      console.warn("Nodes may only be inserted relative to nodes on the original AST (as passed in through the visitor). Use `willMutate` instead.");
+      return;
+    }
+    this.transforms.push(() => {
+      this.insert(proxy, other);
+    });
+  }
+  /**
+   * Queues insertion for after tree has been fully traversed. Must be called synchronously to visitor.
+   */
+  willInsertAfter(node, other) {
+    const proxy = this.asProxy(node);
+    if (!proxy) {
+      console.warn("Nodes may only be inserted relative to nodes on the original AST (as passed in through the visitor). Use `willMutate` instead.");
+      return;
+    }
+    this.transforms.push(() => {
+      this.insert(proxy, other, 1);
+    });
+  }
+  asProxy(node) {
+    if (!node[PROXY]) {
+      return this.proxyMap.get(node);
+    }
+    return node;
+  }
+  applyTransformations() {
+    const transforms = this.transforms;
+    if (!transforms.length) return false;
+    for (const transform of transforms) {
+      transform();
+    }
+    return true;
+  }
+  // #endregion
+  // #region: Node Proxies with parent and path
+  proxyMap = /* @__PURE__ */ new Map();
+  missingChildKeys = /* @__PURE__ */ new Set();
+  NodeProxy(node, parent, path) {
+    if (this.proxyMap.has(node)) return this.proxyMap.get(node);
+    const cursor = this;
+    const proxy = new Proxy(node, {
+      get(target, key) {
+        if (key === PROXY) return true;
+        if (key === "parent") return parent;
+        if (key === "path") return path;
+        const value = target[key];
+        if (typeof key !== "string") return value;
+        if (isNode(value)) {
+          return cursor.NodeProxy(value, target, [key]);
         }
-      });
-      if (!result && inner_result) {
-        result = inner_result;
+        const keys = cursor.childKeys[target.type];
+        if (!keys) {
+          if (!cursor.missingChildKeys.has(target.type)) {
+            cursor.missingChildKeys.add(target.type);
+            console.warn("child keys do not exist for", target.type);
+          }
+          if (isNode(value)) {
+            return cursor.NodeProxy(value, target, [key]);
+          }
+          if (value instanceof Array && value.some(isNode)) {
+            return cursor.NodeListProxy(value, target, key);
+          }
+          return value;
+        }
+        if (keys.indexOf(key) !== -1 && value instanceof Array) {
+          return cursor.NodeListProxy(value, target, key);
+        }
+        return value;
       }
-    } else {
-      result = visitor(node2, context);
-    }
-    if (!result) {
-      if (Object.keys(mutations).length > 0) {
-        result = apply_mutations(node2, mutations);
+    });
+    this.proxyMap.set(node, proxy);
+    return proxy;
+  }
+  NodeListProxy(nodes, parent, key) {
+    if (this.proxyMap.has(nodes)) return this.proxyMap.get(nodes);
+    const cursor = this;
+    const proxy = new Proxy(nodes, {
+      get(target, index) {
+        if (index === PROXY) return true;
+        if (index === "parent") return parent;
+        const value = target[index];
+        if (typeof index !== "string") return value;
+        if (isNode(value)) {
+          return cursor.NodeProxy(value, parent, [key, index]);
+        }
+        return value;
       }
-    }
-    if (result) {
-      return result;
-    }
+    });
+    this.proxyMap.set(nodes, proxy);
+    return proxy;
   }
-  return visit(node, [], state) ?? node;
-}
-function apply_mutations(node, mutations) {
-  const obj = {};
-  const descriptors = Object.getOwnPropertyDescriptors(node);
-  for (const key in descriptors) {
-    Object.defineProperty(obj, key, descriptors[key]);
-  }
-  for (const key in mutations) {
-    obj[key] = mutations[key];
-  }
-  return (
-    /** @type {T} */
-    obj
-  );
+  // #endregion
+};
+var InternalError = class extends Error {
+};
+function isNode(value) {
+  return !!value && typeof value === "object" && "type" in value;
 }
 
 // ../../packages/ruescript/src/3-transform.ts
-var GET_VARIABLE_SUFFIX = "\xAA";
+function assertContext(value, key) {
+  if (!value) throw new Error(key + " is missing from context");
+}
 function transformRXS(ast, edits) {
-  let offset = 0;
-  const transformed = walk(ast, { dog: "hi" }, {
-    // Literal(node) {
-    //    const edit = findEdit(node.start, edits)
-    //    if (!edit) return;
-    //    const delta = edit.transformed.length - edit.original.length
-    //    if (delta) {
-    //       // unwrite insert
-    //       return {
-    //          type: 'Literal',
-    //          start: offset + node.start,
-    //          end: offset + node.end - delta,  // TODO: what about nested edits?
-    //          value: unwriteEdit(node.value, edit),
-    //          raw: unwriteEdit(node.raw, edit)
-    //       }
-    //    }
-    //    // unwrite edit
-    //    return {
-    //       type: 'Literal',
-    //       start: offset + node.start,
-    //       end: offset + node.end,
-    //       value: unwriteEdit(node.value, edit),
-    //       raw: unwriteEdit(node.raw, edit)
-    //    }
-    // },
-    ExpressionStatement(node) {
-      if (node.expression.type !== "AssignmentExpression") return;
-      console.log("*** node", node);
-      if (isPreGetVariableDeclaration(node.expression)) {
-        const edit = findEdit(node.start, edits);
-        if (!edit) throw new Error("missing edit");
-        const identifier = edit.identifier + GET_VARIABLE_SUFFIX;
-        const identifierStart = node.expression.start + "const".length + 1;
-        const initializer = node.expression.right;
-        return {
-          type: "VariableDeclaration",
-          start: offset + node.expression.start,
-          end: offset + node.expression.end,
-          kind: "const",
-          declarations: [{
-            type: "VariableDeclarator",
-            start: offset + identifierStart,
-            end: offset + node.expression.end,
-            id: {
-              type: "Identifier",
-              start: offset + identifierStart,
-              end: offset + identifierStart + identifier.length,
-              name: identifier
-            },
-            init: {
-              type: "CallExpression",
-              start: offset + initializer.start,
-              end: offset + initializer.end,
-              callee: {
-                type: "Identifier",
-                start: offset + initializer.start,
-                end: offset + initializer.end,
-                name: "assert\xAA"
-              },
-              arguments: [initializer],
-              optional: false
-            }
-          }]
-        };
+  const {
+    isGetVariableDeclaration,
+    toGetVariableDeclaration
+  } = GetVariableTransformKit();
+  return traverse(ast, {}, {
+    Program(node) {
+      node.body.forEach((statement) => {
+        this.visit(statement, { program: node });
+      });
+    },
+    ExpressionStatement(node, { program }) {
+      if (isGetVariableDeclaration(node)) {
+        assertContext(program, "program");
+        const edit = getEdit(node.start, edits);
+        this.willReplace(node, toGetVariableDeclaration(edit.identifier, node));
+        this.willMutate(() => importFromRuescript("assert\xAA", program));
+        this.visit(node.expression.right);
+      }
+    },
+    VariableDeclarator(node, context) {
+      this.visit(node.id);
+      if (node.id.type === "Identifier") {
+        this.scope.addVariable(node.id.name);
       }
     }
+    // TODO: scoping
   });
-  console.log("ast", ast);
-  console.log("transformed === ast", transformed === ast);
-  return transformed;
 }
 var lastIndex = 0;
 function findEdit(pos, edits) {
   const limit = edits.length;
   for (let i = lastIndex; i < limit; i++) {
     const edit = edits[i];
-    console.log("edit", edit);
-    console.log("pos", pos);
-    if (pos >= edit.pos && pos < edit.original.length)
+    if (pos >= edit.pos && pos < edit.pos + edit.original.length) {
       lastIndex = i;
+    }
     return edit;
   }
 }
-function isPreGetVariableDeclaration(node) {
-  return node.type === "AssignmentExpression" && node.left.type === "Identifier" && node.left.name.startsWith("g\xC6t_");
+function getEdit(pos, edits) {
+  const edit = findEdit(pos, edits);
+  if (!edit) throw new Error("missing edit");
+  return edit;
+}
+var GET_VARIABLE_SUFFIX = "\xAA";
+function GetVariableTransformKit() {
+  function isGetVariableDeclaration(node) {
+    const expression = node.expression;
+    return expression.type === "AssignmentExpression" && expression.left.type === "Identifier" && expression.left.name.startsWith("g\xC6t_");
+  }
+  function toGetVariableDeclaration(name, node) {
+    const identifier = name + GET_VARIABLE_SUFFIX;
+    const identifierStart = node.expression.start + "const".length + 1;
+    const initializer = node.expression.right;
+    return {
+      type: "VariableDeclaration",
+      start: node.expression.start,
+      end: node.expression.end,
+      kind: "const",
+      declarations: [{
+        type: "VariableDeclarator",
+        start: identifierStart,
+        end: node.expression.end,
+        id: {
+          type: "Identifier",
+          start: identifierStart,
+          end: identifierStart + identifier.length,
+          name: identifier
+        },
+        init: {
+          type: "CallExpression",
+          start: initializer.start,
+          end: initializer.end,
+          callee: {
+            type: "Identifier",
+            start: initializer.start,
+            end: initializer.end,
+            name: "assert\xAA"
+          },
+          arguments: [initializer],
+          optional: false
+        }
+      }]
+    };
+  }
+  return {
+    isGetVariableDeclaration,
+    toGetVariableDeclaration
+  };
+}
+function importFromRuescript(importName, program) {
+  const existing = findRuescriptImport(program.body);
+  if (existing && hasImport(importName, existing)) {
+    return;
+  }
+  const declaration = existing ?? createRuescriptImportDeclaration();
+  const specifier = createImportSpecifier(importName);
+  declaration.specifiers.push(specifier);
+  if (!existing) program.body.unshift(declaration);
+}
+function findRuescriptImport(body) {
+  for (const statement of body) {
+    if (statement.type === "ImportDeclaration" && statement.source.value === RUESCRIPT_IMPORT_SOURCE) {
+      return statement;
+    }
+  }
+}
+function hasImport(name, declaration) {
+  const specifiers = declaration.specifiers;
+  for (const specifier of specifiers) {
+    if (specifier.local.name === name)
+      return true;
+  }
+  return false;
+}
+var RUESCRIPT_IMPORT_SOURCE = "@rue/ruescript";
+function createRuescriptImportDeclaration() {
+  return {
+    type: "ImportDeclaration",
+    start: 0,
+    end: 0,
+    phase: "source",
+    importKind: "value",
+    attributes: [],
+    specifiers: [],
+    source: {
+      type: "Literal",
+      start: 0,
+      end: 0,
+      raw: `"${RUESCRIPT_IMPORT_SOURCE}"`,
+      value: RUESCRIPT_IMPORT_SOURCE
+    }
+  };
+}
+function createImportSpecifier(name) {
+  return {
+    type: "ImportSpecifier",
+    start: 0,
+    end: 0,
+    imported: {
+      type: "Identifier",
+      start: 0,
+      end: 0,
+      name
+    },
+    local: {
+      type: "Identifier",
+      start: 0,
+      end: 0,
+      name
+    },
+    importKind: "value"
+  };
 }
 
 // ../../packages/ruescript/src/5-generate.ts
 var TAB = "	";
-var InternalError = class extends Error {
+var InternalError2 = class extends Error {
 };
 function printTSX(program) {
   const file = new CodePrinter({
@@ -31707,11 +31971,11 @@ var CodePrinter = class _CodePrinter {
   activeNodes = /* @__PURE__ */ new Set();
   visitNode(node) {
     if (this.activeNodes.has(node)) {
-      throw new InternalError("Cycle detected while visiting AST");
+      throw new InternalError2("Cycle detected while visiting AST");
     }
     this.activeNodes.add(node);
     const visit = this.visitors[node.type];
-    if (!visit) throw new InternalError(`Visitor not yet implemented for ${node.type}`);
+    if (!visit) throw new InternalError2(`Visitor not yet implemented for ${node.type}`);
     try {
       visit(node, this);
     } finally {
@@ -31719,10 +31983,12 @@ var CodePrinter = class _CodePrinter {
     }
   }
   visit(node, parent) {
+    if (!node) return;
     this.visitNode(node);
   }
   visitEach(nodes, parent) {
     for (const node of nodes) {
+      if (!node) continue;
       this.visitNode(node);
     }
   }
@@ -31735,7 +32001,7 @@ function hasCapabilities(node) {
 function transpileRueScript(file, source) {
   const { code, edits } = preprocessRXS(source);
   const preTree = parseRXS(file, code);
-  const transformedTree = transformRXS(preTree.program, edits);
+  const { ast: transformedTree } = transformRXS(preTree.program, edits);
   const generated = printTSX(transformedTree);
   return {
     source,

@@ -139,9 +139,9 @@ class Cursor<T extends BaseNode, C> {
       for (const key of childKeys) {
          const nested = node[key as keyof T] as T | T[]
          if (nested instanceof Array && nested.some(isNode)) {
-            for (const node of nested) {
-               if (isNode(nested)) {
-                  this.visit(node)
+            for (const child of nested) {
+               if (isNode(child)) {
+                  this.visit(child)
                }
             }
          }
