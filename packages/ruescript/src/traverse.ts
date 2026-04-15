@@ -1,6 +1,5 @@
 import { createStack } from "@rue/utils";
 import { CHILD_KEYS } from "./ast";
-import { AnyObject } from "@rue/types";
 
 // #region: Types adapted from @svelte/zimmerframe
 
@@ -15,18 +14,19 @@ type BaseNodeProxy = BaseNode & { [PROXY]: boolean }
 type NodeOf<K extends string, X> = X extends { type: infer T } ? K extends T ? X : never : never;
 
 type Visitors<T extends BaseNode, C> = {
-   [K in T['type']]?: Visit<NodeOf<K, T>, C>;
+   [K in T['type']]?: Visit<T, NodeOf<K, T>, C>;
 };
-type Visit<T extends BaseNode, C> = (this: Cursor<T, C>, node: T, context: C) => void;
+
+type Visit<T extends BaseNode, N extends BaseNode, C> = (this: Cursor<T, C>, node: N, context: C) => void;
 
 // #endregion
 
-class InternalError extends Error { }
+
 
 
 export function traverse<T extends BaseNode, C>(ast: T, context: C & object, visitors: Visitors<T, C>) {
 
-   const cursor = new Cursor(visitors, CHILD_KEYS, context)
+   const cursor = new Cursor<T, C>(visitors, CHILD_KEYS, context)
 
    cursor.enterScope()
    try {
@@ -112,8 +112,8 @@ class Cursor<T extends BaseNode, C> {
 
    private visited = new Set()
 
-   visit(node: T, context?: C) {
-      if (!(node as BaseNodeProxy & T)[PROXY]) node = this.NodeProxy(node)
+   visit<N extends BaseNode>(node: N, context?: C) {
+      if (!(node as BaseNodeProxy & N)[PROXY]) node = this.NodeProxy(node as T & N) as T & N
       if (this.visited.has(node)) {
          console.warn('node has already been visited', node)
          return;
@@ -123,10 +123,10 @@ class Cursor<T extends BaseNode, C> {
          const visit = (this.visitors as Visitors<BaseNode, C>)[node.type]
          if (context) this.pushContext(context)
          if (visit) {
-            visit.apply(this, [node, this.getContext() ?? this.context])
+            visit.apply(this as Cursor<BaseNode, C>, [node, this.getContext() ?? this.context])
          }
          else {
-            this.autovisit(node, this.getContext() ?? this.context)
+            this.autovisit(node as T & N, this.getContext() ?? this.context)
          }
       }
       finally {
@@ -150,6 +150,8 @@ class Cursor<T extends BaseNode, C> {
          }
       }
    }
+
+   // #region: transforms
 
    private transforms: (() => void)[] = []
 
@@ -279,6 +281,10 @@ class Cursor<T extends BaseNode, C> {
       return true;
    }
 
+   // #endregion
+
+   // #region: Node Proxies with parent and path
+
    private proxyMap = new Map<T | T[], T | T[]>()
    private missingChildKeys = new Set<string>()
 
@@ -339,7 +345,14 @@ class Cursor<T extends BaseNode, C> {
       this.proxyMap.set(nodes, proxy)
       return proxy
    }
+
+   // #endregion
+   
 }
+
+
+
+class InternalError extends Error { }
 
 
 function isNode<T extends BaseNode>(value: unknown): value is T {

@@ -1,8 +1,9 @@
 function ref(a: number){
-
 }
 
 function frog() {
    get count = ref(0);
    return;
 }
+
+const count = 0
