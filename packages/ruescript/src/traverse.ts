@@ -45,18 +45,28 @@ export function traverse<T extends BaseNode, C>(ast: T, context: C & object, vis
 
 
 class Scope {
-   private variables: Set<string>
+   // private variables: Set<string>
+   private absorbedGetters: Set<string>
 
    constructor(parent: Scope | undefined) {
-      this.variables = new Set(parent?.variables)
+      // this.variables = new Set(parent?.variables)
+      this.absorbedGetters = new Set(parent?.absorbedGetters)
    }
 
-   addVariable(name: string) {
-      this.variables.add(name)
+   // addVariable(name: string) {
+   //    this.variables.add(name)
+   // }
+
+   // has(name: string) {
+   //    return this.variables.has(name)
+   // }
+
+   addAbsorbedGetter(name: string) {
+      this.absorbedGetters.add(name)
    }
 
-   has(name: string) {
-      return this.variables.has(name)
+   isAbsorbedGetter(name: string) {
+      return this.absorbedGetters.has(name)
    }
 }
 
@@ -72,7 +82,7 @@ const PROXY = Symbol('proxy')
 /**
  * This implementation assumes each node in the ast is a unique object
  */
-class Cursor<T extends BaseNode, C> {
+export class Cursor<T extends BaseNode, C> {
    private pushContext: (value: C) => C;
    private popContext: () => void;
    private getContext: () => C | undefined;
@@ -133,6 +143,13 @@ class Cursor<T extends BaseNode, C> {
          if (context) this.popContext()
       }
    }
+
+   visitEach<N extends BaseNode>(nodes: N[], context?: C) {
+      for (const node of nodes) {
+         this.visit(node, context)
+      }
+   }
+
 
    private autovisit(node: T, context: C) {
       const childKeys = this.childKeys[node.type] ?? Object.keys(node)
@@ -347,7 +364,7 @@ class Cursor<T extends BaseNode, C> {
    }
 
    // #endregion
-   
+
 }
 
 

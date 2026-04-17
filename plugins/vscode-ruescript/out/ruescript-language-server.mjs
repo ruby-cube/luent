@@ -28226,9 +28226,6 @@ function createRueScriptService() {
 }
 
 // ../../packages/ruescript/src/1-preprocess.ts
-function encodeGap(group) {
-  return group.replace(/[ \t]/g, "_").replace(/\/\*/g, "\u0192\xBA").replace(/\*\//g, "\xBA\u0192");
-}
 function applyEdits(code, edits) {
   if (edits.length === 0) {
     console.log("*** early return", code);
@@ -28272,15 +28269,14 @@ var RXSPreprocessor = class {
       const gap = match[1];
       const identifier = match[2];
       const postGap = match[3];
-      const transformed = "g\xC6t" + encodeGap(gap) + identifier + postGap;
+      const transformed = "let" + gap + identifier + postGap;
       this.edits.push({
         type: "GetDeclaration",
         pos: index,
         original,
         transformed,
         valid: void 0,
-        identifier,
-        gap
+        identifier
       });
     }
   }
@@ -28290,7 +28286,7 @@ var RXSPreprocessor = class {
    * 
    * Example:
    * `get count: ref(0)` -->
-   * `gÆt_count: ref(0)`
+   * `ge, count: ref(0)`
    */
   rewriteGetPropertyColonNotation() {
     const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g;
@@ -28301,14 +28297,13 @@ var RXSPreprocessor = class {
       const gap = match[1];
       const identifier = match[2];
       const postGap = match[3];
-      const transformed = "g\xC6t" + encodeGap(gap) + identifier + postGap;
+      const transformed = "ge," + gap + identifier + postGap;
       this.edits.push({
-        type: "GetDeclaration",
+        type: "GetPropertyColonNotation",
         pos: index,
         original,
         transformed,
         valid: void 0,
-        gap,
         identifier
       });
     }
@@ -29248,14 +29243,22 @@ function traverse(ast, context, visitors) {
 }
 var Scope = class {
   variables;
+  absorbedGetters;
   constructor(parent) {
     this.variables = new Set(parent?.variables);
+    this.absorbedGetters = new Set(parent?.absorbedGetters);
   }
   addVariable(name) {
     this.variables.add(name);
   }
   has(name) {
     return this.variables.has(name);
+  }
+  addAbsorbedGetter(name) {
+    this.absorbedGetters.add(name);
+  }
+  isAbsorbedGetter(name) {
+    return this.absorbedGetters.has(name);
   }
 };
 var PROXY = /* @__PURE__ */ Symbol("proxy");
@@ -29311,6 +29314,11 @@ var Cursor = class {
       }
     } finally {
       if (context) this.popContext();
+    }
+  }
+  visitEach(nodes, context) {
+    for (const node of nodes) {
+      this.visit(node, context);
     }
   }
   autovisit(node, context) {
@@ -29513,22 +29521,40 @@ function assertContext(value, key) {
 }
 function transformRXS(ast, edits) {
   const {
-    isGetVariableDeclaration,
-    toGetVariableDeclaration
+    isGetVariableDeclaration
   } = GetVariableTransformKit();
-  return traverse(ast, {}, {
+  return traverse(ast, { edits }, {
     Program(node) {
       node.body.forEach((statement) => {
         this.visit(statement, { program: node });
       });
     },
-    ExpressionStatement(node, { program }) {
-      if (isGetVariableDeclaration(node)) {
-        assertContext(program, "program");
+    VariableDeclaration(node, { program }) {
+      if (node.kind == "let") {
         const edit = getEdit(node.start, edits);
-        this.willReplace(node, toGetVariableDeclaration(edit.identifier, node));
-        this.willMutate(() => importFromRuescript("assert\xAA", program));
-        this.visit(node.expression.right);
+        if (isGetVariableDeclaration(node, edit)) {
+          assertContext(program, "program");
+          this.willMutate(() => {
+            importFromRuescript("assert\xAA", program);
+            node.kind = "const";
+          });
+          node.declarations.forEach((node2) => {
+            if (node2.id.type === "Identifier") {
+              this.scope.addAbsorbedGetter(node2.id.name);
+              this.willMutate(() => {
+                node2.init = wrapInCall("assert\xAA", node2.init ?? {
+                  type: "Literal",
+                  start: 0,
+                  end: 0,
+                  value: null,
+                  raw: "null"
+                });
+              });
+            } else {
+            }
+            this.visit(node2);
+          });
+        }
       }
     },
     VariableDeclarator(node, context) {
@@ -29536,9 +29562,35 @@ function transformRXS(ast, edits) {
       if (node.id.type === "Identifier") {
         this.scope.addVariable(node.id.name);
       }
-    }
+    },
     // TODO: scoping
+    BlockStatement(node, context) {
+      if (context.scoped) {
+        this.enterScope();
+        this.visitEach(node.body);
+        this.exitScope();
+      } else {
+        this.visitEach(node.body);
+      }
+    },
+    FunctionDeclaration(node, context) {
+      scopeFunction(this, node, context);
+    }
   });
+}
+function scopeFunction(cursor, node, context) {
+  const body = node.body;
+  if (body) {
+    cursor.enterScope();
+    node.params.forEach((param) => {
+      if (param.type === "Identifier") {
+        cursor.scope.addVariable(param.name);
+      } else {
+      }
+    });
+    cursor.visit(body, { ...context, scoped: true });
+    cursor.exitScope();
+  }
 }
 var lastIndex = 0;
 function findEdit(pos, edits) {
@@ -29557,48 +29609,12 @@ function getEdit(pos, edits) {
   return edit;
 }
 function GetVariableTransformKit() {
-  function isGetVariableDeclaration(node) {
-    const expression = node.expression;
-    return expression.type === "AssignmentExpression" && expression.left.type === "Identifier" && expression.left.name.startsWith("g\xC6t_");
-  }
-  function toGetVariableDeclaration(name, node) {
-    const identifier = name;
-    const identifierStart = node.expression.start + "get".length + 1;
-    const initializer = node.expression.right;
-    return {
-      type: "VariableDeclaration",
-      start: node.expression.start,
-      end: node.expression.end,
-      kind: "const",
-      declarations: [{
-        type: "VariableDeclarator",
-        start: identifierStart,
-        end: node.expression.end,
-        id: {
-          type: "Identifier",
-          start: identifierStart,
-          end: identifierStart + identifier.length,
-          name: identifier
-        },
-        init: {
-          type: "CallExpression",
-          start: 0,
-          end: 0,
-          callee: {
-            type: "Identifier",
-            start: 0,
-            end: 0,
-            name: "assert\xAA"
-          },
-          arguments: [initializer],
-          optional: false
-        }
-      }]
-    };
+  function isGetVariableDeclaration(declaration, edit) {
+    return edit.type === "GetDeclaration" && edit.pos === declaration.start;
   }
   return {
-    isGetVariableDeclaration,
-    toGetVariableDeclaration
+    isGetVariableDeclaration
+    // toGetVariableDeclaration
   };
 }
 function importFromRuescript(importName, program) {
@@ -29663,6 +29679,21 @@ function createImportSpecifier(name) {
       name
     },
     importKind: "value"
+  };
+}
+function wrapInCall(name, node) {
+  return {
+    type: "CallExpression",
+    start: 0,
+    end: 0,
+    arguments: [node],
+    callee: {
+      type: "Identifier",
+      start: 0,
+      end: 0,
+      name
+    },
+    optional: false
   };
 }
 

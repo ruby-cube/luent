@@ -1,3 +1,4 @@
+import { ACCESSOR_POSTFIX_OPERATOR } from "./3-transform"
 
 type BaseEdit = {
    type: string
@@ -10,9 +11,8 @@ type BaseEdit = {
 export type Edit = GetDeclarationEdit
 
 export type GetDeclarationEdit = {
-   type: 'GetDeclaration'
+   type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorPostfixOperator'
    identifier: string,
-   gap: string
 } & BaseEdit
 
 function encodeGap(group: string): string {
@@ -49,11 +49,12 @@ class RXSPreprocessor {
 
    constructor(readonly source: string) {
    }
-   
+
    transform() {
       this.rewriteGetVariableDeclarations()
       this.rewriteGetPropertyColonNotation()
-      const edits = this.edits = this.edits.toSorted((a, b) => b.pos - a.pos)
+      this.rewriteAccessorOperator()
+      const edits = this.edits = this.edits.toSorted((a, b) => a.pos - b.pos)
       console.log('edits', edits.length)
       this.code = applyEdits(this.source, edits)
       return this
@@ -72,21 +73,36 @@ class RXSPreprocessor {
 
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
-         const index = match.index ?? 0
-         const original = match[0]
-         const gap = match[1]
-         const identifier = match[2]
-         const postGap = match[3]
-         const transformed = 'gÆt' + encodeGap(gap) + identifier + postGap
-         
+         const [original, before, identifier, after] = match
+         const transformed = 'let' + before + identifier + after
+
          this.edits.push({
             type: 'GetDeclaration',
-            pos: index,
+            pos: match.index,
             original,
             transformed,
             valid: undefined,
-            identifier,
-            gap
+            identifier
+         })
+      }
+   }
+
+   rewriteAccessorOperator() {
+      const pattern = /([^$\w])([$A-Za-z_][\w$]*)@([^$\w])/g;
+
+      const matches = this.source.matchAll(pattern)
+
+      for (const match of matches) {
+         const [original, before, identifier, after] = match
+         const transformed = before + identifier + ACCESSOR_POSTFIX_OPERATOR + after
+         
+         this.edits.push({
+            type: 'AccessorPostfixOperator',
+            pos: match.index,
+            original,
+            transformed,
+            valid: undefined,
+            identifier
          })
       }
    }
@@ -97,27 +113,23 @@ class RXSPreprocessor {
     * 
     * Example:
     * `get count: ref(0)` -->
-    * `gÆt_count: ref(0)`
+    * `ge, count: ref(0)`
     */
    rewriteGetPropertyColonNotation() {
       const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g
 
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
-         const index = match.index ?? 0
-         const original = match[0]
-         const gap = match[1]
-         const identifier = match[2]
-         const postGap = match[3]
-         const transformed = 'gÆt' + encodeGap(gap) + identifier + postGap
+         const [original, before, identifier, after] = match
+         const index = match.index
+         const transformed = 'ge,' + before + identifier + after
 
          this.edits.push({
-            type: 'GetDeclaration',
+            type: 'GetPropertyColonNotation',
             pos: index,
             original,
             transformed,
             valid: undefined,
-            gap,
             identifier
          })
       }

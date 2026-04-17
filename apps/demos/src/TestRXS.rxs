@@ -1,4 +1,5 @@
 get count = ref(0);
+get other = ref('something');
 
 function ref(a: number) {
    return () => a

@@ -1,6 +1,6 @@
-import { AssignmentExpression, Node as ASTNode, Directive, ExpressionStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, Program, VariableDeclaration } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier } from 'oxc-parser'
 import { Edit } from "./1-preprocess";
-import { traverse } from './traverse';
+import { Cursor, traverse } from './traverse';
 
 // TODO: type context, pass separately from cursor
 // TODO: offsets
@@ -11,7 +11,9 @@ import { traverse } from './traverse';
 // (3) apply transforms
 
 type Context = {
-   program?: Program
+   program?: Program;
+   edits: Edit[];
+   scoped?: boolean;
 }
 
 function assertContext<T>(value: T | undefined, key: string): asserts value is T {
@@ -20,54 +22,148 @@ function assertContext<T>(value: T | undefined, key: string): asserts value is T
 
 export function transformRXS(ast: ASTNode, edits: Edit[]) {
 
-   const {
-      isGetVariableDeclaration,
-      toGetVariableDeclaration
-   } = GetVariableTransformKit()
-
-
    // TODO:
    // let offset = 0;
    // traverseAll(ast, (node) => {
    //    // add offsets (based on edits)
    // })
 
-   return traverse(ast, {} as Context, {
-      Program(node) {
+   return traverse(ast, { edits } as Context, {
+      Program(node, context) {
          node.body.forEach(statement => {
-            this.visit(statement, { program: node })
+            this.visit(statement, { ...context, program: node })
          })
       },
 
-      ExpressionStatement(node, { program }) {
-         /**
-          * get variable = expression
-          * gÆt_variable = expression 
-          * const variableª = assertª(expression)
-         */
-         if (isGetVariableDeclaration(node)) {
-            assertContext(program, 'program')
-
+      VariableDeclaration(node, context) {
+         if (node.kind == 'let') {
             const edit = getEdit(node.start, edits)
+            if (isGetVariableDeclaration(node, edit)) {
+               const { program } = context;
+               assertContext(program, 'program')
 
-            this.willReplace(node, toGetVariableDeclaration(edit.identifier, node))
-            this.willMutate(() => importFromRuescript('assertª', program))
-
-            this.visit(node.expression.right)
+               this.willMutate(() => {
+                  importFromRuescript('assertª', program);
+                  node.kind = 'const'
+               })
+               node.declarations.forEach(node => {
+                  /**
+                   * source: get variable = expression
+                   * prepro: let variable = expression 
+                   * final: const variable = assertª(expression)
+                   */
+                  if (node.id.type === 'Identifier') {
+                     const variable = node.id.name
+                     this.scope.addAbsorbedGetter(variable)
+                     this.scope.addAbsorbedGetter(variable+ACCESSOR_POSTFIX_OPERATOR)
+                     this.willMutate(() => {
+                        node.init = wrapInCall('assertª', node.init ?? {
+                           type: 'Literal',
+                           start: 0,
+                           end: 0,
+                           value: null,
+                           raw: 'null'
+                        })
+                     })
+                  }
+                  /**
+                  * source: get [a, b] = expression
+                  * source: get { a, b } = expression
+                  * source: get [a = () => 0, b] = expression
+                  * source: get { a = () => 0, b } = expression
+                  */
+                  else {
+                     // TODO: get destructuring declaration
+                     // this.visit(node)
+                  }
+               })
+            }
+            else {
+               this.visitEach(node.declarations)
+            }
+         }
+         else {
+            this.visitEach(node.declarations)
          }
       },
 
-      VariableDeclarator(node, context) {
-         this.visit(node.id)
-         if (node.id.type === 'Identifier') {
-            this.scope.addVariable(node.id.name)
-         }
-      },
+      // VariableDeclarator(node, context) {
+      //    this.visit(node.id)
+      //    // if (node.id.type === 'Identifier') {
+      //    //    this.scope.addVariable(node.id.name)
+      //    // }
+      // },
+
 
       // TODO: scoping
+
+      BlockStatement(node, context) {
+         if (context.scoped) {
+            this.enterScope()
+            this.visitEach(node.body)
+            this.exitScope()
+         }
+         else {
+            this.visitEach(node.body)
+         }
+      },
+
+      FunctionDeclaration(node, context) {
+         scopeFunction(this, node, context)
+      },
+
+      Identifier(leaf, { edits }) {
+         if (this.scope.isAbsorbedGetter(leaf.name)) {
+            /**
+             * Absorbed getter access
+             * source: count@
+             * prepro: countª
+             * final: count 
+            */
+            if (isAbsorbedGetterAccess(leaf.name)) {
+               
+               this.willMutate(() => {
+                  leaf.name = leaf.name.slice(0, -1)
+               })
+            }
+            /**
+             * Absorbed getter read
+             * source: count
+             * prepro: count
+             * final: count()
+             * NOTE: assumes get variable declarations, TODO: get variable assignments have stopped traversal
+             */
+            else {
+               this.willReplace(leaf, GetterCall(leaf))
+            }
+         }
+      },
    })
 }
 
+
+
+function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Function, context: Context) {
+   const body = node.body
+   if (body) {
+      cursor.enterScope()
+      node.params.forEach((param) => {
+         if (param.type === 'Identifier') {
+            // cursor.scope.addVariable(param.name)
+            // TODO: parameter with @ operator
+            const edit = findEdit(param.start, context.edits)
+            // if (isAbsorbedParameter(param, edit)) {
+
+            // }
+         }
+         else {
+            // TODO: "ArrayPattern" | "ObjectPattern" | "RestElement" | "AssignmentPattern" | "TSParameterProperty"
+         }
+      })
+      cursor.visit(body, { ...context, scoped: true })
+      cursor.exitScope()
+   }
+}
 
 let lastIndex = 0;
 
@@ -88,58 +184,33 @@ function getEdit(pos: number, edits: Edit[]) {
    return edit
 }
 
+// #region  get variable transforms
 
-const GET_VARIABLE_SUFFIX = 'ª'
+export const ACCESSOR_POSTFIX_OPERATOR = 'ª'
 
-function GetVariableTransformKit() {
+function isAbsorbedGetterAccess(identifier: string) {
+   return identifier.endsWith(ACCESSOR_POSTFIX_OPERATOR)
+}
 
-   function isGetVariableDeclaration(node: ExpressionStatement): node is ExpressionStatement & { expression: AssignmentExpression } {
-      const expression = node.expression
-      return expression.type === 'AssignmentExpression' && expression.left.type === 'Identifier' && expression.left.name.startsWith('gÆt_')
-   }
+function isGetVariableDeclaration(declaration: VariableDeclaration, edit: Edit) {
+   return edit.type === 'GetDeclaration' && edit.pos === declaration.start
+}
 
-   function toGetVariableDeclaration(name: string, node: { expression: AssignmentExpression }): VariableDeclaration {
-      const identifier = name;
-      const identifierStart = node.expression.start + 'get'.length + 1
-      const initializer = node.expression.right
+type Identifier = { name: string, start: number, end: number, type: 'Identifier' }
 
-      return {
-         type: 'VariableDeclaration',
-         start: node.expression.start,
-         end: node.expression.end,
-         kind: 'const',
-         declarations: [{
-            type: 'VariableDeclarator',
-            start: identifierStart,
-            end: node.expression.end,
-            id: {
-               type: 'Identifier',
-               start: identifierStart,
-               end: identifierStart + identifier.length,
-               name: identifier,
-            },
-            init: {
-               type: 'CallExpression',
-               start: 0,
-               end: 0,
-               callee: {
-                  type: 'Identifier',
-                  start: 0,
-                  end: 0,
-                  name: 'assertª',
-               },
-               arguments: [initializer],
-               optional: false
-            },
-         }],
-      }
-   }
-
+function GetterCall(node: Identifier): CallExpression {
    return {
-      isGetVariableDeclaration,
-      toGetVariableDeclaration
+      type: 'CallExpression',
+      arguments: [],
+      start: 0,
+      end: 0,
+      callee: node,
+      optional: false
    }
 }
+
+
+// #endregion
 
 
 // #region: import from ruescript
@@ -149,7 +220,7 @@ function importFromRuescript(importName: string, program: Program) {
    if (existing && hasImport(importName, existing)) {
       return;
    }
-   
+
    const declaration = existing ?? createRuescriptImportDeclaration()
    const specifier = createImportSpecifier(importName)
    declaration.specifiers.push(specifier)
@@ -216,4 +287,25 @@ function createImportSpecifier(name: string): ImportSpecifier {
    }
 }
 
+
+
 // #endregion
+
+
+function wrapInCall(name: string, node: Expression): CallExpression {
+   return {
+      type: 'CallExpression',
+      start: 0,
+      end: 0,
+      arguments: [node],
+      callee: {
+         type: 'Identifier',
+         start: 0,
+         end: 0,
+         name
+      },
+      optional: false
+   }
+}
+
+class InternalError extends Error { }
