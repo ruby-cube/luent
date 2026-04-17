@@ -1,4 +1,4 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression } from 'oxc-parser'
 import { Edit } from "./1-preprocess";
 import { Cursor, traverse } from './traverse';
 
@@ -55,7 +55,7 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
                   if (node.id.type === 'Identifier') {
                      const variable = node.id.name
                      this.scope.addAbsorbedGetter(variable)
-                     this.scope.addAbsorbedGetter(variable+ACCESSOR_POSTFIX_OPERATOR)
+                     this.scope.addAbsorbedGetter(variable + ACCESSOR_POSTFIX_OPERATOR)
                      this.willMutate(() => {
                         node.init = wrapInCall('assertª', node.init ?? {
                            type: 'Literal',
@@ -121,7 +121,7 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
              * final: count 
             */
             if (isAbsorbedGetterAccess(leaf.name)) {
-               
+
                this.willMutate(() => {
                   leaf.name = leaf.name.slice(0, -1)
                })
@@ -138,6 +138,76 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
             }
          }
       },
+      AssignmentExpression(node, context) {
+         const left = node.left
+         switch (left.type) {
+            case 'Identifier':
+               /**
+                * source: count = expression;
+                * final: assertµ(count).value = expression;
+                */
+               transformAccessorVariableWrite(this, node, 'left', left, context)
+               break;
+
+            case 'ArrayPattern':
+
+               break;
+            case 'MemberExpression':
+
+               break;
+            case 'ObjectPattern':
+
+               break;
+            case 'TSAsExpression':
+
+               break;
+            case 'TSNonNullExpression':
+
+               break;
+
+            case 'TSSatisfiesExpression':
+               break;
+
+            case 'TSTypeAssertion':
+               break;
+
+            default:
+               break;
+         }
+         this.visit(node.right)
+      },
+      UpdateExpression(node, context) {
+         const arg = node.argument
+         switch (arg.type) {
+            case 'Identifier':
+               /**
+                * source: count = expression;
+                * final: assertµ(count).value = expression;
+                */
+               transformAccessorVariableWrite(this, node, 'argument', arg, context)
+               break;
+
+            case 'MemberExpression':
+
+               break;
+
+            case 'TSAsExpression':
+
+               break;
+            case 'TSNonNullExpression':
+
+               break;
+
+            case 'TSSatisfiesExpression':
+               break;
+
+            case 'TSTypeAssertion':
+               break;
+
+            default:
+               break;
+         }
+      }
    })
 }
 
@@ -206,6 +276,54 @@ function GetterCall(node: Identifier): CallExpression {
       end: 0,
       callee: node,
       optional: false
+   }
+}
+
+function transformAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpression | UpdateExpression>(
+   cursor: Cursor<T, Context>,
+   node: N,
+   key: 'left' | 'argument',
+   left: Identifier,
+   context: Context
+) {
+   if (cursor.scope.isAbsorbedGetter(left.name)) {
+      const { program } = context;
+      assertContext(program, 'program')
+
+      cursor.willMutate(() => {
+         importFromRuescript('assertµ', program);
+         (node as AssignmentExpression)[key as 'left'] = {
+            type: 'MemberExpression',
+            start: 0,
+            end: 0,
+            computed: false,
+            optional: false,
+            object: {
+               type: 'CallExpression',
+               start: 0,
+               end: 0,
+               callee: {
+                  type: 'Identifier',
+                  start: 0,
+                  end: 0,
+                  name: 'assertµ'
+               },
+               arguments: [{
+                  type: 'Identifier',
+                  start: left.start,
+                  end: left.end,
+                  name: left.name
+               }],
+               optional: false
+            },
+            property: {
+               type: 'Identifier',
+               start: 0,
+               end: 0,
+               name: 'value'
+            }
+         }
+      })
    }
 }
 

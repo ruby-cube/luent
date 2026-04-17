@@ -42,8 +42,7 @@ describe('transform', () => {
       )
    })
 
-   // TODO:
-   it.skip('transforms accessor variable writes', () => {
+   it('transforms accessor variable writes (assignment expression)', () => {
       const { code, edits } = preprocessRXS(
          `get count = ref(0);\n` +
          `count = 2`
@@ -57,9 +56,29 @@ describe('transform', () => {
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/ruescript";\n` +
+         `import { assertª, assertµ } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
          `assertµ(count).value = 2;\n`
+      )
+   })
+
+   it('transforms accessor variable writes (update expression)', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `count++`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `count++`
+      )
+      const ast = parseRXS('test.rxs', code)
+      console.log('ast', ast.program.body, edits)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª, assertµ } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `assertµ(count).value++;\n`
       )
    })
 
