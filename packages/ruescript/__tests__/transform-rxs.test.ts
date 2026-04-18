@@ -3,7 +3,6 @@ import { preprocessRXS } from '../src/1-preprocess'
 import { parseRXS } from '../src/2-parse'
 import { transformRXS } from '../src/3-transform'
 import { printTSX } from '../src/4-generate'
-import { skip } from 'node:test'
 
 
 describe('transform', () => {
@@ -39,6 +38,25 @@ describe('transform', () => {
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
          `console.log(count());\n`
+      )
+   })
+
+   it.only('transforms accessor variable reads with optional postfix', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `count?;`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `countØ;`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `count?.();\n`
       )
    })
 

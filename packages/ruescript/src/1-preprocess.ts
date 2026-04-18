@@ -1,4 +1,4 @@
-import { ACCESSOR_POSTFIX_OPERATOR } from "./3-transform"
+import { ACCESSOR_POSTFIX, OPTIONAL_POSTFIX } from "./3-transform"
 
 type BaseEdit = {
    type: string
@@ -11,7 +11,7 @@ type BaseEdit = {
 export type Edit = GetDeclarationEdit
 
 export type GetDeclarationEdit = {
-   type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorPostfixOperator'
+   type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorPostfixOperator' | 'OptionalPostfix'
    identifier: string,
 } & BaseEdit
 
@@ -31,7 +31,6 @@ function encodeGap(group: string): string {
  */
 function applyEdits(code: string, edits: Edit[]): string {
    if (edits.length === 0) {
-      console.log('*** early return', code)
       return code
    }
 
@@ -43,8 +42,32 @@ function applyEdits(code: string, edits: Edit[]): string {
    return result
 }
 
+export class Edits {
+   lastIndex = 0;
+
+   constructor(
+      private edits: Edit[]
+   ) {
+
+   }
+
+   find(pos: number) {
+      const limit = this.edits.length;
+      for (let i = this.lastIndex; i < limit; i++) {
+         const edit = this.edits[i]
+         if (pos >= edit.pos && pos < edit.pos + edit.transformed.length) {
+            this.lastIndex = i;
+            return edit
+         }
+      }
+   }
+}
+
+
+
 class RXSPreprocessor {
-   edits: Edit[] = []
+   _edits: Edit[] = []
+   edits!: Edits
    code: string = ''
 
    constructor(readonly source: string) {
@@ -54,9 +77,10 @@ class RXSPreprocessor {
       this.rewriteGetVariableDeclarations()
       this.rewriteGetPropertyColonNotation()
       this.rewriteAccessorOperator()
-      const edits = this.edits = this.edits.toSorted((a, b) => a.pos - b.pos)
-      console.log('edits', edits.length)
+      this.rewriteOptionalPostfix()
+      const edits = this._edits.toSorted((a, b) => a.pos - b.pos)
       this.code = applyEdits(this.source, edits)
+      this.edits = new Edits(edits)
       return this
    }
 
@@ -66,7 +90,7 @@ class RXSPreprocessor {
     * 
     * Example:
     * `get count = ref(0)` -->
-    * `gÆt_count = ref(0)`
+    * `let count = ref(0)`
     */
    rewriteGetVariableDeclarations() {
       const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/g
@@ -76,7 +100,7 @@ class RXSPreprocessor {
          const [original, before, identifier, after] = match
          const transformed = 'let' + before + identifier + after
 
-         this.edits.push({
+         this._edits.push({
             type: 'GetDeclaration',
             pos: match.index,
             original,
@@ -94,9 +118,9 @@ class RXSPreprocessor {
 
       for (const match of matches) {
          const [original, before, identifier, after] = match
-         const transformed = before + identifier + ACCESSOR_POSTFIX_OPERATOR + after
-         
-         this.edits.push({
+         const transformed = before + identifier + ACCESSOR_POSTFIX + after
+
+         this._edits.push({
             type: 'AccessorPostfixOperator',
             pos: match.index,
             original,
@@ -124,8 +148,34 @@ class RXSPreprocessor {
          const index = match.index
          const transformed = 'ge,' + before + identifier + after
 
-         this.edits.push({
+         this._edits.push({
             type: 'GetPropertyColonNotation',
+            pos: index,
+            original,
+            transformed,
+            valid: undefined,
+            identifier
+         })
+      }
+   }
+
+   /**
+    * Optional Postfix
+    * source: count?;
+    * prepro: countØ;
+    * final: count?.()
+   */
+   rewriteOptionalPostfix() {
+      const pattern = /([$A-Za-z_][\w$]*)\?;/g;
+
+      const matches = this.source.matchAll(pattern)
+      for (const match of matches) {
+         const [original, identifier] = match
+         const index = match.index
+         const transformed = identifier + OPTIONAL_POSTFIX + ';'
+
+         this._edits.push({
+            type: 'OptionalPostfix',
             pos: index,
             original,
             transformed,

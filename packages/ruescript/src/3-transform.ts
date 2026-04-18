@@ -1,5 +1,5 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression } from 'oxc-parser'
-import { Edit } from "./1-preprocess";
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName } from 'oxc-parser'
+import { Edit, Edits } from "./1-preprocess";
 import { Cursor, traverse } from './traverse';
 
 // TODO: type context, pass separately from cursor
@@ -12,7 +12,7 @@ import { Cursor, traverse } from './traverse';
 
 type Context = {
    program?: Program;
-   edits: Edit[];
+   edits: Edits;
    scoped?: boolean;
 }
 
@@ -20,14 +20,14 @@ function assertContext<T>(value: T | undefined, key: string): asserts value is T
    if (!value) throw new Error(key + ' is missing from context')
 }
 
-export function transformRXS(ast: ASTNode, edits: Edit[]) {
+export function transformRXS(ast: ASTNode, edits: Edits) {
 
    // TODO:
    // let offset = 0;
    // traverseAll(ast, (node) => {
    //    // add offsets (based on edits)
    // })
-
+   console.log('EDITS', edits)
    return traverse(ast, { edits } as Context, {
       Program(node, context) {
          node.body.forEach(statement => {
@@ -36,9 +36,9 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
       },
 
       VariableDeclaration(node, context) {
-         if (node.kind == 'let') {
-            const edit = getEdit(node.start, edits)
-            if (isGetVariableDeclaration(node, edit)) {
+         if (node.kind == 'let' && node.declarations.length === 1) {
+            const edit = edits.find(node.start)
+            if (edit && isGetVariableDeclaration(node, edit)) {
                const { program } = context;
                assertContext(program, 'program')
 
@@ -55,7 +55,8 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
                   if (node.id.type === 'Identifier') {
                      const variable = node.id.name
                      this.scope.addAbsorbedGetter(variable)
-                     this.scope.addAbsorbedGetter(variable + ACCESSOR_POSTFIX_OPERATOR)
+                     this.scope.addAbsorbedGetter(variable + ACCESSOR_POSTFIX)
+                     this.scope.addAbsorbedGetter(variable + OPTIONAL_POSTFIX)
                      this.willMutate(() => {
                         node.init = wrapInCall('assertª', node.init ?? {
                            type: 'Literal',
@@ -79,6 +80,7 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
                })
             }
             else {
+               console.log('FAILED', node, edit)
                this.visitEach(node.declarations)
             }
          }
@@ -112,18 +114,46 @@ export function transformRXS(ast: ASTNode, edits: Edit[]) {
          scopeFunction(this, node, context)
       },
 
+      TSIndexSignature() {
+         // intentionally skip visiting identifier
+      },
+
+      LabeledStatement(node) {
+         // intentionally skip visiting identifier
+         this.visit(node)
+      },
+
       Identifier(leaf, { edits }) {
-         if (this.scope.isAbsorbedGetter(leaf.name)) {
+         // should exclude LabelIdentifier and TSIndexSignature and TSThisParameter
+         if (leaf.name && this.scope.isAbsorbedGetter(leaf.name)) {
             /**
              * Absorbed getter access
              * source: count@
              * prepro: countª
              * final: count 
             */
-            if (isAbsorbedGetterAccess(leaf.name)) {
-
+            if (leaf.name.endsWith(ACCESSOR_POSTFIX)) {
                this.willMutate(() => {
                   leaf.name = leaf.name.slice(0, -1)
+               })
+            }
+            /**
+             * Optional chaining
+             * source: count?; // TODO: PREPROCESS
+             * prepro: countØ;
+             * final: count?.()
+            */
+            else if (leaf.name.endsWith(OPTIONAL_POSTFIX)) {
+               this.willMutate(() => {
+                  leaf.name = leaf.name.slice(0, -1)
+               })
+               this.willReplace(leaf, {
+                  type: 'CallExpression',
+                  start: leaf.start,
+                  end: leaf.end,
+                  arguments: [],
+                  callee: leaf as Identifier,
+                  optional: true
                })
             }
             /**
@@ -221,7 +251,8 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
          if (param.type === 'Identifier') {
             // cursor.scope.addVariable(param.name)
             // TODO: parameter with @ operator
-            const edit = findEdit(param.start, context.edits)
+
+            const edit = context.edits.find(param.start)
             // if (isAbsorbedParameter(param, edit)) {
 
             // }
@@ -235,31 +266,70 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
    }
 }
 
-let lastIndex = 0;
 
-function findEdit(pos: number, edits: Edit[]) {
-   const limit = edits.length;
-   for (let i = lastIndex; i < limit; i++) {
-      const edit = edits[i]
-      if (pos >= edit.pos && pos < edit.pos + edit.original.length) { // TODO: should this be replacement or original length?
-         lastIndex = i;
-      }
-      return edit
-   }
-}
 
-function getEdit(pos: number, edits: Edit[]) {
-   const edit = findEdit(pos, edits)
-   if (!edit) throw new Error('missing edit')
-   return edit
-}
+// [
+//   {
+//     type: 'GetDeclaration',
+//     pos: 0,
+//     original: 'get count ',
+//     transformed: 'let count ',
+//     valid: undefined,
+//     identifier: 'count'
+//   },
+//   {
+//     type: 'GetDeclaration',
+//     pos: 20,
+//     original: 'get other ',
+//     transformed: 'let other ',
+//     valid: undefined,
+//     identifier: 'other'
+//   }
+// ]
+
+// declaration 0 19 {
+//   type: 'Identifier',
+//   decorators: [],
+//   name: 'count',
+//   optional: false,
+//   typeAnnotation: null,
+//   start: 4,
+//   end: 9
+// }
+// edit {
+//   type: 'GetDeclaration',
+//   pos: 0,
+//   original: 'get count ',
+//   transformed: 'let count ',
+//   valid: undefined,
+//   identifier: 'count'
+// }
+// declaration 20 49 {
+//   type: 'Identifier',
+//   decorators: [],
+//   name: 'other',
+//   optional: false,
+//   typeAnnotation: null,
+//   start: 24,
+//   end: 29
+// }
+
+// function getEdit(pos: number, edits: Edit[]) {
+//    // if (!edit) throw new Error('missing edit')
+//    return findEdit(pos, edits)
+// }
 
 // #region  get variable transforms
 
-export const ACCESSOR_POSTFIX_OPERATOR = 'ª'
+export const ACCESSOR_POSTFIX = 'ª'
+export const OPTIONAL_POSTFIX = 'Ø'
 
-function isAbsorbedGetterAccess(identifier: string) {
-   return identifier.endsWith(ACCESSOR_POSTFIX_OPERATOR)
+function hasAccessorPostfixOperator(identifier: string) {
+   return identifier.endsWith(ACCESSOR_POSTFIX)
+}
+
+function hasOptionalPostfix(identifier: string) {
+   return identifier.endsWith(OPTIONAL_POSTFIX)
 }
 
 function isGetVariableDeclaration(declaration: VariableDeclaration, edit: Edit) {

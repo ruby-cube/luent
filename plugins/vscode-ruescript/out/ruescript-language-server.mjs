@@ -28225,92 +28225,20 @@ function createRueScriptService() {
   };
 }
 
-// ../../packages/ruescript/src/1-preprocess.ts
-function applyEdits(code, edits) {
-  if (edits.length === 0) {
-    console.log("*** early return", code);
-    return code;
+// ../../packages/utils/Stack.ts
+function createStack() {
+  let stack = void 0;
+  function push(value) {
+    stack = { value, prev: stack };
+    return value;
   }
-  let result = code;
-  for (const edit of edits) {
-    result = result.slice(0, edit.pos) + edit.transformed + result.slice(edit.pos + edit.original.length);
+  function pop() {
+    if (stack) stack = stack.prev;
   }
-  return result;
-}
-var RXSPreprocessor = class {
-  constructor(source) {
-    this.source = source;
+  function getCurrent() {
+    return stack?.value;
   }
-  source;
-  edits = [];
-  code = "";
-  transform() {
-    this.rewriteGetVariableDeclarations();
-    this.rewriteGetPropertyColonNotation();
-    const edits = this.edits = this.edits.toSorted((a, b) => b.pos - a.pos);
-    console.log("edits", edits.length);
-    this.code = applyEdits(this.source, edits);
-    return this;
-  }
-  /**
-   * - Replaces `get` variable declaration pattern with intermediary valid js.
-   * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
-   * 
-   * Example:
-   * `get count = ref(0)` -->
-   * `gÆt_count = ref(0)`
-   */
-  rewriteGetVariableDeclarations() {
-    const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/g;
-    const matches = this.source.matchAll(pattern);
-    for (const match of matches) {
-      const index = match.index ?? 0;
-      const original = match[0];
-      const gap = match[1];
-      const identifier = match[2];
-      const postGap = match[3];
-      const transformed = "let" + gap + identifier + postGap;
-      this.edits.push({
-        type: "GetDeclaration",
-        pos: index,
-        original,
-        transformed,
-        valid: void 0,
-        identifier
-      });
-    }
-  }
-  /**
-   * - Replaces `get` property colon notation pattern with intermediary valid js.
-   * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string or not in object literal)
-   * 
-   * Example:
-   * `get count: ref(0)` -->
-   * `ge, count: ref(0)`
-   */
-  rewriteGetPropertyColonNotation() {
-    const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g;
-    const matches = this.source.matchAll(pattern);
-    for (const match of matches) {
-      const index = match.index ?? 0;
-      const original = match[0];
-      const gap = match[1];
-      const identifier = match[2];
-      const postGap = match[3];
-      const transformed = "ge," + gap + identifier + postGap;
-      this.edits.push({
-        type: "GetPropertyColonNotation",
-        pos: index,
-        original,
-        transformed,
-        valid: void 0,
-        identifier
-      });
-    }
-  }
-};
-function preprocessRXS(source) {
-  return new RXSPreprocessor(source).transform();
+  return [push, pop, getCurrent];
 }
 
 // ../../node_modules/.pnpm/oxc-parser@0.124.0_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2/node_modules/oxc-parser/src-js/index.js
@@ -29177,32 +29105,6 @@ function parseSync2(filename, sourceText, options) {
   return wrap(parseSync(filename, sourceText, options));
 }
 
-// ../../packages/ruescript/src/2-parse.ts
-function parseRXS(file, code) {
-  return parseSync2(file, code, {
-    astType: "ts",
-    lang: "tsx",
-    preserveParens: true,
-    sourceType: "module"
-  });
-}
-
-// ../../packages/utils/Stack.ts
-function createStack() {
-  let stack = void 0;
-  function push(value) {
-    stack = { value, prev: stack };
-    return value;
-  }
-  function pop() {
-    if (stack) stack = stack.prev;
-  }
-  function getCurrent() {
-    return stack?.value;
-  }
-  return [push, pop, getCurrent];
-}
-
 // ../../packages/ruescript/src/ast.ts
 var CHILD_KEYS = keys_default;
 var IS_DEV = globalThis.process?.env?.NODE_ENV !== "production";
@@ -29242,18 +29144,17 @@ function traverse(ast, context, visitors) {
   };
 }
 var Scope = class {
-  variables;
+  // private variables: Set<string>
   absorbedGetters;
   constructor(parent) {
-    this.variables = new Set(parent?.variables);
     this.absorbedGetters = new Set(parent?.absorbedGetters);
   }
-  addVariable(name) {
-    this.variables.add(name);
-  }
-  has(name) {
-    return this.variables.has(name);
-  }
+  // addVariable(name: string) {
+  //    this.variables.add(name)
+  // }
+  // has(name: string) {
+  //    return this.variables.has(name)
+  // }
   addAbsorbedGetter(name) {
     this.absorbedGetters.add(name);
   }
@@ -29520,19 +29421,18 @@ function assertContext(value, key) {
   if (!value) throw new Error(key + " is missing from context");
 }
 function transformRXS(ast, edits) {
-  const {
-    isGetVariableDeclaration
-  } = GetVariableTransformKit();
+  console.log("EDITS", edits);
   return traverse(ast, { edits }, {
-    Program(node) {
+    Program(node, context) {
       node.body.forEach((statement) => {
-        this.visit(statement, { program: node });
+        this.visit(statement, { ...context, program: node });
       });
     },
-    VariableDeclaration(node, { program }) {
-      if (node.kind == "let") {
-        const edit = getEdit(node.start, edits);
-        if (isGetVariableDeclaration(node, edit)) {
+    VariableDeclaration(node, context) {
+      if (node.kind == "let" && node.declarations.length === 1) {
+        const edit = edits.find(node.start);
+        if (edit && isGetVariableDeclaration(node, edit)) {
+          const { program } = context;
           assertContext(program, "program");
           this.willMutate(() => {
             importFromRuescript("assert\xAA", program);
@@ -29540,7 +29440,9 @@ function transformRXS(ast, edits) {
           });
           node.declarations.forEach((node2) => {
             if (node2.id.type === "Identifier") {
-              this.scope.addAbsorbedGetter(node2.id.name);
+              const variable = node2.id.name;
+              this.scope.addAbsorbedGetter(variable);
+              this.scope.addAbsorbedGetter(variable + ACCESSOR_POSTFIX_OPERATOR);
               this.willMutate(() => {
                 node2.init = wrapInCall("assert\xAA", node2.init ?? {
                   type: "Literal",
@@ -29552,17 +29454,21 @@ function transformRXS(ast, edits) {
               });
             } else {
             }
-            this.visit(node2);
           });
+        } else {
+          console.log("FAILED", node, edit);
+          this.visitEach(node.declarations);
         }
+      } else {
+        this.visitEach(node.declarations);
       }
     },
-    VariableDeclarator(node, context) {
-      this.visit(node.id);
-      if (node.id.type === "Identifier") {
-        this.scope.addVariable(node.id.name);
-      }
-    },
+    // VariableDeclarator(node, context) {
+    //    this.visit(node.id)
+    //    // if (node.id.type === 'Identifier') {
+    //    //    this.scope.addVariable(node.id.name)
+    //    // }
+    // },
     // TODO: scoping
     BlockStatement(node, context) {
       if (context.scoped) {
@@ -29575,6 +29481,62 @@ function transformRXS(ast, edits) {
     },
     FunctionDeclaration(node, context) {
       scopeFunction(this, node, context);
+    },
+    Identifier(leaf, { edits: edits2 }) {
+      if (this.scope.isAbsorbedGetter(leaf.name)) {
+        if (isAbsorbedGetterAccess(leaf.name)) {
+          this.willMutate(() => {
+            leaf.name = leaf.name.slice(0, -1);
+          });
+        } else {
+          this.willReplace(leaf, GetterCall(leaf));
+        }
+      }
+    },
+    AssignmentExpression(node, context) {
+      const left = node.left;
+      switch (left.type) {
+        case "Identifier":
+          transformAccessorVariableWrite(this, node, "left", left, context);
+          break;
+        case "ArrayPattern":
+          break;
+        case "MemberExpression":
+          break;
+        case "ObjectPattern":
+          break;
+        case "TSAsExpression":
+          break;
+        case "TSNonNullExpression":
+          break;
+        case "TSSatisfiesExpression":
+          break;
+        case "TSTypeAssertion":
+          break;
+        default:
+          break;
+      }
+      this.visit(node.right);
+    },
+    UpdateExpression(node, context) {
+      const arg = node.argument;
+      switch (arg.type) {
+        case "Identifier":
+          transformAccessorVariableWrite(this, node, "argument", arg, context);
+          break;
+        case "MemberExpression":
+          break;
+        case "TSAsExpression":
+          break;
+        case "TSNonNullExpression":
+          break;
+        case "TSSatisfiesExpression":
+          break;
+        case "TSTypeAssertion":
+          break;
+        default:
+          break;
+      }
     }
   });
 }
@@ -29584,7 +29546,7 @@ function scopeFunction(cursor, node, context) {
     cursor.enterScope();
     node.params.forEach((param) => {
       if (param.type === "Identifier") {
-        cursor.scope.addVariable(param.name);
+        const edit = context.edits.find(param.start);
       } else {
       }
     });
@@ -29592,30 +29554,62 @@ function scopeFunction(cursor, node, context) {
     cursor.exitScope();
   }
 }
-var lastIndex = 0;
-function findEdit(pos, edits) {
-  const limit = edits.length;
-  for (let i = lastIndex; i < limit; i++) {
-    const edit = edits[i];
-    if (pos >= edit.pos && pos < edit.pos + edit.original.length) {
-      lastIndex = i;
-    }
-    return edit;
-  }
+var ACCESSOR_POSTFIX_OPERATOR = "\xAA";
+function isAbsorbedGetterAccess(identifier) {
+  return identifier.endsWith(ACCESSOR_POSTFIX_OPERATOR);
 }
-function getEdit(pos, edits) {
-  const edit = findEdit(pos, edits);
-  if (!edit) throw new Error("missing edit");
-  return edit;
+function isGetVariableDeclaration(declaration, edit) {
+  return edit.type === "GetDeclaration" && edit.pos === declaration.start;
 }
-function GetVariableTransformKit() {
-  function isGetVariableDeclaration(declaration, edit) {
-    return edit.type === "GetDeclaration" && edit.pos === declaration.start;
-  }
+function GetterCall(node) {
   return {
-    isGetVariableDeclaration
-    // toGetVariableDeclaration
+    type: "CallExpression",
+    arguments: [],
+    start: 0,
+    end: 0,
+    callee: node,
+    optional: false
   };
+}
+function transformAccessorVariableWrite(cursor, node, key, left, context) {
+  if (cursor.scope.isAbsorbedGetter(left.name)) {
+    const { program } = context;
+    assertContext(program, "program");
+    cursor.willMutate(() => {
+      importFromRuescript("assert\xB5", program);
+      node[key] = {
+        type: "MemberExpression",
+        start: 0,
+        end: 0,
+        computed: false,
+        optional: false,
+        object: {
+          type: "CallExpression",
+          start: 0,
+          end: 0,
+          callee: {
+            type: "Identifier",
+            start: 0,
+            end: 0,
+            name: "assert\xB5"
+          },
+          arguments: [{
+            type: "Identifier",
+            start: left.start,
+            end: left.end,
+            name: left.name
+          }],
+          optional: false
+        },
+        property: {
+          type: "Identifier",
+          start: 0,
+          end: 0,
+          name: "value"
+        }
+      };
+    });
+  }
 }
 function importFromRuescript(importName, program) {
   const existing = findRuescriptImport(program.body);
@@ -29695,6 +29689,133 @@ function wrapInCall(name, node) {
     },
     optional: false
   };
+}
+
+// ../../packages/ruescript/src/1-preprocess.ts
+function applyEdits(code, edits) {
+  if (edits.length === 0) {
+    return code;
+  }
+  let result = code;
+  for (const edit of edits) {
+    result = result.slice(0, edit.pos) + edit.transformed + result.slice(edit.pos + edit.original.length);
+  }
+  return result;
+}
+var Edits = class {
+  constructor(edits) {
+    this.edits = edits;
+  }
+  edits;
+  lastIndex = 0;
+  find(pos) {
+    const limit = this.edits.length;
+    for (let i = this.lastIndex; i < limit; i++) {
+      const edit = this.edits[i];
+      console.log("edit start", edit.pos);
+      console.log("edit end", edit.pos + edit.transformed.length);
+      if (pos >= edit.pos && pos < edit.pos + edit.transformed.length) {
+        this.lastIndex = i;
+        return edit;
+      }
+    }
+  }
+};
+var RXSPreprocessor = class {
+  constructor(source) {
+    this.source = source;
+  }
+  source;
+  _edits = [];
+  edits;
+  code = "";
+  transform() {
+    this.rewriteGetVariableDeclarations();
+    this.rewriteGetPropertyColonNotation();
+    this.rewriteAccessorOperator();
+    const edits = this._edits.toSorted((a, b) => a.pos - b.pos);
+    this.code = applyEdits(this.source, edits);
+    this.edits = new Edits(edits);
+    return this;
+  }
+  /**
+   * - Replaces `get` variable declaration pattern with intermediary valid js.
+   * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
+   * 
+   * Example:
+   * `get count = ref(0)` -->
+   * `gÆt_count = ref(0)`
+   */
+  rewriteGetVariableDeclarations() {
+    const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/g;
+    const matches = this.source.matchAll(pattern);
+    for (const match of matches) {
+      const [original, before, identifier, after] = match;
+      const transformed = "let" + before + identifier + after;
+      this._edits.push({
+        type: "GetDeclaration",
+        pos: match.index,
+        original,
+        transformed,
+        valid: void 0,
+        identifier
+      });
+    }
+  }
+  rewriteAccessorOperator() {
+    const pattern = /([^$\w])([$A-Za-z_][\w$]*)@([^$\w])/g;
+    const matches = this.source.matchAll(pattern);
+    for (const match of matches) {
+      const [original, before, identifier, after] = match;
+      const transformed = before + identifier + ACCESSOR_POSTFIX_OPERATOR + after;
+      this._edits.push({
+        type: "AccessorPostfixOperator",
+        pos: match.index,
+        original,
+        transformed,
+        valid: void 0,
+        identifier
+      });
+    }
+  }
+  /**
+   * - Replaces `get` property colon notation pattern with intermediary valid js.
+   * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string or not in object literal)
+   * 
+   * Example:
+   * `get count: ref(0)` -->
+   * `ge, count: ref(0)`
+   */
+  rewriteGetPropertyColonNotation() {
+    const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g;
+    const matches = this.source.matchAll(pattern);
+    for (const match of matches) {
+      const [original, before, identifier, after] = match;
+      const index = match.index;
+      const transformed = "ge," + before + identifier + after;
+      this._edits.push({
+        type: "GetPropertyColonNotation",
+        pos: index,
+        original,
+        transformed,
+        valid: void 0,
+        identifier
+      });
+    }
+  }
+};
+function preprocessRXS(source) {
+  return new RXSPreprocessor(source).transform();
+}
+
+// ../../packages/ruescript/src/2-parse.ts
+function parseRXS(file, code) {
+  return parseSync2(file, code, {
+    astType: "ts",
+    lang: "tsx",
+    preserveParens: true,
+    sourceType: "module"
+  });
 }
 
 // ../../packages/ruescript/src/capabilities.ts
@@ -32064,7 +32185,8 @@ function transpileRueScript(file, source) {
   const preTree = parseRXS(file, code);
   const { ast: transformedTree } = transformRXS(preTree.program, edits);
   const generated = printTSX(transformedTree);
-  console.log("map:", generated.map);
+  console.log("tranformed:");
+  console.log(generated.code);
   return {
     source,
     transpiled: { ast: transformedTree, code: generated.code },

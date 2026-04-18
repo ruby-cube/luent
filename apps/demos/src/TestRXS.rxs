@@ -1,6 +1,14 @@
+
 get count = ref(0);
 get other = ref('something');
 
-function ref(a: number) {
+count = 'okj';
+other = 'ho';
+
+count
+count@
+
+
+function ref<T>(a: T) {
    return () => a
 }
