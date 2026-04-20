@@ -1,5 +1,5 @@
 import { AssignmentExpression, Node as ASTNode, Directive, ExpressionStatement, Program } from 'oxc-parser'
-import { createStack } from "@rue/utils";
+import { createStack } from "../../utils/index.ts";
 import { Edit } from "./1-preprocess";
 import { CHILD_KEYS } from './ast';
 import { traverse } from './traverse';
@@ -86,8 +86,6 @@ function findEdit(pos: number, edits: Edit[]) {
    const limit = edits.length;
    for (let i = lastIndex; i < limit; i++) {
       const edit = edits[i]
-      console.log('edit', edit)
-      console.log('pos', pos)
       if (pos >= edit.pos && pos < edit.original.length) //TODO: should this be replacement or original length?
          lastIndex = i;
       return edit

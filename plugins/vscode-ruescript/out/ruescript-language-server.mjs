@@ -29442,7 +29442,7 @@ function transformRXS(ast, edits) {
             if (node2.id.type === "Identifier") {
               const variable = node2.id.name;
               this.scope.addAbsorbedGetter(variable);
-              this.scope.addAbsorbedGetter(variable + ACCESSOR_POSTFIX_OPERATOR);
+              this.scope.addAbsorbedGetter(variable + ACCESSOR_POSTFIX);
               this.willMutate(() => {
                 node2.init = wrapInCall("assert\xAA", node2.init ?? {
                   type: "Literal",
@@ -29461,6 +29461,54 @@ function transformRXS(ast, edits) {
         }
       } else {
         this.visitEach(node.declarations);
+      }
+    },
+    /**
+     * Accessor Property Colon Notation
+     * source: { get variable: expression }
+     * prepro: { gª, variable: expression }
+     * final: absorbsª({ variable: absorbª(expression) })
+     */
+    ObjectExpression(node, context) {
+      const properties = [];
+      const edits2 = [];
+      let edit = void 0;
+      node.properties.forEach((node2) => {
+        if (node2.type === "Property" && node2.key.type === "Identifier" && node2.key.name === "g\xAA" && node2.shorthand === true) {
+          edit = context.edits.find(node2.start);
+          if (edit) {
+            return;
+          } else {
+            properties.push(node2);
+          }
+        } else {
+          if (edit) {
+            edits2[properties.length] = edit;
+            edit = null;
+          }
+          properties.push(node2);
+        }
+        if (node2.type === "Property" && !node2.shorthand) {
+          this.visit(node2.value);
+        } else {
+          this.visit(node2);
+        }
+      });
+      if (edit !== void 0) {
+        const { program } = context;
+        assertContext(program, "program");
+        this.willMutate(() => {
+          importFromRuescript("assert\xAA", program);
+          importFromRuescript("absorbs\xAA", program);
+          importFromRuescript("absorb\xAA", program);
+          properties.forEach((node2, index) => {
+            if (edits2[index] && node2.type === "Property") {
+              node2.value = wrapInCall("absorb\xAA", wrapInCall("assert\xAA", node2.value));
+            }
+          });
+          node.properties = properties;
+        });
+        this.willReplace(node, wrapInCall("absorbs\xAA", node));
       }
     },
     // VariableDeclarator(node, context) {
@@ -29482,9 +29530,20 @@ function transformRXS(ast, edits) {
     FunctionDeclaration(node, context) {
       scopeFunction(this, node, context);
     },
+    FunctionExpression(node, context) {
+      scopeFunction(this, node, context);
+    },
+    ArrowFunctionExpression(node, context) {
+      scopeFunction(this, node, context);
+    },
+    TSIndexSignature() {
+    },
+    LabeledStatement(node) {
+      this.visit(node);
+    },
     Identifier(leaf, { edits: edits2 }) {
-      if (this.scope.isAbsorbedGetter(leaf.name)) {
-        if (isAbsorbedGetterAccess(leaf.name)) {
+      if (leaf.name && this.scope.isAbsorbedGetter(leaf.name)) {
+        if (leaf.name.endsWith(ACCESSOR_POSTFIX)) {
           this.willMutate(() => {
             leaf.name = leaf.name.slice(0, -1);
           });
@@ -29554,10 +29613,7 @@ function scopeFunction(cursor, node, context) {
     cursor.exitScope();
   }
 }
-var ACCESSOR_POSTFIX_OPERATOR = "\xAA";
-function isAbsorbedGetterAccess(identifier) {
-  return identifier.endsWith(ACCESSOR_POSTFIX_OPERATOR);
-}
+var ACCESSOR_POSTFIX = "\xAA";
 function isGetVariableDeclaration(declaration, edit) {
   return edit.type === "GetDeclaration" && edit.pos === declaration.start;
 }
@@ -29712,8 +29768,6 @@ var Edits = class {
     const limit = this.edits.length;
     for (let i = this.lastIndex; i < limit; i++) {
       const edit = this.edits[i];
-      console.log("edit start", edit.pos);
-      console.log("edit end", edit.pos + edit.transformed.length);
       if (pos >= edit.pos && pos < edit.pos + edit.transformed.length) {
         this.lastIndex = i;
         return edit;
@@ -29744,7 +29798,7 @@ var RXSPreprocessor = class {
    * 
    * Example:
    * `get count = ref(0)` -->
-   * `gÆt_count = ref(0)`
+   * `let count = ref(0)`
    */
   rewriteGetVariableDeclarations() {
     const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/g;
@@ -29767,7 +29821,7 @@ var RXSPreprocessor = class {
     const matches = this.source.matchAll(pattern);
     for (const match of matches) {
       const [original, before, identifier, after] = match;
-      const transformed = before + identifier + ACCESSOR_POSTFIX_OPERATOR + after;
+      const transformed = before + identifier + ACCESSOR_POSTFIX + after;
       this._edits.push({
         type: "AccessorPostfixOperator",
         pos: match.index,
@@ -29784,7 +29838,7 @@ var RXSPreprocessor = class {
    * 
    * Example:
    * `get count: ref(0)` -->
-   * `ge, count: ref(0)`
+   * `gª, count: ref(0)`
    */
   rewriteGetPropertyColonNotation() {
     const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g;
@@ -29792,7 +29846,7 @@ var RXSPreprocessor = class {
     for (const match of matches) {
       const [original, before, identifier, after] = match;
       const index = match.index;
-      const transformed = "ge," + before + identifier + after;
+      const transformed = "g\xAA," + before + identifier + after;
       this._edits.push({
         type: "GetPropertyColonNotation",
         pos: index,
@@ -29803,6 +29857,53 @@ var RXSPreprocessor = class {
       });
     }
   }
+  /**
+   * Optional Postfix
+   * source: count?;
+   * prepro: countØ;
+   * final: count?.()
+  */
+  // rewriteOptionalPostfix() {
+  //    const pattern = /([$A-Za-z_][\w$]*)\?;/g;
+  //    const matches = this.source.matchAll(pattern)
+  //    for (const match of matches) {
+  //       const [original, identifier] = match
+  //       const index = match.index
+  //       const transformed = identifier + OPTIONAL_POSTFIX + ';'
+  //       this._edits.push({
+  //          type: 'OptionalPostfix',
+  //          pos: index,
+  //          original,
+  //          transformed,
+  //          valid: undefined,
+  //          identifier
+  //       })
+  //    }
+  // }
+  /**
+   * Optional Postfix (parenthesized)
+   * source: (count?)
+   * prepro: (countØ);
+   * final: (count?.())
+  */
+  // rewriteParenthesizedOptionalPostfix() {
+  //    const pattern = /\(([$A-Za-z_][\w$]*)\?\)/g;
+  //    const matches = this.source.matchAll(pattern)
+  //    console.log('match!', matches)
+  //    for (const match of matches) {
+  //       const [original, identifier] = match
+  //       const index = match.index
+  //       const transformed = '(' + identifier + OPTIONAL_POSTFIX + ')'
+  //       this._edits.push({
+  //          type: 'OptionalPostfix',
+  //          pos: index,
+  //          original,
+  //          transformed,
+  //          valid: undefined,
+  //          identifier
+  //       })
+  //    }
+  // }
 };
 function preprocessRXS(source) {
   return new RXSPreprocessor(source).transform();
@@ -30422,7 +30523,10 @@ function printTSX(program) {
       cursor.write(")");
     },
     /**
-     * { a: 1, b }
+     * { 
+     *    a: 1,
+     *    b
+     * }
      */
     ObjectExpression(node, cursor) {
       cursor.write("{\n", {
@@ -30430,19 +30534,21 @@ function printTSX(program) {
         capabilities: { structure: true }
       });
       const properties = node.properties ?? [];
-      if (properties.length > 0) cursor.write(" ");
+      cursor.enterScope();
       for (let i = 0; i < properties.length; i++) {
-        if (i > 0) {
+        cursor.indentScope();
+        cursor.visit(properties[i]);
+        if (i < properties.length - 1) {
           if (cursor.code.endsWith("\n")) {
             cursor.code = cursor.code.slice(0, -1);
-            cursor.write(",\n");
-          } else {
-            cursor.write(", ");
           }
+          cursor.write(",\n");
+        } else if (!cursor.code.endsWith("\n")) {
+          cursor.write("\n");
         }
-        cursor.visit(properties[i]);
       }
-      if (properties.length > 0) cursor.write(" ");
+      cursor.exitScope();
+      if (properties.length > 0) cursor.indentScope();
       cursor.write("}", {
         span: { start: node.end - 1, end: node.end },
         capabilities: { structure: true }

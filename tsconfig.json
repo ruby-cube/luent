@@ -3,6 +3,7 @@
     "plugins": [
       { "name": "typescript-plugin-css-modules" }
     ],
+    "allowImportingTsExtensions": true,
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",

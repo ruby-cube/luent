@@ -1,5 +1,5 @@
-import { createStack } from "@rue/utils";
-import { CHILD_KEYS } from "./ast";
+import { createStack } from "../../utils/index.ts";
+import { CHILD_KEYS } from "./ast.ts";
 
 // #region: Types adapted from @svelte/zimmerframe
 

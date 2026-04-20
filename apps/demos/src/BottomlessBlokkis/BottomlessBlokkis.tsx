@@ -34,6 +34,7 @@ export function BottomlessBlokkis() {
     }
 
     function dropBlock() {
+      console.log('&&& dropblock')
         const id = setInterval(moveDown, 1000)
         atDiscard(() => clearInterval(id))
     }

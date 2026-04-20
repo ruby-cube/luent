@@ -1,6 +1,6 @@
 import type { ArrayExpression, AssignmentExpression, Node as ASTNode, BinaryExpression, ForInStatement, ForOfStatement, ForStatement, WhileStatement, LogicalExpression, PrivateInExpression, Program, ArrayPattern, BlockStatement, TSModuleBlock, StaticBlock } from 'oxc-parser'
 import { CodeInformation, CodeMapping } from "@volar/language-core";
-import { BASE_CAPABILITIES, Capabilities } from './capabilities';
+import { BASE_CAPABILITIES, Capabilities } from './capabilities.ts';
 
 const TAB = '\t'
 
@@ -672,7 +672,10 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
       },
 
       /**
-       * { a: 1, b }
+       * { 
+       *    a: 1,
+       *    b
+       * }
        */
       ObjectExpression(node, cursor) {
          cursor.write('{\n', {
@@ -680,20 +683,22 @@ export function printTSX(program: Program): { code: string, map: CodeMapping[] }
             capabilities: { structure: true }
          })
          const properties = node.properties ?? []
-         if (properties.length > 0) cursor.write(' ')
+         cursor.enterScope()
          for (let i = 0; i < properties.length; i++) {
-            if (i > 0) {
+            cursor.indentScope()
+            cursor.visit(properties[i])
+            if (i < properties.length - 1) {
                if (cursor.code.endsWith('\n')) {
                   cursor.code = cursor.code.slice(0, -1)
-                  cursor.write(',\n')
                }
-               else {
-                  cursor.write(', ')
-               }
+               cursor.write(',\n')
             }
-            cursor.visit(properties[i])
+            else if (!cursor.code.endsWith('\n')) {
+               cursor.write('\n')
+            }
          }
-         if (properties.length > 0) cursor.write(' ')
+         cursor.exitScope()
+         if (properties.length > 0) cursor.indentScope()
          cursor.write('}', {
             span: { start: node.end - 1, end: node.end },
             capabilities: { structure: true }

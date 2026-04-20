@@ -1,19 +1,32 @@
-import { ACCESSOR_POSTFIX, OPTIONAL_POSTFIX } from "./3-transform"
+import { ACCESSOR_EXPRESSION_POSTFIX, ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts"
 
 type BaseEdit = {
    type: string
-   pos: number
+   index: number,
+   anchor: number
+   anchorType: 'start' | 'end'
    original: string
    transformed: string
-   valid: undefined | boolean // pattern is in valid transform context (e.g. non-string/non-comment)--context unknown until after parsing
+   // valid: undefined | boolean // pattern is in valid transform context (e.g. non-string/non-comment)--context unknown until after parsing
 }
 
-export type Edit = GetDeclarationEdit
+export type Edit = AccessorVariableEdit | AccessorExpressionEdit | BaseEdit
 
-export type GetDeclarationEdit = {
-   type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorPostfixOperator' | 'OptionalPostfix'
+export type AccessorVariableEdit = {
+   type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorVariablePostfix'
    identifier: string,
 } & BaseEdit
+
+export type AccessorExpressionEdit = {
+   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix'
+} & BaseEdit
+
+const AccessorEditType = {
+   '?': 'OptionalAccessorPostfix',
+   '!': 'NonNullAccessorPostfix',
+   ']': 'BracketAccessorPostfix',
+   ')': 'AccessorExpressionPostfix',
+}
 
 function encodeGap(group: string): string {
    return group
@@ -22,11 +35,15 @@ function encodeGap(group: string): string {
       .replace(/\*\//g, 'ºƒ')
 }
 
+// TODO: current regexes are temporary naive implementations that need to be replaced with more robust searches
+
 /**
  * Applies edits to the code and returns transformed code
  * 
  * @param code source
- * @param edits Assumes edits are in order from lowest pos to highest pos
+ * @param edits Assumes edits
+ * - are in order from lowest pos to highest pos
+ * - edits do not overlap // TODO: I don't know if I can guarantee this
  * @returns 
  */
 function applyEdits(code: string, edits: Edit[]): string {
@@ -37,33 +54,63 @@ function applyEdits(code: string, edits: Edit[]): string {
    let result = code
 
    for (const edit of edits) {
-      result = result.slice(0, edit.pos) + edit.transformed + result.slice(edit.pos + edit.original.length)
+      result = result.slice(0, edit.index) + edit.transformed + result.slice(edit.index + edit.original.length)
    }
    return result
 }
 
 export class Edits {
-   lastIndex = 0;
+   prefixes: Edit[];
+   postfixes: Edit[];
 
+   lastPrefix: number;
+   lastPostfix: number
    constructor(
-      private edits: Edit[]
+      edits: Edit[]
    ) {
-
+      const prefixes: Edit[] = this.prefixes = []
+      const postfixes: Edit[] = this.postfixes = []
+      
+      for (const edit of edits) {
+         if (edit.anchorType === 'start') {
+            prefixes.push(edit)
+         }
+      }
+      for (const edit of edits) {
+         if (edit.anchorType === 'end') {
+            postfixes.push(edit)
+         }
+      }
+      
+      this.lastPrefix = 0;
+      this.lastPostfix = postfixes.length - 1
    }
 
-   find(pos: number) {
-      const limit = this.edits.length;
-      for (let i = this.lastIndex; i < limit; i++) {
-         const edit = this.edits[i]
-         if (pos >= edit.pos && pos < edit.pos + edit.transformed.length) {
-            this.lastIndex = i;
+   findStart(anchor: number) {
+      const edits = this.prefixes
+      const limit = edits.length;
+      for (let i = this.lastPrefix; i < limit; i++) {
+         const edit = edits[i]
+         if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
+            this.lastPrefix = i;
+            return edit
+         }
+      }
+   }
+
+   findEnd(anchor: number) {
+      const edits = this.postfixes
+      for (let i = this.lastPostfix; i >= 0; i--) {
+         const edit = edits[i]
+         if (anchor <= edit.anchor && anchor > edit.anchor - edit.transformed.length) {
+            this.lastPostfix = i;
             return edit
          }
       }
    }
 }
 
-
+// TODO: make sure regex is correct
 
 class RXSPreprocessor {
    _edits: Edit[] = []
@@ -76,9 +123,10 @@ class RXSPreprocessor {
    transform() {
       this.rewriteGetVariableDeclarations()
       this.rewriteGetPropertyColonNotation()
-      this.rewriteAccessorOperator()
-      this.rewriteOptionalPostfix()
-      const edits = this._edits.toSorted((a, b) => a.pos - b.pos)
+      this.rewriteAcessorVariablePostfix()
+      this.rewriteExpressionPostfix()
+
+      const edits = this._edits.toSorted((a, b) => a.index - b.index)
       this.code = applyEdits(this.source, edits)
       this.edits = new Edits(edits)
       return this
@@ -89,8 +137,8 @@ class RXSPreprocessor {
     * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
     * 
     * Example:
-    * `get count = ref(0)` -->
-    * `let count = ref(0)`
+    * `get count =` -->
+    * `let count =`
     */
    rewriteGetVariableDeclarations() {
       const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/g
@@ -98,34 +146,16 @@ class RXSPreprocessor {
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
          const [original, before, identifier, after] = match
+         const index = match.index
          const transformed = 'let' + before + identifier + after
 
          this._edits.push({
             type: 'GetDeclaration',
-            pos: match.index,
+            index,
+            anchor: index,
+            anchorType: 'start',
             original,
             transformed,
-            valid: undefined,
-            identifier
-         })
-      }
-   }
-
-   rewriteAccessorOperator() {
-      const pattern = /([^$\w])([$A-Za-z_][\w$]*)@([^$\w])/g;
-
-      const matches = this.source.matchAll(pattern)
-
-      for (const match of matches) {
-         const [original, before, identifier, after] = match
-         const transformed = before + identifier + ACCESSOR_POSTFIX + after
-
-         this._edits.push({
-            type: 'AccessorPostfixOperator',
-            pos: match.index,
-            original,
-            transformed,
-            valid: undefined,
             identifier
          })
       }
@@ -136,8 +166,8 @@ class RXSPreprocessor {
     * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string or not in object literal)
     * 
     * Example:
-    * `get count: ref(0)` -->
-    * `ge, count: ref(0)`
+    * `get count:` -->
+    * `gª, count:`
     */
    rewriteGetPropertyColonNotation() {
       const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g
@@ -146,16 +176,64 @@ class RXSPreprocessor {
       for (const match of matches) {
          const [original, before, identifier, after] = match
          const index = match.index
-         const transformed = 'ge,' + before + identifier + after
+         const transformed = 'gª,' + before + identifier + after
 
          this._edits.push({
             type: 'GetPropertyColonNotation',
-            pos: index,
+            index,
+            anchor: index,
+            anchorType: 'start',
             original,
             transformed,
-            valid: undefined,
             identifier
          })
+      }
+   }
+
+   rewriteAcessorVariablePostfix() {
+
+      const pattern = /([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
+
+      const matches = this.source.matchAll(pattern)
+
+      for (const match of matches) {
+         const [original, identifier] = match
+         const index = match.index
+         const transformed = identifier + ACCESSOR_VARIABLE_POSTFIX
+
+         this._edits.push({
+            type: 'AccessorVariablePostfix',
+            index,
+            anchor: index + 1,
+            anchorType: 'end',
+            original: original.slice(0, -1),
+            transformed: transformed,
+            identifier
+         })
+      }
+   }
+
+   // expression postfix
+   // nonnullable postfix
+   // optional postfix
+   // bracket postfix
+   rewriteExpressionPostfix() {
+      const pattern = /([)?!\]])@([\s/()])/g
+      const matches = this.source.matchAll(pattern)
+
+      for (const match of matches) {
+         const [original, before, after] = match
+         const index = match.index
+         
+         this._edits.push({
+            type: AccessorEditType[before as keyof typeof AccessorEditType],
+            index,
+            anchor: index + 2, // NOTE: range for non-null expression ends after !
+            anchorType: 'end',
+            original,
+            transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX + after
+         })
+
       }
    }
 
@@ -165,25 +243,50 @@ class RXSPreprocessor {
     * prepro: countØ;
     * final: count?.()
    */
-   rewriteOptionalPostfix() {
-      const pattern = /([$A-Za-z_][\w$]*)\?;/g;
+   // rewriteOptionalPostfix() {
+   //    const pattern = /([$A-Za-z_][\w$]*)\?;/g;
 
-      const matches = this.source.matchAll(pattern)
-      for (const match of matches) {
-         const [original, identifier] = match
-         const index = match.index
-         const transformed = identifier + OPTIONAL_POSTFIX + ';'
+   //    const matches = this.source.matchAll(pattern)
+   //    for (const match of matches) {
+   //       const [original, identifier] = match
+   //       const index = match.index
+   //       const transformed = identifier + OPTIONAL_POSTFIX + ';'
 
-         this._edits.push({
-            type: 'OptionalPostfix',
-            pos: index,
-            original,
-            transformed,
-            valid: undefined,
-            identifier
-         })
-      }
-   }
+   //       this._edits.push({
+   //          type: 'OptionalPostfix',
+   //          pos: index,
+   //          original,
+   //          transformed,
+   //          valid: undefined,
+   //          identifier
+   //       })
+   //    }
+   // }
+
+   /**
+    * Optional Postfix (parenthesized)
+    * source: (count?)
+    * prepro: (countØ);
+    * final: (count?.())
+   */
+   // rewriteParenthesizedOptionalPostfix() {
+   //    const pattern = /\(([$A-Za-z_][\w$]*)\?\)/g;
+   //    const matches = this.source.matchAll(pattern)
+   //    for (const match of matches) {
+   //       const [original, identifier] = match
+   //       const index = match.index
+   //       const transformed = '(' + identifier + OPTIONAL_POSTFIX + ')'
+
+   //       this._edits.push({
+   //          type: 'OptionalPostfix',
+   //          pos: index,
+   //          original,
+   //          transformed,
+   //          valid: undefined,
+   //          identifier
+   //       })
+   //    }
+   // }
 }
 
 // export function unwriteGetDeclarations(string: string, edits: Edit[] = []) {

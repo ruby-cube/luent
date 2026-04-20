@@ -1,4 +1,4 @@
-import { template, unnestComponent } from "../component/Component";
+import { Component, unnestComponent } from "../component/Component";
 import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
 import { markIfMuIon } from "./provide";
 import { Ion } from "@rue/quarky";
@@ -34,7 +34,7 @@ export function Context(
    }>
 ) {
    if (!Slot) debug.warn(`Extraneous <Context>`)
-   return template(callWithContext(Slot, createContextNode(provide)))
+   return Component(callWithContext(Slot, createContextNode(provide)))
 }
 
 export function createContextNode(

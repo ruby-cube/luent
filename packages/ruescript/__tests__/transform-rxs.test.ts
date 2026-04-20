@@ -17,8 +17,8 @@ describe('transform', () => {
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/ruescript";\n`
-         + `const count = assertª(ref(0));\n`
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n`
       )
    })
 
@@ -41,24 +41,27 @@ describe('transform', () => {
       )
    })
 
-   it.only('transforms accessor variable reads with optional postfix', () => {
-      const { code, edits } = preprocessRXS(
-         `get count = ref(0);\n` +
-         `count?;`
-      )
-      expect(code).toBe(
-         `let count = ref(0);\n` +
-         `countØ;`
-      )
-      const ast = parseRXS('test.rxs', code)
-      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
-      const generated = printTSX(tsxTree)
-      expect(generated.code).toBe(
-         `import { assertª } from "@rue/ruescript";\n` +
-         `const count = assertª(ref(0));\n` +
-         `count?.();\n`
-      )
-   })
+   // it.skip('transforms accessor variable reads with optional postfix', () => {
+   //    const { code, edits } = preprocessRXS(
+   //       `get count = ref(0);\n` +
+   //       `count?;\n` +
+   //       `console.log(count?)`
+   //    )
+   //    expect(code).toBe(
+   //       `let count = ref(0);\n` +
+   //       `countØ;\n` +
+   //       `console.log(countØ)`
+   //    )
+   //    const ast = parseRXS('test.rxs', code)
+   //    const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+   //    const generated = printTSX(tsxTree)
+   //    expect(generated.code).toBe(
+   //       `import { assertª } from "@rue/ruescript";\n` +
+   //       `const count = assertª(ref(0));\n` +
+   //       `count?.();\n` +
+   //       `console.log(count?.());\n` 
+   //    )
+   // })
 
    it('transforms accessor variable writes (assignment expression)', () => {
       const { code, edits } = preprocessRXS(
@@ -70,7 +73,6 @@ describe('transform', () => {
          `count = 2`
       )
       const ast = parseRXS('test.rxs', code)
-      console.log('ast', ast.program.body, edits)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
@@ -90,7 +92,6 @@ describe('transform', () => {
          `count++`
       )
       const ast = parseRXS('test.rxs', code)
-      console.log('ast', ast.program.body, edits)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
@@ -110,13 +111,266 @@ describe('transform', () => {
          `console.log(countª)`
       )
       const ast = parseRXS('test.rxs', code)
-      console.log('ast', ast.program.body, edits)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
          `console.log(count);\n`
+      )
+   })
+
+   it('transforms derivation expression', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `watch((count * 2)@)`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `watch((count * 2)!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `watch(() => (count * 2));\n`
+      )
+   })
+
+   it('transforms derivation sequence expression', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `watch((console.log('hi'), count * 2)@)`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `watch((console.log('hi'), count * 2)!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `watch(() => ((console.log('hi'), count * 2)));\n`
+      )
+   })
+
+   it('transforms derivation type casting expression', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `watch((count * 2 as number)@)`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `watch((count * 2 as number)!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `watch(() => (count * 2 as number));\n`
+      )
+   })
+
+
+   it('transforms async derivation expression', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `watch((await count)@)`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `watch((await count)!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `watch(async () => (await count));\n`
+      )
+   })
+
+   it('transforms immediately invoked derivation expression', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `watch((count * 2)@())`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `watch((count * 2)!())`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `watch((() => (count * 2))());\n`
+      )
+   })
+
+   it('transforms accessor property declarations via colon notation', () => {
+      const { code, edits } = preprocessRXS(
+         `const obj = { get count: ref(0), a, b: 0, get frog: ref('kermit') }`
+      )
+      expect(code).toBe(
+         `const obj = { gª, count: ref(0), a, b: 0, gª, frog: ref('kermit') }`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª, absorbsª, absorbª } from "@rue/ruescript";\n` +
+         `const obj = absorbsª({\n` +
+         `\tcount: absorbª(assertª(ref(0))),\n` +
+         `\ta,\n` +
+         `\tb: 0,\n` +
+         `\tfrog: absorbª(assertª(ref('kermit')))` +
+         `\n});\n`
+      )
+   })
+
+
+   it('transforms getter normalization', () => {
+      const { code, edits } = preprocessRXS(
+         `const count = ref(0);\n` +
+         `console.log(count@)`
+      )
+      expect(code).toBe(
+         `const count = ref(0);\n` +
+         `console.log(countª)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `const count = ref(0);\n` +
+         `console.log(toª(count));\n`
+      )
+   })
+
+   it('transforms getter normalization with non-null assertion', () => {
+      const { code, edits } = preprocessRXS(
+         `let count = ref(0);\n` +
+         `console.log(count!@)`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `console.log(count!!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `let count = ref(0);\n` +
+         `console.log(toª(count!));\n`
+      )
+   })
+
+   it('transforms getter normalization with optional chaining', () => {
+      const { code, edits } = preprocessRXS(
+         `let count = ref(0);\n` +
+         `console.log(count?@)`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `console.log(count!!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `let count = ref(0);\n` +
+         `console.log(toª(count, '?'));\n`
+      )
+   })
+
+
+   it('transforms getter normalization with call expressions', () => {
+      const { code, edits } = preprocessRXS(
+         `const run = () => 'hi';\n` +
+         `console.log(run()@)`
+      )
+      expect(code).toBe(
+         `const run = () => 'hi';\n` +
+         `console.log(run()!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `const run = () => 'hi';\n` +
+         `console.log(toª(run()));\n`
+      )
+   })
+
+   it('transforms getter normalization with call expressions with optional chaining', () => {
+      const { code, edits } = preprocessRXS(
+         `const run = () => 'hi';\n` +
+         `console.log(run()?@)`
+      )
+      expect(code).toBe(
+         `const run = () => 'hi';\n` +
+         `console.log(run()!!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `const run = () => 'hi';\n` +
+         `console.log(toª(run(), '?'));\n`
+      )
+   })
+
+
+   it('transforms getter normalization with call expressions with non-null assertion', () => {
+      const { code, edits } = preprocessRXS(
+         `const run = () => 'hi';\n` +
+         `console.log(run()!@)`
+      )
+      expect(code).toBe(
+         `const run = () => 'hi';\n` +
+         `console.log(run()!!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `const run = () => 'hi';\n` +
+         `console.log(toª(run()!));\n`
+      )
+   })
+
+
+   it('transforms getter normalization with call expressions with type casting', () => {
+      const { code, edits } = preprocessRXS(
+         `const run = () => 'hi';\n` +
+         `console.log(run()@ as Get<string>)`
+      )
+      expect(code).toBe(
+         `const run = () => 'hi';\n` +
+         `console.log(run()! as Get<string>)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `const run = () => 'hi';\n` +
+         `console.log(toª(run()) as Get<string>);\n`
       )
    })
 

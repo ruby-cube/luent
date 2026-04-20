@@ -39,7 +39,7 @@ import { TestNullIon } from "./src/TestNullIon"
 import { TestRetracking } from "./src/TestRetracking"
 
 export function runDemo() {
-   const app = createRoot(() =><TestConsecutiveIfElse></TestConsecutiveIfElse>)
+   const app = createRoot(() =><BottomlessBlokkis/>)
 
    app.mount('#root')
 }

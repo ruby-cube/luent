@@ -166,9 +166,9 @@ const foo = {
 
 `compiled compile-time for tsc and language services`
 ```ts
-const foo = absorbª({
+const foo = {
    get count() { return ªvalue(ref(0)) }
-})
+}
 ```
 `compiled runtime for browser`
 ```ts

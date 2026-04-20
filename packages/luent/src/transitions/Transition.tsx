@@ -1,4 +1,4 @@
-import { template } from "../component/Component"
+import { Component } from "../component/Component"
 import { FromTag, RenderSlot } from "../component/Input"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
@@ -9,7 +9,7 @@ export function Transition({ Slot, ...attributes }: FromTag<{ Slot: RenderSlot }
    transitionConfig = attributes
    const output = Slot()
    transitionConfig = undefined
-   return template(output)
+   return Component(output)
 }
 
 export function setTransition(transition: TransitionConfigs | undefined){

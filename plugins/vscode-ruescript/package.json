@@ -28,16 +28,14 @@
    "categories": [
       "Programming Languages"
    ],
-   "activationEvents": [
-      "onLanguage:ruescript"
-   ],
    "contributes": {
       "languages": [
          {
             "id": "ruescript",
             "extensions": [
                ".rxs"
-            ]
+            ],
+            "configuration": "./language-configuration.json"
          }
       ],
       "semanticTokenTypes": [

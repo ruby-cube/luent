@@ -3,8 +3,8 @@ import { dirname, join } from 'node:path'
 import { createRequire } from 'node:module'
 import { transformWithOxc } from 'vite'
 import * as babel from '@babel/core'
-import BabelLuentPlugin from '@rue/babel-plugin-luent'
-import { transpileRueScript } from '@rue/ruescript/compile'
+import { luentPreTransform as BabelLuentPlugin } from '@rue/babel-plugin-luent'
+import { transpileRueScript } from '@rue/ruescript'
 
 const require = createRequire(import.meta.url)
 

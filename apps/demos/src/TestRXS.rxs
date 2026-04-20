@@ -2,6 +2,10 @@
 get count = ref(0);
 get other = ref('something');
 
+const obj = {
+   get frog: ref('kermit')
+}
+
 count = 'okj';
 other = 'ho';
 

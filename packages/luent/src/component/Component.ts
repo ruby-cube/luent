@@ -26,12 +26,14 @@ export type PublicComponent<T extends AnyObject = AnyObject> = T // contains any
 //    ref: T extends {} ? <C>(referent: C) => Component<C> : never,
 // }
 
-export type Component<T = {}> ={
+export type Component<T = {}> = {
    exposed: T;
    jsxNodes: RawJSXNode[];
    // ref: T extends {} ? <C>(referent: C) => Component<C> : never,
    // style: (css: string) => StyledComponent<T>
 }
+
+export const template = Component;
 
 type JSXTemplate = RawJSXNode
 
@@ -179,10 +181,8 @@ export function makeComponent(
          initializeRef(ref, publicComponent)
       }
    }
-   if (publicComponent) {
-      // TODO: throw error if hooks have already been attached?
-      setUpHooks(publicComponent, hooks)
-   }
+   // TODO: throw error if hooks have already been attached?
+   setUpHooks(publicComponent, hooks)
 
    // if (tag['show-if']) setUpConditionalDisplay()
    return output
