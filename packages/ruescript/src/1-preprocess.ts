@@ -221,11 +221,11 @@ class RXSPreprocessor {
    // optional postfix
    // bracket postfix
    rewriteExpressionPostfix() {
-      const pattern = /([)?!\]])@([\s/()])/g
+      const pattern = /([)?!\]])@[\s/()]/g
       const matches = this.source.matchAll(pattern)
 
       for (const match of matches) {
-         const [original, before, after] = match
+         const [original, before] = match
          const index = match.index
 
          this._edits.push({
@@ -233,8 +233,8 @@ class RXSPreprocessor {
             index,
             anchor: index + 2, // NOTE: range for non-null expression ends after !
             anchorType: 'end',
-            original,
-            transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX + after
+            original: original.slice(0, -1),
+            transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX
          })
       }
    }

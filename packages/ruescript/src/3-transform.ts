@@ -218,9 +218,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
       MemberExpression(node, context) {
          const property = node.property
-         // node.computed
-         // node.object
-         if (property.type === 'Identifier') {
+         if (!node.computed && property.type === 'Identifier') {
             /**
              * getter access
              * source: obj.count@
@@ -230,7 +228,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             if (property.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
                const { program } = context
                assertContext(program, 'program')
-               const edit = context.edits.findEnd(node.end) 
+               const edit = context.edits.findEnd(node.end)
                if (edit) {
                   this.willMutate(() => {
                      importFromRuescript('ªof', program)
@@ -408,8 +406,10 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          */
          const edit = context.edits.findEnd(node.end)
          const expression = node.expression
+         console.log('non null', expression, edit, edits, node.end)
          switch (edit?.type) {
             case 'AccessorExpressionPostfix':
+
                // foo()@
                if (expression.type === 'CallExpression') {
                   assertContext(program, 'program')
@@ -429,7 +429,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                // foo?@
                if (expression.type === 'TSNonNullExpression') {
                   const exp = expression.expression
-                  if (exp.type === 'Identifier' || 'CallExpression') {
+                  if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
                      assertContext(program, 'program')
                      this.willMutate(() => {
                         importFromRuescript('toª', program)
@@ -442,6 +442,23 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         raw: "'?'"
                      }))
                   }
+                  // obj.count?@
+                  // obj[count]?@
+                  else if (exp.type === 'MemberExpression') {
+                     assertContext(program, 'program')
+                     this.willMutate(() => {
+                        importFromRuescript('ªof', program)
+                     })
+                     this.willReplace(node, {
+                        type: 'MemberExpression',
+                        start: node.start,
+                        end: node.end,
+                        object: wrapInCall('ªof', exp.object, { type: 'Literal', start: 0, end: 0, value: '?', raw: '"?"' }),
+                        property: exp.property as Identifier,
+                        computed: exp.computed as false,
+                        optional: false
+                     })
+                  }
                }
                break;
 
@@ -450,13 +467,55 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                // foo!@
                if (expression.type === 'TSNonNullExpression') {
                   const exp = expression.expression
-                  if (exp.type === 'Identifier' || 'CallExpression') {
+                  if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
                      assertContext(program, 'program')
                      this.willMutate(() => {
                         importFromRuescript('toª', program)
                      })
                      this.willReplace(node, wrapInCall('toª', expression))
                   }
+                  // obj[count]!@
+                  // obj.count!@
+                  else if (exp.type === 'MemberExpression') {
+                     assertContext(program, 'program')
+                     this.willMutate(() => {
+                        importFromRuescript('ªof', program)
+                     })
+                     this.willReplace(node, {
+                        type: 'MemberExpression',
+                        start: node.start,
+                        end: node.end,
+                        object: wrapInCall('ªof', exp.object, { type: 'Literal', start: 0, end: 0, value: '!', raw: '"!"' }),
+                        property: exp.property as Identifier,
+                        computed: exp.computed as false,
+                        optional: false
+                     })
+                  }
+               }
+               break;
+
+            case 'BracketAccessorPostfix':
+               console.log('bracket')
+               /**
+                * getter access
+                * source: obj[count]@
+                * prepro: obj[count]!
+                * final: ªof(obj)[count]
+                */
+               if (expression.type === 'MemberExpression') {
+                  assertContext(program, 'program')
+                  this.willMutate(() => {
+                     importFromRuescript('ªof', program)
+                  })
+                  this.willReplace(node, {
+                     type: 'MemberExpression',
+                     start: node.start,
+                     end: node.end,
+                     object: wrapInCall('ªof', expression.object),
+                     property: expression.property as Identifier,
+                     computed: true,
+                     optional: false
+                  })
                }
                break;
 
