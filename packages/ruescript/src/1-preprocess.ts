@@ -1,7 +1,7 @@
 import { ACCESSOR_EXPRESSION_POSTFIX, ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts"
 
 type BaseEdit = {
-   type: string
+   // type: string
    index: number,
    anchor: number
    anchorType: 'start' | 'end'
@@ -10,7 +10,7 @@ type BaseEdit = {
    // valid: undefined | boolean // pattern is in valid transform context (e.g. non-string/non-comment)--context unknown until after parsing
 }
 
-export type Edit = VariableEdit | ExpressionEdit | BaseEdit
+export type Edit = VariableEdit | ExpressionEdit
 
 export type VariableEdit = {
    type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorVariablePostfix' | 'JSXAttributeShorthand'
@@ -86,29 +86,42 @@ export class Edits {
       this.lastPostfix = postfixes.length - 1
    }
 
-   findStart(anchor: number) {
+   findStart(anchor: number): Edit | undefined { // TODO: should I find exact matches instead of ranges?
       const edits = this.prefixes
       const limit = edits.length;
       for (let i = this.lastPrefix; i < limit; i++) {
          const edit = edits[i]
-         if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
+         if (anchor === edit.anchor) {
+         // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
             this.lastPrefix = i;
             return edit
          }
       }
    }
 
-   findEnd(anchor: number) {
+   findEnd(anchor: number): Edit | undefined { // TODO: should I find exact matches instead of ranges?
       const edits = this.postfixes
       const limit = edits.length;
-      console.log('anchor', anchor, edits)
       for (let i = 0; i < limit; i++) {
          const edit = edits[i]
-         if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
+         // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
+         if (anchor === edit.anchor) {
             // this.lastPrefix = i;
             return edit
          }
       }
+   }
+
+   atPrefix(anchor: number, task: (edit: Edit) => void) {
+      const edit = this.findStart(anchor)
+      if (edit) task(edit)
+      return edit
+   }
+
+   atPostfix(anchor: number, task: (edit: Edit) => void) {
+      const edit = this.findEnd(anchor)
+      if (edit) task(edit)
+      return edit
    }
 
    // findEnd(anchor: number) {
@@ -211,7 +224,7 @@ class RXSPreprocessor {
       const pattern = /([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
 
       const matches = this.source.matchAll(pattern)
-      
+
       for (const match of matches) {
          console.log('match', match)
          const [original, identifier] = match

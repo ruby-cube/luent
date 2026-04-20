@@ -48,9 +48,9 @@ class Scope {
    // private variables: Set<string>
    private absorbedGetters: Set<string>
 
-   constructor(parent: Scope | undefined) {
+   constructor(private parent: Scope | undefined) {
       // this.variables = new Set(parent?.variables)
-      this.absorbedGetters = new Set(parent?.absorbedGetters)
+      this.absorbedGetters = new Set()
    }
 
    // addVariable(name: string) {
@@ -62,11 +62,20 @@ class Scope {
    // }
 
    addAbsorbedGetter(name: string) {
+      console.log('add', name)
       this.absorbedGetters.add(name)
    }
 
    isAbsorbedGetter(name: string) {
-      return this.absorbedGetters.has(name)
+      let scope: undefined | Scope = this;
+      while (scope) {
+         const result = scope.absorbedGetters.has(name)
+         if (result) {
+            return true;
+         }
+         scope = scope.parent
+      }
+      return false;
    }
 }
 
@@ -145,9 +154,11 @@ export class Cursor<T extends BaseNode, C> {
    }
 
    visitEach<N extends BaseNode>(nodes: N[], context?: C) {
-      for (const node of nodes) {
-         this.visit(node, context)
-      }
+      nodes.forEach(node => {
+         if (isNode(node)) {
+            this.visit(node, context)
+         }
+      })
    }
 
 

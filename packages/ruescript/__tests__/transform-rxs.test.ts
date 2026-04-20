@@ -135,7 +135,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(() => (count * 2));\n`
+         `watch(() => (count() * 2));\n`
       )
    })
 
@@ -154,7 +154,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(() => ((console.log('hi'), count * 2)));\n`
+         `watch(() => ((console.log('hi'), count() * 2)));\n`
       )
    })
 
@@ -173,7 +173,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(() => (count * 2 as number));\n`
+         `watch(() => (count() * 2 as number));\n`
       )
    })
 
@@ -193,7 +193,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(async () => (await count));\n`
+         `watch(async () => (await count()));\n`
       )
    })
 
@@ -212,7 +212,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch((() => (count * 2))());\n`
+         `watch((() => (count() * 2))());\n`
       )
    })
 
@@ -410,7 +410,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
          `let count = ref(0);\n` +
-         `console.log(toª(count, '?'));\n`
+         `console.log(toª(count, "?"));\n`
       )
    })
 
@@ -449,7 +449,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
          `const run = () => 'hi';\n` +
-         `console.log(toª(run(), '?'));\n`
+         `console.log(toª(run(), "?"));\n`
       )
    })
 
@@ -535,7 +535,7 @@ describe('transform', () => {
    })
 
 
-   it.only('transforms getter normalization with default parameters', () => {
+   it('transforms getter normalization with default parameters', () => {
       const { code, edits } = preprocessRXS(
          `function foo(bar@ = 0) {\n` +
          `\tconsole.log(bar)\n` +
@@ -552,7 +552,7 @@ describe('transform', () => {
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª, assertª } from "@rue/ruescript";\n` +
+         `import { assertª, toª } from "@rue/ruescript";\n` +
          `function foo(bar = assertª(0)) {\n` +
          `\tbar = toª(bar);\n` +
          `\tconsole.log(bar());\n` +

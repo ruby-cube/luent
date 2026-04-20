@@ -1,6 +1,7 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse } from './traverse.ts';
+import { BaseNode } from './4-generate.ts';
 
 // TODO: type context, pass separately from cursor
 // TODO: offsets
@@ -14,14 +15,18 @@ type Context = {
    program?: Program;
    edits: Edits;
    scoped?: boolean;
+   isAssignee?: boolean;
+   isProperty?: boolean;
 }
 
-function assertContext<T>(value: T | undefined, key: string): asserts value is T {
-   if (!value) throw new Error(key + ' is missing from context')
+function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefined> {
+   const value = obj[key]
+   if (value === undefined) throw new Error(key.toString() + ' is missing from context')
+   return value as Exclude<T[K], undefined>;
 }
+
 
 export function transformRXS(ast: ASTNode, edits: Edits) {
-
    // TODO:
    // let offset = 0;
    // traverseAll(ast, (node) => {
@@ -29,69 +34,49 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
    // })
    return traverse(ast, { edits } as Context, {
       Program(node, context) {
-         node.body.forEach(statement => {
-            this.visit(statement, { ...context, program: node })
-         })
+         this.visitEach(node.body, {...context, program: node})
       },
 
       JSXAttribute(node, context) {
+         const { edits } = context;
+         /**
+          * <Comp attribute />
+          */
          if (node.value === null) {
-            const edit = context.edits.findStart(node.start)
-            if (edit?.type === 'JSXAttributeShorthand') {
-               const identifier = edit
-                  // @ts-expect-error
-                  .identifier
-               this.willMutate(() => {
-                  node.name.name = identifier
-                  node.value = {
-                     type: 'JSXExpressionContainer',
-                     start: node.start,
-                     end: node.end,
-                     expression: {
-                        type: 'Identifier',
-                        start: node.start + 1,
-                        end: node.end - 1,
-                        name: identifier
-                     }
-                  }
-               })
-               return;
-            }
+            edits.atPrefix(node.start, edit => {
+               if (edit.type !== 'JSXAttributeShorthand')
+                  throw new InternalError(`Unexpected edit type ${edit.type}`)
+               /**
+                * source: <Comp {attribute} />
+                * final: <Comp attribute={attribute} />
+                */
+               queueJSXAttributeShorthand(node, edit.identifier, this)
+            })
          }
          this.visit(node.name)
          if (node.value) this.visit(node.value)
       },
 
       VariableDeclaration(node, context) {
-         if (node.kind == 'let' && node.declarations.length === 1) {
-            const edit = edits.findStart(node.start)
-            if (edit && isGetVariableDeclaration(node, edit)) {
-               const { program } = context;
-               assertContext(program, 'program')
-
-               this.willMutate(() => {
-                  importFromRuescript('assertª', program);
-                  node.kind = 'const'
-               })
-               node.declarations.forEach(node => {
+         const { edits } = context
+         if (node.kind == 'let') {
+            edits.atPrefix(node.start, edit => {
+               if (edit.type === 'GetDeclaration') {
+                  const program = requireFrom(context, 'program');
+                  if (node.declarations.length !== 1) {
+                     return; // TODO: throw compile error
+                  }
+                  const declarator = node.declarations[0]
                   /**
                    * source: get variable = expression
                    * prepro: let variable = expression 
                    * final: const variable = assertª(expression)
                    */
-                  if (node.id.type === 'Identifier') {
-                     const variable = node.id.name
+                  if (declarator.id.type === 'Identifier') {
+                     queueGetVariableDeclaration(node, declarator, program, this)
+                     const variable = declarator.id.name
                      this.scope.addAbsorbedGetter(variable)
                      this.scope.addAbsorbedGetter(variable + ACCESSOR_VARIABLE_POSTFIX)
-                     this.willMutate(() => {
-                        node.init = wrapInCall('assertª', node.init ?? {
-                           type: 'Literal',
-                           start: 0,
-                           end: 0,
-                           value: null,
-                           raw: 'null'
-                        })
-                     })
                   }
                   /**
                   * source: get [a, b] = expression
@@ -103,15 +88,15 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      // TODO: get destructuring declaration
                      // this.visit(node)
                   }
-               })
-            }
-            else {
-               this.visitEach(node.declarations)
-            }
+               }
+            })
          }
-         else {
-            this.visitEach(node.declarations)
-         }
+         this.visitEach(node.declarations)
+      },
+
+      VariableDeclarator(node, context) {
+         this.visit(node.id, { ...context, isAssignee: node.id.type === 'Identifier' })
+         if (node.init) this.visit(node.init)
       },
 
       /**
@@ -148,7 +133,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             }
 
             if (node.type === 'Property' && !node.shorthand) {
-               // intentionally skip visiting node.key
+               this.visit(node.key, { ...context, isProperty: node.key.type === 'Identifier' })
                this.visit(node.value)
             }
             else { // spread and shorthand
@@ -156,8 +141,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             }
          })
          if (edit !== undefined) {
-            const { program } = context
-            assertContext(program, 'program')
+            const program = requireFrom(context, 'program')
 
             this.willMutate(() => {
                importFromRuescript('assertª', program)
@@ -165,24 +149,14 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                importFromRuescript('absorbª', program)
                properties.forEach((node, index) => {
                   if (edits[index] && node.type === 'Property') {
-                     node.value = wrapInCall('absorbª', wrapInCall('assertª', node.value))
+                     node.value = CovertCallExpression('absorbª', CovertCallExpression('assertª', node.value))
                   }
                })
                node.properties = properties
             })
-            this.willReplace(node, wrapInCall('absorbsª', node))
+            this.willReplace(node, CovertCallExpression('absorbsª', node))
          }
       },
-
-      // VariableDeclarator(node, context) {
-      //    this.visit(node.id)
-      //    // if (node.id.type === 'Identifier') {
-      //    //    this.scope.addVariable(node.id.name)
-      //    // }
-      // },
-
-
-      // TODO: scoping
 
       BlockStatement(node, context) {
          if (context.scoped) {
@@ -198,12 +172,14 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       FunctionDeclaration(node, context) {
          scopeFunction(this, node, context)
       },
-
+      
       FunctionExpression(node, context) {
+         console.log('FunctionExpression')
          scopeFunction(this, node, context)
       },
-
+      
       ArrowFunctionExpression(node, context) {
+         console.log('ArrowFunction')
          scopeFunction(this, node, context)
       },
 
@@ -217,7 +193,11 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       },
 
       MemberExpression(node, context) {
-         const property = node.property
+         const { edits } = context
+         const { object, property } = node
+         this.visit(object)
+         this.visit(property, { ...context, isProperty: property.type === 'Identifier' })
+
          if (!node.computed && property.type === 'Identifier') {
             /**
              * getter access
@@ -226,21 +206,25 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
              * final: ªof(obj).count
              */
             if (property.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-               const { program } = context
-               assertContext(program, 'program')
-               const edit = context.edits.findEnd(node.end)
-               if (edit) {
+               edits.atPostfix(node.end, () => {
+                  const program = requireFrom(context, 'program')
+
                   this.willMutate(() => {
                      importFromRuescript('ªof', program)
                      property.name = property.name.slice(0, -1)
                   })
-                  this.willReplace(node.object, wrapInCall('ªof', node.object))
-               }
+                  this.willReplace(node.object, CovertCallExpression('ªof', node.object))
+               })
             }
          }
       },
 
       Identifier(leaf, context) {
+         const { edits } = context
+         if (context.isAssignee || context.isProperty) {
+            // TODO: unwrite invalid edits
+            return;
+         }
          if (!leaf.name || leaf.name === 'this') return; // exclude LabelIdentifier and TSIndexSignature and TSThisParameter
          if (this.scope.isAbsorbedGetter(leaf.name)) {
             /**
@@ -250,8 +234,10 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
              * final: count 
             */
             if (leaf.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-               this.willMutate(() => {
-                  leaf.name = leaf.name.slice(0, -1)
+               edits.atPostfix(leaf.end, () => {
+                  this.willMutate(() => {
+                     leaf.name = leaf.name.slice(0, -1)
+                  })
                })
             }
             /**
@@ -273,19 +259,18 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
              * final: toª(count)
              */
             if (leaf.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-               const { program } = context
-               assertContext(program, 'program')
-               const edit = context.edits.findEnd(leaf.end)
-               if (edit) {
+               const program = requireFrom(context, 'program')
+               edits.atPostfix(leaf.end, () => {
                   this.willMutate(() => {
                      importFromRuescript('toª', program)
                      leaf.name = leaf.name.slice(0, -1)
                   })
-                  this.willReplace(leaf, wrapInCall('toª', leaf as Identifier))
-               }
+                  this.willReplace(leaf, CovertCallExpression('toª', leaf as Identifier))
+               })
             }
          }
       },
+
       AssignmentExpression(node, context) {
          const left = node.left
          switch (left.type) {
@@ -294,23 +279,26 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                 * source: count = expression;
                 * final: assertµ(count).value = expression;
                 */
-               transformAccessorVariableWrite(this, node, 'left', left, context)
+               queueAccessorVariableWrite(this, node, 'left', left, context)
                break;
 
             case 'ArrayPattern':
 
                break;
+
             case 'MemberExpression':
 
                break;
+
             case 'ObjectPattern':
 
                break;
+
             case 'TSAsExpression':
 
                break;
+
             case 'TSNonNullExpression':
-               this.visit(left)
                break;
 
             case 'TSSatisfiesExpression':
@@ -322,17 +310,20 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             default:
                break;
          }
+
+         this.visit(node.left, { ...context, isAssignee: node.left.type === 'Identifier' })
          this.visit(node.right)
       },
+
       UpdateExpression(node, context) {
          const arg = node.argument
          switch (arg.type) {
             case 'Identifier':
                /**
-                * source: count = expression;
-                * final: assertµ(count).value = expression;
+                * source: count++;
+                * final: assertµ(count).value++;
                 */
-               transformAccessorVariableWrite(this, node, 'argument', arg, context)
+               queueAccessorVariableWrite(this, node, 'argument', arg, context)
                break;
 
             case 'MemberExpression':
@@ -342,8 +333,8 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             case 'TSAsExpression':
 
                break;
+
             case 'TSNonNullExpression':
-               this.visit(arg)
                break;
 
             case 'TSSatisfiesExpression':
@@ -355,17 +346,23 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             default:
                break;
          }
+
+         this.visit(arg, { ...context, isAssignee: arg.type === 'Identifier' })
       },
 
       CallExpression(node, context) {
+         const { edits } = context
+
+         this.visit(node.callee)
+         this.visitEach(node.arguments)
+
          if (node.callee.type === 'TSNonNullExpression') {
             const nonNullExpression = node.callee
-            const edit = context.edits.findEnd(nonNullExpression.end)
-            /**
-             * IIDE
-             * (expression)@()
-             */
-            if (edit?.type === 'AccessorExpressionPostfix') {
+            edits.atPostfix(nonNullExpression.end, () => {
+               /**
+                * IIDE
+                * (expression)@()
+                */
                const expression = nonNullExpression.expression
                this.willReplace(node, {
                   type: 'CallExpression',
@@ -380,72 +377,114 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                   },
                   arguments: []
                })
-            }
-            else {
-               this.visit(node.callee)
-               this.visitEach(node.arguments)
-            }
-            /**
-             * {...statements}@() // TODO:
-             */
-         }
-         else {
-            this.visit(node.callee)
-            this.visitEach(node.arguments)
+            })
          }
       },
 
 
       TSNonNullExpression(node, context) {
-         const { program, edits } = context
+         const { edits } = context
+         this.visit(node.expression)
+
          /**
           * Derivation expression:
           * source: (expression)@
           * prepro: (expression)!
           * final: () => expression
          */
-         const edit = context.edits.findEnd(node.end)
-         const expression = node.expression
-         console.log('non null', expression, edit, edits, node.end)
-         switch (edit?.type) {
-            case 'AccessorExpressionPostfix':
+         edits.atPostfix(node.end, edit => {
+            const expression = node.expression
+            switch (edit.type) {
+               case 'AccessorExpressionPostfix':
 
-               // foo()@
-               if (expression.type === 'CallExpression') {
-                  assertContext(program, 'program')
-                  this.willMutate(() => {
-                     importFromRuescript('toª', program)
-                  })
-                  this.willReplace(node, wrapInCall('toª', expression))
-               }
-               // (expression)@
-               else if (expression.type === 'ParenthesizedExpression' || expression.type === 'SequenceExpression') {
-                  this.willReplace(node, DerivationArrowFunctionExpression(expression))
-               }
-               break;
-
-            case 'OptionalAccessorPostfix':
-               // foo()?@
-               // foo?@
-               if (expression.type === 'TSNonNullExpression') {
-                  const exp = expression.expression
-                  if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
-                     assertContext(program, 'program')
+                  // foo()@
+                  if (expression.type === 'CallExpression') {
+                     const program = requireFrom(context, 'program')
                      this.willMutate(() => {
                         importFromRuescript('toª', program)
                      })
-                     this.willReplace(node, wrapInCall('toª', exp, {
-                        type: 'Literal',
-                        start: 0,
-                        end: 0,
-                        value: '?',
-                        raw: "'?'"
-                     }))
+                     this.willReplace(node, CovertCallExpression('toª', expression))
                   }
-                  // obj.count?@
-                  // obj[count]?@
-                  else if (exp.type === 'MemberExpression') {
-                     assertContext(program, 'program')
+                  // (expression)@
+                  else if (expression.type === 'ParenthesizedExpression' || expression.type === 'SequenceExpression') {
+                     this.willReplace(node, DerivationArrowFunctionExpression(expression))
+                  }
+                  break;
+
+               case 'OptionalAccessorPostfix':
+                  // foo()?@
+                  // foo?@
+                  if (expression.type === 'TSNonNullExpression') {
+                     const exp = expression.expression
+                     if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
+                        const program = requireFrom(context, 'program')
+                        this.willMutate(() => {
+                           importFromRuescript('toª', program)
+                        })
+                        this.willReplace(node, CovertCallExpression('toª', exp, CovertString('?')))
+                     }
+                     // obj.count?@
+                     // obj[count]?@
+                     else if (exp.type === 'MemberExpression') {
+                        const program = requireFrom(context, 'program')
+                        this.willMutate(() => {
+                           importFromRuescript('ªof', program)
+                        })
+                        this.willReplace(node, {
+                           type: 'MemberExpression',
+                           start: node.start,
+                           end: node.end,
+                           object: CovertCallExpression('ªof', exp.object, CovertString('?')),
+                           property: exp.property as Identifier,
+                           computed: exp.computed as false,
+                           optional: false
+                        })
+                     }
+                  }
+                  break;
+
+               case 'NonNullAccessorPostfix':
+                  // foo()!@
+                  // foo!@
+                  if (expression.type === 'TSNonNullExpression') {
+                     const exp = expression.expression
+                     if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
+                        const program = requireFrom(context, 'program')
+                        this.willMutate(() => {
+                           importFromRuescript('toª', program)
+                        })
+                        this.willReplace(node, CovertCallExpression('toª', expression))
+                     }
+                     // obj[count]!@
+                     // obj.count!@
+                     else if (exp.type === 'MemberExpression') {
+                        const program = requireFrom(context, 'program')
+                        this.willMutate(() => {
+                           importFromRuescript('ªof', program)
+                        })
+                        this.willReplace(node, {
+                           type: 'MemberExpression',
+                           start: node.start,
+                           end: node.end,
+                           object: CovertCallExpression('ªof', exp.object, CovertString('!')),
+                           property: exp.property as Identifier,
+                           computed: exp.computed as false,
+                           optional: false
+                        })
+                     }
+                  }
+                  break;
+
+               case 'BracketAccessorPostfix':
+                  console.log('bracket')
+                  /**
+                   * getter access
+                   * source: obj[count]@
+                   * prepro: obj[count]!
+                   * final: ªof(obj)[count]
+                   */
+                  if (expression.type === 'MemberExpression') {
+                     const program = requireFrom(context, 'program')
                      this.willMutate(() => {
                         importFromRuescript('ªof', program)
                      })
@@ -453,75 +492,18 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         type: 'MemberExpression',
                         start: node.start,
                         end: node.end,
-                        object: wrapInCall('ªof', exp.object, { type: 'Literal', start: 0, end: 0, value: '?', raw: '"?"' }),
-                        property: exp.property as Identifier,
-                        computed: exp.computed as false,
+                        object: CovertCallExpression('ªof', expression.object),
+                        property: expression.property as Identifier,
+                        computed: true,
                         optional: false
                      })
                   }
-               }
-               break;
+                  break;
 
-            case 'NonNullAccessorPostfix':
-               // foo()!@
-               // foo!@
-               if (expression.type === 'TSNonNullExpression') {
-                  const exp = expression.expression
-                  if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
-                     assertContext(program, 'program')
-                     this.willMutate(() => {
-                        importFromRuescript('toª', program)
-                     })
-                     this.willReplace(node, wrapInCall('toª', expression))
-                  }
-                  // obj[count]!@
-                  // obj.count!@
-                  else if (exp.type === 'MemberExpression') {
-                     assertContext(program, 'program')
-                     this.willMutate(() => {
-                        importFromRuescript('ªof', program)
-                     })
-                     this.willReplace(node, {
-                        type: 'MemberExpression',
-                        start: node.start,
-                        end: node.end,
-                        object: wrapInCall('ªof', exp.object, { type: 'Literal', start: 0, end: 0, value: '!', raw: '"!"' }),
-                        property: exp.property as Identifier,
-                        computed: exp.computed as false,
-                        optional: false
-                     })
-                  }
-               }
-               break;
-
-            case 'BracketAccessorPostfix':
-               console.log('bracket')
-               /**
-                * getter access
-                * source: obj[count]@
-                * prepro: obj[count]!
-                * final: ªof(obj)[count]
-                */
-               if (expression.type === 'MemberExpression') {
-                  assertContext(program, 'program')
-                  this.willMutate(() => {
-                     importFromRuescript('ªof', program)
-                  })
-                  this.willReplace(node, {
-                     type: 'MemberExpression',
-                     start: node.start,
-                     end: node.end,
-                     object: wrapInCall('ªof', expression.object),
-                     property: expression.property as Identifier,
-                     computed: true,
-                     optional: false
-                  })
-               }
-               break;
-
-            default:
-               break;
-         }
+               default:
+                  break;
+            }
+         })
       }
    })
 }
@@ -546,7 +528,9 @@ function bodyHasAwait(node: ASTNode) {
 
 
 function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Function | ArrowFunctionExpression, context: Context) {
+   console.trace('scopeFunction', node)
    const body = node.body
+
    if (body) {
       cursor.enterScope()
       console.log('params', node.params)
@@ -562,15 +546,13 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
          if (identifier) {
             const parameter = identifier.name
             if (identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-               const edit = context.edits.findEnd(identifier.end)
-               if (edit?.type === 'AccessorVariablePostfix') {
-                  const { program } = context
-                  assertContext(program, 'program')
+               context.edits.atPostfix(identifier.end, () => {
+                  const program = requireFrom(context, 'program')
                   const variable = parameter.slice(0, -1)
-                  importFromRuescript('toª', program)
                   cursor.scope.addAbsorbedGetter(parameter)
                   cursor.scope.addAbsorbedGetter(variable)
                   cursor.willMutate(() => {
+                     importFromRuescript('toª', program)
                      // bar = toª(bar)
                      if (body.type === 'BlockStatement') {
                         body.body.unshift({
@@ -581,19 +563,9 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                               type: 'AssignmentExpression',
                               start: 0,
                               end: 0,
-                              left: {
-                                 type: 'Identifier',
-                                 start: 0,
-                                 end: 0,
-                                 name: variable
-                              },
+                              left: CovertIdentifier(variable),
                               operator: '=',
-                              right: wrapInCall('toª', {
-                                 type: 'Identifier',
-                                 start: 0,
-                                 end: 0,
-                                 name: variable
-                              })
+                              right: CovertCallExpression('toª', CovertIdentifier(variable))
                            }
                         })
                      }
@@ -604,10 +576,11 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                   if (param.type === 'AssignmentPattern') {
                      importFromRuescript('assertª', program)
                      cursor.willMutate(() => {
-                        param.right = wrapInCall('assertª', param.right)
+                        param.right = CovertCallExpression('assertª', param.right)
                      })
                   }
-               }
+
+               })
             }
          }
          else {
@@ -678,9 +651,6 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
 export const ACCESSOR_VARIABLE_POSTFIX = 'ª'
 export const ACCESSOR_EXPRESSION_POSTFIX = '!'
 
-function isGetVariableDeclaration(declaration: VariableDeclaration, edit: Edit) {
-   return edit.type === 'GetDeclaration' && edit.anchor === declaration.start
-}
 
 type Identifier = { name: string, start: number, end: number, type: 'Identifier' }
 
@@ -709,7 +679,15 @@ function DerivationArrowFunctionExpression(expression: Expression): ArrowFunctio
    }
 }
 
-function transformAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpression | UpdateExpression>(
+/**
+ * @example
+ * source: count = expression;
+ * final: assertµ(count).value = expression;
+ * 
+ * source: count++;
+ * final: assertµ(count).value++;
+ */
+function queueAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpression | UpdateExpression>(
    cursor: Cursor<T, Context>,
    node: N,
    key: 'left' | 'argument',
@@ -717,8 +695,7 @@ function transformAccessorVariableWrite<T extends ASTNode, N extends AssignmentE
    context: Context
 ) {
    if (cursor.scope.isAbsorbedGetter(left.name)) {
-      const { program } = context;
-      assertContext(program, 'program')
+      const program = requireFrom(context, 'program');
 
       cursor.willMutate(() => {
          importFromRuescript('assertµ', program);
@@ -728,30 +705,13 @@ function transformAccessorVariableWrite<T extends ASTNode, N extends AssignmentE
             end: 0,
             computed: false,
             optional: false,
-            object: {
-               type: 'CallExpression',
-               start: 0,
-               end: 0,
-               callee: {
-                  type: 'Identifier',
-                  start: 0,
-                  end: 0,
-                  name: 'assertµ'
-               },
-               arguments: [{
-                  type: 'Identifier',
-                  start: left.start,
-                  end: left.end,
-                  name: left.name
-               }],
-               optional: false
-            },
-            property: {
+            object: CovertCallExpression('assertµ', {
                type: 'Identifier',
-               start: 0,
-               end: 0,
-               name: 'value'
-            }
+               start: left.start,
+               end: left.end,
+               name: left.name
+            }),
+            property: CovertIdentifier('value')
          }
       })
    }
@@ -769,8 +729,8 @@ function importFromRuescript(importName: string, program: Program) {
       return;
    }
 
-   const declaration = existing ?? createRuescriptImportDeclaration()
-   const specifier = createImportSpecifier(importName)
+   const declaration = existing ?? CovertImportDeclaration(RUESCRIPT_IMPORT_SOURCE)
+   const specifier = CovertImportSpecifier(importName)
    declaration.specifiers.push(specifier)
    if (!existing) program.body.unshift(declaration)
 }
@@ -794,7 +754,7 @@ function hasImport(name: string, declaration: ImportDeclaration) {
 
 const RUESCRIPT_IMPORT_SOURCE = '@rue/ruescript'
 
-function createRuescriptImportDeclaration(): ImportDeclaration {
+function CovertImportDeclaration(source: string): ImportDeclaration {
    return {
       type: 'ImportDeclaration',
       start: 0,
@@ -803,17 +763,31 @@ function createRuescriptImportDeclaration(): ImportDeclaration {
       importKind: 'value',
       attributes: [],
       specifiers: [],
-      source: {
-         type: 'Literal',
-         start: 0,
-         end: 0,
-         raw: `"${RUESCRIPT_IMPORT_SOURCE}"`,
-         value: RUESCRIPT_IMPORT_SOURCE,
-      }
+      source: CovertString(source)
    }
 }
 
-function createImportSpecifier(name: string): ImportSpecifier {
+
+function CovertIdentifier(name: string): Identifier {
+   return {
+      type: 'Identifier',
+      start: 0,
+      end: 0,
+      name: name
+   }
+}
+
+function CovertString(string: string): StringLiteral {
+   return {
+      type: 'Literal',
+      start: 0,
+      end: 0,
+      raw: `"${string}"`,
+      value: string,
+   }
+}
+
+function CovertImportSpecifier(name: string): ImportSpecifier {
 
    return {
       type: 'ImportSpecifier',
@@ -840,12 +814,12 @@ function createImportSpecifier(name: string): ImportSpecifier {
 // #endregion
 
 
-function wrapInCall(name: string, ...nodes: Expression[]): CallExpression {
+function CovertCallExpression(name: string, ...args: Expression[]): CallExpression {
    return {
       type: 'CallExpression',
       start: 0,
       end: 0,
-      arguments: nodes,
+      arguments: args,
       callee: {
          type: 'Identifier',
          start: 0,
@@ -854,6 +828,55 @@ function wrapInCall(name: string, ...nodes: Expression[]): CallExpression {
       },
       optional: false
    }
+}
+
+/**
+ * source: <Comp {attribute} />
+ * final: <Comp attribute={attribute} />
+ */
+function queueJSXAttributeShorthand<T extends ASTNode, C>(node: JSXAttribute, identifier: string, cursor: Cursor<T, C>) {
+   cursor.willMutate(() => {
+      node.name.name = identifier // TODO: what if node.name is replaced before we mutate??
+      node.value = {
+         type: 'JSXExpressionContainer',
+         start: node.start,
+         end: node.end,
+         expression: {
+            type: 'Identifier',
+            start: node.start + 1,
+            end: node.end - 1,
+            name: identifier
+         }
+      }
+   })
+}
+
+/**
+ * @example
+ * source: get variable = expression
+ * prepro: let variable = expression
+ * final: const variable = assertª(expression)
+ */
+function queueGetVariableDeclaration<T extends ASTNode, C>(
+   node: VariableDeclaration,
+   declarator: VariableDeclarator,
+   program: Program,
+   cursor: Cursor<T, C>
+) {
+   if (declarator.id.type !== 'Identifier') throw new InternalError('declarator must be have id type Identifier')
+   cursor.willMutate(() => {
+      importFromRuescript('assertª', program);
+      node.kind = 'const'
+   })
+   cursor.willMutate(() => {
+      declarator.init = CovertCallExpression('assertª', declarator.init ?? {
+         type: 'Literal',
+         start: 0,
+         end: 0,
+         value: null,
+         raw: 'null'
+      })
+   })
 }
 
 class InternalError extends Error { }
