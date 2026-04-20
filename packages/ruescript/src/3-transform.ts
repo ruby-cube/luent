@@ -34,6 +34,34 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          })
       },
 
+      JSXAttribute(node, context) {
+         if (node.value === null) {
+            const edit = context.edits.findStart(node.start)
+            if (edit?.type === 'JSXAttributeShorthand') {
+               const identifier = edit
+                  // @ts-expect-error
+                  .identifier
+               this.willMutate(() => {
+                  node.name.name = identifier
+                  node.value = {
+                     type: 'JSXExpressionContainer',
+                     start: node.start,
+                     end: node.end,
+                     expression: {
+                        type: 'Identifier',
+                        start: node.start + 1,
+                        end: node.end - 1,
+                        name: identifier
+                     }
+                  }
+               })
+               return;
+            }
+         }
+         this.visit(node.name)
+         if (node.value) this.visit(node.value)
+      },
+
       VariableDeclaration(node, context) {
          if (node.kind == 'let' && node.declarations.length === 1) {
             const edit = edits.findStart(node.start)

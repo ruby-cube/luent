@@ -216,6 +216,28 @@ describe('transform', () => {
       )
    })
 
+   // { const c = 0 ; return a + b }@()
+   //
+   // preprocess
+   // { const c = 0 ; return a + b }(ª)
+   //
+   // final
+   // (() => { const c = 0 ; return a + b })()
+   it.skip('transforms immediately invoked derivation expression-block bodied', () => {
+      const { code, edits } = preprocessRXS(
+         `watch({ const c = 0 ; return a + b }@())`
+      )
+      expect(code).toBe(
+         `watch({ const c = 0 ; return a + b }(ª))`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `watch((() => { const c = 0 ; return a + b })());\n`
+      )
+   })
+
    it('transforms accessor property declarations via colon notation', () => {
       const { code, edits } = preprocessRXS(
          `const obj = { get count: ref(0), a, b: 0, get frog: ref('kermit') }`
@@ -371,6 +393,21 @@ describe('transform', () => {
          `import { toª } from "@rue/ruescript";\n` +
          `const run = () => 'hi';\n` +
          `console.log(toª(run()) as Get<string>);\n`
+      )
+   })
+
+   it('transforms jsx attribute shorthand', () => {
+      const { code, edits } = preprocessRXS(
+         `<Tooltip something='true' {tooltip}></Tooltip>`
+      )
+      expect(code).toBe(
+         `<Tooltip something='true' ßtooltipß></Tooltip>`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `<Tooltip something='true' tooltip={tooltip}></Tooltip>;\n`
       )
    })
 

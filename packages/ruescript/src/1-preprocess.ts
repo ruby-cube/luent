@@ -10,15 +10,15 @@ type BaseEdit = {
    // valid: undefined | boolean // pattern is in valid transform context (e.g. non-string/non-comment)--context unknown until after parsing
 }
 
-export type Edit = AccessorVariableEdit | AccessorExpressionEdit | BaseEdit
+export type Edit = VariableEdit | ExpressionEdit | BaseEdit
 
-export type AccessorVariableEdit = {
-   type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorVariablePostfix'
+export type VariableEdit = {
+   type: 'GetDeclaration' | 'GetPropertyColonNotation' | 'AccessorVariablePostfix' | 'JSXAttributeShorthand'
    identifier: string,
 } & BaseEdit
 
-export type AccessorExpressionEdit = {
-   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix'
+export type ExpressionEdit = {
+   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix' | 'BlockIIDEPostfix'
 } & BaseEdit
 
 const AccessorEditType = {
@@ -70,7 +70,7 @@ export class Edits {
    ) {
       const prefixes: Edit[] = this.prefixes = []
       const postfixes: Edit[] = this.postfixes = []
-      
+
       for (const edit of edits) {
          if (edit.anchorType === 'start') {
             prefixes.push(edit)
@@ -81,7 +81,7 @@ export class Edits {
             postfixes.push(edit)
          }
       }
-      
+
       this.lastPrefix = 0;
       this.lastPostfix = postfixes.length - 1
    }
@@ -123,8 +123,10 @@ class RXSPreprocessor {
    transform() {
       this.rewriteGetVariableDeclarations()
       this.rewriteGetPropertyColonNotation()
-      this.rewriteAcessorVariablePostfix()
+      this.rewriteAccessorVariablePostfix()
       this.rewriteExpressionPostfix()
+      this.rewriteBlockIIDE()
+      this.rewriteJSXAttributeShorthand()
 
       const edits = this._edits.toSorted((a, b) => a.index - b.index)
       this.code = applyEdits(this.source, edits)
@@ -141,7 +143,7 @@ class RXSPreprocessor {
     * `let count =`
     */
    rewriteGetVariableDeclarations() {
-      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/g
+      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/gu
 
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
@@ -170,7 +172,7 @@ class RXSPreprocessor {
     * `gª, count:`
     */
    rewriteGetPropertyColonNotation() {
-      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g
+      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/gu
 
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
@@ -190,9 +192,9 @@ class RXSPreprocessor {
       }
    }
 
-   rewriteAcessorVariablePostfix() {
+   rewriteAccessorVariablePostfix() {
 
-      const pattern = /([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
+      const pattern = /[\s]([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
 
       const matches = this.source.matchAll(pattern)
 
@@ -224,7 +226,7 @@ class RXSPreprocessor {
       for (const match of matches) {
          const [original, before, after] = match
          const index = match.index
-         
+
          this._edits.push({
             type: AccessorEditType[before as keyof typeof AccessorEditType],
             index,
@@ -233,7 +235,46 @@ class RXSPreprocessor {
             original,
             transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX + after
          })
+      }
+   }
 
+   rewriteBlockIIDE() {
+      const pattern = /\}@\(\)?[\s/;(),}\]\[]/g
+      const matches = this.source.matchAll(pattern)
+
+      for (const match of matches) {
+         const [original] = match
+         console.log('MATCH!', match)
+         const index = match.index
+
+         this._edits.push({
+            type: 'BlockIIDEPostfix',
+            index,
+            anchor: index, // FIX:
+            anchorType: 'end',
+            original: original.slice(0, -1),
+            transformed: `}(ª)` // FIX:
+         })
+      }
+   }
+
+   rewriteJSXAttributeShorthand() {
+      const pattern = /[\s]\{([\p{ID_Continue}$\u200C\u200D]*)\}/gu
+      const matches = this.source.matchAll(pattern)
+
+      for (const match of matches) {
+         const [original, identifier] = match
+         const index = match.index + 1
+
+         this._edits.push({
+            type: 'JSXAttributeShorthand',
+            index,
+            anchor: index,
+            anchorType: 'start',
+            original: original.slice(1),
+            transformed: `ß${identifier}ß`,
+            identifier
+         })
       }
    }
 
