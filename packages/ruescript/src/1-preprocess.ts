@@ -100,15 +100,28 @@ export class Edits {
 
    findEnd(anchor: number) {
       const edits = this.postfixes
+      const limit = edits.length;
       console.log('anchor', anchor, edits)
-      for (let i = this.lastPostfix; i >= 0; i--) {
+      for (let i = 0; i < limit; i++) {
          const edit = edits[i]
-         if (anchor <= edit.anchor && anchor > edit.anchor - edit.transformed.length) {
-            this.lastPostfix = i;
+         if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
+            // this.lastPrefix = i;
             return edit
          }
       }
    }
+
+   // findEnd(anchor: number) {
+   //    const edits = this.postfixes
+   //    console.log('anchor', anchor, edits, this.lastPostfix)
+   //    for (let i = this.lastPostfix; i >= 0; i--) {
+   //       const edit = edits[i]
+   //       if (anchor <= edit.anchor && anchor > edit.anchor - edit.transformed.length) {
+   //          this.lastPostfix = i;
+   //          return edit
+   //       }
+   //    }
+   // }
 }
 
 // TODO: make sure regex is correct

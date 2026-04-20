@@ -549,18 +549,69 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
    const body = node.body
    if (body) {
       cursor.enterScope()
+      console.log('params', node.params)
       node.params.forEach((param) => {
-         if (param.type === 'Identifier') {
-            // cursor.scope.addVariable(param.name)
-            // TODO: parameter with @ operator
+         const identifier = param.type === 'Identifier'
+            ? param
+            : param.type === 'AssignmentPattern' && param.left.type === 'Identifier'
+               ? param.left
+               : undefined
+         // TODO: destructuring
 
-            const edit = context.edits.findStart(param.start)
-            // if (isAbsorbedParameter(param, edit)) {
+         // simple parameter with @ operator
+         if (identifier) {
+            const parameter = identifier.name
+            if (identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+               const edit = context.edits.findEnd(identifier.end)
+               if (edit?.type === 'AccessorVariablePostfix') {
+                  const { program } = context
+                  assertContext(program, 'program')
+                  const variable = parameter.slice(0, -1)
+                  importFromRuescript('toª', program)
+                  cursor.scope.addAbsorbedGetter(parameter)
+                  cursor.scope.addAbsorbedGetter(variable)
+                  cursor.willMutate(() => {
+                     // bar = toª(bar)
+                     if (body.type === 'BlockStatement') {
+                        body.body.unshift({
+                           type: 'ExpressionStatement',
+                           start: 0,
+                           end: 0,
+                           expression: {
+                              type: 'AssignmentExpression',
+                              start: 0,
+                              end: 0,
+                              left: {
+                                 type: 'Identifier',
+                                 start: 0,
+                                 end: 0,
+                                 name: variable
+                              },
+                              operator: '=',
+                              right: wrapInCall('toª', {
+                                 type: 'Identifier',
+                                 start: 0,
+                                 end: 0,
+                                 name: variable
+                              })
+                           }
+                        })
+                     }
+                  })
+                  cursor.willMutate(() => identifier.name = variable)
 
-            // }
+                  // function foo(bar@ = () => 0) { ... }
+                  if (param.type === 'AssignmentPattern') {
+                     importFromRuescript('assertª', program)
+                     cursor.willMutate(() => {
+                        param.right = wrapInCall('assertª', param.right)
+                     })
+                  }
+               }
+            }
          }
          else {
-            // TODO: "ArrayPattern" | "ObjectPattern" | "RestElement" | "AssignmentPattern" | "TSParameterProperty"
+            // TODO: "ArrayPattern" | "ObjectPattern" | "RestElement"| "TSParameterProperty"
          }
       })
       cursor.visit(body, { ...context, scoped: true })

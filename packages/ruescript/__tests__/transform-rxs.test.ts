@@ -508,6 +508,59 @@ describe('transform', () => {
       )
    })
 
+   it('transforms getter normalization with parameters', () => {
+      const { code, edits } = preprocessRXS(
+         `function foo(bar@) {\n` +
+         `\tconsole.log(bar)\n` +
+         `\tconsole.log(bar@)\n` +
+         `}`
+      )
+      expect(code).toBe(
+         `function foo(barª) {\n` +
+         `\tconsole.log(bar)\n` +
+         `\tconsole.log(barª)\n` +
+         `}`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª } from "@rue/ruescript";\n` +
+         `function foo(bar) {\n` +
+         `\tbar = toª(bar);\n` +
+         `\tconsole.log(bar());\n` +
+         `\tconsole.log(bar);\n` +
+         `}\n\n`
+      )
+   })
+
+
+   it.only('transforms getter normalization with default parameters', () => {
+      const { code, edits } = preprocessRXS(
+         `function foo(bar@ = 0) {\n` +
+         `\tconsole.log(bar)\n` +
+         `\tconsole.log(bar@)\n` +
+         `}`
+      )
+      expect(code).toBe(
+         `function foo(barª = 0) {\n` +
+         `\tconsole.log(bar)\n` +
+         `\tconsole.log(barª)\n` +
+         `}`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { toª, assertª } from "@rue/ruescript";\n` +
+         `function foo(bar = assertª(0)) {\n` +
+         `\tbar = toª(bar);\n` +
+         `\tconsole.log(bar());\n` +
+         `\tconsole.log(bar);\n` +
+         `}\n\n`
+      )
+   })
+
    it('works with new lines', () => {
       const { code, edits } = preprocessRXS('function ref(a: number){\n}\n\nfunction frog() {\n   get count = ref(0);\n   return;\n}\n\nconst count = 0')
       expect(code).toBe('function ref(a: number){\n}\n\nfunction frog() {\n   let count = ref(0);\n   return;\n}\n\nconst count = 0')
