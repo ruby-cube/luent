@@ -216,6 +216,32 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          this.visit(node)
       },
 
+      MemberExpression(node, context) {
+         const property = node.property
+         // node.computed
+         // node.object
+         if (property.type === 'Identifier') {
+            /**
+             * getter access
+             * source: obj.count@
+             * prepro: obj.countª
+             * final: ªof(obj).count
+             */
+            if (property.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+               const { program } = context
+               assertContext(program, 'program')
+               const edit = context.edits.findEnd(node.end) 
+               if (edit) {
+                  this.willMutate(() => {
+                     importFromRuescript('ªof', program)
+                     property.name = property.name.slice(0, -1)
+                  })
+                  this.willReplace(node.object, wrapInCall('ªof', node.object))
+               }
+            }
+         }
+      },
+
       Identifier(leaf, context) {
          if (!leaf.name || leaf.name === 'this') return; // exclude LabelIdentifier and TSIndexSignature and TSThisParameter
          if (this.scope.isAbsorbedGetter(leaf.name)) {
@@ -251,11 +277,14 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             if (leaf.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
                const { program } = context
                assertContext(program, 'program')
-               this.willMutate(() => {
-                  importFromRuescript('toª', program)
-                  leaf.name = leaf.name.slice(0, -1)
-               })
-               this.willReplace(leaf, wrapInCall('toª', leaf as Identifier))
+               const edit = context.edits.findEnd(leaf.end)
+               if (edit) {
+                  this.willMutate(() => {
+                     importFromRuescript('toª', program)
+                     leaf.name = leaf.name.slice(0, -1)
+                  })
+                  this.willReplace(leaf, wrapInCall('toª', leaf as Identifier))
+               }
             }
          }
       },

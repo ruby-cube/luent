@@ -260,6 +260,103 @@ describe('transform', () => {
    })
 
 
+   it('transforms getter normalization for object property access', () => {
+      const { code, edits } = preprocessRXS(
+         `console.log(obj.count@)`
+      )
+      expect(code).toBe(
+         `console.log(obj.countª)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { ªof } from "@rue/ruescript";\n` +
+         `console.log(ªof(obj).count);\n`
+      )
+   })
+
+   it.skip('transforms getter normalization for object property access--bracket notation', () => {
+      const { code, edits } = preprocessRXS(
+         `console.log(obj[count]@)`
+      )
+      expect(code).toBe(
+         `console.log(obj[count]!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { ªof } from "@rue/ruescript";\n` +
+         `console.log(ªof(obj)[count]);\n`
+      )
+   })
+
+   it.skip('transforms getter normalization for optional object property access--bracket notation', () => {
+      const { code, edits } = preprocessRXS(
+         `console.log(obj[count]!@)`
+      )
+      expect(code).toBe(
+         `console.log(obj[count]!!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { ªof } from "@rue/ruescript";\n` +
+         `console.log(ªof(obj, '?')[count]);\n`
+      )
+   })
+
+   it.skip('transforms getter normalization for definite object property access--bracket notation', () => {
+      const { code, edits } = preprocessRXS(
+         `console.log(obj[count]!@)`
+      )
+      expect(code).toBe(
+         `console.log(obj[count]!!)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { ªof } from "@rue/ruescript";\n` +
+         `console.log(ªof(obj, '!')[count]);\n`
+      )
+   })
+
+   it.skip('transforms getter normalization for optional object property access', () => {
+      const { code, edits } = preprocessRXS(
+         `console.log(obj.count!@)`
+      )
+      expect(code).toBe(
+         `console.log(obj.count!!)`
+      )
+      // const ast = parseRXS('test.rxs', code)
+      // const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      // const generated = printTSX(tsxTree)
+      // expect(generated.code).toBe(
+      //    `import { ªof } from "@rue/ruescript";\n` +
+      //    `console.log(ªof(obj, '?').count);\n`
+      // )
+   })
+
+   it.skip('transforms getter normalization for definite object property access', () => {
+      const { code, edits } = preprocessRXS(
+         `console.log(obj.count!@)`
+      )
+      expect(code).toBe(
+         `console.log(obj.count!!)`
+      )
+      // const ast = parseRXS('test.rxs', code)
+      // const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      // const generated = printTSX(tsxTree)
+      // expect(generated.code).toBe(
+      //    `import { ªof } from "@rue/ruescript";\n` +
+      //    `console.log(ªof(obj, '!').count);\n`
+      // )
+   })
+
+
    it('transforms getter normalization', () => {
       const { code, edits } = preprocessRXS(
          `const count = ref(0);\n` +

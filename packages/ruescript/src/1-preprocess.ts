@@ -100,6 +100,7 @@ export class Edits {
 
    findEnd(anchor: number) {
       const edits = this.postfixes
+      console.log('anchor', anchor, edits)
       for (let i = this.lastPostfix; i >= 0; i--) {
          const edit = edits[i]
          if (anchor <= edit.anchor && anchor > edit.anchor - edit.transformed.length) {
@@ -194,22 +195,22 @@ class RXSPreprocessor {
 
    rewriteAccessorVariablePostfix() {
 
-      const pattern = /[\s]([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
+      const pattern = /([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
 
       const matches = this.source.matchAll(pattern)
-
+      
       for (const match of matches) {
+         console.log('match', match)
          const [original, identifier] = match
          const index = match.index
-         const transformed = identifier + ACCESSOR_VARIABLE_POSTFIX
 
          this._edits.push({
             type: 'AccessorVariablePostfix',
             index,
-            anchor: index + 1,
+            anchor: index + 2,
             anchorType: 'end',
             original: original.slice(0, -1),
-            transformed: transformed,
+            transformed: identifier + ACCESSOR_VARIABLE_POSTFIX,
             identifier
          })
       }
