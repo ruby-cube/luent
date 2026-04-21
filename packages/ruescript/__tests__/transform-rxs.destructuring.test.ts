@@ -11,13 +11,13 @@ import { transformRXS } from "../src/3-transform"
 // object
 //    [V] get keyword
 //    [V] nested destructuring
-//    [X] destructuring with defaults
-//    [x] with const and @
+//    [V] destructuring with defaults
+//    [] with const and @
 
 // array
-//    [] get keyword
-//    [] nested destructuring
-//    [] destructuring with defaults
+//    [V] get keyword
+//    [V] nested destructuring
+//    [V] destructuring with defaults
 //    [] with const and @
 
 describe('transform', () => {
@@ -99,6 +99,79 @@ describe('transform', () => {
          `\t\tfoo: 1\n` +
          `\t}\n` +
          `});\n` +
+         `console.log(count());\n` +
+         `console.log(count);\n`
+      )
+   })
+
+   it('transforms destructuring with get keyword - array pattern', () => {
+      const { code, edits } = preprocessRXS(
+         `get [count, bar] = array;` +
+         `console.log(count)\n` +
+         `console.log(count@)\n`
+      )
+      expect(code).toBe(
+         `let [count, bar] = array;` +
+         `console.log(count)\n` +
+         `console.log(countª)\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+
+      expect(generated.code).toBe(
+         `import { destructureª } from "@rue/ruescript";\n` +
+         `const [count, bar] = destructureª(array, [1, 1]);\n` +
+         `console.log(count());\n` +
+         `console.log(count);\n`
+      )
+   })
+
+   it('transforms destructuring with get keyword with default value - array pattern', () => {
+      const { code, edits } = preprocessRXS(
+         `get [count, bar = () => 0] = array;` +
+         `console.log(count)\n` +
+         `console.log(count@)\n`
+      )
+      expect(code).toBe(
+         `let [count, bar = () => 0] = array;` +
+         `console.log(count)\n` +
+         `console.log(countª)\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+
+      expect(generated.code).toBe(
+         `import { assertª, destructureª } from "@rue/ruescript";\n` +
+         `const [count, bar = assertª(() => 0)] = destructureª(array, [1, 1]);\n` +
+         `console.log(count());\n` +
+         `console.log(count);\n`
+      )
+   })
+
+
+   it('transforms nested destructuring with get keyword - array pattern', () => {
+      const { code, edits } = preprocessRXS(
+         `get [count, [b, c]] = array;` +
+         `console.log(count)\n` +
+         `console.log(count@)\n`
+      )
+      expect(code).toBe(
+         `let [count, [b, c]] = array;` +
+         `console.log(count)\n` +
+         `console.log(countª)\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+
+      expect(generated.code).toBe(
+         `import { destructureª } from "@rue/ruescript";\n` +
+         `const [count, [b, c]] = destructureª(array, [1, [1, 1]]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
       )

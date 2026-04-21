@@ -218,13 +218,13 @@ class RXSPreprocessor {
     * `let { count } =`
     */
    rewriteGetDestructuring() {
-      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)\{/gu
+      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\{\[])/gu
 
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
-         const [original, gap] = match
+         const [original, gap, bracket] = match
          const index = match.index
-         const transformed = 'let' + gap + '{'
+         const transformed = 'let' + gap + bracket
 
          this._edits.push({
             type: 'GetDestructuring',

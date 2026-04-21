@@ -1,4 +1,4 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse } from './traverse.ts';
 import { BaseNode } from './4-generate.ts';
@@ -95,17 +95,18 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                * source: get { a = () => 0, b } = expression
                * final: const { a, b } = destructureª(expression, { a: 1, b: 1 })
                */
-               else if (id.type === 'ObjectPattern') {
+               else if (id.type === 'ObjectPattern' || id.type === 'ArrayPattern') {
                   declareAbsorbedGettersFromGetDestructuring(id, this, edits, context)
                   this.willMutate(() => {
                      const program = requireFrom(context, 'program')
                      importFromRuescript('destructureª', program)
                      node.kind = 'const'
-                     declarator.init = CovertCallExpression('destructureª', [init, ObjectDestructuringMapFromGetKeyword(id)])
+                     declarator.init = CovertCallExpression('destructureª', [
+                        init, id.type === 'ObjectPattern'
+                           ? ObjectDestructuringMapFromGetKeyword(id)
+                           : ArrayDestructuringMapFromGetKeyword(id)
+                     ])
                   })
-               }
-               else if (id.type === 'ArrayPattern') {
-
                }
                else {
                   throw new InternalError('uncovered case')
@@ -933,7 +934,34 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
       })
    }
    else {
-      // TODO: Array Pattern
+      destructuring.elements.forEach(element => {
+         if (!element) return;
+         if (element.type === 'RestElement') {
+            // TODO: throw compile error?
+            console.error('rest element not currently supported for `get` keyword destructuring')
+            return;
+         }
+
+         cursor.skip(element)
+         const identifier = element.type === 'Identifier' ? element : element.type === 'AssignmentPattern' ? element.left : undefined
+         if (identifier?.type === 'Identifier') {
+            const propertyKey = undoAccessorVariablePostfix(identifier, cursor, edits)
+            cursor.skip(identifier)
+            undoAccessorVariablePostfix(identifier, cursor, edits)
+            declareAbsorbedGetter(propertyKey, cursor)
+            if (element.type === 'AssignmentPattern') {
+               const program = requireFrom(context, 'program')
+               cursor.willMutate(() => {
+                  importFromRuescript('assertª', program)
+                  element.right = CovertCallExpression('assertª', [element.right])
+               })
+            }
+         }
+         // nested destructuring
+         else if (element.type === 'ObjectPattern' || element.type === 'ArrayPattern') {
+            declareAbsorbedGettersFromGetDestructuring(element, cursor, edits, context)
+         }
+      })
    }
 }
 
@@ -962,6 +990,15 @@ function CovertObjectExpression(properties: ObjectPropertyKind[] = []): ObjectEx
       start: 0,
       end: 0,
       properties
+   }
+}
+
+function CovertArrayExpression(elements: ArrayExpressionElement[] = []): ArrayExpression {
+   return {
+      type: 'ArrayExpression',
+      start: 0,
+      end: 0,
+      elements
    }
 }
 
@@ -1003,10 +1040,34 @@ function ObjectDestructuringMapFromGetKeyword(destructuring: ObjectPattern) {
          objectExpression.properties[index] = CovertObjectProperty(key.name, ObjectDestructuringMapFromGetKeyword(value), property.computed)
       }
       else if (value.type === 'ArrayPattern') {
-         // TODO:
+         objectExpression.properties[index] = CovertObjectProperty(key.name, ArrayDestructuringMapFromGetKeyword(value), property.computed)
       }
    })
    return objectExpression
+}
+
+function ArrayDestructuringMapFromGetKeyword(destructuring: ArrayPattern) {
+   const arrayExpression = CovertArrayExpression()
+   const { elements } = destructuring
+
+   elements.forEach((element, index) => {
+      if (!element) return;
+      if (element.type === 'RestElement') {
+         throw new InternalError('uncovered case')
+         return; // TODO: throw compiler error?
+      }
+      const identifier = element.type === 'Identifier' ? element : element.type === 'AssignmentPattern' ? element.left : null
+      if (identifier?.type === 'Identifier') {
+         arrayExpression.elements[index] = CovertNumber(1)
+      }
+      else if (element.type === 'ObjectPattern') {
+         arrayExpression.elements[index] = ObjectDestructuringMapFromGetKeyword(element)
+      }
+      else if (element.type === 'ArrayPattern') {
+         arrayExpression.elements[index] = ArrayDestructuringMapFromGetKeyword(element)
+      }
+   })
+   return arrayExpression
 }
 
 class InternalError extends Error { }
