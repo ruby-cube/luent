@@ -15,6 +15,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -33,6 +34,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -74,6 +76,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª, assertµ } from "@rue/ruescript";\n` +
@@ -93,6 +96,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª, assertµ } from "@rue/ruescript";\n` +
@@ -112,6 +116,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -131,6 +136,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -150,6 +156,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -169,6 +176,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -189,6 +197,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -208,6 +217,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª } from "@rue/ruescript";\n` +
@@ -232,6 +242,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `watch((() => { const c = 0 ; return a + b })());\n`
@@ -247,6 +258,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª, absorbsª, absorbª } from "@rue/ruescript";\n` +
@@ -269,6 +281,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { ªof } from "@rue/ruescript";\n` +
@@ -285,6 +298,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { ªof } from "@rue/ruescript";\n` +
@@ -301,6 +315,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { ªof } from "@rue/ruescript";\n` +
@@ -317,6 +332,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { ªof } from "@rue/ruescript";\n` +
@@ -333,6 +349,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { ªof } from "@rue/ruescript";\n` +
@@ -349,6 +366,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { ªof } from "@rue/ruescript";\n` +
@@ -368,6 +386,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -387,6 +406,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -406,6 +426,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -426,6 +447,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -445,6 +467,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -465,6 +488,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -485,6 +509,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -502,6 +527,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `<Tooltip something='true' tooltip={tooltip}></Tooltip>;\n`
@@ -523,6 +549,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { toª } from "@rue/ruescript";\n` +
@@ -550,6 +577,7 @@ describe('transform', () => {
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `import { assertª, toª } from "@rue/ruescript";\n` +
@@ -566,6 +594,7 @@ describe('transform', () => {
       expect(code).toBe('function ref(a: number){\n}\n\nfunction frog() {\n   let count = ref(0);\n   return;\n}\n\nconst count = 0')
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe('import { assertª } from "@rue/ruescript";\nfunction ref(a: number) {\n}\n\nfunction frog() {\n\tconst count = assertª(ref(0));\n\treturn;\n}\n\nconst count = 0;\n')
    })
@@ -587,6 +616,5 @@ describe('transform', () => {
             ª=><div></div>
          }
       `)
-      console.log('ast', ast.program.body[0].body.body[0])
    })
 })

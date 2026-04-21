@@ -6,7 +6,7 @@ const TAB = '\t'
 
 class InternalError extends Error { }
 
-export function printTSX(program: Program): { code: string, map: CodeMapping[] } {
+export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] } {
    const file = new CodePrinter({
       /**
        * const answer = 42
@@ -2643,7 +2643,6 @@ class CodePrinter {
          const length = end - start
 
          this.map.push({
-            _DEV_: span.name,
             sourceOffsets: [span.start],
             generatedOffsets: [start],
             data: capabilities ?? {},

@@ -1,7 +1,8 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse } from './traverse.ts';
 import { BaseNode } from './4-generate.ts';
+import { T } from 'node_modules/vitest/dist/chunks/traces.d.402V_yFI';
 
 // TODO: type context, pass separately from cursor
 // TODO: offsets
@@ -15,8 +16,8 @@ type Context = {
    program?: Program;
    edits: Edits;
    scoped?: boolean;
-   isAssignee?: boolean;
-   isProperty?: boolean;
+   // isAssignee?: boolean;
+   // isProperty?: boolean;
 }
 
 function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefined> {
@@ -34,7 +35,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
    // })
    return traverse(ast, { edits } as Context, {
       Program(node, context) {
-         this.visitEach(node.body, {...context, program: node})
+         this.visitEach(node.body, { ...context, program: node })
       },
 
       JSXAttribute(node, context) {
@@ -43,7 +44,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
           * <Comp attribute />
           */
          if (node.value === null) {
-            edits.atPrefix(node.start, edit => {
+            edits.at(node.start, edit => {
                if (edit.type !== 'JSXAttributeShorthand')
                   throw new InternalError(`Unexpected edit type ${edit.type}`)
                /**
@@ -59,43 +60,64 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
       VariableDeclaration(node, context) {
          const { edits } = context
+
          if (node.kind == 'let') {
-            edits.atPrefix(node.start, edit => {
-               if (edit.type === 'GetDeclaration') {
-                  const program = requireFrom(context, 'program');
-                  if (node.declarations.length !== 1) {
-                     return; // TODO: throw compile error
-                  }
-                  const declarator = node.declarations[0]
-                  /**
-                   * source: get variable = expression
-                   * prepro: let variable = expression 
-                   * final: const variable = assertª(expression)
-                   */
-                  if (declarator.id.type === 'Identifier') {
-                     queueGetVariableDeclaration(node, declarator, program, this)
-                     const variable = declarator.id.name
-                     this.scope.addAbsorbedGetter(variable)
-                     this.scope.addAbsorbedGetter(variable + ACCESSOR_VARIABLE_POSTFIX)
-                  }
-                  /**
-                  * source: get [a, b] = expression
-                  * source: get { a, b } = expression
-                  * source: get [a = () => 0, b] = expression
-                  * source: get { a = () => 0, b } = expression
-                  */
-                  else {
-                     // TODO: get destructuring declaration
-                     // this.visit(node)
-                  }
+            edits.at(node.start, edit => {
+               // if (edit.type === 'GetDeclaration' || edit.type === 'GetDestructuring') {
+               const program = requireFrom(context, 'program');
+               if (node.declarations.length !== 1) {
+                  return; // TODO: throw compile error
                }
+               const declarator = node.declarations[0]
+               const { id, init } = declarator
+               if (!init) {
+                  return; // TODO: throw compile error
+               }
+               /**
+                * source: get variable = expression
+                * prepro: let variable = expression 
+                * final: const variable = assertª(expression)
+                */
+               if (id.type === 'Identifier') {
+                  this.willMutate(() => {
+                     importFromRuescript('assertª', program);
+                     node.kind = 'const'
+                     declarator.init = CovertCallExpression('assertª', [init])
+                  })
+                  const variable = undoAccessorVariablePostfix(id, this, edits)
+                  declareAbsorbedGetter(variable, this)
+               }
+               /**
+               * source: get [a, b] = expression
+               * source: get [a = () => 0, b] = expression
+               * 
+               * source: get { a, b } = expression
+               * source: get { a = () => 0, b } = expression
+               * final: const { a, b } = destructureª(expression, { a: 1, b: 1 })
+               */
+               else if (id.type === 'ObjectPattern') {
+                  declareAbsorbedGettersFromGetDestructuring(id, this, edits, context)
+                  this.willMutate(() => {
+                     const program = requireFrom(context, 'program')
+                     importFromRuescript('destructureª', program)
+                     node.kind = 'const'
+                     declarator.init = CovertCallExpression('destructureª', [init, ObjectDestructuringMapFromGetKeyword(id)])
+                  })
+               }
+               else if (id.type === 'ArrayPattern') {
+
+               }
+               else {
+                  throw new InternalError('uncovered case')
+               }
+               // }
             })
          }
          this.visitEach(node.declarations)
       },
 
       VariableDeclarator(node, context) {
-         this.visit(node.id, { ...context, isAssignee: node.id.type === 'Identifier' })
+         this.visit(node.id/* , { ...context, isAssignee: node.id.type === 'Identifier' } */)
          if (node.init) this.visit(node.init)
       },
 
@@ -116,7 +138,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                && node.key.name === 'gª'
                && node.shorthand === true
             ) {
-               edit = context.edits.findStart(node.start);
+               edit = context.edits.find(node.start);
                if (edit) {
                   return; // skip visiting children
                }
@@ -133,7 +155,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             }
 
             if (node.type === 'Property' && !node.shorthand) {
-               this.visit(node.key, { ...context, isProperty: node.key.type === 'Identifier' })
+               this.visit(node.key/* , { ...context, isProperty: node.key.type === 'Identifier' } */)
                this.visit(node.value)
             }
             else { // spread and shorthand
@@ -149,12 +171,12 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                importFromRuescript('absorbª', program)
                properties.forEach((node, index) => {
                   if (edits[index] && node.type === 'Property') {
-                     node.value = CovertCallExpression('absorbª', CovertCallExpression('assertª', node.value))
+                     node.value = CovertCallExpression('absorbª', [CovertCallExpression('assertª', [node.value])])
                   }
                })
                node.properties = properties
             })
-            this.willReplace(node, CovertCallExpression('absorbsª', node))
+            this.willReplace(node, CovertCallExpression('absorbsª', [node]))
          }
       },
 
@@ -172,14 +194,12 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       FunctionDeclaration(node, context) {
          scopeFunction(this, node, context)
       },
-      
+
       FunctionExpression(node, context) {
-         console.log('FunctionExpression')
          scopeFunction(this, node, context)
       },
-      
+
       ArrowFunctionExpression(node, context) {
-         console.log('ArrowFunction')
          scopeFunction(this, node, context)
       },
 
@@ -196,7 +216,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          const { edits } = context
          const { object, property } = node
          this.visit(object)
-         this.visit(property, { ...context, isProperty: property.type === 'Identifier' })
+         this.visit(property/* , { ...context, isProperty: property.type === 'Identifier' } */)
 
          if (!node.computed && property.type === 'Identifier') {
             /**
@@ -206,14 +226,14 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
              * final: ªof(obj).count
              */
             if (property.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-               edits.atPostfix(node.end, () => {
+               edits.at(node.end, () => {
                   const program = requireFrom(context, 'program')
 
                   this.willMutate(() => {
                      importFromRuescript('ªof', program)
                      property.name = property.name.slice(0, -1)
                   })
-                  this.willReplace(node.object, CovertCallExpression('ªof', node.object))
+                  this.willReplace(node.object, CovertCallExpression('ªof', [node.object]))
                })
             }
          }
@@ -221,7 +241,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
       Identifier(leaf, context) {
          const { edits } = context
-         if (context.isAssignee || context.isProperty) {
+         if (isAssignee(leaf) || isPropertyKey(leaf)) {
             // TODO: unwrite invalid edits
             return;
          }
@@ -234,7 +254,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
              * final: count 
             */
             if (leaf.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-               edits.atPostfix(leaf.end, () => {
+               edits.at(leaf.end, () => {
                   this.willMutate(() => {
                      leaf.name = leaf.name.slice(0, -1)
                   })
@@ -260,12 +280,12 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
              */
             if (leaf.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
                const program = requireFrom(context, 'program')
-               edits.atPostfix(leaf.end, () => {
+               edits.at(leaf.end, () => {
                   this.willMutate(() => {
                      importFromRuescript('toª', program)
                      leaf.name = leaf.name.slice(0, -1)
                   })
-                  this.willReplace(leaf, CovertCallExpression('toª', leaf as Identifier))
+                  this.willReplace(leaf, CovertCallExpression('toª', [leaf as Identifier]))
                })
             }
          }
@@ -311,7 +331,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                break;
          }
 
-         this.visit(node.left, { ...context, isAssignee: node.left.type === 'Identifier' })
+         this.visit(node.left/* , { ...context, isAssignee: node.left.type === 'Identifier' } */)
          this.visit(node.right)
       },
 
@@ -347,7 +367,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                break;
          }
 
-         this.visit(arg, { ...context, isAssignee: arg.type === 'Identifier' })
+         this.visit(arg/* , { ...context, isAssignee: arg.type === 'Identifier' } */)
       },
 
       CallExpression(node, context) {
@@ -358,7 +378,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
          if (node.callee.type === 'TSNonNullExpression') {
             const nonNullExpression = node.callee
-            edits.atPostfix(nonNullExpression.end, () => {
+            edits.at(nonNullExpression.end, () => {
                /**
                 * IIDE
                 * (expression)@()
@@ -392,7 +412,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
           * prepro: (expression)!
           * final: () => expression
          */
-         edits.atPostfix(node.end, edit => {
+         edits.at(node.end, edit => {
             const expression = node.expression
             switch (edit.type) {
                case 'AccessorExpressionPostfix':
@@ -403,7 +423,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      this.willMutate(() => {
                         importFromRuescript('toª', program)
                      })
-                     this.willReplace(node, CovertCallExpression('toª', expression))
+                     this.willReplace(node, CovertCallExpression('toª', [expression]))
                   }
                   // (expression)@
                   else if (expression.type === 'ParenthesizedExpression' || expression.type === 'SequenceExpression') {
@@ -421,7 +441,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         this.willMutate(() => {
                            importFromRuescript('toª', program)
                         })
-                        this.willReplace(node, CovertCallExpression('toª', exp, CovertString('?')))
+                        this.willReplace(node, CovertCallExpression('toª', [exp, CovertString('?')]))
                      }
                      // obj.count?@
                      // obj[count]?@
@@ -434,7 +454,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                            type: 'MemberExpression',
                            start: node.start,
                            end: node.end,
-                           object: CovertCallExpression('ªof', exp.object, CovertString('?')),
+                           object: CovertCallExpression('ªof', [exp.object, CovertString('?')]),
                            property: exp.property as Identifier,
                            computed: exp.computed as false,
                            optional: false
@@ -453,7 +473,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         this.willMutate(() => {
                            importFromRuescript('toª', program)
                         })
-                        this.willReplace(node, CovertCallExpression('toª', expression))
+                        this.willReplace(node, CovertCallExpression('toª', [expression]))
                      }
                      // obj[count]!@
                      // obj.count!@
@@ -466,7 +486,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                            type: 'MemberExpression',
                            start: node.start,
                            end: node.end,
-                           object: CovertCallExpression('ªof', exp.object, CovertString('!')),
+                           object: CovertCallExpression('ªof', [exp.object, CovertString('!')]),
                            property: exp.property as Identifier,
                            computed: exp.computed as false,
                            optional: false
@@ -476,7 +496,6 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                   break;
 
                case 'BracketAccessorPostfix':
-                  console.log('bracket')
                   /**
                    * getter access
                    * source: obj[count]@
@@ -492,7 +511,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         type: 'MemberExpression',
                         start: node.start,
                         end: node.end,
-                        object: CovertCallExpression('ªof', expression.object),
+                        object: CovertCallExpression('ªof', [expression.object]),
                         property: expression.property as Identifier,
                         computed: true,
                         optional: false
@@ -528,12 +547,11 @@ function bodyHasAwait(node: ASTNode) {
 
 
 function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Function | ArrowFunctionExpression, context: Context) {
-   console.trace('scopeFunction', node)
    const body = node.body
 
    if (body) {
       cursor.enterScope()
-      console.log('params', node.params)
+
       node.params.forEach((param) => {
          const identifier = param.type === 'Identifier'
             ? param
@@ -546,7 +564,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
          if (identifier) {
             const parameter = identifier.name
             if (identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-               context.edits.atPostfix(identifier.end, () => {
+               context.edits.at(identifier.end, () => {
                   const program = requireFrom(context, 'program')
                   const variable = parameter.slice(0, -1)
                   cursor.scope.addAbsorbedGetter(parameter)
@@ -565,7 +583,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                               end: 0,
                               left: CovertIdentifier(variable),
                               operator: '=',
-                              right: CovertCallExpression('toª', CovertIdentifier(variable))
+                              right: CovertCallExpression('toª', [CovertIdentifier(variable)])
                            }
                         })
                      }
@@ -576,7 +594,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                   if (param.type === 'AssignmentPattern') {
                      importFromRuescript('assertª', program)
                      cursor.willMutate(() => {
-                        param.right = CovertCallExpression('assertª', param.right)
+                        param.right = CovertCallExpression('assertª', [param.right])
                      })
                   }
 
@@ -587,6 +605,8 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
             // TODO: "ArrayPattern" | "ObjectPattern" | "RestElement"| "TSParameterProperty"
          }
       })
+
+
       cursor.visit(body, { ...context, scoped: true })
       cursor.exitScope()
    }
@@ -705,12 +725,12 @@ function queueAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpre
             end: 0,
             computed: false,
             optional: false,
-            object: CovertCallExpression('assertµ', {
+            object: CovertCallExpression('assertµ', [{
                type: 'Identifier',
                start: left.start,
                end: left.end,
                name: left.name
-            }),
+            }]),
             property: CovertIdentifier('value')
          }
       })
@@ -787,6 +807,16 @@ function CovertString(string: string): StringLiteral {
    }
 }
 
+function CovertNumber(num: number): NumericLiteral {
+   return {
+      type: 'Literal',
+      start: 0,
+      end: 0,
+      raw: `${num}`,
+      value: num,
+   }
+}
+
 function CovertImportSpecifier(name: string): ImportSpecifier {
 
    return {
@@ -814,7 +844,7 @@ function CovertImportSpecifier(name: string): ImportSpecifier {
 // #endregion
 
 
-function CovertCallExpression(name: string, ...args: Expression[]): CallExpression {
+function CovertCallExpression(name: string, args: Expression[]): CallExpression {
    return {
       type: 'CallExpression',
       start: 0,
@@ -851,32 +881,132 @@ function queueJSXAttributeShorthand<T extends ASTNode, C>(node: JSXAttribute, id
    })
 }
 
-/**
- * @example
- * source: get variable = expression
- * prepro: let variable = expression
- * final: const variable = assertª(expression)
- */
-function queueGetVariableDeclaration<T extends ASTNode, C>(
-   node: VariableDeclaration,
-   declarator: VariableDeclarator,
-   program: Program,
-   cursor: Cursor<T, C>
-) {
-   if (declarator.id.type !== 'Identifier') throw new InternalError('declarator must be have id type Identifier')
-   cursor.willMutate(() => {
-      importFromRuescript('assertª', program);
-      node.kind = 'const'
-   })
-   cursor.willMutate(() => {
-      declarator.init = CovertCallExpression('assertª', declarator.init ?? {
-         type: 'Literal',
-         start: 0,
-         end: 0,
-         value: null,
-         raw: 'null'
+
+
+function isAssignee(node: Identifier & ASTNode) {
+   const { parent } = node
+   if (!parent) return false;
+   return parent.type === 'VariableDeclarator' ||
+      parent.type === 'UpdateExpression' ||
+      parent.type === 'AssignmentExpression' && parent.left === node
+}
+
+function isPropertyKey(node: Identifier & ASTNode) {
+   const parent = node.parent
+   if (!parent) return false;
+   return parent.type === 'MemberExpression' && parent.property === node ||
+      parent.type === 'ObjectExpression' && parent.properties.find(property => property.type === 'Property' && property.key === node)
+}
+
+
+function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destructuring: ObjectPattern | ArrayPattern, cursor: Cursor<T, C>, edits: Edits, context: Context) {
+   if (destructuring.type === 'ObjectPattern') {
+      destructuring.properties.forEach(property => {
+         if (property.type === 'RestElement') {
+            // TODO: throw compile error?
+            console.error('rest element not currently supported for `get` keyword destructuring')
+            return;
+         }
+         const { key, value } = property
+         if (key.type !== 'Identifier') {
+            throw new InternalError('uncovered case')
+         }
+         cursor.skip(key)
+         const propertyKey = undoAccessorVariablePostfix(key, cursor, edits)
+         const identifier = value.type === 'Identifier' ? value : value.type === 'AssignmentPattern' ? value.left : undefined
+         if (identifier?.type === 'Identifier') {
+            cursor.skip(identifier)
+            undoAccessorVariablePostfix(identifier, cursor, edits)
+            declareAbsorbedGetter(propertyKey, cursor)
+            if (value.type === 'AssignmentPattern') {
+               const program = requireFrom(context, 'program')
+               cursor.willMutate(() => {
+                  importFromRuescript('assertª', program)
+                  value.right = CovertCallExpression('assertª', [value.right])
+               })
+            }
+         }
+         // nested destructuring
+         else if (value.type === 'ObjectPattern' || value.type === 'ArrayPattern') {
+            declareAbsorbedGettersFromGetDestructuring(value, cursor, edits, context)
+         }
       })
+   }
+   else {
+      // TODO: Array Pattern
+   }
+}
+
+function undoAccessorVariablePostfix<T extends ASTNode, C>(node: Identifier, cursor: Cursor<T, C>, edits: Edits) {
+   let variable = node.name
+   if (node.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+      edits.at(node.end, edit => {
+         variable = node.name.slice(0, -1) + '@'
+         // unwrite ª --> @
+         cursor.willMutate(() => {
+            node.name = variable
+         })
+      })
+   }
+   return variable
+}
+
+function declareAbsorbedGetter<T extends ASTNode, C>(variable: string, cursor: Cursor<T, C>) {
+   cursor.scope.addAbsorbedGetter(variable)
+   cursor.scope.addAbsorbedGetter(variable + ACCESSOR_VARIABLE_POSTFIX)
+}
+
+function CovertObjectExpression(properties: ObjectPropertyKind[] = []): ObjectExpression {
+   return {
+      type: 'ObjectExpression',
+      start: 0,
+      end: 0,
+      properties
+   }
+}
+
+function CovertObjectProperty(key: string, value: Expression, computed: boolean = false): ObjectProperty {
+   return {
+      type: 'Property',
+      start: 0,
+      end: 0,
+      computed,
+      key: CovertIdentifier(key),
+      kind: 'init',
+      method: false,
+      shorthand: false,
+      value
+   }
+}
+
+// { a, b = 'hi' } --> { a: 1, b: 1 }
+// { a, b: { c = 'hi' } = { c: 'hi' } }
+function ObjectDestructuringMapFromGetKeyword(destructuring: ObjectPattern) {
+   const objectExpression = CovertObjectExpression()
+   const { properties } = destructuring
+
+   properties.forEach((property, index) => {
+      if (property.type === 'RestElement') {
+         throw new InternalError('uncovered case')
+         return; // TODO: throw compiler error?
+      }
+      const { key, value } = property
+      if (key.type !== 'Identifier') {
+         throw new InternalError('uncovered case')
+         return; // TODO: throw compiler error?
+      }
+      const identifier = value.type === 'Identifier' ? value : value.type === 'AssignmentPattern' ? value.left : null
+      if (identifier?.type === 'Identifier') {
+         objectExpression.properties[index] = CovertObjectProperty(key.name, CovertNumber(1), property.computed)
+      }
+      else if (value.type === 'ObjectPattern') {
+         objectExpression.properties[index] = CovertObjectProperty(key.name, ObjectDestructuringMapFromGetKeyword(value), property.computed)
+      }
+      else if (value.type === 'ArrayPattern') {
+         // TODO:
+      }
    })
+   return objectExpression
 }
 
 class InternalError extends Error { }

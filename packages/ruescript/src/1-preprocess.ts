@@ -17,8 +17,10 @@ export type VariableEdit = {
    identifier: string,
 } & BaseEdit
 
+
+
 export type ExpressionEdit = {
-   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix' | 'BlockIIDEPostfix'
+   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix' | 'BlockIIDEPostfix' | 'GetDestructuring'
 } & BaseEdit
 
 const AccessorEditType = {
@@ -26,7 +28,7 @@ const AccessorEditType = {
    '!': 'NonNullAccessorPostfix',
    ']': 'BracketAccessorPostfix',
    ')': 'AccessorExpressionPostfix',
-}
+} as const
 
 function encodeGap(group: string): string {
    return group
@@ -60,66 +62,83 @@ function applyEdits(code: string, edits: Edit[]): string {
 }
 
 export class Edits {
-   prefixes: Edit[];
-   postfixes: Edit[];
+   // prefixes: Edit[];
+   // postfixes: Edit[];
 
-   lastPrefix: number;
-   lastPostfix: number
+   lastIndex: number = 0
+   // lastPrefix: number = 0
+   // lastPostfix: number = 0
+
    constructor(
-      edits: Edit[]
+      private edits: Edit[]
    ) {
-      const prefixes: Edit[] = this.prefixes = []
-      const postfixes: Edit[] = this.postfixes = []
+      // const prefixes: Edit[] = this.prefixes = []
+      // const postfixes: Edit[] = this.postfixes = []
 
-      for (const edit of edits) {
-         if (edit.anchorType === 'start') {
-            prefixes.push(edit)
-         }
-      }
-      for (const edit of edits) {
-         if (edit.anchorType === 'end') {
-            postfixes.push(edit)
-         }
-      }
-
-      this.lastPrefix = 0;
-      this.lastPostfix = postfixes.length - 1
+      // for (const edit of edits) {
+      //    if (edit.anchorType === 'start') {
+      //       prefixes.push(edit)
+      //    }
+      // }
+      // for (const edit of edits) {
+      //    if (edit.anchorType === 'end') {
+      //       postfixes.push(edit)
+      //    }
+      // }
    }
 
-   findStart(anchor: number): Edit | undefined { // TODO: should I find exact matches instead of ranges?
-      const edits = this.prefixes
+   find(anchor: number): Edit | undefined {
+      const { edits, lastIndex } = this
       const limit = edits.length;
-      for (let i = this.lastPrefix; i < limit; i++) {
+      for (let i = lastIndex; i < limit; i++) {
          const edit = edits[i]
          if (anchor === edit.anchor) {
-         // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
-            this.lastPrefix = i;
+            this.lastIndex = i;
             return edit
          }
       }
    }
 
-   findEnd(anchor: number): Edit | undefined { // TODO: should I find exact matches instead of ranges?
-      const edits = this.postfixes
-      const limit = edits.length;
-      for (let i = 0; i < limit; i++) {
-         const edit = edits[i]
-         // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
-         if (anchor === edit.anchor) {
-            // this.lastPrefix = i;
-            return edit
-         }
-      }
-   }
+   // findStart(anchor: number): Edit | undefined {
+   //    const edits = this.prefixes
+   //    const limit = edits.length;
+   //    for (let i = this.lastPrefix; i < limit; i++) {
+   //       const edit = edits[i]
+   //       if (anchor === edit.anchor) {
+   //       // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
+   //          this.lastPrefix = i;
+   //          return edit
+   //       }
+   //    }
+   // }
 
-   atPrefix(anchor: number, task: (edit: Edit) => void) {
-      const edit = this.findStart(anchor)
-      if (edit) task(edit)
-      return edit
-   }
+   // findEnd(anchor: number): Edit | undefined { // TODO: should I find exact matches instead of ranges?
+   //    const edits = this.postfixes
+   //    const limit = edits.length;
+   //    for (let i = 0; i < limit; i++) {
+   //       const edit = edits[i]
+   //       // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
+   //       if (anchor === edit.anchor) {
+   //          // this.lastPrefix = i;
+   //          return edit
+   //       }
+   //    }
+   // }
 
-   atPostfix(anchor: number, task: (edit: Edit) => void) {
-      const edit = this.findEnd(anchor)
+   // atPrefix(anchor: number, task: (edit: Edit) => void) {
+   //    const edit = this.findStart(anchor)
+   //    if (edit) task(edit)
+   //    return edit
+   // }
+
+   // atPostfix(anchor: number, task: (edit: Edit) => void) {
+   //    const edit = this.findEnd(anchor)
+   //    if (edit) task(edit)
+   //    return edit
+   // }
+
+   at(anchor: number, task: (edit: Edit) => void) {
+      const edit = this.find(anchor)
       if (edit) task(edit)
       return edit
    }
@@ -149,6 +168,7 @@ class RXSPreprocessor {
 
    transform() {
       this.rewriteGetVariableDeclarations()
+      this.rewriteGetDestructuring()
       this.rewriteGetPropertyColonNotation()
       this.rewriteAccessorVariablePostfix()
       this.rewriteExpressionPostfix()
@@ -189,6 +209,33 @@ class RXSPreprocessor {
          })
       }
    }
+   /**
+    * - Replaces `get` variable declaration pattern with intermediary valid js.
+    * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
+    * 
+    * Example:
+    * `get { count } =` -->
+    * `let { count } =`
+    */
+   rewriteGetDestructuring() {
+      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)\{/gu
+
+      const matches = this.source.matchAll(pattern)
+      for (const match of matches) {
+         const [original, gap] = match
+         const index = match.index
+         const transformed = 'let' + gap + '{'
+
+         this._edits.push({
+            type: 'GetDestructuring',
+            index,
+            anchor: index,
+            anchorType: 'start',
+            original,
+            transformed,
+         })
+      }
+   }
 
    /**
     * - Replaces `get` property colon notation pattern with intermediary valid js.
@@ -220,13 +267,11 @@ class RXSPreprocessor {
    }
 
    rewriteAccessorVariablePostfix() {
-
       const pattern = /([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
 
       const matches = this.source.matchAll(pattern)
 
       for (const match of matches) {
-         console.log('match', match)
          const [original, identifier] = match
          const index = match.index
 
@@ -271,7 +316,6 @@ class RXSPreprocessor {
 
       for (const match of matches) {
          const [original] = match
-         console.log('MATCH!', match)
          const index = match.index
 
          this._edits.push({

@@ -1,5 +1,5 @@
 import { Program } from "oxc-parser";
-import { Edit } from "./1-preprocess";
+import { Edit } from "../src/1-preprocess";
 import { walk } from 'zimmerframe'
 
 /**
@@ -25,10 +25,7 @@ export function postprocess(ast: Program, edits: Edit[]) {
          }
          next()
       },
-
    })
-
-
 
    return adjusted
 }

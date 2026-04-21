@@ -133,6 +133,7 @@ export class Cursor<T extends BaseNode, C> {
 
    visit<N extends BaseNode>(node: N, context?: C) {
       if (!(node as BaseNodeProxy & N)[PROXY]) node = this.NodeProxy(node as T & N) as T & N
+      if (this.skipped.has(node)) return;
       if (this.visited.has(node)) {
          console.warn('node has already been visited', node)
          return;
@@ -161,6 +162,11 @@ export class Cursor<T extends BaseNode, C> {
       })
    }
 
+   skipped = new Set();
+
+   skip<N extends BaseNode>(node: N) {
+      this.skipped.add(node)
+   }
 
    private autovisit(node: T, context: C) {
       const childKeys = this.childKeys[node.type] ?? Object.keys(node)
@@ -322,7 +328,7 @@ export class Cursor<T extends BaseNode, C> {
       const proxy = new Proxy(node, {
          get(target, key) {
             if (key === PROXY) return true;
-            if (key === 'parent') return parent;
+            if (key === 'parent') return parent && cursor.NodeProxy(parent);
             if (key === 'path') return path;
             const value = target[key as keyof T]
             if (typeof key !== 'string') return value;
