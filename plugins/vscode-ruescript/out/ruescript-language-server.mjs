@@ -29158,7 +29158,7 @@ var Scope = class {
   addAbsorbedGetter(name) {
     this.absorbedGetters.add(name);
   }
-  isAbsorbedGetter(name) {
+  getAbsorbedGetterDeclaration(name) {
     return this.absorbedGetters.has(name);
   }
 };
@@ -29442,7 +29442,6 @@ function transformRXS(ast, edits) {
             if (node2.id.type === "Identifier") {
               const variable = node2.id.name;
               this.scope.addAbsorbedGetter(variable);
-              this.scope.addAbsorbedGetter(variable + ACCESSOR_POSTFIX);
               this.willMutate(() => {
                 node2.init = wrapInCall("assert\xAA", node2.init ?? {
                   type: "Literal",
@@ -29542,7 +29541,7 @@ function transformRXS(ast, edits) {
       this.visit(node);
     },
     Identifier(leaf, { edits: edits2 }) {
-      if (leaf.name && this.scope.isAbsorbedGetter(leaf.name)) {
+      if (leaf.name && this.scope.getAbsorbedGetterDeclaration(leaf.name)) {
         if (leaf.name.endsWith(ACCESSOR_POSTFIX)) {
           this.willMutate(() => {
             leaf.name = leaf.name.slice(0, -1);
@@ -29628,7 +29627,7 @@ function GetterCall(node) {
   };
 }
 function transformAccessorVariableWrite(cursor, node, key, left, context) {
-  if (cursor.scope.isAbsorbedGetter(left.name)) {
+  if (cursor.scope.getAbsorbedGetterDeclaration(left.name)) {
     const { program } = context;
     assertContext(program, "program");
     cursor.willMutate(() => {

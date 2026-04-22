@@ -1,5 +1,7 @@
+import { ArrowFunctionExpression, FunctionBody, ParamPattern, VariableDeclaration } from "oxc-parser";
 import { createStack } from "../../utils/index.ts";
 import { CHILD_KEYS } from "./ast.ts";
+import { ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts";
 
 // #region: Types adapted from @svelte/zimmerframe
 
@@ -46,11 +48,10 @@ export function traverse<T extends BaseNode, C>(ast: T, context: C & object, vis
 
 class Scope {
    // private variables: Set<string>
-   private absorbedGetters: Set<string>
+   private absorbedGetters: Map<string, VariableDeclaration | Function | ArrowFunctionExpression> = new Map()
 
    constructor(private parent: Scope | undefined) {
       // this.variables = new Set(parent?.variables)
-      this.absorbedGetters = new Set()
    }
 
    // addVariable(name: string) {
@@ -61,21 +62,22 @@ class Scope {
    //    return this.variables.has(name)
    // }
 
-   addAbsorbedGetter(name: string) {
+   addAbsorbedGetter(name: string, declaration: VariableDeclaration | Function | ArrowFunctionExpression) {
       console.log('add', name)
-      this.absorbedGetters.add(name)
+      this.absorbedGetters.set(name, declaration)
    }
 
-   isAbsorbedGetter(name: string) {
+   getAbsorbedGetterDeclaration(name: string) {
+      const variable = name.endsWith(ACCESSOR_VARIABLE_POSTFIX) ? name.slice(0, -1) : name
       let scope: undefined | Scope = this;
       while (scope) {
-         const result = scope.absorbedGetters.has(name)
+         const result = scope.absorbedGetters.get(variable)
          if (result) {
-            return true;
+            return result;
          }
          scope = scope.parent
       }
-      return false;
+      return undefined;
    }
 }
 

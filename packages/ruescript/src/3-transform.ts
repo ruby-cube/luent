@@ -1,14 +1,12 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse } from './traverse.ts';
 import { BaseNode } from './4-generate.ts';
 import { T } from 'node_modules/vitest/dist/chunks/traces.d.402V_yFI';
+import { FunctionDeclaration } from 'typescript';
 
-// TODO: type context, pass separately from cursor
-// TODO: offsets
-// TODO: How do I ensure all nodes that need transforms are reached?
 
-// (1) offset and parent pass
+// (1) offset pass
 // (2) queue transforms pass
 // (3) apply transforms
 
@@ -16,8 +14,6 @@ type Context = {
    program?: Program;
    edits: Edits;
    scoped?: boolean;
-   // isAssignee?: boolean;
-   // isProperty?: boolean;
 }
 
 function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefined> {
@@ -30,9 +26,11 @@ function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefi
 export function transformRXS(ast: ASTNode, edits: Edits) {
    // TODO:
    // let offset = 0;
+
    // traverseAll(ast, (node) => {
    //    // add offsets (based on edits)
    // })
+
    return traverse(ast, { edits } as Context, {
       Program(node, context) {
          this.visitEach(node.body, { ...context, program: node })
@@ -40,18 +38,31 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
       JSXAttribute(node, context) {
          const { edits } = context;
+
          /**
-          * <Comp attribute />
+          * source: <Comp {attribute} />
+          * prepro: <Comp ßattributeß />
+          * final: <Comp attribute={attribute} />
           */
          if (node.value === null) {
             edits.at(node.start, edit => {
                if (edit.type !== 'JSXAttributeShorthand')
                   throw new InternalError(`Unexpected edit type ${edit.type}`)
-               /**
-                * source: <Comp {attribute} />
-                * final: <Comp attribute={attribute} />
-                */
-               queueJSXAttributeShorthand(node, edit.identifier, this)
+               const { identifier } = edit
+               this.willMutate(() => {
+                  node.name.name = identifier // TODO: what if node.name is replaced before we mutate??
+                  node.value = {
+                     type: 'JSXExpressionContainer',
+                     start: node.start,
+                     end: node.end,
+                     expression: {
+                        type: 'Identifier',
+                        start: node.start + 1,
+                        end: node.end - 1,
+                        name: identifier
+                     }
+                  }
+               })
             })
          }
          this.visit(node.name)
@@ -60,70 +71,101 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
       VariableDeclaration(node, context) {
          const { edits } = context
-
+         let isGetKeywordDeclaration = false;
          if (node.kind == 'let') {
-            edits.at(node.start, edit => {
-               // if (edit.type === 'GetDeclaration' || edit.type === 'GetDestructuring') {
-               const program = requireFrom(context, 'program');
-               if (node.declarations.length !== 1) {
-                  return; // TODO: throw compile error
-               }
-               const declarator = node.declarations[0]
-               const { id, init } = declarator
-               if (!init) {
-                  return; // TODO: throw compile error
-               }
-               /**
-                * source: get variable = expression
-                * prepro: let variable = expression 
-                * final: const variable = assertª(expression)
-                */
-               if (id.type === 'Identifier') {
-                  this.willMutate(() => {
-                     importFromRuescript('assertª', program);
-                     node.kind = 'const'
-                     declarator.init = CovertCallExpression('assertª', [init])
-                  })
-                  const variable = undoAccessorVariablePostfix(id, this, edits)
-                  declareAbsorbedGetter(variable, this)
-               }
-               /**
-               * source: get [a, b] = expression
-               * source: get [a = () => 0, b] = expression
-               * 
-               * source: get { a, b } = expression
-               * source: get { a = () => 0, b } = expression
-               * final: const { a, b } = destructureª(expression, { a: 1, b: 1 })
-               */
-               else if (id.type === 'ObjectPattern' || id.type === 'ArrayPattern') {
-                  declareAbsorbedGettersFromGetDestructuring(id, this, edits, context)
-                  this.willMutate(() => {
-                     const program = requireFrom(context, 'program')
-                     importFromRuescript('destructureª', program)
-                     node.kind = 'const'
-                     declarator.init = CovertCallExpression('destructureª', [
-                        init, id.type === 'ObjectPattern'
-                           ? ObjectDestructuringMapFromGetKeyword(id)
-                           : ArrayDestructuringMapFromGetKeyword(id)
-                     ])
-                  })
-               }
-               else {
-                  throw new InternalError('uncovered case')
-               }
-               // }
+            edits.at(node.start, () => {
+               isGetKeywordDeclaration = true;
             })
+         }
+         const declarator = node.declarations[0]
+         const { id, init } = declarator
+         if (isGetKeywordDeclaration) {
+            const program = requireFrom(context, 'program');
+            if (node.declarations.length !== 1) {
+               return; // TODO: throw compile error
+            }
+            if (!init) {
+               return; // TODO: throw compile error
+            }
+            /**
+             * source: get variable = expression
+             * prepro: let variable = expression 
+             * final: const variable = assertª(expression)
+             */
+            if (id.type === 'Identifier') {
+               this.willMutate(() => {
+                  importFromRuescript('assertª', program);
+                  node.kind = 'const'
+                  declarator.init = CovertCallExpression('assertª', [init])
+               })
+               const variable = undoAccessorVariablePostfix(id, this, edits)
+               this.scope.addAbsorbedGetter(variable, node)
+            }
+            /**
+            * source: get [a, b] = expression
+            * prepro: let [a, b] = expression
+            * final: const [a, b] = destructureª(expression, [1, 1])
+            * 
+            * source: get { a, b } = expression
+            * final: const { a, b } = destructureª(expression, { a: 1, b: 1 })
+            * 
+            * source: get { a, b: { foo }} = expression
+            * final: const { a, b: { foo }} = destructureª(expression, { a: 1, b: { foo: 1 } })
+            *
+            * source: get [a = () => 0, b] = expression
+            * final: const [a = assertª(() => 0), b] = destructureª(expression, [1, 1])
+            */
+            else if (id.type === 'ObjectPattern' || id.type === 'ArrayPattern') {
+               declareAbsorbedGettersFromGetDestructuring(id, node, this, edits, context)
+               this.willMutate(() => {
+                  const program = requireFrom(context, 'program')
+                  importFromRuescript('destructureª', program)
+                  node.kind = 'const'
+                  declarator.init = CovertCallExpression('destructureª', [
+                     init, id.type === 'ObjectPattern'
+                        ? ObjectDestructuringMapFromGetKeyword(id)
+                        : ArrayDestructuringMapFromGetKeyword(id)
+                  ])
+               })
+            }
+            else {
+               throw new InternalError('uncovered case')
+            }
+         }
+         /**
+          * source: const { foo@, bar } = obj
+          * prepro: const { fooª, bar } = obj
+          * final: const { foo, bar } = destructureª(obj, { foo: 1, bar: 0 })
+          */
+         else if (init && isAccessorPostfixDestructuring(declarator)) {
+            if (node.declarations.length !== 1) {
+               return; // TODO: throw compile error
+            }
+            if (id.type !== 'ObjectPattern' && id.type !== 'ArrayPattern') {
+               return;
+            }
+            this.willMutate(() => {
+               const program = requireFrom(context, 'program')
+               importFromRuescript('destructureª', program)
+               const transformName = (name: string) => name.endsWith(ACCESSOR_VARIABLE_POSTFIX) ? name.slice(0, -1) : name
+               const deriveValue = (name: string) => name.endsWith(ACCESSOR_VARIABLE_POSTFIX) ? CovertNumber(1) : CovertNumber(0)
+               declarator.init = CovertCallExpression('destructureª', [
+                  init, id.type === 'ObjectPattern'
+                     ? ObjectDestructuringMapFromGetKeyword(id, transformName, deriveValue)
+                     : ArrayDestructuringMapFromGetKeyword(id, transformName, deriveValue)
+               ])
+            })
+            declareAbsorbedGettersFromAccessorPostfix(id, node, this, edits, context)
          }
          this.visitEach(node.declarations)
       },
 
       VariableDeclarator(node, context) {
-         this.visit(node.id/* , { ...context, isAssignee: node.id.type === 'Identifier' } */)
+         this.visit(node.id)
          if (node.init) this.visit(node.init)
       },
 
       /**
-       * Accessor Property Colon Notation
        * source: { get variable: expression }
        * prepro: { gª, variable: expression }
        * final: absorbsª({ variable: absorbª(expression) })
@@ -156,7 +198,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             }
 
             if (node.type === 'Property' && !node.shorthand) {
-               this.visit(node.key/* , { ...context, isProperty: node.key.type === 'Identifier' } */)
+               this.visit(node.key)
                this.visit(node.value)
             }
             else { // spread and shorthand
@@ -204,24 +246,14 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          scopeFunction(this, node, context)
       },
 
-      TSIndexSignature() {
-         // intentionally skip visiting identifier
-      },
-
-      LabeledStatement(node) {
-         // intentionally skip visiting identifier
-         this.visit(node)
-      },
-
       MemberExpression(node, context) {
          const { edits } = context
          const { object, property } = node
          this.visit(object)
-         this.visit(property/* , { ...context, isProperty: property.type === 'Identifier' } */)
+         this.visit(property)
 
          if (!node.computed && property.type === 'Identifier') {
             /**
-             * getter access
              * source: obj.count@
              * prepro: obj.countª
              * final: ªof(obj).count
@@ -242,12 +274,12 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
       Identifier(leaf, context) {
          const { edits } = context
-         if (isAssignee(leaf) || isPropertyKey(leaf)) {
+         if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === 'LabeledStatement' || leaf.parent?.type === 'TSIndexSignature') {
             // TODO: unwrite invalid edits
             return;
          }
-         if (!leaf.name || leaf.name === 'this') return; // exclude LabelIdentifier and TSIndexSignature and TSThisParameter
-         if (this.scope.isAbsorbedGetter(leaf.name)) {
+         if (!leaf.name || leaf.name === 'this') return;
+         if (this.scope.getAbsorbedGetterDeclaration(leaf.name)) {
             /**
              * Absorbed getter access
              * source: count@
@@ -266,7 +298,6 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
              * source: count
              * prepro: count
              * final: count()
-             * NOTE: assumes get variable declarations, TODO: get variable assignments have stopped traversal
              */
             else {
                this.willReplace(leaf, GetterCall(leaf))
@@ -332,7 +363,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                break;
          }
 
-         this.visit(node.left/* , { ...context, isAssignee: node.left.type === 'Identifier' } */)
+         this.visit(node.left)
          this.visit(node.right)
       },
 
@@ -368,7 +399,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                break;
          }
 
-         this.visit(arg/* , { ...context, isAssignee: arg.type === 'Identifier' } */)
+         this.visit(arg)
       },
 
       CallExpression(node, context) {
@@ -407,18 +438,15 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          const { edits } = context
          this.visit(node.expression)
 
-         /**
-          * Derivation expression:
-          * source: (expression)@
-          * prepro: (expression)!
-          * final: () => expression
-         */
          edits.at(node.end, edit => {
             const expression = node.expression
             switch (edit.type) {
                case 'AccessorExpressionPostfix':
-
-                  // foo()@
+                  /**
+                   * source: foo()@
+                   * prepro: foo()!
+                   * final: toª(foo())
+                   */
                   if (expression.type === 'CallExpression') {
                      const program = requireFrom(context, 'program')
                      this.willMutate(() => {
@@ -426,15 +454,26 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      })
                      this.willReplace(node, CovertCallExpression('toª', [expression]))
                   }
-                  // (expression)@
+                  /**
+                   * source: (expression)@
+                   * prepro: (expression)!
+                   * final: () => expression
+                   */
                   else if (expression.type === 'ParenthesizedExpression' || expression.type === 'SequenceExpression') {
                      this.willReplace(node, DerivationArrowFunctionExpression(expression))
                   }
                   break;
 
                case 'OptionalAccessorPostfix':
-                  // foo()?@
-                  // foo?@
+                  /**
+                   * source: foo?@
+                   * prepro: foo!!
+                   * final: toª(foo, "?")
+                   * 
+                   * source: foo()?@
+                   * prepro: foo()!!
+                   * final: toª(foo(), "?")
+                   */
                   if (expression.type === 'TSNonNullExpression') {
                      const exp = expression.expression
                      if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
@@ -444,8 +483,16 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         })
                         this.willReplace(node, CovertCallExpression('toª', [exp, CovertString('?')]))
                      }
-                     // obj.count?@
-                     // obj[count]?@
+
+                     /**
+                     * source: foo.bar?@
+                     * prepro: foo.bar!!
+                     * final: toª(foo.bar, "?")
+                     * 
+                     * source: foo[bar]?@
+                     * prepro: foo[bar]!!
+                     * final: toª(foo[bar], "?")
+                     */
                      else if (exp.type === 'MemberExpression') {
                         const program = requireFrom(context, 'program')
                         this.willMutate(() => {
@@ -465,8 +512,15 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                   break;
 
                case 'NonNullAccessorPostfix':
-                  // foo()!@
-                  // foo!@
+                  /**
+                   * source: foo!@
+                   * prepro: foo!!
+                   * final: toª(foo, "!")
+                   * 
+                   * source: foo()!@
+                   * prepro: foo()!!
+                   * final: toª(foo(), "!")
+                   */
                   if (expression.type === 'TSNonNullExpression') {
                      const exp = expression.expression
                      if (exp.type === 'Identifier' || exp.type === 'CallExpression') {
@@ -476,8 +530,15 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         })
                         this.willReplace(node, CovertCallExpression('toª', [expression]))
                      }
-                     // obj[count]!@
-                     // obj.count!@
+                     /**
+                     * source: foo.bar!@
+                     * prepro: foo.bar!!
+                     * final: toª(foo.bar, "!")
+                     * 
+                     * source: foo[bar]!@
+                     * prepro: foo[bar]!!
+                     * final: toª(foo[bar], "!")
+                     */
                      else if (exp.type === 'MemberExpression') {
                         const program = requireFrom(context, 'program')
                         this.willMutate(() => {
@@ -498,7 +559,6 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 
                case 'BracketAccessorPostfix':
                   /**
-                   * getter access
                    * source: obj[count]@
                    * prepro: obj[count]!
                    * final: ªof(obj)[count]
@@ -554,12 +614,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
       cursor.enterScope()
 
       node.params.forEach((param) => {
-         const identifier = param.type === 'Identifier'
-            ? param
-            : param.type === 'AssignmentPattern' && param.left.type === 'Identifier'
-               ? param.left
-               : undefined
-         // TODO: destructuring
+         const identifier = findIdentifier(param)
 
          // simple parameter with @ operator
          if (identifier) {
@@ -568,8 +623,11 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                context.edits.at(identifier.end, () => {
                   const program = requireFrom(context, 'program')
                   const variable = parameter.slice(0, -1)
-                  cursor.scope.addAbsorbedGetter(parameter)
-                  cursor.scope.addAbsorbedGetter(variable)
+
+                  cursor.scope.addAbsorbedGetter(variable,
+                     // @ts-expect-error
+                     node
+                  )
                   cursor.willMutate(() => {
                      importFromRuescript('toª', program)
                      // bar = toª(bar)
@@ -715,7 +773,7 @@ function queueAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpre
    left: Identifier,
    context: Context
 ) {
-   if (cursor.scope.isAbsorbedGetter(left.name)) {
+   if (cursor.scope.getAbsorbedGetterDeclaration(left.name)) {
       const program = requireFrom(context, 'program');
 
       cursor.willMutate(() => {
@@ -861,28 +919,6 @@ function CovertCallExpression(name: string, args: Expression[]): CallExpression 
    }
 }
 
-/**
- * source: <Comp {attribute} />
- * final: <Comp attribute={attribute} />
- */
-function queueJSXAttributeShorthand<T extends ASTNode, C>(node: JSXAttribute, identifier: string, cursor: Cursor<T, C>) {
-   cursor.willMutate(() => {
-      node.name.name = identifier // TODO: what if node.name is replaced before we mutate??
-      node.value = {
-         type: 'JSXExpressionContainer',
-         start: node.start,
-         end: node.end,
-         expression: {
-            type: 'Identifier',
-            start: node.start + 1,
-            end: node.end - 1,
-            name: identifier
-         }
-      }
-   })
-}
-
-
 
 function isAssignee(node: Identifier & ASTNode) {
    const { parent } = node
@@ -899,8 +935,7 @@ function isPropertyKey(node: Identifier & ASTNode) {
       parent.type === 'ObjectExpression' && parent.properties.find(property => property.type === 'Property' && property.key === node)
 }
 
-
-function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destructuring: ObjectPattern | ArrayPattern, cursor: Cursor<T, C>, edits: Edits, context: Context) {
+function declareAbsorbedGettersFromAccessorPostfix<T extends ASTNode, C>(destructuring: ObjectPattern | ArrayPattern, declaration: VariableDeclaration, cursor: Cursor<T, C>, edits: Edits, context: Context) {
    if (destructuring.type === 'ObjectPattern') {
       destructuring.properties.forEach(property => {
          if (property.type === 'RestElement') {
@@ -913,13 +948,17 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
             throw new InternalError('uncovered case')
          }
          cursor.skip(key)
-         const propertyKey = undoAccessorVariablePostfix(key, cursor, edits)
-         const identifier = value.type === 'Identifier' ? value : value.type === 'AssignmentPattern' ? value.left : undefined
-         if (identifier?.type === 'Identifier') {
+         const identifier = findIdentifier(value)
+         if (identifier && key.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+            const propertyKey = key.name.slice(0, -1)
+            cursor.willMutate(() => {
+               key.name = propertyKey;
+               (value as BindingIdentifier).name = propertyKey
+            })
             cursor.skip(identifier)
-            undoAccessorVariablePostfix(identifier, cursor, edits)
-            declareAbsorbedGetter(propertyKey, cursor)
-            if (value.type === 'AssignmentPattern') {
+            cursor.scope.addAbsorbedGetter(propertyKey, declaration) //TODO: Declaration
+            if (value.type === 'AssignmentPattern' && value.left.type === 'Identifier') {
+               value.left.name = propertyKey
                const program = requireFrom(context, 'program')
                cursor.willMutate(() => {
                   importFromRuescript('assertª', program)
@@ -928,8 +967,9 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
             }
          }
          // nested destructuring
-         else if (value.type === 'ObjectPattern' || value.type === 'ArrayPattern') {
-            declareAbsorbedGettersFromGetDestructuring(value, cursor, edits, context)
+         else if (findObjectPattern(value) || findArrayPattern(value)) {
+            undoAccessorVariablePostfix(key, cursor, edits)
+            declareAbsorbedGettersFromAccessorPostfix(value as ObjectPattern | ArrayPattern, declaration, cursor, edits, context)
          }
       })
    }
@@ -943,12 +983,11 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
          }
 
          cursor.skip(element)
-         const identifier = element.type === 'Identifier' ? element : element.type === 'AssignmentPattern' ? element.left : undefined
-         if (identifier?.type === 'Identifier') {
-            const propertyKey = undoAccessorVariablePostfix(identifier, cursor, edits)
+         const identifier = findIdentifier(element)
+         if (identifier && identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+            const propertyKey = identifier.name.slice(0, -1)
             cursor.skip(identifier)
-            undoAccessorVariablePostfix(identifier, cursor, edits)
-            declareAbsorbedGetter(propertyKey, cursor)
+            cursor.scope.addAbsorbedGetter(propertyKey, declaration) // TODO: declaration
             if (element.type === 'AssignmentPattern') {
                const program = requireFrom(context, 'program')
                cursor.willMutate(() => {
@@ -958,8 +997,85 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
             }
          }
          // nested destructuring
-         else if (element.type === 'ObjectPattern' || element.type === 'ArrayPattern') {
-            declareAbsorbedGettersFromGetDestructuring(element, cursor, edits, context)
+         else if (findObjectPattern(element) || findArrayPattern(element)) {
+            declareAbsorbedGettersFromGetDestructuring(element as ObjectPattern | ArrayPattern, declaration, cursor, edits, context)
+         }
+      })
+   }
+}
+
+function findIdentifier(node: BindingPattern | ParamPattern) {
+   return node.type === 'Identifier' ? node : node.type === 'AssignmentPattern' && node.left.type === 'Identifier' ? node.left : undefined
+}
+
+function findObjectPattern(node: BindingPattern | ParamPattern) {
+   return node.type === 'ObjectPattern' ? node : node.type === 'AssignmentPattern' && node.left.type === 'ObjectPattern' ? node.left : undefined
+}
+
+function findArrayPattern(node: BindingPattern | ParamPattern) {
+   return node.type === 'ArrayPattern' ? node : node.type === 'AssignmentPattern' && node.left.type === 'ArrayPattern' ? node.left : undefined
+}
+
+function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destructuring: ObjectPattern | ArrayPattern, declaration: VariableDeclaration, cursor: Cursor<T, C>, edits: Edits, context: Context) {
+   if (destructuring.type === 'ObjectPattern') {
+      destructuring.properties.forEach(property => {
+         if (property.type === 'RestElement') {
+            // TODO: throw compile error?
+            console.error('rest element not currently supported for `get` keyword destructuring')
+            return;
+         }
+         const { key, value } = property
+         if (key.type !== 'Identifier') {
+            throw new InternalError('uncovered case')
+         }
+         cursor.skip(key)
+         const propertyKey = undoAccessorVariablePostfix(key, cursor, edits)
+         const identifier = findIdentifier(value)
+         if (identifier) {
+            cursor.skip(identifier)
+            undoAccessorVariablePostfix(identifier, cursor, edits)
+            cursor.scope.addAbsorbedGetter(propertyKey, declaration)
+            if (value.type === 'AssignmentPattern') {
+               const program = requireFrom(context, 'program')
+               cursor.willMutate(() => {
+                  importFromRuescript('assertª', program)
+                  value.right = CovertCallExpression('assertª', [value.right])
+               })
+            }
+         }
+         // nested destructuring
+         else if (findObjectPattern(value) || findArrayPattern(value)) {
+            declareAbsorbedGettersFromGetDestructuring(value as ObjectPattern | ArrayPattern, declaration, cursor, edits, context)
+         }
+      })
+   }
+   else {
+      destructuring.elements.forEach(element => {
+         if (!element) return;
+         if (element.type === 'RestElement') {
+            // TODO: throw compile error?
+            console.error('rest element not currently supported for `get` keyword destructuring')
+            return;
+         }
+
+         cursor.skip(element)
+         const identifier = findIdentifier(element)
+         if (identifier) {
+            const propertyKey = undoAccessorVariablePostfix(identifier, cursor, edits)
+            cursor.skip(identifier)
+            undoAccessorVariablePostfix(identifier, cursor, edits)
+            cursor.scope.addAbsorbedGetter(propertyKey, declaration)
+            if (element.type === 'AssignmentPattern') {
+               const program = requireFrom(context, 'program')
+               cursor.willMutate(() => {
+                  importFromRuescript('assertª', program)
+                  element.right = CovertCallExpression('assertª', [element.right])
+               })
+            }
+         }
+         // nested destructuring
+         else if (findObjectPattern(element) || findArrayPattern(element)) {
+            declareAbsorbedGettersFromGetDestructuring(element as ObjectPattern | ArrayPattern, declaration, cursor, edits, context)
          }
       })
    }
@@ -970,7 +1086,9 @@ function undoAccessorVariablePostfix<T extends ASTNode, C>(node: Identifier, cur
    if (node.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
       edits.at(node.end, edit => {
          variable = node.name.slice(0, -1) + '@'
-         // unwrite ª --> @
+         /**
+          * unwrite ª --> @
+          */ 
          cursor.willMutate(() => {
             node.name = variable
          })
@@ -979,10 +1097,6 @@ function undoAccessorVariablePostfix<T extends ASTNode, C>(node: Identifier, cur
    return variable
 }
 
-function declareAbsorbedGetter<T extends ASTNode, C>(variable: string, cursor: Cursor<T, C>) {
-   cursor.scope.addAbsorbedGetter(variable)
-   cursor.scope.addAbsorbedGetter(variable + ACCESSOR_VARIABLE_POSTFIX)
-}
 
 function CovertObjectExpression(properties: ObjectPropertyKind[] = []): ObjectExpression {
    return {
@@ -1016,9 +1130,61 @@ function CovertObjectProperty(key: string, value: Expression, computed: boolean 
    }
 }
 
+function isAccessorPostfixDestructuring(declarator: VariableDeclarator) {
+   if (declarator.id.type === 'Identifier' || declarator.id.type === 'AssignmentPattern') return false;
+   if (declarator.id.type === 'ObjectPattern') {
+      return hasAccessorPostfixDestructuring(declarator.id.properties)
+   }
+   if (declarator.id.type === 'ArrayPattern') {
+      return hasAccessorPostfixArrayDestructuring(declarator.id.elements)
+   }
+}
+
+function hasAccessorPostfixDestructuring(properties: (BindingProperty | BindingRestElement)[]): boolean {
+   for (const property of properties) {
+      if (property.type !== 'Property') continue;
+      const { value } = property
+      const identifier = findIdentifier(value)
+      if (identifier && identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+         return true;
+      }
+      const objectPattern = findObjectPattern(value)
+      if (objectPattern) {
+         return hasAccessorPostfixDestructuring(objectPattern.properties)
+      }
+      const arrayPattern = findArrayPattern(value)
+      if (arrayPattern) {
+         return hasAccessorPostfixArrayDestructuring(arrayPattern.elements)
+      }
+   }
+   return false;
+}
+
+function hasAccessorPostfixArrayDestructuring(elements: (BindingPattern | BindingRestElement | null)[]): boolean {
+   for (const element of elements) {
+      if (!element) continue;
+      if (element.type === 'RestElement') continue;
+      const identifier = findIdentifier(element)
+      if (identifier && identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+         return true;
+      }
+      const objectPattern = findObjectPattern(element)
+      if (objectPattern) {
+         return hasAccessorPostfixDestructuring(objectPattern.properties)
+      }
+      const arrayPattern = findArrayPattern(element)
+      if (arrayPattern) {
+         return hasAccessorPostfixArrayDestructuring(arrayPattern.elements)
+      }
+   }
+   return false;
+}
+
+
+
 // { a, b = 'hi' } --> { a: 1, b: 1 }
 // { a, b: { c = 'hi' } = { c: 'hi' } }
-function ObjectDestructuringMapFromGetKeyword(destructuring: ObjectPattern) {
+function ObjectDestructuringMapFromGetKeyword(destructuring: ObjectPattern, transformName: (name: string) => string = name => name, deriveValue: (name: string) => NumericLiteral = () => CovertNumber(1)) {
    const objectExpression = CovertObjectExpression()
    const { properties } = destructuring
 
@@ -1032,21 +1198,23 @@ function ObjectDestructuringMapFromGetKeyword(destructuring: ObjectPattern) {
          throw new InternalError('uncovered case')
          return; // TODO: throw compiler error?
       }
-      const identifier = value.type === 'Identifier' ? value : value.type === 'AssignmentPattern' ? value.left : null
-      if (identifier?.type === 'Identifier') {
-         objectExpression.properties[index] = CovertObjectProperty(key.name, CovertNumber(1), property.computed)
+      const identifier = findIdentifier(value)
+      let objectPattern;
+      let arrayPattern;
+      if (identifier) {
+         objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), deriveValue(key.name), property.computed)
       }
-      else if (value.type === 'ObjectPattern') {
-         objectExpression.properties[index] = CovertObjectProperty(key.name, ObjectDestructuringMapFromGetKeyword(value), property.computed)
+      else if (objectPattern = findObjectPattern(value)) {
+         objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), ObjectDestructuringMapFromGetKeyword(objectPattern, transformName, deriveValue), property.computed)
       }
-      else if (value.type === 'ArrayPattern') {
-         objectExpression.properties[index] = CovertObjectProperty(key.name, ArrayDestructuringMapFromGetKeyword(value), property.computed)
+      else if (arrayPattern = findArrayPattern(value)) {
+         objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), ArrayDestructuringMapFromGetKeyword(arrayPattern, transformName, deriveValue), property.computed)
       }
    })
    return objectExpression
 }
 
-function ArrayDestructuringMapFromGetKeyword(destructuring: ArrayPattern) {
+function ArrayDestructuringMapFromGetKeyword(destructuring: ArrayPattern, transformName: (name: string) => string = name => name, deriveValue: (name: string) => NumericLiteral = () => CovertNumber(1)) {
    const arrayExpression = CovertArrayExpression()
    const { elements } = destructuring
 
@@ -1056,15 +1224,17 @@ function ArrayDestructuringMapFromGetKeyword(destructuring: ArrayPattern) {
          throw new InternalError('uncovered case')
          return; // TODO: throw compiler error?
       }
-      const identifier = element.type === 'Identifier' ? element : element.type === 'AssignmentPattern' ? element.left : null
-      if (identifier?.type === 'Identifier') {
-         arrayExpression.elements[index] = CovertNumber(1)
+      const identifier = findIdentifier(element)
+      let objectPattern;
+      let arrayPattern;
+      if (identifier) {
+         arrayExpression.elements[index] = deriveValue(identifier.name)
       }
-      else if (element.type === 'ObjectPattern') {
-         arrayExpression.elements[index] = ObjectDestructuringMapFromGetKeyword(element)
+      else if (objectPattern = findObjectPattern(element)) {
+         arrayExpression.elements[index] = ObjectDestructuringMapFromGetKeyword(objectPattern, transformName, deriveValue)
       }
-      else if (element.type === 'ArrayPattern') {
-         arrayExpression.elements[index] = ArrayDestructuringMapFromGetKeyword(element)
+      else if (arrayPattern = findArrayPattern(element)) {
+         arrayExpression.elements[index] = ArrayDestructuringMapFromGetKeyword(arrayPattern, transformName, deriveValue)
       }
    })
    return arrayExpression
