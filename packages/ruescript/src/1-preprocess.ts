@@ -1,4 +1,8 @@
+import { off } from "node:cluster"
 import { ACCESSOR_EXPRESSION_POSTFIX, ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts"
+import { searchOpeningBrace } from "./searchOpeningBrace.ts"
+
+// TODO: create a string/comment/regex mask to prevent edits within
 
 type BaseEdit = {
    // type: string
@@ -7,6 +11,7 @@ type BaseEdit = {
    anchorType: 'start' | 'end'
    original: string
    transformed: string
+   offset: number
    // valid: undefined | boolean // pattern is in valid transform context (e.g. non-string/non-comment)--context unknown until after parsing
 }
 
@@ -20,7 +25,7 @@ export type VariableEdit = {
 
 
 export type ExpressionEdit = {
-   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix' | 'BlockIIDEPostfix' | 'GetDestructuring'
+   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix' | 'BlockDerivationExpressionOpen' | 'BlockDerivationExpressionClose' | 'GetDestructuring'
 } & BaseEdit
 
 const AccessorEditType = {
@@ -37,7 +42,21 @@ function encodeGap(group: string): string {
       .replace(/\*\//g, 'ºƒ')
 }
 
+
 // TODO: current regexes are temporary naive implementations that need to be replaced with more robust searches
+
+
+function applyOffsets(edits: Edit[]) {
+   let offset = 0
+
+   // apply offsets
+   for (const edit of edits) {
+      edit.index = edit.index + offset
+      // edit.anchor = edit.anchor + offset
+      offset += edit.offset
+   }
+}
+
 
 /**
  * Applies edits to the code and returns transformed code
@@ -62,29 +81,14 @@ function applyEdits(code: string, edits: Edit[]): string {
 }
 
 export class Edits {
-   // prefixes: Edit[];
-   // postfixes: Edit[];
-
+   /**
+    * The last visited index
+    */
    lastIndex: number = 0
-   // lastPrefix: number = 0
-   // lastPostfix: number = 0
 
    constructor(
       private edits: Edit[]
    ) {
-      // const prefixes: Edit[] = this.prefixes = []
-      // const postfixes: Edit[] = this.postfixes = []
-
-      // for (const edit of edits) {
-      //    if (edit.anchorType === 'start') {
-      //       prefixes.push(edit)
-      //    }
-      // }
-      // for (const edit of edits) {
-      //    if (edit.anchorType === 'end') {
-      //       postfixes.push(edit)
-      //    }
-      // }
    }
 
    find(anchor: number): Edit | undefined {
@@ -99,61 +103,11 @@ export class Edits {
       }
    }
 
-   // findStart(anchor: number): Edit | undefined {
-   //    const edits = this.prefixes
-   //    const limit = edits.length;
-   //    for (let i = this.lastPrefix; i < limit; i++) {
-   //       const edit = edits[i]
-   //       if (anchor === edit.anchor) {
-   //       // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
-   //          this.lastPrefix = i;
-   //          return edit
-   //       }
-   //    }
-   // }
-
-   // findEnd(anchor: number): Edit | undefined { // TODO: should I find exact matches instead of ranges?
-   //    const edits = this.postfixes
-   //    const limit = edits.length;
-   //    for (let i = 0; i < limit; i++) {
-   //       const edit = edits[i]
-   //       // if (anchor >= edit.anchor && anchor < edit.anchor + edit.transformed.length) {
-   //       if (anchor === edit.anchor) {
-   //          // this.lastPrefix = i;
-   //          return edit
-   //       }
-   //    }
-   // }
-
-   // atPrefix(anchor: number, task: (edit: Edit) => void) {
-   //    const edit = this.findStart(anchor)
-   //    if (edit) task(edit)
-   //    return edit
-   // }
-
-   // atPostfix(anchor: number, task: (edit: Edit) => void) {
-   //    const edit = this.findEnd(anchor)
-   //    if (edit) task(edit)
-   //    return edit
-   // }
-
    at(anchor: number, task: (edit: Edit) => void) {
       const edit = this.find(anchor)
       if (edit) task(edit)
       return edit
    }
-
-   // findEnd(anchor: number) {
-   //    const edits = this.postfixes
-   //    console.log('anchor', anchor, edits, this.lastPostfix)
-   //    for (let i = this.lastPostfix; i >= 0; i--) {
-   //       const edit = edits[i]
-   //       if (anchor <= edit.anchor && anchor > edit.anchor - edit.transformed.length) {
-   //          this.lastPostfix = i;
-   //          return edit
-   //       }
-   //    }
-   // }
 }
 
 // TODO: make sure regex is correct
@@ -162,6 +116,9 @@ class RXSPreprocessor {
    _edits: Edit[] = []
    edits!: Edits
    code: string = ''
+
+   private inserts: number = 0
+   private offset: number = 0
 
    constructor(readonly source: string) {
    }
@@ -172,10 +129,11 @@ class RXSPreprocessor {
       this.rewriteGetPropertyColonNotation()
       this.rewriteAccessorVariablePostfix()
       this.rewriteExpressionPostfix()
-      this.rewriteBlockIIDE()
+      this.rewriteBlockDerivationExpression()
       this.rewriteJSXAttributeShorthand()
 
       const edits = this._edits.toSorted((a, b) => a.index - b.index)
+      applyOffsets(edits)
       this.code = applyEdits(this.source, edits)
       this.edits = new Edits(edits)
       return this
@@ -205,10 +163,12 @@ class RXSPreprocessor {
             anchorType: 'start',
             original,
             transformed,
-            identifier
+            identifier,
+            offset: 0
          })
       }
    }
+
    /**
     * - Replaces `get` variable declaration pattern with intermediary valid js.
     * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
@@ -233,6 +193,7 @@ class RXSPreprocessor {
             anchorType: 'start',
             original,
             transformed,
+            offset: 0
          })
       }
    }
@@ -261,7 +222,8 @@ class RXSPreprocessor {
             anchorType: 'start',
             original,
             transformed,
-            identifier
+            identifier,
+            offset: 0
          })
       }
    }
@@ -282,7 +244,8 @@ class RXSPreprocessor {
             anchorType: 'end',
             original: original.slice(0, -1),
             transformed: identifier + ACCESSOR_VARIABLE_POSTFIX,
-            identifier
+            identifier,
+            offset: 0
          })
       }
    }
@@ -305,26 +268,42 @@ class RXSPreprocessor {
             anchor: index + 2, // NOTE: range for non-null expression ends after !
             anchorType: 'end',
             original: original.slice(0, -1),
-            transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX
+            transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX,
+            offset: 0
          })
       }
    }
 
-   rewriteBlockIIDE() {
-      const pattern = /\}@\(\)?[\s/;(),}\]\[]/g
+   /**
+    * @example
+    * source:     { const c = 0 ; return a + b }@   
+    * prepro: (ª=>{ const c = 0 ; return a + b })
+    */
+   rewriteBlockDerivationExpression() {
+      const pattern = /\}@[\s/;(),}\]]?/g
       const matches = this.source.matchAll(pattern)
 
       for (const match of matches) {
-         const [original] = match
          const index = match.index
+         const openingBracket = searchOpeningBrace(this.source, index)
+         if (openingBracket === undefined) continue;
 
          this._edits.push({
-            type: 'BlockIIDEPostfix',
+            type: 'BlockDerivationExpressionOpen',
+            index: openingBracket,
+            anchor: openingBracket,
+            anchorType: 'start',
+            original: '{',
+            transformed: `(ª=>{`,
+            offset: 4
+         }, {
+            type: 'BlockDerivationExpressionClose',
             index,
-            anchor: index, // FIX:
+            anchor: index + 1,
             anchorType: 'end',
-            original: original.slice(0, -1),
-            transformed: `}(ª)` // FIX:
+            original: '}@',
+            transformed: `})`,
+            offset: 0
          })
       }
    }
@@ -344,7 +323,8 @@ class RXSPreprocessor {
             anchorType: 'start',
             original: original.slice(1),
             transformed: `ß${identifier}ß`,
-            identifier
+            identifier,
+            offset: 0
          })
       }
    }

@@ -28,7 +28,7 @@ type Visit<T extends BaseNode, N extends BaseNode, C> = (this: Cursor<T, C>, nod
 
 export function traverse<T extends BaseNode, C>(ast: T, context: C & object, visitors: Visitors<T, C>) {
 
-   const cursor = new Cursor<T, C>(visitors, CHILD_KEYS, context)
+   const cursor = new Cursor<T, C>(CHILD_KEYS, context, visitors)
 
    cursor.enterScope()
    try {
@@ -43,6 +43,26 @@ export function traverse<T extends BaseNode, C>(ast: T, context: C & object, vis
       transformed: cursor.applyTransformations()
    }
 }
+
+export function traverseAll<T extends BaseNode, C>(ast: T, context: C & object, visitors: { visit: Visit<T, T, C> }) {
+
+   const cursor = new Cursor<T, C>(CHILD_KEYS, context, undefined, visitors.visit)
+
+   cursor.enterScope()
+   try {
+      cursor.visit(ast, context)
+   }
+   finally {
+      cursor.exitScope()
+   }
+
+   return {
+      ast,
+      transformed: cursor.applyTransformations()
+   }
+}
+
+
 
 
 
@@ -115,9 +135,10 @@ export class Cursor<T extends BaseNode, C> {
    private scopeStack: ScopeStack
 
    constructor(
-      private visitors: Visitors<T, C>,
       private childKeys: { [key: string]: string[] },
-      private context: C
+      private context: C,
+      private visitors?: Visitors<T, C>,
+      private visitor?: Visit<T, NodeOf<T['type'], T>, C>
    ) {
       const [pushScope, popScope, getScope] = createStack<Scope>()
       const [pushContext, popContext, getContext] = createStack<C>()
@@ -142,13 +163,13 @@ export class Cursor<T extends BaseNode, C> {
       }
       this.visited.add(node)
       try {
-         const visit = (this.visitors as Visitors<BaseNode, C>)[node.type]
+         const visit = (this.visitors as Visitors<BaseNode, C>)?.[node.type] ?? this.visitor as Visit<BaseNode, BaseNode, C>
          if (context) this.pushContext(context)
          if (visit) {
             visit.apply(this as Cursor<BaseNode, C>, [node, this.getContext() ?? this.context])
          }
          else {
-            this.autovisit(node as T & N, this.getContext() ?? this.context)
+            this.visitChildren(node as T & N, this.getContext() ?? this.context)
          }
       }
       finally {
@@ -170,19 +191,19 @@ export class Cursor<T extends BaseNode, C> {
       this.skipped.add(node)
    }
 
-   private autovisit(node: T, context: C) {
+   visitChildren(node: T, context?: C) {
       const childKeys = this.childKeys[node.type] ?? Object.keys(node)
       for (const key of childKeys) {
          const nested = node[key as keyof T] as T | T[]
          if (nested instanceof Array && nested.some(isNode)) {
             for (const child of nested) {
                if (isNode(child)) {
-                  this.visit(child)
+                  this.visit(child, context)
                }
             }
          }
          else if (isNode(nested)) {
-            this.visit(nested)
+            this.visit(nested, context)
          }
       }
    }

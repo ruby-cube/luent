@@ -1,6 +1,6 @@
 import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
-import { Cursor, traverse } from './traverse.ts';
+import { Cursor, traverse, traverseAll } from './traverse.ts';
 import { BaseNode } from './4-generate.ts';
 import { T } from 'node_modules/vitest/dist/chunks/traces.d.402V_yFI';
 import { FunctionDeclaration } from 'typescript';
@@ -23,13 +23,29 @@ function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefi
 }
 
 
-export function transformRXS(ast: ASTNode, edits: Edits) {
-   // TODO:
-   // let offset = 0;
 
-   // traverseAll(ast, (node) => {
-   //    // add offsets (based on edits)
-   // })
+export function transformRXS(ast: ASTNode, edits: Edits) {
+   let offset = 0;
+   edits.lastIndex = 0 
+
+   // Offset adjustment
+   traverseAll(ast, { edits }, {
+      visit(node, { edits }) {
+         const start = node.start
+         // this.willMutate(() => { // FIX: For some reason if we queue mutation, traverse will not transform
+            node.start = start - offset
+         // })
+         edits.at(start, edit => { // currently only prefix edits have offsets, so we don't need to check postfix edits
+            offset += edit.offset
+         })
+         this.visitChildren(node)
+         // this.willMutate(() => {
+            node.end = node.end - offset
+         // })
+      }
+   })
+
+   edits.lastIndex = 0
 
    return traverse(ast, { edits } as Context, {
       Program(node, context) {
@@ -182,7 +198,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                && node.shorthand === true
             ) {
                edit = context.edits.find(node.start);
-               if (edit) {
+               if (edit?.type === 'GetPropertyColonNotation') {
                   return; // skip visiting children
                }
                else {
@@ -956,7 +972,7 @@ function declareAbsorbedGettersFromAccessorPostfix<T extends ASTNode, C>(destruc
                (value as BindingIdentifier).name = propertyKey
             })
             cursor.skip(identifier)
-            cursor.scope.addAbsorbedGetter(propertyKey, declaration) //TODO: Declaration
+            cursor.scope.addAbsorbedGetter(propertyKey, declaration)
             if (value.type === 'AssignmentPattern' && value.left.type === 'Identifier') {
                value.left.name = propertyKey
                const program = requireFrom(context, 'program')
@@ -1088,7 +1104,7 @@ function undoAccessorVariablePostfix<T extends ASTNode, C>(node: Identifier, cur
          variable = node.name.slice(0, -1) + '@'
          /**
           * unwrite ª --> @
-          */ 
+          */
          cursor.willMutate(() => {
             node.name = variable
          })
