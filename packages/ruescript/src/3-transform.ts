@@ -1,6 +1,9 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse, traverseAll } from './traverse.ts';
+import { BaseNode } from './4-generate.ts';
+import { assert } from 'node:console';
+import { Block } from 'typescript';
 
 
 // (1) reverse offset pass
@@ -258,8 +261,13 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          const { edits } = context
          if (hasAwait(node.body)) node.async = true;
          const firstParam = node.params[0]
-         if (firstParam.type === 'Identifier' && firstParam.name === 'ª') {
-            edits.at(node.body.start, edit => {
+         /**
+          * source: { statements }@
+          * prepro: (ª=>{ statements })
+          * final (() => { statements })
+          */
+         if (firstParam?.type === 'Identifier' && firstParam.name === 'ª') {
+            edits.at(node.body.start, () => {
                this.willMutate(() => {
                   node.params = []
                })
@@ -625,11 +633,13 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
    const body = node.body
 
    if (body) {
+      const { edits } = context
       cursor.enterScope()
 
-      node.params.forEach((param) => {
+      node.params.forEach((param, index) => {
          const identifier = findIdentifier(param)
-
+         let objectPattern;
+         let arrayPattern;
          // simple parameter with @ operator
          if (identifier) {
             const parameter = identifier.name
@@ -670,12 +680,50 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                         param.right = CovertCallExpression('assertª', [param.right])
                      })
                   }
-
                })
             }
          }
-         else {
-            // TODO: "ArrayPattern" | "ObjectPattern" | "RestElement"| "TSParameterProperty"
+         else if ((objectPattern = findObjectPattern(param)) || (arrayPattern = findArrayPattern(param))) {
+            if (objectPattern ? hasAccessorPostfixDestructuring(objectPattern.properties) : hasAccessorPostfixArrayDestructuring(arrayPattern!.elements)) {
+               const pattern = objectPattern ?? arrayPattern!
+               const covertName = 'dpª' + index
+               cursor.willReplace(param as any, CovertIdentifier(covertName) as any)
+               const covertDestructuring = CovertDestructuring(pattern, CovertIdentifier(covertName))
+               cursor.willMutate(() => {
+                  const program = requireFrom(context, 'program')
+                  const declaration = importFromRuescript('destructureª', program)
+                  transformRXS({
+                     type: 'Program',
+                     start: 0,
+                     end: 0,
+                     hashbang: null,
+                     sourceType: 'script',
+                     body: [declaration, covertDestructuring]
+                  }, edits)
+               })
+
+               if (body.type === 'BlockStatement') {
+                  cursor.willMutate(() => {
+                     body.body.unshift(covertDestructuring)
+                  })
+               }
+               else {
+                  cursor.willReplace(body as any, {
+                     type: 'BlockStatement',
+                     start: 0,
+                     end: 0,
+                     body: [
+                        covertDestructuring,
+                        {
+                           type: 'ReturnStatement',
+                           start: 0,
+                           end: 0,
+                           argument: body
+                        }]
+                  } as any)
+               }
+               declareAbsorbedGettersFromAccessorPostfix(pattern, covertDestructuring, cursor, edits, context)
+            }
          }
       })
 
@@ -819,13 +867,14 @@ function queueAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpre
 function importFromRuescript(importName: string, program: Program) {
    const existing = findRuescriptImport(program.body)
    if (existing && hasImport(importName, existing)) {
-      return;
+      return existing;
    }
 
    const declaration = existing ?? CovertImportDeclaration(RUESCRIPT_IMPORT_SOURCE)
    const specifier = CovertImportSpecifier(importName)
    declaration.specifiers.push(specifier)
    if (!existing) program.body.unshift(declaration)
+   return declaration
 }
 
 function findRuescriptImport(body: Program['body']) {
@@ -887,6 +936,22 @@ function CovertNumber(num: number): NumericLiteral {
       end: 0,
       raw: `${num}`,
       value: num,
+   }
+}
+
+function CovertDestructuring(pattern: ObjectPattern | ArrayPattern, init: Identifier): VariableDeclaration {
+   return {
+      type: 'VariableDeclaration',
+      start: 0,
+      end: 0,
+      kind: 'let',
+      declarations: [{
+         type: 'VariableDeclarator',
+         start: 0,
+         end: 0,
+         id: pattern,
+         init
+      }]
    }
 }
 
@@ -1000,6 +1065,9 @@ function declareAbsorbedGettersFromAccessorPostfix<T extends ASTNode, C>(destruc
          const identifier = findIdentifier(element)
          if (identifier && identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
             const propertyKey = identifier.name.slice(0, -1)
+            cursor.willMutate(() => {
+               identifier.name = propertyKey;
+            })
             cursor.skip(identifier)
             cursor.scope.addAbsorbedGetter(propertyKey, declaration) // TODO: declaration
             if (element.type === 'AssignmentPattern') {

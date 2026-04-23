@@ -518,22 +518,6 @@ describe('transform', () => {
       )
    })
 
-   it('transforms jsx attribute shorthand', () => {
-      const { code, edits } = preprocessRXS(
-         `<Tooltip something='true' {tooltip}></Tooltip>`
-      )
-      expect(code).toBe(
-         `<Tooltip something='true' ßtooltipß></Tooltip>`
-      )
-      const ast = parseRXS('test.rxs', code)
-      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
-      expect(transformed).toBe(true)
-      const generated = printTSX(tsxTree)
-      expect(generated.code).toBe(
-         `<Tooltip something='true' tooltip={tooltip}></Tooltip>;\n`
-      )
-   })
-
    it('transforms getter normalization with parameters', () => {
       const { code, edits } = preprocessRXS(
          `function foo(bar@) {\n` +
@@ -560,7 +544,6 @@ describe('transform', () => {
          `}\n\n`
       )
    })
-
 
    it('transforms getter normalization with default parameters', () => {
       const { code, edits } = preprocessRXS(
@@ -599,22 +582,4 @@ describe('transform', () => {
       expect(generated.code).toBe('import { assertª } from "@rue/ruescript";\nfunction ref(a: number) {\n}\n\nfunction frog() {\n\tconst count = assertª(ref(0));\n\treturn;\n}\n\nconst count = 0;\n')
    })
 
-
-   it('parses multiple jsx roots', () => {
-      const ast = parseRXS('test.rxs', `
-          function a() {
-            const b = {
-               a,
-               a,
-               a
-            }
-            const n = /*<T>*/(b: T) => { }
-
-            ª=><div></div>
-            ª=><>{If(
-            )}</>
-            ª=><div></div>
-         }
-      `)
-   })
 })

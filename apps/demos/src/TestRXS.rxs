@@ -2,9 +2,11 @@
 get count = ref(0);
 get other = ref('something');
 
-const obj = {
-   get frog: ref('kermit')
-}
+// const obj = {
+//   get frog: ref('kermit')
+//}
+
+watch((other + 1)@);
 
 count = 'okj';
 other = 'ho';
@@ -12,6 +14,8 @@ other = 'ho';
 count
 count@
 
+
+function watch(arg: any){}
 
 function ref<T>(a: T) {
    return () => a

@@ -10,6 +10,7 @@
    ],
    "scripts": {
       "build": "tsdown src/index.ts --format esm --out-dir dist --clean",
+      "watch": "tsdown src/index.ts --format esm --out-dir dist --clean --watch",
       "prepack": "pnpm run build",
       "pack": "pnpm pack",
       "publish:dry": "pnpm publish --dry-run --no-git-checks",

@@ -28225,22 +28225,6 @@ function createRueScriptService() {
   };
 }
 
-// ../../packages/utils/Stack.ts
-function createStack() {
-  let stack = void 0;
-  function push(value) {
-    stack = { value, prev: stack };
-    return value;
-  }
-  function pop() {
-    if (stack) stack = stack.prev;
-  }
-  function getCurrent() {
-    return stack?.value;
-  }
-  return [push, pop, getCurrent];
-}
-
 // ../../node_modules/.pnpm/oxc-parser@0.124.0_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2/node_modules/oxc-parser/src-js/index.js
 import { createRequire as createRequire2 } from "node:module";
 
@@ -29105,33 +29089,57 @@ function parseSync2(filename, sourceText, options) {
   return wrap(parseSync(filename, sourceText, options));
 }
 
-// ../../packages/ruescript/src/ast.ts
+// ../../packages/ruescript/dist/index.mjs
+function createStack() {
+  let stack = void 0;
+  function push(value) {
+    stack = {
+      value,
+      prev: stack
+    };
+    return value;
+  }
+  function pop() {
+    if (stack) stack = stack.prev;
+  }
+  function getCurrent() {
+    return stack?.value;
+  }
+  return [
+    push,
+    pop,
+    getCurrent
+  ];
+}
 var CHILD_KEYS = keys_default;
 var IS_DEV = globalThis.process?.env?.NODE_ENV !== "production";
 function assertChildKeysDev(map) {
   for (const [nodeType, keys] of Object.entries(map)) {
     const canonicalKeys = [...keys_default[nodeType] ?? []];
-    if (nodeType === "Program" && !canonicalKeys.includes("hashbang")) {
-      canonicalKeys.push("hashbang");
-    }
+    if (nodeType === "Program" && !canonicalKeys.includes("hashbang")) canonicalKeys.push("hashbang");
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      if (key === "parent") {
-        throw new Error(`CHILD_KEYS[${nodeType}] must not include "parent"`);
-      }
-      if (!canonicalKeys.includes(key)) {
-        throw new Error(`CHILD_KEYS[${nodeType}] includes unknown child key "${key}"`);
-      }
+      if (key === "parent") throw new Error(`CHILD_KEYS[${nodeType}] must not include "parent"`);
+      if (!canonicalKeys.includes(key)) throw new Error(`CHILD_KEYS[${nodeType}] includes unknown child key "${key}"`);
     }
   }
 }
-if (IS_DEV) {
-  assertChildKeysDev(CHILD_KEYS);
-}
-
-// ../../packages/ruescript/src/traverse.ts
+if (IS_DEV) assertChildKeysDev(CHILD_KEYS);
 function traverse(ast, context, visitors) {
-  const cursor = new Cursor(visitors, CHILD_KEYS, context);
+  const cursor = new Cursor(CHILD_KEYS, context, visitors);
+  cursor.enterScope();
+  try {
+    cursor.visit(ast, context);
+  } finally {
+    cursor.exitScope();
+  }
+  return {
+    ast,
+    transformed: cursor.applyTransformations()
+  };
+}
+function traverseAll(ast, context, visitors) {
+  const cursor = new Cursor(CHILD_KEYS, context, void 0, visitors.visit);
   cursor.enterScope();
   try {
     cursor.visit(ast, context);
@@ -29144,44 +29152,26 @@ function traverse(ast, context, visitors) {
   };
 }
 var Scope = class {
-  // private variables: Set<string>
-  absorbedGetters;
+  absorbedGetters = /* @__PURE__ */ new Map();
   constructor(parent) {
-    this.absorbedGetters = new Set(parent?.absorbedGetters);
+    this.parent = parent;
   }
-  // addVariable(name: string) {
-  //    this.variables.add(name)
-  // }
-  // has(name: string) {
-  //    return this.variables.has(name)
-  // }
-  addAbsorbedGetter(name) {
-    this.absorbedGetters.add(name);
+  addAbsorbedGetter(name, declaration) {
+    console.log("add", name);
+    this.absorbedGetters.set(name, declaration);
   }
   getAbsorbedGetterDeclaration(name) {
-    return this.absorbedGetters.has(name);
+    const variable = name.endsWith("\xAA") ? name.slice(0, -1) : name;
+    let scope = this;
+    while (scope) {
+      const result = scope.absorbedGetters.get(variable);
+      if (result) return result;
+      scope = scope.parent;
+    }
   }
 };
 var PROXY = /* @__PURE__ */ Symbol("proxy");
 var Cursor = class {
-  constructor(visitors, childKeys, context) {
-    this.visitors = visitors;
-    this.childKeys = childKeys;
-    this.context = context;
-    const [pushScope, popScope, getScope] = createStack();
-    const [pushContext, popContext, getContext] = createStack();
-    this.scopeStack = {
-      push: pushScope,
-      pop: popScope,
-      get: getScope
-    };
-    this.pushContext = pushContext;
-    this.popContext = popContext;
-    this.getContext = getContext;
-  }
-  visitors;
-  childKeys;
-  context;
   pushContext;
   popContext;
   getContext;
@@ -29193,71 +29183,84 @@ var Cursor = class {
   }
   get scope() {
     const scope = this.scopeStack.get();
-    if (!scope) throw new InternalError("no scope :(");
+    if (!scope) throw new InternalError$2("no scope :(");
     return scope;
   }
   scopeStack;
+  constructor(childKeys, context, visitors, visitor) {
+    this.childKeys = childKeys;
+    this.context = context;
+    this.visitors = visitors;
+    this.visitor = visitor;
+    const [pushScope, popScope, getScope] = createStack();
+    const [pushContext, popContext, getContext] = createStack();
+    this.scopeStack = {
+      push: pushScope,
+      pop: popScope,
+      get: getScope
+    };
+    this.pushContext = pushContext;
+    this.popContext = popContext;
+    this.getContext = getContext;
+  }
   visited = /* @__PURE__ */ new Set();
   visit(node, context) {
     if (!node[PROXY]) node = this.NodeProxy(node);
+    if (this.skipped.has(node)) return;
     if (this.visited.has(node)) {
       console.warn("node has already been visited", node);
       return;
     }
     this.visited.add(node);
     try {
-      const visit = this.visitors[node.type];
+      const visit = this.visitors?.[node.type] ?? this.visitor;
       if (context) this.pushContext(context);
-      if (visit) {
-        visit.apply(this, [node, this.getContext() ?? this.context]);
-      } else {
-        this.autovisit(node, this.getContext() ?? this.context);
-      }
+      if (visit) visit.apply(this, [node, this.getContext() ?? this.context]);
+      else this.visitChildren(node, this.getContext() ?? this.context);
     } finally {
       if (context) this.popContext();
     }
   }
   visitEach(nodes, context) {
-    for (const node of nodes) {
-      this.visit(node, context);
-    }
+    nodes.forEach((node) => {
+      if (isNode(node)) this.visit(node, context);
+    });
   }
-  autovisit(node, context) {
+  skipped = /* @__PURE__ */ new Set();
+  skip(node) {
+    this.skipped.add(node);
+  }
+  visitChildren(node, context) {
     const childKeys = this.childKeys[node.type] ?? Object.keys(node);
     for (const key of childKeys) {
       const nested = node[key];
       if (nested instanceof Array && nested.some(isNode)) {
-        for (const child of nested) {
-          if (isNode(child)) {
-            this.visit(child);
-          }
-        }
-      } else if (isNode(nested)) {
-        this.visit(nested);
-      }
+        for (const child of nested) if (isNode(child)) this.visit(child, context);
+      } else if (isNode(nested)) this.visit(nested, context);
     }
   }
-  // #region: transforms
   transforms = [];
   getParentAndPath(node) {
     const path = node.path;
     const parent = node.parent;
-    if (!parent) throw new InternalError("Parent is missing");
-    if (!path) throw new InternalError("Path is missing");
-    return { parent, path };
+    if (!parent) throw new InternalError$2("Parent is missing");
+    if (!path) throw new InternalError$2("Path is missing");
+    return {
+      parent,
+      path
+    };
   }
   /**
-   * Queues mutation for after tree has been fully traversed. Must be called synchronously to visitor.
-   */
+  * Queues mutation for after tree has been fully traversed. Must be called synchronously to visitor.
+  */
   willMutate(mutation) {
     this.transforms.push(mutation);
   }
   /**
-   * Queues replacement for after tree has been fully traversed. Must be called synchronously to visitor.
-   */
+  * Queues replacement for after tree has been fully traversed. Must be called synchronously to visitor.
+  */
   willReplace(node, other) {
-    const proxy = this.asProxy(node);
-    if (!proxy) {
+    if (!this.asProxy(node)) {
       console.warn("Only nodes on the original ast as passed in through the visitor may be replaced. Use `willMutate` instead.");
       return;
     }
@@ -29266,19 +29269,14 @@ var Cursor = class {
       const [key, index] = path;
       if (index) {
         const array = parent[key];
-        if (other instanceof Array) {
-          array.splice(parseInt(index), 1, ...other);
-        } else {
-          array[index] = other;
-        }
-      } else {
-        parent[key] = other;
-      }
+        if (other instanceof Array) array.splice(parseInt(index), 1, ...other);
+        else array[index] = other;
+      } else parent[key] = other;
     });
   }
   /**
-   * Queues removal for after tree has been fully traversed. Must be called synchronously to visitor.
-   */
+  * Queues removal for after tree has been fully traversed. Must be called synchronously to visitor.
+  */
   willRemove(node) {
     const proxy = this.asProxy(node);
     if (!proxy) {
@@ -29288,12 +29286,8 @@ var Cursor = class {
     this.transforms.push(() => {
       const { parent, path } = this.getParentAndPath(proxy);
       const [key, index] = path;
-      if (index) {
-        const array = parent[key];
-        array.splice(parseInt(index), 1);
-      } else {
-        parent[key] = null;
-      }
+      if (index) parent[key].splice(parseInt(index), 1);
+      else parent[key] = null;
     });
   }
   insert(node, other, offset = 0) {
@@ -29301,18 +29295,15 @@ var Cursor = class {
     const [key, index] = path;
     if (index) {
       const array = parent[key];
-      if (other instanceof Array) {
-        array.splice(parseInt(index) + offset, 0, ...other);
-      } else {
-        array.splice(parseInt(index) + offset, 0, other);
-      }
+      if (other instanceof Array) array.splice(parseInt(index) + offset, 0, ...other);
+      else array.splice(parseInt(index) + offset, 0, other);
       return;
     }
     console.warn("Cannot insert before node that is not an array element", node);
   }
   /**
-   * Queues insertion for before tree has been fully traversed. Must be called synchronously to visitor.
-   */
+  * Queues insertion for before tree has been fully traversed. Must be called synchronously to visitor.
+  */
   willInsertBefore(node, other) {
     const proxy = this.asProxy(node);
     if (!proxy) {
@@ -29324,8 +29315,8 @@ var Cursor = class {
     });
   }
   /**
-   * Queues insertion for after tree has been fully traversed. Must be called synchronously to visitor.
-   */
+  * Queues insertion for after tree has been fully traversed. Must be called synchronously to visitor.
+  */
   willInsertAfter(node, other) {
     const proxy = this.asProxy(node);
     if (!proxy) {
@@ -29337,137 +29328,157 @@ var Cursor = class {
     });
   }
   asProxy(node) {
-    if (!node[PROXY]) {
-      return this.proxyMap.get(node);
-    }
+    if (!node[PROXY]) return this.proxyMap.get(node);
     return node;
   }
   applyTransformations() {
     const transforms = this.transforms;
     if (!transforms.length) return false;
-    for (const transform of transforms) {
-      transform();
-    }
+    for (const transform of transforms) transform();
     return true;
   }
-  // #endregion
-  // #region: Node Proxies with parent and path
   proxyMap = /* @__PURE__ */ new Map();
   missingChildKeys = /* @__PURE__ */ new Set();
   NodeProxy(node, parent, path) {
     if (this.proxyMap.has(node)) return this.proxyMap.get(node);
     const cursor = this;
-    const proxy = new Proxy(node, {
-      get(target, key) {
-        if (key === PROXY) return true;
-        if (key === "parent") return parent;
-        if (key === "path") return path;
-        const value = target[key];
-        if (typeof key !== "string") return value;
-        if (isNode(value)) {
-          return cursor.NodeProxy(value, target, [key]);
+    const proxy = new Proxy(node, { get(target, key) {
+      if (key === PROXY) return true;
+      if (key === "parent") return parent && cursor.NodeProxy(parent);
+      if (key === "path") return path;
+      const value = target[key];
+      if (typeof key !== "string") return value;
+      if (isNode(value)) return cursor.NodeProxy(value, target, [key]);
+      const keys = cursor.childKeys[target.type];
+      if (!keys) {
+        if (!cursor.missingChildKeys.has(target.type)) {
+          cursor.missingChildKeys.add(target.type);
+          console.warn("child keys do not exist for", target.type);
         }
-        const keys = cursor.childKeys[target.type];
-        if (!keys) {
-          if (!cursor.missingChildKeys.has(target.type)) {
-            cursor.missingChildKeys.add(target.type);
-            console.warn("child keys do not exist for", target.type);
-          }
-          if (isNode(value)) {
-            return cursor.NodeProxy(value, target, [key]);
-          }
-          if (value instanceof Array && value.some(isNode)) {
-            return cursor.NodeListProxy(value, target, key);
-          }
-          return value;
-        }
-        if (keys.indexOf(key) !== -1 && value instanceof Array) {
-          return cursor.NodeListProxy(value, target, key);
-        }
+        if (isNode(value)) return cursor.NodeProxy(value, target, [key]);
+        if (value instanceof Array && value.some(isNode)) return cursor.NodeListProxy(value, target, key);
         return value;
       }
-    });
+      if (keys.indexOf(key) !== -1 && value instanceof Array) return cursor.NodeListProxy(value, target, key);
+      return value;
+    } });
     this.proxyMap.set(node, proxy);
     return proxy;
   }
   NodeListProxy(nodes, parent, key) {
     if (this.proxyMap.has(nodes)) return this.proxyMap.get(nodes);
     const cursor = this;
-    const proxy = new Proxy(nodes, {
-      get(target, index) {
-        if (index === PROXY) return true;
-        if (index === "parent") return parent;
-        const value = target[index];
-        if (typeof index !== "string") return value;
-        if (isNode(value)) {
-          return cursor.NodeProxy(value, parent, [key, index]);
-        }
-        return value;
-      }
-    });
+    const proxy = new Proxy(nodes, { get(target, index) {
+      if (index === PROXY) return true;
+      if (index === "parent") return parent;
+      const value = target[index];
+      if (typeof index !== "string") return value;
+      if (isNode(value)) return cursor.NodeProxy(value, parent, [key, index]);
+      return value;
+    } });
     this.proxyMap.set(nodes, proxy);
     return proxy;
   }
-  // #endregion
 };
-var InternalError = class extends Error {
+var InternalError$2 = class extends Error {
 };
 function isNode(value) {
   return !!value && typeof value === "object" && "type" in value;
 }
-
-// ../../packages/ruescript/src/3-transform.ts
-function assertContext(value, key) {
-  if (!value) throw new Error(key + " is missing from context");
+function requireFrom(obj, key) {
+  const value = obj[key];
+  if (value === void 0) throw new Error(key.toString() + " is missing from context");
+  return value;
 }
 function transformRXS(ast, edits) {
-  console.log("EDITS", edits);
+  let offset = 0;
+  edits.lastIndex = 0;
+  traverseAll(ast, { edits }, { visit(node, { edits: edits2 }) {
+    node.start = node.start - offset;
+    node.end = node.end - offset;
+    edits2.at(node.start, (edit) => {
+      if (edit.offsetReversed) return;
+      offset += edit.offset;
+      edit.offsetReversed = true;
+    });
+    this.visitChildren(node);
+  } });
+  edits.lastIndex = 0;
   return traverse(ast, { edits }, {
     Program(node, context) {
-      node.body.forEach((statement) => {
-        this.visit(statement, { ...context, program: node });
+      this.visitEach(node.body, {
+        ...context,
+        program: node
       });
     },
+    JSXAttribute(node, context) {
+      const { edits: edits2 } = context;
+      if (node.value === null) edits2.at(node.start, (edit) => {
+        if (edit.type !== "JSXAttributeShorthand") throw new InternalError$1(`Unexpected edit type ${edit.type}`);
+        const { identifier } = edit;
+        this.willMutate(() => {
+          node.name.name = identifier;
+          node.value = {
+            type: "JSXExpressionContainer",
+            start: node.start,
+            end: node.end,
+            expression: {
+              type: "Identifier",
+              start: node.start + 1,
+              end: node.end - 1,
+              name: identifier
+            }
+          };
+        });
+      });
+      this.visit(node.name);
+      if (node.value) this.visit(node.value);
+    },
     VariableDeclaration(node, context) {
-      if (node.kind == "let" && node.declarations.length === 1) {
-        const edit = edits.find(node.start);
-        if (edit && isGetVariableDeclaration(node, edit)) {
-          const { program } = context;
-          assertContext(program, "program");
+      const { edits: edits2 } = context;
+      let isGetKeywordDeclaration = false;
+      if (node.kind == "let") edits2.at(node.start, () => {
+        isGetKeywordDeclaration = true;
+      });
+      const declarator = node.declarations[0];
+      const { id, init } = declarator;
+      if (isGetKeywordDeclaration) {
+        const program = requireFrom(context, "program");
+        if (node.declarations.length !== 1) return;
+        if (!init) return;
+        if (id.type === "Identifier") {
           this.willMutate(() => {
             importFromRuescript("assert\xAA", program);
             node.kind = "const";
+            declarator.init = CovertCallExpression("assert\xAA", [init]);
           });
-          node.declarations.forEach((node2) => {
-            if (node2.id.type === "Identifier") {
-              const variable = node2.id.name;
-              this.scope.addAbsorbedGetter(variable);
-              this.willMutate(() => {
-                node2.init = wrapInCall("assert\xAA", node2.init ?? {
-                  type: "Literal",
-                  start: 0,
-                  end: 0,
-                  value: null,
-                  raw: "null"
-                });
-              });
-            } else {
-            }
+          const variable = undoAccessorVariablePostfix(id, this, edits2);
+          this.scope.addAbsorbedGetter(variable, node);
+        } else if (id.type === "ObjectPattern" || id.type === "ArrayPattern") {
+          declareAbsorbedGettersFromGetDestructuring(id, node, this, edits2, context);
+          this.willMutate(() => {
+            importFromRuescript("destructure\xAA", requireFrom(context, "program"));
+            node.kind = "const";
+            declarator.init = CovertCallExpression("destructure\xAA", [init, id.type === "ObjectPattern" ? ObjectDestructuringMapFromGetKeyword(id) : ArrayDestructuringMapFromGetKeyword(id)]);
           });
-        } else {
-          console.log("FAILED", node, edit);
-          this.visitEach(node.declarations);
-        }
-      } else {
-        this.visitEach(node.declarations);
+        } else throw new InternalError$1("uncovered case");
+      } else if (init && isAccessorPostfixDestructuring(declarator)) {
+        if (node.declarations.length !== 1) return;
+        if (id.type !== "ObjectPattern" && id.type !== "ArrayPattern") return;
+        this.willMutate(() => {
+          importFromRuescript("destructure\xAA", requireFrom(context, "program"));
+          const transformName = (name) => name.endsWith("\xAA") ? name.slice(0, -1) : name;
+          const deriveValue = (name) => name.endsWith("\xAA") ? CovertNumber(1) : CovertNumber(0);
+          declarator.init = CovertCallExpression("destructure\xAA", [init, id.type === "ObjectPattern" ? ObjectDestructuringMapFromGetKeyword(id, transformName, deriveValue) : ArrayDestructuringMapFromGetKeyword(id, transformName, deriveValue)]);
+        });
+        declareAbsorbedGettersFromAccessorPostfix(id, node, this, edits2, context);
       }
+      this.visitEach(node.declarations);
     },
-    /**
-     * Accessor Property Colon Notation
-     * source: { get variable: expression }
-     * prepro: { gª, variable: expression }
-     * final: absorbsª({ variable: absorbª(expression) })
-     */
+    VariableDeclarator(node, context) {
+      this.visit(node.id);
+      if (node.init) this.visit(node.init);
+    },
     ObjectExpression(node, context) {
       const properties = [];
       const edits2 = [];
@@ -29475,11 +29486,8 @@ function transformRXS(ast, edits) {
       node.properties.forEach((node2) => {
         if (node2.type === "Property" && node2.key.type === "Identifier" && node2.key.name === "g\xAA" && node2.shorthand === true) {
           edit = context.edits.find(node2.start);
-          if (edit) {
-            return;
-          } else {
-            properties.push(node2);
-          }
+          if (edit?.type === "GetPropertyColonNotation") return;
+          else properties.push(node2);
         } else {
           if (edit) {
             edits2[properties.length] = edit;
@@ -29488,43 +29496,30 @@ function transformRXS(ast, edits) {
           properties.push(node2);
         }
         if (node2.type === "Property" && !node2.shorthand) {
+          this.visit(node2.key);
           this.visit(node2.value);
-        } else {
-          this.visit(node2);
-        }
+        } else this.visit(node2);
       });
       if (edit !== void 0) {
-        const { program } = context;
-        assertContext(program, "program");
+        const program = requireFrom(context, "program");
         this.willMutate(() => {
           importFromRuescript("assert\xAA", program);
           importFromRuescript("absorbs\xAA", program);
           importFromRuescript("absorb\xAA", program);
           properties.forEach((node2, index) => {
-            if (edits2[index] && node2.type === "Property") {
-              node2.value = wrapInCall("absorb\xAA", wrapInCall("assert\xAA", node2.value));
-            }
+            if (edits2[index] && node2.type === "Property") node2.value = CovertCallExpression("absorb\xAA", [CovertCallExpression("assert\xAA", [node2.value])]);
           });
           node.properties = properties;
         });
-        this.willReplace(node, wrapInCall("absorbs\xAA", node));
+        this.willReplace(node, CovertCallExpression("absorbs\xAA", [node]));
       }
     },
-    // VariableDeclarator(node, context) {
-    //    this.visit(node.id)
-    //    // if (node.id.type === 'Identifier') {
-    //    //    this.scope.addVariable(node.id.name)
-    //    // }
-    // },
-    // TODO: scoping
     BlockStatement(node, context) {
       if (context.scoped) {
         this.enterScope();
         this.visitEach(node.body);
         this.exitScope();
-      } else {
-        this.visitEach(node.body);
-      }
+      } else this.visitEach(node.body);
     },
     FunctionDeclaration(node, context) {
       scopeFunction(this, node, context);
@@ -29533,29 +29528,59 @@ function transformRXS(ast, edits) {
       scopeFunction(this, node, context);
     },
     ArrowFunctionExpression(node, context) {
+      const { edits: edits2 } = context;
+      if (hasAwait(node.body)) node.async = true;
+      const firstParam = node.params[0];
+      if (firstParam?.type === "Identifier" && firstParam.name === "\xAA") edits2.at(node.body.start, () => {
+        this.willMutate(() => {
+          node.params = [];
+        });
+      });
       scopeFunction(this, node, context);
     },
-    TSIndexSignature() {
+    MemberExpression(node, context) {
+      const { edits: edits2 } = context;
+      const { object, property } = node;
+      this.visit(object);
+      this.visit(property);
+      if (!node.computed && property.type === "Identifier") {
+        if (property.name.endsWith("\xAA")) edits2.at(node.end, () => {
+          const program = requireFrom(context, "program");
+          this.willMutate(() => {
+            importFromRuescript("\xAAof", program);
+            property.name = property.name.slice(0, -1);
+          });
+          this.willReplace(node.object, CovertCallExpression("\xAAof", [node.object]));
+        });
+      }
     },
-    LabeledStatement(node) {
-      this.visit(node);
-    },
-    Identifier(leaf, { edits: edits2 }) {
-      if (leaf.name && this.scope.getAbsorbedGetterDeclaration(leaf.name)) {
-        if (leaf.name.endsWith(ACCESSOR_POSTFIX)) {
+    Identifier(leaf, context) {
+      const { edits: edits2 } = context;
+      if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === "LabeledStatement" || leaf.parent?.type === "TSIndexSignature") return;
+      if (!leaf.name || leaf.name === "this") return;
+      if (this.scope.getAbsorbedGetterDeclaration(leaf.name))
+        if (leaf.name.endsWith("\xAA")) edits2.at(leaf.end, () => {
           this.willMutate(() => {
             leaf.name = leaf.name.slice(0, -1);
           });
-        } else {
-          this.willReplace(leaf, GetterCall(leaf));
-        }
+        });
+        else this.willReplace(leaf, GetterCall(leaf));
+      else if (leaf.name.endsWith("\xAA")) {
+        const program = requireFrom(context, "program");
+        edits2.at(leaf.end, () => {
+          this.willMutate(() => {
+            importFromRuescript("to\xAA", program);
+            leaf.name = leaf.name.slice(0, -1);
+          });
+          this.willReplace(leaf, CovertCallExpression("to\xAA", [leaf]));
+        });
       }
     },
     AssignmentExpression(node, context) {
       const left = node.left;
       switch (left.type) {
         case "Identifier":
-          transformAccessorVariableWrite(this, node, "left", left, context);
+          queueAccessorVariableWrite(this, node, "left", left, context);
           break;
         case "ArrayPattern":
           break;
@@ -29574,13 +29599,14 @@ function transformRXS(ast, edits) {
         default:
           break;
       }
+      this.visit(node.left);
       this.visit(node.right);
     },
     UpdateExpression(node, context) {
       const arg = node.argument;
       switch (arg.type) {
         case "Identifier":
-          transformAccessorVariableWrite(this, node, "argument", arg, context);
+          queueAccessorVariableWrite(this, node, "argument", arg, context);
           break;
         case "MemberExpression":
           break;
@@ -29595,26 +29621,174 @@ function transformRXS(ast, edits) {
         default:
           break;
       }
+      this.visit(arg);
+    },
+    CallExpression(node, context) {
+      const { edits: edits2 } = context;
+      this.visit(node.callee);
+      this.visitEach(node.arguments);
+      if (node.callee.type === "TSNonNullExpression") {
+        const nonNullExpression = node.callee;
+        edits2.at(nonNullExpression.end, () => {
+          const expression = nonNullExpression.expression;
+          this.willReplace(node, {
+            type: "CallExpression",
+            start: node.start,
+            end: node.end,
+            optional: false,
+            callee: {
+              type: "ParenthesizedExpression",
+              start: 0,
+              end: 0,
+              expression: DerivationArrowFunctionExpression(expression)
+            },
+            arguments: []
+          });
+        });
+      }
+    },
+    TSNonNullExpression(node, context) {
+      const { edits: edits2 } = context;
+      this.visit(node.expression);
+      edits2.at(node.end, (edit) => {
+        const expression = node.expression;
+        switch (edit.type) {
+          case "AccessorExpressionPostfix":
+            if (expression.type === "CallExpression") {
+              const program = requireFrom(context, "program");
+              this.willMutate(() => {
+                importFromRuescript("to\xAA", program);
+              });
+              this.willReplace(node, CovertCallExpression("to\xAA", [expression]));
+            } else if (expression.type === "ParenthesizedExpression" || expression.type === "SequenceExpression") this.willReplace(node, DerivationArrowFunctionExpression(expression));
+            break;
+          case "OptionalAccessorPostfix":
+            if (expression.type === "TSNonNullExpression") {
+              const exp = expression.expression;
+              if (exp.type === "Identifier" || exp.type === "CallExpression") {
+                const program = requireFrom(context, "program");
+                this.willMutate(() => {
+                  importFromRuescript("to\xAA", program);
+                });
+                this.willReplace(node, CovertCallExpression("to\xAA", [exp, CovertString("?")]));
+              } else if (exp.type === "MemberExpression") {
+                const program = requireFrom(context, "program");
+                this.willMutate(() => {
+                  importFromRuescript("\xAAof", program);
+                });
+                this.willReplace(node, {
+                  type: "MemberExpression",
+                  start: node.start,
+                  end: node.end,
+                  object: CovertCallExpression("\xAAof", [exp.object, CovertString("?")]),
+                  property: exp.property,
+                  computed: exp.computed,
+                  optional: false
+                });
+              }
+            }
+            break;
+          case "NonNullAccessorPostfix":
+            if (expression.type === "TSNonNullExpression") {
+              const exp = expression.expression;
+              if (exp.type === "Identifier" || exp.type === "CallExpression") {
+                const program = requireFrom(context, "program");
+                this.willMutate(() => {
+                  importFromRuescript("to\xAA", program);
+                });
+                this.willReplace(node, CovertCallExpression("to\xAA", [expression]));
+              } else if (exp.type === "MemberExpression") {
+                const program = requireFrom(context, "program");
+                this.willMutate(() => {
+                  importFromRuescript("\xAAof", program);
+                });
+                this.willReplace(node, {
+                  type: "MemberExpression",
+                  start: node.start,
+                  end: node.end,
+                  object: CovertCallExpression("\xAAof", [exp.object, CovertString("!")]),
+                  property: exp.property,
+                  computed: exp.computed,
+                  optional: false
+                });
+              }
+            }
+            break;
+          case "BracketAccessorPostfix":
+            if (expression.type === "MemberExpression") {
+              const program = requireFrom(context, "program");
+              this.willMutate(() => {
+                importFromRuescript("\xAAof", program);
+              });
+              this.willReplace(node, {
+                type: "MemberExpression",
+                start: node.start,
+                end: node.end,
+                object: CovertCallExpression("\xAAof", [expression.object]),
+                property: expression.property,
+                computed: true,
+                optional: false
+              });
+            }
+            break;
+          default:
+            break;
+        }
+      });
     }
   });
+}
+function hasAwait(node) {
+  let has = false;
+  traverse(node, {}, { AwaitExpression() {
+    has = true;
+  } });
+  return has;
 }
 function scopeFunction(cursor, node, context) {
   const body = node.body;
   if (body) {
     cursor.enterScope();
     node.params.forEach((param) => {
-      if (param.type === "Identifier") {
-        const edit = context.edits.find(param.start);
-      } else {
+      const identifier = findIdentifier(param);
+      if (identifier) {
+        const parameter = identifier.name;
+        if (identifier.name.endsWith("\xAA")) context.edits.at(identifier.end, () => {
+          const program = requireFrom(context, "program");
+          const variable = parameter.slice(0, -1);
+          cursor.scope.addAbsorbedGetter(variable, node);
+          cursor.willMutate(() => {
+            importFromRuescript("to\xAA", program);
+            if (body.type === "BlockStatement") body.body.unshift({
+              type: "ExpressionStatement",
+              start: 0,
+              end: 0,
+              expression: {
+                type: "AssignmentExpression",
+                start: 0,
+                end: 0,
+                left: CovertIdentifier(variable),
+                operator: "=",
+                right: CovertCallExpression("to\xAA", [CovertIdentifier(variable)])
+              }
+            });
+          });
+          cursor.willMutate(() => identifier.name = variable);
+          if (param.type === "AssignmentPattern") {
+            importFromRuescript("assert\xAA", program);
+            cursor.willMutate(() => {
+              param.right = CovertCallExpression("assert\xAA", [param.right]);
+            });
+          }
+        });
       }
     });
-    cursor.visit(body, { ...context, scoped: true });
+    cursor.visit(body, {
+      ...context,
+      scoped: true
+    });
     cursor.exitScope();
   }
-}
-var ACCESSOR_POSTFIX = "\xAA";
-function isGetVariableDeclaration(declaration, edit) {
-  return edit.type === "GetDeclaration" && edit.pos === declaration.start;
 }
 function GetterCall(node) {
   return {
@@ -29626,10 +29800,22 @@ function GetterCall(node) {
     optional: false
   };
 }
-function transformAccessorVariableWrite(cursor, node, key, left, context) {
+function DerivationArrowFunctionExpression(expression) {
+  return {
+    type: "ArrowFunctionExpression",
+    start: 0,
+    end: 0,
+    async: expression.type === "ParenthesizedExpression" && expression.expression.type === "AwaitExpression",
+    body: expression,
+    expression: true,
+    generator: false,
+    id: null,
+    params: []
+  };
+}
+function queueAccessorVariableWrite(cursor, node, key, left, context) {
   if (cursor.scope.getAbsorbedGetterDeclaration(left.name)) {
-    const { program } = context;
-    assertContext(program, "program");
+    const program = requireFrom(context, "program");
     cursor.willMutate(() => {
       importFromRuescript("assert\xB5", program);
       node[key] = {
@@ -29638,61 +29824,35 @@ function transformAccessorVariableWrite(cursor, node, key, left, context) {
         end: 0,
         computed: false,
         optional: false,
-        object: {
-          type: "CallExpression",
-          start: 0,
-          end: 0,
-          callee: {
-            type: "Identifier",
-            start: 0,
-            end: 0,
-            name: "assert\xB5"
-          },
-          arguments: [{
-            type: "Identifier",
-            start: left.start,
-            end: left.end,
-            name: left.name
-          }],
-          optional: false
-        },
-        property: {
+        object: CovertCallExpression("assert\xB5", [{
           type: "Identifier",
-          start: 0,
-          end: 0,
-          name: "value"
-        }
+          start: left.start,
+          end: left.end,
+          name: left.name
+        }]),
+        property: CovertIdentifier("value")
       };
     });
   }
 }
 function importFromRuescript(importName, program) {
   const existing = findRuescriptImport(program.body);
-  if (existing && hasImport(importName, existing)) {
-    return;
-  }
-  const declaration = existing ?? createRuescriptImportDeclaration();
-  const specifier = createImportSpecifier(importName);
+  if (existing && hasImport(importName, existing)) return;
+  const declaration = existing ?? CovertImportDeclaration(RUESCRIPT_IMPORT_SOURCE);
+  const specifier = CovertImportSpecifier(importName);
   declaration.specifiers.push(specifier);
   if (!existing) program.body.unshift(declaration);
 }
 function findRuescriptImport(body) {
-  for (const statement of body) {
-    if (statement.type === "ImportDeclaration" && statement.source.value === RUESCRIPT_IMPORT_SOURCE) {
-      return statement;
-    }
-  }
+  for (const statement of body) if (statement.type === "ImportDeclaration" && statement.source.value === RUESCRIPT_IMPORT_SOURCE) return statement;
 }
 function hasImport(name, declaration) {
   const specifiers = declaration.specifiers;
-  for (const specifier of specifiers) {
-    if (specifier.local.name === name)
-      return true;
-  }
+  for (const specifier of specifiers) if (specifier.local.name === name) return true;
   return false;
 }
 var RUESCRIPT_IMPORT_SOURCE = "@rue/ruescript";
-function createRuescriptImportDeclaration() {
+function CovertImportDeclaration(source) {
   return {
     type: "ImportDeclaration",
     start: 0,
@@ -29701,16 +29861,36 @@ function createRuescriptImportDeclaration() {
     importKind: "value",
     attributes: [],
     specifiers: [],
-    source: {
-      type: "Literal",
-      start: 0,
-      end: 0,
-      raw: `"${RUESCRIPT_IMPORT_SOURCE}"`,
-      value: RUESCRIPT_IMPORT_SOURCE
-    }
+    source: CovertString(source)
   };
 }
-function createImportSpecifier(name) {
+function CovertIdentifier(name) {
+  return {
+    type: "Identifier",
+    start: 0,
+    end: 0,
+    name
+  };
+}
+function CovertString(string) {
+  return {
+    type: "Literal",
+    start: 0,
+    end: 0,
+    raw: `"${string}"`,
+    value: string
+  };
+}
+function CovertNumber(num) {
+  return {
+    type: "Literal",
+    start: 0,
+    end: 0,
+    raw: `${num}`,
+    value: num
+  };
+}
+function CovertImportSpecifier(name) {
   return {
     type: "ImportSpecifier",
     start: 0,
@@ -29730,12 +29910,12 @@ function createImportSpecifier(name) {
     importKind: "value"
   };
 }
-function wrapInCall(name, node) {
+function CovertCallExpression(name, args) {
   return {
     type: "CallExpression",
     start: 0,
     end: 0,
-    arguments: [node],
+    arguments: args,
     callee: {
       type: "Identifier",
       start: 0,
@@ -29745,170 +29925,647 @@ function wrapInCall(name, node) {
     optional: false
   };
 }
-
-// ../../packages/ruescript/src/1-preprocess.ts
-function applyEdits(code, edits) {
-  if (edits.length === 0) {
-    return code;
+function isAssignee(node) {
+  const { parent } = node;
+  if (!parent) return false;
+  return parent.type === "VariableDeclarator" || parent.type === "UpdateExpression" || parent.type === "AssignmentExpression" && parent.left === node;
+}
+function isPropertyKey(node) {
+  const parent = node.parent;
+  if (!parent) return false;
+  return parent.type === "MemberExpression" && parent.property === node || parent.type === "ObjectExpression" && parent.properties.find((property) => property.type === "Property" && property.key === node);
+}
+function declareAbsorbedGettersFromAccessorPostfix(destructuring, declaration, cursor, edits, context) {
+  if (destructuring.type === "ObjectPattern") destructuring.properties.forEach((property) => {
+    if (property.type === "RestElement") {
+      console.error("rest element not currently supported for `get` keyword destructuring");
+      return;
+    }
+    const { key, value } = property;
+    if (key.type !== "Identifier") throw new InternalError$1("uncovered case");
+    cursor.skip(key);
+    const identifier = findIdentifier(value);
+    if (identifier && key.name.endsWith("\xAA")) {
+      const propertyKey = key.name.slice(0, -1);
+      cursor.willMutate(() => {
+        key.name = propertyKey;
+        value.name = propertyKey;
+      });
+      cursor.skip(identifier);
+      cursor.scope.addAbsorbedGetter(propertyKey, declaration);
+      if (value.type === "AssignmentPattern" && value.left.type === "Identifier") {
+        value.left.name = propertyKey;
+        const program = requireFrom(context, "program");
+        cursor.willMutate(() => {
+          importFromRuescript("assert\xAA", program);
+          value.right = CovertCallExpression("assert\xAA", [value.right]);
+        });
+      }
+    } else if (findObjectPattern(value) || findArrayPattern(value)) {
+      undoAccessorVariablePostfix(key, cursor, edits);
+      declareAbsorbedGettersFromAccessorPostfix(value, declaration, cursor, edits, context);
+    }
+  });
+  else destructuring.elements.forEach((element) => {
+    if (!element) return;
+    if (element.type === "RestElement") {
+      console.error("rest element not currently supported for `get` keyword destructuring");
+      return;
+    }
+    cursor.skip(element);
+    const identifier = findIdentifier(element);
+    if (identifier && identifier.name.endsWith("\xAA")) {
+      const propertyKey = identifier.name.slice(0, -1);
+      cursor.skip(identifier);
+      cursor.scope.addAbsorbedGetter(propertyKey, declaration);
+      if (element.type === "AssignmentPattern") {
+        const program = requireFrom(context, "program");
+        cursor.willMutate(() => {
+          importFromRuescript("assert\xAA", program);
+          element.right = CovertCallExpression("assert\xAA", [element.right]);
+        });
+      }
+    } else if (findObjectPattern(element) || findArrayPattern(element)) declareAbsorbedGettersFromGetDestructuring(element, declaration, cursor, edits, context);
+  });
+}
+function findIdentifier(node) {
+  return node.type === "Identifier" ? node : node.type === "AssignmentPattern" && node.left.type === "Identifier" ? node.left : void 0;
+}
+function findObjectPattern(node) {
+  return node.type === "ObjectPattern" ? node : node.type === "AssignmentPattern" && node.left.type === "ObjectPattern" ? node.left : void 0;
+}
+function findArrayPattern(node) {
+  return node.type === "ArrayPattern" ? node : node.type === "AssignmentPattern" && node.left.type === "ArrayPattern" ? node.left : void 0;
+}
+function declareAbsorbedGettersFromGetDestructuring(destructuring, declaration, cursor, edits, context) {
+  if (destructuring.type === "ObjectPattern") destructuring.properties.forEach((property) => {
+    if (property.type === "RestElement") {
+      console.error("rest element not currently supported for `get` keyword destructuring");
+      return;
+    }
+    const { key, value } = property;
+    if (key.type !== "Identifier") throw new InternalError$1("uncovered case");
+    cursor.skip(key);
+    const propertyKey = undoAccessorVariablePostfix(key, cursor, edits);
+    const identifier = findIdentifier(value);
+    if (identifier) {
+      cursor.skip(identifier);
+      undoAccessorVariablePostfix(identifier, cursor, edits);
+      cursor.scope.addAbsorbedGetter(propertyKey, declaration);
+      if (value.type === "AssignmentPattern") {
+        const program = requireFrom(context, "program");
+        cursor.willMutate(() => {
+          importFromRuescript("assert\xAA", program);
+          value.right = CovertCallExpression("assert\xAA", [value.right]);
+        });
+      }
+    } else if (findObjectPattern(value) || findArrayPattern(value)) declareAbsorbedGettersFromGetDestructuring(value, declaration, cursor, edits, context);
+  });
+  else destructuring.elements.forEach((element) => {
+    if (!element) return;
+    if (element.type === "RestElement") {
+      console.error("rest element not currently supported for `get` keyword destructuring");
+      return;
+    }
+    cursor.skip(element);
+    const identifier = findIdentifier(element);
+    if (identifier) {
+      const propertyKey = undoAccessorVariablePostfix(identifier, cursor, edits);
+      cursor.skip(identifier);
+      undoAccessorVariablePostfix(identifier, cursor, edits);
+      cursor.scope.addAbsorbedGetter(propertyKey, declaration);
+      if (element.type === "AssignmentPattern") {
+        const program = requireFrom(context, "program");
+        cursor.willMutate(() => {
+          importFromRuescript("assert\xAA", program);
+          element.right = CovertCallExpression("assert\xAA", [element.right]);
+        });
+      }
+    } else if (findObjectPattern(element) || findArrayPattern(element)) declareAbsorbedGettersFromGetDestructuring(element, declaration, cursor, edits, context);
+  });
+}
+function undoAccessorVariablePostfix(node, cursor, edits) {
+  let variable = node.name;
+  if (node.name.endsWith("\xAA")) edits.at(node.end, (edit) => {
+    variable = node.name.slice(0, -1) + "@";
+    cursor.willMutate(() => {
+      node.name = variable;
+    });
+  });
+  return variable;
+}
+function CovertObjectExpression(properties = []) {
+  return {
+    type: "ObjectExpression",
+    start: 0,
+    end: 0,
+    properties
+  };
+}
+function CovertArrayExpression(elements = []) {
+  return {
+    type: "ArrayExpression",
+    start: 0,
+    end: 0,
+    elements
+  };
+}
+function CovertObjectProperty(key, value, computed = false) {
+  return {
+    type: "Property",
+    start: 0,
+    end: 0,
+    computed,
+    key: CovertIdentifier(key),
+    kind: "init",
+    method: false,
+    shorthand: false,
+    value
+  };
+}
+function isAccessorPostfixDestructuring(declarator) {
+  if (declarator.id.type === "Identifier" || declarator.id.type === "AssignmentPattern") return false;
+  if (declarator.id.type === "ObjectPattern") return hasAccessorPostfixDestructuring(declarator.id.properties);
+  if (declarator.id.type === "ArrayPattern") return hasAccessorPostfixArrayDestructuring(declarator.id.elements);
+}
+function hasAccessorPostfixDestructuring(properties) {
+  for (const property of properties) {
+    if (property.type !== "Property") continue;
+    const { value } = property;
+    const identifier = findIdentifier(value);
+    if (identifier && identifier.name.endsWith("\xAA")) return true;
+    const objectPattern = findObjectPattern(value);
+    if (objectPattern) return hasAccessorPostfixDestructuring(objectPattern.properties);
+    const arrayPattern = findArrayPattern(value);
+    if (arrayPattern) return hasAccessorPostfixArrayDestructuring(arrayPattern.elements);
   }
-  let result = code;
+  return false;
+}
+function hasAccessorPostfixArrayDestructuring(elements) {
+  for (const element of elements) {
+    if (!element) continue;
+    if (element.type === "RestElement") continue;
+    const identifier = findIdentifier(element);
+    if (identifier && identifier.name.endsWith("\xAA")) return true;
+    const objectPattern = findObjectPattern(element);
+    if (objectPattern) return hasAccessorPostfixDestructuring(objectPattern.properties);
+    const arrayPattern = findArrayPattern(element);
+    if (arrayPattern) return hasAccessorPostfixArrayDestructuring(arrayPattern.elements);
+  }
+  return false;
+}
+function ObjectDestructuringMapFromGetKeyword(destructuring, transformName = (name) => name, deriveValue = () => CovertNumber(1)) {
+  const objectExpression = CovertObjectExpression();
+  const { properties } = destructuring;
+  properties.forEach((property, index) => {
+    if (property.type === "RestElement") throw new InternalError$1("uncovered case");
+    const { key, value } = property;
+    if (key.type !== "Identifier") throw new InternalError$1("uncovered case");
+    const identifier = findIdentifier(value);
+    let objectPattern;
+    let arrayPattern;
+    if (identifier) objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), deriveValue(key.name), property.computed);
+    else if (objectPattern = findObjectPattern(value)) objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), ObjectDestructuringMapFromGetKeyword(objectPattern, transformName, deriveValue), property.computed);
+    else if (arrayPattern = findArrayPattern(value)) objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), ArrayDestructuringMapFromGetKeyword(arrayPattern, transformName, deriveValue), property.computed);
+  });
+  return objectExpression;
+}
+function ArrayDestructuringMapFromGetKeyword(destructuring, transformName = (name) => name, deriveValue = () => CovertNumber(1)) {
+  const arrayExpression = CovertArrayExpression();
+  const { elements } = destructuring;
+  elements.forEach((element, index) => {
+    if (!element) return;
+    if (element.type === "RestElement") throw new InternalError$1("uncovered case");
+    const identifier = findIdentifier(element);
+    let objectPattern;
+    let arrayPattern;
+    if (identifier) arrayExpression.elements[index] = deriveValue(identifier.name);
+    else if (objectPattern = findObjectPattern(element)) arrayExpression.elements[index] = ObjectDestructuringMapFromGetKeyword(objectPattern, transformName, deriveValue);
+    else if (arrayPattern = findArrayPattern(element)) arrayExpression.elements[index] = ArrayDestructuringMapFromGetKeyword(arrayPattern, transformName, deriveValue);
+  });
+  return arrayExpression;
+}
+var InternalError$1 = class extends Error {
+};
+var RegexAllowedAfterWords = /* @__PURE__ */ new Set([
+  "case",
+  "delete",
+  "do",
+  "else",
+  "in",
+  "instanceof",
+  "new",
+  "of",
+  "return",
+  "throw",
+  "typeof",
+  "void",
+  "yield"
+]);
+var RegexAllowedAfterPunct = /* @__PURE__ */ new Set([
+  "(",
+  "[",
+  "{",
+  ",",
+  ";",
+  ":",
+  "?",
+  "=",
+  "!",
+  "~",
+  "+",
+  "-",
+  "*",
+  "%",
+  "&",
+  "|",
+  "^",
+  "<",
+  ">"
+]);
+function isIdentifierStart(char) {
+  return /[A-Za-z_$]/.test(char);
+}
+function isIdentifierPart(char) {
+  return /[A-Za-z0-9_$]/.test(char);
+}
+function startsRegexLiteral(prevToken) {
+  if (!prevToken) return true;
+  if (prevToken.startsWith("word:")) {
+    const word = prevToken.slice(5);
+    return RegexAllowedAfterWords.has(word);
+  }
+  return RegexAllowedAfterPunct.has(prevToken);
+}
+function searchOpeningBrace(code, closingIndex) {
+  if (code[closingIndex] !== "}") return void 0;
+  const stack = [];
+  let prevToken;
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inTemplateString = false;
+  let inLineComment = false;
+  let inBlockComment = false;
+  let inRegex = false;
+  let inRegexCharClass = false;
+  let escapeNext = false;
+  for (let i = 0; i <= closingIndex; i++) {
+    const char = code[i];
+    const next = code[i + 1];
+    if (inLineComment) {
+      if (char === "\n" || char === "\r") inLineComment = false;
+      continue;
+    }
+    if (inBlockComment) {
+      if (char === "*" && next === "/") {
+        inBlockComment = false;
+        i += 1;
+      }
+      continue;
+    }
+    if (inSingleQuote || inDoubleQuote) {
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+      if (char === "\\") {
+        escapeNext = true;
+        continue;
+      }
+      if (inSingleQuote && char === "'" || inDoubleQuote && char === '"') {
+        inSingleQuote = false;
+        inDoubleQuote = false;
+        prevToken = "literal";
+      }
+      continue;
+    }
+    if (inTemplateString) {
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+      if (char === "\\") {
+        escapeNext = true;
+        continue;
+      }
+      if (char === "`") {
+        inTemplateString = false;
+        prevToken = "literal";
+        continue;
+      }
+      if (char === "$" && next === "{") {
+        stack.push(i + 1);
+        inTemplateString = false;
+        prevToken = "{";
+        i += 1;
+      }
+      continue;
+    }
+    if (inRegex) {
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+      if (char === "\\") {
+        escapeNext = true;
+        continue;
+      }
+      if (inRegexCharClass) {
+        if (char === "]") inRegexCharClass = false;
+        continue;
+      }
+      if (char === "[") {
+        inRegexCharClass = true;
+        continue;
+      }
+      if (char === "/") {
+        inRegex = false;
+        while (isIdentifierPart(code[i + 1] ?? "")) i += 1;
+        prevToken = "literal";
+      }
+      continue;
+    }
+    if (char === "/" && next === "/") {
+      inLineComment = true;
+      i += 1;
+      continue;
+    }
+    if (char === "/" && next === "*") {
+      inBlockComment = true;
+      i += 1;
+      continue;
+    }
+    if (char === "'") {
+      inSingleQuote = true;
+      escapeNext = false;
+      continue;
+    }
+    if (char === '"') {
+      inDoubleQuote = true;
+      escapeNext = false;
+      continue;
+    }
+    if (char === "`") {
+      inTemplateString = true;
+      escapeNext = false;
+      continue;
+    }
+    if (char === "/") {
+      if (startsRegexLiteral(prevToken)) {
+        inRegex = true;
+        inRegexCharClass = false;
+        escapeNext = false;
+        continue;
+      }
+      prevToken = "/";
+      continue;
+    }
+    if (isIdentifierStart(char)) {
+      let end = i + 1;
+      while (isIdentifierPart(code[end] ?? "")) end += 1;
+      prevToken = `word:${code.slice(i, end)}`;
+      i = end - 1;
+      continue;
+    }
+    if (char === "{") {
+      stack.push(i);
+      prevToken = char;
+      continue;
+    }
+    if (char === "}") {
+      const match = stack.pop();
+      if (i === closingIndex) return match;
+      prevToken = char;
+      if (code[i + 1] === "`") inTemplateString = true;
+      continue;
+    }
+    if (!/\s/.test(char)) prevToken = char;
+  }
+}
+var AccessorEditType = {
+  "?": "OptionalAccessorPostfix",
+  "!": "NonNullAccessorPostfix",
+  "]": "BracketAccessorPostfix",
+  ")": "AccessorExpressionPostfix"
+};
+function applyOffsets(edits) {
+  let offset = 0;
   for (const edit of edits) {
-    result = result.slice(0, edit.pos) + edit.transformed + result.slice(edit.pos + edit.original.length);
+    edit.index = edit.index + offset;
+    offset += edit.offset;
   }
+}
+function applyEdits(code, edits) {
+  if (edits.length === 0) return code;
+  let result = code;
+  for (const edit of edits) result = result.slice(0, edit.index) + edit.transformed + result.slice(edit.index + edit.original.length);
   return result;
 }
 var Edits = class {
+  /**
+  * The last visited index
+  */
+  lastIndex = 0;
   constructor(edits) {
     this.edits = edits;
   }
-  edits;
-  lastIndex = 0;
-  find(pos) {
-    const limit = this.edits.length;
-    for (let i = this.lastIndex; i < limit; i++) {
-      const edit = this.edits[i];
-      if (pos >= edit.pos && pos < edit.pos + edit.transformed.length) {
+  find(anchor) {
+    const { edits, lastIndex } = this;
+    const limit = edits.length;
+    for (let i = lastIndex; i < limit; i++) {
+      const edit = edits[i];
+      if (anchor === edit.anchor) {
         this.lastIndex = i;
         return edit;
       }
     }
   }
+  at(anchor, task) {
+    const edit = this.find(anchor);
+    if (edit) task(edit);
+    return edit;
+  }
 };
 var RXSPreprocessor = class {
-  constructor(source) {
-    this.source = source;
-  }
-  source;
   _edits = [];
   edits;
   code = "";
+  inserts = 0;
+  offset = 0;
+  constructor(source) {
+    this.source = source;
+  }
   transform() {
     this.rewriteGetVariableDeclarations();
+    this.rewriteGetDestructuring();
     this.rewriteGetPropertyColonNotation();
-    this.rewriteAccessorOperator();
-    const edits = this._edits.toSorted((a, b) => a.pos - b.pos);
+    this.rewriteAccessorVariablePostfix();
+    this.rewriteExpressionPostfix();
+    this.rewriteBlockDerivationExpression();
+    this.rewriteJSXAttributeShorthand();
+    const edits = this._edits.toSorted((a, b) => a.index - b.index);
+    applyOffsets(edits);
     this.code = applyEdits(this.source, edits);
     this.edits = new Edits(edits);
     return this;
   }
   /**
-   * - Replaces `get` variable declaration pattern with intermediary valid js.
-   * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
-   * 
-   * Example:
-   * `get count = ref(0)` -->
-   * `let count = ref(0)`
-   */
+  * - Replaces `get` variable declaration pattern with intermediary valid js.
+  * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
+  * 
+  * Example:
+  * `get count =` -->
+  * `let count =`
+  */
   rewriteGetVariableDeclarations() {
-    const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/g;
-    const matches = this.source.matchAll(pattern);
+    const matches = this.source.matchAll(/\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/gu);
     for (const match of matches) {
       const [original, before, identifier, after] = match;
+      const index = match.index;
       const transformed = "let" + before + identifier + after;
       this._edits.push({
         type: "GetDeclaration",
-        pos: match.index,
+        index,
+        anchor: index,
         original,
         transformed,
-        valid: void 0,
-        identifier
-      });
-    }
-  }
-  rewriteAccessorOperator() {
-    const pattern = /([^$\w])([$A-Za-z_][\w$]*)@([^$\w])/g;
-    const matches = this.source.matchAll(pattern);
-    for (const match of matches) {
-      const [original, before, identifier, after] = match;
-      const transformed = before + identifier + ACCESSOR_POSTFIX + after;
-      this._edits.push({
-        type: "AccessorPostfixOperator",
-        pos: match.index,
-        original,
-        transformed,
-        valid: void 0,
-        identifier
+        identifier,
+        offset: 0
       });
     }
   }
   /**
-   * - Replaces `get` property colon notation pattern with intermediary valid js.
-   * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string or not in object literal)
-   * 
-   * Example:
-   * `get count: ref(0)` -->
-   * `gª, count: ref(0)`
-   */
+  * - Replaces `get` variable declaration pattern with intermediary valid js.
+  * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string)
+  * 
+  * Example:
+  * `get { count } =` -->
+  * `let { count } =`
+  */
+  rewriteGetDestructuring() {
+    const matches = this.source.matchAll(/\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\{\[])/gu);
+    for (const match of matches) {
+      const [original, gap, bracket] = match;
+      const index = match.index;
+      const transformed = "let" + gap + bracket;
+      this._edits.push({
+        type: "GetDestructuring",
+        index,
+        anchor: index,
+        original,
+        transformed,
+        offset: 0
+      });
+    }
+  }
+  /**
+  * - Replaces `get` property colon notation pattern with intermediary valid js.
+  * - Stores edits in edits array for reversion if needed (e.g. if pattern is in string or not in object literal)
+  * 
+  * Example:
+  * `get count:` -->
+  * `gª, count:`
+  */
   rewriteGetPropertyColonNotation() {
-    const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([a-zA-Z_$][a-zA-Z0-9_$]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/g;
-    const matches = this.source.matchAll(pattern);
+    const matches = this.source.matchAll(/\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/gu);
     for (const match of matches) {
       const [original, before, identifier, after] = match;
       const index = match.index;
       const transformed = "g\xAA," + before + identifier + after;
       this._edits.push({
         type: "GetPropertyColonNotation",
-        pos: index,
+        index,
+        anchor: index,
         original,
         transformed,
-        valid: void 0,
-        identifier
+        identifier,
+        offset: 0
+      });
+    }
+  }
+  rewriteAccessorVariablePostfix() {
+    const matches = this.source.matchAll(/([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu);
+    for (const match of matches) {
+      const [original, identifier] = match;
+      const index = match.index;
+      this._edits.push({
+        type: "AccessorVariablePostfix",
+        index,
+        anchor: index + 2,
+        original: original.slice(0, -1),
+        transformed: identifier + "\xAA",
+        identifier,
+        offset: 0
+      });
+    }
+  }
+  rewriteExpressionPostfix() {
+    const matches = this.source.matchAll(/([)?!\]])@[\s/()]/g);
+    for (const match of matches) {
+      const [original, before] = match;
+      const index = match.index;
+      this._edits.push({
+        type: AccessorEditType[before],
+        index,
+        anchor: index + 2,
+        original: original.slice(0, -1),
+        transformed: (before === "?" ? "!" : before) + "!",
+        offset: 0,
+        offsetReversed: false
       });
     }
   }
   /**
-   * Optional Postfix
-   * source: count?;
-   * prepro: countØ;
-   * final: count?.()
+  * @example
+  * source:     { const c = 0 ; return a + b }@   
+  * prepro: (ª=>{ const c = 0 ; return a + b })
   */
-  // rewriteOptionalPostfix() {
-  //    const pattern = /([$A-Za-z_][\w$]*)\?;/g;
-  //    const matches = this.source.matchAll(pattern)
-  //    for (const match of matches) {
-  //       const [original, identifier] = match
-  //       const index = match.index
-  //       const transformed = identifier + OPTIONAL_POSTFIX + ';'
-  //       this._edits.push({
-  //          type: 'OptionalPostfix',
-  //          pos: index,
-  //          original,
-  //          transformed,
-  //          valid: undefined,
-  //          identifier
-  //       })
-  //    }
-  // }
-  /**
-   * Optional Postfix (parenthesized)
-   * source: (count?)
-   * prepro: (countØ);
-   * final: (count?.())
-  */
-  // rewriteParenthesizedOptionalPostfix() {
-  //    const pattern = /\(([$A-Za-z_][\w$]*)\?\)/g;
-  //    const matches = this.source.matchAll(pattern)
-  //    console.log('match!', matches)
-  //    for (const match of matches) {
-  //       const [original, identifier] = match
-  //       const index = match.index
-  //       const transformed = '(' + identifier + OPTIONAL_POSTFIX + ')'
-  //       this._edits.push({
-  //          type: 'OptionalPostfix',
-  //          pos: index,
-  //          original,
-  //          transformed,
-  //          valid: undefined,
-  //          identifier
-  //       })
-  //    }
-  // }
+  rewriteBlockDerivationExpression() {
+    const matches = this.source.matchAll(/\}@[\s/;(),}\]]?/g);
+    for (const match of matches) {
+      const index = match.index;
+      const openingBracket = searchOpeningBrace(this.source, index);
+      if (openingBracket === void 0) continue;
+      this._edits.push({
+        type: "BlockDerivationExpressionOpen",
+        index: openingBracket,
+        anchor: openingBracket,
+        original: "{",
+        transformed: `(\xAA=>{`,
+        offset: 4,
+        offsetReversed: false
+      }, {
+        type: "BlockDerivationExpressionClose",
+        index,
+        anchor: index + 1,
+        original: "}@",
+        transformed: `})`,
+        offset: 0,
+        offsetReversed: false
+      });
+    }
+  }
+  rewriteJSXAttributeShorthand() {
+    const matches = this.source.matchAll(/[\s]\{([\p{ID_Continue}$\u200C\u200D]*)\}/gu);
+    for (const match of matches) {
+      const [original, identifier] = match;
+      const index = match.index + 1;
+      this._edits.push({
+        type: "JSXAttributeShorthand",
+        index,
+        anchor: index,
+        original: original.slice(1),
+        transformed: `\xDF${identifier}\xDF`,
+        identifier,
+        offset: 0,
+        offsetReversed: false
+      });
+    }
+  }
 };
 function preprocessRXS(source) {
   return new RXSPreprocessor(source).transform();
 }
-
-// ../../packages/ruescript/src/2-parse.ts
 function parseRXS(file, code) {
   return parseSync2(file, code, {
     astType: "ts",
@@ -29917,48 +30574,31 @@ function parseRXS(file, code) {
     sourceType: "module"
   });
 }
-
-// ../../packages/ruescript/src/capabilities.ts
 var BASE_CAPABILITIES = {
   verification: true,
   semantic: true,
   navigation: true,
   completion: true
 };
-
-// ../../packages/ruescript/src/4-generate.ts
 var TAB = "	";
-var InternalError2 = class extends Error {
+var InternalError = class extends Error {
 };
 function printTSX(program) {
   const file = new CodePrinter({
-    /**
-     * const answer = 42
-     */
     Program(node, cursor) {
       cursor.visitEach(node.body);
     },
-    /**
-     * #!/usr/bin/env node
-     */
     Hashbang(node, cursor) {
       cursor.write("#!");
       const value = node.value;
       cursor.write(value);
       cursor.write("\n");
     },
-    // #region: imports & exports
-    /**
-     * with { type: "json" }
-     */
     ImportAttribute(node, cursor) {
       cursor.visit(node.key);
       cursor.write(": ");
       cursor.visit(node.value);
     },
-    /**
-     * import { x } from "pkg"
-     */
     ImportDeclaration(node, cursor) {
       cursor.indentScope();
       cursor.write("import ");
@@ -29986,9 +30626,7 @@ function printTSX(program) {
             if (i > 0) cursor.write(", ");
             cursor.write("{ ");
             openedNamedGroup = true;
-          } else if (prev?.type === "ImportSpecifier") {
-            cursor.write(", ");
-          }
+          } else if (prev?.type === "ImportSpecifier") cursor.write(", ");
           cursor.visit(specifier);
           const next = specifiers[i + 1];
           if (!next || next.type !== "ImportSpecifier") {
@@ -30012,15 +30650,9 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * ModuleName
-     */
     ImportDefaultSpecifier(node, cursor) {
       cursor.visit(node.local);
     },
-    /**
-     * import("pkg")
-     */
     ImportExpression(node, cursor) {
       cursor.write("import(");
       cursor.visit(node.source);
@@ -30030,16 +30662,10 @@ function printTSX(program) {
       }
       cursor.write(")");
     },
-    /**
-     * * as ns
-     */
     ImportNamespaceSpecifier(node, cursor) {
       cursor.write("* as ");
       cursor.visit(node.local);
     },
-    /**
-     * foo as bar
-     */
     ImportSpecifier(node, cursor) {
       if (node.importKind === "type") cursor.write("type ");
       cursor.visit(node.imported);
@@ -30051,9 +30677,6 @@ function printTSX(program) {
         cursor.visit(local);
       }
     },
-    /**
-     * export * from "./mod"
-     */
     ExportAllDeclaration(node, cursor) {
       cursor.indentScope();
       cursor.write("export *");
@@ -30075,35 +30698,22 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * export default value
-     */
     ExportDefaultDeclaration(node, cursor) {
       cursor.indentScope();
       cursor.write("export default ");
       cursor.visit(node.declaration);
-      if (node.declaration.type !== "FunctionDeclaration" && node.declaration.type !== "ClassDeclaration") {
-        cursor.write(";");
-      }
+      if (node.declaration.type !== "FunctionDeclaration" && node.declaration.type !== "ClassDeclaration") cursor.write(";");
       cursor.write("\n");
     },
-    /**
-     * export { foo, bar as baz }
-     */
     ExportNamedDeclaration(node, cursor) {
       cursor.indentScope();
       cursor.write("export ");
       if (node.exportKind === "type") cursor.write("type ");
       if (node.declaration) {
         cursor.visit(node.declaration);
-        if (cursor.code.endsWith("\n")) {
-          return;
-        }
-        if (cursor.code.endsWith(";")) {
-          cursor.write("\n");
-        } else {
-          cursor.write(";\n");
-        }
+        if (cursor.code.endsWith("\n")) return;
+        if (cursor.code.endsWith(";")) cursor.write("\n");
+        else cursor.write(";\n");
         return;
       }
       cursor.write("{ ");
@@ -30127,9 +30737,6 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * bar as baz
-     */
     ExportSpecifier(node, cursor) {
       if (node.exportKind === "type") cursor.write("type ");
       const same = node.local.type === "Identifier" && node.exported.type === "Identifier" && node.local.name === node.exported.name;
@@ -30139,15 +30746,13 @@ function printTSX(program) {
         cursor.visit(node.exported);
       }
     },
-    // #endregion
-    // #region: statements
-    /**
-     * { body }
-     */
     BlockStatement(node, cursor) {
       if (cursor.code.at(-1) === "\n") cursor.indentScope();
       cursor.write("{\n", {
-        span: { start: node.start, end: node.start + 2 },
+        span: {
+          start: node.start,
+          end: node.start + 2
+        },
         capabilities: { structure: true }
       });
       cursor.enterScope();
@@ -30155,13 +30760,13 @@ function printTSX(program) {
       cursor.exitScope();
       cursor.indentScope();
       cursor.write("}\n", {
-        span: { start: node.end - 2, end: node.end - 1 },
+        span: {
+          start: node.end - 2,
+          end: node.end - 1
+        },
         capabilities: { structure: true }
       });
     },
-    /**
-     * if (ok) { run() } else { stop() }
-     */
     IfStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("if (");
@@ -30177,14 +30782,11 @@ function printTSX(program) {
         cursor.exitScope();
       }
       if (node.alternate) {
-        if (node.consequent.type === "BlockStatement") {
-          if (cursor.code.endsWith("\n")) {
-            cursor.indentScope();
-            cursor.write("else");
-          } else {
-            cursor.write(" else");
-          }
-        } else {
+        if (node.consequent.type === "BlockStatement") if (cursor.code.endsWith("\n")) {
+          cursor.indentScope();
+          cursor.write("else");
+        } else cursor.write(" else");
+        else {
           cursor.indentScope();
           cursor.write("else");
         }
@@ -30199,9 +30801,6 @@ function printTSX(program) {
         }
       }
     },
-    /**
-     * switch (x) { case 1: break }
-     */
     SwitchStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("switch (");
@@ -30213,48 +30812,32 @@ function printTSX(program) {
       cursor.indentScope();
       cursor.write("}\n");
     },
-    /**
-     * case 1: break
-     */
     SwitchCase(node, cursor) {
       cursor.indentScope();
       if (node.test) {
         cursor.write("case ");
         cursor.visit(node.test);
         cursor.write(":\n");
-      } else {
-        cursor.write("default:\n");
-      }
+      } else cursor.write("default:\n");
       cursor.enterScope();
       const consequents = node.consequent ?? [];
       for (let i = 0; i < consequents.length; i++) {
         cursor.visit(consequents[i]);
-        if (!cursor.code.endsWith("\n")) {
-          cursor.write("\n");
-        }
+        if (!cursor.code.endsWith("\n")) cursor.write("\n");
       }
       cursor.exitScope();
     },
-    /**
-     * expr;
-     */
     ExpressionStatement(node, cursor) {
       cursor.indentScope();
       cursor.visit(node.expression);
       cursor.write(";\n");
     },
-    /**
-     * throw new Error("boom")
-     */
     ThrowStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("throw ");
       cursor.visit(node.argument);
       cursor.write(";\n");
     },
-    /**
-     * try { run() } catch (e) {}
-     */
     TryStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("try ");
@@ -30268,9 +30851,6 @@ function printTSX(program) {
         cursor.visit(node.finalizer);
       }
     },
-    /**
-     * catch (err) { handle(err) }
-     */
     CatchClause(node, cursor) {
       cursor.write("catch");
       if (node.param) {
@@ -30281,9 +30861,6 @@ function printTSX(program) {
       cursor.write(" ");
       cursor.visit(node.body);
     },
-    /**
-     * with (obj) { x = 1 }
-     */
     WithStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("with (");
@@ -30299,26 +30876,14 @@ function printTSX(program) {
         cursor.exitScope();
       }
     },
-    /**
-     * debugger;
-     */
     DebuggerStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("debugger;\n");
     },
-    /**
-     * ;
-     */
     EmptyStatement(node, cursor) {
       cursor.indentScope();
       cursor.write(";\n");
     },
-    // #endregion
-    // #region: declarations
-    /**
-     * function id<T>(a: A, b: B = 0): Return { body }
-     * declare function id<T>(a: A, b: B): Return
-     */
     FunctionDeclaration(node, cursor) {
       cursor.indentScope();
       if (node.declare) cursor.write("declare ");
@@ -30334,9 +30899,7 @@ function printTSX(program) {
         cursor.visit(params[i]);
       }
       cursor.write(")");
-      if (node.returnType) {
-        cursor.visit(node.returnType);
-      }
+      if (node.returnType) cursor.visit(node.returnType);
       if (node.body) {
         cursor.write(" ");
         cursor.visit(node.body);
@@ -30344,11 +30907,6 @@ function printTSX(program) {
       if (cursor.code.at(-1) !== "\n") cursor.write("\n");
       cursor.write("\n");
     },
-    /**
-     * const a: A = 1,
-     *    b: B = 2, 
-     *    c: C = 3;
-     */
     VariableDeclaration(node, cursor) {
       cursor.indentScope();
       if (node.declare) cursor.write("declare ");
@@ -30357,20 +30915,12 @@ function printTSX(program) {
       const declarations = node.declarations;
       const limit = declarations.length;
       for (let i = 0; i < limit; i++) {
-        if (i > 0) {
-          cursor.write("\n" + TAB);
-        }
+        if (i > 0) cursor.write("\n" + TAB);
         cursor.visit(declarations[i], node);
-        if (i === limit - 1) {
-          cursor.write(";\n");
-        } else {
-          cursor.write(",");
-        }
+        if (i === limit - 1) cursor.write(";\n");
+        else cursor.write(",");
       }
     },
-    /**
-     * a!: Typed = 0
-     */
     VariableDeclarator(node, cursor) {
       if (node.id.type === "Identifier") {
         cursor.write(node.id.name, {
@@ -30389,9 +30939,6 @@ function printTSX(program) {
         cursor.visit(node.init);
       }
     },
-    /**
-     * class Box<T> {}
-     */
     ClassDeclaration(node, cursor) {
       cursor.indentScope();
       if (node.declare) cursor.write("declare ");
@@ -30413,29 +30960,16 @@ function printTSX(program) {
           if (impl.expression) {
             cursor.visit(impl.expression);
             if (impl.typeArguments) cursor.visit(impl.typeArguments);
-          } else {
-            cursor.visit(impls[i]);
-          }
+          } else cursor.visit(impls[i]);
         }
       }
       cursor.visit(node.body);
     },
-    // #endregion
-    // #region: expressions
-    /**
-     * [a, b, c]
-     */
     ArrayExpression,
-    /**
-     * [a, b] = arr
-     */
     ArrayPattern(node, cursor) {
       ArrayExpression(node, cursor);
       if (node.typeAnnotation) cursor.visit(node.typeAnnotation);
     },
-    /**
-     * (x) => x * 2
-     */
     ArrowFunctionExpression(node, cursor) {
       if (node.async) cursor.write("async ");
       if (node.typeParameters) cursor.visit(node.typeParameters);
@@ -30448,57 +30982,29 @@ function printTSX(program) {
       cursor.write(") => ");
       cursor.visit(node.body);
     },
-    /**
-     * a = b
-     */
     AssignmentExpression: OperatorExpression,
-    /**
-     * a + b
-     */
     BinaryExpression: OperatorExpression,
-    /**
-     * a && b
-     */
     LogicalExpression: OperatorExpression,
-    /**
-     * await fetch(url)
-     */
     AwaitExpression(node, cursor) {
       cursor.write("await ");
       cursor.visit(node.argument);
     },
-    /**
-     * run<A, B>(a, b)
-     * run?.()
-     */
     CallExpression(node, cursor) {
       cursor.visit(node.callee);
       if (node.optional) cursor.write("?.");
-      if (node.typeArguments) {
-        cursor.visit(node.typeArguments);
-      }
+      if (node.typeArguments) cursor.visit(node.typeArguments);
       cursor.write("(");
       const args = node.arguments;
       for (let i = 0; i < args.length; i++) {
         const arg = args[i];
         cursor.visit(arg);
-        if (i < args.length - 1) {
-          cursor.write(", ");
-        }
+        if (i < args.length - 1) cursor.write(", ");
       }
       cursor.write(")");
     },
-    /**
-     * obj?.deep?.value
-     */
     ChainExpression(node, cursor) {
       cursor.visit(node.expression);
     },
-    /**
-     * obj?.value
-     * obj[value]
-     * obj?.[value]
-     */
     MemberExpression(node, cursor) {
       cursor.visit(node.object);
       if (node.optional) cursor.write("?.");
@@ -30507,9 +31013,6 @@ function printTSX(program) {
       cursor.visit(node.property);
       if (node.computed) cursor.write("]");
     },
-    /**
-     * new Date()
-     */
     NewExpression(node, cursor) {
       cursor.write("new ");
       cursor.visit(node.callee);
@@ -30521,15 +31024,12 @@ function printTSX(program) {
       }
       cursor.write(")");
     },
-    /**
-     * { 
-     *    a: 1,
-     *    b
-     * }
-     */
     ObjectExpression(node, cursor) {
       cursor.write("{\n", {
-        span: { start: node.start, end: node.start + 2 },
+        span: {
+          start: node.start,
+          end: node.start + 2
+        },
         capabilities: { structure: true }
       });
       const properties = node.properties ?? [];
@@ -30538,24 +31038,20 @@ function printTSX(program) {
         cursor.indentScope();
         cursor.visit(properties[i]);
         if (i < properties.length - 1) {
-          if (cursor.code.endsWith("\n")) {
-            cursor.code = cursor.code.slice(0, -1);
-          }
+          if (cursor.code.endsWith("\n")) cursor.code = cursor.code.slice(0, -1);
           cursor.write(",\n");
-        } else if (!cursor.code.endsWith("\n")) {
-          cursor.write("\n");
-        }
+        } else if (!cursor.code.endsWith("\n")) cursor.write("\n");
       }
       cursor.exitScope();
       if (properties.length > 0) cursor.indentScope();
       cursor.write("}", {
-        span: { start: node.end - 1, end: node.end },
+        span: {
+          start: node.end - 1,
+          end: node.end
+        },
         capabilities: { structure: true }
       });
     },
-    /**
-     * { a, b: c } = obj
-     */
     ObjectPattern(node, cursor) {
       const properties = node.properties ?? [];
       cursor.write("{");
@@ -30567,17 +31063,11 @@ function printTSX(program) {
       if (properties.length > 0) cursor.write(" ");
       cursor.write("}");
     },
-    /**
-     * (a + b)
-     */
     ParenthesizedExpression(node, cursor) {
       cursor.write("(");
       cursor.visit(node.expression);
       cursor.write(")");
     },
-    /**
-     * const fn = function () {}
-     */
     FunctionExpression(node, cursor) {
       if (node.async) cursor.write("async ");
       cursor.write("function");
@@ -30598,28 +31088,17 @@ function printTSX(program) {
       if (node.body) {
         cursor.write(" ");
         cursor.visit(node.body);
-      } else {
-        cursor.write(" { }");
-      }
+      } else cursor.write(" { }");
     },
-    /**
-     * tag`hello ${name}`
-     */
     TaggedTemplateExpression(node, cursor) {
       cursor.visit(node.tag);
       cursor.visit(node.quasi);
     },
-    /**
-     * `hello ${name}`
-     */
     TemplateElement(node, cursor) {
       const value = node;
       const raw = value.value?.raw ?? value.raw ?? "";
       cursor.write(raw);
     },
-    /**
-     * `sum: ${a + b}`
-     */
     TemplateLiteral(node, cursor) {
       cursor.write("`");
       const quasis = node.quasis ?? [];
@@ -30636,9 +31115,6 @@ function printTSX(program) {
       }
       cursor.write("`");
     },
-    /**
-     * (a(), b(), c())
-     */
     SequenceExpression(node, cursor) {
       cursor.write("(");
       const expressions = node.expressions ?? [];
@@ -30648,9 +31124,6 @@ function printTSX(program) {
       }
       cursor.write(")");
     },
-    /**
-     * !ok
-     */
     UnaryExpression(node, cursor) {
       if (node.prefix) {
         cursor.write(node.operator);
@@ -30661,9 +31134,6 @@ function printTSX(program) {
         cursor.write(node.operator);
       }
     },
-    /**
-     * count++
-     */
     UpdateExpression(node, cursor) {
       if (node.prefix) {
         cursor.write(node.operator);
@@ -30673,9 +31143,6 @@ function printTSX(program) {
         cursor.write(node.operator);
       }
     },
-    /**
-     * %DebugPrint(value)
-     */
     V8IntrinsicExpression(node, cursor) {
       cursor.write("%");
       const name = node.name;
@@ -30688,21 +31155,14 @@ function printTSX(program) {
       }
       cursor.write(")");
     },
-    /**
-     * yield value
-     */
     YieldExpression(node, cursor) {
       cursor.write("yield");
-      const delegate = node.delegate;
-      if (delegate) cursor.write("*");
+      if (node.delegate) cursor.write("*");
       if (node.argument) {
         cursor.write(" ");
         cursor.visit(node.argument);
       }
     },
-    /**
-     * const C = class {}
-     */
     ClassExpression(node, cursor) {
       cursor.write("class");
       if (node.id) {
@@ -30724,16 +31184,11 @@ function printTSX(program) {
           if (impl.expression) {
             cursor.visit(impl.expression);
             if (impl.typeArguments) cursor.visit(impl.typeArguments);
-          } else {
-            cursor.visit(impls[i]);
-          }
+          } else cursor.visit(impls[i]);
         }
       }
       cursor.visit(node.body);
     },
-    /**
-     * cond ? a : b
-     */
     ConditionalExpression(node, cursor) {
       cursor.visit(node.test);
       cursor.write(" ? ");
@@ -30741,19 +31196,11 @@ function printTSX(program) {
       cursor.write(" : ");
       cursor.visit(node.alternate);
     },
-    // #endregion
-    // #region: basics
-    /**
-     * x = 10
-     */
     AssignmentPattern(node, cursor) {
       cursor.visit(node.left);
       cursor.write(" = ");
       cursor.visit(node.right);
     },
-    /**
-     * foo
-     */
     Identifier(node, cursor) {
       cursor.write(node.name, {
         span: node,
@@ -30762,11 +31209,6 @@ function printTSX(program) {
       if (node.optional) cursor.write("?");
       if (node.typeAnnotation) cursor.visit(node.typeAnnotation);
     },
-    /**
-     * 42
-     * "hello"
-     * true
-     */
     Literal(leaf, cursor) {
       if (leaf.raw) {
         cursor.write(leaf.raw);
@@ -30789,20 +31231,13 @@ function printTSX(program) {
       }
       cursor.write(String(literal.value));
     },
-    /**
-     * { key: value }
-     * { [key]: value }
-     * { key() {} }
-     */
     Property(node, cursor) {
       const writeKey = () => {
         if (node.computed) {
           cursor.write("[");
           cursor.visit(node.key);
           cursor.write("]");
-        } else {
-          cursor.visit(node.key);
-        }
+        } else cursor.visit(node.key);
       };
       if (node.kind === "init") {
         if (node.method) {
@@ -30827,9 +31262,8 @@ function printTSX(program) {
         writeKey();
         let handledShorthand = false;
         if (node.shorthand && !node.computed && node.key.type === "Identifier") {
-          if (node.value.type === "Identifier" && node.key.name === node.value.name) {
-            handledShorthand = true;
-          } else if (node.value.type === "AssignmentPattern" && node.value.left.type === "Identifier" && node.value.left.name === node.key.name) {
+          if (node.value.type === "Identifier" && node.key.name === node.value.name) handledShorthand = true;
+          else if (node.value.type === "AssignmentPattern" && node.value.left.type === "Identifier" && node.value.left.name === node.key.name) {
             cursor.write(" = ");
             cursor.visit(node.value.right);
             handledShorthand = true;
@@ -30862,16 +31296,10 @@ function printTSX(program) {
       cursor.write(": ");
       cursor.visit(node.value);
     },
-    /**
-     * ...rest
-     */
     RestElement(node, cursor) {
       cursor.write("...");
       cursor.visit(node.argument);
     },
-    /**
-     * return value
-     */
     ReturnStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("return");
@@ -30881,18 +31309,10 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * fn(...args)
-     */
     SpreadElement(node, cursor) {
       cursor.write("...");
       cursor.visit(node.argument);
     },
-    // #endregion
-    // #region: class-related
-    /**
-     * class C { method() {} }
-     */
     ClassBody(node, cursor) {
       cursor.write(" {\n");
       cursor.enterScope();
@@ -30902,17 +31322,11 @@ function printTSX(program) {
       cursor.indentScope();
       cursor.write("}\n");
     },
-    /**
-     * class C { static { init() } }
-     */
     StaticBlock(node, cursor) {
       if (cursor.code.at(-1) === "\n") cursor.indentScope();
       cursor.write("static ");
       writeBlockBody(node, cursor);
     },
-    /**
-     * class C { value = 1 }
-     */
     PropertyDefinition(node, cursor) {
       writeDecorators(node, cursor);
       cursor.indentScope();
@@ -30925,9 +31339,7 @@ function printTSX(program) {
         cursor.write("[");
         cursor.visit(node.key);
         cursor.write("]");
-      } else {
-        cursor.visit(node.key);
-      }
+      } else cursor.visit(node.key);
       if (node.optional) cursor.write("?");
       if (node.definite) cursor.write("!");
       if (node.typeAnnotation) cursor.visit(node.typeAnnotation);
@@ -30937,9 +31349,6 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * class C { m() {} }
-     */
     MethodDefinition(node, cursor) {
       writeDecorators(node, cursor);
       cursor.indentScope();
@@ -30949,17 +31358,14 @@ function printTSX(program) {
       if (node.override) cursor.write("override ");
       const kind = node.kind;
       const value = node.value ?? {};
-      if (kind === "constructor") {
-        cursor.write("constructor");
-      } else if (kind === "get" || kind === "set") {
+      if (kind === "constructor") cursor.write("constructor");
+      else if (kind === "get" || kind === "set") {
         cursor.write(kind + " ");
         if (node.computed) {
           cursor.write("[");
           cursor.visit(node.key);
           cursor.write("]");
-        } else {
-          cursor.visit(node.key);
-        }
+        } else cursor.visit(node.key);
       } else {
         if (value.async) cursor.write("async ");
         if (value.generator) cursor.write("*");
@@ -30967,9 +31373,7 @@ function printTSX(program) {
           cursor.write("[");
           cursor.visit(node.key);
           cursor.write("]");
-        } else {
-          cursor.visit(node.key);
-        }
+        } else cursor.visit(node.key);
       }
       if (value.typeParameters) cursor.visit(value.typeParameters);
       cursor.write("(");
@@ -30983,32 +31387,18 @@ function printTSX(program) {
       if (value.body) {
         cursor.write(" ");
         cursor.visit(value.body);
-      } else {
-        cursor.write(";");
-      }
+      } else cursor.write(";");
       if (cursor.code.at(-1) !== "\n") cursor.write("\n");
     },
-    /**
-     * this.#count
-     */
     PrivateIdentifier(leaf, cursor) {
       cursor.write(`#${leaf.name}`);
     },
-    /**
-     * this
-     */
     ThisExpression(leaf, cursor) {
       cursor.write("this");
     },
-    /**
-     * super
-     */
     Super(leaf, cursor) {
       cursor.write("super");
     },
-    /**
-     * accessor value = 1 
-     */
     AccessorProperty(node, cursor) {
       writeDecorators(node, cursor);
       cursor.indentScope();
@@ -31022,9 +31412,7 @@ function printTSX(program) {
         cursor.write("[");
         cursor.visit(node.key);
         cursor.write("]");
-      } else {
-        cursor.visit(node.key);
-      }
+      } else cursor.visit(node.key);
       if (node.optional) cursor.write("?");
       if (node.definite) cursor.write("!");
       if (node.typeAnnotation) cursor.visit(node.typeAnnotation);
@@ -31034,11 +31422,6 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    // #endregion
-    // #region: loops
-    /**
-     * for (const k in obj) {}
-     */
     ForInStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("for (");
@@ -31048,9 +31431,6 @@ function printTSX(program) {
       cursor.write(")");
       writeLoopBody(node, cursor);
     },
-    /**
-     * for (const v of list) {}
-     */
     ForOfStatement(node, cursor) {
       cursor.indentScope();
       if (node.await) cursor.write("for await (");
@@ -31061,9 +31441,6 @@ function printTSX(program) {
       cursor.write(")");
       writeLoopBody(node, cursor);
     },
-    /**
-     * for (let i = 0; i < n; i++) {}
-     */
     ForStatement(node, cursor) {
       const writeForInit = () => {
         const init = node.init;
@@ -31091,9 +31468,6 @@ function printTSX(program) {
       cursor.write(")");
       writeLoopBody(node, cursor);
     },
-    /**
-     * while (cond) { tick() }
-     */
     WhileStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("while (");
@@ -31101,9 +31475,6 @@ function printTSX(program) {
       cursor.write(")");
       writeLoopBody(node, cursor);
     },
-    /**
-     * do { step() } while (ok)
-     */
     DoWhileStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("do");
@@ -31121,18 +31492,12 @@ function printTSX(program) {
       cursor.visit(node.test);
       cursor.write(");\n");
     },
-    /**
-     * loop: for (;;) { break loop }
-     */
     LabeledStatement(node, cursor) {
       cursor.indentScope();
       cursor.visit(node.label);
       cursor.write(": ");
       cursor.visit(node.body);
     },
-    /**
-     * continue;
-     */
     ContinueStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("continue");
@@ -31142,9 +31507,6 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * break;
-     */
     BreakStatement(node, cursor) {
       cursor.indentScope();
       cursor.write("break");
@@ -31154,11 +31516,6 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    // #endregion
-    // #region: JSX
-    /**
-     * <Comp disabled />
-     */
     JSXAttribute(node, cursor) {
       cursor.visit(node.name);
       if (node.value) {
@@ -31166,82 +31523,48 @@ function printTSX(program) {
         cursor.visit(node.value);
       }
     },
-    /**
-     * </Comp>
-     */
     JSXClosingElement(node, cursor) {
       cursor.write("</");
       cursor.visit(node.name);
       cursor.write(">");
     },
-    /**
-     * </>
-     */
     JSXClosingFragment(node, cursor) {
       cursor.write("</>");
     },
-    /**
-     * <Comp prop={value} />
-     */
     JSXElement(node, cursor) {
       cursor.visit(node.openingElement);
       const children = node.children ?? [];
-      for (let i = 0; i < children.length; i++) {
-        cursor.visit(children[i]);
-      }
+      for (let i = 0; i < children.length; i++) cursor.visit(children[i]);
       if (node.closingElement) cursor.visit(node.closingElement);
     },
-    /**
-     * {value}
-     */
     JSXExpressionContainer(node, cursor) {
       cursor.write("{");
-      if (node.expression.type === "JSXEmptyExpression") {
-        cursor.write("/* */");
-      } else {
-        cursor.visit(node.expression);
-      }
+      if (node.expression.type === "JSXEmptyExpression") cursor.write("/* */");
+      else cursor.visit(node.expression);
       cursor.write("}");
     },
-    /**
-     * <><Item /></>
-     */
     JSXFragment(node, cursor) {
       cursor.visit(node.openingFragment);
       const children = node.children ?? [];
-      for (let i = 0; i < children.length; i++) {
-        cursor.visit(children[i]);
-      }
+      for (let i = 0; i < children.length; i++) cursor.visit(children[i]);
       cursor.visit(node.closingFragment);
     },
-    /**
-     * Comp
-     */
     JSXIdentifier(node, cursor) {
       cursor.write(node.name, {
         span: node,
         capabilities: BASE_CAPABILITIES
       });
     },
-    /**
-     * UI.Button
-     */
     JSXMemberExpression(node, cursor) {
       cursor.visit(node.object);
       cursor.write(".");
       cursor.visit(node.property);
     },
-    /**
-     * svg:path
-     */
     JSXNamespacedName(node, cursor) {
       cursor.visit(node.namespace);
       cursor.write(":");
       cursor.visit(node.name);
     },
-    /**
-     * <Comp>
-     */
     JSXOpeningElement(node, cursor) {
       cursor.write("<");
       cursor.visit(node.name);
@@ -31254,31 +31577,19 @@ function printTSX(program) {
       if (node.selfClosing) cursor.write(" />");
       else cursor.write(">");
     },
-    /**
-     * <>
-     */
     JSXOpeningFragment(node, cursor) {
       cursor.write("<>");
     },
-    /**
-     * <Comp {...props} />
-     */
     JSXSpreadAttribute(node, cursor) {
       cursor.write("{...");
       cursor.visit(node.argument);
       cursor.write("}");
     },
-    /**
-     * {...items}
-     */
     JSXSpreadChild(node, cursor) {
       cursor.write("{...");
       cursor.visit(node.expression);
       cursor.write("}");
     },
-    /**
-     * hello
-     */
     JSXText(node, cursor) {
       if (typeof node.raw === "string") {
         cursor.write(node.raw);
@@ -31287,27 +31598,15 @@ function printTSX(program) {
       const value = typeof node.value === "string" ? node.value : "";
       cursor.write(escapeJSXTextValue(value));
     },
-    // #endregion
-    // #region: other
-    /**
-     * new.target
-     */
     MetaProperty(leaf, cursor) {
       cursor.visit(leaf.meta);
       cursor.write(".");
       cursor.visit(leaf.property);
     },
-    // #region: types
-    /**
-     * : string
-     */
     TSTypeAnnotation(node, cursor) {
       cursor.write(": ");
       cursor.visit(node.typeAnnotation);
     },
-    /**
-     * Array<number>
-     */
     TSTypeReference(node, cursor) {
       cursor.visit(node.typeName);
       if (node.typeArguments) {
@@ -31316,16 +31615,11 @@ function printTSX(program) {
         for (let i = 0; i < args.length; i++) {
           const arg = args[i];
           cursor.visit(arg);
-          if (i < args.length - 1) {
-            cursor.write(", ");
-          }
+          if (i < args.length - 1) cursor.write(", ");
         }
         cursor.write(">");
       }
     },
-    /**
-    * <T, U extends string>
-    */
     TSTypeParameterDeclaration(node, cursor) {
       cursor.write("<");
       const params = node.params ?? [];
@@ -31335,107 +31629,56 @@ function printTSX(program) {
       }
       cursor.write(">");
     },
-    /**
-     * expression as typeAnnotation
-     */
     TSAsExpression(node, cursor) {
       cursor.visit(node.expression);
       cursor.write(" as ");
       cursor.visit(node.typeAnnotation);
     },
-    /**
-     * any
-     */
     TSAnyKeyword(node, cursor) {
       cursor.write("any");
     },
-    /**
-     * bigint
-     */
     TSBigIntKeyword(node, cursor) {
       cursor.write("bigint");
     },
-    /**
-     * boolean
-     */
     TSBooleanKeyword(node, cursor) {
       cursor.write("boolean");
     },
-    /**
-     * intrinsic
-     */
     TSIntrinsicKeyword(node, cursor) {
       cursor.write("intrinsic");
     },
-    /**
-     * ?
-     */
     TSJSDocUnknownType(node, cursor) {
       cursor.write("?");
     },
-    /**
-     * never
-     */
     TSNeverKeyword(node, cursor) {
       cursor.write("never");
     },
-    /**
-     * null
-     */
     TSNullKeyword(node, cursor) {
       cursor.write("null");
     },
-    /**
-     * number
-     */
     TSNumberKeyword(node, cursor) {
       cursor.write("number");
     },
-    /**
-     * object
-     */
     TSObjectKeyword(node, cursor) {
       cursor.write("object");
     },
-    /**
-     * string
-     */
     TSStringKeyword(node, cursor) {
       cursor.write("string");
     },
-    /**
-     * symbol
-     */
     TSSymbolKeyword(node, cursor) {
       cursor.write("symbol");
     },
-    /**
-     * this
-     */
     TSThisType(node, cursor) {
       cursor.write("this");
     },
-    /**
-     * undefined
-     */
     TSUndefinedKeyword(node, cursor) {
       cursor.write("undefined");
     },
-    /**
-     * unknown
-     */
     TSUnknownKeyword(node, cursor) {
       cursor.write("unknown");
     },
-    /**
-     * void
-     */
     TSVoidKeyword(node, cursor) {
       cursor.write("void");
     },
-    /**
-     * abstract accessor value: number
-     */
     TSAbstractAccessorProperty(node, cursor) {
       writeDecorators(node, cursor);
       cursor.indentScope();
@@ -31458,9 +31701,6 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * abstract run(): void
-     */
     TSAbstractMethodDefinition(node, cursor) {
       writeDecorators(node, cursor);
       cursor.indentScope();
@@ -31486,9 +31726,6 @@ function printTSX(program) {
       if (node.value?.returnType) cursor.visit(node.value.returnType);
       cursor.write(";\n");
     },
-    /**
-     * abstract value: number
-     */
     TSAbstractPropertyDefinition(node, cursor) {
       writeDecorators(node, cursor);
       cursor.indentScope();
@@ -31511,16 +31748,10 @@ function printTSX(program) {
       }
       cursor.write(";\n");
     },
-    /**
-     * string[]
-     */
     TSArrayType(node, cursor) {
       cursor.visit(node.elementType);
       cursor.write("[]");
     },
-    /**
-     * (a: A) => B
-     */
     TSCallSignatureDeclaration(node, cursor) {
       if (node.typeParameters) cursor.visit(node.typeParameters);
       cursor.write("(");
@@ -31533,17 +31764,11 @@ function printTSX(program) {
       if (node.returnType) cursor.visit(node.returnType);
       cursor.write(";");
     },
-    /**
-     * implements Serializable
-     */
     TSClassImplements(node, cursor) {
       cursor.write("implements ");
       cursor.visit(node.expression);
       if (node.typeArguments) cursor.visit(node.typeArguments);
     },
-    /**
-     * T extends U ? X : Y
-     */
     TSConditionalType(node, cursor) {
       cursor.visit(node.checkType);
       cursor.write(" extends ");
@@ -31553,9 +31778,6 @@ function printTSX(program) {
       cursor.write(" : ");
       cursor.visit(node.falseType);
     },
-    /**
-     * new (a: A) => B
-     */
     TSConstructSignatureDeclaration(node, cursor) {
       cursor.write("new ");
       if (node.typeParameters) cursor.visit(node.typeParameters);
@@ -31569,9 +31791,6 @@ function printTSX(program) {
       if (node.returnType) cursor.visit(node.returnType);
       cursor.write(";");
     },
-    /**
-     * new () => Date
-     */
     TSConstructorType(node, cursor) {
       if (node.abstract) cursor.write("abstract ");
       cursor.write("new ");
@@ -31585,9 +31804,6 @@ function printTSX(program) {
       cursor.write(") => ");
       cursor.visit(node.returnType.typeAnnotation);
     },
-    /**
-     * declare function id<T>(x: T): T
-     */
     TSDeclareFunction(node, cursor) {
       cursor.indentScope();
       cursor.write("declare function");
@@ -31606,9 +31822,6 @@ function printTSX(program) {
       if (node.returnType) cursor.visit(node.returnType);
       cursor.write(";\n");
     },
-    /**
-     * declare function fn(a: A): B
-     */
     TSEmptyBodyFunctionExpression(node, cursor) {
       cursor.write("function");
       if (node.id) {
@@ -31625,9 +31838,6 @@ function printTSX(program) {
       cursor.write(")");
       if (node.returnType) cursor.visit(node.returnType);
     },
-    /**
-     * enum E { A, B }
-     */
     TSEnumBody(node, cursor) {
       cursor.write("{");
       const members = node.members ?? [];
@@ -31639,9 +31849,6 @@ function printTSX(program) {
       if (members.length > 0) cursor.write(" ");
       cursor.write("}");
     },
-    /**
-     * enum E { A, B }
-     */
     TSEnumDeclaration(node, cursor) {
       cursor.indentScope();
       if (node.declare) cursor.write("declare ");
@@ -31652,9 +31859,6 @@ function printTSX(program) {
       cursor.visit(node.body);
       cursor.write("\n");
     },
-    /**
-     * A = 1
-     */
     TSEnumMember(node, cursor) {
       cursor.visit(node.id);
       if (node.initializer) {
@@ -31662,26 +31866,17 @@ function printTSX(program) {
         cursor.visit(node.initializer);
       }
     },
-    /**
-     * export = value
-     */
     TSExportAssignment(node, cursor) {
       cursor.indentScope();
       cursor.write("export = ");
       cursor.visit(node.expression);
       cursor.write(";\n");
     },
-    /**
-     * require("fs")
-     */
     TSExternalModuleReference(node, cursor) {
       cursor.write("require(");
       cursor.visit(node.expression);
       cursor.write(")");
     },
-    /**
-     * (a: A) => B
-     */
     TSFunctionType(node, cursor) {
       if (node.typeParameters) cursor.visit(node.typeParameters);
       cursor.write("(");
@@ -31693,9 +31888,6 @@ function printTSX(program) {
       cursor.write(") => ");
       cursor.visit(node.returnType.typeAnnotation);
     },
-    /**
-     * import fs = require("fs")
-     */
     TSImportEqualsDeclaration(node, cursor) {
       cursor.indentScope();
       cursor.write("import ");
@@ -31705,9 +31897,6 @@ function printTSX(program) {
       cursor.visit(node.moduleReference);
       cursor.write(";\n");
     },
-    /**
-     * import("pkg").Type
-     */
     TSImportType(node, cursor) {
       cursor.write("import(");
       cursor.visit(node.source);
@@ -31722,9 +31911,6 @@ function printTSX(program) {
       }
       if (node.typeArguments) cursor.visit(node.typeArguments);
     },
-    /**
-     * [k: string]: number
-     */
     TSIndexSignature(node, cursor) {
       if (node.readonly) cursor.write("readonly ");
       cursor.write("[");
@@ -31737,32 +31923,20 @@ function printTSX(program) {
       cursor.visit(node.typeAnnotation);
       cursor.write(";");
     },
-    /**
-     * User["id"]
-     */
     TSIndexedAccessType(node, cursor) {
       cursor.visit(node.objectType);
       cursor.write("[");
       cursor.visit(node.indexType);
       cursor.write("]");
     },
-    /**
-     * infer U
-     */
     TSInferType(node, cursor) {
       cursor.write("infer ");
       cursor.visit(node.typeParameter);
     },
-    /**
-     * fn<number>(1)
-     */
     TSInstantiationExpression(node, cursor) {
       cursor.visit(node.expression);
       cursor.visit(node.typeArguments);
     },
-    /**
-     * interface A { x: number }
-     */
     TSInterfaceBody(node, cursor) {
       cursor.write("{");
       const members = node.body ?? [];
@@ -31774,9 +31948,6 @@ function printTSX(program) {
       if (members.length > 0) cursor.write(" ");
       cursor.write("}");
     },
-    /**
-     * interface A { x: number }
-     */
     TSInterfaceDeclaration(node, cursor) {
       cursor.indentScope();
       if (node.declare) cursor.write("declare ");
@@ -31795,16 +31966,10 @@ function printTSX(program) {
       cursor.visit(node.body);
       cursor.write("\n");
     },
-    /**
-     * extends Base
-     */
     TSInterfaceHeritage(node, cursor) {
       cursor.visit(node.expression);
       if (node.typeArguments) cursor.visit(node.typeArguments);
     },
-    /**
-     * A & B
-     */
     TSIntersectionType(node, cursor) {
       const types = node.types ?? [];
       for (let i = 0; i < types.length; i++) {
@@ -31812,9 +31977,6 @@ function printTSX(program) {
         cursor.visit(types[i]);
       }
     },
-    /**
-     * !string
-     */
     TSJSDocNonNullableType(node, cursor) {
       if (node.postfix) {
         cursor.visit(node.typeAnnotation);
@@ -31824,9 +31986,6 @@ function printTSX(program) {
         cursor.visit(node.typeAnnotation);
       }
     },
-    /**
-     * ?string
-     */
     TSJSDocNullableType(node, cursor) {
       if (node.postfix) {
         cursor.visit(node.typeAnnotation);
@@ -31836,15 +31995,9 @@ function printTSX(program) {
         cursor.visit(node.typeAnnotation);
       }
     },
-    /**
-     * "word"
-     */
     TSLiteralType(node, cursor) {
       cursor.visit(node.literal);
     },
-    /**
-     * { [K in Keys]: T[K] }
-     */
     TSMappedType(node, cursor) {
       cursor.write("{ ");
       if (node.readonly === true) cursor.write("readonly ");
@@ -31866,9 +32019,6 @@ function printTSX(program) {
       }
       cursor.write(" }");
     },
-    /**
-     * run(a: A): B
-     */
     TSMethodSignature(node, cursor) {
       if (node.readonly) cursor.write("readonly ");
       if (node.kind === "get" || node.kind === "set") cursor.write(`${node.kind} `);
@@ -31889,15 +32039,9 @@ function printTSX(program) {
       if (node.returnType) cursor.visit(node.returnType);
       cursor.write(";");
     },
-    /**
-     * declare module "x" { export const y: number }
-     */
     TSModuleBlock(node, cursor) {
       writeBlockBody(node, cursor);
     },
-    /**
-     * declare module "x" {}
-     */
     TSModuleDeclaration(node, cursor) {
       cursor.indentScope();
       if (node.declare) cursor.write("declare ");
@@ -31907,46 +32051,29 @@ function printTSX(program) {
       if (node.body) {
         cursor.write(" ");
         cursor.visit(node.body);
-      } else {
-        cursor.write(";");
-      }
+      } else cursor.write(";");
       cursor.write("\n");
     },
-    /**
-     * name: string
-     */
     TSNamedTupleMember(node, cursor) {
       cursor.visit(node.label);
       if (node.optional) cursor.write("?");
       cursor.write(": ");
       cursor.visit(node.elementType);
     },
-    /**
-     * export as namespace Lib
-     */
     TSNamespaceExportDeclaration(node, cursor) {
       cursor.indentScope();
       cursor.write("export as namespace ");
       cursor.visit(node.id);
       cursor.write(";\n");
     },
-    /**
-     * value!
-     */
     TSNonNullExpression(node, cursor) {
       cursor.visit(node.expression);
       cursor.write("!");
     },
-    /**
-     * T?
-     */
     TSOptionalType(node, cursor) {
       cursor.visit(node.typeAnnotation);
       cursor.write("?");
     },
-    /**
-     * constructor(public id: number) {}
-     */
     TSParameterProperty(node, cursor) {
       if (node.accessibility) cursor.write(`${node.accessibility} `);
       if (node.readonly) cursor.write("readonly ");
@@ -31954,17 +32081,11 @@ function printTSX(program) {
       if (node.static) cursor.write("static ");
       cursor.visit(node.parameter);
     },
-    /**
-     * (A | B)
-     */
     TSParenthesizedType(node, cursor) {
       cursor.write("(");
       cursor.visit(node.typeAnnotation);
       cursor.write(")");
     },
-    /**
-     * id?: number
-     */
     TSPropertySignature(node, cursor) {
       if (node.readonly) cursor.write("readonly ");
       if (node.computed) {
@@ -31976,32 +32097,20 @@ function printTSX(program) {
       if (node.typeAnnotation) cursor.visit(node.typeAnnotation);
       cursor.write(";");
     },
-    /**
-     * ns.Type
-     */
     TSQualifiedName(node, cursor) {
       cursor.visit(node.left);
       cursor.write(".");
       cursor.visit(node.right);
     },
-    /**
-     * ...T[]
-     */
     TSRestType(node, cursor) {
       cursor.write("...");
       cursor.visit(node.typeAnnotation);
     },
-    /**
-     * value satisfies Schema
-     */
     TSSatisfiesExpression(node, cursor) {
       cursor.visit(node.expression);
       cursor.write(" satisfies ");
       cursor.visit(node.typeAnnotation);
     },
-    /**
-     * `id-${number}`
-     */
     TSTemplateLiteralType(node, cursor) {
       cursor.write("`");
       const quasis = node.quasis ?? [];
@@ -32018,9 +32127,6 @@ function printTSX(program) {
       }
       cursor.write("`");
     },
-    /**
-     * [number, string]
-     */
     TSTupleType(node, cursor) {
       cursor.write("[");
       const elements = node.elementTypes ?? [];
@@ -32030,9 +32136,6 @@ function printTSX(program) {
       }
       cursor.write("]");
     },
-    /**
-     * type ID = string | number
-     */
     TSTypeAliasDeclaration(node, cursor) {
       const continuingExportType = /\bexport type[ \t]*$/.test(cursor.code);
       if (!continuingExportType) cursor.indentScope();
@@ -32044,18 +32147,12 @@ function printTSX(program) {
       cursor.visit(node.typeAnnotation);
       cursor.write(";\n");
     },
-    /**
-     * <Foo>value
-     */
     TSTypeAssertion(node, cursor) {
       cursor.write("<");
       cursor.visit(node.typeAnnotation);
       cursor.write(">");
       cursor.visit(node.expression);
     },
-    /**
-     * { a: string; b?: number }
-     */
     TSTypeLiteral(node, cursor) {
       cursor.write("{");
       const members = node.members ?? [];
@@ -32067,16 +32164,10 @@ function printTSX(program) {
       if (members.length > 0) cursor.write(" ");
       cursor.write("}");
     },
-    /**
-     * keyof T
-     */
     TSTypeOperator(node, cursor) {
       cursor.write(`${node.operator} `);
       cursor.visit(node.typeAnnotation);
     },
-    /**
-     * T extends Base = Default
-     */
     TSTypeParameter(node, cursor) {
       if (node.const) cursor.write("const ");
       if (node.in) cursor.write("in ");
@@ -32091,9 +32182,6 @@ function printTSX(program) {
         cursor.visit(node.default);
       }
     },
-    /**
-     * <string, number>
-     */
     TSTypeParameterInstantiation(node, cursor) {
       cursor.write("<");
       const params = node.params ?? [];
@@ -32103,9 +32191,6 @@ function printTSX(program) {
       }
       cursor.write(">");
     },
-    /**
-     * x is Foo
-     */
     TSTypePredicate(node, cursor) {
       if (node.asserts) cursor.write("asserts ");
       cursor.visit(node.parameterName);
@@ -32114,17 +32199,11 @@ function printTSX(program) {
         cursor.visit(node.typeAnnotation.typeAnnotation);
       }
     },
-    /**
-     * typeof value
-     */
     TSTypeQuery(node, cursor) {
       cursor.write("typeof ");
       cursor.visit(node.exprName);
       if (node.typeArguments) cursor.visit(node.typeArguments);
     },
-    /**
-     * A | B | C
-     */
     TSUnionType(node, cursor) {
       const types = node.types ?? [];
       for (let i = 0; i < types.length; i++) {
@@ -32132,16 +32211,12 @@ function printTSX(program) {
         cursor.visit(types[i]);
       }
     },
-    /**
-     * @sealed
-     */
     Decorator(node, cursor) {
       cursor.indentScope();
       cursor.write("@");
       cursor.visit(node.expression);
       cursor.write("\n");
     }
-    // #endregion
   });
   file.visit(program);
   return {
@@ -32157,9 +32232,7 @@ function ArrayExpression(node, cursor) {
     if (i > 0) cursor.write(", ");
     if (element) cursor.visit(element);
   }
-  if (elements.length > 0 && !elements[elements.length - 1]) {
-    cursor.write(",");
-  }
+  if (elements.length > 0 && !elements[elements.length - 1]) cursor.write(",");
   cursor.write("]");
 }
 function OperatorExpression(node, cursor) {
@@ -32202,18 +32275,12 @@ function writeBlockBody(node, cursor) {
 }
 function writeDecorators(node, cursor) {
   const decorators = node.decorators ?? [];
-  for (let i = 0; i < decorators.length; i++) {
-    cursor.visit(decorators[i]);
-  }
+  for (let i = 0; i < decorators.length; i++) cursor.visit(decorators[i]);
 }
 function escapeJSXTextValue(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("{", "&#123;").replaceAll("}", "&#125;");
 }
 var CodePrinter = class {
-  constructor(visitors) {
-    this.visitors = visitors;
-  }
-  visitors;
   code = "";
   map = [];
   static DEFAULT_MAPPING_CAPABILITIES = {
@@ -32233,12 +32300,13 @@ var CodePrinter = class {
   }
   indentScope() {
     let scope = this.depth;
-    while (scope--) {
-      this.write(TAB);
-    }
+    while (scope--) this.write(TAB);
   }
   indent() {
     this.write(TAB);
+  }
+  constructor(visitors) {
+    this.visitors = visitors;
   }
   write(text, map) {
     const start = this.code.length;
@@ -32246,10 +32314,8 @@ var CodePrinter = class {
     if (map) {
       const { span, capabilities } = map;
       if (span.start === 0 && span.end === 0) return;
-      const end = this.code.length;
-      const length = end - start;
+      const length = this.code.length - start;
       this.map.push({
-        _DEV_: span.name,
         sourceOffsets: [span.start],
         generatedOffsets: [start],
         data: capabilities ?? {},
@@ -32260,12 +32326,10 @@ var CodePrinter = class {
   }
   activeNodes = /* @__PURE__ */ new Set();
   visitNode(node) {
-    if (this.activeNodes.has(node)) {
-      throw new InternalError2("Cycle detected while visiting AST");
-    }
+    if (this.activeNodes.has(node)) throw new InternalError("Cycle detected while visiting AST");
     this.activeNodes.add(node);
     const visit = this.visitors[node.type];
-    if (!visit) throw new InternalError2(`Visitor not yet implemented for ${node.type}`);
+    if (!visit) throw new InternalError(`Visitor not yet implemented for ${node.type}`);
     try {
       visit(node, this);
     } finally {
@@ -32283,18 +32347,17 @@ var CodePrinter = class {
     }
   }
 };
-
-// ../../packages/ruescript/src/index.ts
 function transpileRueScript(file, source) {
   const { code, edits } = preprocessRXS(source);
-  const preTree = parseRXS(file, code);
-  const { ast: transformedTree } = transformRXS(preTree.program, edits);
+  const { ast: transformedTree } = transformRXS(parseRXS(file, code).program, edits);
   const generated = printTSX(transformedTree);
-  console.log("tranformed:");
-  console.log(generated.code);
+  console.log("generated", generated.code);
   return {
     source,
-    transpiled: { ast: transformedTree, code: generated.code },
+    transpiled: {
+      ast: transformedTree,
+      code: generated.code
+    },
     map: generated.map
   };
 }
