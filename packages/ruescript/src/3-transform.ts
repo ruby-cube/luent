@@ -255,6 +255,16 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       },
 
       ArrowFunctionExpression(node, context) {
+         const { edits } = context
+         if (hasAwait(node.body)) node.async = true;
+         const firstParam = node.params[0]
+         if (firstParam.type === 'Identifier' && firstParam.name === 'ª') {
+            edits.at(node.body.start, edit => {
+               this.willMutate(() => {
+                  node.params = []
+               })
+            })
+         }
          scopeFunction(this, node, context)
       },
 
@@ -601,20 +611,12 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
 }
 
 
-function expressionHasAwait(node: ASTNode) {
-   if (node.type === 'AwaitExpression') return true;
-   if (node.type !== 'SequenceExpression') return false;
+function hasAwait(node: ASTNode) {
    let has = false;
-
    traverse(node as ASTNode, {}, {
       AwaitExpression() { has = true; }
    })
-
    return has;
-}
-
-function bodyHasAwait(node: ASTNode) {
-   // TODO: 
 }
 
 

@@ -4,15 +4,16 @@ import { searchOpeningBrace } from "./searchOpeningBrace.ts"
 
 // TODO: create a string/comment/regex mask to prevent edits within
 
+
 type BaseEdit = {
    // type: string
    index: number,
    anchor: number
-   anchorType: 'start' | 'end'
+   // anchorType: 'start' | 'end'
    original: string
    transformed: string
    offset: number
-   offsetReversed: boolean
+   offsetReversed?: boolean
    // valid: undefined | boolean // pattern is in valid transform context (e.g. non-string/non-comment)--context unknown until after parsing
 }
 
@@ -56,10 +57,8 @@ function encodeGap(group: string): string {
 function applyOffsets(edits: Edit[]) {
    let offset = 0
 
-   // apply offsets
    for (const edit of edits) {
       edit.index = edit.index + offset
-      // edit.anchor = edit.anchor + offset
       offset += edit.offset
    }
 }
@@ -115,22 +114,6 @@ export class Edits {
       if (edit) task(edit)
       return edit
    }
-
-   consumeUpTo(position: number, task: (edit: Edit) => void) {
-      const { edits, lastIndex } = this
-      const limit = edits.length
-      let i = lastIndex
-
-      while (i < limit) {
-         const edit = edits[i]
-         if (edit.index > position)
-            break;
-         task(edit)
-         i++
-      }
-
-      this.lastIndex = i
-   }
 }
 
 // TODO: make sure regex is correct
@@ -183,12 +166,11 @@ class RXSPreprocessor {
             type: 'GetDeclaration',
             index,
             anchor: index,
-            anchorType: 'start',
+            // anchorType: 'start',
             original,
             transformed,
             identifier,
-            offset: 0,
-            offsetReversed: false
+            offset: 0
          })
       }
    }
@@ -214,11 +196,10 @@ class RXSPreprocessor {
             type: 'GetDestructuring',
             index,
             anchor: index,
-            anchorType: 'start',
+            // anchorType: 'start',
             original,
             transformed,
-            offset: 0,
-            offsetReversed: false
+            offset: 0
          })
       }
    }
@@ -244,12 +225,11 @@ class RXSPreprocessor {
             type: 'GetPropertyColonNotation',
             index,
             anchor: index,
-            anchorType: 'start',
+            // anchorType: 'start',
             original,
             transformed,
             identifier,
             offset: 0,
-            offsetReversed: false
          })
       }
    }
@@ -267,12 +247,11 @@ class RXSPreprocessor {
             type: 'AccessorVariablePostfix',
             index,
             anchor: index + 2,
-            anchorType: 'end',
+            // anchorType: 'end',
             original: original.slice(0, -1),
             transformed: identifier + ACCESSOR_VARIABLE_POSTFIX,
             identifier,
             offset: 0,
-            offsetReversed: false
          })
       }
    }
@@ -293,7 +272,7 @@ class RXSPreprocessor {
             type: AccessorEditType[before as keyof typeof AccessorEditType],
             index,
             anchor: index + 2, // NOTE: range for non-null expression ends after !
-            anchorType: 'end',
+            // anchorType: 'end',
             original: original.slice(0, -1),
             transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX,
             offset: 0,
@@ -320,7 +299,7 @@ class RXSPreprocessor {
             type: 'BlockDerivationExpressionOpen',
             index: openingBracket,
             anchor: openingBracket,
-            anchorType: 'start',
+            // anchorType: 'start',
             original: '{',
             transformed: `(ª=>{`,
             offset: 4,
@@ -329,7 +308,7 @@ class RXSPreprocessor {
             type: 'BlockDerivationExpressionClose',
             index,
             anchor: index + 1,
-            anchorType: 'end',
+            // anchorType: 'end',
             original: '}@',
             transformed: `})`,
             offset: 0,
@@ -350,7 +329,7 @@ class RXSPreprocessor {
             type: 'JSXAttributeShorthand',
             index,
             anchor: index,
-            anchorType: 'start',
+            // anchorType: 'start',
             original: original.slice(1),
             transformed: `ß${identifier}ß`,
             identifier,
