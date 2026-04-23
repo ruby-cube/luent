@@ -5,7 +5,7 @@ import { transformRXS } from "../src/3-transform";
 import { printTSX } from "../src/4-generate";
 
 describe('RueScript transform with offsets', () => {
-   it('transforms block derivation expressions', () => {
+   it.only('transforms block derivation expressions', () => {
       const { code, edits } = preprocessRXS(
          `get foo = ref(0);\n` +
          `watch({ const a = 0; return a }@);` +
@@ -31,7 +31,7 @@ describe('RueScript transform with offsets', () => {
       )
    })
 
-   it.only('transforms async block derivation expressions', () => {
+   it('transforms async block derivation expressions', () => {
       const { code, edits } = preprocessRXS(
          `get foo = ref(0);\n` +
          `watch({ const res = await a; return res }@);` +
@@ -57,7 +57,7 @@ describe('RueScript transform with offsets', () => {
       )
    })
 
-   it('transforms immediately invoked block derivation expressions', () => {
+   it.only('transforms immediately invoked block derivation expressions', () => {
       const { code, edits } = preprocessRXS(
          `get foo = ref(0);\n` +
          `watch({ const a = 0; return a }@());` +

@@ -12,6 +12,7 @@ type BaseEdit = {
    original: string
    transformed: string
    offset: number
+   offsetReversed: boolean
    // valid: undefined | boolean // pattern is in valid transform context (e.g. non-string/non-comment)--context unknown until after parsing
 }
 
@@ -25,7 +26,13 @@ export type VariableEdit = {
 
 
 export type ExpressionEdit = {
-   type: 'AccessorExpressionPostfix' | 'OptionalAccessorPostfix' | 'NonNullAccessorPostfix' | 'BracketAccessorPostfix' | 'BlockDerivationExpressionOpen' | 'BlockDerivationExpressionClose' | 'GetDestructuring'
+   type: 'AccessorExpressionPostfix'
+   | 'OptionalAccessorPostfix'
+   | 'NonNullAccessorPostfix'
+   | 'BracketAccessorPostfix'
+   | 'BlockDerivationExpressionOpen'
+   | 'BlockDerivationExpressionClose'
+   | 'GetDestructuring'
 } & BaseEdit
 
 const AccessorEditType = {
@@ -116,7 +123,7 @@ export class Edits {
 
       while (i < limit) {
          const edit = edits[i]
-         if (edit.index > position) 
+         if (edit.index > position)
             break;
          task(edit)
          i++
@@ -180,7 +187,8 @@ class RXSPreprocessor {
             original,
             transformed,
             identifier,
-            offset: 0
+            offset: 0,
+            offsetReversed: false
          })
       }
    }
@@ -209,7 +217,8 @@ class RXSPreprocessor {
             anchorType: 'start',
             original,
             transformed,
-            offset: 0
+            offset: 0,
+            offsetReversed: false
          })
       }
    }
@@ -239,7 +248,8 @@ class RXSPreprocessor {
             original,
             transformed,
             identifier,
-            offset: 0
+            offset: 0,
+            offsetReversed: false
          })
       }
    }
@@ -261,7 +271,8 @@ class RXSPreprocessor {
             original: original.slice(0, -1),
             transformed: identifier + ACCESSOR_VARIABLE_POSTFIX,
             identifier,
-            offset: 0
+            offset: 0,
+            offsetReversed: false
          })
       }
    }
@@ -285,7 +296,8 @@ class RXSPreprocessor {
             anchorType: 'end',
             original: original.slice(0, -1),
             transformed: (before === '?' ? '!' : before) + ACCESSOR_EXPRESSION_POSTFIX,
-            offset: 0
+            offset: 0,
+            offsetReversed: false
          })
       }
    }
@@ -311,7 +323,8 @@ class RXSPreprocessor {
             anchorType: 'start',
             original: '{',
             transformed: `(ª=>{`,
-            offset: 4
+            offset: 4,
+            offsetReversed: false
          }, {
             type: 'BlockDerivationExpressionClose',
             index,
@@ -319,7 +332,8 @@ class RXSPreprocessor {
             anchorType: 'end',
             original: '}@',
             transformed: `})`,
-            offset: 0
+            offset: 0,
+            offsetReversed: false
          })
       }
    }
@@ -340,7 +354,8 @@ class RXSPreprocessor {
             original: original.slice(1),
             transformed: `ß${identifier}ß`,
             identifier,
-            offset: 0
+            offset: 0,
+            offsetReversed: false
          })
       }
    }

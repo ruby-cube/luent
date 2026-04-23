@@ -1,12 +1,9 @@
 import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse, traverseAll } from './traverse.ts';
-import { BaseNode } from './4-generate.ts';
-import { T } from 'node_modules/vitest/dist/chunks/traces.d.402V_yFI';
-import { FunctionDeclaration } from 'typescript';
 
 
-// (1) offset pass
+// (1) reverse offset pass
 // (2) queue transforms pass
 // (3) apply transforms
 
@@ -31,14 +28,16 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
    // Offset adjustment
    traverseAll(ast, { edits }, {
       visit(node, { edits }) {
-         // Apply all edits up to this transformed start so remapping is stable
-         // even when traversal order differs across equivalent syntax shapes.
-         edits.consumeUpTo(node.start, edit => {
-            offset += edit.offset
-         })
-         this.visitChildren(node)
          node.start = node.start - offset
          node.end = node.end - offset
+
+         edits.at(node.start, edit => {
+            if (edit.offsetReversed) return
+            offset += edit.offset
+            edit.offsetReversed = true;
+         })
+
+         this.visitChildren(node)
       }
    })
 
