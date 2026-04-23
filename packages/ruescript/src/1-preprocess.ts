@@ -108,6 +108,22 @@ export class Edits {
       if (edit) task(edit)
       return edit
    }
+
+   consumeUpTo(position: number, task: (edit: Edit) => void) {
+      const { edits, lastIndex } = this
+      const limit = edits.length
+      let i = lastIndex
+
+      while (i < limit) {
+         const edit = edits[i]
+         if (edit.index > position) 
+            break;
+         task(edit)
+         i++
+      }
+
+      this.lastIndex = i
+   }
 }
 
 // TODO: make sure regex is correct

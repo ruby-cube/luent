@@ -26,22 +26,19 @@ function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefi
 
 export function transformRXS(ast: ASTNode, edits: Edits) {
    let offset = 0;
-   edits.lastIndex = 0 
+   edits.lastIndex = 0
 
    // Offset adjustment
    traverseAll(ast, { edits }, {
       visit(node, { edits }) {
-         const start = node.start
-         // this.willMutate(() => { // FIX: For some reason if we queue mutation, traverse will not transform
-            node.start = start - offset
-         // })
-         edits.at(start, edit => { // currently only prefix edits have offsets, so we don't need to check postfix edits
+         // Apply all edits up to this transformed start so remapping is stable
+         // even when traversal order differs across equivalent syntax shapes.
+         edits.consumeUpTo(node.start, edit => {
             offset += edit.offset
          })
          this.visitChildren(node)
-         // this.willMutate(() => {
-            node.end = node.end - offset
-         // })
+         node.start = node.start - offset
+         node.end = node.end - offset
       }
    })
 
