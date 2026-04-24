@@ -29748,9 +29748,12 @@ function hasAwait(node) {
 function scopeFunction(cursor, node, context) {
   const body = node.body;
   if (body) {
+    const { edits } = context;
     cursor.enterScope();
-    node.params.forEach((param) => {
+    node.params.forEach((param, index) => {
       const identifier = findIdentifier(param);
+      let objectPattern;
+      let arrayPattern;
       if (identifier) {
         const parameter = identifier.name;
         if (identifier.name.endsWith("\xAA")) context.edits.at(identifier.end, () => {
@@ -29781,6 +29784,38 @@ function scopeFunction(cursor, node, context) {
             });
           }
         });
+      } else if ((objectPattern = findObjectPattern(param)) || (arrayPattern = findArrayPattern(param))) {
+        if (objectPattern ? hasAccessorPostfixDestructuring(objectPattern.properties) : hasAccessorPostfixArrayDestructuring(arrayPattern.elements)) {
+          const pattern = objectPattern ?? arrayPattern;
+          const covertName = "dp\xAA" + index;
+          cursor.willReplace(param, CovertIdentifier(covertName));
+          const covertDestructuring = CovertDestructuring(pattern, CovertIdentifier(covertName));
+          cursor.willMutate(() => {
+            transformRXS({
+              type: "Program",
+              start: 0,
+              end: 0,
+              hashbang: null,
+              sourceType: "script",
+              body: [importFromRuescript("destructure\xAA", requireFrom(context, "program")), covertDestructuring]
+            }, edits);
+          });
+          if (body.type === "BlockStatement") cursor.willMutate(() => {
+            body.body.unshift(covertDestructuring);
+          });
+          else cursor.willReplace(body, {
+            type: "BlockStatement",
+            start: 0,
+            end: 0,
+            body: [covertDestructuring, {
+              type: "ReturnStatement",
+              start: 0,
+              end: 0,
+              argument: body
+            }]
+          });
+          declareAbsorbedGettersFromAccessorPostfix(pattern, covertDestructuring, cursor, edits, context);
+        }
       }
     });
     cursor.visit(body, {
@@ -29837,11 +29872,12 @@ function queueAccessorVariableWrite(cursor, node, key, left, context) {
 }
 function importFromRuescript(importName, program) {
   const existing = findRuescriptImport(program.body);
-  if (existing && hasImport(importName, existing)) return;
+  if (existing && hasImport(importName, existing)) return existing;
   const declaration = existing ?? CovertImportDeclaration(RUESCRIPT_IMPORT_SOURCE);
   const specifier = CovertImportSpecifier(importName);
   declaration.specifiers.push(specifier);
   if (!existing) program.body.unshift(declaration);
+  return declaration;
 }
 function findRuescriptImport(body) {
   for (const statement of body) if (statement.type === "ImportDeclaration" && statement.source.value === RUESCRIPT_IMPORT_SOURCE) return statement;
@@ -29888,6 +29924,21 @@ function CovertNumber(num) {
     end: 0,
     raw: `${num}`,
     value: num
+  };
+}
+function CovertDestructuring(pattern, init) {
+  return {
+    type: "VariableDeclaration",
+    start: 0,
+    end: 0,
+    kind: "let",
+    declarations: [{
+      type: "VariableDeclarator",
+      start: 0,
+      end: 0,
+      id: pattern,
+      init
+    }]
   };
 }
 function CovertImportSpecifier(name) {
@@ -29976,6 +30027,9 @@ function declareAbsorbedGettersFromAccessorPostfix(destructuring, declaration, c
     const identifier = findIdentifier(element);
     if (identifier && identifier.name.endsWith("\xAA")) {
       const propertyKey = identifier.name.slice(0, -1);
+      cursor.willMutate(() => {
+        identifier.name = propertyKey;
+      });
       cursor.skip(identifier);
       cursor.scope.addAbsorbedGetter(propertyKey, declaration);
       if (element.type === "AssignmentPattern") {
@@ -30484,7 +30538,7 @@ var RXSPreprocessor = class {
     }
   }
   rewriteAccessorVariablePostfix() {
-    const matches = this.source.matchAll(/([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu);
+    const matches = this.source.matchAll(/([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=}])/gu);
     for (const match of matches) {
       const [original, identifier] = match;
       const index = match.index;
@@ -30500,7 +30554,7 @@ var RXSPreprocessor = class {
     }
   }
   rewriteExpressionPostfix() {
-    const matches = this.source.matchAll(/([)?!\]])@[\s/()]/g);
+    const matches = this.source.matchAll(/([)?!\]])@[\s/()}]/g);
     for (const match of matches) {
       const [original, before] = match;
       const index = match.index;
@@ -32351,7 +32405,6 @@ function transpileRueScript(file, source) {
   const { code, edits } = preprocessRXS(source);
   const { ast: transformedTree } = transformRXS(parseRXS(file, code).program, edits);
   const generated = printTSX(transformedTree);
-  console.log("generated", generated.code);
   return {
     source,
     transpiled: {

@@ -235,7 +235,7 @@ class RXSPreprocessor {
    }
 
    rewriteAccessorVariablePostfix() {
-      const pattern = /([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=])/gu;
+      const pattern = /([\p{ID_Continue}$\u200C\u200D])@([\s/().;,<:=}])/gu;
 
       const matches = this.source.matchAll(pattern)
 
@@ -261,7 +261,7 @@ class RXSPreprocessor {
    // optional postfix
    // bracket postfix
    rewriteExpressionPostfix() {
-      const pattern = /([)?!\]])@[\s/()]/g
+      const pattern = /([)?!\]])@[\s/()}]/g
       const matches = this.source.matchAll(pattern)
 
       for (const match of matches) {

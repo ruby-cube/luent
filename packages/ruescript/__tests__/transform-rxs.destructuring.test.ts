@@ -47,6 +47,33 @@ describe('transform', () => {
          `console.log(count);\n`
       )
    })
+ 
+   it.only('transforms aliased destructuring with get keyword - object pattern', () => {
+      const { code, edits } = preprocessRXS(
+         `get { num: count, bar } = obj;` +
+         `console.log(count)\n` +
+         `console.log(count@)\n`
+      )
+      expect(code).toBe(
+         `let { num: count, bar } = obj;` +
+         `console.log(count)\n` +
+         `console.log(countª)\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+
+      expect(generated.code).toBe(
+         `import { destructureª } from "@rue/ruescript";\n` +
+         `const { num: count, bar } = destructureª(obj, {\n` +
+         `\tnum: 1,\n` +
+         `\tbar: 1\n` +
+         `});\n` +
+         `console.log(count());\n` +
+         `console.log(count);\n`
+      )
+   })
 
    it('transforms destructuring with get keyword with defaults - object pattern', () => {
       const { code, edits } = preprocessRXS(
@@ -197,6 +224,60 @@ describe('transform', () => {
          `import { destructureª } from "@rue/ruescript";\n` +
          `const { count, bar } = destructureª(obj, {\n` +
          `\tcount: 1,\n` +
+         `\tbar: 0\n` +
+         `});\n` +
+         `console.log(count());\n` +
+         `console.log(count);\n`
+      )
+   })
+
+   it('transforms aliased destructuring with @ postfix - object pattern', () => {
+      const { code, edits } = preprocessRXS(
+         `const { num: count@, bar } = obj;` +
+         `console.log(count)\n` +
+         `console.log(count@)`
+      )
+      expect(code).toBe(
+         `const { num: countª, bar } = obj;` +
+         `console.log(count)\n` +
+         `console.log(countª)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+
+      expect(generated.code).toBe(
+         `import { destructureª } from "@rue/ruescript";\n` +
+         `const { num: count, bar } = destructureª(obj, {\n` +
+         `\tnum: 1,\n` +
+         `\tbar: 0\n` +
+         `});\n` +
+         `console.log(count());\n` +
+         `console.log(count);\n`
+      )
+   })
+
+   it('transforms aliased destructuring with @ postfix - object pattern', () => {
+      const { code, edits } = preprocessRXS(
+         `const { num: count@ = () => 0, bar } = obj;` +
+         `console.log(count)\n` +
+         `console.log(count@)`
+      )
+      expect(code).toBe(
+         `const { num: countª = () => 0, bar } = obj;` +
+         `console.log(count)\n` +
+         `console.log(countª)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+
+      expect(generated.code).toBe(
+         `import { destructureª, assertª } from "@rue/ruescript";\n` +
+         `const { num: count = assertª(() => 0), bar } = destructureª(obj, {\n` +
+         `\tnum: 1,\n` +
          `\tbar: 0\n` +
          `});\n` +
          `console.log(count());\n` +

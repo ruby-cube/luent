@@ -1028,16 +1028,16 @@ function declareAbsorbedGettersFromAccessorPostfix<T extends ASTNode, C>(destruc
          }
          cursor.skip(key)
          const identifier = findIdentifier(value)
-         if (identifier && key.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
-            const propertyKey = key.name.slice(0, -1)
+         if (identifier && identifier.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
+            cursor.skip(identifier)
+            const propertyKey = identifier.name.slice(0, -1)
             cursor.willMutate(() => {
-               key.name = propertyKey;
-               (value as BindingIdentifier).name = propertyKey
+               key.name = key.name === identifier.name ? propertyKey : key.name;
+               identifier.name = propertyKey
             })
             cursor.skip(identifier)
             cursor.scope.addAbsorbedGetter(propertyKey, declaration)
             if (value.type === 'AssignmentPattern' && value.left.type === 'Identifier') {
-               value.left.name = propertyKey
                const program = requireFrom(context, 'program')
                cursor.willMutate(() => {
                   importFromRuescript('assertª', program)
@@ -1111,11 +1111,11 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
             throw new InternalError('uncovered case')
          }
          cursor.skip(key)
-         const propertyKey = undoAccessorVariablePostfix(key, cursor, edits)
+         undoAccessorVariablePostfix(key, cursor, edits)
          const identifier = findIdentifier(value)
          if (identifier) {
             cursor.skip(identifier)
-            undoAccessorVariablePostfix(identifier, cursor, edits)
+            const propertyKey = undoAccessorVariablePostfix(identifier, cursor, edits)
             cursor.scope.addAbsorbedGetter(propertyKey, declaration)
             if (value.type === 'AssignmentPattern') {
                const program = requireFrom(context, 'program')
@@ -1284,7 +1284,7 @@ function ObjectDestructuringMapFromGetKeyword(destructuring: ObjectPattern, tran
       let objectPattern;
       let arrayPattern;
       if (identifier) {
-         objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), deriveValue(key.name), property.computed)
+         objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), deriveValue(identifier.name), property.computed)
       }
       else if (objectPattern = findObjectPattern(value)) {
          objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), ObjectDestructuringMapFromGetKeyword(objectPattern, transformName, deriveValue), property.computed)

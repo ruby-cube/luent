@@ -1,12 +1,22 @@
-
-get count = ref(0);
+const b = 9
+get count = ref(0 + b);
 get other = ref('something');
 
 // const obj = {
 //   get frog: ref('kermit')
 //}
 
-watch((other + 1)@);
+watch({ 
+   const a = 0;
+   const b = 1;
+   return other + b;
+}@);
+
+const { o, p@} = {o: 0, p: 1}
+
+function Foo() {
+
+}
 
 count = 'okj';
 other = 'ho';
