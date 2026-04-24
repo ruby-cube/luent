@@ -1,4 +1,4 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse, traverseAll } from './traverse.ts';
 import { BaseNode } from './4-generate.ts';
@@ -347,7 +347,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      importFromRuescript('toª', program)
                      leaf.name = leaf.name.slice(0, -1)
                   })
-                  this.willReplace(leaf, CovertCallExpression('toª', [leaf as Identifier]))
+                  this.willReplace(leaf, CovertCallExpression('toª', [leaf as BindingIdentifier]))
                })
             }
          }
@@ -533,7 +533,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                            start: node.start,
                            end: node.end,
                            object: CovertCallExpression('ªof', [exp.object, CovertString('?')]),
-                           property: exp.property as Identifier,
+                           property: exp.property as BindingIdentifier,
                            computed: exp.computed as false,
                            optional: false
                         })
@@ -579,7 +579,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                            start: node.start,
                            end: node.end,
                            object: CovertCallExpression('ªof', [exp.object, CovertString('!')]),
-                           property: exp.property as Identifier,
+                           property: exp.property as BindingIdentifier,
                            computed: exp.computed as false,
                            optional: false
                         })
@@ -603,7 +603,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                         start: node.start,
                         end: node.end,
                         object: CovertCallExpression('ªof', [expression.object]),
-                        property: expression.property as Identifier,
+                        property: expression.property as BindingIdentifier,
                         computed: true,
                         optional: false
                      })
@@ -616,9 +616,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          })
       },
       IfStatement(node, context) {
-         if (isTypeGuard(node.test)) {
-
-         }
+         transformAbsorbedTypeGuards(node.test, this)
       }
    })
 }
@@ -634,7 +632,7 @@ function hasAwait(node: ASTNode) {
 
 
 
-function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Function | ArrowFunctionExpression, context: Context) {
+function scopeFunction(cursor: Cursor<ASTNode, Context>, node: Function | ArrowFunctionExpression, context: Context) {
    const body = node.body
 
    if (body) {
@@ -689,7 +687,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
             if (objectPattern ? hasAccessorPostfixDestructuring(objectPattern.properties) : hasAccessorPostfixArrayDestructuring(arrayPattern!.elements)) {
                const pattern = objectPattern ?? arrayPattern!
                const covertName = 'dpª' + index
-               cursor.willReplace(param as any, CovertIdentifier(covertName) as any)
+               cursor.willReplace(param, CovertIdentifier(covertName))
                const covertDestructuring = CovertDestructuring(pattern, CovertIdentifier(covertName))
                cursor.willMutate(() => {
                   const program = requireFrom(context, 'program')
@@ -710,7 +708,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                   })
                }
                else {
-                  cursor.willReplace(body as any, CovertFunctionBlockBody(covertDestructuring, body) as any)
+                  cursor.willReplace(body, CovertFunctionBlockBody(covertDestructuring, body))
                }
                declareAbsorbedGettersFromAccessorPostfix(pattern, covertDestructuring, cursor, edits, context)
             }
@@ -782,13 +780,17 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
 export const ACCESSOR_VARIABLE_POSTFIX = 'ª'
 export const ACCESSOR_EXPRESSION_POSTFIX = '!'
 
+type Identifier = IdentifierReference | IdentifierName | BindingIdentifier | LabelIdentifier | TSThisParameter | TSIndexSignatureName |({
+    decorators?: Array<Decorator>;
+} & BindingIdentifier)
 
-function GetterCall(node: BindingIdentifier): CallExpression {
+function GetterCall(node: Identifier): CallExpression {
    return {
       type: 'CallExpression',
       arguments: [],
       start: 0,
       end: 0,
+      // @ts-expect-error
       callee: node,
       optional: false
    }
@@ -816,8 +818,8 @@ function DerivationArrowFunctionExpression(expression: Expression): ArrowFunctio
  * source: count++;
  * final: assertµ(count).value++;
  */
-function queueAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpression | UpdateExpression>(
-   cursor: Cursor<T, Context>,
+function queueAccessorVariableWrite<N extends AssignmentExpression | UpdateExpression>(
+   cursor: Cursor<ASTNode, Context>,
    node: N,
    key: 'left' | 'argument',
    left: BindingIdentifier,
@@ -972,7 +974,7 @@ function CovertImportSpecifier(name: string): ImportSpecifier {
 
 // #endregion
 
-function CovertFunctionBlockBody(insert: Statement | Directive, body: Expression) {
+function CovertFunctionBlockBody(insert: Statement | Directive, body: Expression): BlockStatement {
    return {
       type: 'BlockStatement',
       start: 0,
@@ -1007,7 +1009,7 @@ function CovertCallExpression(name: string, args: Expression[]): CallExpression 
 }
 
 
-function isAssignee(node: BindingIdentifier & ASTNode) {
+function isAssignee(node: Identifier & ASTNode) {
    const { parent } = node
    if (!parent) return false;
    return parent.type === 'VariableDeclarator' ||
@@ -1015,14 +1017,14 @@ function isAssignee(node: BindingIdentifier & ASTNode) {
       parent.type === 'AssignmentExpression' && parent.left === node
 }
 
-function isPropertyKey(node: BindingIdentifier & ASTNode) {
+function isPropertyKey(node: Identifier & ASTNode) {
    const parent = node.parent
    if (!parent) return false;
    return parent.type === 'MemberExpression' && parent.property === node ||
       parent.type === 'ObjectExpression' && parent.properties.find(property => property.type === 'Property' && property.key === node)
 }
 
-function declareAbsorbedGettersFromAccessorPostfix<T extends ASTNode, C>(destructuring: ObjectPattern | ArrayPattern, declaration: VariableDeclaration, cursor: Cursor<T, C>, edits: Edits, context: Context) {
+function declareAbsorbedGettersFromAccessorPostfix(destructuring: ObjectPattern | ArrayPattern, declaration: VariableDeclaration, cursor: Cursor<ASTNode, Context>, edits: Edits, context: Context) {
    if (destructuring.type === 'ObjectPattern') {
       destructuring.properties.forEach(property => {
          if (property.type === 'RestElement') {
@@ -1106,7 +1108,7 @@ function findArrayPattern(node: BindingPattern | ParamPattern) {
    return node.type === 'ArrayPattern' ? node : node.type === 'AssignmentPattern' && node.left.type === 'ArrayPattern' ? node.left : undefined
 }
 
-function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destructuring: ObjectPattern | ArrayPattern, declaration: VariableDeclaration, cursor: Cursor<T, C>, edits: Edits, context: Context) {
+function declareAbsorbedGettersFromGetDestructuring(destructuring: ObjectPattern | ArrayPattern, declaration: VariableDeclaration, cursor: Cursor<ASTNode, Context>, edits: Edits, context: Context) {
    if (destructuring.type === 'ObjectPattern') {
       destructuring.properties.forEach(property => {
          if (property.type === 'RestElement') {
@@ -1171,7 +1173,7 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
    }
 }
 
-function undoAccessorVariablePostfix<T extends ASTNode, C>(node: BindingIdentifier, cursor: Cursor<T, C>, edits: Edits) {
+function undoAccessorVariablePostfix(node: BindingIdentifier, cursor: Cursor<ASTNode, Context>, edits: Edits) {
    let variable = node.name
    if (node.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
       edits.at(node.end, edit => {
@@ -1383,7 +1385,7 @@ function CovertTypeGuardVariableDeclaration(variable: string): VariableDeclarati
  * - inserts type guard helper variable after declaration: e.g. let ø_obj: ReturnType<typeof obj>;
  * - replaces accessor variable with: e.g. (ø_obj = obj(), ø_obj)
  */
-function transformAbsorbedTypeGuards<T extends BaseNode, C>(test: Expression, cursor: Cursor<T, C>): boolean {
+function transformAbsorbedTypeGuards(test: Expression, cursor: Cursor<ASTNode, Context>): boolean {
    // TODO: writing to accessor variable within test: 
    //  - `ø_obj = obj.value = value` 
    //  - `(ø_obj = obj.value++, ø_obj++)` 
@@ -1396,7 +1398,7 @@ function transformAbsorbedTypeGuards<T extends BaseNode, C>(test: Expression, cu
          if (!cursor.scope.isTypeGuarded(variable)) {
             cursor.scope.markTypeGuarded(variable)
             if (declaration.type === 'VariableDeclaration') {
-               cursor.willInsertAfter(declaration as any, CovertTypeGuardVariableDeclaration(variable) as any)
+               cursor.willInsertAfter(declaration, CovertTypeGuardVariableDeclaration(variable))
             }
             else {
                const { body } = declaration
@@ -1407,12 +1409,12 @@ function transformAbsorbedTypeGuards<T extends BaseNode, C>(test: Expression, cu
                   })
                }
                else {
-                  cursor.willReplace(body as any, CovertFunctionBlockBody(CovertTypeGuardVariableDeclaration(variable), body) as any)
+                  cursor.willReplace(body, CovertFunctionBlockBody(CovertTypeGuardVariableDeclaration(variable), body))
                }
             }
          }
          // (ø_obj = obj(), ø_obj)
-         cursor.willReplace(test as any, {
+         cursor.willReplace(test, {
             type: 'SequenceExpression',
             start: 0,
             end: 0,
@@ -1423,8 +1425,8 @@ function transformAbsorbedTypeGuards<T extends BaseNode, C>(test: Expression, cu
                left: CovertIdentifier(typeGuardHelperVariable),
                operator: '=',
                right: CovertCallExpression(variable, []),
-            } satisfies AssignmentExpression, CovertIdentifier(typeGuardHelperVariable)]
-         } satisfies SequenceExpression as any)
+            }, CovertIdentifier(typeGuardHelperVariable)]
+         })
          return true;
       }
       return false;
@@ -1484,7 +1486,7 @@ function transformTypeGuardedAccessorVariableReads(identifier: IdentifierReferen
  * (ø_obj = ++obj.value)
  */
 function transformTypeGuardedAccessorVariableWrites() {
-   
+
 }
 
 class InternalError extends Error { }
