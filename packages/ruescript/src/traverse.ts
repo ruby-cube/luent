@@ -1,4 +1,4 @@
-import { ArrowFunctionExpression, FunctionBody, ParamPattern, VariableDeclaration } from "oxc-parser";
+import { ArrowFunctionExpression, Function, VariableDeclaration } from "oxc-parser";
 import { createStack } from "../../utils/index.ts";
 import { CHILD_KEYS } from "./ast.ts";
 import { ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts";
@@ -98,6 +98,14 @@ class Scope {
          scope = scope.parent
       }
       return undefined;
+   }
+
+   private typeGuarded = new Set<string>()
+   markTypeGuarded(name: string) {
+      this.typeGuarded.add(name)
+   }
+   isTypeGuarded(name: string) {
+      return this.typeGuarded.has(name)
    }
 }
 

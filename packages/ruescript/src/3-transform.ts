@@ -1,4 +1,4 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, traverse, traverseAll } from './traverse.ts';
 import { BaseNode } from './4-generate.ts';
@@ -614,6 +614,11 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                   break;
             }
          })
+      },
+      IfStatement(node, context) {
+         if (isTypeGuard(node.test)) {
+
+         }
       }
    })
 }
@@ -648,10 +653,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                   const program = requireFrom(context, 'program')
                   const variable = parameter.slice(0, -1)
 
-                  cursor.scope.addAbsorbedGetter(variable,
-                     // @ts-expect-error
-                     node
-                  )
+                  cursor.scope.addAbsorbedGetter(variable, node)
                   cursor.willMutate(() => {
                      importFromRuescript('toª', program)
                      // bar = toª(bar)
@@ -708,19 +710,7 @@ function scopeFunction<T extends ASTNode>(cursor: Cursor<T, Context>, node: Func
                   })
                }
                else {
-                  cursor.willReplace(body as any, {
-                     type: 'BlockStatement',
-                     start: 0,
-                     end: 0,
-                     body: [
-                        covertDestructuring,
-                        {
-                           type: 'ReturnStatement',
-                           start: 0,
-                           end: 0,
-                           argument: body
-                        }]
-                  } as any)
+                  cursor.willReplace(body as any, CovertFunctionBlockBody(covertDestructuring, body) as any)
                }
                declareAbsorbedGettersFromAccessorPostfix(pattern, covertDestructuring, cursor, edits, context)
             }
@@ -793,9 +783,7 @@ export const ACCESSOR_VARIABLE_POSTFIX = 'ª'
 export const ACCESSOR_EXPRESSION_POSTFIX = '!'
 
 
-type Identifier = { name: string, start: number, end: number, type: 'Identifier' }
-
-function GetterCall(node: Identifier): CallExpression {
+function GetterCall(node: BindingIdentifier): CallExpression {
    return {
       type: 'CallExpression',
       arguments: [],
@@ -832,7 +820,7 @@ function queueAccessorVariableWrite<T extends ASTNode, N extends AssignmentExpre
    cursor: Cursor<T, Context>,
    node: N,
    key: 'left' | 'argument',
-   left: Identifier,
+   left: BindingIdentifier,
    context: Context
 ) {
    if (cursor.scope.getAbsorbedGetterDeclaration(left.name)) {
@@ -910,12 +898,15 @@ function CovertImportDeclaration(source: string): ImportDeclaration {
 }
 
 
-function CovertIdentifier(name: string): Identifier {
+
+function CovertIdentifier(name: string, typeAnnotation?: TSTypeAnnotation | null): BindingIdentifier {
    return {
       type: 'Identifier',
       start: 0,
       end: 0,
-      name: name
+      name,
+      //@ts-expect-error
+      typeAnnotation
    }
 }
 
@@ -939,7 +930,7 @@ function CovertNumber(num: number): NumericLiteral {
    }
 }
 
-function CovertDestructuring(pattern: ObjectPattern | ArrayPattern, init: Identifier): VariableDeclaration {
+function CovertDestructuring(pattern: ObjectPattern | ArrayPattern, init: BindingIdentifier): VariableDeclaration {
    return {
       type: 'VariableDeclaration',
       start: 0,
@@ -981,6 +972,23 @@ function CovertImportSpecifier(name: string): ImportSpecifier {
 
 // #endregion
 
+function CovertFunctionBlockBody(insert: Statement | Directive, body: Expression) {
+   return {
+      type: 'BlockStatement',
+      start: 0,
+      end: 0,
+      body: [
+         insert,
+         {
+            type: 'ReturnStatement',
+            start: 0,
+            end: 0,
+            argument: body
+         }
+      ]
+   }
+}
+
 
 function CovertCallExpression(name: string, args: Expression[]): CallExpression {
    return {
@@ -999,7 +1007,7 @@ function CovertCallExpression(name: string, args: Expression[]): CallExpression 
 }
 
 
-function isAssignee(node: Identifier & ASTNode) {
+function isAssignee(node: BindingIdentifier & ASTNode) {
    const { parent } = node
    if (!parent) return false;
    return parent.type === 'VariableDeclarator' ||
@@ -1007,7 +1015,7 @@ function isAssignee(node: Identifier & ASTNode) {
       parent.type === 'AssignmentExpression' && parent.left === node
 }
 
-function isPropertyKey(node: Identifier & ASTNode) {
+function isPropertyKey(node: BindingIdentifier & ASTNode) {
    const parent = node.parent
    if (!parent) return false;
    return parent.type === 'MemberExpression' && parent.property === node ||
@@ -1163,7 +1171,7 @@ function declareAbsorbedGettersFromGetDestructuring<T extends ASTNode, C>(destru
    }
 }
 
-function undoAccessorVariablePostfix<T extends ASTNode, C>(node: Identifier, cursor: Cursor<T, C>, edits: Edits) {
+function undoAccessorVariablePostfix<T extends ASTNode, C>(node: BindingIdentifier, cursor: Cursor<T, C>, edits: Edits) {
    let variable = node.name
    if (node.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
       edits.at(node.end, edit => {
@@ -1320,6 +1328,163 @@ function ArrayDestructuringMapFromGetKeyword(destructuring: ArrayPattern, transf
       }
    })
    return arrayExpression
+}
+
+// #region: Type Guards
+
+// - truthy conditions: `!!obj` `obj` `obj !== undefined` `obj != undefined` , `null`
+// - falsey conditions: `!obj` `obj === undefined` `obj == undefined` , `null`
+
+const TYPE_GUARD_PREFIX = 'ø_'
+
+/**
+ * @example
+ * let ø_obj: ReturnType<typeof obj>;
+ */
+function CovertTypeGuardVariableDeclaration(variable: string): VariableDeclaration {
+   return {
+      type: 'VariableDeclaration',
+      start: 0,
+      end: 0,
+      kind: 'let',
+      declarations: [{
+         type: 'VariableDeclarator',
+         start: 0,
+         end: 0,
+         id: CovertIdentifier(TYPE_GUARD_PREFIX + variable, {
+            type: 'TSTypeAnnotation',
+            start: 0,
+            end: 0,
+            typeAnnotation: {
+               type: 'TSTypeReference',
+               start: 0,
+               end: 0,
+               typeName: CovertIdentifier('ReturnType'),
+               typeArguments: {
+                  type: 'TSTypeParameterInstantiation',
+                  start: 0,
+                  end: 0,
+                  params: [{
+                     type: 'TSTypeQuery',
+                     start: 0,
+                     end: 0,
+                     exprName: CovertIdentifier(variable),
+                     typeArguments: null,
+                  }]
+               } satisfies TSTypeParameterInstantiation
+            }
+         }),
+         init: null,
+      } satisfies VariableDeclarator]
+   }
+}
+
+/**
+ * - inserts type guard helper variable after declaration: e.g. let ø_obj: ReturnType<typeof obj>;
+ * - replaces accessor variable with: e.g. (ø_obj = obj(), ø_obj)
+ */
+function transformAbsorbedTypeGuards<T extends BaseNode, C>(test: Expression, cursor: Cursor<T, C>): boolean {
+   // TODO: writing to accessor variable within test: 
+   //  - `ø_obj = obj.value = value` 
+   //  - `(ø_obj = obj.value++, ø_obj++)` 
+   //  - `(ø_obj = ++obj.value)`
+   if (test.type === 'Identifier') {
+      const variable = test.name
+      const declaration = cursor.scope.getAbsorbedGetterDeclaration(test.name)
+      if (declaration) {
+         const typeGuardHelperVariable = TYPE_GUARD_PREFIX + variable
+         if (!cursor.scope.isTypeGuarded(variable)) {
+            cursor.scope.markTypeGuarded(variable)
+            if (declaration.type === 'VariableDeclaration') {
+               cursor.willInsertAfter(declaration as any, CovertTypeGuardVariableDeclaration(variable) as any)
+            }
+            else {
+               const { body } = declaration
+               if (!body) return false;
+               if (body.type === 'BlockStatement') {
+                  cursor.willMutate(() => {
+                     body.body.unshift(CovertTypeGuardVariableDeclaration(variable))
+                  })
+               }
+               else {
+                  cursor.willReplace(body as any, CovertFunctionBlockBody(CovertTypeGuardVariableDeclaration(variable), body) as any)
+               }
+            }
+         }
+         // (ø_obj = obj(), ø_obj)
+         cursor.willReplace(test as any, {
+            type: 'SequenceExpression',
+            start: 0,
+            end: 0,
+            expressions: [{
+               type: 'AssignmentExpression',
+               start: 0,
+               end: 0,
+               left: CovertIdentifier(typeGuardHelperVariable),
+               operator: '=',
+               right: CovertCallExpression(variable, []),
+            } satisfies AssignmentExpression, CovertIdentifier(typeGuardHelperVariable)]
+         } satisfies SequenceExpression as any)
+         return true;
+      }
+      return false;
+   }
+   if (test.type === 'UnaryExpression') {
+      return transformAbsorbedTypeGuards(test.argument, cursor)
+   }
+   if (test.type === 'BinaryExpression' && test.left.type !== 'PrivateIdentifier') {
+      return transformAbsorbedTypeGuards(test.left, cursor)
+   }
+   if (test.type === 'LogicalExpression') {
+      const left = transformAbsorbedTypeGuards(test.left, cursor)
+      const right = transformAbsorbedTypeGuards(test.right, cursor)
+      return left || right;
+   }
+   if (test.type === 'AssignmentExpression') {
+      return transformAbsorbedTypeGuards(test.right, cursor)
+   }
+   if (test.type === 'SequenceExpression') {
+      return transformAbsorbedTypeGuards(test.expressions.at(-1)!, cursor)
+   }
+   throw new InternalError('uncovered case')
+}
+
+// (obj() as typeof ø_obj)
+function transformTypeGuardedAccessorVariableReads(identifier: IdentifierReference, cursor: Cursor<ASTNode, Context>) {
+   if (cursor.scope.isTypeGuarded(identifier.name)) {
+      cursor.willReplace(identifier, {
+         type: 'TSAsExpression',
+         start: 0,
+         end: 0,
+         expression: {
+            type: 'CallExpression',
+            start: 0,
+            end: 0,
+            callee: identifier,
+            arguments: [],
+            optional: false,
+         },
+         typeAnnotation: {
+            type: 'TSTypeQuery',
+            exprName: CovertIdentifier(TYPE_GUARD_PREFIX + identifier.name),
+            start: 0,
+            end: 0,
+            typeArguments: null,
+         },
+      })
+      return true;
+   }
+   return false;
+}
+
+/**
+ * @example
+ *  ø_obj = assertµ(obj).value = value
+ * (ø_obj = obj.value++, ø_obj++)
+ * (ø_obj = ++obj.value)
+ */
+function transformTypeGuardedAccessorVariableWrites() {
+   
 }
 
 class InternalError extends Error { }
