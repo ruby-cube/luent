@@ -6,7 +6,7 @@ import { printTSX } from "../src/4-generate";
 
 describe('RueScript JSX transforms', () => {
 
-   it('transforms jsx attribute shorthand', () => {
+   it.only('transforms jsx attribute shorthand', () => {
       const { code, edits } = preprocessRXS(
          `<Tooltip something='true' {tooltip}></Tooltip>`
       )

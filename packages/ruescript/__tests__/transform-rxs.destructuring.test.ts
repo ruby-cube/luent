@@ -48,7 +48,7 @@ describe('transform', () => {
       )
    })
  
-   it.only('transforms aliased destructuring with get keyword - object pattern', () => {
+   it('transforms aliased destructuring with get keyword - object pattern', () => {
       const { code, edits } = preprocessRXS(
          `get { num: count, bar } = obj;` +
          `console.log(count)\n` +

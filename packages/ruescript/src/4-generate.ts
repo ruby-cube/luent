@@ -617,7 +617,11 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
        * run?.()
        */
       CallExpression(node, cursor) {
+         const parenthesize = !isSimpleNode(node.callee)
+         if (parenthesize) cursor.write('(')
          cursor.visit(node.callee)
+         if (parenthesize) cursor.write(')')
+
          if (node.optional) cursor.write('?.')
          if (node.typeArguments) {
             cursor.visit(node.typeArguments)
@@ -647,7 +651,10 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
        * obj?.[value]
        */
       MemberExpression(node, cursor) {
+         const parenthesize = !isSimpleNode(node.object)
+         if (parenthesize) cursor.write('(')
          cursor.visit(node.object)
+         if (parenthesize) cursor.write(')')
          if (node.optional) cursor.write('?.')
          if (node.computed) cursor.write('[')
          else if (!node.optional) cursor.write('.')
@@ -2570,6 +2577,19 @@ function escapeJSXTextValue(value: string) {
       .replaceAll('>', '&gt;')
       .replaceAll('{', '&#123;')
       .replaceAll('}', '&#125;')
+}
+
+function isSimpleNode(node: ASTNode) {
+   return node.type === 'Identifier' ||
+      node.type === 'MemberExpression' ||
+      node.type === 'CallExpression' ||
+      node.type === 'Super' ||
+      node.type === 'ThisExpression' ||
+      node.type === 'ParenthesizedExpression' ||
+      node.type === 'SequenceExpression' ||
+      node.type === 'NewExpression' ||
+      node.type === 'ImportExpression' ||
+      node.type === 'Literal'
 }
 
 

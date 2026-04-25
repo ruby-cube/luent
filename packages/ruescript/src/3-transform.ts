@@ -1,9 +1,10 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator, AssignmentOperator, DoWhileStatement, WhileStatement, ConditionalExpression } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
-import { Cursor, traverse, traverseAll } from './traverse.ts';
+import { Cursor, Scope, traverse, traverseAll } from './traverse.ts';
 import { BaseNode } from './4-generate.ts';
 import { assert } from 'node:console';
 import { Block } from 'typescript';
+import { State } from 'apps/demos/src/ui-base/menu/store/MenuStore.ts';
 
 
 // (1) reverse offset pass
@@ -616,9 +617,63 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          })
       },
       IfStatement(node, context) {
-         transformAbsorbedTypeGuards(node.test, this)
+         transformIfStatement(node, this, context)
+      },
+
+      WhileStatement(node, context) {
+         transformTestAndBody(node.test, node.body, this, context)
+      },
+
+      DoWhileStatement(node, context) {
+         transformTestAndBody(node.test, node.body, this, context)
+      },
+
+      ConditionalExpression(node, context) {
+         transformIfStatement(node, this, context)
+      },
+
+      LogicalExpression(node, context) {
+         transformTestAndBody(node.left, node.right, this, context)
       }
    })
+}
+
+function transformIfStatement(node: IfStatement | ConditionalExpression, cursor: Cursor<ASTNode, Context>, context: Context) {
+   if (transformAbsorbedTypeGuards(node.test, cursor)) {
+      const { consequent, alternate } = node
+      transformConditionalBody(consequent, cursor, context)
+
+      if (alternate) {
+         transformConditionalBody(alternate, cursor, context)
+      }
+   }
+}
+
+function transformTestAndBody(test: Expression, body: Statement | Expression, cursor: Cursor<ASTNode, Context>, context: Context) {
+   if (transformAbsorbedTypeGuards(test, cursor)) {
+      transformConditionalBody(body, cursor, context)
+   }
+}
+
+function transformConditionalBody(node: Statement | Expression, cursor: Cursor<ASTNode, Context>, context: Context) {
+   const { scope } = cursor
+   traverse<ASTNode, Context>(node, context, {
+      AssignmentExpression(node) {
+         transformTypeGuardedAccessorVariableWrite(node, scope, this)
+      },
+      Identifier(leaf) {
+         transformTypeGuardedAccessorVariableRead(leaf, scope, this);
+      }
+   })
+   cursor.visit(node)
+}
+
+function isTSThisParameter(node: Identifier): node is TSThisParameter {
+   return node.name === 'this'
+}
+
+function isTSIndexSignatureName(node: ASTNode): node is TSIndexSignatureName {
+   return node.parent?.type === 'TSIndexSignature'
 }
 
 
@@ -715,7 +770,6 @@ function scopeFunction(cursor: Cursor<ASTNode, Context>, node: Function | ArrowF
          }
       })
 
-
       cursor.visit(body, { ...context, scoped: true })
       cursor.exitScope()
    }
@@ -780,8 +834,8 @@ function scopeFunction(cursor: Cursor<ASTNode, Context>, node: Function | ArrowF
 export const ACCESSOR_VARIABLE_POSTFIX = 'ª'
 export const ACCESSOR_EXPRESSION_POSTFIX = '!'
 
-type Identifier = IdentifierReference | IdentifierName | BindingIdentifier | LabelIdentifier | TSThisParameter | TSIndexSignatureName |({
-    decorators?: Array<Decorator>;
+type Identifier = IdentifierReference | IdentifierName | BindingIdentifier | LabelIdentifier | TSThisParameter | TSIndexSignatureName | ({
+   decorators?: Array<Decorator>;
 } & BindingIdentifier)
 
 function GetterCall(node: Identifier): CallExpression {
@@ -1381,18 +1435,34 @@ function CovertTypeGuardVariableDeclaration(variable: string): VariableDeclarati
    }
 }
 
+function CovertSequenceExpression(expressions: Expression[]): SequenceExpression {
+   return {
+      type: 'SequenceExpression',
+      start: 0,
+      end: 0,
+      expressions
+   }
+}
+
+function CovertAssignmentExpression(left: AssignmentTarget, operator: AssignmentOperator, right: Expression): AssignmentExpression {
+   return {
+      type: 'AssignmentExpression',
+      start: 0,
+      end: 0,
+      left,
+      operator: '=',
+      right
+   }
+}
+
 /**
  * - inserts type guard helper variable after declaration: e.g. let ø_obj: ReturnType<typeof obj>;
  * - replaces accessor variable with: e.g. (ø_obj = obj(), ø_obj)
  */
-function transformAbsorbedTypeGuards(test: Expression, cursor: Cursor<ASTNode, Context>): boolean {
-   // TODO: writing to accessor variable within test: 
-   //  - `ø_obj = obj.value = value` 
-   //  - `(ø_obj = obj.value++, ø_obj++)` 
-   //  - `(ø_obj = ++obj.value)`
+function transformAbsorbedTypeGuards(test: Expression | AssignmentTarget, cursor: Cursor<ASTNode, Context>): boolean {
    if (test.type === 'Identifier') {
       const variable = test.name
-      const declaration = cursor.scope.getAbsorbedGetterDeclaration(test.name)
+      const declaration = cursor.scope.getAbsorbedGetterDeclaration(variable)
       if (declaration) {
          const typeGuardHelperVariable = TYPE_GUARD_PREFIX + variable
          if (!cursor.scope.isTypeGuarded(variable)) {
@@ -1413,20 +1483,16 @@ function transformAbsorbedTypeGuards(test: Expression, cursor: Cursor<ASTNode, C
                }
             }
          }
+         if (isAssignee(test)) {
+            return true;
+         }
          // (ø_obj = obj(), ø_obj)
-         cursor.willReplace(test, {
-            type: 'SequenceExpression',
-            start: 0,
-            end: 0,
-            expressions: [{
-               type: 'AssignmentExpression',
-               start: 0,
-               end: 0,
-               left: CovertIdentifier(typeGuardHelperVariable),
-               operator: '=',
-               right: CovertCallExpression(variable, []),
-            }, CovertIdentifier(typeGuardHelperVariable)]
-         })
+         else {
+            cursor.willReplace(test, CovertSequenceExpression([
+               CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), '=', CovertCallExpression(variable, [])),
+               CovertIdentifier(typeGuardHelperVariable)
+            ]))
+         }
          return true;
       }
       return false;
@@ -1443,7 +1509,21 @@ function transformAbsorbedTypeGuards(test: Expression, cursor: Cursor<ASTNode, C
       return left || right;
    }
    if (test.type === 'AssignmentExpression') {
-      return transformAbsorbedTypeGuards(test.right, cursor)
+      const { left } = test
+      // FIX:
+      const assignee = transformAbsorbedTypeGuards(left, cursor)
+      if (assignee) {
+         console.log('assignment!', test)
+         if (left.type !== 'Identifier') throw new InternalError('uncovered case');
+         const variable = left.name
+         const typeGuardHelperVariable = TYPE_GUARD_PREFIX + variable
+         cursor.willReplace(test, CovertSequenceExpression([
+            CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), '=', CovertIdentifier(variable)),
+            CovertIdentifier(typeGuardHelperVariable)
+         ]))
+      }
+      const right = transformAbsorbedTypeGuards(test.right, cursor)
+      return assignee || right;
    }
    if (test.type === 'SequenceExpression') {
       return transformAbsorbedTypeGuards(test.expressions.at(-1)!, cursor)
@@ -1451,21 +1531,16 @@ function transformAbsorbedTypeGuards(test: Expression, cursor: Cursor<ASTNode, C
    throw new InternalError('uncovered case')
 }
 
+
 // (obj() as typeof ø_obj)
-function transformTypeGuardedAccessorVariableReads(identifier: IdentifierReference, cursor: Cursor<ASTNode, Context>) {
-   if (cursor.scope.isTypeGuarded(identifier.name)) {
+function transformTypeGuardedAccessorVariableRead(identifier: Identifier, scope: Scope, cursor: Cursor<ASTNode, Context>) {
+   if (!identifier.name || isAssignee(identifier) || isPropertyKey(identifier) || isTSIndexSignatureName(identifier) || isTSThisParameter(identifier)) return false;
+   if (scope.isTypeGuarded(identifier.name)) {
       cursor.willReplace(identifier, {
          type: 'TSAsExpression',
          start: 0,
          end: 0,
-         expression: {
-            type: 'CallExpression',
-            start: 0,
-            end: 0,
-            callee: identifier,
-            arguments: [],
-            optional: false,
-         },
+         expression: identifier,
          typeAnnotation: {
             type: 'TSTypeQuery',
             exprName: CovertIdentifier(TYPE_GUARD_PREFIX + identifier.name),
@@ -1482,11 +1557,21 @@ function transformTypeGuardedAccessorVariableReads(identifier: IdentifierReferen
 /**
  * @example
  *  ø_obj = assertµ(obj).value = value
- * (ø_obj = obj.value++, ø_obj++)
- * (ø_obj = ++obj.value)
  */
-function transformTypeGuardedAccessorVariableWrites() {
-
+function transformTypeGuardedAccessorVariableWrite(assignment: AssignmentExpression, scope: Scope, cursor: Cursor<ASTNode, Context>) {
+   const { left } = assignment
+   if (left.type === 'Identifier' && scope.isTypeGuarded(left.name)) {
+      cursor.willReplace(assignment, {
+         type: 'AssignmentExpression',
+         start: 0,
+         end: 0,
+         left: CovertIdentifier(TYPE_GUARD_PREFIX + left.name),
+         operator: assignment.operator,
+         right: assignment
+      })
+      return true;
+   }
+   return false;
 }
 
 class InternalError extends Error { }

@@ -229,23 +229,26 @@ describe('transform', () => {
    // { const c = 0 ; return a + b }@()
    //
    // preprocess
-   // { const c = 0 ; return a + b }(ª)
+   // (ª=>{ const c = 0 ; return a + b })()
    //
    // final
    // (() => { const c = 0 ; return a + b })()
-   it.skip('transforms immediately invoked derivation expression-block bodied', () => {
+   it('transforms immediately invoked derivation expression-block bodied', () => {
       const { code, edits } = preprocessRXS(
          `watch({ const c = 0 ; return a + b }@())`
       )
       expect(code).toBe(
-         `watch({ const c = 0 ; return a + b }(ª))`
+         `watch((ª=>{ const c = 0 ; return a + b })())`
       )
       const ast = parseRXS('test.rxs', code)
       const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `watch((() => { const c = 0 ; return a + b })());\n`
+         `watch((() => {\n` +
+         `\tconst c = 0;\n` +
+         `\treturn a + b;\n` +
+         `}\n)());\n`
       )
    })
 

@@ -116,7 +116,7 @@ function getNextMovement() {
 }
 
 
-let count = 0;
+export let count = 0;
 
 function reSpacebar(e) {
    if (e.code !== 'Space') return;

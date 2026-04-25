@@ -1,7 +1,8 @@
-import { ArrowFunctionExpression, Function, VariableDeclaration } from "oxc-parser";
+import { ArrowFunctionExpression, Function, Program, VariableDeclaration } from "oxc-parser";
 import { createStack } from "../../utils/index.ts";
 import { CHILD_KEYS } from "./ast.ts";
 import { ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts";
+import { LinkedNode, toLinkedList } from "./linked-nodes.ts";
 
 // #region: Types adapted from @svelte/zimmerframe
 
@@ -27,7 +28,6 @@ type Visit<T extends BaseNode, N extends BaseNode, C> = (this: Cursor<T, C>, nod
 
 
 export function traverse<T extends BaseNode, C>(ast: T, context: C & object, visitors: Visitors<T, C>) {
-
    const cursor = new Cursor<T, C>(CHILD_KEYS, context, visitors)
 
    cursor.enterScope()
@@ -66,7 +66,7 @@ export function traverseAll<T extends BaseNode, C>(ast: T, context: C & object, 
 
 
 
-class Scope {
+export class Scope {
    // private variables: Set<string>
    private absorbedGetters: Map<string, VariableDeclaration | Function | ArrowFunctionExpression> = new Map()
 
@@ -117,6 +117,8 @@ interface ScopeStack {
 
 
 const PROXY = Symbol('proxy')
+const RAW = Symbol('raw')
+const SOURCE_LIST = Symbol('source_list')
 
 /**
  * This implementation assumes each node in the ast is a unique object
@@ -235,6 +237,24 @@ export class Cursor<T extends BaseNode, C> {
       this.transforms.push(mutation)
    }
 
+   private replacements = new Map<T, T | T[]>()
+
+   private findReplacement(node: T, dir: 'L' | 'R') {
+      let current: T | undefined = node
+      while (current) {
+         const replacement = this.replacements.get(current)
+         if (!replacement) return current;
+         if (replacement instanceof Array) {
+            if (replacement.length === 0) return current
+            current = dir === 'R' ? replacement.at(-1) : replacement[0]
+         }
+         else {
+            current = replacement
+         }
+      }
+      return node
+   }
+
    /**
     * Queues replacement for after tree has been fully traversed. Must be called synchronously to visitor.
     */
@@ -244,6 +264,7 @@ export class Cursor<T extends BaseNode, C> {
          console.warn('Only nodes on the original ast as passed in through the visitor may be replaced. Use `willMutate` instead.')
          return;
       }
+      this.replacements.set(node, other)
       this.transforms.push(() => {
          const { parent, path } = this.getParentAndPath(node)
          const [key, index] = path
@@ -286,18 +307,39 @@ export class Cursor<T extends BaseNode, C> {
 
    private insert(node: T, other: T | T[], offset: 1 | 0 = 0) {
       const { parent, path } = this.getParentAndPath(node)
-      const [key, index] = path
-      if (index) {
-         const array = parent[key] as T[]
+      const [key, originalIndex] = path
+      const array = parent[key] as T[]
+
+      const anchor: LinkedNode & BaseNode = this.findReplacement(node, offset ? 'R' : 'L')
+      const ref = offset ? this.findPrev(anchor) : this.findNext(anchor)
+      const index = ref ? array.indexOf(ref as T) : offset ? -1 : array.length
+      const i = index === -1 ? originalIndex ? parseInt(originalIndex) : undefined : index
+      if (i !== undefined) {
          if (other instanceof Array) {
-            array.splice(parseInt(index) + offset, 0, ...other)
+            array.splice(i + offset, 0, ...other)
          }
          else {
-            array.splice(parseInt(index) + offset, 0, other)
+            array.splice(i + offset, 0, other)
          }
          return;
       }
       console.warn('Cannot insert before node that is not an array element', node)
+   }
+
+   private findPrev(node: BaseNode & LinkedNode) {
+      let current: BaseNode & LinkedNode | undefined | null = node;
+      while (current) {
+         if (!current.removed) return current
+         current = node.prev as BaseNode
+      }
+   }
+
+   private findNext(node: BaseNode & LinkedNode) {
+      let current: BaseNode & LinkedNode | undefined | null = node;
+      while (current) {
+         if (!current.removed) return current
+         current = node.next as BaseNode
+      }
    }
 
    /**
@@ -353,14 +395,28 @@ export class Cursor<T extends BaseNode, C> {
    private proxyMap = new Map<T | T[], T | T[]>()
    private missingChildKeys = new Set<string>()
 
+   private toRaw(node: T) {
+      const value =
+         //@ts-expect-error
+         node[RAW]
+      if (value) return value;
+      return node
+   }
+
    private NodeProxy(node: T, parent?: T, path?: [string] | [string, string]) {
-      if (this.proxyMap.has(node)) return this.proxyMap.get(node) as T
+      const raw = this.toRaw(node)
+      if (parent) raw.parent = this.NodeProxy(parent)
+      if (path) raw.path = path;
+      if (this.proxyMap.has(raw)) {
+         return this.proxyMap.get(raw) as T
+      }
       const cursor = this;
       const proxy = new Proxy(node, {
          get(target, key) {
+            if (key === RAW) return target;
             if (key === PROXY) return true;
-            if (key === 'parent') return parent && cursor.NodeProxy(parent);
-            if (key === 'path') return path;
+            // if (key === 'parent') return parent ? cursor.NodeProxy(parent) : parent;
+            // if (key === 'path') return path;
             const value = target[key as keyof T]
             if (typeof key !== 'string') return value;
             if (isNode<T>(value)) {
@@ -394,11 +450,34 @@ export class Cursor<T extends BaseNode, C> {
 
    private NodeListProxy(nodes: T[], parent: T, key: string) {
       if (this.proxyMap.has(nodes)) return this.proxyMap.get(nodes)!
+      const list = toLinkedList<BaseNode & LinkedNode>(nodes)
       const cursor = this;
       const proxy = new Proxy(nodes, {
          get(target, index) {
             if (index === PROXY) return true;
             if (index === 'parent') return parent;
+            if (index === SOURCE_LIST) return list;
+            if (index === 'splice') return (start: number, deleteCount: number, ...items: T[]) => {
+               const removed = target.splice(start, deleteCount, ...items)
+               if (deleteCount) {
+                  for (const item of removed) {
+                     (item as LinkedNode).removed = true
+                  }
+               }
+               if (items) {
+                  const prev: LinkedNode & BaseNode | undefined = removed.at(-1)
+                  const next: LinkedNode & BaseNode | undefined = target[start + deleteCount]
+                  if (prev) {
+                     prev.next = list.head
+                     list.head!.next = prev
+                  }
+                  if (next) {
+                     next.prev = list.tail
+                     list.tail!.next = next
+                  }
+               }
+               return removed
+            }
             const value = target[index as keyof any[]]
             if (typeof index !== 'string') return value;
             if (isNode(value)) {
