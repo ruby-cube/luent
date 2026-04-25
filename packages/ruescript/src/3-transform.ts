@@ -1,10 +1,6 @@
 import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator, AssignmentOperator, DoWhileStatement, WhileStatement, ConditionalExpression } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, Scope, traverse, traverseAll } from './traverse.ts';
-import { BaseNode } from './4-generate.ts';
-import { assert } from 'node:console';
-import { Block } from 'typescript';
-import { State } from 'apps/demos/src/ui-base/menu/store/MenuStore.ts';
 
 
 // (1) reverse offset pass
@@ -14,7 +10,6 @@ import { State } from 'apps/demos/src/ui-base/menu/store/MenuStore.ts';
 type Context = {
    program?: Program;
    edits: Edits;
-   scoped?: boolean;
 }
 
 function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefined> {
@@ -46,6 +41,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
    })
 
    edits.lastIndex = 0
+
 
    return traverse(ast, { edits } as Context, {
       Program(node, context) {
@@ -240,13 +236,14 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       },
 
       BlockStatement(node, context) {
-         if (context.scoped) {
+         const parent = node.parent
+         if (isFunctionNode(parent)) {
+            this.visitEach(node.body)
+         }
+         else {
             this.enterScope()
             this.visitEach(node.body)
             this.exitScope()
-         }
-         else {
-            this.visitEach(node.body)
          }
       },
 
@@ -306,11 +303,14 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       Identifier(leaf, context) {
          const { edits } = context
          if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === 'LabeledStatement' || leaf.parent?.type === 'TSIndexSignature') {
+            console.log('NOPE', leaf.name, isAssignee(leaf))
             // TODO: unwrite invalid edits
             return;
          }
          if (!leaf.name || leaf.name === 'this') return;
+         console.log('yes', leaf.name)
          if (this.scope.getAbsorbedGetterDeclaration(leaf.name)) {
+            console.log('accessor variable:', leaf.name)
             /**
              * Absorbed getter access
              * source: count@
@@ -393,7 +393,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             default:
                break;
          }
-
+         console.log('visit', node.right.name)
          this.visit(node.left)
          this.visit(node.right)
       },
@@ -616,56 +616,87 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             }
          })
       },
+
       IfStatement(node, context) {
-         transformIfStatement(node, this, context)
+         if (transformIfStatement(node, this, context))
+            return;
+         this.visit(node.test)
+         this.visit(node.consequent)
+         if (node.alternate)
+            this.visit(node.alternate)
       },
 
       WhileStatement(node, context) {
-         transformTestAndBody(node.test, node.body, this, context)
+         if (transformTestAndBody(node.test, node.body, this, context))
+            return;
+         this.visit(node.test)
+         this.visit(node.body)
       },
 
       DoWhileStatement(node, context) {
-         transformTestAndBody(node.test, node.body, this, context)
+         if (transformTestAndBody(node.test, node.body, this, context))
+            return;
+         this.visit(node.test)
+         this.visit(node.body)
       },
 
       ConditionalExpression(node, context) {
-         transformIfStatement(node, this, context)
+         if (transformIfStatement(node, this, context))
+            return;
+         this.visit(node.test)
+         this.visit(node.consequent)
+         if (node.alternate)
+            this.visit(node.alternate)
       },
 
       LogicalExpression(node, context) {
-         transformTestAndBody(node.left, node.right, this, context)
+         if (transformTestAndBody(node.left, node.right, this, context))
+            return;
+         this.visit(node.left)
+         this.visit(node.right)
       }
    })
 }
 
 function transformIfStatement(node: IfStatement | ConditionalExpression, cursor: Cursor<ASTNode, Context>, context: Context) {
+   const { consequent, alternate } = node
    if (transformAbsorbedTypeGuards(node.test, cursor)) {
-      const { consequent, alternate } = node
+      // cursor.visit(node.test)
       transformConditionalBody(consequent, cursor, context)
-
+      cursor.visit(consequent)
       if (alternate) {
          transformConditionalBody(alternate, cursor, context)
+         cursor.visit(alternate)
       }
+      return true;
    }
+   return false;
 }
 
 function transformTestAndBody(test: Expression, body: Statement | Expression, cursor: Cursor<ASTNode, Context>, context: Context) {
    if (transformAbsorbedTypeGuards(test, cursor)) {
+      // cursor.visit(test)
       transformConditionalBody(body, cursor, context)
+      cursor.visit(body)
+      return true;
    }
+   return false;
 }
 
 function transformConditionalBody(node: Statement | Expression, cursor: Cursor<ASTNode, Context>, context: Context) {
    const { scope } = cursor
    traverse<ASTNode, Context>(node, context, {
       AssignmentExpression(node) {
-         transformTypeGuardedAccessorVariableWrite(node, scope, this)
+         if (transformTypeGuardedAccessorVariableWrite(node, scope, this)) {
+            return;
+         }
+         this.visit(node.left)
+         this.visit(node.right)
       },
       Identifier(leaf) {
          transformTypeGuardedAccessorVariableRead(leaf, scope, this);
       }
    })
-   cursor.visit(node)
 }
 
 function isTSThisParameter(node: Identifier): node is TSThisParameter {
@@ -770,7 +801,28 @@ function scopeFunction(cursor: Cursor<ASTNode, Context>, node: Function | ArrowF
          }
       })
 
-      cursor.visit(body, { ...context, scoped: true })
+      let absorbedTypeGuard = false;
+      let earlyReturn = false;
+
+      traverse<ASTNode, Context>(body, context, {
+         IfStatement(node) {
+            if (transformAbsorbedTypeGuards(node.test, cursor)) {
+               absorbedTypeGuard = true;
+               traverse<ASTNode, Context>(body, context, {
+                  ReturnStatement() {
+                     earlyReturn = true;
+                     if (absorbedTypeGuard && earlyReturn) cursor.skip(node.test)
+                  }
+               })
+            }
+         }
+      })
+
+      if (absorbedTypeGuard && earlyReturn) {
+         transformConditionalBody(body, cursor, context)
+      }
+
+      cursor.visit(body)
       cursor.exitScope()
    }
 }
@@ -904,6 +956,11 @@ function queueAccessorVariableWrite<N extends AssignmentExpression | UpdateExpre
 
 
 // #endregion
+
+function isFunctionNode(node: ASTNode | undefined) {
+   if (!node) return;
+   return node.type === 'ArrowFunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression'
+}
 
 
 // #region: import from ruescript
@@ -1461,13 +1518,15 @@ function CovertAssignmentExpression(left: AssignmentTarget, operator: Assignment
  */
 function transformAbsorbedTypeGuards(test: Expression | AssignmentTarget, cursor: Cursor<ASTNode, Context>): boolean {
    if (test.type === 'Identifier') {
+      const { scope } = cursor
       const variable = test.name
-      const declaration = cursor.scope.getAbsorbedGetterDeclaration(variable)
+      const declaration = scope.getAbsorbedGetterDeclaration(variable)
       if (declaration) {
          const typeGuardHelperVariable = TYPE_GUARD_PREFIX + variable
-         if (!cursor.scope.isTypeGuarded(variable)) {
-            cursor.scope.markTypeGuarded(variable)
+         if (!scope.isTypeGuarded(variable)) {
+            scope.markTypeGuarded(variable)
             if (declaration.type === 'VariableDeclaration') {
+               // TODO: prevent multiple type guard variable declarations
                cursor.willInsertAfter(declaration, CovertTypeGuardVariableDeclaration(variable))
             }
             else {
@@ -1475,10 +1534,12 @@ function transformAbsorbedTypeGuards(test: Expression | AssignmentTarget, cursor
                if (!body) return false;
                if (body.type === 'BlockStatement') {
                   cursor.willMutate(() => {
+                     // TODO: prevent multiple type guard variable declarations
                      body.body.unshift(CovertTypeGuardVariableDeclaration(variable))
                   })
                }
                else {
+                  // TODO: prevent multiple type guard variable declarations
                   cursor.willReplace(body, CovertFunctionBlockBody(CovertTypeGuardVariableDeclaration(variable), body))
                }
             }
@@ -1513,8 +1574,7 @@ function transformAbsorbedTypeGuards(test: Expression | AssignmentTarget, cursor
       // FIX:
       const assignee = transformAbsorbedTypeGuards(left, cursor)
       if (assignee) {
-         console.log('assignment!', test)
-         if (left.type !== 'Identifier') throw new InternalError('uncovered case');
+         if (left.type !== 'Identifier') throw new InternalError('uncovered case assignment expression');
          const variable = left.name
          const typeGuardHelperVariable = TYPE_GUARD_PREFIX + variable
          cursor.willReplace(test, CovertSequenceExpression([
@@ -1528,7 +1588,7 @@ function transformAbsorbedTypeGuards(test: Expression | AssignmentTarget, cursor
    if (test.type === 'SequenceExpression') {
       return transformAbsorbedTypeGuards(test.expressions.at(-1)!, cursor)
    }
-   throw new InternalError('uncovered case')
+   return false
 }
 
 

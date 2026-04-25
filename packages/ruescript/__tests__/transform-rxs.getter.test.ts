@@ -22,6 +22,24 @@ describe('transform', () => {
          `const count = assertª(ref(0));\n`
       )
    })
+   
+   // FIX: disambiguate from colon notation
+   it.skip('transforms simple accessor variable declarations with type annotation', () => {
+      const { code, edits } = preprocessRXS(
+         `get count: Ref<number> = ref(0)`
+      )
+      expect(code).toBe(
+         `let count: Ref<number> = ref(0)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count: Ref<number> = assertª(ref(0));\n`
+      )
+   })
 
    it('transforms accessor variable reads', () => {
       const { code, edits } = preprocessRXS(
@@ -40,6 +58,106 @@ describe('transform', () => {
          `import { assertª } from "@rue/ruescript";\n` +
          `const count = assertª(ref(0));\n` +
          `console.log(count());\n`
+      )
+   })
+
+   it('transforms accessor variable reads in assignment right', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `a = count.name`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `a = count.name`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `a = count().name;\n`
+      )
+   })
+
+   it('transforms accessor variable reads - member expression', () => {
+      const { code, edits } = preprocessRXS(
+         `get frog = ref({ name: 'kermit' });\n` +
+         `console.log(frog.name)`
+      )
+      expect(code).toBe(
+         `let frog = ref({ name: 'kermit' });\n` +
+         `console.log(frog.name)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const frog = assertª(ref({\n\tname: 'kermit'\n}));\n` +
+         `console.log(frog().name);\n`
+      )
+   })
+
+   it('transforms accessor variable reads - in conditional body', () => {
+      const { code, edits } = preprocessRXS(
+         `get frog = ref({ name: 'kermit' });\n` +
+         `if (a) frog`
+      )
+      expect(code).toBe(
+         `let frog = ref({ name: 'kermit' });\n` +
+         `if (a) frog`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const frog = assertª(ref({\n\tname: 'kermit'\n}));\n` +
+         `if (a)\n\tfrog();\n`
+      )
+   })
+
+   it('transforms accessor variable reads - nullish operator', () => {
+      const { code, edits } = preprocessRXS(
+         `get frog = ref({ name: 'kermit' });\n` +
+         `console.log(frog?.name ?? 'frog')`
+      )
+      expect(code).toBe(
+         `let frog = ref({ name: 'kermit' });\n` +
+         `console.log(frog?.name ?? 'frog')`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const frog = assertª(ref({\n\tname: 'kermit'\n}));\n` +
+         `console.log(frog()?.name ?? 'frog');\n`
+      )
+   })
+
+   it('transforms accessor variable reads - within derivation', () => {
+      const { code, edits } = preprocessRXS(
+         `get count = ref(0);\n` +
+         `get doubleCount = ref(() => count * 2)`
+      )
+      expect(code).toBe(
+         `let count = ref(0);\n` +
+         `let doubleCount = ref(() => count * 2)`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const count = assertª(ref(0));\n` +
+         `const doubleCount = assertª(ref(() => count() * 2));\n`
       )
    })
 

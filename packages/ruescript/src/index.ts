@@ -8,7 +8,9 @@ export function transpileRueScript(file: string, source: string) {
    const preTree = parseRXS(file, code)
    const { ast: transformedTree } = transformRXS(preTree.program, edits)
    const generated = printTSX(transformedTree)
-   
+   console.log('-------------')
+   console.log(generated.code)
+   console.log('-------------')
    return {
       source,
       transpiled: { ast: transformedTree, code: generated.code },
@@ -22,3 +24,10 @@ export function assertª<T extends () => any>(getter: T): T {
    }
    return getter
 }
+
+   //  - [ ] destructureª
+   //  - [ ] absorbª, absorbsª
+   //  - [ ] assertª
+   //  - [ ] assertµ
+   //  - [ ] toª
+   //  - [ ] ªof

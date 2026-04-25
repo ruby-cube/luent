@@ -154,7 +154,7 @@ class RXSPreprocessor {
     * `let count =`
     */
    rewriteGetVariableDeclarations() {
-      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/gu
+      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Start}$][\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/gu
 
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
@@ -213,7 +213,8 @@ class RXSPreprocessor {
     * `gª, count:`
     */
    rewriteGetPropertyColonNotation() {
-      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/gu
+
+      const pattern = /\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Start}$][\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/gu
 
       const matches = this.source.matchAll(pattern)
       for (const match of matches) {
@@ -318,7 +319,7 @@ class RXSPreprocessor {
    }
 
    rewriteJSXAttributeShorthand() {
-      const pattern = /[\s]\{([\p{ID_Continue}$\u200C\u200D]*)\}/gu
+      const pattern = /[\s]\{([\p{ID_Start}$][\p{ID_Continue}$\u200C\u200D]*)\}/gu
       const matches = this.source.matchAll(pattern)
 
       for (const match of matches) {

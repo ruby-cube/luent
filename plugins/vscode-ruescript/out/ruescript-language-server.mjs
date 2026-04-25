@@ -29125,6 +29125,20 @@ function assertChildKeysDev(map) {
   }
 }
 if (IS_DEV) assertChildKeysDev(CHILD_KEYS);
+function toLinkedList(array) {
+  const list = {
+    head: array[0],
+    tail: array.at(-1)
+  };
+  let prev = null;
+  for (const item of array) {
+    item.removed = false;
+    if (prev) prev.next = item;
+    item.prev = prev;
+    prev = item;
+  }
+  return list;
+}
 function traverse(ast, context, visitors) {
   const cursor = new Cursor(CHILD_KEYS, context, visitors);
   cursor.enterScope();
@@ -29169,8 +29183,17 @@ var Scope = class {
       scope = scope.parent;
     }
   }
+  typeGuarded = /* @__PURE__ */ new Set();
+  markTypeGuarded(name) {
+    this.typeGuarded.add(name);
+  }
+  isTypeGuarded(name) {
+    return this.typeGuarded.has(name);
+  }
 };
 var PROXY = /* @__PURE__ */ Symbol("proxy");
+var RAW = /* @__PURE__ */ Symbol("raw");
+var SOURCE_LIST = /* @__PURE__ */ Symbol("source_list");
 var Cursor = class {
   pushContext;
   popContext;
@@ -29256,6 +29279,19 @@ var Cursor = class {
   willMutate(mutation) {
     this.transforms.push(mutation);
   }
+  replacements = /* @__PURE__ */ new Map();
+  findReplacement(node, dir) {
+    let current = node;
+    while (current) {
+      const replacement = this.replacements.get(current);
+      if (!replacement) return current;
+      if (replacement instanceof Array) {
+        if (replacement.length === 0) return current;
+        current = dir === "R" ? replacement.at(-1) : replacement[0];
+      } else current = replacement;
+    }
+    return node;
+  }
   /**
   * Queues replacement for after tree has been fully traversed. Must be called synchronously to visitor.
   */
@@ -29264,6 +29300,7 @@ var Cursor = class {
       console.warn("Only nodes on the original ast as passed in through the visitor may be replaced. Use `willMutate` instead.");
       return;
     }
+    this.replacements.set(node, other);
     this.transforms.push(() => {
       const { parent, path } = this.getParentAndPath(node);
       const [key, index] = path;
@@ -29292,14 +29329,32 @@ var Cursor = class {
   }
   insert(node, other, offset = 0) {
     const { parent, path } = this.getParentAndPath(node);
-    const [key, index] = path;
-    if (index) {
-      const array = parent[key];
-      if (other instanceof Array) array.splice(parseInt(index) + offset, 0, ...other);
-      else array.splice(parseInt(index) + offset, 0, other);
+    const [key, originalIndex] = path;
+    const array = parent[key];
+    const anchor = this.findReplacement(node, offset ? "R" : "L");
+    const ref = offset ? this.findPrev(anchor) : this.findNext(anchor);
+    const index = ref ? array.indexOf(ref) : offset ? -1 : array.length;
+    const i = index === -1 ? originalIndex ? parseInt(originalIndex) : void 0 : index;
+    if (i !== void 0) {
+      if (other instanceof Array) array.splice(i + offset, 0, ...other);
+      else array.splice(i + offset, 0, other);
       return;
     }
     console.warn("Cannot insert before node that is not an array element", node);
+  }
+  findPrev(node) {
+    let current = node;
+    while (current) {
+      if (!current.removed) return current;
+      current = node.prev;
+    }
+  }
+  findNext(node) {
+    let current = node;
+    while (current) {
+      if (!current.removed) return current;
+      current = node.next;
+    }
   }
   /**
   * Queues insertion for before tree has been fully traversed. Must be called synchronously to visitor.
@@ -29339,13 +29394,20 @@ var Cursor = class {
   }
   proxyMap = /* @__PURE__ */ new Map();
   missingChildKeys = /* @__PURE__ */ new Set();
+  toRaw(node) {
+    const value = node[RAW];
+    if (value) return value;
+    return node;
+  }
   NodeProxy(node, parent, path) {
-    if (this.proxyMap.has(node)) return this.proxyMap.get(node);
+    const raw = this.toRaw(node);
+    if (parent) raw.parent = this.NodeProxy(parent);
+    if (path) raw.path = path;
+    if (this.proxyMap.has(raw)) return this.proxyMap.get(raw);
     const cursor = this;
     const proxy = new Proxy(node, { get(target, key) {
+      if (key === RAW) return target;
       if (key === PROXY) return true;
-      if (key === "parent") return parent && cursor.NodeProxy(parent);
-      if (key === "path") return path;
       const value = target[key];
       if (typeof key !== "string") return value;
       if (isNode(value)) return cursor.NodeProxy(value, target, [key]);
@@ -29367,10 +29429,29 @@ var Cursor = class {
   }
   NodeListProxy(nodes, parent, key) {
     if (this.proxyMap.has(nodes)) return this.proxyMap.get(nodes);
+    const list = toLinkedList(nodes);
     const cursor = this;
     const proxy = new Proxy(nodes, { get(target, index) {
       if (index === PROXY) return true;
       if (index === "parent") return parent;
+      if (index === SOURCE_LIST) return list;
+      if (index === "splice") return (start, deleteCount, ...items) => {
+        const removed = target.splice(start, deleteCount, ...items);
+        if (deleteCount) for (const item of removed) item.removed = true;
+        if (items) {
+          const prev = removed.at(-1);
+          const next = target[start + deleteCount];
+          if (prev) {
+            prev.next = list.head;
+            list.head.next = prev;
+          }
+          if (next) {
+            next.prev = list.tail;
+            list.tail.next = next;
+          }
+        }
+        return removed;
+      };
       const value = target[index];
       if (typeof index !== "string") return value;
       if (isNode(value)) return cursor.NodeProxy(value, parent, [key, index]);
@@ -29515,11 +29596,13 @@ function transformRXS(ast, edits) {
       }
     },
     BlockStatement(node, context) {
-      if (context.scoped) {
+      const parent = node.parent;
+      if (isFunctionNode(parent)) this.visitEach(node.body);
+      else {
         this.enterScope();
         this.visitEach(node.body);
         this.exitScope();
-      } else this.visitEach(node.body);
+      }
     },
     FunctionDeclaration(node, context) {
       scopeFunction(this, node, context);
@@ -29556,16 +29639,21 @@ function transformRXS(ast, edits) {
     },
     Identifier(leaf, context) {
       const { edits: edits2 } = context;
-      if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === "LabeledStatement" || leaf.parent?.type === "TSIndexSignature") return;
+      if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === "LabeledStatement" || leaf.parent?.type === "TSIndexSignature") {
+        console.log("NOPE", leaf.name, isAssignee(leaf));
+        return;
+      }
       if (!leaf.name || leaf.name === "this") return;
-      if (this.scope.getAbsorbedGetterDeclaration(leaf.name))
+      console.log("yes", leaf.name);
+      if (this.scope.getAbsorbedGetterDeclaration(leaf.name)) {
+        console.log("accessor variable:", leaf.name);
         if (leaf.name.endsWith("\xAA")) edits2.at(leaf.end, () => {
           this.willMutate(() => {
             leaf.name = leaf.name.slice(0, -1);
           });
         });
         else this.willReplace(leaf, GetterCall(leaf));
-      else if (leaf.name.endsWith("\xAA")) {
+      } else if (leaf.name.endsWith("\xAA")) {
         const program = requireFrom(context, "program");
         edits2.at(leaf.end, () => {
           this.willMutate(() => {
@@ -29599,6 +29687,7 @@ function transformRXS(ast, edits) {
         default:
           break;
       }
+      console.log("visit", node.right.name);
       this.visit(node.left);
       this.visit(node.right);
     },
@@ -29735,8 +29824,75 @@ function transformRXS(ast, edits) {
             break;
         }
       });
+    },
+    IfStatement(node, context) {
+      if (transformIfStatement(node, this, context)) return;
+      this.visit(node.test);
+      this.visit(node.consequent);
+      if (node.alternate) this.visit(node.alternate);
+    },
+    WhileStatement(node, context) {
+      if (transformTestAndBody(node.test, node.body, this, context)) return;
+      this.visit(node.test);
+      this.visit(node.body);
+    },
+    DoWhileStatement(node, context) {
+      if (transformTestAndBody(node.test, node.body, this, context)) return;
+      this.visit(node.test);
+      this.visit(node.body);
+    },
+    ConditionalExpression(node, context) {
+      if (transformIfStatement(node, this, context)) return;
+      this.visit(node.test);
+      this.visit(node.consequent);
+      if (node.alternate) this.visit(node.alternate);
+    },
+    LogicalExpression(node, context) {
+      if (transformTestAndBody(node.left, node.right, this, context)) return;
+      this.visit(node.left);
+      this.visit(node.right);
     }
   });
+}
+function transformIfStatement(node, cursor, context) {
+  const { consequent, alternate } = node;
+  if (transformAbsorbedTypeGuards(node.test, cursor)) {
+    transformConditionalBody(consequent, cursor, context);
+    cursor.visit(consequent);
+    if (alternate) {
+      transformConditionalBody(alternate, cursor, context);
+      cursor.visit(alternate);
+    }
+    return true;
+  }
+  return false;
+}
+function transformTestAndBody(test, body, cursor, context) {
+  if (transformAbsorbedTypeGuards(test, cursor)) {
+    transformConditionalBody(body, cursor, context);
+    cursor.visit(body);
+    return true;
+  }
+  return false;
+}
+function transformConditionalBody(node, cursor, context) {
+  const { scope } = cursor;
+  traverse(node, context, {
+    AssignmentExpression(node2) {
+      if (transformTypeGuardedAccessorVariableWrite(node2, scope, this)) return;
+      this.visit(node2.left);
+      this.visit(node2.right);
+    },
+    Identifier(leaf) {
+      transformTypeGuardedAccessorVariableRead(leaf, scope, this);
+    }
+  });
+}
+function isTSThisParameter(node) {
+  return node.name === "this";
+}
+function isTSIndexSignatureName(node) {
+  return node.parent?.type === "TSIndexSignature";
 }
 function hasAwait(node) {
   let has = false;
@@ -29803,25 +29959,24 @@ function scopeFunction(cursor, node, context) {
           if (body.type === "BlockStatement") cursor.willMutate(() => {
             body.body.unshift(covertDestructuring);
           });
-          else cursor.willReplace(body, {
-            type: "BlockStatement",
-            start: 0,
-            end: 0,
-            body: [covertDestructuring, {
-              type: "ReturnStatement",
-              start: 0,
-              end: 0,
-              argument: body
-            }]
-          });
+          else cursor.willReplace(body, CovertFunctionBlockBody(covertDestructuring, body));
           declareAbsorbedGettersFromAccessorPostfix(pattern, covertDestructuring, cursor, edits, context);
         }
       }
     });
-    cursor.visit(body, {
-      ...context,
-      scoped: true
-    });
+    let absorbedTypeGuard = false;
+    let earlyReturn = false;
+    traverse(body, context, { IfStatement(node2) {
+      if (transformAbsorbedTypeGuards(node2.test, cursor)) {
+        absorbedTypeGuard = true;
+        traverse(body, context, { ReturnStatement() {
+          earlyReturn = true;
+          if (absorbedTypeGuard && earlyReturn) cursor.skip(node2.test);
+        } });
+      }
+    } });
+    if (absorbedTypeGuard && earlyReturn) transformConditionalBody(body, cursor, context);
+    cursor.visit(body);
     cursor.exitScope();
   }
 }
@@ -29870,6 +30025,10 @@ function queueAccessorVariableWrite(cursor, node, key, left, context) {
     });
   }
 }
+function isFunctionNode(node) {
+  if (!node) return;
+  return node.type === "ArrowFunctionExpression" || node.type === "FunctionDeclaration" || node.type === "FunctionExpression";
+}
 function importFromRuescript(importName, program) {
   const existing = findRuescriptImport(program.body);
   if (existing && hasImport(importName, existing)) return existing;
@@ -29900,12 +30059,13 @@ function CovertImportDeclaration(source) {
     source: CovertString(source)
   };
 }
-function CovertIdentifier(name) {
+function CovertIdentifier(name, typeAnnotation) {
   return {
     type: "Identifier",
     start: 0,
     end: 0,
-    name
+    name,
+    typeAnnotation
   };
 }
 function CovertString(string) {
@@ -29961,6 +30121,19 @@ function CovertImportSpecifier(name) {
     importKind: "value"
   };
 }
+function CovertFunctionBlockBody(insert, body) {
+  return {
+    type: "BlockStatement",
+    start: 0,
+    end: 0,
+    body: [insert, {
+      type: "ReturnStatement",
+      start: 0,
+      end: 0,
+      argument: body
+    }]
+  };
+}
 function CovertCallExpression(name, args) {
   return {
     type: "CallExpression",
@@ -29996,16 +30169,16 @@ function declareAbsorbedGettersFromAccessorPostfix(destructuring, declaration, c
     if (key.type !== "Identifier") throw new InternalError$1("uncovered case");
     cursor.skip(key);
     const identifier = findIdentifier(value);
-    if (identifier && key.name.endsWith("\xAA")) {
-      const propertyKey = key.name.slice(0, -1);
+    if (identifier && identifier.name.endsWith("\xAA")) {
+      cursor.skip(identifier);
+      const propertyKey = identifier.name.slice(0, -1);
       cursor.willMutate(() => {
-        key.name = propertyKey;
-        value.name = propertyKey;
+        key.name = key.name === identifier.name ? propertyKey : key.name;
+        identifier.name = propertyKey;
       });
       cursor.skip(identifier);
       cursor.scope.addAbsorbedGetter(propertyKey, declaration);
       if (value.type === "AssignmentPattern" && value.left.type === "Identifier") {
-        value.left.name = propertyKey;
         const program = requireFrom(context, "program");
         cursor.willMutate(() => {
           importFromRuescript("assert\xAA", program);
@@ -30060,11 +30233,11 @@ function declareAbsorbedGettersFromGetDestructuring(destructuring, declaration, 
     const { key, value } = property;
     if (key.type !== "Identifier") throw new InternalError$1("uncovered case");
     cursor.skip(key);
-    const propertyKey = undoAccessorVariablePostfix(key, cursor, edits);
+    undoAccessorVariablePostfix(key, cursor, edits);
     const identifier = findIdentifier(value);
     if (identifier) {
       cursor.skip(identifier);
-      undoAccessorVariablePostfix(identifier, cursor, edits);
+      const propertyKey = undoAccessorVariablePostfix(identifier, cursor, edits);
       cursor.scope.addAbsorbedGetter(propertyKey, declaration);
       if (value.type === "AssignmentPattern") {
         const program = requireFrom(context, "program");
@@ -30178,7 +30351,7 @@ function ObjectDestructuringMapFromGetKeyword(destructuring, transformName = (na
     const identifier = findIdentifier(value);
     let objectPattern;
     let arrayPattern;
-    if (identifier) objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), deriveValue(key.name), property.computed);
+    if (identifier) objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), deriveValue(identifier.name), property.computed);
     else if (objectPattern = findObjectPattern(value)) objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), ObjectDestructuringMapFromGetKeyword(objectPattern, transformName, deriveValue), property.computed);
     else if (arrayPattern = findArrayPattern(value)) objectExpression.properties[index] = CovertObjectProperty(transformName(key.name), ArrayDestructuringMapFromGetKeyword(arrayPattern, transformName, deriveValue), property.computed);
   });
@@ -30198,6 +30371,144 @@ function ArrayDestructuringMapFromGetKeyword(destructuring, transformName = (nam
     else if (arrayPattern = findArrayPattern(element)) arrayExpression.elements[index] = ArrayDestructuringMapFromGetKeyword(arrayPattern, transformName, deriveValue);
   });
   return arrayExpression;
+}
+var TYPE_GUARD_PREFIX = "\xF8_";
+function CovertTypeGuardVariableDeclaration(variable) {
+  return {
+    type: "VariableDeclaration",
+    start: 0,
+    end: 0,
+    kind: "let",
+    declarations: [{
+      type: "VariableDeclarator",
+      start: 0,
+      end: 0,
+      id: CovertIdentifier(TYPE_GUARD_PREFIX + variable, {
+        type: "TSTypeAnnotation",
+        start: 0,
+        end: 0,
+        typeAnnotation: {
+          type: "TSTypeReference",
+          start: 0,
+          end: 0,
+          typeName: CovertIdentifier("ReturnType"),
+          typeArguments: {
+            type: "TSTypeParameterInstantiation",
+            start: 0,
+            end: 0,
+            params: [{
+              type: "TSTypeQuery",
+              start: 0,
+              end: 0,
+              exprName: CovertIdentifier(variable),
+              typeArguments: null
+            }]
+          }
+        }
+      }),
+      init: null
+    }]
+  };
+}
+function CovertSequenceExpression(expressions) {
+  return {
+    type: "SequenceExpression",
+    start: 0,
+    end: 0,
+    expressions
+  };
+}
+function CovertAssignmentExpression(left, operator, right) {
+  return {
+    type: "AssignmentExpression",
+    start: 0,
+    end: 0,
+    left,
+    operator: "=",
+    right
+  };
+}
+function transformAbsorbedTypeGuards(test, cursor) {
+  if (test.type === "Identifier") {
+    const { scope } = cursor;
+    const variable = test.name;
+    const declaration = scope.getAbsorbedGetterDeclaration(variable);
+    if (declaration) {
+      const typeGuardHelperVariable = TYPE_GUARD_PREFIX + variable;
+      if (!scope.isTypeGuarded(variable)) {
+        scope.markTypeGuarded(variable);
+        if (declaration.type === "VariableDeclaration") cursor.willInsertAfter(declaration, CovertTypeGuardVariableDeclaration(variable));
+        else {
+          const { body } = declaration;
+          if (!body) return false;
+          if (body.type === "BlockStatement") cursor.willMutate(() => {
+            body.body.unshift(CovertTypeGuardVariableDeclaration(variable));
+          });
+          else cursor.willReplace(body, CovertFunctionBlockBody(CovertTypeGuardVariableDeclaration(variable), body));
+        }
+      }
+      if (isAssignee(test)) return true;
+      else cursor.willReplace(test, CovertSequenceExpression([CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), "=", CovertCallExpression(variable, [])), CovertIdentifier(typeGuardHelperVariable)]));
+      return true;
+    }
+    return false;
+  }
+  if (test.type === "UnaryExpression") return transformAbsorbedTypeGuards(test.argument, cursor);
+  if (test.type === "BinaryExpression" && test.left.type !== "PrivateIdentifier") return transformAbsorbedTypeGuards(test.left, cursor);
+  if (test.type === "LogicalExpression") {
+    const left = transformAbsorbedTypeGuards(test.left, cursor);
+    const right = transformAbsorbedTypeGuards(test.right, cursor);
+    return left || right;
+  }
+  if (test.type === "AssignmentExpression") {
+    const { left } = test;
+    const assignee = transformAbsorbedTypeGuards(left, cursor);
+    if (assignee) {
+      if (left.type !== "Identifier") throw new InternalError$1("uncovered case assignment expression");
+      const variable = left.name;
+      const typeGuardHelperVariable = TYPE_GUARD_PREFIX + variable;
+      cursor.willReplace(test, CovertSequenceExpression([CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), "=", CovertIdentifier(variable)), CovertIdentifier(typeGuardHelperVariable)]));
+    }
+    const right = transformAbsorbedTypeGuards(test.right, cursor);
+    return assignee || right;
+  }
+  if (test.type === "SequenceExpression") return transformAbsorbedTypeGuards(test.expressions.at(-1), cursor);
+  return false;
+}
+function transformTypeGuardedAccessorVariableRead(identifier, scope, cursor) {
+  if (!identifier.name || isAssignee(identifier) || isPropertyKey(identifier) || isTSIndexSignatureName(identifier) || isTSThisParameter(identifier)) return false;
+  if (scope.isTypeGuarded(identifier.name)) {
+    cursor.willReplace(identifier, {
+      type: "TSAsExpression",
+      start: 0,
+      end: 0,
+      expression: identifier,
+      typeAnnotation: {
+        type: "TSTypeQuery",
+        exprName: CovertIdentifier(TYPE_GUARD_PREFIX + identifier.name),
+        start: 0,
+        end: 0,
+        typeArguments: null
+      }
+    });
+    return true;
+  }
+  return false;
+}
+function transformTypeGuardedAccessorVariableWrite(assignment, scope, cursor) {
+  const { left } = assignment;
+  if (left.type === "Identifier" && scope.isTypeGuarded(left.name)) {
+    cursor.willReplace(assignment, {
+      type: "AssignmentExpression",
+      start: 0,
+      end: 0,
+      left: CovertIdentifier(TYPE_GUARD_PREFIX + left.name),
+      operator: assignment.operator,
+      right: assignment
+    });
+    return true;
+  }
+  return false;
 }
 var InternalError$1 = class extends Error {
 };
@@ -30472,7 +30783,7 @@ var RXSPreprocessor = class {
   * `let count =`
   */
   rewriteGetVariableDeclarations() {
-    const matches = this.source.matchAll(/\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/gu);
+    const matches = this.source.matchAll(/\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Start}$][\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?==(?![=>]))/gu);
     for (const match of matches) {
       const [original, before, identifier, after] = match;
       const index = match.index;
@@ -30521,7 +30832,7 @@ var RXSPreprocessor = class {
   * `gª, count:`
   */
   rewriteGetPropertyColonNotation() {
-    const matches = this.source.matchAll(/\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/gu);
+    const matches = this.source.matchAll(/\bget((?:[ \t]|\/\*[\s\S]*?\*\/)+)([\p{ID_Start}$][\p{ID_Continue}$\u200C\u200D]*)((?:[ \t]|\/\*[\s\S]*?\*\/)*)(?=:)/gu);
     for (const match of matches) {
       const [original, before, identifier, after] = match;
       const index = match.index;
@@ -30600,7 +30911,7 @@ var RXSPreprocessor = class {
     }
   }
   rewriteJSXAttributeShorthand() {
-    const matches = this.source.matchAll(/[\s]\{([\p{ID_Continue}$\u200C\u200D]*)\}/gu);
+    const matches = this.source.matchAll(/[\s]\{([\p{ID_Start}$][\p{ID_Continue}$\u200C\u200D]*)\}/gu);
     for (const match of matches) {
       const [original, identifier] = match;
       const index = match.index + 1;
@@ -31044,7 +31355,10 @@ function printTSX(program) {
       cursor.visit(node.argument);
     },
     CallExpression(node, cursor) {
+      const parenthesize = !isSimpleNode(node.callee);
+      if (parenthesize) cursor.write("(");
       cursor.visit(node.callee);
+      if (parenthesize) cursor.write(")");
       if (node.optional) cursor.write("?.");
       if (node.typeArguments) cursor.visit(node.typeArguments);
       cursor.write("(");
@@ -31060,7 +31374,10 @@ function printTSX(program) {
       cursor.visit(node.expression);
     },
     MemberExpression(node, cursor) {
+      const parenthesize = !isSimpleNode(node.object);
+      if (parenthesize) cursor.write("(");
       cursor.visit(node.object);
+      if (parenthesize) cursor.write(")");
       if (node.optional) cursor.write("?.");
       if (node.computed) cursor.write("[");
       else if (!node.optional) cursor.write(".");
@@ -32334,6 +32651,9 @@ function writeDecorators(node, cursor) {
 function escapeJSXTextValue(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("{", "&#123;").replaceAll("}", "&#125;");
 }
+function isSimpleNode(node) {
+  return node.type === "Identifier" || node.type === "MemberExpression" || node.type === "CallExpression" || node.type === "Super" || node.type === "ThisExpression" || node.type === "ParenthesizedExpression" || node.type === "SequenceExpression" || node.type === "NewExpression" || node.type === "ImportExpression" || node.type === "Literal";
+}
 var CodePrinter = class {
   code = "";
   map = [];
@@ -32405,6 +32725,9 @@ function transpileRueScript(file, source) {
   const { code, edits } = preprocessRXS(source);
   const { ast: transformedTree } = transformRXS(parseRXS(file, code).program, edits);
   const generated = printTSX(transformedTree);
+  console.log("-------------");
+  console.log(generated.code);
+  console.log("-------------");
   return {
     source,
     transpiled: {

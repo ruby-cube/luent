@@ -101,9 +101,11 @@ export class Scope {
    }
 
    private typeGuarded = new Set<string>()
+
    markTypeGuarded(name: string) {
       this.typeGuarded.add(name)
    }
+   
    isTypeGuarded(name: string) {
       return this.typeGuarded.has(name)
    }

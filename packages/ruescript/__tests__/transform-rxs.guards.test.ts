@@ -36,6 +36,127 @@ describe('RueScript TypeGuard transforms', () => {
          `}\n\n`
       )
    })
+   
+   it('transforms if return statement type guards - reads in body', () => {
+      const { code, edits } = preprocessRXS(
+         `get obj = ref(undefined)\n` +
+         `function foo() {` +
+         `\tif(!obj) return;\n` +
+         `\tconsole.log(obj.name)\n` +
+         `}\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const obj = assertª(ref(undefined));\n` +
+         `let ø_obj: ReturnType<typeof obj>;\n` +
+         `function foo() {\n` +
+         `\tif (!(ø_obj = obj(), ø_obj))\n\t\treturn;\n` +
+         `\tconsole.log((obj() as typeof ø_obj).name);\n` +
+         `}\n\n`
+      )
+   })
+
+   it('transforms if return statement type guards - reads in body', () => {
+      const { code, edits } = preprocessRXS(
+         `get obj = ref(undefined)\n` +
+         `function foo() {` +
+         `\tif(!obj) return;\n` +
+         `\ta = obj.name\n` +
+         `}\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const obj = assertª(ref(undefined));\n` +
+         `let ø_obj: ReturnType<typeof obj>;\n` +
+         `function foo() {\n` +
+         `\tif (!(ø_obj = obj(), ø_obj))\n\t\treturn;\n` +
+         `\ta = (obj() as typeof ø_obj).name;\n` +
+         `}\n\n`
+      )
+   })
+
+   it('transforms if return statement type guards - reads in body', () => {
+      const { code, edits } = preprocessRXS(
+         `get obj = ref(undefined)\n` +
+         `function foo() {` +
+         `\tif(obj) {\n` +
+         `\t\ta = obj.name\n` +
+         `\t}\n` +
+         `}\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const obj = assertª(ref(undefined));\n` +
+         `let ø_obj: ReturnType<typeof obj>;\n` +
+         `function foo() {\n` +
+         `\tif ((ø_obj = obj(), ø_obj)) {\n` +
+         `\t\ta = (obj() as typeof ø_obj).name;\n` +
+         `\t}\n` +
+         `}\n\n`
+      )
+   })
+
+   it('transforms if return statement type guards - reads in body', () => {
+      const { code, edits } = preprocessRXS(
+         `get obj = ref(undefined)\n` +
+         `function foo() {` +
+         `\tif(obj) {\n` +
+         // `\t\ta = obj\n` +
+         `\t\tobj\n` +
+         `\t}\n` +
+         `}\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const obj = assertª(ref(undefined));\n` +
+         `let ø_obj: ReturnType<typeof obj>;\n` +
+         `function foo() {\n` +
+         `\tif ((ø_obj = obj(), ø_obj)) {\n` +
+         // `\t\ta = obj() as typeof ø_obj;\n` +
+         `\t\tobj() as typeof ø_obj;\n` +
+         `\t}\n` +
+         `}\n\n`
+      )
+   })
+
+   it('transforms if return statement type guards - reads in body', () => {
+      const { code, edits } = preprocessRXS(
+         `get obj = ref(undefined)\n` +
+         `function foo() {` +
+         `\tif(!obj) return;\n` +
+         `\tif (other) console.log(obj.name)\n` +
+         `}\n`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { assertª } from "@rue/ruescript";\n` +
+         `const obj = assertª(ref(undefined));\n` +
+         `let ø_obj: ReturnType<typeof obj>;\n` +
+         `function foo() {\n` +
+         `\tif (!(ø_obj = obj(), ø_obj))\n\t\treturn;\n` +
+         `\tif (other)\n\t\tconsole.log((obj() as typeof ø_obj).name);\n` +
+         `}\n\n`
+      )
+   })
 
    it('transforms conditional expression type guards - reads in body', () => {
       const { code, edits } = preprocessRXS(
