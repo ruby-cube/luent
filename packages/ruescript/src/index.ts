@@ -1,4 +1,5 @@
-import { ReadonlyKeys } from "@rue/types";
+import { AnyObject, ReadonlyKeys } from "@rue/types";
+import { isObject } from "@rue/utils";
 
 //  - [ ] destructureªª
 //  - [ ] absorbª, absorbsª
@@ -49,6 +50,16 @@ export function assertMutableAccessor<T extends MutableGet>(value: T): T {
    return value
 }
 
+type Postfix = '?' | '!'
+
+type AsAccessor<T, P extends Postfix | undefined> =
+   T extends Get<any>
+   ? T
+   : P extends '?'
+   ? (() => NonNullable<T>) | (Extract<T, null | undefined> extends never ? never : undefined)
+   : P extends '!'
+   ? () => NonNullable<T>
+   : () => T
 
 /**
  * Normalizes value to an accessor: if value is an accessor, returns the value, otherwise wraps the value in an accessor.
@@ -60,18 +71,15 @@ export function assertMutableAccessor<T extends MutableGet>(value: T): T {
  * @param postfix (optional)
  * @returns value | (() => value) | undefined
  */
-function toAccessor<T extends () => any>(value: T, postfix?: '?' | '!'): T
-function toAccessor<T>(value: T, postfix: '?'): (() => T) | undefined
-function toAccessor<T>(value: T, postfix?: '!'): () => T
-function toAccessor<T>(value: T, postfix?: '?' | '!'): T | (() => T) | undefined {
-   if (isAccessor(value)) return value
+function toAccessor<T, P extends Postfix | undefined = undefined>(value: T, postfix?: P): AsAccessor<T, P> {
+   if (isAccessor(value)) return value as AsAccessor<T, P>
    if (postfix === '?' && value == null) {
-      return undefined
+      return undefined as AsAccessor<T, P>
    }
    if (postfix === '!' && value == null) {
       throw new TypeError('Value must be non-nullish')
    }
-   return () => value
+   return (() => value) as AsAccessor<T, P>
 }
 
 
@@ -83,6 +91,7 @@ function toAccessor<T>(value: T, postfix?: '?' | '!'): T | (() => T) | undefined
 //    option?: string // MutableGet<string | undefined> | undefined
 // }
 
+// FIX: consider the case: (() => T) | undefined
 type AccessorValue<T, K extends keyof T> =
    T[K] extends Get<any>
    ? T[K]
@@ -97,7 +106,7 @@ type AccessorsOf<T extends object> = {
 const accessorsProxyCache = new WeakMap<object, object>();
 
 const POSTFIX = Symbol('postfix')
-type Postfix = '?' | '!'
+
 
 function accessorsOf<T extends object>(target: T, postfix?: '?' | '!'): AccessorsOf<T> {
    let proxy: AccessorsOf<T> | undefined = accessorsProxyCache.get(target) as AccessorsOf<T> | undefined
@@ -152,8 +161,31 @@ function createAccessorsProxy<T extends object>(target: T, postfix: Postfix | un
    }
 }
 
-function destructureToAccessors() {
-   // TODO: implement destructuring proxy
+type DestructuredAccessors<T, TMap> = { [K in keyof T]: K extends keyof TMap ? TMap[K] extends 1 ? AsAccessor<T[K], undefined> : T[K] : T[K] }
+// TODO: nesting
+
+/**
+ * const { a, b, c: { d } } = destructureToAccessors(obj, { a: 1, b: 0, c: { d: 1 } })
+ * @param obj 
+ * @param map 
+ * @returns 
+ */
+function destructureToAccessors<T extends AnyObject, TMap extends AnyObject>(obj: T, map: TMap): DestructuredAccessors<T, TMap> {
+   const destructured = Array.isArray(obj) ? [] : Object.create(null)
+   const keys = Object.keys(map)
+   for (const key of keys) {
+      const value = map[key]
+      if (value === 0) {
+         destructured[key] = obj[key]
+      }
+      else if (value === 1) {
+         destructured[key] = accessorsOf(obj)[key] // assumes never undefined
+      }
+      else if (isObject(value)){
+         destructured[key] = destructureToAccessors(obj[key], map[key])
+      }
+   }
+   return destructured
 }
 
 
