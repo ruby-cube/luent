@@ -3,14 +3,24 @@
    "private": false,
    "version": "0.1.0",
    "description": "",
+   "exports": {
+      ".": {
+         "types": "./src/index.ts",
+         "default": "./dist/index.mjs"
+      },
+      "./transpile": {
+         "types": "./src/transpile.ts",
+         "default": "./dist/transpile.mjs"
+      }
+   },
    "main": "./dist/index.mjs",
    "module": "./dist/index.mjs",
    "files": [
       "dist"
    ],
    "scripts": {
-      "build": "tsdown src/index.ts --format esm --out-dir dist --clean",
-      "watch": "tsdown src/index.ts --format esm --out-dir dist --clean --watch",
+      "build": "tsdown src/index.ts src/transpile.ts --format esm --out-dir dist --clean",
+      "watch": "tsdown src/index.ts src/transpile.ts --format esm --out-dir dist --clean --watch",
       "prepack": "pnpm run build",
       "pack": "pnpm pack",
       "publish:dry": "pnpm publish --dry-run --no-git-checks",

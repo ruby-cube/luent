@@ -1,4 +1,6 @@
 // FIX: AI Slop
+const { transpileRueScript } = require('@rue/ruescript/transpile')
+
 const FULL_FEATURES = {
   verification: true,
   completion: true,

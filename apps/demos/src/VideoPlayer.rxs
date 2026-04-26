@@ -40,9 +40,11 @@ export function VideoPlayer() {
    //    duration = video?.duration ?? 0
    // })
 
+   get elapsedTime = ion(0);
+
    track.on("play", () => {
-      if (!video) return;
-      if (track.is("ended")) elapsedTime@.value = video.currentTime = 0;
+      //if (!video) return;
+      if (track.is("ended")) elapsedTime = video.currentTime = 0;
       video.play()
    })
 
@@ -50,7 +52,6 @@ export function VideoPlayer() {
       video?.pause()
    })
 
-   get elapsedTime = ion(0);
 
    function updateTime(currentTime: number) {
       elapsedTime@.value = currentTime;

@@ -56,8 +56,8 @@
       "@rue/ruescript": [
         "./packages/ruescript/src/index.ts"
       ],
-      "@rue/ruescript/compile": [
-        "./packages/ruescript/src/index.ts"
+      "@rue/ruescript/transpile": [
+        "./packages/ruescript/src/transpile.ts"
       ],
       "@rue/flask": [
         "./packages/flask/index.ts"

@@ -1,4 +1,4 @@
-import { transpileRueScript } from '@rue/ruescript';
+import { transpileRueScript } from '@rue/ruescript/transpile';
 import { CodeMapping, LanguagePlugin, VirtualCode } from '@volar/language-core';
 import type * as ts from 'typescript';
 import { URI } from 'vscode-uri';

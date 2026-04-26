@@ -29089,7 +29089,7 @@ function parseSync2(filename, sourceText, options) {
   return wrap(parseSync(filename, sourceText, options));
 }
 
-// ../../packages/ruescript/dist/index.mjs
+// ../../packages/ruescript/dist/transpile.mjs
 function createStack() {
   let stack = void 0;
   function push(value) {
@@ -29523,6 +29523,9 @@ function transformRXS(ast, edits) {
       });
       const declarator = node.declarations[0];
       const { id, init } = declarator;
+      node.declarations.forEach((declarator2) => {
+        if (declarator2.init) this.visit(declarator2.init);
+      });
       if (isGetKeywordDeclaration) {
         const program = requireFrom(context, "program");
         if (node.declarations.length !== 1) return;
@@ -29554,11 +29557,9 @@ function transformRXS(ast, edits) {
         });
         declareAbsorbedGettersFromAccessorPostfix(id, node, this, edits2, context);
       }
-      this.visitEach(node.declarations);
-    },
-    VariableDeclarator(node, context) {
-      this.visit(node.id);
-      if (node.init) this.visit(node.init);
+      node.declarations.forEach((declarator2) => {
+        this.visit(declarator2.id);
+      });
     },
     ObjectExpression(node, context) {
       const properties = [];
@@ -29639,12 +29640,8 @@ function transformRXS(ast, edits) {
     },
     Identifier(leaf, context) {
       const { edits: edits2 } = context;
-      if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === "LabeledStatement" || leaf.parent?.type === "TSIndexSignature") {
-        console.log("NOPE", leaf.name, isAssignee(leaf));
-        return;
-      }
+      if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === "LabeledStatement" || leaf.parent?.type === "TSIndexSignature") return;
       if (!leaf.name || leaf.name === "this") return;
-      console.log("yes", leaf.name);
       if (this.scope.getAbsorbedGetterDeclaration(leaf.name)) {
         console.log("accessor variable:", leaf.name);
         if (leaf.name.endsWith("\xAA")) edits2.at(leaf.end, () => {
@@ -29687,7 +29684,6 @@ function transformRXS(ast, edits) {
         default:
           break;
       }
-      console.log("visit", node.right.name);
       this.visit(node.left);
       this.visit(node.right);
     },
@@ -30448,7 +30444,14 @@ function transformAbsorbedTypeGuards(test, cursor) {
         }
       }
       if (isAssignee(test)) return true;
-      else cursor.willReplace(test, CovertSequenceExpression([CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), "=", CovertCallExpression(variable, [])), CovertIdentifier(typeGuardHelperVariable)]));
+      else cursor.willReplace(test, CovertSequenceExpression([CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), "=", {
+        type: "CallExpression",
+        start: 0,
+        end: 0,
+        callee: test,
+        arguments: [],
+        optional: false
+      }), CovertIdentifier(typeGuardHelperVariable)]));
       return true;
     }
     return false;
@@ -31113,24 +31116,12 @@ function printTSX(program) {
     },
     BlockStatement(node, cursor) {
       if (cursor.code.at(-1) === "\n") cursor.indentScope();
-      cursor.write("{\n", {
-        span: {
-          start: node.start,
-          end: node.start + 2
-        },
-        capabilities: { structure: true }
-      });
+      cursor.write("{\n");
       cursor.enterScope();
       cursor.visitEach(node.body);
       cursor.exitScope();
       cursor.indentScope();
-      cursor.write("}\n", {
-        span: {
-          start: node.end - 2,
-          end: node.end - 1
-        },
-        capabilities: { structure: true }
-      });
+      cursor.write("}\n");
     },
     IfStatement(node, cursor) {
       cursor.indentScope();
@@ -31338,6 +31329,7 @@ function printTSX(program) {
     ArrowFunctionExpression(node, cursor) {
       if (node.async) cursor.write("async ");
       if (node.typeParameters) cursor.visit(node.typeParameters);
+      const start = cursor.code.length;
       cursor.write("(");
       const params = node.params ?? [];
       for (let i = 0; i < params.length; i++) {
@@ -31346,6 +31338,13 @@ function printTSX(program) {
       }
       cursor.write(") => ");
       cursor.visit(node.body);
+      cursor.mapSpan(start, {
+        span: {
+          start: node.start,
+          end: node.body.start
+        },
+        capabilities: { verification: true }
+      });
     },
     AssignmentExpression: OperatorExpression,
     BinaryExpression: OperatorExpression,
@@ -31365,7 +31364,12 @@ function printTSX(program) {
       const args = node.arguments;
       for (let i = 0; i < args.length; i++) {
         const arg = args[i];
+        const start = cursor.code.length;
         cursor.visit(arg);
+        if (!isFunctionNode(arg)) cursor.mapSpan(start, {
+          span: arg,
+          capabilities: { verification: true }
+        });
         if (i < args.length - 1) cursor.write(", ");
       }
       cursor.write(")");
@@ -31396,13 +31400,7 @@ function printTSX(program) {
       cursor.write(")");
     },
     ObjectExpression(node, cursor) {
-      cursor.write("{\n", {
-        span: {
-          start: node.start,
-          end: node.start + 2
-        },
-        capabilities: { structure: true }
-      });
+      cursor.write("{\n");
       const properties = node.properties ?? [];
       cursor.enterScope();
       for (let i = 0; i < properties.length; i++) {
@@ -31415,13 +31413,7 @@ function printTSX(program) {
       }
       cursor.exitScope();
       if (properties.length > 0) cursor.indentScope();
-      cursor.write("}", {
-        span: {
-          start: node.end - 1,
-          end: node.end
-        },
-        capabilities: { structure: true }
-      });
+      cursor.write("}");
     },
     ObjectPattern(node, cursor) {
       const properties = node.properties ?? [];
@@ -32698,6 +32690,18 @@ var CodePrinter = class {
       });
     }
   }
+  mapSpan(start, map) {
+    const { span, capabilities } = map;
+    if (span.start === 0 && span.end === 0) return;
+    const length = this.code.length - start;
+    this.map.push({
+      sourceOffsets: [span.start],
+      generatedOffsets: [start],
+      data: capabilities ?? {},
+      lengths: [span.end - span.start],
+      generatedLengths: [length]
+    });
+  }
   activeNodes = /* @__PURE__ */ new Set();
   visitNode(node) {
     if (this.activeNodes.has(node)) throw new InternalError("Cycle detected while visiting AST");
@@ -32725,9 +32729,9 @@ function transpileRueScript(file, source) {
   const { code, edits } = preprocessRXS(source);
   const { ast: transformedTree } = transformRXS(parseRXS(file, code).program, edits);
   const generated = printTSX(transformedTree);
-  console.log("-------------");
+  console.log("===================");
   console.log(generated.code);
-  console.log("-------------");
+  console.log("===================");
   return {
     source,
     transpiled: {

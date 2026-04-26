@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import { transformWithOxc } from 'vite'
 import * as babel from '@babel/core'
 import { luentPreTransform as BabelLuentPlugin } from '@rue/babel-plugin-luent'
-import { transpileRueScript } from '@rue/ruescript'
+import { transpileRueScript } from '@rue/ruescript/transpile'
 
 const require = createRequire(import.meta.url)
 
@@ -36,7 +36,7 @@ export default function LuentPlugin() {
             if (!fileName.endsWith('.rxs')) return
 
             const code = await readFile(fileName, 'utf8')
-            const sugaredCode = transpileRueScript(fileName, code).code
+            const sugaredCode = transpileRueScript(fileName, code).transpiled.code
             const result = await babel.transformAsync(sugaredCode, {
                plugins: [
                   BabelLuentPlugin,

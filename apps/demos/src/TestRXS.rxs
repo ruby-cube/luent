@@ -1,6 +1,19 @@
-const b = 9
+let b = 9
+b = ''
+
 get count = ref(0 + b);
 get other = ref('something');
+
+get double = 0
+
+assertGetter('hi')
+
+function assertGetter<T extends () => any>(getter: T): T {
+   if (typeof getter !== 'function' || getter.length !== 0) {
+      throw new TypeError(`Getter must be a function: ${getter}`)
+   }
+   return getter
+}
 
 // const obj = {
 //   get frog: ref('kermit')
@@ -12,7 +25,7 @@ watch({
    return other + b;
 }@);
 
-const { o, p@} = {o: 0, p: 1}
+const { o, p@ } = { o: 0, p: 1, r: 0 }
 
 function Foo() {
 

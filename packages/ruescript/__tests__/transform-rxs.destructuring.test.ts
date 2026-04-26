@@ -4,6 +4,7 @@ import { parseRXS } from "../src/2-parse"
 import { printTSX } from "../src/4-generate"
 import { transformRXS } from "../src/3-transform"
 
+
 // get { foo, bar, count } = obj
 // console.log(bar) // value access: 1
 // console.log(bar@)

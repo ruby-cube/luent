@@ -91,6 +91,10 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          }
          const declarator = node.declarations[0]
          const { id, init } = declarator
+         // declarator.init must be visited before id
+         node.declarations.forEach(declarator => {
+            if (declarator.init) this.visit(declarator.init)
+         })
          if (isGetKeywordDeclaration) {
             const program = requireFrom(context, 'program');
             if (node.declarations.length !== 1) {
@@ -169,13 +173,16 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             })
             declareAbsorbedGettersFromAccessorPostfix(id, node, this, edits, context)
          }
-         this.visitEach(node.declarations)
+         // this.visitEach(node.declarations)
+         node.declarations.forEach(declarator => {
+            this.visit(declarator.id)
+         })
       },
 
-      VariableDeclarator(node, context) {
-         this.visit(node.id)
-         if (node.init) this.visit(node.init)
-      },
+      // VariableDeclarator(node, context) {
+      //    if (node.init) this.visit(node.init)
+      //    this.visit(node.id)
+      // },
 
       /**
        * source: { get variable: expression }
@@ -303,12 +310,10 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       Identifier(leaf, context) {
          const { edits } = context
          if (isAssignee(leaf) || isPropertyKey(leaf) || leaf.parent?.type === 'LabeledStatement' || leaf.parent?.type === 'TSIndexSignature') {
-            console.log('NOPE', leaf.name, isAssignee(leaf))
             // TODO: unwrite invalid edits
             return;
          }
          if (!leaf.name || leaf.name === 'this') return;
-         console.log('yes', leaf.name)
          if (this.scope.getAbsorbedGetterDeclaration(leaf.name)) {
             console.log('accessor variable:', leaf.name)
             /**
@@ -393,7 +398,6 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             default:
                break;
          }
-         console.log('visit', node.right.name)
          this.visit(node.left)
          this.visit(node.right)
       },
@@ -957,7 +961,7 @@ function queueAccessorVariableWrite<N extends AssignmentExpression | UpdateExpre
 
 // #endregion
 
-function isFunctionNode(node: ASTNode | undefined) {
+export function isFunctionNode(node: ASTNode | undefined) {
    if (!node) return;
    return node.type === 'ArrowFunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression'
 }
@@ -1550,7 +1554,14 @@ function transformAbsorbedTypeGuards(test: Expression | AssignmentTarget, cursor
          // (ø_obj = obj(), ø_obj)
          else {
             cursor.willReplace(test, CovertSequenceExpression([
-               CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), '=', CovertCallExpression(variable, [])),
+               CovertAssignmentExpression(CovertIdentifier(typeGuardHelperVariable), '=', {
+                  type: 'CallExpression',
+                  start: 0,
+                  end: 0,
+                  callee: test,
+                  arguments: [],
+                  optional: false
+               }),
                CovertIdentifier(typeGuardHelperVariable)
             ]))
          }
@@ -1592,7 +1603,12 @@ function transformAbsorbedTypeGuards(test: Expression | AssignmentTarget, cursor
 }
 
 
-// (obj() as typeof ø_obj)
+/**
+ * @example
+ * source: obj
+ * transform: (obj as typeof ø_obj)
+ * final: (obj() as typeof ø_obj)
+ */
 function transformTypeGuardedAccessorVariableRead(identifier: Identifier, scope: Scope, cursor: Cursor<ASTNode, Context>) {
    if (!identifier.name || isAssignee(identifier) || isPropertyKey(identifier) || isTSIndexSignatureName(identifier) || isTSThisParameter(identifier)) return false;
    if (scope.isTypeGuarded(identifier.name)) {

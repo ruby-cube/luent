@@ -1,8 +1,14 @@
 import type { ArrayExpression, AssignmentExpression, Node as ASTNode, BinaryExpression, ForInStatement, ForOfStatement, ForStatement, WhileStatement, LogicalExpression, PrivateInExpression, Program, ArrayPattern, BlockStatement, TSModuleBlock, StaticBlock } from 'oxc-parser'
 import { CodeInformation, CodeMapping } from "@volar/language-core";
 import { BASE_CAPABILITIES, Capabilities } from './capabilities.ts';
+import { isFunctionTypeNode } from 'typescript';
+import { isFunctionNode } from './3-transform.ts';
 
 const TAB = '\t'
+
+
+
+
 
 class InternalError extends Error { }
 
@@ -252,18 +258,18 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
        */
       BlockStatement(node, cursor) {
          if (cursor.code.at(-1) === '\n') cursor.indentScope()
-         cursor.write('{\n', {
+         cursor.write('{\n'/* , {
             span: { start: node.start, end: node.start + 2 },
             capabilities: { structure: true }
-         })
+         } */)
          cursor.enterScope()
          cursor.visitEach(node.body)
          cursor.exitScope()
          cursor.indentScope()
-         cursor.write('}\n', {
+         cursor.write('}\n'/* , {
             span: { start: node.end - 2, end: node.end - 1 },
             capabilities: { structure: true }
-         })
+         } */)
       },
 
       /**
@@ -579,6 +585,7 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
       ArrowFunctionExpression(node, cursor) {
          if (node.async) cursor.write('async ')
          if (node.typeParameters) cursor.visit(node.typeParameters)
+         const start = cursor.code.length
          cursor.write('(')
          const params = node.params ?? []
          for (let i = 0; i < params.length; i++) {
@@ -587,6 +594,15 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
          }
          cursor.write(') => ')
          cursor.visit(node.body)
+         cursor.mapSpan(start, {
+            span: {
+               start: node.start,
+               end: node.body.start
+            },
+            capabilities: {
+               verification: true
+            }
+         })
       },
 
       /**
@@ -630,7 +646,10 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
          const args = node.arguments
          for (let i = 0; i < args.length; i++) {
             const arg = args[i]
+            const start = cursor.code.length
             cursor.visit(arg)
+            if (!isFunctionNode(arg))  // TODO: check for nested functions in `type as expression`
+               cursor.mapSpan(start, { span: arg, capabilities: { verification: true } })
             if (i < args.length - 1) {
                cursor.write(', ')
             }
@@ -685,10 +704,10 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
        * }
        */
       ObjectExpression(node, cursor) {
-         cursor.write('{\n', {
+         cursor.write('{\n'/* , {
             span: { start: node.start, end: node.start + 2 },
             capabilities: { structure: true }
-         })
+         } */)
          const properties = node.properties ?? []
          cursor.enterScope()
          for (let i = 0; i < properties.length; i++) {
@@ -706,10 +725,10 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
          }
          cursor.exitScope()
          if (properties.length > 0) cursor.indentScope()
-         cursor.write('}', {
+         cursor.write('}'/* , {
             span: { start: node.end - 1, end: node.end },
             capabilities: { structure: true }
-         })
+         } */)
       },
 
       /**
@@ -2670,6 +2689,22 @@ class CodePrinter {
             generatedLengths: [length]
          })
       }
+   }
+
+   mapSpan(start: number, map: { span: { start: number, end: number }, capabilities?: CodeInformation }) {
+      const { span, capabilities } = map
+      if (span.start === 0 && span.end === 0) return; // synthetic node
+
+      const end = this.code.length
+      const length = end - start
+
+      this.map.push({
+         sourceOffsets: [span.start],
+         generatedOffsets: [start],
+         data: capabilities ?? {},
+         lengths: [span.end - span.start],
+         generatedLengths: [length]
+      })
    }
 
    private activeNodes = new Set<ASTNode>()
