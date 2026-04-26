@@ -39,8 +39,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const { count, bar } = destructureª(obj, {\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const { count, bar } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 1\n` +
          `});\n` +
@@ -66,8 +66,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const { num: count, bar } = destructureª(obj, {\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const { num: count, bar } = destructureªª(obj, {\n` +
          `\tnum: 1,\n` +
          `\tbar: 1\n` +
          `});\n` +
@@ -93,8 +93,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { assertª, destructureª } from "@rue/ruescript";\n` +
-         `const { count, bar = assertª(() => 0) } = destructureª(obj, {\n` +
+         `import { assertª, destructureªª } from "@rue/ruescript";\n` +
+         `const { count, bar = assertª(() => 0) } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 1\n` +
          `});\n` +
@@ -120,8 +120,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const { count, bar: { foo } } = destructureª(obj, {\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const { count, bar: { foo } } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: {\n` +
          `\t\tfoo: 1\n` +
@@ -149,8 +149,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const [count, bar] = destructureª(array, [1, 1]);\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const [count, bar] = destructureªª(array, [1, 1]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
       )
@@ -173,8 +173,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { assertª, destructureª } from "@rue/ruescript";\n` +
-         `const [count, bar = assertª(() => 0)] = destructureª(array, [1, 1]);\n` +
+         `import { assertª, destructureªª } from "@rue/ruescript";\n` +
+         `const [count, bar = assertª(() => 0)] = destructureªª(array, [1, 1]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
       )
@@ -198,8 +198,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const [count, [b, c]] = destructureª(array, [1, [1, 1]]);\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const [count, [b, c]] = destructureªª(array, [1, [1, 1]]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
       )
@@ -222,8 +222,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const { count, bar } = destructureª(obj, {\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const { count, bar } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 0\n` +
          `});\n` +
@@ -249,8 +249,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const { num: count, bar } = destructureª(obj, {\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const { num: count, bar } = destructureªª(obj, {\n` +
          `\tnum: 1,\n` +
          `\tbar: 0\n` +
          `});\n` +
@@ -276,8 +276,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª, assertª } from "@rue/ruescript";\n` +
-         `const { num: count = assertª(() => 0), bar } = destructureª(obj, {\n` +
+         `import { destructureªª, assertª } from "@rue/ruescript";\n` +
+         `const { num: count = assertª(() => 0), bar } = destructureªª(obj, {\n` +
          `\tnum: 1,\n` +
          `\tbar: 0\n` +
          `});\n` +
@@ -303,8 +303,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const [count, bar] = destructureª(arr, [1, 0]);\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const [count, bar] = destructureªª(arr, [1, 0]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
       )
@@ -327,8 +327,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª, assertª } from "@rue/ruescript";\n` +
-         `const [count = assertª(() => 0), bar] = destructureª(arr, [1, 0]);\n` +
+         `import { destructureªª, assertª } from "@rue/ruescript";\n` +
+         `const [count = assertª(() => 0), bar] = destructureªª(arr, [1, 0]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
       )
@@ -352,8 +352,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
-         `const { foo: { count }, bar } = destructureª(obj, {\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
+         `const { foo: { count }, bar } = destructureªª(obj, {\n` +
          `\tfoo: {\n` +
          `\t\tcount: 1\n` +
          `\t},\n` + // TODO: printing nested object literal is messed up
@@ -381,8 +381,8 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª, assertª } from "@rue/ruescript";\n` +
-         `const { count = assertª(() => 0), bar } = destructureª(obj, {\n` +
+         `import { destructureªª, assertª } from "@rue/ruescript";\n` +
+         `const { count = assertª(() => 0), bar } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 0\n` +
          `});\n` +
@@ -410,9 +410,9 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
          `function Foo(dpª0) {\n` +
-         `\tlet { count, bar } = destructureª(dpª0, {\n` +
+         `\tlet { count, bar } = destructureªª(dpª0, {\n` +
          `\t\tcount: 1,\n` +
          `\t\tbar: 0\n` +
          `\t});\n` +
@@ -441,9 +441,9 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureª } from "@rue/ruescript";\n` +
+         `import { destructureªª } from "@rue/ruescript";\n` +
          `function Foo(dpª0) {\n` +
-         `\tlet [count, bar] = destructureª(dpª0, [1, 0]);\n` +
+         `\tlet [count, bar] = destructureªª(dpª0, [1, 0]);\n` +
          `\tconsole.log(count());\n` +
          `\tconsole.log(count);\n` +
          `}\n\n`

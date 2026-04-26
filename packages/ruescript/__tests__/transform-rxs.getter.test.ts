@@ -405,8 +405,8 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªof } from "@rue/ruescript";\n` +
-         `console.log(ªof(obj).count);\n`
+         `import { ªªof } from "@rue/ruescript";\n` +
+         `console.log(ªªof(obj).count);\n`
       )
    })
 
@@ -422,8 +422,8 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªof } from "@rue/ruescript";\n` +
-         `console.log(ªof(obj)[count]);\n`
+         `import { ªªof } from "@rue/ruescript";\n` +
+         `console.log(ªªof(obj)[count]);\n`
       )
    })
 
@@ -439,8 +439,8 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªof } from "@rue/ruescript";\n` +
-         `console.log(ªof(obj, "?")[count]);\n`
+         `import { ªªof } from "@rue/ruescript";\n` +
+         `console.log(ªªof(obj, "?")[count]);\n`
       )
    })
 
@@ -456,8 +456,8 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªof } from "@rue/ruescript";\n` +
-         `console.log(ªof(obj, "!")[count]);\n`
+         `import { ªªof } from "@rue/ruescript";\n` +
+         `console.log(ªªof(obj, "!")[count]);\n`
       )
    })
 
@@ -473,8 +473,8 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªof } from "@rue/ruescript";\n` +
-         `console.log(ªof(obj, "?").count);\n`
+         `import { ªªof } from "@rue/ruescript";\n` +
+         `console.log(ªªof(obj, "?").count);\n`
       )
    })
 
@@ -490,8 +490,8 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªof } from "@rue/ruescript";\n` +
-         `console.log(ªof(obj, "!").count);\n`
+         `import { ªªof } from "@rue/ruescript";\n` +
+         `console.log(ªªof(obj, "!").count);\n`
       )
    })
 

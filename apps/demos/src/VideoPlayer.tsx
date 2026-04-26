@@ -9,7 +9,8 @@ import "./reset.css"
 
 export function VideoPlayer() {
 
-   get video = NodeRef("video")
+   const video = NodeRef("video")
+
    
    const player = Finitron({
       "loading": {
@@ -33,19 +34,18 @@ export function VideoPlayer() {
       }
    })
 
-   get duration = () => video?.duration ?? 0
+   const duration = () => video()?.duration ?? 0
 
    // player.on("initialize", () => {
    //    duration = video?.duration ?? 0
    // })
 
-   get elapsedTime = ion(0);
+   const elapsedTime = ion(0);
 
    track.on("play", () => {
+      
       //if (!video) return;
-      const obj = {value: 0}
-      obj.
-      if (track.is("ended")) elapsedTime = video.currentTime = 0;
+      if (track.is("ended")) elapsedTime = video().currentTime = 0;
       video.play()
    })
 
@@ -55,7 +55,7 @@ export function VideoPlayer() {
 
 
    function updateTime(currentTime: number) {
-      elapsedTime@.value = currentTime;
+      elapsedTime.value = currentTime;
    }
 
    function reClickElapsedBar(e: any) {
@@ -73,7 +73,7 @@ export function VideoPlayer() {
             track.play()
          )
       }
-      elapsedTime@.value = time
+      elapsedTime.value = time
    }
 
    const sound = Finitron({
@@ -98,7 +98,7 @@ export function VideoPlayer() {
       <>
          <div class="container">
             <video
-               ref={video@}
+               ref={video}
                on:canplay={e => player.markReady()}
                on:timeupdate={e => updateTime(e.currentTarget.currentTime)}
                on:ended={e => track.end()}
@@ -110,7 +110,7 @@ export function VideoPlayer() {
             {If((player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
                <div>
                   <ElapsedBar
-                     elapsed={elapsedTime@}
+                     elapsed={elapsedTime}
                      duration={duration}
                      paused={(track.is("paused"))}
                      on:click={reClickElapsedBar}
@@ -123,7 +123,7 @@ export function VideoPlayer() {
                         <button on:click={e => track.play()}>►</button>
                      )}
                   </remount-view>
-                  <Timer elapsed={elapsedTime@} duration={duration} />
+                  <Timer elapsed={elapsedTime} duration={duration} />
                </div>
             )}
          </div>
@@ -179,7 +179,7 @@ function ElapsedBar(input: FromTag<{
    duration: number,
    paused: Ion<boolean>
 }>) {
-         const { elapsed@, duration, paused@, emit } = input
+         const { elapsed, duration, paused, emit } = input
 
    return Component(
       <div class="elapsed"
@@ -202,7 +202,7 @@ function Timer(input: FromTag<{
    elapsed: Ion<number>,
    duration: number
 }>) {
-         const { elapsed@, duration } = input
+         const { elapsed, duration } = input
 
    return Component(
       <span class="timer">

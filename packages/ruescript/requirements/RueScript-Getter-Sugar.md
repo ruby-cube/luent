@@ -314,7 +314,7 @@ console.log(foo@) // undefined
 const { foo@ = () => 2 } = obj
 ```
 ```tsx
-const { foo = assertª(() => 2) } = destructureª(obj)
+const { foo = assertª(() => 2) } = destructureªª(obj)
 ```
 
 #### Nested destructuring
@@ -322,7 +322,7 @@ const { foo = assertª(() => 2) } = destructureª(obj)
 const { bar: { foo@ } } = obj
 ```
 ```ts
-const { bar: { foo } } = destructureª(obj, { bar: obj.bar }, 'foo')
+const { bar: { foo } } = destructureªª(obj, { bar: obj.bar }, 'foo')
 ```
 
 #### Aliasing with `@` operator when destructuring 

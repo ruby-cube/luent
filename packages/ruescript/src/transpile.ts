@@ -6,6 +6,7 @@ import { printTSX } from "./4-generate.ts"
 export function transpileRueScript(file: string, source: string) {
    const { code, edits } = preprocessRXS(source)
    const preTree = parseRXS(file, code)
+   console.log('errors', preTree.errors)
    const { ast: transformedTree } = transformRXS(preTree.program, edits)
    const generated = printTSX(transformedTree)
    console.log('===================')

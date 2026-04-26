@@ -120,24 +120,24 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             /**
             * source: get [a, b] = expression
             * prepro: let [a, b] = expression
-            * final: const [a, b] = destructureª(expression, [1, 1])
+            * final: const [a, b] = destructureªª(expression, [1, 1])
             * 
             * source: get { a, b } = expression
-            * final: const { a, b } = destructureª(expression, { a: 1, b: 1 })
+            * final: const { a, b } = destructureªª(expression, { a: 1, b: 1 })
             * 
             * source: get { a, b: { foo }} = expression
-            * final: const { a, b: { foo }} = destructureª(expression, { a: 1, b: { foo: 1 } })
+            * final: const { a, b: { foo }} = destructureªª(expression, { a: 1, b: { foo: 1 } })
             *
             * source: get [a = () => 0, b] = expression
-            * final: const [a = assertª(() => 0), b] = destructureª(expression, [1, 1])
+            * final: const [a = assertª(() => 0), b] = destructureªª(expression, [1, 1])
             */
             else if (id.type === 'ObjectPattern' || id.type === 'ArrayPattern') {
                declareAbsorbedGettersFromGetDestructuring(id, node, this, edits, context)
                this.willMutate(() => {
                   const program = requireFrom(context, 'program')
-                  importFromRuescript('destructureª', program)
+                  importFromRuescript('destructureªª', program)
                   node.kind = 'const'
-                  declarator.init = CovertCallExpression('destructureª', [
+                  declarator.init = CovertCallExpression('destructureªª', [
                      init, id.type === 'ObjectPattern'
                         ? ObjectDestructuringMapFromGetKeyword(id)
                         : ArrayDestructuringMapFromGetKeyword(id)
@@ -151,7 +151,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
          /**
           * source: const { foo@, bar } = obj
           * prepro: const { fooª, bar } = obj
-          * final: const { foo, bar } = destructureª(obj, { foo: 1, bar: 0 })
+          * final: const { foo, bar } = destructureªª(obj, { foo: 1, bar: 0 })
           */
          else if (init && isAccessorPostfixDestructuring(declarator)) {
             if (node.declarations.length !== 1) {
@@ -162,10 +162,10 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             }
             this.willMutate(() => {
                const program = requireFrom(context, 'program')
-               importFromRuescript('destructureª', program)
+               importFromRuescript('destructureªª', program)
                const transformName = (name: string) => name.endsWith(ACCESSOR_VARIABLE_POSTFIX) ? name.slice(0, -1) : name
                const deriveValue = (name: string) => name.endsWith(ACCESSOR_VARIABLE_POSTFIX) ? CovertNumber(1) : CovertNumber(0)
-               declarator.init = CovertCallExpression('destructureª', [
+               declarator.init = CovertCallExpression('destructureªª', [
                   init, id.type === 'ObjectPattern'
                      ? ObjectDestructuringMapFromGetKeyword(id, transformName, deriveValue)
                      : ArrayDestructuringMapFromGetKeyword(id, transformName, deriveValue)
@@ -291,17 +291,17 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             /**
              * source: obj.count@
              * prepro: obj.countª
-             * final: ªof(obj).count
+             * final: ªªof(obj).count
              */
             if (property.name.endsWith(ACCESSOR_VARIABLE_POSTFIX)) {
                edits.at(node.end, () => {
                   const program = requireFrom(context, 'program')
 
                   this.willMutate(() => {
-                     importFromRuescript('ªof', program)
+                     importFromRuescript('ªªof', program)
                      property.name = property.name.slice(0, -1)
                   })
-                  this.willReplace(node.object, CovertCallExpression('ªof', [node.object]))
+                  this.willReplace(node.object, CovertCallExpression('ªªof', [node.object]))
                })
             }
          }
@@ -522,22 +522,22 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      /**
                      * source: foo.bar?@
                      * prepro: foo.bar!!
-                     * final: toª(foo.bar, "?")
+                     * final: toª(foo.bar, "?") // FIX: this is wrong, should be ªªof(foo, "?").bar
                      * 
                      * source: foo[bar]?@
                      * prepro: foo[bar]!!
-                     * final: toª(foo[bar], "?")
+                     * final: toª(foo[bar], "?") // FIX: this is wrong, should be ªªof(foo, "?")[bar]
                      */
                      else if (exp.type === 'MemberExpression') {
                         const program = requireFrom(context, 'program')
                         this.willMutate(() => {
-                           importFromRuescript('ªof', program)
+                           importFromRuescript('ªªof', program)
                         })
                         this.willReplace(node, {
                            type: 'MemberExpression',
                            start: node.start,
                            end: node.end,
-                           object: CovertCallExpression('ªof', [exp.object, CovertString('?')]),
+                           object: CovertCallExpression('ªªof', [exp.object, CovertString('?')]),
                            property: exp.property as BindingIdentifier,
                            computed: exp.computed as false,
                            optional: false
@@ -550,7 +550,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                   /**
                    * source: foo!@
                    * prepro: foo!!
-                   * final: toª(foo, "!")
+                   * final: toª(foo, "!") 
                    * 
                    * source: foo()!@
                    * prepro: foo()!!
@@ -568,22 +568,22 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      /**
                      * source: foo.bar!@
                      * prepro: foo.bar!!
-                     * final: toª(foo.bar, "!")
+                     * final: toª(foo.bar, "!") // FIX: this is wrong, should be ªªof(foo, "?").bar
                      * 
                      * source: foo[bar]!@
                      * prepro: foo[bar]!!
-                     * final: toª(foo[bar], "!")
+                     * final: toª(foo[bar], "!") // FIX: this is wrong, should be ªªof(foo, "?")[bar]
                      */
                      else if (exp.type === 'MemberExpression') {
                         const program = requireFrom(context, 'program')
                         this.willMutate(() => {
-                           importFromRuescript('ªof', program)
+                           importFromRuescript('ªªof', program)
                         })
                         this.willReplace(node, {
                            type: 'MemberExpression',
                            start: node.start,
                            end: node.end,
-                           object: CovertCallExpression('ªof', [exp.object, CovertString('!')]),
+                           object: CovertCallExpression('ªªof', [exp.object, CovertString('!')]),
                            property: exp.property as BindingIdentifier,
                            computed: exp.computed as false,
                            optional: false
@@ -596,18 +596,18 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                   /**
                    * source: obj[count]@
                    * prepro: obj[count]!
-                   * final: ªof(obj)[count]
+                   * final: ªªof(obj)[count]
                    */
                   if (expression.type === 'MemberExpression') {
                      const program = requireFrom(context, 'program')
                      this.willMutate(() => {
-                        importFromRuescript('ªof', program)
+                        importFromRuescript('ªªof', program)
                      })
                      this.willReplace(node, {
                         type: 'MemberExpression',
                         start: node.start,
                         end: node.end,
-                        object: CovertCallExpression('ªof', [expression.object]),
+                        object: CovertCallExpression('ªªof', [expression.object]),
                         property: expression.property as BindingIdentifier,
                         computed: true,
                         optional: false
@@ -781,7 +781,7 @@ function scopeFunction(cursor: Cursor<ASTNode, Context>, node: Function | ArrowF
                const covertDestructuring = CovertDestructuring(pattern, CovertIdentifier(covertName))
                cursor.willMutate(() => {
                   const program = requireFrom(context, 'program')
-                  const declaration = importFromRuescript('destructureª', program)
+                  const declaration = importFromRuescript('destructureªª', program)
                   transformRXS({
                      type: 'Program',
                      start: 0,

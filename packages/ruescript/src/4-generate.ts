@@ -593,7 +593,6 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
             cursor.visit(params[i])
          }
          cursor.write(') => ')
-         cursor.visit(node.body)
          cursor.mapSpan(start, {
             span: {
                start: node.start,
@@ -603,6 +602,7 @@ export function printTSX(program: ASTNode): { code: string, map: CodeMapping[] }
                verification: true
             }
          })
+         cursor.visit(node.body)
       },
 
       /**

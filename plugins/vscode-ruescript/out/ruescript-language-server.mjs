@@ -31337,7 +31337,6 @@ function printTSX(program) {
         cursor.visit(params[i]);
       }
       cursor.write(") => ");
-      cursor.visit(node.body);
       cursor.mapSpan(start, {
         span: {
           start: node.start,
@@ -31345,6 +31344,7 @@ function printTSX(program) {
         },
         capabilities: { verification: true }
       });
+      cursor.visit(node.body);
     },
     AssignmentExpression: OperatorExpression,
     BinaryExpression: OperatorExpression,

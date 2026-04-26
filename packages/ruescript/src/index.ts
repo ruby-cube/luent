@@ -1,16 +1,166 @@
-export function assertª<T extends () => any>(getter: T): T {
-   if (typeof getter !== 'function' || getter.length !== 0) {
-      throw new TypeError(`Getter must be a function: ${getter}`)
+import { ReadonlyKeys } from "@rue/types";
+
+//  - [ ] destructureªª
+//  - [ ] absorbª, absorbsª
+//  - [X] assertª
+//  - [X] assertµ
+//  - [X] toª
+//  - [X] ªªof
+
+/**
+ * Asserts value is an accessor function, evaluated by `typeof value !== 'function' || value.length !== 0`
+ * @param value 
+ * @returns value | never
+ */
+export function assertAccessor<T extends () => any>(value: T): T {
+   if (!isAccessor(value)) {
+      throw new TypeError(`Accessor must be a function with zero parameters: ${value}`)
    }
-   return getter
+   return value;
+}
+
+export function isAccessor<T>(value: T): value is T & (() => ValueOf<T>) {
+   return typeof value === 'function' && value.length === 0
+}
+
+export interface Get<T> {
+   (): T;
+}
+
+interface MutableGet<T = unknown> extends Get<T> {
+   value: T
+}
+
+type ValueOf<T> = T extends () => infer V ? V : never
+
+/**
+ * Asserts value implements the MutableGet interface--an accessor with a 'value' property.
+ * 
+ * @example 
+ * assertµ(count).value = 0
+ * 
+ * @param value 
+ * @returns void
+ */
+export function assertMutableAccessor<T extends MutableGet>(value: T): T {
+   if (!isAccessor(value) || !('value' in value)) {
+      throw new TypeError('Assignment to readonly accessor variable')
+   }
+   return value
+}
+
+
+/**
+ * Normalizes value to an accessor: if value is an accessor, returns the value, otherwise wraps the value in an accessor.
+ * 
+ * @example
+ * toª(count)
+ * 
+ * @param value
+ * @param postfix (optional)
+ * @returns value | (() => value) | undefined
+ */
+function toAccessor<T extends () => any>(value: T, postfix?: '?' | '!'): T
+function toAccessor<T>(value: T, postfix: '?'): (() => T) | undefined
+function toAccessor<T>(value: T, postfix?: '!'): () => T
+function toAccessor<T>(value: T, postfix?: '?' | '!'): T | (() => T) | undefined {
+   if (isAccessor(value)) return value
+   if (postfix === '?' && value == null) {
+      return undefined
+   }
+   if (postfix === '!' && value == null) {
+      throw new TypeError('Value must be non-nullish')
+   }
+   return () => value
 }
 
 
 
-   //  - [ ] destructureª
-   //  - [ ] absorbª, absorbsª
-   //  - [ ] assertª
-   //  - [ ] assertµ
-   //  - [ ] toª
-   //  - [ ] ªof
+// type Foo = {
+//    getGount: () => number, // () => number
+//    readonly bar: number, // Get<number>
+//    frog: string // MutableGet<string>
+//    option?: string // MutableGet<string | undefined> | undefined
+// }
+
+type AccessorValue<T, K extends keyof T> =
+   T[K] extends Get<any>
+   ? T[K]
+   : K extends ReadonlyKeys<T>
+   ? Get<T[K]>
+   : MutableGet<T[K]>
+
+type AccessorsOf<T extends object> = {
+   readonly [K in keyof T]: AccessorValue<T, K>
+}
+
+const accessorsProxyCache = new WeakMap<object, object>();
+
+const POSTFIX = Symbol('postfix')
+type Postfix = '?' | '!'
+
+function accessorsOf<T extends object>(target: T, postfix?: '?' | '!'): AccessorsOf<T> {
+   let proxy: AccessorsOf<T> | undefined = accessorsProxyCache.get(target) as AccessorsOf<T> | undefined
+   if (proxy) {
+      (proxy as AccessorsOf<T> & { [POSTFIX]: Postfix | undefined })[POSTFIX] = postfix
+      return proxy
+   }
+   proxy = createAccessorsProxy(target, postfix)
+   accessorsProxyCache.set(target, proxy)
+   return proxy
+}
+
+function createAccessorsProxy<T extends object>(target: T, postfix: Postfix | undefined): AccessorsOf<T> {
+   const accessors = new Map<PropertyKey, Get<any>>()
+
+   return new Proxy(target, {
+      get(target, key, receiver) {
+         const value = Reflect.get(target, key, receiver)
+         if (value == null) {
+            if (postfix === '?') return value;
+            if (postfix === '!') throw new TypeError('Value must be non-null')
+         }
+         if (isAccessor(value)) return value;
+         return accessors.get(key) ?? createAccessor(target, key, receiver)
+      },
+      set(_, key, value) {
+         if (key === POSTFIX) {
+            postfix = value;
+            return true;
+         }
+         return false
+      }
+   }) as AccessorsOf<T>
+
+   function createAccessor(target: object, key: PropertyKey, receiver: object) {
+      const accessor = () => Reflect.get(target, key, receiver)
+      accessors.set(key, accessor)
+
+      Object.defineProperty(accessor, "value", {
+         get: accessor,
+         set(next) {
+            const success = Reflect.set(target, key, next, receiver);
+            if (!success) {
+               throw new TypeError(`Cannot set property ${String(key)} via accessor`);
+            }
+         },
+         enumerable: false,
+         configurable: false,
+      });
+
+      return accessor;
+   }
+}
+
+function destructureToAccessors() {
+   // TODO: implement destructuring proxy
+}
+
+
+export const destructureªª = destructureToAccessors
+export const assertª = assertAccessor
+export const assertµ = assertMutableAccessor
+export const toª = toAccessor
+export const ªªof = accessorsOf
+
 
