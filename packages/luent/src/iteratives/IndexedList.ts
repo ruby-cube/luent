@@ -56,7 +56,7 @@ export class IndexedListKit extends VineNode {
 
    toArray(input: AnyObject | Nullish) {
       if (!input) return []
-      return input instanceof Array ? input : Symbol.iterator in input ? Array.from(input as Set<any>) : Object.keys(input)
+      return Array.isArray(input) ? input : Symbol.iterator in input ? Array.from(input as Set<any>) : Object.keys(input)
    }
 
    private render($list: Ion<any[]>) {

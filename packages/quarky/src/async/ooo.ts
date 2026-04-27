@@ -102,7 +102,7 @@ export const ooo = {
 function toPromise(awaited: any) {
    if (awaited instanceof Promise) return awaited
    if (awaited instanceof Object && 'asPromise' in awaited) return awaited.asPromise
-   else if (awaited instanceof Array) return Promise.all(toPromises(awaited))
+   else if (Array.isArray(awaited)) return Promise.all(toPromises(awaited))
    else return Promise.resolve(awaited)
 }
 

@@ -228,7 +228,7 @@ defineIonicCollection(Array, {
 
 export function isIonizedArray(target: any): target is IonicProxy {
    if (!isIonicProxy(target)) return false;
-   if (toRaw(target) instanceof Array) return true;
+   if (Array.isArray(toRaw(target))) return true;
    return false;
 }
 

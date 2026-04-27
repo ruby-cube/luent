@@ -369,7 +369,7 @@ type WithMu<D> = HasMu<D> extends true ? {
 
 
 type StaticInput<D> = {
-   [K in keyof D as K extends `mu:${string}` /* | `can:${string}` | `see:${string}`  */ | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
+   [K in keyof D as K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
    : K]: D[K] extends Ion<infer V> ? V
    :
    D[K]

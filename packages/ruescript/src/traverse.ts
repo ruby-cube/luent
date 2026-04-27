@@ -207,7 +207,7 @@ export class Cursor<T extends BaseNode, C> {
       const childKeys = this.childKeys[node.type] ?? Object.keys(node)
       for (const key of childKeys) {
          const nested = node[key as keyof T] as T | T[]
-         if (nested instanceof Array && nested.some(isNode)) {
+         if (Array.isArray(nested) && nested.some(isNode)) {
             for (const child of nested) {
                if (isNode(child)) {
                   this.visit(child, context)
@@ -246,7 +246,7 @@ export class Cursor<T extends BaseNode, C> {
       while (current) {
          const replacement = this.replacements.get(current)
          if (!replacement) return current;
-         if (replacement instanceof Array) {
+         if (Array.isArray(replacement)) {
             if (replacement.length === 0) return current
             current = dir === 'R' ? replacement.at(-1) : replacement[0]
          }
@@ -272,7 +272,7 @@ export class Cursor<T extends BaseNode, C> {
          const [key, index] = path
          if (index) {
             const array = parent[key] as T[]
-            if (other instanceof Array) {
+            if (Array.isArray(other)) {
                array.splice(parseInt(index), 1, ...other)
             }
             else {
@@ -317,7 +317,7 @@ export class Cursor<T extends BaseNode, C> {
       const index = ref ? array.indexOf(ref as T) : offset ? -1 : array.length
       const i = index === -1 ? originalIndex ? parseInt(originalIndex) : undefined : index
       if (i !== undefined) {
-         if (other instanceof Array) {
+         if (Array.isArray(other)) {
             array.splice(i + offset, 0, ...other)
          }
          else {
@@ -435,12 +435,12 @@ export class Cursor<T extends BaseNode, C> {
                if (isNode<T>(value)) {
                   return cursor.NodeProxy(value, target, [key])
                }
-               if (value instanceof Array && value.some(isNode)) {
+               if (Array.isArray(value) && value.some(isNode)) {
                   return cursor.NodeListProxy(value, target, key)
                }
                return value;
             }
-            if (keys.indexOf(key as 'key') !== -1 && value instanceof Array) {
+            if (keys.indexOf(key as 'key') !== -1 && Array.isArray(value)) {
                return cursor.NodeListProxy(value, target, key)
             }
             return value

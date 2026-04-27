@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NodeRef, template, COMPONENT, ComponentTag, If, Else, For, teleportTo } from "@rue/luent";
+import { NodeRef, template, ComponentTag, If, Else, For, teleportTo } from "@rue/luent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/luent/src/component/LazyComponent";
@@ -113,10 +113,10 @@ export function List() {
     const $listLengthIsZero = () => $list().length === 0
 
     return template({
-        exposed: {
+        as: {
             $listLengthIsZero
         },
-        template:
+        nodes:
             <div>
                 {If($listLengthIsZero, 'show',
 

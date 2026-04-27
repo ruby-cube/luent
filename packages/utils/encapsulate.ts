@@ -77,7 +77,7 @@ export function encapsulate<T extends AnyObject>(target: T): T {
 }
 
 function getBaseDataStructure(target: Object) {
-    if (target instanceof Array) return Array;
+    if (Array.isArray(target)) return Array;
     if (target instanceof Object) return Object;
     throw new Error('Invalid Input')
 }

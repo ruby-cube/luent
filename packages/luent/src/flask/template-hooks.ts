@@ -12,7 +12,7 @@ export function setUpHooks(node: AnyObject, hooks: { flask: Flask } & { [key: st
       debug.error('forwarded hooks must be attached to component or element within the same dynamic boundary')
    for (const key in hooks) {
       const value = hooks[key]
-      if (!isFunction(value) && !(value instanceof Array)) continue;
+      if (!isFunction(value) && !(Array.isArray(value))) continue;
       const tasks = normalizeToArray(value)
       switch (key) {
          case 'at:create':

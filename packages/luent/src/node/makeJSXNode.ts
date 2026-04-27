@@ -1,5 +1,5 @@
 import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
-import { Component, ComponentTag, InferSlot, makeComponent } from "../component/Component";
+import { ComponentTag, InferSlot, makeComponent } from "../component/Component";
 import { TagName, makeElement } from "../element/makeElement";
 import { NodeRef, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
@@ -13,6 +13,7 @@ import { DOMNode, VineNode } from "./VineNode";
 import { NodeRefsConfig } from "./NodeRefs";
 import { normalizeToArray, toError } from "@rue/utils";
 import { RenderError } from "../boundaries/Try";
+import { ComponentKit } from "@rue/ruescript";
 
 export type TagType = ComponentTag | string
 
@@ -36,7 +37,7 @@ export type RawJSXNode =
    | string
    | Ion
    | VineNode
-   | Component
+   | ComponentKit
    | InnerHTMLKit
    | null
    | undefined

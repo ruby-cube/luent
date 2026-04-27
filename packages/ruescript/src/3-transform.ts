@@ -1,4 +1,4 @@
-import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator, AssignmentOperator, DoWhileStatement, WhileStatement, ConditionalExpression } from 'oxc-parser'
+import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator, AssignmentOperator, DoWhileStatement, WhileStatement, ConditionalExpression, JSXChild, JSXFragment, JSXAttributeValue, JSXExpression } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
 import { Cursor, Scope, traverse, traverseAll } from './traverse.ts';
 
@@ -46,39 +46,6 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
    return traverse(ast, { edits } as Context, {
       Program(node, context) {
          this.visitEach(node.body, { ...context, program: node })
-      },
-
-      JSXAttribute(node, context) {
-         const { edits } = context;
-
-         /**
-          * source: <Comp {attribute} />
-          * prepro: <Comp ßattributeß />
-          * final: <Comp attribute={attribute} />
-          */
-         if (node.value === null) {
-            edits.at(node.start, edit => {
-               if (edit.type !== 'JSXAttributeShorthand')
-                  throw new InternalError(`Unexpected edit type ${edit.type}`)
-               const { identifier } = edit
-               this.willMutate(() => {
-                  node.name.name = identifier // TODO: what if node.name is replaced before we mutate??
-                  node.value = {
-                     type: 'JSXExpressionContainer',
-                     start: node.start,
-                     end: node.end,
-                     expression: {
-                        type: 'Identifier',
-                        start: node.start + 1,
-                        end: node.end - 1,
-                        name: identifier
-                     }
-                  }
-               })
-            })
-         }
-         this.visit(node.name)
-         if (node.value) this.visit(node.value)
       },
 
       VariableDeclaration(node, context) {
@@ -522,11 +489,11 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      /**
                      * source: foo.bar?@
                      * prepro: foo.bar!!
-                     * final: toª(foo.bar, "?") // FIX: this is wrong, should be ªªof(foo, "?").bar
+                     * final: ªªof(foo, "?").bar)
                      * 
                      * source: foo[bar]?@
                      * prepro: foo[bar]!!
-                     * final: toª(foo[bar], "?") // FIX: this is wrong, should be ªªof(foo, "?")[bar]
+                     * final: ªªof(foo, "?")[bar]
                      */
                      else if (exp.type === 'MemberExpression') {
                         const program = requireFrom(context, 'program')
@@ -568,11 +535,11 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                      /**
                      * source: foo.bar!@
                      * prepro: foo.bar!!
-                     * final: toª(foo.bar, "!") // FIX: this is wrong, should be ªªof(foo, "?").bar
+                     * final: ªªof(foo, "!").bar
                      * 
                      * source: foo[bar]!@
                      * prepro: foo[bar]!!
-                     * final: toª(foo[bar], "!") // FIX: this is wrong, should be ªªof(foo, "?")[bar]
+                     * final: ªªof(foo, "!")[bar]
                      */
                      else if (exp.type === 'MemberExpression') {
                         const program = requireFrom(context, 'program')
@@ -658,8 +625,104 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
             return;
          this.visit(node.left)
          this.visit(node.right)
-      }
+      },
+
+      JSXElement(node, context) {
+         const identifier = node.openingElement.name
+         // source: <Component>...</Component>
+         // final: JSXComponent(...)
+         if (identifier.type === 'JSXIdentifier' && identifier.name === 'Component') {
+            const program = requireFrom(context, 'program')
+            let componentAs: JSXExpression | null = null;
+            traverse<ASTNode, {}>(node, {}, {
+               JSXAttribute(node) {
+                  if (node.name.name === 'as' && node.value?.type === 'JSXExpressionContainer') {
+                     componentAs = node.value.expression
+                  }
+               }
+            })
+
+            if (componentAs) {
+               this.willMutate(() => {
+                  importFromRuescript('JSXComponentAs', program)
+               })
+               this.willReplace(node, {
+                  type: 'CallExpression',
+                  start: node.start,
+                  end: node.end,
+                  callee: CovertIdentifier('JSXComponentAs'),
+                  arguments: [componentAs, CovertJSXFragment(node.children)],
+                  optional: false,
+               })
+            }
+            else {
+               this.willMutate(() => {
+                  importFromRuescript('JSXComponent', program)
+               })
+               this.willReplace(node, {
+                  type: 'CallExpression',
+                  start: node.start,
+                  end: node.end,
+                  callee: CovertIdentifier('JSXComponent'),
+                  arguments: [CovertJSXFragment(node.children)],
+                  optional: false,
+               })
+            }
+         }
+      },
+
+      JSXAttribute(node, context) {
+         const { edits } = context;
+
+         /**
+          * source: <Comp {attribute} />
+          * prepro: <Comp ßattributeß />
+          * final: <Comp attribute={attribute} />
+          */
+         if (node.value === null) {
+            edits.at(node.start, edit => {
+               if (edit.type !== 'JSXAttributeShorthand')
+                  throw new InternalError(`Unexpected edit type ${edit.type}`)
+               const { identifier } = edit
+               this.willMutate(() => {
+                  node.name.name = identifier // TODO: what if node.name is replaced before we mutate??
+                  node.value = {
+                     type: 'JSXExpressionContainer',
+                     start: node.start,
+                     end: node.end,
+                     expression: {
+                        type: 'Identifier',
+                        start: node.start + 1,
+                        end: node.end - 1,
+                        name: identifier
+                     }
+                  }
+               })
+            })
+         }
+         this.visit(node.name)
+         if (node.value) this.visit(node.value)
+      },
    })
+}
+
+function CovertJSXFragment(children: JSXChild[]): JSXFragment {
+   return {
+      type: 'JSXFragment',
+      start: 0,
+      end: 0,
+      openingFragment: {
+         type: 'JSXOpeningFragment',
+         start: 0,
+         end: 0,
+      },
+      closingFragment: {
+         type: 'JSXClosingFragment',
+         start: 0,
+         end: 0
+      },
+      children,
+   }
 }
 
 function transformIfStatement(node: IfStatement | ConditionalExpression, cursor: Cursor<ASTNode, Context>, context: Context) {

@@ -79,7 +79,7 @@ class AsyncMutable {
 
 function updateAsyncMutable(this: AsyncMutable, data: AnyObject) {
    const model = this.mutable
-   if (model instanceof Array) {
+   if (Array.isArray(model)) {
       updateArray(model, data)
    }
    else {

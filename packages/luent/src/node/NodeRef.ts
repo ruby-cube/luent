@@ -1,12 +1,12 @@
-import { Component, PublicComponent } from "../component/Component"
 import { TagName } from "../element/makeElement"
-import { Ion, toValue } from "@rue/quarky"
+import { toValue } from "@rue/quarky"
 import { getActiveFlask, getFlask } from "@rue/flask"
 import { AnyObject, Glass } from "@rue/types"
+import { ComponentTag } from "../component/Component"
 
 export const INTERNAL = Symbol('internal')
 
-export type RefSource = TagName | ((...args: any[]) => { exposed: unknown })
+export type RefSource = TagName | ComponentTag
 
 
 export type NodeReferent<
@@ -16,7 +16,7 @@ export type NodeReferent<
    T
 
 export type ComponentRef<C> = C extends (setup: infer S) => infer R ?
-   S extends { ref?: () => infer F } ? NonNullable<F> : R extends { exposed: infer E } ? E : never : never
+   S extends { ref?: () => infer F } ? NonNullable<F> : R extends { as: infer E } ? E : never : never
 /* 
 * NodeRef property:
 * - undefined means ref has not been set or has been removed from the DOM

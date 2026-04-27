@@ -283,7 +283,7 @@ export function createAwaitSeries(
          console.log('*** C1')
          return true;
       }
-      if (placeholder instanceof Array) {
+      if (Array.isArray(placeholder)) {
          if (placeholder.length > 1) {
             console.log('*** C2')
             return false;

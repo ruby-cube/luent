@@ -71,7 +71,7 @@ export function isEqual(value1: any, value2: any) {
 
 export function normalizeToArray<T>(value: T | T[]): T[] {
     if (value === undefined) return [];
-    return value instanceof Array ? value : [value];
+    return Array.isArray(value) ? value : [value];
 }
 
 export const UNDEFINED = Symbol('undefined');

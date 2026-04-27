@@ -1,5 +1,6 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { isObject } from "@rue/utils";
+export * from './component'
 
 //  - [ ] destructureªª
 //  - [ ] absorbª, absorbsª
@@ -52,6 +53,7 @@ export function assertMutableAccessor<T extends MutableGet>(value: T): T {
 
 type Postfix = '?' | '!'
 
+
 type AsAccessor<T, P extends Postfix | undefined> =
    T extends Get<any>
    ? T
@@ -91,7 +93,7 @@ function toAccessor<T, P extends Postfix | undefined = undefined>(value: T, post
 //    option?: string // MutableGet<string | undefined> | undefined
 // }
 
-// FIX: consider the case: (() => T) | undefined
+// FIX: consider the case: (() => T) | undefined (or any other type)
 type AccessorValue<T, K extends keyof T> =
    T[K] extends Get<any>
    ? T[K]
@@ -161,8 +163,9 @@ function createAccessorsProxy<T extends object>(target: T, postfix: Postfix | un
    }
 }
 
-type DestructuredAccessors<T, TMap> = { [K in keyof T]: K extends keyof TMap ? TMap[K] extends 1 ? AsAccessor<T[K], undefined> : T[K] : T[K] }
-// TODO: nesting
+type DestructuredAccessors<T, TMap> = {
+   [K in keyof T]: K extends keyof TMap ? TMap[K] extends 1 ? AccessorValue<T, K> : TMap[K] extends object ? DestructuredAccessors<T[K], TMap[K]> : T[K] : T[K] 
+}
 
 /**
  * const { a, b, c: { d } } = destructureToAccessors(obj, { a: 1, b: 0, c: { d: 1 } })
@@ -181,7 +184,7 @@ function destructureToAccessors<T extends AnyObject, TMap extends AnyObject>(obj
       else if (value === 1) {
          destructured[key] = accessorsOf(obj)[key] // assumes never undefined
       }
-      else if (isObject(value)){
+      else if (isObject(value)) {
          destructured[key] = destructureToAccessors(obj[key], map[key])
       }
    }
@@ -194,5 +197,6 @@ export const assertª = assertAccessor
 export const assertµ = assertMutableAccessor
 export const toª = toAccessor
 export const ªªof = accessorsOf
+
 
 

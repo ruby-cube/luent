@@ -1,10 +1,10 @@
-import { Component, unnestComponent } from "../component/Component";
 import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
 import { markIfMuIon } from "./provide";
 import { Ion } from "@rue/quarky";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderSlot } from "../component/Input";
 import { debug, normalizeToArray } from "@rue/utils";
+import {  unnestComponent } from "@rue/ruescript";
 
 export interface NodeContext {
    entries: Map<string, unknown>;

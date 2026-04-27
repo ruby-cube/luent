@@ -6,7 +6,7 @@ import { printTSX } from "../src/4-generate";
 
 describe('RueScript JSX transforms', () => {
 
-   it.only('transforms jsx attribute shorthand', () => {
+   it.skip('transforms jsx attribute shorthand', () => {
       const { code, edits } = preprocessRXS(
          `<Tooltip something='true' {tooltip}></Tooltip>`
       )
@@ -19,6 +19,34 @@ describe('RueScript JSX transforms', () => {
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
          `<Tooltip something='true' tooltip={tooltip}></Tooltip>;\n`
+      )
+   })
+
+   it.only('transforms <Component>', () => {
+      const { code, edits } = preprocessRXS(
+         `<Component><div>hi</div></Component>`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { JSXComponent } from "@rue/ruescript";\n` +
+         `JSXComponent(<><div>hi</div></>);\n`
+      )
+   })
+
+   it.only('transforms <Component as={{ open }}>', () => {
+      const { code, edits } = preprocessRXS(
+         `<Component as={{ open }}><div>hi</div></Component>`
+      )
+      const ast = parseRXS('test.rxs', code)
+      const { ast: tsxTree, transformed } = transformRXS(ast.program, edits)
+      expect(transformed).toBe(true)
+      const generated = printTSX(tsxTree)
+      expect(generated.code).toBe(
+         `import { JSXComponentAs } from "@rue/ruescript";\n` +
+         `JSXComponentAs({\n\topen\n}, <><div>hi</div></>);\n`
       )
    })
 

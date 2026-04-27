@@ -253,7 +253,7 @@ export class ModelQuark implements Atom {
       triggerOp(this, INTERNAL_OP, 'ownKeys')
       triggerOp(this, '[[in]]', key)
       trigger(this)
-      if (success && isIntegerKey(key) && this.target instanceof Array) {
+      if (success && isIntegerKey(key) && Array.isArray(this.target)) {
          this.proxy.length = this.state.pending.length
       }
       return !this.proto.has(key) ? this.initNonProperty(key, true) : this.proto.get(key);

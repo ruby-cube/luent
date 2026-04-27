@@ -296,7 +296,7 @@ function _setUpCleanup(until: Until | undefined, stop: CallbackRemover) {
       until.onabort = stop;
       return true;
    }
-   if (until instanceof Array) {
+   if (Array.isArray(until)) {
       until = useCleanupScheduler(...until) // for custom cleanup, like [document, 'mouseup']
    }
    if (until) {

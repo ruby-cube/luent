@@ -1,6 +1,6 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@rue/utils";
 import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, queueRender, untracked, watch, watchToRender} from "@rue/quarky";
-import { isComponentKit } from "../component/Component";
+import { isComponentKit } from "@rue/ruescript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { CONTEXT, ContextNode } from "../context/context-stack";
@@ -80,7 +80,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
    console.log('jsxNodes', jsxNodes)
    for (const node of jsxNodes) {
 
-      if (node instanceof Array) {
+      if (Array.isArray(node)) {
          _processJSXOutput(node, flattened)
       }
       else if (isComponentKit(node)) {

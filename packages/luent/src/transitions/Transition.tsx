@@ -1,4 +1,4 @@
-import { Component } from "../component/Component"
+import { JSXComponent } from "@rue/ruescript"
 import { FromTag, RenderSlot } from "../component/Input"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
@@ -9,7 +9,7 @@ export function Transition({ Slot, ...attributes }: FromTag<{ Slot: RenderSlot }
    transitionConfig = attributes
    const output = Slot()
    transitionConfig = undefined
-   return Component(output)
+   return JSXComponent(output)
 }
 
 export function setTransition(transition: TransitionConfigs | undefined){

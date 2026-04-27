@@ -147,10 +147,11 @@ import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises
 //    )
 // }
 
-// const app = createRoot(TestThru)
-const app = createRoot(TestAsyncMultipliers)
 
-app.mount('#root')
+// const app = createRoot(TestThru)
+// const app = createRoot(TestAsyncMultipliers)
+
+// app.mount('#root')
 
 // const frog = new IonicFrog('kermit')
 
