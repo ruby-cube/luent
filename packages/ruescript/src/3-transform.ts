@@ -628,6 +628,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
       },
 
       JSXElement(node, context) {
+         
          const identifier = node.openingElement.name
          // source: <Component>...</Component>
          // final: JSXComponent(...)
@@ -669,6 +670,7 @@ export function transformRXS(ast: ASTNode, edits: Edits) {
                })
             }
          }
+         this.visitChildren(node)
       },
 
       JSXAttribute(node, context) {
