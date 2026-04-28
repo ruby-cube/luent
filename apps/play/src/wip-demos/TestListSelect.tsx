@@ -86,7 +86,7 @@ export function TestListSelect() {
                {For(list, m => m.id, (item, $index) => (
                   <div>
                      <div
-                        on:click={e => !e.by('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
+                        on:click={e => !e.from('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
                         style={{
                            backgroundColor: randomColor.get(),
                            outline: (selected.has(item) ? 'thick solid blue' : 'unset'),

@@ -45,7 +45,17 @@ export function makeComponent(
    fromTag: ComponentConfig,
    // $index: Ion<number> | undefined
 ): ComponentKit {
-   const { ref, class: classes, style: styles, hooks: forwardHooks, events: forwardEvents, transitions: forwardTransitions, Slot: forwardSlot, ...other } = fromTag
+   const { 
+      ref, 
+      class: classes, 
+      style: styles, 
+      hooks: forwardHooks, 
+      events: forwardEvents, 
+      transitions: forwardTransitions, 
+      Slot: forwardSlot, 
+      ...other 
+   } = fromTag
+
    const { hooks, events, attributes, transitions } = analyzeAttributes(other)
    console.log('component tag config', fromTag)
    console.log('component hooks', hooks)
@@ -55,7 +65,7 @@ export function makeComponent(
 
    const output = Component(toInput({
       events: { ...events, ...forwardEvents },
-      hooks: { flask: getFlask(), ...hooks, ...forwardHooks },
+      hooks: { ...hooks, ...forwardHooks },
       ...attributes,
       transitions: { ...transitions, ...forwardTransitions },
       Slot: Slot ?? forwardSlot,
@@ -65,9 +75,11 @@ export function makeComponent(
       // classes: classString
       // styles: style ? toStyleDeclaration(style) : undefined // TODO:
    }, events))
+   
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    const publicComponent = output.as
+
    console.log('public', publicComponent, ref)
    if (ref && publicComponent) {
       if (isObject(ref) && 'arr' in ref) {

@@ -7,9 +7,6 @@ import { NodeRef, RefSource } from "../node/NodeRef";
 import { LuentHooks } from "../flask/template-hooks";
 
 
-//NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
-// does not have higher order generics, this is not currently possible. Must manually type them all.
-
 export type HandleEvent<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
 
 export const MU_IONS = 'mu_ions'
@@ -332,6 +329,7 @@ type ToMuIon<T> = ExcludePrimitives<T> extends { value: any } ? T
 // type What = FromTag<Froggy>
 
 // TODO: only allow 'mu:' for ions
+
 
 export type FromTag<T = {}, D = {}> =
    T extends RefSource

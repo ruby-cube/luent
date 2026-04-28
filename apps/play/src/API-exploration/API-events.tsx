@@ -94,3 +94,7 @@ function keydown(task: (event: KeyboardEvent, utils: { setup: SetupCleanup, abor
 //       }
 //    }
 // }
+
+// <div on:event={[
+//    tempo(e => { console.log('tempo')})
+// ]}>

@@ -53,7 +53,7 @@ declare global {
          */
          currentTarget: EventTarget & T
 
-         by: typeof Luent.matchEventTarget
+         from: typeof Luent.matchEventTarget
       }
 
 
@@ -772,6 +772,7 @@ declare global {
       // ===================================================================  
 
       interface GlobalAttributes {
+         microclass?: ClassInput | Luent.MaybeIon<string | Falsey> | (Luent.MaybeIon<string | Falsey> | ClassInput)[];
          class?: ClassInput | Luent.MaybeIon<string | Falsey> | (Luent.MaybeIon<string | Falsey> | ClassInput)[];
          style?: StyleInput | StyleInput[];
 
@@ -1138,10 +1139,10 @@ declare global {
       }
 
       interface FormHTMLAttributes<T> extends HTMLAttributes<T> {
+         'accept-charset'?: Luent.MaybeIon<string | undefined>;
          /**
           * DOM Property
           */
-         acceptCharset?: Luent.MaybeIon<string | undefined>;
          action?: Luent.MaybeIon<string | undefined>;
          autocomplete?: Luent.MaybeIon<string | undefined>;
          enctype?: Luent.MaybeIon<string | undefined>;
@@ -1880,8 +1881,8 @@ type LuentAttributes<F, P> =
 
 type LuentComponentAttributes<C> = {
    ref?: () => Luent.ComponentRef<C> | undefined
-   class?: ClassInput | Luent.MaybeIon<string | Falsey> | (Luent.MaybeIon<string | Falsey> | ClassInput)[];
-   style?: StyleInput | StyleInput[];
+   // class?: ClassInput | Luent.MaybeIon<string | Falsey> | (Luent.MaybeIon<string | Falsey> | ClassInput)[];
+   // style?: StyleInput | StyleInput[];
 }
 
 type LuentCommonAttributes = {

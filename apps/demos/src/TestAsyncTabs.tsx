@@ -50,7 +50,7 @@ export function TestAsyncTabs() {
       <hr></hr>
       <ul class="inline">
          {For(openTabs, m => m, tab => (
-            <li class={($tab() === tab && 'selected')} on:click={e => { !e.by('span') && ($tab.value = tab) }}>
+            <li class={($tab() === tab && 'selected')} on:click={e => { !e.from('span') && ($tab.value = tab) }}>
                {tabNames[tab]}
                <span style="padding: 1em" on:click={e => closeTab(tab)}>x</span>
             </li>

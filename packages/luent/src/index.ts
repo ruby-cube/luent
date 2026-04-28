@@ -29,7 +29,8 @@ export * from '../../quarky/src/specialty/Finitron'
 export * from './measureLayout'
 export * from '../../quarky/src/reactivity/RenderCycle'
 export { JSXComponent as Component } from '@rue/ruescript'
-export type { ComponentKit } from '@rue/ruescript'
+export type { ComponentKit, toª as to$, ªªof as $of } from '@rue/ruescript'
+
 
 //@ts-expect-error
 window._$$wrapWithContext = wrapWithContext;

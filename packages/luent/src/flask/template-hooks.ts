@@ -6,10 +6,7 @@ import { toValue } from "@rue/quarky";
 
 type LifecycleTask<T = any> = (element: T, initialOrFinal?: boolean) => void;
 
-export function setUpHooks(node: AnyObject, hooks: { flask: Flask } & { [key: string]: LifecycleTask | LifecycleTask[] }) {
-   console.log('setUpHooks: node', node)
-   if (hooks.flask && hooks.flask !== getFlask()) 
-      debug.error('forwarded hooks must be attached to component or element within the same dynamic boundary')
+export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTask | LifecycleTask[] }) {
    for (const key in hooks) {
       const value = hooks[key]
       if (!isFunction(value) && !(Array.isArray(value))) continue;

@@ -3,7 +3,7 @@ import { isObject } from "@rue/utils";
 export * from './component'
 
 //  - [ ] destructureªª
-//  - [ ] absorbª, absorbsª
+//  - [ ] X absorbª, absorbsª
 //  - [X] assertª
 //  - [X] assertµ
 //  - [X] toª
@@ -149,8 +149,8 @@ function createAccessorsProxy<T extends object>(target: T, postfix: Postfix | un
 
       Object.defineProperty(accessor, "value", {
          get: accessor,
-         set(next) {
-            const success = Reflect.set(target, key, next, receiver);
+         set(value) {
+            const success = Reflect.set(target, key, value, receiver);
             if (!success) {
                throw new TypeError(`Cannot set property ${String(key)} via accessor`);
             }

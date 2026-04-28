@@ -22,20 +22,6 @@ import { setUpInnerHTML } from "../node/InnerHTML";
 
 export type TagName = keyof HTMLElementTagNameMap
 
-// function makeElement(tag, Slot) {
-//    const element = document.createElement(tag)
-
-//    const nodes = Slot() as (VineNode & (NodeKit | CaseKit) | DOMNode)[]
-
-
-
-// mountDOMNodes(nodes, element)
-
-//    return element;
-// }
-
-
-
 
 export function makeElement(
    tagName: string,

@@ -1,6 +1,6 @@
 import { isObject, normalizeToArray } from "@rue/utils";
 
-export interface ComponentKit<T> {
+export interface ComponentKit<T = undefined> {
    as: T
    nodes: unknown[];
 }

@@ -22,7 +22,7 @@ export function TestForSetAndMap() {
       <div>
          <button on:click={e => map.setPair()}>+</button>
          {For(map, ([$key, $value], i) =>
-            <p on:click={e => !e.by('span') && map.delete($key())}>
+            <p on:click={e => !e.from('span') && map.delete($key())}>
                ({i}) {$key} - <span on:click={e => { console.log('clicked'); map.set($key(), "A" + $value()) }}>{$value}</span>
             </p>
          )}
@@ -62,7 +62,7 @@ export function TestForSetAndMapIons() {
       <div>
          <button on:click={e => $map.setPair()}>+</button>
          {For($map, ([$key, $value], i) =>
-            <p on:click={e => !e.by('span') && $map.delete($key())}>
+            <p on:click={e => !e.from('span') && $map.delete($key())}>
                ({i}) {$key} - <span on:click={e => { console.log('clicked'); $map.set($key(), "A" + $value()) }}>{$value}</span>
             </p>
          )}
