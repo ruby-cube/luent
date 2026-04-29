@@ -5,7 +5,7 @@ import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { CONTEXT, ContextNode } from "../context/context-stack";
 import { TRACE } from "../../../flask/debug";
-import { RenderSlot } from "../component/Input";
+import { RenderSlot } from "../component/x-Input";
 
 export type JSXNode = DOMNode | VineNode
 

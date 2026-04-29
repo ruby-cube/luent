@@ -5,7 +5,7 @@ import { getElement } from "../hydration/getElement";
 import { initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
-import { RenderSlot, MaybeIon } from "../component/Input";
+import { RenderSlot, MaybeIon } from "../component/x-Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { setUpNodeRefs } from "../node/NodeRefs";
 import { setUpTransitions } from "../transitions/transitions";
@@ -25,7 +25,7 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    bindings: ElementConfig,
 ): DOMNode {
-   const { slots, ref, showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
+   const { ref, showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
    
    let newXML_NS: string | undefined;
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
@@ -56,10 +56,10 @@ export function makeElement(
    const transitionConfig = getTransition()
    if (transitions) setUpTransitions(domNode as HTMLElement, transitions, transitionConfig) // TODO: transition-in etc
 
-   if (slots) {
+   if (Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
-         const rawOutput = renderSlots(slots) // FIX:
+         const rawOutput = normalizeToArray(Slot())
          const nodes = processJSXOutput(rawOutput)
          setUpNodeVine(nodes, domNode)
          mountDOMNodes(nodes, domNode)
@@ -69,14 +69,14 @@ export function makeElement(
    return domNode;
 }
 
-function renderSlots(slots: RenderSlot[]) {
-   const nodes: RawJSXNode[] = []
-   for (const render of slots) {
-      console.log('render?', render)
-      nodes.push(render())
-   }
-   return nodes
-}
+// function renderSlots(slots: RenderSlot[]) {
+//    const nodes: RawJSXNode[] = []
+//    for (const render of slots) {
+//       console.log('render?', render)
+//       nodes.push(render())
+//    }
+//    return nodes
+// }
 
 
 const transitionAttributes = {

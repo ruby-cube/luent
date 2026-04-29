@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
 import { isObject, normalizeToArray } from "@rue/utils";
 import { initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
-import { toInput } from "./Input";
+import { toInput } from "./x-Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, setUpNodeVine, VineNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { setUpHooks } from "../flask/template-hooks";

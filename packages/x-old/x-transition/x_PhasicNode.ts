@@ -10,7 +10,7 @@ import { Ion } from "@rue/quarky";
 import { template } from "../../luent/src/component/Component";
 import { createIfSeries, Else, If } from "../../luent/src/conditional/If";
 import { ContextKey } from "../../luent/src/context/ContextKey";
-import { RenderSlot } from "../../luent/src/component/Input";
+import { RenderSlot } from "../../luent/src/component/x-Input";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 

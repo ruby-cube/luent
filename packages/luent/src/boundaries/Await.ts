@@ -18,7 +18,7 @@ import { $_snap_context, AsyncState } from "@rue/flask";
 import { SuspenseIon, SUSPENSE_QUARK } from "../../../quarky/src/async/Suspense";
 import { toAsyncRender } from "../node/VineNode";
 import { createHybridIon } from "../../../quarky/src/ion/HybridIon";
-import { FromTag, RenderSlot } from "../component/Input";
+import { FromTag, RenderSlot } from "../component/x-Input";
 import { template } from "../component/Component";
 
 // export function Suspense(input: FromTag<AwaitConfig>) {

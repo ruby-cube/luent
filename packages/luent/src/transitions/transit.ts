@@ -1,7 +1,7 @@
 import { getActiveUpdate, queueRender, queueTask, toValue } from "@rue/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
-import { MaybeIon } from "../component/Input";
+import { MaybeIon } from "../component/x-Input";
 import { Flask, getFlask } from "@rue/flask";
 import { atMounted, atUnmount } from "../flask/flask-hooks";
 

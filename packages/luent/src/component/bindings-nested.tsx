@@ -1,24 +1,27 @@
-import { Component, ComponentTag, FromTag, makeComponent } from "@rue/luent"
+import { AnyObject } from "@rue/types"
+import { ComponentKit, FromTag, RawJSXNode } from ".."
 
 
-type NestedAttributeKit = {
-   selector: string,
-   setup: (Element: ComponentTag) => any
+
+export type NestedAttributeSetup = {
+   [key: string]: NestedSetup<any>
 }
-
-export function nested(selector: string, setup: (Element: ComponentTag) => any) {
-   return {
-      selector,
-      setup
-   }
-}
+type NestedSetup<T> = (nested: { [key: string]: (setup: FromTag<T>) => ComponentKit }) => RawJSXNode
 
 // TODO:
-export function nestAttributes(fragment: DocumentFragment, kits: NestedAttributeKit[]) {
-   for (const kit of kits) {
-      const { selector, setup } = kit
-      const node = fragment.querySelector(selector);
-      setup(input => ({ as: undefined, nodes: [node] }))
+export function nestAttributes(fragment: DocumentFragment, setup: NestedAttributeSetup) {
+   const keys = Object.keys(setup)
+   for (const key of keys) {
+      const bind = setup[key]
+      const node = fragment.querySelector(key);
+      bind(new Proxy({}, {
+         get(target, key) {
+            return (setup: AnyObject) => {
+               // TODO: need to provide as auto-bind somehow
+               return ({ as: undefined, nodes: [node] })
+            }
+         }
+      }))
    }
 }
 
@@ -27,13 +30,20 @@ export function nestAttributes(fragment: DocumentFragment, kits: NestedAttribute
 
 // function App() {
 //    <Board
-//       nested-bind={nested('.close', Button =>
-//          <Button on:click={() => console.log('clicked')} />
-//       )}
+//       nested-bind={{ 
+//          '.open': n => <n.button on:click={() => console.log('clicked')} /> 
+//       }}
 //    ></Board>
 // }
 
-// function Board(setup: FromTag<{ 'at:nest': (select: HTMLElement['querySelector']) => void }>) {
+
+
+
+// function Board(setup: FromTag<{
+//    'nested-bind': {
+//       '.open': NestedSetup<'button'>
+//    }
+// }>) {
 //    return Component(
 //       <div>
 //          <button class='open'></button>

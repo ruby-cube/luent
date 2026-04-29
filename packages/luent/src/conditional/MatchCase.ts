@@ -3,7 +3,7 @@ import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/make
 import { ShowHideType, RenderConditional } from "./If";
 import { isFunction, noop } from "@rue/utils";
 import { template } from "../component/Component";
-import { FromTag, RenderSlot } from "../component/Input";
+import { FromTag, RenderSlot } from "../component/x-Input";
 // import { createCasesKit, DEFAULT, MatchKit } from "./Switch";
 import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode";

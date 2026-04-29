@@ -6,7 +6,7 @@ import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 import { NodeRef } from "../../luent/src/node/NodeRef";
-import { RenderSlot, FromTag } from "../../luent/src/component/Input";
+import { RenderSlot, FromTag } from "../../luent/src/component/x-Input";
 
 export type TransitionHook = {
    phase: 'in' | 'out'

@@ -5,7 +5,7 @@ import {  createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, queueRender,
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { FromTag, MaybeIon, RenderSlot } from "../component/Input";
+import { FromTag, MaybeIon, RenderSlot } from "../component/x-Input";
 import { isPlainObject } from "@rue/utils";
 import { unmarkInitialRender, markInitialRender, TransitionConfigs } from "../transitions/transitions";
 import { setTransition } from "../transitions/Transition";

@@ -1,7 +1,7 @@
 import {  __DEV__checkIfTracked, Ion, toValue, isGetter, watchToRender, queueRender } from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 import { RawJSXNode } from "./makeJSXNode";
-import { MaybeIon } from "../component/Input";
+import { MaybeIon } from "../component/x-Input";
 import { DOMElement, DOMParent } from "./VineNode";
 import DOMPurify from "dompurify";
 

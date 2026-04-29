@@ -1,6 +1,6 @@
 import { getFlask } from "@rue/flask";
 import { instantUpdate, isGetter, queueRender, RUN_EAGERLY, swiftUpdate, toValue, watchToRender } from "@rue/quarky";
-import { MaybeIon } from "../component/Input";
+import { MaybeIon } from "../component/x-Input";
 import { setUpInnerHTML } from "../node/InnerHTML";
 import { isHydrating } from "../hydration/hydration";
 import { AnyObject } from "@rue/types";
@@ -16,7 +16,6 @@ export function isHTMLAttribute(key: string, tag: keyof HTMLElementTagNameMap) {
 }
 
 
-// TODO: innerHTML
 export function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
    const flask = getFlask()
    for (const key in attributes) {

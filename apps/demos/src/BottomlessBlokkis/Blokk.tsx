@@ -6,7 +6,7 @@ export const CELL_SIZE = 20;
 
 const degrees = [0, 270, 180, 90] as const
 
-export function Blokk(setup: FromTag<{
+export function Blokk(setup: FromTag<'div', {
    matrix: (1 | 0)[][],
    shiftX: Ion<number>,
    shiftY: Ion<number>,
@@ -14,8 +14,7 @@ export function Blokk(setup: FromTag<{
    color?: Ion<string>,
    gap?: number
 }>) {
-   console.log('Blokk')
-   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, emit } = $from(setup)
+   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1 } = $from(setup)
 
    const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 
@@ -30,8 +29,7 @@ export function Blokk(setup: FromTag<{
             --grid-gap: ${gap}px;
             transform: ${$translate()} ${$rotate()};
             `)}
-         on:mouseenter={e => { console.log('ENTER'); emit.mouseenter?.(e) }}
-         on:mouseleave={e => { console.log('LEAVE'); emit.mouseleave?.(e) }}
+         auto-bind={setup}
       >
          {For(matrix, row =>
             For(row, col => (

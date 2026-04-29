@@ -7,7 +7,7 @@ import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ShowHideType } from "../conditional/If";
-import { MaybeIon, RenderSlot } from "../component/Input";
+import { MaybeIon, RenderSlot } from "../component/x-Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
 import { NodeRefsConfig } from "./NodeRefs";

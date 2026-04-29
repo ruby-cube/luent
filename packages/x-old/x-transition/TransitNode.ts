@@ -7,7 +7,7 @@ import { template } from "../../luent/src/component/Component";
 import { createIfSeries, Else, If } from "../../luent/src/conditional/If";
 import { isFunction } from "@rue/utils";
 import { ContextKey } from "../../luent/src/context/ContextKey";
-import { RenderSlot } from "../../luent/src/component/Input";
+import { RenderSlot } from "../../luent/src/component/x-Input";
 
 export function renderTransitNode(
    $div: NodeRef<'div'>,

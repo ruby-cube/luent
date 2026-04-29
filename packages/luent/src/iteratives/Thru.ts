@@ -1,5 +1,5 @@
 import { Ion, isGetter, queueRender, watchToRender } from "@rue/quarky";
-import { MaybeIon } from "../component/Input";
+import { MaybeIon } from "../component/x-Input";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
 import { Flask, getFlask } from "@rue/flask";

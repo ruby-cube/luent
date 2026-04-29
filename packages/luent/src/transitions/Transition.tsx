@@ -1,5 +1,5 @@
 import { JSXComponent } from "@rue/ruescript"
-import { FromTag, RenderSlot } from "../component/Input"
+import { FromTag, RenderSlot } from "../component/x-Input"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
 

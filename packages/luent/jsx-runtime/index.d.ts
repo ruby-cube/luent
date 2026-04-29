@@ -1888,7 +1888,7 @@ type LuentComponentAttributes<C> = {
 type LuentCommonAttributes = {
    'on:event'?: { [key: string]: Function };
    'auto-bind'?: SetupBindings
-   'nested-bind'?: { selector: string, setup: (node: Element) => void }
+   'nested-bind'?: Luent.NestedAttributeSetup
 }
 
 

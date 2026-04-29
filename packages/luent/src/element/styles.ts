@@ -1,5 +1,5 @@
 import { AnyObject, Booleanny } from "@rue/types";
-import { MaybeIon } from "../component/Input";
+import { MaybeIon } from "../component/x-Input";
 import { Flask, getFlask } from "@rue/flask";
 import { Ion, isGetter, queueRender, RUN_EAGERLY, watchToRender } from "@rue/quarky";
 import { camelToKebabCase, isObject, isString } from "@rue/utils";

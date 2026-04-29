@@ -1,6 +1,6 @@
 import { queueRender, queueTask, toValue } from "@rue/quarky"
 import { AnyObject } from "@rue/types"
-import { MaybeIon } from "../component/Input"
+import { MaybeIon } from "../component/x-Input"
 import { atMounted, atUnmount } from "../flask/flask-hooks"
 import { getTransition } from "./Transition"
 import { setUpPositionTransition, setUpTransit } from "./transit"

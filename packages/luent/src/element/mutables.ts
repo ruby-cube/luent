@@ -1,5 +1,5 @@
 import { isGetter, isIon, MutableIon, queueRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, watchToRender } from "@rue/quarky";
-import { MaybeIon } from "../component/Input";
+import { MaybeIon } from "../component/x-Input";
 import { getFlask } from "@rue/flask";
 import {toString} from './attributes'
 

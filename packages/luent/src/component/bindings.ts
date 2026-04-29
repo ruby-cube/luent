@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import { MaybeIon, RenderSlot } from "./Input"
+import { MaybeIon, RenderSlot } from "./x-Input"
 import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion } from "@rue/quarky"
@@ -45,13 +45,15 @@ type ComposedBindings = {
 
 type EventBindings = { [key: string]: EventListener[] }
 
-function FiniteBindings<T extends object>(target: T) {
+function FiniteBindings<T extends { Slot: RenderSlot | undefined }>(target: T) {
    const keys = new Set<string | symbol>(Object.keys(target))
 
    return new Proxy(target, {
       get(target, key) {
          if (key === 'on' || key === 'mu')
             return target[key as keyof T]
+         if (key === 'NamedSlot')
+            return target.Slot
          keys.delete(key)
          return target[key as keyof T]
       },
@@ -72,14 +74,16 @@ export function toSetup(bindings: RawBindings): SetupBindings {
    const Slot = bindings.Slot as AnyObject
 
    for (const rawKey of keys) {
-      if (rawKey === 'auto-bind') continue;
+      if (rawKey === 'auto-bind' || rawKey === 'nested-bind') continue;
       const { namespace, key } = analyzeKey(rawKey)
       processBinding(bindings, rawKey, namespace, key)
    }
    if (bindings['auto-bind']) setup['auto-bind'] = bindings['auto-bind']
    if (setup.on) {
       setup.on = FiniteBindings(setup.on)
-      setup.emit = (event: EventListener, eventInfo: Event) => { event(eventInfo) }
+      setup.emit = (event: EventListener, eventInfo: Event) => {
+         event(eventInfo)
+      }
    }
    if (setup.mu) setup.mu = FiniteBindings(setup.mu)
 
@@ -87,8 +91,7 @@ export function toSetup(bindings: RawBindings): SetupBindings {
       switch (namespace) {
          case 'on':
             const events = setup.on ?? (setup.on = Object.create(null))
-            const handlers = events[key] ?? (events[key] = [])
-            handlers.push(bindings[rawKey])
+            events[key] = bindings[rawKey]
             break;
 
          case 'mu':
@@ -100,8 +103,7 @@ export function toSetup(bindings: RawBindings): SetupBindings {
          case 'at': // TODO: use symbol key to keep it internal?
          case 'after': // TODO: use symbol key to keep it internal?
             const hooks = setup.hooks ?? (setup.hooks = Object.create(null))
-            const tasks = hooks[rawKey] ?? (hooks[rawKey] = [])
-            tasks.push(bindings[rawKey])
+            hooks[rawKey] = bindings[rawKey]
             break;
 
          case 'Slot': // Named slots
@@ -169,7 +171,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
    const keys = Object.keys(bindings) as string[]
 
    for (const rawKey of keys) {
-      if (rawKey === 'auto-bind') continue;
+      if (rawKey === 'auto-bind' || rawKey === 'nested-bind') continue;
       const { namespace, key } = analyzeKey(rawKey)
       composeBinding(bindings, rawKey, namespace, key)
    }
@@ -206,8 +208,9 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
                break;
 
             case 'Slot':
-               const slots = composed.slots = (composed.slots = [] as RenderSlot[])
-               if (bindings.Slot) slots.push(bindings.Slot!)
+               console.warn('Cannot auto-bind Slot. Slots must be registered through manual binding.')
+               // const slots = composed.slots = (composed.slots = [] as RenderSlot[])
+               // if (bindings.Slot) slots.push(bindings.Slot!)
                break;
 
             default:
@@ -238,7 +241,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
             break;
 
          case 'Slot': // Named slots
-            const Slot = composed.Slot ?? (composed.Slot = bindings.Slot) // FIX:
+            const Slot = composed.Slot ?? (composed.Slot = bindings.NamedSlot) // FIX:
             Slot[key] = bindings[rawKey]
             break;
 

@@ -5,7 +5,7 @@ import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
 import { instantUpdate, load, queueRender } from "@rue/quarky";
 import { Provided } from "./context/Context";
-import { toInput } from "./component/Input";
+import { toInput } from "./component/x-Input";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
 import { RenderFunction } from "./node/makeJSXNode";
 

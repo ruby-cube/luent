@@ -4,7 +4,7 @@ import { ConditionalKit } from "./IfElse";
 import { ShowHideType, createIfSeries, RenderConditional } from "./If";
 import { isFunction } from "@rue/utils";
 import { template } from "../component/Component";
-import { FromTag, RenderSlot } from "../component/Input";
+import { FromTag, RenderSlot } from "../component/x-Input";
 import { ListKit } from "../iteratives/ItemList";
 import { IndexedListKit } from "../iteratives/IndexedList";
 import { DEFAULT } from "./MatchCase";
