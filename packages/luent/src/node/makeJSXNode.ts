@@ -70,10 +70,9 @@ export type EventsConfig = {
 // }
 
 
-export type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
+
 // export type $Classes = Ion<ClassInput[]>
 // export type ClassInput = MaybeIon<string | Falsey> | $Classes
-export type ClassInput = MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | ClassInput)[]
 
 export type ElementConfig<K extends TagName = TagName> = {
    [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &

@@ -9,6 +9,10 @@ import { RenderSlot } from "../component/Input";
 
 export type JSXNode = DOMNode | VineNode
 
+export function isNode(value: any): value is DOMNode {
+   return isObject(value) && 'remove' in value && 'after' in value
+}
+
 export interface DOMNode {
    remove: () => void
    after: (...nodes: (Node | string)[]) => void
@@ -84,7 +88,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
          _processJSXOutput(node, flattened)
       }
       else if (isComponentKit(node)) {
-         _processJSXOutput(node.jsxNodes, flattened)
+         _processJSXOutput(node.nodes, flattened)
       }
       else if (isFunction(node)) { //TODO: 
          if (node.length !== 0) throw new Error('render functions must have no parameters')
@@ -111,7 +115,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
       else if (node instanceof VineNode) {
          flattened.push(node)
       }
-      else if (node instanceof Element) {
+      else if (isNode(node)) {
          flattened.push(node)
       }
       else {

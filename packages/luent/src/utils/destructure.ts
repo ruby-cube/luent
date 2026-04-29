@@ -37,26 +37,26 @@ type DestructuredAccessors<T, TMap> = {
    [K in keyof T]: K extends keyof TMap ? TMap[K] extends 1 ? AccessorValue<T, K> : TMap[K] extends object ? DestructuredAccessors<T[K], TMap[K]> : T[K] : T[K]
 }
 
-/**
- * const { a, b, c: { d } } = destructureToAccessors(obj, { a: 1, b: 0, c: { d: 1 } })
- * @param obj 
- * @param map 
- * @returns 
- */
-function destructureToAccessors<T extends AnyObject, TMap extends AnyObject>(obj: T, map: TMap): DestructuredAccessors<T, TMap> {
-   const destructured = Array.isArray(obj) ? [] : Object.create(null)
-   const keys = Object.keys(map)
-   for (const key of keys) {
-      const value = map[key]
-      if (value === 0) {
-         destructured[key] = obj[key]
-      }
-      else if (value === 1) {
-         destructured[key] = accessorsOf(obj)[key] // assumes never undefined
-      }
-      else if (isObject(value)) {
-         destructured[key] = destructureToAccessors(obj[key], map[key])
-      }
-   }
-   return destructured
-}
+// /**
+//  * const { a, b, c: { d } } = destructureToAccessors(obj, { a: 1, b: 0, c: { d: 1 } })
+//  * @param obj 
+//  * @param map 
+//  * @returns 
+//  */
+// function destructureToAccessors<T extends AnyObject, TMap extends AnyObject>(obj: T, map: TMap): DestructuredAccessors<T, TMap> {
+//    const destructured = Array.isArray(obj) ? [] : Object.create(null)
+//    const keys = Object.keys(map)
+//    for (const key of keys) {
+//       const value = map[key]
+//       if (value === 0) {
+//          destructured[key] = obj[key]
+//       }
+//       else if (value === 1) {
+//          destructured[key] = accessorsOf(obj)[key] // assumes never undefined
+//       }
+//       else if (isObject(value)) {
+//          destructured[key] = destructureToAccessors(obj[key], map[key])
+//       }
+//    }
+//    return destructured
+// }

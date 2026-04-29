@@ -42,6 +42,6 @@ export function unnestComponent(nodes: unknown) {
    return nodes
 }
 
-export function isComponentKit(entity: unknown): entity is ComponentKit<unknown> {
-   return isObject(entity) && 'as' in entity && 'nodes' in entity
+export function isComponentKit(entity: unknown): entity is ComponentKit<unknown> { 
+   return isObject(entity) && 'as' in entity && 'nodes' in entity // TODO: this seems like many things can be mistaken for a component kit.
 }

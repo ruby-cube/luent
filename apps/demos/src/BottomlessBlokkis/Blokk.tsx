@@ -1,4 +1,4 @@
-import { Component, For, FromTag } from "@rue/luent";
+import { Component, For, FromTag, $from } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 import "./Blokk.css"
 
@@ -14,20 +14,21 @@ export function Blokk(setup: FromTag<{
    color?: Ion<string>,
    gap?: number
 }>) {
-   const { matrix, ærotation, æshiftX, æshiftY, æcolor = ion('#564747'), gap = 1, emit } = setup
+   console.log('Blokk')
+   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, emit } = $from(setup)
 
    const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 
-   const ætranslate = () => `translate(${æshiftX() * CELL_SIZE}px, ${æshiftY() * CELL_SIZE}px)`
-   const ærotate = () => `rotate(${degrees[ærotation()]}deg)`
+   const $translate = () => `translate(${$shiftX() * CELL_SIZE}px, ${$shiftY() * CELL_SIZE}px)`
+   const $rotate = () => `rotate(${degrees[$rotation()]}deg)`
 
    return Component(
       <div class='blokk-base' style={(`
-            --background-color: ${æcolor()};
+            --background-color: ${$color()};
             --cell-size: ${CELL_SIZE}px;
             --grid-size: ${GRID_SIZE}px;
             --grid-gap: ${gap}px;
-            transform: ${ætranslate()} ${ærotate()};
+            transform: ${$translate()} ${$rotate()};
             `)}
          on:mouseenter={e => { console.log('ENTER'); emit.mouseenter?.(e) }}
          on:mouseleave={e => { console.log('LEAVE'); emit.mouseleave?.(e) }}

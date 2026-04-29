@@ -10,6 +10,7 @@ const BOARD_COLUMNS = 20
 const BOARD_ROWS = 20
 
 export function BottomlessBlokkis() {
+   console.log('BottomlessBlokkis')
 
     const $blokk = ion(createBlokk(), {
         next() {

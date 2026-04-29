@@ -8,11 +8,7 @@ import { isPlainObject, normalizeToArray } from "@rue/utils";
 // with custom jsx compiler
 
 
-isEqual({} as any as Luent._TransitionEvent, {} as any as Luent.TransitionEvent)
 
-function isEqual(x: Luent.TransitionEvent, y: Luent._TransitionEvent) {
-
-}
 
 
 export const jsxDEV = jsx;

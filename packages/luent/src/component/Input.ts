@@ -9,9 +9,9 @@ import { LuentHooks } from "../flask/template-hooks";
 
 export type HandleEvent<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
 
-export const MU_IONS = 'mu_ions'
+// export const MU_IONS = 'mu_ions'
 
-export const MU = Symbol('mu')
+// export const MU = Symbol('mu')
 
 // export const [getActiveMuIons, muIonsStack] = AsyncState<Set<Ion>>(MU_IONS)
 

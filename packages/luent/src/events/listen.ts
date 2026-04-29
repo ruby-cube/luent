@@ -1,5 +1,5 @@
 import { $listen, PausableListener, CallbackRemover, defineCustomCleanupScheduler, SustainedListenerOptions, ScheduleStop } from '@rue/flask';
-import { withUpdate } from '../element/makeElement';
+import { withUpdate } from '../element/events';
 
 
 type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<SustainedListenerOptions, 'until'> & CustomCleanupSchedulerListenerOptions

@@ -39,7 +39,7 @@ declare global {
    type Booleanish = boolean | "true" | "false";
 
    namespace L {
-     
+
       // ----------------------------------------------------------------------
       // #region: Event Objects
       // ----------------------------------------------------------------------
@@ -1887,6 +1887,8 @@ type LuentComponentAttributes<C> = {
 
 type LuentCommonAttributes = {
    'on:event'?: { [key: string]: Function };
+   'auto-bind'?: SetupBindings
+   'nested-bind'?: { selector: string, setup: (node: Element) => void }
 }
 
 
@@ -1916,7 +1918,7 @@ declare global {
       interface LuentElements {
          '!--': {}; //comments
          'o--portal': PortalNodeInput & { children: Luent.Slot }
-         
+
          'o--style': L.DetailedHTMLProps<L.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', text: string }
          'o--link': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
          'o--head': L.DetailedHTMLProps<L.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>

@@ -1,147 +1,49 @@
-import { AnyObject } from "@rue/types";
-import { Component, ComponentTag, FromTag, RenderSlot } from "..";
+import { AnyObject } from "@rue/types"
+import { MaybeIon, RenderSlot } from "./Input"
+import { NodeRef } from "../node/NodeRef"
+import { NodeRefsConfig } from "../node/NodeRefs"
+import { Ion } from "@rue/quarky"
+import { TransitionConfigs } from "../transitions/transitions"
+import { ClassInput, StyleInput } from "../element/styles"
 
-function Grandparent() {
-
-   return Component(
-      <Parent on:click={() => console.log('grandparent click')}></Parent>
-   )
-}
-
-function Parent(setup: any) {
-
-   return Component(
-      <Child on:click={() => console.log('parent click')} auto-bind={setup}></Child>
-   )
-}
-
-function Child(setup: any) {
-
-   return Component(
-      <div on:click={() => console.log('child click')} auto-bind={setup}></div>
-   )
-}
-
-function ChildA(setup: FromTag<'div'>) {
-
-   const {
-      styles,
-      microclasses,
-      emit, on: { click },
-   } = setup
-
-   return Component(
-      <div microclass='' on:click={e => { console.log('child click'); emit(click, e) }} auto-bind={setup}></div>
-   )
-}
-
-// a style-class 
-
-function ChildB(setup: any) {
-
-   return Component(
-      <div on:click={() => console.log('child click')} {...setup}></div>
-   )
-}
-
-// Setup types
-// - requested setup
-// - forwarded setup
-//    - blind batch forward
-//    - selective forward
-
-// requested setup
-// - mu: attributes (gather)
-// - attributes
-// - ref?: override
-// - at:hook type
-
-// selective forwarded setup (can be blind)
-// - Slot: override (can be requested)
-
-// blind batch forward
-// - ** Slot: override (can be requested)
-// - * ref: override
-// - * hooks: queue (does it have to match ref? does it need to be typed? no...)
-
-// - classes: combine (rename)
-// - styleClasses: 
-// - styles: cascade (rename)
-// - transitions: ?
-// - events: queue (unpack)
-
-
-
-
-
-// ** must land in component
-// * may land in component or element .. depending on whether component exposes a public instance
-
-// Child
-function makeComponent(Component: ComponentTag, fromTag: any) {
-   const setup = toSetup(fromTag) // unless emit has been extracted and used for something else...
-
-   const output = Component(setup)
-
-   if (output.as) {
-      const ref = composeRef(setup) // throw if ref already used
-      const hooks = composeHooks(setup)
-      if (ref) {
-
-      }
-      if (hooks) {
-
-      }
-   }
-}
-
-function makeElement(fromTag: any) {
-   const { slots, ref, showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(fromTag)
-}
+// <div on:event={[
+//    tempo(e => { console.log('tempo')})
+// ]}>
 
 type RawBindings = {
-   Slot: Function & {}
-   // explicit bindings
-   'mu:count': Function
-   'start': number
-   'at:mount': Function
-   'class': string[]
-   'microclass': string[]
-   'style': {}[],
-   'animate-in': []
-   'show-if': Function,
-   'on:click': Function,
-   'ref': Function,
-
-   // batch bindings
+   Slot?: RenderSlot
+   ref?: NodeRef | NodeRefsConfig,
    'auto-bind'?: SetupBindings | undefined
-}
+} & { [key: string]: any }
 
 type SetupBindings = { // FiniteBindingss
    emit: Function,
-   microclasses: Function,
-   classes: Function,
-   styles: Function,
-   on?: {}, // FiniteBindingss
-   at?: {}, // FiniteBindingss
-   mu?: {}, // FiniteBindingss
+   microclasses?: Function,
+   classes?: Function,
+   styles?: Function,
+   on?: EventBindings, // FiniteBindingss
+   at?: EventBindings, // FiniteBindingss
+   mu?: { [key: string]: Ion<unknown> }, // FiniteBindingss
    Slot?: RenderSlot, // FiniteBindings
-   ref?: Function,
+   ref?: NodeRef | NodeRefsConfig,
    'auto-bind'?: SetupBindings | undefined
 } & { [key: string]: any }  // attributes and namespace objects
 
 type ComposedBindings = {
    events: EventBindings
-   hooks: []
-   attributes: []
+   hooks: EventBindings
+   attributes: { [key: string]: any }
+   mutables: { [key: string]: any }
+   microclasses?: ClassInput,
+   classes?: ClassInput,
+   styles?: StyleInput[],
+   transitions?: TransitionConfigs
+   showIf?: Ion<boolean>
+   ref?: NodeRef | NodeRefsConfig,
+   slots?: RenderSlot[]
 }
 
-type EventBindings = {
-   click: Function[]
-}
-
-// component: raw bindings --> setup bindings
-// element: raw bindings & nested setup bindings --> composed bindings
+type EventBindings = { [key: string]: EventListener[] }
 
 function FiniteBindings<T extends object>(target: T) {
    const keys = new Set<string | symbol>(Object.keys(target))
@@ -164,9 +66,9 @@ function FiniteBindings<T extends object>(target: T) {
    })
 }
 
-function toSetup(bindings: RawBindings): SetupBindings {
+export function toSetup(bindings: RawBindings): SetupBindings {
    const setup = Object.create(null)
-   const keys = Object.keys(bindings) as (keyof RawBindings)[]
+   const keys = Object.keys(bindings) as string[]
    const Slot = bindings.Slot as AnyObject
 
    for (const rawKey of keys) {
@@ -175,7 +77,10 @@ function toSetup(bindings: RawBindings): SetupBindings {
       processBinding(bindings, rawKey, namespace, key)
    }
    if (bindings['auto-bind']) setup['auto-bind'] = bindings['auto-bind']
-   if (setup.on) setup.on = FiniteBindings(setup.on)
+   if (setup.on) {
+      setup.on = FiniteBindings(setup.on)
+      setup.emit = (event: EventListener, eventInfo: Event) => { event(eventInfo) }
+   }
    if (setup.mu) setup.mu = FiniteBindings(setup.mu)
 
    function processBinding(bindings: RawBindings, rawKey: keyof RawBindings, namespace: string | undefined, key: string) {
@@ -193,8 +98,9 @@ function toSetup(bindings: RawBindings): SetupBindings {
             break;
 
          case 'at': // TODO: use symbol key to keep it internal?
-            const hooks = setup.at ?? (setup.at = Object.create(null))
-            const tasks = hooks[key] ?? (hooks[key] = [])
+         case 'after': // TODO: use symbol key to keep it internal?
+            const hooks = setup.hooks ?? (setup.hooks = Object.create(null))
+            const tasks = hooks[rawKey] ?? (hooks[rawKey] = [])
             tasks.push(bindings[rawKey])
             break;
 
@@ -217,10 +123,6 @@ function toSetup(bindings: RawBindings): SetupBindings {
    return FiniteBindings(setup)
 }
 
-// TODO: composed events
-// <div on:event={[
-//    tempo(e => { console.log('tempo')})
-// ]}>
 
 function analyzeKey(rawKey: string) {
    const strings = rawKey.split(':')
@@ -232,10 +134,39 @@ function analyzeKey(rawKey: string) {
 }
 
 
-function composeBindings(bindings: RawBindings) {
+export function composeRef(setup: SetupBindings) {
+   let ref = setup.ref
+   let current: SetupBindings | undefined = setup
+   while (current) {
+      if (current.ref) ref = current.ref
+      current = setup['auto-bind']
+   }
+   return ref
+}
+
+export function composeHooks(setup: SetupBindings) {
+   let composed;
+   let current: SetupBindings | undefined = setup
+   while (current) {
+      if (current.hooks) {
+         const hooks = current.hooks as AnyObject
+         const keys = Object.keys(hooks)
+         composed = composed ?? Object.create(null)
+         for (const key of keys) {
+            const tasks = composed[key] ?? (composed[key] = [])
+            tasks.push(hooks[key])
+         }
+      }
+      current = setup['auto-bind']
+   }
+   return composed
+}
+
+
+export function composeBindings(bindings: RawBindings): ComposedBindings {
    const composed = Object.create(null)
 
-   const keys = Object.keys(bindings) as (keyof RawBindings)[]
+   const keys = Object.keys(bindings) as string[]
 
    for (const rawKey of keys) {
       if (rawKey === 'auto-bind') continue;
@@ -266,17 +197,17 @@ function composeBindings(bindings: RawBindings) {
                }
                break;
 
-            case 'at':
-               const hooks = bindings.at!
+            case 'hooks':
+               const hooks = bindings.hooks!
                const hookNames = Object.keys(hooks)
                for (const key of hookNames) {
-                  composeBinding(hookNames, key, 'at', key)
+                  composeBinding(hookNames, key, 'hooks', key)
                }
                break;
 
             case 'Slot':
                const slots = composed.slots = (composed.slots = [] as RenderSlot[])
-               slots.push(bindings.Slot!)
+               if (bindings.Slot) slots.push(bindings.Slot!)
                break;
 
             default:
@@ -300,14 +231,14 @@ function composeBindings(bindings: RawBindings) {
             mutables[key] = bindings[rawKey]
             break;
 
-         case 'at':
+         case 'hooks':
             const hooks = composed.hooks ?? (composed.hooks = Object.create(null))
             const tasks = hooks[key] ?? (hooks[key] = [])
             tasks.push(bindings[rawKey])
             break;
 
          case 'Slot': // Named slots
-            const Slot = composed.Slot ?? (composed.Slot = bindings.Slot)
+            const Slot = composed.Slot ?? (composed.Slot = bindings.Slot) // FIX:
             Slot[key] = bindings[rawKey]
             break;
 
@@ -319,6 +250,11 @@ function composeBindings(bindings: RawBindings) {
 
    function composeAttributes(bindings: { [key: string]: any }, key: string) {
       switch (key) {
+         case 'Slot':
+            const slots = composed.slots ?? (composed.slots = [])
+            if (bindings.Slot) slots.push(bindings.Slot)
+            break;
+
          case 'microclass':
             const microclasses = composed.microclasses ?? (composed.microclasses = []) // TODO: use twMerge
             microclasses.push(bindings.microclass)
@@ -334,6 +270,7 @@ function composeBindings(bindings: RawBindings) {
             styles.push(bindings.style)
             break;
 
+
          default: // attributes
             const attributes = composed.attributes ?? (composed.attributes = Object.create(null))
             attributes[key] = bindings[key]
@@ -343,35 +280,3 @@ function composeBindings(bindings: RawBindings) {
 
    return composed
 }
-
-function composeRef(setup: SetupBindings) {
-   let ref = setup.ref
-   let current: SetupBindings | undefined = setup
-   while (current) {
-      if (current.ref) ref = current.ref
-      current = setup['auto-bind']
-   }
-   return ref
-}
-
-function composeHooks(setup: SetupBindings) {
-   let composed;
-   let current: SetupBindings | undefined = setup
-   while (current) {
-      if (current.at) {
-         const hooks = current.at as AnyObject
-         const keys = Object.keys(hooks)
-         composed = composed ?? Object.create(null)
-         for (const key of keys) {
-            const tasks = composed[key] ?? (composed[key] = [])
-            tasks.push(hooks[key])
-         }
-      }
-      current = setup['auto-bind']
-   }
-   return composed
-}
-
-// child click
-// parent click
-// grandparent click
