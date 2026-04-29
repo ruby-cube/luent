@@ -36,13 +36,14 @@ export type SetupWithSlot = {
 export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
    (setup?: P) => JSXNode
 
+
 export function makeComponent(
    Component: ComponentTag,
    Slot: InferSlot | undefined,
    fromTag: ComponentConfig,
 ): ComponentKit<unknown> {
    const setup = toSetup(fromTag)
-   const output = Component(setup)
+   const output = Component(setup) // TODO: handle forwarded named slots
    console.log('makeComponent', output)
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")

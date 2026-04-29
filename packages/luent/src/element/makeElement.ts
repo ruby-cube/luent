@@ -25,7 +25,9 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    bindings: ElementConfig,
 ): DOMNode {
+   console.log('before compose bindings', bindings)
    const { ref, showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
+   console.log('after compose bindings')
    
    let newXML_NS: string | undefined;
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();

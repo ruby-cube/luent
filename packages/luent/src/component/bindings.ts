@@ -141,7 +141,7 @@ export function composeRef(setup: SetupBindings) {
    let current: SetupBindings | undefined = setup
    while (current) {
       if (current.ref) ref = current.ref
-      current = setup['auto-bind']
+      current = current['auto-bind']
    }
    return ref
 }
@@ -159,7 +159,7 @@ export function composeHooks(setup: SetupBindings) {
             tasks.push(hooks[key])
          }
       }
-      current = setup['auto-bind']
+      current = current['auto-bind']
    }
    return composed
 }
@@ -209,8 +209,6 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
 
             case 'Slot':
                console.warn('Cannot auto-bind Slot. Slots must be registered through manual binding.')
-               // const slots = composed.slots = (composed.slots = [] as RenderSlot[])
-               // if (bindings.Slot) slots.push(bindings.Slot!)
                break;
 
             default:

@@ -37,9 +37,10 @@ import { TestHookForwarding } from "./src/TestHookForwarding"
 import { TestUndefinedTextNode } from "./src/TestUndefinedTextNode"
 import { TestNullIon } from "./src/TestNullIon"
 import { TestRetracking } from "./src/TestRetracking"
+import { Grandparent } from "./src/TestEventBubbling"
 
 export function runDemo() {
-   const app = createRoot(() =><BottomlessBlokkis/>)
+   const app = createRoot(() =><Grandparent/>)
 
    app.mount('#root')
 }
