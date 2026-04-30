@@ -5,12 +5,12 @@ import { Ion, isGetter, queueRender, RUN_EAGERLY, watchToRender } from "@rue/qua
 import { camelToKebabCase, isObject, isString } from "@rue/utils";
 
 
-type DynamicClassesConfig = {
+type ReactiveClasses = {
    [key: string]: MaybeIon<Booleanny>;
 }
 
 export type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
-export type ClassInput = MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | ClassInput)[]
+export type ClassInput = ReactiveClasses | MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | ClassInput)[]
 type Falsey = undefined | null | false | ''
 
 export function setUpClasses(node: Element, classes: ClassInput[]) {
@@ -19,7 +19,7 @@ export function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isGetter(entry)) {
-         watchToRender(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+         watchToRender(entry, ({ current, previous }/* newState: ReactiveClasses | string | Falsey, oldState: ReactiveClasses | string | Falsey */) => {
             // if (current === previous) return;
             queueRender(() => {
                if (previous) removePreviousClasses(previous, classList)
@@ -75,7 +75,7 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
 // // __debug__ = true
 // // }
 
-function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList, flask: Flask) {
+function setUpClassesFromObject(entry: ReactiveClasses, classList: DOMTokenList, flask: Flask) {
    for (const key in entry) {
       const value = entry[key]
       if (isGetter(value)) {

@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types"
 import { FromTag, MaybeIon, RenderSlot } from "./x-Input"
 import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
-import { Ion } from "@rue/quarky"
+import { Ion, MutableIon } from "@rue/quarky"
 import { TransitionConfigs } from "../transitions/transitions"
 import { ClassInput, StyleInput } from "../element/styles"
 import { ComponentKit } from "@rue/ruescript"
@@ -18,18 +18,17 @@ type RawBindings = {
    'auto-bind'?: SetupBindings | undefined
 } & { [key: string]: any }
 
-type SetupBindings = { // FiniteBindingss
-   emit: Function,
+type SetupBindings = {
    microclasses?: Function,
    classes?: Function,
    styles?: Function,
-   on?: EventBindings, // FiniteBindingss
-   at?: EventBindings, // FiniteBindingss
-   mu?: { [key: string]: Ion<unknown> }, // FiniteBindingss
+   on?: EventBindings,
+   at?: EventBindings,
+   mu?: { [key: string]: MutableIon<unknown> | undefined },
    Slot?: RenderSlot, // FiniteBindings
    ref?: NodeRef | NodeRefsConfig,
    'auto-bind'?: SetupBindings | undefined
-} & { [key: string]: any }  // attributes and namespace objects
+} & { [key: string | symbol]: any }  // attributes and namespace objects
 
 type ComposedBindings = {
    events: EventBindings
@@ -47,39 +46,36 @@ type ComposedBindings = {
 
 type EventBindings = { [key: string]: EventListener[] }
 
-function FiniteBindings<T extends { Slot: RenderSlot | undefined }>(target: T, rest = false) {
-   const keys = new Set<string | symbol>(Object.keys(target))
-   if (rest) keys.add('rest')
-   return new Proxy(target, {
-      get(target, key) {
-         if (key === 'on' || key === 'mu')
-            return target[key as keyof T]
-         if (key === 'NamedSlot')
-            return target.Slot
-         keys.delete(key)
-         return target[key as keyof T]
-      },
+// function FiniteBindings<T extends { Slot: RenderSlot | undefined }>(target: T, rest = false) {
+//    const keys = new Set<string | symbol>(Object.keys(target))
+//    if (rest) keys.add('rest')
+//    return new Proxy(target, {
+//       get(target, key) {
+//          if (key === 'on' || key === 'mu')
+//             return target[key as keyof T]
+//          if (key === 'NamedSlot')
+//             return target.Slot
+//          keys.delete(key)
+//          return target[key as keyof T]
+//       },
 
-      set() {
-         return false;
-      },
+//       set() {
+//          return false;
+//       },
 
-      ownKeys(target) {
-         return Array.from(keys)
-      },
-   })
-}
+//       ownKeys(target) {
+//          return Array.from(keys)
+//       },
+//    })
+// }
+
+const MU = Symbol('mu')
+const ON = Symbol('on')
+const HOOKS = Symbol('hooks')
 
 export function toSetup(bindings: RawBindings): SetupBindings {
    const setup = Object.create(null)
    const xray = setup.xray = Object.create(null)
-   let rest: SetupBindings;
-
-   Object.defineProperty(setup, 'rest', {
-      get() {
-         return rest ?? (rest = { ...setup, on: { ...setup.on }, mu: { ...setup.mu } })
-      }
-   })
 
    const keys = Object.keys(bindings) as string[]
    const Slot = bindings.Slot as AnyObject
@@ -90,30 +86,26 @@ export function toSetup(bindings: RawBindings): SetupBindings {
       processBinding(bindings, rawKey, namespace, key)
    }
    if (bindings['auto-bind']) setup['auto-bind'] = bindings['auto-bind']
-   if (setup.on) {
-      setup.on = FiniteBindings(setup.on)
-      setup.emit = (event: EventListener, eventInfo: Event) => {
-         event(eventInfo)
-      }
-   }
-   if (setup.mu) setup.mu = FiniteBindings(setup.mu)
 
    function processBinding(bindings: RawBindings, rawKey: keyof RawBindings, namespace: string | undefined, key: string) {
       switch (namespace) {
          case 'on':
-            const events = setup.on ?? (setup.on = Object.create(null))
+            const events = setup[ON] ?? (setup[ON] = Object.create(null))
             events[key] = bindings[rawKey]
             break;
 
          case 'mu':
             const mutables = setup.mu ?? (setup.mu = Object.create(null))
+            const internal = setup[MU] ?? (setup[MU] = Object.create(null))
             const mutable = bindings[rawKey]
-            if (mutable) mutables[key] = mutable // overrides
+            if (mutable) {
+               setup[key] = internal[key] = mutables[key] = mutable
+            }
             break;
 
-         case 'at': // TODO: use symbol key to keep it internal?
-         case 'after': // TODO: use symbol key to keep it internal?
-            const hooks = setup.hooks ?? (setup.hooks = Object.create(null))
+         case 'at':
+         case 'after':
+            const hooks = setup[HOOKS] ?? (setup[HOOKS] = Object.create(null))
             hooks[rawKey] = bindings[rawKey]
             break;
 
@@ -137,7 +129,7 @@ export function toSetup(bindings: RawBindings): SetupBindings {
             break;
       }
    }
-   return FiniteBindings(setup, true)
+   return setup
 }
 
 
@@ -163,20 +155,23 @@ export function composeRef(setup: SetupBindings) {
 
 export function composeHooks(setup: SetupBindings) {
    let composed;
+   let hooked = false;
    let current: SetupBindings | undefined = setup
    while (current) {
-      if (current.hooks) {
-         const hooks = current.hooks as AnyObject
+      if (current[HOOKS]) {
+         const hooks = current[HOOKS] as AnyObject
          const keys = Object.keys(hooks)
          composed = composed ?? Object.create(null)
          for (const key of keys) {
+            if (!hooks[key]) continue;
+            hooked = true;
             const tasks = composed[key] ?? (composed[key] = [])
             tasks.push(hooks[key])
          }
       }
       current = current['auto-bind']
    }
-   return composed
+   return hooked ? composed : undefined
 }
 
 
@@ -193,37 +188,37 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
    if (bindings['auto-bind']) composeForwarded(bindings['auto-bind'])
 
    function composeForwarded(bindings: SetupBindings) {
-      const keys = Object.keys(bindings) as string[]
+      const keys = Object.keys(bindings) as (string | typeof MU | typeof HOOKS | typeof ON)[]
+      keys.push(MU, HOOKS, ON)
       for (const key of keys) {
-         if (key === 'auto-bind' || key === 'emit' || key === 'rest') continue;
+         if (key === 'auto-bind' || key === 'xray' || key === 'Slot') continue;
 
          switch (key) {
-            case 'on':
-               const events = bindings.on!
+            case ON:
+               const events = bindings[ON]
+               if (!events) break;
                const eventNames = Object.keys(events)
                for (const key of eventNames) {
                   composeBinding(events, key, 'on', key)
                }
                break;
 
-            case 'mu':
-               const mutables = bindings.mu!
+            case MU:
+               const mutables = bindings[MU]
+               if (!mutables) break;
                const attributes = Object.keys(mutables)
                for (const key of attributes) {
                   composeBinding(attributes, key, 'mu', key)
                }
                break;
 
-            case 'hooks':
-               const hooks = bindings.hooks!
+            case HOOKS:
+               const hooks = bindings[HOOKS]
+               if (!hooks) break;
                const hookNames = Object.keys(hooks)
                for (const key of hookNames) {
-                  composeBinding(hookNames, key, 'hooks', key)
+                  composeBinding(hooks, key, 'hooks', key)
                }
-               break;
-
-            case 'Slot':
-               console.warn('Cannot auto-bind Slot. Slots must be registered through manual binding.')
                break;
 
             default:
@@ -234,23 +229,29 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
       if (bindings['auto-bind']) composeForwarded(bindings['auto-bind'])
    }
 
-   function composeBinding(bindings: { [key: string]: any }, rawKey: string, namespace: string | undefined, key: string) {
-      switch (namespace) {
+   function composeBinding(bindings: { [key: string]: any }, rawKey: string, type: string | undefined, key: string) {
+      switch (type) {
          case 'on':
+            if (!bindings[rawKey]) break;
             const events = composed.events ?? (composed.events = Object.create(null))
             const handlers = events[key] ?? (events[key] = [])
             handlers.push(bindings[rawKey])
             break;
 
          case 'mu':
+            if (!bindings[rawKey]) break;
             const mutables = composed.mutables ?? (composed.mutables = Object.create(null))
             mutables[key] = bindings[rawKey]
             break;
 
+         case 'at':
+         case 'after':
          case 'hooks':
+            if (!bindings[rawKey]) break;
             const hooks = composed.hooks ?? (composed.hooks = Object.create(null))
-            const tasks = hooks[key] ?? (hooks[key] = [])
+            const tasks = hooks[rawKey] ?? (hooks[rawKey] = [])
             tasks.push(bindings[rawKey])
+            bindings[rawKey] = undefined // prevents hook being simultaneously registered on element and component
             break;
 
          case 'Slot': // Named slots

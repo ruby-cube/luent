@@ -4,7 +4,9 @@ import { Xray } from "packages/luent/src/component/bindings"
 export function TestXray() {
    return Component(
       <Board
-         // xray:button={n => <n.button on:click={() => console.log('clicked')} />}
+         style={{ 'color': 'red' }}
+         on:click={e => console.log('click outer')}
+         xray:button={n => <n.button on:click={() => console.log('clicked')} />}
       ></Board>
    )
 }
@@ -12,13 +14,14 @@ export function TestXray() {
 
 
 
-function Board(setup: FromTag<{
+function Board(setup: FromTag<'div', {
    'xray:button'?: Xray<'button'>
 }>) {
-   const { xray } = setup
+   const { xray, ...rest } = setup
 
    return Component(
-      <div>
+      <div auto-bind={rest}>
+         all red
          <button on:click={() => console.log('i click')} auto-bind={xray.button}>click</button>
       </div>
    )
