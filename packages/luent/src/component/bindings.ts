@@ -1,10 +1,12 @@
 import { AnyObject } from "@rue/types"
-import { MaybeIon, RenderSlot } from "./x-Input"
+import { FromTag, MaybeIon, RenderSlot } from "./x-Input"
 import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion } from "@rue/quarky"
 import { TransitionConfigs } from "../transitions/transitions"
 import { ClassInput, StyleInput } from "../element/styles"
+import { ComponentKit } from "@rue/ruescript"
+import { RawJSXNode } from "../node/makeJSXNode"
 
 // <div on:event={[
 //    tempo(e => { console.log('tempo')})
@@ -45,9 +47,9 @@ type ComposedBindings = {
 
 type EventBindings = { [key: string]: EventListener[] }
 
-function FiniteBindings<T extends { Slot: RenderSlot | undefined }>(target: T) {
+function FiniteBindings<T extends { Slot: RenderSlot | undefined }>(target: T, rest = false) {
    const keys = new Set<string | symbol>(Object.keys(target))
-
+   if (rest) keys.add('rest')
    return new Proxy(target, {
       get(target, key) {
          if (key === 'on' || key === 'mu')
@@ -70,11 +72,20 @@ function FiniteBindings<T extends { Slot: RenderSlot | undefined }>(target: T) {
 
 export function toSetup(bindings: RawBindings): SetupBindings {
    const setup = Object.create(null)
+   const xray = setup.xray = Object.create(null)
+   let rest: SetupBindings;
+
+   Object.defineProperty(setup, 'rest', {
+      get() {
+         return rest ?? (rest = { ...setup, on: { ...setup.on }, mu: { ...setup.mu } })
+      }
+   })
+
    const keys = Object.keys(bindings) as string[]
    const Slot = bindings.Slot as AnyObject
 
    for (const rawKey of keys) {
-      if (rawKey === 'auto-bind' || rawKey === 'nested-bind') continue;
+      if (rawKey === 'auto-bind') continue;
       const { namespace, key } = analyzeKey(rawKey)
       processBinding(bindings, rawKey, namespace, key)
    }
@@ -111,6 +122,10 @@ export function toSetup(bindings: RawBindings): SetupBindings {
             if (render) Slot[key] = render
             break;
 
+         case 'xray':
+            xray[key] = getXrayBindings(bindings[rawKey])
+            break;
+
          case 'xlmns': // TODO: other namespaces?
          case undefined:
             setup[key] = bindings[rawKey]
@@ -122,7 +137,7 @@ export function toSetup(bindings: RawBindings): SetupBindings {
             break;
       }
    }
-   return FiniteBindings(setup)
+   return FiniteBindings(setup, true)
 }
 
 
@@ -171,7 +186,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
    const keys = Object.keys(bindings) as string[]
 
    for (const rawKey of keys) {
-      if (rawKey === 'auto-bind' || rawKey === 'nested-bind') continue;
+      if (rawKey === 'auto-bind') continue;
       const { namespace, key } = analyzeKey(rawKey)
       composeBinding(bindings, rawKey, namespace, key)
    }
@@ -180,7 +195,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
    function composeForwarded(bindings: SetupBindings) {
       const keys = Object.keys(bindings) as string[]
       for (const key of keys) {
-         if (key === 'auto-bind' || key === 'emit') continue;
+         if (key === 'auto-bind' || key === 'emit' || key === 'rest') continue;
 
          switch (key) {
             case 'on':
@@ -280,4 +295,16 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
    }
 
    return composed
+}
+
+export type Xray<T> = (nested: { [key: string]: (setup: FromTag<T>) => ComponentKit }) => RawJSXNode
+
+export function getXrayBindings(xray: (nested: { [key: string]: (setup: FromTag) => ComponentKit }) => { setup: AnyObject }) {
+   return xray(new Proxy({}, {
+      get() {
+         return (setup: AnyObject) => {
+            return ({ as: undefined, nodes: [], setup })
+         }
+      }
+   })).setup
 }

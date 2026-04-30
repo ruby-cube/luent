@@ -14,7 +14,7 @@ export function Blokk(setup: FromTag<'div', {
    color?: Ion<string>,
    gap?: number
 }>) {
-   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1 } = $from(setup)
+   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, rest } = $from(setup)
 
    const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 
@@ -29,11 +29,12 @@ export function Blokk(setup: FromTag<'div', {
             --grid-gap: ${gap}px;
             transform: ${$translate()} ${$rotate()};
             `)}
-         auto-bind={setup}
-      >
+            >
          {For(matrix, row =>
             For(row, col => (
-               <div class={`blokk-cell ${col ? 'filled' : ''}`}></div>
+               <div class={`blokk-cell ${col ? 'filled' : ''}`}
+               auto-bind={col ? rest : undefined}
+               ></div>
             ))
          )}
       </div>

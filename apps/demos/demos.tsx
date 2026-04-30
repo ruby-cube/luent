@@ -38,9 +38,10 @@ import { TestUndefinedTextNode } from "./src/TestUndefinedTextNode"
 import { TestNullIon } from "./src/TestNullIon"
 import { TestRetracking } from "./src/TestRetracking"
 import { Grandparent } from "./src/TestEventBubbling"
+import { TestXray } from "./src/TestXray"
 
 export function runDemo() {
-   const app = createRoot(() =><Grandparent/>)
+   const app = createRoot(() =><TestXray/>)
 
    app.mount('#root')
 }

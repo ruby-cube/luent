@@ -46,6 +46,7 @@ export function setUpAttributes(node: Element, attributes: { [key: string]: Mayb
       //    }, { eager: true, phase: Phase.RENDER })
       // }
       else if (!isHydrating()) {
+         console.log('attribute key', _key)
          setAttribute(node, _key, toString(value))
       }
    }
@@ -198,7 +199,6 @@ const numberTypedAttributes: Record<string, true> = {
    low: true,
    high: true,
    optimum: true,
-
 }
 
 
@@ -211,6 +211,7 @@ function isNumberValue(attribute: string) {
 }
 
 export function toString(value: any) {
+   console.log('value?.toString()', value)
    return value?.toString() ?? ""; // TODO: make sure it works with any value
 }
 
