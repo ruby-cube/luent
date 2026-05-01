@@ -1,7 +1,9 @@
 import { ionic, EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
 import { defineIonicCollection } from "./IonicDef";
 import { isIonicProxy, toRaw } from "./IonicModel";
-import type{  ProxyKey, triggerOp } from "./ModelQuark";
+import type { ProxyKey, triggerOp } from "./ModelQuark";
+
+
 
 declare global {
    interface Array<T> {
@@ -10,7 +12,7 @@ declare global {
 
       at<H>(this: H, index: number): T | undefined;
       concat<H>(this: H, ...items: (T | T[])[]): IonizeBy<H, T[]>;
-      slice<H>(this: H, start?: number, end?: number): IonizeBy<H, T[]>;
+      slice<H>(this: H, start?: number, end?: number, ƒ?: 'pure'): IonizeBy<H, T[]>;
 
       // // Mutator methods
       pop<H>(this: H): T | undefined;
@@ -67,6 +69,8 @@ declare global {
    }
 }
 
+
+// B extends 'pure' ? T : 'TypeError: function must be marked pure' :  'TypeError: function must be marked pure' 
 
 
 

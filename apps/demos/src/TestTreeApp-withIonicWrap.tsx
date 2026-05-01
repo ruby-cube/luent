@@ -1,4 +1,4 @@
-import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround } from "@rue/luent";
+import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround, $of } from "@rue/luent";
 import { as, ionic, EACH, ion, Ionic, Nested, } from "@rue/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
@@ -82,7 +82,7 @@ export function TreeApp() {
    return template(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-            <TreeItemView item={root}></TreeItemView>
+            <TreeItemView mu:item={root}></TreeItemView>
          </ul>
          <o--link href='/src/demos/tree-view.css' rel='stylesheet' />
       </>
@@ -94,9 +94,9 @@ export function TreeApp() {
 // # TreeItem
 
 function TreeItemView(input: FromTag<{
-   item: IonicTreeItem
+   'mu:item': IonicTreeItem
 }>) {
-   const { item } = input
+   const { mu, item } = input
 
    const $isFolder = ion(() => !!item.children?.length)
    const $isOpen = ion($isFolder(), {
@@ -109,11 +109,10 @@ function TreeItemView(input: FromTag<{
       console.log('change type')
       if (!$isFolder()) {
          item.children = ionicChildren([])
-         item.addChild(ionicTreeItem({ name: 'stuff' }))
+         mu.item.addChild(ionicTreeItem({ name: 'stuff' }))
          $isOpen.value = true
       }
    }
-
 
    return template(
       <li class='item'>
@@ -122,7 +121,7 @@ function TreeItemView(input: FromTag<{
             on:click={e => $isOpen.toggle()}
             on:dblclick={changeType}
          >
-            {item.æname}
+            {$of(item).name}
             {If($isFolder,
                <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
@@ -132,7 +131,7 @@ function TreeItemView(input: FromTag<{
                {For(item.children!, m => m, item => (
                   <TreeItemView item={item}></TreeItemView>
                ))}
-               <li class='add' on:click={e => item.addChild(ionicTreeItem({ name: 'stuff' }))}>+</li>
+               <li class='add' on:click={e => mu.item.addChild(ionicTreeItem({ name: 'stuff' }))}>+</li>
             </ul>
          )}
       </li>

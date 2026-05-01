@@ -1,4 +1,4 @@
-import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround } from "@rue/luent";
+import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround, $of } from "@rue/luent";
 import { as, ionic, EACH, ion, Ionic, Nested, } from "@rue/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
@@ -123,7 +123,7 @@ function TreeItemView(input: FromTag<{
             on:click={e => $isOpen.toggle()}
             on:dblclick={changeType}
          >
-            {item.æname}
+            {$of(item).name}
             {If($isFolder,
                <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
