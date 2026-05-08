@@ -1,6 +1,6 @@
 <div align="center">
 <picture>
-  <img width="320" src="https://github.com/ruby-cube/luent/blob/cave/luent-logo-desaturated.png" alt="luent-logo"/>
+  <img width="320" src="https://github.com/ruby-cube/luent/blob/cave/luent-logo-github-desaturated.png" alt="luent-logo"/>
 </picture>
 </div>
 
@@ -22,6 +22,32 @@ Modern frameworks bring powerful innovations to web development but often introd
 - type safety
 - readable dynamic templates
 - encapsulation for clarity within complexity
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+## Code glimpse
+
+Here is some contrived code featuring Luent and NeoScript. Note GitHub does not currently support syntax highlighting of the `get` keyword for NeoScript. For a more comprehensive overview of features in both NeoScript and plain TypeScript/JSX, see Luent at a glance.
+
+```tsx
+function Counter() {
+
+   get count = ion(0)
+   get maxed = ion(() => count >= 100)
+
+   <Component>
+      <button 
+         on:click={() => count++} 
+         disabled={maxed}
+      >
+         {count@}
+      </button>
+      {If(maxed,
+         <div class='celebrate'>🎊</div>
+      )}
+   </Component>
+}
+```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
