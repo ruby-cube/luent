@@ -1,3 +1,5 @@
+const PURE = Symbol('pure')
+type pure = { [PURE]?: true }
 
 class Compt {
    count: number = 0
@@ -22,15 +24,25 @@ class Compt {
       return [...args]
    }
 
-   cloneGeneric<T extends any[]>(...args: [...T, 'pure']) {
+   cloneGeneric<T extends any[]>(...args: [...T, pure]) {
       return [...args]
    }
 
-   clone(...args: [...string[], 'pure']) {
+   clone(...args: [...string[], pure]) {
       return [...args]
    }
 
-   cloneB(...args: [...string[], 'pure']): string[]
+   cloneBoolean(...args: [...boolean[], boolean & pure]): boolean[]
+   cloneBoolean(...args: boolean[]) {
+      return [...args]
+   }
+
+   cloneNumbers(...args: [...number[], number & pure]): number[]
+   cloneNumbers(...args: number[]) {
+      return [...args]
+   }
+
+   cloneB(...args: [...string[], string & pure]): string[]
    cloneB(...args: string[]) {
       return [...args]
    }
@@ -51,25 +63,25 @@ class Compt {
       this.count++
    }
 
-   isNegative(p: string, ƒ?: 'pure') {
+   isNegative(p: string, ƒ: pure) {
       return this.count < 0
    }
 
-   isPositive(p: string, ƒ?: 'pure'): boolean
+   isPositive(p: string, ƒ: pure): boolean
    isPositive(p: string) {
       return this.count < 0
    }
 
-   isZero(p?: string, ƒ?: 'pure'): boolean
+   isZero(p?: string, ƒ?: pure): boolean
    isZero(p?: string) {
       return this.count < 0
    }
 
-   foo(x: string, ƒ?: 'pure'): boolean
-   foo(x: number, ƒ?: 'pure'): boolean
+   foo(x: string, ƒ: pure): boolean
+   foo(x: number, ƒ: pure): boolean
    foo(x: number): boolean
    foo(x: string): boolean
-   foo(x: string | number, ƒ?: 'pure') {
+   foo(x: string | number) {
       return true
    }
 
@@ -114,20 +126,24 @@ Child(objet.isZero)
 Child(objet.clone)
 Child(objet.cloneB)
 Child(objet.cloneGeneric)
+Child(objet.cloneBoolean)
+Child(objet.cloneNumbers)
 Child(objet.foo)
 
 type IsAny<T> = 0 extends (1 & T) ? true : false
 
-type IsExactlyPure<T> =
+type IsNever<T> = [T] extends [never] ? true : false
+
+type IsPureMarker<T> =
    IsAny<T> extends true ? false
-   : [T] extends ['pure']
-   ? ['pure'] extends [T] ? true
-   : false
+   : IsNever<T> extends true ? false
+   : [T] extends [pure]
+   ? true
    : false
 
 type IsPureParameters<Args extends any[]> =
    Required<Args> extends [...any[], infer Last]
-   ? IsExactlyPure<Last>
+   ? IsPureMarker<Last>
    : false
 
 type OverloadParameters<F> =
@@ -185,7 +201,7 @@ type Pure<F> =
 // type PureV2<F> =
 //    F extends (...args: any[]) => any
 //    ? Required<Parameters<F>> extends [...any[], infer Last]
-//    ? [Last] extends ['pure'] ? F
+//    ? [Last] extends ['~pure'] ? F
 //    : 'TypeError: function must be marked pure'
 //    : 'TypeError: function must be marked pure'
 //    : 'TypeError: not a function'

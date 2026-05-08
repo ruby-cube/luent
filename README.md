@@ -1,27 +1,35 @@
-# Rue
+<div align="center">
+<picture>
+  <img width="520" src="https://github.com/ruby-cube/project-inklings/blob/cave/luent-logo-github.png" alt="luent-logo"/>
+</picture>
+</div>
 
-<aside>
-⚠️ <b>Experimental:</b> The projects in this repo are works-in-progress, not well-tested, with volatile APIs. Look and play, but definitely don’t use…
-</aside>
-
-<p align="right"><a href="#">[src]</a></p>
-
-## Overview
-
-Hello world, I know you’re tired of JS frameworks. You don’t need this framework, but at the very least what you’ll find here is:
-- an exploration of intuitive abstractions and mental models that unify various aspects of reactivity and reduce cognitive load
-- an API that supports encapsulation and declarative code so you create less spaghetti
-- attempts at ironing out rough edges and bug-prone patterns encountered in the four major frameworks (React, Vue, Solid, and Svelte) so you can focus on app logic instead of wrestling with the framework
-
-Our current goal is to establish an intuitive API that feels pleasant to work with. Once the API is stable, we can focus on more efficient implementations and performance optiminations under the hood.
+# Luent
+Luent is a highly expressive web framework under active development. It consists of a fine-grained reactivity system, rendering engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. Luent also introduces NeoScript, an optional minimal syntactic language extension of Typescript and JSX designed to make writing reactive code more elegant and type-safe without employing magic or counter-intuitive mental models.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-## Features
-Some special features include:
-- a reactivity system that’s compatible with domain models and data structures authored as JavaScript classes, regardless of the presence of private properties
-- readable async code
-- simple-to-use state machines
+## Motivation
+Modern frameworks bring powerful innovations to web development but often introduce their own cognitive overhead through specialized patterns that run counter to native technologies. This project explores how a framework's API design can minimize conceptual complexity and ergonomic friction by aligning with native syntax and behavior so developers can focus on application logic, instead of wrestling with the framework.
+
+### Luent specially features
+- an elegant, unified system of fine-grained reactivity that is consistent with native behavior
+- simplicity in managing shared and centralized state through familiar native structures
+- trackable and traceable mutations to aid in debugging reactivity
+
+
+### Luent supports and encourages
+- type safety
+- readable dynamic templates
+- encapsulation for clarity within complexity
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+## Status
+
+Our current goal is to establish an intuitive and expressive API that feels pleasant to work with. Once the API is stable, we will focus on more efficient implementations and performance optimizations, such as treeshakability for smaller bundle sizes and moving work from runtime to compile time.
+
+> This project is in early development. Standard client-side functionality is more or less stable, but expect bugs and uncovered edge-cases. See how to contribute here.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
