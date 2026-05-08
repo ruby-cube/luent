@@ -27,7 +27,7 @@ Modern frameworks bring powerful innovations to web development but often introd
 
 ## Code glimpse
 
-Here is some contrived code featuring API from Luent and syntax from NeoScript. For a more comprehensive overview of features in NeoScript as well as in plain TypeScript/JSX, see Luent at a glance.
+Here is some contrived code featuring API from Luent and syntax from NeoScript. For more examples, visit luent.dev.
 
 #### In NeoScript
 ```tsx
@@ -44,14 +44,14 @@ function Counter() {
          {count@}
       </button>
       {If(maxed@,
-         <div class='celebrate'>🎊</div>
+         <div class='message'>Max reached!</div>
       )}
    </Component>
 }
 ```
 
 #### In TypeScript + JSX
-(The $ prefix for getters is an encouraged convention, though not required.)
+(Note: The $ prefix for getters below is mere convention, not required.)
 
 ```tsx
 function Counter() {
@@ -59,7 +59,7 @@ function Counter() {
    const $count = ion(0)
    const $maxed = ion(() => $count() >= 100)
 
-   <Component>
+   return Component(
       <button 
          on:click={() => $count.value++} 
          disabled={$maxed}
@@ -67,9 +67,9 @@ function Counter() {
          {$count}
       </button>
       {If($maxed,
-         <div class='celebrate'>🎊</div>
+         <div class='message'>Max reached!</div>
       )}
-   </Component>
+   )
 }
 ```
 
