@@ -11,12 +11,17 @@ Luent is a highly expressive web framework aiming for greater conceptual coheren
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
+## Motivation
+Modern frameworks have brought powerful innovations to web development but have also introduced cognitive overhead often through patterns, abstractions, and syntax that diverge from native web technologies and developer intuition. Coming from a linguistics and design background, I am deeply interested in how syntax and API design might minimize complexity and mental overhead. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
 ## Code glimpse
 
 > For more examples, see Luent at a glance and NextScript at a glance.
 
 #### Luent with JSX
-Ions are Luent's main reactive primitive. The `ion` function is used to create atomic reactive state as well as reactive derivations.
+Ions are Luent's main reactive primitive. The `ion` function is used to create atomic reactive state as well as derivations.
 
 ```tsx
 function Counter({ limit }) {
@@ -33,69 +38,6 @@ function Counter({ limit }) {
             <div class='message'>Limit reached!</div>
          )}
       </>
-   )
-}
-```
-
-```tsx
-
-function TodoList({ ætodos, removeTodo }: FromTag<{
-   todos: Ion<Ionic<Ionic<Todo>[]>>,
-   removeTodo: (todo: Ionic<Todo>) => void
-}>) {
-
-   const æeditedTodo = ion(null as Todo | null)
-
-   let beforeEditCache = ''
-
-   function editTodo(todo: Todo) {
-      beforeEditCache = todo.title
-      // debugger;
-      æeditedTodo.value = todo
-   }
-
-   function cancelEdit(todo: Todo) {
-      æeditedTodo.value = null
-      todo.title = beforeEditCache
-   }
-
-   function doneEdit(todo: Ionic<Todo>) {
-      if (æeditedTodo()) {
-         æeditedTodo.value = null
-         todo.title = todo.title.trim()
-         if (!todo.title) removeTodo(todo)
-      }
-   }
-   watch(æeditedTodo, () => {
-      console.log('isEditing?', æeditedTodo())
-   })
-
-   return Component(
-      <ul class="todo-list">
-         {For(ætodos, m => m.id, (todo) => {
-            const æisEditing = ion(() => todo === æeditedTodo());
-
-            return (
-               <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>
-                  <div class="view">
-                     <input class="toggle" type="checkbox" mu:checked={todo.æcompleted} />
-                     <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
-                     <button class="destroy" on:click={e => removeTodo(todo)}></button>
-                  </div>
-                  {If(æisEditing,
-                     <input
-                        class="edit"
-                        type="text"
-                        mu:value={todo.ætitle}
-                        at:mounted={node => node.focus()}
-                        on:blur={e => doneEdit(todo)}
-                        on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
-                     />
-                  )}
-               </li>
-            )
-         })}
-      </ul>
    )
 }
 ```
@@ -120,11 +62,6 @@ function Counter({ limit }) {
 }
 ```
 
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-## Motivation
-Modern frameworks have brought powerful innovations to web development but have also introduced cognitive overhead often through patterns, abstractions, and syntax that diverge from native web technologies and developer intuition. Coming from a linguistics and design background, I am deeply interested in how syntax and API design might minimize complexity and mental overhead. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
