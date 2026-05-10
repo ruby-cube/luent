@@ -5,7 +5,9 @@
 </div>
 
 # Luent
-Luent is a highly expressive web framework aiming to bring coherence to the complexities of modern web development. It consists of a fine-grained reactivity system, rendering engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional minimal syntactic language extension of Typescript JSX designed to make writing reactive code more elegant and type-safe without employing magic or counter-intuitive mental models.
+Luent is a highly expressive web framework aiming for greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, rendering engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional syntax extension of Typescript JSX designed to make writing reactive code more clean and type-safe without employing magic or counter-intuitive mental models.
+
+> This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, and unhandled edge cases should be expected. See how to contribute here.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -17,39 +19,102 @@ Luent is a highly expressive web framework aiming to bring coherence to the comp
 Ions are Luent's main reactive primitive. The `ion` function is used to create atomic reactive state as well as reactive derivations.
 
 ```tsx
-function Counter() {
+function Counter({ limit }) {
 
    const count = ion(0)
-   const maxed = ion(() => count() >= 100)
+   const maxed = ion(() => count() >= limit)
 
    return Component(
       <>
          <button on:click={() => count.value++} disabled={maxed}>
             {count}
          </button>
-         {If(maxed, () =>
-            <div class='message'>Max reached!</div>
+         {If(maxed,
+            <div class='message'>Limit reached!</div>
          )}
       </>
    )
 }
 ```
 
+```tsx
+
+function TodoList({ ætodos, removeTodo }: FromTag<{
+   todos: Ion<Ionic<Ionic<Todo>[]>>,
+   removeTodo: (todo: Ionic<Todo>) => void
+}>) {
+
+   const æeditedTodo = ion(null as Todo | null)
+
+   let beforeEditCache = ''
+
+   function editTodo(todo: Todo) {
+      beforeEditCache = todo.title
+      // debugger;
+      æeditedTodo.value = todo
+   }
+
+   function cancelEdit(todo: Todo) {
+      æeditedTodo.value = null
+      todo.title = beforeEditCache
+   }
+
+   function doneEdit(todo: Ionic<Todo>) {
+      if (æeditedTodo()) {
+         æeditedTodo.value = null
+         todo.title = todo.title.trim()
+         if (!todo.title) removeTodo(todo)
+      }
+   }
+   watch(æeditedTodo, () => {
+      console.log('isEditing?', æeditedTodo())
+   })
+
+   return Component(
+      <ul class="todo-list">
+         {For(ætodos, m => m.id, (todo) => {
+            const æisEditing = ion(() => todo === æeditedTodo());
+
+            return (
+               <li class={['todo', { 'completed': todo.æcompleted, 'editing': æisEditing }]}>
+                  <div class="view">
+                     <input class="toggle" type="checkbox" mu:checked={todo.æcompleted} />
+                     <label on:dblclick={e => editTodo(todo)}>{(todo.title)}</label>
+                     <button class="destroy" on:click={e => removeTodo(todo)}></button>
+                  </div>
+                  {If(æisEditing,
+                     <input
+                        class="edit"
+                        type="text"
+                        mu:value={todo.ætitle}
+                        at:mounted={node => node.focus()}
+                        on:blur={e => doneEdit(todo)}
+                        on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
+                     />
+                  )}
+               </li>
+            )
+         })}
+      </ul>
+   )
+}
+```
+
 #### Luent with NextScript
-In NextScript, the `get` keyword may be used to declare accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing root-level JSX implicitly return the JSX.
+In NextScript, the `get` keyword declares accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing statement-level JSX implicitly return the JSX.
 
 ```tsx
-function Counter() {
+function Counter({ limit }) {
 
    get count = ion(0)
-   get maxed = ion(() => count >= 100)
+   get maxed = ion(() => count >= limit)
 
    <Component>
       <button on:click={() => count++} disabled={maxed@}>
          {count@}
       </button>
       {If(maxed@,
-         <div class='message'>Max reached!</div>
+         <div class='message'>Limit reached!</div>
       )}
    </Component>
 }
@@ -59,7 +124,7 @@ function Counter() {
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks bring powerful innovations to web development but often introduce cognitive overhead through abstractions or syntax that diverge from native web technologies and developer intuition. As someone who values efficiency and has experienced framework friction while building apps, I began exploring how the ideas of modern web development could better align with native behavior and established standards. Coming from a linguistics and design background, I became particularly interested in how syntax and API design might minimize complexity and mental overhead. The central challenge was understanding how to move towards simplicity without trading off conceptual integrity and technical rigor.
+Modern frameworks have brought powerful innovations to web development but have also introduced cognitive overhead often through patterns, abstractions, and syntax that diverge from native web technologies and developer intuition. Coming from a linguistics and design background, I am deeply interested in how syntax and API design might minimize complexity and mental overhead. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -80,13 +145,13 @@ Luent also supports and encourages:
 Luent is being developed under these guiding principles which encapsulate our values and how they are prioritized:
 
 - **Human-centered, AI-friendly.**
-We take a human-centered approach both in the development of this project and the framework design. The vision, grit, and needs of humans are the driving force behind this project. AI will never take the driver's seat, only a supporting role. Since human-centered interfaces are also incidentally AI-friendly due to how LLMs work, we much prefer to focus on humans.
+We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. Since human-centered interfaces are also incidentally AI-friendly due to how LLMs work, we focus on designing for humans.
 
 - **Elegance and simplicity.**
-Elegance—both conceptual and syntactic—is central to Luent’s API design. We seek out simple solutions through extensive experimentation and relentless removal of excess.
+Elegance—both conceptual and syntactic—is central to Luent’s API design. We seek out simple solutions through extensive experimentation and relentless trimming of excess.
 
 - **Intuitive mental models.**
-Luent aims to be as invisible as possible so developers can focus on application logic rather than framework mechanics. We strive to minimize mental code-switching and memorization by supporting mental models grounded in native web technologies and familiar programming fundamentals.
+Luent aims to be as invisible as possible so developers can focus on application logic rather than framework mechanics. We strive to minimize mental code-switching by supporting mental models grounded in native web technologies and familiar programming fundamentals.
 
 - **High-level abstractions.**
 Abstractions should emphasize high-level concerns while minimizing implementation leakage. We favor clear, descriptive terminology over low-level technical jargon.
@@ -100,6 +165,9 @@ Concise code is valuable, but not at the expense of clarity or flexibility. Deve
 - **Elimination of bug-prone patterns.**
 Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce time spent debugging an application.
 
+- **Quality over speed**
+Quality must not be compromised for the sake of development speed. 
+
 - **Ultimately: Great user experiences.**
 All of this is ultimately in service of the end user. We embrace build steps because they enable better developer ergonomics without sacrificing runtime performance. We preserve framework and language consistency to ensure a stable foundation for developers to write reliable, maintainable software. We strive to create ease for developers so that they can focus on building great user experiences. A solid framework → good DX → great UX.
 
@@ -108,13 +176,13 @@ All of this is ultimately in service of the end user. We embrace build steps bec
 
 ## Prior Art
 
-This project builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the elegance and consistency of React and JSX, the intuitiveness and thoughtfulness of Vue, the enviable aesthetics of Svelte, the pure insightfulness of Solid, and the thoroughness of Angular.
+This project builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the elegance and consistency of React and JSX, the intuitiveness and thoughtfulness of Vue, the clean aesthetics of Svelte, the pure insightfulness of Solid, and the thoroughness of Angular.
 
 Particular acknowledgement to the people and projects I've especially admired:
 
 - Vue 3, the framework I fell in love with and that introduced me to the world of reactivity. Its getter-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
 - Solid.js, which later became a guiding light, particularly in how I approach component props in a signals-based framework.
-- Evan You and the Vue team, whose dedication to developer experience has greatly influenced how I approach designing Luent
+- Evan You and the Vue team, whose dedication to developer experience has greatly informed how I approach designing Luent
 - Ryan Carniato, whose articles and streams have been an encouraging source of clarity and affirmation for this project
 
 
@@ -126,10 +194,6 @@ Particular acknowledgement to the people and projects I've especially admired:
 The current goal is to establish an intuitive and expressive API that enhances developer experience and productivity.
 
 Once the API stabilizes, development will increasingly focus on runtime efficiency, treeshakability, smaller bundle sizes, and shifting more work from runtime to compile time.
-
-
-> This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, and unhandled edge cases should be expected. See how to contribute here.
-
 
 
 
