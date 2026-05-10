@@ -59,7 +59,7 @@ function Counter() {
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks bring powerful innovations to web development but often introduce cognitive overhead through abstractions that diverge from native web technologies and developer intuition. This project explores how framework APIs and syntax design can minimize complexity and cognitive overhead with fresh ideas while staying aligned with native behavior and established standards. The project also explores how developer ergonomics can coexist with conceptual integrity and technical rigor—qualities all frameworks must inevitably balance and negotiate.
+Modern frameworks bring powerful innovations to web development but often introduce cognitive overhead through abstractions that diverge from native web technologies and developer intuition. This project explores how framework APIs and syntax design can minimize complexity and cognitive overhead by refining the ideas of modern web development while staying aligned with native behavior and established standards. The project also explores how developer ergonomics can coexist with conceptual integrity and technical rigor—qualities all frameworks must inevitably balance and negotiate.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
