@@ -11,7 +11,7 @@ Luent is a highly expressive web framework aiming to bring coherence to the comp
 
 ## Code glimpse
 
-Below are some examples. For more, see Luent at a glance and NextScript at a glance.
+> For more examples, see Luent at a glance and NextScript at a glance.
 
 #### Luent with JSX
 Ions are Luent's main reactive primitive. The `ion` function is used to create atomic reactive state as well as reactive derivations.
@@ -36,7 +36,7 @@ function Counter() {
 ```
 
 #### Luent with NextScript
-In NextScript, the `get` keyword may be used to declare accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing root-level JSX implicitly returns the JSX.
+In NextScript, the `get` keyword may be used to declare accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing root-level JSX implicitly return the JSX.
 
 ```tsx
 function Counter() {
@@ -59,7 +59,7 @@ function Counter() {
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks bring powerful innovations to web development but often introduce cognitive overhead through abstractions that diverge from native web technologies and developer intuition. This project explores how framework APIs and syntax design can minimize complexity and cognitive overhead by refining the ideas of modern web development while staying aligned with native behavior and established standards. The project also explores how developer ergonomics can coexist with conceptual integrity and technical rigor—qualities all frameworks must inevitably balance and negotiate.
+Modern frameworks bring powerful innovations to web development but often introduce cognitive overhead through abstractions or syntax that diverge from native web technologies and developer intuition. As someone who values efficiency and has experienced framework friction while building apps, I began exploring how the ideas of modern web development could better align with native behavior and established standards. Coming from a linguistics and design background, I became particularly interested in how syntax and API design might minimize complexity and mental overhead. The central challenge was understanding how to move towards simplicity without trading off conceptual integrity and technical rigor.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -80,7 +80,7 @@ Luent also supports and encourages:
 Luent is being developed under these guiding principles which encapsulate our values and how they are prioritized:
 
 - **Human-centered, AI-friendly.**
-We take a human-centered approach both in the development of this project and the framework design. The vision, grit, and needs of humans are the driving force behind this project. AI will never take the driver's seat, only a supporting role. Since human-centered interfaces are incidentally AI-friendly due to how LLMs work, we opt to focus on humans.
+We take a human-centered approach both in the development of this project and the framework design. The vision, grit, and needs of humans are the driving force behind this project. AI will never take the driver's seat, only a supporting role. Since human-centered interfaces are also incidentally AI-friendly due to how LLMs work, we much prefer to focus on humans.
 
 - **Elegance and simplicity.**
 Elegance—both conceptual and syntactic—is central to Luent’s API design. We seek out simple solutions through extensive experimentation and relentless removal of excess.
@@ -98,24 +98,24 @@ While aesthetics matter, the pursuit of visually elegant code should never intro
 Concise code is valuable, but not at the expense of clarity or flexibility. Developers should never feel constrained by the framework for the sake of terseness or visual minimalism.
 
 - **Elimination of bug-prone patterns.**
-Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce application developers’ time spent debugging.
+Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce time spent debugging an application.
 
 - **Ultimately: Great user experiences.**
-All of this is ultimately in service of the end user. We embrace build steps because they enable better developer ergonomics without sacrificing runtime performance. We preserve framework and language consistency to ensure a stable foundation for developers to write reliable, maintainable software. We strive to create ease for developers so that they have more bandwidth to build great user experiences. A solid framework → good DX → great UX.
+All of this is ultimately in service of the end user. We embrace build steps because they enable better developer ergonomics without sacrificing runtime performance. We preserve framework and language consistency to ensure a stable foundation for developers to write reliable, maintainable software. We strive to create ease for developers so that they can focus on building great user experiences. A solid framework → good DX → great UX.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Prior Art
 
-This project stands on the shoulders of the giants who have shaped modern web development. It draws inspiration from the elegance and consistency of React and JSX, the intuitiveness and thoughtfulness of Vue, the enviable aesthetics of Svelte, the pure insightfulness of Solid, and the thoroughness of Angular.
+This project builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the elegance and consistency of React and JSX, the intuitiveness and thoughtfulness of Vue, the enviable aesthetics of Svelte, the pure insightfulness of Solid, and the thoroughness of Angular.
 
 Particular acknowledgement to the people and projects I've especially admired:
 
-- Vue.js, the framework I fell in love with and that introduced me to the world of reactivity. Its getter-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
+- Vue 3, the framework I fell in love with and that introduced me to the world of reactivity. Its getter-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
 - Solid.js, which later became a guiding light, particularly in how I approach component props in a signals-based framework.
 - Evan You and the Vue team, whose dedication to developer experience has greatly influenced how I approach designing Luent
-- Ryan Carniato, whose articles and streams have become an encouraging source of clarity and affirmation for this project
+- Ryan Carniato, whose articles and streams have been an encouraging source of clarity and affirmation for this project
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -123,12 +123,15 @@ Particular acknowledgement to the people and projects I've especially admired:
 
 ## Current status
 
-Our current goal is to establish an intuitive and expressive API that enhances developer experience and productivity.
+The current goal is to establish an intuitive and expressive API that enhances developer experience and productivity.
 
 Once the API stabilizes, development will increasingly focus on runtime efficiency, treeshakability, smaller bundle sizes, and shifting more work from runtime to compile time.
 
 
 > This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, and unhandled edge cases should be expected. See how to contribute here.
+
+
+
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
