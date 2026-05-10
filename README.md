@@ -1,6 +1,6 @@
 <div align="center">
 <picture>
-  <img width="320" src="https://github.com/ruby-cube/luent/blob/cave/luent-logo-github-desaturated.png" alt="luent-logo"/>
+  <img width="320" src="https://github.com/ruby-cube/luent/blob/cave/luent-logo-site-github.png" alt="luent-logo"/>
 </picture>
 </div>
 
