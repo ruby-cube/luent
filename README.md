@@ -11,9 +11,9 @@ Luent is a highly expressive web framework aiming to bring coherence to the comp
 
 ## Code glimpse
 
-For more examples, see Luent at a glance and NextScript at a glance.
+Below are some examples. For more, see Luent at a glance and NextScript at a glance.
 
-#### In JSX
+#### Luent with JSX
 Ions are Luent's main reactive primitive. The `ion` function is used to create atomic reactive state as well as reactive derivations.
 
 ```tsx
@@ -35,8 +35,8 @@ function Counter() {
 }
 ```
 
-#### In NextScript
-In NextScript, the `get` keyword may be used to declare accessor variables, which behave similarly to native accessor properties. The @ postfix operator enables access to the getter of an accessor variable/property. Functions containing root-level JSX implicitly returns the JSX.
+#### Luent with NextScript
+In NextScript, the `get` keyword may be used to declare accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing root-level JSX implicitly returns the JSX.
 
 ```tsx
 function Counter() {
@@ -59,7 +59,7 @@ function Counter() {
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks bring powerful innovations to web development but often introduce cognitive overhead through abstractions that diverge from native web technologies and developer intuition. This project explores how framework APIs and syntax design can minimize complexity and ergonomic friction by aligning with native behavior and established standards. The project also explores how developer ergonomics can coexist with conceptual integrity and technical rigor—qualities all frameworks must inevitably balance and negotiate.
+Modern frameworks bring powerful innovations to web development but often introduce cognitive overhead through abstractions that diverge from native web technologies and developer intuition. This project explores how framework APIs and syntax design can minimize complexity and cognitive overhead with fresh ideas while staying aligned with native behavior and established standards. The project also explores how developer ergonomics can coexist with conceptual integrity and technical rigor—qualities all frameworks must inevitably balance and negotiate.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
