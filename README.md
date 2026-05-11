@@ -5,7 +5,7 @@
 </div>
 
 # Luent
-Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional syntax extension of Typescript JSX designed to make writing reactive code more clean and type-safe without employing magic or counter-intuitive mental models.
+Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional syntax extension of Typescript and JSX designed to make writing reactive code more clean and type-safe without employing magic or counter-intuitive mental models.
 
 > This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and experimental churn should be expected. See how to contribute here.
 
@@ -20,18 +20,22 @@ Modern frameworks have brought powerful innovations to web development but have 
 
 > For more examples, see Luent at a glance and NextScript at a glance.
 
-#### Luent with TypeScript JSX
-Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations.
+#### Luent with TypeScript and JSX
+Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
 
 ```tsx
-function Counter({ limit }: FromTag<{ limit: number }>) {
+function Counter(setup: FromTag<{ 
+   limit: number, 
+   class: Ion<TagClass> 
+}>) {
+   const { limit, $classes } = setup;
 
    const count = ion(0)
    const maxed = ion(() => count() >= limit)
 
    return Component(
       <>
-         <button on:click={() => count.value++} disabled={maxed}>
+         <button class={$classes} on:click={() => count.value++} disabled={maxed}>
             {count}
          </button>
          {If(maxed,
@@ -40,19 +44,28 @@ function Counter({ limit }: FromTag<{ limit: number }>) {
       </>
    )
 }
+
+createRoot(() =>
+   <Counter class='outlined' limit={100} />
+).mount('#root')
+
 ```
 
 #### Luent with NextScript
 In NextScript, the `get` keyword declares accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing JSX statements implicitly return the JSX.
 
 ```tsx
-function Counter({ limit }: FromTag<{ limit: number }>) {
+function Counter(setup: FromTag<{
+   limit: number, 
+   class: Ion<TagClass> 
+}>) {
+   const { limit, classes@ } = setup;
 
    get count = ion(0)
    get maxed = ion(() => count >= limit)
 
    <Component>
-      <button on:click={() => count++} disabled={maxed@}>
+      <button class={classes@} on:click={() => count++} disabled={maxed@}>
          {count@}
       </button>
       {If(maxed@,
@@ -60,6 +73,11 @@ function Counter({ limit }: FromTag<{ limit: number }>) {
       )}
    </Component>
 }
+
+createRoot(() => 
+   <Counter class='outlined' limit={100} />
+).mount('#root')
+
 ```
 
 
@@ -67,15 +85,25 @@ function Counter({ limit }: FromTag<{ limit: number }>) {
 
 
 ## Features
-Luent currently provides most of the standard features expected of a modern frontend framework, with server-side features planned. It specially features:
+Luent currently provides most of the standard features expected of a modern frontend framework, with server-side features planned.
+
+It specially features:
 - a unified system of fine-grained reactivity that is consistent with native behavior
 - simplicity in managing shared and centralized state through familiar native structures
-- trackable and traceable mutations to aid in debugging reactivity
+- selective and type-explicit reactivity
+- ergonomic asynchronous reactivity
 
-Luent also supports and encourages:
-- type safety
+It uniquely features:
+- trackable and traceable mutations to aid in debugging reactivity
+- x-ray binding and smart auto-binding for greater ease in authoring flexible components
+- ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag.
+- a reactive finite state machine API
+
+It supports and encourages:
+- type-safety
 - readable dynamic templates
 - encapsulation for clarity within complexity
+
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Design Principles
@@ -97,7 +125,7 @@ Abstractions should emphasize high-level concerns while minimizing implementatio
 While aesthetics matter, the pursuit of visually elegant code should never introduce inconsistencies in the language or unpredictable magic. Clean syntax should be acheived through carefully designed rules and rigorously specified syntactic sugar.
 
 - **Clarity and expressiveness over brevity.**
-Concise code is valuable, but not at the expense of clarity or flexibility. Developers should never feel constrained by the framework for the sake of terseness or visual minimalism.
+Concise code is valuable, but not at the expense of basic clarity, flexibility, and type-safety. Developers should never feel constrained by the framework for the sake of terseness or visual minimalism.
 
 - **Elimination of bug-prone patterns.**
 Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce time spent debugging an application.
@@ -113,14 +141,14 @@ All of this is in service of the end user. We preserve framework and language co
 
 ## Prior Art
 
-This project builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the consistency of React, the intuitiveness of Vue, the clean aesthetics of Svelte, the insightfulness of Solid, and the thoroughness of Angular.
+This project builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the consistency of React, the intuitiveness of Vue, the aesthetics of Svelte, the insightfulness of Solid, and the thoroughness of Angular.
 
 Particular acknowledgement to the people and projects I've especially admired:
 
 - Vue 3, the framework I fell in love with and that sparked my fascination with frontend frameworks. Its getter-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
-- Solid.js, which later became a guiding light, particularly in how I approach component props in a signals-based framework.
+- Solid.js, which later became a guiding light, particularly in how to approach component props and derivations in a signals-based framework.
+- Ryan Carniato, whose articles and streams have been an encouraging source of clarity and affirmation
 - Evan You and the Vue team, whose dedication to developer experience has greatly informed how I approach designing Luent
-- Ryan Carniato, whose articles and streams have been an encouraging source of clarity and affirmation for this project
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -131,8 +159,6 @@ Particular acknowledgement to the people and projects I've especially admired:
 The current goal is to establish an intuitive and expressive API that enhances developer experience and productivity.
 
 Once the API stabilizes, development will increasingly focus on runtime efficiency, treeshakability, smaller bundle sizes, and shifting more work from runtime to compile time.
-
-
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
