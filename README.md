@@ -96,7 +96,7 @@ It specially features:
 It uniquely features:
 - trackable and traceable mutations to aid in debugging reactivity
 - x-ray binding and smart auto-binding for greater ease in authoring flexible components
-- ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag.
+- ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 - a reactive finite state machine API
 
 It supports and encourages:
@@ -130,7 +130,7 @@ Concise code is valuable, but not at the expense of basic clarity, flexibility, 
 - **Elimination of bug-prone patterns.**
 Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce time spent debugging an application.
 
-- **Quality over speed**
+- **Quality over speed.**
 Keeping up a reasonable pace is desirable, but quality should not be compromised for the sake of development speed. 
 
 - **Ultimately: Great user experiences.**
