@@ -7,7 +7,7 @@
 # Luent
 Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional syntax extension of Typescript JSX designed to make writing reactive code more clean and type-safe without employing magic or counter-intuitive mental models.
 
-> This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, and unhandled edge cases should be expected. See how to contribute here.
+> This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and experimental churn should be expected. See how to contribute here.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
