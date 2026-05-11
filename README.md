@@ -12,7 +12,7 @@ Luent is a highly expressive web framework that aims to provide greater conceptu
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks have brought powerful innovations to web development but have also introduced cognitive overhead often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. As someone from a linguistics and design background, I am deeply interested in how we might design syntax and APIs that advance technology while still aligning with established standards so that we minimize complexity and mental overhead. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+Modern frameworks have brought powerful innovations to web development but have also introduced cognitive overhead often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. Coming from a linguistics and design background, I am deeply interested in how we might design syntax and APIs that advance technology while still aligning with established standards in order to minimize complexity and mental overhead. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
