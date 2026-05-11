@@ -133,8 +133,8 @@ Luent should absorb as much repetitive and error-prone infrastructure as possibl
 - **Quality over speed.**
 Keeping up a reasonable pace is desirable, but quality should not be compromised for the sake of development speed. 
 
-- **Ultimately: Great user experiences.**
-All of this is in service of the end user. We preserve framework and language consistency to ensure a stable foundation for developers. We strive to create ease for developers so that they can build, grow, and maintain great user experiences. We also embrace build steps because they enable better developer ergonomics without sacrificing runtime performance. A solid framework → good DX → great UX.
+- **Great user experiences.**
+All of this is in service of the end user. We embrace build steps because they enable better developer ergonomics without sacrificing runtime performance. We preserve framework and language consistency to ensure a stable foundation for developers. We strive to create stability and ease for developers so that they can build, grow, and maintain great user experiences. A solid framework → good DX → great UX.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
