@@ -5,14 +5,17 @@
 </div>
 
 # Luent
-Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional syntax extension of Typescript and JSX designed to make writing reactive code more clean and type-safe without employing magic or counter-intuitive mental models.
+Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript (.nsx), an optional syntax extension of Typescript and JSX designed to make reactive code more clean, readable, and type-safe. It has been conscientiously designed to align with established semantics and developer intuition.
 
 > This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and experimental churn should be expected. See how to contribute here.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks have brought powerful innovations to web development but have also introduced cognitive overhead often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. Coming from a linguistics and design background, I am deeply interested in how we might design syntax and APIs that advance technology while still aligning with established standards in order to minimize complexity and mental overhead. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+Modern frameworks have brought powerful innovations to web development but have also introduced additional cognitive overhead, often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. 
+
+Coming from a linguistics and design background, I am particularly passionate about both language fidelity and code aesthetics and deeply interested in how we might design syntax and APIs that advance technology while still aligning with established standards and minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -20,7 +23,7 @@ Modern frameworks have brought powerful innovations to web development but have 
 
 > For more examples, see Luent at a glance and NextScript at a glance.
 
-#### Luent with TypeScript and JSX
+#### Luent with TypeScript + JSX
 Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
 
 ```tsx
@@ -87,22 +90,24 @@ createRoot(() =>
 ## Features
 Luent currently provides most of the standard features expected of a modern frontend framework, with server-side features planned.
 
-It specially features:
+Core design features:
 - a unified system of fine-grained reactivity that is consistent with native behavior
 - simplicity in managing shared and centralized state through familiar native structures
-- selective and type-explicit reactivity
-- ergonomic asynchronous reactivity
+- selective, type-explicit reactivity
+- traceable mutations to aid in debugging reactivity
 
-It uniquely features:
-- trackable and traceable mutations to aid in debugging reactivity
+Other notable features:
 - x-ray binding and smart auto-binding for greater ease in authoring flexible components
-- ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 - a reactive finite state machine API
+- ergonomic asynchronous reactivity
+- ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 
-It supports and encourages:
-- type-safety
-- readable dynamic templates
-- encapsulation for clarity within complexity
+Experimental areas:
+- syntactic sugar for improved readability and type-safety (WIP)
+- compile-time mutation tracking (WIP)
+- selective nested reactivity
+- encapsulated reactivity
+
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
