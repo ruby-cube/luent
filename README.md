@@ -20,14 +20,18 @@ Coming from a linguistics and design background, I am particularly passionate ab
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Code glimpse
+> For more examples, see Luent at a glance and NextScript at a glance.
 
 Below are some code examples featuring API and syntax from Luent and NextScript. A few orientation notes: 
 
-Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
+- Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. 
+- The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
 
-In NextScript, the `get` keyword declares accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing JSX statements implicitly return the JSX.
+In NextScript:
+- The `get` keyword declares accessor variables, which behave similarly to native accessor properties. 
+- The `@` postfix operator enables access to the getter of an accessor variable/property. 
+- Functions containing JSX statements implicitly return the JSX.
 
-> For more examples, see Luent at a glance and NextScript at a glance.
 
 #### Luent with NextScript
 
@@ -109,7 +113,7 @@ Other notable features:
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 
 Experimental areas:
-- syntactic sugar for improved readability and type-safety (WIP)
+- NextScript language extension for improved readability and type-safety (WIP)
 - compile-time mutation tracking (WIP)
 - selective nested reactivity
 - encapsulated reactivity
@@ -165,7 +169,7 @@ This project builds upon ideas pioneered by frameworks that have shaped modern w
 Particular acknowledgement to the people and projects I've especially admired:
 
 - Vue 3, the framework I fell in love with and that sparked my fascination with frontend frameworks. Its getter-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
-- Solid.js, which later became a guiding light, particularly in how to approach component props and derivations in a signals-based framework.
+- Solid.js, which later became a guiding light, particularly in how to approach component props and derivations in a signals-based framework
 - Ryan Carniato, whose articles and streams have been an encouraging source of clarity and affirmation
 - Evan You and the Vue team, whose dedication to developer experience has greatly informed how I approach designing Luent
 
