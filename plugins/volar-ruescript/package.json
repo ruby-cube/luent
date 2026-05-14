@@ -14,15 +14,15 @@
       "@volar/language-core": "~2.4.0",
       "@volar/language-server": "~2.4.0",
       "@volar/typescript": "~2.4.0",
-      "volar-service-css": "volar-2.4",
-      "volar-service-emmet": "volar-2.4",
-      "volar-service-html": "volar-2.4",
-      "volar-service-typescript": "volar-2.4",
+      "volar-service-css": "0.0.71",
+      "volar-service-emmet": "0.0.71",
+      "volar-service-html": "0.0.71",
+      "volar-service-typescript": "0.0.71",
       "vscode-uri": "^3.0.8",
       "@rue/ruescript": "workspace:*",
       "@types/estree": "^1.0.8",
       "@types/estree-jsx": "^1.0.5",
       "zimmerframe": "^1.1.4",
-      "oxc-parser": "^0.124.0"
+      "oxc-parser": "^0.130.0"
    }
 }

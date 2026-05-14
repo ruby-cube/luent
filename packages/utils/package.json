@@ -6,8 +6,8 @@
     "devDependencies": {
         "@rue/types": "workspace:*",
         "@types/node": "latest",
-        "typescript": "^5.5.4",
-        "vite": "^8.0.3"
+        "typescript": "^6.0.3",
+        "vite": "^8.0.13"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT",

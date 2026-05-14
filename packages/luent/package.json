@@ -9,7 +9,7 @@
       "@rue/quarky": "workspace:*",
       "@rue/utils": "workspace:*",
       "@rue/ruescript": "workspace:*",
-      "dompurify": "^3.3.2"
+      "dompurify": "^3.4.3"
    },
    "devDependencies": {
       "@rue/types": "workspace:*",

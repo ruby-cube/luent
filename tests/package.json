@@ -14,7 +14,7 @@
     "@rue/thread": "workspace:*",
     "@rue/utils": "workspace:*",
     "lodash-es": "^4.18.1",
-    "marked": "^15.0.5"
+    "marked": "^18.0.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.25.6",
@@ -31,7 +31,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/babel__traverse": "^7.20.6",
     "@types/node": "^25.2.3",
-    "vite": "^8.0.3"
+    "vite": "^8.0.13"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"
