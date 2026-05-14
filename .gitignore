@@ -32,3 +32,10 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# VS Code extension build artifacts
+/plugins/vscode-ruescript/out/
+/plugins/vscode-ruescript/vendor_node_modules/
+
+# Generated temp output
+/plugins/eslint-plugin-mu/.tmp-run/

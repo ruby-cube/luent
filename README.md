@@ -154,13 +154,6 @@ All of this is in service of the end user. We embrace build steps because they e
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
- TODO:
-## JSX Runtime Semantics
-JSX is conservatively transpiled 
-- control flow series for optimization
-- implicit render functions in slots
-
-<p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Prior Art
 

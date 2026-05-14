@@ -1,0 +1,3 @@
+# Mark vendored and generated code so GitHub ignores them in language detection
+packages/x-old/ linguist-documentation
+pnpm-lock.yaml linguist-generated
