@@ -1,4 +1,4 @@
-import { template, For, listen, NodeRef, css } from "@rue/luent";
+import { Component, template, For, listen, NodeRef, Style, css } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { ion, queueRender, queueTask, EACH, ionic } from "@rue/quarky";
@@ -109,11 +109,11 @@ export function TestListSelectTransition() {
 
    // temporary till Transition API implemented
    const $container = NodeRef('div')
-   const itemDivs: HTMLElement[] = []
+   const itemDivs: HTMLDivElement[] = []
 
    // {{ [m.list]: $active, '.': [m.dark, m.selectedList] }}
 
-   return template(
+   return Component(
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>
@@ -128,7 +128,7 @@ export function TestListSelectTransition() {
 
                   {For(list, m => m.id, (item, $index) => (
                      <div
-                        ref={{ arr: itemDivs, i: $index }}
+                        ref={[itemDivs, $index]}
                         animate-in animate-out transition-item
                      >
                         <div
@@ -172,60 +172,60 @@ export function TestListSelectTransition() {
                )}
             </div>
          </div>
+         {Style(css`
+            body {
+               overflow-y: scroll
+            }
+
+            .delete-btn {
+               background-color: transparent;
+               margin-bottom: 1rem;
+               border: none;
+            }
+
+            .delete-btn:hover {
+               border: none;
+            }
+
+            @keyframes fade-in {
+               from {
+                  opacity: 0;
+                  transform: scaleY(0.01) translate(30px, 0);
+               }
+
+               to {
+                  opacity: 1;
+                  transform: scaleY(1) translate(0px, 0px);
+               }
+            }
+
+            @keyframes fade-out {
+               from {
+                  opacity: 1;
+               }
+
+               to {
+                  opacity: 0;
+               }
+            }
+
+            .fade-out {
+               transform-origin: top center;
+               animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
+               z-index: -1;
+            }
+
+            .fade-in {
+               transform-origin: top center;
+               animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
+            }
+
+            .transition-item {
+               transition: transform 500ms ease-in-out;
+            }
+         `)}
       </>
    )
-      .style(css`
-         body {
-            overflow-y: scroll
-         }
-
-         .delete-btn {
-            background-color: transparent;
-            margin-bottom: 1rem;
-            border: none;
-         }
-
-         .delete-btn:hover {
-            border: none;
-         }
-
-   
-
-         @keyframes fade-in {
-            from {
-               opacity: 0;
-               transform: scaleY(0.01) translate(30px, 0);
-            }
-            to {
-               opacity: 1;
-               transform: scaleY(1) translate(0px, 0px);
-            }
-         }
-
-         @keyframes fade-out {
-            from {
-               opacity: 1;
-            }
-            to {
-               opacity: 0;
-            }
-         }
-
-         .fade-out {
-            transform-origin: top center;
-            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) both reverse fade-in;
-            z-index: -1;
-         }
-
-         .fade-in {
-            transform-origin: top center;
-            animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) fade-in;
-         }
-
-         .transition-item {
-            transition: transform 500ms ease-in-out;
-         }
-      `)
 }
 
 

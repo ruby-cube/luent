@@ -1,7 +1,7 @@
 import { isObject, normalizeToArray } from "@rue/utils";
 
 export interface ComponentKit<T = undefined> {
-   as: T
+   component: T
    nodes: unknown[];
 }
 
@@ -9,7 +9,7 @@ export function JSXComponent(template: JSX.Element | JSX.Element[]): ComponentKi
    const nodes = normalizeToArray(template ? unnestComponent(template) : undefined)
 
    return {
-      get as() { return undefined },
+      get component() { return undefined },
       nodes,
    }
 }
@@ -18,7 +18,7 @@ export function JSXComponentAs<T>(component: T, template: JSX.Element | JSX.Elem
       const nodes = normalizeToArray(template ? unnestComponent(template) : undefined)
 
    return {
-      get as() { return component },
+      get component() { return component },
       nodes,
    }
 }
@@ -35,7 +35,7 @@ export function unnestComponent(nodes: unknown) {
    if (isArray && nodes.length > 1) return nodes;
    const entity = isArray ? nodes[0] : nodes;
    if (isComponentKit(entity)) {
-      if (entity.as)
+      if (entity.component)
          return nodes;
       return entity.nodes;
    }
@@ -43,5 +43,5 @@ export function unnestComponent(nodes: unknown) {
 }
 
 export function isComponentKit(entity: unknown): entity is ComponentKit<unknown> { 
-   return isObject(entity) && 'as' in entity && 'nodes' in entity // TODO: this seems like many things can be mistaken for a component kit.
+   return isObject(entity) && 'component' in entity && 'nodes' in entity // TODO: this seems like many things can be mistaken for a component kit.
 }

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Context, template, fromRoot, fromContext, FromTag, If, Polymorph } from "@rue/luent";
+import { Component, Context, template, fromRoot, fromContext, FromTag, If, Polymorph } from "@rue/luent";
 import { USER, User } from "../context/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";
@@ -20,7 +20,7 @@ export function FriendApp(input: FromTag<{
 
    const $main = $App.Morphable('home')
 
-   return template(
+   return Component(
       <Context provide={[USER(user)]}>
          <Navbar user={user} navigateHome={() => $main.as('home')}>
             <button on:click={() => $main.as('chat')}>Chat</button>

@@ -10,7 +10,7 @@ import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node
 import { setUpNodeRefs } from "../node/NodeRefs";
 import { setUpTransitions } from "../transitions/transitions";
 import { getTransition, setTransition } from "../transitions/Transition";
-import { composeBindings } from "../component/bindings";
+import { composeBindings, composeRef } from "../component/bindings";
 import { setUpAttributes } from "./attributes";
 import { setUpClasses, setUpConditionalDisplay, setUpStyles } from "./styles";
 import { setUpEvents } from "./events";
@@ -25,10 +25,9 @@ export function makeElement(
    Slot: RenderSlot | undefined,
    bindings: ElementConfig,
 ): DOMNode {
-   console.log('before compose bindings', bindings)
-   const { ref, showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
-   console.log('after compose bindings, hooks', hooks)
-   
+   console.log('@@@before compose bindings', bindings)
+   const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
+
    let newXML_NS: string | undefined;
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 
@@ -36,13 +35,13 @@ export function makeElement(
       : XML_NS ? createNSElement(tagName, XML_NS)
          : document.createElement(tagName)
 
+   const ref = composeRef(bindings) // throw if ref already used
    if (ref) {
-      if (isObject(ref) && 'arr' in ref) {
-         setUpNodeRefs(domNode, ref.arr, normalizeToArray(ref.i))
+      if (Array.isArray(ref)) {
+         setUpNodeRefs(domNode, ref[0], normalizeToArray(ref[1]))
       }
       else {
          if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs as ref")
-         console.log('initializing element ref', tagName)
          initializeRef(ref, domNode)
       }
    }

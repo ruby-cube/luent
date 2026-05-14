@@ -1,4 +1,4 @@
-import { Context, createRoot, NodeRef, template } from "@rue/luent"
+import { Component, Context, createRoot, NodeRef, template } from "@rue/luent"
 import { Button } from "../Button"
 import { Tooltip } from "../Tooltip"
 import { IonicTooltip, TOOLTIP_CONFIG, TooltipKit } from "../../ui-base/tooltip/Tooltip.kit"
@@ -35,7 +35,7 @@ export function TooltipDemo() {
 
    
 
-   return template(
+   return Component(
       <Context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 600 })]}>
          <div data-align='center' class={demoBoxStyle}>
 

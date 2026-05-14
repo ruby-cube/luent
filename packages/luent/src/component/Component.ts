@@ -8,6 +8,7 @@ import { setUpHooks } from "../flask/template-hooks";
 import { JSXComponent } from "@rue/ruescript";
 import type { ComponentKit } from "@rue/ruescript";
 import { composeHooks, composeRef, toSetup } from "./bindings";
+import { $from } from "../utils/destructure";
 
 
 export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentKit<unknown> : (setup?: P) => ComponentKit<unknown>
@@ -36,12 +37,12 @@ export function makeComponent(
 
    const setup = toSetup(fromTag)
    const componentHooks = composeHooks(setup)
-   const output = Component(setup) // TODO: handle forwarded named slots
+   const output = Component($from(setup)/* TODO: $from only if not .nsx */) // TODO: handle forwarded named slots
    console.log('componentHooks', componentHooks)
 
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
-   const compode = output.as
+   const compode = output.component
 
    if (compode) {
       const ref = composeRef(setup) // throw if ref already used

@@ -1,4 +1,4 @@
-import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround, $of } from "@rue/luent";
+import { Component, template, FromTag, If, Else, For, fromGround, ContextKey, provideGround, $of } from "@rue/luent";
 import { as, ionic, EACH, ion, Ionic, Nested, } from "@rue/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
@@ -79,7 +79,7 @@ export function TreeApp() {
 
    console.log('root', root.children)
 
-   return template(
+   return Component(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItemView mu:item={root}></TreeItemView>
@@ -114,7 +114,7 @@ function TreeItemView(input: FromTag<{
       }
    }
 
-   return template(
+   return Component(
       <li class='item'>
          <div
             class={($isFolder() && 'bold')}

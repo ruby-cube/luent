@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { atMounted, atUnmount, template } from "@rue/luent";
+import { Component, atMounted, atUnmount, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { resolve } from "path";
 
@@ -333,7 +333,7 @@ export function DinoLogo() {
 
    // ($blink() ? “blink” : “open-eyed”)
 
-   return template(
+   return Component(
       <>
       </>
    )

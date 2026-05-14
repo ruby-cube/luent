@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { template, If, Else,  ElseIf,Style, NodeRef, atMounted } from "@rue/luent";
+import { Component, template, If, Else,  ElseIf,Style, NodeRef, atMounted } from "@rue/luent";
 import { getActiveUpdate, ion, queueRender, queueTask, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -193,7 +193,7 @@ export function MountIfAnimation() {
 
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
-   return template(
+   return Component(
       <div>
          <button on:click={() => ($color.change(), $name.value += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {$name}</h1>

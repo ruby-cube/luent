@@ -1,4 +1,4 @@
-import { template, FromTag, If, Else, For, fromGround, ContextKey, provideGround } from "@rue/luent";
+import { Component, template, FromTag, If, Else, For, fromGround, ContextKey, provideGround } from "@rue/luent";
 import { DeepIonized, EACH, Ion,  Ionic, Ionized, isIonicProxy,} from "@rue/quarky";
 import { isPlainObject } from "@rue/utils";
 
@@ -170,7 +170,7 @@ export function TreeApp(input: FromTag<{
 
    const root = IonizedTreeItem(data)
 
-   return template(
+   return Component(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItemView item={root}></TreeItemView>
@@ -193,7 +193,7 @@ function Counter() {
 
    const frog = ionize({ name: 'kermit', age: NaN })
 
-   return template(
+   return Component(
       <Child mu:count={$count}></Child>
    )
 }
@@ -216,7 +216,7 @@ function Child(input: FromTag<{
    // 'mu:frog': Frog
    // Mu<Frog, 'age', { qualities: Mu<Qualities[], 'brave'> }>
 }>) {
-   return template(
+   return Component(
       <div></div>
    )
 }
@@ -265,7 +265,7 @@ function TreeItemView(input: FromTag<{
       }
    }
 
-   return template(
+   return Component(
       <li class='item'>
          <div
             class={{ 'bold': $isFolder }}

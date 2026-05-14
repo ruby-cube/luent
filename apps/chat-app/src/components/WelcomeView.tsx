@@ -1,4 +1,4 @@
-import { template, Else, FromTag, If, Style, css } from "@rue/luent";
+import { Component, template, Else, FromTag, If, Style, css } from "@rue/luent";
 import { SignupForm } from "./SignupForm";
 import { ion } from "@rue/quarky";
 import { LoginForm } from "./LoginForm";
@@ -10,7 +10,7 @@ export function WelcomeView(input: FromTag<{
    const { initialLoad } = input
    const $initialLoad = ion(initialLoad)
 
-   return template(
+   return Component(
       <>
          <div class="welcome container">
             {If($initialLoad,
@@ -28,37 +28,42 @@ export function WelcomeView(input: FromTag<{
                </>
             )}
          </div>
+         {Style(css`
+            .welcome {
+               text-align: center;
+               padding: 20px 0;
+            }
+
+            .welcome form {
+               width: 300px;
+               margin: 20px auto;
+            }
+
+            .welcome label {
+               display: block;
+               margin: 20px 0 10px;
+            }
+
+            .welcome input {
+               width: 100%;
+               padding: 10px;
+               border-radius: 20px;
+               border: 1px solid #eee;
+               outline: none;
+               color: #999;
+               margin: 10px auto;
+            }
+
+            .welcome span {
+               font-weight: bold;
+               text-decoration: underline;
+               cursor: pointer;
+            }
+
+            .welcome button {
+               margin: 20px auto;
+            }
+         `)}
       </>
    )
-      .style(css`
-         .welcome {
-           text-align: center;
-           padding: 20px 0;
-         }
-         .welcome form {
-           width: 300px;
-           margin: 20px auto;
-         }
-         .welcome label {
-           display: block;
-           margin: 20px 0 10px;
-         }
-         .welcome input {
-           width: 100%;
-           padding: 10px;
-           border-radius: 20px;
-           border: 1px solid #eee;
-           outline: none;
-           color: #999;
-           margin: 10px auto;
-         }
-         .welcome span{
-           font-weight: bold;
-           text-decoration: underline;
-           cursor: pointer;
-         }
-         .welcome button {
-           margin: 20px auto;
-         }
-      `)
 }

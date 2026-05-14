@@ -1,10 +1,10 @@
-import { template, If, RenderSlot, FromTag } from "@rue/luent";
+import { Component, template, If, RenderSlot, FromTag } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestNormalizeToRenderFunction(){
    const $active = ion(true)
    const $msg = ion('hellow world')
-   return template(
+   return Component(
       <>
       <h1>Test Normalize to Renderfunction</h1>
       <div>{$active}</div>
@@ -22,7 +22,7 @@ export function TestNormalizeToRenderFunction(){
 function Child(input : FromTag<{Slot: RenderSlot}>){
    const {Slot} = input
    console.log('Slot', Slot)
-   return template(
+   return Component(
       <div>{Slot}</div>
    )
 }

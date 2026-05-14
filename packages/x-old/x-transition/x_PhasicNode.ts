@@ -44,7 +44,7 @@ export function renderPhasicNode(
 ) {
    if ($disable) {
       const output = Slot()
-      return template(createIfSeries([
+      return Component(createIfSeries([
          If($disable, () =>
             output
          ),

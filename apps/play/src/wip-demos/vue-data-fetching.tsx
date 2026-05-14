@@ -1,4 +1,4 @@
-import { template, Else, For, If} from "@rue/luent"
+import { Component, template, Else, For, If} from "@rue/luent"
 import { ion, queueIonicTask } from "@rue/quarky"
 
 type Commit = {
@@ -71,7 +71,7 @@ export function View() {
       return v.replace(/T|Z/g, ' ')
    }
 
-   return template(
+   return Component(
       <div style='width: 500px'>
          <h1>Latest Vue Core Commits</h1>
 

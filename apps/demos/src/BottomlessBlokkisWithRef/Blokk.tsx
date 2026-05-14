@@ -1,4 +1,4 @@
-import { For, FromTag, template } from "@rue/luent";
+import { Component, For, FromTag, template } from "@rue/luent";
 import { ionic, } from "@rue/quarky";
 import { BlokkModel, Rotation } from "./BlokkModel";
 
@@ -28,7 +28,7 @@ export function Blokk(input: FromTag<{
    const $translate = () => `translate(${blokk.shiftX * CELL_SIZE}px, ${blokk.shiftY * CELL_SIZE}px)`
    const $rotate = () => `rotate(${degrees[blokk.rotation]}deg)`
 
-   return template(
+   return Component(
       <div class='blokk-base' style={(`
             --cell-size: ${CELL_SIZE}px;
             --grid-size: ${GRID_SIZE}px;

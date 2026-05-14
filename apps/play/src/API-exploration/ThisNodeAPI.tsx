@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, FromTag, v } from "@rue/luent"
+import { Component, template, FromTag, v } from "@rue/luent"
 import { Ion, watch } from "@rue/quarky"
 import { DynamicNode } from "../../../../packages/luent/src/flask/ViewFlask";
 
@@ -28,7 +28,7 @@ function TestingStuff(
 
    })
 
-   return template(
+   return Component(
       <>
          <div>{$songBird}</div>
          <p>hi</p>
@@ -67,7 +67,7 @@ type ThisNode = {
 const outerDynamicNode: DynamicNode
 function Component() {
 
-   return template(
+   return Component(
       <>
          {($condition: Ion<boolean>, dynamicNode: DynamicNode) => (
             dynamicNode = new DynamicNode(null),

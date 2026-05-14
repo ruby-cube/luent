@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ComponentTag, FromTag, makeElement, NodeRef, template } from "@rue/luent"
+import { Component, ComponentTag, FromTag, makeElement, NodeRef, template } from "@rue/luent"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 import { VariantProps } from "class-variance-authority"
 
@@ -45,7 +45,7 @@ function Button({
    as?: ComponentTag | string
 } & VariantProps<typeof buttonVariants>>) {
 
-   return template(
+   return Component(
       <Comp
          ref={ref}
          data-slot="button"

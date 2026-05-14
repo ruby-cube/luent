@@ -1,4 +1,4 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { ionize } from "@rue/quarky";
 
 
@@ -25,7 +25,7 @@ export function TestBox() {
 
 
 
-   return template(
+   return Component(
       <>
          <div style={{
             backgroundColor: 'lightgray',

@@ -1,4 +1,4 @@
-import { createRoot, css, template } from "@rue/luent";
+import { Component, createRoot, css, template } from "@rue/luent";
 import "./TestStyleOverride-classes.css"
 import { AnyObject } from "@rue/types";
 
@@ -9,7 +9,7 @@ function genOverrideClass() {
 }
 
 function Grandparent() {
-    return template(
+    return Component(
         <div class='lessons'>
             <Parent class="blue-card something-else"></Parent>
         </div>
@@ -20,7 +20,7 @@ function Grandparent() {
 
 
 function Parent() {
-    return template(
+    return Component(
         <Child class="dark-card"></Child>
         // <Child class='dark-card' overrideClass='ovrrd1'></Child> // transpiler
     );
@@ -45,7 +45,7 @@ function getOverrideStack() {
 
 
 function Child() {
-    return template(
+    return Component(
         <div class='card ovrrd1 ovrrd0 blue-card dark-card'>
             hello world
         </div>

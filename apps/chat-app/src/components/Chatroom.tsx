@@ -1,4 +1,4 @@
-import { template, fromContext, FromTag } from "@rue/luent";
+import { Component, template, fromContext, FromTag } from "@rue/luent";
 import { USER, User } from '../context/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";
@@ -14,7 +14,7 @@ export function Chatroom(input: FromTag<{
 
    const chatKit = ChatKit()
 
-   return template(
+   return Component(
       <div class="container">
          <ChatWindow user={user} chat={chatKit} />
          <MessageForm user={user} postMessage={chatKit.postChatMessage} />

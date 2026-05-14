@@ -1,4 +1,4 @@
-import { If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, css } from "@rue/luent";
+import { Component, If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, Style, css } from "@rue/luent";
 import { ionic, ion, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
@@ -44,7 +44,7 @@ function Counter(input: FromTag<{
    }
 
 
-   return template(
+   return Component(
       <div>
          <div>{label}: {$count}</div>
          <button on:click={e => $count.increment()}>+</button>
@@ -66,7 +66,8 @@ export function TestCreateMountShow() {
       }
    })
 
-   return template(
+   return Component(
+      <>
       <article style="width: 33vw">
          <h1>View Activation: Create/Show/Mount</h1>
 
@@ -315,60 +316,61 @@ export function TestCreateMountShow() {
          }}
          </section>
       </article >
+      {Style(css`
+         hr {
+            border: none;
+            border-bottom: 1px solid #ddd;
+         }
+
+         section {
+            margin-bottom: 6em
+         }
+
+         article {
+            text-align: left
+         }
+
+         aside {
+            padding: 1em;
+            font-size: small;
+         }
+
+         .container {
+            text-align: center
+         }
+
+         code {
+            padding-block: .5em;
+            white-space: pre;
+            background-color: #eee;
+         }
+
+         .code {
+            padding: .25em .75em;
+            background-color: #eee;
+            font-family: monospace;
+            border-radius: 5px;
+         }
+
+         .garden button {
+            background-color: #efd;
+         }
+
+         .emoji {
+            font-size: xx-large
+         }
+
+         .bracket {
+            color: #999
+         }
+
+         button {
+            text-align: center;
+            margin: .25em
+         }
+      `)}
+      </>
    )
-      .style(css`
-      hr {
-         border: none;
-         border-bottom: 1px solid #ddd;
-      }
-
-      section {
-         margin-bottom: 6em
-      }
-
-      article {
-         text-align: left
-      }
-
-      aside {
-         padding: 1em;
-         font-size: small;
-      }
-
-      .container {
-         text-align: center
-      }
-
-      code {
-         padding-block: .5em;
-         white-space: pre;
-         background-color: #eee;
-      }
-
-      .code {
-         padding: .25em .75em;
-         background-color: #eee;
-         font-family: monospace;
-         border-radius: 5px;
-      }
-
-      .garden button {
-         background-color: #efd;
-      }
-
-      .emoji {
-         font-size: xx-large
-      }
-
-      .bracket {
-         color: #999
-      }
-
-      button {
-         text-align: center;
-         margin: .25em
-      }
-   `)
 }
 
 
@@ -413,7 +415,7 @@ export function TestDerivedConditional() {
 
 
 
-   return template(
+   return Component(
       <article>
          <div>{$count}</div>
          <div>{($count() + 1)}</div>

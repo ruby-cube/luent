@@ -1,4 +1,4 @@
-import { template, For, FromTag, Style, css } from "@rue/luent";
+import { Component, template, For, FromTag, Style, css } from "@rue/luent";
 import { ion, ionic, EACH, Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 
@@ -27,7 +27,8 @@ export function TestListTransit() {
       $todos().splice(index, 1);
    }
 
-   return template(
+   return Component(
+      <>
       <div class="board">
          <input
             placeholder="what needs to be done?"
@@ -54,8 +55,7 @@ export function TestListTransit() {
             <TodoList todos={($todos().filter((t) => t.done))} remove={remove} />
          </div>
       </div>
-   )
-      .style(css`
+      {Style(css`
          .board {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -79,7 +79,9 @@ export function TestListTransit() {
          .transition-position {
             transition: transform 150ms ease-in-out;
          }
-      `)
+      `)}
+      </>
+   )
 }
 
 
@@ -121,51 +123,52 @@ function receive(id: number, node: HTMLElement) {
 
 function TodoList(input: FromTag<{
    todos: Ion<Ionic<Todo>[]>,
-   // 'can:remove': (todo: Ionic<Todo>) => void
    remove: (todo: Ionic<Todo>) => void
 }>) {
-   const { ætodos, remove } = input
+   const { $todos, remove } = input
 
-   const lis: HTMLElement[] = []
+   const lis: HTMLLIElement[] = []
 
-   return template(
-      <ul class="todos">
-         {For(ætodos, t => t.id, (todo, $i) =>
-            <li
-               transit-key={todo.id}
-               animate-item
-               class={(todo.done && 'done')}
-               ref={{ arr: lis, i: $i }}
-            >
-               <label>
-                  <input type="checkbox" mu:checked={todo.ædone} />
-                  <span>{todo.description}</span>
-                  <button on:click={() => remove(todo)} aria-label="Remove">{'X'}</button>
-               </label>
-            </li>
-         )}
-      </ul>
+   return Component(
+      <>
+         <ul class="todos">
+            {For(ætodos, t => t.id, (todo, $i) =>
+               <li
+                  transit-key={todo.id}
+                  animate-item
+                  class={(todo.done && 'done')}
+                  ref={[lis, $i]}
+               >
+                  <label>
+                     <input type="checkbox" mu:checked={todo.ædone} />
+                     <span>{todo.description}</span>
+                     <button on:click={() => remove(todo)} aria-label="Remove">{'X'}</button>
+                  </label>
+               </li>
+            )}
+         </ul>
+         {Style(css`
+            label {
+               width: 100%;
+               height: 100%;
+               display: flex;
+            }
+
+            span {
+               flex: 1;
+            }
+
+            button {
+               border: none;
+               background-color: transparent
+            }
+
+            .transition-item {
+               transition: transform 250ms ease-in-out;
+            }
+         `)}
+      </>
    )
-      .style(css`
-   	   label {
-         	width: 100%;
-         	height: 100%;
-         	display: flex;
-         }
-
-         span {
-         	flex: 1;
-         }
-
-         button {
-            border: none;
-            background-color: transparent
-         }
-
-         .transition-item {
-            transition: transform 250ms ease-in-out;
-         }
-      `)
 }
 
 

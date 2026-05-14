@@ -1,4 +1,4 @@
-import { template, For, css } from "@rue/luent"
+import { Component, template, For, Style, css } from "@rue/luent"
 import { ionic, ion, PRELUDE, watch } from "@rue/quarky"
 
 // Adapted from Vue's CRUDApp demo
@@ -51,7 +51,7 @@ export function CRUDApp() {
       return $first().trim() && $last().trim()
    }
 
-   return template(
+   return Component(
       <>
          <div><input mu:value={$filterKey} placeholder="Filter" /></div>
 
@@ -73,30 +73,30 @@ export function CRUDApp() {
          {For($filteredNames, name =>
             <div>{name}</div>
          )}
+         {Style(css`
+            * {
+               font-size: inherit;
+            }
+
+            input {
+               display: block;
+               margin-bottom: 10px;
+            }
+
+            select {
+               float: left;
+               margin: 0 1em 1em 0;
+               width: 14em;
+            }
+
+            .buttons {
+               clear: both;
+            }
+
+            button + button {
+               margin-left: 5px;
+            }
+         `)}
       </>
    )
-      .style(css`
-         * {
-            font-size: inherit;
-         }
-
-         input {
-            display: block;
-           margin-bottom: 10px;
-         }
-
-         select {
-            float: left;
-            margin: 0 1em 1em 0;
-            width: 14em;
-         }
-
-         .buttons {
-            clear: both;
-         }
-
-         button + button {
-            margin-left: 5px;
-         }
-      `)
 }

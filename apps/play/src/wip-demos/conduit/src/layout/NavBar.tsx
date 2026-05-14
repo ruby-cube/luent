@@ -8,7 +8,7 @@ NavBar.router = ContextKey<Router>()
 function NavBar(input: FromTag<{}>) {
    const router = fromRoot(NavBar.router)
 
-   return template(
+   return Component(
       <div>
          hi
       </div>

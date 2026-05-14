@@ -1,4 +1,4 @@
-import { $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
+import { Component, $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template } from "@rue/luent"
 import { Ion, Ionic, toIon, ion } from "@rue/quarky"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
@@ -28,7 +28,7 @@ function PopoverRoot(setup: FromTag<{
 
    const { gap } = popover
 
-   return template(
+   return Component(
       <>
          {If((popover.visible), // TODO: configure activation type
             <Context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
@@ -43,57 +43,56 @@ function PopoverRoot(setup: FromTag<{
                </div>
             </Context>
          )}
+         {Style(css`
+            .popover {
+               position: absolute;
+               position-anchor: var(--popover-anchor);
+               isolation: isolate;
+            }
+
+            .popover.center.above, .popover.center.below {
+               justify-self: anchor-center;
+            }
+
+            .popover.center.left, .popover.center.right {
+               align-self: anchor-center;
+            }
+
+            .popover.above.start, .popover.below.start {
+               left: anchor(left)
+            }
+
+            .popover.above.end, .popover.below.end {
+               right: anchor(right)
+            }
+
+            .popover.left.start, .popover.right.start {
+               top: anchor(top)
+            }
+
+            .popover.left.end, .popover.right.end {
+               bottom: anchor(bottom)
+            }
+
+            .popover.above {
+               bottom: calc(anchor(top) + ${gap}rem);
+            }
+
+            .popover.below {
+               top: calc(anchor(bottom) + ${gap}rem);
+            }
+
+            .popover.left {
+               left: unset;
+               right: calc(anchor(left) + ${gap}rem);
+            }
+
+            .popover.right {
+               left: calc(anchor(right) + ${gap}rem);
+            }
+         `)}
       </>
    )
-      .style(css`
-      
-         .popover {
-            position: absolute;
-            position-anchor: var(--popover-anchor);
-            isolation: isolate;
-         }
-
-         .popover.center.above, .popover.center.below {
-            justify-self: anchor-center;
-         }
-         
-         .popover.center.left, .popover.center.right {
-            align-self: anchor-center;
-         }
-         
-         .popover.above.start, .popover.below.start {
-            left: anchor(left)
-         }
- 
-         .popover.above.end, .popover.below.end {
-            right: anchor(right)
-         }
-
-         .popover.left.start, .popover.right.start {
-            top: anchor(top)
-         }
-
-         .popover.left.end, .popover.right.end {
-            bottom: anchor(bottom)
-         }
-
-         .popover.above {
-            bottom: calc(anchor(top) + ${gap}rem);
-         }
-
-         .popover.below {
-            top: calc(anchor(bottom) + ${gap}rem);
-         }
-
-         .popover.left {
-            left: unset;
-            right: calc(anchor(left) + ${gap}rem);
-         }
-
-         .popover.right {
-            left: calc(anchor(right) + ${gap}rem);
-         }
-      `)
 
 }
 
@@ -112,7 +111,7 @@ function PopoverContent(setup: FromTag<{
    // const popover = fromContext(TOOLTIP)
    // const { gap } = popover;
 
-   return template(
+   return Component(
       <div class={æclasses()} style={æstyles()} {...attributes}>
          {Slot()}
       </div>
@@ -139,63 +138,65 @@ function PopoverTail(setup: FromTag<{
    const popover = fromContext(POPOVER)
    const $popover = $fromContext(POPOVER_NODE)
 
-   return template(
-      <div
-         at:mounted={node => positionTail(node, popover, $popover)}
-         class={('tail-root ' + popover.placement + ' ' + æclasses())}
-         {...attributes}
-      >
-         <Comp
-            class={(`tail ${popover.placement} ${æshapeClasses()}`)}
-            style={æshapeStyles}
-         ></Comp>
-      </div>
+   return Component(
+      <>
+         <div
+            at:mounted={node => positionTail(node, popover, $popover)}
+            class={('tail-root ' + popover.placement + ' ' + æclasses())}
+            {...attributes}
+         >
+            <Comp
+               class={(`tail ${popover.placement} ${æshapeClasses()}`)}
+               style={æshapeStyles}
+            ></Comp>
+         </div>
+         {Style(css`
+            .tail-root {
+               position: absolute;
+            }
+
+            .tail-root.above {
+               bottom: 0px;
+            }
+
+            .tail-root.below {
+               top: 0px;
+            }
+
+            .tail-root.left {
+               right: 0px;
+               // top: 50%;
+            }
+
+            .tail-root.right {
+               left: 0px;
+               // top: 50%;
+            }
+
+            .tail {
+               position: absolute;
+            }
+
+            .tail.above {
+               bottom: ${æoffset()};
+            }
+
+            .tail.below {
+               top: ${æoffset()};
+            }
+
+            .tail.left {
+               right: ${æoffset()};
+               // top: -50%;
+            }
+
+            .tail.right {
+               left: ${æoffset()};
+               // top: -50%;
+            }
+         `)}
+      </>
    )
-      .style(css`
-         .tail-root {
-            position: absolute;
-         }
-
-         .tail-root.above {
-            bottom: 0px;
-         }
-
-         .tail-root.below {
-            top: 0px;
-         }
-
-         .tail-root.left {
-            right: 0px;
-            // top: 50%;
-         }
-
-         .tail-root.right {
-            left: 0px;
-            // top: 50%;
-         }
-
-         .tail {
-            position: absolute;
-         }
-
-         .tail.above {
-            bottom: ${æoffset()};
-         }
-
-         .tail.below {
-            top: ${æoffset()};
-         }
-
-         .tail.left {
-            right:${æoffset()};
-            // top: -50%;
-         }
-
-         .tail.right {
-            left: ${æoffset()};
-            // top: -50%;
-         }
-      `)
 }
 
 

@@ -1,4 +1,4 @@
-import { $thisView, template, If, NodeRef } from "@rue/luent";
+import { Component, $thisView, template, If, NodeRef } from "@rue/luent";
 import {  ion } from "@rue/quarky";
 import { inert } from "../../../../packages/x-old/x_inert";
 
@@ -172,7 +172,7 @@ export function TestAnimationController() {
    setTimeout(initAnimation, 1)
 
 
-   return template(
+   return Component(
       <>
          <div style="display: flex; flex-direction: column; align-items: flex-start">
             <canvas ref={$canvas} at:mounted={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>

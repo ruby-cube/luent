@@ -1,101 +1,101 @@
-import { For, template } from "@rue/luent";
+import { $of, Component, For, template } from "@rue/luent";
 import { ionic, SYNC, watch } from "@rue/quarky";
 
 
 
 export function TestDerivation() {
    const count = ionic({
-      balue: 0
+      value: 0
    })
 
-   watch(() => count.balue, () => {
-      console.log('label', count.balue) // This runs on count balue change
+   watch(() => count.value, () => {
+      console.log('label', count.value) // This runs on count value change
    }, { phase: SYNC })
 
-   return template(
-      <button on:click={e => count.balue++}>+</button>
+   return Component(
+      <button on:click={e => count.value++}>+</button>
    )
 }
 
 export function TestDerivationA() {
    const count = ionic({
-      balue: 0
+      value: 0
    })
 
-   watch(() => count.balue, () => {
-      console.log('labelA', /* count.balue */) // This FAILS to run on count balue change
+   watch(() => count.value, () => {
+      console.log('labelA', /* count.value */) // This FAILS to run on count value change
    }, { phase: SYNC })
 
-   watch(count.æbalue, () => {
-      console.log('pion', /* count.balue */)
+   watch($of(count).value, () => {
+      console.log('pion', /* count.value */)
    }, { phase: SYNC })
 
-   return template(
-      <button on:click={e => count.balue++}>+</button>
+   return Component(
+      <button on:click={e => count.value++}>+</button>
    )
 }
 
 export function TestDerivationB() {
    const count = ionic({
-      balue: 0
+      value: 0
    })
 
-   count.æbalue
+   $of(count).value
 
-   watch(() => count.balue, () => {
-      console.log('label', count.balue) // This runs on count balue change
+   watch(() => count.value, () => {
+      console.log('label', count.value) // This runs on count value change
    }, { phase: SYNC })
 
-   watch(count.æbalue, () => {
-      console.log('pion', count.balue)
+   watch($of(count).value, () => {
+      console.log('pion', count.value)
    }, { phase: SYNC })
 
 
 
-   return template(
-      <button on:click={e => count.balue++}>+</button>
+   return Component(
+      <button on:click={e => count.value++}>+</button>
    )
 }
 
 export function TestDerivationD() {
    const count = ionic({
-      balue: 0
+      value: 0
    })
 
-   count.balue
+   count.value
 
-   watch(() => count.balue, () => {
-      console.log('label', count.balue) // This FAILS
+   watch(() => count.value, () => {
+      console.log('label', count.value) // This FAILS
    }, { phase: SYNC })
 
-   watch(count.æbalue, () => {
-      console.log('pion', count.balue)
+   watch($of(count).value, () => {
+      console.log('pion', count.value)
    }, { phase: SYNC })
 
 
 
-   return template(
-      <button on:click={e => count.balue++}>+</button>
+   return Component(
+      <button on:click={e => count.value++}>+</button>
    )
 }
 
 
 export function TestDerivationC() {
    const count = ionic({
-      balue: 0
+      value: 0
    })
 
-   watch(count.æbalue, () => {
-      console.log('pion', count.balue)
+   watch($of(count).value, () => {
+      console.log('pion', count.value)
    }, { phase: SYNC })
 
-   watch(() => count.balue, () => {
-      console.log('label', count.balue) // This runs on count balue change
+   watch(() => count.value, () => {
+      console.log('label', count.value) // This runs on count value change
    }, { phase: SYNC })
 
 
 
-   return template(
-      <button on:click={e => count.balue++}>+</button>
+   return Component(
+      <button on:click={e => count.value++}>+</button>
    )
 }

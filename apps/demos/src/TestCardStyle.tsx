@@ -1,8 +1,8 @@
-import { createRoot, template } from "@rue/luent";
+import { Component, createRoot, template } from "@rue/luent";
 import "./ui/card.css"
 
 export function TestCardStyle() {
-    return template(
+    return Component(
         <div class='card'>hello world</div>
     )
 }   

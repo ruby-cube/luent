@@ -1,4 +1,4 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { ionize, watch } from "@rue/quarky";
 
 export function TestSetHas() {
@@ -16,7 +16,7 @@ export function TestSetHas() {
       console.log('mySet changed', current, previous)
    })
 
-   return template(
+   return Component(
       <>
          <p style={{ outline: (mySet.has(0) ? 'thick solid blue' : 'thick solid red') }}>{(mySet.has(0))}</p>
          <button on:click={addZero}>add</button>

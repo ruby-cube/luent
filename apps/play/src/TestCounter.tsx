@@ -6,11 +6,11 @@
 // - derived signal with memo
 
 
-import { template, FromTag } from "@rue/luent"
+import { Component, template, FromTag } from "@rue/luent"
 import { ionic, Ion, ion, Ionic, } from "@rue/quarky"
 
 export function CounterApp() {
-   return template(
+   return Component(
       <>
          <TestCount mu:apple={$apple}></TestCount>
          {/* <hr></hr> */}
@@ -42,7 +42,7 @@ function TestIonize() {
       console.log('new message', obj.message)
    }
 
-   return template(
+   return Component(
       <>
          <div>{obj.$message}</div>
          <button on:click={changeMessage}>click</button>
@@ -61,7 +61,7 @@ function TestIon() {
       console.log('new message (call)', $message())
    }
 
-   return template(
+   return Component(
       <>
          <div>{$message}</div>
          <button on:click={changeMessage}>click</button>
@@ -98,7 +98,7 @@ export function TestCount() {
    //    console.log('running ionic task', $count())
    // })
 
-   return template(
+   return Component(
       <>
          <h3>mutable ion</h3>
          <div>{$count}</div>
@@ -135,7 +135,7 @@ export function TestThisCount() {
       $count.value--
    }
 
-   return template(
+   return Component(
       <>
          <h3>mutable ion with methods</h3>
          <div>{$count}</div>
@@ -414,7 +414,7 @@ export function TestCounterModel() {
    //    console.log('changed', state)
    // }, { eager: true, phase: RENDER })
 
-   return template(
+   return Component(
       <>
          <div>{counter.$count}</div>
          <div>{$doubleCount}</div>

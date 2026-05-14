@@ -1,4 +1,4 @@
-import { template, If, Else, ElseIf, NodeRef, createRoot, css } from "@rue/luent";
+import { Component, template, If, Else, ElseIf, NodeRef, createRoot, Style, css } from "@rue/luent";
 import { ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -17,7 +17,8 @@ export function TestIfElse() {
       }
    })
 
-   return template(
+   return Component(
+      <>
       <div>
          <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
@@ -46,8 +47,7 @@ export function TestIfElse() {
             )}
          </div>
       </div>
-   )
-      .style(css`
+      {Style(css`
          .container {
             overflow: hidden;
          }
@@ -68,7 +68,9 @@ export function TestIfElse() {
          p.fade-out {
             transform: translateY(-16px);
          }
-      `)
+      `)}
+      </>
+   )
 }
 
 

@@ -89,7 +89,7 @@ function createLevel(level: number, levels: number, array: any[]) {
    return $node
 }
 
-export type NodeRefsConfig = { arr: any[], i: Index | Index[] }
+export type NodeRefsConfig = [any[], Index | Index[]]
 
 // export function setUpNodeRefs(node: any, config: NodeRefsConfig) {
 //    const [array, index] = config

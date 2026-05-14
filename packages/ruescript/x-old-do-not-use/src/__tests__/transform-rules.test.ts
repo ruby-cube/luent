@@ -277,7 +277,7 @@ function Demo() {
     const input = `
 function Demo() {
   get obj = ion({ name: 'kermit' } as { name: string } | undefined)
-  return template(
+  return Component(
     <div>
       {If(obj, <p>{obj.name}</p>)}
       {ElseIf(obj !== undefined, <p>{obj.name}</p>)}
@@ -295,7 +295,7 @@ function Demo() {
     const input = `
 function Demo() {
   get obj = ion({ name: 'kermit' } as { name: string } | undefined)
-  return template(
+  return Component(
     <div>
       {If(!obj, <p>missing</p>)}
       {Else(<p>{obj.name}</p>)}
@@ -313,7 +313,7 @@ function Demo() {
     const input = `
 function Demo() {
   get obj = ion({ name: 'kermit' } as { name: string } | undefined)
-  return template(
+  return Component(
     <div>
       {If(obj, () => <p>{obj.name}</p>)}
       {ElseIf(obj !== undefined, () => <p>{obj.name}</p>)}
@@ -331,7 +331,7 @@ function Demo() {
     const input = `
 function Demo() {
   get obj = ion({ name: 'kermit' } as { name: string } | undefined)
-  return template(
+  return Component(
     <div>
       {If(!obj, () => <p>missing</p>)}
       {Else(() => <p>{obj.name}</p>)}

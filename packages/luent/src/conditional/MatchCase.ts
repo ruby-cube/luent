@@ -32,7 +32,7 @@ export function Match(input: FromTag<{
    Slot: RenderSlot
 }>) {
    const { $x, toCase = (key: any) => key, Slot, "view": view } = input
-   return template(
+   return Component(
       new MatchKit($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)
    )
 }

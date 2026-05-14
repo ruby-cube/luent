@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, NodeRef } from "@rue/luent";
+import { Component, template, NodeRef } from "@rue/luent";
 import { MorphicNode } from "../../../packages/luent/src/morphic/MorphicNode";
 
 export function TestMorphic() {
@@ -20,7 +20,7 @@ export function TestMorphic() {
       $morphicNode()!.as(key)
    }
 
-   return template(
+   return Component(
       <>
          <$Morphable as='hi' ref={$morphicNode}></$Morphable>
 
@@ -55,7 +55,7 @@ export function TestMorphic() {
 function CommentBlock(setup: {
    blue: string
 }) {
-   return template({
+   return Component({
       frog: true
    },
       <div>blah</div>

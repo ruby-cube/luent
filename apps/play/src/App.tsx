@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NodeRef, template, ComponentTag, If, Else, For, teleportTo } from "@rue/luent";
+import { Component, NodeRef, template, ComponentTag, If, Else, For, teleportTo } from "@rue/luent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/luent/src/component/LazyComponent";
@@ -112,7 +112,7 @@ export function List() {
 
     const $listLengthIsZero = () => $list().length === 0
 
-    return template({
+    return Component({
         as: {
             $listLengthIsZero
         },
@@ -211,7 +211,7 @@ function Appo(
         $ready
     }
 
-    return template(
+    return Component(
         <>
             {If($active, () => ((dialogBox) => (
                 <>
@@ -283,7 +283,7 @@ function DialogBox({
     $button?: NodeRef
 }) {
 
-    return template(
+    return Component(
         teleportTo('body', (
             <dialog style="background-color: gray" open={$open}>
                 Stop

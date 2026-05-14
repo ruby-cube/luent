@@ -1,5 +1,5 @@
 
-import { template, For, fromRoot, AsyncIon } from "@rue/luent";
+import { Component, template, For, fromRoot, AsyncIon } from "@rue/luent";
 import { EACH, Ion, Ionic, ionic } from "@rue/quarky";
 import { prototype } from "events";
 import { UseShared } from "../../../../packages/utils/UseShared";
@@ -102,7 +102,7 @@ export function TodoApp() {
 
    const $todos = fetchTodos($userID)
 
-   return template(
+   return Component(
       <div>
          {For($todos, m => m.id, (todo) => (
             <div>{todo.title}</div>

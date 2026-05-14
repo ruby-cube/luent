@@ -1,9 +1,9 @@
-import { createRoot, css, template } from "@rue/luent";
+import { Component, createRoot, css, Style, template } from "@rue/luent";
 import "./TestStyleOverride-classes.css"
 import { AnyObject } from "@rue/types";
 
 function Grandparent() {
-    return template(
+    return Component(
         <div class='lessons'>
             <Parent class="bg-blue-600"></Parent>
         </div>
@@ -12,22 +12,24 @@ function Grandparent() {
 }
 
 function Parent() {
-    return template(
+    return Component(
         <Child class="bg-amber-900"></Child>
         // <Child class='override1 bg-amber-900'></Child> // transpiler
     );
 }
 
 function Child() {
-    return template(
+    return Component(
+      <>
         <div class='bg-amber-400 override1 override0 bg-blue-600 bg-amber-900'>
             hello world
         </div>
+        {Style(css`
+           ${getTailwindClassDeclaration('bg-blue-600', ['override0', 'override1'])}
+           ${getTailwindClassDeclaration('bg-amber-900', ['override1'])}
+        `)}
+      </>
     )
-        .style(css`
-        ${getTailwindClassDeclaration('bg-blue-600', ['override0', 'override1'])}
-        ${getTailwindClassDeclaration('bg-amber-900', ['override1'])}
-    `);
 }
 
 if (__STYLE__) createRoot(() => <Grandparent></Grandparent>).mount("#root");

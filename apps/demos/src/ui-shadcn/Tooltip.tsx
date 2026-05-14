@@ -1,4 +1,4 @@
-import { FromTag, If, NodeRef, RenderSlot, template } from "@rue/luent"
+import { Component, FromTag, If, NodeRef, RenderSlot, template } from "@rue/luent"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
 import { mergeTailwind } from "../utils/utils"
 import { IonicTooltip } from "../ui-base/tooltip/Tooltip.kit";
@@ -45,7 +45,7 @@ function Tooltip(setup: FromTag<{
    const animateIn = `animate-in fade-in-0 zoom-in-95`
    const animateOut = `animate-out fade-out-0 zoom-out-95`
 
-   return template(
+   return Component(
       <o--body>
          <TooltipRoot
             animate-in={(animateIn + ' ' + slideIn())}

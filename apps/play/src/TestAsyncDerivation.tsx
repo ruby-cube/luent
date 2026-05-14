@@ -1,10 +1,10 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { createAsyncDerivation } from "../../../packages/quarky/src/async/AsyncDerivation";
 
 export function TestAsyncDerivation() {
    const $count = createAsyncDerivation({ fetch: () => fetchCount(), standin: 0 })
 
-   return template(
+   return Component(
       <div>
          <h1>Hello world</h1>
          <div>{$count}</div>

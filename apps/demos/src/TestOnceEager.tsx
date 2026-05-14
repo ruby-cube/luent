@@ -1,4 +1,4 @@
-import { listen, template } from "@rue/luent";
+import { Component, listen, template } from "@rue/luent";
 import { ion, watch } from "@rue/quarky";
 
 export function TestOnceEager() {
@@ -14,7 +14,7 @@ export function TestOnceEager() {
        console.log('$count is', $count())
    }, {once: true, eager: true})
 
-   return template(
+   return Component(
       <div on:click={e => $count.increment()}>{$count}</div>
    )
 }

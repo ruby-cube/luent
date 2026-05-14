@@ -1,10 +1,10 @@
 
 import { atMounted, For, If, Style } from "@rue/luent"
-import { template, atUnmount } from "@rue/luent"
+import { Component, template, atUnmount } from "@rue/luent"
 import {  Ion, ion, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
 
 export function SevenGUIs() {
-   return template(
+   return Component(
       <>
          {/* <CircleApp></CircleApp> */}
          <TemperatureApp></TemperatureApp>
@@ -41,7 +41,7 @@ function TemperatureApp() {
       // $f.value = v
    }
 
-   return template(
+   return Component(
       <>
          <input type="number" value={$c} on:change={setC} /> Celsius =
          <input type="number" value={$f} on:change={setF} /> Fahrenheit
@@ -89,7 +89,7 @@ function FlightBooker() {
       return s.length < 2 ? `0${s}` : s
    }
 
-   return template(
+   return Component(
       <>
          <select mu:value={$flightType}>
             <option value="one-way flight">One-way Flight</option>
@@ -175,7 +175,7 @@ function TimerApp() {
       cancelAnimationFrame(handle)
    })
 
-   return template(
+   return Component(
       <>
          <label>Elapsed Time: <progress value={$progressRate}></progress></label>
 

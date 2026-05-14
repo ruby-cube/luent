@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, FromTag } from "@rue/luent";
+import { Component, template, FromTag } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 
@@ -20,7 +20,7 @@ export function Component(input: FromTag<{
 
    const { mu: { $value: $input, $count, item }, details, start, $value } = input
 
-   return template(
+   return Component(
       <></>
    )
 }

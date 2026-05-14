@@ -1,7 +1,7 @@
 //@ts-nocheck
 // You're filtering a large list based on a search input.
 
-import { AsyncIon, template, For, fromGround, provideGround } from "@rue/luent";
+import { Component, AsyncIon, template, For, fromGround, provideGround } from "@rue/luent";
 import { Ion,queueIonicTask } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 
@@ -56,7 +56,7 @@ function App() {
 
    const $items = fetchItems($searchTerm, { awaited: true })
 
-   return template(
+   return Component(
       <>
          <input mu:value={$searchTerm} />
          <button on:click={e => $items.cancelUpdate()}>cancel</button>
@@ -115,7 +115,7 @@ function App() {
    })
    const $filteredList = ion.suspense(async () => await lazyMapping($items(), item => hasSearchTerm(item, $searchTerm()) ? item : undefined))
 
-   return template(
+   return Component(
       <>
          <input mu:value={$searchTerm} />
          <button on:click={e => $items.cancelUpdate()}>cancel</button>

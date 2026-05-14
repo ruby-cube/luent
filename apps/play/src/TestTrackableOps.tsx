@@ -1,4 +1,4 @@
-import { template, For } from "@rue/luent";
+import { Component, template, For } from "@rue/luent";
 import { ion, ionic, ionize } from "@rue/quarky";
 
 export function TestTrackableOps() {
@@ -7,7 +7,7 @@ export function TestTrackableOps() {
    const $length = ion(()=>$filteredList().length)
 
 console.log(list.filter(item => item.count > 10))
-   return template(
+   return Component(
       <>
          <button on:click={e => list.push(ionize({ count: 12 }))}>click</button>
          {(list.length)}

@@ -41,8 +41,7 @@ import { Grandparent } from "./src/TestEventBubbling"
 import { TestXray } from "./src/TestXray"
 
 export function runDemo() {
-   const app = createRoot(() =><TestHookForwarding/>)
-
-   app.mount('#root')
+   createRoot(() => <CellsApp />)
+      .mount('#root')
 }
 

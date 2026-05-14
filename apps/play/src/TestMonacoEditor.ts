@@ -31,7 +31,6 @@ export function initMonacoEditor() {
       value,
       language: "typescript",
       automaticLayout: true
-
    });
 
    

@@ -1,4 +1,4 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestRenderFunctionAsIon() {
@@ -15,7 +15,7 @@ export function TestRenderFunctionAsIon() {
       )
    }
 
-   return template(
+   return Component(
       <div>
          <div>{RenderCounter}</div>
          <button on:click={e => $count.increment()}>+</button>

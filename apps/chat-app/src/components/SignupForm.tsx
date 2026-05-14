@@ -1,4 +1,4 @@
-import { template } from '@rue/luent'
+import { Component, template } from '@rue/luent'
 import { ion } from '@rue/quarky'
 import { signUp } from '../database/database'
 
@@ -16,7 +16,7 @@ export function SignupForm() {
          $error.value = response.error
    }
 
-   return template(
+   return Component(
       <form on:submit={e => reSubmit(e)}>
          <input type="text" required placeholder="username" mu:value={$username}></input>
          <input type="email" required placeholder="email" mu:value={$email}></input>

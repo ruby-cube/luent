@@ -1,10 +1,10 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { ionize } from "@rue/quarky";
 
 export function TestJSON() {
    const array = ionize([]as number[])
 
-   return template(
+   return Component(
       <>
          <button on:click={e => array.push(array.length)}>add</button>
          <button on:click={e => array.pop()}>pop</button>

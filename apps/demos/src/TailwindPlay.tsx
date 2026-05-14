@@ -1,10 +1,10 @@
-import { createRoot, css, template } from "@rue/luent";
+import { Component, createRoot, css, template, Style } from "@rue/luent";
 import "./index.css"
 import "./TailwindPlay-card.css"
 import ".overrides.css" // transpiler
 
 function Grandparent() {
-    return template(
+    return Component(
         <Parent class='bg-blue-600'></Parent>
         // <Parent class='override0 bg-blue-600'></Parent> // transpiler
     )
@@ -12,34 +12,36 @@ function Grandparent() {
 
 function Parent() {
 
-    return template(
+    return Component(
         <Child class='bg-amber-900'></Child>
         // <Child class='override1 bg-amber-900'></Child> // transpiler
     )
 }
 
 function Child() {
-    return template(
-        <div class='bg-amber-400'>hi</div>
+    return Component(
+        <>
+            <div class='bg-amber-400'>hi</div>
+            {Style(css`
+               @reference "./index.css";
+
+               .override0 .override1 .bg-amber-600 {
+                  @apply bg-blue-600;
+               }
+
+               .override1 .bg-amber-900 {
+                  @apply bg-amber-900;
+               }
+            `)}
+        </>
     )
-        .style(css`
-            @reference "./index.css";
-
-            .override0 .override1 .bg-amber-600 {
-                @apply bg-blue-600;
-            }
-
-            .override1 .bg-amber-900 {
-                @apply bg-amber-900;
-            }
-        `)
 }
 
 
 function TailwindPlay() {
     const HEIGHT = 610
 
-    return template(
+    return Component(
         <div></div>
         // <div class='bg-amber-400 override0 override1 bg-amber-900 bg-blue-600'>child</div>
         // <div class='card lessons'>

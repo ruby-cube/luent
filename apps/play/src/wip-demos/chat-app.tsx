@@ -4,7 +4,7 @@
 // [] if open, append message in main messages view
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
-import { template, FromTag, NodeRef, Slot } from "@rue/luent";
+import { Component, template, FromTag, NodeRef, Slot } from "@rue/luent";
 import { MorphicNode as Polymorph } from "../../../../packages/luent/src/conditional/x_Polymorph";
 import { Finitron, finiton, ion } from "@rue/quarky";
 
@@ -132,7 +132,7 @@ export function FBApp() {
 
    const $main = $Main.varion('home')
 
-   return template(
+   return Component(
       <>
          <NavBar></NavBar>
          <main>
@@ -154,7 +154,7 @@ const $Main = Polymorph({
 function Button(input : FromTag<{
    Slot: Slot
 }>) {
-   return template(
+   return Component(
       <button>
 
       </button>
@@ -162,37 +162,37 @@ function Button(input : FromTag<{
 }
 
 function NavBar() {
-   return template(
+   return Component(
       <div></div>
    )
 }
 
 function ChatPopup() {
-   return template(
+   return Component(
       <div></div>
    )
 }
 
 function Home() {
-   return template(
+   return Component(
       <div></div>
    )
 }
 
 function Chat() {
-   return template(
+   return Component(
       <div></div>
    )
 }
 
 function ThreadList() {
-   return template(
+   return Component(
       <>
       </>
    )
 }
 function MessageThread() {
-   return template(
+   return Component(
       <>
       </>
    )

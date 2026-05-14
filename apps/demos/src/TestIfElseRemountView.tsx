@@ -1,4 +1,4 @@
-import { template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, css } from "@rue/luent";
+import { Component, template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, Style, css } from "@rue/luent";
 import { Ion, ion, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -16,7 +16,8 @@ export function TestIfElseRemountView(setup: FromTag<{}>) {
       }
    })
 
-   return template(
+   return Component(
+      <>
       <div>
          <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
@@ -47,12 +48,13 @@ export function TestIfElseRemountView(setup: FromTag<{}>) {
             </remount-view>
          </div>
       </div>
-   )
-      .style(css`
+      {Style(css`
          .container {
             overflow: hidden;
          }
-      `)
+      `)}
+      </>
+   )
 }
 
 if (__TEST__) createRoot(TestIfElseRemountView).mount('#root')

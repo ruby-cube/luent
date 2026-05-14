@@ -1,4 +1,4 @@
-import { $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
+import { Component, $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
 import { ion, toIon } from "@rue/quarky"
 import { IonicTooltip } from "./Tooltip.kit";
 import { Alignment, maybeFlip, Placement, positionTail } from "../popover/Popover.kit";
@@ -15,7 +15,7 @@ function TooltipRoot(setup: FromTag<{
 }>) {
    const { tooltip, ...rest } = setup
 
-   return template(
+   return Component(
       <PopoverRoot popover={tooltip} {...rest}></PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
    )
 }

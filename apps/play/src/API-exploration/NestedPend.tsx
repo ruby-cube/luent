@@ -1,6 +1,6 @@
 import { ion } from "../../../../packages/quarky/src"
 import { pend, Suspense } from "../../../packages/luent/src/componentSuspense"
-import { template } from "@rue/luent"
+import { Component, template } from "@rue/luent"
 
 
 
@@ -25,7 +25,7 @@ const PendingTextArea = Suspense({
 export function NestedPend() {
    const $count = ion(0)
 
-   return template(
+   return Component(
       () =>
          <>
             <h1>Hello World</h1>

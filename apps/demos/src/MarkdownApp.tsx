@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { ion } from '@rue/quarky'
-import { template, FromTag, NodeRef, atMounted, atUnmount } from '@rue/luent'
+import { Component, template, FromTag, NodeRef, atMounted, atUnmount } from '@rue/luent'
 import './style.css'
 
 // Demo from Vue.js
@@ -10,7 +10,7 @@ export function TestMarkdownApp() {
    const $markdown = ion('# Hello World')
    const $html = ion(() => marked($markdown()) as string)
 
-   return template(
+   return Component(
       <>
          <div class='editor'>
             <textarea class='input' mu:value={$markdown}></textarea>

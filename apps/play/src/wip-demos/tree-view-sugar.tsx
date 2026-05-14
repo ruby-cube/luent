@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, FromTag, If, Else, For } from "@rue/luent";
+import { Component, template, FromTag, If, Else, For } from "@rue/luent";
 import { $from, defineDeepIonize, EACH, ion, Ionic, ionize, Ionized } from "@rue/quarky";
 
 
@@ -61,7 +61,7 @@ export function TreeApp({ data = getTreeData() }) {
 
    const root = ionizeItem(data)
 
-   return template(
+   return Component(
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItem item={root} can:addChildTo={addChildTo}></TreeItem>

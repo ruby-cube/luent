@@ -1,4 +1,4 @@
-import { template, For, FromTag } from "@rue/luent";
+import { Component, template, For, FromTag } from "@rue/luent";
 import { Ion, ion,ionic, Ionic, SuspenseIon, swiftUpdate } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 import { Dispatch } from "../../../../packages/quarky/src/async/Dispatch";
@@ -30,7 +30,7 @@ export function TestAsyncMultiply() {
       '-fetch': () => db.multiply($n(), 2)
    })
 
-   return template(
+   return Component(
       <div>
          <button on:click={e => {
             $n.increment();
@@ -81,7 +81,7 @@ export function TestAsyncMultipliers() {
       }
    }
 
-   return template(
+   return Component(
       <div>
          <button on:click={e => { $n.increment(); multiply() }}>{$n} {($pending() ? '...' : '')}</button>
          {For(products, ($product, i) =>
@@ -124,7 +124,7 @@ export function TestAsyncMultiplyB() {
 
    const { $Multiply, $pending } = MultiplyKit()
 
-   return template(
+   return Component(
       <div>
          {/* <button on:click={e => $n.increment()}>{$n} {($product.pending ? '...' : '')}</button> */}
          <button on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
@@ -145,7 +145,7 @@ export function TestAsyncMultiplyDrop() {
 
    const { $Multiply, $pending } = MultiplyKit()
 
-   return template(
+   return Component(
       <div>
          <button disabled={$pending} on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
          <p>1 * {$n} = {$Multiply($n, 1)}</p>
@@ -170,7 +170,7 @@ export function TestAsyncMultiplyQueue() {
 
    const nums = ionic([1])
 
-   return template(
+   return Component(
       <div>
          <button on:click={e => { $n.increment(); nums.push($n()) }}>{$n}</button>
          {For(nums, (num) => (
@@ -187,7 +187,7 @@ function Result(input: FromTag<{ n: number }>) {
       return AwaitedIon(() => db.multiply(n, o))
    }
 
-   return template(
+   return Component(
       <div style="border: 1px solid gray; padding: 5px">
          {Await(<>
             <p>1 * {n} = {$Multiply(n, 1)}</p>

@@ -1,4 +1,4 @@
-import { FromTag, template } from "@rue/luent"
+import { Component, FromTag, template } from "@rue/luent"
 import { mergeTailwind } from "../utils/utils"
 
 function Card({
@@ -9,7 +9,7 @@ function Card({
    size?: "default" | "sm"
 }>) {
 
-   return template(
+   return Component(
       <div
          data-slot="card"
          data-size={size}
@@ -22,7 +22,7 @@ function Card({
 
 function CardHeader(attributes: FromTag<{}>) {
 
-   return template(
+   return Component(
       <div
          data-slot="card-header"
          class={"gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3 group/card-header @container/card-header grid auto-rows-min items-start has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]"}
@@ -37,7 +37,7 @@ function CardTitle({
    ...attributes
 }: FromTag<{}>) {
 
-   return template(
+   return Component(
       <div
          data-slot="card-title"
          class={(mergeTailwind('text-base leading-snug font-medium group-data-[size=sm]/card:text-sm', æclasses()))}
@@ -49,7 +49,7 @@ function CardTitle({
 
 function CardDescription(attributes: FromTag<{}>) {
 
-   return template(
+   return Component(
       <div
          data-slot="card-description"
          class={"text-muted-foreground text-sm"}
@@ -61,7 +61,7 @@ function CardDescription(attributes: FromTag<{}>) {
 
 function CardAction(attributes: FromTag<{}>) {
 
-   return template(
+   return Component(
       <div
          data-slot="card-action"
          class={"col-start-2 row-span-2 row-start-1 self-start justify-self-end"}
@@ -76,7 +76,7 @@ function CardContent({
    ...attributes
 }: FromTag<{}>) {
 
-   return template(
+   return Component(
       <div
          data-slot="card-content"
          // class={[æclasses, 'px-4 group-data-[size=sm]/card:px-3']}
@@ -92,7 +92,7 @@ function CardFooter({
    ...attributes
 }: FromTag<{}>) {
 
-   return template(
+   return Component(
       <div
          data-slot="card-footer"
          // class={[æclasses, 'bg-muted/50 rounded-b-xl border-t p-4 group-data-[size=sm]/card:p-3 flex items-center']}

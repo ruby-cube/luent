@@ -1,4 +1,4 @@
-import { template, fromGround, fromRoot, If, Style, css } from "@rue/luent";
+import { Component, template, fromGround, fromRoot, If, Style, css } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 import { User } from "./context/keys";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
@@ -26,20 +26,20 @@ export function FriendSite() {
       $user.value = null
    })
 
-   return template(
+   return Component(
       <>
          {If($connected,
             <RouteView as={$route}></RouteView>
          )}
+         {Style(css`
+            #app {
+               font-family: Avenir, Helvetica, Arial, sans-serif;
+               -webkit-font-smoothing: antialiased;
+               -moz-osx-font-smoothing: grayscale;
+            }
+         `)}
       </>
    )
-      .style(css`
-         #app {
-           font-family: Avenir, Helvetica, Arial, sans-serif;
-           -webkit-font-smoothing: antialiased;
-           -moz-osx-font-smoothing: grayscale;
-         }
-      `)
 }
 
 

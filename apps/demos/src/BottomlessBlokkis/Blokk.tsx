@@ -1,4 +1,4 @@
-import { Component, For, FromTag, $from } from "@rue/luent";
+import { Component, For, FromTag } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 import "./Blokk.css"
 
@@ -14,7 +14,7 @@ export function Blokk(setup: FromTag<'div', {
    color?: Ion<string>,
    gap?: number
 }>) {
-   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, ...rest } = $from(setup)
+   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, ...rest } = setup
 
    const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 

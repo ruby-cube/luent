@@ -1,5 +1,5 @@
-import { template, For, If, Style, css } from "@rue/luent"
-import { Ionic, ionic } from "@rue/quarky"
+import { Component, template, For, If, Style, css } from "@rue/luent"
+import { ion, Ionic, ionic } from "@rue/quarky"
 
 // Modified Demo from Vue.js
 
@@ -58,7 +58,7 @@ export function CircleApp() {
 
    const circle = $circles()[0]
 
-   return template(
+   return Component(
       <>
          <svg on:click={reClick}>
             <foreignObject x="0" y="40%" width="100%" height="200">
@@ -93,60 +93,60 @@ export function CircleApp() {
                />
             </div>
          )}
+         {Style(css`
+            body {
+               margin: 0;
+               overflow: hidden;
+            }
+         
+            svg {
+              width: 100vw;
+              height: 100vh;
+              background-color: #eee;
+            }
+         
+            circle {
+               stroke: #000;
+            }
+         
+            .controls {
+               position: fixed;
+               top: 10px;
+               left: 0;
+               right: 0;
+               text-align: center;
+            }
+         
+            .controls button + button {
+               margin-left: 6px;
+            }
+         
+            .dialog {
+               position: fixed;
+               top: calc(50% - 50px);
+               left: calc(50% - 175px);
+               background: #fff;
+               width: 350px;
+               height: 100px;
+               padding: 5px 20px;
+               box-sizing: border-box;
+               border-radius: 4px;
+               text-align: center;
+               box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+            }
+         
+            .dialog input {
+               display: block;
+               width: 200px;
+               margin: 0px auto;
+            }
+         
+            .tip {
+               text-align: center;
+               padding: 0 50px;
+               color: #bbb;
+            }
+      `)}
       </>
    )
-      .style(css`
-         body {
-            margin: 0;
-            overflow: hidden;
-         }
-
-         svg {
-           width: 100vw;
-           height: 100vh;
-           background-color: #eee;
-         }
-
-         circle {
-            stroke: #000;
-         }
-
-         .controls {
-            position: fixed;
-            top: 10px;
-            left: 0;
-            right: 0;
-            text-align: center;
-         }
-
-         .controls button + button {
-            margin-left: 6px;
-         }
-
-         .dialog {
-            position: fixed;
-            top: calc(50% - 50px);
-            left: calc(50% - 175px);
-            background: #fff;
-            width: 350px;
-            height: 100px;
-            padding: 5px 20px;
-            box-sizing: border-box;
-            border-radius: 4px;
-            text-align: center;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
-         }
-
-         .dialog input {
-            display: block;
-            width: 200px;
-            margin: 0px auto;
-         }
-
-         .tip {
-            text-align: center;
-            padding: 0 50px;
-            color: #bbb;
-         }
-      `)
 }

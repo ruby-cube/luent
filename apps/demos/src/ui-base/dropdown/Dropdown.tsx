@@ -1,4 +1,4 @@
-import { $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
+import { Component, $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
 import { Ion, toIon } from "@rue/quarky"
 import { maybeFlip, positionTail } from "../popover/Popover.kit";
 import { PopoverRoot } from "../popover/Popover";
@@ -15,7 +15,7 @@ function DropdownRoot(setup: FromTag<{
 }>) {
    const { dropdown, ...rest } = setup
 
-   return template(
+   return Component(
       <PopoverRoot popover={dropdown} {...rest}></PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
    )
 }

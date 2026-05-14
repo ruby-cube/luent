@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "@rue/luent";
+import { Component, ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "@rue/luent";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ionize, Ionized, watch, ion } from "@rue/quarky";
 
@@ -18,7 +18,7 @@ export function TabApp() {
    })
    const $markdown = ion('# Something Special')
 
-   return template(
+   return Component(
       <>
          <button on:click={$open.toggle}>open/close</button>
          <button on:click={$active.toggle}>show/hide</button>
@@ -125,7 +125,7 @@ function LoadingApp() { //Stand in until I fix createRoot
    })
 
 
-   return template(
+   return Component(
       // Await
       <App files={files}></App>
    )
@@ -252,7 +252,7 @@ function App(input : FromTag<{
    // MainView.discardAll()
    // MainView.discard('file', file)
 
-   return template(
+   return Component(
       <>
          <Sidebar files={files} provide={[
             FILES_KIT({ addNewFile, deleteFile, openFile }),
@@ -305,7 +305,7 @@ export function List(input : FromTag<{
 		
 		$.pear = $.pear ?? fromContext(PEAR)
 
-		return template(<></>)
+		return Component(<></>)
 }
 
 const $APPLE = ContextKey<Ion<string>>('$APPLE')
@@ -320,7 +320,7 @@ function Sidebar(input : FromTag<{
    const { files } = input
    const { addFile } = fromContext(FILES_KIT);
 
-   return template(
+   return Component(
       <div>
          {For($files, file => file.id, (file, $index) => (
             <SidebarFile file={file} index={$index}></SidebarFile>
@@ -339,7 +339,7 @@ function SidebarFile(input : FromTag<{
 
    const { openFile } = fromContext(FILES_KIT)
 
-   return template(
+   return Component(
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
          <IfContextMenu on:click={reMenuClick} ref={$menu}></IfContextMenu>
          {file.$title}
@@ -379,7 +379,7 @@ function Tab(input : FromTag<{
    const { file, tabManager = fromContext(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 
-   return template(
+   return Component(
       <div style={{ backgroundColor: (file.active ? 'red' : 'gray') }}
          on:click={e => focusFile($index())}
       >

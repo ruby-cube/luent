@@ -1,5 +1,5 @@
 
-import { template, Else, For, FromTag, If } from '@rue/luent'
+import { Component, template, Else, For, FromTag, If } from '@rue/luent'
 import { ionic, Ion, ion } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 import "./style.css"
@@ -17,7 +17,7 @@ export function SortableTableApp() {
       { name: 'Jet Li', power: 8000 }
    ]
 
-   return template(
+   return Component(
       <>
          <form id="search">
             Search <input name="query" mu:value={$searchQuery} />
@@ -78,7 +78,7 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
       return str.charAt(0).toUpperCase() + str.slice(1)
    }
 
-   return template(
+   return Component(
       <>
          {If(($filteredData().length),
             <table>

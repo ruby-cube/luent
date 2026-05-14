@@ -1,8 +1,8 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import m from "./Root.module.css"
 
 export function Root(){
-   return template(
+   return Component(
       <div></div>
    )
 }

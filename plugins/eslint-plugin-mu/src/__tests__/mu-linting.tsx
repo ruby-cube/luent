@@ -1,4 +1,4 @@
-import { FromTag, template } from "@rue/luent"
+import { Component, FromTag, template } from "@rue/luent"
 import { ionic, Ion, Ionic, ion } from "@rue/quarky"
 import { Something } from "./external-file"
 
@@ -43,7 +43,7 @@ function Compo({ dog, something, list, mu: { frog } }: FromTag<CompoInput>) {
       something.aboo
    }
 
-   return template(
+   return Component(
       <div></div>
    )
 }
@@ -60,7 +60,7 @@ function CompoB({ dog, mu }: FromTag<CompoInput>) {
       dog.name = 'spot' // ERROR: Mutating external objects disallowed
    }
 
-   return template(
+   return Component(
       <div></div>
    )
 }
@@ -70,7 +70,7 @@ function App() {
    const frog = ionic({ name: 'kermit' })
    const something = new Something()
 
-   return template(
+   return Component(
       <>
          <input mu:value={$count}></input>
          <Compo mu:frog={frog} dog={{ name: 'fido' }}></Compo>

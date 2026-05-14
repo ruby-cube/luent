@@ -1,4 +1,4 @@
-import { template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, css } from "@rue/luent";
+import { Component, template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, Style, css } from "@rue/luent";
 import { ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -17,7 +17,8 @@ export function TestIfElseMix(setup: FromTag<{ activation: [ShowHideType, ShowHi
       }
    })
 
-   return template(
+   return Component(
+      <>
       <div>
          <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
@@ -46,12 +47,13 @@ export function TestIfElseMix(setup: FromTag<{ activation: [ShowHideType, ShowHi
             )}
          </div>
       </div>
-   )
-      .style(css`
+      {Style(css`
          .container {
             overflow: hidden;
          }
-      `)
+      `)}
+      </>
+   )
 }
 
 

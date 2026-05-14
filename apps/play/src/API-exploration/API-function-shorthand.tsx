@@ -1,4 +1,4 @@
-import { template, FromTag } from "@rue/luent"
+import { Component, template, FromTag } from "@rue/luent"
 import { ionic, Ion, Ionic, watch } from "@rue/quarky"
 
 // absorbed ions
@@ -117,7 +117,7 @@ const animal = ionic({
 
 function Appo() {
    const $active = ion(true)
-   return template(
+   return Component(
       <div class={{ active: $active, inactive: (!$active()) }}>
          <Child disabled={(!$active())}></Child>
       </div>
@@ -128,7 +128,7 @@ function Child(input: FromTag<{
 }>) {
    const $active = ion(true)
 
-   return template(
+   return Component(
       <div class={{ active: $active, inactive: (!$active()) }}>
          <Child disabled={(!$active())}></Child>
       </div>

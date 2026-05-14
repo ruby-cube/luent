@@ -5,26 +5,60 @@
 </div>
 
 # Luent
-Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript (.nsx), an optional syntax extension of Typescript and JSX designed to make reactive code more clean, readable, and type-safe. It has been conscientiously designed to align with established semantics and developer intuition.
+Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript (.nsx), an optional language extension of Typescript + JSX designed to make reactive code more readable and type-safe.
 
-> This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and experimental churn should be expected. See how to contribute here.
+> This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. See how to contribute here.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
 Modern frameworks have brought powerful innovations to web development but have also introduced additional cognitive overhead, often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. 
 
-Coming from a linguistics and design background, I am particularly passionate about both language fidelity and code aesthetics and deeply interested in how we might design syntax and APIs that advance technology while still aligning with established standards and minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+Coming from a linguistics and design background, I am particularly passionate about both language coherence and code aesthetics and deeply interested in how we might design syntax and APIs that advance technology while minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Code glimpse
 
+Below are some code examples featuring API and syntax from Luent and NextScript. A few orientation notes: 
+
+Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
+
+In NextScript, the `get` keyword declares accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing JSX statements implicitly return the JSX.
+
 > For more examples, see Luent at a glance and NextScript at a glance.
 
+#### Luent with NextScript
+
+```tsx
+function Counter(setup: FromTag<{
+   limit: number, 
+   class: Ion<TagClass> 
+}>) {
+   const { limit, classes@ } = setup;
+
+   get count = ion(0)
+   get maxed = ion(() => count >= limit)
+
+   <Component>
+      <button class={classes@} on:click={() => count++} disabled={maxed@}>
+         {count@}
+      </button>
+      {If(maxed@,
+         <div class='message'>Limit reached!</div>
+      )}
+   </Component>
+}
+
+createRoot(() => 
+   <Counter class='outlined' limit={100} />
+).mount('#root')
+
+```
+
 #### Luent with TypeScript + JSX
-Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
+
 
 ```tsx
 function Counter(setup: FromTag<{ 
@@ -54,34 +88,6 @@ createRoot(() =>
 
 ```
 
-#### Luent with NextScript
-In NextScript, the `get` keyword declares accessor variables, which behave similarly to native accessor properties. The `@` postfix operator enables access to the getter of an accessor variable/property. Functions containing JSX statements implicitly return the JSX.
-
-```tsx
-function Counter(setup: FromTag<{
-   limit: number, 
-   class: Ion<TagClass> 
-}>) {
-   const { limit, classes@ } = setup;
-
-   get count = ion(0)
-   get maxed = ion(() => count >= limit)
-
-   <Component>
-      <button class={classes@} on:click={() => count++} disabled={maxed@}>
-         {count@}
-      </button>
-      {If(maxed@,
-         <div class='message'>Limit reached!</div>
-      )}
-   </Component>
-}
-
-createRoot(() => 
-   <Counter class='outlined' limit={100} />
-).mount('#root')
-
-```
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -91,7 +97,7 @@ createRoot(() =>
 Luent currently provides most of the standard features expected of a modern frontend framework, with server-side features planned.
 
 Core design features:
-- a unified system of fine-grained reactivity that is consistent with native behavior
+- a unified system of fine-grained reactivity
 - simplicity in managing shared and centralized state through familiar native structures
 - selective, type-explicit reactivity
 - traceable mutations to aid in debugging reactivity
@@ -141,6 +147,14 @@ Keeping up a reasonable pace is desirable, but quality should not be compromised
 - **Great user experiences.**
 All of this is in service of the end user. We embrace build steps because they enable better developer ergonomics without sacrificing runtime performance. We preserve framework and language consistency to ensure a stable foundation for developers. We strive to create stability and ease for developers so that they can build, grow, and maintain great user experiences. A solid framework → good DX → great UX.
 
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+ TODO:
+## JSX Runtime Semantics
+JSX is conservatively transpiled 
+- control flow series for optimization
+- implicit render functions in slots
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

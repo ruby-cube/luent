@@ -1,4 +1,4 @@
-import { template, pend, Suspense } from "@rue/luent"
+import { Component, template, pend, Suspense } from "@rue/luent"
 import { ion } from "@rue/quarky"
 
 
@@ -7,13 +7,13 @@ import { ion } from "@rue/quarky"
 const $ListBlock = Suspense({
     Pending: ListBlock,
     Placeholder() {
-        return template(
+        return Component(
             <div>I'm not ready...</div>
         )
     },
     timeout: 9001,
     Error({ error }: { error: any }) {
-        return template(
+        return Component(
             <div>Oops! {error}</div>
         )
     }
@@ -22,14 +22,14 @@ const $ListBlock = Suspense({
 const $TextArea = Suspense({
     Pending: TextArea,
     Placeholder() {
-        return template(<div>loading...</div>)
+        return Component(<div>loading...</div>)
     },
     // Error: ({ error }: { error: any }) => <div>Ohh noes!! {error}</div>
 })
 
 export function MainSite() {
     const $count = ion(0)
-    return template(
+    return Component(
         <>
             <h1>Hello World</h1>
             <$ListBlock></$ListBlock>
@@ -41,13 +41,13 @@ export function MainSite() {
 }
 
 function Something() {
-    return template(
+    return Component(
         <p>hey</p>
     )
 }
 
 function ListBlock() {
-    return template(
+    return Component(
         <div>
             <h2>list</h2>
             {/* <ItemBlockA></ItemBlockA> */}
@@ -63,7 +63,7 @@ function TextArea() {
     pend(simFetchC("pomp"))
         .then(word => $word.value = word)
 
-    return template({
+    return Component({
         $word
     },
         <div>
@@ -81,7 +81,7 @@ function ItemBlockA() {
     pend(simFetch("calico"))
         .then(word => $word.value = word)
 
-    return template(
+    return Component(
         <div>{$word}</div>
     )
 }
@@ -119,7 +119,7 @@ function ItemBlockB() {
         }
     })
 
-    return template(
+    return Component(
         <div>{$word}</div>
     )
 }
@@ -130,7 +130,7 @@ function ItemBlockC() {
     pend(simFetchB("cerulean"))
         .then(word => $word.value = word)
 
-    return template(
+    return Component(
         <div>{$word}</div>
     )
 }
@@ -141,7 +141,7 @@ function ItemBlockD() {
     pend(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.value = word)
 
-    return template(
+    return Component(
         <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect pend call and wrap component in promise) 
     )
 }

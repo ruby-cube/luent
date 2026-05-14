@@ -1,5 +1,5 @@
-import { If, template } from "@rue/luent";
-import { ion, PRELUDE, SYNC, watch } from "@rue/quarky";
+import { Component, If } from "@rue/luent";
+import { ion, PRELUDE, watch } from "@rue/quarky";
 
 export function TestNullIon() {
    const $frog = ion(null)
@@ -8,7 +8,7 @@ export function TestNullIon() {
       console.log('@@@frog', $frog())
    }, { phase: PRELUDE })
 
-   return template(
+   return Component(
       <div>
 
          <button on:click={e => $frog.value = 'kermit'}>click</button>

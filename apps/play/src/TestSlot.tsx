@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { FromTag, RenderSlot, template } from "@rue/luent";
+import { Component, FromTag, RenderSlot, template } from "@rue/luent";
 
 // [x] Distinguishing getter from render function
 //    - static analysis of functions defined in template (arrow functions) ---> function SlotA() { return }
@@ -23,7 +23,7 @@ function TestSlotO() {
    const ContentB = () => (
       <div></div>
    )
-   return template(
+   return Component(
       <Comp>{{
          ContentA,
          ContentB
@@ -33,7 +33,7 @@ function TestSlotO() {
 
 function TestSlotO() {
 
-   return template(
+   return Component(
       <Comp>{{
          ContentA: () => (
             <div></div>
@@ -55,7 +55,7 @@ function TestSlotO() {
 
    // if Content.length !== 0 throw error
    // QUESTION: What happens if you watch a render function that renders its own ions?
-   return template(
+   return Component(
       <Comp>{namedSlots} hi</Comp>
    )
 }
@@ -70,7 +70,7 @@ function TestSlotO() {
 
    // if Content.length !== 0 throw error
    // QUESTION: What happens if you watch a render function that renders its own ions?
-   return template(
+   return Component(
       <Comp>{Content} hi</Comp>
    )
 }
@@ -84,7 +84,7 @@ function TestSlotO() {
    }
 
 
-   return template(
+   return Component(
       <Comp>{makeContent()}</Comp>
    )
 }
@@ -98,7 +98,7 @@ function TestSlotO() {
    }
 
 
-   return template(
+   return Component(
       <Comp>{Content}</Comp>
    )
 }
@@ -110,13 +110,13 @@ function TestSlotO() {
    ))
 
 
-   return template(
+   return Component(
       <Comp>{Content}</Comp>
    )
 }
 
 function TestSlotA() {
-   return template(
+   return Component(
       <Comp>{o => (
          <div></div>
       )}</Comp>
@@ -124,7 +124,7 @@ function TestSlotA() {
 }
 
 function TestSlotA() {
-   return template(
+   return Component(
       <Comp>
          {o => (
             <div></div>
@@ -135,7 +135,7 @@ function TestSlotA() {
 
 // UGLY
 function TestSlotC() {
-   return template(
+   return Component(
       <Comp>{Slot(() => (
          <div></div>
       ))}</Comp>
@@ -143,7 +143,7 @@ function TestSlotC() {
 }
 
 function TestSlotB() {
-   return template(
+   return Component(
       <Comp>{{
          Slot: () => (
             <div></div>
@@ -153,7 +153,7 @@ function TestSlotB() {
 }
 
 function Comp({ Slot }: FromTag<{ Slot: RenderSlot<{}> }>) {
-   return template(
+   return Component(
       <div></div>
    )
 }

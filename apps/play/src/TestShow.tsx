@@ -1,4 +1,4 @@
-import { template, Else, If } from "@rue/luent";
+import { Component, template, Else, If } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestShow() {
@@ -8,7 +8,7 @@ export function TestShow() {
       }
    })
 
-   return template(
+   return Component(
       <>
          <h1>Test Show</h1>
          <button on:click={$active.toggle}>toggle active</button>

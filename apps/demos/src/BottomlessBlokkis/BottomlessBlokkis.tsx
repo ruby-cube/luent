@@ -10,7 +10,6 @@ const BOARD_COLUMNS = 20
 const BOARD_ROWS = 20
 
 export function BottomlessBlokkis() {
-   console.log('BottomlessBlokkis')
 
     const $blokk = ion(createBlokk(), {
         next() {
@@ -35,7 +34,6 @@ export function BottomlessBlokkis() {
     }
 
     function dropBlock() {
-      console.log('&&& dropblock')
         const id = setInterval(moveDown, 1000)
         atDiscard(() => clearInterval(id))
     }
@@ -90,7 +88,7 @@ export function BottomlessBlokkis() {
         <div class='container'>
             <div class='header'>
                 <h1>Bottomless Blokkis</h1>
-                ... where you can never win or lose
+                A game for contemplating the void
             </div>
             <div
                 class='board'

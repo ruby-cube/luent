@@ -1,5 +1,5 @@
 import { getActiveFlask, getFlask } from "@rue/flask";
-import { template, Else, ElseIf, If } from "@rue/luent";
+import { Component, template, Else, ElseIf, If } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 export function TestIfElse() {
@@ -8,7 +8,7 @@ export function TestIfElse() {
 
    console.log('### outer flask', getActiveFlask())
 
-   return template(
+   return Component(
       <div>
          <button on:click={e => $active.value = !$active()}>toggle</button>
          <button on:click={e => $ready.value = !$ready()}>toggle</button>

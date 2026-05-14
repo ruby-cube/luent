@@ -1,4 +1,4 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { ion, watch } from "@rue/quarky";
 
 export function TestEffectCycle() {
@@ -39,7 +39,7 @@ export function TestEffectCycle() {
 
    },{})
 
-   return template(
+   return Component(
       <>
          <p>{$count}</p>
          <p>{$doubleCount}</p>

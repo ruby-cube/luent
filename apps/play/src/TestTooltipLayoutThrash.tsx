@@ -1,11 +1,11 @@
-import { template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/luent';
+import { Component, template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/luent';
 import { $layout, ion, queueLayout } from '@rue/quarky';
 import './TestTooltip.css'
 
 
 export function TestTooltip() {
 
-   return template(
+   return Component(
       <div>
          <ButtonWithTooltip
             Slot:Tooltip={(
@@ -53,7 +53,7 @@ export function ButtonWithTooltip(setup: FromTag<{
    const { Slot } = setup
    const $targetRect = ion(null as Rect | null)
 
-   return template(
+   return Component(
       <>
          <button
             on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
@@ -130,7 +130,7 @@ export function Tooltip(input: FromTag<{
       return y < 0 ? targetRect.bottom : y;
    })
 
-   return template(
+   return Component(
       Portal('body',
          <div
             style={{

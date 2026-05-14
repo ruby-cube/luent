@@ -1,4 +1,4 @@
-import { template } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { ion, ionic, queueIonicTask } from "@rue/quarky";
 
 export function TestIonicTask() {
@@ -22,7 +22,7 @@ export function TestIonicTask() {
       console.log('count x 2:', $doubleCount())
    })
 
-   return template(
+   return Component(
       <>
          hi
          <div>{$count}</div>

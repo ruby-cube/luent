@@ -1,4 +1,4 @@
-import { template, FromTag, atUnmount } from "@rue/luent";
+import { Component, template, FromTag, atUnmount } from "@rue/luent";
 import { Animation, Interval, Ion, swiftUpdate, HeavyUpdate, queueTask, ion, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
@@ -87,7 +87,7 @@ export function TriangleDemo() {
    }
    // const $suspense = Suspense()
 
-   return template(
+   return Component(
       <>
          {/* <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div> */}
          <div>
@@ -121,7 +121,7 @@ let $slowCount = 0
 
 function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
    if (s <= TARGET) {
-      return template(
+      return Component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}
             // text={(o.await($suspense, $seconds))}
          text={$seconds}
@@ -162,7 +162,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
       return $seconds()
    })
 
-   return template(
+   return Component(
       <>
          <Triangle x={x} y={y - s / 2} s={s} seconds={$slow} /* suspense={$suspense}  *//>
          <Triangle x={x - s} y={y + s / 2} s={s} seconds={$slow} /* suspense={$suspense} */ />
@@ -177,7 +177,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
 function Dot({ x, y, s, $text }: FromTag<any>) {
    const $hover = ion(false)
 
-   return template(
+   return Component(
       <div
          class="dot"
          style={{

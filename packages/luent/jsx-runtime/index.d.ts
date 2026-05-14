@@ -1844,12 +1844,14 @@ declare global {
       // DOM Attributes
       // ----------------------------------------------------------------------
 
+      type Index = Ion<number> | number
+
       interface RefAttributes<T> {
          /**
           * Access the DOM element via NodeRef or node refs config object.
           * Once the view unmounts, the ref value will be set to `null`
           */
-         ref?: () => T | undefined // TODO: add NodeRefsConfig
+         ref?: (() => T | undefined)  | [T[], Index] | [T[][], [Index, Index]]
       }
 
       type DetailedHTMLProps<E extends HTMLAttributes<T>, T> = RefAttributes<T> & E & Luent.LuentHooks<P> & LuentCommonAttributes

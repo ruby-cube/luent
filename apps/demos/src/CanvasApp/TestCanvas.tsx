@@ -1,4 +1,4 @@
-import { NodeRef, css, template } from "@rue/luent";
+import { Component, NodeRef, Style, css } from "@rue/luent";
 
 
 export function TestCanvas() {
@@ -26,7 +26,7 @@ export function TestCanvas() {
 
    function getMousePosition(e: DrawEvent) {
       const canvas = $canvas()
-      if (!canvas) return
+      if (!canvas) return;
       const rect = canvas.getBoundingClientRect()
 
       return {
@@ -37,6 +37,7 @@ export function TestCanvas() {
 
    function startDrawing(e: DrawEvent) {
       const point = getMousePosition(e)
+      console.log('start drawing', point)
       if (!point) return
 
       isDrawing = true
@@ -46,9 +47,10 @@ export function TestCanvas() {
 
    function draw(e: DrawEvent) {
       if (!isDrawing) return
-
+      
       const context = getContext()
       const point = getMousePosition(e)
+      console.log('drawing', context, point)
       if (!context || !point) return
 
       context.beginPath()
@@ -71,39 +73,42 @@ export function TestCanvas() {
       context.clearRect(0, 0, canvas.width, canvas.height)
    }
 
-   return template(
-      <div class="canvas-app">
-         <button type="button" on:click={clearCanvas}>Clear</button>
-         <canvas
-            ref={$canvas}
-            width="900"
-            height="500"
-            on:mousedown={startDrawing}
-            on:mousemove={draw}
-            on:mouseup={stopDrawing}
-            on:mouseleave={stopDrawing}
-         ></canvas>
-      </div>
+   return Component(
+      <>
+         <div class="canvas-app">
+            <button type="button" on:click={clearCanvas}>Clear</button>
+            <canvas
+               ref={$canvas}
+               width="900"
+               height="500"
+               on:mousedown={startDrawing}
+               on:mousemove={draw}
+               on:mouseup={stopDrawing}
+               on:mouseleave={stopDrawing}
+            ></canvas>
+         </div>
+
+         {Style(css`
+            .canvas-app {
+               display: grid;
+               gap: 10px;
+               width: fit-content;
+               margin: 24px auto;
+            }
+
+            button {
+               width: 90px;
+               padding: 6px 10px;
+               cursor: pointer;
+            }
+
+            canvas {
+               border: 1px solid #ccc;
+               background: #fff;
+               cursor: crosshair;
+            }
+         `)}
+      </>
    )
-      .style(css`
-         .canvas-app {
-            display: grid;
-            gap: 10px;
-            width: fit-content;
-            margin: 24px auto;
-         }
-
-         button {
-            width: 90px;
-            padding: 6px 10px;
-            cursor: pointer;
-         }
-
-         canvas {
-            border: 1px solid #ccc;
-            background: #fff;
-            cursor: crosshair;
-         }
-      `)
 }
 

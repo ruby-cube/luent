@@ -1,4 +1,4 @@
-import { FromTag, TagName, TagType, template } from "@rue/luent"
+import { Component, FromTag, TagName, TagType, template } from "@rue/luent"
 import { type VariantProps } from "class-variance-authority"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 
@@ -32,7 +32,7 @@ function Badge({
    ...attributes
 }: FromTag<'span', BadgeInput>) {
 
-   return template(
+   return Component(
       <Comp
          class={(mergeTailwind(badgeVariants({ variant }), æclasses()))}
          {...attributes}

@@ -1,4 +1,4 @@
-import { template, For, If, listen, NodeRef, Portal, Style } from "@rue/luent"
+import { Component, template, For, If, listen, NodeRef, Portal, Style } from "@rue/luent"
 import { Finitron, ion, watch } from "@rue/quarky"
 
 //FIX: 
@@ -8,7 +8,7 @@ export function Sidebar() {
    const items = ['a', 'b', 'c']
    const $contextMenu = NodeRef(IfContextMenu)
 
-   return template(
+   return Component(
       <>
          <ul class='sidebar'>
             {For(items, (item) => (
@@ -69,7 +69,7 @@ function IfContextMenu() {
       }, { once: true })
    }
 
-   return template({
+   return Component({
       open() {
          $menu.apply('open')
       }
@@ -119,7 +119,7 @@ function IfContextMenuB() {
       }, { once: true })
    })
 
-   return template(
+   return Component(
       {
          open
       },
@@ -166,7 +166,7 @@ function IfContextMenuC() {
       }, { once: true })
    }
 
-   return template({
+   return Component({
       open
    },
       <div>
@@ -202,7 +202,7 @@ function IfContextMenuC() {
 function IntuitivePopUpA() {
    const $open = ion(false)
 
-   return template(
+   return Component(
       <o--portal to='body'>
          {If($open,
             <div>
@@ -218,7 +218,7 @@ function IntuitivePopUpA() {
 function IntuitivePopUpB() {
    const $open = ion(false)
 
-   return template(
+   return Component(
       <>
          {If($open,
             <o--portal to='body'>

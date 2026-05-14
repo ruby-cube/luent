@@ -1,5 +1,5 @@
 
-import { template, If, JSXNode, FromTag } from "@rue/luent";
+import { Component, template, If, JSXNode, FromTag } from "@rue/luent";
 import {ion} from '@rue/quarky'
 
 // - [ ]  transform slot to render function for:
@@ -8,7 +8,7 @@ import {ion} from '@rue/quarky'
 
 // text
 function CompA() {
-   return template(
+   return Component(
       <div>Hello</div>
    )
 }
@@ -17,7 +17,7 @@ function CompA() {
 function CompB() {
    const $hello = ion('hi')
 
-   return template(
+   return Component(
       <div>{$hello}</div>
    )
 }
@@ -26,7 +26,7 @@ function CompB() {
 function CompC() {
    const $hello = ion('hi')
 
-   return template(
+   return Component(
       <div>greeting: {$hello}</div>
    )
 }
@@ -37,7 +37,7 @@ function CompC() {
 function CompD() {
    const $hello = ion('hi')
 
-   return template(
+   return Component(
       <div>{$hello() + '!'}</div>
    )
 }
@@ -46,7 +46,7 @@ function CompD() {
 function CompDTransform() {
    const $hello = ion('hi')
 
-   return template(
+   return Component(
       <div>{() => function $() { return $hello() + '!' }}</div>
    )
 }
@@ -55,7 +55,7 @@ function CompDTransform() {
 function CompE() {
    const $hello = ion('hi')
 
-   return template(
+   return Component(
       <div><p>{$hello() + '!'}</p></div>
    )
 }
@@ -63,7 +63,7 @@ function CompE() {
 // a component
 function CompG() {
 
-   return template(
+   return Component(
       <div><CompA /></div>
    )
 }
@@ -72,7 +72,7 @@ function CompG() {
 function CompF() {
    const $hello = ion('hi')
 
-   return template(
+   return Component(
       <div>
          <h1>Hello World</h1>
          <p>{$hello() + '!'}</p>
@@ -82,7 +82,7 @@ function CompF() {
 
 // component with slot: single child
 function Parent() {
-   return template(
+   return Component(
       <Child>
          <div>hi</div>
       </Child>
@@ -91,7 +91,7 @@ function Parent() {
 
 // component with slot: multi childs
 function ParentB() {
-   return template(
+   return Component(
       <Child>
          <div>hi</div>
          <div>bye</div>
@@ -105,7 +105,7 @@ function kit() {
 let o: any;
 // component with sequence expression
 function ParentD() {
-   return template(
+   return Component(
       <Child>
          {(o = kit(),
             <div>
@@ -117,7 +117,7 @@ function ParentD() {
 }
 // component with sequence expression: fragment
 function ParentD2() {
-   return template(
+   return Component(
       <Child>
          {(o = kit(), <>
             <div>hi</div>
@@ -129,7 +129,7 @@ function ParentD2() {
 
 // component with slot input
 function ParentE() {
-   return template(
+   return Component(
       <Child> {o =>
          <div>hi</div>}
       </Child>
@@ -138,7 +138,7 @@ function ParentE() {
 
 // component with slot input with fragment
 function ParentE3() {
-   return template(
+   return Component(
       <Child>
          {o => <>
             <div>hi</div>
@@ -149,7 +149,7 @@ function ParentE3() {
 
 // component with slot input with parentheses
 function ParentE2() {
-   return template(
+   return Component(
       <Child> {(o) =>
          <div>hi</div>}
       </Child>
@@ -158,7 +158,7 @@ function ParentE2() {
 
 // component with named slot
 function ParentC() {
-   return template(
+   return Component(
       <Child>
          {{
             title:
@@ -172,7 +172,7 @@ function ParentC() {
 
 // component with named slot: with slot input or render function
 function ParentF() {
-   return template(
+   return Component(
       <Child>
          {{
             title: (o) =>
@@ -188,7 +188,7 @@ function ParentF() {
 function ParentG() {
    const $active = ion(true);
 
-   return template(
+   return Component(
       <div>
          {If($active,
             <p>yay</p>
@@ -201,7 +201,7 @@ function ParentG() {
 function ParentG3() {
    const $active = ion(true);
 
-   return template(
+   return Component(
       <div>
          {If($active, <>
             <p>yay</p>
@@ -216,7 +216,7 @@ function ParentG3() {
 function ParentG2() {
    const $active = ion(true);
 
-   return template(
+   return Component(
       <div>
          {If($active, (o = kit(),
             <p>yay</p>
@@ -231,7 +231,7 @@ function Child(input: FromTag<{
 }>) {
    const { Slot } = input
 
-   return template(
+   return Component(
       ''
    )
 }

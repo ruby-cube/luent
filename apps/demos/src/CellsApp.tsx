@@ -1,7 +1,6 @@
-import { template, For, FromTag, Style, INTERNAL, atUnmount, atDemount, atMounted, css } from "@rue/luent"
+import { Component, template, For, FromTag, Style, INTERNAL, atUnmount, atDemount, atMounted, css, If, Else } from "@rue/luent"
 import { Ion, ion } from "@rue/quarky"
 import { Thru } from "../../../packages/luent/src/iteratives/Thru"
-import { active } from "apps/play/src/wip-demos/TestStyling.module.css"
 
 // Modified Demo from Vue.js
 // barebones cells app
@@ -43,18 +42,7 @@ export function CellsApp() {
       return Number.isFinite(num) ? num : val
    }
 
-   atMounted(() => {
-      console.warn('node================')
-      console.log(tds[0][0])
-      console.log(tds[1][0])
-      console.log(tds[2][0])
-      console.log(tds[0][1])
-      console.log(tds[1][1])
-      console.log(tds[2][1])
-      console.warn('node============END')
-   })
-
-   return template(
+   return Component(
       <>
          <table>
             <thead>
@@ -70,7 +58,7 @@ export function CellsApp() {
                   <tr>
                      <th>{row}</th>
                      {Thru(cols.length, (_, col: any) =>
-                        <td ref={{ arr: tds, i: [row, col] }}>
+                        <td ref={[tds, [row, col]]}>
                            <Cell
                               value={(cells[col][row])}
                               setCellValue={value => { cells[col][row] = value }}
@@ -82,37 +70,37 @@ export function CellsApp() {
                ))}
             </tbody>
          </table >
+         {Style(css`
+            body {
+               margin: 0;
+            }
+         
+            table {
+               border-collapse: collapse;
+               table-layout: fixed;
+               width: 100%;
+            }
+         
+            th {
+               background-color: #eee;
+            }
+         
+            tr:first-of-type th {
+               width: 100px;
+            }
+         
+            tr:first-of-type th:first-of-type {
+               width: 25px;
+            }
+         
+            td {
+               border: 1px solid #ccc;
+               height: 1.5em;
+               overflow: hidden;
+            }
+         `)}
       </>
    )
-      .style(css`
-         body {
-            margin: 0;
-         }
-
-         table {
-            border-collapse: collapse;
-            table-layout: fixed;
-            width: 100%;
-         }
-
-         th {
-            background-color: #eee;
-         }
-
-         tr:first-of-type th {
-            width: 100px;
-         }
-
-         tr:first-of-type th:first-of-type {
-            width: 25px;
-         }
-
-         td {
-            border: 1px solid #ccc;
-            height: 1.5em;
-            overflow: hidden;
-         }
-      `)
 }
 
 
@@ -130,37 +118,39 @@ function Cell(input: FromTag<{
       setCellValue(e.target.value.trim())
    }
 
-   return template(
-      <div class="cell" title={$value} on:click={e => { $editing.value = true }}>
-         {If($editing,
-            <input
-               value={$value}
-               on:change={update}
-               on:blur={update}
-               at:mounted={el => el.focus()}
-            />
-         )}
-         {Else(
-            <span>{calcCellValue($value())}</span>
-         )}
-      </div >
+   return Component(
+      <>
+         <div class="cell" title={$value} on:click={e => { $editing.value = true }}>
+            {If($editing,
+               <input
+                  value={$value}
+                  on:change={update}
+                  on:blur={update}
+                  at:mounted={el => el.focus()}
+               />
+            )}
+            {Else(
+               <span>{calcCellValue($value())}</span>
+            )}
+         </div >
+         {Style(css`
+            .cell, .cell input {
+               height: 1.5em;
+               line-height: 1.5;
+               font-size: 15px;
+            }
+
+            .cell span {
+               padding: 0 6px;
+            }
+
+            .cell input {
+               width: 100%;
+               box-sizing: border-box;
+            }
+         `)}
+      </>
    )
-      .style(css`
-         .cell, .cell input {
-            height: 1.5em;
-            line-height: 1.5;
-            font-size: 15px;
-         }
-
-         .cell span {
-            padding: 0 6px;
-         }
-
-         .cell input {
-            width: 100%;
-            box-sizing: border-box;
-         }
-      `)
 }
 
 

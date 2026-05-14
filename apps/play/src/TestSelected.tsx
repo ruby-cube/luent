@@ -1,4 +1,4 @@
-import { template, For } from "@rue/luent";
+import { Component, template, For } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestCustomRadioSelection() {
@@ -9,7 +9,7 @@ export function TestCustomRadioSelection() {
       $selectedItem.value = item;
    }
 
-   return template(
+   return Component(
       For(choices, (item) =>
          <p class={(item === $selectedItem() && 'selected')} on:click={e => selectItem(item)}>
             {item}

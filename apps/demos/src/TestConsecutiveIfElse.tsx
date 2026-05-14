@@ -1,4 +1,4 @@
-import { template, If, Else, createRoot, css } from "@rue/luent";
+import { Component, template, If, Else, createRoot, Style, css } from "@rue/luent";
 import { ion } from "@rue/quarky";
 import "./style.css"
 
@@ -17,7 +17,8 @@ export function TestConsecutiveIfElse() {
       }
    })
 
-   return template(
+   return Component(
+      <>
       <div>
          <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
@@ -43,12 +44,13 @@ export function TestConsecutiveIfElse() {
             )}
          </div>
       </div>
-   )
-      .style(css`
+      {Style(css`
          .container {
             overflow: hidden;
          }
-      `)
+      `)}
+      </>
+   )
 }
 
 

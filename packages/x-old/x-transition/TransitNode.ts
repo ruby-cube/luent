@@ -17,7 +17,7 @@ export function renderTransitNode(
 ) {
    if ($disable) {
       const output = isFunction(Slot) ? Slot() : Slot //QUESTION: is it necessary to call Slot here? Can we call it within conditional blocks?
-      return template(
+      return Component(
          createIfSeries([
             If($disable, () =>
                output

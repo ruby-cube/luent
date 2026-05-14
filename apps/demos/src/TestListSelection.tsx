@@ -1,4 +1,4 @@
-import { template, createRoot, For, listen, NodeRef, Style, css } from "@rue/luent";
+import { Component, template, createRoot, For, listen, NodeRef, Style, css } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { ion, EACH, ionic } from "@rue/quarky";
@@ -102,7 +102,8 @@ export function TestListSelection() {
       selected.clear()
    })
 
-   return template(
+   return Component(
+      <>
       <div style='transform: scale(.5); transform-origin: top'>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>
@@ -157,12 +158,13 @@ export function TestListSelection() {
             </div>
          </div>
       </div>
-   )
-      .style(css`
+      {Style(css`
          body {
             overflow-y: scroll
          }
-      `)
+      `)}
+      </>
+   )
 }
 
 

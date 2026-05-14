@@ -1,4 +1,4 @@
-import { template, For, FromTag, Style, css, } from "@rue/luent"
+import { Component, template, For, FromTag, Style, css, } from "@rue/luent"
 import { as, ion, ionic, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
@@ -41,7 +41,7 @@ export function SVGPolygonApp() {
       }
    }
 
-   return template(
+   return Component(
       <>
          <svg width="200" height="200">
             <PolyGraph stats={stats}></PolyGraph>
@@ -62,36 +62,36 @@ export function SVGPolygonApp() {
          </form>
 
          <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
+         {Style(css`
+            polygon {
+               fill: #42b983;
+               opacity: 0.75;
+            }
+
+            circle {
+               fill: transparent;
+               stroke: #999;
+            }
+
+            text {
+               font-size: 10px;
+               fill: #666;
+            }
+
+            label {
+               display: inline-block;
+               margin-left: 10px;
+               width: 20px;
+            }
+
+            #raw {
+               position: absolute;
+               top: 0;
+               left: 300px;
+            }
+         `)}
       </>
    )
-      .style(css`
-         polygon {
-           fill: #42b983;
-           opacity: 0.75;
-         }
-
-         circle {
-           fill: transparent;
-           stroke: #999;
-         }
-
-         text {
-           font-size: 10px;
-           fill: #666;
-         }
-
-         label {
-           display: inline-block;
-           margin-left: 10px;
-           width: 20px;
-         }
-
-         #raw {
-           position: absolute;
-           top: 0;
-           left: 300px;
-         }
-      `)
 }
 
 // const replacer = (_key: string, val: unknown): any => {
@@ -132,7 +132,7 @@ function AxisLabel(setup: FromTag<{
       valueToPoint(+stat.value + 10, $index(), $total())
    )
 
-   return template(
+   return Component(
       <text x={($point().x)} y={($point().y)}>{stat.$label}</text>
 
    )
@@ -153,7 +153,7 @@ function PolyGraph({ stats }: FromTag<{
          .join(' ')
    })
 
-   return template(
+   return Component(
       <g>
          <polygon points={$points}></polygon>
          <circle cx="100" cy="100" r="80"></circle>

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { template, For, If, Else, FromTag, listen } from "@rue/luent"
+import { Component, template, For, If, Else, FromTag, listen } from "@rue/luent"
 import { watch,  queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
 
 
@@ -118,7 +118,7 @@ export function TodoMVC() {
       app.setFilter(route) ?? (window.location.hash = '')
    }
 
-   return template(
+   return Component(
       <>
          <section class="todoapp">
             <header class="header">
@@ -174,7 +174,7 @@ function TodoInput(input: FromTag<{
       }
    }
 
-   return template(
+   return Component(
       <input
          class="new-todo"
          autofocus
@@ -215,7 +215,7 @@ function TodoList(input: FromTag<{
       }
    }
 
-   return template(
+   return Component(
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
             const $isEditing = ion(() => todo === $editedTodo());
@@ -264,7 +264,7 @@ function CheckBox(input: FromTag<{
 }>) {
    const { toggleAll, ctx: { $remaining } } = input
 
-   return template(
+   return Component(
       <>
          <input
             id="toggle-all"
@@ -283,7 +283,7 @@ function Remaining(input: FromTag<{
 }>) {
    const { $count } = input
 
-   return template(
+   return Component(
       <span class="todo-count">
          <strong>{$count}</strong>
          <span>{($count() === 1 ? ' item' : ' items')} left</span>
