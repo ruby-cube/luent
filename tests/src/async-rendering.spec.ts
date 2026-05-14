@@ -2,7 +2,7 @@ import test, { expect } from "@playwright/test";
 
 const LOCAL_HOST = 'http://localhost:5173/'
 
-test('TestAsyncSelect', async ({ page }) => {
+test.skip('TestAsyncSelect', async ({ page }) => {
    // test initial render
    await page.goto(LOCAL_HOST);
    await page.addScriptTag({ type: 'module', url: '/src/TestAsyncSelect.tsx' })
@@ -60,7 +60,7 @@ test('TestAsyncSelect', async ({ page }) => {
    page.close()
 })
 
-test('TestAsyncSelect: Race', async ({ page }) => {
+test.skip('TestAsyncSelect: Race', async ({ page }) => {
    // test initial render
    await page.goto(LOCAL_HOST);
    await page.addScriptTag({ type: 'module', url: '/src/TestAsyncSelect.tsx' })

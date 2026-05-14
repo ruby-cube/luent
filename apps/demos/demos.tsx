@@ -41,7 +41,7 @@ import { Grandparent } from "./src/TestEventBubbling"
 import { TestXray } from "./src/TestXray"
 
 export function runDemo() {
-   createRoot(() => <CellsApp />)
+   createRoot(() => <TestCounter />)
       .mount('#root')
 }
 
