@@ -1,5 +1,13 @@
 packages:
- - 'packages/**'
- - 'plugins/**'
- - 'apps/**'
- - 'tests/**'
+  - packages/**
+  - plugins/**
+  - apps/**
+  - tests/**
+
+ignoredBuiltDependencies:
+  - '@firebase/util'
+  - protobufjs
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - esbuild
