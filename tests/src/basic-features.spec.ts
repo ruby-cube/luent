@@ -3,6 +3,26 @@ import "../../playwright.fixtures"
 
 const LOCAL_HOST = 'http://localhost:5173/'
 
+function parseTranslate(transform: string): { x: number; y: number } {
+   const translateMatch = transform.match(/translate\(\s*(-?\d+(?:\.\d+)?)px(?:\s*,\s*(-?\d+(?:\.\d+)?)px)?\s*\)/)
+   if (translateMatch) {
+      return {
+         x: Number(translateMatch[1]),
+         y: Number(translateMatch[2] ?? 0),
+      }
+   }
+
+   const matrixMatch = transform.match(/matrix\(\s*-?\d+(?:\.\d+)?(?:e[-+]?\d+)?\s*,\s*-?\d+(?:\.\d+)?(?:e[-+]?\d+)?\s*,\s*-?\d+(?:\.\d+)?(?:e[-+]?\d+)?\s*,\s*-?\d+(?:\.\d+)?(?:e[-+]?\d+)?\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/i)
+   if (matrixMatch) {
+      return {
+         x: Number(matrixMatch[1]),
+         y: Number(matrixMatch[2]),
+      }
+   }
+
+   throw new Error(`Unsupported transform format: ${transform}`)
+}
+
 
 
 test('TestCounter', async ({ page }) => {
@@ -50,25 +70,25 @@ test('TestCounter', async ({ page }) => {
 test('TestBoxMove', async ({ page }) => {
    await page.goto(LOCAL_HOST);
    await page.addScriptTag({ type: 'module', url: '/src/TestBoxMove.tsx' })
-   const INITIAL_TRANSFORM = 'translate(0px, 0px)'
    const INCREMENT = await page.locator("[data-test]").getAttribute('data-test').then(res => res && JSON.parse(res).INCREMENT)
    // assert initial render
    const initialTransform = await page.locator('#box').evaluate(box => box.style.transform)
+   const initialPosition = parseTranslate(initialTransform)
 
-   expect(initialTransform).toBe(INITIAL_TRANSFORM)
+   expect(initialPosition).toEqual({ x: 0, y: 0 })
 
    // move box to the right three times
    await page.getByRole('button', { name: '>' }).click();
    const transform1 = await page.locator('#box').evaluate(box => box.style.transform)
-   expect(transform1).toBe(`translate(${INCREMENT}px, 0px)`)
+   expect(parseTranslate(transform1)).toEqual({ x: INCREMENT, y: 0 })
 
    await page.getByRole('button', { name: '>' }).click();
    const transform2 = await page.locator('#box').evaluate(box => box.style.transform)
-   expect(transform2).toBe(`translate(${INCREMENT * 2}px, 0px)`)
+   expect(parseTranslate(transform2)).toEqual({ x: INCREMENT * 2, y: 0 })
 
    await page.getByRole('button', { name: '>' }).click();
    const transform3 = await page.locator('#box').evaluate(box => box.style.transform)
-   expect(transform3).toBe(`translate(${INCREMENT * 3}px, 0px)`)
+   expect(parseTranslate(transform3)).toEqual({ x: INCREMENT * 3, y: 0 })
 
    page.close()
 })
