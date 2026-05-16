@@ -19,84 +19,6 @@ Coming from a linguistics and design background, I am particularly passionate ab
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-## Code glimpse
-> For more examples, see Luent at a glance and NextScript at a glance.
-
-Below are some code examples featuring API and syntax from Luent and NextScript. A few orientation notes: 
-
-- Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. 
-- The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
-
-In NextScript:
-- The `get` keyword declares accessor variables, which behave similarly to native accessor properties. 
-- The `@` postfix operator enables access to the getter of an accessor variable/property. 
-- Functions containing JSX statements implicitly return the JSX.
-
-
-#### Luent with NextScript
-
-```tsx
-function Counter(setup: FromTag<{
-   limit: number, 
-   class: Ion<TagClass> 
-}>) {
-   const { limit, classes@ } = setup;
-
-   get count = ion(0)
-   get maxed = ion(() => count >= limit)
-
-   <Component>
-      <button class={classes@} on:click={() => count++} disabled={maxed@}>
-         {count@}
-      </button>
-      {If(maxed@,
-         <div class='message'>Limit reached!</div>
-      )}
-   </Component>
-}
-
-createRoot(() => 
-   <Counter class='outlined' limit={100} />
-).mount('#root')
-
-```
-
-#### Luent with TypeScript + JSX
-
-
-```tsx
-function Counter(setup: FromTag<{ 
-   limit: number, 
-   class: Ion<TagClass> 
-}>) {
-   const { limit, $classes } = setup;
-
-   const count = ion(0)
-   const maxed = ion(() => count() >= limit)
-
-   return Component(
-      <>
-         <button class={$classes} on:click={() => count.value++} disabled={maxed}>
-            {count}
-         </button>
-         {If(maxed,
-            <div class='message'>Limit reached!</div>
-         )}
-      </>
-   )
-}
-
-createRoot(() =>
-   <Counter class='outlined' limit={100} />
-).mount('#root')
-
-```
-
-
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-
 ## Features
 Luent currently provides most of the standard features expected of a modern frontend framework, with server-side features planned.
 
@@ -120,6 +42,127 @@ Experimental areas:
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
+
+## Code glimpse
+> For more examples, see Luent at a glance and NextScript at a glance.
+
+Below are some code examples featuring API and syntax from Luent and NextScript. A few orientation notes: 
+
+- Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. 
+- The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
+
+In NextScript:
+- The `get` keyword declares accessor variables, which behave similarly to native accessor properties. 
+- The `@` postfix operator enables access to the getter of an accessor variable/property. 
+- Functions containing JSX statements implicitly return the JSX.
+
+
+#### Luent with NextScript
+
+```tsx
+function PointlessCounter(setup: FromTag<{
+   start?: number,
+   limit: number, 
+   class: Ion<TagClass> 
+}>) {
+   const { start = 0, limit, classes@ } = setup;
+
+   get count = ion(0)
+   get remaining = ion(() => limit - count)
+
+   <Component>
+      <button class={classes@} on:click={() => count++} disabled={(count === limit)@}>
+         {count@}
+      </button>
+      {If(remaining@,
+         <div class='message'>You have {remaining@} clicks left.</div>
+         <div class='message'>You started with {start} clicks.</div>
+      )}
+   </Component>
+}
+
+createRoot(() => 
+   <Counter class='outlined' limit={100} />
+).mount('#root')
+
+```
+
+#### Luent with TypeScript + JSX
+
+
+```tsx
+function PointlessCounter(setup: FromTag<{
+   start?: number 
+   limit: number, 
+   class: Ion<TagClass> 
+}>) {
+   const { start = 0, limit, $classes } = setup;
+
+   const count = ion(start)
+   const remaining = ion(() => limit - count())
+
+   return Component(
+      <>
+         <button class={$classes} on:click={() => count.value++} disabled={() => count() === limit}>
+            {count}
+         </button>
+         {If(remaining,
+            <>
+               <div class='message'>You have {remaining} clicks left.</div>
+               <div class='message'>You started with {start} clicks.</div>
+            </>
+         )}
+      </>
+   )
+}
+
+createRoot(() =>
+   <Counter class='outlined' limit={100} />
+).mount('#root')
+
+```
+
+
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+
+### JSX Runtime
+
+Luent transpiles JSX consistently and conservatively, similar to React's JSX, for easy mental mapping. Luent currently adds two additional transforms to the JSX transpiler:
+- JSX slots (known as `children` in classic JSX) are normalized to render functions so that parents are created before children.
+- Template function calls that form a control flow series are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile-time for better runtime performance.
+
+The following JSX...
+```jsx
+<Parent foo={foo} bar={bar()} on:click={logClick}>
+   <Child />
+   {If(active, 
+      <div>Hello world! - {name}</div>
+   )}
+   {Else(
+      <div>zzzzzz</div>
+   )}
+</Parent>
+```
+
+...essentially maps to:
+```jsx
+jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
+   Slot: () => [
+      jsx(Child),
+      IfSeries(
+         If(active, () => [
+            jsx('div', { Slot: () => ['Hello world! - ', name]})
+         ]),
+         Else(() => [
+            jsx('div', { Slot: () => ['zzzzzz']})
+         ])
+      )
+   ]
+})
+```
+
 
 ## Design Principles
 Luent is being developed under these guiding principles, which encapsulate our values and how we view competing values:
