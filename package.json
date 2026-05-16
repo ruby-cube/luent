@@ -1,7 +1,6 @@
 {
   "name": "@rue/root",
   "private": true,
-  "packageManager": "pnpm@10.30.1",
   "description": "A collection of TypeScript-enhanced libraries to manage complexity. Covers event-driven architecture, composition, tree structures, and control flow",
   "type": "module",
   "scripts": {
