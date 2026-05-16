@@ -14,7 +14,7 @@ Luent is a highly expressive web framework that aims to provide greater conceptu
 ## Motivation
 Modern frameworks have brought powerful innovations to web development but have also introduced additional cognitive overhead, often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. 
 
-Coming from a linguistics and design background, I am particularly passionate about both language coherence and code aesthetics and deeply interested in how we might design syntax and APIs that advance technology while minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+Coming from a linguistics and design background, I am particularly passionate about both language coherence, expressiveness, and code aesthetics and deeply interested in how we might design syntax and APIs that advance technology while minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -56,6 +56,10 @@ In NextScript:
 - The `@` postfix operator enables access to the getter of an accessor variable/property. 
 - Functions containing JSX statements implicitly return the JSX.
 
+Plain JSX and NextScript JSX are both sufficiently readable in Luent. However, there are a few advantages to using NextScript:
+- improved readability of derivations, especially in-template derivations.
+- visual distinction between static and reactive bindings. (Note: This could also be achieved outside of NextScript through enforced naming convention, e.g. `const $count = ion(0)`)
+- visually compact JSX without excessive fragments and indentation
 
 #### Luent with NextScript
 
