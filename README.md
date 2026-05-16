@@ -127,9 +127,9 @@ createRoot(() =>
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 
-### JSX Runtime
+### JSX Transpiler
 
-Luent transpiles JSX consistently and conservatively, similar to React's JSX, for easy mental mapping. Luent currently adds two additional transforms to the JSX transpiler:
+Luent transpiles JSX consistently and conservatively using the standard JSX transpiler for easy mental mapping. Luent currently extends the transpiler with two additional transforms:
 - JSX slots (known as `children` in classic JSX) are normalized to render functions so that parents are created before children.
 - Template function calls that form a control flow series are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile-time for better runtime performance.
 
