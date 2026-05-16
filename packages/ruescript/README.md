@@ -4,7 +4,7 @@
 </picture>
 </div>
 
-# NextScript Readme
+# NextScript
 
 NextScript is an experimental language extension of TypeScript + JSX designed to improve the readability, ergonomics, and type-safety of modern reactive application code.
 
