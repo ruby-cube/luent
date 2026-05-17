@@ -1,18 +1,18 @@
 import { ion, ionic } from "@rue/quarky"
 
-const æcount = ion(0)
+const $count = ion(0)
 
 const frog = ionic({
    name: 'kermit',
    get fullname() {
       return this.name + 'the frog'
    },
-   æcount,
+   $count,
    something() {
       return 9
    }
 })
 
-frog.æcount()
+frog.$count()
 
 frog.something()

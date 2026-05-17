@@ -128,7 +128,7 @@ export function TestListSelection() {
                            </p>
 
                            <li on:click={e => item.changeContent()}>
-                              {item?.æcontent}
+                              {item?.$content}
                            </li>
                            <p>{$index}</p>
                            <div on:click={e => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">

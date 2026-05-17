@@ -58,35 +58,52 @@ In NextScript:
 
 Plain JSX and NextScript JSX are both sufficiently readable in Luent. However, there are a few advantages to using NextScript:
 - improved readability of derivations, especially in-template derivations.
-- visual distinction between static and reactive bindings. (Note: This could also be achieved outside of NextScript through enforced naming convention, e.g. `const $count = ion(0)`)
-- visually compact JSX without excessive fragments and indentation
+- enforced visual distinction between static and reactive bindings. (Note: The distinction can also be achieved outside of NextScript through naming convention, e.g. `const $count = ion(0)`, but would require additional enforcement to guarantee consistency)
+- JSX without excessive fragments and indentation
 
 #### Luent with NextScript
 
 ```tsx
-function Counter(setup: FromTag<{
-   start?: number,
+function Arsenal(setup: FromTag<{
+   existing?: string[]
    limit: number, 
    class: Ion<TagClass> 
 }>) {
-   const { start = 0, limit, classes@ } = setup;
+   const { existing = [], limit, classes@ } = setup;
 
-   get count = ion(0)
+   const powers = [🍀, 🍄, 🐦‍🔥, ✨, 🌱, 🌪, 🔥, ☄️, 🕸, 🪶, 💎, 🔮, ⚗️, 🪵, 🐉, 🫧]
+   const arsenal = ionic([...existing], {
+      addRandomPower() {
+         this.push(powers[Math.floor(Math.random() * powers.length)])
+      }
+   })
+   get count = ion(0, {
+      increment() { count++ }
+   })
    get remaining = ion(() => limit - count)
 
    <Component>
-      <button class={classes@} on:click={() => count++} disabled={(count === limit)@}>
-         {count@}
+      <ul class={['arsenal', classes@]}>
+         {For(arsenal, power =>
+            <li class='power'>{power}</li>
+         )}
+      </ul>
+      total: {count@}
+      <button 
+         disabled={(count === limit)@}
+         on:click={() => { addRandomPower(); count.increment()}} 
+      >
+         add random power
       </button>
       {If(remaining@,
-         <div class='message'>You have {remaining@} clicks left.</div>
-         <div class='message'>You started with {start} clicks.</div>
+         <div class='message'>You have {remaining@} slots left.</div>
+         <div class='message'>You started with {existing.length} powers.</div>
       )}
    </Component>
 }
 
 createRoot(() => 
-   <Counter class='outlined' limit={100} />
+   <Arsenal class='outlined' limit={100} />
 ).mount('#root')
 
 ```
@@ -95,25 +112,42 @@ createRoot(() =>
 
 
 ```tsx
-function Counter(setup: FromTag<{
-   start?: number 
+function Arsenal(setup: FromTag<{
+   existing?: string[]
    limit: number, 
    class: Ion<TagClass> 
 }>) {
-   const { start = 0, limit, $classes } = setup;
+   const { existing = [], limit, classes@ } = setup;
 
-   const count = ion(start)
-   const remaining = ion(() => limit - count())
+   const powers = [🍀, 🍄, 🐦‍🔥, ✨, 🌱, 🌪, 🔥, ☄️, 🕸, 🪶, 💎, 🔮, ⚗️, 🪵, 🐉, 🫧]
+   const arsenal = ionic([...existing], {
+      addRandomPower() {
+         this.push(powers[Math.floor(Math.random() * powers.length)])
+      }
+   })
+   const count = ion(0, {
+      increment() { count++ }
+   })
+   const remaining = ion(() => limit - count)
 
    return Component(
       <>
-         <button class={$classes} on:click={() => count.value++} disabled={() => count() === limit}>
-            {count}
+         <ul class={['arsenal', classes@]}>
+            {For(arsenal, power =>
+               <li>{power}</li>
+            )}
+         </ul>
+         total: {count}
+         <button 
+            disabled={() => count() === limit}
+            on:click={() => { addRandomPower(); count.increment()}} 
+         >
+            add random power
          </button>
          {If(remaining,
             <>
-               <div class='message'>You have {remaining} clicks left.</div>
-               <div class='message'>You started with {start} clicks.</div>
+               <div class='message'>You have {remaining} slots left.</div>
+               <div class='message'>You started with {existing.length} powers.</div>
             </>
          )}
       </>
@@ -121,7 +155,7 @@ function Counter(setup: FromTag<{
 }
 
 createRoot(() =>
-   <Counter class='outlined' limit={100} />
+   <Arsenal class='outlined' limit={100} />
 ).mount('#root')
 
 ```

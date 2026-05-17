@@ -18,8 +18,8 @@ function PopoverRoot(setup: FromTag<{
 }>) {
    const {
       ref: $popover = NodeRef('div'),
-      æclasses,
-      æstyles,
+      $classes,
+      $styles,
       // gap = 0,
       Slot,
       popover,
@@ -36,7 +36,7 @@ function PopoverRoot(setup: FromTag<{
                   at:create={node => maybeFlip(node, popover)}
                   ref={$popover}
                   class={(`popover ${popover.placement} ${popover.alignment}`)}
-                  style={(`--popover-anchor: ${popover.anchorName}; ${æstyles()}`)}
+                  style={(`--popover-anchor: ${popover.anchorName}; ${$styles()}`)}
                   {...attributes}
                >
                   {Slot()}
@@ -102,8 +102,8 @@ function PopoverContent(setup: FromTag<{
 }>) {
    const {
       ref,
-      æclasses,
-      æstyles,
+      $classes,
+      $styles,
       Slot,
       ...attributes
    } = setup
@@ -112,7 +112,7 @@ function PopoverContent(setup: FromTag<{
    // const { gap } = popover;
 
    return Component(
-      <div class={æclasses()} style={æstyles()} {...attributes}>
+      <div class={$classes()} style={$styles()} {...attributes}>
          {Slot()}
       </div>
    )
@@ -126,11 +126,11 @@ function PopoverTail(setup: FromTag<{
    'shape:style'?: Ion<string>
 }>) {
    const {
-      æclasses,
-      æstyles,
-      "æshape:class": æshapeClasses = toIon(''),
-      "æshape:style": æshapeStyles = toIon(''),
-      æoffset = toIon('-30%'),
+      $classes,
+      $styles,
+      "$shape:class": $shapeClasses = toIon(''),
+      "$shape:style": $shapeStyles = toIon(''),
+      $offset = toIon('-30%'),
       as: Comp = 'div',
       ...attributes
    } = setup
@@ -142,12 +142,12 @@ function PopoverTail(setup: FromTag<{
       <>
          <div
             at:mounted={node => positionTail(node, popover, $popover)}
-            class={('tail-root ' + popover.placement + ' ' + æclasses())}
+            class={('tail-root ' + popover.placement + ' ' + $classes())}
             {...attributes}
          >
             <Comp
-               class={(`tail ${popover.placement} ${æshapeClasses()}`)}
-               style={æshapeStyles}
+               class={(`tail ${popover.placement} ${$shapeClasses()}`)}
+               style={$shapeStyles}
             ></Comp>
          </div>
          {Style(css`
@@ -178,20 +178,20 @@ function PopoverTail(setup: FromTag<{
             }
 
             .tail.above {
-               bottom: ${æoffset()};
+               bottom: ${$offset()};
             }
 
             .tail.below {
-               top: ${æoffset()};
+               top: ${$offset()};
             }
 
             .tail.left {
-               right: ${æoffset()};
+               right: ${$offset()};
                // top: -50%;
             }
 
             .tail.right {
-               left: ${æoffset()};
+               left: ${$offset()};
                // top: -50%;
             }
          `)}

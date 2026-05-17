@@ -132,7 +132,7 @@ function TodoList(input: FromTag<{
    return Component(
       <>
          <ul class="todos">
-            {For(ætodos, t => t.id, (todo, $i) =>
+            {For($todos, t => t.id, (todo, $i) =>
                <li
                   transit-key={todo.id}
                   animate-item
@@ -140,7 +140,7 @@ function TodoList(input: FromTag<{
                   ref={[lis, $i]}
                >
                   <label>
-                     <input type="checkbox" mu:checked={todo.ædone} />
+                     <input type="checkbox" mu:checked={todo.$done} />
                      <span>{todo.description}</span>
                      <button on:click={() => remove(todo)} aria-label="Remove">{'X'}</button>
                   </label>

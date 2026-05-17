@@ -3,7 +3,7 @@ import { mergeTailwind } from "../utils/utils"
 
 function Card({
    size = "default",
-   æclasses,
+   $classes,
    ...attributes
 }: FromTag<{
    size?: "default" | "sm"
@@ -13,7 +13,7 @@ function Card({
       <div
          data-slot="card"
          data-size={size}
-         class={(mergeTailwind(`ring-foreground/10 bg-card text-card-foreground gap-4 overflow-hidden rounded-xl py-4 text-sm ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col`, æclasses()))}
+         class={(mergeTailwind(`ring-foreground/10 bg-card text-card-foreground gap-4 overflow-hidden rounded-xl py-4 text-sm ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col`, $classes()))}
          {...attributes}
       ></div>
    )
@@ -33,14 +33,14 @@ function CardHeader(attributes: FromTag<{}>) {
 
 
 function CardTitle({
-   æclasses,
+   $classes,
    ...attributes
 }: FromTag<{}>) {
 
    return Component(
       <div
          data-slot="card-title"
-         class={(mergeTailwind('text-base leading-snug font-medium group-data-[size=sm]/card:text-sm', æclasses()))}
+         class={(mergeTailwind('text-base leading-snug font-medium group-data-[size=sm]/card:text-sm', $classes()))}
          {...attributes}
       ></div>
    )
@@ -72,15 +72,15 @@ function CardAction(attributes: FromTag<{}>) {
 
 
 function CardContent({
-   æclasses,
+   $classes,
    ...attributes
 }: FromTag<{}>) {
 
    return Component(
       <div
          data-slot="card-content"
-         // class={[æclasses, 'px-4 group-data-[size=sm]/card:px-3']}
-         class={(mergeTailwind('px-4 group-data-[size=sm]/card:px-3', æclasses()))}
+         // class={[$classes, 'px-4 group-data-[size=sm]/card:px-3']}
+         class={(mergeTailwind('px-4 group-data-[size=sm]/card:px-3', $classes()))}
          {...attributes}
       ></div>
    )
@@ -88,15 +88,15 @@ function CardContent({
 
 
 function CardFooter({
-   æclasses,
+   $classes,
    ...attributes
 }: FromTag<{}>) {
 
    return Component(
       <div
          data-slot="card-footer"
-         // class={[æclasses, 'bg-muted/50 rounded-b-xl border-t p-4 group-data-[size=sm]/card:p-3 flex items-center']}
-         class={(mergeTailwind('bg-muted/50 rounded-b-xl border-t p-4 group-data-[size=sm]/card:p-3 flex items-center', æclasses()))}
+         // class={[$classes, 'bg-muted/50 rounded-b-xl border-t p-4 group-data-[size=sm]/card:p-3 flex items-center']}
+         class={(mergeTailwind('bg-muted/50 rounded-b-xl border-t p-4 group-data-[size=sm]/card:p-3 flex items-center', $classes()))}
          {...attributes}
       ></div>
    )

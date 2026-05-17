@@ -287,6 +287,9 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
             styles.push(bindings.style)
             break;
 
+         case 'show-if':
+            composed.showIf = bindings['show-if']
+            break;
 
          default: // attributes
             const attributes = composed.attributes ?? (composed.attributes = Object.create(null))

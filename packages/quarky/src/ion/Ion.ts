@@ -154,25 +154,25 @@ function asIon(
 // isReined
 
 
-// const æcount = ion(0)
+// const $count = ion(0)
 
-// const ædoublecount = ion(() =>{if (isIon(æcount)) return æcount() * 2}, {
+// const $doublecount = ion(() =>{if (isIon($count)) return $count() * 2}, {
 //    doSomething(){}
 // })
 
-// const æcountB = ion((prev?: number) => (prev ?? 0) + 2)
+// const $countB = ion((prev?: number) => (prev ?? 0) + 2)
 
-// const æactive = ion('frog', {
+// const $active = ion('frog', {
 //    toggle() {
 
 //    }
 // })
 
-// const æactived = ion(false, {
+// const $actived = ion(false, {
 //    toggler() { }
 // })
 
-// æactived.value = true
+// $actived.value = true
 
 // function som<T>(value: T): T {
 //    return null as T;

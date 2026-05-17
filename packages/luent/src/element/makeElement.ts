@@ -27,7 +27,7 @@ export function makeElement(
 ): DOMNode {
    console.log('@@@before compose bindings', bindings)
    const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
-
+   console.log('showIf', showIf)
    let newXML_NS: string | undefined;
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 

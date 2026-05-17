@@ -26,7 +26,7 @@ type BadgeInput = VariantProps<typeof badgeVariants> & {
 }
 
 function Badge({
-   æclasses,
+   $classes,
    variant = "default",
    as: Comp = 'span', // replaces useRender; TODO: does it cover use case below?
    ...attributes
@@ -34,7 +34,7 @@ function Badge({
 
    return Component(
       <Comp
-         class={(mergeTailwind(badgeVariants({ variant }), æclasses()))}
+         class={(mergeTailwind(badgeVariants({ variant }), $classes()))}
          {...attributes}
       ></Comp>
    )

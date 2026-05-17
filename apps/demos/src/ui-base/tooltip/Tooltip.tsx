@@ -30,8 +30,8 @@ function TooltipRoot(setup: FromTag<{
 // }>) {
 //    const {
 //       ref: $tooltip = NodeRef('div'),
-//       æclasses,
-//       æstyles,
+//       $classes,
+//       $styles,
 //       // gap = 0,
 //       Slot,
 //       tooltip,
@@ -50,7 +50,7 @@ function TooltipRoot(setup: FromTag<{
 //                   at:create={node => maybeFlip(node, tooltip)}
 //                   ref={$tooltip}
 //                   class={(`tooltip ${tooltip.placement} ${tooltip.alignment}`)}
-//                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${æstyles()}`)}
+//                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${$styles()}`)}
 //                   {...attributes}
 //                >
 //                   {Slot()}
@@ -117,8 +117,8 @@ function TooltipRoot(setup: FromTag<{
 // }>) {
 //    const {
 //       ref,
-//       æclasses,
-//       æstyles,
+//       $classes,
+//       $styles,
 //       Slot,
 //       ...attributes
 //    } = setup
@@ -127,7 +127,7 @@ function TooltipRoot(setup: FromTag<{
 //    // const { gap } = tooltip;
 
 //    return template(
-//       <div class={æclasses()} style={æstyles()} {...attributes}>
+//       <div class={$classes()} style={$styles()} {...attributes}>
 //          {Slot()}
 //       </div>
 //    )
@@ -141,11 +141,11 @@ function TooltipRoot(setup: FromTag<{
 //    'shape:style'?: Ion<string>
 // }>) {
 //    const {
-//       æclasses,
-//       æstyles,
-//       "æshape:class": æshapeClasses = toIon(''),
-//       "æshape:style": æshapeStyles = toIon(''),
-//       æoffset = toIon('-30%'),
+//       $classes,
+//       $styles,
+//       "$shape:class": $shapeClasses = toIon(''),
+//       "$shape:style": $shapeStyles = toIon(''),
+//       $offset = toIon('-30%'),
 //       as: Comp = 'div',
 //       ...attributes
 //    } = setup
@@ -156,12 +156,12 @@ function TooltipRoot(setup: FromTag<{
 //    return template(
 //       <div
 //          at:mounted={node => positionTail(node, tooltip, $tooltip)}
-//          class={('tail-root ' + tooltip.placement + ' ' + æclasses())}
+//          class={('tail-root ' + tooltip.placement + ' ' + $classes())}
 //          {...attributes}
 //       >
 //          <Comp
-//             class={(`tail ${tooltip.placement} ${æshapeClasses()}`)}
-//             style={æshapeStyles}
+//             class={(`tail ${tooltip.placement} ${$shapeClasses()}`)}
+//             style={$shapeStyles}
 //          ></Comp>
 //       </div>
 //    )
@@ -193,20 +193,20 @@ function TooltipRoot(setup: FromTag<{
 //          }
 
 //          .tail.above {
-//             bottom: ${æoffset()};
+//             bottom: ${$offset()};
 //          }
 
 //          .tail.below {
-//             top: ${æoffset()};
+//             top: ${$offset()};
 //          }
 
 //          .tail.left {
-//             right:${æoffset()};
+//             right:${$offset()};
 //             // top: -50%;
 //          }
 
 //          .tail.right {
-//             left: ${æoffset()};
+//             left: ${$offset()};
 //             // top: -50%;
 //          }
 //       `)

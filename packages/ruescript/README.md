@@ -23,6 +23,7 @@ On the templating side, JSX, though elegant in its syntactic rules, can quickly 
 
 NextScript proposes to address these caveats through thoughtfully designed syntactic sugar and principled shorthands.
 
+//TODO: JSX transpilation note
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -367,6 +368,8 @@ function logName() {
 ### Implicit JSX Return & JSX Fragments
 `function View() { <element/> }`
 Functions that contain JSX elements (or fragments) that are not nested in declarations or other expressions will implicitly wrap the JSX elements in a fragment and return that fragment.
+
+Design note: TODO:  Rationale behind implicit return.    extraneous
 ```tsx
 function Counter() {
    get count = ion(0)

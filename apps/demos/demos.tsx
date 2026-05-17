@@ -39,9 +39,10 @@ import { TestNullIon } from "./src/TestNullIon"
 import { TestRetracking } from "./src/TestRetracking"
 import { Grandparent } from "./src/TestEventBubbling"
 import { TestXray } from "./src/TestXray"
+import { FantasyGame } from "./src/Powerset"
 
 export function runDemo() {
-   createRoot(() => <TestCounter />)
+   createRoot(() => <FantasyGame></FantasyGame>)
       .mount('#root')
 }
 

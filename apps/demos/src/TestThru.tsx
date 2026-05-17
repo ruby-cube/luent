@@ -3,7 +3,7 @@ import { Thru } from "../../../packages/luent/src/iteratives/Thru";
 import { ion } from "@rue/quarky";
 
 export function TestThru() {
-   const æcount = ion(1, {
+   const $count = ion(1, {
       increment() {
          this.value++
       },
@@ -14,9 +14,9 @@ export function TestThru() {
 
    return Component(
       <div>
-         <button on:click={e => æcount.increment()}>+</button>
-         <button on:click={e => æcount.decrement()}>-</button>
-         {Thru(æcount, (count) =>
+         <button on:click={e => $count.increment()}>+</button>
+         <button on:click={e => $count.decrement()}>-</button>
+         {Thru($count, (count) =>
             <div>{count}</div>
          )}
       </div>

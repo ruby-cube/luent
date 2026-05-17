@@ -27,7 +27,7 @@ function Tooltip(setup: FromTag<{
 }>) {
    const {
       ref,
-      æclasses,
+      $classes,
       tooltip,
       tail = true,
       Slot,
@@ -56,7 +56,7 @@ function Tooltip(setup: FromTag<{
             <TooltipContent
                class={(mergeTailwind(
                   `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
-                  æclasses()
+                  $classes()
                ))}
                {...props}
             >

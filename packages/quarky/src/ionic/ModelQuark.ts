@@ -228,7 +228,7 @@ export class ModelQuark implements Atom {
     
       if (!Object.isExtensible(this.target)) return { get: () => undefined, set: nowrite }
       const valueKey = isIonKey(key) ? key.slice(1) : key
-      const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? 'æ' + key : undefined
+      const ionKey = valueKey !== key ? key as string : typeof key === 'string' ? '$' + key : undefined
       if (isNewProperty || ionKey && valueKey in this.state.get())
          return this.initPion(key, valueKey, ionKey, key === ionKey ? this.state.get()[valueKey] : undefined)
       return undefined
@@ -281,7 +281,7 @@ export class ModelQuark implements Atom {
       def: AnyObject | undefined// TODO:
    ) {
       const valueKey = isIonKey(key) ? key.slice(1) : key
-      const ionKey = key === valueKey && typeof key === 'string' ? 'æ' + key : undefined
+      const ionKey = key === valueKey && typeof key === 'string' ? '$' + key : undefined
       if ('value' in descriptor) {
          return this.initValueProperty(
             key,
@@ -627,7 +627,7 @@ function assertNotFunction(value: unknown) {
 }
 
 export function isIonKey(key: PropertyKey): key is string {
-   return typeof key === 'string' && /^\æ[a-z]/.test(key)
+   return typeof key === 'string' && /^\$[a-z]/.test(key)
 }
 
 

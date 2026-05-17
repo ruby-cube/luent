@@ -34,7 +34,7 @@ const buttonVariants = defineVariants(
 )
 
 function Button({
-   æclasses,
+   $classes,
    ref,
    variant = "default",
    size = "default",
@@ -51,8 +51,8 @@ function Button({
          data-slot="button"
          data-variant={variant}
          data-size={size}
-         class={(mergeTailwind(buttonVariants({ variant, size }), æclasses()))}
-         // class={[buttonVariants({ variant, size }), æclasses]}
+         class={(mergeTailwind(buttonVariants({ variant, size }), $classes()))}
+         // class={[buttonVariants({ variant, size }), $classes]}
          {...other}
       >{Slot()}</Comp>
    )

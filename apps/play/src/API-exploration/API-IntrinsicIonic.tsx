@@ -38,7 +38,7 @@ function ionicBind<T>(obj: T, fn: (this: Ionic<T>, ...args: any) => any) {
 
 export class IonicFrog extends IonicModel implements Ionic<IonicFrog> {
    name: string;
-   æname!: Ion<string>;
+   $name!: Ion<string>;
 
    constructor(name: string) {
       super()

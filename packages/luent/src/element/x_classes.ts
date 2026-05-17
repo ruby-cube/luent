@@ -7,9 +7,9 @@ type OverrideClassesIon = Ion<string | Falsey> & {
 export const OVERRIDE_LEVEL = Symbol('override-level')
 
 export function createOverrideClasses(classes: ClassInput | ClassInput[]) {
-   const æclasses = ion((() => {
-      if (æclasses[OVERRIDE_LEVEL]) {
-         return toOverrideClasses(normalizeToArray(classes), æclasses[OVERRIDE_LEVEL])
+   const $classes = ion((() => {
+      if ($classes[OVERRIDE_LEVEL]) {
+         return toOverrideClasses(normalizeToArray(classes), $classes[OVERRIDE_LEVEL])
       }
       console.log('override', classes)
       return classes;
@@ -17,7 +17,7 @@ export function createOverrideClasses(classes: ClassInput | ClassInput[]) {
       [OVERRIDE_LEVEL]: 0
    })
 
-   return æclasses;
+   return $classes;
 }
 
 // TODO: add css rules
@@ -30,7 +30,7 @@ function toOverrideClasses(classes: ClassInput[], level: number) {
       else {
          const value = toValue(input)
          if (!value) return;
-         if (typeof value !== 'string') throw new Error('This should never happen. æclasses should have been handled by preceding if-block')
+         if (typeof value !== 'string') throw new Error('This should never happen. $classes should have been handled by preceding if-block')
          const classes = value.split(' ')
          return classes.reduce((classString) => {
             return 'ovrrd' + level + '-' + classString.trim() + ' '
