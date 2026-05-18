@@ -6,7 +6,7 @@
 
 # NextScript
 
-NextScript is an experimental language extension of TypeScript + JSX designed to improve the clarity, readability, ergonomics, and type-safety of modern reactive application code.
+NextScript is an experimental language extension of TypeScript + JSX designed to improve the clarity, consistency, readability, ergonomics, and type-safety of modern reactive application code.
 
 > This project is in early development. Most features have been specified and partially implemented, but substantial tooling work remains before the extension is fully usable. See how to contribute here.
 
@@ -15,15 +15,14 @@ NextScript is an experimental language extension of TypeScript + JSX designed to
 
 ## Motivation
 
-Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple, readable data bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. Solutions often seem simple and elegant at first glance only to create complexity, conceptual overhead, and/or performance issues down the line through implicit behavior that do not always align with native JavaScript semantics or patterns.
+Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple, readable data bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What may seem simple and elegant at first glance often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
 
-Getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as not playing well with TypeScript type guards, impacting readability due to the visual clutter of functions and function calls, or the confusion caused by functions cloaked in data variable naming.
+Meanwhile, getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as not playing well with TypeScript type guards, impacting readability due to the visual clutter of functions and function calls, or the confusion caused by functions cloaked in data variable naming.
 
 On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell. Furthermore, control flow through ternaries aren’t always intuitive.
 
 NextScript proposes to address these caveats through thoughtfully designed syntactic sugar and principled shorthands.
 
-//TODO: JSX transpilation note
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -41,7 +40,7 @@ NextScript introduces new syntax and semantics carefully, opting for explicitnes
 ## Features
 > For examples and details, see NextScript at a glance
 ### Readability
-- **accessor variables** as scope-level counterparts to native accessor properties
+- **accessor variables** as scope-level counterparts to native accessor properties for consistency
 - **derivation expressions** for improved readability of inline derivations
 - **implicit template render functions** for improved readability of control flow
 
@@ -69,6 +68,7 @@ NextScript introduces new syntax and semantics carefully, opting for explicitnes
 ## Code comparison
 > **Note:** While the examples below feature API from Luent for demonstration purposes, NextScript may be used independently of Luent.
 
+TODO: JSX transpilation note
 
 ### Code readability
 #### with NextScript (.nsx)
@@ -184,6 +184,7 @@ Because NextScript makes use of an `@` postfix in its syntax, some developers ma
 
 ### Accessor variables
 `get variable = getter`
+
 Accessor variables, similar to native accessor properties, absorb its getter function such that variable reads return the output of the getter rather than the getter itself. Accessor variables are declared with the `get` keyword.
 ```ts
 get count = ion(0)
@@ -196,6 +197,7 @@ get double = ion(() => count * 2)
 
 #### Implicit declaration contexts
 `variable@`
+
 When declaring through parameters or destructuring, accessor variables are selectively declared through the `@` postfix operator. Unlike optional parameters, order does not matter.
 ```ts
 function foo(bar@, count) {
@@ -208,6 +210,7 @@ const { count, bar@ } = foo;
 
 #### Accessor variable writes
 `variable = value`
+
 The getter's value can be set if the getter implements the `MutableGet` interface with a writable `value` property.
 ```ts
 get count = ref(0)
@@ -233,6 +236,7 @@ interface MutableGet<T> {
 ### Accessor Properties
 #### …via colon notation
 `{ get property: getter }`
+
 In addition to native accessor property declarations, accessor properties may also be declared through colon notation.
 ```ts
 const foo = {
@@ -365,13 +369,45 @@ function logName() {
 
 ## JSX syntactic sugar
 
+### Terminology
+
+#### Render function
+In NextScript, any function that returns JSX are considered render functions:
+```tsx
+function renderFoo() {
+   return (
+      <div>hello world</div>
+   )
+}
+```
+
+#### Component factory
+Component factories are render functions that return the `<Component>` element as the root. Component factories are written in JSX templates as tags.
+```tsx
+function Foo() {
+   return (
+      <Component>
+         <div>hello world</div>
+      </Component>
+   )
+}
+
+function App() {
+   return (
+      <Component>
+         <Foo></Foo>
+      </Component>
+   )
+}
+```
+
+
 ### Implicit JSX Return & JSX Fragments
 `function View() { <element/> }`
-Functions that contain JSX elements (or fragments) that are not nested in declarations or other expressions will implicitly wrap the JSX elements in a fragment and return that fragment.
+Function blocks that contain root-level JSX expression statements will implicitly wrap the JSX statement (as well as any subsequent statements) in a JSX fragment and return that fragment.
 
-Design note: TODO:  Rationale behind implicit return.    extraneous
 ```tsx
-function Counter() {
+function renderCounter() {
    get count = ion(0)
    
    <div>{count}</div>
@@ -381,10 +417,70 @@ function Counter() {
 }
 ```
 
+Only *root-level*, JSX expression *statements* will create implicit JSX returns.
+
+There is no implicit return in this example because the JSX expression is not a statement:
+```tsx
+function Foo() {
+   const bar = <div>hello world</div>;
+}
+```
+
+There is no implicit return in this example because the JSX expression statements are not at the root-level of the function:
+```tsx
+function Counter() {
+   if (access) {
+      get count = ion(0)
+   
+      <div>{count}</div>
+      <button on:click={() => count++}>
+         +
+      </button>
+   }
+   else {
+      <div>Access denied.</div>
+   }
+}
+```
+
+Non-root-level JSX must be explicitly returned:
+```tsx
+function Counter() {
+   if (access) {
+      get count = ion(0)
+   
+      return (
+         <div>{count}</div>
+         <button on:click={() => count++}>
+            +
+         </button>
+      )
+   }
+   return (
+      <div>Access denied.</div>
+   )
+}
+```
+
+Non-JSX expression statements may not follow a JSX expression statement. This example produces invalid JSX:
+```tsx
+function Counter() {
+   get count = ion(0)
+   
+   <div>{count}</div>
+   const foo = 0;
+   <button on:click={() => count++}>
+      +
+   </button>
+}
+```
+
+
 ### Implicit Template Render Functions
 
 #### … in template call expressions
 `{If(active, <element/>)}`
+
 JSX elements that are passed as the final argument of a call expression are implicitly wrapped in a render function. 
 ```tsx
 <div>

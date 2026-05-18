@@ -9,11 +9,11 @@ type ReactiveClasses = {
    [key: string]: MaybeIon<Booleanny>;
 }
 
-export type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
-export type ClassInput = ReactiveClasses | MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | ClassInput)[]
+export type TagStyle = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
+export type TagClass = ReactiveClasses | MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | TagClass)[]
 type Falsey = undefined | null | false | ''
 
-export function setUpClasses(node: Element, classes: ClassInput[]) {
+export function setUpClasses(node: Element, classes: TagClass[]) {
    const flask = getFlask()
    const classList = node.classList
 
@@ -206,7 +206,7 @@ export function setUpConditionalDisplay(node: { style: CSSStyleDeclaration }, $s
 }
 
 
-export function setUpStyles(node: Element, styles: StyleInput[]) {
+export function setUpStyles(node: Element, styles: TagStyle[]) {
    const flask = getFlask()
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {

@@ -248,7 +248,7 @@ type TagAttributes<D> =
    Attributes<D>
    // StaticInput<D>
    // & MaybeIonAttributes<D>
-   & MutableIonAttributes<D>
+   & MutableAttribute<D>
    // & NonmutableIonAttributes<D>
    & TagEvents<D>
    // & { class?: MaybeIon<string>, style?: MaybeIon<string> }
@@ -307,14 +307,14 @@ type MaybeIonAttributes<D> = {
 //    | (OnlyPrimitives<D[K]>)
 // }
 
-type MutableIonAttributes<D> = {
+type MutableAttribute<D> = {
    [K in keyof D
-   as IncludesIon<D[K]> extends true ?
-   K extends `mu:${string}` ? K
+   as K extends `mu:${string}` ? K
    : K extends `mu?:${infer S}` ? `mu:${S}`
    : never
-   : never]?:
-   ToMuIon<ExcludePrimitives<D[K]>> | OnlyPrimitives<D[K]>
+   ]?:
+   D[K]
+   // ToMuIon<ExcludePrimitives<D[K]>> | OnlyPrimitives<D[K]>
 }
 
 

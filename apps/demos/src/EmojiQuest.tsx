@@ -1,9 +1,14 @@
-import { $of, Component, createRoot, css, Else, For, FromTag, If, RenderSlot, Style } from "@rue/luent";
-import { ion, Ion, ionic } from "@rue/quarky";
+import { $of, Component, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
+import { ion, Ion, Ionic, ionic } from "@rue/quarky";
 
-type TagClass = any // TODO
 
 export function EmojiQuest() {
+   const powers = ['🍀', '🍄', '✨', '🌱', '🔥', '☄️', '💎', '🔮', '⚗️', '🪵', '🫧'] as const
+   const powerset = ionic([] as typeof powers[number][], {
+      addRandomPower() {
+         this.push(powers[Math.floor(Math.random() * powers.length)])
+      }
+   })
    return Component(
       <>
          <main>
@@ -11,7 +16,7 @@ export function EmojiQuest() {
          </main>
          <aside>
             <Panel title="Powerset">
-               <Powerset limit={10}></Powerset>
+               <Powerset mu:powerset={powerset} limit={10}></Powerset>
             </Panel>
          </aside>
       </>
@@ -68,17 +73,13 @@ function Panel(setup: FromTag<{
 }
 
 function Powerset(setup: FromTag<{
-   initial?: string[]
+   'mu:powerset': Ionic<string[]> & { addRandomPower(): void }
    limit: number,
    class?: Ion<TagClass>
 }>) {
-   const { initial = [], limit, $class } = setup;
-   const powers = ['🍀', '🍄', '✨', '🌱', '🔥', '☄️', '💎', '🔮', '⚗️', '🪵', '🫧']
-   const powerset = ionic([...initial], {
-      addRandomPower() {
-         this.push(powers[Math.floor(Math.random() * powers.length)])
-      }
-   })
+   const { mu, limit, $class } = setup;
+   const { powerset } = mu
+
    const count = $of(powerset).length
    const remaining = ion(() => limit - count())
 
@@ -95,7 +96,7 @@ function Powerset(setup: FromTag<{
                <button
                   class='add-power-button'
                   disabled={() => count() === limit}
-                  on:click={() => powerset.addRandomPower()}
+                  on:click={() => mu.powerset.addRandomPower()}
                >
                   +
                </button>
@@ -109,7 +110,7 @@ function Powerset(setup: FromTag<{
             {If(remaining,
                <>
                   <div class='message'>You have {remaining} slots left.</div>
-                  <div class='message'>You started with {initial.length} powers.</div>
+                  <div class='message'>You started with {powerset.length} powers.</div>
                </>
             )}
             {Else(

@@ -4,7 +4,7 @@ import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@rue/quarky"
 import { TransitionConfigs } from "../transitions/transitions"
-import { ClassInput, StyleInput } from "../element/styles"
+import { TagClass, TagStyle } from "../element/styles"
 import { ComponentKit } from "@rue/ruescript"
 import { RawJSXNode } from "../node/makeJSXNode"
 
@@ -35,9 +35,9 @@ type ComposedBindings = {
    hooks: EventBindings
    attributes: { [key: string]: any }
    mutables: { [key: string]: any }
-   microclasses?: ClassInput,
-   classes?: ClassInput,
-   styles?: StyleInput[],
+   microclasses?: TagClass,
+   classes?: TagClass,
+   styles?: TagStyle[],
    transitions?: TransitionConfigs
    showIf?: Ion<boolean>
    ref?: NodeRef | NodeRefsConfig,

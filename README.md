@@ -58,8 +58,8 @@ In NextScript:
 
 Plain JSX and NextScript JSX are both sufficiently readable in Luent. However, there are a few advantages to using NextScript:
 - improved readability of derivations, especially in-template derivations.
-- enforced visual distinction between static and reactive bindings. (Note: The distinction can also be achieved outside of NextScript through naming convention, e.g. `const $count = ion(0)`, but would require additional enforcement to guarantee consistency)
-- JSX without excessive fragments and indentation
+- visual distinction between static and live reference bindings. (Note: The distinction can also be achieved outside of NextScript through naming convention, e.g. `const $count = ion(0)`, but would require additional enforcement to guarantee consistency)
+- JSX without extraneous fragments and indentation
 
 #### Luent with NextScript
 
