@@ -67,7 +67,7 @@ const INTERNAL_OP = "[[INTERNAL]]"
 function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
    return {
       get(_, key, receiver) {
-         __DEV__assertNotPrototype(modelQuark.proxy, receiver)
+         // __DEV__assertNotPrototype(modelQuark.proxy, receiver)
          const proto = modelQuark.proto
          if (!proto.has(key)) {
             return modelQuark.initProperty(key)?.get()
@@ -76,7 +76,7 @@ function useTraps(modelQuark: ModelQuark): ProxyHandler<ModelQuark> {
       },
 
       set(_, key, newValue, receiver) {
-         __DEV__assertNotPrototype(modelQuark.proxy, receiver)
+         // __DEV__assertNotPrototype(modelQuark.proxy, receiver)
          const proto = modelQuark.proto
          if (!proto.has(key) && !(key in modelQuark.state.get())) {
             return Boolean(modelQuark.setNewProperty(key, newValue)?.set(newValue))

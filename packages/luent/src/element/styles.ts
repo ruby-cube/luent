@@ -230,6 +230,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isGetter(value)) {
             watchToRender(value, () => {
+               console.log('style entry', key, value)
                queueRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
                })

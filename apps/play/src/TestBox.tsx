@@ -1,5 +1,5 @@
 import { Component, template } from "@rue/luent";
-import { ionize } from "@rue/quarky";
+import { ion, ionic } from "@rue/quarky";
 
 
 //tests:
@@ -7,13 +7,12 @@ import { ionize } from "@rue/quarky";
 
 export function TestBox() {
 
-   const box = ionize({
-      position: {
+   const box = {
+      position: ionic({
          x: 0,
          y: 0
-      }
-   })
-
+      })
+   }
 
    function moveRight() {
       box.position.x = box.position.x + 10;
@@ -23,13 +22,14 @@ export function TestBox() {
       box.position.x = box.position.x - 10;
    }
 
-
-
    return Component(
       <>
          <div style={{
+            position: 'absolute',
+            width: '100px',
+            height: '100px',
             backgroundColor: 'lightgray',
-            transform: (`translate(${box.position.x}px)`)
+            transform: ()=>`translate(${box.position.x}px)`
          }}>I'm a box</div>
          <button on:click={moveLeft}>moveLeft</button>
          <button on:click={moveRight}>moveRight</button>

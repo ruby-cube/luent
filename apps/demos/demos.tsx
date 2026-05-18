@@ -39,10 +39,10 @@ import { TestNullIon } from "./src/TestNullIon"
 import { TestRetracking } from "./src/TestRetracking"
 import { Grandparent } from "./src/TestEventBubbling"
 import { TestXray } from "./src/TestXray"
-import { FantasyGame } from "./src/Powerset"
+import { EmojiQuest } from "./src/EmojiQuest"
 
 export function runDemo() {
-   createRoot(() => <FantasyGame></FantasyGame>)
+   createRoot(() => <EmojiQuest></EmojiQuest>)
       .mount('#root')
 }
 

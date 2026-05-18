@@ -149,9 +149,9 @@ import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises
 
 
 // const app = createRoot(TestThru)
-// const app = createRoot(TestAsyncMultipliers)
+const app = createRoot(TestBox)
 
-// app.mount('#root')
+app.mount('#root')
 
 // const frog = new IonicFrog('kermit')
 
