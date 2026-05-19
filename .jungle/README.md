@@ -1,4 +1,4 @@
 # The Jungle
-Where chaos rules. 
+Where chaos and nonsense reign. 
 
 Go back. Keep out. This is jungle of no return... 
