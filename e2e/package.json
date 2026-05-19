@@ -1,7 +1,8 @@
 {
-  "name": "@rue/tests",
+  "name": "@rue/e2e",
   "private": true,
   "description": "",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build-babel": "tsc --jsx react-jsx && babel src -d dist"

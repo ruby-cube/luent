@@ -2,7 +2,8 @@ packages:
   - packages/**
   - plugins/**
   - apps/**
-  - tests/**
+  - demos/**
+  - e2e/**
 
 ignoredBuiltDependencies:
   - '@firebase/util'

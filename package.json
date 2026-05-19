@@ -1,7 +1,6 @@
 {
   "name": "@rue/root",
   "private": true,
-  "description": "A collection of TypeScript-enhanced libraries to manage complexity. Covers event-driven architecture, composition, tree structures, and control flow",
   "type": "module",
   "scripts": {
     "build": "pnpm run typecheck && vite build",
@@ -13,14 +12,16 @@
     "ni:luent": "pnpm -F @rue/luent install",
     "ni:play": "pnpm -F @rue/play install",
     "ni:demos": "pnpm -F @rue/demos install",
-    "ni:tests": "pnpm -F @rue/tests install",
-    "test-demos": "pnpm exec playwright test --project=chromium",
+    "ni:e2e": "pnpm -F @rue/e2e install",
+    "test-demos": "pnpm exec playwright test --config=e2e/playwright.config.ts --project=chromium",
+    
     "dev": "pnpm -F @rue/play dev",
     "dev-movies": "pnpm -F @rue/movies-app dev",
     "dev-demos": "pnpm -F @rue/demos dev",
     "dev-style": "pnpm -F @rue/demos dev-style",
-    "dev-tests": "pnpm -F @rue/tests dev",
+    "dev-e2e": "pnpm -F @rue/e2e dev",
     "dev-chat": "pnpm -F @rue/live-chat dev",
+
     "build-babel": "pnpm -F @rue/play build-babel",
     "ni:quarky": "pnpm -F @rue/quarky install",
     "mu-lint": "pnpm exec tsc apps/play/mu-linting/mu-mutation-linter.ts apps/play/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir apps/play/mu-linting/.tmp-run && node apps/play/mu-linting/.tmp-run/run-mu-mutation-lint.js",

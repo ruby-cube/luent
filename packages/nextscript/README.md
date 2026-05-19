@@ -1,6 +1,6 @@
 <div align="center">
 <picture>
-  <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/packages/nextscript/nextscript-logo-padded.png" alt="luent-logo"/>
+  <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/packages/nextscript/assets/nextscript-logo-padded.png" alt="luent-logo"/>
 </picture>
 </div>
 

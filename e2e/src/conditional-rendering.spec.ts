@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import "../../playwright.fixtures"
+import "../playwright.fixtures"
 
 const LOCAL_HOST = 'http://localhost:5173/'
 

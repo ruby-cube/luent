@@ -12,15 +12,15 @@ import { dirname, resolve } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const testsDir = resolve(__dirname, 'tests');
+const repoRoot = resolve(__dirname, '..');
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
    // globalSetup: resolve(__dirname, './playwright-global-setup.ts'),
-   testDir: './tests/src/',
-   outputDir: resolve(testsDir, 'test-results'),
+   testDir: './src/',
+   outputDir: resolve(__dirname, 'test-results'),
    /* Run tests in files in parallel */
    // fullyParallel: true,
    /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -30,7 +30,7 @@ export default defineConfig({
    /* Opt out of parallel tests on CI. */
    workers: process.env.CI ? 1 : undefined,
    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-   reporter: [['html', { outputFolder: resolve(testsDir, 'playwright-report') }]],
+   reporter: [['html', { outputFolder: resolve(__dirname, 'playwright-report') }]],
    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
    use: {
       // headless: false,
@@ -82,6 +82,7 @@ export default defineConfig({
     /* Run your local dev server before starting the tests */
     webServer: {
        command: 'NODE_ENV=test pnpm run dev-demos',
+       cwd: repoRoot,
        url: 'http://localhost:5173',
        reuseExistingServer: !process.env.CI,
     },
