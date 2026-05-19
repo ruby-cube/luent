@@ -1,0 +1,45 @@
+{
+   "name": "@rue/nextscript",
+   "private": false,
+   "version": "0.1.0",
+   "description": "",
+   "exports": {
+      ".": "./src/index.ts",
+      "./transpile": {
+         "types": "./src/transpile.ts",
+         "default": "./dist/transpile.mjs"
+      }
+   },
+   "main": "./src/index.ts",
+   "module": "./src/index.ts",
+   "files": [
+      "dist"
+   ],
+   "scripts": {
+      "build": "tsdown src/index.ts src/transpile.ts --format esm --out-dir dist --clean",
+      "watch": "tsdown src/index.ts src/transpile.ts --format esm --out-dir dist --clean --watch",
+      "prepack": "pnpm run build",
+      "pack": "pnpm pack",
+      "publish:dry": "pnpm publish --dry-run --no-git-checks",
+      "publish:public": "pnpm publish --no-git-checks"
+   },
+   "publishConfig": {
+      "access": "public"
+   },
+   "dependencies": {
+      "@rue/utils": "workspace:*",
+      "@types/estree": "^1.0.8",
+      "@types/estree-jsx": "^1.0.5",
+      "@volar/language-core": "~2.4.0",
+      "esrap": "^2.2.4",
+      "oxc-parser": "^0.124.0",
+      "zimmerframe": "^1.1.4"
+   },
+   "devDependencies": {
+      "@rue/types": "workspace:*",
+      "tsdown": "^0.21.9",
+      "typescript": "^6.0.3"
+   },
+   "author": "Ruby Yi Wang",
+   "license": "MIT"
+}

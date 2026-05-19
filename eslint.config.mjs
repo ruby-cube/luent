@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import tsParser from '@typescript-eslint/parser'
-// import { createRXSProcessor } from './packages/ruescript/scripts/eslint-rxs-processor.mjs'
+// import { createNSXProcessor } from './packages/nextscript/scripts/eslint-nsx-processor.mjs'
 
 const require = createRequire(import.meta.url)
 const muRules = require('@rue/eslint-plugin-mu')
@@ -15,7 +15,7 @@ const defaultIgnores = [
 
 export default [
 //   {
-//     files: ['**/*.rxs'],
+//     files: ['**/*.nsx'],
 //     ignores: defaultIgnores,
 //     languageOptions: {
 //       parser: tsParser,
@@ -24,7 +24,7 @@ export default [
 //         ecmaFeatures: { jsx: true },
 //       },
 //     },
-//     processor: createRXSProcessor(),
+//     processor: createNSXProcessor(),
 //     rules: {},
 //   },
   {

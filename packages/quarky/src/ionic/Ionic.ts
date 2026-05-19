@@ -5,7 +5,6 @@ import type{ QuarkyIonicProxy } from "./ModelQuark";
 import { isObject } from "@rue/utils";
 import { Ion } from "../ion/Ion";
 
-export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 
 
 // export type DeepIonic<T, N> = Ionized<{ [P in Exclude<keyof T, keyof N>]: T[P]; }> & { [K in keyof N]: N[K] extends (...args: any[]) => infer R ? R : never }
@@ -20,16 +19,16 @@ export type IonicProxy = AnyObject & { '~ionic-proxy': true }
 // **** THIS WORKS: I just need to figure out how to connect it to selective ionization config
 export type Expand<T> = T extends infer O ? O : never;
 
-type AbsorbIons<T> = T extends any[] ? T : { [K in keyof T as K extends `$${infer S}` ? T[K] extends () => any ? S : K : K]: K extends `$${infer S}` ? T[K] extends () => infer V ? V : T[K] : T[K] }
+// type AbsorbIons<T> = T extends any[] ? T : { [K in keyof T as K extends `$${infer S}` ? T[K] extends () => any ? S : K : K]: K extends `$${infer S}` ? T[K] extends () => infer V ? V : T[K] : T[K] }
 
-type IonAccess<T, M = {}> = Expand<{
-   [K in keyof T as K extends '~ionic' ? never :K extends `$${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never :`$${K}` : T[K] extends Function ? never : K extends string ? `$${K}` : never]:
-   K extends `$${string}`
-   ? T[K] extends Ion<infer V>
-   ? NestedType<K, M, V>
-   : Ion<NestedType<K, M, T[K]>>
-   : Ion<NestedType<K, M, T[K]>>
-}>
+// type IonAccess<T, M = {}> = Expand<{
+//    [K in keyof T as K extends '~ionic' ? never :K extends `$${infer I}` ? T[K] extends () => any ? I : T[K] extends Function ? never :`$${K}` : T[K] extends Function ? never : K extends string ? `$${K}` : never]:
+//    K extends `$${string}`
+//    ? T[K] extends Ion<infer V>
+//    ? NestedType<K, M, V>
+//    : Ion<NestedType<K, M, T[K]>>
+//    : Ion<NestedType<K, M, T[K]>>
+// }>
 
 type Methods<M> = Expand<{
    [K in keyof M as M[K] extends Function ? K : never]: M[K]
@@ -38,20 +37,30 @@ type Methods<M> = Expand<{
 export type Nested<T> = { [K in keyof T]: { '-as': (arg: any) => T[K] } }
 
 // TODO: Ionizing types with non-object intersections
+// export type Ionic<T, M = {}> = T extends any[] ?
+//    Ionize<Expand<{
+//       [K in keyof T]: NestedType<K, M, T[K]>
+//    } & IonAccess<T, M> & Methods<M>>>
+//    : Ionize<Expand<Glass<{
+//       [K in keyof T]: NestedType<K, M, T[K]>
+//    } & IonAccess<T, M> & Methods<M>>>>
+
 export type Ionic<T, M = {}> = T extends any[] ?
    Ionize<Expand<{
       [K in keyof T]: NestedType<K, M, T[K]>
-   } & IonAccess<T, M> & Methods<M>>>
+   } & Methods<M>>>
    : Ionize<Expand<Glass<{
       [K in keyof T]: NestedType<K, M, T[K]>
-   } & IonAccess<T, M> & Methods<M>>>>
+   } & Methods<M>>>>
+
+
 
 type NestedType<K, M, V> = K extends keyof M
-   ? M[K] extends { '-as': infer N } ? N extends { '~Ionic': true } ? Ionic<V> : N extends ((arg: any) => infer R) ? R : N
+   ? M[K] extends { '-as': infer N } ? N extends { '~ionizer': true } ? Ionic<V> : N extends ((arg: any) => infer R) ? R : N
    : V
    : K extends number
    ? M extends { [EACH]: infer O }
-   ? O extends { '-as': infer N } ? N extends { '~Ionic': true } ? Ionic<V> : N extends (arg: any) => infer R ? R : N
+   ? O extends { '-as': infer N } ? N extends { '~ionizer': true } ? Ionic<V> : N extends (arg: any) => infer R ? R : N
    : V
    : V
    : V
@@ -108,9 +117,9 @@ type IonicConfig<T> = {
 
 
 
-export const Ionic = ionic as typeof ionic & { '~Ionic': true }
+export const Ionic = ionic as typeof ionic & { '~ionizer': true }
 
-export function ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<AbsorbIons<T>, M> {
+export function ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<T, M> {
    if (isIonicProxy(target)) {
       return target as any
    }

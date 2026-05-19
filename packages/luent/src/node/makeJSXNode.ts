@@ -13,7 +13,7 @@ import { DOMNode, VineNode } from "./VineNode";
 import { NodeRefsConfig } from "./NodeRefs";
 import { normalizeToArray, toError } from "@rue/utils";
 import { RenderError } from "../boundaries/Try";
-import { ComponentKit } from "@rue/ruescript";
+import { ComponentKit } from "@rue/nextscript";
 
 export type TagType = ComponentTag | string
 

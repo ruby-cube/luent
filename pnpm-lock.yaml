@@ -142,9 +142,9 @@ importers:
       '@rue/quarky':
         specifier: workspace:*
         version: link:../../packages/quarky
-      '@rue/ruescript':
+      '@rue/nextscript':
         specifier: workspace:*
-        version: link:../../packages/ruescript
+        version: link:../../packages/nextscript
       '@rue/thread':
         specifier: workspace:*
         version: link:../../packages/x-old/thread
@@ -386,9 +386,9 @@ importers:
       '@rue/quarky':
         specifier: workspace:*
         version: link:../quarky
-      '@rue/ruescript':
+      '@rue/nextscript':
         specifier: workspace:*
-        version: link:../ruescript
+        version: link:../nextscript
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils
@@ -416,7 +416,7 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/ruescript:
+  packages/nextscript:
     dependencies:
       '@rue/utils':
         specifier: workspace:*
@@ -497,11 +497,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/x-old/tsserver-plugin-ruescript:
+  packages/x-old/tsserver-plugin-nextscript:
     dependencies:
-      '@rue/ruescript-language-service':
+      '@rue/nextscript-language-service':
         specifier: workspace:*
-        version: link:../../x-ruescript-language-service
+        version: link:../../x-nextscript-language-service
       '@volar/typescript':
         specifier: ^2.4.28
         version: 2.4.28
@@ -512,19 +512,19 @@ importers:
         specifier: workspace:*
         version: link:../../types
 
-  packages/x-old/x-tsserver-plugin-ruescript:
+  packages/x-old/x-tsserver-plugin-nextscript:
     dependencies:
-      '@rue/ruescript':
+      '@rue/nextscript':
         specifier: workspace:*
-        version: link:../../ruescript
+        version: link:../../nextscript
 
-  packages/x-old/x-vscode-ruescript: {}
+  packages/x-old/x-vscode-nextscript: {}
 
-  packages/x-ruescript-language-service:
+  packages/x-nextscript-language-service:
     dependencies:
-      '@rue/ruescript':
+      '@rue/nextscript':
         specifier: workspace:*
-        version: link:../ruescript
+        version: link:../nextscript
 
   plugins/babel-plugin-luent:
     dependencies:
@@ -546,9 +546,9 @@ importers:
       '@rue/luent':
         specifier: workspace:*
         version: link:../../packages/luent
-      '@rue/ruescript':
+      '@rue/nextscript':
         specifier: workspace:*
-        version: link:../../packages/ruescript
+        version: link:../../packages/nextscript
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -560,11 +560,11 @@ importers:
         specifier: ^8.0.13
         version: 8.0.13(@types/node@25.8.0)(esbuild@0.27.7)(jiti@2.6.1)(less@4.6.4)(sass@1.98.0)(stylus@0.62.0)(terser@5.46.1)
 
-  plugins/volar-ruescript:
+  plugins/volar-nextscript:
     dependencies:
-      '@rue/ruescript':
+      '@rue/nextscript':
         specifier: workspace:*
-        version: link:../../packages/ruescript
+        version: link:../../packages/nextscript
       '@types/estree':
         specifier: ^1.0.8
         version: 1.0.8
@@ -602,7 +602,7 @@ importers:
         specifier: ^1.1.4
         version: 1.1.4
 
-  plugins/vscode-ruescript:
+  plugins/vscode-nextscript:
     dependencies:
       '@types/vscode':
         specifier: ^1.115.0

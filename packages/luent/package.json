@@ -8,7 +8,7 @@
       "@rue/flask": "workspace:*",
       "@rue/quarky": "workspace:*",
       "@rue/utils": "workspace:*",
-      "@rue/ruescript": "workspace:*",
+      "@rue/nextscript": "workspace:*",
       "dompurify": "^3.4.3"
    },
    "devDependencies": {

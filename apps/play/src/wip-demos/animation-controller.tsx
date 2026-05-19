@@ -1,6 +1,8 @@
-import { Component, $thisView, template, If, NodeRef } from "@rue/luent";
-import {  ion } from "@rue/quarky";
-import { inert } from "../../../../packages/x-old/x_inert";
+import { Component, NodeRef } from "@rue/luent";
+import {  ion, ionic } from "@rue/quarky";
+
+// Source of AnimationAnimator class: https://svelte.dev/playground/a7b1bf2fb4d947eda4f72ebabd8b06e6?version=5.19.0#H4sIAAAAAAAAE7VYbY_buBH-K3O6ApYvXtmbXg6t19oi2eSAAA1wyOaAAFU_0NJ4lw1F6cjRrl3D_70gKUukLPu2Re_DrmXOyzOcd3kfSVZitIzeSl4y4pWEu0qSqoRAFc2iDReoo-U_9hHtasNnDqJZJ1XXiX5CQeZszTSOneeVJJSko2W00rniNd1mMqP5HL48cg15VaKGjapKYBJwS6gkEyD4WjG1SwwrL-tKEXxGlhN_ws7W3lQnn0XJ_AJTa1LyL51FN57ePVTyU9VIgsNRj-Ns2cyfQIKcySemIYU_aWKE8fSmo_SGjFBrwXbvGqJKdkfES7znBaoAAAWrNRa9jkWvhOtfBNtx-dBTSTU47RS0d4jjKaS3sLfHFBgm8fmSD2N3v1ajJ5qwovjwhJL-zjWhRBVnUVMXzDhoBjH6gBn1l8CkQGJcJO1Rq_jwMgTjtV9Yo0dBfG90MN3hBSCjtQ2NI8uMNo3Mbep3kPH0CMU3EHviHcS0t8Uja6rq-Ih6ABQaR_k8KzI6WGMGpjj_fuElmqv30dQudz6ZNKyZ0vhRUowJMfWAlDwx0aWEj_dQfamsLifb3j-Tq3lfkHJV8CfQtBOYZlHBtTFyCRuB2xv7_6rgCq11S8gr0ZTyBpjgD_KKE5basV5pYoqyyJb4qq2YNZfFkh65Tvfu5NDhrCtVoFrCdb0FXQlewFqw_FsWwTMv6DHNop8WiyyCR-QPj5Rm0Wvz9XY1d4oczHdXV_ARnpkkMChQMGJAFawRVJvvcHXleHXN5O2-zcjDam6_W0rBn26d51ZrW61QyVzw_Fu67xLjcLvvU-9vMKnN4QSWMDEsk8Nq7kSPirisG4JK2s9030f1AKahplmkmHzALIKSyzSLzFVLtk2z6M3C3ttGNO3sdZbOnanuM5pFhFuKlqYdHGZnOvWL2mLYxF8q4vX3tqFebNBj6o4dWeLWKihwwxpBkAumtZ0JstCjam1loGkdX2wJtG3uQ38SH8v8pMeYe84gZ0KsWf6tqzKTQomn8rQ5DQRvvAJWWFZP-L_hvEDWhzIlyih_tAIto-uEg4ZhMVrH3DWaqtIX2bdC0LXLE8NCJEsJLVHsOc4bpVDS1w5cNzWqJKT5CKFWf6Tsj5NwCc6WdqQcAlTXREO0oLGOogRjZd-P1SWY-hlAuH4eQgQ9_r-E2DAzEXqMw8uKd7xkBivXOR6vPEerqxN0D5UKkkc1OVXdatAPM3vxbiFyDzchkbYdJXlAMnbhluLJ62IyDVn1bw1TeM__jZDCm8WAaAbKV0hhcI6y-NoD2GkBVzDQF4rsIIX2KokbKKcSU5jD61CMHT30vlFuRzZWLsbsNK3dVFojxBkdPyt2hqVfnAaa7ZA5q9lfhWx-eWuFfRivTruA3wlkqnXhMHhJboifMad4MYPFDLyQO3eHR86hfWQ9mPeKPYNz8QnKhgtxb5YBSGHy_Z9__OtfivXkJJMsm7XleJEWfDcbBvDkYDp0iIsFHlUZz3puMRvfd2FEPepIsD01x3QKF14P2nmdibwRjBBqVT0o1BrihdlXrqdnEmIEorOgA3HNvlOZwidGj0nJZRxom8N4Us_gejR4vbWtFVBXmhuJEPgYGEjBr9tXEPfl6tv-dQo_dNaezZoj5saUTeCd0cESKPjVDhTQwrxoAd8AJ8At16RDy-3LmGNKoajypkRJpmV9EGge3-0-FvGk5_Lal0mWnhDmSXfs1vKjX4a54Vvx3m3dv2dGy-bZ0VvS0gJTnDEtJTFd-M4NBdMPB8lxvVgspglVP_MtFvH1FF7BRE88oIOf1CfJUkniskHo0sv4XVbmFbmsBRL6nutydQXXpzV20jIV_tagprfBeezxYmLeNOzJtPfN8D2sK2Fvjnv1072sX4pCz3UShJ40iEFPGIRgYhr4JRd37SNcedrylDkKYHLnctsMgs5zQZqe-jQwMLeKzju3E7q5lACfUSOBLXCb0bBuCErGJTEuux84DOVlw9NTfW-Vntzt_5orJxPV7GXD-RFuhX-Ud1-0OBzOGj66Cgx_Bwgy6Z6q2uaRaqQcTaPRuvG3CVbWLupUeR2gaCfMYF4YbizaoLtZxbZm1-jnlrVydmZgTS81_bOZ5g3V3oDLc69rU0wWZ4afN3VfNGwHQ_uPmZ12ZgIj0DXmfMPH3DE6RU_fTP45i8w74jOXRbS0qXX4D6KGjjI7FgAA
+// linked from https://github.com/sveltejs/svelte/issues/15068
 
 class AnimationAnimator {
    canvas: HTMLCanvasElement;
@@ -15,9 +17,10 @@ class AnimationAnimator {
    elapsed: number;
    pauseTime: null | number;
    isPlaying: boolean;
+
    constructor(canvas: HTMLCanvasElement) {
-      this.canvas = inert(canvas);
-      this.ctx = inert(canvas.getContext('2d'));
+      this.canvas = canvas;
+      this.ctx = canvas.getContext('2d');
       this.squareSize = 50;
       this.startX = 0;
       this.endX = canvas.width - this.squareSize;
@@ -121,7 +124,7 @@ export function TestAnimationController() {
 
    const $canvas = NodeRef('canvas')
 
-   // const $animation = ion(() =>$canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
+   // const $animation = ion(() =>$canvas() ? ionic(new AnimationAnimator(inert($canvas()))) : undefined)
 
    const $elapsed = ion(() =>$animation()?.$elapsed() ?? 0)
    const $isPlaying = ion(() =>$animation()?.$isPlaying() ?? false)
@@ -146,11 +149,11 @@ export function TestAnimationController() {
 
    function initAnimation(canvas) {
       console.log('on mount')
-      const animation = $animation.value = ionize(new AnimationAnimator(canvas.ref))
+      const animation = $animation.value = ionic(new AnimationAnimator(canvas.ref))
 
       // debug.traceTriggers('# animation', animation, { canvas: true })
 
-      // const list = ionize([])
+      // const list = ionic([])
 
       // animation.play()
       // $elapsed = animation.$elapsed
@@ -194,9 +197,9 @@ export function TestAnimationController() {
 
 
 // function AnimationKit(canvas) {
-//    const animation = ionize(new AnimationAnimator(inert(canvas)
+//    const animation = ionic(new AnimationAnimator(inert(canvas)
 //       // , {
-//       //    ionize: {
+//       //    ionic: {
 //       //       elapsed: true,
 //       //       isPlaying: true,
 //       //       // canvas: 'inert'

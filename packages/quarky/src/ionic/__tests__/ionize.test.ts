@@ -1,8 +1,10 @@
 //@ts-nocheck
 import { describe, expect, it } from "vitest"
-import { ionize, isIonicProxy, MARK, withInertItems } from "../x_ionize"
+// import { ionize, isIonicProxy, MARK, withInertItems } from "../x_ionize"
 import { watch } from "../../reactivity/Watcher"
-import { inert, isInert } from "../../../../x-old/x_inert"
+// import { inert, isInert } from "../../../../x-old/x_inert"
+
+// TODO: update with new API
 
 // [x] ionize Object
 // [] ionize Array

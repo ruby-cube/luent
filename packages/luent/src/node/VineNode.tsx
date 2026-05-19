@@ -1,6 +1,6 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@rue/utils";
 import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, queueRender, untracked, watch, watchToRender} from "@rue/quarky";
-import { isComponentKit } from "@rue/ruescript";
+import { isComponentKit } from "@rue/nextscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { CONTEXT, ContextNode } from "../context/context-stack";

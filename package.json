@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run typecheck && vite build",
-    "typecheck": "pnpm run typecheck:rxs",
+    "typecheck": "pnpm run typecheck:nsx",
     "preview": "vite preview",
     "test": "vitest --run --reporter verbose",
     "ni:flask": "pnpm -F @rue/flask install",

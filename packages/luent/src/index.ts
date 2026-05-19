@@ -31,8 +31,8 @@ export * from '../../quarky/src/specialty/Finitron'
 export * from './measureLayout'
 export * from './element/styles'
 export * from '../../quarky/src/reactivity/RenderCycle'
-export { JSXComponent as Component, toª as to$, ªªof as $of } from '@rue/ruescript'
-export type { ComponentKit } from '@rue/ruescript'
+export { JSXComponent as Component, toª as to$, ªªof as $of } from '@rue/nextscript'
+export type { ComponentKit } from '@rue/nextscript'
 
 
 //@ts-expect-error

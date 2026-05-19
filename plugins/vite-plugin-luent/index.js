@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import { transformWithOxc } from 'vite'
 import * as babel from '@babel/core'
 import { luentPreTransform as BabelLuentPlugin } from '@rue/babel-plugin-luent'
-import { transpileRueScript } from '@rue/ruescript/transpile'
+import { transpileNextScript } from '@rue/nextscript/transpile'
 
 const require = createRequire(import.meta.url)
 
@@ -29,14 +29,14 @@ export default function LuentPlugin() {
          }
       },
       {
-         name: 'vite-rxs-loader',
+         name: 'vite-nsx-loader',
          enforce: 'pre',
          async load(id) {
             const fileName = id.split('?')[0]
-            if (!fileName.endsWith('.rxs')) return
+            if (!fileName.endsWith('.nsx')) return
 
             const code = await readFile(fileName, 'utf8')
-            const sugaredCode = transpileRueScript(fileName, code).transpiled.code
+            const sugaredCode = transpileNextScript(fileName, code).transpiled.code
             const result = await babel.transformAsync(sugaredCode, {
                plugins: [
                   BabelLuentPlugin,
@@ -51,7 +51,7 @@ export default function LuentPlugin() {
                }
             })
 
-            const normalized = await transformWithOxc(result.code, fileName.replace(/\.rxs$/, '.tsx'), {
+            const normalized = await transformWithOxc(result.code, fileName.replace(/\.nsx$/, '.tsx'), {
                jsx: {
                   runtime: 'automatic',
                   importSource: '@rue/luent'

@@ -1,0 +1,46 @@
+import { ion } from '@rue/quarky'
+let b = 9
+b = ''
+
+get count = ion(0 + b);
+get other = ref('something');
+
+get double = 0
+
+// assertGetter(()=>'hi')
+// 
+// function assertGetter<T extends () => any>(getter: T): T {
+//    if (typeof getter !== 'function' || getter.length !== 0) {
+//       throw new TypeError(`Getter must be a function: ${getter}`)
+//    }
+//    return getter
+// }
+
+// const obj = {
+//   get frog: ref('kermit')
+//}
+
+watch({ 
+   const a = 0;
+   const b = 1;
+   return other + b;
+}@);
+
+const { o, p@ } = { o: 0, p: 1, r: 0 }
+
+function Foo() {
+
+}
+
+count = 9;
+other = 'ho';
+
+count
+count@
+
+
+function watch(arg: any){}
+
+function ref<T>(a: T) {
+   return () => a
+}

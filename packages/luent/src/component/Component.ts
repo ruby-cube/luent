@@ -5,8 +5,8 @@ import { initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { setUpHooks } from "../flask/template-hooks";
-import { JSXComponent } from "@rue/ruescript";
-import type { ComponentKit } from "@rue/ruescript";
+import { JSXComponent } from "@rue/nextscript";
+import type { ComponentKit } from "@rue/nextscript";
 import { composeHooks, composeRef, toSetup } from "./bindings";
 import { $from } from "../utils/destructure";
 

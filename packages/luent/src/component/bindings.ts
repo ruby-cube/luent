@@ -5,7 +5,7 @@ import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@rue/quarky"
 import { TransitionConfigs } from "../transitions/transitions"
 import { TagClass, TagStyle } from "../element/styles"
-import { ComponentKit } from "@rue/ruescript"
+import { ComponentKit } from "@rue/nextscript"
 import { RawJSXNode } from "../node/makeJSXNode"
 
 // <div on:event={[

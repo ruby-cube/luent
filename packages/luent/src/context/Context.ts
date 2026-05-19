@@ -4,7 +4,7 @@ import { Ion } from "@rue/quarky";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderSlot } from "../component/x-Input";
 import { debug, normalizeToArray } from "@rue/utils";
-import {  unnestComponent } from "@rue/ruescript";
+import {  unnestComponent } from "@rue/nextscript";
 
 export interface NodeContext {
    entries: Map<string, unknown>;

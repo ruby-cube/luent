@@ -1,4 +1,4 @@
-import { ªªof } from "@rue/ruescript";
+import { ªªof } from "@rue/nextscript";
 
 type $From<T> = T & AccessorsOf<T>
 

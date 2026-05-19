@@ -53,11 +53,11 @@
       "@rue/quarky/core": [
         "./packages/quarky/src/core/index.ts"
       ],
-      "@rue/ruescript": [
-        "./packages/ruescript/src/index.ts"
+      "@rue/nextscript": [
+        "./packages/nextscript/src/index.ts"
       ],
-      "@rue/ruescript/transpile": [
-        "./packages/ruescript/src/transpile.ts"
+      "@rue/nextscript/transpile": [
+        "./packages/nextscript/src/transpile.ts"
       ],
       "@rue/flask": [
         "./packages/flask/index.ts"

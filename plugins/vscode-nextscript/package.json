@@ -1,0 +1,69 @@
+{
+   "name": "vscode-nextscript",
+   "displayName": "NextScript for VS Code",
+   "description": "NextScript language support via Volar TS plugin plus syntax highlighting for NextScript-specific tokens.",
+   "version": "0.2.8",
+   "publisher": "local",
+   "main": "./out/extension.js",
+   "files": [
+      "out/**",
+      "vendor_node_modules/**",
+      "syntaxes/**",
+      "package.json",
+      "README.md"
+   ],
+   "scripts": {
+      "build": "pnpm run build:nextscript && pnpm run build:server && pnpm run build:server-assets && pnpm run build:extension && pnpm run build:vendor",
+      "build:nextscript": "pnpm --dir ../../packages/nextscript run build",
+      "build:server": "rm -rf ./out && mkdir -p ./out && ESBUILD_BIN=$(ls ../../node_modules/.pnpm/esbuild@*/node_modules/esbuild/bin/esbuild | head -n1) && \"$ESBUILD_BIN\" ../volar-nextscript/src/index.ts --bundle --platform=node --format=esm --banner:js=\"import { createRequire as __rueCreateRequire } from 'node:module'; const require = __rueCreateRequire(import.meta.url);\" --outfile=./out/nextscript-language-server.mjs",
+      "build:server-assets": "mkdir -p ./out/beautify ./out/data ./out/languageFacts ./out/parser ./out/services ./out/utils ./out/node_modules/@vscode ./out/node_modules/@oxc-parser && cp ../../node_modules/.pnpm/vscode-css-languageservice@*/node_modules/vscode-css-languageservice/lib/umd/cssLanguageTypes.js ./out/ && cp ../../node_modules/.pnpm/vscode-css-languageservice@*/node_modules/vscode-css-languageservice/lib/umd/beautify/*.js ./out/beautify/ && cp ../../node_modules/.pnpm/vscode-css-languageservice@*/node_modules/vscode-css-languageservice/lib/umd/data/*.js ./out/data/ && cp ../../node_modules/.pnpm/vscode-css-languageservice@*/node_modules/vscode-css-languageservice/lib/umd/languageFacts/*.js ./out/languageFacts/ && cp ../../node_modules/.pnpm/vscode-css-languageservice@*/node_modules/vscode-css-languageservice/lib/umd/parser/*.js ./out/parser/ && cp ../../node_modules/.pnpm/vscode-css-languageservice@*/node_modules/vscode-css-languageservice/lib/umd/services/*.js ./out/services/ && cp ../../node_modules/.pnpm/vscode-css-languageservice@*/node_modules/vscode-css-languageservice/lib/umd/utils/*.js ./out/utils/ && cp -R ../../node_modules/.pnpm/@vscode+l10n@*/node_modules/@vscode/l10n ./out/node_modules/@vscode/ && cp -R ../../node_modules/.pnpm/vscode-uri@*/node_modules/vscode-uri ./out/node_modules/ && cp -R ../../node_modules/.pnpm/vscode-languageserver-textdocument@*/node_modules/vscode-languageserver-textdocument ./out/node_modules/ && cp -R ../../node_modules/.pnpm/vscode-languageserver-types@*/node_modules/vscode-languageserver-types ./out/node_modules/ && cp -R ../../node_modules/.pnpm/@oxc-parser+binding-darwin-arm64@*/node_modules/@oxc-parser/binding-darwin-arm64 ./out/node_modules/@oxc-parser/",
+      "build:extension": "ESBUILD_BIN=$(ls ../../node_modules/.pnpm/esbuild@*/node_modules/esbuild/bin/esbuild | head -n1) && \"$ESBUILD_BIN\" ./src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=./out/extension.js",
+      "build:vendor": "rm -rf ./vendor_node_modules && mkdir -p ./vendor_node_modules/@oxc-parser ./vendor_node_modules/@vscode && cp -R ../../node_modules/.pnpm/@oxc-parser+binding-darwin-arm64@*/node_modules/@oxc-parser/binding-darwin-arm64 ./vendor_node_modules/@oxc-parser/ && cp -R ../../node_modules/.pnpm/@vscode+l10n@*/node_modules/@vscode/l10n ./vendor_node_modules/@vscode/ && cp -R ../../node_modules/.pnpm/vscode-uri@*/node_modules/vscode-uri ./vendor_node_modules/ && cp -R ../../node_modules/.pnpm/vscode-languageserver-textdocument@*/node_modules/vscode-languageserver-textdocument ./vendor_node_modules/ && cp -R ../../node_modules/.pnpm/vscode-languageserver-types@*/node_modules/vscode-languageserver-types ./vendor_node_modules/",
+      "watch": "pnpm exec tsc -p ./tsconfig.json -w",
+      "vsix": "pnpm run build && pnpm exec vsce package --no-dependencies --allow-missing-repository --skip-license --out ./vscode-nextscript.vsix",
+      "vsix:dev": "pnpm exec vsce package --no-dependencies --allow-missing-repository --skip-license --out ./vscode-nextscript.vsix"
+   },
+   "engines": {
+      "vscode": "^1.90.0"
+   },
+   "categories": [
+      "Programming Languages"
+   ],
+   "contributes": {
+      "languages": [
+         {
+            "id": "nextscript",
+            "extensions": [
+               ".nsx"
+            ],
+            "configuration": "./language-configuration.json"
+         }
+      ],
+      "semanticTokenTypes": [
+         {
+            "id": "nsxGetterAccess",
+            "superType": "operator",
+            "description": "The @ getter-access operator in NextScript syntax."
+         }
+      ],
+      "grammars": [
+         {
+            "path": "./syntaxes/nsx-get.injection.tmLanguage.json",
+            "scopeName": "nsx.get.injection",
+            "injectTo": [
+               "source.tsx",
+               "source.ts"
+            ]
+         }
+      ]
+   },
+   "extensionDependencies": [
+      "vscode.typescript-language-features"
+   ],
+   "dependencies": {
+      "@types/vscode": "^1.115.0",
+      "@volar/language-server": "~2.4.28",
+      "@volar/vscode": "^2.4.28",
+      "vscode-languageclient": "^9.0.1"
+   }
+}

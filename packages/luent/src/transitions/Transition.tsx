@@ -1,4 +1,4 @@
-import { JSXComponent } from "@rue/ruescript"
+import { JSXComponent } from "@rue/nextscript"
 import { FromTag, RenderSlot } from "../component/x-Input"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"

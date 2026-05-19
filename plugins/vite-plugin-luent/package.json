@@ -7,7 +7,7 @@
    "dependencies": {
       "@rue/babel-plugin-luent": "workspace:*",
        "@rue/luent": "workspace:*",
-       "@rue/ruescript": "workspace:*"
+       "@rue/nextscript": "workspace:*"
    },
    "devDependencies": {
       "@babel/core": "^7.25.2",

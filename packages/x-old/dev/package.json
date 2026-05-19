@@ -1,9 +1,0 @@
-{
-    "name": "@rue/dev",
-    "private": true,
-    "description": "",
-    "devDependencies": {
-    },
-    "author": "Ruby Yi Wang",
-    "license": "MIT"
-}

@@ -35,7 +35,7 @@ Other notable features:
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 
 Experimental areas:
-- NextScript language extension for improved readability and type-safety (WIP)
+- NextScript language extension of TypeScript + JSX for improved readability and type-safety (WIP)
 - compile-time mutation tracking (WIP)
 - selective nested reactivity
 - encapsulated reactivity

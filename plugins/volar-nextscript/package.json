@@ -1,0 +1,28 @@
+{
+   "name": "@rue/nextscript-language-server",
+   "version": "0.0.1",
+   "main": "out/index.js",
+   "license": "MIT",
+   "files": [
+      "out/**/*.js",
+      "out/**/*.d.ts"
+   ],
+   "bin": {
+      "nextscript-language-server": "./bin/nextscript-language-server.js"
+   },
+   "dependencies": {
+      "@volar/language-core": "~2.4.0",
+      "@volar/language-server": "~2.4.0",
+      "@volar/typescript": "~2.4.0",
+      "volar-service-css": "0.0.71",
+      "volar-service-emmet": "0.0.71",
+      "volar-service-html": "0.0.71",
+      "volar-service-typescript": "0.0.71",
+      "vscode-uri": "^3.0.8",
+      "@rue/nextscript": "workspace:*",
+      "@types/estree": "^1.0.8",
+      "@types/estree-jsx": "^1.0.5",
+      "zimmerframe": "^1.1.4",
+      "oxc-parser": "^0.130.0"
+   }
+}

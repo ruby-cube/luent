@@ -1,1 +1,0 @@
-export type DevReturnType<T extends (...args: any) => any> = NonNullable<ReturnType<T>>;
