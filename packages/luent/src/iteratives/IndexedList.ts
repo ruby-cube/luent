@@ -1,5 +1,4 @@
 import { createMemoizedDerivation, Ion, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
-import { MaybeIon } from "../component/x-Input";
 import { AnyObject } from "@rue/types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";

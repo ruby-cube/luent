@@ -5,7 +5,7 @@ import { getElement } from "../hydration/getElement";
 import { initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
-import { RenderSlot, MaybeIon } from "../component/x-Input";
+import { RenderSlot } from "../component/x-Input";
 import { DOMNode, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { setUpNodeRefs } from "../node/NodeRefs";
 import { setUpTransitions } from "../transitions/transitions";

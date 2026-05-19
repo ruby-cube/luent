@@ -36,14 +36,14 @@ function ErrorMessage({ message } : FromTag<{
 
 // , Try(() => [/* @__PURE__ */
 //    jsxDEV(Child, {}, void 0, false, {
-//       fileName: "/Users/Ruby/Desktop/ruby-cube/rue/apps/play/src/API-exploration/TestTry.tsx",
+//       fileName: "/Users/Ruby/Desktop/ruby-cube/rue/.jungle/src/API-exploration/TestTry.tsx",
 //       lineNumber: 4,
 //       columnNumber: 124
 //    }, this)]), Catch((err) => /* @__PURE__ */
 //       jsxDEV(ErrorMessage, {
 //          message: err.message
 //       }, void 0, false, {
-//          fileName: "/Users/Ruby/Desktop/ruby-cube/rue/apps/play/src/API-exploration/TestTry.tsx",
+//          fileName: "/Users/Ruby/Desktop/ruby-cube/rue/.jungle/src/API-exploration/TestTry.tsx",
 //          lineNumber: 4,
 //          columnNumber: 156
 //       }, this))

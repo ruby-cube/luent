@@ -1,6 +1,7 @@
 packages:
   - packages/**
   - plugins/**
+  - .jungle/**
   - apps/**
   - demos/**
   - e2e/**

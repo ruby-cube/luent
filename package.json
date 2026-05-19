@@ -10,22 +10,22 @@
     "ni:flask": "pnpm -F @rue/flask install",
     "ni:utils": "pnpm -F @rue/utils install",
     "ni:luent": "pnpm -F @rue/luent install",
-    "ni:play": "pnpm -F @rue/play install",
+    "ni:jungle": "pnpm -F @rue/jungle install",
     "ni:demos": "pnpm -F @rue/demos install",
     "ni:e2e": "pnpm -F @rue/e2e install",
     "test-demos": "pnpm exec playwright test --config=e2e/playwright.config.ts --project=chromium",
     
-    "dev": "pnpm -F @rue/play dev",
+    "dev": "pnpm -F @rue/jungle dev",
     "dev-movies": "pnpm -F @rue/movies-app dev",
     "dev-demos": "pnpm -F @rue/demos dev",
     "dev-style": "pnpm -F @rue/demos dev-style",
     "dev-e2e": "pnpm -F @rue/e2e dev",
     "dev-chat": "pnpm -F @rue/live-chat dev",
 
-    "build-babel": "pnpm -F @rue/play build-babel",
+    "build-babel": "pnpm -F @rue/jungle build-babel",
     "ni:quarky": "pnpm -F @rue/quarky install",
-    "mu-lint": "pnpm exec tsc apps/play/mu-linting/mu-mutation-linter.ts apps/play/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir apps/play/mu-linting/.tmp-run && node apps/play/mu-linting/.tmp-run/run-mu-mutation-lint.js",
-    "lint:mu-eslint": "pnpm exec eslint \"apps/play/mu-linting/**/*.{ts,tsx}\""
+    "mu-lint": "pnpm exec tsc .jungle/mu-linting/mu-mutation-linter.ts .jungle/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir .jungle/mu-linting/.tmp-run && node .jungle/mu-linting/.tmp-run/run-mu-mutation-lint.js",
+    "lint:mu-eslint": "pnpm exec eslint \".jungle/mu-linting/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@rue/eslint-plugin-mu": "workspace:*",

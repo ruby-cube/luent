@@ -28,8 +28,8 @@ export default [
 //     rules: {},
 //   },
   {
-    files: ['apps/play/mu-linting/**/*.{ts,tsx}'],
-    ignores: [...defaultIgnores, 'apps/play/mu-linting/.tmp-run/**'],
+    files: ['.jungle/mu-linting/**/*.{ts,tsx}'],
+    ignores: [...defaultIgnores, '.jungle/mu-linting/.tmp-run/**'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

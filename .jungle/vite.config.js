@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import LuentPlugin from '../../plugins/vite-plugin-luent/index.js'
+import LuentPlugin from '../plugins/vite-plugin-luent/index.js'
 
 export default defineConfig({
    esbuild: {

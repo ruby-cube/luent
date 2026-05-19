@@ -2,6 +2,11 @@
    "name": "@rue/luent",
    "private": true,
    "description": "",
+   "exports": {
+      ".": "./src/index.ts",
+      "./jsx-runtime": "./jsx-runtime/index.ts",
+      "./jsx-dev-runtime": "./jsx-runtime/index.ts"
+   },
    "main": "./src/index",
    "module": "./src/index",
    "dependencies": {

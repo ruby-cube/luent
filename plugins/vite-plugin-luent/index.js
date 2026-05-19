@@ -1,5 +1,4 @@
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
 import { createRequire } from 'node:module'
 import { transformWithOxc } from 'vite'
 import * as babel from '@babel/core'
@@ -8,9 +7,8 @@ import { transpileNextScript } from '@rue/nextscript/transpile'
 
 const require = createRequire(import.meta.url)
 
-function resolveLuentJsxRuntimePath() {
-   const luentPackageJsonPath = require.resolve('@rue/luent/package.json')
-   return join(dirname(luentPackageJsonPath), 'jsx-runtime/index.ts')
+function resolveLuentJsxRuntimePath(id) {
+   return require.resolve(id)
 }
 
 let jsxRuntimePath
@@ -23,7 +21,7 @@ export default function LuentPlugin() {
          enforce: 'pre',
          resolveId(id) {
             if (id === '@rue/luent/jsx-runtime' || id === '@rue/luent/jsx-dev-runtime') {
-               jsxRuntimePath ??= resolveLuentJsxRuntimePath()
+               jsxRuntimePath ??= resolveLuentJsxRuntimePath(id)
                return jsxRuntimePath
             }
          }

@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import { FromTag, MaybeIon, RenderSlot } from "./x-Input"
+import { FromTag, RenderSlot } from "./x-Input"
 import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@rue/quarky"

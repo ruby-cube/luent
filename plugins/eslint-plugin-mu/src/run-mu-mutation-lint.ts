@@ -7,7 +7,7 @@ declare const process: {
 }
 
 function run() {
-   const inputPath = process.argv[2] ?? "apps/play/mu-linting/mu-linting.tsx"
+   const inputPath = process.argv[2] ?? ".jungle/mu-linting/mu-linting.tsx"
    const filePath = ts.sys.resolvePath(inputPath)
    const cwd = ts.sys.getCurrentDirectory()
 

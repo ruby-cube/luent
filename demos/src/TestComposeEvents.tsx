@@ -1,5 +1,4 @@
-import { AnyObject } from "@rue/types";
-import { Component, ComponentTag, FromTag, RenderSlot } from "..";
+import { Component } from "@rue/luent";
 
 function Grandparent() {
 
