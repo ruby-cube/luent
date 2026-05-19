@@ -26,12 +26,12 @@ dist-ssr
 *.mp4
 
 # Playwright
-/test-results/
+**/test-results/
 **/*.ts-snapshots/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+**/playwright-report/
+**/blob-report/
+**/playwright/.cache/
+**/playwright/.auth/
 
 # VS Code extension build artifacts
 /plugins/vscode-nextscript/out/
