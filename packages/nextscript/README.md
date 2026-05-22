@@ -6,7 +6,7 @@
 
 # NextScript
 
-NextScript is an experimental language extension of TypeScript + JSX designed to improve the clarity, consistency, readability, ergonomics, and type-safety of modern reactive application code.
+NextScript is an experimental language extension of TypeScript + JSX designed to improve the readability, ergonomics, and type-safety of modern reactive application code.
 
 > This project is in early development. Most features have been specified and partially implemented, but substantial tooling work remains before the extension is fully usable. See how to contribute here.
 
@@ -19,7 +19,7 @@ Reactive UI programming and JSX have both been game changers in web development,
 
 Meanwhile, getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as not playing well with TypeScript type guards, impacting readability due to the visual clutter of functions and function calls, or the confusion caused by functions cloaked in data variable naming.
 
-On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell. Furthermore, control flow through ternaries aren’t always intuitive.
+On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell.
 
 NextScript proposes to address these caveats through a dash of syntactic sugar.
 
@@ -42,21 +42,18 @@ NextScript introduces new syntax and semantics carefully, opting for explicitnes
 ### Readability
 - **accessor variables** as scope-level counterparts to native accessor properties for consistency
 - **derivation expressions** for improved readability of inline derivations
-- **implicit template render functions** for improved readability of control flow
+- **JSX flow expressions** for improved readability of control flow
 
 ### Ergonomics
 - **accessor postfix operator** to facilitate reference passing
 - **colon notation for accessor properties** for ergonomic accessor property declarations
-<!-- - **implicit JSX return** for clean render functions -->
-- **implicit JSX fragments** within template functions for improved readability and ergonomics
-- **JSX gateway** to ergomically embed JSX expressions and JSX text into JavaScript
+- **JSX gateway syntax** to ergomically embed JSX into JavaScript
 - **JSX attribute shorthand** to reduce redundancy
-
 
 ### Type-safety
 - **type-guarding of accessor variables** for improved type-safety
 - **type-guarding via If/Else template calls** for improved type-safety
-- **JSX component** for type-safe component refs
+- **JSX component element** for type-safe component refs
 
 ### Planned features:
 - **async sequence statements** for improved readability of async sequences 
