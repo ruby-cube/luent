@@ -40,19 +40,18 @@ NextScript introduces new syntax and semantics carefully, opting for explicitnes
 ## Features
 > For examples and details, see NextScript at a glance
 ### Readability
-- **accessor variables** as scope-level counterparts to native accessor properties for consistency
+- **accessor variables** as scope-level counterparts to native accessor properties
 - **derivation expressions** for improved readability of inline derivations
-- **JSX flow expressions** for improved readability of control flow
+- **JSX flow expressions** for intuitive control flow
 
 ### Ergonomics
-- **accessor postfix operator** to facilitate reference passing
-- **colon notation for accessor properties** for ergonomic accessor property declarations
-- **JSX gateway syntax** to ergomically embed JSX into JavaScript
+- **accessor postfix operator** to facilitate live reference passing
+- **accessor property colon notation** for ergonomic accessor property declarations
+- **JSX gateway syntax** to ergomically embed JSX in JavaScript
 - **JSX attribute shorthand** to reduce redundancy
 
 ### Type-safety
 - **type-guarding of accessor variables** for improved type-safety
-- **type-guarding via If/Else template calls** for improved type-safety
 - **JSX component element** for type-safe component refs
 
 ### Planned features:
@@ -368,171 +367,260 @@ function logName() {
 
 ## JSX syntactic sugar
 
-### Terminology
 
-#### Render function
-In NextScript, any function that returns JSX are considered render functions:
+### JSX Factory `() => <jsx/>`
+A JSX factory is any function that returns a JSX element or fragment.
 ```tsx
-function renderFoo() {
-   return (
-      <div>hello world</div>
-   )
+const renderRow = () => <tr><td>Hello</td></tr>
+```
+
+### JSX Gateway Return `<//>`
+The JSX gateway syntax, `<//>`, signifies a switch from JavaScript to JSX until the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
+
+source:
+```tsx
+function Something() {
+   const foo = getSomething();
+   <//>
+   <p>{foo}</p>
+   <p>{foo}</p>
+}
+```
+compiled:
+```tsx
+function Something() {
+   const foo = getSomething();
+   return <>
+      <p>{foo}</p>
+      <p>{foo}</p>
+   </>;
 }
 ```
 
-#### Component factory
-Component factories are render functions that return the `<Component>` element as the root. Component factories are written in JSX templates as tags.
+source:
 ```tsx
-function Foo() {
-   return (
-      <Component>
-         <div>hello world</div>
-      </Component>
-   )
-}
-
-function App() {
-   return (
-      <Component>
-         <Foo></Foo>
-      </Component>
-   )
-}
-```
-
-
-### Implicit JSX Return & JSX Fragments
-`function View() { <element/> }`
-Function blocks that contain root-level JSX expression statements will implicitly wrap the JSX statement (as well as any subsequent statements) in a JSX fragment and return that fragment.
-
-```tsx
-function renderCounter() {
-   get count = ion(0)
-   
-   <div>{count}</div>
-   <button on:click={() => count++}>
-      +
-   </button>
-}
-```
-
-Only *root-level*, JSX expression *statements* will create implicit JSX returns.
-
-There is no implicit return in this example because the JSX expression is not a statement:
-```tsx
-function Foo() {
-   const bar = <div>hello world</div>;
-}
-```
-
-There is no implicit return in this example because the JSX expression statements are not at the root-level of the function:
-```tsx
-function Counter() {
-   if (access) {
-      get count = ion(0)
-   
-      <div>{count}</div>
-      <button on:click={() => count++}>
-         +
-      </button>
+function Something() {
+   const foo = getSomething();
+   if (foo) {
+      <//>
+      <p>{foo}</p>
    }
-   else {
-      <div>Access denied.</div>
-   }
+   <//>
+   <p>Nothing :(</p>
 }
 ```
-
-Non-root-level JSX must be explicitly returned:
+compiled:
 ```tsx
-function Counter() {
-   if (access) {
-      get count = ion(0)
-   
-      return (
-         <div>{count}</div>
-         <button on:click={() => count++}>
-            +
-         </button>
-      )
+function Something() {
+   const foo = getSomething();
+   if (foo) {
+      return <><p>{foo}</p></>
    }
-   return (
-      <div>Access denied.</div>
-   )
-}
-```
-
-Non-JSX expression statements may not follow a JSX expression statement. This example produces invalid JSX:
-```tsx
-function Counter() {
-   get count = ion(0)
-   
-   <div>{count}</div>
-   const foo = 0;
-   <button on:click={() => count++}>
-      +
-   </button>
+   return <><p>Nothing :(</p></>
 }
 ```
 
 
-### Implicit Template Render Functions
+### JSX flow expression
+A JSX flow expression is a JSX call expression where the final argument is a JSX-like entity:
+- JSX factory
+- JSX element
+- JSX fragment
+- JSX children (implicitly wrapped in a JSX fragment by the compiler)
+- JSX gateway function expression
 
-#### … in template call expressions
-`{If(active, <element/>)}`
+The final argument is normalized to a JSX factory at compile time.
 
-JSX elements that are passed as the final argument of a call expression are implicitly wrapped in a render function. 
+source:
 ```tsx
 <div>
-   {If(loggedIn@, 
-      <Welcome user={user@} />
+   {If(active, 
+      <p>{foo}</p>
    )}
-   {Else(
-      <Signin />
-   )}
+</div>
+```
+compiled:
+```tsx
 <div>
+   {If(active, () =>
+      <><p>{foo}</p></>
+   )}
+</div>
 ```
 
-#### … in slots
-JSX element passed into slots (known as children in classic JSX) are also implicitly wrapped in a render function.
+source:
 ```tsx
-<List>
-   <ListItem {item}></ListItem>
-   <ListItem {item}></ListItem>
-   <ListItem {item}></ListItem>
-</List>
+<div>
+   {If(active, 
+      <p>{foo}</p>
+      <p>{foo}</p>
+   )}
+</div>
 ```
-
-### JSX Attribute Shorthand
-`<Element {attribute}></Element>`
-Similar to property shorthands in object literals, attribute assignment may be shortend to the attribute shorthand if the attribute name matches the variable name.
+compiled:
 ```tsx
-const tooltip = createTooltip('open')
-
-<Tooltip {tooltip} />
+<div>
+   {If(active, () =>
+      <>
+         <p>{foo}</p>
+         <p>{foo}</p>
+      </>
+   )}
+</div>
 ```
 
-### JSX Component Statement
-`<Component as={component}></Component>`
-A JSX component statement allows refs of component instances to be typed. It creates and implicitly returns a ComponentKit, a plain object containing the component instance and nodes.
+source:
+```tsx
+<div>
+   {If(active, <>
+      <p>{foo}</p>
+      <p>{foo}</p>
+   </>)}
+</div>
+```
+compiled:
+```tsx
+<div>
+   {If(active, () =>
+      <><>
+         <p>{foo}</p>
+         <p>{foo}</p>
+      </></>
+   )}
+</div>
+```
+
+### JSX gateway function expressions
+A JSX gateway function expression is shorthand for an arrow function that returns a fragment-wrapped JSX block. It may only appear as the final argument of a JSX flow expression. Parameter parentheses may be omitted. 
+
+source:
+```tsx
+<div>
+   {If(active, <//>
+      Hello world
+   )}
+</div>
+```
+compiled:
+```tsx
+<div>
+   {If(active, () =>
+      <>Hello world</>
+   )}
+</div>
+```
+
+source:
+```tsx
+<div>
+   {If(active, <//>
+      {If(open,
+         <p>Hello world</p>
+      )}
+   )}
+</div>
+```
+compiled:
+```tsx
+<div>
+   {If(active, () => 
+      <>
+      {If(open,
+         <p>Hello world</p>
+      )}
+      </>
+   )}
+</div>
+```
+
+source:
+```tsx
+<div>
+   {If(active, o <//>
+      Hello world
+   )}
+</div>
+```
+compiled:
+```tsx
+<div>
+   {If(active, o =>
+      <>
+         Hello world
+      </>
+   )}
+</div>
+```
+
+source:
+```tsx
+<div>
+   {If(active, o <//>
+      {If(open,
+         <p>Hello world</p>
+      )}
+   )}
+</div>
+```
+compiled
+```tsx
+<div>
+   {If(active, o =>
+      <>
+         {If(open,
+            <p>Hello world</p>
+         )}
+      </>
+   )}
+</div>
+```
+
+source:
+```tsx
+<div>
+   {If(active, (o, p) <//>
+      Hello world
+   )}
+</div>
+```
+compiled:
+```tsx
+<div>
+   {If(active, (o, p) =>
+      <>
+         Hello world
+      </>
+   )}
+</div>
+```
+
+```tsx
+// X invalid: not the final argument of a JSX flow expression
+const renderSomething = x <//>
+   {If(open,
+      <p>Hello world</p>
+   )}
+   <div>other</div>;
+```
+
+### JSX keyword element
+`<*keyword><*keyword>`
+A JSX keyword element is a reserved symbol-prefixed language element registered by the transpiler. Components and native elements may not serve as keyword elements. Any unknown, unregistered keyword elements result in compile-time errors. Currently, there is only one keyword element (the component element) and only one reserved symbol-prefix (the colon prefix for auto-returns).
+
+### JSX return element
+`<:keyword></:keyword>`
+A JSX return element is a colon-prefixed keyword element that returns its keyword element. All following sibling statements are unreachable.
+
+### JSX component element
+`<:component as={component}></:component>`
+The JSX component element is an auto-returned JSX keyword element that allows refs of component instances to be typed. It creates a ComponentKit, a plain object containing the component instance and nodes. The default implementation of JSXComponent simply returns a component kit. 
+
 ```ts
+type JSXComponent = <T>(setup: { as?: T, Slot: NSXNode | NSXNode[] }) => ComponentKit<T>
+
 interface ComponentKit<T> {
    component: T
-   nodes: unknown[];
-}
-```
-```ts
-function Dialog({ Slot }) {
-   get opened = ion(false)
-   const open = () => { opened = true }
-   const close = () => { opened = false }
-
-   <Component as={{ open, close }}>  
-      {If(opened, 
-         <o--body>
-            <div>{Slot()}</div>
-         </o--body>
-      )}
-   </Component>
+   nodes: NSXNode[];
 }
 ```
 ```ts
@@ -543,21 +631,37 @@ get dialog = NodeRef(Dialog)
    <DialogContent close={() => dialog?.close()}/>
 </Dialog>
 ```
-
-### Type-guarding in JSX flow expressions
-
-NextScript will apply type-narrowing and -widening rules to template calls of function whose names are designated control flow names:
-- `If`/`ElseIf`/`Else`
-- `Switch`/`Case`/`Default`
-- `Match`/`Case`/`Default`
-- `As`
 ```ts
-<div>
-   {If(user@, 
-      <Welcome user={user@} />
-   )}
-   {Else(
-      <Signin />
-   )}
-<div>
+function Dialog({ Slot }) {
+   get opened = ion(false)
+   const open = () => { opened = true }
+   const close = () => { opened = false }
+
+   <:component as={{ open, close }}>  
+      {If(opened, 
+         <o--body>
+            <div>{Slot()}</div>
+         </o--body>
+      )}
+   </:component>
+}
+```
+compiled:
+```tsx
+function Dialog({ Slot }) {
+   get opened = ion(false)
+   const open = () => { opened = true }
+   const close = () => { opened = false }
+
+   return JSXComponent({
+      Slot: <>
+         {If(opened, 
+            <o--body>
+               <div>{Slot()}</div>
+            </o--body>
+         )}
+      </>,
+      as: { open, close }
+   }) 
+}
 ```
