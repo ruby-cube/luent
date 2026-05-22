@@ -16,7 +16,7 @@ NextScript is an experimental language extension of TypeScript + JSX designed to
 
 Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple data bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What may seem simple and elegant at first glance often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
 
-Meanwhile, getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as not playing well with TypeScript type guards, impacting readability due to the visual clutter of functions and function calls, or the confusion caused by functions cloaked in data variable naming.
+Meanwhile, getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as being opaque to TypeScript type guards, impacting readability due to the visual clutter of functions and function calls, or the confusion caused by functions cloaked in data variable naming.
 
 On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell.
 
@@ -262,19 +262,20 @@ function logUsername() {
 
 ## Design Principles
 
-### Clarity and elegance
-lorem
+### Conceptual elegance and predictability
+When language rules are simple and consistent, code becomes less bug-prone and less mentally taxing to read and write. As a language extension, NextScript should remain coherent with its foundational languages and preserve predictable behavior.
 
 —
 
-### Coherence and predictability
-As a language extension, NextScript must remain coherent with its foundational languages and preserve predictable semantics.
+### Syntactic elegance
+Simple and consistent syntax allows developers to read and write code with less friction, improving readability and developer ergonomics.
 
 —
 
 ### Principled magic, not spookiness
-NextScript introduces new syntax and semantics carefully, opting for explicitness whenever possible. It introduces implicit semantics only if behavior is locally deducible and provides enough ergonomic benefit to justify its addition to the language. The goal is not to avoid magic altogether, but to avoid *unaccountable* magic: behavior that feels arbitrary, exceptional, or difficult to reason about.
+NextScript introduces new syntax carefully, favoring explicitness whenever possible. It allows implicit behavior only when that behavior is locally deducible and provides sufficient ergonomic benefit to justify the added language complexity. 
 
+The goal is not to avoid magic altogether, but to avoid *unaccountable* magic: behavior that feels arbitrary, exceptional, or difficult to reason about.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
