@@ -41,7 +41,7 @@ Things to note:
 `get variable = getter` • scope-level, locally-bound counterpart to native accessor properties
 ```ts
 get count = ion(start)
-get remaining = ion(() => limit - count)
+get remaining = ion(() => limit - count) // hover [ get count: number ]
 ```
 ```ts
 // native equivalent
@@ -76,7 +76,7 @@ watch(count, () => {
 ```
 ```tsx
 // native equivalent
-<button on:click={() => count++} disabled={() => count >= limit}>
+<button on:click={() => count.value++} disabled={() => count() >= limit}>
    +
 </button>
 ```
@@ -262,11 +262,19 @@ function logUsername() {
 
 ## Design Principles
 
+### Clarity and elegance
+lorem
+
+—
+
 ### Coherence and predictability
 As a language extension, NextScript must remain coherent with its foundational languages and preserve predictable semantics.
 
+—
+
 ### Principled magic, not spookiness
 NextScript introduces new syntax and semantics carefully, opting for explicitness whenever possible. It introduces implicit semantics only if behavior is locally deducible and provides enough ergonomic benefit to justify its addition to the language. The goal is not to avoid magic altogether, but to avoid *unaccountable* magic: behavior that feels arbitrary, exceptional, or difficult to reason about.
+
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
