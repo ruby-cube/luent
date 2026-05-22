@@ -13,12 +13,10 @@
       "@rue/flask": "workspace:*",
       "@rue/quarky": "workspace:*",
       "@rue/utils": "workspace:*",
-      "@rue/nextscript": "workspace:*",
-      "dompurify": "^3.4.3"
+      "@rue/nextscript": "workspace:*"
    },
    "devDependencies": {
-      "@rue/types": "workspace:*",
-      "jsdom": "^25.0.1"
+      "@rue/types": "workspace:*"
    },
    "author": "Ruby Yi Wang",
    "license": "MIT"

@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "firebase": "^12.13.0",
-   "date-fns": "^4.1.0",
+    "date-fns": "^4.1.0",
     "@rue/flask": "workspace:*",
     "@rue/luent": "workspace:*",
     "@rue/quarky": "workspace:*",

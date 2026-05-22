@@ -1,13 +1,14 @@
 import {  __DEV__checkIfTracked, Ion, toValue, isGetter, watchToRender, queueRender } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { DOMParent } from "./VineNode";
-import DOMPurify from "dompurify";
 
+export function sanitize() {
 
+}
 
 export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
    //  nodePod.appendStaticNode(textNode) //QUESTION: do we need to append innerHTML to nodePod??, we don't have to worry about siblings, so idon't think so
-   const htmlString = kit.innerHTML;
+   const htmlString = kit.html;
    const sanitizeHTML = getHTMLSanitizer(kit);
    if (isGetter(htmlString)) {
       watchToRender(htmlString, ({ flask }) => {
@@ -52,10 +53,23 @@ function passthroughHTML(html: string): string {
 }
 
 export type InnerHTMLKit = {
-   innerHTML: MaybeIon<string>,
-   trustedHTML?: boolean, // TODO:
-   sanitizeHTML?: (html: string) => string, // TODO:
+   trusted?: boolean
+   html: MaybeIon<string>,
 }
+
+// <div innerHTML={{ 
+//    trusted: true,
+//    html: <div></div>
+// }}></div>
+
+// <div innerHTML={trusted(`
+//    <div>Hello world</div> 
+//`)}></div>
+
+// <div innerHTML={sanitize(`
+//    <div>Hello world</div> 
+//`)}></div>
+
 // export function isInnerHTMLKit(nodeEntity: RawJSXNode): nodeEntity is InnerHTMLKit {
 //    return isPlainObject(nodeEntity) && 'innerHTML' in nodeEntity
 // }

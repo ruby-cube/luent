@@ -21,7 +21,7 @@ Meanwhile, getter functions, popularized in the form of signals by Solid.js, sho
 
 On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell. Furthermore, control flow through ternaries aren’t always intuitive.
 
-NextScript proposes to address these caveats through thoughtfully designed syntactic sugar for getter functions and principled shorthands for JSX.
+NextScript proposes to address these caveats through a dash of syntactic sugar.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -47,14 +47,16 @@ NextScript introduces new syntax and semantics carefully, opting for explicitnes
 ### Ergonomics
 - **accessor postfix operator** to facilitate reference passing
 - **colon notation for accessor properties** for ergonomic accessor property declarations
-- **implicit JSX return** for clean render functions
+<!-- - **implicit JSX return** for clean render functions -->
 - **implicit JSX fragments** within template functions for improved readability and ergonomics
+- **JSX gateway** to ergomically embed JSX expressions and JSX text into JavaScript
 - **JSX attribute shorthand** to reduce redundancy
+
 
 ### Type-safety
 - **type-guarding of accessor variables** for improved type-safety
 - **type-guarding via If/Else template calls** for improved type-safety
-- **a dedicated component element** for type-safe component refs
+- **JSX component** for type-safe component refs
 
 ### Planned features:
 - **async sequence statements** for improved readability of async sequences 
@@ -512,9 +514,9 @@ const tooltip = createTooltip('open')
 <Tooltip {tooltip} />
 ```
 
-### The Component Element
+### JSX Component Statement
 `<Component as={component}></Component>`
-The component element allows refs of component instances to be typed. It creates a ComponentKit, a plain object containing the component instance and nodes.
+A JSX component statement allows refs of component instances to be typed. It creates and implicitly returns a ComponentKit, a plain object containing the component instance and nodes.
 ```ts
 interface ComponentKit<T> {
    component: T
@@ -545,7 +547,7 @@ get dialog = NodeRef(Dialog)
 </Dialog>
 ```
 
-### Type-guarding in JSX control flow call expressions
+### Type-guarding in JSX flow expressions
 
 NextScript will apply type-narrowing and -widening rules to template calls of function whose names are designated control flow names:
 - `If`/`ElseIf`/`Else`
