@@ -6,7 +6,7 @@
 
 # NextScript
 
-NextScript is an experimental language extension of TypeScript + JSX designed to improve the readability, ergonomics, and type-safety of modern reactive application code. Check out our language design principles [here](#design-prinicples).
+NextScript is an experimental language extension of TypeScript + JSX designed to improve the readability, ergonomics, and type-safety of modern reactive application code. Check out our language design principles [here](#design-principles).
 
 > This project is in early development. Most features have been specified and partially implemented, but substantial tooling work remains before the extension is fully usable. See how to contribute here.
 
@@ -262,10 +262,10 @@ function logUsername() {
 
 ## Design Principles
 
-**Coherence and predictability.** 
+### Coherence and predictability
 As a language extension, NextScript must remain coherent with its foundational languages and preserve predictable semantics.
 
-**Principled magic, not spookiness.**
+### Principled magic, not spookiness
 NextScript introduces new syntax and semantics carefully, opting for explicitness whenever possible. It introduces implicit semantics only if behavior is locally deducible and provides enough ergonomic benefit to justify its addition to the language. The goal is not to avoid magic altogether, but to avoid *unaccountable* magic: behavior that feels arbitrary, exceptional, or difficult to reason about.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
