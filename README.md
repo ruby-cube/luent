@@ -26,7 +26,7 @@ Core design features:
 - a unified system of fine-grained reactivity through `ion()` and `ionic()`
 - simplicity in managing shared and centralized state through familiar native structures
 - selective, type-explicit reactivity
-- traceable mutations to aid in debugging reactivity (WIP)
+- traceable mutations to aid in debugging reactivity
 
 Other notable features:
 - x-ray binding and smart auto-binding for greater ease in authoring flexible components
@@ -35,8 +35,8 @@ Other notable features:
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 
 Experimental areas:
-- NextScript language extension of TypeScript + JSX for improved readability and type-safety (WIP)
-- compile-time mutation tracking (WIP)
+- NextScript language extension of TypeScript + JSX for improved readability and type-safety [work-in-progress]
+- compile-time mutation tracking [work-in-progress]
 - selective nested reactivity
 - encapsulated reactivity
 
