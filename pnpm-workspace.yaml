@@ -1,10 +1,22 @@
 packages:
-  - packages/**
-  - plugins/**
-  - .jungle/**
-  - apps/**
-  - demos/**
-  - e2e/**
+  - packages/*
+  - plugins/*
+  - websites/*
+  - apps/*
+  - demos/*
+  - e2e/*
+  - .jungle/*
+
+recursiveInstall: false
+
+overrides:
+  postcss@<8.5.10: '>=8.5.10'
+
+allowBuilds:
+  '@firebase/util': set this to true or false
+  '@parcel/watcher': true
+  esbuild: true
+  protobufjs: set this to true or false
 
 ignoredBuiltDependencies:
   - '@firebase/util'

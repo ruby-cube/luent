@@ -1,0 +1,16 @@
+{
+  "name": "@rue/nextscript-site",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "vitepress": "2.0.0-alpha.17"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  }
+}
