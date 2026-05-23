@@ -1,4 +1,4 @@
-import { Component, template, For, If, Else, FromTag } from "@rue/luent"
+import { component, template, For, If, Else, FromTag } from "@rue/luent"
 import { watch,  queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"
@@ -199,7 +199,7 @@ export function TodoMVC() {
    )
 
 
-   return Component(
+   return component(
       <>
          <section class="todoapp">
             <header class="header">
@@ -249,7 +249,7 @@ function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void
       }
    }
 
-   return Component(
+   return component(
       <input
          class="new-todo"
          autofocus
@@ -288,7 +288,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
       }
    }
 
-   return Component(
+   return component(
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
             const $isEditing = ion(() => todo === $editedTodo());

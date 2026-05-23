@@ -22,9 +22,9 @@ describe('NextScript JSX transforms', () => {
       )
    })
 
-   it('transforms <Component>', () => {
+   it('transforms <:component>', () => {
       const { code, edits } = preprocessNSX(
-         `<Component><div>hi</div></Component>`
+         `<:component><div>hi</div></:component>`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
@@ -36,9 +36,9 @@ describe('NextScript JSX transforms', () => {
       )
    })
 
-   it('transforms <Component as={{ open }}>', () => {
+   it('transforms <:component as={{ open }}>', () => {
       const { code, edits } = preprocessNSX(
-         `<Component as={{ open }}><div>hi</div></Component>`
+         `<:component as={{ open }}><div>hi</div></:component>`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)

@@ -52,30 +52,30 @@ Luent transpiles JSX consistently and conservatively using the standard JSX tran
 The following JSX...
 ```jsx
 <Parent foo={foo} bar={bar()} on:click={logClick}>
-   <Child />
-   {If(active, 
-      <div>Hello world! - {name}</div>
-   )}
-   {Else(
-      <div>zzzzzz</div>
-   )}
+  <Child />
+  {If(active, 
+    <div>Hello world! - {name}</div>
+  )}
+  {Else(
+    <div>zzzzzz</div>
+  )}
 </Parent>
 ```
 
 ...essentially maps to:
 ```jsx
 jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
-   Slot: () => [
-      jsx(Child),
-      IfSeries(
-         If(active, () => [
-            jsx('div', { Slot: () => ['Hello world! - ', name]})
-         ]),
-         Else(() => [
-            jsx('div', { Slot: () => ['zzzzzz']})
-         ])
-      )
-   ]
+  Slot: () => [
+    jsx(Child),
+    IfSeries(
+      If(active, () => [
+        jsx('div', { Slot: () => ['Hello world! - ', name]})
+      ]),
+      Else(() => [
+        jsx('div', { Slot: () => ['zzzzzz']})
+      ])
+    )
+  ]
 })
 ```
 

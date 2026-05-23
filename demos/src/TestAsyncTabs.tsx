@@ -1,12 +1,12 @@
 import { Ion, ion, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon, ionic } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { Component, Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/luent";
+import { component, Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMounted, Match, If } from "@rue/luent";
 import { As } from "../../../packages/luent/src/conditional/As";
 
 // Modified Demo from Solid.js 
 
 function Loading() {
-   return Component('loading...')
+   return component('loading...')
 }
 
 export function TestAsyncTabs() {
@@ -39,7 +39,7 @@ export function TestAsyncTabs() {
 
    // const $tabSuspense = SuspenseIon()
 
-   return Component(<>
+   return component(<>
       <ul class="inline">
          {For(allTabs, m => m, tab => (
             <li class={($tab() === tab && 'selected')} on:click={e => { openTab(tab) }}>
@@ -106,7 +106,7 @@ function Tab(input: FromTag<{
       // '-awaited': true
    });
 
-   return Component(<>
+   return component(<>
       <div class="tab-content">
          <p style="font-size: xx-large">{CONTENT[page]}</p>
          This content is for page "{page}" after {($time()?.toFixed())}ms.

@@ -1,4 +1,4 @@
-import { Component, template, For, listen, Style } from "@rue/luent";
+import { component, template, For, listen, Style } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
 import { instantUpdate,  ionic, EACH, ion} from "@rue/quarky";
@@ -119,7 +119,7 @@ export function TestListDragDrop() {
       })
    }
 
-   return Component(
+   return component(
       <>
          <h1>hello world</h1>
          <div style='user-select: none; display: grid; grid-template-columns: 1fr 1fr; width: 100vw'>

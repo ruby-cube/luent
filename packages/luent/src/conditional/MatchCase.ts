@@ -9,7 +9,7 @@ import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode"
 import { DynamicNodeKit, IfElseKit } from "./IfElse";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
-import { Component } from "..";
+import { component } from "..";
 
 type CaseKey = any
 
@@ -32,7 +32,7 @@ export function Match(input: FromTag<{
    Slot: RenderSlot
 }>) {
    const { $x, toCase = (key: any) => key, Slot, "view": view } = input
-   return Component(
+   return component(
       new MatchKit($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)
    )
 }

@@ -9,7 +9,7 @@ type ThisComponent = {
 
 // TODO: Cases
 // [ ] hidden nested await and other async function
-// [ ] Component Kits
+// [ ] component Kits
 
 
 type LessonInput = FromTag<{

@@ -1,8 +1,8 @@
-import { Component, FromTag, template } from "@rue/luent";
+import { component, FromTag, template } from "@rue/luent";
 
 export function CreateIcon(icon: string) {
    return function Icon(attributes: FromTag) {
-      return Component(
+      return component(
          <i data-lucide={icon} {...attributes}></i>
       )
    }

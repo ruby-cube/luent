@@ -1,4 +1,4 @@
-import { Component, template, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/luent";
+import { component, template, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/luent";
 import { Inert, ion, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
@@ -36,7 +36,7 @@ interface Robot {
 export function RoboFriendsApp() {
    const $robots = ion(robots as Robot[])
 
-   return Component(
+   return component(
       <>
          <h1>RoboFriends</h1>
          <RoboList
@@ -61,7 +61,7 @@ export function RoboList(input: FromTag<{
 }>) {
    const { $robots } = input; // TODO: type input such that $robots is defined
 
-   return Component(
+   return component(
       <div class='robo-list'>
          {For($robots, m => m.id, robot => (
             <RoboCard
@@ -132,7 +132,7 @@ export function RoboCard(input: FromTag<{
    // }
 
 
-   return Component(
+   return component(
       <>
          <div class='robot-card grow'>
             <img alt='robot' src={`https:robohash.org/${id}?size=200x200`} />

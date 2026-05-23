@@ -1,4 +1,4 @@
-import { Component, If } from "@rue/luent";
+import { component, If } from "@rue/luent";
 import { ion, PRELUDE, watch } from "@rue/quarky";
 
 export function TestNullIon() {
@@ -8,7 +8,7 @@ export function TestNullIon() {
       console.log('@@@frog', $frog())
    }, { phase: PRELUDE })
 
-   return Component(
+   return component(
       <div>
 
          <button on:click={e => $frog.value = 'kermit'}>click</button>

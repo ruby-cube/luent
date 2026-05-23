@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/luent";
+import { component, queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/luent";
 import { Ion, ionic, ion } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -133,7 +133,7 @@ export function ChatWindow(input: FromTag<{
       })
    }
 
-   return Component(
+   return component(
       <div class='chat-window'>
          {If($error,
             <div class='error'>{$error}</div>

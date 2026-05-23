@@ -32,7 +32,7 @@ export function TestAsyncSelect() {
       '-writable': true
    })
 
-   return Component(
+   return component(
       <div class='test-view' data-test-latency={JSON.stringify([TEST_LATENCY_0, TEST_LATENCY_1])}>
          {Await(
             <>

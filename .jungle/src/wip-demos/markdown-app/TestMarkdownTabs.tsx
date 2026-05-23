@@ -1,4 +1,4 @@
-import { Component, template, For, FromTag } from "@rue/luent";
+import { component, template, For, FromTag } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 
 let id = 1;
@@ -56,7 +56,7 @@ export function MarkdownApp() {
    const $allFiles = resolvedDispatch(GET_FILES)
 
 
-   return Component(
+   return component(
       <>
          <Sidebar files={$allFiles}></Sidebar>
             <Main files={$opendFiles}></Main>
@@ -71,7 +71,7 @@ function Main(
 }>()
 ) {
 
-   return Component(
+   return component(
       <>
          <nav>
             {For($openedFiles, (file) => (
@@ -83,14 +83,14 @@ function Main(
    )
 }
 function Sidebar() {
-   return Component(
+   return component(
       <>
       </>
    )
 }
 
 function Tab() {
-   return Component(
+   return component(
       <>
       </>
    )

@@ -1,10 +1,10 @@
-import { Component, FromTag, NodeRef, template } from "@rue/luent"
+import { component, FromTag, NodeRef, template } from "@rue/luent"
 
 export function StyledComp() {
    const $div = NodeRef('div')
    const $comp = NodeRef(Comp)
 
-   return Component(
+   return component(
       <div>
          <Comp ref={$comp} at:mounted={() => console.log('comp>>', $comp())}></Comp>
          <BaseComp ref={$div} at:mounted={() => console.log('div>>', $div())}></BaseComp>
@@ -17,14 +17,14 @@ function BaseComp(input: FromTag<{
 }>) {
    const { ref } = input
 
-   return Component(
+   return component(
       <div ref={ref}>hi</div>
    )
 }
 
 function Comp(input: FromTag<{
 }>) {
-   return Component(
+   return component(
       <div>hi</div>
    )
       .ref({

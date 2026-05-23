@@ -1,9 +1,9 @@
-import { Component, FromTag, If, Xray } from "@rue/luent";
+import { component, FromTag, If, Xray } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestHookForwarding() {
 
-   return Component(
+   return component(
       <Comp
          at:mount={node => console.warn('node', node)}
          xray:root={x => <x.div
@@ -20,7 +20,7 @@ function Comp(setup: FromTag<{
 
    const $active = ion(true)
 
-   return Component.as({
+   return component.as({
       hey: true
    })(
       <div auto-bind={xray.root}>

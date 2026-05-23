@@ -1,4 +1,4 @@
-import { Component, createRoot, template } from "@rue/luent"
+import { component, createRoot, template } from "@rue/luent"
 import {
    Card,
    CardContent,
@@ -10,7 +10,7 @@ import {
 import { Button } from "../Button"
 
 export function SmallCard() {
-   return Component(
+   return component(
       <Card size="sm" class="mx-auto w-full max-w-sm">
          <CardHeader>
             <CardTitle>Small Card</CardTitle>

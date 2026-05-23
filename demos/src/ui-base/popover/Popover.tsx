@@ -1,4 +1,4 @@
-import { Component, $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template } from "@rue/luent"
+import { component, $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template } from "@rue/luent"
 import { Ion, Ionic, toIon, ion } from "@rue/quarky"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
@@ -28,7 +28,7 @@ function PopoverRoot(setup: FromTag<{
 
    const { gap } = popover
 
-   return Component(
+   return component(
       <>
          {If((popover.visible), // TODO: configure activation type
             <Context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
@@ -111,7 +111,7 @@ function PopoverContent(setup: FromTag<{
    // const popover = fromContext(TOOLTIP)
    // const { gap } = popover;
 
-   return Component(
+   return component(
       <div class={$classes()} style={$styles()} {...attributes}>
          {Slot()}
       </div>
@@ -138,7 +138,7 @@ function PopoverTail(setup: FromTag<{
    const popover = fromContext(POPOVER)
    const $popover = $fromContext(POPOVER_NODE)
 
-   return Component(
+   return component(
       <>
          <div
             at:mounted={node => positionTail(node, popover, $popover)}

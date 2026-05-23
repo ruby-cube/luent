@@ -1,7 +1,7 @@
 
 // composability only
 
-import { Component, template } from "@rue/luent"
+import { component, template } from "@rue/luent"
 import { ion } from "@rue/quarky"
 
 
@@ -71,7 +71,7 @@ function TestVanillaStream() {
             : 1
    )
 
-   return Component(
+   return component(
       <>
          <div class="logo">
             <div class={['bg dragon', (`${$side()}${$frame()}`)]}></div>

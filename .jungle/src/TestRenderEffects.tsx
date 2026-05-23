@@ -1,5 +1,5 @@
 import { getFlask } from "@rue/flask";
-import { Component, atMounted, template } from "@rue/luent";
+import { component, atMounted, template } from "@rue/luent";
 import { ion, LAYOUT, PRELUDE, queuePrelude, queueRender, queueTask, RENDER, SYNC, TICK, watch } from "@rue/quarky";
 
 export function TestRenderEffects() {
@@ -32,7 +32,7 @@ export function TestRenderEffects() {
       })
    }
 
-   return Component(
+   return component(
       <div on:click={increment}>hi</div>
    )
 }

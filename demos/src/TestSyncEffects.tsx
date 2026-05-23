@@ -1,4 +1,4 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { ion, SYNC, watch } from "@rue/quarky";
 
 export function TestSyncEffects() {
@@ -7,7 +7,7 @@ export function TestSyncEffects() {
       console.log('count', $count())
    }, { phase: SYNC })
 
-   return Component(
+   return component(
       <div on:click={e => $count.value++}>Sync effects</div>
    )
 }

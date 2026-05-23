@@ -1,4 +1,4 @@
-import { Component, atDiscard, ComponentRef, createRoot, NodeRef, template } from "@rue/luent";
+import { component, atDiscard, ComponentRef, createRoot, NodeRef, template } from "@rue/luent";
 import { ion } from "@rue/quarky";
 import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
@@ -69,7 +69,7 @@ export function BottomlessBlokkis() {
         return blokk.leftEdge === 0
     }
 
-    return Component(
+    return component(
         <div class='container'>
             <div class='header'>
                 <h1>Bottomless Blokkis</h1>

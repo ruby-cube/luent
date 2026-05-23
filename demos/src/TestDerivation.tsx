@@ -1,4 +1,4 @@
-import { $of, Component, For, template } from "@rue/luent";
+import { $of, component, For, template } from "@rue/luent";
 import { ionic, SYNC, watch } from "@rue/quarky";
 
 
@@ -12,7 +12,7 @@ export function TestDerivation() {
       console.log('label', count.value) // This runs on count value change
    }, { phase: SYNC })
 
-   return Component(
+   return component(
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -30,7 +30,7 @@ export function TestDerivationA() {
       console.log('pion', /* count.value */)
    }, { phase: SYNC })
 
-   return Component(
+   return component(
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -52,7 +52,7 @@ export function TestDerivationB() {
 
 
 
-   return Component(
+   return component(
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -74,7 +74,7 @@ export function TestDerivationD() {
 
 
 
-   return Component(
+   return component(
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -95,7 +95,7 @@ export function TestDerivationC() {
 
 
 
-   return Component(
+   return component(
       <button on:click={e => count.value++}>+</button>
    )
 }

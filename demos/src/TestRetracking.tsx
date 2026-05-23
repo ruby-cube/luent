@@ -1,4 +1,4 @@
-import { Component, css, For, template, Style } from "@rue/luent";
+import { component, css, For, template, Style } from "@rue/luent";
 import { ionic, ion } from "@rue/quarky";
 
 export function TestRetracking() {
@@ -17,7 +17,7 @@ export function TestRetracking() {
    function uncheckAll() {
       $todos().forEach(todo => todo.completed = false)
    }
-   return Component(
+   return component(
       <>
       <div>
          <button on:click={checkAll}>checkAll</button>

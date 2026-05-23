@@ -55,13 +55,13 @@ const remaining = ion(() => limit - count())
 `variable@` • getter access for reference passing
 ```ts
 watch(count@, () => {
-   console.log('The count is', count)
+  console.log('The count is', count)
 })
 ```
 ```ts
 // native equivalent
 watch(count, () => {
-   console.log('The count is', count())
+  console.log('The count is', count())
 })
 ```
 
@@ -74,8 +74,8 @@ e.g. `if(obj) { obj.property }` • Type-narrowing and -widening of accessor var
 get user = ion(null as User | null)
 
 function logUsername() {
-   if (!user) return;
-   console.log('username:' user.name)
+  if (!user) return;
+  console.log('username:' user.name)
 }
 ```
 ```tsx
@@ -83,8 +83,8 @@ function logUsername() {
 const user = ion(null as User | null)
 
 function logUsername() {
-   if (!user()) return;
-   console.log('username:' user()!.name)
+  if (!user()) return;
+  console.log('username:' user()!.name)
 }
 ```
 ```tsx
@@ -92,9 +92,9 @@ function logUsername() {
 const $user = ion(null as User | null)
 
 function logUsername() {
-   const user = $user();
-   if (!user) return;
-   console.log('username:' user.name)
+  const user = $user();
+  if (!user) return;
+  console.log('username:' user.name)
 }
 ```
 

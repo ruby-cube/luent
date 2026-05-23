@@ -1,4 +1,4 @@
-import { $of, Component, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
+import { $of, component, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
 import { ion, Ion, Ionic, ionic } from "@rue/quarky";
 
 
@@ -9,7 +9,7 @@ export function EmojiQuest() {
          this.push(powers[Math.floor(Math.random() * powers.length)])
       }
    })
-   return Component(
+   return component(
       <>
          <main>
             {/* <EmojiGame></EmojiGame> */}
@@ -31,7 +31,7 @@ function Panel(setup: FromTag<{
 
    const opened = ion(true)
 
-   return Component(
+   return component(
       <>
          <div class='panel'>
             <div class='top-bar'>{title}
@@ -83,7 +83,7 @@ function Powerset(setup: FromTag<{
    const count = $of(powerset).length
    const remaining = ion(() => limit - count())
 
-   return Component(
+   return component(
       <>
          <div class={['powerset-panel', $class]}>
             <ul class='powerset-list'>

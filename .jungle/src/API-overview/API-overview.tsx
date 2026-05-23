@@ -1,13 +1,13 @@
 //@ts-nocheck
 // COMPONENTS
 
-import { Component, template, POSTLUDE, PRELUDE } from "@rue/luent"
+import { component, template, POSTLUDE, PRELUDE } from "@rue/luent"
 import { ion, ionize } from "@rue/quarky"
 import { sub } from "date-fns"
 
 export function App() {
 
-   return Component(
+   return component(
       <>
          <h1>My Counter App</h1>
          <Counter></Counter>
@@ -18,7 +18,7 @@ export function App() {
 export function Counter() {
    const $count = ion(0)
 
-   return Component(
+   return component(
       <div>
          <p>{$count}</p>
          <button on:click={e => $count.value++}>increment</button>
@@ -41,7 +41,7 @@ export function Counter() {
       $count.value = 0
    }
 
-   return Component(
+   return component(
       <div>
          <p>{$count}</p>
          <button on:click={e => $count.value++}>increment</button>
@@ -63,7 +63,7 @@ export function Counter() {
       }
    })
 
-   return Component(
+   return component(
       <div>
          <p>{$count}</p>
          <button on:click={e => $count.increment()}>increment</button>
@@ -78,7 +78,7 @@ export function DoubleCounter() {
    const $count = ion(0)
    const $doubleCount = ion(() => $count() * 2)
 
-   return Component(
+   return component(
       <div>
          <p>{$doubleCount}</p>
          <button on:click={e => $count.value++}>increment</button>
@@ -92,7 +92,7 @@ export function DoubleCounter() {
 export function DoubleCounter() {
    const $count = ion(0)
 
-   return Component(
+   return component(
       <div>
          <p>{($count() * 2)}</p>
          <button on:click={e => $count.value++}>increment</button>
@@ -125,7 +125,7 @@ function makeAnonymous() {
 export function Counter() {
    const $count = ion(0)
 
-   return Component(
+   return component(
       <div>
          <p>{$count}</p>
          <button on:click={e => $count.value++}>increment</button>
@@ -138,7 +138,7 @@ export function Counter() {
 export function Counter() {
    const $count = ion(0)
 
-   return Component(
+   return component(
       <div>
          <p>{$count}</p>
          <button on:click={e => $count.value++}>increment</button>
@@ -163,7 +163,7 @@ function ScoreBoard({ a, b }) {
       points: 0
    })
 
-   return Component(
+   return component(
       <div>
          <h3>Scores</h3>
          <hr></hr>
@@ -204,7 +204,7 @@ function ScoreBoard({ a, b }) {
       points: 0
    })
 
-   return Component(
+   return component(
       <div>
          <h3>Scores</h3>
          <hr></hr>
@@ -227,7 +227,7 @@ function FruitBasket({ $selectedFruit, fruitStore }) {
       fruits.add(fruit)
    }
 
-   return Component(
+   return component(
       <div>
          {$selectedFruit()} {(fruits.has($selectedFruit()) ? '✅' : '❌')}
          <button on:click={addRandomFruit}>add random fruit</button>
@@ -246,7 +246,7 @@ export function Counter() {
       console.log('count is now', $count())
    })
 
-   return Component(
+   return component(
       <div>
          <p>{$count}</p>
          <button on:click={e => $count.value++}>increment</button>
@@ -314,7 +314,7 @@ function ScoreBoard({ a, b }) {
    const playerA = ionize(new Player(a))
    const playerB = ionize(new Player(b))
 
-   return Component(
+   return component(
       <div>
          <p>{playerA.name}: {playerA.$points}</p>
          <button on:click={e => playerA.addPoint()}>+</button>
@@ -356,7 +356,7 @@ watch(player.$name, () => {
 export function PlayingCard({ $number, $suit, faceup = false, $cardBack }) {
    const $faceup = ion(faceup)
 
-   return Component(
+   return component(
       <div on:click={e => $faceup.value = !$faceup()}>
          {If($faceup,
             <CardFace number={$number} suit={$suit}></CardFace>
@@ -371,7 +371,7 @@ export function PlayingCard({ $number, $suit, faceup = false, $cardBack }) {
 // Match series
 export function WeirdDice({ $number }) {
 
-   return Component(
+   return component(
       <div>
          {Match($number)}
          {Case(1,
@@ -426,7 +426,7 @@ export function TodoList() {
       $input.value = ""
    }
 
-   return Component(
+   return component(
       <div>
          <ul>
             {For(todos, (todo, $index) =>

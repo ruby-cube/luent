@@ -1,10 +1,10 @@
-import { Component, createRoot, css, template, Style } from "@rue/luent";
+import { component, createRoot, css, template, Style } from "@rue/luent";
 import "./index.css"
 import "./TailwindPlay-card.css"
 import ".overrides.css" // transpiler
 
 function Grandparent() {
-    return Component(
+    return component(
         <Parent class='bg-blue-600'></Parent>
         // <Parent class='override0 bg-blue-600'></Parent> // transpiler
     )
@@ -12,14 +12,14 @@ function Grandparent() {
 
 function Parent() {
 
-    return Component(
+    return component(
         <Child class='bg-amber-900'></Child>
         // <Child class='override1 bg-amber-900'></Child> // transpiler
     )
 }
 
 function Child() {
-    return Component(
+    return component(
         <>
             <div class='bg-amber-400'>hi</div>
             {Style(css`
@@ -41,7 +41,7 @@ function Child() {
 function TailwindPlay() {
     const HEIGHT = 610
 
-    return Component(
+    return component(
         <div></div>
         // <div class='bg-amber-400 override0 override1 bg-amber-900 bg-blue-600'>child</div>
         // <div class='card lessons'>

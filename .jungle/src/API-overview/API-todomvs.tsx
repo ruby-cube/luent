@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, template, For, If, Else } from "@rue/luent"
+import { component, template, For, If, Else } from "@rue/luent"
 import { watch, ion, queueIonicTask, ionize, Ionized, ionic } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 
@@ -96,7 +96,7 @@ export function TodoMVC() {
       }
    }
 
-   return Component(
+   return component(
       <>
          <section class="todoapp">
             <header class="header">

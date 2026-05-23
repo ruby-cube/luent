@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, template, v } from "@rue/luent"
+import { component, template, v } from "@rue/luent"
 import { ionize } from "@rue/quarky"
 
 function Board() {
@@ -12,7 +12,7 @@ function Board() {
       }
    })
 
-   return Component(
+   return component(
       <template>
          <h1>{(frog.fullname)}</h1>
          <input m:value={frog.$firstName} />

@@ -1,4 +1,4 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { ion, ionic } from "@rue/quarky";
 
 
@@ -22,7 +22,7 @@ export function TestBox() {
       box.position.x = box.position.x - 10;
    }
 
-   return Component(
+   return component(
       <>
          <div style={{
             position: 'absolute',

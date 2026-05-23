@@ -1,4 +1,4 @@
-import { Component, template, fromGround, fromRoot, If, Style, css } from "@rue/luent";
+import { component, template, fromGround, fromRoot, If, Style, css } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 import { User } from "./context/keys";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
@@ -26,7 +26,7 @@ export function FriendSite() {
       $user.value = null
    })
 
-   return Component(
+   return component(
       <>
          {If($connected,
             <RouteView as={$route}></RouteView>

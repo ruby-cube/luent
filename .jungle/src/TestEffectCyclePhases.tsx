@@ -1,4 +1,4 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { watch, ion } from "@rue/quarky";
 
 export function TestEffectCyclePhases() {
@@ -48,7 +48,7 @@ export function TestEffectCyclePhases() {
 
 
 
-   return Component(
+   return component(
       <>
 
          <button on:click={e => $count.change()}>{$count}</button>

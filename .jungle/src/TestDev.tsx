@@ -1,4 +1,4 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { dev, ion, PRELUDE, SYNC, watch } from "@rue/quarky";
 
 // COMPOUNDS
@@ -55,7 +55,7 @@ export function TestDev() {
    //    // 'dev.logAtoms': true
    // })
 
-   return Component(
+   return component(
       <div on:click={e => $count.increment()}>{$count}</div>
    )
 }

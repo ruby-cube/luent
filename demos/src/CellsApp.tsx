@@ -1,4 +1,4 @@
-import { Component, template, For, FromTag, Style, INTERNAL, atUnmount, atDemount, atMounted, css, If, Else } from "@rue/luent"
+import { component, template, For, FromTag, Style, INTERNAL, atUnmount, atDemount, atMounted, css, If, Else } from "@rue/luent"
 import { Ion, ion } from "@rue/quarky"
 import { Thru } from "../../../packages/luent/src/iteratives/Thru"
 
@@ -42,7 +42,7 @@ export function CellsApp() {
       return Number.isFinite(num) ? num : val
    }
 
-   return Component(
+   return component(
       <>
          <table>
             <thead>
@@ -118,7 +118,7 @@ function Cell(input: FromTag<{
       setCellValue(e.target.value.trim())
    }
 
-   return Component(
+   return component(
       <>
          <div class="cell" title={$value} on:click={e => { $editing.value = true }}>
             {If($editing,

@@ -1,87 +1,87 @@
 body {
-    font-family: 'Avenir Next';
-    display: flex;
-    margin: 0;
-    min-height: 100vh;
-    background-color: white;
-    justify-content: center;
+  font-family: 'Avenir Next';
+  display: flex;
+  margin: 0;
+  min-height: 100vh;
+  background-color: white;
+  justify-content: center;
 }
 
 .header {
-    padding: 0px 1em;
-    margin-bottom: 30px;
+  padding: 0px 1em;
+  margin-bottom: 30px;
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .board {
-    border-radius: 30px 30px 0px 0px;
-    display: grid;
-    grid-template-columns: repeat(var(--board-columns), var(--cell-size));
-    grid-template-rows: repeat(var(--board-rows), var(--cell-size));
-    position: relative;
-    z-index: 1;
-    background: linear-gradient(#feca92, #63d0ff);
-    overflow: hidden;
-    border: .25em solid black;
+  border-radius: 30px 30px 0px 0px;
+  display: grid;
+  grid-template-columns: repeat(var(--board-columns), var(--cell-size));
+  grid-template-rows: repeat(var(--board-rows), var(--cell-size));
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(#feca92, #63d0ff);
+  overflow: hidden;
+  border: .25em solid black;
 }
 
 .console {
-    border-radius: 0px 0px 30px 30px;
-    display: grid;
-    position: relative;
-    z-index: 2;
-    background-color: rgb(74, 66, 66);
-    flex-grow: 1;
-    align-items: center;
-    justify-items: center;
-    padding: 2em;
-    border: .25em solid black;
+  border-radius: 0px 0px 30px 30px;
+  display: grid;
+  position: relative;
+  z-index: 2;
+  background-color: rgb(74, 66, 66);
+  flex-grow: 1;
+  align-items: center;
+  justify-items: center;
+  padding: 2em;
+  border: .25em solid black;
 }
 
 
 button {
-    width: 4rem;
-    height: 4rem;
-    border: 0px;
-    border-radius: .5em;
-    background-color: rgb(229, 232, 233);
+  width: 4rem;
+  height: 4rem;
+  border: 0px;
+  border-radius: .5em;
+  background-color: rgb(229, 232, 233);
 }
 
 .console-btns {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 0.5em;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 0.5em;
 }
 
 .move-left {
-    grid-column: 1;
-    grid-row: 1;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .move-right {
-    grid-column: 3;
-    grid-row: 1;
+  grid-column: 3;
+  grid-row: 1;
 }
 
 .move-down {
-    grid-column: 2;
-    grid-row: 2;
+  grid-column: 2;
+  grid-row: 2;
 }
 
 .rotate-btn {
-    font-size: 2em;
-    grid-column: 2;
-    grid-row: 1;
-    border-radius: 50%;
-    border: 0px solid
+  font-size: 2em;
+  grid-column: 2;
+  grid-row: 1;
+  border-radius: 50%;
+  border: 0px solid
 }
 
 h1 {
-    margin-bottom: auto;
+  margin-bottom: auto;
 }

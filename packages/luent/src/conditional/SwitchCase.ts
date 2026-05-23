@@ -39,7 +39,7 @@ export function Switch(input: FromTag<{
       cases: toCases(Slot() as RawCaseKit[]) as CasesKit[],
       matches
    })
-   return Component(
+   return component(
       createIfSeries(kits, view)
    )
 }

@@ -5,31 +5,31 @@ export type Capabilities = CodeMapping['data']
 
 
 export type BaseCapabilities = {
-   completion: true,
-   navigation: true,
-   semantic: true,
-   verification: true
+  completion: true,
+  navigation: true,
+  semantic: true,
+  verification: true
 }
 
 export type NoCapabilities = {
-   completion: false,
-   navigation: false,
-   semantic: false,
-   verification: false
+  completion: false,
+  navigation: false,
+  semantic: false,
+  verification: false
 }
 
 export const BASE_CAPABILITIES = {
-   verification: true,
-   semantic: true,
-   navigation: true,
-   completion: true,
+  verification: true,
+  semantic: true,
+  navigation: true,
+  completion: true,
 };
 
 export const NO_CAPABILITIES = {
-   verification: false,
-   completion: false,
-   semantic: false,
-   navigation: false,
+  verification: false,
+  completion: false,
+  semantic: false,
+  navigation: false,
 };
 
 export const SEMANTIC_ONLY = {

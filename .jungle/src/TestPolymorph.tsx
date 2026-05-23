@@ -1,4 +1,4 @@
-import { Component, template, For, fromRoot, fromContext, fromGround, FromTag, If, provideRoot, provideGround } from "@rue/luent";
+import { component, template, For, fromRoot, fromContext, fromGround, FromTag, If, provideRoot, provideGround } from "@rue/luent";
 import "./style.css"
 
 type File = { name: string }
@@ -81,7 +81,7 @@ export function TestPolymorph() {
       history.pushState(state ?? {}, "", key)
    }
 
-   return Component(
+   return component(
       <>
          <div>
             {/* <$Main as={'peas'}></$Main> */}
@@ -104,7 +104,7 @@ export function TestPolymorph() {
 }
 
 function Home() {
-   return Component(
+   return component(
       <>
          <h3>Tadaima</h3>
          <p>🏠</p>
@@ -115,7 +115,7 @@ function Home() {
 function Happy() {
    const $message = ion('hi')
 
-   return Component(
+   return component(
       <>
          <h3>Heee</h3>
          <p>☺️</p>
@@ -126,7 +126,7 @@ function Happy() {
 }
 
 function Peas() {
-   return Component(
+   return component(
       <>
          <h3>Wanh-wah</h3>
          <p>🤢🤢</p>
@@ -135,7 +135,7 @@ function Peas() {
 }
 
 function Missing() {
-   return Component(
+   return component(
       <>
          <h3>404</h3>
          <p>😩</p>
@@ -150,7 +150,7 @@ function File(input: FromTag<{
 }>) {
    const { file } = input
 
-   return Component(
+   return component(
       <>
          <h3>File:</h3>
          <p>{file.name}</p>

@@ -1,4 +1,4 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { Thru } from "../../../packages/luent/src/iteratives/Thru";
 import { ion } from "@rue/quarky";
 
@@ -12,7 +12,7 @@ export function TestThru() {
       }
    })
 
-   return Component(
+   return component(
       <div>
          <button on:click={e => $count.increment()}>+</button>
          <button on:click={e => $count.decrement()}>-</button>

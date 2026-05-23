@@ -1,4 +1,4 @@
-import { Component, template, For, listen, NodeRef, Style, css } from "@rue/luent";
+import { component, template, For, listen, NodeRef, Style, css } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { ion, queueRender, queueTask, EACH, ionic } from "@rue/quarky";
@@ -113,7 +113,7 @@ export function TestListSelectTransition() {
 
    // {{ [m.list]: $active, '.': [m.dark, m.selectedList] }}
 
-   return Component(
+   return component(
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>

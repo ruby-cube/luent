@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, template, fromGround } from "@rue/luent";
+import { component, template, fromGround } from "@rue/luent";
 import { Polymorph } from "../../../../packages/luent/src/conditional/x_Polymorph";
 
 // A: We provide route parameters via context and tag
@@ -121,7 +121,7 @@ export function SomeChild() {
 
    }
 
-   return Component(
+   return component(
       <div>
          <input mu:value={$searchTerm} />
          <button on:click={search}>SEARCH</button>

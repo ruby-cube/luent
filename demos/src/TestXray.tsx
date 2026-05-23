@@ -1,8 +1,8 @@
-import { Component, FromTag } from "@rue/luent"
+import { component, FromTag } from "@rue/luent"
 import { Xray } from "packages/luent/src/component/bindings"
 
 export function TestXray() {
-   return Component(
+   return component(
       <Board
          style={{ 'color': 'red' }}
          on:click={e => console.log('click outer')}
@@ -19,7 +19,7 @@ function Board(setup: FromTag<'div', {
 }>) {
    const { xray, ...rest } = setup
 
-   return Component(
+   return component(
       <div auto-bind={rest}>
          all red
          <button on:click={() => console.log('i click')} auto-bind={xray.button}>click</button>

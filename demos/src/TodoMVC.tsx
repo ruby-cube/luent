@@ -1,4 +1,4 @@
-import { Component, template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/luent"
+import { component, template, For, If, Else, FromTag, listen, isMutableIon, NodeRef } from "@rue/luent"
 import { watch, queueIonicTask, Ion, Ionic, EACH, ionic, ion } from "@rue/quarky"
 
 interface Todo {
@@ -126,7 +126,7 @@ export function TodoMVC() {
    const $todoList = NodeRef(TodoList)
    const $h1 = NodeRef('h1')
 
-   return Component(
+   return component(
       <>
          <section class="todoapp">
             <header class="header">
@@ -174,7 +174,7 @@ function TodoInput({ addTodo }: FromTag<{ addTodo: (title: string) => void }>) {
       }
    }
 
-   return Component(
+   return component(
       <input
          class="new-todo"
          autofocus
@@ -217,7 +217,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
       console.log('isEditing?', $editedTodo())
    })
 
-   return Component(
+   return component(
       <ul class="todo-list">
          {For($todos, m => m.id, (todo) => {
             const $isEditing = ion(() => todo === $editedTodo());

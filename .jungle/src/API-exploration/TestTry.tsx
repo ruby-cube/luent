@@ -1,9 +1,9 @@
-import { Component, Catch, template, createTryCatch, FromTag, Try } from "@rue/luent";
+import { component, Catch, template, createTryCatch, FromTag, Try } from "@rue/luent";
 
 export function TestTry() {
    console.log('running TestTry')
 
-   return Component(
+   return component(
       <div>
          <h2>Stubbon Child</h2>
          {Try(
@@ -20,7 +20,7 @@ export function TestTry() {
 function Child() {
    console.log('Running Child')
    throw 'I was born a restless child'
-   return Component(
+   return component(
       <div>:)</div>
    )
 }
@@ -28,7 +28,7 @@ function Child() {
 function ErrorMessage({ message } : FromTag<{
    message: string
 }>) {
-   return Component(
+   return component(
       <div>{message}</div>
    )
 }

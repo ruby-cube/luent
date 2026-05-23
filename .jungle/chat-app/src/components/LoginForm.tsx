@@ -1,4 +1,4 @@
-import { Component, template, FromTag } from '@rue/luent'
+import { component, template, FromTag } from '@rue/luent'
 import { ion } from '@rue/quarky'
 import { logIn } from '../database/database'
 
@@ -16,7 +16,7 @@ export function LoginForm() {
          $error.value = response.error
    }
 
-   return Component(
+   return component(
       <form on:submit={reSubmit}>
          <input type="email" required placeholder="email" mu:value={$email}></input>
          <input type="password" required placeholder="password" mu:value={$password}></input>

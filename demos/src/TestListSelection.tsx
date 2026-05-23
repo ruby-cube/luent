@@ -1,4 +1,4 @@
-import { Component, template, createRoot, For, listen, NodeRef, Style, css } from "@rue/luent";
+import { component, template, createRoot, For, listen, NodeRef, Style, css } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { ion, EACH, ionic } from "@rue/quarky";
@@ -102,7 +102,7 @@ export function TestListSelection() {
       selected.clear()
    })
 
-   return Component(
+   return component(
       <>
       <div style='transform: scale(.5); transform-origin: top'>
          <h1>hello world</h1>

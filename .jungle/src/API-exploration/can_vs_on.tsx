@@ -8,7 +8,7 @@
  */
 
 import { getActiveFlask } from "@rue/flask";
-import { Component, template, FromTag } from "@rue/luent";
+import { component, template, FromTag } from "@rue/luent";
 import { Ion, Ionic } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -40,7 +40,7 @@ function StatefulCounter(input: FromTag<{
       emit('decrement', { count: $count() })
    }
 
-   return Component(
+   return component(
       <>
          <div>{$count}</div>
          <button on:click={incrementCount}>+</button>
@@ -59,7 +59,7 @@ function DumbCounter(input: FromTag<{
 }>) {
    const { $count, emit } = input
 
-   return Component(
+   return component(
       <>
          <div>{$count}</div>
          <button on:click={e => emit('incrementClick')}>+</button>
@@ -77,7 +77,7 @@ function DumbCounterC(input: FromTag<{
 }>) {
    const { $count, incrementCount, decrementCount } = input
 
-   return Component(
+   return component(
       <>
          <div>{$count}</div>
          <button on:click={e => incrementCount()}>+</button>
@@ -93,7 +93,7 @@ function DumbCounterB(input: FromTag<{
 }>) {
    const { $count, mu } = input
 
-   return Component(
+   return component(
       <>
          <div>{$count}</div>
          <button on:click={e => mu($count).increment()}>+</button>
@@ -168,7 +168,7 @@ function Parent() {
 
    const product = ionic(new Product({}))
 
-   return Component(
+   return component(
       <>
          <Child
             can:atIncrementProductQty={getHook(product, 'incrementQty')}
@@ -249,7 +249,7 @@ function DumbProduct(input: FromTag<{
 }>) {
    const { product } = input
 
-   return Component(
+   return component(
       <>
          <StatefulCounter
             on:decrement={e => product.qty = e.count}
@@ -265,7 +265,7 @@ function SmartProduct(input: FromTag<{
 }>) {
    const { product } = input
 
-   return Component(
+   return component(
       <>
          <DumbCounterB
             mu:count={$(product.$qty, { increment: mu(product).incrementQty, decrement: mu(product).decrementQty })}

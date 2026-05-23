@@ -93,14 +93,14 @@ function Multiplier() {
 
    const { doubled@, tripled@, quadrupled@ } = MultiplierKit(count@)
 
-   <Component>
+   <:component>
       <p on:click={() => count++}>
          count: {count@}
       </p>
       <p>{count@} x 2 = {doubled@}</p>
       <p>{count@} x 3 = {tripled@}</p>
       <p>{count@} x 4 = {tripled@}</p>
-   </Component>
+   </:component>
 }
 ```
 

@@ -1,4 +1,4 @@
-import { Component, template, For, If, Else, FromTag, listen } from "@rue/luent"
+import { component, template, For, If, Else, FromTag, listen } from "@rue/luent"
 import { watch, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
 
 // PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)
@@ -130,7 +130,7 @@ export function TodoMVC() {
       app.setFilter(route) ?? (window.location.hash = '')
    }
 
-   return Component(
+   return component(
       <>
          <section class="todoapp">
             <header class="header">
@@ -186,7 +186,7 @@ function TodoInput(input: FromTag<{
       }
    }
 
-   return Component(
+   return component(
       <input
          class="new-todo"
          autofocus
@@ -227,7 +227,7 @@ function TodoList(input: FromTag<{
       }
    }
 
-   return Component(
+   return component(
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
             const $isEditing = ion(() => todo === $editedTodo());
@@ -264,7 +264,7 @@ function CheckBox(input: FromTag<{
 }>) {
    const { toggleAll, ctx: { $remaining } } = input
 
-   return Component(
+   return component(
       <>
          <input
             id="toggle-all"
@@ -283,7 +283,7 @@ function Remaining(input: FromTag<{
 }>) {
    const { $count } = input
 
-   return Component(
+   return component(
       <span class="todo-count">
          <strong>{$count}</strong>
          <span>{($count() === 1 ? ' item' : ' items')} left</span>

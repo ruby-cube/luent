@@ -1,11 +1,11 @@
 //@ts-nocheck
-import { Component, Context, ContextKey, template, fromContext, FromTag, RenderSlot } from "@rue/luent";
+import { component, Context, ContextKey, template, fromContext, FromTag, RenderSlot } from "@rue/luent";
 import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase";
 
 // # via context
 
 function Parent() {
-   return Component(
+   return component(
       <div>
          <Context provide={[
             Content['something'](new Something()),
@@ -33,7 +33,7 @@ Content['something'] = ContextKey<string>()
 function Content() {
    const something = fromContext(Content['something'])
 
-   return Component(
+   return component(
       <div>hi</div>
    )
 }
@@ -47,7 +47,7 @@ export function Button(input: FromTag<{
 }>) {
    const { Slot, Nested } = input
 
-   return Component(
+   return component(
       <div>
          <Context provide={[Nested['something']('hello')]}>
             {Slot}
@@ -62,7 +62,7 @@ export function Button(input: FromTag<{
 // # via slot input
 
 function ParentB() {
-   return Component(
+   return component(
       <div>
          <ButtonB>{something =>
             <ContentB something={something}></ContentB>
@@ -80,7 +80,7 @@ ContentB['something'] = ContextKey<string>()
 function ContentB(input: FromTag<{ something?: string }>) {
    const { something = fromContext(Content['something']) } = input
 
-   return Component(
+   return component(
       <div>hi</div>
    )
 }
@@ -93,7 +93,7 @@ export function ButtonB(input: FromTag<{
 }>) {
    const { Slot } = input
 
-   return Component(
+   return component(
       <div>
          {Slot('hi')}
       </div>

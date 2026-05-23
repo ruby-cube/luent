@@ -1,4 +1,4 @@
-import { Component, If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, Style, css } from "@rue/luent";
+import { component, If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, Style, css } from "@rue/luent";
 import { ionic, ion, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
@@ -44,7 +44,7 @@ function Counter(input: FromTag<{
    }
 
 
-   return Component(
+   return component(
       <div>
          <div>{label}: {$count}</div>
          <button on:click={e => $count.increment()}>+</button>
@@ -66,7 +66,7 @@ export function TestCreateMountShow() {
       }
    })
 
-   return Component(
+   return component(
       <>
       <article style="width: 33vw">
          <h1>View Activation: Create/Show/Mount</h1>
@@ -204,7 +204,7 @@ export function TestCreateMountShow() {
             return <>
                <code>
                   <span class="bracket">{`{`}</span>{`If($condition, 'remount',`}<br />
-                  {`   <Component></Component>`}<br />
+                  {`   <:component></:component>`}<br />
                   {`)`}<span class="bracket">{`}`}</span>
                </code>
                <p>
@@ -415,7 +415,7 @@ export function TestDerivedConditional() {
 
 
 
-   return Component(
+   return component(
       <article>
          <div>{$count}</div>
          <div>{($count() + 1)}</div>

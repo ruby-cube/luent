@@ -1,4 +1,4 @@
-import { Component, template } from "@rue/luent"
+import { component, template } from "@rue/luent"
 import {  ion, queueIonicTask, SYNC } from "@rue/quarky"
 
 
@@ -14,7 +14,7 @@ export function TestIonicEffect() {
         $count.increment()
     }, { phase: SYNC })
 
-    return Component(
+    return component(
         <button on:click={$count.increment}>click for effect</button>
     )
 }

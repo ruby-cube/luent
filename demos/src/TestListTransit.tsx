@@ -1,4 +1,4 @@
-import { Component, template, For, FromTag, Style, css } from "@rue/luent";
+import { component, template, For, FromTag, Style, css } from "@rue/luent";
 import { ion, ionic, EACH, Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 
@@ -27,7 +27,7 @@ export function TestListTransit() {
       $todos().splice(index, 1);
    }
 
-   return Component(
+   return component(
       <>
       <div class="board">
          <input
@@ -129,7 +129,7 @@ function TodoList(input: FromTag<{
 
    const lis: HTMLLIElement[] = []
 
-   return Component(
+   return component(
       <>
          <ul class="todos">
             {For($todos, t => t.id, (todo, $i) =>

@@ -1,4 +1,4 @@
-import { Else, FromTag, If, NodeRef, css, Component, Style } from "@rue/luent";
+import { Else, FromTag, If, NodeRef, css, component, Style } from "@rue/luent";
 import { Ion, ion, queueTask, watch, Finitron, ionic } from "@rue/quarky";
 import "./reset.css"
 
@@ -94,7 +94,7 @@ export function VideoPlayer() {
 
 
 
-   return Component(
+   return component(
       <>
          <div class="container">
             <video
@@ -181,7 +181,7 @@ function ElapsedBar(input: FromTag<{
 }>) {
          const { elapsed@, duration, paused@, emit } = input
 
-   return Component(
+   return component(
       <div class="elapsed"
          on:event={emit}
       >
@@ -204,7 +204,7 @@ function Timer(input: FromTag<{
 }>) {
          const { elapsed@, duration } = input
 
-   return Component(
+   return component(
       <span class="timer">
          {(asTime(elapsed))} / {asTime(duration)}
       </span>

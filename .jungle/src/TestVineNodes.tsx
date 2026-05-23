@@ -1,7 +1,7 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 
 export function TestVineNodes(){
-   return Component(
+   return component(
       <div>
          hi
       </div>

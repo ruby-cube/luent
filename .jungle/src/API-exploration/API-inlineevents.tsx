@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 
 export function Comp() {
-   return Component(
+   return component(
       <>
          <input
             class="edit"

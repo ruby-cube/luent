@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { Component, Context, ContextKey, fromContext, FromTag, RawJSXNode, RenderSlot, template } from "@rue/luent"
+import { component, Context, ContextKey, fromContext, FromTag, RawJSXNode, RenderSlot, template } from "@rue/luent"
 import { DropdownKit, IonicDropdown } from "../../ui-base/dropdown/Dropdown.kit"
 import { DropdownContent, DropdownRoot, DropdownTail } from "../../ui-base/dropdown/Dropdown";
 
@@ -18,7 +18,7 @@ function DropdownMenu(setup: FromTag<{
    const { Slot } = setup
    const { dropdown, menu } = DropdownKit()
 
-   return Component(
+   return component(
       <Context provide={DROPDOWN(dropdown)}>
          {Slot.Face(menu)}
          {Slot()}
@@ -30,7 +30,7 @@ function Dropdown(setup: FromTag<{ Slot: RenderSlot }>) {
    const { Slot } = setup
    const dropdown = fromContext(DROPDOWN)
 
-   return Component(
+   return component(
       <o--body>
          <DropdownRoot dropdown={dropdown}>
             <DropdownContent>{Slot()}</DropdownContent>
@@ -42,7 +42,7 @@ function Dropdown(setup: FromTag<{ Slot: RenderSlot }>) {
 
 export function DropdownMenuDemo() {
 
-   return Component(
+   return component(
       <DropdownMenu Slot:Face={menu =>
          <Button on:click={e => menu.open()} at:create={menu.anchor} variant="outline">Open</Button>
       }>

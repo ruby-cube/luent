@@ -1,10 +1,10 @@
-import { Component, If, Portal, template } from "@rue/luent";
+import { component, If, Portal, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 export function TestPortal() {
    const $show = ion(false)
 
-   return Component(
+   return component(
       <div>
          <div on:click={e => $show.value = !$show()}>This is not teleported</div>
          <o--portal to='body'>
@@ -19,7 +19,7 @@ export function TestPortal() {
 export function TestPortalB() {
    const $show = ion(false)
 
-   return Component(
+   return component(
       <div>
          <div on:click={e => $show.value = !$show()}>This is not teleported</div>
          {If($show,

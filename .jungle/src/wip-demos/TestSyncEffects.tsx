@@ -1,5 +1,5 @@
 import { ion, SYNC, watch } from "@rue/quarky";
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 
 export function TestSyncEffects() {
 
@@ -38,7 +38,7 @@ export function TestSyncEffects() {
 
 
 
-   return Component(
+   return component(
       <>
          <button on:click={e => { $count.increment() }}>increment</button>
       </>

@@ -1,4 +1,4 @@
-import { $from, $of, Component, Else, For, If } from "@rue/luent";
+import { $from, $of, component, Else, For, If } from "@rue/luent";
 import { ion, ionic } from "@rue/quarky";
 
 type Todo = {
@@ -52,7 +52,7 @@ export function TodoList() {
       }
    }
 
-   return Component(
+   return component(
       <ul on:click={e => $activeTodo() && ($activeTodo.value = null)}>
          {For(todos, byId, (todo, index) =>
             <li on:click={e => !$activeTodo() && ($activeTodo.value = todo)}>

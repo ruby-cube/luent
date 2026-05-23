@@ -1,4 +1,4 @@
-import { Component, template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, Style, css } from "@rue/luent";
 import { ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -16,7 +16,7 @@ export function TestIfElseRemountView(setup: FromTag<{}>) {
       }
    })
 
-   return Component(
+   return component(
       <>
       <div>
          <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>

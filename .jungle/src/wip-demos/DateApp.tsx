@@ -1,4 +1,4 @@
-import { Component, atUnmount, template } from "@rue/luent";
+import { component, atUnmount, template } from "@rue/luent";
 import { queueIonicTask, Ion, Ionized, SYNC, watch } from "@rue/quarky";
 
 export function DateApp() {
@@ -17,7 +17,7 @@ export function DateApp() {
 
    atUnmount(() => clearInterval(interval))
 
-   return Component(
+   return component(
       <p>The time is {(format(date))}</p>
    )
 }

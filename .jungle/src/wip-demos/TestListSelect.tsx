@@ -1,4 +1,4 @@
-import { Component, template, For, Style } from "@rue/luent";
+import { component, template, For, Style } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import '../style.css'
 import { instantUpdate, Ion, ion, ionic, EACH } from "@rue/quarky";
@@ -74,7 +74,7 @@ export function TestListSelect() {
 
    iteratorTests(list, selected)
    let initial = true
-   return Component(
+   return component(
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; width: 100vw'>

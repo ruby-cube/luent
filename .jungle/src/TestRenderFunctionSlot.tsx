@@ -1,8 +1,8 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestRenderFunctionSlot() {
-   return Component(
+   return component(
       <div>
          <div></div>
          <section>{() => {

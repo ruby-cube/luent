@@ -1,4 +1,4 @@
-import { Component, NodeRef, Style, css } from "@rue/luent";
+import { component, NodeRef, Style, css } from "@rue/luent";
 
 
 export function TestCanvas() {
@@ -73,7 +73,7 @@ export function TestCanvas() {
       context.clearRect(0, 0, canvas.width, canvas.height)
    }
 
-   return Component(
+   return component(
       <>
          <div class="canvas-app">
             <button type="button" on:click={clearCanvas}>Clear</button>

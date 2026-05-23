@@ -1,9 +1,9 @@
-import { Component, createRoot, css, Style, template } from "@rue/luent";
+import { component, createRoot, css, Style, template } from "@rue/luent";
 import "./TestStyleOverride-classes.css"
 import { AnyObject } from "@rue/types";
 
 function Grandparent() {
-    return Component(
+    return component(
         <div class='lessons'>
             <Parent class="bg-blue-600"></Parent>
         </div>
@@ -12,14 +12,14 @@ function Grandparent() {
 }
 
 function Parent() {
-    return Component(
+    return component(
         <Child class="bg-amber-900"></Child>
         // <Child class='override1 bg-amber-900'></Child> // transpiler
     );
 }
 
 function Child() {
-    return Component(
+    return component(
       <>
         <div class='bg-amber-400 override1 override0 bg-blue-600 bg-amber-900'>
             hello world

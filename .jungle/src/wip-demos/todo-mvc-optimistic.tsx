@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, template, For, If, Else, FromTag, fromRoot, ContextKey, ContextEntryKey, fromGround, AsyncIon, fromRoot } from "@rue/luent"
+import { component, template, For, If, Else, FromTag, fromRoot, ContextKey, ContextEntryKey, fromGround, AsyncIon, fromRoot } from "@rue/luent"
 import { watch,  queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"
@@ -548,7 +548,7 @@ export function TodoMVC({
       storeTodos($todos())
    })
 
-   return Component(
+   return component(
       <>
          <section class="todoapp">
             <header class="header">

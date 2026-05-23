@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, template } from '@rue/luent'
+import { component, template } from '@rue/luent'
 // function LoadingApp() {
 //    const $data = fromCloud(MARKDOWN_FILES) // Data | undefined
 
@@ -36,7 +36,7 @@ function Album(input : FromTag<{
    const [$albumA, $albumB, $albumC]
       = fromCloud([ALBUM_A, ALBUM_B, ALBUM_C]) // resolve in sequence (dependent fetches)
 
-   return Component((album = $album()) =>
+   return component((album = $album()) =>
       <div>{album.$title}</div>
    )
 }
@@ -190,7 +190,7 @@ function LoadingApp() {
       )
    })
 
-   return Component(
+   return component(
       <>
          <h1>Hello World</h1>
          {Await($data, suspense =>
@@ -202,7 +202,7 @@ function LoadingApp() {
 function LoadingApp() {
    const $data = fromCloud(MARKDOWN_FILES) // how to deal with latency?
 
-   return Component(
+   return component(
       <>
          <h1>Hello World</h1>
          {Await(suspense =>
@@ -301,7 +301,7 @@ function App(input : FromTag()) {
       files.remove(index)
    }
 
-   return Component(
+   return component(
       <>
          {Await($files, () =>
             <>

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, template, For } from "@rue/luent";
+import { component, template, For } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 
 function App() {
@@ -10,7 +10,7 @@ function App() {
    const $cities = fetchCities($selectedState);
    const $selectedCity = HybridIon(() => $cities()[0]);
 
-   return Component(
+   return component(
       <>
          <select mu:value={$selectedState}>
             {For($states, state =>

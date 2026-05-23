@@ -32,7 +32,7 @@ export * from './measureLayout'
 export * from './element/styles'
 export * from './conditional/As'
 export * from '../../quarky/src/reactivity/RenderCycle'
-export { JSXComponent as Component, toª as to$, ªªof as $of } from '@rue/nextscript'
+export { JSXComponent as component, toª as to$, ªªof as $of } from '@rue/nextscript'
 export type { ComponentKit } from '@rue/nextscript'
 
 

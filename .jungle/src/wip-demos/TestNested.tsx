@@ -1,4 +1,4 @@
-import { Component, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { finiton, ion, watch } from "@rue/quarky";
 
 export function TestNested() {
@@ -22,7 +22,7 @@ export function TestNested() {
    }, { eager: true })
 
 
-   return Component(
+   return component(
       <>
          <div>is active: {$isActive}</div>
          <div>is happy: {$isHappy}</div>
@@ -81,7 +81,7 @@ export function TestNestedB() {
       }
    })
 
-   return Component(
+   return component(
       <>
          <div style={($hasColor() ? { backgroundColor: $color } : { backgroundColor: 'black' })}>hi</div>
          <div>hasColor: {$hasColor}</div>
