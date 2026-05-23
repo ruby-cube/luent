@@ -16,7 +16,7 @@ NextScript is an experimental language extension of TypeScript + JSX designed to
 
 Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple data bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What may seem simple and elegant at first glance often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
 
-Meanwhile, getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as being opaque to TypeScript type guards, impacting readability due to the visual clutter of functions and function calls, or the confusion caused by functions cloaked in data variable naming.
+Getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as opaqueness to TypeScript type guards, the visual clutter of getter function calls, or confusion caused by functions with data variable names.
 
 On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell.
 
@@ -32,8 +32,8 @@ A brief glimpse of NextScript's offerings. For more details, see NextScript docu
 Things to note:
 
 - While some examples below feature API from Luent for demonstration purposes, NextScript was designed to be compatible with any getter-based system. 
-- Though primarily designed to accommodate getter-based reactivity, NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
-- JSX examples assume a conservative XML to JavaScript transpilation strategy with transparent mapping of tag bindings to object properties. Since NextScript transpiles to TypeScript and JSX, it does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
+- NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
+- JSX examples assume a conservative XML to JavaScript transpilation strategy with tag bindings that map directly to object properties. NextScript itself transpiles to only TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -43,11 +43,10 @@ Things to note:
 get count = ion(start)
 get remaining = ion(() => limit - count) // hover [ get count: number ]
 ```
-```ts
-// native equivalent
-const count = ion(start)
-const remaining = ion(() => limit - count())
-```
+<pre><code><font color="#767C9DB0">// native equivalent</font>
+<font color="#5DE4C7C0">const</font> <font color="#E4F0FB">count</font> <font color="#E4F0FB">=</font> <font color="#ADD7FF">ion</font><font color="#E4F0FB">(</font><font color="#E4F0FB">start</font><font color="#E4F0FB">)</font>
+<font color="#5DE4C7C0">const</font> <font color="#E4F0FB">remaining</font> <font color="#E4F0FB">=</font> <font color="#ADD7FF">ion</font><font color="#E4F0FB">(() =&gt; limit - count())</font>
+</code></pre>
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -186,7 +185,7 @@ with parameters:
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ### JSX Component Element
-`<:component>...</:component>` • implicitly returned component kit with typed refs
+`<:component>...</:component>` • implicitly returned component kit with type information for refs
 ```tsx
 function Dialog({ Slot }) {
    get opened = ion(false)

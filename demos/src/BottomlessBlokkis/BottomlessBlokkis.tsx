@@ -1,6 +1,5 @@
-import { atDiscard, Component } from "@rue/luent";
+import { atDiscard, Component, As } from "@rue/luent";
 import { ionic, ion, Ionic } from "@rue/quarky";
-import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
 import './BottomlessBlokkis.css'
