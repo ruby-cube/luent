@@ -31,7 +31,7 @@ A brief glimpse of a few of NextScript's features. For the full set, see NextScr
 
 Things to note:
 
-- While some examples below feature API from Luent for demonstration purposes, NextScript was designed to be compatible with any getter-based system. 
+- While some examples below feature API from Luent for demonstration purposes, NextScript is framework-agnostic. 
 - NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
 
 

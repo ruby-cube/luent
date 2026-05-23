@@ -9,20 +9,6 @@ Luent is a highly expressive web framework that aims to provide greater conceptu
 
 > This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. See how to contribute here.
 
-## Monorepo Install Behavior
-This repo uses pnpm with `recursiveInstall: false` in [pnpm-workspace.yaml](pnpm-workspace.yaml), so `pnpm install` only installs the current package by default.
-
-To bootstrap the entire workspace explicitly, run:
-
-```bash
-pnpm -r install
-```
-
-For package-scoped work, prefer filtered commands such as:
-
-```bash
-pnpm --filter ./websites/nextscript-site add -D vitepress@next
-```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
