@@ -43,10 +43,11 @@ Things to note:
 get count = ion(start)
 get remaining = ion(() => limit - count) // hover [ get count: number ]
 ```
-<pre><code><span style='color: #767C9DB0'>// native equivalent</span>
-<span style='color: #91B4D5'>const</span> <span style='color: #E4F0FB'>count</span> <span style='color: #E4F0FB'>=</span> <span style='color: #53D0F6'>ion</span><span style='color: #E4F0FB'>(</span><span style='color: #E4F0FB'>start</span><span style='color: #E4F0FB'>)</span>
-<span style='color: #91B4D5'>const</span> <span style='color: #E4F0FB'>remaining</span> <span style='color: #E4F0FB'>=</span> <span style='color: #53D0F6'>ion</span><span style='color: #E4F0FB'>(() =&gt; limit - count())</span>
-</code></pre>
+```tsx
+// native equivalent
+const count = ion(start)
+const remaining = ion(() => limit - count())
+```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
