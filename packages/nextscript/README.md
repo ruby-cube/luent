@@ -27,7 +27,7 @@ NextScript proposes to address these caveats through a dash of syntactic sugar.
 
 ## Code Glimpse
 
-A brief glimpse of three of NextScript's offerings. For the full set of features, see NextScript documentation. 
+A brief glimpse of a few of NextScript's features. For the full set, see NextScript's documentation. 
 
 Things to note:
 
@@ -130,3 +130,8 @@ Because NextScript makes use of an `@` postfix in its syntax, some developers ma
 - JetBrains Mono
 - Commit Mono
 - Fira Code
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+## License
+[MIT license](https://github.com/ruby-cube/luent/blob/main/LICENSE)
