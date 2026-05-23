@@ -260,4 +260,5 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-© 2025 - present [Ruby Y Wang](https://github.com/ruby-cube)
+## License
+[MIT license](https://github.com/ruby-cube/luent/blob/main/LICENSE)
