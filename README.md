@@ -45,11 +45,12 @@ Experimental areas:
 
 ### JSX Transpiler
 
-Luent transpiles JSX consistently and conservatively using the standard JSX transpiler for easy mental mapping. Luent currently extends the transpiler with two additional transforms:
-- JSX slots (known as `children` in classic JSX) are normalized to render functions so that parents are created before children.
-- Template function calls that form a control flow series are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile-time for better runtime performance.
+Luent transpiles JSX consistently and conservatively using the standard JSX transpiler for easy mental mapping. Luent currently extends the transpiler with three minimal transforms:
+- JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parents may be created before children.
+- JSX flow expressions (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile-time for better runtime performance.
+- JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
 
-The following JSX...
+The following JSX template...
 ```jsx
 <Parent foo={foo} bar={bar()} on:click={logClick}>
   <Child />

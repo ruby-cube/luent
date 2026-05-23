@@ -104,7 +104,7 @@ function logUsername() {
 ## Design Principles
 
 ### Conceptual elegance and predictability
-When language rules are simple and consistent, code becomes less bug-prone and less mentally taxing to read and write. As a language extension, NextScript should remain coherent with its foundational languages and preserve predictable behavior.
+When language rules are simple and consistent, code is less bug-prone and less mentally taxing to read and write. As a language extension, NextScript should remain coherent with its foundational languages and preserve predictable behavior.
 
 —
 
