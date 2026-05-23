@@ -25,15 +25,15 @@ NextScript proposes to address these caveats through a dash of syntactic sugar.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-## Core Features
+## Code Glimpse
 
-A brief glimpse of NextScript's offerings. For more details, see NextScript documentation. 
+A brief glimpse of three of NextScript's offerings. For the full set of features, see NextScript documentation. 
 
 Things to note:
 
 - While some examples below feature API from Luent for demonstration purposes, NextScript was designed to be compatible with any getter-based system. 
 - NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
-- JSX examples assume a conservative XML to JavaScript transpilation strategy with tag bindings that map directly to object properties. NextScript itself transpiles to only TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
+
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -67,165 +67,6 @@ watch(count, () => {
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Derivation Expressions
-`(expression)@` • derivation-first shorthand for inline arrow function expressions
-```tsx
-<button on:click={() => count++} disabled={(count >= limit)@}>
-   +
-</button>
-```
-```tsx
-// native equivalent
-<button on:click={() => count.value++} disabled={() => count() >= limit}>
-   +
-</button>
-```
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-### JSX Flow Expressions
-`{Fn(...args, <tag>)}` • template control flow with implicit JSX fragment factories
-```tsx
-<div>
-   {If(remaining,
-      <div class='message'>You have {remaining@} slots left.</div>
-      <div class='message'>You started with {start} powers.</div>
-   )}
-   {Else(
-      <div class='message'>Powerset complete.</div>
-   )}
-</div>
-```
-```tsx
-// native equivalent
-<div>
-   {If(remaining, () => <>
-      <div class='message'>You have {remaining@} slots left.</div>
-      <div class='message'>You started with {start} powers.</div>
-   </>)}
-   {Else(() => <>
-      <div class='message'>Powerset complete.</div>
-   </>)}
-</div>
-```
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-### JSX Gateway Function Expression
-`(parameters) <//> JSX` | `<//> JSX` • JSX fragment factory shorthand within JSX flow expressions
-
-no parameters:
-```tsx
-<div>
-   {If(active, <//>
-      {If(opened, <//>
-         <h3>Hi!</h3>
-         <p>How can I help you?</p>
-         <button on:click={close}>-</button>
-      )}
-      {Else(
-         <button on:click={open}>Enter</button>
-      )}
-   )}
-   {Else(<//>
-      <h3>Sleeping</h3>
-      <p>Come back later...</p>
-   )}
-</div>
-```
-```tsx
-// native equivalent
-<div>
-   {If(active, () => <>
-      {If(opened,  () => <>
-         <h3>Hi!</h3>
-         <p>How can I help you?</p>
-         <button on:click={close}>-</button>
-      </>)}
-      {Else(() => <>
-         <button on:click={open}>Enter</button>
-      </>)}
-   </>)}
-   {Else(() => <>
-      <h3>Sleeping</h3>
-      <p>Come back later...</p>
-   </>)}
-</div>
-```
-with parameters:
-```tsx
-<div>
-   {For(items, (item) <//>
-      <div>{item.title}</div>
-      <hr/>
-   )}
-</div>
-```
-```tsx
-// native equivalent
-<div>
-   {For(items, (item) => <>
-      <div>{item.title}</div>
-      <hr/>
-   </>)}
-</div>
-```
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-### JSX Attribute Shorthand
-`{attribute}` • shorthand for repetitive attribute binding
-```tsx
-<Tooltip {tooltip}>
-```
-```tsx
-// native equivalent
-<Tooltip tooltip={tooltip}>
-```
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-### JSX Component Element
-`<:component>...</:component>` • implicitly returned component kit with type information for refs
-```tsx
-function Dialog({ Slot }) {
-   get opened = ion(false)
-   const open = () => { opened = true }
-   const close = () => { opened = false }
-
-   <:component as={{ open, close }}>  // provides type information for the ref attribute
-      {If(opened, 
-         <o--body>
-            <div class='dialog'>{Slot()}</div>
-         </o--body>
-      )}
-   </:component>
-}
-```
-```tsx
-// native equivalent
-function Dialog({ Slot }) {
-   const opened = ion(false)
-   const open = () => { opened.value = true }
-   const close = () => { opened.value = false }
-
-   return {
-      component: { open, close }, // provides type information for the ref attribute
-      nodes: (
-         <>
-            {If(opened, 
-               <o--body>
-                  <div class='dialog'>{Slot()}</div>
-               </o--body>
-            )}
-         </>
-      )
-   }
-}
-```
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
 ### Type-guard-aware accessor variables
 e.g. `if(obj) { obj.property }` • Type-narrowing and -widening of accessor variables
 
@@ -248,12 +89,12 @@ function logUsername() {
 ```
 ```tsx
 // alternative native equivalent
-const user = ion(null as User | null)
+const $user = ion(null as User | null)
 
 function logUsername() {
-   const u = user();
-   if (!u) return;
-   console.log('username:' u.name)
+   const user = $user();
+   if (!user) return;
+   console.log('username:' user.name)
 }
 ```
 
