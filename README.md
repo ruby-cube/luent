@@ -23,14 +23,14 @@ Coming from a linguistics and design background, I am particularly passionate ab
 Luent currently provides most of the standard features expected of a modern frontend framework, with server-side features planned.
 
 Core design features:
-- a unified system of fine-grained reactivity
+- a unified system of fine-grained reactivity through `ion()` and `ionic()`
 - simplicity in managing shared and centralized state through familiar native structures
 - selective, type-explicit reactivity
-- traceable mutations to aid in debugging reactivity
+- traceable mutations to aid in debugging reactivity (WIP)
 
 Other notable features:
 - x-ray binding and smart auto-binding for greater ease in authoring flexible components
-- a reactive finite state machine API
+- a reactive finite state machine API via `Finitron`
 - ergonomic asynchronous reactivity
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 
@@ -39,128 +39,6 @@ Experimental areas:
 - compile-time mutation tracking (WIP)
 - selective nested reactivity
 - encapsulated reactivity
-
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-## Code glimpse
-> For more examples, see Luent at a glance and NextScript at a glance.
-
-Below are some code examples featuring API and syntax from Luent and NextScript. A few orientation notes: 
-
-- Ions are Luent's main reactive primitive. The `ion` function creates atomic reactive state as well as memoized derivations. 
-- The `FromTag` utility type transforms component tag bindings into script-friendly properties. For example, the 'class' binding becomes 'classes' and maybe-ions are normalized to ions. 
-
-In NextScript:
-- The `get` keyword declares accessor variables, which behave similarly to native accessor properties. 
-- The `@` postfix operator enables access to the getter of an accessor variable/property. 
-- Functions containing JSX statements implicitly return the JSX.
-
-Plain JSX and NextScript JSX are both sufficiently readable in Luent. However, there are a few advantages to using NextScript:
-- improved readability of derivations, especially in-template derivations.
-- visual distinction between static and live reference bindings. (Note: The distinction can also be achieved outside of NextScript through naming convention, e.g. `const $count = ion(0)`, but would require additional enforcement to guarantee consistency)
-- JSX without extraneous fragments and indentation
-
-#### Luent with NextScript
-
-```tsx
-function Arsenal(setup: FromTag<{
-   existing?: string[]
-   limit: number, 
-   class: Ion<TagClass> 
-}>) {
-   const { existing = [], limit, classes@ } = setup;
-
-   const powers = [🍀, 🍄, 🐦‍🔥, ✨, 🌱, 🌪, 🔥, ☄️, 🕸, 🪶, 💎, 🔮, ⚗️, 🪵, 🐉, 🫧]
-   const arsenal = ionic([...existing], {
-      addRandomPower() {
-         this.push(powers[Math.floor(Math.random() * powers.length)])
-      }
-   })
-   get count = ion(0, {
-      increment() { count++ }
-   })
-   get remaining = ion(() => limit - count)
-
-   <Component>
-      <ul class={['arsenal', classes@]}>
-         {For(arsenal, power =>
-            <li class='power'>{power}</li>
-         )}
-      </ul>
-      total: {count@}
-      <button 
-         disabled={(count === limit)@}
-         on:click={() => { addRandomPower(); count.increment()}} 
-      >
-         add random power
-      </button>
-      {If(remaining@,
-         <div class='message'>You have {remaining@} slots left.</div>
-         <div class='message'>You started with {existing.length} powers.</div>
-      )}
-   </Component>
-}
-
-createRoot(() => 
-   <Arsenal class='outlined' limit={100} />
-).mount('#root')
-
-```
-
-#### Luent with TypeScript + JSX
-
-
-```tsx
-function Arsenal(setup: FromTag<{
-   existing?: string[]
-   limit: number, 
-   class: Ion<TagClass> 
-}>) {
-   const { existing = [], limit, classes@ } = setup;
-
-   const powers = [🍀, 🍄, 🐦‍🔥, ✨, 🌱, 🌪, 🔥, ☄️, 🕸, 🪶, 💎, 🔮, ⚗️, 🪵, 🐉, 🫧]
-   const arsenal = ionic([...existing], {
-      addRandomPower() {
-         this.push(powers[Math.floor(Math.random() * powers.length)])
-      }
-   })
-   const count = ion(0, {
-      increment() { count++ }
-   })
-   const remaining = ion(() => limit - count)
-
-   return Component(
-      <>
-         <ul class={['arsenal', classes@]}>
-            {For(arsenal, power =>
-               <li>{power}</li>
-            )}
-         </ul>
-         total: {count}
-         <button 
-            disabled={() => count() === limit}
-            on:click={() => { addRandomPower(); count.increment()}} 
-         >
-            add random power
-         </button>
-         {If(remaining,
-            <>
-               <div class='message'>You have {remaining} slots left.</div>
-               <div class='message'>You started with {existing.length} powers.</div>
-            </>
-         )}
-      </>
-   )
-}
-
-createRoot(() =>
-   <Arsenal class='outlined' limit={100} />
-).mount('#root')
-
-```
-
-
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -200,6 +78,10 @@ jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
    ]
 })
 ```
+
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
 
 
 ## Design Principles
