@@ -4,22 +4,24 @@ layout: home
 
 hero:
   name: "NextScript"
-  text: "NextScript documentation and resources"
-  tagline: My great project tagline
+  text: "A TypeScript + JSX Language Extension"
+  tagline: Familiar syntax, reimagined for the modern web
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Features
+      link: /getter-syntax.md
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: About the project
+      link: https://github.com/ruby-cube/luent/tree/main/packages/nextscript#nextscript
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: Ergonomic
+    details: Reduces boilerplate code while remaining clear and expressive.
+  - title: Readable
+    details: Declutters UI templates and reactive code through principled syntactic sugar.
+  - title: Type-safe
+    details: Cleanly addresses type-safety gaps of modern web development.
+
+
 ---
 

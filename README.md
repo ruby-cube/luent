@@ -5,7 +5,7 @@
 </div>
 
 # Luent
-Luent is a highly expressive web framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional language extension of Typescript + JSX designed to make reactive code more explicit, readable, ergonomic, and type-safe.
+Luent is a web application framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional language extension of Typescript + JSX designed to make reactive code more explicit, readable, ergonomic, and type-safe.
 
 > This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. See how to contribute here.
 
@@ -25,7 +25,7 @@ Luent currently provides most of the standard features expected of a modern fron
 
 Core design features:
 - a unified system of fine-grained reactivity through `ion()` and `ionic()`
-- simplicity in managing shared and centralized state through familiar native structures
+- state management through familiar native structures
 - selective, type-explicit reactivity
 - traceable mutations to aid in debugging reactivity
 
@@ -36,8 +36,8 @@ Other notable features:
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
 
 Experimental areas:
-- NextScript language extension of TypeScript + JSX for improved readability and type-safety [work-in-progress]
-- compile-time mutation tracking [work-in-progress]
+- [work-in-progress] NextScript language extension of TypeScript + JSX for improved readability and type-safety 
+- [work-in-progress] compile-time mutation tracking
 - selective nested reactivity
 - encapsulated reactivity
 
@@ -46,7 +46,7 @@ Experimental areas:
 
 ### JSX Transpiler
 
-Luent transpiles JSX consistently and conservatively using the standard JSX transpiler for easy mental mapping. Luent currently extends the transpiler with three minimal transforms:
+Luent transpiles JSX conservatively using the standard JSX transpiler for easy mental mapping. Luent currently extends the transpiler with three minimal transforms:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parents may be created before children. E.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
 - JSX flow expressions (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile-time for better runtime performance.
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.

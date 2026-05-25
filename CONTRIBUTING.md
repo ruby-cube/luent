@@ -13,7 +13,7 @@ The Luent monorepo currently contains four key packages:
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Monorepo Install Behavior
-`pnpm install` only installs the current package by default. To bootstrap the workspace, run:
+`pnpm install` only installs the current package by default. To bootstrap the entire workspace from the root folder, run:
 
 ```bash
 pnpm run i:stable

@@ -24,6 +24,7 @@
     "dev-style": "pnpm -F @rue/demos dev-style",
     "dev-e2e": "pnpm -F @rue/e2e dev",
     "dev-chat": "pnpm -F @rue/live-chat dev",
+    "dev:ns-site": "pnpm -F @rue/nextscript-site docs:dev",
     "build-babel": "pnpm -F @rue/jungle build-babel",
     "mu-lint": "pnpm exec tsc .jungle/mu-linting/mu-mutation-linter.ts .jungle/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir .jungle/mu-linting/.tmp-run && node .jungle/mu-linting/.tmp-run/run-mu-mutation-lint.js",
     "lint:mu-eslint": "pnpm exec eslint \".jungle/mu-linting/**/*.{ts,tsx}\""

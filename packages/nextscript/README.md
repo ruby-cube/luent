@@ -51,7 +51,7 @@ const remaining = ion(() => limit - count())
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Accessor Postfix Operator
+### @ Postfix Operator
 `variable@` • getter access for reference passing
 ```ts
 watch(count@, () => {
@@ -104,12 +104,12 @@ function logUsername() {
 ## Design Principles
 
 ### Conceptual elegance and predictability
-When language rules are simple and consistent, code is less bug-prone and less mentally taxing to read and write. As a language extension, NextScript should remain coherent with its foundational languages and preserve predictable behavior.
+When language rules are simple and consistent, code is less bug-prone as well as less mentally taxing to read and write. As a language extension, NextScript strives to remain coherent with its foundational languages and preserve predictable behavior.
 
 —
 
-### Syntactic elegance
-Simple and consistent syntax allows developers to read and write code with less friction, improving readability and developer ergonomics.
+### Pragmatic syntactic elegance
+NextScript prioritizes syntactic elegance that allows developers to read and write code with less friction, improving readability and developer ergonomics.
 
 —
 
