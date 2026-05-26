@@ -45,12 +45,12 @@ Things to note:
 `get variable = getter` • scope-level, locally-bound counterpart to native accessor properties
 ```ts
 get count = ion(start)
-get remaining = ion(() => limit - count) // hover [ get count: number ]
+get remaining = ion(() => limit - count) // hover `count` → [ get count: MutableIon<number> ]
 ```
 ```tsx
 // native equivalent
 const count = ion(start)
-const remaining = ion(() => limit - count())
+const remaining = ion(() => limit - count()) // hover `count` → [ const count: MutableIon<number> ]
 ```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
