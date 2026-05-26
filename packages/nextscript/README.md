@@ -2,6 +2,7 @@
 <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/packages/nextscript/assets/nextscript-logo-512px-padded.png" alt="nextscript-logo"/>
 </picture>
+<p><a href='https://nextscript.org/getter-syntax'>docs</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href='https://nextscript.org/'>examples</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href='https://nextscript.org/'>motivation</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href='https://nextscript.org/'>principles</a></p>
 </div>
 
 # NextScript
@@ -25,9 +26,10 @@ NextScript proposes to address these caveats through a dash of syntactic sugar.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
+
 ## Code Glimpse
 
-A brief glimpse of a few of NextScript's features. For the full set, see NextScript's documentation. 
+A brief glimpse of a few of NextScript's features. For the full set, see [NextScript's documentation](https://nextscript.org). 
 
 Things to note:
 
