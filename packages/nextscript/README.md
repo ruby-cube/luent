@@ -66,7 +66,7 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
    +
 </button>
 ```
-> **Note:** This example assumes a conservative XML to JavaScript transpilation strategy with tag bindings that map directly to object properties. NextScript itself transpiles to only TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
+> **Note:** This example assumes a conservative XML to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
