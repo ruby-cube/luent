@@ -2,6 +2,7 @@
 <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-site-ambicolor.png" alt="luent-logo"/>
 </picture>
+<p><a href='https://nextscript.org/getter-syntax'>learn</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/examples'>play</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#motivation'>motivation</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#design-principles'>principles</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript'>nextscript</a></p>
 </div>
 
 # Luent
