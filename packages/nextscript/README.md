@@ -31,11 +31,11 @@ NextScript proposes to address these caveats through a dash of syntactic sugar.
 
 ## Code Glimpse
 
-A brief glimpse of a few of NextScript's features. For the full set, see [NextScript's documentation](https://nextscript.org). 
+A brief glimpse of some of NextScript's features. For the full set, see [NextScript's documentation](https://nextscript.org). 
 
 Things to note:
 
-- While some examples below feature API from Luent for demonstration purposes, NextScript is framework-agnostic. 
+- While the examples below feature API from [Luent](https://github.com/ruby-cube/luent/blob/main) for demonstration purposes, NextScript is framework-agnostic. 
 - NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
 
 
