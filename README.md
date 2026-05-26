@@ -5,7 +5,7 @@
 </div>
 
 # Luent
-Luent is a web application framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces NextScript, an optional language extension of Typescript + JSX designed to make reactive code more explicit, readable, ergonomic, and type-safe.
+Luent is a web application framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional language extension of Typescript + JSX designed to make reactive code more explicit, readable, ergonomic, and type-safe.
 
 > This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. See how to contribute here.
 

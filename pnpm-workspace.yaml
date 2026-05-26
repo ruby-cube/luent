@@ -3,8 +3,11 @@ packages:
   - plugins/*
   - websites/*
   - apps/*
+  - demos
   - demos/*
+  - e2e
   - e2e/*
+  - .jungle
   - .jungle/*
 
 recursiveInstall: false

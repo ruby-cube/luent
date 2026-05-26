@@ -16,7 +16,7 @@ type Falsey = undefined | null | false | ''
 export function setUpClasses(node: Element, classes: TagClass[]) {
    const flask = getFlask()
    const classList = node.classList
-
+  console.log('classes', classes)
    for (const entry of classes) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: ReactiveClasses | string | Falsey, oldState: ReactiveClasses | string | Falsey */) => {

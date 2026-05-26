@@ -6,7 +6,7 @@ import { Flask, getFlask } from "@rue/flask";
 import { toAsyncRenderItem } from "./ItemList";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
-export function Thru(count: MaybeIon<number>, render: (count: number, index: number) => RawJSXNode) {
+export function Thru(count: MaybeIon<number>, render: ((count: number, index: number) => RawJSXNode) | RawJSXNode) {
    if (isGetter(count)) {
       return new ThruKit(count, toAsyncRenderItem(render), getFlask())
    }

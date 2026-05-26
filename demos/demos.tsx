@@ -40,9 +40,12 @@ import { TestRetracking } from "./src/TestRetracking"
 import { Grandparent } from "./src/TestEventBubbling"
 import { TestXray } from "./src/TestXray"
 import { EmojiQuest } from "./src/EmojiQuest"
+import { HabitTracker } from "./src/HabitTracker"
+import { BulletJournal } from "./src/SimpleTodo"
 
 export function runDemo() {
-   createRoot(() => <EmojiQuest></EmojiQuest>)
-      .mount('#root')
+  createRoot(() => <BulletJournal></BulletJournal>)
+  // createRoot(() => <HabitTracker habit="water" goal={8}></HabitTracker>)
+    .mount('#root')
 }
 

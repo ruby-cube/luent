@@ -2,6 +2,7 @@ import { $of, component, css, Else, For, FromTag, If, RenderSlot, Style, TagClas
 import { ion, Ion, Ionic, ionic } from "@rue/quarky";
 
 
+
 export function EmojiQuest() {
    const powers = ['🍀', '🍄', '✨', '🌱', '🔥', '☄️', '💎', '🔮', '⚗️', '🪵', '🫧'] as const
    const powerset = ionic([] as typeof powers[number][], {
@@ -9,6 +10,7 @@ export function EmojiQuest() {
          this.push(powers[Math.floor(Math.random() * powers.length)])
       }
    })
+
    return component(
       <>
          <main>

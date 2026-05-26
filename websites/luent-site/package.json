@@ -1,0 +1,16 @@
+{
+  "name": "@rue/luent-site",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "vitepress": "2.0.0-alpha.17"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  }
+}

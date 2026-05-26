@@ -1,35 +1,66 @@
 # Getter syntax
 
+::: info
+This is currently an *aspirational* document, detailing what the NextScript project is in the process of implementing. It is being published to garner the interest of contributors.
+:::
+
+> NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
+
+> NOTE: The examples below modify transpiled output with descriptive variable names for better comprehension. The actual implementation uses unique variable names to avoid name collisions.
+
 ## Accessor variables
 
-### Declarations
+### `get` declarations
 `get variable = getter`
 
-Accessor variables, similar to native accessor properties, absorb its getter function such that variable reads return the output of the getter rather than the getter itself. Accessor variables are declared with the `get` keyword.
+Accessor variables are declared with the `get` keyword and initialized with a getter—a function that has zero parameters and returns a value. `get` declarations transpile to `const` declarations.
 ```ts
-get count = ion(0)
-get double = ion(() => count * 2)
+let _count = 0
+get count = () => _count
+
+get name = 'Jim' // TypeError: Getter must be a function: 'Jim'
+```
+```ts
+// transpiled
+let _count = 0
+const count = assertGetter(() => _count)
+
+get name = assertGetter('Jim') // TypeError: Getter must be a function: 'Jim'
 ```
 
-> An accessor variable must be initialized with a getter—a function with zero parameters and returns a value. Getters must never set state that it derives its return value from.
+::: warning
+Getters should avoid changing state that they read from as this breaks assumptions of referentially transparent reads, resulting in unpredictable or confusing behavior.
 
-> Since accessor variable declarations are compiled to `const` declarations, the getter cannot be replaced.
+```ts
+get count = () => _count += 10 // ❌
+
+console.log(count) // 10
+console.log(count) // 20 ⁉️
+```
+:::
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 
-### @ postfix declarations
-`variable@`
+### Accessor variable reads
+`variable`
 
-When declared through parameters or destructuring, accessor variables are selectively declared through the `@` postfix operator. Unlike optional parameters, order does not matter.
+Similar to native accessor properties, an accessor variable will absorb its getter function at declaration such that reading the variable will call the getter rather than access it.
+
 ```ts
-function foo(bar@, count) {
-   /* ... */
-}
+get count = ref(0)
+get double = () => count * 2
+
+console.log(count instanceof Function) // false
 ```
 ```ts
-const { count, bar@ } = foo;
+// transpiled
+const count = assertGetter(ref(0))
+const double = assertGetter(() => count() * 2)
+
+console.log(count() instanceof Function) // false
 ```
+
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
@@ -37,26 +68,45 @@ const { count, bar@ } = foo;
 ### Accessor variable writes
 `variable = value`
 
-The getter's value can be set if the getter implements the `MutableGet` interface with a writable `value` property.
+An accessor variable's value may be reassigned if its getter implements the `MutableGet` interface with a writable `value` property.
 ```ts
 get count = ref(0)
 
 count = 2 // writes via the getter's `value` setter
 ```
+```ts
+// transpiled
+const count = assertGetter(ref(0))
+
+count.value = 2 // writes via the getter's `value` setter
+```
+
 ```tsx
+interface MutableGet<T> {
+  (): T
+  value: T
+}
+
 function ref(state): MutableGet {
-   const get = () => state
-   return Object.defineProperty(get, "value", {
-      get,
-      set: value => state = value
-   })
+  const get = () => state
+  return Object.defineProperty(get, "value", {
+    get,
+    set: value => state = value
+  })
 }
 ```
+
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+
+### Accessor variable type
+`variable`
+
+Hovering an accessor variable read or write will reveal it to be a `get` variable.
 ```ts
-interface MutableGet<T> {
-   (): T
-   value: T
-}
+get count = ref(0)
+
+count // hover [ get count: number ]
 ```
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
@@ -68,7 +118,8 @@ interface MutableGet<T> {
 In addition to native accessor property declarations, accessor properties may also be declared through colon notation.
 ```ts
 const foo = {
-   get bar: ion(true)
+  total: 0,
+  get bar: ref(true)
 }
 ```
 
@@ -81,43 +132,45 @@ const foo = {
 Accessor properties may also be defined through property definition in class declarations.
 ```ts
 class Foo {
-   get bar = ion(true)
+  total = 0
+  get bar = ref(true)
 }
 ```
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
-## The @ postfix operator 
+## Accessor operator
 
 ### ...for getter access
 `variable@`  |  `obj.property@`
 
-The getter of an accessor variable or accessor property may be easily accessed using the `@` postfix operator, useful for live reference passing.
+The getter of an accessor variable or accessor property may be accessed using the `@` postfix operator. Getter access is useful for live reference passing.
 ```tsx
 export function MultiplierKit(count@: Get<number>) {
-   return {
-      doubled: () => count * 2,
-      tripled: () => count * 3,
-      quadrupled: () => count * 4,
-   }
+  return {
+    doubled: () => count * 2,
+    tripled: () => count * 3,
+    quadrupled: () => count * 4,
+  }
 }
 ```
 ```ts
+import { ion } from '@rue/luent'
 import { MultiplierKit } from './MultiplierKit.ns'
 
 function Multiplier() {
-   get count = ion(0)
+  get count = ion(0)
 
-   const { doubled@, tripled@, quadrupled@ } = MultiplierKit(count@)
+  const { doubled@, tripled@, quadrupled@ } = MultiplierKit(count@)
 
-   <:component>
-      <p on:click={() => count++}>
-         count: {count@}
-      </p>
-      <p>{count@} x 2 = {doubled@}</p>
-      <p>{count@} x 3 = {tripled@}</p>
-      <p>{count@} x 4 = {tripled@}</p>
-   </:component>
+  <:component>
+    <p on:click={() => count++}>
+      count: {count@}
+    </p>
+    <p>{count@} x 2 = {doubled@}</p>
+    <p>{count@} x 3 = {tripled@}</p>
+    <p>{count@} x 4 = {tripled@}</p>
+  </:component>
 }
 ```
 
@@ -127,35 +180,142 @@ function Multiplier() {
 ### ...for getter normalization
 `variable@`  |  `obj.property@`
 
-When used on a data variable/property read, the `@` operator will wrap the read in a getter. This applies to destructuring as well.
+When used on a data variable/property read, the `@` operator normalizes the read to a getter. If the value is a getter, it returns the getter. Otherwise, it wraps the read in a getter.
+wrap the read in a getter. 
 ```ts
 function foo(bar: { count: number | Ion<number> } {
-   get count = bar.count@
-   // alternatively: const { count@ } = bar;
+  get count = bar.count@
+  /* ... */
+}
+```
+```ts
+function foo(bar: { count: number | Ion<number> } {
+  const count = toGetter(bar, 'count')
+  /* ... */
 }
 ```
 
+This applies to destructuring as well. See [`@`-postfix declarations](#postfix-declarations-in-destructuring) for more on destructuring.
+```ts
+function foo(bar: { count: number | Ion<number> } {
+  const { count@ } = bar;
+  /* ... */
+}
+```
+
+
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+
+## `@`-postfix declarations
+
+### `@`-postfix parameter declarations
+`variable@`
+
+Accessor variables may be selectively declared during parameter declarations through the `@` postfix operator.
+```tsx
+let count = 4
+foo(() => count, true)
+
+function foo(bar@: Get<number>, log: boolean) {
+  if (log) {
+    console.log(bar) // value access: 4
+    console.log(bar@) // getter access: () => 4
+  }
+}
+```
+```ts
+interface Get<T> {
+  (): T
+}
+```
+
+The default value of accessor parameter declaration must be a getter.
+```tsx
+function foo(bar@ = () => 0) {
+  /* ... */
+}
+```
+```tsx
+// transpiled
+function foo(bar = assertGetter(() => 0)) {
+  /* ... */
+}
+```
+
+Unlike accessor variables declared with the `get` keyword, accessor parameters may be `undefined` and may be reassigned.
+```tsx
+function foo(bar@: Get<number> | undefined) {
+  if (bar@) {
+    console.log(bar) // value access: 4
+    console.log(bar@) // getter access: () => 4
+  }
+  else {
+    bar@ = ref(0)
+  }
+}
+```
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+### `@`-postfix declarations in destructuring
+`variable@`
+
+```ts
+const { bar, count@ } = foo;
+```
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+### `get` declarations in destructuring
+```ts
+const { bar, count@ } = foo;
+```
+
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+### Aliasing in destructuring
+```ts
+const { bar, count@: count } = foo;
+const { bar, count@: num@ } = foo;
+get { bar, count: num } = foo;
+```
+
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
 
 ## Derivation expressions 
 
 ### Synchronous derivations
 `(expression)@`  |  `{ statements; return statement }@`
 
-Derivation expressions are shorthand's for getter/derivation functions, useful for in-template derivations. They may be written with parentheses for implicit returns or with curly braces for block-bodied expressions.
+Derivation expressions are shorthand's for arrow function expressions that have zero parameters and return a value. They are useful for in-template derivations. They may be written as expressions with an implicit return...
 ```tsx
 <p>doubled: {(count * 2)@}</p>
-<p>doubled: {() => count * 2}</p>
 ```
 ```tsx
+// transpiled
+<p>doubled: {() => count * 2}</p>
+```
+
+...or as block-bodied expressions.
+```tsx
 <p>result: {{
-   const num = getNum()
-   if (num > 100) 
-      return 'too ambitious'
-   if (num < 0) 
-      return 'too negative'
-   return count * num
+  const num = getNum()
+  if (num > 100) 
+    return 'too ambitious'
+  if (num < 0) 
+    return 'too negative'
+  return count * num
 }@}</p>
+```
+```tsx
+<p>result: {() => {
+  const num = getNum()
+  if (num > 100) 
+    return 'too ambitious'
+  if (num < 0) 
+    return 'too negative'
+  return count * num
+}}</p>
 ```
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
@@ -201,7 +361,7 @@ Expressions surrounded by non-grouping parentheses and which use `await` are com
 Type-narrowing and -widening apply to accessor variables in the same way they apply to normal variables and accessor properties. There is no need to manually add the non-null assertion operator or store the state in a variable the way you would with getter functions.
 
 ```ts
-get user = ion<User | undefined>(undefined)
+get user = ref<User | undefined>(undefined)
 
 function logName() {
    console.log(user ? user.name : 'no user. :(')
@@ -210,7 +370,7 @@ function logName() {
 
 Compare: managing types with getter functions:
 ```ts
-const user = ion<User | undefined>(undefined)
+const user = ref<User | undefined>(undefined)
 
 function logName() {
    console.log(user() ? user()!.name : 'no user :(')
@@ -220,5 +380,7 @@ function logName() {
 }
 ```
 
-> **Caution**: Although an improvement to manual assertions, be aware that type-narrowing and type-widening is not 100% type-safe. This is true even for native variables and accessor properties. Type-narrowing and type-widening reflect only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is modified covertly via a function call between the type guard and the read, the type will not reflect new state. 
+::: warning
+Although an improvement to manual assertions, be aware that type-narrowing and type-widening is not 100% type-safe. This is true even for native variables and accessor properties. Type-narrowing and type-widening reflect only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is modified covertly via a function call between the type guard and the read, the type will not reflect new state. 
+:::
 

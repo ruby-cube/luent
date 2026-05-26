@@ -15,10 +15,10 @@ export default defineConfig({
     logo: '/assets/nextscript-logo-512px.png',
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Features', link: '/markdown-examples' },
+      { text: 'Features', link: '/getter-syntax' },
       { text: 'Examples', link: '/markdown-examples' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#motivation' },
-      { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-priniciples' },
+      { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-principles' },
     ],
     sidebar: [
       {

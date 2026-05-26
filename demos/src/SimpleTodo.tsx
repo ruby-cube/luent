@@ -1,73 +1,80 @@
 import { $from, $of, component, Else, For, If } from "@rue/luent";
-import { ion, ionic } from "@rue/quarky";
-
-type Todo = {
-   id: number,
-   title: string,
-   completed: boolean
-}
+import { ion, ionic, watch } from "@rue/quarky";
 
 let id = 0
 function genUID() {
-   return id++
+  return id++
+}
+
+class Item {
+  id = genUID()
+  completed = false
+  constructor(
+    public text: string
+  ) {
+  }
 }
 
 
+export function BulletJournal() {
 
-export function TodoList() {
+  const list = ionic([new Item('Learn Luent')] as Item[], {
+    '-capsule': true,
+    insert(item: Item, index: number) {
+      this.splice(index, 0, item)
+    },
+    remove(index: number) {
+      return this.splice(index, 1)[0]
+    },
+    appendNew() {
+      const item = new Item('')
+      this.push(item)
+      return item
+    }
+  })
 
-   const todos: Todo[] = ionic([] as Todo[], {
-      '-capsule': true,
-      insert(todo: Todo, index: number) {
-         this.splice(index, 0, todo)
-      },
-      remove(index: number) {
-         return this.splice(index, 1)[0]
-      },
-      appendNew() {
-         const todo = {
-            id: genUID(),
-            title: '',
-            completed: false
-         }
-         this.push(todo)
-         return todo
-      }
-   })
+  const $activeTodo = ion(null as Item | null)
 
-   const $activeTodo = ion(null as Todo | null)
+  function reKeyup(event: KeyboardEvent, item: Item, index: number) {
+    console.log('event.key', event.key)
+    if (event.key === 'Enter') {
+      $activeTodo.value = null;
+      return;
+    }
+    if (event.key === 'Delete') {
+      list.remove(index)
+      $activeTodo.value = list[index] ?? list.appendNew()
+      return;
+    }
+    if (event.key === 'Space' && event.metaKey) {
+      item.completed = !item.completed
+    }
+  }
 
-   function reKeyup(key: string, todo: Todo, index: number) {
-      if (key === 'Enter') {
-         $activeTodo.value = todo;
-         return;
-      }
-      if (key === 'Delete') {
-         todos.remove(index)
-         $activeTodo.value = todos[index] ?? todos.appendNew()
-         return;
-      }
-      if (key === 'Space' && modifier === 'command') {
-         todo.completed = !todo.completed
-      }
-   }
+  watch($activeTodo, () => {
+    console.log('@@@ active todo', $activeTodo())
+  })
 
-   return component(
-      <ul on:click={e => $activeTodo() && ($activeTodo.value = null)}>
-         {For(todos, byId, (todo, index) =>
-            <li on:click={e => !$activeTodo() && ($activeTodo.value = todo)}>
-               {If(() => todo === $activeTodo(),
-                  <input on:keyup={e => reKeyup(e.code, todo, index())} mu:value={$of(todo).title} />
-               )}
-               {Else(
-                  <>{$of(todo).title}</>
-               )}
-            </li>
-         )}
-      </ul>
-   )
+  return component(
+    <ul on:click={e => e.from('li', 'input') || $activeTodo() && ($activeTodo.value = null)}>
+      {For(list, m => m.id, (item, index) =>
+        <li on:click={e => $activeTodo() || ($activeTodo.value = item)}>
+          {If(() => item === $activeTodo(), () =>
+            <input
+              type='text'
+              on:keyup={e => reKeyup(e, item, index())}
+              mu:value={$of(item).text}
+            />
+          )}
+          {Else(
+            <>{$of(item).text}</>
+          )}
+        </li>
+      )}
+    </ul>
+  )
 }
 
 function byId(item: any) {
-   return item.id
+  return item.id
 }

@@ -1,10 +1,9 @@
 import { isFunction } from "@rue/utils";
 import { NodeRef } from "../node/NodeRef";
 
-export function matchEventTarget(...args: [...(string | ((x: HTMLElement) => boolean) | NodeRef)[]]) {
-   const e = args.pop() as object
+export function matchEventTarget(this: Event, ...args: [...(string | ((x: HTMLElement) => boolean) | NodeRef)[]]) {
    // if (!e || !('target' in e)) throw new Error('JSX transform failed to add event object to e.() call')
-   const targ = e.target
+   const targ = this.target
    for (const arg of args) {
       if (typeof arg === 'string') {
          if (matchSelector(targ as HTMLElement, arg))
@@ -21,6 +20,7 @@ export function matchEventTarget(...args: [...(string | ((x: HTMLElement) => boo
 }
 
 function matchSelector(target: EventTarget & HTMLElement, selector: string): boolean {
+ 
    if (selector.startsWith('.')) {
       return target.classList.contains(selector)
    }
