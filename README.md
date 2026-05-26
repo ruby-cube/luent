@@ -16,7 +16,7 @@ Luent is a web application framework that aims to provide greater conceptual coh
 ## Motivation
 Modern frameworks have brought powerful innovations to web development but have also introduced additional cognitive overhead, often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. 
 
-Coming from a linguistics and design background, I care deeply about language coherence, expressiveness, and code aesthetics. These interests led me to curiosity over how we might design syntax and APIs can advance technology while minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+Coming from a linguistics and design background, I care deeply about language coherence, expressiveness, and code aesthetics. These interests led me to explore how syntax and API design might advance technology while minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
