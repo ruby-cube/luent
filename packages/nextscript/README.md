@@ -37,7 +37,7 @@ Things to note:
 
 - While the examples below feature API from [Luent](https://github.com/ruby-cube/luent/blob/main) for demonstration purposes, NextScript is framework-agnostic. 
 - NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
-
+- The JSX example assumes a conservative XML to JavaScript transpilation strategy with tag bindings that map directly to object properties. NextScript itself transpiles to only TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
