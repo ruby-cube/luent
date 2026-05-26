@@ -2,7 +2,7 @@
 <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/packages/nextscript/assets/nextscript-logo-512px-padded.png" alt="nextscript-logo"/>
 </picture>
-<p><a href='https://nextscript.org/getter-syntax'>docs</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/'>examples</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/'>motivation</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/'>principles</a></p>
+<p><a href='https://nextscript.org/getter-syntax'>docs</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/examples'>examples</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#motivation'>motivation</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#design-principles'>principles</a></p>
 </div>
 
 # NextScript
@@ -53,18 +53,18 @@ const remaining = ion(() => limit - count())
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### @ Postfix Operator
-`variable@` • getter access for reference passing
-```ts
-watch(count@, () => {
-  console.log('The count is', count)
-})
+### Derivation Expressions
+`(expression)@` • derivation-first shorthand for derivational arrow function expressions
+```tsx
+<button on:click={() => count++} disabled={(count === limit)@}>
+   +
+</button>
 ```
-```ts
+```tsx
 // native equivalent
-watch(count, () => {
-  console.log('The count is', count())
-})
+<button on:click={() => count.value++} disabled={() => count() === limit}>
+   +
+</button>
 ```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -106,7 +106,7 @@ function logUsername() {
 ## Design Principles
 
 ### Conceptual elegance and predictability
-When language rules are simple and consistent, code is less bug-prone as well as less mentally taxing to read and write. As a language extension, NextScript strives to remain coherent with its foundational languages and preserve predictable behavior.
+When language rules are simple and consistent, code is less bug-prone and less mentally taxing to read and write. As a language extension, NextScript strives to remain coherent with its foundational languages and preserve predictable behavior.
 
 —
 
@@ -116,7 +116,7 @@ NextScript prioritizes syntactic elegance that allows developers to read and wri
 —
 
 ### Principled magic, not spookiness
-NextScript introduces new syntax carefully, favoring explicitness whenever possible. It allows implicit behavior only when that behavior is locally deducible and provides sufficient ergonomic benefit to justify the added language complexity. 
+NextScript introduces new syntax carefully, favoring explicitness whenever possible. It allows implicit behavior only when that behavior is locally deducible and provides sufficient ergonomic benefit to justify the added language complexity.
 
 The goal is not to avoid magic altogether, but to avoid *unaccountable* magic: behavior that feels arbitrary, exceptional, or difficult to reason about.
 

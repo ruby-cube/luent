@@ -1,12 +1,14 @@
-# Getter syntax
-
-::: info
-This is currently an *aspirational* document, detailing what the NextScript project is in the process of implementing. It is being published to garner the interest of contributors.
+::: tip NOTE
+This is currently an *aspirational* document, detailing what the NextScript project is in the process of implementing. It is being published to garner the interest of contributors. Most features have been specified and implemented, but substantial tooling work remains before the extension is fully usable. See how to contribute here.
 :::
 
-> NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
+# Getter syntax
 
-> NOTE: The examples below modify transpiled output with descriptive variable names for better comprehension. The actual implementation uses unique variable names to avoid name collisions.
+NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
+
+::: info NOTE
+The examples below modify transpiled output with descriptive variable names for better comprehension. The actual implementation uses unique variable names to avoid name collisions.
+:::
 
 ## Accessor variables
 
@@ -15,24 +17,25 @@ This is currently an *aspirational* document, detailing what the NextScript proj
 
 Accessor variables are declared with the `get` keyword and initialized with a getter—a function that has zero parameters and returns a value. `get` declarations transpile to `const` declarations.
 ```ts
-let _count = 0
-get count = () => _count
+let n = 0
+get count = () => n
 
 get name = 'Jim' // TypeError: Getter must be a function: 'Jim'
 ```
+::: info transpiled
 ```ts
-// transpiled
-let _count = 0
-const count = assertGetter(() => _count)
+let n = 0
+const count = assertGetter(() => n)
 
 get name = assertGetter('Jim') // TypeError: Getter must be a function: 'Jim'
 ```
+:::
 
-::: warning
+::: warning IMPORTANT
 Getters should avoid changing state that they read from as this breaks assumptions of referentially transparent reads, resulting in unpredictable or confusing behavior.
 
 ```ts
-get count = () => _count += 10 // ❌
+get count = () => n += 10 // ❌
 
 console.log(count) // 10
 console.log(count) // 20 ⁉️
@@ -53,14 +56,14 @@ get double = () => count * 2
 
 console.log(count instanceof Function) // false
 ```
+::: info transpiled
 ```ts
-// transpiled
 const count = assertGetter(ref(0))
 const double = assertGetter(() => count() * 2)
 
 console.log(count() instanceof Function) // false
 ```
-
+:::
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
@@ -74,12 +77,13 @@ get count = ref(0)
 
 count = 2 // writes via the getter's `value` setter
 ```
+::: info transpiled
 ```ts
-// transpiled
 const count = assertGetter(ref(0))
 
 count.value = 2 // writes via the getter's `value` setter
 ```
+:::
 
 ```tsx
 interface MutableGet<T> {
@@ -173,6 +177,20 @@ function Multiplier() {
   </:component>
 }
 ```
+::: info transpiled
+```ts
+import { ion } from '@rue/luent'
+import { MultiplierKit } from './MultiplierKit.ns'
+
+function Multiplier() {
+  const count = assertGetter(ion(0))
+
+  const { /* ... */ } = MultiplierKit(count)
+
+  /* ... */
+}
+```
+:::
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
@@ -236,12 +254,13 @@ function foo(bar@ = () => 0) {
   /* ... */
 }
 ```
+::: info transpiled
 ```tsx
-// transpiled
 function foo(bar = assertGetter(() => 0)) {
   /* ... */
 }
 ```
+:::
 
 Unlike accessor variables declared with the `get` keyword, accessor parameters may be `undefined` and may be reassigned.
 ```tsx
@@ -287,14 +306,15 @@ get { bar, count: num } = foo;
 ### Synchronous derivations
 `(expression)@`  |  `{ statements; return statement }@`
 
-Derivation expressions are shorthand's for arrow function expressions that have zero parameters and return a value. They are useful for in-template derivations. They may be written as expressions with an implicit return...
+Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for in-template derivations. They may be written as expressions with an implicit return...
 ```tsx
-<p>doubled: {(count * 2)@}</p>
+<p>{count@} x 2 = {(count * 2)@}</p>
 ```
+::: info transpiled
 ```tsx
-// transpiled
-<p>doubled: {() => count * 2}</p>
+<p>{count} x 2 = {() => count() * 2}</p>
 ```
+:::
 
 ...or as block-bodied expressions.
 ```tsx
@@ -307,16 +327,22 @@ Derivation expressions are shorthand's for arrow function expressions that have 
   return count * num
 }@}</p>
 ```
+::: info transpiled
 ```tsx
 <p>result: {() => {
+  count() // hoisted call
   const num = getNum()
   if (num > 100) 
     return 'too ambitious'
   if (num < 0) 
     return 'too negative'
-  return count * num
+  return count() * num
 }}</p>
 ```
+:::
+::: info NOTE
+If an accessor variable read happens only under certain conditions within a derivation expression, NextScript will hoist the call to the top of the function body. This allows getters with trackers to ...
+:::
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
@@ -324,7 +350,7 @@ Derivation expressions are shorthand's for arrow function expressions that have 
 ### Immediately-invoked derivation expressions (IIDEs)
 `{ statements; return expression }@()`  |  `(expression)@()`
 
-Derivation expressions may be immediately invoked, useful for encapsulating variables within the scope of the derivation.
+Derivation expressions may be immediately invoked. This is useful for encapsulating variables within the scope of the derivation.
 ```ts
 const foo = {
    let foo = 0;
@@ -332,6 +358,15 @@ const foo = {
    return foo
 }@()
 ```
+::: info transpiled
+```ts
+const foo = (() => {
+   let foo = 0;
+   // some complex calculations
+   return foo
+})()
+```
+:::
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
@@ -339,18 +374,19 @@ const foo = {
 ### Async derivation expressions
 `(await expression)@`  |  `{ await expression; return expression }@`
 
-Expressions surrounded by non-grouping parentheses and which use `await` are compiled to async arrow functions.
+Expressions surrounded by non-grouping parentheses containing `await` are transpiled to async arrow functions.
 ```tsx
 <p>
    Selection: {city@}, {(await cities@.pending, state)@}
 </p>
 ```
+::: info transpiled
 ```tsx
-// compiled
 <p>
    Selection: {city}, {async () => (await cities.pending, state())}
 </p>
 ```
+:::
 
 
 
@@ -368,7 +404,8 @@ function logName() {
 }
 ```
 
-Compare: managing types with getter functions:
+::: info COMPARE
+Managing types with getter functions:
 ```ts
 const user = ref<User | undefined>(undefined)
 
@@ -379,8 +416,9 @@ function logName() {
    console.log(u ? u.name : 'no user :(')
 }
 ```
+:::
 
-::: warning
-Although an improvement to manual assertions, be aware that type-narrowing and type-widening is not 100% type-safe. This is true even for native variables and accessor properties. Type-narrowing and type-widening reflect only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is modified covertly via a function call between the type guard and the read, the type will not reflect new state. 
+::: warning CAUTION
+Although an improvement to manual assertions, be aware that type-narrowing/widening is not 100% type-safe even for native variables and accessor properties. Type-narrowing/widening reflects only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is changed covertly via a function call between the type guard and the read, the read type might not reflect the new state. 
 :::
 

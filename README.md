@@ -5,7 +5,7 @@
 </div>
 
 # Luent
-Luent is a web application framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional language extension of Typescript + JSX designed to make reactive code more explicit, readable, ergonomic, and type-safe.
+Luent is a web application framework that aims to provide greater conceptual coherence amid the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional Typescript + JSX language extension designed to make reactive code more explicit, readable, ergonomic, and type-safe.
 
 > This project is in early development. Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. See how to contribute here.
 
@@ -15,7 +15,7 @@ Luent is a web application framework that aims to provide greater conceptual coh
 ## Motivation
 Modern frameworks have brought powerful innovations to web development but have also introduced additional cognitive overhead, often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. 
 
-Coming from a linguistics and design background, I am particularly passionate about both language coherence, expressiveness, and code aesthetics and deeply interested in how we might design syntax and APIs that advance technology while minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+Coming from a linguistics and design background, I am particularly passionate about language coherence, expressiveness, and code aesthetics and deeply interested in how we might design syntax and APIs that advance technology while minimizing complexity. The key challenge is understanding how far we can move towards simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -30,13 +30,13 @@ Core design features:
 - traceable mutations to aid in debugging reactivity
 
 Other notable features:
-- x-ray binding and smart auto-binding for greater ease in authoring flexible components
+- x-ray binding and smart auto-binding for authoring flexible components
 - a reactive finite state machine API via `Finitron`
 - ergonomic asynchronous reactivity
-- ergonomic preservation of state and DOM nodes through a `'remount'` directive and `<remount-view>` tag
+- ergonomic preservation of state and DOM nodes through a `'remount'` directive or `<remount-view>` tag
 
 Experimental areas:
-- [work-in-progress] NextScript language extension of TypeScript + JSX for improved readability and type-safety 
+- [work-in-progress] language extension of TypeScript + JSX for improved readability and type-safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
 - [work-in-progress] compile-time mutation tracking
 - selective nested reactivity
 - encapsulated reactivity
@@ -46,7 +46,7 @@ Experimental areas:
 
 ### JSX Transpiler
 
-Luent transpiles JSX conservatively using the standard JSX transpiler for easy mental mapping. Luent currently extends the transpiler with three minimal transforms:
+Luent transpiles JSX conservatively using the standard JSX transpiler for easy mental mapping. Luent additionally extends the transpiler with three minimal transforms:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parents may be created before children. E.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
 - JSX flow expressions (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile-time for better runtime performance.
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
