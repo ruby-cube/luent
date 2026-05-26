@@ -37,8 +37,8 @@ Other notable features:
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive or `<remount-view>` tag
 
 Experimental areas:
-- [work-in-progress] language extension of TypeScript + JSX for improved readability and type-safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
-- [work-in-progress] compile-time mutation tracking
+- [WIP] language extension of TypeScript + JSX for improved readability and type-safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
+- [WIP] compile-time mutation tracking
 - selective nested reactivity
 - encapsulated reactivity
 
@@ -88,22 +88,22 @@ jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
 
 
 ## Design Principles
-Luent is being developed under these guiding principles, which encapsulate our values and how we view competing values:
+Luent is being developed under these guiding principles, which encapsulate our values and how we navigate tradeoffs:
 
 - **Human-centered, AI-friendly.**
-We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. Since human-centered interfaces are also incidentally AI-friendly due to how LLMs work, we focus on designing for humans.
+We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we often create systems that are naturally AI-friendly as well.
 
 - **Elegance and simplicity.**
-Elegance—both conceptual and syntactic—is central to Luent’s API design. We seek out simple solutions through extensive experimentation and relentless trimming of excess.
+Elegance—both conceptual and syntactic—is central to Luent’s API design. We pursue simple solutions through extensive experimentation and relentless trimming of excess.
 
 - **Intuitive mental models.**
 Luent aims to be as invisible as possible so developers can focus on application logic rather than framework mechanics. We strive to minimize mental code-switching by supporting mental models grounded in native web technologies and familiar programming fundamentals.
 
 - **High-level abstractions.**
-Abstractions should emphasize high-level concerns while minimizing implementation leakage. We favor clear, descriptive terminology over low-level technical jargon.
+Abstractions should emphasize high-level concerns while minimizing exposure to underlying implementation details. We favor clear, descriptive terminology over low-level technical jargon.
 
 - **Consistency over aesthetics.**
-While aesthetics matter, the pursuit of visually elegant code should never introduce inconsistencies in the language or unpredictable magic. Clean syntax should be acheived through carefully designed rules and rigorously specified syntactic sugar.
+While aesthetics matter, the pursuit of visually elegant code should never introduce inconsistencies in the language or unpredictable magic. Clean syntax should emerge from carefully designed rules and principled syntactic sugar.
 
 - **Clarity and expressiveness over brevity.**
 Concise code is valuable, but not at the expense of basic clarity, flexibility, and type-safety. Developers should never feel constrained by the framework for the sake of terseness or visual minimalism.
@@ -111,12 +111,14 @@ Concise code is valuable, but not at the expense of basic clarity, flexibility, 
 - **Elimination of bug-prone patterns.**
 Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce time spent debugging an application.
 
+- **Pragmatic type-safety.**
+We strive to improve type-safety whenever possible while also recognizing that manual solutions are sometimes preferable when the costs outweigh the benefits or TypeScript itself imposes limitations.
+
 - **Quality over speed.**
 Keeping up a reasonable pace is desirable, but quality should not be compromised for the sake of development speed. 
 
 - **Great user experiences.**
-All of this is in service of the end user. We embrace build steps because they enable better developer ergonomics without sacrificing runtime performance. We preserve framework and language consistency to ensure a stable foundation for developers. We strive to create stability and ease for developers so that they can build, grow, and maintain great user experiences. A solid framework → good DX → great UX.
-
+All of this ultimately serves the end user. We embrace build steps when they improve developer ergonomics without compromising runtime performance. We prioritize expressiveness and stability in our framework design because they form the foundation developers rely on to build, evolve, and maintain great user experiences. A solid framework → good DX → great UX.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
