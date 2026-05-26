@@ -70,7 +70,7 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Type-guard awareness in Accessor Variables
+### Type-guard awareness of accessor variables
 e.g. `if(obj) { obj.property }` • Type-narrowing and -widening of accessor variables
 
 ```tsx
@@ -100,7 +100,7 @@ function logUsername() {
   console.log('username:' user.name)
 }
 ```
-> **CAUTION:** Although an improvement to manual assertions, be aware that type-narrowing/widening is not 100% type-safe even for native variables and accessor properties. Type-narrowing/widening reflects only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is changed covertly via a function call between the type guard and the read, the read type might not reflect the new state.
+> **Caution:** Although an improvement to manual assertions, be aware that type-narrowing/widening is not 100% type-safe even for native variables and accessor properties. This is a limitation of TypeScript or any other compile-time tool. Type-narrowing/widening reflects only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is changed covertly via a function call between the type guard and the read, the read type might not reflect the new state.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
