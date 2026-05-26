@@ -33,8 +33,7 @@ NextScript proposes to address these caveats through a dash of syntactic sugar.
 
 A brief glimpse of some of NextScript's features. For the full set, see [NextScript's documentation](https://nextscript.org). 
 
-> [!NOTE]
-> While the examples below feature API from [Luent](https://github.com/ruby-cube/luent/blob/main) for demonstration purposes, NextScript is framework-agnostic. 
+> **Note:** While the examples below feature API from [Luent](https://github.com/ruby-cube/luent/blob/main) for demonstration purposes, NextScript is framework-agnostic. 
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -50,7 +49,7 @@ get remaining = ion(() => limit - count) // hover `count` → [ get count: Mutab
 const count = ion(start)
 const remaining = ion(() => limit - count()) // hover `count` → [ const count: MutableIon<number> ]
 ```
-> NextScript accessor variables have no inherent reactivity. Reactivity comes from the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`.
+> **Note:** NextScript accessor variables have no inherent reactivity. Reactivity comes from the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -67,7 +66,7 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
    +
 </button>
 ```
-> This example assumes a conservative XML to JavaScript transpilation strategy with tag bindings that map directly to object properties. NextScript itself transpiles to only TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
+> **Note:** This example assumes a conservative XML to JavaScript transpilation strategy with tag bindings that map directly to object properties. NextScript itself transpiles to only TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
