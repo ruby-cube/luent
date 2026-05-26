@@ -49,7 +49,7 @@ get remaining = ion(() => limit - count) // hover `count` → [ get count: Mutab
 const count = ion(start)
 const remaining = ion(() => limit - count()) // hover `count` → [ const count: MutableIon<number> ]
 ```
-> **Note:** NextScript accessor variables have no inherent reactivity. Reactivity comes from the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`.
+> **Note:** NextScript accessor variables have no inherent reactivity. Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`. Accessor variables are equally useful for non-reactive use cases, such as template refs.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
