@@ -100,9 +100,9 @@ function logUsername() {
   console.log('username:' user.name)
 }
 ```
-> **Caution:** Although an improvement over manual assertions, type narrowing/widening is not fully type-safe even for non-accessor variables and properties. If the state of a variable or property changes through side effects between a type guard and a subsequent read, the inferred type may no longer reflect the actual runtime state. This behavior reflects a current design choice in TypeScript for ergonomic reasons (see [discussion](https://github.com/microsoft/TypeScript/issues/9998)).
+> **Caution:** Although an improvement over manual assertions, type narrowing/widening is not fully type-safe even for non-accessor variables and properties. If the state of a variable or property changes through a side effectful call between a type guard and a subsequent read, the inferred type may no longer reflect the actual runtime state. This behavior reflects a current design choice in TypeScript for ergonomic reasons (see [discussion](https://github.com/microsoft/TypeScript/issues/9998)).
 > 
-> It is recommended to re-check mutable values after potentially side-effectful calls or async operations to avoid relying on stale type narrowings.
+> It is recommended to re-check mutable values after async operations and potentially side-effectful calls to avoid relying on stale type narrowings.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
