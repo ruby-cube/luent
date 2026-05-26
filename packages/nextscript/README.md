@@ -71,7 +71,7 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ### Type-guard awareness of accessor variables
-e.g. `if(obj) { obj.property }` • Type-narrowing and -widening of accessor variables
+e.g. `if(obj) { obj.property }` • Type narrowing and widening of accessor variables
 
 ```tsx
 get user = ion(null as User | null)
@@ -100,7 +100,9 @@ function logUsername() {
   console.log('username:' user.name)
 }
 ```
-> **Caution:** Although an improvement to manual assertions, type-narrowing/widening is not 100% type-safe even for native variables and accessor properties. This is a limitation of TypeScript or any other compile-time tool. Type-narrowing/widening reflects only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is changed covertly via a function call between the type guard and the read, the read type might not reflect the new state.
+> **Caution:** Although an improvement over manual assertions, type narrowing/widening is not fully type-safe even for non-accessor variables and properties. If the state of a variable or property changes through side effects between a type guard and a subsequent read, the inferred type may no longer reflect the actual runtime state. This behavior reflects a current design choice in TypeScript for ergonomic reasons (see [discussion](https://github.com/microsoft/TypeScript/issues/9998)).
+> 
+> It is recommended to re-check mutable values after potentially side-effectful calls or async operations to avoid relying on stale type narrowings.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
