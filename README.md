@@ -6,13 +6,13 @@
 </div>
 
 # Luent
-Luent is a web application framework that aims to bring greater conceptual coherence to the complexities of modern web development. It combines a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension designed to improve the readability, ergonomics, and type-safety of reactive code.
+Luent is a web application framework that aims to bring greater conceptual coherence to the complexities of modern web development. It combines a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of reactive code.
 
 > **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish an npm package or CLI. In the meantime, you can explore Luent through interactive [StackBlitz examples](). 
 >
 > NextScript features have mostly been implemented but require substantial tooling work before the extension is fully usable. You can get a sense of NextScript's syntax through these [code glimpses]() and [examples]().
 >
-> We'd love help getting this project off the ground. See how to [contribute](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
+> We'd love help getting this project off the ground. Learn how to [contribute](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -41,7 +41,7 @@ Other notable features:
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive or `<remount-view>` tag
 
 Experimental areas:
-- [WIP] language extension of TypeScript + JSX for improved readability and type-safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
+- [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
 - [WIP] compile-time mutation tracking
 - selective nested reactivity
 - encapsulated reactivity
@@ -110,13 +110,13 @@ Abstractions should emphasize high-level concerns while minimizing exposure to u
 While aesthetics matter, the pursuit of visually elegant code should never introduce inconsistencies in the language or unpredictable magic. Clean syntax should emerge from carefully designed rules and principled syntactic sugar.
 
 - **Clarity and expressiveness over brevity.**
-Concise code is valuable, but not at the expense of basic clarity, flexibility, and type-safety. Developers should never feel constrained by the framework for the sake of terseness or visual minimalism.
+Concise code is valuable, but not at the expense of basic clarity, flexibility, and type safety. Developers should never feel constrained by the framework for the sake of terseness or visual minimalism.
 
 - **Elimination of bug-prone patterns.**
 Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce time spent debugging an application.
 
-- **Pragmatic type-safety.**
-We strive to improve type-safety whenever possible while also recognizing that manual solutions are sometimes preferable when the costs outweigh the benefits or TypeScript itself imposes limitations.
+- **Pragmatic type safety.**
+We strive to improve type safety whenever possible while also recognizing that manual solutions are sometimes preferable when the costs outweigh the benefits or TypeScript itself imposes limitations.
 
 - **Quality over speed.**
 Keeping up a reasonable pace is desirable, but quality should not be compromised for the sake of development speed. 

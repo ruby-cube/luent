@@ -7,11 +7,11 @@
 
 # NextScript
 
-NextScript is an experimental language extension of TypeScript + JSX designed to improve the readability, ergonomics, and type-safety of modern reactive application code. Check out our language design principles [here](#design-principles).
+NextScript is an experimental TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of modern reactive application code. Its syntax is guided by [our language design principles](#design-principles).
 
-> **This project is in early development.** Most features have been specified and implemented, but substantial tooling work remains before the extension is fully usable. To get a sense of the syntax, check out these [code glimpses]() and [examples]().
+> **This project is in early development.** Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. To get a sense of the syntax, explore these [code glimpses]() and [examples]().
 >
-> We'd love help getting this project off the ground. See how to [contribute]().
+> We'd love help getting this project off the ground. Learn how to [contribute]().
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
