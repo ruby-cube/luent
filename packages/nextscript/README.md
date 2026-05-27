@@ -50,6 +50,7 @@ get total = ion(() => count() * qty()) // hover `count` → [ get count: Mutable
 ```
 ```tsx
 // native equivalent
+
 const count = ion(initial)
 const qty = ion(0, {
   increment() { qty.value++ },
@@ -70,6 +71,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 ```
 ```tsx
 // native equivalent
+
 <button on:click={() => count.value++} disabled={() => count() === limit}>
    +
 </button>
@@ -95,6 +97,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 ```
 ```tsx
 // native equivalent
+
 <div>
   {If(active, () =>
     <>
@@ -130,6 +133,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 ```
 ```tsx
 // native equivalent
+
 <div>
   {If(folder, () => 
     <>
