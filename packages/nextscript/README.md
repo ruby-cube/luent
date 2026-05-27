@@ -100,11 +100,6 @@ function logUsername() {
   console.log('username:' user.name)
 }
 ```
-> **Caution:** Although an improvement over manual assertions, type narrowing/widening is not fully type-safe even for non-accessor variables and properties. If the value of a variable or property changes through a side effectful call between a type guard and a subsequent read, the inferred type may no longer reflect the actual runtime state. This behavior reflects a current design tradeoff in TypeScript's control flow analysis (see [discussion](https://github.com/microsoft/TypeScript/issues/9998)).
->
-> It is recommended to re-check mutable references after potentially side-effectful calls to avoid relying on stale type narrowings.
-
-
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -174,8 +169,11 @@ function logUsername() {
 ```tsx
 <div>
   {If(folder, <//>
-    {If(open,
-      <p>Hello world</p>
+    {If(open, <//>
+      {For(folder.items, item =>
+        <div>{item}</div>
+      )}
+      <button on:click={addItem}>+</button>
     )}
   )}
 </div>
@@ -185,8 +183,13 @@ function logUsername() {
 <div>
   {If(folder, () => 
     <>
-      {If(open,
-        <p>Hello world</p>
+      {If(open, () =>
+        <>
+          {For(folder!.items, item => 
+            <div>{item}</div>
+          )}
+          <button on:click={addItem}>+</button>
+        </>
       )}
     </>
   )}
