@@ -135,7 +135,7 @@ function logUsername() {
 ```tsx
 <div>
   {If(folder, <//>
-    {If(open, <//>
+    {If(open, 'remount', <//>
       {For(folder.items, item =>
         <div>{item}</div>
       )}
@@ -149,7 +149,7 @@ function logUsername() {
 <div>
   {If(folder, () => 
     <>
-      {If(open, () =>
+      {If(open, 'remount', () =>
         <>
           {For(folder!.items, item => 
             <div>{item}</div>
