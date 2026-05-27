@@ -41,12 +41,16 @@ A brief glimpse of select features. For the full set, see [NextScript's document
 ### Accessor variables 
 `get variable = getter` • scope-level, locally-bound, type-guard-aware counterpart to native accessor properties
 ```ts
-get count = ion(start)
+get count = ion(start, {
+  increment() { count++ }
+})
 get remaining = ion(() => limit - count) // hover `count` → [ get count: MutableIon<number> ]
 ```
 ```tsx
 // native equivalent
-const count = ion(start)
+const count = ion(start, {
+  increment() { count.value++ }
+})
 const remaining = ion(() => limit - count()) // hover `count` → [ const count: MutableIon<number> ]
 ```
 > **Note:** Accessor variables have no inherent reactivity. Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`. Accessor variables are equally useful for non-reactive use cases, such as template refs.
