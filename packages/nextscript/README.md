@@ -39,7 +39,7 @@ A brief glimpse of select features. For the full set, see [NextScript's document
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ### Accessor variables 
-`get variable = getter` • scope-level, locally-bound counterpart to native accessor properties
+`get variable = getter` • scope-level, locally-bound, type-guard-aware counterpart to native accessor properties
 ```ts
 get count = ion(start)
 get remaining = ion(() => limit - count) // hover `count` → [ get count: MutableIon<number> ]
