@@ -6,7 +6,7 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 
 # JSX Syntax
 
-## JSX Gateway Return 
+## JSX return statement
 `{ statements; <//> JSX }` | `{Fn(...args, <//> JSX)}`
 
 The JSX gateway return syntax, `<//>`, signifies a switch from JavaScript to JSX, which extends to the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
@@ -111,7 +111,7 @@ The final argument is normalized to a JSX fragment factory at compile time.
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX gateway function expressions
+## JSX gateway function expression
 `(parameters) <//> JSX` | `<//> JSX` 
 
 A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a JSX flow expression. Parameter parentheses may only be omitted if there are no parameters. 

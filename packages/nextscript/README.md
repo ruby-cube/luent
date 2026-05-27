@@ -31,14 +31,14 @@ NextScript proposes to address these caveats through a dash of syntactic sugar.
 
 ## Code Glimpse
 
-A brief glimpse of some of NextScript's features. For the full set, see [NextScript's documentation](https://nextscript.org). 
+A brief glimpse of select features. For the full set, see [NextScript's documentation](https://nextscript.org). 
 
 > **Note:** While the examples below feature API from [Luent](https://github.com/ruby-cube/luent/blob/main) for demonstration purposes, NextScript is framework-agnostic. 
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Accessor Variables 
+### Accessor variables 
 `get variable = getter` • scope-level, locally-bound counterpart to native accessor properties
 ```ts
 get count = ion(start)
@@ -53,7 +53,7 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Derivation Expressions
+### Derivation expressions
 `(expression)@` • derivation-first shorthand for derivational arrow function expressions
 ```tsx
 <button on:click={() => count++} disabled={(count === limit)@}>
@@ -109,7 +109,7 @@ function logUsername() {
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 
-## JSX flow expression
+## JSX flow expressions
 `{Fn(...args, <tag/>)}` • template control flow with implicit JSX fragment factories
 
 ```tsx
@@ -135,8 +135,8 @@ function logUsername() {
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 
-## JSX Gateway Return 
-`() => { statements; <//> <tag/> }` • JSX return statement with implicit JSX fragment
+## JSX gateway returns
+`() => { statements; <//> <tag/> }` • JSX return statements with implicit JSX fragment
 
 ```tsx
 <article>
@@ -167,6 +167,30 @@ function logUsername() {
     )
   })}
 </article>
+```
+
+## JSX gateway function expressions
+`(parameters) <//> JSX` | `<//> JSX` • shorthands for arrow functions that return a JSX fragment
+```tsx
+<div>
+  {If(folder, <//>
+    {If(open,
+      <p>Hello world</p>
+    )}
+  )}
+</div>
+```
+```tsx
+// native equivalent
+<div>
+  {If(folder, () => 
+    <>
+      {If(open,
+        <p>Hello world</p>
+      )}
+    </>
+  )}
+</div>
 ```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
