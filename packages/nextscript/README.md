@@ -41,10 +41,7 @@ A brief glimpse of select features. For the full set, see [NextScript's document
 ### Accessor variables 
 `get variable = getter` • scope-level, locally-bound, type-guard-aware counterpart to native accessor properties
 ```ts
-get count = ion(start, {
-  increment() { count++ },
-  decrement() { count-- }
-})
+get count = ion(initial)
 get qty = ion(0, {
   increment() { qty++ },
   decrement() { qty-- }
@@ -53,10 +50,7 @@ get total = ion(() => count() * qty()) // hover `count` → [ get count: Mutable
 ```
 ```tsx
 // native equivalent
-const count = ion(start, {
-  increment() { count.value++ },
-  decrement() { count.value-- }
-})
+const count = ion(initial)
 const qty = ion(0, {
   increment() { qty.value++ },
   decrement() { qty.value-- }
