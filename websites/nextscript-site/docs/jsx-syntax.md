@@ -6,7 +6,7 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 
 # JSX Syntax
 
-## JSX return statement
+## JSX gateway return
 `{ statements; <//> JSX }` | `{Fn(...args, <//> JSX)}`
 
 The JSX gateway return syntax, `<//>`, signifies a switch from JavaScript to JSX, which extends to the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
@@ -53,6 +53,42 @@ function Something() {
 }
 ```
 :::
+
+
+
+## JSX gateway returns
+`() => { statements; <//> <tag/> }` • JSX fragment return statements
+
+```tsx
+<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    <//>
+    <section>
+      <h2 class={highlight}>{section.title}</h2>
+      <p>{section.body}</p>
+    </section>
+    <hr/>
+  })}
+</article>
+```
+```tsx
+// native equivalent
+<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    return (
+      <>
+        <section>
+          <h2 class={highlight}>{section.title}</h2>
+          <p>{section.body}</p>
+        </section>
+        <hr/>
+      </>
+    )
+  })}
+</article>
+```
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ## JSX flow expression

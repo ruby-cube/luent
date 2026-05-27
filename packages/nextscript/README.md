@@ -130,40 +130,6 @@ function logUsername() {
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 
-## JSX gateway returns
-`() => { statements; <//> <tag/> }` • JSX return statements with implicit JSX fragment
-
-```tsx
-<article>
-  {For(sections, section => {
-    const highlight = HighlighterKit(section)
-    <//>
-    <section>
-      <h2 class={highlight}>{section.title}</h2>
-      <p>{section.body}</p>
-    </section>
-    <hr/>
-  })}
-</article>
-```
-```tsx
-// native equivalent
-<article>
-  {For(sections, section => {
-    const highlight = HighlighterKit(section)
-    return (
-      <>
-        <section>
-          <h2 class={highlight}>{section.title}</h2>
-          <p>{section.body}</p>
-        </section>
-        <hr/>
-      </>
-    )
-  })}
-</article>
-```
-
 ## JSX gateway function expressions
 `(parameters) <//> JSX` | `<//> JSX` • shorthands for arrow functions that return a JSX fragment
 ```tsx
