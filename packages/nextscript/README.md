@@ -43,11 +43,11 @@ A brief glimpse of select features. For the full set, see [NextScript's document
 ```ts
 get count = ion(start, {
   increment() { count++ },
-  decrement() { count--}
+  decrement() { count-- }
 })
 get qty = ion(0, {
   increment() { qty++ },
-  decrement() { qty--}
+  decrement() { qty-- }
 })
 get total = ion(() => count() * qty()) // hover `count` → [ get count: MutableIon<number> ]
 ```
@@ -59,7 +59,7 @@ const count = ion(start, {
 })
 const qty = ion(0, {
   increment() { qty.value++ },
-  decrement() { qty.value--}
+  decrement() { qty.value-- }
 })
 const total = ion(() => count() * qty()) // hover `count` → [ const count: MutableIon<number> ]
 ```
