@@ -70,39 +70,6 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Type-guard awareness of accessor variables
-e.g. `if(obj) { obj.property }` • type narrowing and widening of accessor variables
-
-```tsx
-get user = ion(getUser())
-
-function logUsername() {
-  if (!user) return;
-  console.log('username:' user.name)
-}
-```
-```tsx
-// native equivalent
-const user = ion(getUser())
-
-function logUsername() {
-  if (!user()) return;
-  console.log('username:' user()!.name)
-}
-```
-```tsx
-// alternative native equivalent
-const $user = ion(getUser())
-
-function logUsername() {
-  const user = $user();
-  if (!user) return;
-  console.log('username:' user.name)
-}
-```
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
 
 ## JSX flow expressions
 `{Fn(...args, <tag/>)}` • template control flow with implicit JSX fragment factories
