@@ -46,7 +46,7 @@ get qty = ion(0, {
   increment() { qty++ },
   decrement() { qty-- }
 })
-get total = ion(() => count() * qty()) // hover `count` → [ get count: MutableIon<number> ]
+get total = ion(() => count * qty) // hover `count` → [ get count: MutableIon<number> ]
 ```
 ```tsx
 // native equivalent
