@@ -81,7 +81,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 
-## JSX flow expressions
+### JSX flow expressions
 `{Fn(...args, <tag/>)}` • template control flow with implicit JSX fragment factories
 
 ```tsx
@@ -114,7 +114,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 
-## JSX gateway function expressions
+### JSX gateway function expressions
 `(parameters) <//> JSX` | `<//> JSX` • shorthands for arrow functions that return a JSX fragment
 ```tsx
 <div>
