@@ -80,6 +80,9 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
     <p>{foo}</p>
     <p>{bar}</p>
   )}
+  {Else(
+    <p>{awayMessage}</p>
+  )}
 </div>
 ```
 ```tsx
@@ -90,6 +93,9 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
       <p>{foo}</p>
       <p>{bar}</p>
     </>
+  )}
+  {Else(() =>
+    <p>{awayMessage}</p>
   )}
 </div>
 ```
