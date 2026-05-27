@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": "../..",
+    "ignoreDeprecations": "6.0",
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@rue/luent",
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "react/jsx-runtime": [
+        "./packages/luent/jsx-runtime"
+      ],
+      "@rue/luent": [
+        "./packages/luent/src/index.ts"
+      ],
+      "@rue/quarky": [
+        "./packages/quarky/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "../../packages/luent/jsx-runtime/index.d.ts",
+    "docs/**/*.ts",
+    "docs/**/*.tsx",
+    ".vitepress/**/*.ts",
+    ".vitepress/**/*.tsx"
+  ]
+}

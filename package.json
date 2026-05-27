@@ -14,6 +14,7 @@
     "i:flask": "pnpm -r --filter @rue/flask install",
     "i:quarky": "pnpm -r --filter @rue/quarky install",
     "i:nextscript": "pnpm -r --filter @rue/nextscript install",
+    "i:nextscript-site": "pnpm -r --filter @rue/nextscript-site install",
     "i:utils": "pnpm -r --filter @rue/utils install",
     "i:jungle": "pnpm -r --filter './.jungle/**' install",
     "i:e2e": "pnpm -r --filter @rue/e2e install",

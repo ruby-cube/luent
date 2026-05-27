@@ -4,7 +4,9 @@
   "description": "",
   "type": "module",
   "devDependencies": {
-    "vitepress": "2.0.0-alpha.17"
+    "vitepress": "2.0.0-alpha.17",
+    "@rue/luent": "workspace:*",
+    "@rue/quarky": "workspace:*"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT",

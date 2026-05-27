@@ -1,10 +1,10 @@
-::: tip NOTE
-This is currently an *aspirational* document, detailing what the NextScript project is in the process of implementing. It is being published to garner the interest of contributors. Most features have been specified and implemented, but substantial tooling work remains before the extension is fully usable. See how to contribute here.
+::: tip This project is in early development.
+Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
+
+We'd love help getting this project off the ground. Learn how to contribute [here]().
 :::
 
 # Getter syntax
-
-NextScript accessor variables and the accessor postfix operator have no inherent reactivity. They are equally useful for simple live reference passing of “inert” getters. Refs, for example.
 
 ::: info NOTE
 The examples below modify transpiled output with descriptive variable names for better comprehension. The actual implementation uses unique variable names to avoid name collisions.
@@ -397,7 +397,7 @@ Expressions surrounded by non-grouping parentheses containing `await` are transp
 Type-narrowing and -widening apply to accessor variables in the same way they apply to normal variables and accessor properties. There is no need to manually add the non-null assertion operator or store the state in a variable the way you would with getter functions.
 
 ```ts
-get user = ref<User | undefined>(undefined)
+get user = ref(getUser())
 
 function logName() {
    console.log(user ? user.name : 'no user. :(')
@@ -407,7 +407,7 @@ function logName() {
 ::: info COMPARE
 Managing types with getter functions:
 ```ts
-const user = ref<User | undefined>(undefined)
+const user = ref(getUser())
 
 function logName() {
    console.log(user() ? user()!.name : 'no user :(')
@@ -419,6 +419,18 @@ function logName() {
 :::
 
 ::: warning CAUTION
-Although an improvement to manual assertions, be aware that type-narrowing/widening is not 100% type-safe even for native variables and accessor properties. Type-narrowing/widening reflects only what the TypeScript compiler can deduce from static analysis. If the state of a variable or property is changed covertly via a function call between the type guard and the read, the read type might not reflect the new state. 
+Although an improvement over manual assertions, type narrowing/widening is not fully type-safe even for non-accessor variables and properties. If the value of a variable or property changes through a side effectful call between a type guard and a subsequent read, the inferred type may no longer reflect the actual runtime state. This behavior reflects a current design tradeoff in TypeScript's control flow analysis (see [discussion](https://github.com/microsoft/TypeScript/issues/9998)).
+
+It is recommended to re-check mutable variables and properties after potentially side-effectful calls to avoid relying on stale type narrowings.
+
+```ts
+function logName() {
+  if (!user) return;
+  console.log('Username:', user.name);
+  emitUserLogged();
+  if (!user) return; // re-check
+  console.log('After callbacks:', user.name);
+}
+```
 :::
 

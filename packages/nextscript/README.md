@@ -2,7 +2,7 @@
 <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/packages/nextscript/assets/nextscript-logo-512px-padded.png" alt="nextscript-logo"/>
 </picture>
-<p><a href='https://nextscript.org/getter-syntax'>docs</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/examples'>examples</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#motivation'>motivation</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#design-principles'>principles</a></p>
+<p><a href='https://nextscript.org/getter-syntax'>learn</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/examples'>see</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#motivation'>motivation</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#design-principles'>principles</a></p>
 </div>
 
 # NextScript
@@ -49,7 +49,7 @@ get remaining = ion(() => limit - count) // hover `count` → [ get count: Mutab
 const count = ion(start)
 const remaining = ion(() => limit - count()) // hover `count` → [ const count: MutableIon<number> ]
 ```
-> **Note:** NextScript accessor variables have no inherent reactivity. Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`. Accessor variables are equally useful for non-reactive use cases, such as template refs.
+> **Note:** Accessor variables have no inherent reactivity. Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`. Accessor variables are equally useful for non-reactive use cases, such as template refs.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -66,15 +66,15 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
    +
 </button>
 ```
-> **Note:** This example assumes a conservative XML to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
+> **Note:** This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ### Type-guard awareness of accessor variables
-e.g. `if(obj) { obj.property }` • Type narrowing and widening of accessor variables
+e.g. `if(obj) { obj.property }` • type narrowing and widening of accessor variables
 
 ```tsx
-get user = ion(null as User | null)
+get user = ion(getUser())
 
 function logUsername() {
   if (!user) return;
@@ -83,7 +83,7 @@ function logUsername() {
 ```
 ```tsx
 // native equivalent
-const user = ion(null as User | null)
+const user = ion(getUser())
 
 function logUsername() {
   if (!user()) return;
@@ -92,7 +92,7 @@ function logUsername() {
 ```
 ```tsx
 // alternative native equivalent
-const $user = ion(null as User | null)
+const $user = ion(getUser())
 
 function logUsername() {
   const user = $user();
@@ -100,9 +100,74 @@ function logUsername() {
   console.log('username:' user.name)
 }
 ```
-> **Caution:** Although an improvement over manual assertions, type narrowing/widening is not fully type-safe even for non-accessor variables and properties. If the state of a variable or property changes through a side effectful call between a type guard and a subsequent read, the inferred type may no longer reflect the actual runtime state. This behavior reflects a current design choice in TypeScript for ergonomic reasons (see [discussion](https://github.com/microsoft/TypeScript/issues/9998)).
-> 
-> It is recommended to re-check mutable values after async operations and potentially side-effectful calls to avoid relying on stale type narrowings.
+> **Caution:** Although an improvement over manual assertions, type narrowing/widening is not fully type-safe even for non-accessor variables and properties. If the value of a variable or property changes through a side effectful call between a type guard and a subsequent read, the inferred type may no longer reflect the actual runtime state. This behavior reflects a current design tradeoff in TypeScript's control flow analysis (see [discussion](https://github.com/microsoft/TypeScript/issues/9998)).
+>
+> It is recommended to re-check mutable references after potentially side-effectful calls to avoid relying on stale type narrowings.
+
+
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+
+## JSX flow expression
+`{Fn(...args, <tag/>)}` • template control flow with implicit JSX fragment factories
+
+```tsx
+<div>
+  {If(active, 
+    <p>{foo}</p>
+    <p>{bar}</p>
+  )}
+</div>
+```
+```tsx
+// native equivalent
+<div>
+  {If(active, () =>
+    <>
+      <p>{foo}</p>
+      <p>{bar}</p>
+    </>
+  )}
+</div>
+```
+
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+
+## JSX Gateway Return 
+`() => { statements; <//> <tag/> }` • JSX return statement with implicit JSX fragment
+
+```tsx
+<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    <//>
+    <section>
+      <h2 class={highlight}>{section.title}</h2>
+      <p>{section.body}</p>
+    </section>
+    <hr/>
+  })}
+</article>
+```
+```tsx
+// native equivalent
+<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    return (
+      <>
+        <section>
+          <h2 class={highlight}>{section.title}</h2>
+          <p>{section.body}</p>
+        </section>
+        <hr/>
+      </>
+    )
+  })}
+</article>
+```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

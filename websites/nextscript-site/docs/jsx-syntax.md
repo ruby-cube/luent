@@ -1,31 +1,16 @@
-# JSX Syntax & Terminology
+::: tip This project is in early development.
+Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
 
-## JSX Factory 
-`() => <jsx/>`
+We'd love help getting this project off the ground. Learn how to contribute [here]().
+:::
 
-A JSX factory refers to any function that returns a JSX element or fragment.
-```tsx
-const renderRow = () => <tr><td>Hello</td></tr>
-```
-
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
-
-## JSX Call Expression 
-`{callee()}`
-
-A JSX call expression refers to a call expression directly embedded in a JSX expression container.
-```tsx
-<div>{foo(bar)}</div>
-```
-
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+# JSX Syntax
 
 ## JSX Gateway Return 
 `{ statements; <//> JSX }` | `{Fn(...args, <//> JSX)}`
 
 The JSX gateway return syntax, `<//>`, signifies a switch from JavaScript to JSX, which extends to the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
 
-source:
 ```tsx
 function Something() {
    const foo = getSomething();
@@ -34,7 +19,7 @@ function Something() {
    <p>{foo}</p>
 }
 ```
-compiled:
+::: info transpiled
 ```tsx
 function Something() {
    const foo = getSomething();
@@ -44,8 +29,8 @@ function Something() {
    </>;
 }
 ```
+:::
 
-source:
 ```tsx
 function Something() {
    const foo = getSomething();
@@ -57,7 +42,7 @@ function Something() {
    <p>Nothing :(</p>
 }
 ```
-compiled:
+::: info transpiled
 ```tsx
 function Something() {
    const foo = getSomething();
@@ -67,7 +52,7 @@ function Something() {
    return <><p>Nothing :(</p></>
 }
 ```
-
+:::
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ## JSX flow expression
@@ -82,7 +67,7 @@ A JSX flow expression is a JSX call expression where the callee is a pascale-cas
 
 The final argument is normalized to a JSX fragment factory at compile time.
 
-source:
+**with a single root:**
 ```tsx
 <div>
    {If(active, 
@@ -90,7 +75,7 @@ source:
    )}
 </div>
 ```
-compiled:
+::: info transpiled
 ```tsx
 <div>
    {If(active, () =>
@@ -98,8 +83,9 @@ compiled:
    )}
 </div>
 ```
+:::
 
-source:
+**with multiple roots:**
 ```tsx
 <div>
    {If(active, 
@@ -108,7 +94,7 @@ source:
    )}
 </div>
 ```
-compiled:
+::: info transpiled
 ```tsx
 <div>
    {If(active, () =>
@@ -119,27 +105,9 @@ compiled:
    )}
 </div>
 ```
+:::
 
-source:
-```tsx
-<div>
-   {If(active, <>
-      <p>{foo}</p>
-      <p>{foo}</p>
-   </>)}
-</div>
-```
-compiled:
-```tsx
-<div>
-   {If(active, () =>
-      <><>
-         <p>{foo}</p>
-         <p>{foo}</p>
-      </></>
-   )}
-</div>
-```
+
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
@@ -148,7 +116,6 @@ compiled:
 
 A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a JSX flow expression. Parameter parentheses may only be omitted if there are no parameters. 
 
-source:
 ```tsx
 <div>
    {If(active, <//>
@@ -156,7 +123,7 @@ source:
    )}
 </div>
 ```
-compiled:
+::: info transpiled
 ```tsx
 <div>
    {If(active, () =>
@@ -164,8 +131,8 @@ compiled:
    )}
 </div>
 ```
+:::
 
-source:
 ```tsx
 <div>
    {If(active, <//>
@@ -175,7 +142,7 @@ source:
    )}
 </div>
 ```
-compiled:
+::: info transpiled
 ```tsx
 <div>
    {If(active, () => 
@@ -187,8 +154,7 @@ compiled:
    )}
 </div>
 ```
-
-source:
+:::
 ```tsx
 <div>
    {If(active, (o) <//>
@@ -196,7 +162,7 @@ source:
    )}
 </div>
 ```
-compiled:
+::: info transpiled
 ```tsx
 <div>
    {If(active, (o) =>
@@ -206,8 +172,7 @@ compiled:
    )}
 </div>
 ```
-
-source:
+:::
 ```tsx
 <div>
    {If(active, (o) <//>
@@ -217,7 +182,7 @@ source:
    )}
 </div>
 ```
-compiled
+::: info transpiled
 ```tsx
 <div>
    {If(active, (o) =>
@@ -229,8 +194,8 @@ compiled
    )}
 </div>
 ```
+:::
 
-source:
 ```tsx
 <div>
    {If(active, (o, p) <//>
@@ -238,7 +203,7 @@ source:
    )}
 </div>
 ```
-compiled:
+::: info transpiled
 ```tsx
 <div>
    {If(active, (o, p) =>
@@ -248,6 +213,7 @@ compiled:
    )}
 </div>
 ```
+:::
 
 ```tsx
 // X invalid: not the final argument of a JSX flow expression
@@ -311,7 +277,7 @@ function Dialog({ Slot }) {
    </:component>
 }
 ```
-compiled:
+::: info transpiled
 ```tsx
 function Dialog({ Slot }) {
    get opened = ion(false)
@@ -330,3 +296,4 @@ function Dialog({ Slot }) {
    }) 
 }
 ```
+:::
