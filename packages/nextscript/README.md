@@ -103,9 +103,9 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
 <div>
   {If(folder, <//>
     <h2>{title}</h2>
-    {If(open, 'remount', <//>
+    {If(open, <//>
       <ul>
-        {For(folder!.items, item => 
+        {For(folder.items, item => 
           <li>{item}</li>
         )}
       </ul>
@@ -120,7 +120,7 @@ const remaining = ion(() => limit - count()) // hover `count` → [ const count:
   {If(folder, () => 
     <>
       <h2>{title}<h2>
-      {If(open, 'remount', () =>
+      {If(open, () =>
         <>
           <ul>
             {For(folder!.items, item => 
