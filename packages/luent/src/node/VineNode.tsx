@@ -194,11 +194,13 @@ export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | n
    }
 }
 
+
 export type DOMParent = {
    appendChild(node: Node): Node,
    innerHTML: string,
    prepend: (...nodes: (Node | string)[]) => void
    append: (...nodes: (Node | string)[]) => void
+   setHTML: (html: string) => void
 } & DOMNode
 
 export function mountDOMNodes(nodes: JSXNode[], root: DOMParent | DocumentFragment) {

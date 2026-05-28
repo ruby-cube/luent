@@ -20,7 +20,7 @@ export function setUpAttributes(node: Element, attributes: { [key: string]: Mayb
    const flask = getFlask()
    for (const key in attributes) {
       if (key === 'innerHTML') {
-         setUpInnerHTML({ innerHTML: attributes.innerHTML }, node)
+         setUpInnerHTML(attributes.innerHTML, node)
          continue;
       }
       if (key === 'Slot') continue;

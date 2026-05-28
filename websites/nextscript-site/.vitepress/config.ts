@@ -37,28 +37,43 @@ export default defineConfig({
     logo: '/assets/nextscript-logo-512px.png',
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Features', link: '/getter-syntax' },
-      { text: 'Examples', link: '/markdown-examples' },
+      { text: 'Features', link: '/guide/getter-syntax' },
+      { text: 'Demos', link: '/demos/habit-tracker' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-principles' }
     ],
-    sidebar: [
-      {
-        text: 'Features',
-        items: [
-          {
-            text: 'Getter Syntax',
-            link: '/getter-syntax',
-            items: [
-              { text: 'Accessor Variables', link: '/getter-syntax#accessor-variables' },
-              { text: '@ Postfix Operator', link: '/getter-syntax#the-postfix-operator' }
-            ]
-          },
-          { text: 'JSX Syntax', link: '/jsx-syntax' },
-          { text: 'Terminology', link: '/terminology' }
-        ]
-      }
-    ],
+    sidebar: {
+      '/guide/': [
+        {
+          text: 'Features',
+          items: [
+            {
+              text: 'Getter Syntax',
+              link: '/guide/getter-syntax',
+              items: [
+                { text: 'Accessor Variables', link: '/guide/getter-syntax#accessor-variables' },
+                { text: '@ Postfix Operator', link: '/guide/getter-syntax#the-postfix-operator' }
+              ]
+            },
+            { text: 'JSX Syntax', link: '/guide/jsx-syntax' },
+            { text: 'Terminology', link: '/guide/terminology' }
+          ]
+        },
+      ],
+      '/demos/': [
+        {
+          text: 'Demos',
+          items: [
+            {
+              text: 'Habit Tracker', link: '/demos/habit-tracker',
+            },
+            { text: 'Drawing Canvas', link: '/jsx-syntax' },
+            { text: 'Video Player', link: '/terminology' },
+          ]
+        }
+        
+      ]
+    },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript' }
     ]

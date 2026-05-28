@@ -39,3 +39,6 @@ dist-ssr
 
 # Generated temp output
 /plugins/eslint-plugin-mu/.tmp-run/
+
+# VitePress cache
+**/.vitepress/cache/

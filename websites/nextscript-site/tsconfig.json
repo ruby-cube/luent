@@ -33,5 +33,5 @@
     "docs/**/*.tsx",
     ".vitepress/**/*.ts",
     ".vitepress/**/*.tsx"
-  ]
+, "src/Counter.tsx"  ]
 }

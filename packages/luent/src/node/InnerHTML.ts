@@ -1,60 +1,68 @@
-import {  __DEV__checkIfTracked, Ion, toValue, isGetter, watchToRender, queueRender } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, watchToRender, queueRender, RUN_EAGERLY } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { DOMParent } from "./VineNode";
+import { getFlask } from "@rue/flask";
 
-export function sanitize() {
-
+export function setUpInnerHTML(kit: InnerHTMLKit | MaybeIon<string>, parentNode: DOMParent) {
+  //  nodePod.appendStaticNode(textNode) //QUESTION: do we need to append innerHTML to nodePod??, we don't have to worry about siblings, so idon't think so
+  kit = (typeof kit === 'string' || isGetter(kit)) ? { trusted: false, html: kit } : kit
+  const { trusted, html } = kit;
+  if (isGetter(html)) {
+    watchToRender(html, () => {
+      queueRender(() => {
+        setInnerHTML(html(), trusted, parentNode)
+      })
+    }, getFlask(), true);
+  }
+  else {
+    setInnerHTML(toString(html), trusted, parentNode)
+  }
 }
 
-export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
-   //  nodePod.appendStaticNode(textNode) //QUESTION: do we need to append innerHTML to nodePod??, we don't have to worry about siblings, so idon't think so
-   const htmlString = kit.html;
-   const sanitizeHTML = getHTMLSanitizer(kit);
-   if (isGetter(htmlString)) {
-      watchToRender(htmlString, ({ flask }) => {
-         queueRender(() => {
-            parentNode.innerHTML = sanitizeHTML(toString(htmlString()));
-         })
-      });
-   }
-   return htmlString;
+function setInnerHTML(html: string, trusted: boolean | undefined, node: DOMParent) {
+  if (trusted) {
+    node.innerHTML = html
+  }
+  else if ('setHTML' in node) {
+    node.setHTML(html)
+  }
+  else {
+    throw new Error('html must be sanitized or marked trusted')
+  }
 }
 
-// export function mountInnerHTML(htmlString: MaybeIon<any>, parent: DOMParent) {
-//    parent.innerHTML = toString(toValue(htmlString))
-// }
 
 
 
 
 
 function toString(value: any) {
-   return value == null ? "" : String(value);
+  return value == null ? "" : String(value);
 }
 
 function getHTMLSanitizer(kit: InnerHTMLKit): (html: string) => string {
-   if (kit.trustedHTML) {
-      return passthroughHTML;
-   }
-   if (kit.sanitizeHTML) {
-      return kit.sanitizeHTML;
-   }
-   return defaultSanitizeHTML;
+  if (kit.trustedHTML) {
+    return passthroughHTML;
+  }
+  if (kit.sanitizeHTML) {
+    return kit.sanitizeHTML;
+  }
+  return defaultSanitizeHTML;
 }
 
 function defaultSanitizeHTML(html: string): string {
-   return DOMPurify.sanitize(html, {
-      USE_PROFILES: { html: true },
-   });
+  return DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+  });
 }
 
 function passthroughHTML(html: string): string {
-   return html;
+  return html;
 }
 
 export type InnerHTMLKit = {
-   trusted?: boolean
-   html: MaybeIon<string>,
+  trusted?: boolean
+  html: MaybeIon<string>,
 }
 
 // <div innerHTML={{ 

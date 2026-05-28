@@ -21,7 +21,6 @@ function insertStyle(cssText: string, id: string) {
 }
 
 function composeCSSText(strings: TemplateStringsArray, values: string[]) {
-   console.log('values', values)
    return strings.reduce((cssText, string, i) => cssText + string + (i < values.length ? values[i] : ''), '')
 }
 

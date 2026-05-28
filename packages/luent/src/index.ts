@@ -1,5 +1,7 @@
 import { wrapWithContext } from './context/Context'
 
+export { ion, ionic, watch, queueIonicPrelude, queueIonicRender, queueIonicTask, queueLayout, queuePrelude, queueRender, queueTask, queueTick } from '@rue/quarky'
+export type { Ion, Ionic } from '@rue/quarky'
 export * from './node/NodeRef'
 export * from './node/NodeSetup'
 export * from './component/Component'

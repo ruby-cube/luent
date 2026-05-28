@@ -130,10 +130,10 @@ class MemoizedState extends SimpleState {
 
    override lock() {
       const update = $activeUpdate()
-      if (!update) {
-         console.error('nothing to lock to')
-         return;
-      }
+      // if (!update) {
+      //    console.error('nothing to lock to')
+      //    return;
+      // }
       // if (update.cancelled) console.warn('DEV RESEARCH: state is being accessed after update cancelled...')
       // if (update.committed) {
       //    return;

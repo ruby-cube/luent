@@ -6,7 +6,7 @@ export function TestXray() {
       <Board
          style={{ 'color': 'red' }}
          on:click={e => console.log('click outer')}
-         xray:button={n => <n.button on:click={() => console.log('clicked')} />}
+         xray:button={x => <x.button on:click={() => console.log('clicked')} style='background-color: green'/>}
       ></Board>
    )
 }
@@ -18,7 +18,7 @@ function Board(setup: FromTag<'div', {
    'xray:button'?: Xray<'button'>
 }>) {
    const { xray, ...rest } = setup
-
+  console.log('xray?', xray)
    return component(
       <div auto-bind={rest}>
          all red

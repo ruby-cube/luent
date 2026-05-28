@@ -42,9 +42,10 @@ import { TestXray } from "./src/TestXray"
 import { EmojiQuest } from "./src/EmojiQuest"
 import { HabitTracker } from "./src/HabitTracker"
 import { BulletJournal } from "./src/SimpleTodo"
+import { TestInnerHTML } from "./src/TestInnerHTML"
 
 export function runDemo() {
-  createRoot(() => <BulletJournal></BulletJournal>)
+  createRoot(() => <TestXray></TestXray>)
   // createRoot(() => <HabitTracker habit="water" goal={8}></HabitTracker>)
     .mount('#root')
 }

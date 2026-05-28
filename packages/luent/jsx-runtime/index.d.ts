@@ -904,7 +904,7 @@ declare global {
          /**
           * DOM Property
           */
-         innerHTML?: Luent.MaybeIon<string>;
+         innerHTML?: {trusted?: boolean, html: Luent.MaybeIon<string>} | Luent.MaybeIon<string>;
       }
 
 
@@ -1925,8 +1925,8 @@ declare global {
          'o--head': L.DetailedHTMLProps<L.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
          'o--body': L.DetailedHTMLProps<L.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
          'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
-         'create-view': { children: ConditionalRenderKit[] }
-         'remount-view': { children: ConditionalRenderKit[]; discard?: Ion<Booleanish> }
+         'create-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
+         'remount-view': { children: ConditionalRenderKit[] | ConditionalRenderKit; discard?: Ion<Booleanish> }
          'render-view': { children: Luent.RawJSXNode }
          // 'o--preserve': { children: ConditionalRenderKit[]; discard?: Ion<Booleanish> };
          // 'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
