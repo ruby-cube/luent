@@ -6,9 +6,7 @@ This package includes third-party material.
 
 - Component: Syntax highlighting theme data used by Shiki
 - Upstream project: ahme-dev/dimfire
-- Source files:
-  - https://github.com/ahme-dev/dimfire/blob/main/themes/Dim%20Fire%20Day-color-theme.json
-  - https://github.com/ahme-dev/dimfire/blob/main/themes/Dim%20Fire%20Dusk-color-theme.json
+- Source file: https://github.com/ahme-dev/dimfire/blob/main/themes/Dim%20Fire%20Day-color-theme.json
 - Author: ahme.dev
 - License: MIT
 

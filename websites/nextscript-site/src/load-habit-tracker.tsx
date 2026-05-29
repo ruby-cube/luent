@@ -67,6 +67,7 @@ export function HabitTracker({ habit, goal = 5 }) {
   get achieved = ion(() => count === goal)
 
   <:component>
+    <Modal />
     <div class='tracker'>
       {habit}
       <ul>

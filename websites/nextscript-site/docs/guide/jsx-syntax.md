@@ -1,7 +1,7 @@
 ::: tip This project is in early development.
 Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
 
-We'd love help getting this project off the ground. Learn how to contribute [here]().
+We'd love help getting this project off the ground. Learn how to contribute [here](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
 :::
 
 # JSX Syntax

@@ -1,7 +1,7 @@
 ::: tip This project is in early development.
 Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
 
-We'd love help getting this project off the ground. Learn how to contribute [here]().
+We'd love help getting this project off the ground. Learn how to contribute [here](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
 :::
 
 # Terminology
@@ -46,17 +46,3 @@ A JSX call expression refers to a call expression directly embedded in a JSX exp
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-<script setup lang="ts">
-import { onMounted } from 'vue'
-
-onMounted(async () => {
-  if (typeof window === 'undefined') return
-
-  const [{ createRoot }, { Counter }] = await Promise.all([
-    import('@rue/luent'),
-    import('./Counter')
-  ])
-
-  createRoot(Counter).mount('#counter')
-})
-</script>

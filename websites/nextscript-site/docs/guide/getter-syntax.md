@@ -1,7 +1,7 @@
 ::: tip This project is in early development.
 Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
 
-We'd love help getting this project off the ground. Learn how to contribute [here]().
+We'd love help getting this project off the ground. Learn how to contribute [here](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
 :::
 
 # Getter syntax
@@ -16,7 +16,7 @@ The examples below modify transpiled output with descriptive variable names for 
 `get variable = getter`
 
 Accessor variables are declared with the `get` keyword and initialized with a getter—a function that has zero parameters and returns a value. `get` declarations transpile to `const` declarations.
-```ts
+```nsx
 let n = 0
 get count = () => n
 
@@ -27,14 +27,14 @@ get name = 'Jim' // TypeError: Getter must be a function: 'Jim'
 let n = 0
 const count = assertGetter(() => n)
 
-get name = assertGetter('Jim') // TypeError: Getter must be a function: 'Jim'
+const name = assertGetter('Jim') // TypeError: Getter must be a function: 'Jim'
 ```
 :::
 
 ::: warning IMPORTANT
 Getters should avoid changing state that they read from as this breaks assumptions of referentially transparent reads, resulting in unpredictable or confusing behavior.
 
-```ts
+```nsx
 get count = () => n += 10 // ❌
 
 console.log(count) // 10
@@ -50,7 +50,7 @@ console.log(count) // 20 ⁉️
 
 Similar to native accessor properties, an accessor variable will absorb its getter function at declaration such that reading the variable will call the getter rather than access it.
 
-```ts
+```nsx
 get count = ref(0)
 get double = () => count * 2
 
@@ -72,7 +72,7 @@ console.log(count() instanceof Function) // false
 `variable = value`
 
 An accessor variable's value may be reassigned if its getter implements the `MutableGet` interface with a writable `value` property.
-```ts
+```nsx
 get count = ref(0)
 
 count = 2 // writes via the getter's `value` setter
@@ -107,7 +107,7 @@ function ref(state): MutableGet {
 `variable`
 
 Hovering an accessor variable read or write will reveal it to be a `get` variable.
-```ts
+```nsx
 get count = ref(0)
 
 count // hover [ get count: number ]
@@ -120,7 +120,7 @@ count // hover [ get count: number ]
 `{ get property: getter }`
 
 In addition to native accessor property declarations, accessor properties may also be declared through colon notation.
-```ts
+```nsx
 const foo = {
   total: 0,
   get bar: ref(true)
@@ -134,7 +134,7 @@ const foo = {
 `class Obj { get property = getter }`
 
 Accessor properties may also be defined through property definition in class declarations.
-```ts
+```nsx
 class Foo {
   total = 0
   get bar = ref(true)
@@ -149,7 +149,7 @@ class Foo {
 `variable@`  |  `obj.property@`
 
 The getter of an accessor variable or accessor property may be accessed using the `@` postfix operator. Getter access is useful for live reference passing.
-```tsx
+```nsx
 export function MultiplierKit(count@: Get<number>) {
   return {
     doubled: () => count * 2,
@@ -158,7 +158,7 @@ export function MultiplierKit(count@: Get<number>) {
   }
 }
 ```
-```ts
+```nsx
 import { ion } from '@rue/luent'
 import { MultiplierKit } from './MultiplierKit.ns'
 
@@ -200,21 +200,23 @@ function Multiplier() {
 
 When used on a data variable/property read, the `@` operator normalizes the read to a getter. If the value is a getter, it returns the getter. Otherwise, it wraps the read in a getter.
 wrap the read in a getter. 
-```ts
+```nsx
 function foo(bar: { count: number | Ion<number> } {
   get count = bar.count@
   /* ... */
 }
 ```
+::: info transpiled
 ```ts
 function foo(bar: { count: number | Ion<number> } {
   const count = toGetter(bar, 'count')
   /* ... */
 }
 ```
+:::
 
 This applies to destructuring as well. See [`@`-postfix declarations](#postfix-declarations-in-destructuring) for more on destructuring.
-```ts
+```nsx
 function foo(bar: { count: number | Ion<number> } {
   const { count@ } = bar;
   /* ... */
@@ -231,7 +233,7 @@ function foo(bar: { count: number | Ion<number> } {
 `variable@`
 
 Accessor variables may be selectively declared during parameter declarations through the `@` postfix operator.
-```tsx
+```nsx
 let count = 4
 foo(() => count, true)
 
@@ -249,7 +251,7 @@ interface Get<T> {
 ```
 
 The default value of accessor parameter declaration must be a getter.
-```tsx
+```nsx
 function foo(bar@ = () => 0) {
   /* ... */
 }
@@ -263,7 +265,7 @@ function foo(bar = assertGetter(() => 0)) {
 :::
 
 Unlike accessor variables declared with the `get` keyword, accessor parameters may be `undefined` and may be reassigned.
-```tsx
+```nsx
 function foo(bar@: Get<number> | undefined) {
   if (bar@) {
     console.log(bar) // value access: 4
@@ -285,14 +287,14 @@ const { bar, count@ } = foo;
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ### `get` declarations in destructuring
-```ts
+```nsx
 const { bar, count@ } = foo;
 ```
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Aliasing in destructuring
-```ts
+```nsx
 const { bar, count@: count } = foo;
 const { bar, count@: num@ } = foo;
 get { bar, count: num } = foo;
@@ -307,7 +309,7 @@ get { bar, count: num } = foo;
 `(expression)@`  |  `{ statements; return statement }@`
 
 Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for in-template derivations. They may be written as expressions with an implicit return...
-```tsx
+```nsx
 <p>{count@} x 2 = {(count * 2)@}</p>
 ```
 ::: info transpiled
@@ -317,7 +319,7 @@ Derivation expressions are shorthand for arrow function expressions that have ze
 :::
 
 ...or as block-bodied expressions.
-```tsx
+```nsx
 <p>result: {{
   const num = getNum()
   if (num > 100) 
@@ -351,7 +353,7 @@ If an accessor variable read happens only under certain conditions within a deri
 `{ statements; return expression }@()`  |  `(expression)@()`
 
 Derivation expressions may be immediately invoked. This is useful for encapsulating variables within the scope of the derivation.
-```ts
+```nsx
 const foo = {
    let foo = 0;
    // some complex calculations
@@ -375,7 +377,7 @@ const foo = (() => {
 `(await expression)@`  |  `{ await expression; return expression }@`
 
 Expressions surrounded by non-grouping parentheses containing `await` are transpiled to async arrow functions.
-```tsx
+```nsx
 <p>
    Selection: {city@}, {(await cities@.pending, state)@}
 </p>
@@ -396,7 +398,7 @@ Expressions surrounded by non-grouping parentheses containing `await` are transp
 
 Type-narrowing and -widening apply to accessor variables in the same way they apply to normal variables and accessor properties. There is no need to manually add the non-null assertion operator or store the state in a variable the way you would with getter functions.
 
-```ts
+```ns
 get user = ref(getUser())
 
 function logName() {

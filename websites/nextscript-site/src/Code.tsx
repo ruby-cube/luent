@@ -1,91 +1,18 @@
 import { As, Await, Case, component, css, Else, ElseIf, FromTag, If, Match, MaybeIon, Style } from "@rue/luent";
 import { ion, watch } from "@rue/quarky";
 import { createHighlighter } from 'shiki'
-import nsxGetInjectionGrammar from '../../../plugins/vscode-nextscript/grammar/nsx-get.injection.tmLanguage.json'
-// Dim Fire themes by ahme.dev (MIT): https://github.com/ahme-dev/dimfire
-import dimFireDay from './themes/dim-fire-day.json'
-import dimFireDusk from './themes/dim-fire-dusk.json'
-
-const tokenColors = [{
-  scope: [
-    "punctuation.section.embedded.begin.tsx",
-    "punctuation.section.embedded.end.tsx",
-    "punctuation.section.embedded.begin.jsx",
-    "punctuation.section.embedded.end.jsx",
-  ],
-  settings: {
-    foreground: "#A6ACCDC0"
-  }
-},
-{
-  scope: [
-    "meta.embedded.expression meta.brace.round",
-    "meta.arrow punctuation.definition.parameters"
-  ],
-  settings: {
-    foreground: "#A6ACCDC0"
-  }
-},
-{
-  scope: [
-    "keyword.operator.at",
-  ],
-  settings: {
-    foreground: "#A6ACCDC0"
-  }
-}
-]
-
-const dimFireDayCustom = {
-  ...dimFireDay,
-  name: 'dim-fire-day-custom',
-  tokenColors: [
-    ...(dimFireDay.tokenColors ?? []),
-    // ...tokenColors
-  ]
-}
-
-const dimFireDuskCustom = {
-  ...dimFireDusk,
-  name: 'dim-fire-dusk-custom',
-  tokenColors: [
-    ...(dimFireDusk.tokenColors ?? []),
-    // ...tokenColors
-  ]
-}
-
-const nsxGetPatterns = (nsxGetInjectionGrammar.patterns ?? []).map(pattern => ({
-  ...pattern
-}))
-
-const nsxGrammar = {
-  name: 'nsx',
-  scopeName: 'source.nsx',
-  aliases: ['ns'],
-  patterns: [
-    { include: 'source.tsx' }
-  ],
-  repository: {},
-  injections: {
-    'L:source.nsx -comment -string': {
-      patterns: nsxGetPatterns
-    }
-  }
-}
+import { shikiLanguages, shikiThemeNames, shikiThemes } from '../.vitepress/theme/shiki-setup'
 
 const highlighterPromise = createHighlighter({
-  themes: [dimFireDayCustom, dimFireDuskCustom],
-  langs: ['tsx', nsxGrammar]
+  themes: [...shikiThemes],
+  langs: [...shikiLanguages]
 })
 
 async function renderCodeToHtml(code: string, lang: 'nsx' | 'tsx') {
   const highlighter = await highlighterPromise
   return highlighter.codeToHtml(code, {
     lang,
-    themes: {
-      light: 'dim-fire-day-custom',
-      dark: 'dim-fire-dusk-custom'
-    },
+    themes: shikiThemeNames,
     defaultColor: false
   })
 }
@@ -195,7 +122,8 @@ export function Code(setup: FromTag<{
 
         .code-container remount-view {
           display: block;
-          background-color: var(--vp-code-block-bg);
+          background-color: var(--vp-code-block-bg); 
+          background-color: white;
         }
 
         .code-container remount-view > div {

@@ -74,7 +74,7 @@
   --vp-c-danger-3: var(--vp-c-red-3);
   --vp-c-danger-soft: var(--vp-c-red-soft);
 
-  --vp-font-family-mono: 'SF Mono'
+  --vp-font-family-mono: 'SFMono-Regular', 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'JetBrains Mono', 'Cascadia Mono', 'IBM Plex Mono', 'Courier New', monospace;
 }
 
 /**

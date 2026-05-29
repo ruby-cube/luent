@@ -33,6 +33,8 @@
     "docs/**/*.ts",
     "docs/**/*.tsx",
     ".vitepress/**/*.ts",
-    ".vitepress/**/*.tsx"
-, "src/Counter.tsx"  ]
+    ".vitepress/**/*.tsx",
+    "src/**/**.tsx",
+    "src/**/**.ts"
+  ]
 }

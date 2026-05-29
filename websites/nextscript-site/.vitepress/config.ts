@@ -1,10 +1,12 @@
 import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
 import LuentPlugin from '../../../plugins/vite-plugin-luent/index.js'
+import { markdownShikiConfig } from './theme/shiki-setup.js'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   srcDir: 'docs',
+  markdown: markdownShikiConfig,
   vite: {
     resolve: {
       // Keep Vite defaults so VitePress internal extensionless imports resolve,
