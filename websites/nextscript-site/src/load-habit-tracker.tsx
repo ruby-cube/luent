@@ -59,8 +59,8 @@ import { HabitTracker } from "./HabitTracker"
 
 // const STYLES = '$Styles'
 
-const nsx = 
-`import { ion, If, Thru } from "@rue/luent";
+const nsx =
+  `import { ion, If, Thru } from "@rue/luent";
 
 export function HabitTracker({ habit, goal = 5 }) {
   get count = ion(0)
@@ -70,11 +70,13 @@ export function HabitTracker({ habit, goal = 5 }) {
     <div class='tracker'>
       {habit}
       <ul>
-        {Thru(goal, n =>
+        {Thru(goal, (n) <:>
           <li
-            class={['unit', { 'filled': (n <= count)@ }]}
-            on:click={() => count = n}
-          ></li>
+            on:click={() => count.value = n}
+            auto-bind={xray.li}
+          >
+            <div class={['unit', { 'filled': (n <= count)@ }]}></div>
+          </li>
         )}
       </ul>
       {If(achieved@,
@@ -87,7 +89,7 @@ export function HabitTracker({ habit, goal = 5 }) {
 }`
 
 const tsx =
-`import { ion, component, If, Thru } from "@rue/luent";
+  `import { ion, component, If, Thru } from "@rue/luent";
 
 export function HabitTracker({ habit, goal = 5 }) {
   const count = ion(0)
@@ -100,9 +102,11 @@ export function HabitTracker({ habit, goal = 5 }) {
         <ul>
           {Thru(goal, n =>
             <li
-              class={['unit', { 'filled': () => n <= count() }]}
               on:click={() => count.value = n}
-            ></li>
+              auto-bind={xray.li}
+            >
+              <div class={['unit', { 'filled': () => n <= count() }]}></div>
+            </li>
           )}
         </ul>
         {If(achieved, () =>
@@ -116,7 +120,7 @@ export function HabitTracker({ habit, goal = 5 }) {
 }`
 
 const transpiled =
-`import { ion, component, If, Thru } from "@rue/luent";
+  `import { ion, component, If, Thru } from "@rue/luent";
 
 export function HabitTracker({ habit, goal = 5 }) {
   const count = assertGetter(ion(0))
@@ -129,9 +133,11 @@ export function HabitTracker({ habit, goal = 5 }) {
         <ul>
           {Thru(goal, n => <>
             <li
-              class={['unit', { 'filled': () => n <= count() }]}
-              on:click={() => assertMutable(count).value = n}
-            ></li>
+              on:click={() => count.value = n}
+              auto-bind={xray.li}
+            >
+              <div class={['unit', { 'filled': () => n <= count() }]}></div>
+            </li>
           </>)}
         </ul>
         {If(achieved, () => <>

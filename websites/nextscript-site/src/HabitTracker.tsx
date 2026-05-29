@@ -6,7 +6,6 @@ export function HabitTracker(setup: FromTag<{
   'xray:li'?: Xray<'li'>
 }>) {
   const { xray, habit, goal = 5 } = setup
-  console.log('xray??', xray)
 
   const count = ion(0)
   const achieved = ion(() => count() === goal)
@@ -18,10 +17,11 @@ export function HabitTracker(setup: FromTag<{
         <ul>
           {Thru(goal, n =>
             <li
-              class={['unit', { 'filled': () => n <= count() }]}
               on:click={() => count.value = n}
               auto-bind={xray.li}
-            ></li>
+            >
+              <div class={['unit', { 'filled': () => n <= count() }]}></div>
+            </li>
           )}
         </ul>
         {If(achieved,
@@ -39,14 +39,22 @@ export function HabitTracker(setup: FromTag<{
 
         .tracker ul {
           display: inline-flex;
-          gap: 0.25rem;
           margin: 0 0 0 0.5rem;
           padding: 0;
           list-style-type: none;
           vertical-align: middle;
         }
+
+        .tracker li {
+          margin: 0px;
+          padding: .125rem;
+        }
+
+        .tracker li:hover > div {
+           outline: 2px solid #dddddd33;
+        }
         
-        li {
+        div.unit {
           width: .85rem;
           height: .85rem;
           display: inline-flex;
@@ -56,15 +64,12 @@ export function HabitTracker(setup: FromTag<{
           background-color: transparent;
           box-sizing: border-box;
           text-align: center;
-        }
-        
-        li.unit {
           border: 1px solid currentColor;
           border-radius: 50%;
           transition: background-color 0.15s ease;
         }
         
-        li.filled {
+        div.filled {
           background-color: currentColor;
         }
         

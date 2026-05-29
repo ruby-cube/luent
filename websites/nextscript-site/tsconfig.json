@@ -12,6 +12,7 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@rue/luent",
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "noEmit": true,

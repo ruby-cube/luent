@@ -35,7 +35,6 @@ Core design features:
 - traceable mutations to aid in debugging reactivity
 
 Other notable features:
-- x-ray binding and smart auto-binding for authoring flexible components
 - a reactive finite state machine API via `Finitron`
 - ergonomic asynchronous reactivity
 - ergonomic preservation of state and DOM nodes through a `'remount'` directive or `<remount-view>` tag
@@ -43,8 +42,10 @@ Other notable features:
 Experimental areas:
 - [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
 - [WIP] compile-time mutation tracking
+- x-ray binding and smart auto-binding for authoring flexible components
 - selective nested reactivity
 - encapsulated reactivity
+- ergonomic DOM node access with `useNode()`
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

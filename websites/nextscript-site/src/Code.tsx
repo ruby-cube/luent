@@ -1,6 +1,94 @@
 import { As, Await, Case, component, css, Else, ElseIf, FromTag, If, Match, MaybeIon, Style } from "@rue/luent";
 import { ion, watch } from "@rue/quarky";
-import { codeToHtml } from 'shiki'
+import { createHighlighter } from 'shiki'
+import nsxGetInjectionGrammar from '../../../plugins/vscode-nextscript/grammar/nsx-get.injection.tmLanguage.json'
+// Dim Fire themes by ahme.dev (MIT): https://github.com/ahme-dev/dimfire
+import dimFireDay from './themes/dim-fire-day.json'
+import dimFireDusk from './themes/dim-fire-dusk.json'
+
+const tokenColors = [{
+  scope: [
+    "punctuation.section.embedded.begin.tsx",
+    "punctuation.section.embedded.end.tsx",
+    "punctuation.section.embedded.begin.jsx",
+    "punctuation.section.embedded.end.jsx",
+  ],
+  settings: {
+    foreground: "#A6ACCDC0"
+  }
+},
+{
+  scope: [
+    "meta.embedded.expression meta.brace.round",
+    "meta.arrow punctuation.definition.parameters"
+  ],
+  settings: {
+    foreground: "#A6ACCDC0"
+  }
+},
+{
+  scope: [
+    "keyword.operator.at",
+  ],
+  settings: {
+    foreground: "#A6ACCDC0"
+  }
+}
+]
+
+const dimFireDayCustom = {
+  ...dimFireDay,
+  name: 'dim-fire-day-custom',
+  tokenColors: [
+    ...(dimFireDay.tokenColors ?? []),
+    // ...tokenColors
+  ]
+}
+
+const dimFireDuskCustom = {
+  ...dimFireDusk,
+  name: 'dim-fire-dusk-custom',
+  tokenColors: [
+    ...(dimFireDusk.tokenColors ?? []),
+    // ...tokenColors
+  ]
+}
+
+const nsxGetPatterns = (nsxGetInjectionGrammar.patterns ?? []).map(pattern => ({
+  ...pattern
+}))
+
+const nsxGrammar = {
+  name: 'nsx',
+  scopeName: 'source.nsx',
+  aliases: ['ns'],
+  patterns: [
+    { include: 'source.tsx' }
+  ],
+  repository: {},
+  injections: {
+    'L:source.nsx -comment -string': {
+      patterns: nsxGetPatterns
+    }
+  }
+}
+
+const highlighterPromise = createHighlighter({
+  themes: [dimFireDayCustom, dimFireDuskCustom],
+  langs: ['tsx', nsxGrammar]
+})
+
+async function renderCodeToHtml(code: string, lang: 'nsx' | 'tsx') {
+  const highlighter = await highlighterPromise
+  return highlighter.codeToHtml(code, {
+    lang,
+    themes: {
+      light: 'dim-fire-day-custom',
+      dark: 'dim-fire-dusk-custom'
+    },
+    defaultColor: false
+  })
+}
 
 function toHtml(code: string) {
   return code
@@ -23,13 +111,10 @@ export function Code(setup: FromTag<{
   tsx: string,
   transpiled: string,
 }>) {
-  const { nsx, tsx, transpiled} = setup
+  const { nsx, tsx, transpiled } = setup
   const $tab = ion('nsx' as 'nsx' | 'tsx' | 'output')
   const $nsx = ion(codeHtml(nsx), {
-    '-fetch': () => codeToHtml(nsx, {
-      lang: 'tsx',
-      theme: 'poimandres'
-    })
+    '-fetch': () => renderCodeToHtml(nsx, 'nsx')
   })
 
   return component(
@@ -47,19 +132,13 @@ export function Code(setup: FromTag<{
             })}
             {/* {ElseIf(() => $tab() === 'tsx', () => {
               const $tsx = ion('', {
-                '-fetch': () => codeToHtml(tsx, {
-                  lang: 'tsx',
-                  theme: 'poimandres'
-                })
+                '-fetch': () => renderCodeToHtml(tsx, 'tsx')
               })
               return <div innerHTML={trusted($tsx)}></div>
             })} */}
             {Else(() => {
               const $transpiled = ion('', {
-                '-fetch': () => codeToHtml(transpiled, {
-                  lang: 'tsx',
-                  theme: 'poimandres'
-                })
+                '-fetch': () => renderCodeToHtml(transpiled, 'tsx')
               })
               return <div innerHTML={trusted($transpiled)}></div>
             })}
@@ -67,6 +146,7 @@ export function Code(setup: FromTag<{
           )}
         </remount-view>
       </div>
+
       {Style(css`
         .code-container {
           margin: 16px 0;
@@ -137,13 +217,13 @@ export function Code(setup: FromTag<{
           line-height: 1.7;
         }
         
-        .dark .code-container .shiki span {
-          color: var(--shiki-dark, inherit);
-        }
+        // .dark .code-container .shiki span {
+        //   color: var(--shiki-dark, inherit);
+        // }
         
-        html:not(.dark) .code-container .shiki span {
-          color: var(--shiki-light, inherit);
-        }
+        // html:not(.dark) .code-container .shiki span {
+        //   color: var(--shiki-light, inherit);
+        // }
 
         @media (max-width: 639px) {
           .code-container {

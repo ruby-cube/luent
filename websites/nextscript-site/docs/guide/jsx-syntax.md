@@ -7,14 +7,14 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 # JSX Syntax
 
 ## JSX gateway return
-`{ statements; <//> JSX }` | `{Fn(...args, <//> JSX)}`
+`{ statements; <:> JSX }` | `{Fn(...args, <:> JSX)}`
 
-The JSX gateway return syntax, `<//>`, signifies a switch from JavaScript to JSX, which extends to the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
+The JSX gateway return syntax, `<:>`, signifies a switch from JavaScript to JSX, which extends to the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
 
 ```tsx
 function Something() {
    const foo = getSomething();
-   <//>
+   <:>
    <p>{foo}</p>
    <p>{foo}</p>
 }
@@ -35,10 +35,10 @@ function Something() {
 function Something() {
    const foo = getSomething();
    if (foo) {
-      <//>
+      <:>
       <p>{foo}</p>
    }
-   <//>
+   <:>
    <p>Nothing :(</p>
 }
 ```
@@ -57,13 +57,13 @@ function Something() {
 
 
 ## JSX gateway returns
-`() => { statements; <//> <tag/> }` • JSX fragment return statements
+`() => { statements; <:> <tag/> }` • JSX fragment return statements
 
 ```tsx
 <article>
   {For(sections, section => {
     const highlight = HighlighterKit(section)
-    <//>
+    <:>
     <section>
       <h2 class={highlight}>{section.title}</h2>
       <p>{section.body}</p>
@@ -148,13 +148,13 @@ The final argument is normalized to a JSX fragment factory at compile time.
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ## JSX gateway function expression
-`(parameters) <//> JSX` | `<//> JSX` 
+`(parameters) <:> JSX` | `<:> JSX` 
 
 A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a JSX flow expression. Parameter parentheses may only be omitted if there are no parameters. 
 
 ```tsx
 <div>
-   {If(active, <//>
+   {If(active, <:>
       Hello world
    )}
 </div>
@@ -171,7 +171,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 
 ```tsx
 <div>
-   {If(active, <//>
+   {If(active, <:>
       {If(open,
          <p>Hello world</p>
       )}
@@ -193,7 +193,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 :::
 ```tsx
 <div>
-   {If(active, (o) <//>
+   {If(active, (o) <:>
       Hello world
    )}
 </div>
@@ -211,7 +211,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 :::
 ```tsx
 <div>
-   {If(active, (o) <//>
+   {If(active, (o) <:>
       {If(open,
          <p>Hello world</p>
       )}
@@ -234,7 +234,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 
 ```tsx
 <div>
-   {If(active, (o, p) <//>
+   {If(active, (o, p) <:>
       Hello world
    )}
 </div>
@@ -253,7 +253,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 
 ```tsx
 // X invalid: not the final argument of a JSX flow expression
-const renderSomething = x <//>
+const renderSomething = x <:>
    {If(open,
       <p>Hello world</p>
    )}

@@ -1,0 +1,58 @@
+{
+  "scopeName": "nsx.get.injection",
+  "injectionSelector": "L:source.nsx -comment -string, L:source.ns -comment -string",
+  "patterns": [
+    {
+      "name": "keyword.control.flow",
+      "match": "<:component(?=\\s|>)"
+    },
+    {
+      "name": "keyword.control.flow",
+      "match": "<\\/:component>"
+    },
+    {
+      "match": "^(\\s*)(<:>)",
+      "captures": {
+        "2": {
+          "name": "keyword.control.flow"
+        }
+      }
+    },
+    {
+      "name": "storage.type.function.arrow",
+      "match": "<:>"
+    },
+    {
+      "name": "keyword.operator.at",
+      "match": "(?<=[A-Za-z_$][\\w$]*)@"
+    },
+    {
+      "name": "keyword.operator.at",
+      "match": "(?<=\\))@(?=\\s*(?:\\(\\s*\\))?)"
+    },
+    {
+      "name": "keyword.operator.at",
+      "match": "(?<=\\})@(?=\\s*(?:\\(\\s*\\))?)"
+    },
+    {
+      "name": "keyword.operator.at",
+      "match": "(?<=\\])@(?=\\s*(?:\\(\\s*\\))?)"
+    },
+    {
+      "name": "keyword.operator.at",
+      "match": "(?<=[?!])@(?=\\s*(?:\\(\\s*\\))?)"
+    },
+    {
+      "name": "storage.type",
+      "match": "\\bget(?=\\s+[A-Za-z_$][\\w$]*\\s*=)"
+    },
+    {
+      "name": "storage.type",
+      "match": "\\bget(?=\\s+[A-Za-z_$][\\w$]*\\s*:)"
+    },
+    {
+      "name": "storage.type",
+      "match": "\\bget(?=\\s+[A-Za-z_$][\\w$]*\\s*\\()"
+    }
+  ]
+}

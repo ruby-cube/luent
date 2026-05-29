@@ -115,12 +115,12 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 
 
 ### JSX gateway function expressions
-`(parameters) <//> JSX` | `<//> JSX` • shorthands for arrow functions that return a JSX fragment
+`(parameters) <:> JSX` | `<:> JSX` • shorthands for arrow functions that return a JSX fragment
 ```tsx
 <div>
-  {If(folder, <//>
+  {If(folder, <:>
     <h2>{title}</h2>
-    {If(open, <//>
+    {If(open, <:>
       <ul>
         {For(folder.items, item => 
           <li>{item}</li>
