@@ -11,9 +11,9 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 
 The JSX gateway return syntax, `<:>`, signifies a switch from JavaScript to JSX, which extends to the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
 
-```tsx
-function Something() {
-   const foo = getSomething();
+```nsx
+function Foo() {
+   const foo = getFoo();
    <:>
    <p>{foo}</p>
    <p>{foo}</p>
@@ -21,8 +21,8 @@ function Something() {
 ```
 ::: info transpiled
 ```tsx
-function Something() {
-   const foo = getSomething();
+function Foo() {
+   const foo = getFoo();
    return <>
       <p>{foo}</p>
       <p>{foo}</p>
@@ -31,25 +31,25 @@ function Something() {
 ```
 :::
 
-```tsx
-function Something() {
-   const foo = getSomething();
+```nsx
+function Foo() {
+   const foo = getFoo();
    if (foo) {
       <:>
       <p>{foo}</p>
    }
    <:>
-   <p>Nothing :(</p>
+   <p>Nothing</p>
 }
 ```
 ::: info transpiled
 ```tsx
-function Something() {
-   const foo = getSomething();
+function Foo() {
+   const foo = getFoo();
    if (foo) {
       return <><p>{foo}</p></>
    }
-   return <><p>Nothing :(</p></>
+   return <><p>Nothing</p></>
 }
 ```
 :::
@@ -59,7 +59,7 @@ function Something() {
 ## JSX gateway returns
 `() => { statements; <:> <tag/> }` • JSX fragment return statements
 
-```tsx
+```nsx
 <article>
   {For(sections, section => {
     const highlight = HighlighterKit(section)
@@ -104,7 +104,7 @@ A JSX flow expression is a JSX call expression where the callee is a pascale-cas
 The final argument is normalized to a JSX fragment factory at compile time.
 
 **with a single root:**
-```tsx
+```nsx
 <div>
    {If(active, 
       <p>{foo}</p>
@@ -122,7 +122,7 @@ The final argument is normalized to a JSX fragment factory at compile time.
 :::
 
 **with multiple roots:**
-```tsx
+```nsx
 <div>
    {If(active, 
       <p>{foo}</p>
@@ -152,7 +152,7 @@ The final argument is normalized to a JSX fragment factory at compile time.
 
 A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a JSX flow expression. Parameter parentheses may only be omitted if there are no parameters. 
 
-```tsx
+```nsx
 <div>
    {If(active, <:>
       Hello world
@@ -169,7 +169,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 ```
 :::
 
-```tsx
+```nsx
 <div>
    {If(active, <:>
       {If(open,
@@ -191,7 +191,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 </div>
 ```
 :::
-```tsx
+```nsx
 <div>
    {If(active, (o) <:>
       Hello world
@@ -209,7 +209,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 </div>
 ```
 :::
-```tsx
+```nsx
 <div>
    {If(active, (o) <:>
       {If(open,
@@ -232,7 +232,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 ```
 :::
 
-```tsx
+```nsx
 <div>
    {If(active, (o, p) <:>
       Hello world
@@ -251,9 +251,9 @@ A JSX gateway function expression is shorthand for an arrow function that return
 ```
 :::
 
-```tsx
+```nsx
 // X invalid: not the final argument of a JSX flow expression
-const renderSomething = x <:>
+const renderFoo = (x) <:>
    {If(open,
       <p>Hello world</p>
    )}
@@ -290,7 +290,7 @@ interface ComponentKit<T> {
    nodes: NSXNode[];
 }
 ```
-```ts
+```nsx
 get dialog = NodeRef(Dialog)
 
 <button on:click={() => dialog?.open()}>submit</button>
@@ -298,7 +298,7 @@ get dialog = NodeRef(Dialog)
    <DialogContent close={() => dialog?.close()}/>
 </Dialog>
 ```
-```ts
+```nsx
 function Dialog({ Slot }) {
    get opened = ion(false)
    const open = () => { opened = true }
