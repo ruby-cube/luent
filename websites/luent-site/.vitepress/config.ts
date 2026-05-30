@@ -12,7 +12,11 @@ export default defineConfig({
   title: "Luent",
   description: "Luent documentation and resources",
   themeConfig: {
-    logo: '/assets/luent-logo-512px.png',
+    siteTitle: false,
+    logo: {
+      dark: '/assets/luent-logo-dark.png',
+      light: '/assets/luent-logo-light.png'
+    },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Learn', link: '/' },

@@ -42,6 +42,8 @@ console.log(count) // 20 ⁉️
 ```
 :::
 
+<small>**Demo:** [Habit tracker](/demos/habit-tracker.md)</small>
+
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 

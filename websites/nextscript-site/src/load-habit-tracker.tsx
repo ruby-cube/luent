@@ -67,13 +67,12 @@ export function HabitTracker({ habit, goal = 5 }) {
   get achieved = ion(() => count === goal)
 
   <:component>
-    <Modal />
     <div class='tracker'>
       {habit}
       <ul>
         {Thru(goal, (n) <:>
           <li
-            on:click={() => count.value = n}
+            on:click={() => count = n}
             auto-bind={xray.li}
           >
             <div class={['unit', { 'filled': (n <= count)@ }]}></div>

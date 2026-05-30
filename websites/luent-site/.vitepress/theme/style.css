@@ -133,3 +133,15 @@
   --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
 }
 
+/* Slightly larger than VitePress default without being oversized. */
+.VPNavBarTitle .logo {
+  height: 30px;
+  width: auto;
+}
+
+@media (max-width: 768px) {
+  .VPNavBarTitle .logo {
+    height: 27px;
+  }
+}
+

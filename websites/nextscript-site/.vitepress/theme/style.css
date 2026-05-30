@@ -142,3 +142,134 @@
   --iris-3: #4e3fe0;
   --iris-soft: rgba(100, 108, 255, 0.16);
 }
+
+/* Slightly larger than VitePress default without being oversized. */
+.VPNavBarTitle .logo {
+  height: 30px;
+  width: auto;
+}
+
+.VPNavBarTitle .title {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .VPNavBarTitle .logo {
+    height: 27px;
+  }
+}
+
+/* Home hero: render a code panel in the right column. */
+.VPHomeHero .image {
+  display: flex;
+  align-items: flex-end;
+}
+
+.VPHomeHero .image-bg {
+  display: none;
+}
+
+.VPHomeHero .image-container {
+  position: relative;
+  width: min(560px, 100%);
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  top: 40px;
+  top: 2.5rem;
+}
+
+#hero-code-panel-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.ns-hero-code {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: none;
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 24%, transparent);
+  border-radius: 16px 16px 0 0;
+  background: var(--vp-code-block-bg);
+  /* box-shadow: 0 24px 52px rgba(4, 6, 12, 0.35); */
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none;     /* IE 10 and IE 11 */
+  user-select: none;         /* Standard syntax */
+}
+
+.ns-hero-code__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.ns-hero-code__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 24%, transparent);
+}
+
+.ns-hero-code__title {
+  margin-left: 6px;
+  color: var(--vp-code-tab-text-color);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+
+.ns-hero-code__body {
+  margin: 0;
+  padding: 1rem 2rem 2rem;
+  color: var(--vp-code-block-color);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  white-space: pre;
+}
+
+.ns-hero-code .kw {
+  color: #8db4ff;
+  font-weight: 600;
+}
+
+.ns-hero-code .fn {
+  color: #90e7c6;
+}
+
+@media (max-width: 959px) {
+  .VPHomeHero .main {
+    order: 1;
+  }
+
+  .VPHomeHero .image {
+    order: 2;
+    margin: 16px 0 8px;
+  }
+
+  .VPHomeHero .image-container {
+    width: min(100%, 560px);
+    height: auto;
+  }
+
+  #hero-code-panel-root {
+    height: auto;
+  }
+
+  .ns-hero-code {
+    text-align: left;
+    position: relative;
+    inset-inline: auto;
+    bottom: auto;
+    transform: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+    border-radius: 16px;
+  }
+}

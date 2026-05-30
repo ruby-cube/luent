@@ -4,8 +4,8 @@ layout: home
 
 hero:
   name: "NextScript"
-  text: "A TypeScript + JSX Language Extension"
-  tagline: Familiar syntax, reimagined for the modern web
+  text: "Familiar syntax, reimagined for the modern web"
+  tagline: A TypeScript + JSX Language Extension
   actions:
     - theme: brand
       text: Features
@@ -18,9 +18,9 @@ features:
   - title: Ergonomic
     details: Reduces boilerplate code while remaining clear and expressive.
   - title: Readable
-    details: Declutters UI templates and reactive code through principled syntactic sugar.
+    details: Declutters UI templates and getter-based code through principled syntactic sugar.
   - title: Type-safe
-    details: Cleanly addresses type-safety gaps of modern web development.
+    details: Cleanly addresses type-safety gaps of getter-based reactivity and JSX templates.
 
 
 ---

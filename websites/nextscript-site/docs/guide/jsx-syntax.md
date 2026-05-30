@@ -91,7 +91,7 @@ function Foo() {
 ```
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX flow expression
+## JSX flow expressions
 `{Fn(...args, <tag>)}`
 
 A JSX flow expression is a JSX call expression where the callee is a pascale-cased function and the final argument is a JSX entity or factory:
@@ -147,7 +147,7 @@ The final argument is normalized to a JSX fragment factory at compile time.
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX gateway function expression
+## JSX gateway function expressions
 `(parameters) <:> JSX` | `<:> JSX` 
 
 A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a JSX flow expression. Parameter parentheses may only be omitted if there are no parameters. 
@@ -265,14 +265,36 @@ const renderFoo = (x) <:>
 ## JSX keyword element
 `<*keyword><*keyword>`
 
-A JSX keyword element is a reserved symbol-prefixed language element registered by the transpiler. Components and native elements may not serve as keyword elements. Any unknown, unregistered keyword elements result in compile-time errors. Currently, there is only one keyword element (the component element) and only one reserved symbol-prefix (the colon prefix for auto-returns).
+A JSX keyword element is a reserved symbol-prefixed language element registered by the transpiler. Components and native elements may not serve as keyword elements. Any unknown, unregistered keyword elements result in compile-time errors. Currently, there is only one keyword element (the component element).
+
+```nsx
+function Foo({ bar }) {
+  get count = ion(0)
+
+  <:component>
+    <p>{bar}</p>
+    <button on:click={() => count++ }>{count@}</button>
+  </:component>
+}
+```
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ## JSX return element
 `<:keyword></:keyword>`
 
-A JSX return element is a colon-prefixed keyword element that returns its keyword element. All following sibling statements are unreachable.
+A JSX return element is a colon-prefixed [keyword element](#jsx-keyword-element) that returns its keyword element. All following sibling statements are unreachable. Currently, there is only one return element: the [component element](#jsx-component-element)
+
+```nsx
+function Foo({ bar }) {
+  get count = ion(0)
+
+  <:component>
+    <p>{bar}</p>
+    <button on:click={() => count++ }>{count@}</button>
+  </:component>
+}
+```
 
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
@@ -280,7 +302,7 @@ A JSX return element is a colon-prefixed keyword element that returns its keywor
 ## JSX component element
 `<:component as={component}></:component>`
 
-The JSX component element is an auto-returned JSX keyword element that allows refs of component instances to be typed. The default implementation of JSXComponent simply returns a ComponentKit, a plain object containing the component instance and nodes.
+The JSX component element is an [auto-returned](#jsx-return-element) [JSX keyword element](#jsx-keyword-element) that enables refs of component instances to be typed. The default implementation of JSXComponent simply returns a ComponentKit, a plain object containing the component instance and nodes.
 
 ```ts
 type JSXComponent = <T>(setup: { as?: T, Slot: NSXNode | NSXNode[] }) => ComponentKit<T>
