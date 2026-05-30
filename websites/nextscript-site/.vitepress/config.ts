@@ -37,6 +37,9 @@ export default defineConfig({
   description: 'NextScript documentation and resources',
   themeConfig: {
     logo: '/assets/nextscript-logo-512px.png',
+    search: {
+      provider: 'local'
+    },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Features', link: '/guide/getter-syntax' },

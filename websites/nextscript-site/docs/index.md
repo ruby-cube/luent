@@ -18,7 +18,7 @@ features:
   - title: Ergonomic
     details: Reduces boilerplate code while remaining clear and expressive.
   - title: Readable
-    details: Declutters UI templates and getter-based code through principled syntactic sugar.
+    details: Declutters nested templates and getter-based code through principled syntactic sugar.
   - title: Type-safe
     details: Cleanly addresses type-safety gaps of getter-based reactivity and JSX templates.
 

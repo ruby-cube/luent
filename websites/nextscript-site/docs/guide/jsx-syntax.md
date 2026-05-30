@@ -6,100 +6,15 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 
 # JSX Syntax
 
-## JSX gateway return
-`{ statements; <:> JSX }` | `{Fn(...args, <:> JSX)}`
-
-The JSX gateway return syntax, `<:>`, signifies a switch from JavaScript to JSX, which extends to the end of the containing JavaScript block or expression position. It returns the JSX as a fragment. A JSX gateway is only valid in a statement position or as the arrow of a JSX gateway function expression.
-
-```nsx
-function Foo() {
-   const foo = getFoo();
-   <:>
-   <p>{foo}</p>
-   <p>{foo}</p>
-}
-```
-::: info transpiled
-```tsx
-function Foo() {
-   const foo = getFoo();
-   return <>
-      <p>{foo}</p>
-      <p>{foo}</p>
-   </>;
-}
-```
-:::
-
-```nsx
-function Foo() {
-   const foo = getFoo();
-   if (foo) {
-      <:>
-      <p>{foo}</p>
-   }
-   <:>
-   <p>Nothing</p>
-}
-```
-::: info transpiled
-```tsx
-function Foo() {
-   const foo = getFoo();
-   if (foo) {
-      return <><p>{foo}</p></>
-   }
-   return <><p>Nothing</p></>
-}
-```
-:::
-
-
-
-## JSX gateway returns
-`() => { statements; <:> <tag/> }` • JSX fragment return statements
-
-```nsx
-<article>
-  {For(sections, section => {
-    const highlight = HighlighterKit(section)
-    <:>
-    <section>
-      <h2 class={highlight}>{section.title}</h2>
-      <p>{section.body}</p>
-    </section>
-    <hr/>
-  })}
-</article>
-```
-```tsx
-// native equivalent
-<article>
-  {For(sections, section => {
-    const highlight = HighlighterKit(section)
-    return (
-      <>
-        <section>
-          <h2 class={highlight}>{section.title}</h2>
-          <p>{section.body}</p>
-        </section>
-        <hr/>
-      </>
-    )
-  })}
-</article>
-```
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
-
 ## JSX flow expressions
-`{Fn(...args, <tag>)}`
+`{Fn(...args, JSX)}`
 
-A JSX flow expression is a JSX call expression where the callee is a pascale-cased function and the final argument is a JSX entity or factory:
+A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a pascale-cased function and the final argument is a JSX entity or factory:
 - JSX fragment
 - JSX element
 - JSX children
-- JSX gateway function expression
-- JSX factory
+- [JSX gateway function](#jsx-gateway-function)
+- [JSX factory](/guide/terminology#jsx-factory)
 
 The final argument is normalized to a JSX fragment factory at compile time.
 
@@ -147,11 +62,50 @@ The final argument is normalized to a JSX fragment factory at compile time.
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX gateway function expressions
-`(parameters) <:> JSX` | `<:> JSX` 
 
-A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a JSX flow expression. Parameter parentheses may only be omitted if there are no parameters. 
+## JSX gateway return
+`{ statements; <:> JSX }`
 
+A JSX gateway return statement is shorthand for a return statement that returns a JSX fragment.
+
+```nsx
+<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    <:>
+    <section>
+      <h2 class={highlight}>{section.title}</h2>
+      <p>{section.body}</p>
+    </section>
+    <hr/>
+  })}
+</article>
+```
+```tsx
+// native equivalent
+<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    return (
+      <>
+        <section>
+          <h2 class={highlight}>{section.title}</h2>
+          <p>{section.body}</p>
+        </section>
+        <hr/>
+      </>
+    )
+  })}
+</article>
+```
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+## JSX gateway function
+`(...parameters) <:> JSX` 
+
+A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a [JSX flow expression](#jsx-flow-expressions). Parameter parentheses may only be omitted if there are no parameters. 
+
+**with JSX text:**
 ```nsx
 <div>
    {If(active, <:>
@@ -169,6 +123,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
 ```
 :::
 
+**with JSX expression:**
 ```nsx
 <div>
    {If(active, <:>
@@ -191,66 +146,32 @@ A JSX gateway function expression is shorthand for an arrow function that return
 </div>
 ```
 :::
+**with parameters:**
 ```nsx
-<div>
-   {If(active, (o) <:>
-      Hello world
-   )}
-</div>
-```
-::: info transpiled
-```tsx
-<div>
-   {If(active, (o) =>
-      <>
-         Hello world
-      </>
-   )}
-</div>
-```
-:::
-```nsx
-<div>
-   {If(active, (o) <:>
-      {If(open,
-         <p>Hello world</p>
+<ul>
+   {For(list, (item, index) <:>
+      {If(item.active,
+         <li>{index + 1}: {item.title}</li>
       )}
    )}
-</div>
+</ul>
 ```
 ::: info transpiled
 ```tsx
-<div>
-   {If(active, (o) =>
+<ul>
+   {For(list, (item, index) =>
       <>
-         {If(open,
-            <p>Hello world</p>
-         )}
+        {If(item.active, () => 
+          <>
+            <li>{index + 1}: {item}</li>
+          </>
+        )}
       </>
    )}
-</div>
+</ul>
 ```
 :::
-
-```nsx
-<div>
-   {If(active, (o, p) <:>
-      Hello world
-   )}
-</div>
-```
-::: info transpiled
-```tsx
-<div>
-   {If(active, (o, p) =>
-      <>
-         Hello world
-      </>
-   )}
-</div>
-```
-:::
-
+**invalid usage:**
 ```nsx
 // X invalid: not the final argument of a JSX flow expression
 const renderFoo = (x) <:>
@@ -262,63 +183,23 @@ const renderFoo = (x) <:>
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX keyword element
-`<*keyword><*keyword>`
-
-A JSX keyword element is a reserved symbol-prefixed language element registered by the transpiler. Components and native elements may not serve as keyword elements. Any unknown, unregistered keyword elements result in compile-time errors. Currently, there is only one keyword element (the component element).
-
-```nsx
-function Foo({ bar }) {
-  get count = ion(0)
-
-  <:component>
-    <p>{bar}</p>
-    <button on:click={() => count++ }>{count@}</button>
-  </:component>
-}
-```
-
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
-
-## JSX return element
-`<:keyword></:keyword>`
-
-A JSX return element is a colon-prefixed [keyword element](#jsx-keyword-element) that returns its keyword element. All following sibling statements are unreachable. Currently, there is only one return element: the [component element](#jsx-component-element)
-
-```nsx
-function Foo({ bar }) {
-  get count = ion(0)
-
-  <:component>
-    <p>{bar}</p>
-    <button on:click={() => count++ }>{count@}</button>
-  </:component>
-}
-```
-
-
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
-
 ## JSX component element
 `<:component as={component}></:component>`
 
-The JSX component element is an [auto-returned](#jsx-return-element) [JSX keyword element](#jsx-keyword-element) that enables refs of component instances to be typed. The default implementation of JSXComponent simply returns a ComponentKit, a plain object containing the component instance and nodes.
+The JSX component element is an auto-returned keyword element. It enables refs of component instances to be typed through its transpiled form: `JSXComponent()`. The default implementation of `JSXComponent` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
 
-```ts
-type JSXComponent = <T>(setup: { as?: T, Slot: NSXNode | NSXNode[] }) => ComponentKit<T>
-
-interface ComponentKit<T> {
-   component: T
-   nodes: NSXNode[];
-}
-```
 ```nsx
-get dialog = NodeRef(Dialog)
+function Parent() {
+  // ref is typed based on `as` attribute of Dialog's `<:component>`
+  get dialog = NodeRef(Dialog) 
 
-<button on:click={() => dialog?.open()}>submit</button>
-<Dialog ref={dialog}>
-   <DialogContent close={() => dialog?.close()}/>
-</Dialog>
+  <:component>
+    <button on:click={() => dialog?.open()}>submit</button>
+    <Dialog ref={dialog}>
+      <DialogContent close={() => dialog?.close()}/>
+    </Dialog>
+  </:component>
+}
 ```
 ```nsx
 function Dialog({ Slot }) {
@@ -355,3 +236,13 @@ function Dialog({ Slot }) {
 }
 ```
 :::
+
+**interfaces:**
+```ts
+type JSXComponent = <T>(setup: { as?: T, Slot: NSXNode | NSXNode[] }) => ComponentKit<T>
+
+interface ComponentKit<T> {
+   component: T
+   nodes: NSXNode[];
+}
+```

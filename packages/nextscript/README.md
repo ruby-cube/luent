@@ -2,7 +2,7 @@
 <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/packages/nextscript/assets/nextscript-logo-512px-padded.png" alt="nextscript-logo"/>
 </picture>
-<p><a href='https://nextscript.org/getter-syntax'>learn</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/examples'>examples</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#motivation'>motivation</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#design-principles'>principles</a></p>
+<p><a href='https://nextscript.org/getter-syntax'>learn</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demos</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> &nbsp;-&nbsp; <a href='#design-principles'>principles</a></p>
 </div>
 
 # NextScript
