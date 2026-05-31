@@ -19,7 +19,7 @@ import { component, createRoot } from '@rue/luent'
 //   </:component>
 // }`
 const codeSnippet =
-  `function Total({ count@ }) {
+  `function Total({ count@ }: { count: Ion<number> }) {
   get qty = ion(0)
 
   <:component>
