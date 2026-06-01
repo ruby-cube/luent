@@ -13,7 +13,8 @@ The examples below modify transpiled output with descriptive variable names for 
 ## Accessor variables
 
 ### `get` declarations
-`get variable = getter`
+<!-- `get variable = getter` -->
+<code>get <i>variable</i> = <i>getter</i></code>
 
 Accessor variables are declared with the `get` keyword and initialized with a getter—a function that has zero parameters and returns a value. `get` declarations transpile to `const` declarations.
 ```nsx
@@ -48,7 +49,8 @@ console.log(count) // 20 ⁉️
 
 
 ### Accessor variable reads
-`variable`
+<!-- `variable` -->
+<code><i>variable</i></code>
 
 Similar to native accessor properties, an accessor variable will absorb its getter function at declaration such that reading the variable will call the getter rather than access it.
 
@@ -71,7 +73,8 @@ console.log(count() instanceof Function) // false
 
 
 ### Accessor variable writes
-`variable = value`
+<!-- `variable = value` -->
+<code><i>variable</i> = <i>value</i></code>
 
 An accessor variable's value may be reassigned if its getter implements the `MutableGet` interface with a writable `value` property.
 ```nsx
@@ -106,7 +109,8 @@ function ref(state): MutableGet {
 
 
 ### Accessor variable type
-`variable`
+<!-- `variable` -->
+<code><i>variable</i></code>
 
 Hovering an accessor variable read or write will reveal it to be a `get` variable.
 ```nsx
@@ -119,7 +123,8 @@ count // hover [ get count: number ]
 
 ## Accessor properties
 ### …via colon notation
-`{ get property: getter }`
+<!-- `{ get property: getter }` -->
+<code>{ get <i>property</i>: <i>getter</i> }</code>
 
 In addition to native accessor property declarations, accessor properties may also be declared through colon notation.
 ```nsx
@@ -133,7 +138,8 @@ const foo = {
 
 
 ### …via property definition
-`class Obj { get property = getter }`
+<!-- `class Obj { get property = getter }` -->
+<code>class <i>Obj</i> { get <i>property</i> = <i>getter</i> }</code>
 
 Accessor properties may also be defined through property definition in class declarations.
 ```nsx
@@ -148,7 +154,8 @@ class Foo {
 ## Accessor operator
 
 ### ...for getter access
-`variable@`  |  `obj.property@`
+<!-- `variable@` | `obj.property@` -->
+<code><i>variable</i>@</code>  |  <code><i>obj</i>.<i>property</i>@</code>
 
 The getter of an accessor variable or accessor property may be accessed using the `@` postfix operator. Getter access is useful for live reference passing.
 ```nsx
@@ -198,7 +205,8 @@ function Multiplier() {
 
 
 ### ...for getter normalization
-`variable@`  |  `obj.property@`
+<!-- `variable@` | `obj.property@` -->
+<code><i>variable</i>@</code>  |  <code><i>obj</i>.<i>property</i>@</code>
 
 When used on a data variable/property read, the `@` operator normalizes the read to a getter. If the value is a getter, it returns the getter. Otherwise, it wraps the read in a getter.
 wrap the read in a getter. 
@@ -232,7 +240,8 @@ function foo(bar: { count: number | Ion<number> } {
 ## `@`-postfix declarations
 
 ### `@`-postfix parameter declarations
-`variable@`
+<!-- `variable@` -->
+<code><i>variable</i>@</code>
 
 Accessor variables may be selectively declared during parameter declarations through the `@` postfix operator.
 ```nsx
@@ -281,7 +290,8 @@ function foo(bar@: Get<number> | undefined) {
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ### `@`-postfix declarations in destructuring
-`variable@`
+<!-- `variable@` -->
+<code><i>variable</i>@</code>
 
 ```ts
 const { bar, count@ } = foo;
@@ -308,7 +318,8 @@ get { bar, count: num } = foo;
 ## Derivation expressions 
 
 ### Synchronous derivations
-`(expression)@`  |  `{ statements; return statement }@`
+<!-- `(expression)@` | `{ statements; return statement }@` -->
+<code>(<i>expression</i>)@</code>  |  <code>{ <i>statements;</i> return <i>statement</i> }@</code>
 
 Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for in-template derivations. They may be written as expressions with an implicit return...
 ```nsx
@@ -352,7 +363,8 @@ If an accessor variable read happens only under certain conditions within a deri
 
 
 ### Immediately-invoked derivation expressions (IIDEs)
-`{ statements; return expression }@()`  |  `(expression)@()`
+<!-- `{ statements; return expression }@()` | `(expression)@()` -->
+<code>{ <i>statements;</i> return <i>expression</i> }@()</code>  |  <code>(<i>expression</i>)@()</code>
 
 Derivation expressions may be immediately invoked. This is useful for encapsulating variables within the scope of the derivation.
 ```nsx
@@ -376,7 +388,8 @@ const foo = (() => {
 
 
 ### Async derivation expressions
-`(await expression)@`  |  `{ await expression; return expression }@`
+<!-- `(await expression)@` | `{ await expression; return expression }@` -->
+<code>(await <i>expression</i>)@</code>  |  <code>{ await <i>expression</i>; return <i>expression</i> }@</code>
 
 Expressions surrounded by non-grouping parentheses containing `await` are transpiled to async arrow functions.
 ```nsx

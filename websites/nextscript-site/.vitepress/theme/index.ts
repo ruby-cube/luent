@@ -11,6 +11,15 @@ function mountHeroCodePanel(el: Element | null) {
   })
 }
 
+function mountHomeTour() {
+  if (typeof window === 'undefined') return
+  const hasRoot = document.querySelector('#home-tour-root')
+  if (!hasRoot) return
+  import('../../src/load-home-tour').then(({ loadHomeTour }) => {
+    loadHomeTour('#home-tour-root')
+  })
+}
+
 function createHeroImageSlot(): VNode {
   return h('div', {
     id: 'hero-code-panel-root',
@@ -29,6 +38,15 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    // ...
+    if (typeof window === 'undefined') return
+
+    const mount = () => {
+      window.requestAnimationFrame(() => {
+        mountHomeTour()
+      })
+    }
+
+    mount()
+    router.onAfterRouteChange = mount
   }
 } satisfies Theme

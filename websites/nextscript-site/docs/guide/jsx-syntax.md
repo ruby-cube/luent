@@ -7,7 +7,8 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 # JSX Syntax
 
 ## JSX flow expressions
-`{Fn(...args, JSX)}`
+<!-- `{Fn(arguments, jsx)}` -->
+<code>{<i>Fn</i>(<i>arguments</i>, <i>jsx</i>)}</code>
 
 A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a pascale-cased function and the final argument is a JSX entity or factory:
 - JSX fragment
@@ -64,7 +65,8 @@ The final argument is normalized to a JSX fragment factory at compile time.
 
 
 ## JSX gateway return
-`{ statements; <:> JSX }`
+<!-- `{ statements; <:> jsx }` -->
+<code>{ <i>statements;</i> <:> <i>jsx</i> }</code>
 
 A JSX gateway return statement is shorthand for a return statement that returns a JSX fragment.
 
@@ -101,7 +103,9 @@ A JSX gateway return statement is shorthand for a return statement that returns 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ## JSX gateway function
-`(...parameters) <:> JSX` 
+<!-- `(parameters) <:> jsx` | `<:> jsx` -->
+<code>(<i>parameters</i>) <:> <i>jsx</i></code> | 
+<code><:> <i>jsx</i></code>
 
 A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a [JSX flow expression](#jsx-flow-expressions). Parameter parentheses may only be omitted if there are no parameters. 
 
@@ -184,7 +188,9 @@ const renderFoo = (x) <:>
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ## JSX component element
-`<:component as={component}></:component>`
+<!-- `<:component>jsx</:component>` | `<:component as={component}>jsx</:component>` -->
+<code><:component><i>jsx</i></:component></code> |
+<code><:component as={<i>component</i>}><i>jsx</i></:component></code>
 
 The JSX component element is an auto-returned keyword element. It enables refs of component instances to be typed through its transpiled form: `JSXComponent()`. The default implementation of `JSXComponent` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
 

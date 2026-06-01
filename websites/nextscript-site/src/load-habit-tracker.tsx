@@ -160,7 +160,7 @@ export function load() {
           xray:li={x => <x.li style='margin: 0px'></x.li>}
         ></HabitTracker>
       </div>
-      <Code nsx={nsx} tsx={tsx} transpiled={transpiled} />
+      <Code nsx={nsx} transpiled={transpiled} />
       {Style(css`
         .demo-container {
           position: relative;

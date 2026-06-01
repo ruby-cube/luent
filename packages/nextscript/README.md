@@ -23,7 +23,7 @@ Getter functions, popularized in the form of signals by Solid.js, show real prom
 
 On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell.
 
-NextScript proposes to address these caveats through a dash of syntactic sugar.
+NextScript proposes to address these caveats with a dash of syntactic sugar.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -49,7 +49,7 @@ get qty = ion(0, {
 get total = ion(() => count * qty) // hover `count` → [ get count: MutableIon<number> ]
 ```
 ```tsx
-// native equivalent
+// ts equivalent
 
 const count = ion(initial)
 const qty = ion(0, {
@@ -70,7 +70,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 </button>
 ```
 ```tsx
-// native equivalent
+// tsx equivalent
 
 <button on:click={() => count.value++} disabled={() => count() === limit}>
    +
@@ -96,7 +96,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 </div>
 ```
 ```tsx
-// native equivalent
+// tsx equivalent
 
 <div>
   {If(active, () =>
@@ -115,7 +115,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 
 
 ### JSX gateway function expressions
-`(parameters) <:> JSX` | `<:> JSX` • shorthands for arrow functions that return a JSX fragment
+`(parameters) <:> JSX` | `<:> JSX` • shorthand for arrow functions that return a JSX fragment
 ```tsx
 <div>
   {If(folder, <:>
@@ -132,7 +132,7 @@ const total = ion(() => count() * qty()) // hover `count` → [ const count: Mut
 </div>
 ```
 ```tsx
-// native equivalent
+// tsx equivalent
 
 <div>
   {If(folder, () => 

@@ -15,13 +15,49 @@ hero:
       link: https://github.com/ruby-cube/luent/tree/main/packages/nextscript#nextscript
 
 features:
-  - title: Ergonomic Syntax
+  - title: Ergonomic syntax
     details: Reduce boilerplate code while remaining clear and expressive.
-  - title: Language Coherence
-    details: Write new syntax confidently with familiar, predictable semantics.
-  - title: Improved Type safety
+  - title: Language coherence
+    details: Write new yet familiar syntax confidently through predictable semantics.
+  - title: Improved type safety
     details: Cleanly address type-safety gaps of getter functions and JSX templates.
 
 
 ---
 
+<section class="home-glimpses-heading">
+  <h2>Code Glimpses</h2>
+</section>
+
+<div id="home-tour-root"></div>
+
+<style scoped>
+.home-glimpses-heading {
+  width: 100%;
+  max-width: 1120px;
+  margin: clamp(2.4rem, 5vw, 5rem) auto 0;
+  padding: 0 clamp(0rem, 2vw, 0.4rem) clamp(1rem, 2vw, 1.8rem);
+  text-align: center;
+}
+
+.home-glimpses-heading h2 {
+  margin: 0;
+  font-size: clamp(2.1rem, 5vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  color: var(--vp-c-text-1);
+  margin-inline: auto;
+  border-top: 0px;
+}
+
+@media (max-width: 959px) {
+  .home-glimpses-heading {
+    margin-top: 2.2rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .home-glimpses-heading h2 {
+    line-height: 1.04;
+  }
+}
+</style>

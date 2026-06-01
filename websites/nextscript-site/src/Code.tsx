@@ -4,10 +4,10 @@ import { codeHtml, renderCodeToHtml } from "./code-utils";
 
 export function Code(setup: FromTag<{
   nsx: string,
-  tsx: string,
+  // tsx: string,
   transpiled: string,
 }>) {
-  const { nsx, tsx, transpiled } = setup
+  const { nsx, transpiled } = setup
   const $tab = ion('nsx' as 'nsx' | 'tsx' | 'output')
   const $nsx = ion(codeHtml(nsx), {
     '-fetch': () => renderCodeToHtml(nsx, 'nsx')
