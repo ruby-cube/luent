@@ -1,42 +1,48 @@
 import { As, Await, Case, component, css, Else, ElseIf, FromTag, If, Match, MaybeIon, Style } from "@rue/luent";
-import { ion, watch } from "@rue/quarky";
-import { codeHtml, renderCodeToHtml } from "./code-utils";
+import { ion } from "@rue/quarky";
+import { codeHtml, trusted } from "./code-utils";
 
 export function Code(setup: FromTag<{
-  nsx: string,
-  // tsx: string,
-  transpiled: string,
+  main: { name: string, code: string, lang?: string },
+  alt: { name: string, code: string, lang?: string },
+  highlight: (code: string, lang: string) => Promise<string>,
+  trusted: boolean
 }>) {
-  const { nsx, transpiled } = setup
-  const $tab = ion('nsx' as 'nsx' | 'tsx' | 'output')
-  const $nsx = ion(codeHtml(nsx), {
-    '-fetch': () => renderCodeToHtml(nsx, 'nsx')
+  const { main, alt, highlight, trusted } = setup;
+
+  const $tab = ion('main' as 'main' | 'alt', {
+    toggle() {
+      $tab() === 'main'
+        ? $tab.value = 'alt'
+        : $tab.value = 'main'
+    }
   })
+  const $main = ion(codeHtml(main.code), {
+    '-fetch': () => highlight(main.code, main.lang ?? main.name)
+  })
+
+  let mainWidth = 0;
 
   return component(
     <>
       <div class='code-container'>
         <nav>
-          <button class={{ 'selected': () => $tab.value === 'nsx' }} on:click={() => $tab.value = 'nsx'}>nsx</button>
-          <button class={{ 'selected': () => $tab.value === 'output' }} on:click={() => $tab.value = 'output'}>output</button>
-          {/* <button class={{ 'selected': () => $tab.value === 'tsx' }} on:click={() => $tab.value = 'tsx'}>tsx</button> */}
+          <button class='toggle' on:click={() => $tab.toggle()}>
+            <span class='option selected' style={{ 'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined }}>{() => $tab() === 'main' ? main.name : alt.name}</span>
+            <span at:mounted={node => mainWidth = node.offsetWidth} class='option'>{main.name}</span>
+            <span class='option'>{alt.name}</span>
+          </button>
         </nav>
         <remount-view>
           {Await(() => <>
-            {If(() => $tab() === 'nsx', () => {
-              return <div innerHTML={trusted($nsx)}></div>
+            {If(() => $tab() === 'main', () => {
+              return <div innerHTML={{ html: $main, trusted }}></div>
             })}
-            {/* {ElseIf(() => $tab() === 'tsx', () => {
-              const $tsx = ion('', {
-                '-fetch': () => renderCodeToHtml(tsx, 'tsx')
-              })
-              return <div innerHTML={trusted($tsx)}></div>
-            })} */}
             {Else(() => {
-              const $transpiled = ion('', {
-                '-fetch': () => renderCodeToHtml(transpiled, 'tsx')
+              const $alt = ion('', {
+                '-fetch': () => highlight(alt.code, alt.lang ?? alt.name)
               })
-              return <div innerHTML={trusted($transpiled)}></div>
+              return <div innerHTML={{ html: $alt, trusted }}></div>
             })}
           </>
           )}
@@ -63,30 +69,39 @@ export function Code(setup: FromTag<{
           overflow-x: auto;
         }
 
-        .code-container nav button {
+        .code-container .toggle {
+          position: relative;
+          height: 3rem;
+          border: 1px solid var(--vp-c-divider);
+          border-radius: 1.5rem;
+          padding: 4px;
+                z-index: 0;
+          // background-color: var(--vp-input-switch-bg-color);
+        }
+
+        .code-container nav span {
           appearance: none;
+          height: 39px;
           border: 1px solid transparent;
-          border-radius: 10px;
+          border-radius: 19.5px;
           background: transparent;
           color: var(--vp-code-tab-text-color);
           font-size: 14px;
           font-weight: 500;
-          line-height: 1;
           white-space: nowrap;
           padding: 10px 14px;
           cursor: pointer;
-          transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
         }
 
-        .code-container nav button:hover {
-          color: var(--vp-code-tab-hover-text-color);
-          background-color: var(--vp-c-default-soft);
-        }
-
-        .code-container nav button.selected {
-          color: var(--vp-code-tab-active-text-color);
+        .code-container nav span.selected {
+          position: absolute;
+          top: 4px;
+          display: inline-flex;
+          align-items: center;
+          color: transparent;
           background-color: var(--vp-c-neutral-inverse);
-          border-color: var(--vp-c-divider);
+          transition: transform .25s;
+          z-index: -1;
         }
 
         .code-container remount-view {
@@ -143,11 +158,4 @@ export function Code(setup: FromTag<{
       `)}
     </>
   )
-}
-
-export function trusted(html: MaybeIon<string>) {
-  return {
-    trusted: true,
-    html
-  }
 }

@@ -6,6 +6,12 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 
 # Terminology
 
+## JSX Block
+A JSX block refers to a series of one or more JSX entities. There are three types of JSX entities:
+- JSX elements
+- JSX fragments
+- JSX expression containers
+
 
 ## JSX Factory 
 `() => <jsx/>`
@@ -16,6 +22,7 @@ const renderRow = () => <tr><td>Hello</td></tr>
 ```
 
 <p align="right"><a href="#terminology" style="text-decoration: none">[top]</a></p>
+
 
 ## JSX Array Factory 
 `() => [jsx('tag'), 'string']`

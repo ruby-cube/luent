@@ -67,7 +67,7 @@ export const shikiThemeNames = {
 
 export const shikiThemes = [goldenHour, dusky]
 
-export const shikiLanguages = ['tsx', nsxGrammar] as const
+export const shikiLanguages = ['ts', 'tsx', nsxGrammar] as const
 
 export const markdownShikiConfig = {
   theme: {

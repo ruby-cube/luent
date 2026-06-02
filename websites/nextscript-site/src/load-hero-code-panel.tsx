@@ -99,9 +99,9 @@ function HeroCodePanel() {
   return component(
     <div class='ns-hero-code' aria-label='NextScript example code'>
       <div class='ns-hero-code__header'>
-        <span class='ns-hero-code__dot ns-hero-code__dot--red' />
-        <span class='ns-hero-code__dot ns-hero-code__dot--amber' />
-        <span class='ns-hero-code__dot ns-hero-code__dot--green' />
+        <span class='ns-hero-code__dot' />
+        <span class='ns-hero-code__dot' />
+        <span class='ns-hero-code__dot' />
         <span class='ns-hero-code__title'>total.nsx</span>
       </div>
       <pre class='ns-hero-code__body'>

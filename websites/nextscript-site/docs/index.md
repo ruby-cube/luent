@@ -25,17 +25,28 @@ features:
 
 ---
 
-<section class="home-glimpses-heading">
-  <h2>Code Glimpses</h2>
-</section>
+  <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
+    <span class='ns-hero-code__dot'></span>
+    <span class='ns-hero-code__dot'></span>
+    <span class='ns-hero-code__dot'></span>
+  </div>
+  <section class="home-glimpses-heading">
+    <h2>Code Glimpses</h2>
+  </section>
 
-<div id="home-tour-root"></div>
+  <div id="home-tour-root"></div>
 
 <style scoped>
+.code-glimpse-divider .ns-hero-code__dot {
+  border: 1px solid var(--vp-c-brand-1);
+  margin-top: 5rem;
+}
+
 .home-glimpses-heading {
   width: 100%;
   max-width: 1120px;
-  margin: clamp(2.4rem, 5vw, 5rem) auto 0;
+  margin: 2.4rem auto 0;
+  /* margin: clamp(2.4rem, 5vw, 5rem) auto 0; */
   padding: 0 clamp(0rem, 2vw, 0.4rem) clamp(1rem, 2vw, 1.8rem);
   text-align: center;
 }

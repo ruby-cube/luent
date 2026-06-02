@@ -1,12 +1,20 @@
 import { createHighlighter } from 'shiki'
 import { shikiLanguages, shikiThemeNames, shikiThemes } from '../.vitepress/theme/shiki-setup'
+import { MaybeIon } from '@rue/luent'
 
 const highlighterPromise = createHighlighter({
   themes: [...shikiThemes],
   langs: [...shikiLanguages]
 })
 
-export async function renderCodeToHtml(code: string, lang: 'nsx' | 'tsx') {
+export function trusted(html: MaybeIon<string>) {
+  return {
+    trusted: true,
+    html
+  }
+}
+
+export async function renderCodeToHtml(code: string, lang: string) {
   const highlighter = await highlighterPromise
   return highlighter.codeToHtml(code, {
     lang,

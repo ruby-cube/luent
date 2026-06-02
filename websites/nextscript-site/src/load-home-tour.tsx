@@ -1,5 +1,6 @@
 import { component, createRoot, css, Style } from '@rue/luent'
 import { Code } from './Code'
+import { codeHtml, renderCodeToHtml, toHtml } from './code-utils'
 
 const accessorNsx =
   `get count = ion(initial)
@@ -52,6 +53,9 @@ const flowNsx =
   )}
 </section>
 
+
+
+
 `
 
 
@@ -68,9 +72,7 @@ const flowTranspiled =
       <span class='status'>Sold out</span>
     </>
   )}
-</section>
-
-`
+</section>`
 
 
 const gatewayNsx =
@@ -82,10 +84,10 @@ const gatewayNsx =
           <li>{item}</li>
         )}
       </ul>
-      <button on:click={addItem}>+</button>
     )}
   )}
 </div>
+
 
 `
 
@@ -125,19 +127,85 @@ const gatewayTranspiled =
   {If(folder, () =>
     <>
       {If(open, () =>
-        <>
-          <ul>
-            {For(folder!.items, item =>
-              <li>{item}</li>
-            )}
-          </ul>
-          <button on:click={addItem}>+</button>
-        </>
+        <ul>
+          {For(folder!.items, item =>
+            <li>{item}</li>
+          )}
+        </ul>
       )}
     </>
   )}
 </div>
+`
 
+const gatewayReturn = 
+`<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    <:>
+    <section>
+      <h2 class={highlight}>{section.title}</h2>
+      <p>{section.body}</p>
+    </section>
+    <hr/>
+  })}
+</article>
+
+`
+
+const gatewayReturnTranspiled = 
+`<article>
+  {For(sections, section => {
+    const highlight = HighlighterKit(section)
+    return (
+      <>
+        <section>
+          <h2 class={highlight}>{section.title}</h2>
+          <p>{section.body}</p>
+        </section>
+        <hr/>
+      </>
+    )
+  })}
+</article>
+`
+
+const componentNsx =
+  `function Dialog({ Slot }) {
+  get opened = ion(false)
+  const open = () => { opened = true }
+  const close = () => { opened = false }
+
+  <:component as={{ open, close }}>  
+    {If(opened@, 
+      <o--body>
+        <div>{Slot()}</div>
+      </o--body>
+    )}
+  </:component>
+}
+
+
+
+`
+
+const componentTranspiled =
+`function Dialog({ Slot }) {
+  const opened = ion(false)
+  const open = () => { opened = true }
+  const close = () => { opened = false }
+
+  return JSXComponent({
+    Slot: <>
+      {If(opened, 
+        <o--body>
+          <div>{Slot()}</div>
+        </o--body>
+      )}
+    </>,
+    as: { open, close }
+  }) 
+}
 `
 
 function HomeTour() {
@@ -157,7 +225,12 @@ function HomeTour() {
             <a href='' class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
-            <Code nsx={accessorNsx} transpiled={accessorTranspiled} />
+            <Code
+              trusted
+              main={{ name: 'ns', code: accessorNsx }}
+              alt={{ name: 'ts equivalent', code: accessorTranspiled, lang: 'ts' }}
+              highlight={renderCodeToHtml}
+            />
           </div>
         </article>
 
@@ -174,11 +247,16 @@ function HomeTour() {
             <a href='' class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
-            <Code nsx={derivationNsx} transpiled={derivationTranspiled} />
+            <Code
+              trusted
+              main={{ name: 'nsx', code: derivationNsx }}
+              alt={{ name: 'tsx equivalent', code: derivationTranspiled, lang: 'tsx' }}
+              highlight={renderCodeToHtml}
+            />
           </div>
         </article>
 
-         <article class='tour-row code-right'>
+        <article class='tour-row code-right'>
           <div class='tour-copy'>
             <h3>JSX flow expressions</h3>
             <code>{`{Fn(...args, <tag/>)}`}</code>
@@ -188,7 +266,12 @@ function HomeTour() {
             <a href='' class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
-            <Code nsx={flowNsx} transpiled={flowTranspiled} />
+            <Code
+              trusted
+              main={{ name: 'nsx', code: flowNsx }}
+              alt={{ name: 'tsx equivalent', code: flowTranspiled, lang: 'tsx' }}
+              highlight={renderCodeToHtml}
+            />
           </div>
         </article>
 
@@ -202,7 +285,51 @@ function HomeTour() {
             <a href='' class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
-            <Code nsx={gatewayNsx} transpiled={gatewayTranspiled} />
+            <Code
+              trusted
+              main={{ name: 'nsx', code: gatewayNsx }}
+              alt={{ name: 'tsx equivalent', code: gatewayTranspiled, lang: 'tsx' }}
+              highlight={renderCodeToHtml}
+            />
+          </div>
+        </article>
+
+        <article class='tour-row code-right'>
+          <div class='tour-copy'>
+            <h3>JSX gateway return</h3>
+            <code>{'() => {'} <i>statements;</i> {'<:>'} <i>jsx</i> {'}'}</code>
+            <p>
+              —shorthand JSX fragment return statements
+            </p>
+            <a href='' class='medium brand'>Learn more</a>
+          </div>
+          <div class='tour-code'>
+            <Code
+              trusted
+              main={{ name: 'nsx', code: gatewayReturn }}
+              alt={{ name: 'tsx equivalent', code: gatewayReturnTranspiled, lang: 'tsx' }}
+              highlight={renderCodeToHtml}
+            />
+          </div>
+        </article>
+
+        <article class='tour-row code-left'>
+          <div class='tour-copy'>
+            <h3>JSX component</h3>
+            <code>{'<:component'} as={<i>component</i>}{'>'}<i>jsx</i>{'</:component>'}</code><br/>
+            | <code>{'<:component>'}<i>jsx</i>{'</:component>'}</code>
+            <p>
+              —auto-returned component with component instance type information
+            </p>
+            <a href='' class='medium brand'>Learn more</a>
+          </div>
+          <div class='tour-code'>
+            <Code
+              trusted
+              main={{ name: 'nsx', code: componentNsx }}
+              alt={{ name: 'tsx equivalent', code: componentTranspiled, lang: 'tsx' }}
+              highlight={renderCodeToHtml}
+            />
           </div>
         </article>
       </section>

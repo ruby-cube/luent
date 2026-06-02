@@ -1,6 +1,7 @@
 import { createRoot, css, queueTask, Style } from "@rue/luent"
 import { Code } from './Code'
 import { HabitTracker } from "./HabitTracker"
+import { renderCodeToHtml } from "./code-utils"
 
 // const styles =
 //   `     .tracker {
@@ -160,7 +161,12 @@ export function load() {
           xray:li={x => <x.li style='margin: 0px'></x.li>}
         ></HabitTracker>
       </div>
-      <Code nsx={nsx} transpiled={transpiled} />
+      <Code
+        trusted
+        main={{ name: 'nsx', code: nsx }}
+        alt={{ name: 'output', code: transpiled, lang: 'tsx' }}
+        highlight={renderCodeToHtml}
+      />
       {Style(css`
         .demo-container {
           position: relative;

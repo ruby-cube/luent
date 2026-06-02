@@ -11,53 +11,48 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 <code>{<i>FlowFn</i>(<i>jsx</i>)}</code>
 | <code>{<i>FlowFn</i>(<i>...arguments</i>, <i>jsx</i>)}</code>
 
-A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a JSXFlow-branded, Pascal-cased function and the final argument is one of the following JSX-like entities:
-- JSX fragment
-- JSX element
-- JSX element block
-- [JSX gateway function](#jsx-gateway-function)
-- [JSX factory](/guide/terminology#jsx-factory)
-
-The final argument forms an [implicit JSX fragment factory](#implicit-jsx-fragment-factory) if it is a JSX element block—a sequence of one or more root JSX elements.
+A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a [JSX flow-branded](#jsx-flow-branded-functions) function and the final argument is one of the following entities:
+- an element-leading [JSX block](/guide/terminology#jsx-block)
+- a fragment-leading [JSX block](/guide/terminology#jsx-block)
+- [a JSX factory](/guide/terminology#jsx-factory)
+- [a JSX gateway function](#jsx-gateway-function)
 
 ```nsx
 <section>
-  {If(inStock,
+  {If(inStock, // with element-leading JSX block
     <span class='status'>In stock</span>
     <button on:click={addToCart}>Buy</button>
   )}
-  {Else(
+  {Else( // with fragment-leading JSX block
+    <>Folder items</>
     <span class='status'>Sold out</span>
   )}
 </section>
+
+<div>
+  {If(folder, <:> // with JSX gateway function
+    {If(open,
+      <ul>
+        {For(folder.items, item => // with JSX factory
+          <li>{item}</li>
+        )}
+      </ul>
+      <button on:click={addItem}>+</button>
+    )}
+  )}
+</div>
 ```
-::: info transpiled
+
+
+### JSX flow-branded functions
 ```tsx
-<section>
-  {If(inStock, () =>
-    <>
-      <span class='status'>In stock</span>
-      <button on:click={addToCart}>Buy</button>
-    </>
-  )}
-  {Else(() =>
-    <>
-      <span class='status'>Sold out</span>
-    </>
-  )}
-</section>
+type JSXFlowBrand
 ```
-:::
-
-
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Implicit JSX fragment factories
-A JSX block forms an implicit JSX fragment factory if it satisfies the following conditions:
-- it consists of one or more root JSX elements
-- it does not have JSX expression containers or JSX text at the root level
-- it is the last argument of a [JSX flow expression](#jsx-flow-expressions)
+The final argument of a JSX flow expression forms an implicit JSX fragment factory if it is an element- or fragment-leading [JSX block](/guide/terminology#jsx-block).
 
 ```nsx
 <section>
@@ -70,7 +65,7 @@ A JSX block forms an implicit JSX fragment factory if it satisfies the following
   )}
 </section>
 ```
-::: info transpiled
+::: info transpiled tsx
 ```tsx
 <section>
   {If(inStock, () =>
@@ -87,6 +82,7 @@ A JSX block forms an implicit JSX fragment factory if it satisfies the following
 </section>
 ```
 :::
+<br></br>
 
 If the JSX block contains a JSX expression container or JSX text, the compiler will throw an error. You must instead explicitly wrap the JSX block in a JSX fragment factory or use the [JSX gateway function shorthand](#jsx-gateway-function).
 ```nsx
@@ -104,7 +100,7 @@ If the JSX block contains a JSX expression container or JSX text, the compiler w
 </div>
 ```
 
-::: info transpiled
+::: info transpiled tsx
 ```tsx
 <div>
   {If(folder,
@@ -123,6 +119,9 @@ If the JSX block contains a JSX expression container or JSX text, the compiler w
 ```
 :::
 
+### Type guarding
+
+
 ## JSX gateway
 <!-- `JavaScript <:> JSX` -->
 <code>{ <i>JavaScript</i> <:> <i>JSX</i> }</code>
@@ -133,7 +132,7 @@ The JSX gateway syntax marks the transition from JavaScript into JSX. It wraps t
 
 ### JSX gateway return
 <!-- `{ statements; <:> jsx }` -->
-<code>{ <i>statements;</i> <:> <i>jsx</i> }</code>
+<code>() => { <i>statements;</i> <:> <i>jsx</i> }</code>
 
 A JSX gateway return is shorthand for a return statement that returns a JSX fragment.
 
@@ -150,7 +149,7 @@ A JSX gateway return is shorthand for a return statement that returns a JSX frag
   })}
 </article>
 ```
-::: info transpiled
+::: info transpiled tsx
 ```tsx
 <article>
   {For(sections, section => {
@@ -175,25 +174,9 @@ A JSX gateway return is shorthand for a return statement that returns a JSX frag
 <code>(<i>parameters</i>) <:> <i>jsx</i></code> | 
 <code><:> <i>jsx</i></code>
 
-A JSX gateway function is shorthand for an arrow function expression that returns a JSX fragment. It may only appear as the final argument of a [JSX flow expression](#jsx-flow-expressions). Parameter parentheses may be omitted if there are one or no parameters.
-
-**with JSX text:**
-```nsx
-<div>
-   {If(active, <:>
-      Hello world
-   )}
-</div>
-```
-::: info transpiled
-```tsx
-<div>
-   {If(active, () =>
-      <>Hello world</>
-   )}
-</div>
-```
-:::
+A JSX gateway function is shorthand for an arrow function expression that returns a JSX fragment. It may only appear as the final argument of a [JSX flow expression](#jsx-flow-expressions). Parameter parentheses may be omitted if there are one or no parameters. The JSX gateway, `<:>`, must be followed by a [JSX block](/guide/terminology#jsx-block)
+<br></br>
+<br></br>
 
 **with JSX expression:**
 ```nsx
@@ -205,47 +188,47 @@ A JSX gateway function is shorthand for an arrow function expression that return
    )}
 </div>
 ```
-::: info transpiled
+::: info transpiled tsx
 ```tsx
 <div>
    {If(active, () => 
       <>
-      {If(open,
-         <p>Hello world</p>
-      )}
+        {If(open,
+          <p>Hello world</p>
+        )}
       </>
    )}
 </div>
 ```
 :::
+<br></br>
+
 **with parameters:**
 ```nsx
-<ul>
+<div>
    {For(list, (item, index) <:>
-      {If(item.active,
-         <li>{index + 1}: {item.title}</li>
-      )}
+     <div>{index}</div>
+     <div>{item}</div>
    )}
-</ul>
+</div>
 ```
-::: info transpiled
+::: info transpiled tsx
 ```tsx
-<ul>
+<div>
    {For(list, (item, index) =>
       <>
-        {If(item.active, () => 
-          <>
-            <li>{index + 1}: {item.title}</li>
-          </>
-        )}
+        <div>{index}</div>
+        <div>{item}</div>
       </>
    )}
-</ul>
+</div>
 ```
 :::
+<br></br>
+
 **invalid usage:**
 ```nsx
-// X invalid: not the final argument of a JSX flow expression
+// ❌ invalid: not the final argument of a JSX flow expression
 const renderFoo = (x) <:>
    {If(open,
       <p>Hello world</p>
@@ -282,7 +265,7 @@ function Dialog({ Slot }) {
    const close = () => { opened = false }
 
    <:component as={{ open, close }}>  
-      {If(opened, 
+      {If(opened@, 
          <o--body>
             <div>{Slot()}</div>
          </o--body>
@@ -290,10 +273,10 @@ function Dialog({ Slot }) {
    </:component>
 }
 ```
-::: info transpiled
+::: info transpiled tsx
 ```tsx
 function Dialog({ Slot }) {
-   get opened = ion(false)
+   const opened = ion(false)
    const open = () => { opened = true }
    const close = () => { opened = false }
 
