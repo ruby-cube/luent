@@ -7,55 +7,45 @@ We'd love help getting this project off the ground. Learn how to contribute [her
 # JSX Syntax
 
 ## JSX flow expressions
-<!-- `{Fn(arguments, jsx)}` -->
-<code>{<i>Fn</i>(<i>arguments</i>, <i>jsx</i>)}</code>
+<!-- `{FlowFn(...arguments, jsx)}` -->
+<code>{<i>FlowFn</i>(<i>jsx</i>)}</code>
+| <code>{<i>FlowFn</i>(<i>...arguments</i>, <i>jsx</i>)}</code>
 
-A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a pascale-cased function and the final argument is a JSX entity or factory:
+A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a JSXFlow-branded, Pascal-cased function and the final argument is one of the following JSX-like entities:
 - JSX fragment
 - JSX element
-- JSX children
+- JSX element block
 - [JSX gateway function](#jsx-gateway-function)
 - [JSX factory](/guide/terminology#jsx-factory)
 
-The final argument is normalized to a JSX fragment factory at compile time.
+The final argument forms an [implicit JSX fragment factory](#implicit-jsx-fragment-factory) if it is a JSX element block—a sequence of one or more root JSX elements.
 
-**with a single root:**
 ```nsx
-<div>
-   {If(active, 
-      <p>{foo}</p>
-   )}
-</div>
+<section>
+  {If(inStock,
+    <span class='status'>In stock</span>
+    <button on:click={addToCart}>Buy</button>
+  )}
+  {Else(
+    <span class='status'>Sold out</span>
+  )}
+</section>
 ```
 ::: info transpiled
 ```tsx
-<div>
-   {If(active, () =>
-      <><p>{foo}</p></>
-   )}
-</div>
-```
-:::
-
-**with multiple roots:**
-```nsx
-<div>
-   {If(active, 
-      <p>{foo}</p>
-      <p>{foo}</p>
-   )}
-</div>
-```
-::: info transpiled
-```tsx
-<div>
-   {If(active, () =>
-      <>
-         <p>{foo}</p>
-         <p>{foo}</p>
-      </>
-   )}
-</div>
+<section>
+  {If(inStock, () =>
+    <>
+      <span class='status'>In stock</span>
+      <button on:click={addToCart}>Buy</button>
+    </>
+  )}
+  {Else(() =>
+    <>
+      <span class='status'>Sold out</span>
+    </>
+  )}
+</section>
 ```
 :::
 
@@ -63,12 +53,89 @@ The final argument is normalized to a JSX fragment factory at compile time.
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
+### Implicit JSX fragment factories
+A JSX block forms an implicit JSX fragment factory if it satisfies the following conditions:
+- it consists of one or more root JSX elements
+- it does not have JSX expression containers or JSX text at the root level
+- it is the last argument of a [JSX flow expression](#jsx-flow-expressions)
 
-## JSX gateway return
+```nsx
+<section>
+  {If(inStock,
+    <span class='status'>In stock</span>
+    <button on:click={addToCart}>Buy</button>
+  )}
+  {Else(
+    <span class='status'>Sold out</span>
+  )}
+</section>
+```
+::: info transpiled
+```tsx
+<section>
+  {If(inStock, () =>
+    <>
+      <span class='status'>In stock</span>
+      <button on:click={addToCart}>Buy</button>
+    </>
+  )}
+  {Else(() =>
+    <>
+      <span class='status'>Sold out</span>
+    </>
+  )}
+</section>
+```
+:::
+
+If the JSX block contains a JSX expression container or JSX text, the compiler will throw an error. You must instead explicitly wrap the JSX block in a JSX fragment factory or use the [JSX gateway function shorthand](#jsx-gateway-function).
+```nsx
+<div>
+  {If(folder,
+    {If(open, // ❌
+      <ul>
+        {For(folder.items, item =>
+          <li>{item}</li>
+        )}
+      </ul>
+      <button on:click={addItem}>+</button>
+    )}
+  )}
+</div>
+```
+
+::: info transpiled
+```tsx
+<div>
+  {If(folder,
+    {If(open, () =>
+      <>
+        <ul>
+          {For(folder.items, item =>
+            <li>{item}</li>
+          )}
+        </ul>
+        <button on:click={addItem}>+</button>
+      </>
+    )}
+  )}
+</div>
+```
+:::
+
+## JSX gateway
+<!-- `JavaScript <:> JSX` -->
+<code>{ <i>JavaScript</i> <:> <i>JSX</i> }</code>
+
+The JSX gateway syntax marks the transition from JavaScript into JSX. It wraps the JSX block that follows it in a fragment and returns that fragment. It is only valid when used in a [JSX gateway return](#jsx-gateway-return) or a [JSX gateway function](#jsx-gateway-function).
+
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+### JSX gateway return
 <!-- `{ statements; <:> jsx }` -->
 <code>{ <i>statements;</i> <:> <i>jsx</i> }</code>
 
-A JSX gateway return statement is shorthand for a return statement that returns a JSX fragment.
+A JSX gateway return is shorthand for a return statement that returns a JSX fragment.
 
 ```nsx
 <article>
@@ -83,8 +150,8 @@ A JSX gateway return statement is shorthand for a return statement that returns 
   })}
 </article>
 ```
+::: info transpiled
 ```tsx
-// native equivalent
 <article>
   {For(sections, section => {
     const highlight = HighlighterKit(section)
@@ -100,14 +167,15 @@ A JSX gateway return statement is shorthand for a return statement that returns 
   })}
 </article>
 ```
+:::
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX gateway function
+### JSX gateway function
 <!-- `(parameters) <:> jsx` | `<:> jsx` -->
 <code>(<i>parameters</i>) <:> <i>jsx</i></code> | 
 <code><:> <i>jsx</i></code>
 
-A JSX gateway function expression is shorthand for an arrow function that returns a JSX fragment. It may only appear as the final argument of a [JSX flow expression](#jsx-flow-expressions). Parameter parentheses may only be omitted if there are no parameters. 
+A JSX gateway function is shorthand for an arrow function expression that returns a JSX fragment. It may only appear as the final argument of a [JSX flow expression](#jsx-flow-expressions). Parameter parentheses may be omitted if there are one or no parameters.
 
 **with JSX text:**
 ```nsx
@@ -167,7 +235,7 @@ A JSX gateway function expression is shorthand for an arrow function that return
       <>
         {If(item.active, () => 
           <>
-            <li>{index + 1}: {item}</li>
+            <li>{index + 1}: {item.title}</li>
           </>
         )}
       </>

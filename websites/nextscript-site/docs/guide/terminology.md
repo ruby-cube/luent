@@ -15,7 +15,7 @@ A JSX factory refers to any function that returns a JSX element or fragment.
 const renderRow = () => <tr><td>Hello</td></tr>
 ```
 
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+<p align="right"><a href="#terminology" style="text-decoration: none">[top]</a></p>
 
 ## JSX Array Factory 
 `() => [jsx('tag'), 'string']`
@@ -32,7 +32,7 @@ const renderRow = () => [
 ```
 
 
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+<p align="right"><a href="#terminology" style="text-decoration: none">[top]</a></p>
 
 ## JSX Call Expression 
 `{callee()}`
@@ -44,5 +44,5 @@ A JSX call expression refers to a call expression directly embedded in a JSX exp
 
 <div id="counter"></div>
 
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+<p align="right"><a href="#terminology" style="text-decoration: none">[top]</a></p>
 

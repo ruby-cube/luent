@@ -49,11 +49,11 @@ const flowNsx =
   )}
   {Else(
     <span class='status'>Sold out</span>
-    <button on:click={notify}>Notify me</button>
   )}
 </section>
 
 `
+
 
 const flowTranspiled =
   `<section>
@@ -66,18 +66,17 @@ const flowTranspiled =
   {Else(() =>
     <>
       <span class='status'>Sold out</span>
-      <button on:click={notify}>Notify me</button>
     </>
   )}
 </section>
 
 `
 
+
 const gatewayNsx =
   `<div>
   {If(folder, <:>
-    <h2>{title}</h2>
-    {If(open, <:>
+    {If(open,
       <ul>
         {For(folder.items, item =>
           <li>{item}</li>
@@ -90,11 +89,41 @@ const gatewayNsx =
 
 `
 
+// const gatewayTranspiled =
+//   `<div>
+//   {If(folder, <:>
+//     {If(open,
+//       <ul>
+//         {For(folder.items, item =>
+//           <li>{item}</li>
+//         )}
+//       </ul>
+//       <button on:click={addItem}>+</button>
+//     )}
+//   )}
+// </div>
+
+// `
+// const gatewayTranspiled =
+//   `<div>
+//   {~If(folder, <:>
+//     {~If(open, 
+//       <ul>
+//         {~For(folder.items, item =>
+//           <li>{item}</li>
+//         )}
+//       </ul>
+//       <button on:click={addItem}>+</button>
+//     )}
+//   )}
+// </div>
+
+// `
+
 const gatewayTranspiled =
   `<div>
   {If(folder, () =>
     <>
-      <h2>{title}</h2>
       {If(open, () =>
         <>
           <ul>
@@ -149,7 +178,7 @@ function HomeTour() {
           </div>
         </article>
 
-        <article class='tour-row code-right'>
+         <article class='tour-row code-right'>
           <div class='tour-copy'>
             <h3>JSX flow expressions</h3>
             <code>{`{Fn(...args, <tag/>)}`}</code>
@@ -165,7 +194,7 @@ function HomeTour() {
 
         <article class='tour-row code-left'>
           <div class='tour-copy'>
-            <h3>JSX gateway function expressions</h3>
+            <h3>JSX gateway function</h3>
             <code>(parameters) &lt;:&gt; JSX</code> | <code>&lt;:&gt; JSX</code>
             <p>
               —shorthand for arrow functions that return a JSX fragment
