@@ -44,6 +44,7 @@ export default defineConfig({
     nav: [
       { text: 'Features', link: '/guide/getter-syntax' },
       { text: 'Demos', link: '/demos/habit-tracker' },
+      { text: 'Code Glimpses', link: '/#code-glimpses' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-principles' }
     ],
@@ -61,7 +62,7 @@ export default defineConfig({
               ]
             },
             { text: 'JSX Syntax', link: '/guide/jsx-syntax' },
-            { text: 'Terminology', link: '/guide/terminology' }
+            { text: 'JSX Terminology', link: '/guide/terminology' }
           ]
         },
       ],

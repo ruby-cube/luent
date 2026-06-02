@@ -74,5 +74,5 @@
     "**/src/*", 
     "e2e",
     "plugins"
-, "websites/nextscript-site/.vitepress/theme/shiki-setup.ts"   ]
+, "websites/nextscript-site/.vitepress/theme/shiki-setup.ts", "websites/nextscript-site/.vitepress/theme/HeroCode.vue"   ]
 }

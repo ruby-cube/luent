@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Features
-      link: /getter-syntax.md
+      link: /guide/getter-syntax.md
     - theme: alt
       text: About the project
       link: https://github.com/ruby-cube/luent/tree/main/packages/nextscript#nextscript
@@ -24,19 +24,27 @@ features:
 
 
 ---
+<p class='custom-block status-notice'>This project is in early development.</p>
 
   <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
   </div>
-  <section class="home-glimpses-heading">
+  <section id='code-glimpses' class="home-glimpses-heading">
     <h2>Code Glimpses</h2>
   </section>
 
   <div id="home-tour-root"></div>
 
 <style scoped>
+p.custom-block.status-notice {
+  border: .5px solid var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+  text-align: center;
+  padding: 1rem;
+}
+
 .code-glimpse-divider .ns-hero-code__dot {
   border: 1px solid var(--vp-c-brand-1);
   margin-top: 5rem;
@@ -46,6 +54,7 @@ features:
   width: 100%;
   max-width: 1120px;
   margin: 2.4rem auto 0;
+  scroll-margin-top: calc(var(--vp-nav-height) + 20px);
   /* margin: clamp(2.4rem, 5vw, 5rem) auto 0; */
   padding: 0 clamp(0rem, 2vw, 0.4rem) clamp(1rem, 2vw, 1.8rem);
   text-align: center;
@@ -58,6 +67,7 @@ features:
   letter-spacing: -0.03em;
   color: var(--vp-c-text-1);
   margin-inline: auto;
+  padding-top: 0;
   border-top: 0px;
 }
 

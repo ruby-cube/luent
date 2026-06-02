@@ -296,3 +296,8 @@ html:not(.dark) .ns-hero-code__body {
     border-radius: 16px;
   }
 }
+
+
+html {
+  scroll-behavior: smooth;
+}

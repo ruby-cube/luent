@@ -91,37 +91,6 @@ const gatewayNsx =
 
 `
 
-// const gatewayTranspiled =
-//   `<div>
-//   {If(folder, <:>
-//     {If(open,
-//       <ul>
-//         {For(folder.items, item =>
-//           <li>{item}</li>
-//         )}
-//       </ul>
-//       <button on:click={addItem}>+</button>
-//     )}
-//   )}
-// </div>
-
-// `
-// const gatewayTranspiled =
-//   `<div>
-//   {~If(folder, <:>
-//     {~If(open, 
-//       <ul>
-//         {~For(folder.items, item =>
-//           <li>{item}</li>
-//         )}
-//       </ul>
-//       <button on:click={addItem}>+</button>
-//     )}
-//   )}
-// </div>
-
-// `
-
 const gatewayTranspiled =
   `<div>
   {If(folder, () =>
@@ -222,7 +191,7 @@ function HomeTour() {
             <p class='tour-note'>
               <strong>Note:</strong> Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's <code>ion()</code>. Accessor variables are equally useful for non-reactive use cases, such as template refs.
             </p>
-            <a href='' class='medium brand'>Learn more</a>
+            <a href='/guide/getter-syntax' class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
             <Code
@@ -244,7 +213,7 @@ function HomeTour() {
             <p class='tour-note'>
               <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
             </p>
-            <a href='' class='medium brand'>Learn more</a>
+            <a href='/guide/getter-syntax#derivation-expressions'  class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
             <Code
@@ -263,7 +232,7 @@ function HomeTour() {
             <p>
               —template control flow with implicit JSX fragment factories
             </p>
-            <a href='' class='medium brand'>Learn more</a>
+            <a href='/guide/jsx-syntax'  class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
             <Code
@@ -275,14 +244,14 @@ function HomeTour() {
           </div>
         </article>
 
-        <article class='tour-row code-left'>
+        {/* <article class='tour-row code-left'>
           <div class='tour-copy'>
             <h3>JSX gateway function</h3>
             <code>(parameters) &lt;:&gt; JSX</code> | <code>&lt;:&gt; JSX</code>
             <p>
               —shorthand for arrow functions that return a JSX fragment
             </p>
-            <a href='' class='medium brand'>Learn more</a>
+            <a href='/guide/jsx-syntax#jsx-gateway-function'  class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
             <Code
@@ -292,7 +261,7 @@ function HomeTour() {
               highlight={renderCodeToHtml}
             />
           </div>
-        </article>
+        </article> */}
 
         <article class='tour-row code-right'>
           <div class='tour-copy'>
@@ -301,7 +270,7 @@ function HomeTour() {
             <p>
               —shorthand JSX fragment return statements
             </p>
-            <a href='' class='medium brand'>Learn more</a>
+            <a href='/guide/jsx-syntax#jsx-gateway'   class='medium brand'>Learn more</a>
           </div>
           <div class='tour-code'>
             <Code

@@ -1,9 +1,3 @@
-::: tip This project is in early development.
-Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
-
-We'd love help getting this project off the ground. Learn how to contribute [here](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
-:::
-
 # JSX Syntax
 
 ## JSX flow expressions
@@ -122,9 +116,9 @@ If the JSX block contains a JSX expression container or JSX text, the compiler w
 ### Type guarding
 
 
-## JSX gateway
+## JSX gateway syntax
 <!-- `JavaScript <:> JSX` -->
-<code>{ <i>JavaScript</i> <:> <i>JSX</i> }</code>
+<code><i>JavaScript</i> <:> <i>JSX</i></code>
 
 The JSX gateway syntax marks the transition from JavaScript into JSX. It wraps the JSX block that follows it in a fragment and returns that fragment. It is only valid when used in a [JSX gateway return](#jsx-gateway-return) or a [JSX gateway function](#jsx-gateway-function).
 
@@ -238,12 +232,12 @@ const renderFoo = (x) <:>
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX component element
+## JSX component
 <!-- `<:component>jsx</:component>` | `<:component as={component}>jsx</:component>` -->
 <code><:component><i>jsx</i></:component></code> |
 <code><:component as={<i>component</i>}><i>jsx</i></:component></code>
 
-The JSX component element is an auto-returned keyword element. It enables refs of component instances to be typed through its transpiled form: `JSXComponent()`. The default implementation of `JSXComponent` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
+The JSX component is an auto-returned keyword tag. It enables refs of component instances to be typed through its transpiled form: `JSXComponent()`. The default implementation of `JSXComponent` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
 
 ```nsx
 function Parent() {
@@ -303,3 +297,10 @@ interface ComponentKit<T> {
    nodes: NSXNode[];
 }
 ```
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+::: tip This project is in early development.
+Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
+
+We'd love help getting this project off the ground. Learn how to contribute [here](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
+:::
