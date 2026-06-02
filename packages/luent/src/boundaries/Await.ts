@@ -262,15 +262,21 @@ export function createAwaitSeries(
 ) {
    const { renderError, renderPlaceholder, renderResolved, $suspense, timeout } = unpackAwaitSeries(series)
    const $error = createAtomicIon(undefined as undefined | Error);
-   const $renderPlaceholder = createAtomicIon(true)
+   const $renderPlaceholder = createAtomicIon(false)
+
+   function syncPlaceholderState() {
+      const suspensePending = Boolean($suspense())
+      placeholder = renderPlaceholder()
+      $renderPlaceholder.value = suspensePending && !shouldHold()
+   }
 
    // NOTE: DO NOT USE HYBRID ION... the scheduling is not correct
    watch($suspense, () => {
       if ($renderPlaceholder() === Boolean($suspense())) {
          return;
       }
-      $renderPlaceholder.value = Boolean($suspense()) && !shouldHold()
-   }, { phase: PRELUDE })
+      syncPlaceholderState()
+   }, { phase: PRELUDE, eager: true })
 
    function shouldHold() {
       placeholder = renderPlaceholder()

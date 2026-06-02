@@ -1,4 +1,5 @@
 import { component, createRoot } from '@rue/luent'
+import { toHtml } from './code-utils'
 
 // const codeSnippet =
 //   `get count = ion(start)
@@ -46,53 +47,53 @@ const codeSnippet =
 
 
 
-const TYPEWRITER_START_DELAY_MS = 250
-const TYPEWRITER_STEP_MS = 28
+// const TYPEWRITER_START_DELAY_MS = 250
+// const TYPEWRITER_STEP_MS = 28
 
-function clearTypewriterTimers(codeNode: HTMLElement) {
-  const timeoutId = Number(codeNode.dataset.typewriterTimeoutId)
-  if (Number.isFinite(timeoutId) && timeoutId > 0) {
-    window.clearTimeout(timeoutId)
-  }
+// function clearTypewriterTimers(codeNode: HTMLElement) {
+//   const timeoutId = Number(codeNode.dataset.typewriterTimeoutId)
+//   if (Number.isFinite(timeoutId) && timeoutId > 0) {
+//     window.clearTimeout(timeoutId)
+//   }
 
-  const intervalId = Number(codeNode.dataset.typewriterIntervalId)
-  if (Number.isFinite(intervalId) && intervalId > 0) {
-    window.clearInterval(intervalId)
-  }
-}
+//   const intervalId = Number(codeNode.dataset.typewriterIntervalId)
+//   if (Number.isFinite(intervalId) && intervalId > 0) {
+//     window.clearInterval(intervalId)
+//   }
+// }
 
-function startTypewriter(host: Element) {
-  const codeNode = host.querySelector<HTMLElement>('.ns-hero-code__content')
-  if (!codeNode) return
+// function startTypewriter(host: Element) {
+//   const codeNode = host.querySelector<HTMLElement>('.ns-hero-code__content')
+//   if (!codeNode) return
 
-  clearTypewriterTimers(codeNode)
+//   clearTypewriterTimers(codeNode)
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    codeNode.textContent = codeSnippet
-    codeNode.classList.remove('is-typing')
-    return
-  }
+//   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+//     codeNode.textContent = codeSnippet
+//     codeNode.classList.remove('is-typing')
+//     return
+//   }
 
-  codeNode.textContent = ''
-  codeNode.classList.add('is-typing')
+//   codeNode.textContent = ''
+//   codeNode.classList.add('is-typing')
 
-  let cursor = 0
-  const startTimeout = window.setTimeout(() => {
-    const interval = window.setInterval(() => {
-      cursor += 1
-      codeNode.textContent = codeSnippet.slice(0, cursor)
+//   let cursor = 0
+//   const startTimeout = window.setTimeout(() => {
+//     const interval = window.setInterval(() => {
+//       cursor += 1
+//       codeNode.textContent = codeSnippet.slice(0, cursor)
 
-      if (cursor >= codeSnippet.length) {
-        window.clearInterval(interval)
-        codeNode.classList.remove('is-typing')
-      }
-    }, TYPEWRITER_STEP_MS)
+//       if (cursor >= codeSnippet.length) {
+//         window.clearInterval(interval)
+//         codeNode.classList.remove('is-typing')
+//       }
+//     }, TYPEWRITER_STEP_MS)
 
-    codeNode.dataset.typewriterIntervalId = String(interval)
-  }, TYPEWRITER_START_DELAY_MS)
+//     codeNode.dataset.typewriterIntervalId = String(interval)
+//   }, TYPEWRITER_START_DELAY_MS)
 
-  codeNode.dataset.typewriterTimeoutId = String(startTimeout)
-}
+//   codeNode.dataset.typewriterTimeoutId = String(startTimeout)
+// }
 
 function HeroCodePanel() {
   return component(
@@ -104,16 +105,14 @@ function HeroCodePanel() {
         <span class='ns-hero-code__title'>total.nsx</span>
       </div>
       <pre class='ns-hero-code__body'>
-        <code class='ns-hero-code__content' />
+        <code class='ns-hero-code__content'>
+          {codeSnippet}
+        </code>
       </pre>
     </div>
   )
 }
 
-export function loadHeroCodePanel(mountTarget = '#hero-code-panel-root') {
-  const host = document.querySelector(mountTarget)
-  if (!host) return
-  host.innerHTML = ''
-  createRoot(() => <HeroCodePanel />).mount(mountTarget)
-  startTypewriter(host)
+export function loadHeroCodePanel() {
+  createRoot(() => <HeroCodePanel />).mount('#hero-code-panel-root')
 }

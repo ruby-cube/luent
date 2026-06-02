@@ -15,7 +15,7 @@ export async function renderCodeToHtml(code: string, lang: 'nsx' | 'tsx') {
   })
 }
 
-function toHtml(code: string) {
+export function toHtml(code: string) {
   return code
     .replace(/&/g, '&#x26;')
     .replace(/</g, '&#x3C;')
