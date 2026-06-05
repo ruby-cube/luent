@@ -18,7 +18,7 @@
     "noEmit": true,
     "paths": {
       "react/jsx-runtime": [
-        "./packages/luent/jsx-runtime"
+        "./packages/luent/src/jsx-runtime"
       ],
       "@rue/luent": [
         "./packages/luent/src/index.ts"
@@ -29,7 +29,7 @@
     }
   },
   "include": [
-    "../../packages/luent/jsx-runtime/index.d.ts",
+    "../../packages/luent/src/jsx-runtime/index.d.ts",
     "docs/**/*.ts",
     "docs/**/*.tsx",
     ".vitepress/**/*.ts",

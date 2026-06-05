@@ -301,3 +301,7 @@ html:not(.dark) .ns-hero-code__body {
 html {
   scroll-behavior: smooth;
 }
+
+.VPHomeFeatures .items {
+  margin-top: 4rem;
+}

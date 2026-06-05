@@ -28,20 +28,20 @@ export type TagType = ComponentTag | string
 // }
 
 declare global {
-   function Slot<T>(input: { children?: RawJSXNode } & { provide?: Provided } & AnyObject): T
+  function Slot<T>(input: { children?: RawJSXNode } & { provide?: Provided } & AnyObject): T
 }
 
 export type RawJSXNode =
-   RawJSXNode[]
-   | DOMNode
-   | string
-   | Ion
-   | VineNode
-   | ComponentKit
-   | InnerHTMLKit
-   | null
-   | undefined
-   | JSX.Element
+  RawJSXNode[]
+  | DOMNode
+  | string
+  | Ion
+  | VineNode
+  | ComponentKit
+  | InnerHTMLKit
+  | null
+  | undefined
+  | JSX.Element
 
 // export type JSXNode =
 //    | JSX.Element
@@ -59,7 +59,7 @@ export type RenderFunction<Params = unknown> = (input?: any) => RawJSXNode
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
 export type EventsConfig = {
-   [K in keyof HTMLElementEventMap]?: EventHandler<K> | EventHandler<K>[]
+  [K in keyof HTMLElementEventMap]?: EventHandler<K> | EventHandler<K>[]
 }
 
 // export type AssignedAttributes = {
@@ -75,10 +75,10 @@ export type EventsConfig = {
 // export type ClassInput = MaybeIon<string | Falsey> | $Classes
 
 export type ElementConfig<K extends TagName = TagName> = {
-   [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
+  [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
-   'show-if'?: Ion<Booleanny>
-   // attributes?: K extends TagName ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
+  'show-if'?: Ion<Booleanny>
+  // attributes?: K extends TagName ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 
 // class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
@@ -87,13 +87,13 @@ export type ElementConfig<K extends TagName = TagName> = {
 
 type NodesArray<T> = ReturnType<NodeRef<T>>[] | NodesArray<T>[]
 type NodeSetup<T extends TagName | ComponentTag> = {
-   // ref?: NodeRef<T> | NodeRefsConfig,
-   // provide?: Provided,
-   // class?: ClassInput | ClassInput[],
-   // style?: StyleInput | StyleInput[]
+  // ref?: NodeRef<T> | NodeRefsConfig,
+  // provide?: Provided,
+  // class?: ClassInput | ClassInput[],
+  // style?: StyleInput | StyleInput[]
 }
 export type ComponentConfig<T extends ComponentTag = ComponentTag> =
-   T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
+  T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
 export type GroupActivationType = ShowHideType | 'show'
 
@@ -101,11 +101,11 @@ let groupActivationType: GroupActivationType | undefined = undefined
 let outerGroupActivationType: GroupActivationType | undefined = undefined
 
 export function getGroupActivationType() {
-   return groupActivationType
+  return groupActivationType
 }
 
 export function resetGroupActivationType() {
-   groupActivationType = undefined
+  groupActivationType = undefined
 }
 
 
@@ -124,17 +124,17 @@ export function resetGroupActivationType() {
 
 
 export function wrapWithActivationType(type: GroupActivationType, Slot: RenderSlot) {
-   return () => {
-      outerGroupActivationType = groupActivationType
-      groupActivationType = type;
-      try {
-         return Slot()
-      }
-      finally {
-         groupActivationType = outerGroupActivationType;
-         outerGroupActivationType = undefined
-      }
-   }
+  return () => {
+    outerGroupActivationType = groupActivationType
+    groupActivationType = type;
+    try {
+      return Slot()
+    }
+    finally {
+      groupActivationType = outerGroupActivationType;
+      outerGroupActivationType = undefined
+    }
+  }
 }
 
 /**
@@ -143,9 +143,9 @@ export function wrapWithActivationType(type: GroupActivationType, Slot: RenderSl
  * @returns 
  */
 export function normalizeToRenderFunction(lastArg: ((...args: any[]) => RawJSXNode) | RawJSXNode) {
-   if (lastArg instanceof Function)
-      return lastArg;
-   return function render() { return lastArg };
+  if (lastArg instanceof Function)
+    return lastArg;
+  return function render() { return lastArg };
 }
 
 export type ViewConfig = AwaitConfig & ContextConfig
@@ -153,91 +153,91 @@ export type ViewConfig = AwaitConfig & ContextConfig
 
 
 type CatchConfig = {
-   catch?: (error: Error) => RawJSXNode
+  catch?: (error: Error) => RawJSXNode
 }
 
 type ContextConfig = {
-   provide?: Provided,
+  provide?: Provided,
 }
 
 type TransitionConfig = {
-   'transition-in'?: any // TODO:
-   'transition-out'?: any // TODO:
+  'transition-in'?: any // TODO:
+  'transition-out'?: any // TODO:
 }
 
 function makeView(Slot: RenderFunction, config: ViewConfig) {
-   const { provide, await: awaited, meanwhile: renderPlaceholder, catch: renderError } = config
-   Slot = provide ? wrapWithContext(Slot, provide) : Slot
-   // Slot = awaited || renderPlaceholder ? wrapWithAwait(Slot, config) : renderError ? wrapWithTryCatch(Slot, renderError) : Slot
-   // TODO: transitions
-   return Slot()
+  const { provide, await: awaited, meanwhile: renderPlaceholder, catch: renderError } = config
+  Slot = provide ? wrapWithContext(Slot, provide) : Slot
+  // Slot = awaited || renderPlaceholder ? wrapWithAwait(Slot, config) : renderError ? wrapWithTryCatch(Slot, renderError) : Slot
+  // TODO: transitions
+  return Slot()
 }
 
 
 function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
-   return () => {
-      try {
-         return Slot()
-      }
-      catch (error) {
-         return renderError(toError(error))
-      }
-   }
+  return () => {
+    try {
+      return Slot()
+    }
+    catch (error) {
+      return renderError(toError(error))
+    }
+  }
 }
 
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-   nodeType: SVGTag | TagName | ComponentTag | 'o--link' | 'o--body' | 'o--portal' | 'remount-view' | 'show-view' | 'create-view' | any,
-   Slot: undefined | (() => RawJSXNode[]) | InferSlot,
-   config: ElementConfig | ComponentConfig,
+  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'remount-view' | 'show-view' | 'create-view' | any,
+  Slot: undefined | (() => RawJSXNode[]) | InferSlot,
+  config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
 
-   switch (nodeType) {
+  switch (nodeType) {
 
-      case 'o--link':
-         return Portal(config['portal-to'] ?? 'head', () =>
-            makeElement('link', undefined, <ElementConfig>config)
-         );
+    case 'o-link':
+      return Portal(config['portal-to'] ?? 'head', () =>
+        makeElement('link', undefined, <ElementConfig>config)
+      );
 
-      case 'o--body':
-         return Portal('body', Slot);
+    case 'o--body':
+      return Portal('body', Slot);
 
-      case 'o--portal':
-         return Portal(config.to, Slot)
-      // deprecated??
-      case 'create-view':
-         if (!Slot) throw new Error(`Extraneous <create-view>`)
-         return makeView(wrapWithActivationType('create', Slot), config);
+    case 'o--head':
+      return Portal('body', Slot);
 
-      case 'show-view':
-         if (!Slot) throw new Error(`Extraneous <show-view>`)
-         return makeView(wrapWithActivationType('show', Slot), config);
+    case 'o--portal':
+      return Portal(config.to, Slot)
+    // deprecated??
+    case 'create-view':
+      if (!Slot) throw new Error(`Extraneous <create-view>`)
+      return makeView(wrapWithActivationType('create', Slot), config);
 
-      case 'remount-view':
-         if (!Slot) throw new Error(`Extraneous <remount-view>`)
-         return makeView(wrapWithActivationType('remount', Slot), config);
+    case 'show-view':
+      if (!Slot) throw new Error(`Extraneous <show-view>`)
+      return makeView(wrapWithActivationType('show', Slot), config);
 
-      case 'render-view':
-         if (!Slot) throw new Error(`Extraneous <render-view>`)
-         return makeView(Slot, config);
+    case 'remount-view':
+      if (!Slot) throw new Error(`Extraneous <remount-view>`)
+      return makeView(wrapWithActivationType('remount', Slot), config);
 
-      default:
-         if (typeof nodeType === 'string') {
-            return makeElement(
-               nodeType,
-               Slot,
-               <ElementConfig>config,
-               // getCurrentIndex()
-            )
-         }
-         return makeComponent(
-            nodeType,
-            <InferSlot>Slot,
-            <ComponentConfig>config,
-            // getCurrentIndex()
-         )
-   }
+    case 'render-view':
+      if (!Slot) throw new Error(`Extraneous <render-view>`)
+      return makeView(Slot, config);
+
+    default:
+      if (typeof nodeType === 'string') {
+        return makeElement(
+          nodeType,
+          Slot,
+          <ElementConfig>config,
+        )
+      }
+      return makeComponent(
+        nodeType,
+        <ComponentConfig>config,
+      )
+  }
 }
 
 // export function _getNodeConfig(ref: NodeRef | undefined) {

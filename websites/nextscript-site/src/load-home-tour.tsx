@@ -165,7 +165,7 @@ const componentTranspiled =
   const close = () => { opened = false }
 
   return JSXComponent({
-    Slot: <>
+    slot: <>
       {If(opened, 
         <o--body>
           <div>{Slot()}</div>

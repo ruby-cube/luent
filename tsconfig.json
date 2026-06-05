@@ -20,7 +20,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@rue/luent",
     "types": [
-      "./packages/luent/jsx-runtime/index"
+      "./packages/luent/src/jsx-runtime/index"
     ],
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -31,9 +31,9 @@
     "noImplicitReturns": false,
     "skipLibCheck": true,
     "paths": {
-      "react/jsx-runtime": ["./packages/luent/jsx-runtime"],
-      "react-dom": ["./packages/luent/jsx-runtime"],
-      "react-dom/*": ["./packages/luent/jsx-runtime/*"],
+      "react/jsx-runtime": ["./packages/luent/src/jsx-runtime"],
+      "react-dom": ["./packages/luent/src/jsx-runtime"],
+      "react-dom/*": ["./packages/luent/src/jsx-runtime/*"],
 
       "@rue/utils": [
         "./packages/utils/index.ts"
@@ -42,10 +42,10 @@
         "./packages/luent/src/index.ts"
       ],
       "@rue/luent/jsx-runtime": [
-        "./packages/luent/jsx-runtime/index.ts"
+        "./packages/luent/src/jsx-runtime/index.ts"
       ],
       "@rue/luent/jsx-dev-runtime": [
-        "./packages/luent/jsx-runtime/index.ts"
+        "./packages/luent/src/jsx-runtime/index.ts"
       ],
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"

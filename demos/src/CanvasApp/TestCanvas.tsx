@@ -50,7 +50,6 @@ export function TestCanvas() {
       
       const context = getContext()
       const point = getMousePosition(e)
-      console.log('drawing', context, point)
       if (!context || !point) return
 
       context.beginPath()

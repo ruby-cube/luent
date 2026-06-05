@@ -222,7 +222,7 @@ export function TodoMVC() {
             </footer>
          </section>
 
-         <o--link href="https://unpkg.com/todomvc-app-css%2.4.1/index.css" rel="stylesheet" />
+         <o-link href="https://unpkg.com/todomvc-app-css%2.4.1/index.css" rel="stylesheet" />
       </>)
 }
 

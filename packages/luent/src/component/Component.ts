@@ -31,14 +31,12 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 
 export function makeComponent(
    Component: ComponentTag,
-   Slot: InferSlot | undefined,
    fromTag: ComponentConfig,
 ): ComponentKit<unknown> {
 
    const setup = toSetup(fromTag)
    const componentHooks = composeHooks(setup)
-   const output = Component($from(setup)/* TODO: $from only if not .nsx */) // TODO: handle forwarded named slots
-   console.log('componentHooks', componentHooks)
+   const output = Component($from(setup)) // TODO: handle forwarded named slots
 
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
@@ -57,7 +55,6 @@ export function makeComponent(
    }
 
    const hooks = composeHooks(setup)
-   console.log('hooks', hooks)
    if (componentHooks && compode) {
       if (!hooks) throw new Error('Cannot auto-bind hooks to nested element if component exposes a component node. Use x-ray to auto-bind hooks to nested elements.')
       setUpHooks(compode, hooks) // TODO: can a component with no public

@@ -74,12 +74,19 @@ export default defineConfig({
               text: 'Habit Tracker', link: '/demos/habit-tracker',
             },
             { text: 'Drawing Canvas', link: '/jsx-syntax' },
-            { text: 'Video Player', link: '/terminology' },
+            { text: 'EmojiQuest', link: '/terminology' },
+            { text: 'Folder Tree', link: '/terminology' },
+            { text: 'Bottomless Void', link: '/terminology' },
           ]
         }
         
       ]
     },
+
+    outline: {
+      level: [2,3]
+    },
+
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript' }
     ]

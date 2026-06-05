@@ -65,17 +65,14 @@ const nsx =
 
 export function HabitTracker({ habit, goal = 5 }) {
   get count = ion(0)
-  get achieved = ion(() => count === goal)
+  get achieved = ion((count === goal)@)
 
   <:component>
     <div class='tracker'>
       {habit}
       <ul>
         {Thru(goal, (n) <:>
-          <li
-            on:click={() => count = n}
-            auto-bind={xray.li}
-          >
+          <li on:click={() => count = n}>
             <div class={['unit', { 'filled': (n <= count)@ }]}></div>
           </li>
         )}
@@ -85,58 +82,25 @@ export function HabitTracker({ habit, goal = 5 }) {
       )}
     </div>
 
-    <o--link href='/src/demos/habit-tracker.css' rel='stylesheet' />
+    <o-link href='/src/demos/habit-tracker.css' rel='stylesheet' />
   </:component>
 }`
 
-const tsx =
-  `import { ion, component, If, Thru } from "@rue/luent";
-
-export function HabitTracker({ habit, goal = 5 }) {
-  const count = ion(0)
-  const achieved = ion(() => count() === goal)
-
-  return component(
-    <>
-      <div class='tracker'>
-        {habit}
-        <ul>
-          {Thru(goal, n =>
-            <li
-              on:click={() => count.value = n}
-              auto-bind={xray.li}
-            >
-              <div class={['unit', { 'filled': () => n <= count() }]}></div>
-            </li>
-          )}
-        </ul>
-        {If(achieved, () =>
-          <span class='star'>🌟</span>
-        )}
-      </div>
-
-      <o--link href='/src/demos/habit-tracker.css' rel='stylesheet' />
-    </>
-  )
-}`
-
 const transpiled =
-  `import { ion, component, If, Thru } from "@rue/luent";
+  `import { ion, If, Thru } from "@rue/luent";
+import { JSXComponent } from "@rue/nextscript";
 
 export function HabitTracker({ habit, goal = 5 }) {
   const count = assertGetter(ion(0))
   const achieved = assertGetter(ion(() => count() === goal))
 
-  return component(
-    <>
+  return JSXComponent({
+    slot: <>
       <div class='tracker'>
         {habit}
         <ul>
           {Thru(goal, n => <>
-            <li
-              on:click={() => count.value = n}
-              auto-bind={xray.li}
-            >
+            <li on:click={() => count.value = n}>
               <div class={['unit', { 'filled': () => n <= count() }]}></div>
             </li>
           </>)}
@@ -146,9 +110,9 @@ export function HabitTracker({ habit, goal = 5 }) {
         </>)}
       </div>
 
-      <o--link href='/src/demos/habit-tracker.css' rel='stylesheet' />
+      <o-link href='/src/demos/habit-tracker.css' rel='stylesheet' />
     </>
-  )
+  })
 }`
 
 export function load() {

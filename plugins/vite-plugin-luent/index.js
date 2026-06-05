@@ -11,7 +11,11 @@ function resolveLuentJsxRuntimePath(id) {
    return require.resolve(id)
 }
 
-let jsxRuntimePath
+function isLuentJsxRuntimeId(id) {
+   return id === '@rue/luent/jsx-runtime' || id === '@rue/luent/jsx-dev-runtime'
+}
+
+let luentJsxRuntimePath
 
 export default function LuentPlugin() {
    /** @type {import('vite').PluginOption[]} */
@@ -20,9 +24,9 @@ export default function LuentPlugin() {
          name: 'vite-luent-runtime-resolver',
          enforce: 'pre',
          resolveId(id) {
-            if (id === '@rue/luent/jsx-runtime' || id === '@rue/luent/jsx-dev-runtime') {
-               jsxRuntimePath ??= resolveLuentJsxRuntimePath(id)
-               return jsxRuntimePath
+            if (isLuentJsxRuntimeId(id)) {
+               luentJsxRuntimePath ??= resolveLuentJsxRuntimePath('@rue/luent/jsx-runtime')
+               return luentJsxRuntimePath
             }
          }
       },

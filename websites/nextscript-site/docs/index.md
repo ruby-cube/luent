@@ -24,7 +24,7 @@ features:
 
 
 ---
-<p class='custom-block status-notice'>This project is in early development.</p>
+
 
   <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
     <span class='ns-hero-code__dot'></span>
@@ -37,6 +37,8 @@ features:
 
   <div id="home-tour-root"></div>
 
+  <p class='custom-block status-notice'>This project is in early development.</p>
+
 <style scoped>
 p.custom-block.status-notice {
   border: .5px solid var(--vp-c-brand-1);
@@ -45,9 +47,12 @@ p.custom-block.status-notice {
   padding: 1rem;
 }
 
+.code-glimpse-divider {
+  margin-block: 5rem;
+}
+
 .code-glimpse-divider .ns-hero-code__dot {
   border: 1px solid var(--vp-c-brand-1);
-  margin-top: 5rem;
 }
 
 .home-glimpses-heading {

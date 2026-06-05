@@ -3,7 +3,6 @@ import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, queueRender, untracked, 
 import { isComponentKit } from "@rue/nextscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
-import { CONTEXT, ContextNode } from "../context/context-stack";
 import { TRACE } from "../../../flask/debug";
 import { RenderSlot } from "../component/x-Input";
 
@@ -175,7 +174,7 @@ function createTextNode(value: unknown) {
    return document.createTextNode(toString(value))
 }
 
-function toString(value: any) {
+export function toString(value: any) {
    if (value == null) return '';
    if (value instanceof Object) {
       return JSON.stringify(value);

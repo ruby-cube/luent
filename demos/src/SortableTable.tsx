@@ -27,7 +27,7 @@ export function SortableTableApp() {
             columns={gridColumns}
             filterKey={$searchQuery}>
          </SortableTable >
-         <o--link href='/src/demos/sortable-table.css' rel='stylesheet' />
+         <o-link href='/src/demos/sortable-table.css' rel='stylesheet' />
       </>
    )
 }

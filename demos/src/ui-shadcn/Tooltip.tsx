@@ -17,59 +17,59 @@ import { Alignment, Placement } from "../ui-base/popover/Popover.kit";
 // }
 
 function Tooltip(setup: FromTag<{
-   ref?: NodeRef<'div'>;
-   Slot: RenderSlot,
-   tail?: RenderSlot,
-   tooltip: IonicTooltip,
-   gap?: number,
-   place?: Placement,
-   align?: Alignment
+  ref?: NodeRef<'div'>;
+  Slot: RenderSlot,
+  tail?: RenderSlot,
+  tooltip: IonicTooltip,
+  gap?: number,
+  place?: Placement,
+  align?: Alignment
 }>) {
-   const {
-      ref,
-      $classes,
-      tooltip,
-      tail = true,
-      Slot,
-      place,
-      align,
-      gap,
-      ...props
-   } = setup
+  const {
+    ref,
+    $classes,
+    tooltip,
+    tail = true,
+    Slot,
+    place,
+    align,
+    gap,
+    ...props
+  } = setup
 
-   tooltip.configure({ placement: place, alignment: align, gap })
+  tooltip.configure({ placement: place, alignment: align, gap })
 
-   /* FIX: flipping happens AFTER transition origin and slide in is already determined, so tooltip slides in from wrong direction if tooltip is flipped. How do we delay transition until after the flip? */
-   // TODO: fix tailwind class intellisense
-   const slideIn = () => `${tooltip.above ? 'slide-in-from-bottom-2' : tooltip.below ? 'slide-in-from-top-2' : tooltip.left ? 'slide-in-from-right-2' : 'slide-in-from-left-2'}`
-   const animateIn = `animate-in fade-in-0 zoom-in-95`
-   const animateOut = `animate-out fade-out-0 zoom-out-95`
+  /* FIX: flipping happens AFTER transition origin and slide in is already determined, so tooltip slides in from wrong direction if tooltip is flipped. How do we delay transition until after the flip? */
+  // TODO: fix tailwind class intellisense
+  const slideIn = () => `${tooltip.above ? 'slide-in-from-bottom-2' : tooltip.below ? 'slide-in-from-top-2' : tooltip.left ? 'slide-in-from-right-2' : 'slide-in-from-left-2'}`
+  const animateIn = `animate-in fade-in-0 zoom-in-95`
+  const animateOut = `animate-out fade-out-0 zoom-out-95`
 
-   return component(
-      <o--body>
-         <TooltipRoot
-            animate-in={(animateIn + ' ' + slideIn())}
-            animate-out={animateOut}
-            // transit-key='tooltip'
-            // animate-item
-            tooltip={tooltip}>
-            <TooltipContent
-               class={(mergeTailwind(
-                  `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
-                  $classes()
-               ))}
-               {...props}
-            >
-               {Slot()}
-            </TooltipContent>
-            <TooltipTail
-               class={`size-2.5`}
-               shape:class='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'
-            >
-            </TooltipTail>
-         </TooltipRoot>
-      </o--body>
-   )
+  return component(
+    <o--body>
+      <TooltipRoot
+        animate-in={(animateIn + ' ' + slideIn())}
+        animate-out={animateOut}
+        // transit-key='tooltip'
+        // animate-item
+        tooltip={tooltip}>
+        <TooltipContent
+          class={(mergeTailwind(
+            `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
+            $classes()
+          ))}
+          {...props}
+        >
+          {Slot()}
+        </TooltipContent>
+        <TooltipTail
+          class={`size-2.5`}
+          shape:class='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'
+        >
+        </TooltipTail>
+      </TooltipRoot>
+    </o--body>
+  )
 }
 
 export { Tooltip }

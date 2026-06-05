@@ -74,7 +74,6 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
       return (node: HTMLElement) => {
          if (explicitAnchors.has(key)) return;
          explicitAnchors.add(key)
-         // @ts-expect-error
          node.style.anchorName
             = anchorRoot + '-' + key
          node.setAttribute(DATA_ATTRIBUTE_POPOVER, anchorRoot + '-' + key)

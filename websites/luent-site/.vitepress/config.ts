@@ -17,27 +17,122 @@ export default defineConfig({
       dark: '/assets/luent-logo-dark.png',
       light: '/assets/luent-logo-light.png'
     },
+    search: {
+      provider: 'local'
+    },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Learn', link: '/' },
-      { text: 'Play', link: '/markdown-examples' },
       { text: 'API', link: '/markdown-examples' },
+      { text: 'Demos', link: '/markdown-examples' },
+      { text: 'Code Glimpses', link: '/markdown-examples' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
-      { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' }
+      { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
+      { text: 'Introducing NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
     ],
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Learn',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
+          { text: 'nsx/tsx' }
         ]
-      }
+      },
+      {
+        text: 'Essentials',
+        items: [
+          { text: 'Anatomy of an App', link: '/guide/anatomy-of-an-app' },
+          {
+            text: 'Reactive State', link: '/guide/reactive-state', items: [
+              // { text: 'Atomic Reactive State', link: '/guide/getter-syntax#accessor-variables' },
+              // { text: 'Derived Reactive State', link: '/guide/getter-syntax#accessor-variables' },
+              // { text: 'Inline Derivations', link: '/guide/getter-syntax#the-postfix-operator' },
+              // { text: 'Reactive Structures', link: '/guide/getter-syntax#the-postfix-operator' },
+              // { text: 'Encapsulation', link: '/guide/getter-syntax#the-postfix-operator' },
+              // { text: 'Debugging', link: '/guide/getter-syntax#the-postfix-operator' },
+            ]
+          },
+          { text: 'Reactive Structures', link: '/guide/reactive-structures' },
+          {
+            text: 'Dynamic Templates', link: '/markdown-examples', items: [
+              // { text: 'Iterative Rendering', link: '/guide/' },
+              // { text: 'Control Flow', link: '/guide/' },
+              // { text: 'Dynamic Views', link: '/guide/' },
+              // { text: 'Preserving Views', link: '/guide/' },
+              // { text: 'Lifecycle Hooks', link: '/guide/' },
+            ]
+          },
+          {
+            text: 'Element Bindings', link: '/markdown-examples', items: [
+              // { text: 'Events', link: '/guide/' },
+              // { text: 'Styles', link: '/guide/' },
+              // { text: 'Attributes', link: '/guide/' }
+            ]
+          },
+          {
+            text: 'Component Bindings', link: '/markdown-examples', items: [
+              // { text: 'Direct Input', link: '/guide/' },
+              // { text: 'Indirect Input', link: '/guide/' },
+              // { text: 'Dependency Injection', link: '/guide/' },
+              // { text: 'Events', link: '/guide/' },
+              // { text: 'Styles', link: '/guide/' },
+              // { text: 'Slots', link: '/guide/' },
+              // { text: 'Auto-binding', link: '/guide/' }
+            ]
+          },
+          { text: 'Portals', link: '/guide/' },
+          { text: 'Node Access', link: '/guide/' },
+          { text: 'Reusable Logic', link: '/guide/reusable-logic' }
+        ]
+      },
+      {
+        text: 'Extended Topics',
+        items: [
+          {
+            text: 'More Bindings', link: '/markdown-examples', items: [
+              // { text: 'Transitions', link: '/guide/' },
+              // { text: 'Lifecycle Hooks', link: '/guide/' },
+              // { text: 'Mutable Bindings', link: '/guide/' },
+            ]
+          },
+          {
+            text: 'More Reactivity', link: '/markdown-examples', items: [
+              // { text: 'Finite States', link: '/guide/' },
+              // { text: 'Writable Derivations', link: '/guide/' },
+              // { text: 'Reactive Tasks', link: '/guide/' },
+              // { text: 'Untracked', link: '/guide/' },
+              // { text: 'Debugging Reactivity', link: '/guide/' },
+              // { text: 'Custom Reactive Structures', link: '/guide/' },
+            ]
+          },
+                    {
+            text: 'More Dynamic Rendering', link: '/markdown-examples', items: [
+              // { text: 'Error Rendering', link: '/guide/' },
+              // { text: 'Async Rendering', link: '/guide/' },
+              // { text: 'Prioritized Rendering', link: '/guide/' },
+              // { text: 'Lazy Loading', link: '/guide/' },
+            ]
+          },
+        ]
+      },
+      {
+        text: 'Special Topics',
+        items: [
+          { text: 'Schedulers', link: '/guide/' },
+          { text: 'Cleanup', link: '/guide/' },
+          { text: 'Client-side Routing [planned]', link: '/markdown-examples' },
+          { text: 'Server Side [planned]' }
+        ]
+      },
     ],
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ruby-cube/luent/' }
-    ]
-  }
+    ],
+
+    outline: {
+      level: [2, 3]
+    }
+  },
+  lastUpdated: true,
 })

@@ -275,7 +275,7 @@ function Dialog({ Slot }) {
    const close = () => { opened = false }
 
    return JSXComponent({
-      Slot: <>
+      slot: <>
          {If(opened, 
             <o--body>
                <div>{Slot()}</div>

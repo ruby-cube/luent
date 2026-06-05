@@ -66,7 +66,7 @@ export function TreeApp({ data = getTreeData() }) {
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItem item={root} can:addChildTo={addChildTo}></TreeItem>
          </ul>
-         <o--link href='/src/demos/tree-view.css' rel='stylesheet' />
+         <o-link href='/src/demos/tree-view.css' rel='stylesheet' />
       </>
 
    )

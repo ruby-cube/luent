@@ -1,4 +1,4 @@
-import { TagName, makeJSXNode, RenderSlot, Context, RawJSXNode, ComponentTag } from "../src/index";
+import { TagName, makeJSXNode, RenderSlot, Context, RawJSXNode, ComponentTag } from "../index";
 import { AnyObject } from "@rue/types";
 import { isPlainObject, normalizeToArray } from "@rue/utils";
 
@@ -19,7 +19,6 @@ export function jsx(nodeType: TagName | ComponentTag, config: { children: Render
    const Slot = config.children;
    delete config.children
    config.Slot = Slot ?? config.Slot;
-   console.log('Slot name, jsx', Slot, config.children)
    if (nodeType === Context) {
       return Context({ Slot, provide: config.provide } as any)
    }
