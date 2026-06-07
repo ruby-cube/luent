@@ -54,7 +54,7 @@ export default defineConfig({
           },
           { text: 'Reactive Structures', link: '/guide/reactive-structures' },
           {
-            text: 'Dynamic Templates', link: '/markdown-examples', items: [
+            text: 'Template Control Flow', link: '/guide/template-control-flow', items: [
               // { text: 'Iterative Rendering', link: '/guide/' },
               // { text: 'Control Flow', link: '/guide/' },
               // { text: 'Dynamic Views', link: '/guide/' },
@@ -80,7 +80,9 @@ export default defineConfig({
               // { text: 'Auto-binding', link: '/guide/' }
             ]
           },
-          { text: 'Portals', link: '/guide/' },
+
+          { text: 'Contextual Bindings', link: '/guide/portals' },
+          { text: 'Lifecycle Hooks', link: '/guide/portals' },
           { text: 'Node Access', link: '/guide/' },
           { text: 'Reusable Logic', link: '/guide/reusable-logic' }
         ]
@@ -88,13 +90,6 @@ export default defineConfig({
       {
         text: 'Extended Topics',
         items: [
-          {
-            text: 'More Bindings', link: '/markdown-examples', items: [
-              // { text: 'Transitions', link: '/guide/' },
-              // { text: 'Lifecycle Hooks', link: '/guide/' },
-              // { text: 'Mutable Bindings', link: '/guide/' },
-            ]
-          },
           {
             text: 'More Reactivity', link: '/markdown-examples', items: [
               // { text: 'Finite States', link: '/guide/' },
@@ -105,8 +100,8 @@ export default defineConfig({
               // { text: 'Custom Reactive Structures', link: '/guide/' },
             ]
           },
-                    {
-            text: 'More Dynamic Rendering', link: '/markdown-examples', items: [
+          {
+            text: 'More Control Flow', link: '/guide/more-control-flow', items: [
               // { text: 'Error Rendering', link: '/guide/' },
               // { text: 'Async Rendering', link: '/guide/' },
               // { text: 'Prioritized Rendering', link: '/guide/' },
@@ -118,6 +113,9 @@ export default defineConfig({
       {
         text: 'Special Topics',
         items: [
+          { text: 'Mutable Bindings', link: '/guide/' },
+          { text: 'Portals', link: '/guide/portals' },
+          { text: 'Transitions', link: '/guide/transitions' },
           { text: 'Schedulers', link: '/guide/' },
           { text: 'Cleanup', link: '/guide/' },
           { text: 'Client-side Routing [planned]', link: '/markdown-examples' },

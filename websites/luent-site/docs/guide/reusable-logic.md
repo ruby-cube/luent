@@ -1,10 +1,12 @@
 # Reusable Logic
 As applications grow, components often need to share the same stateful behavior. Rather than rewriting similar logic across multiple components, logic may be extracted and composed independently of components. This makes logic easier to reuse, test, and maintain.
 
-## Stateful Kits
-Stateful kits are reusable and composable units of stateful logic. They can encapsulate reactive state, methods, derivations, effects, and cleanup behavior, while remaining simple to consume through destructuring.
+## Kits
+Kits are reusable, composable units of application logic. They are headless counterparts to components, encapsulating reactive state, methods, derivations, effects, and cleanup behavior while remaining decoupled from rendering.
 
-### Defining a stateful kit
+Kits expose their reactive state and methods through plain objects, making them simple to consume through destructuring.
+
+### Defining a kit factory
 
 ```tsx
 export function CounterKit(startCount: number) {
@@ -26,20 +28,20 @@ export function CounterKit(startCount: number) {
 }
 ```
 
-### Using a stateful kit
+### Creating a kit
 ```tsx
 import { CounterKit } from "./CounterKit"
 
 function App() {
    const { count@, incrementCount, decrementCount } = CounterKit(0)
    
-   <Component>
+   <:component>
       <div>
          <div>{count@}</div>
          <button on:click={incrementCount}>+</button>
          <button on:click={decrementCount}>-</button>
       </div>
-   </Component>
+   </:component>
 }
 ```
 

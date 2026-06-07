@@ -144,3 +144,26 @@
     height: 27px;
   }
 }
+
+.doc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: .5rem;
+
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+
+  /* border: 1px solid color-mix(in srgb, currentColor 18%, transparent); */
+  background: color-mix(in srgb, currentColor 10%, transparent);
+
+  vertical-align: middle;
+  white-space: nowrap;
+}
+

@@ -52,9 +52,9 @@ Experimental areas:
 
 ### JSX Transpiler
 
-Luent transpiles JSX using the standard JSX transpiler for easy mental mapping. Luent additionally extends the transpiler with three minimal transforms:
-- JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parents are created before children. E.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
-- JSX flow expressions ([designated JSX call expressions that form a control flow series]()) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile-time for better runtime performance.
+Luent transpiles JSX into basic `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It additionally extends the base JSX transform with three minimal transforms:
+- JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants, e.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
+- [JSX flow expressions](http://luent.dev/guide/template-control-flow) (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead.
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
 
 The following JSX template...
@@ -95,8 +95,8 @@ jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
 ## Design Principles
 Luent is being developed under these guiding principles, which encapsulate our values and how we navigate tradeoffs:
 
-- **Human-centered, AI-friendly.**
-We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we often create systems that are naturally AI-friendly as well.
+- **Human-centered, LLM-friendly.**
+We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we often create systems that are naturally LLM-friendly as well.
 
 - **Elegance and simplicity.**
 Elegance—both conceptual and syntactic—is central to Luent’s API design. We pursue simple solutions through extensive experimentation and relentless trimming of excess.
