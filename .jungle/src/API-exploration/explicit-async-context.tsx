@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { atMounted, template, FromTag, listen } from "@rue/luent";
+import { atMount, template, FromTag, listen } from "@rue/luent";
 
 type ThisComponent = {
    context: any,
-   atMounted(): void
+   atMount(): void
 }
 
 
@@ -22,7 +22,7 @@ function MessageForm(this: ThisView, {
 
    const thus = this.with({ TextKit, doSomething })
 
-   this.atMounted(() => {
+   this.atMount(() => {
 
    })
 
@@ -37,7 +37,7 @@ function MessageForm(this: ThisView, {
 
 
 
-   this.atRemounted(() => {
+   this.atRemount(() => {
 
    })
 
@@ -75,7 +75,7 @@ function MessageForm(this: ThisView, {
 }
 
 const compo = {
-   atMounted() { },
+   atMount() { },
    with(methods) {
       return new Proxy(this, {
          get(target, key) {
@@ -95,7 +95,7 @@ function TextKit(this: ThisView, files: any) {
 
    const $text = ion('hi')
 
-   this.atMounted(() => {
+   this.atMount(() => {
 
    })
 

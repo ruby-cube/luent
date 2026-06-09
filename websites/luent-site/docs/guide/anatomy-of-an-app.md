@@ -2,9 +2,9 @@
 
 ## Mounting an App
 There are three main steps to mounting an app with Luent.
-- defining one or more [components](#component-anatomy) through component factories
-- mounting a root component to a designated HTML element
-- loading the script in the HTML document
+- defining the app with one or more [components](#component-anatomy)
+- mounting the root component to an HTML element
+- loading the entry script in the HTML document
 
 **Define the app**
 ```tsx
@@ -16,10 +16,11 @@ function HelloWorld() {
 ```
 **Designate an app container in HTML**
 ```html
-<div id='app'></div>
+<div id="app"></div>
 ```
 
 **Instantiate and mount the app**
+
 via selector
 ```tsx
 // main.tsx
@@ -27,7 +28,7 @@ createRoot(() =>
   <HelloWorld/>
 ).mount('#app')
 ```
-or pass in the DOM node
+or by passing a DOM node
 ```tsx
 const div = document.querySelector('#app')
 
@@ -36,7 +37,7 @@ createRoot(() =>
 ).mount(div)
 ```
 
-**Load entry scripts in HTML**
+**Load the entry script**
 ```html
 <script type="module" src="/main.tsx"></script>
 ```
@@ -44,13 +45,15 @@ createRoot(() =>
 
 ## Component Anatomy
 
-Components are the building blocks of an app. They are defined through component factories. A function is a component factory if:
-- it returns a `ComponentKit`
-  - component kits are created by passing a [JSX template](#jsx-templates) to `component()`
-- it declares one or zero parameters
-- its parameter (if any) expects a `FromTag` object
+Components are the building blocks of an app. They are defined through component factories. 
 
-Functions that fulfill these requirements may render nodes in a JSX template by instantiating it through its tag form.
+A function is considered a component factory when it:
+- declares zero or one parameter
+- expects a `FromTag` object when a parameter is declared
+- returns a `ComponentKit`
+Component kits are created by passing a [JSX template](#jsx-templates) to `component()`
+
+Functions that satisfy these requirements may be instantiated through their JSX tag form.
 
 :::info Type definitions
 ```ts

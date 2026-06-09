@@ -1,4 +1,4 @@
-import { createMemoizedDerivation, Ion, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
+import { createMemoizedDerivation, Ion, PRELUDE, atRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
@@ -105,7 +105,7 @@ export class IndexedListKit extends VineNode {
             kit.preceding = preceding;
             mountDOMNodes(kit.nodes!, fragment)
          }
-         queueRender(() => {
+         atRender(() => {
             // mount to fragment
             mountFragment(fragment, kits[previousLength].precedingLeaf, this.parent)
          })
@@ -119,7 +119,7 @@ export class IndexedListKit extends VineNode {
          const removed = kits.splice(length, previousLength - length)
 
          for (const kit of removed) {
-            queueRender(() => {
+            atRender(() => {
                removeDOMNodes(kit.nodes!)
                kit.nodes = undefined;
             })

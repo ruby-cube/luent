@@ -512,17 +512,17 @@ function Setup() {
 
    return function setup<T>(setupFn: () => T) {
       let stub = setupFn()
-      flask.atRemount(() => stub = setupFn)
+      flask.beforeRemount(() => stub = setupFn)
       return {
          cleanup(cleanUp?: (stub: T) => void) {
             if (cleanUp) {
-               flask.atDemount(() => cleanUp(stub))
+               flask.beforeDemount(() => cleanUp(stub))
                flask.onDiscard(() => cleanUp(stub))
             }
             else {
                if (!(stub instanceof Function) || stub.length !== 0)
                   throw new Error('Must provide a cleanup function that expects no arguments')
-               flask.atDemount(stub)
+               flask.beforeDemount(stub)
                flask.onDiscard(stub)
             }
          }

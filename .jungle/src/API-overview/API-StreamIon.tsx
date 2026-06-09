@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, atMounted, atUnmount, template } from "@rue/luent";
+import { component, atMount, beforeUnmount, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { resolve } from "path";
 
@@ -65,7 +65,7 @@ export function DinoLogo() {
          delay: 5000,
          x: 1000,
       },
-      until: atUnmount
+      until: beforeUnmount
    })
 
    animation.start();
@@ -85,7 +85,7 @@ export function DinoLogo() {
    //          end()
    //       }, {
    //          time: 5000,
-   //          until: atUnmount,
+   //          until: beforeUnmount,
    //       })
    //    )
    // }
@@ -270,7 +270,7 @@ export function DinoLogo() {
                $blink.value = true
             }
          }, 500)
-      atUnmount(() => {
+      beforeUnmount(() => {
          clearInterval(interval)
       })
    }
@@ -287,7 +287,7 @@ export function DinoLogo() {
       }, {
          state: { count: 0 },
          interval: 500,
-         until: atUnmount
+         until: beforeUnmount
       })
 
 
@@ -301,7 +301,7 @@ export function DinoLogo() {
                $blink.value = true
             }
          }, 500)
-      atUnmount(() => {
+      beforeUnmount(() => {
          clearInterval(interval)
       })
    }
@@ -322,7 +322,7 @@ export function DinoLogo() {
                   end()
                }
             }, 500)
-         atUnmount(() => {
+         beforeUnmount(() => {
             clearInterval(interval)
          })
       })

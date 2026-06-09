@@ -212,7 +212,7 @@ function TodoList({ removeTodo, todos@ }: FromTag<TodoListInput>) {
                         class="edit"
                         type="text"
                         mu:value={todo.title@}
-                        at:mounted={node => node.focus()}
+                        at:mount={node => node.focus()}
                         on:blur={e => doneEdit(todo)}
                         on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                      />

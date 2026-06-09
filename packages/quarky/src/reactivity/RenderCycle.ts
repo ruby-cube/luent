@@ -279,6 +279,8 @@ export function getCurrentPhase() {
 }
 
 
+// TODO: need to address context loss through compiler
+
 let _prelude: Promise<void> | undefined = undefined
 let _render: Promise<void> | undefined = undefined
 let _layout: Promise<void> | undefined = undefined
@@ -286,7 +288,7 @@ let _tick: Promise<void> | undefined = undefined
 
 export function $prelude() {
    return _prelude ?? (_prelude = new Promise<void>(resolve => {
-      queuePrelude(() => {
+      atPrelude(() => {
          const prelude = _prelude
          _prelude = undefined
          resolve()
@@ -297,7 +299,7 @@ export function $prelude() {
 
 export function $render() {
    return _render ?? (_render = new Promise<void>(resolve => {
-      queueRender(() => {
+      atRender(() => {
          const render = _render
          _render = undefined
          resolve()
@@ -308,7 +310,7 @@ export function $render() {
 
 export function $layout() {
    return _layout ?? (_layout = new Promise<void>(resolve => {
-      queueLayout(() => {
+      atLayout(() => {
          const layout = _layout
          _layout = undefined
          resolve()
@@ -333,19 +335,19 @@ export function $tick() {
 
 
 
-export function queuePrelude(task: Task) {
+export function atPrelude(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
 }
 
-export function queueRender(task: Task) {
+export function atRender(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, RENDER)
 }
 
-export function queueLayout(task: Task) {
+export function atLayout(task: Task) {
    $activeUpdate()?.cycle.scheduleTask(task, LAYOUT)
 }
 
-export function queueTick(task: Task) {
+export function atTick(task: Task) {
    requestAnimationFrame(() => {
       queueTask(task)
    })

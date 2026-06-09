@@ -1,7 +1,7 @@
-import { queueRender, queueTask, toValue } from "@rue/quarky"
+import { atRender, queueTask, toValue } from "@rue/quarky"
 import { AnyObject } from "@rue/types"
 import { MaybeIon } from "../component/x-Input"
-import { atMounted, atUnmount } from "../flask/flask-hooks"
+import { atMount, beforeUnmount } from "../flask/flask-hooks"
 import { getTransition } from "./Transition"
 import { setUpPositionTransition, setUpTransit } from "./transit"
 import { createStack } from "@rue/utils"
@@ -111,7 +111,7 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
    const toClasses = transitions['transition-out-to'] ?? transitionConfig?.["transition-out-to"]// TODO: ??? not sure
 
    if (animateInClasses || transitionInClasses) {
-      atMounted(() => {
+      atMount(() => {
          if (!animateLoad && initialRender) return;
          transitionIn(node, (clone) => {
             let endTransition: () => void
@@ -155,7 +155,7 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
    if (animateOutClasses || transitionOutClasses) {
       const flask = getFlask()
 
-      atUnmount(() => {
+      beforeUnmount(() => {
          transitioningOut.add(flask)
 
          transitionOut(node, (clone) => {
@@ -364,7 +364,7 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
 
    console.log('transition out clone', clone.childNodes[0])
 
-   queueRender(() => {
+   atRender(() => {
       const transition = createTransition(clone)
       transition.start()
 

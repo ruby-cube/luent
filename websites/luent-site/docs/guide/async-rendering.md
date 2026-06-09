@@ -1,54 +1,11 @@
-# More Control Flow
-Luent provides specialized template control flow functions for handling rendering failures and asynchronous rendering states.
- 
-## Error rendering
-`Try`/`Catch` render a fallback when part of a template throws during rendering. `Try()` delineates the scope of the error boundary, which extends until nested `Try`/`Catch`s. 
-
-The render function passed to `Catch()` receives the thrown error and a retry function that attempts to render the failed template again.
-
-```tsx
-<div>
-  {Try(
-    <Foo/>
-  )}
-  {Catch((error, retry) =>
-    <ErrorNotice error={error} retry={retry}/>
-  )}
-</div>
-```
-
-### Rendering errors elsewhere
-Errors do not need to be rendered in place of the failed template. Use `ErrableView()` when error state should be exposed elsewhere. This is useful when the error UI belongs in a shared location, such as a banner, sidebar, toast region, or page-level notice.
-
-```tsx
-function FooApp() {
-  const errable = ErrableView()
-
-  return component(
-    <Notices>
-      {If($of(errable).error, 
-        <ErrorNotice error={errable.error} retry={() => errable.retry()}/>
-      )}
-    </Notices>
-    <div>
-      <h1>Welcome</h1>
-      {Try(
-        <Foo/>
-      )}
-      {Catch(errable)}
-    </div>
-  )
-}
-```
-
-## Async rendering
-In Luent, suspense refers to pending state based on one or more promises. It is essentially a batch promise similar to `Promise.all()` containing the parallel promises of async ions. 
+# Async rendering
+In Luent, suspense refers to pending state based on one or more promises. It is essentially a batch promise similar to `Promise.all()` that resolves based on the parallel promises of async ions. 
 
 There are two ways to create suspense:
 - through a suspense boundary created by `Await()`
 - through manual suspense creation
 
-### Suspense boundaries
+## Suspense boundaries
 `Await()` delineates a suspense boundary that encompasses any awaited async ions within the awaited view but outside of any nested awaited views. Awaited async ions are ions created with the `{ '-awaited': true }` option.
 
 The awaited view is not rendered until suspense is unresolved.
@@ -82,7 +39,7 @@ function Foo() {
 ```
 Notice in the above example, there are two suspense boundaries. `Await(<Foo/>)` will not wait for any awaited async ions within `<Bar/>`.
 
-### Rendering suspense views
+## Rendering suspense views
 When a suspense boundary is created by `Await()`, a suspense view (placeholder) can be rendered while the awaited view is pending. 
 
 `Meanwhile()` renders an initial loading view before the awaited template has resolved. `OnReawait()` renders subsequent placeholder views if the awaited template becomes pending again.
@@ -98,7 +55,7 @@ When a suspense boundary is created by `Await()`, a suspense view (placeholder) 
 ```
 
 
-### Rendering suspense in resolved views
+## Rendering suspense in resolved views
 Refetching awaited async ions causes resolved views to re-enter a pending state. If a suspense view is not provided for subsequent pending states via `OnReawait()`, suspense may be rendered in the resolved view itself via the `$suspense` argument. 
 
 The `$suspense` argument is the [suspense ion](#manual-suspense) created by `Await()`. It contains an unresolved batch promise, indicating a pending state, or null, indicating a resolved state.
@@ -115,7 +72,7 @@ The `$suspense` argument is the [suspense ion](#manual-suspense) created by `Awa
 </div>
 ```
 
-### Manual Suspense
+## Manual Suspense
 A suspense ion--an ion containing a batch promise or `null`--may be created with `Suspense()`. Promises are then collected by the suspense ion by passing it to an async ion's `'-awaited'` option. 
 
 ```tsx
@@ -142,7 +99,7 @@ function App() {
 ```
 
 
-### Manual suspense with suspense boundaries
+## Manual suspense with suspense boundaries
 `Suspense()` is also useful when pending state should be shared outside a suspense boundary. This allows loading indicators, progress bars, or parent-level UI to reflect the same pending state as the async boundary. 
 
 Simply pass the suspense ion as the first argument of `Await()`.
@@ -200,7 +157,7 @@ function Foo(setup: FromTag<{
 }
 ```
 
-## Ionic fetching
+# Ionic fetching
 ```ts
 const $user
 
@@ -225,7 +182,7 @@ const $suspense = Suspense()
 </div>
 ```
 
-## Awaiting async ions
+# Awaiting async ions
 `Await()` can also await an async ion rather than a pending view, which is useful when the fetch is initiated outside the view itself.
 
 ```tsx
@@ -245,7 +202,7 @@ const $cities = ion('', {
 </div>
 ```
 
-### Rendering async resolution errors
+## Rendering async resolution errors
 Similar to the `Try`/`Catch` series, async resolution errors may be rendered through a `Catch()` expression.
 
 ```tsx
@@ -263,3 +220,8 @@ Similar to the `Try`/`Catch` series, async resolution errors may be rendered thr
   )}
 </div>
 ```
+<p align="right"><a href="#async-rendering">[top]</a></p>
+
+:::info Under construction
+This article is a work in progress and may contain incomplete documentation.
+:::

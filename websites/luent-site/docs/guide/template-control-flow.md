@@ -1,7 +1,33 @@
 # Template Control Flow
-Dynamic rendering of templates, such as conditional or iterative templates, is achieved through template control flow functions. 
+Luent offers three main ways of rendering templates based on control flow:
+- JSX flow expressions
+- JavaScript control flow for static-only rendering
+- the `show-if` attribute for conditional display
 
-Template function calls, or JSX flow expressions, are only valid within a JSX template. The last parameter of a template function, known as the template slot, takes in a render function. For convenience and readability, the slot argument may be written in shorthand as a JSX template. Luent's JSX transpiler normalizes the slot position of flow expressions into render functions.
+Template control flow may render either static views or dynamic views. A view is dynamic when its presence in the DOM is determined by reactive state.
+
+
+## Template Control Flow Series
+Luent provides the following series of primitive template functions for writing template control flow:
+
+**Iterative rendering**
+- `For`
+- `Thru`
+
+**Conditional rendering**
+- `If/ElseIf/Else`
+- `Match/Case/Default`
+- `As`
+
+Additionally, the following [specialized control flow series]() are provided for async and error rendering.
+- `Await`/`Meanwhile`/`OnReawait`/`Catch`
+- `Try`/`Catch`
+
+
+## JSX Flow Expressions
+Template control flow function calls, or JSX flow expressions, are only valid within a JSX template. The last parameter of a template function, known as the template slot, takes in a render function. 
+
+For convenience and readability, the slot argument may be written in shorthand as a JSX template. Luent's JSX transpiler normalizes the slot position of flow expressions into render functions.
 
 For example:
 
@@ -22,7 +48,8 @@ For example:
 </div>
 ```
 
-Note that some template control functions may contain optional parameters *before* the slot argument.
+### Optional parameters
+Some template control functions may take in optional arguments *before* the slot argument since the slot parameter is always the final parameter of a template function.
 ```tsx
 <div>
   {If(active, 'remount',
@@ -31,13 +58,18 @@ Note that some template control functions may contain optional parameters *befor
 </div>
 ```
 
-Luent offers the basic control flow primitives described on this page as well as [specialized control flow]() for async rendering and error boundaries.
+
 
 ## Iterative Rendering
 Luent provides two functions for template iterations: `For()` and `Thru()`. `For()` renders iterables while `Thru()` renders number ranges.
 
-### Static `For()`
-When passed a non-reactive iterable, `For()` renders items statically, meaning it is rendered once and not updated when the collection changes.
+### Static iteratives
+
+There are two main ways of rendering static iterative templates:
+
+**with `For` and `Thru`**
+
+When passed a non-reactive iterable, `For()` and `Thru()` render items statically, meaning the collection are rendered once and not updated when the collection changes.
 
 ```tsx
 function FruitList() {
@@ -51,6 +83,17 @@ function FruitList() {
     </ul>
   )
 }
+```
+
+**with JavaScript `Array.map()`**
+
+Static lists may also be rendered through a JavaScript array's `map` method.
+```tsx
+<ul>
+  {fruits.map((fruit, index) => {
+    <li>{index + 1}. {fruit}</li>
+  })}
+</ul>
 ```
 
 ### Reactive `For()`
@@ -197,8 +240,20 @@ Luent provides three distinct control flow functions for static and reactive con
 - `As` for rendering a template as the active case
 - `Match`/`Case` for diverse case rendering
 
-### Static conditional rendering
-In addition to these dedicated control flow functions, static-only conditional rendering may be also achieved through JavaScript ternaries and if/else statements.
+Luent also exposes a display-toggle attribute, `show-if` on elements to ergonomically show or hide an element. 
+
+### Conditional display
+`show-if` is a hybrid of static and dynamic rendering. It lazily mounts the element to the DOM if its initial state is false. Once mounted, the element remains in the DOM and Luent toggles its CSS display property based on the state of `show-if`.
+
+```tsx
+<div show-if={$active}>Hello world</div>
+<button on:click={$active.toggle}>
+  {() => $active() ? 'hide' : 'show'}
+</button>
+```
+
+### Static-only conditionals
+Static conditional rendering may be also achieved through JavaScript ternaries and if/else statements.
 
 **with if/else statements**
 ```tsx
@@ -229,7 +284,6 @@ function Foo(setup: FromTag<{
   )
 }
 ```
-
 
 ### `If`/`Else`
 The `If()`, `ElseIf()`, and `Else()` control flow functions render ordered conditional branching. `If`/`Else` series must start with an `If()` call. Additional branches (if any), must directly follow the opening `If()`.
@@ -294,9 +348,25 @@ function TabContent() {
 </main>
 ```
 
-Although each case uses the same template, `As()` gives each case identity its own view. When wrapped in a `<remount-view>` node, changing case identities remounts the active view while caching inactive views for later reuse.
+#### Preserving views
+Although each case uses the same template, `As()` gives each case identity its own view. The views may be preserved by passing in the 'remount' mount type. Changing case identities remounts the active view while caching inactive views for later reuse. 
 
-To manually discard cached views, pass in a views object to `As()`. Luent will populate it with view objects containing a `markDiscard()` method.
+```tsx
+<main>
+  {As($tab, 'remount', tab =>
+    <div>
+      <Tab page={pages[tab]} />
+    </div>
+  ))}
+  {Default(
+    <div>No tabs open</div>
+  )}
+</main>
+```
+See: [Preserving Views](/guide/preserving-views)
+
+#### Discarding preserved views
+To discard preserved views, pass in a views object in place of 'remount'. Luent will populate it with view objects containing a `markDiscard()` method.
 
 ```tsx
 function closeTab(tab: number) {
@@ -306,25 +376,23 @@ function closeTab(tab: number) {
 
 <nav class="inline">
   {For(openTabs, u => u, tab => (
-      <div 
-        class={($tab() === tab && 'selected')} 
-        on:click={e => { !e.from('span') && ($tab.value = tab) }}
-      >
-        {tabNames[tab]}
-        <span on:click={() => closeTab(tab)}>x</span>
-      </div>
+    <div 
+      class={($tab() === tab && 'selected')} 
+      on:click={e => { !e.from('span') && ($tab.value = tab) }}
+    >
+      {tabNames[tab]}
+      <span on:click={() => closeTab(tab)}>x</span>
+    </div>
   ))}
 </nav>
 <main>
-  <remount-view>
-    {As($tab, views, tab =>
-      <div>
-        <Tab page={pages[tab]} />
-      </div>
-    ))}
-    {Default(
-      <div>No tabs open</div>
-    )}
-  </remount-view>
+  {As($tab, views, tab =>
+    <div>
+      <Tab page={pages[tab]} />
+    </div>
+  ))}
+  {Default(
+    <div>No tabs open</div>
+  )}
 </main>
 ```

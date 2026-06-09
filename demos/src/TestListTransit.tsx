@@ -1,5 +1,5 @@
 import { component, template, For, FromTag, Style, css } from "@rue/luent";
-import { ion, ionic, EACH, Ion, Ionic, queueRender, queueTask } from "@rue/quarky";
+import { ion, ionic, EACH, Ion, Ionic, atRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 
 // Modified Demo from Svelte
@@ -97,7 +97,7 @@ function receive(id: number, node: HTMLElement) {
    const first = sent.get(id)
    if (first) {
       const last = node.getBoundingClientRect()
-      queueRender(() => {
+      atRender(() => {
          const deltaY = first.top - last.top
          const deltaX = first.left - last.left
          if (deltaY || deltaX) {

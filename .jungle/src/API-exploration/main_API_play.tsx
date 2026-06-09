@@ -51,7 +51,7 @@ Dynamic node
 - onCreated
 - onDiscard
 - onRemount
-- atUnmount
+- beforeUnmount
 
 context.get()
 context.getGlobal()

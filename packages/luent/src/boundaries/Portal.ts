@@ -1,9 +1,9 @@
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { isFunction, isObject, normalizeToArray } from "@rue/utils";
-import { atMounted, atUnmount, atRemounted } from "../flask/flask-hooks";
+import { atMount, beforeUnmount, atRemount } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@rue/flask";
-import { queueRender } from "@rue/quarky";
+import { atRender } from "@rue/quarky";
 
 export type MorphConfig = {}
 
@@ -54,17 +54,17 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
    setUpNodeVine(nodes, element)
    const flask = getFlask()
 
-   queueRender(() => {
+   atRender(() => {
       mountDOMNodes(nodes, element)
    })
 
-   atUnmount((final) => {
-      queueRender(() => {
+   beforeUnmount((final) => {
+      atRender(() => {
          removeDOMNodes(nodes)
       })
    })
 
-   atRemounted(() => {
+   atRemount(() => {
       mountDOMNodes(nodes, element)
    })
 

@@ -1,4 +1,4 @@
-import { component, atUnmount, template } from "@rue/luent";
+import { component, beforeUnmount, template } from "@rue/luent";
 import { queueIonicTask, Ion, Ionized, SYNC, watch } from "@rue/quarky";
 
 export function DateApp() {
@@ -15,7 +15,7 @@ export function DateApp() {
       date.setTime(Date.now());
    }, 1000);
 
-   atUnmount(() => clearInterval(interval))
+   beforeUnmount(() => clearInterval(interval))
 
    return component(
       <p>The time is {(format(date))}</p>

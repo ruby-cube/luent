@@ -1,7 +1,7 @@
 import { isObject } from "@rue/utils"
 import { DOMNode } from "../../../../packages/luent/src/node/VineNode"
 import { getActiveFlask } from "@rue/flask"
-import { atMounted, atUnmount, queueRender, queueTask } from "@rue/luent"
+import { atMount, beforeUnmount, atRender, queueTask } from "@rue/luent"
 
 // class-based
 type VarKit = {
@@ -189,11 +189,11 @@ function useTransitionOutByClasses(kit: TransitionOutClassKit) {
 export function setUpTransitions(node: HTMLElement, createTransitionIn: (clone: DOMNode) => ActiveTransitionIn, createTransitionOut: (clone: DOMNode) => ActiveTransitionOut) {
    const transitioning = new Set<ActiveTransitionIn>()
 
-   atMounted(() => {
+   atMount(() => {
       transitionIn(node, createTransitionIn, transitioning)
    })
 
-   atUnmount(() => {
+   beforeUnmount(() => {
       transitionOut(node, createTransitionOut, transitioning)
    })
 }
@@ -264,7 +264,7 @@ function transitionOut(node: HTMLElement, createTransition: (clone: DOMNode) => 
    const parent = node.parentNode
    const clone = node.cloneNode(true) as HTMLElement
 
-   queueRender(() => {
+   atRender(() => {
       // - position clone
       clone.style.removeProperty('visibility')
       clone.style.setProperty('position', 'fixed')

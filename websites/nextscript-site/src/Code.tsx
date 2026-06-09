@@ -29,7 +29,7 @@ export function Code(setup: FromTag<{
         <nav>
           <button class='toggle' on:click={() => $tab.toggle()}>
             <span class='option selected' style={{ 'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined }}>{() => $tab() === 'main' ? main.name : alt.name}</span>
-            <span at:mounted={node => mainWidth = node.offsetWidth} class='option'>{main.name}</span>
+            <span at:mount={node => mainWidth = node.offsetWidth} class='option'>{main.name}</span>
             <span class='option'>{alt.name}</span>
           </button>
         </nav>

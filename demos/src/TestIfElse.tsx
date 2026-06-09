@@ -1,5 +1,5 @@
 import { component, template, If, Else, ElseIf, NodeRef, createRoot, Style, css } from "@rue/luent";
-import { ion, ooo, queueRender, queueTask, toValue, watch } from "@rue/quarky";
+import { ion, ooo, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
 

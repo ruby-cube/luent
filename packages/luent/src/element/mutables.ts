@@ -1,4 +1,4 @@
-import { isGetter, isIon, MutableIon, queueRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, watchToRender } from "@rue/quarky";
+import { isGetter, isIon, MutableIon, atRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { getFlask } from "@rue/flask";
 import {toString} from './attributes'
@@ -86,7 +86,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
    const ion = attributes['mu:value'];
    const flask = getFlask()
    watchToRender(ion, () => {
-      queueRender(() => {
+      atRender(() => {
          queueTask(() => {
             element.value = toString(toValue(ion))
          })

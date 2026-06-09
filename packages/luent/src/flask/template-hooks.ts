@@ -1,6 +1,5 @@
 import { debug, isFunction, normalizeToArray } from "@rue/utils";
-import { Flask, getFlask } from "@rue/flask";
-import { afterCreated, afterDemounted, afterDiscarded, afterMounted, afterRemounted, afterUnmounted, atCreate, atCreated, atDemount, atDemounted, atDiscard, atDiscarded, atMount, atMounted, atRemount, atRemounted, atUnmount, atUnmounted } from "./flask-hooks";
+import { afterInstall, afterDemount, afterUninstall, afterMount, afterRemount, afterUnmount, beforeInstall, atInstall, beforeDemount, atDemount, beforeUninstall, atUninstall, beforeMount, atMount, beforeRemount, atRemount, beforeUnmount, atUnmount } from "./flask-hooks";
 import { AnyObject } from "@rue/types";
 import { toValue } from "@rue/quarky";
 
@@ -12,10 +11,31 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
       if (!isFunction(value) && !(Array.isArray(value))) continue;
       const tasks = normalizeToArray(value)
       switch (key) {
-         case 'at:create':
+         case 'pre:install':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atCreate(() => task(toValue(node)))
+               beforeInstall(() => task(toValue(node)))
+            }
+            break;
+
+         case 'pre:mount':
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               beforeMount((initial) => task(toValue(node), initial))
+            }
+            break;
+
+         case 'pre:remount':
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               beforeRemount(() => task(toValue(node)))
+            }
+            break;
+
+         case 'at:install':
+            for (const task of tasks) {
+               if (!isFunction(task)) continue;
+               atInstall(() => task(toValue(node)))
             }
             break;
 
@@ -33,52 +53,52 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
             }
             break;
 
-         case 'at:created':
+         case 'post:install':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atCreated(() => task(toValue(node)))
+               afterInstall(() => task(toValue(node)))
             }
             break;
 
-         case 'at:mounted':
+         case 'post:mount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atMounted((initial) => task(toValue(node), initial))
+               afterMount((initial) => task(toValue(node), initial))
             }
             break;
 
-         case 'at:remounted':
+         case 'post:remount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atRemounted(() => task(toValue(node)))
+               afterRemount(() => task(toValue(node)))
             }
             break;
 
-         case 'after:created':
+         case 'pre:uninstall':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               afterCreated(() => task(toValue(node)))
+               beforeUninstall(() => task(toValue(node)))
             }
             break;
 
-         case 'after:mounted':
+         case 'pre:unmount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               afterMounted((initial) => task(toValue(node), initial))
+               beforeUnmount((initial) => task(toValue(node), initial))
             }
             break;
 
-         case 'after:remounted':
+         case 'pre:demount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               afterRemounted(() => task(toValue(node)))
+               beforeDemount(() => task(toValue(node)))
             }
             break;
 
-         case 'at:discard':
+         case 'at:uninstall':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atDiscard(() => task(toValue(node)))
+               atUninstall(() => task(toValue(node)))
             }
             break;
 
@@ -96,45 +116,24 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
             }
             break;
 
-         case 'at:discarded':
+         case 'post:uninstall':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atDiscarded(() => task(toValue(node)))
+               afterUninstall(() => task(toValue(node)))
             }
             break;
 
-         case 'at:unmounted':
+         case 'post:unmount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atUnmounted((initial) => task(toValue(node), initial))
+               afterUnmount((initial) => task(toValue(node), initial))
             }
             break;
 
-         case 'at:demounted':
+         case 'post:demount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
-               atDemounted(() => task(toValue(node)))
-            }
-            break;
-
-         case 'after:discarded':
-            for (const task of tasks) {
-               if (!isFunction(task)) continue;
-               afterDiscarded(() => task(toValue(node)))
-            }
-            break;
-
-         case 'after:unmounted':
-            for (const task of tasks) {
-               if (!isFunction(task)) continue;
-               afterUnmounted((initial) => task(toValue(node), initial))
-            }
-            break;
-
-         case 'after:demounted':
-            for (const task of tasks) {
-               if (!isFunction(task)) continue;
-               afterDemounted(() => task(toValue(node)))
+               afterDemount(() => task(toValue(node)))
             }
             break;
 
@@ -147,50 +146,55 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
 
 
 export interface LuentHooks<T> {
-   'at:create'?: LifecycleTask<T> | LifecycleTask<T>[] | void // allows functions to be called in the JSX expression space
-   'at:mount'?: LifecycleTask<T> | LifecycleTask<T>[] | void
+   'pre:install'?: LifecycleTask<T> | LifecycleTask<T>[] | void // allows functions to be called in the JSX expression space
+   'pre:mount'?: LifecycleTask<T> | LifecycleTask<T>[] | void
+   'pre:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
+
+   'at:install'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'at:mount'?: LifecycleTask<T> | LifecycleTask<T>[]
    'at:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:created'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:mounted'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:remounted'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'after:created'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'after:mounted'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'after:remounted'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:discard'?: LifecycleTask<T> | LifecycleTask<T>[]
+
+   'post:install'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'post:mount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'post:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
+
+   'pre:uninstall'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'pre:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'pre:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
+
+   'at:uninstall'?: LifecycleTask<T> | LifecycleTask<T>[]
    'at:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
    'at:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:discarded'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:unmounted'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'at:demounted'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'after:discarded'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'after:unmounted'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'after:demounted'?: LifecycleTask<T> | LifecycleTask<T>[]
+
+   'post:uninstall'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'post:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'post:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
 }
 
 const flaskHooks = {
-   'at:create': true,
+   'pre:install': true,
+   'pre:mount': true,
+   'pre:remount': true,
+
+   'at:install': true,
    'at:mount': true,
    'at:remount': true,
 
-   'at:created': true,
-   'at:mounted': true,
-   'at:remounted': true,
+   'post:install': true,
+   'post:mount': true,
+   'post:remount': true,
 
-   'after:created': true,
-   'after:mounted': true,
-   'after:remounted': true,
+   'pre:uninstall': true,
+   'pre:unmount': true,
+   'pre:demount': true,
 
-   'at:discard': true,
+   'at:uninstall': true,
    'at:unmount': true,
    'at:demount': true,
 
-   'at:discarded': true,
-   'at:unmounted': true,
-   'at:demounted': true,
-
-   'after:discarded': true,
-   'after:unmounted': true,
-   'after:demounted': true
+   'post:uninstall': true,
+   'post:unmount': true,
+   'post:demount': true
 }
 
 export function isFlaskLifecycleHook(attibuteName: string) {

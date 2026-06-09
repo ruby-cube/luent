@@ -1,14 +1,14 @@
-import { getActiveUpdate, queueRender, queueTask, toValue } from "@rue/quarky";
+import { getActiveUpdate, atRender, queueTask, toValue } from "@rue/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/x-Input";
 import { Flask, getFlask } from "@rue/flask";
-import { atMounted, atUnmount } from "../flask/flask-hooks";
+import { atMount, beforeUnmount } from "../flask/flask-hooks";
 
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
    atListChanged(() => {
       const first = node.getBoundingClientRect()
-      queueRender(() => {
+      atRender(() => {
          const last = node.getBoundingClientRect()
          startTransitionItem(node, first, last, toClassNames(toValue(transitionClasses)))
       })
@@ -85,11 +85,11 @@ const ANY_PORT = Symbol('any port')
 export function setUpTransit(node: HTMLElement, key: any, port: any = ANY_PORT, transitClasses: MaybeIon<string> = 'transition-position') {
    usePorts().addPort(port)
 
-   atMounted(() => {
+   atMount(() => {
       receive(key, node, port, toClassNames(toValue(transitClasses)))
    })
 
-   atUnmount(() => {
+   beforeUnmount(() => {
       send(key, node, port)
    })
 }

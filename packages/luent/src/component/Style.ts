@@ -1,5 +1,5 @@
 import { UIDGenerator } from "@rue/utils";
-import { atDiscard, atUnmount } from "../flask/flask-hooks";
+import { beforeUninstall, beforeUnmount } from "../flask/flask-hooks";
 import { isTransitioningOut } from "../transitions/transitions";
 import { getFlask } from "@rue/flask";
 import { queueTask } from "@rue/quarky";
@@ -31,7 +31,7 @@ export function Style(cssText: string) {
    const id = genUID()
    const style = insertStyle(cssText, id)
    const flask = getFlask()
-   atDiscard(() => {
+   beforeUninstall(() => {
       if (isTransitioningOut(flask)) {
          queueTask(() => {
             flask.onDiscard(() => {

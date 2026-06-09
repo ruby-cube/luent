@@ -78,7 +78,7 @@ function IfContextMenu() {
          <o--portal to='body'>
             <div>
                {If(($menu.is('opened')),
-                  <div ref={$container} at:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
+                  <div ref={$container} at:mount={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
                      menu item 1
                      -
                      menu item 2
@@ -172,7 +172,7 @@ function IfContextMenuC() {
       <div>
          {If($open,
             <o--portal to='body'>
-               <div ref={$container} at:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
+               <div ref={$container} at:mount={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
                   <p>
                      menu item 1
                   </p>

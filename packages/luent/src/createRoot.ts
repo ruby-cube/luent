@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { RootContext, createRootContext } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { instantUpdate, load, queueRender } from "@rue/quarky";
+import { instantUpdate, load, atRender } from "@rue/quarky";
 import { Provided } from "./context/Context";
 import { JSXNode, mountDOMNodes, processJSXOutput, removeDOMNodes, setUpNodeVine } from "./node/VineNode";
 import { RenderFunction } from "./node/makeJSXNode";
@@ -51,7 +51,7 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
             try {
                nodes = this.nodes = processJSXOutput(App())
                setUpNodeVine(nodes, appRoot)
-               queueRender(() => {
+               atRender(() => {
                   mountDOMNodes(nodes, appRoot)
                })
 

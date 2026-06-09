@@ -1,4 +1,4 @@
-import { Ion, isGetter, queueRender, watchToRender } from "@rue/quarky";
+import { Ion, isGetter, atRender, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
@@ -49,7 +49,7 @@ export class ThruKit extends VineNode {
                   kits.push(kit)
                   mountDOMNodes(kit.nodes!, fragment)
                }
-               queueRender(() => {
+               atRender(() => {
                   // mount to fragment
                   mountFragment(fragment, kits[previous].precedingLeaf, this.parent)
                })
@@ -58,7 +58,7 @@ export class ThruKit extends VineNode {
                // delete indexes
                const removed = kits.splice(current, previous - current)
                for (const kit of removed) {
-                  queueRender(() => {
+                  atRender(() => {
                      removeDOMNodes(kit.nodes!)
                      kit.nodes = undefined;
                   })

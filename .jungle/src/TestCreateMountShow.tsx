@@ -1,4 +1,4 @@
-import { component, If, template, Else, ElseIf, FromTag, atMounted, atCreated, atRemounted, atDemount, atUnmount, atDiscard, For, atMount, atRemount, Style, css } from "@rue/luent";
+import { component, If, template, Else, ElseIf, FromTag, atMount, atInstall, atRemount, beforeDemount, beforeUnmount, beforeUninstall, For, beforeMount, beforeRemount, Style, css } from "@rue/luent";
 import { ionic, ion, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
@@ -18,27 +18,27 @@ function Counter(input: FromTag<{
    })
 
    if (logHook) {
-      atCreated(() => {
+      atInstall(() => {
          logHook("freshly created")
       })
 
-      atMount(initial => {
+      beforeMount(initial => {
          logHook(`the initial mount? --${initial}`)
       })
 
-      atRemount(() => {
+      beforeRemount(() => {
          logHook('remounted')
       })
 
-      atDiscard(() => {
+      beforeUninstall(() => {
          logHook('destroying view...')
       })
 
-      atUnmount(final => {
+      beforeUnmount(final => {
          logHook(`unmounting view... The final unmount? --${final}`)
       })
 
-      atDemount(() => {
+      beforeDemount(() => {
          logHook('demounting...')
       })
    }
@@ -260,7 +260,7 @@ export function TestCreateMountShow() {
 
             return <>
                <code>
-                  {`atMounted(initial => {`}<br />
+                  {`atMount(initial => {`}<br />
                   {`   console.log('the very first mount?', initial)`}<br />
                   {`})`}
                </code>
@@ -268,12 +268,12 @@ export function TestCreateMountShow() {
                   {`Lifecycle hooks are available to perform tasks after view has mounted 
                   and before the view is unmounted. Views cast the following hooks:`}
                   <ul>
-                     <li><code>atCreated</code> casted on the initial mount</li>
-                     <li><code>atRemounted</code> casted when remounted</li>
-                     <li><code>atMounted</code> casted on initial mount and remounts</li>
-                     <li><code>atDiscard</code> casted just before view is destroyed</li>
-                     <li><code>atDemount</code> casted just before view unmounts but not when destroyed</li>
-                     <li><code>atUnmount</code> casted just before view is destroyed or unmounted</li>
+                     <li><code>atInstall</code> casted on the initial mount</li>
+                     <li><code>atRemount</code> casted when remounted</li>
+                     <li><code>atMount</code> casted on initial mount and remounts</li>
+                     <li><code>beforeUninstall</code> casted just before view is destroyed</li>
+                     <li><code>beforeDemount</code> casted just before view unmounts but not when destroyed</li>
+                     <li><code>beforeUnmount</code> casted just before view is destroyed or unmounted</li>
                   </ul>
                   {`Here the Counter component calls each of the 
                   lifecycle hooks and logs them. WARNING: There will be obnoxious dialog boxes popping up as you navigate the tabs`}

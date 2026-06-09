@@ -135,7 +135,7 @@ export function TodoMVC() {
             </header>
             <section class="main">
                {ToggleAllButton()}
-               <TodoList ref={$todoList} at:mounted={node => node} todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
+               <TodoList ref={$todoList} at:mount={node => node} todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
             </section>
             <footer show-if={$todoCount} class="footer">
                {RemainingCount()}
@@ -234,7 +234,7 @@ function TodoList({ $todos, removeTodo }: FromTag<{
                         class="edit"
                         type="text"
                         mu:value={todo.$title}
-                        at:mounted={node => node.focus()}
+                        at:mount={node => node.focus()}
                         on:blur={e => doneEdit(todo)}
                         on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                      />

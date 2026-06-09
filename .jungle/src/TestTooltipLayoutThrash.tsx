@@ -1,5 +1,5 @@
-import { component, template, If, NodeRef, Portal, RenderSlot, FromTag, atCreate } from '@rue/luent';
-import { $layout, ion, queueLayout } from '@rue/quarky';
+import { component, template, If, NodeRef, Portal, RenderSlot, FromTag, beforeInstall } from '@rue/luent';
+import { $layout, ion, atLayout } from '@rue/quarky';
 import './TestTooltip.css'
 
 
@@ -95,12 +95,12 @@ export function Tooltip(input: FromTag<{
    const $div = NodeRef('div');
    const $height = ion(undefined as number | undefined)
 
-   // queueLayout(() => {
+   // atLayout(() => {
    //    const height = $div()?.getBoundingClientRect().height
    //    if (height != null) $height.value = height;
    // })
 
-   atCreate(async () => {
+   beforeInstall(async () => {
       await $layout()
       const height = $div()?.getBoundingClientRect().height
       if (height != null) $height.value = height;
@@ -114,7 +114,7 @@ export function Tooltip(input: FromTag<{
    // }
 
    // prevent looped layout thrashing w/ measureLayout
-   // atMounted(async () => {
+   // atMount(async () => {
    //    const height = await layout(() =>
    //       $div()?.getBoundingClientRect().height
    //    )

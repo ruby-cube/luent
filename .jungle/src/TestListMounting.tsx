@@ -1,5 +1,5 @@
 import { component, template, Else, ElseIf, For, FromTag, If } from "@rue/luent";
-import { $activeUpdate, ionic, ion, Ionic, PRELUDE, queueRender, queueTask, watch } from "@rue/quarky";
+import { $activeUpdate, ionic, ion, Ionic, PRELUDE, atRender, queueTask, watch } from "@rue/quarky";
 
 export function TestListMounting() {
    let count = 0
@@ -53,11 +53,11 @@ function Counter(input: FromTag<{ log?: (msg: string) => void }>) {
    const { log } = input
    return component(
       <div
-         at:unmount={e => {
+         pre:unmount={e => {
             log?.({ msg: 'bye' + count++ })
             log?.('bye' + count++)
          }}
-         at:mount={e => {
+         pre:mount={e => {
             log?.({ msg: 'hiya' + count++ })
             // log?.('hiya' + count++)
          }}
@@ -70,7 +70,7 @@ function Counter(input: FromTag<{ log?: (msg: string) => void }>) {
 //    const $countB = ion('B0')
 
 //    watch($count, () => {
-//       queueRender(() => {
+//       atRender(() => {
 //          $countB.value = 'B' + $count()
 //          console.log('$$$', $countB())
 //          // queueTask(() => console.log('$$$', $countB()))

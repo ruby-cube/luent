@@ -1,4 +1,4 @@
-import { atDiscard, component, As } from "@rue/luent";
+import { beforeUninstall, component, As } from "@rue/luent";
 import { ionic, ion, Ionic } from "@rue/quarky";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
@@ -34,7 +34,7 @@ export function BottomlessBlokkis() {
 
   function dropBlock() {
     const id = setInterval(moveDown, 1000)
-    atDiscard(() => clearInterval(id))
+    beforeUninstall(() => clearInterval(id))
   }
 
   function moveRight() {
@@ -99,7 +99,7 @@ export function BottomlessBlokkis() {
       >
         {As($blokk,
           <Blokk
-            at:create={dropBlock}
+            pre:install={dropBlock}
             matrix={$blokk()!.matrix}
             shiftX={($blokk()!.shiftX)}
             shiftY={($blokk()!.shiftY)}

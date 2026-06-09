@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, Ion, toValue, isGetter, watchToRender, queueRender, RUN_EAGERLY } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, watchToRender, atRender, RUN_EAGERLY } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { DOMParent } from "./VineNode";
 import { getFlask } from "@rue/flask";
@@ -9,7 +9,7 @@ export function setUpInnerHTML(kit: InnerHTMLKit | MaybeIon<string>, parentNode:
   const { trusted, html } = kit;
   if (isGetter(html)) {
     watchToRender(html, () => {
-      queueRender(() => {
+      atRender(() => {
         setInnerHTML(html(), trusted, parentNode)
       })
     }, getFlask(), true);

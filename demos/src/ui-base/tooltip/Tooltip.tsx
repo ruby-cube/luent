@@ -1,4 +1,4 @@
-import { component, $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
+import { component, $fromContext, beforeUninstall, atMount, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
 import { ion, toIon } from "@rue/quarky"
 import { IonicTooltip } from "./Tooltip.kit";
 import { Alignment, maybeFlip, Placement, positionTail } from "../popover/Popover.kit";
@@ -47,7 +47,7 @@ function TooltipRoot(setup: FromTag<{
 //          {If((tooltip.visible), // TODO: configure activation type
 //             <Context provide={[TOOLTIP(tooltip), TOOLTIP_NODE($tooltip)]}>
 //                <div
-//                   at:create={node => maybeFlip(node, tooltip)}
+//                   pre:install={node => maybeFlip(node, tooltip)}
 //                   ref={$tooltip}
 //                   class={(`tooltip ${tooltip.placement} ${tooltip.alignment}`)}
 //                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${$styles()}`)}
@@ -155,7 +155,7 @@ function TooltipRoot(setup: FromTag<{
 
 //    return template(
 //       <div
-//          at:mounted={node => positionTail(node, tooltip, $tooltip)}
+//          at:mount={node => positionTail(node, tooltip, $tooltip)}
 //          class={('tail-root ' + tooltip.placement + ' ' + $classes())}
 //          {...attributes}
 //       >

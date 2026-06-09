@@ -1,98 +1,98 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@rue/flask";
-import { queueRender, queueTask } from "../../../quarky/src/reactivity/RenderCycle";
+import { atRender, atTick } from "../../../quarky/src/reactivity/RenderCycle";
 
 
-export function atCreate(task: () => void) {
+export function beforeInstall(task: () => void) {
    getFlask().onInitialMount($_wrap_with_context(task));
 }
-export function atRemount(task: () => void) {
+export function beforeRemount(task: () => void) {
    getFlask().onRemount($_wrap_with_context(task));
 }
 
-export function atMount(task: (initial: boolean) => void) {
+export function beforeMount(task: (initial: boolean) => void) {
    getFlask().onInitialMount($_wrap_with_context(() => task(true)));
    getFlask().onRemount($_wrap_with_context(() => task(false)));
 }
 
-export function atCreated(task: () => void) {
+export function atInstall(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onInitialMount(() => { queueRender(contextTask) });
+   getFlask().onInitialMount(() => { atRender(contextTask) });
 }
-export function atRemounted(task: () => void) {
+export function atRemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onRemount(() => { queueRender(contextTask) });
+   getFlask().onRemount(() => { atRender(contextTask) });
 }
 
-export function atMounted(task: (initial: boolean) => void) {
+export function atMount(task: (initial: boolean) => void) {
    const context = $_snap_context()
-   getFlask().onInitialMount(() => { queueRender(() => $_run_with_(context, () => task(true))) });
-   getFlask().onRemount(() => { queueRender(() => $_run_with_(context, () => task(false))) });
+   getFlask().onInitialMount(() => { atRender(() => $_run_with_(context, () => task(true))) });
+   getFlask().onRemount(() => { atRender(() => $_run_with_(context, () => task(false))) });
 }
 
-export function afterCreated(task: () => void) {
+export function afterInstall(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onInitialMount(() => { queueTask(contextTask) });
+   getFlask().onInitialMount(() => { atTick(contextTask) });
 }
-export function afterRemounted(task: () => void) {
+export function afterRemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onRemount(() => { queueTask(contextTask) });
+   getFlask().onRemount(() => { atTick(contextTask) });
 }
 
-export function afterMounted(task: (initial: boolean) => void) {
+export function afterMount(task: (initial: boolean) => void) {
    const context = $_snap_context()
-   getFlask().onInitialMount(() => { queueTask(() => $_run_with_(context, () => task(true))) });
-   getFlask().onRemount(() => { queueTask(() => $_run_with_(context, () => task(false))) });
+   getFlask().onInitialMount(() => { atTick(() => $_run_with_(context, () => task(true))) });
+   getFlask().onRemount(() => { atTick(() => $_run_with_(context, () => task(false))) });
 }
 
 
 
-export function atDiscard(task: () => void) {
+export function beforeUninstall(task: () => void) {
    getFlask().onDiscard($_wrap_with_context(task));
 }
 
-export function atDemount(task: () => void) {
+export function beforeDemount(task: () => void) {
    getFlask().onDemount($_wrap_with_context(task));
 }
 
-export function atUnmount(task: (final: boolean) => void) {
+export function beforeUnmount(task: (final: boolean) => void) {
    getFlask().onDiscard($_wrap_with_context(() => task(true)));
    getFlask().onDemount($_wrap_with_context(() => task(false)));
 }
 
 
-export function atDiscarded(task: () => void) {
+export function atUninstall(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDiscard(() => { queueRender(contextTask) });
+   getFlask().onDiscard(() => { atRender(contextTask) });
 }
 
-export function atDemounted(task: () => void) {
+export function atDemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDemount(() => { queueRender(contextTask) });
+   getFlask().onDemount(() => { atRender(contextTask) });
 }
 
-export function atUnmounted(task: (final: boolean) => void) {
+export function atUnmount(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
 
-   getFlask().onDiscard(() => { queueRender(discardTask) });
-   getFlask().onDemount(() => { queueRender(demountTask) });
+   getFlask().onDiscard(() => { atRender(discardTask) });
+   getFlask().onDemount(() => { atRender(demountTask) });
 }
 
-export function afterDiscarded(task: () => void) {
+export function afterUninstall(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDiscard(() => { queueRender(contextTask) });
+   getFlask().onDiscard(() => { atRender(contextTask) });
 }
 
-export function afterDemounted(task: () => void) {
+export function afterDemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDemount(() => { queueRender(contextTask) });
+   getFlask().onDemount(() => { atRender(contextTask) });
 }
 
-export function afterUnmounted(task: (final: boolean) => void) {
+export function afterUnmount(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
-   getFlask().onDiscard(() => { queueRender(discardTask) });
-   getFlask().onDemount(() => { queueRender(demountTask) });
+   getFlask().onDiscard(() => { atRender(discardTask) });
+   getFlask().onDemount(() => { atRender(demountTask) });
 }
 
 

@@ -45,7 +45,7 @@ You have no idea whether there is a long task downstream or whether it has many 
 - event handler (synchronous effects)
 Scheduled with microtasks
 - pre-render: for manual derivations (using watch to sync two ions) and updating state, like $index()
-- render === atMounted/atUnmount (use measureLayout to batch reads)
+- render === atMount/beforeUnmount (use measureLayout to batch reads)
 Scheduled on idle
 - post-render (useEffect)
 

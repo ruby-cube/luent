@@ -1,6 +1,6 @@
 import { getFlask } from "@rue/flask";
-import { component, atMounted, template } from "@rue/luent";
-import { ion, LAYOUT, PRELUDE, queuePrelude, queueRender, queueTask, RENDER, SYNC, TICK, watch } from "@rue/quarky";
+import { component, atMount, template } from "@rue/luent";
+import { ion, LAYOUT, PRELUDE, atPrelude, atRender, queueTask, RENDER, SYNC, TICK, watch } from "@rue/quarky";
 
 export function TestRenderEffects() {
    const $count = ion(0)
@@ -26,7 +26,7 @@ export function TestRenderEffects() {
    }, { phase: TICK })
 
    function increment() {
-      queueRender(() => {
+      atRender(() => {
          console.log('@@@ mutate count')
          $count.value++
       })

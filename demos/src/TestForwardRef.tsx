@@ -6,8 +6,8 @@ export function StyledComp() {
 
    return component(
       <div>
-         <Comp ref={$comp} at:mounted={() => console.log('comp>>', $comp())}></Comp>
-         <BaseComp ref={$div} at:mounted={() => console.log('div>>', $div())}></BaseComp>
+         <Comp ref={$comp} at:mount={() => console.log('comp>>', $comp())}></Comp>
+         <BaseComp ref={$div} at:mount={() => console.log('div>>', $div())}></BaseComp>
       </div>
    )
 }

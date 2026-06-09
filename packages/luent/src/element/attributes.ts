@@ -1,5 +1,5 @@
 import { getFlask } from "@rue/flask";
-import { instantUpdate, isGetter, queueRender, RUN_EAGERLY, swiftUpdate, toValue, watchToRender } from "@rue/quarky";
+import { instantUpdate, isGetter, atRender, RUN_EAGERLY, swiftUpdate, toValue, watchToRender } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { setUpInnerHTML } from "../node/InnerHTML";
 import { isHydrating } from "../hydration/hydration";
@@ -32,7 +32,7 @@ export function setUpAttributes(node: Element, attributes: { [key: string]: Mayb
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return;
-            queueRender(() => {
+            atRender(() => {
                setAttribute(node, _key, toValue(value())) // toValue for mu getters
             })
          }, flask, RUN_EAGERLY)

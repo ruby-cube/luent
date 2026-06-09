@@ -1,6 +1,6 @@
 import { getActiveFlask } from "@rue/flask";
-import { component, template, If, Else,  ElseIf,Style, NodeRef, atMounted } from "@rue/luent";
-import { getActiveUpdate, ion, queueRender, queueTask, watch } from "@rue/quarky";
+import { component, template, If, Else,  ElseIf,Style, NodeRef, atMount } from "@rue/luent";
+import { getActiveUpdate, ion, atRender, queueTask, watch } from "@rue/quarky";
 import "./style.css"
 
 
@@ -70,7 +70,7 @@ export function MountIfAnimation() {
 
    let prevNode: HTMLDivElement | undefined
 
-   atMounted(initial => {
+   atMount(initial => {
       if (!initial) return;
       prevNode = getActiveDivRef()()
    })
@@ -112,7 +112,7 @@ export function MountIfAnimation() {
       prevClone.style.setProperty('width', rect.width + 'px')
       prevClone.style.setProperty('height', rect.height + 'px')
 
-      queueRender(() => {
+      atRender(() => {
          const last = $container()!.getBoundingClientRect() // TODO: queue in Layout to prevent layout thrashing
 
          // const deltaX = first.left - last.left;
@@ -411,7 +411,7 @@ function ArticleBlock(setup: {
 //     //     console.log("activated yo")
 //     // })
 
-//     // atUnmount(() => {
+//     // beforeUnmount(() => {
 //     //     console.log("unmount")
 //     // })
 

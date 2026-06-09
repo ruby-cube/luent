@@ -1,4 +1,4 @@
-import { component, $fromContext, atDiscard, atMounted, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
+import { component, $fromContext, beforeUninstall, atMount, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
 import { Ion, toIon } from "@rue/quarky"
 import { maybeFlip, positionTail } from "../popover/Popover.kit";
 import { PopoverRoot } from "../popover/Popover";

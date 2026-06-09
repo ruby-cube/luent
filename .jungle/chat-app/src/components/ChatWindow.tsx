@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, queueRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, atUnmount, queuePostlude, atDemount, atRemounted } from "@rue/luent";
+import { component, atRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, beforeUnmount, queuePostlude, beforeDemount, atRemount } from "@rue/luent";
 import { Ion, ionic, ion } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -26,7 +26,7 @@ export function ChatWindow(input: FromTag<{
    const $notifyNewMessages = ion(false)
    const $smoothScroll = ion(false)
 
-   atRemounted(() => {
+   atRemount(() => {
       $smoothScroll.value = false;
       $notifyNewMessages.value = false;
 
@@ -38,7 +38,7 @@ export function ChatWindow(input: FromTag<{
       })
    })
 
-   atDemount(() => {
+   beforeDemount(() => {
       if (!$hasUnseenMessages()) $newMessageMarker.value = null
    })
 
@@ -101,7 +101,7 @@ export function ChatWindow(input: FromTag<{
       if (!node) {
          return;
       }
-      queueRender(() => {
+      atRender(() => {
          node.scrollTop = node.scrollHeight
       })
    }
@@ -169,7 +169,7 @@ export function ChatWindow(input: FromTag<{
                         )}
                      </div>
                      {If($ShowNewMessageMarker(message),
-                        <div at:mounted={node => (console.log('*** DIV MOUNTED'), message.id === user.lastSeenMessageID && ($newMessageMarker.value = node))} data-messageID={message.id}>
+                        <div at:mount={node => (console.log('*** DIV MOUNTED'), message.id === user.lastSeenMessageID && ($newMessageMarker.value = node))} data-messageID={message.id}>
                            --- new messages ---
                         </div>
                      )}

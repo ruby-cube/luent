@@ -324,7 +324,7 @@ function TodoList(todos@: Ionic<Todo[]>, removeTodo: (todo: Ionic<Todo>) => void
                         class="edit"
                         type="text"
                         mu:value={todo.title@}
-                        at:mounted={node => node.focus()}
+                        at:mount={node => node.focus()}
                         on:blur={e => doneEdit(todo)}
                         on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                      />
@@ -405,7 +405,7 @@ function TodoList({ todos@, removeTodo }: FromTag<{
                         class="edit"
                         type="text"
                         mu:value={todo.title@}
-                        at:mounted={node => node.focus()}
+                        at:mount={node => node.focus()}
                         on:blur={e => doneEdit(todo)}
                         on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                      />

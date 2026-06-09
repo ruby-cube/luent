@@ -11,6 +11,7 @@ export function App() {
       <>
          <h1>My Counter App</h1>
          <Counter></Counter>
+         <div style={() => `background-color: ${$darkMode() ? '#222' : '#fff'}`}></div>
       </>
    )
 }

@@ -39,17 +39,17 @@ export function TooltipDemo() {
       <Context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 600 })]}>
          <div data-align='center' class={demoBoxStyle}>
 
-            {/* <div style='background-color: lightblue' at:create={tooltip.anchor.bold}>b</div> */}
-            {/* <div style='background-color: lightblue' at:create={tooltip.anchor.italic}>i</div> */}
-            {/* <div style='background-color: lightblue' at:create={tooltip.anchor.underline}>u</div> */}
-            {/* <Button at:create={tooltip.anchor.default} variant='outline'>o</Button> */}
-            <Button at:create={asTooltipTrigger.bold} variant="outline">
+            {/* <div style='background-color: lightblue' pre:install={tooltip.anchor.bold}>b</div> */}
+            {/* <div style='background-color: lightblue' pre:install={tooltip.anchor.italic}>i</div> */}
+            {/* <div style='background-color: lightblue' pre:install={tooltip.anchor.underline}>u</div> */}
+            {/* <Button pre:install={tooltip.anchor.default} variant='outline'>o</Button> */}
+            <Button pre:install={asTooltipTrigger.bold} variant="outline">
                B
             </Button>
-            <Button at:create={asTooltipTrigger.italic} variant="outline">
+            <Button pre:install={asTooltipTrigger.italic} variant="outline">
                I
             </Button>
-            <Button at:create={asTooltipTrigger.underline} variant="outline">
+            <Button pre:install={asTooltipTrigger.underline} variant="outline">
                U
             </Button>
             <Tooltip tooltip={tooltip} place="above" align="center">

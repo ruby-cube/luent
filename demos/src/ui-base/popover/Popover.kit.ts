@@ -1,5 +1,5 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { atDiscard, NodeRef, queueLayout } from "@rue/luent"
+import { beforeUninstall, NodeRef, atLayout } from "@rue/luent"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'
@@ -71,7 +71,7 @@ export class Popover {
 }
 
 export function maybeFlip(node: HTMLElement, popover: Popover) {
-   queueLayout(() => {
+   atLayout(() => {
       const rect = node.getBoundingClientRect()
       if (
          popover.placement === 'above' && rect.top < 0
@@ -133,5 +133,5 @@ export function positionTail(node: HTMLElement, popover: Popover, $popover: Node
       node,
       placeArrow,
    );
-   atDiscard(cleanup)
+   beforeUninstall(cleanup)
 }

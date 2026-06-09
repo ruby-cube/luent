@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, $render, atCreate, atCreated, template } from "@rue/luent";
+import { component, $render, beforeInstall, atInstall, template } from "@rue/luent";
 
 function doSomething() { }
 
@@ -7,6 +7,6 @@ function SomeComp() {
 
 
    return component(
-      <div at:create={Render(doSomething)}></div>
+      <div pre:install={Render(doSomething)}></div>
    )
 }

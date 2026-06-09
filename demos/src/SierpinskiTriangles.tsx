@@ -1,4 +1,4 @@
-import { component, template, FromTag, atUnmount } from "@rue/luent";
+import { component, template, FromTag, beforeUnmount } from "@rue/luent";
 import { Animation, Interval, Ion, swiftUpdate, HeavyUpdate, queueTask, ion, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
@@ -67,7 +67,7 @@ export function TriangleDemo() {
       $elapsed.value = Date.now() - start;
    }).start()
 
-   atUnmount(() => {
+   beforeUnmount(() => {
       secondsStream.stop();
       animation.stop();
    });

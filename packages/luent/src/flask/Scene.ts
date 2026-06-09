@@ -1,28 +1,28 @@
-import { atDiscard } from "./flask-hooks";
+import { beforeUninstall } from "./flask-hooks";
 export { Scene } from '@rue/flask'
 
 
-export const atEnd = atDiscard
+export const atEnd = beforeUninstall
 
-// atMount(() => {
+// beforeMount(() => {
 
-//    atUnmount(() => {
-
-//    })
-// })
-
-// atRemount(() => {
-
-
-
-//    atDemount(() => {
+//    beforeUnmount(() => {
 
 //    })
 // })
 
-// atCreate(() => {
+// beforeRemount(() => {
 
-//    atDiscard(() => {
+
+
+//    beforeDemount(() => {
+
+//    })
+// })
+
+// beforeInstall(() => {
+
+//    beforeUninstall(() => {
 
 //    })
 // })

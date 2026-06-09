@@ -207,7 +207,7 @@ function hook(proxy: AnyObject, method: string, task: Task, options?: { until: a
    const flask = getActiveFlask()
    const target = asHookTarget(proxy)
    target.addEventListener(method, task)
-   flask.atDiscard(unhook)
+   flask.beforeUninstall(unhook)
 
    function unhook() {
       target.removeEventListener(method, task)

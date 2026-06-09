@@ -1,7 +1,7 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@rue/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ShowHideType, If } from "./If";
-import {  createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, queueRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
+import {  createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, atRender, queueTask, SuspenseIon, watch, watchToRender } from "@rue/quarky";
 import { Booleanny } from "@rue/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -245,7 +245,7 @@ export class IfElseKit extends VineNode {
          setUpNodeVine(kit.nodes!, this.parent!, this.preceding)
          const fragment = new DocumentFragment()
          mountDOMNodes(kit.nodes!, fragment)
-         queueRender(() => {
+         atRender(() => {
             mountFragment(fragment, this.precedingLeaf, this.parent)
          })
          initial ? kit.flask!.emitInitialMount() : kit.flask!.emitRemount()
@@ -280,7 +280,7 @@ export class IfElseKit extends VineNode {
          kit.flask!.emitDemount()
       }
       
-      queueRender(() => {
+      atRender(() => {
          removeDOMNodes(prevNodes)
       })
       return kit;
@@ -411,12 +411,12 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
       watchToRender($match, ({ current: isActive, previous: wasActive, flask }) => {
          if (isActive === wasActive) return;
          if ($match()) {
-            queueRender(() => {
+            atRender(() => {
                showDOMNodes(nodes)
             })
          }
          else if (wasActive) {
-            queueRender(() => {
+            atRender(() => {
                hideDOMNodes(nodes)
             })
          }

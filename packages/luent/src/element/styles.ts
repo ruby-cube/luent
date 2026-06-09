@@ -1,7 +1,7 @@
 import { AnyObject, Booleanny } from "@rue/types";
 import { MaybeIon } from "../component/x-Input";
 import { Flask, getFlask } from "@rue/flask";
-import { Ion, isGetter, queueRender, RUN_EAGERLY, watchToRender } from "@rue/quarky";
+import { Ion, isGetter, atRender, RUN_EAGERLY, watchToRender } from "@rue/quarky";
 import { camelToKebabCase, isObject, isString } from "@rue/utils";
 
 
@@ -21,7 +21,7 @@ export function setUpClasses(node: Element, classes: TagClass[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }/* newState: ReactiveClasses | string | Falsey, oldState: ReactiveClasses | string | Falsey */) => {
             // if (current === previous) return;
-            queueRender(() => {
+            atRender(() => {
                if (previous) removePreviousClasses(previous, classList)
                if (entry()) addClasses(entry(), classList, flask)
             })
@@ -81,7 +81,7 @@ function setUpClassesFromObject(entry: ReactiveClasses, classList: DOMTokenList,
       if (isGetter(value)) {
          watchToRender(value, ({ current, previous }) => {
             // if (current === previous) return
-            queueRender(() => {
+            atRender(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
             })
@@ -187,7 +187,7 @@ export function setUpConditionalDisplay(node: { style: CSSStyleDeclaration }, $s
    watchToRender($show, ({ flask, current: shouldShow, previous, eagerRun }) => {
       if (!eagerRun && shouldShow === previous) return;
       if (shouldShow) {
-         queueRender(() => {
+         atRender(() => {
             if (!display) {
                node.style.removeProperty('display');
             }
@@ -198,7 +198,7 @@ export function setUpConditionalDisplay(node: { style: CSSStyleDeclaration }, $s
       }
       else {
          display = node.style.display
-         queueRender(() => {
+         atRender(() => {
             node.style.display = 'none'
          })
       }
@@ -213,7 +213,7 @@ export function setUpStyles(node: Element, styles: TagStyle[]) {
       if (isGetter(entry)) {
          watchToRender(entry, ({ current, previous }) => {
             // if (current === previous) return;
-            queueRender(() => {
+            atRender(() => {
                setUpStyleEntry(style, entry(), flask);
             })
          }, flask, RUN_EAGERLY)
@@ -231,7 +231,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          if (isGetter(value)) {
             watchToRender(value, () => {
                console.log('style entry', key, value)
-               queueRender(() => {
+               atRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
                })
             }, flask, RUN_EAGERLY)

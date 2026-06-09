@@ -1,7 +1,7 @@
 # Portals
 Portals allow content to be mounted into another part of the DOM while remaining logically associated with its original component.
 
-## The `<o--portal>` tag
+## The Portal Tag
 The portal tag renders its children into the parent element specified by its `to` attribute. The `to` attribute accepts either a DOM node or a selector string.
 ```tsx
 function NotificationButton(setup: FromTag<{
@@ -32,7 +32,7 @@ function NotificationButton(setup: FromTag<{
 ```
 
 ## Built-in portals
-Luent provides two built-in portal tags, `<o--body>` and `<o--head>`, as shorthands for `<o--portal to='body'>` and `<o--portal to='head'>`
+Luent provides 5 built-in portal tags, `<o--window>`, `<o--document>`, `<o--html>`, `<o--head>` and `<o--body>`, as shorthands for `<o--portal to='body'>`, etc. They can also be used to [register events](/guide/event-bindings).
 ```tsx
 <o--body>
   <Modal message={msg}/>

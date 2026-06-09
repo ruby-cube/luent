@@ -4,11 +4,11 @@ import { component, template, FromTag, listen } from "@rue/luent";
 
 function App(input : FromTag()) {
 
-   context.atMounted(() => {
+   context.atMount(() => {
 
    })
 
-   // thisView atMounted atUnmount (flask)
+   // thisView atMount beforeUnmount (flask)
 
    // thisContext 
 
