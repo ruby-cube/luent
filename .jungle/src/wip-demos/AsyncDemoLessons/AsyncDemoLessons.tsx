@@ -68,12 +68,12 @@ function Home() {
 
 
 
-export function TabList(input: FromTag<{
+export function TabList(input: {
    activeTab: Ion<string>,
    'on:change': HandleEvent,
    Slot: RenderSlot,
    contentPending: SuspenseIon
-}>) {
+}) {
    const { $activeTab, emit, Slot, $contentPending } = input
 
    return (
@@ -105,7 +105,7 @@ export function TabList(input: FromTag<{
 }
 
 
-function LessonList({ $tab, $search, $pending }: FromTag<{ tab: Ion<string>, search: Ion<string>, pending: Suspense }>) {
+function LessonList({ $tab, $search, $pending }: { tab: Ion<string>, search: Ion<string>, pending: Suspense }) {
    /**
     * data.getLessons is a suspense-enabled data fetching function.
     * It returns a cached promise that fetched the first time it's called
@@ -156,7 +156,7 @@ function Lesson({ id, item, toggleCompleted }) {
 }
 
 
-export function SearchInput(input: FromTag<{ value: string, 'on:change': HandleEvent }>) {
+export function SearchInput(input: { value: string, 'on:change': HandleEvent }) {
    const { value, emit } = input
    const [inputValue, setInputValue] = useOptimistic(value);
    const isPending = inputValue !== value;
@@ -193,7 +193,7 @@ export function SearchInput(input: FromTag<{ value: string, 'on:change': HandleE
 }
 
 
-export function CompleteButton({ $completed }: FromTag<{ 'mu:completed': Ion<boolean> }>) {
+export function CompleteButton({ $completed }: { 'mu:completed': Ion<boolean> }) {
    const toggleCompleted = Action((id: string) => {
       storeRollback($completed(), prev => {
          $completed.value = prev

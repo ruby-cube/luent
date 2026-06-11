@@ -66,15 +66,14 @@ function TestRootContext() {
    )
 }
 
-type GreatGrandparentInput = {
-   name: string
-}
 
 
 
 function GreatGrandparent({
    name
-}: FromTag<GreatGrandparentInput>) {
+}: {
+   name: string
+}) {
 
 
    return component(
@@ -100,7 +99,7 @@ const ROOT_MESSAGE_GREAT
    = Grandparent.ROOT_MESSAGE
    = ContextKey<string>('root')
 
-function Grandparent({ name }: FromTag<GrandparentInput>) {
+function Grandparent({ name }: GrandparentInput) {
    const msg = fromContext(GREAT_MESSAGE)
    const rootMsg = fromRoot(ROOT_MESSAGE_GREAT)
 

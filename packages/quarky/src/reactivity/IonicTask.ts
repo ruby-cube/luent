@@ -4,7 +4,7 @@ import { Glass } from "@rue/types";
 import { Effect } from "./Effect";
 import { FunctionSubject } from "./Subject";
 import { Traceable } from "../debug/Traceable";
-import { Phase, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
+import { LAYOUT, Phase, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
 
 
 type _IonicTaskOptions = {
@@ -57,23 +57,31 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 type IonicTaskOptions = { [K in keyof _IonicTaskOptions as K extends 'phase' ? never : K]: _IonicTaskOptions[K] }
 
 
-export function queueIonicPrelude(task: IonicTask, options?: IonicTaskOptions) {
+function queueIonicPrelude(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: PRELUDE })
 }
 
-export function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: SYNC })
 }
 
-export function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {
+function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: RENDER })
+}
+
+function queueIonicLayout(task: IonicTask, options?: IonicTaskOptions) {
+   return _queueIonicTask(task, { ...options ?? {}, phase: LAYOUT })
 }
 
 // export function queueIonicPostlude(task: IonicTask, options?: IonicTaskOptions) {
 //    return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
 // }
 
-export function queueIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+export function trackEffect(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: TICK })
 }
 
+trackEffect.atPrelude = queueIonicPrelude
+trackEffect.atRender = queueIonicRender
+trackEffect.atLayout = queueIonicLayout
+trackEffect.sync = runIonicTask

@@ -1,4 +1,4 @@
-import { component, FromTag, If, Xray } from "@rue/luent";
+import { component, If, Xray } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestHookForwarding() {
@@ -13,9 +13,9 @@ export function TestHookForwarding() {
    )
 }
 
-function Comp(setup: FromTag<{
+function Comp(setup: {
    'xray:root'?: Xray<'div'>
-}>) {
+}) {
    const { xray } = setup
 
    const $active = ion(true)

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, template, For, If, Else, FromTag, fromRoot, ContextKey } from "@rue/luent"
-import { watch, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
+import { watch, trackEffect, ionize, Ionized, Ion, $, makeIon, createIon, $$, update, EACH } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
@@ -198,7 +198,7 @@ export function TodoMVC() {
 
    // # persist state
 
-   queueIonicTask(() => {
+   trackEffect(() => {
       storeTodos($todos())
    })
 

@@ -119,7 +119,7 @@ export function TriangleDemo() {
 
 let $slowCount = 0
 
-function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
+function Triangle({ x, y, s, $seconds, /* $suspense  */}: any) {
    if (s <= TARGET) {
       return component(
          <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}
@@ -174,7 +174,7 @@ function Triangle({ x, y, s, $seconds, /* $suspense  */}: FromTag<any>) {
 
 // 729 dots
 
-function Dot({ x, y, s, $text }: FromTag<any>) {
+function Dot({ x, y, s, $text }: any) {
    const $hover = ion(false)
 
    return component(

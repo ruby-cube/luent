@@ -173,9 +173,9 @@ Like, `For()` `Thru()` may be rendered reactively or statically based on the rea
 When passed a number or number ion, `Thru()` renders a range from 1 up to a count.
 
 ```tsx
-function RowBar(setup: FromTag<{
+function RowBar(setup: {
   rows: Ionic<Cell[]>
-}>) {
+}) {
   const { rows }
 
   return component(
@@ -194,9 +194,9 @@ function RowBar(setup: FromTag<{
 When passed a range tuple or range ion, `Thru()` renders through the provided range. This is useful for rendering windows or slices of larger collections without creating derived arrays.
 
 ```tsx
-function PaginatedTable(setup: FromTag<{
+function PaginatedTable(setup: {
   rows: Ionic<Row[]>
-}>) {
+}) {
   const { rows } = setup
 
   const $page = ion(0)
@@ -272,9 +272,9 @@ function Foo({ bar }) {
 
 **with ternaries**
 ```tsx
-function Foo(setup: FromTag<{
+function Foo(setup: {
   bar: boolean
-}>) { 
+}) { 
   const { bar } = setup
 
   return component( 

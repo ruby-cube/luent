@@ -71,7 +71,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             <Error {...props} error={$error()}></Error>
           )}
           {Else(() =>
-            <Component {...props}></Component>
+            <Component {...props}></::>
           )}
         </>
       )
@@ -87,7 +87,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             <Placeholder {...props}></Placeholder>
           )}
           {ElseIf($loaded, () =>
-            <Component {...props}></Component>
+            <Component {...props}></::>
           )}
         </>
       )
@@ -103,7 +103,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             <Error {...props} error={$error()}></Error>
           )}
           {ElseIf($loaded, () =>
-            <Component {...props}></Component>
+            <Component {...props}></::>
           )}
         </>
       )
@@ -115,7 +115,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
     return (
       <>
         {If($loaded, () => {
-          return <Component {...props}></Component>
+          return <Component {...props}></::>
         }
         )}
       </>

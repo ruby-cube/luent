@@ -1,13 +1,13 @@
-import { component, template, FromTag, RenderSlot } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import './navbar.css'
 import { User } from "../context/keys";
 import { logOut } from "../database/firebase";
 
-export function Navbar(input: FromTag<{
+export function Navbar(input: {
    user: User,
    navigateHome: () => void,
    Slot?: RenderSlot
-}>) {
+}) {
    const { user, navigateHome, Slot } = input
 
    return component(

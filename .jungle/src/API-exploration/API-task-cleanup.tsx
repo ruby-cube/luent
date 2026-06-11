@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { getActiveFlask } from "@rue/flask";
 import { component, template, fromContext, RENDER } from "@rue/luent";
-import { queueIonicTask } from "@rue/quarky";
+import { trackEffect } from "@rue/quarky";
 
 
 
@@ -220,7 +220,7 @@ useEffect(() => {
 }, [serverUrl, roomId]);
 
 
-queueIonicTask(({ setup }) => {
+trackEffect(({ setup }) => {
    const chatroom = createConnection($serverURL, $roomID)
    setup(() =>
       chatroom.connect()
@@ -239,7 +239,7 @@ useEffect(() => {
    };
 }, []);
 
-queueIonicTask(({ setup }) => {
+trackEffect(({ setup }) => {
    function handleMove(e) {
       setPosition({ x: e.clientX, y: e.clientY });
    }
@@ -258,7 +258,7 @@ useEffect(() => {
    };
 }, []);
 
-queueIonicTask(({ setup }) => {
+trackEffect(({ setup }) => {
    const animation = new FadeInAnimation($div())
    setup(() =>
       animation.start(100)
@@ -288,7 +288,7 @@ useEffect(() => {
 }, []);
 
 
-queueIonicTask(({ setup }) => {
+trackEffect(({ setup }) => {
    const div = $div();
    const observer = new IntersectionObserver(entries => {
       const entry = entries[0];
@@ -318,7 +318,7 @@ useEffect(() => {
    }
 }, [person]);
 
-queueIonicTask(({ setup, ooo }) => {
+trackEffect(({ setup, ooo }) => {
    let ignore = false;
    mu($bio).value = null
    setup(() => {
@@ -329,7 +329,7 @@ queueIonicTask(({ setup, ooo }) => {
    }).cleanup(() => ignore = true)
 })
 
-queueIonicTask(({ setup, ooo }) => {
+trackEffect(({ setup, ooo }) => {
    let ignore = false;
    mu($bio).value = null
    setup(() => {
@@ -341,9 +341,9 @@ queueIonicTask(({ setup, ooo }) => {
 })
 
 // NOTE: ooo is only needed if you want to stack awaits, especially to distinguish action promises from scheduling promises
-// ... maybe only relevant in sync effects? Is it relevant with queueIonicTask??
+// ... maybe only relevant in sync effects? Is it relevant with trackEffect??
 
-queueIonicTask(({ ooo, abort }) => {
+trackEffect(({ ooo, abort }) => {
    mu($bio).value = null
 
    ooo.await(fetchBio(person, { abort }))
@@ -355,7 +355,7 @@ queueIonicTask(({ ooo, abort }) => {
       })
 })
 
-queueIonicTask(({ abort }) => {
+trackEffect(({ abort }) => {
    mu($bio).value = null
 
    fetchBio(person, { abort })
@@ -367,7 +367,7 @@ queueIonicTask(({ abort }) => {
       })
 })
 
-queueIonicTask(async ({ abort }) => {
+trackEffect(async ({ abort }) => {
    mu($bio).value = null
    try {
       const result = await fetchBio(person, { abort })
@@ -378,7 +378,7 @@ queueIonicTask(async ({ abort }) => {
    }
 })
 
-queueIonicTask(async ({ abort }) => {
+trackEffect(async ({ abort }) => {
    mu($bio).value = null
    const [result, error] = await fetchBio(person, { abort })
    if (err) {
@@ -389,7 +389,7 @@ queueIonicTask(async ({ abort }) => {
    }
 })
 
-queueIonicTask(({ setup }) => {
+trackEffect(({ setup }) => {
    let abort = false;
    mu($bio).value = null
    setup(async () => {

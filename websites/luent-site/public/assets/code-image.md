@@ -1,7 +1,7 @@
 ```tsx
 
 
-function Todos(setup: FromTag<{ limit: number }>) {
+function Todos(setup: { limit: number }) {
   const { limit } = setup
 
   const todos = ionic([
@@ -72,7 +72,7 @@ function Todos(setup: FromTag<{ limit: number }>) {
 ```tsx
 
 
-function Todos(setup: FromTag<{ goal: number }>) {
+function Todos(setup: { goal: number }) {
   const { goal } = setup
 
   const todos = ionic([

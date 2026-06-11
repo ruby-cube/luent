@@ -1,4 +1,4 @@
-import { Else, FromTag, If, NodeRef, css, component, Style } from "@rue/luent";
+import { Else, If, NodeRef, css, component, Style } from "@rue/luent";
 import { Ion, ion, queueTask, watch, Finitron, ionic } from "@rue/quarky";
 import "./reset.css"
 
@@ -174,11 +174,11 @@ export function VideoPlayer() {
 }
 
 
-function ElapsedBar(input: FromTag<{
+function ElapsedBar(input: {
    elapsed: Ion<number>,
    duration: number,
    paused: Ion<boolean>
-}>) {
+}) {
          const { elapsed, duration, paused, emit } = input
 
    return component(
@@ -198,10 +198,10 @@ function ElapsedBar(input: FromTag<{
 
 
 
-function Timer(input: FromTag<{
+function Timer(input: {
    elapsed: Ion<number>,
    duration: number
-}>) {
+}) {
          const { elapsed, duration } = input
 
    return component(

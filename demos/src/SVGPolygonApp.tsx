@@ -1,4 +1,4 @@
-import { component, template, For, FromTag, Style, css, } from "@rue/luent"
+import { component, template, For, FromTag, Style, css, fromTag, $of, } from "@rue/luent"
 import { as, ion, ionic, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
@@ -6,63 +6,63 @@ import { as, ion, ionic, EACH, Ion, Ionic } from "@rue/quarky"
 // - svg
 
 type Stat = {
-   label: string,
-   value: number
+  label: string,
+  value: number
 }
 
 export function SVGPolygonApp() {
-   const $newLabel = ion('')
+  const $newLabel = ion('')
 
-   const stats = ionic([
-      { label: 'A', value: 100 },
-      { label: 'B', value: 100 },
-      { label: 'C', value: 100 },
-      { label: 'D', value: 100 },
-      { label: 'E', value: 100 },
-      { label: 'F', value: 100 }
-   ], { [EACH]: { '-as': ionic } })
+  const stats = ionic([
+    { label: 'A', value: 100 },
+    { label: 'B', value: 100 },
+    { label: 'C', value: 100 },
+    { label: 'D', value: 100 },
+    { label: 'E', value: 100 },
+    { label: 'F', value: 100 }
+  ], { [EACH]: { '-as': ionic } })
 
 
-   function add(e: any) {
-      e.preventDefault()
-      if (!$newLabel()) return
-      stats.push(ionic({
-         label: $newLabel(),
-         value: 100
-      }))
-      $newLabel.value = ''
-   }
+  function add(e: any) {
+    e.preventDefault()
+    if (!$newLabel()) return
+    stats.push(ionic({
+      label: $newLabel(),
+      value: 100
+    }))
+    $newLabel.value = ''
+  }
 
-   function remove(stat: Ionic<Stat>) {
-      if (stats.length > 3) {
-         stats.splice(stats.indexOf(stat), 1)
-      } else {
-         alert("Can't delete more!")
-      }
-   }
+  function remove(stat: Ionic<Stat>) {
+    if (stats.length > 3) {
+      stats.splice(stats.indexOf(stat), 1)
+    } else {
+      alert("Can't delete more!")
+    }
+  }
 
-   return component(
-      <>
-         <svg width="200" height="200">
-            <PolyGraph stats={stats}></PolyGraph>
-         </svg >
+  return component(
+    <>
+      <svg width="200" height="200">
+        <PolyGraph stats={stats}></PolyGraph>
+      </svg >
 
-         {For(stats, $stat =>
-            <div>
-               <label>{($stat().label)}</label>
-               <input type="range" mu:value={($stat().$value)} min="0" max="100" />
-               <span>{($stat().value)}</span>
-               <button on:click={e => remove($stat())} class="remove">X</button>
-            </div>
-         )}
+      {For(stats, $stat =>
+        <div>
+          <label>{($stat().label)}</label>
+          <input type="range" mu:value={($stat().$value)} min="0" max="100" />
+          <span>{($stat().value)}</span>
+          <button on:click={e => remove($stat())} class="remove">X</button>
+        </div>
+      )}
 
-         <form id="add">
-            <input name="newlabel" mu:value={$newLabel} />
-            <button on:click={add}>Add a Stat</button>
-         </form>
+      <form id="add">
+        <input name="newlabel" mu:value={$newLabel} />
+        <button on:click={add}>Add a Stat</button>
+      </form>
 
-         <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
-         {Style(css`
+      <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
+      {Style(css`
             polygon {
                fill: #42b983;
                opacity: 0.75;
@@ -90,8 +90,8 @@ export function SVGPolygonApp() {
                left: 300px;
             }
          `)}
-      </>
-   )
+    </>
+  )
 }
 
 // const replacer = (_key: string, val: unknown): any => {
@@ -121,64 +121,64 @@ export function SVGPolygonApp() {
 //  }
 
 
-function AxisLabel(setup: FromTag<{
-   stat: Ionic<Stat>,
-   index: Ion<number>,
-   total: Ion<number>
-}>) {
-   const { $index, stat, $total } = setup
+function AxisLabel(setup: {
+  stat: Ionic<Stat>,
+  index: Ion<number>,
+  total: Ion<number>
+}) {
+  const { $index, stat, $total } = fromTag(setup)
 
-   const $point = ion(() =>
-      valueToPoint(+stat.value + 10, $index(), $total())
-   )
+  const $point = ion(() =>
+    valueToPoint(+stat.value + 10, $index(), $total())
+  )
 
-   return component(
-      <text x={($point().x)} y={($point().y)}>{stat.$label}</text>
+  return component(
+    <text x={($point().x)} y={($point().y)}>{$of(stat).label}</text>
 
-   )
+  )
 }
 
 
-function PolyGraph({ stats }: FromTag<{
-   stats: Ionic<Ionic<Stat>[]>
-}>) {
+function PolyGraph({ stats }: {
+  stats: Ionic<Ionic<Stat>[]>
+}) {
 
-   const $points = ion(() => {
-      const total = stats.length
-      return stats
-         .map((stat, i) => {
-            const { x, y } = valueToPoint(stat.value, i, total)
-            return `${x},${y}`
-         })
-         .join(' ')
-   })
+  const $points = ion(() => {
+    const total = stats.length
+    return stats
+      .map((stat, i) => {
+        const { x, y } = valueToPoint(stat.value, i, total)
+        return `${x},${y}`
+      })
+      .join(' ')
+  })
 
-   return component(
-      <g>
-         <polygon points={$points}></polygon>
-         <circle cx="100" cy="100" r="80"></circle>
-         {For(stats, ($stat, index) =>
-            <AxisLabel
-               stat={$stat()}
-               index={index}
-               total={stats.$length}
-            >
-            </AxisLabel>
-         )}
-      </g>
-   )
+  return component(
+    <g>
+      <polygon points={$points}></polygon>
+      <circle cx="100" cy="100" r="80"></circle>
+      {For(stats, ($stat, index) =>
+        <AxisLabel
+          stat={$stat()}
+          index={index}
+          total={$of(stats).length}
+        >
+        </AxisLabel>
+      )}
+    </g>
+  )
 }
 
 function valueToPoint(value: number, index: number, total: number) {
-   const x = 0
-   const y = -value * 0.8
-   const angle = ((Math.PI * 2) / total) * index
-   const cos = Math.cos(angle)
-   const sin = Math.sin(angle)
-   const tx = x * cos - y * sin + 100
-   const ty = x * sin + y * cos + 100
-   return {
-      x: tx,
-      y: ty
-   }
+  const x = 0
+  const y = -value * 0.8
+  const angle = ((Math.PI * 2) / total) * index
+  const cos = Math.cos(angle)
+  const sin = Math.sin(angle)
+  const tx = x * cos - y * sin + 100
+  const ty = x * sin + y * cos + 100
+  return {
+    x: tx,
+    y: ty
+  }
 }

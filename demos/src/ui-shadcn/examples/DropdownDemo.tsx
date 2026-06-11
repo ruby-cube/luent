@@ -12,9 +12,9 @@ type DropdownMenu = {
 
 const DROPDOWN = ContextKey<IonicDropdown>()
 
-function DropdownMenu(setup: FromTag<{
+function DropdownMenu(setup: {
    'Slot:Face': (menu: DropdownMenu) => RawJSXNode
-}>) {
+}) {
    const { Slot } = setup
    const { dropdown, menu } = DropdownKit()
 
@@ -26,7 +26,7 @@ function DropdownMenu(setup: FromTag<{
    )
 }
 
-function Dropdown(setup: FromTag<{ Slot: RenderSlot }>) {
+function Dropdown(setup: { Slot: RenderSlot }) {
    const { Slot } = setup
    const dropdown = fromContext(DROPDOWN)
 

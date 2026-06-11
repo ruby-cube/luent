@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { ion } from '@rue/quarky'
-import { component, template, FromTag, NodeRef, atMount, beforeUnmount } from '@rue/luent'
+import { component } from '@rue/luent'
 import './style.css'
 
 // Demo from Vue.js

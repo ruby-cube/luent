@@ -35,13 +35,13 @@ import { CounterKit } from "./CounterKit"
 function App() {
    const { count@, incrementCount, decrementCount } = CounterKit(0)
    
-   <:component>
+   <::>
       <div>
          <div>{count@}</div>
          <button on:click={incrementCount}>+</button>
          <button on:click={decrementCount}>-</button>
       </div>
-   </:component>
+   </::>
 }
 ```
 
@@ -78,7 +78,7 @@ import { Box } from "./Box"
 function App() {
   const box = ionic(new Box(0, 100))
 
-  <:component>
+  <::>
     <div 
       class="box" 
       style={(`transform: translate(${box.x}px, ${box.y}px)`)@}
@@ -86,7 +86,7 @@ function App() {
     <button on:click={box.moveLeft}>◀</button>
     <button on:click={box.moveRight}>▶</button>
     <button on:click={box.moveDown}>▼</button>
-  </:component>
+  </::>
 }
 ```
 
@@ -170,7 +170,7 @@ counter.decrement() // reactivity works
 ```tsx
 class IonicCounter {
   private counter = new Counter()
-  private core = IonCore()
+  private core = IonicCore()
 
   get count() {
     this.core.track('[[get]]', 'count');

@@ -151,9 +151,9 @@ const $Main = Polymorph({
       <Chat></Chat>
 })
 
-function Button(input : FromTag<{
+function Button(input : {
    Slot: Slot
-}>) {
+}) {
    return component(
       <button>
 

@@ -21,9 +21,9 @@ import { component, template } from '@rue/luent'
 //    )
 // }
 
-function Album(input : FromTag<{
+function Album(input : {
    resolve: ResolveSuspense
-}>) {
+}) {
    const { resolve } = input
 
    const $album = fromCloud(ALBUM, {

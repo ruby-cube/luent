@@ -12,9 +12,9 @@ export function StyledComp() {
    )
 }
 
-function BaseComp(input: FromTag<{
+function BaseComp(input: {
    ref?: NodeRef<'div'>
-}>) {
+}) {
    const { ref } = input
 
    return component(
@@ -22,8 +22,8 @@ function BaseComp(input: FromTag<{
    )
 }
 
-function Comp(input: FromTag<{
-}>) {
+function Comp(input: {
+}) {
    return component(
       <div>hi</div>
    )

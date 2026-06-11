@@ -46,8 +46,11 @@ import { TestInnerHTML } from "./src/TestInnerHTML"
 import { Counter } from "./src/CounterApp"
 
 export function runDemo() {
-  createRoot(() => <Counter max={10}/>)
-  // createRoot(() => <HabitTracker habit="water" goal={8}></HabitTracker>)
+  createRoot(() => 
+  // <HabitTracker habit="water" goal={8}></HabitTracker>
+  <BottomlessBlokkis></BottomlessBlokkis>
+)
+  // createRoot(() => )
     .mount('#root')
 }
 

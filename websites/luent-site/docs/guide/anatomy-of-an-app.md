@@ -9,9 +9,9 @@ There are three main steps to mounting an app with Luent.
 **Define the app**
 ```tsx
 function HelloWorld() {
-  <:component>
+  <::>
     <p>Hello World.</p>
-  </:component>
+  </::>
 }
 ```
 **Designate an app container in HTML**
@@ -64,19 +64,18 @@ type ComponentKit = {
   component?: object
 }
 
-type FromTag<T extends object> = ToSetup<T> & ToAttributes<T>
 ```
 :::
 **Define a component**
 ```tsx
-function MessageApp(setup: FromTag<{
+function MessageApp(setup: {
   message?: string
-}>) {
+}) {
   const { message = 'Hello World' } = setup
 
-  <:component>
+  <::>
     <p>{message}</p>
-  </:component>
+  </::>
 }
 ```
 **Instantiate component through its tag form**

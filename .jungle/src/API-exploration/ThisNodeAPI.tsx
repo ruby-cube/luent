@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, template, FromTag, v } from "@rue/luent"
+import { component, template, v } from "@rue/luent"
 import { Ion, watch } from "@rue/quarky"
 import { DynamicNode } from "../../../../packages/luent/src/flask/ViewFlask";
 
@@ -12,9 +12,9 @@ import { DynamicNode } from "../../../../packages/luent/src/flask/ViewFlask";
 function $thisNode() { return {} as ThisNode }
 
 function TestingStuff(
-   input : FromTag<{
+   input : {
       frog: Frog
-   }>()
+   }()
 ) {
    const { fromCoop, onDismantle } = $thisNode();
    const { frog } = input;

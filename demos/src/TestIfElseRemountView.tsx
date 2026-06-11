@@ -1,9 +1,9 @@
-import { component, template, If, Else, ElseIf, NodeRef, createRoot, FromTag, ShowHideType, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, createRoot, ShowHideType, Style, css } from "@rue/luent";
 import { Ion, ion, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
 
-export function TestIfElseRemountView(setup: FromTag<{}>) {
+export function TestIfElseRemountView(setup: {}) {
    const $active = ion(true, {
       toggle() {
          $active.value = !$active()

@@ -2,7 +2,7 @@ import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, watchToRender } 
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ShowHideType, RenderConditional } from "./If";
 import { isFunction, noop } from "@rue/utils";
-import { FromTag, RenderSlot } from "../component/x-Input";
+import { fromTag, RenderSlot } from "../component/x-Input";
 // import { createCasesKit, DEFAULT, MatchKit } from "./Switch";
 import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode";
@@ -25,13 +25,13 @@ export type CasesKit = {
 
 type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
 
-export function Match(input: FromTag<{
+export function Match(input: {
    x: Ion<any>, // TODO: change to key ... but need to make sure JSX plays well with it
    'view'?: ShowHideType // TODO: allow 'show'?
    toCase?: (key: any) => any,
    Slot: RenderSlot
-}>) {
-   const { $x, toCase = (key: any) => key, Slot, "view": view } = input
+}) {
+   const { $x, toCase = (key: any) => key, Slot, "view": view } = fromTag(input)
    return component(
       new MatchKit($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)
    )

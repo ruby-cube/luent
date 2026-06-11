@@ -1,4 +1,4 @@
-import { component, For, FromTag, template } from "@rue/luent";
+import { component, For, template } from "@rue/luent";
 import { ionic, } from "@rue/quarky";
 import { BlokkModel, Rotation } from "./BlokkModel";
 
@@ -7,10 +7,10 @@ export const CELL_SIZE = 20;
 
 const degrees = [0, 270, 180, 90] as const
 
-export function Blokk(input: FromTag<{
+export function Blokk(input: {
   shapes: (0 | 1)[][][];
   initialX: number
-}>) {
+}) {
   const { shapes, initialX } = input
   const blokk = ionic(new BlokkModel(randomShape(), randomRotation(), initialX))
 

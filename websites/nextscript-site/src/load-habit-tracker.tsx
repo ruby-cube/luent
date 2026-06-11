@@ -67,7 +67,7 @@ export function HabitTracker({ habit, goal = 5 }) {
   get count = ion(0)
   get achieved = ion((count === goal)@)
 
-  <:component>
+  <::>
     <div class='tracker'>
       {habit}
       <ul>
@@ -83,7 +83,7 @@ export function HabitTracker({ habit, goal = 5 }) {
     </div>
 
     <o-link href='/src/demos/habit-tracker.css' rel='stylesheet' />
-  </:component>
+  </::>
 }`
 
 const transpiled =

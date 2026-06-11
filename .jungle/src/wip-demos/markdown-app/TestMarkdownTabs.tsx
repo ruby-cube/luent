@@ -66,9 +66,9 @@ export function MarkdownApp() {
 
 
 function Main(
-   { $openedFiles } : FromTag<{
+   { $openedFiles } : {
    openedFiles: Ion<File[]>
-}>()
+}()
 ) {
 
    return component(

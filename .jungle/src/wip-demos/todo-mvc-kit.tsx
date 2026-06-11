@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, template, For, If, Else, FromTag, fromRoot, ContextKey, ContextEntryKey, fromGround } from "@rue/luent"
-import { watch,  queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
+import { component, template, For, If, Else, fromRoot, ContextKey, ContextEntryKey, fromGround } from "@rue/luent"
+import { watch,  trackEffect, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
@@ -317,7 +317,7 @@ export function TodoMVC({
 
    // # persist state
 
-   queueIonicTask(() => {
+   trackEffect(() => {
       storeTodos($todos())
    })
 
@@ -418,11 +418,11 @@ type IsMutable<T> = (value: T) => value is Mutable<T>
 type Mutable<T> = T
 
 
-function TodoList(input: FromTag<{
+function TodoList(setup: {
    'mu:todos': Ion<$$TodoArray>,
    removeTodo: (todo: Ionic<Todo>) => void,
-}>) {
-   const { mu, $todos, removeTodo, } = input()
+}) {
+   const { mu, $todos, removeTodo, } = fromTag(setup)
 
    const $editedTodo = ion(null as Todo | null)
 

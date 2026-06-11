@@ -294,7 +294,7 @@ class AsyncIon<T> {
    private watchingFetch = false;
 
    private watchFetch() {
-      queueIonicTask(() => this.fetch())
+      trackEffect(() => this.fetch())
       this.watchingFetch = true;
    }
 

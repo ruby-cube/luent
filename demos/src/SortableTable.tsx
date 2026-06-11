@@ -32,11 +32,11 @@ export function SortableTableApp() {
    )
 }
 
-type SortableTableInput = FromTag<{
+type SortableTableInput = {
    data: any[],
    columns: string[],
    filterKey: Ion<string>
-}>
+}
 
 function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
 

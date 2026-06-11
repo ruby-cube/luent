@@ -163,9 +163,9 @@ function LoadingApp() { //Stand in until I fix createRoot
 // }
 
 
-function App(input : FromTag<{
+function App(input : {
    files: Ionized<File[]>
-}>) {
+}) {
 
    const { files } = input;
 
@@ -290,7 +290,7 @@ const TABS_KIT = ContextKey<TabManager>('TABS_KIT')
 // const CLOSE_FILE = ContextKey(v<TabManager['closeFile']>)
 // const FOCUS_FILE = ContextKey(v<TabManager['focusFile']>)
 
-export function List(input : FromTag<{
+export function List(input : {
 		apple?: string,
 		peach?: number,
 		pear?: object,
@@ -314,9 +314,9 @@ const PEAR = ContextKey<MaybeIon<string>>('PEAR')
 
 
 
-function Sidebar(input : FromTag<{
+function Sidebar(input : {
    files: Ionized<File[]> // TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
-}>) {
+}) {
    const { files } = input
    const { addFile } = fromContext(FILES_KIT);
 
@@ -330,10 +330,10 @@ function Sidebar(input : FromTag<{
    )
 }
 
-function SidebarFile(input : FromTag<{
+function SidebarFile(input : {
    file: Ionized<File>,
    index: Ion<number>
-}>) {
+}) {
    const { $index, file } = input
    const $menu = NodeRef(IfContextMenu)
 
@@ -371,11 +371,11 @@ function SidebarFile(input : FromTag<{
 
 
 
-function Tab(input : FromTag<{
+function Tab(input : {
    index?: Ion<number>,
    file: Ionized<File>,
    tabManager?: TabManager,
-}>) {
+}) {
    const { file, tabManager = fromContext(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 

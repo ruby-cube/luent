@@ -1,4 +1,4 @@
-import { component, FromTag, If, NodeRef, RenderSlot, template } from "@rue/luent"
+import { component, If, NodeRef, RenderSlot, template } from "@rue/luent"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
 import { mergeTailwind } from "../utils/utils"
 import { IonicTooltip } from "../ui-base/tooltip/Tooltip.kit";
@@ -16,7 +16,7 @@ import { Alignment, Placement } from "../ui-base/popover/Popover.kit";
 //    if (!('show' in tooltip) || !('hide' in tooltip)) throw new Error('`show` and `hide` methods missing from tooltip')
 // }
 
-function Tooltip(setup: FromTag<{
+function Tooltip(setup: {
   ref?: NodeRef<'div'>;
   Slot: RenderSlot,
   tail?: RenderSlot,
@@ -24,7 +24,7 @@ function Tooltip(setup: FromTag<{
   gap?: number,
   place?: Placement,
   align?: Alignment
-}>) {
+}) {
   const {
     ref,
     $classes,

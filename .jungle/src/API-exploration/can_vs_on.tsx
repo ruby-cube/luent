@@ -8,17 +8,17 @@
  */
 
 import { getActiveFlask } from "@rue/flask";
-import { component, template, FromTag } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { Ion, Ionic } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
 
 
-function StatefulCounter(input: FromTag<{
+function StatefulCounter(input: {
    'on:increment': (e: CountEvent) => void
    'on:decrement': (e: CountEvent) => void
-}>) {
+}) {
    const { emit } = input
 
    const $count = ion(0, {
@@ -52,11 +52,11 @@ function StatefulCounter(input: FromTag<{
 
 
 
-function DumbCounter(input: FromTag<{
+function DumbCounter(input: {
    count: Ion<number>
    'on:incrementClick': () => void
    'on:derementClick': () => void
-}>) {
+}) {
    const { $count, emit } = input
 
    return component(
@@ -70,11 +70,11 @@ function DumbCounter(input: FromTag<{
 
 
 
-function DumbCounterC(input: FromTag<{
+function DumbCounterC(input: {
    count: Ion<number>
    incrementCount: () => void
    decrementCount: () => void
-}>) {
+}) {
    const { $count, incrementCount, decrementCount } = input
 
    return component(
@@ -88,9 +88,9 @@ function DumbCounterC(input: FromTag<{
 
 
 
-function DumbCounterB(input: FromTag<{
+function DumbCounterB(input: {
    'mu:count': Ion<number> & { increment: () => void, decrement: () => void }
-}>) {
+}) {
    const { $count, mu } = input
 
    return component(
@@ -182,9 +182,9 @@ function Parent() {
 }
 
 
-function Child(input: FromTag<{
+function Child(input: {
    'can:atIncrementProductQty': (task: Task) => (() => void)
-}>) {
+}) {
    const { atIncrementProductQty } = input
 
    atIncrementProductQty(e => {
@@ -244,9 +244,9 @@ function wrappedMethod(...input: any[]) {
 // So it's great for a Tempo component where calculating tempo is a complex operation and you only need it in once place in the app
 // Not so great for product quantity which you need to mutate in several places
 
-function DumbProduct(input: FromTag<{
+function DumbProduct(input: {
    product: IonicProduct
-}>) {
+}) {
    const { product } = input
 
    return component(
@@ -260,9 +260,9 @@ function DumbProduct(input: FromTag<{
 }
 
 
-function SmartProduct(input: FromTag<{
+function SmartProduct(input: {
    'mu:product': IonicProduct
-}>) {
+}) {
    const { product } = input
 
    return component(

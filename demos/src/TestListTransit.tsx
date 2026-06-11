@@ -121,10 +121,10 @@ function receive(id: number, node: HTMLElement) {
 
 
 
-function TodoList(input: FromTag<{
+function TodoList(input: {
    todos: Ion<Ionic<Todo>[]>,
    remove: (todo: Ionic<Todo>) => void
-}>) {
+}) {
    const { $todos, remove } = input
 
    const lis: HTMLLIElement[] = []

@@ -123,9 +123,9 @@ function Appo() {
       </div>
    )
 }
-function Child(input: FromTag<{
+function Child(input: {
    disabled: Ion<boolean>
-}>) {
+}) {
    const $active = ion(true)
 
    return component(

@@ -1,12 +1,12 @@
-import { component, template, Else, FromTag, If, Style, css } from "@rue/luent";
+import { component, template, Else, If, Style, css } from "@rue/luent";
 import { SignupForm } from "./SignupForm";
 import { ion } from "@rue/quarky";
 import { LoginForm } from "./LoginForm";
 import './welcome-view.css'
 
-export function WelcomeView(input: FromTag<{
+export function WelcomeView(input: {
    initialLoad: boolean
-}>) {
+}) {
    const { initialLoad } = input
    const $initialLoad = ion(initialLoad)
 

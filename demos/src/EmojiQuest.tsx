@@ -25,10 +25,10 @@ export function EmojiQuest() {
    )
 }
 
-function Panel(setup: FromTag<{
+function Panel(setup: {
    title: string,
    Slot: RenderSlot
-}>) {
+}) {
    const { title, Slot } = setup
 
    const opened = ion(true)
@@ -74,11 +74,11 @@ function Panel(setup: FromTag<{
    )
 }
 
-function Powerset(setup: FromTag<{
+function Powerset(setup: {
    'mu:powerset': Ionic<string[]> & { addRandomPower(): void }
    limit: number,
    class?: Ion<TagClass>
-}>) {
+}) {
    const { mu, limit, $class } = setup;
    const { powerset } = mu
 

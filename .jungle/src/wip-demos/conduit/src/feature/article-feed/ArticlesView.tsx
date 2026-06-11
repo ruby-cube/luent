@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, Context, ContextKey, template, Else, ElseIf, For, fromContext, fromRoot, FromTag, If, RenderSlot, AsyncIon } from "@rue/luent";
+import { component, Context, ContextKey, template, Else, ElseIf, For, fromContext, fromRoot, If, RenderSlot, AsyncIon } from "@rue/luent";
 import { Ion, Ionized, watch, ion } from "@rue/quarky";
 import { Article } from "../../../api";
 import { AnyObject } from "@rue/types";
@@ -12,11 +12,11 @@ ArticlesView['db'] = RootContextKey<ArticleDatabase>()
 ArticlesView['settings'] = ContextKey<SiteSettings>()
 ArticlesView['greeting'] = ContextKey<string>()
 
-export function ArticlesView(input: FromTag<{
+export function ArticlesView(input: {
    'articlesMeta': $<{ tag: string, username: string, category: string }>
    'articlesPerPage': $<number>,
    'greeting'?: string
-}>) {
+}) {
    const {
       $articlesMeta,
       $articlesPerPage,
@@ -78,7 +78,7 @@ export function ArticlesView(input: FromTag<{
 
 ArticlesNav.router = ContextKey<Router>()
 
-function ArticlesNav(input: FromTag<{}>) {
+function ArticlesNav(input: {}) {
    const router = fromRoot(ArticlesNav.router)
 
    return component(
@@ -98,9 +98,9 @@ ArticlePreview['author'] = RootContextKey.Ion<ArticleDatabase>()
 ArticlePreview['addTodo'] = ContextKey<() => void>()
 ArticlePreview['on:clickIncrement'] = ContextKey<() => void>()
 
-export function ArticlePreview(input: FromTag<{
+export function ArticlePreview(input: {
    'mu:article': Ionized<Article>,
-}>) {
+}) {
 
    const { article, mu } = input as unknown as { article: Ionized<Article>, mu: <T>(arg: T) => T }
    const db = fromContext(ArticlePreview.db)
@@ -163,11 +163,11 @@ function RootContextKey<T>() {
 
 // #region: pagination
 
-function ArticlePagination(input: FromTag<{
+function ArticlePagination(input: {
    page: Ion<number>
    articleCount: Ion<number>
    articlesPerPage: Ion<number>
-}>) {
+}) {
    const { $page, $articleCount, $articlesPerPage } = input
 
    const $totalPages = ion(() => Math.ceil($articleCount() / $articlesPerPage()))

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { atMount, template, FromTag, listen } from "@rue/luent";
+import { atMount, template, listen } from "@rue/luent";
 
 type ThisComponent = {
    context: any,
@@ -12,9 +12,9 @@ type ThisComponent = {
 // [ ] component Kits
 
 
-type LessonInput = FromTag<{
+type LessonInput = {
    apple: string
-}>
+}
 
 function MessageForm(this: ThisView, {
    apple

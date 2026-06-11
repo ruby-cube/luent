@@ -1,6 +1,6 @@
 ```tsx
 import { template, For, If, Else, FromTag, listen, isMutableIon } from "@rue/luent"
-import { watch, queueIonicTask, Ion, Ionic, EACH, as, ion, ionic } from "@rue/quarky"
+import { watch, trackEffect, Ion, Ionic, EACH, as, ion, ionic } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -50,7 +50,7 @@ export function TodoMVC() {
    function getTodos(): Todo[] {
       const STORAGE_KEY = 'vue-todomvc'
 
-      queueIonicTask(() => {
+      trackEffect(() => {
          localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
       })
 
@@ -146,7 +146,7 @@ export function TodoMVC() {
 </style> */}
 
 
-function TodoInput({ addTodo }: FromTag<{ addTodo: (title: string) => void }>) {
+function TodoInput({ addTodo }: { addTodo: (title: string) => void }) {
 
    function submitTodo(e: InputEvent) {
       const value = e.target.value.trim()
@@ -171,7 +171,7 @@ interface TodoListInput {
    removeTodo: (todo: Ionic<Todo>) => void
 }
 
-function TodoList({ removeTodo, todos@ }: FromTag<TodoListInput>) {
+function TodoList({ removeTodo, todos@ }: TodoListInput) {
 
    get editedTodo = ion(null as Todo | null)
 

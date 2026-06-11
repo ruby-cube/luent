@@ -1,4 +1,4 @@
-import { component, $fromContext, beforeUninstall, atMount, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
+import { component, $fromContext, beforeUninstall, atMount, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
 import { Ion, toIon } from "@rue/quarky"
 import { maybeFlip, positionTail } from "../popover/Popover.kit";
 import { PopoverRoot } from "../popover/Popover";
@@ -8,11 +8,11 @@ import { IonicDropdown } from "./Dropdown.kit";
 // [] hideDelay should never be greater than delay, clamp hideDelay to delay if it is greater
 // [] if the tooltip blocks the trigger hover, we end up with a weird toggling the tooltip on-off-on-off situation
 
-function DropdownRoot(setup: FromTag<{
+function DropdownRoot(setup: {
    ref?: NodeRef<'div'>;
    Slot: RenderSlot;
    dropdown: IonicDropdown
-}>) {
+}) {
    const { dropdown, ...rest } = setup
 
    return component(

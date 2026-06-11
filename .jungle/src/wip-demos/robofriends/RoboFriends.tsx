@@ -56,9 +56,9 @@ export function RoboFriendsApp() {
 // They would need to be two different frogs. You may have to sync them if they represent the same frog.
 
 
-export function RoboList(input: FromTag<{
+export function RoboList(input: {
    robots: Ion<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
-}>) {
+}) {
    const { $robots } = input; // TODO: type input such that $robots is defined
 
    return component(
@@ -106,11 +106,11 @@ export function RoboList(input: FromTag<{
 //   const $swamp = $fromContext(MU(SWAMP))
 
 
-export function RoboCard(input: FromTag<{
+export function RoboCard(input: {
    id: number;
    name: Ion<string>;
    email: Ion<string>;
-}>) {
+}) {
    const {
       id,
       $name,

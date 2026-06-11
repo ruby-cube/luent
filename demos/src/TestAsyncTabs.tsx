@@ -89,10 +89,10 @@ const CONTENT = {
    Six: `🎲`
 };
 
-function Tab(input: FromTag<{
+function Tab(input: {
    page: keyof typeof CONTENT,
    count: Ion<number>
-}>) {
+}) {
    const { page, $count } = input
 
    const $localCount = ion(0, {

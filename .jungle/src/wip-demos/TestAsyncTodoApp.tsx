@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { FromTag, AsyncIon, If, Suspense } from "@rue/luent";
+import { AsyncIon, If, Suspense } from "@rue/luent";
 import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 import { EACH, instantUpdate, Ion, Ionic, ionic, IonicProxy, isIonicProxy } from "@rue/quarky";
 import { Action, REFETCH } from "../../../../packages/quarky/src/async/Action";
@@ -334,9 +334,9 @@ export default function TodoApp() {
    );
 }
 
-function TodoInput(input: FromTag<{
+function TodoInput(input: {
    addTodo: AsyncOp<(todo: Todo) => Promise<any>>;
-}>) {
+}) {
    const { addTodo } = input
 
    const reKeyDown: KeyboardEventHandler<HTMLInputElement> = ({
@@ -362,9 +362,9 @@ function TodoInput(input: FromTag<{
    );
 }
 
-function TodoInput(input: FromTag<{
+function TodoInput(input: {
    addTodo: AsyncOp<(todo: Todo) => Promise<any>>;
-}>) {
+}) {
    const { addTodo } = input
 
    const reKeyDown: KeyboardEventHandler<HTMLInputElement> = ({
@@ -391,10 +391,10 @@ function TodoInput(input: FromTag<{
    );
 }
 
-function TodoList(input: FromTag<{
+function TodoList(input: {
    todos: Ion<Todo[]>;
    removeTodo: (id: string) => Promise<void>;
-}>) {
+}) {
    const { $todos, removeTodo } = input
 
    return (
@@ -415,10 +415,10 @@ function TodoList(input: FromTag<{
 function Todo({
    todo,
    removeTodo,
-}: FromTag<{
+}: {
    todo: Todo;
    removeTodo: (id: string) => Promise<void>;
-}>) {
+}) {
    const $isRemoving = ion(false);
 
    const reRemoveBtnClick = () => {

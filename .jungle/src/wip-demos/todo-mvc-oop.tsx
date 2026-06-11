@@ -1,5 +1,5 @@
 import { component, template, For, If, Else, FromTag, listen } from "@rue/luent"
-import { watch, queueIonicTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
+import { watch, trackEffect, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
 
 // PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)
 // CONS: Not as composable as kits
@@ -117,7 +117,7 @@ export function TodoMVC() {
 
    const { $filteredTodos, removeTodo, updateTodo } = $from(app)
 
-   queueIonicTask(() => {
+   trackEffect(() => {
       storeTodos(app.todos)
    })
 
@@ -173,9 +173,9 @@ type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 
 
-function TodoInput(input: FromTag<{
+function TodoInput(input: {
    'can:addTodo': (title: string) => void
-}>) {
+}) {
    const { addTodo } = input
 
    function submitTodo(e: InputEvent) {
@@ -198,11 +198,11 @@ function TodoInput(input: FromTag<{
 
 
 
-function TodoList(input: FromTag<{
+function TodoList(input: {
    todos: Ion<Ionized<Todo[]>>,
    'can:removeTodo': (todo: Ionized<Todo>) => void,
    'can:updateTodo': typeof IonicTodoApp['updateTodo']
-}>) {
+}) {
    const { $todos, removeTodo, updateTodo } = input;
 
    const $editedTodo = ion(null as Todo | null)
@@ -258,10 +258,10 @@ function TodoList(input: FromTag<{
 
 type Ctx<T> = T // TODO: this should allow ionized object to be destructured, toIons
 
-function CheckBox(input: FromTag<{
+function CheckBox(input: {
    'can:toggleAll': IonicTodoApp['toggleAll']
    ctx: Ctx<{ remaining: IonicTodoApp['remaining'] }>
-}>) {
+}) {
    const { toggleAll, ctx: { $remaining } } = input
 
    return component(
@@ -278,9 +278,9 @@ function CheckBox(input: FromTag<{
    )
 }
 
-function Remaining(input: FromTag<{
+function Remaining(input: {
    count: Ion<number>
-}>) {
+}) {
    const { $count } = input
 
    return component(

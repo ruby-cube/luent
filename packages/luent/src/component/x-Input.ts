@@ -244,7 +244,7 @@ export function toInput(attributes: AnyObject, events: AnyObject) {
 }
 
 
-type TagAttributes<D> =
+export type TagAttributes<D> =
    Attributes<D>
    // StaticInput<D>
    // & MaybeIonAttributes<D>
@@ -331,9 +331,15 @@ type ToMuIon<T> = ExcludePrimitives<T> extends { value: any } ? T
 // TODO: only allow 'mu:' for ions
 
 
-export type FromTag<T = {}, D = {}> =
-   T extends RefSource
-   ? _FromTag<ElementAttributes<T> & D> & { ref?: NodeRef<T> } : _FromTag<T>
+// TODO: This is temporarily implemented as a type helper. It should be replaced with `toSetup()` implementation.
+// But I need to figure out how to handle component hooks first.
+export function fromTag<T>(setup: T) {
+  return setup as FromTag<T>
+}
+
+export type WithRef<N extends RefSource> = ElementAttributes<N> & { ref?: NodeRef<N> }
+
+export type FromTag<D = {}> = _FromTag<D>
 
 export type _FromTag<D> =
    StaticInput<D>

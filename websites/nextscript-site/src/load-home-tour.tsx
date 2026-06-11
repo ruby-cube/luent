@@ -145,13 +145,13 @@ const componentNsx =
   const open = () => { opened = true }
   const close = () => { opened = false }
 
-  <:component as={{ open, close }}>  
+  <:: as={{ open, close }}>  
     {If(opened@, 
       <o--body>
         <div>{Slot()}</div>
       </o--body>
     )}
-  </:component>
+  </::>
 }
 
 
@@ -285,8 +285,8 @@ function HomeTour() {
         <article class='tour-row code-left'>
           <div class='tour-copy'>
             <h3>JSX component</h3>
-            <code>{'<:component'} as={<i>component</i>}{'>'}<i>jsx</i>{'</:component>'}</code><br/>
-            | <code>{'<:component>'}<i>jsx</i>{'</:component>'}</code>
+            <code>{'<:component'} as={<i>component</i>}{'>'}<i>jsx</i>{'</::>'}</code><br/>
+            | <code>{'<::>'}<i>jsx</i>{'</::>'}</code>
             <p>
               —auto-returned component with component instance type information
             </p>

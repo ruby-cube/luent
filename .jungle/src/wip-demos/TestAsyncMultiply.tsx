@@ -1,4 +1,4 @@
-import { component, template, For, FromTag } from "@rue/luent";
+import { component, template, For } from "@rue/luent";
 import { Ion, ion,ionic, Ionic, SuspenseIon, swiftUpdate } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 import { Dispatch } from "../../../../packages/quarky/src/async/Dispatch";
@@ -180,7 +180,7 @@ export function TestAsyncMultiplyQueue() {
    )
 }
 
-function Result(input: FromTag<{ n: number }>) {
+function Result(input: { n: number }) {
    const { n } = input
 
    function $Multiply(n: number, o: number) {

@@ -69,9 +69,9 @@ function TestIon() {
    )
 }
 
-type TestCountInput = FromTag<{
+type TestCountInput = {
    'mu?:apple': Ion<string>
-}>
+}
 
 export function TestCount() {
 
@@ -94,7 +94,7 @@ export function TestCount() {
       $count.value--
    }
 
-   // queueIonicTask(() => {
+   // trackEffect(() => {
    //    console.log('running ionic task', $count())
    // })
 

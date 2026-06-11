@@ -1,6 +1,6 @@
 ```tsx
 import { template, For, If, Else, FromTag } from "%rue/luent"
-import { watch, queueIonicTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
+import { watch, trackEffect, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
 import { PRELUDE } from "../../../../packages/luent/src/render-cycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/compound/Compound"
@@ -184,7 +184,7 @@ export function TodoMVC() {
    function getTodos(): Todo[] {
       const STORAGE_KEY = 'vue-todomvc'
 
-      queueIonicTask(() => {
+      trackEffect(() => {
          localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
       })
 
@@ -339,7 +339,7 @@ function TodoList(todos@: Ionic<Todo[]>, removeTodo: (todo: Ionic<Todo>) => void
 
 
 
-function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void }>) {
+function TodoInput({ addTodo }: { 'can:addTodo': (title: string) => void }) {
 
    function submitTodo(e: InputEvent) {
       const value = e.target.value.trim()
@@ -361,10 +361,10 @@ function TodoInput({ addTodo }: FromTag<{ 'can:addTodo': (title: string) => void
 
 
 
-function TodoList({ todos@, removeTodo }: FromTag<{
+function TodoList({ todos@, removeTodo }: {
    todos: Ion<Ionic<Todo[]>>,
    'can:removeTodo': (todo: Ionic<Todo>) => void
-}>) {
+}) {
 
    get editedTodo = ion(null as Todo | null)
 

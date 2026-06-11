@@ -1,11 +1,11 @@
-import { component, If, template, Else, ElseIf, FromTag, atMount, atInstall, atRemount, beforeDemount, beforeUnmount, beforeUninstall, For, beforeMount, beforeRemount, Style, css } from "@rue/luent";
+import { component, If, template, Else, ElseIf, atMount, atInstall, atRemount, beforeDemount, beforeUnmount, beforeUninstall, For, beforeMount, beforeRemount, Style, css } from "@rue/luent";
 import { ionic, ion, Ion, Ionic } from "@rue/quarky";
 import "./style.css"
 
-function Counter(input: FromTag<{
+function Counter(input: {
    label: string,
    logHook?: (msg: string) => void
-}>
+}
 ) {
    const { label, logHook } = input
    const $count = ion(0, {
@@ -204,7 +204,7 @@ export function TestCreateMountShow() {
             return <>
                <code>
                   <span class="bracket">{`{`}</span>{`If($condition, 'remount',`}<br />
-                  {`   <:component></:component>`}<br />
+                  {`   <::></::>`}<br />
                   {`)`}<span class="bracket">{`}`}</span>
                </code>
                <p>

@@ -41,9 +41,9 @@ function Button({
    as: Comp = "button",
    Slot,
    ...other
-}: FromTag<'button', {
+}: WithRef<'button'> & VariantProps<typeof buttonVariants> & {
    as?: ComponentTag | string
-} & VariantProps<typeof buttonVariants>>) {
+}) {
 
    return component(
       <Comp

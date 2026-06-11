@@ -1,4 +1,4 @@
-import { component, template, For, fromRoot, fromContext, fromGround, FromTag, If, provideRoot, provideGround } from "@rue/luent";
+import { component, template, For, fromRoot, fromContext, fromGround, If, provideRoot, provideGround } from "@rue/luent";
 import "./style.css"
 
 type File = { name: string }
@@ -145,9 +145,9 @@ function Missing() {
 
 
 
-function File(input: FromTag<{
+function File(input: {
    file: { name: string }
-}>) {
+}) {
    const { file } = input
 
    return component(

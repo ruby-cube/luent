@@ -1,5 +1,5 @@
 import './index.css'
-import { component, createRoot, FromTag, RenderSlot, template } from "@rue/luent";
+import { component, createRoot, RenderSlot, template } from "@rue/luent";
 
 export function TestNamedSlots() {
 
@@ -15,7 +15,7 @@ export function TestNamedSlots() {
    )
 }
 
-function Comp({ Slot }: FromTag<{ Slot: { title: RenderSlot, description: RenderSlot } }>) {
+function Comp({ Slot }: { Slot: { title: RenderSlot, description: RenderSlot } }) {
    return component(
       <div>
          {Slot.title}

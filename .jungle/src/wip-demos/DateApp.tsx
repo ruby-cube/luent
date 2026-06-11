@@ -1,5 +1,5 @@
 import { component, beforeUnmount, template } from "@rue/luent";
-import { queueIonicTask, Ion, Ionized, SYNC, watch } from "@rue/quarky";
+import { trackEffect, Ion, Ionized, SYNC, watch } from "@rue/quarky";
 
 export function DateApp() {
 

@@ -1,4 +1,4 @@
-import { component, template, Else, ElseIf, For, FromTag, If } from "@rue/luent";
+import { component, template, Else, ElseIf, For, If } from "@rue/luent";
 import { $activeUpdate, ionic, ion, Ionic, PRELUDE, atRender, queueTask, watch } from "@rue/quarky";
 
 export function TestListMounting() {
@@ -48,7 +48,7 @@ export function TestListMounting() {
    )
 }
 
-function Counter(input: FromTag<{ log?: (msg: string) => void }>) {
+function Counter(input: { log?: (msg: string) => void }) {
    let count = 0
    const { log } = input
    return component(

@@ -1,7 +1,9 @@
-import { FromTag } from "@rue/luent"
+import { fromTag, FromTag, WithRef } from "@rue/luent"
 import { twMerge as mergeClasses } from "tailwind-merge"
 
-function Input({ $classes, type, ...attributes }: FromTag<'input'>) {
+function Input(setup: WithRef<'input'>) {
+  const { $classes, type, ...attributes } = fromTag(setup)
+  
    return (
       <input
          type={type}

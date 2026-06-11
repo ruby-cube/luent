@@ -94,9 +94,9 @@ export function TreeApp() {
 
 // # TreeItem
 
-function TreeItemView(input: FromTag<{
+function TreeItemView(input: {
    item: IonicTreeItem
-}>) {
+}) {
    const { item } = input
 
    const $isFolder = ion(() => !!item.children?.length)

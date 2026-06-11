@@ -41,10 +41,10 @@ function Content() {
 
 //--
 
-export function Button(input: FromTag<{
+export function Button(input: {
    Slot: RenderSlot,
    Nested: { something: ContextKey<string> }
-}>) {
+}) {
    const { Slot, Nested } = input
 
    return component(
@@ -77,7 +77,7 @@ function ParentB() {
 
 ContentB['something'] = ContextKey<string>()
 
-function ContentB(input: FromTag<{ something?: string }>) {
+function ContentB(input: { something?: string }) {
    const { something = fromContext(Content['something']) } = input
 
    return component(
@@ -88,9 +88,9 @@ function ContentB(input: FromTag<{ something?: string }>) {
 
 //--
 
-export function ButtonB(input: FromTag<{
+export function ButtonB(input: {
    Slot: RenderSlot<string>,
-}>) {
+}) {
    const { Slot } = input
 
    return component(

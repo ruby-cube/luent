@@ -2,7 +2,7 @@
 // You're filtering a large list based on a search input.
 
 import { component, AsyncIon, template, For, fromGround, provideGround } from "@rue/luent";
-import { Ion,queueIonicTask } from "@rue/quarky";
+import { Ion,trackEffect } from "@rue/quarky";
 import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
 
 // tsx

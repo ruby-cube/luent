@@ -427,16 +427,16 @@ Expressions surrounded by non-grouping parentheses and that use `await` are comp
 ```tsx
 function Compo(setup) {
    const { a, b@ } = setup
-   <:component>
-   </:component>
+   <::>
+   </::>
 }
 ```
 ```tsx
 function Compo(setup) {
    const { a, b } = setup[Wª]
 
-   <:component>
-   </:component>
+   <::>
+   </::>
 }
 ```
 
@@ -444,15 +444,15 @@ Destructured parameter with `@` operator
 ```tsx
 function Compo({ a, b@ }) {
    
-   <:component>
-   </:component>
+   <::>
+   </::>
 }
 ```
 ```tsx
 function Compo(setup) {
    const { a, b } = setup[Wª]
 
-   <:component>
-   </:component>
+   <::>
+   </::>
 }
 ```

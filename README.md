@@ -41,7 +41,7 @@ Other notable features:
 
 Experimental areas:
 - [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
-- [WIP] compile-time mutation tracking
+- [WIP] compile-time mutation safety checks
 - x-ray binding and smart auto-binding for authoring flexible components
 - selective nested reactivity
 - encapsulated reactivity

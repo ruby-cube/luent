@@ -152,7 +152,7 @@ function TestSlotB() {
    )
 }
 
-function Comp({ Slot }: FromTag<{ Slot: RenderSlot<{}> }>) {
+function Comp({ Slot }: { Slot: RenderSlot<{}> }) {
    return component(
       <div></div>
    )

@@ -1,4 +1,4 @@
-import { component, $fromContext, beforeUninstall, atMount, ComponentTag, Context, ContextKey, css, fromContext, FromTag, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template } from "@rue/luent"
+import { component, $fromContext, beforeUninstall, atMount, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template } from "@rue/luent"
 import { Ion, Ionic, toIon, ion } from "@rue/quarky"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
@@ -11,11 +11,11 @@ import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popove
 const POPOVER = ContextKey<Ionic<Popover>>()
 const POPOVER_NODE = ContextKey<NodeRef<'div'>>()
 
-function PopoverRoot(setup: FromTag<{
+function PopoverRoot(setup: {
    ref?: NodeRef<'div'>;
    Slot: RenderSlot;
    popover: Ionic<Popover>
-}>) {
+}) {
    const {
       ref: $popover = NodeRef('div'),
       $classes,
@@ -96,10 +96,10 @@ function PopoverRoot(setup: FromTag<{
 
 }
 
-function PopoverContent(setup: FromTag<{
+function PopoverContent(setup: {
    ref?: NodeRef<'div'>;
    Slot: RenderSlot;
-}>) {
+}) {
    const {
       ref,
       $classes,
@@ -119,12 +119,12 @@ function PopoverContent(setup: FromTag<{
 }
 
 
-function PopoverTail(setup: FromTag<{
+function PopoverTail(setup: {
    as?: ComponentTag | string;
    offset?: Ion<number>
    'shape:class'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
    'shape:style'?: Ion<string>
-}>) {
+}) {
    const {
       $classes,
       $styles,

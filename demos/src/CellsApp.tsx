@@ -104,11 +104,11 @@ export function CellsApp() {
 }
 
 
-function Cell(input: FromTag<{
+function Cell(input: {
    value: Ion<string>
    setCellValue: (value: string) => void
    calcCellValue: (value: string) => string
-}>) {
+}) {
    const { setCellValue, $value, calcCellValue } = input
 
    const $editing = ion(false)

@@ -14,21 +14,21 @@ Defaults
 function App() {
    get count = ion(0)
    
-   <Component>
+   <::>
       <Counter {count} increment={() => count++} />
-   </Component>
+   </::>
 }
 
 
-function Counter(setup: FromTag<{
+function Counter(setup: {
    count: Ion<number>
    increment: () => void
-}>) {
-   const { count@, increment } = setup
+}) {
+   const { count@, increment } = fromTag(setup)
 
-   <Component>
+   <::>
       <button on:click={increment}>+</button>
-   </Component>
+   </::>
 }
 ```
 
@@ -47,11 +47,11 @@ function App() {
 }
 
 
-function Counter(setup: FromTag<{
+function Counter(setup: {
    start?: number
    limit: number
    onLimitReached: HandleEvent<{ limit: number }>
-}>) {
+}) {
    const { start = 0, limit, onLimitReached } = setup
 
    get count = ion(0, {
@@ -104,10 +104,10 @@ function App() {
 }
 
 
-function Counter(setup: FromTag<'button', {
+function Counter(setup: WithRef<'button'> & {
   count: Ion<number>
   increment: () => void
-}>) {
+}) {
   const { count@, increment, ...rest } = setup
 
   <div class='counter'>
@@ -132,10 +132,10 @@ function App() {
 }
 
 
-function Counter(setup: FromTag<'div', {
+function Counter(setup: WithRef<'div'> & {
   'xray:plus': Xray<'button'>;
   'xray:minus': Xray<'button'>;
-}>) {
+}) {
   const { xray, ...rest } = setup
 
   const count = ion(0, {

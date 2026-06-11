@@ -70,7 +70,7 @@ export default defineConfig({
             ]
           },
           {
-            text: '[] Component Bindings', link: '/guide/component-bindings', items: [
+            text: '~ Component Bindings', link: '/guide/component-bindings', items: [
               // { text: 'Direct Input', link: '/guide/' },
               // { text: 'Indirect Input', link: '/guide/' },
               // { text: 'Dependency Injection', link: '/guide/' },
@@ -85,34 +85,33 @@ export default defineConfig({
           { text: 'The Render Cycle', link: '/guide/the-render-cycle' },
           { text: 'Preserving Views', link: '/guide/preserving-views' },
           { text: 'Lifecycle Hooks', link: '/guide/lifecycle-hooks' },
-          { text: '[] Node Access', link: '/guide/node-access' },
+          { text: 'Node Access', link: '/guide/node-access' },
           { text: 'Reusable Logic', link: '/guide/reusable-logic' }
         ]
       },
       {
         text: 'Extended Topics',
         items: [
-           { text: 'Debugging Reactivity', link: '/guide/debugging-reactivity' },
-          {
-            text: '[] More Reactivity', link: '/markdown-examples', items: [
-              // { text: 'Finite States', link: '/guide/' },
-              // { text: 'Writable Derivations', link: '/guide/' },
-              // { text: 'Reactive Tasks', link: '/guide/' },
-              // { text: 'Untracked', link: '/guide/' },
-              // { text: 'Debugging Reactivity', link: '/guide/' },
-              // { text: 'Custom Reactive Structures', link: '/guide/' },
-            ]
-          }
-        ]
-      },
-      {
-        text: 'Special Topics',
-        items: [
-          { text: 'Mutable Bindings', link: '/guide/mutable-bindings' },
-          { text: 'Error Rendering', link: '/guide/error-rendering' },
-          { text: 'Async Rendering', link: '/guide/async-rendering' },
-          { text: 'Portals', link: '/guide/portals' },
-          { text: 'Transitions', link: '/guide/transitions' },
+           { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
+           { text: 'Reactive Effects', link: '/guide/reactive-effects' },
+           { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
+          // {
+          //   text: '[] More Reactivity', link: '/markdown-examples', items: [
+            //     // { text: 'Writable Derivations', link: '/guide/' },
+            //   ]
+            // }
+          ]
+        },
+        {
+          text: 'Special Topics',
+          items: [
+            { text: '[] Mutable Bindings', link: '/guide/mutable-bindings' },
+            { text: 'Error Rendering', link: '/guide/error-rendering' },
+            { text: 'Async Rendering', link: '/guide/async-rendering' },
+            { text: 'Portals', link: '/guide/portals' },
+            { text: 'Transitions', link: '/guide/transitions' },
+            { text: '~ Finite States', link: '/guide/' },
+            { text: '~ Custom Reactive Structures', link: '/guide/' },
           { text: 'Client-side Routing [planned]'},
           { text: 'Server Side [planned]' }
         ]

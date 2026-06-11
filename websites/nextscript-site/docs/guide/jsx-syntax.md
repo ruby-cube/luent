@@ -233,23 +233,25 @@ const renderFoo = (x) <:>
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ## JSX component
-<!-- `<:component>jsx</:component>` | `<:component as={component}>jsx</:component>` -->
-<code><:component><i>jsx</i></:component></code> |
-<code><:component as={<i>component</i>}><i>jsx</i></:component></code>
+<!-- `<::>jsx</::>` | `<:: as={component}>jsx</::>` -->
+<code><::><i>jsx</i></::></code> |
+<code><:: as={<i>component</i>}><i>jsx</i></::></code>
 
-The JSX component is an auto-returned keyword tag. It enables refs of component instances to be typed through its transpiled form: `JSXComponent()`. The default implementation of `JSXComponent` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
+The JSX component tag represents an auto-returned `JSXComponent()` call. It eliminates the need to wrap multiroot templates or JSX-expression-container roots in a JSX fragment.
+
+It also enables refs of component instances to be typed through its `as` attribute. The default implementation of `JSXComponent` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
 
 ```nsx
 function Parent() {
-  // ref is typed based on `as` attribute of Dialog's `<:component>`
+  // ref is typed based on `as` attribute of Dialog's `<::>`
   get dialog = NodeRef(Dialog) 
 
-  <:component>
+  <::>
     <button on:click={() => dialog?.open()}>submit</button>
     <Dialog ref={dialog}>
       <DialogContent close={() => dialog?.close()}/>
     </Dialog>
-  </:component>
+  </::>
 }
 ```
 ```nsx
@@ -258,13 +260,13 @@ function Dialog({ Slot }) {
    const open = () => { opened = true }
    const close = () => { opened = false }
 
-   <:component as={{ open, close }}>  
+   <:: as={{ open, close }}>  
       {If(opened@, 
          <o--body>
             <div>{Slot()}</div>
          </o--body>
       )}
-   </:component>
+   </::>
 }
 ```
 ::: info transpiled tsx

@@ -1,4 +1,4 @@
-import { component, FromTag } from "@rue/luent"
+import { component, fromTag, FromTag, WithRef } from "@rue/luent"
 import { Xray } from "packages/luent/src/component/bindings"
 
 export function TestXray() {
@@ -14,10 +14,10 @@ export function TestXray() {
 
 
 
-function Board(setup: FromTag<'div', {
+function Board(setup: WithRef<'div'> & {
    'xray:button'?: Xray<'button'>
-}>) {
-   const { xray, ...rest } = setup
+}) {
+   const { xray, ...rest } = fromTag(setup)
   console.log('xray?', xray)
    return component(
       <div auto-bind={rest}>

@@ -104,7 +104,8 @@ export function toSetup(bindings: RawBindings): SetupBindings {
         break;
 
       case 'at':
-      case 'after':
+      case 'pre':
+      case 'post':
         const hooks = setup[HOOKS] ?? (setup[HOOKS] = Object.create(null))
         hooks[rawKey] = bindings[rawKey]
         break;
@@ -245,7 +246,8 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
         break;
 
       case 'at':
-      case 'after':
+      case 'pre':
+      case 'post':
       case 'hooks':
         if (!bindings[rawKey]) break;
         const hooks = composed.hooks ?? (composed.hooks = Object.create(null))
@@ -312,6 +314,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
   return composed
 }
 
+// TODO: fix FromTag?
 export type Xray<T> = (nested: { [key: string]: (setup: FromTag<T>) => ComponentKit }) => RawJSXNode
 
 export function getXrayBindings(xray: (nested: { [key: string]: (setup: FromTag) => ComponentKit }) => { setup: AnyObject }) {

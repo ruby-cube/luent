@@ -1,11 +1,11 @@
 import { JSXComponent } from "@rue/nextscript"
-import { FromTag, RenderSlot } from "../component/x-Input"
+import { RenderSlot } from "../component/x-Input"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
 
 let transitionConfig: TransitionConfigs | undefined
 
-export function Transition({ Slot, ...attributes }: FromTag<{ Slot: RenderSlot }>) {
+export function Transition({ Slot, ...attributes }: { Slot: RenderSlot }) {
    transitionConfig = attributes
    const output = Slot()
    transitionConfig = undefined

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { component, Await, template, Else, FromTag, If, Meanwhile } from "@rue/luent";
+import { component, Await, template, Else, If, Meanwhile } from "@rue/luent";
 import { Ion,ion, Suspense } from "@rue/quarky";
 
 export function TestAwaitConditional() {
@@ -59,7 +59,7 @@ export function TestAwaitConditional() {
 }
 
 
-export function Child(setup: FromTag<{ state: 'awake' | 'sleeping' }>) {
+export function Child(setup: { state: 'awake' | 'sleeping' }) {
    const { state } = setup
    const $something = ion(0, {
       '-fetch': () => db.fetchSomething(),

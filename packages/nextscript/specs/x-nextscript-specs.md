@@ -102,9 +102,9 @@ The `:component` keyword element defines a typed component-kit return form.
 Syntax:
 
 ```tsx
-<:component as={componentExpr}>
+<:: as={componentExpr}>
 	...children
-</:component>
+</::>
 ```
 
 The `as` attribute is optional.
@@ -142,9 +142,9 @@ Let `childrenFragment` be `<>children</>`.
 1. Without `as`:
 
 ```tsx
-<:component>
+<::>
 	...children
-</:component>
+</::>
 ```
 
 denotes:
@@ -156,9 +156,9 @@ return JSXComponent(childrenFragment)
 2. With `as={expr}`:
 
 ```tsx
-<:component as={expr}>
+<:: as={expr}>
 	...children
-</:component>
+</::>
 ```
 
 denotes:
@@ -186,13 +186,13 @@ function Dialog({ Slot }) {
 	const open = () => { opened = true }
 	const close = () => { opened = false }
 
-	<:component as={{ open, close }}>
+	<:: as={{ open, close }}>
 		{If(opened,
 			<o--body>
 				<div>{Slot()}</div>
 			</o--body>
 		)}
-	</:component>
+	</::>
 }
 ```
 

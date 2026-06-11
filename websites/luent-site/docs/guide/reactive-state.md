@@ -1,5 +1,5 @@
 # Reactive State
-
+TODO: writable derivations
 Reactivity refers to the ability of state changes to trigger effects, such as view updates. In Luent, ions are the fundamental units of reactivity. They are the building blocks of ionic compounds, which may take the form of compound ions, ionic objects, ionic collections, and ionic tasks.
 
 ## Ions

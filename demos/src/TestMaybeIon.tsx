@@ -1,4 +1,4 @@
-import { component, FromTag, template } from "@rue/luent";
+import { component, template } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 function TestMaybeIon() {
@@ -8,7 +8,7 @@ function TestMaybeIon() {
    )
 }
 
-function Child({ msg }: FromTag<{ msg: Ion<string> }>) {
+function Child({ msg }: { msg: Ion<string> }) {
    return component(
       <div></div>
    )

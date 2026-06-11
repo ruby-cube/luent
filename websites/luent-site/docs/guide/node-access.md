@@ -1,17 +1,17 @@
 # Node Access
 
+
+
 ## Node Refs
 
-TODO:
+DOM elements and component instances may be accessed from the template by passing a node ref to a JSX tag. Node refs may be in the form of a getter function or a node ref tuple for iterative nodes.
 
-DOM elements may be accessed from the template by passing in a node ref to  JSX element tag. Node refs may be in the form of a getter function or an array.
-
-
-To access a DOM element, we create a node getter function, by calling `NodeRef()` and pass it to the JSX tag whose element you want to access. The value of the ref will initially be undefined. Once the template has been rendered to the screen, we have access to the element.
+### Single node refs
+Node refs are created by passing the tag name or component factory to `NodeRef()`. This will return a getter function. The value of the ref will be undefined until the template is mounted.
 
 ```tsx
 function DrawingApp() {
-  const $canvas = NodeRef<'canvas'>() // create ref
+  const $canvas = NodeRef('canvas') // create ref
 
   function clearCanvas() {
     const canvas = $canvas() // access the element
@@ -34,7 +34,31 @@ function DrawingApp() {
 }
 ```
 
-#### Node Refs in Iterated Templates
-#### Component Refs
-- Absorbed ions?
-- Ref forwarding
+### Iterative node refs
+```tsx
+const tds = NodeRef('td', [])
+```
+```tsx
+<tr>
+   <th>{row}</th>
+   {Thru(cols.length, (_, col) =>
+      <td ref={[tds, [row, col]]}>
+         <Cell
+            value={(cells[col][row])}
+            setCellValue={value => { cells[col][row] = value }}
+            calcCellValue={evalCell}
+         ></Cell>
+      </td>
+   )}
+</tr>
+```
+
+
+<!-- #### Component Node Refss -->
+<!-- - Absorbed ions?
+- Ref forwarding -->
+
+
+
+### Template hooks
+Nodes may also be accessed through [template hooks](/guide/lifecycle-hooks#template-hooks)

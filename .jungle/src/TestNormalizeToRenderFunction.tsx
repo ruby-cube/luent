@@ -1,4 +1,4 @@
-import { component, template, If, RenderSlot, FromTag } from "@rue/luent";
+import { component, template, If, RenderSlot } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
 export function TestNormalizeToRenderFunction(){
@@ -19,7 +19,7 @@ export function TestNormalizeToRenderFunction(){
    )
 }
 
-function Child(input : FromTag<{Slot: RenderSlot}>){
+function Child(input : {Slot: RenderSlot}){
    const {Slot} = input
    console.log('Slot', Slot)
    return component(

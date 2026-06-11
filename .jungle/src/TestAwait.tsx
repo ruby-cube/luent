@@ -1,4 +1,4 @@
-import { component, template, AsyncIon, Else, If, FromTag } from "@rue/luent";
+import { component, template, AsyncIon, Else, If } from "@rue/luent";
 import { Await, Meanwhile, Catch } from "../../../packages/luent/src/boundaries/Await";
 import {  Ion, ion } from "@rue/quarky";
 
@@ -85,7 +85,7 @@ function ChildB() {
    )
 }
 
-function Child({ $name }: FromTag<{ name: string }>) {
+function Child({ $name }: { name: string }) {
    const $kermit = fetchData()
 
    return component(
@@ -97,7 +97,7 @@ function Child({ $name }: FromTag<{ name: string }>) {
    )
 }
 
-function GrandChild({ $name }: FromTag<{ name: string }>) {
+function GrandChild({ $name }: { name: string }) {
    const $robin = fetchNestedData($name, {
       awaited: 'load'
    })
@@ -128,7 +128,7 @@ function Loading() {
    )
 }
 
-function ErrorView({ $error }: FromTag<{ error: Ion<Error> }>) {
+function ErrorView({ $error }: { error: Ion<Error> }) {
    console.log('render error view')
    return component(
       <>

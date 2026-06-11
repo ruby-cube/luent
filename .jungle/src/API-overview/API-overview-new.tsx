@@ -596,7 +596,7 @@ watch(($count), () => {
 })
 
 // ionic task
-queueIonicTask(() => {
+trackEffect(() => {
    console.log('card number:', $cardNumber())
    console.log('card suit:', $cardSuit())
 }) // default poster render
@@ -678,12 +678,12 @@ watch((player.name), () => {
 // DYNAMIC RENDERING
 // $ prefix is for stateful getters, not necessarily reactive
 // IF series
-export function PlayingCard(input: FromTag<{
+export function PlayingCard(input: {
    number: number,
    suit: number,
    startFaceup: boolean,
    cardBack: string
-}>) {
+}) {
    const { $number, $suit, startFaceup = false, $cardBack } = input
 
    let $faceup = ion(startFaceup)

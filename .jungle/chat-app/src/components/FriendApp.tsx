@@ -1,12 +1,12 @@
 //@ts-nocheck
-import { component, Context, template, fromRoot, fromContext, FromTag, If, Polymorph } from "@rue/luent";
+import { component, Context, template, fromRoot, fromContext, If, Polymorph } from "@rue/luent";
 import { USER, User } from "../context/keys";
 import { Chatroom } from "./Chatroom";
 import { Navbar } from "./Navbar";
 
-export function FriendApp(input: FromTag<{
+export function FriendApp(input: {
    user: User
-}>) {
+}) {
    const { user } = input
 
    const $App = Polymorph([

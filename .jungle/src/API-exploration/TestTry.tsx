@@ -25,9 +25,9 @@ function Child() {
    )
 }
 
-function ErrorMessage({ message } : FromTag<{
+function ErrorMessage({ message } : {
    message: string
-}>) {
+}) {
    return component(
       <div>{message}</div>
    )

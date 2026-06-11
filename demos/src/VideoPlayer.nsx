@@ -174,11 +174,11 @@ export function VideoPlayer() {
 }
 
 
-function ElapsedBar(input: FromTag<{
+function ElapsedBar(input: {
    elapsed: Ion<number>,
    duration: number,
    paused: Ion<boolean>
-}>) {
+}) {
          const { elapsed@, duration, paused@, emit } = input
 
    return component(
@@ -198,10 +198,10 @@ function ElapsedBar(input: FromTag<{
 
 
 
-function Timer(input: FromTag<{
+function Timer(input: {
    elapsed: Ion<number>,
    duration: number
-}>) {
+}) {
          const { elapsed@, duration } = input
 
    return component(

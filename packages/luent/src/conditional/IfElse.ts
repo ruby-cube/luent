@@ -426,19 +426,19 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
    return seriesNodes
 }
 
-export function Remount(input: FromTag<{
+export function Remount(input: {
    discard: DiscardSignal,
    Slot: RenderSlot
 
-}>) {
+}) {
    const { discard, Slot } = input;
    return markActivationType('remount', Slot, discard)
 }
 
-export function Create(input: FromTag<{
+export function Create(input: {
    Slot: RenderSlot
 
-}>) {
+}) {
    const { Slot } = input;
    return markActivationType('create', Slot)
 }

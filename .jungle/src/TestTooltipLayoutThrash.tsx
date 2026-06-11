@@ -1,4 +1,4 @@
-import { component, template, If, NodeRef, Portal, RenderSlot, FromTag, beforeInstall } from '@rue/luent';
+import { component, template, If, NodeRef, Portal, RenderSlot, beforeInstall } from '@rue/luent';
 import { $layout, ion, atLayout } from '@rue/quarky';
 import './TestTooltip.css'
 
@@ -46,10 +46,10 @@ export function TestTooltip() {
 
 
 
-export function ButtonWithTooltip(setup: FromTag<{
+export function ButtonWithTooltip(setup: {
    Slot: RenderSlot,
    'Slot:Tooltip': RenderSlot
-}>) {
+}) {
    const { Slot } = setup
    const $targetRect = ion(null as Rect | null)
 
@@ -86,10 +86,10 @@ type Rect = { left: number, top: number, bottom: number }
 // What we can do is prevent a LOOP of layout thrashing by batching layout measuring with measureLayout
 // Not super necessary in this case because it's highly unlikely more than one tooltip will be generated at a time
 
-export function Tooltip(input: FromTag<{
+export function Tooltip(input: {
    Slot: RenderSlot
    targetRect: Rect
-}>) {
+}) {
    const { Slot, targetRect } = input
 
    const $div = NodeRef('div');

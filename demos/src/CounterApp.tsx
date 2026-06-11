@@ -1,8 +1,8 @@
-import { component, FromTag, ion } from "@rue/luent";
+import { component, ion } from "@rue/luent";
 
-export function Counter(setup: FromTag<{
+export function Counter(setup: {
   max: number
-}>) {
+}) {
   const { max } = setup;
 
   const $disabled = ion(false);

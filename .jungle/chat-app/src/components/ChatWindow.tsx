@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, atRender, template, Else, For, FromTag, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, beforeUnmount, queuePostlude, beforeDemount, atRemount } from "@rue/luent";
+import { component, atRender, template, Else, For, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, beforeUnmount, queuePostlude, beforeDemount, atRemount } from "@rue/luent";
 import { Ion, ionic, ion } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -14,10 +14,10 @@ import { User } from '../context/keys'
 // [ ] infinite scroll
 // [ ] watch multisubject is broken
 
-export function ChatWindow(input: FromTag<{
+export function ChatWindow(input: {
    user: User;
    chat: ChatKit;
-}>) {
+}) {
    const { user, chat: { $messages, atMessagePosted, atMessageReceived, atErrorReceived, $error } } = input
    const $messagesNode = NodeRef('div')
 

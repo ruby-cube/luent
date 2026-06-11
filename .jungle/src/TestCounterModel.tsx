@@ -55,7 +55,7 @@ export function TestMutableCounter() {
       count.value--
    }
 
-   // queueIonicTask(()=>{
+   // trackEffect(()=>{
    //    console.log('running ionic task', count.value)
    // })
 

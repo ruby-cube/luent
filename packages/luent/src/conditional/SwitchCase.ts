@@ -27,12 +27,12 @@ type RawCaseKit = {
 
 type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
 
-export function Switch(input: FromTag<{
+export function Switch(input: {
    x: Ion<any>, // TODO: change to key ... but need to make sure JSX plays well with it
    'view'?: GroupActivationType
    matches?: (target: any, _case: any) => boolean,
    Slot: RenderSlot
-}>) {
+}) {
    const { $x, matches = (x: any, c: any) => x === c, Slot, "view": view } = input
    const kits = toConditionalKits({
       target: $x,

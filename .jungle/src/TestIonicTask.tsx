@@ -1,5 +1,5 @@
 import { component, template } from "@rue/luent";
-import { ion, ionic, queueIonicTask } from "@rue/quarky";
+import { ion, ionic, trackEffect } from "@rue/quarky";
 
 export function TestIonicTask() {
 
@@ -14,11 +14,11 @@ export function TestIonicTask() {
 
    const $doubleCount = ion(() => $count() * 2)
 
-   queueIonicTask(() => {
+   trackEffect(() => {
       console.log('count:', $count())
    })
 
-   queueIonicTask(() => {
+   trackEffect(() => {
       console.log('count x 2:', $doubleCount())
    })
 

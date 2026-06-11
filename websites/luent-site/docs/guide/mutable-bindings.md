@@ -1,61 +1,123 @@
+# Mutable Bindings
 
+By default, element and component bindings are read-only, enforced by Luent's compile-time mutation safety checks.
 
+However, direct mutation is often the simplest and most ergonomic way to synchronize state across component or element boundaries. For this, Luent provides explicit mutable bindings that are statically traceable.
 
-### Mutable Data Binding
+Mutable bindings are marked with the `mu:` prefix.
+
+```tsx
+<input mu:value={$newTodo}/>
+```
+```tsx
+<Todos mu:todos={$todos} />
+```
+
+## Mutable element bindings
+Input elements such as `<input>` and `<select>` expose mutable bindings on attributes that may reflect user input. 
+
+This forms a two-way binding where the input element is permitted to mutate the ion:
+```tsx
+// newTodo will be mutated
+<input mu:value={$newTodo}/>
+```
+
+Compare the one-way binding implementation:
+```tsx
+<input
+   value={$newTodo}
+   on:input={e => $newTodo.value = e.target.value}
+/>
+```
+
+:::details CODE SWITCH
+Vue: `v-model`
+
+Svelte: `bind:`
+
+Angular: `[(attribute)]`
+:::
+
+## Mutable component bindings
+<span class='doc-tag'>WIP</span><span class='doc-tag'>Experimental</span>
+
+Components may also define mutable bindings
+
+The `mu` linter is an experimental linter that only permits component input mutation when explicitly declared by both the component and its consumer.
+
+In `Counter`, `count` may only be mutated if accessed as a property or nested property of the `mu` object.
+
 ```tsx
 function App() {
   get count = ion(0, {
     increment() { count++ },
     decrement() { count-- },
-    isNegative(ƒ: pure) { return count < 0 },
   })
   
-  <Component>
+  <::>
     <Counter mu:count={count@} />
-  </Component>
+  </::>
 }
+```
 
-function Counter(setup: FromTag<{
-  'mu:count': Ion<number> & { 
+```tsx
+function Counter(setup: {
+  'mu:count': Ion<number> & {
     increment: () => void; 
-    isNegative: (ƒ: pure) => boolean
   };
-}>) {
-  const { mu } = setup;
-  get { count@ } = mu;
+}) {
+  const { mu, count@ } = fromTag(setup);
 
-  <Component>
+  <::>
     {count@}
-    <button on:click={e=> mu.count++}>+</button>
-    <button on:click={e=> count@.isNegative()}>negative?</button>
-  </Component>
+    <button on:click={e=> mu(count).value++}>+</button>
+  </::>
 }
+```
 
-foo(muo({ count: mu.count@ }))
+### Deep mutation
 
-function foo(mu: Mu<{ count: number }>) {
+
+### Read vs Write Methods
+<span class='doc-tag'>WIP</span><span class='doc-tag'>Experimental</span>
+
+The `mu` linter assumes methods passed to a component is a mutating method, or a write method, unless it is explicitly typed with a final `ƒ: read` parameter.
+
+The linter will disallow `count.isNegative()` here:
+```tsx
+function NegativeNotification(setup: {
+  count: Ion<number> & {
+    isNegative: () => boolean; // assumed to be mutating
+  };
+}) {
+  const { $count } = fromTag(setup)
   
+  <::>
+    <div>{count.isNegative() ? '😕' : '🙂'}</div>
+  <::>
 }
+```
 
-function App() {
-  get count = ion(0, {
-    increment() { count++ }
-  })
+`count.isNegative()` is OK here:
+```tsx
+function NegativeNotification(setup: {
+  count: Ion<number> & {
+    isNegative: () => boolean; // assumed to be mutating
+  };
+}) {
+  const { $count } = fromTag(setup)
   
-  <Component>
-    <Counter mu:count={count@} />
-  </Component>
+  <::>
+    <div>{count.isNegative() ? '😕' : '🙂'}</div>
+  <::>
 }
+```
 
-function Counter(setup: FromTag<{
-  'mu?:count': Ion<number> & { increment: void }
-}>) {
-  const { mu, count@ } = setup
+Luent infers read methods when the method body is locally verifiable. If a method calls unknown code, performs assignment, or passes mutable state into another function, it is treated as a write method unless marked with a `ƒ: read` parameter.
 
-  <Component>
-    {count}
-    <button on:click={() => mu.count && count@.increment()}>+</button>
-  </Component>
-}
+A read method may access reactive state and participate in dependency tracking, but it may not mutate application state.
+
+```tsx
+
 
 ```

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, template, FromTag } from "@rue/luent";
+import { Component, template } from "@rue/luent";
 import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 
@@ -8,13 +8,13 @@ import { isFunction } from "@rue/utils";
 // [ ] 
 
 
-export function Component(input: FromTag<{
+export function Component(input: {
    'mu?:value': Ion<string>
    'mu:count': Ion<number>
    'mu:item': Ionic<{ name: string }>
    details: Ionic<{ address: string }>
    start: number
-}>) {
+}) {
    const { mu, details, start } = input
    const { $: { value, count }, item } = mu
 

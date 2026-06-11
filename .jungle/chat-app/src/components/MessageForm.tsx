@@ -1,6 +1,6 @@
 
 //@ts-nocheck
-import { component, template, FromTag, If } from "@rue/luent";
+import { component, template, If } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 import { User } from "../context/keys";
 import './message-form.css'
@@ -8,10 +8,10 @@ import { Timestamp } from "firebase/firestore";
 import { Message } from "../database/database";
 
 
-export function MessageForm(input: FromTag<{
+export function MessageForm(input: {
    user: User,
    postMessage: (message: Message) => void
-}>) {
+}) {
 
    const { user, postMessage } = input()
 

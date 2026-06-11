@@ -54,7 +54,7 @@ export function makeComponent(
     }
   }
 
-  const hooks = composeHooks(setup)
+  const hooks = composeHooks(setup) // TODO: I don't remember why I call composeHooks twice
   if (componentHooks && compode) {
     if (!hooks) throw new Error('Cannot auto-bind hooks to nested element if component exposes a component node. Use x-ray to auto-bind hooks to nested elements.')
     setUpHooks(compode, hooks) // TODO: can a component with no public

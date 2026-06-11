@@ -28,10 +28,10 @@ export type Provided = { 0: ContextEntryKey | string, 1: any }[] | { 0: ContextE
 //API
 
 export function Context(
-   { Slot, provide }: FromTag<{
+   { Slot, provide }: {
       provide: Provided,
       Slot: RenderSlot
-   }>
+   }
 ) {
    if (!Slot) debug.warn(`Extraneous <Context>`)
    return component(callWithContext(Slot, createContextNode(provide)))

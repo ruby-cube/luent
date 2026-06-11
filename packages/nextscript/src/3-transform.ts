@@ -630,7 +630,7 @@ export function transformNSX(ast: ASTNode, edits: Edits) {
     JSXElement(node, context) {
 
       const identifier = node.openingElement.name
-      // source: <:component>...</:component>
+      // source: <::>...</::>
       // preprocess: <Œcomponent>...</Œcomponent>  TODO: preprocess step
       // final: JSXComponent(...)
       if (identifier.type === 'JSXIdentifier' && identifier.name === 'Œcomponent') {

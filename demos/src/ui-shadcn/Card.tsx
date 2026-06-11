@@ -1,13 +1,13 @@
-import { component, FromTag, template } from "@rue/luent"
+import { component, template } from "@rue/luent"
 import { mergeTailwind } from "../utils/utils"
 
 function Card({
    size = "default",
    $classes,
    ...attributes
-}: FromTag<{
+}: {
    size?: "default" | "sm"
-}>) {
+}) {
 
    return component(
       <div
@@ -20,7 +20,7 @@ function Card({
 }
 
 
-function CardHeader(attributes: FromTag<{}>) {
+function CardHeader(attributes: {}) {
 
    return component(
       <div
@@ -35,7 +35,7 @@ function CardHeader(attributes: FromTag<{}>) {
 function CardTitle({
    $classes,
    ...attributes
-}: FromTag<{}>) {
+}: {}) {
 
    return component(
       <div
@@ -47,7 +47,7 @@ function CardTitle({
 }
 
 
-function CardDescription(attributes: FromTag<{}>) {
+function CardDescription(attributes: {}) {
 
    return component(
       <div
@@ -59,7 +59,7 @@ function CardDescription(attributes: FromTag<{}>) {
 }
 
 
-function CardAction(attributes: FromTag<{}>) {
+function CardAction(attributes: {}) {
 
    return component(
       <div
@@ -74,7 +74,7 @@ function CardAction(attributes: FromTag<{}>) {
 function CardContent({
    $classes,
    ...attributes
-}: FromTag<{}>) {
+}: {}) {
 
    return component(
       <div
@@ -90,7 +90,7 @@ function CardContent({
 function CardFooter({
    $classes,
    ...attributes
-}: FromTag<{}>) {
+}: {}) {
 
    return component(
       <div

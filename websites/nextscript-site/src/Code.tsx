@@ -1,13 +1,13 @@
-import { As, Await, Case, component, css, Else, ElseIf, FromTag, If, Match, MaybeIon, Style } from "@rue/luent";
+import { As, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Style } from "@rue/luent";
 import { ion } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
 
-export function Code(setup: FromTag<{
+export function Code(setup: {
   main: { name: string, code: string, lang?: string },
   alt: { name: string, code: string, lang?: string },
   highlight: (code: string, lang: string) => Promise<string>,
   trusted: boolean
-}>) {
+}) {
   const { main, alt, highlight, trusted } = setup;
 
   const $tab = ion('main' as 'main' | 'alt', {
