@@ -105,11 +105,11 @@ function Powerset(setup: {
       </div>
 
       {If(remaining@,
-        <div>You have {remaining@} slots left.</div>
-        <div>You started with {powerset.length} powers.</div>
+        <div class='msg'>You have {remaining@} slots left.</div>
+        <div class='msg'>You started with {powerset.length} powers.</div>
       )}
       {Else(
-        <div>Powerset complete.</div>
+        <div class='msg'>Powerset complete.</div>
       )}
     </div>
 
