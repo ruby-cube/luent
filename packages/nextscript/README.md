@@ -46,7 +46,8 @@ get qty = ion(0, {
   increment() { qty++ },
   decrement() { qty-- }
 })
-get total = ion(() => count * qty) // hover `count` → [ get count: MutableIon<number> ]
+// hover `count` → [ get count: MutableIon<number> ]
+get total = ion(() => count * qty) 
 ```
 ```tsx
 // ts equivalent
@@ -56,7 +57,8 @@ const qty = ion(0, {
   increment() { qty.value++ },
   decrement() { qty.value-- }
 })
-const total = ion(() => count() * qty()) // hover `count` → [ const count: MutableIon<number> ]
+// hover `count` → [ const count: MutableIon<number> ]
+const total = ion(() => count() * qty()) 
 ```
 > **Note:** Accessor variables have no inherent reactivity and are equally useful for non-reactive use cases. Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from [Luent's](https://github.com/ruby-cube/luent) `ion()`. 
 
