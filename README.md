@@ -55,26 +55,31 @@ Experimental areas:
 // .nsx
 function EmojiQuest() {
   const powers = ['🍀', '🍄', '✨'] as const
-  const powerset = ionic([], {
-    addRandomPower() {
+  const powerset = ionic(['🍀', '🍄', '✨'], {
+    addPower() {
       this.push(powers[Math.floor(Math.random() * powers.length)])
     }
   })
 
   <::>
     <main>
-      <EmojiGame {powerset}></EmojiGame>
+      <EmojiGame {powerset}/>
     </main>
     <aside>
       <Panel title="Powerset">
-        <Powerset mu:powerset={powerset} limit={10}></Powerset>
+        <Powerset 
+          mu:powerset={powerset} 
+          limit={10}
+        />
       </Panel>
     </aside>
   </::>
 }
 
 function Powerset(setup: {
-  'mu:powerset': Ionic<string[]> & { addRandomPower(): void }
+  'mu:powerset': Ionic<string[]> & { 
+    addPower(): void 
+  }
   limit: number
 }) {
   const { mu, limit, powerset } = fromTag(setup);
@@ -93,7 +98,7 @@ function Powerset(setup: {
       <div class='panel-footer'>
         <button
           disabled={(count === limit)@}
-          on:click={() => mu(powerset).addRandomPower()}
+          on:click={() => mu(powerset).addPower()}
         >
           +
         </button>
@@ -104,16 +109,30 @@ function Powerset(setup: {
         </div>
       </div>
 
-      {If(remaining@,
-        <div class='msg'>You have {remaining@} slots left.</div>
-        <div class='msg'>You started with {powerset.length} powers.</div>
-      )}
-      {Else(
-        <div class='msg'>Powerset complete.</div>
-      )}
+      <PowersetMessages 
+        start={powerset.length} 
+        remaining={remaining@}
+      />
     </div>
 
     <o-link href='/src/powerset.css' rel='stylesheet'/>  
+  </::>
+}
+
+function PowersetMessages(setup: { 
+  start: number; 
+  remaining: Ion<number> 
+}) {
+  const { start, remaining@ } = setup
+
+  <::>
+    {If(remaining@,
+      <div class='msg'>You have {remaining@} slots left.</div>
+      <div class='msg'>You started with {start} powers.</div>
+    )}
+    {Else(
+      <div class='msg'>Powerset complete.</div>
+    )}
   </::>
 }
 ```
