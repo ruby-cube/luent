@@ -167,39 +167,56 @@ function Panel(setup: {
 
 ### JSX Transpiler
 
-Luent transpiles JSX into basic `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It additionally extends the base JSX transform with three minimal transforms:
+Luent transpiles JSX into basic `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It additionally extends the base JSX transform with these transforms:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants, e.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
 - [JSX flow expressions](http://luent.dev/guide/template-control-flow) (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead.
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
+- `<o-style>` tags are transformed to a `style()` call with a string template literal argument
+- JSX fragments are transformed into arrays
 
 The following JSX template...
 ```jsx
-<Parent foo={foo} bar={bar()} on:click={logClick}>
-  <Child />
-  {If(active, 
-    <div>Hello world! - {name}</div>
-  )}
-  {Else(
-    <div>zzzzzz</div>
-  )}
-</Parent>
+<>
+  <Parent foo={foo} bar={bar()} on:click={logClick}>
+    <Child />
+    {If(active, 
+      <div class='msg'>Hello world! - {name}</div>
+    )}
+    {Else(
+      <div class='msg'>zzzzzz</div>
+    )}
+  </Parent>
+  <o-style>
+    .msg {
+      border: 1px solid gray;
+    }
+  </o-style>
+</>
 ```
 
 ...essentially maps to:
 ```jsx
-jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
-  Slot: () => [
-    jsx(Child),
-    IfSeries(
-      If(active, () => [
-        jsx('div', { Slot: () => ['Hello world! - ', name]})
-      ]),
-      Else(() => [
-        jsx('div', { Slot: () => ['zzzzzz']})
-      ])
-    )
-  ]
-})
+[
+  jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
+    Slot: () => [
+      jsx(Child),
+      IfSeries(
+        If(active, () => [
+          jsx('div', { Slot: () => ['Hello world! - ', name]})
+        ]),
+        Else(() => [
+          jsx('div', { Slot: () => ['zzzzzz']})
+        ])
+      )
+    ]
+  }),
+  style(`    
+    .msg {
+      border: 1px solid gray;
+    }
+  `)
+]
+
 ```
 
 
