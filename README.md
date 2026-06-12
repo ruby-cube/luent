@@ -49,10 +49,9 @@ Experimental areas:
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Code Glimpses
-
+### Code Glimpse
+The following Luent components are written in [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript)
 ```tsx
-// .nsx
 function EmojiQuest() {
   const powers = ['🍀', '🍄', '✨'] as const
   const powerset = ionic(['🍀', '🍄', '✨'], {
@@ -164,6 +163,7 @@ function Panel(setup: {
   </::>
 }
 ```
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 ### JSX Transpiler
 
