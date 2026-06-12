@@ -1,49 +1,49 @@
-import { $of, component, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
+import { $of, component, css, Else, For, fromTag, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
 import { ion, Ion, Ionic, ionic } from "@rue/quarky";
 
 
 
 export function EmojiQuest() {
-   const powers = ['🍀', '🍄', '✨', '🌱', '🔥', '☄️', '💎', '🔮', '⚗️', '🪵', '🫧'] as const
-   const powerset = ionic([] as typeof powers[number][], {
-      addRandomPower() {
-         this.push(powers[Math.floor(Math.random() * powers.length)])
-      }
-   })
+  const powers = ['🍀', '🍄', '✨', '🌱', '🔥', '☄️', '💎', '🔮', '⚗️', '🪵', '🫧'] as const
+  const powerset = ionic([] as typeof powers[number][], {
+    addRandomPower() {
+      this.push(powers[Math.floor(Math.random() * powers.length)])
+    }
+  })
 
-   return component(
-      <>
-         <main>
-            {/* <EmojiGame></EmojiGame> */}
-         </main>
-         <aside>
-            <Panel title="Powerset">
-               <Powerset mu:powerset={powerset} limit={10}></Powerset>
-            </Panel>
-         </aside>
-      </>
-   )
+  return component(
+    <>
+      <main>
+        {/* <EmojiGame></EmojiGame> */}
+      </main>
+      <aside>
+        <Panel title="Powerset">
+          <Powerset mu:powerset={powerset} limit={10}></Powerset>
+        </Panel>
+      </aside>
+    </>
+  )
 }
 
 function Panel(setup: {
-   title: string,
-   Slot: RenderSlot
+  title: string,
+  Slot: RenderSlot
 }) {
-   const { title, Slot } = setup
+  const { title, Slot } = setup
 
-   const opened = ion(true)
+  const opened = ion(true)
 
-   return component(
-      <>
-         <div class='panel'>
-            <div class='top-bar'>{title}
-               <button on:click={() => opened.value = !opened.value}>
-                  {() => opened() ? '-' : '+'}
-               </button>
-            </div>
-            <div show-if={opened} class='panel-body'>{Slot()}</div>
-         </div>
-         {Style(css`
+  return component(
+    <>
+      <div class='panel'>
+        <div class='top-bar'>{title}
+          <button on:click={() => opened.value = !opened.value}>
+            {() => opened() ? '-' : '+'}
+          </button>
+        </div>
+        <div show-if={opened} class='panel-body'>{Slot()}</div>
+      </div>
+      {Style(css`
             .panel {
                width: 25vh;
                user-select: none;
@@ -70,57 +70,57 @@ function Panel(setup: {
                padding: .5rem;
             }
          `)}
-      </>
-   )
+    </>
+  )
 }
 
 function Powerset(setup: {
-   'mu:powerset': Ionic<string[]> & { addRandomPower(): void }
-   limit: number,
-   class?: Ion<TagClass>
+  'mu:powerset': Ionic<string[]> & { addRandomPower(): void }
+  limit: number,
+  class?: Ion<TagClass>
 }) {
-   const { mu, limit, $class } = setup;
-   const { powerset } = mu
+  const { mu, limit, $class } = fromTag(setup);
+  const { powerset } = mu
 
-   const count = $of(powerset).length
-   const remaining = ion(() => limit - count())
+  const count = $of(powerset).length
+  const remaining = ion(() => limit - count())
 
-   return component(
-      <>
-         <div class={['powerset-panel', $class]}>
-            <ul class='powerset-list'>
-               {For(powerset, power =>
-                  <li class='power-chip'>{power}</li>
-               )}
-            </ul>
+  return component(
+    <>
+      <div class={['powerset-panel', $class]}>
+        <ul class='powerset-list'>
+          {For(powerset, power =>
+            <li class='power-chip'>{power}</li>
+          )}
+        </ul>
 
-            <div class='panel-footer'>
-               <button
-                  class='add-power-button'
-                  disabled={() => count() === limit}
-                  on:click={() => mu.powerset.addRandomPower()}
-               >
-                  +
-               </button>
+        <div class='panel-footer'>
+          <button
+            class='add-power-button'
+            disabled={() => count() === limit}
+            on:click={() => mu.powerset.addRandomPower()}
+          >
+            +
+          </button>
 
-               <div class='stats'>
-                  <span class='stats-label'>Total</span>
-                  <span class='stats-value'>{count}/{limit}</span>
-               </div>
-            </div>
+          <div class='stats'>
+            <span class='stats-label'>Total</span>
+            <span class='stats-value'>{count}/{limit}</span>
+          </div>
+        </div>
 
-            {If(remaining,
-               <>
-                  <div class='message'>You have {remaining} slots left.</div>
-                  <div class='message'>You started with {powerset.length} powers.</div>
-               </>
-            )}
-            {Else(
-               <div class='message'>Powerset complete.</div>
-            )}
-         </div>
+        {If(remaining,
+          <>
+            <div class='message'>You have {remaining} slots left.</div>
+            <div class='message'>You started with {powerset.length} powers.</div>
+          </>
+        )}
+        {Else(
+          <div class='message'>Powerset complete.</div>
+        )}
+      </div>
 
-         {Style(css`
+      {Style(css`
             body {
                background-color: black;
                font-family: 'Courier New';
@@ -229,6 +229,6 @@ function Powerset(setup: {
                color: #d4af37;
             }
          `)}
-      </>
-   )
+    </>
+  )
 }

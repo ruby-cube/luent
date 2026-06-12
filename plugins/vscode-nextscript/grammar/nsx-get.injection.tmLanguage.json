@@ -4,11 +4,11 @@
   "patterns": [
     {
       "name": "keyword.control.flow",
-      "match": "<:component(?=\\s|>)"
+      "match": "<::(?=\\s|>)"
     },
     {
       "name": "keyword.control.flow",
-      "match": "<\\/:component>"
+      "match": "<\\/::>"
     },
     {
       "match": "^(\\s*)(<:>)",

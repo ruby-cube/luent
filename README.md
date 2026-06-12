@@ -49,6 +49,102 @@ Experimental areas:
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
+### Code Glimpses
+
+```tsx
+// .nsx
+function EmojiQuest() {
+  const powers = ['🍀', '🍄', '✨'] as const
+  const powerset = ionic([], {
+    addRandomPower() {
+      this.push(powers[Math.floor(Math.random() * powers.length)])
+    }
+  })
+
+  <::>
+    <main>
+      <EmojiGame {powerset}></EmojiGame>
+    </main>
+    <aside>
+      <Panel title="Powerset">
+        <Powerset mu:powerset={powerset} limit={10}></Powerset>
+      </Panel>
+    </aside>
+  </::>
+}
+
+function Powerset(setup: {
+  'mu:powerset': Ionic<string[]> & { addRandomPower(): void }
+  limit: number
+}) {
+  const { mu, limit, powerset } = fromTag(setup);
+
+  get count = powerset.length@
+  get remaining = ion(() => limit - count)
+
+  <::>
+    <div class='powerset-panel'>
+      <ul>
+        {For(powerset, power =>
+          <li class='power-chip'>{power}</li>
+        )}
+      </ul>
+
+      <div class='panel-footer'>
+        <button
+          disabled={(count === limit)@}
+          on:click={() => mu(powerset).addRandomPower()}
+        >
+          +
+        </button>
+
+        <div class='stats'>
+          <span>Total</span>
+          <span>{count@}/{limit}</span>
+        </div>
+      </div>
+
+      {If(remaining@,
+        <div>You have {remaining@} slots left.</div>
+        <div>You started with {powerset.length} powers.</div>
+      )}
+      {Else(
+        <div>Powerset complete.</div>
+      )}
+    </div>
+
+    <o-link href='/src/powerset.css' rel='stylesheet'/>  
+  </::>
+}
+```
+```tsx
+function Panel(setup: {
+  title: string,
+  Slot: RenderSlot
+}) {
+  const { title, Slot } = setup
+
+  get opened = ion(true)
+
+  <::>
+    <div class='panel'>
+      <div>{title}
+        <button on:click={() => opened = !opened}>
+          {(opened() ? '-' : '+')@}
+        </button>
+      </div>
+      <div show-if={opened@}>{Slot}</div>
+    </div>
+
+    <o-style>
+      .panel {
+        width: 25vh;
+        user-select: none;
+      }
+    <o-style>
+  </::>
+}
+```
 
 ### JSX Transpiler
 

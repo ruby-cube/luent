@@ -33,7 +33,7 @@ NextScript proposes to address these caveats with a dash of syntactic sugar.
 
 A brief glimpse of select features. For the full set, see [NextScript's documentation](https://nextscript.org). 
 
-> **Note:** While the examples below feature API from [Luent](https://github.com/ruby-cube/luent/blob/main) for demonstration purposes, NextScript is framework-agnostic. 
+> **Note:** While the examples below feature API from [Luent](https://github.com/ruby-cube/luent/) for demonstration purposes, NextScript is framework-agnostic. 
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -58,21 +58,27 @@ const qty = ion(0, {
 })
 const total = ion(() => count() * qty()) // hover `count` → [ const count: MutableIon<number> ]
 ```
-> **Note:** Accessor variables have no inherent reactivity. Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's `ion()`. Accessor variables are equally useful for non-reactive use cases, such as template refs.
+> **Note:** Accessor variables have no inherent reactivity and are equally useful for non-reactive use cases. Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from [Luent's](https://github.com/ruby-cube/luent) `ion()`. 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ### Derivation expressions
 `(expression)@` • derivation-first shorthand for derivational arrow function expressions
 ```tsx
-<button on:click={() => count++} disabled={(count === limit)@}>
+<button 
+  on:click={() => count++} 
+  disabled={(count === limit)@}
+>
    +
 </button>
 ```
 ```tsx
 // tsx equivalent
 
-<button on:click={() => count.value++} disabled={() => count() === limit}>
+<button 
+  on:click={() => count.value++} 
+  disabled={() => count() === limit}
+>
    +
 </button>
 ```

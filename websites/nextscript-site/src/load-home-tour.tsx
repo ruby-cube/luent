@@ -189,7 +189,7 @@ function HomeTour() {
               —scope-level, locally-bound, type-guard-aware counterpart to native accessor properties
             </p>
             <p class='tour-note'>
-              <strong>Note:</strong> Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's <code>ion()</code>. Accessor variables are equally useful for non-reactive use cases, such as template refs.
+              <strong>Note:</strong> Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from <a href='https://github.com/ruby-cube/luent'>Luent's</a> <code>ion()</code>. 
             </p>
             <a href='/guide/getter-syntax' class='medium brand'>Learn more</a>
           </div>
@@ -285,7 +285,7 @@ function HomeTour() {
         <article class='tour-row code-left'>
           <div class='tour-copy'>
             <h3>JSX component</h3>
-            <code>{'<:component'} as={<i>component</i>}{'>'}<i>jsx</i>{'</::>'}</code><br/>
+            <code>{'<::'} as={<i>component</i>}{'>'}<i>jsx</i>{'</::>'}</code><br/>
             | <code>{'<::>'}<i>jsx</i>{'</::>'}</code>
             <p>
               —auto-returned component with component instance type information
