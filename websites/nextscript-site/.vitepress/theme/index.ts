@@ -21,53 +21,53 @@ function mountHomeTour() {
   })
 }
 
-let hashRealignTimers: number[] = []
+// let hashRealignTimers: number[] = []
 
-function clearHashRealignTimers() {
-  for (const timer of hashRealignTimers) {
-    window.clearTimeout(timer)
-  }
-  hashRealignTimers = []
-}
+// function clearHashRealignTimers() {
+//   for (const timer of hashRealignTimers) {
+//     window.clearTimeout(timer)
+//   }
+//   hashRealignTimers = []
+// }
 
-function realignHashScroll(route?: string) {
-  if (typeof window === 'undefined') return
-  clearHashRealignTimers()
+// function realignHashScroll(route?: string) {
+//   if (typeof window === 'undefined') return
+//   clearHashRealignTimers()
 
-  const hashIndex = route?.indexOf('#') ?? -1
-  const hash = hashIndex >= 0 ? route!.slice(hashIndex + 1) : window.location.hash.slice(1)
-  if (!hash) return
+//   const hashIndex = route?.indexOf('#') ?? -1
+//   const hash = hashIndex >= 0 ? route!.slice(hashIndex + 1) : window.location.hash.slice(1)
+//   if (!hash) return
 
-  let targetId = hash
-  try {
-    targetId = decodeURIComponent(hash)
-  } catch {
-    // Fall back to raw hash if decoding fails.
-  }
+//   let targetId = hash
+//   try {
+//     targetId = decodeURIComponent(hash)
+//   } catch {
+//     // Fall back to raw hash if decoding fails.
+//   }
 
-  // Re-apply hash scrolling over a short bounded window to absorb async layout
-  // shifts (lazy mounts, font metrics, responsive recalculation) on first nav.
-  const retryDelays = [0, 40, 120, 260, 480]
-  for (const delay of retryDelays) {
-    const timer = window.setTimeout(() => {
-      const currentHash = window.location.hash.slice(1)
-      if (!currentHash) return
+//   // Re-apply hash scrolling over a short bounded window to absorb async layout
+//   // shifts (lazy mounts, font metrics, responsive recalculation) on first nav.
+//   const retryDelays = [0, 40, 120, 260, 480]
+//   for (const delay of retryDelays) {
+//     const timer = window.setTimeout(() => {
+//       const currentHash = window.location.hash.slice(1)
+//       if (!currentHash) return
 
-      let currentTargetId = currentHash
-      try {
-        currentTargetId = decodeURIComponent(currentHash)
-      } catch {
-        // Fall back to raw hash if decoding fails.
-      }
+//       let currentTargetId = currentHash
+//       try {
+//         currentTargetId = decodeURIComponent(currentHash)
+//       } catch {
+//         // Fall back to raw hash if decoding fails.
+//       }
 
-      if (currentTargetId !== targetId) return
+//       if (currentTargetId !== targetId) return
 
-      const target = document.getElementById(targetId)
-      target?.scrollIntoView({ block: 'start', behavior: 'auto' })
-    }, delay)
-    hashRealignTimers.push(timer)
-  }
-}
+//       const target = document.getElementById(targetId)
+//       target?.scrollIntoView({ block: 'start', behavior: 'auto' })
+//     }, delay)
+//     hashRealignTimers.push(timer)
+//   }
+// }
 
 // function createHeroImageSlot(): VNode {
 //   return h('div', {
@@ -80,12 +80,15 @@ function realignHashScroll(route?: string) {
 
 export default {
   extends: DefaultTheme,
-  Layout: () => {
-    return h(DefaultTheme.Layout, null, {
-      // https://vitepress.dev/guide/extending-default-theme#layout-slots
-      'home-hero-image': () => h(HeroCode)
-    })
-  },
+  // Layout: () => {
+  //   return h(DefaultTheme.Layout, null, {
+  //     // https://vitepress.dev/guide/extending-default-theme#layout-slots
+  //     'home-hero-image': () => {
+  //       console.warn('rendering hero')
+  //       return h(HeroCode)
+  //     }
+  //   })
+  // },
   enhanceApp({ app, router, siteData }) {
     if (typeof window === 'undefined') return
 
@@ -96,12 +99,12 @@ export default {
     }
 
     mount()
-    realignHashScroll()
+    // realignHashScroll()
     const previousOnAfterRouteChange = router.onAfterRouteChange
     router.onAfterRouteChange = (to) => {
       previousOnAfterRouteChange?.(to)
       mount()
-      realignHashScroll(to)
+      // realignHashScroll(to)
     }
   }
 } satisfies Theme

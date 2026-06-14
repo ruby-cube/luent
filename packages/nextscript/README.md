@@ -7,7 +7,7 @@
 
 # NextScript
 
-NextScript is an experimental TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of modern reactive application code. Its syntax is guided by [our language design principles](#design-principles).
+NextScript is an experimental TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of UI templates and accessor-based reactive code. Its syntax is guided by [our language design principles](#design-principles).
 
 > **This project is in early development.** Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. To get a sense of the syntax, explore these [code glimpses](#code-glimpse) and [examples]().
 >
@@ -17,9 +17,9 @@ NextScript is an experimental TypeScript + JSX language extension designed to im
 
 ## Motivation
 
-Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple data bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What may seem simple and elegant at first glance often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
+Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple data bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What initially seems simple and elegant often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
 
-Getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as opaqueness to TypeScript type guards, the visual clutter of getter function calls, or confusion caused by functions with data variable names.
+Getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as opaqueness to TypeScript type guards, the visual clutter of accessor function calls, or confusion caused by functions with data variable names.
 
 On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell.
 
@@ -127,8 +127,7 @@ const total = ion(() => count() * qty())
 ```tsx
 <div>
   {If(folder, <:>
-    <h2>{title}</h2>
-    {If(open, <:>
+    {If(open,
       <ul>
         {For(folder.items, item => 
           <li>{item}</li>
@@ -145,7 +144,6 @@ const total = ion(() => count() * qty())
 <div>
   {If(folder, () => 
     <>
-      <h2>{title}<h2>
       {If(open, () =>
         <>
           <ul>

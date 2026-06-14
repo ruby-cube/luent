@@ -402,5 +402,5 @@ export function createAwaitSeries(
 }
 
 //@ts-expect-error
-window._$$AwaitSeries = createAwaitSeries
+globalThis._$$AwaitSeries = createAwaitSeries
 

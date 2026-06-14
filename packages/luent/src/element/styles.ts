@@ -5,7 +5,7 @@ import { Ion, isGetter, atRender, RUN_EAGERLY, watchToRender } from "@rue/quarky
 import { camelToKebabCase, isObject, isString } from "@rue/utils";
 
 
-type ReactiveClasses = {
+export type ReactiveClasses = {
    [key: string]: MaybeIon<Booleanny>;
 }
 

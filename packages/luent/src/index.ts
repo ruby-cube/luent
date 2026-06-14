@@ -40,7 +40,7 @@ export type { ComponentKit } from '@rue/nextscript'
 
 
 //@ts-expect-error
-window._$$wrapWithContext = wrapWithContext;
+globalThis._$$wrapWithContext = wrapWithContext;
 
 
 

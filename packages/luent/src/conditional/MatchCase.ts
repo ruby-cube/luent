@@ -9,7 +9,7 @@ import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode"
 import { DynamicNodeKit, IfElseKit } from "./IfElse";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
-import { component } from "..";
+import { component } from "../index";
 
 type CaseKey = any
 

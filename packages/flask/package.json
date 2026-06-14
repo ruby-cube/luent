@@ -2,6 +2,12 @@
     "name": "@rue/flask",
     "private": true,
     "description": "",
+    "type": "module",
+    "exports": {
+      ".": "./index.ts"
+    },
+    "main": "./index.ts",
+    "module": "./index.ts",
     "dependencies": {
       "@rue/utils": "workspace:*"
     },

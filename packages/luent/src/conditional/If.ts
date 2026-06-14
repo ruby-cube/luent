@@ -129,7 +129,7 @@ export function createIfSeries(kits: ConditionalKit[], viewBy?: GroupActivationT
 
 
 //@ts-expect-error
-window._$$IfSeries = createIfSeries
+globalThis._$$IfSeries = createIfSeries
 
 
 export function renderStaticConditional(statements: ConditionalKit[]) {

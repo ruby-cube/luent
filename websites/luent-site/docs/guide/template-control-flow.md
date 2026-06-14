@@ -100,7 +100,7 @@ Static lists may also be rendered through a JavaScript array's `map` method.
 `For()` can also render collections reactively when passed either an ion or an ionic iterable.
 
 ### `For` unique items
-To render collections based on item identity, pass a identity getter function as the second argument of `For()`. The identity getter receives the item as its argument and can either return the item itself (if items are unique objects or strings) or a unique ID. 
+To render collections based on item identity, pass a identity accessor function as the second argument of `For()`. The identity accessor receives the item as its argument and can either return the item itself (if items are unique objects or strings) or a unique ID. 
 
 The third argument is a render function that receives an item and an index ion, meaning it will render a template where the item is stable and the index may change.
 
@@ -146,7 +146,7 @@ function TodoList() {
 ```
 
 ### `For` indices
-To render a reactive collection based on stable indices and changing values, omit the identity-getter function. The render function will receive an item ion and a stable index. This form is concise and works well for simple lists that don't require reordering.
+To render a reactive collection based on stable indices and changing values, omit the identity accessor. The render function will receive an item ion and a stable index. This form is concise and works well for simple lists that don't require reordering.
 
 ```tsx
 

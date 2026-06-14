@@ -1,6 +1,7 @@
 import { TagName, makeJSXNode, RenderSlot, Context, RawJSXNode, ComponentTag } from "../index";
 import { AnyObject } from "@rue/types";
 import { isPlainObject, normalizeToArray } from "@rue/utils";
+import { writeJSXNode } from "../server/jsx-runtime";
 
 // without custom jsx compiler
 // - nodeEntity | nodeEntity[]
@@ -16,20 +17,31 @@ export const jsxDEV = jsx;
 export const jsxs = jsx;
 
 export function jsx(nodeType: TagName | ComponentTag, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
-   const Slot = config.children;
-   delete config.children
-   config.Slot = Slot ?? config.Slot;
-   if (nodeType === Context) {
-      return Context({ Slot, provide: config.provide } as any)
-   }
-   if (nodeType === Fragment) {
-      return normalizeToArray(Slot())
-   }
-   return makeJSXNode(
+  let Slot = config.children;
+  delete config.children
+  config.Slot = Slot ?? (Slot = config.Slot);
+  if (typeof Slot !== 'function' && Slot !== undefined) {
+    console.warn('Slot is not a function', Slot)
+    return;
+  }
+  if (nodeType === Context) {
+    return Context({ Slot, provide: config.provide } as any)
+  }
+  if (nodeType === Fragment) {
+    return normalizeToArray(Slot())
+  }
+  if (import.meta.env.SSR) {
+    return writeJSXNode(
       nodeType,
-      Slot,
+      Slot as (() => RawJSXNode[]) | undefined,
       config
-   );
+    )
+  }
+  return makeJSXNode(
+    nodeType,
+    Slot as (() => RawJSXNode[]) | undefined,
+    config
+  );
 }
 
 // function processSlot(Slot: Slot | { mu: AnyObject } | { [key: string]: Slot } | undefined) {

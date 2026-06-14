@@ -22,7 +22,7 @@ export function createTryCatch(renderAttempt: RenderFunction, errorKit: undefine
 }
 
 //@ts-expect-error
-window._$$TrySeries = createTryCatch
+globalThis._$$TrySeries = createTryCatch
 
 // EXAMPLE:
 // const $App = Tentative({

@@ -1,6 +1,7 @@
 import nsxGetInjectionGrammar from '../../../../plugins/vscode-nextscript/grammar/nsx-get.injection.tmLanguage.json'
 import dusky from './dusky.json'
 import goldenHour from './golden-hour.json'
+import { ThemeRegistrationResolved } from 'shiki/types'
 
 const tokenColors = [
   {
@@ -71,8 +72,8 @@ export const shikiLanguages = ['ts', 'tsx', nsxGrammar] as const
 
 export const markdownShikiConfig = {
   theme: {
-    light: goldenHour,
-    dark: dusky
+    light: goldenHour as unknown as ThemeRegistrationResolved,
+    dark: dusky as unknown as ThemeRegistrationResolved,
   },
   languages: [...shikiLanguages]
 }

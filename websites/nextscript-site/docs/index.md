@@ -20,26 +20,32 @@ features:
   - title: Language coherence
     details: Write new yet familiar syntax confidently through predictable semantics.
   - title: Improved type safety
-    details: Cleanly address type-safety gaps of getter functions and JSX templates.
-
-
+    details: Cleanly address type-safety gaps of accessor functions and JSX templates.
 ---
-
 
   <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
   </div>
-  <section id='code-glimpses' class="home-glimpses-heading">
+  <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2>Code Glimpses</h2>
+    <p><small><strong>Note:</strong> Examples use API from <a href="https://github.com/ruby-cube/luent">Luent</a> for demonstration purposes. While NextScript was developed alongside Luent, it is designed to be framework-agnostic.</small></p>
   </section>
 
   <div id="home-tour-root"></div>
 
   <p class='custom-block status-notice'>This project is in early development.</p>
 
+:::luent
+HelloWorld
+:::
+
 <style scoped>
+  section#code-glimpses p {
+    margin-inline: auto;
+  }
+
 p.custom-block.status-notice {
   border: .5px solid var(--vp-c-brand-1);
   color: var(--vp-c-brand-1);
@@ -86,4 +92,6 @@ p.custom-block.status-notice {
     line-height: 1.04;
   }
 }
+
+
 </style>

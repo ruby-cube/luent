@@ -183,9 +183,11 @@
 html:not(.dark) .VPHomeFeatures .VPFeature {
   background-color: #32363f;
 }
+
 html:not(.dark) .VPHomeFeatures .VPFeature .details {
   color: #dfdfd6;
 }
+
 html:not(.dark) .VPHomeFeatures .VPFeature .title {
   color: #fff;
 }
@@ -304,4 +306,203 @@ html {
 
 .VPHomeFeatures .items {
   margin-top: 4rem;
+}
+
+
+/* CODE SNIPPETS */
+.code-container {
+  margin: 16px 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background-color: var(--vp-code-block-bg);
+  overflow: hidden;
+}
+
+.code-container nav {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 8px;
+  background-color: var(--vp-code-tab-bg);
+  border-bottom: 1px solid var(--vp-c-divider);
+  overflow-x: auto;
+}
+
+.code-container .toggle {
+  position: relative;
+  height: 3rem;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 1.5rem;
+  padding: 4px;
+  z-index: 0;
+  /* background-color: var(--vp-input-switch-bg-color); */
+}
+
+.code-container nav span {
+  appearance: none;
+  height: 39px;
+  border: 1px solid transparent;
+  border-radius: 19.5px;
+  background: transparent;
+  color: var(--vp-code-tab-text-color);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.code-container nav span.selected {
+  position: absolute;
+  top: 4px;
+  display: inline-flex;
+  align-items: center;
+  color: transparent;
+  background-color: var(--vp-c-neutral-inverse);
+  transition: transform .25s;
+  z-index: -1;
+}
+
+.code-container remount-view {
+  display: block;
+  background-color: var(--vp-code-block-bg);
+  background-color: white;
+}
+
+.code-container remount-view>div {
+  margin: 0;
+}
+
+.code-container .shiki {
+  margin: 0 !important;
+  padding: 20px 24px !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  color: var(--vp-code-block-color);
+  overflow-x: auto;
+}
+
+.code-container .shiki code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* .dark .code-container .shiki span {
+          color: var(--shiki-dark, inherit);
+        }
+        
+        html:not(.dark) .code-container .shiki span {
+          color: var(--shiki-light, inherit);
+        } */
+
+@media (max-width: 639px) {
+  .code-container {
+    border-radius: 10px;
+  }
+
+  .code-container nav {
+    padding: 6px;
+  }
+
+  .code-container nav button {
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+
+  .code-container .shiki {
+    padding: 16px !important;
+  }
+}
+
+
+/* Code Glimpse */
+.home-tour {
+  display: grid;
+  gap: clamp(4.9rem, 8.85vw, 8.1rem);
+  width: 100%;
+  max-width: 1120px;
+  margin: clamp(3.7rem, 6.65vw, 6.4rem) auto 0;
+}
+
+.tour-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+  padding: clamp(1.2rem, 1.2vw, 1.6rem) 0;
+}
+
+.tour-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.tour-copy {
+  min-width: 0;
+}
+
+.tour-copy h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.5rem, 3.1vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--vp-c-text-1);
+}
+
+.tour-copy p {
+  margin: 0 0 0.9rem;
+  font-size: clamp(1rem, 1.25vw, 1.1rem);
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+  max-width: 58ch;
+}
+
+.tour-copy p:not(.tour-note) {
+  margin-bottom: 1.4rem;
+  margin-top: .75rem;
+}
+
+.tour-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.tour-copy .tour-note {
+  font-size: clamp(0.9rem, 0.95vw, 0.96rem);
+}
+
+.tour-code {
+  min-width: 0;
+}
+
+.home-tour .code-container {
+  margin: 0;
+}
+
+@media (max-width: 959px) {
+  .home-tour {
+    margin-top: clamp(2.7rem, 12vw, 4rem);
+  }
+
+  .tour-row {
+    padding: 0;
+    border-top: 0;
+  }
+}
+
+@media (min-width: 960px) {
+  .tour-row {
+    grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(1.8rem, 3vw, 3rem);
+  }
+
+  .tour-row.code-left .tour-code {
+    order: 1;
+  }
+
+  .tour-row.code-left .tour-copy {
+    order: 2;
+  }
 }

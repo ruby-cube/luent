@@ -59,7 +59,7 @@ type IonOptions<T, M> = M extends { '-fetch': any } ? { '-fetch': () => Promise<
  * 
  * ```
  * ---
- * @param initialState or pure getter for derivations
+ * @param initialState or side-effect-free accessor functions for derivations
  * @param methods optional
  * @returns `Ion<T>`
  */

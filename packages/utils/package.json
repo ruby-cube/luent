@@ -3,6 +3,11 @@
     "private": true,
     "description": "",
     "type": "module",
+    "exports": {
+        ".": "./index.ts"
+    },
+    "main": "./index.ts",
+    "module": "./index.ts",
     "devDependencies": {
         "@rue/types": "workspace:*",
         "@types/node": "latest",

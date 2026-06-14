@@ -6,11 +6,11 @@
 </div>
 
 # Luent
-Luent is a web application framework that aims to bring greater conceptual coherence to the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of reactive code.
+Luent is a web application framework that aims to bring greater conceptual coherence to the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of signal-based reactive code.
 
-> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish an npm package or CLI. In the meantime, you can explore Luent through interactive [StackBlitz examples](). 
+> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish docs, an npm package, or CLI. In the meantime, Luent examples can be seen through this [code glimpse](#code-glimpse) and [NextScript demos](). 
 >
-> NextScript features have mostly been implemented but require substantial tooling work before the extension is fully usable. You can get a sense of NextScript's syntax through these [code glimpses]() and [examples]().
+> NextScript features have mostly been implemented but require substantial tooling work before the extension is usable. To get a sense of NextScript's syntax, check out these [code glimpses]() and [demos]().
 >
 > We'd love help getting this project off the ground. Learn how to [contribute](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
 
@@ -41,16 +41,13 @@ Other notable features:
 
 Experimental areas:
 - [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
-- [WIP] compile-time mutation safety checks
-- x-ray binding and smart auto-binding for authoring flexible components
-- selective nested reactivity
-- encapsulated reactivity
-- DOM node access with `useNode()`
+- [WIP] compile-time mutation safety checks and statically traceable `mu:` bindings
+
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ### Code Glimpse
-The following Luent components are written in [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript)
+The following Luent components are written in [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript) (.nsx), which compiles down to TypeScript + JSX. To see this example written in .tsx, see [EmojiQuest Demo]()
 ```tsx
 function EmojiQuest() {
   const powers = ['🍀', '🍄', '✨'] as const
@@ -76,20 +73,20 @@ function EmojiQuest() {
 }
 
 function Powerset(setup: {
-  'mu:powerset': Ionic<string[]> & { 
+  'mu:powers': Ionic<string[]> & { 
     addPower(): void 
   }
   limit: number
 }) {
-  const { mu, limit, powerset } = fromTag(setup);
+  const { mu, limit, powers } = fromTag(setup);
 
-  get count = powerset.length@
+  get count = powers.length@
   get remaining = ion(() => limit - count)
 
   <::>
     <div class='powerset-panel'>
       <ul>
-        {For(powerset, power =>
+        {For(powers, power =>
           <li class='power-chip'>{power}</li>
         )}
       </ul>
@@ -97,7 +94,7 @@ function Powerset(setup: {
       <div class='panel-footer'>
         <button
           disabled={(count === limit)@}
-          on:click={() => mu(powerset).addPower()}
+          on:click={() => mu(powers).addPower()}
         >
           +
         </button>
@@ -109,7 +106,7 @@ function Powerset(setup: {
       </div>
 
       <PowersetMessages 
-        start={powerset.length} 
+        start={powers.length} 
         remaining={remaining@}
       />
     </div>
@@ -167,7 +164,7 @@ function Panel(setup: {
 
 ### JSX Transpiler
 
-Luent transpiles JSX into basic `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It additionally extends the base JSX transform with these transforms:
+Luent transpiles JSX into `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It extends the base JSX transform with the following:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants, e.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
 - [JSX flow expressions](http://luent.dev/guide/template-control-flow) (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead.
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
@@ -255,7 +252,8 @@ We strive to improve type safety whenever possible while also recognizing that m
 Keeping up a reasonable pace is desirable, but quality should not be compromised for the sake of development speed. 
 
 - **Great user experiences.**
-All of this ultimately serves the end user. We embrace build steps when they improve developer ergonomics without compromising runtime performance. We prioritize expressiveness and stability in our framework design because they form the foundation developers rely on to build, evolve, and maintain great user experiences. A solid framework → good DX → great UX.
+All of this ultimately serves the end user. We embrace build steps as they allow us to improve developer ergonomics without compromising runtime performance. We prioritize expressiveness and stability in our framework design because they form the foundation developers rely on to build, evolve, and maintain great user experiences. A solid framework → good DX → great UX.
+
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -266,7 +264,7 @@ This project builds upon ideas pioneered by frameworks that have shaped modern w
 
 Particular acknowledgement to the people and projects I've especially admired:
 
-- Vue 3, the framework I fell in love with and that sparked my fascination with frontend frameworks. Its getter-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
+- Vue 3, the framework I fell in love with and that sparked my fascination with frontend frameworks. Its accessor-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
 - Solid.js, which later became a guiding light, particularly in how to approach component props and derivations in a signals-based framework
 - Ryan Carniato, whose articles and streams have been an encouraging source of clarity and affirmation
 - Evan You and the Vue team, whose dedication to developer experience has greatly informed how I approach designing Luent

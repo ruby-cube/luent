@@ -69,5 +69,6 @@ export function createAsSeries(...series: [RawAsKit, {
    return new MatchKit(kit.key, toCasesMap(series, undefined), (key) => key == null ? DEFAULT : 'as')
 }
 
-window._$$AsSeries = createAsSeries
+   //@ts-expect-error
+   globalThis._$$AsSeries = createAsSeries
 

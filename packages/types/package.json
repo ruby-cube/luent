@@ -2,6 +2,12 @@
     "name": "@rue/types",
     "private": true,
     "description": "",
+    "type": "module",
+    "exports": {
+        ".": "./index.ts"
+    },
+    "main": "./index.ts",
+    "module": "./index.ts",
     "devDependencies": {
         "@types/node": "^22.5.4",
         "typescript": "^5.5.4",

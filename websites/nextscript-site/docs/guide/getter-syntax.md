@@ -198,12 +198,12 @@ function Multiplier() {
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 
-### ...for getter normalization
+### ...for accessor function normalization
 <!-- `variable@` | `obj.property@` -->
 <code><i>variable</i>@</code>  |  <code><i>obj</i>.<i>property</i>@</code>
 
-When used on a data variable/property read, the `@` operator normalizes the read to a getter. If the value is a getter, it returns the getter. Otherwise, it wraps the read in a getter.
-wrap the read in a getter. 
+When used on a data variable/property read, the `@` operator normalizes the read to an accessor function. If the value is an accessor function, it returns that function. Otherwise, it wraps the read in an accessor function.
+
 ```nsx
 function foo(bar: { count: number | Ion<number> } {
   get count = bar.count@
@@ -213,7 +213,7 @@ function foo(bar: { count: number | Ion<number> } {
 ::: info transpiled
 ```ts
 function foo(bar: { count: number | Ion<number> } {
-  const count = toGetter(bar, 'count')
+  const count = toAccessor(bar, 'count')
   /* ... */
 }
 ```
@@ -255,7 +255,7 @@ interface Get<T> {
 }
 ```
 
-The default value of accessor parameter declaration must be a getter.
+The default value of accessor parameter declaration must be a getter function.
 ```nsx
 function foo(bar@ = () => 0) {
   /* ... */
@@ -405,7 +405,7 @@ Expressions surrounded by non-grouping parentheses containing `await` are transp
 
 ## Type guards
 
-Type-narrowing and -widening apply to accessor variables in the same way they apply to normal variables and accessor properties. There is no need to manually add the non-null assertion operator or store the state in a variable the way you would with getter functions.
+Type-narrowing and -widening apply to accessor variables in the same way they apply to normal variables and accessor properties. There is no need to manually add the non-null assertion operator or store the state in a variable the way you would with accessor functions.
 
 ```ns
 get user = ref(getUser())
@@ -416,7 +416,7 @@ function logName() {
 ```
 
 ::: info COMPARE
-Managing types with getter functions:
+Managing types with accessor functions:
 ```ts
 const user = ref(getUser())
 

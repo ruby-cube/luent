@@ -2,11 +2,43 @@ import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
 import LuentPlugin from '../../../plugins/vite-plugin-luent/index.js'
 import { markdownShikiConfig } from './theme/shiki-setup.js'
+import { luentIslands } from '../src/luent-islands'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   srcDir: 'docs',
-  markdown: markdownShikiConfig,
+  markdown: {
+    config(md) {
+      md.block.ruler.before('fence', 'luent_island', (state, startLine, endLine, silent) => {
+        const start = state.bMarks[startLine] + state.tShift[startLine]
+        const line = state.src.slice(start, state.eMarks[startLine])
+
+        if (!line.startsWith(':::luent')) return false
+        if (silent) return true
+
+        const next = state.bMarks[startLine + 1] + state.tShift[startLine + 1]
+        const spec = state.src.slice(next, state.eMarks[startLine + 1])
+        const name = spec.trim()
+        const render = luentIslands[name]
+        const html = render ? render() : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
+
+        state.tokens.push({
+          type: 'html_block',
+          tag: '',
+          nesting: 0,
+          level: state.level,
+          content: `<div data-luent-island="${name}">${typeof html === 'string' ? html : String(html ?? '')}</div>`,
+          block: true,
+          map: [startLine, startLine + 3],
+          markup: ''
+        } as any)
+
+        state.line = startLine + 3
+        return true
+      })
+    },
+    ...markdownShikiConfig
+  },
   vite: {
     resolve: {
       // Keep Vite defaults so VitePress internal extensionless imports resolve,
