@@ -1,4 +1,4 @@
-import { component, createRoot, css, Style } from '@rue/luent'
+import { component, createRoot, css, Style, renderToString } from '@rue/luent'
 import { Code } from './Code'
 import { codeHtml, renderCodeToHtml, toHtml } from './code-utils'
 
@@ -177,7 +177,7 @@ const componentTranspiled =
 }
 `
 
-function HomeTour() {
+export function HomeTour() {
   return component(
     <>
       <section class='home-tour'>
@@ -306,9 +306,14 @@ function HomeTour() {
   )
 }
 
-export function loadHomeTour(mountTarget = '#home-tour-root') {
+export function loadHomeTour(mountTarget = '[data-luent-island="HomeTour"]') {
   const host = document.querySelector(mountTarget)
   if (!host) return
   host.innerHTML = ''
   createRoot(() => <HomeTour />).mount(mountTarget)
+}
+
+
+export function writeHomeTour() {
+  return renderToString(() => <HomeTour/>)
 }

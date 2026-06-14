@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
 import LuentPlugin from '../../../plugins/vite-plugin-luent/index.js'
 import { markdownShikiConfig } from './theme/shiki-setup.js'
-import { luentIslands } from '../src/luent-islands'
+import { islands } from './.luent-islands/server/index.js'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -19,9 +19,9 @@ export default defineConfig({
         const next = state.bMarks[startLine + 1] + state.tShift[startLine + 1]
         const spec = state.src.slice(next, state.eMarks[startLine + 1])
         const name = spec.trim()
-        const render = luentIslands[name]
+        const render = islands[name]
         const html = render ? render() : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
-
+        if (html instanceof Object)  console.log('HTML?', html.nodes.join(" "))
         state.tokens.push({
           type: 'html_block',
           tag: '',

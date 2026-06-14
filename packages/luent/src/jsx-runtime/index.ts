@@ -28,7 +28,7 @@ export function jsx(nodeType: TagName | ComponentTag, config: { children: Render
     return Context({ Slot, provide: config.provide } as any)
   }
   if (nodeType === Fragment) {
-    return normalizeToArray(Slot())
+    return normalizeToArray(Slot?.())
   }
   if (import.meta.env.SSR) {
     return writeJSXNode(

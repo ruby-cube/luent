@@ -55,7 +55,9 @@ export function Code(setup: {
             <span class='option'>{alt.name}</span>
           </button>
         </nav>
-        {import.meta.env.SSR ? <div innerHTML={{ html: $main, trusted }}></div> : renderClient()}
+        {import.meta.env.SSR
+          ? <div>{$main()}</div>
+          : renderClient()}
       </div>
     </>
   )

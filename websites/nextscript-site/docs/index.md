@@ -33,7 +33,10 @@ features:
     <p><small><strong>Note:</strong> Examples use API from <a href="https://github.com/ruby-cube/luent">Luent</a> for demonstration purposes. While NextScript was developed alongside Luent, it is designed to be framework-agnostic.</small></p>
   </section>
 
-  <div id="home-tour-root"></div>
+  <!-- <div id="home-tour-root"></div> -->
+:::luent
+HomeTour
+:::
 
   <p class='custom-block status-notice'>This project is in early development.</p>
 

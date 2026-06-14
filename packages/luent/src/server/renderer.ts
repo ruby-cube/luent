@@ -2,7 +2,7 @@ import { camelToKebabCase, isFunction, isObject, isString, normalizeToArray } fr
 import { composeBindings, toSetup } from "../component/bindings";
 import { ComponentTag } from "../component/Component";
 import { RenderSlot } from "../component/x-Input";
-import { ComponentConfig, ElementConfig, RawJSXNode } from "../node/makeJSXNode";
+import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { $from } from "../utils/destructure";
 import { toString } from '../node/VineNode'
 import { isComponentKit } from "@rue/nextscript";
@@ -10,6 +10,8 @@ import { Ion, isGetter, toValue } from "@rue/quarky";
 import { isBooleanAttribute, setUpAttributes } from "../element/attributes";
 import { ReactiveClasses, TagClass, TagStyle } from "../element/styles";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
+import { Provided, RootContext } from "../context/Context";
+import { Flask, flaskStack } from "@rue/flask";
 
 const selfclosing = {
   "area": true,
@@ -46,16 +48,31 @@ function renderBindings(bindings: ElementConfig) {
   const { attributes, classes, microclasses, styles, showIf, transitions /* TODO: */ } = composeBindings(bindings)
   let renderedAttributes = ''
 
-  if (attributes) setUpAttributes(null, attributes, (_, key: string, val: any) => {
-    const value = getValue(val)
-    renderedAttributes += isBooleanAttribute(key) && value
-      ? ` ${key}`
-      : ` ${key}="${value}"`
-  })
-  if (classes) renderedAttributes += ` class="${genClasses(normalizeToArray(classes))}"`
-  if (styles || showIf) renderedAttributes += ` style="${genStyles(styles, showIf)}"`
+  if (attributes) renderedAttributes += genAtrributes(attributes)
+  if (classes) {
+    const classString = genClasses(normalizeToArray(classes))
+    if (classString)
+      renderedAttributes += ` class="${classString}"`
+  }
+  if (styles || showIf) {
+    const styleString = genStyles(styles, showIf)
+    if (styleString)
+      renderedAttributes += ` style="${styleString}"`
+  }
 
   return renderedAttributes
+}
+
+function genAtrributes(attributes: AnyObject) {
+  for (const [key, value] of Object.entries(attributes)) {
+    const _key = key.startsWith('mu:') ? key.slice(3) : key;
+    if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
+    // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
+    const value = getValue(attributes[key])
+    return isBooleanAttribute(key) && value
+      ? ` ${key}`
+      : ` ${key}="${value}"`
+  }
 }
 
 function genClasses(classes: TagClass[]) {
@@ -64,6 +81,7 @@ function genClasses(classes: TagClass[]) {
     if (!entry) continue;
     classString += addClasses(getValue(entry))
   }
+  return classString.trim()
 }
 
 function addClasses(value: string | Falsey | { [key: string]: Booleanny }) {
@@ -101,6 +119,7 @@ function genStyles(styles: TagStyle[] | undefined, showIf: Ion<Booleanny> | unde
       styleString += ` display: none;`
     }
   }
+  return styleString.trim()
 }
 
 function genStyle(entry: string | AnyObject | Falsey) {
@@ -122,7 +141,7 @@ function genStylesFromObject(entry: AnyObject) {
 
 function genStyleProperty(key: string, value: string | number | Falsey) {
   if (!value) return ''
-  return ' ' + key + ': '+String(value) + ';'
+  return ' ' + key + ': ' + String(value) + ';'
 }
 
 
@@ -135,7 +154,7 @@ function normalizeStyle(expression: string) {
 
 function renderSlot(Slot: RenderSlot | undefined,) {
   if (!Slot) return ''
-  return processJSXOutput(typeof Slot === 'function'  ? Slot() : Slot)
+  return processJSXOutput(typeof Slot === 'function' ? Slot() : Slot).join(" ")
 }
 
 
@@ -179,6 +198,25 @@ export function renderComponent(
   fromTag: ComponentConfig,
 ) {
   const setup = toSetup(fromTag) // TODO: SSR version of toSetup?
-  return processJSXOutput(Component($from(setup)))
+  return processJSXOutput(Component($from(setup))).join(" ")
 }
+
+
+
+
+export function renderToString<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, groundContext?: RootContext, setup?: T }) {
+  const flask = new Flask({ type: 'view' });
+  try {
+    flaskStack.push(flask)
+    flask.emitInitialMount()
+    console.log('RENDER TO STRING')
+    const output = processJSXOutput(App()).join(' ')
+    console.log('OUTPUT????', output)
+    return output
+  }
+  finally {
+    flaskStack.pop()
+  }
+}
+
 

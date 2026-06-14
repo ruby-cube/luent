@@ -13,11 +13,12 @@ import './style.css'
 // }
 
 function mountHomeTour() {
+  console.log('mount home tour')
   if (typeof window === 'undefined') return
-  const hasRoot = document.querySelector('#home-tour-root')
+  const hasRoot = document.querySelector('[data-luent-island="HomeTour"]')
   if (!hasRoot) return
   import('../../src/load-home-tour').then(({ loadHomeTour }) => {
-    loadHomeTour('#home-tour-root')
+    loadHomeTour('[data-luent-island="HomeTour"]')
   })
 }
 
@@ -80,15 +81,15 @@ function mountHomeTour() {
 
 export default {
   extends: DefaultTheme,
-  // Layout: () => {
-  //   return h(DefaultTheme.Layout, null, {
-  //     // https://vitepress.dev/guide/extending-default-theme#layout-slots
-  //     'home-hero-image': () => {
-  //       console.warn('rendering hero')
-  //       return h(HeroCode)
-  //     }
-  //   })
-  // },
+  Layout: () => {
+    return h(DefaultTheme.Layout, null, {
+      // https://vitepress.dev/guide/extending-default-theme#layout-slots
+      'home-hero-image': () => {
+        console.warn('rendering hero')
+        return h(HeroCode)
+      }
+    })
+  },
   enhanceApp({ app, router, siteData }) {
     if (typeof window === 'undefined') return
 
