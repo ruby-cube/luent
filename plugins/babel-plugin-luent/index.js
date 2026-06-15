@@ -295,15 +295,15 @@ function transformChildrenToRenderFunction(paths) {
       ));
 }
 
-function transformJSXChildren(childrenPath) {
-   for (let i = 0; i < childrenPath.length; i++) {
-      const child = childrenPath[i]
-      if (t.isJSXExpressionContainer(child.node) && !t.isJSXEmptyExpression(child.node.expression)) {
-         transformIfDerivationShorthand(child.get('expression'))
-      }
-   }
-   return childrenPath;
-}
+// function transformJSXChildren(childrenPath) {
+//    for (let i = 0; i < childrenPath.length; i++) {
+//       const child = childrenPath[i]
+//       if (t.isJSXExpressionContainer(child.node) && !t.isJSXEmptyExpression(child.node.expression)) {
+//          transformIfDerivationShorthand(child.get('expression'))
+//       }
+//    }
+//    return childrenPath;
+// }
 
 function isAsyncIonShorthand(node) {
    return t.isCallExpression(node) && t.isMemberExpression(node.callee) && node.callee.object.name === 'o' && node.callee.property.name === 'await'
@@ -315,24 +315,24 @@ function toAsyncIon(node) {
    ]))])
 }
 
-function transformIfDerivationShorthand(path) {
-   if (!path || !path.node) return;
-   const node = path.node
-   if (isDerivationShorthand(node)) {
-      if (isAsyncIonShorthand(node)) {
-         path.replaceWith(toAsyncIon(node))
-      }
-      else {
-         path.replaceWith(toDerivationFunction(node))
-      }
-      // transformLiterals(path.get('right'))
-   }
-   // else if (isDerivation(path)) {
-   //    // console.log('isDerivation', path.node)
-   //    // transformLiterals(path)
-   //    path.replaceWith(toDerivationFunction(path.node))
-   // }
-}
+// function transformIfDerivationShorthand(path) {
+//    if (!path || !path.node) return;
+//    const node = path.node
+//    if (isDerivationShorthand(node)) {
+//       if (isAsyncIonShorthand(node)) {
+//          path.replaceWith(toAsyncIon(node))
+//       }
+//       else {
+//          path.replaceWith(toDerivationFunction(node))
+//       }
+//       // transformLiterals(path.get('right'))
+//    }
+//    // else if (isDerivation(path)) {
+//    //    // console.log('isDerivation', path.node)
+//    //    // transformLiterals(path)
+//    //    path.replaceWith(toDerivationFunction(path.node))
+//    // }
+// }
 
 function transformLiterals(path) {
    path.traverse({
@@ -353,9 +353,9 @@ function transformLiterals(path) {
    })
 }
 
-function isDerivationShorthand(node) {
-   return isParenthesized(node) && !t.isIdentifier(node);
-}
+// function isDerivationShorthand(node) {
+//    return isParenthesized(node) && !t.isIdentifier(node);
+// }
 
 
 
@@ -390,7 +390,7 @@ const TemplateFunctions = {
    Default: transformTemplateArgToRenderFunction,
    As: transformTemplateArgToRenderFunction,
    Case: (path) => {
-      transformIfDerivationShorthand(path.get('arguments.0'));
+      // transformIfDerivationShorthand(path.get('arguments.0'));
       if (path.node.arguments.length > 1)
          transformTemplateArgToRenderFunction(path)
    }
@@ -414,7 +414,7 @@ function transformTemplateFnCall(name, path) {
 }
 
 function transformIfCall(path) {
-   transformIfDerivationShorthand(path.get('arguments.0'))
+  //  transformIfDerivationShorthand(path.get('arguments.0'))
    transformTemplateArgToRenderFunction(path)
 }
 
@@ -477,23 +477,23 @@ function transformJSXAttributes(jsxElementPath) {
       // else if (t.isArrayExpression(value.expression)) {
       //    transformArrayElements(attribute.get('value.expression.elements'))
       // }
-      if (namespaceName !== 'on' && namespaceName !== 'mu' && namespaceName !== 'Slot') {
-         transformIfDerivationShorthand(attribute.get('value.expression'))
-      }
-      else {
-         transformIfSlotShorthand(attribute.get('value.expression')) // TODO: slot shorthand is same as derivation shorthand
-      }
+      // if (namespaceName !== 'on' && namespaceName !== 'mu' && namespaceName !== 'Slot') {
+      //    transformIfDerivationShorthand(attribute.get('value.expression'))
+      // }
+      // else {
+      //    transformIfSlotShorthand(attribute.get('value.expression')) // TODO: slot shorthand is same as derivation shorthand
+      // }
    }
 }
 
 
-function transformIfSlotShorthand(path) {
-   if (!path || !path.node) return;
-   const node = path.node
-   if (isDerivationShorthand(node)) {
-      path.replaceWith(toArrowFunction(node))
-   }
-}
+// function transformIfSlotShorthand(path) {
+//    if (!path || !path.node) return;
+//    const node = path.node
+//    if (isDerivationShorthand(node)) {
+//       path.replaceWith(toArrowFunction(node))
+//    }
+// }
 
 function toArrowFunction(node) {
    return t.arrowFunctionExpression([], t.blockStatement([
@@ -521,9 +521,9 @@ function transformArrayElements(paths) {
       else if (t.isArrayExpression(elementNode)) {
          transformArrayElements(element.get(`elements`))
       }
-      else {
-         transformIfDerivationShorthand(element)
-      }
+      // else {
+      //    transformIfDerivationShorthand(element)
+      // }
    }
 }
 
@@ -538,9 +538,9 @@ function transformObjectProperties(paths) {
       else if (t.isArrayExpression(value.node)) {
          transformArrayElements(value.get('elements'))
       }
-      else {
-         transformIfDerivationShorthand(value)
-      }
+      // else {
+      //    transformIfDerivationShorthand(value)
+      // }
    }
 }
 

@@ -25,26 +25,6 @@ export function Code(setup: {
 
   let mainWidth = 0;
 
-  function renderClient() {
-    return <remount-view>
-      {Await(() => <>
-        {If(() => $tab() === 'main', () => {
-          return <div innerHTML={{ html: $main, trusted }}></div>
-        })}
-        {Else(() => {
-          const $alt = ion('', {
-            '-fetch': () => highlight(alt.code, alt.lang ?? alt.name)
-          })
-          return <div innerHTML={{ html: $alt, trusted }}></div>
-        })}
-      </>
-      )}
-      {Meanwhile(
-        <div innerHTML={{ html: $main, trusted }}></div>
-      )}
-    </remount-view>
-  }
-
   return component(
     <>
       <div class='code-container'>
@@ -55,9 +35,26 @@ export function Code(setup: {
             <span class='option'>{alt.name}</span>
           </button>
         </nav>
-        {import.meta.env.SSR
+        {/* {import.meta.env.SSR
           ? <div>{$main()}</div>
-          : renderClient()}
+          : renderClient()} */}
+        <remount-view>
+          {Await(() => <>
+            {If(() => $tab() === 'main', () => {
+              return <div>{{ html: $main, trusted }}</div>
+            })}
+            {Else(() => {
+              const $alt = ion('', {
+                '-fetch': () => highlight(alt.code, alt.lang ?? alt.name)
+              })
+              return <div>{{ html: $alt, trusted }}</div>
+            })}
+          </>
+          )}
+          {Meanwhile(
+            <div>{{ html: $main, trusted }}</div>
+          )}
+        </remount-view>
       </div>
     </>
   )

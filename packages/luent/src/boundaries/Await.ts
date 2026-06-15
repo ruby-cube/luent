@@ -261,6 +261,7 @@ export function createAwaitSeries(
       | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
 ) {
    const { renderError, renderPlaceholder, renderResolved, $suspense, timeout } = unpackAwaitSeries(series)
+   if (import.meta.env.SSR) return renderPlaceholder()
    const $error = createAtomicIon(undefined as undefined | Error);
    const $renderPlaceholder = createAtomicIon(false)
 
