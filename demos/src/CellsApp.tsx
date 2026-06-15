@@ -1,4 +1,4 @@
-import { component, template, For, FromTag, Style, INTERNAL, beforeUnmount, beforeDemount, atMount, css, If, Else } from "@rue/luent"
+import { component, template, For, FromTag, Style, INTERNAL, beforeDetach, beforeDemount, atAttach, css, If, Else } from "@rue/luent"
 import { Ion, ion } from "@rue/quarky"
 import { Thru } from "../../../packages/luent/src/iteratives/Thru"
 
@@ -126,7 +126,7 @@ function Cell(input: {
                   value={$value}
                   on:change={update}
                   on:blur={update}
-                  at:mount={el => el.focus()}
+                  at:attach={el => el.focus()}
                />
             )}
             {Else(

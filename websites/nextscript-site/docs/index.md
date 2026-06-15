@@ -8,11 +8,11 @@ hero:
   tagline: for writing clear, ergonomic, type-safe code
   actions:
     - theme: brand
-      text: Features
+      text: Learn NextScript
       link: /guide/getter-syntax.md
     - theme: alt
-      text: About the project
-      link: https://github.com/ruby-cube/luent/tree/main/packages/nextscript#nextscript
+      text: Code Glimpses
+      link: /#code-glimpses
 
 features:
   - title: Ergonomic syntax
@@ -38,7 +38,7 @@ features:
 HomeTour
 :::
 
-  <p class='custom-block status-notice'>This project is in early development.</p>
+  <p class='custom-block status-notice'><strong>This project is in early development.</strong> <br/>Most core features have been implemented, but substantial tooling work remains before the extension is usable.</p>
 
 
 <style scoped>
@@ -51,6 +51,7 @@ p.custom-block.status-notice {
   color: var(--vp-c-brand-1);
   text-align: center;
   padding: 1rem;
+  margin-top: 6rem;
 }
 
 .code-glimpse-divider {

@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@rue/flask";
-import { component, template, If, Else,  ElseIf,Style, NodeRef, atMount } from "@rue/luent";
+import { component, template, If, Else,  ElseIf,Style, NodeRef, atAttach } from "@rue/luent";
 import { getActiveUpdate, ion, atRender, queueTask, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -70,7 +70,7 @@ export function MountIfAnimation() {
 
    let prevNode: HTMLDivElement | undefined
 
-   atMount(initial => {
+   atAttach(initial => {
       if (!initial) return;
       prevNode = getActiveDivRef()()
    })
@@ -411,7 +411,7 @@ function ArticleBlock(setup: {
 //     //     console.log("activated yo")
 //     // })
 
-//     // beforeUnmount(() => {
+//     // beforeDetach(() => {
 //     //     console.log("unmount")
 //     // })
 

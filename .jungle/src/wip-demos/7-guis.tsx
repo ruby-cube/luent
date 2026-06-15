@@ -1,6 +1,6 @@
 
-import { atMount, For, If, Style } from "@rue/luent"
-import { component, template, beforeUnmount } from "@rue/luent"
+import { atAttach, For, If, Style } from "@rue/luent"
+import { component, template, beforeDetach } from "@rue/luent"
 import {  Ion, ion, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
 
 export function SevenGUIs() {
@@ -171,7 +171,7 @@ function TimerApp() {
 
    reset()
 
-   beforeUnmount(() => {
+   beforeDetach(() => {
       cancelAnimationFrame(handle)
    })
 

@@ -132,7 +132,7 @@ export function TodoMVC() {
                               class="edit"
                               type="text"
                               mu:value={todo.title}
-                              at:mount={node => node.focus()}
+                              at:attach={node => node.focus()}
                               on:blur={e => doneEdit(todo)}
                               on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                            />

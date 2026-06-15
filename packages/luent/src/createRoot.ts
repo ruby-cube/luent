@@ -35,7 +35,7 @@ export function createRoot<T extends AnyObject, E extends Provided>(App: Compone
 
    return {
       nodes: undefined as JSXNode[] | undefined,
-      mount(element: string | HTMLElement | SVGAElement) {
+      mount(element: string | Element | HTMLElement | SVGAElement) {
          const root = typeof element === 'string' ? document.querySelector(element) : element;
          if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
          appRoot = root!;

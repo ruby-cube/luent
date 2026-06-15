@@ -252,6 +252,8 @@ export function AsyncIon<
     // error: null as null | Error,
   })
 
+  if (import.meta.env.SSR) return $async as any as AsyncIon<T>;
+
   // const pendingPromises = new Set()
   let pendingPromise: Promise<unknown> | null = null
 

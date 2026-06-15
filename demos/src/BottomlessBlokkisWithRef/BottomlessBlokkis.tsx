@@ -1,4 +1,4 @@
-import { component, beforeUninstall, ComponentRef, createRoot, NodeRef, template } from "@rue/luent";
+import { component, beforeUnmount, ComponentRef, createRoot, NodeRef, template } from "@rue/luent";
 import { ion } from "@rue/quarky";
 import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
@@ -20,7 +20,7 @@ export function BottomlessBlokkis() {
 
     function dropBlock() {
         const id = setInterval(moveDown, 1000)
-        beforeUninstall(() => clearInterval(id))
+        beforeUnmount(() => clearInterval(id))
     }
 
     function moveRight() {
@@ -82,7 +82,7 @@ export function BottomlessBlokkis() {
             `}>
                 {As($activeBlokk,
                     <Blokk
-                        pre:mount={dropBlock()}
+                        pre:attach={dropBlock()}
                         ref={$blokk}
                         shapes={shapes}
                         initialX={BOARD_COLUMNS / 2 - BLOKK_GRID / 2}

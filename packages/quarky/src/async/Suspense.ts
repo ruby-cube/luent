@@ -89,6 +89,7 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
             return success
          },
          include(quark: AsyncQuark) {
+          if (import.meta.env.SSR) return;
             if (quarks.has(quark)) return;
             console.log('start suspense', quark, quarks.size)
             const { $promise } = quark

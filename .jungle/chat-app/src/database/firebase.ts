@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
 import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
-import { beforeUnmount, fromGround, provideGround } from "@rue/luent";
+import { beforeDetach, fromGround, provideGround } from "@rue/luent";
 import {  ion, watch } from "@rue/quarky";
 
 // Import the functions you need from the SDKs you need
@@ -161,7 +161,7 @@ export function onLoggedIn(task: (user: User | null) => void) {
       }
    })
 
-   beforeUnmount(final => {
+   beforeDetach(final => {
       if (!final) return
       unsub()
    })
@@ -172,7 +172,7 @@ export function onLoggedOut(task: () => void) {
    const unsub = onAuthStateChanged(auth, (user) => {
       if (!user) task()
    })
-   beforeUnmount(final => {
+   beforeDetach(final => {
       if (!final) return
       unsub()
    })
@@ -282,7 +282,7 @@ export function ChatKit() {
       $error.value = err.message
    })
 
-   beforeUnmount((final) => {
+   beforeDetach((final) => {
       if (!final) return;
       unsub()
    })

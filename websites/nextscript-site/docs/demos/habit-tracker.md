@@ -1,6 +1,8 @@
 # Habit Tracker
 
-<div id='habit-tracker-code'></div>
+:::luent
+HabitTrackerDemo
+:::
 
 <blockquote>
 <small>

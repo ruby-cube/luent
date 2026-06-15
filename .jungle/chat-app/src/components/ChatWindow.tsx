@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, atRender, template, Else, For, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, beforeUnmount, queuePostlude, beforeDemount, atRemount } from "@rue/luent";
+import { component, atRender, template, Else, For, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, beforeDetach, queuePostlude, beforeDemount, atRemount } from "@rue/luent";
 import { Ion, ionic, ion } from "@rue/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
@@ -169,7 +169,7 @@ export function ChatWindow(input: {
                         )}
                      </div>
                      {If($ShowNewMessageMarker(message),
-                        <div at:mount={node => (console.log('*** DIV MOUNTED'), message.id === user.lastSeenMessageID && ($newMessageMarker.value = node))} data-messageID={message.id}>
+                        <div at:attach={node => (console.log('*** DIV MOUNTED'), message.id === user.lastSeenMessageID && ($newMessageMarker.value = node))} data-messageID={message.id}>
                            --- new messages ---
                         </div>
                      )}

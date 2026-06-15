@@ -1,6 +1,6 @@
 import { Ion, ion, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon, ionic } from "@rue/quarky";
 import "./TestAsyncTabs.css";
-import { component, Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atMount, Match, If } from "@rue/luent";
+import { component, Await, Meanwhile, template, ElseIf, FromTag, Case, Default, For, atAttach, Match, If } from "@rue/luent";
 import { As } from "../../../packages/luent/src/conditional/As";
 
 // Modified Demo from Solid.js 
@@ -61,7 +61,7 @@ export function TestAsyncTabs() {
          <div class={(`tab ${$suspense() && 'pending'}`)}>
             <remount-view>
                {As($tab, view => (
-                  <div pre:mount={() => tabViews[$tab()] = view}>
+                  <div pre:attach={() => tabViews[$tab()] = view}>
                      <Tab page={tabNames[$tab()]} count={$count} />
                   </div>
                ))}

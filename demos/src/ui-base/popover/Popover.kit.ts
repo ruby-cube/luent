@@ -1,5 +1,5 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { beforeUninstall, NodeRef, atLayout } from "@rue/luent"
+import { beforeUnmount, NodeRef, atLayout } from "@rue/luent"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'
@@ -133,5 +133,5 @@ export function positionTail(node: HTMLElement, popover: Popover, $popover: Node
       node,
       placeArrow,
    );
-   beforeUninstall(cleanup)
+   beforeUnmount(cleanup)
 }

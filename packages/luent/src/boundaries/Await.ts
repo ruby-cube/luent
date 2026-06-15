@@ -48,12 +48,17 @@ type MeanwhileKit = {
 // export function Await(suspense: any | any[], renderResolved: RenderFunction | RawJSXNode): AwaitKit
 // export function Await(renderOrSuspense: [...any[], RenderFunction | RawJSXNode] | RenderFunction | any | any[], renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
 export function Await(...awaited: [...any[], RenderFunction | RawJSXNode]): AwaitKit {
-   const renderResolved = awaited.at(-1)
-   if (!isFunction(renderResolved) || isIon(renderResolved)) throw new Error('INVALID Render function')
-   const secondToLast = awaited.at(-2)
-   const $suspense = secondToLast instanceof Object && SUSPENSE_QUARK in secondToLast ? secondToLast as SuspenseIon : SuspenseIon()
-
-   const render = collectAwaited($suspense, awaited, renderResolved)
+  const renderResolved = awaited.at(-1)
+  if (!isFunction(renderResolved) || isIon(renderResolved)) throw new Error('INVALID Render function')
+    const secondToLast = awaited.at(-2)
+  const $suspense = secondToLast instanceof Object && SUSPENSE_QUARK in secondToLast ? secondToLast as SuspenseIon : SuspenseIon()
+  if (import.meta.env.SSR) return {
+      $suspense,
+      // ions,
+      renderResolved: () => undefined,
+   }
+  
+  const render = collectAwaited($suspense, awaited, renderResolved)
 
    function collectAwaited($suspense: SuspenseIon, awaited: any[], Slot: RenderFunction) {
       let output: RawJSXNode;

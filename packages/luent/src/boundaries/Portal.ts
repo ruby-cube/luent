@@ -1,6 +1,6 @@
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { isFunction, isObject, normalizeToArray } from "@rue/utils";
-import { atMount, beforeUnmount, atRemount } from "../flask/flask-hooks";
+import { atAttach, beforeDetach, atRemount } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@rue/flask";
 import { atRender } from "@rue/quarky";
@@ -58,7 +58,7 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
       mountDOMNodes(nodes, element)
    })
 
-   beforeUnmount((final) => {
+   beforeDetach((final) => {
       atRender(() => {
          removeDOMNodes(nodes)
       })

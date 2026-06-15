@@ -2,19 +2,19 @@ import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@rue
 import { atRender, atTick } from "../../../quarky/src/reactivity/RenderCycle";
 
 
-export function beforeInstall(task: () => void) {
+export function beforeMount(task: () => void) {
    getFlask().onInitialMount($_wrap_with_context(task));
 }
 export function beforeRemount(task: () => void) {
    getFlask().onRemount($_wrap_with_context(task));
 }
 
-export function beforeMount(task: (initial: boolean) => void) {
+export function beforeAttach(task: (initial: boolean) => void) {
    getFlask().onInitialMount($_wrap_with_context(() => task(true)));
    getFlask().onRemount($_wrap_with_context(() => task(false)));
 }
 
-export function atInstall(task: () => void) {
+export function atMount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
    getFlask().onInitialMount(() => { atRender(contextTask) });
 }
@@ -23,13 +23,13 @@ export function atRemount(task: () => void) {
    getFlask().onRemount(() => { atRender(contextTask) });
 }
 
-export function atMount(task: (initial: boolean) => void) {
+export function atAttach(task: (initial: boolean) => void) {
    const context = $_snap_context()
    getFlask().onInitialMount(() => { atRender(() => $_run_with_(context, () => task(true))) });
    getFlask().onRemount(() => { atRender(() => $_run_with_(context, () => task(false))) });
 }
 
-export function afterInstall(task: () => void) {
+export function afterMount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
    getFlask().onInitialMount(() => { atTick(contextTask) });
 }
@@ -38,7 +38,7 @@ export function afterRemount(task: () => void) {
    getFlask().onRemount(() => { atTick(contextTask) });
 }
 
-export function afterMount(task: (initial: boolean) => void) {
+export function afterAttach(task: (initial: boolean) => void) {
    const context = $_snap_context()
    getFlask().onInitialMount(() => { atTick(() => $_run_with_(context, () => task(true))) });
    getFlask().onRemount(() => { atTick(() => $_run_with_(context, () => task(false))) });
@@ -46,7 +46,7 @@ export function afterMount(task: (initial: boolean) => void) {
 
 
 
-export function beforeUninstall(task: () => void) {
+export function beforeUnmount(task: () => void) {
    getFlask().onDiscard($_wrap_with_context(task));
 }
 
@@ -54,13 +54,13 @@ export function beforeDemount(task: () => void) {
    getFlask().onDemount($_wrap_with_context(task));
 }
 
-export function beforeUnmount(task: (final: boolean) => void) {
+export function beforeDetach(task: (final: boolean) => void) {
    getFlask().onDiscard($_wrap_with_context(() => task(true)));
    getFlask().onDemount($_wrap_with_context(() => task(false)));
 }
 
 
-export function atUninstall(task: () => void) {
+export function atUnmount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
    getFlask().onDiscard(() => { atRender(contextTask) });
 }
@@ -70,7 +70,7 @@ export function atDemount(task: () => void) {
    getFlask().onDemount(() => { atRender(contextTask) });
 }
 
-export function atUnmount(task: (final: boolean) => void) {
+export function atDetach(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
 
@@ -78,7 +78,7 @@ export function atUnmount(task: (final: boolean) => void) {
    getFlask().onDemount(() => { atRender(demountTask) });
 }
 
-export function afterUninstall(task: () => void) {
+export function afterUnmount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
    getFlask().onDiscard(() => { atRender(contextTask) });
 }
@@ -88,7 +88,7 @@ export function afterDemount(task: () => void) {
    getFlask().onDemount(() => { atRender(contextTask) });
 }
 
-export function afterUnmount(task: (final: boolean) => void) {
+export function afterDetach(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
    getFlask().onDiscard(() => { atRender(discardTask) });

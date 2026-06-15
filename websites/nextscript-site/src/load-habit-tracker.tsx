@@ -1,4 +1,4 @@
-import { createRoot, css, queueTask, Style } from "@rue/luent"
+import { createRoot, css, renderToString, Style } from "@rue/luent"
 import { Code } from './Code'
 import { HabitTracker } from "./HabitTracker"
 import { renderCodeToHtml } from "./code-utils"
@@ -116,7 +116,14 @@ export function HabitTracker({ habit, goal = 5 }) {
 }`
 
 export function load() {
-  createRoot(() => (
+  const root = document.querySelector('[data-luent-island="HabitTrackerDemo"]')
+  if (!root) return
+  root.innerHTML = ''
+  createRoot(HabitTrackerDemo).mount(root)
+}
+
+function HabitTrackerDemo() {
+  return (
     <>
       <div class='demo-container'>
         <HabitTracker
@@ -158,5 +165,9 @@ export function load() {
         }
       `)}
     </>
-  )).mount('#habit-tracker-code')
+  )
+}
+
+export function writeHabitTrackerDemo() {
+  return renderToString(HabitTrackerDemo)
 }

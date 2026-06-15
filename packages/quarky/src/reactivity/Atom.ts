@@ -170,7 +170,7 @@ export class TrackedAtom {
      */
    link(effect: Effect) {
       this.getEffects(effect.phase).add(effect)
-      console.log('link effect', effect, effect.phase, this.effects)
+      // console.log('link effect', effect, effect.phase, this.effects)
    }
 
    triggerEffects() {

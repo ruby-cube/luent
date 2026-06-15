@@ -59,12 +59,12 @@ export class ThisFlask {
    }
 
 
-   atMount(task: (initial: boolean) => void) {
+   atAttach(task: (initial: boolean) => void) {
       this.flask.onInitialMount(() => task(true))
       this.flask.onRemount(() => task(false))
    }
 
-   beforeUnmount(task: (final: boolean) => void) {
+   beforeDetach(task: (final: boolean) => void) {
       this.flask.onDemount(() => task(false))
       this.flask.onDiscard(() => task(true))
    }

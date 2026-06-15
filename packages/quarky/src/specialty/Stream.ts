@@ -7,7 +7,7 @@ export type Stream = {
 
 // TODO: timeout
 // TODO: animation ... interval 'frame'
-// TODO: until beforeUnmount
+// TODO: until beforeDetach
 
 export function Stream(startDef: (utils: AnyObject) => Promise<void>, options?: { '@stop': () => void }): Stream {
 

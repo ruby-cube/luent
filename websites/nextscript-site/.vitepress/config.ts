@@ -2,7 +2,8 @@ import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
 import LuentPlugin from '../../../plugins/vite-plugin-luent/index.js'
 import { markdownShikiConfig } from './theme/shiki-setup.js'
-import { islands } from './.luent-islands/server/index.js'
+import { islands, getPortals, runWithPortals } from './.luent-islands/server/index.js'
+
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -17,12 +18,19 @@ export default defineConfig({
         if (!line.startsWith(':::luent')) return false
         if (silent) return true
 
+        const page = state.env?.relativePath
+        if (!page) {
+          console.log('NO PAGE??', page)
+          return false;
+        }
+        console.log('PAGE??', page)
+
         const next = state.bMarks[startLine + 1] + state.tShift[startLine + 1]
         const spec = state.src.slice(next, state.eMarks[startLine + 1])
         const name = spec.trim()
         const render = islands[name]
-        const html = render ? render() : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
-        if (html instanceof Object) console.log('HTML???', html.nodes.join(" "))
+        const html = render ? runWithPortals(render, page) : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
+
         state.tokens.push({
           type: 'html_block',
           tag: '',
@@ -40,18 +48,22 @@ export default defineConfig({
     },
     ...markdownShikiConfig
   },
-  transformHead(ctx) {
-    console.log('TRANSFORM HEAD', ctx)
+
+  transformHtml(code, id, ctx) {
+    const portals = getPortals(ctx.page)
+    if (!portals || portals.head.length === 0 && portals.body.length === 0) {
+      return code;
+    }
+
+    console.log('includes head??', code.includes('</head>'));
+    
+    const newCode = code
+    .replace('</head>', `${portals.head.join('\n')}\n</head>`)
+    .replace('</body>', `${portals.body.join('\n')}\n</body>`)
+    console.log('BEGINNING CODE:', newCode.slice(500, 2500));
+    return newCode
   },
-  transformHtml(ctx) {
-    console.log('TRANSFORM HTML', ctx)
-  },
-  postRender(ctx) {
-    console.log('POST RENDER', ctx)
-  },
-  buildEnd(siteConfig) {
-    console.log('BUILD END', siteConfig)
-  },
+
   vite: {
     resolve: {
       // Keep Vite defaults so VitePress internal extensionless imports resolve,
@@ -87,7 +99,7 @@ export default defineConfig({
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Features', link: '/guide/getter-syntax' },
+      { text: 'Learn', link: '/guide/getter-syntax' },
       { text: 'Demos', link: '/demos/habit-tracker' },
       { text: 'Code Glimpses', link: '/#code-glimpses' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#motivation' },
@@ -96,7 +108,7 @@ export default defineConfig({
     sidebar: {
       '/guide/': [
         {
-          text: 'Features',
+          text: 'Learn',
           items: [
             {
               text: 'Getter Syntax',

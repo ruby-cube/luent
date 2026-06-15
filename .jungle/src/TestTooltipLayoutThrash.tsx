@@ -1,4 +1,4 @@
-import { component, template, If, NodeRef, Portal, RenderSlot, beforeInstall } from '@rue/luent';
+import { component, template, If, NodeRef, Portal, RenderSlot, beforeMount } from '@rue/luent';
 import { $layout, ion, atLayout } from '@rue/quarky';
 import './TestTooltip.css'
 
@@ -100,7 +100,7 @@ export function Tooltip(input: {
    //    if (height != null) $height.value = height;
    // })
 
-   beforeInstall(async () => {
+   beforeMount(async () => {
       await $layout()
       const height = $div()?.getBoundingClientRect().height
       if (height != null) $height.value = height;
@@ -114,7 +114,7 @@ export function Tooltip(input: {
    // }
 
    // prevent looped layout thrashing w/ measureLayout
-   // atMount(async () => {
+   // atAttach(async () => {
    //    const height = await layout(() =>
    //       $div()?.getBoundingClientRect().height
    //    )

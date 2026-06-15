@@ -1,5 +1,5 @@
 import { getFlask } from "@rue/flask";
-import { component, atMount, template } from "@rue/luent";
+import { component, atAttach, template } from "@rue/luent";
 import { ion, LAYOUT, PRELUDE, atPrelude, atRender, queueTask, RENDER, SYNC, TICK, watch } from "@rue/quarky";
 
 export function TestRenderEffects() {

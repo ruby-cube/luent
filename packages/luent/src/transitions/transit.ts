@@ -3,7 +3,7 @@ import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/x-Input";
 import { Flask, getFlask } from "@rue/flask";
-import { atMount, beforeUnmount } from "../flask/flask-hooks";
+import { atAttach, beforeDetach } from "../flask/flask-hooks";
 
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
    atListChanged(() => {
@@ -85,11 +85,11 @@ const ANY_PORT = Symbol('any port')
 export function setUpTransit(node: HTMLElement, key: any, port: any = ANY_PORT, transitClasses: MaybeIon<string> = 'transition-position') {
    usePorts().addPort(port)
 
-   atMount(() => {
+   atAttach(() => {
       receive(key, node, port, toClassNames(toValue(transitClasses)))
    })
 
-   beforeUnmount(() => {
+   beforeDetach(() => {
       send(key, node, port)
    })
 }

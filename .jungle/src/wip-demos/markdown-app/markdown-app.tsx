@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { Ion, Ionic, ion } from '@rue/quarky'
-import { component, template, FromTag, NodeRef, atMount, beforeUnmount, beforeUninstall, atInstall } from '@rue/luent'
+import { component, template, FromTag, NodeRef, atAttach, beforeDetach, beforeUnmount, atMount } from '@rue/luent'
 import '../../style.css'
 
 
@@ -28,14 +28,14 @@ export function MarkdownApp(
       selectionEnd: undefined as undefined | number,
    })
    // <create-view> <remount-view>
-   beforeUninstall(() => {
+   beforeUnmount(() => {
       const textArea = $textArea()!
       const isActive = document.activeElement !== textArea
       caretRange.selectionStart = isActive ? textArea.selectionStart : undefined
       caretRange.selectionEnd = isActive ? textArea.selectionEnd : undefined
    })
 
-   atInstall(() => {
+   atMount(() => {
       const textArea = $textArea()!
       const { selectionEnd, selectionStart } = caretRange
       if (selectionStart === undefined) return;

@@ -19,53 +19,53 @@ Luent exposes lifecycle hooks compositionally. Hooks are formed by combining a l
 - tick: after render
 
 
-beforeInstall(task: () => void)
+beforeMount(task: () => void)
 beforeRemount(task: () => void)
-beforeMount(task: (initial: boolean) => void)
-beforeUninstall(task: () => void)
+beforeAttach(task: (initial: boolean) => void)
+beforeUnmount(task: () => void)
 beforeDemount(task: () => void)
-beforeUnmount(task: (final: boolean) => void)
+beforeDetach(task: (final: boolean) => void)
 
-atInstall(task: () => void)
+atMount(task: () => void)
 atRemount(task: () => void)
-atMount(task: (initial: boolean) => void)
-atUninstall(task: () => void)
+atAttach(task: (initial: boolean) => void)
+atUnmount(task: () => void)
 atDemount(task: () => void)
-atUnmount(task: (final: boolean) => void)
+atDetach(task: (final: boolean) => void)
 
-afterInstall(task: () => void)
+afterMount(task: () => void)
 afterRemount(task: () => void)
-afterMount(task: (initial: boolean) => void)
-afterUninstall(task: () => void)
+afterAttach(task: (initial: boolean) => void)
+afterUnmount(task: () => void)
 afterDemount(task: () => void)
-afterUnmount(task: (final: boolean) => void)
+afterDetach(task: (final: boolean) => void)
 
 
-<div at:install={node => node.focus()}></div>
+<div at:mount={node => node.focus()}></div>
 
-pre:install
 pre:mount
+pre:attach
 pre:remount
 
-at:install
 at:mount
+at:attach
 at:remount
 
-post:install
 post:mount
+post:attach
 post:remount
 
-pre:uninstall
 pre:unmount
+pre:detach
 pre:demount
 
 at:demount
+at:detach
 at:unmount
-at:uninstall
 
 post:demount
-post:unmount
-post:uninstall -->
+post:detach
+post:unmount -->
 
 
 
@@ -90,17 +90,17 @@ Luent exposes lifecycle hooks compositionally. Hooks are formed by combining:
 For example:
 
 ```ts
-beforeInstall()
-atMount()
-afterUnmount()
+beforeMount()
+atAttach()
+afterDetach()
 ```
 
 Template hooks follow the same pattern:
 
 ```tsx
-<div pre:install={...}></div>
-<div at:mount={...}></div>
-<div post:unmount={...}></div>
+<div pre:mount={...}></div>
+<div at:attach={...}></div>
+<div post:detach={...}></div>
 ```
 
 
@@ -148,13 +148,13 @@ Runs during the synchronous/prelude phase before rendering occurs.
 This phase is useful for preparing state or synchronizing data before the DOM updates.
 
 ```ts
-beforeMount(() => {
+beforeAttach(() => {
   console.log('about to mount')
 })
 ```
 
 ```tsx
-<div pre:install={node => prepareNode(node)}></div>
+<div pre:mount={node => prepareNode(node)}></div>
 ```
 
 ---
@@ -167,13 +167,13 @@ At this point, DOM nodes exist and mount/unmount operations have been applied.
 This phase is useful for interacting with nodes immediately during rendering.
 
 ```ts
-atInstall(() => {
+atMount(() => {
   console.log('view installed')
 })
 ```
 
 ```tsx
-<div at:mount={node => node.focus()}></div>
+<div at:attach={node => node.focus()}></div>
 ```
 
 ---
@@ -184,13 +184,13 @@ Runs during the tick phase after rendering has completed.
 This phase is useful for tasks that should occur after the DOM has settled, such as measurements, animations, scrolling, or third-party integrations.
 
 ```ts
-afterMount(() => {
+afterAttach(() => {
   console.log('mount completed')
 })
 ```
 
 ```tsx
-<div post:mount={node => startAnimation(node)}></div>
+<div post:attach={node => startAnimation(node)}></div>
 ```
 
 ---
@@ -212,7 +212,7 @@ unmount
 This means:
 
 ```ts
-beforeMount()
+beforeAttach()
 ```
 
 runs for both:
@@ -222,7 +222,7 @@ runs for both:
 while:
 
 ```ts
-beforeInstall()
+beforeMount()
 ```
 
 runs only during the initial mount.
@@ -230,7 +230,7 @@ runs only during the initial mount.
 Similarly:
 
 ```ts
-afterUnmount()
+afterDetach()
 ```
 
 runs for both:
@@ -240,7 +240,7 @@ runs for both:
 while:
 
 ```ts
-afterUninstall()
+afterUnmount()
 ```
 
 runs only during final disposal.
@@ -252,7 +252,7 @@ runs only during final disposal.
 Lifecycle hooks may be declared imperatively within component or kit logic.
 
 ```ts
-beforeInstall(() => {
+beforeMount(() => {
   console.log('first mount')
 })
 
@@ -260,7 +260,7 @@ atRemount(() => {
   console.log('view restored')
 })
 
-afterUnmount(() => {
+afterDetach(() => {
   console.log('view removed')
 })
 ```
@@ -273,7 +273,7 @@ Lifecycle hooks may also be attached directly to elements within templates.
 
 ```tsx
 <input
-  at:install={node => {
+  at:mount={node => {
     node.indeterminate = true
   }}
 />
@@ -281,7 +281,7 @@ Lifecycle hooks may also be attached directly to elements within templates.
 
 ```tsx
 <div
-  post:mount={node => {
+  post:attach={node => {
     node.scrollIntoView()
   }}
 ></div>
@@ -307,15 +307,15 @@ Hooks are formed compositionally by combining:
 - a timing prefix that corresponds to a render-cycle phase (e.g. `before`/`at`/`after`)
 
 ```ts
-beforeInstall(...)
-atMount(...)
-afterUnmount(...)
+beforeMount(/*...*/)
+afterAttach(/*...*/)
+atDetach(/*...*/)
 ```
 
 ```tsx
-<div pre:install={...}></div>
-<div at:mount={...}></div>
-<div post:unmount={...}></div>
+<div pre:mount={/*...*/}></div>
+<div post:attach={/*...*/}></div>
+<div at:detach={/*...*/}></div>
 ```
 
 
@@ -325,39 +325,39 @@ afterUnmount(...)
 
 | Transition | Description |
 |---|---|
-| `mount` | view enters the DOM |
-| `unmount` | view leaves the DOM |
+| `attach` | view enters the DOM |
+| `detach` | view leaves the DOM |
 
 #### Primitive transitions
 
 | Transition | Description |
 |---|---|
-| `install` | initial mount |
-| `remount` | restored mount |
-| `demount` | temporary unmount |
-| `uninstall` | final unmount |
+| `mount` | initial attach |
+| `remount` | restored attach |
+| `demount` | temporary detach |
+| `unmount` | final detach |
 
 
-#### Mount and Unmount
-- Use mount hooks to run tasks at both the initial install and recurring remounts. Mount tasks receive an `initial` argument that is `true` if it is the intial mount (install) and `false` otherwise.
-- Use unmount hooks to run tasks at both recurring demounts and the final uninstall. Unmount tasks receive an `final` argument that is `true` if it is the final unmount (uninstall) and `false` otherwise.
+#### Attach and Detach
+- Use attach hooks to run tasks at both the initial mount and recurring remounts. Attach-hook tasks receive an `initial` argument that is `true` if it is the intial mount and `false` otherwise.
+- Use detach hooks to run tasks at both recurring demounts and the final unmount. Detach-hook tasks receive an `final` argument that is `true` if it is the final unmount and `false` otherwise.
 
 ```txt
-mount
-├─ install
+attach
+├─ mount
 └─ remount
 
-unmount
+detach
 ├─ demount
-└─ uninstall
+└─ unmount
 ```
 
 ```ts
-atMount(initial => {
+atAttach(initial => {
   if (initial) ...
 })
 
-atUnmount(final => {
+atDetach(final => {
   if (final) ...
 })
 
@@ -381,31 +381,31 @@ All available function hooks:
 **Umbrella hooks**
 | Phase | sync / prelude | render | tick |
 |---|---|---|---|
-| mount | `beforeMount()` | `atMount()` | `afterMount()` |
-| unmount | `beforeUnmount()` | `atUnmount()` | `afterUnmount()` |
+| attach | `beforeAttach()` | `atAttach()` | `afterAttach()` |
+| detach | `beforeDetach()` | `atDetach()` | `afterDetach()` |
 
 **Primitive hooks**
 | Phase | sync / prelude | render | tick |
 |---|---|---|---|
-| install | `beforeInstall()` | `atInstall()` | `afterInstall()` |
+| mount | `beforeMount()` | `atMount()` | `afterMount()` |
 | remount | `beforeRemount()` | `atRemount()` | `afterRemount()` |
 | demount | `beforeDemount()` | `atDemount()` | `afterDemount()` |
-| uninstall | `beforeUninstall()` | `atUninstall()` | `afterUninstall()` |
+| unmount | `beforeUnmount()` | `atUnmount()` | `afterUnmount()` |
 
 
 **Examples**
 
 ```ts
-beforeInstall(() => {
+beforeMount(() => {
   console.log('the view is created but not yet mounted')
 })
 
-atMount(() => {
-  console.log('the view is mounted but not painted')
+atAttach(() => {
+  console.log('the view is attach but not painted')
 })
 
-afterUnmount(() => {
-  console.log('the unmount has been painted')
+afterDetach(() => {
+  console.log('the detach has been painted')
 })
 ```
 
@@ -417,29 +417,29 @@ All available template hooks:
 **Umbrella hooks**
 | Phase | sync / prelude | render | tick |
 |---|---|---|---|
-| mount | `pre:mount` | `at:mount` | `post:mount` |
-| unmount | `pre:unmount` | `at:unmount` | `post:unmount` |
+| attach | `pre:attach` | `at:attach` | `post:attach` |
+| detach | `pre:detach` | `at:detach` | `post:detach` |
 
 **Primitive hooks**
 | Phase | sync / prelude | render | tick |
 |---|---|---|---|
-| install | `pre:install` | `at:install` | `post:install` |
+| mount | `pre:mount` | `at:mount` | `post:mount` |
 | remount | `pre:remount` | `at:remount` | `post:remount` |
 | demount | `pre:demount` | `at:demount` | `post:demount` |
-| uninstall | `pre:uninstall` | `at:uninstall` | `post:uninstall` |
+| unmount | `pre:unmount` | `at:unmount` | `post:unmount` |
 
-**Examples**
+### Examples
 
 Template hook tasks receive the associated DOM node.
 
 ```tsx
 <input
-  at:install={node => node.indeterminate = true}
+  at:mount={node => node.indeterminate = true}
 />
 ```
 
 ```tsx
 <div
-  post:mount={node => node.scrollIntoView()}
+  post:attach={node => node.scrollIntoView()}
 ></div>
 ```

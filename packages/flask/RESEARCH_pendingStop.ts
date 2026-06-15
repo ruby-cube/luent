@@ -14,7 +14,7 @@ watch($count, () => {
    // PendingStop listeners do not need to be bound to a flask because they will be stopped when _removeCallback is called.
    // But you might want to pause and restore it
    //
-   // in the case of flask.beforeUnmount or outerflask.beforeUnmount, is there a chance that 
+   // in the case of flask.beforeDetach or outerflask.beforeDetach, is there a chance that 
 })
 
 // if you want to preserve:
@@ -22,7 +22,7 @@ listen(document, 'click', watcher.stop, { once: true, preserve: true })
 
 watch($count, () => {
 
-}) // internally flask.beforeUnmount(), flask.onDiscard(), flask.onMount()
+}) // internally flask.beforeDetach(), flask.onDiscard(), flask.onMount()
 
 
 // CONCLUSION: 
@@ -35,7 +35,7 @@ watch($count, () => {
 
 
 // RESEARCH QUESTION 2: 
-// Should flask.beforeUnmount(), flask.onDiscard(), flask.onMount(), be normal listeners 
+// Should flask.beforeDetach(), flask.onDiscard(), flask.onMount(), be normal listeners 
 // ie 
 // - bound to encompassing flask
 // - pause and resume with flask

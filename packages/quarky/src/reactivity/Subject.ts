@@ -230,7 +230,7 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
       this.untrackAtoms()
       const output = this.trackAtoms(this.fn)
       this.forEachAtom(atom => {
-         if ('key' in atom && 'modelQuark' in atom && atom.key === 'completed') console.log('@&@ link effect', atom)
+        //  if ('key' in atom && 'modelQuark' in atom && atom.key === 'completed') console.log('@&@ link effect', atom)
          linkEffectToAtom(atom, effect)
       })
       // this.state.set(output)

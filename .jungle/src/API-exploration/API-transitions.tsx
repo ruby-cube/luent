@@ -1,7 +1,7 @@
 import { isObject } from "@rue/utils"
 import { DOMNode } from "../../../../packages/luent/src/node/VineNode"
 import { getActiveFlask } from "@rue/flask"
-import { atMount, beforeUnmount, atRender, queueTask } from "@rue/luent"
+import { atAttach, beforeDetach, atRender, queueTask } from "@rue/luent"
 
 // class-based
 type VarKit = {
@@ -189,11 +189,11 @@ function useTransitionOutByClasses(kit: TransitionOutClassKit) {
 export function setUpTransitions(node: HTMLElement, createTransitionIn: (clone: DOMNode) => ActiveTransitionIn, createTransitionOut: (clone: DOMNode) => ActiveTransitionOut) {
    const transitioning = new Set<ActiveTransitionIn>()
 
-   atMount(() => {
+   atAttach(() => {
       transitionIn(node, createTransitionIn, transitioning)
    })
 
-   beforeUnmount(() => {
+   beforeDetach(() => {
       transitionOut(node, createTransitionOut, transitioning)
    })
 }
