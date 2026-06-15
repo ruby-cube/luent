@@ -258,7 +258,7 @@ export class IfElseKit extends VineNode {
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       kit.nodes = this.nodes =
          kit.type === 'remount' ?
-            (kit.cache ?? (kit.cache = processJSXOutput(kit.awaitCache ? kit.awaitCache : kit.render(flask, kit.view))))
+            (kit.cache ?? (kit.cache = processJSXOutput(kit.awaitCache ? kit.awaitCache : kit.render(flask, kit.view)))) // TODO: remove kit.view as input?
             : processJSXOutput(kit.awaitCache ? kit.awaitCache : kit.render(flask, kit.view));
       kit.awaitCache = undefined
       emitActivated(kit, initialMount)

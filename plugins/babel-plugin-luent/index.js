@@ -153,7 +153,7 @@ function transformJSXText(node) {
 
 function transformJSXFragment(path) {
    const children = path.get('children')
-   transformJSXChildren(children)
+  //  transformJSXChildren(children)
    path.replaceWith(transformJSXChildrenToArrayExpression(children))
 }
 
@@ -505,7 +505,7 @@ function toArrowFunction(node) {
 function transformJSXSlot(path) {
    const children = path.get('children')
    if (children.length === 0) return;
-   transformJSXChildren(children)
+  //  transformJSXChildren(children)
    path.node.children = [normalizeSlotToRenderFunction(children)]
 }
 

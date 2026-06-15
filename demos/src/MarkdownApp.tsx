@@ -7,16 +7,16 @@ import './style.css'
 
 export function TestMarkdownApp() {
 
-   const $markdown = ion('# Hello World')
-   const $html = ion(() => marked($markdown()) as string)
+  const $markdown = ion('# Hello World')
+  const $html = ion(() => marked($markdown()) as string)
 
-   return component(
-      <>
-         <div class='editor'>
-            <textarea class='input' mu:value={$markdown}></textarea>
-            <div class='output' innerHTML={$html}></div>
-         </div>
-         <o-link href='/src/MarkdownApp.css' rel='stylesheet'/>
-      </>
-   )
+  return component(
+    <>
+      <div class='editor'>
+        <textarea class='input' mu:value={$markdown}></textarea>
+        <div class='output'>{{ html: $html }}</div>
+      </div>
+      <o-link href='/src/MarkdownApp.css' rel='stylesheet' />
+    </>
+  )
 }

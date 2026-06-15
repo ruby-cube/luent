@@ -891,20 +891,15 @@ declare global {
           */
          virtualkeyboardpolicyExperimental?: Luent.MaybeIon<'auto' | 'manual'>;
 
-         /**
-          * DOM Property
-          */
-         scrollTop?: Luent.MaybeIon<number | undefined>;
+        //  /**
+        //   * DOM Property
+        //   */
+        //  scrollTop?: Luent.MaybeIon<number | undefined>;
 
-         /**
-          * DOM Property
-          */
-         scrollLeft?: Luent.MaybeIon<number | undefined>;
-
-         /**
-          * DOM Property
-          */
-         innerHTML?: {trusted?: boolean, html: Luent.MaybeIon<string>} | Luent.MaybeIon<string>;
+        //  /**
+        //   * DOM Property
+        //   */
+        //  scrollLeft?: Luent.MaybeIon<number | undefined>;
       }
 
 

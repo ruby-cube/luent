@@ -1,4 +1,4 @@
-import { Ion, isGetter, atRender, watchToRender } from "@rue/quarky";
+import { Ion, isGetter, atRender, watchToRender, toValue } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
@@ -7,12 +7,13 @@ import { toAsyncRenderItem } from "./ItemList";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
 export function Thru(count: MaybeIon<number>, render: ((count: number, index: number) => RawJSXNode) | RawJSXNode) {
-   if (isGetter(count)) {
+   if (!import.meta.env.SSR && isGetter(count)) {
       return new ThruKit(count, toAsyncRenderItem(render), getFlask())
    }
    else {
       const nodes = []
-      for (let i = 0; i < count; i++) {
+      const limit = toValue(count)
+      for (let i = 0; i < limit; i++) {
          nodes.push(render(i + 1, i))
       }
       return nodes

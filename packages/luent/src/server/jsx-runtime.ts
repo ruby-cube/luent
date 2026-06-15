@@ -3,7 +3,7 @@ import { ComponentTag, InferSlot } from "../component/Component";
 import { RenderSlot } from "../component/x-Input";
 import { TagName } from "../element/makeElement";
 import { ComponentConfig, ElementConfig, makeView, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { processJSXOutput, writeComponent, writeElement } from "./renderer";
+import { writeComponent, writeElement } from "./writeHTML";
 import { Context } from "../context/Context";
 import { isFunction } from "@rue/utils";
 

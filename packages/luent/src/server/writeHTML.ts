@@ -12,6 +12,7 @@ import { ReactiveClasses, TagClass, TagStyle } from "../element/styles";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Provided, RootContext } from "../context/Context";
 import { Flask, flaskStack } from "@rue/flask";
+import { InnerHTMLKit, isInnerHTMLKit } from "../node/InnerHTML";
 
 const selfclosing = {
   "area": true,
@@ -154,27 +155,32 @@ function normalizeStyle(expression: string) {
 
 function renderSlot(Slot: RenderSlot | undefined,) {
   if (!Slot) return ''
-  return processJSXOutput(typeof Slot === 'function' ? Slot() : Slot).join(" ")
+  const output = normalizeToArray(typeof Slot === 'function' ? Slot() : Slot)
+  if (isInnerHTMLKit(output[0])) return writeInnerHTML(output[0])
+  return processJSXOutput(output).join(" ")
 }
 
-
-export function processJSXOutput(rawJSX: RawJSXNode) {
-  return _processJSXOutput(normalizeToArray(rawJSX))
+function writeInnerHTML(kit: InnerHTMLKit) {
+  if (!kit.trusted) {
+    console.warn('Untrusted HTML cannot be rendered. Sanitize if untrusted, and mark as trusted')
+  }
+  return toValue(kit.html)
 }
+
 
 /**
  * - spread arrays and components into root array
  * - get rid of undefined
  * @param jsxNodes 
  */
-function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = []) {
+function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = []) {
   for (const node of jsxNodes) {
 
     if (Array.isArray(node)) {
-      _processJSXOutput(node, flattened)
+      processJSXOutput(node, flattened)
     }
     else if (isComponentKit(node)) {
-      _processJSXOutput(node.nodes as RawJSXNode[], flattened)
+      processJSXOutput(node.nodes as RawJSXNode[], flattened)
     }
     else if (isFunction(node)) {
       if (node.length !== 0) throw new Error('render functions must have no parameters')
@@ -198,7 +204,7 @@ export function writeComponent(
   fromTag: ComponentConfig,
 ) {
   const setup = toSetup(fromTag) // TODO: SSR version of toSetup?
-  return processJSXOutput(Component($from(setup))).join(" ")
+  return processJSXOutput(normalizeToArray(Component($from(setup)))).join(" ")
 }
 
 
@@ -211,7 +217,7 @@ export function renderToString<T extends AnyObject, E extends Provided>(App: Com
     flask.emitInitialMount()
     console.log('RENDER TO STRING')
      const output = instantUpdate(() => 
-      processJSXOutput(App()).join(' ')
+      processJSXOutput(normalizeToArray(App())).join(' ')
     )
     return output
   }

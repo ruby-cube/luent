@@ -75,14 +75,14 @@ export function For<L, U>(data: L & ListData, renderOrGetUID: GetKey<ToValue<L>>
    if (!data) return;
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID);
-   if (isGetter(data) || isIonicProxy(data) && isIterable(data)) {
+   if (!import.meta.env.SSR && (isGetter(data) || isIonicProxy(data) && isIterable(data))) {
       if (uidProvided) {
          return new ListKit(toIon(data), toAsyncRenderItem(wrapWithList(_render, data)), renderOrGetUID as (item: unknown) => unknown, getFlask())
       }
       return ForIndex(data, toAsyncRenderItem(_render))
    }
    else {
-      return renderStaticList(data, _render)
+      return renderStaticList(toValue(data), _render)
    }
 }
 

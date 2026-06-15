@@ -15,6 +15,7 @@ import { setUpAttributes } from "./attributes";
 import { setUpClasses, setUpConditionalDisplay, setUpStyles } from "./styles";
 import { setUpEvents } from "./events";
 import { setUpMutables } from "./mutables";
+import { isInnerHTMLKit, setUpInnerHTML } from "../node/InnerHTML";
 
 
 export type TagName = keyof HTMLElementTagNameMap
@@ -61,6 +62,7 @@ export function makeElement(
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
          const rawOutput = normalizeToArray(Slot())
+         if (isInnerHTMLKit(rawOutput[0])) setUpInnerHTML(rawOutput[0], domNode)
          const nodes = processJSXOutput(rawOutput)
          setUpNodeVine(nodes, domNode)
          mountDOMNodes(nodes, domNode)

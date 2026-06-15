@@ -40,9 +40,6 @@ HomeTour
 
   <p class='custom-block status-notice'>This project is in early development.</p>
 
-:::luent
-HelloWorld
-:::
 
 <style scoped>
   section#code-glimpses p {

@@ -5,7 +5,7 @@ import { IfElseKit } from "./IfElse";
 import { ShowHideType, RenderConditional } from "./If";
 import { $_snap_context, ContextSnapshot, Flask, FLASK, getFlask } from "@rue/flask";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { DEFAULT, MatchKit, toCasesMap } from "./MatchCase";
+import { DEFAULT, MatchKit, renderStaticMatchCase, toCasesMap } from "./MatchCase";
 import { isFunction } from "@rue/utils";
 
 //    {Match($tab, openTabs, tab => (
@@ -42,33 +42,34 @@ type RenderCase = (view: View) => RawJSXNode;
 type View = { markDiscard: () => void }
 
 type RawAsKit = {
-   key: any;
-   case: any;
-   render: (view: View) => RawJSXNode;
-   type: ShowHideType | undefined
+  key: any;
+  case: any;
+  render: (view: View) => RawJSXNode;
+  type: ShowHideType | undefined
 }
 export function As(key: Ion<any>, renderCase: RenderConditional | RawJSXNode): RawAsKit
 export function As(key: Ion<any>, type: ShowHideType, renderCase: RenderConditional | RawJSXNode): RawAsKit
 export function As(key: Ion<any>, typeOrRender: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode): RawAsKit {
-   const type = isFunction(typeOrRender) ? undefined : typeOrRender as ShowHideType
-   const render = (isFunction(typeOrRender) ? typeOrRender : renderCase) as RenderConditional
-   return {
-      case: 'as',
-      key,
-      render,
-      type
-   }
+  const type = isFunction(typeOrRender) ? undefined : typeOrRender as ShowHideType
+  const render = (isFunction(typeOrRender) ? typeOrRender : renderCase) as RenderConditional
+  return {
+    case: 'as',
+    key,
+    render,
+    type
+  }
 }
 
 export function createAsSeries(...series: [RawAsKit, {
-   case: any;
-   render: RenderFunction;
-   type: ShowHideType;
+  case: any;
+  render: RenderFunction;
+  type: ShowHideType;
 }]) {
-   const [kit] = series
-   return new MatchKit(kit.key, toCasesMap(series, undefined), (key) => key == null ? DEFAULT : 'as')
+  const [kit] = series
+  if (import.meta.env.SSR) return renderStaticMatchCase(kit.key, toCasesMap(series, undefined), (key) => key == null ? DEFAULT : 'as')
+  return new MatchKit(kit.key, toCasesMap(series, undefined), (key) => key == null ? DEFAULT : 'as')
 }
 
-   //@ts-expect-error
-   globalThis._$$AsSeries = createAsSeries
+//@ts-expect-error
+globalThis._$$AsSeries = createAsSeries
 

@@ -19,10 +19,6 @@ export function isHTMLAttribute(key: string, tag: keyof HTMLElementTagNameMap) {
 export function setUpAttributes(node: Element | null, attributes: { [key: string]: MaybeIon<any> }, setAttribute = setAttributeInClient) {
   const flask = getFlask()
   for (const key in attributes) {
-    if (key === 'innerHTML') { // TODO: remove
-      setUpInnerHTML(attributes.innerHTML, node)
-      continue;
-    }
     if (key === 'Slot') continue; // TODO: remove
     const _key = key.startsWith('mu:') ? key.slice(3) : key;
     if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)

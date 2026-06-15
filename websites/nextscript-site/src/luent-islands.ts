@@ -1,4 +1,4 @@
-import { renderToString } from "packages/luent/src/server/renderer";
+import { renderToString } from "packages/luent/src/server/writeHTML";
 import { HelloWorld } from "./HelloWorld";
 import { writeHomeTour } from "./load-home-tour";
 

@@ -1,7 +1,7 @@
 import { component } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
-function toHtml(code: string){
+function toHtml(code: string) {
   return code
     .replace(/&/g, '&#x26;')
     .replace(/</g, '&#x3C;')
@@ -12,7 +12,7 @@ function codeHtml(code: string) {
   return `<code><pre>${toHtml(code)}</pre></code>`
 }
 
-const nsx = 
+const nsx =
   `
 import { component, css, Style } from '@rue/luent'
 import { ion } from '@rue/quarky'
@@ -35,13 +35,13 @@ export function Counter() {
   )
 }
     `
-    const $nsx = ion(codeHtml(nsx))
+const $nsx = ion(codeHtml(nsx))
 
 export function TestInnerHTML() {
   return component(
     <>
-    <h1>Hello world</h1>
-    <div innerHTML={{trusted: true, html: $nsx}}></div>
+      <h1>Hello world</h1>
+      <div>{{ trusted: true, html: $nsx }}</div>
     </>
   )
 }

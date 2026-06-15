@@ -41,7 +41,6 @@ dist-ssr
 /plugins/eslint-plugin-mu/.tmp-run/
 
 # VitePress cache
-**/.luent-islands/
-**/.vitepress/.luent-islands
+**/.vitePress/.luent-islands/
 **/.vitepress/cache
 
