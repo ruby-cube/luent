@@ -110,7 +110,7 @@ function getParams(typeOrRenderConditional: RawJSXNode | RenderConditional | Sho
 
 export function createIfSeries(kits: ConditionalKit[], viewBy?: GroupActivationType) {
    const condition = kits[0].$condition
-   if (!isGetter(condition) || isInertIon(condition)) return renderStaticConditional(kits)
+   if (!isGetter(condition) || isInertIon(condition) || import.meta.env.SSR) return renderStaticConditional(kits)
    const showHideType = viewBy ?? getGroupActivationType()
    resetGroupActivationType()
    if (showHideType === 'show') {

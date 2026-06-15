@@ -6,7 +6,7 @@ import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../n
 import { $from } from "../utils/destructure";
 import { toString } from '../node/VineNode'
 import { isComponentKit } from "@rue/nextscript";
-import { Ion, isGetter, toValue } from "@rue/quarky";
+import { instantUpdate, Ion, isGetter, toValue } from "@rue/quarky";
 import { isBooleanAttribute, setUpAttributes } from "../element/attributes";
 import { ReactiveClasses, TagClass, TagStyle } from "../element/styles";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
@@ -31,7 +31,7 @@ const selfclosing = {
 }
 
 
-export function renderElement(
+export function writeElement(
   tagName: string,
   Slot: RenderSlot | undefined,
   bindings: ElementConfig,
@@ -193,7 +193,7 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = []) {
   return flattened;
 }
 
-export function renderComponent(
+export function writeComponent(
   Component: ComponentTag,
   fromTag: ComponentConfig,
 ) {
@@ -210,8 +210,9 @@ export function renderToString<T extends AnyObject, E extends Provided>(App: Com
     flaskStack.push(flask)
     flask.emitInitialMount()
     console.log('RENDER TO STRING')
-    const output = processJSXOutput(App()).join(' ')
-    console.log('OUTPUT????', output)
+     const output = instantUpdate(() => 
+      processJSXOutput(App()).join(' ')
+    )
     return output
   }
   finally {

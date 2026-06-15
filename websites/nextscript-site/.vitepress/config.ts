@@ -9,6 +9,7 @@ export default defineConfig({
   srcDir: 'docs',
   markdown: {
     config(md) {
+      console.log('MARKDOWN CONFIG')
       md.block.ruler.before('fence', 'luent_island', (state, startLine, endLine, silent) => {
         const start = state.bMarks[startLine] + state.tShift[startLine]
         const line = state.src.slice(start, state.eMarks[startLine])
@@ -21,7 +22,7 @@ export default defineConfig({
         const name = spec.trim()
         const render = islands[name]
         const html = render ? render() : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
-        if (html instanceof Object)  console.log('HTML?', html.nodes.join(" "))
+        if (html instanceof Object) console.log('HTML???', html.nodes.join(" "))
         state.tokens.push({
           type: 'html_block',
           tag: '',
@@ -38,6 +39,18 @@ export default defineConfig({
       })
     },
     ...markdownShikiConfig
+  },
+  transformHead(ctx) {
+    console.log('TRANSFORM HEAD', ctx)
+  },
+  transformHtml(ctx) {
+    console.log('TRANSFORM HTML', ctx)
+  },
+  postRender(ctx) {
+    console.log('POST RENDER', ctx)
+  },
+  buildEnd(siteConfig) {
+    console.log('BUILD END', siteConfig)
   },
   vite: {
     resolve: {
@@ -111,12 +124,12 @@ export default defineConfig({
             { text: 'Bottomless Void', link: '/terminology' },
           ]
         }
-        
+
       ]
     },
 
     outline: {
-      level: [2,3]
+      level: [2, 3]
     },
 
     socialLinks: [

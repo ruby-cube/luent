@@ -180,7 +180,6 @@ export class TrackedAtom {
       for (let i = 1; i < phases.length; i++) {
          const phase = phases[i]
          const effects = this.effects[phase]
-         console.log('@@@trigger effects', this.entity, phase, effects)
          if (!effects) continue;
          cycle.scheduleEffects(effects, phase)
       }

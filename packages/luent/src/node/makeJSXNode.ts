@@ -165,7 +165,7 @@ type TransitionConfig = {
   'transition-out'?: any // TODO:
 }
 
-function makeView(Slot: RenderFunction, config: ViewConfig) {
+export function makeView(Slot: RenderFunction, config: ViewConfig) {
   const { provide, await: awaited, meanwhile: renderPlaceholder, catch: renderError } = config
   Slot = provide ? wrapWithContext(Slot, provide) : Slot
   // Slot = awaited || renderPlaceholder ? wrapWithAwait(Slot, config) : renderError ? wrapWithTryCatch(Slot, renderError) : Slot

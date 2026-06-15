@@ -2,31 +2,32 @@ import { AnyObject } from "@rue/types";
 import { ComponentTag, InferSlot } from "../component/Component";
 import { RenderSlot } from "../component/x-Input";
 import { TagName } from "../element/makeElement";
-import { ComponentConfig, ElementConfig, RawJSXNode } from "../node/makeJSXNode";
-import { renderComponent, renderElement } from "./renderer";
+import { ComponentConfig, ElementConfig, makeView, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
+import { processJSXOutput, writeComponent, writeElement } from "./renderer";
 import { Context } from "../context/Context";
+import { isFunction } from "@rue/utils";
 
-export const jsxDEV = jsx;
+// export const jsxDEV = jsx;
 
-export const jsxs = jsx;
+// export const jsxs = jsx;
 
-export function jsx(nodeType: TagName | ComponentTag, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
-  let Slot = config.children;
-  delete config.children
-  config.Slot = Slot ?? (Slot = config.Slot);
-  if (typeof Slot !== 'function' || undefined) throw new Error()
-  if (nodeType === Context) {
-    return Context({ Slot, provide: config.provide } as any)
-  }
-  if (nodeType === Fragment) {
-    return normalizeToArray(Slot())
-  }
-  return writeJSXNode(
-    nodeType,
-    Slot as (() => RawJSXNode[]) | undefined,
-    config
-  );
-}
+// export function jsx(nodeType: TagName | ComponentTag, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
+//   let Slot = config.children;
+//   delete config.children
+//   config.Slot = Slot ?? (Slot = config.Slot);
+//   if (typeof Slot !== 'function' || undefined) throw new Error()
+//   if (nodeType === Context) {
+//     return Context({ Slot, provide: config.provide } as any)
+//   }
+//   if (nodeType === Fragment) {
+//     return normalizeToArray(Slot())
+//   }
+//   return writeJSXNode(
+//     nodeType,
+//     Slot as (() => RawJSXNode[]) | undefined,
+//     config
+//   );
+// }
 
 
 export function writeJSXNode(
@@ -37,47 +38,43 @@ export function writeJSXNode(
 
   switch (nodeType) {
     // TODO:
-    // case 'o-link':
-    //   return Portal(config['portal-to'] ?? 'head', () =>
-    //     renderElement('link', undefined, <ElementConfig>config)
-    //   );
+    case 'o-link':
+      return Portal(config['portal-to'] ?? 'head', () =>
+        writeElement('link', undefined, <ElementConfig>config)
+      );
 
-    // case 'o--body':
-    //   return Portal('body', Slot);
+    case 'o--body':
+      return Portal('body', Slot);
 
-    // case 'o--head':
-    //   return Portal('body', Slot);
+    case 'o--head':
+      return Portal('body', Slot);
 
-    // case 'o--portal':
-    //   return Portal(config.to, Slot)
-    // // deprecated??
-    // case 'create-view':
-    //   if (!Slot) throw new Error(`Extraneous <create-view>`)
-    //   return makeView(wrapWithActivationType('create', Slot), config);
+    case 'o--portal':
+      return Portal(config.to, Slot)
 
-    // case 'show-view':
-    //   if (!Slot) throw new Error(`Extraneous <show-view>`)
-    //   return makeView(wrapWithActivationType('show', Slot), config);
-
-    // case 'remount-view':
-    //   if (!Slot) throw new Error(`Extraneous <remount-view>`)
-    //   return makeView(wrapWithActivationType('remount', Slot), config);
-
-    // case 'render-view':
-    //   if (!Slot) throw new Error(`Extraneous <render-view>`)
-    //   return makeView(Slot, config);
+    case 'remount-view':
+      if (!Slot) throw new Error(`Extraneous <remount-view>`)
+      return makeView(Slot, config);
 
     default:
       if (typeof nodeType === 'string') {
-        return renderElement(
+        return writeElement(
           nodeType,
           Slot,
           <ElementConfig>config,
         )
       }
-      return renderComponent(
+      return writeComponent(
         nodeType,
         <ComponentConfig>config,
       )
+  }
+
+  function Portal(container: string | Element, render: RenderFunction | RawJSXNode) {
+     if (!(isFunction(render))) throw new Error('Compiler failed to turn JSX into render function')
+      
+       const output = processJSXOutput(render())
+    
+       
   }
 }
