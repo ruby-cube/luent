@@ -1,11 +1,12 @@
-import { renderToString } from "packages/luent/src/server/writeHTML";
-import { HelloWorld } from "./HelloWorld";
-import { writeHomeTour } from "./load-home-tour";
-import { writeHabitTrackerDemo } from "./load-habit-tracker";
+import { CodeGlimpses } from "./CodeGlimpses";
+import { HabitTrackerDemo } from "./demos/HabitTrackerDemo";
 export { getPortals, runWithPortals } from '@rue/luent'
+import { writeRoot } from '@rue/luent'
+import { TranspilationNote } from "./TranspilationNote";
+
 
 export const islands = {
-  HelloWorld,
-  HomeTour: writeHomeTour,
-  HabitTrackerDemo: writeHabitTrackerDemo
+  CodeGlimpses: () => writeRoot(CodeGlimpses),
+  HabitTrackerDemo: () => writeRoot(HabitTrackerDemo),
+  TranspilationNote: () => writeRoot(TranspilationNote)
 }

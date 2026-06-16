@@ -210,7 +210,7 @@ export function writeComponent(
 
 
 
-export function renderToString<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, groundContext?: RootContext, setup?: T }) {
+export function writeRoot<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, groundContext?: RootContext, setup?: T }) {
   const flask = new Flask({ type: 'view' });
   try {
     flaskStack.push(flask)

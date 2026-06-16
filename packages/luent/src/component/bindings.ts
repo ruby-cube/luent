@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import { FromTag, RenderSlot } from "./x-Input"
+import { FromTag, RenderSlot, WithRef } from "./x-Input"
 import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@rue/quarky"
@@ -315,7 +315,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
 }
 
 // TODO: fix FromTag?
-export type Xray<T> = (nested: { [key: string]: (setup: FromTag<T>) => ComponentKit }) => RawJSXNode
+export type Xray<T> = (nested: { [key: string]: (setup: WithRef<'li'>) => ComponentKit }) => RawJSXNode
 
 export function getXrayBindings(xray: (nested: { [key: string]: (setup: FromTag) => ComponentKit }) => { setup: AnyObject }) {
   return xray(new Proxy({}, {

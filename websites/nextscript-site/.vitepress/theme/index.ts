@@ -12,15 +12,15 @@ import './style.css'
 //   })
 // }
 
-function mountHomeTour() {
-  console.log('mount home tour')
-  if (typeof window === 'undefined') return
-  const hasRoot = document.querySelector('[data-luent-island="HomeTour"]')
-  if (!hasRoot) return
-  import('../../src/load-home-tour').then(({ loadHomeTour }) => {
-    loadHomeTour('[data-luent-island="HomeTour"]')
-  })
-}
+// function mountHomeTour() {
+//   console.log('mount home tour')
+//   if (typeof window === 'undefined') return
+//   const hasRoot = document.querySelector('[data-luent-island="HomeTour"]')
+//   if (!hasRoot) return
+//   import('../../src/load-home-tour').then(({ loadHomeTour }) => {
+//     loadHomeTour('[data-luent-island="HomeTour"]')
+//   })
+// }
 
 // let hashRealignTimers: number[] = []
 
@@ -90,22 +90,22 @@ export default {
       }
     })
   },
-  enhanceApp({ app, router, siteData }) {
-    if (typeof window === 'undefined') return
+  // enhanceApp({ app, router, siteData }) {
+  //   if (typeof window === 'undefined') return
 
-    const mount = () => {
-      window.requestAnimationFrame(() => {
-        mountHomeTour()
-      })
-    }
+  //   const mount = () => {
+  //     window.requestAnimationFrame(() => {
+  //       mountHomeTour()
+  //     })
+  //   }
 
-    mount()
-    // realignHashScroll()
-    const previousOnAfterRouteChange = router.onAfterRouteChange
-    router.onAfterRouteChange = (to) => {
-      previousOnAfterRouteChange?.(to)
-      mount()
-      // realignHashScroll(to)
-    }
-  }
+  //   mount()
+  //   // realignHashScroll()
+  //   const previousOnAfterRouteChange = router.onAfterRouteChange
+  //   router.onAfterRouteChange = (to) => {
+  //     previousOnAfterRouteChange?.(to)
+  //     mount()
+  //     // realignHashScroll(to)
+  //   }
+  // }
 } satisfies Theme

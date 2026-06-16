@@ -76,5 +76,5 @@
     "plugins", 
     "websites/nextscript-site/.vitepress/theme/shiki-setup.ts", 
     "websites/nextscript-site/.vitepress/theme/HeroCode.vue"   
-  ]
+, "websites/nextscript-site/src/demos/HabitTracker.tsx", "websites/nextscript-site/src/demos/HabitTrackerDemo.tsx"  ]
 }
