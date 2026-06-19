@@ -1,4 +1,4 @@
-import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template } from "@rue/luent"
+import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, fromTag } from "@rue/luent"
 import { Ion, Ionic, toIon, ion } from "@rue/quarky"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
@@ -12,197 +12,200 @@ const POPOVER = ContextKey<Ionic<Popover>>()
 const POPOVER_NODE = ContextKey<NodeRef<'div'>>()
 
 function PopoverRoot(setup: {
-   ref?: NodeRef<'div'>;
-   Slot: RenderSlot;
-   popover: Ionic<Popover>
+  ref?: NodeRef<'div'>;
+  Slot: RenderSlot;
+  popover: Ionic<Popover>
 }) {
-   const {
-      ref: $popover = NodeRef('div'),
-      $classes,
-      $styles,
-      // gap = 0,
-      Slot,
-      popover,
-      ...attributes
-   } = setup
+  const {
+    ref: $popover = NodeRef('div'),
+    $classes,
+    $styles,
+    // gap = 0,
+    Slot,
+    popover,
+    ...attributes
+  } = fromTag(setup)
 
-   const { gap } = popover
+  const { gap } = popover
 
-   return component(
-      <>
-         {If((popover.visible), // TODO: configure activation type
-            <v-context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
-               <div
-                  pre:mount={node => maybeFlip(node, popover)}
-                  ref={$popover}
-                  class={(`popover ${popover.placement} ${popover.alignment}`)}
-                  style={(`--popover-anchor: ${popover.anchorName}; ${$styles()}`)}
-                  {...attributes}
-               >
-                  {Slot()}
-               </div>
-            </v-context>
-         )}
-         {Style(css`
-            .popover {
-               position: absolute;
-               position-anchor: var(--popover-anchor);
-               isolation: isolate;
-            }
-
-            .popover.center.above, .popover.center.below {
-               justify-self: anchor-center;
-            }
-
-            .popover.center.left, .popover.center.right {
-               align-self: anchor-center;
-            }
-
-            .popover.above.start, .popover.below.start {
-               left: anchor(left)
-            }
-
-            .popover.above.end, .popover.below.end {
-               right: anchor(right)
-            }
-
-            .popover.left.start, .popover.right.start {
-               top: anchor(top)
-            }
-
-            .popover.left.end, .popover.right.end {
-               bottom: anchor(bottom)
-            }
-
-            .popover.above {
-               bottom: calc(anchor(top) + ${gap}rem);
-            }
-
-            .popover.below {
-               top: calc(anchor(bottom) + ${gap}rem);
-            }
-
-            .popover.left {
-               left: unset;
-               right: calc(anchor(left) + ${gap}rem);
-            }
-
-            .popover.right {
-               left: calc(anchor(right) + ${gap}rem);
-            }
-         `)}
-      </>
-   )
+  return component(
+    <>
+      {If((popover.visible), // TODO: configure activation type
+        <v-context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
+          <div
+            before:mount={node => maybeFlip(node, popover)}
+            ref={$popover}
+            class={() => (`popover ${popover.placement} ${popover.alignment}`)}
+            style={() => (`--popover-anchor: ${popover.anchorName}; ${$styles()}`)}
+            auto-bind={attributes}
+          >
+            {Slot()}
+          </div>
+        </v-context>
+      )}
+      {Style(css`
+        .popover {
+           position: absolute;
+           position-anchor: var(--popover-anchor);
+           isolation: isolate;
+        }
+        
+        .popover.center.above, .popover.center.below {
+           justify-self: anchor-center;
+        }
+        
+        .popover.center.left, .popover.center.right {
+           align-self: anchor-center;
+        }
+        
+        .popover.above.start, .popover.below.start {
+           left: anchor(left)
+        }
+        
+        .popover.above.end, .popover.below.end {
+           right: anchor(right)
+        }
+        
+        .popover.left.start, .popover.right.start {
+           top: anchor(top)
+        }
+        
+        .popover.left.end, .popover.right.end {
+           bottom: anchor(bottom)
+        }
+        
+        .popover.above {
+           bottom: calc(anchor(top) + ${gap}rem);
+        }
+        
+        .popover.below {
+           top: calc(anchor(bottom) + ${gap}rem);
+        }
+        
+        .popover.left {
+           left: unset;
+           right: calc(anchor(left) + ${gap}rem);
+        }
+        
+        .popover.right {
+           left: calc(anchor(right) + ${gap}rem);
+        }
+      `)}
+    </>
+  )
 
 }
 
 function PopoverContent(setup: {
-   ref?: NodeRef<'div'>;
-   Slot: RenderSlot;
+  ref?: NodeRef<'div'>;
+  Slot: RenderSlot;
 }) {
-   const {
-      ref,
-      $classes,
-      $styles,
-      Slot,
-      ...attributes
-   } = setup
+  const {
+    ref,
+    $classes,
+    $styles,
+    Slot,
+    ...attributes
+  } = fromTag(setup)
 
-   // const popover = fromContext(TOOLTIP)
-   // const { gap } = popover;
+  // const popover = fromContext(TOOLTIP)
+  // const { gap } = popover;
 
-   return component(
-      <div class={$classes()} style={$styles()} {...attributes}>
-         {Slot()}
-      </div>
-   )
+  console.warn('classes?', $classes)
+  console.warn('styles?', $styles)
+
+  return component(
+    <div class={$classes?.()} style={$styles()} auto-bind={attributes}>
+      {Slot()}
+    </div>
+  )
 }
 
 
 function PopoverTail(setup: {
-   as?: ComponentTag | string;
-   offset?: Ion<number>
-   'shape:class'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
-   'shape:style'?: Ion<string>
+  as?: ComponentTag | string;
+  offset?: Ion<number>
+  'shape:class'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
+  'shape:style'?: Ion<string>
 }) {
-   const {
-      $classes,
-      $styles,
-      "$shape:class": $shapeClasses = toIon(''),
-      "$shape:style": $shapeStyles = toIon(''),
-      $offset = toIon('-30%'),
-      as: Comp = 'div',
-      ...attributes
-   } = setup
+  const {
+    $classes,
+    $styles,
+    "$shape:class": $shapeClasses = toIon(''),
+    "$shape:style": $shapeStyles = toIon(''),
+    $offset = toIon('-30%'),
+    as: Comp = 'div',
+    ...attributes
+  } = fromTag(setup)
 
-   const popover = fromContext(POPOVER)
-   const $popover = $fromContext(POPOVER_NODE)
+  const popover = fromContext(POPOVER)
+  const $popover = $fromContext(POPOVER_NODE)
 
-   return component(
-      <>
-         <div
-            at:attach={node => positionTail(node, popover, $popover)}
-            class={('tail-root ' + popover.placement + ' ' + $classes())}
-            {...attributes}
-         >
-            <Comp
-               class={(`tail ${popover.placement} ${$shapeClasses()}`)}
-               style={$shapeStyles}
-            ></Comp>
-         </div>
-         {Style(css`
-            .tail-root {
-               position: absolute;
-            }
-
-            .tail-root.above {
-               bottom: 0px;
-            }
-
-            .tail-root.below {
-               top: 0px;
-            }
-
-            .tail-root.left {
-               right: 0px;
-               // top: 50%;
-            }
-
-            .tail-root.right {
-               left: 0px;
-               // top: 50%;
-            }
-
-            .tail {
-               position: absolute;
-            }
-
-            .tail.above {
-               bottom: ${$offset()};
-            }
-
-            .tail.below {
-               top: ${$offset()};
-            }
-
-            .tail.left {
-               right: ${$offset()};
-               // top: -50%;
-            }
-
-            .tail.right {
-               left: ${$offset()};
-               // top: -50%;
-            }
+  return component(
+    <>
+      <div
+        at:attach={node => positionTail(node, popover, $popover)}
+        class={() => ('tail-root ' + popover.placement + ' ' + $classes())}
+        auto-bind={attributes}
+      >
+        <Comp
+          class={() => (`tail ${popover.placement} ${$shapeClasses()}`)}
+          style={$shapeStyles}
+        ></Comp>
+      </div>
+      {Style(css`
+        .tail-root {
+           position: absolute;
+        }
+        
+        .tail-root.above {
+           bottom: 0px;
+        }
+        
+        .tail-root.below {
+           top: 0px;
+        }
+        
+        .tail-root.left {
+           right: 0px;
+           // top: 50%;
+        }
+        
+        .tail-root.right {
+           left: 0px;
+           // top: 50%;
+        }
+        
+        .tail {
+           position: absolute;
+        }
+        
+        .tail.above {
+           bottom: ${$offset()};
+        }
+        
+        .tail.below {
+           top: ${$offset()};
+        }
+        
+        .tail.left {
+           right: ${$offset()};
+           // top: -50%;
+        }
+        
+        .tail.right {
+           left: ${$offset()};
+           // top: -50%;
+        }    
          `)}
-      </>
-   )
+    </>
+  )
 }
 
 
 
 export {
-   PopoverContent,
-   PopoverTail,
-   PopoverRoot
+  PopoverContent,
+  PopoverTail,
+  PopoverRoot
 }

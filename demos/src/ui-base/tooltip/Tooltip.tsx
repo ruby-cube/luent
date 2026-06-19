@@ -16,7 +16,7 @@ function TooltipRoot(setup: {
    const { tooltip, ...rest } = setup
 
    return component(
-      <PopoverRoot popover={tooltip} {...rest}></PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
+      <PopoverRoot popover={tooltip} auto-bind={rest}></PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
    )
 }
 
@@ -47,7 +47,7 @@ function TooltipRoot(setup: {
 //          {If((tooltip.visible), // TODO: configure activation type
 //             <Context provide={[TOOLTIP(tooltip), TOOLTIP_NODE($tooltip)]}>
 //                <div
-//                   pre:mount={node => maybeFlip(node, tooltip)}
+//                   before:mount={node => maybeFlip(node, tooltip)}
 //                   ref={$tooltip}
 //                   class={(`tooltip ${tooltip.placement} ${tooltip.alignment}`)}
 //                   style={(`--tooltip-anchor: ${tooltip.anchorName}; ${$styles()}`)}

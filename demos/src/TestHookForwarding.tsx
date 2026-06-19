@@ -5,9 +5,9 @@ export function TestHookForwarding() {
 
    return component(
       <Comp
-         pre:attach={node => console.warn('node', node)}
+         before:attach={node => console.warn('node', node)}
          xray:root={x => <x.div
-            pre:attach={node => console.warn('div node', node)}
+            before:attach={node => console.warn('div node', node)}
             on:click={e => console.log('clicked the root')} />}
       ></Comp>
    )

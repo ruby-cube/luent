@@ -24,9 +24,6 @@ export function jsx(nodeType: TagName | ComponentTag, config: { children: Render
     console.warn('Slot is not a function', Slot)
     return;
   }
-  if (nodeType === Context) {
-    return Context({ Slot, provide: config.provide } as any)
-  }
   if (nodeType === Fragment) {
     return normalizeToArray(Slot?.())
   }

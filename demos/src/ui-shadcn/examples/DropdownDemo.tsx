@@ -44,7 +44,7 @@ export function DropdownMenuDemo() {
 
    return component(
       <DropdownMenu Slot:Face={menu =>
-         <Button on:click={e => menu.open()} pre:mount={menu.anchor} variant="outline">Open</Button>
+         <Button on:click={e => menu.open()} before:mount={menu.anchor} variant="outline">Open</Button>
       }>
          const menu = MenuKit()
          

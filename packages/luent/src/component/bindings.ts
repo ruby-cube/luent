@@ -104,8 +104,8 @@ export function toSetup(bindings: RawBindings): SetupBindings {
         break;
 
       case 'at':
-      case 'pre':
-      case 'post':
+      case 'before':
+      case 'after':
         const hooks = setup[HOOKS] ?? (setup[HOOKS] = Object.create(null))
         hooks[rawKey] = bindings[rawKey]
         break;
@@ -246,8 +246,8 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
         break;
 
       case 'at':
-      case 'pre':
-      case 'post':
+      case 'before':
+      case 'after':
       case 'hooks':
         if (!bindings[rawKey]) break;
         const hooks = composed.hooks ?? (composed.hooks = Object.create(null))

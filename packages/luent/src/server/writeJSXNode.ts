@@ -6,6 +6,7 @@ import { isFunction, normalizeToArray } from "@rue/utils";
 import { writeShadowRoot } from "../component/shadow";
 import { writeToPortal } from "./portals";
 import { RenderSlot } from "../component/x-Input";
+import { Context } from "../context/Context";
 
 
 export function writeJSXNode(
@@ -15,6 +16,8 @@ export function writeJSXNode(
 ): RawJSXNode | void {
 
   switch (nodeType) {
+    case 'v-context':
+      return Context({ Slot, provide: config.provide } as any)
 
     case 'shadow-root':
       return writeShadowRoot(config)
@@ -33,7 +36,7 @@ export function writeJSXNode(
     case 'o--portal':
       console.error('writing o--portal as HTML string is not yet supported')
       return "";
-      // return writeToPortal(config.to, Slot)
+    // return writeToPortal(config.to, Slot)
 
     case 'v-preserve':
       if (!Slot) throw new Error(`Extraneous <v-preserve>`)

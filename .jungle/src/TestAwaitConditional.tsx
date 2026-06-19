@@ -23,12 +23,12 @@ export function TestAwaitConditional() {
                meanwhile={o => o.initial && 'loading...'}
             >
                {If($active,
-                  <div pre:mount={() => console.log('CREATE A')}>
+                  <div before:mount={() => console.log('CREATE A')}>
                      <Child state='awake'></Child>
                   </div>
                )}
                {Else(
-                  <div pre:mount={() => console.log('CREATE B')}>
+                  <div before:mount={() => console.log('CREATE B')}>
                      <Child state='sleeping'></Child>
                   </div>
                )}
@@ -43,12 +43,12 @@ export function TestAwaitConditional() {
                meanwhile={o => o.initial && 'loading...'}
             >
                {If($active,
-                  <div pre:mount={() => console.log('CREATE A')}>
+                  <div before:mount={() => console.log('CREATE A')}>
                      <Child state='awake'></Child>
                   </div>
                )}
                {Else(
-                  <div pre:mount={() => console.log('CREATE B')}>
+                  <div before:mount={() => console.log('CREATE B')}>
                      <Child state='sleeping'></Child>
                   </div>
                )}

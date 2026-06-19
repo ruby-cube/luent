@@ -11,21 +11,21 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
       if (!isFunction(value) && !(Array.isArray(value))) continue;
       const tasks = normalizeToArray(value)
       switch (key) {
-         case 'pre:mount':
+         case 'before:mount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                beforeMount(() => task(toValue(node)))
             }
             break;
 
-         case 'pre:attach':
+         case 'before:attach':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                beforeAttach((initial) => task(toValue(node), initial))
             }
             break;
 
-         case 'pre:remount':
+         case 'before:remount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                beforeRemount(() => task(toValue(node)))
@@ -53,42 +53,42 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
             }
             break;
 
-         case 'post:mount':
+         case 'after:mount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                afterMount(() => task(toValue(node)))
             }
             break;
 
-         case 'post:attach':
+         case 'after:attach':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                afterAttach((initial) => task(toValue(node), initial))
             }
             break;
 
-         case 'post:remount':
+         case 'after:remount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                afterRemount(() => task(toValue(node)))
             }
             break;
 
-         case 'pre:unmount':
+         case 'before:unmount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                beforeUnmount(() => task(toValue(node)))
             }
             break;
 
-         case 'pre:detach':
+         case 'before:detach':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                beforeDetach((initial) => task(toValue(node), initial))
             }
             break;
 
-         case 'pre:demount':
+         case 'before:demount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                beforeDemount(() => task(toValue(node)))
@@ -116,21 +116,21 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
             }
             break;
 
-         case 'post:unmount':
+         case 'after:unmount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                afterUnmount(() => task(toValue(node)))
             }
             break;
 
-         case 'post:detach':
+         case 'after:detach':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                afterDetach((initial) => task(toValue(node), initial))
             }
             break;
 
-         case 'post:demount':
+         case 'after:demount':
             for (const task of tasks) {
                if (!isFunction(task)) continue;
                afterDemount(() => task(toValue(node)))
@@ -146,55 +146,55 @@ export function setUpHooks(node: AnyObject, hooks: { [key: string]: LifecycleTas
 
 
 export interface LuentHooks<T> {
-   'pre:mount'?: LifecycleTask<T> | LifecycleTask<T>[] | void // allows functions to be called in the JSX expression space
-   'pre:attach'?: LifecycleTask<T> | LifecycleTask<T>[] | void
-   'pre:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'before:mount'?: LifecycleTask<T> | LifecycleTask<T>[] | void // allows functions to be called in the JSX expression space
+   'before:attach'?: LifecycleTask<T> | LifecycleTask<T>[] | void
+   'before:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
 
    'at:mount'?: LifecycleTask<T> | LifecycleTask<T>[]
    'at:attach'?: LifecycleTask<T> | LifecycleTask<T>[]
    'at:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
 
-   'post:mount'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'post:attach'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'post:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:mount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:attach'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:remount'?: LifecycleTask<T> | LifecycleTask<T>[]
 
-   'pre:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'pre:detach'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'pre:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'before:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'before:detach'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'before:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
 
    'at:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
    'at:detach'?: LifecycleTask<T> | LifecycleTask<T>[]
    'at:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
 
-   'post:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'post:detach'?: LifecycleTask<T> | LifecycleTask<T>[]
-   'post:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:unmount'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:detach'?: LifecycleTask<T> | LifecycleTask<T>[]
+   'after:demount'?: LifecycleTask<T> | LifecycleTask<T>[]
 }
 
 const flaskHooks = {
-   'pre:mount': true,
-   'pre:attach': true,
-   'pre:remount': true,
+   'before:mount': true,
+   'before:attach': true,
+   'before:remount': true,
 
    'at:mount': true,
    'at:attach': true,
    'at:remount': true,
 
-   'post:mount': true,
-   'post:attach': true,
-   'post:remount': true,
+   'after:mount': true,
+   'after:attach': true,
+   'after:remount': true,
 
-   'pre:unmount': true,
-   'pre:detach': true,
-   'pre:demount': true,
+   'before:unmount': true,
+   'before:detach': true,
+   'before:demount': true,
 
    'at:unmount': true,
    'at:detach': true,
    'at:demount': true,
 
-   'post:unmount': true,
-   'post:detach': true,
-   'post:demount': true
+   'after:unmount': true,
+   'after:detach': true,
+   'after:demount': true
 }
 
 export function isFlaskLifecycleHook(attibuteName: string) {

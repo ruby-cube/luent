@@ -5,7 +5,7 @@ import { NodeRef, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
-import { Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
+import { Context, Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ViewType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/x-Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
@@ -186,7 +186,9 @@ export function makeJSXNode(
 ): RawJSXNode | void {
 
   switch (nodeType) {
-
+    case 'v-context':
+      return Context({ Slot, provide: config.provide } as any)
+      
     case 'shadow-root':
       return createShadowRoot(config)
 

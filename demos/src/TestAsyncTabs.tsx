@@ -61,7 +61,7 @@ export function TestAsyncTabs() {
          <div class={(`tab ${$suspense() && 'pending'}`)}>
             <v-preserve>
                {As($tab, view => (
-                  <div pre:attach={() => tabViews[$tab()] = view}>
+                  <div before:attach={() => tabViews[$tab()] = view}>
                      <Tab page={tabNames[$tab()]} count={$count} />
                   </div>
                ))}

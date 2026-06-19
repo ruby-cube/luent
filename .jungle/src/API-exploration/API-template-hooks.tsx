@@ -7,6 +7,6 @@ function SomeComp() {
 
 
    return component(
-      <div pre:mount={Render(doSomething)}></div>
+      <div before:mount={Render(doSomething)}></div>
    )
 }

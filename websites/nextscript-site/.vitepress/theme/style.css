@@ -172,9 +172,8 @@
   background-size: 100% 50%;
   background-repeat: no-repeat;
   background-position: center top;
-  width: 60vw;
-  height: 15vw;
-  transform: translate(-5vw, -180px) rotate(-10deg);
+  width: 50vw;
+  transform: translate(-25vw, -180px) rotate(-5deg);
 }
 
 .VPHomeHero .image-container {
@@ -309,6 +308,11 @@ html:not(.dark) .ns-hero-code__body {
     -webkit-mask-image: none;
     mask-image: none;
     border-radius: 16px;
+  }
+
+  .VPHomeHero .image-bg {
+    width: 75vw;
+    transform: translate(-35vw, -190px) rotate(-5deg);
   }
 }
 

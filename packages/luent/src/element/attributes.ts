@@ -16,10 +16,11 @@ export function isHTMLAttribute(key: string, tag: keyof HTMLElementTagNameMap) {
 }
 
 
-export function setUpAttributes(node: Element | null, attributes: { [key: string]: MaybeIon<any> }, setAttribute = setAttributeInClient) {
+export function setUpAttributes(node: Element | null, attributes: { [key: string]: MaybeIon<any> }) {
   const flask = getFlask()
   for (const key in attributes) {
     if (key === 'Slot') continue; // TODO: remove
+    if (key === 'xray') continue; // TODO: remove
     const _key = key.startsWith('mu:') ? key.slice(3) : key;
     if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
     // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
@@ -29,7 +30,7 @@ export function setUpAttributes(node: Element | null, attributes: { [key: string
   }
 }
 
-function setAttributeInClient(node: Element | null, key: string, value: any, flask: Flask) {
+function setAttribute(node: Element | null, key: string, value: any, flask: Flask) {
   if (!node) {
     console.warn('Node is missing. Cannot setAttribute.')
     return;
@@ -43,7 +44,7 @@ function setAttributeInClient(node: Element | null, key: string, value: any, fla
     }, flask, RUN_EAGERLY)
   }
   else {
-    _setAttribute(node, key, toString(value))
+    _setAttribute(node, key, value)
   }
 }
 
@@ -56,9 +57,11 @@ function _setAttribute(node: AnyObject, attribute: string, value: any) {
     node[attribute] = _value
   }
   else if (node instanceof SVGElement || isAttributeOnly(attribute)) {
+    console.log('set attribute', attribute)
     node.setAttribute(attribute, toString(value) ?? '')
   }
   else {
+    console.log('set attribute', attribute)
     if (attribute === 'textContent') console.log('$$$ SETTING TEXTCONTENT', value)
     node[toElementProperty(attribute)] = isNumberValue(attribute) ? toNumber(value) : toString(value) ?? '';
   }

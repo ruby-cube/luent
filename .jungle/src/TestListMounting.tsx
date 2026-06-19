@@ -53,11 +53,11 @@ function Counter(input: { log?: (msg: string) => void }) {
    const { log } = input
    return component(
       <div
-         pre:detach={e => {
+         before:detach={e => {
             log?.({ msg: 'bye' + count++ })
             log?.('bye' + count++)
          }}
-         pre:attach={e => {
+         before:attach={e => {
             log?.({ msg: 'hiya' + count++ })
             // log?.('hiya' + count++)
          }}

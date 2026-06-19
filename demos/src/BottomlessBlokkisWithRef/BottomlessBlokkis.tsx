@@ -82,7 +82,7 @@ export function BottomlessBlokkis() {
             `}>
                 {As($activeBlokk,
                     <Blokk
-                        pre:attach={dropBlock()}
+                        before:attach={dropBlock()}
                         ref={$blokk}
                         shapes={shapes}
                         initialX={BOARD_COLUMNS / 2 - BLOKK_GRID / 2}

@@ -19,14 +19,14 @@ import { isFunction } from "@rue/utils";
 
 
 //    {Match($tab, tab => tab.id, (tab, view) => (
-//       <div pre:mount={tabViews.set(tab, view)}>
+//       <div before:mount={tabViews.set(tab, view)}>
 //          <Tab page={tabNames[tab]} count={$count} />
 //       </div>
 //    ))}
 
 // <Match x={$tab} view='preserve' toCase={key => 'tab'}>
 //    {Case('tab', view =>
-//       <div pre:mount={() => tabViews[$tab()] = view}>
+//       <div before:mount={() => tabViews[$tab()] = view}>
 //          <Tab page={tabNames[$tab()]} count={$count} />
 //       </div>
 //    )}

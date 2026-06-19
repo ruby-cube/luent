@@ -99,7 +99,7 @@ export function BottomlessBlokkis() {
       >
         {As($blokk,
           <Blokk
-            pre:mount={dropBlock}
+            before:mount={dropBlock}
             matrix={$blokk()!.matrix}
             shiftX={($blokk()!.shiftX)}
             shiftY={($blokk()!.shiftY)}

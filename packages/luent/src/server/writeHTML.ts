@@ -7,7 +7,7 @@ import { $from } from "../utils/destructure";
 import { toString } from '../node/VineNode'
 import { isComponentKit } from "@rue/nextscript";
 import { instantUpdate, Ion, isGetter, toValue } from "@rue/quarky";
-import { isBooleanAttribute, setUpAttributes } from "../element/attributes";
+import { isBooleanAttribute } from "../element/attributes";
 import { ReactiveClasses, TagClass, TagStyle } from "../element/styles";
 import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Provided, RootContext } from "../context/Context";
