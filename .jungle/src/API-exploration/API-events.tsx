@@ -77,7 +77,7 @@ function keydown(task: (event: KeyboardEvent, utils: { setup: SetupCleanup, abor
 
 
 //    private create = new Event('create')
-//    private remount = new Event('remount')
+//    private remount = new Event('preserve')
 //    private demount = new Event('demount')
 //    private discard = new Event('discard')
 

@@ -19,10 +19,10 @@ function DropdownMenu(setup: {
    const { dropdown, menu } = DropdownKit()
 
    return component(
-      <Context provide={DROPDOWN(dropdown)}>
+      <v-context provide={DROPDOWN(dropdown)}>
          {Slot.Face(menu)}
          {Slot()}
-      </Context>
+      </v-context>
    )
 }
 

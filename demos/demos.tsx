@@ -48,7 +48,7 @@ import { Counter } from "./src/CounterApp"
 export function runDemo() {
   createRoot(() => 
   // <HabitTracker habit="water" goal={8}></HabitTracker>
-  <BottomlessBlokkis></BottomlessBlokkis>
+  <EmojiQuest></EmojiQuest>
 )
   // createRoot(() => )
     .mount('#root')

@@ -36,7 +36,7 @@ features:
   <!-- <div id="home-tour-root"></div> -->
 
 :::luent
-CodeGlimpses
+code-glimpses
 :::
 
 <script setup>

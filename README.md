@@ -37,7 +37,7 @@ Core design features:
 Other notable features:
 - a reactive finite state machine API via `Finitron`
 - ergonomic asynchronous reactivity
-- preservation of state and DOM nodes through a `'remount'` directive or `<remount-view>` tag
+- preservation of state and DOM nodes through a `'preserve'` directive or `<v-preserve>` tag
 
 Experimental areas:
 - [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))

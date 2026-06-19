@@ -1,9 +1,9 @@
 # Habit Tracker
 
-:::luent 
-HabitTrackerDemo
+<!-- <div v-once data-island="HabitTrackerDemo"></div> -->
+:::luent
+habit-tracker-demo
 :::
-
 <script setup>
 import { onMounted } from 'vue'
 import { hydrate } from '../../src/hydrate'
@@ -11,13 +11,10 @@ import { hydrate } from '../../src/hydrate'
 onMounted(async () => {
   if (typeof window === 'undefined') return;
   const { HabitTrackerDemo } = await import('../../src/demos/HabitTrackerDemo')
-  hydrate('HabitTrackerDemo', HabitTrackerDemo)
+  // hydrate('HabitTrackerDemo', HabitTrackerDemo)
 })
 </script>
 
-:::luent 
-TranspilationNote
-:::
 
 <div style='margin-bottom: 3rem'></div>
 

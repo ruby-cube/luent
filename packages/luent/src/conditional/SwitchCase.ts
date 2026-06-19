@@ -1,7 +1,7 @@
 import {createMemoizedDerivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@rue/quarky";
 import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ConditionalKit } from "./IfElse";
-import { ShowHideType, createIfSeries, RenderConditional } from "./If";
+import { ViewType, createIfSeries, RenderConditional } from "./If";
 import { isFunction } from "@rue/utils";
 import { FromTag, RenderSlot } from "../component/x-Input";
 import { DEFAULT } from "./MatchCase";
@@ -16,13 +16,13 @@ type SwitchCaseKit = {
 type CasesKit = {
    cases: any[],
    render: (() => RawJSXNode) | undefined
-   type?: ShowHideType | undefined
+   type?: ViewType | undefined
 }
 
 type RawCaseKit = {
    case: any,
    render?: () => RawJSXNode
-   type?: ShowHideType | undefined
+   type?: ViewType | undefined
 }
 
 type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
@@ -69,7 +69,7 @@ function toCases(raw: RawCaseKit[]): CasesKit[] {
 }
 
 
-export function Case(c: any, typeOrRender?: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+export function Case(c: any, typeOrRender?: ViewType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {
@@ -81,7 +81,7 @@ export function Case(c: any, typeOrRender?: ShowHideType | RenderConditional | R
 
 
 
-export function Default(typeOrRender: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+export function Default(typeOrRender: ViewType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
    const type = isFunction(typeOrRender) ? undefined : typeOrRender
    const render = isFunction(typeOrRender) ? typeOrRender : renderCase
    return {

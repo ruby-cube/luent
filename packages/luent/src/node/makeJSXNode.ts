@@ -6,7 +6,7 @@ import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
-import { ShowHideType } from "../conditional/If";
+import { ViewType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/x-Input";
 import { Create, markActivationType, Remount } from "../conditional/IfElse";
 import { DOMNode, VineNode } from "./VineNode";
@@ -14,6 +14,7 @@ import { NodeRefsConfig } from "./NodeRefs";
 import { normalizeToArray, toError } from "@rue/utils";
 import { RenderError } from "../boundaries/Try";
 import { ComponentKit } from "@rue/nextscript";
+import { createShadowRoot } from "../component/shadow";
 
 export type TagType = ComponentTag | string
 
@@ -95,7 +96,7 @@ type NodeSetup<T extends TagName | ComponentTag> = {
 export type ComponentConfig<T extends ComponentTag = ComponentTag> =
   T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
-export type GroupActivationType = ShowHideType | 'show'
+export type GroupActivationType = ViewType | 'show'
 
 let groupActivationType: GroupActivationType | undefined = undefined
 let outerGroupActivationType: GroupActivationType | undefined = undefined
@@ -174,29 +175,23 @@ export function makeView(Slot: RenderFunction, config: ViewConfig) {
 }
 
 
-function wrapWithTryCatch(Slot: RenderFunction, renderError: RenderError) {
-  return () => {
-    try {
-      return Slot()
-    }
-    catch (error) {
-      return renderError(toError(error))
-    }
-  }
-}
+
 
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'remount-view' | 'show-view' | 'create-view' | any,
+  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'v-preserve' | 'show-view' | 'create-view' | any,
   Slot: undefined | (() => RawJSXNode[]) | InferSlot,
   config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
 
   switch (nodeType) {
 
+    case 'shadow-root':
+      return createShadowRoot(config)
+
     case 'o-link':
-      return Portal(config['portal-to'] ?? 'head', () =>
+      return Portal('head', () =>
         makeElement('link', undefined, <ElementConfig>config)
       );
 
@@ -204,26 +199,14 @@ export function makeJSXNode(
       return Portal('body', Slot);
 
     case 'o--head':
-      return Portal('body', Slot);
+      return Portal('head', Slot);
 
     case 'o--portal':
       return Portal(config.to, Slot)
-    // deprecated??
-    case 'create-view':
-      if (!Slot) throw new Error(`Extraneous <create-view>`)
-      return makeView(wrapWithActivationType('create', Slot), config);
 
-    case 'show-view':
-      if (!Slot) throw new Error(`Extraneous <show-view>`)
-      return makeView(wrapWithActivationType('show', Slot), config);
-
-    case 'remount-view':
-      if (!Slot) throw new Error(`Extraneous <remount-view>`)
-      return makeView(wrapWithActivationType('remount', Slot), config);
-
-    case 'render-view':
-      if (!Slot) throw new Error(`Extraneous <render-view>`)
-      return makeView(Slot, config);
+    case 'v-preserve':
+      if (!Slot) throw new Error(`Extraneous <v-preserve>`)
+      return makeView(wrapWithActivationType('preserve', Slot), config);
 
     default:
       if (typeof nodeType === 'string') {

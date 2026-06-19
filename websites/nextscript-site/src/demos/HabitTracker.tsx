@@ -1,11 +1,17 @@
-import { ion, component, css, If, Style, Thru, Xray, fromTag } from "@rue/luent";
+import { ion, component, css, If, Style, Thru, Xray, fromTag, createRoot } from "@rue/luent";
+
+// createRoot(() =>
+//   <HabitTracker
+//     habit="water"
+//     goal={8}
+//   />
+// ).mount('body')
 
 export function HabitTracker(setup: {
   habit: string,
   goal?: number,
-  'xray:li'?: Xray<'li'>
 }) {
-  const { xray, habit, goal = 5 } = fromTag(setup)
+  const { habit, goal = 5 } = fromTag(setup)
 
   const count = ion(0)
   const achieved = ion(() => count() === goal)
@@ -16,10 +22,7 @@ export function HabitTracker(setup: {
         {habit}
         <ul>
           {Thru(goal, n =>
-            <li
-              on:click={() => count.value = n}
-              auto-bind={xray.li}
-            >
+            <li on:click={() => count.value = n}>
               <div class={['unit', { 'filled': () => n <= count() }]}></div>
             </li>
           )}
@@ -27,12 +30,11 @@ export function HabitTracker(setup: {
         {If(achieved,
           <span
             class='star'
-            auto-bind={xray.li}
           >🌟</span>
         )}
       </div>
-
       {Style(css`
+
         .tracker {
           position: relative;
         }
@@ -78,7 +80,7 @@ export function HabitTracker(setup: {
           position: absolute;
           right: 0;
           top: 55%;
-          transform: translate(125%, -50%);
+          transform: translate(1.25rem, -0.9rem);
           pointer-events: none;
           margin: 0px;
         }

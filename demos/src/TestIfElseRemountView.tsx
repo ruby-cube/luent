@@ -1,4 +1,4 @@
-import { component, template, If, Else, ElseIf, NodeRef, createRoot, ShowHideType, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, createRoot, ViewType, Style, css } from "@rue/luent";
 import { Ion, ion, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -23,7 +23,7 @@ export function TestIfElseRemountView(setup: {}) {
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
          <hr></hr>
          <div class='container view'>
-            <remount-view>
+            <v-preserve>
                {If($active,
                   <div>
                      oh
@@ -45,7 +45,7 @@ export function TestIfElseRemountView(setup: {}) {
                      <h2>bye</h2>
                   </div>
                )}
-            </remount-view>
+            </v-preserve>
          </div>
       </div>
       {Style(css`

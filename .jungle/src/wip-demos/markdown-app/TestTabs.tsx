@@ -27,7 +27,7 @@ export function TabApp() {
          ))} */}
          {
             If($open, 'create',
-               If($active, 'remount',
+               If($active, 'preserve',
                   // <MarkdownApp></MarkdownApp>
                   <MarkdownApp mu:markdown={$markdown}></MarkdownApp>
                   // <MarkdownApp mu:markdown={ions(data).$markdown}></MarkdownApp>

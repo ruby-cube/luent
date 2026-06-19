@@ -1,11 +1,11 @@
-import { $of, component, css, Else, For, fromTag, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
+import { $of, component, css, Else, For, fromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
 import { ion, Ion, Ionic, ionic } from "@rue/quarky";
 
 
 
 export function EmojiQuest() {
   const powers = ['🍀', '🍄', '✨', '🔥', '🔮', '🪵'] as const
-  const powerset = ionic([] as typeof powers[number][], {
+  const powerset = ionic(['🍀', '🍄', '✨'], {
     addRandomPower() {
       this.push(powers[Math.floor(Math.random() * powers.length)])
     }
@@ -13,14 +13,23 @@ export function EmojiQuest() {
 
   return component(
     <>
-      <main>
-        {/* <EmojiGame></EmojiGame> */}
-      </main>
-      <aside>
-        <Panel title="Powerset">
-          <Powerset mu:powerset={powerset} limit={10}></Powerset>
-        </Panel>
-      </aside>
+      <div class='emoji-quest'>
+        <main>
+          {/* <EmojiGame></EmojiGame> */}
+        </main>
+        <aside>
+          <Panel title="Powerset">
+            <Powerset mu:powerset={powerset} limit={10}></Powerset>
+          </Panel>
+        </aside>
+      </div>
+      {Style(css`
+        .emoji-quest {
+          align-self: start;
+          font-family: 'Courier New';
+          font-weight: 700;
+        }
+      `)}
     </>
   )
 }
@@ -28,8 +37,9 @@ export function EmojiQuest() {
 function Panel(setup: {
   title: string,
   Slot: RenderSlot
+  width?: number
 }) {
-  const { title, Slot } = setup
+  const { title, Slot, width = 230 } = setup
 
   const opened = ion(true)
 
@@ -43,34 +53,35 @@ function Panel(setup: {
         </div>
         <div show-if={opened} class='panel-body'>{Slot()}</div>
       </div>
+
       {Style(css`
-            .panel {
-               width: 24vw;
-               user-select: none;
-            }
+        .panel {
+          width: ${width}px;
+          user-select: none;
+        }
 
-            .panel button {
-               border: none;
-               background-color: goldenrod;
-               border-radius: 5px;
-            }
+        .panel button {
+          border: none;
+          background-color: goldenrod;
+          border-radius: 5px;
+        }
 
-            .panel .top-bar {
-               display: flex;
-               align-items: center;
-               justify-content: space-between;
-               gap: .5rem;
-               background-color: gold;
-               padding: .25rem;
-            }
+        .panel .top-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: .5rem;
+          background-color: gold;
+          padding: .25rem .5rem;
+          color: saddlebrown;
+        }
 
-            .panel-body {
-               background-color: black;
-               border: 2px solid goldenrod;
-               border-radius: 0px 0px 1rem 1rem;
-               overflow: hidden;
-            }
-         `)}
+        .panel-body {
+          background-color: black;
+          border: 2px solid goldenrod;
+          overflow: hidden;
+        }
+      `)}
     </>
   )
 }
@@ -117,17 +128,14 @@ function Powerset(setup: {
           </>
         )}
         {Else(
-          <div class='message'>Powerset complete.</div>
+          <>
+            <div class='message'>Powerset complete.</div>
+            <button class="reset-btn" on:click={() => powerset.length = 0}>Reset</button>
+          </>
         )}
       </div>
 
       {Style(css`
-        body {
-           background-color: black;
-           font-family: 'Courier New';
-           font-weight: 700;
-        }
-
         .powerset-panel {
            box-sizing: border-box;
            width: 100%;
@@ -159,6 +167,7 @@ function Powerset(setup: {
         .power-chip {
            width: 2rem;
            height: 2rem;
+           margin-top: unset !important;
            display: grid;
            place-items: center;
            border-radius: .4rem;
@@ -188,6 +197,7 @@ function Powerset(setup: {
            background-color: #8a2be244 !important;
            cursor: pointer;
            transition: all .2s ease;
+           line-height: 1rem;
         }
 
         .add-power-button:hover:enabled {
@@ -227,6 +237,14 @@ function Powerset(setup: {
            margin: .25rem;
            background-color: #1a0e2e;
            color: #d4af37;
+        }
+
+        .reset-btn {
+          padding: .55rem;
+          margin: .25rem;
+          font-family: inherit;
+          font-weight: inherit;
+          color: saddlebrown;
         }
       `)}
     </>

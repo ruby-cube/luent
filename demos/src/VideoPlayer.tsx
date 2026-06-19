@@ -115,14 +115,14 @@ export function VideoPlayer() {
                      paused={(track.is("paused"))}
                      on:click={reClickElapsedBar}
                   />
-                  <remount-view>
+                  <v-preserve>
                      {If((track.is("playing")),
                         <button on:click={e => track.pause()}>‖</button>
                      )}
                      {Else(
                         <button on:click={e => track.play()}>►</button>
                      )}
-                  </remount-view>
+                  </v-preserve>
                   <Timer elapsed={elapsedTime} duration={duration} />
                </div>
             )}

@@ -14,7 +14,7 @@ export function trusted(html: MaybeIon<string>) {
   }
 }
 
-export async function renderCodeToHtml(code: string, lang: string) {
+export async function highlightCode(code: string, lang: string) {
   const highlighter = await highlighterPromise
   return highlighter.codeToHtml(code, {
     lang,

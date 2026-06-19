@@ -1,4 +1,4 @@
-import { component, template, If, Else, ElseIf, NodeRef, createRoot, ShowHideType, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, createRoot, ViewType, Style, css } from "@rue/luent";
 import { ion, ooo, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 

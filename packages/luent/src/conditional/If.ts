@@ -12,7 +12,7 @@ import { getTransition, setTransition } from "../transitions/Transition";
 //    currentNodePodIndex = index ?? undefined;
 // }
 
-export type ShowHideType = 'create' | 'remount'
+export type ViewType = 'create' | 'preserve'
 
 export type RenderConditional<T = undefined> = (/* v: NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>> : T> */view?: { discard(changeCondition?: () => void): void }) => RawJSXNode
 
@@ -23,12 +23,12 @@ export type RenderConditional<T = undefined> = (/* v: NonNullable<T extends Ion<
 //    return createConditionalKit('if', 'create', () => jsx, $condition)
 // }
 
-// const { showHideType, discard, render } = jsx
+// const { viewType, discard, render } = jsx
 // TODO: manage both activation type and pending
 export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, jsx: RenderConditional<T> | RawJSXNode): ConditionalKit
 export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, pending: (() => Promise<any> | null), renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
-export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, showHideType: ShowHideType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
-export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RenderConditional<T> | RawJSXNode | ShowHideType | (() => Promise<any> | null), renderConditional?: RenderConditional<T> | RawJSXNode): ConditionalKit {
+export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, viewType: ViewType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
+export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RenderConditional<T> | RawJSXNode | ViewType | (() => Promise<any> | null), renderConditional?: RenderConditional<T> | RawJSXNode): ConditionalKit {
    const [render, type, pending] = getParams(typeOrRenderConditional, renderConditional)
    return {
       statementType: 'if',
@@ -44,15 +44,15 @@ export function If<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T
 
 
 export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, jsx: RenderConditional<T> | RawJSXNode): ConditionalKit
-export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, showHideType: ShowHideType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
-export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RawJSXNode | RenderConditional<T> | ShowHideType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
+export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, viewType: ViewType, renderConditional: RenderConditional<T> | RawJSXNode): ConditionalKit
+export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($condition: T, typeOrRenderConditional: RawJSXNode | RenderConditional<T> | ViewType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
    const [render, type, pending] = getParams(typeOrRenderConditional, renderConditional)
    // if (!isActivationKit(jsx)) {
    //    if ( __DEV__) console.error('compiler failed to tranform last argument to activation kit')
    //    return createConditionalKit('elseIf', 'create', () => jsx, $condition)
    // }
 
-   // const { showHideType, discard, render } = jsx
+   // const { viewType, discard, render } = jsx
    return {
       statementType: 'elseIf',
       render,
@@ -65,15 +65,15 @@ export function ElseIf<T extends Booleanny | ((_?: any) => Booleanny)>($conditio
 
 
 export function Else(jsx: RenderConditional | RawJSXNode): ConditionalKit
-export function Else(showHideType: ShowHideType, renderConditional: RenderConditional | RawJSXNode): ConditionalKit
-export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | ShowHideType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
+export function Else(viewType: ViewType, renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | ViewType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
    const [render, type, pending] = getParams(typeOrRenderConditional, renderConditional)
    // if (!isActivationKit(jsx)) {
    //    if ( __DEV__) console.error('compiler failed to tranform last argument to activation kit')
    //    return createConditionalKit('else', 'create', () => jsx)
    // }
 
-   // const { showHideType, discard, render } = jsx
+   // const { viewType, discard, render } = jsx
    return {
       statementType: 'else',
       render,
@@ -84,16 +84,16 @@ export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | S
    }
 }
 
-function getParams(typeOrRenderConditional: RawJSXNode | RenderConditional | ShowHideType | (() => Promise<any> | null), renderConditional?: RenderConditional | RawJSXNode) {
+function getParams(typeOrRenderConditional: RawJSXNode | RenderConditional | ViewType | (() => Promise<any> | null), renderConditional?: RenderConditional | RawJSXNode) {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional!)
-   const showHideType = renderConditional ? typeof typeOrRenderConditional === "string" ? typeOrRenderConditional as ShowHideType : undefined : undefined;
+   const viewType = renderConditional ? typeof typeOrRenderConditional === "string" ? typeOrRenderConditional as ViewType : undefined : undefined;
    const pending = renderConditional ? isFunction(typeOrRenderConditional) ? typeOrRenderConditional : undefined : undefined;
-   return [_renderConditional, showHideType, pending] as const
+   return [_renderConditional, viewType, pending] as const
 }
 
 // export function createConditionalKit(
 //    statementType: "if" | "elseIf" | "else",
-//    showHideType: ShowHideType | undefined,
+//    viewType: ViewType | undefined,
 //    render: RenderConditional,
 //    $condition?: Ion<Booleanny> | Booleanny,
 //    discard?: (() => void) | undefined
@@ -102,7 +102,7 @@ function getParams(typeOrRenderConditional: RawJSXNode | RenderConditional | Sho
 //    return {
 //       statementType: statementType as 'if' | 'elseIf' | 'else',
 //       render: render as RenderFunction,
-//       type: showHideType,
+//       type: viewType,
 //       // discard,
 //       $condition
 //    }
@@ -111,15 +111,15 @@ function getParams(typeOrRenderConditional: RawJSXNode | RenderConditional | Sho
 export function createIfSeries(kits: ConditionalKit[], viewBy?: GroupActivationType) {
    const condition = kits[0].$condition
    if (!isGetter(condition) || isInertIon(condition) || import.meta.env.SSR) return renderStaticConditional(kits)
-   const showHideType = viewBy ?? getGroupActivationType()
+   const viewType = viewBy ?? getGroupActivationType()
    resetGroupActivationType()
-   if (showHideType === 'show') {
+   if (viewType === 'show') {
       return renderShowHideSeries(kits)
    }
    const transitions = getTransition()
    try {
       if (kits.at(-1)?.statementType !== 'else') kits.push(Else(() => undefined))
-      const dynamicKits = toDynamicConditionalKits(kits, showHideType, transitions)
+      const dynamicKits = toDynamicConditionalKits(kits, viewType, transitions)
       return new IfElseKit(dynamicKits, getFlask())
    }
    finally {

@@ -36,7 +36,7 @@ export function TooltipDemo() {
    
 
    return component(
-      <Context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 600 })]}>
+      <v-context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 600 })]}>
          <div data-align='center' class={demoBoxStyle}>
 
             {/* <div style='background-color: lightblue' pre:mount={tooltip.anchor.bold}>b</div> */}
@@ -59,7 +59,7 @@ export function TooltipDemo() {
             </Tooltip>
          </div>
          <button class='mt-70' on:click={e => tooltip.hide()}>hide tooltip</button>
-      </Context>
+      </v-context>
    )
 }
 

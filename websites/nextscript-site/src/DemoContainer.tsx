@@ -1,12 +1,27 @@
-import { component, css, fromTag, RenderSlot, Style } from "@rue/luent";
+import { afterMount, atAttach, atMount, callWithShadowRoot, component, createRoot, css, fromTag, NodeRef, RenderSlot, Style } from "@rue/luent";
 
-export function DemoContainer(setup: { Slot: RenderSlot }) {
-  const { Slot } = fromTag(setup)
+export function DemoContainer(setup: {
+  Slot: RenderSlot
+}) {
+  const { Slot, ...rest } = fromTag(setup)
+  const $div = NodeRef('div')
+
   return component(
     <>
-      <div class='demo-container'>
-        {Slot()}
+      <div ref={$div} class='demo-container' auto-bind={rest}>
+        {import.meta.env.SSR
+          ?
+          <style-scope>
+            <template>
+              {callWithShadowRoot(Slot)}
+            </template>
+          </style-scope>
+          : <shadow-root mode='open'>
+            {Slot()}
+          </shadow-root>
+        }
       </div>
+
       {Style(css`
         .demo-container {
           position: relative;
@@ -36,3 +51,4 @@ export function DemoContainer(setup: { Slot: RenderSlot }) {
     </>
   )
 }
+

@@ -278,7 +278,7 @@ export class Flask {
 //    node = new EventTarget()
 
 //    private create = new Event('create')
-//    private remount = new Event('remount')
+//    private remount = new Event('preserve')
 //    private demount = new Event('demount')
 //    private discard = new Event('discard')
 

@@ -1,9 +1,9 @@
-import { component, template, If, Else, ElseIf, NodeRef, createRoot, ShowHideType, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, createRoot, ViewType, Style, css } from "@rue/luent";
 import { ion, ooo, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
 
-export function TestIfElseMix(setup: { activation: [ShowHideType, ShowHideType] }) {
+export function TestIfElseMix(setup: { activation: [ViewType, ViewType] }) {
    const { activation } = setup
    const $active = ion(true, {
       toggle() {

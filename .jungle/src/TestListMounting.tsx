@@ -29,7 +29,7 @@ export function TestListMounting() {
          {If($active,
             <Counter log={log}></Counter>
          )}
-         {ElseIf((!$active()), 'remount',
+         {ElseIf((!$active()), 'preserve',
             <Counter log={log}></Counter>
          )}
          <aside style="position: fixed; width: 500px; height: 1000px; background-color: #eee">

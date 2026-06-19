@@ -6,19 +6,19 @@ import { ArticlePreview } from "./ArticlePreview"
 
 function Parent() {
 
-   component(
-      <Context provide={[
-         ArticlePreview['mu:db'](new ArticleDatabase()),
-         Shared.db(new ArticleDatabase()),
-      ]}>
-         <ArticlesView></ArticlesView>
-      </Context>
-   )
+  component(
+    <v-context provide={[
+      ArticlePreview['mu:db'](new ArticleDatabase()),
+      Shared.db(new ArticleDatabase()),
+    ]}>
+      <ArticlesView></ArticlesView>
+    </v-context>
+  )
 }
 
 const Shared = {
-   db: mergeContextKeys(
-      ArticlesView.db,
-      ArticlePreview.db
-   )
+  db: mergeContextKeys(
+    ArticlesView.db,
+    ArticlePreview.db
+  )
 }

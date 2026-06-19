@@ -1,6 +1,6 @@
 import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, watchToRender } from "@rue/quarky";
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { ShowHideType, RenderConditional } from "./If";
+import { ViewType, RenderConditional } from "./If";
 import { isFunction, noop } from "@rue/utils";
 import { fromTag, RenderSlot } from "../component/x-Input";
 // import { createCasesKit, DEFAULT, MatchKit } from "./Switch";
@@ -16,7 +16,7 @@ type CaseKey = any
 type RawCaseKit = {
   case: any,
   render?: (view: View) => RawJSXNode
-  type?: ShowHideType | undefined
+  type?: ViewType | undefined
 }
 
 export type CasesKit = {
@@ -27,7 +27,7 @@ type RawOutput = RawCaseKit | RawCaseKit[] | RawJSXNode[]
 
 export function Match(input: {
   x: Ion<any>, // TODO: change to key ... but need to make sure JSX plays well with it
-  'view'?: ShowHideType // TODO: allow 'show'?
+  'view'?: ViewType // TODO: allow 'show'?
   toCase?: (key: any) => any,
   Slot: RenderSlot
 }) {
@@ -39,9 +39,9 @@ export function Match(input: {
 }
 
 
-export function toCasesMap(raw: RawCaseKit[], groupActivationType: ShowHideType | undefined): Map<any, CasesKit> {
+export function toCasesMap(raw: RawCaseKit[], groupActivationType: ViewType | undefined): Map<any, CasesKit> {
   const superGroupActivationType = getGroupActivationType()
-  const fallbackType = groupActivationType ?? superGroupActivationType === 'show' ? 'remount' : superGroupActivationType ?? 'create'
+  const fallbackType = groupActivationType ?? superGroupActivationType === 'show' ? 'preserve' : superGroupActivationType ?? 'create'
   const map: Map<any, CasesKit> = new Map()
   const context = $_snap_context()
   const pending = getAwaiting()
@@ -70,7 +70,7 @@ export function toCasesMap(raw: RawCaseKit[], groupActivationType: ShowHideType 
 }
 
 
-export function Case(c: any, typeOrRender?: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+export function Case(c: any, typeOrRender?: ViewType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
   const type = isFunction(typeOrRender) ? undefined : typeOrRender
   const render = isFunction(typeOrRender) ? typeOrRender : renderCase
   return {
@@ -80,8 +80,8 @@ export function Case(c: any, typeOrRender?: ShowHideType | RenderConditional | R
   }
 }
 
-export function Default(typeOrRender: ShowHideType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
-  const type = (isFunction(typeOrRender) ? undefined : typeOrRender) as ShowHideType
+export function Default(typeOrRender: ViewType | RenderConditional | RawJSXNode, renderCase?: RenderConditional | RawJSXNode) {
+  const type = (isFunction(typeOrRender) ? undefined : typeOrRender) as ViewType
   const render = isFunction(typeOrRender) ? typeOrRender : renderCase as RenderConditional
   return {
     case: DEFAULT,
@@ -101,7 +101,7 @@ type View = { markDiscard: (arg: any) => void }
 
 export const DEFAULT = Symbol('default')
 
-export function createCasesKit(showHideType: ShowHideType | undefined, render: RenderCase | undefined, context: ContextSnapshot, pending: SuspenseIon | undefined): CasesKit {
+export function createCasesKit(viewType: ViewType | undefined, render: RenderCase | undefined, context: ContextSnapshot, pending: SuspenseIon | undefined): CasesKit {
 
   return {
     pending,
@@ -111,7 +111,7 @@ export function createCasesKit(showHideType: ShowHideType | undefined, render: R
       [FLASK]: undefined,
       [TRACE]: __DEV__ ? __DEV__buildAsyncPath() ?? '' : ''
     }) : undefined,
-    type: showHideType,
+    type: viewType,
     cache: undefined,
     awaitCache: undefined,
     view: {
@@ -142,7 +142,7 @@ export class MatchKit extends VineNode {
     const protoKit = this.cases.get(caseKey) ?? this.cases.get(DEFAULT)
     if (!protoKit) return;
     if (protoKit.type === 'create') return protoKit
-    if (protoKit.type === 'remount') {
+    if (protoKit.type === 'preserve') {
       const cached = this.cached ?? (this.cached = new Map())
       return cached.get(cacheKey) ?? this.createCachedKit(cacheKey, protoKit)
     }
@@ -190,7 +190,7 @@ export class MatchKit extends VineNode {
         markInitialRender(true)
         this.activateConditional(kit, (kit) => {
           kit.flask!.emitInitialMount()
-          if (kit.type == 'remount')
+          if (kit.type == 'preserve')
             kit.flask!.onDiscard(() => {
               this.cached?.delete(caseKey)
             })
@@ -227,7 +227,7 @@ export class MatchKit extends VineNode {
       else {
         this.deactivateConditional(prevKit)
         this.reactivateConditional(kit)
-        if (kit.type == 'remount')
+        if (kit.type == 'preserve')
           kit.flask!.onDiscard(() => {
             this.cached?.delete(matchKey)
           })

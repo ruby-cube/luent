@@ -31,7 +31,7 @@ function PopoverRoot(setup: {
    return component(
       <>
          {If((popover.visible), // TODO: configure activation type
-            <Context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
+            <v-context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
                <div
                   pre:mount={node => maybeFlip(node, popover)}
                   ref={$popover}
@@ -41,7 +41,7 @@ function PopoverRoot(setup: {
                >
                   {Slot()}
                </div>
-            </Context>
+            </v-context>
          )}
          {Style(css`
             .popover {

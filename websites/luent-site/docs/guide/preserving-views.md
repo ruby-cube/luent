@@ -1,25 +1,25 @@
 # Preserving Views
 By default, conditional views are recreated each time they are rendered. 
 
-In cases where state should persist when a conditional view is unmounted, a conditional series may be wrapped in a `<remount-view>` node. This preserves a view's DOM nodes as well as any state created within the render function, avoiding the need to lift state higher in the application tree. 
+In cases where state should persist when a conditional view is unmounted, a conditional series may be wrapped in a `<v-preserve>` node. This preserves a view's DOM nodes as well as any state created within the render function, avoiding the need to lift state higher in the application tree. 
 
 When the view becomes active again, Luent will remount the preserved nodes rather than recreating the view.
 
 ```jsx
-<remount-view>
+<v-preserve>
   {If($sidebarOpen,
     <Sidebar></Sidebar> // Sidebar state and DOM nodes are preserved
   )}
   {Else(
     <Icon>{sidebarIcon}</Icon> // Icon DOM nodes are preserved
   )}
-</remount-view>
+</v-preserve>
 ```
 
-Views may also be selectively preserved by passing in the mount type, 'remount'. The default mount type is 'create'.
+Views may also be selectively preserved by passing in the view type, 'preserve'. The default view type is 'create'.
 
 ```jsx
-{If($sidebarOpen, 'remount',
+{If($sidebarOpen, 'preserve',
   <Sidebar></Sidebar> // Sidebar state and DOM nodes are preserved
 )}
 {Else(
@@ -28,7 +28,7 @@ Views may also be selectively preserved by passing in the mount type, 'remount'.
 ```
 
 #### Discarding preserved views
-Views may also be preserved by creating a view ref and passing it as the mount type in place of 'remount'. Luent will populate the view ref with a view instance containing a `markDiscard` method. When `markDiscard` is called, the cache is cleared and the next time the view mounts, it will be recreated.
+Views may also be preserved by creating a view ref and passing it as the view type in place of 'preserve'. Luent will populate the view ref with a view instance containing a `markDiscard` method. When `markDiscard` is called, the cache is cleared and the next time the view mounts, it will be recreated.
 
 ```jsx
 function Foo() {

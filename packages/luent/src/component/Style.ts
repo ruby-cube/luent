@@ -3,6 +3,7 @@ import { writeToPortal } from "../server/portals";
 import { isTransitioningOut } from "../transitions/transitions";
 import { getFlask } from "@rue/flask";
 import { queueTask } from "@rue/quarky";
+import { inShadow } from "./shadow";
 // import { createHash } from "node:crypto";
 
 
@@ -21,10 +22,10 @@ function declareStyles(strings: TemplateStringsArray, ...values: any[]): string 
   return composeCSSText(strings, values)
 }
 
-function insertStyle(cssText: string, id: string) {
+function insertStyle(cssText: string, id: string, shadow: true | undefined) {
   const style = document.createElement('style');
   style.id = id;
-  document.head.appendChild(style);
+  if (!shadow) document.head.appendChild(style);
   style.textContent = cssText;
   return style;
 }
@@ -36,16 +37,41 @@ function composeCSSText(strings: TemplateStringsArray, values: string[]) {
 export const css = declareStyles
 export const style = declareStyles
 
+
+let existingStyleTags: Set<string> | undefined;
+
+export function RenderPage() {
+  const tags = new Set<string>();
+  return function renderPage(render: () => any) {
+    try {
+      existingStyleTags = tags;
+      return render()
+    }
+    finally {
+      existingStyleTags = undefined;
+    }
+  }
+}
+
 export function Style(cssText: string) {
   const id = genUID(cssText)
+  const shadow = inShadow()
   if (import.meta.env.SSR) {
+    if (existingStyleTags?.has(id)) {
+      return;
+    }
+    existingStyleTags?.add(id)
     const style = `<style id="${id}">${cssText}</style>`
+    if (shadow) return style
     writeToPortal('head', style)
     return;
   }
   const existing = document.querySelector('#' + id)
-  if (existing) return;
-  const style = insertStyle(cssText, id)
+  if (existing) {
+    console.warn('#$# existing style tag', existing)
+    return;
+  }
+  const style = insertStyle(cssText, id, shadow)
   const flask = getFlask()
   beforeUnmount(() => {
     if (isTransitioningOut(flask)) {
@@ -58,6 +84,7 @@ export function Style(cssText: string) {
     }
     style.remove(); // TODO: wait till end of transition to remove
   })
+  if (shadow) return style
 }
 
 function hash(text: string): string {

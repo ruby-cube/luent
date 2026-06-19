@@ -36,5 +36,5 @@
     ".vitepress/**/*.tsx",
     "src/**/**.tsx",
     "src/**/**.ts"
-  ]
+, "src/style-scope.js"  ]
 }

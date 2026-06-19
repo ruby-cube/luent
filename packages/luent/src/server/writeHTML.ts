@@ -48,7 +48,7 @@ function getValue(value: any) {
 function renderBindings(bindings: ElementConfig) {
   const { attributes, classes, microclasses, styles, showIf, transitions /* TODO: */ } = composeBindings(bindings)
   let renderedAttributes = ''
-
+  
   if (attributes) renderedAttributes += genAtrributes(attributes)
   if (classes) {
     const classString = genClasses(normalizeToArray(classes))
@@ -65,15 +65,19 @@ function renderBindings(bindings: ElementConfig) {
 }
 
 function genAtrributes(attributes: AnyObject) {
+  let attrs = ""
   for (const [key, value] of Object.entries(attributes)) {
+    if (key === 'ref') continue;
     const _key = key.startsWith('mu:') ? key.slice(3) : key;
     if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
     // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
-    const value = getValue(attributes[key])
-    return isBooleanAttribute(key) && value
-      ? ` ${key}`
-      : ` ${key}="${value}"`
+    const val = getValue(value)
+    if (_key === 'width') console.log('attribute!!', key, val)
+    attrs += isBooleanAttribute(_key) && val
+      ? ` ${_key}`
+      : ` ${_key}="${val}"`
   }
+  return attrs;
 }
 
 function genClasses(classes: TagClass[]) {
@@ -116,7 +120,7 @@ function genStyles(styles: TagStyle[] | undefined, showIf: Ion<Booleanny> | unde
       styleString += genStyle(entry)
     }
   if (showIf) {
-    if (!getValue(showIf)) {
+    if (!toValue(showIf)) {
       styleString += ` display: none;`
     }
   }
@@ -157,7 +161,7 @@ function renderSlot(Slot: RenderSlot | undefined,) {
   if (!Slot) return ''
   const output = normalizeToArray(typeof Slot === 'function' ? Slot() : Slot)
   if (isInnerHTMLKit(output[0])) return writeInnerHTML(output[0])
-  return processJSXOutput(output).join(" ")
+  return processJSXOutput(output).join("")
 }
 
 function writeInnerHTML(kit: InnerHTMLKit) {
@@ -173,7 +177,7 @@ function writeInnerHTML(kit: InnerHTMLKit) {
  * - get rid of undefined
  * @param jsxNodes 
  */
-function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = []) {
+export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = []) {
   for (const node of jsxNodes) {
 
     if (Array.isArray(node)) {
@@ -204,7 +208,7 @@ export function writeComponent(
   fromTag: ComponentConfig,
 ) {
   const setup = toSetup(fromTag) // TODO: SSR version of toSetup?
-  return processJSXOutput(normalizeToArray(Component($from(setup)))).join(" ")
+  return processJSXOutput(normalizeToArray(Component($from(setup)))).join("")
 }
 
 
@@ -217,7 +221,7 @@ export function writeRoot<T extends AnyObject, E extends Provided>(App: Componen
     flask.emitInitialMount()
     console.log('RENDER TO STRING')
      const output = instantUpdate(() => 
-      processJSXOutput(normalizeToArray(App())).join(' ')
+      processJSXOutput(normalizeToArray(App())).join('')
     )
     return output
   }

@@ -135,7 +135,7 @@ The view is temporarily removed from the DOM while preserving its state and DOM 
 **`uninstall`**
 The view is permanently removed and discarded.
 
-These transitions are primarily useful when working with preserved views through `<remount-view>` or remount-enabled control flow.
+These transitions are primarily useful when working with preserved views through `<v-preserve>` or remount-enabled control flow.
 
 
 ## Render-Cycle Phases

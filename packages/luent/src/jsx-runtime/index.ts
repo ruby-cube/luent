@@ -1,7 +1,7 @@
 import { TagName, makeJSXNode, RenderSlot, Context, RawJSXNode, ComponentTag } from "../index";
 import { AnyObject } from "@rue/types";
 import { isPlainObject, normalizeToArray } from "@rue/utils";
-import { writeJSXNode } from "../server/jsx-runtime";
+import { writeJSXNode } from "../server/writeJSXNode";
 
 // without custom jsx compiler
 // - nodeEntity | nodeEntity[]

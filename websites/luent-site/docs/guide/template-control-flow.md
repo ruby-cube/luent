@@ -52,7 +52,7 @@ For example:
 Some template control functions may take in optional arguments *before* the slot argument since the slot parameter is always the final parameter of a template function.
 ```tsx
 <div>
-  {If(active, 'remount',
+  {If(active, 'preserve',
     <Foo/>
   )}
 </div>
@@ -349,11 +349,11 @@ function TabContent() {
 ```
 
 #### Preserving views
-Although each case uses the same template, `As()` gives each case identity its own view. The views may be preserved by passing in the 'remount' mount type. Changing case identities remounts the active view while caching inactive views for later reuse. 
+Although each case uses the same template, `As()` gives each case identity its own view. The views may be preserved by passing in the 'preserve' attach type. Changing case identities remounts the active view while caching inactive views for later reuse. 
 
 ```tsx
 <main>
-  {As($tab, 'remount', tab =>
+  {As($tab, 'preserve', tab =>
     <div>
       <Tab page={pages[tab]} />
     </div>
@@ -366,7 +366,7 @@ Although each case uses the same template, `As()` gives each case identity its o
 See: [Preserving Views](/guide/preserving-views)
 
 #### Discarding preserved views
-To discard preserved views, pass in a views object in place of 'remount'. Luent will populate it with view objects containing a `markDiscard()` method.
+To discard preserved views, pass in a views object in place of 'preserve'. Luent will populate it with view objects containing a `markDiscard()` method.
 
 ```tsx
 function closeTab(tab: number) {

@@ -2,15 +2,32 @@ import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
 import LuentPlugin from '../../../plugins/vite-plugin-luent/index.js'
 import { markdownShikiConfig } from './theme/shiki-setup.js'
-import { islands, getPortals, runWithPortals } from './.luent-islands/server/index.js'
+import { islands, getPortals, runWithPortals, RenderPage, writeIsland } from './.luent-islands/server/index.js'
 
+function encodeStyleTags(html: string): string {
+  return html.replace(/<style(?=[\s>])[^>]*>([\s\S]*?)<\/style>/gi, (_, css: string) => {
+    // const encodedCss = Buffer.from(css, 'utf8').toString('base64')
+    return `<style-rules>${css}</style-rules>`
+  })
+}
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   srcDir: 'docs',
+
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag.includes('-') && tag !== 'await-mount',
+      }
+    }
+  },
+
   markdown: {
     config(md) {
-      console.log('MARKDOWN CONFIG')
+      const pages = new Set()
+      let withPageContext: (cb: () => any) => any;
+
       md.block.ruler.before('fence', 'luent_island', (state, startLine, endLine, silent) => {
         const start = state.bMarks[startLine] + state.tShift[startLine]
         const line = state.src.slice(start, state.eMarks[startLine])
@@ -19,8 +36,13 @@ export default defineConfig({
         if (silent) return true
 
         const page = state.env?.relativePath
-        if (!page) {
-          console.log('NO PAGE??', page)
+        if (page) {
+          if (!pages.has(page)) {
+            pages.add(page)
+            withPageContext = RenderPage()
+          }
+        }
+        else {
           return false;
         }
         console.log('PAGE??', page)
@@ -28,15 +50,20 @@ export default defineConfig({
         const next = state.bMarks[startLine + 1] + state.tShift[startLine + 1]
         const spec = state.src.slice(next, state.eMarks[startLine + 1])
         const name = spec.trim()
-        const render = islands[name]
-        const html = render ? runWithPortals(render, page) : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
+        const write = writeIsland[name]
+        const html = write
+          ? withPageContext(() => runWithPortals(write, page))
+          : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
+        const islandHtml = encodeStyleTags(typeof html === 'string' ? html : String(html ?? ''))
+        const islandTokenContent = `<await-mount><${name}></${name}><template #fallback>${islandHtml}</template></await-mount>`
 
         state.tokens.push({
           type: 'html_block',
           tag: '',
           nesting: 0,
           level: state.level,
-          content: `<div data-luent-island="${name}">${typeof html === 'string' ? html : String(html ?? '')}</div>`,
+          content: islandTokenContent,
+
           block: true,
           map: [startLine, startLine + 3],
           markup: ''
@@ -55,12 +82,9 @@ export default defineConfig({
       return code;
     }
 
-    console.log('includes head??', code.includes('</head>'));
-    
     const newCode = code
-    .replace('</head>', `${portals.head.join('\n')}\n</head>`)
-    .replace('</body>', `${portals.body.join('\n')}\n</body>`)
-    console.log('BEGINNING CODE:', newCode.slice(500, 2500));
+      .replace('</head>', `${portals.head.join('\n')}\n</head>`)
+      .replace('</body>', `${portals.body.join('\n')}\n</body>`)
     return newCode
   },
 
@@ -105,6 +129,9 @@ export default defineConfig({
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-principles' }
     ],
+    footer: {
+      message: 'Built with Vitepress + Luent',
+    },
     sidebar: {
       '/guide/': [
         {
@@ -130,8 +157,8 @@ export default defineConfig({
             {
               text: 'Habit Tracker', link: '/demos/habit-tracker',
             },
-            { text: 'Drawing Canvas', link: '/jsx-syntax' },
-            { text: 'EmojiQuest', link: '/terminology' },
+            { text: 'Drawing Canvas', link: '/demos/doodle-canvas' },
+            { text: 'EmojiQuest', link: '/demos/emoji-quest' },
             { text: 'Folder Tree', link: '/terminology' },
             { text: 'Bottomless Void', link: '/terminology' },
           ]

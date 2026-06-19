@@ -1,7 +1,7 @@
 import { Code } from '../Code'
-import { HabitTracker } from "./HabitTracker"
-import { renderCodeToHtml } from "../code-utils"
+import { highlightCode } from "../code-utils"
 import { DemoContainer } from "../DemoContainer"
+import { HabitTracker } from './HabitTracker'
 
 export function HabitTrackerDemo() {
   return (
@@ -10,14 +10,14 @@ export function HabitTrackerDemo() {
         <HabitTracker
           habit="water"
           goal={8}
-          xray:li={x => <x.li style='margin: 0px'></x.li>}
         ></HabitTracker>
       </DemoContainer>
       <Code
         trusted
         main={{ name: 'nsx', code: nsx }}
-        alt={{ name: 'output', code: transpiled, lang: 'tsx' }}
-        highlight={renderCodeToHtml}
+        alt={{ name: 'tsx', code: tsx, lang: 'tsx' }}
+        highlight={highlightCode}
+        showSticky
       />
     </>
   )
@@ -45,20 +45,22 @@ export function HabitTracker({ habit, goal = 5 }) {
       )}
     </div>
 
-    <o-link href='/src/demos/habit-tracker.css' rel='stylesheet' />
+    <o-link href='/src/habit-tracker.css' rel='stylesheet' />
   </::>
-}`
+}
+  
 
-const transpiled =
-  `import { ion, If, Thru } from "@rue/luent";
-import { JSXComponent } from "@rue/nextscript";
+`
+
+const tsx =
+  `import { ion, If, Thru, component } from "@rue/luent";
 
 export function HabitTracker({ habit, goal = 5 }) {
-  const count = assertGetter(ion(0))
-  const achieved = assertGetter(ion(() => count() === goal))
+  const count = ion(0)
+  const achieved = ion(() => count() === goal)
 
-  return JSXComponent({
-    slot: <>
+  return component(
+    <>
       <div class='tracker'>
         {habit}
         <ul>
@@ -73,7 +75,7 @@ export function HabitTracker({ habit, goal = 5 }) {
         </>)}
       </div>
 
-      <o-link href='/src/demos/habit-tracker.css' rel='stylesheet' />
+      <o-link href='/src/habit-tracker.css' rel='stylesheet' />
     </>
-  })
+  )
 }`

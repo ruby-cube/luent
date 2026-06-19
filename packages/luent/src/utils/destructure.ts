@@ -22,7 +22,7 @@ export function $from<T extends object>(target: T): $From<T> {
             const valueKey = key.slice(1)
             if (valueKey in target)
                return ªªof(target)[valueKey as keyof T]
-            return () => undefined
+            return undefined
          }
          return Reflect.get(target, key, receiver)
       },
