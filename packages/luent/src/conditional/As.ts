@@ -1,4 +1,4 @@
-import { getAwaiting, Ion, toValue, watchToRender } from "@rue/quarky";
+import { getAwaiting, Ion, toValue, trackForRender } from "@rue/quarky";
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { JSXNode, processJSXOutput, toAsyncRender, VineNode } from "../node/VineNode";
 import { IfElseKit } from "./IfElse";

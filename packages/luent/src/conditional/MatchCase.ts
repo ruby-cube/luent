@@ -1,4 +1,4 @@
-import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, watchToRender } from "@rue/quarky";
+import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, trackForRender } from "@rue/quarky";
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ViewType, RenderConditional } from "./If";
 import { isFunction, noop } from "@rue/utils";
@@ -201,7 +201,7 @@ export class MatchKit extends VineNode {
       }
     }
 
-    watchToRender($key, ({ previous, flask }) => {
+    trackForRender($key, ({ previous, flask }) => {
       const prevCase = toCase(previous)
       const caseKey = toCase($key())
       const matchKey = $key()

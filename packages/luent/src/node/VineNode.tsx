@@ -1,5 +1,5 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@rue/utils";
-import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, atRender, untracked, watch, watchToRender } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, atRender, untracked, watch, trackForRender } from "@rue/quarky";
 import { isComponentKit } from "@rue/nextscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@rue/flask";
@@ -159,7 +159,7 @@ class DynamicTextNode extends VineNode {
     if (__DEV__) __DEV__checkIfTracked()
     const textNode = this.node = createTextNode($text())
     this.nodes = [textNode]
-    watchToRender($text, ({ current, previous, flask }) => {
+    trackForRender($text, ({ current, previous, flask }) => {
       // if (current === previous) return;
       atRender(() => {
         textNode.data = toString($text());

@@ -1,4 +1,4 @@
-import { Ion, isGetter, atRender, watchToRender, toValue } from "@rue/quarky";
+import { Ion, isGetter, atRender, trackForRender, toValue } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
@@ -38,7 +38,7 @@ export class ThruKit extends VineNode {
       }
       finally {
          unmarkInitialRender()
-         watchToRender($count, ({ current, previous }) => {
+         trackForRender($count, ({ current, previous }) => {
             const kits = this.nodes as CountKit[]
             if (current > previous) {
                let preceding = kits[previous - 1] ?? this.preceding

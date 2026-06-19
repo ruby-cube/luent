@@ -104,7 +104,7 @@ import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises
 //    }
 // })
 
-// watchToRender($count, () => {
+// trackForRender($count, () => {
 //       console.log('Count is now', $count())
 // })
 
@@ -556,7 +556,7 @@ app.mount('#root')
 //     const $doubleCount = $(() => $count() * 2)
 //     let prevDoubleCount = $doubleCount;
 //     dynamicNode.mount(() => {
-//         watchToRender($doubleCount, function $stubbornHandler() {
+//         trackForRender($doubleCount, function $stubbornHandler() {
 //             console.log("tada")
 //             destroyDerivedSignal(prevDoubleCount)
 //             prevDoubleCount = null;

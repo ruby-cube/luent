@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, Ion, toValue, isGetter, watchToRender, atRender, RUN_EAGERLY } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, atRender, RUN_EAGERLY } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { DOMParent } from "./VineNode";
 import { getFlask } from "@rue/flask";
@@ -12,7 +12,7 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
   //  nodePod.appendStaticNode(textNode) //QUESTION: do we need to append innerHTML to nodePod??, we don't have to worry about siblings, so idon't think so
   const { trusted, html } = kit;
   if (isGetter(html)) {
-    watchToRender(html, () => {
+    trackForRender(html, () => {
       atRender(() => {
         setInnerHTML(html(), trusted, parentNode)
       })

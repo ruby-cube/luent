@@ -52,9 +52,9 @@ function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> &
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      class={(mergeTailwind(buttonVariants({ variant, size }), $classes?.()))}
+      class={() => (mergeTailwind(buttonVariants({ variant, size }), $classes?.()))}
       // class={[buttonVariants({ variant, size }), $classes]}
-      {...other}
+      auto-bind={other}
     >{Slot()}</Comp>
   )
 }

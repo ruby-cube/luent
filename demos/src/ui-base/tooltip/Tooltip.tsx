@@ -13,10 +13,10 @@ function TooltipRoot(setup: {
    Slot: RenderSlot;
    tooltip: IonicTooltip
 }) {
-   const { tooltip, ...rest } = setup
+   const { Slot, tooltip, ...rest } = setup
 
    return component(
-      <PopoverRoot popover={tooltip} auto-bind={rest}></PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
+      <PopoverRoot popover={tooltip} auto-bind={rest}>{Slot()}</PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
    )
 }
 

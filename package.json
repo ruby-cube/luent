@@ -18,7 +18,7 @@
     "i:utils": "pnpm -r --filter @rue/utils install",
     "i:jungle": "pnpm -r --filter './.jungle/**' install",
     "i:e2e": "pnpm -r --filter @rue/e2e install",
-    "test-demos": "pnpm exec playwright test --config=e2e/playwright.config.ts --project=chromium",
+    "test:demos": "pnpm exec playwright test --config=e2e/playwright.config.ts --project=chromium",
     "dev": "pnpm -F @rue/jungle dev",
     "dev-movies": "pnpm -F @rue/movies-app dev",
     "dev:demos": "pnpm -F @rue/demos dev",

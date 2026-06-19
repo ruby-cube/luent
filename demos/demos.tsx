@@ -1,4 +1,4 @@
-import { createRoot } from "@rue/luent"
+import { createRoot, MICROCLASS_MERGE, provideRoot } from "@rue/luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
@@ -44,13 +44,17 @@ import { HabitTracker } from "./src/HabitTracker"
 import { BulletJournal } from "./src/SimpleTodo"
 import { TestInnerHTML } from "./src/TestInnerHTML"
 import { Counter } from "./src/CounterApp"
+import { TestStylesBindings } from "./src/TestStylesBindings"
+import { twMerge } from "tailwind-merge"
 
 export function runDemo() {
-  createRoot(() => 
-  // <HabitTracker habit="water" goal={8}></HabitTracker>
-  <TooltipDemo></TooltipDemo>
-)
-  // createRoot(() => )
+  createRoot(() => {
+    console.log('twMerge', twMerge)
+    provideRoot(MICROCLASS_MERGE, twMerge);
+    // <HabitTracker habit="water" goal={8}></HabitTracker>
+    return <TestStylesBindings />
+  })
+    // createRoot(() => )
     .mount('#root')
 }
 

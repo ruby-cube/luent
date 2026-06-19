@@ -239,7 +239,7 @@ export function InertWatcher() {
  * @param eager 
  * @returns 
  */
-export function watchToRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getActiveFlask(), eager: boolean = false) {
+export function trackForRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getActiveFlask(), eager: boolean = false) {
   // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
   // return;
   const subject = new IonSubject(() => toValue(ion())) // toValue in case of mutable ion getter

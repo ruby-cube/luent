@@ -1,6 +1,5 @@
 import { component, fromTag, If, NodeRef, RenderSlot, template } from "@rue/luent"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
-import { mergeTailwind } from "../utils/utils"
 import { IonicTooltip } from "../ui-base/tooltip/Tooltip.kit";
 import { Alignment, Placement } from "../ui-base/popover/Popover.kit";
 
@@ -27,14 +26,13 @@ function Tooltip(setup: {
 }) {
   const {
     ref,
-    $classes,
     tooltip,
     tail = true,
     Slot,
     place,
     align,
     gap,
-    ...props
+    ...bindings
   } = fromTag(setup)
 
   tooltip.configure({ placement: place, alignment: align, gap })
@@ -48,17 +46,14 @@ function Tooltip(setup: {
   return component(
     <o--body>
       <TooltipRoot
-        animate-in={(animateIn + ' ' + slideIn())}
+        animate-in={() => animateIn + ' ' + slideIn()}
         animate-out={animateOut}
         // transit-key='tooltip'
         // animate-item
         tooltip={tooltip}>
         <TooltipContent
-          class={(mergeTailwind(
-            `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`,
-            $classes()
-          ))}
-          {...props}
+          microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
+          auto-bind={bindings}
         >
           {Slot()}
         </TooltipContent>

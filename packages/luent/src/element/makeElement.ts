@@ -12,7 +12,7 @@ import { setUpTransitions } from "../transitions/transitions";
 import { getTransition, setTransition } from "../transitions/Transition";
 import { composeBindings, composeRef } from "../component/bindings";
 import { setUpAttributes } from "./attributes";
-import { setUpClasses, setUpConditionalDisplay, setUpStyles } from "./styles";
+import { setUpClasses, setUpConditionalDisplay, setUpMicroclasses, setUpStyles } from "./styles";
 import { setUpEvents } from "./events";
 import { setUpMutables } from "./mutables";
 import { isInnerHTMLKit, setUpInnerHTML } from "../node/InnerHTML";
@@ -22,55 +22,57 @@ export type TagName = keyof HTMLElementTagNameMap
 
 
 export function makeElement(
-   tagName: string,
-   Slot: RenderSlot | undefined,
-   bindings: ElementConfig,
+  tagName: string,
+  Slot: RenderSlot | undefined,
+  bindings: ElementConfig,
 ): DOMNode {
-   console.log('@@@before compose bindings', bindings)
-   const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
-   console.log('showIf', showIf)
-   let newXML_NS: string | undefined;
-   const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
+  console.log('@@@before compose bindings', bindings)
+  const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
+  console.log('showIf', showIf)
+  let newXML_NS: string | undefined;
+  const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 
-   const domNode = isHydrating() ? getElement()
-      : XML_NS ? createNSElement(tagName, XML_NS)
-         : document.createElement(tagName)
+  const domNode = isHydrating() ? getElement()
+    : XML_NS ? createNSElement(tagName, XML_NS)
+      : document.createElement(tagName)
 
-   const ref = composeRef(bindings) // throw if ref already used
-   if (ref) {
-      if (Array.isArray(ref)) {
-         setUpNodeRefs(domNode, ref[0], normalizeToArray(ref[1]))
-      }
-      else {
-         if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs as ref")
-         initializeRef(ref, domNode)
-      }
-   }
+  const ref = composeRef(bindings) // throw if ref already used
+  if (ref) {
+    if (Array.isArray(ref)) {
+      setUpNodeRefs(domNode, ref[0], normalizeToArray(ref[1]))
+    }
+    else {
+      if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs as ref")
+      initializeRef(ref, domNode)
+    }
+  }
 
-   // if (microclasses) setUpMicroclasses(domNode, microclasses)
-   if (classes) setUpClasses(domNode, classes)
-   if (styles) setUpStyles(domNode, styles)
-   if (showIf) setUpConditionalDisplay(domNode, showIf)
-   if (events) setUpEvents(domNode, events);
-   if (hooks) setUpHooks(domNode, hooks)
-   if (mutables) setUpMutables(domNode, mutables) // FIX:
-   if (attributes) setUpAttributes(domNode, attributes);
-   const transitionConfig = getTransition()
-   if (transitions) setUpTransitions(domNode as HTMLElement, transitions, transitionConfig) // TODO: transition-in etc
+  if (microclasses) setUpMicroclasses(domNode, microclasses)
+  if (classes) setUpClasses(domNode, classes)
+  if (styles) setUpStyles(domNode, styles)
+  if (showIf) setUpConditionalDisplay(domNode, showIf)
+  if (events) setUpEvents(domNode, events);
+  if (hooks) setUpHooks(domNode, hooks)
+  if (mutables) setUpMutables(domNode, mutables) // FIX:
+  if (attributes) setUpAttributes(domNode, attributes);
+  const transitionConfig = getTransition()
+  if (transitions) setUpTransitions(domNode as HTMLElement, transitions, transitionConfig) // TODO: transition-in etc
 
-   if (Slot) {
-      const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
-      runWithXMLNamespace(() => {
-         const rawOutput = normalizeToArray(Slot())
-         if (isInnerHTMLKit(rawOutput[0])) setUpInnerHTML(rawOutput[0], domNode)
-         const nodes = processJSXOutput(rawOutput)
-         setUpNodeVine(nodes, domNode)
-         mountDOMNodes(nodes, domNode)
-      }, xml_ns)
-   }
-   setTransition(transitionConfig) // makes transition config available to siblings
-   return domNode;
+  if (Slot) {
+    const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
+    runWithXMLNamespace(() => {
+      const rawOutput = normalizeToArray(Slot())
+      if (isInnerHTMLKit(rawOutput[0])) setUpInnerHTML(rawOutput[0], domNode)
+      const nodes = processJSXOutput(rawOutput)
+      setUpNodeVine(nodes, domNode)
+      mountDOMNodes(nodes, domNode)
+    }, xml_ns)
+  }
+  setTransition(transitionConfig) // makes transition config available to siblings
+  return domNode;
 }
+
+
 
 // function renderSlots(slots: RenderSlot[]) {
 //    const nodes: RawJSXNode[] = []
@@ -83,23 +85,23 @@ export function makeElement(
 
 
 const transitionAttributes = {
-   'transition-item': true,
-   'animate-item': true,
-   'transit-class': true,
-   'transit-key': true,
-   'transit-port': true,
-   'animate-load': true,
-   'animate-in': true,
-   'animate-out': true,
-   'transition-in-from': true,
-   'transition-in': true,
-   'transition-out-to': true,
-   'transition-out': true, // ?? TODO:
-   'cancel-transition': true, // ??? TODO:
+  'transition-item': true,
+  'animate-item': true,
+  'transit-class': true,
+  'transit-key': true,
+  'transit-port': true,
+  'animate-load': true,
+  'animate-in': true,
+  'animate-out': true,
+  'transition-in-from': true,
+  'transition-in': true,
+  'transition-out-to': true,
+  'transition-out': true, // ?? TODO:
+  'cancel-transition': true, // ??? TODO:
 }
 
 function isTransition(key: string) {
-   return key in transitionAttributes
+  return key in transitionAttributes
 }
 
 // function isNamedSlot(key: string) {

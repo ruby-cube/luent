@@ -1,4 +1,4 @@
-import { createMemoizedDerivation, Ion, PRELUDE, atRender, SYNC, toRaw, toValue, watch, watchToRender } from "@rue/quarky";
+import { createMemoizedDerivation, Ion, PRELUDE, atRender, SYNC, toRaw, toValue, watch, trackForRender } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";

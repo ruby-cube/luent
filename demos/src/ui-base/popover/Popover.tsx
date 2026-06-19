@@ -13,7 +13,6 @@ const POPOVER_NODE = ContextKey<NodeRef<'div'>>()
 
 function PopoverRoot(setup: {
   ref?: NodeRef<'div'>;
-  Slot: RenderSlot;
   popover: Ionic<Popover>
 }) {
   const {
@@ -27,16 +26,16 @@ function PopoverRoot(setup: {
   } = fromTag(setup)
 
   const { gap } = popover
-
+  console.warn('Slot', Slot)
   return component(
     <>
-      {If((popover.visible), // TODO: configure activation type
+      {If(() => popover.visible, // TODO: configure activation type
         <v-context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
           <div
             before:mount={node => maybeFlip(node, popover)}
             ref={$popover}
             class={() => (`popover ${popover.placement} ${popover.alignment}`)}
-            style={() => (`--popover-anchor: ${popover.anchorName}; ${$styles()}`)}
+            style={() => (`--popover-anchor: ${popover.anchorName}; ${$styles?.() ?? ''}`)}
             auto-bind={attributes}
           >
             {Slot()}
@@ -115,7 +114,7 @@ function PopoverContent(setup: {
   console.warn('styles?', $styles)
 
   return component(
-    <div class={$classes?.()} style={$styles()} auto-bind={attributes}>
+    <div class={$classes?.()} style={$styles?.()} auto-bind={attributes}>
       {Slot()}
     </div>
   )
@@ -131,8 +130,9 @@ function PopoverTail(setup: {
   const {
     $classes,
     $styles,
-    "$shape:class": $shapeClasses = toIon(''),
-    "$shape:style": $shapeStyles = toIon(''),
+    shape,
+    // "$shape:class": $shapeClasses = toIon(''),
+    // "$shape:style": $shapeStyles = toIon(''),
     $offset = toIon('-30%'),
     as: Comp = 'div',
     ...attributes
@@ -145,12 +145,12 @@ function PopoverTail(setup: {
     <>
       <div
         at:attach={node => positionTail(node, popover, $popover)}
-        class={() => ('tail-root ' + popover.placement + ' ' + $classes())}
+        class={() => ('tail-root ' + popover.placement + ' ' + $classes?.())}
         auto-bind={attributes}
       >
         <Comp
-          class={() => (`tail ${popover.placement} ${$shapeClasses()}`)}
-          style={$shapeStyles}
+          class={() => (`tail ${popover.placement} ${shape.class ?? ''}`)}
+          style={shape.style ?? ''}
         ></Comp>
       </div>
       {Style(css`

@@ -1,5 +1,5 @@
 import { Flask, getFlask } from "@rue/flask";
-import { instantUpdate, isGetter, atRender, RUN_EAGERLY, swiftUpdate, toValue, watchToRender } from "@rue/quarky";
+import { instantUpdate, isGetter, atRender, RUN_EAGERLY, swiftUpdate, toValue, trackForRender } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { setUpInnerHTML } from "../node/InnerHTML";
 import { isHydrating } from "../hydration/hydration";
@@ -36,7 +36,7 @@ function setAttribute(node: Element | null, key: string, value: any, flask: Flas
     return;
   }
   if (isGetter(value)) {
-    watchToRender(value, ({ current, previous }) => {
+    trackForRender(value, ({ current, previous }) => {
       // if (current === previous) return;
       atRender(() => {
         _setAttribute(node, key, toValue(value())) // normalize to value for mu getters

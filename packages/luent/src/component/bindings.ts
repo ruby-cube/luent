@@ -19,12 +19,9 @@ type RawBindings = {
 } & { [key: string]: any }
 
 type SetupBindings = {
-  microclasses?: Function,
-  classes?: Function,
-  styles?: Function,
   on?: EventBindings,
   at?: EventBindings,
-  mu?: { [key: string]: MutableIon<unknown> | undefined },
+  mu?: { [key: string]: MutableIon<unknown> | undefined }, // TODO: mu checker
   Slot?: RenderSlot, // FiniteBindings
   ref?: NodeRef | NodeRefsConfig,
   'auto-bind'?: SetupBindings | undefined
@@ -45,29 +42,6 @@ type ComposedBindings = {
 }
 
 type EventBindings = { [key: string]: EventListener[] }
-
-// function FiniteBindings<T extends { Slot: RenderSlot | undefined }>(target: T, rest = false) {
-//    const keys = new Set<string | symbol>(Object.keys(target))
-//    if (rest) keys.add('rest')
-//    return new Proxy(target, {
-//       get(target, key) {
-//          if (key === 'on' || key === 'mu')
-//             return target[key as keyof T]
-//          if (key === 'NamedSlot')
-//             return target.Slot
-//          keys.delete(key)
-//          return target[key as keyof T]
-//       },
-
-//       set() {
-//          return false;
-//       },
-
-//       ownKeys(target) {
-//          return Array.from(keys)
-//       },
-//    })
-// }
 
 const MU = Symbol('mu')
 const ON = Symbol('on')
@@ -120,7 +94,7 @@ export function toSetup(bindings: RawBindings): SetupBindings {
         break;
 
       case 'xlmns': // TODO: other namespaces?
-      case undefined:
+      case undefined: // normal attributes/bindings
         setup[key] = bindings[rawKey]
         break;
 
@@ -276,7 +250,6 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
 
       case 'microclass':
         const microclasses = composed.microclasses ?? (composed.microclasses = []) 
-        // TODO: use twMerge
         microclasses.push(bindings.microclass)
         break;
 

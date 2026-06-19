@@ -1875,7 +1875,7 @@ type LuentAttributes<F, P> =
   //  P extends { '~attributes'?: infer A }
   //  ? A & Luent.LuentHooks<Luent.ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<Luent.ComponentRef<F>>// Component Attributes
   //  : P // Element attributes must be added to DetailedHTMLProps
-  Luent.TagAttributes<P> & Luent.LuentHooks<Luent.ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<Luent.ComponentRef<F>>
+  GlobalAttributes & Luent.TagAttributes<P> & Luent.LuentHooks<Luent.ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<Luent.ComponentRef<F>>
 
 type LuentComponentAttributes<C> = {
   ref?: () => Luent.ComponentRef<C> | undefined

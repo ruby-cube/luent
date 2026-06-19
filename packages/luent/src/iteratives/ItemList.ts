@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import {createAtomicIon, Ion, MaybeIonized, MutableIon, atRender, watchToRender } from "@rue/quarky";
+import {createAtomicIon, Ion, MaybeIonized, MutableIon, atRender, trackForRender } from "@rue/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { RawJSXNode } from "../node/makeJSXNode";
@@ -39,7 +39,7 @@ export class ListKit extends VineNode {
       }
       finally {
          unmarkInitialRender()
-         watchToRender($list, ({ current: newList }) => {
+         trackForRender($list, ({ current: newList }) => {
             this.nodes = this.rerender(newList, renderItem)
          })
       }
@@ -256,7 +256,7 @@ export class ListItemKit extends VineNode {
 //    return {
 
 //       setUp() {
-//          watchToRender(){
+//          trackForRender(){
 
 //          }
 //       },
