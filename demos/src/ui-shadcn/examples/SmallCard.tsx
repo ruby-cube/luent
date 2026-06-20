@@ -11,7 +11,7 @@ import { Button } from "../Button"
 
 export function SmallCard() {
    return component(
-      <Card size="sm" class="mx-auto w-full max-w-sm">
+      <Card size="sm" microclass="mx-auto w-full max-w-sm">
          <CardHeader>
             <CardTitle>Small Card</CardTitle>
             <CardDescription>

@@ -37,7 +37,6 @@ function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> &
   as?: ComponentTag | string
 }) {
   const {
-    $classes,
     ref,
     variant = "default",
     size = "default",
@@ -52,8 +51,7 @@ function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> &
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      class={() => (mergeTailwind(buttonVariants({ variant, size }), $classes?.()))}
-      // class={[buttonVariants({ variant, size }), $classes]}
+      microclass={buttonVariants({ variant, size })}
       auto-bind={other}
     >{Slot()}</Comp>
   )

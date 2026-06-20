@@ -80,7 +80,7 @@ export function FBApp() {
          <button on:click={toggleChatPopup}>(Z)</button>
          <div style='border-radius: 50%; width: 25px; height: 25px; background-color: red; color: white; text-align: center'>{$unseenCount}</div>
          <div style='display: flex; flex-direction: horizontal'>
-            <Context provide={[
+            <o:context provide={[
                UNSEEN_COUNT($unseenCount.with_only('increment')),
                MESSAGES(messages),
                TOGGLE_CHAT_VIEW(toggleChatView)
@@ -95,7 +95,7 @@ export function FBApp() {
                      <ChatPopup></ChatPopup>
                   )}
                </div>
-            </Context>
+            </o:context>
          </div>
          <input
             mu:value={$newMessage}

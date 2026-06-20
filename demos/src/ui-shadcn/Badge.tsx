@@ -1,4 +1,4 @@
-import { component, FromTag, TagName, TagType, template } from "@rue/luent"
+import { component, FromTag, TagName, TagType, template, WithRef } from "@rue/luent"
 import { type VariantProps } from "class-variance-authority"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 
@@ -26,15 +26,14 @@ type BadgeInput = VariantProps<typeof badgeVariants> & {
 }
 
 function Badge({
-   $classes,
    variant = "default",
    as: Comp = 'span', // replaces useRender; TODO: does it cover use case below?
    ...attributes
-}: FromTag<'span', BadgeInput>) {
+}: WithRef<'span'> & BadgeInput) {
 
    return component(
       <Comp
-         class={(mergeTailwind(badgeVariants({ variant }), $classes()))}
+         microclass={badgeVariants({ variant })}
          {...attributes}
       ></Comp>
    )

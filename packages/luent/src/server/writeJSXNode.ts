@@ -10,13 +10,13 @@ import { Context } from "../context/Context";
 
 
 export function writeJSXNode(
-  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'v-preserve' | 'shadow-root' | any,
+  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'o:preserve' | 'shadow-root' | any,
   Slot: undefined | (() => RawJSXNode[]) | InferSlot,
   config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
 
   switch (nodeType) {
-    case 'v-context':
+    case 'o:context':
       return Context({ Slot, provide: config.provide } as any)
 
     case 'shadow-root':
@@ -38,8 +38,8 @@ export function writeJSXNode(
       return "";
     // return writeToPortal(config.to, Slot)
 
-    case 'v-preserve':
-      if (!Slot) throw new Error(`Extraneous <v-preserve>`)
+    case 'o:preserve':
+      if (!Slot) throw new Error(`Extraneous <o:preserve>`)
       return makeView(Slot, config);
 
     default:

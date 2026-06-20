@@ -59,7 +59,7 @@ export function TestAsyncTabs() {
 
       {Await($suspense =>
          <div class={(`tab ${$suspense() && 'pending'}`)}>
-            <v-preserve>
+            <o:preserve>
                {As($tab, view => (
                   <div before:attach={() => tabViews[$tab()] = view}>
                      <Tab page={tabNames[$tab()]} count={$count} />
@@ -68,7 +68,7 @@ export function TestAsyncTabs() {
                {Default(
                   <div>No tabs open</div>
                )}
-            </v-preserve>
+            </o:preserve>
          </div>
       )}
       {Meanwhile(o => o.initial &&

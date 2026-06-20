@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { component, Context, createRoot, NodeRef, template } from "@rue/luent"
 import { Button } from "../Button"
 import { Tooltip } from "../Tooltip"
@@ -35,7 +36,7 @@ export function TooltipDemo() {
 
 
   return component(
-    <v-context provide={[TOOLTIP_CONFIG({ delay: 600, hideDelay: 600 })]}>
+    <o:context provide={[TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })]}>
       <div data-align='center' class={demoBoxStyle}>
 
         {/* <div style='background-color: lightblue' before:mount={tooltip.anchor.bold}>b</div> */}
@@ -58,7 +59,7 @@ export function TooltipDemo() {
         </Tooltip>
       </div>
       <button class='mt-70' on:click={e => tooltip.hide()}>hide tooltip</button>
-    </v-context>
+    </o:context>
   )
 }
 

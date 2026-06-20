@@ -17,8 +17,6 @@ function PopoverRoot(setup: {
 }) {
   const {
     ref: $popover = NodeRef('div'),
-    $classes,
-    $styles,
     // gap = 0,
     Slot,
     popover,
@@ -26,21 +24,20 @@ function PopoverRoot(setup: {
   } = fromTag(setup)
 
   const { gap } = popover
-  console.warn('Slot', Slot)
   return component(
     <>
       {If(() => popover.visible, // TODO: configure activation type
-        <v-context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
+        <o:context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
           <div
             before:mount={node => maybeFlip(node, popover)}
             ref={$popover}
-            class={() => (`popover ${popover.placement} ${popover.alignment}`)}
-            style={() => (`--popover-anchor: ${popover.anchorName}; ${$styles?.() ?? ''}`)}
+            class={['popover', () => popover.placement, () => popover.alignment]}
+            style={() => `--popover-anchor: ${popover.anchorName}`}
             auto-bind={attributes}
           >
             {Slot()}
           </div>
-        </v-context>
+        </o:context>
       )}
       {Style(css`
         .popover {
@@ -101,20 +98,12 @@ function PopoverContent(setup: {
 }) {
   const {
     ref,
-    $classes,
-    $styles,
     Slot,
     ...attributes
   } = fromTag(setup)
 
-  // const popover = fromContext(TOOLTIP)
-  // const { gap } = popover;
-
-  console.warn('classes?', $classes)
-  console.warn('styles?', $styles)
-
   return component(
-    <div class={$classes?.()} style={$styles?.()} auto-bind={attributes}>
+    <div auto-bind={attributes}>
       {Slot()}
     </div>
   )
@@ -124,15 +113,11 @@ function PopoverContent(setup: {
 function PopoverTail(setup: {
   as?: ComponentTag | string;
   offset?: Ion<number>
-  'shape:class'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
+  'shape:microclass'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
   'shape:style'?: Ion<string>
 }) {
   const {
-    $classes,
-    $styles,
     shape,
-    // "$shape:class": $shapeClasses = toIon(''),
-    // "$shape:style": $shapeStyles = toIon(''),
     $offset = toIon('-30%'),
     as: Comp = 'div',
     ...attributes
@@ -145,12 +130,13 @@ function PopoverTail(setup: {
     <>
       <div
         at:attach={node => positionTail(node, popover, $popover)}
-        class={() => ('tail-root ' + popover.placement + ' ' + $classes?.())}
+        class={['tail-root', () => popover.placement]}
         auto-bind={attributes}
       >
         <Comp
-          class={() => (`tail ${popover.placement} ${shape.class ?? ''}`)}
+          class={['tail', () => popover.placement]}
           style={shape.style ?? ''}
+          auto-bind={shape}
         ></Comp>
       </div>
       {Style(css`

@@ -15,7 +15,7 @@ export function DropdownMenuDemo() {
             get other = ion(() => count + price);
             
          ```
-         <Dropdown class="w-40" align="start">
+         <Dropdown microclass="w-40" align="start">
             <DropdownGroup>
             </DropdownGroup>
 

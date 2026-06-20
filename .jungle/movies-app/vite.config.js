@@ -16,7 +16,7 @@ export default defineConfig({
    define: {
       __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
       __SSR__: false,
-      __TEST__: true,
+      __TEST__: JSON.stringify(process.env.NODE_ENV === 'test'),
       __DOCU__: false,
    }
 })

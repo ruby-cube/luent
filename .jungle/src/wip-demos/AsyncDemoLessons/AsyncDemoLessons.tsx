@@ -83,17 +83,17 @@ export function TabList(input: {
          on:valuechange={e => emit('change')}
          class="relative w-full h-full"
       >
-         <div class="px-8">
-            <TabsList class="w-full">
-               <TabsTrigger value="all" class="relative overflow-hidden">
+         <div microclass="px-8">
+            <TabsList microclass="w-full">
+               <TabsTrigger value="all" microclass="relative overflow-hidden">
                   All
                   <ButtonShimmer isPending={$contentPending() && $activeTab() === "all"} />
                </TabsTrigger>
-               <TabsTrigger value="wip" class="relative overflow-hidden">
+               <TabsTrigger value="wip" microclass="relative overflow-hidden">
                   In Progress
                   <ButtonShimmer isPending={$contentPending()  && $activeTab() === "wip"} />
                </TabsTrigger>
-               <TabsTrigger value="done" class="relative overflow-hidden">
+               <TabsTrigger value="done" microclass="relative overflow-hidden">
                   Complete
                   <ButtonShimmer isPending={($contentPending()  && $activeTab() === "done")} />
                </TabsTrigger>

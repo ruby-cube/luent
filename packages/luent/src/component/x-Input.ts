@@ -158,8 +158,8 @@ type HasMu<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C
 // }
 
 
-
-export function toInput(attributes: AnyObject, events: AnyObject) {
+/**DEPRECATED */
+function toInput(attributes: AnyObject, events: AnyObject) {
    // TODO: write a linter that disallows mutation unless variable comes from a property or nested property of the mu object
    // TODO: also provide a input transform helper for non-component functions that mutate arguments
 

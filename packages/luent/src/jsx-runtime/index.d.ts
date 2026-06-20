@@ -9,6 +9,11 @@ import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, Susp
 import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../src/boundaries/Portal";
 
+/*
+Modified from React type definitions in DefinitelyTyped:
+https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/react/v18/index.d.ts
+*/
+
 type NativeAnimationEvent = AnimationEvent;
 type NativeClipboardEvent = ClipboardEvent;
 type NativeCompositionEvent = CompositionEvent;
@@ -1922,20 +1927,10 @@ declare global {
       'o-link': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
       'o--head': L.DetailedHTMLProps<L.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
       'o--body': L.DetailedHTMLProps<L.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
-      //  'show-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
-      //  'create-view': { children: ConditionalRenderKit[] | ConditionalRenderKit }
-      'v-preserve': { children: ConditionalRenderKit[] | ConditionalRenderKit; discard?: Ion<Booleanish> }
-      'v-context': { children: ConditionalRenderKit[] | ConditionalRenderKit; provide: Luent.Provided }
-      //  'render-view': { children: Luent.RawJSXNode }
-      // 'o--preserve': { children: ConditionalRenderKit[]; discard?: Ion<Booleanish> };
-      // 'preserve-conditionals': { children: ConditionalRenderKit[]; 'can:discard'?: () => void };
-      // 'Slot': {Slot: unknown}
+      'o:preserve': { children: ConditionalRenderKit[] | ConditionalRenderKit; discard?: Ion<Booleanish> }
+      'o:context': { children: ConditionalRenderKit[] | ConditionalRenderKit; provide: Luent.Provided }
+      'o:transition': { children: ConditionalRenderKit[] | ConditionalRenderKit; } // TODO: add transition bindings
 
-      // 'o--suspense': SuspenseNodeInput & { children: Luent.Slot };
-      // 'o--try': TryNodeInput & { children: Luent.Slot };
-
-      // 'ooo-transit': L.DetailedHTMLProps<L.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
-      // 'ooo-transition': L.DetailedHTMLProps<L.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
       'o--dock': L.DetailedHTMLProps<L.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
     }
 

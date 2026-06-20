@@ -129,7 +129,7 @@ listen(window, 'mousedown', () => {
 
 ## Styles
 
-Luent supports static and reactive style bindings through the `class`, `micro:class`, and `style` attributes.
+Luent supports static and reactive style bindings through the `class`, `microclass`, and `style` attributes.
 
 ### Class attribute
 
@@ -183,14 +183,14 @@ Static and dynamic classes may be mixed with object or array notation.
 ### Microclass attribute
 <span class='doc-tag'>WIP</span><span class='doc-tag'>Experimental</span>
 
-The `micro:class` attribute is designed for utility-style class composition.
+The `microclass` attribute is designed for utility-style class composition.
 
 Unlike the standard `class` attribute, microclasses participate in utility class merging, especially when composed across component boundaries through forwarded bindings. This allows conflicting utility classes to be resolved predictably through utility merge strategies such as `twMerge()`. See [Forwarded bindings]()
 
 #### Static microclasses
 
 ```tsx
-<div micro:class='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'></div>
+<div microclass='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'></div>
 ```
 
 #### Reactive microclasses
@@ -203,7 +203,7 @@ const $rotation = ion(45)
 ```
 
 ```tsx
-<div micro:class={() => `size-2.5 rotate-${$rotation()} rounded-[2px] bg-foreground fill-foreground z-50`}></div>
+<div microclass={() => `size-2.5 rotate-${$rotation()} rounded-[2px] bg-foreground fill-foreground z-50`}></div>
 ```
 
 **with boolean ions**
@@ -212,7 +212,7 @@ const $rounded = ion(true)
 ```
 
 ```tsx
-<div micro:class={() => `size-2.5 rotate-45 ${$rounded() ? 'rounded-[2px]' : ''} bg-foreground fill-foreground z-50`}></div>
+<div microclass={() => `size-2.5 rotate-45 ${$rounded() ? 'rounded-[2px]' : ''} bg-foreground fill-foreground z-50`}></div>
 ```
 
 ### Style attribute

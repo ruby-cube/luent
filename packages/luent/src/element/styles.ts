@@ -13,19 +13,18 @@ export const MICROCLASS_MERGE = ContextKey<MergeMicroclasses>('microclassMerge')
 
 export function setUpMicroclasses(node: Element, classes: TagClass[]) {
   const merge = fromRoot(MICROCLASS_MERGE)
-  console.log('merge?', typeof merge)
   if (!merge) return setUpClasses(node, classes)
   const microclasses = composeMicroclasses(classes, merge)
-  console.log('microclasses?', microclasses)
   if (!microclasses) return;
   const flask = getFlask()
   const classList = node.classList
   if (isGetter(microclasses)) {
-    trackForRender(microclasses, ({ current, previous }/* newState: ReactiveClasses | string | Falsey, oldState: ReactiveClasses | string | Falsey */) => {
+    trackForRender(microclasses, ({ previous }/* newState: ReactiveClasses | string | Falsey, oldState: ReactiveClasses | string | Falsey */) => {
       // if (current === previous) return;
       atRender(() => {
+        const current = microclasses()
         if (previous) removePreviousClasses(previous, classList)
-        if (microclasses()) setUpClassesFromString(microclasses(), classList)
+        if (current) setUpClassesFromString(current, classList)
       })
     }, flask, RUN_EAGERLY)
   }
@@ -134,11 +133,6 @@ function addClasses(value: TagClass, classList: DOMTokenList, flask: Flask) {
   }
 }
 
-// let __debug__=false;
-// // export function initDebugger(){
-// // __debug__ = true
-// // }
-
 function setUpClassesFromArray(entries: TagClass[], classList: DOMTokenList, flask: Flask) {
   for (const entry of entries) {
     if (isGetter(entry)) {
@@ -230,12 +224,11 @@ export function setUpStyles(node: Element, styles: TagStyle[]) {
 }
 
 function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, flask: Flask) {
-  if (entry instanceof Object) {
+  if (isObject(entry)) {
     for (const key in entry) {
       const value = entry[key] as MaybeIon<string | number | Falsey>;
       if (isGetter(value)) {
         trackForRender(value, () => {
-          console.log('style entry', key, value)
           atRender(() => {
             assignStyleProperty(style, toStylePropertyName(key), value())
           })
@@ -258,24 +251,17 @@ function toStylePropertyName(key: string) {
 function assignStyleProperty(style: AnyObject, property: string, value: string | number | Falsey) {
   const key = camelToKebabCase(property)
   if (value != null) {
-    const splitValue = typeof value === 'string' ? value.split(' !importan') : undefined; // ['red', 't'] 
-    const _value = String(splitValue ? splitValue[0] : value);
-    if (splitValue === undefined || splitValue.length === 1) {
-      // if (key === 'transform') 
-      style.setProperty(key, _value)
-    }
-    else {
-      style.setProperty(key, _value, { priority: 'important' })
-    }
+    const importantMatch = typeof value === 'string' && /\s*!important\s*$/i.test(value)
+    const rawValue = typeof value === 'string' ? value.replace(/\s*!important\s*$/i, '') : value
+    style.setProperty(key, String(rawValue), importantMatch ? 'important' : '')
   }
   else {
     style.removeProperty(key)
   }
 }
 
-
 function normalizeStyle(expression: string) {
-  expression.trim();
+  expression = expression.trim();
   if (expression.endsWith(';')) return expression.substring(0, expression.length - 1);
   return expression;
 }

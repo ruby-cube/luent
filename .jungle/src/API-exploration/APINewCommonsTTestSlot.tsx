@@ -7,14 +7,14 @@ import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase";
 function Parent() {
    return component(
       <div>
-         <Context provide={[
+         <o:context provide={[
             Content['something'](new Something()),
             ArticleView['mu:db'](new ArticleDatabase())
          ]}>
             <Button Nested={Nested}>
                <Content></Content>
             </Button>
-         </Context>
+         </o:context>
       </div >
    )
 }
@@ -49,9 +49,9 @@ export function Button(input: {
 
    return component(
       <div>
-         <Context provide={[Nested['something']('hello')]}>
+         <o:context provide={[Nested['something']('hello')]}>
             {Slot}
-         </Context>
+         </o:context>
       </div>
    )
 }

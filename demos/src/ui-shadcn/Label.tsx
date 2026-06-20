@@ -1,25 +1,17 @@
-import { FromTag } from "@rue/luent"
-import { twMerge as mergeClasses } from "tailwind-merge"
+import { FromTag, WithRef, } from "@rue/luent"
 
 
 function Label({
-   $classes,
-   ...attributes
-}: FromTag<'label'>) { // TODO: Accessible label?
+  ...bindings
+}: WithRef<'label'>) { // TODO: Accessible label?
 
-   return (
-      <label
-         data-slot="label"
-         class={(mergeClasses(
-            "gap-2 text-sm leading-none font-medium group-data-[disabled=true]:opacity-50 peer-disabled:opacity-50 flex items-center select-none group-data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed",
-            $classes()
-         ))}
-         // class={[$classes,
-         //    "gap-2 text-sm leading-none font-medium group-data-[disabled=true]:opacity-50 peer-disabled:opacity-50 flex items-center select-none group-data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed",
-         // ]}
-         {...attributes}
-      ></label>
-   )
+  return (
+    <label
+      data-slot="label"
+      class="gap-2 text-sm leading-none font-medium group-data-[disabled=true]:opacity-50 peer-disabled:opacity-50 flex items-center select-none group-data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed"
+      auto-bind={bindings}
+    ></label>
+  )
 }
 
 export { Label }

@@ -89,7 +89,7 @@ export function Code(setup: {
             </div>
           </>
         })}
-        <v-preserve>
+        <o:preserve>
           {Await(() => <>
             {If(() => $tab() === 'main', () => {
               return <div class='code'>{{ html: $main, trusted }}</div>
@@ -105,7 +105,7 @@ export function Code(setup: {
           {Meanwhile(
             <div class='code'>{{ html: $main, trusted }}</div>
           )}
-        </v-preserve>
+        </o:preserve>
       </div>
       {Style(css`
         .code-container {

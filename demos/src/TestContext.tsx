@@ -53,15 +53,15 @@ function TestRootContext() {
          <p>from root: {$rootMsg}</p>
          <hr></hr> */}
 
-      <v-context provide={[GREAT_MESSAGE($adamsMsg)]}>
+      <o:context provide={[GREAT_MESSAGE($adamsMsg)]}>
         <GreatGrandparent name='Adam'></GreatGrandparent>
         <input mu:value={$adamsMsg}></input>
-      </v-context >
+      </o:context >
       
-      <v-context provide={[GREAT_MESSAGE($evesMsg)]}>
+      <o:context provide={[GREAT_MESSAGE($evesMsg)]}>
         <GreatGrandparent name='Eve'></GreatGrandparent>
         <input mu:value={$evesMsg}></input>
-      </v-context >
+      </o:context >
       
       {/* 
          <GreatGrandparent name='Adam' provide={[ROOT_MESSAGE(adamsMsg)]}></GreatGrandparent>
@@ -117,9 +117,9 @@ function Grandparent({ name }: GrandparentInput) {
          <h6>Reactive</h6>
          <p>from root: {$rootMsg}</p>
          <p>from great grandparent: {$greatMsg}</p> */}
-      <v-context provide={[GRAND_MESSAGE('my name is' + name)]}>
+      <o:context provide={[GRAND_MESSAGE('my name is' + name)]}>
         <Parent></Parent>
-      </v-context>
+      </o:context>
     </div>
   )
 }

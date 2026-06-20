@@ -52,10 +52,10 @@ export function CardDemo() {
             </form>
          </CardContent>
          <CardFooter class="flex-col gap-2">
-            <Button type="submit" class="w-full">
+            <Button type="submit" microclass="w-full">
                Log in
             </Button>
-            <Button variant="outline" class="w-full">
+            <Button variant="outline" microclass="w-full">
                Log in with Google
             </Button>
          </CardFooter>

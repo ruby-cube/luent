@@ -45,7 +45,7 @@ function TooltipRoot(setup: {
 //    return template(
 //       <>
 //          {If((tooltip.visible), // TODO: configure activation type
-//             <Context provide={[TOOLTIP(tooltip), TOOLTIP_NODE($tooltip)]}>
+//             <o:context provide={[TOOLTIP(tooltip), TOOLTIP_NODE($tooltip)]}>
 //                <div
 //                   before:mount={node => maybeFlip(node, tooltip)}
 //                   ref={$tooltip}
@@ -55,7 +55,7 @@ function TooltipRoot(setup: {
 //                >
 //                   {Slot()}
 //                </div>
-//             </Context>
+//             </o:context>
 //          )}
 //       </>
 //    )

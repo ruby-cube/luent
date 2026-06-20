@@ -4,20 +4,25 @@ import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase"
 import { ArticlesView } from "../wip-demos/conduit/src/feature/article-feed/ArticlesView"
 import { ArticlePreview } from "./ArticlePreview"
 
+
 function Parent() {
 
   component(
-    <v-context provide={[
-      ArticlePreview['mu:db'](new ArticleDatabase()),
-      Shared.db(new ArticleDatabase()),
-    ]}>
-      <ArticlesView></ArticlesView>
-    </v-context>
+    <div>
+      <div>Hello World</div>
+      <o:context with={[
+        ARTICLE_DB(new ArticleDatabase()),
+        SHARED.DB(new Database()),
+      ]}>
+        <ArticlesView></ArticlesView>
+      </o:context>
+    </div>
   )
 }
 
+
 const Shared = {
-  db: mergeContextKeys(
+  DB: mergeContextKeys(
     ArticlesView.db,
     ArticlePreview.db
   )

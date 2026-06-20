@@ -49,10 +49,9 @@ import { twMerge } from "tailwind-merge"
 
 export function runDemo() {
   createRoot(() => {
-    console.log('twMerge', twMerge)
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestStylesBindings />
+    return <TooltipDemo />
   })
     // createRoot(() => )
     .mount('#root')

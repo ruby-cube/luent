@@ -20,7 +20,7 @@ Luent is a web application framework that aims to bring greater conceptual coher
 ## Motivation
 Modern frameworks have brought powerful innovations to web development. While these frameworks have significantly advanced the ecosystem, they also come with additional cognitive overhead, often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. 
 
-Coming from a linguistics and design background, I care deeply about language coherence, expressiveness, and code aesthetics. These interests led me to delve into how syntax and API design might improve the way we build modern web applications while minimizing complexity. The key challenge is understanding how far we can move toward simplicity without trading off conceptual integrity and technical rigor. This project explores that challenge.
+This project explores ways syntax and API design might improve the way we build modern web applications while minimizing complexity. The key challenge is understanding how far we can move toward simplicity without trading off conceptual integrity and technical rigor. 
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -37,7 +37,7 @@ Core design features:
 Other notable features:
 - a reactive finite state machine API via `Finitron`
 - ergonomic asynchronous reactivity
-- preservation of state and DOM nodes through a `'preserve'` directive or `<v-preserve>` tag
+- preservation of state and DOM nodes through a `'preserve'` directive or `<o:preserve>` tag
 
 Experimental areas:
 - [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))

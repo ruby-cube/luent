@@ -23,7 +23,7 @@ export function TestIfElseRemountView(setup: {}) {
          <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
          <hr></hr>
          <div class='container view'>
-            <v-preserve>
+            <o:preserve>
                {If($active,
                   <div>
                      oh
@@ -45,7 +45,7 @@ export function TestIfElseRemountView(setup: {}) {
                      <h2>bye</h2>
                   </div>
                )}
-            </v-preserve>
+            </o:preserve>
          </div>
       </div>
       {Style(css`

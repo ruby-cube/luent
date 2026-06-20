@@ -58,8 +58,8 @@ function Tooltip(setup: {
           {Slot()}
         </TooltipContent>
         <TooltipTail
-          class={`size-2.5`}
-          shape:class='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'
+          microclass={`size-2.5`}
+          shape:microclass='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'
         >
         </TooltipTail>
       </TooltipRoot>

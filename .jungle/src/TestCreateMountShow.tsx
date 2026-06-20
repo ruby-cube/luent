@@ -162,7 +162,7 @@ export function TestCreateMountShow() {
             // const $tab1 = Remountable()
 
             return <>
-               <code>{'<v-preserve>'}</code>
+               <code>{'<o:preserve>'}</code>
                <p>
                   {`This mounts, demounts, and remounts views of a conditional series, preserving state when demounted. 
                   Remountable views can also be destroyed. (not yet implemented)`}
@@ -171,7 +171,7 @@ export function TestCreateMountShow() {
                   <button style="width: 5em" on:click={e => { $tab.value = 1 }}>home</button>
                   <button style="width: 6em" on:click={e => { $tab.value = 2 }}>garden</button>
                   <div class='container' style="height: 160px">
-                     <v-preserve>
+                     <o:preserve>
                         {If(($tab() === 1), /* $tab1, */
                            <div>
                               <p>🏠</p>
@@ -189,7 +189,7 @@ export function TestCreateMountShow() {
                            </div>
                         )}
                         <aside>(state is preserved!!)</aside>
-                     </v-preserve>
+                     </o:preserve>
                   </div>
                </div>
             </>

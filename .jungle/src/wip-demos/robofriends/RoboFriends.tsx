@@ -99,7 +99,7 @@ export function RoboList(input: {
 
 // provide={MU(SWAMP)(swamp)}
 
-// <Context provide={MU(SWAMP)(swamp)}>
+// <o:context provide={MU(SWAMP)(swamp)}>
 //    ...
 //    <Comp mu:swamp={SWAMP} />
 

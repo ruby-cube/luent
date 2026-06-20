@@ -27,7 +27,7 @@ export function MarkdownApp(
       selectionStart: undefined as undefined | number,
       selectionEnd: undefined as undefined | number,
    })
-   // <create-view> <v-preserve>
+   // <create-view> <o:preserve>
    beforeUnmount(() => {
       const textArea = $textArea()!
       const isActive = document.activeElement !== textArea

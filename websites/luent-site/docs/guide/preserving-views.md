@@ -1,19 +1,19 @@
 # Preserving Views
 By default, conditional views are recreated each time they are rendered. 
 
-In cases where state should persist when a conditional view is unmounted, a conditional series may be wrapped in a `<v-preserve>` node. This preserves a view's DOM nodes as well as any state created within the render function, avoiding the need to lift state higher in the application tree. 
+In cases where state should persist when a conditional view is unmounted, a conditional series may be wrapped in a `<o:preserve>` node. This preserves a view's DOM nodes as well as any state created within the render function, avoiding the need to lift state higher in the application tree. 
 
 When the view becomes active again, Luent will remount the preserved nodes rather than recreating the view.
 
 ```jsx
-<v-preserve>
+<o:preserve>
   {If($sidebarOpen,
     <Sidebar></Sidebar> // Sidebar state and DOM nodes are preserved
   )}
   {Else(
     <Icon>{sidebarIcon}</Icon> // Icon DOM nodes are preserved
   )}
-</v-preserve>
+</o:preserve>
 ```
 
 Views may also be selectively preserved by passing in the view type, 'preserve'. The default view type is 'create'.
