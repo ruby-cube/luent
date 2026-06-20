@@ -50,6 +50,7 @@ const HOOKS = Symbol('hooks')
 export function toSetup(bindings: RawBindings): SetupBindings {
   const setup = Object.create(null)
   const xray = setup.xray = Object.create(null)
+  const nested = setup.bind = Object.create(null)
 
   const keys = Object.keys(bindings) as string[]
   const Slot = bindings.Slot as AnyObject
@@ -91,6 +92,10 @@ export function toSetup(bindings: RawBindings): SetupBindings {
 
       case 'xray':
         xray[key] = getXrayBindings(bindings[rawKey])
+        break;
+
+      case 'bind':
+        nested[key] = toSetup(bindings[rawKey]) // TODO: use proxy to evaluate lazily
         break;
 
       case 'xlmns': // TODO: other namespaces?
@@ -166,7 +171,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
     const keys = Object.keys(bindings) as (string | typeof MU | typeof HOOKS | typeof ON)[]
     keys.push(MU, HOOKS, ON)
     for (const key of keys) {
-      if (key === 'auto-bind' || key === 'xray' || key === 'Slot') continue;
+      if (key === 'auto-bind' || key === 'xray' || key === 'Slot' || key === 'bind') continue;
 
       switch (key) {
         case ON:
@@ -249,7 +254,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
         break;
 
       case 'microclass':
-        const microclasses = composed.microclasses ?? (composed.microclasses = []) 
+        const microclasses = composed.microclasses ?? (composed.microclasses = [])
         microclasses.push(bindings.microclass)
         break;
 

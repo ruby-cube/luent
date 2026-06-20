@@ -4,6 +4,10 @@ import { codeHtml, trusted } from "./code-utils";
 
 // TODO: Fix hacky SSG solutions
 
+function hover(code: string, config: {[key: string]: string}) {
+
+}
+
 export function Code(setup: {
   main: { name: string, code: string, lang?: string },
   alt: { name: string, code: string, lang?: string },

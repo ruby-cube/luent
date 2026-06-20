@@ -23,7 +23,7 @@ export function CodeGlimpses() {
             <Code
               trusted
               main={{ name: 'ns', code: accessorNsx }}
-              alt={{ name: 'ts', code: accessorTranspiled, lang: 'ts' }}
+              alt={{ name: 'ts equivalent', code: accessorTranspiled, lang: 'ts' }}
               highlight={highlightCode}
             />
           </div>
@@ -45,7 +45,7 @@ export function CodeGlimpses() {
             <Code
               trusted
               main={{ name: 'nsx', code: derivationNsx }}
-              alt={{ name: 'tsx', code: derivationTranspiled, lang: 'tsx' }}
+              alt={{ name: 'tsx equivalent', code: derivationTranspiled, lang: 'tsx' }}
               highlight={highlightCode}
             />
           </div>
@@ -64,7 +64,7 @@ export function CodeGlimpses() {
             <Code
               trusted
               main={{ name: 'nsx', code: flowNsx }}
-              alt={{ name: 'tsx', code: flowTranspiled, lang: 'tsx' }}
+              alt={{ name: 'tsx equivalent', code: flowTranspiled, lang: 'tsx' }}
               highlight={highlightCode}
             />
           </div>
@@ -83,7 +83,7 @@ export function CodeGlimpses() {
             <Code
               trusted
               main={{ name: 'nsx', code: gatewayReturn }}
-              alt={{ name: 'tsx', code: gatewayReturnTranspiled, lang: 'tsx' }}
+              alt={{ name: 'tsx equivalent', code: gatewayReturnTranspiled, lang: 'tsx' }}
               highlight={highlightCode}
             />
           </div>
@@ -103,7 +103,7 @@ export function CodeGlimpses() {
             <Code
               trusted
               main={{ name: 'nsx', code: componentNsx }}
-              alt={{ name: 'tsx', code: componentTranspiled, lang: 'tsx' }}
+              alt={{ name: 'tsx equivalent', code: componentTranspiled, lang: 'tsx' }}
               highlight={highlightCode}
             />
           </div>

@@ -6,7 +6,7 @@
 </div>
 
 # Luent
-Luent is a web application framework that aims to bring greater conceptual coherence to the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of signal-based reactive code.
+Luent is a web application framework that aims to bring greater conceptual coherence to the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension designed to improve the clarity, ergonomics, and type safety of signal-based reactive code.
 
 > **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish docs, an npm package, or CLI. In the meantime, Luent examples can be seen through this [code glimpse](#code-glimpse) and [NextScript demos](). 
 >
@@ -35,9 +35,8 @@ Core design features:
 - traceable mutations to aid in debugging reactivity
 
 Other notable features:
-- a reactive finite state machine API via `Finitron`
 - ergonomic asynchronous reactivity
-- preservation of state and DOM nodes through a `'preserve'` directive or `<o:preserve>` tag
+- ergonomic preservation of state and DOM nodes
 
 Experimental areas:
 - [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
@@ -50,7 +49,7 @@ Experimental areas:
 The following Luent components are written in [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript) (.nsx), which compiles down to TypeScript + JSX. To see this example written in .tsx, see [EmojiQuest Demo]()
 ```tsx
 function EmojiQuest() {
-  const powers = ['🍀', '🍄', '✨'] as const
+  const powers = ['🍀', '🍄', '✨', '🔥'] as const
   const powerset = ionic(['🍀', '🍄', '✨'], {
     addPower() {
       this.push(powers[Math.floor(Math.random() * powers.length)])
@@ -80,8 +79,8 @@ function Powerset(setup: {
 }) {
   const { mu, limit, powers } = fromTag(setup);
 
-  get count = powers.length@
-  get remaining = ion(() => limit - count)
+  get count = powers.length@;
+  get remaining = ion(() => limit - count);
 
   <::>
     <div class='powerset-panel'>
@@ -94,7 +93,7 @@ function Powerset(setup: {
       <div class='panel-footer'>
         <button
           disabled={(count === limit)@}
-          on:click={() => mu(powers).addPower()}
+          on:click={() => mu.powers.addPower()}
         >
           +
         </button>
@@ -119,7 +118,7 @@ function PowersetMessages(setup: {
   start: number; 
   remaining: Ion<number> 
 }) {
-  const { start, remaining@ } = setup
+  const { start, remaining@ } = fromTag(setup)
 
   <::>
     {If(remaining@,
@@ -137,7 +136,7 @@ function Panel(setup: {
   title: string,
   Slot: RenderSlot
 }) {
-  const { title, Slot } = setup
+  const { title, Slot } = fromTag(setup)
 
   get opened = ion(true)
 
@@ -225,7 +224,7 @@ The following JSX template...
 Luent is being developed under these guiding principles, which encapsulate our values and how we navigate tradeoffs:
 
 - **Human-centered, LLM-friendly.**
-We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we often create systems that are naturally LLM-friendly as well.
+We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we create systems that are LLM-friendly as well.
 
 - **Elegance and simplicity.**
 Elegance—both conceptual and syntactic—is central to Luent’s API design. We pursue simple solutions through extensive experimentation and relentless trimming of excess.

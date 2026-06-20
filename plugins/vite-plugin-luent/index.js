@@ -56,7 +56,8 @@ export default function LuentPlugin() {
             const normalized = await transformWithOxc(result.code, fileName.replace(/\.nsx$/, '.tsx'), {
                jsx: {
                   runtime: 'automatic',
-                  importSource: '@rue/luent'
+                  importSource: '@rue/luent',
+                  throwIfNamespace: false
                },
                sourcemap: true
             })
@@ -88,9 +89,18 @@ export default function LuentPlugin() {
                }
             })
 
+            const normalized = await transformWithOxc(result.code, fileName, {
+               jsx: {
+                  runtime: 'automatic',
+                  importSource: '@rue/luent',
+                  throwIfNamespace: false
+               },
+               sourcemap: true
+            })
+
             return {
-               code: result.code,
-               map: result.map
+               code: normalized.code,
+               map: normalized.map
             }
          },
       }
