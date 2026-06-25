@@ -27,7 +27,7 @@ Take a tour of Luent's syntax and APIs through these [code glimpses]().
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks have brought powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
+Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
 This project explores ways to reduce framework friction and simplify application development without sacrificing technical rigor.
 
@@ -43,10 +43,6 @@ Core design features:
 - selective, type-explicit reactivity
 - traceable mutations to aid in debugging reactivity
 
-Other notable features:
-- ergonomic asynchronous reactivity
-- ergonomic preservation of state and DOM nodes
-
 Experimental areas:
 - [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
 - [WIP] compile-time mutation safety checks and statically traceable `mu:` bindings
@@ -54,121 +50,6 @@ Experimental areas:
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-### Code Glimpse
-The following Luent components are written in [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript) (.nsx), which compiles down to TypeScript + JSX. To see this example written in .tsx, see [EmojiQuest Demo]()
-```tsx
-function EmojiQuest() {
-  const powers = ['🍀', '🍄', '✨', '🔥'] as const
-  const powerset = ionic(['🍀', '🍄', '✨'], {
-    addPower() {
-      this.push(powers[Math.floor(Math.random() * powers.length)])
-    }
-  })
-
-  <:>
-    <main>
-      <EmojiGame {powerset}/>
-    </main>
-    <aside>
-      <Panel title="Powerset">
-        <Powerset 
-          mu:powerset={powerset} 
-          limit={10}
-        />
-      </Panel>
-    </aside>
-  </:>
-}
-
-function Powerset(setup: {
-  'mu:powers': Ionic<string[]> & { 
-    addPower(): void 
-  }
-  limit: number
-}) {
-  const { mu, limit, powers } = fromTag(setup);
-
-  get count = powers.length@;
-  get remaining = ion(() => limit - count);
-
-  <:>
-    <div class='powerset-panel'>
-      <ul>
-        {For(powers, power =>
-          <li class='power-chip'>{power}</li>
-        )}
-      </ul>
-
-      <div class='panel-footer'>
-        <button
-          disabled={(count === limit)@}
-          on:click={() => mu(powers).addPower()}
-        >
-          +
-        </button>
-
-        <div class='stats'>
-          <span>Total</span>
-          <span>{count@}/{limit}</span>
-        </div>
-      </div>
-
-      <PowersetMessages 
-        start={powers.length} 
-        remaining={remaining@}
-      />
-    </div>
-
-    <o-link href='/src/powerset.css' rel='stylesheet'/>  
-  </:>
-}
-
-function PowersetMessages(setup: { 
-  start: number; 
-  remaining: Ion<number> 
-}) {
-  const { start, remaining@ } = fromTag(setup)
-
-  <:>
-    {If(remaining@,
-      <div class='msg'>You have {remaining@} slots left.</div>
-      <div class='msg'>You started with {start} powers.</div>
-    )}
-    {Else(
-      <div class='msg'>Powerset complete.</div>
-    )}
-  </:>
-}
-```
-```tsx
-function Panel(setup: {
-  title: string,
-  Slot: RenderSlot
-}) {
-  const { title, Slot } = fromTag(setup)
-
-  get opened = ion(true)
-
-  <:>
-    <div class='panel'>
-      <div>{title}
-        <button on:click={() => opened = !opened}>
-          {(opened() ? '-' : '+')@}
-        </button>
-      </div>
-      <div display-if={opened@}>{Slot}</div>
-    </div>
-
-    <o-style>
-      .panel {
-        width: 25vh;
-        user-select: none;
-      }
-    <o-style>
-  </:>
-}
-```
-<p align="right"><a href="#readme-top">[top]</a></p>
 
 ### JSX Transpiler
 
@@ -179,7 +60,7 @@ Luent transpiles JSX into `jsx()` calls for straightforward mental mapping betwe
 - `<o-style>` tags are transformed to a `style()` call with a string template literal argument
 - JSX fragments are transformed into arrays
 
-The following JSX template...
+This JSX template ...
 ```jsx
 <>
   <Parent foo={foo} bar={bar()} on:click={logClick}>
@@ -199,7 +80,7 @@ The following JSX template...
 </>
 ```
 
-...essentially maps to:
+... essentially maps to:
 ```jsx
 [
   jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
