@@ -13,13 +13,13 @@ It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/pac
 
 <br/>
 
-> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents implemented and in-progress features. Planned features are listed in our [roadmap]().
+> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents completed and in-progress features. Planned features are listed in our [roadmap]().
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-## Code Glimpses
-Take a tour of Luent's syntax and APIs through these [code glimpses]().
+## Code Examples
+Take a tour of Luent's syntax and APIs through these [code glimpses]() and [demos]().
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -49,13 +49,13 @@ Experimental areas:
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 
-### JSX Transpiler
+## JSX Transpiler
 
 Luent transpiles JSX into `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It extends the base JSX transform with the following:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants, e.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
 - [JSX flow expressions](http://luent.dev/guide/template-control-flow) (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead.
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
-- `<o-style>` tags are transformed to a `style()` call with a string template literal argument
+- `<o-style>` tags are transformed to `style()` calls with a string template literal argument
 - JSX fragments are transformed into arrays
 
 This JSX template ...
