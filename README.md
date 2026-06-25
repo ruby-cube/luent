@@ -16,13 +16,13 @@ It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/pac
 > **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents completed and in-progress features. Planned features are listed in our [roadmap]().
 
 
-<p align="right"><a href="#readme-top">[top]</a></p>
+<br/>
 
 ## Code Examples
 Take a tour of Luent's syntax and APIs through these [code glimpses]() and [demos]().
 
 
-<p align="right"><a href="#readme-top">[top]</a></p>
+<br/>
 
 ## Motivation
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
