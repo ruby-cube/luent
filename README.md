@@ -42,8 +42,8 @@ Core design features:
 - traceable mutations to aid in debugging reactivity
 
 Experimental areas:
-- [WIP] language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
-- [WIP] compile-time mutation safety checks and statically traceable `mu:` bindings
+- language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
+- compile-time mutation safety checks and statically traceable `mu:` bindings
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -52,9 +52,9 @@ Experimental areas:
 ## JSX Transpiler
 
 Luent transpiles JSX into `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It extends the base JSX transform with the following:
-- JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants, e.g. `<Parent><Child/></Parent>` → `jsx(Parent, { Slot: () => [jsx(Child)] })`
-- [JSX flow expressions](http://luent.dev/guide/template-control-flow) (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead.
-- JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
+- JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants
+- [JSX flow expressions](http://luent.dev/guide/template-control-flow) (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
+- JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories
 - `<o-style>` tags are transformed to `style()` calls with a string template literal argument
 - JSX fragments are transformed into arrays
 
@@ -172,6 +172,7 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 ### In progress
 - Runtime refinement and stabilization
 - `.nsx` preprocessing pipeline
+- Mutation safety checks
 - Async rendering
 - Animation and transition APIs
 - Debugging tools
