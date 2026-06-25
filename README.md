@@ -164,7 +164,7 @@ Particular acknowledgement to the people and projects I've especially admired:
 
 ## Roadmap
 
-This project is in early development. The current goal is to establish an intuitive and expressive API that enhances developer productivity and application maintainability.
+This project is in early development. The current goal is to establish intuitive and expressive APIs that enhance developer productivity and application maintainability.
 
 Once the API stabilizes, development will increasingly focus on runtime efficiency, tree-shakability, smaller bundle sizes, and shifting more work from runtime to compile time.
 
@@ -180,18 +180,18 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 - Server-side rendering
 - Interactive islands
 
-### Planned: Framework Features
+### Planned: Framework features
 - Scoped styles
 - Client-side routing
 
-### Planned: Tooling & Developer experience
+### Planned: Tooling and developer experience
 - Improved dev warnings
 - npm package
 - CLI
 - Hot module replacement
 - Playground
 
-### Planned: Runtime & Performance
+### Planned: Runtime and performance
 - Performance optimizations
 - Smaller bundle sizes
 - Compiler-assisted tree-shaking of ergonomic APIs
