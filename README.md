@@ -13,9 +13,7 @@ It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/pac
 
 <br/>
 
-> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents implemented and in-progress features while planned features are listed in our [roadmap]().
->
-> We'd love help getting this project off the ground. Learn how to [contribute](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
+> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents implemented and in-progress features. Planned features are listed in our [roadmap]().
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -164,14 +162,15 @@ Particular acknowledgement to the people and projects I've especially admired:
 
 ## Roadmap
 
-This project is in early development. The current goal is to establish intuitive and expressive APIs that enhance developer productivity and application maintainability.
+This project is early-stage. The current goal is to establish intuitive and expressive APIs that enhance developer productivity and application maintainability.
 
 Once the API stabilizes, development will increasingly focus on runtime efficiency, tree-shakability, smaller bundle sizes, and shifting more work from runtime to compile time.
 
 ### Completed
-- Core client-side features
+- Core client-side functionality
 
 ### In progress
+- Runtime refinement and stabilization
 - `.nsx` preprocessing pipeline
 - Async rendering
 - Animation and transition APIs
