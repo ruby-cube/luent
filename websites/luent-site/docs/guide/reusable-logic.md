@@ -35,13 +35,13 @@ import { CounterKit } from "./CounterKit"
 function App() {
    const { count@, incrementCount, decrementCount } = CounterKit(0)
    
-   <::>
+   <:>
       <div>
          <div>{count@}</div>
          <button on:click={incrementCount}>+</button>
          <button on:click={decrementCount}>-</button>
       </div>
-   </::>
+   </:>
 }
 ```
 
@@ -78,7 +78,7 @@ import { Box } from "./Box"
 function App() {
   const box = ionic(new Box(0, 100))
 
-  <::>
+  <:>
     <div 
       class="box" 
       style={(`transform: translate(${box.x}px, ${box.y}px)`)@}
@@ -86,7 +86,7 @@ function App() {
     <button on:click={box.moveLeft}>◀</button>
     <button on:click={box.moveRight}>▶</button>
     <button on:click={box.moveDown}>▼</button>
-  </::>
+  </:>
 }
 ```
 

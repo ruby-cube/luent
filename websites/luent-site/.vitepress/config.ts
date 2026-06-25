@@ -1,10 +1,39 @@
 import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
+import { transformMarkdownIslands, transformPortals, writeIsland, isCustomElement } from './.luent-islands/server/index.js'
+import { createSharedViteConfig } from '../../shared/vite.shared.js'
+import { markdownShikiConfig } from './theme/shiki-setup.js'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  srcDir: "docs",
+ srcDir: 'docs',
+
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement
+      }
+    }
+  },
+
+  markdown: {
+    config(md) {
+      transformMarkdownIslands(md, writeIsland)
+    },
+    ...markdownShikiConfig
+  },
+
+  transformHtml(code, id, ctx) {
+    return transformPortals(code, ctx)
+  },
+
   vite: {
+    ...createSharedViteConfig(),
+    server: {
+      fs: {
+        strict: false
+      }
+    },
     // Keep static assets (logo, etc.) in ../public while docs live in ./docs.
     publicDir: resolve(__dirname, '../public')
   },

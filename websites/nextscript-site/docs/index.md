@@ -39,17 +39,6 @@ features:
 code-glimpses
 :::
 
-<script setup>
-import { onMounted } from 'vue'
-import { hydrate } from '../src/hydrate'
-
-onMounted(async () => {
-  if (typeof window === 'undefined') return;
-  const { CodeGlimpses } = await import('../src/CodeGlimpses')
-  hydrate('CodeGlimpses', CodeGlimpses)
-})
-</script>
-
 <p class='custom-block status-notice'><strong>This project is in early development.</strong> <br/>Most core features have been implemented, but substantial tooling work remains before the extension is usable.</p>
 
 <style scoped>

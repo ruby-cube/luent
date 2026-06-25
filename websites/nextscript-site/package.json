@@ -6,8 +6,10 @@
   "devDependencies": {
     "@rue/luent": "workspace:*",
     "@rue/quarky": "workspace:*",
+    "@rue/websites-shared": "workspace:*",
     "concurrently": "^10.0.3",
     "shiki": "^4.1.0",
+    "vue": "^3.5.0",
     "vitepress": "2.0.0-alpha.17"
   },
   "author": "Ruby Yi Wang",

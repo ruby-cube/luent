@@ -4,16 +4,7 @@
 :::luent
 habit-tracker-demo
 :::
-<script setup>
-import { onMounted } from 'vue'
-import { hydrate } from '../../src/hydrate'
 
-onMounted(async () => {
-  if (typeof window === 'undefined') return;
-  const { HabitTrackerDemo } = await import('../../src/demos/HabitTrackerDemo')
-  // hydrate('HabitTrackerDemo', HabitTrackerDemo)
-})
-</script>
 
 
 <div style='margin-bottom: 3rem'></div>
@@ -26,5 +17,4 @@ Featured in this demo:
 - [getter access](/guide/getter-syntax#for-getter-access)
 - [derivation expression](/guide/getter-syntax#derivation-expressions)
 - [JSX flow expression](/guide/jsx-syntax#jsx-flow-expressions)
-- [JSX gateway function expression](/guide/jsx-syntax#jsx-gateway-function-expressions)
-- [JSX component element](/guide/jsx-syntax#jsx-component-element)
+- [JSX fragment return](/guide/jsx-syntax#jsx-fragment-return)

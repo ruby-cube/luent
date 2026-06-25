@@ -143,6 +143,13 @@
   --iris-soft: rgba(100, 108, 255, 0.16);
 }
 
+.VPButton.medium {
+  line-height: 3rem !important;
+  border-radius: 3rem !important;
+  padding: 0 1.5rem !important;
+  font-size: 16px !important;
+}
+
 /* Slightly larger than VitePress default without being oversized. */
 .VPNavBarTitle .logo {
   height: 30px;
@@ -172,8 +179,9 @@
   background-size: 100% 50%;
   background-repeat: no-repeat;
   background-position: center top;
-  width: 50vw;
-  transform: translate(-25vw, -180px) rotate(-5deg);
+  width: 60vw;
+  max-width: 850px;
+  transform: translate(max(-30vw, -450px), -200px) rotate(-5deg);
 }
 
 .VPHomeHero .image-container {

@@ -170,14 +170,14 @@ function Multiplier() {
 
   const { doubled@, tripled@, quadrupled@ } = MultiplierKit(count@)
 
-  <::>
+  <:>
     <p on:click={() => count++}>
       count: {count@}
     </p>
     <p>{count@} x 2 = {doubled@}</p>
     <p>{count@} x 3 = {tripled@}</p>
     <p>{count@} x 4 = {tripled@}</p>
-  </::>
+  </:>
 }
 ```
 ::: info transpiled
@@ -339,7 +339,6 @@ Derivation expressions are shorthand for arrow function expressions that have ze
 ::: info transpiled
 ```tsx
 <p>result: {() => {
-  count() // hoisted call
   const num = getNum()
   if (num > 100) 
     return 'too ambitious'

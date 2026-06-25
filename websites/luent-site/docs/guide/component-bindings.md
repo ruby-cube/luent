@@ -14,9 +14,9 @@ Defaults
 function App() {
    get count = ion(0)
    
-   <::>
+   <:>
       <Counter {count} increment={() => count++} />
-   </::>
+   </:>
 }
 
 
@@ -26,9 +26,9 @@ function Counter(setup: {
 }) {
    const { count@, increment } = fromTag(setup)
 
-   <::>
+   <:>
       <button on:click={increment}>+</button>
-   </::>
+   </:>
 }
 ```
 

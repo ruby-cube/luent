@@ -54,9 +54,9 @@ function App() {
     decrement() { count-- },
   })
   
-  <::>
+  <:>
     <Counter mu:count={count@} />
-  </::>
+  </:>
 }
 ```
 
@@ -68,10 +68,10 @@ function Counter(setup: {
 }) {
   const { mu, count@ } = fromTag(setup);
 
-  <::>
+  <:>
     {count@}
-    <button on:click={e=> mu(count).value++}>+</button>
-  </::>
+    <button on:click={e=> mu(count@).value++}>+</button>
+  </:>
 }
 ```
 
@@ -92,9 +92,9 @@ function NegativeNotification(setup: {
 }) {
   const { $count } = fromTag(setup)
   
-  <::>
+  <:>
     <div>{count.isNegative() ? '😕' : '🙂'}</div>
-  <::>
+  <:>
 }
 ```
 
@@ -107,9 +107,9 @@ function NegativeNotification(setup: {
 }) {
   const { $count } = fromTag(setup)
   
-  <::>
+  <:>
     <div>{count.isNegative() ? '😕' : '🙂'}</div>
-  <::>
+  <:>
 }
 ```
 

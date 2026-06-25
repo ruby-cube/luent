@@ -1,6 +1,5 @@
-import { Code } from '../Code'
-import { highlightCode } from "../code-utils"
-import { DemoContainer } from "../DemoContainer"
+import { Code, DemoContainer } from '@rue/websites-shared'
+import { highlightCode } from "../highlighter"
 import { ion } from '@rue/quarky'
 import { EmojiQuest } from './EmojiQuest'
 

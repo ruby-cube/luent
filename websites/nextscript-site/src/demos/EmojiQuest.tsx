@@ -11,7 +11,7 @@ export function EmojiQuest() {
     }
   })
 
-  return component(
+  return (
     <>
       <div class='emoji-quest'>
         <main>
@@ -43,7 +43,7 @@ function Panel(setup: {
 
   const opened = ion(true)
 
-  return component(
+  return (
     <>
       <div class='panel'>
         <div class='top-bar'>{title}
@@ -51,7 +51,7 @@ function Panel(setup: {
             {() => opened() ? '-' : '+'}
           </button>
         </div>
-        <div show-if={opened} class='panel-body'>{Slot()}</div>
+        <div display-if={opened} class='panel-body'>{Slot()}</div>
       </div>
 
       {Style(css`
@@ -97,45 +97,44 @@ function Powerset(setup: {
   const count = $of(powerset).length
   const remaining = ion(() => limit - count())
 
-  return component(
-    <>
-      <div class={['powerset-panel', $class]}>
-        <ul class='powerset-list'>
-          {For(powerset, power =>
-            <li class='power-chip'>{power}</li>
-          )}
-        </ul>
+  return <>
+    <div class={['powerset-panel', $class]}>
+      <ul class='powerset-list'>
+        {For(powerset, power =>
+          <li class='power-chip'>{power}</li>
+        )}
+      </ul>
 
-        <div class='panel-footer'>
-          <button
-            class='add-power-button'
-            disabled={() => count() === limit}
-            on:click={() => mu.powerset.addRandomPower()}
-          >
-            +
-          </button>
+      <div class='panel-footer'>
+        <button
+          class='add-power-button'
+          disabled={() => count() === limit}
+          on:click={() => mu.powerset.addRandomPower()}
+        >
+          +
+        </button>
 
-          <div class='stats'>
-            <span class='stats-label'>Total</span>
-            <span class='stats-value'>{count}/{limit}</span>
-          </div>
+        <div class='stats'>
+          <span class='stats-label'>Total</span>
+          <span class='stats-value'>{count}/{limit}</span>
         </div>
-
-        {If(remaining,
-          <>
-            <div class='message'>You have {remaining} slots left.</div>
-            <div class='message'>You started with {powerset.length} powers.</div>
-          </>
-        )}
-        {Else(
-          <>
-            <div class='message'>Powerset complete.</div>
-            <button class="reset-btn" on:click={() => powerset.length = 0}>Reset</button>
-          </>
-        )}
       </div>
 
-      {Style(css`
+      {If(remaining,
+        <>
+          <div class='message'>You have {remaining} slots left.</div>
+          <div class='message'>You started with {powerset.length} powers.</div>
+        </>
+      )}
+      {Else(
+        <>
+          <div class='message'>Powerset complete.</div>
+          <button class="reset-btn" on:click={() => powerset.length = 0}>Reset</button>
+        </>
+      )}
+    </div>
+
+    {Style(css`
         .powerset-panel {
            box-sizing: border-box;
            width: 100%;
@@ -247,6 +246,5 @@ function Powerset(setup: {
           color: saddlebrown;
         }
       `)}
-    </>
-  )
+  </>
 }

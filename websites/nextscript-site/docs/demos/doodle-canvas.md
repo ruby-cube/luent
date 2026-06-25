@@ -4,16 +4,7 @@
 doodle-canvas-demo
 :::
 
-<script setup>
-import { onMounted } from 'vue'
-import { hydrate } from '../../src/hydrate'
 
-onMounted(async () => {
-  if (typeof window === 'undefined') return;
-  const { DoodleCanvasDemo } = await import('../../src/demos/DoodleCanvasDemo')
-  // hydrate('DoodleCanvasDemo', DoodleCanvasDemo)
-})
-</script>
 
 
 

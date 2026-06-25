@@ -3,6 +3,7 @@ import { h } from 'vue'
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
+import { islands, hydrate } from "../../src/luent-islands.js"
 
 export default {
   extends: DefaultTheme,
@@ -12,6 +13,6 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    // ...
+    hydrate(app, islands)
   }
 } satisfies Theme

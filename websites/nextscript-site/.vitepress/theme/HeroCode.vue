@@ -9,11 +9,11 @@
       <pre class='ns-hero-code__body'><code class='ns-hero-code__content'>{{`function Total({ count@ }: { count: Ion<number> }) {
   get qty = ion(0)
 
-  <::>
+  <:>
     <div>{count@}</div>
     <button on:click={() => qty++}>x {qty@}</button>
     <div>= {(count * qty)@} total</div>
-  </::>
+  </:>
 }`}}</code></pre>
     </div>
 </template>

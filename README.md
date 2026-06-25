@@ -6,7 +6,10 @@
 </div>
 
 # Luent
-Luent is a web application framework that aims to bring greater conceptual coherence to the complexities of modern web development. It consists of a fine-grained reactivity system, DOM manipulation engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation. The project also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension designed to improve the clarity, ergonomics, and type safety of signal-based reactive code.
+
+Luent is a web application framework designed around conceptual coherence and expressiveness. It aims to make evolving applications simpler to build and maintain. 
+
+It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension that improves the clarity, ergonomics, and type safety of fine-grained reactive code.
 
 > **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish docs, an npm package, or CLI. In the meantime, Luent examples can be seen through this [code glimpse](#code-glimpse) and [NextScript demos](). 
 >
@@ -18,9 +21,9 @@ Luent is a web application framework that aims to bring greater conceptual coher
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
-Modern frameworks have brought powerful innovations to web development. While these frameworks have significantly advanced the ecosystem, they also come with additional cognitive overhead, often through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition. 
+Modern frameworks have brought powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
-This project explores ways syntax and API design might improve the way we build modern web applications while minimizing complexity. The key challenge is understanding how far we can move toward simplicity without trading off conceptual integrity and technical rigor. 
+This project explores ways to reduce framework friction and simplify application development without sacrificing technical rigor.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -56,7 +59,7 @@ function EmojiQuest() {
     }
   })
 
-  <::>
+  <:>
     <main>
       <EmojiGame {powerset}/>
     </main>
@@ -68,7 +71,7 @@ function EmojiQuest() {
         />
       </Panel>
     </aside>
-  </::>
+  </:>
 }
 
 function Powerset(setup: {
@@ -82,7 +85,7 @@ function Powerset(setup: {
   get count = powers.length@;
   get remaining = ion(() => limit - count);
 
-  <::>
+  <:>
     <div class='powerset-panel'>
       <ul>
         {For(powers, power =>
@@ -93,7 +96,7 @@ function Powerset(setup: {
       <div class='panel-footer'>
         <button
           disabled={(count === limit)@}
-          on:click={() => mu.powers.addPower()}
+          on:click={() => mu(powers).addPower()}
         >
           +
         </button>
@@ -111,7 +114,7 @@ function Powerset(setup: {
     </div>
 
     <o-link href='/src/powerset.css' rel='stylesheet'/>  
-  </::>
+  </:>
 }
 
 function PowersetMessages(setup: { 
@@ -120,7 +123,7 @@ function PowersetMessages(setup: {
 }) {
   const { start, remaining@ } = fromTag(setup)
 
-  <::>
+  <:>
     {If(remaining@,
       <div class='msg'>You have {remaining@} slots left.</div>
       <div class='msg'>You started with {start} powers.</div>
@@ -128,7 +131,7 @@ function PowersetMessages(setup: {
     {Else(
       <div class='msg'>Powerset complete.</div>
     )}
-  </::>
+  </:>
 }
 ```
 ```tsx
@@ -140,14 +143,14 @@ function Panel(setup: {
 
   get opened = ion(true)
 
-  <::>
+  <:>
     <div class='panel'>
       <div>{title}
         <button on:click={() => opened = !opened}>
           {(opened() ? '-' : '+')@}
         </button>
       </div>
-      <div show-if={opened@}>{Slot}</div>
+      <div display-if={opened@}>{Slot}</div>
     </div>
 
     <o-style>
@@ -156,7 +159,7 @@ function Panel(setup: {
         user-select: none;
       }
     <o-style>
-  </::>
+  </:>
 }
 ```
 <p align="right"><a href="#readme-top">[top]</a></p>

@@ -118,7 +118,7 @@ export function TodoMVC() {
                {ToggleAllButton()}
                <TodoList todos={filteredTodos@} removeTodo={removeTodo}></TodoList>
             </section>
-            <footer show-if={todoCount@} class="footer">
+            <footer display-if={todoCount@} class="footer">
                {RemainingCount()}
                <ul class="filters">
                   <li>
@@ -131,7 +131,7 @@ export function TodoMVC() {
                      <a href="#/completed" class={(view === 'completed' && 'selected')@}>Completed</a>
                   </li>
                </ul>
-               <button show-if={(todoCount > remaining)@} class="clear-completed" on:click={removeCompleted}>
+               <button display-if={(todoCount > remaining)@} class="clear-completed" on:click={removeCompleted}>
                   Clear completed
                </button>
             </footer>

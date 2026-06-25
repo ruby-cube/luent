@@ -1,4 +1,4 @@
-import { afterMount, atAttach, atMount, callWithShadowRoot, component, createRoot, css, fromTag, NodeRef, RenderSlot, Style } from "@rue/luent";
+import { callWithShadowRoot, component, css, fromTag, NodeRef, RenderSlot, Style } from "@rue/luent";
 
 export function DemoContainer(setup: {
   Slot: RenderSlot

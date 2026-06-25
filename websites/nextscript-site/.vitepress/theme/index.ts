@@ -4,27 +4,9 @@ import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import HeroCode from './HeroCode.vue'
 import './style.css'
-import '../../src/style-rules'
-import { islands } from '../../src/luent-islands'
+import '../../../shared/src/style-rules'
+import { islands, hydrate } from '../../src/luent-islands.js'
 
-const AwaitMount = defineComponent({
-  name: 'await-mount',
-  setup(_, { slots }) {
-    const mounted = ref(false)
-
-    onMounted(() => {
-      mounted.value = true
-    })
-
-    return () => {
-      if (!mounted.value) {
-        return slots.fallback?.() ?? null
-      }
-
-      return slots.default?.() ?? null
-    }
-  }
-})
 
 export default {
   extends: DefaultTheme,
@@ -38,37 +20,7 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    app.component('await-mount', AwaitMount)
-
-    if (typeof window == 'undefined') return;
-
-    if (!customElements.get('style-scope')) {
-      customElements.define('style-scope', class StyleScope extends HTMLElement {
-        connectedCallback() {
-          const template = this.querySelector('template')
-          const content = template?.content.cloneNode(true) as DocumentFragment | undefined
-
-          const slot = content ?? document.createElement('slot')
-          const root = this.attachShadow({ mode: 'open' });
-          root.appendChild(slot)
-          if (template) template.remove()
-        }
-      });
-    }
-
-    // define custom elements
-    for (const key in islands) {
-      if (!customElements.get(key)) {
-        customElements.define(key, islands[key]())
-      }
-    }
+    hydrate(app, islands)
   }
 } satisfies Theme
 
-declare global {
-  namespace JSX {
-    interface CustomElements {
-      'style-scope': {}
-    }
-  }
-}

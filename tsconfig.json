@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "plugins": [
-      { "name": "typescript-plugin-css-modules" }
+      {
+        "name": "typescript-plugin-css-modules"
+      }
     ],
     "allowImportingTsExtensions": true,
     "target": "ESNext",
@@ -31,10 +33,15 @@
     "noImplicitReturns": false,
     "skipLibCheck": true,
     "paths": {
-      "react/jsx-runtime": ["./packages/luent/src/jsx-runtime"],
-      "react-dom": ["./packages/luent/src/jsx-runtime"],
-      "react-dom/*": ["./packages/luent/src/jsx-runtime/*"],
-
+      "react/jsx-runtime": [
+        "./packages/luent/src/jsx-runtime"
+      ],
+      "react-dom": [
+        "./packages/luent/src/jsx-runtime"
+      ],
+      "react-dom/*": [
+        "./packages/luent/src/jsx-runtime/*"
+      ],
       "@rue/utils": [
         "./packages/utils/index.ts"
       ],
@@ -46,6 +53,9 @@
       ],
       "@rue/luent/jsx-dev-runtime": [
         "./packages/luent/src/jsx-runtime/index.ts"
+      ],
+      "@rue/websites-shared": [
+        "./websites/shared/src/index.ts"
       ],
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"
@@ -71,10 +81,11 @@
     "packages",
     "apps",
     "demos",
-    "**/src/*", 
+    "**/src/*",
     "e2e",
-    "plugins", 
-    "websites/nextscript-site/.vitepress/theme/*", 
+    "plugins",
+    "websites/nextscript-site/.vitepress/theme/*",
     "websites/nextscript-site/src/*",
-    "websites/nextscript-site/demos/*"  ]
+    "websites/nextscript-site/demos/*"
+, "websites/shared/tsconfig.json"  ]
 }

@@ -51,7 +51,7 @@ export function runDemo() {
   createRoot(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestHookForwarding />
+    return <EmojiQuest />
   })
     // createRoot(() => )
     .mount('#root')

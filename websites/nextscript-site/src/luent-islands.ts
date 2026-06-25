@@ -4,6 +4,7 @@ export { getPortals, runWithPortals, RenderPage } from '@rue/luent'
 import { createRoot, writeRoot } from '@rue/luent'
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
 import { DoodleCanvasDemo } from "./demos/DoodleCanvasDemo";
+export * from "@rue/websites-shared";
 
 export const writeIsland = {
   'code-glimpses': () => writeRoot(CodeGlimpses),

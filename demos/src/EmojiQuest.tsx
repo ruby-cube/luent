@@ -11,7 +11,7 @@ export function EmojiQuest() {
     }
   })
 
-  return component(
+  return (
     <>
       <main>
         {/* <EmojiGame></EmojiGame> */}
@@ -29,11 +29,11 @@ function Panel(setup: {
   title: string,
   Slot: RenderSlot
 }) {
-  const { title, Slot } = setup
+  const { title, Slot } = fromTag(setup)
 
   const opened = ion(true)
 
-  return component(
+  return (
     <>
       <div class='panel'>
         <div class='top-bar'>{title}
@@ -41,7 +41,7 @@ function Panel(setup: {
             {() => opened() ? '-' : '+'}
           </button>
         </div>
-        <div show-if={opened} class='panel-body'>{Slot()}</div>
+        <div display-if={opened} class='panel-body'>{Slot()}</div>
       </div>
       {Style(css`
             .panel {
@@ -86,7 +86,7 @@ function Powerset(setup: {
   const count = $of(powerset).length
   const remaining = ion(() => limit - count())
 
-  return component(
+  return (
     <>
       <div class={['powerset-panel', $class]}>
         <ul class='powerset-list'>

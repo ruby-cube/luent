@@ -1,0 +1,20 @@
+{
+  "name": "@rue/websites-shared",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "dependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@rue/luent": "workspace:*",
+    "@rue/quarky": "workspace:*"
+  },
+  "peerDependencies": {
+    "vitepress": "2.0.0-alpha.17"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT"
+}

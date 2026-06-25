@@ -1,6 +1,5 @@
-import { Code } from '../Code'
-import { highlightCode } from "../code-utils"
-import { DemoContainer } from "../DemoContainer"
+import { Code, DemoContainer } from '@rue/websites-shared'
+import { highlightCode } from "../highlighter"
 import { HabitTracker } from './HabitTracker'
 
 export function HabitTrackerDemo() {
@@ -30,11 +29,11 @@ export function HabitTracker({ habit, goal = 5 }) {
   get count = ion(0)
   get achieved = ion((count === goal)@)
 
-  <::>
+  <:>
     <div class='tracker'>
       {habit}
       <ul>
-        {Thru(goal, (n) <:>
+        {Thru(goal, n =>
           <li on:click={() => count = n}>
             <div class={['unit', { 'filled': (n <= count)@ }]}></div>
           </li>
@@ -46,7 +45,7 @@ export function HabitTracker({ habit, goal = 5 }) {
     </div>
 
     <o-link href='/src/habit-tracker.css' rel='stylesheet' />
-  </::>
+  </:>
 }
   
 
@@ -59,16 +58,16 @@ export function HabitTracker({ habit, goal = 5 }) {
   const count = ion(0)
   const achieved = ion(() => count() === goal)
 
-  return component(
+  return (
     <>
       <div class='tracker'>
         {habit}
         <ul>
-          {Thru(goal, n => <>
+          {Thru(goal, n =>
             <li on:click={() => count.value = n}>
               <div class={['unit', { 'filled': () => n <= count() }]}></div>
             </li>
-          </>)}
+          )}
         </ul>
         {If(achieved, () => <>
           <span class='star'>🌟</span>

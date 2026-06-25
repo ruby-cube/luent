@@ -278,8 +278,8 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
         }
         break;
 
-      case 'show-if':
-        composed.showIf = bindings['show-if']
+      case 'display-if':
+        composed.showIf = bindings['display-if']
         break;
 
       default: // attributes

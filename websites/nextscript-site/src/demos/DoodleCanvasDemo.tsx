@@ -1,7 +1,6 @@
-import { Code } from '../Code'
+import { Code, DemoContainer } from '@rue/websites-shared'
 import { DoodleCanvas } from "./DoodleCanvas"
-import { highlightCode } from "../code-utils"
-import { DemoContainer } from "../DemoContainer"
+import { highlightCode } from "../highlighter"
 import { ion } from '@rue/quarky'
 
 export function DoodleCanvasDemo() {
@@ -211,7 +210,7 @@ function DoodleCanvas() {
     clearCanvas 
   } = DoodleCanvasKit()
   
-  <::>
+  <:>
     <div class="canvas-app">
       <div class="frame">
         <canvas
@@ -250,7 +249,7 @@ function DoodleCanvas() {
         cursor: crosshair;
       }
     </o-style>
-  </::>
+  </:>
 }
     
   `

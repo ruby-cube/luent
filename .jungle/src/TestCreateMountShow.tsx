@@ -74,11 +74,11 @@ export function TestCreateMountShow() {
          <hr></hr>
          <h3>Show/hide an element</h3>
          <section>
-            <code>{'<div show-if={$condition}>'}</code>
+            <code>{'<div display-if={$condition}>'}</code>
             <p>This toggles css <span class="code">display: none</span> on a single element</p>
             <div class='container'>
                <div class='container' style="height: 60px">
-                  <div show-if={$brave} class='emoji'>
+                  <div display-if={$brave} class='emoji'>
                      😳
                   </div>
                </div>

@@ -78,7 +78,7 @@ export type EventsConfig = {
 export type ElementConfig<K extends TagName = TagName> = {
   [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
-  'show-if'?: Ion<Booleanny>
+  'display-if'?: Ion<Booleanny>
   // attributes?: K extends TagName ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 

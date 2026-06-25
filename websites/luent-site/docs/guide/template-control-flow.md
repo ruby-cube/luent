@@ -2,7 +2,7 @@
 Luent offers three main ways of rendering templates based on control flow:
 - JSX flow expressions
 - JavaScript control flow for static-only rendering
-- the `show-if` attribute for conditional display
+- the `display-if` attribute for conditional display
 
 Template control flow may render either static views or dynamic views. A view is dynamic when its presence in the DOM is determined by reactive state.
 
@@ -240,13 +240,13 @@ Luent provides three distinct control flow functions for static and reactive con
 - `As` for rendering a template as the active case
 - `Match`/`Case` for diverse case rendering
 
-Luent also exposes a display-toggle attribute, `show-if` on elements to ergonomically show or hide an element. 
+Luent also exposes a display-toggle attribute, `display-if` on elements to ergonomically show or hide an element. 
 
 ### Conditional display
-`show-if` is a hybrid of static and dynamic rendering. It lazily mounts the element to the DOM if its initial state is false. Once mounted, the element remains in the DOM and Luent toggles its CSS display property based on the state of `show-if`.
+`display-if` is a hybrid of static and dynamic rendering. It lazily mounts the element to the DOM if its initial state is false. Once mounted, the element remains in the DOM and Luent toggles its CSS display property based on the state of `display-if`.
 
 ```tsx
-<div show-if={$active}>Hello world</div>
+<div display-if={$active}>Hello world</div>
 <button on:click={$active.toggle}>
   {() => $active() ? 'hide' : 'show'}
 </button>

@@ -4,16 +4,7 @@
 emoji-quest-demo
 :::
 
-<script setup>
-import { onMounted } from 'vue'
-import { hydrate } from '../../src/hydrate'
 
-onMounted(async () => {
-  if (typeof window === 'undefined') return;
-  const { EmojiQuestDemo } = await import('../../src/demos/EmojiQuestDemo')
-  // hydrate('EmojiQuestDemo', EmojiQuestDemo)
-})
-</script>
 
 
 

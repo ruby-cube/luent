@@ -62,7 +62,7 @@ export function makeComponent(
 
   // TODO: if publicComponent and hooks has been nested, throw error?
 
-  // if (tag['show-if']) setUpConditionalDisplay()
+  // if (tag['display-if']) setUpConditionalDisplay()
   return output
 }
 

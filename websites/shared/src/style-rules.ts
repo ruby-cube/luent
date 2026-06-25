@@ -12,3 +12,11 @@ if (typeof window !== 'undefined' && !customElements.get('style-rules')) {
     }
   })
 }
+
+export function encodeStyleTags(html: string): string {
+  return html.replace(/<style(?=[\s>])[^>]*>([\s\S]*?)<\/style>/gi, (_, css: string) => {
+    // const encodedCss = Buffer.from(css, 'utf8').toString('base64')
+    return `<style-rules>${css}</style-rules>`
+  })
+}
+

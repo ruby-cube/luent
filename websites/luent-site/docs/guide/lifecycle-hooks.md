@@ -9,6 +9,8 @@ Lifecycle hooks may take the form of:
 - [function hooks](#function-hooks) (e.g. `atMount(task)`) 
 - [template hooks](#template-hooks) (e.g. `<div at:mount={task}/>`)
 
+Template hooks are useful when the lifecycle behavior belongs to a specific element or node. Function hooks should be used when the behavior belongs to the component or dynamic view.
+
 ## Hook Grammar
 
 Hooks are formed compositionally by combining:

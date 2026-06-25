@@ -4,13 +4,21 @@
   "description": "",
   "type": "module",
   "devDependencies": {
+    "@rue/luent": "workspace:*",
+    "@rue/quarky": "workspace:*",
+    "@rue/websites-shared": "workspace:*",
+    "concurrently": "^10.0.3",
+    "shiki": "^4.1.0",
+    "vue": "^3.5.0",
     "vitepress": "2.0.0-alpha.17"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT",
   "scripts": {
-    "dev": "vitepress dev",
-    "build": "vitepress build",
-    "preview": "vitepress preview"
+    "docs:preview": "vitepress preview",
+    "islands:dev": "concurrently \"vite build --watch --config island.server.config.ts\" \"vite build --watch --config island.client.config.ts\"",
+    "docs:dev": "pnpm docs:prebuild && concurrently \"pnpm islands:dev\" \"vitepress dev\"",
+    "docs:prebuild": "vite build --config island.server.config.ts && vite build --config island.client.config.ts",
+    "docs:build": "pnpm docs:prebuild && vitepress build"
   }
 }
