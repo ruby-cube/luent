@@ -11,11 +11,15 @@ Luent is a web application framework designed around conceptual coherence and ex
 
 It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension that improves the clarity, ergonomics, and type safety of fine-grained reactive code.
 
-> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish docs, an npm package, or CLI. In the meantime, Luent examples can be seen through this [code glimpse](#code-glimpse) and [NextScript demos](). 
->
-> NextScript features have mostly been implemented but require substantial tooling work before the extension is usable. To get a sense of NextScript's syntax, check out these [code glimpses]() and [demos]().
+> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish docs, an npm package, or CLI.
 >
 > We'd love help getting this project off the ground. Learn how to [contribute](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
+
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+## Code Glimpses
+Take a tour of Luent's syntax and APIs through these [code glimpses]().
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
