@@ -112,7 +112,7 @@ This JSX template ...
 Luent is being developed under these guiding principles, which encapsulate our values and how we navigate tradeoffs:
 
 - **Human-centered, LLM-friendly.**
-We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. AI plays a supporting role. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we create systems that are LLM-friendly as well.
+We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we create systems that are LLM-friendly as well.
 
 - **Elegance and simplicity.**
 Elegance—both conceptual and syntactic—is central to Luent’s API design. We pursue simple solutions through extensive experimentation and relentless trimming of excess.
