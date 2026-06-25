@@ -13,7 +13,7 @@ It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/pac
 
 <br/>
 
-> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. We have yet to publish docs, an npm package, or CLI.
+> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents implemented and in-progress features while planned features are listed in our [roadmap]().
 >
 > We'd love help getting this project off the ground. Learn how to [contribute](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
 
@@ -162,11 +162,40 @@ Particular acknowledgement to the people and projects I've especially admired:
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 
-## Current status
+## Roadmap
 
-The current goal is to establish an intuitive and expressive API that enhances developer experience and productivity.
+This project is in early development. The current goal is to establish an intuitive and expressive API that enhances developer productivity and application maintainability.
 
-Once the API stabilizes, development will increasingly focus on runtime efficiency, treeshakability, smaller bundle sizes, and shifting more work from runtime to compile time.
+Once the API stabilizes, development will increasingly focus on runtime efficiency, tree-shakability, smaller bundle sizes, and shifting more work from runtime to compile time.
+
+### Completed
+- Core client-side features
+
+### In progress
+- `.nsx` preprocessing pipeline
+- Async rendering
+- Animation and transition APIs
+- Debugging tools
+- Documentation
+- Server-side rendering
+- Interactive islands
+
+### Planned: Framework Features
+- Scoped styles
+- Client-side routing
+
+### Planned: Tooling & Developer experience
+- Improved dev warnings
+- npm package
+- CLI
+- Hot module replacement
+- Playground
+
+### Planned: Runtime & Performance
+- Performance optimizations
+- Smaller bundle sizes
+- Compiler-assisted tree-shaking of ergonomic APIs
+
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
