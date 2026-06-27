@@ -106,7 +106,7 @@ function asFiles(data: FileData[]) {
 // })
 const data = [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
 
-function LoadingApp() { //Stand in until I fix createRoot
+function LoadingApp() { //Stand-in until I fix mount
 
    // const files = dispatchGET(FILES, { $userId })
 

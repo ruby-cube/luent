@@ -1,4 +1,3 @@
-import { getAppRoot } from "../createRoot";
 import { endHydration } from "./hydration";
 
 // To hydrate the DOM tree, we start with the left-most leaf

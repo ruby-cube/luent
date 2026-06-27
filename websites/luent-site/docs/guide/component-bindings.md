@@ -6,6 +6,17 @@
 
 ## From Tag
 
+These bindings include:
+
+- ions
+- events
+- styles
+- attributes
+- slots
+- lifecycle hooks
+- namespaced bindings
+- callbacks
+
 #### Input Validation
 Defaults
 

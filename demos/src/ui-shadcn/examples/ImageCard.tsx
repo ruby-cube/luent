@@ -1,4 +1,4 @@
-import { createRoot } from "@rue/luent"
+import { mount } from "@rue/luent"
 import { Badge } from "../Badge"
 import { Button } from "../Button"
 import {
@@ -37,5 +37,5 @@ export function ImageCard() {
 }
 
 if (__STYLE__) {
-   createRoot(ImageCard).mount('#root')
+   mount(ImageCard, '#root')
 }

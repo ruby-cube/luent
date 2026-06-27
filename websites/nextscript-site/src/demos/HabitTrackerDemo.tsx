@@ -14,7 +14,7 @@ export function HabitTrackerDemo() {
       <Code
         trusted
         main={{ name: 'nsx', code: nsx }}
-        alt={{ name: 'tsx', code: tsx, lang: 'tsx' }}
+        alt={{ name: 'tsx equivalent', code: tsx, lang: 'tsx' }}
         highlight={highlightCode}
         showSticky
       />
@@ -52,7 +52,7 @@ export function HabitTracker({ habit, goal = 5 }) {
 `
 
 const tsx =
-  `import { ion, If, Thru, component } from "@rue/luent";
+  `import { ion, If, Thru } from "@rue/luent";
 
 export function HabitTracker({ habit, goal = 5 }) {
   const count = ion(0)

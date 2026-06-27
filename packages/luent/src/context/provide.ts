@@ -42,14 +42,12 @@ export function _fromContext<K extends ContextEntryKey | string, OPT>(key: K, op
 }
 
 
-export function createRootContext(provided: [ContextEntryKey | string, unknown][] | undefined, groundContext: RootContext | undefined) {
-  const [entries, muIons] = provided ? toContextEntries(provided) : [undefined, undefined]
+export function createRootContext() {
   const rootContext = {
-    entries,
-    parent: groundContext,
+    entries:undefined,
+    parent: undefined,
     root: undefined as unknown as RootContext,
-    ground: groundContext,
-    muIons
+    ground: undefined,
   }
   rootContext.root = rootContext
   return rootContext;
@@ -65,7 +63,6 @@ export function provideRoot<K extends ContextEntryKey>(key: K, value: ContextVal
   const rootContext = context.root;
   const appEntries = rootContext.entries || (rootContext.entries = new Map());
   const contextKey = toContextKey(key)
-  markIfMuIon(key, value, rootContext)
   if (appEntries.has(contextKey)) {
     if (__DEV__) {
       console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -126,10 +123,9 @@ export function provideGround<K extends ContextEntryKey | string>(key: K, value:
     throw new Error('')
   const groundContext = context.ground
   if (!groundContext)
-    throw new Error('No ground context found. Call createGroundContext() and pass into createRoot() via config')
+    throw new Error('No ground context found. Call createGroundContext() and pass into mount() via config')
   const globalEntries = groundContext.entries!
   const contextKey = toContextKey(key)
-  markIfMuIon(key, value, groundContext)
   if (globalEntries.has(contextKey)) {
     if (__DEV__) {
       console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)

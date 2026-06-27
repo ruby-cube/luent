@@ -1,8 +1,6 @@
-// @ts-nocheck
-import { component, Context, createRoot, NodeRef, template } from "@rue/luent"
+import { component, Context, mount, NodeRef, template } from "@rue/luent"
 import { Button } from "../Button"
-import { Tooltip } from "../Tooltip"
-import { TOOLTIP_CONFIG, TooltipKit } from "../../ui-base/tooltip/Tooltip.kit"
+import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui"
 
 // Basic:
 // [X] anchoring
@@ -25,7 +23,7 @@ import { TOOLTIP_CONFIG, TooltipKit } from "../../ui-base/tooltip/Tooltip.kit"
 const demoBoxStyle = "relative flex h-72 w-full justify-center p-10 data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0"
 
 export function TooltipDemo() {
-  const { tooltip, asTooltipTrigger } = TooltipKit({
+  const { tooltip, setTooltipTrigger } = TooltipKit({
     info: { // TODO: remove info?
       bold: 'Bold Bold Bold Bold',
       italic: 'Italic',
@@ -43,13 +41,13 @@ export function TooltipDemo() {
         {/* <div style='background-color: lightblue' before:mount={tooltip.anchor.italic}>i</div> */}
         {/* <div style='background-color: lightblue' before:mount={tooltip.anchor.underline}>u</div> */}
         {/* <Button before:mount={tooltip.anchor.default} variant='outline'>o</Button> */}
-        <Button before:mount={asTooltipTrigger.bold} variant="outline">
+        <Button before:mount={setTooltipTrigger.bold} variant="outline">
           B
         </Button>
-        <Button before:mount={asTooltipTrigger.italic} variant="outline">
+        <Button before:mount={setTooltipTrigger.italic} variant="outline">
           I
         </Button>
-        <Button before:mount={asTooltipTrigger.underline} variant="outline">
+        <Button before:mount={setTooltipTrigger.underline} variant="outline">
           U
         </Button>
         <Tooltip tooltip={tooltip} place="above" align="center">
@@ -64,6 +62,6 @@ export function TooltipDemo() {
 }
 
 if (__STYLE__) {
-  createRoot(TooltipDemo).mount('#root')
+  mount(TooltipDemo, '#root')
 }
 

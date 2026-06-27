@@ -1,6 +1,8 @@
 import { css, Style } from '@rue/luent'
 import { Code, CodeTour, TourSection } from '@rue/websites-shared'
 import { highlightCode } from './highlighter'
+import { HoverInfo, TooltipKit } from '@rue/websites-shared'
+import { TOOLTIP_CONFIG } from '@rue/luent-ui'
 
 let direction = 'code-right'
 function flowDirection() {
@@ -9,6 +11,7 @@ function flowDirection() {
 }
 
 export function CodeGlimpses() {
+
   return (
     <>
       <CodeTour>
@@ -77,12 +80,49 @@ export function CodeGlimpses() {
 
         <TourSection
           flow={flowDirection()}
+          mainCode={{ name: 'nsx', code: MutationSafety.nsx }}
+          altCode={{ name: 'tsx', code: MutationSafety.tsx, lang: 'tsx' }}
+          highlightCode={highlightCode}
+        >
+          {MutationSafety()}
+        </TourSection>
+
+        <TourSection
+          flow={flowDirection()}
           mainCode={{ name: 'nsx', code: LifecycleHooks.nsx }}
           altCode={{ name: 'tsx', code: LifecycleHooks.tsx, lang: 'tsx' }}
           highlightCode={highlightCode}
         >
           {LifecycleHooks()}
         </TourSection>
+
+        <TourSection
+          flow={flowDirection()}
+          mainCode={{ name: 'nsx', code: Portals.nsx }}
+          altCode={{ name: 'tsx', code: Portals.tsx, lang: 'tsx' }}
+          highlightCode={highlightCode}
+        >
+          {Portals()}
+        </TourSection>
+
+        <TourSection
+          flow={flowDirection()}
+          mainCode={{ name: 'nsx', code: ContextualBindings.nsx }}
+          altCode={{ name: 'tsx', code: ContextualBindings.tsx, lang: 'tsx' }}
+          highlightCode={highlightCode}
+        >
+          {ContextualBindings()}
+        </TourSection>
+
+        <TourSection
+          flow={flowDirection()}
+          mainCode={{ name: 'nsx', code: ViewPreservation.nsx }}
+          altCode={{ name: 'tsx', code: ViewPreservation.tsx, lang: 'tsx' }}
+          highlightCode={highlightCode}
+        >
+          {ViewPreservation()}
+        </TourSection>
+
       </CodeTour>
 
       {Style(css`
@@ -125,7 +165,7 @@ function FunctionalComponents() {
   return <>
     <h3>Functional components</h3>
     <p style='text-wrap: balance'>
-      Write components as view setup functions. Views are composed using JSX or NSX and updated through fine-grained reactivity.
+      Write components as render functions that run once to create a view. Views are composed using JSX or NSX and updated through fine-grained reactivity.
     </p>
     <a href='/guide/getter-syntax' class='medium brand'>Learn more</a>
   </>
@@ -149,9 +189,7 @@ FunctionalComponents.nsx =
   </:>
 }
 
-createRoot(() =>
-  <Counter/>
-).mount('#app')
+mount(Counter, '#app')
 
 `
 
@@ -166,9 +204,7 @@ FunctionalComponents.tsx =
   )
 }
 
-createRoot(() =>
-  <Counter/>
-).mount('#app')
+mount(Counter, '#app')
 
 `
 
@@ -253,10 +289,18 @@ const list = ionic(['apples', 'peaches', 'pears']);
 `
 
 function TypeExplicit() {
+  const { tooltip, setTooltipTrigger } = TooltipKit({
+    info: { text: 'this is info' }
+  })
   return <>
-    <h3>Type-explicit reactivity</h3>
+    <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
+      <h3 before:mount={setTooltipTrigger.text}>Type-explicit reactivity</h3>
+      <HoverInfo info={tooltip} placement='above' align='start'>
+        {tooltip.info}
+      </HoverInfo>
+    </o:context>
     <p style='text-wrap: balance'>
-      Distinguish reactive variables from plain variables through type information. Try it out: hover variables in the example to inspect their types.
+      Distinguish reactive variables from plain variables through type information. Hover variables in the example to inspect their types.
     </p>
     <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
@@ -289,8 +333,8 @@ function SelectiveReactivity() {
   return <>
     <h3>Selective reactivity</h3>
     <p>
-      Apply reactivity where it matters while keeping other parts of the view inert. Selective reactivity reduces unnecessary performance overhead and offers clarity and control over what gets re-rendered.
-{/*       
+      Apply reactivity where it matters. Selective reactivity reduces unnecessary performance overhead and offers clarity and control over what gets re-rendered.
+      {/*       
       allows fine-grained 
       Control over what participates in the reactive system  */}
     </p>
@@ -432,6 +476,76 @@ DynamicViewSetup.tsx =
 
 
 
+function MutationSafety() {
+  return <>
+    <h3>Mutation Safety</h3>
+    <p>
+      Compile-time mutation checking prevent hidden nonlocal mutations, while explicit mutable bindings enable safe, statically traceable cross-boundary mutations.
+    </p>
+    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+  </>
+}
+
+MutationSafety.nsx =
+  `function EmojiQuest({ powers }) {
+  const powerset = ionic(['🍀', '🍄', '✨'], {
+    addRandomPower() {
+      this.push(chooseRandom(powers))
+    }
+  })
+  <:>
+    <EmojiBoard powers={powerset}/>
+    <Powerset mu:powers={powerset} limit={10}/>
+  </:>
+}
+
+function Powerset(setup: {
+  'mu:powers': Ionic<string[]> & { addRandomPower(): void }
+  limit: number,
+}) {
+  const { mu, '-r': { powers }, limit } = fromTag(setup);
+  <:>
+    <div class='powerset-panel'>
+      <Powers {powers}>
+      <button
+        disabled={() => powers.length === limit}
+        on:click={() => mu.powers.addRandomPower()}
+      >+</button>
+    </div>
+    <o--link href='/powerset.css' rel='stylesheet' />
+  </:>
+}`
+
+MutationSafety.tsx =
+  `function EmojiQuest({ powers }) {
+  const powerset = ionic(['🍀', '🍄', '✨'], {
+    addRandomPower() {
+      this.push(chooseRandom(powers))
+    }
+  })
+  return <>
+    <EmojiBoard powers={powerset}/>
+    <Powerset mu:powers={powerset} limit={10}/>
+  </>
+}
+
+function Powerset(setup: {
+  'mu:powers': Ionic<string[]> & { addRandomPower(): void }
+  limit: number,
+}) {
+  const { mu, '-r': { powers }, limit } = fromTag(setup);
+  return <>
+    <div class='powerset-panel'>
+      <Powers powers={powers}>
+      <button
+        disabled={() => powers.length === limit}
+        on:click={() => mu.powers.addRandomPower()}
+      >+</button>
+    </div>
+    <o--link href='/powerset.css' rel='stylesheet' />
+  </>
+}`
+
 function LifecycleHooks() {
   return <>
     <h3>Inline lifecycle hooks</h3>
@@ -465,4 +579,134 @@ LifecycleHooks.tsx =
     on:blur={e => doneEdit(todo)}
   />
 )}
+`
+
+function Portals() {
+  return <>
+    <h3>Portals</h3>
+    <p>
+      Visually distinctive portal tags make it clear which sections of the view are rendered elsewhere in the DOM. Declare metadata locally in components through head elements like <code>{'<o-link>'}</code> and <code>{'<o-style>'}</code>.
+    </p>
+    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+  </>
+}
+
+Portals.nsx =
+  `<o--portal to='#sidebar'>
+  <Preview document={document}/>
+</o--portal>
+
+<o--body>
+  {If(show@, 
+    <Modal content={content}/>
+  )}
+</o--body>
+
+<o-link href='./style.css' rel='stylesheet'/>
+`
+
+Portals.tsx =
+  `<o--portal to='#sidebar'>
+  <Preview document={document}/>
+</o--portal>
+
+<o--body>
+  {If($show, 
+    <Modal content={content}/>
+  )}
+</o--body>
+
+<o-link href='./style.css' rel='stylesheet'/>
+`
+
+function ContextualBindings() {
+  return <>
+    <h3>Context Bindings</h3>
+    <p>
+      Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Provide from the root of an application locally with <code>{'<o--root>'}</code> or from reusable kits with <code>provideRoot()</code>. Merge context keys to provide the same binding across multiple decoupled components.
+    </p>
+    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+  </>
+}
+
+ContextualBindings.nsx =
+  `const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
+
+<o:context provide={[THEME(theme@), SETTINGS(settings)]}>
+  <Main/>
+  <Sidebar/>
+</o:context>
+
+//--
+
+Sidebar.THEME = ContextKey<Ion<Theme>>('theme')
+Sidebar.SETTINGS = ContextKey<Settings>('settings')
+
+export function Sidebar() {
+  get theme = fromContext(THEME)@;
+  const settings = fromContext(SETTINGS);
+  /* ... */
+}
+`
+
+ContextualBindings.tsx =
+  `const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
+
+<o:context provide={[THEME($theme), SETTINGS(settings)]}>
+  <Main/>
+  <Sidebar/>
+</o:context>
+
+//--
+
+Sidebar.THEME = ContextKey<Ion<Theme>>('theme')
+Sidebar.SETTINGS = ContextKey<Settings>('settings')
+
+export function Sidebar() {
+  const $theme = $fromContext(THEME);
+  const settings = fromContext(SETTINGS);
+  /* ... */
+}
+`
+
+function ViewPreservation() {
+  return <>
+    <h3>Preserved Views</h3>
+    <p>
+      Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>’preserve’</code> directive. Discard with <code>`view.markDiscard()`</code> when the view is no longer needed or state needs to be refreshed.
+    </p>
+    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+  </>
+}
+
+ViewPreservation.nsx =
+  `<div>
+  {If(showSidebar@, 'preserve',
+    <Sidebar selected={tab@}/>
+  )}
+  <o:preserve>
+    {As(tab@,
+      <Editor content={tabNames[tab]} />
+    )}
+    {Default(
+      <p>No tabs open</p>
+    )}
+  </o:preserve>
+</div>
+`
+
+ViewPreservation.tsx =
+  `<div>
+  {If($showSidebar, 'preserve',
+    <Sidebar selected={$tab}/>
+  )}
+  <o:preserve>
+    {As($tab,
+      <Editor content={tabNames[$tab()]} />
+    )}
+    {Default(
+      <p>No tabs open</p>
+    )}
+  </o:preserve>
+</div>
 `

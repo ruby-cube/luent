@@ -315,7 +315,7 @@ get { bar, count: num } = foo;
 <!-- `(expression)@` | `{ statements; return statement }@` -->
 <code>(<i>expression</i>)@</code>  |  <code>{ <i>statements;</i> return <i>statement</i> }@</code>
 
-Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for in-template derivations. They may be written as expressions with an implicit return...
+Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for inline derivations. They may be written as expressions with an implicit return...
 ```nsx
 <p>{count@} x 2 = {(count * 2)@}</p>
 ```

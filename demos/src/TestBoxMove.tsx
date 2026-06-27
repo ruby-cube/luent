@@ -1,4 +1,4 @@
-import { component, template, createRoot } from "@rue/luent"
+import { component, template, mount } from "@rue/luent"
 import { ionic } from "@rue/quarky"
 
 /* 
@@ -51,4 +51,4 @@ export function TestMoveBox() {
    )
 }
 
-if (__TEST__) createRoot(TestMoveBox).mount('#root')
+if (__TEST__) mount(TestMoveBox, '#root')

@@ -1,4 +1,4 @@
-import { component, template, createRoot, For, listen, NodeRef, Style, css } from "@rue/luent";
+import { component, template, mount, For, listen, NodeRef, Style, css } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { ion, EACH, ionic } from "@rue/quarky";
@@ -179,5 +179,5 @@ function genId() {
 
 
 if (__TEST__) {
-   createRoot(TestListSelection).mount('#root')
+   mount(TestListSelection, '#root')
 }

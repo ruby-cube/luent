@@ -2,7 +2,7 @@
 import { SevenGUIs } from './wip-demos/7-guis';
 import { View } from './wip-demos/vue-data-fetching';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { createRoot } from '@rue/luent';
+import { mount } from '@rue/luent';
 import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { TestListSelect } from './wip-demos/TestListSelect';
@@ -147,10 +147,7 @@ import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises
 // }
 
 
-// const app = createRoot(TestThru)
-const app = createRoot(TestBox)
-
-app.mount('#root')
+mount(TestBox, '#root')
 
 // const frog = new IonicFrog('kermit')
 
@@ -416,8 +413,6 @@ app.mount('#root')
 
 // frog;
 
-// const root = createRoot(document.getElementById('app'));
-// root.render(<h1>Hello, world</h1>);
 
 // if ( __DEV__) configureFlask({
 //    warnNoCleanup: true
@@ -427,12 +422,6 @@ app.mount('#root')
 //    m(DOOR, () => doSomething())
 // ])
 
-// const app = createRoot(
-//    <SortableTableApp
-//       hideApp={hideApp}
-//       closeApp={closeApp}
-//    />
-// )
 
 // const array = ionize([{ name: 'a' }, { name: 'b' }])
 // console.log('Stringify', JSON.stringify(array))

@@ -112,10 +112,10 @@ export function Code(setup: {
         </o:preserve>
       </div>
       {Style(css`
-        .code-container {
-          position: relative;
+.code-container {
+  position: relative;
   margin: 16px 0;
-  border: 1px solid var(--vp-c-divider);
+  // border: 1px solid var(--vp-c-divider);
   border-radius: 12px;
   background-color: var(--vp-code-block-bg);
   overflow: hidden;
@@ -128,14 +128,14 @@ export function Code(setup: {
   align-items: center;
   padding: 8px;
   background-color: var(--vp-code-tab-bg);
-  border-bottom: 1px solid var(--vp-c-divider);
+  border-bottom: 2px solid var(--vp-c-bg);
   overflow-x: auto;
 }
 
 .code-container .toggle {
   position: relative;
-  height: 3rem;
-  border: 1px solid var(--vp-c-divider);
+  height: 2.5rem;
+  // border: 1px solid var(--vp-c-divider);
   border-radius: 1.5rem;
   padding: 4px;
   z-index: 0;
@@ -144,15 +144,14 @@ export function Code(setup: {
 
 .code-container button span {
   appearance: none;
-  height: 39px;
   border: 1px solid transparent;
   border-radius: 19.5px;
   background: transparent;
   color: var(--vp-code-tab-text-color);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
-  padding: 10px 14px;
+  padding: 3px 10px;
   cursor: pointer;
 }
 

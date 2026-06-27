@@ -13,6 +13,9 @@ import { AnyObject, Booleanny, Falsey } from "@rue/types";
 import { Provided, RootContext } from "../context/Context";
 import { Flask, flaskStack } from "@rue/flask";
 import { InnerHTMLKit, isInnerHTMLKit } from "../node/InnerHTML";
+import { createRootContext } from "../context/provide";
+import { popContext, pushContext } from "../context/context-stack";
+import {toHtml} from "@rue/utils"
 
 const selfclosing = {
   "area": true,
@@ -48,10 +51,10 @@ function getValue(value: any) {
 function renderBindings(bindings: ElementConfig) {
   const { attributes, classes, microclasses, styles, showIf, transitions /* TODO: */ } = composeBindings(bindings)
   let renderedAttributes = ''
-  
+
   if (attributes) renderedAttributes += genAtrributes(attributes)
-  if (classes) {
-    const classString = genClasses(normalizeToArray(classes))
+  if (classes || microclasses) {
+    const classString = classes ? genClasses(normalizeToArray(classes)) : '' + microclasses ? ' ' + toValue(microclasses) : ''
     if (classString)
       renderedAttributes += ` class="${classString}"`
   }
@@ -188,7 +191,8 @@ export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = [
     }
     else if (isFunction(node)) {
       if (node.length !== 0) throw new Error('render functions must have no parameters')
-      flattened.push(toString(node()))
+      // flattened.push(toString(node()))
+      processJSXOutput(toString(node()), flattened)
     }
     else if (node == null || node === '') {
       continue;
@@ -197,7 +201,7 @@ export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = [
     //   flattened.push(node)
     // }
     else {
-      flattened.push(toString(node))
+      flattened.push(toHtml(toString(node)))
     }
   }
   return flattened;
@@ -214,18 +218,21 @@ export function writeComponent(
 
 
 
-export function writeRoot<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, config?: { provide?: E, remountable?: boolean, groundContext?: RootContext, setup?: T }) {
+export function writeRoot<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction) {
   const flask = new Flask({ type: 'view' });
+  const rootContext = createRootContext()
   try {
+    pushContext(rootContext)
     flaskStack.push(flask)
     flask.emitInitialMount()
     console.log('RENDER TO STRING')
-     const output = instantUpdate(() => 
+    const output = instantUpdate(() =>
       processJSXOutput(normalizeToArray(App())).join('')
     )
     return output
   }
   finally {
+    popContext()
     flaskStack.pop()
   }
 }

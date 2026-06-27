@@ -170,7 +170,7 @@ function FlowExpressions() {
     <h3>JSX flow expressions</h3>
     <code>{`{Fn(...args, <tag/>)}`}</code>
     <p>
-      —template control flow with implicit JSX fragment factories
+      —view control flow with implicit JSX fragment factories
     </p>
     <a href='/guide/jsx-syntax' class='medium brand'>Learn more</a>
   </>

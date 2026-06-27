@@ -49,10 +49,10 @@ view.onDiscard(() => element.removeEventListener(event, handler))
 :::
 
 ### Event Capture
-To handle an event during the capture phase, postfix the `on` namespace with a `V`, which visually represents downward event propagation.
+To handle an event during the capture phase, postfix the `on` namespace with a `v`, which visually represents downward event propagation.
 
 ```tsx
-<button onV:click={submit}>submit</button>
+<button onv:click={submit}>submit</button>
 ```
 
 ### Targeted Event Handling

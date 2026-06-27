@@ -42,7 +42,7 @@ Notice in the above example, there are two suspense boundaries. `Await(<Foo/>)` 
 ## Rendering suspense views
 When a suspense boundary is created by `Await()`, a suspense view (placeholder) can be rendered while the awaited view is pending. 
 
-`Meanwhile()` renders an initial loading view before the awaited template has resolved. `OnReawait()` renders subsequent placeholder views if the awaited template becomes pending again.
+`Meanwhile()` renders an initial loading view before the awaited view has resolved. `OnReawait()` renders subsequent placeholder views if the awaited view becomes pending again.
 
 ```tsx
 <div>

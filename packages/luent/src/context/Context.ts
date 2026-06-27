@@ -1,6 +1,4 @@
 import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
-import { markIfMuIon } from "./provide";
-import { Ion } from "@rue/quarky";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderSlot } from "../component/x-Input";
 import { debug, normalizeToArray } from "@rue/utils";
@@ -12,7 +10,6 @@ export interface NodeContext {
    parent: NodeContext | RootContext,
    root: RootContext,
    ground?: RootContext,
-   muIons: Set<Ion> | undefined
 }
 
 export interface RootContext {
@@ -20,7 +17,6 @@ export interface RootContext {
    parent?: RootContext,
    root: RootContext,
    ground?: RootContext,
-   muIons: Set<Ion> | undefined
 }
 
 
@@ -45,13 +41,12 @@ export function createContextNode(
    if (!parentContext) {
       throw new Error(`no context found :( This should never happen`)
    }
-   const [entries, muIons] = toContextEntries(normalizeToArray(provide))
+   const entries = toContextEntries(normalizeToArray(provide))
    const context: NodeContext = {
       entries,
       parent: parentContext,
       root: parentContext?.root,
       ground: parentContext?.ground,
-      muIons
    }
    return context;
 }
@@ -77,14 +72,13 @@ export function wrapWithContext(
    }
 }
 
-export function toContextEntries(provided: [ContextEntryKey, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
-   const context = { muIons: undefined }
+export function toContextEntries(provided: [ContextEntryKey, unknown][]): Map<string, unknown> {
+   const context = {}
    const entries: Map<string, unknown> = new Map()
    for (const { 0: key, 1: value } of provided) {
-      markIfMuIon(key, value, context)
       entries.set(toContextKey(key), value)
    }
-   return [entries, context.muIons]
+   return entries
 }
 
 // export function createContext(

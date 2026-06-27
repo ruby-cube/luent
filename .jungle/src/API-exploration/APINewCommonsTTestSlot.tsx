@@ -20,7 +20,7 @@ function Parent() {
 }
 
 const Nested = {
-   'something': mergeContextKeys(
+   'something': mergeKeys(
       Content['something'],
       Deeper['something']
    )

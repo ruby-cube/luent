@@ -8,7 +8,7 @@ export default defineConfig({
   ...createSharedViteConfig(),
   build: {
     lib: {
-      entry: resolve(__dirname, './src/luent-islands.ts'),
+      entry: resolve(__dirname, './src/luent-islands.tsx'),
       formats: ['es'],
       fileName: 'index'
     },

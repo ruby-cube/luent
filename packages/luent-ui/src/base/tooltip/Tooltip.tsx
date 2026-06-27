@@ -1,7 +1,5 @@
-import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
-import { ion, toIon } from "@rue/quarky"
+import { component,  NodeRef, RenderSlot } from "@rue/luent"
 import { IonicTooltip } from "./Tooltip.kit";
-import { Alignment, maybeFlip, Placement, positionTail } from "../popover/Popover.kit";
 import { PopoverRoot } from "../popover/Popover";
 
 // TODO:
@@ -217,6 +215,6 @@ function TooltipRoot(setup: {
 export {
    PopoverContent as TooltipContent,
    PopoverTail as TooltipTail,
-} from '../popover/Popover'
+} from "../popover/Popover"
 
 export { TooltipRoot }

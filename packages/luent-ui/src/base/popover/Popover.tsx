@@ -1,4 +1,4 @@
-import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, fromTag } from "@rue/luent"
+import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, fromTag, Xray } from "@rue/luent"
 import { Ion, Ionic, toIon, ion } from "@rue/quarky"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
@@ -113,11 +113,12 @@ function PopoverContent(setup: {
 function PopoverTail(setup: {
   as?: ComponentTag | string;
   offset?: Ion<number>
-  'shape:microclass'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
-  'shape:style'?: Ion<string>
+  'xray:shape'?: Xray<'div'>
+  // 'shape:microclass'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
+  // 'shape:style'?: Ion<string>
 }) {
   const {
-    shape,
+    xray,
     $offset = toIon('-30%'),
     as: Comp = 'div',
     ...attributes
@@ -135,8 +136,7 @@ function PopoverTail(setup: {
       >
         <Comp
           class={['tail', () => popover.placement]}
-          style={shape.style ?? ''}
-          auto-bind={shape}
+          auto-bind={xray.shape}
         ></Comp>
       </div>
       {Style(css`

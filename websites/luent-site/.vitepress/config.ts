@@ -6,7 +6,7 @@ import { markdownShikiConfig } from './theme/shiki-setup.js'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
- srcDir: 'docs',
+  srcDir: 'docs',
 
   vue: {
     template: {
@@ -46,13 +46,16 @@ export default defineConfig({
       dark: '/assets/luent-logo-dark.png',
       light: '/assets/luent-logo-light.png'
     },
+
+    footer: {
+      message: 'Built with Vitepress + Luent',
+    },
     search: {
       provider: 'local'
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Learn', link: '/' },
-      { text: 'API', link: '/markdown-examples' },
+      { text: 'Learn', link: '/guide/anatomy-of-an-app' },
       { text: 'Demos', link: '/markdown-examples' },
       { text: 'Code Glimpses', link: '/markdown-examples' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
@@ -61,12 +64,6 @@ export default defineConfig({
     ],
 
     sidebar: [
-      {
-        text: 'Learn',
-        items: [
-          { text: 'nsx/tsx' }
-        ]
-      },
       {
         text: 'Essentials',
         items: [
@@ -121,27 +118,27 @@ export default defineConfig({
       {
         text: 'Extended Topics',
         items: [
-           { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
-           { text: 'Reactive Effects', link: '/guide/reactive-effects' },
-           { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
+          { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
+          { text: 'Reactive Effects', link: '/guide/reactive-effects' },
+          { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
           // {
           //   text: '[] More Reactivity', link: '/markdown-examples', items: [
-            //     // { text: 'Writable Derivations', link: '/guide/' },
-            //   ]
-            // }
-          ]
-        },
-        {
-          text: 'Special Topics',
-          items: [
-            { text: '[] Mutable Bindings', link: '/guide/mutable-bindings' },
-            { text: 'Error Rendering', link: '/guide/error-rendering' },
-            { text: 'Async Rendering', link: '/guide/async-rendering' },
-            { text: 'Portals', link: '/guide/portals' },
-            { text: 'Transitions', link: '/guide/transitions' },
-            { text: '~ Finite States', link: '/guide/' },
-            { text: '~ Custom Reactive Structures', link: '/guide/' },
-          { text: 'Client-side Routing [planned]'},
+          //     // { text: 'Writable Derivations', link: '/guide/' },
+          //   ]
+          // }
+        ]
+      },
+      {
+        text: 'Special Topics',
+        items: [
+          { text: '[] Mutable Bindings', link: '/guide/mutable-bindings' },
+          { text: 'Error Rendering', link: '/guide/error-rendering' },
+          { text: 'Async Rendering', link: '/guide/async-rendering' },
+          { text: 'Portals', link: '/guide/portals' },
+          { text: 'Transitions', link: '/guide/transitions' },
+          { text: '~ Finite States', link: '/guide/' },
+          { text: '~ Custom Reactive Structures', link: '/guide/' },
+          { text: 'Client-side Routing [planned]' },
           { text: 'Server Side [planned]' }
         ]
       },

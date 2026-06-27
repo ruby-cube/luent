@@ -351,115 +351,115 @@ declare global {
       // ===================================================
 
       // Clipboard Events
-      'onV:copy'?: HandleClipboardEvent<T>;
-      'onV:cut'?: HandleClipboardEvent<T>;
-      'onV:paste'?: HandleClipboardEvent<T>;
+      'onv:copy'?: HandleClipboardEvent<T>;
+      'onv:cut'?: HandleClipboardEvent<T>;
+      'onv:paste'?: HandleClipboardEvent<T>;
 
       // Composition Events
-      'onV:compositionend'?: HandleCompositionEvent<T>;
-      'onV:compositionstart'?: HandleCompositionEvent<T>;
-      'onV:compositionupdate'?: HandleCompositionEvent<T>;
+      'onv:compositionend'?: HandleCompositionEvent<T>;
+      'onv:compositionstart'?: HandleCompositionEvent<T>;
+      'onv:compositionupdate'?: HandleCompositionEvent<T>;
 
       // Focus Events
-      'onV:focus'?: HandleFocusEvent<T>;
-      'onV:blur'?: HandleFocusEvent<T>;
+      'onv:focus'?: HandleFocusEvent<T>;
+      'onv:blur'?: HandleFocusEvent<T>;
 
       // Form Events
-      'onV:change'?: HandleFormEvent<T>;
-      'onV:beforeinput'?: HandleFormEvent<T>;
-      'onV:input'?: HandleFormEvent<T>;
-      'onV:reset'?: HandleFormEvent<T>;
-      'onV:submit'?: HandleFormEvent<T>;
-      'onV:invalid'?: HandleFormEvent<T>;
+      'onv:change'?: HandleFormEvent<T>;
+      'onv:beforeinput'?: HandleFormEvent<T>;
+      'onv:input'?: HandleFormEvent<T>;
+      'onv:reset'?: HandleFormEvent<T>;
+      'onv:submit'?: HandleFormEvent<T>;
+      'onv:invalid'?: HandleFormEvent<T>;
 
       // Image Events
-      'onV:load'?: HandleEvent<T> | undefined;
-      'onV:error'?: HandleEvent<T> | undefined; // also a Media Event
+      'onv:load'?: HandleEvent<T> | undefined;
+      'onv:error'?: HandleEvent<T> | undefined; // also a Media Event
 
       // Keyboard Events
-      'onV:keydown'?: HandleKeyboardEvent<T>;
-      'onV:keyup'?: HandleKeyboardEvent<T>;
+      'onv:keydown'?: HandleKeyboardEvent<T>;
+      'onv:keyup'?: HandleKeyboardEvent<T>;
 
       // Media Events
-      'onV:abort'?: HandleEvent<T> | undefined;
-      'onV:canplay'?: HandleEvent<T> | undefined;
-      'onV:canplaythrough'?: HandleEvent<T> | undefined;
-      'onV:durationchange'?: HandleEvent<T> | undefined;
-      'onV:emptied'?: HandleEvent<T> | undefined;
-      'onV:encrypted'?: HandleEvent<T> | undefined;
-      'onV:ended'?: HandleEvent<T> | undefined;
-      'onV:loadeddata'?: HandleEvent<T> | undefined;
-      'onV:loadedmetadata'?: HandleEvent<T> | undefined;
-      'onV:loadstart'?: HandleEvent<T> | undefined;
-      'onV:pause'?: HandleEvent<T> | undefined;
-      'onV:play'?: HandleEvent<T> | undefined;
-      'onV:playing'?: HandleEvent<T> | undefined;
-      'onV:progress'?: HandleEvent<T> | undefined;
-      'onV:ratechange'?: HandleEvent<T> | undefined;
-      'onV:resize'?: HandleEvent<T> | undefined;
-      'onV:seeked'?: HandleEvent<T> | undefined;
-      'onV:seeking'?: HandleEvent<T> | undefined;
-      'onV:stalled'?: HandleEvent<T> | undefined;
-      'onV:suspend'?: HandleEvent<T> | undefined;
-      'onV:timeupdate'?: HandleEvent<T> | undefined;
-      'onV:volumechange'?: HandleEvent<T> | undefined;
-      'onV:waiting'?: HandleEvent<T> | undefined;
+      'onv:abort'?: HandleEvent<T> | undefined;
+      'onv:canplay'?: HandleEvent<T> | undefined;
+      'onv:canplaythrough'?: HandleEvent<T> | undefined;
+      'onv:durationchange'?: HandleEvent<T> | undefined;
+      'onv:emptied'?: HandleEvent<T> | undefined;
+      'onv:encrypted'?: HandleEvent<T> | undefined;
+      'onv:ended'?: HandleEvent<T> | undefined;
+      'onv:loadeddata'?: HandleEvent<T> | undefined;
+      'onv:loadedmetadata'?: HandleEvent<T> | undefined;
+      'onv:loadstart'?: HandleEvent<T> | undefined;
+      'onv:pause'?: HandleEvent<T> | undefined;
+      'onv:play'?: HandleEvent<T> | undefined;
+      'onv:playing'?: HandleEvent<T> | undefined;
+      'onv:progress'?: HandleEvent<T> | undefined;
+      'onv:ratechange'?: HandleEvent<T> | undefined;
+      'onv:resize'?: HandleEvent<T> | undefined;
+      'onv:seeked'?: HandleEvent<T> | undefined;
+      'onv:seeking'?: HandleEvent<T> | undefined;
+      'onv:stalled'?: HandleEvent<T> | undefined;
+      'onv:suspend'?: HandleEvent<T> | undefined;
+      'onv:timeupdate'?: HandleEvent<T> | undefined;
+      'onv:volumechange'?: HandleEvent<T> | undefined;
+      'onv:waiting'?: HandleEvent<T> | undefined;
 
       // MouseEvents
-      'onV:auxclick'?: HandleMouseEvent<T>;
-      'onV:click'?: HandleMouseEvent<T>;
-      'onV:contextmenu'?: HandleMouseEvent<T>;
-      'onV:doubleclick'?: HandleMouseEvent<T>;
-      'onV:drag'?: HandleDragEvent<T>;
-      'onV:dragend'?: HandleDragEvent<T>;
-      'onV:dragenter'?: HandleDragEvent<T>;
-      'onV:dragexit'?: HandleDragEvent<T>;
-      'onV:dragleave'?: HandleDragEvent<T>;
-      'onV:dragover'?: HandleDragEvent<T>;
-      'onV:dragstart'?: HandleDragEvent<T>;
-      'onV:drop'?: HandleDragEvent<T>;
-      'onV:mousedown'?: HandleMouseEvent<T>;
-      'onV:mouseenter'?: HandleMouseEvent<T>;
-      'onV:mouseleave'?: HandleMouseEvent<T>;
-      'onV:mousemove'?: HandleMouseEvent<T>;
-      'onV:mouseout'?: HandleMouseEvent<T>;
-      'onV:mouseover'?: HandleMouseEvent<T>;
-      'onV:mouseup'?: HandleMouseEvent<T>;
+      'onv:auxclick'?: HandleMouseEvent<T>;
+      'onv:click'?: HandleMouseEvent<T>;
+      'onv:contextmenu'?: HandleMouseEvent<T>;
+      'onv:doubleclick'?: HandleMouseEvent<T>;
+      'onv:drag'?: HandleDragEvent<T>;
+      'onv:dragend'?: HandleDragEvent<T>;
+      'onv:dragenter'?: HandleDragEvent<T>;
+      'onv:dragexit'?: HandleDragEvent<T>;
+      'onv:dragleave'?: HandleDragEvent<T>;
+      'onv:dragover'?: HandleDragEvent<T>;
+      'onv:dragstart'?: HandleDragEvent<T>;
+      'onv:drop'?: HandleDragEvent<T>;
+      'onv:mousedown'?: HandleMouseEvent<T>;
+      'onv:mouseenter'?: HandleMouseEvent<T>;
+      'onv:mouseleave'?: HandleMouseEvent<T>;
+      'onv:mousemove'?: HandleMouseEvent<T>;
+      'onv:mouseout'?: HandleMouseEvent<T>;
+      'onv:mouseover'?: HandleMouseEvent<T>;
+      'onv:mouseup'?: HandleMouseEvent<T>;
 
       // Selection Events
-      'onV:select'?: HandleEvent<T> | undefined;
+      'onv:select'?: HandleEvent<T> | undefined;
 
       // Touch Events
-      'onV:touchcancel'?: HandleTouchEvent<T>;
-      'onV:touchend'?: HandleTouchEvent<T>;
-      'onV:touchmove'?: HandleTouchEvent<T>;
-      'onV:touchstart'?: HandleTouchEvent<T>;
+      'onv:touchcancel'?: HandleTouchEvent<T>;
+      'onv:touchend'?: HandleTouchEvent<T>;
+      'onv:touchmove'?: HandleTouchEvent<T>;
+      'onv:touchstart'?: HandleTouchEvent<T>;
 
       // Pointer Events
-      'onV:pointerdown'?: HandlePointerEvent<T>;
-      'onV:pointermove'?: HandlePointerEvent<T>;
-      'onV:pointerup'?: HandlePointerEvent<T>;
-      'onV:pointercancel'?: HandlePointerEvent<T>;
-      'onV:pointerenter'?: HandlePointerEvent<T>;
-      'onV:pointerleave'?: HandlePointerEvent<T>;
-      'onV:pointerover'?: HandlePointerEvent<T>;
-      'onV:pointerout'?: HandlePointerEvent<T>;
-      'onV:gotpointercapture'?: HandlePointerEvent<T>;
-      'onV:lostpointercapture'?: HandlePointerEvent<T>;
+      'onv:pointerdown'?: HandlePointerEvent<T>;
+      'onv:pointermove'?: HandlePointerEvent<T>;
+      'onv:pointerup'?: HandlePointerEvent<T>;
+      'onv:pointercancel'?: HandlePointerEvent<T>;
+      'onv:pointerenter'?: HandlePointerEvent<T>;
+      'onv:pointerleave'?: HandlePointerEvent<T>;
+      'onv:pointerover'?: HandlePointerEvent<T>;
+      'onv:pointerout'?: HandlePointerEvent<T>;
+      'onv:gotpointercapture'?: HandlePointerEvent<T>;
+      'onv:lostpointercapture'?: HandlePointerEvent<T>;
 
       // UI Events
-      'onV:scroll'?: HandleUIEvent<T>;
+      'onv:scroll'?: HandleUIEvent<T>;
 
       // Wheel Events
-      'onV:wheel'?: HandleWheelEvent<T>;
+      'onv:wheel'?: HandleWheelEvent<T>;
 
       // Animation Events
-      'onV:animationstart'?: HandleAnimationEvent<T>;
-      'onV:animationend'?: HandleAnimationEvent<T>;
-      'onV:animationiteration'?: HandleAnimationEvent<T>;
+      'onv:animationstart'?: HandleAnimationEvent<T>;
+      'onv:animationend'?: HandleAnimationEvent<T>;
+      'onv:animationiteration'?: HandleAnimationEvent<T>;
 
       // Transition Events
-      'onV:transitionend'?: HandleTransitionEvent<T>;
+      'onv:transitionend'?: HandleTransitionEvent<T>;
     }
 
     export interface CSSProperties extends CSS.Properties<string | number> {

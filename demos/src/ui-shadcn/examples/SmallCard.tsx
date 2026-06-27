@@ -1,4 +1,4 @@
-import { component, createRoot, template } from "@rue/luent"
+import { component, mount, template } from "@rue/luent"
 import {
    Card,
    CardContent,
@@ -35,8 +35,7 @@ export function SmallCard() {
 
 
 if (__STYLE__)
-   createRoot(() =>
-      <SmallCard></SmallCard>).mount('#root')
+   mount(SmallCard, '#root')
 
 
 // const buttonVariants = cva(

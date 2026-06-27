@@ -116,7 +116,7 @@ importers:
         version: 5.2.0(typescript@6.0.3)
       vite:
         specifier: ^8.0.13
-        version: 8.0.14(@types/node@26.0.0)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
+        version: 8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
       vite-plugin-monaco-editor:
         specifier: ^1.1.0
         version: 1.1.0(monaco-editor@0.55.1)
@@ -189,7 +189,7 @@ importers:
         version: 6.0.3
       vite:
         specifier: ^8.0.13
-        version: 8.0.14(@types/node@26.0.0)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
+        version: 8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
 
   .jungle/movies-app:
     dependencies:
@@ -269,6 +269,9 @@ importers:
       '@rue/luent':
         specifier: workspace:*
         version: link:../packages/luent
+      '@rue/luent-ui':
+        specifier: workspace:*
+        version: link:../packages/luent-ui
       '@rue/nextscript':
         specifier: workspace:*
         version: link:../packages/nextscript
@@ -448,6 +451,40 @@ importers:
         specifier: workspace:*
         version: link:../types
 
+  packages/luent-ui:
+    dependencies:
+      '@floating-ui/dom':
+        specifier: ^1.7.6
+        version: 1.7.6
+      '@rue/luent':
+        specifier: workspace:*
+        version: link:../luent
+      '@rue/quarky':
+        specifier: workspace:*
+        version: link:../quarky
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.6.0
+      tailwindcss:
+        specifier: ^4.2.1
+        version: 4.3.0
+    devDependencies:
+      '@rue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@rue/vite-plugin-luent':
+        specifier: workspace:*
+        version: link:../../plugins/vite-plugin-luent
+      '@tailwindcss/vite':
+        specifier: ^4.2.1
+        version: 4.3.0(vite@8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0))
+      vite:
+        specifier: ^8.0.13
+        version: 8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
+
   packages/nextscript:
     dependencies:
       '@rue/utils':
@@ -514,13 +551,13 @@ importers:
         version: link:../types
       '@types/node':
         specifier: latest
-        version: 26.0.0
+        version: 26.0.1
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
       vite:
         specifier: ^8.0.13
-        version: 8.0.14(@types/node@26.0.0)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
+        version: 8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
 
   plugins/babel-plugin-luent:
     dependencies:
@@ -554,7 +591,7 @@ importers:
         version: 7.28.6(@babel/core@7.29.0)
       vite:
         specifier: ^8.0.13
-        version: 8.0.14(@types/node@26.0.0)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
+        version: 8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
 
   plugins/volar-nextscript:
     dependencies:
@@ -709,6 +746,9 @@ importers:
       '@rue/luent':
         specifier: workspace:*
         version: link:../../packages/luent
+      '@rue/luent-ui':
+        specifier: workspace:*
+        version: link:../../packages/luent-ui
       '@rue/quarky':
         specifier: workspace:*
         version: link:../../packages/quarky
@@ -721,12 +761,15 @@ importers:
       shiki:
         specifier: ^4.1.0
         version: 4.1.0
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.6.0
+      tailwindcss:
+        specifier: ^4.2.1
+        version: 4.3.0
       vitepress:
         specifier: 2.0.0-alpha.17
-        version: 2.0.0-alpha.17(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3)
-      vue:
-        specifier: ^3.5.0
-        version: 3.5.34(typescript@6.0.3)
+        version: 2.0.0-alpha.17(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3)
 
   websites/nextscript-site:
     devDependencies:
@@ -745,25 +788,34 @@ importers:
       shiki:
         specifier: ^4.1.0
         version: 4.1.0
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.6.0
       vitepress:
         specifier: 2.0.0-alpha.17
-        version: 2.0.0-alpha.17(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3)
+        version: 2.0.0-alpha.17(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3)
       vue:
         specifier: ^3.5.0
         version: 3.5.34(typescript@6.0.3)
 
   websites/shared:
     dependencies:
+      '@rue/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@tailwindcss/vite':
+        specifier: ^4.3.0
+        version: 4.3.0(vite@8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0))
       vitepress:
         specifier: 2.0.0-alpha.17
-        version: 2.0.0-alpha.17(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3)
-      vue:
-        specifier: ^3.5.0
-        version: 3.5.34(typescript@6.0.3)
+        version: 2.0.0-alpha.17(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3)
     devDependencies:
       '@rue/luent':
         specifier: workspace:*
         version: link:../../packages/luent
+      '@rue/luent-ui':
+        specifier: workspace:*
+        version: link:../../packages/luent-ui
       '@rue/quarky':
         specifier: workspace:*
         version: link:../../packages/quarky
@@ -3089,8 +3141,8 @@ packages:
   '@types/node@25.9.3':
     resolution: {integrity: sha512-603BddQMv3pUcr4U2dhujk83N2tTDVr/34wII2B6bJy6g+8WD6yUb11jszNs0gdi4PesVWl7ABt8nYMVpnLUcg==}
 
-  '@types/node@26.0.0':
-    resolution: {integrity: sha512-vf2YFi1iY9lHGwNJMs01biZFbKJkrZR1T6/MlzjhJLPdntOHLhTrDSnSVcdtvjihi4VQNlrFRIxLsDBlQpAipA==}
+  '@types/node@26.0.1':
+    resolution: {integrity: sha512-fc3KiUoBt6kie0N9bIW3E47vZsuaMf0PM2AaUpLCLT0s/LvX1nxAim6Fc049cNxODPpGm6qRAuUOB86SkRuPQw==}
 
   '@types/postcss-modules-local-by-default@4.0.2':
     resolution: {integrity: sha512-CtYCcD+L+trB3reJPny+bKWKMzPfxEyQpKIwit7kErnOexf5/faaGpkFy4I5AwbV4hp1sk7/aTg0tt0B67VkLQ==}
@@ -8630,6 +8682,13 @@ snapshots:
       tailwindcss: 4.3.0
       vite: 8.0.14(@types/node@25.9.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
 
+  '@tailwindcss/vite@4.3.0(vite@8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0))':
+    dependencies:
+      '@tailwindcss/node': 4.3.0
+      '@tailwindcss/oxide': 4.3.0
+      tailwindcss: 4.3.0
+      vite: 8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0)
+
   '@tootallnate/once@2.0.1': {}
 
   '@tybys/wasm-util@0.10.2':
@@ -8745,7 +8804,7 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
-  '@types/node@26.0.0':
+  '@types/node@26.0.1':
     dependencies:
       undici-types: 8.3.0
 
@@ -8918,10 +8977,10 @@ snapshots:
 
   '@ungap/structured-clone@1.3.1': {}
 
-  '@vitejs/plugin-vue@6.0.7(vite@7.3.3(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0))(vue@3.5.34(typescript@6.0.3))':
+  '@vitejs/plugin-vue@6.0.7(vite@7.3.3(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0))(vue@3.5.34(typescript@6.0.3))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
-      vite: 7.3.3(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0)
+      vite: 7.3.3(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0)
       vue: 3.5.34(typescript@6.0.3)
 
   '@vitest/expect@4.1.7':
@@ -11950,7 +12009,7 @@ snapshots:
     dependencies:
       monaco-editor: 0.55.1
 
-  vite@7.3.3(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0):
+  vite@7.3.3(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0):
     dependencies:
       esbuild: 0.27.7
       fdir: 6.5.0(picomatch@4.0.4)
@@ -11959,7 +12018,7 @@ snapshots:
       rollup: 4.60.4
       tinyglobby: 0.2.16
     optionalDependencies:
-      '@types/node': 26.0.0
+      '@types/node': 26.0.1
       fsevents: 2.3.3
       jiti: 2.7.0
       less: 4.6.4
@@ -11999,7 +12058,7 @@ snapshots:
       sass: 1.100.0
       stylus: 0.62.0
 
-  vite@8.0.14(@types/node@26.0.0)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0):
+  vite@8.0.14(@types/node@26.0.1)(esbuild@0.27.7)(jiti@2.7.0)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
@@ -12007,7 +12066,7 @@ snapshots:
       rolldown: 1.0.2
       tinyglobby: 0.2.16
     optionalDependencies:
-      '@types/node': 26.0.0
+      '@types/node': 26.0.1
       esbuild: 0.27.7
       fsevents: 2.3.3
       jiti: 2.7.0
@@ -12015,7 +12074,7 @@ snapshots:
       sass: 1.100.0
       stylus: 0.62.0
 
-  vitepress@2.0.0-alpha.17(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3):
+  vitepress@2.0.0-alpha.17(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(postcss@8.5.15)(sass@1.100.0)(stylus@0.62.0)(typescript@6.0.3):
     dependencies:
       '@docsearch/css': 4.6.3
       '@docsearch/js': 4.6.3
@@ -12025,7 +12084,7 @@ snapshots:
       '@shikijs/transformers': 3.23.0
       '@shikijs/types': 3.23.0
       '@types/markdown-it': 14.1.2
-      '@vitejs/plugin-vue': 6.0.7(vite@7.3.3(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0))(vue@3.5.34(typescript@6.0.3))
+      '@vitejs/plugin-vue': 6.0.7(vite@7.3.3(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0))(vue@3.5.34(typescript@6.0.3))
       '@vue/devtools-api': 8.1.2
       '@vue/shared': 3.5.34
       '@vueuse/core': 14.3.0(vue@3.5.34(typescript@6.0.3))
@@ -12034,7 +12093,7 @@ snapshots:
       mark.js: 8.11.1
       minisearch: 7.2.0
       shiki: 3.23.0
-      vite: 7.3.3(@types/node@26.0.0)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0)
+      vite: 7.3.3(@types/node@26.0.1)(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.100.0)(stylus@0.62.0)
       vue: 3.5.34(typescript@6.0.3)
     optionalDependencies:
       postcss: 8.5.15

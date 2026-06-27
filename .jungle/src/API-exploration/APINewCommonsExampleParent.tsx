@@ -22,7 +22,7 @@ function Parent() {
 
 
 const Shared = {
-  DB: mergeContextKeys(
+  DB: mergeKeys(
     ArticlesView.db,
     ArticlePreview.db
   )

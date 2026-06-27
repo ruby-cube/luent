@@ -1,4 +1,4 @@
-import { component, template, If, Else, ElseIf, NodeRef, createRoot, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, mount, Style, css } from "@rue/luent";
 import { ion, ooo, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -44,4 +44,4 @@ export function TestNestedIfElse() {
 }
 
 
-if (__TEST__) createRoot(TestNestedIfElse).mount('#root')
+if (__TEST__) mount(TestNestedIfElse, '#root')

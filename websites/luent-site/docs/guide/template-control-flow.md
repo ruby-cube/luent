@@ -1,14 +1,14 @@
-# Template Control Flow
-Luent offers three main ways of rendering templates based on control flow:
+# View Control Flow
+Luent offers three main ways of rendering views based on control flow:
 - JSX flow expressions
 - JavaScript control flow for static-only rendering
 - the `display-if` attribute for conditional display
 
-Template control flow may render either static views or dynamic views. A view is dynamic when its presence in the DOM is determined by reactive state.
+View control flow may render either static views or dynamic views. A view is dynamic when its presence in the DOM is determined by reactive state.
 
 
-## Template Control Flow Series
-Luent provides the following series of primitive template functions for writing template control flow:
+## View Control Flow Series
+Luent provides the following series of primitive control flow functions for writing view control flow:
 
 **Iterative rendering**
 - `For`
@@ -25,9 +25,9 @@ Additionally, the following [specialized control flow series]() are provided for
 
 
 ## JSX Flow Expressions
-Template control flow function calls, or JSX flow expressions, are only valid within a JSX template. The last parameter of a template function, known as the template slot, takes in a render function. 
+Flow function calls, or JSX flow expressions, are only valid within JSX. The last parameter of a flow function, known as the view slot, takes in a render function. 
 
-For convenience and readability, the slot argument may be written in shorthand as a JSX template. Luent's JSX transpiler normalizes the slot position of flow expressions into render functions.
+For convenience and readability, the slot argument may be written in shorthand as JSX. Luent's JSX transpiler normalizes the slot position of flow expressions into render functions.
 
 For example:
 
@@ -49,7 +49,7 @@ For example:
 ```
 
 ### Optional parameters
-Some template control functions may take in optional arguments *before* the slot argument since the slot parameter is always the final parameter of a template function.
+Some control flow functions may take in optional arguments *before* the slot argument since the slot parameter is always the final parameter of a flow function.
 ```tsx
 <div>
   {If(active, 'preserve',
@@ -61,11 +61,11 @@ Some template control functions may take in optional arguments *before* the slot
 
 
 ## Iterative Rendering
-Luent provides two functions for template iterations: `For()` and `Thru()`. `For()` renders iterables while `Thru()` renders number ranges.
+Luent provides two functions for view iterations: `For()` and `Thru()`. `For()` renders iterables while `Thru()` renders number ranges.
 
 ### Static iteratives
 
-There are two main ways of rendering static iterative templates:
+There are two main ways of rendering static iterative views:
 
 **with `For` and `Thru`**
 
@@ -102,7 +102,7 @@ Static lists may also be rendered through a JavaScript array's `map` method.
 ### `For` unique items
 To render collections based on item identity, pass a identity accessor function as the second argument of `For()`. The identity accessor receives the item as its argument and can either return the item itself (if items are unique objects or strings) or a unique ID. 
 
-The third argument is a render function that receives an item and an index ion, meaning it will render a template where the item is stable and the index may change.
+The third argument is a render function that receives an item and an index ion, meaning it will render a view where the item is stable and the index may change.
 
 ```tsx
 <ul>
@@ -237,7 +237,7 @@ function PaginatedTable(setup: {
 ## Conditional Rendering
 Luent provides three distinct control flow functions for static and reactive conditional rendering: 
 - `If`/`Else` for ordered conditional branching
-- `As` for rendering a template as the active case
+- `As` for rendering a view as the active case
 - `Match`/`Case` for diverse case rendering
 
 Luent also exposes a display-toggle attribute, `display-if` on elements to ergonomically show or hide an element. 
@@ -333,7 +333,7 @@ function TabContent() {
 ```
 
 ### `As(case)`
-`As()`, like `Match()`, renders a view as the active case. Unlike `Match()`, which maps explicit cases to different templates, `As()` renders the same template for its current case. It is especially useful when there is an indefinite number of cases.
+`As()`, like `Match()`, renders a view as the active case. Unlike `Match()`, which maps explicit cases to different views, `As()` applies the same render function to its current case. It is especially useful when there is an indefinite number of cases.
 
 ```tsx
 <main>
@@ -349,7 +349,7 @@ function TabContent() {
 ```
 
 #### Preserving views
-Although each case uses the same template, `As()` gives each case identity its own view. The views may be preserved by passing in the 'preserve' attach type. Changing case identities remounts the active view while caching inactive views for later reuse. 
+Although each case uses the same render function, `As()` gives each case identity its own view. The views may be preserved by passing in the 'preserve' attach type. Changing case identities remounts the active view while caching inactive views for later reuse. 
 
 ```tsx
 <main>

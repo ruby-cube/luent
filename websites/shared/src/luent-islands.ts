@@ -2,7 +2,6 @@ import { getPortals, RenderPage, runWithPortals } from "@rue/luent";
 import { DefaultTheme, TransformContext, type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
 import { AnyObject } from "@rue/types";
-import { defineComponent, onMounted, ref, type VNode } from 'vue'
 
 type MarkdownIt = Exclude<MarkdownOptions['config'], undefined> extends (arg: infer P) => any ? P : never
 
@@ -10,28 +9,8 @@ export function isCustomElement(tag: string) {
   return tag.includes('-') && tag !== 'await-mount'
 }
 
-// TODO: get rid of Vue dependency
-const AwaitMount = defineComponent({
-  name: 'await-mount',
-  setup(_, { slots }) {
-    const mounted = ref(false)
-
-    onMounted(() => {
-      mounted.value = true
-    })
-
-    return () => {
-      if (!mounted.value) {
-        return slots.fallback?.() ?? null
-      }
-
-      return slots.default?.() ?? null
-    }
-  }
-})
-
 export function hydrate(app: any, islands: AnyObject) {
-  app.component('await-mount', AwaitMount)
+  // app.component('await-mount', AwaitMount)
 
   if (typeof window == 'undefined') return;
 
@@ -44,7 +23,18 @@ export function hydrate(app: any, islands: AnyObject) {
         const slot = content ?? document.createElement('slot')
         const root = this.attachShadow({ mode: 'open' });
         root.appendChild(slot)
-        if (template) template.remove()
+        // if (template) template.remove()
+      }
+    });
+  }
+
+  if (!customElements.get('await-mount')) {
+    customElements.define('await-mount', class AwaitMount extends HTMLElement {
+      connectedCallback() {
+        const template = this.querySelector('template')
+        const content = template?.childNodes ??[]
+        this.innerHTML = ''
+        this.append(...content)
       }
     });
   }
@@ -72,8 +62,9 @@ export function transformMarkdownIslands(md: MarkdownIt, writeIsland: AnyObject)
   md.block.ruler.before('fence', 'luent_island', (state, startLine, endLine, silent) => {
     const start = state.bMarks[startLine] + state.tShift[startLine]
     const line = state.src.slice(start, state.eMarks[startLine])
-
-    if (!line.startsWith(':::luent')) return false
+    const isLuentIsland = line.startsWith(':::luent')
+    const isNSXBlock = line.startsWith(':::nsx')
+    if (!isLuentIsland && !isNSXBlock) return false
     if (silent) return true
 
     const page = state.env?.relativePath
@@ -86,32 +77,150 @@ export function transformMarkdownIslands(md: MarkdownIt, writeIsland: AnyObject)
     else {
       return false;
     }
+    if (isLuentIsland) {
+      const next = state.bMarks[startLine + 1] + state.tShift[startLine + 1]
+      const spec = state.src.slice(next, state.eMarks[startLine + 1])
+      const name = spec.trim()
+      const islandHtml = renderFallback(name, writeIsland[name], withPageContext, page)
+      const islandTokenContent = `<await-mount><template><${name}></${name}></template>${islandHtml}</await-mount>`
+      // const islandTokenContent = `<await-mount><${name}></${name}><template #fallback>${islandHtml}</template></await-mount>`
 
-    const next = state.bMarks[startLine + 1] + state.tShift[startLine + 1]
-    const spec = state.src.slice(next, state.eMarks[startLine + 1])
-    const name = spec.trim()
-    const write = writeIsland[name]
-    const html = write
-      ? withPageContext(() => runWithPortals(write, page))
-      : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
-    const islandHtml = encodeStyleTags(typeof html === 'string' ? html : String(html ?? ''))
-    const islandTokenContent = `<await-mount><${name}></${name}><template #fallback>${islandHtml}</template></await-mount>`
+      state.tokens.push({
+        type: 'html_block',
+        tag: '',
+        nesting: 0,
+        level: state.level,
+        content: islandTokenContent,
 
-    state.tokens.push({
-      type: 'html_block',
-      tag: '',
-      nesting: 0,
-      level: state.level,
-      content: islandTokenContent,
+        block: true,
+        map: [startLine, startLine + 3],
+        markup: ''
+      } as any)
 
-      block: true,
-      map: [startLine, startLine + 3],
-      markup: ''
-    } as any)
+      state.line = startLine + 3
+      return true
+    }
 
-    state.line = startLine + 3
-    return true
+    return nsxCodeBlockRule(state, startLine, endLine, writeIsland, withPageContext, page)
   })
+}
+
+// :::nsx
+// ```nsx
+// function Counter() {
+//   get count = ion(0)
+//   return (
+//     <div></div>
+//   )
+// }
+// ```
+// ```tsx
+// function Counter() {
+//   const $count = ion(0)
+//   return (
+//     <div></div>
+//   )
+// }
+// ```
+// :::
+
+// const nsName = 'nsx'
+// const tsName = 'tsx'
+// const nsCode = `function Counter() {
+//    get count = ion(0)
+//    return (
+//      <div></div>
+//    )
+//  }`
+// const tsCode = `function Counter() {
+//   const $count = ion(0)
+//   return (
+//     <div></div>
+//   )
+// }`
+
+// const islandTokenContent = `<await-mount><nsx-code ns-name='${nsName}' ts-name='${tsName}' ns-code='${nsCode}' ts-code='${tsCode}'></nsx-code><template #fallback>${islandHtml}</template></await-mount>`
+
+function renderFallback(name: string, write: () => string, withPageContext: (cb: () => any) => string, page: string) {
+  const html = write
+    ? withPageContext(() => runWithPortals(write, page))
+    : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
+  return encodeStyleTags(typeof html === 'string' ? html : String(html ?? ''))
+}
+
+function escapeAttr(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('\n', '&#10;')
+    .replaceAll('\r', '&#13;')
+}
+
+function nsxCodeBlockRule(state, startLine: number, endLine: number, writeIsland: AnyObject, withPageContext: (cb: () => any) => any, page: string) {
+  let nextLine = startLine + 1
+  let closeLine = -1
+
+  while (nextLine < endLine) {
+    const pos = state.bMarks[nextLine] + state.tShift[nextLine]
+    const end = state.eMarks[nextLine]
+    const line = state.src.slice(pos, end).trim()
+
+    if (line === ':::') {
+      closeLine = nextLine
+      break
+    }
+
+    nextLine++
+  }
+
+  if (closeLine === -1) return false
+
+  const innerStart = state.bMarks[startLine + 1]
+  const innerEnd = state.eMarks[closeLine - 1]
+  const inner = state.src.slice(innerStart, innerEnd)
+
+  const blocks = [...inner.matchAll(/```(\w+)\n([\s\S]*?)```/g)]
+
+  const nsxBlock = blocks.find(match => match[1] === 'nsx' || match[1] === 'ns')
+  const tsxBlock = blocks.find(match => match[1] === 'tsx' || match[1] === 'ts')
+
+  if (!nsxBlock || !tsxBlock) return false
+
+  const nsName = nsxBlock[1]
+  const tsName = tsxBlock[1]
+  const nsCode = escapeAttr(nsxBlock[2].trimEnd())
+  const tsCode = escapeAttr(tsxBlock[2].trimEnd())
+
+  const islandHtml = renderFallback('nsx-code', () => writeIsland['nsx-code'](nsName, tsName, nsCode, tsCode), withPageContext, page)
+
+  const islandTokenContent =
+    `<await-mount>` +
+    `<nsx-code ` +
+    `ns-name='${nsName}' ` +
+    `ts-name='${tsName}' ` +
+    `ns-code='${nsCode}' ` +
+    `ts-code='${tsCode}'` +
+    `></nsx-code>` +
+    `<template #fallback>${islandHtml}</template>` +
+    `</await-mount>`
+  console.log('NSX CODE BLOCK', islandTokenContent)
+
+  state.tokens.push({
+    type: 'html_block',
+    tag: '',
+    nesting: 0,
+    level: state.level,
+    content: islandTokenContent,
+    block: true,
+    map: [startLine, closeLine + 1],
+    markup: ':::'
+  } as any)
+
+  state.line = closeLine + 1
+  return true
 }
 
 export function transformPortals(code: string, ctx: TransformContext<NoInfer<DefaultTheme.Config>>) {

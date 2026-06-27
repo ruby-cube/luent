@@ -1,7 +1,7 @@
 # Error rendering
-`Try`/`Catch` render a fallback when part of a template throws during rendering. `Try()` delineates the scope of the error boundary, which extends until nested `Try`/`Catch`s. 
+`Try`/`Catch` render a fallback when part of a view throws during rendering. `Try()` delineates the scope of the error boundary, which extends until nested `Try`/`Catch`s. 
 
-The render function passed to `Catch()` receives the thrown error and a retry function that attempts to render the failed template again.
+The render function passed to `Catch()` receives the thrown error and a retry function that attempts to render the failed view again.
 
 ```tsx
 <div>
@@ -15,7 +15,7 @@ The render function passed to `Catch()` receives the thrown error and a retry fu
 ```
 
 ## Rendering errors elsewhere
-Errors do not need to be rendered in place of the failed template. Use `ErrableView()` when error state should be exposed elsewhere. This is useful when the error UI belongs in a shared location, such as a banner, sidebar, toast region, or page-level notice.
+Errors do not need to be rendered in place of the failed view. Use `ErrableView()` when error state should be exposed elsewhere. This is useful when the error UI belongs in a shared location, such as a banner, sidebar, toast region, or page-level notice.
 
 ```tsx
 function FooApp() {

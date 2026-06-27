@@ -47,7 +47,7 @@ function Panel(setup: {
     <>
       <div class='panel'>
         <div class='top-bar'>{title}
-          <button on:click={() => opened.value = !opened.value}>
+          <button class='open-btn' on:click={() => opened.value = !opened.value}>
             {() => opened() ? '-' : '+'}
           </button>
         </div>
@@ -60,7 +60,8 @@ function Panel(setup: {
           user-select: none;
         }
 
-        .panel button {
+        .panel button.open-btn {
+          width: 1.5rem;
           border: none;
           background-color: goldenrod;
           border-radius: 5px;
@@ -185,7 +186,7 @@ function Powerset(setup: {
 
         .add-power-button {
            margin: .25rem;
-           border: 1px solid #8a2be2;
+           border: none;
            border-radius: .4rem;
            padding: .5rem .8rem;
            font-size: .85rem;
@@ -194,19 +195,20 @@ function Powerset(setup: {
            letter-spacing: .05em;
            color: #d4af37;
            background-color: #8a2be244 !important;
-           cursor: pointer;
-           transition: all .2s ease;
            line-height: 1rem;
         }
 
-        .add-power-button:hover:enabled {
-           background: linear-gradient(135deg, #5a2e7d 0%, #3d2817 100%);
-           box-shadow: 0 0 12px rgba(138, 43, 226, .4), 0 0 6px rgba(212, 175, 55, .2);
+        button {
+          cursor: pointer;
         }
 
         .add-power-button:disabled {
            cursor: not-allowed;
            opacity: .4;
+        }
+
+        .add-power-button:hover:enabled {
+          outline: 1px solid #8a2be2;
         }
 
         .stats {

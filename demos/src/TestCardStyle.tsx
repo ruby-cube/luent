@@ -1,4 +1,4 @@
-import { component, createRoot, template } from "@rue/luent";
+import { component, mount, template } from "@rue/luent";
 import "./ui/card.css"
 
 export function TestCardStyle() {
@@ -8,6 +8,4 @@ export function TestCardStyle() {
 }   
 
 if (__STYLE__)
-    createRoot(() =>
-        <TestCardStyle></TestCardStyle>
-    ).mount('#root')
+    mount(TestCardStyle, '#root')

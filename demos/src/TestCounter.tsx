@@ -1,4 +1,4 @@
-import { component, template, createRoot } from "@rue/luent"
+import { component, template, mount } from "@rue/luent"
 import { ion } from "@rue/quarky"
 
 /* 
@@ -34,4 +34,4 @@ export function TestCounter() {
    )
 }
 
-if (__TEST__) createRoot(TestCounter).mount('#root')
+if (__TEST__) mount(TestCounter, '#root')

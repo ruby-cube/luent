@@ -4,10 +4,10 @@
 
 ## Node Refs
 
-DOM elements and component instances may be accessed from the template by passing a node ref to a JSX tag. Node refs may be in the form of a getter function or a node ref tuple for iterative nodes.
+DOM elements and component instances may be accessed from the view by passing a node ref to a JSX tag. Node refs may be in the form of a getter function or a node ref tuple for iterative nodes.
 
 ### Single node refs
-Node refs are created by passing the tag name or component factory to `NodeRef()`. This will return a getter function. The value of the ref will be undefined until the template is mounted.
+Node refs are created by passing the tag name or component factory to `NodeRef()`. This will return a getter function. The value of the ref will be undefined until the node is created.
 
 ```tsx
 function DrawingApp() {
@@ -24,7 +24,7 @@ function DrawingApp() {
     <div class="canvas-app">
       <button type="button" on:click={clearCanvas}>Clear</button>
       <canvas
-        ref={$canvas} /* pass ref to template */
+        ref={$canvas} /* pass ref to node */
         width="900"
         height="500"
 			  {...DrawingKit($canvas())}
@@ -57,8 +57,19 @@ const tds = NodeRef('td', [])
 <!-- #### Component Node Refss -->
 <!-- - Absorbed ions?
 - Ref forwarding -->
+:::info Type definitions
+
+```ts
+type RawJSXNode = any | any[];
+
+type ComponentKit = {
+  nodes: RawJSXNode;
+  component: object;
+};
+```
+
+:::
 
 
-
-### Template hooks
-Nodes may also be accessed through [template hooks](/guide/lifecycle-hooks#template-hooks)
+### Inline hooks
+Nodes may also be accessed through [inline hooks](/guide/lifecycle-hooks#inline-hooks)

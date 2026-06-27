@@ -148,7 +148,7 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
    return {
       tooltip: tooltip as unknown as IonicTooltip<I>,
       asTooltipAnchor: asAnchor,
-      asTooltipTrigger: asTrigger
+      setTooltipTrigger: asTrigger
    }
 }
 

@@ -1,4 +1,4 @@
-import { component, beforeUnmount, ComponentRef, createRoot, NodeRef, template } from "@rue/luent";
+import { component, beforeUnmount, ComponentRef, mount, NodeRef, template } from "@rue/luent";
 import { ion } from "@rue/quarky";
 import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";
@@ -153,11 +153,4 @@ const shapes: (0 | 1)[][][] = [
     ]
 ]
 
-
-
-
-// if (__STYLE__)
-//     createRoot(() =>
-//         <BottomlessBlokkis></BottomlessBlokkis>
-//     ).mount('#root')
 

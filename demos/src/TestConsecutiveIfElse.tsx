@@ -1,4 +1,4 @@
-import { component, template, If, Else, createRoot, Style, css } from "@rue/luent";
+import { component, template, If, Else, mount, Style, css } from "@rue/luent";
 import { ion } from "@rue/quarky";
 import "./style.css"
 
@@ -54,4 +54,4 @@ export function TestConsecutiveIfElse() {
 }
 
 
-if (__TEST__) createRoot(TestConsecutiveIfElse).mount('#root')
+if (__TEST__) mount(TestConsecutiveIfElse, '#root')

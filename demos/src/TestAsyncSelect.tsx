@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Await, For, Meanwhile, Nonce, createRoot } from "@rue/luent";
+import { Await, For, Meanwhile, Nonce, mount } from "@rue/luent";
 import { AsyncIon, Ion, isPending, o, ion } from "@rue/quarky";
 
 // based on Solid.js/Remix demo
@@ -82,6 +82,4 @@ const db = {
    }
 }
 
-if (__TEST__) createRoot(() =>
-   <TestAsyncSelect></TestAsyncSelect>
-).mount('#root')
+if (__TEST__) mount(TestAsyncSelect, '#root')

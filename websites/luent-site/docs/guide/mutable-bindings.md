@@ -1,6 +1,6 @@
 # Mutable Bindings
 
-By default, element and component bindings are read-only, enforced by Luent's compile-time mutation safety checks.
+By default, element and component bindings are read-only, enforced by Luent's compile-time mutation checking.
 
 However, direct mutation is often the simplest and most ergonomic way to synchronize state across component or element boundaries. For this, Luent provides explicit mutable bindings that are statically traceable.
 

@@ -1,4 +1,4 @@
-import { createRoot, MICROCLASS_MERGE, provideRoot } from "@rue/luent"
+import { mount, MICROCLASS_MERGE, provideRoot } from "@rue/luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
@@ -48,12 +48,10 @@ import { TestStylesBindings } from "./src/TestStylesBindings"
 import { twMerge } from "tailwind-merge"
 
 export function runDemo() {
-  createRoot(() => {
+  mount(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <EmojiQuest />
-  })
-    // createRoot(() => )
-    .mount('#root')
+    return <TooltipDemo />
+  }, '#root')
 }
 

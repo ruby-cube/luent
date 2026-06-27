@@ -1,6 +1,7 @@
-import { template, createRoot } from "@rue/luent";
+import { template, mount } from "@rue/luent";
 import { TestIfElseMix } from "./TestIfElseMix";
 
-if (__TEST__) createRoot(() =>
-   <TestIfElseMix activation={['preserve', 'create']}></TestIfElseMix>
-).mount('#root')
+if (__TEST__)
+  mount(() => (
+    <TestIfElseMix activation={['preserve', 'create']}></TestIfElseMix>
+  ), '#root')

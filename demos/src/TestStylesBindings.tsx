@@ -1,4 +1,4 @@
-import { component, createRoot, fromTag, ion, MICROCLASS_MERGE, template } from "@rue/luent"
+import { component, mount, fromTag, ion, MICROCLASS_MERGE, template, provideRoot } from "@rue/luent"
 import { twMerge } from "tailwind-merge"
 
 const $simpleOn = ion(false)
@@ -110,4 +110,7 @@ export function TestStylesBindings() {
   )
 }
 
-if (__TEST__) createRoot(TestStylesBindings, { provide: [[MICROCLASS_MERGE, twMerge]] }).mount("#root")
+if (__TEST__) mount(() => {
+  provideRoot(MICROCLASS_MERGE, twMerge)
+  return TestStylesBindings()
+}, "#root")

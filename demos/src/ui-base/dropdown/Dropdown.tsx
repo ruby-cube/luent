@@ -1,7 +1,7 @@
 import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, style, template } from "@rue/luent"
 import { Ion, toIon } from "@rue/quarky"
-import { maybeFlip, positionTail } from "../popover/Popover.kit";
-import { PopoverRoot } from "../popover/Popover";
+import { maybeFlip, positionTail } from "../../../../packages/luent-ui/src/base/popover/Popover.kit";
+import { PopoverRoot } from "../../../../packages/luent-ui/src/base/popover/Popover";
 import { IonicDropdown } from "./Dropdown.kit";
 
 // TODO:
@@ -26,6 +26,6 @@ function DropdownRoot(setup: {
 export {
    PopoverContent as DropdownContent,
    PopoverTail as DropdownTail,
-} from '../popover/Popover'
+} from '../../../../packages/luent-ui/src/base/popover/Popover'
 
 export { DropdownRoot }

@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite'
 import LuentPlugin from '../../plugins/vite-plugin-luent/index.js'
 
 export function createSharedViteConfig() {
@@ -10,6 +11,7 @@ export function createSharedViteConfig() {
       extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.nsx']
     },
     plugins: [
+      tailwindcss(),
       ...(LuentPlugin() as any[])
     ],
     define: {

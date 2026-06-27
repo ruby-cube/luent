@@ -15,7 +15,7 @@ export type ContextEntryKey<T = any> = ((value: T) => [ContextEntryKey<T>, T]) &
 
 type FnKey = ContextEntryKey & { contextKey: string | ContextEntryKey }
 
-export function mergeContextKeys(...keys: ContextEntryKey[]) {
+export function mergeKeys(...keys: ContextEntryKey[]) {
    const mergedKey = ContextKey()
    for (const fnKey of keys) {
       (fnKey as FnKey).contextKey = mergedKey

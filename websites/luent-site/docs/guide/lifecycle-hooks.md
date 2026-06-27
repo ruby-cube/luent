@@ -1,15 +1,15 @@
 
 # Lifecycle Hooks
 
-In Luent, lifecycles are tied to dynamic view instances rather than components. Dynamic views are the views created by reactive [template control flow](/guide/template-control-flow).
+In Luent, lifecycles are tied to dynamic view instances rather than components. Dynamic views are the views created by reactive [view control flow](/guide/view-control-flow).
 
 Lifecycle hooks provide a way to run tasks at specific points within a view’s lifecycle.
 
 Lifecycle hooks may take the form of: 
 - [function hooks](#function-hooks) (e.g. `atMount(task)`) 
-- [template hooks](#template-hooks) (e.g. `<div at:mount={task}/>`)
+- [inline hooks](#inline-hooks) (e.g. `<div at:mount={task}/>`)
 
-Template hooks are useful when the lifecycle behavior belongs to a specific element or node. Function hooks should be used when the behavior belongs to the component or dynamic view.
+Inline hooks are useful when the lifecycle behavior belongs to a specific element or node. Function hooks should be used when the behavior belongs to the component or dynamic view.
 
 ## Hook Grammar
 
@@ -121,9 +121,9 @@ afterDetach(() => {
 ```
 
 
-## Template Hooks
+## Inline Hooks
 
-All available template hooks:
+All available inline hooks:
 
 **Umbrella hooks**
 | Phase | sync / prelude | render | tick |
@@ -141,7 +141,7 @@ All available template hooks:
 
 ### Examples
 
-Template hook tasks receive the associated DOM node.
+Inline hook callbacks receive the associated DOM node.
 
 ```tsx
 <input

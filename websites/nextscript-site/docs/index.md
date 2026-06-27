@@ -20,7 +20,7 @@ features:
   - title: Language coherence
     details: Write new yet familiar syntax confidently through predictable semantics.
   - title: Improved type safety
-    details: Cleanly address type-safety gaps of accessor functions and JSX templates.
+    details: Cleanly address type-safety gaps of accessor functions and JSX.
 ---
 
   <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
@@ -39,7 +39,7 @@ features:
 code-glimpses
 :::
 
-<p class='custom-block status-notice'><strong>This project is in early development.</strong> <br/>Most core features have been implemented, but substantial tooling work remains before the extension is usable.</p>
+<p class='custom-block status-notice'><strong>This project is in early development.</strong></p>
 
 <style scoped>
   section#code-glimpses p {

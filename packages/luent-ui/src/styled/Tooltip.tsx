@@ -1,7 +1,9 @@
-import { component, fromTag, If, NodeRef, RenderSlot, template } from "@rue/luent"
-import { TooltipContent, TooltipRoot, TooltipTail } from "../ui-base/tooltip/Tooltip"
-import { IonicTooltip } from "../ui-base/tooltip/Tooltip.kit";
-import { Alignment, Placement } from "../ui-base/popover/Popover.kit";
+import { component, fromTag, NodeRef, RenderSlot } from "@rue/luent"
+import { TooltipContent, TooltipRoot, TooltipTail } from "../base/tooltip/Tooltip"
+import { IonicTooltip } from "../base/tooltip/Tooltip.kit";
+import { Alignment, Placement } from "../base/popover/Popover.kit";
+
+// Shadcn
 
 // const transitionInStyles = "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95"
 
@@ -59,7 +61,7 @@ function Tooltip(setup: {
         </TooltipContent>
         <TooltipTail
           microclass={`size-2.5`}
-          shape:microclass='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50'
+          xray:shape={x => <x.div microclass='size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50' />}
         >
         </TooltipTail>
       </TooltipRoot>

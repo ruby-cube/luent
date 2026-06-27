@@ -1,11 +1,4 @@
-import { ion, component, css, If, Style, Thru, Xray, fromTag, createRoot } from "@rue/luent";
-
-// createRoot(() =>
-//   <HabitTracker
-//     habit="water"
-//     goal={8}
-//   />
-// ).mount('body')
+import { ion, component, css, If, Style, Thru, Xray, fromTag, mount } from "@rue/luent";
 
 export function HabitTracker(setup: {
   habit: string,

@@ -1,5 +1,5 @@
 import { ionic, Ionic, queueTask, toRaw } from "@rue/quarky"
-import { DATA_ATTRIBUTE_POPOVER, getPopoverID, Popover } from "../popover/Popover.kit"
+import { DATA_ATTRIBUTE_POPOVER, getPopoverID, Popover } from "../../../../packages/luent-ui/src/base/popover/Popover.kit"
 
 
 function DropdownKit<I extends { [key: string]: any }>() {

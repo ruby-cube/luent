@@ -178,9 +178,3 @@ const shapes: (0 | 1)[][][] = [
 
 
 
-
-// if (__STYLE__)
-//     createRoot(() =>
-//         <BottomlessBlokkis></BottomlessBlokkis>
-//     ).mount('#root')
-

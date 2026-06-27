@@ -1,0 +1,26 @@
+{
+  "name": "@rue/luent-ui",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "dependencies": {
+    "@rue/luent": "workspace:*",
+    "@rue/quarky": "workspace:*",
+    "@floating-ui/dom": "^1.7.6",
+    "class-variance-authority": "^0.7.1",
+    "tailwindcss": "^4.2.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@rue/types": "workspace:*",
+    "@rue/vite-plugin-luent": "workspace:*",
+    "vite": "^8.0.13"
+  },
+  "peerDependencies": {
+    "tailwind-merge": "^3.5.0"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT"
+}

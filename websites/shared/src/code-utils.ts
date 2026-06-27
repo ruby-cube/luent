@@ -1,4 +1,5 @@
 import { MaybeIon } from '@rue/luent'
+import { toHtml } from '@rue/utils'
 
 export function trusted(html: MaybeIon<string>) {
   return {
@@ -7,12 +8,7 @@ export function trusted(html: MaybeIon<string>) {
   }
 }
 
-export function toHtml(code: string) {
-  return code
-    .replace(/&/g, '&#x26;')
-    .replace(/</g, '&#x3C;')
-    .replace(/>/g, '&#x3E;')
-}
+
 
 export function codeHtml(code: string) {
   return `<pre class='shiki'><code>${toHtml(code)}</code></pre>`

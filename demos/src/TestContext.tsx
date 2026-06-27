@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, $fromContext, ContextEntryKey, ContextKey, createRoot, fromContext, fromRoot, FromTag, mergeContextKeys, template } from "@rue/luent"
+import { component, $fromContext, ContextEntryKey, ContextKey, mount, fromContext, fromRoot, FromTag, mergeKeys, template, provideRoot } from "@rue/luent"
 import { Ion, ion } from "@rue/quarky"
 import './TestContext.css'
 
@@ -57,12 +57,12 @@ function TestRootContext() {
         <GreatGrandparent name='Adam'></GreatGrandparent>
         <input mu:value={$adamsMsg}></input>
       </o:context >
-      
+
       <o:context provide={[GREAT_MESSAGE($evesMsg)]}>
         <GreatGrandparent name='Eve'></GreatGrandparent>
         <input mu:value={$evesMsg}></input>
       </o:context >
-      
+
       {/* 
          <GreatGrandparent name='Adam' provide={[ROOT_MESSAGE(adamsMsg)]}></GreatGrandparent>
          <GreatGrandparent name='Eve' provide={[ROOT_MESSAGE(evesMsg)]}></GreatGrandparent> */}
@@ -175,14 +175,11 @@ export {
   TestRootContext
 }
 
-const ROOT = mergeContextKeys(Child.ROOT_MESSAGE, Grandparent.ROOT_MESSAGE)
+const ROOT = mergeKeys(Child.ROOT_MESSAGE, Grandparent.ROOT_MESSAGE)
 
 if (__STYLE__) {
-  createRoot(TestRootContext, {
-    provide: [
-      // TestRootContext['rootMessage']('"Hello World" -root')
-      // TestRootContext['rootMessage'](null)
-      ROOT('heya')
-    ]
-  }).mount('#root')
+  mount(() => {
+    provideRoot([ROOT('heya')])
+    return TestRootContext()
+  }, '#root')
 }

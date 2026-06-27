@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fromRoot, fromContext, createGroundContext, fromGround } from '../provide';
 import { template, makeComponent } from '../../component/component';
-import { createRoot } from '../../createRoot';
+import { mount } from '../../mount';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { Context, createContext } from '../Context';
@@ -22,7 +22,7 @@ beforeEach(() => {
 const _frog_ = 'frog'
 
 describe('Integration tests the Context API', () => {
-    describe('createRoot() with appwide context', () => {
+    describe('mount() with appwide context', () => {
 
         it('should provide all components with context entries', () => {
 
@@ -67,7 +67,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['sibling'], {}, undefined)
                 )
             }
-            const app = createRoot(App, { with: { [_frog_]: value } });
+            const app = mount(App, { with: { [_frog_]: value } });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -91,7 +91,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createRoot(App, { with: { [_frog_]: value } });
+            const app = mount(App, { with: { [_frog_]: value } });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -109,7 +109,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createRoot(App, { with: { [_frog_]: value } });
+            const app = mount(App, { with: { [_frog_]: value } });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -124,7 +124,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
             expect(frog).toBe(undefined)
@@ -147,7 +147,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createRoot(App, { groundContext });
+            const app = mount(App, { groundContext });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -227,7 +227,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['sibling'], {}, undefined)
                 )
             }
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -272,7 +272,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['sibling'], {}, undefined)
                 )
             }
-            const app = createRoot(Parent);
+            const app = mount(Parent);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -334,7 +334,7 @@ describe('Integration tests the Context API', () => {
             }
 
             const groundContext = createGroundContext({ [GLOBAL_FROG]: globalValue })
-            const app = createRoot(App, { with: { [APP_FROG]: appValue }, groundContext });
+            const app = mount(App, { with: { [APP_FROG]: appValue }, groundContext });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -389,7 +389,7 @@ describe('Integration tests the Context API', () => {
                 }
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -418,7 +418,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -446,7 +446,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -476,7 +476,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -517,7 +517,7 @@ describe('Integration tests the Context API', () => {
                 }
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -556,7 +556,7 @@ describe('Integration tests the Context API', () => {
                 }
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -587,7 +587,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -618,7 +618,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -646,7 +646,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -675,7 +675,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const app = createRoot(App);
+            const app = mount(App);
 
             app.mount(<HTMLElement>document.createElement('div'))
 

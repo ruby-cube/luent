@@ -9,11 +9,11 @@ hero:
     src: /assets/luent-logo-512px.png
     alt: My Logo
   actions:
-    - theme: brand
-      text: Learn Luent
-      link: /markdown-examples
+    # - theme: brand
+    #   text: Learn Luent
+    #   link: /markdown-examples
     - theme: alt
-      text: Code glimpses
+      text: Take a code tour
       link: /index#code-glimpses
 
 features:
@@ -39,6 +39,8 @@ features:
 :::luent
 code-glimpses
 :::
+
+<p class='custom-block status-notice'><strong>This project is in early development.</strong></p>
 
 <style>
 

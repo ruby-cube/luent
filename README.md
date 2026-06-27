@@ -2,7 +2,7 @@
 <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-site-ambicolor.png" alt="luent-logo"/>
 </picture>
-<p><a href='https://nextscript.org/getter-syntax'>learn</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#motivation'>motivation</a> &nbsp;&nbsp;-&nbsp;&nbsp; <a href='#design-principles'>principles</a>
+<p><a href='https://nextscript.org/getter-syntax'>learn</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> &nbsp;-&nbsp; <a href='#design-principles'>principles</a>
 </div>
 
 # Luent
@@ -11,18 +11,18 @@ Luent is a web application framework designed around conceptual coherence and ex
 
 It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension that improves the clarity, ergonomics, and type safety of fine-grained reactive code.
 
-<br/>
+<br>
 
-> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents completed and in-progress features. Planned features are listed in our [roadmap]().
+> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents completed and in-progress features. Planned features are listed in the [roadmap]().
 
 
-<br/>
+<br>
 
 ## Code Examples
-Take a tour of Luent's syntax and APIs through these [code glimpses]() and [demos]().
+Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos]().
 
 
-<br/>
+<br>
 
 ## Motivation
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
@@ -43,7 +43,7 @@ Core design features:
 
 Experimental areas:
 - language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
-- compile-time mutation safety checks and statically traceable `mu:` bindings
+- compile-time mutation safety checking and statically traceable `mu:` bindings
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -53,7 +53,7 @@ Experimental areas:
 
 Luent transpiles JSX into `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It extends the base JSX transform with the following:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants
-- [JSX flow expressions](http://luent.dev/guide/template-control-flow) (designated JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
+- [JSX flow expressions](http://luent.dev/guide/template-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories
 - `<o-style>` tags are transformed to `style()` calls with a string template literal argument
 - JSX fragments are transformed into arrays
@@ -109,10 +109,10 @@ This JSX template ...
 
 
 ## Design Principles
-Luent is being developed under these guiding principles, which encapsulate our values and how we navigate tradeoffs:
+Luent is being developed under these guiding principles, which encapsulate the project's values and how tradeoffs are navigated:
 
 - **Human-centered, LLM-friendly.**
-We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. We believe interfaces designed for human clarity also tend to work well with AI systems. By designing for humans first, we create systems that are LLM-friendly as well.
+Luent take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. We believe that by designing for clarity and consistency, we create systems that are LLM-friendly as well.
 
 - **Elegance and simplicity.**
 Elegance—both conceptual and syntactic—is central to Luent’s API design. We pursue simple solutions through extensive experimentation and relentless trimming of excess.
@@ -151,8 +151,8 @@ This project builds upon ideas pioneered by frameworks that have shaped modern w
 
 Particular acknowledgement to the people and projects I've especially admired:
 
-- Vue 3, the framework I fell in love with and that sparked my fascination with frontend frameworks. Its accessor-based reactivity and seeds of fine-grained reactivity heavily influenced Quarky (Luent's reactivity system).
-- Solid.js, which later became a guiding light, particularly in how to approach component props and derivations in a signals-based framework
+- Vue 3, the framework I fell in love with and that sparked my fascination with frontend frameworks. Its accessor-based reactivity and seeds of fine-grained reactivity heavily influenced Luent's reactivity system.
+- Solid.js, which provided insight particularly in how to approach component props and derivations in a signals-based framework
 - Ryan Carniato, whose articles and streams have been an encouraging source of clarity and affirmation
 - Evan You and the Vue team, whose dedication to developer experience has greatly informed how I approach designing Luent
 
@@ -170,9 +170,9 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 - Core client-side functionality
 
 ### In progress
-- Runtime refinement and stabilization
-- `.nsx` preprocessing pipeline
-- Mutation safety checks
+- API refinement and stabilization
+- NextScript transpiler and language services
+- Mutation safety
 - Async rendering
 - Animation and transition APIs
 - Debugging tools
@@ -183,6 +183,7 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 ### Planned: Framework features
 - Scoped styles
 - Client-side routing
+- Async context
 
 ### Planned: Tooling and developer experience
 - Improved dev warnings

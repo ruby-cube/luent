@@ -1,5 +1,6 @@
 export * from './CodeTour'
 export * from './Code'
 export * from './DemoContainer'
+export * from './HoverInfo'
 export * from './style-rules'
 export * from './luent-islands'
