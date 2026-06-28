@@ -254,9 +254,10 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
           })
           afterMount(() => {
             for (const key in tab.hover) {
-              const node = document.querySelector(`[data-hover-id="${key}"]`)
-              console.log('set tooltip trigger', key, node)
-              if (node) setTooltipTrigger[key](node)
+              const nodes = document.querySelectorAll(`[data-hover-id="${key}"]`)
+              for (const node of nodes) {
+                setTooltipTrigger[key](node)
+              }
             }
           })
           return <>

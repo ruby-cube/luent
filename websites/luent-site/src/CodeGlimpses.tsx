@@ -1,9 +1,7 @@
 import { css, For, Style } from '@rue/luent'
 import { Code, CodeTour, TourSection } from '@rue/websites-shared'
 import { highlightCode } from './highlighter'
-import { TOOLTIP_CONFIG } from '@rue/luent-ui'
 import { TourNav } from './TourNav'
-import { AnyObject } from 'packages/types'
 
 let direction = 'code-right'
 function flowDirection() {
@@ -22,8 +20,8 @@ const sections: {
   tsx?: string,
   ns?: string,
   ts?: string,
-  nsHover?: {[key: string]: string},
-  tsHover?: {[key: string]: string},
+  nsHover?: { [key: string]: string },
+  tsHover?: { [key: string]: string },
 }[] = [
     FunctionalComponents,
     UnifiedReactivity,
@@ -64,106 +62,6 @@ export function CodeGlimpses() {
             {render()}
           </TourSection>
         })}
-        {/* 
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'ns', code: UnifiedReactivity.ns }}
-          altCode={{ name: 'ts', code: UnifiedReactivity.ts, lang: 'ts' }}
-          highlightCode={highlightCode}
-        >
-          {UnifiedReactivity()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: TypeExplicit.nsx }}
-          altCode={{ name: 'tsx', code: TypeExplicit.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {TypeExplicit()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: SelectiveReactivity.nsx }}
-          altCode={{ name: 'tsx', code: SelectiveReactivity.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {SelectiveReactivity()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'ns', code: ReusableLogic.ns }}
-          altCode={{ name: 'ts', code: ReusableLogic.ts, lang: 'ts' }}
-          highlightCode={highlightCode}
-        >
-          {ReusableLogic()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: flowNSX }}
-          altCode={{ name: 'tsx', code: flowTSX, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {FlowExpressions()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: DynamicViewSetup.nsx }}
-          altCode={{ name: 'tsx', code: DynamicViewSetup.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {DynamicViewSetup()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: MutationSafety.nsx }}
-          altCode={{ name: 'tsx', code: MutationSafety.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {MutationSafety()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: LifecycleHooks.nsx }}
-          altCode={{ name: 'tsx', code: LifecycleHooks.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {LifecycleHooks()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: Portals.nsx }}
-          altCode={{ name: 'tsx', code: Portals.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {Portals()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: ContextBindings.nsx }}
-          altCode={{ name: 'tsx', code: ContextBindings.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {ContextBindings()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: ViewPreservation.nsx }}
-          altCode={{ name: 'tsx', code: ViewPreservation.tsx, lang: 'tsx' }}
-          highlightCode={highlightCode}
-        >
-          {ViewPreservation()}
-        </TourSection> */}
-
       </CodeTour>
 
       {Style(css`
@@ -240,11 +138,18 @@ FunctionalComponents.tsx =
   `function Counter() {
   const $count = ion(0)
 
-  return (
-    <button on:click={() => count++}>
+  return <>
+    <button on:click={() => $count.value++}>
       {$count}
     </button>
-  )
+
+    <o-style>
+      button {
+        border: 1px solid gray;
+        background-color: transparent;
+      }
+    </o-style>
+  </>
 }
 
 mount(Counter, '#app')
@@ -262,7 +167,7 @@ function UnifiedReactivity() {
 }
 
 UnifiedReactivity.ns =
-  `// atomic
+  `/* atomic */
 get count = ion(0);
 
 get qty = ion(1, {
@@ -270,77 +175,43 @@ get qty = ion(1, {
   decrement() { qty-- },
 });
 
-// derived
+/* derived */
 get total = ion(() => count * qty);
 
-// structured
+/* structured */
 const menu = ionic(['apples', 'peaches', 'pears']);
 
 const position = ionic({ x: 0, y: 0 })
 
 const user = ionic(new User())
+
 `
 
 UnifiedReactivity.ts =
-  `const $count = ion(0);
-const $total = ion(() => $count() * qty);
-const list = ionic(['apples', 'peaches', 'pears']);
+  `/* atomic */
+const $count = ion(0);
 
-// TS examples use a $-prefix naming convention for accessor functions
-`
-ReusableLogic.heading = 'Reusable logic'
-function ReusableLogic() {
-  return <>
-    <p style='text-wrap: balance'>
-      Compose reusable logic independently of views. Define domain models with JavaScript classes and encapsulate stateful systems in destructurable kits—headless counterparts to components.
-    </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
-  </>
-}
+const $qty = ion(1, {
+  increment() { $qty.value++ },
+  decrement() { $qty.value-- },
+});
 
-ReusableLogic.ns =
-  `function PointerInfoKit(position: Ionic<Pointer>) {
-  get distance = ion(() =>
-    Math.sqrt(position.x ** 2 + position.y ** 2)
-  )
+/* derived */
+const $total = ion(() => $count() * $qty());
 
-  get quadrant = ion(() => {
-    if (position.x >= 0 && position.y >= 0) return 'I'
-    if (position.x < 0 && position.y >= 0) return 'II'
-    if (position.x < 0 && position.y < 0) return 'III'
-    return 'IV'
-})
+/* structured */
+const menu = ionic(['apples', 'peaches', 'pears']);
 
-  return { distance@, quadrant@ }
-}
+const position = ionic({ x: 0, y: 0 })
 
-// ---
+const user = ionic(new User())
 
-const pointer = ionic(new Pointer())
-
-const { distance@, quadrant@ } = PointerInfoKit(pointer)
 `
 
-ReusableLogic.ts =
-  `const $count = ion(0);
-const $total = ion(() => $count() * qty);
-const list = ionic(['apples', 'peaches', 'pears']);
-
-// TS examples use a $-prefix naming convention for accessor functions
-`
 TypeExplicit.heading = 'Type-explicit reactivity'
 
 function TypeExplicit() {
-  // const { tooltip, setTooltipTrigger } = TooltipKit({
-  //   info: { text: 'this is info' }
-  // })
   return <>
-    {/* <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
-      <h3 before:mount={setTooltipTrigger.text}>Type-explicit reactivity</h3>
-      <HoverInfo info={tooltip} placement='above' align='start'>
-        {tooltip.info}
-      </HoverInfo>
-    </o:context> */}
     <p style='text-wrap: balance'>
       Distinguish reactive variables from plain variables through type information. Hover variables in the example to inspect their types.
     </p>
@@ -350,9 +221,11 @@ function TypeExplicit() {
 
 
 TypeExplicit.nsHover = {
-  count: '(parameter) count: number',
+  count: 'const count: number',
   total: 'get total: Ion<number>',
   qty: 'get qty: Ion<number>',
+  list: 'const list: Ionic<List>',
+  item: '(parameter) item: Item',
 }
 
 TypeExplicit.tsHover = {
@@ -362,13 +235,15 @@ TypeExplicit.tsHover = {
 }
 
 TypeExplicit.nsx =
-  `get total = ion(() => count * qty)
+  `get total = ion(() => count * qty);
+
+// ---
 
 <:>
-  <div>{total@}</div>
   {For(list, item => 
     <li>{item}</li>
   )}
+  <div>{total@}</div>
 </:>
 
 `
@@ -376,12 +251,15 @@ TypeExplicit.nsx =
 TypeExplicit.tsx =
   `const $total = ion(() => count * $qty())
 
+// ---
+
 <:>
-  <div>{$total}</div>
   {For(list, item => 
     <li>{item}</li>
   )}
+  <div>{$total}</div>
 </:>
+
 `
 SelectiveReactivity.heading = 'Selective reactivity'
 function SelectiveReactivity() {
@@ -420,23 +298,78 @@ SelectiveReactivity.tsx =
   price: number;
   qty: Ion<number>;
 }) {
-  const { name, price, qty@ } = fromTag(setup);
+  const { name, price, $qty } = fromTag(setup);
 
-  const item = ionic({
-    selected: false,
-    notes: ionic([]),
-    meta: {
-      sku: 'apple-01',
-      taxable: true,
-    } as const
-  })
+  return <>
+    <li>
+      <span class='item-name'>{name}</span>
+      <span class='price'>{price} × {$qty}</span>
+      <span class='total'>= {()=> price * $qty())}</span>
+    </li>
 
-  get total = ion(() => price * qty)
-
-  <:>
-    {/* ... */}
-  </:>
+    <o-link href='/cart-item.css' rel='stylesheet'/>
+  </>
 }
+
+`
+
+
+ReusableLogic.heading = 'Reusable logic'
+function ReusableLogic() {
+  return <>
+    <p style='text-wrap: balance'>
+      Compose reusable logic independently of views. Define domain models with JavaScript classes and encapsulate stateful systems in destructurable kits—headless counterparts to components.
+    </p>
+    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+  </>
+}
+
+ReusableLogic.ns =
+  `function PointerInfoKit(position: Ionic<Pointer>) {
+  get distance = ion(() =>
+    Math.sqrt(position.x ** 2 + position.y ** 2)
+  )
+
+  get quadrant = ion(() => {
+    if (position.x >= 0 && position.y >= 0) return 'I'
+    if (position.x < 0 && position.y >= 0) return 'II'
+    if (position.x < 0 && position.y < 0) return 'III'
+    return 'IV'
+})
+
+  return { distance@, quadrant@ }
+}
+
+// ---
+
+const pointer = ionic(new Pointer())
+
+const { distance@, quadrant@ } = PointerInfoKit(pointer)
+
+`
+
+ReusableLogic.ts =
+  `function PointerInfoKit(position: Ionic<Pointer>) {
+  const $distance = ion(() =>
+    Math.sqrt(position.x ** 2 + position.y ** 2)
+  )
+
+  const $quadrant = ion(() => {
+    if (position.x >= 0 && position.y >= 0) return 'I'
+    if (position.x < 0 && position.y >= 0) return 'II'
+    if (position.x < 0 && position.y < 0) return 'III'
+    return 'IV'
+})
+
+  return { $distance, $quadrant }
+}
+
+// ---
+
+const pointer = ionic(new Pointer())
+
+const { $distance, $quadrant } = PointerInfoKit(pointer)
+
 `
 
 FlowExpressions.heading = 'View control flow'
@@ -497,7 +430,7 @@ function DynamicViewSetup() {
 DynamicViewSetup.nsx =
   `<section>
   {If(selectedUser@, user => {
-    const { profile@ } = UserProfileKit(user.id)
+    const { profile } = UserProfileKit(user.id)
     <:/>
     <aside class="profile-card">
       <h3>{user.name}</h3>
@@ -505,15 +438,13 @@ DynamicViewSetup.nsx =
     </aside>
   })}
 </section>
-
-
 
 `
 
 DynamicViewSetup.tsx =
   `<section>
-  {If(selectedUser@, user => {
-    const { profile@ } = UserProfileKit(user.id)
+  {If($selectedUser, user => {
+    const { profile } = UserProfileKit(user.id)
     <:/>
     <aside class="profile-card">
       <h3>{user.name}</h3>
@@ -521,6 +452,7 @@ DynamicViewSetup.tsx =
     </aside>
   })}
 </section>
+
 `
 
 MutationSafety.heading = 'Mutation safety'
@@ -615,19 +547,18 @@ LifecycleHooks.nsx =
   />
 )}
 
-
-
 `
 
 LifecycleHooks.tsx =
-  `{If(editing@,
+  `{If($editing,
   <input
     type="text"
     at:mount={node => node.focus()}
-    mu:value={todo.title@}
+    mu:value={$of(todo).title}
     on:blur={e => doneEdit(todo)}
   />
 )}
+
 `
 
 Portals.heading = 'Portals'
@@ -653,6 +584,7 @@ Portals.nsx =
 </o--body>
 
 <o-link href='./style.css' rel='stylesheet'/>
+
 `
 
 Portals.tsx =
@@ -667,6 +599,7 @@ Portals.tsx =
 </o--body>
 
 <o-link href='./style.css' rel='stylesheet'/>
+
 `
 
 ContextBindings.heading = 'Context bindings'
@@ -698,6 +631,7 @@ export function Sidebar() {
   const settings = fromContext(SETTINGS);
   /* ... */
 }
+
 `
 
 ContextBindings.tsx =
@@ -718,6 +652,7 @@ export function Sidebar() {
   const settings = fromContext(SETTINGS);
   /* ... */
 }
+
 `
 
 ViewPreservation.heading = 'Preserved views'
@@ -745,6 +680,7 @@ ViewPreservation.nsx =
     )}
   </o:preserve>
 </div>
+
 `
 
 ViewPreservation.tsx =
@@ -761,4 +697,5 @@ ViewPreservation.tsx =
     )}
   </o:preserve>
 </div>
+
 `
