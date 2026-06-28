@@ -1,16 +1,24 @@
 import { fromTag, As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount } from "@rue/luent";
 import { Ion, ion, MutableIon } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
+import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";
+import { HoverInfo } from "./HoverInfo";
 
 // TODO: Fix hacky SSG solutions
 
-function hover(code: string, config: {[key: string]: string}) {
-
+function markHover(code: string, map?: { [key: string]: string }) {
+  if (!map) return code;
+  for (const variable in map) {
+    code = code.replaceAll(variable, `<span data-hover-id='${variable}'>${variable}</span>`)
+  }
+  return code;
 }
 
+type CodeTab = { name: string, code: string, lang?: string, hover?: { [key: string]: string } }
+
 export function Code(setup: {
-  main: { name: string, code: string, lang?: string },
-  alt: { name: string, code: string, lang?: string },
+  main: CodeTab,
+  alt: CodeTab,
   highlight: (code: string, lang: string) => Promise<string>,
   trusted: boolean
   showSticky?: boolean
@@ -27,10 +35,6 @@ export function Code(setup: {
     })
   } = fromTag(setup);
 
-
-  const $main = ion(codeHtml(main.code), {
-    '-fetch': () => highlight(main.code, main.lang ?? main.name)
-  })
 
   let mainWidth = 0;
 
@@ -95,19 +99,16 @@ export function Code(setup: {
         })}
         <o:preserve>
           {Await(() => <>
-            {If(() => $tab() === 'main', () => {
-              return <div class='code'>{{ html: $main, trusted }}</div>
-            })}
-            {Else(() => {
-              const $alt = ion('', {
-                '-fetch': () => highlight(alt.code, alt.lang ?? alt.name)
-              })
-              return <div class='code'>{{ html: $alt, trusted }}</div>
-            })}
+            {If(() => $tab() === 'main', () =>
+              CodeBlock(main, highlight)
+            )}
+            {Else(() =>
+              CodeBlock(alt, highlight)
+            )}
           </>
           )}
           {Meanwhile(
-            <div class='code'>{{ html: $main, trusted }}</div>
+            <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
           )}
         </o:preserve>
       </div>
@@ -231,4 +232,40 @@ export function Code(setup: {
       `)}
     </>
   )
+}
+
+function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Promise<string>) {
+  const $code = ion('', {
+    '-fetch': async () => {
+      const highlighted = await highlight(tab.code, tab.lang ?? tab.name)
+      return markHover(highlighted, tab.hover)
+    }
+  })
+  const $container = NodeRef('div')
+
+  return <>
+    <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
+      <div ref={$container} class='code'>{{ html: $code, trusted }}</div>
+      {Await($code, () => <>
+        {If(tab.hover, () => {
+          const { tooltip, setTooltipTrigger } = TooltipKit({
+            info: tab.hover,
+            container: $container
+          })
+          afterMount(() => {
+            for (const key in tab.hover) {
+              const node = document.querySelector(`[data-hover-id="${key}"]`)
+              console.log('set tooltip trigger', key, node)
+              if (node) setTooltipTrigger[key](node)
+            }
+          })
+          return <>
+            <HoverInfo tooltip={tooltip} place="above" align="start">
+              <span>{() => (tooltip.info)}</span>
+            </HoverInfo>
+          </>
+        })}
+      </>)}
+    </o:context>
+  </>
 }

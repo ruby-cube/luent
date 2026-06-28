@@ -1,5 +1,6 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
 import { beforeUnmount, NodeRef, atLayout } from "@rue/luent"
+import { toValue } from "@rue/quarky"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'
@@ -16,7 +17,8 @@ export class Popover {
   constructor(
     public configuredPlacement: Placement, // TODO: alignment
     public alignment: Alignment,
-    public gap: number
+    public gap: number,
+    public container: (() => HTMLElement) | string | HTMLElement
   ) {
   }
 
@@ -70,15 +72,24 @@ export class Popover {
 export function maybeFlip(node: HTMLElement, popover: Popover) {
   atLayout(() => {
     const rect = node.getBoundingClientRect()
+    const container = getContainer(popover)
+    const bound = container?.getBoundingClientRect()
+
     if (
-      popover.placement === 'above' && rect.top < 0
-      || popover.placement === 'below' && rect.bottom > document.documentElement.clientHeight
-      || popover.placement === 'left' && rect.left < 0
-      || popover.placement === 'right' && rect.right > document.documentElement.clientWidth
+      popover.placement === 'above' && rect.top < (bound ? bound.top : 0)
+      || popover.placement === 'below' && rect.bottom > (bound ? bound.bottom : document.documentElement.clientHeight)
+      || popover.placement === 'left' && rect.left < (bound ? bound.left : 0)
+      || popover.placement === 'right' && rect.right > (bound ? bound.right : document.documentElement.clientWidth)
     ) {
       popover.flip()
     }
   })
+
+  function getContainer(popover: Popover) {
+    const { container } = popover;
+    if (!container) return;
+    return typeof container === 'string' ? document.querySelector(container) : toValue(container)
+  }
 }
 
 export const DATA_ATTRIBUTE_POPOVER = 'data-popover-anchor'

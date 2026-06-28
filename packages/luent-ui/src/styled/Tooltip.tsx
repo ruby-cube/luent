@@ -45,7 +45,7 @@ function Tooltip(setup: {
   const animateIn = `animate-in fade-in-0 zoom-in-95`
   const animateOut = `animate-out fade-out-0 zoom-out-95`
 
-  return component(
+  return (
     <o--body>
       <TooltipRoot
         animate-in={() => animateIn + ' ' + slideIn()}

@@ -41,17 +41,18 @@ export function CodeTour(setup: {
 }
 
 export function TourSection(setup: {
+  id?: string,
   Slot: RenderSlot,
   mainCode: { name: string, code: string, lang?: string },
   altCode: { name: string, code: string, lang?: string },
   highlightCode: (code: string, lang: string) => Promise<string>,
   flow: 'code-right' | 'code-left'
 }) {
-  const { Slot, flow, mainCode, altCode, highlightCode } = fromTag(setup)
+  const { Slot, flow, mainCode, altCode, highlightCode, id } = fromTag(setup)
 
   return component(
     <>
-      <article class={`tour-row ${flow}`}>
+      <article id={id} class={`tour-row ${flow}`}>
         <div class='tour-copy'>
           {Slot()}
         </div>

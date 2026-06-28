@@ -1,8 +1,9 @@
-import { css, Style } from '@rue/luent'
+import { css, For, Style } from '@rue/luent'
 import { Code, CodeTour, TourSection } from '@rue/websites-shared'
 import { highlightCode } from './highlighter'
-import { HoverInfo, TooltipKit } from '@rue/websites-shared'
 import { TOOLTIP_CONFIG } from '@rue/luent-ui'
+import { TourNav } from './TourNav'
+import { AnyObject } from 'packages/types'
 
 let direction = 'code-right'
 function flowDirection() {
@@ -10,27 +11,67 @@ function flowDirection() {
   return direction = 'code-right'
 }
 
+function toId(heading: string) {
+  return heading.toLowerCase().replaceAll(' ', '-')
+}
+
+const sections: {
+  (): any,
+  heading: string,
+  nsx?: string,
+  tsx?: string,
+  ns?: string,
+  ts?: string,
+  nsHover?: {[key: string]: string},
+  tsHover?: {[key: string]: string},
+}[] = [
+    FunctionalComponents,
+    UnifiedReactivity,
+    TypeExplicit,
+    SelectiveReactivity,
+    ReusableLogic,
+    FlowExpressions,
+    DynamicViewSetup,
+    MutationSafety,
+    LifecycleHooks,
+    Portals,
+    ContextBindings,
+    ViewPreservation
+  ]
+
 export function CodeGlimpses() {
 
   return (
     <>
+      <TourNav headings={sections.map(section => ({
+        text: section.heading,
+        id: toId(section.heading)
+      }))}></TourNav>
       <CodeTour>
+        {For(sections, (render) => {
+          const jsx = 'nsx' in render
+          const ns = jsx ? 'nsx' : 'ns'
+          const ts = jsx ? 'tsx' : 'ts'
+          const heading = render.heading
+          return <TourSection
+            id={toId(heading)}
+            flow={flowDirection()}
+            mainCode={{ name: ns, code: render[ns], hover: render.nsHover }}
+            altCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
+            highlightCode={highlightCode}
+          >
+            <h3>{heading}</h3>
+            {render()}
+          </TourSection>
+        })}
+        {/* 
         <TourSection
           flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: FunctionalComponents.nsx }}
-          altCode={{ name: 'tsx', code: FunctionalComponents.tsx, lang: 'tsx' }}
+          mainCode={{ name: 'ns', code: UnifiedReactivity.ns }}
+          altCode={{ name: 'ts', code: UnifiedReactivity.ts, lang: 'ts' }}
           highlightCode={highlightCode}
         >
-          {FunctionalComponents()}
-        </TourSection>
-
-        <TourSection
-          flow={flowDirection()}
-          mainCode={{ name: 'ns', code: ReactivePrimitives.ns }}
-          altCode={{ name: 'ts', code: ReactivePrimitives.ts, lang: 'ts' }}
-          highlightCode={highlightCode}
-        >
-          {ReactivePrimitives()}
+          {UnifiedReactivity()}
         </TourSection>
 
         <TourSection
@@ -107,11 +148,11 @@ export function CodeGlimpses() {
 
         <TourSection
           flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: ContextualBindings.nsx }}
-          altCode={{ name: 'tsx', code: ContextualBindings.tsx, lang: 'tsx' }}
+          mainCode={{ name: 'nsx', code: ContextBindings.nsx }}
+          altCode={{ name: 'tsx', code: ContextBindings.tsx, lang: 'tsx' }}
           highlightCode={highlightCode}
         >
-          {ContextualBindings()}
+          {ContextBindings()}
         </TourSection>
 
         <TourSection
@@ -121,7 +162,7 @@ export function CodeGlimpses() {
           highlightCode={highlightCode}
         >
           {ViewPreservation()}
-        </TourSection>
+        </TourSection> */}
 
       </CodeTour>
 
@@ -161,15 +202,17 @@ export function CodeGlimpses() {
 }
 
 
+FunctionalComponents.heading = 'Functional components'
+
 function FunctionalComponents() {
   return <>
-    <h3>Functional components</h3>
     <p style='text-wrap: balance'>
       Write components as render functions that run once to create a view. Views are composed using JSX or NSX and updated through fine-grained reactivity.
     </p>
     <a href='/guide/getter-syntax' class='medium brand'>Learn more</a>
   </>
 }
+
 
 FunctionalComponents.nsx =
   `function Counter() {
@@ -208,10 +251,9 @@ mount(Counter, '#app')
 
 `
 
-
-function ReactivePrimitives() {
+UnifiedReactivity.heading = 'Unified reactivity'
+function UnifiedReactivity() {
   return <>
-    <h3>Unified reactivity</h3>
     <p>
       Manage simple, derived, and structured reactive state under a unified reactivity model. Reactive state is initialized through the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
@@ -219,7 +261,7 @@ function ReactivePrimitives() {
   </>
 }
 
-ReactivePrimitives.ns =
+UnifiedReactivity.ns =
   `// atomic
 get count = ion(0);
 
@@ -239,17 +281,16 @@ const position = ionic({ x: 0, y: 0 })
 const user = ionic(new User())
 `
 
-ReactivePrimitives.ts =
+UnifiedReactivity.ts =
   `const $count = ion(0);
 const $total = ion(() => $count() * qty);
 const list = ionic(['apples', 'peaches', 'pears']);
 
 // TS examples use a $-prefix naming convention for accessor functions
 `
-
+ReusableLogic.heading = 'Reusable logic'
 function ReusableLogic() {
   return <>
-    <h3>Reusable logic</h3>
     <p style='text-wrap: balance'>
       Compose reusable logic independently of views. Define domain models with JavaScript classes and encapsulate stateful systems in destructurable kits—headless counterparts to components.
     </p>
@@ -287,23 +328,37 @@ const list = ionic(['apples', 'peaches', 'pears']);
 
 // TS examples use a $-prefix naming convention for accessor functions
 `
+TypeExplicit.heading = 'Type-explicit reactivity'
 
 function TypeExplicit() {
-  const { tooltip, setTooltipTrigger } = TooltipKit({
-    info: { text: 'this is info' }
-  })
+  // const { tooltip, setTooltipTrigger } = TooltipKit({
+  //   info: { text: 'this is info' }
+  // })
   return <>
-    <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
+    {/* <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
       <h3 before:mount={setTooltipTrigger.text}>Type-explicit reactivity</h3>
       <HoverInfo info={tooltip} placement='above' align='start'>
         {tooltip.info}
       </HoverInfo>
-    </o:context>
+    </o:context> */}
     <p style='text-wrap: balance'>
       Distinguish reactive variables from plain variables through type information. Hover variables in the example to inspect their types.
     </p>
     <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
+}
+
+
+TypeExplicit.nsHover = {
+  count: '(parameter) count: number',
+  total: 'get total: Ion<number>',
+  qty: 'get qty: Ion<number>',
+}
+
+TypeExplicit.tsHover = {
+  count: '(parameter) count: number',
+  $total: 'const $total: Ion<number>',
+  $qty: 'const $qty: Ion<number>',
 }
 
 TypeExplicit.nsx =
@@ -328,15 +383,11 @@ TypeExplicit.tsx =
   )}
 </:>
 `
-
+SelectiveReactivity.heading = 'Selective reactivity'
 function SelectiveReactivity() {
   return <>
-    <h3>Selective reactivity</h3>
     <p>
       Apply reactivity where it matters. Selective reactivity reduces unnecessary performance overhead and offers clarity and control over what gets re-rendered.
-      {/*       
-      allows fine-grained 
-      Control over what participates in the reactive system  */}
     </p>
     <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
@@ -388,11 +439,10 @@ SelectiveReactivity.tsx =
 }
 `
 
-
+FlowExpressions.heading = 'View control flow'
 
 function FlowExpressions() {
   return <>
-    <h3>View control flow</h3>
     <p>
       Describe the control flow of dynamic views through flow functions such as <code>If</code>/<code>Else</code>, <code>For</code>/<code>Empty</code>, and <code>Await</code>/<code>Meanwhile</code>.
       {/* Control flow functions such as <code>If</code>/<code>Else</code>, <code>For</code>/<code>Empty</code>, and <code>Await</code>/<code>Meanwhile</code> create and manage dynamic views. */}
@@ -401,7 +451,7 @@ function FlowExpressions() {
   </>
 }
 
-const flowNSX =
+FlowExpressions.nsx =
   `<section>
   {If(online@,
     <span class="status">Online</span>
@@ -416,7 +466,7 @@ const flowNSX =
 `
 
 
-const flowTSX =
+FlowExpressions.tsx =
   `<section>
   {If($online,
     <>
@@ -434,11 +484,10 @@ const flowTSX =
 
 
 
-
+DynamicViewSetup.heading = 'Dynamic view setup'
 
 function DynamicViewSetup() {
   return <>
-    <h3>Dynamic view setup</h3>
     <p>
       Dynamic view logic may be set up locally, eliminating the need for premature component extraction. Resources are initialized and discarded alongside the view. Complexity is introduced only when needed. Logic is colocated where it is used.
     </p>
@@ -474,11 +523,10 @@ DynamicViewSetup.tsx =
 </section>
 `
 
-
+MutationSafety.heading = 'Mutation safety'
 
 function MutationSafety() {
   return <>
-    <h3>Mutation Safety</h3>
     <p>
       Compile-time mutation checking prevent hidden nonlocal mutations, while explicit mutable bindings enable safe, statically traceable cross-boundary mutations.
     </p>
@@ -546,9 +594,10 @@ function Powerset(setup: {
   </>
 }`
 
+LifecycleHooks.heading = 'Inline lifecycle hooks'
+
 function LifecycleHooks() {
   return <>
-    <h3>Inline lifecycle hooks</h3>
     <p>
       Lifecycle behavior specific to a view node may be declared inline through lifecycle bindings such as <code>at:mount</code> and <code>before:unmount</code>.
     </p>
@@ -581,9 +630,10 @@ LifecycleHooks.tsx =
 )}
 `
 
+Portals.heading = 'Portals'
+
 function Portals() {
   return <>
-    <h3>Portals</h3>
     <p>
       Visually distinctive portal tags make it clear which sections of the view are rendered elsewhere in the DOM. Declare metadata locally in components through head elements like <code>{'<o-link>'}</code> and <code>{'<o-style>'}</code>.
     </p>
@@ -619,9 +669,10 @@ Portals.tsx =
 <o-link href='./style.css' rel='stylesheet'/>
 `
 
-function ContextualBindings() {
+ContextBindings.heading = 'Context bindings'
+
+function ContextBindings() {
   return <>
-    <h3>Context Bindings</h3>
     <p>
       Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Provide from the root of an application locally with <code>{'<o--root>'}</code> or from reusable kits with <code>provideRoot()</code>. Merge context keys to provide the same binding across multiple decoupled components.
     </p>
@@ -629,7 +680,7 @@ function ContextualBindings() {
   </>
 }
 
-ContextualBindings.nsx =
+ContextBindings.nsx =
   `const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
 
 <o:context provide={[THEME(theme@), SETTINGS(settings)]}>
@@ -649,7 +700,7 @@ export function Sidebar() {
 }
 `
 
-ContextualBindings.tsx =
+ContextBindings.tsx =
   `const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
 
 <o:context provide={[THEME($theme), SETTINGS(settings)]}>
@@ -669,9 +720,10 @@ export function Sidebar() {
 }
 `
 
+ViewPreservation.heading = 'Preserved views'
+
 function ViewPreservation() {
   return <>
-    <h3>Preserved Views</h3>
     <p>
       Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>’preserve’</code> directive. Discard with <code>`view.markDiscard()`</code> when the view is no longer needed or state needs to be refreshed.
     </p>

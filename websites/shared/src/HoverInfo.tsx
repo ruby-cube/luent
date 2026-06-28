@@ -7,14 +7,14 @@ export function HoverInfo(setup: {
   ref?: NodeRef<'div'>;
   Slot: RenderSlot,
   tail?: RenderSlot,
-  info: IonicTooltip,
+  tooltip: IonicTooltip,
   gap?: number,
   place?: Placement,
   align?: Alignment
 }) {
   const {
     ref,
-    info,
+    tooltip,
     tail = true,
     Slot,
     place,
@@ -23,14 +23,14 @@ export function HoverInfo(setup: {
     ...bindings
   } = fromTag(setup)
 
-  info.configure({ placement: place, alignment: align, gap })
+  tooltip.configure({ placement: place, alignment: align, gap })
 
-  return component(
+  return (
     <o--body>
       <TooltipRoot
-        tooltip={info}>
+        tooltip={tooltip}>
         <TooltipContent
-          microclass={() => `${info.above ? 'origin-bottom' : info.below ? 'origin-top' : info.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
+          microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
           auto-bind={bindings}
           style='background-color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); font-weight: 600;'
         >

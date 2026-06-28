@@ -40,6 +40,7 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
    // gap?: number,
    // placement?: Placement,
    // alignment?: Alignment
+   container?: (() => HTMLElement | undefined) | string | HTMLElement
    info?: I
 }) {
    const anchorRoot = '--popover-anchor-' + getPopoverID()
@@ -48,7 +49,8 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
    const tooltip = ionic(new TooltipModel(
       /* options?.placement ??  */'above',
       /* options?.alignment ??  */'center',
-      /* options?.gap ??  */.75
+      /* options?.gap ??  */.75,
+      options?.container
    ), {
       '-devName': 'tooltip'
    })
