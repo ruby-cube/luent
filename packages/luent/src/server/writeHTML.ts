@@ -1,4 +1,4 @@
-import { camelToKebabCase, isFunction, isObject, isString, normalizeToArray } from "@rue/utils";
+import { camelToKebabCase, isArray, isFunction, isObject, isString, normalizeToArray } from "@rue/utils";
 import { composeBindings, toSetup } from "../component/bindings";
 import { ComponentTag } from "../component/Component";
 import { RenderSlot } from "../component/x-Input";
@@ -15,7 +15,7 @@ import { Flask, flaskStack } from "@rue/flask";
 import { InnerHTMLKit, isInnerHTMLKit } from "../node/InnerHTML";
 import { createRootContext } from "../context/provide";
 import { popContext, pushContext } from "../context/context-stack";
-import {toHtml} from "@rue/utils"
+import { escapeHTML } from "@rue/utils"
 
 const selfclosing = {
   "area": true,
@@ -40,8 +40,8 @@ export function writeElement(
   Slot: RenderSlot | undefined,
   bindings: ElementConfig,
 ) {
-  if (tagName in selfclosing) return `<${tagName}${renderBindings(bindings)}>`
-  return `<${tagName}${renderBindings(bindings)}>${renderSlot(Slot)}</${tagName}>`
+  if (tagName in selfclosing) return { element: `<${tagName}${renderBindings(bindings)}>` }
+  return { element: `<${tagName}${renderBindings(bindings)}>${renderSlot(Slot)}</${tagName}>` }
 }
 
 function getValue(value: any) {
@@ -164,7 +164,7 @@ function renderSlot(Slot: RenderSlot | undefined,) {
   if (!Slot) return ''
   const output = normalizeToArray(typeof Slot === 'function' ? Slot() : Slot)
   if (isInnerHTMLKit(output[0])) return writeInnerHTML(output[0])
-  return processJSXOutput(output).join("")
+  return joinIsland(processJSXOutput(output))
 }
 
 function writeInnerHTML(kit: InnerHTMLKit) {
@@ -182,8 +182,10 @@ function writeInnerHTML(kit: InnerHTMLKit) {
  */
 export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = []) {
   for (const node of jsxNodes) {
-
-    if (Array.isArray(node)) {
+    if (isObject(node) && 'element' in node) {
+      flattened.push(node)
+    }
+    else if (Array.isArray(node)) {
       processJSXOutput(node, flattened)
     }
     else if (isComponentKit(node)) {
@@ -191,18 +193,13 @@ export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = [
     }
     else if (isFunction(node)) {
       if (node.length !== 0) throw new Error('render functions must have no parameters')
-      // flattened.push(toString(node()))
-      processJSXOutput(toString(node()), flattened)
+      flattened.push(escapeHTML(toString(node())))
     }
     else if (node == null || node === '') {
       continue;
     }
-    // else if (node instanceof VineNode) { // TODO: SSR versions of createIfSeries etc
-    //   flattened.push(node)
-    // }
     else {
-      flattened.push(toString(node))
-      // flattened.push(toHtml(toString(node)))
+      flattened.push(escapeHTML(toString(node)))
     }
   }
   return flattened;
@@ -213,7 +210,7 @@ export function writeComponent(
   fromTag: ComponentConfig,
 ) {
   const setup = toSetup(fromTag) // TODO: SSR version of toSetup?
-  return processJSXOutput(normalizeToArray(Component($from(setup)))).join("")
+  return processJSXOutput(normalizeToArray(Component($from(setup))))
 }
 
 
@@ -228,7 +225,7 @@ export function writeIsland<T extends AnyObject, E extends Provided>(App: Compon
     flask.emitInitialMount()
     console.log('RENDER TO STRING')
     const output = instantUpdate(() =>
-      processJSXOutput(normalizeToArray(App())).join('')
+      joinIsland(processJSXOutput(normalizeToArray(App())))
     )
     return output
   }
@@ -238,4 +235,19 @@ export function writeIsland<T extends AnyObject, E extends Provided>(App: Compon
   }
 }
 
+function joinIsland(array: (string | { element: string[] })[]) {
+  let html = ''
+  for (const item of array) {
+    if (Array.isArray(item)) {
+      html += joinIsland(item)
+    }
+    else if (isObject(item) && 'element' in item) {
+      html += item.element
+    }
+    else {
+      html += item
+    }
+  }
+  return html;
+}
 

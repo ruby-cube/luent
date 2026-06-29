@@ -18,12 +18,14 @@ export default defineConfig({
 
   markdown: {
     config(md) {
+      console.log('TRANSFORM MARKDOWN')
       transformMarkdownIslands(md, Islands)
     },
     ...markdownShikiConfig
   },
-
+  
   transformHtml(code, id, ctx) {
+    console.log('TRANSFORM HTML')
     return transformPortals(code, ctx.page)
   },
 

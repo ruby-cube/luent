@@ -28,6 +28,7 @@
     "dev:ns-site": "pnpm -F @rue/nextscript-site docs:dev",
     "dev:luent-site": "pnpm -F @rue/luent-site docs:dev",
     "build:ns-site": "pnpm -F @rue/nextscript-site docs:build",
+    "build:luent-site": "pnpm -F @rue/luent-site docs:build",
     "preview:ns-site": "pnpm -F @rue/nextscript-site docs:preview",
     "build-babel": "pnpm -F @rue/jungle build-babel",
     "mu-lint": "pnpm exec tsc .jungle/mu-linting/mu-mutation-linter.ts .jungle/mu-linting/run-mu-mutation-lint.ts --module commonjs --target es2020 --moduleResolution node --skipLibCheck --outDir .jungle/mu-linting/.tmp-run && node .jungle/mu-linting/.tmp-run/run-mu-mutation-lint.js",

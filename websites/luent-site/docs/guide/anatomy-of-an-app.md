@@ -123,25 +123,6 @@ mount(() => {
 Component setup functions are render functions with additional ergonomic features provided through JSX tag syntax, the setup object, and `fromTag()` setup interpreter.
 
 **Component setup function**
-<!-- ```tsx
-function MessageDisplay(setup: {
-  message: Ion<string>
-}) {
-  const { message@ } = fromTag(setup)
-  <:>
-    <p>{message@}</p>
-  </:>
-}
-``` -->
-
-<!-- :::nsx
-```nsx
-get count = ion(0)
-```
-```tsx
-const $count = ion(0)
-```
-::: -->
 
 :::nsx
 ```nsx

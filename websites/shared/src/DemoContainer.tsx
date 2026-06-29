@@ -1,4 +1,4 @@
-import { callWithShadowRoot, component, css, fromTag, NodeRef, RenderSlot, Style } from "@rue/luent";
+import { callWithShadowRoot, component, css, fromTag, NodeRef, renderInShadow, RenderSlot, Style } from "@rue/luent";
 
 // function Powerset(setup: {
 //   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
@@ -29,17 +29,7 @@ export function DemoContainer(setup: {
   return (
     <>
       <div ref={$div} class='demo-container' auto-bind={rest}>
-        {import.meta.env.SSR
-          ?
-          <style-scope>
-            <template>
-              {callWithShadowRoot(Slot)}
-            </template>
-          </style-scope>
-          : <shadow-root mode='open'>
-            {Slot()}
-          </shadow-root>
-        }
+        {renderInShadow(Slot)}
       </div>
 
       {Style(css`

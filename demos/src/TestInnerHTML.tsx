@@ -1,7 +1,7 @@
 import { component } from "@rue/luent";
 import { ion } from "@rue/quarky";
 
-function toHtml(code: string) {
+function escapeHTML(code: string) {
   return code
     .replace(/&/g, '&#x26;')
     .replace(/</g, '&#x3C;')
@@ -9,7 +9,7 @@ function toHtml(code: string) {
 }
 
 function codeHtml(code: string) {
-  return `<code><pre>${toHtml(code)}</pre></code>`
+  return `<code><pre>${escapeHTML(code)}</pre></code>`
 }
 
 const nsx =

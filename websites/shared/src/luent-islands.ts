@@ -1,7 +1,8 @@
-import { getPortals, RenderPageWithStyles, runWithPortals } from "@rue/luent";
+import { getPortals, RenderPageWithStyles, runWithPortals, renderInShadow } from "@rue/luent";
 import { type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
 import { AnyObject } from "@rue/types";
+import { escapeHTML } from "@rue/utils";
 
 type MarkdownIt = Exclude<MarkdownOptions['config'], undefined> extends (arg: infer P) => any ? P : never
 
@@ -30,7 +31,7 @@ export function hydrate(app: any, islands: AnyObject) {
     customElements.define('await-mount', class AwaitMount extends HTMLElement {
       connectedCallback() {
         const template = this.querySelector('template')
-        const content = template?.childNodes ??[]
+        const content = template?.childNodes ?? []
         // this.innerHTML = ''
         this.append(...content)
       }
@@ -106,6 +107,7 @@ export function transformMarkdownIslands(md: MarkdownIt, Islands: AnyObject) {
   })
 }
 
+
 // :::nsx
 // ```nsx
 // function Counter() {
@@ -146,19 +148,9 @@ function renderFallback(name: string, write: () => string, withPageContext: (cb:
   const html = write
     ? withPageContext(() => runWithPortals(write, page))
     : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
-  return encodeStyleTags(typeof html === 'string' ? html : String(html ?? ''))
+  return encodeStyleTags(html)
 }
 
-function escapeAttr(value: string) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('\n', '&#10;')
-    .replaceAll('\r', '&#13;')
-}
 
 function nsxCodeBlockRule(state, startLine: number, endLine: number, Islands: AnyObject, withPageContext: (cb: () => any) => any, page: string) {
   let nextLine = startLine + 1
@@ -192,8 +184,8 @@ function nsxCodeBlockRule(state, startLine: number, endLine: number, Islands: An
 
   const nsName = nsxBlock[1]
   const tsName = tsxBlock[1]
-  const nsCode = escapeAttr(nsxBlock[2].trimEnd())
-  const tsCode = escapeAttr(tsxBlock[2].trimEnd())
+  const nsCode = escapeHTML(nsxBlock[2].trimEnd())
+  const tsCode = escapeHTML(tsxBlock[2].trimEnd())
 
   const islandHtml = renderFallback('nsx-code', () => Islands['nsx-code'](nsName, tsName, nsCode, tsCode), withPageContext, page)
 

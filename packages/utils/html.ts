@@ -1,6 +1,10 @@
-export function toHtml(code: string) {
-  return code
-    .replace(/&/g, '&#x26;')
-    .replace(/</g, '&#x3C;')
-    .replace(/>/g, '&#x3E;')
+export function escapeHTML(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('\n', '&#10;')
+    .replaceAll('\r', '&#13;')
 }

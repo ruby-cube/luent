@@ -1,5 +1,5 @@
 import { MaybeIon } from '@rue/luent'
-import { toHtml } from '@rue/utils'
+import { escapeHTML } from '@rue/utils'
 
 export function trusted(html: MaybeIon<string>) {
   return {
@@ -11,7 +11,7 @@ export function trusted(html: MaybeIon<string>) {
 
 
 export function codeHtml(code: string) {
-  return `<pre class='shiki'><code>${toHtml(code)}</code></pre>`
+  return `<pre class='shiki'><code>${escapeHTML(code)}</code></pre>`
 }
 
 function unwrapShikiCode(html: string) {

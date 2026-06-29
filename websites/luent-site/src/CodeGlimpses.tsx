@@ -32,9 +32,9 @@ const sections: {
     DynamicViewSetup,
     MutationSafety,
     LifecycleHooks,
-    // Portals,
-    // ContextBindings,
-    // ViewPreservation
+    Portals,
+    ContextBindings,
+    ViewPreservation
   ]
 
 export function CodeGlimpses() {
