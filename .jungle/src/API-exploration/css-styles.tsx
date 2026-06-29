@@ -3,7 +3,8 @@ import { component, template } from "@rue/luent";
 
 function App() {
 
-   return component(
+   return (
+
       <>
          <div style={`
             min-width: ${$width()}px;

@@ -55,7 +55,8 @@ export function BulletJournal() {
     console.log('@@@ active todo', $activeTodo())
   })
 
-  return component(
+  return (
+
     <ul on:click={e => e.from('li', 'input') || $activeTodo() && ($activeTodo.value = null)}>
       {For(list, m => m.id, (item, index) =>
         <li on:click={e => $activeTodo() || ($activeTodo.value = item)}>

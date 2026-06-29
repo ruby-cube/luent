@@ -21,7 +21,7 @@ Errors do not need to be rendered in place of the failed view. Use `ErrableView(
 function FooApp() {
   const errable = ErrableView()
 
-  return component(
+  return (
     <Notices>
       {If($of(errable).error, 
         <ErrorNotice error={errable.error} retry={() => errable.retry()}/>

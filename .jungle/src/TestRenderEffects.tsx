@@ -32,7 +32,8 @@ export function TestRenderEffects() {
       })
    }
 
-   return component(
+   return (
+
       <div on:click={increment}>hi</div>
    )
 }

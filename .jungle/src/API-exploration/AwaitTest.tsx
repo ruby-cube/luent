@@ -7,13 +7,15 @@ import { ion } from "@rue/quarky"
 const $ListBlock = Suspense({
     Pending: ListBlock,
     Placeholder() {
-        return component(
+        return (
+
             <div>I'm not ready...</div>
         )
     },
     timeout: 9001,
     Error({ error }: { error: any }) {
-        return component(
+        return (
+
             <div>Oops! {error}</div>
         )
     }
@@ -22,14 +24,15 @@ const $ListBlock = Suspense({
 const $TextArea = Suspense({
     Pending: TextArea,
     Placeholder() {
-        return component(<div>loading...</div>)
+        return <div>loading...</div>
     },
     // Error: ({ error }: { error: any }) => <div>Ohh noes!! {error}</div>
 })
 
 export function MainSite() {
     const $count = ion(0)
-    return component(
+    return (
+
         <>
             <h1>Hello World</h1>
             <$ListBlock></$ListBlock>
@@ -41,13 +44,15 @@ export function MainSite() {
 }
 
 function Something() {
-    return component(
+    return (
+
         <p>hey</p>
     )
 }
 
 function ListBlock() {
-    return component(
+    return (
+
         <div>
             <h2>list</h2>
             {/* <ItemBlockA></ItemBlockA> */}
@@ -81,7 +86,8 @@ function ItemBlockA() {
     pend(simFetch("calico"))
         .then(word => $word.value = word)
 
-    return component(
+    return (
+
         <div>{$word}</div>
     )
 }
@@ -119,7 +125,8 @@ function ItemBlockB() {
         }
     })
 
-    return component(
+    return (
+
         <div>{$word}</div>
     )
 }
@@ -130,7 +137,8 @@ function ItemBlockC() {
     pend(simFetchB("cerulean"))
         .then(word => $word.value = word)
 
-    return component(
+    return (
+
         <div>{$word}</div>
     )
 }
@@ -141,7 +149,8 @@ function ItemBlockD() {
     pend(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.value = word)
 
-    return component(
+    return (
+
         <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect pend call and wrap component in promise) 
     )
 }

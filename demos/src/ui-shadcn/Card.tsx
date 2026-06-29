@@ -7,7 +7,7 @@ function Card({
   size?: "default" | "sm"
 }) {
 
-  return component(
+  return (
     <div
       data-slot="card"
       data-size={size}
@@ -20,7 +20,7 @@ function Card({
 
 function CardHeader({ ...bindings }: {}) {
 
-  return component(
+  return (
     <div
       data-slot="card-header"
       microclass="gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3 group/card-header @container/card-header grid auto-rows-min items-start has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]"
@@ -34,7 +34,7 @@ function CardTitle({
   ...bindings
 }: {}) {
 
-  return component(
+  return (
     <div
       data-slot="card-title"
       microclass='text-base leading-snug font-medium group-data-[size=sm]/card:text-sm'
@@ -46,7 +46,7 @@ function CardTitle({
 
 function CardDescription({ ...bindings }: {}) {
 
-  return component(
+  return (
     <div
       data-slot="card-description"
       microclass="text-muted-foreground text-sm"
@@ -58,7 +58,7 @@ function CardDescription({ ...bindings }: {}) {
 
 function CardAction({...bindings}: {}) {
 
-  return component(
+  return (
     <div
       data-slot="card-action"
       microclass="col-start-2 row-span-2 row-start-1 self-start justify-self-end"
@@ -70,7 +70,7 @@ function CardAction({...bindings}: {}) {
 
 function CardContent({ ...bindings }: {}) {
 
-  return component(
+  return (
     <div
       data-slot="card-content"
       microclass='px-4 group-data-[size=sm]/card:px-3'
@@ -84,7 +84,7 @@ function CardFooter({
   ...bindings
 }: {}) {
 
-  return component(
+  return (
     <div
       data-slot="card-footer"
       microclass='bg-muted/50 rounded-b-xl border-t p-4 group-data-[size=sm]/card:p-3 flex items-center'

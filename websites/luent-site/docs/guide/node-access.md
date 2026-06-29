@@ -20,7 +20,7 @@ function DrawingApp() {
     context.clearRect(0, 0, canvas.width, canvas.height)
   }
 
-  return component(
+  return (
     <div class="canvas-app">
       <button type="button" on:click={clearCanvas}>Clear</button>
       <canvas

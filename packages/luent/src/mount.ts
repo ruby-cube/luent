@@ -11,7 +11,7 @@ import { RenderFunction } from "./node/makeJSXNode";
 export function mount<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
   const rootContext = createRootContext()
   const flask = new Flask({ type: 'view' });
-
+  console.log('document', document.body)
   const root = typeof element === 'string' ? document.querySelector(element) : element;
   if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
   load(() => { // FIX: Error are being swallowed up here despite being rethrown

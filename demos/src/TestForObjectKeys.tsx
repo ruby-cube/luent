@@ -7,7 +7,8 @@ export function TestForObjectKeys() {
       b: 2,
       c: 3
    })
-   return component(
+   return (
+
       <div>
          {For(obj, (key) => {
             return (

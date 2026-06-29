@@ -12,7 +12,8 @@ export function TestThru() {
       }
    })
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => $count.increment()}>+</button>
          <button on:click={e => $count.decrement()}>-</button>

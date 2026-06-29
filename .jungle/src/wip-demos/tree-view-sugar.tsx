@@ -61,7 +61,8 @@ export function TreeApp({ data = getTreeData() }) {
 
    const root = ionizeItem(data)
 
-   return component(
+   return (
+
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItem item={root} can:addChildTo={addChildTo}></TreeItem>

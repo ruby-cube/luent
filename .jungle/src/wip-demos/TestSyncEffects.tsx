@@ -38,7 +38,8 @@ export function TestSyncEffects() {
 
 
 
-   return component(
+   return (
+
       <>
          <button on:click={e => { $count.increment() }}>increment</button>
       </>

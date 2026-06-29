@@ -43,7 +43,7 @@ function Compo({ dog, something, list, mu: { frog } }: FromTag<CompoInput>) {
       something.aboo
    }
 
-   return component(
+   return (
       <div></div>
    )
 }
@@ -60,7 +60,7 @@ function CompoB({ dog, mu }: FromTag<CompoInput>) {
       dog.name = 'spot' // ERROR: Mutating external objects disallowed
    }
 
-   return component(
+   return (
       <div></div>
    )
 }
@@ -70,7 +70,7 @@ function App() {
    const frog = ionic({ name: 'kermit' })
    const something = new Something()
 
-   return component(
+   return (
       <>
          <input mu:value={$count}></input>
          <Compo mu:frog={frog} dog={{ name: 'fido' }}></Compo>

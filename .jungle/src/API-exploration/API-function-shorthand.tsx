@@ -117,7 +117,8 @@ const animal = ionic({
 
 function Appo() {
    const $active = ion(true)
-   return component(
+   return (
+
       <div class={{ active: $active, inactive: (!$active()) }}>
          <Child disabled={(!$active())}></Child>
       </div>
@@ -128,7 +129,8 @@ function Child(input: {
 }) {
    const $active = ion(true)
 
-   return component(
+   return (
+
       <div class={{ active: $active, inactive: (!$active()) }}>
          <Child disabled={(!$active())}></Child>
       </div>

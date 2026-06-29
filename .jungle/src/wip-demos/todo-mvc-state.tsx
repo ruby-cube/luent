@@ -118,7 +118,8 @@ export function TodoMVC() {
       app.setFilter(route) ?? (window.location.hash = '')
    }
 
-   return component(
+   return (
+
       <>
          <section class="todoapp">
             <header class="header">
@@ -174,7 +175,8 @@ function TodoInput(input: {
       }
    }
 
-   return component(
+   return (
+
       <input
          class="new-todo"
          autofocus
@@ -215,7 +217,8 @@ function TodoList(input: {
       }
    }
 
-   return component(
+   return (
+
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
             const $isEditing = ion(() => todo === $editedTodo());
@@ -264,7 +267,8 @@ function CheckBox(input: {
 }) {
    const { toggleAll, ctx: { $remaining } } = input
 
-   return component(
+   return (
+
       <>
          <input
             id="toggle-all"
@@ -283,7 +287,8 @@ function Remaining(input: {
 }) {
    const { $count } = input
 
-   return component(
+   return (
+
       <span class="todo-count">
          <strong>{$count}</strong>
          <span>{($count() === 1 ? ' item' : ' items')} left</span>

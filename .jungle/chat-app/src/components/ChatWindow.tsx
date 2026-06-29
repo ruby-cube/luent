@@ -133,7 +133,8 @@ export function ChatWindow(input: {
       })
    }
 
-   return component(
+   return (
+
       <div class='chat-window'>
          {If($error,
             <div class='error'>{$error}</div>

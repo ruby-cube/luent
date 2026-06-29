@@ -48,7 +48,8 @@ export function TestEffectCyclePhases() {
 
 
 
-   return component(
+   return (
+
       <>
 
          <button on:click={e => $count.change()}>{$count}</button>

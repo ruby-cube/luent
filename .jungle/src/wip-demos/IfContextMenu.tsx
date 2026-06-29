@@ -8,7 +8,8 @@ export function Sidebar() {
    const items = ['a', 'b', 'c']
    const $contextMenu = NodeRef(IfContextMenu)
 
-   return component(
+   return (
+
       <>
          <ul class='sidebar'>
             {For(items, (item) => (
@@ -119,7 +120,8 @@ function IfContextMenuB() {
       }, { once: true })
    })
 
-   return component(
+   return (
+
       {
          open
       },
@@ -202,7 +204,8 @@ function IfContextMenuC() {
 function IntuitivePopUpA() {
    const $open = ion(false)
 
-   return component(
+   return (
+
       <o--portal to='body'>
          {If($open,
             <div>
@@ -218,7 +221,8 @@ function IntuitivePopUpA() {
 function IntuitivePopUpB() {
    const $open = ion(false)
 
-   return component(
+   return (
+
       <>
          {If($open,
             <o--portal to='body'>

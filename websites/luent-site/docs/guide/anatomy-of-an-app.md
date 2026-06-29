@@ -2,7 +2,7 @@
 
 ## Mounting an app
 
-There are three main steps to mounting an app with Luent.
+There are three main steps to mounting an app to the DOM:
 
 - defining the app with one or more [render functions](#render-functions)
 - mounting the root view to an HTML element
@@ -23,7 +23,7 @@ function HelloWorld() {
 
 ```html
 <!-- index.html -->
-<div id="app"></div>
+<luent-island id="app"></luent-island>
 ```
 
 **Instantiate and mount the app**
@@ -184,7 +184,7 @@ To learn more about these features see [Component Bindings](), [Node Access](), 
 ## Tag vs function call
 Any render function with zero parameters may be called through JSX syntax. If a render function declares a setup object parameter, it must inter
 
-Simple render functions bypass the overhead of setting up components. Component setup functions improve 
+Simple render functions bypass the overhead of setting up components. Component setup functions improve [TODO:]
 
 
 <!-- 

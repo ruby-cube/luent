@@ -16,7 +16,8 @@ export function SignupForm() {
          $error.value = response.error
    }
 
-   return component(
+   return (
+
       <form on:submit={e => reSubmit(e)}>
          <input type="text" required placeholder="username" mu:value={$username}></input>
          <input type="email" required placeholder="email" mu:value={$email}></input>

@@ -94,7 +94,8 @@ export function VideoPlayer() {
 
 
 
-   return component(
+   return (
+
       <>
          <div class="container">
             <video
@@ -181,7 +182,8 @@ function ElapsedBar(input: {
 }) {
          const { elapsed@, duration, paused@, emit } = input
 
-   return component(
+   return (
+
       <div class="elapsed"
          on:event={emit}
       >
@@ -204,7 +206,8 @@ function Timer(input: {
 }) {
          const { elapsed@, duration } = input
 
-   return component(
+   return (
+
       <span class="timer">
          {(asTime(elapsed))} / {asTime(duration)}
       </span>

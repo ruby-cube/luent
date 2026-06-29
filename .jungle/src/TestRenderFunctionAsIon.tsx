@@ -15,7 +15,8 @@ export function TestRenderFunctionAsIon() {
       )
    }
 
-   return component(
+   return (
+
       <div>
          <div>{RenderCounter}</div>
          <button on:click={e => $count.increment()}>+</button>

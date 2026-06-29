@@ -29,7 +29,8 @@ export function PlainList() {
    })
 
 
-   return component(
+   return (
+
       <>
          hello world
          {For(list, m => m.id, (item) =>

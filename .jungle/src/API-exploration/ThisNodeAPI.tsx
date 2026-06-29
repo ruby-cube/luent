@@ -28,7 +28,8 @@ function TestingStuff(
 
    })
 
-   return component(
+   return (
+
       <>
          <div>{$songBird}</div>
          <p>hi</p>
@@ -67,7 +68,8 @@ type ThisNode = {
 const outerDynamicNode: DynamicNode
 function component() {
 
-   return component(
+   return (
+
       <>
          {($condition: Ion<boolean>, dynamicNode: DynamicNode) => (
             dynamicNode = new DynamicNode(null),

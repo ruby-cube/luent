@@ -6,7 +6,8 @@ function doSomething() { }
 function SomeComp() {
 
 
-   return component(
+   return (
+
       <div before:mount={Render(doSomething)}></div>
    )
 }

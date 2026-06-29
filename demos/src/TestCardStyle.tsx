@@ -2,7 +2,8 @@ import { component, mount, template } from "@rue/luent";
 import "./ui/card.css"
 
 export function TestCardStyle() {
-    return component(
+    return (
+
         <div class='card'>hello world</div>
     )
 }   

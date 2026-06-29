@@ -4,7 +4,8 @@ import { Ion } from "@rue/quarky";
 export function TestPortal() {
    const $show = ion(false)
 
-   return component(
+   return (
+
       <div>
          <div on:click={e => $show.value = !$show()}>This is not teleported</div>
          <o--portal to='body'>
@@ -19,7 +20,8 @@ export function TestPortal() {
 export function TestPortalB() {
    const $show = ion(false)
 
-   return component(
+   return (
+
       <div>
          <div on:click={e => $show.value = !$show()}>This is not teleported</div>
          {If($show,

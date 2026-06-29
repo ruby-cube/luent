@@ -9,7 +9,8 @@ function genOverrideClass() {
 }
 
 function Grandparent() {
-    return component(
+    return (
+
         <div class='lessons'>
             <Parent class="blue-card something-else"></Parent>
         </div>
@@ -20,7 +21,8 @@ function Grandparent() {
 
 
 function Parent() {
-    return component(
+    return (
+
         <Child class="dark-card"></Child>
         // <Child class='dark-card' overrideClass='ovrrd1'></Child> // transpiler
     );
@@ -45,7 +47,8 @@ function getOverrideStack() {
 
 
 function Child() {
-    return component(
+    return (
+
         <div class='card ovrrd1 ovrrd0 blue-card dark-card'>
             hello world
         </div>

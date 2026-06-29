@@ -22,7 +22,8 @@ export function TestBox() {
       box.position.x = box.position.x - 10;
    }
 
-   return component(
+   return (
+
       <>
          <div style={{
             position: 'absolute',

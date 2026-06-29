@@ -25,7 +25,7 @@ function Foo() {
     '-awaited': true
   })
 
-  return component(
+  return (
     <ul>
       {For($list, item =>
         <li>{item}<li>
@@ -89,7 +89,7 @@ function App() {
     '-awaited': $suspense
   }
 
-  return component(
+  return (
     <div>
       A: {() => $suspense() ? '...' : $a()}
       B: {() => $suspense() ? '...' : $b()}
@@ -108,7 +108,7 @@ Simply pass the suspense ion as the first argument of `Await()`.
 function App() {
   const $suspense = SuspenseIon()
 
-  return component(
+  return (
     <div>
       <ProgressBar pending={$suspense}/>
       <div>
@@ -144,7 +144,7 @@ function Foo(setup: {
     '-awaited': $suspense ?? true
   })
 
-  return component(
+  return (
     <section>
       <h2>{$name}</h2>
       <ul>

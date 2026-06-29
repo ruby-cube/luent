@@ -23,7 +23,8 @@ export function TestListMounting() {
       return clone
    }
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => $active.toggle()}>switch</button>
          {If($active,
@@ -51,7 +52,8 @@ export function TestListMounting() {
 function Counter(input: { log?: (msg: string) => void }) {
    let count = 0
    const { log } = input
-   return component(
+   return (
+
       <div
          before:detach={e => {
             log?.({ msg: 'bye' + count++ })

@@ -33,7 +33,8 @@ export function ArticlesView(input: {
    const $feed = ion('global' as 'global' | 'user')
    const $tabs = ion(['global', 'my-feed'])
 
-   return component(
+   return (
+
       <>
          <ArticlesNav
             mu:activetab={$feed}
@@ -81,7 +82,8 @@ ArticlesNav.router = ContextKey<Router>()
 function ArticlesNav(input: {}) {
    const router = fromRoot(ArticlesNav.router)
 
-   return component(
+   return (
+
       <div>
          hi
       </div>
@@ -108,7 +110,8 @@ export function ArticlePreview(input: {
    const $author = ion(() => article.author.username)
    const $authorImage = ion(() => article.author.image)
 
-   return component(
+   return (
+
       <div class="article-preview">
          <div class="article-meta">
             <RouterLink to="profile" params={{ username: $author }}>
@@ -172,7 +175,8 @@ function ArticlePagination(input: {
 
    const $totalPages = ion(() => Math.ceil($articleCount() / $articlesPerPage()))
 
-   return component(
+   return (
+
       <ul class="pagination">
          {Thru($totalPages, (page) =>
             <li class={`${$page() === page && 'active'} page-item`}>

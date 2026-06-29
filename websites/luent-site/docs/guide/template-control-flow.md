@@ -75,7 +75,7 @@ When passed a non-reactive iterable, `For()` and `Thru()` render items staticall
 function FruitList() {
   const fruits = [🍑, 🍐, 🟣]
 
-  return component(
+  return (
     <ul>
       {For(fruits, (fruit, index) =>
         <li>{index + 1}. {fruit}</li>
@@ -131,7 +131,7 @@ function TodoList() {
     todos.splice(index, 1)
   }
 
-  return component(
+  return (
     <ul>
       {For(todos, u => u.id, (todo, $index) =>
         <Todo 
@@ -157,7 +157,7 @@ function Log() {
     logs.push(msg)
   }
 
-  return component(
+  return (
     <ul>
       {For(logs, ($msg, index) =>
         <li>{index}: {$msg}</li>
@@ -178,7 +178,7 @@ function RowBar(setup: {
 }) {
   const { rows }
 
-  return component(
+  return (
     <div>
       {Thru(() => rows.length, row =>
         <div>{row}</div>
@@ -204,7 +204,7 @@ function PaginatedTable(setup: {
   const $start = ion(() => $page() * pageSize)
   const $end = ion(() => Math.min($start() + pageSize, rows.length))
 
-  return component(
+  return (
     <>
       <table>
         <tbody>
@@ -260,11 +260,11 @@ Static conditional rendering may be also achieved through JavaScript ternaries a
 function Foo({ bar }) {
 
   if (bar) {
-    return component(
+    return (
       <Bar/>
     )
   }
-  return component(
+  return (
     <DefaultView/>
   )
 }
@@ -277,7 +277,7 @@ function Foo(setup: {
 }) { 
   const { bar } = setup
 
-  return component( 
+  return ( 
     <section> 
       {bar ? <Bar/> : <DefaultView/>}
     </section> 
@@ -292,7 +292,7 @@ The `If()`, `ElseIf()`, and `Else()` control flow functions render ordered condi
 function StatusMessage() {
   const $status = ion('idle' as 'idle' | 'loading' | 'done')
 
-  return component(
+  return (
     <div>
       {If(() => $status() === 'loading',
         <p>Loading...</p>
@@ -315,7 +315,7 @@ function StatusMessage() {
 function TabContent() {
   const $tab = ion('home' as 'home' | 'settings' | 'about')
 
-  return component(
+  return <>
     {Match($tab, <>
       {Case('home', 
         <Home/>
@@ -328,7 +328,7 @@ function TabContent() {
       )}
       {Default(<p>Not found</p>)}
     </>)}
-  )
+  </>
 }
 ```
 

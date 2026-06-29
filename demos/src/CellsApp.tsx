@@ -42,7 +42,8 @@ export function CellsApp() {
       return Number.isFinite(num) ? num : val
    }
 
-   return component(
+   return (
+
       <>
          <table>
             <thead>
@@ -118,7 +119,8 @@ function Cell(input: {
       setCellValue(e.target.value.trim())
    }
 
-   return component(
+   return (
+
       <>
          <div class="cell" title={$value} on:click={e => { $editing.value = true }}>
             {If($editing,

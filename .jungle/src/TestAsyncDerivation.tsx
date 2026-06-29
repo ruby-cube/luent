@@ -4,7 +4,8 @@ import { createAsyncDerivation } from "../../../packages/quarky/src/async/AsyncD
 export function TestAsyncDerivation() {
    const $count = createAsyncDerivation({ fetch: () => fetchCount(), standin: 0 })
 
-   return component(
+   return (
+
       <div>
          <h1>Hello world</h1>
          <div>{$count}</div>

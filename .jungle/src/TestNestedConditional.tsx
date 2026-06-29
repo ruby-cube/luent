@@ -15,7 +15,8 @@ export function TestNestedConditionalB() {
    const $ready = ion(true)
    const $open = ion(true)
 
-   return component(
+   return (
+
       <div>
          <button on:click={e=>$ready.value = !$ready()}>toggle ready</button>
          <button on:click={e=>$open.value = !$open()}>toggle open</button>
@@ -38,7 +39,8 @@ export function TestNestedConditional() {
    const $ready = ion(true)
    const $open = ion(true)
 
-   return component(
+   return (
+
       <div>
          <button on:click={e=>$ready.value = !$ready()}>toggle ready</button>
          <button on:click={e=>$open.value = !$open()}>toggle open</button>

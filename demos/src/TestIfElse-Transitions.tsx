@@ -18,7 +18,8 @@ export function TestIfElse() {
       }
    })
 
-   return component(
+   return (
+
       <>
       <div>
          <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>

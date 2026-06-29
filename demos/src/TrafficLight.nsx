@@ -58,7 +58,8 @@ export function TrafficLight() {
       });
    }
 
-   return component(
+   return (
+
       <div style="place-items: center">
          <div class="traffic-light-container">
             <div

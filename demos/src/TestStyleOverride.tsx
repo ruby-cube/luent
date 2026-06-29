@@ -3,7 +3,8 @@ import "./TestStyleOverride-classes.css"
 import { AnyObject } from "@rue/types";
 
 function Grandparent() {
-    return component(
+    return (
+
         <div class='lessons'>
             <Parent class="bg-blue-600"></Parent>
         </div>
@@ -12,14 +13,16 @@ function Grandparent() {
 }
 
 function Parent() {
-    return component(
+    return (
+
         <Child class="bg-amber-900"></Child>
         // <Child class='override1 bg-amber-900'></Child> // transpiler
     );
 }
 
 function Child() {
-    return component(
+    return (
+
       <>
         <div class='bg-amber-400 override1 override0 bg-blue-600 bg-amber-900'>
             hello world

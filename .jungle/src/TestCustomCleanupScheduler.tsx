@@ -32,7 +32,8 @@ export function Article({ content } = input({
    content: Type('?', String).default('hi')
 })) {
 
-   return component(
+   return (
+
       <article>
          <p>{content}</p>
       </article>
@@ -115,7 +116,8 @@ export function Bog(setup: {
 
    // const _name = name ?? 'sir robin'
 
-   return component(
+   return (
+
       <div>hi</div>
    )
 }
@@ -220,7 +222,8 @@ export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC 
 
    const priceCurrency = asCurrency(priceNum, 'USD')
 
-   return component(
+   return (
+
       <p>{asCurrency(price)}</p>
    )
 }
@@ -390,7 +393,8 @@ export function TestCleanupScheduler({
       )
    )
 
-   return component(
+   return (
+
       <>
          <div class={['storm active', $ = $editable() && 'editable']}
             style={[
@@ -467,7 +471,8 @@ function ChildBlock() {
 
 
 
-   return component(
+   return (
+
       <div style color={text_color}></div>
    )
 }

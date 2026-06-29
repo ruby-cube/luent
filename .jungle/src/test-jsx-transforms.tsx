@@ -8,7 +8,8 @@ import {ion} from '@rue/quarky'
 
 // text
 function CompA() {
-   return component(
+   return (
+
       <div>Hello</div>
    )
 }
@@ -17,7 +18,8 @@ function CompA() {
 function CompB() {
    const $hello = ion('hi')
 
-   return component(
+   return (
+
       <div>{$hello}</div>
    )
 }
@@ -26,7 +28,8 @@ function CompB() {
 function CompC() {
    const $hello = ion('hi')
 
-   return component(
+   return (
+
       <div>greeting: {$hello}</div>
    )
 }
@@ -37,7 +40,8 @@ function CompC() {
 function CompD() {
    const $hello = ion('hi')
 
-   return component(
+   return (
+
       <div>{$hello() + '!'}</div>
    )
 }
@@ -46,7 +50,8 @@ function CompD() {
 function CompDTransform() {
    const $hello = ion('hi')
 
-   return component(
+   return (
+
       <div>{() => function $() { return $hello() + '!' }}</div>
    )
 }
@@ -55,7 +60,8 @@ function CompDTransform() {
 function CompE() {
    const $hello = ion('hi')
 
-   return component(
+   return (
+
       <div><p>{$hello() + '!'}</p></div>
    )
 }
@@ -63,7 +69,8 @@ function CompE() {
 // a component
 function CompG() {
 
-   return component(
+   return (
+
       <div><CompA /></div>
    )
 }
@@ -72,7 +79,8 @@ function CompG() {
 function CompF() {
    const $hello = ion('hi')
 
-   return component(
+   return (
+
       <div>
          <h1>Hello World</h1>
          <p>{$hello() + '!'}</p>
@@ -82,7 +90,8 @@ function CompF() {
 
 // component with slot: single child
 function Parent() {
-   return component(
+   return (
+
       <Child>
          <div>hi</div>
       </Child>
@@ -91,7 +100,8 @@ function Parent() {
 
 // component with slot: multi childs
 function ParentB() {
-   return component(
+   return (
+
       <Child>
          <div>hi</div>
          <div>bye</div>
@@ -105,7 +115,8 @@ function kit() {
 let o: any;
 // component with sequence expression
 function ParentD() {
-   return component(
+   return (
+
       <Child>
          {(o = kit(),
             <div>
@@ -117,7 +128,8 @@ function ParentD() {
 }
 // component with sequence expression: fragment
 function ParentD2() {
-   return component(
+   return (
+
       <Child>
          {(o = kit(), <>
             <div>hi</div>
@@ -129,7 +141,8 @@ function ParentD2() {
 
 // component with slot input
 function ParentE() {
-   return component(
+   return (
+
       <Child> {o =>
          <div>hi</div>}
       </Child>
@@ -138,7 +151,8 @@ function ParentE() {
 
 // component with slot input with fragment
 function ParentE3() {
-   return component(
+   return (
+
       <Child>
          {o => <>
             <div>hi</div>
@@ -149,7 +163,8 @@ function ParentE3() {
 
 // component with slot input with parentheses
 function ParentE2() {
-   return component(
+   return (
+
       <Child> {(o) =>
          <div>hi</div>}
       </Child>
@@ -158,7 +173,8 @@ function ParentE2() {
 
 // component with named slot
 function ParentC() {
-   return component(
+   return (
+
       <Child>
          {{
             title:
@@ -172,7 +188,8 @@ function ParentC() {
 
 // component with named slot: with slot input or render function
 function ParentF() {
-   return component(
+   return (
+
       <Child>
          {{
             title: (o) =>
@@ -188,7 +205,8 @@ function ParentF() {
 function ParentG() {
    const $active = ion(true);
 
-   return component(
+   return (
+
       <div>
          {If($active,
             <p>yay</p>
@@ -201,7 +219,8 @@ function ParentG() {
 function ParentG3() {
    const $active = ion(true);
 
-   return component(
+   return (
+
       <div>
          {If($active, <>
             <p>yay</p>
@@ -216,7 +235,8 @@ function ParentG3() {
 function ParentG2() {
    const $active = ion(true);
 
-   return component(
+   return (
+
       <div>
          {If($active, (o = kit(),
             <p>yay</p>
@@ -231,7 +251,8 @@ function Child(input: {
 }) {
    const { Slot } = input
 
-   return component(
+   return (
+
       ''
    )
 }

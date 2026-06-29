@@ -81,7 +81,8 @@ export function TestPolymorph() {
       history.pushState(state ?? {}, "", key)
    }
 
-   return component(
+   return (
+
       <>
          <div>
             {/* <$Main as={'peas'}></$Main> */}
@@ -104,7 +105,8 @@ export function TestPolymorph() {
 }
 
 function Home() {
-   return component(
+   return (
+
       <>
          <h3>Tadaima</h3>
          <p>🏠</p>
@@ -115,7 +117,8 @@ function Home() {
 function Happy() {
    const $message = ion('hi')
 
-   return component(
+   return (
+
       <>
          <h3>Heee</h3>
          <p>☺️</p>
@@ -126,7 +129,8 @@ function Happy() {
 }
 
 function Peas() {
-   return component(
+   return (
+
       <>
          <h3>Wanh-wah</h3>
          <p>🤢🤢</p>
@@ -135,7 +139,8 @@ function Peas() {
 }
 
 function Missing() {
-   return component(
+   return (
+
       <>
          <h3>404</h3>
          <p>😩</p>
@@ -150,7 +155,8 @@ function File(input: {
 }) {
    const { file } = input
 
-   return component(
+   return (
+
       <>
          <h3>File:</h3>
          <p>{file.name}</p>

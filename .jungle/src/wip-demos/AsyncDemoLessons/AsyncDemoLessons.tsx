@@ -9,7 +9,8 @@ import { Action } from "../../../../../packages/quarky/src/async/Action";
 
 
 export function AsyncDemoLessons() {
-   return component(
+   return (
+
       <Home></Home>
    );
 }
@@ -30,7 +31,8 @@ function Home() {
    const $suspense = SuspenseIon()
 
 
-   return component(
+   return (
+
       <>
          {/*
          Design.SearchInput is using the action prop pattern to automatically 
@@ -122,7 +124,8 @@ function LessonList({ $tab, $search, $pending }: { tab: Ion<string>, search: Ion
 
    const $lessons = AsyncIon(() => db.getLessons($tab(), $search()), { suspense: $pending })
 
-   return component(
+   return (
+
       <>
          {If(($lessons().length === 0),
             <EmptyList />

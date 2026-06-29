@@ -320,7 +320,8 @@ const $user = AsyncIon(async () => {
 
 export function App() {
 
-   return component(
+   return (
+
       <>
          <h1>My Counter App</h1>
          <Counter></Counter>
@@ -331,7 +332,8 @@ export function App() {
 export function Counter() {
    let $count = ion(0)
 
-   return component(
+   return (
+
       <div>
          <p>{($count)}</p>
          {If($count), () => {
@@ -355,7 +357,8 @@ export function Counter() {
       }
    })
 
-   return component(
+   return (
+
       <div>
          <p>{(count)}</p>
          <button on:click={e => { count.increment() }}>increment</button>
@@ -377,7 +380,8 @@ export function Counter() {
 
    console.log('count is', $count)
 
-   return component(
+   return (
+
       <div>
          <p>{(fullname.$)}</p>
 
@@ -418,7 +422,8 @@ export function DoubleCounter() {
    let $count = ion(0)
    let $doubleCount = ionic(($count * 2))
 
-   return component(
+   return (
+
       <div>
          <p>{($doubleCount)}</p>
          <button on:click={e => { $$: $count++ }}>increment</button>
@@ -432,7 +437,8 @@ export function DoubleCounter() {
 export function DoubleCounter() {
    let $count = ion(0)
 
-   return component(
+   return (
+
       <div>
          <p>{($count * 2)}</p>
          <button on:click={e => { $$: $count++ }}>increment</button>
@@ -462,7 +468,8 @@ function makeAnonymous() {
 export function Counter() {
    let $count = ion(0)
 
-   return component(
+   return (
+
       <div>
          <p>{($count)}</p>
          <button on:click={e => { $$: $count++ }}>increment</button>
@@ -488,7 +495,8 @@ function ScoreBoard({ a, b }) {
       points: 0
    })
 
-   return component(
+   return (
+
       <div>
          <h3>Scores</h3>
          <hr></hr>
@@ -529,7 +537,8 @@ function ScoreBoard({ a, b }) {
       points: 0
    })
 
-   return component(
+   return (
+
       <div>
          <h3>Scores</h3>
          <hr></hr>
@@ -552,7 +561,8 @@ function FruitBasket({ $selectedFruit, fruitStore }) {
       $$: fruits.add(fruit)
    }
 
-   return component(
+   return (
+
       <div>
          {($selectedFruit)} {(fruits.has($selectedFruit) ? '✅' : '❌')}
          <button on:click={addRandomFruit}>add random fruit</button>
@@ -571,7 +581,8 @@ export function Counter() {
       console.log('count is now', $count())
    })
 
-   return component(
+   return (
+
       <div>
          <p>{($count)}</p>
          <button on:click={e => { $$: $count++ }}>increment</button>
@@ -639,7 +650,8 @@ function ScoreBoard({ a, b }) {
    const playerA = ionize(new Player(a))
    const playerB = ionize(new Player(b))
 
-   return component(
+   return (
+
       <div>
          <p>{playerA.name}: {(playerA.points)}</p>
          <button on:click={e => { $$: playerA.addPoint() }}>+</button>
@@ -689,7 +701,8 @@ export function PlayingCard(input: {
    let $faceup = ion(startFaceup)
    const $div = NodeRef('div')
 
-   return component(
+   return (
+
       <div on:click={e => { $$: $faceup = !$faceup }} ref={$div}>
          {If(($faceup),
             <CardFace number={($number)} suit={($suit)}></CardFace>
@@ -704,7 +717,8 @@ export function PlayingCard(input: {
 // Match series
 export function WeirdDice({ $number }) {
 
-   return component(
+   return (
+
       <div>
          <Switch x={$number} match={(x, c) => x.includes(c)}>
             {Case(1,
@@ -793,7 +807,8 @@ export function TodoList() {
       $$: $input = ""
    }
 
-   return component(
+   return (
+
       <div>
          <ul>
             {For(todos, (todo, $index) =>

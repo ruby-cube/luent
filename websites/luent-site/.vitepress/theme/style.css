@@ -47,22 +47,20 @@
  * -------------------------------------------------------------------------- */
 
 :root {
-  --breezy-blue-1: #086390;
-  --breezy-blue-2: #12b5d0;
-  --breezy-blue-3: #42d4ed;
-  --breezy-blue-5: #9a97b8;
-  --breezy-blue-4: #7fb0b8;
-  --breezy-blue-soft: rgba(18, 181, 208, 0.14);
+  --kelp-1: #194a60;
+  --kelp-2: #248a9e;
+  --kelp-3: #7ed4e4;
+  --kelp-soft: hsla(189, 84%, 44%, 0.14);
 
   --vp-c-default-1: var(--vp-c-gray-1);
   --vp-c-default-2: var(--vp-c-gray-2);
   --vp-c-default-3: var(--vp-c-gray-3);
   --vp-c-default-soft: var(--vp-c-gray-soft);
 
-  --vp-c-brand-1: var(--breezy-blue-3);
-  --vp-c-brand-2: var(--breezy-blue-2);
-  --vp-c-brand-3: var(--breezy-blue-1);
-  --vp-c-brand-soft: var(--breezy-blue-soft);
+  --vp-c-brand-1: var(--kelp-2);
+  --vp-c-brand-2: var(--kelp-3);
+  --vp-c-brand-3: var(--kelp-1);
+  --vp-c-brand-soft: var(--kelp-soft);
 
   --vp-c-tip-1: var(--vp-c-brand-1);
   --vp-c-tip-2: var(--vp-c-brand-2);
@@ -86,6 +84,11 @@
   }
 }
 
+.dark {
+  --vp-c-brand-1: var(--kelp-3);
+  --vp-c-brand-2: var(--kelp-2);
+}
+
 /**
  * Component: Button
  * -------------------------------------------------------------------------- */
@@ -101,6 +104,8 @@
   --vp-button-brand-active-text: var(--vp-c-white);
   --vp-button-brand-active-bg: var(--vp-c-brand-1);
 }
+
+:root :not(.dark) {}
 
 /**
  * Component: Home

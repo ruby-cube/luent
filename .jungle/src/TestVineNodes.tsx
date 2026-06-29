@@ -1,7 +1,8 @@
 import { component, template } from "@rue/luent";
 
 export function TestVineNodes(){
-   return component(
+   return (
+
       <div>
          hi
       </div>

@@ -17,7 +17,8 @@ export function TestRetracking() {
    function uncheckAll() {
       $todos().forEach(todo => todo.completed = false)
    }
-   return component(
+   return (
+
       <>
       <div>
          <button on:click={checkAll}>checkAll</button>

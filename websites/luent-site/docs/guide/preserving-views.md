@@ -43,7 +43,7 @@ function Foo() {
     $sidebarOpen.value = false
   }
   
-  return component(
+  return (
     <>
       <main>
         <Articles/>

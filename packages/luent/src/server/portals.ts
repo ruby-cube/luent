@@ -39,3 +39,16 @@ export function runWithPortals(render: () => string, page: string) {
     activePortals = null
   }
 }
+
+
+export function transformPortals(code: string, key: string) {
+  const portals = getPortals(key)
+  if (!portals || portals.head.length === 0 && portals.body.length === 0) {
+    return code;
+  }
+
+  const newCode = code
+    .replace('</head>', `${portals.head.join('\n')}\n</head>`)
+    .replace('</body>', `${portals.body.join('\n')}\n</body>`)
+  return newCode
+}

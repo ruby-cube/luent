@@ -13,7 +13,7 @@ function NotificationButton(setup: {
     toggle() { $show.value = !$show.value }
   })
 
-  return component(
+  return (
     <>
       <button on:click={$show.toggle}>
         {() => $show() ? 'Hide' : 'Show'} notifications

@@ -34,7 +34,8 @@ export function MessageForm(input: {
       $message.value = ''
    }
 
-   return component(
+   return (
+
       <form class='message-form'>
          <textarea
             placeholder="Type a message and hit enter to send"

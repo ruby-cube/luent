@@ -61,7 +61,8 @@ export function TestSelectiveTracking() {
         console.log('frog name changed', name)
     })
 
-    return component(
+    return (
+
         () =>
             <>
                 <div>{$count}</div>

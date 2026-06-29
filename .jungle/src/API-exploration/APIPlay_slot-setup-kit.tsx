@@ -3,7 +3,8 @@ import { component, template, FromTag } from "@rue/luent";
 
 function ColumnB() {
 
-   return component(
+   return (
+
       <SomeComponent>
          {({ name } = SelectionKit()) =>
             <div>{name}</div>}
@@ -15,7 +16,8 @@ function ColumnB() {
    // NOTE: slotSetup is only needed if the slot is used in a conditional... 
    // [ ] how do you pass both slot input and slot setup??
    // [ ] what is the syntax for passing setup kit to a conditional render function? I want to avoid passing an options object to If() or For(). optional parameter + jsx transform
-   return component(
+   return (
+
       <SomeComponent>
          {({ name }) => (o = SelectionKit(),
             <div>{name} and {o.slide}</div>)}
@@ -34,7 +36,8 @@ function ColumnB() {
 function SomeComponent(input : {
    Slot: Slot
 }) {
-   return component(
+   return (
+
       ''
    )
 }

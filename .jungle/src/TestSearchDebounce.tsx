@@ -13,7 +13,8 @@ export function TestSearchDebounce() {
       return fetchArticles($searchTerm(), { debounce: 100 })
    })
 
-   return component(
+   return (
+
       <>
          <input id='search' value={$searchTerm} on:input={(e) => $searchTerm.value = e.currentTarget!.value}></input>
          {For($articles, m => m.id, (article) =>

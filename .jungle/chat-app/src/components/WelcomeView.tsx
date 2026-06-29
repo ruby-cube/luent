@@ -10,7 +10,8 @@ export function WelcomeView(input: {
    const { initialLoad } = input
    const $initialLoad = ion(initialLoad)
 
-   return component(
+   return (
+
       <>
          <div class="welcome container">
             {If($initialLoad,

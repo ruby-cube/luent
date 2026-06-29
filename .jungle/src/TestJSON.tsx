@@ -4,7 +4,8 @@ import { ionize } from "@rue/quarky";
 export function TestJSON() {
    const array = ionize([]as number[])
 
-   return component(
+   return (
+
       <>
          <button on:click={e => array.push(array.length)}>add</button>
          <button on:click={e => array.pop()}>pop</button>

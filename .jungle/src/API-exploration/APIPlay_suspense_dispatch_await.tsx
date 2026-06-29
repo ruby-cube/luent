@@ -36,7 +36,7 @@ function Album(input : {
    const [$albumA, $albumB, $albumC]
       = fromCloud([ALBUM_A, ALBUM_B, ALBUM_C]) // resolve in sequence (dependent fetches)
 
-   return component((album = $album()) =>
+   return (
       <div>{album.$title}</div>
    )
 }
@@ -190,7 +190,8 @@ function LoadingApp() {
       )
    })
 
-   return component(
+   return (
+
       <>
          <h1>Hello World</h1>
          {Await($data, suspense =>
@@ -202,7 +203,8 @@ function LoadingApp() {
 function LoadingApp() {
    const $data = fromCloud(MARKDOWN_FILES) // how to deal with latency?
 
-   return component(
+   return (
+
       <>
          <h1>Hello World</h1>
          {Await(suspense =>
@@ -301,7 +303,8 @@ function App(input : FromTag()) {
       files.remove(index)
    }
 
-   return component(
+   return (
+
       <>
          {Await($files, () =>
             <>

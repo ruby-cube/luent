@@ -29,7 +29,8 @@ export function List() {
       const [data, error] = await resolve(pendingData)
    }
 
-   return component(
+   return (
+
       <>
          {Await($userPosts, { hold: Loading, catch: ErrorBlock },
             <div>{$userPosts()}</div>
@@ -57,7 +58,8 @@ function Suspense(...args: any[]) {
 
 }
 function Item(...args: any[]) {
-   return component(
+   return (
+
       <></>
    )
 }

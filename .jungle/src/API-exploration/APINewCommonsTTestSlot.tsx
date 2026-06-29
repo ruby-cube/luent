@@ -5,7 +5,8 @@ import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase";
 // # via context
 
 function Parent() {
-   return component(
+   return (
+
       <div>
          <o:context provide={[
             Content['something'](new Something()),
@@ -33,7 +34,8 @@ Content['something'] = ContextKey<string>()
 function Content() {
    const something = fromContext(Content['something'])
 
-   return component(
+   return (
+
       <div>hi</div>
    )
 }
@@ -47,7 +49,8 @@ export function Button(input: {
 }) {
    const { Slot, Nested } = input
 
-   return component(
+   return (
+
       <div>
          <o:context provide={[Nested['something']('hello')]}>
             {Slot}
@@ -62,7 +65,8 @@ export function Button(input: {
 // # via slot input
 
 function ParentB() {
-   return component(
+   return (
+
       <div>
          <ButtonB>{something =>
             <ContentB something={something}></ContentB>
@@ -80,7 +84,8 @@ ContentB['something'] = ContextKey<string>()
 function ContentB(input: { something?: string }) {
    const { something = fromContext(Content['something']) } = input
 
-   return component(
+   return (
+
       <div>hi</div>
    )
 }
@@ -93,7 +98,8 @@ export function ButtonB(input: {
 }) {
    const { Slot } = input
 
-   return component(
+   return (
+
       <div>
          {Slot('hi')}
       </div>

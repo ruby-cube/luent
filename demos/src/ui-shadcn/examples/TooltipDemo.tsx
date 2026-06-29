@@ -31,7 +31,7 @@ export function TooltipDemo() {
     }
   })
 
-  return component(
+  return (
     <o:context provide={[TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })]}>
       <div data-align='center' class={demoBoxStyle}>
 

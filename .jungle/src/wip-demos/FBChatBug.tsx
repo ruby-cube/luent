@@ -75,7 +75,8 @@ export function FBApp() {
 
    
 
-   return component(
+   return (
+
       <div style='border: solid 1px gray; width: 50rem; height: 50rem'>
          <button on:click={toggleChatPopup}>(Z)</button>
          <div style='border-radius: 50%; width: 25px; height: 25px; background-color: red; color: white; text-align: center'>{$unseenCount}</div>
@@ -126,7 +127,8 @@ export function ChatPopup() {
       $unseenCount.decrement()
    }
 
-   return component(
+   return (
+
       <div style='border: solid 1px gray; width: 15rem; height: 15rem'>
          <button on:click={toggleChatView}>[[]]</button>
          <div style='border-radius: 50%; width: 25px; height: 25px; background-color: red; color: white; text-align: center'>{$unseenCount}</div>
@@ -151,7 +153,8 @@ export function ChatView() {
       }
    }
 
-   return component(
+   return (
+
       <div style='border: solid 1px gray; width: 25rem; height: 25rem'>
          <button on:click={toggleChatView}>[X]</button>
          <div style='border-radius: 50%; width: 25px; height: 25px; background-color: red; color: white; text-align: center'>{$unseenCount}</div>

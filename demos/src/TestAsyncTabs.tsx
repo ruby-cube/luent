@@ -6,7 +6,7 @@ import { As } from "../../../packages/luent/src/conditional/As";
 // Modified Demo from Solid.js 
 
 function Loading() {
-  return component('loading...')
+  return 'loading...'
 }
 
 export function TestAsyncTabs() {
@@ -39,7 +39,7 @@ export function TestAsyncTabs() {
 
   // const $tabSuspense = SuspenseIon()
 
-  return component(<>
+  return <>
     <ul class="inline">
       {For(allTabs, m => m, tab => (
         <li class={($tab() === tab && 'selected')} on:click={e => { openTab(tab) }}>
@@ -74,7 +74,7 @@ export function TestAsyncTabs() {
     {Meanwhile(o => o.initial &&
       <Loading></Loading>
     )}
-  </>);
+  </>
 };
 
 
@@ -106,7 +106,7 @@ function Tab(input: {
     // '-awaited': true
   });
 
-  return component(<>
+  return <>
     <div class="tab-content">
       <p style="font-size: xx-large">{CONTENT[page]}</p>
       This content is for page "{page}" after {($time()?.toFixed())}ms.
@@ -115,7 +115,6 @@ function Tab(input: {
       <button on:click={e => $localCount.increment()}>+</button>
     </div>
   </>
-  );
 };
 
 const db = {

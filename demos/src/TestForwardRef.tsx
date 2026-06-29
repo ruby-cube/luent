@@ -4,7 +4,8 @@ export function StyledComp() {
    const $div = NodeRef('div')
    const $comp = NodeRef(Comp)
 
-   return component(
+   return (
+
       <div>
          <Comp ref={$comp} at:attach={() => console.log('comp>>', $comp())}></Comp>
          <BaseComp ref={$div} at:attach={() => console.log('div>>', $div())}></BaseComp>
@@ -17,14 +18,16 @@ function BaseComp(input: {
 }) {
    const { ref } = input
 
-   return component(
+   return (
+
       <div ref={ref}>hi</div>
    )
 }
 
 function Comp(input: {
 }) {
-   return component(
+   return (
+
       <div>hi</div>
    )
       .ref({

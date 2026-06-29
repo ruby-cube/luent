@@ -32,9 +32,9 @@ const sections: {
     DynamicViewSetup,
     MutationSafety,
     LifecycleHooks,
-    Portals,
-    ContextBindings,
-    ViewPreservation
+    // Portals,
+    // ContextBindings,
+    // ViewPreservation
   ]
 
 export function CodeGlimpses() {
@@ -107,7 +107,7 @@ function FunctionalComponents() {
     <p style='text-wrap: balance'>
       Write components as render functions that run once to create a view. Views are composed using JSX or NSX and updated through fine-grained reactivity.
     </p>
-    <a href='/guide/getter-syntax' class='medium brand'>Learn more</a>
+    <a href='/guide/anatomy-of-an-app' class='medium brand'>Learn more</a>
   </>
 }
 

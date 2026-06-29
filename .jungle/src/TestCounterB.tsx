@@ -12,7 +12,8 @@ export function Counter() {
    })
 
 
-   return component(
+   return (
+
       <>
          <button on:click={e => $count.increment()}>+</button>
          <button on:click={e => $count.decrement()}>-</button>

@@ -17,7 +17,8 @@ export function TestIfElseMix(setup: { activation: [ViewType, ViewType] }) {
       }
    })
 
-   return component(
+   return (
+
       <>
       <div>
          <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>

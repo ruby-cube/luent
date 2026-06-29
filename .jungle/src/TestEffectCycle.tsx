@@ -39,7 +39,8 @@ export function TestEffectCycle() {
 
    },{})
 
-   return component(
+   return (
+
       <>
          <p>{$count}</p>
          <p>{$doubleCount}</p>

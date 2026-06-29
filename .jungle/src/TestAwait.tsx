@@ -41,7 +41,8 @@ export function TestAwait() {
    const $name = ion('sir robin the brave')
    const $brave = fetchNestedDataB($name)
 
-   return component(
+   return (
+
       <>
          <button on:click={e => $name.value = $name() + '!'}>click</button>
          <p>{($brave()?.name)}</p>
@@ -76,7 +77,8 @@ export function TestAwait() {
 function ChildB() {
    const $kermit = fetchData({ awaited: true })
 
-   return component(
+   return (
+
       <>
          {'B'}
          <div>{($kermit()?.name)}</div>
@@ -88,7 +90,8 @@ function ChildB() {
 function Child({ $name }: { name: string }) {
    const $kermit = fetchData()
 
-   return component(
+   return (
+
       <>
          <div>{($kermit()?.name)}</div>
          <div>Child :)</div>
@@ -102,7 +105,8 @@ function GrandChild({ $name }: { name: string }) {
       awaited: 'load'
    })
 
-   return component(
+   return (
+
       <div>
          {/* <div>{(JSON.stringify($robin.promise))}</div> */}
          <div>{($robin()?.name)}</div>
@@ -121,7 +125,8 @@ function GrandChild({ $name }: { name: string }) {
 
 function Loading() {
    console.log('render loading view')
-   return component(
+   return (
+
       <>
          <div>Loading...</div>
       </>
@@ -130,7 +135,8 @@ function Loading() {
 
 function ErrorView({ $error }: { error: Ion<Error> }) {
    console.log('render error view')
-   return component(
+   return (
+
       <>
          <div>{($error()?.message)}</div>
       </>

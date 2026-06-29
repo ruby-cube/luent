@@ -27,7 +27,8 @@ export function TestListTransit() {
       $todos().splice(index, 1);
    }
 
-   return component(
+   return (
+
       <>
       <div class="board">
          <input
@@ -129,7 +130,8 @@ function TodoList(input: {
 
    const lis: HTMLLIElement[] = []
 
-   return component(
+   return (
+
       <>
          <ul class="todos">
             {For($todos, t => t.id, (todo, $i) =>

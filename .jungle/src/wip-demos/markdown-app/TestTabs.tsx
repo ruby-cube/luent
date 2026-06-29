@@ -18,7 +18,8 @@ export function TabApp() {
    })
    const $markdown = ion('# Something Special')
 
-   return component(
+   return (
+
       <>
          <button on:click={$open.toggle}>open/close</button>
          <button on:click={$active.toggle}>show/hide</button>
@@ -125,7 +126,8 @@ function LoadingApp() { //Stand-in until I fix mount
    })
 
 
-   return component(
+   return (
+
       // Await
       <App files={files}></App>
    )
@@ -252,7 +254,8 @@ function App(input : {
    // MainView.discardAll()
    // MainView.discard('file', file)
 
-   return component(
+   return (
+
       <>
          <Sidebar files={files} provide={[
             FILES_KIT({ addNewFile, deleteFile, openFile }),
@@ -305,7 +308,7 @@ export function List(input : {
 		
 		$.pear = $.pear ?? fromContext(PEAR)
 
-		return component(<></>)
+		return;
 }
 
 const $APPLE = ContextKey<Ion<string>>('$APPLE')
@@ -320,7 +323,8 @@ function Sidebar(input : {
    const { files } = input
    const { addFile } = fromContext(FILES_KIT);
 
-   return component(
+   return (
+
       <div>
          {For($files, file => file.id, (file, $index) => (
             <SidebarFile file={file} index={$index}></SidebarFile>
@@ -339,7 +343,8 @@ function SidebarFile(input : {
 
    const { openFile } = fromContext(FILES_KIT)
 
-   return component(
+   return (
+
       <div on:click={e => openFile(file)} on:contextmenu={e=>$menu()?.open()}>
          <IfContextMenu on:click={reMenuClick} ref={$menu}></IfContextMenu>
          {file.$title}
@@ -379,7 +384,8 @@ function Tab(input : {
    const { file, tabManager = fromContext(TABS_KIT), $index = ion('hi') } = input
    const { closeFile, focusFile } = tabManager
 
-   return component(
+   return (
+
       <div style={{ backgroundColor: (file.active ? 'red' : 'gray') }}
          on:click={e => focusFile($index())}
       >

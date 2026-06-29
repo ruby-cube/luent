@@ -9,7 +9,8 @@ import { ion } from "@rue/quarky";
 function Parent() {
    const $count = ion(0)
 
-   return component(
+   return (
+
       <>
          <div>{$count}</div>
       </>
@@ -20,7 +21,8 @@ function Child({ $count } : { count: number }) {
 
    const $doubleCount = ion(() =>)
 
-      return component(
+      return (
+
       <>
          <div>{$doubleCount}</div>
       </>

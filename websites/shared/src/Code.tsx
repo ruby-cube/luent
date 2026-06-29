@@ -43,7 +43,7 @@ export function Code(setup: {
   const $nav = NodeRef('nav')
 
 
-  return component(
+  return (
     <>
       <div class='code-container'>
         <nav ref={$nav}>

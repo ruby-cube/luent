@@ -57,7 +57,7 @@ function EmojiQuest() {
     }
   })
 
-  return component(
+  return (
     <>
       <main>
         <EmojiGame></EmojiGame>
@@ -84,7 +84,7 @@ function EmojiQuest() {
     }
   })
 
-  return component(
+  return (
     <>
       <main>
         <EmojiGame></EmojiGame>

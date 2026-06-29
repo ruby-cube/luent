@@ -267,7 +267,7 @@ function DoodleCanvas() {
     clearCanvas 
   } = DoodleCanvasKit()
 
-  return component(
+  return (
     <>
       <div class="canvas-app">
         <div class="frame">

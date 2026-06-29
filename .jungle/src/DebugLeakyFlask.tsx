@@ -11,7 +11,8 @@ export function DebugLeakyFlask() {
    const $ready = ion(true)
    const $active = ion(true)
 
-   return component(
+   return (
+
       <>
          {If($ready,
             <>

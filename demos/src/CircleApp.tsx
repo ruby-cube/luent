@@ -58,7 +58,8 @@ export function CircleApp() {
 
    const circle = $circles()[0]
 
-   return component(
+   return (
+
       <>
          <svg on:click={reClick}>
             <foreignObject x="0" y="40%" width="100%" height="200">

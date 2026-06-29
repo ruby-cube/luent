@@ -20,7 +20,8 @@ export function TestMorphic() {
       $morphicNode()!.as(key)
    }
 
-   return component(
+   return (
+
       <>
          <$Morphable as='hi' ref={$morphicNode}></$Morphable>
 

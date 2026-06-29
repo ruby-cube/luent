@@ -10,7 +10,8 @@ function App() {
    const $cities = fetchCities($selectedState);
    const $selectedCity = HybridIon(() => $cities()[0]);
 
-   return component(
+   return (
+
       <>
          <select mu:value={$selectedState}>
             {For($states, state =>

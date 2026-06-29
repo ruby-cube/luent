@@ -3,7 +3,8 @@ import { component, mount, RenderSlot, template } from "@rue/luent";
 
 export function TestNamedSlots() {
 
-   return component(
+   return (
+
       <div class='p-10 border border-emerald-800'>
          <Comp>{{
             title: () =>
@@ -16,7 +17,8 @@ export function TestNamedSlots() {
 }
 
 function Comp({ Slot }: { Slot: { title: RenderSlot, description: RenderSlot } }) {
-   return component(
+   return (
+
       <div>
          {Slot.title}
          <hr></hr>

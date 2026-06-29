@@ -136,7 +136,8 @@ function SideBar(
     })
 
 
-    return component(
+    return (
+
         <ProviderBlock> // dog is provided here...
             <ChildBlock dog={slot.fromContext(_dog_)}>hi</ChildBlock>
         </ProviderBlock>

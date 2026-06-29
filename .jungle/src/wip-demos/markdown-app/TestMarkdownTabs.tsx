@@ -56,7 +56,8 @@ export function MarkdownApp() {
    const $allFiles = resolvedDispatch(GET_FILES)
 
 
-   return component(
+   return (
+
       <>
          <Sidebar files={$allFiles}></Sidebar>
             <Main files={$opendFiles}></Main>
@@ -71,7 +72,8 @@ function Main(
 }()
 ) {
 
-   return component(
+   return (
+
       <>
          <nav>
             {For($openedFiles, (file) => (
@@ -83,14 +85,16 @@ function Main(
    )
 }
 function Sidebar() {
-   return component(
+   return (
+
       <>
       </>
    )
 }
 
 function Tab() {
-   return component(
+   return (
+
       <>
       </>
    )

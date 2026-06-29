@@ -80,7 +80,8 @@ export function TreeApp() {
 
    console.log('root', root.children)
 
-   return component(
+   return (
+
       <>
          <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
             <TreeItemView item={root}></TreeItemView>
@@ -116,7 +117,8 @@ function TreeItemView(input: {
    }
 
 
-   return component(
+   return (
+
       <li class='item'>
          <div
             class={($isFolder() && 'bold')}

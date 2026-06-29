@@ -22,7 +22,8 @@ export function TestNested() {
    }, { eager: true })
 
 
-   return component(
+   return (
+
       <>
          <div>is active: {$isActive}</div>
          <div>is happy: {$isHappy}</div>
@@ -81,7 +82,8 @@ export function TestNestedB() {
       }
    })
 
-   return component(
+   return (
+
       <>
          <div style={($hasColor() ? { backgroundColor: $color } : { backgroundColor: 'black' })}>hi</div>
          <div>hasColor: {$hasColor}</div>

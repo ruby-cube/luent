@@ -1,17 +1,17 @@
 import { CodeGlimpses } from "./CodeGlimpses";
-export { getPortals, runWithPortals, RenderPage } from '@rue/luent'
-import { mount, MICROCLASS_MERGE, writeRoot, provideRoot } from '@rue/luent'
+export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from '@rue/luent'
+import { mount, MICROCLASS_MERGE, writeIsland, provideRoot } from '@rue/luent'
 import { Code } from "@rue/websites-shared";
 export * from "@rue/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
 
-export const writeIsland = {
-  'code-glimpses': () => writeRoot(() => {
+export const Islands = {
+  'code-glimpses': () => writeIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge)
     return CodeGlimpses()
   }),
-  'nsx-code': (nsName, tsName, nsCode, tsCode) => writeRoot(() => {
+  'nsx-code': (nsName, tsName, nsCode, tsCode) => writeIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge)
     return <Code
       trusted
@@ -26,12 +26,18 @@ export const islands = {
   'code-glimpses': () => class extends HTMLElement {
     constructor() {
       super()
-      mount(() => {
-        provideRoot(MICROCLASS_MERGE, twMerge)
-        return CodeGlimpses()
-      }, this)
+      // mount(() => {
+      //   provideRoot(MICROCLASS_MERGE, twMerge)
+      //   return CodeGlimpses()
+      // }, this)
     }
   },
+  // 'code-glimpses': () => {
+  //   mount(() => {
+  //     provideRoot(MICROCLASS_MERGE, twMerge)
+  //     return CodeGlimpses()
+  //   }, '#code-glimpses')
+  // },
 
   'nsx-code': () => class extends HTMLElement {
     constructor() {

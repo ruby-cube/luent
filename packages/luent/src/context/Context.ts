@@ -31,7 +31,7 @@ export function Context(
    }
 ) {
    if (!Slot) debug.warn(`Extraneous <o:context>`)
-   return component(callWithContext(Slot, createContextNode(provide)))
+   return (callWithContext(Slot, createContextNode(provide)))
 }
 
 export function createContextNode(

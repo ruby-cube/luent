@@ -2,7 +2,8 @@
 import { component, template } from "@rue/luent";
 
 export function Comp() {
-   return component(
+   return (
+
       <>
          <input
             class="edit"

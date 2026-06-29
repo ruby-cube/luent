@@ -7,7 +7,8 @@ export function TestSyncEffects() {
       console.log('count', $count())
    }, { phase: SYNC })
 
-   return component(
+   return (
+
       <div on:click={e => $count.value++}>Sync effects</div>
    )
 }

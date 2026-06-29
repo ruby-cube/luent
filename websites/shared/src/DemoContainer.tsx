@@ -1,12 +1,32 @@
 import { callWithShadowRoot, component, css, fromTag, NodeRef, RenderSlot, Style } from "@rue/luent";
 
+// function Powerset(setup: {
+//   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
+//   limit: number,
+// }) {
+//   const a = {
+//     add(){}
+//   }
+//   const { mu, '-r': { powers }, limit } = fromTag(setup);
+//   <:>
+//     <div class='powerset-panel'>
+//       <Powers {powers}>
+//       <button
+//         disabled={() => powers.length === limit}
+//         on:click={() => mu.powers.addRandomPower()}
+//       >+</button>
+//     </div>
+//     <o--link href='/powerset.css' rel='stylesheet' />
+//   </:>
+// }
+
 export function DemoContainer(setup: {
   Slot: RenderSlot
 }) {
   const { Slot, ...rest } = fromTag(setup)
   const $div = NodeRef('div')
 
-  return component(
+  return (
     <>
       <div ref={$div} class='demo-container' auto-bind={rest}>
         {import.meta.env.SSR

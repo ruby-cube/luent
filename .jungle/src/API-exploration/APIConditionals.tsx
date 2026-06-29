@@ -12,7 +12,8 @@ export function TestCounterModel() {
       }
    })
 
-   return component(
+   return (
+
       <>
          {/* <vvv:mount /> */}
          <div>{counter.$count}</div>
@@ -167,7 +168,8 @@ export function MountIf() {
       }
    })
    //NOTE: if ooo-transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
-   return component(
+   return (
+
       <>
          <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $ = $color() + 'e' }]}>shout</button>
          <h1>Hello {todos[0].name}</h1>

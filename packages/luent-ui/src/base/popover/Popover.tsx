@@ -24,7 +24,7 @@ function PopoverRoot(setup: {
   } = fromTag(setup)
 
   const { gap } = popover
-  return component(
+  return (
     <>
       {If(() => popover.visible, // TODO: configure activation type
         <o:context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
@@ -102,7 +102,7 @@ function PopoverContent(setup: {
     ...attributes
   } = fromTag(setup)
 
-  return component(
+  return (
     <div auto-bind={attributes}>
       {Slot()}
     </div>
@@ -120,24 +120,24 @@ function PopoverTail(setup: {
   const {
     xray,
     $offset = toIon('-30%'),
-    as: Comp = 'div',
+    as: Node = 'div',
     ...attributes
   } = fromTag(setup)
 
   const popover = fromContext(POPOVER)
   const $popover = $fromContext(POPOVER_NODE)
 
-  return component(
+  return (
     <>
       <div
         at:attach={node => positionTail(node, popover, $popover)}
         class={['tail-root', () => popover.placement]}
         auto-bind={attributes}
       >
-        <Comp
+        <Node
           class={['tail', () => popover.placement]}
           auto-bind={xray.shape}
-        ></Comp>
+        ></Node>
       </div>
       {Style(css`
         .tail-root {

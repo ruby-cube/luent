@@ -89,7 +89,8 @@ export function TestVanillaStream() {
       $running() ? $running() : $eye()
    )
 
-   return component(
+   return (
+
       <>
          <div class="logo">
             <div class={['bg dragon', (`${$side()}${$frame()}`)]}></div>

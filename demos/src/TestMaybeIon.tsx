@@ -3,13 +3,15 @@ import { ion } from "@rue/quarky";
 
 function TestMaybeIon() {
    const $msg = ion('hi')
-   return component(
+   return (
+
       <Child msg={$msg}></Child>
    )
 }
 
 function Child({ msg }: { msg: Ion<string> }) {
-   return component(
+   return (
+
       <div></div>
    )
 }

@@ -102,7 +102,8 @@ export function TodoApp() {
 
    const $todos = fetchTodos($userID)
 
-   return component(
+   return (
+
       <div>
          {For($todos, m => m.id, (todo) => (
             <div>{todo.title}</div>

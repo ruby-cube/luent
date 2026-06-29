@@ -132,7 +132,8 @@ export function FBApp() {
 
    const $main = $Main.varion('home')
 
-   return component(
+   return (
+
       <>
          <NavBar></NavBar>
          <main>
@@ -154,7 +155,8 @@ const $Main = Polymorph({
 function Button(input : {
    Slot: Slot
 }) {
-   return component(
+   return (
+
       <button>
 
       </button>
@@ -162,37 +164,43 @@ function Button(input : {
 }
 
 function NavBar() {
-   return component(
+   return (
+
       <div></div>
    )
 }
 
 function ChatPopup() {
-   return component(
+   return (
+
       <div></div>
    )
 }
 
 function Home() {
-   return component(
+   return (
+
       <div></div>
    )
 }
 
 function Chat() {
-   return component(
+   return (
+
       <div></div>
    )
 }
 
 function ThreadList() {
-   return component(
+   return (
+
       <>
       </>
    )
 }
 function MessageThread() {
-   return component(
+   return (
+
       <>
       </>
    )

@@ -12,7 +12,8 @@ export function TestDerivation() {
       console.log('label', count.value) // This runs on count value change
    }, { phase: SYNC })
 
-   return component(
+   return (
+
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -30,7 +31,8 @@ export function TestDerivationA() {
       console.log('pion', /* count.value */)
    }, { phase: SYNC })
 
-   return component(
+   return (
+
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -52,7 +54,8 @@ export function TestDerivationB() {
 
 
 
-   return component(
+   return (
+
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -74,7 +77,8 @@ export function TestDerivationD() {
 
 
 
-   return component(
+   return (
+
       <button on:click={e => count.value++}>+</button>
    )
 }
@@ -95,7 +99,8 @@ export function TestDerivationC() {
 
 
 
-   return component(
+   return (
+
       <button on:click={e => count.value++}>+</button>
    )
 }

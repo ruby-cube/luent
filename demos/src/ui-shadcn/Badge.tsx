@@ -31,7 +31,8 @@ function Badge({
    ...attributes
 }: WithRef<'span'> & BadgeInput) {
 
-   return component(
+   return (
+
       <Comp
          microclass={badgeVariants({ variant })}
          {...attributes}

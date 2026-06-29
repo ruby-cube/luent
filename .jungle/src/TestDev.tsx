@@ -55,7 +55,8 @@ export function TestDev() {
    //    // 'dev.logAtoms': true
    // })
 
-   return component(
+   return (
+
       <div on:click={e => $count.increment()}>{$count}</div>
    )
 }

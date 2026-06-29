@@ -10,7 +10,8 @@ export function HabitTracker(setup: {
   const count = ion(0)
   const achieved = ion(() => count() === goal)
 
-  return component(
+  return (
+
     <div>
       {habit}
       <ul class='tracker'>

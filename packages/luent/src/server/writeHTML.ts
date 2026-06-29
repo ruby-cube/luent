@@ -201,7 +201,8 @@ export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = [
     //   flattened.push(node)
     // }
     else {
-      flattened.push(toHtml(toString(node)))
+      flattened.push(toString(node))
+      // flattened.push(toHtml(toString(node)))
     }
   }
   return flattened;
@@ -218,7 +219,7 @@ export function writeComponent(
 
 
 
-export function writeRoot<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction) {
+export function writeIsland<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction) {
   const flask = new Flask({ type: 'view' });
   const rootContext = createRootContext()
   try {

@@ -15,7 +15,8 @@ function DropdownRoot(setup: {
 }) {
    const { dropdown, ...rest } = setup
 
-   return component(
+   return (
+
       <PopoverRoot popover={dropdown} {...rest}></PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
    )
 }

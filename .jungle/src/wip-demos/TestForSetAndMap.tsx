@@ -18,7 +18,8 @@ export function TestForSetAndMap() {
       }
    })
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => map.setPair()}>+</button>
          {For(map, ([$key, $value], i) =>
@@ -58,7 +59,8 @@ export function TestForSetAndMapIons() {
       }
    })
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => $map.setPair()}>+</button>
          {For($map, ([$key, $value], i) =>

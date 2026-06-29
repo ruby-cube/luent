@@ -18,7 +18,7 @@ function DropdownMenu(setup: {
    const { Slot } = setup
    const { dropdown, menu } = DropdownKit()
 
-   return component(
+   return (
       <o:context provide={DROPDOWN(dropdown)}>
          {Slot.Face(menu)}
          {Slot()}
@@ -30,7 +30,7 @@ function Dropdown(setup: { Slot: RenderSlot }) {
    const { Slot } = setup
    const dropdown = fromContext(DROPDOWN)
 
-   return component(
+   return (
       <o--body>
          <DropdownRoot dropdown={dropdown}>
             <DropdownContent>{Slot()}</DropdownContent>
@@ -42,7 +42,7 @@ function Dropdown(setup: { Slot: RenderSlot }) {
 
 export function DropdownMenuDemo() {
 
-   return component(
+   return (
       <DropdownMenu Slot:Face={menu =>
          <Button on:click={e => menu.open()} before:mount={menu.anchor} variant="outline">Open</Button>
       }>

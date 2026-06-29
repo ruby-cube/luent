@@ -119,7 +119,8 @@ export function TestListDragDrop() {
       })
    }
 
-   return component(
+   return (
+
       <>
          <h1>hello world</h1>
          <div style='user-select: none; display: grid; grid-template-columns: 1fr 1fr; width: 100vw'>

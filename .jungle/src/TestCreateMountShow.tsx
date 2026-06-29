@@ -44,7 +44,8 @@ function Counter(input: {
    }
 
 
-   return component(
+   return (
+
       <div>
          <div>{label}: {$count}</div>
          <button on:click={e => $count.increment()}>+</button>
@@ -66,7 +67,8 @@ export function TestCreateMountShow() {
       }
    })
 
-   return component(
+   return (
+
       <>
       <article style="width: 33vw">
          <h1>View Activation: Create/Show/Mount</h1>
@@ -415,7 +417,8 @@ export function TestDerivedConditional() {
 
 
 
-   return component(
+   return (
+
       <article>
          <div>{$count}</div>
          <div>{($count() + 1)}</div>

@@ -12,7 +12,8 @@ function Board() {
       }
    })
 
-   return component(
+   return (
+
       <template>
          <h1>{(frog.fullname)}</h1>
          <input m:value={frog.$firstName} />

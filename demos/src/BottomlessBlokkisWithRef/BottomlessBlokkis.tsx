@@ -69,7 +69,8 @@ export function BottomlessBlokkis() {
         return blokk.leftEdge === 0
     }
 
-    return component(
+    return (
+
         <div class='container'>
             <div class='header'>
                 <h1>Bottomless Blokkis</h1>

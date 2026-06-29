@@ -13,7 +13,7 @@ It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/pac
 
 <br>
 
-> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected. The [website]() documents completed and in-progress features. Planned features are listed in the [roadmap]().
+> **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected.
 
 
 <br>
@@ -27,7 +27,7 @@ Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](
 ## Motivation
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
-This project explores ways to reduce framework friction and simplify application development without sacrificing technical rigor.
+This project explores ways to reduce framework friction and simplify application development while maintaining technical rigor.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -39,7 +39,6 @@ Core design features:
 - a unified system of fine-grained reactivity through `ion()` and `ionic()`
 - state management through familiar native structures
 - selective, type-explicit reactivity
-- traceable mutations to aid in debugging reactivity
 
 Experimental areas:
 - language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
@@ -112,7 +111,7 @@ This JSX template ...
 Luent is being developed under these guiding principles, which encapsulate the project's values and how tradeoffs are navigated:
 
 - **Human-centered, LLM-friendly.**
-Luent take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. We believe that by designing for clarity and consistency, we create systems that are LLM-friendly as well.
+We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. We believe that by designing for clarity and consistency, we create systems that are LLM-friendly as well.
 
 - **Elegance and simplicity.**
 Elegance—both conceptual and syntactic—is central to Luent’s API design. We pursue simple solutions through extensive experimentation and relentless trimming of excess.
@@ -195,7 +194,7 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 ### Planned: Runtime and performance
 - Performance optimizations
 - Smaller bundle sizes
-- Compiler-assisted tree-shaking of ergonomic APIs
+- Compiler-assisted tree-shaking
 
 
 

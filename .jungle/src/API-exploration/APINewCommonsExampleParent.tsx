@@ -7,7 +7,7 @@ import { ArticlePreview } from "./ArticlePreview"
 
 function Parent() {
 
-  component(
+  return(
     <div>
       <div>Hello World</div>
       <o:context with={[

@@ -5,7 +5,8 @@ import './TestTooltip.css'
 
 export function TestTooltip() {
 
-   return component(
+   return (
+
       <div>
          <ButtonWithTooltip
             Slot:Tooltip={(
@@ -53,7 +54,8 @@ export function ButtonWithTooltip(setup: {
    const { Slot } = setup
    const $targetRect = ion(null as Rect | null)
 
-   return component(
+   return (
+
       <>
          <button
             on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
@@ -130,7 +132,8 @@ export function Tooltip(input: {
       return y < 0 ? targetRect.bottom : y;
    })
 
-   return component(
+   return (
+
       Portal('body',
          <div
             style={{

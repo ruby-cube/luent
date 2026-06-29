@@ -26,7 +26,8 @@ export function TestSettableDerivation() {
       console.log('names', names)
    }
 
-   return component(
+   return (
+
       <div>
          <form ref={$form} on:submit={e => { reSubmit(e) }}>
             <label>first:</label><input type='text' mu:value={$first}></input>

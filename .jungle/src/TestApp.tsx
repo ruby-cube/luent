@@ -7,7 +7,8 @@ import { TestPropIons } from "./TestPropIons";
 
 
 export function TestApp(){
-   return component(
+   return (
+
       <>
       {/* <h2>Counter: Ions and Derived</h2>
       <TestDerivedConditional></TestDerivedConditional> */}

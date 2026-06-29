@@ -40,7 +40,7 @@ export const style = declareStyles
 
 let existingStyleTags: Set<string> | undefined;
 
-export function RenderPage() {
+export function RenderPageWithStyles() {
   const tags = new Set<string>();
   return function renderPage(render: () => any) {
     try {

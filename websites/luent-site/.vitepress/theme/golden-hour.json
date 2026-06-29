@@ -49,7 +49,7 @@
     {
       "scope": ["constant.numeric"],
       "settings": {
-        "foreground": "#12b5d0"
+        "foreground": "#22afca"
       }
     },
     {

@@ -193,7 +193,8 @@ export function MountIfAnimation() {
 
 
    //NOTE: if Transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
-   return component(
+   return (
+
       <div>
          <button on:click={() => ($color.change(), $name.value += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {$name}</h1>

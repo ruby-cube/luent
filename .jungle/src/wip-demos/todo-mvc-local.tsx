@@ -203,7 +203,8 @@ export function TodoMVC() {
    })
 
 
-   return component(
+   return (
+
       <>
          <section class="todoapp">
             <header class="header">

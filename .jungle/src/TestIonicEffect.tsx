@@ -14,7 +14,8 @@ export function TestIonicEffect() {
         $count.increment()
     }, { phase: SYNC })
 
-    return component(
+    return (
+
         <button on:click={$count.increment}>click for effect</button>
     )
 }

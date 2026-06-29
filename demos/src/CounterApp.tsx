@@ -21,7 +21,8 @@ export function Counter(setup: {
     $count.value = 0;
   }
 
-  return component(
+  return (
+
     <div>
       <button on:click={toggle}>on | off</button>
       <button on:click={increment} disabled={$disabled}>

@@ -2,21 +2,24 @@ import { component } from "@rue/luent";
 
 function Grandparent() {
 
-   return component(
+   return (
+
       <Parent on:click={() => console.log('grandparent click')}></Parent>
    )
 }
 
 function Parent(setup: any) {
 
-   return component(
+   return (
+
       <Child on:click={() => console.log('parent click')} auto-bind={setup}></Child>
    )
 }
 
 function Child(setup: any) {
 
-   return component(
+   return (
+
       <div on:click={() => console.log('child click')} auto-bind={setup}></div>
    )
 }
@@ -29,7 +32,8 @@ function Child(setup: any) {
 //       emit, on: { click },
 //    } = setup
 
-//    return component(
+//    return (
+
 //       <div microclass='' on:click={e => { console.log('child click'); emit(click, e) }} auto-bind={setup}></div>
 //    )
 // }
@@ -40,7 +44,8 @@ function Child(setup: any) {
 
 function ChildB(setup: any) {
 
-   return component(
+   return (
+
       <div on:click={() => console.log('child click')} {...setup}></div>
    )
 }

@@ -45,7 +45,7 @@ function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> &
     ...other
   } = fromTag(setup)
 
-  return component(
+  return (
     <Comp
       ref={ref}
       data-slot="button"

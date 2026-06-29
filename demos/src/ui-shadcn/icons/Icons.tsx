@@ -2,7 +2,7 @@ import { component, FromTag, template } from "@rue/luent";
 
 export function CreateIcon(icon: string) {
    return function Icon(attributes: FromTag) {
-      return component(
+      return (
          <i data-lucide={icon} {...attributes}></i>
       )
    }

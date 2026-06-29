@@ -74,7 +74,8 @@ export function TestListSelect() {
 
    iteratorTests(list, selected)
    let initial = true
-   return component(
+   return (
+
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; width: 100vw'>

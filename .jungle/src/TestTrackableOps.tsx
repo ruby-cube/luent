@@ -7,7 +7,8 @@ export function TestTrackableOps() {
    const $length = ion(()=>$filteredList().length)
 
 console.log(list.filter(item => item.count > 10))
-   return component(
+   return (
+
       <>
          <button on:click={e => list.push(ionize({ count: 12 }))}>click</button>
          {(list.length)}

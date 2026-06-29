@@ -71,7 +71,8 @@ function TestVanillaStream() {
             : 1
    )
 
-   return component(
+   return (
+
       <>
          <div class="logo">
             <div class={['bg dragon', (`${$side()}${$frame()}`)]}></div>

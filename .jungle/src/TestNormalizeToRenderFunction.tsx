@@ -4,7 +4,8 @@ import { ion } from "@rue/quarky";
 export function TestNormalizeToRenderFunction(){
    const $active = ion(true)
    const $msg = ion('hellow world')
-   return component(
+   return (
+
       <>
       <h1>Test Normalize to Renderfunction</h1>
       <div>{$active}</div>
@@ -22,7 +23,8 @@ export function TestNormalizeToRenderFunction(){
 function Child(input : {Slot: RenderSlot}){
    const {Slot} = input
    console.log('Slot', Slot)
-   return component(
+   return (
+
       <div>{Slot}</div>
    )
 }

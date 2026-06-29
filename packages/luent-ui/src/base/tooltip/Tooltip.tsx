@@ -13,7 +13,7 @@ function TooltipRoot(setup: {
 }) {
    const { Slot, tooltip, ...rest } = setup
 
-   return component(
+   return (
       <PopoverRoot popover={tooltip} auto-bind={rest}>{Slot()}</PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
    )
 }

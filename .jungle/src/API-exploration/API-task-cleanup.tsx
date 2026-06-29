@@ -500,7 +500,7 @@ ionicPostTask(async ({ setup, useSelection, IonicTodo }) => {
 }, { contextualize: { useSelection, IonicTodo } })
 
 
-return component(<></>)
+return ;
 }
 
 type CleanupFn<T> = (...values: T | [undefined]) => void

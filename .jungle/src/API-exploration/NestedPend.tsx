@@ -25,7 +25,8 @@ const PendingTextArea = Suspense({
 export function NestedPend() {
    const $count = ion(0)
 
-   return component(
+   return (
+
       () =>
          <>
             <h1>Hello World</h1>

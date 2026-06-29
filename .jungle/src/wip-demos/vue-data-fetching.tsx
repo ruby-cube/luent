@@ -71,7 +71,8 @@ export function View() {
       return v.replace(/T|Z/g, ' ')
    }
 
-   return component(
+   return (
+
       <div style='width: 500px'>
          <h1>Latest Vue Core Commits</h1>
 

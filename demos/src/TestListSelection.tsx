@@ -102,7 +102,8 @@ export function TestListSelection() {
       selected.clear()
    })
 
-   return component(
+   return (
+
       <>
       <div style='transform: scale(.5); transform-origin: top'>
          <h1>hello world</h1>

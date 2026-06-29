@@ -20,7 +20,8 @@ export function FriendApp(input: {
 
    const $main = $App.Morphable('home')
 
-   return component(
+   return (
+
       <o:context provide={[USER(user)]}>
          <Navbar user={user} navigateHome={() => $main.as('home')}>
             <button on:click={() => $main.as('chat')}>Chat</button>

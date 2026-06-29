@@ -8,7 +8,8 @@ export function TempoPlayer() {
 
    listen(window, click(e => { doSomething() }))
 
-   return component(
+   return (
+
       <>
          {If($active,
             <>

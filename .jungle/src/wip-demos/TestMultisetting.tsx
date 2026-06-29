@@ -10,7 +10,8 @@ export function TestMultisetting() {
       // frog.name = 'sir robin the brave'
    }
 
-   return component(
+   return (
+
       <>
          <p>{$frog}</p>
          <button on:click={changeName}>click</button>

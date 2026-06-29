@@ -19,7 +19,8 @@ export function TestPropIons() {
    })
 
 
-   return component(
+   return (
+
       <>
          <h3>True prop ion</h3>
          <div>{frog.$name}</div>

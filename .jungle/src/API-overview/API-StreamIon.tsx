@@ -333,7 +333,8 @@ export function DinoLogo() {
 
    // ($blink() ? “blink” : “open-eyed”)
 
-   return component(
+   return (
+
       <>
       </>
    )

@@ -548,7 +548,8 @@ export function TodoMVC({
       storeTodos($todos())
    })
 
-   return component(
+   return (
+
       <>
          <section class="todoapp">
             <header class="header">

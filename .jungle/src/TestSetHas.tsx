@@ -16,7 +16,8 @@ export function TestSetHas() {
       console.log('mySet changed', current, previous)
    })
 
-   return component(
+   return (
+
       <>
          <p style={{ outline: (mySet.has(0) ? 'thick solid blue' : 'thick solid red') }}>{(mySet.has(0))}</p>
          <button on:click={addZero}>add</button>

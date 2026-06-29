@@ -3,7 +3,8 @@ import { component, Catch, template, createTryCatch, FromTag, Try } from "@rue/l
 export function TestTry() {
    console.log('running TestTry')
 
-   return component(
+   return (
+
       <div>
          <h2>Stubbon Child</h2>
          {Try(
@@ -20,7 +21,8 @@ export function TestTry() {
 function Child() {
    console.log('Running Child')
    throw 'I was born a restless child'
-   return component(
+   return (
+
       <div>:)</div>
    )
 }
@@ -28,7 +30,8 @@ function Child() {
 function ErrorMessage({ message } : {
    message: string
 }) {
-   return component(
+   return (
+
       <div>{message}</div>
    )
 }

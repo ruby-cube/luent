@@ -11,7 +11,8 @@ export function TestCreate() {
 
    const $activeTab = ion(tabs[1])
 
-   return component(
+   return (
+
       <div>
 
          <button on:click={e => $activeTab.value = tabs[1]}>1</button>
@@ -25,7 +26,8 @@ export function TestCreate() {
 function Tab({ $content }) {
    const $count = ion(0)
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => $count.value++}>+</button>
          <button on:click={e => $count.value--}>-</button>

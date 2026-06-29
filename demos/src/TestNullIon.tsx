@@ -8,7 +8,8 @@ export function TestNullIon() {
       console.log('@@@frog', $frog())
    }, { phase: PRELUDE })
 
-   return component(
+   return (
+
       <div>
 
          <button on:click={e => $frog.value = 'kermit'}>click</button>

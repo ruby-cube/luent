@@ -83,7 +83,8 @@ export function TestStream() {
    }
 
 
-   return component(
+   return (
+
       <div>
          <p>{$count}</p>
          <button on:click={e => increment.start()}>start</button>

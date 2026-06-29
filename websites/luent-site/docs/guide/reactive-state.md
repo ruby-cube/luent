@@ -255,7 +255,7 @@ const textNode = document.createTextNode(value)
 ```tsx
 const $count = ion(0, {
   '@set'(value) {
-    debug.asyncTrace('count', value)
+    debug.traceAsync('count', value)
   }
 })
 ```

@@ -10,7 +10,8 @@ export function Navbar(input: {
 }) {
    const { user, navigateHome, Slot } = input
 
-   return component(
+   return (
+
       <>
          <nav>
             <button on:click={navigateHome}>Home</button>

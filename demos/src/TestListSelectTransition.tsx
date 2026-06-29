@@ -113,7 +113,8 @@ export function TestListSelectTransition() {
 
    // {{ [m.list]: $active, '.': [m.dark, m.selectedList] }}
 
-   return component(
+   return (
+
       <>
          <h1>hello world</h1>
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>

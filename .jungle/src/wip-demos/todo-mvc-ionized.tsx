@@ -199,7 +199,8 @@ export function TodoMVC() {
    )
 
 
-   return component(
+   return (
+
       <>
          <section class="todoapp">
             <header class="header">
@@ -249,7 +250,8 @@ function TodoInput({ addTodo }: { 'can:addTodo': (title: string) => void }) {
       }
    }
 
-   return component(
+   return (
+
       <input
          class="new-todo"
          autofocus
@@ -288,7 +290,8 @@ function TodoList({ $todos, removeTodo }: {
       }
    }
 
-   return component(
+   return (
+
       <ul class="todo-list">
          {For($todos, o => o.id, (todo) => {
             const $isEditing = ion(() => todo === $editedTodo());

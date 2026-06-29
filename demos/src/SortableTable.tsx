@@ -17,7 +17,8 @@ export function SortableTableApp() {
       { name: 'Jet Li', power: 8000 }
    ]
 
-   return component(
+   return (
+
       <>
          <form id="search">
             Search <input name="query" mu:value={$searchQuery} />
@@ -78,7 +79,8 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
       return str.charAt(0).toUpperCase() + str.slice(1)
    }
 
-   return component(
+   return (
+
       <>
          {If(($filteredData().length),
             <table>

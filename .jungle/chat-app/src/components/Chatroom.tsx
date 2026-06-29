@@ -14,7 +14,8 @@ export function Chatroom(input: {
 
    const chatKit = ChatKit()
 
-   return component(
+   return (
+
       <div class="container">
          <ChatWindow user={user} chat={chatKit} />
          <MessageForm user={user} postMessage={chatKit.postChatMessage} />

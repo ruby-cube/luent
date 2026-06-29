@@ -1,17 +1,15 @@
-import { getPortals, RenderPage, runWithPortals } from "@rue/luent";
-import { DefaultTheme, TransformContext, type MarkdownOptions } from "VitePress"
+import { getPortals, RenderPageWithStyles, runWithPortals } from "@rue/luent";
+import { type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
 import { AnyObject } from "@rue/types";
 
 type MarkdownIt = Exclude<MarkdownOptions['config'], undefined> extends (arg: infer P) => any ? P : never
 
 export function isCustomElement(tag: string) {
-  return tag.includes('-') && tag !== 'await-mount'
+  return tag.includes('-')
 }
 
 export function hydrate(app: any, islands: AnyObject) {
-  // app.component('await-mount', AwaitMount)
-
   if (typeof window == 'undefined') return;
 
   if (!customElements.get('style-scope')) {
@@ -33,7 +31,7 @@ export function hydrate(app: any, islands: AnyObject) {
       connectedCallback() {
         const template = this.querySelector('template')
         const content = template?.childNodes ??[]
-        this.innerHTML = ''
+        // this.innerHTML = ''
         this.append(...content)
       }
     });
@@ -41,6 +39,9 @@ export function hydrate(app: any, islands: AnyObject) {
 
   // define custom elements
   for (const key in islands) {
+    // if (key === 'code-glimpses') {
+    //   islands[key]()
+    // }
     if (!customElements.get(key)) {
       customElements.define(key, islands[key]())
     }
@@ -55,7 +56,7 @@ declare global {
   }
 }
 
-export function transformMarkdownIslands(md: MarkdownIt, writeIsland: AnyObject) {
+export function transformMarkdownIslands(md: MarkdownIt, Islands: AnyObject) {
   const pages = new Set()
   let withPageContext: (cb: () => any) => any;
 
@@ -71,7 +72,7 @@ export function transformMarkdownIslands(md: MarkdownIt, writeIsland: AnyObject)
     if (page) {
       if (!pages.has(page)) {
         pages.add(page)
-        withPageContext = RenderPage()
+        withPageContext = RenderPageWithStyles()
       }
     }
     else {
@@ -81,9 +82,9 @@ export function transformMarkdownIslands(md: MarkdownIt, writeIsland: AnyObject)
       const next = state.bMarks[startLine + 1] + state.tShift[startLine + 1]
       const spec = state.src.slice(next, state.eMarks[startLine + 1])
       const name = spec.trim()
-      const islandHtml = renderFallback(name, writeIsland[name], withPageContext, page)
+      const islandHtml = renderFallback(name, Islands[name], withPageContext, page)
+      // const islandTokenContent = `<luent-island id='${name}'></luent-island><await-mount>${islandHtml}</await-mount>`
       const islandTokenContent = `<await-mount><template><${name}></${name}></template>${islandHtml}</await-mount>`
-      // const islandTokenContent = `<await-mount><${name}></${name}><template #fallback>${islandHtml}</template></await-mount>`
 
       state.tokens.push({
         type: 'html_block',
@@ -101,7 +102,7 @@ export function transformMarkdownIslands(md: MarkdownIt, writeIsland: AnyObject)
       return true
     }
 
-    return nsxCodeBlockRule(state, startLine, endLine, writeIsland, withPageContext, page)
+    return nsxCodeBlockRule(state, startLine, endLine, Islands, withPageContext, page)
   })
 }
 
@@ -159,7 +160,7 @@ function escapeAttr(value: string) {
     .replaceAll('\r', '&#13;')
 }
 
-function nsxCodeBlockRule(state, startLine: number, endLine: number, writeIsland: AnyObject, withPageContext: (cb: () => any) => any, page: string) {
+function nsxCodeBlockRule(state, startLine: number, endLine: number, Islands: AnyObject, withPageContext: (cb: () => any) => any, page: string) {
   let nextLine = startLine + 1
   let closeLine = -1
 
@@ -194,7 +195,7 @@ function nsxCodeBlockRule(state, startLine: number, endLine: number, writeIsland
   const nsCode = escapeAttr(nsxBlock[2].trimEnd())
   const tsCode = escapeAttr(tsxBlock[2].trimEnd())
 
-  const islandHtml = renderFallback('nsx-code', () => writeIsland['nsx-code'](nsName, tsName, nsCode, tsCode), withPageContext, page)
+  const islandHtml = renderFallback('nsx-code', () => Islands['nsx-code'](nsName, tsName, nsCode, tsCode), withPageContext, page)
 
   const islandTokenContent =
     `<await-mount>` +
@@ -221,16 +222,4 @@ function nsxCodeBlockRule(state, startLine: number, endLine: number, writeIsland
 
   state.line = closeLine + 1
   return true
-}
-
-export function transformPortals(code: string, ctx: TransformContext<NoInfer<DefaultTheme.Config>>) {
-  const portals = getPortals(ctx.page)
-  if (!portals || portals.head.length === 0 && portals.body.length === 0) {
-    return code;
-  }
-
-  const newCode = code
-    .replace('</head>', `${portals.head.join('\n')}\n</head>`)
-    .replace('</body>', `${portals.body.join('\n')}\n</body>`)
-  return newCode
 }

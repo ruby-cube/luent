@@ -23,7 +23,8 @@ function TestSlotO() {
    const ContentB = () => (
       <div></div>
    )
-   return component(
+   return (
+
       <Comp>{{
          ContentA,
          ContentB
@@ -33,7 +34,8 @@ function TestSlotO() {
 
 function TestSlotO() {
 
-   return component(
+   return (
+
       <Comp>{{
          ContentA: () => (
             <div></div>
@@ -55,7 +57,8 @@ function TestSlotO() {
 
    // if Content.length !== 0 throw error
    // QUESTION: What happens if you watch a render function that renders its own ions?
-   return component(
+   return (
+
       <Comp>{namedSlots} hi</Comp>
    )
 }
@@ -70,7 +73,8 @@ function TestSlotO() {
 
    // if Content.length !== 0 throw error
    // QUESTION: What happens if you watch a render function that renders its own ions?
-   return component(
+   return (
+
       <Comp>{Content} hi</Comp>
    )
 }
@@ -84,7 +88,8 @@ function TestSlotO() {
    }
 
 
-   return component(
+   return (
+
       <Comp>{makeContent()}</Comp>
    )
 }
@@ -98,7 +103,8 @@ function TestSlotO() {
    }
 
 
-   return component(
+   return (
+
       <Comp>{Content}</Comp>
    )
 }
@@ -110,13 +116,15 @@ function TestSlotO() {
    ))
 
 
-   return component(
+   return (
+
       <Comp>{Content}</Comp>
    )
 }
 
 function TestSlotA() {
-   return component(
+   return (
+
       <Comp>{o => (
          <div></div>
       )}</Comp>
@@ -124,7 +132,8 @@ function TestSlotA() {
 }
 
 function TestSlotA() {
-   return component(
+   return (
+
       <Comp>
          {o => (
             <div></div>
@@ -135,7 +144,8 @@ function TestSlotA() {
 
 // UGLY
 function TestSlotC() {
-   return component(
+   return (
+
       <Comp>{Slot(() => (
          <div></div>
       ))}</Comp>
@@ -143,7 +153,8 @@ function TestSlotC() {
 }
 
 function TestSlotB() {
-   return component(
+   return (
+
       <Comp>{{
          Slot: () => (
             <div></div>
@@ -153,7 +164,8 @@ function TestSlotB() {
 }
 
 function Comp({ Slot }: { Slot: RenderSlot<{}> }) {
-   return component(
+   return (
+
       <div></div>
    )
 }

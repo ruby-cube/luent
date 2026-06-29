@@ -12,7 +12,8 @@ export function TestAwaitConditional() {
 
    let cache;
 
-   return component(
+   return (
+
       <>
          <div>
             <loadingBar loading={ooo} />
@@ -65,7 +66,8 @@ export function Child(setup: { state: 'awake' | 'sleeping' }) {
       '-fetch': () => db.fetchSomething(),
       '-awaited': true
    })
-   return component(
+   return (
+
       <div>
          {state}
          {$something}

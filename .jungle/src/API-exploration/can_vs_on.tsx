@@ -40,7 +40,8 @@ function StatefulCounter(input: {
       emit('decrement', { count: $count() })
    }
 
-   return component(
+   return (
+
       <>
          <div>{$count}</div>
          <button on:click={incrementCount}>+</button>
@@ -59,7 +60,8 @@ function DumbCounter(input: {
 }) {
    const { $count, emit } = input
 
-   return component(
+   return (
+
       <>
          <div>{$count}</div>
          <button on:click={e => emit('incrementClick')}>+</button>
@@ -77,7 +79,8 @@ function DumbCounterC(input: {
 }) {
    const { $count, incrementCount, decrementCount } = input
 
-   return component(
+   return (
+
       <>
          <div>{$count}</div>
          <button on:click={e => incrementCount()}>+</button>
@@ -93,7 +96,8 @@ function DumbCounterB(input: {
 }) {
    const { $count, mu } = input
 
-   return component(
+   return (
+
       <>
          <div>{$count}</div>
          <button on:click={e => mu($count).increment()}>+</button>
@@ -168,7 +172,8 @@ function Parent() {
 
    const product = ionic(new Product({}))
 
-   return component(
+   return (
+
       <>
          <Child
             can:atIncrementProductQty={getHook(product, 'incrementQty')}
@@ -249,7 +254,8 @@ function DumbProduct(input: {
 }) {
    const { product } = input
 
-   return component(
+   return (
+
       <>
          <StatefulCounter
             on:decrement={e => product.qty = e.count}
@@ -265,7 +271,8 @@ function SmartProduct(input: {
 }) {
    const { product } = input
 
-   return component(
+   return (
+
       <>
          <DumbCounterB
             mu:count={$(product.$qty, { increment: mu(product).incrementQty, decrement: mu(product).decrementQty })}

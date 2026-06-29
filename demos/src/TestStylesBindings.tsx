@@ -6,7 +6,8 @@ const $hierarchyRootOn = ion(false)
 const $microOn = ion(false)
 
 function SimpleBindings() {
-  return component(
+  return (
+
     <div
       id="simple-target"
       class={[
@@ -29,7 +30,8 @@ function SimpleBindings() {
 
 function HierarchyLeaf(setup: { [key: string]: unknown }) {
   const { ...bindings } = fromTag(setup)
-  return component(
+  return (
+
     <div
       id="hierarchy-target"
       class={["class-leaf"]}
@@ -43,7 +45,8 @@ function HierarchyLeaf(setup: { [key: string]: unknown }) {
 
 function HierarchyMiddle(setup: { [key: string]: unknown }) {
   const { ...bindings } = fromTag(setup)
-  return component(
+  return (
+
     <HierarchyLeaf
       class={["class-middle"]}
       style={{ backgroundColor: "rgb(20, 20, 220)" }}
@@ -53,7 +56,8 @@ function HierarchyMiddle(setup: { [key: string]: unknown }) {
 }
 
 function HierarchyRoot() {
-  return component(
+  return (
+
     <HierarchyMiddle
       class={["class-root"]}
       style={{
@@ -65,7 +69,8 @@ function HierarchyRoot() {
 
 function MicroLeaf(setup: { [key: string]: unknown }) {
   const { ...bindings } = fromTag(setup)
-  return component(
+  return (
+
     <div
       id="micro-target"
       microclass={["px-2 py-2 text-blue-500 rounded-sm"]}
@@ -78,7 +83,8 @@ function MicroLeaf(setup: { [key: string]: unknown }) {
 
 function MicroMiddle(setup: { [key: string]: unknown }) {
   const { ...bindings } = fromTag(setup)
-  return component(
+  return (
+
     <MicroLeaf
       microclass={() => ($microOn() ? "px-6 py-1 text-red-500" : "px-6 py-1 text-green-500")}
       auto-bind={bindings}
@@ -87,11 +93,12 @@ function MicroMiddle(setup: { [key: string]: unknown }) {
 }
 
 function MicroRoot() {
-  return component(<MicroMiddle microclass="px-8 py-6" />)
+  return <MicroMiddle microclass="px-8 py-6" />
 }
 
 export function TestStylesBindings() {
-  return component(
+  return (
+
     <div>
       <button id="toggle-simple" on:click={() => ($simpleOn.value = !$simpleOn())}>
         toggle simple

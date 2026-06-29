@@ -6,7 +6,7 @@ export function CodeTour(setup: {
 }) {
   const { Slot } = fromTag(setup);
 
-  return component(
+  return (
     <>
       <section class='home-tour'>
         {Slot()}
@@ -50,7 +50,7 @@ export function TourSection(setup: {
 }) {
   const { Slot, flow, mainCode, altCode, highlightCode, id } = fromTag(setup)
 
-  return component(
+  return (
     <>
       <article id={id} class={`tour-row ${flow}`}>
         <div class='tour-copy'>

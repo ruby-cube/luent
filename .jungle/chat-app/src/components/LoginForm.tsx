@@ -16,7 +16,8 @@ export function LoginForm() {
          $error.value = response.error
    }
 
-   return component(
+   return (
+
       <form on:submit={reSubmit}>
          <input type="email" required placeholder="email" mu:value={$email}></input>
          <input type="password" required placeholder="password" mu:value={$password}></input>

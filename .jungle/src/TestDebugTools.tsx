@@ -108,7 +108,8 @@ export function TestDebugApp() {
    }
 
 
-   return component(
+   return (
+
       <>
          <div>{$count}</div>
          <button on:click={e => incrementCount()}>increment</button>

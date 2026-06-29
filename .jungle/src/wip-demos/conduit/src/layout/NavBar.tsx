@@ -7,7 +7,8 @@ NavBar.router = ContextKey<Router>()
 function NavBar(input: {}) {
    const router = fromRoot(NavBar.router)
 
-   return component(
+   return (
+
       <div>
          hi
       </div>

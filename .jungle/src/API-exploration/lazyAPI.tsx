@@ -56,7 +56,8 @@ function App() {
 
    const $items = fetchItems($searchTerm, { awaited: true })
 
-   return component(
+   return (
+
       <>
          <input mu:value={$searchTerm} />
          <button on:click={e => $items.cancelUpdate()}>cancel</button>
@@ -115,7 +116,8 @@ function App() {
    })
    const $filteredList = ion.suspense(async () => await lazyMapping($items(), item => hasSearchTerm(item, $searchTerm()) ? item : undefined))
 
-   return component(
+   return (
+
       <>
          <input mu:value={$searchTerm} />
          <button on:click={e => $items.cancelUpdate()}>cancel</button>

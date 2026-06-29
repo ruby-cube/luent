@@ -175,7 +175,8 @@ export function TestAnimationController() {
    setTimeout(initAnimation, 1)
 
 
-   return component(
+   return (
+
       <>
          <div style="display: flex; flex-direction: column; align-items: flex-start">
             <canvas ref={$canvas} at:attach={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>

@@ -30,7 +30,8 @@ export function TestAsyncMultiply() {
       '-fetch': () => db.multiply($n(), 2)
    })
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => {
             $n.increment();
@@ -81,7 +82,8 @@ export function TestAsyncMultipliers() {
       }
    }
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => { $n.increment(); multiply() }}>{$n} {($pending() ? '...' : '')}</button>
          {For(products, ($product, i) =>
@@ -124,7 +126,8 @@ export function TestAsyncMultiplyB() {
 
    const { $Multiply, $pending } = MultiplyKit()
 
-   return component(
+   return (
+
       <div>
          {/* <button on:click={e => $n.increment()}>{$n} {($product.pending ? '...' : '')}</button> */}
          <button on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
@@ -145,7 +148,8 @@ export function TestAsyncMultiplyDrop() {
 
    const { $Multiply, $pending } = MultiplyKit()
 
-   return component(
+   return (
+
       <div>
          <button disabled={$pending} on:click={e => $n.increment()}>{$n} {($pending() ? '...' : '')}</button>
          <p>1 * {$n} = {$Multiply($n, 1)}</p>
@@ -170,7 +174,8 @@ export function TestAsyncMultiplyQueue() {
 
    const nums = ionic([1])
 
-   return component(
+   return (
+
       <div>
          <button on:click={e => { $n.increment(); nums.push($n()) }}>{$n}</button>
          {For(nums, (num) => (
@@ -187,7 +192,8 @@ function Result(input: { n: number }) {
       return AwaitedIon(() => db.multiply(n, o))
    }
 
-   return component(
+   return (
+
       <div style="border: 1px solid gray; padding: 5px">
          {Await(<>
             <p>1 * {n} = {$Multiply(n, 1)}</p>

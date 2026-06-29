@@ -33,9 +33,7 @@ export function Match(input: {
 }) {
   const { $x, toCase = (key: any) => key, Slot, "view": view } = fromTag(input)
   if (import.meta.env.SSR) return renderStaticMatchCase($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)
-  return component(
-    new MatchKit($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)
-  )
+  return new MatchKit($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)
 }
 
 

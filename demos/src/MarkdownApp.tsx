@@ -10,7 +10,8 @@ export function TestMarkdownApp() {
   const $markdown = ion('# Hello World')
   const $html = ion(() => marked($markdown()) as string)
 
-  return component(
+  return (
+
     <>
       <div class='editor'>
         <textarea class='input' mu:value={$markdown}></textarea>

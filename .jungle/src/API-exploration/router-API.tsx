@@ -121,7 +121,8 @@ export function SomeChild() {
 
    }
 
-   return component(
+   return (
+
       <div>
          <input mu:value={$searchTerm} />
          <button on:click={search}>SEARCH</button>

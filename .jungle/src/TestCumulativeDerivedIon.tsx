@@ -26,7 +26,8 @@ export function TestDerived() {
       return $count() === index ? 'beige' : 'unset'
    }
 
-   return component(
+   return (
+
       <>
          {For(counts, ($n, index) =>
             <div class='count-box' style={`background-color: ${$count() === index ? 'beige' : 'unset'};`}>{$n}</div>

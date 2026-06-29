@@ -51,7 +51,8 @@ export function CRUDApp() {
       return $first().trim() && $last().trim()
    }
 
-   return component(
+   return (
+
       <>
          <div><input mu:value={$filterKey} placeholder="Filter" /></div>
 

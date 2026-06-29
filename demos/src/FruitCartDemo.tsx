@@ -34,7 +34,8 @@ export function FruitCartDemo() {
     $selectedFruit.value = fruits[0] ?? ''
   }
 
-  return component(
+  return (
+
     <div>
       <h2>Fruit Cart</h2>
       <p>One derived total plus one reactive fruit list.</p>

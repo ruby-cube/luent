@@ -43,7 +43,8 @@ function TestRootContext() {
   const $adamsMsg = ion('I come from Adam')
   const $evesMsg = ion('I come from Eve')
 
-  return component(
+  return (
+
     <div class='container bg-cyan-200'>
       <h1>Root</h1>
       <h6>Static</h6>
@@ -80,7 +81,8 @@ function GreatGrandparent({
 }) {
 
 
-  return component(
+  return (
+
     <div class='container bg-cyan-400'>
       <h2>Great Grandparent: {name}</h2>
       <h6>Static</h6>
@@ -107,7 +109,8 @@ function Grandparent({ name }: GrandparentInput) {
   const msg = fromContext(GREAT_MESSAGE)
   const rootMsg = fromRoot(ROOT_MESSAGE_GREAT)
 
-  return component(
+  return (
+
     <div class='container bg-cyan-600'>
       <h3>Grandparent: {name}</h3>
       <h6>Static</h6>
@@ -127,7 +130,8 @@ function Grandparent({ name }: GrandparentInput) {
 
 
 function Parent() {
-  return component(
+  return (
+
     <div class='container bg-amber-900'>
       {/* <h4>Parent</h4>
          <h6>Static</h6>
@@ -154,7 +158,8 @@ function Child() {
   const grandMsg = fromContext(GRAND_MESSAGE)
   console.log('$greatMsg', $greatMsg)
 
-  return component(
+  return (
+
     <div class='container bg-amber-500'>
       <h5>Child</h5>
       <h6>Static</h6>

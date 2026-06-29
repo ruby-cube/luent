@@ -21,7 +21,8 @@ export function Blokk(setup: WithRef<'div'> & {
   const $translate = () => `translate(${$shiftX() * CELL_SIZE}px, ${$shiftY() * CELL_SIZE}px)`
   const $rotate = () => `rotate(${degrees[$rotation()]}deg)`
 
-  return component(
+  return (
+
     <div class='blokk-base' style={(`
         --background-color: ${$color()};
         --cell-size: ${CELL_SIZE}px;

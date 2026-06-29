@@ -17,7 +17,8 @@ export function DateApp() {
 
    beforeDetach(() => clearInterval(interval))
 
-   return component(
+   return (
+
       <p>The time is {(format(date))}</p>
    )
 }

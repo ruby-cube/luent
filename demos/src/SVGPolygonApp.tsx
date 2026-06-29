@@ -41,7 +41,8 @@ export function SVGPolygonApp() {
     }
   }
 
-  return component(
+  return (
+
     <>
       <svg width="200" height="200">
         <PolyGraph stats={stats}></PolyGraph>
@@ -132,7 +133,8 @@ function AxisLabel(setup: {
     valueToPoint(+stat.value + 10, $index(), $total())
   )
 
-  return component(
+  return (
+
     <text x={($point().x)} y={($point().y)}>{$of(stat).label}</text>
 
   )
@@ -153,7 +155,8 @@ function PolyGraph({ stats }: {
       .join(' ')
   })
 
-  return component(
+  return (
+
     <g>
       <polygon points={$points}></polygon>
       <circle cx="100" cy="100" r="80"></circle>

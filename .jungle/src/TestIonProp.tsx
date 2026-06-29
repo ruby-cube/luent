@@ -62,7 +62,8 @@ export function TestIonProp() {
         $fullName.set('SirRobin theBrave')
     }
 
-    return component(
+    return (
+
         <>
             <div>{$firstName}</div>
             <div>{$lastName}</div>

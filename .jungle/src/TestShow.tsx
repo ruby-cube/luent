@@ -8,7 +8,8 @@ export function TestShow() {
       }
    })
 
-   return component(
+   return (
+
       <>
          <h1>Test Show</h1>
          <button on:click={$active.toggle}>toggle active</button>

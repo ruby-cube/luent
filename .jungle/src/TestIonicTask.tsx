@@ -22,7 +22,8 @@ export function TestIonicTask() {
       console.log('count x 2:', $doubleCount())
    })
 
-   return component(
+   return (
+
       <>
          hi
          <div>{$count}</div>

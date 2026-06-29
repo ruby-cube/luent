@@ -11,7 +11,8 @@ export function Chalkboard() {
       await deleteText.doAction()
    }
 
-   return component(
+   return (
+
       <div>
          {If(deleteText.$pending,
             <div></div>

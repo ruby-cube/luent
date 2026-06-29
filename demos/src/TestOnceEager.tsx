@@ -14,7 +14,8 @@ export function TestOnceEager() {
        console.log('$count is', $count())
    }, {once: true, eager: true})
 
-   return component(
+   return (
+
       <div on:click={e => $count.increment()}>{$count}</div>
    )
 }

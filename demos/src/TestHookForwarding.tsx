@@ -5,7 +5,8 @@ import { ion } from "@rue/quarky";
 
 export function TestHookForwarding() {
 
-  return component(
+  return (
+
     <Comp
       before:attach={node => console.warn('node', node)}
       xray:button={x => <x.ray
@@ -36,7 +37,8 @@ function Comp(setup: {
 
 // export function TestHookForwarding() {
 
-//   return component(
+//   return (
+
 //     <Comp
 //       before:attach={node => console.warn('node', node)}
 //       bind:button={{

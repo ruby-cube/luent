@@ -26,7 +26,8 @@ export function FriendSite() {
       $user.value = null
    })
 
-   return component(
+   return (
+
       <>
          {If($connected,
             <RouteView as={$route}></RouteView>

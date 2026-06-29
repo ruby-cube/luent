@@ -19,8 +19,16 @@
       }
     },
     {
+      "match": "^(\\s*)(</:>)",
+      "captures": {
+        "2": {
+          "name": "keyword.control.flow"
+        }
+      }
+    },
+    {
       "name": "storage.type.function.arrow",
-      "match": "<:>"
+      "match": "<:/>"
     },
     {
       "name": "keyword.operator.at",

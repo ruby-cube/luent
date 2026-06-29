@@ -12,7 +12,8 @@ export function TestViewFlasks() {
       toggle() { $active.value = !$active() }
    })
 
-   return component(
+   return (
+
       <>
          <div>hallo</div>
          <Parent></Parent>
@@ -28,7 +29,8 @@ function Parent() {
    const view = $thisView()
    console.log('>>> this view parent', view, rootView === view)
 
-   return component(
+   return (
+
       <div>parent</div>
    )
 }
@@ -57,7 +59,8 @@ function DynamicParent() {
       }, { eager: true })
    }, { eager: true })
 
-   return component(
+   return (
+
       <>
          <div>dynamic parent</div>
          <button on:click={e => $active.toggle()}>toggle active</button>
@@ -80,7 +83,8 @@ function DynamicChild() {
    const view = $thisView()
    // console.log('>>> this view dynamic child', view)
 
-   return component(
+   return (
+
       <div>dynamic child</div>
    )
 }

@@ -20,7 +20,8 @@ import { ion } from '@rue/quarky'
 export function Counter() {
   get count = ion(0);
 
-  return component(
+  return (
+
     <>
       <button class='counter' on:click={e => $count.value++}>{$count}</button>
       {Style(css\`
@@ -38,7 +39,8 @@ export function Counter() {
 const $nsx = ion(codeHtml(nsx))
 
 export function TestInnerHTML() {
-  return component(
+  return (
+
     <>
       <h1>Hello world</h1>
       <div>{{ trusted: true, html: $nsx }}</div>

@@ -23,7 +23,8 @@ export function TestCounter() {
 
    const $doubleCount = ion(() => $count() * 2)
 
-   return component(
+   return (
+
       <div>
          <div id='count'>{$count}</div>
          <div id='double-count'>x2 = {$doubleCount}</div>

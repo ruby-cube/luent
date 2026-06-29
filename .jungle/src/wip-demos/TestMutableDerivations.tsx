@@ -11,7 +11,8 @@ export function TestMutableDerivation() {
    })
 
 
-   return component(
+   return (
+
       <>
          <div>{$first} {$last}</div>
          <form on:submit={e => { e.preventDefault(); $fullname.value = e.target[0].value }}>

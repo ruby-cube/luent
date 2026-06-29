@@ -211,7 +211,8 @@ function Appo(
         $ready
     }
 
-    return component(
+    return (
+
         <>
             {If($active, () => ((dialogBox) => (
                 <>
@@ -283,7 +284,8 @@ function DialogBox({
     $button?: NodeRef
 }) {
 
-    return component(
+    return (
+
         teleportTo('body', (
             <dialog style="background-color: gray" open={$open}>
                 Stop

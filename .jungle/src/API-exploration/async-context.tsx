@@ -22,7 +22,8 @@ function App(input : FromTag()) {
    })
 
 
-   return component(
+   return (
+
       <div></div>
    )
 }
