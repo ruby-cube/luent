@@ -19,13 +19,18 @@ export default defineConfig({
   },
 
   markdown: {
+    html: true,
     config(md) {
+      console.log('TRANSFORM MARKDOWN')
       transformMarkdownIslands(md, Islands)
     },
     ...markdownShikiConfig
   },
 
+  // NOTE: this currently only runs during build, not dev
   transformHtml(code, id, ctx) {
+    console.log('TRANSFORM HTML')
+    // const pageKey = ctx.pageData?.relativePath ?? ctx.page
     return transformPortals(code, ctx.page)
   },
 

@@ -12,6 +12,17 @@ export function isCustomElement(tag: string) {
 
 export function hydrate(app: any, islands: AnyObject) {
   if (typeof window == 'undefined') return;
+  console.log('#### HYDRATING!!')
+  // define custom elements
+  for (const key in islands) {
+    // if (key === 'code-glimpses') {
+    //   islands[key]()
+    // }
+    if (!customElements.get(key)) {
+      console.log('#### defining island:', key)
+      customElements.define(key, islands[key]())
+    }
+  }
 
   if (!customElements.get('style-scope')) {
     customElements.define('style-scope', class StyleScope extends HTMLElement {
@@ -30,23 +41,24 @@ export function hydrate(app: any, islands: AnyObject) {
   if (!customElements.get('await-mount')) {
     customElements.define('await-mount', class AwaitMount extends HTMLElement {
       connectedCallback() {
+        console.log('#### hydrating <await-mount>')
         const template = this.querySelector('template')
-        const content = template?.childNodes ?? []
-        // this.innerHTML = ''
-        this.append(...content)
+        if (!template) throw new Error('await mount requires a template')
+          console.log('#### TEMPLATE', template)
+        if (template.content.childNodes.length) {
+          const content = template.content.cloneNode(true) as DocumentFragment | undefined
+          this.replaceChildren(content!)
+        }
+        else {
+          // for <nsx-code> because the nodes are not in document fragment for some reason
+          // this.innerHTML = ''
+          // this.append(...(template?.childNodes ?? []))
+        }
       }
     });
   }
 
-  // define custom elements
-  for (const key in islands) {
-    // if (key === 'code-glimpses') {
-    //   islands[key]()
-    // }
-    if (!customElements.get(key)) {
-      customElements.define(key, islands[key]())
-    }
-  }
+
 }
 
 declare global {
@@ -191,15 +203,14 @@ function nsxCodeBlockRule(state, startLine: number, endLine: number, Islands: An
 
   const islandTokenContent =
     `<await-mount>` +
-    `<nsx-code ` +
+    `<template><nsx-code ` +
     `ns-name='${nsName}' ` +
     `ts-name='${tsName}' ` +
     `ns-code='${nsCode}' ` +
     `ts-code='${tsCode}'` +
-    `></nsx-code>` +
-    `<template #fallback>${islandHtml}</template>` +
+    `></nsx-code></template>` +
+    `${islandHtml}` +
     `</await-mount>`
-  console.log('NSX CODE BLOCK', islandTokenContent)
 
   state.tokens.push({
     type: 'html_block',

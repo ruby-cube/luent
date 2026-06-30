@@ -26,10 +26,10 @@ export const islands = {
   'code-glimpses': () => class extends HTMLElement {
     constructor() {
       super()
-      // mount(() => {
-      //   provideRoot(MICROCLASS_MERGE, twMerge)
-      //   return CodeGlimpses()
-      // }, this)
+      mount(() => {
+        provideRoot(MICROCLASS_MERGE, twMerge)
+        return CodeGlimpses()
+      }, this)
     }
   },
   // 'code-glimpses': () => {
@@ -39,16 +39,24 @@ export const islands = {
   //   }, '#code-glimpses')
   // },
 
-  'nsx-code': () => class extends HTMLElement {
+  'nsx-code': () => {
+    console.log('#### defining nsx-code')
+    return class extends HTMLElement {
     constructor() {
+      console.log('constructing nsx-code')
       super()
     }
+    mounted = false;
     connectedCallback() {
+      if (this.mounted) return;
+      this.mounted = true;
+      console.log('#### mounting nsx-code')
       const ns = this.getAttribute('ns-name') || 'nsx'
       const ts = this.getAttribute('ts-name') || 'tsx'
       const nsCode = this.getAttribute('ns-code') || 'broken'
       const tsCode = this.getAttribute('ts-code') || 'nul'
       mount(() => {
+        
         provideRoot(MICROCLASS_MERGE, twMerge)
         return <Code
           trusted
@@ -58,7 +66,7 @@ export const islands = {
         />
       }, this)
     }
-  },
+  }},
 
 }
 

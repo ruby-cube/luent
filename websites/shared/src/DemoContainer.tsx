@@ -29,7 +29,16 @@ export function DemoContainer(setup: {
   return (
     <>
       <div ref={$div} class='demo-container' auto-bind={rest}>
-        {renderInShadow(Slot)}
+        {import.meta.env.SSR
+    ?
+    <style-scope>
+      <template>
+        {callWithShadowRoot(Slot)}
+      </template>
+    </style-scope>
+    : <shadow-root mode='open'>
+      {Slot()}
+    </shadow-root>}
       </div>
 
       {Style(css`

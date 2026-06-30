@@ -7,7 +7,7 @@ import { markdownShikiConfig } from './theme/shiki-setup.js'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   srcDir: 'docs',
-
+ignoreDeadLinks: true,
   vue: {
     template: {
       compilerOptions: {

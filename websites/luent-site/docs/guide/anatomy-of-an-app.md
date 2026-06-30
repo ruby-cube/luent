@@ -140,9 +140,9 @@ function MessageDisplay(setup: {
   message: Ion<string>
 }) {
   const { $message } = fromTag(setup)
-  <:>
+  return <>
     <p>{$message}</p>
-  </:>
+  </>
 }
 ```
 :::

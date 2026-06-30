@@ -3,6 +3,7 @@ import { Ion, ion, MutableIon } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
 import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";
 import { HoverInfo } from "./HoverInfo";
+import { escapeHTML } from "@rue/utils";
 
 // TODO: Fix hacky SSG solutions
 

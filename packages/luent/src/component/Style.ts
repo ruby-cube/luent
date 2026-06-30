@@ -62,7 +62,7 @@ export function Style(cssText: string) {
     }
     existingStyleTags?.add(id)
     const style = `<style id="${id}">${cssText}</style>`
-    if (shadow) return style
+    if (shadow) return { element: style }
     writeToPortal('head', style)
     return;
   }

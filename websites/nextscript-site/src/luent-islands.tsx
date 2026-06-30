@@ -31,6 +31,7 @@ export const islands = {
   'habit-tracker-demo': () => class extends HTMLElement {
     constructor() {
       super()
+      console.log('mounting habit-tracker-demo')
       mount(HabitTrackerDemo, this)
     }
   },

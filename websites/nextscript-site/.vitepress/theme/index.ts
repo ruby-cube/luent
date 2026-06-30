@@ -20,6 +20,7 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
+    console.log('hydrating :)')
     hydrate(app, islands)
   }
 } satisfies Theme
