@@ -1,4 +1,4 @@
-import { $of, component, css, Else, For, FromTag, fromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
+import { $of, component, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
 import { ion, Ion, Ionic, ionic } from "@rue/quarky";
 
 

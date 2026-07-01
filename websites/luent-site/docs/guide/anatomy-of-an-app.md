@@ -120,7 +120,7 @@ mount(() => {
 
 ## Components
 
-Component setup functions are render functions with additional ergonomic features provided through JSX tag syntax, the setup object, and `fromTag()` setup interpreter.
+Component setup functions are render functions with additional ergonomic features provided through JSX tag syntax and the `FrogTag` setup object.
 
 **Component setup function**
 

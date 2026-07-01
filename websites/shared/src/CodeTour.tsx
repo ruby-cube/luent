@@ -1,10 +1,10 @@
-import { component, css, fromTag, RenderSlot, Style } from '@rue/luent'
+import { component, css, FromTag, RenderSlot, Style } from '@rue/luent'
 import { Code } from './Code';
 
-export function CodeTour(setup: {
+export function CodeTour(setup: FromTag<{
   Slot: RenderSlot
-}) {
-  const { Slot } = fromTag(setup);
+}>) {
+  const { Slot } = setup;
 
   return (
     <>
@@ -40,15 +40,15 @@ export function CodeTour(setup: {
   )
 }
 
-export function TourSection(setup: {
+export function TourSection(setup: FromTag<{
   id?: string,
   Slot: RenderSlot,
   mainCode: { name: string, code: string, lang?: string },
   altCode: { name: string, code: string, lang?: string },
   highlightCode: (code: string, lang: string) => Promise<string>,
   flow: 'code-right' | 'code-left'
-}) {
-  const { Slot, flow, mainCode, altCode, highlightCode, id } = fromTag(setup)
+}>) {
+  const { Slot, flow, mainCode, altCode, highlightCode, id } = setup
 
   return (
     <>

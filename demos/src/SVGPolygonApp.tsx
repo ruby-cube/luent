@@ -1,4 +1,4 @@
-import { component, template, For, FromTag, Style, css, fromTag, $of, } from "@rue/luent"
+import { component, template, For, FromTag, Style, css, $of, } from "@rue/luent"
 import { as, ion, ionic, EACH, Ion, Ionic } from "@rue/quarky"
 
 // Demo from Vue.js
@@ -122,12 +122,12 @@ export function SVGPolygonApp() {
 //  }
 
 
-function AxisLabel(setup: {
+function AxisLabel(setup: FromTag<{
   stat: Ionic<Stat>,
   index: Ion<number>,
   total: Ion<number>
-}) {
-  const { $index, stat, $total } = fromTag(setup)
+}>) {
+  const { $index, stat, $total } = setup
 
   const $point = ion(() =>
     valueToPoint(+stat.value + 10, $index(), $total())

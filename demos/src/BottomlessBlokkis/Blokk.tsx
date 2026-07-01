@@ -1,4 +1,4 @@
-import { component, For, fromTag, FromTag, WithRef } from "@rue/luent";
+import { component, For, FromTag, WithRef } from "@rue/luent";
 import { Ion, ion } from "@rue/quarky";
 import "./Blokk.css"
 
@@ -6,15 +6,15 @@ export const CELL_SIZE = 20;
 
 const degrees = [0, 270, 180, 90] as const
 
-export function Blokk(setup: WithRef<'div'> & {
+export function Blokk(setup: WithRef<'div'> & FromTag<{
   matrix: (1 | 0)[][],
   shiftX: Ion<number>,
   shiftY: Ion<number>,
   rotation: Ion<number>,
   color?: Ion<string>,
   gap?: number
-}) {
-  const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, ...rest } = fromTag(setup)
+}>) {
+  const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, ...rest } = setup
 
   const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
 

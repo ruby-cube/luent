@@ -130,10 +130,10 @@ function App() {
 
 A view's pending state is dete
 ```tsx
-function Foo(setup: {
+function Foo(setup: FromTag<{
   suspense?: Ion<Promise<void> | null>
-}) {
-  const { $suspense } = fromTag(setup)
+}>) {
+  const { $suspense } = setup
 
   const $list = ion([], {
     '-fetch': fetchList,

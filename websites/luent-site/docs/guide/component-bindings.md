@@ -31,11 +31,11 @@ function App() {
 }
 
 
-function Counter(setup: {
+function Counter(setup: FromTag<{
    count: Ion<number>
    increment: () => void
-}) {
-   const { count@, increment } = fromTag(setup)
+}>) {
+   const { count@, increment } = setup
 
    <:>
       <button on:click={increment}>+</button>

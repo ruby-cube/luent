@@ -4,11 +4,11 @@ Portals allow content to be mounted into another part of the DOM while remaining
 ## The Portal Tag
 The portal tag renders its children into the parent element specified by its `to` attribute. The `to` attribute accepts either a DOM node or a selector string.
 ```tsx
-function NotificationButton(setup: {
+function NotificationButton(setup: FromTag<{
   sidebar: HTMLElement | string,
   count: Ion<number>
-}) {
-  const { sidebar, $count } = fromTag(setup)
+}>) {
+  const { sidebar, $count } = setup
   const $show = ion(false, {
     toggle() { $show.value = !$show.value }
   })

@@ -20,7 +20,7 @@ Apps, or interactive islands, may be rendered on the client or on the server.
 - `Finitron()` to create finite reactive state
 
 ## Context binding
-- `fromTag()` to access tag bindings
+- `FromTag` to type tag bindings
 - `fromContext()` to access a binding from nearest providing context node
 - `fromRoot()` to access a binding from root
 - `fromGround()` to access a global binding

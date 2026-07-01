@@ -272,12 +272,12 @@ function SelectiveReactivity() {
 }
 
 SelectiveReactivity.nsx =
-  `function CartItem(setup: {
+  `function CartItem(setup: FromTag<{
   name: string;
   price: number;
   qty: Ion<number>;
-}) {
-  const { name, price, qty@ } = fromTag(setup);
+}>) {
+  const { name, price, qty@ } = setup;
 
   <:>
     <li>
@@ -293,12 +293,12 @@ SelectiveReactivity.nsx =
 `
 
 SelectiveReactivity.tsx =
-  `function CartItem(setup: {
+  `function CartItem(setup: FromTag<{
   name: string;
   price: number;
   qty: Ion<number>;
-}) {
-  const { name, price, $qty } = fromTag(setup);
+}>) {
+  const { name, price, $qty } = setup;
 
   return <>
     <li>
@@ -479,11 +479,11 @@ MutationSafety.nsx =
   </:>
 }
 
-function Powerset(setup: {
+function Powerset(setup: FromTag<{
   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
   limit: number,
-}) {
-  const { mu, '-r': { powers }, limit } = fromTag(setup);
+}>) {
+  const { mu, '-r': { powers }, limit } = setup;
   <:>
     <div class='powerset-panel'>
       <Powers {powers}>
@@ -509,11 +509,11 @@ MutationSafety.tsx =
   </>
 }
 
-function Powerset(setup: {
+function Powerset(setup: FromTag<{
   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
   limit: number,
-}) {
-  const { mu, '-r': { powers }, limit } = fromTag(setup);
+}>) {
+  const { mu, '-r': { powers }, limit } = setup;
   return <>
     <div class='powerset-panel'>
       <Powers powers={powers}>

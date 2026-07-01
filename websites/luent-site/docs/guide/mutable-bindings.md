@@ -61,12 +61,12 @@ function App() {
 ```
 
 ```tsx
-function Counter(setup: {
+function Counter(setup: FromTag<{
   'mu:count': Ion<number> & {
     increment: () => void; 
   };
-}) {
-  const { mu, count@ } = fromTag(setup);
+}>) {
+  const { mu, count@ } = setup;
 
   <:>
     {count@}
@@ -85,12 +85,12 @@ The `mu` linter assumes methods passed to a component is a mutating method, or a
 
 The linter will disallow `count.isNegative()` here:
 ```tsx
-function NegativeNotification(setup: {
+function NegativeNotification(setup: FromTag<{
   count: Ion<number> & {
     isNegative: () => boolean; // assumed to be mutating
   };
-}) {
-  const { $count } = fromTag(setup)
+}>) {
+  const { $count } = setup
   
   <:>
     <div>{count.isNegative() ? '😕' : '🙂'}</div>
@@ -100,12 +100,12 @@ function NegativeNotification(setup: {
 
 `count.isNegative()` is OK here:
 ```tsx
-function NegativeNotification(setup: {
+function NegativeNotification(setup: FromTag<{
   count: Ion<number> & {
     isNegative: () => boolean; // assumed to be mutating
   };
-}) {
-  const { $count } = fromTag(setup)
+}>) {
+  const { $count } = setup
   
   <:>
     <div>{count.isNegative() ? '😕' : '🙂'}</div>

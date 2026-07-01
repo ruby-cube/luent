@@ -1,4 +1,4 @@
-import { fromTag, As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag } from "@rue/luent";
+import { As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag } from "@rue/luent";
 import { Ion, ion, MutableIon } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
 import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";

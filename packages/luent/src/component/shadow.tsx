@@ -1,7 +1,7 @@
 // let shadow: ShadowRoot | undefined;
 
 import { AsyncState } from "@rue/flask";
-import { fromTag, RenderSlot } from "./x-Input";
+import { RenderSlot } from "./x-Input";
 import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 
 // NOTE: The shadow-root helper does not work with VitePress :( 

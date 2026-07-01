@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, ComponentTag, fromTag, FromTag, makeElement, NodeRef, template } from "@rue/luent"
+import { component, ComponentTag, FromTag, makeElement, NodeRef, template } from "@rue/luent"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 import { VariantProps } from "class-variance-authority"
 
@@ -33,9 +33,9 @@ const buttonVariants = defineVariants(
   }
 )
 
-function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> & {
+function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> & FromTag<{
   as?: ComponentTag | string
-}) {
+}>) {
   const {
     ref,
     variant = "default",
@@ -43,7 +43,7 @@ function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> &
     as: Comp = "button",
     Slot,
     ...other
-  } = fromTag(setup)
+  } = setup
 
   return (
     <Comp

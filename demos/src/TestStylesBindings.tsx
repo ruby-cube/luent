@@ -1,4 +1,4 @@
-import { component, mount, fromTag, ion, MICROCLASS_MERGE, template, provideRoot } from "@rue/luent"
+import { component, mount, FromTag, ion, MICROCLASS_MERGE, template, provideRoot } from "@rue/luent"
 import { twMerge } from "tailwind-merge"
 
 const $simpleOn = ion(false)
@@ -28,8 +28,8 @@ function SimpleBindings() {
   )
 }
 
-function HierarchyLeaf(setup: { [key: string]: unknown }) {
-  const { ...bindings } = fromTag(setup)
+function HierarchyLeaf(setup: FromTag<{ [key: string]: unknown }>) {
+  const { ...bindings } = setup
   return (
 
     <div
@@ -43,8 +43,8 @@ function HierarchyLeaf(setup: { [key: string]: unknown }) {
   )
 }
 
-function HierarchyMiddle(setup: { [key: string]: unknown }) {
-  const { ...bindings } = fromTag(setup)
+function HierarchyMiddle(setup: FromTag<{ [key: string]: unknown }>) {
+  const { ...bindings } = setup
   return (
 
     <HierarchyLeaf
@@ -67,8 +67,8 @@ function HierarchyRoot() {
   )
 }
 
-function MicroLeaf(setup: { [key: string]: unknown }) {
-  const { ...bindings } = fromTag(setup)
+function MicroLeaf(setup: FromTag<{ [key: string]: unknown }>) {
+  const { ...bindings } = setup
   return (
 
     <div
@@ -81,8 +81,8 @@ function MicroLeaf(setup: { [key: string]: unknown }) {
   )
 }
 
-function MicroMiddle(setup: { [key: string]: unknown }) {
-  const { ...bindings } = fromTag(setup)
+function MicroMiddle(setup: FromTag<{ [key: string]: unknown }>) {
+  const { ...bindings } = setup
   return (
 
     <MicroLeaf

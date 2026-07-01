@@ -1,10 +1,10 @@
-import { ion, component, css, If, Style, Thru, Xray, fromTag, mount } from "@rue/luent";
+import { ion, component, css, If, Style, Thru, Xray, mount, FromTag } from "@rue/luent";
 
-export function HabitTracker(setup: {
+export function HabitTracker(setup: FromTag<{
   habit: string,
   goal?: number,
-}) {
-  const { habit, goal = 5 } = fromTag(setup)
+}>) {
+  const { habit, goal = 5 } = setup
 
   const count = ion(0)
   const achieved = ion(() => count() === goal)

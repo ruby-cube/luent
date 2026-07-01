@@ -419,11 +419,11 @@ type IsMutable<T> = (value: T) => value is Mutable<T>
 type Mutable<T> = T
 
 
-function TodoList(setup: {
+function TodoList(setup: FromTag<{
    'mu:todos': Ion<$$TodoArray>,
    removeTodo: (todo: Ionic<Todo>) => void,
-}) {
-   const { mu, $todos, removeTodo, } = fromTag(setup)
+}>) {
+   const { mu, $todos, removeTodo, } = setup
 
    const $editedTodo = ion(null as Todo | null)
 

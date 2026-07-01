@@ -1,7 +1,7 @@
-import { fromTag, FromTag, WithRef } from "@rue/luent"
+import { FromTag, WithRef } from "@rue/luent"
 
 function Input(setup: WithRef<'input'>) {
-  const { type, ...bindings } = fromTag(setup)
+  const { type, ...bindings } = setup
 
   return (
     <input

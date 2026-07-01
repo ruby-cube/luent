@@ -17,10 +17,10 @@ export function TestHookForwarding() {
 }
 
 
-function Comp(setup: {
+function Comp(setup: FromTag<{
   'xray:button'?: WithRef<'button'>
-}) {
-  const { xray } = fromTag(setup)
+}>) {
+  const { xray } = setup
   const $active = ion(true)
 
   return component.as({

@@ -1,4 +1,4 @@
-import { callWithShadowRoot, component, css, fromTag, NodeRef, renderInShadow, RenderSlot, Style } from "@rue/luent";
+import { callWithShadowRoot, component, css, FromTag, NodeRef, renderInShadow, RenderSlot, Style } from "@rue/luent";
 
 // function Powerset(setup: {
 //   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
@@ -7,7 +7,7 @@ import { callWithShadowRoot, component, css, fromTag, NodeRef, renderInShadow, R
 //   const a = {
 //     add(){}
 //   }
-//   const { mu, '-r': { powers }, limit } = fromTag(setup);
+//   const { mu, '-r': { powers }, limit } = setup;
 //   <:>
 //     <div class='powerset-panel'>
 //       <Powers {powers}>
@@ -20,10 +20,10 @@ import { callWithShadowRoot, component, css, fromTag, NodeRef, renderInShadow, R
 //   </:>
 // }
 
-export function DemoContainer(setup: {
+export function DemoContainer(setup: FromTag<{
   Slot: RenderSlot
-}) {
-  const { Slot, ...rest } = fromTag(setup)
+}>) {
+  const { Slot, ...rest } = setup
   const $div = NodeRef('div')
 
   return (
