@@ -4,7 +4,9 @@ import { encodeStyleTags } from "./style-rules";
 import { AnyObject } from "@rue/types";
 import { escapeHTML, unescapeHTML } from "@rue/utils";
 
-
+export type WriteIslands = { [key: string]: (inner: string) => void }
+type Island = { inner: string, node: HTMLElement }
+export type MountIslands = { [key: string]: (island: Island) => void }
 
 type MarkdownIt = Exclude<MarkdownOptions['config'], undefined> extends (arg: infer P) => any ? P : never
 
@@ -126,6 +128,7 @@ export function TransformLuentIslands(Islands: AnyObject) {
     const innerStart = state.bMarks[startLine + 1]
     const innerEnd = state.eMarks[closeLine - 1]
     const inner = state.src.slice(innerStart, innerEnd)
+    console.log('NAME', name, ':')
 
     const islandHtml = renderFallback('luent-island', () => Islands[name](inner), withPageContext, page)
 

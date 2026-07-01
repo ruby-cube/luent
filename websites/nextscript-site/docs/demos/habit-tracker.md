@@ -1,8 +1,7 @@
 # Habit Tracker
 
 <!-- <div v-once data-island="HabitTrackerDemo"></div> -->
-:::luent
-habit-tracker-demo
+:::luent habit-tracker-demo
 :::
 
 

@@ -20,8 +20,10 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    console.log('hydrating :)')
-    mountIslands(islands)
+    router.onAfterRouteChange = () => {
+      console.log('HYDRATING :)')
+      mountIslands(islands)
+    }
   }
 } satisfies Theme
 

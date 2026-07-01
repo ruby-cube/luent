@@ -1,6 +1,7 @@
-import { css, Style } from '@rue/luent'
+import { css, MICROCLASS_MERGE, provideRoot, Style } from '@rue/luent'
 import { Code, CodeTour, TourSection } from '@rue/websites-shared'
 import { highlightCode } from './highlighter'
+import { twMerge } from 'tailwind-merge'
 
 let direction = 'code-right'
 function flowDirection() {
@@ -9,6 +10,7 @@ function flowDirection() {
 }
 
 export function CodeGlimpses() {
+  provideRoot(MICROCLASS_MERGE, twMerge)
   return (
     <>
       <CodeTour>

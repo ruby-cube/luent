@@ -1,7 +1,6 @@
 # Doodle Canvas
 
-:::luent 
-doodle-canvas-demo
+:::luent doodle-canvas-demo
 :::
 
 

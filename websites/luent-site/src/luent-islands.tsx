@@ -4,7 +4,7 @@ import { mount, MICROCLASS_MERGE, writeIsland, provideRoot } from '@rue/luent'
 export * from "@rue/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
-import { Code, extractParams, parseNSXBlock } from "@rue/websites-shared";
+import { Code, extractParams, MountIslands, parseNSXBlock, WriteIslands } from "@rue/websites-shared";
 
 function renderCodeGlimpses() {
   provideRoot(MICROCLASS_MERGE, twMerge)
@@ -28,15 +28,15 @@ function renderNSXCode(setup: { nsName: string, tsName: string, nsCode: string, 
 
 
 
-export const Islands = {
+export const Islands: WriteIslands = {
   'code-glimpses': () => writeIsland(renderCodeGlimpses),
-  'nsx-code': (inner: string) => writeIsland(() => {
+  'nsx-code': (inner) => writeIsland(() => {
     console.log('inner nsx code string', inner)
     return renderNSXCode(parseNSXBlock(inner))
   })
 }
 
-export const islands = {
+export const islands: MountIslands = {
   // 'code-glimpses': () => class extends HTMLElement {
   //   connectedCallback() {
   //     mount(() => {
@@ -45,7 +45,7 @@ export const islands = {
   //     }, this)
   //   }
   // },
-  'code-glimpses': ({ node }: { node: HTMLElement }) => {
+  'code-glimpses': ({ node }) => {
     console.log('#### mounting node', node)
     mount(renderCodeGlimpses, node)
   },

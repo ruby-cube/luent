@@ -241,6 +241,9 @@ function Powerset(setup: FromTag<{
         }
 
         .reset-btn {
+          border: none;
+          border-radius: .45rem;
+          background-color: goldenrod;
           padding: .55rem;
           margin: .25rem;
           font-family: inherit;

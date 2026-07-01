@@ -1,7 +1,6 @@
 # EmojiQuest: Powerset Panel
 
-:::luent 
-emoji-quest-demo
+:::luent emoji-quest-demo
 :::
 
 
