@@ -1,10 +1,10 @@
-import { css, For, fromTag, If, ion, Style } from "@rue/luent";
+import { css, For, FromTag, If, ion, Style } from "@rue/luent";
 
 
-export function TourNav(setup: {
+export function TourNav(setup: FromTag<{
   headings: { text: string, id: string }[]
-}) {
-  const { headings } = fromTag(setup)
+}>) {
+  const { headings } = setup
   const $hovered = ion('')
   const $selected = ion('')
 

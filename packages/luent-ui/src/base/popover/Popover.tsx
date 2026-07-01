@@ -1,4 +1,4 @@
-import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, fromTag, Xray } from "@rue/luent"
+import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, fromTag, Xray, FromTag } from "@rue/luent"
 import { Ion, Ionic, toIon, ion } from "@rue/quarky"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
@@ -11,17 +11,17 @@ import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popove
 const POPOVER = ContextKey<Ionic<Popover>>()
 const POPOVER_NODE = ContextKey<NodeRef<'div'>>()
 
-function PopoverRoot(setup: {
+function PopoverRoot(setup: FromTag<{
   ref?: NodeRef<'div'>;
   popover: Ionic<Popover>
-}) {
+}>) {
   const {
     ref: $popover = NodeRef('div'),
     // gap = 0,
     Slot,
     popover,
     ...attributes
-  } = fromTag(setup)
+  } = setup
 
   const { gap } = popover
   return (
@@ -92,15 +92,15 @@ function PopoverRoot(setup: {
 
 }
 
-function PopoverContent(setup: {
+function PopoverContent(setup: FromTag<{
   ref?: NodeRef<'div'>;
   Slot: RenderSlot;
-}) {
+}>) {
   const {
     ref,
     Slot,
     ...attributes
-  } = fromTag(setup)
+  } = setup
 
   return (
     <div auto-bind={attributes}>

@@ -244,7 +244,7 @@ function toInput(attributes: AnyObject, events: AnyObject) {
 }
 
 
-export type TagAttributes<D> =
+export type TagBindings<D> =
    Attributes<D>
    // StaticInput<D>
    // & MaybeIonAttributes<D>
@@ -348,7 +348,7 @@ export type _FromTag<D> =
    & WithMu<D>
    & WithSlot<D>
    & Styles
-   & { '~attributes'?: TagAttributes<D> }
+   & { '~bindings'?: TagBindings<D> }
 
 type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S & WithNamedSlots<D> } : { Slot: WithNamedSlots<D> & RenderSlot }
 type WithNamedSlots<D> = { [K in keyof D as K extends `Slot:${infer N}` ? N : never]: D[K] }

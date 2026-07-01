@@ -5,7 +5,7 @@ import DefaultTheme from 'vitepress/theme'
 import HeroCode from './HeroCode.vue'
 import './style.css'
 import '../../../shared/src/style-rules'
-import { islands, hydrate } from '../../src/luent-islands.js'
+import { islands, mountIslands } from '../../src/luent-islands.js'
 
 
 export default {
@@ -21,7 +21,7 @@ export default {
   },
   enhanceApp({ app, router, siteData }) {
     console.log('hydrating :)')
-    hydrate(app, islands)
+    mountIslands(islands)
   }
 } satisfies Theme
 

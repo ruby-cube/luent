@@ -1,4 +1,4 @@
-import { $of, component, css, Else, For, fromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
+import { $of, component, css, Else, For, FromTag, fromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
 import { ion, Ion, Ionic, ionic } from "@rue/quarky";
 
 
@@ -34,11 +34,11 @@ export function EmojiQuest() {
   )
 }
 
-function Panel(setup: {
+function Panel(setup: FromTag<{
   title: string,
   Slot: RenderSlot
   width?: number
-}) {
+}>) {
   const { title, Slot, width = 230 } = setup
 
   const opened = ion(true)
@@ -87,12 +87,12 @@ function Panel(setup: {
   )
 }
 
-function Powerset(setup: {
+function Powerset(setup: FromTag<{
   'mu:powerset': Ionic<string[]> & { addRandomPower(): void }
   limit: number,
   class?: Ion<TagClass>
-}) {
-  const { mu, limit, $class } = fromTag(setup);
+}>) {
+  const { mu, limit, $class } = setup;
   const { powerset } = mu
 
   const count = $of(powerset).length

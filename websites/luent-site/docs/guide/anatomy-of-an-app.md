@@ -124,22 +124,22 @@ Component setup functions are render functions with additional ergonomic feature
 
 **Component setup function**
 
-:::nsx
+:::luent nsx-code
 ```nsx
-function MessageDisplay(setup: {
+function MessageDisplay(setup: FromTag<{
   message: Ion<string>
-}) {
-  const { message@ } = fromTag(setup)
+}>) {
+  const { message@ } = setup
   <:>
     <p>{message@}</p>
   </:>
 }
 ```
 ```tsx
-function MessageDisplay(setup: {
+function MessageDisplay(setup: FromTag<{
   message: Ion<string>
-}) {
-  const { $message } = fromTag(setup)
+}>) {
+  const { $message } = setup
   return <>
     <p>{$message}</p>
   </>

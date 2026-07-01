@@ -15,21 +15,20 @@ export function mount<T extends AnyObject, E extends Provided>(App: ComponentTag
   const root = typeof element === 'string' ? document.querySelector(element) : element;
   if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
   load(() => { // FIX: Error are being swallowed up here despite being rethrown
-     flaskStack.push(flask)
-     pushContext(rootContext)
-     try {
-        const nodes = processJSXOutput(App())
-        setUpNodeVine(nodes, root)
-        atRender(() => {
-           mountDOMNodes(nodes, root)
-        })
-
-        flask.emitInitialMount()
-     }
-     finally {
-        flaskStack.pop()
-        popContext() // for sibling components to access parent, must be set AFTER `component()`
-     }
+    flaskStack.push(flask)
+    pushContext(rootContext)
+    try {
+      const nodes = processJSXOutput(App())
+      setUpNodeVine(nodes, root)
+      atRender(() => {
+        mountDOMNodes(nodes, root)
+      })
+      flask.emitInitialMount()
+    }
+    finally {
+      flaskStack.pop()
+      popContext() // for sibling components to access parent, must be set AFTER `component()`
+    }
   })
 }
 

@@ -1,4 +1,4 @@
-import { fromTag, As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount } from "@rue/luent";
+import { fromTag, As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag } from "@rue/luent";
 import { Ion, ion, MutableIon } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
 import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";
@@ -17,14 +17,14 @@ function markHover(code: string, map?: { [key: string]: string }) {
 
 type CodeTab = { name: string, code: string, lang?: string, hover?: { [key: string]: string } }
 
-export function Code(setup: {
+export function Code(setup: FromTag<{
   main: CodeTab,
   alt: CodeTab,
   highlight: (code: string, lang: string) => Promise<string>,
   trusted: boolean
   showSticky?: boolean
   tab?: Ion<'main' | 'alt'> & { toggle(): void }
-}) {
+}>) {
   const { main, alt, highlight, trusted, showSticky = false,
 
     $tab = ion('main' as 'main' | 'alt', {
@@ -34,7 +34,7 @@ export function Code(setup: {
           : this.value = 'main'
       }
     })
-  } = fromTag(setup);
+  } = setup;
 
 
   let mainWidth = 0;
@@ -100,14 +100,10 @@ export function Code(setup: {
         })}
         <o:preserve>
           {Await(() => <>
-            {If(() => $tab() === 'main', () =>
-              CodeBlock(main, highlight)
+            {As($tab, () =>
+              CodeBlock($tab() === 'main' ? main : alt, highlight)
             )}
-            {Else(() =>
-              CodeBlock(alt, highlight)
-            )}
-          </>
-          )}
+          </>)}
           {Meanwhile(
             <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
           )}

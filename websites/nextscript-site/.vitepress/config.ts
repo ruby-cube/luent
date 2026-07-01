@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
 import { markdownShikiConfig } from './theme/shiki-setup.js'
-import { transformMarkdownIslands, transformPortals, Islands, isCustomElement } from './.luent-islands/server/index.js'
+import { TransformLuentIslands, transformPortals, Islands, isCustomElement } from './.luent-islands/server/index.js'
 import { createSharedViteConfig } from '../../shared/vite.shared.js'
 
 
@@ -22,7 +22,7 @@ export default defineConfig({
     html: true,
     config(md) {
       console.log('TRANSFORM MARKDOWN')
-      transformMarkdownIslands(md, Islands)
+      md.block.ruler.before('fence', 'luent_island', TransformLuentIslands(Islands))
     },
     ...markdownShikiConfig
   },

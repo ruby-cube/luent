@@ -62,7 +62,10 @@ export function makeElement(
     const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
     runWithXMLNamespace(() => {
       const rawOutput = normalizeToArray(Slot())
-      if (isInnerHTMLKit(rawOutput[0])) setUpInnerHTML(rawOutput[0], domNode)
+      if (isInnerHTMLKit(rawOutput[0])) {
+        setUpInnerHTML(rawOutput[0], domNode)
+        return;
+      }
       const nodes = processJSXOutput(rawOutput)
       setUpNodeVine(nodes, domNode)
       mountDOMNodes(nodes, domNode)

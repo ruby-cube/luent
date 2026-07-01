@@ -1,13 +1,14 @@
 // https://vitepress.dev/guide/custom-theme
-import { onContentUpdated, type Theme } from 'vitepress'
+import { type Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
-import { islands, hydrate } from "../../src/luent-islands.js"
+import { islands, mountIslands } from "../../src/luent-islands.js"
 
 export default {
   extends: DefaultTheme,
-  enhanceApp({ app, router, siteData }) {
-    onContentUpdated(() => console.log('#### CONTENT UPDATED'))
-    hydrate(app, islands)
+  enhanceApp({ router }) {
+    router.onAfterRouteChange = () => {
+      mountIslands(islands)
+    }
   }
 } satisfies Theme

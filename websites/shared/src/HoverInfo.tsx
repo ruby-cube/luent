@@ -1,9 +1,9 @@
-import { component, fromTag, NodeRef, RenderSlot } from "@rue/luent"
+import { component, FromTag, fromTag, NodeRef, RenderSlot } from "@rue/luent"
 import { TooltipContent, TooltipRoot, IonicTooltip, Alignment, Placement } from "@rue/luent-ui"
 
 export { TooltipKit } from "@rue/luent-ui"
 
-export function HoverInfo(setup: {
+export function HoverInfo(setup: FromTag<{
   ref?: NodeRef<'div'>;
   Slot: RenderSlot,
   tail?: RenderSlot,
@@ -11,7 +11,7 @@ export function HoverInfo(setup: {
   gap?: number,
   place?: Placement,
   align?: Alignment
-}) {
+}>) {
   const {
     ref,
     tooltip,
@@ -21,7 +21,7 @@ export function HoverInfo(setup: {
     align,
     gap,
     ...bindings
-  } = fromTag(setup)
+  } = setup
 
   tooltip.configure({ placement: place, alignment: align, gap })
 

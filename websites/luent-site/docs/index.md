@@ -36,8 +36,7 @@ features:
 </small></p>
   </section>
 
-:::luent
-code-glimpses
+:::luent code-glimpses
 :::
 
 <p class='custom-block status-notice'><strong>This project is in early development.</strong></p>
