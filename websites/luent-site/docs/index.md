@@ -112,7 +112,6 @@ features:
 }
 
 
-
 section#code-glimpses p {
     margin-inline: auto;
   }

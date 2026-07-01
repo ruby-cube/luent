@@ -1,4 +1,4 @@
-import { css, For, FromTag, If, ion, Style } from "@rue/luent";
+import { atUnmount, css, For, FromTag, If, ion, Style } from "@rue/luent";
 
 
 export function TourNav(setup: FromTag<{
@@ -7,10 +7,50 @@ export function TourNav(setup: FromTag<{
   const { headings } = setup
   const $hovered = ion('')
   const $selected = ion('')
+  const $visible = ion(false)
+
+  if (typeof window !== 'undefined') {
+    let codeGlimpsesInView = false
+    let dividerInView = false
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const element = entry.target as Element
+        if (element.id === 'code-glimpses') {
+          codeGlimpsesInView = entry.isIntersecting
+        }
+
+        if (element === featuresSection) {
+          dividerInView = entry.isIntersecting
+        }
+      }
+
+      if (!$visible()) {
+        $visible.value = codeGlimpsesInView && !dividerInView
+      }
+      else if (dividerInView) {
+        $visible.value = false;
+      }
+    }, { threshold: 0 })
+
+    const tourHeading = document.querySelector('#code-glimpses')
+    const featuresSection = document.querySelector('.VPFeatures')
+    if (tourHeading) {
+      observer.observe(tourHeading)
+    }
+
+    if (featuresSection) {
+      observer.observe(featuresSection)
+    }
+
+    atUnmount(() => {
+      observer.disconnect()
+    })
+  }
 
   return <>
     <nav class='tour-nav'>
-      <ul>
+      <ul display-if={$visible}>
         {For(headings, heading => {
           const $hover = ion(() => $hovered() === heading.text)
           return <li
@@ -73,7 +113,7 @@ export function TourNav(setup: FromTag<{
         transition: background-color 0.15s ease;
       }
       
-      .dark {
+      .dark .circle {
         background-color: #444;
       }
 

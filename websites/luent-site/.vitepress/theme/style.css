@@ -156,8 +156,6 @@ html {
   scroll-behavior: smooth;
 }
 
-
-
 section#code-glimpses {
   outline: none !important;
 }
@@ -166,6 +164,10 @@ section#code-glimpses {
 .VPNavBarTitle .logo {
   height: 30px;
   width: auto;
+}
+
+.VPImage.logo {
+  background-color: transparent !important;
 }
 
 @media (max-width: 768px) {
