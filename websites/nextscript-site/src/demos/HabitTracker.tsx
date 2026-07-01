@@ -1,4 +1,4 @@
-import { ion, component, css, If, Style, Thru, Xray, mount, FromTag } from "@rue/luent";
+import { ion, css, If, Style, Thru, FromTag } from "@rue/luent";
 
 export function HabitTracker(setup: FromTag<{
   habit: string,

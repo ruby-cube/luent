@@ -91,23 +91,23 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `Dispatch()` to create async actions
 - `dispatch()` for async updates
 
-## Render cycle hooks
-- `atPrelude()`: before update is rendered to DOM
-* `atRender()`: for DOM manipulation tasks
-* `atLayout()`: for DOM layout reading tasks
-* `atTick()`: after update is painted to the DOM
-* `before`*[LifecycleHook]*
-* `at`*[LifecycleHook]*
-* `after`*[LifecycleHook]*
+## Render cycle phases
+- `atPrelude()` before update is rendered to DOM
+* `atRender()` for DOM manipulation tasks
+* `atLayout()` for DOM layout reading tasks
+* `atTick()` after update is painted to the DOM
+* `before` lifecycle hook prefix for before render phase
+* `at` lifecycle hook prefix for render phase
+* `after` lifecycle hook prefix for tick phase
 
 ## Lifecycle hooks
-Lifecycle hooks register tasks to be run at certain points of a dynamic view's lifecycle.
-- `atAttach()`: at mount and remount
-- `atDetach()`: at unmount and demount
-- `atMount()`: at initial mount only
-- `atUnmount()`: at final unmount only
-- `atRemount()`: at restored mount
-- `atDemount()`: at temporary unmount
+Lifecycle hooks register tasks to be run at certain points of a dynamic view's lifecycle. There are `before`, `at`, and `after` lifecycle hooks, which correspond to render cycle phases.
+- `atAttach()` at mount and remount
+- `atDetach()` at unmount and demount
+- `atMount()` at initial mount only
+- `atUnmount()` at final unmount only
+- `atRemount()` at restored mount
+- `atDemount()` at temporary unmount
 
 ## Batch cleanup
 - `Scene()` to batch subscriptions cleanup

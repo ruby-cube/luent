@@ -14,7 +14,7 @@ export function DoodleCanvasDemo() {
   return (
     <>
       <DemoContainer>
-        <DoodleCanvas />
+        {DoodleCanvas()}
       </DemoContainer>
       <Code
         trusted

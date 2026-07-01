@@ -35,7 +35,7 @@ export const islands: MountIslands = {
     mount(DoodleCanvasDemo, node)
   },
 
-  'nsx-code': ({ inner, node }: { inner: string, node: HTMLElement }) => {
+  'ns-code': ({ inner, node }: { inner: string, node: HTMLElement }) => {
     mount(() => renderNSXCode(parseNSXBlock(extractParams(inner))), node)
   },
 

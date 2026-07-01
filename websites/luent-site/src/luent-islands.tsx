@@ -1,10 +1,11 @@
 import { CodeGlimpses } from "./CodeGlimpses";
 export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from '@rue/luent'
-import { mount, MICROCLASS_MERGE, writeIsland, provideRoot } from '@rue/luent'
+import { mount, MICROCLASS_MERGE, writeIsland, provideRoot, atTick } from '@rue/luent'
 export * from "@rue/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
-import { Code, extractParams, MountIslands, parseNSXBlock, WriteIslands } from "@rue/websites-shared";
+import { Code, extractParams, isMounted, MountIslands, parseNSXBlock, WriteIslands } from "@rue/websites-shared";
+import { LanguageToggle } from "./LanguageToggle";
 
 function renderCodeGlimpses() {
   provideRoot(MICROCLASS_MERGE, twMerge)
@@ -26,14 +27,15 @@ function renderNSXCode(setup: { nsName: string, tsName: string, nsCode: string, 
   />
 }
 
-
+const LANGUAGE_TOGGLE = 'section.VPSidebarItem p.text'
 
 export const Islands: WriteIslands = {
   'code-glimpses': () => writeIsland(renderCodeGlimpses),
-  'nsx-code': (inner) => writeIsland(() => {
+  'ns-code': (inner) => writeIsland(() => {
     console.log('inner nsx code string', inner)
     return renderNSXCode(parseNSXBlock(inner))
-  })
+  }),
+  'language-toggle': () => writeIsland(LanguageToggle)
 }
 
 export const islands: MountIslands = {
@@ -45,26 +47,35 @@ export const islands: MountIslands = {
   //     }, this)
   //   }
   // },
+  'language-toggle': () => {
+    atTick(() => {
+      const node = document.querySelector(LANGUAGE_TOGGLE)
+      console.log('hydrating language-toggle', node)
+      if (!node || isMounted(node)) return;
+      node.innerHTML = ''
+      mount(LanguageToggle, node)
+    })
+  },
   'code-glimpses': ({ node }) => {
     console.log('#### mounting node', node)
     mount(renderCodeGlimpses, node)
   },
 
-  'nsx-code': ({ inner, node }: { inner: string, node: HTMLElement }) => {
+  'ns-code': ({ inner, node }: { inner: string, node: HTMLElement }) => {
     mount(() => renderNSXCode(parseNSXBlock(extractParams(inner))), node)
   },
-  // 'nsx-code': () => {
-  //   console.log('#### defining nsx-code')
+  // 'ns-code': () => {
+  //   console.log('#### defining ns-code')
   //   return class extends HTMLElement {
   //   constructor() {
-  //     console.log('constructing nsx-code')
+  //     console.log('constructing ns-code')
   //     super()
   //   }
   //   mounted = false;
   //   connectedCallback() {
   //     if (this.mounted) return;
   //     this.mounted = true;
-  //     console.log('#### mounting nsx-code')
+  //     console.log('#### mounting ns-code')
   //     const ns = this.getAttribute('ns-name') || 'nsx'
   //     const ts = this.getAttribute('ts-name') || 'tsx'
   //     const nsCode = this.getAttribute('ns-code') || 'broken'

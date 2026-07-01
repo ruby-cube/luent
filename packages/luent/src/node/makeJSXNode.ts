@@ -180,7 +180,7 @@ export function makeView(Slot: RenderFunction, config: ViewConfig) {
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'o:preserve' | 'o:context'  | 'o:transition'| any,
+  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'o:preserve' | 'o:context' | 'o:transition' | any,
   Slot: undefined | (() => RawJSXNode[]) | InferSlot,
   config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {
@@ -188,7 +188,7 @@ export function makeJSXNode(
   switch (nodeType) {
     case 'o:context':
       return Context({ Slot, provide: config.provide } as any)
-      
+
     case 'shadow-root':
       return createShadowRoot(config)
 
@@ -197,14 +197,18 @@ export function makeJSXNode(
         makeElement('link', undefined, <ElementConfig>config)
       );
 
+    case 'o--html':
+      return Portal('html', Slot, config);
+
     case 'o--body':
-      return Portal('body', Slot);
+      return Portal('body', Slot, config);
 
     case 'o--head':
-      return Portal('head', Slot);
+      return Portal('head', Slot, config);
 
     case 'o--portal':
-      return Portal(config.to, Slot)
+      const { to: target, ...rest } = config
+      return Portal(target, Slot, rest)
 
     case 'o:preserve':
       if (!Slot) throw new Error(`Extraneous <o:preserve>`)

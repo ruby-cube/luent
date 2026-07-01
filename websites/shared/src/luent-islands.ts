@@ -46,7 +46,7 @@ export function mountIslands(islands: AnyObject) {
           this.replaceChildren(content!)
         }
         else {
-          // for <nsx-code> because the nodes are not in document fragment for some reason
+          // for <ns-code> because the nodes are not in document fragment for some reason
           // this.innerHTML = ''
           // this.append(...(template?.childNodes ?? []))
         }
@@ -55,9 +55,10 @@ export function mountIslands(islands: AnyObject) {
   }
 
   for (const key in islands) {
-    // if (key === 'code-glimpses') {
-    //   islands[key]()
-    // }
+    if (key === 'language-toggle') {
+      islands[key]()
+      continue;
+    }
     // if (!customElements.get(key)) {
     //   console.log('#### defining island:', key)
     //   customElements.define(key, islands[key]())
@@ -66,15 +67,20 @@ export function mountIslands(islands: AnyObject) {
     console.log('#### Hydrating', key, nodes)
     for (const node of nodes) {
       if (node.getAttribute('data-mounted') === '') continue;
+      node.setAttribute('data-mounted', '')
       const inner = node.innerHTML
       node.innerHTML = ''
-      node.setAttribute('data-mounted', '')
       islands[key]({ inner, node })
     }
   }
-
-
 }
+
+export function isMounted(node: Element) {
+  if (node.getAttribute('data-mounted') === '') return true;
+  node.setAttribute('data-mounted', '')
+  return false;
+}
+
 
 declare global {
   namespace JSX {
@@ -189,7 +195,7 @@ export function TransformLuentIslands(Islands: AnyObject) {
 //   )
 // }`
 
-// const islandTokenContent = `<await-mount><nsx-code ns-name='${nsName}' ts-name='${tsName}' ns-code='${nsCode}' ts-code='${tsCode}'></nsx-code><template #fallback>${islandHtml}</template></await-mount>`
+// const islandTokenContent = `<await-mount><ns-code ns-name='${nsName}' ts-name='${tsName}' ns-code='${nsCode}' ts-code='${tsCode}'></ns-code><template #fallback>${islandHtml}</template></await-mount>`
 
 function renderFallback(name: string, write: () => string, withPageContext: (cb: () => any) => string, page: string) {
   const html = write
@@ -233,16 +239,16 @@ function renderFallback(name: string, write: () => string, withPageContext: (cb:
 //   const nsCode = nsxBlock[2].trimEnd()
 //   const tsCode = tsxBlock[2].trimEnd()
 
-//   const islandHtml = renderFallback('nsx-code', () => Islands['nsx-code'](nsName, tsName, nsCode, tsCode), withPageContext, page)
+//   const islandHtml = renderFallback('ns-code', () => Islands['ns-code'](nsName, tsName, nsCode, tsCode), withPageContext, page)
 
 //   const islandTokenContent =
 //     `<await-mount>` +
-//     `<template><nsx-code ` +
+//     `<template><ns-code ` +
 //     `ns-name='${nsName}' ` +
 //     `ts-name='${tsName}' ` +
 //     `ns-code='${nsCode}' ` +
 //     `ts-code='${tsCode}'` +
-//     `></nsx-code></template>` +
+//     `></ns-code></template>` +
 //     `${islandHtml}` +
 //     `</await-mount>`
 

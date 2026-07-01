@@ -28,7 +28,12 @@ export function writeJSXNode(
       );
 
     case 'o--body':
-      return writeToPortal('body', writeSlot(Slot));
+      // TODO: portal attributes
+      if (Slot) return writeToPortal('body', writeSlot(Slot));
+      
+      case 'o--html':
+      // TODO: portal attributes
+      if (Slot) return writeToPortal('html', writeSlot(Slot));
 
     case 'o--head':
       return writeToPortal('head', writeSlot(Slot));

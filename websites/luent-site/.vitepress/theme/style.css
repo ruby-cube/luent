@@ -201,6 +201,22 @@ section#code-glimpses {
   margin-bottom: 2rem;
 }
 
+.vp-doc ul:has(+ :is(p, h1, h2, h3, h4, h5, h6)) {
+  margin-bottom: 2rem;
+}
+
+.vp-doc div[class*='language-nsx']:has(+ div[class*='language-tsx'] + :is(p, h1, h2, h3, h4, h5, h6)) {
+  margin-bottom: 2rem;
+}
+
+
+.vp-doc div[class*='language-']+div[class*='language-nsx']+div[class*='language-'] {
+  margin-top: -8px !important;
+}
+
+.vp-doc div[class*='language-nsx']+div[class*='language-tsx'] {
+  margin-top: 16px !important;
+}
 
 
 
@@ -245,4 +261,14 @@ section#code-glimpses {
   height: 10px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 24%, transparent);
+}
+
+
+/* Toggle language preference */
+body.lang-mode-tsx .vp-doc [class*='language-nsx'] {
+  display: none;
+}
+
+body:not(.lang-mode-tsx) .vp-doc [class*='language-tsx'] {
+  display: none;
 }

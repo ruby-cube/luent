@@ -3,7 +3,7 @@ import { Ion, ion, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
 
-export function TestIfElseRemountView(setup: {}) {
+export function TestIfElseRemountView() {
    const $active = ion(true, {
       toggle() {
          $active.value = !$active()

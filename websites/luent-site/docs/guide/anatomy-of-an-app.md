@@ -1,5 +1,7 @@
 # Anatomy of an App
 
+Luent apps are interactive islands mounted onto static HTML.
+
 ## Mounting an app
 
 There are three main steps to mounting an app to the DOM:
@@ -19,18 +21,32 @@ function HelloWorld() {
 }
 ```
 
+```tsx
+// HelloWorld.tsx
+function HelloWorld() {
+  return <>
+    <p>Hello World.</p>
+  </>
+}
+```
+
 **Designate an app container in the HTML**
 
 ```html
 <!-- index.html -->
-<luent-island id="app"></luent-island>
+<hello-world></hello-world>
 ```
 
 **Instantiate and mount the app**
 
+```nsx
+// main.tsx
+mount(HelloWorld, "hello-world");
+```
+
 ```tsx
 // main.tsx
-mount(HelloWorld, "#app");
+mount(HelloWorld, "hello-world");
 ```
 
 **Load the entry script**
@@ -40,13 +56,16 @@ mount(HelloWorld, "#app");
 <script type="module" src="/main.tsx"></script>
 ```
 
+App containers may be any native element or a custom tag. Custom tag names must contain a dash. Mount to the app container by either passing in a css selector or the DOM node.
+
 ## Render functions
 
 Render functions are functions that create a view. They are essentially view templates and serve as the building blocks of an app.
 
 To define a render function, declare a function that returns a view composed using [JSX](#jsx) or [NSX]().
 
-```tsx
+```nsx
+// HelloWorld.nsx
 function HelloWorld() {
   <:>
     <p>Hello World.</p>
@@ -54,11 +73,20 @@ function HelloWorld() {
 }
 ```
 
+```tsx
+// HelloWorld.nsx
+function HelloWorld() {
+  return <>
+    <p>Hello World.</p>
+  </>
+}
+```
+
 #### Setting up stateful views
 
 In Luent, render functions, much like class constructors and factory functions, run once per view creation rather than per view update. Render functions may set up reactive state to pass to its view. The reactive portions of the view are then granularly updated through fine-grained reactivity.
 
-```tsx
+```nsx
 function Counter() {
   get count = ion(0)
   <:>
@@ -69,11 +97,22 @@ function Counter() {
 }
 ```
 
+```tsx
+function Counter() {
+  const $count = ion(0)
+  return <>
+    <button on:click={()=> $count.value++}>
+      {$count}
+    </button>
+  </>
+}
+```
+
 #### Parameters
 
 Render functions may define parameters.
 
-```tsx
+```nsx
 function Counter(start: number) {
   get count = ion(start)
   <:>
@@ -83,19 +122,37 @@ function Counter(start: number) {
   </:>
 }
 ```
-
 ```tsx
-mount(() => (
+function Counter(start: number) {
+  const $count = ion(start)
+  return <>
+    <button on:click={()=> $count.value++}>
+      {$count}
+    </button>
+  </>
+}
+```
+
+```nsx
+mount(() => {
   <:>
     <h1>The Counter App</h1>
     <div>{Counter(0)}</div>
   </:>
+}, "#counter-app");
+```
+```tsx
+mount(() => (
+  <>
+    <h1>The Counter App</h1>
+    <div>{Counter(0)}</div>
+  </>
 ), "#counter-app");
 ```
 
 ...or a parameter object for better clarity at call sites:
 
-```tsx
+```nsx
 function Counter({ start, increment }: {
   start: number,
   increment: number
@@ -108,14 +165,35 @@ function Counter({ start, increment }: {
   </:>
 }
 ```
-
 ```tsx
+function Counter({ start, increment }: {
+  start: number,
+  increment: number
+}) {
+  const $count = ion(start)
+  return <>
+    <button on:click={()=> $count.value += increment}>
+      {$count}
+    </button>
+  </>
+}
+```
+
+```nsx
 mount(() => {
   <:>
     <h1>The Counter App</h1>
     <div>{Counter({ start: 0, increment: 5 })}</div>
   </:>
-}, "#counter-app");
+}, "counter-app");
+```
+```tsx
+mount(() => (
+  <>
+    <h1>The Counter App</h1>
+    <div>{Counter({ start: 0, increment: 5 })}</div>
+  </>
+), "counter-app");
 ```
 
 ## Components
@@ -124,7 +202,6 @@ Component setup functions are render functions with additional ergonomic feature
 
 **Component setup function**
 
-:::luent nsx-code
 ```nsx
 function MessageDisplay(setup: FromTag<{
   message: Ion<string>
@@ -145,11 +222,14 @@ function MessageDisplay(setup: FromTag<{
   </>
 }
 ```
-:::
 
 **JSX tag syntax**
-```tsx
+
+```nsx
 <MessageDisplay message={msg@} />
+```
+```tsx
+<MessageDisplay message={$msg} />
 ```
 
 Instantiating views as components through JSX tag syntax enables features such as:

@@ -1086,7 +1086,7 @@ declare global {
       name?: Luent.MaybeIon<string | undefined>;
       popovertarget?: Luent.MaybeIon<string>;
       popovertargetaction?: Luent.MaybeIon<string>;
-      type?: Luent.MaybeIon<"submit" | "reset" | "button" | undefined>;
+      type?: Luent.MaybeIon<"submit" | "reset" | "button" | undefined | string>;
       value?: Luent.MaybeIon<string | readonly string[] | number | undefined>;
     }
 

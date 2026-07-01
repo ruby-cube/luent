@@ -58,11 +58,11 @@ function App() {
 }
 
 
-function Counter(setup: {
+function Counter(setup: FromTag<{
    start?: number
    limit: number
    onLimitReached: HandleEvent<{ limit: number }>
-}) {
+}>) {
    const { start = 0, limit, onLimitReached } = setup
 
    get count = ion(0, {

@@ -43,7 +43,6 @@ export function Code(setup: FromTag<{
   const $container = NodeRef('div')
   const $nav = NodeRef('nav')
 
-
   return (
     <>
       <div class='code-container'>

@@ -20,21 +20,21 @@ import { isInnerHTMLKit, setUpInnerHTML } from "../node/InnerHTML";
 
 export type TagName = keyof HTMLElementTagNameMap
 
-
 export function makeElement(
   tagName: string,
   Slot: RenderSlot | undefined,
   bindings: ElementConfig,
+  element?: HTMLElement
 ): DOMNode {
   console.log('@@@before compose bindings', bindings)
   const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
   console.log('showIf', showIf)
-  let newXML_NS: string | undefined;
-  const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 
-  const domNode = isHydrating() ? getElement()
-    : XML_NS ? createNSElement(tagName, XML_NS)
-      : document.createElement(tagName)
+  let newXML_NS: string | undefined;
+  let XML_NS: string | undefined;
+  const domNode = element ?? ((XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes?.xmlns)) || getXMLNamespace())
+    ? createNSElement(tagName, XML_NS)
+    : document.createElement(tagName));
 
   const ref = composeRef(bindings) // throw if ref already used
   if (ref) {

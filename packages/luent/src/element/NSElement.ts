@@ -275,8 +275,8 @@ export function createNSElement(tagName: string, namespace: string) {
    return document.createElementNS(namespace, tagName)
 }
 
-export function newXMLNamespace(tagName: string, attributes: AnyObject) {
-   return XML_NS[tagName] || attributes?.xmlns
+export function newXMLNamespace(tagName: string, xmlns: string | undefined) {
+   return XML_NS[tagName] || xmlns
 }
 
 const XML_NS = {

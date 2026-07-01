@@ -4,19 +4,21 @@ import { atAttach, beforeDetach, atRemount } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@rue/flask";
 import { atRender } from "@rue/quarky";
+import { AnyObject } from "@rue/types";
+import { makeElement } from "../element/makeElement";
 
 export type MorphConfig = {}
 
 let morphConfig: MorphConfig | undefined
 
 export function getTransition() {
-   const _morphConfig = morphConfig;
-   morphConfig = undefined; // applies to only one conditional node. Once used, it is made undefined.
-   return _morphConfig
+  const _morphConfig = morphConfig;
+  morphConfig = undefined; // applies to only one conditional node. Once used, it is made undefined.
+  return _morphConfig
 }
 
 export type PortalNodeInput = {
-   to: string | Element,
+  to: string | Element,
 }
 
 type SelectorString = string
@@ -37,44 +39,48 @@ type SelectorString = string
 
 let _portalMap: Map<any, any> | undefined;
 
-export function Portal(container: SelectorString | Element, render: RenderFunction | RawJSXNode) {
-   if (!(isFunction(render))) throw new Error('Compiler failed to turn JSX into render function')
+export function Portal(container: SelectorString | Element, render: RenderFunction | RawJSXNode, config?: AnyObject) {
 
-   const element = typeof container === "string" ? document.querySelector(container) : container;
-   if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
+  const element = typeof container === "string" ? document.querySelector(container) : container;
+  if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
+  if (config) {
+    // set up attributes
+    makeElement(element.tagName, undefined, config, () => element)
+  }
+  if (!render) return;
+  if (!(isFunction(render))) throw new Error('Compiler failed to turn JSX into render function')
+  const nodes = processJSXOutput(render())
 
-   const nodes = processJSXOutput(render())
+  if (nodes[0] instanceof VineNode) {
+    const portalMap = _portalMap ?? (_portalMap = new Map())
+    const comment = portalMap.get(element) ?? (portalMap.set(element, document.createComment('portal')), portalMap.get(element))
+    nodes.unshift(comment)
+  }
 
-   if (nodes[0] instanceof VineNode) {
-      const portalMap = _portalMap ?? (_portalMap = new Map())
-      const comment = portalMap.get(element) ?? (portalMap.set(element, document.createComment('portal')), portalMap.get(element))
-      nodes.unshift(comment)
-   }
+  setUpNodeVine(nodes, element)
+  const flask = getFlask()
 
-   setUpNodeVine(nodes, element)
-   const flask = getFlask()
+  atRender(() => {
+    mountDOMNodes(nodes, element)
+  })
 
-   atRender(() => {
-      mountDOMNodes(nodes, element)
-   })
+  beforeDetach((final) => {
+    atRender(() => {
+      removeDOMNodes(nodes)
+    })
+  })
 
-   beforeDetach((final) => {
-      atRender(() => {
-         removeDOMNodes(nodes)
-      })
-   })
+  atRemount(() => {
+    mountDOMNodes(nodes, element)
+  })
 
-   atRemount(() => {
-      mountDOMNodes(nodes, element)
-   })
-
-   return new PortalKit(nodes);
+  return new PortalKit(nodes);
 }
 
 class PortalKit extends VineNode {
-   constructor(public nodes: JSXNode[]){
-      super()
-   }
+  constructor(public nodes: JSXNode[]) {
+    super()
+  }
 }
 
 // export function isPortal(value: unknown) {

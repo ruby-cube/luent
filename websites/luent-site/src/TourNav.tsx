@@ -16,14 +16,14 @@ export function TourNav(setup: FromTag<{
           return <li
             on:pointerenter={() => $hovered.value = heading.text}
             on:pointerleave={() => $hovered.value = ''}
-            class={{'hover': $hover}}
+            class={{ 'hover': $hover }}
           >
-            <a class={['circle', {
+            <a
+              href={`/#${heading.id}`}
+            ><div class={['circle', {
               'hover': $hover,
               'selected': () => $selected() === 'heading'
-            }]}
-              href={`/#${heading.id}`}
-            ></a>
+            }]}></div></a>
             <span display-if={$hover} class='heading'>{heading.text}</span>
           </li>
         })}
@@ -41,8 +41,12 @@ export function TourNav(setup: FromTag<{
         justify-content: center;
       }
 
+      .dark .tour-nav li.hover {
+        background-color: #333333BF;
+      }
+
       .tour-nav li.hover {
-        background-color: #33333344
+        background-color: #dddde3BF;
       }
 
       .tour-nav li {
@@ -62,11 +66,15 @@ export function TourNav(setup: FromTag<{
         align-items: center;
         justify-content: center;
         line-height: 1;
-        background-color: #444;
+        background-color: #cccccc;
         box-sizing: border-box;
         text-align: center;
         border-radius: 50%;
         transition: background-color 0.15s ease;
+      }
+      
+      .dark {
+        background-color: #444;
       }
 
       .tour-nav .circle.hover {
@@ -81,7 +89,13 @@ export function TourNav(setup: FromTag<{
       .tour-nav .heading {
         padding: 4px 8px;
         font-size: 14px;
-        color: var(--vp-c-text-2)
+        color: var(--vp-c-text-1);
+      }
+
+      @media (max-width: 960px) {
+        .tour-nav {
+          display: none;
+        }
       }
 
     `)}

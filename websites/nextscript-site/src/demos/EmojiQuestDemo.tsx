@@ -15,7 +15,7 @@ export function EmojiQuestDemo() {
   return (
     <>
       <DemoContainer style='height: 460px'>
-        <EmojiQuest />
+        {EmojiQuest()}
       </DemoContainer>
       <Code
         trusted

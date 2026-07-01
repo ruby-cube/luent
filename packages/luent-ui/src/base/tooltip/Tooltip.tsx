@@ -1,4 +1,4 @@
-import { component,  NodeRef, RenderSlot } from "@rue/luent"
+import {  FromTag,  NodeRef, RenderSlot } from "@rue/luent"
 import { IonicTooltip } from "./Tooltip.kit";
 import { PopoverRoot } from "../popover/Popover";
 
@@ -6,11 +6,11 @@ import { PopoverRoot } from "../popover/Popover";
 // [] hideDelay should never be greater than delay, clamp hideDelay to delay if it is greater
 // [] if the tooltip blocks the trigger hover, we end up with a weird toggling the tooltip on-off-on-off situation
 
-function TooltipRoot(setup: {
+function TooltipRoot(setup: FromTag<{
    ref?: NodeRef<'div'>;
    Slot: RenderSlot;
    tooltip: IonicTooltip
-}) {
+}>) {
    const { Slot, tooltip, ...rest } = setup
 
    return (
