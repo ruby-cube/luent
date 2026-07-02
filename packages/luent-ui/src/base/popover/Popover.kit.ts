@@ -55,7 +55,7 @@ export class Popover {
   flipped: boolean = false;
 
   flip() {
-    this.flipped = !this.flipped
+    this.flipped = true;
   }
 
   visible = false
@@ -66,10 +66,12 @@ export class Popover {
 
   hide() {
     this.visible = false
+    this.flipped = false;
   }
 }
 
 export function maybeFlip(node: HTMLElement, popover: Popover) {
+  console.log('$$$ maybe flip')
   atLayout(() => {
     const rect = node.getBoundingClientRect()
     const container = getContainer(popover)

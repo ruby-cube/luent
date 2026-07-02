@@ -166,6 +166,20 @@ section#code-glimpses {
   width: auto;
 }
 
+.tagline {
+  color: var(--vp-c-text-1) !important;
+}
+
+.action .VPButton.medium {
+  border: 1px solid var(--vp-c-brand-1) !important;
+  color: var(--vp-c-brand-1) !important;
+}
+
+.action .VPButton:hover {
+  border: 1px solid var(--vp-c-brand-2) !important;
+  color: var(--vp-c-brand-2) !important;
+}
+
 .VPImage.logo {
   background-color: transparent !important;
 }

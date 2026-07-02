@@ -67,7 +67,7 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Language preference',
+        text: 'Language',
         collapsed: false,
         items: [{
           text: '&nbsp;&nbsp;&nbsp;&nbsp;nsx&nbsp;&nbsp;&nbsp;&nbsp;tsx'

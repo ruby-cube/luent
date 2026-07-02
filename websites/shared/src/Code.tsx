@@ -1,18 +1,26 @@
-import { As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag } from "@rue/luent";
+import { As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag, afterAttach } from "@rue/luent";
 import { Ion, ion, MutableIon } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
 import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";
 import { HoverInfo } from "./HoverInfo";
-import { escapeHTML } from "@rue/utils";
 
 // TODO: Fix hacky SSG solutions
 
+function encodeHover(variable: string) {
+  return variable[0] + 'æ' + variable.slice(1)
+}
+
+function decode(code: string) {
+  return code.replaceAll('æ', '')
+}
+
 function markHover(code: string, map?: { [key: string]: string }) {
   if (!map) return code;
-  for (const variable in map) {
-    code = code.replaceAll(variable, `<span data-hover-id='${variable}'>${variable}</span>`)
+  for (const key in map) {
+    const [variable] = key.split('_')
+    code = code.replace(variable, `<span data-hover-id='${encodeHover(key)}'>${encodeHover(variable)}</span>`)
   }
-  return code;
+  return decode(code);
 }
 
 type CodeTab = { name: string, code: string, lang?: string, hover?: { [key: string]: string } }
@@ -99,8 +107,11 @@ export function Code(setup: FromTag<{
         })}
         <o:preserve>
           {Await(() => <>
-            {As($tab, () =>
-              CodeBlock($tab() === 'main' ? main : alt, highlight)
+            {If(() => $tab() === 'main', () =>
+              CodeBlock(main, highlight)
+            )}
+            {Else(() =>
+              CodeBlock(alt, highlight)
             )}
           </>)}
           {Meanwhile(
@@ -238,7 +249,7 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
     }
   })
   const $container = NodeRef('div')
-
+  console.log('$$$ RENDER CODE BLOCK')
   return <>
     <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
       <div ref={$container} class='code'>{{ html: $code, trusted }}</div>
@@ -248,12 +259,11 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
             info: tab.hover,
             container: $container
           })
-          afterMount(() => {
+          afterAttach(() => {
             for (const key in tab.hover) {
-              const nodes = document.querySelectorAll(`[data-hover-id="${key}"]`)
-              for (const node of nodes) {
+              const node = document.querySelector(`[data-hover-id="${key}"]`)
+              if (node)
                 setTooltipTrigger[key](node)
-              }
             }
           })
           return <>

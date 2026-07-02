@@ -219,14 +219,24 @@ function TypeExplicit() {
   </>
 }
 
-
 TypeExplicit.nsHover = {
   count: 'const count: number',
   total: 'get total: Ion<number>',
+  total_1: 'get total: Ion<number>',
   qty: 'get qty: Ion<number>',
   list: 'const list: Ionic<List>',
   item: '(parameter) item: Item',
+  item_1: '(parameter) item: Item',
 }
+// [
+//   ['count', 'const count: number'],
+//   ['total', 'get total: Ion<number>'],
+//   ['total', 'get total: Ion<number>'],
+//   ['qty', 'get qty: Ion<number>'],
+//   ['list', 'const list: Ionic<List>'],
+//   ['item', '(parameter) item: Item'],
+//   ['item', '(parameter) item: Item'],
+// ]
 
 TypeExplicit.tsHover = {
   count: '(parameter) count: number',

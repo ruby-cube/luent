@@ -22,14 +22,14 @@ function PopoverRoot(setup: FromTag<{
     popover,
     ...attributes
   } = setup
-
+  console.log('$$$ create popover')
   const { gap } = popover
   return (
     <>
-      {If(() => popover.visible, // TODO: configure activation type
+      {If(() => popover.visible,'create', // TODO: configure activation type
         <o:context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
           <div
-            before:mount={node => maybeFlip(node, popover)}
+            before:attach={node => maybeFlip(node, popover)}
             ref={$popover}
             class={['popover', () => popover.placement, () => popover.alignment]}
             style={() => `--popover-anchor: ${popover.anchorName}`}

@@ -17,7 +17,7 @@ export function HoverInfo(setup: FromTag<{
     tooltip,
     tail = true,
     Slot,
-    place,
+    place = "above",
     align,
     gap,
     ...bindings
