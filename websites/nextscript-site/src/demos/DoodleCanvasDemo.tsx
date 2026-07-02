@@ -1,5 +1,4 @@
-import { Code, DemoContainer } from '@rue/websites-shared'
-import { DoodleCanvas } from "./DoodleCanvas"
+import { Code, DemoContainer, DoodleCanvas } from '@rue/websites-shared'
 import { highlightCode } from "../highlighter"
 import { ion } from '@rue/quarky'
 

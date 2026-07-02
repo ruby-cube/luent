@@ -41,5 +41,5 @@
     "src/**/**.tsx",
     "src/**/**.ts",
     "src/style-scope.js"
-  ]
+, "../shared/src/demos/EmojiQuest.tsx", "src/demos/EmojiQuestDemo.tsx", "../shared/src/demos/HabitTracker.tsx", "src/demos/HabitTrackerDemo.tsx", "src/demos/DoodleCanvasDemo.tsx", "../shared/src/demos/DoodleCanvas.tsx"  ]
 }

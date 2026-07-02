@@ -16,9 +16,9 @@ export function isCustomElement(tag: string) {
 
 
 
-export function mountIslands(islands: AnyObject) {
+export function mountIslands(islands: AnyObject, page: string) {
   if (typeof window == 'undefined') return;
-  console.log('#### HYDRATING!!')
+  console.log('#### HYDRATING!!', page)
   // define custom elements
   if (!customElements.get('style-scope')) {
     customElements.define('style-scope', class StyleScope extends HTMLElement {
@@ -34,29 +34,29 @@ export function mountIslands(islands: AnyObject) {
     });
   }
 
-  if (!customElements.get('await-mount')) {
-    customElements.define('await-mount', class AwaitMount extends HTMLElement {
-      connectedCallback() {
-        console.log('#### hydrating <await-mount>')
-        const template = this.querySelector('template')
-        if (!template) throw new Error('await mount requires a template')
-        console.log('#### TEMPLATE', template)
-        if (template.content.childNodes.length) {
-          const content = template.content.cloneNode(true) as DocumentFragment | undefined
-          this.replaceChildren(content!)
-        }
-        else {
-          // for <ns-code> because the nodes are not in document fragment for some reason
-          // this.innerHTML = ''
-          // this.append(...(template?.childNodes ?? []))
-        }
-      }
-    });
-  }
+  // if (!customElements.get('await-mount')) {
+  //   customElements.define('await-mount', class AwaitMount extends HTMLElement {
+  //     connectedCallback() {
+  //       console.log('#### hydrating <await-mount>')
+  //       const template = this.querySelector('template')
+  //       if (!template) throw new Error('await mount requires a template')
+  //       console.log('#### TEMPLATE', template)
+  //       if (template.content.childNodes.length) {
+  //         const content = template.content.cloneNode(true) as DocumentFragment | undefined
+  //         this.replaceChildren(content!)
+  //       }
+  //       else {
+  //         // for <ns-code> because the nodes are not in document fragment for some reason
+  //         // this.innerHTML = ''
+  //         // this.append(...(template?.childNodes ?? []))
+  //       }
+  //     }
+  //   });
+  // }
 
   for (const key in islands) {
     if (key === 'language-toggle') {
-      islands[key]()
+      if (page.startsWith('/guide/')) islands[key]()
       continue;
     }
     // if (!customElements.get(key)) {

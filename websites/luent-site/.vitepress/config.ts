@@ -58,7 +58,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Learn', link: '/guide/anatomy-of-an-app' },
-      { text: 'Demos', link: '/markdown-examples' },
+      { text: 'Demos', link: '/demos/habit-tracker' },
       { text: 'Code Glimpses', link: '/markdown-examples' },
       { text: 'Reference', link: '/guide/api-overview' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
@@ -66,8 +66,9 @@ export default defineConfig({
       { text: 'Introducing NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
     ],
 
-    sidebar: [
-      {
+     sidebar: {
+      '/guide/': [
+       {
         text: 'Language',
         collapsed: false,
         items: [{
@@ -152,7 +153,23 @@ export default defineConfig({
           { text: 'Server Side [planned]' }
         ]
       },
-    ],
+      ],
+      '/demos/': [
+        {
+          text: 'Demos',
+          items: [
+            {
+              text: 'Habit Tracker', link: '/demos/habit-tracker',
+            },
+            { text: 'Drawing Canvas', link: '/demos/doodle-canvas' },
+            { text: 'EmojiQuest', link: '/demos/emoji-quest' },
+            { text: 'Folder Tree', link: '/terminology' },
+            { text: 'Bottomless Void', link: '/terminology' },
+          ]
+        }
+
+      ]
+    },
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ruby-cube/luent/' }

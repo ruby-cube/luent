@@ -236,6 +236,7 @@ export function Code(setup: FromTag<{
   inset: 0px;
   bottom: 4rem;
   top: 4rem;
+  pointer-events: none;
 }
 
       `)}

@@ -13,8 +13,8 @@ export default {
   //   })
   // },
   enhanceApp({ router }) {
-    router.onAfterRouteChange = () => {
-      mountIslands(islands)
+    router.onAfterRouteChange = (page) => {
+      mountIslands(islands, page)
     }
   }
 } satisfies Theme
