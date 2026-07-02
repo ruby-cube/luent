@@ -1,7 +1,7 @@
 import { CodeGlimpses } from "./CodeGlimpses";
 import { HabitTrackerDemo } from "./demos/HabitTrackerDemo"
 export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from '@rue/luent'
-import { mount, MICROCLASS_MERGE, writeIsland, provideRoot } from '@rue/luent'
+import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot } from '@rue/luent'
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
 import { DoodleCanvasDemo } from "./demos/DoodleCanvasDemo";
 export * from "@rue/websites-shared";
@@ -22,21 +22,21 @@ export const Islands: WriteIslands = {
 export const islands: MountIslands = {
   'code-glimpses': ({ node }) => {
     console.log('#### mounting node', node)
-    mount(CodeGlimpses, node)
+    mountIsland(CodeGlimpses, node)
   },
   'habit-tracker-demo': ({ node }) => {
     console.log('mounting habit-tracker-demo')
-    mount(HabitTrackerDemo, node)
+    mountIsland(HabitTrackerDemo, node)
   },
   'emoji-quest-demo': ({ node }) => {
-    mount(EmojiQuestDemo, node)
+    mountIsland(EmojiQuestDemo, node)
   },
   'doodle-canvas-demo': ({ node }) => {
-    mount(DoodleCanvasDemo, node)
+    mountIsland(DoodleCanvasDemo, node)
   },
 
   'ns-code': ({ inner, node }: { inner: string, node: HTMLElement }) => {
-    mount(() => renderNSXCode(parseNSXBlock(extractParams(inner))), node)
+    mountIsland(() => renderNSXCode(parseNSXBlock(extractParams(inner))), node)
   },
 
 }

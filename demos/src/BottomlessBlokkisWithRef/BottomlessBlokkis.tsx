@@ -1,4 +1,4 @@
-import { component, beforeUnmount, ComponentRef, mount, NodeRef, template } from "@rue/luent";
+import { component, beforeUnmount, ComponentRef, mountIsland, NodeRef, template } from "@rue/luent";
 import { ion } from "@rue/quarky";
 import { As } from "../../../../packages/luent/src/conditional/As";
 import { Blokk, CELL_SIZE } from "./Blokk";

@@ -8,7 +8,7 @@ import { Provided } from "./context/Context";
 import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "./node/VineNode";
 import { RenderFunction } from "./node/makeJSXNode";
 
-export function mount<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
+export function mountIsland<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
   const rootContext = createRootContext()
   const flask = new Flask({ type: 'view' });
   console.log('document', document.body)

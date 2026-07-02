@@ -288,3 +288,7 @@ body.lang-mode-tsx .vp-doc [class*='language-nsx'] {
 body:not(.lang-mode-tsx) .vp-doc [class*='language-tsx'] {
   display: none;
 }
+
+.vp-doc .section-tags {
+  padding: 0px;
+}

@@ -1,22 +1,28 @@
 # Luent APIs
 
 :::warning <span style='margin-right: .5rem'>🚧</span> UNDER CONSTRUCTION 
-The <u>API</u> reference is still being written. In the meantime, here is a quick reference of Luent's APIs
+The API reference is still being written. In the meantime, here is a overview of Luent's APIs
 :::
 
 ## App rendering
-Apps, or interactive islands, may be rendered on the client or on the server.
+Apps may be rendered as interactive islands on the client and static islands on the server.
 #### Client-side
-- `mount()` to mount an interactive island
+- `mountIsland()` to mount an interactive island
 #### Server-side
-- `writeIslands()` [experimental] to transform HTML to include auto-hydrating islands
+- `writeIsland()` to write the app as static html
+- `withIslands()` [experimental] to transform HTML to include islands
 
 ## Reactivity
 - `ion()` to create simple and derived reactive state
 - `ionic()` to create structured reactive state
-- `ionize()` to create an ion of an ionic structure
 - `track()` to link effect to ions
-- `trackEffect()` to track an ionic effect
+
+#### Non-essential reactivity
+- `ionize()` to create an ion of an ionic structure
+- `ionicPrelude()` to track an ionic prelude phase task 
+- `ionicRender()` to track an ionic render phase task 
+- `ionicLayout()` to track an ionic layout phase task 
+- `ionicTask()` to track an ionic tick phase task 
 - `Finitron()` to create finite reactive state
 
 ## Context binding
@@ -92,13 +98,15 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `dispatch()` for async updates
 
 ## Render cycle phases
-- `atPrelude()` before update is rendered to DOM
-* `atRender()` for DOM manipulation tasks
-* `atLayout()` for DOM layout reading tasks
-* `atTick()` after update is painted to the DOM
-* `before` lifecycle hook prefix for before render phase
-* `at` lifecycle hook prefix for render phase
-* `after` lifecycle hook prefix for tick phase
+- `prelude` before update is rendered to DOM
+- `render` for DOM manipulation tasks
+- `layout` for DOM layout reading tasks
+- `tick` after update is painted to the DOM
+
+#### Lifecycle hook prefixes
+- `before` lifecycle hook prefix for before render phase
+- `at` lifecycle hook prefix for render phase
+- `after` lifecycle hook prefix for tick phase
 
 ## Lifecycle hooks
 Lifecycle hooks register tasks to be run at certain points of a dynamic view's lifecycle. There are `before`, `at`, and `after` lifecycle hooks, which correspond to render cycle phases.

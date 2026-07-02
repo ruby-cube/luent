@@ -123,7 +123,7 @@ export function provideGround<K extends ContextEntryKey | string>(key: K, value:
     throw new Error('')
   const groundContext = context.ground
   if (!groundContext)
-    throw new Error('No ground context found. Call createGroundContext() and pass into mount() via config')
+    throw new Error('No ground context found. Call createGroundContext() and pass into mountIsland() via config')
   const globalEntries = groundContext.entries!
   const contextKey = toContextKey(key)
   if (globalEntries.has(contextKey)) {

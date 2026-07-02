@@ -11,7 +11,7 @@ class PortableNode {
         // remove listeners but preserve
     }
 
-    mount() {
+    mountIsland() {
         // (re)setup listeners
     }
 }

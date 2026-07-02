@@ -1,6 +1,6 @@
 import { CodeGlimpses } from "./CodeGlimpses";
 export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from '@rue/luent'
-import { mount, MICROCLASS_MERGE, writeIsland, provideRoot, atTick } from '@rue/luent'
+import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, atTick } from '@rue/luent'
 export * from "@rue/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
@@ -41,7 +41,7 @@ export const Islands: WriteIslands = {
 export const islands: MountIslands = {
   // 'code-glimpses': () => class extends HTMLElement {
   //   connectedCallback() {
-  //     mount(() => {
+  //     mountIsland(() => {
   //       provideRoot(MICROCLASS_MERGE, twMerge)
   //       return CodeGlimpses()
   //     }, this)
@@ -53,16 +53,16 @@ export const islands: MountIslands = {
       console.log('hydrating language-toggle', node)
       if (!node || isMounted(node)) return;
       node.innerHTML = ''
-      mount(LanguageToggle, node)
+      mountIsland(LanguageToggle, node)
     })
   },
   'code-glimpses': ({ node }) => {
     console.log('#### mounting node', node)
-    mount(renderCodeGlimpses, node)
+    mountIsland(renderCodeGlimpses, node)
   },
 
   'ns-code': ({ inner, node }: { inner: string, node: HTMLElement }) => {
-    mount(() => renderNSXCode(parseNSXBlock(extractParams(inner))), node)
+    mountIsland(() => renderNSXCode(parseNSXBlock(extractParams(inner))), node)
   },
   // 'ns-code': () => {
   //   console.log('#### defining ns-code')
@@ -80,7 +80,7 @@ export const islands: MountIslands = {
   //     const ts = this.getAttribute('ts-name') || 'tsx'
   //     const nsCode = this.getAttribute('ns-code') || 'broken'
   //     const tsCode = this.getAttribute('ts-code') || 'nul'
-  //     mount(() => {
+  //     mountIsland(() => {
 
   //       provideRoot(MICROCLASS_MERGE, twMerge)
   //       return <Code

@@ -80,19 +80,19 @@ export function atDetach(task: (final: boolean) => void) {
 
 export function afterUnmount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDiscard(() => { atRender(contextTask) });
+   getFlask().onDiscard(() => { atTick(contextTask) });
 }
 
 export function afterDemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDemount(() => { atRender(contextTask) });
+   getFlask().onDemount(() => { atTick(contextTask) });
 }
 
 export function afterDetach(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
-   getFlask().onDiscard(() => { atRender(discardTask) });
-   getFlask().onDemount(() => { atRender(demountTask) });
+   getFlask().onDiscard(() => { atTick(discardTask) });
+   getFlask().onDemount(() => { atTick(demountTask) });
 }
 
 

@@ -8,7 +8,7 @@ import { runWithPortals, transformPortals } from "./portals";
 import { writeIsland } from "./writeHTML";
 
 
-export function writeIslands(html: string, islands: { [key: string]: RenderFunction }) {
+export function withIslands(html: string, islands: { [key: string]: RenderFunction }) {
   const withPageContext = RenderPageWithStyles()
   for (const [id, renderIsland] of Object.entries(islands)) {
     const island = withPageContext(() => runWithPortals(() => writeIsland(renderIsland), 'page-key')) //TODO: page key OR I need a better portal system

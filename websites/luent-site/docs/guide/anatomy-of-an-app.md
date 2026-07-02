@@ -41,12 +41,12 @@ function HelloWorld() {
 
 ```nsx
 // main.tsx
-mount(HelloWorld, "hello-world");
+mountIsland(HelloWorld, "hello-world");
 ```
 
 ```tsx
 // main.tsx
-mount(HelloWorld, "hello-world");
+mountIsland(HelloWorld, "hello-world");
 ```
 
 **Load the entry script**
@@ -81,6 +81,8 @@ function HelloWorld() {
   </>
 }
 ```
+
+Render functions must not be `async` functions although they can absolutely render views and run tasks asynchronously. To learn more, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
 
 #### Setting up stateful views
 
@@ -134,7 +136,7 @@ function Counter(start: number) {
 ```
 
 ```nsx
-mount(() => {
+mountIsland(() => {
   <:>
     <h1>The Counter App</h1>
     <div>{Counter(0)}</div>
@@ -142,7 +144,7 @@ mount(() => {
 }, "#counter-app");
 ```
 ```tsx
-mount(() => (
+mountIsland(() => (
   <>
     <h1>The Counter App</h1>
     <div>{Counter(0)}</div>
@@ -180,7 +182,7 @@ function Counter({ start, increment }: {
 ```
 
 ```nsx
-mount(() => {
+mountIsland(() => {
   <:>
     <h1>The Counter App</h1>
     <div>{Counter({ start: 0, increment: 5 })}</div>
@@ -188,7 +190,7 @@ mount(() => {
 }, "counter-app");
 ```
 ```tsx
-mount(() => (
+mountIsland(() => (
   <>
     <h1>The Counter App</h1>
     <div>{Counter({ start: 0, increment: 5 })}</div>
@@ -296,7 +298,7 @@ function MessageDisplay(setup: {
 
 ```tsx
 // main.tsx
-mount(() => {
+mountIsland(() => {
   get msg = ion("Hello world!")
   <:>
     <MessageDisplay message={msg@} />

@@ -1,4 +1,4 @@
-import { component, template, If, Else, ElseIf, NodeRef, mount, ViewType, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, mountIsland, ViewType, Style, css } from "@rue/luent";
 import { Ion, ion, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 
@@ -58,4 +58,4 @@ export function TestIfElseRemountView() {
    )
 }
 
-if (__TEST__) mount(TestIfElseRemountView, '#root')
+if (__TEST__) mountIsland(TestIfElseRemountView, '#root')

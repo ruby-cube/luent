@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, $fromContext, ContextEntryKey, ContextKey, mount, fromContext, fromRoot, FromTag, mergeKeys, template, provideRoot } from "@rue/luent"
+import { component, $fromContext, ContextEntryKey, ContextKey, mountIsland, fromContext, fromRoot, FromTag, mergeKeys, template, provideRoot } from "@rue/luent"
 import { Ion, ion } from "@rue/quarky"
 import './TestContext.css'
 
@@ -183,7 +183,7 @@ export {
 const ROOT = mergeKeys(Child.ROOT_MESSAGE, Grandparent.ROOT_MESSAGE)
 
 if (__STYLE__) {
-  mount(() => {
+  mountIsland(() => {
     provideRoot([ROOT('heya')])
     return TestRootContext()
   }, '#root')

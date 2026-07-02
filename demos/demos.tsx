@@ -1,4 +1,4 @@
-import { mount, MICROCLASS_MERGE, provideRoot } from "@rue/luent"
+import { mountIsland, MICROCLASS_MERGE, provideRoot } from "@rue/luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
@@ -46,12 +46,13 @@ import { TestInnerHTML } from "./src/TestInnerHTML"
 import { Counter } from "./src/CounterApp"
 import { TestStylesBindings } from "./src/TestStylesBindings"
 import { twMerge } from "tailwind-merge"
+import { TestRenderCycle } from "./src/TestRenderCycle"
 
 export function runDemo() {
-  mount(() => {
+  mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TooltipDemo />
+    return <TestRenderCycle />
   }, '#root')
 }
 

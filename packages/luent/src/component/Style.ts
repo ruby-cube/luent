@@ -80,20 +80,20 @@ export function Style(cssText: string) {
     return style;
   }
   const flask = getFlask()
-  const style = createStyleTag(cssText, id, shadow)
-  if (style) {
-    atMount(() => {
-      const existing = document.querySelector('#' + id)
-      if (existing) {
-        console.warn('#$# existing style tag', existing)
-        return;
-      }
+  atMount(() => { // QUESTION: Why do things break when this is atRender instead of atMount?
+    const existing = document.querySelector('#' + id)
+    if (existing) {
+      console.warn('#$# existing style tag', existing)
+      return;
+    }
+    const style = createStyleTag(cssText, id, shadow)
+    if (style) {
       document.head.appendChild(style);
-    })
-    beforeUnmount(() => {
-      discardStyleTag(style, flask)
-    })
-  }
+      beforeUnmount(() => {
+        discardStyleTag(style, flask)
+      })
+    }
+  })
 }
 
 

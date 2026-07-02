@@ -1,4 +1,4 @@
-import { mount } from "@rue/luent"
+import { mountIsland } from "@rue/luent"
 import { Badge } from "../Badge"
 import { Button } from "../Button"
 import {
@@ -37,5 +37,5 @@ export function ImageCard() {
 }
 
 if (__STYLE__) {
-   mount(ImageCard, '#root')
+   mountIsland(ImageCard, '#root')
 }

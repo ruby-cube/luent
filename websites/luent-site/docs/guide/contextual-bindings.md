@@ -45,7 +45,7 @@ Provide root context via `<RootContext provide={}/>`
 // main.tsx
 import { SCREEN_WIDTH } from '/components/Foo.tsx'
 
-mount(() => (
+mountIsland(() => (
   <o--root provide={SCREEN_WIDTH(1020)}>
     <MyApp/>
   </o--root>

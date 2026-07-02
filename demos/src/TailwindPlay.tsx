@@ -1,4 +1,4 @@
-import { component, mount, css, template, Style } from "@rue/luent";
+import { component, mountIsland, css, template, Style } from "@rue/luent";
 import "./index.css"
 import "./TailwindPlay-card.css"
 import ".overrides.css" // transpiler
@@ -57,7 +57,7 @@ function TailwindPlay() {
 }
 
 if (__STYLE__)
-    mount(TailwindPlay, '#root')
+    mountIsland(TailwindPlay, '#root')
 
 
 // <Card className="h-[610px] gap-2 flex flex-col border-solid border rounded-lg">

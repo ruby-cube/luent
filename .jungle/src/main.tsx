@@ -147,7 +147,7 @@ import { TestAsyncSelectPromises } from '../../demos/src/TestAsyncSelectPromises
 // }
 
 
-mount(TestBox, '#root')
+mountIsland(TestBox, '#root')
 
 // const frog = new IonicFrog('kermit')
 

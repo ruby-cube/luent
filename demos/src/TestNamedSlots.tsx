@@ -1,5 +1,5 @@
 import './index.css'
-import { component, mount, RenderSlot, template } from "@rue/luent";
+import { component, mountIsland, RenderSlot, template } from "@rue/luent";
 
 export function TestNamedSlots() {
 
@@ -28,5 +28,5 @@ function Comp({ Slot }: { Slot: { title: RenderSlot, description: RenderSlot } }
 }
 
 if (__STYLE__) {
-   mount(TestNamedSlots, '#root')
+   mountIsland(TestNamedSlots, '#root')
 }

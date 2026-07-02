@@ -60,6 +60,7 @@ export default defineConfig({
       { text: 'Learn', link: '/guide/anatomy-of-an-app' },
       { text: 'Demos', link: '/markdown-examples' },
       { text: 'Code Glimpses', link: '/markdown-examples' },
+      { text: 'Reference', link: '/guide/api-overview' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
       { text: 'Introducing NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
@@ -71,13 +72,6 @@ export default defineConfig({
         collapsed: false,
         items: [{
           text: '&nbsp;&nbsp;&nbsp;&nbsp;nsx&nbsp;&nbsp;&nbsp;&nbsp;tsx'
-        }]
-      },
-      {
-        text: 'API reference',
-        items: [{
-          text: 'Overview',
-          link: '/guide/api-overview',
         }]
       },
       {

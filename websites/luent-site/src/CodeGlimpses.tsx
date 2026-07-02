@@ -130,7 +130,7 @@ FunctionalComponents.nsx =
   </:>
 }
 
-mount(Counter, '#app')
+mountIsland(Counter, '#app')
 
 `
 
@@ -152,7 +152,7 @@ FunctionalComponents.tsx =
   </>
 }
 
-mount(Counter, '#app')
+mountIsland(Counter, '#app')
 
 `
 
@@ -220,7 +220,7 @@ function TypeExplicit() {
 }
 
 TypeExplicit.nsHover = {
-  count: 'const count: number',
+  count: 'let count: number',
   total: 'get total: Ion<number>',
   total_1: 'get total: Ion<number>',
   qty: 'get qty: Ion<number>',
@@ -239,7 +239,7 @@ TypeExplicit.nsHover = {
 // ]
 
 TypeExplicit.tsHover = {
-  count: 'const count: number',
+  count: 'let count: number',
   '$total': 'const $total: Ion<number>',
   '$total_1': 'const $total: Ion<number>',
   '$qty': 'const $qty: Ion<number>',
@@ -249,7 +249,9 @@ TypeExplicit.tsHover = {
 }
 
 TypeExplicit.nsx =
-  `get total = ion(() => count * qty);
+  `// (excerpt of function body)
+
+get total = ion(() => count * qty);
 
 // ---
 
@@ -263,16 +265,18 @@ TypeExplicit.nsx =
 `
 
 TypeExplicit.tsx =
-  `const $total = ion(() => count * $qty())
+  `// (excerpt of function body)
+
+const $total = ion(() => count * $qty())
 
 // ---
 
-<:>
+return <>
   {For(list, item => 
     <li>{item}</li>
   )}
   <div>{$total}</div>
-</:>
+</>
 
 `
 SelectiveReactivity.heading = 'Selective reactivity'

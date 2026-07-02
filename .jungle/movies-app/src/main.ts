@@ -1,4 +1,4 @@
-import {mount} from "@rue/luent"
+import {mountIsland} from "@rue/luent"
 import { Root } from "./Root"
 
-mount(Root, '#root')
+mountIsland(Root, '#root')

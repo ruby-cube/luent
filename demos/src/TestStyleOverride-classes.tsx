@@ -1,4 +1,4 @@
-import { component, mount, css, template } from "@rue/luent";
+import { component, mountIsland, css, template } from "@rue/luent";
 import "./TestStyleOverride-classes.css"
 import { AnyObject } from "@rue/types";
 
@@ -59,7 +59,7 @@ function Child() {
     `);
 }
 
-if (__STYLE__) mount(Grandparent, "#root");
+if (__STYLE__) mountIsland(Grandparent, "#root");
 
 function getTailwindClassDeclaration(className: string, specifiers: string[]) {
     const selector = generateSelector(className, specifiers)

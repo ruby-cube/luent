@@ -1,4 +1,4 @@
-import { component, template, If, Else, ElseIf, NodeRef, mount, Style, css } from "@rue/luent";
+import { component, template, If, Else, ElseIf, NodeRef, mountIsland, Style, css } from "@rue/luent";
 import { ion, ooo, atRender, queueTask, toValue, watch } from "@rue/quarky";
 import "./style.css"
 import { Transition } from "../../../packages/luent/src/transitions/Transition";
@@ -79,4 +79,4 @@ export function TestIfElse() {
 }
 
 
-if (__TEST__) mount(TestIfElse, '#root')
+if (__TEST__) mountIsland(TestIfElse, '#root')

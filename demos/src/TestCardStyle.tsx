@@ -1,4 +1,4 @@
-import { component, mount, template } from "@rue/luent";
+import { component, mountIsland, template } from "@rue/luent";
 import "./ui/card.css"
 
 export function TestCardStyle() {
@@ -9,4 +9,4 @@ export function TestCardStyle() {
 }   
 
 if (__STYLE__)
-    mount(TestCardStyle, '#root')
+    mountIsland(TestCardStyle, '#root')

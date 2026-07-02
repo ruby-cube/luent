@@ -1,4 +1,4 @@
-import { mount } from "@rue/luent"
+import { mountIsland } from "@rue/luent"
 import { Button } from "../Button"
 import {
    Card,
@@ -64,5 +64,5 @@ export function CardDemo() {
 }
 
 if (__STYLE__) {
-   mount(CardDemo, '#root')
+   mountIsland(CardDemo, '#root')
 }
