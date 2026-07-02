@@ -201,7 +201,7 @@ export function makeJSXNode(
       return Portal('html', Slot, config);
 
     case 'o--body':
-      return Portal('body', Slot, config);
+      return Portal(document.body, Slot, config);
 
     case 'o--head':
       return Portal('head', Slot, config);

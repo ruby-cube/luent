@@ -24,7 +24,6 @@ function DropdownKit<I extends { [key: string]: any }>() {
             dropdown.hide()
          },
          anchor(node: HTMLElement) {
-            // @ts-expect-error
             node.style.anchorName
                = anchorName
             node.setAttribute(DATA_ATTRIBUTE_POPOVER, anchorName)

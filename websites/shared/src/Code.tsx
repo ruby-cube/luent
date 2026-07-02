@@ -1,5 +1,5 @@
-import { As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag, afterAttach } from "@rue/luent";
-import { Ion, ion, MutableIon } from "@rue/quarky";
+import { As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag, afterAttach, beforeUnmount, beforeMount } from "@rue/luent";
+import { atRender, atTick, Ion, ion, MutableIon } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
 import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -11,7 +11,9 @@ function encodeHover(variable: string) {
 }
 
 function decode(code: string) {
-  return code.replaceAll('æ', '')
+  return code
+    .replaceAll('æ', '')
+    .replaceAll("data-hover-id='$", "data-hover-id='ß") // dollar signs cause trouble in css selectors, so we must get rid of them
 }
 
 function markHover(code: string, map?: { [key: string]: string }) {
@@ -107,10 +109,10 @@ export function Code(setup: FromTag<{
         })}
         <o:preserve>
           {Await(() => <>
-            {If(() => $tab() === 'main', () =>
+            {If(() => $tab() === 'main', 'create', () =>
               CodeBlock(main, highlight)
             )}
-            {Else(() =>
+            {Else('create', () =>
               CodeBlock(alt, highlight)
             )}
           </>)}
@@ -249,18 +251,19 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
     }
   })
   const $container = NodeRef('div')
-  console.log('$$$ RENDER CODE BLOCK')
+
   return <>
     <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
       <div ref={$container} class='code'>{{ html: $code, trusted }}</div>
       {Await($code, () => <>
         {If(tab.hover, () => {
+          const hoverMap = removeDollarSigns(tab.hover!)
           const { tooltip, setTooltipTrigger } = TooltipKit({
-            info: tab.hover,
+            info: hoverMap,
             container: $container
           })
           afterAttach(() => {
-            for (const key in tab.hover) {
+            for (const key in hoverMap) {
               const node = document.querySelector(`[data-hover-id="${key}"]`)
               if (node)
                 setTooltipTrigger[key](node)
@@ -275,4 +278,12 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
       </>)}
     </o:context>
   </>
+}
+
+function removeDollarSigns(map: { [key: string]: string }) {
+  const safeMap = Object.create(null)
+  for (const key in map) {
+    safeMap[key.replaceAll('$', 'ß')] = map[key]
+  }
+  return safeMap
 }

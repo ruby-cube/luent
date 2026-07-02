@@ -26,7 +26,7 @@ export function HoverInfo(setup: FromTag<{
   tooltip.configure({ placement: place, alignment: align, gap })
 
   return (
-    <o--body>
+    // <o--body>
       <TooltipRoot
         tooltip={tooltip}>
         <TooltipContent
@@ -37,6 +37,6 @@ export function HoverInfo(setup: FromTag<{
           {Slot()}
         </TooltipContent>
       </TooltipRoot>
-    </o--body>
+    // </o--body>
   )
 }

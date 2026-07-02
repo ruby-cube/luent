@@ -239,9 +239,13 @@ TypeExplicit.nsHover = {
 // ]
 
 TypeExplicit.tsHover = {
-  count: '(parameter) count: number',
-  $total: 'const $total: Ion<number>',
-  $qty: 'const $qty: Ion<number>',
+  count: 'const count: number',
+  '$total': 'const $total: Ion<number>',
+  '$total_1': 'const $total: Ion<number>',
+  '$qty': 'const $qty: Ion<number>',
+  list: 'const list: Ionic<List>',
+  item: '(parameter) item: Item',
+  item_1: '(parameter) item: Item',
 }
 
 TypeExplicit.nsx =

@@ -1,8 +1,8 @@
-import { beforeUnmount, beforeDetach } from "../flask/flask-hooks";
+import { beforeUnmount, beforeDetach, atMount } from "../flask/flask-hooks";
 import { writeToPortal } from "../server/portals";
 import { isTransitioningOut } from "../transitions/transitions";
-import { getFlask } from "@rue/flask";
-import { queueTask } from "@rue/quarky";
+import { Flask, getFlask } from "@rue/flask";
+import { atRender, atTick, queueTask } from "@rue/quarky";
 import { inShadow } from "./shadow";
 // import { createHash } from "node:crypto";
 
@@ -22,13 +22,14 @@ function declareStyles(strings: TemplateStringsArray, ...values: any[]): string 
   return composeCSSText(strings, values)
 }
 
-function insertStyle(cssText: string, id: string, shadow: true | undefined) {
+function createStyleTag(cssText: string, id: string, shadow: true | undefined) {
   const style = document.createElement('style');
   style.id = id;
-  if (!shadow) document.head.appendChild(style);
   style.textContent = cssText;
   return style;
 }
+
+
 
 function composeCSSText(strings: TemplateStringsArray, values: string[]) {
   return strings.reduce((cssText, string, i) => cssText + string + (i < values.length ? values[i] : ''), '')
@@ -66,25 +67,48 @@ export function Style(cssText: string) {
     writeToPortal('head', style)
     return;
   }
-  const existing = document.querySelector('#' + id)
-  if (existing) {
-    console.warn('#$# existing style tag', existing)
-    return;
-  }
-  const style = insertStyle(cssText, id, shadow)
-  const flask = getFlask()
-  beforeUnmount(() => {
-    if (isTransitioningOut(flask)) {
-      queueTask(() => {
-        flask.onDiscard(() => {
-          style.remove()
-        })
-      })
+  if (shadow) {
+    const existing = document.querySelector('#' + id) // TODO: check shadow instead of document?
+    if (existing) {
+      console.warn('#$# existing style tag', existing)
       return;
     }
-    style.remove(); // TODO: wait till end of transition to remove
-  })
-  if (shadow) return style
+    const style = createStyleTag(cssText, id, shadow)
+    beforeUnmount(() => {
+      discardStyleTag(style, flask)
+    })
+    return style;
+  }
+  const flask = getFlask()
+  const style = createStyleTag(cssText, id, shadow)
+  if (style) {
+    atMount(() => {
+      const existing = document.querySelector('#' + id)
+      if (existing) {
+        console.warn('#$# existing style tag', existing)
+        return;
+      }
+      document.head.appendChild(style);
+    })
+    beforeUnmount(() => {
+      discardStyleTag(style, flask)
+    })
+  }
+}
+
+
+function discardStyleTag(style: HTMLStyleElement, flask: Flask) {
+  if (isTransitioningOut(flask)) {
+    queueTask(() => {
+      flask.onDiscard(() => {
+        console.log('#$# remove style transitioning')
+        style.remove()
+      })
+    })
+    return;
+  }
+  console.log('#$# remove style')
+  style.remove(); // TODO: wait till end of transition to remove
 }
 
 function hash(text: string): string {
