@@ -57,7 +57,7 @@ export default defineConfig({
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Learn', link: '/guide/anatomy-of-an-app' },
+      { text: 'Learn', link: '/guide/interactive-islands' },
       { text: 'Demos', link: '/demos/habit-tracker' },
       { text: 'Code Glimpses', link: '/markdown-examples' },
       { text: 'Reference', link: '/guide/api-overview' },
@@ -78,7 +78,7 @@ export default defineConfig({
       {
         text: 'Essentials',
         items: [
-          { text: 'Anatomy of an App', link: '/guide/anatomy-of-an-app' },
+          { text: 'Interactive islands', link: '/guide/interactive-islands' },
           {
             text: 'Reactive State', link: '/guide/reactive-state', items: [
               // { text: 'Atomic Reactive State', link: '/guide/getter-syntax#accessor-variables' },

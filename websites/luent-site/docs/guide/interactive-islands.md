@@ -1,16 +1,16 @@
-# Anatomy of an App
+# Interactive islands
 
-Luent apps are interactive islands mounted onto static HTML.
+Luent provides APIs to build dynamic interactive islands that are mounted onto static HTML.
 
-## Mounting an app
+## Mounting an island
 
-There are three main steps to mounting an app to the DOM:
+There are three main steps to mounting an island to the DOM:
 
-- defining the app with one or more [render functions](#render-functions)
+- defining the island with one or more [render functions](#render-functions)
 - mounting the root view to an HTML element
 - loading the entry script in the HTML document
 
-**Define the app**
+**Define the island**
 
 ```nsx
 // HelloWorld.nsx
@@ -30,14 +30,14 @@ function HelloWorld() {
 }
 ```
 
-**Designate an app container in the HTML**
+**Designate an island container in the HTML**
 
 ```html
 <!-- index.html -->
 <hello-world></hello-world>
 ```
 
-**Instantiate and mount the app**
+**Instantiate and mount the island**
 
 ```nsx
 // main.tsx
@@ -56,11 +56,11 @@ mountIsland(HelloWorld, "hello-world");
 <script type="module" src="/main.tsx"></script>
 ```
 
-App containers may be any native element or a custom tag. Custom tag names must contain a dash. Mount to the app container by either passing in a css selector or the DOM node.
+Island containers may be any native element or a custom tag. Custom tag names must contain a dash. Mount to the island container by either passing in a css selector or the DOM node.
 
 ## Render functions
 
-Render functions are functions that create a view. They are essentially view templates and serve as the building blocks of an app.
+Render functions are functions that create a view. They are essentially view templates and serve as the building blocks of an dynamic island.
 
 To define a render function, declare a function that returns a view composed using [JSX](#jsx) or [NSX]().
 

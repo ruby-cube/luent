@@ -4,13 +4,12 @@
 The API reference is still being written. In the meantime, here is a overview of Luent's APIs
 :::
 
-## App rendering
-Apps may be rendered as interactive islands on the client and static islands on the server.
+## Island rendering
 #### Client-side
 - `mountIsland()` to mount an interactive island
 #### Server-side
-- `writeIsland()` to write the app as static html
-- `withIslands()` [experimental] to transform HTML to include islands
+- `writeIsland()` to write the island as static html
+- `withIslands()` <span class='doc-tag'>Experimental</span> to transform HTML to include islands
 
 ## Reactivity
 - `ion()` to create simple and derived reactive state
@@ -30,7 +29,7 @@ Apps may be rendered as interactive islands on the client and static islands on 
 - `fromContext()` to access a binding from nearest providing context node
 - `fromRoot()` to access a binding from root
 - `fromGround()` to access a global binding
-- `provideRoot()` to provide a binding from root of app
+- `provideRoot()` to provide a binding from the island root
 - `provideGround()` to provide a global binding
 - `ContextKey()` to create a context binding key
 - `mergeKeys()` to merge multiple keys into one
@@ -54,7 +53,7 @@ Apps may be rendered as interactive islands on the client and static islands on 
 - `microclass` for utility classes
 - `auto-bind` for forwarded bindings
 - `ref` for node access
-- `node` [experimental] for pre-existing DOM nodes
+- `node` <span class='doc-tag'>Experimental</span> for pre-existing DOM nodes
 
 ## Flow functions
 Flow functions are called within JSX to direct the control flow of view rendering.
@@ -89,13 +88,17 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 ## Node access
 - `component()` to expose a component instance
 - `NodeRef()` to create a node accessor
-- `DOMNode()` [experimental] to create a DOM node 
+- `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node 
 
 ## Async rendering
 - `Suspense()` to batch async state
 - `Lazy()` to create a lazy loaded component or render function
 - `Dispatch()` to create async actions
 - `dispatch()` for async updates
+
+## Async tasks
+- `awaiting()` for awaiting promises without losing context
+- `streaming` for async sequences with context
 
 ## Render cycle phases
 - `prelude` before update is rendered to DOM
