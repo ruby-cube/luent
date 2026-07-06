@@ -1877,10 +1877,13 @@ declare global {
 // IMPORTANT Components and elements
 // N = (props: P) => JSX.Element
 type LuentAttributes<F, P> =
-  P extends { '~bindings'?: infer A } ?
-  //  ? A & Luent.LuentHooks<Luent.ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<Luent.ComponentRef<F>>// Component Attributes
-  //  : P // Element attributes must be added to DetailedHTMLProps
+  F extends (...args: infer Params) => any ? 
+  Params extends never[] ? {}
+  : Params extends [infer B] ? 
+  B extends { '~bindings'?: infer A } ?
   GlobalAttributes & A & Luent.LuentHooks<Luent.ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<Luent.ComponentRef<F>>
+  : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
+  : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
   : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
 
 type LuentComponentAttributes<C> = {

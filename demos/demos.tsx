@@ -1,11 +1,11 @@
-import { mountIsland, MICROCLASS_MERGE, provideRoot } from "@rue/luent"
+import { mountIsland, MICROCLASS_MERGE, provideRoot, FromTag } from "@rue/luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
 import { TriangleDemo } from "./src/SierpinskiTriangles"
 import { TestListSelectTransition } from "./src/TestListSelectTransition"
 import { TestListTransit } from "./src/TestListTransit"
-import { TestIfElse } from "./src/TestIfElse"
+import { TestIfElse } from "./src/TestIfElse-Transitions"
 import { TodoMVC } from "./src/TodoMVC"
 // import { } from "./src/TodoMVC"
 import { TrafficLight } from "./src/TrafficLight.nsx"
@@ -52,7 +52,6 @@ export function runDemo() {
   mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestRenderCycle />
+    return <TestIfElse />
   }, '#root')
 }
-

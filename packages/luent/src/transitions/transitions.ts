@@ -20,7 +20,7 @@ export type TransitionConfigs = {
    'transit-class'?: MaybeIon<string>
    'transit-key'?: any
    'transit-port'?: any
-   'animate-load'?: boolean | MaybeIon<string>
+   'animate-intro'?: boolean | MaybeIon<string>
    'animate-in'?: boolean | MaybeIon<string>
    'animate-out'?: boolean | MaybeIon<string>
 
@@ -91,8 +91,8 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
    const animateInClasses = animateIn === true ? useAnimateIn() : animateIn as MaybeIon<string>
    const animateOut = transitions['animate-out'] ?? transitionConfig?.["animate-out"]
    const animateOutClasses = animateOut === true ? useAnimateOut() : animateOut
-   const animateLoad = transitions['animate-load'] ?? transitionConfig?.["animate-load"]
-   const animateLoadClasses = animateLoad === true ? animateInClasses : animateLoad as MaybeIon<string>
+   const animateIntro = transitions['animate-intro'] ?? transitionConfig?.["animate-load"]
+   const animateIntroClasses = animateIntro === true ? animateInClasses : animateIntro as MaybeIon<string>
 
    const animateItem = transitions['animate-item'] ?? transitionConfig?.["animate-item"]
    const animateItemClasses = animateItem === true ? undefined : animateItem
@@ -112,7 +112,7 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
 
    if (animateInClasses || transitionInClasses) {
       atAttach(() => {
-         if (!animateLoad && initialRender) return;
+         if (!animateIntro && initialRender) return;
          transitionIn(node, (clone) => {
             let endTransition: () => void
             let cancelTransition: () => void
@@ -127,9 +127,9 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
                      transitionCount++
                      startAnimateIn(clone, toClassNames(toValue(animateInClasses)), onEnd)
                   }
-                  else if (initialRender && animateLoad) {
+                  else if (initialRender && animateIntro) {
                      transitionCount++
-                     startAnimateIn(clone, toClassNames(toValue(animateLoadClasses)), onEnd)
+                     startAnimateIn(clone, toClassNames(toValue(animateIntroClasses)), onEnd)
                   }
                   if (transitionInClasses && fromClasses) {
                      transitionCount++
@@ -200,7 +200,7 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
 
 function positionClone(clone: HTMLElement, rect: DOMRect) {
    clone.style.setProperty('position', 'absolute')
-   clone.style.setProperty('top', rect.top + 'px')
+   clone.style.setProperty('top', rect.top + 16 + 'px') // FIX: Why do I need to add 16px for transition out to be correct?
    clone.style.setProperty('left', rect.left + 'px')
    clone.style.setProperty('width', rect.width + 'px')
    clone.style.setProperty('height', rect.height + 'px')

@@ -29,6 +29,7 @@ export function makeElement(
   console.log('@@@before compose bindings', bindings)
   const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
   console.log('showIf', showIf)
+  console.warn('transitions', transitions)
 
   let newXML_NS: string | undefined;
   let XML_NS: string | undefined;
@@ -93,7 +94,7 @@ const transitionAttributes = {
   'transit-class': true,
   'transit-key': true,
   'transit-port': true,
-  'animate-load': true,
+  'animate-intro': true,
   'animate-in': true,
   'animate-out': true,
   'transition-in-from': true,

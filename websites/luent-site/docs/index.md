@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "Luent"
-  tagline: An expressive framework for building web applications
+  tagline: An expressive framework for developing the web
   image:
     src: /assets/luent-logo-512px.png
     alt: My Logo

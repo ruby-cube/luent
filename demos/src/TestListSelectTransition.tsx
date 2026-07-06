@@ -1,4 +1,4 @@
-import { component, template, For, listen, NodeRef, Style, css } from "@rue/luent";
+import { component, template, For, listen, NodeRef, Style, css, $of } from "@rue/luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import './style.css'
 import { ion, atRender, queueTask, EACH, ionic } from "@rue/quarky";
@@ -10,13 +10,11 @@ class ListItem {
    ) { }
 
    changeContent() {
-      console.log('change content')
       this.content = 'something else'
    }
 }
 
 type ItemData = { id: number, content: string }
-
 
 const ionicItem = (data: ItemData) => ionic(new ListItem(data.id, data.content))
 
@@ -120,10 +118,10 @@ export function TestListSelectTransition() {
          <div style='display: grid; grid-template-columns: 1fr 1fr; place-items: center; align-items: start'>
             <div style='width: 20vw'>
                <div ref={$container} class='list' style="list-style-type: none;">
-                  <div on:click={e => insertItem(0)} style="background-color: gray; cursor: pointer">
+                  <div on:click={() => insertItem(0)} style="background-color: gray; cursor: pointer">
                      +
                   </div>
-                  <div on:click={e => moveSelectedItems(0)} style="background-color: white; cursor: pointer">
+                  <div on:click={() => moveSelectedItems(0)} style="background-color: white; cursor: pointer">
                      insert
                   </div>
 
@@ -136,14 +134,14 @@ export function TestListSelectTransition() {
                            on:click={e => !e.from('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
                            style={{
                               backgroundColor: randomColor.get(),
-                              outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
+                              outline: ()=>(selected.has(item) ? 'thick solid blue' : 'unset'),
                            }}>
                            <button class='delete-btn' on:click={e => removeItem($index())} style="cursor: pointer">
                               X
                            </button>
 
                            <li on:click={e => item.changeContent()}>
-                              {item.$content}
+                              {$of(item).content}
                            </li>
                            <p>{$index}</p>
                            <div on:click={e => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">
@@ -162,7 +160,7 @@ export function TestListSelectTransition() {
                </div>
             </div>
 
-            <div style='width: 20vw; list-style-type: none;'>
+            {/* <div style='width: 20vw; list-style-type: none;'>
                {For($listClone, ($item, index) =>
                   <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                      <li>
@@ -171,7 +169,7 @@ export function TestListSelectTransition() {
                      <p>{index}</p>
                   </div>
                )}
-            </div>
+            </div> */}
          </div>
          {Style(css`
             body {

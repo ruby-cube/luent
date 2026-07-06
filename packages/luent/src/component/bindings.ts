@@ -282,6 +282,33 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
         composed.showIf = bindings['display-if']
         break;
 
+      //  'animate-item'?: boolean | MaybeIon<string>
+      //  'transition-item'?: boolean | MaybeIon<string>
+      //  'transit-class'?: MaybeIon<string>
+      //  'transit-key'?: any
+      //  'transit-port'?: any
+      //  'animate-intro'?: boolean | MaybeIon<string>
+      //  'animate-in'?: boolean | MaybeIon<string>
+      //  'animate-out'?: boolean | MaybeIon<string>
+
+      //  'transition-in-from'?: MaybeIon<string>
+      //  'transition-in'?: MaybeIon<string>
+
+
+      case 'animate-in':
+      case 'animate-out':
+      case 'transition-in-from':
+      case 'transition-in':
+      case 'animate-intro':
+      case 'transit-port':
+      case 'transit-key':
+      case 'transit-class':
+      case 'transition-item':
+      case 'animate-item':
+        const transitions = composed.transitions ?? (composed.transitions = Object.create(null))
+        transitions[key] = bindings[key]
+        break;
+
       default: // attributes
         const attributes = composed.attributes ?? (composed.attributes = Object.create(null))
         attributes[key] = bindings[key]

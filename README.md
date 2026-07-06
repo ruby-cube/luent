@@ -7,7 +7,7 @@
 
 # Luent
 
-Luent is a web application framework designed around conceptual coherence and expressiveness. It aims to make complex, evolving applications simpler to build and maintain. 
+Luent is a web framework designed around conceptual coherence and expressiveness. It aims to make complex, evolving applications simpler to build and maintain. 
 
 It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension that improves the clarity, ergonomics, and type safety of fine-grained reactive code.
 
@@ -33,7 +33,7 @@ This project explores ways to reduce framework friction and simplify application
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Features
-Luent currently provides most of the standard features expected of a modern frontend framework, with server-side features planned.
+Luent currently provides the core capabilities expected of a modern framework, including support for static site generation, server-side rendering, and building client-side interactivity.
 
 Core design features:
 - a unified system of fine-grained reactivity through `ion()` and `ionic()`
@@ -54,12 +54,12 @@ Luent transpiles JSX into `jsx()` calls for straightforward mental mapping betwe
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants
 - [JSX flow expressions](http://luent.dev/guide/template-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories
-- `<o-style>` tags are transformed to `style()` calls with a string template literal argument
 - JSX fragments are transformed into arrays
 
 This JSX template ...
 ```jsx
 <>
+  <h1>Home</h1>
   <Parent foo={foo} bar={bar()} on:click={logClick}>
     <Child />
     {If(active, 
@@ -69,17 +69,13 @@ This JSX template ...
       <div class='msg'>zzzzzz</div>
     )}
   </Parent>
-  <o-style>
-    .msg {
-      border: 1px solid gray;
-    }
-  </o-style>
 </>
 ```
 
 ... essentially maps to:
 ```jsx
 [
+  jsx('h1', { Slot: () => ['Home']}),
   jsx(Parent, { foo: foo, bar: bar(), 'on:click': logClick,
     Slot: () => [
       jsx(Child),
@@ -92,12 +88,7 @@ This JSX template ...
         ])
       )
     ]
-  }),
-  style(`    
-    .msg {
-      border: 1px solid gray;
-    }
-  `)
+  })
 ]
 
 ```
