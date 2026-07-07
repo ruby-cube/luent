@@ -25,14 +25,14 @@ const demoBoxStyle = "relative flex h-72 w-full justify-center p-10 data-[align=
 export function TooltipDemo() {
   const { tooltip, setTooltipTrigger } = TooltipKit({
     info: { // TODO: remove info?
-      bold: 'Bold Bold Bold Bold',
+      bold: 'Bold',
       italic: 'Italic',
       underline: 'Underline'
     }
   })
 
   return (
-    <o:context provide={[TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })]}>
+    <o:context provide={[TOOLTIP_CONFIG({ /* delay: 500, hideDelay: 500 */ })]}>
       <div data-align='center' class={demoBoxStyle}>
 
         {/* <div style='background-color: lightblue' before:mount={tooltip.anchor.bold}>b</div> */}
@@ -49,12 +49,10 @@ export function TooltipDemo() {
           U
         </Button>
         <Tooltip tooltip={tooltip} place="above" align="center">
-          <p>{() => (tooltip.info)}</p>
-          <p>{() => (tooltip.info)}</p>
-          <p>{() => (tooltip.info)}</p>
+          <p>{() => tooltip.info}</p>
         </Tooltip>
       </div>
-      <button class='mt-70' on:click={e => tooltip.hide()}>hide tooltip</button>
+      <button class='mt-70' on:click={() => tooltip.hide()}>hide tooltip</button>
     </o:context>
   )
 }

@@ -1,19 +1,7 @@
 import { Flask, getFlask } from "@rue/flask";
-import { instantUpdate, isGetter, atRender, RUN_EAGERLY, swiftUpdate, toValue, trackForRender } from "@rue/quarky";
+import { isGetter, atRender, RUN_EAGERLY, toValue, trackForRender } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
-import { setUpInnerHTML } from "../node/InnerHTML";
-import { isHydrating } from "../hydration/hydration";
 import { AnyObject } from "@rue/types";
-
-const globalHTMLAttributes = new Set([
-  'accesskey', 'class', 'contenteditable', 'contextmenu', 'data-*', 'dir',
-  'draggable', 'hidden', 'id', 'lang', 'spellcheck', 'style', 'tabindex',
-  'title', 'translate'
-])
-
-export function isHTMLAttribute(key: string, tag: keyof HTMLElementTagNameMap) {
-  return globalHTMLAttributes.has(key) || key.startsWith('aria-') || key.startsWith('data-') // TODO: need to add element specific attributes
-}
 
 
 export function setUpAttributes(node: Element | null, attributes: { [key: string]: MaybeIon<any> }) {
@@ -30,7 +18,7 @@ export function setUpAttributes(node: Element | null, attributes: { [key: string
   }
 }
 
-function setAttribute(node: Element | null, key: string, value: any, flask: Flask) {
+export function setAttribute(node: Element | null, key: string, value: any, flask: Flask) {
   if (!node) {
     console.warn('Node is missing. Cannot setAttribute.')
     return;

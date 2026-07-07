@@ -110,7 +110,8 @@ const accessorsProxyCache = new WeakMap<object, object>();
 const POSTFIX = Symbol('postfix')
 
 
-function accessorsOf<T extends object>(target: T, postfix?: '?' | '!'): AccessorsOf<T> {
+function accessorsOf<T extends object>(target: T | undefined | null, postfix?: '?' | '!'): AccessorsOf<T> | undefined {
+  if (target == undefined) return undefined;
   let proxy: AccessorsOf<T> | undefined = accessorsProxyCache.get(target) as AccessorsOf<T> | undefined
   if (proxy) {
     (proxy as AccessorsOf<T> & { [POSTFIX]: Postfix | undefined })[POSTFIX] = postfix

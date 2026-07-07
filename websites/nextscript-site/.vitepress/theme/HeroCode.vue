@@ -6,7 +6,7 @@
         <span class='ns-hero-code__dot'></span>
         <span class='ns-hero-code__title'>total.nsx</span>
       </div>
-      <pre class='ns-hero-code__body'><code class='ns-hero-code__content'>{{`function Total({ count@ }: { count: Ion<number> }) {
+      <pre class='ns-hero-code__body'><code class='ns-hero-code__content'>{{`function Total({ count@ }: Tag) {
   get qty = ion(0)
 
   <:>

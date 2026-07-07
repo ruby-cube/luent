@@ -7,11 +7,8 @@ hero:
   text: "A TypeScript + JSX Language Extension"
   tagline: for writing clear, ergonomic, type-safe code
   actions:
-    - theme: brand
-      text: Learn NextScript
-      link: /guide/getter-syntax.md
     - theme: alt
-      text: Code Glimpses
+      text: Take a code tour
       link: /#code-glimpses
 
 features:
@@ -40,10 +37,27 @@ features:
 
 <p class='custom-block status-notice'><strong>This project is in early development.</strong></p>
 
+<style>
+.VPButton.alt {
+  border: 1px solid var(--vp-c-brand-1) !important;
+  background-color: transparent !important;
+  color: var(--vp-c-brand-1) !important;
+}
+
+.VPButton.alt:hover {
+  border: 1px solid var(--vp-c-brand-2) !important;
+  color: var(--vp-c-brand-2) !important;
+}
+/* .tagline {
+  color: var(--vp-c-text-1) !important;
+} */
+</style>
+
 <style scoped>
-  section#code-glimpses p {
-    margin-inline: auto;
-  }
+
+section#code-glimpses p {
+  margin-inline: auto;
+}
 
 p.custom-block.status-notice {
   border: .5px solid var(--vp-c-brand-1);

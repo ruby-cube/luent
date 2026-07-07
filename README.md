@@ -33,7 +33,7 @@ This project explores ways to reduce framework friction and simplify application
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Features
-Luent currently provides the core capabilities expected of a modern framework, including support for static site generation, server-side rendering, and building client-side interactivity.
+Luent currently provides the core capabilities expected of a modern web framework, including support for static site generation, server-side rendering, and building client-side interactivity.
 
 Core design features:
 - a unified system of fine-grained reactivity through `ion()` and `ionic()`

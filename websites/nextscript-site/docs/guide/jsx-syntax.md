@@ -356,14 +356,114 @@ const renderFoo = (x) <//>
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
+
+## JSX style tags
+<!-- <code><style><i>css rules</i></style></code> -->
+<code>&lt;style&gt;<i>css</i>&lt;/style&gt;</code>
+
+A JSX style tag is a special JSX tag whose slot is parsed as template literal text. Plain curly braces are treated as text while curly braces prefixed with a dollar sign, `${}`, serve as JavaScript expression containers. 
+
+The tag is transformed into a `jsxStyle()` call. The default implementation of `jsxStyle()` simply creates a style element with the slot text.
+
+```nsx
+const FONT_SIZE = 16;
+
+function Foo() {
+  <:>
+    <div class='message'>Hello world</div>
+    <style>
+      .message {
+        color: blue;
+        font-size: ${FONT_SIZE}
+      }
+    </style>
+  </:>
+}
+```
+:::info transpiled tsx
+```tsx
+const FONT_SIZE = 16;
+
+function Foo() {
+  return <>
+    <div class='message'>Hello world</div>
+    {jsxStyle('style', {
+      Slot:
+`.message {
+  color: blue;
+  font-size: ${FONT_SIZE}
+}`
+    })}
+  </>
+}
+```
+:::
+
+The `lang` attribute may be used as directives for build tools. NextScript itself will not compile `scss` to `css`.
+```nsx
+<style lang='scss'>
+  .message {
+    color: blue;
+    font-size: ${FONT_SIZE}
+  }
+</style>
+```
+:::info transpiled tsx
+```tsx
+{jsxStyle('style', {
+  lang: 'scss',
+  Slot:
+`.message {
+  color: blue;
+  font-size: ${FONT_SIZE}
+}`
+})}
+```
+:::
+
+
+Frameworks and libraries may register hyphenated style element names and define the runtime of `jsxStyle()`. In this example, the `<o-style>` tag has been configured to append the style element to the head of the document.
+```tsx
+nextscript({
+  jsx: {
+    styleTags: ['o-style'],
+    jsx
+  },
+})
+```
+```nsx
+<o-style>
+  .message {
+    color: blue;
+    font-size: ${FONT_SIZE}
+  }
+</o-style>
+```
+:::info transpiled tsx
+```tsx
+{jsxStyle('o-style', {
+  Slot:
+`.message {
+  color: blue;
+  font-size: ${FONT_SIZE}
+}`
+})}
+```
+:::
+
+
+
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+
 ## JSX component return
 <!-- `<::>jsx</::>` | `<:: as={component}>jsx</::>` -->
 <!-- <code><::><i>jsx</i></::></code> | -->
 <code><:: as={<i>component</i>}><i>jsx</i></::></code>
 
-The JSX component tag represents an auto-returned `JSXComponent()` call. It enables refs of component instances to be typed through its `as` attribute. 
+The JSX component tag represents an auto-returned `jsxComponent()` call. It enables refs of component instances to be typed through its `as` attribute. 
 
-The default implementation of `JSXComponent()` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
+The default implementation of `jsxComponent()` simply returns a `ComponentKit`, a plain object containing the component instance and nodes.
 
 ```nsx
 function Parent() {
@@ -404,7 +504,7 @@ function Dialog({ Slot }) {
     close() { opened.value = false }
   }
 
-  return JSXComponent({
+  return jsxComponent({
     slot: <>
       {If(opened, 
         <o--body>

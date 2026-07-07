@@ -16,7 +16,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@rue/types": "workspace:*",
     "@rue/vite-plugin-luent": "workspace:*",
-    "vite": "^8.0.13"
+    "vite": "^8.1.3"
   },
   "peerDependencies": {
     "tailwind-merge": "^3.5.0"

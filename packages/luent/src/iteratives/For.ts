@@ -1,12 +1,12 @@
-import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
+import { getFlask } from "@rue/flask";
 import { MaybeIon } from "../component/x-Input";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
-import { ListItemKit, ListKit, toAsyncRenderItem } from "./ItemList";
-import { Ion, Ionic, isGetter, PRELUDE, toIon, toValue, watch } from "@rue/quarky";
+import { ListKit, toAsyncRenderItem } from "./ItemList";
+import { atPrelude, atRender, Ion, Ionic, isGetter, PRELUDE, queueTask, toIon, toValue, watch } from "@rue/quarky";
 import { isIonicProxy } from "@rue/quarky/core";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { ForIndex, IndexedListKit, Nullish } from "./IndexedList";
-import { createStack, isObject } from "@rue/utils";
+import { ForIndex, Nullish } from "./IndexedList";
+import { createStack } from "@rue/utils";
 import { AnyObject } from "@rue/types";
 
 
@@ -24,19 +24,19 @@ export type Collection<T> = MaybeIon<T[]>
 type GetKey<L> = L extends (infer I)[] ? (item: I) => unknown : never
 
 type RenderDynamicIndex<L> = L extends (infer I)[] ? ($item: Ion<I>, index: number) => RawJSXNode
-   : L extends Set<infer I> ? ($item: Ion<I>, index: number) => RawJSXNode
-   : L extends Map<infer K, infer V> ? (entry: [Ion<K>, Ion<V>], index: number) => RawJSXNode
-   : L extends object ? (key: keyof L, index: number) => RawJSXNode
-   : never
+  : L extends Set<infer I> ? ($item: Ion<I>, index: number) => RawJSXNode
+  : L extends Map<infer K, infer V> ? (entry: [Ion<K>, Ion<V>], index: number) => RawJSXNode
+  : L extends object ? (key: keyof L, index: number) => RawJSXNode
+  : never
 
 export type RenderItem<L> = L extends (infer I)[] ? (item: I, $index: Ion<number>) => RawJSXNode
-   : never
+  : never
 
 type RenderStatic<L> = L extends (infer I)[] ? (item: I, index: number) => RawJSXNode
-   : L extends Set<infer I> ? (item: I, index: number) => RawJSXNode
-   : L extends Map<infer K, infer V> ? (entry: [K, V], index: number) => RawJSXNode
-   : L extends object ? (key: keyof L, index: number) => RawJSXNode
-   : (item: unknown, index: unknown) => RawJSXNode
+  : L extends Set<infer I> ? (item: I, index: number) => RawJSXNode
+  : L extends Map<infer K, infer V> ? (entry: [K, V], index: number) => RawJSXNode
+  : L extends object ? (key: keyof L, index: number) => RawJSXNode
+  : (item: unknown, index: unknown) => RawJSXNode
 
 type IsReactive<L> = L extends Ion<any> ? true : L extends { '~ionic': true } ? true : false
 
@@ -51,19 +51,22 @@ type ToValue<T> = T extends Ion<infer V> ? V : T
 const [pushList, popList, getList] = createStack<any>()
 
 export function atListChanged(task: () => void) {
-   watch(getList(), task, { phase: PRELUDE })
+  const list = getList()
+  atRender(() => { // QUESTION: Why is this important? When watch was being set up synchronously, any items that were initially loaded would not transition properly and inserted items would get unnecessarily transitioned in. atPrelude is too early and messes up consecutively inserted items
+    watch(list, task, { phase: PRELUDE })
+  })
 }
 
 function wrapWithList(renderItem: RenderItem<any>, list: any) {
-   return (item: any, index: any) => {
-      try {
-         pushList(list)
-         return renderItem(item, index)
-      }
-      finally {
-         popList()
-      }
-   }
+  return (item: any, index: any) => {
+    try {
+      pushList(list)
+      return renderItem(item, index)
+    }
+    finally {
+      popList()
+    }
+  }
 }
 
 
@@ -72,41 +75,41 @@ function wrapWithList(renderItem: RenderItem<any>, list: any) {
 export function For<L, U>(data: L & MaybeIon<Ionic<any[]> | any[] | Nullish>, getKey: GetKey<ToValue<L>>, render: RenderItem<ToValue<L>>): ListKit | undefined | RawJSXNode
 export function For<L, U>(data: L & ListData, render: RenderIndex<L>): ListKit | undefined | RawJSXNode
 export function For<L, U>(data: L & ListData, renderOrGetUID: GetKey<ToValue<L>> | RenderIndex<L>, render?: RenderItem<ToValue<L>>): ListKit | undefined | RawJSXNode {
-   if (!data) return;
-   const uidProvided = arguments.length === 3
-   const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID);
-   if (!import.meta.env.SSR && (isGetter(data) || isIonicProxy(data) && isIterable(data))) {
-      if (uidProvided) {
-         return new ListKit(toIon(data), toAsyncRenderItem(wrapWithList(_render, data)), renderOrGetUID as (item: unknown) => unknown, getFlask())
-      }
-      return ForIndex(data, toAsyncRenderItem(_render))
-   }
-   else {
-      return renderStaticList(toValue(data), _render)
-   }
+  if (!data) return;
+  const uidProvided = arguments.length === 3
+  const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID);
+  if (!import.meta.env.SSR && (isGetter(data) || isIonicProxy(data) && isIterable(data))) {
+    if (uidProvided) {
+      return new ListKit(toIon(data), toAsyncRenderItem(wrapWithList(_render, data)), renderOrGetUID as (item: unknown) => unknown, getFlask())
+    }
+    return ForIndex(data, toAsyncRenderItem(_render))
+  }
+  else {
+    return renderStaticList(toValue(data), _render)
+  }
 }
 
 function isIterable(data: any) {
-   return Symbol.iterator in data
+  return Symbol.iterator in data
 }
 
 
 
 function renderStaticList(data: undefined | unknown[] | Set<unknown> | Map<unknown, unknown> | AnyObject, render: (item: unknown, index: number) => RawJSXNode) {
-   if (!data) return;
-   const array = normalizeToArray(data)
-   const renderedList = []
-   for (let i = 0; i < array.length; i++) {
-      renderedList.push(render(array[i], i))
-   }
-   return renderedList
+  if (!data) return;
+  const array = normalizeToArray(data)
+  const renderedList = []
+  for (let i = 0; i < array.length; i++) {
+    renderedList.push(render(array[i], i))
+  }
+  return renderedList
 }
 
 function normalizeToArray(data: unknown[] | { [Symbol.iterator]: any } | ArrayLike<any> | object) {
-   if (Array.isArray(data)) return data;
-   if (Symbol.iterator in data)
-      return Array.from(data)
-   return Object.keys(data)
+  if (Array.isArray(data)) return data;
+  if (Symbol.iterator in data)
+    return Array.from(data)
+  return Object.keys(data)
 }
 
 

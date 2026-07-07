@@ -1,4 +1,4 @@
-import { component, FromTag, NodeRef, RenderSlot } from "@rue/luent"
+import {  FromTag, NodeRef, RenderSlot } from "@rue/luent"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../base/tooltip/Tooltip"
 import { IonicTooltip } from "../base/tooltip/Tooltip.kit";
 import { Alignment, Placement } from "../base/popover/Popover.kit";

@@ -1,5 +1,5 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { beforeUnmount, NodeRef, atLayout } from "@rue/luent"
+import { beforeUnmount, NodeRef, atLayout, awaiting } from "@rue/luent"
 import { toValue } from "@rue/quarky"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
@@ -114,28 +114,28 @@ export function positionTail(node: HTMLElement, popover: Popover, $popover: Node
     const axis = popover.axis
     const placement = axis === 'y' ? 'bottom' : 'left'// tail's placement on the other axis is handled by the tooltip container so we only care about one axis
 
-    computePosition(anchor, node, {
-      placement,
-    }).then(({ x, y }) => {
-      const inset = axis === 'y' ? x : y
-      const popoverNode = $popover()
-      if (!popoverNode) {
-        console.error('popoverNode is missing')
-        return;
-      }
-      // hide tail if popover is greatly misaligned due to collision shift
-      if (inset < 5 || popoverNode[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 5) {
-        if (visibility === null) visibility = node.style.visibility
-        node.style.visibility = 'hidden'
-      }
-      else {
-        if (typeof visibility === 'string') {
-          node.style.visibility = visibility
-          visibility = null
+    awaiting(computePosition(anchor, node, { placement }),
+      ({ x, y }) => {
+        const inset = axis === 'y' ? x : y
+        const popoverNode = $popover()
+        if (!popoverNode) {
+          console.error('popoverNode is missing')
+          return;
         }
-        node.style[axis === 'y' ? 'left' : 'top'] = `${inset}px`
+        // hide tail if popover is greatly misaligned due to collision shift
+        if (inset < 5 || popoverNode[axis === 'y' ? 'offsetWidth' : 'offsetHeight'] - inset < 5) {
+          if (visibility === null) visibility = node.style.visibility
+          node.style.visibility = 'hidden'
+        }
+        else {
+          if (typeof visibility === 'string') {
+            node.style.visibility = visibility
+            visibility = null
+          }
+          node.style[axis === 'y' ? 'left' : 'top'] = `${inset}px`
+        }
       }
-    });
+    );
   }
 
   const cleanup = autoUpdate(

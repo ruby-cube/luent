@@ -1,60 +1,60 @@
-import { component, template, For, FromTag, Style, css } from "@rue/luent";
+import { component, template, For, FromTag, Style, css, $of } from "@rue/luent";
 import { ion, ionic, EACH, Ion, Ionic, atRender, queueTask } from "@rue/quarky";
 import './TestListTransit.css'
 
 // Modified Demo from Svelte
 type Todo = {
-   id: number;
-   done: boolean;
-   description: string;
+  id: number;
+  done: boolean;
+  description: string;
 }
 
 export function TestListTransit() {
 
-   const $todos = ion(ionic([
-      { id: 1, done: false, description: 'write some docs' },
-      { id: 2, done: false, description: 'start writing blog post' },
-      { id: 3, done: true, description: 'buy some milk' },
-      { id: 4, done: false, description: 'mow the lawn' },
-      { id: 5, done: false, description: 'feed the turtle' },
-      { id: 6, done: false, description: 'fix some bugs' }
-   ], { [EACH]: { '-as': ionic } }));
+  const $todos = ion(ionic([
+    { id: 1, done: false, description: 'write some docs' },
+    { id: 2, done: false, description: 'start writing blog post' },
+    { id: 3, done: true, description: 'buy some milk' },
+    { id: 4, done: false, description: 'mow the lawn' },
+    { id: 5, done: false, description: 'feed the turtle' },
+    { id: 6, done: false, description: 'fix some bugs' }
+  ], { [EACH]: { '-as': ionic } }));
 
-   let uid = $todos().length + 1;
+  let uid = $todos().length + 1;
 
-   function remove(todo: Ionic<Todo>) {
-      const index = $todos().indexOf(todo);
-      $todos().splice(index, 1);
-   }
+  function remove(todo: Ionic<Todo>) {
+    const index = $todos().indexOf(todo);
+    $todos().splice(index, 1);
+  }
 
-   return (
+  return (
 
-      <>
+    <>
       <div class="board">
-         <input
-            placeholder="what needs to be done?"
-            on:keydown={(e) => {
-               if (e.key !== 'Enter') return;
+        <input
+          placeholder="what needs to be done?"
+          on:keydown={(e) => {
+            if (e.key !== 'Enter') return;
 
-               $todos().push(ionic({
-                  id: uid++,
-                  done: false,
-                  description: e.currentTarget.value
-               }));
+            $todos().push(ionic({
+              id: uid++,
+              done: false,
+              description: e.currentTarget.value
+            }));
 
-               e.currentTarget.value = '';
-            }}
-         />
+            e.currentTarget.value = '';
+          }}
+        />
 
-         <div class="todo">
-            <h2>todo</h2>
-            <TodoList todos={($todos().filter((t) => !t.done))} remove={remove} />
-         </div>
+        <div class="todo">
+          <h2>todo</h2>
+          <TodoList todos={() => $todos().filter((t) => !t.done)} remove={remove} />
+        </div>
 
-         <div class="done">
-            <h2>done</h2>
-            <TodoList todos={($todos().filter((t) => t.done))} remove={remove} />
-         </div>
+        <div class="done">
+          <h2>done</h2>
+          <TodoList todos={() => $todos().filter((t) => t.done)} remove={remove} />
+        </div>
       </div>
       {Style(css`
          .board {
@@ -81,8 +81,8 @@ export function TestListTransit() {
             transition: transform 150ms ease-in-out;
          }
       `)}
-      </>
-   )
+    </>
+  )
 }
 
 
@@ -90,66 +90,66 @@ export function TestListTransit() {
 const sent = new Map()
 
 function send(id: number, node: HTMLElement) {
-   const rect = node.getBoundingClientRect()
-   sent.set(id, rect)
+  const rect = node.getBoundingClientRect()
+  sent.set(id, rect)
 }
 
 function receive(id: number, node: HTMLElement) {
-   const first = sent.get(id)
-   if (first) {
-      const last = node.getBoundingClientRect()
-      atRender(() => {
-         const deltaY = first.top - last.top
-         const deltaX = first.left - last.left
-         if (deltaY || deltaX) {
-            node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
-            console.log('DELTA', 56)
-            requestAnimationFrame(() => {
-               queueTask(() => {
-                  node.classList.add('transition-position')
-                  node.style.setProperty('transform', `translate(${0}px, ${0}px)`)
-                  node.addEventListener('transitionend', () => {
-                     console.log('transition end')
-                     node.classList.remove('transition-position')
-                     node.style.removeProperty('transform')
-                  })
-               })
+  const first = sent.get(id)
+  if (first) {
+    const last = node.getBoundingClientRect()
+    atRender(() => {
+      const deltaY = first.top - last.top
+      const deltaX = first.left - last.left
+      if (deltaY || deltaX) {
+        node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
+        console.log('DELTA', 56)
+        requestAnimationFrame(() => {
+          queueTask(() => {
+            node.classList.add('transition-position')
+            node.style.setProperty('transform', `translate(${0}px, ${0}px)`)
+            node.addEventListener('transitionend', () => {
+              console.log('transition end')
+              node.classList.remove('transition-position')
+              node.style.removeProperty('transform')
             })
-         }
-      })
-   }
+          })
+        })
+      }
+    })
+  }
 }
 
 
 
-function TodoList(input: {
-   todos: Ion<Ionic<Todo>[]>,
-   remove: (todo: Ionic<Todo>) => void
-}) {
-   const { $todos, remove } = input
+function TodoList(input: FromTag<{
+  todos: Ion<Ionic<Todo>[]>,
+  remove: (todo: Ionic<Todo>) => void
+}>) {
+  const { $todos, remove } = input
 
-   const lis: HTMLLIElement[] = []
+  const lis: HTMLLIElement[] = []
 
-   return (
+  return (
 
-      <>
-         <ul class="todos">
-            {For($todos, t => t.id, (todo, $i) =>
-               <li
-                  transit-key={todo.id}
-                  animate-item
-                  class={(todo.done && 'done')}
-                  ref={[lis, $i]}
-               >
-                  <label>
-                     <input type="checkbox" mu:checked={todo.$done} />
-                     <span>{todo.description}</span>
-                     <button on:click={() => remove(todo)} aria-label="Remove">{'X'}</button>
-                  </label>
-               </li>
-            )}
-         </ul>
-         {Style(css`
+    <>
+      <ul class="todos">
+        {For($todos, t => t.id, (todo, $i) =>
+          <li
+            transit-key={todo.id}
+            transition-item
+            class={()=>(todo.done && 'done')}
+            ref={[lis, $i]}
+          >
+            <label>
+              <input type="checkbox" mu:checked={$of(todo).done} />
+              <span>{todo.description}</span>
+              <button on:click={() => remove(todo)} aria-label="Remove">{'X'}</button>
+            </label>
+          </li>
+        )}
+      </ul>
+      {Style(css`
             label {
                width: 100%;
                height: 100%;
@@ -169,8 +169,8 @@ function TodoList(input: {
                transition: transform 250ms ease-in-out;
             }
          `)}
-      </>
-   )
+    </>
+  )
 }
 
 

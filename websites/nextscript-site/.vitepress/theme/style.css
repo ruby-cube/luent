@@ -205,7 +205,7 @@
   top: 2.5rem;
 }
 
-html:not(.dark) .VPHomeFeatures .VPFeature {
+/* html:not(.dark) .VPHomeFeatures .VPFeature {
   background-color: #32363f;
 }
 
@@ -215,7 +215,7 @@ html:not(.dark) .VPHomeFeatures .VPFeature .details {
 
 html:not(.dark) .VPHomeFeatures .VPFeature .title {
   color: #fff;
-}
+} */
 
 #hero-code-panel-root {
   position: relative;
@@ -336,9 +336,7 @@ html:not(.dark) .ns-hero-code__body {
 }
 
 
-html {
-  scroll-behavior: smooth;
-}
+
 
 .VPHomeFeatures .items {
   margin-top: 4rem;

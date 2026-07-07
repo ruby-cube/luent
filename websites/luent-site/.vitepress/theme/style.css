@@ -152,9 +152,7 @@
   --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
 }
 
-html {
-  scroll-behavior: smooth;
-}
+
 
 section#code-glimpses {
   outline: none !important;

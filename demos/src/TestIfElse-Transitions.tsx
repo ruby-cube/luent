@@ -66,7 +66,7 @@ export function TestIfElse() {
         }
        
         .fade-out {
-          animation: 250ms ease-in reverse both fade-in
+          animation: 2500ms ease-in reverse both fade-in
         }
         
         p.fade-out {

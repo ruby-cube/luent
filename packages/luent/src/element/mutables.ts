@@ -1,109 +1,97 @@
-import { isGetter, isIon, MutableIon, atRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender } from "@rue/quarky";
+import { isGetter, isIon, MutableIon, atRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, watch } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { getFlask } from "@rue/flask";
-import {toString} from './attributes'
+import { toString } from './attributes'
+import { AnyObject } from "@rue/types";
+
+// | Property                    | Elements                            | Typical event      | Notes                                     |
+// | --------------------------- | ----------------------------------- | ------------------ | ----------------------------------------- |
+// | `value`                     | `<input>`, `<textarea>`, `<select>` | `input`            | Most important case                       |
+// | `checked`                   | Checkbox/radio inputs               | `input`            | Boolean selection state                   |
+// | `selectedIndex`             | `<select>`                          | `input`            | Alternative to `value`                    |
+// | `files`                     | `<input type="file">`               | `input`            | Read-only from JS in practice             |
+
+// | `innerHTML` / `textContent` | contenteditable                     | `input`            | Often used for editors                    |
+
+// | `open`                      | `<details>`                         | `toggle`           | Nice candidate for disclosure state       |
+// | `open`                      | `<dialog>`                          | `close`            | Modal state synchronization               |
+
+// | `currentTime`               | `<video>`, `<audio>`                | `timeupdate`       | Media scrubbers                           |
+// | `playbackRate`              | Media elements                      | `ratechange`       | Legitimate synchronized state             |
+// | `volume` / `muted`          | Media elements                      | `volumechange`     | Common media UI                           |
+// | `paused`                    | Media elements                      | `play` / `pause`   | Slightly awkward because methods drive it |
+
 
 export function isMutableIon(ion: unknown): ion is MutableIon<any> {
-   return isIon(ion) && 'value' in ion
+  return isIon(ion) && 'value' in ion
 }
 
-export function setUpMutables(element: Element, attributes: { [key: string]: MaybeIon<any> }) {
-   switch (element.tagName) {
-      case 'INPUT':
-         bindInput(<HTMLInputElement>element, attributes)
-
-      case 'SELECT':
-         bindSelect(<HTMLSelectElement>element, attributes)
-
-      case 'TEXTAREA':
-         return bindTextInput(<HTMLTextAreaElement>element, attributes);
-   }
+export function setUpMutables(element: Element, mutables: { [key: string]: MaybeIon<any> }) {
+  for (const key in mutables) {
+    if (!(key in element)) continue;
+    bindMutable(element, key, mutables[key], getEvent(element, key as keyof Element))
+  }
 }
 
-function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string]: MaybeIon<any> }) {
-   if (!('mu:checked' in attributes))
-      return;
-   const ion = attributes['mu:checked'];
-   console.log('checkbox input', ion)
-   delete attributes['mu:checked'];
-   attributes.checked = ion;
-   if (!isGetter(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
-   }
-   else {
-      setUpInputListener(element, ion, 'checked')
-   }
-}
-function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: MaybeIon<any> }) {
-   if (!('mu:checked' in attributes))
-      return;
-   const ion = attributes['mu:checked'];
-   console.log('radio')
-   const radioValue = attributes.value;
-   delete attributes['mu:checked'];
-   attributes.checked = () => ion() === radioValue;
-   if (!isGetter(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
-   }
-   else {
-      setUpInputListener(element, ion)
-   }
+function getEvent(element: Element, key: keyof Element) {
+  const map = eventMap[element.tagName as keyof typeof eventMap]
+  if (!map) return 'input'
+  const event = map[key as keyof typeof map]
+  if (!event) {
+    if (__DEV__) console.warn('Invalid mutable binding for', element.tagName.toLowerCase(), ':', key)
+    return ''
+  }
+  return event;
 }
 
-function bindTextInput(element: HTMLInputElement | HTMLTextAreaElement, attributes: { [key: string]: MaybeIon<any> }) {
-   if (!('mu:value' in attributes))
-      return;
-   const ion = attributes['mu:value'];
-   delete attributes['mu:value'];
-   attributes.value = ion;
-   if (!isGetter(ion)) {
-      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work', ion)
-   }
-   else {
-      setUpInputListener(element, ion)
-   }
+const mediaEventMap = {
+  currentTime: 'timeupdate',
+  playbackRate: 'ratechange',
+  volume: 'volumechange',
+  muted: 'volumechange'
 }
 
-function bindInput(element: HTMLInputElement, attributes: { [key: string]: MaybeIon<any> }) {
-   switch (attributes.type) {
-      case 'radio':
-         bindRadioInput(element, attributes)
-         break;
-
-      case 'checkbox':
-         bindCheckboxInput(element, attributes)
-         break;
-
-      default:
-         bindTextInput(element, attributes)
-         break;
-   }
+const eventMap = {
+  DETAILS: { open: 'toggle' },
+  DIALOG: { open: 'close' },
+  VIDEO: mediaEventMap,
+  AUDIO: mediaEventMap
 }
 
-function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: MaybeIon<any> }) {
-   if (!('mu:value' in attributes))
-      return;
-   const ion = attributes['mu:value'];
-   const flask = getFlask()
-   trackForRender(ion, () => {
-      atRender(() => {
-         queueTask(() => {
-            element.value = toString(toValue(ion))
-         })
+function bindMutable(element: AnyObject, key: PropertyKey, mutable: MaybeIon<any>, event: string) {
+  if (!event) return;
+  if (!isGetter(mutable)) {
+    if (__DEV__) console.warn('mu binding must receive a mutable ion for two-way binding to work', mutable)
+  }
+  else {
+    element.addEventListener(event, () => {
+      forMutableIon(mutable, ion => {
+        ion.value = element[key]
       })
-   }, flask, RUN_EAGERLY)
-   delete attributes['mu:value'];
-   if (!isGetter(ion)) {
-      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work', ion)
-   }
-   else {
-      element.addEventListener('change', e => {
-         swiftUpdate(() => {
-            updateIonWithInput(ion, e)
-         })
+    })
+    watch(mutable, () => {
+      forMutableIon(mutable, ion => {
+        element[key] = ion.value
       })
-   }
+    }, { eager: true })
+  }
 }
+
+function forMutableIon(maybeIon: Ion<any>, task: (ion: MutableIon<any>) => void) {
+  if ('value' in maybeIon) {
+    task(maybeIon)
+  }
+  else {
+    const ion = maybeIon()
+    if (isMutableIon(maybeIon)) {
+      task(ion)
+    }
+    else {
+      if (__DEV__) throw new Error('invalid two-way binding')
+    }
+  }
+}
+
 
 
 // function bindTextarea(element: Element, Slot: RenderSlot | undefined) {
@@ -127,37 +115,4 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: May
 //    return ion;
 // }
 
-function setUpCheckboxInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }) {
-   element.addEventListener('input', e => {
-      // instantUpdate(() => {
-      updateIonWithInput(ion, e, 'checked')
-      // })
-   })
-}
-
-function setUpInputListener(element: Element, ion: { value: any } | { set: (value: any) => any }, key: string = 'value') {
-   element.addEventListener('input', e => {
-      updateIonWithInput(ion, e, key)
-   })
-}
-
-function updateIonWithInput(ion: { value: any } | { set: (value: any) => any }, e: Event, key: string = 'value') {
-   if ('value' in ion) {
-      ion.value =
-         //@ts-expect-error
-         e.currentTarget?.[key];
-      console.log('@&@ e.currentTarget?.[key]', key, e.currentTarget?.[key])
-   }
-   else {
-      const maybeIon = ion()
-      if (isMutableIon(maybeIon)) {
-         maybeIon.value =
-            //@ts-expect-error
-            e.currentTarget?.[key];
-      }
-      else {
-         throw new Error('invalid two-way binding')
-      }
-   }
-}
 

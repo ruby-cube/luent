@@ -2,7 +2,7 @@
 import { type Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
-import { islands, mountIslands } from "../../src/luent-islands.js"
+import { islands, mountIslands, smoothScrollHomepage } from "../../src/luent-islands.js"
 // import { h } from 'vue'
 
 export default {
@@ -15,6 +15,7 @@ export default {
   enhanceApp({ router }) {
     router.onAfterRouteChange = (page) => {
       mountIslands(islands, page)
+      smoothScrollHomepage(document.documentElement, page)
     }
   }
 } satisfies Theme

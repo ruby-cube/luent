@@ -5,7 +5,7 @@ import DefaultTheme from 'vitepress/theme'
 import HeroCode from './HeroCode.vue'
 import './style.css'
 import '../../../shared/src/style-rules'
-import { islands, mountIslands } from '../../src/luent-islands.js'
+import { islands, mountIslands, smoothScrollHomepage } from '../../src/luent-islands.js'
 
 
 export default {
@@ -20,9 +20,9 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    router.onAfterRouteChange = () => {
-      console.log('HYDRATING :)')
-      mountIslands(islands)
+    router.onAfterRouteChange = (page) => {
+      mountIslands(islands, page)
+      smoothScrollHomepage(document.documentElement, page)
     }
   }
 } satisfies Theme

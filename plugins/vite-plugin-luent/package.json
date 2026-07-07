@@ -10,9 +10,9 @@
        "@rue/nextscript": "workspace:*"
    },
    "devDependencies": {
-      "@babel/core": "^7.25.2",
+      "@babel/core": "^8.0.1",
       "@babel/plugin-syntax-typescript": "^7.25.9",
-      "vite": "^8.0.13"
+      "vite": "^8.1.3"
    },
    "author": "Ruby Yi Wang",
    "license": "MIT"
