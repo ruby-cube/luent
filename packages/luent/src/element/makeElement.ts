@@ -88,20 +88,45 @@ export function makeElement(
 //    return nodes
 // }
 
+// case 'animate-intro':
+// case 'animate-in':
+// case 'animate-out':
+// case 'animate-in-out':
+
+// case 'transition-from':
+// case 'from-to':
+// case 'transition-to':
+// case 'transition-in':
+// case 'transition-out':
+// case 'in-out':
+// case 'transit-port':
+// case 'transit-key':
+// case 'transit-class':
+// case 'transition-item':
+// case 'animate-item':
+
 
 const transitionAttributes = {
   'transition-item': true,
   'animate-item': true,
+
   'transit-class': true,
   'transit-key': true,
   'transit-port': true,
+  
   'animate-intro': true,
   'animate-in': true,
   'animate-out': true,
-  'transition-in-from': true,
+  'animate-in-out': true,
+  
   'transition-in': true,
-  'transition-out-to': true,
-  'transition-out': true, // ?? TODO:
+  'transition-out': true,
+  'in-out': true,
+
+  'transition-to': true,
+  'transition-from': true,
+  'from-to': true,
+
   'cancel-transition': true, // ??? TODO:
 }
 

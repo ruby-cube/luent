@@ -25,13 +25,14 @@ export function TestIfElse() {
         <button id='toggle-ready' on:click={() => { $ready.toggle() }}>toggle ready</button>
         <hr></hr>
         <div class='container view'>
-          <o:transition animate-in-out>
+          <o:transition in='fade' out='slide'>
             {If($active,
               <div>
                 oh
                 <h2>hi</h2>
                 {If($ready,
-                  <p animate-in-out>ready</p>
+                  <p in-out='fade' from-to='opacity-0'
+                  >ready</p>
                 )}
               </div>
             )}
@@ -55,17 +56,25 @@ export function TestIfElse() {
           overflow: hidden;
         }
 
-        @keyframes fade-in {
-          from { opacity: 0 }
-          to { opacity: 1 }
-        }
+        // @keyframes fade-in {
+        //   from { opacity: 0 }
+        //   to { opacity: 1 }
+        // }
        
-        .fade-in {
-          animation: 2500ms ease-in both fade-in
-        }
+        // .fade-in {
+        //   animation: 2500ms ease-in both fade-in
+        // }
        
-        .fade-out {
-          animation: 2500ms ease-in reverse both fade-in
+        // .fade-out {
+        //   animation: 2500ms ease-in reverse both fade-in
+        // }
+
+        .opacity-0 {
+          opacity: 0;
+        }
+
+        .fade {
+          transition: opacity 2500ms ease-in;
         }
         
       `)}

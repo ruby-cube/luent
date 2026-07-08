@@ -1934,7 +1934,7 @@ declare global {
       'o--body': L.DetailedHTMLProps<L.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
       'o:preserve': { children: ConditionalRenderKit[] | ConditionalRenderKit; discard?: Ion<Booleanish> }
       'o:context': { children: ConditionalRenderKit[] | ConditionalRenderKit; provide: Luent.Provided }
-      'o:transition': { children: ConditionalRenderKit[] | ConditionalRenderKit; } & TransitionConfigs
+      'o:transition': { children: ConditionalRenderKit[] | ConditionalRenderKit; } & Luent.TransitionBindings
 
       'o--dock': L.DetailedHTMLProps<L.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
     }

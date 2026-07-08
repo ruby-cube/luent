@@ -14,8 +14,7 @@
       "@rue/flask": "workspace:*",
       "@rue/quarky": "workspace:*",
       "@rue/utils": "workspace:*",
-      "@rue/nextscript": "workspace:*",
-      "@floating-ui/dom": "1.7.6"
+      "@rue/nextscript": "workspace:*"
    },
    "devDependencies": {
       "@rue/types": "workspace:*"

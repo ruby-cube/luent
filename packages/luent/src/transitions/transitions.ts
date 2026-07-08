@@ -2,12 +2,9 @@ import { atRender, queueTask, toValue } from "@rue/quarky"
 import { AnyObject } from "@rue/types"
 import { MaybeIon } from "../component/x-Input"
 import { atAttach, beforeDetach } from "../flask/flask-hooks"
-import { getTransition } from "./Transition"
 import { setUpPositionTransition, setUpTransit } from "./transit"
 import { createStack } from "@rue/utils"
-import { Flask, getActiveFlask, getFlask } from "@rue/flask"
-import { awaiting } from "../async/awaiting"
-import { computePosition } from "@floating-ui/dom"
+import { Flask, getFlask } from "@rue/flask"
 
 const END_EVENT_FALLBACK_BUFFER_MS = 50
 
@@ -16,25 +13,35 @@ export function isTransitioningOut(flask: Flask) {
   return transitioningOut.has(flask)
 }
 
-export type TransitionConfigs = {
+export interface TransitionBindings extends BaseTransitionBindings {
+  'in'?: true | MaybeIon<string>
+  'out'?: true | MaybeIon<string>
+  'from'?: MaybeIon<string>
+  'to'?: MaybeIon<string>
+}
+
+interface BaseTransitionBindings {
   'animate-item'?: boolean | MaybeIon<string>
   'transition-item'?: boolean | MaybeIon<string>
+
   'transit-class'?: MaybeIon<string>
   'transit-key'?: any
   'transit-port'?: any
-  
-  'animate-intro'?: boolean | MaybeIon<string>
-  'animate-in'?: boolean | MaybeIon<string>
-  'animate-out'?: boolean | MaybeIon<string>
-  'animate-in-out'?: boolean
 
-  'transition-in-out'?: boolean
+  'animate-intro'?: true | MaybeIon<string>
+  'animate-in'?: true | MaybeIon<string>
+  'animate-out'?: true | MaybeIon<string>
+  'animate-in-out'?: true
 
-  'transition-in-from'?: MaybeIon<string>
-  'transition-in'?: boolean | MaybeIon<string>
-  'transition-out-to'?: MaybeIon<string> // ?? TODO:
-  'transition-out'?: boolean | MaybeIon<string> // ?? TODO:
-} & AnyObject
+  'in-out'?: boolean | MaybeIon<string>
+  'from-to'?: MaybeIon<string>
+}
+export interface TransitionConfigs extends BaseTransitionBindings {
+  'transition-in'?: true | MaybeIon<string>
+  'transition-out'?: true | MaybeIon<string>
+  'transition-from'?: MaybeIon<string>
+  'transition-to'?: MaybeIon<string> // ?? TODO:
+}
 
 // TODO: add transition in and out classes like animate in out
 
@@ -63,6 +70,26 @@ function useAnimateOut() {
   return ANIMATE_OUT
 }
 
+let TRANSITION_IN_OUT: string;
+function useTransitionInOut() {
+  if (!TRANSITION_IN_OUT) {
+    TRANSITION_IN_OUT = 'luent-in-out'
+    insertCSSRule('.' + TRANSITION_IN_OUT, "transition: opacity 500ms cubic-bezier(0.55, 0, 0.1, 1);")
+  }
+  return TRANSITION_IN_OUT
+}
+
+let TRANSITION_TO_FROM: string;
+function useTransitionToFrom() {
+  if (!TRANSITION_TO_FROM) {
+    TRANSITION_TO_FROM = 'luent-transition-to-from'
+    insertCSSRule('.' + TRANSITION_TO_FROM, "opacity: 0;")
+  }
+  return TRANSITION_TO_FROM
+}
+
+
+
 let TRANSITION_POSITION: string;
 
 function useTransitionPosition() {
@@ -85,6 +112,7 @@ export function useLuentStyleSheet() {
   const stylesheets = document.styleSheets
   const index = stylesheets.length;
   const style = document.createElement('style');
+  style.id = 'luent-stylesheet'
   document.head.appendChild(style)
   const stylesheet = stylesheets.item(index)
   if (!stylesheet) throw new Error(`no stylesheet at this index!`)
@@ -113,10 +141,14 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
   const transitClasses = transitions['transit-class'] ?? transitKey ? useTransitionPosition() : undefined
   const transitPort = transitions['transit-port']
 
-  const transitionInClasses = transitions['transition-in']
-  const fromClasses = transitions['transition-in-from']
-  const transitionOutClasses = transitions['transition-out'] 
-  const toClasses = transitions['transition-out-to']
+  const _transitionIn = transitions['transition-in']
+  const _transitionOut = transitions['transition-out']
+  const _transitionInOut = transitions['in-out']
+  const _transitionFromTo = transitions['from-to']
+  const transitionInClasses = _transitionIn === true || _transitionInOut === true ? useTransitionInOut() : _transitionIn ?? _transitionInOut
+  const fromClasses = (_transitionIn || _transitionInOut) ? (transitions['transition-from'] ?? _transitionFromTo ?? useTransitionToFrom()) : undefined
+  const transitionOutClasses = _transitionOut === true || _transitionInOut === true ? useTransitionInOut() : _transitionOut ?? _transitionInOut
+  const toClasses = (_transitionOut || _transitionInOut) ? (transitions['transition-to'] ?? _transitionFromTo ?? useTransitionToFrom()) : undefined
 
   if (animateInClasses || transitionInClasses) {
     atAttach(() => {
@@ -175,9 +207,9 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
               transitionCount++
               startAnimateOut(clone, toClassNames(toValue(animateOutClasses)), onEnd)
             }
-            if (transitionOutClasses) {
+            if (transitionOutClasses && toClasses) {
               transitionCount++
-              startTransitionOut(clone, toClassNames(toValue(transitionOutClasses)), onEnd)
+              startTransitionOut(clone, toClassNames(toValue(toClasses)), toClassNames(toValue(transitionOutClasses)), onEnd)
             }
 
             function onEnd() {
@@ -208,7 +240,7 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
 
 function positionClone(clone: HTMLElement, node: HTMLElement) {
   const rect = node.getBoundingClientRect()
-  
+
   clone.style.setProperty('position', 'fixed')
 
   clone.style.setProperty('top', rect.top + 'px') // FIX: margin collapsing doesn't get applied, causing inaccurate positioning
@@ -375,15 +407,10 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
     }
   }
 
-  // - read dims of prev node
-  // const rect = node.getBoundingClientRect()
   const clone = node.cloneNode(true) as HTMLElement
   node.after(clone)
-  // - position clone
   positionClone(clone, node)
   clone.style.removeProperty('visibility')
-
-  console.log('transition out clone', clone.childNodes[0])
 
   atRender(() => {
     const transition = createTransition(clone)
@@ -529,18 +556,19 @@ function startTransitionIn(clone: HTMLElement, startClasses: string[], classes: 
       startClasses.forEach(className => clone.classList.remove(className))
 
       onTransitionEnd(clone, () => {
+        classes.forEach(className => clone.classList.remove(className))
         emitTransitionEnd()
       })
     })
   })
 }
 
-function startTransitionOut(clone: HTMLElement, classes: string[], emitTransitionEnd: () => void) {
+function startTransitionOut(clone: HTMLElement, endClasses: string[], classes: string[], emitTransitionEnd: () => void) {
   requestAnimationFrame(() => { // THIS IS IMPORTANT... ensures browser doesn't batch changes, preventing transition
     queueTask(() => {
       classes.forEach(className => clone.classList.add(className))
+      endClasses.forEach(className => clone.classList.add(className))
       onTransitionEnd(clone, () => {
-        classes.forEach(className => clone.classList.remove(className))
         emitTransitionEnd()
       })
     })

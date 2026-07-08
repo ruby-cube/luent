@@ -434,9 +434,6 @@ importers:
 
   packages/luent:
     dependencies:
-      '@floating-ui/dom':
-        specifier: 1.7.6
-        version: 1.7.6
       '@rue/flask':
         specifier: workspace:*
         version: link:../flask

@@ -291,19 +291,27 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
       //  'animate-in'?: boolean | MaybeIon<string>
       //  'animate-out'?: boolean | MaybeIon<string>
 
-      //  'transition-in-from'?: MaybeIon<string>
+      //  'transition-from'?: MaybeIon<string>
       //  'transition-in'?: MaybeIon<string>
 
 
+      case 'animate-intro':
       case 'animate-in':
       case 'animate-out':
       case 'animate-in-out':
-      case 'transition-in-from':
+
       case 'transition-in':
-      case 'animate-intro':
+      case 'transition-out':
+      case 'in-out':
+
+      case 'transition-from':
+      case 'transition-to':
+      case 'from-to':
+
       case 'transit-port':
       case 'transit-key':
       case 'transit-class':
+
       case 'transition-item':
       case 'animate-item':
         const transitions = composed.transitions ?? (composed.transitions = Object.create(null))
