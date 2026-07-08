@@ -3,7 +3,7 @@ import { isFunction, isObject, normalizeToArray } from "@rue/utils";
 import { atAttach, beforeDetach, atRemount, atDetach } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@rue/flask";
-import { atRender } from "@rue/quarky";
+import { atInternalRender, atRender } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { makeElement } from "../element/makeElement";
 
@@ -61,7 +61,7 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
   setUpNodeVine(nodes, element)
   const flask = getFlask()
 
-  atRender(() => {
+  atInternalRender(() => {
     mountDOMNodes(nodes, element)
   })
 

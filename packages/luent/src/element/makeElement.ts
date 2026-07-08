@@ -56,8 +56,9 @@ export function makeElement(
   if (hooks) setUpHooks(domNode, hooks)
   if (mutables) setUpMutables(domNode, mutables, attributes.type)
   if (attributes) setUpAttributes(domNode, attributes);
+  if (transitions) setUpTransitions(domNode as HTMLElement, transitions) // TODO: transition-in etc
   const transitionConfig = getTransition()
-  if (transitions) setUpTransitions(domNode as HTMLElement, transitions, transitionConfig) // TODO: transition-in etc
+  if (transitionConfig) setUpTransitions(domNode as HTMLElement, transitionConfig) // TODO: transition-in etc
 
   if (Slot) {
     const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS

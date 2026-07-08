@@ -4,7 +4,7 @@ import { hasQuark, QUARK } from "../abstract/Quark";
 import { $activeUpdate, popUpdate, pushUpdate, Update, UpdateType } from "./Update";
 import { TraceableEntity } from "../debug/Traceable";
 import { Stateful } from "../abstract/Stateful";
-import { createPhaseMap, LAYOUT, Phase, phaseKeys, PRELUDE, queueTask, RENDER, RenderCycle, SYNC, TICK } from "./RenderCycle";
+import { createPhaseMap, Phase, phaseKeys, queueTask, RenderCycle, SYNC, TICK } from "./RenderCycle";
 
 
 export type Atom = {

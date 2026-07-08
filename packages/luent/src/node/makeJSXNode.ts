@@ -15,6 +15,7 @@ import { normalizeToArray, toError } from "@rue/utils";
 import { RenderError } from "../boundaries/Try";
 import { ComponentKit } from "@rue/nextscript";
 import { createShadowRoot } from "../component/shadow";
+import { provideTransition } from "../transitions/Transition";
 
 export type TagType = ComponentTag | string
 
@@ -188,6 +189,10 @@ export function makeJSXNode(
   switch (nodeType) {
     case 'o:context':
       return Context({ Slot, provide: config.provide } as any)
+
+    case 'o:transition':
+      if (!Slot) return;
+      return provideTransition(Slot, config)
 
     case 'shadow-root':
       return createShadowRoot(config)

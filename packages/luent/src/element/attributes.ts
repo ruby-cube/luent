@@ -26,7 +26,7 @@ export function setAttribute(node: Element | null, key: string, value: any, flas
   if (isGetter(value)) {
     trackForRender(value, ({ current, previous }) => {
       // if (current === previous) return;
-      atRender(() => {
+      atInternalRender(() => {
         _setAttribute(node, key, toValue(value())) // normalize to value for mu getters
       })
     }, flask, RUN_EAGERLY)

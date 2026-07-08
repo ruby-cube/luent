@@ -8,6 +8,7 @@ import { NodeRefsConfig } from "../src/node/NodeRefs";
 import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/luent";
 import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../src/boundaries/Portal";
+import { TransitionConfigs } from "../transitions/transitions";
 
 /*
 Modified from React type definitions in DefinitelyTyped:
@@ -1933,7 +1934,7 @@ declare global {
       'o--body': L.DetailedHTMLProps<L.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
       'o:preserve': { children: ConditionalRenderKit[] | ConditionalRenderKit; discard?: Ion<Booleanish> }
       'o:context': { children: ConditionalRenderKit[] | ConditionalRenderKit; provide: Luent.Provided }
-      'o:transition': { children: ConditionalRenderKit[] | ConditionalRenderKit; } // TODO: add transition bindings
+      'o:transition': { children: ConditionalRenderKit[] | ConditionalRenderKit; } & TransitionConfigs
 
       'o--dock': L.DetailedHTMLProps<L.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
     }

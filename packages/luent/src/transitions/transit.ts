@@ -8,10 +8,8 @@ import { atAttach, beforeDetach } from "../flask/flask-hooks";
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
   atListChanged(() => {
     const first = node.getBoundingClientRect()
-    console.log('$$$ LIST CHANGED', first.top, first.left)
     atRender(() => {
       const last = node.getBoundingClientRect()
-      console.log('$$$ AT RENDER', last.top, last.left)
       startTransitionItem(node, first, last, toClassNames(toValue(transitionClasses)))
     })
   })
@@ -21,8 +19,6 @@ export function setUpPositionTransition(node: HTMLElement, transitionClasses: Ma
 export function startTransitionItem(node: HTMLElement, first: DOMRect, last: DOMRect, classes: string[]) {
   const deltaY = first.top - last.top
   const deltaX = first.left - last.left
-  console.warn('$$$ last rect', last.left, last.top)
-  console.warn('$$$ AT LIST CHANGED', deltaX, deltaY)
   if (deltaX || deltaY) {
     node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
     requestAnimationFrame(() => {
@@ -82,9 +78,7 @@ function send(key: any, node: HTMLElement, port: any) {
 function receive(key: any, node: HTMLElement, port: any, classes: string[]) {
   const first = usePorts().getFromPort(port, key)
   if (!first) return;
-  atRender(() => {
-    startTransitionItem(node, first, node.getBoundingClientRect(), classes)
-  })
+  startTransitionItem(node, first, node.getBoundingClientRect(), classes)
 }
 
 const ANY_PORT = Symbol('any port')

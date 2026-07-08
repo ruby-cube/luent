@@ -52,6 +52,6 @@ export function runDemo() {
   mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestListTransit />
+    return <TestIfElse />
   }, '#root')
 }

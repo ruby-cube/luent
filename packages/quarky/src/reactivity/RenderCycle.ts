@@ -19,238 +19,246 @@ type Task = () => void | Promise<void>
 // [] infinite loop detection/prevention
 
 export enum Phase {
-   SYNC = 's',
-   PRELUDE = 'p',
-   RENDER = 'r',
-   LAYOUT = 'l',
-   TICK = 't'
+  SYNC = 's',
+  PRELUDE = 'p',
+  INTERNAL_RENDER = 'ir',
+  RENDER = 'r',
+  LAYOUT = 'l',
+  TICK = 't'
 }
 
-export const { LAYOUT, PRELUDE, RENDER, SYNC, TICK } = Phase
+export const { LAYOUT, PRELUDE, INTERNAL_RENDER, RENDER, SYNC, TICK } = Phase
 
-export const phaseKeys = [SYNC, PRELUDE, RENDER, LAYOUT, TICK]
+export const phaseKeys = [SYNC, PRELUDE, INTERNAL_RENDER, RENDER, LAYOUT, TICK]
 
 
 export function createPhaseMap(): { [K in typeof phaseKeys[number]]: undefined } {
-   const map = Object.create(null)
-   for (const phase of phaseKeys) {
-      map[phase] = undefined
-   }
-   return map
+  const map = Object.create(null)
+  for (const phase of phaseKeys) {
+    map[phase] = undefined
+  }
+  return map
 }
 
 
 export class RenderCycle {
 
-   currentPhase = SYNC
+  currentPhase = SYNC
 
-   phases: { [K in typeof phaseKeys[number]]?: InstanceType<typeof phaseClasses[K]> } = createPhaseMap()
+  phases: { [K in typeof phaseKeys[number]]?: InstanceType<typeof phaseClasses[K]> } = createPhaseMap()
 
-   getPhase(phase: Phase) {
-      return (this.phases[phase] ?? (this.phases[phase] = this.createPhase(phase)))
-   }
+  getPhase(phase: Phase) {
+    return (this.phases[phase] ?? (this.phases[phase] = this.createPhase(phase)))
+  }
 
-   createPhase(phase: Phase): BasePhase & CycledPhase {
-      return new phaseClasses[phase](phase) as BasePhase & CycledPhase
-   }
+  createPhase(phase: Phase): BasePhase & CycledPhase {
+    return new phaseClasses[phase](phase) as BasePhase & CycledPhase
+  }
 
-   constructor(private update: Update) {
+  constructor(private update: Update) {
 
-   }
+  }
 
-   get more() {
-      return this.phases[PRELUDE]?.more || this.phases[RENDER]?.more || this.phases[LAYOUT]?.more
-   }
+  get more() {
+    return this.phases[PRELUDE]?.more || this.phases[RENDER]?.more || this.phases[LAYOUT]?.more
+  }
 
-   started = false
+  started = false
 
-   loop = 0;
+  loop = 0;
 
-   async start() {
-      this.started = true;
-      while (this.more) {
-         this.loop++;
-         console.log('@@@ this.loop', this.loop)
+  async start() {
+    this.started = true;
+    while (this.more) {
+      this.loop++;
+      console.log('@@@ this.loop', this.loop)
 
-         console.log('@@@ prelude---')
-         this.currentPhase = PRELUDE
-         const prelude = this.phases[PRELUDE]
-         if (prelude) await this.runPhase(prelude)
+      console.log('@@@ prelude---')
+      this.currentPhase = PRELUDE
+      const prelude = this.phases[PRELUDE]
+      if (prelude) await this.runPhase(prelude)
 
-         if (this.loop === 1) {
-            this.update.commit()
-            pushUpdate(this.update)
-         }
-
-         console.log('@@@ render---')
-         this.currentPhase = RENDER
-         const render = this.phases[RENDER]
-         if (render) await this.runPhase(render)
-
-         console.log('@@@ layout---')
-         this.currentPhase = LAYOUT
-         const layout = this.phases[LAYOUT]
-         if (layout) await this.runPhase(layout)
+      if (this.loop === 1) {
+        this.update.commit()
+        pushUpdate(this.update)
       }
-      if (!this.update.committed) this.update.commit()
 
-      console.log('@@@ tick---')
-      this.currentPhase = TICK
-      this.runEffects(TICK)
+      console.log('@@@ internal render---')
+      this.currentPhase = INTERNAL_RENDER
+      const internalRender = this.phases[INTERNAL_RENDER]
+      if (internalRender) await this.runPhase(internalRender)
 
-      this.update.complete()
-      popUpdate()
-      if (__DEV__) {
-         requestAnimationFrame((time) =>
-            this.timecheck(time)
-         )
+      console.log('@@@ layout---')
+      this.currentPhase = LAYOUT
+      const layout = this.phases[LAYOUT]
+      if (layout) await this.runPhase(layout)
+
+      console.log('@@@ render---')
+      this.currentPhase = RENDER
+      const render = this.phases[RENDER]
+      if (render) await this.runPhase(render)
+
+    }
+    if (!this.update.committed) this.update.commit()
+
+    console.log('@@@ tick---')
+    this.currentPhase = TICK
+    this.runEffects(TICK)
+
+    this.update.complete()
+    popUpdate()
+    if (__DEV__) {
+      requestAnimationFrame((time) =>
+        this.timecheck(time)
+      )
+    }
+  }
+
+  startTime = performance.now()
+
+  timecheck(now: DOMHighResTimeStamp) {
+    const delta = now - this.startTime
+    const timeMargin = this.update.timeMargin
+    if (timeMargin && delta > timeMargin) {
+      if (timeMargin !== 16.7) console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+    }
+    else {
+      if (timeMargin === Infinity) console.log('passed timecheck', timeMargin, delta)
+    }
+  }
+
+  async runPhase(phase: CycledPhase) {
+    let effects = phase.effects
+    phase.effects = []
+
+    let tasks: WrappedTask[] = phase.tasks
+    phase.tasks = []
+
+    let loop = 0
+    while (effects.length || tasks.length) {
+      loop++
+      const ran: Set<Effect> = new Set()
+      for (const queue of effects) {
+        queue.runEffects(ran, this.update)
       }
-   }
-
-   startTime = performance.now()
-
-   timecheck(now: DOMHighResTimeStamp) {
-      const delta = now - this.startTime
-      const timeMargin = this.update.timeMargin
-      if (timeMargin && delta > timeMargin) {
-         if (timeMargin !== 16.7) console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+      for (const task of tasks) {
+        const output = task(this.update)
+        if (output instanceof Promise) {
+          await output;
+        }
       }
-      else {
-         if (timeMargin === Infinity) console.log('passed timecheck', timeMargin, delta)
-      }
-   }
-
-   async runPhase(phase: CycledPhase) {
-      let effects = phase.effects
+      effects = phase.effects
+      tasks = phase.tasks
       phase.effects = []
-
-      let tasks: WrappedTask[] = phase.tasks
       phase.tasks = []
+    }
 
-      let loop = 0
-      while (effects.length || tasks.length) {
-         loop++
-         const ran: Set<Effect> = new Set()
-         for (const queue of effects) {
-            queue.runEffects(ran, this.update)
-         }
-         for (const task of tasks) {
-            const output = task(this.update)
-            if (output instanceof Promise) {
-               await output;
-            }
-         }
-         effects = phase.effects
-         tasks = phase.tasks
-         phase.effects = []
-         phase.tasks = []
+  }
+
+  scheduleEffects(effects: Effects, phase: Phase) {
+    this.getPhase(phase).scheduleEffects(effects)
+  }
+
+  scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER | Phase.INTERNAL_RENDER| Phase.TICK) {
+    if (phase === TICK) requestAnimationFrame(() => queueTask(task))
+    else (this.getPhase(phase) as CycledPhase).scheduleTask(task)
+  }
+
+  runEffects(phaseKey: Phase.SYNC | Phase.TICK) {
+    const phase = this.phases[phaseKey]
+    if (!phase) return;
+    let effects = phase.effects
+    phase.effects = []
+
+    while (effects.length) {
+      const ran: Set<Effect> = new Set()
+      for (const queue of effects) {
+        queue.runEffects(ran, this.update)
       }
-
-   }
-
-   scheduleEffects(effects: Effects, phase: Phase) {
-      this.getPhase(phase).scheduleEffects(effects)
-   }
-
-   scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER | Phase.TICK) {
-      if (phase === TICK) requestAnimationFrame(() => queueTask(task))
-      else (this.getPhase(phase) as CycledPhase).scheduleTask(task)
-   }
-
-   runEffects(phaseKey: Phase.SYNC | Phase.TICK) {
-      const phase = this.phases[phaseKey]
-      if (!phase) return;
-      let effects = phase.effects
+      effects = phase.effects
       phase.effects = []
+    }
+  }
 
-      while (effects.length) {
-         const ran: Set<Effect> = new Set()
-         for (const queue of effects) {
-            queue.runEffects(ran, this.update)
-         }
-         effects = phase.effects
-         phase.effects = []
-      }
-   }
+  // runTickEffects() {
+  //    const phase = this.phases[TICK]
+  //    if (!phase) return;
+  //    let effects = phase.effects
+  //    phase.effects = []
 
-   // runTickEffects() {
-   //    const phase = this.phases[TICK]
-   //    if (!phase) return;
-   //    let effects = phase.effects
-   //    phase.effects = []
-
-   //    while (effects.length) {
-   //       const ran: Set<Effect> = new Set()
-   //       for (const queue of effects) {
-   //          queue.runEffects(ran, this.update)
-   //       }
-   //       effects = phase.effects
-   //       phase.effects = []
-   //    }
-   // }
+  //    while (effects.length) {
+  //       const ran: Set<Effect> = new Set()
+  //       for (const queue of effects) {
+  //          queue.runEffects(ran, this.update)
+  //       }
+  //       effects = phase.effects
+  //       phase.effects = []
+  //    }
+  // }
 }
 
 
 class BasePhase {
-   effects: Effects[] = []
+  effects: Effects[] = []
 
-   get more() {
-      return this.effects.length
-   }
+  get more() {
+    return this.effects.length
+  }
 
-   constructor(
-      public phase: Phase
-   ) { }
+  constructor(
+    public phase: Phase
+  ) { }
 
-   scheduleEffects(effects: Effects) {
-      console.log('@@@ schedule effects', this.effects, 'queued?', this.queued(effects))
-      if (!this.queued(effects)) {
-         this.effects.push(effects)
-      }
-   }
+  scheduleEffects(effects: Effects) {
+    console.log('@@@ schedule effects', this.effects, 'queued?', this.queued(effects))
+    if (!this.queued(effects)) {
+      this.effects.push(effects)
+    }
+  }
 
-   queued(effects: Effects) {
-      return this.effects.indexOf(effects) > -1
-   }
+  queued(effects: Effects) {
+    return this.effects.indexOf(effects) > -1
+  }
 }
 
 type WrappedTask = (update: Update) => Promise<void> | void
 
 class CycledPhase extends BasePhase {
-   tasks: WrappedTask[] = []
+  tasks: WrappedTask[] = []
 
-   get more() {
-      console.log('this.effects.length', this.effects.length)
-      return this.effects.length || this.tasks.length
-   }
+  get more() {
+    console.log('this.effects.length', this.effects.length)
+    return this.effects.length || this.tasks.length
+  }
 
-   constructor(
-      public phase: Phase
-   ) {
-      super(phase)
-   }
+  constructor(
+    public phase: Phase
+  ) {
+    super(phase)
+  }
 
-   scheduleTask(task: Task) {
-      this.tasks.push((update: Update) => {
-         try {
-            pushUpdate(update)
-            return task()
-         }
-         finally {
-            popUpdate()
-         }
-      })
-   }
+  scheduleTask(task: Task) {
+    this.tasks.push((update: Update) => {
+      try {
+        pushUpdate(update)
+        return task()
+      }
+      finally {
+        popUpdate()
+      }
+    })
+  }
 }
 
 const phaseClasses = {
-   [SYNC]: BasePhase,
+  [SYNC]: BasePhase,
 
-   [PRELUDE]: CycledPhase,
-   [RENDER]: CycledPhase,
-   [LAYOUT]: CycledPhase,
+  [PRELUDE]: CycledPhase,
+  [INTERNAL_RENDER]: CycledPhase,
+  [RENDER]: CycledPhase,
+  [LAYOUT]: CycledPhase,
 
-   [TICK]: BasePhase,
+  [TICK]: BasePhase,
 }
 
 
@@ -262,20 +270,20 @@ const phaseClasses = {
  * @returns 
  */
 export function $currentCycle() {
-   const update = getActiveUpdate()
-   if (!update) throw new Error('Must wrap in update')
-   return update.cycle
+  const update = getActiveUpdate()
+  if (!update) throw new Error('Must wrap in update')
+  return update.cycle
 }
 
 export function getDefaultPhase(): Phase {
-   return TICK;
+  return TICK;
 }
 
 
 export function getCurrentPhase() {
-   const update = getActiveUpdate()
-   if (!update) return SYNC;
-   return update.cycle.currentPhase;
+  const update = getActiveUpdate()
+  if (!update) return SYNC;
+  return update.cycle.currentPhase;
 }
 
 
@@ -287,68 +295,72 @@ let _layout: Promise<void> | undefined = undefined
 let _tick: Promise<void> | undefined = undefined
 
 export function $prelude() {
-   return _prelude ?? (_prelude = new Promise<void>(resolve => {
-      atPrelude(() => {
-         const prelude = _prelude
-         _prelude = undefined
-         resolve()
-         return prelude;
-      })
-   }))
+  return _prelude ?? (_prelude = new Promise<void>(resolve => {
+    atPrelude(() => {
+      const prelude = _prelude
+      _prelude = undefined
+      resolve()
+      return prelude;
+    })
+  }))
 }
 
 export function $render() {
-   return _render ?? (_render = new Promise<void>(resolve => {
-      atRender(() => {
-         const render = _render
-         _render = undefined
-         resolve()
-         return render;
-      })
-   }))
+  return _render ?? (_render = new Promise<void>(resolve => {
+    atRender(() => {
+      const render = _render
+      _render = undefined
+      resolve()
+      return render;
+    })
+  }))
 }
 
 export function $layout() {
-   return _layout ?? (_layout = new Promise<void>(resolve => {
-      atLayout(() => {
-         const layout = _layout
-         _layout = undefined
-         resolve()
-         return layout;
-      })
-   }))
+  return _layout ?? (_layout = new Promise<void>(resolve => {
+    atLayout(() => {
+      const layout = _layout
+      _layout = undefined
+      resolve()
+      return layout;
+    })
+  }))
 }
 
 export function $tick() {
-   return _tick ?? (_tick = new Promise<void>(resolve => {
-      requestAnimationFrame(() => {
-         queueTask(() => {
-            const tick = _tick
-            _tick = undefined
-            resolve()
-            return tick;
-         })
+  return _tick ?? (_tick = new Promise<void>(resolve => {
+    requestAnimationFrame(() => {
+      queueTask(() => {
+        const tick = _tick
+        _tick = undefined
+        resolve()
+        return tick;
       })
-   }))
+    })
+  }))
 }
 
 
 
 
 export function atPrelude(task: Task) {
-   $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
+  $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
+}
+
+export function atInternalRender(task: Task) {
+  $activeUpdate()?.cycle.scheduleTask(task, INTERNAL_RENDER)
 }
 
 export function atRender(task: Task) {
-   $activeUpdate()?.cycle.scheduleTask(task, RENDER)
+  $activeUpdate()?.cycle.scheduleTask(task, RENDER)
 }
 
 export function atLayout(task: Task) {
-   $activeUpdate()?.cycle.scheduleTask(task, LAYOUT)
+  $activeUpdate()?.cycle.scheduleTask(task, LAYOUT)
 }
 
 export function atTick(task: Task) {
-   requestAnimationFrame(() => {
-      queueTask(task)
-   })
+  requestAnimationFrame(() => {
+    queueTask(task)
+  })
 }

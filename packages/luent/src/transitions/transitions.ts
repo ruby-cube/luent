@@ -22,15 +22,21 @@ export type TransitionConfigs = {
   'transit-class'?: MaybeIon<string>
   'transit-key'?: any
   'transit-port'?: any
+  
   'animate-intro'?: boolean | MaybeIon<string>
   'animate-in'?: boolean | MaybeIon<string>
   'animate-out'?: boolean | MaybeIon<string>
+  'animate-in-out'?: boolean
+
+  'transition-in-out'?: boolean
 
   'transition-in-from'?: MaybeIon<string>
-  'transition-in'?: MaybeIon<string>
+  'transition-in'?: boolean | MaybeIon<string>
   'transition-out-to'?: MaybeIon<string> // ?? TODO:
-  'transition-out'?: MaybeIon<string> // ?? TODO:
+  'transition-out'?: boolean | MaybeIon<string> // ?? TODO:
 } & AnyObject
+
+// TODO: add transition in and out classes like animate in out
 
 
 export const [markInitialRender, unmarkInitialRender, isInitialRender] = createStack<boolean>()
@@ -86,30 +92,31 @@ export function useLuentStyleSheet() {
   return stylesheet;
 }
 
-export function setUpTransitions(node: HTMLElement, transitions: TransitionConfigs, transitionConfig: TransitionConfigs | undefined) {
+export function setUpTransitions(node: HTMLElement, transitions: TransitionConfigs) {
   const transitioning = new Set<ActiveTransitionIn>()
   const initialRender = isInitialRender()
-  const animateIn = transitions['animate-in'] ?? transitionConfig?.["animate-in"]
+  const animateInOut = transitions['animate-in-out']
+  const animateIn = transitions['animate-in'] ?? animateInOut
   const animateInClasses = animateIn === true ? useAnimateIn() : animateIn as MaybeIon<string>
-  const animateOut = transitions['animate-out'] ?? transitionConfig?.["animate-out"]
+  const animateOut = transitions['animate-out'] ?? animateInOut
   const animateOutClasses = animateOut === true ? useAnimateOut() : animateOut
-  const animateIntro = transitions['animate-intro'] ?? transitionConfig?.["animate-load"]
+  const animateIntro = transitions['animate-intro']
   const animateIntroClasses = animateIntro === true ? animateInClasses : animateIntro as MaybeIon<string>
 
-  const animateItem = transitions['animate-item'] ?? transitionConfig?.["animate-item"]
+  const animateItem = transitions['animate-item']
   const animateItemClasses = animateItem === true ? undefined : animateItem
 
-  const transitionItem = transitions['transition-item'] ?? transitionConfig?.["transition-item"]
+  const transitionItem = transitions['transition-item']
   const transitionItemClasses = transitionItem === true || animateItem === true ? useTransitionPosition() : transitionItem
 
   const transitKey = transitions['transit-key']
   const transitClasses = transitions['transit-class'] ?? transitKey ? useTransitionPosition() : undefined
   const transitPort = transitions['transit-port']
 
-  const transitionInClasses = transitions['transition-in'] ?? transitionConfig?.["transition-in"]
-  const fromClasses = transitions['transition-in-from'] ?? transitionConfig?.["transition-in-from"]
-  const transitionOutClasses = transitions['transition-out'] ?? transitionConfig?.["transition-out"]// TODO: ?? not sure
-  const toClasses = transitions['transition-out-to'] ?? transitionConfig?.["transition-out-to"]// TODO: ??? not sure
+  const transitionInClasses = transitions['transition-in']
+  const fromClasses = transitions['transition-in-from']
+  const transitionOutClasses = transitions['transition-out'] 
+  const toClasses = transitions['transition-out-to']
 
   if (animateInClasses || transitionInClasses) {
     atAttach(() => {
@@ -201,14 +208,25 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
 
 function positionClone(clone: HTMLElement, node: HTMLElement) {
   const rect = node.getBoundingClientRect()
-  return awaiting(computePosition(node, clone, { placement: 'center' }), ({ x, y }) => {
-    clone.style.setProperty('position', 'absolute')
-    clone.style.setProperty('top', x + 'px') // FIX: Why do I need to add 16px for transition out to be correct?
-    clone.style.setProperty('left', y + 'px')
-    clone.style.setProperty('width', rect.width + 'px')
-    clone.style.setProperty('height', rect.height + 'px')
-  })
+  
+  clone.style.setProperty('position', 'fixed')
+
+  clone.style.setProperty('top', rect.top + 'px') // FIX: margin collapsing doesn't get applied, causing inaccurate positioning
+  clone.style.setProperty('left', rect.left + 'px')
+  clone.style.setProperty('width', rect.width + 'px')
+  clone.style.setProperty('height', rect.height + 'px')
+  clone.style.setProperty('margin', 'unset', 'important')
 }
+// function positionClone(clone: HTMLElement, node: HTMLElement) {
+//   const rect = node.getBoundingClientRect()
+//   return awaiting(computePosition(node, clone), ({ x, y }) => {
+//     clone.style.setProperty('position', 'absolute')
+//     clone.style.setProperty('top', x + 'px') // FIX: Why do I need to add 16px for transition out to be correct?
+//     clone.style.setProperty('left', y + 'px')
+//     clone.style.setProperty('width', rect.width + 'px')
+//     clone.style.setProperty('height', rect.height + 'px')
+//   })
+// }
 
 
 // function getVisualAnchorRect(root: HTMLElement) {
@@ -349,7 +367,6 @@ function transitionIn(node: HTMLElement, createTransition: (clone: HTMLElement) 
 //     transitioning.delete(transition)
 //   })
 // }
-
 function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement) => ActiveTransitionOut, transitioning: Set<ActiveTransitionIn>) {
   if (transitioning?.size) {
     for (const transition of transitioning) {
@@ -357,24 +374,52 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
       transitioning.delete(transition)
     }
   }
-  return;
-  // FIX: transitioning out is currently broken due to positioning issues
+
+  // - read dims of prev node
+  // const rect = node.getBoundingClientRect()
   const clone = node.cloneNode(true) as HTMLElement
-  clone.style.removeProperty('visibility')
   node.after(clone)
   // - position clone
-  awaiting(positionClone(clone, node), () => {
+  positionClone(clone, node)
+  clone.style.removeProperty('visibility')
 
-    atRender(() => {
-      const transition = createTransition(clone)
-      transition.start()
+  console.log('transition out clone', clone.childNodes[0])
 
-      transition.onEnd(() => {
-        clone.remove();
-      })
+  atRender(() => {
+    const transition = createTransition(clone)
+    transition.start()
+
+    transition.onEnd(() => {
+      clone.remove();
     })
   })
 }
+
+// function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement) => ActiveTransitionOut, transitioning: Set<ActiveTransitionIn>) {
+//   if (transitioning?.size) {
+//     for (const transition of transitioning) {
+//       transition.cancel()
+//       transitioning.delete(transition)
+//     }
+//   }
+
+
+//   const clone = node.cloneNode(true) as HTMLElement
+//   clone.style.removeProperty('visibility')
+//   node.after(clone)
+//   // - position clone
+//   awaiting(positionClone(clone, node), () => {
+
+//     atRender(() => {
+//       const transition = createTransition(clone)
+//       transition.start()
+
+//       transition.onEnd(() => {
+//         clone.remove();
+//       })
+//     })
+//   })
+// }
 
 export function toClassNames(classString: string) {
   const classNames: string[] = []

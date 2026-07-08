@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, atRender, RUN_EAGERLY } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, atRender, RUN_EAGERLY, atInternalRender } from "@rue/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { DOMParent } from "./VineNode";
 import { getFlask } from "@rue/flask";
@@ -13,7 +13,7 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
   const { trusted, html } = kit;
   if (isGetter(html)) {
     trackForRender(html, () => {
-      atRender(() => {
+      atInternalRender(() => {
         setInnerHTML(html(), trusted, parentNode)
       })
     }, getFlask(), true);

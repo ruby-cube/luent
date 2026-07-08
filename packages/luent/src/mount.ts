@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { createRootContext } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { load, atRender } from "@rue/quarky";
+import { load, atRender, atInternalRender } from "@rue/quarky";
 import { Provided } from "./context/Context";
 import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "./node/VineNode";
 import { RenderFunction } from "./node/makeJSXNode";
@@ -20,7 +20,7 @@ export function mountIsland<T extends AnyObject, E extends Provided>(App: Compon
     try {
       const nodes = processJSXOutput(App())
       setUpNodeVine(nodes, root)
-      atRender(() => {
+      atInternalRender(() => {
         mountDOMNodes(nodes, root)
       })
       flask.emitInitialMount()

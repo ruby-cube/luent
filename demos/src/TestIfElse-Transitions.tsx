@@ -20,35 +20,34 @@ export function TestIfElse() {
 
   return (
     <>
-      <div>
-        <button id='toggle-active' on:click={e => { $active.toggle() }}>toggle active</button>
-        <button id='toggle-ready' on:click={e => { $ready.toggle() }}>toggle ready</button>
+      <div style='position: relative'>
+        <button id='toggle-active' on:click={() => { $active.toggle() }}>toggle active</button>
+        <button id='toggle-ready' on:click={() => { $ready.toggle() }}>toggle ready</button>
         <hr></hr>
         <div class='container view'>
-          {/* <Transition animate-in animate-out> */}
-          {/* <Transition animate-in='fade-in' animate-out='fade-out'> */}
-          {If($active,
-            <div>
-              oh
-              <h2>hi</h2>
-              {If($ready,
-                <p style='width: 500px; height: 500px; background-color: beige' animate-intro animate-in='fade-in' animate-out='fade-out'>ready</p>
-              )}
-            </div>
-          )}
-          {ElseIf($ready,
-            <div>
-              two peas in a pod
-              <h2>🤢🤢</h2>
-            </div>
-          )}
-          {Else(
-            <div>
-              ok
-              <h2>bye</h2>
-            </div>
-          )}
-          {/* </Transition> */}
+          <o:transition animate-in-out>
+            {If($active,
+              <div>
+                oh
+                <h2>hi</h2>
+                {If($ready,
+                  <p animate-in-out>ready</p>
+                )}
+              </div>
+            )}
+            {ElseIf($ready,
+              <div>
+                two peas in a pod
+                <h2>🤢🤢</h2>
+              </div>
+            )}
+            {Else(
+              <div>
+                ok
+                <h2>bye</h2>
+              </div>
+            )}
+          </o:transition>
         </div>
       </div>
       {Style(css`
@@ -62,16 +61,13 @@ export function TestIfElse() {
         }
        
         .fade-in {
-          animation: 250ms ease-in both fade-in
+          animation: 2500ms ease-in both fade-in
         }
        
         .fade-out {
           animation: 2500ms ease-in reverse both fade-in
         }
         
-        p.fade-out {
-          transform: translateY(-16px);
-        }
       `)}
     </>
   )

@@ -297,6 +297,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
 
       case 'animate-in':
       case 'animate-out':
+      case 'animate-in-out':
       case 'transition-in-from':
       case 'transition-in':
       case 'animate-intro':
