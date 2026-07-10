@@ -57,19 +57,19 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 type IonicTaskOptions = { [K in keyof _IonicTaskOptions as K extends 'phase' ? never : K]: _IonicTaskOptions[K] }
 
 
-function queueIonicPrelude(task: IonicTask, options?: IonicTaskOptions) {
+export function ionicPrelude(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: PRELUDE })
 }
 
-function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+export function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: SYNC })
 }
 
-function queueIonicRender(task: IonicTask, options?: IonicTaskOptions) {
+export function ionicRender(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: RENDER })
 }
 
-function queueIonicLayout(task: IonicTask, options?: IonicTaskOptions) {
+export function ionicLayout(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: LAYOUT })
 }
 
@@ -77,11 +77,7 @@ function queueIonicLayout(task: IonicTask, options?: IonicTaskOptions) {
 //    return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
 // }
 
-export function trackEffect(task: IonicTask, options?: IonicTaskOptions) {
+export function ionicTickTask(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: TICK })
 }
 
-trackEffect.atPrelude = queueIonicPrelude
-trackEffect.atRender = queueIonicRender
-trackEffect.atLayout = queueIonicLayout
-trackEffect.sync = runIonicTask

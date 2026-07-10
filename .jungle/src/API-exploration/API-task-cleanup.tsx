@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { getActiveFlask } from "@rue/flask";
 import { component, template, fromContext, RENDER } from "@rue/luent";
-import { trackEffect } from "@rue/quarky";
+import { ionicTickTask, runIonicTask } from "@rue/quarky";
 
 
 
@@ -20,7 +20,7 @@ import { trackEffect } from "@rue/quarky";
 export function ScoreBoard() {
 
    // synchronous
-   ionicSyncTask(() => {
+   runIonicTask(() => {
 
    })
 
@@ -220,7 +220,7 @@ useEffect(() => {
 }, [serverUrl, roomId]);
 
 
-trackEffect(({ setup }) => {
+ionicTickTask(({ setup }) => {
    const chatroom = createConnection($serverURL, $roomID)
    setup(() =>
       chatroom.connect()
@@ -239,7 +239,7 @@ useEffect(() => {
    };
 }, []);
 
-trackEffect(({ setup }) => {
+ionicTickTask(({ setup }) => {
    function handleMove(e) {
       setPosition({ x: e.clientX, y: e.clientY });
    }
@@ -258,7 +258,7 @@ useEffect(() => {
    };
 }, []);
 
-trackEffect(({ setup }) => {
+ionicTickTask(({ setup }) => {
    const animation = new FadeInAnimation($div())
    setup(() =>
       animation.start(100)
@@ -288,7 +288,7 @@ useEffect(() => {
 }, []);
 
 
-trackEffect(({ setup }) => {
+ionicTickTask(({ setup }) => {
    const div = $div();
    const observer = new IntersectionObserver(entries => {
       const entry = entries[0];
@@ -318,7 +318,7 @@ useEffect(() => {
    }
 }, [person]);
 
-trackEffect(({ setup, ooo }) => {
+ionicTickTask(({ setup, ooo }) => {
    let ignore = false;
    mu($bio).value = null
    setup(() => {
@@ -329,7 +329,7 @@ trackEffect(({ setup, ooo }) => {
    }).cleanup(() => ignore = true)
 })
 
-trackEffect(({ setup, ooo }) => {
+ionicTickTask(({ setup, ooo }) => {
    let ignore = false;
    mu($bio).value = null
    setup(() => {
@@ -341,9 +341,9 @@ trackEffect(({ setup, ooo }) => {
 })
 
 // NOTE: ooo is only needed if you want to stack awaits, especially to distinguish action promises from scheduling promises
-// ... maybe only relevant in sync effects? Is it relevant with trackEffect??
+// ... maybe only relevant in sync effects? Is it relevant with ionicTickTask??
 
-trackEffect(({ ooo, abort }) => {
+ionicTickTask(({ ooo, abort }) => {
    mu($bio).value = null
 
    ooo.await(fetchBio(person, { abort }))
@@ -355,7 +355,7 @@ trackEffect(({ ooo, abort }) => {
       })
 })
 
-trackEffect(({ abort }) => {
+ionicTickTask(({ abort }) => {
    mu($bio).value = null
 
    fetchBio(person, { abort })
@@ -367,7 +367,7 @@ trackEffect(({ abort }) => {
       })
 })
 
-trackEffect(async ({ abort }) => {
+ionicTickTask(async ({ abort }) => {
    mu($bio).value = null
    try {
       const result = await fetchBio(person, { abort })
@@ -378,7 +378,7 @@ trackEffect(async ({ abort }) => {
    }
 })
 
-trackEffect(async ({ abort }) => {
+ionicTickTask(async ({ abort }) => {
    mu($bio).value = null
    const [result, error] = await fetchBio(person, { abort })
    if (err) {
@@ -389,7 +389,7 @@ trackEffect(async ({ abort }) => {
    }
 })
 
-trackEffect(({ setup }) => {
+ionicTickTask(({ setup }) => {
    let abort = false;
    mu($bio).value = null
    setup(async () => {

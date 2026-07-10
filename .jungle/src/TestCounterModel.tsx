@@ -56,7 +56,7 @@ export function TestMutableCounter() {
       count.value--
    }
 
-   // trackEffect(()=>{
+   // ionicTickTask(()=>{
    //    console.log('running ionic task', count.value)
    // })
 

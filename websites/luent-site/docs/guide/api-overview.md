@@ -6,10 +6,12 @@ The API reference is still being written. In the meantime, here is a overview of
 
 ## Island rendering
 #### Client-side
-- `mountIsland()` to mount an interactive island
+- `mountHyperHTML()` to auto-mount interactive islands onto JSX-generated HTML
+- `mountIsland()` to mount an interactive island onto existing HTML
 #### Server-side
-- `writeIsland()` to write the island as static html
+- `writeHyperHTML()` to write HTML with static islands and auto-mount interactive islands
 - `withIslands()` <span class='doc-tag'>Experimental</span> to transform HTML to include islands
+- `writeIsland()` to write an island as static HTML
 
 ## Reactivity
 - `ion()` to create simple and derived reactive state
@@ -18,10 +20,11 @@ The API reference is still being written. In the meantime, here is a overview of
 
 #### Non-essential reactivity
 - `ionize()` to create an ion of an ionic structure
-- `ionicPrelude()` to track an ionic prelude phase task 
-- `ionicRender()` to track an ionic render phase task 
-- `ionicLayout()` to track an ionic layout phase task 
-- `ionicTask()` to track an ionic tick phase task 
+- `ionicSyncTask()` to track a synchronous ionic task 
+- `ionicPreludeTask()` to track an ionic prelude phase task 
+- `ionicRenderTask()` to track an ionic render phase task 
+- `ionicLayoutTask()` to track an ionic layout phase task 
+- `ionicTickTask()` to track an ionic tick phase task 
 - `Finitron()` to create finite reactive state
 
 ## Context binding
@@ -38,8 +41,8 @@ The API reference is still being written. In the meantime, here is a overview of
 
 #### Context tags
 - `<o:context>` to provide context bindings
-- `<o—root>` to provide root bindings
-- `<o—ground>` to provide global bindings
+- `<o—-root>` to provide root bindings
+- `<o—-ground>` to provide global bindings
 
 ## Binding namespaces
 - `on:` for event handlers
@@ -98,7 +101,7 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 
 ## Async tasks
 - `awaiting()` for awaiting promises without losing context
-- `streaming` for async sequences with context
+- `ooo` for async sequences that preserve context
 
 ## Render cycle phases
 - `prelude` before update is rendered to DOM
@@ -120,9 +123,12 @@ Lifecycle hooks register tasks to be run at certain points of a dynamic view's l
 - `atRemount()` at restored mount
 - `atDemount()` at temporary unmount
 
+## Effect cleanup
+- `atEnd()` to schedule tasks for the end of an effect
+
 ## Batch cleanup
 - `Scene()` to batch subscriptions cleanup
-- `scene.atEnd()` to run task at end of scene or effect
+- `scene.atEnd()` to schedule tasks for the end of a scene
 - `scene.end()` to end a scene
 
 
@@ -140,7 +146,7 @@ Lifecycle hooks register tasks to be run at certain points of a dynamic view's l
 
 ## Debugging
 - `debug.log()`
-- `debug.trace()` for tracing effects
+- `debug.trace()` for async traces across the reactivity pipeline
 - `debug.error()`
 - `debug.warn()`
 - `debug.logAtoms()`

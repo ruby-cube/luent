@@ -1,14 +1,13 @@
-import { ComponentTag } from "./component/Component";
+import { ComponentTag } from "../component/Component";
 import { AnyObject } from "@rue/types";
-import { createRootContext } from "./context/provide";
-import { popContext, pushContext } from "./context/context-stack";
+import { createRootContext } from "../context/provide";
+import { popContext, pushContext } from "../context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
 import { load, atRender, atInternalRender } from "@rue/quarky";
-import { Provided } from "./context/Context";
-import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "./node/VineNode";
-import { RenderFunction } from "./node/makeJSXNode";
+import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
+import { RenderFunction } from "../node/makeJSXNode";
 
-export function mountIsland<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
+export function mountIsland<T extends AnyObject>(App: ComponentTag<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
   const rootContext = createRootContext()
   const flask = new Flask({ type: 'view' });
   console.log('document', document.body)
@@ -21,6 +20,7 @@ export function mountIsland<T extends AnyObject, E extends Provided>(App: Compon
       const nodes = processJSXOutput(App())
       setUpNodeVine(nodes, root)
       atInternalRender(() => {
+        console.log('*** nodes', nodes, root)
         mountDOMNodes(nodes, root)
       })
       flask.emitInitialMount()

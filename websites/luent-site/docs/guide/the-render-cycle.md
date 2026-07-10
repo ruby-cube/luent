@@ -88,7 +88,7 @@ The render phase performs DOM mutation work. It is used to schedule tasks that d
 Once the render phase begins, the update is considered committed and can no longer be interrupted by newer updates.
 
 ```tsx
-trackRender(() => {
+ionicRender(() => {
   if ($open()) {
     $dialog()?.focus();
   }
@@ -237,9 +237,10 @@ track(
 
 ## Scheduling Ionic Tasks
 
-Ionic tasks run during the specified phase and automatically re-run as effects when their tracked ions change state.
+Ionic tasks run during the specified phase and automatically re-run when their tracked ions change state.
 
-- `ionicPrelude()` for prelude phase tasks
-- `ionicRender()` for render phase tasks
-- `ionicLayout()` for layout phase tasks
-- `ionicTask()` for tick phase tasks
+- `ionicSyncTask()` for synchronous tasks
+- `ionicPreludeTask()` for prelude phase tasks
+- `ionicRenderTask()` for render phase tasks
+- `ionicLayoutTask()` for layout phase tasks
+- `ionicTickTask()` for tick phase tasks

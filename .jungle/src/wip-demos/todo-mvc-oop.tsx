@@ -1,5 +1,5 @@
 import { component, template, For, If, Else, FromTag, listen } from "@rue/luent"
-import { watch, trackEffect, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
+import { watch, ionicTickTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@rue/quarky"
 
 // PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)
 // CONS: Not as composable as kits
@@ -117,7 +117,7 @@ export function TodoMVC() {
 
    const { $filteredTodos, removeTodo, updateTodo } = $from(app)
 
-   trackEffect(() => {
+   ionicTickTask(() => {
       storeTodos(app.todos)
    })
 

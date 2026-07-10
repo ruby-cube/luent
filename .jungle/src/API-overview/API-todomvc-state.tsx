@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, template, For, If, Else } from "@rue/luent"
-import { watch, ion, trackEffect, ionize, Ionized, ionic } from "@rue/quarky"
+import { watch, ion, ionicTickTask, ionize, Ionized, ionic } from "@rue/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 
 interface Todo {
@@ -38,7 +38,7 @@ export function TodoMVC() {
    onHashChange()
 
    // persist state
-   trackEffect(() => {
+   ionicTickTask(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(todos.value))
    })
 

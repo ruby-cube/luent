@@ -31,12 +31,11 @@
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
     "@volar/language-core": "~2.4.0",
-    "esrap": "^2.2.4",
-    "oxc-parser": "^0.124.0",
-    "zimmerframe": "^1.1.4"
+    "oxc-parser": "^0.124.0"
   },
   "devDependencies": {
     "@rue/types": "workspace:*",
+    "@rue/squirl": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.3"
   },

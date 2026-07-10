@@ -60,6 +60,9 @@
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"
       ],
+      "@rue/squirl": [
+        "./packages/squirl/src/index.ts"
+      ],
       "@rue/quarky/core": [
         "./packages/quarky/src/core/index.ts"
       ],

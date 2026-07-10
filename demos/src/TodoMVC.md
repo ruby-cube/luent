@@ -1,6 +1,6 @@
 ```tsx
 import { template, For, If, Else, FromTag, listen, isMutableIon } from "@rue/luent"
-import { watch, trackEffect, Ion, Ionic, EACH, as, ion, ionic } from "@rue/quarky"
+import { watch, ionicTickTask, Ion, Ionic, EACH, as, ion, ionic } from "@rue/quarky"
 
 interface Todo {
    id: number
@@ -50,7 +50,7 @@ export function TodoMVC() {
    function getTodos(): Todo[] {
       const STORAGE_KEY = 'vue-todomvc'
 
-      trackEffect(() => {
+      ionicTickTask(() => {
          localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
       })
 

@@ -1,10 +1,9 @@
-import { ArrowFunctionExpression, Function, Program, VariableDeclaration } from "oxc-parser";
-import { createStack } from "../../utils/index.ts";
+import { createStack, isFunction } from "@rue/utils";
 import { CHILD_KEYS } from "./ast.ts";
-import { ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts";
 import { LinkedNode, toLinkedList } from "./linked-nodes.ts";
 
 // #region: Types adapted from @svelte/zimmerframe
+
 
 type BaseNode = {
   type: string;
@@ -24,11 +23,11 @@ type Visit<T extends BaseNode, N extends BaseNode, C> = (this: Cursor<T, C>, nod
 
 // #endregion
 
+type CreateScope<S> = (parent?: S | undefined) => S
 
 
-
-export function traverse<T extends BaseNode, C>(ast: T, context: C & object, visitors: Visitors<T, C>) {
-  const cursor = new Cursor<T, C>(CHILD_KEYS, context, visitors)
+export function traverse<T extends BaseNode, C>(ast: T, context: C, visitors: Visitors<T, C>) {
+  const cursor = new Cursor<T, C>(CHILD_KEYS, context, visitors, undefined)
 
   cursor.enterScope()
   try {
@@ -44,7 +43,7 @@ export function traverse<T extends BaseNode, C>(ast: T, context: C & object, vis
   }
 }
 
-export function traverseAll<T extends BaseNode, C>(ast: T, context: C & object, visitors: { visit: Visit<T, T, C> }) {
+export function traverseAll<T extends BaseNode, C>(ast: T, context: C & { createScope?: CreateScope<Scope<C>> }, visitors: { visit: Visit<T, T, C> }) {
 
   const cursor = new Cursor<T, C>(CHILD_KEYS, context, undefined, visitors.visit)
 
@@ -66,55 +65,11 @@ export function traverseAll<T extends BaseNode, C>(ast: T, context: C & object, 
 
 
 
-export class Scope {
-  // private variables: Set<string>
-  private absorbedGetters: Map<string, VariableDeclaration | Function | ArrowFunctionExpression> = new Map()
 
-  constructor(private parent: Scope | undefined) {
-    // this.variables = new Set(parent?.variables)
-  }
-
-  // addVariable(name: string) {
-  //    this.variables.add(name)
-  // }
-
-  // has(name: string) {
-  //    return this.variables.has(name)
-  // }
-
-  addAbsorbedGetter(name: string, declaration: VariableDeclaration | Function | ArrowFunctionExpression) {
-    console.log('add', name)
-    this.absorbedGetters.set(name, declaration)
-  }
-
-  getAbsorbedGetterDeclaration(name: string) {
-    const variable = name.endsWith(ACCESSOR_VARIABLE_POSTFIX) ? name.slice(0, -1) : name
-    let scope: undefined | Scope = this;
-    while (scope) {
-      const result = scope.absorbedGetters.get(variable)
-      if (result) {
-        return result;
-      }
-      scope = scope.parent
-    }
-    return undefined;
-  }
-
-  private typeGuarded = new Set<string>()
-
-  markTypeGuarded(name: string) {
-    this.typeGuarded.add(name)
-  }
-
-  isTypeGuarded(name: string) {
-    return this.typeGuarded.has(name)
-  }
-}
-
-interface ScopeStack {
-  push(scope: Scope): Scope,
+interface ScopeStack<S> {
+  push(scope: S): S,
   pop(): void,
-  get(): Scope | undefined
+  get(): S | undefined
 }
 
 
@@ -122,6 +77,7 @@ const PROXY = Symbol('proxy')
 const RAW = Symbol('raw')
 const SOURCE_LIST = Symbol('source_list')
 
+type Scope<C> = C extends { createScope: infer F } ? F extends (arg: any) => infer S ? S : never : never
 /**
  * This implementation assumes each node in the ast is a unique object
  */
@@ -131,20 +87,23 @@ export class Cursor<T extends BaseNode, C> {
   private getContext: () => C | undefined;
 
   enterScope() {
-    return this.scopeStack.push(new Scope(this.scopeStack.get()))
+    if (isFunction(this.createScope))
+      return this.scopeStack?.push(this.createScope(this.scopeStack.get()))
   }
 
   exitScope() {
-    return this.scopeStack.pop()
+    return this.scopeStack?.pop()
   }
 
-  get scope() {
-    const scope = this.scopeStack.get()
+  get scope(): C extends { createScope: CreateScope<any> } ? Scope<C> : undefined {
+    if (!this.createScope) return undefined as C extends { createScope: CreateScope<any> } ? Scope<C> : undefined;
+    const scope = this.scopeStack?.get()
     if (!scope) throw new InternalError('no scope :(')
     return scope;
   }
 
-  private scopeStack: ScopeStack
+  private scopeStack: ScopeStack<Scope<C>> | undefined
+  private createScope: C extends { createScope: infer F } ? F : undefined
 
   constructor(
     private childKeys: { [key: string]: string[] },
@@ -152,13 +111,15 @@ export class Cursor<T extends BaseNode, C> {
     private visitors?: Visitors<T, C>,
     private visitor?: Visit<T, NodeOf<T['type'], T>, C>
   ) {
-    const [pushScope, popScope, getScope] = createStack<Scope>()
+    const { createScope } = context as { createScope?: any }
+    this.createScope = createScope;
+    const [pushScope, popScope, getScope] = createStack<Scope<C>>()
     const [pushContext, popContext, getContext] = createStack<C>()
-    this.scopeStack = {
+    this.scopeStack = createScope ? {
       push: pushScope,
       pop: popScope,
       get: getScope
-    }
+    } : undefined
     this.pushContext = pushContext;
     this.popContext = popContext;
     this.getContext = getContext;

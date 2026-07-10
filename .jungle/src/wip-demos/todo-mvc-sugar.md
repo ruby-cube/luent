@@ -1,6 +1,6 @@
 ```tsx
 import { template, For, If, Else, FromTag } from "%rue/luent"
-import { watch, trackEffect, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
+import { watch, ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
 import { PRELUDE } from "../../../../packages/luent/src/render-cycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/compound/Compound"
@@ -184,7 +184,7 @@ export function TodoMVC() {
    function getTodos(): Todo[] {
       const STORAGE_KEY = 'vue-todomvc'
 
-      trackEffect(() => {
+      ionicTickTask(() => {
          localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
       })
 

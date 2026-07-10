@@ -26,10 +26,7 @@ export function makeElement(
   bindings: ElementConfig,
   element?: HTMLElement
 ): DOMNode {
-  console.log('@@@before compose bindings', bindings)
   const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
-  console.log('showIf', showIf)
-  console.warn('mutables', mutables)
 
   let newXML_NS: string | undefined;
   let XML_NS: string | undefined;
@@ -54,7 +51,7 @@ export function makeElement(
   if (showIf) setUpConditionalDisplay(domNode, showIf)
   if (events) setUpEvents(domNode, events);
   if (hooks) setUpHooks(domNode, hooks)
-  if (mutables) setUpMutables(domNode, mutables, attributes.type)
+  if (mutables) setUpMutables(domNode, mutables)
   if (attributes) setUpAttributes(domNode, attributes);
   if (transitions) setUpTransitions(domNode as HTMLElement, transitions) // TODO: transition-in etc
   const transitionConfig = getTransition()

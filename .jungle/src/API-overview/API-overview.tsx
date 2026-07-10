@@ -284,7 +284,7 @@ watch($count, () => {
 })
 
 // ionic task
-trackEffect(() => {
+ionicTickTask(() => {
    console.log('card number:', $cardNumber())
    console.log('card suit:', $cardSuit())
 }) // default poster render

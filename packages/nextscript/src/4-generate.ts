@@ -1,7 +1,6 @@
 import type { ArrayExpression, AssignmentExpression, Node as ASTNode, BinaryExpression, ForInStatement, ForOfStatement, ForStatement, WhileStatement, LogicalExpression, PrivateInExpression, Program, ArrayPattern, BlockStatement, TSModuleBlock, StaticBlock } from 'oxc-parser'
 import { CodeInformation, CodeMapping } from "@volar/language-core";
 import { BASE_CAPABILITIES, Capabilities } from './capabilities.ts';
-import { isFunctionTypeNode } from 'typescript';
 import { isFunctionNode } from './3-transform.ts';
 
 const TAB = '\t'

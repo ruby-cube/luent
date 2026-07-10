@@ -1,4 +1,4 @@
-import { component, template, mountIsland } from "@rue/luent"
+import { mountIsland } from "@rue/luent"
 import { ion } from "@rue/quarky"
 
 /* 
@@ -24,13 +24,12 @@ export function TestCounter() {
    const $doubleCount = ion(() => $count() * 2)
 
    return (
-
       <div>
          <div id='count'>{$count}</div>
          <div id='double-count'>x2 = {$doubleCount}</div>
          <hr></hr>
-         <button on:click={e => $count.increment()}>+</button>
-         <button on:click={e => $count.decrement()}>-</button>
+         <button on:click={() => $count.increment()}>+</button>
+         <button on:click={() => $count.decrement()}>-</button>
       </div>
    )
 }

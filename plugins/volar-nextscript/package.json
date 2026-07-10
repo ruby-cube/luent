@@ -22,7 +22,6 @@
       "@rue/nextscript": "workspace:*",
       "@types/estree": "^1.0.8",
       "@types/estree-jsx": "^1.0.5",
-      "zimmerframe": "^1.1.4",
       "oxc-parser": "^0.130.0"
    }
 }

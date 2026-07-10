@@ -1,5 +1,5 @@
 import { component, beforeDetach, template } from "@rue/luent";
-import { trackEffect, Ion, Ionized, SYNC, watch } from "@rue/quarky";
+import { ionicTickTask, Ion, Ionized, SYNC, watch } from "@rue/quarky";
 
 export function DateApp() {
 

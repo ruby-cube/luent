@@ -1,21 +1,21 @@
 import { component, template } from "@rue/luent"
-import {  ion, trackEffect, SYNC } from "@rue/quarky"
+import { ion, runIonicTask, SYNC } from "@rue/quarky"
 
 
 export function TestIonicEffect() {
-    const $count = ion(0, {
-        increment() {
-            console.log("incrementing")
-            $count.value = $count() + 1
-        }
-    })
+  const $count = ion(0, {
+    increment() {
+      console.log("incrementing")
+      $count.value = $count() + 1
+    }
+  })
 
-    trackEffect(() => {
-        $count.increment()
-    }, { phase: SYNC })
+  runIonicTask(() => {
+    $count.increment()
+  })
 
-    return (
+  return (
 
-        <button on:click={$count.increment}>click for effect</button>
-    )
+    <button on:click={$count.increment}>click for effect</button>
+  )
 }

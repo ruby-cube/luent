@@ -216,16 +216,15 @@ export function writeComponent(
 
 
 
-export function writeIsland<T extends AnyObject, E extends Provided>(App: ComponentTag<T> | RenderFunction) {
+export function writeIsland(render: RenderFunction) {
   const flask = new Flask({ type: 'view' });
   const rootContext = createRootContext()
   try {
     pushContext(rootContext)
     flaskStack.push(flask)
     flask.emitInitialMount()
-    console.log('RENDER TO STRING')
     const output = instantUpdate(() =>
-      joinIsland(processJSXOutput(normalizeToArray(App())))
+      joinIsland(processJSXOutput(normalizeToArray(render())))
     )
     return output
   }

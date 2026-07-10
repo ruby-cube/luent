@@ -47,11 +47,11 @@ track($list, () => {
 ```
 When passed an ion containing an ionic structure, `track()` tracks mutations of the ion as well as shallow mutations of the ionic structure.
 
-## Tracking reactive effects
-`trackEffect()` tracks trackable access operations (e.g. getter calls, reactive property access, `Array.filter()`, etc) performed *synchronously* within the task.
+## Tracking ionic tasks
+`ionicTickTask()` tracks trackable access operations (e.g. getter calls, reactive property access, `Array.filter()`, etc) performed *synchronously* within the task.
 
 ```ts
-trackEffect(() => {
+ionicTickTask(() => {
   if ($qty()) {
     console.log('quantity is', $qty())
     console.log('count is', $count())
@@ -64,7 +64,7 @@ trackEffect(() => {
 
 
 ## Scheduling
-By default, `track()` and `trackEffect()` run effects at the end of a render cycle, or the tick—after the mutation has been rendered and painted to the screen. To schedule effects earlier in the render cycle, see [The Render Cycle](/guide/the-render-cycle)
+By default, `track()` runs effects at the end of a render cycle, or the tick—after the mutation has been rendered and painted to the screen. To schedule effects earlier in the render cycle, see [The Render Cycle](/guide/the-render-cycle)
 
 
 ## Effect Cleanup

@@ -294,7 +294,7 @@ class AsyncIon<T> {
    private watchingFetch = false;
 
    private watchFetch() {
-      trackEffect(() => this.fetch())
+      ionicTickTask(() => this.fetch())
       this.watchingFetch = true;
    }
 

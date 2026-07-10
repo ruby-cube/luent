@@ -204,7 +204,7 @@ export function SomeChild() {
          function getfiles() {
             const $state = ion(undefined);
       
-            trackEffect(() => {
+            ionicTickTask(() => {
                const res = await fetch(`files/${$id()}`)
                res.json().then(v => $state.value = v)
             })

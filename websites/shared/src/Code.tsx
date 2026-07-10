@@ -107,19 +107,19 @@ export function Code(setup: FromTag<{
             </div>
           </>
         })}
-        <o:preserve>
+        {/* <o:preserve> */}
           {Await(() => <>
-            {If(() => $tab() === 'main', 'create', () =>
+            {If(() => $tab() === 'main', () =>
               CodeBlock(main, highlight)
             )}
-            {Else('create', () =>
+            {Else(() =>
               CodeBlock(alt, highlight)
             )}
           </>)}
           {Meanwhile(
             <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
           )}
-        </o:preserve>
+        {/* </o:preserve> */}
       </div>
       {Style(css`
 .code-container {

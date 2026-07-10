@@ -60,7 +60,7 @@ export class RenderCycle {
   }
 
   get more() {
-    return this.phases[PRELUDE]?.more || this.phases[RENDER]?.more || this.phases[LAYOUT]?.more
+    return this.phases[PRELUDE]?.more || this.phases[RENDER]?.more || this.phases[INTERNAL_RENDER]?.more|| this.phases[LAYOUT]?.more
   }
 
   started = false

@@ -1,4 +1,4 @@
-import { component, template, mountIsland } from "@rue/luent"
+import { mountIsland } from "@rue/luent"
 import { ionic } from "@rue/quarky"
 
 /* 
@@ -36,17 +36,17 @@ export function TestMoveBox() {
 
       <div data-test={JSON.stringify({ "INCREMENT": INCREMENT })}>
          <div style='display: grid; width: 100%; height: 500px; place-items: center'>
-            <div id='box' style={{ backgroundColor: "#53D0F6", width: '50px', height: '50px', transform: (`translate(${box.x}px, ${box.y}px)`) }}></div>
+            <div id='box' style={{ backgroundColor: "#53D0F6", width: '50px', height: '50px', transform: () =>`translate(${box.x}px, ${box.y}px)` }}></div>
          </div>
          <hr></hr>
          <div style="text-align: center">
-            <button style='width: 2em' on:click={e => box.moveUp()}>^</button>
+            <button style='width: 2em' on:click={() => box.moveUp()}>^</button>
             <br />
-            <button style='width: 2em' on:click={e => box.moveLeft()}>{'<'}</button>
-            <button style='width: 2em' on:click={e => box.reset()}>o</button>
-            <button style='width: 2em' on:click={e => box.moveRight()}>{'>'}</button>
+            <button style='width: 2em' on:click={() => box.moveLeft()}>{'<'}</button>
+            <button style='width: 2em' on:click={() => box.reset()}>o</button>
+            <button style='width: 2em' on:click={() => box.moveRight()}>{'>'}</button>
             <br />
-            <button style='width: 2em' on:click={e => box.moveDown()}>V</button>
+            <button style='width: 2em' on:click={() => box.moveDown()}>V</button>
          </div>
       </div>
    )

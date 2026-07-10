@@ -97,7 +97,7 @@ export function TestCount() {
       $count.value--
    }
 
-   // trackEffect(() => {
+   // ionicTickTask(() => {
    //    console.log('running ionic task', $count())
    // })
 

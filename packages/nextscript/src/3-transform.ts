@@ -1,6 +1,6 @@
 import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator, AssignmentOperator, DoWhileStatement, WhileStatement, ConditionalExpression, JSXChild, JSXFragment, JSXAttributeValue, JSXExpression } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
-import { Cursor, Scope, traverse, traverseAll } from './traverse.ts';
+import { Cursor, traverse, traverseAll } from '@rue/squirl';
 
 
 // (1) reverse offset pass
@@ -10,12 +10,59 @@ import { Cursor, Scope, traverse, traverseAll } from './traverse.ts';
 type Context = {
   program?: Program;
   edits: Edits;
+  createScope: (parent: Scope | undefined) => Scope
 }
 
 function requireFrom<T, K extends keyof T>(obj: T, key: K): Exclude<T[K], undefined> {
   const value = obj[key]
   if (value === undefined) throw new Error(key.toString() + ' is missing from context')
   return value as Exclude<T[K], undefined>;
+}
+
+
+class Scope {
+  // private variables: Set<string>
+  private absorbedGetters: Map<string, VariableDeclaration | Function | ArrowFunctionExpression> = new Map()
+
+  constructor(private parent: Scope | undefined) {
+    // this.variables = new Set(parent?.variables)
+  }
+
+  // addVariable(name: string) {
+  //    this.variables.add(name)
+  // }
+
+  // has(name: string) {
+  //    return this.variables.has(name)
+  // }
+
+  addAbsorbedGetter(name: string, declaration: VariableDeclaration | Function | ArrowFunctionExpression) {
+    console.log('add', name)
+    this.absorbedGetters.set(name, declaration)
+  }
+
+  getAbsorbedGetterDeclaration(name: string) {
+    const variable = name.endsWith(ACCESSOR_VARIABLE_POSTFIX) ? name.slice(0, -1) : name
+    let scope: undefined | Scope = this;
+    while (scope) {
+      const result = scope.absorbedGetters.get(variable)
+      if (result) {
+        return result;
+      }
+      scope = scope.parent
+    }
+    return undefined;
+  }
+
+  private typeGuarded = new Set<string>()
+
+  markTypeGuarded(name: string) {
+    this.typeGuarded.add(name)
+  }
+
+  isTypeGuarded(name: string) {
+    return this.typeGuarded.has(name)
+  }
 }
 
 
@@ -43,7 +90,7 @@ export function transformNSX(ast: ASTNode, edits: Edits) {
   edits.lastIndex = 0
 
 
-  return traverse(ast, { edits } as Context, {
+  return traverse(ast, { edits, createScope: (parent) => new Scope(parent) } as Context, {
     Program(node, context) {
       this.visitEach(node.body, { ...context, program: node })
     },

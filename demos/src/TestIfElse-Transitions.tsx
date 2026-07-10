@@ -1,5 +1,5 @@
 import { component, template, If, Else, ElseIf, NodeRef, mountIsland, Style, css } from "@rue/luent";
-import { ion, ooo, atRender, queueTask, toValue, watch } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 import "./style.css"
 // import { Transition } from "../../../packages/luent/src/transitions/Transition";
 
@@ -25,7 +25,7 @@ export function TestIfElse() {
         <button id='toggle-ready' on:click={() => { $ready.toggle() }}>toggle ready</button>
         <hr></hr>
         <div class='container view'>
-          <o:transition in='fade' out='slide'>
+          <o:transition in='fade' out='fade'>
             {If($active,
               <div>
                 oh

@@ -21,7 +21,7 @@ export default function LuentPlugin() {
   /** @type {import('vite').PluginOption[]} */
   const plugins = [
     {
-      name: 'vite-luent-runtime-resolver',
+      name: 'vite-luent-jsx-runtime-resolver',
       enforce: 'pre',
       resolveId(id) {
         if (isLuentJsxRuntimeId(id)) {

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, template, For, If, Else, FromTag, listen } from "@rue/luent"
-import { watch,  trackEffect, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
+import { watch,  ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
 
 
 interface Todo {
@@ -105,7 +105,7 @@ export function TodoMVC() {
 
    const { updateTodo } = IonicTodoApp
 
-   trackEffect(() => {
+   ionicTickTask(() => {
       storeTodos(app.todos)
    })
 

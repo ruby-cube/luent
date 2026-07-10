@@ -47,11 +47,12 @@ import { Counter } from "./src/CounterApp"
 import { TestStylesBindings } from "./src/TestStylesBindings"
 import { twMerge } from "tailwind-merge"
 import { TestRenderCycle } from "./src/TestRenderCycle"
+import { TestIfElseDisplayView } from "./src/TestIfElseDisplayView"
 
 export function runDemo() {
   mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestIfElse />
+    return <TestMarkdownApp />
   }, '#root')
 }

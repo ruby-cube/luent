@@ -1,5 +1,5 @@
 import { component, template, Else, For, If} from "@rue/luent"
-import { ion, trackEffect } from "@rue/quarky"
+import { ion, ionicTickTask } from "@rue/quarky"
 
 type Commit = {
    commit: {
@@ -29,13 +29,13 @@ export function View() {
 
    // const context = $_snap_context()
 
-   trackEffect(async (initial) => {
+   ionicTickTask(async (initial) => {
       if (!initial) $commits.value = []
       const response = await fetch(`${API_URL}${$currentBranch()}`)
       $commits.value = await response.json()
    })
 
-   // trackEffect(async () => {
+   // ionicTickTask(async () => {
    //    await postlude()
    //    console.log('postlude logging', $currentBranch())
    // })

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fromRoot, fromContext, createGroundContext, fromGround } from '../provide';
 import { template, makeComponent } from '../../component/component';
-import { mount } from '../../mount';
+import { mount } from '../../client/mountIsland';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { Context, createContext } from '../Context';
