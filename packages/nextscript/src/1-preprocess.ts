@@ -1,4 +1,3 @@
-import { off } from "node:cluster"
 import { ACCESSOR_EXPRESSION_POSTFIX, ACCESSOR_VARIABLE_POSTFIX } from "./3-transform.ts"
 import { searchOpeningBrace } from "./searchOpeningBrace.ts"
 

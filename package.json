@@ -14,7 +14,7 @@
     "i:luent": "pnpm -r --filter @rue/luent install",
     "i:flask": "pnpm -r --filter @rue/flask install",
     "i:quarky": "pnpm -r --filter @rue/quarky install",
-    "i:squirl": "pnpm -r --filter @rue/squirl install",
+    "i:tree-squirl": "pnpm -r --filter @rue/tree-squirl install",
     "i:nextscript": "pnpm -r --filter @rue/nextscript install",
     "i:nextscript-site": "pnpm -r --filter @rue/nextscript-site install",
     "i:utils": "pnpm -r --filter @rue/utils install",

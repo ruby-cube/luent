@@ -16,8 +16,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts src/transpile.ts --format esm --out-dir dist --clean",
-    "watch": "tsdown src/index.ts src/transpile.ts --format esm --out-dir dist --clean --watch",
+    "build": "tsdown",
+    "watch": "tsdown --watch",
     "prepack": "pnpm run build",
     "pack": "pnpm pack",
     "publish:dry": "pnpm publish --dry-run --no-git-checks",
@@ -27,6 +27,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@jridgewell/gen-mapping": "^0.3.13",
     "@rue/utils": "workspace:*",
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
@@ -35,7 +36,7 @@
   },
   "devDependencies": {
     "@rue/types": "workspace:*",
-    "@rue/squirl": "workspace:*",
+    "@rue/tree-squirl": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.3"
   },

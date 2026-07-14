@@ -1,7 +1,5 @@
 import { isObject, normalizeToArray } from "@rue/utils";
 import { ElementConfig, RawJSXNode } from "../node/makeJSXNode";
-import { isHydrating } from "../hydration/hydration";
-import { getElement } from "../hydration/getElement";
 import { initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";

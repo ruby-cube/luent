@@ -6,19 +6,18 @@ The API reference is still being written. In the meantime, here is a overview of
 
 ## Island rendering
 #### Client-side
-- `mountHyperHTML()` to auto-mount interactive islands onto JSX-generated HTML
 - `mountIsland()` to mount an interactive island onto existing HTML
 #### Server-side
-- `writeHyperHTML()` to write HTML with static islands and auto-mount interactive islands
 - `withIslands()` <span class='doc-tag'>Experimental</span> to transform HTML to include islands
 - `writeIsland()` to write an island as static HTML
 
 ## Reactivity
+#### Primary reactivity
 - `ion()` to create simple and derived reactive state
 - `ionic()` to create structured reactive state
 - `track()` to link effect to ions
 
-#### Non-essential reactivity
+#### Secondary reactivity
 - `ionize()` to create an ion of an ionic structure
 - `ionicSyncTask()` to track a synchronous ionic task 
 - `ionicPreludeTask()` to track an ionic prelude phase task 
@@ -44,11 +43,11 @@ The API reference is still being written. In the meantime, here is a overview of
 - `<o—-root>` to provide root bindings
 - `<o—-ground>` to provide global bindings
 
-## Binding namespaces
+## Binding annotations
 - `on:` for event handlers
 - `onv:` for event capture handlers
 - `mu:` for mutable bindings
-- `r:` for accessor method bindings
+- `m:` for nested method bindings
 - `Slot:` for named slots
 - `xray:` for nested bindings
 

@@ -1,5 +1,5 @@
-import { As, atAttach, atMount, atUnmount, Await, Case, component, css, Else, ElseIf, If, Match, MaybeIon, Meanwhile, NodeRef, Style, afterMount, FromTag, afterAttach, beforeUnmount, beforeMount } from "@rue/luent";
-import { atRender, atTick, Ion, ion, MutableIon } from "@rue/quarky";
+import { atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting } from "@rue/luent";
+import { $activeUpdate, Ion, ion, layout } from "@rue/quarky";
 import { codeHtml, trusted } from "./code-utils";
 import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -48,6 +48,13 @@ export function Code(setup: FromTag<{
 
 
   let mainWidth = 0;
+  
+  function setMainWidth(node: HTMLSpanElement) {
+    awaiting(layout, () => {
+      console.log('@@@ layout task', $activeUpdate())
+      mainWidth = node.offsetWidth;
+    })
+  }
 
   const $stickyBtn = NodeRef('button')
   const $container = NodeRef('div')
@@ -59,7 +66,7 @@ export function Code(setup: FromTag<{
         <nav ref={$nav}>
           <button class='toggle' on:click={() => $tab.toggle()}>
             <span class='option selected' style={{ 'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined }}>{() => $tab() === 'main' ? main.name : alt.name}</span>
-            <span after:mount={node => mainWidth = node.offsetWidth} class='option'>{main.name}</span>
+            <span after:mount={setMainWidth} class='option'>{main.name}</span>
             <span class='option'>{alt.name}</span>
           </button>
         </nav>
@@ -108,17 +115,17 @@ export function Code(setup: FromTag<{
           </>
         })}
         {/* <o:preserve> */}
-          {Await(() => <>
-            {If(() => $tab() === 'main', () =>
-              CodeBlock(main, highlight)
-            )}
-            {Else(() =>
-              CodeBlock(alt, highlight)
-            )}
-          </>)}
-          {Meanwhile(
-            <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
+        {Await(() => <>
+          {If(() => $tab() === 'main', () =>
+            CodeBlock(main, highlight)
           )}
+          {Else(() =>
+            CodeBlock(alt, highlight)
+          )}
+        </>)}
+        {Meanwhile(
+          <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
+        )}
         {/* </o:preserve> */}
       </div>
       {Style(css`

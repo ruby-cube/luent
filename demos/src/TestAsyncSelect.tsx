@@ -43,25 +43,25 @@ export function TestAsyncSelect() {
                   )}
                </select>
 
-               <select mu:value={$activeCity} class='test-select-city' disabled={(!!$cities.pending)}>
+               <select mu:value={$activeCity} class='test-select-city' disabled={() => !!$cities.pending}>
                   {For($cities, $city =>
                      <option>{$city}</option>
                   )}
                </select>
 
-               <p style={{ color: ($cities.pending ? 'gray' : 'black') }}>
-                  {/* Selection: {$activeCity}, {(o.await($cities, $activeState))} */}
-                  Selection: {$activeCity}, {(await $cities.pending, $activeState())}
+               <p style={{ color: () => $cities.pending ? 'gray' : 'black' }}>
+                  Selection: {$activeCity}, {() => awaiting($cities, $activeState)}
+                  {/* Selection: {$activeCity}, {(await $cities.pending, $activeState())} */}
                </p>
             </>
          )}
-         {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state
+         {/* {Nonce(() =>  // `Nonce` renders only once (during initial load). `Meanwhile` renders whenever awaited entity goes into a pending state
             'loading...'
-         )}
-
-         {/* {Meanwhile(() =>
-            $cities.loaded || 'loading...'
          )} */}
+
+         {Meanwhile(() =>
+            $cities.loaded || 'loading...'
+         )}
       </div>
    )
 }

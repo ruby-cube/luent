@@ -56,3 +56,4 @@ export function runDemo() {
     return <TestMarkdownApp />
   }, '#root')
 }
+

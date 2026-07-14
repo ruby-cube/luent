@@ -12,7 +12,9 @@
   "devDependencies": {
     "@rue/luent": "workspace:*",
     "@rue/luent-ui": "workspace:*",
-    "@rue/quarky": "workspace:*"
+    "@rue/quarky": "workspace:*",
+    "@rue/vite-plugin-luent": "workspace:*"
+
   },
   "peerDependencies": {
     "vitepress": "2.0.0-alpha.17"

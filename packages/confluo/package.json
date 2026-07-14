@@ -1,0 +1,20 @@
+{
+  "name": "@rue/confluo",
+  "private": true,
+  "description": "Where server and client converge. The full-stack framework for Luent.",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "dependencies": {
+    "@rue/utils": "workspace:*",
+    "oxc-parser": "^0.124.0"
+  },
+  "devDependencies": {
+    "@rue/types": "workspace:*"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT"
+}

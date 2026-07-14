@@ -60,8 +60,8 @@
       "@rue/quarky": [
         "./packages/quarky/src/index.ts"
       ],
-      "@rue/squirl": [
-        "./packages/squirl/src/index.ts"
+      "@rue/tree-squirl": [
+        "./packages/tree-squirl/src/index.ts"
       ],
       "@rue/quarky/core": [
         "./packages/quarky/src/core/index.ts"
@@ -77,6 +77,9 @@
       ],
       "@rue/types": [
         "./packages/types/index.ts"
+      ],
+      "@rue/vite-plugin-luent": [
+        "./plugins/vite-plugin-luent/index.js"
       ]
     }
   },
@@ -87,8 +90,6 @@
     "**/src/*",
     "e2e",
     "plugins",
-    "websites/nextscript-site/.vitepress/theme/*",
-    "websites/nextscript-site/src/*",
-    "websites/nextscript-site/demos/*"
-, "websites/shared/tsconfig.json"  ]
+    "websites"
+  ]
 }

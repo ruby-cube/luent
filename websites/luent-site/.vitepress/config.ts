@@ -60,13 +60,20 @@ export default defineConfig({
       { text: 'Learn', link: '/guide/interactive-islands' },
       { text: 'Demos', link: '/demos/habit-tracker' },
       { text: 'Code Glimpses', link: '/markdown-examples' },
-      { text: 'Reference', link: '/guide/api-overview' },
+      { text: 'Reference', link: '/api/overview' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
       { text: 'Introducing NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
     ],
 
      sidebar: {
+      '/api/': [{
+        text: 'API reference',
+        items: [{
+          text: 'Overview',
+          link: '/api/overview'
+        }]
+      }],
       '/guide/': [
        {
         text: 'Language',
@@ -142,7 +149,7 @@ export default defineConfig({
       {
         text: 'Special Topics',
         items: [
-          { text: '[] Mutable Bindings', link: '/guide/mutable-bindings' },
+          { text: '[] Mutation Safety', link: '/guide/mutation-safety' },
           { text: 'Error Rendering', link: '/guide/error-rendering' },
           { text: 'Async Rendering', link: '/guide/async-rendering' },
           { text: 'Portals', link: '/guide/portals' },

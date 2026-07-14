@@ -43,6 +43,9 @@ Angular: `[(attribute)]`
 
 Components may also define mutable bindings
 
+- `mu:` functions for deep property assignment and method call capabilities
+- `m:` for deep method call capabilities
+
 The `mu` linter is an experimental linter that only permits component input mutation when explicitly declared by both the component and its consumer.
 
 In `Counter`, `count` may only be mutated if accessed as a property or nested property of the `mu` object.

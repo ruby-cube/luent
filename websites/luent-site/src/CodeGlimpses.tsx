@@ -249,7 +249,7 @@ TypeExplicit.tsHover = {
 }
 
 TypeExplicit.nsx =
-  `// (excerpt of function body)
+  `/* (excerpt of function body) */
 
 get total = ion(() => count * qty);
 
@@ -265,7 +265,7 @@ get total = ion(() => count * qty);
 `
 
 TypeExplicit.tsx =
-  `// (excerpt of function body)
+  `/* (excerpt of function body) */
 
 const $total = ion(() => count * $qty())
 

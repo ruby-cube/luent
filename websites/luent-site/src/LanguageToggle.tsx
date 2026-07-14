@@ -22,7 +22,7 @@ export function LanguageToggle() {
     {/* <o--body class={() => `language-${$lang}`} /> */}
     <button class='sidebar toggle' on:click={() => $lang.toggle()}>
       <span class='option selected' style={{ 'transform': () => $lang() === 'tsx' ? `translate(${nsxWidth}px, -1px)` : undefined }}>{() => $lang() === 'nsx' ? 'nsx' : 'tsx'}</span>
-      <span at:attach={node => nsxWidth = node.offsetWidth} class='option'>nsx</span>
+      <span after:mount={node => nsxWidth = node.offsetWidth} class='option'>nsx</span>
       <span class='option'>tsx</span>
     </button>
     {Style(css`

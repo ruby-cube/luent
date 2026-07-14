@@ -38,13 +38,14 @@ export default function LuentPlugin() {
         if (!fileName.endsWith('.nsx')) return
 
         const code = await readFile(fileName, 'utf8')
-        const sugaredCode = transpileNextScript(fileName, code).transpiled.code
-        const result = await babel.transformAsync(sugaredCode, {
+        const { transpiled, sourceMap } = transpileNextScript(fileName, code)
+        const result = await babel.transformAsync(transpiled.code, {
           plugins: [
             BabelLuentPlugin,
             ['@babel/plugin-syntax-typescript', { isTSX: true }]
           ],
           filename: fileName,
+          inputSourceMap: sourceMap,
           sourceMaps: true,
           generatorOpts: {
             jsescOption: {
@@ -60,7 +61,7 @@ export default function LuentPlugin() {
             throwIfNamespace: false
           },
           sourcemap: true
-        })
+        }, result.map)
 
         return {
           code: normalized.code,
@@ -89,6 +90,8 @@ export default function LuentPlugin() {
           }
         })
 
+        // const transformed = transformLuentJSX(code)
+
         const normalized = await transformWithOxc(result.code, fileName, {
           jsx: {
             runtime: 'automatic',
@@ -96,7 +99,7 @@ export default function LuentPlugin() {
             throwIfNamespace: false
           },
           sourcemap: true
-        })
+        }, result.map)
 
         return {
           code: normalized.code,

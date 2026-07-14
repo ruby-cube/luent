@@ -6,8 +6,8 @@ let t; // TODO: import from @babel/types
 // - async shorthand
 
 // BABEL PLUGIN: for transforms that don't impact type-checking and linting
-// - derivation shorthand
-// - async shorthand
+// - X derivation shorthand
+// - X async shorthand
 // - dynamic template render function
 // - template series
 // - slot to render function

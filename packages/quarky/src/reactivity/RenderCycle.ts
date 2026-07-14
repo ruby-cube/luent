@@ -60,7 +60,7 @@ export class RenderCycle {
   }
 
   get more() {
-    return this.phases[PRELUDE]?.more || this.phases[RENDER]?.more || this.phases[INTERNAL_RENDER]?.more|| this.phases[LAYOUT]?.more
+    return this.phases[PRELUDE]?.more || this.phases[RENDER]?.more || this.phases[INTERNAL_RENDER]?.more || this.phases[LAYOUT]?.more
   }
 
   started = false
@@ -159,7 +159,7 @@ export class RenderCycle {
     this.getPhase(phase).scheduleEffects(effects)
   }
 
-  scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER | Phase.INTERNAL_RENDER| Phase.TICK) {
+  scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER | Phase.INTERNAL_RENDER | Phase.TICK) {
     if (phase === TICK) requestAnimationFrame(() => queueTask(task))
     else (this.getPhase(phase) as CycledPhase).scheduleTask(task)
   }
@@ -287,58 +287,112 @@ export function getCurrentPhase() {
 }
 
 
-// TODO: need to address context loss through compiler
+class PhasePromise implements Promise<void> {
+  get [Symbol.toStringTag]() {
+    return "PhasePromise";
+  }
 
-let _prelude: Promise<void> | undefined = undefined
-let _render: Promise<void> | undefined = undefined
-let _layout: Promise<void> | undefined = undefined
-let _tick: Promise<void> | undefined = undefined
+  constructor(private schedule: (task: Task) => void) { }
 
-export function $prelude() {
-  return _prelude ?? (_prelude = new Promise<void>(resolve => {
-    atPrelude(() => {
-      const prelude = _prelude
-      _prelude = undefined
-      resolve()
-      return prelude;
+  then<TResult1 = void, TResult2 = never>(
+    onfulfilled?: ((value: void) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
+  ): Promise<TResult1 | TResult2> {
+    return new Promise<TResult1 | TResult2>((resolve, reject) => {
+      const handleRejected = (reason: any) => {
+        if (!onrejected) {
+          reject(reason)
+          return;
+        }
+        Promise.resolve(onrejected(reason)).then(resolve, reject)
+      }
+
+      try {
+        this.schedule(() => {
+          try {
+            Promise.resolve(onfulfilled ? onfulfilled(undefined) : (undefined as TResult1)).then(resolve, handleRejected)
+          }
+          catch (err) {
+            handleRejected(err)
+          }
+        })
+      }
+      catch (err) {
+        handleRejected(err)
+      }
     })
-  }))
+  }
+
+  catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null): Promise<void | TResult> {
+    return this.then<void, TResult>(undefined, onrejected)
+  }
+
+  finally(onfinally?: (() => void) | null): Promise<void> {
+    const runFinally = () => Promise.resolve(onfinally?.()).then(() => undefined)
+
+    return this.then<void, never>(
+      () => runFinally(),
+      (reason) => runFinally().then(() => {
+        throw reason
+      }),
+    )
+  }
 }
 
-export function $render() {
-  return _render ?? (_render = new Promise<void>(resolve => {
-    atRender(() => {
-      const render = _render
-      _render = undefined
-      resolve()
-      return render;
-    })
-  }))
-}
 
-export function $layout() {
-  return _layout ?? (_layout = new Promise<void>(resolve => {
-    atLayout(() => {
-      const layout = _layout
-      _layout = undefined
-      resolve()
-      return layout;
-    })
-  }))
-}
+// export function $prelude() {
+//   return _prelude ?? (_prelude = new Promise<void>(resolve => {
+//     atPrelude(() => {
+//       const prelude = _prelude
+//       _prelude = undefined
+//       resolve()
+//       return prelude;
+//     })
+//   }))
+// }
 
-export function $tick() {
-  return _tick ?? (_tick = new Promise<void>(resolve => {
-    requestAnimationFrame(() => {
-      queueTask(() => {
-        const tick = _tick
-        _tick = undefined
-        resolve()
-        return tick;
-      })
-    })
-  }))
-}
+// export function $render() {
+//   return _render ?? (_render = new Promise<void>(resolve => {
+//     atRender(() => {
+//       const render = _render
+//       _render = undefined
+//       resolve()
+//       return render;
+//     })
+//   }))
+// }
+
+// export function $layout() {
+//   return _layout ?? (_layout = new Promise<void>(resolve => {
+//     atLayout(() => {
+//       const layout = _layout
+//       _layout = undefined
+//       resolve()
+//       return layout;
+//     })
+//   }))
+// }
+
+export const prelude = new PhasePromise(atPrelude)
+export const render = new PhasePromise(atRender)
+export const layout = new PhasePromise(atLayout)
+export const tick = new PhasePromise(atTick)
+
+
+
+
+// export function $tick() {
+//   return _tick ?? (_tick = new Promise<void>(resolve => {
+//     requestAnimationFrame(() => {
+//       queueTask(() => {
+//         const tick = _tick
+//         _tick = undefined
+//         resolve()
+//         return tick;
+//       })
+//     })
+//   }))
+// }
 
 
 

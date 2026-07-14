@@ -1,7 +1,7 @@
 {
-  "name": "@rue/squirl",
+  "name": "@rue/tree-squirl",
   "private": true,
-  "description": "",
+  "description": "A lightweight AST traversal utility",
   "type": "module",
   "exports": {
     ".": "./index.ts"

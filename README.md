@@ -7,7 +7,7 @@
 
 # Luent
 
-Luent is a web framework designed around conceptual coherence and expressiveness. It aims to make complex, evolving applications simpler to build and maintain. 
+Luent is a web framework designed around conceptual coherence and semantic clarity. It aims to make complex, evolving applications easier to build, understand, and maintain, through expressive APIs and type-explicit, examinable reactivity.
 
 It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension that improves the clarity, ergonomics, and type safety of fine-grained reactive code.
 
