@@ -1,5 +1,5 @@
 import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@rue/flask";
-import { Effect } from "./Effect";
+import { Reaction } from "./Reaction";
 import { asSubject, IonSubject, isSubject, Subject } from "./Subject";
 import { AnyObject, Glass } from "@rue/types";
 import { __DEV__unwrap } from "@rue/utils";
@@ -31,7 +31,7 @@ import { $activeUpdate, getActiveUpdate } from "./Update";
  * cycle: 'current'
  * hasChanged: a !== b
  */
-export type EffectOptions = {
+export type ReactionOptions = {
   phase?: Phase;
   preserve?: boolean;
   retrack?: boolean;
@@ -43,7 +43,7 @@ export type WatchDebugOptions = {
   'dev.traceTriggers'?: boolean
 }
 
-export type EffectTask<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
+export type ReactionTask<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
 
 type SubjectValues<T> = [T] extends [() => infer R] ? R : [T] extends [infer O] ? O : MultiSubjectValues<T>;
 
@@ -85,7 +85,7 @@ export class StateChangeEvent<S = unknown> {
 
 export type WatchSubjects = (Object | Ion)[]
 
-export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
+export function watch<T>(subject: T, reaction: ReactionTask<T>, options: ReactionOptions = {}): PausableListener {
   console.log('*** watching', subject)
   options.retrack = options.retrack ?? true;
 
@@ -109,8 +109,8 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
   if (!isSubject(target)) { // plain object
     console.log('inert A')
     if (options?.eager) {
-      scheduleEagerEffect(() =>
-        effect(new StateChangeEvent(undefined, subject, true))
+      scheduleEagerReaction(() =>
+        reaction(new StateChangeEvent(undefined, subject, true))
         , getPhase(options))
     }
     return InertWatcher()
@@ -121,19 +121,19 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
   if (!target.reactive) {
     if (options?.eager) {
       console.log('inert B')
-      scheduleEagerEffect(() =>
-        effect(new StateChangeEvent(undefined, prevState.get(), true))
+      scheduleEagerReaction(() =>
+        reaction(new StateChangeEvent(undefined, prevState.get(), true))
         , getPhase(options))
     }
     return InertWatcher()
   }
 
-  function wrappedEffect() {
+  function wrappedReaction() {
     const newState = target.getState() // retracking
-    // console.log('effect!!!', prevState.get(), newState)
+    // console.log('reaction!!!', prevState.get(), newState)
 
     try {
-      (<EffectTask>effect)(new StateChangeEvent(prevState.get(), newState, !!options.eager))
+      (<ReactionTask>reaction)(new StateChangeEvent(prevState.get(), newState, !!options.eager))
     }
     finally {
       options.eager = false;
@@ -141,18 +141,18 @@ export function watch<T>(subject: T, effect: EffectTask<T>, options: EffectOptio
       // hasChanged = getHasChangedFn(options, prevState.get()) //accounts for ions whose value may change from ionized to not ionized
     }
   }
-  wrappedEffect.__DEV__fn = effect
+  wrappedReaction.__DEV__fn = reaction
 
   return setUpWatcher(
     target,
-    wrappedEffect,
+    wrappedReaction,
     options,
   )
 }
 
 type Task = () => void
 
-export function getPhase(options: undefined | EffectOptions): Phase {
+export function getPhase(options: undefined | ReactionOptions): Phase {
   return options?.phase ?? getDefaultPhase()
 }
 
@@ -168,7 +168,7 @@ export function sync<F>(fn: F): F {
 export function setUpWatcher(
   subject: Subject,
   task: Task,
-  options: EffectOptions,
+  options: ReactionOptions,
 ) {
   const phase = options.phase = getPhase(options)
   const eager = options.eager ?? false;
@@ -178,7 +178,7 @@ export function setUpWatcher(
   // task = maybePostcycleTask(task, phase)
 
   // if (eager) {
-  //    scheduleEagerEffect(task, phase)
+  //    scheduleEagerReaction(task, phase)
   // }
   if (options?.["dev.traceTriggers"]) {
 
@@ -187,28 +187,28 @@ export function setUpWatcher(
 
   return $listen(task, options || {}, {
     enroll(_task) {
-      const effect = new Effect(_task, phase)
-      effect.__DEV__fn = task.__DEV__fn
-      subject.linkEffect(effect)
+      const reaction = new Reaction(_task, phase)
+      reaction.__DEV__fn = task.__DEV__fn
+      subject.linkReaction(reaction)
       if (eager) {
-        scheduleEagerEffect(_task, phase)
+        scheduleEagerReaction(_task, phase)
       }
-      return effect;
+      return reaction;
     },
-    remove(effect: Effect) {
-      effect.destroy()
+    remove(reaction: Reaction) {
+      reaction.destroy()
     },
     pausable: true
   });
 }
 
 
-export function scheduleEagerEffect(task: Task, phase: Phase) {
+export function scheduleEagerReaction(task: Task, phase: Phase) {
   if (!getActiveUpdate()) $activeUpdate()
   const cycle = $currentCycle()
   cycle.scheduleTask(task, phase)
   if (phase === SYNC) {
-    cycle.runEffects(SYNC)
+    cycle.runReactions(SYNC)
   }
 }
 
@@ -233,7 +233,7 @@ export function InertWatcher() {
 
 
 /**
- * Optimized barebones ion-only watch function. links effect to atoms and flask. No async context used.
+ * Optimized barebones ion-only watch function. links reaction to atoms and flask. No async context used.
  * @param ion 
  * @param render 
  * @param eager 
@@ -253,7 +253,7 @@ export function trackForRender<T>(ion: Ion<T>, render: (state: { current: T, pre
   let stale = false;
   let paused = false;
 
-  const effect = new Effect(() => {
+  const reaction = new Reaction(() => {
     if (paused) {
       stale = true;
       return;
@@ -272,13 +272,13 @@ export function trackForRender<T>(ion: Ion<T>, render: (state: { current: T, pre
   }
 
   if (eager) {
-    scheduleEagerEffect(_render, PRELUDE)
+    scheduleEagerReaction(_render, PRELUDE)
   }
 
-  subject.linkEffect(effect)
+  subject.linkReaction(reaction)
 
   flask?.onDiscard(/* listener.stop */() => {
-    effect.destroy()
+    reaction.destroy()
   });
   flask?.onDemount(/* listener.pause */() => {
     paused = true;
@@ -286,7 +286,7 @@ export function trackForRender<T>(ion: Ion<T>, render: (state: { current: T, pre
   flask?.onRemount(/* listener.resume */() => {
     paused = false;
     if (stale) {
-      effect.run?.()
+      reaction.run?.()
     }
   });
 }

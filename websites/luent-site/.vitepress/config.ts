@@ -137,7 +137,7 @@ export default defineConfig({
         text: 'Extended Topics',
         items: [
           { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
-          { text: 'Reactive Effects', link: '/guide/reactive-effects' },
+          { text: 'Reactions', link: '/guide/reactions' },
           { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
           // {
           //   text: '[] More Reactivity', link: '/markdown-examples', items: [

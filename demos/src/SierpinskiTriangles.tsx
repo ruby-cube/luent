@@ -1,5 +1,5 @@
 import { component, template, FromTag, beforeDetach } from "@rue/luent";
-import { Animation, Interval, Ion, swiftUpdate, HeavyUpdate, queueTask, ion, o, } from "@rue/quarky";
+import { Animation, Interval, Ion, swiftUpdate, LaxUpdate, queueTask, ion, o, } from "@rue/quarky";
 import './SierpinskiTriangles.css'
 
 // Modified Demo from Solid.js / React Fiber
@@ -8,7 +8,7 @@ import './SierpinskiTriangles.css'
 // - time warning for lazy update
 // - pState for consistency, how to keep lazy state consistent with 'watch() derivations'?
 //QUESTION:
-// - async effects?
+// - async reactions?
 // - when to cancel, when to queue?
 
 const TARGET = 25;
@@ -17,8 +17,8 @@ const TARGET = 25;
 
 // Types of update delays
 // - expensive work or fetches in original task
-// - expensive work or fetches in prelude effects
-// - many prelude effects
+// - expensive work or fetches in prelude reactions
+// - many prelude reactions
 
 // QUESTION: Should these be handled in one API or two?
 
@@ -52,7 +52,7 @@ export function TriangleDemo() {
    // incrementSeconds.dispatch()
 
 
-   const incrementSeconds = HeavyUpdate(() =>
+   const incrementSeconds = LaxUpdate(() =>
       $seconds.value = ($seconds() % 10) + 1
    )
 

@@ -1,4 +1,4 @@
-import { Effect } from "../reactivity/Effect";
+import { Reaction } from "../reactivity/Reaction";
 import { FunctionSubject } from "../reactivity/Subject";
 import { QUARK } from "../abstract/Quark";
 import { AnyObject } from "@rue/types";
@@ -52,7 +52,7 @@ export function createMemoizedDerivation(
    let trackCall = () => {
       // initial call
       const value = trackedCall()
-      quark.linkEffect(new Effect(() => {
+      quark.linkReaction(new Reaction(() => {
          if (state.get() !== STALE) previous.set(state.get())
          state.set(STALE);
       }, SYNC))

@@ -1,6 +1,6 @@
 # The Render Cycle
 
-The render cycle coordinates when reactive effects and scheduled tasks run during an update.
+The render cycle coordinates when reactions and scheduled tasks run during an update.
 
 Render cycle phases give you predictable timing for:
 
@@ -25,10 +25,10 @@ A render cycle progresses through these phases in the following order:
 5. Tick
 
 :::info NOTE
-If effects are triggered or tasks scheduled during any update phase, the render cycle continues looping through the update phases until no additional work remains.
+If reactions are triggered or tasks scheduled during any update phase, the render cycle continues looping through the update phases until no additional work remains.
 :::
 
-In a typical application, most tasks and effects are post-update work.
+In a typical application, most tasks and reactions are post-update work.
 
 ## The Sync Phase
 
@@ -47,7 +47,7 @@ track(
 :::warning Use mindfully
 Derivations are preferred over manual synchronization as it is less bug-prone across code edits. Use derivations whenever possible.
 
-Because sync effects run immediately, excessive work in this phase may block rendering and reduce responsiveness. If the data does not need to be updated immediately, prefer the prelude phase or the tick phase.
+Because synchronous reactions run immediately, excessive work in this phase may block rendering and reduce responsiveness. If the data does not need to be updated immediately, prefer the prelude phase or the tick phase.
 :::
 
 ## The Prelude Phase
@@ -221,9 +221,9 @@ queueTask(() => {
 })
 ``` -->
 
-## Scheduling Effects
+## Scheduling Reactions
 
-`track()` defaults to running effects in the tick phase. To schedule the effect for a different phase, pass in the phase option with one of the provided constants: `SYNC`, `PRELUDE`, `RENDER`, `LAYOUT`.
+`track()` defaults to running reactions in the tick phase. To schedule the reaction for a different phase, pass in the phase option with one of the provided constants: `SYNC`, `PRELUDE`, `RENDER`, `LAYOUT`.
 
 ```tsx
 track(

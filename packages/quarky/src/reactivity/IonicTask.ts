@@ -1,7 +1,7 @@
 import { $listen, SustainedListenerOptions } from "@rue/flask";
-import { getPhase, scheduleEagerEffect, WatchDebugOptions } from "./Watcher";
+import { getPhase, scheduleEagerReaction, WatchDebugOptions } from "./Watcher";
 import { Glass } from "@rue/types";
-import { Effect } from "./Effect";
+import { Reaction } from "./Reaction";
 import { FunctionSubject } from "./Subject";
 import { Traceable } from "../debug/Traceable";
 import { LAYOUT, Phase, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
@@ -22,7 +22,7 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 
    let initial = true;
 
-   const wrappedEffect = () => {
+   const wrappedReaction = () => {
       try {
          task(initial)
       }
@@ -31,7 +31,7 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
       }
    }
 
-   const subject = new FunctionSubject(wrappedEffect, retrack)
+   const subject = new FunctionSubject(wrappedReaction, retrack)
    subject.asTraceable = new Traceable('ionic task:' + options?.devName) // TODO: add phase details
 
 
@@ -41,15 +41,15 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 
    return $listen(() => subject.trackedCall(), options || {}, {
       enroll(_task) {
-         const effect = new Effect(_task, phase)
-         scheduleEagerEffect(() => {
+         const reaction = new Reaction(_task, phase)
+         scheduleEagerReaction(() => {
             _task()
-            subject.linkEffect(effect)
+            subject.linkReaction(reaction)
          }, phase)
-         return effect;
+         return reaction;
       },
-      remove(effect: Effect) {
-         effect.destroy()
+      remove(reaction: Reaction) {
+         reaction.destroy()
       }
    });
 }

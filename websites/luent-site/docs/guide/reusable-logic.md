@@ -2,7 +2,7 @@
 As applications grow, components often need to share the same stateful behavior. Rather than rewriting similar logic across multiple components, logic may be extracted and composed independently of components. This makes logic easier to reuse, test, and maintain.
 
 ## Kits
-Kits are reusable, composable units of application logic. They are headless counterparts to components, encapsulating reactive state, methods, derivations, effects, and cleanup behavior while remaining decoupled from rendering.
+Kits are reusable, composable units of application logic. They are headless counterparts to components, encapsulating reactive state, methods, derivations, reactions, and cleanup behavior while remaining decoupled from rendering.
 
 Kits expose their reactive state and methods through plain objects, making them simple to consume through destructuring.
 

@@ -1,5 +1,5 @@
-import { Effects } from "./Atom";
-import { Effect } from "./Effect";
+import { Reactions } from "./Atom";
+import { Reaction } from "./Reaction";
 import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, Update } from "./Update";
 
 export const queueTask = (task: () => void) => scheduler.postTask(task);
@@ -7,10 +7,10 @@ export const queueTask = (task: () => void) => scheduler.postTask(task);
 
 type Task = () => void | Promise<void>
 
-// [X] run sync effects
-// [X] skip effects that have already been run *** (completed.has(effect) for each round)
-// [X] make sure Effects of TrackedAtoms don't get queued multiple times
-// [X] run tick effects
+// [X] run sync reactions
+// [X] skip reactions that have already been run *** (completed.has(reaction) for each round)
+// [X] make sure Reactions of TrackedAtoms don't get queued multiple times
+// [X] run tick reactions
 // [X] phase management
 // [X] initialize lazily
 // --
@@ -103,7 +103,7 @@ export class RenderCycle {
 
     console.log('@@@ tick---')
     this.currentPhase = TICK
-    this.runEffects(TICK)
+    this.runReactions(TICK)
 
     this.update.complete()
     popUpdate()
@@ -128,18 +128,18 @@ export class RenderCycle {
   }
 
   async runPhase(phase: CycledPhase) {
-    let effects = phase.effects
-    phase.effects = []
+    let reactions = phase.reactions
+    phase.reactions = []
 
     let tasks: WrappedTask[] = phase.tasks
     phase.tasks = []
 
     let loop = 0
-    while (effects.length || tasks.length) {
+    while (reactions.length || tasks.length) {
       loop++
-      const ran: Set<Effect> = new Set()
-      for (const queue of effects) {
-        queue.runEffects(ran, this.update)
+      const ran: Set<Reaction> = new Set()
+      for (const queue of reactions) {
+        queue.runReactions(ran, this.update)
       }
       for (const task of tasks) {
         const output = task(this.update)
@@ -147,16 +147,16 @@ export class RenderCycle {
           await output;
         }
       }
-      effects = phase.effects
+      reactions = phase.reactions
       tasks = phase.tasks
-      phase.effects = []
+      phase.reactions = []
       phase.tasks = []
     }
 
   }
 
-  scheduleEffects(effects: Effects, phase: Phase) {
-    this.getPhase(phase).scheduleEffects(effects)
+  scheduleReactions(reactions: Reactions, phase: Phase) {
+    this.getPhase(phase).scheduleReactions(reactions)
   }
 
   scheduleTask(task: Task, phase: Phase.LAYOUT | Phase.PRELUDE | Phase.RENDER | Phase.INTERNAL_RENDER | Phase.TICK) {
@@ -164,60 +164,60 @@ export class RenderCycle {
     else (this.getPhase(phase) as CycledPhase).scheduleTask(task)
   }
 
-  runEffects(phaseKey: Phase.SYNC | Phase.TICK) {
+  runReactions(phaseKey: Phase.SYNC | Phase.TICK) {
     const phase = this.phases[phaseKey]
     if (!phase) return;
-    let effects = phase.effects
-    phase.effects = []
+    let reactions = phase.reactions
+    phase.reactions = []
 
-    while (effects.length) {
-      const ran: Set<Effect> = new Set()
-      for (const queue of effects) {
-        queue.runEffects(ran, this.update)
+    while (reactions.length) {
+      const ran: Set<Reaction> = new Set()
+      for (const queue of reactions) {
+        queue.runReactions(ran, this.update)
       }
-      effects = phase.effects
-      phase.effects = []
+      reactions = phase.reactions
+      phase.reactions = []
     }
   }
 
-  // runTickEffects() {
+  // runTickReactions() {
   //    const phase = this.phases[TICK]
   //    if (!phase) return;
-  //    let effects = phase.effects
-  //    phase.effects = []
+  //    let reactions = phase.reactions
+  //    phase.reactions = []
 
-  //    while (effects.length) {
-  //       const ran: Set<Effect> = new Set()
-  //       for (const queue of effects) {
-  //          queue.runEffects(ran, this.update)
+  //    while (reactions.length) {
+  //       const ran: Set<Reaction> = new Set()
+  //       for (const queue of reactions) {
+  //          queue.runReactions(ran, this.update)
   //       }
-  //       effects = phase.effects
-  //       phase.effects = []
+  //       reactions = phase.reactions
+  //       phase.reactions = []
   //    }
   // }
 }
 
 
 class BasePhase {
-  effects: Effects[] = []
+  reactions: Reactions[] = []
 
   get more() {
-    return this.effects.length
+    return this.reactions.length
   }
 
   constructor(
     public phase: Phase
   ) { }
 
-  scheduleEffects(effects: Effects) {
-    console.log('@@@ schedule effects', this.effects, 'queued?', this.queued(effects))
-    if (!this.queued(effects)) {
-      this.effects.push(effects)
+  scheduleReactions(reactions: Reactions) {
+    console.log('@@@ schedule reactions', this.reactions, 'queued?', this.queued(reactions))
+    if (!this.queued(reactions)) {
+      this.reactions.push(reactions)
     }
   }
 
-  queued(effects: Effects) {
-    return this.effects.indexOf(effects) > -1
+  queued(reactions: Reactions) {
+    return this.reactions.indexOf(reactions) > -1
   }
 }
 
@@ -227,8 +227,8 @@ class CycledPhase extends BasePhase {
   tasks: WrappedTask[] = []
 
   get more() {
-    console.log('this.effects.length', this.effects.length)
-    return this.effects.length || this.tasks.length
+    console.log('this.reactions.length', this.reactions.length)
+    return this.reactions.length || this.tasks.length
   }
 
   constructor(

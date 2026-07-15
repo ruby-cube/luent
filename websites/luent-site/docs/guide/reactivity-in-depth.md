@@ -1,6 +1,6 @@
 # Reactivity in depth
 
-Reactivity in Luent emerges from linking **effects** to **ions** through the process of **tracking**. A tracked ion's mutations will then **trigger** any linked effects, creating the illusion of reactivity.
+Reactivity in Luent emerges from linking **reactions** to **ions** through the process of **tracking**. A tracked ion's mutations will then **trigger** any linked reactions, creating the illusion of reactivity.
 
 :::info NOTE
 The following document contains pseudo-implementations for explanatory purposes. Actual implementation details would obscure the concepts being illustrated.
@@ -43,7 +43,7 @@ $count.value = 5; // set
 function ion(initialState) {
   const _ion = {
     state: initialState,
-    effects: [],
+    reactions: [],
   };
 
   const get = () => {
@@ -92,8 +92,8 @@ function ionic(target) {
 }
 ```
 
-## Effects
-Effects are functions that run in reaction to state changes of ions tracked by the effect.
+## Reactions
+Reactions are functions that run in reaction to state changes of ions tracked by the function.
 
 ```ts
 track($count, () => { // runs whenever count changes
@@ -108,7 +108,7 @@ In order to track ions,
 
 
 
-Linking ions to effects may seem straightforward in the above example. However, consider 
+Linking ions to reactions may seem straightforward in the above example. However, consider 
 
 ```ts
 const $doubled = ion(() => $count() * 2)
@@ -118,41 +118,41 @@ track($doubled, () => {
 });
 ```
 
-Effects are able to track nested ions through implicit dependency tracking.
+Reactions are able to track nested ions through implicit dependency tracking.
 
 Trackable accessors are accessors that emit one or more "track me" signals originating from atomic ions when accessed. A compound ion will emit nested signals.
 
-The signal is ultimately received by the tracker, which then links an effect to the ion, either directly or through an ionic compound.
+The signal is ultimately received by the tracker, which then links a reaction to the ion, either directly or through an ionic compound.
 
 
 
 ```tsx
-function track(target, effect) {
+function track(target, reaction) {
   typeof target === "function"
-    ? trackSignals(target, effect)
-    : trackStructure(target, effect);
+    ? trackSignals(target, reaction)
+    : trackStructure(target, reaction);
 }
 
-let tracker: Effect | null = null;
+let tracker: Reaction | null = null;
 
-function trackSignals(target, effect) {
-  tracker = effect;
+function trackSignals(target, reaction) {
+  tracker = reaction;
   target(); // emits 'track me' signal(s)
   tracker = null;
 }
 
 function trackMe(ion) {
-  ion.effects.push(tracker);
+  ion.reactions.push(tracker);
 }
 ```
 
 ### Triggering
 
-Once tracked, any associated mutations will trigger the effect to run.
+Once tracked, any associated mutations will trigger the reaction.
 
 ```tsx
 function trigger(ion) {
-  ion.effects.forEach((effect) => effect());
+  ion.reactions.forEach(react => react());
 }
 ```
 
@@ -160,7 +160,7 @@ The relationships created by tracking an ion may be visualized as follows:
 
 ```txt
 track:
-  ion ─ effect
+  ion ─ reaction
    |
    ├─ trackable accessor
    └─ triggering mutator(s)
@@ -169,14 +169,14 @@ track:
 ...ultimately producing this reactive bond:
 
 ```txt
-mutation → run effect
+mutation → run reaction
 ```
 
-Tracking an ionic compound creates the same reactive bond between mutation(s) and effect:
+Tracking an ionic compound creates the same reactive bond between mutation(s) and reaction:
 
 ```txt
 track:
-  ionic compound ─ effect
+  ionic compound ─ reaction
    |
   ion(s)
    |
@@ -188,12 +188,12 @@ track:
 
 Because these concepts are closely linked, the terms "track" and "trigger" are often used across different parts of the reactive pipeline.
 
-Effects track ions and ionic compounds, but we could also say effects track:
+Reactions track ions and ionic compounds, but we could also say reactions track:
 
 - access operations
 - mutations
 
-Mutations trigger effects, but we could also say mutations trigger:
+Mutations trigger reactions, but we could also say mutations trigger:
 
 - ions
 - ionic compounds

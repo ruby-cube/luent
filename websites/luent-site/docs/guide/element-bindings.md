@@ -108,7 +108,7 @@ To handle events on the window, document, html, head, or body, use the built-in 
 ### Temporary Listeners
 
 For temporary event listeners whose lifetime should not span the lifetime of its encompassing view, Luent provides `listen()`.
-It is recommended over `Element.addEventListener()` as it provides automatic cleanup and ensures that any reactive effects triggered during the event do not block rendering.
+It is recommended over `Element.addEventListener()` as it provides automatic cleanup and ensures that any reactions triggered during the event do not block rendering.
 
 `listen()` is useful for
 

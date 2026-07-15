@@ -52,7 +52,7 @@ describe('ionize', () => {
       frog.name = name2;
       expect(frog.name).toBe(name2)
 
-      // effect has run
+      // reaction has run
       expect(currentName).toBe(name2)
    })
 
@@ -79,7 +79,7 @@ describe('ionize', () => {
       swamp.frog.name = name2;
       expect(swamp.frog.name).toBe(name2)
 
-      // effect has run
+      // reaction has run
       expect(currentName).toBe(name2)
    })
 

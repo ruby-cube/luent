@@ -105,7 +105,7 @@ export function traceMutation(traceable: TraceableMutable | undefined, previous:
 
 
 /**
- * Traces triggers of derivations and effects
+ * Traces triggers of derivations and reactions
  */
 function traceTriggers(target: Function) {
    const quark = hasQuark(target) ? quarkOf(target) : undefined

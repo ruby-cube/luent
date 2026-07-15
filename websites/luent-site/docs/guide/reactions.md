@@ -1,7 +1,7 @@
-# Reactive Effects
+# Reactions
 // TODO:
 
-track: links an effect to an ion 
+track: links a reaction to an ion 
 
 ion: trackable accessor - triggering mutation(s)
 
@@ -12,11 +12,11 @@ examples of trackable accessors
 The term 'track' can be used on any we can:
 - track an ionic structure
 - track an ion
-- track an effect
+- track a reaction
 - track an access operation
 - track a mutation
 
-Ultimately, run an effect when a mutation happens
+Ultimately, run a reaction when a mutation happens
 
 ## Tracking ions
 ```ts
@@ -64,9 +64,13 @@ ionicTickTask(() => {
 
 
 ## Scheduling
-By default, `track()` runs effects at the end of a render cycle, or the tick—after the mutation has been rendered and painted to the screen. To schedule effects earlier in the render cycle, see [The Render Cycle](/guide/the-render-cycle)
+By default, `track()` runs reactions at the end of a render cycle, or the tick—after the mutation has been rendered and painted to the screen. To schedule reactions earlier in the render cycle, see [The Render Cycle](/guide/the-render-cycle)
 
 
 ## Effect Cleanup
+In the same way that render functions create views with a lifecycle, reactions and event handlers create scenes that have a lifecycle. A scene begins when a reaction runs and ends when the reaction reruns to create a new scene or when an encompassing view is unmounted.
 
+Some reactions will have (side-)effects that need to be cleaned up before the reaction re-runs or is unmounted with an encompassing view.
+
+ at the end of a scene.
 See [Cleanup]().

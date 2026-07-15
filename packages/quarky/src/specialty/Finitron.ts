@@ -320,7 +320,7 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
       const parent = getFinitron()
       if (parent) {
          console.log('*&* init', initialState, getActiveUpdate()?.cycle.currentPhase)
-         queueTask(() => { // must queue because parent.state has not been set yet and will trigger effect early when set
+         queueTask(() => { // must queue because parent.state has not been set yet and will trigger reaction early when set
             watch(() => parent.state, ({ previous }) => {
                console.log('*&* deactivating finitron', finitron.state)
                finitron.deactivate()

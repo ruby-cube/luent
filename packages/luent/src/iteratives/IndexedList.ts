@@ -35,7 +35,7 @@ export class IndexedListKit extends VineNode {
       let array = [...$list()]
       
       // NOTE: IMPORTANT: We must set up the watcher BEFORE rendering
-      // This ensure the order of effects run in such a way that
+      // This ensure the order of reactions run in such a way that
       // there is no need for optional chaining $item().property
       // to avoid cannot read property of undefined when removing an item
       

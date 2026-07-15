@@ -335,7 +335,7 @@ export function AsyncIon<
       // But when this is swiftUpdate, it causes inaccurate Suspense resolution
       // WHen this is instantUpdate or no update, it breaks multiply with suspense, on ever other click
       // NOTE: The solution should be NO UPDATE. It inherits the update from upstream... but why does so much behavior break?
-      // The problem was rooted in effect queue scheduling. Effects failed to schedule because of queued and requeued flags. Solved by resetting requeued flag at the beginning of loop, not the end.
+      // The problem was rooted in reaction queue scheduling. Reactions failed to schedule because of queued and requeued flags. Solved by resetting requeued flag at the beginning of loop, not the end.
       if (!resolve) {
         // if (!suspense && !awaiting) {
         //    timeout = setTimeout(() => {

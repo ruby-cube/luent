@@ -1,5 +1,5 @@
 import { __DEV__unwrap } from "@rue/utils";
-import { Effect } from "./Effect";
+import { Reaction } from "./Reaction";
 import { hasQuark, QUARK } from "../abstract/Quark";
 import { $activeUpdate, popUpdate, pushUpdate, Update, UpdateType } from "./Update";
 import { TraceableEntity } from "../debug/Traceable";
@@ -23,7 +23,7 @@ export function trigger(
    atom: Atom | undefined
 ) {
    if (!atom) return;
-   atom.asTrackedAtom?.triggerEffects()
+   atom.asTrackedAtom?.triggerReactions()
 }
 
 
@@ -46,55 +46,55 @@ export function asTrackedAtom(watchable: Atom) {
 
 //    }
 
-//    private effects: Map<Phase, EffectQueue> = new Map()
+//    private reactions: Map<Phase, ReactionQueue> = new Map()
 //    private phases: Phase[] = []
 
 
 //    private initializePhase(phase: Phase) {
 //       this.phases.push(phase)
-//       const queue: EffectQueue = new EffectQueue(phase, this)
-//       this.effects.set(phase, queue);
+//       const queue: ReactionQueue = new ReactionQueue(phase, this)
+//       this.reactions.set(phase, queue);
 //       return queue
 //    }
 
 
 //    /**
 //      * To be called by watch() when initializing watcher
-//      * @param effect 
+//      * @param reaction 
 //      */
-//    link(effect: Effect) {
-//       (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase)).queue(effect);
+//    link(reaction: Reaction) {
+//       (this.reactions.get(reaction.phase) ?? this.initializePhase(reaction.phase)).queue(reaction);
 //    }
 
-//    isLinked(effect: Effect) {
-//       const effects = (this.effects.get(effect.phase) ?? this.initializePhase(effect.phase))
-//       return effects.nextLinkedEffects.has(effect)
+//    isLinked(reaction: Reaction) {
+//       const reactions = (this.reactions.get(reaction.phase) ?? this.initializePhase(reaction.phase))
+//       return reactions.nextLinkedReactions.has(reaction)
 //    }
 
-//    triggerEffects() { // the surrounding effect when original trigger happened
+//    triggerReactions() { // the surrounding reaction when original trigger happened
 //       const phases = this.phases
 //       const cycle = $activeUpdate().cycle
 //       for (const phase of phases) {
-//          // console.warn('schedule effects', phase, this.effects.get(phase), this)
-//          cycle.scheduleEffects(this.effects.get(phase)!, phase)
+//          // console.warn('schedule reactions', phase, this.reactions.get(phase), this)
+//          cycle.scheduleReactions(this.reactions.get(phase)!, phase)
 //          if (phase === SYNC) {
-//             console.log('run sync effects')
-//             cycle.runSyncEffects()
+//             console.log('run sync reactions')
+//             cycle.runSyncReactions()
 //          }
 //       }
 //    }
 // }
 
 
-export class Effects {
-   effects: Set<Effect> = new Set()
+export class Reactions {
+   reactions: Set<Reaction> = new Set()
 
    constructor(
       public phase: Phase,
-      private runEffect = (effect: Effect, update: Update) => {
+      private runReaction = (reaction: Reaction, update: Update) => {
          try {
             pushUpdate(update)
-            effect.run!()
+            reaction.run!()
          }
          finally {
             popUpdate()
@@ -104,28 +104,28 @@ export class Effects {
 
    }
 
-   runEffects(ran: Set<Effect>, update: Update) {
-      const effects = this.effects;
+   runReactions(ran: Set<Reaction>, update: Update) {
+      const reactions = this.reactions;
 
-      for (const effect of effects) {
-         if (!effect.run) {
+      for (const reaction of reactions) {
+         if (!reaction.run) {
             continue;
          }
-         if (ran.has(effect)) {
-            this.effects.add(effect)
+         if (ran.has(reaction)) {
+            this.reactions.add(reaction)
             continue;
          }
-         ran.add(effect)
-         this.runEffect(effect, update)
+         ran.add(reaction)
+         this.runReaction(reaction, update)
 
-         if (effect.fn) {
-            this.effects.add(effect) // retain
+         if (reaction.fn) {
+            this.reactions.add(reaction) // retain
          }
       }
    }
 
-   add(effect: Effect) {
-      this.effects.add(effect)
+   add(reaction: Reaction) {
+      this.reactions.add(reaction)
    }
 }
 
@@ -139,54 +139,54 @@ export class TrackedAtom {
 
    phases = phaseKeys
 
-   effects: { [K in typeof phaseKeys[number]]?: Effects } = createPhaseMap()
+   reactions: { [K in typeof phaseKeys[number]]?: Reactions } = createPhaseMap()
 
-   private getEffects(phase: Phase) {
-      return this.effects[phase] ?? (this.effects[phase] = this.createPhaseEffects(phase))
+   private getReactions(phase: Phase) {
+      return this.reactions[phase] ?? (this.reactions[phase] = this.createPhaseReactions(phase))
    }
 
-   private createPhaseEffects(phase: Phase) {
+   private createPhaseReactions(phase: Phase) {
       if (phase === TICK) {
-         return new Effects(TICK, (effect: Effect, update: Update) => {
+         return new Reactions(TICK, (reaction: Reaction, update: Update) => {
             requestAnimationFrame(() => {
                queueTask(() => {
-                  if (!effect.run) return;
+                  if (!reaction.run) return;
                   const _update = new Update(
                      update.type,
                      update.timeMargin,
                      update.type === UpdateType.USER_INTERACTION ? false : update.idle // TODO: not sure about this
                   )
-                  _update.queue(effect.run).start()
+                  _update.queue(reaction.run).start()
                })
             })
          })
       }
 
-      return new Effects(phase)
+      return new Reactions(phase)
    }
    /**
      * To be called by watch() when initializing watcher
-     * @param effect 
+     * @param reaction 
      */
-   link(effect: Effect) {
-      this.getEffects(effect.phase).add(effect)
-      // console.log('link effect', effect, effect.phase, this.effects)
+   link(reaction: Reaction) {
+      this.getReactions(reaction.phase).add(reaction)
+      // console.log('link reaction', reaction, reaction.phase, this.reactions)
    }
 
-   triggerEffects() {
+   triggerReactions() {
       const phases = this.phases
       const cycle = $activeUpdate().cycle as unknown as RenderCycle
       if (__DEV__) assertSyncPhase(phases[0])
       for (let i = 1; i < phases.length; i++) {
          const phase = phases[i]
-         const effects = this.effects[phase]
-         if (!effects) continue;
-         cycle.scheduleEffects(effects, phase)
+         const reactions = this.reactions[phase]
+         if (!reactions) continue;
+         cycle.scheduleReactions(reactions, phase)
       }
-      const syncEffects = this.effects[SYNC]
-      if (syncEffects) {
-         cycle.scheduleEffects(syncEffects, SYNC)
-         cycle.runEffects(SYNC)
+      const syncReactions = this.reactions[SYNC]
+      if (syncReactions) {
+         cycle.scheduleReactions(syncReactions, SYNC)
+         cycle.runReactions(SYNC)
       }
    }
 }

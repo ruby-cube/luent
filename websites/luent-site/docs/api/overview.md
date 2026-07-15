@@ -15,7 +15,7 @@ The API reference is still being written. In the meantime, here is a overview of
 #### Primary reactivity
 - `ion()` to create simple and derived reactive state
 - `ionic()` to create structured reactive state
-- `track()` to link effect to ions
+- `track()` to link reaction to ions
 
 #### Secondary reactivity
 - `ionize()` to create an ion of an ionic structure
@@ -90,13 +90,14 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 ## Node access
 - `component()` to expose a component instance
 - `NodeRef()` to create a node accessor
-- `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node 
+<!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering
 - `Suspense()` to batch async state
 - `Lazy()` to create a lazy loaded component or render function
-- `Dispatch()` to create async actions
-- `dispatch()` for async updates
+- `Action()` to create async actions
+<!-- - `LaxUpdate()` to create async updates -->
+<!-- - `lax()` for async updates -->
 
 ## Async tasks
 - `awaiting()` for awaiting promises without losing context
@@ -122,11 +123,8 @@ Lifecycle hooks register tasks to be run at certain points of a dynamic view's l
 - `atRemount()` at restored mount
 - `atDemount()` at temporary unmount
 
-## Effect cleanup
-- `atEnd()` to schedule tasks for the end of an effect
-
 ## Batch cleanup
-- `Scene()` to batch subscriptions cleanup
+- `Scene()` to batch cleanup
 - `scene.atEnd()` to schedule tasks for the end of a scene
 - `scene.end()` to end a scene
 

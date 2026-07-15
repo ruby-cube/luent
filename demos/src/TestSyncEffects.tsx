@@ -9,6 +9,6 @@ export function TestSyncEffects() {
 
    return (
 
-      <div on:click={e => $count.value++}>Sync effects</div>
+      <div on:click={e => $count.value++}>Sync reactions</div>
    )
 }
