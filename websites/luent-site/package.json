@@ -19,7 +19,7 @@
   "scripts": {
     "docs:preview": "vitepress preview",
     "islands:dev": "concurrently \"vite build --watch --config island.server.config.ts\" \"vite build --watch --config island.client.config.ts\"",
-    "docs:dev": "pnpm docs:prebuild && concurrently \"pnpm islands:dev\" \"vitepress dev\"",
+    "docs:dev": "pnpm docs:prebuild && concurrently -k \"vite build --watch --config island.server.config.ts\" \"vite build --watch --config island.client.config.ts\" \"vitepress dev\"",
     "docs:prebuild": "vite build --config island.server.config.ts && vite build --config island.client.config.ts",
     "docs:build": "pnpm docs:prebuild && vitepress build"
   }

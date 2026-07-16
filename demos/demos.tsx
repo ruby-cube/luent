@@ -1,4 +1,4 @@
-import { mountIsland, MICROCLASS_MERGE, provideRoot, FromTag } from "@rue/luent"
+import { mountIsland, MICROCLASS_MERGE, provideRoot, FromTag, ionic } from "@rue/luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
@@ -48,12 +48,13 @@ import { TestStylesBindings } from "./src/TestStylesBindings"
 import { twMerge } from "tailwind-merge"
 import { TestRenderCycle } from "./src/TestRenderCycle"
 import { TestIfElseDisplayView } from "./src/TestIfElseDisplayView"
+import { TestNameEditor } from "./src/TestNameEditor"
 
 export function runDemo() {
   mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestMarkdownApp />
+    return <TestNameEditor mu:user={{ name: ionic({ first: 'damien', last: 'lewis' }) }} />
   }, '#root')
 }
 

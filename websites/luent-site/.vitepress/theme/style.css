@@ -182,9 +182,18 @@ section#code-glimpses {
   background-color: transparent !important;
 }
 
-@media (max-width: 768px) {
+.VPHomeHero .name {
+  font-weight: 600 !important;
+  line-height: 72px !important;
+}
+
+@media (max-width: 959px) {
   .VPNavBarTitle .logo {
     height: 27px;
+  }
+
+  .VPHomeHero .name {
+    font-size: 56px !important;
   }
 }
 

@@ -665,18 +665,53 @@ importers:
 
   plugins/vscode-nextscript:
     dependencies:
+      '@rue/nextscript':
+        specifier: workspace:*
+        version: link:../../packages/nextscript
       '@types/vscode':
         specifier: ^1.115.0
         version: 1.125.0
+      '@volar/language-core':
+        specifier: ~2.4.28
+        version: 2.4.28
       '@volar/language-server':
         specifier: ~2.4.28
         version: 2.4.28
       '@volar/vscode':
         specifier: ^2.4.28
         version: 2.4.28
+      '@vscode/l10n':
+        specifier: 0.0.18
+        version: 0.0.18
+      volar-service-css:
+        specifier: 0.0.71
+        version: 0.0.71(@volar/language-service@2.4.28)
+      volar-service-typescript:
+        specifier: 0.0.71
+        version: 0.0.71(@volar/language-service@2.4.28)
+      vscode-css-languageservice:
+        specifier: 6.3.10
+        version: 6.3.10
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1
+      vscode-languageserver-textdocument:
+        specifier: 1.0.12
+        version: 1.0.12
+      vscode-languageserver-types:
+        specifier: 3.17.5
+        version: 3.17.5
+      vscode-uri:
+        specifier: 3.1.0
+        version: 3.1.0
+    devDependencies:
+      esbuild:
+        specifier: 0.28.1
+        version: 0.28.1
+    optionalDependencies:
+      '@oxc-parser/binding-darwin-arm64':
+        specifier: 0.130.0
+        version: 0.130.0
 
   websites/luent-site:
     devDependencies:
@@ -7536,7 +7571,7 @@ snapshots:
       emmet: 2.4.11
       jsonc-parser: 2.3.1
       vscode-languageserver-textdocument: 1.0.12
-      vscode-languageserver-types: 3.18.0
+      vscode-languageserver-types: 3.17.5
       vscode-uri: 3.1.0
 
   '@vscode/l10n@0.0.18': {}
@@ -9231,7 +9266,7 @@ snapshots:
     dependencies:
       '@vscode/l10n': 0.0.18
       vscode-languageserver-textdocument: 1.0.12
-      vscode-languageserver-types: 3.18.0
+      vscode-languageserver-types: 3.17.5
       vscode-uri: 3.1.0
 
   vscode-jsonrpc@8.2.0: {}
