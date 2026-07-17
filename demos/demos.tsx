@@ -49,12 +49,13 @@ import { twMerge } from "tailwind-merge"
 import { TestRenderCycle } from "./src/TestRenderCycle"
 import { TestIfElseDisplayView } from "./src/TestIfElseDisplayView"
 import { TestNameEditor } from "./src/TestNameEditor"
+import { TestColorSort } from "./src/TestColorSort"
 
 export function runDemo() {
   mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestNameEditor mu:user={{ name: ionic({ first: 'damien', last: 'lewis' }) }} />
+    return <TestColorSort/>
   }, '#root')
 }
 

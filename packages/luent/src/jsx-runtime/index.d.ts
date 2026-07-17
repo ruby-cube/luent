@@ -1932,6 +1932,7 @@ declare global {
       'o-link': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
       'o--head': L.DetailedHTMLProps<L.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
       'o--body': L.DetailedHTMLProps<L.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
+      'o--window': L.DetailedHTMLProps<L.HTMLAttributes<Window>, Window>
       'o:preserve': { children: ConditionalRenderKit[] | ConditionalRenderKit; discard?: Ion<Booleanish> }
       'o:context': { children: ConditionalRenderKit[] | ConditionalRenderKit; provide: Luent.Provided }
       'o:transition': { children: ConditionalRenderKit[] | ConditionalRenderKit; } & Luent.TransitionBindings

@@ -25,14 +25,13 @@ export function TestIfElse() {
         <button id='toggle-ready' on:click={() => { $ready.toggle() }}>toggle ready</button>
         <hr></hr>
         <div class='container view'>
-          <o:transition in='fade' out='fade'>
+          <o:transition in out>
             {If($active,
               <div>
                 oh
                 <h2>hi</h2>
                 {If($ready,
-                  <p in-out='fade' from-to='opacity-0'
-                  >ready</p>
+                  <p in-out>ready</p>
                 )}
               </div>
             )}
@@ -69,13 +68,13 @@ export function TestIfElse() {
         //   animation: 2500ms ease-in reverse both fade-in
         // }
 
-        .opacity-0 {
-          opacity: 0;
-        }
+        // .opacity-0 {
+        //   opacity: 0;
+        // }
 
-        .fade {
-          transition: opacity 2500ms ease-in;
-        }
+        // .fade {
+        //   transition: opacity 2500ms ease-in;
+        // }
         
       `)}
     </>

@@ -87,6 +87,7 @@ export function processJSXOutput(rawJSX: RawJSXNode) {
 function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
   console.log('jsxNodes', jsxNodes)
   for (const node of jsxNodes) {
+    if (node === window) continue;
 
     if (Array.isArray(node)) {
       _processJSXOutput(node, flattened)

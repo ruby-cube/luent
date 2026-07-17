@@ -19,7 +19,7 @@ import { isInnerHTMLKit, setUpInnerHTML } from "../node/InnerHTML";
 export type TagName = keyof HTMLElementTagNameMap
 
 export function makeElement(
-  tagName: string,
+  tagName: string | Element,
   Slot: RenderSlot | undefined,
   bindings: ElementConfig,
   element?: HTMLElement
@@ -28,10 +28,10 @@ export function makeElement(
 
   let newXML_NS: string | undefined;
   let XML_NS: string | undefined;
-  const domNode = element ?? ((XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes?.xmlns)) || getXMLNamespace())
+  const domNode = typeof tagName === 'string' ? (element ?? ((XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes?.xmlns)) || getXMLNamespace())
     ? createNSElement(tagName, XML_NS)
-    : document.createElement(tagName));
-
+    : document.createElement(tagName)))
+    : tagName;
   const ref = composeRef(bindings) // throw if ref already used
   if (ref) {
     if (Array.isArray(ref)) {
@@ -108,12 +108,12 @@ const transitionAttributes = {
   'transit-class': true,
   'transit-key': true,
   'transit-port': true,
-  
+
   'animate-intro': true,
   'animate-in': true,
   'animate-out': true,
   'animate-in-out': true,
-  
+
   'transition-in': true,
   'transition-out': true,
   'in-out': true,
