@@ -11,7 +11,7 @@ import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 
 
 
-export const [inShadow, shadowStack] = AsyncState<true>('shadow')
+export const [inShadow, shadowStack] = AsyncState<true | ShadowRoot>('shadow')
 
 export function createShadowRoot(setup: { Slot: RenderSlot } & ShadowRootInit) {
   const { Slot, mode } = setup
@@ -41,14 +41,15 @@ class ShadowRootKit extends VineNode {
       console.warn('DEV RESEARCH: Mounting a shadow root to a DocumentFragment should never happen')
       return;
     }
-    this.nodes = processJSXOutput(callWithShadowRoot(this.Slot))
-    super.mount(root.attachShadow({ mode: this.mode }))
+    const shadowRoot = (root as unknown as HTMLElement).attachShadow({ mode: this.mode })
+    this.nodes = processJSXOutput(callWithShadowRoot(this.Slot, shadowRoot))
+    super.mount(shadowRoot)
   }
 }
 
-export function callWithShadowRoot(render: RenderSlot) {
+export function callWithShadowRoot(render: RenderSlot, shadowRoot: ShadowRoot | true) {
   try {
-    shadowStack.push(true)
+    shadowStack.push(shadowRoot)
     return render()
   }
   finally {

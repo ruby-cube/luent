@@ -8,6 +8,7 @@ import { Code, extractParams, isMounted, MountIslands, parseNSXBlock, WriteIslan
 import { LanguageToggle } from "./LanguageToggle";
 import { HabitTrackerDemo } from "./demos/HabitTrackerDemo";
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
+import { PalettableDemo } from "./demos/PalettableDemo";
 
 function renderCodeGlimpses() {
   provideRoot(MICROCLASS_MERGE, twMerge)
@@ -44,6 +45,7 @@ export const Islands: WriteIslands = {
   'language-toggle': () => writeIsland(LanguageToggle),
   'habit-tracker-demo': () => writeIsland(HabitTrackerDemo),
   'emoji-quest-demo': () => writeIsland(EmojiQuestDemo),
+  'palettable-demo': () => writeIsland(PalettableDemo),
   // 'doodle-canvas-demo': () => writeIsland(DoodleCanvasDemo)
 }
 
@@ -75,11 +77,14 @@ export const islands: MountIslands = {
   },
 
   'habit-tracker-demo': ({ node }) => {
-    console.log('mounting habit-tracker-demo')
     mountIsland(HabitTrackerDemo, node)
   },
   'emoji-quest-demo': ({ node }) => {
     mountIsland(EmojiQuestDemo, node)
+  },
+  'palettable-demo': ({ node }) => {
+    console.log('mounting palettable-demo')
+    mountIsland(PalettableDemo, node)
   },
   // 'doodle-canvas-demo': ({ node }) => {
   //   mountIsland(DoodleCanvasDemo, node)

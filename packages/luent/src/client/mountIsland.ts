@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { createRootContext } from "../context/provide";
 import { popContext, pushContext } from "../context/context-stack";
 import { Flask, flaskStack } from "@rue/flask";
-import { load, atRender, atInternalRender } from "@rue/quarky";
+import { load, atInternalRender } from "@rue/quarky";
 import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { RenderFunction } from "../node/makeJSXNode";
 

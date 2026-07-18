@@ -56,7 +56,7 @@ function nowrite(value: unknown) {
 type GetHooks = <T extends "property" | "method">(key: ProxyKey) => T extends "property" ? PropertyHooks | undefined : MethodHook | undefined
 
 export class ModelQuark implements Atom {
-   asTraceable?: TraceableMutable | undefined;
+   asTraceable: TraceableMutable | undefined = __DEV__ ? new TraceableMutable() : undefined
 
    // quarkType = IONIZED_MODEL
    asTrackedAtom: TrackedAtom | undefined

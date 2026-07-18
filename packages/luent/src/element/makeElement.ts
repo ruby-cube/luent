@@ -21,16 +21,15 @@ export type TagName = keyof HTMLElementTagNameMap
 export function makeElement(
   tagName: string | Element,
   Slot: RenderSlot | undefined,
-  bindings: ElementConfig,
-  element?: HTMLElement
+  bindings: ElementConfig
 ): DOMNode {
   const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
 
   let newXML_NS: string | undefined;
   let XML_NS: string | undefined;
-  const domNode = typeof tagName === 'string' ? (element ?? ((XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes?.xmlns)) || getXMLNamespace())
+  const domNode = typeof tagName === 'string' ? ((XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes?.xmlns)) || getXMLNamespace())
     ? createNSElement(tagName, XML_NS)
-    : document.createElement(tagName)))
+    : document.createElement(tagName))
     : tagName;
   const ref = composeRef(bindings) // throw if ref already used
   if (ref) {
@@ -42,7 +41,6 @@ export function makeElement(
       initializeRef(ref, domNode)
     }
   }
-
   if (microclasses) setUpMicroclasses(domNode, microclasses)
   if (classes) setUpClasses(domNode, classes)
   if (styles) setUpStyles(domNode, styles)

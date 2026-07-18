@@ -75,7 +75,7 @@ function isAwaitSeriesElement(node, seriesType) {
 
 
 function createIfSeries(series) {
-   return t.callExpression(t.identifier('_$$IfSeries'), [t.ArrayExpression(series)])
+   return t.callExpression(t.identifier('_$$IfSeries'), [t.arrayExpression(series)])
 }
 
 function createTrySeries(series) {
@@ -87,7 +87,7 @@ function createAsSeries(series) {
 }
 
 function createAwaitSeries(series) {
-   return t.callExpression(t.identifier('_$$AwaitSeries'), [t.ArrayExpression(series)])
+   return t.callExpression(t.identifier('_$$AwaitSeries'), [t.arrayExpression(series)])
 }
 
 

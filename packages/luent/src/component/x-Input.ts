@@ -56,6 +56,8 @@ type HasEvent<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyo
 
 type WithEmit<C> = { emit: { [K in keyof C as K extends `on:${infer E}` ? E : never]: C[K] } & { [K in keyof DOMEvents<HTMLElement> as K extends `on:${infer E}` ? E : never]: DOMEvents<HTMLElement>[K] } }
 
+type WithEvent<C> = { [K in keyof C as K extends `on${infer Head}${string}` ? Head extends Uppercase<Head> ? K : never : never]: C[K] }
+
 
 // C extends AnyObject ? HasEvent<C> extends true ? {
 //    emit: {[K in C[`on:${string}`]: C[] ]}
@@ -345,6 +347,7 @@ export type _FromTag<D> =
    StaticInput<D>
    & ReadonlyIonInput<D>
    & WithEmit<D>
+   & WithEvent<D>
    & WithMu<D>
    & WithSlot<D>
    & Styles

@@ -78,7 +78,13 @@ export function For<L, U>(data: L & ListData, renderOrGetUID: GetKey<ToValue<L>>
   if (!data) return;
   const uidProvided = arguments.length === 3
   const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID);
-  if (!import.meta.env.SSR && (isGetter(data) || isIonicProxy(data) && isIterable(data))) {
+  if ( isGetter(data) || isIonicProxy(data) && isIterable(data)) {
+    if (import.meta.env.SSR) {
+      if (uidProvided) {
+        return renderStaticList(toValue(data), _render, 'index')
+      }
+      return renderStaticList(toValue(data), _render, 'item')
+    }
     if (uidProvided) {
       return new ListKit(toIon(data), toAsyncRenderItem(wrapWithList(_render, data)), renderOrGetUID as (item: unknown) => unknown, getFlask())
     }
@@ -95,12 +101,12 @@ function isIterable(data: any) {
 
 
 
-function renderStaticList(data: undefined | unknown[] | Set<unknown> | Map<unknown, unknown> | AnyObject, render: (item: unknown, index: number) => RawJSXNode) {
+function renderStaticList(data: undefined | unknown[] | Set<unknown> | Map<unknown, unknown> | AnyObject, render: (item: unknown, index: number) => RawJSXNode, reactive?: 'item' | 'index') {
   if (!data) return;
   const array = normalizeToArray(data)
   const renderedList = []
   for (let i = 0; i < array.length; i++) {
-    renderedList.push(render(array[i], i))
+    renderedList.push(render(reactive === 'item' ? () => array[i] : array[i], reactive === 'index' ? () => i : i))
   }
   return renderedList
 }

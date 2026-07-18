@@ -30,15 +30,15 @@ export function DemoContainer(setup: FromTag<{
     <>
       <div ref={$div} class='demo-container' auto-bind={rest}>
         {import.meta.env.SSR
-    ?
-    <style-scope>
-      <template>
-        {callWithShadowRoot(Slot)}
-      </template>
-    </style-scope>
-    : <shadow-root mode='open'>
-      {Slot()}
-    </shadow-root>}
+          ?
+          <style-scope>
+            <template>
+              {callWithShadowRoot(Slot)}
+            </template>
+          </style-scope>
+          : <shadow-root mode='open'>
+            {Slot()}
+          </shadow-root>}
       </div>
 
       {Style(css`

@@ -213,8 +213,10 @@ export function writeComponent(
   return processJSXOutput(normalizeToArray(Component($from(setup))))
 }
 
-
-
+if (typeof window === 'undefined') {
+  globalThis.window = undefined
+  globalThis.document = undefined
+}
 
 export function writeIsland(render: RenderFunction) {
   const flask = new Flask({ type: 'view' });

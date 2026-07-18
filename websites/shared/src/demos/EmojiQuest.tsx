@@ -270,7 +270,7 @@ function EmojiQuest() {
 
   <:>
     <main>
-      <EmojiGame></EmojiGame>
+      <EmojiGame powers={powerset}></EmojiGame>
     </main>
     <aside>
       <Panel title="Powerset">
@@ -295,7 +295,7 @@ function EmojiQuest() {
 
   return <>
     <main>
-      <EmojiGame></EmojiGame>
+      <EmojiGame powers={powerset}></EmojiGame>
     </main>
     <aside>
       <Panel title="Powerset">
@@ -311,7 +311,7 @@ EmojiQuest.nsxPowerset = `function Powerset(setup: FromTag<{
   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
   limit: number
 }>) {
-  const { mu, r: { powers }, limit } = setup;
+  const { mu: { powers }, limit } = setup;
 
   <:>
     <div class='powerset-panel'>
@@ -325,7 +325,7 @@ EmojiQuest.nsxPowerset = `function Powerset(setup: FromTag<{
         <button
           class='add-power-button'
           disabled={(powers.length === limit)@}
-          on:click={() => mu.powers.addRandomPower()}
+          on:click={() => powers.addRandomPower()}
         >
           +
         </button>
@@ -356,7 +356,7 @@ EmojiQuest.tsxPowerset = `function Powerset(setup: FromTag<{
   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
   limit: number
 }>) {
-  const { mu, r: { powers }, limit } = setup;
+  const { mu: { powers }, limit } = setup;
 
   return <>
     <div class='powerset-panel'>
@@ -370,7 +370,7 @@ EmojiQuest.tsxPowerset = `function Powerset(setup: FromTag<{
         <button
           class='add-power-button'
           disabled={() => powers.length === limit}
-          on:click={() => mu.powers.addRandomPower()}
+          on:click={() => powers.addRandomPower()}
         >
           +
         </button>
@@ -401,7 +401,7 @@ EmojiQuest.nsxMessages = `function Messages(setup: FromTag<{
   'mu:powers': Ionic<string[]>
   limit: number
 }>) {
-  const { mu, r: { powers }, limit } = setup;
+  const { mu: { powers }, limit } = setup;
 
   get remaining = ion(() => limit - powers.length)
 
@@ -412,7 +412,7 @@ EmojiQuest.nsxMessages = `function Messages(setup: FromTag<{
     )}
     {Else(
       <div class='message'>Powerset complete.</div>
-      <button class="reset-btn" on:click={() => mu.powers.length = 0}>
+      <button class="reset-btn" on:click={() => powers.length = 0}>
         Reset
       </button>
     )}
@@ -440,7 +440,7 @@ EmojiQuest.tsxMessages = `function Messages(setup: FromTag<{
   'mu:powers': Ionic<string[]>
   limit: number
 }>) {
-  const { mu, r: { powers }, limit } = setup;
+  const { mu: { powers }, limit } = setup;
 
   const $remaining = ion(() => limit - powers.length)
 
@@ -454,7 +454,7 @@ EmojiQuest.tsxMessages = `function Messages(setup: FromTag<{
     {Else(
       <>
         <div class='message'>Powerset complete.</div>
-        <button class="reset-btn" on:click={() => mu.powers.length = 0}>
+        <button class="reset-btn" on:click={() => powers.length = 0}>
           Reset
         </button>
       </>

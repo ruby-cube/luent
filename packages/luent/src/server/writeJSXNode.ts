@@ -16,6 +16,8 @@ export function writeJSXNode(
 ): RawJSXNode | void {
 
   switch (nodeType) {
+    case 'o--window': return ''
+
     case 'o:context':
       return Context({ Slot, provide: config.provide } as any)
 

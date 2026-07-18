@@ -1,24 +1,27 @@
-import { As, css, Else, For, FromTag, If, ion, ionic, Style, track } from "@rue/luent";
+import { As, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, track } from "@rue/luent";
 import { moveUniqueItems } from "@rue/utils";
 
-export function TestColorSort() {
+export function Palettable() {
   const $count = ion(0)
   const $complete = ion(false)
+  const $container = NodeRef('div')
 
   return <>
-    <div class='color-sort-app'>
-      {As($count,
-        <ColorPalette
-          class='anchor'
-          before:mount={$complete.value = false}
-          animate-in='slide-in'
-          count={5}
-          onComplete={() => setTimeout(() => $complete.value = true, 1000)}
-        ></ColorPalette>
-      )}
+    <div ref={$container} class='palettable'>
+      <o:context provide={HOST($container())}>
+        {As($count,
+          <ColorPalette
+            class='anchor'
+            before:mount={$complete.value = false}
+            animate-in='slide-in'
+            count={5}
+            onComplete={() => $complete.value = true}
+          ></ColorPalette>
+        )}
+      </o:context>
       {If($complete,
-        <button transition-in class='next-btn' on:click={() => {
-          $count.value++;
+        <button class='next-btn' transition-in on:click={() => {
+          $count.value++ % 2;
         }}>Next</button>
       )}
     </div>
@@ -33,14 +36,16 @@ export function TestColorSort() {
         anchor-name: --color-palette;
       }
 
-      .color-sort-app {
+      .palettable {
         display: flex;
         flex-direction: column;
-        height: 100vh;
         justify-content: center;
+        background-color: white;
+        width: 100%;
+        height: 100%;
       }
 
-      .next-btn {
+      .palettable .next-btn {
         width: 88px;
         height: 44px;
         border-radius: 22px;
@@ -65,7 +70,7 @@ export function TestColorSort() {
         }
       }
 
-      .slide-in {
+      .palettable .slide-in {
         animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) slide-in forwards;
       }
     `)}
@@ -76,6 +81,8 @@ type Color = {
   s: number,
   l: number,
 }
+
+const HOST = ContextKey<HTMLElement | undefined>('host')
 
 function ColorPalette(setup: FromTag<{
   count: number,
@@ -124,7 +131,6 @@ function ColorPalette(setup: FromTag<{
 
   track($isComplete, () => {
     if ($isComplete()) {
-      onComplete()
       setTimeout(celebrate, 250) // 250 to ensure item transitions are complete
     }
   })
@@ -136,6 +142,7 @@ function ColorPalette(setup: FromTag<{
     const id = setInterval(() => {
       $magnifiedIndex.value!++
       if ($magnifiedIndex() === 7) {
+        onComplete()
         clearInterval(id)
         $magnifiedIndex.value = undefined
       }
@@ -161,32 +168,24 @@ function ColorPalette(setup: FromTag<{
     if (!block) return false;
     return selected.has(block)
   }
-
-  const $dragging = ion(false)
+  console.log('host?', fromContext(HOST))
 
   return <>
-    <o--window on:click={e => e.target.closest('.clickable') || deselectAll()} />
+    <o--portal to={fromContext(HOST) ?? window} on:click={e => e.target.closest('.clickable') || deselectAll()} />
     <div class='container' auto-bind={rest}>
       <div class='row'>
         <button
           class='clickable gap'
           disabled={() => selected.size === 0 || isSelected(colors[0])}
           on:click={() => colors.insertSelected(0)}
-          // on:dragover={e => e.preventDefault()}
-          // on:drop={e => { e.preventDefault(); colors.insertSelected(0) }}
-          // on:dragenter={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'none' }}
         ></button>
         {For(colors, m => m, (color, $index) =>
           <>
             <div
-              // draggable
-              // on:dragend={e => { $dragging.value = false; selected.clear() }}
-              // on:dragstart={e => { e.dataTransfer.effectAllowed = "move"; selected.add(color); setTimeout(() => $dragging.value = true, 0) }}
               transition-item
               on:click={() => toggleSelect(color)}
               class={['clickable', 'square', {
-                'selected': () => isSelected(color) && !$dragging(),
-                // 'dragging': () => isSelected(color) && $dragging(),
+                'selected': () => isSelected(color),
                 'magnifying': () => $magnifiedIndex() !== undefined
               }]}
               style={{
@@ -195,9 +194,6 @@ function ColorPalette(setup: FromTag<{
               }}
             ></div>
             <button
-              // on:dragover={e => e.preventDefault()}
-              // on:drop={e => { e.preventDefault(); colors.insertSelected($index() + 1); $dragging.value = false }}
-              // on:dragenter={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'none' }}
               class='clickable gap'
               disabled={() => selected.size === 0 || isSelected(color) || isSelected(colors[$index() + 1])}
               on:click={() => colors.insertSelected($index() + 1)}
@@ -209,36 +205,32 @@ function ColorPalette(setup: FromTag<{
 
     {Style(css`
 
-      .container {
+      .palettable .container {
         display: flex;
         flex-direction: column;
       }
 
-      .row {
+      .palettable .row {
         display: flex;
         margin-inline: auto;
       }
 
-      .selected {
+      .palettable .selected {
         outline: 5px solid hsla(35deg 10% 50% / 50%);
       }
 
-      .dragging {
-        opacity: 50%;
-      }
-
-      .square {
+      .palettable .square {
         width: 44px;
         height: 44px;
         border-radius: 10px;
         cursor: pointer;
       }
       
-      .magnifying {
+      .palettable .magnifying {
         transition: transform 90ms ease-in;
       }
 
-      .gap {
+      .palettable .gap {
         margin: 0px;
         display: block;
         border: none;
@@ -248,7 +240,7 @@ function ColorPalette(setup: FromTag<{
         border-radius: 10px;
       }
       
-      .gap:hover:enabled {
+      .palettable .gap:hover:enabled {
         background-color: #ccc;
       }
     `)}
@@ -315,3 +307,81 @@ function goalHue(baseHue: number) {
   return h;
 }
 
+Palettable.nsx = `function Palettable() {
+  get count = ion(0)
+  get complete = ion(false)
+
+  <:>
+    <div class='app'>
+      {As(count@,
+        <ColorPalette
+          before:mount={complete = false}
+          animate-in='slide-in'
+          count={5}
+          onComplete={() => setTimeout(() => complete = true, 1000)}
+        ></ColorPalette>
+      )}
+      <button show-if={complete@} transition-in on:click={() => count++}>
+        Next
+      </button>
+    </div>
+
+    <o-style>
+      @keyframes slide-in {
+        from {
+          opacity: 0;
+          transform: translateY(-100px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0px);
+        }
+      }
+
+      .slide-in {
+        animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) slide-in forwards;
+      }
+    </o-style>
+  </:>
+}`
+
+
+Palettable.tsx = `function Palettable() {
+  const $count = ion(0)
+  const $complete = ion(false)
+
+  return <>
+    <div class='app'>
+      {As($count,
+        <ColorPalette
+          before:mount={$complete.value = false}
+          animate-in='slide-in'
+          count={5}
+          onComplete={() => setTimeout(() => $complete.value = true, 1000)}
+        ></ColorPalette>
+      )}
+      <button show-if={$complete} transition-in on:click={() => $count.value++}>
+        Next
+      </button>
+    </div>
+
+    {Style(css\`
+      @keyframes slide-in {
+        from {
+          opacity: 0;
+          transform: translateY(-100px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0px);
+        }
+      }
+
+      .slide-in {
+        animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) slide-in forwards;
+      }
+    \`)}
+  </>
+}`

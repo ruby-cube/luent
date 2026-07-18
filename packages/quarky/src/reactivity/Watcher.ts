@@ -86,6 +86,7 @@ export class StateChangeEvent<S = unknown> {
 export type WatchSubjects = (Object | Ion)[]
 
 export function watch<T>(subject: T, reaction: ReactionTask<T>, options: ReactionOptions = {}): PausableListener {
+  if (import.meta.env.SSR) return InertWatcher()
   console.log('*** watching', subject)
   options.retrack = options.retrack ?? true;
 

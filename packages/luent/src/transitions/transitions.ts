@@ -1,10 +1,11 @@
 import { atRender, queueTask, toValue } from "@rue/quarky"
-import { AnyObject } from "@rue/types"
 import { MaybeIon } from "../component/x-Input"
-import { atAttach, beforeDetach } from "../flask/flask-hooks"
+import { atAttach, atUnmount, beforeDetach } from "../flask/flask-hooks"
 import { setUpPositionTransition, setUpTransit } from "./transit"
 import { createStack } from "@rue/utils"
 import { Flask, getFlask } from "@rue/flask"
+import { inShadow } from "../component/shadow"
+import { css, Style } from "../component/Style"
 
 const END_EVENT_FALLBACK_BUFFER_MS = 50
 
@@ -50,21 +51,25 @@ export const [markInitialRender, unmarkInitialRender, isInitialRender] = createS
 
 let ANIMATE_IN: string;
 function useAnimateIn() {
-  if (!ANIMATE_IN) {
-    ANIMATE_IN = 'luent-animate-in'
+  if (!ANIMATE_IN || inShadow()) {
+    const className = 'luent-animate-in'
     insertCSSRule('@keyframes luent-fade-in', "from { opacity: 0; } to { opacity: 1; }")
 
-    insertCSSRule('.' + ANIMATE_IN, "animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) luent-fade-in;")
+    insertCSSRule('.' + className, "animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) luent-fade-in;")
+    if (!inShadow()) ANIMATE_IN = className
+    return className;
   }
   return ANIMATE_IN
 }
 
 let ANIMATE_OUT: string;
 function useAnimateOut() {
-  if (!ANIMATE_OUT) {
-    ANIMATE_OUT = 'luent-animate-out'
+  if (!ANIMATE_OUT || inShadow()) {
+    const className = 'luent-animate-out'
     insertCSSRule('@keyframes luent-fade-out', "from { opacity: 1; } to { opacity: 0; }")
-    insertCSSRule('.' + ANIMATE_OUT, "animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) luent-fade-out; z-index: -1;")
+    insertCSSRule('.' + className, "animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) luent-fade-out; z-index: -1;")
+    if (!inShadow()) ANIMATE_OUT = className
+    return className;
   }
 
   return ANIMATE_OUT
@@ -72,18 +77,22 @@ function useAnimateOut() {
 
 let TRANSITION_IN_OUT: string;
 function useTransitionInOut() {
-  if (!TRANSITION_IN_OUT) {
-    TRANSITION_IN_OUT = 'luent-in-out'
-    insertCSSRule('.' + TRANSITION_IN_OUT, "transition: opacity 500ms cubic-bezier(0.55, 0, 0.1, 1);")
+  if (!TRANSITION_IN_OUT || inShadow()) {
+    const className = 'luent-in-out'
+    insertCSSRule('.' + className, "transition: opacity 500ms cubic-bezier(0.55, 0, 0.1, 1);")
+    if (!inShadow()) TRANSITION_IN_OUT = className
+    return className;
   }
   return TRANSITION_IN_OUT
 }
 
 let TRANSITION_TO_FROM: string;
 function useTransitionToFrom() {
-  if (!TRANSITION_TO_FROM) {
-    TRANSITION_TO_FROM = 'luent-transition-to-from'
-    insertCSSRule('.' + TRANSITION_TO_FROM, "opacity: 0;")
+  if (!TRANSITION_TO_FROM || inShadow()) {
+    const className = 'luent-transition-to-from'
+    insertCSSRule('.' + className, "opacity: 0;")
+    if (!inShadow()) TRANSITION_TO_FROM = className
+    return className;
   }
   return TRANSITION_TO_FROM
 }
@@ -93,31 +102,45 @@ function useTransitionToFrom() {
 let TRANSITION_POSITION: string;
 
 function useTransitionPosition() {
-  if (!TRANSITION_POSITION) {
-    TRANSITION_POSITION = 'luent-transition-position'
-    insertCSSRule('.' + TRANSITION_POSITION, "transition: transform 250ms ease-in-out;")
+  if (!TRANSITION_POSITION || inShadow()) {
+    const className = 'luent-transition-position'
+    insertCSSRule('.' + className, "transition: transform 250ms ease-in-out;")
+    if (!inShadow()) TRANSITION_POSITION = className
+    return className;
   }
   return TRANSITION_POSITION
 }
 
 function insertCSSRule(name: string, rule: string) {
-  const stylesheet = useLuentStyleSheet()
-  stylesheet.insertRule(`${name} { ${rule} }`, stylesheet.cssRules.length)
+  const style = useTransitionStyleElement()
+  atRender(() => {
+    const stylesheet = style.sheet
+    if (!stylesheet) throw new Error('style element not attached to DOM')
+    stylesheet.insertRule(`${name} { ${rule} }`, stylesheet.cssRules.length)
+  })
 }
 
-let luentStylesheet: CSSStyleSheet
+const transitionStylesheets = new Map<HTMLHeadElement | ShadowRoot, { count: number, style: HTMLStyleElement }>()
 
-export function useLuentStyleSheet() {
-  if (luentStylesheet) return luentStylesheet
-  const stylesheets = document.styleSheets
-  const index = stylesheets.length;
+export function useTransitionStyleElement() {
+  const host = inShadow() ?? document.head
+  const existing = transitionStylesheets.get(host)
+  if (existing) {
+    existing.count++
+    return existing.style
+  }
   const style = document.createElement('style');
-  style.id = 'luent-stylesheet'
-  document.head.appendChild(style)
-  const stylesheet = stylesheets.item(index)
-  if (!stylesheet) throw new Error(`no stylesheet at this index!`)
-  luentStylesheet = stylesheet
-  return stylesheet;
+  style.id = 'luent-transitions'
+  host.appendChild(style)
+  const entry = { count: 1, style }
+  transitionStylesheets.set(host, { count: 1, style })
+  atUnmount(() => {
+    entry.count--;
+    if (!entry.count) {
+      transitionStylesheets.delete(host)
+    }
+  })
+  return style;
 }
 
 export function setUpTransitions(node: HTMLElement, transitions: TransitionConfigs) {
@@ -133,10 +156,9 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
 
   const animateItem = transitions['animate-item']
   const animateItemClasses = animateItem === true ? undefined : animateItem
-
   const transitionItem = transitions['transition-item']
   const transitionItemClasses = transitionItem === true || animateItem === true ? useTransitionPosition() : transitionItem
-
+  console.log('^^^ transitionItemClasses', transitionItemClasses)
   const transitKey = transitions['transit-key']
   const transitClasses = transitions['transit-class'] ?? transitKey ? useTransitionPosition() : undefined
   const transitPort = transitions['transit-port']

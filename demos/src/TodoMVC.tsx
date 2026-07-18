@@ -21,7 +21,6 @@ export function TodoMVC() {
   const $todos = ion(ionicTodos(getTodos()))
   const $view = ion('all' as keyof typeof filters)
 
-
   const filters = {
     all: (todos: Todo[]) => todos,
     active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
@@ -229,9 +228,6 @@ function TodoList({ $todos, removeTodo }: {
       })}
     </ul>
   )
-    // .ref({
-    //   message: 'hi'
-    // })
 }
 
 

@@ -67,19 +67,21 @@ export function Style(cssText: string) {
     writeToPortal('head', style)
     return;
   }
+  const flask = getFlask()
   if (shadow) {
-    const existing = document.querySelector('#' + id) // TODO: check shadow instead of document?
+    const existing = shadow.querySelector('#' + id) // TODO: check shadow instead of document?
     if (existing) {
-      console.warn('#$# existing style tag', existing)
+      console.warn('^^^ existing style tag', existing)
       return;
     }
+    console.log('^^^ createStyleTag in shadow')
     const style = createStyleTag(cssText, id, shadow)
     beforeUnmount(() => {
       discardStyleTag(style, flask)
     })
-    return style;
+    shadow.appendChild(style)
+    return;
   }
-  const flask = getFlask()
   atMount(() => { // QUESTION: Why do things break when this is atRender instead of atMount?
     const existing = document.querySelector('#' + id)
     if (existing) {
@@ -90,6 +92,7 @@ export function Style(cssText: string) {
     if (style) {
       document.head.appendChild(style);
       beforeUnmount(() => {
+        style.id = style.id + '_unmounting'
         discardStyleTag(style, flask)
       })
     }
@@ -101,14 +104,12 @@ function discardStyleTag(style: HTMLStyleElement, flask: Flask) {
   if (isTransitioningOut(flask)) {
     queueTask(() => {
       flask.onDiscard(() => {
-        console.log('#$# remove style transitioning')
         style.remove()
       })
     })
     return;
   }
-  console.log('#$# remove style')
-  style.remove(); // TODO: wait till end of transition to remove
+  style.remove();
 }
 
 function hash(text: string): string {

@@ -463,11 +463,12 @@ DynamicViewSetup.tsx =
   `<section>
   {If($selectedUser, user => {
     const { profile } = UserProfileKit(user.id)
-    <:/>
-    <aside class="profile-card">
-      <h3>{user.name}</h3>
-      <p>{profile.bio}</p>
-    </aside>
+    return (
+      <aside class="profile-card">
+        <h3>{user.name}</h3>
+        <p>{profile.bio}</p>
+      </aside>
+    )
   })}
 </section>
 
@@ -501,13 +502,13 @@ function Powerset(setup: FromTag<{
   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
   limit: number,
 }>) {
-  const { mu, '-r': { powers }, limit } = setup;
+  const { mu: { powers }, limit } = setup;
   <:>
     <div class='powerset-panel'>
       <Powers {powers}>
       <button
         disabled={() => powers.length === limit}
-        on:click={() => mu.powers.addRandomPower()}
+        on:click={() => powers.addRandomPower()}
       >+</button>
     </div>
     <o--link href='/powerset.css' rel='stylesheet' />
@@ -531,13 +532,13 @@ function Powerset(setup: FromTag<{
   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
   limit: number,
 }>) {
-  const { mu, '-r': { powers }, limit } = setup;
+  const { mu: { powers }, limit } = setup;
   return <>
     <div class='powerset-panel'>
       <Powers powers={powers}>
       <button
         disabled={() => powers.length === limit}
-        on:click={() => mu.powers.addRandomPower()}
+        on:click={() => powers.addRandomPower()}
       >+</button>
     </div>
     <o--link href='/powerset.css' rel='stylesheet' />
