@@ -33,20 +33,11 @@
     {
       "scope": [
         "entity.name.type",
+        "support.type",
         "entity.name.class"
       ],
       "settings": {
         "foreground": "#42d4ed"
-      }
-    },
-    {
-      "scope": [
-        "support.type",
-        "entity.name.type",
-        "meta.type.annotation meta.definition.method entity.name.function"
-      ],
-      "settings": {
-        "foreground": "#538e97"
       }
     },
     {
@@ -76,15 +67,6 @@
       ],
       "settings": {
         "foreground": "#e6c77a"
-      }
-    },
-    {
-      "scope": [
-        "meta.type.annotation string.quoted.single",
-        "meta.type.annotation string.quoted.double"
-      ],
-      "settings": {
-        "foreground": "#e6c77a90"
       }
     },
     {
@@ -136,16 +118,6 @@
       ],
       "settings": {
         "foreground": "#8d91a1"
-      }
-    },
-    {
-      "scope": [
-        "variable.other.property",
-        "variable.object.property",
-        "entity.name.variable.field"
-      ],
-      "settings": {
-        "foreground": "#8D91A1"
       }
     }
   ]

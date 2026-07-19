@@ -17,11 +17,23 @@ hero:
       link: /index#code-glimpses
 
 features:
-  - title: Develop with fluency
+  - icon:
+      src: /assets/audio-waveform.svg
+      width: 32
+      height: 32
+    title: Develop with fluency
     details: Build with intuitive APIs and expressive syntax designed as natural extensions of native web technologies.
-  - title: Take command of reactivity
+  - icon:
+      src: /assets/atom.svg
+      width: 32
+      height: 32
+    title: Take command of reactivity
     details: Gain clarity and control over re-renders through reactivity that is fine-grained, selective, typed, and traceable.
-  - title: Manage state natively
+  - icon:
+      src: /assets/shapes.svg
+      width: 32
+      height: 32
+    title: Manage state natively
     details: Simplify management of structured state through familiar native structures.
 ---
 
@@ -31,7 +43,7 @@ features:
     <span class='ns-hero-code__dot'></span>
   </div>
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
-    <h2>Code Glimpses</h2>
+    <h2>Code Tour</h2>
     <p style='text-wrap: balance'><small>Luent applications may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
 </small></p>
   </section>

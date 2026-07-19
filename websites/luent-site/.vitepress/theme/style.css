@@ -187,6 +187,11 @@ section#code-glimpses {
   line-height: 72px !important;
 }
 
+.VPNavBarTitle .title {
+  font-size: small; /* Change this to your desired size */
+  color: var(--vp-c-text-2)
+}
+
 @media (max-width: 959px) {
   .VPNavBarTitle .logo {
     height: 27px;

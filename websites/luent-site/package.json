@@ -4,15 +4,15 @@
   "description": "",
   "type": "module",
   "devDependencies": {
-    "@rue/luent-ui": "workspace:*",
     "@rue/luent": "workspace:*",
+    "@rue/luent-ui": "workspace:*",
     "@rue/quarky": "workspace:*",
     "@rue/websites-shared": "workspace:*",
     "concurrently": "^10.0.3",
     "shiki": "^4.1.0",
-    "vitepress": "2.0.0-alpha.17",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.3.2"
+    "tailwindcss": "^4.3.2",
+    "vitepress": "2.0.0-alpha.17"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT",

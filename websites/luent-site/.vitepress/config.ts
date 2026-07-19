@@ -43,7 +43,8 @@ export default defineConfig({
   title: "Luent",
   description: "Luent documentation and resources",
   themeConfig: {
-    siteTitle: false,
+    // siteTitle: false,
+    siteTitle: 'v0.0.1',
     logo: {
       dark: '/assets/luent-logo-dark.png',
       light: '/assets/luent-logo-light.png'
@@ -59,7 +60,7 @@ export default defineConfig({
     nav: [
       { text: 'Learn', link: '/guide/interactive-islands' },
       { text: 'Demos', link: '/demos/habit-tracker' },
-      { text: 'Code Glimpses', link: '/markdown-examples' },
+      { text: 'Tour', link: '/markdown-examples' },
       { text: 'Reference', link: '/api/overview' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },

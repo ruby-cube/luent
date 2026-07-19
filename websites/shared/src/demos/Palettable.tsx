@@ -332,7 +332,6 @@ Palettable.nsx = `function Palettable() {
           opacity: 0;
           transform: translateY(-100px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0px);
@@ -372,7 +371,6 @@ Palettable.tsx = `function Palettable() {
           opacity: 0;
           transform: translateY(-100px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0px);
