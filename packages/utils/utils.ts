@@ -78,30 +78,27 @@ export const UNDEFINED = Symbol('undefined');
 
 
 export function moveUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], reinsertionIndex: number) { // assumes items are unique
-    const indicesAndRemoveCount: [number, number][] = [];
+    const boundedIndex = Math.max(0, Math.min(reinsertionIndex, list.length));
     const removedItems = [];
-    let j = 0;
-    while (j < list.length) {
-        const id = list[j];
-        if (uniqueItemsToRemove.has(id)) {
-            const prevEntry = indicesAndRemoveCount.at(-1);
-            if (prevEntry && prevEntry[0] + 1 === j) {
-                prevEntry[1]++; // increment count
-            }
-            else {
-                indicesAndRemoveCount.push([j, 1])
-            }
-            removedItems.push(id);
-            if (reinsertionIndex > j) reinsertionIndex--; // adjust index
+    let removedBeforeIndex = 0;
+    let readIndex = 0;
+    let writeIndex = 0;
+
+    while (readIndex < list.length) {
+        const item = list[readIndex];
+        if (uniqueItemsToRemove.has(item)) {
+            removedItems.push(item);
+            if (readIndex < boundedIndex) removedBeforeIndex++;
         }
-        j++;
+        else {
+            list[writeIndex] = item;
+            writeIndex++;
+        }
+        readIndex++;
     }
-    let k = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
-    while (k--) {
-        const [index, count] = indicesAndRemoveCount[k];
-        list.splice(index, count);
-    }
-    list.splice(reinsertionIndex, 0, ...removedItems)
+
+    list.length = writeIndex;
+    list.splice(boundedIndex - removedBeforeIndex, 0, ...removedItems)
 }
 
 

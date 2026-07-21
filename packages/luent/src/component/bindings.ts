@@ -7,6 +7,7 @@ import { TransitionConfigs } from "../transitions/transitions"
 import { TagClass, TagStyle } from "../element/styles"
 import { ComponentKit } from "@rue/nextscript"
 import { RawJSXNode } from "../node/makeJSXNode"
+import { $from } from "../utils/destructure"
 
 // <div on:event={[
 //    tempo(e => { console.log('tempo')})
@@ -109,6 +110,7 @@ export function toSetup(bindings: RawBindings): SetupBindings {
         break;
     }
   }
+  if (setup.mu) setup.mu = $from(setup.mu)
   return setup
 }
 
