@@ -1,33 +1,42 @@
-import { Scene } from "@rue/flask";
-import { As, atTick, css, listen, For, FromTag, If, Ion, ion, ionic, Style, Thru, track, Else } from "@rue/luent";
-import { MutableIon, queueTask } from "@rue/quarky";
+import { As, css, For, FromTag, If, ion, ionic, Style, Thru, track } from "@rue/luent";
+import { Finitron, queueTask } from "@rue/quarky";
 import { moveUniqueItems } from "@rue/utils";
 
 export function TestColorSort() {
-  const $count = ion(0)
-  const $moves = ion(0)
-  const $complete = ion(false)
+  const $count = ion(0, { increment() { $count.value++ } })
 
   return <>
     <div class='color-sort-app'>
-      <div class='moves-panel'>
-        {$moves}
-      </div>
-      {As($count,
-        <ColorPalette
-          class='anchor'
-          before:mount={() => { $complete.value = false; $moves.value = 0 }}
-          animate-in='slide-in'
-          count={5}
-          mu:moves={$moves}
-          onComplete={() => setTimeout(() => $complete.value = true, 1000)}
-        ></ColorPalette>
-      )}
-      {If($complete,
-        <button transition-in class='next-btn' on:click={() => {
-          $count.value++;
-        }}>Next</button>
-      )}
+      {As($count, () => {
+        const $moves = ion(0, {
+          increment() { $moves.value++ }
+        })
+
+        const palette = Finitron({
+          'unsorted': { complete: () => 'x:sorted' },
+          'x:sorted': {}
+        })
+        palette.init('unsorted')
+
+        return <>
+          <div class='moves-panel'>
+            {$moves}
+          </div>
+          <ColorPalette
+            class='anchor'
+            animate-in='slide-in'
+            onMove={$moves.increment}
+            onComplete={() => setTimeout(() => palette.complete(), 1000)}
+          ></ColorPalette>
+          {If(() => palette.is('x:sorted'),
+            <button
+              transition-in
+              class='next-btn'
+              on:click={$count.increment}
+            >Next</button>
+          )}
+        </>
+      })}
     </div>
 
     {Style(css`
@@ -78,60 +87,40 @@ export function TestColorSort() {
     `)}
   </>
 }
-type Color = {
-  h: number,
-  s: number,
-  l: number,
-}
 
 function ColorPalette(setup: FromTag<{
-  'mu:moves': MutableIon<number>,
-  count: number,
-  onComplete: () => void
+  size?: number;
+  onMove: () => void;
+  onComplete: () => void;
 }>) {
-  const { mu: { $moves }, count, onComplete, ...rest } = setup
-  const genColor = useRandomColorGenerator()
+  const { size = 5, onMove, onComplete, ...rest } = setup
 
-  const [h, s, l] = genColor()
-  const goal = goalHue(h)
-  const hues = getSteps(h, goal, count).map(hue => hue % 360)
-  const sats = getSteps(s, (s + 30) % 100, count)
-  const lights = getSteps(l, (l + 30) % 100, count)
+  const { colors, $sorted } = ColorsKit(size)
+  const selected = ionic(new Set<Color>())
 
-  const sortedColors = composeColorArray(hues, sats, lights)
-  const reverseColors = sortedColors.toReversed()
-  const colors = ionic(shuffle([...sortedColors]), {
-    insertSelected(index: number) {
-      if (!selected.size) return;
-      $moves.value++;
-      moveUniqueItems(selected, this, index)
-      selected.clear()
-    }
-  })
+  function toggleSelect(block: Color) {
+    if (selected.has(block)) selected.delete(block)
+    else selected.add(block)
+  }
 
-  const $isComplete = ion(() => {
-    let i = 0;
-    let failed = 0;
-    for (const color of colors) {
-      if (color !== sortedColors[i]) {
-        failed++;
-        break;
-      }
-      i++;
-    }
-    i = 0;
-    for (const color of colors) {
-      if (color !== reverseColors[i]) {
-        failed++;
-        break;
-      }
-      i++;
-    }
-    return failed < 2;
-  })
+  function deselectAll() {
+    selected.clear()
+  }
 
-  track($isComplete, () => {
-    if ($isComplete()) {
+  function isSelected(block: Color | undefined | null) {
+    if (!block) return false;
+    return selected.has(block)
+  }
+
+  function moveSelected(index: number) {
+    if (!selected.size) return;
+    colors.moveColors(selected, index)
+    selected.clear()
+    onMove()
+  }
+
+  track($sorted, () => {
+    if ($sorted()) {
       onComplete()
       setTimeout(celebrate, 250) // 250 to ensure item transitions are complete
     }
@@ -154,32 +143,32 @@ function ColorPalette(setup: FromTag<{
     return index === $magnifiedIndex();
   }
 
-  const selected = ionic(new Set())
 
-  function toggleSelect(block: Color) {
-    if (dragging) {
-      dragging = false
-      return;
-    }
-    if (selected.has(block)) selected.delete(block)
-    else selected.add(block)
-  }
-
-  function deselectAll() {
-    selected.clear()
-  }
-
-  function isSelected(block: Color | undefined | null) {
-    if (!block) return false;
-    return selected.has(block)
-  }
 
   let dragging = false;
   let dropIndex: number | null = null;
   let selectedIndex = 0;
   let dropZone: Element | null = null;
-  const $transitioning = ion(false)
-  function maybeDrag(e: PointerEvent, index: number, color: Color, $shiftX: MutableIon<number>, $shiftY: MutableIon<number>) {
+
+  /**
+   * @state is transitioning tag-alongs
+   */
+  const $taggingAlong = ion(false)
+
+  /**
+   * @description prevents canceled drag and drops from being reselected by `toggleSelect`
+   */
+  function endDragging() {
+    if (dragging) {
+      dragging = false
+      return true;
+    }
+  }
+
+  const $shiftX = ion(0)
+  const $shiftY = ion(0)
+
+  function maybeDrag(e: PointerEvent, index: number, color: Color) {
     const target = e.currentTarget! as Element
     target.setPointerCapture(e.pointerId)
     let x = 0;
@@ -204,7 +193,10 @@ function ColorPalette(setup: FromTag<{
       target.removeEventListener('pointermove', rePointermove);
       target.addEventListener('pointermove', drag)
       if (selected.size > 1) {
-        $transitioning.value = true;
+        $taggingAlong.value = true;
+        for (const color of selected) {
+          // on transition end here
+        }
       }
     }
 
@@ -241,14 +233,14 @@ function ColorPalette(setup: FromTag<{
         target.releasePointerCapture(e.pointerId)
         $shiftX.value = 0;
         $shiftY.value = 0;
-        colors.insertSelected(dropIndex === null ? selectedIndex : dropIndex);
+        moveSelected(dropIndex === null ? selectedIndex : dropIndex);
         endDrag()
+        selected.clear()
         target.removeEventListener('pointermove', drag)
       }
       target.removeEventListener('pointermove', rePointermove)
       target.removeEventListener('pointerup', rePointerUp)
     }
-
   }
 
   const $dragging = ion(false)
@@ -258,16 +250,18 @@ function ColorPalette(setup: FromTag<{
   }
 
   function endDrag() {
-    queueTask(() => dragging = false);
+    queueTask(() => dragging = false); // allows swatches to be selected after a drag and drop action
     $dragging.value = false;
-    selected.clear()
   }
 
+  /**
+   * @description selected colors in order that matches original array
+   */
   const $selected = ion(() => colors.filter(color => selected.has(color)))
 
-  const $shiftX = ion(0)
-  const $shiftY = ion(0)
-
+  /**
+   * @description nudges tag-alongs so that they are peeking out from the dragged swatch
+   */
   function adjustX(x: number, index: number) {
     if (index === selectedIndex) return x;
     const delta = Math.abs(index - selectedIndex);
@@ -277,56 +271,49 @@ function ColorPalette(setup: FromTag<{
     return index < selectedIndex ? x + shift - nudge : x - shift - nudge
   }
 
+  /**
+   * @description determines z-index
+   */
   function order(index: number, selectedIndex: number) {
     if (index <= selectedIndex) return 150;
     const delta = selectedIndex - index
     return 150 + delta;
   }
 
-  const Gap = ($index: Ion<number>) =>
-    <button
-      class='clickable gap'
-      disabled={() => $dragging() || selected.size === 0}
-      on:click={() => colors.insertSelected($index())}
-    >
-      {Arrow()}
-    </button>
 
-  const Endgap = (index: number) =>
-    <button
-      class='clickable gap endgap'
-      disabled={() => $dragging() || selected.size === 0}
-      on:click={() => colors.insertSelected(index)}
-    ></button>
+  const $disableGap = ion(() => $dragging() || selected.size === 0)
 
   return <>
     <o--window on:click={e => e.from('.clickable') || deselectAll()} />
     <div class='container' auto-bind={rest}>
       <div class='row'>
-        {Endgap(0)}
-        {Gap(() => 0)}
+        <Endgap
+          disabled={$disableGap}
+          on:click={() => moveSelected(0)}
+        />
+        <Gap
+          disabled={$disableGap}
+          on:click={() => moveSelected(0)}
+        />
         {For(colors, m => m, (color, $index) => {
           const $dragged = ion(() => isSelected(color) && $dragging())
+          const $tagalong = ion(() => $taggingAlong() && $dragged() && $index() !== selectedIndex)
           return <>
             <div
               transition-item
-              on:pointerdown={e => maybeDrag(e, $index(), color, $shiftX, $shiftY)}
-              on:click={() => toggleSelect(color)}
-              class={['clickable', {
-                'drag-along': () => $transitioning() && $dragged() && $index() !== selectedIndex,
-                'dragging': $dragging
-              }]}
+              on:pointerdown={e => maybeDrag(e, $index(), color)}
+              on:transitionend={() => $taggingAlong.value = false}
+              on:click={() => endDragging() || toggleSelect(color)}
+              class={['clickable', { 'tag-along': $tagalong, 'dragged': $dragged }]}
               style={{
                 'z-index': () => $dragged() ? order($index(), selectedIndex) : 0,
                 'transform': () => $dragged() ? `translate(${adjustX($shiftX(), $index())}px, ${$shiftY()}px)` : 'unset'
               }}
-              on:transitionend={() => $transitioning.value = false}
             >
               <div
                 class={['square', {
                   'selected': () => isSelected(color) && !$dragging(),
-                  'selected-drag': () => isSelected(color) && $dragging(),
-                  'transform': `scale(${1 + ($selected().length - ($index() + 1)) * -.075})`,
+                  'selected-drag': $dragged,
                   'magnifying': () => $magnifiedIndex() !== undefined
                 }]}
                 style={{
@@ -335,10 +322,16 @@ function ColorPalette(setup: FromTag<{
                 }}
               ></div>
             </div>
-            {Gap(() => $index() + 1)}
+            <Gap
+              disabled={$disableGap}
+              on:click={() => moveSelected($index() + 1)}
+            />
           </>
         })}
-        {Endgap(colors.length)}
+        <Endgap
+          disabled={$disableGap}
+          on:click={() => moveSelected(colors.length)}
+        />
         {If($dragging,
           <div class='dropzones'>
             <div class='drop-zone' data-drop-index={-1}></div>
@@ -346,7 +339,6 @@ function ColorPalette(setup: FromTag<{
               <div
                 class='drop-zone'
                 data-drop-index={count - 1}
-              // style={{ width: (count === 1 || count === colors.length + 1 ? 136 : 68) + 'px' }}
               >{Arrow()}</div>
             )}
             <div class='drop-zone' data-drop-index={colors.length + 1}></div>
@@ -373,11 +365,11 @@ function ColorPalette(setup: FromTag<{
         font-family: sans-serif;
       }
 
-      .dragging {
+      .dragged {
         cursor: grabbing;
       }
 
-      .drag-along {
+      .tag-along {
         transition: transform 85ms ease;
       }
 
@@ -390,8 +382,6 @@ function ColorPalette(setup: FromTag<{
       .selected-drag {
         box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
       }
-     
-
 
       .dropzones {
         position: absolute;
@@ -403,7 +393,6 @@ function ColorPalette(setup: FromTag<{
         position: relative;
         width: 68px;
         height: 88px;
-        // background-color: transparent !important;
         z-index: 200;
         opacity: 0;
         transition: opacity 150ms ease-in-out;
@@ -437,7 +426,20 @@ function ColorPalette(setup: FromTag<{
       .magnifying {
         transition: transform 90ms ease-in;
       }
+    `)}
+  </>
+}
 
+const Gap = (setup: FromTag) =>
+  <>
+    <button
+      class='clickable gap'
+      auto-bind={setup}
+    >
+      {Arrow()}
+    </button>
+
+    {Style(css`
       .gap {
         position: relative;
         margin: 0px;
@@ -458,6 +460,18 @@ function ColorPalette(setup: FromTag<{
       .gap:enabled:has(+ .endgap:hover) {
         opacity: 1;
       }
+    `)}
+  </>
+
+
+const Endgap = (setup: FromTag) =>
+  <>
+    <button
+      class='clickable gap endgap'
+      auto-bind={setup}
+    ></button>
+
+    {Style(css`
       .endgap:hover + .gap:enabled {
         opacity: 1;
       }
@@ -467,6 +481,99 @@ function ColorPalette(setup: FromTag<{
       }
     `)}
   </>
+
+
+const Arrow = () =>
+  <>
+    <div class='chevron-arrow'>
+      <div class='chevron-down chevron-tic'></div>
+      <div class='chevron-down chevron-tac'></div>
+    </div>
+
+    {Style(css`
+      .chevron-arrow {
+        position: absolute;
+        left: 50%;
+        top: -5px;
+        width: 24px;
+        height: 8px;
+        transform: translateX(-50%);
+      }
+
+      .chevron-down {
+        position: absolute;
+        background-color: #ccc;
+        top: 0;
+        width: 20px;
+        height: 8px;
+        border-radius: 2px;
+      }
+      .chevron-tic {
+        right: 40%;
+        transform-origin: right center;
+        transform: rotate(45deg);
+      }
+      .chevron-tac {
+        left: 40%;
+        transform-origin: left center;
+        transform: rotate(-45deg);
+      }
+    `)}
+  </>
+
+export type Color = {
+  h: number,
+  s: number,
+  l: number,
+}
+
+function ColorsKit(size: number = 5) {
+
+  const genColor = useRandomColorGenerator()
+
+  const [h, s, l] = genColor()
+  const goal = goalHue(h)
+  const hues = getSteps(h, goal, size).map(hue => hue % 360)
+  const sats = getSteps(s, (s + 30) % 100, size)
+  const lights = getSteps(l, (l + 30) % 100, size)
+
+  const sortedColors = composeColorArray(hues, sats, lights)
+  const reverseColors = sortedColors.toReversed()
+  const colors = ionic(shuffle([...sortedColors]), {
+    moveColors(items: Set<Color>, index: number) {
+      moveUniqueItems(items, this, index)
+    }
+  })
+
+  const $sorted = ion(() => {
+    let i = 0;
+    let failed = 0;
+    for (const color of colors) {
+      if (color !== sortedColors[i]) {
+        failed++;
+        break;
+      }
+      i++;
+    }
+    i = 0;
+    for (const color of colors) {
+      if (color !== reverseColors[i]) {
+        failed++;
+        break;
+      }
+      i++;
+    }
+    return failed < 2;
+  })
+
+  while ($sorted()) {
+    shuffle(colors)
+  }
+
+  return {
+    colors,
+    $sorted
+  }
 }
 
 function composeColorArray(hues: number[], sats: number[], lights: number[]) {
@@ -532,40 +639,4 @@ function goalHue(baseHue: number) {
 
 
 
-const Arrow = () => <>
-  <div class='chevron-arrow'>
-    <div class='chevron-down chevron-tic'></div>
-    <div class='chevron-down chevron-tac'></div>
-  </div>
-
-  {Style(css`
-      .chevron-arrow {
-        position: absolute;
-        left: 50%;
-        top: -5px;
-        width: 24px;
-        height: 8px;
-        transform: translateX(-50%);
-      }
-
-      .chevron-down {
-        position: absolute;
-        background-color: #ccc;
-        top: 0;
-        width: 20px;
-        height: 8px;
-        border-radius: 2px;
-      }
-      .chevron-tic {
-        right: 40%;
-        transform-origin: right center;
-        transform: rotate(45deg);
-      }
-      .chevron-tac {
-        left: 40%;
-        transform-origin: left center;
-        transform: rotate(-45deg);
-      }
-    `)}
-</>
 
