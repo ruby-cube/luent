@@ -171,7 +171,7 @@ function ColorPalette(setup: FromTag<{
   console.log('host?', fromContext(HOST))
 
   return <>
-    <o--portal to={fromContext(HOST) ?? window} on:click={e => e.target.closest('.clickable') || deselectAll()} />
+    <o--portal to={fromContext(HOST) ?? window} on:click={e => e.from('.clickable') || deselectAll()} />
     <div class='container' auto-bind={rest}>
       <div class='row'>
         <button

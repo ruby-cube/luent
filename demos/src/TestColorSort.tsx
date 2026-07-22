@@ -178,7 +178,7 @@ function ColorPalette(setup: FromTag<{
   let dropIndex: number | null = null;
   let selectedIndex = 0;
   let dropZone: Element | null = null;
-
+  const $transitioning = ion(false)
   function maybeDrag(e: PointerEvent, index: number, color: Color, $shiftX: MutableIon<number>, $shiftY: MutableIon<number>) {
     const target = e.currentTarget! as Element
     target.setPointerCapture(e.pointerId)
@@ -192,7 +192,8 @@ function ColorPalette(setup: FromTag<{
     target.addEventListener('pointerup', rePointerUp)
 
     function rePointermove(e: any) {
-      if (Math.abs(e.clientX - originalX) < 5 && Math.abs(e.clientY - originalY) < 5) return;
+      if (Math.abs(e.clientX - originalX) < 5 && Math.abs(e.clientY - originalY) < 5)
+        return;
       dragging = true;
       selectedIndex = index;
       selected.add(color);
@@ -202,6 +203,9 @@ function ColorPalette(setup: FromTag<{
       drag(e)
       target.removeEventListener('pointermove', rePointermove);
       target.addEventListener('pointermove', drag)
+      if (selected.size > 1) {
+        $transitioning.value = true;
+      }
     }
 
     let prevDropZone = dropZone;
@@ -210,18 +214,18 @@ function ColorPalette(setup: FromTag<{
       $shiftX.value = e.clientX - x;
       $shiftY.value = e.clientY - y;
 
-      // Manually find the element underneath the pointer
+      // Find the element underneath the pointer
       const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
       dropZone = elementBelow?.closest('.drop-zone') ?? null;
 
       if (dropZone !== prevDropZone) {
         if (dropZone) {
-          const index = Number(dropZone.getAttribute('data-drop-index'))
-          console.log('$$ drop zone', index)
-          // Manually trigger your hover visual logic here
+          const i = Number(dropZone.getAttribute('data-drop-index'))
+          dropZone = i === -1 ? dropZone.nextElementSibling! : i === colors.length + 1 ? dropZone.previousElementSibling! : dropZone
+          const index = i === -1 ? 0 : i === colors.length + 1 ? colors.length : i;
           prevDropZone?.classList.remove('drop-target')
           dropZone.classList.add('drop-target');
-          dropIndex = Number(dropZone.getAttribute('data-drop-index'))
+          dropIndex = index
           prevDropZone = dropZone
         }
         else {
@@ -248,30 +252,18 @@ function ColorPalette(setup: FromTag<{
   }
 
   const $dragging = ion(false)
-  const $drag = ion(false)
 
   function startDrag() {
-    console.log('$$ start drag')
-    $drag.value = true;
-    atTick(() => { $dragging.value = true })
+    $dragging.value = true
   }
 
   function endDrag() {
-    console.log('$$ end drag')
     queueTask(() => dragging = false);
     $dragging.value = false;
-    $drag.value = false;
     selected.clear()
   }
 
   const $selected = ion(() => colors.filter(color => selected.has(color)))
-
-  const Gap = ($index: Ion<number>) =>
-    <button
-      class='clickable gap'
-      disabled={() => selected.size === 0}
-      on:click={() => colors.insertSelected($index())}
-    ></button>
 
   const $shiftX = ion(0)
   const $shiftY = ion(0)
@@ -291,29 +283,48 @@ function ColorPalette(setup: FromTag<{
     return 150 + delta;
   }
 
+  const Gap = ($index: Ion<number>) =>
+    <button
+      class='clickable gap'
+      disabled={() => $dragging() || selected.size === 0}
+      on:click={() => colors.insertSelected($index())}
+    >
+      {Arrow()}
+    </button>
+
+  const Endgap = (index: number) =>
+    <button
+      class='clickable gap endgap'
+      disabled={() => $dragging() || selected.size === 0}
+      on:click={() => colors.insertSelected(index)}
+    ></button>
+
   return <>
-    <o--window on:click={e => e.target.closest('.clickable') || deselectAll()} />
+    <o--window on:click={e => e.from('.clickable') || deselectAll()} />
     <div class='container' auto-bind={rest}>
       <div class='row'>
+        {Endgap(0)}
         {Gap(() => 0)}
         {For(colors, m => m, (color, $index) => {
           const $dragged = ion(() => isSelected(color) && $dragging())
           return <>
             <div
-              on:pointerdown={e => maybeDrag(e, $index(), color, $shiftX, $shiftY)}
               transition-item
+              on:pointerdown={e => maybeDrag(e, $index(), color, $shiftX, $shiftY)}
               on:click={() => toggleSelect(color)}
               class={['clickable', {
-                'dragging': () => $dragged()
+                'drag-along': () => $transitioning() && $dragged() && $index() !== selectedIndex,
+                'dragging': $dragging
               }]}
               style={{
                 'z-index': () => $dragged() ? order($index(), selectedIndex) : 0,
                 'transform': () => $dragged() ? `translate(${adjustX($shiftX(), $index())}px, ${$shiftY()}px)` : 'unset'
               }}
+              on:transitionend={() => $transitioning.value = false}
             >
               <div
                 class={['square', {
-                  'selected': () => isSelected(color) && !$drag(),
+                  'selected': () => isSelected(color) && !$dragging(),
                   'selected-drag': () => isSelected(color) && $dragging(),
                   'transform': `scale(${1 + ($selected().length - ($index() + 1)) * -.075})`,
                   'magnifying': () => $magnifiedIndex() !== undefined
@@ -327,21 +338,27 @@ function ColorPalette(setup: FromTag<{
             {Gap(() => $index() + 1)}
           </>
         })}
+        {Endgap(colors.length)}
         {If($dragging,
           <div class='dropzones'>
+            <div class='drop-zone' data-drop-index={-1}></div>
             {Thru(colors.length + 1, (count) =>
               <div
                 class='drop-zone'
                 data-drop-index={count - 1}
-                style={{ width: (count === 1 || count === colors.length + 1 ? 136 : 68) + 'px' }}
-              ></div>
+              // style={{ width: (count === 1 || count === colors.length + 1 ? 136 : 68) + 'px' }}
+              >{Arrow()}</div>
             )}
+            <div class='drop-zone' data-drop-index={colors.length + 1}></div>
           </div>
         )}
       </div>
     </div>
 
     {Style(css`
+      .clickable {
+        cursor: pointer;
+      }
 
       .moves-panel {
         position: absolute;
@@ -356,8 +373,12 @@ function ColorPalette(setup: FromTag<{
         font-family: sans-serif;
       }
 
+      .dragging {
+        cursor: grabbing;
+      }
+
       .drag-along {
-        visibility: hidden;
+        transition: transform 85ms ease;
       }
 
       .selected-stack {
@@ -367,26 +388,29 @@ function ColorPalette(setup: FromTag<{
       }
 
       .selected-drag {
-        // position: absolute;
-        // top: 0px;
         box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
       }
      
-      .drop-target {
-        outline: 2px solid gray;
-      }
+
 
       .dropzones {
         position: absolute;
         display: flex;
-        left: -90px;
+        left: 0px;
       }
 
       .drop-zone {
+        position: relative;
         width: 68px;
         height: 88px;
-        background-color: transparent !important;
+        // background-color: transparent !important;
         z-index: 200;
+        opacity: 0;
+        transition: opacity 150ms ease-in-out;
+      }
+
+      .drop-target {
+        opacity: 1;
       }
 
       .container {
@@ -404,16 +428,10 @@ function ColorPalette(setup: FromTag<{
         outline: 5px solid hsla(35deg 10% 50% / 50%);
       }
 
-      // .dragging {
-      //   // opacity: 50%;
-      //   z-index: 100;
-      // }
-
       .square {
         width: 44px;
         height: 44px;
         border-radius: 10px;
-        cursor: pointer;
       }
       
       .magnifying {
@@ -421,6 +439,7 @@ function ColorPalette(setup: FromTag<{
       }
 
       .gap {
+        position: relative;
         margin: 0px;
         display: block;
         border: none;
@@ -428,10 +447,23 @@ function ColorPalette(setup: FromTag<{
         height: 44px;
         background-color: transparent;
         border-radius: 10px;
+        opacity: 0;
+        transition: opacity 150ms ease-in-out;
       }
       
       .gap:hover:enabled {
-        background-color: #ccc;
+        opacity: 1;
+      }
+
+      .gap:enabled:has(+ .endgap:hover) {
+        opacity: 1;
+      }
+      .endgap:hover + .gap:enabled {
+        opacity: 1;
+      }
+
+      .endgap {
+        width: 90px;
       }
     `)}
   </>
@@ -478,7 +510,7 @@ function useRandomColorGenerator() {
   return function genColor(): [number, number, number] {
     const h = Math.floor(Math.random() * 360);
     const s = 30 + Math.floor(Math.random() * 40);
-    const l = 30 + Math.floor(Math.random() * 35);
+    const l = 40 + Math.floor(Math.random() * 40);
     const color = `${h}+${s}+${l}`
     if (color === previous) return genColor();
     previous = `${h}+${s}+${l}`
@@ -496,4 +528,44 @@ function goalHue(baseHue: number) {
   if (hueGap < 60 || hueGap > 120) return goalHue(baseHue)
   return h;
 }
+
+
+
+
+const Arrow = () => <>
+  <div class='chevron-arrow'>
+    <div class='chevron-down chevron-tic'></div>
+    <div class='chevron-down chevron-tac'></div>
+  </div>
+
+  {Style(css`
+      .chevron-arrow {
+        position: absolute;
+        left: 50%;
+        top: -5px;
+        width: 24px;
+        height: 8px;
+        transform: translateX(-50%);
+      }
+
+      .chevron-down {
+        position: absolute;
+        background-color: #ccc;
+        top: 0;
+        width: 20px;
+        height: 8px;
+        border-radius: 2px;
+      }
+      .chevron-tic {
+        right: 40%;
+        transform-origin: right center;
+        transform: rotate(45deg);
+      }
+      .chevron-tac {
+        left: 40%;
+        transform-origin: left center;
+        transform: rotate(-45deg);
+      }
+    `)}
+</>
 

@@ -6,8 +6,9 @@ export function matchEventTarget(this: Event, ...args: [...(string | ((x: HTMLEl
    const targ = this.target
    for (const arg of args) {
       if (typeof arg === 'string') {
-         if (matchSelector(targ as HTMLElement, arg))
-            return true;
+         if (matchSelector(targ as HTMLElement, arg)){
+           return true;
+         }
       }
       // else if (isNodeRef(arg)){ // TODO:
 
@@ -20,25 +21,24 @@ export function matchEventTarget(this: Event, ...args: [...(string | ((x: HTMLEl
 }
 
 function matchSelector(target: EventTarget & HTMLElement, selector: string): boolean {
- 
-   if (selector.startsWith('.')) {
-      return target.classList.contains(selector)
-   }
-   else if (selector.startsWith('#')) {
-      return target.id === selector;
-   }
-   else if (selector.startsWith('style.')) {
+  if (selector.startsWith('.')) {
+     return target.classList.contains(selector.slice(1))
+    }
+    else if (selector.startsWith('#')) {
+      return target.id === selector.slice(1);
+    }
+    else if (selector.startsWith('style.')) {
       // style: pattern 'style.propertyCamel:value'
       const [key, value] = selector.slice(6).split(':')
       //@ts-expect-error
       return target.style[key] === value; // TODO: key toCamelCase
-   }
-   else if (selector.startsWith('x-')) {
+    }
+    else if (selector.startsWith('x-')) {
       // data-attribute
       // return target.dataset[toCamelCase(selector.slice(2))] === 'true'; // TODO: toCamelCase
-   }
-   else {
-      return target.tagName.toLowerCase() === selector;
-   }
+    }
+    else {
+     return target.tagName.toLowerCase() === selector;
+    }
    return false;
 }
