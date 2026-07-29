@@ -1,5 +1,5 @@
-import { component, template, For } from "@rue/luent";
-import { ionic, Ionic } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { ionic, Ionic } from "@luent/quarky";
 
 export function TestIonicList() {
    const list = ionic([1, 2, 3])

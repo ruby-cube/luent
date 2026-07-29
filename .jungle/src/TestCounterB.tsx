@@ -1,5 +1,5 @@
-import { component, template, Else, ElseIf, If } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, template, Else, ElseIf, If } from "luent";
+import { ion } from "@luent/quarky";
 
 export function Counter() {
    const $count = ion(0, {

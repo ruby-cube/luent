@@ -1,5 +1,5 @@
-import { component, template, FromTag } from "@rue/luent"
-import { ionic, Ion, Ionic, watch } from "@rue/quarky"
+import { component, template, FromTag } from "luent"
+import { ionic, Ion, Ionic, watch } from "@luent/quarky"
 
 // absorbed ions
 // get something 

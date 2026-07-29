@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { finiton, ion, watch } from "@rue/quarky";
+import { component, template } from "luent";
+import { finiton, ion, watch } from "@luent/quarky";
 
 export function TestNested() {
    const $isActive = ion(true, {

@@ -2,8 +2,8 @@ import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { transformWithOxc } from 'vite'
 import * as babel from '@babel/core'
-import { luentPreTransform as BabelLuentPlugin } from '@rue/babel-plugin-luent'
-import { transpileNextScript } from '@rue/nextscript/transpile'
+import { luentPreTransform as BabelLuentPlugin } from '@luent/babel-plugin-luent'
+import { transpileNextScript } from '@luent/nextscript/transpile'
 
 const require = createRequire(import.meta.url)
 
@@ -12,7 +12,7 @@ function resolveLuentJsxRuntimePath(id) {
 }
 
 function isLuentJsxRuntimeId(id) {
-  return id === '@rue/luent/jsx-runtime' || id === '@rue/luent/jsx-dev-runtime'
+  return id === 'luent/jsx-runtime' || id === 'luent/jsx-dev-runtime'
 }
 
 let luentJsxRuntimePath
@@ -25,7 +25,7 @@ export default function LuentPlugin() {
       enforce: 'pre',
       resolveId(id) {
         if (isLuentJsxRuntimeId(id)) {
-          luentJsxRuntimePath ??= resolveLuentJsxRuntimePath('@rue/luent/jsx-runtime')
+          luentJsxRuntimePath ??= resolveLuentJsxRuntimePath('luent/jsx-runtime')
           return luentJsxRuntimePath
         }
       }
@@ -57,7 +57,7 @@ export default function LuentPlugin() {
         const normalized = await transformWithOxc(result.code, fileName.replace(/\.nsx$/, '.tsx'), {
           jsx: {
             runtime: 'automatic',
-            importSource: '@rue/luent',
+            importSource: 'luent',
             throwIfNamespace: false
           },
           sourcemap: true
@@ -95,7 +95,7 @@ export default function LuentPlugin() {
         const normalized = await transformWithOxc(result.code, fileName, {
           jsx: {
             runtime: 'automatic',
-            importSource: '@rue/luent',
+            importSource: 'luent',
             throwIfNamespace: false
           },
           sourcemap: true

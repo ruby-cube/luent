@@ -1,8 +1,8 @@
-import { getActiveFlask } from "@rue/flask"
+import { getActiveFlask } from "@luent/flask"
 import { watch } from "../reactivity/Watcher"
 import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"
-import { RawJSXNode } from "@rue/luent"
+import { RawJSXNode } from "luent"
 import { PRELUDE } from "../reactivity/RenderCycle"
 import { createAtomicIon } from "../ion/AtomicIon"
 

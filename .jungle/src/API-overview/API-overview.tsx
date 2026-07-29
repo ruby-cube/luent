@@ -1,8 +1,8 @@
 //@ts-nocheck
 // COMPONENTS
 
-import { component, template, POSTLUDE, PRELUDE } from "@rue/luent"
-import { ion, ionize } from "@rue/quarky"
+import { component, template, POSTLUDE, PRELUDE } from "luent"
+import { ion, ionize } from "@luent/quarky"
 import { sub } from "date-fns"
 
 export function App() {

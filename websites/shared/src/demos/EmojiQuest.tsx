@@ -1,5 +1,5 @@
-import { $of, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "@rue/luent";
-import { ion, Ion, Ionic, ionic } from "@rue/quarky";
+import { $of, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "luent";
+import { ion, Ion, Ionic, ionic } from "@luent/quarky";
 
 
 
@@ -257,7 +257,7 @@ function Powerset(setup: FromTag<{
 
 
 EmojiQuest.nsx =
-`import { ionic } from "@rue/luent";
+`import { ionic } from "luent";
 import { Panel } from "../components/Panel"
 
 function EmojiQuest() {
@@ -282,7 +282,7 @@ function EmojiQuest() {
 `
 
 EmojiQuest.tsx =
-`import { ionic } from "@rue/luent";
+`import { ionic } from "luent";
 import { Panel } from "../components/Panel"
 
 function EmojiQuest() {
@@ -339,7 +339,7 @@ EmojiQuest.nsxPowerset = `function Powerset(setup: FromTag<{
       <Messages mu:powers={powers} limit={limit} />
     </div>
 
-    <o--style>
+    <o-style>
       .powerset-panel {
         box-sizing: border-box;
         width: 100%;
@@ -348,7 +348,7 @@ EmojiQuest.nsxPowerset = `function Powerset(setup: FromTag<{
         padding: 1rem;
         background-color: #2d1b4e;
       }
-    </o--style>
+    </o-style>
   </:>
 }`
 
@@ -384,7 +384,7 @@ EmojiQuest.tsxPowerset = `function Powerset(setup: FromTag<{
       <Messages mu:powers={powers} limit={limit} />
     </div>
 
-    <o--style>
+    <o-style>
       .powerset-panel {
         box-sizing: border-box;
         width: 100%;
@@ -393,7 +393,7 @@ EmojiQuest.tsxPowerset = `function Powerset(setup: FromTag<{
         padding: 1rem;
         background-color: #2d1b4e;
       }
-    </o--style>
+    </o-style>
   </>
 }`
 
@@ -417,7 +417,7 @@ EmojiQuest.nsxMessages = `function Messages(setup: FromTag<{
       </button>
     )}
 
-    <o--style>
+    <o-style>
       .message {
         border-radius: .45rem;
         padding: .55rem .65rem;
@@ -427,7 +427,7 @@ EmojiQuest.nsxMessages = `function Messages(setup: FromTag<{
         background-color: #1a0e2e;
         color: #d4af37;
       }
-    </o--style>
+    </o-style>
   </:>
 }  
 
@@ -460,7 +460,7 @@ EmojiQuest.tsxMessages = `function Messages(setup: FromTag<{
       </>
     )}
 
-    <o--style>
+    <o-style>
       .message {
         border-radius: .45rem;
         padding: .55rem .65rem;
@@ -470,7 +470,7 @@ EmojiQuest.tsxMessages = `function Messages(setup: FromTag<{
         background-color: #1a0e2e;
         color: #d4af37;
       }
-    </o--style>
+    </o-style>
   </>
 }`
 
@@ -494,12 +494,12 @@ EmojiQuest.nsxPanel = `function Panel(setup: FromTag<{
       <div display-if={opened@} class='panel-body'>{Slot()}</div>
     </div>
 
-    <o--style>
+    <o-style>
       .panel {
         width: \${width}px;
         user-select: none;
       }
-    </o--style>
+    </o-style>
   </:>
 }`
 
@@ -522,11 +522,11 @@ EmojiQuest.tsxPanel = `function Panel(setup: FromTag<{
       <div display-if={$opened} class='panel-body'>{Slot()}</div>
     </div>
 
-    <o--style>
+    <o-style>
       .panel {
         width: \${width}px;
         user-select: none;
       }
-    </o--style>
+    </o-style>
   </>
 }`

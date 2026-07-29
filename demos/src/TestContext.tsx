@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, $fromContext, ContextEntryKey, ContextKey, mountIsland, fromContext, fromRoot, FromTag, mergeKeys, template, provideRoot } from "@rue/luent"
-import { Ion, ion } from "@rue/quarky"
+import { component, $fromContext, ContextEntryKey, ContextKey, mountIsland, fromContext, fromRoot, FromTag, mergeKeys, template, provideRoot } from "luent"
+import { Ion, ion } from "@luent/quarky"
 import './TestContext.css'
 
 // Context Keys

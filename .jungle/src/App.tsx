@@ -1,10 +1,10 @@
 //@ts-nocheck
-import { component, NodeRef, template, ComponentTag, If, Else, For, teleportTo } from "@rue/luent";
-import { useRandomColorGenerator } from "@rue/utils";
+import { component, NodeRef, template, ComponentTag, If, Else, For, teleportTo } from "luent";
+import { useRandomColorGenerator } from "@luent/utils";
 import { __addDevName, Ion, ion, ionize } from "../../../packages/quarky/src";
-import { lazyLoadComponent } from "../../../packages/luent/src/component/LazyComponent";
-import { ElseIf } from "../../../packages/luent/src/conditional/If";
-import { AnyObject } from "@rue/types";
+import { lazyLoadComponent } from "../../../packagesluent/src/component/LazyComponent";
+import { ElseIf } from "../../../packagesluent/src/conditional/If";
+import { AnyObject } from "@luent/types";
 
 
 const randomColor = useRandomColorGenerator()

@@ -1,6 +1,6 @@
-import { component, template, For, AsyncIon } from "@rue/luent";
-import { ion } from "@rue/quarky";
-import { isPlainObject } from "@rue/utils";
+import { component, template, For, AsyncIon } from "luent";
+import { ion } from "@luent/quarky";
+import { isPlainObject } from "@luent/utils";
 
 type Article = { id: number, word: string }
 

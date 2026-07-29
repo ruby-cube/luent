@@ -1,5 +1,5 @@
-import { component, template, EventHandler, For, fromContext, FromTag, HandleEvent, } from "@rue/luent";
-import { Inert, ion, Ion, Ionized } from "@rue/quarky";
+import { component, template, EventHandler, For, fromContext, FromTag, HandleEvent, } from "luent";
+import { Inert, ion, Ion, Ionized } from "@luent/quarky";
 import { robots } from "./robots";
 
 // TODO:

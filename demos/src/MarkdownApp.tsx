@@ -1,5 +1,5 @@
 import { marked } from 'marked'
-import { ion } from '@rue/quarky'
+import { ion } from '@luent/quarky'
 import './style.css'
 // import { Part } from './MarkdownApp_a'
 

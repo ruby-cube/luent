@@ -1,4 +1,4 @@
-import { AnyObject, Mutable, MutableObject } from "@rue/types";
+import { AnyObject, Mutable, MutableObject } from "@luent/types";
 
 export type KeyPath = string[];
 export type KeyPathString = string;

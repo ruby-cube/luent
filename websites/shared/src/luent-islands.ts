@@ -1,8 +1,8 @@
-import { getPortals, RenderPageWithStyles, runWithPortals, renderInShadow } from "@rue/luent";
+import { getPortals, RenderPageWithStyles, runWithPortals, renderInShadow } from "luent";
 import { type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
-import { AnyObject } from "@rue/types";
-import { escapeHTML, unescapeHTML } from "@rue/utils";
+import { AnyObject } from "@luent/types";
+import { escapeHTML, unescapeHTML } from "@luent/utils";
 
 export type WriteIslands = { [key: string]: (inner: string) => void }
 type Island = { inner: string, node: HTMLElement }

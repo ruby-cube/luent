@@ -1,5 +1,5 @@
-import { component, css, For, template, Style } from "@rue/luent";
-import { ionic, ion } from "@rue/quarky";
+import { component, css, For, template, Style } from "luent";
+import { ionic, ion } from "@luent/quarky";
 
 export function TestRetracking() {
    

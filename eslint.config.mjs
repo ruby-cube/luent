@@ -3,7 +3,7 @@ import tsParser from '@typescript-eslint/parser'
 // import { createNSXProcessor } from './packages/nextscript/scripts/eslint-nsx-processor.mjs'
 
 const require = createRequire(import.meta.url)
-const muRules = require('@rue/eslint-plugin-mu')
+const muRules = require('@luent/eslint-plugin-mu')
 
 const defaultIgnores = [
   '**/node_modules/**',

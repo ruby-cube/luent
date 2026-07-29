@@ -1,4 +1,4 @@
-import { component, FromTag, template } from "@rue/luent";
+import { component, FromTag, template } from "luent";
 
 export function CreateIcon(icon: string) {
    return function Icon(attributes: FromTag) {

@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, template, v } from "@rue/luent"
-import { ionize } from "@rue/quarky"
+import { component, template, v } from "luent"
+import { ionize } from "@luent/quarky"
 
 function Board() {
 

@@ -43,7 +43,7 @@ export function DropdownMenuDemo() {
    <p></p>
 </div>
 
-makeElement('div', {
+setUpElement('div', {
    Slot: () => {
 
       return (
@@ -60,7 +60,7 @@ makeElement('div', {
    <p></p>
 </div>
 
-makeElement('div', {
+setUpElement('div', {
    Slot: () => {
       const frog = new Frog();
       return (

@@ -1,4 +1,4 @@
-import { isFunction } from "@rue/utils";
+import { isFunction } from "@luent/utils";
 import { QUARK } from "../abstract/Quark";
 import { Ion } from "./Ion";
 import { Inert } from "./Get";

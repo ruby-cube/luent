@@ -1,5 +1,5 @@
-import { AsyncState } from "@rue/flask";
-import { AnyObject } from "@rue/types";
+import { AsyncState } from "@luent/flask";
+import { AnyObject } from "@luent/types";
 
 
 // export const mathElements = {
@@ -289,12 +289,14 @@ const XML_NAMESPACE = 'xmlns'
 export const [getXMLNamespace, XMLNamespaceStack] = AsyncState<string | undefined>(XML_NAMESPACE)
 
 
-export function runWithXMLNamespace(Slot: Function, ns: string | undefined){
-   try{
-      XMLNamespaceStack.push(ns)
-      return Slot();
-   }
-   finally{
-      XMLNamespaceStack.pop()
-   }
+export function withXMLNamespace(Slot: Function, ns: string | undefined){
+  return () => {
+    try{
+       XMLNamespaceStack.push(ns)
+       return Slot();
+    }
+    finally{
+       XMLNamespaceStack.pop()
+    }
+  }
 }

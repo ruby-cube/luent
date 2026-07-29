@@ -1,4 +1,4 @@
-import { asNonlocalReadonly, ion, ionize, isReadonly } from "@rue/quarky";
+import { asNonlocalReadonly, ion, ionize, isReadonly } from "@luent/quarky";
 
 // IONIZED OBJECT LITERAL
 console.log('')

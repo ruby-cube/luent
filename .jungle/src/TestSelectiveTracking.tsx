@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { DerivedIon, ion, ionic, ionize, watch, watchEffect } from "@rue/quarky";
+import { component, template } from "luent";
+import { DerivedIon, ion, ionic, ionize, watch, watchEffect } from "@luent/quarky";
 
 export function TestSelectiveTracking() {
 

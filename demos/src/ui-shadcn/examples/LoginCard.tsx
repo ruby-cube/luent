@@ -1,4 +1,4 @@
-import { mountIsland } from "@rue/luent"
+import { mountIsland } from "luent"
 import { Button } from "../Button"
 import {
    Card,

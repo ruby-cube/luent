@@ -1,5 +1,5 @@
-import { component, template, FromTag, beforeDetach } from "@rue/luent";
-import { Animation, Interval, Ion, swiftUpdate, LaxUpdate, queueTask, ion, o, } from "@rue/quarky";
+import { component, template, FromTag, beforeDetach } from "luent";
+import { Animation, Interval, Ion, swiftUpdate, LaxUpdate, queueTask, ion, o, } from "@luent/quarky";
 import './SierpinskiTriangles.css'
 
 // Modified Demo from Solid.js / React Fiber

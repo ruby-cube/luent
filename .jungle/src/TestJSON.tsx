@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { ionize } from "@rue/quarky";
+import { component, template } from "luent";
+import { ionize } from "@luent/quarky";
 
 export function TestJSON() {
    const array = ionize([]as number[])

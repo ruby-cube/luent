@@ -1,4 +1,4 @@
-import { Ionized } from "@rue/quarky"
+import { Ionized } from "@luent/quarky"
 
 export class Well {
    water: {

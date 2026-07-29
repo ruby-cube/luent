@@ -1,6 +1,6 @@
-import { getActiveFlask, getFlask } from "@rue/flask";
-import { component, template, Else, ElseIf, If } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { getActiveFlask, getFlask } from "@luent/flask";
+import { component, template, Else, ElseIf, If } from "luent";
+import { Ion } from "@luent/quarky";
 
 export function TestIfElse() {
    const $active = ion(false)

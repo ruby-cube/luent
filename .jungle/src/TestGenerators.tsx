@@ -1,4 +1,4 @@
-import { queueTask, Update } from "@rue/quarky";
+import { queueTask, Update } from "@luent/quarky";
 
 const BUFFER = 8.5
 

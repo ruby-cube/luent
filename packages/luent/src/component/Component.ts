@@ -1,12 +1,12 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
-import { isObject, normalizeToArray } from "@rue/utils";
+import { isObject, normalizeToArray } from "@luent/utils";
 import { initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
 import { JSXNode } from "../node/VineNode";
 import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
 import { setUpHooks } from "../flask/template-hooks";
-import { JSXComponent } from "@rue/nextscript";
-import type { ComponentKit } from "@rue/nextscript";
+import { JSXComponent } from "@luent/nextscript";
+import type { ComponentKit } from "@luent/nextscript";
 import { composeHooks, composeRef, toSetup } from "./bindings";
 import { $from } from "../utils/destructure";
 

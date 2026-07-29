@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { Await, For, Meanwhile, Nonce, mountIsland } from "@rue/luent";
-import { AsyncIon, Ion, isPending, o, ion } from "@rue/quarky";
+import { Await, For, Meanwhile, Nonce, mountIsland } from "luent";
+import { AsyncIon, Ion, isPending, o, ion } from "@luent/quarky";
 
 // based on Solid.js/Remix demo
 

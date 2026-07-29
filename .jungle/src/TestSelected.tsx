@@ -1,5 +1,5 @@
-import { component, template, For } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { ion } from "@luent/quarky";
 
 export function TestCustomRadioSelection() {
    const choices = [1, 2, 3]

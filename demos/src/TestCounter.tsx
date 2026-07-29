@@ -1,5 +1,5 @@
-import { mountIsland } from "@rue/luent"
-import { ion } from "@rue/quarky"
+import { mountIsland } from "luent"
+import { ion } from "@luent/quarky"
 
 /* 
 Tests:

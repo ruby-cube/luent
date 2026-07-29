@@ -1,5 +1,5 @@
-import { MaybeIon } from '@rue/luent'
-import { escapeHTML } from '@rue/utils'
+import { MaybeIon } from 'luent'
+import { escapeHTML } from '@luent/utils'
 
 export function trusted(html: MaybeIon<string>) {
   return {
@@ -11,7 +11,11 @@ export function trusted(html: MaybeIon<string>) {
 
 
 export function codeHtml(code: string) {
-  return `<pre class='shiki'><code>${escapeHTML(code)}</code></pre>`
+  // must escape double curly braces because Vue parses it as interpolation
+  const escaped = escapeHTML(code)
+    .replaceAll('{{', '&#123;&#123;')
+
+  return `<pre class='shiki'><code>${escaped}</code></pre>`
 }
 
 function unwrapShikiCode(html: string) {

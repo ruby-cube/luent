@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, template, Else, If, v } from "@rue/luent";
-import {Ion } from "@rue/quarky";
+import { component, template, Else, If, v } from "luent";
+import {Ion } from "@luent/quarky";
 
 
 const POSTS = Symbol()

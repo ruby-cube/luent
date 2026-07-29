@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { ion, ionic, ionicTickTask } from "@rue/quarky";
+import { component, template } from "luent";
+import { ion, ionic, ionicTickTask } from "@luent/quarky";
 
 export function TestIonicTask() {
 

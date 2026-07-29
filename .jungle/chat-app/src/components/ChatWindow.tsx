@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, atRender, template, Else, For, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, beforeDetach, queuePostlude, beforeDemount, atRemount } from "@rue/luent";
-import { Ion, ionic, ion } from "@rue/quarky";
+import { component, atRender, template, Else, For, If, NodeRef, POSTLUDE, PRELUDE, RENDER, fromRoot, beforeDetach, queuePostlude, beforeDemount, atRemount } from "luent";
+import { Ion, ionic, ion } from "@luent/quarky";
 import './chat-window.css'
 import type { ChatKit, Message } from "../database/database";
 import { formatDistanceToNow } from 'date-fns'

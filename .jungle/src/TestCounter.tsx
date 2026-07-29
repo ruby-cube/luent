@@ -6,8 +6,8 @@
 // - derived signal with memo
 
 
-import { component, template, FromTag } from "@rue/luent"
-import { ionic, Ion, ion, Ionic, } from "@rue/quarky"
+import { component, template, FromTag } from "luent"
+import { ionic, Ion, ion, Ionic, } from "@luent/quarky"
 
 export function CounterApp() {
    return (

@@ -1,4 +1,4 @@
-import { component, css, NodeRef, Style } from "@rue/luent"
+import { component, css, NodeRef, Style } from "luent"
 
 export function DoodleCanvas() {
   const { 

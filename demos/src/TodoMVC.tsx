@@ -1,5 +1,5 @@
-import { For, If, listen, NodeRef, $of } from "@rue/luent"
-import { watch, ionicTickTask, Ion, Ionic, EACH, ionic, ion } from "@rue/quarky"
+import { For, If, listen, NodeRef, $of } from "luent"
+import { watch, ionicTickTask, Ion, Ionic, EACH, ionic, ion } from "@luent/quarky"
 
 interface Todo {
   id: number

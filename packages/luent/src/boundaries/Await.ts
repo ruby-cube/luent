@@ -8,11 +8,11 @@
 //    <div>{err}</div>
 // )}
 
-import { createAtomicIon, Ion, isIon, PRELUDE, watch } from "@rue/quarky";
+import { createAtomicIon, Ion, isIon, PRELUDE, watch } from "@luent/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
-import { isFunction, normalizeToArray, toError, UNDEFINED } from "@rue/utils";
+import { isFunction, normalizeToArray, toError, UNDEFINED } from "@luent/utils";
 import { ASYNC_QUARK, AsyncIon, AsyncProps, isAsyncIon, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
 import { SuspenseIon, SUSPENSE_QUARK } from "../../../quarky/src/async/Suspense";
 

@@ -1,6 +1,6 @@
 
-import { ionic, ion, Ion, Ionic } from "@rue/quarky";
-import { For, template } from "@rue/luent";
+import { ionic, ion, Ion, Ionic } from "@luent/quarky";
+import { For, template } from "luent";
 
 function NSXTodo() {
 

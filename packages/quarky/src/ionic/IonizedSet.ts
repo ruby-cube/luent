@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 import { ionic, Ionic } from "./Ionic";
 import { defineIonicCollection, IonicDef } from "./IonicDef";
 import { trigger } from "../reactivity/Atom";

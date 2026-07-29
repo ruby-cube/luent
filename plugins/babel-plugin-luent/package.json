@@ -1,5 +1,5 @@
 {
-   "name": "@rue/babel-plugin-luent",
+   "name": "@luent/babel-plugin-luent",
    "private": true,
    "description": "",
    "type": "module",

@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { template } from "@rue/luent"
-import { Ion } from "@rue/quarky"
+import { template } from "luent"
+import { Ion } from "@luent/quarky"
 
 type Todo = {
    text: string

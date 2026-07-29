@@ -23,7 +23,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -50,7 +50,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -73,7 +73,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -97,7 +97,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -123,7 +123,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -148,7 +148,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -170,7 +170,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -191,7 +191,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -217,7 +217,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -249,7 +249,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@rue/nextscript";\n` +
+         `import { assertª, assertµ } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -281,7 +281,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -313,7 +313,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@rue/nextscript";\n` +
+         `import { assertª, assertµ } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +
@@ -341,7 +341,7 @@ describe('NextScript TypeGuard transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@rue/nextscript";\n` +
+         `import { assertª } from "@luent/nextscript";\n` +
          `const obj = assertª(ref(undefined));\n` +
          `let ø_obj: ReturnType<typeof obj>;\n` +
          `function foo() {\n` +

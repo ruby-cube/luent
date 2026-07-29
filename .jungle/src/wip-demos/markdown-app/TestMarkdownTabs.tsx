@@ -1,5 +1,5 @@
-import { component, template, For, FromTag } from "@rue/luent";
-import { Ion, ion } from "@rue/quarky";
+import { component, template, For, FromTag } from "luent";
+import { Ion, ion } from "@luent/quarky";
 
 let id = 1;
 

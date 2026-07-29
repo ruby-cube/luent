@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { ionize, watch } from "@rue/quarky";
+import { component, template } from "luent";
+import { ionize, watch } from "@luent/quarky";
 
 export function TestSetHas() {
    const mySet = ionize(new Set([0, 1, 2]))

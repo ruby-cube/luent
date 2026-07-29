@@ -1,5 +1,5 @@
-import { component, template, If, RenderSlot } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, template, If, RenderSlot } from "luent";
+import { ion } from "@luent/quarky";
 
 export function TestNormalizeToRenderFunction(){
    const $active = ion(true)

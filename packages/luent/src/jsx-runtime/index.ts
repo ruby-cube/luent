@@ -1,6 +1,6 @@
 import { TagName, makeJSXNode, RenderSlot, Context, RawJSXNode, ComponentTag } from "../index";
-import { AnyObject } from "@rue/types";
-import { isPlainObject, normalizeToArray } from "@rue/utils";
+import { AnyObject } from "@luent/types";
+import { isPlainObject, normalizeToArray } from "@luent/utils";
 import { writeJSXNode } from "../server/writeJSXNode";
 
 // without custom jsx compiler

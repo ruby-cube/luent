@@ -1,6 +1,6 @@
-import { component, template, AsyncIon, Else, If } from "@rue/luent";
-import { Await, Meanwhile, Catch } from "../../../packages/luent/src/boundaries/Await";
-import {  Ion, ion } from "@rue/quarky";
+import { component, template, AsyncIon, Else, If } from "luent";
+import { Await, Meanwhile, Catch } from "../../../packagesluent/src/boundaries/Await";
+import {  Ion, ion } from "@luent/quarky";
 
 
 

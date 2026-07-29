@@ -1,6 +1,6 @@
-import { getFlask } from "@rue/flask";
-import { component, atAttach, template } from "@rue/luent";
-import { ion, LAYOUT, PRELUDE, atPrelude, atRender, queueTask, RENDER, SYNC, TICK, watch } from "@rue/quarky";
+import { getFlask } from "@luent/flask";
+import { component, atAttach, template } from "luent";
+import { ion, LAYOUT, PRELUDE, atPrelude, atRender, queueTask, RENDER, SYNC, TICK, watch } from "@luent/quarky";
 
 export function TestRenderEffects() {
    const $count = ion(0)

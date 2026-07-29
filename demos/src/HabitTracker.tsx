@@ -1,5 +1,5 @@
-import { component, css, If, Style, Thru } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, css, If, Style, Thru } from "luent";
+import { ion } from "@luent/quarky";
 
 export function HabitTracker(setup: {
   habit: string,

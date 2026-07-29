@@ -1,9 +1,9 @@
-import { atRender, queueTask, toValue } from "@rue/quarky"
+import { atRender, queueTask, toValue } from "@luent/quarky"
 import { MaybeIon } from "../component/x-Input"
 import { atAttach, atUnmount, beforeDetach } from "../flask/flask-hooks"
 import { setUpPositionTransition, setUpTransit } from "./transit"
-import { createStack } from "@rue/utils"
-import { Flask, getFlask } from "@rue/flask"
+import { createStack } from "@luent/utils"
+import { Flask, getFlask } from "@luent/flask"
 import { inShadow } from "../component/shadow"
 import { css, Style } from "../component/Style"
 
@@ -104,7 +104,7 @@ let TRANSITION_POSITION: string;
 function useTransitionPosition() {
   if (!TRANSITION_POSITION || inShadow()) {
     const className = 'luent-transition-position'
-    insertCSSRule('.' + className, "transition: transform 250ms ease-in-out;")
+    insertCSSRule('.' + className, "transition: transform 200ms ease-in-out;")
     if (!inShadow()) TRANSITION_POSITION = className
     return className;
   }

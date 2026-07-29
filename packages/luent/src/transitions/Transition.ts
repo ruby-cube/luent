@@ -1,8 +1,8 @@
-import { JSXComponent } from "@rue/nextscript"
+import { JSXComponent } from "@luent/nextscript"
 import { RenderSlot } from "../component/x-Input"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
-import { AnyObject } from "@rue/types"
+import { AnyObject } from "@luent/types"
 
 let transitionConfig: TransitionConfigs | undefined
 

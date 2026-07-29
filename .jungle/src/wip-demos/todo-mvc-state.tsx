@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, template, For, If, Else, FromTag, listen } from "@rue/luent"
-import { watch,  ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@rue/quarky"
+import { component, template, For, If, Else, FromTag, listen } from "luent"
+import { watch,  ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$, update } from "@luent/quarky"
 
 
 interface Todo {

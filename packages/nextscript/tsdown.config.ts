@@ -16,7 +16,7 @@ export default defineConfig([
     format: 'esm',
     outDir: 'dist',
     deps: {
-      alwaysBundle: [/^@rue\/utils$/, /^@rue\/tree-squirl$/]
+      alwaysBundle: [/^@luent\/utils$/, /^@luent\/tree-squirl$/]
     }
   }
 ])

@@ -1,14 +1,14 @@
-import { isFunction } from "@rue/utils";
+import { isFunction } from "@luent/utils";
 
 export function MU_<K extends ContextEntryKey | string>(key: K): ContextEntryKey<K extends ContextEntryKey<infer T> ? T : unknown> {
-   const contextKey = toContextKey(key)
-   const name = 'MU_' + contextKey;
-   const fnKey = function (value: unknown) {
-      return [name, value]
-   };
-   Object.defineProperty(fnKey, "name", { value: name });
-   Object.defineProperty(fnKey, "contextKey", { value: contextKey });
-   return fnKey as ContextEntryKey<K extends ContextEntryKey<infer T> ? T : unknown>
+  const contextKey = toContextKey(key)
+  const name = 'MU_' + contextKey;
+  const fnKey = function (value: unknown) {
+    return [name, value]
+  };
+  Object.defineProperty(fnKey, "name", { value: name });
+  Object.defineProperty(fnKey, "contextKey", { value: contextKey });
+  return fnKey as ContextEntryKey<K extends ContextEntryKey<infer T> ? T : unknown>
 }
 
 export type ContextEntryKey<T = any> = ((value: T) => [ContextEntryKey<T>, T]) & { defaultValue: any, optional: boolean }
@@ -16,33 +16,33 @@ export type ContextEntryKey<T = any> = ((value: T) => [ContextEntryKey<T>, T]) &
 type FnKey = ContextEntryKey & { contextKey: string | ContextEntryKey }
 
 export function mergeKeys(...keys: ContextEntryKey[]) {
-   const mergedKey = ContextKey()
-   for (const fnKey of keys) {
-      (fnKey as FnKey).contextKey = mergedKey
-   }
-   return mergedKey
+  const mergedKey = ContextKey()
+  for (const fnKey of keys) {
+    (fnKey as FnKey).contextKey = mergedKey
+  }
+  return mergedKey
 }
 
 export function isMuKey(key: unknown) {
-   return isFunction(key) && key.name.startsWith('MU_')
+  return isFunction(key) && key.name.startsWith('MU_')
 }
 
 export function toContextKey(key: ContextEntryKey | string): string | Function {
-   if (typeof key === 'string') return key;
-   if ('contextKey' in key)
-      return key.contextKey as string
-   return key.name === 'context-key' ? key : key.name
+  if (typeof key === 'string') return key;
+  if ('contextKey' in key)
+    return key.contextKey as string
+  return key.name === 'context-key' ? key : key.name
 }
 
-export function ContextKey<T>(key: string = 'context-key'): ContextEntryKey<T> {
-   // const { default: defaultValue, key = 'context-key', optional = false } = options ?? {}
-   const fnKey = function (v: T) {
-      return { 0: fnKey, 1: v }
-   }
-   Object.defineProperty(fnKey, 'name', { value: key })
-   // Object.defineProperty(fnKey, 'defaultValue', { value: defaultValue })
-   // Object.defineProperty(fnKey, 'optional', { value: !!options?.default || optional })
-   return fnKey as ContextEntryKey<T>
+export function ContextKey<T>(optional?: '?' | (() => T)): ContextEntryKey<T> {
+  const defaultValue = typeof optional === 'function' ? optional : undefined;
+  const fnKey = function (v: T) {
+    return { 0: fnKey, 1: v }
+  }
+  Object.defineProperty(fnKey, 'name', { value: 'context-key' })
+  Object.defineProperty(fnKey, 'optional', { value: !!optional })
+  if (defaultValue) Object.defineProperty(fnKey, 'defaultValue', { value: defaultValue })
+  return fnKey as ContextEntryKey<T>
 }
 
 // export function isOpKey(key: string) {

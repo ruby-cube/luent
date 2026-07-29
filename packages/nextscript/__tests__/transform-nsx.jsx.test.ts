@@ -31,7 +31,7 @@ describe('NextScript JSX transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { JSXComponent } from "@rue/nextscript";\n` +
+         `import { JSXComponent } from "@luent/nextscript";\n` +
          `JSXComponent(<><div>hi</div></>);\n`
       )
    })
@@ -45,7 +45,7 @@ describe('NextScript JSX transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { JSXComponentAs } from "@rue/nextscript";\n` +
+         `import { JSXComponentAs } from "@luent/nextscript";\n` +
          `JSXComponentAs({\n\topen\n}, <><div>hi</div></>);\n`
       )
    })
@@ -92,7 +92,7 @@ describe('NextScript JSX transforms', () => {
       // expect(transformed).toBe(true)
       // const generated = printTSX(tsxTree)
       // expect(generated.code).toBe(
-      //    `import { assertª, assertµ } from "@rue/nextscript";\n` +
+      //    `import { assertª, assertµ } from "@luent/nextscript";\n` +
       //    `const foo = assertª(ref(0));\n` +
       //    `watch((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n));\n` + // TODO: remove parentheses if not IIDE
       //    `const count = assertª(ref(0));\n` +

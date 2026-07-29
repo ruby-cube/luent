@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ionize } from "@rue/quarky";
+import { ionize } from "@luent/quarky";
 
 const frog = ionize({
    name: 'kermit',

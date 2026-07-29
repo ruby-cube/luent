@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 
 export function getSpreadableMethods(object: Object) {
    const proto = Object.getPrototypeOf(object);

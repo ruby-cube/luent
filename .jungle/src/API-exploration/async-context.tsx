@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, template, FromTag, listen } from "@rue/luent";
+import { component, template, FromTag, listen } from "luent";
 
 
 function App(input : FromTag()) {

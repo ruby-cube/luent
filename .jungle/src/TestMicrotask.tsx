@@ -1,5 +1,5 @@
-import { queueTask } from "@rue/quarky"
-import { createStack, noop } from "@rue/utils"
+import { queueTask } from "@luent/quarky"
+import { createStack, noop } from "@luent/utils"
 
 const [push, pop] = createStack()
 

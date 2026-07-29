@@ -1,4 +1,4 @@
-import { component, template, fromContext } from "@rue/luent";
+import { component, template, fromContext } from "luent";
 import { USER, User } from '../context/keys'
 import { ChatWindow } from "./ChatWindow";
 import { MessageForm } from "./MessageForm";

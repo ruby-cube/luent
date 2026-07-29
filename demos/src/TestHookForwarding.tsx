@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, fromTag, If, WithRef, Xray } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, fromTag, If, WithRef, Xray } from "luent";
+import { ion } from "@luent/quarky";
 
 
 export function TestHookForwarding() {

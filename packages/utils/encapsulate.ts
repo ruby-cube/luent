@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 
 const ENCAPSULATED = Symbol('encapsulated')
 

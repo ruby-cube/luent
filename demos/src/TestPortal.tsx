@@ -1,5 +1,5 @@
-import { component, If, Portal, template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { component, If, Portal, template } from "luent";
+import { Ion } from "@luent/quarky";
 
 export function TestPortal() {
    const $show = ion(false)

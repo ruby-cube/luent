@@ -1,5 +1,5 @@
-import { component, template, FromTag } from '@rue/luent'
-import { ion } from '@rue/quarky'
+import { component, template, FromTag } from 'luent'
+import { ion } from '@luent/quarky'
 import { logIn } from '../database/database'
 
 

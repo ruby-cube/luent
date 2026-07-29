@@ -7,10 +7,10 @@
  * - composed events and bubbling
  */
 
-import { getActiveFlask } from "@rue/flask";
-import { component, template } from "@rue/luent";
-import { Ion, Ionic } from "@rue/quarky";
-import { AnyObject } from "@rue/types";
+import { getActiveFlask } from "@luent/flask";
+import { component, template } from "luent";
+import { Ion, Ionic } from "@luent/quarky";
+import { AnyObject } from "@luent/types";
 
 
 

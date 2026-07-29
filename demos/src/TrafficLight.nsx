@@ -1,5 +1,5 @@
-import { component, css } from "@rue/luent";
-import { ion, SYNC, watch, Finitron } from "@rue/quarky";
+import { component, css } from "luent";
+import { ion, SYNC, watch, Finitron } from "@luent/quarky";
 import "./style.css"
 
 export function TrafficLight() {

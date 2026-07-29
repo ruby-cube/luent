@@ -1,4 +1,4 @@
-import { component, template, For, fromRoot, fromContext, fromGround, If, provideRoot, provideGround } from "@rue/luent";
+import { component, template, For, fromRoot, fromContext, fromGround, If, provideRoot, provideGround } from "luent";
 import "./style.css"
 
 type File = { name: string }

@@ -27,8 +27,8 @@
 // Passing an ion with methods is essentially two-way binding..., just a bit more controlled
 
 
-import { component, Context, ContextKey, template, For, fromContext, If, Ion, Ionized, v } from "@rue/luent";
-import { ion, ionize, watch } from "@rue/quarky";
+import { component, Context, ContextKey, template, For, fromContext, If, Ion, Ionized, v } from "luent";
+import { ion, ionize, watch } from "@luent/quarky";
 
 class Message {
    constructor(

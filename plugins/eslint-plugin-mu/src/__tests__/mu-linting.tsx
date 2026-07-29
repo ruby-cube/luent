@@ -1,5 +1,5 @@
-import { component, FromTag, template } from "@rue/luent"
-import { ionic, Ion, Ionic, ion } from "@rue/quarky"
+import { component, FromTag, template } from "luent"
+import { ionic, Ion, Ionic, ion } from "@luent/quarky"
 import { Something } from "./external-file"
 
 type Frog = { name: string }

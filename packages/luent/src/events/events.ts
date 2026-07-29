@@ -1,4 +1,4 @@
-import { swiftUpdate } from "@rue/quarky";
+import { swiftUpdate } from "@luent/quarky";
 
 export const events = {
    click: swiftUpdate,

@@ -1,6 +1,6 @@
 import { Ion, MutableIon } from "./Ion"
 import { watch } from "../reactivity/Watcher"
-import { AnyObject } from "@rue/types"
+import { AnyObject } from "@luent/types"
 import { SYNC } from "../reactivity/RenderCycle"
 import { createAtomicIon } from "./AtomicIon"
 

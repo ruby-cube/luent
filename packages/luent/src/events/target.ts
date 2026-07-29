@@ -1,4 +1,4 @@
-import { isFunction } from "@rue/utils";
+import { isFunction } from "@luent/utils";
 import { NodeRef } from "../node/NodeRef";
 
 export function matchEventTarget(this: Event, ...args: [...(string | ((x: HTMLElement) => boolean) | NodeRef)[]]) {

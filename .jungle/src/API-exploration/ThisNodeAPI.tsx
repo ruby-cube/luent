@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { component, template, v } from "@rue/luent"
-import { Ion, watch } from "@rue/quarky"
-import { DynamicNode } from "../../../../packages/luent/src/flask/ViewFlask";
+import { component, template, v } from "luent"
+import { Ion, watch } from "@luent/quarky"
+import { DynamicNode } from "../../../../packagesluent/src/flask/ViewFlask";
 
 /**
  * [] Should asynchronous functions be bound to their contexts? ... It's a lot of work... leaning towards no..

@@ -1,11 +1,11 @@
 //@ts-nocheck
-import { component, template, For, If, Else, FromTag, fromRoot, ContextKey, ContextEntryKey, fromGround, AsyncIon, fromRoot } from "@rue/luent"
-import { watch,  ionicTickTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@rue/quarky"
+import { component, template, For, If, Else, FromTag, fromRoot, ContextKey, ContextEntryKey, fromGround, AsyncIon, fromRoot } from "luent"
+import { watch,  ionicTickTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@luent/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"
 import { TODO_DB_KIT } from "./todo-mvc-local"
-import { AnyObject } from "@rue/types"
+import { AnyObject } from "@luent/types"
 import { json } from "stream/consumers"
 
 // CON: You have to return a whole object

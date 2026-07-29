@@ -1,15 +1,9 @@
-import { Code, DemoContainer, EmojiQuest } from '@rue/websites-shared'
+import { $Tab, Code, DemoContainer, EmojiQuest } from '@luent/websites-shared'
 import { highlightCode } from "../highlighter"
-import { ion } from '@rue/quarky'
+import { ion } from '@luent/quarky'
 
 export function EmojiQuestDemo() {
-  const $tab = ion('main' as 'main' | 'alt', {
-    toggle() {
-      this.value === 'main'
-        ? this.value = 'alt'
-        : this.value = 'main'
-    }
-  })
+  const $tab = $Tab()
   
   return (
     <>

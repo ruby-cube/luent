@@ -1,7 +1,7 @@
 import { Stateful } from "../abstract/Stateful";
 import { TraceableEntity } from "../debug/Traceable";
 import { Atom } from "./Atom"
-import { createStack, isObject } from "@rue/utils"
+import { createStack, isObject } from "@luent/utils"
 
 export const [pushTracker, popTracker, getActiveTracker] = createStack<Compound | null>()
 

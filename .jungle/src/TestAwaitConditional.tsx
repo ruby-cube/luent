@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { component, Await, template, Else, If, Meanwhile } from "@rue/luent";
-import { Ion,ion, Suspense } from "@rue/quarky";
+import { component, Await, template, Else, If, Meanwhile } from "luent";
+import { Ion,ion, Suspense } from "@luent/quarky";
 
 export function TestAwaitConditional() {
 

@@ -1,5 +1,5 @@
 import { beforeUnmount } from "./flask-hooks";
-export { Scene } from '@rue/flask'
+export { Scene } from '@luent/flask'
 
 
 export const atEnd = beforeUnmount

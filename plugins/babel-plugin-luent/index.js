@@ -92,7 +92,7 @@ function createAwaitSeries(series) {
 
 
 // function storeLocalNameOfImport(path, functionName, localNames) {
-//    if (path.node.source.value === '@rue/quarky') {
+//    if (path.node.source.value === '@luent/quarky') {
 //       for (const specifier of path.node.specifiers) {
 //          if (
 //             t.isImportSpecifier(specifier) &&

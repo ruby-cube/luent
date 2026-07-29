@@ -1,11 +1,11 @@
 import { CodeGlimpses } from "./CodeGlimpses";
 import { HabitTrackerDemo } from "./demos/HabitTrackerDemo"
-export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from '@rue/luent'
-import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot } from '@rue/luent'
+export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from 'luent'
+import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot } from 'luent'
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
 import { DoodleCanvasDemo } from "./demos/DoodleCanvasDemo";
-export * from "@rue/websites-shared";
-import { Code, extractParams, MountIslands, parseNSXBlock, WriteIslands } from "@rue/websites-shared";
+export * from "@luent/websites-shared";
+import { Code, extractParams, MountIslands, parseNSXBlock, WriteIslands } from "@luent/websites-shared";
 import { twMerge } from "tailwind-merge";
 import { highlightCode } from "./highlighter";
 

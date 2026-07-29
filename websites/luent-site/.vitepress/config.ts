@@ -44,7 +44,7 @@ export default defineConfig({
   description: "Luent documentation and resources",
   themeConfig: {
     // siteTitle: false,
-    siteTitle: 'v0.0.1',
+    siteTitle: 'v0.0.0',
     logo: {
       dark: '/assets/luent-logo-dark.png',
       light: '/assets/luent-logo-light.png'

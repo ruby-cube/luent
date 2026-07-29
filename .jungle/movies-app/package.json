@@ -1,5 +1,5 @@
 {
-  "name": "@rue/movies-app",
+  "name": "@luent/movies-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -20,16 +20,16 @@
       "@babel/preset-react": "^7.26.3",
       "@babel/preset-typescript": "^7.26.0",
       "@babel/types": "^7.26.3",
-      "@rue/types": "workspace:*",
-      "@rue/vite-plugin-luent": "workspace:*",
+      "@luent/types": "workspace:*",
+      "@luent/vite-plugin-luent": "workspace:*",
       "@types/babel__core": "^7.20.5",
       "@types/babel__traverse": "^7.20.6",
       "typescript-plugin-css-modules": "^5.2.0"
   },
    "dependencies": {
-        "@rue/flask": "workspace:*",
-        "@rue/luent": "workspace:*",
-        "@rue/quarky": "workspace:*",
-        "@rue/utils": "workspace:*"
+        "@luent/flask": "workspace:*",
+        "luent": "workspace:*",
+        "@luent/quarky": "workspace:*",
+        "@luent/utils": "workspace:*"
     }
 }

@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, atAttach, beforeDetach, template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { component, atAttach, beforeDetach, template } from "luent";
+import { Ion } from "@luent/quarky";
 import { resolve } from "path";
 
 export function DinoLogo() {

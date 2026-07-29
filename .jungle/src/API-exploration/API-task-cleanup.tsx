@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { getActiveFlask } from "@rue/flask";
-import { component, template, fromContext, RENDER } from "@rue/luent";
-import { ionicTickTask, runIonicTask } from "@rue/quarky";
+import { getActiveFlask } from "@luent/flask";
+import { component, template, fromContext, RENDER } from "luent";
+import { ionicTickTask, runIonicTask } from "@luent/quarky";
 
 
 

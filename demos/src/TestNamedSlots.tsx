@@ -1,5 +1,5 @@
 import './index.css'
-import { component, mountIsland, RenderSlot, template } from "@rue/luent";
+import { component, mountIsland, RenderSlot, template } from "luent";
 
 export function TestNamedSlots() {
 

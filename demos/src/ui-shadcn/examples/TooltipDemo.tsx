@@ -1,6 +1,6 @@
-import { component, Context, mountIsland, NodeRef, template } from "@rue/luent"
+import { component, Context, mountIsland, NodeRef, template } from "luent"
 import { Button } from "../Button"
-import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui"
+import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui"
 
 // Basic:
 // [X] anchoring

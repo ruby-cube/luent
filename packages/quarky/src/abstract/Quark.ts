@@ -1,4 +1,4 @@
-import { isFunction, isObject } from "@rue/utils";
+import { isFunction, isObject } from "@luent/utils";
 
 export const QUARK = Symbol('quark')
 

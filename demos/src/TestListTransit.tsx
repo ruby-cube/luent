@@ -1,5 +1,5 @@
-import { component, template, For, FromTag, Style, css, $of } from "@rue/luent";
-import { ion, ionic, EACH, Ion, Ionic, atRender, queueTask } from "@rue/quarky";
+import { component, template, For, FromTag, Style, css, $of } from "luent";
+import { ion, ionic, EACH, Ion, Ionic, atRender, queueTask } from "@luent/quarky";
 import './TestListTransit.css'
 
 // Modified Demo from Svelte

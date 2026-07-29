@@ -1,9 +1,9 @@
 import { ComponentTag } from "../component/Component";
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 import { createRootContext } from "../context/provide";
 import { popContext, pushContext } from "../context/context-stack";
-import { Flask, flaskStack } from "@rue/flask";
-import { load, atInternalRender } from "@rue/quarky";
+import { Flask, flaskStack } from "@luent/flask";
+import { load, atInternalRender } from "@luent/quarky";
 import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { RenderFunction } from "../node/makeJSXNode";
 

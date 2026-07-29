@@ -71,7 +71,7 @@ async function buildServer() {
     },
     outfile: join(outDir, 'nextscript-language-server.mjs'),
     alias: {
-      '@rue/nextscript/transpile': resolve(packageRoot, '..', '..', 'packages', 'nextscript', 'dist', 'transpile.mjs'),
+      '@luent/nextscript/transpile': resolve(packageRoot, '..', '..', 'packages', 'nextscript', 'dist', 'transpile.mjs'),
       '@volar/language-core': resolvePackageRoot('@volar/language-core'),
       '@volar/language-server/node': resolveImport('@volar/language-server/node'),
       'volar-service-css': resolveImport('volar-service-css'),

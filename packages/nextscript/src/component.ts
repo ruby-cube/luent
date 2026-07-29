@@ -1,4 +1,5 @@
-import { isObject, normalizeToArray } from "@rue/utils";
+import { RawJSXNode } from "luent";
+import { isObject, normalizeToArray } from "@luent/utils";
 
 export interface ComponentKit<T = undefined> {
   component: T
@@ -30,16 +31,16 @@ JSXComponent.as = function expose<T>(component: T) {
   }
 }
 
-export function unnestComponent(nodes: unknown) {
+export function unnestComponent(nodes: unknown): RawJSXNode {
   const isArray = Array.isArray(nodes);
   if (isArray && nodes.length > 1) return nodes;
   const entity = isArray ? nodes[0] : nodes;
   if (isComponentKit(entity)) {
     if (entity.component)
-      return nodes;
+      return nodes as RawJSXNode;
     return entity.nodes;
   }
-  return nodes
+  return nodes as RawJSXNode
 }
 
 export function isComponentKit(entity: unknown): entity is ComponentKit<unknown> {

@@ -1,5 +1,5 @@
-import { component, template, Else, If } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, template, Else, If } from "luent";
+import { ion } from "@luent/quarky";
 
 // Bug conditions
 // - conditional outside

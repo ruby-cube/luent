@@ -1,7 +1,7 @@
-import { Flask, getFlask } from "@rue/flask";
-import { isGetter, atRender, RUN_EAGERLY, toValue, trackForRender, atInternalRender } from "@rue/quarky";
+import { Flask, getFlask } from "@luent/flask";
+import { isGetter, atRender, RUN_EAGERLY, toValue, trackForRender, atInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/x-Input";
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 
 
 export function setUpAttributes(node: Element | null, attributes: { [key: string]: MaybeIon<any> }) {

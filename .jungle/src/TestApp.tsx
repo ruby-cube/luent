@@ -1,4 +1,4 @@
-import { component, template } from "@rue/luent";
+import { component, template } from "luent";
 import { List } from "./wip-demos/TestListSelect";
 import { MountIf } from "./demo/TestMountIf";
 import { TestDerivedConditional } from "./TestCreateMountShow";

@@ -1,9 +1,9 @@
 //@ts-nocheck
 // You're filtering a large list based on a search input.
 
-import { component, AsyncIon, template, For, fromGround, provideGround } from "@rue/luent";
-import { Ion,ionicTickTask } from "@rue/quarky";
-import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
+import { component, AsyncIon, template, For, fromGround, provideGround } from "luent";
+import { Ion,ionicTickTask } from "@luent/quarky";
+import { Await, Meanwhile } from "../../../../packagesluent/src/boundaries/Await";
 
 // tsx
 // Copy

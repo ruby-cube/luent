@@ -1,5 +1,5 @@
-import { component, template, fromGround, fromRoot, If, Style, css } from "@rue/luent";
-import { Ion, ion } from "@rue/quarky";
+import { component, template, fromGround, fromRoot, If, Style, css } from "luent";
+import { Ion, ion } from "@luent/quarky";
 import { User } from "./context/keys";
 import { initDatabaseConnection, onLoggedIn, onLoggedOut } from "./database/database";
 

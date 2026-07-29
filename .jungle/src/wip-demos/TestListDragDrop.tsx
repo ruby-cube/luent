@@ -1,8 +1,8 @@
-import { component, template, For, listen, Style } from "@rue/luent";
-import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
+import { component, template, For, listen, Style } from "luent";
+import { moveUniqueItems, useRandomColorGenerator } from "@luent/utils";
 import '../style.css'
-import { instantUpdate,  ionic, EACH, ion} from "@rue/quarky";
-import { $thisFlask, Flask, getActiveFlask } from "@rue/flask";
+import { instantUpdate,  ionic, EACH, ion} from "@luent/quarky";
+import { $thisFlask, Flask, getActiveFlask } from "@luent/flask";
 
 class ListItem {
    constructor(

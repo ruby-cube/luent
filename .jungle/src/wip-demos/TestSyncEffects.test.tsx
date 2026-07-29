@@ -1,4 +1,4 @@
-import { ion, watch } from "@rue/quarky";
+import { ion, watch } from "@luent/quarky";
 import { describe, expect, it, vi } from "vitest";
 
 //NOTE: Infinite loops should be eliminated from an app, not supported. Infinite loop prevention is for debugging and tracking down loops.

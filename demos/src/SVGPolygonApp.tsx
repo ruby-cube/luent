@@ -1,5 +1,5 @@
-import { component, template, For, FromTag, Style, css, $of, } from "@rue/luent"
-import { as, ion, ionic, EACH, Ion, Ionic } from "@rue/quarky"
+import { component, template, For, FromTag, Style, css, $of, } from "luent"
+import { as, ion, ionic, EACH, Ion, Ionic } from "@luent/quarky"
 
 // Demo from Vue.js
 // features
@@ -50,9 +50,9 @@ export function SVGPolygonApp() {
 
       {For(stats, $stat =>
         <div>
-          <label>{($stat().label)}</label>
-          <input type="range" mu:value={($stat().$value)} min="0" max="100" />
-          <span>{($stat().value)}</span>
+          <label>{() => $stat().label}</label>
+          <input type="range" mu:value={$of($stat()).value} min="0" max="100" />
+          <span>{() => $stat().value}</span>
           <button on:click={e => remove($stat())} class="remove">X</button>
         </div>
       )}
@@ -62,7 +62,7 @@ export function SVGPolygonApp() {
         <button on:click={add}>Add a Stat</button>
       </form>
 
-      <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
+      <pre id="raw">{() => JSON.stringify(stats, undefined, 2)}</pre>
       {Style(css`
             polygon {
                fill: #42b983;
@@ -123,19 +123,18 @@ export function SVGPolygonApp() {
 
 
 function AxisLabel(setup: FromTag<{
-  stat: Ionic<Stat>,
+  stat: Ion<Ionic<Stat>>,
   index: Ion<number>,
   total: Ion<number>
 }>) {
-  const { $index, stat, $total } = setup
+  const { $index, $stat, $total } = setup
 
   const $point = ion(() =>
-    valueToPoint(+stat.value + 10, $index(), $total())
+    valueToPoint(+$stat().value + 10, $index(), $total())
   )
 
   return (
-
-    <text x={($point().x)} y={($point().y)}>{$of(stat).label}</text>
+    <text x={() => $point().x} y={() => $point().y}>{() => $stat().label}</text>
 
   )
 }
@@ -162,7 +161,7 @@ function PolyGraph({ stats }: {
       <circle cx="100" cy="100" r="80"></circle>
       {For(stats, ($stat, index) =>
         <AxisLabel
-          stat={$stat()}
+          stat={$stat}
           index={index}
           total={$of(stats).length}
         >

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { atAttach, template, listen } from "@rue/luent";
+import { atAttach, template, listen } from "luent";
 
 type ThisComponent = {
    context: any,

@@ -1,8 +1,8 @@
 import { ComponentTag } from "./Component";
 import { Else, ElseIf, If } from "../conditional/If";
-import { noop } from "@rue/utils";
+import { noop } from "@luent/utils";
 import { createAtomicIon, ion } from "../../../quarky/src";
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 
 const lazyComponents: Map<() => Promise<ComponentTag>, ComponentTag> = new Map()
 

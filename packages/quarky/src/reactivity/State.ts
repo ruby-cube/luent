@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types"
+import { AnyObject } from "@luent/types"
 import { Update, $activeUpdate, getActiveUpdate } from "./Update"
 
 

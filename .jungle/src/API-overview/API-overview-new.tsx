@@ -2,9 +2,9 @@
 //@ts-nocheck
 // COMPONENTS
 
-import { component, template, POSTLUDE, PRELUDE } from "@rue/luent"
-import { ion, ionize } from "@rue/quarky"
-import { isFunction } from "@rue/utils";
+import { component, template, POSTLUDE, PRELUDE } from "luent"
+import { ion, ionize } from "@luent/quarky"
+import { isFunction } from "@luent/utils";
 import { time } from "console";
 import { watch } from "fs";
 import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"

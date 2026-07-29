@@ -1,4 +1,4 @@
-import { component, mountIsland, FromTag, ion, MICROCLASS_MERGE, template, provideRoot } from "@rue/luent"
+import { component, mountIsland, FromTag, ion, MICROCLASS_MERGE, template, provideRoot } from "luent"
 import { twMerge } from "tailwind-merge"
 
 const $simpleOn = ion(false)

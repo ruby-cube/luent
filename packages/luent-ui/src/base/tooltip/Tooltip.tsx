@@ -1,4 +1,4 @@
-import {  FromTag,  NodeRef, RenderSlot } from "@rue/luent"
+import {  FromTag,  NodeRef, RenderSlot } from "luent"
 import { IonicTooltip } from "./Tooltip.kit";
 import { PopoverRoot } from "../popover/Popover";
 

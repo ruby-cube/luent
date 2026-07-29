@@ -1,5 +1,5 @@
 {
-    "name": "@rue/flask",
+    "name": "@luent/flask",
     "private": true,
     "description": "",
     "type": "module",
@@ -9,10 +9,10 @@
     "main": "./index.ts",
     "module": "./index.ts",
     "dependencies": {
-      "@rue/utils": "workspace:*"
+      "@luent/utils": "workspace:*"
     },
     "devDependencies": {
-      "@rue/types": "workspace:*"
+      "@luent/types": "workspace:*"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"

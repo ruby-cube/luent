@@ -1,5 +1,5 @@
-import { component, template, For } from "@rue/luent";
-import { ionic, ion, Ionic } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { ionic, ion, Ionic } from "@luent/quarky";
 
 let num = 0
 

@@ -1,4 +1,4 @@
-import { createStack, isFunction } from "@rue/utils";
+import { createStack, isFunction } from "@luent/utils";
 import { CHILD_KEYS } from "./ast.ts";
 import { LinkedNode, toLinkedList } from "./linked-nodes.ts";
 

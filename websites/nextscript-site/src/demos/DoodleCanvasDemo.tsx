@@ -1,6 +1,6 @@
-import { Code, DemoContainer, DoodleCanvas } from '@rue/websites-shared'
+import { Code, DemoContainer, DoodleCanvas } from '@luent/websites-shared'
 import { highlightCode } from "../highlighter"
-import { ion } from '@rue/quarky'
+import { ion } from '@luent/quarky'
 
 export function DoodleCanvasDemo() {
   const $tab = ion('main' as 'main' | 'alt', {
@@ -36,7 +36,7 @@ export function DoodleCanvasDemo() {
 }
 
 const nsKit =
-  `import { NodeRef } from "@rue/luent"
+  `import { NodeRef } from "luent"
   
 function DoodleCanvasKit() {
   get canvas = NodeRef("canvas")
@@ -116,7 +116,7 @@ function DoodleCanvasKit() {
 `
 
 const tsKit =
-  `import { NodeRef } from "@rue/luent"
+  `import { NodeRef } from "luent"
   
 function DoodleCanvasKit() {
   const $canvas = NodeRef("canvas")
@@ -197,7 +197,7 @@ function DoodleCanvasKit() {
 
 
 const nsx =
-  `import { component, css, Style } from "@rue/luent"
+  `import { component, css, Style } from "luent"
 import { DoodleCanvasKit } from "./DoodleCanvasKit"
   
 function DoodleCanvas() {
@@ -254,7 +254,7 @@ function DoodleCanvas() {
   `
 
 const tsx =
-  `import { component, css, Style } from "@rue/luent"
+  `import { component, css, Style } from "luent"
 import { DoodleCanvasKit } from "./DoodleCanvasKit"
   
 function DoodleCanvas() {

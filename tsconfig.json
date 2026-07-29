@@ -20,7 +20,7 @@
     ],
     "strict": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@rue/luent",
+    "jsxImportSource": "luent",
     "types": [
       "./packages/luent/src/jsx-runtime/index"
     ],
@@ -42,43 +42,43 @@
       "react-dom/*": [
         "./packages/luent/src/jsx-runtime/*"
       ],
-      "@rue/utils": [
+      "@luent/utils": [
         "./packages/utils/index.ts"
       ],
-      "@rue/luent": [
+      "luent": [
         "./packages/luent/src/index.ts"
       ],
-      "@rue/luent/jsx-runtime": [
+      "luent/jsx-runtime": [
         "./packages/luent/src/jsx-runtime/index.ts"
       ],
-      "@rue/luent/jsx-dev-runtime": [
+      "luent/jsx-dev-runtime": [
         "./packages/luent/src/jsx-runtime/index.ts"
       ],
-      "@rue/websites-shared": [
+      "@luent/websites-shared": [
         "./websites/shared/src/index.ts"
       ],
-      "@rue/quarky": [
+      "@luent/quarky": [
         "./packages/quarky/src/index.ts"
       ],
-      "@rue/tree-squirl": [
+      "@luent/tree-squirl": [
         "./packages/tree-squirl/src/index.ts"
       ],
-      "@rue/quarky/core": [
+      "@luent/quarky/core": [
         "./packages/quarky/src/core/index.ts"
       ],
-      "@rue/nextscript": [
+      "@luent/nextscript": [
         "./packages/nextscript/src/index.ts"
       ],
-      "@rue/nextscript/transpile": [
+      "@luent/nextscript/transpile": [
         "./packages/nextscript/src/transpile.ts"
       ],
-      "@rue/flask": [
+      "@luent/flask": [
         "./packages/flask/index.ts"
       ],
-      "@rue/types": [
+      "@luent/types": [
         "./packages/types/index.ts"
       ],
-      "@rue/vite-plugin-luent": [
+      "@luent/vite-plugin-luent": [
         "./plugins/vite-plugin-luent/index.js"
       ]
     }

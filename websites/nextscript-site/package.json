@@ -1,12 +1,12 @@
 {
-  "name": "@rue/nextscript-site",
+  "name": "@luent/nextscript-site",
   "private": true,
   "description": "",
   "type": "module",
   "devDependencies": {
-    "@rue/luent": "workspace:*",
-    "@rue/quarky": "workspace:*",
-    "@rue/websites-shared": "workspace:*",
+    "luent": "workspace:*",
+    "@luent/quarky": "workspace:*",
+    "@luent/websites-shared": "workspace:*",
     "concurrently": "^10.0.3",
     "shiki": "^4.1.0",
     "vue": "^3.5.0",

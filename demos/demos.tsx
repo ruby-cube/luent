@@ -1,4 +1,4 @@
-import { mountIsland, MICROCLASS_MERGE, provideRoot, FromTag, ionic } from "@rue/luent"
+import { mountIsland, MICROCLASS_MERGE, provideRoot, FromTag, ionic } from "luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
@@ -55,7 +55,7 @@ export function runDemo() {
   mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
     // <HabitTracker habit="water" goal={8}></HabitTracker>
-    return <TestColorSort/>
+    return <TestInnerHTML/>
   }, '#root')
 }
 

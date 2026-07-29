@@ -1,4 +1,4 @@
-import { __DEV__unwrap, noop } from "@rue/utils";
+import { __DEV__unwrap, noop } from "@luent/utils";
 import { TrackedAtom } from "./Atom";
 import { Phase } from "./RenderCycle";
 

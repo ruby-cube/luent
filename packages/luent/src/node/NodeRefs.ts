@@ -1,6 +1,6 @@
-import { getActiveFlask, getFlask } from "@rue/flask";
-import { INTERNAL, Ion, PRELUDE, toValue, watch } from "@rue/quarky";
-import { isFunction } from "@rue/utils";
+import { getActiveFlask, getFlask } from "@luent/flask";
+import { INTERNAL, Ion, PRELUDE, toValue, watch } from "@luent/quarky";
+import { isFunction } from "@luent/utils";
 
 
 type Nodes = any[] | Nodes[]

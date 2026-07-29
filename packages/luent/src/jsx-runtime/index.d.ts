@@ -1,12 +1,12 @@
 /// <reference path="global.d.ts" />
 
 import * as CSS from "csstype";
-import * as Luent from "@rue/luent";
-import * as Quarky from "@rue/quarky";
+import * as Luent from "luent";
+import * as Quarky from "@luent/quarky";
 import { NodeRef } from "../src/node/NodeRef";
 import { NodeRefsConfig } from "../src/node/NodeRefs";
-import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/luent";
-import { AnyObject, Booleanny } from "@rue/types";
+import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "luent";
+import { AnyObject, Booleanny } from "@luent/types";
 import { PortalNodeInput } from "../src/boundaries/Portal";
 import { TransitionConfigs } from "../transitions/transitions";
 
@@ -1928,11 +1928,12 @@ declare global {
       'shadow-root': { children: any, mode: 'open' | 'closed' }
       'o--portal': PortalNodeInput & { children: Luent.Slot }
 
-      'o--style': L.DetailedHTMLProps<L.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', text: string }
+      'o-style': L.DetailedHTMLProps<L.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', text: string }
       'o-link': L.DetailedHTMLProps<L.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
       'o--head': L.DetailedHTMLProps<L.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>
       'o--body': L.DetailedHTMLProps<L.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>
       'o--window': L.DetailedHTMLProps<L.HTMLAttributes<Window>, Window>
+      'o--host': L.DetailedHTMLProps<L.HTMLAttributes<Window>, Window>
       'o:preserve': { children: ConditionalRenderKit[] | ConditionalRenderKit; discard?: Ion<Booleanish> }
       'o:context': { children: ConditionalRenderKit[] | ConditionalRenderKit; provide: Luent.Provided }
       'o:transition': { children: ConditionalRenderKit[] | ConditionalRenderKit; } & Luent.TransitionBindings

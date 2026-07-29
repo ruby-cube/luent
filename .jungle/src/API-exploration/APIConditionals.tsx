@@ -102,9 +102,9 @@ export function TestCounterModel() {
    )
 }
 
-import { component, template, If, Else, fade, ElseIf, slide, FromTag, v, target, prep, Ion } from "@rue/luent";
-import { ion, ionize } from "@rue/quarky";
-import { AnyObject } from "@rue/types";
+import { component, template, If, Else, fade, ElseIf, slide, FromTag, v, target, prep, Ion } from "luent";
+import { ion, ionize } from "@luent/quarky";
+import { AnyObject } from "@luent/types";
 
 
 

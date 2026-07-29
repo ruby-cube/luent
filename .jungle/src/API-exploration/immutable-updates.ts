@@ -1,4 +1,4 @@
-import { Ion } from "@rue/quarky"
+import { Ion } from "@luent/quarky"
 
 ion(0)
 

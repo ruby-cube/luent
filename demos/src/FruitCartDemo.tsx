@@ -1,5 +1,5 @@
-import { component, For } from "@rue/luent"
-import { ion, ionic } from "@rue/quarky"
+import { component, For } from "luent"
+import { ion, ionic } from "@luent/quarky"
 
 export function FruitCartDemo() {
   const $count = ion(0)

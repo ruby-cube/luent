@@ -1,7 +1,7 @@
-import { isObject } from "@rue/utils"
-import { DOMNode } from "../../../../packages/luent/src/node/VineNode"
-import { getActiveFlask } from "@rue/flask"
-import { atAttach, beforeDetach, atRender, queueTask } from "@rue/luent"
+import { isObject } from "@luent/utils"
+import { DOMNode } from "../../../../packagesluent/src/node/VineNode"
+import { getActiveFlask } from "@luent/flask"
+import { atAttach, beforeDetach, atRender, queueTask } from "luent"
 
 // class-based
 type VarKit = {

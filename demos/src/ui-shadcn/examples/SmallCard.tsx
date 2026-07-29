@@ -1,4 +1,4 @@
-import { component, mountIsland, template } from "@rue/luent"
+import { component, mountIsland, template } from "luent"
 import {
    Card,
    CardContent,

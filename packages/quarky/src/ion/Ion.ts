@@ -1,8 +1,8 @@
-import { isFunction, isObject } from "@rue/utils";
+import { isFunction, isObject } from "@luent/utils";
 import { createAtomicIon } from "./AtomicIon";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { createHybridIon } from "./HybridIon";
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 import { AsyncIon } from "../async/AsyncIon";
 import { isIon } from "./utils";
 

@@ -1,4 +1,4 @@
-import { ªªof } from "@rue/nextscript";
+import { ªªof } from "@luent/nextscript";
 
 type $From<T> = T & AccessorsOf<T>
 
@@ -19,9 +19,10 @@ export function $from<T extends object>(target: T): $From<T> {
    return (new Proxy(target, {
       get(target, key, receiver) {
          if (isGetterKey(key)) {
-            const valueKey = key.slice(1)
-            if (valueKey in target)
-               return ªªof(target)[valueKey as keyof T]
+            const valueKey = key.slice(1) as keyof T
+            if (valueKey in target && target[valueKey] !== undefined) {
+              return ªªof(target)[valueKey]
+            }
             return undefined
          }
          return Reflect.get(target, key, receiver)

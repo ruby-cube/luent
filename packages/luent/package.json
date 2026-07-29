@@ -1,24 +1,43 @@
 {
-   "name": "@rue/luent",
-   "private": true,
-   "description": "",
+   "name": "luent",
+   "private": false,
+   "version": "0.0.1",
+   "description": "An expressive framework for building web applications with clarity and flow",
+   "repository": {
+    "type": "git",
+    "url": "https://github.com/ruby-cube/luent"
+   },
    "type": "module",
    "exports": {
-      ".": "./src/index.ts",
-      "./jsx-runtime": "./src/jsx-runtime/index.ts",
-      "./jsx-dev-runtime": "./src/jsx-runtime/index.ts",
-      "./hyper-html": "./src/client/mountHyperHTML.ts"
+      ".": "./dist/index.mjs",
+      "./jsx-runtime": "./dist/jsx-runtime.mjs",
+      "./jsx-dev-runtime": "./dist/jsx-runtime.mjs",
+      "./hyper-html": "./dist/hyper-html.mjs"
    },
-   "main": "./src/index",
-   "module": "./src/index",
-   "dependencies": {
-      "@rue/flask": "workspace:*",
-      "@rue/quarky": "workspace:*",
-      "@rue/utils": "workspace:*",
-      "@rue/nextscript": "workspace:*"
+   "main": "./dist/index.mjs",
+   "module": "./dist/index.mjs",
+   "files": [
+      "dist"
+   ],
+   "scripts": {
+      "build": "tsdown",
+      "watch": "tsdown --watch",
+      "prepack": "tsdown",
+      "pack": "pnpm pack",
+      "publish:dry": "pnpm publish --dry-run --no-git-checks",
+      "publish:public": "pnpm publish --no-git-checks"
    },
    "devDependencies": {
-      "@rue/types": "workspace:*"
+      "@luent/flask": "workspace:*",
+      "@luent/nextscript": "workspace:*",
+      "@luent/quarky": "workspace:*",
+      "@luent/types": "workspace:*",
+      "@luent/utils": "workspace:*",
+      "tsdown": "^0.21.9",
+      "typescript": "^6.0.3"
+   },
+   "publishConfig": {
+      "access": "public"
    },
    "author": "Ruby Yi Wang",
    "license": "MIT"

@@ -1,5 +1,4 @@
-import { component, $fromContext, beforeUnmount, atAttach, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, Xray, FromTag } from "@rue/luent"
-import { Ion, Ionic, toIon, ion } from "@rue/quarky"
+import {Ion, Ionic, toIon, $fromContext, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, Xray, FromTag } from "luent"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
 // TODO:

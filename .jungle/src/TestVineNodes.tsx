@@ -1,4 +1,4 @@
-import { component, template } from "@rue/luent";
+import { component, template } from "luent";
 
 export function TestVineNodes(){
    return (

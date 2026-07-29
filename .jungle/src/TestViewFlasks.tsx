@@ -1,5 +1,5 @@
-import { component, $thisView, template, Else, If } from "@rue/luent";
-import { getCurrentPhase, ion, watch } from "@rue/quarky";
+import { component, $thisView, template, Else, If } from "luent";
+import { getCurrentPhase, ion, watch } from "@luent/quarky";
 import { $thisScene } from "../../../packages/flask/Scene";
 
 let rootView: any;

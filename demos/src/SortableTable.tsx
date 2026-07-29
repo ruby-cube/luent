@@ -1,7 +1,7 @@
 
-import { component, template, Else, For, FromTag, If } from '@rue/luent'
-import { ionic, Ion, ion } from '@rue/quarky'
-import { AnyObject } from '@rue/types'
+import { component, template, Else, For, FromTag, If } from 'luent'
+import { ionic, Ion, ion } from '@luent/quarky'
+import { AnyObject } from '@luent/types'
 import "./style.css"
 import "./SortableTable.css"
 
@@ -82,7 +82,7 @@ function SortableTable({ columns, data, $filterKey }: SortableTableInput) {
    return (
 
       <>
-         {If(($filteredData().length),
+         {If(()=>($filteredData().length),
             <table>
                <thead>
                   <tr>

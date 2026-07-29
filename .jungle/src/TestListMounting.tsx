@@ -1,5 +1,5 @@
-import { component, template, Else, ElseIf, For, If } from "@rue/luent";
-import { $activeUpdate, ionic, ion, Ionic, PRELUDE, atRender, queueTask, watch } from "@rue/quarky";
+import { component, template, Else, ElseIf, For, If } from "luent";
+import { $activeUpdate, ionic, ion, Ionic, PRELUDE, atRender, queueTask, watch } from "@luent/quarky";
 
 export function TestListMounting() {
    let count = 0

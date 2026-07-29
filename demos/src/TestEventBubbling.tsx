@@ -1,4 +1,4 @@
-import { component, WithRef } from "@rue/luent"
+import { component, WithRef } from "luent"
 
 export function Grandparent() {
 

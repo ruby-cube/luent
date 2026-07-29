@@ -1,5 +1,5 @@
-import { ContextKey } from "@rue/luent";
-import { Ionized } from "@rue/quarky";
+import { ContextKey } from "luent";
+import { Ionized } from "@luent/quarky";
 
 
 export type User = {

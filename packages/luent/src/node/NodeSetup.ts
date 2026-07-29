@@ -1,8 +1,8 @@
 import { ComponentTag } from "../component/Component";
-import { TagName } from "../element/makeElement";
+import { TagName } from "../element/setUpElement";
 import { ListData } from "../iteratives/For";
 import { ComponentConfig, ElementConfig } from "./makeJSXNode";
-import {  Ion } from "@rue/quarky";
+import {  Ion } from "@luent/quarky";
 
 
 //NOTE: We use partial types so that we can split between spreading and directly passing values to template

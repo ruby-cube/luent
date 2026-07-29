@@ -1,5 +1,5 @@
-import { component, template, If, NodeRef, Portal, RenderSlot, beforeMount } from '@rue/luent';
-import { $layout, ion, atLayout } from '@rue/quarky';
+import { component, template, If, NodeRef, Portal, RenderSlot, beforeMount } from 'luent';
+import { $layout, ion, atLayout } from '@luent/quarky';
 import './TestTooltip.css'
 
 

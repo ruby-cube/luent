@@ -1,8 +1,8 @@
-import { getActiveUpdate, atRender, queueTask, toValue, atTick } from "@rue/quarky";
+import { getActiveUpdate, atRender, queueTask, toValue } from "@luent/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/x-Input";
-import { Flask, getFlask } from "@rue/flask";
+import { Flask, getFlask } from "@luent/flask";
 import { atAttach, beforeDetach } from "../flask/flask-hooks";
 
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {

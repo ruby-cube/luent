@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@rue/luent-ui/tailwind.css";
+@import "@luent/luent-ui/tailwind.css";
 @source "../../shared/src/**/*.{ts,tsx,js,jsx,vue}";
 /**
  * Customize default theme styling by overriding CSS variables:

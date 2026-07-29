@@ -1,6 +1,6 @@
 
-import { component, template, If, JSXNode } from "@rue/luent";
-import {ion} from '@rue/quarky'
+import { component, template, If, JSXNode } from "luent";
+import {ion} from '@luent/quarky'
 
 // - [ ]  transform slot to render function for:
 

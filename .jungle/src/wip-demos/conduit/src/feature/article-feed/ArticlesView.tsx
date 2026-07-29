@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { component, Context, ContextKey, template, Else, ElseIf, For, fromContext, fromRoot, If, RenderSlot, AsyncIon } from "@rue/luent";
-import { Ion, Ionized, watch, ion } from "@rue/quarky";
+import { component, Context, ContextKey, template, Else, ElseIf, For, fromContext, fromRoot, If, RenderSlot, AsyncIon } from "luent";
+import { Ion, Ionized, watch, ion } from "@luent/quarky";
 import { Article } from "../../../api";
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 import { ArticleDatabase } from "../../db/ArticleDatabase";
 
 

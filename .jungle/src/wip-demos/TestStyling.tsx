@@ -1,4 +1,4 @@
-import { component, template } from "@rue/luent";
+import { component, template } from "luent";
 import m from "./TestStyling.module.css"
 
 export function TestStyling() {

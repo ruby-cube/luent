@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { AsyncIon } from "@rue/luent";
-import { Ionic } from "@rue/quarky";
+import { AsyncIon } from "luent";
+import { Ionic } from "@luent/quarky";
 
 
 

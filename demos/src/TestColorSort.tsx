@@ -1,22 +1,19 @@
-import { As, css, For, FromTag, If, ion, ionic, Style, Thru, track } from "@rue/luent";
-import { Finitron, queueTask } from "@rue/quarky";
-import { moveUniqueItems } from "@rue/utils";
+import { As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, track } from "luent";
+import { Ion, queueTask } from "@luent/quarky";
+import { moveUniqueItems } from "@luent/utils";
 
 export function TestColorSort() {
-  const $count = ion(0, { increment() { $count.value++ } })
+  const $round = ion(0, {
+    increment() { $round.value++ }
+  })
 
   return <>
-    <div class='color-sort-app'>
-      {As($count, () => {
+    <div class='palettable'>
+      {As($round, () => {
         const $moves = ion(0, {
           increment() { $moves.value++ }
         })
-
-        const palette = Finitron({
-          'unsorted': { complete: () => 'x:sorted' },
-          'x:sorted': {}
-        })
-        palette.init('unsorted')
+        const $solved = ion(false)
 
         return <>
           <div class='moves-panel'>
@@ -26,13 +23,13 @@ export function TestColorSort() {
             class='anchor'
             animate-in='slide-in'
             onMove={$moves.increment}
-            onComplete={() => setTimeout(() => palette.complete(), 1000)}
+            onComplete={() => $solved.value = true}
           ></ColorPalette>
-          {If(() => palette.is('x:sorted'),
+          {If($solved,
             <button
               transition-in
               class='next-btn'
-              on:click={$count.increment}
+              on:click={$round.increment}
             >Next</button>
           )}
         </>
@@ -49,11 +46,27 @@ export function TestColorSort() {
         anchor-name: --color-palette;
       }
 
-      .color-sort-app {
+      .palettable {
         display: flex;
         flex-direction: column;
-        height: 100vh;
         justify-content: center;
+        background-color: white;
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+      }
+
+      .moves-panel {
+        position: absolute;
+        top: 0px;
+        border: 2px solid gray;
+        padding: 1rem;
+        border-radius: 15px;
+        width: 44px;
+        margin: 10px;
+        place-self: center;
+        text-align: center;
+        font-family: sans-serif;
       }
 
       .next-btn {
@@ -88,18 +101,22 @@ export function TestColorSort() {
   </>
 }
 
+export const HOST = ContextKey<HTMLElement | undefined>('?')
+
 function ColorPalette(setup: FromTag<{
   size?: number;
   onMove: () => void;
   onComplete: () => void;
 }>) {
-  const { size = 5, onMove, onComplete, ...rest } = setup
+  const { size = 6, onMove, onComplete, ...rest } = setup
 
   const { colors, $sorted } = ColorsKit(size)
+
   const selected = ionic(new Set<Color>())
 
   function toggleSelect(block: Color) {
-    if (selected.has(block)) selected.delete(block)
+    if (selected.has(block))
+      selected.delete(block)
     else selected.add(block)
   }
 
@@ -119,172 +136,22 @@ function ColorPalette(setup: FromTag<{
     onMove()
   }
 
-  track($sorted, () => {
-    if ($sorted()) {
-      onComplete()
-      setTimeout(celebrate, 250) // 250 to ensure item transitions are complete
-    }
+  const { $dragging, makeDraggable } = DraggableKit<Color>({
+    n: colors.length,
+    onDrag(color) { selected.add(color) },
+    onDrop(index) { moveSelected(index) },
+    $selected: ion(() => colors.filter(color => selected.has(color))),
+    isSelected: color => selected.has(color)
   })
-
-  const $magnifiedIndex = ion(undefined as number | undefined);
-
-  function celebrate() {
-    $magnifiedIndex.value = 0;
-    const id = setInterval(() => {
-      $magnifiedIndex.value!++
-      if ($magnifiedIndex() === 7) {
-        clearInterval(id)
-        $magnifiedIndex.value = undefined
-      }
-    }, 84)
-  }
-
-  function magnified(index: number) {
-    return index === $magnifiedIndex();
-  }
-
-
-
-  let dragging = false;
-  let dropIndex: number | null = null;
-  let selectedIndex = 0;
-  let dropZone: Element | null = null;
-
-  /**
-   * @state is transitioning tag-alongs
-   */
-  const $taggingAlong = ion(false)
-
-  /**
-   * @description prevents canceled drag and drops from being reselected by `toggleSelect`
-   */
-  function endDragging() {
-    if (dragging) {
-      dragging = false
-      return true;
-    }
-  }
-
-  const $shiftX = ion(0)
-  const $shiftY = ion(0)
-
-  function maybeDrag(e: PointerEvent, index: number, color: Color) {
-    const target = e.currentTarget! as Element
-    target.setPointerCapture(e.pointerId)
-    let x = 0;
-    let y = 0;
-
-    const originalX = e.clientX
-    const originalY = e.clientY
-
-    target.addEventListener('pointermove', rePointermove)
-    target.addEventListener('pointerup', rePointerUp)
-
-    function rePointermove(e: any) {
-      if (Math.abs(e.clientX - originalX) < 5 && Math.abs(e.clientY - originalY) < 5)
-        return;
-      dragging = true;
-      selectedIndex = index;
-      selected.add(color);
-      startDrag()
-      x = e.clientX
-      y = e.clientY
-      drag(e)
-      target.removeEventListener('pointermove', rePointermove);
-      target.addEventListener('pointermove', drag)
-      if (selected.size > 1) {
-        $taggingAlong.value = true;
-        for (const color of selected) {
-          // on transition end here
-        }
-      }
-    }
-
-    let prevDropZone = dropZone;
-
-    function drag(e: any) {
-      $shiftX.value = e.clientX - x;
-      $shiftY.value = e.clientY - y;
-
-      // Find the element underneath the pointer
-      const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
-      dropZone = elementBelow?.closest('.drop-zone') ?? null;
-
-      if (dropZone !== prevDropZone) {
-        if (dropZone) {
-          const i = Number(dropZone.getAttribute('data-drop-index'))
-          dropZone = i === -1 ? dropZone.nextElementSibling! : i === colors.length + 1 ? dropZone.previousElementSibling! : dropZone
-          const index = i === -1 ? 0 : i === colors.length + 1 ? colors.length : i;
-          prevDropZone?.classList.remove('drop-target')
-          dropZone.classList.add('drop-target');
-          dropIndex = index
-          prevDropZone = dropZone
-        }
-        else {
-          prevDropZone?.classList.remove('drop-target')
-          dropIndex = null;
-          prevDropZone = null;
-        }
-      }
-    }
-
-    function rePointerUp(e: any) {
-      if (dragging) {
-        target.releasePointerCapture(e.pointerId)
-        $shiftX.value = 0;
-        $shiftY.value = 0;
-        moveSelected(dropIndex === null ? selectedIndex : dropIndex);
-        endDrag()
-        selected.clear()
-        target.removeEventListener('pointermove', drag)
-      }
-      target.removeEventListener('pointermove', rePointermove)
-      target.removeEventListener('pointerup', rePointerUp)
-    }
-  }
-
-  const $dragging = ion(false)
-
-  function startDrag() {
-    $dragging.value = true
-  }
-
-  function endDrag() {
-    queueTask(() => dragging = false); // allows swatches to be selected after a drag and drop action
-    $dragging.value = false;
-  }
-
-  /**
-   * @description selected colors in order that matches original array
-   */
-  const $selected = ion(() => colors.filter(color => selected.has(color)))
-
-  /**
-   * @description nudges tag-alongs so that they are peeking out from the dragged swatch
-   */
-  function adjustX(x: number, index: number) {
-    if (index === selectedIndex) return x;
-    const delta = Math.abs(index - selectedIndex);
-    const shift = delta * 24 + delta * 44
-    const selected = $selected()
-    const nudge = (selected.indexOf(colors[selectedIndex]) - selected.indexOf(colors[index])) * 8
-    return index < selectedIndex ? x + shift - nudge : x - shift - nudge
-  }
-
-  /**
-   * @description determines z-index
-   */
-  function order(index: number, selectedIndex: number) {
-    if (index <= selectedIndex) return 150;
-    const delta = selectedIndex - index
-    return 150 + delta;
-  }
-
 
   const $disableGap = ion(() => $dragging() || selected.size === 0)
 
+  const { makeMagnifyable } = CelebrationKit($sorted, onComplete)
+
   return <>
-    <o--window on:click={e => e.from('.clickable') || deselectAll()} />
+    <o--portal to={fromContext(HOST) ?? window}
+      on:click={e => e.from('.clickable') || deselectAll()}
+    />
     <div class='container' auto-bind={rest}>
       <div class='row'>
         <Endgap
@@ -295,122 +162,48 @@ function ColorPalette(setup: FromTag<{
           disabled={$disableGap}
           on:click={() => moveSelected(0)}
         />
-        {For(colors, m => m, (color, $index) => {
-          const $dragged = ion(() => isSelected(color) && $dragging())
-          const $tagalong = ion(() => $taggingAlong() && $dragged() && $index() !== selectedIndex)
-          return <>
+        {For(colors, m => m, (color, $index) =>
+          <>
             <div
               transition-item
-              on:pointerdown={e => maybeDrag(e, $index(), color)}
-              on:transitionend={() => $taggingAlong.value = false}
-              on:click={() => endDragging() || toggleSelect(color)}
-              class={['clickable', { 'tag-along': $tagalong, 'dragged': $dragged }]}
-              style={{
-                'z-index': () => $dragged() ? order($index(), selectedIndex) : 0,
-                'transform': () => $dragged() ? `translate(${adjustX($shiftX(), $index())}px, ${$shiftY()}px)` : 'unset'
+              before:mount={node => {
+                makeDraggable(node, color, $index);
+                makeMagnifyable(node, $index);
               }}
-            >
-              <div
-                class={['square', {
-                  'selected': () => isSelected(color) && !$dragging(),
-                  'selected-drag': $dragged,
-                  'magnifying': () => $magnifiedIndex() !== undefined
-                }]}
-                style={{
-                  'background-color': `hsl(${color.h}deg, ${color.s}%, ${color.l}%)`,
-                  'transform': () => magnified($index()) ? `scale(1.25)` : `scale(1)`
-                }}
-              ></div>
-            </div>
+              class={['clickable', 'square', {
+                'selected': () => isSelected(color) && !$dragging()
+              }]}
+              style={`background-color: hsl(${color.h}deg, ${color.s}%, ${color.l}%)`}
+              on:click={() => $dragging() || toggleSelect(color)}
+            ></div>
             <Gap
               disabled={$disableGap}
               on:click={() => moveSelected($index() + 1)}
             />
           </>
-        })}
+        )}
         <Endgap
           disabled={$disableGap}
           on:click={() => moveSelected(colors.length)}
         />
-        {If($dragging,
-          <div class='dropzones'>
-            <div class='drop-zone' data-drop-index={-1}></div>
-            {Thru(colors.length + 1, (count) =>
-              <div
-                class='drop-zone'
-                data-drop-index={count - 1}
-              >{Arrow()}</div>
-            )}
-            <div class='drop-zone' data-drop-index={colors.length + 1}></div>
-          </div>
-        )}
+        <DropZones n={colors.length} dragging={$dragging}></DropZones>
       </div>
     </div>
 
     {Style(css`
-      .clickable {
-        cursor: pointer;
-      }
-
-      .moves-panel {
-        position: absolute;
-        top: 0px;
-        border: 2px solid gray;
-        padding: 1rem;
-        border-radius: 15px;
-        width: 44px;
-        margin: 10px;
-        place-self: center;
-        text-align: center;
-        font-family: sans-serif;
-      }
-
-      .dragged {
-        cursor: grabbing;
-      }
-
-      .tag-along {
-        transition: transform 85ms ease;
-      }
-
-      .selected-stack {
-        position: relative;
-        width: 44px;
-        height: 44px;
-      }
-
-      .selected-drag {
-        box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
-      }
-
-      .dropzones {
-        position: absolute;
-        display: flex;
-        left: 0px;
-      }
-
-      .drop-zone {
-        position: relative;
-        width: 68px;
-        height: 88px;
-        z-index: 200;
-        opacity: 0;
-        transition: opacity 150ms ease-in-out;
-      }
-
-      .drop-target {
-        opacity: 1;
-      }
-
       .container {
         display: flex;
         flex-direction: column;
       }
-
+      
       .row {
         position: relative;
         display: flex;
         margin-inline: auto;
+      }
+
+      .clickable {
+        cursor: pointer;
       }
 
       .selected {
@@ -421,10 +214,6 @@ function ColorPalette(setup: FromTag<{
         width: 44px;
         height: 44px;
         border-radius: 10px;
-      }
-      
-      .magnifying {
-        transition: transform 90ms ease-in;
       }
     `)}
   </>
@@ -521,21 +310,222 @@ const Arrow = () =>
     `)}
   </>
 
+
+function DraggableKit<T>(config: {
+  n: number,
+  onDrag: (item: T) => void,
+  onDrop: (dropIndex: number) => void,
+  isSelected: (item: T) => boolean,
+  $selected: Ion<T[]>
+}) {
+  const { n, onDrag, onDrop, isSelected, $selected } = config
+
+  let selectedItem: T | null = null;
+  let selectedIndex: number | null = null;
+  let dropIndex: number | null = null;
+  let dropZone: Element | null = null;
+
+  const $dragging = ion(false)
+  const $taggingAlong = ion(false) // tag-along transition
+  const $shiftX = ion(0)
+  const $shiftY = ion(0)
+
+  function maybeDrag(e: PointerEvent, item: T, index: number) {
+    const target = e.currentTarget! as Element
+    target.setPointerCapture(e.pointerId)
+    let x = 0;
+    let y = 0;
+
+    const originalX = e.clientX
+    const originalY = e.clientY
+
+    target.addEventListener('pointermove', rePointermove)
+    target.addEventListener('pointerup', rePointerUp)
+
+    function rePointermove(e: any) {
+      if (Math.abs(e.clientX - originalX) < 5 && Math.abs(e.clientY - originalY) < 5)
+        return;
+
+      selectedItem = item;
+      selectedIndex = index;
+      $dragging.value = true
+      onDrag(item);
+
+      if ($selected().length > 1) {
+        $taggingAlong.value = true;
+      }
+
+      x = e.clientX
+      y = e.clientY
+      drag(e)
+      target.removeEventListener('pointermove', rePointermove);
+      target.addEventListener('pointermove', drag)
+    }
+
+    let prevDropZone = dropZone;
+
+    function drag(e: any) {
+      $shiftX.value = e.clientX - x;
+      $shiftY.value = e.clientY - y;
+
+      // Find the element underneath the pointer
+      const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+      dropZone = elementBelow?.closest('.drop-zone') ?? null;
+
+      if (dropZone !== prevDropZone) {
+        if (dropZone) {
+          const i = Number(dropZone.getAttribute('data-drop-index'))
+          dropZone = i === -1 ? dropZone.nextElementSibling! : i === n + 1 ? dropZone.previousElementSibling! : dropZone
+          const index = i === -1 ? 0 : i === n + 1 ? n : i;
+          prevDropZone?.classList.remove('drop-target')
+          dropZone.classList.add('drop-target');
+          dropIndex = index
+          prevDropZone = dropZone
+        }
+        else {
+          prevDropZone?.classList.remove('drop-target')
+          dropIndex = null;
+          prevDropZone = null;
+        }
+      }
+    }
+
+    function rePointerUp(e: any) {
+      if ($dragging()) {
+        target.releasePointerCapture(e.pointerId)
+        $shiftX.value = 0;
+        $shiftY.value = 0;
+        onDrop(dropIndex === null ? selectedIndex! : dropIndex)
+        // delaying prevents a swatch that is dropped in its original position from being reselected.
+        queueTask(() => $dragging.value = false);
+        target.removeEventListener('pointermove', drag)
+      }
+      target.removeEventListener('pointermove', rePointermove)
+      target.removeEventListener('pointerup', rePointerUp)
+    }
+  }
+
+
+
+  // Tag-along
+  /**
+   * @description positions tag-alongs so that they are peeking out from the primary dragged swatch
+   */
+  function adjustX(x: number, item: T, index: number) {
+    if (index === selectedIndex || selectedIndex === null) return x;
+    const delta = Math.abs(index - selectedIndex);
+    const shift = delta * 24 + delta * 44
+    const selected = $selected()
+    const nudge = (selected.indexOf(selectedItem!) - selected.indexOf(item)) * 8
+    return index < selectedIndex ? x + shift - nudge : x - shift - nudge
+  }
+
+  /**
+   * @description determines z-index
+   */
+  function order(index: number) {
+    if (selectedIndex === null || index <= selectedIndex) return 150;
+    const delta = selectedIndex - index
+    return 150 + delta;
+  }
+
+  function makeDraggable(node: HTMLElement, item: T, $index: Ion<number>) {
+    const $dragged = ion(() => isSelected(item) && $dragging());
+    const $tagalong = ion(() => $taggingAlong() && $dragged() && $index() !== selectedIndex);
+    const $node = asJSX(node);
+
+    <$node
+      on:pointerdown={e => maybeDrag(e, item, $index())}
+      on:transitionend={() => $taggingAlong.value = false}
+      class={[{
+        'tag-along': $tagalong,
+        'dragged': $dragged,
+      }]}
+      style={{
+        'z-index': () => $dragged() ? order($index()) : 0,
+        'transform': () => $dragged() ? `translate(${adjustX($shiftX(), item, $index())}px, ${$shiftY()}px)` : undefined
+      }}
+    />
+  }
+
+  Style(css`
+    .dragged {
+      cursor: grabbing;
+      box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
+    }
+  
+    .tag-along {
+      transition: transform 67ms ease;
+    }
+  `)
+
+  return {
+    makeDraggable,
+    $dragging,
+  }
+}
+
+
+function DropZones(setup: FromTag<{
+  dragging: Ion<boolean>;
+  n: number
+}>) {
+  const { $dragging, n } = setup
+
+  return <>
+    {If($dragging,
+      <div class='dropzones'>
+        <div class='drop-zone' data-drop-index={-1}></div>
+        {Thru(n + 1, count =>
+          <div
+            class='drop-zone'
+            data-drop-index={count - 1}
+          >{Arrow()}</div>
+        )}
+        <div class='drop-zone' data-drop-index={n + 1}></div>
+      </div>
+    )}
+
+    {Style(css`
+      .dropzones {
+        position: absolute;
+        display: flex;
+        left: 0px;
+      }
+
+      .drop-zone {
+        position: relative;
+        width: 68px;
+        height: 88px;
+        z-index: 200;
+        opacity: 0;
+        transition: opacity 150ms ease-in-out;
+      }
+
+      .drop-target {
+        opacity: 1;
+      }
+    `)}
+  </>
+}
+
+
 export type Color = {
   h: number,
   s: number,
   l: number,
 }
 
-function ColorsKit(size: number = 5) {
+function ColorsKit(size: number) {
+  const n = size - 1
 
   const genColor = useRandomColorGenerator()
 
   const [h, s, l] = genColor()
   const goal = goalHue(h)
-  const hues = getSteps(h, goal, size).map(hue => hue % 360)
-  const sats = getSteps(s, (s + 30) % 100, size)
-  const lights = getSteps(l, (l + 30) % 100, size)
+  const hues = getSteps(h, goal, n).map(hue => hue % 360)
+  const sats = getSteps(s, (s + 30) % 100, n)
+  const lights = getSteps(l, (l + 10) % 100, n)
 
   const sortedColors = composeColorArray(hues, sats, lights)
   const reverseColors = sortedColors.toReversed()
@@ -582,7 +572,7 @@ function composeColorArray(hues: number[], sats: number[], lights: number[]) {
     const color = {
       h: hues[i],
       s: sats[i],
-      l: sats[i]
+      l: lights[i]
     }
     colors.push(color)
   }
@@ -617,7 +607,7 @@ function useRandomColorGenerator() {
   return function genColor(): [number, number, number] {
     const h = Math.floor(Math.random() * 360);
     const s = 30 + Math.floor(Math.random() * 40);
-    const l = 40 + Math.floor(Math.random() * 40);
+    const l = 30 + Math.floor(Math.random() * 30);
     const color = `${h}+${s}+${l}`
     if (color === previous) return genColor();
     previous = `${h}+${s}+${l}`
@@ -640,3 +630,48 @@ function goalHue(baseHue: number) {
 
 
 
+function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
+
+  track($sorted, () => {
+    if ($sorted()) {
+      setTimeout(celebrate, 250) // 250 to ensure item transitions are complete
+    }
+  })
+
+  const $magnifiedIndex = ion(undefined as number | undefined);
+
+  function celebrate() {
+    $magnifiedIndex.value = 0;
+    const id = setInterval(() => {
+      $magnifiedIndex.value!++
+      if ($magnifiedIndex() === 7) {
+        clearInterval(id)
+        $magnifiedIndex.value = undefined
+        onComplete()
+      }
+    }, 84)
+  }
+
+  function magnified(index: number) {
+    return index === $magnifiedIndex();
+  }
+
+  return {
+    makeMagnifyable(node: HTMLElement, $index: Ion<number>) {
+      const $node = asJSX(node);
+
+      <$node
+        class={{ 'magnifying': () => $magnifiedIndex() !== undefined }}
+        style={{
+          'transform': () => magnified($index()) ? `scale(1.25)` : `scale(1)`
+        }}
+      ></$node>
+
+      Style(css`
+        .magnifying {
+          transition: transform 90ms ease-in;
+        }
+      `)
+    }
+  }
+}

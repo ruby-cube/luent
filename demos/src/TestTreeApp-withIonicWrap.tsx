@@ -1,5 +1,5 @@
-import { component, template, FromTag, If, Else, For, fromGround, ContextKey, provideGround, $of } from "@rue/luent";
-import { as, ionic, EACH, ion, Ionic, Nested, } from "@rue/quarky";
+import { component, template, FromTag, If, Else, For, fromGround, ContextKey, provideGround, $of } from "luent";
+import { as, ionic, EACH, ion, Ionic, Nested, } from "@luent/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
 

@@ -1,7 +1,7 @@
 
-import { atAttach, For, If, Style } from "@rue/luent"
-import { component, template, beforeDetach } from "@rue/luent"
-import {  Ion, ion, popUpdate, pushUpdate, SYNC,watch } from "@rue/quarky"
+import { atAttach, For, If, Style } from "luent"
+import { component, template, beforeDetach } from "luent"
+import {  Ion, ion, popUpdate, pushUpdate, SYNC,watch } from "@luent/quarky"
 
 export function SevenGUIs() {
    return (

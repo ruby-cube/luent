@@ -162,7 +162,7 @@ export function MultiplierKit(count@: Get<number>) {
 }
 ```
 ```nsx
-import { ion } from '@rue/luent'
+import { ion } from 'luent'
 import { MultiplierKit } from './MultiplierKit.ns'
 
 function Multiplier() {
@@ -182,7 +182,7 @@ function Multiplier() {
 ```
 ::: info transpiled
 ```ts
-import { ion } from '@rue/luent'
+import { ion } from 'luent'
 import { MultiplierKit } from './MultiplierKit.ns'
 
 function Multiplier() {

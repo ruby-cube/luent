@@ -1,5 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
-import LuentPlugin from '@rue/vite-plugin-luent'
+import LuentPlugin from '@luent/vite-plugin-luent'
 
 export function createSharedViteConfig() {
   return {

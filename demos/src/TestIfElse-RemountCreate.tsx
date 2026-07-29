@@ -1,4 +1,4 @@
-import { template, mountIsland } from "@rue/luent";
+import { template, mountIsland } from "luent";
 import { TestIfElseMix } from "./TestIfElseMix";
 
 if (__TEST__)

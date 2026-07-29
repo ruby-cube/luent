@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { dev, ion, PRELUDE, SYNC, watch } from "@rue/quarky";
+import { component, template } from "luent";
+import { dev, ion, PRELUDE, SYNC, watch } from "@luent/quarky";
 
 // COMPOUNDS
 // [] multisubject

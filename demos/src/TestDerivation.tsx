@@ -1,5 +1,5 @@
-import { $of, component, For, template } from "@rue/luent";
-import { ionic, SYNC, watch } from "@rue/quarky";
+import { $of, component, For, template } from "luent";
+import { ionic, SYNC, watch } from "@luent/quarky";
 
 
 

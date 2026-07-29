@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 
 const macOSPlatforms = new Set(['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K']);
 const windowsPlatforms = new Set(['Win32', 'Win64', 'Windows', 'WinCE']);

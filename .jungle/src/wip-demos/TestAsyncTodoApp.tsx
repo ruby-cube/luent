@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { AsyncIon, If, Suspense } from "@rue/luent";
-import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
-import { EACH, instantUpdate, Ion, Ionic, ionic, IonicProxy, isIonicProxy } from "@rue/quarky";
+import { AsyncIon, If, Suspense } from "luent";
+import { Await, Meanwhile } from "../../../../packagesluent/src/boundaries/Await";
+import { EACH, instantUpdate, Ion, Ionic, ionic, IonicProxy, isIonicProxy } from "@luent/quarky";
 import { Action, REFETCH } from "../../../../packages/quarky/src/async/Action";
 import { toggleCompleted } from "./AsyncDemoLessons/data";
-import { AnyObject } from "@rue/types";
-import { isObject, noop } from "@rue/utils";
+import { AnyObject } from "@luent/types";
+import { isObject, noop } from "@luent/utils";
 
 
 

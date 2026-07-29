@@ -1,4 +1,4 @@
-// import { mountIsland } from "@rue/luent"
+// import { mountIsland } from "luent"
 
 // export function mountIslands(island: string, render: () => any) {
 //   const root = document.querySelector(`[data-luent-island="${island}"]`)

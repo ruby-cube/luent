@@ -1,7 +1,6 @@
-import { atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting } from "@rue/luent";
-import { $activeUpdate, Ion, ion, layout } from "@rue/quarky";
+import { Ion, ion, layout, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component } from "luent";
 import { codeHtml, trusted } from "./code-utils";
-import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@rue/luent-ui";
+import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
 
 // TODO: Fix hacky SSG solutions
@@ -27,6 +26,16 @@ function markHover(code: string, map?: { [key: string]: string }) {
 
 type CodeTab = { name: string, code: string, lang?: string, hover?: { [key: string]: string } }
 
+export function $Tab() {
+  return ion('main' as 'main' | 'alt', {
+    toggle() {
+      this.value === 'main'
+        ? this.value = 'alt'
+        : this.value = 'main'
+    }
+  })
+}
+
 export function Code(setup: FromTag<{
   main: CodeTab,
   alt: CodeTab,
@@ -36,22 +45,13 @@ export function Code(setup: FromTag<{
   tab?: Ion<'main' | 'alt'> & { toggle(): void }
 }>) {
   const { main, alt, highlight, trusted, showSticky = false,
-
-    $tab = ion('main' as 'main' | 'alt', {
-      toggle() {
-        this.value === 'main'
-          ? this.value = 'alt'
-          : this.value = 'main'
-      }
-    })
+    $tab = $Tab()
   } = setup;
 
-
   let mainWidth = 0;
-  
+
   function setMainWidth(node: HTMLSpanElement) {
     awaiting(layout, () => {
-      console.log('@@@ layout task', $activeUpdate())
       mainWidth = node.offsetWidth;
     })
   }
@@ -60,11 +60,14 @@ export function Code(setup: FromTag<{
   const $container = NodeRef('div')
   const $nav = NodeRef('nav')
 
-  return (
-    <>
+  return {
+    component: {
+      get tab() { return $tab() }
+    },
+    nodes: <>
       <div class='code-container'>
         <nav ref={$nav}>
-          <button class='toggle' on:click={() => $tab.toggle()}>
+          <button class='toggle' on:click={() => { console.log('$$$click toggle'); $tab.toggle() }}>
             <span class='option selected' style={{ 'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined }}>{() => $tab() === 'main' ? main.name : alt.name}</span>
             <span after:mount={setMainWidth} class='option'>{main.name}</span>
             <span class='option'>{alt.name}</span>
@@ -248,7 +251,7 @@ export function Code(setup: FromTag<{
 
       `)}
     </>
-  )
+  }
 }
 
 function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Promise<string>) {

@@ -1,6 +1,6 @@
 ```tsx
-import { template, For, If, Else, FromTag, listen, isMutableIon } from "@rue/luent"
-import { watch, ionicTickTask, Ion, Ionic, EACH, as, ion, ionic } from "@rue/quarky"
+import { template, For, If, Else, FromTag, listen, isMutableIon } from "luent"
+import { watch, ionicTickTask, Ion, Ionic, EACH, as, ion, ionic } from "@luent/quarky"
 
 interface Todo {
    id: number

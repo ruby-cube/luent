@@ -1,8 +1,8 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 import { Reaction } from "./Reaction"
 import { hasQuark, quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
-import { isFunction, isObject, noop } from "@rue/utils";
+import { isFunction, isObject, noop } from "@luent/utils";
 import { isIon, toValue } from "../ion/utils";
 import { WatchSubjects } from "./Watcher";
 import { Compound, popTracker, pushTracker } from "./Compound";

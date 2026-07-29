@@ -1,13 +1,13 @@
 {
-  "name": "@rue/luent-site",
+  "name": "@luent/luent-site",
   "private": true,
   "description": "",
   "type": "module",
   "devDependencies": {
-    "@rue/luent": "workspace:*",
-    "@rue/luent-ui": "workspace:*",
-    "@rue/quarky": "workspace:*",
-    "@rue/websites-shared": "workspace:*",
+    "luent": "workspace:*",
+    "@luent/luent-ui": "workspace:*",
+    "@luent/quarky": "workspace:*",
+    "@luent/websites-shared": "workspace:*",
     "concurrently": "^10.0.3",
     "shiki": "^4.1.0",
     "tailwind-merge": "^3.6.0",

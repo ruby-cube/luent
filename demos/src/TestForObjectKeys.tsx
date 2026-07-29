@@ -1,5 +1,5 @@
-import { component, template, For } from "@rue/luent";
-import { ionic } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { ionic } from "@luent/quarky";
 
 export function TestForObjectKeys() {
    const obj = ionic({

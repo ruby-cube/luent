@@ -1,4 +1,4 @@
-import { component, css, FromTag, RenderSlot, Style } from '@rue/luent'
+import { css, FromTag, Ion, RenderSlot, Style } from 'luent'
 import { Code } from './Code';
 
 export function CodeTour(setup: FromTag<{
@@ -41,6 +41,7 @@ export function CodeTour(setup: FromTag<{
 }
 
 export function TourSection(setup: FromTag<{
+  tab: Ion<"main" | "alt">,
   id?: string,
   Slot: RenderSlot,
   mainCode: { name: string, code: string, lang?: string },
@@ -48,8 +49,7 @@ export function TourSection(setup: FromTag<{
   highlightCode: (code: string, lang: string) => Promise<string>,
   flow: 'code-right' | 'code-left'
 }>) {
-  const { Slot, flow, mainCode, altCode, highlightCode, id } = setup
-
+  const { Slot, flow, mainCode, altCode, highlightCode, id, $tab } = setup
   return (
     <>
       <article id={id} class={`tour-row ${flow}`}>
@@ -62,6 +62,7 @@ export function TourSection(setup: FromTag<{
             main={mainCode}
             alt={altCode}
             highlight={highlightCode}
+            tab={$tab}
           ></Code>
         </div>
       </article>

@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, User as FirebaseUser, Auth, UserCredential } from "firebase/auth";
 import { addDoc, collection, Firestore, getFirestore, Timestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
-import { beforeDetach, fromGround, provideGround } from "@rue/luent";
-import {  ion, watch } from "@rue/quarky";
+import { beforeDetach, fromGround, provideGround } from "luent";
+import {  ion, watch } from "@luent/quarky";
 
 // Import the functions you need from the SDKs you need
 // https://firebase.google.com/docs/web/setup#available-libraries

@@ -1,5 +1,5 @@
-import { NodeRef } from "@rue/luent";
-import {ion} from "@rue/quarky"
+import { NodeRef } from "luent";
+import {ion} from "@luent/quarky"
 
 export function MainBlock() {
 

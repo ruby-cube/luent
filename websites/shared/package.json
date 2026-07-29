@@ -1,5 +1,5 @@
 {
-  "name": "@rue/websites-shared",
+  "name": "@luent/websites-shared",
   "private": true,
   "description": "",
   "type": "module",
@@ -7,13 +7,13 @@
   "module": "./src/index.ts",
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
-    "@rue/utils": "workspace:*"
+    "@luent/utils": "workspace:*"
   },
   "devDependencies": {
-    "@rue/luent": "workspace:*",
-    "@rue/luent-ui": "workspace:*",
-    "@rue/quarky": "workspace:*",
-    "@rue/vite-plugin-luent": "workspace:*"
+    "luent": "workspace:*",
+    "@luent/luent-ui": "workspace:*",
+    "@luent/quarky": "workspace:*",
+    "@luent/vite-plugin-luent": "workspace:*"
 
   },
   "peerDependencies": {

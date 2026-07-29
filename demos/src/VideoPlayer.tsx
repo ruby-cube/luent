@@ -1,5 +1,5 @@
-import { Else, If, NodeRef, css, component, Style } from "@rue/luent";
-import { Ion, ion, queueTask, watch, Finitron, ionic } from "@rue/quarky";
+import { Else, If, NodeRef, css, component, Style } from "luent";
+import { Ion, ion, queueTask, watch, Finitron, ionic } from "@luent/quarky";
 import "./reset.css"
 
 
@@ -108,7 +108,7 @@ export function VideoPlayer() {
           <source src="https://developer.mozilla.org/shared-assets/videos/flower.mp4" type="video/mp4" />
         </video>
 
-        {If((player.is("x:ready")), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
+        {If(() => player.is("x:ready"), //FIX: conditionals break without a root node, conditionals are not being mounted correctly
           <div>
             <ElapsedBar
               elapsed={elapsedTime}

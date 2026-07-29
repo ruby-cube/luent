@@ -1,5 +1,5 @@
-import { component, listen, template } from "@rue/luent";
-import { ion, watch } from "@rue/quarky";
+import { component, listen, template } from "luent";
+import { ion, watch } from "@luent/quarky";
 
 export function TestOnceEager() {
    const $count = ion(0, {

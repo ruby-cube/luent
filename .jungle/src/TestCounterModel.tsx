@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent"
-import { ionic, ion, Ionic, watch } from "@rue/quarky"
+import { component, template } from "luent"
+import { ionic, ion, Ionic, watch } from "@luent/quarky"
 
 // TODO:
 // [x] private this access in methods and typing

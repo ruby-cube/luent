@@ -1,7 +1,6 @@
-import { ContextKey, fromContext, listen } from "@rue/luent"
-import { ionic, Ionic, queueTask } from "@rue/quarky"
-import { AnyObject } from "@rue/types"
-import { Alignment, DATA_ATTRIBUTE_POPOVER, getPopoverID, Placement, Popover } from "../popover/Popover.kit"
+import { ContextKey, fromContext, listen, ionic, Ionic, queueTask } from "luent"
+import { AnyObject } from "@luent/types"
+import { DATA_ATTRIBUTE_POPOVER, getPopoverID, Popover } from "../popover/Popover.kit"
 
 
 type TooltipConfig = Readonly<{

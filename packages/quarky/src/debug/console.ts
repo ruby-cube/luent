@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types"
+import { AnyObject } from "@luent/types"
 import { isIonicProxy } from "../ionic/IonicModel"
 
 // TODO: check environment for global object

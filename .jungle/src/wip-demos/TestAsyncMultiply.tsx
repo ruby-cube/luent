@@ -1,6 +1,6 @@
-import { component, template, For } from "@rue/luent";
-import { Ion, ion,ionic, Ionic, SuspenseIon, swiftUpdate } from "@rue/quarky";
-import { Await, Meanwhile } from "../../../../packages/luent/src/boundaries/Await";
+import { component, template, For } from "luent";
+import { Ion, ion,ionic, Ionic, SuspenseIon, swiftUpdate } from "@luent/quarky";
+import { Await, Meanwhile } from "../../../../packagesluent/src/boundaries/Await";
 import { Dispatch } from "../../../../packages/quarky/src/async/Dispatch";
 
 

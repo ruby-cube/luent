@@ -1,11 +1,11 @@
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { isFunction, isObject, normalizeToArray } from "@rue/utils";
+import { isFunction, isObject, normalizeToArray } from "@luent/utils";
 import { atAttach, beforeDetach, atRemount, atDetach } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
-import { getFlask } from "@rue/flask";
-import { atInternalRender, atRender } from "@rue/quarky";
-import { AnyObject } from "@rue/types";
-import { makeElement } from "../element/makeElement";
+import { getFlask } from "@luent/flask";
+import { atInternalRender, atRender } from "@luent/quarky";
+import { AnyObject } from "@luent/types";
+import { setUpElement } from "../element/setUpElement";
 
 export type MorphConfig = {}
 
@@ -46,7 +46,7 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
   if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
   if (config) {
     // set up attributes
-    makeElement(element, undefined, config)
+    setUpElement(element, undefined, config)
   }
   if (!render) return;
   if (!(isFunction(render))) throw new Error('Compiler failed to turn JSX into render function')

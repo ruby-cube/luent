@@ -1,5 +1,5 @@
-import { ion, SYNC, watch } from "@rue/quarky";
-import { component, template } from "@rue/luent";
+import { ion, SYNC, watch } from "@luent/quarky";
+import { component, template } from "luent";
 
 export function TestSyncEffects() {
 

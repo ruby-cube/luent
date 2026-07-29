@@ -1,21 +1,20 @@
 import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
 import { ComponentTag, InferSlot, makeComponent } from "../component/Component";
-import { TagName, makeElement } from "../element/makeElement";
+import { TagName, setUpElement, useDOMNode } from "../element/setUpElement";
 import { NodeRef, INTERNAL } from "./NodeRef";
-import { AnyObject, Booleanny, Falsey } from "@rue/types";
+import { AnyObject, Booleanny, Falsey } from "@luent/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Context, Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ViewType } from "../conditional/If";
 import { MaybeIon, RenderSlot } from "../component/x-Input";
-import { Create, markActivationType, Remount } from "../conditional/IfElse";
-import { DOMNode, VineNode } from "./VineNode";
-import { NodeRefsConfig } from "./NodeRefs";
-import { normalizeToArray, toError } from "@rue/utils";
-import { RenderError } from "../boundaries/Try";
-import { ComponentKit } from "@rue/nextscript";
+import { DOMNode, DOMParent, VineNode } from "./VineNode";
+import { ComponentKit } from "@luent/nextscript";
 import { createShadowRoot } from "../component/shadow";
 import { provideTransition } from "../transitions/Transition";
+import { fromContext } from "../context/provide";
+import { ContextKey } from "../context/ContextKey";
+import { createNSElement, getXMLNamespace, newXMLNamespace, withXMLNamespace } from "../element/NSElement";
 
 export type TagType = ComponentTag | string
 
@@ -176,7 +175,7 @@ export function makeView(Slot: RenderFunction, config: ViewConfig) {
 }
 
 
-
+export const HOST = ContextKey<Element>('?')
 
 type SVGTag = keyof SVGElementTagNameMap
 
@@ -199,7 +198,7 @@ export function makeJSXNode(
 
     case 'o-link':
       return Portal('head', () =>
-        makeElement('link', undefined, <ElementConfig>config)
+        setUpElement(useDOMNode('link').domNode, undefined, <ElementConfig>config)
       );
 
     case 'o--html':
@@ -208,8 +207,12 @@ export function makeJSXNode(
     case 'o--body':
       return Portal(document.body, Slot, config);
 
+    case 'o--host':
+      Portal(fromContext(HOST) ?? window, Slot, config);
+      return null;
+
     case 'o--window':
-      makeElement(window, undefined, config)
+      setUpElement(window, undefined, config)
       return null;
 
     case 'o--head':
@@ -223,20 +226,50 @@ export function makeJSXNode(
       if (!Slot) throw new Error(`Extraneous <o:preserve>`)
       return makeView(wrapWithActivationType('preserve', Slot), config);
 
+    case undefined:
+    case null:
+      return;
+
     default:
-      if (typeof nodeType === 'string') {
-        return makeElement(
+      if (typeof nodeType === 'function') {
+        return makeComponent(
           nodeType,
-          Slot,
+          <ComponentConfig>config,
+        )
+      }
+      const { domNode, SlotWithXMLNS } = useDOMNode(nodeType, config.xmlns, Slot)
+
+      if (SlotWithXMLNS && 'is-host' in config) {
+        return setUpElement(
+          domNode,
+          wrapWithContext(SlotWithXMLNS, HOST(domNode)),
           <ElementConfig>config,
         )
       }
-      return makeComponent(
-        nodeType,
-        <ComponentConfig>config,
+      return setUpElement(
+        domNode,
+        SlotWithXMLNS,
+        <ElementConfig>config,
       )
   }
 }
+
+// TODO: xml namespace for existing elements
+function useDOMNode(tag: string | Element, xmlns?: any, Slot?: RenderSlot | undefined) {
+  let newXML_NS: string | undefined;
+  let XML_NS: string | undefined;
+
+  const domNode = typeof tag === 'string' ? ((XML_NS = (newXML_NS = newXMLNamespace(tag, xmlns)) || getXMLNamespace())
+    ? createNSElement(tag, XML_NS)
+    : document.createElement(tag))
+    : tag;
+
+  return {
+    domNode: domNode as Element & DOMParent & HTMLElement,
+    SlotWithXMLNS: Slot ? withXMLNamespace(Slot, newXML_NS ? newXML_NS : tag === 'foreignObject' ? undefined : XML_NS) : Slot
+  }
+}
+
 
 // export function _getNodeConfig(ref: NodeRef | undefined) {
 //     if (ref) {

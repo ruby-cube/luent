@@ -1,4 +1,4 @@
-import { traverse } from '@rue/tree-squirl';
+import { traverse } from '@luent/tree-squirl';
 import { Argument, Node, parseSync, Program } from 'oxc-parser';
 import { PluginOption } from 'vite';
 
@@ -51,7 +51,7 @@ export default function hyperHTMLPlugin() {
 
 
 function hasHyperHTML(code: string) {
-  if (!code.includes('@rue/luent/hyper-html')) return false;
+  if (!code.includes('luent/hyper-html')) return false;
   const callIndex = code.indexOf('mountHyperHTML(') // NOTE: Currently assumes `mountHyperHTML` is never reassigned to an alias.
   if (callIndex === -1) return false;
   const importIndex = code.indexOf('mountHyperHTML')
@@ -89,7 +89,7 @@ function transformTSX(ast: Node) {
 
 function extractJSXTree(ast: Node) {
   // TODO: 
-  // - verify mountHyperHTML imported from @rue/luent/hyper-html
+  // - verify mountHyperHTML imported from luent/hyper-html
   // - aliasing
   // - reassignment
   // - top-level call requirement

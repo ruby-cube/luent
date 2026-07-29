@@ -1,5 +1,5 @@
-import { component, If, template, Else, ElseIf, atAttach, atMount, atRemount, beforeDemount, beforeDetach, beforeUnmount, For, beforeAttach, beforeRemount, Style, css } from "@rue/luent";
-import { ionic, ion, Ion, Ionic } from "@rue/quarky";
+import { component, If, template, Else, ElseIf, atAttach, atMount, atRemount, beforeDemount, beforeDetach, beforeUnmount, For, beforeAttach, beforeRemount, Style, css } from "luent";
+import { ionic, ion, Ion, Ionic } from "@luent/quarky";
 import "./style.css"
 
 function Counter(input: {

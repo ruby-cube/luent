@@ -4,9 +4,9 @@
 // [] if open, append message in main messages view
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
-import { component, template, FromTag, NodeRef, Slot } from "@rue/luent";
-import { MorphicNode as Polymorph } from "../../../../packages/luent/src/conditional/x_Polymorph";
-import { Finitron, finiton, ion } from "@rue/quarky";
+import { component, template, FromTag, NodeRef, Slot } from "luent";
+import { MorphicNode as Polymorph } from "../../../../packagesluent/src/conditional/x_Polymorph";
+import { Finitron, finiton, ion } from "@luent/quarky";
 
 // data
 type User = {

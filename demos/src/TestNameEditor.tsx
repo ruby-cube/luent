@@ -1,4 +1,4 @@
-import { $of, FromTag, NodeRef } from "@rue/luent";
+import { $of, FromTag, NodeRef } from "luent";
 
 export function TestNameEditor(setup: FromTag<{
   'mu:user': { name: { first: string, last: string } }

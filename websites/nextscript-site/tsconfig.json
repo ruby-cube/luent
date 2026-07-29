@@ -11,7 +11,7 @@
     ],
     "strict": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@rue/luent",
+    "jsxImportSource": "luent",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
@@ -20,13 +20,13 @@
       "react/jsx-runtime": [
         "./packages/luent/src/jsx-runtime"
       ],
-      "@rue/luent": [
+      "luent": [
         "./packages/luent/src/index.ts"
       ],
-      "@rue/quarky": [
+      "@luent/quarky": [
         "./packages/quarky/src/index.ts"
       ],
-      "@rue/websites-shared": [
+      "@luent/websites-shared": [
         "./websites/shared/src/index.ts"
       ],
     }

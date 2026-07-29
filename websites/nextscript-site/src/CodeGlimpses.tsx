@@ -1,5 +1,5 @@
-import { css, MICROCLASS_MERGE, provideRoot, Style } from '@rue/luent'
-import { Code, CodeTour, TourSection } from '@rue/websites-shared'
+import { css, MICROCLASS_MERGE, provideRoot, Style } from 'luent'
+import { Code, CodeTour, TourSection } from '@luent/websites-shared'
 import { highlightCode } from './highlighter'
 import { twMerge } from 'tailwind-merge'
 

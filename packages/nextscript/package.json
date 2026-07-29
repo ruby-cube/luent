@@ -1,5 +1,5 @@
 {
-  "name": "@rue/nextscript",
+  "name": "@luent/nextscript",
   "private": false,
   "version": "0.1.0",
   "description": "",
@@ -28,15 +28,15 @@
   },
   "dependencies": {
     "@jridgewell/gen-mapping": "^0.3.13",
-    "@rue/utils": "workspace:*",
+    "@luent/utils": "workspace:*",
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
     "@volar/language-core": "~2.4.0",
     "oxc-parser": "^0.124.0"
   },
   "devDependencies": {
-    "@rue/types": "workspace:*",
-    "@rue/tree-squirl": "workspace:*",
+    "@luent/types": "workspace:*",
+    "@luent/tree-squirl": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.3"
   },

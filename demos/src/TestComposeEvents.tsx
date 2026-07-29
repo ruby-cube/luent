@@ -1,4 +1,4 @@
-import { component } from "@rue/luent";
+import { component } from "luent";
 
 function Grandparent() {
 
@@ -101,7 +101,7 @@ function ChildB(setup: any) {
 //    }
 // }
 
-// function makeElement(fromTag: any) {
+// function setUpElement(fromTag: any) {
 //    const { slots, ref, showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(fromTag)
 // }
 

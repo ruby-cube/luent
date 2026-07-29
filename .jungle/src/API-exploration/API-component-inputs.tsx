@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { Component, template } from "@rue/luent";
-import { Ion } from "@rue/quarky";
-import { isFunction } from "@rue/utils";
+import { Component, template } from "luent";
+import { Ion } from "@luent/quarky";
+import { isFunction } from "@luent/utils";
 
 // TODO:
 // [ ] validation and normalization

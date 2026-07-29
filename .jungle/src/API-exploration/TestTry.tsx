@@ -1,4 +1,4 @@
-import { component, Catch, template, createTryCatch, FromTag, Try } from "@rue/luent";
+import { component, Catch, template, createTryCatch, FromTag, Try } from "luent";
 
 export function TestTry() {
    console.log('running TestTry')

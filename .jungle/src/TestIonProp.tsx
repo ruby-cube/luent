@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { ion, ionic, ionize, watch } from "@rue/quarky";
+import { component, template } from "luent";
+import { ion, ionic, ionize, watch } from "@luent/quarky";
 
 
 export function TestIonProp() {

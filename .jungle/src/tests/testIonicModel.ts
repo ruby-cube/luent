@@ -1,4 +1,4 @@
-import { Ionic, ionic } from "@rue/quarky"
+import { Ionic, ionic } from "@luent/quarky"
 
 const arr = ionic([1])
 console.log('key in?', '0' in arr)

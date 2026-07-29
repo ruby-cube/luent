@@ -5,10 +5,10 @@
 
 ## Navigating the Monorepo
 The Luent monorepo currently contains four key packages:
-- @rue/luent - the core framework package
-- @rue/quarky - the reactivity system
-- @rue/flask - the batch cleanup and lifecycle manager
-- @rue/nextscript - the TypeScript + JSX language extension
+- luent - the core framework package
+- @luent/quarky - the reactivity system
+- @luent/flask - the batch cleanup and lifecycle manager
+- @luent/nextscript - the TypeScript + JSX language extension
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

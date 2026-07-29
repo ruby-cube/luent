@@ -1,4 +1,4 @@
-import { SetMap, UIDGenerator } from "@rue/utils";
+import { SetMap, UIDGenerator } from "@luent/utils";
 import { AsyncState } from "./context/AsyncContext";
 import { PausableListener, SustainedListenerOptions } from "./Listener";
 

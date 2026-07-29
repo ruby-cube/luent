@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent"
-import { ion, runIonicTask, SYNC } from "@rue/quarky"
+import { component, template } from "luent"
+import { ion, runIonicTask, SYNC } from "@luent/quarky"
 
 
 export function TestIonicEffect() {

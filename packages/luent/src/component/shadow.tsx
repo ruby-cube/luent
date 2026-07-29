@@ -1,6 +1,6 @@
 // let shadow: ShadowRoot | undefined;
 
-import { AsyncState } from "@rue/flask";
+import { AsyncState } from "@luent/flask";
 import { RenderSlot } from "./x-Input";
 import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 

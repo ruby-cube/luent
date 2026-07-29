@@ -1,5 +1,5 @@
-import { component, For, FromTag, WithRef } from "@rue/luent";
-import { Ion, ion } from "@rue/quarky";
+import { component, For, FromTag, WithRef } from "luent";
+import { Ion, ion } from "@luent/quarky";
 import "./Blokk.css"
 
 export const CELL_SIZE = 20;

@@ -1,5 +1,5 @@
-import { component, template, For, NodeRef } from "@rue/luent";
-import { ionic, ion } from "@rue/quarky";
+import { component, template, For, NodeRef } from "luent";
+import { ionic, ion } from "@luent/quarky";
 
 export function TestSettableDerivation() {
    const names = ionic([] as string[])

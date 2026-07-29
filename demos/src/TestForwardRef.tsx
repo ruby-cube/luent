@@ -1,4 +1,4 @@
-import { component, FromTag, NodeRef, template } from "@rue/luent"
+import { component, FromTag, NodeRef, template } from "luent"
 
 export function StyledComp() {
    const $div = NodeRef('div')

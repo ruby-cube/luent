@@ -1,4 +1,4 @@
-import { component, FromTag, TagName, TagType, template, WithRef } from "@rue/luent"
+import { component, FromTag, TagName, TagType, template, WithRef } from "luent"
 import { type VariantProps } from "class-variance-authority"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 

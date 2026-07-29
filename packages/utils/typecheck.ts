@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 
 export function isFunction(value: any): value is (...args: any[])=>any {
    // return value instanceof Function

@@ -1,4 +1,4 @@
-import { component, template } from "@rue/luent";
+import { component, template } from "luent";
 import './navbar.css'
 import { User } from "../context/keys";
 import { logOut } from "../database/firebase";

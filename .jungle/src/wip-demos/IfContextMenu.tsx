@@ -1,5 +1,5 @@
-import { component, template, For, If, listen, NodeRef, Portal, Style } from "@rue/luent"
-import { Finitron, ion, watch } from "@rue/quarky"
+import { component, template, For, If, listen, NodeRef, Portal, Style } from "luent"
+import { Finitron, ion, watch } from "@luent/quarky"
 
 //FIX: 
 // [] conditional rendering with <o--portal>

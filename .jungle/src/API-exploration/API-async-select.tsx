@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { component, template, For } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { Ion } from "@luent/quarky";
 
 function App() {
 

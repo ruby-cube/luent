@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { EACH, Ion, Ionized, ionize } from "@rue/quarky";
+import { EACH, Ion, Ionized, ionize } from "@luent/quarky";
 
 interface Todo {
    id: number

@@ -1,6 +1,5 @@
-import { component, template, For, FromTag, Style, INTERNAL, beforeDetach, beforeDemount, atAttach, css, If, Else } from "@rue/luent"
-import { Ion, ion } from "@rue/quarky"
-import { Thru } from "../../../packages/luent/src/iteratives/Thru"
+import { For, Style, css, If, Else, Thru } from "luent"
+import { Ion, ion } from "@luent/quarky"
 
 // Modified Demo from Vue.js
 // barebones cells app

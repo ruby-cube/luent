@@ -1,21 +1,21 @@
 {
-    "name": "@rue/quarky",
-    "private": true,
-    "description": "",
-    "type": "module",
-    "exports": {
-        ".": "./src/index.ts",
-        "./core": "./src/core/index.ts"
-    },
-    "module": "./src/index",
-    "main": "./src/index",
-    "dependencies": {
-        "@rue/flask": "workspace:*",
-        "@rue/utils": "workspace:*"
-    },
-    "devDependencies": {
-        "@rue/types": "workspace:*"
-    },
-    "author": "Ruby Yi Wang",
-    "license": "MIT"
+  "name": "@luent/quarky",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./core": "./src/core/index.ts"
+  },
+  "module": "./src/index",
+  "main": "./src/index",
+  "dependencies": {
+    "@luent/flask": "workspace:*",
+    "@luent/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@luent/types": "workspace:*"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT"
 }

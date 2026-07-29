@@ -1,6 +1,5 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { beforeUnmount, NodeRef, atLayout, awaiting } from "@rue/luent"
-import { toValue } from "@rue/quarky"
+import { beforeUnmount, NodeRef, atLayout, awaiting, toValue } from "luent"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'

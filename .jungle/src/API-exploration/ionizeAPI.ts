@@ -14,7 +14,7 @@
 // [v] what happens when you nest an ionized model in an ionized model?
 //    - we make it raw when we get the chance. since ionized models are deep, it will become an ionized model when accessed
 
-import { ion, ionize } from "@rue/quarky"
+import { ion, ionize } from "@luent/quarky"
 
 
 const list = ionize([])

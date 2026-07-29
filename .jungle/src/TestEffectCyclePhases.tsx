@@ -1,5 +1,5 @@
-import { component, template } from "@rue/luent";
-import { watch, ion } from "@rue/quarky";
+import { component, template } from "luent";
+import { watch, ion } from "@luent/quarky";
 
 export function TestEffectCyclePhases() {
 

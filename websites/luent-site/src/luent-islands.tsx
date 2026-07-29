@@ -1,10 +1,10 @@
 import { CodeGlimpses } from "./CodeGlimpses";
-export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from '@rue/luent'
-import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, atTick } from '@rue/luent'
-export * from "@rue/websites-shared";
+export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from 'luent'
+import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, atTick } from 'luent'
+export * from "@luent/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
-import { Code, extractParams, isMounted, MountIslands, parseNSXBlock, WriteIslands } from "@rue/websites-shared";
+import { Code, extractParams, isMounted, MountIslands, parseNSXBlock, WriteIslands } from "@luent/websites-shared";
 import { LanguageToggle } from "./LanguageToggle";
 import { HabitTrackerDemo } from "./demos/HabitTrackerDemo";
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
@@ -17,10 +17,6 @@ function renderCodeGlimpses() {
 
 function renderNSXCode(setup: { nsName: string, tsName: string, nsCode: string, tsCode: string }) {
   const { nsName, tsName, nsCode, tsCode } = setup;
-  console.log('nsName', nsName)
-  console.log('nsCode', nsCode)
-  console.log('tsName', tsName)
-  console.log('tsCode', tsCode)
   provideRoot(MICROCLASS_MERGE, twMerge)
   return <Code
     trusted

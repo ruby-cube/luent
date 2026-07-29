@@ -1,6 +1,6 @@
-import { component, template, Else, If, Style, css } from "@rue/luent";
+import { component, template, Else, If, Style, css } from "luent";
 import { SignupForm } from "./SignupForm";
-import { ion } from "@rue/quarky";
+import { ion } from "@luent/quarky";
 import { LoginForm } from "./LoginForm";
 import './welcome-view.css'
 

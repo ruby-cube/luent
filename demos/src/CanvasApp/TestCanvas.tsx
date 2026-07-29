@@ -1,4 +1,4 @@
-import { component, NodeRef, Style, css } from "@rue/luent";
+import { component, NodeRef, Style, css } from "luent";
 
 
 export function TestCanvas() {

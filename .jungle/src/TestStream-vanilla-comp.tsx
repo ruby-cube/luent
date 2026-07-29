@@ -1,8 +1,8 @@
 
 // composability only
 
-import { component, template } from "@rue/luent"
-import { ion } from "@rue/quarky"
+import { component, template } from "luent"
+import { ion } from "@luent/quarky"
 
 
 function TestVanillaStream() {

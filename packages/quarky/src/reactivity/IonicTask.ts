@@ -1,6 +1,6 @@
-import { $listen, SustainedListenerOptions } from "@rue/flask";
+import { $listen, SustainedListenerOptions } from "@luent/flask";
 import { getPhase, scheduleEagerReaction, WatchDebugOptions } from "./Watcher";
-import { Glass } from "@rue/types";
+import { Glass } from "@luent/types";
 import { Reaction } from "./Reaction";
 import { FunctionSubject } from "./Subject";
 import { Traceable } from "../debug/Traceable";

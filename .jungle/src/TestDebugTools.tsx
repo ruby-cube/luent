@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { component, template, listen } from "@rue/luent";
-import { traceable, ion, ionize, watch } from "@rue/quarky";
+import { component, template, listen } from "luent";
+import { traceable, ion, ionize, watch } from "@luent/quarky";
 import { $_run_with_, $_snap_context } from "../../../packages/flask/context/AsyncContext";
-import { getActiveFlask } from "@rue/flask";
+import { getActiveFlask } from "@luent/flask";
 
 
 

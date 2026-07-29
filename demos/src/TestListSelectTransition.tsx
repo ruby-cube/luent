@@ -1,7 +1,7 @@
-import { For, listen, NodeRef, Style, css, $of } from "@rue/luent";
-import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
+import { For, listen, NodeRef, Style, css, $of } from "luent";
+import { moveUniqueItems, useRandomColorGenerator } from "@luent/utils";
 import './style.css'
-import { ion, atRender, queueTask, EACH, ionic } from "@rue/quarky";
+import { ion, atRender, queueTask, EACH, ionic } from "@luent/quarky";
 
 class ListItem {
   constructor(

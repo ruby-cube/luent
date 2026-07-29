@@ -1,6 +1,6 @@
-import { component, mountIsland, css, Style, template } from "@rue/luent";
+import { component, mountIsland, css, Style, template } from "luent";
 import "./TestStyleOverride-classes.css"
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 
 function Grandparent() {
     return (

@@ -136,7 +136,7 @@ export default defineComponent({
 Listeners and reactive effects registered within a nestable flask can be handled independently of an outer flask via the [Enflask API](#enflask-api). Listeners and reactive effects are collected in a flask (created either by `collectEffects()` or `enflask()`) and disposed of when the flask is disposed of:
 
 ```tsx
-import { collectEffects } from "@rue/flask";
+import { collectEffects } from "@luent/flask";
 
 function useTable() {
     return collectEffects((flask) => {
@@ -166,7 +166,7 @@ function useTable() {
 Nestable flasks can be configured to “outlive” its outer flask via the `outlive` parameter. For readability, Flask provides an `OUTLIVE` constant that can be passed in as the argument:
 
 ```tsx
-import { collectEffects, OUTLIVE } from "@rue/flask";
+import { collectEffects, OUTLIVE } from "@luent/flask";
 
 function useTable() {
     return collectEffects((flask, outerFlask) => {
@@ -200,7 +200,7 @@ Flask’s [Scene API](#scene-api) offers an alternative way of thinking about ba
 
 ```jsx
 // SFC script
-import { sceneSetup } from "@rue/flask"
+import { sceneSetup } from "@luent/flask"
 
 // create a 'dragging' scene
 function initDrag(event){
@@ -385,8 +385,8 @@ Covert flasks must be registered at initiation of the flask event system via `in
 ```tsx
 // main.ts
 
-import { initFlask } from "@rue/flask";
-import { onUnmounted, getComponent } from "@rue/paravue";
+import { initFlask } from "@luent/flask";
+import { onUnmounted, getComponent } from "@luent/paravue";
 
 initFlask({
     covertFlasks: [{
@@ -431,7 +431,7 @@ A scene can be created via `sceneSetup()`, or alternatively `enscene()`. `sceneS
 
 ```jsx
 // SFC script
-import { sceneSetup } from "@rue/flask"
+import { sceneSetup } from "@luent/flask"
 
 // create a 'dragging' scene
 function initDrag(event){
@@ -466,7 +466,7 @@ function initDrag(event){
 `enscene()` returns a wrapped function:
 
 ```jsx
-import { enscene } from "@rue/flask"
+import { enscene } from "@luent/flask"
 
 // create a 'drawing' scene
 onMouseDown(document, enscene((drawing, event) => {
@@ -495,7 +495,7 @@ A nestable flask can be created within any other flask or serve as a root flask 
 A nestable flask can be created via `collectEffects()`, or alternatively `enflask()`. `collectEffects()` sets up a flask within the function it’s called in:
 
 ```tsx
-import { collectEffects, OUTLIVE } from "@rue/flask";
+import { collectEffects, OUTLIVE } from "@luent/flask";
 
 function useTable() {
     return collectEffects((flask, outerFlask) => {
@@ -562,7 +562,7 @@ Nestable flasks are useful for managing shared state across multiple usages of a
 Just as a nestable flask can outlive its outer flask, a listener can outlive its containing flask by configuring the options argument with the `outlive` constant.
 
 ```tsx
-import { outlive } from "@rue/flask";
+import { outlive } from "@luent/flask";
 
 export default defineComponent({
     setup(){
@@ -639,8 +639,8 @@ Note that in order for covert flasks to be restored after awaiting a promise, th
 ```tsx
 // main.ts
 
-import { initFlask } from "@rue/flask";
-import { onUnmounted, getComponent } from "@rue/paravue";
+import { initFlask } from "@luent/flask";
+import { onUnmounted, getComponent } from "@luent/paravue";
 
 initFlask({
     covertFlasks: [{
@@ -685,8 +685,8 @@ type CovertFlaskConfig = {
 ```tsx
 // main.ts
 
-import { initFlask } from "@rue/flask";
-import { getComponent, onUnmounted } from "@rue/paravue";
+import { initFlask } from "@luent/flask";
+import { getComponent, onUnmounted } from "@luent/paravue";
 
 initFlask({
     covertFlasks: [{
@@ -731,7 +731,7 @@ type Scene = {
 
 ```jsx
 // SFC script
-import { sceneSetup } from "@rue/flask"
+import { sceneSetup } from "@luent/flask"
 
 // create a 'dragging' scene
 function initDrag(event){
@@ -793,7 +793,7 @@ type Scene = {
 (See [Scenes](#scenes) for notes on usage)
 
 ```jsx
-import { enscene } from "@rue/flask"
+import { enscene } from "@luent/flask"
 
 // create a 'drawing' scene
 onMouseDown(document, enscene((drawing, event) => {
@@ -854,7 +854,7 @@ type Flask = {
 (See [Nestable Flasks](#nestable-flasks) for notes on usage)
 
 ```tsx
-import { collectEffects, OUTLIVE } from "@rue/flask";
+import { collectEffects, OUTLIVE } from "@luent/flask";
 
 function useTable() {
     return collectEffects((flask, outerFlask) => {

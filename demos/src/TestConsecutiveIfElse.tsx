@@ -1,5 +1,5 @@
-import { component, template, If, Else, mountIsland, Style, css } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, template, If, Else, mountIsland, Style, css } from "luent";
+import { ion } from "@luent/quarky";
 import "./style.css"
 
 

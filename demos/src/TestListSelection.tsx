@@ -1,7 +1,7 @@
-import { component, template, mountIsland, For, listen, NodeRef, Style, css, $of } from "@rue/luent";
-import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
+import { component, template, mountIsland, For, listen, NodeRef, Style, css, $of } from "luent";
+import { moveUniqueItems, useRandomColorGenerator } from "@luent/utils";
 import './style.css'
-import { ion, EACH, ionic } from "@rue/quarky";
+import { ion, EACH, ionic } from "@luent/quarky";
 
 class ListItem {
   constructor(

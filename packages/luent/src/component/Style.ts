@@ -1,8 +1,8 @@
 import { beforeUnmount, beforeDetach, atMount } from "../flask/flask-hooks";
 import { writeToPortal } from "../server/portals";
 import { isTransitioningOut } from "../transitions/transitions";
-import { Flask, getFlask } from "@rue/flask";
-import { atRender, atTick, queueTask } from "@rue/quarky";
+import { Flask, getFlask } from "@luent/flask";
+import { atRender, atTick, queueTask } from "@luent/quarky";
 import { inShadow } from "./shadow";
 // import { createHash } from "node:crypto";
 

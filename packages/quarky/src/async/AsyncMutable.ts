@@ -1,5 +1,5 @@
-import { AnyObject } from "@rue/types"
-import { isObject, noop } from "@rue/utils"
+import { AnyObject } from "@luent/types"
+import { isObject, noop } from "@luent/utils"
 import { EACH } from "../ionic/Ionic"
 
 const cancelledDispatches = new Set()

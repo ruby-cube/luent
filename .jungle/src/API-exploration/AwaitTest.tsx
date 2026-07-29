@@ -1,5 +1,5 @@
-import { component, template, pend, Suspense } from "@rue/luent"
-import { ion } from "@rue/quarky"
+import { component, template, pend, Suspense } from "luent"
+import { ion } from "@luent/quarky"
 
 
 

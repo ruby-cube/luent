@@ -1,6 +1,6 @@
-import { getActiveFlask } from "@rue/flask";
-import { component, template, If, Else,  ElseIf,Style, NodeRef, atAttach } from "@rue/luent";
-import { getActiveUpdate, ion, atRender, queueTask, watch } from "@rue/quarky";
+import { getActiveFlask } from "@luent/flask";
+import { component, template, If, Else,  ElseIf,Style, NodeRef, atAttach } from "luent";
+import { getActiveUpdate, ion, atRender, queueTask, watch } from "@luent/quarky";
 import "./style.css"
 
 

@@ -1,4 +1,4 @@
-import { component, mountIsland, css, template, Style } from "@rue/luent";
+import { component, mountIsland, css, template, Style } from "luent";
 import "./index.css"
 import "./TailwindPlay-card.css"
 import ".overrides.css" // transpiler

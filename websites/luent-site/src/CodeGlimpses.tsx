@@ -1,5 +1,5 @@
-import { css, For, Style } from '@rue/luent'
-import { Code, CodeTour, TourSection } from '@rue/websites-shared'
+import { css, Else, For, If, ion, Ion, NodeRef, Style } from 'luent'
+import { $Tab, Code, CodeTour, TourSection } from '@luent/websites-shared'
 import { highlightCode } from './highlighter'
 import { TourNav } from './TourNav'
 
@@ -14,12 +14,13 @@ function toId(heading: string) {
 }
 
 const sections: {
-  (): any,
+  (...args: any[]): any,
   heading: string,
   nsx?: string,
   tsx?: string,
   ns?: string,
   ts?: string,
+  $tab?: Ion<'main' | 'alt'> & { toggle: () => void },
   nsHover?: { [key: string]: string },
   tsHover?: { [key: string]: string },
 }[] = [
@@ -51,15 +52,17 @@ export function CodeGlimpses() {
           const ns = jsx ? 'nsx' : 'ns'
           const ts = jsx ? 'tsx' : 'ts'
           const heading = render.heading
+
           return <TourSection
             id={toId(heading)}
             flow={flowDirection()}
-            mainCode={{ name: ns, code: render[ns], hover: render.nsHover }}
-            altCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
+            altCode={{ name: ns, code: render[ns], hover: render.nsHover }}
+            mainCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
             highlightCode={highlightCode}
+            tab={render.$tab ?? $Tab()}
           >
             <h3>{heading}</h3>
-            {render()}
+            {render(render.$tab)}
           </TourSection>
         })}
       </CodeTour>
@@ -102,14 +105,31 @@ export function CodeGlimpses() {
 
 FunctionalComponents.heading = 'Functional components'
 
-function FunctionalComponents() {
+function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
   return <>
     <p style='text-wrap: balance'>
-      Write components as render functions that run once to create a view. Views are composed using JSX or NSX and updated through fine-grained reactivity.
+      Write components as render functions that run once to create a view. Views are composed using JSX or <a href='' target="_blank">NSX</a> (an extension of JSX), and updated through fine-grained reactivity.
     </p>
+    <p style='text-wrap: balance'><small>
+      {If(() => $tab() === 'main',
+        <>
+          Note that the <code>$</code> prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
+        </>
+      )}
+      {Else(
+        <>
+          Note that, in NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
+        </>
+      )}
+    </small></p>
+    {/* <p>
+      Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
+    </p> */}
     <a href='/guide/anatomy-of-an-app' class='medium brand'>Learn more</a>
   </>
 }
+
+FunctionalComponents.$tab = $Tab()
 
 
 FunctionalComponents.nsx =
@@ -143,24 +163,23 @@ FunctionalComponents.tsx =
       {$count}
     </button>
 
-    <o-style>
+    {Style(css\`
       button {
         border: 1px solid gray;
         background-color: transparent;
       }
-    </o-style>
+    \`)}
   </>
 }
 
 mountIsland(Counter, '#app')
-
 `
 
 UnifiedReactivity.heading = 'Unified reactivity'
 function UnifiedReactivity() {
   return <>
     <p>
-      Manage simple, derived, and structured reactive state under a unified reactivity model. Reactive state is initialized through the primitives <code>ion()</code> and <code>ionic()</code>.
+      Manage simple, derived, async, and structured reactive state under a unified reactivity model. Reactive state is initialized through the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
     <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
@@ -177,6 +196,9 @@ get qty = ion(1, {
 
 /* derived */
 get total = ion(() => count * qty);
+
+/* async */
+get posts = ion([], { '-fetch': fetchRecentPosts });
 
 /* structured */
 const menu = ionic(['apples', 'peaches', 'pears']);
@@ -198,6 +220,9 @@ const $qty = ion(1, {
 
 /* derived */
 const $total = ion(() => $count() * $qty());
+
+/* async */
+const $posts = ion([], { '-fetch': fetchRecentPosts });
 
 /* structured */
 const menu = ionic(['apples', 'peaches', 'pears']);
@@ -249,7 +274,7 @@ TypeExplicit.tsHover = {
 }
 
 TypeExplicit.nsx =
-  `/* (excerpt of function body) */
+  `/* excerpts from function body */
 
 get total = ion(() => count * qty);
 
@@ -265,7 +290,7 @@ get total = ion(() => count * qty);
 `
 
 TypeExplicit.tsx =
-  `/* (excerpt of function body) */
+  `/* excerpts from function body */
 
 const $total = ion(() => count * $qty())
 
@@ -322,7 +347,7 @@ SelectiveReactivity.tsx =
     <li>
       <span class='item-name'>{name}</span>
       <span class='price'>{price} × {$qty}</span>
-      <span class='total'>= {()=> price * $qty())}</span>
+      <span class='total'>= {() => price * $qty()}</span>
     </li>
 
     <o-link href='/cart-item.css' rel='stylesheet'/>

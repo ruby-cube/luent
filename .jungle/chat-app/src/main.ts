@@ -1,4 +1,4 @@
-import { mountIsland, createGroundContext } from "@rue/luent";
+import { mountIsland, createGroundContext } from "luent";
 import { FriendSite } from "./App";
 import './assets/main.css'
 

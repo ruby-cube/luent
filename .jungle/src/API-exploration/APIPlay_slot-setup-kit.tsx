@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, template, FromTag } from "@rue/luent";
+import { component, template, FromTag } from "luent";
 
 function ColumnB() {
 

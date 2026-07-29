@@ -1,4 +1,4 @@
-import { css, ion, Style, track } from "@rue/luent"
+import { css, ion, Style, track } from "luent"
 
 export function LanguageToggle() {
   const $lang = ion('nsx' as 'nsx' | 'tsx', {

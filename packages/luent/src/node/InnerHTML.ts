@@ -1,8 +1,8 @@
-import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, atRender, RUN_EAGERLY, atInternalRender } from "@rue/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, atRender, RUN_EAGERLY, atInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/x-Input";
 import { DOMParent } from "./VineNode";
-import { getFlask } from "@rue/flask";
-import { isObject } from "@rue/utils";
+import { getFlask } from "@luent/flask";
+import { isObject } from "@luent/utils";
 
 export function isInnerHTMLKit(entity: any): entity is InnerHTMLKit {
   return isObject(entity) && 'html' in entity
@@ -44,21 +44,21 @@ function toString(value: any) {
   return value == null ? "" : String(value);
 }
 
-function getHTMLSanitizer(kit: InnerHTMLKit): (html: string) => string {
-  if (kit.trustedHTML) {
-    return passthroughHTML;
-  }
-  if (kit.sanitizeHTML) {
-    return kit.sanitizeHTML;
-  }
-  return defaultSanitizeHTML;
-}
+// function getHTMLSanitizer(kit: InnerHTMLKit): (html: string) => string {
+//   if (kit.trustedHTML) {
+//     return passthroughHTML;
+//   }
+//   if (kit.sanitizeHTML) {
+//     return kit.sanitizeHTML;
+//   }
+//   return defaultSanitizeHTML;
+// }
 
-function defaultSanitizeHTML(html: string): string {
-  return DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-  });
-}
+// function defaultSanitizeHTML(html: string): string {
+//   return DOMPurify.sanitize(html, {
+//     USE_PROFILES: { html: true },
+//   });
+// }
 
 function passthroughHTML(html: string): string {
   return html;

@@ -62,7 +62,7 @@ type JSXFlowSlot = () => JSXElement
 Frameworks and libraries can use `JSXFlowBrand` to define control-flow helpers such as `If()`.
 
 ```tsx
-import type { JSXFlowBrand, JSXFlowSlot, JSXElement } from '@rue/nextscript';
+import type { JSXFlowBrand, JSXFlowSlot, JSXElement } from '@luent/nextscript';
 
 declare const If: {
   (condition: unknown, slot: JSXFlowSlot): JSXElement

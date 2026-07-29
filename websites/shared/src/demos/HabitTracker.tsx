@@ -1,4 +1,4 @@
-import { ion, css, If, Style, Thru, FromTag } from "@rue/luent";
+import { ion, css, If, Style, Thru, FromTag } from "luent";
 
 export function HabitTracker(setup: FromTag<{
   habit: string,
@@ -84,9 +84,14 @@ export function HabitTracker(setup: FromTag<{
 
 
 HabitTracker.nsx =
-  `import { ion, If, Thru } from "@rue/luent";
+  `import { ion, If, Thru } from "luent";
 
-export function HabitTracker({ habit, goal = 5 }) {
+function HabitTracker(setup: FromTag<{
+  habit: string;
+  goal: number;
+}>) {
+  const { habit, goal = 5 } = setup;
+
   get count = ion(0)
   get achieved = ion((count === goal)@)
 
@@ -111,9 +116,14 @@ export function HabitTracker({ habit, goal = 5 }) {
 `
 
 HabitTracker.tsx =
-  `import { ion, If, Thru } from "@rue/luent";
+  `import { ion, If, Thru } from "luent";
 
-export function HabitTracker({ habit, goal = 5 }) {
+function HabitTracker(setup: FromTag<{
+  habit: string;
+  goal: number;
+}>) {
+  const { habit, goal = 5 } = setup;
+
   const count = ion(0)
   const achieved = ion(() => count() === goal)
 

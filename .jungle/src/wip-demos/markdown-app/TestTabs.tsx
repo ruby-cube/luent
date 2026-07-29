@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { component, ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "@rue/luent";
+import { component, ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "luent";
 import { MarkdownApp } from "./markdown-app";
-import { Ion, ionize, Ionized, watch, ion } from "@rue/quarky";
+import { Ion, ionize, Ionized, watch, ion } from "@luent/quarky";
 
 export function TabApp() {
 

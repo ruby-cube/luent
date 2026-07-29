@@ -1,5 +1,5 @@
 import { watch } from "../reactivity/Watcher"
-import { AnyObject } from "@rue/types"
+import { AnyObject } from "@luent/types"
 import { MutableIon } from "../ion/Ion"
 import { createAtomicIon } from "../ion/AtomicIon"
 import { createMemoizedDerivation } from "../ion/DerivationIon"

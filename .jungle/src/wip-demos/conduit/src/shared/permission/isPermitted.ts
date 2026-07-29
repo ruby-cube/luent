@@ -1,5 +1,5 @@
-import { fromRoot } from "@rue/luent";
-import { Ion } from "@rue/quarky";
+import { fromRoot } from "luent";
+import { Ion } from "@luent/quarky";
 
 type Permissions = typeof permissions
 

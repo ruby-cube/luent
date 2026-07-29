@@ -1,4 +1,4 @@
-import { isFunction } from "@rue/utils";
+import { isFunction } from "@luent/utils";
 import { IonicProxy } from "./Ionic";
 import { isIonicProxy, toRaw } from "./IonicModel";
 

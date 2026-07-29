@@ -1,4 +1,4 @@
-import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@rue/flask";
+import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@luent/flask";
 import { atRender, atTick } from "../../../quarky/src/reactivity/RenderCycle";
 
 

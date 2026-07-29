@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { getActiveFlask } from "@rue/flask";
-import { component, template, listen } from "@rue/luent";
-import { normalizeToArray } from "@rue/utils";
+import { getActiveFlask } from "@luent/flask";
+import { component, template, listen } from "luent";
+import { normalizeToArray } from "@luent/utils";
 
 
 export function TempoPlayer() {

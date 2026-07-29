@@ -1,5 +1,5 @@
-import { component, template, Else, For, If} from "@rue/luent"
-import { ion, ionicTickTask } from "@rue/quarky"
+import { component, template, Else, For, If} from "luent"
+import { ion, ionicTickTask } from "@luent/quarky"
 
 type Commit = {
    commit: {

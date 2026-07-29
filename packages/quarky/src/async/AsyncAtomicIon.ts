@@ -1,4 +1,4 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject } from "@luent/types";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { Ion } from "../ion/Ion";
 

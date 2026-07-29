@@ -1,5 +1,5 @@
 {
-  "name": "@rue/eslint-plugin-mu",
+  "name": "@luent/eslint-plugin-mu",
   "private": true,
   "description": "ESLint plugin for Mu mutation boundary rules",
   "main": "src/index.cjs",

@@ -1,5 +1,5 @@
-import { component, template, For } from "@rue/luent";
-import { ion, ionic, ionize } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { ion, ionic, ionize } from "@luent/quarky";
 
 export function TestTrackableOps() {
    const list = ionize([{ count: 0 }, { count: 11 }])

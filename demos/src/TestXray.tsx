@@ -1,4 +1,4 @@
-import { component, FromTag, WithRef } from "@rue/luent"
+import { component, FromTag, WithRef } from "luent"
 import { Xray } from "packages/luent/src/component/bindings"
 
 export function TestXray() {

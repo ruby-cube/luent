@@ -1,8 +1,8 @@
 import { ComponentTag, InferSlot } from "../component/Component";
-import { TagName } from "../element/makeElement";
+import { TagName } from "../element/setUpElement";
 import { ComponentConfig, ElementConfig, makeView, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { writeComponent, writeElement, processJSXOutput } from "./writeHTML";
-import { isFunction, normalizeToArray } from "@rue/utils";
+import { isFunction, normalizeToArray } from "@luent/utils";
 import { writeShadowRoot } from "../component/shadow";
 import { writeToPortal } from "./portals";
 import { RenderSlot } from "../component/x-Input";
@@ -16,7 +16,9 @@ export function writeJSXNode(
 ): RawJSXNode | void {
 
   switch (nodeType) {
-    case 'o--window': return ''
+    case 'o--window':
+    case 'o--host':
+      return ''
 
     case 'o:context':
       return Context({ Slot, provide: config.provide } as any)

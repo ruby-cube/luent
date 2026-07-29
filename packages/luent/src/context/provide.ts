@@ -2,18 +2,19 @@ import { ContextNode, getClosestContext } from "./context-stack";
 import { NodeContext, RootContext, toContextEntries } from "./Context";
 import { ContextEntryKey, isMuKey, toContextKey } from "./ContextKey";
 import { assertMutableIon } from "../component/x-Input";
-import { Ion, toIon } from "@rue/quarky";
-import { isFunction } from "@rue/utils";
+import { Ion, toIon } from "@luent/quarky";
+import { isFunction } from "@luent/utils";
 
 // TODO: trace provider
 // fromContext.trace('dog')(DOG)
 
-export function fromContext<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT & '?'): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {
-  const value = _fromContext(key, optional)
+export function fromContext<K extends ContextEntryKey | string>(key: K, required?: '!'): ContextValue<K> {
+  const value = _fromContext(key, required ? false : key.optional)
   return value
 }
 
-export function $fromContext<K extends ContextEntryKey | string, OPT>(key: K, optional?: OPT & '?'): OPT extends string ? ContextValue<K> | undefined : ContextValue<K> {
+export function $fromContext<K extends ContextEntryKey | string>(key: K, required?: '!'): ContextValue<K> {
+  const optional = required ? false : key.optional
   const value = _fromContext(key, optional)
   if (optional && value === undefined) return undefined;
   return toIon(value)
@@ -44,7 +45,7 @@ export function _fromContext<K extends ContextEntryKey | string, OPT>(key: K, op
 
 export function createRootContext() {
   const rootContext = {
-    entries:undefined,
+    entries: undefined,
     parent: undefined,
     root: undefined as unknown as RootContext,
     ground: undefined,
@@ -173,8 +174,7 @@ export function markIfMuIon(key: string | ContextEntryKey, value: unknown, conte
 
 
 function getDefaultValue(key: string | ContextEntryKey) {
-  return undefined;
-  // return typeof key === 'string' ? undefined : key.defaultValue
+  return typeof key === 'string' ? undefined : key.defaultValue?.()
 }
 
 const RequiredInputNotProvidedError = (key: string | ContextEntryKey) => {

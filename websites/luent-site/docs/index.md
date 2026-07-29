@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "Luent"
-  tagline: An expressive framework for building web applications
+  tagline: An expressive framework for building web applications with clarity and flow
   image:
     src: /assets/luent-logo-512px.png
     alt: My Logo
@@ -13,8 +13,11 @@ hero:
     #   text: Learn Luent
     #   link: /markdown-examples
     - theme: alt
-      text: Take a code tour
+      text: Preview Luent
       link: /index#code-glimpses
+    # - theme: alt
+    #   text: Take a Code Tour
+    #   link: /index#code-glimpses
 
 features:
   - icon:
@@ -28,7 +31,7 @@ features:
       width: 32
       height: 32
     title: Take command of reactivity
-    details: Gain clarity and control over re-renders through reactivity that is fine-grained, selective, typed, and traceable.
+    details: Gain clarity and control over re-renders through reactivity that's fine-grained, selective, type-explicit, and traceable.
   - icon:
       src: /assets/shapes.svg
       width: 32
@@ -36,6 +39,18 @@ features:
     title: Manage state natively
     details: Simplify management of structured state through familiar native structures.
 ---
+  <!-- <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
+    <span class='ns-hero-code__dot'></span>
+    <span class='ns-hero-code__dot'></span>
+    <span class='ns-hero-code__dot'></span>
+  </div>
+
+<section id='vision' style='width: 70rem'>
+<h2 class='section-heading'>Refining the Framework Experience</h2>
+<p class='vision-text'>Modern frameworks have brought powerful innovations to web development. Luent builds on these ideas, exploring ways to reduce cognitive overhead and make application development more intuitive and ergonomic without sacrificing performance, clarity, or scalability.</p>
+<p class='vision-text'>Luent is largely implemented, but not yet ready for release. Below is a glimpse of what’s taking shape.</p>
+</section> -->
+  
 
   <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
     <span class='ns-hero-code__dot'></span>
@@ -43,9 +58,14 @@ features:
     <span class='ns-hero-code__dot'></span>
   </div>
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
-    <h2>Code Tour</h2>
-    <p style='text-wrap: balance'><small>Luent applications may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
-</small></p>
+    <h2 class='section-heading'>Code Tour</h2>
+    <p>
+    Luent is in early development. Here's a glimpse of what’s taking shape.
+    </p>
+    <!-- <p style='text-wrap: balance'><small>Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
+</small></p> -->
+    <!-- <p style='text-wrap: balance'><small>Luent applications are currently written in TypeScript + JSX (.tsx). An optional, experimental language extension, NextScript (.ns/.nsx) is in the works. Get a glimpse of its syntax through the language toggle in code examples.
+    </small></p> -->
   </section>
 
 :::luent code-glimpses
@@ -54,6 +74,19 @@ features:
 <p class='custom-block status-notice'><strong>This project is in early development.</strong></p>
 
 <style>
+
+.vision {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.vision-text {
+  text-wrap: balance; 
+  font-size: x-large; 
+  line-height: 2.5rem !important;
+}
 
 .VPHero {
   font-size: 18px;
@@ -154,7 +187,7 @@ p.custom-block.status-notice {
   text-align: center;
 }
 
-.home-glimpses-heading h2 {
+h2.section-heading {
   margin: 0;
   font-size: clamp(2.1rem, 5vw, 4rem);
   line-height: 1.5em;

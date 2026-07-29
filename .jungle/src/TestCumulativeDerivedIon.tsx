@@ -1,5 +1,5 @@
-import { component, template, For } from "@rue/luent";
-import { ion, ionize } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { ion, ionize } from "@luent/quarky";
 
 export function TestDerived() {
 

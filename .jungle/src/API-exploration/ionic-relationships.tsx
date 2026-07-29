@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { component, template } from "@rue/luent";
-import { ion } from "@rue/quarky";
+import { component, template } from "luent";
+import { ion } from "@luent/quarky";
 
 
 //$count ---> render to DOM 

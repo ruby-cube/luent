@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, $render, beforeMount, atMount, template } from "@rue/luent";
+import { component, $render, beforeMount, atMount, template } from "luent";
 
 function doSomething() { }
 

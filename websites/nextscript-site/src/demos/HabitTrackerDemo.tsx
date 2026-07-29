@@ -1,4 +1,4 @@
-import { Code, DemoContainer, HabitTracker } from '@rue/websites-shared'
+import { Code, DemoContainer, HabitTracker } from '@luent/websites-shared'
 import { highlightCode } from "../highlighter"
 
 export function HabitTrackerDemo() {

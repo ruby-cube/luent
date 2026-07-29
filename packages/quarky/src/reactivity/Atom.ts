@@ -1,4 +1,4 @@
-import { __DEV__unwrap } from "@rue/utils";
+import { __DEV__unwrap } from "@luent/utils";
 import { Reaction } from "./Reaction";
 import { hasQuark, QUARK } from "../abstract/Quark";
 import { $activeUpdate, popUpdate, pushUpdate, Update, UpdateType } from "./Update";

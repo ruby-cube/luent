@@ -1,4 +1,4 @@
-import { atUnmount, css, For, FromTag, If, ion, Style } from "@rue/luent";
+import { atUnmount, css, For, FromTag, If, ion, Style } from "luent";
 
 
 export function TourNav(setup: FromTag<{

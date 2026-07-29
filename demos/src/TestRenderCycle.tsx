@@ -1,4 +1,4 @@
-import { afterMount, afterUnmount, atLayout, atMount, atPrelude, atRender, atTick, atUnmount, beforeMount, beforeUnmount, Else, If, ion } from "@rue/luent"
+import { afterMount, afterUnmount, atLayout, atMount, atPrelude, atRender, atTick, atUnmount, beforeMount, beforeUnmount, Else, If, ion } from "luent"
 
 export function TestRenderCycle() {
   const $open = ion(true)

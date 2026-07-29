@@ -1,5 +1,5 @@
-import { isFunction, isObject, toError } from "@rue/utils";
-import { AsyncState, getActiveFlask } from "@rue/flask";
+import { isFunction, isObject, toError } from "@luent/utils";
+import { AsyncState, getActiveFlask } from "@luent/flask";
 import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
 import { watch } from "../reactivity/Watcher";

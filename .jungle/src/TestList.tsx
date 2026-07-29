@@ -1,5 +1,5 @@
-import { component, template, For } from "@rue/luent";
-import { ionize, watch } from "@rue/quarky";
+import { component, template, For } from "luent";
+import { ionize, watch } from "@luent/quarky";
 let id = 4;
 
 function genId() {

@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { component, template } from "@rue/luent";
-import { Ion, ion } from "@rue/quarky";
-import { AnyObject } from "@rue/types";
+import { component, template } from "luent";
+import { Ion, ion } from "@luent/quarky";
+import { AnyObject } from "@luent/types";
 import { max } from "date-fns";
 
 

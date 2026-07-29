@@ -1,4 +1,4 @@
-import { component, FromTag, ion } from "@rue/luent";
+import { component, FromTag, ion } from "luent";
 
 export function Counter(setup: FromTag<{
   max: number

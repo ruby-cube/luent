@@ -1,7 +1,7 @@
 
 //@ts-nocheck
-import { component, template, If } from "@rue/luent";
-import { Ion, ion } from "@rue/quarky";
+import { component, template, If } from "luent";
+import { Ion, ion } from "@luent/quarky";
 import { User } from "../context/keys";
 import './message-form.css'
 import { Timestamp } from "firebase/firestore";

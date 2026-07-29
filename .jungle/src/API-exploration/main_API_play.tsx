@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { collectEffects, EffectFlask, getActiveFlask } from "@rue/flask";
+import { collectEffects, EffectFlask, getActiveFlask } from "@luent/flask";
 import { flaskablePromise } from "../../../packages/flask/flaskablePromises";
-import { watchEffect } from "@rue/quarky";
+import { watchEffect } from "@luent/quarky";
 import { abort } from "process";
-import { component, template } from "@rue/luent";
+import { component, template } from "luent";
 
 collectEffects(async () => {
     console.log(getActiveFlask())

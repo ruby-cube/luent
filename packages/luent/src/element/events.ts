@@ -1,7 +1,7 @@
-import { $listen, SustainedListenerOptions } from "@rue/flask";
-import { instantUpdate, swiftUpdate } from "@rue/quarky";
-import { AnyObject } from "@rue/types";
-import { normalizeToArray } from "@rue/utils";
+import { $listen, SustainedListenerOptions } from "@luent/flask";
+import { instantUpdate, swiftUpdate } from "@luent/quarky";
+import { AnyObject } from "@luent/types";
+import { normalizeToArray } from "@luent/utils";
 import { matchEventTarget } from "../events/target";
 
 // TODO: figure out how to incorporate options into inline events

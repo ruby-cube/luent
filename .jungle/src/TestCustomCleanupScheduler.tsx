@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { component, template, NodeRef } from "@rue/luent"
-import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@rue/quarky"
-import { or, $setup, is, isDefined, isAny, not } from "../../../packages/luent/src/component/X_$setup"
-import { AnyObject } from "@rue/types"
-import { toIonicProps } from "../../../packages/luent/src/component/X_normalizeProps"
+import { component, template, NodeRef } from "luent"
+import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@luent/quarky"
+import { or, $setup, is, isDefined, isAny, not } from "../../../packagesluent/src/component/X_$setup"
+import { AnyObject } from "@luent/types"
+import { toIonicProps } from "../../../packagesluent/src/component/X_normalizeProps"
 
 // optional and default
 // normalize

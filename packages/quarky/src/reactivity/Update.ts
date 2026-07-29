@@ -1,4 +1,4 @@
-import { createStack } from "@rue/utils";
+import { createStack } from "@luent/utils";
 import { queueTask, RenderCycle } from "./RenderCycle";
 
 export type UpdateType = typeof UpdateType[keyof typeof UpdateType]
