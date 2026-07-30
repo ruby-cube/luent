@@ -1,5 +1,5 @@
 import { Ion, isGetter, atRender, trackForRender, toValue, atInternalRender } from "@luent/quarky";
-import { MaybeIon } from "../component/x-Input";
+import { MaybeIon } from "../component/bindings-types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
 import { Flask, getFlask } from "@luent/flask";

@@ -7,7 +7,7 @@ import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Context, Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ViewType } from "../conditional/If";
-import { MaybeIon, RenderSlot } from "../component/x-Input";
+import { MaybeIon, RenderSlot } from "../component/bindings-types";
 import { DOMNode, DOMParent, VineNode } from "./VineNode";
 import { ComponentKit } from "@luent/nextscript";
 import { createShadowRoot } from "../component/shadow";

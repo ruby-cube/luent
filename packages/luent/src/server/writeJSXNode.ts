@@ -5,7 +5,7 @@ import { writeComponent, writeElement, processJSXOutput } from "./writeHTML";
 import { isFunction, normalizeToArray } from "@luent/utils";
 import { writeShadowRoot } from "../component/shadow";
 import { writeToPortal } from "./portals";
-import { RenderSlot } from "../component/x-Input";
+import { RenderSlot } from "../component/bindings-types";
 import { Context } from "../context/Context";
 
 

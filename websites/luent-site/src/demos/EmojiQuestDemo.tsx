@@ -1,6 +1,5 @@
 import { $Tab, Code, DemoContainer, EmojiQuest } from '@luent/websites-shared'
 import { highlightCode } from "../highlighter"
-import { ion } from '@luent/quarky'
 
 export function EmojiQuestDemo() {
   const $tab = $Tab()

@@ -1,5 +1,5 @@
 import { AnyObject } from "@luent/types"
-import { FromTag, RenderSlot, WithRef } from "./x-Input"
+import { FromTag, RenderSlot, WithRef } from "./bindings-types"
 import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@luent/quarky"

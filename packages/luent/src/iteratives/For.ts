@@ -1,10 +1,10 @@
 import { getFlask } from "@luent/flask";
-import { MaybeIon } from "../component/x-Input";
+import { MaybeIon } from "../component/bindings-types";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListKit, toAsyncRenderItem } from "./ItemList";
 import { atInternalRender, atPrelude, atRender, Ion, Ionic, isGetter, PRELUDE, queueTask, toIon, toValue, watch } from "@luent/quarky";
 import { isIonicProxy } from "@luent/quarky/core";
-import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
+import { __DEV__buildAsyncPath, TRACE } from "../../../flask/src/debug";
 import { ForIndex, Nullish } from "./IndexedList";
 import { createStack } from "@luent/utils";
 import { AnyObject } from "@luent/types";

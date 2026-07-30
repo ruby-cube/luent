@@ -1,5 +1,5 @@
 import { isGetter, isIon, MutableIon, atRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, watch } from "@luent/quarky";
-import { MaybeIon } from "../component/x-Input";
+import { MaybeIon } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 
 // | Property                    | Elements                            | Typical event      | Notes                                     |

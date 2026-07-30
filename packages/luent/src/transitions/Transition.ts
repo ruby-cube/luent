@@ -1,5 +1,5 @@
 import { JSXComponent } from "@luent/nextscript"
-import { RenderSlot } from "../component/x-Input"
+import { RenderSlot } from "../component/bindings-types"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
 import { AnyObject } from "@luent/types"

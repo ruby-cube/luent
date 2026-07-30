@@ -1,8 +1,7 @@
 export default {
   entry: {
     index: 'src/index.ts',
-    'jsx-runtime': 'src/jsx-runtime/index.ts',
-    'hyper-html': 'src/client/mountHyperHTML.ts'
+    'jsx-runtime': 'src/jsx-runtime/index.ts'
   },
   format: 'esm',
   outDir: 'dist',

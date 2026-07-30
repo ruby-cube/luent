@@ -1,7 +1,7 @@
 import { camelToKebabCase, isArray, isFunction, isObject, isString, normalizeToArray } from "@luent/utils";
 import { composeBindings, toSetup } from "../component/bindings";
 import { ComponentTag } from "../component/Component";
-import { RenderSlot } from "../component/x-Input";
+import { RenderSlot } from "../component/bindings-types";
 import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { $from } from "../utils/destructure";
 import { toString } from '../node/VineNode'

@@ -1,7 +1,7 @@
 // let shadow: ShadowRoot | undefined;
 
 import { AsyncState } from "@luent/flask";
-import { RenderSlot } from "./x-Input";
+import { RenderSlot } from "./bindings-types";
 import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 
 // NOTE: The shadow-root helper does not work with VitePress :( 

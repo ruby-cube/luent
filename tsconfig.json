@@ -10,6 +10,9 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "customConditions": [
+      "workspace"
+    ],
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     "allowArbitraryExtensions": true,
@@ -22,7 +25,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "luent",
     "types": [
-      "./packages/luent/src/jsx-runtime/index"
+      "./packages/luent/src/jsx-runtime/index.d.ts"
     ],
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -49,10 +52,10 @@
         "./packages/luent/src/index.ts"
       ],
       "luent/jsx-runtime": [
-        "./packages/luent/src/jsx-runtime/index.ts"
+        "./packages/luent/src/jsx-runtime/index.d.ts"
       ],
       "luent/jsx-dev-runtime": [
-        "./packages/luent/src/jsx-runtime/index.ts"
+        "./packages/luent/src/jsx-runtime/index.d.ts"
       ],
       "@luent/websites-shared": [
         "./websites/shared/src/index.ts"
@@ -73,7 +76,7 @@
         "./packages/nextscript/src/transpile.ts"
       ],
       "@luent/flask": [
-        "./packages/flask/index.ts"
+        "packages/flask/src/index.ts"
       ],
       "@luent/types": [
         "./packages/types/index.ts"

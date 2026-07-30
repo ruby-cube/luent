@@ -1,5 +1,5 @@
 import { AnyObject, Booleanny } from "@luent/types";
-import { MaybeIon } from "../component/x-Input";
+import { MaybeIon } from "../component/bindings-types";
 import { Flask, getFlask } from "@luent/flask";
 import { Ion, isGetter, atRender, RUN_EAGERLY, trackForRender, atInternalRender } from "@luent/quarky";
 import { camelToKebabCase, isFunction, isObject, isString } from "@luent/utils";

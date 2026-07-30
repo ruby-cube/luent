@@ -6,7 +6,7 @@ import { setUpElement } from '../../element/setUpElement';
 import { JSDOM } from 'jsdom'
 import { Context, createContext } from '../Context';
 import { ContextKey } from '../ContextKey';
-import { Ion, Ionized, MaybeIon, v } from '../../component/x-Input';
+import { Ion, Ionized, MaybeIon, v } from '../../component/bindings-types';
 import { ion, ionize, isIon, isIonicProxy } from '@luent/quarky';
 
 

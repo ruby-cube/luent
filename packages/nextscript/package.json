@@ -16,7 +16,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsdown",
+    "build:types": "tsc -p tsconfig.build.json",
     "watch": "tsdown --watch",
     "prepack": "pnpm run build",
     "pack": "pnpm pack",

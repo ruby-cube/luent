@@ -2,12 +2,12 @@ import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, trackForRender }
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ViewType, RenderConditional } from "./If";
 import { isFunction, noop } from "@luent/utils";
-import { FromTag, RenderSlot } from "../component/x-Input";
+import { FromTag, RenderSlot } from "../component/bindings-types";
 // import { createCasesKit, DEFAULT, MatchKit } from "./Switch";
 import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@luent/flask";
 import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode";
 import { DynamicNodeKit, IfElseKit } from "./IfElse";
-import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
+import { __DEV__buildAsyncPath, TRACE } from "../../../flask/src/debug";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 import { component } from "../index";
 

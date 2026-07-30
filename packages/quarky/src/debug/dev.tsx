@@ -1,6 +1,6 @@
 import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { Traceable, TraceableEntity, TraceableMutable } from "./Traceable";
-import { __DEV__getTrace, getAsyncPath, traceAsyncPath } from "../../../flask/debug";
+import { __DEV__getTrace, getAsyncPath, traceAsyncPath } from "../../../flask/src/debug";
 import { Compound, Particle } from "../reactivity/Compound";
 import { watch } from "../reactivity/Watcher";
 import { isFunction, isObject } from "@luent/utils";

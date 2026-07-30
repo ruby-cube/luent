@@ -1,7 +1,7 @@
 import { getActiveUpdate, atRender, queueTask, toValue } from "@luent/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
-import { MaybeIon } from "../component/x-Input";
+import { MaybeIon } from "../component/bindings-types";
 import { Flask, getFlask } from "@luent/flask";
 import { atAttach, beforeDetach } from "../flask/flask-hooks";
 

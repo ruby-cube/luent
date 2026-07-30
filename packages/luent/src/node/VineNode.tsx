@@ -2,9 +2,9 @@ import { debug, isFunction, isObject, normalizeToArray } from "@luent/utils";
 import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, atRender, untracked, watch, trackForRender, atInternalRender } from "@luent/quarky";
 import { isComponentKit } from "@luent/nextscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
-import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@luent/flask";
-import { TRACE } from "../../../flask/debug";
-import { RenderSlot } from "../component/x-Input";
+import { $_run_with_, ContextSnapshot, FLASK, Flask } from "packages/flask/src";
+import { TRACE } from "../../../flask/src/debug";
+import { RenderSlot } from "../component/bindings-types";
 
 export type JSXNode = DOMNode | VineNode
 

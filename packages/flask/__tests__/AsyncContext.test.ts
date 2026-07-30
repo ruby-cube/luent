@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from "vitest"
-import { $_run_with_, $_snap_context, AsyncState } from "../context/AsyncContext"
+import { $_run_with_, $_snap_context, AsyncState } from "../src/context/AsyncContext"
 
 describe('async context', () => {
    test('AsyncState', () => {

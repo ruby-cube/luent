@@ -7,6 +7,7 @@ export default defineConfig(async () => {
 
   return {
     resolve: {
+      conditions: ['workspace'],
       extensions: ['.ts', '.tsx', '.nsx'],
     },
     oxc: {

@@ -1,7 +1,7 @@
 import { ContextNode, getClosestContext } from "./context-stack";
 import { NodeContext, RootContext, toContextEntries } from "./Context";
 import { ContextEntryKey, isMuKey, toContextKey } from "./ContextKey";
-import { assertMutableIon } from "../component/x-Input";
+import { assertMutableIon } from "../component/bindings-types";
 import { Ion, toIon } from "@luent/quarky";
 import { isFunction } from "@luent/utils";
 
@@ -165,12 +165,6 @@ export function _fromGround<K extends ContextEntryKey | string>(key: K, optional
   return value
 }
 
-export function markIfMuIon(key: string | ContextEntryKey, value: unknown, context: { muIons: Set<Ion> | undefined }) {
-  if (isMuKey(key)) {
-    assertMutableIon(value)
-    context.muIons ? context.muIons.add(value) : (context.muIons = new Set([value]))
-  }
-}
 
 
 function getDefaultValue(key: string | ContextEntryKey) {

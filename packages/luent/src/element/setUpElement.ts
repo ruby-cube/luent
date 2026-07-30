@@ -3,7 +3,7 @@ import { ElementConfig, RawJSXNode } from "../node/makeJSXNode";
 import { initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack, withXMLNamespace } from "./NSElement";
-import { RenderSlot } from "../component/x-Input";
+import { RenderSlot } from "../component/bindings-types";
 import { DOMNode, DOMParent, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { setUpNodeRefs } from "../node/NodeRefs";
 import { setUpTransitions } from "../transitions/transitions";

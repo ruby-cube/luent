@@ -4,10 +4,10 @@
     "description": "",
     "type": "module",
     "exports": {
-      ".": "./index.ts"
+      ".": "./src/index.ts"
     },
-    "main": "./index.ts",
-    "module": "./index.ts",
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
     "dependencies": {
       "@luent/utils": "workspace:*"
     },

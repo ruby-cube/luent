@@ -1,5 +1,5 @@
 import { atRender, queueTask, toValue } from "@luent/quarky"
-import { MaybeIon } from "../component/x-Input"
+import { MaybeIon } from "../component/bindings-types"
 import { atAttach, atUnmount, beforeDetach } from "../flask/flask-hooks"
 import { setUpPositionTransition, setUpTransit } from "./transit"
 import { createStack } from "@luent/utils"

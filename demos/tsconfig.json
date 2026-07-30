@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "../packages/luent/src/jsx-runtime/index.d.ts"
+    ],
+    "customConditions": [
+      "workspace"
+    ]
+  },
+  "include": [
+    "./**/*",
+    "../packages/luent/src/jsx-runtime/index.d.ts"
+  ]
+}

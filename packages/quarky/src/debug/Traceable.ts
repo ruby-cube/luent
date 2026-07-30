@@ -1,4 +1,4 @@
-import { getPublicTrace } from "../../../flask/debug"
+import { getPublicTrace } from "../../../flask/src/debug"
 
 export interface TraceableEntity {
    asTraceable?: Traceable

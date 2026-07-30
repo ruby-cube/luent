@@ -3,7 +3,7 @@ import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSX
 import { ConditionalKit } from "./IfElse";
 import { ViewType, createIfSeries, RenderConditional } from "./If";
 import { isFunction } from "@luent/utils";
-import { FromTag, RenderSlot } from "../component/x-Input";
+import { FromTag, RenderSlot } from "../component/bindings-types";
 import { DEFAULT } from "./MatchCase";
 
 

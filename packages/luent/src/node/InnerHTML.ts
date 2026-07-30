@@ -1,5 +1,5 @@
 import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, atRender, RUN_EAGERLY, atInternalRender } from "@luent/quarky";
-import { MaybeIon } from "../component/x-Input";
+import { MaybeIon } from "../component/bindings-types";
 import { DOMParent } from "./VineNode";
 import { getFlask } from "@luent/flask";
 import { isObject } from "@luent/utils";

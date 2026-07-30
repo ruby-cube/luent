@@ -1,11 +1,11 @@
 import { AnyObject } from "@luent/types";
-import { ComponentConfig, RawJSXNode } from "../node/makeJSXNode";
+import { ComponentConfig } from "../node/makeJSXNode";
 import { isObject, normalizeToArray } from "@luent/utils";
-import { initializeRef, InternalRef, isNodesRef } from "../node/NodeRef";
+import { initializeRef } from "../node/NodeRef";
 import { JSXNode } from "../node/VineNode";
-import { NodeRefsConfig, setUpNodeRefs } from "../node/NodeRefs";
+import { setUpNodeRefs } from "../node/NodeRefs";
 import { setUpHooks } from "../flask/template-hooks";
-import { JSXComponent } from "@luent/nextscript";
+import { JSXComponentAs } from "@luent/nextscript";
 import type { ComponentKit } from "@luent/nextscript";
 import { composeHooks, composeRef, toSetup } from "./bindings";
 import { $from } from "../utils/destructure";
@@ -13,7 +13,7 @@ import { $from } from "../utils/destructure";
 
 export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentKit<unknown> : (setup?: P) => ComponentKit<unknown>
 
-export const template = JSXComponent; // TODO: Temporary
+export const component = JSXComponentAs;
 
 export type InferSlot<T extends ComponentTag = ComponentTag> =
   T extends (setup?: infer P) => any ?

@@ -1,6 +1,6 @@
 import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
-import { FromTag, RenderSlot } from "../component/x-Input";
+import { FromTag, RenderSlot } from "../component/bindings-types";
 import { debug, normalizeToArray } from "@luent/utils";
 import {  unnestComponent } from "@luent/nextscript";
 import { component } from "..";

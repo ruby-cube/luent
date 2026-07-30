@@ -1,6 +1,6 @@
 import { Flask, getFlask } from "@luent/flask";
 import { isGetter, atRender, RUN_EAGERLY, toValue, trackForRender, atInternalRender } from "@luent/quarky";
-import { MaybeIon } from "../component/x-Input";
+import { MaybeIon } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 
 
