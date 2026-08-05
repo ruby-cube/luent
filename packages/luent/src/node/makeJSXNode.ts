@@ -1,4 +1,4 @@
-import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "../../../quarky/src";
+import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "@luent/quarky";
 import { ComponentTag, InferSlot, makeComponent } from "../component/Component";
 import { TagName, setUpElement, useDOMNode } from "../element/setUpElement";
 import { NodeRef, INTERNAL } from "./NodeRef";

@@ -1,32 +1,23 @@
 import { readFile } from 'node:fs/promises'
-import { createRequire } from 'node:module'
 import { transformWithOxc } from 'vite'
 import * as babel from '@babel/core'
 import { luentPreTransform as BabelLuentPlugin } from '@luent/babel-plugin-luent'
 import { transpileNextScript } from '@luent/nextscript/transpile'
 
-const require = createRequire(import.meta.url)
-
-function resolveLuentJsxRuntimePath(id) {
-  return require.resolve(id)
-}
-
-function isLuentJsxRuntimeId(id) {
-  return id === 'luent/jsx-runtime' || id === 'luent/jsx-dev-runtime'
-}
-
-let luentJsxRuntimePath
-
 export default function LuentPlugin() {
   /** @type {import('vite').PluginOption[]} */
   const plugins = [
     {
-      name: 'vite-luent-jsx-runtime-resolver',
+      name: 'vite-luent-conditions',
       enforce: 'pre',
-      resolveId(id) {
-        if (isLuentJsxRuntimeId(id)) {
-          luentJsxRuntimePath ??= resolveLuentJsxRuntimePath('luent/jsx-runtime')
-          return luentJsxRuntimePath
+      config(config) {
+        const existingConditions = config.resolve?.conditions ?? []
+        const nextConditions = ['workspace', ...existingConditions.filter(c => c !== 'workspace')]
+
+        return {
+          resolve: {
+            conditions: nextConditions,
+          },
         }
       }
     },

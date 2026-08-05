@@ -27,6 +27,7 @@ export * from "./ionic/IonizedIterator"
 export * from "./reactivity/IonicTask"
 export * from "./reactivity/Update"
 export * from "./reactivity/animation"
+export * from "./specialty/Stream"
 export * from "./specialty/Finitron"
 export * from "./debug/dev"
 

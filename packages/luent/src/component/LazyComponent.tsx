@@ -1,7 +1,7 @@
 import { ComponentTag } from "./Component";
 import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@luent/utils";
-import { createAtomicIon, ion } from "../../../quarky/src";
+import { createAtomicIon, ion } from "@luent/quarky";
 import { AnyObject } from "@luent/types";
 
 const lazyComponents: Map<() => Promise<ComponentTag>, ComponentTag> = new Map()
@@ -71,7 +71,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             <Error {...props} error={$error()}></Error>
           )}
           {Else(() =>
-            <Component {...props}></::>
+            <Component {...props}></Component>
           )}
         </>
       )
@@ -87,7 +87,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             <Placeholder {...props}></Placeholder>
           )}
           {ElseIf($loaded, () =>
-            <Component {...props}></::>
+            <Component {...props}></Component>
           )}
         </>
       )
@@ -103,7 +103,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             <Error {...props} error={$error()}></Error>
           )}
           {ElseIf($loaded, () =>
-            <Component {...props}></::>
+            <Component {...props}></Component>
           )}
         </>
       )
@@ -115,7 +115,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
     return (
       <>
         {If($loaded, () => {
-          return <Component {...props}></::>
+          return <Component {...props}></Component>
         }
         )}
       </>

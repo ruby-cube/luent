@@ -4,7 +4,7 @@ import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListKit, toAsyncRenderItem } from "./ItemList";
 import { atInternalRender, atPrelude, atRender, Ion, Ionic, isGetter, PRELUDE, queueTask, toIon, toValue, watch } from "@luent/quarky";
 import { isIonicProxy } from "@luent/quarky/core";
-import { __DEV__buildAsyncPath, TRACE } from "../../../flask/src/debug";
+import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
 import { ForIndex, Nullish } from "./IndexedList";
 import { createStack } from "@luent/utils";
 import { AnyObject } from "@luent/types";

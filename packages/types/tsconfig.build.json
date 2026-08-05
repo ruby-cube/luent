@@ -1,0 +1,29 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "jsx": "preserve",
+    "paths": {
+      "luent/jsx-runtime": [
+        "../luent/src/jsx-runtime/index.d.ts"
+      ],
+      "luent/jsx-dev-runtime": [
+        "../luent/src/jsx-runtime/index.d.ts"
+      ]
+    },
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "noCheck": true,
+    "types": [],
+    "rootDir": ".",
+    "outDir": "./dist/types",
+    "composite": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo/types.dts.tsbuildinfo"
+  },
+  "include": [
+    "../env.d.ts",
+    "./index.ts"
+  ]
+}

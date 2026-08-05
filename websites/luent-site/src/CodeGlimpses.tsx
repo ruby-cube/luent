@@ -151,7 +151,6 @@ FunctionalComponents.nsx =
 }
 
 mountIsland(Counter, '#app')
-
 `
 
 FunctionalComponents.tsx =
@@ -176,11 +175,24 @@ mountIsland(Counter, '#app')
 `
 
 UnifiedReactivity.heading = 'Unified reactivity'
-function UnifiedReactivity() {
+UnifiedReactivity.$tab = FunctionalComponents.$tab
+function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
       Manage simple, derived, async, and structured reactive state under a unified reactivity model. Reactive state is initialized through the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
+    <p style='text-wrap: balance'><small>
+      {If(() => $tab() === 'main',
+        <>
+          Note that the <code>$</code> prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
+        </>
+      )}
+      {Else(
+        <>
+          Note that, in NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
+        </>
+      )}
+    </small></p>
     <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
 }
@@ -281,7 +293,7 @@ get total = ion(() => count * qty);
 // ---
 
 <:>
-  {For(list, item => 
+  {For(list, item :> 
     <li>{item}</li>
   )}
   <div>{total@}</div>

@@ -4,11 +4,23 @@
   "description": "",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./core": "./src/core/index.ts"
+    ".": {
+      "workspace": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./core": {
+      "workspace": "./src/core/index.ts",
+      "types": "./dist/types/core/index.d.ts",
+      "default": "./src/core/index.ts"
+    }
   },
+  "types": "./dist/types/index.d.ts",
   "module": "./src/index",
   "main": "./src/index",
+  "scripts": {
+    "build:types": "tsc -p tsconfig.build.json"
+  },
   "dependencies": {
     "@luent/flask": "workspace:*",
     "@luent/utils": "workspace:*"

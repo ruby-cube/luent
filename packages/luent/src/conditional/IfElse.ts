@@ -4,7 +4,7 @@ import { ViewType, If } from "./If";
 import { createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, atRender, queueTask, SuspenseIon, watch, trackForRender, atInternalRender } from "@luent/quarky";
 import { Booleanny } from "@luent/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { __DEV__buildAsyncPath, TRACE } from "../../../flask/src/debug";
+import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
 import { FromTag, MaybeIon, RenderSlot } from "../component/bindings-types";
 import { isPlainObject } from "@luent/utils";
 import { unmarkInitialRender, markInitialRender, TransitionConfigs } from "../transitions/transitions";

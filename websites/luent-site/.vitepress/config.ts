@@ -43,8 +43,8 @@ export default defineConfig({
   title: "Luent",
   description: "Luent documentation and resources",
   themeConfig: {
-    // siteTitle: false,
-    siteTitle: 'v0.0.0',
+    siteTitle: false,
+    // siteTitle: 'v0.0.0',
     logo: {
       dark: '/assets/luent-logo-dark.png',
       light: '/assets/luent-logo-light.png'
@@ -65,9 +65,10 @@ export default defineConfig({
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
       { text: 'Introducing NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
+      { text: 'v0.0.0', items: [{ text: '0.0.0', link: '/guide' }] },
     ],
 
-     sidebar: {
+    sidebar: {
       '/api/': [{
         text: 'API reference',
         items: [{
@@ -76,91 +77,91 @@ export default defineConfig({
         }]
       }],
       '/guide/': [
-       {
-        text: 'Language',
-        collapsed: false,
-        items: [{
-          text: '&nbsp;&nbsp;&nbsp;&nbsp;nsx&nbsp;&nbsp;&nbsp;&nbsp;tsx'
-        }]
-      },
-      {
-        text: 'Essentials',
-        items: [
-          { text: 'Interactive islands', link: '/guide/interactive-islands' },
-          {
-            text: 'Reactive State', link: '/guide/reactive-state', items: [
-              // { text: 'Atomic Reactive State', link: '/guide/getter-syntax#accessor-variables' },
-              // { text: 'Derived Reactive State', link: '/guide/getter-syntax#accessor-variables' },
-              // { text: 'Inline Derivations', link: '/guide/getter-syntax#the-postfix-operator' },
-              // { text: 'Reactive Structures', link: '/guide/getter-syntax#the-postfix-operator' },
-              // { text: 'Encapsulation', link: '/guide/getter-syntax#the-postfix-operator' },
-              // { text: 'Debugging', link: '/guide/getter-syntax#the-postfix-operator' },
-            ]
-          },
-          { text: '[] Reactive Structures', link: '/guide/reactive-structures' },
-          {
-            text: 'Template Control Flow', link: '/guide/template-control-flow', items: [
-              // { text: 'Iterative Rendering', link: '/guide/' },
-              // { text: 'Control Flow', link: '/guide/' },
-              // { text: 'Dynamic Views', link: '/guide/' },
-              // { text: 'Preserving Views', link: '/guide/' },
-              // { text: 'Lifecycle Hooks', link: '/guide/' },
-            ]
-          },
-          {
-            text: 'Element Bindings', link: '/guide/element-bindings', items: [
-              // { text: 'Events', link: '/guide/' },
-              // { text: 'Styles', link: '/guide/' },
-              // { text: 'Attributes', link: '/guide/' }
-            ]
-          },
-          {
-            text: '~ Component Bindings', link: '/guide/component-bindings', items: [
-              // { text: 'Direct Input', link: '/guide/' },
-              // { text: 'Indirect Input', link: '/guide/' },
-              // { text: 'Dependency Injection', link: '/guide/' },
-              // { text: 'Events', link: '/guide/' },
-              // { text: 'Styles', link: '/guide/' },
-              // { text: 'Slots', link: '/guide/' },
-              // { text: 'Auto-binding', link: '/guide/' }
-            ]
-          },
+        {
+          text: 'Language',
+          collapsed: false,
+          items: [{
+            text: '&nbsp;&nbsp;&nbsp;&nbsp;nsx&nbsp;&nbsp;&nbsp;&nbsp;tsx'
+          }]
+        },
+        {
+          text: 'Essentials',
+          items: [
+            { text: 'Interactive islands', link: '/guide/interactive-islands' },
+            {
+              text: 'Reactive State', link: '/guide/reactive-state', items: [
+                // { text: 'Atomic Reactive State', link: '/guide/getter-syntax#accessor-variables' },
+                // { text: 'Derived Reactive State', link: '/guide/getter-syntax#accessor-variables' },
+                // { text: 'Inline Derivations', link: '/guide/getter-syntax#the-postfix-operator' },
+                // { text: 'Reactive Structures', link: '/guide/getter-syntax#the-postfix-operator' },
+                // { text: 'Encapsulation', link: '/guide/getter-syntax#the-postfix-operator' },
+                // { text: 'Debugging', link: '/guide/getter-syntax#the-postfix-operator' },
+              ]
+            },
+            { text: '[] Reactive Structures', link: '/guide/reactive-structures' },
+            {
+              text: 'Template Control Flow', link: '/guide/template-control-flow', items: [
+                // { text: 'Iterative Rendering', link: '/guide/' },
+                // { text: 'Control Flow', link: '/guide/' },
+                // { text: 'Dynamic Views', link: '/guide/' },
+                // { text: 'Preserving Views', link: '/guide/' },
+                // { text: 'Lifecycle Hooks', link: '/guide/' },
+              ]
+            },
+            {
+              text: 'Element Bindings', link: '/guide/element-bindings', items: [
+                // { text: 'Events', link: '/guide/' },
+                // { text: 'Styles', link: '/guide/' },
+                // { text: 'Attributes', link: '/guide/' }
+              ]
+            },
+            {
+              text: '~ Component Bindings', link: '/guide/component-bindings', items: [
+                // { text: 'Direct Input', link: '/guide/' },
+                // { text: 'Indirect Input', link: '/guide/' },
+                // { text: 'Dependency Injection', link: '/guide/' },
+                // { text: 'Events', link: '/guide/' },
+                // { text: 'Styles', link: '/guide/' },
+                // { text: 'Slots', link: '/guide/' },
+                // { text: 'Auto-binding', link: '/guide/' }
+              ]
+            },
 
-          { text: '[] Contextual Bindings', link: '/guide/contextual-bindings' },
-          { text: 'The Render Cycle', link: '/guide/the-render-cycle' },
-          { text: 'Preserving Views', link: '/guide/preserving-views' },
-          { text: 'Lifecycle Hooks', link: '/guide/lifecycle-hooks' },
-          { text: 'Node Access', link: '/guide/node-access' },
-          { text: 'Reusable Logic', link: '/guide/reusable-logic' }
-        ]
-      },
-      {
-        text: 'Extended Topics',
-        items: [
-          { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
-          { text: 'Reactions', link: '/guide/reactions' },
-          { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
-          // {
-          //   text: '[] More Reactivity', link: '/markdown-examples', items: [
-          //     // { text: 'Writable Derivations', link: '/guide/' },
-          //   ]
-          // }
-        ]
-      },
-      {
-        text: 'Special Topics',
-        items: [
-          { text: '[] Mutation Safety', link: '/guide/mutation-safety' },
-          { text: 'Error Rendering', link: '/guide/error-rendering' },
-          { text: 'Async Rendering', link: '/guide/async-rendering' },
-          { text: 'Portals', link: '/guide/portals' },
-          { text: 'Transitions', link: '/guide/transitions' },
-          { text: '~ Finite States', link: '/guide/' },
-          { text: '~ Custom Reactive Structures', link: '/guide/' },
-          { text: 'Client-side Routing [planned]' },
-          { text: 'Server Side [planned]' }
-        ]
-      },
+            { text: '[] Contextual Bindings', link: '/guide/contextual-bindings' },
+            { text: 'The Render Cycle', link: '/guide/the-render-cycle' },
+            { text: 'Preserving Views', link: '/guide/preserving-views' },
+            { text: 'Lifecycle Hooks', link: '/guide/lifecycle-hooks' },
+            { text: 'Node Access', link: '/guide/node-access' },
+            { text: 'Reusable Logic', link: '/guide/reusable-logic' }
+          ]
+        },
+        {
+          text: 'Extended Topics',
+          items: [
+            { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
+            { text: 'Reactions', link: '/guide/reactions' },
+            { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
+            // {
+            //   text: '[] More Reactivity', link: '/markdown-examples', items: [
+            //     // { text: 'Writable Derivations', link: '/guide/' },
+            //   ]
+            // }
+          ]
+        },
+        {
+          text: 'Special Topics',
+          items: [
+            { text: '[] Mutation Safety', link: '/guide/mutation-safety' },
+            { text: 'Error Rendering', link: '/guide/error-rendering' },
+            { text: 'Async Rendering', link: '/guide/async-rendering' },
+            { text: 'Portals', link: '/guide/portals' },
+            { text: 'Transitions', link: '/guide/transitions' },
+            { text: '~ Finite States', link: '/guide/' },
+            { text: '~ Custom Reactive Structures', link: '/guide/' },
+            { text: 'Client-side Routing [planned]' },
+            { text: 'Server Side [planned]' }
+          ]
+        },
       ],
       '/demos/': [
         {

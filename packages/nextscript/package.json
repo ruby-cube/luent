@@ -4,12 +4,17 @@
   "version": "0.1.0",
   "description": "",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "workspace": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "default": "./src/index.ts"
+    },
     "./transpile": {
-      "types": "./src/transpile.ts",
+      "types": "./dist/types/transpile.d.ts",
       "default": "./dist/transpile.mjs"
     }
   },
+  "types": "./dist/types/index.d.ts",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "files": [

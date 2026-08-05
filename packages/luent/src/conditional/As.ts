@@ -3,7 +3,7 @@ import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/make
 import { JSXNode, processJSXOutput, toAsyncRender, VineNode } from "../node/VineNode";
 import { IfElseKit } from "./IfElse";
 import { ViewType, RenderConditional } from "./If";
-import { __DEV__buildAsyncPath, TRACE } from "../../../flask/src/debug";
+import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
 import { DEFAULT, MatchKit, renderStaticMatchCase, toCasesMap } from "./MatchCase";
 import { isFunction } from "@luent/utils";
 

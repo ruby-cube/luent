@@ -11,17 +11,31 @@
    "exports": {
       ".": {
          "workspace": "./src/index.ts",
+         "types": "./dist/index.d.ts",
          "default": "./dist/index.mjs"
+      },
+      "./client": {
+         "workspace": "./src/client/index.ts",
+         "types": "./dist/client/index.d.ts",
+         "default": "./dist/client/index.mjs"
+      },
+      "./server": {
+         "workspace": "./src/server/index.ts",
+         "types": "./dist/server/index.d.ts",
+         "default": "./dist/server/index.mjs"
       },
       "./jsx-runtime": {
          "workspace": "./src/jsx-runtime/index.ts",
+         "types": "./dist/jsx-runtime/index.d.ts",
          "default": "./dist/jsx-runtime.mjs"
       },
       "./jsx-dev-runtime": {
          "workspace": "./src/jsx-runtime/index.ts",
+         "types": "./dist/jsx-runtime/index.d.ts",
          "default": "./dist/jsx-runtime.mjs"
       }
    },
+   "types": "./dist/index.d.ts",
    "main": "./dist/index.mjs",
    "module": "./dist/index.mjs",
    "files": [
@@ -30,9 +44,11 @@
    "scripts": {
       "build": "pnpm run build:js && pnpm run build:dts",
       "build:js": "tsdown",
-      "build:dts": "node ./scripts/copy-dts.mjs",
+      "build:dts": "pnpm run build:dts:deps && tsc -p tsconfig.build.json && node ./scripts/bundle-dts.mjs",
+      "build:dts:deps": "pnpm --filter @luent/types run build:types && pnpm --filter @luent/utils run build:types && pnpm --filter @luent/flask run build:types && pnpm --filter @luent/quarky run build:types && pnpm --filter @luent/tree-squirl run build:types && pnpm --filter @luent/nextscript run build:types",
       "watch": "tsdown --watch",
       "prepack": "pnpm run build",
+      "prep:publish": "npm pack --dry-run",
       "pack": "pnpm pack",
       "publish:dry": "pnpm publish --dry-run --no-git-checks",
       "publish:public": "pnpm publish --no-git-checks"
@@ -41,6 +57,7 @@
       "@luent/flask": "workspace:*",
       "@luent/nextscript": "workspace:*",
       "@luent/quarky": "workspace:*",
+      "@microsoft/api-extractor": "^7.52.12",
       "@luent/types": "workspace:*",
       "@luent/utils": "workspace:*",
       "tsdown": "^0.21.9",

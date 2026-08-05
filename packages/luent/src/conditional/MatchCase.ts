@@ -7,7 +7,7 @@ import { FromTag, RenderSlot } from "../component/bindings-types";
 import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@luent/flask";
 import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode";
 import { DynamicNodeKit, IfElseKit } from "./IfElse";
-import { __DEV__buildAsyncPath, TRACE } from "../../../flask/src/debug";
+import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 import { component } from "../index";
 

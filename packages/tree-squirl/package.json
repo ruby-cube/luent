@@ -8,6 +8,9 @@
   },
   "main": "./index.ts",
   "module": "./index.ts",
+  "scripts": {
+    "build:types": "tsc -p tsconfig.build.json"
+  },
   "dependencies": {
     "@luent/utils": "workspace:*",
     "oxc-parser": "^0.124.0"

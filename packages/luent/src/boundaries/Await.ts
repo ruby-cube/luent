@@ -13,8 +13,7 @@ import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { isFunction, normalizeToArray, toError, UNDEFINED } from "@luent/utils";
-import { ASYNC_QUARK, AsyncIon, AsyncProps, isAsyncIon, popAwaiting, pushAwaiting } from "../../../quarky/src/async/AsyncIon";
-import { SuspenseIon, SUSPENSE_QUARK } from "../../../quarky/src/async/Suspense";
+import { ASYNC_QUARK, AsyncIon, isAsyncIon, popAwaiting, pushAwaiting, SuspenseIon, SUSPENSE_QUARK } from "@luent/quarky";
 
 // export function Suspense(input: FromTag<AwaitConfig>) {
 //    const { await: _awaited, $as: suspense, provide, meanwhile: renderPlaceholder, catch: renderError, loading: renderLoading, Slot } = input

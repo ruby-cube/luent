@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@luent/flask";
-import { atRender, atTick } from "../../../quarky/src/reactivity/RenderCycle";
+import { atRender, atTick } from "@luent/quarky";
 
 
 export function beforeMount(task: () => void) {
