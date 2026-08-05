@@ -4,10 +4,10 @@ import * as babel from '@babel/core'
 import { luentPreTransform as BabelLuentPlugin } from '@luent/babel-plugin-luent'
 import { transpileNextScript } from '@luent/nextscript/transpile'
 
-export default function LuentPlugin() {
+export default function LuentPlugin(options = {}) {
   /** @type {import('vite').PluginOption[]} */
   const plugins = [
-    {
+    ...(options.useWorkspaceCondition ? [{
       name: 'vite-luent-conditions',
       enforce: 'pre',
       config(config) {
@@ -20,7 +20,7 @@ export default function LuentPlugin() {
           },
         }
       }
-    },
+    }] : []),
     {
       name: 'vite-nsx-loader',
       enforce: 'pre',
