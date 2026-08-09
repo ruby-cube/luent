@@ -85,7 +85,6 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", vi
     },
     view: {
       markDiscard() {
-        console.log('@$@ marking discard')
         _cache = undefined
       }
     }
@@ -122,24 +121,19 @@ export class IfElseKit extends VineNode {
     finally {
       unmarkInitialRender()
       trackForRender(this.$activeIndex, ({ previous: prevIndex }) => {
-        console.log('@@@ index changed!', this.$activeIndex(), prevIndex)
         if (this.$activeIndex() === prevIndex) return;
         const kit = this.kits[this.$activeIndex()]
         const prevKit = this.pendingDeactivatedKit ?? this.kits[prevIndex]
 
-        console.log('switch?')
         if (this.pendingSwitch) {
-          console.log('>>> CANCEL PROMISE')
           this.cancelledPendingSwitch.add(this.pendingSwitch)
           this.pendingSwitch = null
         }
 
         if (kit.pending) {
-          console.log('await pending switch')
           this.awaitPendingConditional(kit.pending, kit, prevKit)
         }
         else {
-          console.log('@@@ switch!')
           this.deactivateConditional(prevKit);
           this.reactivateConditional(kit)
         }
@@ -163,17 +157,14 @@ export class IfElseKit extends VineNode {
         kit.awaitCache = rawOutput
         const promise = suspense()
         if (promise) {
-          console.log('### B promise...', prevKit && prevKit.nodes ? [...prevKit.nodes] : prevKit.nodes)
           const id = this.pendingSwitch = ++this._pendingSwitchID
           this.pendingDeactivatedKit = prevKit
           promise.then(() => {
             if (this.cancelledPendingSwitch.has(id)) {
-              console.log('>>> (canceled) B')
               this.cancelledPendingSwitch.delete(id)
               return;
             }
             this.pendingSwitch = null
-            console.log('### B promise switch')
             if (prevKit !== kit)
               this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
@@ -182,17 +173,14 @@ export class IfElseKit extends VineNode {
         else {
           watch(suspense, ({ current: promise }) => {
             if (promise) {
-              console.log('### A promise...', prevKit && prevKit.nodes ? [...prevKit.nodes] : prevKit.nodes)
               const id = this.pendingSwitch = ++this._pendingSwitchID
               this.pendingDeactivatedKit = prevKit
               promise.then(() => {
                 if (this.cancelledPendingSwitch.has(id)) {
-                  console.log('>>> (canceled) A')
                   this.cancelledPendingSwitch.delete(id)
                   return;
                 }
                 this.pendingSwitch = null
-                console.log('### A promise switch')
                 if (prevKit !== kit)
                   this.deactivateConditional(prevKit);
                 this.reactivateConditional(kit)
@@ -204,7 +192,6 @@ export class IfElseKit extends VineNode {
       else {
         // TODO: end suspense... need a way to do this without exposing .value to devs
         suspense.value = null
-        console.log('### C switch')
         kit.awaitCache = rawOutput
         if (prevKit !== kit)
           this.deactivateConditional(prevKit);
@@ -214,25 +201,21 @@ export class IfElseKit extends VineNode {
     else {
       const promise = suspense()
       if (promise) {
-        console.log('### D promise...')
         const id = this.pendingSwitch = ++this._pendingSwitchID
         this.pendingDeactivatedKit = prevKit
 
         promise.then(() => {
           if (this.cancelledPendingSwitch.has(id)) {
-            console.log('>>> (canceled) D')
             this.cancelledPendingSwitch.delete(id)
             return;
           }
           this.pendingSwitch = null
-          console.log('### D promise switch', prevKit === kit)
           if (prevKit !== kit)
             this.deactivateConditional(prevKit);
           this.reactivateConditional(kit)
         })
       }
       else {
-        console.log('### E switch')
         if (prevKit !== kit)
           this.deactivateConditional(prevKit);
         this.reactivateConditional(kit)
@@ -359,7 +342,7 @@ export function hideDOMNodes(nodes: JSXNode[]) {
       showIfMap.set(node, node.style.display)
       node.style.display = 'none'
     }
-    else if (__DEV__) {
+    else if (__INTERNAL__) {
       console.warn(`Unhandled node type ${node}`)
     }
   })
@@ -381,7 +364,7 @@ export function showDOMNodes(nodes: JSXNode[]) {
         node.style.display = display
       }
     }
-    else {
+    else if (__INTERNAL__) {
       console.warn(`Unhandled node type ${node}`)
     }
   })

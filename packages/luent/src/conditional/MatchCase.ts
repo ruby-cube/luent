@@ -43,7 +43,6 @@ export function toCasesMap(raw: RawCaseKit[], groupActivationType: ViewType | un
   const map: Map<any, CasesKit> = new Map()
   const context = $_snap_context()
   const pending = getAwaiting()
-  console.log('awaiting??', pending)
   let currentKit;
   for (const rawKit of raw) {
     const { case: c, render, type } = rawKit
@@ -113,7 +112,7 @@ export function createCasesKit(viewType: ViewType | undefined, render: RenderCas
     cache: undefined,
     awaitCache: undefined,
     view: {
-      markDiscard: () => { console.log('@$@ noop'); noop() }
+      markDiscard: noop
     }
   }
 }
@@ -157,7 +156,6 @@ export class MatchKit extends VineNode {
       },
       view: {
         markDiscard() {
-          console.log('@$@ markDiscard')
           _cache = undefined
         }
       }
@@ -203,10 +201,7 @@ export class MatchKit extends VineNode {
       const prevCase = toCase(previous)
       const caseKey = toCase($key())
       const matchKey = $key()
-      console.log('prevCase', prevCase)
-      console.log('caseKey', caseKey)
       if (matchKey === previous) {
-        console.warn('PREVIOUS MATCH', matchKey)
         return;
       }
 
@@ -214,7 +209,6 @@ export class MatchKit extends VineNode {
       const prevKit = this.pendingDeactivatedKit ?? this.getKit(prevCase, previous)
 
       if (this.pendingSwitch) {
-        console.log('>>> CANCEL PROMISE')
         this.cancelledPendingSwitch.add(this.pendingSwitch)
         this.pendingSwitch = null
       }

@@ -71,10 +71,10 @@ export class Compound {
 }
 
 export function __DEV__checkIfTracked() {
-   if (getActiveTracker()) console.warn(`RESEARCH: This is currently a tracked context. May need to use untracked`)
+   if (__INTERNAL__ && getActiveTracker()) console.warn(`RESEARCH: This is currently a tracked context. May need to use untracked`)
 }
 
 export function __DEV__checkIfNotTracked() {
-   if (!getActiveTracker()) console.warn(`RESEARCH: This is currently not a tracked context. untracked may be extraneous`)
+   if (__INTERNAL__ && !getActiveTracker()) console.warn(`RESEARCH: This is currently not a tracked context. untracked may be extraneous`)
 }
 

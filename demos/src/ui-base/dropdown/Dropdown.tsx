@@ -1,6 +1,4 @@
 import { NodeRef, RenderSlot, FromTag } from "luent"
-import { Ion, toIon } from "@luent/quarky"
-import { maybeFlip, positionTail } from "../../../../packages/luent-ui/src/base/popover/Popover.kit";
 import { PopoverRoot } from "../../../../packages/luent-ui/src/base/popover/Popover";
 import { IonicDropdown } from "./Dropdown.kit";
 

@@ -1,5 +1,5 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { beforeUnmount, NodeRef, atLayout, awaiting, toValue } from "luent"
+import { beforeUnmount, NodeRef, awaiting, toValue, layout } from "luent"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'
@@ -70,8 +70,7 @@ export class Popover {
 }
 
 export function maybeFlip(node: HTMLElement, popover: Popover) {
-  console.log('$$$ maybe flip')
-  atLayout(() => {
+  awaiting(layout, () => {
     const rect = node.getBoundingClientRect()
     const container = getContainer(popover)
     const bound = container?.getBoundingClientRect()
@@ -118,7 +117,7 @@ export function positionTail(node: HTMLElement, popover: Popover, $popover: Node
         const inset = axis === 'y' ? x : y
         const popoverNode = $popover()
         if (!popoverNode) {
-          console.error('popoverNode is missing')
+          if (__DEV__) console.warn('popoverNode is missing')
           return;
         }
         // hide tail if popover is greatly misaligned due to collision shift

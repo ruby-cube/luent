@@ -8,8 +8,8 @@ import { TestListTransit } from "./src/TestListTransit"
 import { TestIfElse } from "./src/TestIfElse-Transitions"
 import { TodoMVC } from "./src/TodoMVC"
 // import { } from "./src/TodoMVC"
-import { TrafficLight } from "./src/TrafficLight.nsx"
-import { VideoPlayer } from "./src/VideoPlayer.nsx"
+// import { TrafficLight } from "./src/TrafficLight.nsx"
+// import { VideoPlayer } from "./src/VideoPlayer.nsx"
 import { TestMarkdownApp } from "./src/MarkdownApp"
 import { TreeApp } from "./src/TestTreeApp"
 import { TestAsyncSelect } from "./src/TestAsyncSelect"
@@ -54,7 +54,11 @@ import { TestColorSort } from "./src/TestColorSort"
 export function runDemo() {
   mountIsland(() => {
     provideRoot(MICROCLASS_MERGE, twMerge);
-    return <HabitTracker habit="water" goal={8}></HabitTracker>
+
+    return <>
+      <span aria-hidden="true"></span>
+      <HabitTracker habit="water" goal={8}></HabitTracker>
+    </>
     // return <TestInnerHTML/>
   }, '#root')
 }

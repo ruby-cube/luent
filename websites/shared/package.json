@@ -13,7 +13,7 @@
     "luent": "workspace:*",
     "@luent/luent-ui": "workspace:*",
     "@luent/quarky": "workspace:*",
-    "@luent/vite-plugin-luent": "workspace:*"
+    "vite-plugin-luent": "workspace:*"
 
   },
   "peerDependencies": {

@@ -1,5 +1,4 @@
-import { template, For, If, Else, FromTag, listen, isMutableIon } from "luent"
-import { watch, ionicTickTask, Ion, Ionic, EACH, as, ion, ionic } from "@luent/quarky"
+import { template, For, If, Else, FromTag, listen, isMutableIon, track, ionicTickTask, Ion, Ionic, EACH, as, ion, ionic } from "luent"
 
 interface Todo {
    id: number

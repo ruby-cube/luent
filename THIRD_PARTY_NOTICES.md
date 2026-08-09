@@ -4,8 +4,8 @@
 
 The following files include code modified from React type definitions published in DefinitelyTyped:
 
-- packages/luent/src/jsx-runtime/global.d.ts
-- packages/luent/src/jsx-runtime/index.d.ts
+- packages/luent/src/jsx-runtime/types/global.ts
+- packages/luent/src/jsx-runtime/types/index.ts
 
 Upstream sources:
 

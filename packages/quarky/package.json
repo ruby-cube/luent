@@ -5,12 +5,12 @@
   "type": "module",
   "exports": {
     ".": {
-      "workspace": "./src/index.ts",
+      "luentWorkspace": "./src/index.ts",
       "types": "./dist/types/index.d.ts",
       "default": "./src/index.ts"
     },
     "./core": {
-      "workspace": "./src/core/index.ts",
+      "luentWorkspace": "./src/core/index.ts",
       "types": "./dist/types/core/index.d.ts",
       "default": "./src/core/index.ts"
     }

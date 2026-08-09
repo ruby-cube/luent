@@ -1,5 +1,4 @@
-import { Else, If, NodeRef, css, component, Style } from "luent";
-import { Ion, ion, queueTask, watch, Finitron, ionic } from "@luent/quarky";
+import { Else, If, NodeRef, css, Ion, ion, queueTask, track as watch, Finitron, ionic, Style } from "luent";
 import "./reset.css"
 
 

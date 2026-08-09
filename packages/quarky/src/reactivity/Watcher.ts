@@ -87,28 +87,12 @@ export type WatchSubjects = (Object | Ion)[]
 
 export function watch<T>(subject: T, reaction: ReactionTask<T>, options: ReactionOptions = {}): PausableListener {
   if (import.meta.env.SSR) return InertWatcher()
-  console.log('*** watching', subject)
   options.retrack = options.retrack ?? true;
 
   const target = asSubject(subject, options.retrack)
   target.asTraceable = new Traceable(options?.devName ?? 'watch' + subject)
 
-  if (__DEV__ && options["dev.logAtoms"]) {
-    const target = ion(() => subject(), {
-      devName: options.devName
-    })
-    watch(target, () => {
-      console.log('hi')
-      logAtoms(quarkOf(target))
-    }, {
-      phase: options.phase,
-      eager: true,
-      once: options.once
-    })
-    //TODO: ionic proxy cases      
-  }
   if (!isSubject(target)) { // plain object
-    console.log('inert A')
     if (options?.eager) {
       scheduleEagerReaction(() =>
         reaction(new StateChangeEvent(undefined, subject, true))
@@ -121,7 +105,6 @@ export function watch<T>(subject: T, reaction: ReactionTask<T>, options: Reactio
 
   if (!target.reactive) {
     if (options?.eager) {
-      console.log('inert B')
       scheduleEagerReaction(() =>
         reaction(new StateChangeEvent(undefined, prevState.get(), true))
         , getPhase(options))

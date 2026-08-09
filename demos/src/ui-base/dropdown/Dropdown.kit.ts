@@ -1,4 +1,4 @@
-import { ionic, Ionic, queueTask, toRaw } from "@luent/quarky"
+import { ionic, Ionic, queueTask, toRaw } from "luent"
 import { DATA_ATTRIBUTE_POPOVER, getPopoverID, Popover } from "../../../../packages/luent-ui/src/base/popover/Popover.kit"
 
 

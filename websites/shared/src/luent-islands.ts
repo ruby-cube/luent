@@ -1,4 +1,4 @@
-import { getPortals, RenderPageWithStyles, runWithPortals, renderInShadow } from "luent";
+import { getPortals, RenderPageWithStyles, runWithPortals } from "luent/server";
 import { type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
 import { AnyObject } from "@luent/types";

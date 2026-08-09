@@ -1,16 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": [
-      "vite/client",
-      "../../packages/luent/src/jsx-runtime/index.d.ts"
-    ],
-    "customConditions": [
-      "workspace"
-    ],
     "target": "es2023",
     "module": "esnext",
     "lib": ["ES2023", "DOM"],
+    "types": ["vite/client", "luent"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 
@@ -21,14 +14,14 @@
     "moduleDetection": "force",
     "noEmit": true,
 
+    "jsx": "preserve",
+    "jsxImportSource": "luent",
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "./**/*",
-    "../../packages/luent/src/jsx-runtime/index.d.ts"
-  ]
+  "include": ["src"]
 }

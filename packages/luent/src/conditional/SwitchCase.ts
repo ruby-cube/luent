@@ -98,7 +98,6 @@ function toConditionalKits(kit: SwitchCaseKit): ConditionalKit[] {
 
    for (const kit of cases) {
       const { render, type, cases } = kit
-      console.log(cases[0], type)
       const defaultCase = cases.length === 0
       kits.push({
          statementType: kits.length === 0 ? 'if' : defaultCase ? 'else' : 'elseIf',

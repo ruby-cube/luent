@@ -10,6 +10,9 @@ export default {
   format: 'esm',
   outDir: 'dist',
   clean: true,
+  define: {
+    __INTERNAL__: 'false'
+  },
   deps: {
     // Bundle local workspace packages so npm consumers do not need private @luent/* packages.
     alwaysBundle: [/^@luent\//]

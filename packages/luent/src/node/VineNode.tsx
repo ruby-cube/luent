@@ -85,7 +85,6 @@ export function processJSXOutput(rawJSX: RawJSXNode) {
  * @param jsxNodes 
  */
 function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
-  console.log('jsxNodes', jsxNodes)
   for (const node of jsxNodes) {
     if (node === window) continue;
 
@@ -124,7 +123,6 @@ function _processJSXOutput(jsxNodes: RawJSXNode[], flattened: JSXNode[] = []) {
       flattened.push(node)
     }
     else {
-      console.log('### is text', node)
       flattened.push(createTextNode(node))
     }
   }
@@ -194,7 +192,6 @@ export function mountFragment(fragment: DocumentFragment, preceding: DOMNode | n
     preceding.after(fragment)
   }
   else {
-    console.log('PREPEND')
     parent?.prepend(fragment)
   }
 }

@@ -123,7 +123,7 @@ export class ModelQuark implements Atom {
       if (hooks && EACH in hooks && hooks[EACH]) {
          const each = hooks[EACH]
          const transform = each['-as']
-         if (each instanceof Function) console.error(`Failed to ionize nested items. Must pass ionizer in config object, e.g. { '-as': ionic } or use as() helper`)
+         if (__DEV__ && each instanceof Function) console.warn(`Failed to ionize nested items. Must pass ionizer in config object, e.g. { '-as': ionic } or use as() helper`)
          if (transform) this.initEach(transform)
          // delete each.as
          if ('@get' in each || '@set' in each) this.overrideGetHooks()

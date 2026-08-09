@@ -5,7 +5,7 @@
     "type": "module",
     "exports": {
       ".": {
-        "workspace": "./src/index.ts",
+        "luentWorkspace": "./src/index.ts",
         "types": "./dist/types/index.d.ts",
         "default": "./src/index.ts"
       }

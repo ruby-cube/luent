@@ -42,7 +42,6 @@ let _portalMap: Map<any, any> | undefined;
 export function Portal(container: SelectorString | Element, render: RenderFunction | RawJSXNode | undefined, config?: AnyObject) {
 
   const element = typeof container === "string" ? document.querySelector(container) : container;
-  console.log('$$$ PORTAL TO', element)
   if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
   if (config) {
     // set up attributes

@@ -71,10 +71,8 @@ export function Style(cssText: string) {
   if (shadow) {
     const existing = shadow.querySelector('#' + id) // TODO: check shadow instead of document?
     if (existing) {
-      console.warn('^^^ existing style tag', existing)
       return;
     }
-    console.log('^^^ createStyleTag in shadow')
     const style = createStyleTag(cssText, id, shadow)
     beforeUnmount(() => {
       discardStyleTag(style, flask)
@@ -85,7 +83,6 @@ export function Style(cssText: string) {
   atMount(() => { // QUESTION: Why do things break when this is atRender instead of atMount?
     const existing = document.querySelector('#' + id)
     if (existing) {
-      console.warn('#$# existing style tag', existing)
       return;
     }
     const style = createStyleTag(cssText, id, shadow)

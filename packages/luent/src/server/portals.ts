@@ -45,10 +45,8 @@ export function runWithPortals(render: () => string, page: string) {
 export function transformPortals(code: string, key: string) {
   const portals = getPortals(key)
   if (!portals || portals.head.length === 0 && portals.body.length === 0) {
-    console.log('transform portals.. no portals', key)
     return code;
   }
-  console.log('transform portals!', key)
 
   const newCode = code
     .replace('</head>', `${portals.head.join('\n')}\n</head>`)

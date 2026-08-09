@@ -1,5 +1,4 @@
-import { beforeUnmount, component, As } from "luent";
-import { ionic, ion, Ionic } from "@luent/quarky";
+import { beforeUnmount, ionic, ion, Ionic , As } from "luent";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
 import './BottomlessBlokkis.css'

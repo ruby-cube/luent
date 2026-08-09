@@ -10,7 +10,6 @@ import { RenderFunction } from "../node/makeJSXNode";
 export function mountIsland<T extends AnyObject>(App: ComponentTag<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
   const rootContext = createRootContext()
   const flask = new Flask({ type: 'view' });
-  console.log('document', document.body)
   const root = typeof element === 'string' ? document.querySelector(element) : element;
   if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
   load(() => { // FIX: Error are being swallowed up here despite being rethrown
@@ -20,7 +19,6 @@ export function mountIsland<T extends AnyObject>(App: ComponentTag<T> | RenderFu
       const nodes = processJSXOutput(App())
       setUpNodeVine(nodes, root)
       atInternalRender(() => {
-        console.log('*** nodes', nodes, root)
         mountDOMNodes(nodes, root)
       })
       flask.emitInitialMount()

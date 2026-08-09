@@ -6,7 +6,6 @@ import { Flask, getFlask } from "@luent/flask";
 import { atAttach, beforeDetach } from "../flask/flask-hooks";
 
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
-  console.log('^^^ setUpPositionTransition')
   atListChanged(() => {
     const first = node.getBoundingClientRect()
     atRender(() => {

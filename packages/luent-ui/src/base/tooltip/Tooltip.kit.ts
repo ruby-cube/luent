@@ -73,12 +73,9 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
 
    function AsAnchor(key: string) {
       return (node: HTMLElement) => {
-        console.log('$$$ asAnchor...')
         if (explicitAnchors.has(key)) {
-          console.log('$$$ Nooooo anchor')
           return;
         }
-        console.log('$$$ anchoring!!', node)
          explicitAnchors.add(key)
          node.style.anchorName
             = anchorRoot + '-' + key
@@ -100,12 +97,9 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
 
       return (node: HTMLElement) => {
          queueTask(() => {
-          console.log('$$$ shall we anchor?')
           if (explicitAnchors.has('default') || explicitAnchors.has(key)) {
-              console.log('$$$ no anchor...')
               return;
             }
-            console.log('$$$ yes anchor!')
             asAnchor[key](node)
          })
 

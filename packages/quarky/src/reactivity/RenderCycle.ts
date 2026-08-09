@@ -71,9 +71,7 @@ export class RenderCycle {
     this.started = true;
     while (this.more) {
       this.loop++;
-      console.log('@@@ this.loop', this.loop)
 
-      console.log('@@@ prelude---')
       this.currentPhase = PRELUDE
       const prelude = this.phases[PRELUDE]
       if (prelude) await this.runPhase(prelude)
@@ -83,17 +81,14 @@ export class RenderCycle {
         pushUpdate(this.update)
       }
 
-      console.log('@@@ internal render---')
       this.currentPhase = INTERNAL_RENDER
       const internalRender = this.phases[INTERNAL_RENDER]
       if (internalRender) await this.runPhase(internalRender)
 
-      console.log('@@@ layout---')
       this.currentPhase = LAYOUT
       const layout = this.phases[LAYOUT]
       if (layout) await this.runPhase(layout)
 
-      console.log('@@@ render---')
       this.currentPhase = RENDER
       const render = this.phases[RENDER]
       if (render) await this.runPhase(render)
@@ -101,7 +96,6 @@ export class RenderCycle {
     }
     if (!this.update.committed) this.update.commit()
 
-    console.log('@@@ tick---')
     this.currentPhase = TICK
     this.runReactions(TICK)
 
@@ -119,12 +113,13 @@ export class RenderCycle {
   timecheck(now: DOMHighResTimeStamp) {
     const delta = now - this.startTime
     const timeMargin = this.update.timeMargin
-    if (timeMargin && delta > timeMargin) {
-      if (timeMargin !== 16.7) console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
-    }
-    else {
-      if (timeMargin === Infinity) console.log('passed timecheck', timeMargin, delta)
-    }
+    if (__DEV__)
+      if (timeMargin && delta > timeMargin) {
+        if (timeMargin !== 16.7) console.log('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+      }
+      else {
+        if (timeMargin === Infinity) console.log('passed timecheck', timeMargin, delta)
+      }
   }
 
   async runPhase(phase: CycledPhase) {
@@ -210,7 +205,6 @@ class BasePhase {
   ) { }
 
   scheduleReactions(reactions: Reactions) {
-    console.log('@@@ schedule reactions', this.reactions, 'queued?', this.queued(reactions))
     if (!this.queued(reactions)) {
       this.reactions.push(reactions)
     }
@@ -227,7 +221,6 @@ class CycledPhase extends BasePhase {
   tasks: WrappedTask[] = []
 
   get more() {
-    console.log('this.reactions.length', this.reactions.length)
     return this.reactions.length || this.tasks.length
   }
 

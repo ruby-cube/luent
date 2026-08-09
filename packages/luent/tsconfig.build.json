@@ -5,10 +5,10 @@
     "jsx": "preserve",
     "paths": {
       "luent/jsx-runtime": [
-        "../luent/src/jsx-runtime/index.d.ts"
+        "../luent/src/jsx-runtime/index.ts"
       ],
       "luent/jsx-dev-runtime": [
-        "../luent/src/jsx-runtime/index.d.ts"
+        "../luent/src/jsx-runtime/index.ts"
       ]
     },
     "noEmit": false,

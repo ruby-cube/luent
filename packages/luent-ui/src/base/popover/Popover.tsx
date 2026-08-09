@@ -21,7 +21,6 @@ function PopoverRoot(setup: FromTag<{
     popover,
     ...attributes
   } = setup
-  console.log('$$$ create popover')
   const { gap } = popover
   return (
     <>

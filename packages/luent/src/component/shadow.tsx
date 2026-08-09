@@ -1,7 +1,7 @@
 // let shadow: ShadowRoot | undefined;
 
 import { AsyncState } from "@luent/flask";
-import { RenderSlot } from "./bindings-types";
+import { FromTag, RenderSlot } from "./bindings-types";
 import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 
 // NOTE: The shadow-root helper does not work with VitePress :( 
@@ -38,7 +38,7 @@ class ShadowRootKit extends VineNode {
 
   override mount(root: DOMParent | DocumentFragment): void {
     if (root instanceof DocumentFragment) {
-      console.warn('DEV RESEARCH: Mounting a shadow root to a DocumentFragment should never happen')
+      if (__INTERNAL__) console.warn('DEV RESEARCH: Mounting a shadow root to a DocumentFragment should never happen')
       return;
     }
     const shadowRoot = (root as unknown as HTMLElement).attachShadow({ mode: this.mode })
@@ -58,12 +58,13 @@ export function callWithShadowRoot(render: RenderSlot, shadowRoot: ShadowRoot | 
 }
 
 
-export function renderInShadow(Slot: RenderSlot) {
+export function ShadowRoot(setup: FromTag<{Slot: RenderSlot}>) {
+  const {Slot} = setup
   return import.meta.env.SSR
     ?
     <style-scope>
       <template>
-        {callWithShadowRoot(Slot)}
+        {callWithShadowRoot(Slot, inShadow())}
       </template>
     </style-scope>
     : <shadow-root mode='open'>

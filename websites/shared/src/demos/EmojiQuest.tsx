@@ -1,5 +1,4 @@
-import { $of, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "luent";
-import { ion, Ion, Ionic, ionic } from "@luent/quarky";
+import { ion, Ion, Ionic, ionic, $of, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "luent";
 
 
 
@@ -257,7 +256,7 @@ function Powerset(setup: FromTag<{
 
 
 EmojiQuest.nsx =
-`import { ionic } from "luent";
+  `import { ionic } from "luent";
 import { Panel } from "../components/Panel"
 
 function EmojiQuest() {
@@ -282,7 +281,7 @@ function EmojiQuest() {
 `
 
 EmojiQuest.tsx =
-`import { ionic } from "luent";
+  `import { ionic } from "luent";
 import { Panel } from "../components/Panel"
 
 function EmojiQuest() {

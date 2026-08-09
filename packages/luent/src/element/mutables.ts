@@ -36,7 +36,7 @@ function getEvent(element: Element, key: keyof Element) {
   if (!map) return 'input'
   const event = map[key as keyof typeof map]
   if (!event) {
-    if (__DEV__) console.warn('Invalid mutable binding for', element.tagName.toLowerCase(), ':', key)
+    if (__DEV__) console.warn('[LUENT] Invalid mutable binding for', element.tagName.toLowerCase(), ':', key)
     return ''
   }
   return event;
@@ -59,7 +59,7 @@ const eventMap = {
 function bindMutable(element: AnyObject, key: PropertyKey, mutable: MaybeIon<any>, event: string) {
   if (!event) return;
   if (!isGetter(mutable)) {
-    if (__DEV__) console.warn('mu binding must receive a mutable ion for two-way binding to work', mutable)
+    if (__DEV__) console.warn('[LUENT] mu binding must receive a mutable ion for two-way binding to work', mutable)
   }
   else {
     element.addEventListener(event, () => {

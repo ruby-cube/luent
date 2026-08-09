@@ -1,5 +1,4 @@
-import { component, For, template } from "luent";
-import { ionic, } from "@luent/quarky";
+import { component, For, ionic } from "luent";
 import { BlokkModel, Rotation } from "./BlokkModel";
 
 const GAP = 1;

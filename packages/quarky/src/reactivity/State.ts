@@ -26,7 +26,7 @@ function getState(state: PendableState) {
 function lockState(state: PendableState) {
    const update = $activeUpdate()
    if (!update) {
-      console.error('nothing to lock to')
+      if (__INTERNAL__) console.error('nothing to lock to')
       return;
    }
    // if (update.committed) return;
@@ -44,7 +44,7 @@ function lockState(state: PendableState) {
    //    return;
    // }
    const ok = update.race(state.pendingUpdate)
-   if (!ok) console.warn("*&^ RACE updates aren't the same", update, state.pendingUpdate, state.get())
+   if (!ok && __INTERNAL__) console.warn("*&^ RACE updates aren't the same", update, state.pendingUpdate, state.get())
    if (state.pendingUpdate === null) {
       state.pendingUpdate = update
 
@@ -55,7 +55,7 @@ function lockState(state: PendableState) {
       })
    }
    if (update.committed) {
-      console.warn('ALREADY COMMITTED', state.pending instanceof Array ? [...state.pending] : state.pending)
+      if (__INTERNAL__) console.warn('ALREADY COMMITTED', state.pending instanceof Array ? [...state.pending] : state.pending)
       update.atComplete(() => {
          state.commitUpdate()
       })
@@ -256,7 +256,6 @@ export class CollectiveState implements PendableState {
    }
 
    private applyMutations() {
-      console.log('apply mutations', this.mutations)
       for (const mutate of this.mutations) {
          mutate(this.current)
       }

@@ -158,7 +158,6 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
   const animateItemClasses = animateItem === true ? undefined : animateItem
   const transitionItem = transitions['transition-item']
   const transitionItemClasses = transitionItem === true || animateItem === true ? useTransitionPosition() : transitionItem
-  console.log('^^^ transitionItemClasses', transitionItemClasses)
   const transitKey = transitions['transit-key']
   const transitClasses = transitions['transit-class'] ?? transitKey ? useTransitionPosition() : undefined
   const transitPort = transitions['transit-port']

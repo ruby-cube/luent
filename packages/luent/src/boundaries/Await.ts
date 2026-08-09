@@ -286,20 +286,16 @@ export function createAwaitSeries(
    function shouldHold() {
       placeholder = renderPlaceholder()
       if (placeholder === false || placeholder === true) {
-         console.log('*** C1')
          return true;
       }
       if (Array.isArray(placeholder)) {
          if (placeholder.length > 1) {
-            console.log('*** C2')
             return false;
          }
          else {
-            console.log('*** C3')
             return placeholder[0] === false
          }
       }
-      console.log('*** C4')
       return true;
    }
 

@@ -109,7 +109,7 @@ function removePreviousClasses(prevValue: string | AnyObject, classList: DOMToke
       }
     }
   }
-  else if (prevValue && __DEV__) {
+  else if (prevValue && __INTERNAL__) {
     console.warn('DEV RESEARCH: Reactive class input has not been handled for', prevValue)
   }
 }
@@ -129,7 +129,7 @@ function addClasses(value: TagClass, classList: DOMTokenList, flask: Flask) {
     setUpClassesFromObject(value, classList, flask)
   }
   else {
-    if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
+    if (__INTERNAL__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
   }
 }
 

@@ -3,7 +3,7 @@ import { createIonicModel, isIonicProxy, MethodHook } from "./IonicModel";
 import { quarkOf } from "../abstract/Quark";
 import type{ QuarkyIonicProxy } from "./ModelQuark";
 import { isObject } from "@luent/utils";
-import { Ion } from "../ion/Ion";
+import { ion, Ion } from "../ion/Ion";
 
 
 
@@ -126,7 +126,7 @@ export function ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T 
    if (!isObject(target)) return target;
    const existing = ionicModels.get(target)
    if (existing) {
-      if ( __DEV__ && setup && quarkOf(existing).extension !== setup) {
+      if ( __INTERNAL__ && setup && quarkOf(existing).extension !== setup) {
          console.warn(`[DEV RESEARCH] Ionic model config mismatch. Config of existing model is not identical to config provided by ionic`)
       }
       return existing as any
@@ -135,6 +135,8 @@ export function ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T 
    ionicModels.set(target, proxy)
    return proxy as any
 }
+
+
 
 export type IsIonic<T> = keyof T extends never ? false : T extends { '~ionic': true } ? true : false
 /**

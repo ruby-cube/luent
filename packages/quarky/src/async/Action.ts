@@ -42,7 +42,6 @@ export function Action<F, V>(dispatch: F & ((o: { await: Await }, ...args: any[]
    function cancelIfFetching() {
       if (pendingPromise) {
          cancelPromise(pendingPromise)
-         console.warn('CANCEL FETCH')
          pendingPromise = null
          return true
       }
@@ -90,7 +89,6 @@ export function Action<F, V>(dispatch: F & ((o: { await: Await }, ...args: any[]
             //    return;
             // }
             pendingPromise = null
-            console.log('resolve to:', value)
             if (resolve) {
                resolve(value)
                resolve = null

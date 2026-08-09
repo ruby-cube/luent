@@ -5,6 +5,7 @@ import { createHybridIon } from "./HybridIon";
 import { AnyObject } from "@luent/types";
 import { AsyncIon } from "../async/AsyncIon";
 import { isIon } from "./utils";
+import { Ionic, ionic } from "../ionic/Ionic";
 
 /* API */
 export interface Ion<T = unknown> {
@@ -79,6 +80,9 @@ export function ion<
    return asIon(initialState, setup) as AsIon<T, M>
 }
 
+export function ionize<T extends AnyObject, M>(target: T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>) {
+  return ion(ionic(target), setup)
+}
 
 
 type OptionFlags = '-writable' | '-fetch' | '-refetch' | '-watch' | '-derive'

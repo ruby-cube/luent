@@ -1,5 +1,4 @@
-import { component, css, FromTag, If, Style, Thru } from "luent";
-import { ion } from "@luent/quarky";
+import { ion, css, FromTag, If, Style, Thru } from "luent";
 
 export function HabitTracker(setup: FromTag<{
   habit: string,

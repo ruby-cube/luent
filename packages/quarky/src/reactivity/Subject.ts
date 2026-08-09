@@ -225,7 +225,6 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
     // }
     const reaction = this.reaction
     if (!reaction) throw new Error('Must call linkReaction before retracking')
-    console.log('@&@ retrack call', this.fn)
     reaction.unlink()
     this.untrackAtoms()
     const output = this.trackAtoms(this.fn)

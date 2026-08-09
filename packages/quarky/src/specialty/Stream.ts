@@ -140,9 +140,7 @@ function Interval() {
    let reject: ((reason?: any) => void) | null = null
 
    function startInterval(ms: number, task: () => void, options?: { max?: number }) {
-      console.log('starting interval')
       const maxTimes = options?.max ?? Infinity
-      console.log('maxTimes', maxTimes)
       const boundTask = () => {
          state.x++
          task.call(state)

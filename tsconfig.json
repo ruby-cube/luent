@@ -11,7 +11,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "customConditions": [
-      "workspace"
+      "luentWorkspace"
     ],
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
@@ -24,9 +24,7 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "luent",
-    "types": [
-      "./packages/luent/src/jsx-runtime/index.d.ts"
-    ],
+
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -52,10 +50,10 @@
         "./packages/luent/src/index.ts"
       ],
       "luent/jsx-runtime": [
-        "./packages/luent/src/jsx-runtime/index.d.ts"
+        "packages/luent/src/jsx-runtime/index.ts"
       ],
       "luent/jsx-dev-runtime": [
-        "./packages/luent/src/jsx-runtime/index.d.ts"
+        "packages/luent/src/jsx-runtime/index.ts"
       ],
       "@luent/websites-shared": [
         "./websites/shared/src/index.ts"
@@ -81,8 +79,8 @@
       "@luent/types": [
         "./packages/types/index.ts"
       ],
-      "@luent/vite-plugin-luent": [
-        "./plugins/vite-plugin-luent/index.js"
+      "vite-plugin-luent": [
+        "./plugins/vite-plugin-luent/src/index.js"
       ]
     }
   },

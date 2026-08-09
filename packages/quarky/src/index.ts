@@ -5,9 +5,56 @@ installIonicMap()
 
 
 export * from "./ion/Ion"
-export { EACH, Ionic, as, ionic } from "./ionic/Ionic"
+export * from "./ionic/Ionic"
 
 export { toRaw } from "./ionic/IonicModel"
+// export {
+// 	ion,
+// } from "./ion/Ion"
+// export type { MutableIon, Ion } from "./ion/Ion"
+// export {
+// 	Ionic,
+// 	ionic,
+// 	as,
+// 	EACH,
+// } from "./ionic/Ionic"
+// export type { Nested } from "./ionic/Ionic"
+// export {
+// 	toIon,
+// 	toValue,
+// } from "./ion/utils"
+// export {
+// 	AsyncIon,
+// 	isPending,
+// 	getAwaiting,
+// 	$suspense,
+// } from "./async/AsyncIon"
+// export { SuspenseIon } from "./async/Suspense"
+// export {
+// 	o,
+// 	ooo,
+// } from "./async/ooo"
+// export {
+// 	watch,
+// } from "./reactivity/Watcher"
+// export {
+// 	queueTask,
+// 	atRender,
+// 	PRELUDE,
+// 	SYNC,
+// } from "./reactivity/RenderCycle"
+// export {
+// 	getActiveUpdate,
+// 	LaxUpdate,
+// 	swiftUpdate,
+// 	load,
+// } from "./reactivity/Update"
+// export { ionicTickTask } from "./reactivity/IonicTask"
+// export {
+// 	Animation,
+// 	Interval,
+// } from "./reactivity/animation"
+// export { Finitron } from "./specialty/Finitron"
 export * from "./async/AsyncIon"
 export * from "./async/Suspense"
 export * from "./async/ooo"

@@ -1,6 +1,6 @@
 import { Code, DemoContainer, EmojiQuest } from '@luent/websites-shared'
 import { highlightCode } from "../highlighter"
-import { ion } from '@luent/quarky'
+import { ion } from 'luent'
 
 export function EmojiQuestDemo() {
   const $tab = ion('main' as 'main' | 'alt', {

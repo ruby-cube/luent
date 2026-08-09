@@ -26,7 +26,8 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 }
 
 export function isGetter(value: unknown): value is () => any {
-   if (value instanceof Function && value.length === 0 !== isIon(value)) 
+   if (__INTERNAL__ && value instanceof Function && value.length === 0 !== isIon(value)) {
       console.warn(value, 'isGetter', !isIon(value), 'isIon', isIon(value))
+   }
    return value instanceof Function && value.length === 0;
 }

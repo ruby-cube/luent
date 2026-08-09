@@ -43,7 +43,7 @@ export function writeJSXNode(
       return writeToPortal('head', writeSlot(Slot));
 
     case 'o--portal':
-      console.error('writing o--portal as HTML string is not yet supported')
+      if (__DEV__) console.warn('writing o--portal as HTML string is not yet supported')
       return "";
     // return writeToPortal(config.to, Slot)
 

@@ -71,14 +71,10 @@ function genAtrributes(attributes: AnyObject) {
   let attrs = ""
   for (const [key, value] of Object.entries(attributes)) {
     if (key === 'ref') continue;
-    const _key = key.startsWith('mu:') ? key.slice(3) : key;
-    if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
-    // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
     const val = getValue(value)
-    if (_key === 'width') console.log('attribute!!', key, val)
-    attrs += isBooleanAttribute(_key) && val
-      ? ` ${_key}`
-      : ` ${_key}="${val}"`
+    attrs += isBooleanAttribute(key) && val
+      ? ` ${key}`
+      : ` ${key}="${val}"`
   }
   return attrs;
 }
@@ -103,7 +99,7 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }) {
     return classesFromObject(value)
   }
   else {
-    if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
+    if (__INTERNAL__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
   }
 }
 
@@ -169,7 +165,7 @@ function renderSlot(Slot: RenderSlot | undefined,) {
 
 function writeInnerHTML(kit: InnerHTMLKit) {
   if (!kit.trusted) {
-    console.warn('Untrusted HTML cannot be rendered. Sanitize if untrusted, and mark as trusted')
+    if (__DEV__) console.warn('Untrusted HTML cannot be rendered. Sanitize if untrusted, and mark as trusted')
   }
   return toValue(kit.html)
 }

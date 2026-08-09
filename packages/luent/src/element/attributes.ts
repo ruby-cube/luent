@@ -9,18 +9,17 @@ export function setUpAttributes(node: Element | null, attributes: { [key: string
   for (const key in attributes) {
     if (key === 'Slot') continue; // TODO: remove
     if (key === 'xray') continue; // TODO: remove
-    const _key = key.startsWith('mu:') ? key.slice(3) : key;
-    if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
+    // const _key = key.startsWith('mu:') ? key.slice(3) : key;
+    // if (__DEV__ && key.startsWith('mu:')) console.warn(`[LUENT] The attribute ${_key} is not a valid two-way binding attribute`)
     // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
-    const value = attributes[key]
     // TODO: only attributes that affect layout should be scheduled for render phase
-    setAttribute(node, _key, value, flask)
+    setAttribute(node, key, attributes[key], flask)
   }
 }
 
 export function setAttribute(node: Element | null, key: string, value: any, flask: Flask) {
   if (!node) {
-    console.warn('Node is missing. Cannot setAttribute.')
+    if (__INTERNAL__) console.warn('Node is missing. Cannot setAttribute.')
     return;
   }
   if (isGetter(value)) {
@@ -45,12 +44,9 @@ function _setAttribute(node: AnyObject, attribute: string, value: any) {
     node[attribute] = _value
   }
   else if (node instanceof SVGElement || isAttributeOnly(attribute)) {
-    console.log('set attribute', attribute)
     node.setAttribute(attribute, toString(value) ?? '')
   }
   else {
-    console.log('set attribute', attribute)
-    if (attribute === 'textContent') console.log('$$$ SETTING TEXTCONTENT', value)
     node[toElementProperty(attribute)] = isNumberValue(attribute) ? toNumber(value) : toString(value) ?? '';
   }
 }
@@ -197,7 +193,6 @@ function isNumberValue(attribute: string) {
 }
 
 export function toString(value: any) {
-  console.log('value?.toString()', value)
   return value?.toString() ?? ""; // TODO: make sure it works with any value
 }
 

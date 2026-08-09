@@ -319,10 +319,8 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
       const state = $currentState.value = initialState
       const parent = getFinitron()
       if (parent) {
-         console.log('*&* init', initialState, getActiveUpdate()?.cycle.currentPhase)
          queueTask(() => { // must queue because parent.state has not been set yet and will trigger reaction early when set
             watch(() => parent.state, ({ previous }) => {
-               console.log('*&* deactivating finitron', finitron.state)
                finitron.deactivate()
             }, { phase: PRELUDE, once: true })
          })
@@ -352,7 +350,6 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
       activated = false;
       if (timeout) clearTimeout(timeout);
       const prevStateID = prevState = $currentState.value
-      console.log('deactivate', states, prevStateID)
       runExitHooks(prevStateID!, getHooks(ANY_STATE))
       $currentState.value = undefined;
       runDeactivationTasks()
@@ -440,7 +437,6 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
       }
 
       $currentState.value = nextStateID;
-      console.log('next state', nextStateID, $currentState[QUARK])
 
       runEnterHooks(nextStateID, anyStateHooks) // TODO: should I pass the prev state to the enter hook?
 

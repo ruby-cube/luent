@@ -262,7 +262,6 @@ export function AsyncIon<
   }
 
   function cancelFetch() {
-    console.warn('CANCEL FETCH')
     // for (const promise of pendingPromises){
     cancelledPromises.add(pendingPromise)
     pendingPromise = null
@@ -371,7 +370,6 @@ export function AsyncIon<
           // }
 
           if (cancelledPromises.has(maybePromise)) {
-            console.warn('canceleld awaited', maybePromise)
             cancelledPromises.delete(maybePromise)
             if (reject) {
               reject('cancelled')
@@ -444,7 +442,6 @@ export function AsyncIon<
 
     }
     else {
-      console.log('*** no promise', resolve, $promise())
       if (resolve) {
         resolve(output)
         resolve = null

@@ -33,7 +33,7 @@
   },
   "include": [
     "../shared/**/*.ts",
-    "../../packages/luent/src/jsx-runtime/index.d.ts",
+    "../../packages/luent/src/jsx-runtime/types/index.ts",
     "docs/**/*.ts",
     "docs/**/*.tsx",
     ".vitepress/**/*.ts",

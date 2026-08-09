@@ -1,6 +1,6 @@
 import { CodeGlimpses } from "./CodeGlimpses";
-export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from 'luent'
-import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, atTick } from 'luent'
+export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from 'luent/server'
+import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, awaiting, tick } from 'luent'
 export * from "@luent/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
@@ -55,7 +55,7 @@ export const islands: MountIslands = {
   //   }
   // },
   'language-toggle': () => {
-    atTick(() => {
+    awaiting(tick, () => {
       const node = document.querySelector(LANGUAGE_TOGGLE)
       console.log('hydrating language-toggle', node)
       if (!node || isMounted(node)) return;

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Luent Starter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600&family=Sora:wght@300;400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: inherit
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    img.mark {
+      display: block;
+      height: auto
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .9em;
+      color: var(--accent)
+    }
+
+    :root {
+      --bg: #FCFDFD;
+      --ink: #1B2A31;
+      --muted: #5A6B73;
+      --accent: #1E7385;
+      --btn: #1E7385;
+      --btn-hover: #175E6D;
+      --t-line: rgba(27, 42, 49, .35);
+      --knob: #1B2A31;
+      --t-sun: #FFFFFF;
+      --t-moon: #51636B;
+      --knob-x: 3px;
+      --knob-y: 3px;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column
+    }
+
+    header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1.1rem;
+      padding: 1.4rem 1.6rem
+    }
+
+    header a.gh-top {
+      display: flex;
+      color: var(--muted);
+      transition: color .2s
+    }
+
+    header a.gh-top:hover {
+      color: var(--accent)
+    }
+
+    header a.gh-top svg {
+      width: 1.25rem;
+      height: 1.25rem
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 1.6rem;
+      padding: 2.5rem 1.5rem
+    }
+
+    h1 {
+      font-size: clamp(1.7rem, 3.6vw, 2.3rem);
+      font-weight: 600;
+      letter-spacing: -0.02em
+    }
+
+    .lede {
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 38ch;
+      font-size: .98rem;
+      font-weight: 300
+    }
+
+    body.dark .count-btn {
+      color: var(--btn-ink-dark)
+    }
+
+    footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: .9rem;
+      padding: 2rem;
+      font-size: .88rem;
+      color: var(--muted)
+    }
+
+    footer .mark {
+      width: 22px
+    }
+
+    footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      transition: color .2s
+    }
+
+    footer a:hover {
+      color: var(--accent)
+    }
+
+    footer a svg {
+      width: 1rem;
+      height: 1rem
+    }
+
+    footer .sep {
+      opacity: .4
+    }
+
+    footer .ver {
+      font-size: .8rem;
+      letter-spacing: .06em
+    }
+
+    footer .built-with {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      transition: color .2s
+    }
+
+    footer .built-with:hover {
+      color: var(--accent)
+    }
+
+    footer .div {
+      width: 1px;
+      height: 1.05em;
+      background: var(--ring);
+      margin: 0 .35rem
+    }
+  </style>
+</head>
+
+<body class="light">
+  <luent-island></luent-island>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

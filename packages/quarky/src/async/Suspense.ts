@@ -52,7 +52,7 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
    let startTime = performance.now();
    function timecheck() {
       const delta = performance.now() - startTime
-      console.log('Suspense: suspense took', delta)
+      if (__INTERNAL__) console.log('Suspense: suspense took', delta)
    }
 
    const $suspense = createAtomicIon(null as Promise<unknown> | null, {
@@ -64,7 +64,7 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
          return $suspense()
       },
       retry() {
-         console.warn('NOT YET IMPLEMENTED')
+         if (__DEV__) console.warn('.retry() method not yet implemented')
       },
       get pendingState(): P {
          return $pendingState() as P
@@ -80,7 +80,6 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
             return quarks.size
          },
          cancelIfFetching() {
-            console.warn('group cancel if fetching')
             let success = false
             for (const { cancelIfFetching, $promise } of quarks) {
                const cancelled = success = cancelIfFetching()
@@ -91,10 +90,8 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
          include(quark: AsyncQuark) {
           if (import.meta.env.SSR) return;
             if (quarks.has(quark)) return;
-            console.log('start suspense', quark, quarks.size)
             const { $promise } = quark
             if ($promise() && !$suspense()) {
-               console.log('Suspense: ++ new promise')
                $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                startTime = performance.now()
             }
@@ -108,13 +105,11 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
 
             watch($promise, ({ current: promise, previous, eager }) => {
                if (!eager && promise === previous) {
-                  console.log('Suspense: same', promise)
                   return;
                }
                pendingPromises.delete(previous)
                if (promise === null) {
-                  if (!$suspense()) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
-                  if (!pendingPromises.has(previous)) console.warn('Suspense: previous not in pending promises', previous)
+                  if (!$suspense() && __INTERNAL__) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
                   // console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
                   if (pendingPromises.size === 0 && !isPending()) {
                      if (resolve) {
@@ -123,7 +118,6 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
                         resolve = null
                         reject = null
                      }
-                     console.log('Suspense RESOLVED: Suspense to NULL :D', $suspense.value)
                      $suspense.value = null
                      if ($suspense.initial) $suspense.initial = false
                   }
@@ -135,7 +129,6 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
                if ($suspense.initial) $suspense.initial = false
                if (!$suspense()) {
                   startTime = performance.now()
-                  console.log('Suspense: ++ new suspense promise')
                   $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
                }
 
@@ -143,10 +136,8 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
                   .catch(err => {
                      pendingPromises.delete(promise)
                      if (err === 'cancelled') {
-                        console.log('Suspense: catch canceled; delete promise', pendingPromises.size)
                         return;
                      }
-                     console.log('ERROR')
                      if (reject) {
                         reject(err)
                         resolve = null

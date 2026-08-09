@@ -1,7 +1,10 @@
-import { TagName, makeJSXNode, RenderSlot, Context, RawJSXNode, ComponentTag } from "../index";
 import { AnyObject } from "@luent/types";
 import { isPlainObject, normalizeToArray } from "@luent/utils";
 import { writeJSXNode } from "../server/writeJSXNode";
+import { makeJSXNode, RawJSXNode } from "../node/makeJSXNode";
+import { TagName } from "../element/setUpElement";
+import { ComponentTag } from "../component/Component";
+import { RenderSlot } from "../component/bindings-types";
 
 // without custom jsx compiler
 // - nodeEntity | nodeEntity[]
@@ -21,7 +24,7 @@ export function jsx(nodeType: TagName | ComponentTag, config: { children: Render
   delete config.children
   config.Slot = Slot ?? (Slot = config.Slot);
   if (typeof Slot !== 'function' && Slot !== undefined) {
-    console.warn('Slot is not a function', Slot)
+    if (__INTERNAL__) console.warn('Slot is not a function', Slot)
     return;
   }
   if (nodeType === Fragment) {

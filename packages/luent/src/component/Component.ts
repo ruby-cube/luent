@@ -40,7 +40,7 @@ export function makeComponent(
 
   if (output instanceof Promise)
     throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
-  const compode = output.component
+  const compode = output?.component
 
   if (compode) {
     const ref = composeRef(setup) // throw if ref already used

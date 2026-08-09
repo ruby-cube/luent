@@ -1,15 +1,14 @@
-import { As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, track } from "luent";
-import { Ion, queueTask } from "@luent/quarky";
+import { Ion, queueTask, As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, track } from "luent";
 import { moveUniqueItems } from "@luent/utils";
 
 export function Palettable() {
-  const $count = ion(0, {
-    increment() { $count.value++ }
+  const $round = ion(1, {
+    increment() { $round.value++ }
   })
 
   return <>
     <div class='palettable'>
-      {As($count, () => {
+      {As($round, () => {
         const $moves = ion(0, {
           increment() { $moves.value++ }
         })
@@ -29,7 +28,7 @@ export function Palettable() {
             <button
               transition-in
               class='next-btn'
-              on:click={$count.increment}
+              on:click={$round.increment}
             >Next</button>
           )}
         </>
@@ -211,7 +210,7 @@ function ColorPalette(setup: FromTag<{
         cursor: pointer;
       }
 
-      .selected {
+      .palettable .selected {
         outline: 5px solid hsla(35deg 10% 50% / 50%);
       }
 
@@ -787,13 +786,13 @@ Palettable.nsx = `function Palettable() {
 
 
 Palettable.tsx = `function Palettable() {
-  const $count = ion(1, {
-    increment() { $count.value++ }
+  const $round = ion(1, {
+    increment() { $round.value++ }
   })
 
   return <>
     <div class='palettable'>
-      {As($count, () => {
+      {As($round, () => {
         const $solved = ion(false)
         const $moves = ion(0, {
           increment() { $moves.value++ }
@@ -809,7 +808,7 @@ Palettable.tsx = `function Palettable() {
             onComplete={() => $solved.value = true}
           ></ColorPalette>
           {If($solved,
-            <button transition-in on:click={$count.increment}>
+            <button transition-in on:click={$round.increment}>
               Next
             </button>
           )}

@@ -5,33 +5,35 @@
    "description": "An expressive framework for building web applications with clarity and flow",
    "repository": {
       "type": "git",
-      "url": "git+https://github.com/ruby-cube/luent.git"
+      "url": "git+https://github.com/ruby-cube/luent.git",
+      "directory": "packages/luent"
    },
+   "homepage": "https://github.com/ruby-cube/luent",
    "type": "module",
    "exports": {
       ".": {
-         "workspace": "./src/index.ts",
+         "luentWorkspace": "./src/index.ts",
          "types": "./dist/index.d.ts",
          "default": "./dist/index.mjs"
       },
       "./client": {
-         "workspace": "./src/client/index.ts",
+         "luentWorkspace": "./src/client/index.ts",
          "types": "./dist/client/index.d.ts",
          "default": "./dist/client/index.mjs"
       },
       "./server": {
-         "workspace": "./src/server/index.ts",
+         "luentWorkspace": "./src/server/index.ts",
          "types": "./dist/server/index.d.ts",
          "default": "./dist/server/index.mjs"
       },
       "./jsx-runtime": {
-         "workspace": "./src/jsx-runtime/index.ts",
-         "types": "./dist/jsx-runtime/index.d.ts",
+         "luentWorkspace": "./src/jsx-runtime/index.ts",
+         "types": "./jsx-runtime.d.ts",
          "default": "./dist/jsx-runtime.mjs"
       },
       "./jsx-dev-runtime": {
-         "workspace": "./src/jsx-runtime/index.ts",
-         "types": "./dist/jsx-runtime/index.d.ts",
+         "luentWorkspace": "./src/jsx-runtime/index.ts",
+         "types": "./jsx-runtime.d.ts",
          "default": "./dist/jsx-runtime.mjs"
       }
    },
@@ -39,7 +41,8 @@
    "main": "./dist/index.mjs",
    "module": "./dist/index.mjs",
    "files": [
-      "dist"
+      "dist",
+      "jsx-runtime.d.ts"
    ],
    "scripts": {
       "build": "pnpm run build:js && pnpm run build:dts",
@@ -57,7 +60,6 @@
       "@luent/flask": "workspace:*",
       "@luent/nextscript": "workspace:*",
       "@luent/quarky": "workspace:*",
-      "@microsoft/api-extractor": "^7.52.12",
       "@luent/types": "workspace:*",
       "@luent/utils": "workspace:*",
       "tsdown": "^0.21.9",

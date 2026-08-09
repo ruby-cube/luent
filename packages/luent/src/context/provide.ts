@@ -56,6 +56,11 @@ export function createRootContext() {
 
 type ContextValue<K> = K extends (arg: infer T) => any ? T : unknown
 
+function warnAlreadyProvided() {
+  // TODO: provide dev name in context key using compiler
+  console.warn(`[LUENT] Context already provided`)
+}
+
 // TODO: validate value
 export function provideRoot<K extends ContextEntryKey>(key: K, value: ContextValue<K>) {
   let context = getClosestContext();
@@ -66,8 +71,7 @@ export function provideRoot<K extends ContextEntryKey>(key: K, value: ContextVal
   const contextKey = toContextKey(key)
   if (appEntries.has(contextKey)) {
     if (__DEV__) {
-      console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
-      console.trace();
+      warnAlreadyProvided()
     }
     return value; // TODO: Maybe allow overrides??
   }
@@ -129,8 +133,7 @@ export function provideGround<K extends ContextEntryKey | string>(key: K, value:
   const contextKey = toContextKey(key)
   if (globalEntries.has(contextKey)) {
     if (__DEV__) {
-      console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
-      console.trace();
+      warnAlreadyProvided()
     }
     return value; // TODO: Maybe allow overrides??
   }

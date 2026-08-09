@@ -1,5 +1,4 @@
-import { For, If, listen, NodeRef, $of } from "luent"
-import { watch, ionicTickTask, Ion, Ionic, EACH, ionic, ion } from "@luent/quarky"
+import { For, If, listen, NodeRef, $of, track, ionicTickTask, Ion, Ionic, EACH, ionic, ion } from "luent"
 
 interface Todo {
   id: number
@@ -197,7 +196,7 @@ function TodoList({ $todos, removeTodo }: {
       if (!todo.title) removeTodo(todo)
     }
   }
-  watch($editedTodo, () => {
+  track($editedTodo, () => {
     console.log('isEditing?', $editedTodo())
   })
 

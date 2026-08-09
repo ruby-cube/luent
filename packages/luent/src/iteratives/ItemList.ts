@@ -96,7 +96,6 @@ export class ListKit extends VineNode {
 
          // existing item
          if (kit) {
-            console.log('&&& existing item!', item)
             const { $index } = kit
             $index.value = i
             if (kit.preceding !== preceding || i === 0) {
@@ -111,7 +110,6 @@ export class ListKit extends VineNode {
          }
          // new item!
          else {
-            console.log('&&& new item!', item)
             const $index = createAtomicIon(i)
             kit = new ListItemKit(item, $index, renderItem, this.flask)
             kit.parent = this.parent;
@@ -182,7 +180,6 @@ export class ListKit extends VineNode {
                   if (!fragment) {
                      fragments.push({ fragment: fragment = new DocumentFragment(), precedingLeaf: kit.precedingLeaf })
                   }
-                  console.log('$$$ MOUNT TO FRAGMENT')
                   mountDOMNodes(kit.nodes!, fragment)
                   kit.hasMoved = null;
                }
@@ -194,7 +191,6 @@ export class ListKit extends VineNode {
 
          if (fragments.length) {
             for (const { fragment, precedingLeaf } of fragments) {
-               console.log('$$$ MOUNT FRAGMENT')
                mountFragment(fragment, precedingLeaf, this.parent)
             }
          }

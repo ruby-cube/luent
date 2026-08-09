@@ -51,7 +51,6 @@ export function Dispatch<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> |
    function cancelIfFetching() {
       if (pendingPromise) {
          cancelPromise(pendingPromise)
-         console.warn('CANCEL FETCH')
          pendingPromise = null
          return true
       }
@@ -90,7 +89,6 @@ export function Dispatch<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> |
             }
 
             pendingPromise = null
-            console.log('resolve to:', value)
             if (resolve) {
                resolve(value)
                resolve = null

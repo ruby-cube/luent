@@ -231,7 +231,6 @@ export let load = (task: () => unknown) => {
    const update = initialLoad = new Update(undefined, 1700, false)
    update.queue(task)
    update.atComplete(() => {
-      console.log("#### initial load completed")
       load = (fn: Function) => fn()
       initialLoad = null;
    })

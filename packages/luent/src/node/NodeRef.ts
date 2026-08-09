@@ -99,11 +99,10 @@ export class MetaRef {
 export function initializeRef($node: InternalRef<NodeRef>, value: any | undefined) {
   const ref = $node[INTERNAL]
   if (ref.value) {
-    console.warn("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance", ref.value)
+    if (__DEV__) console.warn("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance", ref.value)
     return;
   }
   if (value) {
-    console.log('initializing ref', value, toValue(value))
     ref.value = toValue(value);
     getActiveFlask()?.onDiscard(() => {
       ref.value = undefined
