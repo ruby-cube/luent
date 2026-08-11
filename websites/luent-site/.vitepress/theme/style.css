@@ -160,7 +160,7 @@ section#code-glimpses {
 
 /* Slightly larger than VitePress default without being oversized. */
 .VPNavBarTitle .logo {
-  height: 30px;
+  height: 20px;
   width: auto;
 }
 
@@ -194,7 +194,7 @@ section#code-glimpses {
 
 @media (max-width: 959px) {
   .VPNavBarTitle .logo {
-    height: 27px;
+    height: 18px;
   }
 
   .VPHomeHero .name {

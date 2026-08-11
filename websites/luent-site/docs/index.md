@@ -129,9 +129,9 @@ features:
 
 .VPHero .image {
   order: 1;
-  margin: 0 0 1.5rem;
-  height: 128px;
-  width: 128px;
+  margin: 0 0 1rem;
+  height: 90px;
+  width: 90px;
 }
 
 .VPHero .image-container {

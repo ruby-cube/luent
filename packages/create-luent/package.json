@@ -1,0 +1,23 @@
+{
+  "name": "create-luent",
+  "version": "0.1.0",
+  "description": "CLI for creating a Vite-powered Luent project",
+  "license": "MIT",
+  "author": "Ruby Y Wang",
+  "type": "module",
+  "bin": {
+    "create-luent": "index.js"
+  },
+  "files": [
+    "index.js",
+    "template"
+  ],
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2",
+    "fs-extra": "^11.4.0"
+  }
+
+}
