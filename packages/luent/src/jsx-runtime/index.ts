@@ -5,6 +5,7 @@ import { makeJSXNode, RawJSXNode } from "../node/makeJSXNode";
 import { TagName } from "../element/setUpElement";
 import { ComponentTag } from "../component/Component";
 import { RenderSlot } from "../component/bindings-types";
+export type { JSX } from "./types/index";
 
 // without custom jsx compiler
 // - nodeEntity | nodeEntity[]

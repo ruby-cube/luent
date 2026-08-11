@@ -181,4 +181,7 @@ export function Test(setup: FromTag<{ a: 'true' | 'false' }>) {
 
 <Test a='false'></Test>;
 
-<span aria-hidden='true'/>;
+//@ts-expect-error
+<span aria-hidden="frog"/>;
+
+<span aria-hidden="false"/>;
