@@ -12,12 +12,12 @@ hero:
     # - theme: brand
     #   text: Learn Luent
     #   link: /markdown-examples
-    - theme: alt
-      text: Preview Luent
-      link: /index#code-glimpses
     # - theme: alt
-    #   text: Take a Code Tour
+    #   text: Preview Luent
     #   link: /index#code-glimpses
+    - theme: alt
+      text: Take a Code Tour
+      link: /index#code-glimpses
 
 features:
   - icon:

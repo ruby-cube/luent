@@ -64,8 +64,8 @@ export default defineConfig({
       { text: 'Reference', link: '/api/overview' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
-      { text: 'Introducing NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
-      { text: 'v0.0.0', items: [{ text: '0.0.0', link: '/guide' }] },
+      { text: 'Preview NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
+      { text: 'v0.0.1', link: '/' },
     ],
 
     sidebar: {
