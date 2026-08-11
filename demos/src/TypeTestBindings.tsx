@@ -172,3 +172,13 @@ function EventBinding(setup: FromTag<{
 
 //@ts-expect-error
 <EventBinding onClick={() => e => { }}></EventBinding>;
+
+
+
+export function Test(setup: FromTag<{ a: 'true' | 'false' }>) {
+  return <></>
+}
+
+<Test a='false'></Test>;
+
+<span aria-hidden='true'/>;

@@ -19,7 +19,7 @@ type RawBindings = {
   'auto-bind'?: SetupBindings | undefined
 } & { [key: string]: any }
 
-type SetupBindings = {
+export type SetupBindings = {
   on?: EventBindings,
   at?: EventBindings,
   mu?: { [key: string]: MutableIon<unknown> | undefined }, // TODO: mu checker

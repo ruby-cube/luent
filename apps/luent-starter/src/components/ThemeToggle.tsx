@@ -18,6 +18,7 @@ export function ThemeToggle() {
         </svg>
       </span>
       <span class="knob" aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
     </button>
 
     {Style(css`

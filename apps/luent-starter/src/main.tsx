@@ -3,6 +3,11 @@ import './style.css'
 import { App } from './App'
 
 mountIsland(() => (
-  <App />
+  <>
+    <App />
+  </>
 ), 'luent-island')
+
+
+
 

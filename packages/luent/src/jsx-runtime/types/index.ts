@@ -11,6 +11,7 @@ import { JSXNode } from "../../node/VineNode";
 import { LuentHooks } from "../../flask/template-hooks";
 import { ComponentRef } from "../../node/NodeRef";
 import { Provided } from "../../context/Context";
+import { SetupBindings } from "../../component/bindings";
 
 /*
 Modified from React type definitions in DefinitelyTyped:
@@ -799,7 +800,7 @@ declare global {
 
 
     interface HTMLAttributes<T> extends AriaAttributes, GlobalAttributes, DOMAttributes<T> {
-
+      testing?: Booleanish
       // Standard HTML Attributes
       contenteditable?: MaybeIon<Booleanish | "inherit" | "plaintext-only" | undefined>;
       contextmenu?: MaybeIon<string | undefined>;
@@ -1879,11 +1880,11 @@ declare global {
 // IMPORTANT Components and elements
 // N = (props: P) => JSX.Element
 type LuentAttributes<F, P> =
-  F extends (...args: infer Params) => any ? 
+  F extends (...args: infer Params) => any ?
   Params extends never[] ? {}
-  : Params extends [infer B] ? 
+  : Params extends [infer B] ?
   B extends { '~bindings'?: infer A } ?
-  GlobalAttributes & A & LuentHooks<ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<ComponentRef<F>>
+  L.GlobalAttributes & A & LuentHooks<ComponentRef<F>> & LuentComponentAttributes<F> & LuentCommonAttributes & L.Events<ComponentRef<F>>
   : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
   : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
   : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
