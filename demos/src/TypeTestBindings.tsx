@@ -182,6 +182,13 @@ export function Test(setup: FromTag<{ a: 'true' | 'false' }>) {
 <Test a='false'></Test>;
 
 //@ts-expect-error
-<span aria-hidden="frog"/>;
+<span aria-hidden="frog" />;
 
-<span aria-hidden="false"/>;
+<span aria-hidden="true" />;
+
+function NonTag(a: { something: boolean }) {
+  return <></>
+}
+
+//@ts-expect-error
+<NonTag something={true} />
