@@ -50,6 +50,7 @@ type Booleanish = boolean | "true" | "false";
 
 
 
+// IMPORTANT Components and elements
 // N = (props: P) => JSX.Element
 type LuentAttributes<F, P> =
   F extends (...args: infer Params) => any ?
@@ -1900,13 +1901,7 @@ export namespace JSX {
   export interface Element { }
 
   // important for converting component input types to attribute types
-  export type LibraryManagedAttributes<C, P> =
-    C extends (...args: infer Params) => any ?
-    Params extends never[] ? {}
-    : Params extends [infer B] ?
-    B extends { '~bindings'?: any } ?
-    LuentAttributes<C, P>
-    : P : P : P
+  export type LibraryManagedAttributes<C, P> = LuentAttributes<C, P>;
 
   type Falsey = undefined | null | false;
 
@@ -1914,7 +1909,7 @@ export namespace JSX {
 
   type ClassInput = MaybeIon<string> | MaybeIon<{ [key: string]: MaybeIon<Booleanny> }>
 
-  export interface IntrinsicElements extends _IntrinsicElements, LuentElements, CustomElements { }
+  export interface IntrinsicElements extends HTMLElementTags, LuentElements, CustomElements {}
 
   interface CustomElements { }
 
@@ -1938,7 +1933,7 @@ export namespace JSX {
 
 
 
-  interface _IntrinsicElements {
+  interface HTMLElementTags {
     // HTML
     a: DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
     abbr: DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>;
@@ -2123,3 +2118,24 @@ export namespace JSX {
     view: SVGProps<SVGViewElement>;
   }
 }
+
+//$$$
+// React.JSX needs to point to global.JSX to keep global module augmentations intact.
+// But we can't access global.JSX so we need to create these aliases instead.
+// Once the global JSX namespace will be removed we replace React.JSX with the contents of global.JSX
+// type GlobalJSXElementType = JSX.IntrinsicElements
+// interface GlobalJSXElement extends JSX.Element { }
+
+
+
+
+// interface GlobalJSXElementClass extends JSX.ElementClass { }
+// interface GlobalJSXElementAttributesProperty extends JSX.ElementAttributesProperty { }
+// interface GlobalJSXElementChildrenAttribute extends JSX.ElementChildrenAttribute { }
+
+// type GlobalJSXLibraryManagedAttributes<C, P> = JSX.LibraryManagedAttributes<C, P>;
+
+// interface GlobalJSXIntrinsicAttributes extends JSX.IntrinsicAttributes { }
+// interface GlobalJSXIntrinsicClassAttributes<T> extends JSX.IntrinsicClassAttributes<T> { }
+
+// interface GlobalJSXIntrinsicElements extends JSX.IntrinsicElements { }
