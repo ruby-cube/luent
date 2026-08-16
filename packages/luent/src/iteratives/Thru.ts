@@ -6,6 +6,8 @@ import { Flask, getFlask } from "@luent/flask";
 import { toAsyncRenderItem } from "./ItemList";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
+export function Thru(count: MaybeIon<number>, render: (count: number, index: number) => RawJSXNode): RawJSXNode[]
+export function Thru(count: MaybeIon<number>, render: RawJSXNode): RawJSXNode[]
 export function Thru(count: MaybeIon<number>, render: ((count: number, index: number) => RawJSXNode) | RawJSXNode) {
    if (!import.meta.env.SSR && isGetter(count)) {
       return new ThruKit(count, toAsyncRenderItem(render), getFlask())

@@ -20,7 +20,7 @@ function SimpleBindings() {
       ]}
       style={{
         color: () => ($simpleOn() ? "rgb(255, 0, 0)" : "rgb(0, 0, 255)"),
-        fontWeight: () => ($simpleOn() ? 700 : 400),
+        'font-weight': () => ($simpleOn() ? 700 : 400),
       }}
     >
       simple
@@ -35,7 +35,7 @@ function HierarchyLeaf(setup: FromTag<{ [key: string]: unknown }>) {
     <div
       id="hierarchy-target"
       class={["class-leaf"]}
-      style={{ backgroundColor: "rgb(1, 2, 3)" }}
+      style={{ 'background-color': "rgb(1, 2, 3)" }}
       auto-bind={bindings}
     >
       hierarchy
@@ -49,7 +49,7 @@ function HierarchyMiddle(setup: FromTag<{ [key: string]: unknown }>) {
 
     <HierarchyLeaf
       class={["class-middle"]}
-      style={{ backgroundColor: "rgb(20, 20, 220)" }}
+      style={{ 'background-color': "rgb(20, 20, 220)" }}
       auto-bind={bindings}
     />
   )
@@ -61,7 +61,7 @@ function HierarchyRoot() {
     <HierarchyMiddle
       class={["class-root"]}
       style={{
-        backgroundColor: () => ($hierarchyRootOn() ? "rgb(220, 20, 20)" : "rgb(20, 220, 20)"),
+        'background-color': () => ($hierarchyRootOn() ? "rgb(220, 20, 20)" : "rgb(20, 220, 20)"),
       }}
     />
   )

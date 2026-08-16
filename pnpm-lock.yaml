@@ -303,6 +303,22 @@ importers:
         specifier: file:../../plugins/vite-plugin-luent/vite-plugin-luent-0.0.1.tgz
         version: file:plugins/vite-plugin-luent/vite-plugin-luent-0.0.1.tgz(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0))
 
+  apps/my-app:
+    dependencies:
+      luent:
+        specifier: file:../../packages/luent/luent-0.0.1.tgz
+        version: file:packages/luent/luent-0.0.1.tgz
+    devDependencies:
+      typescript:
+        specifier: ~7.0.2
+        version: 7.0.2
+      vite:
+        specifier: ^8.2.1
+        version: 8.2.1(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0)
+      vite-plugin-luent:
+        specifier: file:../../plugins/vite-plugin-luent/vite-plugin-luent-0.0.1.tgz
+        version: file:plugins/vite-plugin-luent/vite-plugin-luent-0.0.1.tgz(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0))
+
   demos:
     dependencies:
       '@babel/traverse':
@@ -4145,7 +4161,7 @@ packages:
     resolution: {integrity: sha512-m78hY+pL+dLrVvDEl68oYTdvjXW5Nz0ULDsUfbWfl7lzNDv1kFZGG+bAEm2eGEmUyvpZgAcyRwNhFljIErss3w==}
 
   luent@file:packages/luent/luent-0.0.1.tgz:
-    resolution: {integrity: sha512-y/cR4X7siOfeKZiVRnKPThmPvPTW9ebLBKNDok6OoeP2BMnHUMVlwT0o67v2im0WwrnmbP0Fn2x9XTOlpQb4Uw==, tarball: file:packages/luent/luent-0.0.1.tgz}
+    resolution: {integrity: sha512-hl5T1KN+mLXqfWoIksUJbsD4I4jMBFSEn7l55E8M0RtN5ZzgXMaBnaEWDX3n6i4egHcnE7WvM8W8l8L1zMBc9g==, tarball: file:packages/luent/luent-0.0.1.tgz}
     version: 0.0.1
 
   magic-string@0.30.21:

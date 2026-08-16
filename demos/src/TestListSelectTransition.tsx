@@ -134,7 +134,7 @@ export function TestListSelectTransition() {
                 <div
                   on:click={e => !e.from('style.cursor:pointer') && selected.toggle((console.log('$index', $index()), item))}
                   style={{
-                    backgroundColor: randomColor.get(),
+                    'background-color': randomColor.get(),
                     outline: () => (selected.has(item) ? 'thick solid blue' : 'unset'),
                   }}>
                   <button class='delete-btn' on:click={e => removeItem($index())} style="cursor: pointer">

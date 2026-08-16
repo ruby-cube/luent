@@ -57,7 +57,8 @@ export function runDemo() {
 
     return <>
       <span aria-hidden="true"></span>
-      <HabitTracker habit="water" goal={8}></HabitTracker>
+      {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
+      <BottomlessBlokkis></BottomlessBlokkis>
     </>
     // return <TestInnerHTML/>
   }, '#root')

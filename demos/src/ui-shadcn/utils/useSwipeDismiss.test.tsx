@@ -80,7 +80,7 @@ describe('useSwipeDismiss', () => {
           style={swipeDismiss.getDragStyles()}
           {...swipeDismiss.getPointerProps()}
         >
-          <div data-testid="scroll" style={{ overflowY: 'auto', height: 100 }}>
+          <div data-testid="scroll" style={{ 'overflow-y': 'auto', height: 100 }}>
             <div style={{ height: 200 }} />
           </div>
         </div>
@@ -632,7 +632,7 @@ describe('useSwipeDismiss', () => {
           style={swipe.getDragStyles()}
           {...swipe.getTouchProps()}
         >
-          <div data-testid="touch-scroll" style={{ overflowY: 'auto', maxHeight: 40 }}>
+          <div data-testid="touch-scroll" style={{ 'overflow-y': 'auto', maxHeight: 40 }}>
             <div style={{ height: 120 }} />
           </div>
         </div>

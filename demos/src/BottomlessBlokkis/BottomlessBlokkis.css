@@ -25,7 +25,7 @@ body {
   grid-template-rows: repeat(var(--board-rows), var(--cell-size));
   position: relative;
   z-index: 1;
-  background: linear-gradient(#feca92, #63d0ff);
+  background: linear-gradient(#e3ae75, #000);
   overflow: hidden;
   border: .25em solid black;
 }

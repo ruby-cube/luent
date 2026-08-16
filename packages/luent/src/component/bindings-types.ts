@@ -3,6 +3,7 @@ import { Ion, Ionic } from "@luent/quarky";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { NodeRef, RefSource } from "../node/NodeRef";
 import { LuentHooks } from "../flask/template-hooks";
+import { JSX } from "../jsx-runtime"
 
 
 export type HandleEvent<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
@@ -53,15 +54,12 @@ export type TagBindings<D> =
 
 type Attributes<D> = {
   [K in keyof D as
-  K extends 'Slot' ? never
-  : K extends `Slot:${string}` ? never
+  K extends 'Slot' | `Slot:${string}` | `on:${string}` | `mu:${string}` | `...` ? never
   : K extends `on${infer Head}${string}` ? Head extends Uppercase<Head> ? never : K
-  : K extends `on:${string}` ? never
-  : K extends `mu:${string}` ? never
   : K]:
   D[K] extends Ion<infer S>
   ? S | D[K]
-  :D[K] extends Ion<infer S> | undefined
+  : D[K] extends Ion<infer S> | undefined
   ? S | D[K]
   : D[K]
 }
@@ -93,9 +91,9 @@ type MutableAttribute<D> = {
 
 export type WithRef<N extends RefSource> = ElementAttributes<N> & { ref?: NodeRef<N> }
 
-export type FromTag<D = {}> = _FromTag<D>
+// export type FromTag<D = {}> = _FromTag<D>
 
-export type _FromTag<D> =
+export type FromTag<D = {}> =
   StaticInput<D>
   & ReadonlyIonInput<D>
   & WithDOMEvent<D>
@@ -103,18 +101,18 @@ export type _FromTag<D> =
   & WithMu<D>
   & WithSlot<D>
   & Styles
-  & { '~bindings'?: TagBindings<D> }
+  & { '~bindings'?: TagBindings<D> & ForwardedBindings<D>}
+
+type ForwardedBindings<D> = D extends { '...': infer T } ? T extends RefSource ? WithRef<T> : {} : {}
 
 type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S & WithNamedSlots<D> } : { Slot: WithNamedSlots<D> & RenderSlot }
 type WithNamedSlots<D> = { [K in keyof D as K extends `Slot:${infer N}` ? N : never]: D[K] }
-
 
 type ElementAttributes<D> =
   D extends keyof JSX.IntrinsicElements ? Omit<JSX.IntrinsicElements[D], 'ref' | keyof LuentHooks<any>> : {} // TODO: use Attributes from index.d.ts
 
 type Styles = {
-  styles: Ionic<CSSStyleDeclaration>
-  $classes: Ion<string>,
+  styles: Ionic<JSX.CSSProperties>
 }
 
 type WithMu<D> = HasMu<D> extends true ? {
@@ -128,7 +126,7 @@ type WithMu<D> = HasMu<D> extends true ? {
 
 
 type StaticInput<D> = {
-  [K in keyof D as K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
+  [K in keyof D as K extends `...` | `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
   : K]: D[K] extends Ion<infer V> ? V
   :
   D[K]
@@ -142,7 +140,7 @@ type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, P
 type ReadonlyIonInput<D> = {
   [K in keyof D
   as IncludesIon<D[K]> extends true ?
-  K extends `mu:${string}` | `on:${string}` | 'Slot' ? never
+  K extends `...` | `mu:${string}` | `on:${string}` | 'Slot' ? never
   : K extends string ? `$${K}`
   : never
   : never

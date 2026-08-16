@@ -63,15 +63,15 @@ export function TrafficLight() {
          <div class="traffic-light-container">
             <div
                class="light"
-               style={{ backgroundColor: "red", opacity: $LightOpacity("red") }}
+               style={{ 'background-color': "red", opacity: $LightOpacity("red") }}
             ></div>
             <div
                class="light"
-               style={{ backgroundColor: "gold", opacity: $LightOpacity("yellow") }}
+               style={{ 'background-color': "gold", opacity: $LightOpacity("yellow") }}
             ></div>
             <div
                class="light"
-               style={{ backgroundColor: "green", opacity: $LightOpacity("green") }}
+               style={{ 'background-color': "green", opacity: $LightOpacity("green") }}
             ></div>
          </div>
          <button

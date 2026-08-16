@@ -1,4 +1,4 @@
-import { ion, css, Style } from "luent";
+import { css, ion, Style } from "luent";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { Counter } from "./components/Counter";
 import { AtomIcon } from "./components/AtomIcon";
@@ -14,7 +14,7 @@ export function App() {
   return <>
     <o--body class={$theme} />
     <header>
-      <ThemeToggle on:click={$theme.toggle}/>
+      <ThemeToggle on:click={() => $theme.toggle()} />
     </header>
 
     <main>

@@ -220,7 +220,7 @@ describe('useRenderElement', () => {
         <TestComponent
           active
           style={{ color: 'rgb(255, 0, 0)' }}
-          render={<div style={{ fontSize: '16px' }} />}
+          render={<div style={{ 'font-size': '16px' }} />}
         />,
       );
 
@@ -235,7 +235,7 @@ describe('useRenderElement', () => {
         <TestComponent
           active
           style={(state) => ({ color: state.active ? 'rgb(255, 0, 0)' : 'rgb(0, 0, 0)' })}
-          render={<div style={{ fontSize: '16px' }} />}
+          render={<div style={{ 'font-size': '16px' }} />}
         />,
       );
 

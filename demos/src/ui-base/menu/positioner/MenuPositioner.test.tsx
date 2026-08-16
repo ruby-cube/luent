@@ -50,7 +50,7 @@ describe('<Menu.Positioner />', () => {
                 </Menu.Positioner>
               </Menu.Portal>
             </Menu.Root>
-            <div data-testid="anchor" style={{ marginTop: '100px' }} ref={anchor} />
+            <div data-testid="anchor" style={{ 'margin-top': '100px' }} ref={anchor} />
           </div>
         );
       }
@@ -94,7 +94,7 @@ describe('<Menu.Positioner />', () => {
                 </Menu.Positioner>
               </Menu.Portal>
             </Menu.Root>
-            <div data-testid="anchor" style={{ marginTop: '100px' }} ref={handleRef} />
+            <div data-testid="anchor" style={{ 'margin-top': '100px' }} ref={handleRef} />
           </div>
         );
       }
@@ -140,7 +140,7 @@ describe('<Menu.Positioner />', () => {
                 </Menu.Positioner>
               </Menu.Portal>
             </Menu.Root>
-            <div data-testid="anchor" style={{ marginTop: '100px' }} ref={handleRef} />
+            <div data-testid="anchor" style={{ 'margin-top': '100px' }} ref={handleRef} />
           </div>
         );
       }
@@ -258,7 +258,7 @@ describe('<Menu.Positioner />', () => {
             </Menu.Root>
             <div
               data-testid="anchor"
-              style={{ marginTop: '100px', width: 10, height: 10 }}
+              style={{ 'margin-top': '100px', 'width': 10, 'height': 10 }}
               ref={anchorRef}
             />
           </div>

@@ -101,9 +101,9 @@ export function BottomlessBlokkis() {
           <Blokk
             before:mount={dropBlock}
             matrix={$blokk()!.matrix}
-            shiftX={($blokk()!.shiftX)}
-            shiftY={($blokk()!.shiftY)}
-            rotation={($blokk()!.rotation)}
+            shiftX={() =>$blokk()!.shiftX}
+            shiftY={()=>$blokk()!.shiftY}
+            rotation={()=>$blokk()!.rotation}
 
             color={$blokkColor}
             gap={1}

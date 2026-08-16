@@ -6,7 +6,6 @@
     ]
   },
   "include": [
-    "./**/*",
     "../packages/luent/src/jsx-runtime/types/index-backup.ts"
   ]
 }

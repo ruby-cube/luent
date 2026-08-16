@@ -9,8 +9,6 @@
 
 Luent is a web framework designed around conceptual coherence and expressiveness. It aims to make complex, evolving applications easier to build, understand, and maintain, through intuitive APIs and type-explicit, examinable reactivity.
 
-It also introduces [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript), an optional TypeScript + JSX language extension that improves the clarity, ergonomics, and type safety of fine-grained reactive code.
-
 <br>
 
 > **This project is in early development.** Most standard client-side functionality is already working and relatively stable, but bugs, rough edges, unhandled cases, and some amount of experimental churn should be expected.
@@ -27,7 +25,7 @@ Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](
 ## Motivation
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
-This project explores ways to reduce framework friction and simplify application development while maintaining technical rigor.
+This project explores ways to make application development more intuitive and ergonomic without trading off performance, clarity, or scalability.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -92,44 +90,6 @@ This JSX template ...
 ]
 
 ```
-
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-
-
-## Design Principles
-Luent is being developed under these guiding principles, which encapsulate the project's values and how tradeoffs are navigated:
-
-- **Human-centered, LLM-friendly.**
-We take a human-centered approach, both in the development of this project and the framework design. The vision, creativity, and needs of humans are the driving force behind this project. We believe that by designing for clarity and consistency, we create systems that are LLM-friendly as well.
-
-- **Elegance and simplicity.**
-Elegance—both conceptual and syntactic—is central to Luent’s API design. We pursue simple solutions through extensive experimentation and relentless trimming of excess.
-
-- **Intuitive mental models.**
-Luent aims to be as invisible as possible so developers can focus on application logic rather than framework mechanics. We strive to minimize mental code-switching by supporting mental models grounded in native web technologies and familiar programming fundamentals.
-
-- **High-level abstractions.**
-Abstractions should emphasize high-level concerns while minimizing exposure to underlying implementation details. We favor clear, descriptive terminology over low-level technical jargon.
-
-- **Consistency over aesthetics.**
-While aesthetics matter, the pursuit of visually elegant code should never introduce inconsistencies in the language or unpredictable magic. Clean syntax should emerge from carefully designed rules and principled syntactic sugar.
-
-- **Clarity and expressiveness over brevity.**
-Concise code is valuable, but not at the expense of basic clarity, flexibility, and type safety. Developers should never feel constrained by the framework for the sake of terseness or visual minimalism.
-
-- **Elimination of bug-prone patterns.**
-Luent should absorb as much repetitive and error-prone infrastructure as possible to reduce time spent debugging an application.
-
-- **Pragmatic type safety.**
-We strive to improve type safety whenever possible while also recognizing that manual solutions are sometimes preferable when the costs outweigh the benefits or TypeScript itself imposes limitations.
-
-- **Quality over speed.**
-Keeping up a reasonable pace is desirable, but quality should not be compromised for the sake of development speed. 
-
-- **Great user experiences.**
-All of this ultimately serves the end user. We embrace build steps as they allow us to improve developer ergonomics without compromising runtime performance. We prioritize expressiveness and stability in our framework design because they form the foundation developers rely on to build, evolve, and maintain great user experiences. A solid framework → good DX → great UX.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>

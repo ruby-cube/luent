@@ -186,13 +186,13 @@ function Dot({ x, y, s, $text }: any) {
          class="dot"
          style={{
             // color: "#61dafb",
-            width: s + "px",
-            height: s + "px",
-            left: x + "px",
-            top: y + "px",
+            'width': s + "px",
+            'height': s + "px",
+            'left': x + "px",
+            'top': y + "px",
             "border-radius": s / 2 + "px",
             "line-height": s + "px",
-            background: ($hover() ? "#ff0" : "#61dafb")
+            'background': ($hover() ? "#ff0" : "#61dafb")
          }}
          on:mouseenter={e => $hover.value = true}
          on:mouseleave={e => $hover.value = false}

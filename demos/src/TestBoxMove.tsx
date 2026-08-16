@@ -36,7 +36,13 @@ export function TestMoveBox() {
 
       <div data-test={JSON.stringify({ "INCREMENT": INCREMENT })}>
          <div style='display: grid; width: 100%; height: 500px; place-items: center'>
-            <div id='box' style={{ backgroundColor: "#53D0F6", width: '50px', height: '50px', transform: () =>`translate(${box.x}px, ${box.y}px)` }}></div>
+            <div id='box' style={{ 'background-color': "#53D0F6", width: '50px', height: '50px', transform: () =>`translate(${box.x}px, ${box.y}px)` }}></div>
+            {/* <div id='box' style='
+              background-color: #53D0F6; 
+              width: 50px; 
+              height: 50px; 
+              transform: {() =>`translate(${box.x}px, ${box.y}px)`}
+            '></div> */}
          </div>
          <hr></hr>
          <div style="text-align: center">

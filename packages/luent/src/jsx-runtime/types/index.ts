@@ -47,16 +47,6 @@ export namespace JSX {
   // #region: Event Objects
   // ----------------------------------------------------------------------
 
-  //   interface EventHandler<T, E extends Event> {
-  //   (
-  //     e: E & {
-  //       currentTarget: T;
-  //       target: DOMElement;
-  //     }
-  //   ): void;
-  // }
-
-
   interface Event<T> extends NativeEvent {
     /**
     * The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
@@ -85,7 +75,7 @@ export namespace JSX {
   }
 
 
-  interface InvalidEvent<T = Element>  {
+  interface InvalidEvent<T = Element> {
     target: EventTarget & T;
   }
 
@@ -430,7 +420,7 @@ export namespace JSX {
     'onv:transitionend'?: HandleTransitionEvent<T>;
   }
 
-  export interface CSSProperties extends CSS.Properties<string | number> {
+  export interface CSSProperties extends CSS.PropertiesHyphenFallback<string | number> {
     /**
      * The index signature was removed to enable closed typing for style
      * using CSSType. You're able to use type assertion or module augmentation
@@ -1819,29 +1809,23 @@ export namespace JSX {
     children?: any;
   } & Events<T>
 
-  interface FrameworkAttributes<T> extends RefAttributes<T>, LuentHooks<T>, LuentCommonAttributes { }
-
-  type LuentComponentAttributes<C> = {
-    ref?: () => ComponentRef<C> | undefined
-  }
-
-  type LuentCommonAttributes = {
+  interface LuentAttributes<T> extends RefAttributes<T>, LuentHooks<T> {
     'on:event'?: { [key: string]: Function };
     'auto-bind'?: SetupBindings
   }
 
-  
+
   export type LibraryManagedAttributes<T, P> =
-  T extends (...args: infer Params) => any ?
-  Params extends never[] ? {}
-  : Params extends [infer B] ?
-  B extends { '~bindings'?: infer A } ?
-  GlobalAttributes & A & LuentHooks<ComponentRef<T>> & LuentComponentAttributes<T> & LuentCommonAttributes & Events<ComponentRef<T>>
-  : P extends GlobalAttributes
-  ? P
-  : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
-  : P
-  : P
+    T extends (...args: infer Params) => any ?
+    Params extends never[] ? {}
+    : Params extends [infer B] ?
+    B extends { '~bindings'?: infer A } ?
+    GlobalAttributes & A & LuentAttributes<ComponentRef<T>> & Events<ComponentRef<T>>
+    : P extends GlobalAttributes
+    ? P
+    : { TypeError: `Function cannot be called as a JSX tag. Setup object must type FromTag<T>` }
+    : P
+    : P
 
   export interface Element { }
 
@@ -1855,140 +1839,140 @@ export namespace JSX {
     'shadow-root': { children: any, mode: 'open' | 'closed' }
     'o--portal': PortalNodeInput & { children: any }
 
-    'o-style': StyleHTMLAttributes<HTMLStyleElement> & FrameworkAttributes<HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', text: string }
-    'o-link': LinkHTMLAttributes<HTMLLinkElement> & FrameworkAttributes<HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
-    'o--head': HTMLAttributes<HTMLHeadElement> & FrameworkAttributes<HTMLHeadElement>
-    'o--body': HTMLAttributes<HTMLBodyElement> & FrameworkAttributes<HTMLBodyElement>
-    'o--window': HTMLAttributes<Window> & FrameworkAttributes<Window>
-    'o--host': HTMLAttributes<Window> & FrameworkAttributes<Window>
+    'o-style': StyleHTMLAttributes<HTMLStyleElement> & LuentAttributes<HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', text: string }
+    'o-link': LinkHTMLAttributes<HTMLLinkElement> & LuentAttributes<HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
+    'o--head': HTMLAttributes<HTMLHeadElement> & LuentAttributes<HTMLHeadElement>
+    'o--body': HTMLAttributes<HTMLBodyElement> & LuentAttributes<HTMLBodyElement>
+    'o--window': HTMLAttributes<Window> & LuentAttributes<Window>
+    'o--host': HTMLAttributes<Window> & LuentAttributes<Window>
     'o:preserve': { children: any[] | any; discard?: Quarky.Ion<Booleanish> }
     'o:context': { children: any[] | any; provide: Provided }
     'o:transition': { children: any[] | any; } & TransitionBindings
 
-    'o--dock': HTMLAttributes<HTMLDivElement> & TransitionConfigs & FrameworkAttributes<HTMLDivElement>
+    'o--dock': HTMLAttributes<HTMLDivElement> & TransitionConfigs & LuentAttributes<HTMLDivElement>
   }
 
   interface HTMLElements {
     // HTML
-    a: AnchorHTMLAttributes<HTMLAnchorElement> & FrameworkAttributes<HTMLAnchorElement>;
-    abbr: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    address: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    area: AreaHTMLAttributes<HTMLAreaElement> & FrameworkAttributes<HTMLAreaElement>;
-    article: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    aside: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    audio: AudioHTMLAttributes<HTMLAudioElement> & FrameworkAttributes<HTMLAudioElement>;
-    b: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    base: BaseHTMLAttributes<HTMLBaseElement> & FrameworkAttributes<HTMLBaseElement>;
-    bdi: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    bdo: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    big: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    blockquote: BlockquoteHTMLAttributes<HTMLQuoteElement> & FrameworkAttributes<HTMLQuoteElement>;
-    body: HTMLAttributes<HTMLBodyElement> & FrameworkAttributes<HTMLBodyElement>;
-    br: HTMLAttributes<HTMLBRElement> & FrameworkAttributes<HTMLBRElement>;
-    button: ButtonHTMLAttributes<HTMLButtonElement> & FrameworkAttributes<HTMLButtonElement>;
-    canvas: CanvasHTMLAttributes<HTMLCanvasElement> & FrameworkAttributes<HTMLCanvasElement>;
-    caption: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    center: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    cite: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    code: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    col: ColHTMLAttributes<HTMLTableColElement> & FrameworkAttributes<HTMLTableColElement>;
-    colgroup: ColgroupHTMLAttributes<HTMLTableColElement> & FrameworkAttributes<HTMLTableColElement>;
-    data: DataHTMLAttributes<HTMLDataElement> & FrameworkAttributes<HTMLDataElement>;
-    datalist: HTMLAttributes<HTMLDataListElement> & FrameworkAttributes<HTMLDataListElement>;
-    dd: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    del: DelHTMLAttributes<HTMLModElement> & FrameworkAttributes<HTMLModElement>;
-    details: DetailsHTMLAttributes<HTMLDetailsElement> & FrameworkAttributes<HTMLDetailsElement>;
-    dfn: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    dialog: DialogHTMLAttributes<HTMLDialogElement> & FrameworkAttributes<HTMLDialogElement>;
-    div: HTMLAttributes<HTMLDivElement> & FrameworkAttributes<HTMLDivElement>;
-    dl: HTMLAttributes<HTMLDListElement> & FrameworkAttributes<HTMLDListElement>;
-    dt: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    em: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    embed: EmbedHTMLAttributes<HTMLEmbedElement> & FrameworkAttributes<HTMLEmbedElement>;
-    fieldset: FieldsetHTMLAttributes<HTMLFieldSetElement> & FrameworkAttributes<HTMLFieldSetElement>;
-    figcaption: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    figure: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    footer: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    form: FormHTMLAttributes<HTMLFormElement> & FrameworkAttributes<HTMLFormElement>;
-    h1: HTMLAttributes<HTMLHeadingElement> & FrameworkAttributes<HTMLHeadingElement>;
-    h2: HTMLAttributes<HTMLHeadingElement> & FrameworkAttributes<HTMLHeadingElement>;
-    h3: HTMLAttributes<HTMLHeadingElement> & FrameworkAttributes<HTMLHeadingElement>;
-    h4: HTMLAttributes<HTMLHeadingElement> & FrameworkAttributes<HTMLHeadingElement>;
-    h5: HTMLAttributes<HTMLHeadingElement> & FrameworkAttributes<HTMLHeadingElement>;
-    h6: HTMLAttributes<HTMLHeadingElement> & FrameworkAttributes<HTMLHeadingElement>;
-    head: HTMLAttributes<HTMLHeadElement> & FrameworkAttributes<HTMLHeadElement>;
-    header: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    hgroup: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    hr: HTMLAttributes<HTMLHRElement> & FrameworkAttributes<HTMLHRElement>;
-    html: HtmlHTMLAttributes<HTMLHtmlElement> & FrameworkAttributes<HTMLHtmlElement>;
-    i: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    iframe: IframeHTMLAttributes<HTMLIFrameElement> & FrameworkAttributes<HTMLIFrameElement>;
-    img: ImgHTMLAttributes<HTMLImageElement> & FrameworkAttributes<HTMLImageElement>;
-    input: InputHTMLAttributes<HTMLInputElement> & FrameworkAttributes<HTMLInputElement>;
-    ins: InsHTMLAttributes<HTMLModElement> & FrameworkAttributes<HTMLModElement>;
-    kbd: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    keygen: KeygenHTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    label: LabelHTMLAttributes<HTMLLabelElement> & FrameworkAttributes<HTMLLabelElement>;
-    legend: HTMLAttributes<HTMLLegendElement> & FrameworkAttributes<HTMLLegendElement>;
-    li: LiHTMLAttributes<HTMLLIElement> & FrameworkAttributes<HTMLLIElement>;
-    link: LinkHTMLAttributes<HTMLLinkElement> & FrameworkAttributes<HTMLLinkElement>;
-    main: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    map: MapHTMLAttributes<HTMLMapElement> & FrameworkAttributes<HTMLMapElement>;
-    mark: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    menu: MenuHTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    menuitem: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    meta: MetaHTMLAttributes<HTMLMetaElement> & FrameworkAttributes<HTMLMetaElement>;
-    meter: MeterHTMLAttributes<HTMLMeterElement> & FrameworkAttributes<HTMLMeterElement>;
-    nav: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    noindex: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    noscript: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    object: ObjectHTMLAttributes<HTMLObjectElement> & FrameworkAttributes<HTMLObjectElement>;
-    ol: OlHTMLAttributes<HTMLOListElement> & FrameworkAttributes<HTMLOListElement>;
-    optgroup: OptgroupHTMLAttributes<HTMLOptGroupElement> & FrameworkAttributes<HTMLOptGroupElement>;
-    option: OptionHTMLAttributes<HTMLOptionElement> & FrameworkAttributes<HTMLOptionElement>;
-    output: OutputHTMLAttributes<HTMLOutputElement> & FrameworkAttributes<HTMLOutputElement>;
-    p: HTMLAttributes<HTMLParagraphElement> & FrameworkAttributes<HTMLParagraphElement>;
-    param: ParamHTMLAttributes<HTMLParamElement> & FrameworkAttributes<HTMLParamElement>;
-    picture: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    pre: HTMLAttributes<HTMLPreElement> & FrameworkAttributes<HTMLPreElement>;
-    progress: ProgressHTMLAttributes<HTMLProgressElement> & FrameworkAttributes<HTMLProgressElement>;
-    q: QuoteHTMLAttributes<HTMLQuoteElement> & FrameworkAttributes<HTMLQuoteElement>;
-    rp: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    rt: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    ruby: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    s: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    samp: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    search: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    slot: SlotHTMLAttributes<HTMLSlotElement> & FrameworkAttributes<HTMLSlotElement>;
-    script: ScriptHTMLAttributes<HTMLScriptElement> & FrameworkAttributes<HTMLScriptElement>;
-    section: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    select: SelectHTMLAttributes<HTMLSelectElement> & FrameworkAttributes<HTMLSelectElement>;
-    small: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    source: SourceHTMLAttributes<HTMLSourceElement> & FrameworkAttributes<HTMLSourceElement>;
-    span: HTMLAttributes<HTMLSpanElement> & FrameworkAttributes<HTMLSpanElement>;
-    strong: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    style: StyleHTMLAttributes<HTMLStyleElement> & FrameworkAttributes<HTMLStyleElement>;
-    sub: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    summary: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    sup: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    table: TableHTMLAttributes<HTMLTableElement> & FrameworkAttributes<HTMLTableElement>;
-    template: HTMLAttributes<HTMLTemplateElement> & FrameworkAttributes<HTMLTemplateElement>;
-    tbody: HTMLAttributes<HTMLTableSectionElement> & FrameworkAttributes<HTMLTableSectionElement>;
-    td: TdHTMLAttributes<HTMLTableCellElement> & FrameworkAttributes<HTMLTableCellElement>;
-    textarea: TextareaHTMLAttributes<HTMLTextAreaElement> & FrameworkAttributes<HTMLTextAreaElement>;
-    tfoot: HTMLAttributes<HTMLTableSectionElement> & FrameworkAttributes<HTMLTableSectionElement>;
-    th: ThHTMLAttributes<HTMLTableCellElement> & FrameworkAttributes<HTMLTableCellElement>;
-    thead: HTMLAttributes<HTMLTableSectionElement> & FrameworkAttributes<HTMLTableSectionElement>;
-    time: TimeHTMLAttributes<HTMLTimeElement> & FrameworkAttributes<HTMLTimeElement>;
-    title: HTMLAttributes<HTMLTitleElement> & FrameworkAttributes<HTMLTitleElement>;
-    tr: HTMLAttributes<HTMLTableRowElement> & FrameworkAttributes<HTMLTableRowElement>;
-    track: TrackHTMLAttributes<HTMLTrackElement> & FrameworkAttributes<HTMLTrackElement>;
-    u: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    ul: HTMLAttributes<HTMLUListElement> & FrameworkAttributes<HTMLUListElement>;
-    "var": HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    video: VideoHTMLAttributes<HTMLVideoElement> & FrameworkAttributes<HTMLVideoElement>;
-    wbr: HTMLAttributes<HTMLElement> & FrameworkAttributes<HTMLElement>;
-    webview: WebViewHTMLAttributes<HTMLWebViewElement> & FrameworkAttributes<HTMLWebViewElement>;
+    a: AnchorHTMLAttributes<HTMLAnchorElement> & LuentAttributes<HTMLAnchorElement>;
+    abbr: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    address: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    area: AreaHTMLAttributes<HTMLAreaElement> & LuentAttributes<HTMLAreaElement>;
+    article: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    aside: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    audio: AudioHTMLAttributes<HTMLAudioElement> & LuentAttributes<HTMLAudioElement>;
+    b: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    base: BaseHTMLAttributes<HTMLBaseElement> & LuentAttributes<HTMLBaseElement>;
+    bdi: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    bdo: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    big: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    blockquote: BlockquoteHTMLAttributes<HTMLQuoteElement> & LuentAttributes<HTMLQuoteElement>;
+    body: HTMLAttributes<HTMLBodyElement> & LuentAttributes<HTMLBodyElement>;
+    br: HTMLAttributes<HTMLBRElement> & LuentAttributes<HTMLBRElement>;
+    button: ButtonHTMLAttributes<HTMLButtonElement> & LuentAttributes<HTMLButtonElement>;
+    canvas: CanvasHTMLAttributes<HTMLCanvasElement> & LuentAttributes<HTMLCanvasElement>;
+    caption: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    center: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    cite: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    code: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    col: ColHTMLAttributes<HTMLTableColElement> & LuentAttributes<HTMLTableColElement>;
+    colgroup: ColgroupHTMLAttributes<HTMLTableColElement> & LuentAttributes<HTMLTableColElement>;
+    data: DataHTMLAttributes<HTMLDataElement> & LuentAttributes<HTMLDataElement>;
+    datalist: HTMLAttributes<HTMLDataListElement> & LuentAttributes<HTMLDataListElement>;
+    dd: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    del: DelHTMLAttributes<HTMLModElement> & LuentAttributes<HTMLModElement>;
+    details: DetailsHTMLAttributes<HTMLDetailsElement> & LuentAttributes<HTMLDetailsElement>;
+    dfn: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    dialog: DialogHTMLAttributes<HTMLDialogElement> & LuentAttributes<HTMLDialogElement>;
+    div: HTMLAttributes<HTMLDivElement> & LuentAttributes<HTMLDivElement>;
+    dl: HTMLAttributes<HTMLDListElement> & LuentAttributes<HTMLDListElement>;
+    dt: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    em: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    embed: EmbedHTMLAttributes<HTMLEmbedElement> & LuentAttributes<HTMLEmbedElement>;
+    fieldset: FieldsetHTMLAttributes<HTMLFieldSetElement> & LuentAttributes<HTMLFieldSetElement>;
+    figcaption: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    figure: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    footer: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    form: FormHTMLAttributes<HTMLFormElement> & LuentAttributes<HTMLFormElement>;
+    h1: HTMLAttributes<HTMLHeadingElement> & LuentAttributes<HTMLHeadingElement>;
+    h2: HTMLAttributes<HTMLHeadingElement> & LuentAttributes<HTMLHeadingElement>;
+    h3: HTMLAttributes<HTMLHeadingElement> & LuentAttributes<HTMLHeadingElement>;
+    h4: HTMLAttributes<HTMLHeadingElement> & LuentAttributes<HTMLHeadingElement>;
+    h5: HTMLAttributes<HTMLHeadingElement> & LuentAttributes<HTMLHeadingElement>;
+    h6: HTMLAttributes<HTMLHeadingElement> & LuentAttributes<HTMLHeadingElement>;
+    head: HTMLAttributes<HTMLHeadElement> & LuentAttributes<HTMLHeadElement>;
+    header: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    hgroup: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    hr: HTMLAttributes<HTMLHRElement> & LuentAttributes<HTMLHRElement>;
+    html: HtmlHTMLAttributes<HTMLHtmlElement> & LuentAttributes<HTMLHtmlElement>;
+    i: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    iframe: IframeHTMLAttributes<HTMLIFrameElement> & LuentAttributes<HTMLIFrameElement>;
+    img: ImgHTMLAttributes<HTMLImageElement> & LuentAttributes<HTMLImageElement>;
+    input: InputHTMLAttributes<HTMLInputElement> & LuentAttributes<HTMLInputElement>;
+    ins: InsHTMLAttributes<HTMLModElement> & LuentAttributes<HTMLModElement>;
+    kbd: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    keygen: KeygenHTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    label: LabelHTMLAttributes<HTMLLabelElement> & LuentAttributes<HTMLLabelElement>;
+    legend: HTMLAttributes<HTMLLegendElement> & LuentAttributes<HTMLLegendElement>;
+    li: LiHTMLAttributes<HTMLLIElement> & LuentAttributes<HTMLLIElement>;
+    link: LinkHTMLAttributes<HTMLLinkElement> & LuentAttributes<HTMLLinkElement>;
+    main: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    map: MapHTMLAttributes<HTMLMapElement> & LuentAttributes<HTMLMapElement>;
+    mark: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    menu: MenuHTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    menuitem: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    meta: MetaHTMLAttributes<HTMLMetaElement> & LuentAttributes<HTMLMetaElement>;
+    meter: MeterHTMLAttributes<HTMLMeterElement> & LuentAttributes<HTMLMeterElement>;
+    nav: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    noindex: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    noscript: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    object: ObjectHTMLAttributes<HTMLObjectElement> & LuentAttributes<HTMLObjectElement>;
+    ol: OlHTMLAttributes<HTMLOListElement> & LuentAttributes<HTMLOListElement>;
+    optgroup: OptgroupHTMLAttributes<HTMLOptGroupElement> & LuentAttributes<HTMLOptGroupElement>;
+    option: OptionHTMLAttributes<HTMLOptionElement> & LuentAttributes<HTMLOptionElement>;
+    output: OutputHTMLAttributes<HTMLOutputElement> & LuentAttributes<HTMLOutputElement>;
+    p: HTMLAttributes<HTMLParagraphElement> & LuentAttributes<HTMLParagraphElement>;
+    param: ParamHTMLAttributes<HTMLParamElement> & LuentAttributes<HTMLParamElement>;
+    picture: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    pre: HTMLAttributes<HTMLPreElement> & LuentAttributes<HTMLPreElement>;
+    progress: ProgressHTMLAttributes<HTMLProgressElement> & LuentAttributes<HTMLProgressElement>;
+    q: QuoteHTMLAttributes<HTMLQuoteElement> & LuentAttributes<HTMLQuoteElement>;
+    rp: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    rt: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    ruby: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    s: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    samp: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    search: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    slot: SlotHTMLAttributes<HTMLSlotElement> & LuentAttributes<HTMLSlotElement>;
+    script: ScriptHTMLAttributes<HTMLScriptElement> & LuentAttributes<HTMLScriptElement>;
+    section: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    select: SelectHTMLAttributes<HTMLSelectElement> & LuentAttributes<HTMLSelectElement>;
+    small: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    source: SourceHTMLAttributes<HTMLSourceElement> & LuentAttributes<HTMLSourceElement>;
+    span: HTMLAttributes<HTMLSpanElement> & LuentAttributes<HTMLSpanElement>;
+    strong: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    style: StyleHTMLAttributes<HTMLStyleElement> & LuentAttributes<HTMLStyleElement>;
+    sub: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    summary: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    sup: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    table: TableHTMLAttributes<HTMLTableElement> & LuentAttributes<HTMLTableElement>;
+    template: HTMLAttributes<HTMLTemplateElement> & LuentAttributes<HTMLTemplateElement>;
+    tbody: HTMLAttributes<HTMLTableSectionElement> & LuentAttributes<HTMLTableSectionElement>;
+    td: TdHTMLAttributes<HTMLTableCellElement> & LuentAttributes<HTMLTableCellElement>;
+    textarea: TextareaHTMLAttributes<HTMLTextAreaElement> & LuentAttributes<HTMLTextAreaElement>;
+    tfoot: HTMLAttributes<HTMLTableSectionElement> & LuentAttributes<HTMLTableSectionElement>;
+    th: ThHTMLAttributes<HTMLTableCellElement> & LuentAttributes<HTMLTableCellElement>;
+    thead: HTMLAttributes<HTMLTableSectionElement> & LuentAttributes<HTMLTableSectionElement>;
+    time: TimeHTMLAttributes<HTMLTimeElement> & LuentAttributes<HTMLTimeElement>;
+    title: HTMLAttributes<HTMLTitleElement> & LuentAttributes<HTMLTitleElement>;
+    tr: HTMLAttributes<HTMLTableRowElement> & LuentAttributes<HTMLTableRowElement>;
+    track: TrackHTMLAttributes<HTMLTrackElement> & LuentAttributes<HTMLTrackElement>;
+    u: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    ul: HTMLAttributes<HTMLUListElement> & LuentAttributes<HTMLUListElement>;
+    "var": HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    video: VideoHTMLAttributes<HTMLVideoElement> & LuentAttributes<HTMLVideoElement>;
+    wbr: HTMLAttributes<HTMLElement> & LuentAttributes<HTMLElement>;
+    webview: WebViewHTMLAttributes<HTMLWebViewElement> & LuentAttributes<HTMLWebViewElement>;
 
     // SVG
     svg: SVGProps<SVGSVGElement>;

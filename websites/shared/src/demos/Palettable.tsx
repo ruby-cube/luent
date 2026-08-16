@@ -154,7 +154,7 @@ function ColorPalette(setup: FromTag<{
   const { makeMagnifyable } = CelebrationKit($sorted, onComplete)
 
   return <>
-    <o--host on:click={e => e.from('.clickable') || deselectAll()}/>
+    <o--host on:click={e => e.from('.clickable') || deselectAll()} />
     <div class='container' auto-bind={rest}>
       <div class='row'>
         <Endgap
@@ -230,7 +230,7 @@ function ColorPalette(setup: FromTag<{
   </>
 }
 
-const Gap = (setup: FromTag) =>
+const Gap = (setup: FromTag<{ '...': 'button' }>) =>
   <>
     <button
       class='clickable gap'
@@ -270,7 +270,7 @@ const Gap = (setup: FromTag) =>
   </>
 
 
-const Endgap = (setup: FromTag) =>
+const Endgap = (setup: FromTag<{ '...': 'button' }>) =>
   <>
     <button
       class='clickable gap endgap'
@@ -738,47 +738,47 @@ Palettable.nsx = `function Palettable() {
   })
 
   <:>
-    <div class='palettable'>
-      {As(round@, () => {
-        get done = ion(false)
-        get moves = ion(0, {
-          increment() { moves++ }
-        })
+  <div class='palettable'>
+    {As(round@, :>
+      <--->
+      get solved = ion(false)
+      get moves = ion(0, {
+        increment() { moves++ }
+      })
+      <--->
+      <div class='moves-panel'>
+        {moves@}
+      </div>
+      <ColorPalette
+        animate-in='slide-in'
+        onMove={moves@.increment}
+        onComplete={() => solved = true}
+      ></ColorPalette>
+      {If(done@,
+        <button transition-in on:click={round@.increment}>
+          Next
+        </button>
+      )}
+    )}
+  </div>
 
-        <:/>
-        <div class='moves-panel'>
-          {moves@}
-        </div>
-        <ColorPalette
-          animate-in='slide-in'
-          onMove={moves@.increment}
-          onComplete={() => done = true}
-        ></ColorPalette>
-        {If(done@,
-          <button transition-in on:click={round@.increment}>
-            Next
-          </button>
-        )}
-      })}
-    </div>
-
-    <o-style>
-      @keyframes slide-in {
-        from {
-          opacity: 0;
-          transform: translateY(-100px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0px);
-        }
+  <o-style>
+    @keyframes slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(-100px);
       }
 
-      .slide-in {
-        animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) slide-in forwards;
+      to {
+        opacity: 1;
+        transform: translateY(0px);
       }
-    </o-style>
+    }
+
+    .slide-in {
+      animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) slide-in forwards;
+    }
+  </o-style>
   </:>
 }
 

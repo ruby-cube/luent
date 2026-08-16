@@ -5,13 +5,14 @@ export const CELL_SIZE = 20;
 
 const degrees = [0, 270, 180, 90] as const
 
-export function Blokk(setup: WithRef<'div'> & FromTag<{
+export function Blokk(setup: FromTag<{
   matrix: (1 | 0)[][],
   shiftX: Ion<number>,
   shiftY: Ion<number>,
   rotation: Ion<number>,
   color?: Ion<string>,
   gap?: number
+  '...': 'div';
 }>) {
   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, ...rest } = setup
 
@@ -22,7 +23,7 @@ export function Blokk(setup: WithRef<'div'> & FromTag<{
 
   return (
 
-    <div class='blokk-base' style={(`
+    <div class='blokk-base' style={()=>(`
         --background-color: ${$color()};
         --cell-size: ${CELL_SIZE}px;
         --grid-size: ${GRID_SIZE}px;
