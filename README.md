@@ -1,7 +1,5 @@
 <div align="center">
 <picture>
-  <!-- <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg" alt="luent-logo"/> -->
-  
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-dark-padded.svg">
   <img width="200" alt="luent logo" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg">
 
@@ -18,8 +16,6 @@ It specially features:
 - a unified system of fine-grained, type-explicit, async-aware reactivity
 - state management through familiar native structures
 - compile-time mutation safety checking that prevents accidental, hidden mutations while allowing statically traceable mutable bindings
-
-It embraces flexibility and aesthetics without losing sight of technical rigor.
 
 <br>
 
