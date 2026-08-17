@@ -25,20 +25,21 @@ features:
       width: 32
       height: 32
     title: Develop with fluency
-    details: Build with intuitive APIs and expressive syntax designed as natural extensions of native web technologies.
+    details: Build with intuitive APIs and expressive syntax designed as natural extensions of established standards.
   - icon:
       src: /assets/atom.svg
       width: 32
       height: 32
     title: Take command of reactivity
-    details: Gain clarity and control over re-renders through reactivity that's fine-grained, selective, type-explicit, and traceable.
+    details: Gain clarity and control over re-renders through traceable, type-explicit, fine-grained reactivity.
   - icon:
       src: /assets/shapes.svg
       width: 32
       height: 32
     title: Manage state natively
-    details: Simplify management of structured state through familiar native structures.
+    details: Model and update complex state through familiar JavaScript structures and custom classes.
 ---
+
   <!-- <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>

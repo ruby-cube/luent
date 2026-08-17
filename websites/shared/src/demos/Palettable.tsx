@@ -1,4 +1,4 @@
-import { Ion, queueTask, As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, track } from "luent";
+import { Ion, queueTask, As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, track } from "luent";
 import { moveUniqueItems } from "@luent/utils";
 
 export function Palettable() {
@@ -360,9 +360,10 @@ function DraggableKit<T>(config: {
   onDrag: (item: T) => void,
   onDrop: (dropIndex: number) => void,
   isSelected: (item: T) => boolean,
-  $selected: Ion<T[]>
+  $selected: Ion<T[]>,
+  axis?: 'horizontal' | 'vertical' // TODO:
 }) {
-  const { n, onDrag, onDrop, isSelected, $selected } = config
+  const { n, onDrag, onDrop, isSelected, $selected, axis = 'horizontal' } = config
 
   let selectedItem: T | null = null;
   let selectedIndex: number | null = null;
@@ -479,6 +480,11 @@ function DraggableKit<T>(config: {
     const $tagalong = ion(() => $taggingAlong() && $dragged() && $index() !== selectedIndex);
     const $node = asJSX(node);
 
+    const $transform = ion(() => axis === 'horizontal'
+      ? `translate(${adjustX($shiftX(), item, $index())}px, ${$shiftY()}px)`
+      : `translate(${$shiftY()}px, ${adjustX($shiftX(), item, $index())}px)`
+    );
+
     <$node
       on:pointerdown={e => maybeDrag(e, item, $index())}
       on:transitionend={() => $taggingAlong.value = false}
@@ -488,7 +494,7 @@ function DraggableKit<T>(config: {
       }]}
       style={{
         'z-index': () => $dragged() ? order($index()) : 0,
-        'transform': () => $dragged() ? `translate(${adjustX($shiftX(), item, $index())}px, ${$shiftY()}px)` : undefined
+        'transform': () => $dragged() ? $transform() : undefined
       }}
     />
   }
@@ -539,12 +545,10 @@ function DraggableKit<T>(config: {
         @media (max-width: 479px) {
           .dropzones {
             left: -45px;
-            outline: 1px solid gray;
           }
 
           .drop-zone {
             width: 54px;
-            outline: 1px solid gray;
           }
         }
 

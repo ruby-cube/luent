@@ -20,7 +20,7 @@ Luent provides the following series of primitive control flow functions for writ
 - `As`
 
 Additionally, the following [specialized control flow series]() are provided for async and error rendering.
-- `Await`/`Meanwhile`/`OnReawait`/`Catch`
+- `Await`/`Meanwhile`/`Twiddle`/`Catch`
 - `Try`/`Catch`
 
 

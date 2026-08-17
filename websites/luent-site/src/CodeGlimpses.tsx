@@ -108,70 +108,85 @@ FunctionalComponents.heading = 'Functional components'
 function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
   return <>
     <p style='text-wrap: balance'>
-      Write components as render functions that run once to create a view. Views are composed using JSX or <a href='' target="_blank">NSX</a> (an extension of JSX), and updated through fine-grained reactivity.
+      Write components as render functions that run once to create a view. Views are composed using JSX and updated through fine-grained reactivity.
     </p>
-    <p style='text-wrap: balance'><small>
-      {If(() => $tab() === 'main',
-        <>
-          Note that the <code>$</code> prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
-        </>
-      )}
-      {Else(
-        <>
-          Note that, in NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
-        </>
-      )}
-    </small></p>
+    <p style='text-wrap: balance'>
+      <small>
+        <strong>Upcoming language alternative:</strong> <a href=''>NextScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
+      </small>
+    </p>
+    <a href='/guide/anatomy-of-an-app' class='medium brand'>Learn more</a>
     {/* <p>
       Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
     </p> */}
-    <a href='/guide/anatomy-of-an-app' class='medium brand'>Learn more</a>
   </>
 }
 
 FunctionalComponents.$tab = $Tab()
 
 
-FunctionalComponents.nsx =
-  `function Counter() {
-  get count = ion(0)
-
-  <:>
-    <button on:click={() => count++}>
-      {count@}
-    </button>
-
-    <o-style>
-      button {
-        border: 1px solid gray;
-        background-color: transparent;
-      }
-    </o-style>
-  </:>
-}
-
-mountIsland(Counter, '#app')
-`
-
 FunctionalComponents.tsx =
-  `function Counter() {
-  const $count = ion(0)
+  `function EmojiCollection(setup: FromTag<{
+  limit: number;
+  getEmoji: () => string
+}>) {
+  const { limit, getEmoji } = setup;
+
+  const emojis = ionic(['🍀', '🍄', '✨'])
 
   return <>
-    <button on:click={() => $count.value++}>
-      {$count}
-    </button>
+    <ul class='collection'>
+      {For(emojis, emoji =>
+        <Chip>{emoji}</Chip>
+      )}
+    </ul>
+    <button
+      disabled={() => emojis.length === limit}
+      on:click={() => emojis.push(getEmoji())}
+    >add emoji</button>
 
     {Style(css\`
-      button {
-        border: 1px solid gray;
-        background-color: transparent;
+      .collection {
+        display: flex;  
+        flex-wrap: wrap;
       }
     \`)}
   </>
 }
 
-mountIsland(Counter, '#app')
+mountIsland(EmojiCollection, '#app')
+`
+
+FunctionalComponents.nsx =
+  `function EmojiCollection(setup: FromTag<{
+  limit: number;
+  getEmoji: () => string
+}>) {
+  const { limit, getEmoji } = setup;
+
+  const emojis = ionic(['🍀', '🍄', '✨'])
+
+  <:>
+    <ul class='collection'>
+      {For(emojis, emoji :>
+        <Chip>{emoji}</Chip>
+      )}
+    </ul>
+    <button
+      disabled={(emojis.length === limit)@}
+      on:click={() => emojis.push(getEmoji())}
+    >add emoji</button>
+
+    <o-style>
+      .collection {
+        display: flex;  
+        flex-wrap: wrap;
+      }
+    </o-style>
+  </:>
+}
+
+mountIsland(EmojiCollection, '#app')
 `
 
 UnifiedReactivity.heading = 'Unified reactivity'
@@ -179,7 +194,7 @@ UnifiedReactivity.$tab = FunctionalComponents.$tab
 function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
-      Manage simple, derived, async, and structured reactive state under a unified reactivity model. Reactive state is initialized through the primitives <code>ion()</code> and <code>ionic()</code>.
+      Manage simple, derived, async, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
     <p style='text-wrap: balance'><small>
       {If(() => $tab() === 'main',
@@ -198,21 +213,21 @@ function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
 }
 
 UnifiedReactivity.ns =
-  `/* atomic */
+  `// atomic
 get count = ion(0);
 
 get qty = ion(1, {
   increment() { qty++ },
-  decrement() { qty-- },
+  decrement() { qty-- }
 });
 
-/* derived */
+// derived
 get total = ion(() => count * qty);
 
-/* async */
+// async
 get posts = ion([], { '-fetch': fetchRecentPosts });
 
-/* structured */
+// structured
 const menu = ionic(['apples', 'peaches', 'pears']);
 
 const position = ionic({ x: 0, y: 0 })
@@ -222,21 +237,21 @@ const user = ionic(new User())
 `
 
 UnifiedReactivity.ts =
-  `/* atomic */
+  `// atomic
 const $count = ion(0);
 
 const $qty = ion(1, {
   increment() { $qty.value++ },
-  decrement() { $qty.value-- },
+  decrement() { $qty.value-- }
 });
 
-/* derived */
+// derived
 const $total = ion(() => $count() * $qty());
 
-/* async */
+// async
 const $posts = ion([], { '-fetch': fetchRecentPosts });
 
-/* structured */
+// structured
 const menu = ionic(['apples', 'peaches', 'pears']);
 
 const position = ionic({ x: 0, y: 0 })
@@ -257,7 +272,7 @@ function TypeExplicit() {
 }
 
 TypeExplicit.nsHover = {
-  count: 'let count: number',
+  count: 'const count: number',
   total: 'get total: Ion<number>',
   total_1: 'get total: Ion<number>',
   qty: 'get qty: Ion<number>',
@@ -276,7 +291,7 @@ TypeExplicit.nsHover = {
 // ]
 
 TypeExplicit.tsHover = {
-  count: 'let count: number',
+  count: 'const count: number',
   '$total': 'const $total: Ion<number>',
   '$total_1': 'const $total: Ion<number>',
   '$qty': 'const $qty: Ion<number>',

@@ -42,7 +42,7 @@ Notice in the above example, there are two suspense boundaries. `Await(<Foo/>)` 
 ## Rendering suspense views
 When a suspense boundary is created by `Await()`, a suspense view (placeholder) can be rendered while the awaited view is pending. 
 
-`Meanwhile()` renders an initial loading view before the awaited view has resolved. `OnReawait()` renders subsequent placeholder views if the awaited view becomes pending again.
+`Meanwhile()` renders an initial loading view before the awaited view has resolved. `Twiddle()` renders subsequent placeholder views if the awaited view becomes pending again.
 
 ```tsx
 <div>
@@ -50,13 +50,13 @@ When a suspense boundary is created by `Await()`, a suspense view (placeholder) 
     <Foo/>
   )}
   {Meanwhile(<Loading/>)}
-  {OnReawait(<Skeleton/>)}
+  {Twiddle(<Skeleton/>)}
 </div>
 ```
 
 
 ## Rendering suspense in resolved views
-Refetching awaited async ions causes resolved views to re-enter a pending state. If a suspense view is not provided for subsequent pending states via `OnReawait()`, suspense may be rendered in the resolved view itself via the `$suspense` argument. 
+Refetching awaited async ions causes resolved views to re-enter a pending state. If a suspense view is not provided for subsequent pending states via `Twiddle()`, suspense may be rendered in the resolved view itself via the `$suspense` argument. 
 
 The `$suspense` argument is the [suspense ion](#manual-suspense) created by `Await()`. It contains an unresolved batch promise, indicating a pending state, or null, indicating a resolved state.
 ```tsx

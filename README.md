@@ -1,13 +1,20 @@
 <div align="center">
 <picture>
-  <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-site-ambicolor.png" alt="luent-logo"/>
+  <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.png" alt="luent-logo"/>
 </picture>
-<p><a href='https://nextscript.org/getter-syntax'>tour</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> &nbsp;-&nbsp; <a href='#design-principles'>principles</a>
+<p><a href='https://nextscript.org/getter-syntax'>tour</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
 </div>
 
 # Luent
 
-Luent is a web framework designed around conceptual coherence, expressiveness, and clarity. It aims to make complex, evolving applications easier to build, understand, and maintain, through intuitive APIs and type-explicit, examinable reactivity.
+Luent is a web framework designed around conceptual coherence, expressiveness, and clarity, with the aim of making complex, evolving applications easier to build, understand, and maintain.
+
+It specially features: 
+- a unified system of fine-grained, type-explicit, async-aware reactivity
+- state management through familiar native structures
+- compile-time mutation safety checking that prevents accidental, hidden mutations while allowing statically traceable mutable bindings
+
+It embraces flexibility and aesthetics without losing sight of technical rigor.
 
 <br>
 

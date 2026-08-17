@@ -60,10 +60,9 @@ export default defineConfig({
     nav: [
       { text: 'Learn', link: '/guide/interactive-islands' },
       { text: 'Demos', link: '/demos/habit-tracker' },
-      { text: 'Tour', link: '/markdown-examples' },
+      { text: 'Tour', link: '/#code-glimpses' },
       { text: 'Reference', link: '/api/overview' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
-      { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
       { text: 'Preview NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
       { text: 'v0.0.1', link: '/' },
     ],

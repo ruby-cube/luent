@@ -40,7 +40,7 @@ export type TagBindings<D> =
   & TagSlot<D>
 // TODO: MaybeMutable<D> mu?:x
 
-// StaticInput<D>
+// PlainInput<D>
 // & MaybeIonAttributes<D>
 // & NonmutableIonAttributes<D>
 // & { class?: MaybeIon<string>, style?: MaybeIon<string> }
@@ -94,14 +94,14 @@ export type WithRef<N extends RefSource> = ElementAttributes<N> & { ref?: NodeRe
 // export type FromTag<D = {}> = _FromTag<D>
 
 export type FromTag<D = {}> =
-  StaticInput<D>
+  PlainInput<D>
   & ReadonlyIonInput<D>
   & WithDOMEvent<D>
   & WithEvents<D>
   & WithMu<D>
   & WithSlot<D>
   & Styles
-  & { '~bindings'?: TagBindings<D> & ForwardedBindings<D>}
+  & { '~bindings'?: TagBindings<D> & ForwardedBindings<D> }
 
 type ForwardedBindings<D> = D extends { '...': infer T } ? T extends RefSource ? WithRef<T> : {} : {}
 
@@ -125,11 +125,9 @@ type WithMu<D> = HasMu<D> extends true ? {
 } : {}
 
 
-type StaticInput<D> = {
+type PlainInput<D> = {
   [K in keyof D as K extends `...` | `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot'/*  | 'provide' */ ? never
-  : K]: D[K] extends Ion<infer V> ? V
-  :
-  D[K]
+  : K]: D[K]
 }
 
 

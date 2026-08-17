@@ -1,5 +1,5 @@
 # Palettable
-Drag and drop colors into a spectrum. Select and move multiple swatches at a time to solve in fewer moves.
+Drag and drop colors into a spectrum. Select multiple swatches to solve in fewer moves.
 
 :::luent palettable-demo
 :::
