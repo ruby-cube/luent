@@ -1,8 +1,9 @@
 <div align="center">
-<picture>
+<!-- <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg" alt="luent-logo"/>
-  
-</picture>
+</picture> -->
+  ![Luent Logo](https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg#gh-light-mode-only)
+  ![Luent Logo](https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-dark-padded.svg#gh-dark-mode-only)
 <p><a href='https://nextscript.org/getter-syntax'>tour</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
 </div>
 
