@@ -1,9 +1,12 @@
 <div align="center">
-<!-- <picture>
-  <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg" alt="luent-logo"/>
-</picture> -->
-  ![Luent Logo](https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg#gh-light-mode-only)
-  ![Luent Logo](https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-dark-padded.svg#gh-dark-mode-only)
+<picture>
+  <!-- <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg" alt="luent-logo"/> -->
+  
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-dark-padded.svg">
+  <img width="200" alt="luent logo" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg">
+
+</picture>
+  
 <p><a href='https://nextscript.org/getter-syntax'>tour</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
 </div>
 
