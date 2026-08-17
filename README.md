@@ -1,6 +1,30 @@
 <div align="center">
 <picture>
-  <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.png" alt="luent-logo"/>
+  <!-- <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.png" alt="luent-logo"/> -->
+  <svg
+   width="42.224327mm"
+   height="42.224361mm"
+   viewBox="0 0 42.224327 42.224361"
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><g
+     id="layer1"
+     transform="translate(-446.8216,624.67437)"><rect
+       style="opacity:1;fill:none;fill-opacity:0.984314;stroke:none;stroke-width:2.46665;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect54-3-4"
+       width="42.224342"
+       height="42.224342"
+       x="446.82159"
+       y="-624.67432" /><path
+       d="m 476.61211,-600.84153 c -1.01093,1.34008 -2.91917,1.60155 -4.26113,0.57929 l -0.008,-0.006 -4.23268,-3.22424 c -3.44546,-2.6246 -4.00623,-2.51792 -7.20273,-0.63115 l 7.48009,-4.4621 c 1.06001,-0.61446 2.38791,-0.52824 3.36827,0.21874 l -5.8e-4,-1.8e-4 c 0.01,0.007 0.0187,0.0137 0.0276,0.0208 l 4.22889,3.22137 0.004,0.004 c 1.3419,1.02219 1.60697,2.93933 0.59651,4.27961 z"
+       style="fill:var(--fgColor-default, var(--color-fg-default));fill-opacity:1;stroke-width:0.904643;stroke-linejoin:round"
+       id="path17-4-4-5-9-8-4-83-0-8-5-16-3-9-5-8" /><path
+       d="m 467.53803,-598.46768 -5.9e-4,10e-5 c -1.03264,1.33887 -2.94831,1.59295 -4.27827,0.56806 -3.29687,-2.50855 -3.55665,-2.7062 -6.58834,-0.91539 l 6.86938,-4.10317 c 0.0207,-0.0135 0.0431,-0.0264 0.0649,-0.0391 l 5.8e-4,0.005 c 1.07261,-0.62936 2.41462,-0.54845 3.39479,0.20474 1.32991,1.02502 1.57092,2.94105 0.5381,4.27968 z"
+       style="display:inline;fill:var(--fgColor-default, var(--color-fg-default));fill-opacity:1;stroke-width:0.904643;stroke-linejoin:round"
+       id="path11-5-4-7-4-2-8-8-6-6-1-5-4-4-5-9-5-4" /></g></svg>
 </picture>
 <p><a href='https://nextscript.org/getter-syntax'>tour</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
 </div>
