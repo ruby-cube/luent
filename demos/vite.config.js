@@ -20,6 +20,9 @@ export default defineConfig(async () => {
     plugins: [
       tailwindcss(),
       luent({ useWorkspace: true }),
-    ]
+    ],
+    define: {
+      __INTERNAL__: true
+    }
   }
 })

@@ -13,7 +13,7 @@ export function EmojiQuestDemo() {
   
   return (
     <>
-      <DemoContainer style='height: 460px'>
+      <DemoContainer style='height: 468px; padding: 28px'>
         {EmojiQuest()}
       </DemoContainer>
       <Code

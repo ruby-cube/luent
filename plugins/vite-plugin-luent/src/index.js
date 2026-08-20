@@ -25,6 +25,8 @@ export default function LuentPlugin(options = {}) {
           },
         },
         define: {
+          __INTERNAL__: false,
+          __TEST__: false,
           ...userConfig.resolve?.define ?? {},
           __DEV__: command !== 'build',
           __SSR__: !!ssrBuild
@@ -111,5 +113,5 @@ export default function LuentPlugin(options = {}) {
 }
 
 function composeList(item, existing) {
-  return ['item', ...existing.filter(c => c !== 'item')]
+  return [item, ...existing.filter(c => c !== item)]
 }

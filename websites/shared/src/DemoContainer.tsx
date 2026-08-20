@@ -48,7 +48,6 @@ export function DemoContainer(setup: FromTag<{
         .demo-container {
           position: relative;
           margin: 16px 0;
-          padding: 28px;
           min-height: 180px;
           border: 1px solid var(--vp-c-divider);
           border-radius: 12px;

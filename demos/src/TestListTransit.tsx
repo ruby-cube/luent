@@ -1,5 +1,4 @@
-import { component, template, For, FromTag, Style, css, $of } from "luent";
-import { ion, ionic, EACH, Ion, Ionic, atRender, queueTask } from "@luent/quarky";
+import { For, FromTag, Style, css, $of, ion, ionic, Ion, Ionic, awaiting, render, queueTask } from "luent";
 import './TestListTransit.css'
 
 // Modified Demo from Svelte
@@ -18,7 +17,7 @@ export function TestListTransit() {
     { id: 4, done: false, description: 'mow the lawn' },
     { id: 5, done: false, description: 'feed the turtle' },
     { id: 6, done: false, description: 'fix some bugs' }
-  ], { [EACH]: { '-as': ionic } }));
+  ], { '@each': { '-as': ionic } }));
 
   let uid = $todos().length + 1;
 
@@ -87,38 +86,38 @@ export function TestListTransit() {
 
 
 
-const sent = new Map()
+// const sent = new Map()
 
-function send(id: number, node: HTMLElement) {
-  const rect = node.getBoundingClientRect()
-  sent.set(id, rect)
-}
+// function send(id: number, node: HTMLElement) {
+//   const rect = node.getBoundingClientRect()
+//   sent.set(id, rect)
+// }
 
-function receive(id: number, node: HTMLElement) {
-  const first = sent.get(id)
-  if (first) {
-    const last = node.getBoundingClientRect()
-    atRender(() => {
-      const deltaY = first.top - last.top
-      const deltaX = first.left - last.left
-      if (deltaY || deltaX) {
-        node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
-        console.log('DELTA', 56)
-        requestAnimationFrame(() => {
-          queueTask(() => {
-            node.classList.add('transition-position')
-            node.style.setProperty('transform', `translate(${0}px, ${0}px)`)
-            node.addEventListener('transitionend', () => {
-              console.log('transition end')
-              node.classList.remove('transition-position')
-              node.style.removeProperty('transform')
-            })
-          })
-        })
-      }
-    })
-  }
-}
+// function receive(id: number, node: HTMLElement) {
+//   const first = sent.get(id)
+//   if (first) {
+//     const last = node.getBoundingClientRect()
+//     queueRender(() => {
+//       const deltaY = first.top - last.top
+//       const deltaX = first.left - last.left
+//       if (deltaY || deltaX) {
+//         node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
+//         console.log('DELTA', 56)
+//         requestAnimationFrame(() => {
+//           queueTask(() => {
+//             node.classList.add('transition-position')
+//             node.style.setProperty('transform', `translate(${0}px, ${0}px)`)
+//             node.addEventListener('transitionend', () => {
+//               console.log('transition end')
+//               node.classList.remove('transition-position')
+//               node.style.removeProperty('transform')
+//             })
+//           })
+//         })
+//       }
+//     })
+//   }
+// }
 
 
 

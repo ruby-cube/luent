@@ -48,7 +48,7 @@ export type Nested<T> = { [K in keyof T]: { '-as': (arg: any) => T[K] } }
 export type Ionic<T, M = {}> = T extends any[] ?
    Ionize<Expand<{
       [K in keyof T]: NestedType<K, M, T[K]>
-   } & Methods<M>>>
+   } & Methods<M>>> 
    : Ionize<Expand<Glass<{
       [K in keyof T]: NestedType<K, M, T[K]>
    } & Methods<M>>>>
@@ -56,10 +56,10 @@ export type Ionic<T, M = {}> = T extends any[] ?
 
 
 type NestedType<K, M, V> = K extends keyof M
-   ? M[K] extends { '-as': infer N } ? N extends { '~ionizer': true } ? Ionic<V> : N extends ((arg: any) => infer R) ? R : N
-   : V
+   ? M[K] extends { '-as': infer N } ? N extends { '~ionizer': true } ? Ionic<V> : N extends ((arg: any) => infer R) ? R : N 
+   : V 
    : K extends number
-   ? M extends { [EACH]: infer O }
+   ? M extends { '@each': infer O }
    ? O extends { '-as': infer N } ? N extends { '~ionizer': true } ? Ionic<V> : N extends (arg: any) => infer R ? R : N
    : V
    : V
@@ -77,7 +77,7 @@ export function as<T>(ionizer: T & ((data: any) => any)): { '-as': T } {
 
 export const INTERNAL_OP = "[[INTERNAL]]"
 
-export const EACH = Symbol('each')
+export const EACH = '@each'
 
 const ionicModels: WeakMap<AnyObject, QuarkyIonicProxy> = new WeakMap()
 
@@ -111,7 +111,7 @@ type IonicPropertyConfig<P = any> = {
    '@set'?: (value: P) => void // TODO: needs to be ReturnType of '-as' function if there is an as function
 }
 type IonicConfig<T> = { 
-   [EACH]?: IonicPropertyConfig<T extends (infer I)[] ? I : never> 
+   '@each'?: IonicPropertyConfig<T extends (infer I)[] ? I : never> 
    '-devName'?: string
 }
 
@@ -134,7 +134,7 @@ export function ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T 
    const proxy = createIonicModel(target, setup ?? {})
    ionicModels.set(target, proxy)
    return proxy as any
-}
+} 
 
 
 

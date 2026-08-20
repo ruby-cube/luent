@@ -1,5 +1,5 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@luent/utils";
-import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, atRender, untracked, watch, trackForRender, atInternalRender } from "@luent/quarky";
+import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, queueRender, untracked, watch, trackForRender, queueInternalRender } from "@luent/quarky";
 import { isComponentKit } from "@luent/nextscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@luent/flask";
@@ -160,7 +160,7 @@ class DynamicTextNode extends VineNode {
     this.nodes = [textNode]
     trackForRender($text, ({ current, previous, flask }) => {
       // if (current === previous) return;
-      atInternalRender(() => {
+      queueInternalRender(() => {
         textNode.data = toString($text());
       })
       //NOTE: We call the ion instead of using the current value passed in because, 

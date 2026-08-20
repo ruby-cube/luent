@@ -1,7 +1,7 @@
 import { For, listen, NodeRef, Style, css, $of } from "luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@luent/utils";
 import './style.css'
-import { ion, atRender, queueTask, EACH, ionic } from "@luent/quarky";
+import { ion, queueRender, queueTask, EACH, ionic } from "@luent/quarky";
 
 class ListItem {
   constructor(
@@ -70,7 +70,7 @@ export function TestListSelectTransition() {
 
     // temporary till Transition API implemented
     // const divs = [...itemDivs]
-    // atPrelude(() =>
+    // queuePrelude(() =>
     //    transitionExisting(divs)
     // )
   }
@@ -82,7 +82,7 @@ export function TestListSelectTransition() {
 
     // temporary till Transition API implemented
     // const divs = [...itemDivs]
-    // atPrelude(() =>
+    // queuePrelude(() =>
     //    transitionExisting(divs)
     // )
   }
@@ -91,7 +91,7 @@ export function TestListSelectTransition() {
     moveUniqueItems(selected, list, index)
 
     // temporary till Transition API implemented
-    // atPrelude(() =>
+    // queuePrelude(() =>
     //    transitionExisting(itemDivs)
     // )
   }
@@ -250,7 +250,7 @@ export function transitionExisting(itemDivs: HTMLElement[]) {
     nodes.push(node)
   }
 
-  atRender(() => {
+  queueRender(() => {
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i]
       const last = node.getBoundingClientRect()

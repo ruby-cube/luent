@@ -1,4 +1,4 @@
-import { isGetter, isIon, MutableIon, atRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, watch } from "@luent/quarky";
+import { isGetter, isIon, MutableIon, queueRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, watch } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 

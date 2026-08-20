@@ -1,5 +1,5 @@
 import { Flask, getFlask } from "@luent/flask";
-import { isGetter, atRender, RUN_EAGERLY, toValue, trackForRender, atInternalRender } from "@luent/quarky";
+import { isGetter, queueRender, RUN_EAGERLY, toValue, trackForRender, queueInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 
@@ -25,7 +25,7 @@ export function setAttribute(node: Element | null, key: string, value: any, flas
   if (isGetter(value)) {
     trackForRender(value, ({ current, previous }) => {
       // if (current === previous) return;
-      atInternalRender(() => {
+      queueInternalRender(() => {
         _setAttribute(node, key, toValue(value())) // normalize to value for mu getters
       })
     }, flask, RUN_EAGERLY)

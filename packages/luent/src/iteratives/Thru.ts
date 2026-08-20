@@ -1,4 +1,4 @@
-import { Ion, isGetter, atRender, trackForRender, toValue, atInternalRender } from "@luent/quarky";
+import { Ion, isGetter, queueRender, trackForRender, toValue, queueInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
@@ -52,7 +52,7 @@ export class ThruKit extends VineNode {
                   kits.push(kit)
                   mountDOMNodes(kit.nodes!, fragment)
                }
-               atInternalRender(() => {
+               queueInternalRender(() => {
                   // mount to fragment
                   mountFragment(fragment, kits[previous].precedingLeaf, this.parent)
                })
@@ -61,7 +61,7 @@ export class ThruKit extends VineNode {
                // delete indexes
                const removed = kits.splice(current, previous - current)
                for (const kit of removed) {
-                  atInternalRender(() => {
+                  queueInternalRender(() => {
                      removeDOMNodes(kit.nodes!)
                      kit.nodes = undefined;
                   })

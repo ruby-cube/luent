@@ -46,7 +46,7 @@ type MeanwhileKit = {
 // export function Await(renderResolved: RenderFunction | RawJSXNode): AwaitKit
 // export function Await(suspense: any | any[], renderResolved: RenderFunction | RawJSXNode): AwaitKit
 // export function Await(renderOrSuspense: [...any[], RenderFunction | RawJSXNode] | RenderFunction | any | any[], renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
-export function Await(...awaited: [...any[], RenderFunction | RawJSXNode]): AwaitKit {
+export function Await(...awaited: [...any[], RawJSXNode | (($suspense: SuspenseIon) => any | RawJSXNode)]): AwaitKit {
   const renderResolved = awaited.at(-1)
   if (!isFunction(renderResolved) || isIon(renderResolved)) throw new Error('INVALID Render function')
     const secondToLast = awaited.at(-2)
@@ -96,9 +96,9 @@ export function Await(...awaited: [...any[], RenderFunction | RawJSXNode]): Awai
    }
 }
 
-export function Meanwhile(renderPlaceholder: ((o: SuspenseIon) => RawJSXNode) | RawJSXNode): MeanwhileKit
-export function Meanwhile(options: { timeout: number }): MeanwhileKit
-export function Meanwhile(renderOrOptions: ((o: SuspenseIon) => RawJSXNode) | RawJSXNode | { timeout: number }, renderPlaceholder?: ((o: SuspenseIon) => RawJSXNode) | RawJSXNode | RawJSXNode): MeanwhileKit {
+export function _Meanwhile(renderPlaceholder: ((o: SuspenseIon) => RawJSXNode) | RawJSXNode): MeanwhileKit
+export function _Meanwhile(options: { timeout: number }): MeanwhileKit
+export function _Meanwhile(renderOrOptions: ((o: SuspenseIon) => RawJSXNode) | RawJSXNode | { timeout: number }, renderPlaceholder?: ((o: SuspenseIon) => RawJSXNode) | RawJSXNode | RawJSXNode): MeanwhileKit {
    const timeout = renderPlaceholder ? (<{ timeout: number }>renderOrOptions).timeout : undefined
    const render = (renderPlaceholder ? renderPlaceholder : renderOrOptions) as RenderFunction
    return {
@@ -107,12 +107,17 @@ export function Meanwhile(renderOrOptions: ((o: SuspenseIon) => RawJSXNode) | Ra
    }
 }
 
-export function Nonce(renderPlaceholder: any) {
-   return Meanwhile(o => {
+export function Meanwhile(renderPlaceholder: any) {
+   return _Meanwhile(o => {
       return o.initial && renderPlaceholder()
    })
 }
 
+export function Twiddle(renderPlaceholder: any) {
+   return _Meanwhile(o => {
+      return !o.initial && renderPlaceholder()
+   })
+}
 
 // const getAwaitStack = defineAppwide('awaitStack', () => [] as { promises: Promise<any>[], $promises: Ion<Promise<unknown> | null>[] }[])
 

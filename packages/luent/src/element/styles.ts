@@ -1,7 +1,7 @@
 import { AnyObject, Booleanny } from "@luent/types";
 import { MaybeIon } from "../component/bindings-types";
 import { Flask, getFlask } from "@luent/flask";
-import { Ion, isGetter, atRender, RUN_EAGERLY, trackForRender, atInternalRender } from "@luent/quarky";
+import { Ion, isGetter, queueRender, RUN_EAGERLY, trackForRender, queueInternalRender } from "@luent/quarky";
 import { camelToKebabCase, isFunction, isObject, isString } from "@luent/utils";
 import { ContextKey } from "../context/ContextKey";
 import { fromRoot } from "../context/provide";
@@ -21,7 +21,7 @@ export function setUpMicroclasses(node: Element, classes: TagClass[]) {
   if (isGetter(microclasses)) {
     trackForRender(microclasses, ({ previous }/* newState: ReactiveClasses | string | Falsey, oldState: ReactiveClasses | string | Falsey */) => {
       // if (current === previous) return;
-      atInternalRender(() => {
+      queueInternalRender(() => {
         const current = microclasses()
         if (previous) removePreviousClasses(previous, classList)
         if (current) setUpClassesFromString(current, classList)
@@ -138,7 +138,7 @@ function setUpClassesFromArray(entries: TagClass[], classList: DOMTokenList, fla
     if (isGetter(entry)) {
       trackForRender(entry, ({ current, previous }/* newState: ReactiveClasses | string | Falsey, oldState: ReactiveClasses | string | Falsey */) => {
         // if (current === previous) return;
-        atInternalRender(() => {
+        queueInternalRender(() => {
           if (previous) removePreviousClasses(previous, classList)
           if (entry()) addClasses(entry(), classList, flask)
         })
@@ -156,7 +156,7 @@ function setUpClassesFromObject(entry: ReactiveClasses, classList: DOMTokenList,
     if (isGetter(value)) {
       trackForRender(value, ({ current, previous }) => {
         // if (current === previous) return
-        atInternalRender(() => {
+        queueInternalRender(() => {
           if (value()) classList.add(key)
           else if (previous) classList.remove(key)
         })
@@ -186,7 +186,7 @@ export function setUpConditionalDisplay(node: { style: CSSStyleDeclaration }, $s
   trackForRender($show, ({ flask, current: shouldShow, previous, eagerRun }) => {
     if (!eagerRun && shouldShow === previous) return;
     if (shouldShow) {
-      atInternalRender(() => {
+      queueInternalRender(() => {
         if (!display) {
           node.style.removeProperty('display');
         }
@@ -197,7 +197,7 @@ export function setUpConditionalDisplay(node: { style: CSSStyleDeclaration }, $s
     }
     else {
       display = node.style.display
-      atInternalRender(() => {
+      queueInternalRender(() => {
         node.style.display = 'none'
       })
     }
@@ -212,7 +212,7 @@ export function setUpStyles(node: Element, styles: TagStyle[]) {
     if (isGetter(entry)) {
       trackForRender(entry, ({ current, previous }) => {
         // if (current === previous) return;
-        atInternalRender(() => {
+        queueInternalRender(() => {
           setUpStyleEntry(style, entry(), flask);
         })
       }, flask, RUN_EAGERLY)
@@ -229,7 +229,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
       const value = entry[key] as MaybeIon<string | number | Falsey>;
       if (isGetter(value)) {
         trackForRender(value, () => {
-          atInternalRender(() => {
+          queueInternalRender(() => {
             assignStyleProperty(style, toStylePropertyName(key), value())
           })
         }, flask, RUN_EAGERLY)

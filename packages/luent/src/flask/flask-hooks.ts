@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@luent/flask";
-import { atRender, atTick } from "@luent/quarky";
+import { queueRender, awaitTick } from "@luent/quarky";
 
 
 export function beforeMount(task: () => void) {
@@ -16,32 +16,32 @@ export function beforeAttach(task: (initial: boolean) => void) {
 
 export function atMount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onInitialMount(() => { atRender(contextTask) });
+   getFlask().onInitialMount(() => { queueRender(contextTask) });
 }
 export function atRemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onRemount(() => { atRender(contextTask) });
+   getFlask().onRemount(() => { queueRender(contextTask) });
 }
 
 export function atAttach(task: (initial: boolean) => void) {
    const context = $_snap_context()
-   getFlask().onInitialMount(() => { atRender(() => $_run_with_(context, () => task(true))) });
-   getFlask().onRemount(() => { atRender(() => $_run_with_(context, () => task(false))) });
+   getFlask().onInitialMount(() => { queueRender(() => $_run_with_(context, () => task(true))) });
+   getFlask().onRemount(() => { queueRender(() => $_run_with_(context, () => task(false))) });
 }
 
 export function afterMount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onInitialMount(() => { atTick(contextTask) });
+   getFlask().onInitialMount(() => { awaitTick(contextTask) });
 }
 export function afterRemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onRemount(() => { atTick(contextTask) });
+   getFlask().onRemount(() => { awaitTick(contextTask) });
 }
 
 export function afterAttach(task: (initial: boolean) => void) {
    const context = $_snap_context()
-   getFlask().onInitialMount(() => { atTick(() => $_run_with_(context, () => task(true))) });
-   getFlask().onRemount(() => { atTick(() => $_run_with_(context, () => task(false))) });
+   getFlask().onInitialMount(() => { awaitTick(() => $_run_with_(context, () => task(true))) });
+   getFlask().onRemount(() => { awaitTick(() => $_run_with_(context, () => task(false))) });
 }
 
 
@@ -62,37 +62,37 @@ export function beforeDetach(task: (final: boolean) => void) {
 
 export function atUnmount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDiscard(() => { atRender(contextTask) });
+   getFlask().onDiscard(() => { queueRender(contextTask) });
 }
 
 export function atDemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDemount(() => { atRender(contextTask) });
+   getFlask().onDemount(() => { queueRender(contextTask) });
 }
 
 export function atDetach(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
 
-   getFlask().onDiscard(() => { atRender(discardTask) });
-   getFlask().onDemount(() => { atRender(demountTask) });
+   getFlask().onDiscard(() => { queueRender(discardTask) });
+   getFlask().onDemount(() => { queueRender(demountTask) });
 }
 
 export function afterUnmount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDiscard(() => { atTick(contextTask) });
+   getFlask().onDiscard(() => { awaitTick(contextTask) });
 }
 
 export function afterDemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDemount(() => { atTick(contextTask) });
+   getFlask().onDemount(() => { awaitTick(contextTask) });
 }
 
 export function afterDetach(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
-   getFlask().onDiscard(() => { atTick(discardTask) });
-   getFlask().onDemount(() => { atTick(demountTask) });
+   getFlask().onDiscard(() => { awaitTick(discardTask) });
+   getFlask().onDemount(() => { awaitTick(demountTask) });
 }
 
 

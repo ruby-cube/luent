@@ -1,4 +1,4 @@
-import { For, If, listen, NodeRef, $of, track, ionicTickTask, Ion, Ionic, EACH, ionic, ion } from "luent"
+import { For, If, listen, NodeRef, $of, track, ionicTick, Ion, Ionic, ionic, ion, FromTag } from "luent"
 
 interface Todo {
   id: number
@@ -10,20 +10,24 @@ type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 type FilterKeys = 'all' | 'active' | 'completed'
 
-type IonicTodo = Ionic<Todo>
+// const ionicTodos = (todos: Ionic<Todo>[]) => ionic(todos)
+const ionicTodos = (todos: Todo[]) => ionic(todos, { '@each': { '-as': ionic } });
 
-const ionicTodos = (todos: Todo[]) => ionic(todos, { [EACH]: { '-as': ionic } })
 
 
 export function TodoMVC() {
-
   const $todos = ion(ionicTodos(getTodos()))
   const $view = ion('all' as keyof typeof filters)
 
+
+  track($todos, () => {
+    console.log('$todos', $todos())
+  }, { eager: true })
+
   const filters = {
     all: (todos: Todo[]) => todos,
-    active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
-    completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
+    active: (todos: Todo[]) => ionic(todos.filter(todo => !todo.completed)),
+    completed: (todos: Todo[]) => ionic(todos.filter(todo => todo.completed))
   }
 
   const $filteredTodos = ion(() => ionicTodos(filters[$view()]($todos())))
@@ -48,7 +52,7 @@ export function TodoMVC() {
   function getTodos(): Todo[] {
     const STORAGE_KEY = 'vue-todomvc'
 
-    ionicTickTask(() => {
+    ionicTick(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
     })
 
@@ -117,7 +121,7 @@ export function TodoMVC() {
         </header>
         <section class="main">
           {ToggleAllButton()}
-          <TodoList ref={$todoList} at:attach={node => node} todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
+          <TodoList ref={$todoList} todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
         </section>
         <footer display-if={$todoCount} class="footer">
           {RemainingCount()}
@@ -132,7 +136,7 @@ export function TodoMVC() {
               <a href="#/completed" class={() => ($view() === 'completed' && 'selected')}>Completed</a>
             </li>
           </ul>
-          <button display-if={() => ($todoCount() > $remaining())} class="clear-completed" on:click={removeCompleted}>
+          <button display-if={() => $todoCount() > $remaining()} class="clear-completed" on:click={removeCompleted}>
             Clear completed
           </button>
         </footer>
@@ -146,7 +150,10 @@ export function TodoMVC() {
 @import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
 </style> */}
 
-function TodoInput({ addTodo }: { addTodo: (title: string) => void }) {
+function TodoInput(setup: FromTag<{
+  addTodo: (title: string) => void
+}>) {
+  const { addTodo } = setup;
 
   function submitTodo(e: InputEvent) {
     const value = e.target.value.trim()
@@ -169,10 +176,11 @@ function TodoInput({ addTodo }: { addTodo: (title: string) => void }) {
 
 
 
-function TodoList({ $todos, removeTodo }: {
-  todos: Ion<Ionic<Ionic<Todo>[]>>,
+function TodoList(setup: FromTag<{
+  todos: Ion<Ionic<Ionic<Todo>[]>>, // Ion<Todo^[]^>
   removeTodo: (todo: Ionic<Todo>) => void
-}) {
+}>) {
+  const { $todos, removeTodo } = setup;
 
   const $editedTodo = ion(null as Todo | null)
 
@@ -184,7 +192,7 @@ function TodoList({ $todos, removeTodo }: {
     $editedTodo.value = todo
   }
 
-  function cancelEdit(todo: Todo) {
+  function cancelEdit(todo: Ionic<Todo>) {
     $editedTodo.value = null
     todo.title = beforeEditCache
   }
@@ -203,9 +211,9 @@ function TodoList({ $todos, removeTodo }: {
   return (
 
     <ul class="todo-list">
-      {For($todos, m => m.id, (todo: Ionic<Todo>) => {
+      {For($todos, m => m.id, (todo) => {
         const $isEditing = ion(() => todo === $editedTodo());
-        return (
+        return <>
           <li class={['todo', { 'completed': () => todo.completed, 'editing': $isEditing }]}>
             <div class="view">
               <input class="toggle" type="checkbox" mu:checked={$of(todo).completed} />
@@ -223,7 +231,7 @@ function TodoList({ $todos, removeTodo }: {
               />
             )}
           </li>
-        )
+        </>
       })}
     </ul>
   )

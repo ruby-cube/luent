@@ -77,7 +77,7 @@ export function ionicLayout(task: IonicTask, options?: IonicTaskOptions) {
 //    return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
 // }
 
-export function ionicTickTask(task: IonicTask, options?: IonicTaskOptions) {
+export function ionicTick(task: IonicTask, options?: IonicTaskOptions) {
    return _queueIonicTask(task, { ...options ?? {}, phase: TICK })
 }
 

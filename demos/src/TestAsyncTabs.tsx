@@ -1,13 +1,7 @@
-import { Ion, ion, getActiveUpdate, Ionic, load, getAwaiting, $suspense, SuspenseIon, ionic } from "@luent/quarky";
 import "./TestAsyncTabs.css";
-import { component, Await, Meanwhile, ElseIf, FromTag, Case, Default, For, atAttach, Match, If } from "luent";
-import { As } from "../../../packages/luent/src/conditional/As";
+import { Ion, ion, ionic, Await, Meanwhile, Default, For, As, FromTag } from "luent";
 
 // Modified Demo from Solid.js 
-
-function Loading() {
-  return 'loading...'
-}
 
 export function TestAsyncTabs() {
   const tabNames = ['Un', 'Deux', 'Trois', 'Quatre', 'Cinq', 'Six'] as const
@@ -33,16 +27,14 @@ export function TestAsyncTabs() {
     openTabs.splice(openTabs.indexOf(tab), 1)
   }
 
-  // setInterval(() => {
-  //    $count.value++
-  // }, 1000)
-
-  // const $tabSuspense = SuspenseIon()
+  setInterval(() => {
+     $count.value++
+  }, 1000)
 
   return <>
     <ul class="inline">
       {For(allTabs, m => m, tab => (
-        <li class={($tab() === tab && 'selected')} on:click={e => { openTab(tab) }}>
+        <li class={() => $tab() === tab && 'selected'} on:click={e => { openTab(tab) }}>
           {tabNames[tab]}
         </li>
       ))}
@@ -50,7 +42,7 @@ export function TestAsyncTabs() {
     <hr></hr>
     <ul class="inline">
       {For(openTabs, m => m, tab => (
-        <li class={($tab() === tab && 'selected')} on:click={e => { !e.from('span') && ($tab.value = tab) }}>
+        <li class={() => $tab() === tab && 'selected'} on:click={e => { !e.from('span') && ($tab.value = tab) }}>
           {tabNames[tab]}
           <span style="padding: 1em" on:click={e => closeTab(tab)}>x</span>
         </li>
@@ -58,21 +50,21 @@ export function TestAsyncTabs() {
     </ul>
 
     {Await($suspense =>
-      <div class={(`tab ${$suspense() && 'pending'}`)}>
+      <div class={() => `tab ${$suspense() && 'pending'}`}>
         <o:preserve>
-          {As($tab, view => (
+          {As($tab, view => 
             <div before:attach={() => tabViews[$tab()] = view}>
               <Tab page={tabNames[$tab()]} count={$count} />
             </div>
-          ))}
+          )}
           {Default(
             <div>No tabs open</div>
           )}
         </o:preserve>
       </div>
     )}
-    {Meanwhile(o => o.initial &&
-      <Loading></Loading>
+    {Meanwhile(
+      <>loading...</>
     )}
   </>
 };
@@ -83,16 +75,16 @@ export function TestAsyncTabs() {
 const CONTENT = {
   Un: `All by myself... 😭`,
   Deux: `Two peas in a pod 🤢🤢`,
-  Trois: `🙈 🙉 🙊\n ...no evil`,
+  Trois: `🙈 🙉 🙊 ...no evil`,
   Quatre: `🌸 🌺 🍄 🍀`,
-  Cinq: `fall colors\n🌾 🌰 🍂 🐌 🍁`,
+  Cinq: `🌾 🌰 🍂 🐌 🍁`,
   Six: `🎲`
 };
 
-function Tab(input: {
+function Tab(input: FromTag<{
   page: keyof typeof CONTENT,
   count: Ion<number>
-}) {
+}>) {
   const { page, $count } = input
 
   const $localCount = ion(0, {
@@ -109,7 +101,7 @@ function Tab(input: {
   return <>
     <div class="tab-content">
       <p style="font-size: xx-large">{CONTENT[page]}</p>
-      This content is for page "{page}" after {($time()?.toFixed())}ms.
+      This content is for page "{page}" after {() => $time()?.toFixed()}ms.
       <h3>{$count}</h3>
       <h3>{$localCount}</h3>
       <button on:click={e => $localCount.increment()}>+</button>

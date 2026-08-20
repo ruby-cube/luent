@@ -2,7 +2,7 @@ import { beforeUnmount, beforeDetach, atMount } from "../flask/flask-hooks";
 import { writeToPortal } from "../server/portals";
 import { isTransitioningOut } from "../transitions/transitions";
 import { Flask, getFlask } from "@luent/flask";
-import { atRender, atTick, queueTask } from "@luent/quarky";
+import { queueRender, awaitTick, queueTask } from "@luent/quarky";
 import { inShadow } from "./shadow";
 // import { createHash } from "node:crypto";
 
@@ -80,7 +80,7 @@ export function Style(cssText: string) {
     shadow.appendChild(style)
     return;
   }
-  atMount(() => { // QUESTION: Why do things break when this is atRender instead of atMount?
+  atMount(() => { // QUESTION: Why do things break when this is queueRender instead of atMount?
     const existing = document.querySelector('#' + id)
     if (existing) {
       return;

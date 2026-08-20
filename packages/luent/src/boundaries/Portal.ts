@@ -3,7 +3,7 @@ import { isFunction, isObject, normalizeToArray } from "@luent/utils";
 import { atAttach, beforeDetach, atRemount, atDetach } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@luent/flask";
-import { atInternalRender, atRender } from "@luent/quarky";
+import { queueInternalRender, queueRender } from "@luent/quarky";
 import { AnyObject } from "@luent/types";
 import { setUpElement } from "../element/setUpElement";
 
@@ -60,7 +60,7 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
   setUpNodeVine(nodes, element)
   const flask = getFlask()
 
-  atInternalRender(() => {
+  queueInternalRender(() => {
     mountDOMNodes(nodes, element)
   })
 

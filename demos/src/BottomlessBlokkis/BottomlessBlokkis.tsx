@@ -1,4 +1,4 @@
-import { beforeUnmount, ionic, ion, Ionic , As } from "luent";
+import { beforeUnmount, ionic, ion, Ionic, As } from "luent";
 import { Blokk, CELL_SIZE } from "./Blokk";
 import { BlokkModel, makeBlokk, Rotation } from "./makeBlokk";
 import './BottomlessBlokkis.css'
@@ -92,18 +92,18 @@ export function BottomlessBlokkis() {
       <div
         class='board'
         style={`
-                    --board-columns: ${BOARD_COLUMNS};
-                    --board-rows: ${BOARD_ROWS};
-                    --cell-size: ${CELL_SIZE}px;
-                `}
+          --board-columns: ${BOARD_COLUMNS};
+          --board-rows: ${BOARD_ROWS};
+          --cell-size: ${CELL_SIZE}px;
+        `}
       >
         {As($blokk,
           <Blokk
             before:mount={dropBlock}
             matrix={$blokk()!.matrix}
-            shiftX={() =>$blokk()!.shiftX}
-            shiftY={()=>$blokk()!.shiftY}
-            rotation={()=>$blokk()!.rotation}
+            shiftX={() => $blokk()!.shiftX}
+            shiftY={() => $blokk()!.shiftY}
+            rotation={() => $blokk()!.rotation}
 
             color={$blokkColor}
             gap={1}

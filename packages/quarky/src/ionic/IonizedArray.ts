@@ -1,4 +1,4 @@
-import { ionic, EACH, INTERNAL_OP, Ionic, IonicProxy, IonizeBy, ToRaw } from "./Ionic";
+import { ionic, EACH, INTERNAL_OP, IonizeBy, ToRaw } from "./Ionic";
 import { defineIonicCollection } from "./IonicDef";
 import { isIonicProxy, toRaw } from "./IonicModel";
 import type { ProxyKey, triggerOp } from "./ModelQuark";
@@ -230,7 +230,7 @@ defineIonicCollection(Array, {
    }
 })
 
-export function isIonizedArray(target: any): target is IonicProxy {
+export function isIonizedArray(target: any) {
    if (!isIonicProxy(target)) return false;
    if (Array.isArray(toRaw(target))) return true;
    return false;

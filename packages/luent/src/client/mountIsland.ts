@@ -3,7 +3,7 @@ import { AnyObject } from "@luent/types";
 import { createRootContext } from "../context/provide";
 import { popContext, pushContext } from "../context/context-stack";
 import { Flask, flaskStack } from "@luent/flask";
-import { load, atInternalRender } from "@luent/quarky";
+import { load, queueInternalRender } from "@luent/quarky";
 import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { RenderFunction } from "../node/makeJSXNode";
 
@@ -18,7 +18,7 @@ export function mountIsland<T extends AnyObject>(App: ComponentTag<T> | RenderFu
     try {
       const nodes = processJSXOutput(App())
       setUpNodeVine(nodes, root)
-      atInternalRender(() => {
+      queueInternalRender(() => {
         mountDOMNodes(nodes, root)
       })
       flask.emitInitialMount()

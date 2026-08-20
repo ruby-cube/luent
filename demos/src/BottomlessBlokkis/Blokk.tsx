@@ -23,17 +23,17 @@ export function Blokk(setup: FromTag<{
 
   return (
 
-    <div class='blokk-base' style={()=>(`
+    <div class='blokk-base' style={() => `
         --background-color: ${$color()};
         --cell-size: ${CELL_SIZE}px;
         --grid-size: ${GRID_SIZE}px;
         --grid-gap: ${gap}px;
         transform: ${$translate()} ${$rotate()};
-      `)}
+      `}
     >
       {For(matrix, row =>
         For(row, col => (
-          <div 
+          <div
             class={`blokk-cell ${col ? 'filled' : ''}`}
             auto-bind={col ? rest : undefined}
           ></div>

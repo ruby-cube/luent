@@ -1,4 +1,4 @@
-import { getActiveUpdate, atRender, queueTask, toValue } from "@luent/quarky";
+import { getActiveUpdate, queueRender, queueTask, toValue } from "@luent/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/bindings-types";
@@ -8,7 +8,7 @@ import { atAttach, beforeDetach } from "../flask/flask-hooks";
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
   atListChanged(() => {
     const first = node.getBoundingClientRect()
-    atRender(() => {
+    queueRender(() => {
       const last = node.getBoundingClientRect()
       startTransitionItem(node, first, last, toClassNames(toValue(transitionClasses)))
     })

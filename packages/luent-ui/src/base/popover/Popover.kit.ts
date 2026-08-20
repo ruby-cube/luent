@@ -1,5 +1,5 @@
 import { autoUpdate, computePosition } from "@floating-ui/dom"
-import { beforeUnmount, NodeRef, awaiting, toValue, layout } from "luent"
+import { beforeUnmount, NodeRef, awaiting, toValue, queueLayout } from "luent"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
 export type Alignment = 'start' | 'center' | 'end'
@@ -70,7 +70,7 @@ export class Popover {
 }
 
 export function maybeFlip(node: HTMLElement, popover: Popover) {
-  awaiting(layout, () => {
+  queueLayout(() => {
     const rect = node.getBoundingClientRect()
     const container = getContainer(popover)
     const bound = container?.getBoundingClientRect()

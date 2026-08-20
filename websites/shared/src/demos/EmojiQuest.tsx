@@ -257,7 +257,7 @@ function Powerset(setup: FromTag<{
 
 EmojiQuest.nsx =
   `import { ionic } from "luent";
-import { Panel } from "../components/Panel"
+import { Panel } from "./Panel"
 
 function EmojiQuest() {
   const powers = ['🍀', '🍄', '✨', '🔥', '🔮', '🪵'] as const
@@ -282,7 +282,7 @@ function EmojiQuest() {
 
 EmojiQuest.tsx =
   `import { ionic } from "luent";
-import { Panel } from "../components/Panel"
+import { Panel } from "./Panel"
 
 function EmojiQuest() {
   const powers = ['🍀', '🍄', '✨', '🔥', '🔮', '🪵'] as const

@@ -19,12 +19,12 @@ The API reference is still being written. In the meantime, here is a overview of
 
 #### Secondary reactivity
 - `ionize()` to create an ion of an ionic structure
-- `ionicSyncTask()` to track a synchronous ionic task 
-- `ionicPreludeTask()` to track an ionic prelude phase task 
-- `ionicRenderTask()` to track an ionic render phase task 
-- `ionicLayoutTask()` to track an ionic layout phase task 
-- `ionicTickTask()` to track an ionic tick phase task 
-- `Finitron()` to create finite reactive state
+- `ionicCall()` to track a synchronous ionic task 
+- `ionicPrelude()` to track an ionic prelude phase task 
+- `ionicRender()` to track an ionic render phase task 
+- `ionicLayout()` to track an ionic layout phase task 
+- `ionicTick()` to track an ionic tick phase task 
+- `Finitron()` to create a finite reactive state machine
 
 ## Context binding
 - `FromTag` to type tag bindings
@@ -64,7 +64,7 @@ Flow functions are called within JSX to direct the control flow of view renderin
 - `As`/`Default`
 - `For`/`Empty`
 - `Thru`
-- `Await`/`Meanwhile`/`Catch`
+- `Await`/`Meanwhile`/`Twiddle`/`Catch`
 - `Try`/`Catch`
 
 ## Orbital tags
@@ -104,10 +104,10 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `ooo` for async sequences that preserve context
 
 ## Render cycle phases
-- `prelude` before update is rendered to DOM
-- `render` for DOM manipulation tasks
-- `layout` for DOM layout reading tasks
-- `tick` after update is painted to the DOM
+- `queuePrelude` to queue a task for before update is rendered to DOM
+- `queueRender` for DOM manipulation tasks
+- `queueLayout` for DOM layout reading tasks
+- `awaitTick` to schedule a task for after update is painted to the DOM
 
 #### Lifecycle hook prefixes
 - `before` lifecycle hook prefix for before render phase

@@ -1,4 +1,4 @@
-import { atRender, queueTask, toValue } from "@luent/quarky"
+import { queueRender, queueTask, toValue } from "@luent/quarky"
 import { MaybeIon } from "../component/bindings-types"
 import { atAttach, atUnmount, beforeDetach } from "../flask/flask-hooks"
 import { setUpPositionTransition, setUpTransit } from "./transit"
@@ -113,7 +113,7 @@ function useTransitionPosition() {
 
 function insertCSSRule(name: string, rule: string) {
   const style = useTransitionStyleElement()
-  atRender(() => {
+  queueRender(() => {
     const stylesheet = style.sheet
     if (!stylesheet) throw new Error('style element not attached to DOM')
     stylesheet.insertRule(`${name} { ${rule} }`, stylesheet.cssRules.length)
@@ -433,7 +433,7 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
   positionClone(clone, node)
   clone.style.removeProperty('visibility')
 
-  atRender(() => {
+  queueRender(() => {
     const transition = createTransition(clone)
     transition.start()
 
@@ -458,7 +458,7 @@ function transitionOut(node: HTMLElement, createTransition: (clone: HTMLElement)
 //   // - position clone
 //   awaiting(positionClone(clone, node), () => {
 
-//     atRender(() => {
+//     queueRender(() => {
 //       const transition = createTransition(clone)
 //       transition.start()
 

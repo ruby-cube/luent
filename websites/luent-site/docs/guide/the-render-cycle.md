@@ -55,24 +55,20 @@ Because synchronous reactions run immediately, excessive work in this phase may 
 The prelude phase runs before rendering begins. It is for synchronizing data needed by the upcoming render.
 
 ```tsx
-track(
-  $documents,
-  () => {
-    searchIndex.update($documents());
-  },
-  { phase: PRELUDE },
-);
+track($documents, () => {
+  searchIndex.update($documents());
+}, { phase: PRELUDE });
 ```
 
-```nsx
+<!-- ```nsx
 async {
   await prelude...:
     preloadUserProfile(userID)
 }
-```
+``` -->
 
 ```tsx
-awaiting(prelude, () => {
+queuePrelude(() => {
   preloadUserProfile($userId());
 });
 ```
@@ -96,7 +92,7 @@ ionicRender(() => {
 ```
 
 ```tsx
-awaiting(render, () => {
+queueRender(() => {
   const el = $panel();
   if (el) el.style.opacity = "1";
 });
@@ -107,7 +103,7 @@ awaiting(render, () => {
 The layout phase runs after the render phase. It is for layout-dependent reads such as element measurements, scroll positions, and geometry calculations. Batching layout reads separately from DOM writes helps reduce layout thrashing and allows measurements to reflect the latest rendered state.
 
 ```tsx
-awaiting(layout, () => {
+queueLayout(() => {
   const height = $panel()?.getBoundingClientRect().height;
 
   if (height != null) {
@@ -123,7 +119,7 @@ The tick phase runs after update-cycle work has completed and the update has bee
 Because the tick phase occurs after rendering completes, it does not delay visual updates.
 
 ```tsx
-awaiting(tick, () => {
+awaitTick(() => {
   saveDraft($form());
 });
 ```
@@ -134,20 +130,20 @@ awaiting(tick, () => {
 <span class='doc-tag'>Experimental</span>
 </div>
 
-Tasks are scheduled for phases of the current render cycle with the following promises:
+<!-- Tasks are scheduled for phases of the current render cycle with the following promises:
 
 - `prelude`
 - `render`
 - `layout`
-- `tick`
+- `tick` -->
 
 ```tsx
 function ChatApp() {
   // subscribe to stuff
-  awaiting(layout, () => {
+  queueLayout(() => {
     // measure layout
   })
-  awaiting(render, () => {
+  queueRender(() => {
     // manipulate DOM
   })
   atUnmount(() => {
@@ -165,10 +161,10 @@ function ChatApp() {
   // subscribe to stuff
 
   beforeMount(() => {
-    awaiting(layout, () => {
+    queueLayout(() => {
       // measure layout
     })
-    awaiting(render, () => {
+    queueRender(() => {
       // manipulate DOM
     })
   })
@@ -183,7 +179,7 @@ function ChatApp() {
 }
 ```
 
-If you prefer `async/await` syntax, there are a few limitations:
+<!-- If you prefer `async/await` syntax, there are a few limitations:
 -  
 
 ```tsx
@@ -205,7 +201,7 @@ function ChatApp() {
     {/* view */}
   </>
 }
-```
+``` -->
 
 <!-- - `queueTask(task)`
 
@@ -240,7 +236,7 @@ track(
 Ionic tasks run during the specified phase and automatically re-run when their tracked ions change state.
 
 - `ionicSyncTask()` for synchronous tasks
-- `ionicPreludeTask()` for prelude phase tasks
+- `ionicPrelude()` for prelude phase tasks
 - `ionicRenderTask()` for render phase tasks
-- `ionicLayoutTask()` for layout phase tasks
-- `ionicTickTask()` for tick phase tasks
+- `ionicLayout()` for layout phase tasks
+- `ionicTick()` for tick phase tasks

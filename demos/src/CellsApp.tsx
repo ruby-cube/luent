@@ -1,5 +1,4 @@
-import { For, Style, css, If, Else, Thru } from "luent"
-import { Ion, ion } from "@luent/quarky"
+import { For, Style, css, If, Else, Thru, Ion, ion } from "luent"
 
 // Modified Demo from Vue.js
 // barebones cells app

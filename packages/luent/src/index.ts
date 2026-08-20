@@ -4,11 +4,11 @@ export {
   watch as track,
   ionize,
 
-  ionicTickTask,
-  ionicLayout as ionicLayoutTask,
-  ionicPrelude as ionicPreludeTask,
-  ionicRender as ionicRenderTask,
-  runIonicTask as ionicSyncTask,
+  ionicTick,
+  ionicLayout,
+  ionicPrelude,
+  ionicRender,
+  runIonicTask as ionicCall,
 
   Finitron,
 
@@ -34,22 +34,17 @@ export {
   // o,
   // ooo,
   // swiftUpdate,
-  
+
   toRaw,
   toIon,
   toValue,
 
   queueTask,
 
-  // atLayout,
-  // atPrelude,
-  // atRender,
-  // atTick,
-
-  layout,
-  prelude,
-  render,
-  tick
+  queueLayout,
+  queuePrelude,
+  queueRender,
+  awaitTick
 } from '@luent/quarky'
 export { isMutableIon } from './element/mutables'
 export type { Nested, Ion, Ionic, MutableIon } from '@luent/quarky'
@@ -77,7 +72,7 @@ export { awaiting } from './async/awaiting'
 // export * from './events/target'
 // export * from './events/listen'
 // export * from './events/Abortable'
-export {Try, Catch} from './boundaries/Try'
+
 // export * from './utils/destructure'
 // export * from './flask/flask-hooks'
 // export * from './flask/ViewFlask'
@@ -95,27 +90,28 @@ export { writeIsland } from './server/writeHTML'
 export { withIslands } from './server/writeIslands'
 export { css, Style } from './component/Style'
 export { setUpElement } from './element/setUpElement'
-export { 
-  $fromContext, 
-  fromContext, 
-  fromRoot, 
-  fromGround, 
-  provideRoot, 
-  provideGround 
+export {
+  $fromContext,
+  fromContext,
+  fromRoot,
+  fromGround,
+  provideRoot,
+  provideGround
 } from './context/provide'
 export { Context } from './context/Context'
-export { 
-  ContextKey, 
-  mergeKeys 
+export {
+  ContextKey,
+  mergeKeys
 } from './context/ContextKey'
 export { listen } from './events/listen'
-export { Await, Meanwhile } from './boundaries/Await'
+export { Await, Meanwhile, Twiddle } from './boundaries/Await'
 export { Portal } from './boundaries/Portal'
 export { For } from './iteratives/For'
 export { Thru } from './iteratives/Thru'
 export { If, Else, ElseIf } from './conditional/If'
 export { Match, Case, Default } from './conditional/MatchCase'
 export { As } from './conditional/As'
+export { Try, Catch } from './boundaries/Try'
 export {
   beforeMount,
   atMount,

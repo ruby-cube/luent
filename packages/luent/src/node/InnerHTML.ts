@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, atRender, RUN_EAGERLY, atInternalRender } from "@luent/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, queueRender, RUN_EAGERLY, queueInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { DOMParent } from "./VineNode";
 import { getFlask } from "@luent/flask";
@@ -13,7 +13,7 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: DOMParent) {
   const { trusted, html } = kit;
   if (isGetter(html)) {
     trackForRender(html, () => {
-      atInternalRender(() => {
+      queueInternalRender(() => {
         setInnerHTML(html(), trusted, parentNode)
       })
     }, getFlask(), true);

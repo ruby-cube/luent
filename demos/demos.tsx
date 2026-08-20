@@ -56,9 +56,11 @@ export function runDemo() {
     provideRoot(MICROCLASS_MERGE, twMerge);
 
     return <>
-      <span aria-hidden="true"></span>
+      {/* <TestAsyncTabs></TestAsyncTabs> */}
       {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
-      <BottomlessBlokkis></BottomlessBlokkis>
+      {/* <BottomlessBlokkis></BottomlessBlokkis> */}
+      {/* <TodoMVC></TodoMVC> */}
+      <TestAsyncSelect/>
     </>
     // return <TestInnerHTML/>
   }, '#root')

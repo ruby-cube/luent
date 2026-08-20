@@ -39,7 +39,7 @@ export { toRaw } from "./ionic/IonicModel"
 // } from "./reactivity/Watcher"
 // export {
 // 	queueTask,
-// 	atRender,
+// 	queueRender,
 // 	PRELUDE,
 // 	SYNC,
 // } from "./reactivity/RenderCycle"
@@ -49,7 +49,7 @@ export { toRaw } from "./ionic/IonicModel"
 // 	swiftUpdate,
 // 	load,
 // } from "./reactivity/Update"
-// export { ionicTickTask } from "./reactivity/IonicTask"
+// export { ionicTick } from "./reactivity/IonicTask"
 // export {
 // 	Animation,
 // 	Interval,

@@ -28,7 +28,7 @@ export function toRaw<T>(obj: T): ToRaw<T> {
 export type MethodHook = { '@call': (event: { input: unknown[], output: unknown }) => unknown; }
 
 export type IonicModelHooks<T = AnyObject> = {
-   [EACH]?: PropertyHooks
+   '@each'?: PropertyHooks
 } & {
    [K in keyof Partial<T>]?: PropertyHooks | /* TODO: */MethodHook | NestedAsyncAction
 } & {

@@ -1,4 +1,4 @@
-import { Ion, ion, layout, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component } from "luent";
+import { Ion, ion, layout, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component, queueLayout } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -51,7 +51,7 @@ export function Code(setup: FromTag<{
   let mainWidth = 0;
 
   function setMainWidth(node: HTMLSpanElement) {
-    awaiting(layout, () => {
+    queueLayout(() => {
       mainWidth = node.offsetWidth;
     })
   }

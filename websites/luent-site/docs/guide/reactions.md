@@ -48,10 +48,10 @@ track($list, () => {
 When passed an ion containing an ionic structure, `track()` tracks mutations of the ion as well as shallow mutations of the ionic structure.
 
 ## Tracking ionic tasks
-`ionicTickTask()` tracks trackable access operations (e.g. getter calls, reactive property access, `Array.filter()`, etc) performed *synchronously* within the task.
+`ionicTick()` tracks trackable access operations (e.g. getter calls, reactive property access, `Array.filter()`, etc) performed *synchronously* within the task.
 
 ```ts
-ionicTickTask(() => {
+ionicTick(() => {
   if ($qty()) {
     console.log('quantity is', $qty())
     console.log('count is', $count())

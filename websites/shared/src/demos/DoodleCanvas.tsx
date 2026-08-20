@@ -30,13 +30,16 @@ export function DoodleCanvas() {
         .canvas-app {
           display: grid;
           gap: 10px;
-          margin: 24px auto;
         }
 
         .canvas {
           width: 100%;
           overflow: hidden;
           border-radius: .75rem;
+        }
+
+        .canvas-app button {
+          margin: 28px;
         }
 
         html:not(.dark) .canvas {

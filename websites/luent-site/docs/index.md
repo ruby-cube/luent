@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: "Luent"
-  tagline: An expressive framework for building web applications with clarity and flow
+  name: "Build with clarity and flow"
+  tagline: An expressive framework for web applications
   image:
     src: /assets/luent-logo-512px.png
     alt: My Logo

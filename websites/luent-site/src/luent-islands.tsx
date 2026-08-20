@@ -1,6 +1,6 @@
 import { CodeGlimpses } from "./CodeGlimpses";
 export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from 'luent/server'
-import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, awaiting, tick } from 'luent'
+import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, awaiting, tick, awaitTick } from 'luent'
 export * from "@luent/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
@@ -9,6 +9,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { HabitTrackerDemo } from "./demos/HabitTrackerDemo";
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
 import { PalettableDemo } from "./demos/PalettableDemo";
+import { DoodleCanvasDemo } from "./demos/DoodleCanvas";
 
 function renderCodeGlimpses() {
   provideRoot(MICROCLASS_MERGE, twMerge)
@@ -42,7 +43,7 @@ export const Islands: WriteIslands = {
   'habit-tracker-demo': () => writeIsland(HabitTrackerDemo),
   'emoji-quest-demo': () => writeIsland(EmojiQuestDemo),
   'palettable-demo': () => writeIsland(PalettableDemo),
-  // 'doodle-canvas-demo': () => writeIsland(DoodleCanvasDemo)
+  'doodle-canvas-demo': () => writeIsland(DoodleCanvasDemo),
 }
 
 export const islands: MountIslands = {
@@ -55,7 +56,7 @@ export const islands: MountIslands = {
   //   }
   // },
   'language-toggle': () => {
-    awaiting(tick, () => {
+    awaitTick(() => {
       const node = document.querySelector(LANGUAGE_TOGGLE)
       console.log('hydrating language-toggle', node)
       if (!node || isMounted(node)) return;
@@ -64,7 +65,6 @@ export const islands: MountIslands = {
     })
   },
   'code-glimpses': ({ node }) => {
-    console.log('#### mounting node', node)
     mountIsland(renderCodeGlimpses, node)
   },
 
@@ -79,12 +79,11 @@ export const islands: MountIslands = {
     mountIsland(EmojiQuestDemo, node)
   },
   'palettable-demo': ({ node }) => {
-    console.log('mounting palettable-demo')
     mountIsland(PalettableDemo, node)
   },
-  // 'doodle-canvas-demo': ({ node }) => {
-  //   mountIsland(DoodleCanvasDemo, node)
-  // },
+  'doodle-canvas-demo': ({ node }) => {
+    mountIsland(DoodleCanvasDemo, node)
+  },
 
 }
 

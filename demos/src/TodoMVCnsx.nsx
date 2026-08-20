@@ -1,4 +1,4 @@
-import { template, For, If, Else, FromTag, listen, isMutableIon, track, ionicTickTask, Ion, Ionic, EACH, as, ion, ionic } from "luent"
+import { template, For, If, Else, FromTag, listen, isMutableIon, track, ionicTick, Ion, Ionic, EACH, as, ion, ionic } from "luent"
 
 interface Todo {
    id: number
@@ -48,7 +48,7 @@ export function TodoMVC() {
    function getTodos(): Todo[] {
       const STORAGE_KEY = 'vue-todomvc'
 
-      ionicTickTask(() => {
+      ionicTick(() => {
          localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
       })
 
