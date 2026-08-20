@@ -12,6 +12,8 @@
 
 Luent is a web framework designed around conceptual coherence, expressiveness, and clarity, with the aim of making complex, evolving applications easier to build, understand, and maintain.
 
+Luent currently provides the core capabilities expected of a modern web framework, including support for static site generation, server-side rendering, and building client-side interactivity.
+
 Experimental features include: 
 - a unified system of fine-grained, type-explicit, async-aware reactivity
 - state management through familiar native structures
@@ -35,12 +37,6 @@ Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
 This project explores ways to make application development more intuitive and ergonomic without trading off performance or scalability.
-
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-## Features
-Luent currently provides the core capabilities expected of a modern web framework, including support for static site generation, server-side rendering, and building client-side interactivity.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
