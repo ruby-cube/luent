@@ -12,9 +12,12 @@
 
 Luent is a web framework designed around conceptual coherence, expressiveness, and clarity, with the aim of making complex, evolving applications easier to build, understand, and maintain.
 
-Experimental features include: 
-- a unified system of fine-grained, type-explicit, async-aware reactivity
+Core features:
+- a unified system of fine-grained reactivity
 - state management through familiar native structures
+
+Experimental features:
+- type-explicit reactivity
 - compile-time mutation safety checking that prevents accidental, hidden mutations while allowing statically traceable mutable bindings
 - language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
 
