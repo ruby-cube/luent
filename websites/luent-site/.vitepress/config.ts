@@ -99,7 +99,7 @@ export default defineConfig({
             },
             { text: '[] Reactive Structures', link: '/guide/reactive-structures' },
             {
-              text: 'Template Control Flow', link: '/guide/template-control-flow', items: [
+              text: 'View Control Flow', link: '/guide/view-control-flow', items: [
                 // { text: 'Iterative Rendering', link: '/guide/' },
                 // { text: 'Control Flow', link: '/guide/' },
                 // { text: 'Dynamic Views', link: '/guide/' },

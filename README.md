@@ -15,6 +15,7 @@ Luent is a web framework designed around conceptual coherence, expressiveness, a
 Core features:
 - a unified system of fine-grained reactivity
 - state management through familiar native structures
+- readable control flow of dynamic views
 
 Experimental features:
 - type-explicit reactivity
