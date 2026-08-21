@@ -10,7 +10,7 @@
 
 # Luent
 
-Luent is a web framework designed around conceptual coherence, expressiveness, and clarity, with the aim of making complex, evolving applications more intuitive to build, understand, and maintain.
+Luent is a web framework designed around conceptual coherence, expressiveness, and clarity, with the aim of making complex, evolving applications easier to build and maintain.
 
 It consists of a reactivity system, rendering engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation.
 
