@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luent — Build with clarity and flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fragment+Mono&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fcfcfb;
+      --ink: #1c1d22;
+      --ink-2: #62646d;
+      --line: #e3e4e6;
+      --teal: #48bac4;
+      --teal-ink: #1e8a94;
+      --panel: #f4f5f4;
+      --code-bg: #1c1d22;
+      --code-ink: #e8e9e6;
+      --btn-bg: #48bac4;
+      --btn-ink: #10282b;
+      --dotc: #cfd1d4;
+      --ring: rgba(28, 29, 34, .18);
+      --nucleus: #48bac4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0d0f12;
+      --ink: #e9eae7;
+      --ink-2: #8f929c;
+      --line: #23262c;
+      --teal: #48bac4;
+      --teal-ink: #5cc5ce;
+      --panel: #13161a;
+      --code-bg: #13161a;
+      --code-ink: #d5d7d3;
+      --btn-bg: #48bac4;
+      --btn-ink: #0d0f12;
+      --dotc: #33373e;
+      --ring: rgba(233, 234, 231, .2);
+      --nucleus: #48bac4;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      transition: background .25s, color .25s
+    }
+
+    .mono {
+      font-family: 'Fragment Mono', monospace
+    }
+
+    .wrap {
+      max-width: 1250px;
+      margin: 0 auto;
+      padding: 0 5%
+    }
+
+    img.logo {
+      height: 26px;
+      display: block
+    }
+
+    [data-theme="light"] .logo-dark {
+      display: none
+    }
+
+    [data-theme="dark"] .logo-light {
+      display: none
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      transition: background .25s
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 26px
+    }
+
+    .nav-right a {
+      color: var(--ink-2);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-family: 'Fragment Mono', monospace
+    }
+
+    .nav-right a:hover {
+      color: var(--teal-ink)
+    }
+
+    .toggle {
+      border: 1px solid var(--line);
+      background: none;
+      color: var(--ink-2);
+      padding: 6px 12px;
+      font-family: 'Fragment Mono', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px
+    }
+
+    .toggle:hover {
+      color: var(--ink);
+      border-color: var(--ink-2)
+    }
+
+    .hero {
+      position: relative;
+      padding: 128px 0 116px;
+      overflow: hidden
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1
+    }
+
+    .kicker {
+      font-family: 'Fragment Mono', monospace;
+      font-size: 13px;
+      color: var(--teal-ink);
+      margin-bottom: 26px;
+      letter-spacing: .04em
+    }
+
+    h1 {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(44px, 6.4vw, 78px);
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      line-height: 1.05
+    }
+
+    h1 .accent {
+      color: var(--teal);
+      display: block
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 44px;
+      background: var(--btn-bg);
+      color: var(--btn-ink);
+      text-decoration: none;
+      font-family: 'Fragment Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 14px 24px;
+      border-radius: 3px
+    }
+
+    .btn .arrow {
+      transition: transform .18s
+    }
+
+    .btn:hover .arrow {
+      transform: translateX(4px)
+    }
+
+    .hero-orb {
+      position: absolute;
+      right: max(-320px, -19vw);
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(76vw, 1400px);
+      z-index: 0;
+      pointer-events: none
+    }
+
+    .hero-orb svg {
+      width: 100%;
+      height: auto;
+      display: block
+    }
+
+    .features {
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr)
+    }
+
+    .feat {
+      padding: 52px 40px 60px;
+      border-right: 1px solid var(--line)
+    }
+
+    .feat:first-child {
+      padding-left: 0
+    }
+
+    .feat:last-child {
+      border-right: none;
+      padding-right: 0
+    }
+
+    .feat .num {
+      font-family: 'Fragment Mono', monospace;
+      font-size: 12px;
+      color: var(--teal-ink);
+      margin-bottom: 20px
+    }
+
+    .feat h3 {
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px
+    }
+
+    .feat p {
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--ink-2)
+    }
+
+    /* ---- Code tour (stacked) ---- */
+    .tour {
+      border-top: 1px solid var(--line);
+      padding: 72px 0 40px
+    }
+
+    .tour-head {
+      display: flex;
+      /* align-items: baseline;
+      justify-content: space-between; */
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 72px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tour-head h2 {
+      font-size: clamp(30px, 5.4vw, 55px);
+      /* text-align: center; */
+      font-weight: 600;
+      letter-spacing: -0.015em
+    }
+
+    .tsec {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 56px;
+      align-content: center;
+      padding: 72px 0;
+      border-top: 1px solid var(--line);
+      scroll-margin-top: 84px;
+      min-width: 0
+    }
+
+    .tsec:first-child {
+      border-top: none
+    }
+
+    .tsec.tall {
+      min-height: 100vh
+    }
+
+    .tsec .meta .snum {
+      font-family: 'Fragment Mono', monospace;
+      font-size: 12.5px;
+      color: var(--teal-ink);
+      margin-bottom: 18px
+    }
+
+    .tsec .meta h3 {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      margin-bottom: 14px
+    }
+
+    .tsec .meta p {
+      font-size: 15.5px;
+      line-height: 1.7;
+      color: var(--ink-2);
+      max-width: 40ch
+    }
+
+    .code {
+      background: var(--code-bg);
+      color: var(--code-ink);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-family: 'Fragment Mono', monospace;
+      font-size: 13px;
+      line-height: 1.75;
+      padding: 24px 26px;
+      overflow: auto;
+      min-width: 0
+    }
+
+    .code .fname {
+      display: block;
+      font-size: 11.5px;
+      color: #6c6f78;
+      margin-bottom: 14px;
+      letter-spacing: .05em
+    }
+
+    .code pre {
+      white-space: pre;
+      margin: 0
+    }
+
+    .tk-kw {
+      color: #48bac4
+    }
+
+    .tk-str {
+      color: #b9c78a
+    }
+
+    .tk-cm {
+      color: #6c6f78
+    }
+
+    .tk-num {
+      color: #d0a86e
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 26px 0 40px;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Fragment Mono', monospace;
+      font-size: 12.5px;
+      color: var(--ink-2)
+    }
+
+    .tour-grid {
+      display: grid;
+      grid-template-columns: 1fr 88px;
+      gap: 0
+    }
+
+    .tour-main {
+      padding-right: 56px;
+      min-width: 0
+    }
+
+    .railwrap {
+      position: relative;
+      border-left: 1px solid var(--line);
+      padding-top: 2rem;
+    }
+
+    .rail {
+      position: sticky;
+      top: calc(15rem - 150px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+      opacity: 0;
+      transform: translateX(6px);
+      pointer-events: none;
+      transition: opacity .3s, transform .3s
+    }
+
+    .rail.on {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto
+    }
+
+    .rail-count {
+      font-family: 'Fragment Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-2)
+    }
+
+    .rail-count b {
+      color: var(--teal-ink);
+      font-weight: 400
+    }
+
+    .rail-dots {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center
+    }
+
+    .rdot {
+      position: relative;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dotc);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background .2s, transform .2s
+    }
+
+    .rdot:hover {
+      background: var(--ink-2)
+    }
+
+    .rdot.active {
+      background: var(--teal);
+      transform: scale(1.4)
+    }
+
+    @media(max-width:900px) {
+      .tour-grid {
+        grid-template-columns: 1fr;
+        gap: 0
+      }
+
+      .railwrap {
+        display: none
+      }
+    }
+
+    @media(max-width:900px) {
+      .hero {
+        padding: 76px 0 68px
+      }
+
+      .hero-orb {
+        width: 120vw;
+        right: -55vw;
+        opacity: .45
+      }
+
+      .features {
+        grid-template-columns: 1fr
+      }
+
+      .feat {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding: 40px 0
+      }
+
+      .feat:last-child {
+        border-bottom: none
+      }
+
+      .tsec {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: 56px 0
+      }
+
+      .tsec.tall {
+        min-height: 0
+      }
+
+      .nav-right a:not(:last-child) {
+        display: none
+      }
+    }
+  </style>
+  <style>
+    .ha-img-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
+      background: #f4f4f5;
+      border: 1px dashed #d4d4d8;
+      border-radius: 8px;
+      color: #71717a;
+      font-size: 12px;
+      font-family: system-ui, sans-serif;
+      min-height: 80px;
+      padding: 16px;
+      box-sizing: border-box;
+      animation: ha-img-pulse 1.5s ease-in-out infinite
+    }
+
+    .ha-img-placeholder.ha-failed {
+      animation: none;
+      opacity: .7
+    }
+
+    @keyframes ha-img-pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .5
+      }
+    }
+
+    @media(prefers-color-scheme:dark) {
+      .ha-img-placeholder {
+        background: #27272a;
+        border-color: #3f3f46;
+        color: #a1a1aa
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar" id="topbar">
+    <div class="wrap">
+      <nav>
+        <a href="#">
+          <img class="logo logo-light"
+          src="luent-logo-light.png"
+          alt="Luent">
+          <img class="logo logo-dark"
+          src="luent-logo-dark.png"
+            alt="Luent">
+        </a>
+        <div class="nav-right">
+          <a href="#">docs</a><a href="#">api</a><a href="#">examples</a><a href="#">github</a>
+          <button class="toggle" onclick="toggleTheme()">theme: <span id="tname">light</span></button>
+        </div>
+      </nav>
+    </div>
+  </div>
+  <section class="hero">
+    <div class="wrap hero-copy">
+      <div class="kicker">an expressive framework for web applications</div>
+      <h1>Build with clarity <span class="accent">and flow</span></h1>
+      <a class="btn" href="#tour">Take a code tour <span class="arrow">→</span></a>
+    </div>
+    <div class="hero-orb" aria-hidden="true">
+      <svg viewBox="0 0 640 640" fill="none">
+        <circle cx="320" cy="320" r="140" stroke="var(--line)" stroke-width=".75" />
+        <circle cx="320" cy="320" r="225" stroke="var(--line)" stroke-width=".75" />
+        <circle cx="320" cy="320" r="310" stroke="var(--line)" stroke-width=".75" />
+        <circle cx="320" cy="320" r="14" fill="var(--nucleus)" style="opacity: .30" />
+        <circle cx="419" cy="221" r="7" fill="var(--nucleus)" style="opacity: .30" />
+        <circle cx="108.6" cy="397" r="7" fill="var(--nucleus)" style="opacity: .30" />
+      </svg>
+    </div>
+  </section>
+  <div class="wrap">
+    <section class="features">
+      <div class="feat">
+        <svg class="num" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="#48bac4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-audio-waveform-icon lucide-audio-waveform">
+          <path
+            d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 1 2-2" />
+        </svg>
+        <h3>Develop with fluency</h3>
+        <p>Build with intuitive APIs and expressive syntax designed as natural extensions of established standards.</p>
+      </div>
+      <div class="feat">
+        <svg class='num' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="#48bac4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-atom-icon lucide-atom">
+          <circle cx="12" cy="12" r="1" />
+          <path
+            d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z" />
+          <path
+            d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z" />
+        </svg>
+        <h3>Take command of reactivity</h3>
+        <p>Gain clarity and control over re-renders through traceable, type-explicit, fine-grained reactivity.</p>
+      </div>
+      <div class="feat">
+        <svg class='num' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="#48bac4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-shapes-icon lucide-shapes">
+          <path d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <circle cx="17.5" cy="17.5" r="3.5" />
+        </svg>
+        <h3>Manage state natively</h3>
+        <p>Model and update complex state through familiar JavaScript structures and custom classes.</p>
+      </div>
+    </section>
+    <section class="tour" id="tour">
+      <div class="tour-head">
+        <h2>Code tour</h2>
+      </div>
+      <div class="tour-grid">
+        <div class="tour-main">
+          <div id="tourList"></div>
+        </div>
+        <div class="railwrap">
+          <div class="rail" id="rail" aria-label="Tour sections">
+            <div class="rail-count"><b id="cur">01</b>/12</div>
+            <div class="rail-dots" id="railDots"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer><span>luent v1.0</span><span>MIT License</span></footer>
+  </div>
+  <script>
+    const root = document.documentElement;
+    let saved = null; try { saved = localStorage.getItem('luent-theme') } catch (e) { }
+    root.dataset.theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    syncLabel();
+    function toggleTheme() { root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'; try { localStorage.setItem('luent-theme', root.dataset.theme) } catch (e) { } syncLabel(); }
+    function syncLabel() { document.getElementById('tname').textContent = root.dataset.theme; }
+
+    const sections = [
+      {
+        t: "Installation", f: "terminal", d: "Placeholder copy — scaffold a new Luent project in one command. The CLI sets up a zero-config project with TypeScript, routing, and a dev server.",
+        c: `$ npm create luent@latest my-app
+$ cd my-app
+$ npm run dev
+
+  luent v1.0  dev server running
+  ➜ local: http://localhost:5173`},
+      {
+        t: "Your first component", f: "hello.lu.js", d: "Placeholder copy — components are plain functions. No lifecycle boilerplate, no class ceremony; markup reads as a natural extension of JavaScript.",
+        c: `import { component } from 'luent';
+
+export default component(() => (
+  <main>
+    <h1>Hello, Luent</h1>
+  </main>
+));`},
+      {
+        t: "Templates & syntax", f: "card.lu.js", d: "Placeholder copy — expressive template syntax that follows established standards. Attributes, events, and bindings look the way you expect them to.",
+        c: `export default component(({ title }) => (
+  <section class="card">
+    <h2>{title}</h2>
+    <slot />
+  </section>
+));`},
+      {
+        t: "Signals", f: "counter.lu.js", full: true, d: "Placeholder copy — signals are the unit of reactivity. Read them anywhere, set them anywhere; only what depends on them updates. This is a longer, full-height tour stop with room for a deeper walkthrough.",
+        c: `import { signal } from 'luent';
+
+// create
+const count = signal(0);
+
+// read
+console.log(count.value); // 0
+
+// write
+count.value++;
+
+// subscribe
+count.watch((next, prev) => {
+  console.log(prev, '→', next);
+});`},
+      {
+        t: "Derived values", f: "derived.lu.js", d: "Placeholder copy — computed values track their sources automatically and stay type-explicit end to end.",
+        c: `import { signal, derived } from 'luent';
+
+const price = signal(24);
+const qty = signal(3);
+
+const total = derived(() =>
+  price.value * qty.value); // 72`},
+      {
+        t: "Effects", f: "effects.lu.js", d: "Placeholder copy — effects run when their dependencies change, and every re-run is traceable back to the exact signal that caused it.",
+        c: `import { effect } from 'luent';
+
+effect(() => {
+  document.title =
+    \`Cart (\${qty.value})\`;
+}); // re-runs only when qty changes`},
+      {
+        t: "State classes", f: "cart.state.js", full: true, d: "Placeholder copy — model complex state with ordinary JavaScript classes. Fields become reactive; methods stay methods; getters become derived values. Another full-height stop with richer example code.",
+        c: `import { state } from 'luent';
+
+class Cart extends state() {
+  items = [];
+
+  add(item) {
+    this.items.push(item);
+  }
+
+  remove(id) {
+    this.items = this.items
+      .filter(i => i.id !== id);
+  }
+
+  get count() {
+    return this.items.length;
+  }
+
+  get total() {
+    return this.items
+      .reduce((s, i) => s + i.price, 0);
+  }
+}`},
+      {
+        t: "Stores & collections", f: "store.js", d: "Placeholder copy — arrays, maps, and nested objects update granularly. Mutate them like normal JavaScript; renders stay fine-grained.",
+        c: `const todos = store([
+  { text: 'Ship v1', done: false },
+]);
+
+todos[0].done = true;   // one row
+todos.push({ ... });    // one insert`},
+      {
+        t: "Props & composition", f: "compose.lu.js", d: "Placeholder copy — pass signals or plain values; components compose without wrapper components or context gymnastics.",
+        c: `<UserCard
+  user={currentUser}
+  compact
+  on:select={openProfile}
+/>`},
+      {
+        t: "Routing", f: "routes.js", d: "Placeholder copy — file-based routes with typed params. Nested layouts fall out of the folder structure.",
+        c: `// routes/users/[id].lu.js
+export default component(({ params }) => (
+  <Profile id={params.id} />
+));`},
+      {
+        t: "Data loading", f: "loader.js", d: "Placeholder copy — load data next to the route that needs it. Results arrive as signals, so streaming and revalidation come for free.",
+        c: `export const load = query(async ({ id }) => {
+  const user = await api.users.get(id);
+  return { user };
+});`},
+      {
+        t: "Build & deploy", f: "terminal", d: "Placeholder copy — one build command, standard output. Deploy the dist folder to any static host or edge runtime.",
+        c: `$ npm run build
+
+  ✓ 42 modules transformed
+  dist/index.html     1.2 kB
+  dist/assets/app.js  14.8 kB
+  build complete in 640ms`},
+    ];
+
+    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function hl(src) {
+      let s = esc(src);
+      s = s.replace(/(\/\/[^\n]*)/g, '\x01cm\x02$1\x03');
+      s = s.replace(/('[^'\n]*'|`[^`]*`)/g, '\x01str\x02$1\x03');
+      s = s.replace(/\b(import|from|export|default|const|let|class|extends|return|get|async|await|new|this)\b/g, '\x01kw\x02$1\x03');
+      s = s.replace(/\b(\d+(?:\.\d+)?)\b/g, '\x01num\x02$1\x03');
+      s = s.replace(/\x01(\w+)\x02/g, '<span class="tk-$1">').replace(/\x03/g, '</span>');
+      return s;
+    }
+    const list = document.getElementById('tourList');
+    sections.forEach((sec, i) => {
+      const el = document.createElement('div');
+      el.className = 'tsec' + (sec.full ? ' tall' : '');
+      el.id = 's' + String(i + 1).padStart(2, '0');
+      el.innerHTML = `<div class="meta"><div class="snum">[${String(i + 1).padStart(2, '0')} / 12]</div>
+    <h3>${sec.t}</h3><p>${sec.d}</p></div>
+    <div class="code"><span class="fname">${sec.f}</span><pre>${hl(sec.c)}</pre></div>`;
+      list.appendChild(el);
+    });
+    const secEls = [...list.children];
+    let active = -1;
+    const tourSec = document.getElementById('tour');
+    const rail = document.getElementById('rail'), railDots = document.getElementById('railDots');
+    sections.forEach((sec, i) => {
+      const b = document.createElement('button');
+      b.className = 'rdot'; b.setAttribute('aria-label', 'Section ' + (i + 1) + ': ' + sec.t);
+      b.title = String(i + 1).padStart(2, '0') + ' \u00b7 ' + sec.t;
+      b.onclick = () => secEls[i].scrollIntoView({ behavior: 'smooth' });
+      railDots.appendChild(b);
+    });
+    function renderNav(a) { [...railDots.children].forEach((d, j) => d.classList.toggle('active', j === a)); }
+    function navScroll() {
+      const r = tourSec.getBoundingClientRect();
+      rail.classList.toggle('on', r.top < innerHeight * .42 && r.bottom > innerHeight * .42);
+    }
+    document.addEventListener('keydown', e => {
+      if (!rail.classList.contains('on')) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); secEls[Math.min(secEls.length - 1, active + 1)].scrollIntoView({ behavior: 'smooth' }); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); secEls[Math.max(0, active - 1)].scrollIntoView({ behavior: 'smooth' }); }
+    });
+    function updateActive() {
+      const mid = innerHeight * 0.42;
+      let a = 0;
+      secEls.forEach((s, i) => { if (s.getBoundingClientRect().top <= mid) a = i; });
+      if (a !== active) { active = a; document.getElementById('cur').textContent = String(a + 1).padStart(2, '0'); renderNav(a); }
+      navScroll();
+    }
+    addEventListener('scroll', () => requestAnimationFrame(updateActive), { passive: true });
+    addEventListener('resize', () => requestAnimationFrame(updateActive), { passive: true });
+    updateActive();
+  </script>
+  <script>
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && window.parent !== window) {
+        window.parent.postMessage({ type: 'close-fullscreen' }, '*');
+      }
+    });
+  </script>
+  <!-- broken-img-handler -->
+  <script>
+    (function () {
+      if (window.__brokenImgHandler) return;
+      window.__brokenImgHandler = true;
+      var MAX = 5, DELAYS = [2000, 4000, 8000, 16000, 32000];
+      var TOKEN = /^__(?:IMG|EMBED)_[a-zA-Z0-9_-]+__/;
+      var SENTINEL = new RegExp('^/api/published/[^/]+/(?:assets|embeds)/[^/?#]*-missing(?:[?#]|$)');
+      var NOISE = /^[\s\u2018\u2019\u201c\u201d]+|[\s\u2018\u2019\u201c\u201d]+$/g;
+      function canSrcEverResolve(src) {
+        var bare = src.replace(NOISE, '');
+        return !TOKEN.test(bare) && !SENTINEL.test(bare);
+      }
+      document.addEventListener('error', function (e) {
+        var img = e.target;
+        if (!img || img.tagName !== 'IMG') return;
+        var liveSrc = img.getAttribute('src');
+        var src = img.dataset.haOriginalSrc || liveSrc;
+        if (!src) return;
+        if (img.dataset.haOriginalSrc && liveSrc && liveSrc !== img.dataset.haOriginalSrc && liveSrc.indexOf('_r=') < 0) { src = liveSrc; img.dataset.haOriginalSrc = src; img.dataset.haRetryCount = '0' }
+        else if (!img.dataset.haOriginalSrc) { img.dataset.haOriginalSrc = src }
+        var attempt = canSrcEverResolve(src) ? parseInt(img.dataset.haRetryCount || '0', 10) : MAX;
+        if (img.dataset.haPhId) { var old = document.getElementById(img.dataset.haPhId); if (old) old.remove() }
+        var ph = document.createElement('div');
+        ph.className = 'ha-img-placeholder' + (attempt >= MAX ? ' ha-failed' : '');
+        ph.id = 'ha-ph-' + Math.random().toString(36).slice(2, 9);
+        var w = img.getAttribute('width'); var h = img.getAttribute('height');
+        if (w) ph.style.width = w + (isNaN(Number(w)) ? '' : 'px');
+        else if (img.style.width) ph.style.width = img.style.width;
+        else if (img.width > 1) ph.style.width = img.width + 'px';
+        if (h) ph.style.height = h + (isNaN(Number(h)) ? '' : 'px');
+        else if (img.style.height) ph.style.height = img.style.height;
+        else if (img.height > 1) ph.style.height = img.height + 'px';
+        ph.textContent = attempt >= MAX ? 'Image unavailable' : 'Loading image\u2026';
+        img.dataset.haPhId = ph.id;
+        if (img.dataset.haOrigDisplay == null) img.dataset.haOrigDisplay = img.style.display || '';
+        img.style.display = 'none';
+        img.insertAdjacentElement('afterend', ph);
+        if (attempt < MAX) {
+          img.dataset.haRetryCount = String(attempt + 1);
+          setTimeout(function () {
+            if (!img.isConnected) return;
+            if (img.dataset.haOriginalSrc !== src) return;
+            if (img.complete && img.naturalWidth > 0) return;
+            var curSrc = img.getAttribute('src');
+            if (curSrc && curSrc.indexOf(src) !== 0) return;
+            var fresh = src + (src.indexOf('?') >= 0 ? '&' : '?') + '_r=' + (attempt + 1) + '_' + Date.now();
+            img.src = fresh;
+          }, DELAYS[attempt]);
+        }
+      }, true);
+      document.addEventListener('load', function (e) {
+        var img = e.target;
+        if (!img || img.tagName !== 'IMG') return;
+        if (img.dataset.haPhId) {
+          var ph = document.getElementById(img.dataset.haPhId);
+          if (ph) ph.remove();
+          delete img.dataset.haPhId;
+          img.style.display = img.dataset.haOrigDisplay || '';
+          delete img.dataset.haOrigDisplay;
+          delete img.dataset.haOriginalSrc;
+          delete img.dataset.haRetryCount;
+        }
+      }, true);
+    })();
+  </script>
+</body>
+
+</html>

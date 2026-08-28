@@ -1,7 +1,7 @@
 <div align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-dark-padded.svg">
-  <img width="200" alt="luent logo" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded-dark.png">
+  <img width="200" alt="luent logo" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded-light.png">
 
 </picture>
   
@@ -17,12 +17,12 @@ It consists of a reactivity system, rendering engine, and JSX transpiler, all wr
 Core features:
 - a unified system of fine-grained reactivity
 - state management through familiar native structures
-- readable control flow of dynamic views
+- readable view control flow
 
 Experimental features:
 - type-explicit reactivity
 - compile-time mutation safety checking that prevents accidental, hidden mutations while allowing statically traceable mutable bindings
-- language extension of TypeScript + JSX for improved readability and type safety (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
+- language extension of TypeScript + JSX for improved readability and type safety of signal-based reactivity (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
 
 <br>
 

@@ -28,3 +28,7 @@ ignoredBuiltDependencies:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
+
+minimumReleaseAgeExclude:
+  - '@astrojs/starlight@0.41.9'
+  - astro@7.2.7
