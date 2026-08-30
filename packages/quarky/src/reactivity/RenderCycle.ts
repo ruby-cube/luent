@@ -101,7 +101,7 @@ export class RenderCycle {
 
     this.update.complete()
     popUpdate()
-    if (__DEV__) {
+    if (__DEV__ && typeof window != 'undefined') {
       requestAnimationFrame((time) =>
         this.timecheck(time)
       )

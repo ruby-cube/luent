@@ -3,6 +3,7 @@ import { Listener, Until } from "./Listener";
 import { Flask } from "./Flask";
 
 export let shouldWarnNoCleanup = false;
+const __DEV__ = process.env.NODE_ENV === 'development'
 
 const listenersWithNoCleanup = new Set();
 

@@ -1,4 +1,4 @@
-import { getPortals, RenderPageWithStyles, runWithPortals } from "luent/server";
+import { getPortals, RenderPageWithStyles, encodePortals, defineStyleScopeElement } from "luent/server";
 import { type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
 import { AnyObject } from "@luent/types";
@@ -20,19 +20,7 @@ export function mountIslands(islands: AnyObject, page: string) {
   if (typeof window == 'undefined') return;
   console.log('#### HYDRATING!!', page)
   // define custom elements
-  if (!customElements.get('style-scope')) {
-    customElements.define('style-scope', class StyleScope extends HTMLElement {
-      connectedCallback() {
-        const template = this.querySelector('template')
-        const content = template?.content.cloneNode(true) as DocumentFragment | undefined
-
-        const slot = content ?? document.createElement('slot')
-        const root = this.attachShadow({ mode: 'open' });
-        root.appendChild(slot)
-        // if (template) template.remove()
-      }
-    });
-  }
+  defineStyleScopeElement()
 
   // if (!customElements.get('await-mount')) {
   //   customElements.define('await-mount', class AwaitMount extends HTMLElement {
@@ -199,7 +187,7 @@ export function TransformLuentIslands(Islands: AnyObject) {
 
 function renderFallback(name: string, write: () => string, withPageContext: (cb: () => any) => string, page: string) {
   const html = write
-    ? withPageContext(() => runWithPortals(write, page))
+    ? withPageContext(() => encodePortals(write, page))
     : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
   return encodeStyleTags(html)
 }

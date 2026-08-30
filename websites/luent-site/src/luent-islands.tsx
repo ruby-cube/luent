@@ -1,5 +1,5 @@
 import { CodeGlimpses } from "./CodeGlimpses";
-export { getPortals, runWithPortals, RenderPageWithStyles, transformPortals } from 'luent/server'
+export { getPortals, encodePortals, RenderPageWithStyles, transformPortals } from 'luent/server'
 import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, awaiting, tick, awaitTick } from 'luent'
 export * from "@luent/websites-shared";
 import { twMerge } from 'tailwind-merge';

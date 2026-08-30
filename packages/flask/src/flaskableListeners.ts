@@ -1,6 +1,7 @@
 import { PausableListener, EnrollFunction, SustainedListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeListener, Listener, Pause, makeScheduler, makePausableListener } from "./Listener";
 import { __DEV__buildAsyncPath } from "./debug";
 
+const __DEV__ = process.env.NODE_ENV === 'development'
 export type CallbackRemover = {
    (): void;
    isRemover: true;

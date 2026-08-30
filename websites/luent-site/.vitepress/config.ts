@@ -26,6 +26,7 @@ export default defineConfig({
 
   transformHtml(code, id, ctx) {
     console.log('TRANSFORM HTML')
+    // FIX:
     return transformPortals(code, ctx.page)
   },
 

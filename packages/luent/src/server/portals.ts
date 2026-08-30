@@ -1,8 +1,44 @@
-import { renderInShadow } from "../component/shadow"
+export { defineStyleScopeElement } from "../component/shadow"
 
-type Portals = {
-  head: string[]
-  body: string[]
+console.log('run portals module')
+/**
+ * per-page/route portals
+ */
+type Portals = Map<string, string[]>
+
+
+
+// function clonePortals(portals: Portals): Portals {
+//   return {
+//     head: [...portals.head],
+//     body: [...portals.body],
+//   }
+// }
+
+type PortalRuntimeState = {
+  // portalsByPage: Map<string, Portals>
+  activePortalsStack: (Portals | null)[]
+}
+
+const PORTAL_STATE_KEY = Symbol.for('luent.portals.state')
+
+/**
+ * We need global state to share portals across module instances 
+ * in frameworks like Astro, which runs this module twice.
+ */
+function getPortalRuntimeState(): PortalRuntimeState {
+  const globals = globalThis as typeof globalThis & {
+    [PORTAL_STATE_KEY]?: PortalRuntimeState
+  }
+
+  if (!globals[PORTAL_STATE_KEY]) {
+    globals[PORTAL_STATE_KEY] = {
+      // portalsByPage: new Map<string, Portals>(),
+      activePortalsStack: []
+    }
+  }
+
+  return globals[PORTAL_STATE_KEY]
 }
 
 // type HeadConfig = [
@@ -11,45 +47,111 @@ type Portals = {
 //   string?                // Optional inner content
 // ]
 
-const portalsByPage = new Map<string, Portals>()
 
-export function getPortals(page: string): Portals {
-  let portals = portalsByPage.get(page)
+export function writeToPortal(to: 'head' | 'body', html: string) {
+  const activePortals = usePortals()
+  console.log('writePortal', to, html)
+  addPortal(activePortals, to, html)
+}
+
+function usePortals() {
+  const { activePortalsStack } = getPortalRuntimeState()
+  let portals = activePortalsStack.at(-1)
   if (!portals) {
-    portals = { 
-      head: [], 
-      body: [] 
-    }
-    portalsByPage.set(page, portals)
+    portals = new Map()
+    activePortalsStack[activePortalsStack.length - 1] = portals;
+    return portals
   }
   return portals
 }
 
-let activePortals: null | Portals = null;
-
-export function writeToPortal(to: 'head' | 'body', html: string) {
-  activePortals?.[to].push(html)
+function addPortal(portals: Portals, to: string, html: string) {
+  const collection = portals.get(to) ?? (portals.set(to, []), portals.get(to)!);
+  collection.push(html)
 }
 
-export function runWithPortals(render: () => string, page: string) {
+
+
+
+
+
+const PORTAL_MARKER_PREFIX = '<!--luent-portals:'
+const PORTAL_MARKER_RE = /<!--luent-portals:([A-Za-z0-9+/=]+)-->/g
+
+function _encodePortals(render: () => string): string {
+  const html = render()
+  const portals = drainPortals()
+  if (!portals || portals.size === 0) return html;
+
+  const payload = Buffer.from(JSON.stringify(Object.fromEntries(portals)), 'utf8').toString('base64')
+  return `${PORTAL_MARKER_PREFIX}${payload}-->${html}`
+}
+
+
+export function encodePortals(render: () => string) {
+  const { activePortalsStack } = getPortalRuntimeState()
+  activePortalsStack.push(null)
+
   try {
-    activePortals = getPortals(page)
-    return render()
+    return _encodePortals(render);
   }
   finally {
-    activePortals = null
+    activePortalsStack.pop()
   }
 }
 
+export function drainPortals() {
+  const { activePortalsStack } = getPortalRuntimeState()
+  const portals = activePortalsStack.at(-1);
+  activePortalsStack[activePortalsStack.length - 1] = null;
+  return portals
+}
 
-export function transformPortals(code: string, key: string) {
-  const portals = getPortals(key)
-  if (!portals || portals.head.length === 0 && portals.body.length === 0) {
-    return code;
+
+
+export function extractPortals(html: string) {
+  const combined: Portals = new Map()
+  const seen: { [key: string]: Set<string> } = Object.create(null)
+
+  function useSeen(key: string) {
+    return seen[key] ?? (seen[key] = new Set())
   }
 
-  const newCode = code
-    .replace('</head>', `${portals.head.join('\n')}\n</head>`)
-    .replace('</body>', `${portals.body.join('\n')}\n</body>`)
-  return newCode
+  function usePortal(key: string) {
+    return combined.get(key) ?? (combined.set(key, []), combined.get(key)!)
+  }
+
+  const htmlWithoutMarkers = html.replace(PORTAL_MARKER_RE, (_, payload: string) => {
+    try {
+      const decoded = Buffer.from(payload, 'base64').toString('utf8')
+      const parsed = JSON.parse(decoded) as { [key: string]: string[] }
+      for (const key in parsed) {
+        if (Array.isArray(parsed[key])) {
+          for (const item of parsed[key]) {
+            if (typeof item !== 'string' || useSeen(key).has(item)) 
+              continue;
+            useSeen(key).add(item)
+            usePortal(key).push(item)
+          }
+        }
+      }
+    } catch {
+      // Ignore malformed marker payloads to avoid breaking page generation.
+    }
+
+    return ''
+  })
+
+  return {
+    html: htmlWithoutMarkers,
+    portals: combined,
+  }
+}
+
+export function injectPortals(code: string, portals: Portals) {
+  if (portals.size === 0) return code;
+
+  return code
+    .replace('</head>', `${(portals.get('head') ?? []).join('\n')}\n</head>`)
+    .replace('</body>', `${(portals.get('body') ?? []).join('\n')}\n</body>`)
 }

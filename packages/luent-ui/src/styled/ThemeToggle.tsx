@@ -1,8 +1,8 @@
 import { css, Style, type FromTag } from "luent";
 
 export function ThemeToggle(setup: FromTag<{ '...': 'button' }>) {
+
   return <>
-  
     <button auto-bind={setup} class="toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle color scheme">
       <span class="t-icon t-sun">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
@@ -22,6 +22,24 @@ export function ThemeToggle(setup: FromTag<{ '...': 'button' }>) {
     </button>
 
     {Style(css`
+       :root {
+        --t-line: rgba(27, 42, 49, .35);
+        --knob: #1B2A31;
+        --t-sun: #FFFFFF;
+        --t-moon: #51636B;
+        --knob-x: 3px;
+        --knob-y: 3px;
+      }
+
+      .dark {
+        --t-line: rgba(234, 243, 245, .35);
+        --knob: #9BE3EC;
+        --t-sun: #9FB4BB;
+        --t-moon: #08262C;
+        --knob-x: 33px;
+        --knob-y: 33px;
+      }
+
       .toggle {
         position: relative;
         display: flex;

@@ -1,0 +1,481 @@
+---
+import AudioWaveIcon from "../icons/AudioWaveIcon.astro";
+import AtomIcon from "../icons/AtomIcon.astro";
+import ShapesIcon from "../icons/ShapesIcon.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import OrbitSVG from "../icons/OrbitSVG.astro";
+import { Counter } from "../components/Counter";
+---
+
+<BaseLayout wrap>
+  <section class="hero">
+    <div class="wrap hero-copy">
+      <div class="kicker">an expressive framework for web applications</div>
+      <h1>Build with clarity <span class="accent">and flow</span></h1>
+      <a class="btn" href="#tour"
+        >Take a code tour <span class="arrow">→</span></a
+      >
+    </div>
+
+    <div class="hero-orb" aria-hidden="true">
+      <OrbitSVG orbitLine="var(--line)" nucleusFill="var(--nucleus)" />
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="features">
+      <div class="feat">
+        <AudioWaveIcon class="icon" />
+        <h3 slot="heading">Develop with fluency</h3>
+        <p slot="description">
+          Build with intuitive APIs and expressive syntax designed as natural
+          extensions of established standards.
+        </p>
+      </div>
+      <div class="feat">
+        <AtomIcon class="icon" />
+        <h3>Take command of reactivity</h3>
+        <p>
+          Gain clarity and control over re-renders through traceable,
+          type-explicit, fine-grained reactivity.
+        </p>
+      </div>
+      <div class="feat">
+        <ShapesIcon class="icon" />
+        <h3>Manage state natively</h3>
+        <p>
+          Model and update complex state through familiar JavaScript structures
+          and custom classes.
+        </p>
+      </div>
+    </section>
+    <Counter client:load/>
+    
+    <script>
+      // document.parentElement!.style.scrollBehavior = 'smooth'
+    </script>
+
+    <style>
+      .features {
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .feat {
+        padding: 52px 40px 60px;
+        border-right: 1px solid var(--line);
+      }
+
+      .feat:first-child {
+        padding-left: 0;
+      }
+
+      .feat:last-child {
+        border-right: none;
+        padding-right: 0;
+      }
+
+      .feat .icon {
+        font-family: "Fragment Mono", monospace;
+        font-size: 12px;
+        color: var(--teal-ink);
+        margin-bottom: 20px;
+      }
+
+      .feat h3 {
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin-bottom: 12px;
+      }
+
+      .feat p {
+        font-size: 15px;
+        line-height: 1.65;
+        color: var(--ink-2);
+      }
+    </style>
+
+    <section class="tour" id="tour">
+      <div class="tour-head">
+        <h2>Code tour</h2>
+      </div>
+      <div class="tour-grid">
+        <div class="tour-main">
+          <div id="tourList"></div>
+        </div>
+        <div class="railwrap">
+          <div class="rail" id="rail" aria-label="Tour sections">
+            <div class="rail-count"><b id="cur">01</b>/12</div>
+            <div class="rail-dots" id="railDots"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer><span>luent v1.0</span><span>MIT License</span></footer>
+  </div>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    padding: 128px 0 116px;
+    overflow: hidden;
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 1;
+  }
+
+  .kicker {
+    font-family: "Fragment Mono", monospace;
+    font-size: 13px;
+    color: var(--teal-ink);
+    margin-bottom: 26px;
+    letter-spacing: 0.04em;
+  }
+
+  h1 {
+    font-family: "Instrument Sans", sans-serif;
+    font-size: clamp(44px, 6.4vw, 78px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+
+  h1 .accent {
+    color: var(--teal);
+    display: block;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 44px;
+    background: var(--btn-bg);
+    color: var(--btn-ink);
+    text-decoration: none;
+    font-family: "Fragment Mono", monospace;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 14px 24px;
+    border-radius: 3px;
+  }
+
+  .btn .arrow {
+    transition: transform 0.18s;
+  }
+
+  .btn:hover .arrow {
+    transform: translateX(4px);
+  }
+
+  .hero-orb {
+    position: absolute;
+    right: max(-320px, -19vw);
+    top: 50%;
+    transform: translateY(-50%);
+    width: min(76vw, 1400px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-orb svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* ---- Code tour (stacked) ---- */
+  .tour {
+    border-top: 1px solid var(--line);
+    padding: 72px 0 40px;
+  }
+
+  .tour-head {
+    display: flex;
+    /* align-items: baseline;
+      justify-content: space-between; */
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 72px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tour-head h2 {
+    font-size: clamp(30px, 5.4vw, 55px);
+    /* text-align: center; */
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .tsec {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 56px;
+    align-content: center;
+    padding: 72px 0;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 84px;
+    min-width: 0;
+  }
+
+  .tsec:first-child {
+    border-top: none;
+  }
+
+  .tsec.tall {
+    min-height: 100vh;
+  }
+
+  .tsec .meta .snum {
+    font-family: "Fragment Mono", monospace;
+    font-size: 12.5px;
+    color: var(--teal-ink);
+    margin-bottom: 18px;
+  }
+
+  .tsec .meta h3 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 14px;
+  }
+
+  .tsec .meta p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    color: var(--ink-2);
+    max-width: 40ch;
+  }
+
+  .code {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: "Fragment Mono", monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    padding: 24px 26px;
+    overflow: auto;
+    min-width: 0;
+  }
+
+  .code .fname {
+    display: block;
+    font-size: 11.5px;
+    color: #6c6f78;
+    margin-bottom: 14px;
+    letter-spacing: 0.05em;
+  }
+
+  .code pre {
+    white-space: pre;
+    margin: 0;
+  }
+
+  .tk-kw {
+    color: #48bac4;
+  }
+
+  .tk-str {
+    color: #b9c78a;
+  }
+
+  .tk-cm {
+    color: #6c6f78;
+  }
+
+  .tk-num {
+    color: #d0a86e;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 26px 0 40px;
+    display: flex;
+    justify-content: space-between;
+    font-family: "Fragment Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink-2);
+  }
+
+  .tour-grid {
+    display: grid;
+    grid-template-columns: 1fr 88px;
+    gap: 0;
+  }
+
+  .tour-main {
+    padding-right: 56px;
+    min-width: 0;
+  }
+
+  .railwrap {
+    position: relative;
+    border-left: 1px solid var(--line);
+    padding-top: 2rem;
+  }
+
+  .rail {
+    position: sticky;
+    top: calc(15rem - 150px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    opacity: 0;
+    transform: translateX(6px);
+    pointer-events: none;
+    transition:
+      opacity 0.3s,
+      transform 0.3s;
+  }
+
+  .rail.on {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .rail-count {
+    font-family: "Fragment Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+
+  .rail-count b {
+    color: var(--teal-ink);
+    font-weight: 400;
+  }
+
+  .rail-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .rdot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dotc);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition:
+      background 0.2s,
+      transform 0.2s;
+  }
+
+  .rdot:hover {
+    background: var(--ink-2);
+  }
+
+  .rdot.active {
+    background: var(--teal);
+    transform: scale(1.4);
+  }
+
+  @media (max-width: 900px) {
+    .tour-grid {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .railwrap {
+      display: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      padding: 76px 0 68px;
+    }
+
+    .hero-orb {
+      width: 120vw;
+      right: -55vw;
+      opacity: 0.45;
+    }
+
+    .features {
+      grid-template-columns: 1fr;
+    }
+
+    .feat {
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+      padding: 40px 0;
+    }
+
+    .feat:last-child {
+      border-bottom: none;
+    }
+
+    .tsec {
+      grid-template-columns: 1fr;
+      gap: 28px;
+      padding: 56px 0;
+    }
+
+    .tsec.tall {
+      min-height: 0;
+    }
+
+    .nav-right a:not(:last-child) {
+      display: none;
+    }
+  }
+</style>
+
+<style>
+  .ha-img-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    background: #f4f4f5;
+    border: 1px dashed #d4d4d8;
+    border-radius: 8px;
+    color: #71717a;
+    font-size: 12px;
+    font-family: system-ui, sans-serif;
+    min-height: 80px;
+    padding: 16px;
+    box-sizing: border-box;
+    animation: ha-img-pulse 1.5s ease-in-out infinite;
+  }
+
+  .ha-img-placeholder.ha-failed {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  @keyframes ha-img-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .ha-img-placeholder {
+      background: #27272a;
+      border-color: #3f3f46;
+      color: #a1a1aa;
+    }
+  }
+</style>

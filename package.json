@@ -29,6 +29,7 @@
     "dev:chat": "pnpm -F @luent/live-chat dev",
     "dev:ns-site": "pnpm -F @luent/nextscript-site docs:dev",
     "dev:luent-site": "pnpm -F @luent/luent-site docs:dev",
+    "dev:luent-docs": "pnpm -F luent-docs dev",
     "prep:luent:publish": "pnpm --dir packages/luent run prep:publish",
     "build:ns-site": "pnpm -F @luent/nextscript-site docs:build",
     "build:luent-site": "pnpm -F @luent/luent-site docs:build",

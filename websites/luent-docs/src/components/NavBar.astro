@@ -1,0 +1,66 @@
+---
+import { ThemeToggle } from "./ThemeToggle"
+---
+
+<nav>
+  <a href="#">
+    <img class="logo logo-light" src="/luent-logo-light.png" alt="Luent" />
+    <img class="logo logo-dark" src="/luent-logo-dark.png" alt="Luent" />
+  </a>
+  <div class="nav-right">
+    <a href="#">docs</a><a href="#">api</a><a href="#">examples</a><a href="#"
+      >github</a
+    >
+    <!-- <button class="toggle" onclick="toggleTheme()"
+      >theme: <span id="tname">light</span></button
+    > -->
+    <ThemeToggle client:load/>
+  </div>
+</nav>
+
+<style>
+  img.logo {
+    height: 26px;
+    display: block;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+  }
+
+  .nav-right a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-family: "Fragment Mono", monospace;
+  }
+
+  .nav-right a:hover {
+    color: var(--teal-ink);
+  }
+
+  /* .toggle {
+    border: 1px solid var(--line);
+    background: none;
+    color: var(--ink-2);
+    padding: 6px 12px;
+    font-family: "Fragment Mono", monospace;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+
+  .toggle:hover {
+    color: var(--ink);
+    border-color: var(--ink-2);
+  } */
+</style>

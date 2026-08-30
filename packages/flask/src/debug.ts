@@ -1,6 +1,7 @@
 import { AsyncState } from "./context/AsyncContext";
 
 export const TRACE = 'trace'
+const __DEV__ = process.env.NODE_ENV === 'development'
 
 export const [getAsyncPath, __DEV__traceStack] = __DEV__ ? AsyncState<string>(TRACE) : [];
 

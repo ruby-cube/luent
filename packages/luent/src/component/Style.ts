@@ -2,7 +2,7 @@ import { beforeUnmount, beforeDetach, atMount } from "../flask/flask-hooks";
 import { writeToPortal } from "../server/portals";
 import { isTransitioningOut } from "../transitions/transitions";
 import { Flask, getFlask } from "@luent/flask";
-import { queueRender, awaitTick, queueTask } from "@luent/quarky";
+import { queueTask } from "@luent/quarky";
 import { inShadow } from "./shadow";
 // import { createHash } from "node:crypto";
 
@@ -43,6 +43,7 @@ let existingStyleTags: Set<string> | undefined;
 
 export function RenderPageWithStyles() {
   const tags = new Set<string>();
+
   return function renderPage(render: () => any) {
     try {
       existingStyleTags = tags;
@@ -58,12 +59,9 @@ export function Style(cssText: string) {
   const id = genUID(cssText)
   const shadow = inShadow()
   if (import.meta.env.SSR) {
-    if (existingStyleTags?.has(id)) {
-      return;
-    }
-    existingStyleTags?.add(id)
     const style = `<style id="${id}">${cssText}</style>`
     if (shadow) return { element: style }
+     console.log('write <style>')
     writeToPortal('head', style)
     return;
   }

@@ -58,8 +58,9 @@ export function callWithShadowRoot(render: RenderSlot, shadowRoot: ShadowRoot | 
 }
 
 
-export function ShadowRoot(setup: FromTag<{Slot: RenderSlot}>) {
-  const {Slot} = setup
+export function ShadowRoot(setup: FromTag<{ Slot: RenderSlot }>) {
+  const { Slot } = setup
+
   return import.meta.env.SSR
     ?
     <style-scope>
@@ -67,7 +68,29 @@ export function ShadowRoot(setup: FromTag<{Slot: RenderSlot}>) {
         {callWithShadowRoot(Slot, inShadow())}
       </template>
     </style-scope>
-    : <shadow-root mode='open'>
-      {Slot()}
-    </shadow-root>
+    : createShadowRoot({ mode: 'open', Slot })
+
+
+  // <shadow-root mode='open'>
+  //   {Slot()}
+  // </shadow-root>
+}
+
+
+// This is needed because Vitepress removes style tags. So we need to create a 'black box' via custom element
+export function defineStyleScopeElement() {
+  // define custom elements
+  if (!customElements.get('style-scope')) {
+    customElements.define('style-scope', class StyleScope extends HTMLElement {
+      connectedCallback() {
+        const template = this.querySelector('template')
+        const content = template?.content.cloneNode(true) as DocumentFragment | undefined
+
+        const slot = content ?? document.createElement('slot')
+        const root = this.attachShadow({ mode: 'open' });
+        root.appendChild(slot)
+        // if (template) template.remove()
+      }
+    });
+  }
 }

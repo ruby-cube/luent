@@ -27,6 +27,7 @@ export function writeJSXNode(
       return writeShadowRoot(config)
     // TODO:
     case 'o-link':
+       console.log('write o-link')
       return writeToPortal('head',
         writeElement('link', undefined, <ElementConfig>config)
       );
@@ -34,10 +35,12 @@ export function writeJSXNode(
     case 'o--body':
       // TODO: portal attributes
       if (Slot) return writeToPortal('body', writeSlot(Slot));
+      return '';
 
     case 'o--html':
       // TODO: portal attributes
       if (Slot) return writeToPortal('html', writeSlot(Slot));
+      return '';
 
     case 'o--head':
       return writeToPortal('head', writeSlot(Slot));

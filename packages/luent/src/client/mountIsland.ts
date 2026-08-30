@@ -28,6 +28,12 @@ export function mountIsland<T extends AnyObject>(App: ComponentTag<T> | RenderFu
       popContext() // for sibling components to access parent, must be set AFTER `component()`
     }
   })
+  
+  return {
+    unmount() {
+      flask.emitDiscard()
+    }
+  }
 }
 
 

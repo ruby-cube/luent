@@ -8,7 +8,7 @@ The API reference is still being written. In the meantime, here is a overview of
 #### Client-side
 - `mountIsland()` to mount an interactive island onto existing HTML
 #### Server-side
-- `withIslands()` <span class='doc-tag'>Experimental</span> to transform HTML to include islands
+<!-- - `withIslands()` <span class='doc-tag'>Experimental</span> to transform HTML to include islands -->
 - `writeIsland()` to write an island as static HTML
 
 ## Reactivity

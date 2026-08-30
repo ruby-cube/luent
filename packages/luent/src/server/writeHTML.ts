@@ -1,4 +1,4 @@
-import { camelToKebabCase, isArray, isFunction, isObject, isString, normalizeToArray } from "@luent/utils";
+import { isFunction, isObject, isString, normalizeToArray } from "@luent/utils";
 import { composeBindings, toSetup } from "../component/bindings";
 import { ComponentTag } from "../component/Component";
 import { RenderSlot } from "../component/bindings-types";
@@ -10,7 +10,6 @@ import { instantUpdate, Ion, isGetter, toValue } from "@luent/quarky";
 import { isBooleanAttribute } from "../element/attributes";
 import { ReactiveClasses, TagClass, TagStyle } from "../element/styles";
 import { AnyObject, Booleanny, Falsey } from "@luent/types";
-import { Provided, RootContext } from "../context/Context";
 import { Flask, flaskStack } from "@luent/flask";
 import { InnerHTMLKit, isInnerHTMLKit } from "../node/InnerHTML";
 import { createRootContext } from "../context/provide";
