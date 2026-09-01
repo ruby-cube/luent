@@ -2,7 +2,6 @@
 //  ‘counter-island’: Counter)
 // }))
 
-import { RenderPageWithStyles } from "../component/Style";
 import { RenderFunction } from "../node/makeJSXNode";
 import { encodePortals } from "./portals";
 import { writeIsland } from "./writeHTML";

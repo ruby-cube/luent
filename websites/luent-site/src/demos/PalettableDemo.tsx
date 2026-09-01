@@ -1,6 +1,6 @@
 import { Code, DemoContainer, Palettable } from '@luent/websites-shared'
 import { highlightCode } from "../highlighter"
-import { css, Else, ElseIf, FromTag, If, NodeRef, RenderSlot, Style, ion, MutableIon} from 'luent'
+import { css, Else, ElseIf, FromTag, If, RenderSlot, Style, ion, MutableIon} from 'luent'
 
 export function PalettableDemo() {
   const $tab = ion('main' as 'main' | 'alt', {

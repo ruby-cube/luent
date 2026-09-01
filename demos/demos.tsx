@@ -50,6 +50,7 @@ import { TestRenderCycle } from "./src/TestRenderCycle"
 import { TestIfElseDisplayView } from "./src/TestIfElseDisplayView"
 import { TestNameEditor } from "./src/TestNameEditor"
 import { TestColorSort } from "./src/TestColorSort"
+import { TestStyleComments } from "./src/TestStyleComments"
 
 export function runDemo() {
   mountIsland(() => {
@@ -60,7 +61,7 @@ export function runDemo() {
       {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
       {/* <BottomlessBlokkis></BottomlessBlokkis> */}
       {/* <TodoMVC></TodoMVC> */}
-      <TestAsyncSelect/>
+      <TestStyleComments/>
     </>
     // return <TestInnerHTML/>
   }, '#root')

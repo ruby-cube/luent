@@ -1,4 +1,4 @@
-import { getPortals, RenderPageWithStyles, encodePortals, defineStyleScopeElement } from "luent/server";
+import { encodePortals, defineStyleScopeElement } from "luent/server";
 import { type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
 import { AnyObject } from "@luent/types";
@@ -79,8 +79,6 @@ declare global {
 }
 
 export function TransformLuentIslands(Islands: AnyObject) {
-  const pages = new Set()
-  let withPageContext: (cb: () => any) => any;
 
   return (state, startLine: number, endLine: number, silent: boolean) => {
     const start = state.bMarks[startLine] + state.tShift[startLine]
@@ -90,13 +88,7 @@ export function TransformLuentIslands(Islands: AnyObject) {
     if (silent) return true
 
     const page = state.env?.relativePath
-    if (page) {
-      if (!pages.has(page)) {
-        pages.add(page)
-        withPageContext = RenderPageWithStyles()
-      }
-    }
-    else {
+    if (!page) {
       return false;
     }
     const name = line.slice(':::luent '.length, state.eMarks[startLine]).trim()
@@ -124,7 +116,7 @@ export function TransformLuentIslands(Islands: AnyObject) {
     const inner = state.src.slice(innerStart, innerEnd)
     console.log('NAME', name, ':')
 
-    const islandHtml = renderFallback('luent-island', () => Islands[name](inner), withPageContext, page)
+    const islandHtml = renderFallback('luent-island', () => Islands[name](inner))
 
     const islandTokenContent =
       `<${name}>` +
@@ -185,9 +177,9 @@ export function TransformLuentIslands(Islands: AnyObject) {
 
 // const islandTokenContent = `<await-mount><ns-code ns-name='${nsName}' ts-name='${tsName}' ns-code='${nsCode}' ts-code='${tsCode}'></ns-code><template #fallback>${islandHtml}</template></await-mount>`
 
-function renderFallback(name: string, write: () => string, withPageContext: (cb: () => any) => string, page: string) {
+function renderFallback(name: string, write: () => string) {
   const html = write
-    ? withPageContext(() => encodePortals(write, page))
+    ? encodePortals(write)
     : `<div data-luent-island-error="${name}">Unknown island: ${name}</div>`
   return encodeStyleTags(html)
 }

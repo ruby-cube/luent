@@ -1,129 +1,29 @@
-import { css, Else, For, If, ion, Ion, NodeRef, Style } from 'luent'
-import { $CodeTab, Code, CodeTour, TourSection } from '@luent/websites-shared'
-import { highlightCode } from './highlighter'
-import { TourNav } from './TourNav'
+import { Else, If, type FromTag, type Ion, type RenderSlot } from 'luent'
+import { $CodeTab } from '@luent/websites-shared'
+import type { CodeTab, TourSection } from './types';
 
-let direction = 'code-right'
-function flowDirection() {
-  if (direction === 'code-right') return direction = 'code-left'
-  return direction = 'code-right'
-}
 
-function toId(heading: string) {
+export function toID(heading: string) {
   return heading.toLowerCase().replaceAll(' ', '-')
 }
 
-const sections: {
-  (...args: any[]): any,
-  heading: string,
-  nsx?: string,
-  tsx?: string,
-  ns?: string,
-  ts?: string,
-  $tab?: Ion<'main' | 'alt'> & { toggle: () => void },
-  nsHover?: { [key: string]: string },
-  tsHover?: { [key: string]: string },
-}[] = [
-    FunctionalComponents,
-    UnifiedReactivity,
-    TypeExplicit,
-    SelectiveReactivity,
-    ReusableLogic,
-    FlowExpressions,
-    DynamicViewSetup,
-    MutationSafety,
-    LifecycleHooks,
-    Portals,
-    ContextBindings,
-    ViewPreservation
-  ]
-
-export function CodeGlimpses() {
-
-  return (
-    <>
-      <TourNav
-        headings={sections.map(section => ({
-          text: section.heading,
-          id: toId(section.heading)
-        }))}/>
-      <CodeTour>
-        {For(sections, (render) => {
-          const jsx = 'nsx' in render
-          const ns = jsx ? 'nsx' : 'ns'
-          const ts = jsx ? 'tsx' : 'ts'
-          const heading = render.heading
-
-          return <TourSection
-            id={toId(heading)}
-            flow={flowDirection()}
-            altCode={{ name: ns, code: render[ns], hover: render.nsHover }}
-            mainCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
-            highlightCode={highlightCode}
-            tab={render.$tab ?? $CodeTab()}
-          >
-            <h3>{heading}</h3>
-            {render(render.$tab)}
-          </TourSection>
-        })}
-      </CodeTour>
-
-      {Style(css`
-        .tour-copy h3 {
-          margin-top: 0;
-          margin-bottom: 0.75rem;
-          font-size: clamp(1.5rem, 3.1vw, 2.35rem);
-          line-height: 1.08;
-          letter-spacing: -0.02em;
-          color: var(--vp-c-text-1);
-        }
-
-        .tour-copy p {
-          margin: 0 0 0.9rem;
-          font-size: clamp(1rem, 1.25vw, 1.1rem);
-          line-height: 1.7;
-          color: var(--vp-c-text-2);
-          max-width: 58ch;
-        }
-
-        .tour-copy p:not(.tour-note) {
-          margin-bottom: 1.4rem;
-          margin-top: .75rem;
-        }
-
-        .tour-copy p:last-child {
-          margin-bottom: 0;
-        }
-
-        .tour-copy .tour-note {
-          font-size: clamp(0.9rem, 0.95vw, 0.96rem);
-        }
-      `)}
-    </>
-  )
-}
-
-
-FunctionalComponents.heading = 'Functional components'
-
-function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
-  return <>
-    <p style='text-wrap: balance'>
+const FunctionalComponents: TourSection = {
+  heading: 'Functional components',
+  Description() {
+    return <>
       Write components as render functions that run once to create a view. Views are composed using JSX and updated through fine-grained reactivity.
-    </p>
-    <p style='text-wrap: balance'>
+    </>
+  },
+  Note() {
+    return <>
       <small>
         <strong>Upcoming language alternative:</strong> <a href=''>NextScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
       </small>
-    </p>
-    <a href='/guide/anatomy-of-an-app' class='medium brand'>Learn more</a>
-    {/* <p>
-      Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
-    </p> */}
-  </>
+    </>
+  },
+  tab: $CodeTab(),
+  url: '/guide/anatomy-of-an-app'
 }
-
-FunctionalComponents.$tab = $CodeTab()
 
 FunctionalComponents.tsx =
   `function EmojiCollection(setup: FromTag<{
@@ -189,27 +89,33 @@ FunctionalComponents.nsx =
 mountIsland(EmojiCollection, '#app')
 `
 
-UnifiedReactivity.heading = 'Unified reactivity'
-UnifiedReactivity.$tab = FunctionalComponents.$tab
-function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
-  return <>
-    <p>
+
+const UnifiedReactivity: TourSection = {
+  heading: 'Unified reactivity',
+  Description() {
+    return <>
       Manage simple, derived, async, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
-    </p>
-    <p style='text-wrap: balance'><small>
-      {If(() => $tab() === 'main',
-        <>
-          Note that the <code>$</code> prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
-        </>
-      )}
-      {Else(
-        <>
-          Note that, in NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
-        </>
-      )}
-    </small></p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
-  </>
+    </>
+  },
+  Note(setup: FromTag<{ tab: CodeTab }>) {
+    const { $tab } = setup
+    return <>
+      <small>
+        {If(() => $tab() === 'main',
+          <>
+            Note that the <code>$</code> prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
+          </>
+        )}
+        {Else(
+          <>
+            Note that, in NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
+          </>
+        )}
+      </small>
+    </>
+  },
+  tab: $CodeTab(),
+  url: '/guide/anatomy-of-an-app'
 }
 
 UnifiedReactivity.ns =
@@ -260,16 +166,21 @@ const user = ionic(new User())
 
 `
 
-TypeExplicit.heading = 'Type-explicit reactivity'
 
-function TypeExplicit() {
-  return <>
-    <p style='text-wrap: balance'>
+
+
+const TypeExplicit: TourSection = {
+  heading: 'Type-explicit reactivity',
+  Description() {
+    return <>
       Distinguish reactive variables from plain variables through type information. Hover variables in the example to inspect their types.
-    </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
-  </>
+    </>
+  },
+  tab: $CodeTab(),
+  url: '/guide/anatomy-of-an-app'
 }
+
+
 
 TypeExplicit.nsHover = {
   count: 'const count: number',
@@ -331,15 +242,24 @@ return <>
 </>
 
 `
-SelectiveReactivity.heading = 'Selective reactivity'
 
-function SelectiveReactivity() {
-  return <>
-    <p>
+
+const SelectiveReactivity: TourSection = {
+  heading: 'Selective reactivity',
+  Description() {
+    return <>
       Apply reactivity where it matters. Selective reactivity reduces unnecessary performance overhead and offers clarity and control over what gets re-rendered.
-    </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
-  </>
+    </>
+  },
+  Note() {
+    return <>
+      <small>
+        <strong>Upcoming language alternative:</strong> <a href=''>NextScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
+      </small>
+    </>
+  },
+  tab: $CodeTab(),
+  url: '/guide/anatomy-of-an-app'
 }
 
 SelectiveReactivity.nsx =
@@ -773,3 +693,18 @@ ViewPreservation.tsx =
 </div>
 
 `
+
+export const tourSections: TourSection[] = [
+  FunctionalComponents,
+  UnifiedReactivity,
+  TypeExplicit,
+  SelectiveReactivity,
+  // ReusableLogic,
+  // FlowExpressions,
+  // DynamicViewSetup,
+  // MutationSafety,
+  // LifecycleHooks,
+  // Portals,
+  // ContextBindings,
+  // ViewPreservation
+]

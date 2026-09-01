@@ -1,6 +1,6 @@
 import { CodeGlimpses } from "./CodeGlimpses";
-export { getPortals, encodePortals, RenderPageWithStyles, transformPortals } from 'luent/server'
-import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, awaiting, tick, awaitTick } from 'luent'
+export { encodePortals, injectPortals, extractPortals } from 'luent/server'
+import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, awaitTick } from 'luent'
 export * from "@luent/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";

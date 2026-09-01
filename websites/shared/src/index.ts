@@ -10,7 +10,7 @@ export * from './demos/HabitTracker'
 export * from './demos/Palettable'
 export * from './smoothScroll'
 
-export { Code, $Tab } from './Code'
+export { Code, $CodeTab } from './Code'
 export { CodeTour, TourSection } from './CodeTour'
 export { DemoContainer } from './DemoContainer'
 export { DoodleCanvas } from './demos/DoodleCanvas'

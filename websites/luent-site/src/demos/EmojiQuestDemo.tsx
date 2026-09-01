@@ -1,8 +1,8 @@
-import { $Tab, Code, DemoContainer, EmojiQuest } from '@luent/websites-shared'
+import { $CodeTab, Code, DemoContainer, EmojiQuest } from '@luent/websites-shared'
 import { highlightCode } from "../highlighter"
 
 export function EmojiQuestDemo() {
-  const $tab = $Tab()
+  const $tab = $CodeTab()
   
   return (
     <>

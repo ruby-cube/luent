@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
-import { TransformLuentIslands, transformPortals, Islands, isCustomElement } from './.luent-islands/server/index.js'
+import { TransformLuentIslands, injectPortals, extractPortals, Islands, isCustomElement } from './.luent-islands/server/index.js'
 import { createSharedViteConfig } from '../../shared/vite.shared.js'
 import { markdownShikiConfig } from './theme/shiki-setup.js'
 
@@ -25,9 +25,8 @@ export default defineConfig({
   },
 
   transformHtml(code, id, ctx) {
-    console.log('TRANSFORM HTML')
-    // FIX:
-    return transformPortals(code, ctx.page)
+    const { html, portals } = extractPortals(code)
+    return injectPortals(html, portals)
   },
 
   vite: {

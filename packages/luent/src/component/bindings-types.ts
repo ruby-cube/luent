@@ -38,6 +38,7 @@ export type TagBindings<D> =
   & TagDOMEvents<D>
   & TagEvents<D>
   & TagSlot<D>
+  & TagNamedSlots<D>
 // TODO: MaybeMutable<D> mu?:x
 
 // PlainInput<D>
@@ -62,6 +63,11 @@ type Attributes<D> = {
   : D[K] extends Ion<infer S> | undefined
   ? S | D[K]
   : D[K]
+}
+
+type TagNamedSlots<D> = {
+  [K in keyof D as
+  K extends `Slot:${string}` ?K : never]: D[K]
 }
 
 type TagDOMEvents<D> = {

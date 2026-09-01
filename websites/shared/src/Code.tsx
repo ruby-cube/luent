@@ -1,4 +1,4 @@
-import { Ion, ion, layout, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component, queueLayout } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component, queueLayout } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -26,7 +26,7 @@ function markHover(code: string, map?: { [key: string]: string }) {
 
 type CodeTab = { name: string, code: string, lang?: string, hover?: { [key: string]: string } }
 
-export function $Tab() {
+export function $CodeTab() {
   return ion('main' as 'main' | 'alt', {
     toggle() {
       this.value === 'main'
@@ -45,7 +45,7 @@ export function Code(setup: FromTag<{
   tab?: Ion<'main' | 'alt'> & { toggle(): void }
 }>) {
   const { main, alt, highlight, trusted, showSticky = false,
-    $tab = $Tab()
+    $tab = $CodeTab()
   } = setup;
 
   let mainWidth = 0;

@@ -1,48 +1,104 @@
 import { readFile } from 'node:fs/promises'
 import { transformWithOxc } from 'vite'
+import type { ConfigEnv, Plugin, UserConfig, ViteDevServer } from 'vite'
 import * as babel from '@babel/core'
 import { luentPreTransform as BabelLuentPlugin } from '@luent/babel-plugin-luent'
 import { transpileNextScript } from '@luent/nextscript/transpile'
+import { discoverPages } from './html-generator'
 
-export default function LuentPlugin(options = {}) {
+interface LuentPluginOptions {
+  useWorkspace?: boolean
+}
+
+// [] generate html from html.tsx
+
+const VIRTUAL_PREFIX = '\0luent:'
+
+interface Page {
+  id: string
+  route: string
+}
+
+interface ClientModule {
+  id: string
+  sourceId: string
+}
+
+
+export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
+  const pages = new Map<string, Page>()
+  const clientModules = new Map<string, ClientModule>()
+  let server: ViteDevServer
 
   return {
     name: 'luent',
     enforce: 'pre',
 
-    config(userConfig, { command, ssrBuild }) {
+    configureServer(devServer) {
+      server = devServer
+    },
+
+    async config(userConfig: UserConfig, env: ConfigEnv) {
+      const { command, isSsrBuild } = env
       const conditions = userConfig.resolve?.conditions ?? []
+      const configuredExtensions = userConfig.resolve?.extensions
+
+      const input = await discoverPages({
+        forEach(id, route) {
+          pages.set(id, { id, route })
+        }
+      })
+
       return {
         resolve: {
+          ...userConfig.resolve,
           conditions: options.useWorkspace ? composeList('luentWorkspace', conditions) : conditions,
+          ...(configuredExtensions
+            ? { extensions: composeList('.nsx', composeList('.ns', configuredExtensions)) }
+            : {}),
         },
-        extensions: ['.ts', '.jsx', '.tsx', '.ns', '.nsx'],
         oxc: {
-          ...userConfig.resolve?.oxc ?? {},
+          ...(userConfig.oxc || {}),
           jsx: {
-            ...userConfig.resolve?.oxc?.jsx ?? {},
             throwIfNamespace: false,
           },
         },
         define: {
+          ...(userConfig.define ?? {}),
           __INTERNAL__: false,
           __TEST__: false,
-          ...userConfig.resolve?.define ?? {},
           __DEV__: command !== 'build',
-          __SSR__: !!ssrBuild
+          __SSR__: Boolean(isSsrBuild),
+        },
+        build: {
+          rolldownOptions: {
+            input
+          }
         }
       }
     },
 
-    // TODO: simplify pipeline
+    buildStart() {
+      for (const page of pages.values()) {
+        const clientEntry = `${VIRTUAL_PREFIX}page:${page.id}`
+
+        this.emitFile({
+          type: 'chunk',
+          id: clientEntry,
+          name: `${page.route || 'index'}.client`,
+        })
+      }
+    },
+
+    // TODO: move .nsx transform to transform()
     async load(id) {
       const fileName = id.split('?')[0]
       if (!fileName.endsWith('.nsx')) {
-        return;
+        return null
       }
 
       const code = await readFile(fileName, 'utf8')
-      const { transpiled, sourceMap } = transpileNextScript(fileName, code)
+      const { transpiled } = transpileNextScript(fileName, code)
 
       const result = await babel.transformAsync(transpiled.code, {
         plugins: [
@@ -50,7 +106,6 @@ export default function LuentPlugin(options = {}) {
           ['@babel/plugin-syntax-typescript', { isTSX: true }]
         ],
         filename: fileName,
-        inputSourceMap: sourceMap,
         sourceMaps: true,
         generatorOpts: {
           jsescOption: {
@@ -58,6 +113,10 @@ export default function LuentPlugin(options = {}) {
           }
         }
       })
+
+      if (!result?.code) {
+        return null
+      }
 
       const normalized = await transformWithOxc(result.code, fileName.replace(/\.nsx$/, '.tsx'), {
         jsx: {
@@ -77,7 +136,7 @@ export default function LuentPlugin(options = {}) {
     async transform(code, id) {
       const fileName = id.split('?')[0]
       if (!fileName.endsWith('.jsx') && !fileName.endsWith('.tsx')) {
-        return;
+        return null
       }
 
       // TODO: migrate to oxc
@@ -95,6 +154,10 @@ export default function LuentPlugin(options = {}) {
         }
       })
 
+      if (!result?.code) {
+        return null
+      }
+
       const normalized = await transformWithOxc(result.code, fileName, {
         jsx: {
           runtime: 'automatic',
@@ -109,9 +172,22 @@ export default function LuentPlugin(options = {}) {
         map: normalized.map
       }
     },
+
+    generateBundle() {
+      for (const page of pages) {
+        const Page = await loadPage(server, page)
+
+        const html = renderToString(Page)
+
+        const extracted = extractPortals(html)
+        const finalHtml = injectPortals(extracted)
+
+        // Write finalHtml to dist/...
+      }
+    }
   }
 }
 
-function composeList(item, existing) {
-  return [item, ...existing.filter(c => c !== item)]
+function composeList(item: string, existing: string[]): string[] {
+  return [item, ...existing.filter((c) => c !== item)]
 }

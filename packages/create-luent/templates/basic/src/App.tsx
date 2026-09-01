@@ -27,7 +27,7 @@ export function App() {
     <footer>
       <a class="built-with" href="https://luent.dev" target="_blank" rel="noopener noreferrer">
         <img class="mark"
-          src="/src/assets/luent-logo-512px.png"
+          src="/luent-logo-512px.png"
           alt="Luent logo" width="215" height="240" />
         <span>Built with Luent</span>
       </a>

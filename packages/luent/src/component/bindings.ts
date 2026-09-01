@@ -54,7 +54,7 @@ export function toSetup(bindings: RawBindings): SetupBindings {
   const nested = setup.bind = Object.create(null)
 
   const keys = Object.keys(bindings) as string[]
-  const Slot = bindings.Slot as AnyObject
+  const Slot = bindings.Slot ?? {} as AnyObject
 
   for (const rawKey of keys) {
     if (rawKey === 'auto-bind') continue;

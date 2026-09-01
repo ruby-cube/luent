@@ -80,7 +80,7 @@
         "./packages/types/index.ts"
       ],
       "vite-plugin-luent": [
-        "./plugins/vite-plugin-luent/src/index.js"
+        "plugins/vite-plugin-luent/src/index.ts"
       ]
     }
   },
