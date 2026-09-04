@@ -38,7 +38,7 @@ export type TagBindings<D> =
   & TagDOMEvents<D>
   & TagEvents<D>
   & TagSlot<D>
-  & TagNamedSlots<D>
+  // & TagNamedSlots<D>
 // TODO: MaybeMutable<D> mu?:x
 
 // PlainInput<D>
@@ -55,7 +55,7 @@ export type TagBindings<D> =
 
 type Attributes<D> = {
   [K in keyof D as
-  K extends 'Slot' | `Slot:${string}` | `on:${string}` | `mu:${string}` | `...` ? never
+  K extends 'Slot' | `on:${string}` | `mu:${string}` | `...` ? never
   : K extends `on${infer Head}${string}` ? Head extends Uppercase<Head> ? never : K
   : K]:
   D[K] extends Ion<infer S>
@@ -65,18 +65,18 @@ type Attributes<D> = {
   : D[K]
 }
 
-type TagNamedSlots<D> = {
-  [K in keyof D as
-  K extends `Slot:${string}` ? K : never]: D[K]
-}
+// type TagNamedSlots<D> = {
+//   [K in keyof D as
+//   K extends `Slot:${string}` ? K : never]: D[K]
+// }
 
 type TagDOMEvents<D> = {
   [K in keyof D as K extends `on:${string}` ? K : never]: (event: D[K]) => void
 }
 
 type TagSlot<D> = D extends { Slot: infer S } ? {
-  children?: (() => RawJSXNode) | RawJSXNode
-} : { children?: (() => RawJSXNode) | RawJSXNode }
+  children: S | RawJSXNode
+} : {}
 
 
 
@@ -110,8 +110,6 @@ export type FromTag<D = {}> =
   & { '~bindings'?: TagBindings<D> & ForwardedBindings<D> }
 
 type ForwardedBindings<D> = D extends { '...': infer T } ? T extends RefSource ? WithRef<T> : {} : {}
-
-type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S } : {}
 
 type ElementAttributes<D> =
   D extends keyof JSX.IntrinsicElements ? Omit<JSX.IntrinsicElements[D], 'ref' | keyof LuentHooks<any>> : {} // TODO: use Attributes from index.d.ts

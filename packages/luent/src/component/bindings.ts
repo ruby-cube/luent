@@ -54,7 +54,6 @@ export function toSetup(bindings: RawBindings): SetupBindings {
   const nested = setup.bind = Object.create(null)
 
   const keys = Object.keys(bindings) as string[]
-  const Slot = bindings.Slot ?? {} as AnyObject
 
   for (const rawKey of keys) {
     if (rawKey === 'auto-bind') continue;
@@ -84,11 +83,6 @@ export function toSetup(bindings: RawBindings): SetupBindings {
       case 'after':
         const hooks = setup[HOOKS] ?? (setup[HOOKS] = Object.create(null))
         hooks[rawKey] = bindings[rawKey]
-        break;
-
-      case 'Slot': // Named slots
-        const render = bindings[rawKey]
-        if (render) Slot[key] = render
         break;
 
       case 'xray':
@@ -237,10 +231,10 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
         bindings[rawKey] = undefined // prevents hook being simultaneously registered on element and component
         break;
 
-      case 'Slot': // Named slots
-        const Slot = composed.Slot ?? (composed.Slot = bindings.NamedSlot) // FIX:
-        Slot[key] = bindings[rawKey]
-        break;
+      // case 'Slot': // Named slots
+      //   const Slot = composed.Slot ?? (composed.Slot = bindings.NamedSlot) // FIX:
+      //   Slot[key] = bindings[rawKey]
+      //   break;
 
       default:
         composeAttributes(bindings, rawKey)
