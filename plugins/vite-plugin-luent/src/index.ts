@@ -26,37 +26,74 @@ interface ClientModule {
 
 
 export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
-  const pages = new Map<string, Page>()
-  const clientModules = new Map<string, ClientModule>()
-  let server: ViteDevServer
+  // const pages = new Map<string, Page>()
+  // const clientModules = new Map<string, ClientModule>()
+  // let server: ViteDevServer
 
   return {
     name: 'luent',
     enforce: 'pre',
 
-    configureServer(devServer) {
-      server = devServer
-    },
+    // configureServer(devServer) {
+    //   server = devServer
+    // },
 
     async config(userConfig: UserConfig, env: ConfigEnv) {
       const { command, isSsrBuild } = env
       const conditions = userConfig.resolve?.conditions ?? []
+      const workspaceConditions = options.useWorkspace
+        ? composeList('luentWorkspace', conditions)
+        : conditions
       const configuredExtensions = userConfig.resolve?.extensions
+      const optimizeDeps = userConfig.optimizeDeps
+      const ssrOptions = typeof userConfig.ssr === 'object' && userConfig.ssr !== null ? userConfig.ssr : undefined
 
-      const input = await discoverPages({
-        forEach(id, route) {
-          pages.set(id, { id, route })
-        }
-      })
+      // const input = await discoverPages({
+      //   forEach(id, route) {
+      //     pages.set(id, { id, route })
+      //   }
+      // })
 
       return {
         resolve: {
           ...userConfig.resolve,
-          conditions: options.useWorkspace ? composeList('luentWorkspace', conditions) : conditions,
+          conditions: workspaceConditions,
           ...(configuredExtensions
             ? { extensions: composeList('.nsx', composeList('.ns', configuredExtensions)) }
             : {}),
         },
+        ...(options.useWorkspace
+          ? {
+              optimizeDeps: {
+                ...optimizeDeps,
+                rolldownOptions: {
+                  ...(optimizeDeps?.rolldownOptions ?? {}),
+                  resolve: {
+                    ...(optimizeDeps?.rolldownOptions?.resolve ?? {}),
+                    conditionNames: composeList(
+                      'luentWorkspace',
+                      optimizeDeps?.rolldownOptions?.resolve?.conditionNames ?? []
+                    ),
+                  },
+                },
+              },
+              ssr: {
+                ...ssrOptions,
+                noExternal: composeNoExternal(ssrOptions?.noExternal),
+                resolve: {
+                  ...(ssrOptions?.resolve ?? {}),
+                  conditions: composeList(
+                    'luentWorkspace',
+                    ssrOptions?.resolve?.conditions ?? []
+                  ),
+                  externalConditions: composeList(
+                    'luentWorkspace',
+                    ssrOptions?.resolve?.externalConditions ?? []
+                  ),
+                },
+              },
+            }
+          : {}),
         oxc: {
           ...(userConfig.oxc || {}),
           jsx: {
@@ -70,25 +107,25 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
           __DEV__: command !== 'build',
           __SSR__: Boolean(isSsrBuild),
         },
-        build: {
-          rolldownOptions: {
-            input
-          }
-        }
+        // build: {
+        //   rolldownOptions: {
+        //     input
+        //   }
+        // }
       }
     },
 
-    buildStart() {
-      for (const page of pages.values()) {
-        const clientEntry = `${VIRTUAL_PREFIX}page:${page.id}`
+    // buildStart() {
+    //   for (const page of pages.values()) {
+    //     const clientEntry = `${VIRTUAL_PREFIX}page:${page.id}`
 
-        this.emitFile({
-          type: 'chunk',
-          id: clientEntry,
-          name: `${page.route || 'index'}.client`,
-        })
-      }
-    },
+    //     this.emitFile({
+    //       type: 'chunk',
+    //       id: clientEntry,
+    //       name: `${page.route || 'index'}.client`,
+    //     })
+    //   }
+    // },
 
     // TODO: move .nsx transform to transform()
     async load(id) {
@@ -173,21 +210,42 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
       }
     },
 
-    generateBundle() {
-      for (const page of pages) {
-        const Page = await loadPage(server, page)
+    // generateBundle() {
+    //   for (const page of pages) {
+    //     const Page = await loadPage(server, page)
 
-        const html = renderToString(Page)
+    //     const html = renderToString(Page)
 
-        const extracted = extractPortals(html)
-        const finalHtml = injectPortals(extracted)
+    //     const extracted = extractPortals(html)
+    //     const finalHtml = injectPortals(extracted)
 
-        // Write finalHtml to dist/...
-      }
-    }
+    //     // Write finalHtml to dist/...
+    //   }
+    // }
   }
 }
 
 function composeList(item: string, existing: string[]): string[] {
   return [item, ...existing.filter((c) => c !== item)]
+}
+
+function composeNoExternal(
+  existing: true | string | RegExp | (string | RegExp)[] | undefined
+): true | (string | RegExp)[] {
+  const workspacePackages = /^(luent|@luent\/)/
+
+  if (existing === true) {
+    return true
+  }
+
+  if (existing === undefined) {
+    return [workspacePackages]
+  }
+
+  const list = Array.isArray(existing) ? existing : [existing]
+  if (list.some((item) => item instanceof RegExp && item.source === workspacePackages.source)) {
+    return list
+  }
+
+  return [...list, workspacePackages]
 }

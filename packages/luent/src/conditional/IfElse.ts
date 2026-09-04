@@ -5,7 +5,7 @@ import { createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, queueRender, 
 import { Booleanny } from "@luent/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
-import { FromTag, MaybeIon, RenderSlot } from "../component/bindings-types";
+import { FromTag, MaybeIon, RenderTag } from "../component/bindings-types";
 import { isPlainObject } from "@luent/utils";
 import { unmarkInitialRender, markInitialRender, TransitionConfigs } from "../transitions/transitions";
 import { setTransition } from "../transitions/Transition";
@@ -411,7 +411,7 @@ export function renderShowHideSeries(kits: ConditionalKit[]) {
 
 export function Remount(input: {
   discard: DiscardSignal,
-  Slot: RenderSlot
+  Slot: RenderTag
 
 }) {
   const { discard, Slot } = input;
@@ -419,7 +419,7 @@ export function Remount(input: {
 }
 
 export function Create(input: {
-  Slot: RenderSlot
+  Slot: RenderTag
 
 }) {
   const { Slot } = input;

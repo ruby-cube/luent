@@ -1,9 +1,9 @@
-import type { FromTag, Ion, RenderSlot } from "luent";
+import type { FromTag, Ion, RenderTag } from "luent";
 
 export interface TourSection {
   heading: string;
-  Description: RenderSlot;
-  Note?: RenderSlot<FromTag<{ tab: CodeTab }>>
+  Description: RenderTag;
+  Note?: RenderTag<FromTag<{ tab: CodeTab }>>
   url: string;
   tab: CodeTab & { toggle(): void },
   nsx?: string,

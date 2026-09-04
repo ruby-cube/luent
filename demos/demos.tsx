@@ -60,8 +60,8 @@ export function runDemo() {
       {/* <TestAsyncTabs></TestAsyncTabs> */}
       {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
       {/* <BottomlessBlokkis></BottomlessBlokkis> */}
-      {/* <TodoMVC></TodoMVC> */}
-      <TestStyleComments/>
+      <TestNamedSlots/>
+      {/* <TestStyleComments/> */}
     </>
     // return <TestInnerHTML/>
   }, '#root')

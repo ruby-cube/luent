@@ -1,4 +1,4 @@
-import { $of, component, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "luent";
+import { $of, component, css, Else, For, FromTag, If, RenderTag, Style, TagClass } from "luent";
 import { ion, Ion, Ionic, ionic } from "@luent/quarky";
 
 
@@ -27,7 +27,7 @@ export function EmojiQuest() {
 
 function Panel(setup: FromTag<{
   title: string,
-  Slot: RenderSlot
+  Slot: RenderTag
 }>) {
   const { title, Slot } = setup
 

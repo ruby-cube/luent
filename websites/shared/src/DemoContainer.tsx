@@ -1,4 +1,4 @@
-import { FromTag, NodeRef, ShadowRoot, RenderSlot, Style, css } from "luent";
+import { FromTag, NodeRef, ShadowRoot, RenderTag, Style, css } from "luent";
 
 // function Powerset(setup: {
 //   'mu:powers': Ionic<string[]> & { addRandomPower(): void }
@@ -21,7 +21,7 @@ import { FromTag, NodeRef, ShadowRoot, RenderSlot, Style, css } from "luent";
 // }
 
 export function DemoContainer(setup: FromTag<{
-  Slot: RenderSlot
+  Slot: RenderTag
 }>) {
   const { Slot, ...rest } = setup
   const $div = NodeRef('div')

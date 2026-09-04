@@ -1,76 +1,72 @@
-import { component, template, If, NodeRef, Portal, RenderSlot, beforeMount } from 'luent';
+import { component, template, If, NodeRef, Portal, RenderTag, beforeMount } from 'luent';
 import { $layout, ion, atLayout } from '@luent/quarky';
 import './TestTooltip.css'
 
 
 export function TestTooltip() {
 
-   return (
+  return <>
+    <div>
+      <ButtonWithTooltip
+        Slot:Tooltip={() =>
+          <div>
+            This tooltip does not fit above the button.
+            <br />
+            This is why it's displayed below instead!
+          </div>
+        }
+      >
+        Hover over me (tooltip below)
+      </ButtonWithTooltip>
 
-      <div>
-         <ButtonWithTooltip
-            Slot:Tooltip={(
-               <div>
-                  This tooltip does not fit above the button.
-                  <br />
-                  This is why it's displayed below instead!
-               </div>
-            )}
-         >
-            Hover over me (tooltip below)
-         </ButtonWithTooltip>
+      <div style={{ height: '100px' }} />
 
-         <div style={{ height: '100px' }} />
+      <ButtonWithTooltip
+        Slot:Tooltip={() =>
+          <div>
+            This tooltip fits above the button.
+          </div>
+        }
+      >Hover over me (tooltip above)</ButtonWithTooltip>
 
-         <ButtonWithTooltip
-            Slot:Tooltip={(
-               <div>
-                  This tooltip fits above the button.
-               </div>
-            )}
-         >Hover over me (tooltip above)</ButtonWithTooltip>
+      <div style={{ height: '100px' }} ></div>
 
-         <div style={{ height: '100px' }} ></div>
-
-         <ButtonWithTooltip
-            Slot:Tooltip={(
-               <div>
-                  This tooltip fits above the button.
-               </div>
-            )}
-         >
-            Hover over me (tooltip above)
-         </ButtonWithTooltip>
-      </div>
-   );
+      <ButtonWithTooltip
+        TooltipContent={() =>
+          <div>
+            This tooltip fits above the button.
+          </div>
+        }
+      >
+        Hover over me (tooltip above)
+      </ButtonWithTooltip>
+    </div>
+  </>
 }
 
 
 
 export function ButtonWithTooltip(setup: {
-   Slot: RenderSlot,
-   'Slot:Tooltip': RenderSlot
+  Slot: RenderTag,
+  TooltipContent: RenderTag
 }) {
-   const { Slot } = setup
-   const $targetRect = ion(null as Rect | null)
+  const { Slot, TooltipContent } = setup
+  const $targetRect = ion(null as Rect | null)
 
-   return (
+  return <>
+    <button
+      on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
+      on:pointerleave={e => { $targetRect.value = null }}
+    >
+      <Slot />
+    </button>
 
-      <>
-         <button
-            on:pointerenter={e => { $targetRect.value = e.currentTarget.getBoundingClientRect() }}
-            on:pointerleave={e => { $targetRect.value = null }}
-         >
-            {Slot()}
-         </button>
-
-         {If($targetRect,
-            <Tooltip targetRect={$targetRect()!}>
-               {Slot.Tooltip()}
-            </Tooltip>
-         )}
-      </>
-   );
+    {If($targetRect,
+      <Tooltip targetRect={$targetRect()!}>
+        <TooltipContent />
+      </Tooltip>
+    )}
+  </>
 }
 
 
@@ -89,67 +85,67 @@ type Rect = { left: number, top: number, bottom: number }
 // Not super necessary in this case because it's highly unlikely more than one tooltip will be generated at a time
 
 export function Tooltip(input: {
-   Slot: RenderSlot
-   targetRect: Rect
+  Slot: RenderTag
+  targetRect: Rect
 }) {
-   const { Slot, targetRect } = input
+  const { Slot, targetRect } = input
 
-   const $div = NodeRef('div');
-   const $height = ion(undefined as number | undefined)
+  const $div = NodeRef('div');
+  const $height = ion(undefined as number | undefined)
 
-   // atLayout(() => {
-   //    const height = $div()?.getBoundingClientRect().height
-   //    if (height != null) $height.value = height;
-   // })
+  // atLayout(() => {
+  //    const height = $div()?.getBoundingClientRect().height
+  //    if (height != null) $height.value = height;
+  // })
 
-   beforeMount(async () => {
-      await $layout()
-      const height = $div()?.getBoundingClientRect().height
-      if (height != null) $height.value = height;
-   })
+  beforeMount(async () => {
+    await $layout()
+    const height = $div()?.getBoundingClientRect().height
+    if (height != null) $height.value = height;
+  })
 
 
-   // async {
-   //    await $layout() ...:
-   //       const height = $div()?.getBoundingClientRect().height;
-   //       if (height != null) $height.value = height
-   // }
+  // async {
+  //    await $layout() ...:
+  //       const height = $div()?.getBoundingClientRect().height;
+  //       if (height != null) $height.value = height
+  // }
 
-   // prevent looped layout thrashing w/ measureLayout
-   // atAttach(async () => {
-   //    const height = await layout(() =>
-   //       $div()?.getBoundingClientRect().height
-   //    )
-   //    if (height != null) $height.value = height;
-   // })
+  // prevent looped layout thrashing w/ measureLayout
+  // atAttach(async () => {
+  //    const height = await layout(() =>
+  //       $div()?.getBoundingClientRect().height
+  //    )
+  //    if (height != null) $height.value = height;
+  // })
 
-   const shiftX = targetRect.left
+  const shiftX = targetRect.left
 
-   const $shiftY = ion(() => {
-      const height = $height()
-      if (height === undefined) return 0;
-      const y = targetRect.top - height;
-      return y < 0 ? targetRect.bottom : y;
-   })
+  const $shiftY = ion(() => {
+    const height = $height()
+    if (height === undefined) return 0;
+    const y = targetRect.top - height;
+    return y < 0 ? targetRect.bottom : y;
+  })
 
-   return (
+  return (
 
-      Portal('body',
-         <div
-            style={{
-               position: 'absolute',
-               pointerEvents: 'none',
-               left: 0,
-               top: 0,
-               transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
-            }}
-         >
-            <div ref={$div} class="tooltip">
-               {Slot()}
-            </div>
-         </div>
-      )
-   )
+    Portal('body',
+      <div
+        style={{
+          position: 'absolute',
+          pointerEvents: 'none',
+          left: 0,
+          top: 0,
+          transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
+        }}
+      >
+        <div ref={$div} class="tooltip">
+          {Slot()}
+        </div>
+      </div>
+    )
+  )
 }
 
 

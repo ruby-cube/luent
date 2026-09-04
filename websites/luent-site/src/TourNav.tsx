@@ -1,4 +1,8 @@
-import { atUnmount, css, For, FromTag, If, ion, Style } from "luent";
+import { atUnmount, css, For, FromTag, ion, Style } from "luent";
+
+function pad(value: number) {
+  return String(value).padStart(2, '0')
+}
 
 
 export function TourNav(setup: FromTag<{
@@ -6,63 +10,66 @@ export function TourNav(setup: FromTag<{
 }>) {
   const { headings } = setup
   const $hovered = ion('')
-  const $selected = ion('')
-  const $visible = ion(false)
+  const $selected = ion(headings[0]?.id ?? '')
+
+  function selectedIndex() {
+    const index = headings.findIndex(heading => heading.id === $selected())
+    return index < 0 ? 0 : index
+  }
 
   if (typeof window !== 'undefined') {
-    let codeGlimpsesInView = false
-    let dividerInView = false
+    let raf = 0
 
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        const element = entry.target as Element
-        if (element.id === 'code-glimpses') {
-          codeGlimpsesInView = entry.isIntersecting
+    const updateActive = () => {
+      const midpoint = window.innerHeight * 0.42
+      let activeId = headings[0]?.id ?? ''
+
+      for (const heading of headings) {
+        const section = document.getElementById(heading.id)
+        if (!section) continue
+        if (section.getBoundingClientRect().top <= midpoint) {
+          activeId = heading.id
         }
-
-        if (element === featuresSection) {
-          dividerInView = entry.isIntersecting
-        }
       }
 
-      if (!$visible()) {
-        $visible.value = codeGlimpsesInView && !dividerInView
+      if (activeId) {
+        $selected.value = activeId
       }
-      else if (dividerInView) {
-        $visible.value = false;
-      }
-    }, { threshold: 0 })
-
-    const tourHeading = document.querySelector('#code-glimpses')
-    const featuresSection = document.querySelector('.VPFeatures')
-    if (tourHeading) {
-      observer.observe(tourHeading)
     }
 
-    if (featuresSection) {
-      observer.observe(featuresSection)
+    const queueActiveUpdate = () => {
+      if (raf) cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(updateActive)
     }
+
+    window.addEventListener('scroll', queueActiveUpdate, { passive: true })
+    window.addEventListener('resize', queueActiveUpdate, { passive: true })
+    requestAnimationFrame(updateActive)
 
     atUnmount(() => {
-      observer.disconnect()
+      window.removeEventListener('scroll', queueActiveUpdate)
+      window.removeEventListener('resize', queueActiveUpdate)
+      if (raf) cancelAnimationFrame(raf)
     })
   }
 
   return <>
-    <nav class='tour-nav'>
-      <ul display-if={$visible}>
+    <nav class='tour-nav' aria-label='Tour sections'>
+      <div class='rail-count'><b>{() => pad(selectedIndex() + 1)}</b>/{pad(headings.length)}</div>
+      <ul class='rail-dots'>
         {For(headings, heading => {
           const $hover = ion(() => $hovered() === heading.text)
           return <li
             on:pointerenter={() => $hovered.value = heading.text}
             on:pointerleave={() => $hovered.value = ''}
-            class={{ 'hover': $hover }}
+            class={{ hover: $hover }}
           >
             <a
               href={`/#${heading.id}`}
+              on:click={() => { $selected.value = heading.id }}
             ><div class={['circle', {
-              'hover': $hover,
-              'selected': () => $selected() === 'heading'
+              hover: $hover,
+              selected: () => $selected() === heading.id
             }]}></div></a>
             <span display-if={$hover} class='heading'>{heading.text}</span>
           </li>
@@ -71,65 +78,77 @@ export function TourNav(setup: FromTag<{
     </nav >
     {Style(css`
       .tour-nav {
-        position: fixed;
-        left: 5px;
-        top: 0px;
-        bottom: 0px;
-        z-index: 1000;
+        position: sticky;
+        top: calc(15rem - 150px);
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        gap: 14px;
+        align-items: center;
       }
 
-      .dark .tour-nav li.hover {
-        background-color: #333333BF;
+      .tour-nav .rail-count {
+        font-family: 'Fragment Mono', monospace;
+        font-size: 11px;
+        color: var(--vp-c-text-2);
       }
 
-      .tour-nav li.hover {
-        background-color: #dddde3BF;
+      .tour-nav .rail-count b {
+        color: var(--vp-c-brand-1);
+        font-weight: 500;
+      }
+
+      .tour-nav .rail-dots {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        margin: 0;
+        padding: 0;
       }
 
       .tour-nav li {
-        height: 2rem;
-        padding: 4px 8px;
+        position: relative;
         list-style-type: none;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        border-radius: 50px;
       }
 
       .tour-nav .circle {
-        width: .5rem;
-        height: .5rem;
+        width: 8px;
+        height: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        line-height: 1;
-        background-color: #cccccc;
+        background-color: var(--vp-c-default-3);
         box-sizing: border-box;
-        text-align: center;
         border-radius: 50%;
-        transition: background-color 0.15s ease;
+        transition: background .2s, transform .2s;
       }
-      
-      .dark .circle {
-        background-color: #444;
+
+      .tour-nav .circle:hover {
+        background: var(--vp-c-text-2);
       }
 
       .tour-nav .circle.hover {
-        width: .75rem;
-        height: .75rem;
+        transform: scale(1.25);
       }
 
       .tour-nav .circle.selected {
-        border: 5px solid #444;
+        background: var(--vp-c-brand-1);
+        transform: scale(1.4);
       }
 
       .tour-nav .heading {
-        padding: 4px 8px;
-        font-size: 14px;
+        position: absolute;
+        right: calc(100% + 10px);
+        top: 50%;
+        transform: translateY(-50%);
+        white-space: nowrap;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--vp-c-divider);
+        font-family: 'Fragment Mono', monospace;
+        font-size: 12px;
         color: var(--vp-c-text-1);
+        background: color-mix(in srgb, var(--vp-c-bg) 94%, transparent);
       }
 
       @media (max-width: 960px) {

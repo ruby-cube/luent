@@ -1,6 +1,6 @@
 import { CodeGlimpses } from "./CodeGlimpses";
 import { HabitTrackerDemo } from "./demos/HabitTrackerDemo"
-export { getPortals, encodePortals, RenderPageWithStyles, transformPortals } from 'luent/server'
+export { extractPortals, injectPortals } from 'luent/server'
 import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot } from 'luent'
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
 import { DoodleCanvasDemo } from "./demos/DoodleCanvasDemo";

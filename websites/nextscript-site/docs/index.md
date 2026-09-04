@@ -8,7 +8,7 @@ hero:
   tagline: for writing clear, ergonomic, type-safe code
   actions:
     - theme: alt
-      text: Take a code tour
+      text: Preview
       link: /#code-glimpses
 
 features:
@@ -27,6 +27,7 @@ features:
   </div>
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2>Code Glimpses</h2>
+    <p>NextScript is in early development. Here's a glimpse of what's in store.</p>
     <p><small><strong>Note:</strong> Examples use API from <a href="https://github.com/ruby-cube/luent">Luent</a> for demonstration purposes. While NextScript was developed alongside Luent, it is designed to be framework-agnostic.</small></p>
   </section>
 

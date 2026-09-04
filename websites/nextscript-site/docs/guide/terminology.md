@@ -1,16 +1,16 @@
-::: tip This project is in early development.
-Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
-
-We'd love help getting this project off the ground. Learn how to contribute [here](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
-:::
 
 # JSX Terminology
+::: tip This project is in early development.
+Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
+:::
 
 ## JSX Block
-A JSX block refers to a series of one or more JSX entities. There are three types of JSX entities:
+A JSX block refers to a series of one or more JSX entities. JSX entities include:
 - JSX elements
 - JSX fragments
+- JSX text
 - JSX expression containers
+- JSX statements fences
 
 
 ## JSX Factory 

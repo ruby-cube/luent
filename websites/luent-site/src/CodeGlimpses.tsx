@@ -5,6 +5,7 @@ import { TourNav } from './TourNav'
 
 let direction = 'code-right'
 function flowDirection() {
+  return 'code-right';
   if (direction === 'code-right') return direction = 'code-left'
   return direction = 'code-right'
 }
@@ -42,48 +43,79 @@ export function CodeGlimpses() {
 
   return (
     <>
-      <TourNav
-        headings={sections.map(section => ({
-          text: section.heading,
-          id: toId(section.heading)
-        }))}/>
-      <CodeTour>
-        {For(sections, (render) => {
-          const jsx = 'nsx' in render
-          const ns = jsx ? 'nsx' : 'ns'
-          const ts = jsx ? 'tsx' : 'ts'
-          const heading = render.heading
+      <div class='tour-grid'>
+        <div class='tour-main'>
+          <CodeTour>
+            {For(sections, (render) => {
+              const jsx = 'nsx' in render
+              const ns = jsx ? 'nsx' : 'ns'
+              const ts = jsx ? 'tsx' : 'ts'
+              const heading = render.heading
 
-          return <TourSection
-            id={toId(heading)}
-            flow={flowDirection()}
-            altCode={{ name: ns, code: render[ns], hover: render.nsHover }}
-            mainCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
-            highlightCode={highlightCode}
-            tab={render.$tab ?? $CodeTab()}
-          >
-            <h3>{heading}</h3>
-            {render(render.$tab)}
-          </TourSection>
-        })}
-      </CodeTour>
+              return <TourSection
+                id={toId(heading)}
+                flow={flowDirection()}
+                altCode={{ name: ns, code: render[ns], hover: render.nsHover }}
+                mainCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
+                highlightCode={highlightCode}
+                tab={render.$tab ?? $CodeTab()}
+              >
+                <h3>{heading}</h3>
+                {render(render.$tab)}
+              </TourSection>
+            })}
+          </CodeTour>
+        </div>
+        <aside class='railwrap'>
+          <TourNav
+            headings={sections.map(section => ({
+              text: section.heading,
+              id: toId(section.heading)
+            }))}/>
+        </aside>
+      </div>
 
       {Style(css`
+        .tour-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 88px;
+          gap: 0;
+          align-items: start;
+        }
+
+        .tour-main .home-tour {
+          max-width: none;
+          margin: 0;
+        }
+
+        .tour-main {
+          min-width: 0;
+          padding-right: 56px;
+        }
+
+        .railwrap {
+          position: relative;
+          border-left: 1px solid var(--vp-c-divider);
+          padding-top: 2rem;
+          min-height: 100%;
+        }
+
         .tour-copy h3 {
           margin-top: 0;
           margin-bottom: 0.75rem;
-          font-size: clamp(1.5rem, 3.1vw, 2.35rem);
-          line-height: 1.08;
-          letter-spacing: -0.02em;
+          font-size: 26px;
+          font-weight: 600;
+          line-height: 1.2;
+          letter-spacing: -0.015em;
           color: var(--vp-c-text-1);
         }
 
         .tour-copy p {
           margin: 0 0 0.9rem;
-          font-size: clamp(1rem, 1.25vw, 1.1rem);
+          font-size: 15.5px;
           line-height: 1.7;
           color: var(--vp-c-text-2);
-          max-width: 58ch;
+          max-width: 40ch;
         }
 
         .tour-copy p:not(.tour-note) {
@@ -96,7 +128,21 @@ export function CodeGlimpses() {
         }
 
         .tour-copy .tour-note {
-          font-size: clamp(0.9rem, 0.95vw, 0.96rem);
+          font-size: 13.5px;
+        }
+
+        @media (max-width: 900px) {
+          .tour-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .tour-main {
+            padding-right: 0;
+          }
+
+          .railwrap {
+            display: none;
+          }
         }
       `)}
     </>

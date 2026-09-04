@@ -1,7 +1,7 @@
 // let shadow: ShadowRoot | undefined;
 
 import { AsyncState } from "@luent/flask";
-import { FromTag, RenderSlot } from "./bindings-types";
+import { FromTag, RenderTag } from "./bindings-types";
 import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 
 // NOTE: The shadow-root helper does not work with VitePress :( 
@@ -13,12 +13,12 @@ import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 
 export const [inShadow, shadowStack] = AsyncState<true | ShadowRoot>('shadow')
 
-export function createShadowRoot(setup: { Slot: RenderSlot } & ShadowRootInit) {
+export function createShadowRoot(setup: { Slot: RenderTag } & ShadowRootInit) {
   const { Slot, mode } = setup
   return new ShadowRootKit(mode, Slot)
 }
 
-export function writeShadowRoot(setup: { Slot: RenderSlot } & ShadowRootInit) {
+export function writeShadowRoot(setup: { Slot: RenderTag } & ShadowRootInit) {
   const { Slot, mode } = setup
   return (
     <template data-shadowrootmode={mode}>
@@ -31,7 +31,7 @@ class ShadowRootKit extends VineNode {
 
   constructor(
     public mode: 'open' | 'closed',
-    public Slot: RenderSlot
+    public Slot: RenderTag
   ) {
     super()
   }
@@ -47,7 +47,7 @@ class ShadowRootKit extends VineNode {
   }
 }
 
-export function callWithShadowRoot(render: RenderSlot, shadowRoot: ShadowRoot | true) {
+export function callWithShadowRoot(render: RenderTag, shadowRoot: ShadowRoot | true) {
   try {
     shadowStack.push(shadowRoot)
     return render()
@@ -58,7 +58,7 @@ export function callWithShadowRoot(render: RenderSlot, shadowRoot: ShadowRoot | 
 }
 
 
-export function ShadowRoot(setup: FromTag<{ Slot: RenderSlot }>) {
+export function ShadowRoot(setup: FromTag<{ Slot: RenderTag }>) {
   const { Slot } = setup
 
   return import.meta.env.SSR

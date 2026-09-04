@@ -1,4 +1,4 @@
-import {  FromTag,  NodeRef, RenderSlot } from "luent"
+import {  FromTag,  NodeRef, RenderTag } from "luent"
 import { IonicTooltip } from "./Tooltip.kit";
 import { PopoverRoot } from "../popover/Popover";
 
@@ -8,7 +8,7 @@ import { PopoverRoot } from "../popover/Popover";
 
 function TooltipRoot(setup: FromTag<{
    ref?: NodeRef<'div'>;
-   Slot: RenderSlot;
+   Slot: RenderTag;
    tooltip: IonicTooltip
 }>) {
    const { Slot, tooltip, ...rest } = setup
@@ -23,7 +23,7 @@ function TooltipRoot(setup: FromTag<{
 
 // function TooltipRoot(setup: FromTag<{
 //    ref?: NodeRef<'div'>;
-//    Slot: RenderSlot;
+//    Slot: RenderTag;
 //    tooltip: IonicTooltip
 // }>) {
 //    const {
@@ -111,7 +111,7 @@ function TooltipRoot(setup: FromTag<{
 
 // function TooltipContent(setup: FromTag<{
 //    ref?: NodeRef<'div'>;
-//    Slot: RenderSlot;
+//    Slot: RenderTag;
 // }>) {
 //    const {
 //       ref,

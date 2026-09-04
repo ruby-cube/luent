@@ -142,7 +142,7 @@ export type {
 } from './node/makeJSXNode'
 export type { ComponentTag } from './component/Component'
 export type { ContextEntryKey } from './context/ContextKey'
-export type { FromTag, RenderSlot, WithRef } from './component/bindings-types'
+export type { FromTag, RenderTag, WithRef } from './component/bindings-types'
 export type { TagClass } from './element/styles'
 export type { TagName } from './element/setUpElement'
 export type { ViewType } from './conditional/If'

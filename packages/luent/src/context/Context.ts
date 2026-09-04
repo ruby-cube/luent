@@ -1,6 +1,6 @@
 import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
-import { FromTag, RenderSlot } from "../component/bindings-types";
+import { FromTag, RenderTag } from "../component/bindings-types";
 import { debug, normalizeToArray } from "@luent/utils";
 import {  unnestComponent } from "@luent/nextscript";
 import { component } from "..";
@@ -27,7 +27,7 @@ export type Provided = { 0: ContextEntryKey | string, 1: any }[] | { 0: ContextE
 export function Context(
    { Slot, provide }: {
       provide: Provided,
-      Slot: RenderSlot
+      Slot: RenderTag
    }
 ) {
    if (!Slot) debug.warn(`Extraneous <o:context>`)
@@ -53,7 +53,7 @@ export function createContextNode(
 
 
 export function callWithContext(
-   Slot: RenderSlot,
+   Slot: RenderTag,
    context: ContextNode
 ) {
 
@@ -64,7 +64,7 @@ export function callWithContext(
 }
 
 export function wrapWithContext(
-   Slot: RenderSlot,
+   Slot: RenderTag,
    provide: Provided) {
    const context = createContextNode(provide)
    return (arg: any) => {

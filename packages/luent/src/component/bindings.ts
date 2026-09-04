@@ -1,5 +1,5 @@
 import { AnyObject } from "@luent/types"
-import { FromTag, RenderSlot, WithRef } from "./bindings-types"
+import { FromTag, RenderTag, WithRef } from "./bindings-types"
 import { NodeRef } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@luent/quarky"
@@ -14,7 +14,7 @@ import { $from } from "../utils/destructure"
 // ]}>
 
 type RawBindings = {
-  Slot?: RenderSlot
+  Slot?: RenderTag
   ref?: NodeRef | NodeRefsConfig,
   'auto-bind'?: SetupBindings | undefined
 } & { [key: string]: any }
@@ -23,7 +23,7 @@ export type SetupBindings = {
   on?: EventBindings,
   at?: EventBindings,
   mu?: { [key: string]: MutableIon<unknown> | undefined }, // TODO: mu checker
-  Slot?: RenderSlot, // FiniteBindings
+  Slot?: RenderTag, // FiniteBindings
   ref?: NodeRef | NodeRefsConfig,
   'auto-bind'?: SetupBindings | undefined
 } & { [key: string | symbol]: any }  // attributes and namespace objects
@@ -39,7 +39,7 @@ type ComposedBindings = {
   transitions?: TransitionConfigs
   showIf?: Ion<boolean>
   ref?: NodeRef | NodeRefsConfig,
-  slots?: RenderSlot[]
+  slots?: RenderTag[]
 }
 
 type EventBindings = { [key: string]: EventListener[] }

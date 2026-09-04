@@ -1,7 +1,7 @@
 import { isFunction, isObject, isString, normalizeToArray } from "@luent/utils";
 import { composeBindings, toSetup } from "../component/bindings";
 import { ComponentTag } from "../component/Component";
-import { RenderSlot } from "../component/bindings-types";
+import { RenderTag } from "../component/bindings-types";
 import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { $from } from "../utils/destructure";
 import { toString } from '../node/VineNode'
@@ -36,7 +36,7 @@ const selfclosing = {
 
 export function writeElement(
   tagName: string,
-  Slot: RenderSlot | undefined,
+  Slot: RenderTag | undefined,
   bindings: ElementConfig,
 ) {
   if (tagName in selfclosing) return { element: `<${tagName}${renderBindings(bindings)}>` }
@@ -155,7 +155,7 @@ function normalizeStyle(expression: string) {
 }
 
 
-function renderSlot(Slot: RenderSlot | undefined,) {
+function renderSlot(Slot: RenderTag | undefined,) {
   if (!Slot) return ''
   const output = normalizeToArray(typeof Slot === 'function' ? Slot() : Slot)
   if (isInnerHTMLKit(output[0])) return writeInnerHTML(output[0])

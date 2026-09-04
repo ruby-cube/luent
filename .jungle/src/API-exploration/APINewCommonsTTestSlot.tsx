@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, Context, ContextKey, template, fromContext, FromTag, RenderSlot } from "luent";
+import { component, Context, ContextKey, template, fromContext, FromTag, RenderTag } from "luent";
 import { ArticleDatabase } from "../wip-demos/conduit/src/db/ArticleDatabase";
 
 // # via context
@@ -44,7 +44,7 @@ function Content() {
 //--
 
 export function Button(input: {
-   Slot: RenderSlot,
+   Slot: RenderTag,
    Nested: { something: ContextKey<string> }
 }) {
    const { Slot, Nested } = input
@@ -94,7 +94,7 @@ function ContentB(input: { something?: string }) {
 //--
 
 export function ButtonB(input: {
-   Slot: RenderSlot<string>,
+   Slot: RenderTag<string>,
 }) {
    const { Slot } = input
 

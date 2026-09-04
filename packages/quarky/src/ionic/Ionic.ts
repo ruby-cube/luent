@@ -77,7 +77,7 @@ export function as<T>(ionizer: T & ((data: any) => any)): { '-as': T } {
 
 export const INTERNAL_OP = "[[INTERNAL]]"
 
-export const EACH = '@each'
+export const EACH = '@each' as const
 
 const ionicModels: WeakMap<AnyObject, QuarkyIonicProxy> = new WeakMap()
 
@@ -117,9 +117,9 @@ type IonicConfig<T> = {
 
 
 
-export const Ionic = ionic as typeof ionic & { '~ionizer': true }
+export const ionic = _ionic as typeof _ionic & { '~ionizer': true }
 
-export function ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<T, M> {
+function _ionic<T extends AnyObject, M>(target: T, setup?: M & ThisType<T & M> & IonicConfig<T> & Partial<PropertiesOf<T>>): T extends { '~ionic': true } ? T : Ionic<T, M> {
    if (isIonicProxy(target)) {
       return target as any
    }

@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { component, Context, ContextKey, fromContext, FromTag, RawJSXNode, RenderSlot, template } from "luent"
+import { component, Context, ContextKey, fromContext, FromTag, RawJSXNode, RenderTag, template } from "luent"
 import { DropdownKit, IonicDropdown } from "../../ui-base/dropdown/Dropdown.kit"
 import { DropdownContent, DropdownRoot, DropdownTail } from "../../ui-base/dropdown/Dropdown";
 
@@ -26,7 +26,7 @@ function DropdownMenu(setup: FromTag<{
   )
 }
 
-function Dropdown(setup: FromTag<{ Slot: RenderSlot }>) {
+function Dropdown(setup: FromTag<{ Slot: RenderTag }>) {
   const { Slot } = setup
   const dropdown = fromContext(DROPDOWN)
 

@@ -4,7 +4,7 @@ import { isComponentKit } from "@luent/nextscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@luent/flask";
 import { TRACE } from "@luent/flask";
-import { RenderSlot } from "../component/bindings-types";
+import { RenderTag } from "../component/bindings-types";
 
 export type JSXNode = DOMNode | VineNode
 
@@ -68,7 +68,7 @@ export class VineNode {
 //    // unmount(nodes: JSXNode[]): void
 // }
 
-export function mountToFragment(Slot: RenderSlot) {
+export function mountToFragment(Slot: RenderTag) {
   const fragment = new DocumentFragment()
   const output = processJSXOutput(Slot())
   mountDOMNodes(output, fragment)

@@ -211,7 +211,7 @@ function wrapWithSuspense(render: RenderFunction, $suspense: SuspenseIon) {
 //    meanwhile?: (suspense: SuspenseIon) => RawJSXNode | false
 //    loading?: (suspense: SuspenseIon) => RawJSXNode | false
 //    catch?: (error: Error) => RawJSXNode,
-//    Slot: RenderSlot
+//    Slot: RenderTag
 // }
 
 // export function wrapWithAwait(Slot: RenderFunction, config: AwaitConfig) {

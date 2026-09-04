@@ -437,10 +437,10 @@ function DraggableKit<T>(config: {
     <$node
       on:pointerdown={e => maybeDrag(e, item, $index())}
       on:transitionend={() => $taggingAlong.value = false}
-      class={[{
+      class={{
         'tag-along': $tagalong,
         'dragged': $dragged,
-      }]}
+      }}
       style={{
         'z-index': () => $dragged() ? order($index()) : 0,
         'transform': () => $dragged() ? `translate(${adjustX($shiftX(), item, $index())}px, ${$shiftY()}px)` : undefined

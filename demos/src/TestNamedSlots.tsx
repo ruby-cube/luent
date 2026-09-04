@@ -1,32 +1,36 @@
 import './index.css'
-import { component, mountIsland, RenderSlot, template } from "luent";
+import { FromTag, Ion, RenderTag } from "luent";
 
 export function TestNamedSlots() {
 
-   return (
-
-      <div class='p-10 border border-emerald-800'>
-         <Comp>{{
-            title: () =>
-               <h1>Stormy Night</h1>,
-            description: () =>
-               <p>Lorem ipsum de fulctus</p>,
-         }}</Comp>
-      </div>
-   )
+  return <>
+    <div class='p-10 border border-emerald-800'>
+      <Comp
+        Title={() =>
+          <h1>Stormy Night</h1>
+        }
+        Description={() =>
+          <p>Lorem ipsum de fulctus</p>
+        }
+      />
+    </div>
+  </>
 }
 
-function Comp({ Slot }: { Slot: { title: RenderSlot, description: RenderSlot } }) {
-   return (
+function Comp(setup: FromTag<{
+  Title: RenderTag<{ dog: Ion<true> }>;
+  Description: RenderTag;
+}>) {
+  const { Title, Description } = setup;
 
-      <div>
-         {Slot.title}
-         <hr></hr>
-         {Slot.description}
-      </div>
-   )
+  return <>
+    <div>
+      <Title dog={true} />
+      <hr></hr>
+      <Description />
+    </div>
+  </>
 }
 
-if (__STYLE__) {
-   mountIsland(TestNamedSlots, '#root')
-}
+
+

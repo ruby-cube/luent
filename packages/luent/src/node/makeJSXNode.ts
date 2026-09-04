@@ -7,7 +7,7 @@ import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Context, Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ViewType } from "../conditional/If";
-import { MaybeIon, RenderSlot } from "../component/bindings-types";
+import { MaybeIon, RenderTag } from "../component/bindings-types";
 import { DOMNode, DOMParent, VineNode } from "./VineNode";
 import { ComponentKit } from "@luent/nextscript";
 import { createShadowRoot } from "../component/shadow";
@@ -111,7 +111,7 @@ export function resetGroupActivationType() {
 
 
 
-// export function runWithGroupActivationReset(render: RenderSlot, input: Object | undefined) {
+// export function runWithGroupActivationReset(render: RenderTag, input: Object | undefined) {
 //    outerGroupActivationType = groupActivationType
 //    groupActivationType = undefined;
 //    try {
@@ -124,7 +124,7 @@ export function resetGroupActivationType() {
 // }
 
 
-export function wrapWithActivationType(type: GroupActivationType, Slot: RenderSlot) {
+export function wrapWithActivationType(type: GroupActivationType, Slot: RenderTag) {
   return () => {
     outerGroupActivationType = groupActivationType
     groupActivationType = type;
@@ -255,7 +255,7 @@ export function makeJSXNode(
 }
 
 // TODO: xml namespace for existing elements
-function useDOMNode(tag: string | Element, xmlns?: any, Slot?: RenderSlot | undefined) {
+function useDOMNode(tag: string | Element, xmlns?: any, Slot?: RenderTag | undefined) {
   let newXML_NS: string | undefined;
   let XML_NS: string | undefined;
 

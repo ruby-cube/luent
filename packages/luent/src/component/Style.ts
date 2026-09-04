@@ -61,7 +61,6 @@ export function Style(cssText: string) {
   if (import.meta.env.SSR) {
     const style = `<style id="${id}">${cssText}</style>`
     if (shadow) return { element: style }
-     console.log('write <style>')
     writeToPortal('head', style)
     return;
   }

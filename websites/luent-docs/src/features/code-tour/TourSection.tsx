@@ -1,5 +1,5 @@
 import { Code } from "@luent/websites-shared";
-import type { RenderSlot } from "luent";
+import type { RenderTag } from "luent";
 import { css, For, Style, type FromTag, type Ion } from "luent";
 import type { CodeBlock, CodeTab, TourSection } from "./types";
 import { toID, tourSections } from "./tour-content";
@@ -52,8 +52,8 @@ function TourSection(setup: FromTag<{
   index: number;
   id: string;
   heading: string;
-  Description: RenderSlot;
-  Note?: RenderSlot<{ tab: CodeTab }>
+  Description: RenderTag;
+  Note?: RenderTag<{ tab: CodeTab }>
   url: string;
   tab: CodeTab & { toggle(): void },
   code: CodeBlock

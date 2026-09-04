@@ -67,7 +67,7 @@ type Attributes<D> = {
 
 type TagNamedSlots<D> = {
   [K in keyof D as
-  K extends `Slot:${string}` ?K : never]: D[K]
+  K extends `Slot:${string}` ? K : never]: D[K]
 }
 
 type TagDOMEvents<D> = {
@@ -105,14 +105,13 @@ export type FromTag<D = {}> =
   & WithDOMEvent<D>
   & WithEvents<D>
   & WithMu<D>
-  & WithSlot<D>
+  // & WithSlot<D>
   & Styles
   & { '~bindings'?: TagBindings<D> & ForwardedBindings<D> }
 
 type ForwardedBindings<D> = D extends { '...': infer T } ? T extends RefSource ? WithRef<T> : {} : {}
 
-type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S & WithNamedSlots<D> } : { Slot: WithNamedSlots<D> & RenderSlot }
-type WithNamedSlots<D> = { [K in keyof D as K extends `Slot:${infer N}` ? N : never]: D[K] }
+type WithSlot<D> = D extends { Slot: infer S } ? { Slot: S } : {}
 
 type ElementAttributes<D> =
   D extends keyof JSX.IntrinsicElements ? Omit<JSX.IntrinsicElements[D], 'ref' | keyof LuentHooks<any>> : {} // TODO: use Attributes from index.d.ts
@@ -137,7 +136,7 @@ type PlainInput<D> = {
 }
 
 
-export type RenderSlot<T = {}> = (input?: T) => RawJSXNode
+export type RenderTag<T = undefined> = T extends undefined ? () => RawJSXNode : (setup: FromTag<T>) => RawJSXNode
 
 type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, Primitive> extends Ion ? true : false
 

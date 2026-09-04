@@ -3,7 +3,7 @@ import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSX
 import { ConditionalKit } from "./IfElse";
 import { ViewType, createIfSeries, RenderConditional } from "./If";
 import { isFunction } from "@luent/utils";
-import { FromTag, RenderSlot } from "../component/bindings-types";
+import { FromTag, RenderTag } from "../component/bindings-types";
 import { DEFAULT } from "./MatchCase";
 
 
@@ -31,7 +31,7 @@ export function Switch(input: {
    x: Ion<any>, // TODO: change to key ... but need to make sure JSX plays well with it
    'view'?: GroupActivationType
    matches?: (target: any, _case: any) => boolean,
-   Slot: RenderSlot
+   Slot: RenderTag
 }) {
    const { $x, matches = (x: any, c: any) => x === c, Slot, "view": view } = input
    const kits = toConditionalKits({

@@ -1,4 +1,4 @@
-import { NodeRef, RenderSlot, FromTag } from "luent"
+import { NodeRef, RenderTag, FromTag } from "luent"
 import { PopoverRoot } from "../../../../packages/luent-ui/src/base/popover/Popover";
 import { IonicDropdown } from "./Dropdown.kit";
 
@@ -8,7 +8,7 @@ import { IonicDropdown } from "./Dropdown.kit";
 
 function DropdownRoot(setup: FromTag<{
    ref?: NodeRef<'div'>;
-   Slot: RenderSlot;
+   Slot: RenderTag;
    dropdown: IonicDropdown
 }>) {
    const { dropdown, ...rest } = setup

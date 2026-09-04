@@ -134,7 +134,7 @@ Lifecycle hooks register tasks to be run at certain points of a dynamic view's l
 - `Ionic`
 - `Ionized`
 - `MutableIon`
-- `RenderSlot`
+- `RenderTag`
 - `Xray`
 
 ## Event handling

@@ -1,4 +1,4 @@
-import {Ion, Ionic, toIon, $fromContext, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderSlot, Style, template, Xray, FromTag } from "luent"
+import {Ion, Ionic, toIon, $fromContext, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderTag, Style, template, Xray, FromTag } from "luent"
 import { Alignment, maybeFlip, Placement, Popover, positionTail } from "./Popover.kit";
 
 // TODO:
@@ -92,7 +92,7 @@ function PopoverRoot(setup: FromTag<{
 
 function PopoverContent(setup: FromTag<{
   ref?: NodeRef<'div'>;
-  Slot: RenderSlot;
+  Slot: RenderTag;
 }>) {
   const {
     ref,

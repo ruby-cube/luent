@@ -1,4 +1,4 @@
-import {  FromTag, NodeRef, RenderSlot } from "luent"
+import {  FromTag, NodeRef, RenderTag } from "luent"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../base/tooltip/Tooltip"
 import { IonicTooltip } from "../base/tooltip/Tooltip.kit";
 import { Alignment, Placement } from "../base/popover/Popover.kit";
@@ -19,8 +19,8 @@ import { Alignment, Placement } from "../base/popover/Popover.kit";
 
 function Tooltip(setup: FromTag<{
   ref?: NodeRef<'div'>;
-  Slot: RenderSlot,
-  tail?: RenderSlot,
+  Slot: RenderTag,
+  tail?: RenderTag,
   tooltip: IonicTooltip,
   gap?: number,
   place?: Placement,

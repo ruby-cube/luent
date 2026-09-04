@@ -99,7 +99,7 @@ function HabitTracker(setup: FromTag<{
     <div class='tracker'>
       {habit}
       <ul>
-        {Thru(goal, n =>
+        {Thru(goal, n :>
           <li on:click={() => count = n}>
             <div class={['unit', { 'filled': (n <= count)@ }]}></div>
           </li>

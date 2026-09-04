@@ -329,7 +329,7 @@ For a list of non-static data bindings and to learn more about component binding
 A component kit may be written as a plain object, created using the `component()` helper function, or created through NSX's component syntax. To learn more about component kits and exposing/accessing component instances, see [Node Access](/guide/node-access#component-ref)
 
 ```tsx
-function Dialog(setup: { Slot: RenderSlot }) {
+function Dialog(setup: { Slot: RenderTag }) {
   const { Slot } = fromTag(setup)
 
   get opened = ion(false)

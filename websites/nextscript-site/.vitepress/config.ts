@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 import { resolve } from 'node:path'
 import { markdownShikiConfig } from './theme/shiki-setup.js'
-import { TransformLuentIslands, transformPortals, Islands, isCustomElement } from './.luent-islands/server/index.js'
+import { TransformLuentIslands, extractPortals, injectPortals, Islands, isCustomElement } from './.luent-islands/server/index.js'
 import { createSharedViteConfig } from '../../shared/vite.shared.js'
 
 
@@ -27,11 +27,10 @@ export default defineConfig({
     ...markdownShikiConfig
   },
 
-  // NOTE: this currently only runs during build, not dev
+  // NOTE: this only runs during build, not dev
   transformHtml(code, id, ctx) {
-    console.log('TRANSFORM HTML')
-    // const pageKey = ctx.pageData?.relativePath ?? ctx.page
-    return transformPortals(code, ctx.page)
+    const { html, portals } = extractPortals(code)
+    return injectPortals(html, portals)
   },
 
   vite: {
@@ -59,7 +58,8 @@ export default defineConfig({
       { text: 'Demos', link: '/demos/habit-tracker' },
       { text: 'Code Glimpses', link: '/#code-glimpses' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#motivation' },
-      { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-principles' }
+      { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-principles' },
+      { text: 'pre-alpha', link: '/' },
     ],
     footer: {
       message: 'Built with Vitepress + Luent',
@@ -73,8 +73,13 @@ export default defineConfig({
               text: 'Getter Syntax',
               link: '/guide/getter-syntax',
               items: [
-                { text: 'Accessor Variables', link: '/guide/getter-syntax#accessor-variables' },
-                { text: '@ Postfix Operator', link: '/guide/getter-syntax#the-postfix-operator' }
+                { text: 'Accessor variables', link: '/guide/getter-syntax#accessor-variables' },
+                { text: 'Accessor properties', link: '/guide/getter-syntax#accessor-properties' },
+                { text: 'Accessor operator', link: '/guide/getter-syntax#accessor-operator' },
+                { text: 'Derivation expressions', link: '/guide/getter-syntax#derivation-expressions' },
+                { text: 'Parameter declarations', link: '/guide/getter-syntax#parameter-declarations' },
+                { text: 'Destructuring declarations', link: '/guide/getter-syntax#destructuring-declarations' },
+                { text: 'Type guards', link: '/guide/getter-syntax#type-guards' }
               ]
             },
             { text: 'JSX Syntax', link: '/guide/jsx-syntax' },

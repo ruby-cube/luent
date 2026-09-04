@@ -1,5 +1,9 @@
 # Getter syntax
 
+::: tip This project is in early development.
+Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable.
+:::
+
 ::: info NOTE
 The examples below modify transpiled output with descriptive variable names for better comprehension. The actual implementation uses unique variable names to avoid name collisions.
 :::
@@ -198,7 +202,7 @@ function Multiplier() {
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 
-### ...for accessor function normalization
+### ...for getter normalization
 <!-- `variable@` | `obj.property@` -->
 <code><i>variable</i>@</code>  |  <code><i>obj</i>.<i>property</i>@</code>
 
@@ -219,7 +223,7 @@ function foo(bar: { count: number | Ion<number> } {
 ```
 :::
 
-This applies to destructuring as well. See [`@`-postfix declarations](#postfix-declarations-in-destructuring) for more on destructuring.
+This applies to destructuring as well. See [Destructuring declarations](#destructuring-declarations) for more on destructuring.
 ```nsx
 function foo(bar: { count: number | Ion<number> } {
   const { count@ } = bar;
@@ -231,9 +235,100 @@ function foo(bar: { count: number | Ion<number> } {
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 
-## `@`-postfix declarations
 
-### `@`-postfix parameter declarations
+## Derivation expressions 
+
+### Synchronous derivations
+<!-- `(expression)@` | `{ statements; return statement }@` -->
+<code>(<i>expression</i>)@</code>  |  <code>{ <i>statements;</i> return <i>statement</i> }@</code>
+
+Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for inline derivations. They may be written as expressions with an implicit return...
+```nsx
+<p>{count@} x 2 = {(count * 2)@}</p>
+```
+::: info transpiled
+```tsx
+<p>{count} x 2 = {() => count() * 2}</p>
+```
+:::
+
+...or as block-bodied expressions.
+```nsx
+<p>result: {{
+  const num = getNum()
+  if (num > 100) 
+    return 'too ambitious'
+  if (num < 0) 
+    return 'too negative'
+  return count * num
+}@}</p>
+```
+
+::: info transpiled
+```tsx
+<p>result: {() => {
+  const num = getNum()
+  if (num > 100) 
+    return 'too ambitious'
+  if (num < 0) 
+    return 'too negative'
+  return count() * num
+}}</p>
+```
+:::
+
+::: info NOTE
+If an accessor variable read happens only under certain conditions within a derivation expression, NextScript will hoist the call to the top of the function body. This allows getters with trackers to ...[UNFINISHED]
+:::
+
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+
+### Immediately-invoked derivation expressions (IIDEs)
+<!-- `{ statements; return expression }@()` | `(expression)@()` -->
+<code>{ <i>statements;</i> return <i>expression</i> }@()</code>  |  <code>(<i>expression</i>)@()</code>
+
+Derivation expressions may be immediately invoked. This is useful for encapsulating variables within the scope of the derivation.
+```nsx
+const foo = {
+   let foo = 0;
+   // some complex calculations
+   return foo
+}@()
+```
+::: info transpiled
+```ts
+const foo = (() => {
+   let foo = 0;
+   // some complex calculations
+   return foo
+})()
+```
+:::
+
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+
+### Async derivations
+<!-- `(await expression)@` | `{ await expression; return expression }@` -->
+<code>(await <i>expression</i>)@</code>  |  <code>{ await <i>expression</i>; return <i>expression</i> }@</code>
+
+Expressions surrounded by non-grouping parentheses containing `await` are transpiled to async arrow functions.
+```nsx
+<p>
+   Selection: {city@}, {(await cities@.pending, state)@}
+</p>
+```
+::: info transpiled
+```tsx
+<p>
+   Selection: {city}, {async () => (await cities.pending, state())}
+</p>
+```
+:::
+
+
+## Parameter declarations
 <!-- `variable@` -->
 <code><i>variable</i>@</code>
 
@@ -283,18 +378,19 @@ function foo(bar@: Get<number> | undefined) {
 ```
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
-### `@`-postfix declarations in destructuring
+## Destructuring declarations
 <!-- `variable@` -->
 <code><i>variable</i>@</code>
-
+Accessor variables may be selectively declared during destructuring through the @ postfix operator.
 ```ts
 const { bar, count@ } = foo;
 ```
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ### `get` declarations in destructuring
+If the `get` keyword is used for destructuring, all destructured variables are declared as accessor variables.
 ```nsx
-const { bar, count@ } = foo;
+get { bar, count } = foo;
 ```
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
@@ -307,96 +403,6 @@ get { bar, count: num } = foo;
 ```
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
-
-
-## Derivation expressions 
-
-### Synchronous derivations
-<!-- `(expression)@` | `{ statements; return statement }@` -->
-<code>(<i>expression</i>)@</code>  |  <code>{ <i>statements;</i> return <i>statement</i> }@</code>
-
-Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for inline derivations. They may be written as expressions with an implicit return...
-```nsx
-<p>{count@} x 2 = {(count * 2)@}</p>
-```
-::: info transpiled
-```tsx
-<p>{count} x 2 = {() => count() * 2}</p>
-```
-:::
-
-...or as block-bodied expressions.
-```nsx
-<p>result: {{
-  const num = getNum()
-  if (num > 100) 
-    return 'too ambitious'
-  if (num < 0) 
-    return 'too negative'
-  return count * num
-}@}</p>
-```
-::: info transpiled
-```tsx
-<p>result: {() => {
-  const num = getNum()
-  if (num > 100) 
-    return 'too ambitious'
-  if (num < 0) 
-    return 'too negative'
-  return count() * num
-}}</p>
-```
-:::
-::: info NOTE
-If an accessor variable read happens only under certain conditions within a derivation expression, NextScript will hoist the call to the top of the function body. This allows getters with trackers to ...
-:::
-
-<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
-
-
-### Immediately-invoked derivation expressions (IIDEs)
-<!-- `{ statements; return expression }@()` | `(expression)@()` -->
-<code>{ <i>statements;</i> return <i>expression</i> }@()</code>  |  <code>(<i>expression</i>)@()</code>
-
-Derivation expressions may be immediately invoked. This is useful for encapsulating variables within the scope of the derivation.
-```nsx
-const foo = {
-   let foo = 0;
-   // some complex calculations
-   return foo
-}@()
-```
-::: info transpiled
-```ts
-const foo = (() => {
-   let foo = 0;
-   // some complex calculations
-   return foo
-})()
-```
-:::
-
-<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
-
-
-### Async derivation expressions
-<!-- `(await expression)@` | `{ await expression; return expression }@` -->
-<code>(await <i>expression</i>)@</code>  |  <code>{ await <i>expression</i>; return <i>expression</i> }@</code>
-
-Expressions surrounded by non-grouping parentheses containing `await` are transpiled to async arrow functions.
-```nsx
-<p>
-   Selection: {city@}, {(await cities@.pending, state)@}
-</p>
-```
-::: info transpiled
-```tsx
-<p>
-   Selection: {city}, {async () => (await cities.pending, state())}
-</p>
-```
-:::
 
 
 
@@ -446,8 +452,3 @@ function logName() {
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 
-::: tip This project is in early development.
-Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
-
-We'd love help getting this project off the ground. Learn how to contribute [here](https://github.com/ruby-cube/luent/blob/main/CONTRIBUTING.md).
-:::

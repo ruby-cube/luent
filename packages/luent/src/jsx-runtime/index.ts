@@ -4,7 +4,7 @@ import { writeJSXNode } from "../server/writeJSXNode";
 import { makeJSXNode, RawJSXNode } from "../node/makeJSXNode";
 import { TagName } from "../element/setUpElement";
 import { ComponentTag } from "../component/Component";
-import { RenderSlot } from "../component/bindings-types";
+import { RenderTag } from "../component/bindings-types";
 export type { JSX } from "./types/index";
 
 // without custom jsx compiler
@@ -20,7 +20,7 @@ export const jsxDEV = jsx;
 
 export const jsxs = jsx;
 
-export function jsx(nodeType: TagName | ComponentTag, config: { children: RenderSlot | RawJSXNode | AnyObject } & AnyObject) {
+export function jsx(nodeType: TagName | ComponentTag, config: { children: RenderTag | RawJSXNode | AnyObject } & AnyObject) {
   let Slot = config.children;
   delete config.children
   config.Slot = Slot ?? (Slot = config.Slot);

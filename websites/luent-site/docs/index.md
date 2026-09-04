@@ -5,9 +5,6 @@ layout: home
 hero:
   name: "Build with clarity and flow"
   tagline: An expressive framework for web applications
-  image:
-    src: /assets/luent-logo-512px.png
-    alt: My Logo
   actions:
     # - theme: brand
     #   text: Learn Luent
@@ -53,11 +50,11 @@ features:
 </section> -->
   
 
-  <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
+  <!-- <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
-  </div>
+  </div> -->
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2 class='section-heading'>Code Tour</h2>
     <p>
@@ -89,74 +86,10 @@ features:
   line-height: 2.5rem !important;
 }
 
-.VPHero {
-  font-size: 18px;
-  padding-bottom: 128px !important;
-}
-
 .VPNavBarSearchButton {
   width: 100% !important;
   margin-right: 1rem !important;
 }
-
-.VPHero p.tagline {
-  text-align: center;
-  text-wrap: balance;
-  font-size: 28px;
-  line-height: 42px;
-}
-
-.VPHero h1 {
-  font-size: 64px;
-  line-height: 72px;
-}
-
-.VPHero .actions {
-  }
-
-.VPHero .VPButton {
-  border-radius: 30px !important;
-  padding-inline: 30px !important;
-  line-height: 48px !important;
-  font-size: 16px !important;
-}
-
-.VPHero .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.VPHero .image {
-  order: 1;
-  margin: 0 0 1rem;
-  height: 90px;
-  width: 90px;
-}
-
-.VPHero .image-container {
-  height: 100%;
-  width: 100%;
-  transform: none;
-}
-
-.VPHero .main {
-  order: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.VPHero .actions {
-  justify-content: center;
-}
-
-.VPButton.alt {
-  border: 1px solid var(--vp-c-text-2) !important;
-  background-color: transparent !important;
-}
-
 
 section#code-glimpses p {
     margin-inline: auto;
@@ -190,9 +123,10 @@ p.custom-block.status-notice {
 
 h2.section-heading {
   margin: 0;
-  font-size: clamp(2.1rem, 5vw, 4rem);
-  line-height: 1.5em;
-  letter-spacing: -0.03em;
+  font-size: clamp(30px, 5.4vw, 55px);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  font-weight: 600;
   color: var(--vp-c-text-1);
   margin-inline: auto;
   padding-top: 0;

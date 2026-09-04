@@ -34,6 +34,15 @@ export function CodeGlimpses() {
 
         <TourSection
           flow={flowDirection()}
+          mainCode={{ name: 'nsx', code: fragmentNSX }}
+          altCode={{ name: 'tsx equivalent', code: fragmentTSX, lang: 'tsx' }}
+          highlightCode={highlightCode}
+        >
+          {JSXFragmentReturn()}
+        </TourSection>
+
+        <TourSection
+          flow={flowDirection()}
           mainCode={{ name: 'nsx', code: flowNSX }}
           altCode={{ name: 'tsx equivalent', code: flowTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
@@ -43,21 +52,31 @@ export function CodeGlimpses() {
 
         <TourSection
           flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: gatewayNSX }}
-          altCode={{ name: 'tsx equivalent', code: gatewayTSX, lang: 'tsx' }}
+          mainCode={{ name: 'nsx', code: gatewayFnNSX }}
+          altCode={{ name: 'tsx equivalent', code: gatewayFnTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
         >
-          {GatewayReturn()}
+          {GatewayFunction()}
         </TourSection>
 
         <TourSection
           flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: componentNSX }}
-          altCode={{ name: 'tsx equivalent', code: componentTSX, lang: 'tsx' }}
+          mainCode={{ name: 'nsx', code: styleNSX }}
+          altCode={{ name: 'tsx equivalent', code: styleTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
         >
-          {JSXComponent()}
+          {TaggedTemplateStyles()}
         </TourSection>
+
+        <TourSection
+          flow={flowDirection()}
+          mainCode={{ name: 'nsx', code: typeguardNSX }}
+          altCode={{ name: 'tsx equivalent', code: typeguardTSX, lang: 'tsx' }}
+          highlightCode={highlightCode}
+        >
+          {TypeGuards()}
+        </TourSection>
+
       </CodeTour>
 
       {Style(css`
@@ -79,8 +98,7 @@ export function CodeGlimpses() {
         }
 
         .tour-copy p:not(.tour-note) {
-          margin-bottom: 1.4rem;
-          margin-top: .75rem;
+          margin-block: 1.4rem;
         }
 
         .tour-copy p:last-child {
@@ -208,6 +226,46 @@ const flowTSX =
 
 
 
+function GatewayFunction() {
+  return <>
+    <h3>JSX gateway function</h3>
+    <code><i>parameters</i> {':>'} <i>jsx</i></code>
+    <p>
+      —shorthand an arrow function expression that returns a JSX fragment
+    </p>
+    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+  </>
+}
+
+const gatewayFnNSX =
+  `<article>
+  {For(sections, section :>
+    <section>
+      <h2>{section.title}</h2>
+      <p>{section.body}</p>
+    </section>
+    <hr/>
+  )}
+</article>
+
+
+`
+
+const gatewayFnTSX =
+  `<article>
+  {For(sections, section => 
+    <>
+      <section>
+        <h2>{section.title}</h2>
+        <p>{section.body}</p>
+      </section>
+      <hr/>
+    </>
+  )}
+</article>
+`
+
+
 function GatewayReturn() {
   return <>
     <h3>JSX gateway return</h3>
@@ -233,7 +291,6 @@ const gatewayNSX =
 </article>
 
 
-
 `
 
 const gatewayTSX =
@@ -253,6 +310,40 @@ const gatewayTSX =
 </article>
 `
 
+function JSXFragmentReturn() {
+  return <>
+    <h3>JSX fragment return</h3>
+    <code>{'<:>'}<i>jsx</i>{'</:>'}</code>
+    <p>
+      —auto-returned fragment
+    </p>
+    <a href='' class='medium brand'>Learn more</a>
+  </>
+}
+
+
+const fragmentNSX =
+  `function Counter() {
+  get count = ion(0);
+  <:>
+    <button on:click={() => count++}>
+      {count@}
+    </button>
+  </:>
+}
+`
+
+const fragmentTSX =
+  `function Counter() {
+  const $count = ion(0);
+  <:>
+    <button on:click={() => $count.value++}>
+      {$count}
+    </button>
+  </:>
+}
+`
+
 
 function JSXComponent() {
   return <>
@@ -266,7 +357,7 @@ function JSXComponent() {
   </>
 }
 const componentNSX =
-  `function Dialog({ Slot }: { Slot: RenderSlot }) {
+  `function Dialog({ Slot }: { Slot: RenderTag }) {
   get opened = ion(false)
   const dialog = {
     open() { opened = true },
@@ -287,7 +378,7 @@ const componentNSX =
 `
 
 const componentTSX =
-  `function Dialog({ Slot }: { Slot: RenderSlot }) {
+  `function Dialog({ Slot }: { Slot: RenderTag }) {
   const opened = ion(false)
   const dialog = {
     open() { opened = true },
@@ -309,35 +400,73 @@ const componentTSX =
 
 
 
+function TaggedTemplateStyles() {
+  return <>
+    <h3>Tagged template styles</h3>
+    <code>{'<'}<i>node</i> {'style=`'}<i>css</i>{'`>'}</code> | <code>{'<style>'}<i>css</i>{'</style>'}</code>
+    <p>
+      —tagged template literal shorthand for style bindings and style tags
+    </p>
+    <a href='' class='medium brand'>Learn more</a>
+  </>
+}
 
-const gatewayNsx =
-  `<div>
-  {If(folder, <:>
-    {If(open,
-      <ul>
-        {For(folder.items, item =>
-          <li>{item}</li>
-        )}
-      </ul>
-    )}
-  )}
-</div>
-
-
+const styleNSX = 
+  `<div
+  on:pointerdown={e => maybeDrag(e, item, index)}
+  on:transitionend={() => taggingAlong = false}
+  class={{
+    'tag-along': tagalong@,
+    'dragged': dragged@,
+  }}
+  style=\`
+    z-index: \${(dragged ? order(index) : 0)@};
+    transform: \${(dragged ? transform : undefined)@};
+  \`
+></div>
 `
 
-const gatewayTranspiled =
-  `<div>
-  {If(folder, () =>
-    <>
-      {If(open, () =>
-        <ul>
-          {For(folder!.items, item =>
-            <li>{item}</li>
-          )}
-        </ul>
-      )}
-    </>
-  )}
-</div>
+const styleTSX = 
+  `<div
+  on:pointerdown={e => maybeDrag(e, item, $index())}
+  on:transitionend={() => $taggingAlong.value = false}
+  class={{
+    'tag-along': $tagalong,
+    'dragged': $dragged,
+  }}
+  style={css\`
+    z-index: \${() => $dragged() ? order(index) : 0};
+    transform: \${() => $dragged() ? $transform() : undefined)@};
+  \`}
+></div>
 `
+
+
+
+function TypeGuards() {
+  return <>
+    <h3>Accessor variable type guards</h3>
+    {/* e.g. <code>if(obj) {'{'} return obj.property {'}'}</code> */}
+    <p>
+      —type narrowing and widening of accessor variables
+    </p>
+    <a href='' class='medium brand'>Learn more</a>
+  </>
+}
+
+const typeguardNSX = 
+  `get user = ion(getUser())
+
+function logUsername() {
+  if (!user) return;
+  log('username:' user.name)
+}`
+
+const typeguardTSX = 
+  `const user = ion(getUser())
+
+function logUsername() {
+  if (!user()) return;
+  log('username:' user()!.name)
+}`
+

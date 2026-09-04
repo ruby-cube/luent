@@ -3,7 +3,7 @@ import { ElementConfig, RawJSXNode } from "../node/makeJSXNode";
 import { initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack, withXMLNamespace } from "./NSElement";
-import { RenderSlot } from "../component/bindings-types";
+import { RenderTag } from "../component/bindings-types";
 import { DOMNode, DOMParent, mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { setUpNodeRefs } from "../node/NodeRefs";
 import { setUpTransitions } from "../transitions/transitions";
@@ -20,7 +20,7 @@ export type TagName = keyof HTMLElementTagNameMap
 
 export function setUpElement(
   domNode: Element & DOMParent & HTMLElement,
-  Slot: RenderSlot | undefined,
+  Slot: RenderTag | undefined,
   bindings: ElementConfig
 ): DOMNode {
   const { showIf, events, attributes, styles, classes, microclasses, hooks, transitions, mutables } = composeBindings(bindings)
@@ -66,7 +66,7 @@ export function setUpElement(
 
 
 
-// function renderSlots(slots: RenderSlot[]) {
+// function renderSlots(slots: RenderTag[]) {
 //    const nodes: RawJSXNode[] = []
 //    for (const render of slots) {
 //       console.log('render?', render)

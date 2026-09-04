@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, FromTag, RenderSlot, template } from "luent";
+import { component, FromTag, RenderTag, template } from "luent";
 
 // [x] Distinguishing getter from render function
 //    - static analysis of functions defined in template (arrow functions) ---> function SlotA() { return }
@@ -163,13 +163,13 @@ function TestSlotB() {
    )
 }
 
-function Comp({ Slot }: { Slot: RenderSlot<{}> }) {
+function Comp({ Slot }: { Slot: RenderTag<{}> }) {
    return (
 
       <div></div>
    )
 }
 
-function Slot(fn: RenderSlot) {
+function Slot(fn: RenderTag) {
    return fn
 }

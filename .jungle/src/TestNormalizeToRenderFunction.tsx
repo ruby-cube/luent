@@ -1,4 +1,4 @@
-import { component, template, If, RenderSlot } from "luent";
+import { component, template, If, RenderTag } from "luent";
 import { ion } from "@luent/quarky";
 
 export function TestNormalizeToRenderFunction(){
@@ -20,7 +20,7 @@ export function TestNormalizeToRenderFunction(){
    )
 }
 
-function Child(input : {Slot: RenderSlot}){
+function Child(input : {Slot: RenderTag}){
    const {Slot} = input
    console.log('Slot', Slot)
    return (

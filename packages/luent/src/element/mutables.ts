@@ -92,7 +92,7 @@ function forMutableIon(maybeIon: Ion<any>, task: (ion: MutableIon<any>) => void)
 
 
 
-// function bindTextarea(element: Element, Slot: RenderSlot | undefined) {
+// function bindTextarea(element: Element, Slot: RenderTag | undefined) {
 //    if (!Slot || !isFunction(Slot)) return;
 //    const nodeEntities = Slot();
 //    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;

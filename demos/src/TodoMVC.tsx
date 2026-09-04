@@ -10,29 +10,22 @@ type InputEvent = { target: { value: string }, key: string }
 type RadioInputEvent = { target: { checked: boolean } }
 type FilterKeys = 'all' | 'active' | 'completed'
 
-// const ionicTodos = (todos: Ionic<Todo>[]) => ionic(todos)
 const ionicTodos = (todos: Todo[]) => ionic(todos, { '@each': { '-as': ionic } });
-
-
 
 export function TodoMVC() {
   const $todos = ion(ionicTodos(getTodos()))
   const $view = ion('all' as keyof typeof filters)
 
-
-  track($todos, () => {
-    console.log('$todos', $todos())
-  }, { eager: true })
-
   const filters = {
-    all: (todos: Todo[]) => todos,
-    active: (todos: Todo[]) => ionic(todos.filter(todo => !todo.completed)),
-    completed: (todos: Todo[]) => ionic(todos.filter(todo => todo.completed))
+    all: (todos: Ionic<Ionic<Todo>[]>) => todos,
+    active: (todos: Ionic<Ionic<Todo>[]>) => todos.filter(todo => !todo.completed),
+    completed: (todos: Ionic<Ionic<Todo>[]>) => todos.filter(todo => todo.completed)
   }
 
-  const $filteredTodos = ion(() => ionicTodos(filters[$view()]($todos())))
+  const $filteredTodos = ion(() => filters[$view()]($todos()))
   const $remaining = ion(() => filters.active($todos()).length)
   const $todoCount = ion(() => $todos().length)
+
 
   // # handle routing
 
@@ -75,7 +68,7 @@ export function TodoMVC() {
   }
 
   function removeCompleted() {
-    $todos.value = ionicTodos(filters.active($todos()))
+    $todos.value = filters.active($todos())
   }
 
 
@@ -85,70 +78,69 @@ export function TodoMVC() {
     $todos().forEach((todo) => { todo.completed = e.target.checked })
   }
 
-  const ToggleAllButton = () => (
-    <>
-      <input
-        id="toggle-all"
-        class="toggle-all"
-        type="checkbox"
-        checked={() => $remaining() === 0}
-        on:change={toggleAll}
-      />
-      <label for="toggle-all">Mark all as complete</label>
-    </>
-  )
+  const ToggleAllButton = () => <>
+    <input
+      id="toggle-all"
+      class="toggle-all"
+      type="checkbox"
+      checked={() => $remaining() === 0}
+      on:change={toggleAll}
+    />
+    <label for="toggle-all">Mark all as complete</label>
+  </>
 
 
   // # remaining todos
 
-  const RemainingCount = () => (
+  const RemainingCount = () => <>
     <span class="todo-count">
       <strong>{$remaining}</strong>
       <span>{() => ($remaining() === 1 ? ' item' : ' items')} left</span>
     </span>
-  )
+  </>
 
   const $todoList = NodeRef(TodoList)
   const $h1 = NodeRef('h1')
 
-  return (
-
-    <>
-      <section class="todoapp">
-        <header class="header">
-          <h1 ref={$h1}>Todos</h1>
-          <TodoInput addTodo={addTodo}></TodoInput>
-        </header>
-        <section class="main">
-          {ToggleAllButton()}
-          <TodoList ref={$todoList} todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
-        </section>
-        <footer display-if={$todoCount} class="footer">
-          {RemainingCount()}
-          <ul class="filters">
-            <li>
-              <a href="#/all" class={() => ($view() === 'all' && 'selected')}>All</a>
-            </li>
-            <li>
-              <a href="#/active" class={() => ($view() === 'active' && 'selected')}>Active</a>
-            </li>
-            <li>
-              <a href="#/completed" class={() => ($view() === 'completed' && 'selected')}>Completed</a>
-            </li>
-          </ul>
-          <button display-if={() => $todoCount() > $remaining()} class="clear-completed" on:click={removeCompleted}>
-            Clear completed
-          </button>
-        </footer>
+  return <>
+    <section class="todoapp">
+      <header class="header">
+        <h1 ref={$h1}>Todos</h1>
+        <TodoInput addTodo={addTodo}></TodoInput>
+      </header>
+      <section class="main">
+        <ToggleAllButton />
+        <TodoList ref={$todoList} todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
       </section>
+      <footer display-if={$todoCount} class="footer">
+        <RemainingCount />
+        <ul class="filters">
+          <li>
+            <a href="#/all" class={() => ($view() === 'all' && 'selected')}>
+              All
+            </a>
+          </li>
+          <li>
+            <a href="#/active" class={() => ($view() === 'active' && 'selected')}>
+              Active
+            </a>
+          </li>
+          <li>
+            <a href="#/completed" class={() => ($view() === 'completed' && 'selected')}>
+              Completed
+            </a>
+          </li>
+        </ul>
+        <button display-if={() => $todoCount() > $remaining()} class="clear-completed" on:click={removeCompleted}>
+          Clear completed
+        </button>
+      </footer>
+    </section>
 
-      <o-link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
-    </>)
+    <o-link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
+  </>
 }
 
-{/* <style>
-@import "https://unpkg.com/todomvc-app-css@2.4.1/index.css";
-</style> */}
 
 function TodoInput(setup: FromTag<{
   addTodo: (title: string) => void
@@ -163,32 +155,30 @@ function TodoInput(setup: FromTag<{
     }
   }
 
-  return (
-
+  return <>
     <input
       class="new-todo"
       autofocus
       placeholder="What needs to be done?"
       on:keyup={e => e.key === 'Enter' && submitTodo(e as unknown as InputEvent)}
     />
-  )
+  </>
 }
 
 
 
 function TodoList(setup: FromTag<{
-  todos: Ion<Ionic<Ionic<Todo>[]>>, // Ion<Todo^[]^>
+  todos: Ion<Ionic<Ionic<Todo>[]>>, // Ion<Todo*[]*>
   removeTodo: (todo: Ionic<Todo>) => void
 }>) {
   const { $todos, removeTodo } = setup;
 
-  const $editedTodo = ion(null as Todo | null)
+  const $editedTodo = ion(null as Ionic<Todo> | null)
 
   let beforeEditCache = ''
 
-  function editTodo(todo: Todo) {
+  function editTodo(todo: Ionic<Todo>) {
     beforeEditCache = todo.title
-    // debugger;
     $editedTodo.value = todo
   }
 
@@ -204,12 +194,8 @@ function TodoList(setup: FromTag<{
       if (!todo.title) removeTodo(todo)
     }
   }
-  track($editedTodo, () => {
-    console.log('isEditing?', $editedTodo())
-  })
 
-  return (
-
+  return <>
     <ul class="todo-list">
       {For($todos, m => m.id, (todo) => {
         const $isEditing = ion(() => todo === $editedTodo());
@@ -217,8 +203,8 @@ function TodoList(setup: FromTag<{
           <li class={['todo', { 'completed': () => todo.completed, 'editing': $isEditing }]}>
             <div class="view">
               <input class="toggle" type="checkbox" mu:checked={$of(todo).completed} />
-              <label on:dblclick={e => editTodo(todo)}>{() => todo.title}</label>
-              <button class="destroy" on:click={e => removeTodo(todo)}></button>
+              <label on:dblclick={() => editTodo(todo)}>{() => todo.title}</label>
+              <button class="destroy" on:click={() => removeTodo(todo)}></button>
             </div>
             {If($isEditing,
               <input
@@ -226,7 +212,7 @@ function TodoList(setup: FromTag<{
                 type="text"
                 mu:value={$of(todo).title}
                 at:attach={node => node.focus()}
-                on:blur={e => doneEdit(todo)}
+                on:blur={() => doneEdit(todo)}
                 on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
               />
             )}
@@ -234,7 +220,7 @@ function TodoList(setup: FromTag<{
         </>
       })}
     </ul>
-  )
+  </>
 }
 
 

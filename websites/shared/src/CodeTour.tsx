@@ -1,8 +1,8 @@
-import { css, FromTag, Ion, RenderSlot, Style } from 'luent'
+import { css, FromTag, Ion, RenderTag, Style } from 'luent'
 import { Code } from './Code';
 
 export function CodeTour(setup: FromTag<{
-  Slot: RenderSlot
+  Slot: RenderTag
 }>) {
   const { Slot } = setup;
 
@@ -43,7 +43,7 @@ export function CodeTour(setup: FromTag<{
 export function TourSection(setup: FromTag<{
   tab: Ion<"main" | "alt">,
   id?: string,
-  Slot: RenderSlot,
+  Slot: RenderTag,
   mainCode: { name: string, code: string, lang?: string },
   altCode: { name: string, code: string, lang?: string },
   highlightCode: (code: string, lang: string) => Promise<string>,

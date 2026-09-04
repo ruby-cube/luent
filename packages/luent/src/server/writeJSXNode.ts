@@ -5,7 +5,7 @@ import { writeComponent, writeElement, processJSXOutput } from "./writeHTML";
 import { isFunction, normalizeToArray } from "@luent/utils";
 import { writeShadowRoot } from "../component/shadow";
 import { writeToPortal } from "./portals";
-import { RenderSlot } from "../component/bindings-types";
+import { RenderTag } from "../component/bindings-types";
 import { Context } from "../context/Context";
 
 
@@ -27,7 +27,6 @@ export function writeJSXNode(
       return writeShadowRoot(config)
     // TODO:
     case 'o-link':
-       console.log('write o-link')
       return writeToPortal('head',
         writeElement('link', undefined, <ElementConfig>config)
       );
@@ -69,7 +68,7 @@ export function writeJSXNode(
   }
 }
 
-function writeSlot(Slot: RenderSlot | undefined) {
+function writeSlot(Slot: RenderTag | undefined) {
   if (!Slot) return ""
   return processJSXOutput(normalizeToArray(Slot?.())).join('')
 }

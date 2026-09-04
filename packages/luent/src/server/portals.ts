@@ -50,7 +50,6 @@ function getPortalRuntimeState(): PortalRuntimeState {
 
 export function writeToPortal(to: 'head' | 'body', html: string) {
   const activePortals = usePortals()
-  console.log('writePortal', to, html)
   addPortal(activePortals, to, html)
 }
 

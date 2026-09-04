@@ -1,4 +1,4 @@
-import { ion, Ion, Ionic, ionic, $of, css, Else, For, FromTag, If, RenderSlot, Style, TagClass } from "luent";
+import { ion, Ion, Ionic, ionic, $of, css, Else, For, FromTag, If, RenderTag, Style, TagClass } from "luent";
 
 
 
@@ -35,7 +35,7 @@ export function EmojiQuest() {
 
 function Panel(setup: FromTag<{
   title: string,
-  Slot: RenderSlot
+  Slot: RenderTag
   width?: number
 }>) {
   const { title, Slot, width = 230 } = setup
@@ -476,7 +476,7 @@ EmojiQuest.tsxMessages = `function Messages(setup: FromTag<{
 
 EmojiQuest.nsxPanel = `function Panel(setup: FromTag<{
   title: string,
-  Slot: RenderSlot
+  Slot: RenderTag
   width?: number
 }>) {
   const { title, Slot, width = 230 } = setup
@@ -504,7 +504,7 @@ EmojiQuest.nsxPanel = `function Panel(setup: FromTag<{
 
 EmojiQuest.tsxPanel = `function Panel(setup: FromTag<{
   title: string,
-  Slot: RenderSlot
+  Slot: RenderTag
   width?: number
 }>) {
   const { title, Slot, width = 230 } = setup

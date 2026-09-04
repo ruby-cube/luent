@@ -2,7 +2,7 @@ import { cancelPromise, getAwaiting, Ion, SuspenseIon, toValue, trackForRender }
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ViewType, RenderConditional } from "./If";
 import { isFunction, noop } from "@luent/utils";
-import { FromTag, RenderSlot } from "../component/bindings-types";
+import { FromTag, RenderTag } from "../component/bindings-types";
 // import { createCasesKit, DEFAULT, MatchKit } from "./Switch";
 import { $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@luent/flask";
 import { AsyncRender, JSXNode, toAsyncRender, VineNode } from "../node/VineNode";
@@ -29,7 +29,7 @@ export function Match(setup: FromTag<{
   x: Ion<any>, // TODO: change to key ... but need to make sure JSX plays well with it
   'view'?: ViewType // TODO: allow 'show'?
   toCase?: (key: any) => any,
-  Slot: RenderSlot
+  Slot: RenderTag
 }>) {
   const { $x, toCase = (key: any) => key, Slot, "view": view } = setup
   if (import.meta.env.SSR) return renderStaticMatchCase($x, toCasesMap(Slot() as RawCaseKit[], view), toCase)

@@ -1,6 +1,6 @@
 import "./index.css";
 import "./debugger.css";
-import { component, AsyncIon, template, Else, For, FromTag, HandleEvent, If, RenderSlot, SuspenseIon } from "luent";
+import { component, AsyncIon, template, Else, For, FromTag, HandleEvent, If, RenderTag, SuspenseIon } from "luent";
 import * as db from "./data/index"
 import { Ion, ion } from "@luent/quarky";
 import { Await, Meanwhile, Nonce } from "../../../../../packagesluent/src/boundaries/Await";
@@ -73,7 +73,7 @@ function Home() {
 export function TabList(input: {
    activeTab: Ion<string>,
    'on:change': HandleEvent,
-   Slot: RenderSlot,
+   Slot: RenderTag,
    contentPending: SuspenseIon
 }) {
    const { $activeTab, emit, Slot, $contentPending } = input

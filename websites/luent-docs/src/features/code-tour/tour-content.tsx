@@ -1,4 +1,4 @@
-import { Else, If, type FromTag, type Ion, type RenderSlot } from 'luent'
+import { Else, If, type FromTag, type Ion, type RenderTag } from 'luent'
 import { $CodeTab } from '@luent/websites-shared'
 import type { CodeTab, TourSection } from './types';
 

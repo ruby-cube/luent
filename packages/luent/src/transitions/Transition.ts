@@ -1,12 +1,12 @@
 import { JSXComponent } from "@luent/nextscript"
-import { RenderSlot } from "../component/bindings-types"
+import { RenderTag } from "../component/bindings-types"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
 import { AnyObject } from "@luent/types"
 
 let transitionConfig: TransitionConfigs | undefined
 
-export function provideTransition(Slot: RenderSlot, bindings: AnyObject) {
+export function provideTransition(Slot: RenderTag, bindings: AnyObject) {
   try {
     transitionConfig = toTransitionConfig(bindings)
     return Slot()
