@@ -38,7 +38,7 @@ function EmojiChip(setup: FromTag<{ Slot: () => string }>) {
   const { Slot } = setup;
 
   return <>
-    <li class='emoji-chip'>{Slot()}</li>
+    <li class='emoji-chip'><Slot/></li>
 
     {Style(css`
       .emoji-chip {

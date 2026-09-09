@@ -40,7 +40,7 @@ export function DemoContainer(setup: FromTag<{
             {Slot()}
           </shadow-root>} */}
           <ShadowRoot>
-            {Slot()}
+              <Slot/>
           </ShadowRoot>
       </div>
 

@@ -53,7 +53,7 @@ function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> &
       data-size={size}
       microclass={buttonVariants({ variant, size })}
       auto-bind={other}
-    >{Slot()}</Comp>
+    ><Slot/></Comp>
   )
 }
 

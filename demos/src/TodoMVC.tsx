@@ -1,4 +1,4 @@
-import { For, If, listen, NodeRef, $of, track, ionicTick, Ion, Ionic, ionic, ion, FromTag } from "luent"
+import { KeyboardEvent, For, If, listen, $of, track, ionicTick, Ion, Ionic, ionic, ion, FromTag, FormEvent } from "luent"
 
 interface Todo {
   id: number
@@ -6,8 +6,8 @@ interface Todo {
   completed: boolean
 }
 
-type InputEvent = { target: { value: string }, key: string }
-type RadioInputEvent = { target: { checked: boolean } }
+// type InputEvent = { target: { value: string }, key: string }
+// type RadioInputEvent = { target: { checked: boolean } }
 type FilterKeys = 'all' | 'active' | 'completed'
 
 const ionicTodos = (todos: Todo[]) => ionic(todos, { '@each': { '-as': ionic } });
@@ -74,7 +74,7 @@ export function TodoMVC() {
 
   // # toggle completed
 
-  function toggleAll(e: RadioInputEvent) {
+  function toggleAll(e: FormEvent<HTMLInputElement>) {
     $todos().forEach((todo) => { todo.completed = e.target.checked })
   }
 
@@ -99,18 +99,15 @@ export function TodoMVC() {
     </span>
   </>
 
-  const $todoList = NodeRef(TodoList)
-  const $h1 = NodeRef('h1')
-
   return <>
     <section class="todoapp">
       <header class="header">
-        <h1 ref={$h1}>Todos</h1>
+        <h1>Todos</h1>
         <TodoInput addTodo={addTodo}></TodoInput>
       </header>
       <section class="main">
         <ToggleAllButton />
-        <TodoList ref={$todoList} todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
+        <TodoList todos={$filteredTodos} removeTodo={removeTodo}></TodoList>
       </section>
       <footer display-if={$todoCount} class="footer">
         <RemainingCount />
@@ -147,7 +144,7 @@ function TodoInput(setup: FromTag<{
 }>) {
   const { addTodo } = setup;
 
-  function submitTodo(e: InputEvent) {
+  function submitTodo(e: KeyboardEvent<HTMLInputElement>) {
     const value = e.target.value.trim()
     if (value) {
       addTodo(value)
@@ -160,7 +157,7 @@ function TodoInput(setup: FromTag<{
       class="new-todo"
       autofocus
       placeholder="What needs to be done?"
-      on:keyup={e => e.key === 'Enter' && submitTodo(e as unknown as InputEvent)}
+      on:keyup={e => e.key === 'Enter' && submitTodo(e)}
     />
   </>
 }

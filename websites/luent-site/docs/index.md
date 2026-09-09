@@ -57,8 +57,8 @@ features:
   </div> -->
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2 class='section-heading'>Code Tour</h2>
-    <p>
-    Luent is in early development. Here's a glimpse of what’s taking shape.
+    <p style='text-wrap: balance'>
+    <strong>Luent is in early development.</strong> Here's a glimpse of what’s taking shape.
     </p>
     <!-- <p style='text-wrap: balance'><small>Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
 </small></p> -->
@@ -69,7 +69,7 @@ features:
 :::luent code-glimpses
 :::
 
-<p class='custom-block status-notice'><strong>This project is in early development.</strong></p>
+<!-- <p class='custom-block status-notice'><strong>This project is in early development.</strong></p> -->
 
 <style>
 
@@ -86,10 +86,7 @@ features:
   line-height: 2.5rem !important;
 }
 
-.VPNavBarSearchButton {
-  width: 100% !important;
-  margin-right: 1rem !important;
-}
+
 
 section#code-glimpses p {
     margin-inline: auto;
@@ -114,7 +111,7 @@ p.custom-block.status-notice {
 .home-glimpses-heading {
   width: 100%;
   max-width: 1120px;
-  margin: 2.4rem auto 0;
+  /* margin: 2.4rem auto 0; */
   scroll-margin-top: calc(var(--vp-nav-height) + 20px);
   /* margin: clamp(2.4rem, 5vw, 5rem) auto 0; */
   padding: 0 clamp(0rem, 2vw, 0.4rem) clamp(1rem, 2vw, 1.8rem);
@@ -135,7 +132,7 @@ h2.section-heading {
 
 @media (max-width: 959px) {
   .home-glimpses-heading {
-    margin-top: 2.2rem;
+    /* margin-top: 2.2rem; */
     padding-bottom: 0.7rem;
   }
 

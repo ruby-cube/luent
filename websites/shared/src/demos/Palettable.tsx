@@ -78,7 +78,7 @@ export function Palettable() {
         margin-top: 154px;
         align-self: center;
         cursor: pointer;
-        position: fixed;
+        position: absolute;
         position-anchor: --color-palette;
       }
 
@@ -189,7 +189,7 @@ function ColorPalette(setup: FromTag<{
           disabled={$gapDisabled}
           on:click={() => moveSelected(colors.length)}
         />
-        {DropZones()}
+        <DropZones/>
       </div>
     </div>
 
@@ -236,7 +236,7 @@ const Gap = (setup: FromTag<{ '...': 'button' }>) =>
       class='clickable gap'
       auto-bind={setup}
     >
-      {Arrow()}
+      <Arrow/>
     </button>
 
     {Style(css`
@@ -521,7 +521,7 @@ function DraggableKit<T>(config: {
             <div
               class='drop-zone'
               data-drop-index={count - 1}
-            >{Arrow()}</div>
+            ><Arrow/></div>
           )}
           <div class='drop-zone' data-drop-index={n + 1}></div>
         </div>
@@ -908,7 +908,7 @@ Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<{
             on:click={() => moveSelected(index + 1)}
           />
         )}
-        {DropZones()}
+        <DropZones/>
       </div>
     </div>
 
@@ -1004,7 +1004,7 @@ Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<{
             />
           </>
         )}
-        {DropZones()}
+        <DropZones/>
       </div>
     </div>
 
@@ -1032,7 +1032,7 @@ Palettable.nsxGap = `function Gap(setup: FromTag) {
       class='clickable gap'
       auto-bind={setup}
     >
-      {Arrow()}
+      <Arrow/>
     </button>
 
     <o-style>
@@ -1069,7 +1069,7 @@ Palettable.tsxGap = `function Gap(setup: FromTag) {
       class='clickable gap'
       auto-bind={setup}
     >
-      {Arrow()}
+      <Arrow/>
     </button>
 
     {Style(css\`
@@ -1249,7 +1249,7 @@ Palettable.nsxDraggableKit = `function DraggableKit<T>(config: {
             <div
               class='drop-zone'
               data-drop-index={count - 1}
-            >{Arrow()}</div>
+            ><Arrow/></div>
           )}
           <div class='drop-zone' data-drop-index={n + 1}></div>
         </div>
@@ -1426,7 +1426,7 @@ Palettable.tsxDraggableKit = `function DraggableKit<T>(config: {
             <div
               class='drop-zone'
               data-drop-index={count - 1}
-            >{Arrow()}</div>
+            ><Arrow/></div>
           )}
           <div class='drop-zone' data-drop-index={n + 1}></div>
         </div>

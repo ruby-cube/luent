@@ -35,6 +35,12 @@
       }
     },
     {
+      "scope": ["meta.type.annotation"],
+      "settings": {
+        "foreground": "#8d91a1"
+      }
+    },
+    {
       "scope": ["variable", "variable.parameter", "support.variable"],
       "settings": {
         "foreground": "#1e1e1e"

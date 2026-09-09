@@ -47,7 +47,7 @@ export namespace JSX {
   // #region: Event Objects
   // ----------------------------------------------------------------------
 
-  interface Event<T> extends NativeEvent {
+  export interface Event<T> extends NativeEvent {
     /**
     * The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
     *
@@ -59,33 +59,34 @@ export namespace JSX {
   }
 
 
-  interface ClipboardEvent extends NativeClipboardEvent {
+  export interface ClipboardEvent extends NativeClipboardEvent {
     clipboardData: DataTransfer;
   }
 
 
-  interface FocusEvent<T = Element, RelatedTarget = Element> extends NativeFocusEvent {
+  export interface FocusEvent<T = Element, RelatedTarget = Element> extends NativeFocusEvent {
     relatedTarget: (EventTarget & RelatedTarget) | null;
     target: EventTarget & T;
   }
 
 
-  interface FormEvent<T = Element> {
+  export interface FormEvent<T = Element> {
     target: EventTarget & T;
   }
 
 
-  interface InvalidEvent<T = Element> {
+  export interface InvalidEvent<T = Element> {
     target: EventTarget & T;
   }
 
 
-  interface StateChangeEvent<T = Element> {
+  export interface StateChangeEvent<T = Element> {
     target: EventTarget & T;
   }
 
 
-  interface KeyboardEvent extends NativeKeyboardEvent {
+  export interface KeyboardEvent<T> extends NativeKeyboardEvent {
+    target: EventTarget & T;
     /**
      * See [DOM Level 3 Events spec](https://www.w3.org/TR/uievents-key/#keys-modifier). for a list of valid (case-sensitive) arguments to this method.
      */
@@ -101,7 +102,7 @@ export namespace JSX {
   }
 
 
-  interface MouseEvent extends NativeMouseEvent {
+  export interface MouseEvent extends NativeMouseEvent {
 
     /**
     * The **`MouseEvent.getModifierState()`** method returns the current state of the specified modifier key: `true` if the modifier is active (i.e., the modifier key is pressed or locked), otherwise, `false`.
@@ -116,7 +117,7 @@ export namespace JSX {
 
 
 
-  type ModifierKey =
+  export type ModifierKey =
     | "Alt"
     | "AltGraph"
     | "CapsLock"
@@ -171,10 +172,10 @@ export namespace JSX {
   type HandleClipboardEvent<T = Element> = EventHandler<ClipboardEvent, T>;
   type HandleCompositionEvent<T = Element> = EventHandler<CompositionEvent, T>;
   type HandleDragEvent<T = Element> = EventHandler<DragEvent, T>;
-  type HandleFocusEvent<T = Element> = EventHandler<FocusEvent, T>;
-  type HandleFormEvent<T = Element> = EventHandler<FormEvent, T>;
-  type HandleChangeEvent<T = Element> = EventHandler<StateChangeEvent, T>;
-  type HandleKeyboardEvent<T = Element> = EventHandler<KeyboardEvent, T>;
+  type HandleFocusEvent<T = Element> = EventHandler<FocusEvent<T>, T>;
+  type HandleFormEvent<T = Element> = EventHandler<FormEvent<T>, T>;
+  type HandleChangeEvent<T = Element> = EventHandler<StateChangeEvent<T>, T>;
+  type HandleKeyboardEvent<T = Element> = EventHandler<KeyboardEvent<T>, T>;
   type HandleMouseEvent<T = Element> = EventHandler<MouseEvent, T>;
   type HandleTouchEvent<T = Element> = EventHandler<TouchEvent, T>;
   type HandlePointerEvent<T = Element> = EventHandler<PointerEvent, T>;

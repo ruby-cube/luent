@@ -27,10 +27,6 @@
       }
     },
     {
-      "name": "storage.type.function.arrow",
-      "match": "<:/>"
-    },
-    {
       "name": "keyword.operator.at",
       "match": "(?<=[A-Za-z_$][\\w$]*)@"
     },

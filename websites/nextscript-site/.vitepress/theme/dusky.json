@@ -42,6 +42,14 @@
     },
     {
       "scope": [
+        "meta.type.annotation"
+      ],
+      "settings": {
+        "foreground": "#8d91a1"
+      }
+    },
+    {
+      "scope": [
         "entity.name.function",
         "support.function",
         "meta.function-call"

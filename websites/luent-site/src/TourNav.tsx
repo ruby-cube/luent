@@ -56,6 +56,7 @@ export function TourNav(setup: FromTag<{
   return <>
     <nav class='tour-nav' aria-label='Tour sections'>
       <div class='rail-count'><b>{() => pad(selectedIndex() + 1)}</b>/{pad(headings.length)}</div>
+      {/* <div class='rail-count'><b>tour</b></div> */}
       <ul class='rail-dots'>
         {For(headings, heading => {
           const $hover = ion(() => $hovered() === heading.text)
@@ -100,7 +101,6 @@ export function TourNav(setup: FromTag<{
       .tour-nav .rail-dots {
         display: flex;
         flex-direction: column;
-        gap: 12px;
         align-items: center;
         margin: 0;
         padding: 0;
@@ -117,10 +117,14 @@ export function TourNav(setup: FromTag<{
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background-color: var(--vp-c-default-3);
+        background-color: #cfd1d4;
         box-sizing: border-box;
         border-radius: 50%;
         transition: background .2s, transform .2s;
+      }
+
+      .dark .tour-nav .circle {
+        background-color: #33373e;
       }
 
       .tour-nav .circle:hover {
@@ -142,13 +146,13 @@ export function TourNav(setup: FromTag<{
         top: 50%;
         transform: translateY(-50%);
         white-space: nowrap;
-        padding: 6px 10px;
+        padding: 6px 14px;
         border-radius: 999px;
         border: 1px solid var(--vp-c-divider);
         font-family: 'Fragment Mono', monospace;
         font-size: 12px;
-        color: var(--vp-c-text-1);
-        background: color-mix(in srgb, var(--vp-c-bg) 94%, transparent);
+        color: var(--vp-c-white);
+        background: color-mix(in srgb, var(--vp-c-black) 94%, transparent);
       }
 
       @media (max-width: 960px) {

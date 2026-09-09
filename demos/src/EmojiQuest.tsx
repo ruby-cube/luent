@@ -41,7 +41,7 @@ function Panel(setup: FromTag<{
             {() => opened() ? '-' : '+'}
           </button>
         </div>
-        <div display-if={opened} class='panel-body'>{Slot()}</div>
+        <div display-if={opened} class='panel-body'><Slot/></div>
       </div>
       {Style(css`
             .panel {

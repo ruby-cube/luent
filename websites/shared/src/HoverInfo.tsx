@@ -34,7 +34,7 @@ export function HoverInfo(setup: FromTag<{
           auto-bind={bindings}
           style='background-color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); font-weight: 600;'
         >
-          {Slot()}
+          <Slot/>
         </TooltipContent>
       </TooltipRoot>
     // </o--body>

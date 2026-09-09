@@ -207,7 +207,9 @@ function Dialog({ Slot }) {
 	return JSXComponentAs({ open, close }, <>
 		{If(opened,
 			<o--body>
-				<div>{Slot()}</div>
+				<div>
+          <Slot/>
+        </div>
 			</o--body>
 		)}
 	</>)

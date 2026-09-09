@@ -13,15 +13,15 @@ type DropdownMenu = {
 const DROPDOWN = ContextKey<IonicDropdown>()
 
 function DropdownMenu(setup: FromTag<{
-  'Slot:Face': (menu: DropdownMenu) => RawJSXNode
+  Face: (menu: DropdownMenu) => RawJSXNode
 }>) {
   const { Slot } = setup
   const { dropdown, menu } = DropdownKit()
 
   return (
     <o:context provide={DROPDOWN(dropdown)}>
-      {Slot.Face(menu)}
-      {Slot()}
+      <Face menu={menu}/>
+      <Slot/>
     </o:context>
   )
 }
@@ -33,7 +33,7 @@ function Dropdown(setup: FromTag<{ Slot: RenderTag }>) {
   return (
     <o--body>
       <DropdownRoot dropdown={dropdown}>
-        <DropdownContent>{Slot()}</DropdownContent>
+        <DropdownContent><Slot/></DropdownContent>
         <DropdownTail></DropdownTail>
       </DropdownRoot>
     </o--body>

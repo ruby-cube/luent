@@ -63,9 +63,11 @@ function iconSrc(icon: FeatureItem['icon']) {
           <circle cx="320" cy="320" r="140" stroke="var(--vp-c-divider)" stroke-width=".75" />
           <circle cx="320" cy="320" r="225" stroke="var(--vp-c-divider)" stroke-width=".75" />
           <circle cx="320" cy="320" r="310" stroke="var(--vp-c-divider)" stroke-width=".75" />
-          <circle cx="320" cy="320" r="14" fill="var(--vp-c-brand-2)" style="opacity: .30" />
-          <circle cx="419" cy="221" r="7" fill="var(--vp-c-brand-2)" style="opacity: .30" />
-          <circle cx="108.6" cy="397" r="7" fill="var(--vp-c-brand-2)" style="opacity: .30" />
+          <circle cx="314" cy="316" r="14" stroke="var(--vp-c-brand-2)" fill="none" stroke-width=".75" opacity=".3"/>
+          <circle cx="326" cy="316" r="14" stroke="var(--vp-c-brand-2)" fill="none" stroke-width=".75" opacity=".3"/>
+          <circle cx="320" cy="326" r="14" stroke="var(--vp-c-brand-2)" fill="none" stroke-width=".75" opacity=".3"/>
+          <circle cx="419" cy="221" r="7" fill="var(--vp-c-brand-2)" opacity=".30" />
+          <circle cx="108.6" cy="397" r="7" fill="var(--vp-c-brand-2)" opacity=".30" />
         </svg>
       </div>
     </section>

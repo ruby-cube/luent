@@ -1,7 +1,7 @@
 # Luent APIs
 
 :::warning <span style='margin-right: .5rem'>🚧</span> UNDER CONSTRUCTION 
-The API reference is still being written. In the meantime, here is a overview of Luent's APIs
+The guide and API reference are underway. In the meantime, here is an overview of Luent's APIs
 :::
 
 ## Island rendering
@@ -57,6 +57,7 @@ The API reference is still being written. In the meantime, here is a overview of
 - `ref` for node access
 - `node` <span class='doc-tag'>Experimental</span> for pre-existing DOM nodes
 
+
 ## Flow functions
 Flow functions are called within JSX to direct the control flow of view rendering.
 - `If`/`ElseIf`/`Else`
@@ -86,6 +87,9 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 ## Teleported meta tags
 - `<o-link>` to create and attach a `<link>` element to the document head
 - `<o-style>` to create and attach a `<style>` element to the document head
+
+## Bindings portal
+- `asJSX()` <span class='doc-tag'>Experimental</span> for bindings on existing DOM nodes
 
 ## Node access
 - `component()` to expose a component instance

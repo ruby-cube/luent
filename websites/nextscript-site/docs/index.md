@@ -8,7 +8,7 @@ hero:
   tagline: for writing clear, ergonomic, type-safe code
   actions:
     - theme: alt
-      text: Preview
+      text: Preview NextScript
       link: /#code-glimpses
 
 features:
@@ -26,9 +26,10 @@ features:
     <span class='ns-hero-code__dot'></span>
   </div>
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
-    <h2>Code Glimpses</h2>
-    <p>NextScript is in early development. Here's a glimpse of what's in store.</p>
-    <p><small><strong>Note:</strong> Examples use API from <a href="https://github.com/ruby-cube/luent">Luent</a> for demonstration purposes. While NextScript was developed alongside Luent, it is designed to be framework-agnostic.</small></p>
+    <h2>Preview</h2>
+    <p><strong>NextScript is in early development.</strong> Here's a glimpse of what's in store.</p>
+    <p style='text-wrap: balance'><small>
+    <strong>Note:</strong> Examples use API from <a href="https://luent.dev">Luent</a> for demonstration purposes. NextScript itself is framework-agnostic.</small></p>
   </section>
 
   <!-- <div id="home-tour-root"></div> -->
@@ -37,6 +38,7 @@ features:
 :::
 
 <p class='custom-block status-notice'><strong>This project is in early development.</strong></p>
+
 
 <style>
 .VPButton.alt {
@@ -49,9 +51,9 @@ features:
   border: 1px solid var(--vp-c-brand-2) !important;
   color: var(--vp-c-brand-2) !important;
 }
-/* .tagline {
-  color: var(--vp-c-text-1) !important;
-} */
+.tagline {
+  text-wrap: balance;
+}
 </style>
 
 <style scoped>

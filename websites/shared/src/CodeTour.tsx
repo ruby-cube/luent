@@ -9,7 +9,7 @@ export function CodeTour(setup: FromTag<{
   return (
     <>
       <section class='home-tour'>
-        {Slot()}
+        <Slot />
       </section>
 
       {Style(css`
@@ -41,23 +41,25 @@ export function CodeTour(setup: FromTag<{
 }
 
 export function TourSection(setup: FromTag<{
-  tab: Ion<"main" | "alt">,
+  tab: Ion<"main" | "alt"> & { toggle: () => void },
   id?: string,
+  filename: string,
   Slot: RenderTag,
   mainCode: { name: string, code: string, lang?: string },
   altCode: { name: string, code: string, lang?: string },
   highlightCode: (code: string, lang: string) => Promise<string>,
   flow: 'code-right' | 'code-left'
 }>) {
-  const { Slot, flow, mainCode, altCode, highlightCode, id, $tab } = setup
+  const { filename, Slot, flow, mainCode, altCode, highlightCode, id, $tab } = setup
   return (
     <>
       <article id={id} class={`tour-row ${flow}`}>
         <div class='tour-copy'>
-          {Slot()}
+          <Slot />
         </div>
         <div class='tour-code'>
           <Code
+            filename={filename}
             trusted
             main={mainCode}
             alt={altCode}
@@ -68,6 +70,7 @@ export function TourSection(setup: FromTag<{
       </article>
 
       {Style(css`
+
         .tour-row {
           display: grid;
           grid-template-columns: minmax(0, 1fr);

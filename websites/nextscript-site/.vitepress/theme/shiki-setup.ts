@@ -18,7 +18,7 @@ const tokenColors = [
   {
     scope: [
       'meta.embedded.expression meta.brace.round',
-      'meta.arrow punctuation.definition.parameters'
+      'meta.arrow punctuation.definition.parameters',
     ],
     settings: {
       foreground: '#A6ACCDC0'

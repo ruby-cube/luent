@@ -107,6 +107,7 @@ export function CodeGlimpses() {
 
         .tour-copy .tour-note {
           font-size: clamp(0.9rem, 0.95vw, 0.96rem);
+          margin-block: 1.4rem; 
         }
       `)}
     </>
@@ -124,7 +125,7 @@ function AccessorVariables() {
     <p class='tour-note'>
       <strong>Note:</strong> Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's <code>ion()</code>.
     </p>
-    <a href='/guide/getter-syntax' class='medium brand'>Learn more</a>
+    <a href='/guide/accessor-syntax' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -159,7 +160,7 @@ function DerivationExpressions() {
     <p class='tour-note'>
       <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
     </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+    <a href='/guide/accessor-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -192,7 +193,7 @@ function FlowExpressions() {
     <p>
       —view control flow with implicit JSX fragment factories
     </p>
-    <a href='/guide/jsx-syntax' class='medium brand'>Learn more</a>
+    <a href='/guide/jsx-syntax#jsx-flow-expressions' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -231,9 +232,9 @@ function GatewayFunction() {
     <h3>JSX gateway function</h3>
     <code><i>parameters</i> {':>'} <i>jsx</i></code>
     <p>
-      —shorthand an arrow function expression that returns a JSX fragment
+      —shorthand for an arrow function expression that returns a JSX fragment
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+    <a href='/guide/jsx-syntax#jsx-gateway-function' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -317,7 +318,7 @@ function JSXFragmentReturn() {
     <p>
       —auto-returned fragment
     </p>
-    <a href='' class='medium brand'>Learn more</a>
+    <a href='/guide/jsx-syntax#jsx-fragment-return' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -367,7 +368,9 @@ const componentNSX =
   <:: as={dialog}>  
     {If(opened@, 
       <o--body>
-        <div>{Slot()}</div>
+        <div>
+          <Slot/>
+        </div>
       </o--body>
     )}
   </::>
@@ -389,7 +392,9 @@ const componentTSX =
     slot: <>
       {If(opened, 
         <o--body>
-          <div>{Slot()}</div>
+          <div>
+            <Slot/>
+          </div>
         </o--body>
       )}
     </>,
@@ -405,40 +410,38 @@ function TaggedTemplateStyles() {
     <h3>Tagged template styles</h3>
     <code>{'<'}<i>node</i> {'style=`'}<i>css</i>{'`>'}</code> | <code>{'<style>'}<i>css</i>{'</style>'}</code>
     <p>
-      —tagged template literal shorthand for style bindings and style tags
+      —tagged template literals for style bindings and style tags
     </p>
-    <a href='' class='medium brand'>Learn more</a>
+    <a href='/guide/jsx-syntax#jsx-style-tags' class='medium brand'>Learn more</a>
   </>
 }
 
 const styleNSX = 
-  `<div
-  on:pointerdown={e => maybeDrag(e, item, index)}
-  on:transitionend={() => taggingAlong = false}
-  class={{
-    'tag-along': tagalong@,
-    'dragged': dragged@,
-  }}
-  style=\`
-    z-index: \${(dragged ? order(index) : 0)@};
-    transform: \${(dragged ? transform : undefined)@};
-  \`
-></div>
+  `<div style=\`
+  z-index: \${(drag ? order(index) : 0)@};
+  transform: \${(drag ? transform : undefined)@};
+\`></div>
+
+<style>
+  .dragging {
+    cursor: grabbing;
+    box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
+  }
+</style>
 `
 
 const styleTSX = 
-  `<div
-  on:pointerdown={e => maybeDrag(e, item, $index())}
-  on:transitionend={() => $taggingAlong.value = false}
-  class={{
-    'tag-along': $tagalong,
-    'dragged': $dragged,
-  }}
-  style={css\`
-    z-index: \${() => $dragged() ? order(index) : 0};
-    transform: \${() => $dragged() ? $transform() : undefined)@};
-  \`}
-></div>
+  `<div style={css\`
+  z-index: \${() => drag() ? order(index) : 0};
+  transform: \${() => drag() ? transform() : undefined)@};
+\`}></div>
+
+<style>{css\`
+  .dragging {
+    cursor: grabbing;
+    box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
+  }
+\`}</style>
 `
 
 
@@ -450,7 +453,7 @@ function TypeGuards() {
     <p>
       —type narrowing and widening of accessor variables
     </p>
-    <a href='' class='medium brand'>Learn more</a>
+    <a href='/guide/accessor-syntax#type-guards' class='medium brand'>Learn more</a>
   </>
 }
 

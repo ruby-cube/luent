@@ -50,7 +50,9 @@ function Panel(setup: FromTag<{
             {() => opened() ? '-' : '+'}
           </button>
         </div>
-        <div display-if={opened} class='panel-body'>{Slot()}</div>
+        <div display-if={opened} class='panel-body'>
+          <Slot/>
+        </div>
       </div>
 
       {Style(css`
@@ -490,7 +492,9 @@ EmojiQuest.nsxPanel = `function Panel(setup: FromTag<{
           {(opened ? '-' : '+')@}
         </button>
       </div>
-      <div display-if={opened@} class='panel-body'>{Slot()}</div>
+      <div display-if={opened@} class='panel-body'>
+        <Slot/>
+      </div>
     </div>
 
     <o-style>
@@ -518,7 +522,9 @@ EmojiQuest.tsxPanel = `function Panel(setup: FromTag<{
           {() => $opened() ? '-' : '+'}
         </button>
       </div>
-      <div display-if={$opened} class='panel-body'>{Slot()}</div>
+      <div display-if={$opened} class='panel-body'>
+        <Slot/>
+      </div>
     </div>
 
     <o-style>

@@ -12,11 +12,12 @@ export function DoodleCanvasDemo() {
   })
   return (
     <>
-      <DemoContainer>
+      <DemoContainer style='border: none'>
         {DoodleCanvas()}
       </DemoContainer>
       <Code
         trusted
+        filename='DrawingKit'
         main={{ name: 'ns', code: nsKit }}
         alt={{ name: 'ts', code: tsKit, lang: 'ts' }}
         highlight={highlightCode}
@@ -25,6 +26,7 @@ export function DoodleCanvasDemo() {
       />
       <Code
         trusted
+        filename='DoodleCanvas'
         main={{ name: 'nsx', code: nsx }}
         alt={{ name: 'tsx', code: tsx, lang: 'tsx' }}
         highlight={highlightCode}
@@ -38,8 +40,7 @@ export function DoodleCanvasDemo() {
 const nsKit =
   `import { NodeRef } from "luent"
   
-function DoodleCanvasKit() {
-  get canvas = NodeRef("canvas")
+function DrawingKit(canvas@: NodeRef<'canvas'>) {
 
   let isDrawing = false
   let lastX = 0
@@ -59,9 +60,7 @@ function DoodleCanvasKit() {
     return context;
   }
 
-  type DrawEvent = { clientX: number, clientY: number }
-
-  function getMousePosition(e: DrawEvent) {
+  function getMousePosition(e: MouseEvent) {
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect()
 
@@ -72,9 +71,8 @@ function DoodleCanvasKit() {
   }
 
   return {
-    canvas@,
 
-    startDrawing(e: DrawEvent) {
+    startDrawing(e: MouseEvent) {
       const point = getMousePosition(e)
       if (!point) return;
 
@@ -83,7 +81,7 @@ function DoodleCanvasKit() {
       lastY = point.y
     },
 
-    draw(e: DrawEvent) {
+    draw(e: MouseEvent) {
       if (!isDrawing) return;
 
       const context = getContext()
@@ -118,8 +116,7 @@ function DoodleCanvasKit() {
 const tsKit =
   `import { NodeRef } from "luent"
   
-function DoodleCanvasKit() {
-  const $canvas = NodeRef("canvas")
+function DrawingKit($canvas: NodeRef<'canvas'>) {
 
   let isDrawing = false
   let lastX = 0
@@ -140,9 +137,7 @@ function DoodleCanvasKit() {
     return context;
   }
 
-  type DrawEvent = { clientX: number, clientY: number }
-
-  function getMousePosition(e: DrawEvent) {
+  function getMousePosition(e: MouseEvent) {
     const canvas = $canvas()
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect()
@@ -154,9 +149,8 @@ function DoodleCanvasKit() {
   }
 
   return {
-    $canvas,
 
-    startDrawing(e: DrawEvent) {
+    startDrawing(e: MouseEvent) {
       const point = getMousePosition(e)
       if (!point) return;
 
@@ -165,7 +159,7 @@ function DoodleCanvasKit() {
       lastY = point.y
     },
 
-    draw(e: DrawEvent) {
+    draw(e: MouseEvent) {
       if (!isDrawing) return;
 
       const context = getContext()
@@ -198,16 +192,17 @@ function DoodleCanvasKit() {
 
 const nsx =
   `import { component, css, Style } from "luent"
-import { DoodleCanvasKit } from "./DoodleCanvasKit"
+import { DrawingKit } from "./DrawingKit"
   
 function DoodleCanvas() {
+  get canvas = NodeRef("canvas");
+
   const { 
-    canvas@, 
     startDrawing, 
     draw, 
     stopDrawing, 
     clearCanvas 
-  } = DoodleCanvasKit()
+  } = DrawingKit(canvas@)
   
   <:>
     <div class="canvas-app">
@@ -255,16 +250,17 @@ function DoodleCanvas() {
 
 const tsx =
   `import { component, css, Style } from "luent"
-import { DoodleCanvasKit } from "./DoodleCanvasKit"
+import { DrawingKit } from "./DrawingKit"
   
 function DoodleCanvas() {
+  const $canvas = NodeRef("canvas");
+  
   const { 
-    $canvas, 
     startDrawing, 
     draw, 
     stopDrawing, 
     clearCanvas 
-  } = DoodleCanvasKit()
+  } = DrawingKit($canvas)
 
   return (
     <>

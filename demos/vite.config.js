@@ -22,7 +22,8 @@ export default defineConfig(async () => {
       luent({ useWorkspace: true }),
     ],
     define: {
-      __INTERNAL__: true
+      __INTERNAL__: true,
+      __STYLE__: true,
     }
   }
 })

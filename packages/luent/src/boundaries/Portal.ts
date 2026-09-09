@@ -1,6 +1,6 @@
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { isFunction, isObject, normalizeToArray } from "@luent/utils";
-import { atAttach, beforeDetach, atRemount, atDetach } from "../flask/flask-hooks";
+import { atAttach, beforeDetach, atRemount, atDetach, atDemount, atUnmount } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@luent/flask";
 import { queueInternalRender, queueRender } from "@luent/quarky";
@@ -37,7 +37,6 @@ type SelectorString = string
 //    return undefined;
 // }
 
-let _portalMap: Map<any, any> | undefined;
 
 export function Portal(container: SelectorString | Element, render: RenderFunction | RawJSXNode | undefined, config?: AnyObject) {
 
@@ -52,8 +51,7 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
   const nodes = processJSXOutput(render())
 
   if (nodes[0] instanceof VineNode) {
-    const portalMap = _portalMap ?? (_portalMap = new Map())
-    const comment = portalMap.get(element) ?? (portalMap.set(element, document.createComment('portal')), portalMap.get(element))
+    const comment = document.createComment('portal')
     nodes.unshift(comment)
   }
 
@@ -64,7 +62,7 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
     mountDOMNodes(nodes, element)
   })
 
-  atDetach((final) => {
+  atDetach(() => {
     removeDOMNodes(nodes)
   })
 

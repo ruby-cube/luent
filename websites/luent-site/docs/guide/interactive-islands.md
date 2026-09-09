@@ -1,68 +1,58 @@
 # Interactive islands
 
-Luent provides APIs to build dynamic interactive islands that are mounted onto static HTML.
+Luent provides APIs to build interactive islands and mount them onto static HTML.
 
 ## Mounting an island
 
 There are three main steps to mounting an island to the DOM:
 
-- defining the island with one or more [render functions](#render-functions)
-- mounting the root view to an HTML element
-- loading the entry script in the HTML document
+- define the island with a [component](#components)
+- mount it to a designated HTML element or custom tag
+- load the entry script in the HTML document
 
-**Define the island**
+
+**Designate an island container and load the entry script**
+```html
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hello World</title>
+</head>
+<body>
+  <hello-world></hello-world>
+  <script type="module" src="/main.tsx"></script>
+</body>
+</html>
+```
+
+**Define and mount the island**
 
 ```nsx
-// HelloWorld.nsx
-function HelloWorld() {
+// main.tsx
+mountIsland(() => {
   <:>
-    <p>Hello World.</p>
+    <button on:click={logHello}>Hello, World.</button>
   </:>
-}
+}, "hello-world");
 ```
 
 ```tsx
-// HelloWorld.tsx
-function HelloWorld() {
+// main.tsx
+mountIsland(() => {
   return <>
-    <p>Hello World.</p>
+    <button on:click={logHello}>Hello, World.</button>
   </>
-}
-```
-
-**Designate an island container in the HTML**
-
-```html
-<!-- index.html -->
-<hello-world></hello-world>
-```
-
-**Instantiate and mount the island**
-
-```nsx
-// main.tsx
-mountIsland(HelloWorld, "hello-world");
-```
-
-```tsx
-// main.tsx
-mountIsland(HelloWorld, "hello-world");
-```
-
-**Load the entry script**
-
-```html
-<!-- index.html -->
-<script type="module" src="/main.tsx"></script>
+}, "hello-world");
 ```
 
 Island containers may be any native element or a custom tag. Custom tag names must contain a dash. Mount to the island container by either passing in a css selector or the DOM node.
 
-## Render functions
+## Components
 
-Render functions are functions that create a view. They are essentially view templates and serve as the building blocks of an dynamic island.
+Components are functions that create a view. They are essentially view templates and serve as the building blocks of an island.
 
-To define a render function, declare a function that returns a view composed using [JSX](#jsx) or [NSX]().
+To define a component, declare a function that returns a view written in [JSX](#jsx) or [NSX]().
 
 ```nsx
 // HelloWorld.nsx
@@ -82,11 +72,53 @@ function HelloWorld() {
 }
 ```
 
-Render functions must not be `async` functions although they can absolutely render views and run tasks asynchronously. To learn more, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
+### Tag Syntax
 
-#### Setting up stateful views
+Components are instantiated through JSX tag syntax:
+```nsx
+<HelloWorld />
+```
+```tsx
+<HelloWorld />
+```
+While technically, components with no parameters or slots may simply be invoked, e.g. `HelloWorld()`, the JSX syntax offers a consistent, readable way to instantiate components.
 
-In Luent, render functions, much like class constructors and factory functions, run once per view creation rather than per view update. Render functions may set up reactive state to pass to its view. The reactive portions of the view are then granularly updated through fine-grained reactivity.
+
+### Nesting Components
+Similar to function calls, component tags may be nested within components.
+
+```nsx
+// Layout.nsx
+function Layout() {
+  <:>
+    <NavBar />
+    <Main />
+    <Footer/>
+  </:>
+}
+```
+```tsx
+// Layout.tsx
+function Layout() {
+  return <>
+    <NavBar />
+    <Main />
+    <Footer/>
+  </>
+}
+```
+
+:::info Note
+Component must not be `async` functions or return promises. 
+
+To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
+:::
+
+### Stateful views
+
+In Luent, components, much like class constructors and factory functions, run once per view creation rather than per view update.
+
+Components may set up reactive state to pass to its view. The reactive portions of the view are then granularly updated through fine-grained reactivity.
 
 ```nsx
 function Counter() {
@@ -110,6 +142,84 @@ function Counter() {
 }
 ```
 
+### The setup parameter
+
+Components may be configured through a setup parameter, whose type is defined via the `FromTag` type helper. The setup parameter is an object containing all the bindings declared on an instantiation tag.
+
+
+**Component setup function**
+
+```nsx
+import type { FromTag } from 'luent';
+
+function MessageDisplay(setup: FromTag<{
+  message: Ion<string>
+}>) {
+  const { message@ } = setup
+  <:>
+    <p>{message@}</p>
+  </:>
+}
+```
+```tsx
+import type { FromTag } from 'luent';
+
+function MessageDisplay(setup: FromTag<{
+  message: Ion<string>
+}>) {
+  const { $message } = setup
+  return <>
+    <p>{$message}</p>
+  </>
+}
+```
+
+**Tag with binding**
+
+```nsx
+<MessageDisplay message={msg@} />
+```
+```tsx
+<MessageDisplay message={$msg} />
+```
+
+It is important to use the `FromTag` type helper to define the setup object as it serves as a translation layer between the component tag bindings and the component setup object.
+
+:::danger Omitting `FromTag` ...
+```nsx
+function MessageDisplay(setup: { // ❌ ... may cause type discrepancies
+  message: Ion<string>
+}) {
+  const { message } = setup
+  <:>
+    <p>{message}</p>
+  </:>
+}
+```
+```tsx
+function MessageDisplay(setup: { // ❌ ... may cause type discrepancies
+  message: Ion<string>
+}) {
+  const { message } = setup
+  return <>
+    <p>{message}</p>
+  </>
+}
+```
+:::
+To learn more about bindings see [Component Bindings](), [Node Access](), and [Mutable Bindings]()
+
+<!-- Instantiating views as components through JSX tag syntax enables features such as:
+- input normalization
+- style composition
+- binding forwarding and auto-binding
+- component ref access
+- mutation safety checking and mutable binding -->
+
+
+
+
+<!-- 
 #### Parameters
 
 Render functions may define parameters.
@@ -196,11 +306,11 @@ mountIsland(() => (
     <div>{Counter({ start: 0, increment: 5 })}</div>
   </>
 ), "counter-app");
-```
-
+``` -->
+<!-- 
 ## Components
 
-Component setup functions are render functions with additional ergonomic features provided through JSX tag syntax and the `FrogTag` setup object.
+Component setup functions are render functions with additional ergonomic features provided through JSX tag syntax and the `FromTag` setup object.
 
 **Component setup function**
 
@@ -248,7 +358,7 @@ To learn more about these features see [Component Bindings](), [Node Access](), 
 Any render function with zero parameters may be called through JSX syntax. If a render function declares a setup object parameter, it must inter
 
 Simple render functions bypass the overhead of setting up components. Component setup functions improve [TODO:]
-
+ -->
 
 <!-- 
  For example, the above `Counter` render function can be called like so:
@@ -349,7 +459,7 @@ function Dialog(setup: { Slot: RenderTag }) {
 }
 ``` -->
 
-## JSX
+## JSX transpilation
 
 JSX describes a component's view through HTML-like tags, which are transpiled to JavaScript.
 
@@ -386,7 +496,7 @@ jsx(Parent, {
 
 :::
 
-#### Hyperscript
+<!-- #### Hyperscript
 
 Those who prefer non-build workflows, render functions may technically be written using `jsx()` hyperscript, though a thin ergonomic wrapper around the function would probably make for better authoring experience and readability.
 
@@ -394,4 +504,4 @@ Those who prefer non-build workflows, render functions may technically be writte
 function HelloWorld() {
   return m("p", { Slot: "Hello world" });
 }
-```
+``` -->

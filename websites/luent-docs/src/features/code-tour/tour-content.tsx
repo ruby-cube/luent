@@ -312,7 +312,7 @@ function ReusableLogic() {
     <p style='text-wrap: balance'>
       Compose reusable logic independently of views. Define domain models with JavaScript classes and encapsulate stateful systems in destructurable kits—headless counterparts to components.
     </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+    <a href='/guide/accessor-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -421,9 +421,10 @@ function DynamicViewSetup() {
 }
 DynamicViewSetup.nsx =
   `<section>
-  {If(selectedUser@, user => {
+  {If(selectedUser@, user :>
+    <--->
     const { profile } = UserProfileKit(user.id)
-    <:/>
+    <--->
     <aside class="profile-card">
       <h3>{user.name}</h3>
       <p>{profile.bio}</p>
@@ -654,7 +655,7 @@ ViewPreservation.heading = 'Preserved views'
 function ViewPreservation() {
   return <>
     <p>
-      Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>’preserve’</code> directive. Discard with <code>`view.markDiscard()`</code> when the view is no longer needed or state needs to be refreshed.
+      Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>preserve</code> directive. Discard with <code>view.markDiscard()</code> when the view is no longer needed or state needs to be refreshed.
     </p>
     <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
   </>

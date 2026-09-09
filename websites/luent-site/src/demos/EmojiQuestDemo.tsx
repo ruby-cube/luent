@@ -11,6 +11,7 @@ export function EmojiQuestDemo() {
       </DemoContainer>
       <Code
         trusted
+        filename='EmojiQuest'
         main={{ name: 'nsx', code: EmojiQuest.nsx }}
         alt={{ name: 'tsx', code: EmojiQuest.tsx, lang: 'tsx' }}
         highlight={highlightCode}
@@ -19,6 +20,7 @@ export function EmojiQuestDemo() {
       />
       <Code
         trusted
+        filename='EmojiQuest'
         main={{ name: 'nsx', code: EmojiQuest.nsxPowerset }}
         alt={{ name: 'tsx', code: EmojiQuest.tsxPowerset, lang: 'tsx' }}
         highlight={highlightCode}
@@ -27,6 +29,7 @@ export function EmojiQuestDemo() {
       />
       <Code
         trusted
+        filename='EmojiQuest'
         main={{ name: 'nsx', code: EmojiQuest.nsxMessages }}
         alt={{ name: 'tsx', code: EmojiQuest.tsxMessages, lang: 'tsx' }}
         highlight={highlightCode}
@@ -35,6 +38,7 @@ export function EmojiQuestDemo() {
       />
       <Code
         trusted
+        filename='Panel'
         main={{ name: 'nsx', code: EmojiQuest.nsxPanel }}
         alt={{ name: 'tsx', code: EmojiQuest.tsxPanel, lang: 'tsx' }}
         highlight={highlightCode}

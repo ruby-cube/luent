@@ -1,4 +1,4 @@
-# Getter syntax
+# Accessor syntax
 
 ::: tip This project is in early development.
 Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable.

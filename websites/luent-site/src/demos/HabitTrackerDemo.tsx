@@ -10,6 +10,7 @@ export function HabitTrackerDemo() {
       ></HabitTracker>
     </DemoContainer>
     <Code
+      filename='HabitTracker'
       trusted
       main={{ name: 'nsx', code: HabitTracker.nsx }}
       alt={{ name: 'tsx', code: HabitTracker.tsx, lang: 'tsx' }}

@@ -38,6 +38,7 @@ export function PalettableDemo() {
       {If(() => $sectionTab() === 'components',
         <>
           <Code
+            filename='Palettable'
             trusted
             main={{ name: 'nsx', code: Palettable.nsx }}
             alt={{ name: 'tsx', code: Palettable.tsx, lang: 'tsx' }}
@@ -46,6 +47,7 @@ export function PalettableDemo() {
             tab={$tab}
           />
           <Code
+          filename='ColorPalette'
             trusted
             main={{ name: 'nsx', code: Palettable.nsxColorPalette }}
             alt={{ name: 'tsx', code: Palettable.tsxColorPalette, lang: 'tsx' }}
@@ -55,6 +57,7 @@ export function PalettableDemo() {
           />
           <Code
             trusted
+            filename='ColorPalette'
             main={{ name: 'nsx', code: Palettable.nsxGap }}
             alt={{ name: 'tsx', code: Palettable.tsxGap, lang: 'tsx' }}
             highlight={highlightCode}
@@ -66,6 +69,7 @@ export function PalettableDemo() {
       {ElseIf(() => $sectionTab() === 'colors',
         <Code
           trusted
+          filename='ColorsKit'
           main={{ name: 'nsx', code: Palettable.nsxColorsKit }}
           alt={{ name: 'tsx', code: Palettable.tsxColorsKit, lang: 'tsx' }}
           highlight={highlightCode}
@@ -76,6 +80,7 @@ export function PalettableDemo() {
       {ElseIf(() => $sectionTab() === 'draggable',
         <Code
           trusted
+          filename='DraggableKit'
           main={{ name: 'nsx', code: Palettable.nsxDraggableKit }}
           alt={{ name: 'tsx', code: Palettable.tsxDraggableKit, lang: 'tsx' }}
           highlight={highlightCode}
@@ -86,6 +91,7 @@ export function PalettableDemo() {
       {Else(
         <Code
           trusted
+          filename='CelebrationKit'
           main={{ name: 'nsx', code: Palettable.nsxCelebrationKit }}
           alt={{ name: 'tsx', code: Palettable.tsxCelebrationKit, lang: 'tsx' }}
           highlight={highlightCode}
@@ -112,7 +118,7 @@ function CodeSectionTab(setup: FromTag<{
     <button
       class={['code-section-tab', { 'active-code-section-tab': () => $sectionTab() === name }]}
       on:click={() => $sectionTab.value = name}
-    ><h5>{Slot()}</h5></button>
+    ><h5><Slot/></h5></button>
     {Style(css`
       .code-section-tab {
         color: var(--vp-c-text-1);

@@ -1,4 +1,3 @@
-import { component, Context, mountIsland, NodeRef, template } from "luent"
 import { Button } from "../Button"
 import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui"
 
@@ -57,7 +56,7 @@ export function TooltipDemo() {
   )
 }
 
-if (__STYLE__) {
-  mountIsland(TooltipDemo, '#root')
-}
+// if (__STYLE__) {
+//   mountIsland(TooltipDemo, '#root')
+// }
 

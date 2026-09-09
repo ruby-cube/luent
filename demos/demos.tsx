@@ -46,11 +46,13 @@ import { TestInnerHTML } from "./src/TestInnerHTML"
 import { Counter } from "./src/CounterApp"
 import { TestStylesBindings } from "./src/TestStylesBindings"
 import { twMerge } from "tailwind-merge"
+import './src/index.css'
 import { TestRenderCycle } from "./src/TestRenderCycle"
 import { TestIfElseDisplayView } from "./src/TestIfElseDisplayView"
 import { TestNameEditor } from "./src/TestNameEditor"
 import { TestColorSort } from "./src/TestColorSort"
 import { TestStyleComments } from "./src/TestStyleComments"
+// import { DayView } from "./src/TimelineApp/Timeline"
 
 export function runDemo() {
   mountIsland(() => {
@@ -60,8 +62,9 @@ export function runDemo() {
       {/* <TestAsyncTabs></TestAsyncTabs> */}
       {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
       {/* <BottomlessBlokkis></BottomlessBlokkis> */}
-      <TestNamedSlots/>
+      {/* <DayView/> */}
       {/* <TestStyleComments/> */}
+      <TooltipDemo></TooltipDemo>
     </>
     // return <TestInnerHTML/>
   }, '#root')

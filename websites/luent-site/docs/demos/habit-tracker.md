@@ -9,10 +9,10 @@
 
 Featured in this demo:
 
-- [`get` declaration](/guide/getter-syntax#get-declarations)
-- [accessor variable read](/guide/getter-syntax#accessor-variable-reads)
-- [accessor variable write](/guide/getter-syntax#accessor-variable-writes)
-- [getter access](/guide/getter-syntax#for-getter-access)
-- [derivation expression](/guide/getter-syntax#derivation-expressions)
+- [`get` declaration](/guide/accessor-syntax#get-declarations)
+- [accessor variable read](/guide/accessor-syntax#accessor-variable-reads)
+- [accessor variable write](/guide/accessor-syntax#accessor-variable-writes)
+- [getter access](/guide/accessor-syntax#for-getter-access)
+- [derivation expression](/guide/accessor-syntax#derivation-expressions)
 - [JSX flow expression](/guide/jsx-syntax#jsx-flow-expressions)
 - [JSX fragment return](/guide/jsx-syntax#jsx-fragment-return)

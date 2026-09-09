@@ -1,4 +1,4 @@
-import {  FromTag, NodeRef, RenderTag } from "luent"
+import { FromTag, NodeRef, RenderTag } from "luent"
 import { TooltipContent, TooltipRoot, TooltipTail } from "../base/tooltip/Tooltip"
 import { IonicTooltip } from "../base/tooltip/Tooltip.kit";
 import { Alignment, Placement } from "../base/popover/Popover.kit";
@@ -57,7 +57,7 @@ function Tooltip(setup: FromTag<{
           microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
           auto-bind={bindings}
         >
-          {Slot()}
+          <Slot />
         </TooltipContent>
         <TooltipTail
           microclass={`size-2.5`}

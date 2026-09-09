@@ -4,15 +4,14 @@
         <span class='ns-hero-code__dot'></span>
         <span class='ns-hero-code__dot'></span>
         <span class='ns-hero-code__dot'></span>
-        <span class='ns-hero-code__title'>total.nsx</span>
+        <span class='ns-hero-code__title'>Counter.nsx</span>
       </div>
-      <pre class='ns-hero-code__body'><code class='ns-hero-code__content'>{{`function Total({ count@ }: Tag) {
-  get qty = ion(0)
-
+      <pre class='ns-hero-code__body'><code class='ns-hero-code__content'>{{`function Counter() {
+  get count = ion(0);
   <:>
-    <div>{count@}</div>
-    <button on:click={() => qty++}>x {qty@}</button>
-    <div>= {(count * qty)@} total</div>
+    <button on:click={() => count++}>
+      {count@}
+    </button>
   </:>
 }`}}</code></pre>
     </div>

@@ -7,7 +7,7 @@ export function DoodleCanvas() {
     draw, 
     stopDrawing, 
     clearCanvas 
-  } = DoodleCanvasKit();
+  } = DrawingKit();
 
   return (
     <>
@@ -38,8 +38,13 @@ export function DoodleCanvas() {
           border-radius: .75rem;
         }
 
+        .canvas {
+          box-sizing: border-box;
+          border: 1px solid var(--vp-c-divider);
+        }
+
         .canvas-app button {
-          margin: 28px;
+          margin-bottom: 28px;
         }
 
         html:not(.dark) .canvas {
@@ -67,7 +72,7 @@ export function DoodleCanvas() {
   )
 }
 
-function DoodleCanvasKit() {
+function DrawingKit() {
   const $canvas = NodeRef("canvas")
 
   let isDrawing = false

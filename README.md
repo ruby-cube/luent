@@ -5,19 +5,18 @@
 
 </picture>
   
-<p><a href='https://nextscript.org/getter-syntax'>tour</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demo</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
+<p><a href='https://luent.dev/#code-glimpses'>tour</a> &nbsp;-&nbsp; <a href='http://luent.dev/demos/habit-tracker.html'>demo</a> &nbsp;-&nbsp; <a href='http://luent.dev/api/overview.html'>API</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
 </div>
 
 # Luent
 
-Luent is a web framework designed around conceptual coherence, expressiveness, and clarity, with the aim of easing the process of building and maintaining complex, evolving applications.
-
-It consists of a reactivity system, rendering engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation.
+Luent is a web framework designed around conceptual coherence, expressiveness, and clarity. It consists of a reactivity system, rendering engine, and JSX transpiler, all written from scratch with much tender loving care and obsessive experimentation.
 
 Core features:
 - a unified system of fine-grained reactivity
 - state management through familiar native structures
-- readable view control flow
+- control flow expressions to render dynamic views
+- dynamic view lifecycle hooks
 
 Experimental features:
 - type-explicit reactivity
@@ -40,8 +39,7 @@ Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](
 ## Motivation
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
-This project explores ways to make application development more intuitive and ergonomic without trading off performance or scalability.
-
+This project explores ways to make development of complex, evolving applications more intuitive and ergonomic without trading off performance or scalability.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

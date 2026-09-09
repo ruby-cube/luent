@@ -1,4 +1,5 @@
-import { css, Else, For, If, ion, Ion, NodeRef, Style } from 'luent'
+import { atUnmount, css, Else, For, If, ion, Ion, NodeRef, Style } from 'luent'
+import { Tooltip, TOOLTIP_CONFIG, TooltipContent, TooltipKit, TooltipRoot } from '@luent/luent-ui'
 import { $CodeTab, Code, CodeTour, TourSection } from '@luent/websites-shared'
 import { highlightCode } from './highlighter'
 import { TourNav } from './TourNav'
@@ -17,6 +18,7 @@ function toId(heading: string) {
 const sections: {
   (...args: any[]): any,
   heading: string,
+  filename: string,
   nsx?: string,
   tsx?: string,
   ns?: string,
@@ -53,10 +55,39 @@ export function CodeGlimpses() {
               const heading = render.heading
 
               return <TourSection
+                filename={render.filename}
                 id={toId(heading)}
                 flow={flowDirection()}
-                altCode={{ name: ns, code: render[ns], hover: render.nsHover }}
                 mainCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
+                altCode={{
+                  name: ns,
+                  TabName() {
+                    const { tooltip, setTooltipTrigger } = TooltipKit({ info: { nsx: '' } })
+                    console.log('TabName render')
+                    atUnmount(() => 'unmounting TabName')
+                    return <>
+                      <o:context provide={[TOOLTIP_CONFIG({})]}>
+                        {ns} <small at:mount={setTooltipTrigger.nsx} class='more-info'>(?)</small>
+                        <o--body>
+                          <TooltipRoot
+                            tooltip={tooltip}>
+                            <TooltipContent
+                              // microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
+                              // style='background-color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); font-weight: 600;'
+                            >
+                              <p class='ns-note'>
+                                <small>
+                                NextScript is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
+                                </small>
+                              </p>
+                            </TooltipContent>
+                          </TooltipRoot>
+                        </o--body>
+                      </o:context>
+                    </>
+                  },
+                  code: render[ns], hover: render.nsHover
+                }}
                 highlightCode={highlightCode}
                 tab={render.$tab ?? $CodeTab()}
               >
@@ -71,11 +102,32 @@ export function CodeGlimpses() {
             headings={sections.map(section => ({
               text: section.heading,
               id: toId(section.heading)
-            }))}/>
+            }))} />
         </aside>
       </div>
 
       {Style(css`
+        .code-container .more-info {
+          color: var(--vp-c-brand-3);
+          font-weight: bold;
+        }
+
+        .code-container .selected .more-info {
+          color: transparent;
+        }
+
+        .ns-note {
+          background-color: var(--vp-c-black); 
+          color: var(--vp-c-white);
+          margin-block: 2rem; 
+          max-width: 36ch;
+          line-height: 1rem;
+          padding: 1rem;
+          padding-right: .5rem;
+          border-radius: 1rem;
+          border: 1px solid var(--vp-c-divider);
+        }
+
         .tour-grid {
           display: grid;
           grid-template-columns: minmax(0, 1fr) 88px;
@@ -157,12 +209,7 @@ function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
     <p style='text-wrap: balance'>
       Write components as render functions that run once to create a view. Views are composed using JSX and updated through fine-grained reactivity.
     </p>
-    <p style='text-wrap: balance'>
-      <small>
-        <strong>Upcoming language alternative:</strong> <a href=''>NextScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
-      </small>
-    </p>
-    <a href='/guide/anatomy-of-an-app' class='medium brand'>Learn more</a>
+    <a href='/guide/interactive-islands.html#components' class='medium brand'>Learn more</a>
     {/* <p>
       Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
     </p> */}
@@ -170,7 +217,7 @@ function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
 }
 
 FunctionalComponents.$tab = $CodeTab()
-
+FunctionalComponents.filename = 'main'
 FunctionalComponents.tsx =
   `function EmojiCollection(setup: FromTag<{
   limit: number;
@@ -236,28 +283,30 @@ mountIsland(EmojiCollection, '#app')
 `
 
 UnifiedReactivity.heading = 'Unified reactivity'
+
 UnifiedReactivity.$tab = FunctionalComponents.$tab
 function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
       Manage simple, derived, async, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
-    <p style='text-wrap: balance'><small>
+    <p style='text-wrap: balance'>
       {If(() => $tab() === 'main',
         <>
-          Note that the <code>$</code> prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
+          <strong>Note:</strong> The <code>$</code> prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
         </>
       )}
       {Else(
         <>
-          Note that, in NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
+          <strong>Note:</strong> In NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
         </>
       )}
-    </small></p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+    </p>
+    <a href='/guide/reactivity-in-depth' class='medium brand'>Learn more</a>
   </>
 }
 
+UnifiedReactivity.filename = 'examples'
 UnifiedReactivity.ns =
   `// atomic
 get count = ion(0);
@@ -313,7 +362,7 @@ function TypeExplicit() {
     <p style='text-wrap: balance'>
       Distinguish reactive variables from plain variables through type information. Hover variables in the example to inspect their types.
     </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+    <a href='/guide/reactive-structures' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -345,7 +394,7 @@ TypeExplicit.tsHover = {
   item: '(parameter) item: Item',
   item_1: '(parameter) item: Item',
 }
-
+TypeExplicit.filename = 'examples'
 TypeExplicit.nsx =
   `/* excerpts from function body */
 
@@ -384,10 +433,10 @@ function SelectiveReactivity() {
     <p>
       Apply reactivity where it matters. Selective reactivity reduces unnecessary performance overhead and offers clarity and control over what gets re-rendered.
     </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+    <a href='/guide/component-bindings' class='medium brand'>Learn more</a>
   </>
 }
-
+SelectiveReactivity.filename = 'CartItem'
 SelectiveReactivity.nsx =
   `function CartItem(setup: FromTag<{
   name: string;
@@ -438,10 +487,11 @@ function ReusableLogic() {
     <p style='text-wrap: balance'>
       Compose reusable logic independently of views. Define domain models with JavaScript classes and encapsulate stateful systems in destructurable kits—headless counterparts to components.
     </p>
-    <a href='/guide/getter-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+    <a href='/guide/reusable-logic' class='medium brand'>Learn more</a>
   </>
 }
 
+ReusableLogic.filename = 'PointerInfoKit'
 ReusableLogic.ns =
   `function PointerInfoKit(position: Ionic<Pointer>) {
   get distance = ion(() =>
@@ -498,10 +548,11 @@ function FlowExpressions() {
       Describe the control flow of dynamic views through flow functions such as <code>If</code>/<code>Else</code>, <code>For</code>/<code>Empty</code>, and <code>Await</code>/<code>Meanwhile</code>.
       {/* Control flow functions such as <code>If</code>/<code>Else</code>, <code>For</code>/<code>Empty</code>, and <code>Await</code>/<code>Meanwhile</code> create and manage dynamic views. */}
     </p>
-    <a href='/guide/jsx-syntax' class='medium brand'>Learn more</a>
+    <a href='/guide/view-control-flow' class='medium brand'>Learn more</a>
   </>
 }
 
+FlowExpressions.filename = "ChatApp"
 FlowExpressions.nsx =
   `<section>
   {If(online@,
@@ -535,26 +586,28 @@ FlowExpressions.tsx =
 
 
 
-DynamicViewSetup.heading = 'Dynamic view setup'
+DynamicViewSetup.heading = 'Colocation'
 
 function DynamicViewSetup() {
   return <>
     <p>
-      Dynamic view logic may be set up locally, eliminating the need for premature component extraction. Resources are initialized and discarded alongside the view. Complexity is introduced only when needed. Logic is colocated where it is used.
+      Variables and logic may be set up next to the portion of the view it applies to, eliminating the need for premature component extraction. Resources are initialized and discarded alongside dynamic views. Complexity is introduced only when needed. Logic is colocated where it is used.
     </p>
     <a href='' class='medium brand'>Learn more</a>
   </>
 }
+DynamicViewSetup.filename = 'UserProfile'
 DynamicViewSetup.nsx =
   `<section>
-  {If(selectedUser@, user => {
+  {If(selectedUser@, user :>
+    <--->
     const { profile } = UserProfileKit(user.id)
-    <:/>
+    <--->
     <aside class="profile-card">
       <h3>{user.name}</h3>
       <p>{profile.bio}</p>
     </aside>
-  })}
+  )}
 </section>
 
 `
@@ -563,12 +616,12 @@ DynamicViewSetup.tsx =
   `<section>
   {If($selectedUser, user => {
     const { profile } = UserProfileKit(user.id)
-    return (
+    return <>
       <aside class="profile-card">
         <h3>{user.name}</h3>
         <p>{profile.bio}</p>
       </aside>
-    )
+    </>
   })}
 </section>
 
@@ -581,10 +634,11 @@ function MutationSafety() {
     <p>
       Compile-time mutation checking prevent hidden nonlocal mutations, while explicit mutable bindings enable safe, statically traceable cross-boundary mutations.
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+    <a href='/guide/mutation-safety' class='medium brand'>Learn more</a>
   </>
 }
 
+MutationSafety.filename = 'EmojiQuest'
 MutationSafety.nsx =
   `function EmojiQuest({ powers }) {
   const powerset = ionic(['🍀', '🍄', '✨'], {
@@ -652,10 +706,11 @@ function LifecycleHooks() {
     <p>
       Lifecycle behavior specific to a view node may be declared inline through lifecycle bindings such as <code>at:mount</code> and <code>before:unmount</code>.
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+    <a href='/guide/lifecycle-hooks' class='medium brand'>Learn more</a>
   </>
 }
 
+LifecycleHooks.filename = 'Editor'
 LifecycleHooks.nsx =
   `{If(editing@,
   <input
@@ -687,10 +742,11 @@ function Portals() {
     <p>
       Visually distinctive portal tags make it clear which sections of the view are rendered elsewhere in the DOM. Declare metadata locally in components through head elements like <code>{'<o-link>'}</code> and <code>{'<o-style>'}</code>.
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+    <a href='/guide/portals' class='medium brand'>Learn more</a>
   </>
 }
 
+Portals.filename = 'portal-examples'
 Portals.nsx =
   `<o--portal to='#sidebar'>
   <Preview document={document}/>
@@ -729,9 +785,11 @@ function ContextBindings() {
     <p>
       Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Provide from the root of an application locally with <code>{'<o--root>'}</code> or from reusable kits with <code>provideRoot()</code>. Merge context keys to provide the same binding across multiple decoupled components.
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+    <a href='/guide/contextual-bindings' class='medium brand'>Learn more</a>
   </>
 }
+
+ContextBindings.filename = 'App'
 
 ContextBindings.nsx =
   `const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
@@ -780,12 +838,13 @@ ViewPreservation.heading = 'Preserved views'
 function ViewPreservation() {
   return <>
     <p>
-      Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>’preserve’</code> directive. Discard with <code>`view.markDiscard()`</code> when the view is no longer needed or state needs to be refreshed.
+      Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>"preserve"</code> directive. Discard with <code>view.markDiscard()</code> when the view is no longer needed or state needs to be refreshed.
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+    <a href='/guide/preserving-views' class='medium brand'>Learn more</a>
   </>
 }
 
+ViewPreservation.filename = 'App'
 ViewPreservation.nsx =
   `<div>
   {If(showSidebar@, 'preserve',

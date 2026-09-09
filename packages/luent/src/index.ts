@@ -1,3 +1,5 @@
+import type { JSX } from './jsx-runtime'
+
 export {
   ion,
   ionic,
@@ -147,6 +149,16 @@ export type { TagClass } from './element/styles'
 export type { TagName } from './element/setUpElement'
 export type { ViewType } from './conditional/If'
 export type { Xray } from './component/bindings'
+export type { JSX }
+export type Event<T = Element> = JSX.Event<T>
+export type ClipboardEvent = JSX.ClipboardEvent
+export type FocusEvent<T = Element, RelatedTarget = Element> = JSX.FocusEvent<T, RelatedTarget>
+export type FormEvent<T = Element> = JSX.FormEvent<T>
+export type InvalidEvent<T = Element> = JSX.InvalidEvent<T>
+export type StateChangeEvent<T = Element> = JSX.StateChangeEvent<T>
+export type KeyboardEvent<T = Element> = JSX.KeyboardEvent<T>
+export type MouseEvent = JSX.MouseEvent
+export type ModifierKey = JSX.ModifierKey
 
 export { JSXComponent as component, toª as to$, ªªof as $of } from '@luent/nextscript'
 export type { ComponentKit } from '@luent/nextscript'

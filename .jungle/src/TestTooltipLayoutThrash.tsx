@@ -141,7 +141,7 @@ export function Tooltip(input: {
         }}
       >
         <div ref={$div} class="tooltip">
-          {Slot()}
+          <Slot/>
         </div>
       </div>
     )

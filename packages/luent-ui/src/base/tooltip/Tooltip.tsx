@@ -14,7 +14,7 @@ function TooltipRoot(setup: FromTag<{
    const { Slot, tooltip, ...rest } = setup
 
    return (
-      <PopoverRoot popover={tooltip} auto-bind={rest}>{Slot()}</PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
+      <PopoverRoot popover={tooltip} auto-bind={rest}><Slot/></PopoverRoot> // TODO: how do I prevent over wrapping of Slot? 
    )
 }
 

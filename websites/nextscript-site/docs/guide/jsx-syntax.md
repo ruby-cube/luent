@@ -584,7 +584,9 @@ function Dialog({ Slot }) {
   <:: as={dialog}>  
     {If(opened@, 
       <o--body>
-        <div>{Slot()}</div>
+        <div>
+          <Slot/>
+        </div>
       </o--body>
     )}
   </::>
@@ -605,7 +607,9 @@ function Dialog({ Slot }) {
     Slot: <>
       {If(opened, 
         <o--body>
-          <div>{Slot()}</div>
+          <div>  
+            <Slot/>
+          </div>
         </o--body>
       )}
     </>,

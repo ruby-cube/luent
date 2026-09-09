@@ -58,12 +58,12 @@ export default defineConfig({
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Learn', link: '/guide/interactive-islands' },
-      { text: 'Demos', link: '/demos/habit-tracker' },
-      { text: 'Tour', link: '/#code-glimpses' },
-      { text: 'Reference', link: '/api/overview' },
-      { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
-      { text: 'Preview NextScript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
+      { text: 'learn', link: '/guide/interactive-islands' },
+      { text: 'tour', link: '/#code-glimpses' },
+      { text: 'demos', link: '/demos/habit-tracker' },
+      { text: 'reference', link: '/api/overview' },
+      { text: 'motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
+      { text: 'preview nextscript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
       { text: 'v0.0.1', link: '/' },
     ],
 
@@ -81,7 +81,7 @@ export default defineConfig({
           collapsed: false,
           items: [{
             text: '&nbsp;&nbsp;&nbsp;&nbsp;nsx&nbsp;&nbsp;&nbsp;&nbsp;tsx'
-          }]
+          }, {text: 'NextScript (nsx) is currently a preview, not yet ready for use'}]
         },
         {
           text: 'Essentials',
@@ -170,8 +170,8 @@ export default defineConfig({
             { text: 'Palettable', link: '/demos/palettable' },
             { text: 'Drawing Canvas', link: '/demos/doodle-canvas' },
             { text: 'EmojiQuest', link: '/demos/emoji-quest' },
-            { text: 'Folder Tree', link: '/terminology' },
-            { text: 'Bottomless Void', link: '/terminology' },
+            // { text: 'Folder Tree', link: '/terminology' },
+            // { text: 'Bottomless Void', link: '/terminology' },
           ]
         }
 

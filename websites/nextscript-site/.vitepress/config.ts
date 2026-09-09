@@ -54,9 +54,9 @@ export default defineConfig({
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Learn', link: '/guide/getter-syntax' },
+      { text: 'Preview', link: '/#code-glimpses' },
+      { text: 'Learn', link: '/guide/accessor-syntax' },
       { text: 'Demos', link: '/demos/habit-tracker' },
-      { text: 'Code Glimpses', link: '/#code-glimpses' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/nextscript#design-principles' },
       { text: 'pre-alpha', link: '/' },
@@ -70,18 +70,19 @@ export default defineConfig({
           text: 'Learn',
           items: [
             {
-              text: 'Getter Syntax',
-              link: '/guide/getter-syntax',
+              text: 'Accessor Syntax',
+              link: '/guide/accessor-syntax',
               items: [
-                { text: 'Accessor variables', link: '/guide/getter-syntax#accessor-variables' },
-                { text: 'Accessor properties', link: '/guide/getter-syntax#accessor-properties' },
-                { text: 'Accessor operator', link: '/guide/getter-syntax#accessor-operator' },
-                { text: 'Derivation expressions', link: '/guide/getter-syntax#derivation-expressions' },
-                { text: 'Parameter declarations', link: '/guide/getter-syntax#parameter-declarations' },
-                { text: 'Destructuring declarations', link: '/guide/getter-syntax#destructuring-declarations' },
-                { text: 'Type guards', link: '/guide/getter-syntax#type-guards' }
+                { text: 'Accessor variables', link: '/guide/accessor-syntax#accessor-variables' },
+                { text: 'Accessor properties', link: '/guide/accessor-syntax#accessor-properties' },
+                { text: 'Accessor operator', link: '/guide/accessor-syntax#accessor-operator' },
+                { text: 'Derivation expressions', link: '/guide/accessor-syntax#derivation-expressions' },
+                { text: 'Parameter declarations', link: '/guide/accessor-syntax#parameter-declarations' },
+                { text: 'Destructuring declarations', link: '/guide/accessor-syntax#destructuring-declarations' },
+                { text: 'Type guards', link: '/guide/accessor-syntax#type-guards' }
               ]
             },
+            { text: 'Type Syntax', link: '/guide/type-syntax' },
             { text: 'JSX Syntax', link: '/guide/jsx-syntax' },
             { text: 'JSX Terminology', link: '/guide/terminology' }
           ]
@@ -91,13 +92,11 @@ export default defineConfig({
         {
           text: 'Demos',
           items: [
-            {
-              text: 'Habit Tracker', link: '/demos/habit-tracker',
-            },
+            { text: 'Habit Tracker', link: '/demos/habit-tracker' },
             { text: 'Drawing Canvas', link: '/demos/doodle-canvas' },
             { text: 'EmojiQuest', link: '/demos/emoji-quest' },
-            { text: 'Folder Tree', link: '/terminology' },
-            { text: 'Bottomless Void', link: '/terminology' },
+            // { text: 'Folder Tree', link: '/terminology' },
+            // { text: 'Bottomless Void', link: '/terminology' },
           ]
         }
 
