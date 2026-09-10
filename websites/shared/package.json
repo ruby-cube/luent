@@ -7,14 +7,13 @@
   "module": "./src/index.ts",
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
-    "@luent/utils": "workspace:*",
-    "vite-plugin-luent": "workspace:*"
+    "vite-plugin-luent": "workspace:*",
+    "@luent/utils": "workspace:*"
   },
   "devDependencies": {
     "luent": "workspace:*",
     "@luent/luent-ui": "workspace:*",
     "@luent/quarky": "workspace:*"
-
   },
   "peerDependencies": {
     "vitepress": "2.0.0-alpha.17"

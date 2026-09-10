@@ -843,6 +843,9 @@ importers:
       '@luent/websites-shared':
         specifier: workspace:*
         version: link:../shared
+      '@tailwindcss/vite':
+        specifier: ^4.3.0
+        version: 4.3.3(vite@8.2.1(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0))
       concurrently:
         specifier: ^10.0.3
         version: 10.0.4
@@ -858,6 +861,9 @@ importers:
       tailwindcss:
         specifier: ^4.3.2
         version: 4.3.3
+      vite-plugin-luent:
+        specifier: workspace:*
+        version: link:../../plugins/vite-plugin-luent
       vitepress:
         specifier: 2.0.0-alpha.17
         version: 2.0.0-alpha.17(@types/node@26.4.0)(jiti@2.7.0)(less@4.8.0)(lightningcss@1.33.0)(postcss@8.5.23)(sass@1.102.0)(stylus@0.62.0)(typescript@7.0.2)
