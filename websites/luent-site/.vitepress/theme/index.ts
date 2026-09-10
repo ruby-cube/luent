@@ -1,12 +1,11 @@
 // https://vitepress.dev/guide/custom-theme
-import { type Theme } from 'vitepress'
+import { type Theme, useData } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import { h } from 'vue'
-import { useData } from 'vitepress'
 import './style.css'
 import { islands, mountIslands, smoothScrollHomepage } from "../../src/luent-islands.js"
 import CustomHome from './CustomHome.vue'
-// import { h } from 'vue'
+import { installVitePressScrollRestoration } from '../../../shared/src/vitepress-scroll-restoration'
 
 const Layout = () => {
   const { frontmatter } = useData()
@@ -27,10 +26,12 @@ export default {
   //   })
   // },
   enhanceApp({ router }) {
-    router.onAfterRouteChange = (page) => {
-      if (typeof document === 'undefined') return;
-      mountIslands(islands, page)
-      smoothScrollHomepage(document.documentElement, page)
-    }
+    installVitePressScrollRestoration(router, {
+      onAfterRouteChange: (page) => {
+        if (typeof document === 'undefined') return
+        mountIslands(islands, page)
+        smoothScrollHomepage(document.documentElement, page)
+      }
+    })
   }
 } satisfies Theme

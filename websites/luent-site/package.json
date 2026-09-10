@@ -4,11 +4,11 @@
   "description": "",
   "type": "module",
   "devDependencies": {
-    "luent": "workspace:*",
     "@luent/luent-ui": "workspace:*",
     "@luent/quarky": "workspace:*",
     "@luent/websites-shared": "workspace:*",
     "concurrently": "^10.0.3",
+    "luent": "workspace:*",
     "shiki": "^4.1.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.2",

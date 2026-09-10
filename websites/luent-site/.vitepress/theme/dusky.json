@@ -4,7 +4,7 @@
   "colors": {
     "editor.background": "#15161b",
     "editor.foreground": "#d8d9e0",
-    "editorCursor.foreground": "#42d4ed",
+    "editorCursor.foreground": "#5cc5ce",
     "editor.selectionBackground": "rgba(18,181,208, 0.22)",
     "editorLineNumber.foreground": "#5e6273"
   },
@@ -37,7 +37,7 @@
         "entity.name.class"
       ],
       "settings": {
-        "foreground": "#42d4ed"
+        "foreground": "#5cc5ce"
       }
     },
     {
@@ -47,7 +47,7 @@
         "meta.function-call"
       ],
       "settings": {
-        "foreground": "#42d4ed"
+        "foreground": "#5cc5ce"
       }
     },
     {

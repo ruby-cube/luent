@@ -2,7 +2,7 @@ import { atUnmount, css, Else, For, If, ion, Ion, NodeRef, Style } from 'luent'
 import { Tooltip, TOOLTIP_CONFIG, TooltipContent, TooltipKit, TooltipRoot } from '@luent/luent-ui'
 import { $CodeTab, Code, CodeTour, TourSection } from '@luent/websites-shared'
 import { highlightCode } from './highlighter'
-import { TourNav } from './TourNav'
+import { pad, TourNav } from './TourNav'
 
 let direction = 'code-right'
 function flowDirection() {
@@ -48,7 +48,7 @@ export function CodeGlimpses() {
       <div class='tour-grid'>
         <div class='tour-main'>
           <CodeTour>
-            {For(sections, (render) => {
+            {For(sections, (render, index) => {
               const jsx = 'nsx' in render
               const ns = jsx ? 'nsx' : 'ns'
               const ts = jsx ? 'tsx' : 'ts'
@@ -72,12 +72,12 @@ export function CodeGlimpses() {
                           <TooltipRoot
                             tooltip={tooltip}>
                             <TooltipContent
-                              // microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
-                              // style='background-color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); font-weight: 600;'
+                            // microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
+                            // style='background-color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); font-weight: 600;'
                             >
                               <p class='ns-note'>
                                 <small>
-                                NextScript is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
+                                  NextScript is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
                                 </small>
                               </p>
                             </TooltipContent>
@@ -91,6 +91,7 @@ export function CodeGlimpses() {
                 highlightCode={highlightCode}
                 tab={render.$tab ?? $CodeTab()}
               >
+                <div class='section-num'>[ {pad(index + 1)} ]</div>
                 <h3>{heading}</h3>
                 {render(render.$tab)}
               </TourSection>
@@ -107,6 +108,13 @@ export function CodeGlimpses() {
       </div>
 
       {Style(css`
+        .section-num {
+          font-family: 'Fragment Mono', monospace;
+          font-size: 12.5px;
+          color: var(--vp-c-brand-3);
+          margin-bottom: 18px
+        }
+
         .code-container .more-info {
           color: var(--vp-c-brand-3);
           font-weight: bold;
@@ -362,7 +370,7 @@ function TypeExplicit() {
     <p style='text-wrap: balance'>
       Distinguish reactive variables from plain variables through type information. Hover variables in the example to inspect their types.
     </p>
-    <a href='/guide/reactive-structures' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/reactive-structures' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -433,7 +441,7 @@ function SelectiveReactivity() {
     <p>
       Apply reactivity where it matters. Selective reactivity reduces unnecessary performance overhead and offers clarity and control over what gets re-rendered.
     </p>
-    <a href='/guide/component-bindings' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/component-bindings' class='medium brand'>Learn more</a> */}
   </>
 }
 SelectiveReactivity.filename = 'CartItem'
@@ -593,7 +601,7 @@ function DynamicViewSetup() {
     <p>
       Variables and logic may be set up next to the portion of the view it applies to, eliminating the need for premature component extraction. Resources are initialized and discarded alongside dynamic views. Complexity is introduced only when needed. Logic is colocated where it is used.
     </p>
-    <a href='' class='medium brand'>Learn more</a>
+    {/* <a href='' class='medium brand'>Learn more</a> */}
   </>
 }
 DynamicViewSetup.filename = 'UserProfile'

@@ -55,7 +55,7 @@
     {
       "scope": ["constant.language", "constant.character", "support.constant"],
       "settings": {
-        "foreground": "#42d4ed"
+        "foreground": "#5cc5ce"
       }
     },
     {

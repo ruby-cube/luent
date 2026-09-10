@@ -586,7 +586,18 @@ body {
   margin-top: 44px;
 }
 
+.home-shell .btn.install {
+  color: var(--vp-c-text-2);
+  background-color: transparent;
+  border: 1px solid var(--vp-c-divider);
+}
+
+.home-shell .btn.install:hover {
+  background: var(--vp-c-gray-soft);
+}
+
 .home-shell .btn {
+  margin-right: 2rem;
   display: inline-flex;
   align-items: center;
   gap: 10px;

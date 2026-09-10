@@ -29,7 +29,7 @@ There are three main steps to mounting an island to the DOM:
 **Define and mount the island**
 
 ```nsx
-// main.tsx
+// main.nsx
 mountIsland(() => {
   <:>
     <button on:click={logHello}>Hello, World.</button>

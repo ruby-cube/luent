@@ -48,7 +48,6 @@ The guide and API reference are underway. In the meantime, here is an overview o
 - `onv:` for event capture handlers
 - `mu:` for mutable bindings
 - `m:` for nested method bindings
-- `Slot:` for named slots
 - `xray:` for nested bindings
 
 ## Special tag bindings
@@ -58,8 +57,8 @@ The guide and API reference are underway. In the meantime, here is an overview o
 - `node` <span class='doc-tag'>Experimental</span> for pre-existing DOM nodes
 
 
-## Flow functions
-Flow functions are called within JSX to direct the control flow of view rendering.
+## View control flow
+Control flow functions are called within JSX to direct the control flow of view rendering.
 - `If`/`ElseIf`/`Else`
 - `Match`/`Case`/`Default`
 - `As`/`Default`

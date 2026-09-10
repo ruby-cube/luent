@@ -41,7 +41,7 @@ function iconSrc(icon: FeatureItem['icon']) {
   <section class="home-shell">
     <section class="home-hero">
       <div class="wrap home-hero-copy">
-        <div class="kicker">an expressive framework for web applications</div>
+        <div class="kicker">luent: an expressive framework for web applications</div>
         <h1>
           {{ heroLead }}
           <span class="accent">{{ heroAccent }}</span>
@@ -52,9 +52,13 @@ function iconSrc(icon: FeatureItem['icon']) {
             :key="`${action.text}-${action.link}`"
             class="btn"
             :href="action.link"
-          >
+            >
             {{ action.text }} <span class="arrow">→</span>
           </a>
+          <button class="btn install">
+            npm create luent
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </button>
         </div>
       </div>
 

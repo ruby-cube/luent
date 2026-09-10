@@ -58,8 +58,8 @@ export default defineConfig({
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'learn', link: '/guide/interactive-islands' },
       { text: 'tour', link: '/#code-glimpses' },
+      { text: 'learn', link: '/guide/interactive-islands' },
       { text: 'demos', link: '/demos/habit-tracker' },
       { text: 'reference', link: '/api/overview' },
       { text: 'motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },

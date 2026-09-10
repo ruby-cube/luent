@@ -1,6 +1,6 @@
 import { atUnmount, css, For, FromTag, ion, Style } from "luent";
 
-function pad(value: number) {
+export function pad(value: number) {
   return String(value).padStart(2, '0')
 }
 

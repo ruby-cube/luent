@@ -1,11 +1,12 @@
 // https://vitepress.dev/guide/custom-theme
-import { defineComponent, h, onMounted, ref, type VNode } from 'vue'
+import { h } from 'vue'
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import HeroCode from './HeroCode.vue'
 import './style.css'
 import '../../../shared/src/style-rules'
 import { islands, mountIslands, smoothScrollHomepage } from '../../src/luent-islands.js'
+import { installVitePressScrollRestoration } from '../../../shared/src/vitepress-scroll-restoration'
 
 
 export default {
@@ -19,11 +20,13 @@ export default {
       }
     })
   },
-  enhanceApp({ app, router, siteData }) {
-    router.onAfterRouteChange = (page) => {
-      mountIslands(islands, page)
-      smoothScrollHomepage(document.documentElement, page)
-    }
+  enhanceApp({ router }) {
+    installVitePressScrollRestoration(router, {
+      onAfterRouteChange: (page) => {
+        mountIslands(islands, page)
+        smoothScrollHomepage(document.documentElement, page)
+      }
+    })
   }
 } satisfies Theme
 

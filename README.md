@@ -25,7 +25,7 @@ Experimental features:
 
 <br>
 
-> **This project is in early development.** Most core client-side functionality is already working and relatively stable, but bugs, rough edges, and some amount of experimental churn should be expected.
+> **This project is in early development.** Most core client-side functionality is working and relatively stable, but bugs, rough edges, and some amount of experimental churn should be expected.
 
 
 <br>

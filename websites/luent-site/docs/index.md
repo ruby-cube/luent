@@ -13,7 +13,7 @@ hero:
     #   text: Preview Luent
     #   link: /index#code-glimpses
     - theme: alt
-      text: Take a Code Tour
+      text: Take a code tour
       link: /index#code-glimpses
 
 features:
@@ -65,6 +65,7 @@ features:
     <!-- <p style='text-wrap: balance'><small>Luent applications are currently written in TypeScript + JSX (.tsx). An optional, experimental language extension, NextScript (.ns/.nsx) is in the works. Get a glimpse of its syntax through the language toggle in code examples.
     </small></p> -->
   </section>
+
 
 :::luent code-glimpses
 :::
