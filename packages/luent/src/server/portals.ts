@@ -74,16 +74,18 @@ function addPortal(portals: Portals, to: string, html: string) {
 
 
 
-const PORTAL_MARKER_PREFIX = '<!--luent-portals:'
-const PORTAL_MARKER_RE = /<!--luent-portals:([A-Za-z0-9+/=]+)-->/g
+const PORTAL_MARKER_PREFIX = '<luent-portals>'
+const PORTAL_MARKER_RE = /<luent-portals>([A-Za-z0-9+/=]+)<\/luent-portals>/g
 
 function _encodePortals(render: () => string): string {
+  console.log('encodePortals')
   const html = render()
   const portals = drainPortals()
   if (!portals || portals.size === 0) return html;
+  console.log('portals:', portals.size)
 
   const payload = Buffer.from(JSON.stringify(Object.fromEntries(portals)), 'utf8').toString('base64')
-  return `${PORTAL_MARKER_PREFIX}${payload}-->${html}`
+  return `${PORTAL_MARKER_PREFIX}${payload}</luent-portals>${html}`
 }
 
 
