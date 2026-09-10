@@ -1,6 +1,7 @@
 import { AnyObject, ReadonlyKeys } from "@luent/types";
 import { isObject } from "@luent/utils";
 export * from './component'
+export { transpileNextScript } from './transpile'
 
 //  - [ ] destructureªª
 //  - [ ] X absorbª, absorbsª

@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@jridgewell/gen-mapping": "^0.3.13",
+    "@luent/tree-squirl": "workspace:*",
     "@luent/utils": "workspace:*",
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
@@ -43,7 +44,6 @@
   },
   "devDependencies": {
     "@luent/types": "workspace:*",
-    "@luent/tree-squirl": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.3"
   },

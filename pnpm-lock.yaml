@@ -581,6 +581,9 @@ importers:
       '@jridgewell/gen-mapping':
         specifier: ^0.3.13
         version: 0.3.13
+      '@luent/tree-squirl':
+        specifier: workspace:*
+        version: link:../tree-squirl
       '@luent/utils':
         specifier: workspace:*
         version: link:../utils
@@ -597,9 +600,6 @@ importers:
         specifier: ^0.124.0
         version: 0.124.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
     devDependencies:
-      '@luent/tree-squirl':
-        specifier: workspace:*
-        version: link:../tree-squirl
       '@luent/types':
         specifier: workspace:*
         version: link:../types

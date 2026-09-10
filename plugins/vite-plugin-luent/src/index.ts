@@ -3,8 +3,6 @@ import { transformWithOxc } from 'vite'
 import type { ConfigEnv, Plugin, UserConfig, ViteDevServer } from 'vite'
 import * as babel from '@babel/core'
 import { luentPreTransform as BabelLuentPlugin } from '@luent/babel-plugin-luent'
-import { transpileNextScript } from '@luent/nextscript/transpile'
-import { discoverPages } from './html-generator'
 
 interface LuentPluginOptions {
   useWorkspace?: boolean
@@ -12,17 +10,17 @@ interface LuentPluginOptions {
 
 // [] generate html from html.tsx
 
-const VIRTUAL_PREFIX = '\0luent:'
+// const VIRTUAL_PREFIX = '\0luent:'
 
-interface Page {
-  id: string
-  route: string
-}
+// interface Page {
+//   id: string
+//   route: string
+// }
 
-interface ClientModule {
-  id: string
-  sourceId: string
-}
+// interface ClientModule {
+//   id: string
+//   sourceId: string
+// }
 
 
 export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
@@ -128,47 +126,49 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
     // },
 
     // TODO: move .nsx transform to transform()
-    async load(id) {
-      const fileName = id.split('?')[0]
-      if (!fileName.endsWith('.nsx')) {
-        return null
-      }
+    // async load(id) {
+    //   const fileName = id.split('?')[0]
+    //   if (!fileName.endsWith('.nsx')) {
+    //     return null
+    //   }
 
-      const code = await readFile(fileName, 'utf8')
-      const { transpiled } = transpileNextScript(fileName, code)
+    //   const { transpileNextScript } = await import('@luent/nextscript/transpile')
 
-      const result = await babel.transformAsync(transpiled.code, {
-        plugins: [
-          BabelLuentPlugin,
-          ['@babel/plugin-syntax-typescript', { isTSX: true }]
-        ],
-        filename: fileName,
-        sourceMaps: true,
-        generatorOpts: {
-          jsescOption: {
-            minimal: true
-          }
-        }
-      })
+    //   const code = await readFile(fileName, 'utf8')
+    //   const { transpiled } = transpileNextScript(fileName, code)
 
-      if (!result?.code) {
-        return null
-      }
+    //   const result = await babel.transformAsync(transpiled.code, {
+    //     plugins: [
+    //       BabelLuentPlugin,
+    //       ['@babel/plugin-syntax-typescript', { isTSX: true }]
+    //     ],
+    //     filename: fileName,
+    //     sourceMaps: true,
+    //     generatorOpts: {
+    //       jsescOption: {
+    //         minimal: true
+    //       }
+    //     }
+    //   })
 
-      const normalized = await transformWithOxc(result.code, fileName.replace(/\.nsx$/, '.tsx'), {
-        jsx: {
-          runtime: 'automatic',
-          importSource: 'luent',
-          throwIfNamespace: false
-        },
-        sourcemap: true
-      }, result.map)
+    //   if (!result?.code) {
+    //     return null
+    //   }
 
-      return {
-        code: normalized.code,
-        map: normalized.map
-      }
-    },
+    //   const normalized = await transformWithOxc(result.code, fileName.replace(/\.nsx$/, '.tsx'), {
+    //     jsx: {
+    //       runtime: 'automatic',
+    //       importSource: 'luent',
+    //       throwIfNamespace: false
+    //     },
+    //     sourcemap: true
+    //   }, result.map)
+
+    //   return {
+    //     code: normalized.code,
+    //     map: normalized.map
+    //   }
+    // },
 
     async transform(code, id) {
       const fileName = id.split('?')[0]
