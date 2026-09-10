@@ -833,10 +833,6 @@ importers:
         version: link:../shared
 
   websites/luent-site:
-    dependencies:
-      '@tailwindcss/vite':
-        specifier: ^4.3.3
-        version: 4.3.3(vite@8.2.1(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0))
     devDependencies:
       '@luent/luent-ui':
         specifier: workspace:*
