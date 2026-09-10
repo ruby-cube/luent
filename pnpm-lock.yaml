@@ -704,9 +704,6 @@ importers:
       '@luent/babel-plugin-luent':
         specifier: workspace:*
         version: link:../babel-plugin-luent
-      '@luent/nextscript':
-        specifier: workspace:*
-        version: link:../../packages/nextscript
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3

@@ -1,4 +1,4 @@
-import { resolve, relative, extname } from 'node:path'
+import { resolve, relative } from 'node:path'
 import glob from 'fast-glob'
 
 const PAGE_RE = /\.html\.tsx$/

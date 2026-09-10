@@ -1,6 +1,5 @@
-import { readFile } from 'node:fs/promises'
 import { transformWithOxc } from 'vite'
-import type { ConfigEnv, Plugin, UserConfig, ViteDevServer } from 'vite'
+import type { ConfigEnv, Plugin, UserConfig } from 'vite'
 import * as babel from '@babel/core'
 import { luentPreTransform as BabelLuentPlugin } from '@luent/babel-plugin-luent'
 

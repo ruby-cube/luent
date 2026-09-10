@@ -24,7 +24,7 @@
     "docs:preview": "vitepress preview",
     "islands:dev": "concurrently \"vite build --watch --config island.server.config.ts\" \"vite build --watch --config island.client.config.ts\"",
     "docs:dev": "pnpm docs:prebuild && concurrently -k \"vite build --watch --config island.server.config.ts\" \"vite build --watch --config island.client.config.ts\" \"vitepress dev\"",
-    "docs:prebuild": "vite build --config island.server.config.ts && vite build --config island.client.config.ts",
+    "docs:prebuild": "pnpm --dir ../../plugins/vite-plugin-luent run build && vite build --config island.server.config.ts && vite build --config island.client.config.ts",
     "docs:build": "pnpm docs:prebuild && vitepress build"
   }
 }
