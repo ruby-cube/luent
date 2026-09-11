@@ -36,16 +36,18 @@ export function Palettable() {
     </div>
 
     {Style(css`
-      * {
-        margin: 0;
-        padding: 0;
-      }
+      // * {
+      //   margin: 0;
+      //   padding: 0;
+      // }
 
       .anchor {
         anchor-name: --color-palette;
       }
 
       .palettable {
+        margin: 0;
+        padding: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -194,7 +196,7 @@ function ColorPalette(setup: FromTag<{
     </div>
 
     {Style(css`
-      .container {
+      .palettable .container {
         display: flex;
         flex-direction: column;
         touch-action: none;
@@ -208,13 +210,13 @@ function ColorPalette(setup: FromTag<{
         user-select: none
       }
       
-      .row {
+      .palettable .row {
         position: relative;
         display: flex;
         margin-inline: auto;
       }
 
-      .clickable {
+      .palettable .clickable {
         cursor: pointer;
       }
 
@@ -222,7 +224,7 @@ function ColorPalette(setup: FromTag<{
         outline: 5px solid hsla(35deg 10% 50% / 50%);
       }
 
-      .square {
+      .palettable .square {
         width: 44px;
         height: 44px;
         border-radius: 10px;
