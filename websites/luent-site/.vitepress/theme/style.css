@@ -576,6 +576,7 @@ body {
   margin-bottom: 26px;
   letter-spacing: 0.04em;
   text-transform: lowercase;
+  text-wrap: balance;
 }
 
 .home-shell .home-hero h1 {
