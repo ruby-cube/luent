@@ -231,7 +231,7 @@ function ColorPalette(setup: FromTag<{
       }
 
       @media (max-width: 479px) {
-        .square {
+        .palettable .square {
           width: 30px;
           height: 30px;
         }
