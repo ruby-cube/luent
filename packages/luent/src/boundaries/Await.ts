@@ -269,10 +269,10 @@ export function createAwaitSeries(
       | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }]
       | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
 ) {
-   const { renderError, renderPlaceholder, renderResolved, $suspense, timeout } = unpackAwaitSeries(series)
+   const { renderError, renderPlaceholder, renderResolved, $suspense } = unpackAwaitSeries(series)
    if (import.meta.env.SSR) return renderPlaceholder()
    const $error = createAtomicIon(undefined as undefined | Error);
-   const $renderPlaceholder = createAtomicIon(false)
+   const $renderPlaceholder = createAtomicIon(true)
 
    function syncPlaceholderState() {
       const suspensePending = Boolean($suspense())
@@ -310,8 +310,12 @@ export function createAwaitSeries(
       If($renderPlaceholder, () => {
          return placeholder
       }),
-      ElseIf($error, () => renderError($error()!)),
-      Else('preserve', renderResolved)
+      ElseIf($error, () => {
+        return renderError($error()!)
+      }),
+      Else('preserve', () => {
+        return renderResolved()
+      })
    ])
 
    return awaitSeries

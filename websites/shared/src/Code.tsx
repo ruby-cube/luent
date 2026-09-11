@@ -1,4 +1,4 @@
-import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component, queueLayout } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component, queueLayout, Twiddle } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -78,7 +78,7 @@ export function Code(setup: FromTag<{
             <span class='filename'>{filename}.{() => $tab() === 'main' ? main.name : alt.name}</span>
             : <span></span>
           }
-          <button class='toggle' on:click={() => { console.log('$$$click toggle'); $tab.toggle() }}>
+          <button class='toggle' on:click={() => { $tab.toggle() }}>
             <span class='option selected' style={{ 'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined }}>
               {If(() => $tab() === 'main',
                 <>{main.name}</>
@@ -158,19 +158,21 @@ export function Code(setup: FromTag<{
         {Await(() => <>
           {If(() => $tab() === 'main', () =>
             CodeBlock(main, highlight)
+            // <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
           )}
           {Else(() =>
             CodeBlock(alt, highlight)
+            // <div class='code'>{{ html: codeHtml(alt.code), trusted }}</div>
           )}
         </>)}
-        {Meanwhile(
-          <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
-        )}
+        {Meanwhile(() => {
+          console.log('$$$ meanwhile...')
+          return <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
+        })}
+
         {/* </o:preserve> */}
       </div>
       {Style(css`
-
-
         .code-container {
           position: relative;
           margin: 16px 0;
@@ -258,7 +260,7 @@ export function Code(setup: FromTag<{
           }
 
           .code-container nav {
-            padding: 6px;
+            padding: 6px 6px 6px 16px;
           }
 
           .code-container nav button {
@@ -302,34 +304,33 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
     '-fetch': async () => {
       const highlighted = await highlight(tab.code, tab.lang ?? tab.name)
       return markHover(highlighted, tab.hover)
-    }
+    },
+    '-awaited': true
   })
   const $container = NodeRef('div')
 
   return <>
     <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
       <div ref={$container} class='code'>{{ html: $code, trusted }}</div>
-      {Await($code, () => <>
-        {If(tab.hover, () => {
-          const hoverMap = removeDollarSigns(tab.hover!)
-          const { tooltip, setTooltipTrigger } = TooltipKit({
-            info: hoverMap,
-            container: $container
-          })
-          afterAttach(() => {
-            for (const key in hoverMap) {
-              const node = document.querySelector(`[data-hover-id="${key}"]`)
-              if (node)
-                setTooltipTrigger[key](node)
-            }
-          })
-          return <>
-            <HoverInfo tooltip={tooltip} place="above" align="start">
-              <span>{() => (tooltip.info)}</span>
-            </HoverInfo>
-          </>
-        })}
-      </>)}
+      {If(tab.hover, () => {
+        const hoverMap = removeDollarSigns(tab.hover!)
+        const { tooltip, setTooltipTrigger } = TooltipKit({
+          info: hoverMap,
+          container: $container
+        })
+        afterAttach(() => {
+          for (const key in hoverMap) {
+            const node = document.querySelector(`[data-hover-id="${key}"]`)
+            if (node)
+              setTooltipTrigger[key](node)
+          }
+        })
+        return <>
+          <HoverInfo tooltip={tooltip} place="above" align="start">
+            <span>{() => (tooltip.info)}</span>
+          </HoverInfo>
+        </>
+      })}
     </o:context>
   </>
 }
