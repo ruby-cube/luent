@@ -74,7 +74,6 @@ export function maybeFlip(node: HTMLElement, popover: Popover) {
     const rect = node.getBoundingClientRect()
     const container = getContainer(popover)
     const bound = container?.getBoundingClientRect()
-
     if (
       popover.placement === 'above' && rect.top < (bound ? bound.top : 0)
       || popover.placement === 'below' && rect.bottom > (bound ? bound.bottom : document.documentElement.clientHeight)

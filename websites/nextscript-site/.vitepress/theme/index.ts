@@ -23,6 +23,7 @@ export default {
   enhanceApp({ router }) {
     installVitePressScrollRestoration(router, {
       onAfterRouteChange: (page) => {
+        if (typeof document === 'undefined') return;
         mountIslands(islands, page)
         smoothScrollHomepage(document.documentElement, page)
       }
