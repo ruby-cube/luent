@@ -155,7 +155,7 @@ function ColorPalette(setup: FromTag<{
 
   return <>
     <o--host on:click={e => e.from('.clickable') || deselectAll()} />
-    <div class='container' auto-bind={rest}>
+    <div class='container no-select' auto-bind={rest}>
       <div class='row'>
         <Endgap
           disabled={$gapDisabled}
