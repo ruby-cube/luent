@@ -368,7 +368,7 @@ TypeExplicit.heading = 'Type-explicit reactivity'
 function TypeExplicit() {
   return <>
     <p style='text-wrap: balance'>
-      Distinguish reactive variables from plain variables through type information. Hover variables in the example to inspect their types.
+      Distinguish reactive variables from plain variables through type information. Hover/tap variables in the example to inspect their types.
     </p>
     {/* <a href='/guide/reactive-structures' class='medium brand'>Learn more</a> */}
   </>

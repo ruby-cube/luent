@@ -52,7 +52,7 @@ Island containers may be any native element or a custom tag. Custom tag names mu
 
 Components are functions that create a view. They are essentially view templates and serve as the building blocks of an island.
 
-To define a component, declare a function that returns a view written in [JSX](#jsx) or [NSX]().
+To define a component, declare a function that returns a view written in [JSX](#jsx) or [NSX]()*.
 
 ```nsx
 // HelloWorld.nsx

@@ -135,6 +135,8 @@ export {
   beforeRemount
 } from './flask/flask-hooks'
 
+export { atEnd } from './flask/Scene'
+
 export type {
   ComponentRef,
 } from './node/NodeRef'

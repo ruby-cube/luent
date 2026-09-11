@@ -6,7 +6,7 @@ The guide and API reference are underway. In the meantime, here is an overview o
 
 ## Island rendering
 #### Client-side
-- `mountIsland()` to mount an interactive island onto existing HTML
+- `mountIsland()` to mount an interactive island onto static HTML
 #### Server-side
 <!-- - `withIslands()` <span class='doc-tag'>Experimental</span> to transform HTML to include islands -->
 - `writeIsland()` to write an island as static HTML
@@ -15,28 +15,28 @@ The guide and API reference are underway. In the meantime, here is an overview o
 #### Primary reactivity
 - `ion()` to create simple and derived reactive state
 - `ionic()` to create structured reactive state
-- `track()` to link reaction to ions
+- `track()` to track ions for state changes and link a reaction to those changes
 
 #### Secondary reactivity
-- `ionize()` to create an ion of an ionic structure
+- `ionize()` to create an ion of an ionic structure (equivalent to `ion(ionic(x))`)
 - `ionicCall()` to track a synchronous ionic task 
-- `ionicPrelude()` to track an ionic prelude phase task 
-- `ionicRender()` to track an ionic render phase task 
-- `ionicLayout()` to track an ionic layout phase task 
-- `ionicTick()` to track an ionic tick phase task 
+- `ionicPrelude()` to track an ionic task scheduled for the prelude phase
+- `ionicRender()` to track an ionic task scheduled for the render phase
+- `ionicLayout()` to track an ionic task scheduled for the layout phase
+- `ionicTick()` to track an ionic task scheduled for the upcoming render cycle tick
 - `Finitron()` to create a finite reactive state machine
 
 ## Context binding
-- `FromTag` to type tag bindings
-- `fromContext()` to access a binding from nearest providing context node
-- `fromRoot()` to access a binding from root
-- `fromGround()` to access a global binding
-- `provideRoot()` to provide a binding from the island root
+- `FromTag` to provide type validation and annotations for tag bindings
+- `fromContext()` to access a value from the nearest providing context node
+- `fromRoot()` to access a value from an island root
+- `fromGround()` to access a globally provided value
+- `provideRoot()` to provide a value from an island root
 - `provideGround()` to provide a global binding
-- `ContextKey()` to create a context binding key
+- `ContextKey()` to create a context key for context bindings
 - `mergeKeys()` to merge multiple keys into one
-- `RootService()` to define a root binding that exists only if used
-- `GroundService()` to define a ground binding that exists only if used
+- `RootService()` to define an island-wide value that exists only if in use
+- `GroundService()` to define a global value that exists only if in use
 
 #### Context tags
 - `<o:context>` to provide context bindings
@@ -54,7 +54,7 @@ The guide and API reference are underway. In the meantime, here is an overview o
 - `microclass` for utility classes
 - `auto-bind` for forwarded bindings
 - `ref` for node access
-- `node` <span class='doc-tag'>Experimental</span> for pre-existing DOM nodes
+<!-- - `node` <span class='doc-tag'>Experimental</span> for pre-existing DOM nodes -->
 
 
 ## View control flow
@@ -87,12 +87,10 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `<o-link>` to create and attach a `<link>` element to the document head
 - `<o-style>` to create and attach a `<style>` element to the document head
 
-## Bindings portal
-- `asJSX()` <span class='doc-tag'>Experimental</span> for bindings on existing DOM nodes
-
 ## Node access
-- `component()` to expose a component instance
+- `expose()` to expose a component instance
 - `NodeRef()` to create a node accessor
+- `asJSX()` <span class='doc-tag'>Experimental</span> for declaring bindings on existing DOM nodes and/or rendering pre-created DOM nodes
 <!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering
@@ -117,7 +115,7 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `at` lifecycle hook prefix for render phase
 - `after` lifecycle hook prefix for tick phase
 
-## Lifecycle hooks
+## View lifecycle hooks
 Lifecycle hooks register tasks to be run at certain points of a dynamic view's lifecycle. There are `before`, `at`, and `after` lifecycle hooks, which correspond to render cycle phases.
 - `atAttach()` at mount and remount
 - `atDetach()` at unmount and demount
@@ -125,6 +123,11 @@ Lifecycle hooks register tasks to be run at certain points of a dynamic view's l
 - `atUnmount()` at final unmount only
 - `atRemount()` at restored mount
 - `atDemount()` at temporary unmount
+
+
+## Effect lifecycle hooks
+- `atEnd()` to schedule tasks for the end of an event handler or reaction's effect lifespan
+
 
 ## Batch cleanup
 - `Scene()` to batch cleanup
@@ -142,9 +145,10 @@ Lifecycle hooks register tasks to be run at certain points of a dynamic view's l
 
 ## Event handling
 - `event.from()` to check where event originated
-- `listen()` for one-time, transient, or abortable event handling
+- `listen()` for transient event handling
 
 ## Debugging
+<span class='doc-tag'>WIP</span>
 - `debug.log()`
 - `debug.trace()` for async traces across the reactivity pipeline
 - `debug.error()`
