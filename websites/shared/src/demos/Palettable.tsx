@@ -205,6 +205,7 @@ function ColorPalette(setup: FromTag<{
         position: relative;
         display: flex;
         margin-inline: auto;
+        user-select: none;
       }
 
       .clickable {
