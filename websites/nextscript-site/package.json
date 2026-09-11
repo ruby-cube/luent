@@ -11,7 +11,11 @@
     "shiki": "^4.1.0",
     "vue": "^3.5.0",
     "vitepress": "2.0.0-alpha.17",
-        "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "vite-plugin-luent": "workspace:*"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT",
