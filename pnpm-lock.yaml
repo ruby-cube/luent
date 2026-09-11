@@ -385,7 +385,7 @@ importers:
         version: 4.18.1
       lucide:
         specifier: ^1.16.0
-        version: 1.43.0
+        version: 1.44.0
       luent:
         specifier: workspace:*
         version: link:../packages/luent
@@ -905,6 +905,13 @@ importers:
         version: 2.0.0-alpha.17(@types/node@26.4.0)(jiti@2.7.0)(less@4.8.0)(lightningcss@1.33.0)(postcss@8.5.23)(sass@1.102.0)(stylus@0.62.0)(typescript@7.0.2)
 
   websites/nextscript-site:
+    dependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.3.0
+        version: 4.3.3(vite@8.2.1(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0))
+      vite-plugin-luent:
+        specifier: workspace:*
+        version: link:../../plugins/vite-plugin-luent
     devDependencies:
       '@luent/quarky':
         specifier: workspace:*
@@ -5298,8 +5305,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide@1.43.0:
-    resolution: {integrity: sha512-koRMVADN3XR9zte+NHXFHuJM4ejAqvwu/6DMf2O40jl2rMlhzu3t2mHSd3ugXnmTm5HIMUbOexhC/nClhetbGg==}
+  lucide@1.44.0:
+    resolution: {integrity: sha512-d30uv1R6AOLBddzVMeeSk6aDAhobqh7nFxMsXuWHyhMmxKRhpLivikbfkmgzbWsn8WTLQIceGMlFY4g3gn4reg==}
 
   luent@file:packages/luent/luent-0.0.1.tgz:
     resolution: {integrity: sha512-hl5T1KN+mLXqfWoIksUJbsD4I4jMBFSEn7l55E8M0RtN5ZzgXMaBnaEWDX3n6i4egHcnE7WvM8W8l8L1zMBc9g==, tarball: file:packages/luent/luent-0.0.1.tgz}
@@ -9422,6 +9429,13 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
+  '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)':
+    dependencies:
+      '@emnapi/core': 1.11.1
+      '@emnapi/runtime': 1.11.3
+      '@tybys/wasm-util': 0.10.3
+    optional: true
+
   '@napi-rs/wasm-runtime@1.2.3(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
       '@emnapi/core': 1.10.0
@@ -9558,7 +9572,7 @@ snapshots:
 
   '@oxc-parser/binding-wasm32-wasi@0.124.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.2.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -11911,7 +11925,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide@1.43.0: {}
+  lucide@1.44.0: {}
 
   luent@file:packages/luent/luent-0.0.1.tgz: {}
 
