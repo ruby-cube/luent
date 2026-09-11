@@ -479,7 +479,16 @@ body {
   border-right: none;
 }
 
+
+
+@media (max-width: 959px) {
+  html:not(.dark) .VPSidebar {
+    background-color: var(--vp-c-bg);
+  }
+}
+
 @media (min-width: 960px) {
+
   .VPSidebar .curtain::after {
     content: '';
     position: absolute;
@@ -594,6 +603,12 @@ body {
 
 .home-shell .btn.install:hover {
   background: var(--vp-c-gray-soft);
+}
+
+@media(max-width:640px) {
+  .home-shell .btn.install {
+    display: none;
+  }
 }
 
 .home-shell .btn {
@@ -783,12 +798,15 @@ body {
   /* background-color: #13161a; */
 }
 
-.dark .VPNavBarSearchButton {
-  background-color: #171c23;
+@media (min-width: 768px) {
+  .dark .VPNavBarSearchButton {
+    background-color: #171c23;
+  }
 }
 
 /* @media (min-width: 960px) { */
-  .curtain {
-    background-color: transparent !important;
-  }
+.curtain {
+  background-color: transparent !important;
+}
+
 /* } */

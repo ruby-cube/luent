@@ -2,7 +2,65 @@ import { Reactions } from "./Atom";
 import { Reaction } from "./Reaction";
 import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, Update } from "./Update";
 
-export const queueTask = (task: () => void) => scheduler.postTask(task);
+type PostTaskCallback = () => void | Promise<void>
+
+type SchedulerLike = {
+  postTask?: (task: PostTaskCallback) => Promise<void> | void
+}
+
+const postTaskFallback = (task: PostTaskCallback) =>
+  postMessageScheduler(task)
+
+const postMessageScheduler = (() => {
+  const channel = typeof window !== 'undefined' ? window : undefined
+  const messageKey = `__quarky_posttask_${Math.random().toString(36).slice(2)}`
+  let scheduled = false
+  let queue: Array<() => void> = []
+
+  const flush = () => {
+    scheduled = false
+    const pending = queue
+    queue = []
+    for (const run of pending) {
+      run()
+    }
+  }
+
+  if (channel) {
+    channel.addEventListener('message', (event) => {
+      if (event.source === channel && event.data === messageKey) {
+        flush()
+      }
+    })
+  }
+
+  return (task: PostTaskCallback) =>
+    new Promise<void>((resolve, reject) => {
+      queue.push(() => {
+        Promise.resolve()
+          .then(task)
+          .then(() => resolve(), reject)
+      })
+
+      if (scheduled) return
+      scheduled = true
+
+      if (channel) {
+        channel.postMessage(messageKey, '*')
+      }
+      else {
+        setTimeout(flush, 0)
+      }
+    })
+})()
+
+export const queueTask = (task: PostTaskCallback) => {
+  const schedulerApi = (globalThis as typeof globalThis & { scheduler?: SchedulerLike }).scheduler
+  if (typeof schedulerApi?.postTask === 'function') {
+    return schedulerApi.postTask(task)
+  }
+  return postTaskFallback(task)
+};
 
 
 type Task = () => void | Promise<void>

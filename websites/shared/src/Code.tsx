@@ -101,18 +101,26 @@ export function Code(setup: FromTag<{
           let navInView = false;
 
           atMount(() => {
-            const stickyBtn = $stickyBtn()
-            const container = $container()
+            const stickyButton = $stickyBtn()
+            const stickyContainer = $container()
             const nav = $nav()
-            if (!stickyBtn || !container || !nav) return;
+            if (!stickyButton || !stickyContainer || !nav) return;
+
+            function updateStickyPlacement() {
+              if (!stickyButton || !stickyContainer) return
+              const containerRect = stickyContainer.getBoundingClientRect()
+              const rightOffset = Math.max(0, window.innerWidth - containerRect.right + 8)
+              stickyButton.style.right = `${rightOffset}px`
+            }
 
             const observer = new IntersectionObserver((entries) => {
               entries.forEach(entry => {
-                if (entry.target === container) containerInView = entry.isIntersecting;
+                if (entry.target === stickyContainer) containerInView = entry.isIntersecting;
                 if (entry.target === nav) navInView = entry.isIntersecting;
               });
               if (containerInView && !navInView) {
                 $show.value = true;
+                updateStickyPlacement()
               } else {
                 $show.value = false;
               }
@@ -123,10 +131,18 @@ export function Code(setup: FromTag<{
               rootMargin: '-75px 0px 0px 0px'
             });
 
-            observer.observe(container);
+            observer.observe(stickyContainer);
             observer.observe(nav);
 
-            atUnmount(() => observer.disconnect())
+            updateStickyPlacement()
+            window.addEventListener('resize', updateStickyPlacement, { passive: true })
+            window.addEventListener('scroll', updateStickyPlacement, { passive: true })
+
+            atUnmount(() => {
+              observer.disconnect()
+              window.removeEventListener('resize', updateStickyPlacement)
+              window.removeEventListener('scroll', updateStickyPlacement)
+            })
           })
           return <>
             <button display-if={$show} ref={$stickyBtn} class='toggle sticky-btn' on:click={() => $tab.toggle()}>
@@ -162,7 +178,6 @@ export function Code(setup: FromTag<{
           border-radius: 12px;
           background-color: var(--vp-code-block-bg);
           overflow: hidden;
-          anchor-name: --code-container;
         }
 
         .code-container nav {
@@ -261,8 +276,8 @@ export function Code(setup: FromTag<{
           top: calc(var(--vp-nav-height) + .5rem);
           /* Reset left if previously set */
           left: auto;
-          right: anchor(--code-container right);
-          margin-right: 0.5rem;
+          right: .5rem;
+          margin-right: 0;
 
           z-index: 1000 !important;
           transition: opacity 0.3s ease; /* Smooth fade-in/out */

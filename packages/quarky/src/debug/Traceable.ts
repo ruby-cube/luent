@@ -19,5 +19,5 @@ export class TraceableMutable extends Traceable {
 function getOriginTrace() {
    const trace = getPublicTrace()
    if (!trace) return '';
-   return 'at ' + trace?.split('at')[1].trim()
+   return 'at ' + trace.split('at')[1]?.trim()
 }
