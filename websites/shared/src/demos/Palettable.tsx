@@ -198,19 +198,24 @@ function ColorPalette(setup: FromTag<{
         display: flex;
         flex-direction: column;
         touch-action: none;
-        user-select: none;
+      }
+
+      .no-select {
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none
       }
       
       .row {
         position: relative;
         display: flex;
         margin-inline: auto;
-        user-select: none;
       }
 
       .clickable {
         cursor: pointer;
-        user-select: none;
       }
 
       .palettable .selected {
