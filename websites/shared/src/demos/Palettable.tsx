@@ -210,6 +210,7 @@ function ColorPalette(setup: FromTag<{
 
       .clickable {
         cursor: pointer;
+        user-select: none;
       }
 
       .palettable .selected {
