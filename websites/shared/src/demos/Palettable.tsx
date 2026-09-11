@@ -75,6 +75,8 @@ export function Palettable() {
         width: 88px;
         height: 44px;
         border-radius: 22px;
+        background-color: #555;
+        color: white;
         padding: 10px;
         border: none;
         margin-top: 154px;
