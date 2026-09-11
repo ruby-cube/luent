@@ -27,7 +27,7 @@ features:
   </div>
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2>Preview</h2>
-    <p><strong>NextScript is in early development.</strong> Here's a glimpse of what's in store.</p>
+    <p><strong>NextScript is in early development.</strong> Here's a glimpse of what's taking shape.</p>
     <p style='text-wrap: balance'><small>
     <strong>Note:</strong> Examples use API from <a href="https://luent.dev">Luent</a> for demonstration purposes. NextScript itself is framework-agnostic.</small></p>
   </section>

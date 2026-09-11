@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { component, Context, ContextKey, fromContext, FromTag, RawJSXNode, RenderTag, template } from "luent"
+import { Context, ContextKey, fromContext, FromTag, RawJSXNode, RenderTag } from "luent"
 import { DropdownKit, IonicDropdown } from "../../ui-base/dropdown/Dropdown.kit"
 import { DropdownContent, DropdownRoot, DropdownTail } from "../../ui-base/dropdown/Dropdown";
 

@@ -1,4 +1,3 @@
-import { component, template } from "luent";
 import { createAsyncDerivation } from "../../../packages/quarky/src/async/AsyncDerivation";
 
 export function TestAsyncDerivation() {

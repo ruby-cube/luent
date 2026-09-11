@@ -191,6 +191,19 @@ importers:
         specifier: workspace:*
         version: link:../../plugins/vite-plugin-luent
 
+  .jungle/confluo:
+    dependencies:
+      '@luent/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      oxc-parser:
+        specifier: ^0.124.0
+        version: 0.124.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
+    devDependencies:
+      '@luent/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+
   .jungle/luent-docs:
     dependencies:
       '@luent/luent-ui':
@@ -9409,13 +9422,6 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
-  '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)':
-    dependencies:
-      '@emnapi/core': 1.11.1
-      '@emnapi/runtime': 1.11.3
-      '@tybys/wasm-util': 0.10.3
-    optional: true
-
   '@napi-rs/wasm-runtime@1.2.3(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
       '@emnapi/core': 1.10.0
@@ -9552,7 +9558,7 @@ snapshots:
 
   '@oxc-parser/binding-wasm32-wasi@0.124.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
+      '@napi-rs/wasm-runtime': 1.2.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'

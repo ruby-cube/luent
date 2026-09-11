@@ -1,7 +1,7 @@
 # Luent APIs
 
 :::warning <span style='margin-right: .5rem'>🚧</span> UNDER CONSTRUCTION 
-The guide and API reference are underway. In the meantime, here is an overview of Luent's APIs
+The API reference is in the works. In the meantime, here is an overview of Luent's APIs
 :::
 
 ## Island rendering
@@ -130,7 +130,7 @@ Lifecycle hooks register tasks to be run at certain points of a dynamic view's l
 
 
 ## Batch cleanup
-- `Scene()` to batch cleanup
+- `Scene()` to create a cleanup batch
 - `scene.atEnd()` to schedule tasks for the end of a scene
 - `scene.end()` to end a scene
 
