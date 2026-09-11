@@ -95,6 +95,7 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
           ...(userConfig.oxc || {}),
           jsx: {
             throwIfNamespace: false,
+            pure: false,
           },
         },
         define: {
@@ -198,7 +199,8 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
         jsx: {
           runtime: 'automatic',
           importSource: 'luent',
-          throwIfNamespace: false
+          throwIfNamespace: false,
+          pure: false
         },
         sourcemap: true
       }, result.map)

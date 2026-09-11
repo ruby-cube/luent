@@ -198,6 +198,7 @@ function ColorPalette(setup: FromTag<{
         display: flex;
         flex-direction: column;
         touch-action: none;
+        user-select: none;
       }
       
       .row {
@@ -376,6 +377,7 @@ function DraggableKit<T>(config: {
   const $shiftY = ion(0)
 
   function maybeDrag(e: PointerEvent, item: T, index: number) {
+    console.log('maybe drag?')
     const target = e.currentTarget! as Element
     target.setPointerCapture(e.pointerId)
     let x = 0;
