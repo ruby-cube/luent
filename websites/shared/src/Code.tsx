@@ -312,7 +312,7 @@ function CodeToggle(setup: FromTag<{
     <button
       auto-bind={rest}
       class='toggle'
-      on:click={() => { transitionToggle($knob()); queueTask(() => $tab.toggle()) }}
+      on:click={() => { transitionToggle($knob()); awaitTick(() => $tab.toggle()) }}
     >
       <span
         display-if={$toggling}
@@ -362,7 +362,6 @@ function CodeToggle(setup: FromTag<{
         align-items: center;
         color: transparent;
         background-color: var(--vp-c-neutral-inverse);
-        background-color: red;
         transition: transform .15s;
         z-index: -1;
         opacity: .5;
