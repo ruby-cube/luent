@@ -1,4 +1,4 @@
-import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaiting, component, queueLayout, Twiddle } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, queueTask, WithRef, awaitTick } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -26,7 +26,6 @@ function markHover(code: string, map?: { [key: string]: string }) {
 
 type CodeTab = {
   name: string,
-  TabName?: () => any,
   code: string,
   lang?: string,
   hover?: { [key: string]: string }
@@ -55,124 +54,101 @@ export function Code(setup: FromTag<{
     $tab = $CodeTab()
   } = setup;
 
-  let mainWidth = 0;
-
-  function setMainWidth(node: HTMLSpanElement) {
-    queueLayout(() => {
-      mainWidth = node.offsetWidth;
-    })
-  }
-
   const $stickyBtn = NodeRef('button')
   const $container = NodeRef('div')
   const $nav = NodeRef('nav')
 
-  return {
-    component: {
-      get tab() { return $tab() }
-    },
-    nodes: <>
-      <div class='code-container'>
-        <nav ref={$nav}>
-          {filename ?
-            <span class='filename'>{filename}.{() => $tab() === 'main' ? main.name : alt.name}</span>
-            : <span></span>
+
+
+
+  return <>
+    <div class='code-container'>
+      <nav ref={$nav}>
+        {filename ?
+          <span class='filename'>{filename}.{() => $tab() === 'main' ? main.name : alt.name}</span>
+          : <span></span>
+        }
+        <CodeToggle tab={$tab} main={main.name} alt={alt.name} />
+      </nav>
+      {If(showSticky, () => {
+        const $show = ion(false)
+
+        let containerInView = false;
+        let navInView = false;
+
+        atMount(() => {
+          const stickyButton = $stickyBtn()
+          const stickyContainer = $container()
+          const nav = $nav()
+          if (!stickyButton || !stickyContainer || !nav) return;
+
+          function updateStickyPlacement() {
+            if (!stickyButton || !stickyContainer) return
+            const containerRect = stickyContainer.getBoundingClientRect()
+            const rightOffset = Math.max(0, window.innerWidth - containerRect.right + 8)
+            stickyButton.style.right = `${rightOffset}px`
           }
-          <button class='toggle' on:click={() => { $tab.toggle() }}>
-            <span class='option selected' style={{ 'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined }}>
-              {If(() => $tab() === 'main',
-                <>{main.name}</>
-              )}
-              {Else('preserve',
-                <>{alt.TabName ? alt.TabName() : alt.name}</>
-              )}
-            </span>
-            <span after:mount={setMainWidth} class='option'>{main.name}</span>
-            <span class='option'>
-              <>{alt.TabName ? alt.TabName() : alt.name}</>
-            </span>
-            {/* <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> */}
-          </button>
-        </nav>
-        {If(showSticky, () => {
-          const $show = ion(false)
 
-          let containerInView = false;
-          let navInView = false;
-
-          atMount(() => {
-            const stickyButton = $stickyBtn()
-            const stickyContainer = $container()
-            const nav = $nav()
-            if (!stickyButton || !stickyContainer || !nav) return;
-
-            function updateStickyPlacement() {
-              if (!stickyButton || !stickyContainer) return
-              const containerRect = stickyContainer.getBoundingClientRect()
-              const rightOffset = Math.max(0, window.innerWidth - containerRect.right + 8)
-              stickyButton.style.right = `${rightOffset}px`
-            }
-
-            const observer = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                if (entry.target === stickyContainer) containerInView = entry.isIntersecting;
-                if (entry.target === nav) navInView = entry.isIntersecting;
-              });
-              if (containerInView && !navInView) {
-                $show.value = true;
-                updateStickyPlacement()
-              } else {
-                $show.value = false;
-              }
-            }, {
-              threshold: 0,
-              root: null,
-              // This makes the 'out of view' trigger happen 100px before the nav hits the top
-              rootMargin: '-75px 0px 0px 0px'
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.target === stickyContainer) containerInView = entry.isIntersecting;
+              if (entry.target === nav) navInView = entry.isIntersecting;
             });
+            if (containerInView && !navInView) {
+              $show.value = true;
+              updateStickyPlacement()
+            } else {
+              $show.value = false;
+            }
+          }, {
+            threshold: 0,
+            root: null,
+            // This makes the 'out of view' trigger happen 100px before the nav hits the top
+            rootMargin: '-75px 0px 0px 0px'
+          });
 
-            observer.observe(stickyContainer);
-            observer.observe(nav);
+          observer.observe(stickyContainer);
+          observer.observe(nav);
 
-            updateStickyPlacement()
-            window.addEventListener('resize', updateStickyPlacement, { passive: true })
-            window.addEventListener('scroll', updateStickyPlacement, { passive: true })
+          updateStickyPlacement()
+          listen(window, 'resize', updateStickyPlacement, { passive: true })
+          listen(window, 'scroll', updateStickyPlacement, { passive: true })
 
-            atUnmount(() => {
-              observer.disconnect()
-              window.removeEventListener('resize', updateStickyPlacement)
-              window.removeEventListener('scroll', updateStickyPlacement)
-            })
+          atUnmount(() => {
+            observer.disconnect()
           })
-          return <>
-            <button display-if={$show} ref={$stickyBtn} class='toggle sticky-btn' on:click={() => $tab.toggle()}>
-              <span class='option selected' style={{ 'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined }}>{() => $tab() === 'main' ? main.name : alt.name}</span>
-              <span at:attach={node => mainWidth = node.offsetWidth} class='option'>{main.name}</span>
-              <span class='option'>{alt.name}</span>
-            </button>
-            <div ref={$container} class="sticky-zone">
-            </div>
-          </>
-        })}
-        {/* <o:preserve> */}
-        {Await(() => <>
-          {If(() => $tab() === 'main', () =>
-            CodeBlock(main, highlight)
-            // <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
-          )}
-          {Else(() =>
-            CodeBlock(alt, highlight)
-            // <div class='code'>{{ html: codeHtml(alt.code), trusted }}</div>
-          )}
-        </>)}
-        {Meanwhile(() => {
-          console.log('$$$ meanwhile...')
-          return <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
-        })}
+        })
+        return <>
+          <CodeToggle
+            display-if={$show}
+            tab={$tab}
+            ref={$stickyBtn}
+            class='sticky-btn'
+            main={main.name}
+            alt={alt.name}
+          />
+          <div ref={$container} class="sticky-zone"></div>
+        </>
+      })}
+      {/* <o:preserve> */}
+      {Await(() => <>
+        {If(() => $tab() === 'main', () =>
+          CodeBlock(main, highlight)
+          // <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
+        )}
+        {Else(() =>
+          CodeBlock(alt, highlight)
+          // <div class='code'>{{ html: codeHtml(alt.code), trusted }}</div>
+        )}
+      </>)}
+      {Meanwhile(() => {
+        console.log('$$$ meanwhile...')
+        return <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
+      })}
 
-        {/* </o:preserve> */}
-      </div>
-      {Style(css`
+      {/* </o:preserve> */}
+    </div>
+    {Style(css`
         .code-container {
           position: relative;
           margin: 16px 0;
@@ -190,15 +166,6 @@ export function Code(setup: FromTag<{
           overflow-x: auto;
         }
 
-        .code-container .toggle {
-          position: relative;
-          height: 2.5rem;
-          border-radius: 1.5rem;
-          padding: 4px;
-          z-index: 0;
-          background-color: var(--vp-input-switch-bg-color);
-        }
-
         .code-container .filename {
           font-family: var(--default-mono-font-family);
           font-size: 11.5px;
@@ -207,33 +174,9 @@ export function Code(setup: FromTag<{
           margin-block: auto;
         }
 
-        .code-container button span {
-          appearance: none;
-          border: 1px solid transparent;
-          border-radius: 19.5px;
-          background: transparent;
-          color: var(--vp-code-tab-text-color);
-          font-size: 12px;
-          font-weight: 500;
-          white-space: nowrap;
-          padding: 3px 10px;
-          cursor: pointer;
-        }
-
-        .code-container button span.selected {
-          position: absolute;
-          top: 4px;
-          display: inline-flex;
-          align-items: center;
-          color: transparent;
-          background-color: var(--vp-c-neutral-inverse);
-          transition: transform .25s;
-          z-index: -1;
-        }
-
         .code-container .shiki {
           margin: 0 !important;
-          padding: 0px 20px 24px 24px !important;
+          padding: 10px 20px 24px 24px !important;
           border-radius: 0 !important;
           background-color: transparent !important;
           color: var(--vp-code-block-color);
@@ -265,7 +208,6 @@ export function Code(setup: FromTag<{
 
           .code-container nav button {
             font-size: 13px;
-            padding: 9px 12px;
           }
 
           .code-container .shiki {
@@ -280,11 +222,8 @@ export function Code(setup: FromTag<{
           left: auto;
           right: .5rem;
           margin-right: 0;
-
           z-index: 1000 !important;
-          transition: opacity 0.3s ease; /* Smooth fade-in/out */
         }
-
 
         .sticky-zone {
           position: absolute;
@@ -295,8 +234,7 @@ export function Code(setup: FromTag<{
         }
 
       `)}
-    </>
-  }
+  </>
 }
 
 function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Promise<string>) {
@@ -327,7 +265,7 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
         })
         return <>
           <HoverInfo tooltip={tooltip} place="above" align="start">
-            <span>{() => (tooltip.info)}</span>
+            <span>{() => tooltip.info}</span>
           </HoverInfo>
         </>
       })}
@@ -341,4 +279,103 @@ function removeDollarSigns(map: { [key: string]: string }) {
     safeMap[key.replaceAll('$', 'ß')] = map[key]
   }
   return safeMap
+}
+
+function CodeToggle(setup: FromTag<{
+  tab: Ion<'main' | 'alt'> & { toggle(): void },
+  main: string,
+  alt: string
+}> & WithRef<'button'>) {
+  const { $tab, main, alt, ...rest } = setup;
+  let mainWidth = 0;
+
+  const $mainNode = NodeRef('span')
+  const $knob = NodeRef('span')
+  const $toggling = ion(false)
+
+  function transitionToggle(node: HTMLElement | undefined) {
+    if (!node) {
+      return;
+    }
+    if (mainWidth === 0) {
+      queueLayout(() => {
+        mainWidth = $mainNode()!.offsetWidth;
+      })
+    }
+    $toggling.value = true;
+    listen(node, 'transitionend', () => {
+      $toggling.value = false;
+    })
+  }
+
+  return <>
+    <button
+      auto-bind={rest}
+      class='toggle'
+      on:click={() => { transitionToggle($knob()); queueTask(() => $tab.toggle()) }}
+    >
+      <span
+        display-if={$toggling}
+        ref={$knob}
+        class='option selected'
+        style={{
+          'transform': () => $tab() === 'alt' ? `translateX(${mainWidth}px)` : undefined
+        }}
+      >
+        {() => $tab() === 'main' ? main : alt}
+      </span>
+      <span class={['option', { 'active': () => !$toggling() && $tab() === 'main' }]}
+        ref={$mainNode}
+      >
+        {main}
+      </span>
+      <span class={['option', { 'active': () => !$toggling() && $tab() === 'alt' }]}>
+        {alt}
+      </span>
+    </button>
+    {Style(css`
+      .code-container .toggle {
+        position: relative;
+        border-radius: 1.5rem;
+        z-index: 0;
+        background-color: var(--vp-input-switch-bg-color);
+      }
+
+      .code-container button span {
+        display: inline-block;
+        appearance: none;
+        border: 1px solid transparent;
+        border-radius: 19.5px;
+        background: transparent;
+        color: var(--vp-code-tab-text-color);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.5em;
+        white-space: nowrap;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+
+      .code-container button span.selected {
+        position: absolute;
+        display: inline-flex;
+        align-items: center;
+        color: transparent;
+        background-color: var(--vp-c-neutral-inverse);
+        transition: transform .15s;
+        z-index: -1;
+        opacity: .5;
+      }
+
+      .code-container button span.active {
+        background-color: var(--vp-c-neutral-inverse);
+      }
+
+      @media (max-width: 639px) {
+        .code-container nav button {
+          font-size: 13px;
+        }
+      } 
+    `)}
+  </>
 }

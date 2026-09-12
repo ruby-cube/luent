@@ -61,31 +61,31 @@ export function CodeGlimpses() {
                 mainCode={{ name: ts, code: render[ts], lang: ts, hover: render.tsHover }}
                 altCode={{
                   name: ns,
-                  TabName() {
-                    const { tooltip, setTooltipTrigger } = TooltipKit({ info: { nsx: '' } })
-                    console.log('TabName render')
-                    atUnmount(() => 'unmounting TabName')
-                    return <>
-                      <o:context provide={[TOOLTIP_CONFIG({})]}>
-                        {ns} <small at:mount={setTooltipTrigger.nsx} class='more-info'>(?)</small>
-                        <o--body>
-                          <TooltipRoot
-                            tooltip={tooltip}>
-                            <TooltipContent
-                            // microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
-                            // style='background-color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); font-weight: 600;'
-                            >
-                              <p class='ns-note'>
-                                <small>
-                                  NextScript is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
-                                </small>
-                              </p>
-                            </TooltipContent>
-                          </TooltipRoot>
-                        </o--body>
-                      </o:context>
-                    </>
-                  },
+                  // TabName() {
+                  //   const { tooltip, setTooltipTrigger } = TooltipKit({ info: { nsx: '' } })
+                  //   console.log('TabName render')
+                  //   atUnmount(() => 'unmounting TabName')
+                  //   return <>
+                  //     <o:context provide={[TOOLTIP_CONFIG({})]}>
+                  //       {ns} <small at:mount={setTooltipTrigger.nsx} class='more-info'>(?)</small>
+                  //       <o--body>
+                  //         <TooltipRoot
+                  //           tooltip={tooltip}>
+                  //           <TooltipContent
+                  //           // microclass={() => `${tooltip.above ? 'origin-bottom' : tooltip.below ? 'origin-top' : tooltip.left ? 'origin-right' : 'origin-left'} rounded-md px-3 py-1.5 text-xs bg-foreground text-background z-50 w-fit max-w-xs`}
+                  //           // style='background-color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); font-weight: 600;'
+                  //           >
+                  //             <p class='ns-note'>
+                  //               <small>
+                  //                 NextScript is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
+                  //               </small>
+                  //             </p>
+                  //           </TooltipContent>
+                  //         </TooltipRoot>
+                  //       </o--body>
+                  //     </o:context>
+                  //   </>
+                  // },
                   code: render[ns], hover: render.nsHover
                 }}
                 highlightCode={highlightCode}
