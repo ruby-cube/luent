@@ -362,6 +362,7 @@ function CodeToggle(setup: FromTag<{
         align-items: center;
         color: transparent;
         background-color: var(--vp-c-neutral-inverse);
+        background-color: red;
         transition: transform .15s;
         z-index: -1;
         opacity: .5;
