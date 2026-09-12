@@ -1,5 +1,5 @@
 import { Ion, Ionic, toIon, $fromContext, ComponentTag, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderTag, Style, template, Xray, FromTag } from "luent"
-import { maybeFlip, Popover, positionTail } from "./Popover.kit";
+import { maybeFlip, Popover, positionPopover, positionTail } from "./Popover.kit";
 
 // TODO:
 // [] hideDelay should never be greater than delay, clamp hideDelay to delay if it is greater
@@ -30,6 +30,7 @@ function PopoverRoot(setup: FromTag<{
           <div
             at:mount={() => console.log('mounting popover!')}
             before:attach={node => maybeFlip(node, popover)}
+            at:attach={node => positionPopover(node, popover)}
             ref={$popover}
             class={['popover', () => popover.placement, () => popover.alignment]}
             style={() => `--popover-anchor: ${popover.anchorName}`}

@@ -64,7 +64,7 @@ export function runDemo() {
       {/* <BottomlessBlokkis></BottomlessBlokkis> */}
       {/* <DayView/> */}
       {/* <TestStyleComments/> */}
-      <TooltipDemo></TooltipDemo>
+      <TestColorSort></TestColorSort>
     </>
     // return <TestInnerHTML/>
   }, '#root')

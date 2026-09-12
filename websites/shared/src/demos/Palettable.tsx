@@ -388,7 +388,6 @@ function DraggableKit<T>(config: {
   const $shiftY = ion(0)
 
   function maybeDrag(e: PointerEvent, item: T, index: number) {
-    console.log('maybe drag?')
     const target = e.currentTarget! as Element
     target.setPointerCapture(e.pointerId)
     let x = 0;
@@ -755,47 +754,47 @@ Palettable.nsx = `function Palettable() {
   })
 
   <:>
-  <div class='palettable'>
-    {As(round@, :>
-      <--->
-      get solved = ion(false)
-      get moves = ion(0, {
-        increment() { moves++ }
-      })
-      <--->
-      <div class='moves-panel'>
-        {moves@}
-      </div>
-      <ColorPalette
-        animate-in='slide-in'
-        onMove={moves@.increment}
-        onComplete={() => solved = true}
-      ></ColorPalette>
-      {If(done@,
-        <button transition-in on:click={round@.increment}>
-          Next
-        </button>
+    <div class='palettable'>
+      {As(round@, :>
+        <--->
+        get solved = ion(false)
+        get moves = ion(0, {
+          increment() { moves++ }
+        })
+        <--->
+        <div class='moves-panel'>
+          {moves@}
+        </div>
+        <ColorPalette
+          animate-in='slide-in'
+          onMove={moves@.increment}
+          onComplete={() => solved = true}
+        ></ColorPalette>
+        {If(done@,
+          <button transition-in on:click={round@.increment}>
+            Next
+          </button>
+        )}
       )}
-    )}
-  </div>
+    </div>
 
-  <o-style>
-    @keyframes slide-in {
-      from {
-        opacity: 0;
-        transform: translateY(-100px);
+    <o-style>
+      @keyframes slide-in {
+        from {
+          opacity: 0;
+          transform: translateY(-100px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0px);
+        }
       }
 
-      to {
-        opacity: 1;
-        transform: translateY(0px);
+      .slide-in {
+        animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) slide-in forwards;
       }
-    }
-
-    .slide-in {
-      animation: 500ms cubic-bezier(0.55, 0, 0.1, 1) slide-in forwards;
-    }
-  </o-style>
+    </o-style>
   </:>
 }
 

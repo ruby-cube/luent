@@ -2,7 +2,7 @@ import { getActiveUpdate, queueRender, queueTask, toValue } from "@luent/quarky"
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/bindings-types";
-import { Flask, getFlask } from "@luent/flask";
+import { getFlask } from "@luent/flask";
 import { atAttach, beforeDetach } from "../flask/flask-hooks";
 
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
@@ -19,19 +19,28 @@ export function setUpPositionTransition(node: HTMLElement, transitionClasses: Ma
 export function startTransitionItem(node: HTMLElement, first: DOMRect, last: DOMRect, classes: string[]) {
   const deltaY = first.top - last.top
   const deltaX = first.left - last.left
-  if (deltaX || deltaY) {
-    node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
-    requestAnimationFrame(() => {
-      queueTask(() => {
-        classes.forEach(className => node.classList.add(className))
-        node.style.setProperty('transform', `translate(0px, 0px)`)
-        node.addEventListener('transitionend', () => {
-          classes.forEach(className => node.classList.remove(className))
-          node.style.removeProperty('transform')
-        }, { once: true })
-      })
+  if (!deltaX && !deltaY) return;
+
+  classes.forEach(className => node.classList.add(className))
+
+  // Disable transitions while applying the inverted transform.
+  node.style.setProperty('transition', 'none')
+
+  node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
+
+  // Force style flush before enabling transitions back. (required by Safari)
+  node.getBoundingClientRect()
+  node.style.removeProperty('transition')
+  
+  requestAnimationFrame(() => {
+    queueTask(() => {
+      node.style.setProperty('transform', `translate(0px, 0px)`)
+      node.addEventListener('transitionend', () => {
+        classes.forEach(className => node.classList.remove(className))
+        node.style.removeProperty('transform')
+      }, { once: true })
     })
-  }
+  })
 }
 
 let ports: Ports | undefined
