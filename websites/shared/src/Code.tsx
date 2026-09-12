@@ -364,7 +364,6 @@ function CodeToggle(setup: FromTag<{
         background-color: var(--vp-c-neutral-inverse);
         transition: transform .15s;
         z-index: -1;
-        opacity: .5;
       }
 
       .code-container button span.active {
