@@ -333,7 +333,7 @@ export function CodeToggle(setup: FromTag<{
         {alt}
       </span>
     </button>
-    
+
     {Style(css`
       .code-toggle {
         position: relative;
@@ -363,8 +363,16 @@ export function CodeToggle(setup: FromTag<{
         align-items: center;
         color: transparent;
         background-color: var(--vp-c-neutral-inverse);
-        transition: transform .15s !important;
+        transition: transform .15s;
         z-index: -1;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .code-toggle span.selected {
+          transition-property: transform !important;
+          transition-duration: 0.15s !important;
+          transition-delay: 0s !important;
+        }
       }
 
       .code-toggle span.active {
