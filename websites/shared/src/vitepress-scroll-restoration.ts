@@ -11,13 +11,17 @@ interface ScrollRestorationOptions {
 const DEFAULT_STORAGE_KEY = 'vp-scroll-positions'
 
 function normalizePath(path: string) {
-  const [withoutHash] = path.split('#')
-  const [withoutQuery] = withoutHash.split('?')
+  const [pathAndQuery, rawHash] = path.split('#')
+  const [withoutQuery] = pathAndQuery.split('?')
   if (!withoutQuery) return '/'
-  if (withoutQuery !== '/' && withoutQuery.endsWith('/')) {
-    return withoutQuery.slice(0, -1)
+
+  let normalized = withoutQuery
+  if (normalized !== '/' && normalized.endsWith('/')) {
+    normalized = normalized.slice(0, -1)
   }
-  return withoutQuery
+
+  if (!rawHash) return normalized
+  return `${normalized}#${rawHash}`
 }
 
 function isBackForwardNavigation() {
@@ -92,7 +96,7 @@ export function installVitePressScrollRestoration(
 
   if (typeof window !== 'undefined') {
     window.addEventListener('pagehide', () => {
-      saveScrollPosition(window.location.pathname, window.scrollY)
+      saveScrollPosition(`${window.location.pathname}${window.location.hash}`, window.scrollY)
     })
 
     // Mark SPA navigations initiated by browser back/forward.
@@ -102,7 +106,7 @@ export function installVitePressScrollRestoration(
 
     // Handles full-page back/forward when navigation bypasses VitePress router.
     if (isBackForwardNavigation()) {
-      restoreScroll(window.location.pathname)
+      restoreScroll(`${window.location.pathname}${window.location.hash}`)
     }
   }
 
