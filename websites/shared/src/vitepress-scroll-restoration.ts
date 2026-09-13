@@ -24,6 +24,16 @@ function normalizePath(path: string) {
   return `${normalized}#${rawHash}`
 }
 
+function normalizePathWithoutHash(path: string) {
+  const [withoutHash] = path.split('#')
+  const [withoutQuery] = withoutHash.split('?')
+  if (!withoutQuery) return '/'
+  if (withoutQuery !== '/' && withoutQuery.endsWith('/')) {
+    return withoutQuery.slice(0, -1)
+  }
+  return withoutQuery
+}
+
 function isBackForwardNavigation() {
   if (typeof performance === 'undefined') return false
   const entries = performance.getEntriesByType('navigation')
@@ -74,8 +84,23 @@ export function installVitePressScrollRestoration(
     const normalized = normalizePath(path)
     const fromMemory = scrollPositions.get(normalized)
     if (typeof fromMemory === 'number') return fromMemory
-    const fromStorage = readPersistedScrollPositions()[normalized]
-    return typeof fromStorage === 'number' ? fromStorage : undefined
+
+    const normalizedWithoutHash = normalizePathWithoutHash(path)
+    if (normalizedWithoutHash !== normalized) {
+      const fromMemoryWithoutHash = scrollPositions.get(normalizedWithoutHash)
+      if (typeof fromMemoryWithoutHash === 'number') return fromMemoryWithoutHash
+    }
+
+    const all = readPersistedScrollPositions()
+    const fromStorage = all[normalized]
+    if (typeof fromStorage === 'number') return fromStorage
+
+    if (normalizedWithoutHash !== normalized) {
+      const fromStorageWithoutHash = all[normalizedWithoutHash]
+      if (typeof fromStorageWithoutHash === 'number') return fromStorageWithoutHash
+    }
+
+    return undefined
   }
 
   function restoreScroll(path: string) {
@@ -115,7 +140,7 @@ export function installVitePressScrollRestoration(
 
   router.onBeforeRouteChange = async (to) => {
     if (typeof window !== 'undefined') {
-      saveScrollPosition(router.route.path, window.scrollY)
+      saveScrollPosition(`${window.location.pathname}${window.location.hash}`, window.scrollY)
     }
 
     if (!prevBeforeRouteChange) return
