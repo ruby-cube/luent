@@ -33,6 +33,7 @@ export function installVitePressScrollRestoration(
 ) {
   const storageKey = options.storageKey ?? DEFAULT_STORAGE_KEY
   const scrollPositions = new Map<string, number>()
+  let shouldRestoreOnNextRouteChange = false
 
   function readPersistedScrollPositions() {
     if (typeof window === 'undefined') return {} as Record<string, number>
@@ -80,7 +81,11 @@ export function installVitePressScrollRestoration(
     // Double RAF gives VitePress/layout hydration a frame before restoring.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        const root = document.documentElement
+        const previousBehavior = root.style.scrollBehavior
+        root.style.scrollBehavior = 'auto'
         window.scrollTo({ top: y, left: 0, behavior: 'auto' })
+        root.style.scrollBehavior = previousBehavior
       })
     })
   }
@@ -90,8 +95,13 @@ export function installVitePressScrollRestoration(
       saveScrollPosition(window.location.pathname, window.scrollY)
     })
 
+    // Mark SPA navigations initiated by browser back/forward.
+    window.addEventListener('popstate', () => {
+      shouldRestoreOnNextRouteChange = true
+    })
+
     // Handles full-page back/forward when navigation bypasses VitePress router.
-    if (!window.location.hash && isBackForwardNavigation()) {
+    if (isBackForwardNavigation()) {
       restoreScroll(window.location.pathname)
     }
   }
@@ -117,8 +127,14 @@ export function installVitePressScrollRestoration(
       await options.onAfterRouteChange(page)
     }
 
-    // Let native anchor scrolling win for hash links.
+    // Only restore when navigation came from browser back/forward.
+    if (shouldRestoreOnNextRouteChange) {
+      shouldRestoreOnNextRouteChange = false
+      restoreScroll(page)
+      return
+    }
+
+    // Let native anchor scrolling win for hash links on regular link navigations.
     if (page.includes('#')) return
-    restoreScroll(page)
   }
 }

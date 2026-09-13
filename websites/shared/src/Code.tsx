@@ -132,19 +132,16 @@ export function Code(setup: FromTag<{
       })}
       {/* <o:preserve> */}
       {Await(() => <>
-        {If(() => $tab() === 'main', () =>
-          CodeBlock(main, highlight)
-          // <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
+        {If(() => $tab() === 'main',
+          <CodeBlock tab={main} highlight={highlight} />
         )}
-        {Else(() =>
-          CodeBlock(alt, highlight)
-          // <div class='code'>{{ html: codeHtml(alt.code), trusted }}</div>
+        {Else(
+          <CodeBlock tab={alt} highlight={highlight} />
         )}
       </>)}
-      {Meanwhile(() => {
-        console.log('$$$ meanwhile...')
-        return <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
-      })}
+      {Meanwhile(
+        <div class='code'>{{ html: codeHtml(main.code), trusted }}</div>
+      )}
 
       {/* </o:preserve> */}
     </div>
@@ -189,14 +186,6 @@ export function Code(setup: FromTag<{
           line-height: 1.7;
         }
 
-        /* .dark .code-container .shiki span {
-                  color: var(--shiki-dark, inherit);
-                }
-                
-                html:not(.dark) .code-container .shiki span {
-                  color: var(--shiki-light, inherit);
-                } */
-
         @media (max-width: 639px) {
           .code-container {
             border-radius: 10px;
@@ -237,7 +226,8 @@ export function Code(setup: FromTag<{
   </>
 }
 
-function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Promise<string>) {
+function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang: string) => Promise<string> }>) {
+  const { tab, highlight } = setup
   const $code = ion('', {
     '-fetch': async () => {
       const highlighted = await highlight(tab.code, tab.lang ?? tab.name)
@@ -339,7 +329,7 @@ export function CodeToggle(setup: FromTag<{
         position: relative;
         border-radius: 1.5rem;
         z-index: 0;
-        background-color: var(--vp-input-switch-bg-color);
+        background-color: var(--vp-c-bg);
       }
 
       .code-toggle span {

@@ -21,11 +21,20 @@ export default {
     })
   },
   enhanceApp({ router }) {
+    let previousPage = router.route.path
+    const prevBeforeRouteChange = router.onBeforeRouteChange
+
+    router.onBeforeRouteChange = async (to) => {
+      previousPage = router.route.path
+      if (!prevBeforeRouteChange) return
+      return prevBeforeRouteChange(to)
+    }
+
     installVitePressScrollRestoration(router, {
       onAfterRouteChange: (page) => {
         if (typeof document === 'undefined') return;
         mountIslands(islands, page)
-        smoothScrollHomepage(document.documentElement, page)
+        smoothScrollHomepage(document.documentElement, page, previousPage)
       }
     })
   }
