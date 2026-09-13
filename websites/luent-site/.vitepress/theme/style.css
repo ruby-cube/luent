@@ -811,3 +811,13 @@ body {
 }
 
 /* } */
+
+/* Keep reduced-motion defaults, but allow the appearance switch to animate. */
+@media (prefers-reduced-motion: reduce) {
+  .VPSwitchAppearance,
+  .VPSwitchAppearance .check,
+  .VPSwitchAppearance .icon [class^='vpi-'] {
+    transition-duration: 0.25s !important;
+    transition-delay: 0s !important;
+  }
+}

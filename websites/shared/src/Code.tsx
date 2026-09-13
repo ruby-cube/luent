@@ -281,7 +281,7 @@ function removeDollarSigns(map: { [key: string]: string }) {
   return safeMap
 }
 
-function CodeToggle(setup: FromTag<{
+export function CodeToggle(setup: FromTag<{
   tab: Ion<'main' | 'alt'> & { toggle(): void },
   main: string,
   alt: string
@@ -311,7 +311,7 @@ function CodeToggle(setup: FromTag<{
   return <>
     <button
       auto-bind={rest}
-      class='toggle'
+      class='code-toggle'
       on:click={() => { transitionToggle($knob()); awaitTick(() => $tab.toggle()) }}
     >
       <span
@@ -333,15 +333,16 @@ function CodeToggle(setup: FromTag<{
         {alt}
       </span>
     </button>
+    
     {Style(css`
-      .code-container .toggle {
+      .code-toggle {
         position: relative;
         border-radius: 1.5rem;
         z-index: 0;
         background-color: var(--vp-input-switch-bg-color);
       }
 
-      .code-container button span {
+      .code-toggle span {
         display: inline-block;
         appearance: none;
         border: 1px solid transparent;
@@ -356,7 +357,7 @@ function CodeToggle(setup: FromTag<{
         cursor: pointer;
       }
 
-      .code-container button span.selected {
+      .code-toggle span.selected {
         position: absolute;
         display: inline-flex;
         align-items: center;
@@ -366,12 +367,12 @@ function CodeToggle(setup: FromTag<{
         z-index: -1;
       }
 
-      .code-container button span.active {
+      .code-toggle span.active {
         background-color: var(--vp-c-neutral-inverse);
       }
 
       @media (max-width: 639px) {
-        .code-container nav button {
+        .code-toggle {
           font-size: 13px;
         }
       } 

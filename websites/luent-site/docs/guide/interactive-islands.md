@@ -64,7 +64,7 @@ function HelloWorld() {
 ```
 
 ```tsx
-// HelloWorld.nsx
+// HelloWorld.tsx
 function HelloWorld() {
   return <>
     <p>Hello World.</p>
