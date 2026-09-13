@@ -258,7 +258,7 @@ function CodeBlock(tab: CodeTab, highlight: (code: string, lang: string) => Prom
         })
         afterAttach(() => {
           for (const key in hoverMap) {
-            const node = document.querySelector(`[data-hover-id="${key}"]`)
+            const node = document.querySelector(`[data-hover-id="${key}"]`) as HTMLElement
             if (node)
               setTooltipTrigger[key](node)
           }
@@ -367,16 +367,18 @@ export function CodeToggle(setup: FromTag<{
         z-index: -1;
       }
 
-      @media (prefers-reduced-motion: reduce) {
-        .code-toggle span.selected {
-          transition-property: transform !important;
-          transition-duration: 0.15s !important;
-          transition-delay: 0s !important;
-        }
-      }
-
       .code-toggle span.active {
         background-color: var(--vp-c-neutral-inverse);
+      }
+
+      @layer __vitepress_base {
+        @media (prefers-reduced-motion: reduce) {
+          .code-toggle span.selected {
+            transition-property: transform !important;
+            transition-duration: .15s !important;
+            transition-delay: 0s !important;
+          }
+        }
       }
 
       @media (max-width: 639px) {
