@@ -363,7 +363,7 @@ export function CodeToggle(setup: FromTag<{
         align-items: center;
         color: transparent;
         background-color: var(--vp-c-neutral-inverse);
-        transition: transform .15s;
+        transition: transform .15s !important;
         z-index: -1;
       }
 
