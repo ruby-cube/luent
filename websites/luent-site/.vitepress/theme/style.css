@@ -813,11 +813,24 @@ body {
 /* } */
 
 /* Keep reduced-motion defaults, but allow the appearance switch to animate. */
-@media (prefers-reduced-motion: reduce) {
-  .VPSwitchAppearance,
-  .VPSwitchAppearance .check,
-  .VPSwitchAppearance .icon [class^='vpi-'] {
-    transition-duration: 0.25s !important;
-    transition-delay: 0s !important;
+@layer __vitepress_base {
+  @media (prefers-reduced-motion: reduce) {
+    .VPSwitchAppearance {
+      transition-property: border-color !important;
+      transition-duration: 0.25s !important;
+      transition-delay: 0s !important;
+    }
+
+    .VPSwitchAppearance .check {
+      transition-property: transform !important;
+      transition-duration: 0.25s !important;
+      transition-delay: 0s !important;
+    }
+
+    .VPSwitchAppearance .icon [class^='vpi-'] {
+      transition-property: opacity !important;
+      transition-duration: 0.25s !important;
+      transition-delay: 0s !important;
+    }
   }
 }
