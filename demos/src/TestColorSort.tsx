@@ -253,7 +253,7 @@ const Gap = (setup: FromTag) =>
   </>
 
 
-const Endgap = (setup: FromTag) =>
+const Endgap = (setup: FromTag<{ '...': 'button' }>) =>
   <>
     <button
       class='clickable gap endgap'

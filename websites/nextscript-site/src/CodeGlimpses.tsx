@@ -2,6 +2,7 @@ import { css, MICROCLASS_MERGE, provideRoot, Style } from 'luent'
 import { Code, CodeTour, TourSection } from '@luent/websites-shared'
 import { highlightCode } from './highlighter'
 import { twMerge } from 'tailwind-merge'
+import { FromTag } from 'packages/luent/dist'
 
 let direction = 'code-right'
 function flowDirection() {
@@ -19,6 +20,7 @@ export function CodeGlimpses() {
           mainCode={{ name: 'ns', code: accessorNS }}
           altCode={{ name: 'ts equivalent', code: accesorTS, lang: 'ts' }}
           highlightCode={highlightCode}
+          Note={AccessorVariables.Note}
         >
           {AccessorVariables()}
         </TourSection>
@@ -28,6 +30,7 @@ export function CodeGlimpses() {
           mainCode={{ name: 'nsx', code: derivationNSX }}
           altCode={{ name: 'tsx equivalent', code: derivationTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
+          Note={DerivationExpressions.Note}
         >
           {DerivationExpressions()}
         </TourSection>
@@ -104,11 +107,6 @@ export function CodeGlimpses() {
         .tour-copy p:last-child {
           margin-bottom: 0;
         }
-
-        .tour-copy .tour-note {
-          font-size: clamp(0.9rem, 0.95vw, 0.96rem);
-          margin-block: 1.4rem; 
-        }
       `)}
     </>
   )
@@ -122,10 +120,16 @@ function AccessorVariables() {
     <p>
       —scope-level, locally-bound, type-guard-aware counterpart to native accessor properties
     </p>
-    <p class='tour-note'>
+    <a href='/guide/accessor-syntax' class='medium brand'>Learn more</a>
+  </>
+}
+
+AccessorVariables.Note = (setup: FromTag<{ '...': 'p' }>) => {
+  const { ...rest } = setup
+  return <>
+    <p auto-bind={rest}>
       <strong>Note:</strong> Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's <code>ion()</code>.
     </p>
-    <a href='/guide/accessor-syntax' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -157,12 +161,14 @@ function DerivationExpressions() {
     <p>
       —derivation-first shorthand for derivational arrow function expressions
     </p>
-    <p class='tour-note'>
-      <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
-    </p>
     <a href='/guide/accessor-syntax#derivation-expressions' class='medium brand'>Learn more</a>
   </>
 }
+
+DerivationExpressions.Note = (setup: FromTag<{ '...': 'p' }>) =>
+  <p auto-bind={setup}>
+    <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
+  </p>
 
 const derivationNSX =
   `<button 
@@ -416,7 +422,7 @@ function TaggedTemplateStyles() {
   </>
 }
 
-const styleNSX = 
+const styleNSX =
   `<div style=\`
   z-index: \${(drag ? order(index) : 0)@};
   transform: \${(drag ? transform : undefined)@};
@@ -430,7 +436,7 @@ const styleNSX =
 </style>
 `
 
-const styleTSX = 
+const styleTSX =
   `<div style={css\`
   z-index: \${() => drag() ? order(index) : 0};
   transform: \${() => drag() ? transform() : undefined)@};
@@ -457,7 +463,7 @@ function TypeGuards() {
   </>
 }
 
-const typeguardNSX = 
+const typeguardNSX =
   `get user = ion(getUser())
 
 function logUsername() {
@@ -465,7 +471,7 @@ function logUsername() {
   log('username:' user.name)
 }`
 
-const typeguardTSX = 
+const typeguardTSX =
   `const user = ion(getUser())
 
 function logUsername() {

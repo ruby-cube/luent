@@ -1,4 +1,4 @@
-import { FromTag, WithRef, } from "luent"
+import { WithRef, } from "luent"
 
 
 function Label({

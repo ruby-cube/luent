@@ -1,4 +1,4 @@
-import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, queueTask, WithRef, awaitTick } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, awaitTick } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -166,7 +166,7 @@ export function Code(setup: FromTag<{
         .code-container .filename {
           font-family: var(--default-mono-font-family);
           font-size: 11.5px;
-          color: #6c6f78;
+          color: var(--vp-c-text-3);
           letter-spacing: .05em;
           margin-block: auto;
         }
@@ -275,7 +275,8 @@ export function CodeToggle(setup: FromTag<{
   tab: Ion<'main' | 'alt'> & { toggle(): void },
   main: string,
   alt: string
-}> & WithRef<'button'>) {
+  '...': 'button'
+}>) {
   const { $tab, main, alt, ...rest } = setup;
   let mainWidth = 0;
 
@@ -329,7 +330,9 @@ export function CodeToggle(setup: FromTag<{
         position: relative;
         border-radius: 1.5rem;
         z-index: 0;
-        background-color: var(--vp-c-bg);
+        // background-color: var(--vp-c-bg);
+        border: 1px solid var(--vp-c-divider);
+        background-color: var(--vp-input-switch-bg-color);
       }
 
       .code-toggle span {
@@ -338,7 +341,8 @@ export function CodeToggle(setup: FromTag<{
         border: 1px solid transparent;
         border-radius: 19.5px;
         background: transparent;
-        color: var(--vp-code-tab-text-color);
+        // color: var(--vp-code-tab-text-color);
+        color: var(--vp-c-text-2);
         font-size: 12px;
         font-weight: 500;
         line-height: 1.5em;

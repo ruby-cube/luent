@@ -115,10 +115,11 @@ function App() {
 }
 
 
-function Counter(setup: WithRef<'button'> & {
+function Counter(setup: FromTag<{
   count: Ion<number>
   increment: () => void
-}) {
+  '...': 'button'
+}>) {
   const { count@, increment, ...rest } = setup
 
   <div class='counter'>
@@ -143,9 +144,10 @@ function App() {
 }
 
 
-function Counter(setup: WithRef<'div'> & {
+function Counter(setup: {
   'xray:plus': Xray<'button'>;
   'xray:minus': Xray<'button'>;
+  '...': 'div'
 }) {
   const { xray, ...rest } = setup
 

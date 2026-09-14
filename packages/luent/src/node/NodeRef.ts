@@ -4,7 +4,6 @@ import { getActiveFlask } from "@luent/flask"
 import { AnyObject } from "@luent/types"
 import { ComponentTag } from "../component/Component"
 import { FromTag } from "packages/luent/dist"
-import { WithRef } from "../component/bindings-types"
 import { makeJSXNode } from "./makeJSXNode"
 
 
@@ -13,9 +12,9 @@ import { makeJSXNode } from "./makeJSXNode"
 * @param node 
 * @returns 
 */
-export function asJSX<T extends TagName | HTMLElement | ComponentTag>(node: T): T extends ComponentTag ? T : (setup: FromTag<{}> & WithRef<T extends HTMLElement ? T['tagName'] : T>) => JSX.Element { // FIX: fix type
+export function asJSX<T extends TagName | HTMLElement | ComponentTag>(node: T): T extends ComponentTag ? T : (setup: FromTag<{ '...': T extends HTMLElement ? T['tagName'] : T }>) => JSX.Element { // FIX: fix type
   if (typeof node === 'string') {
-    return ((setup: FromTag<{}> & WithRef<TagName>) => {
+    return ((setup: FromTag<{ '...': TagName }>) => {
       return makeJSXNode(node, setup.Slot, { 'auto-bind': setup })
     }) as any
   }

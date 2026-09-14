@@ -9,9 +9,10 @@ import { JSXComponentAs } from "@luent/nextscript";
 import type { ComponentKit } from "@luent/nextscript";
 import { composeHooks, composeRef, toSetup } from "./bindings";
 import { $from } from "../utils/destructure";
+import { RawJSXNode } from "packages/luent/dist";
 
 
-export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentKit<unknown> : (setup?: P) => ComponentKit<unknown>
+export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => RawJSXNode : (setup?: P) => RawJSXNode
 
 export const component = JSXComponentAs;
 

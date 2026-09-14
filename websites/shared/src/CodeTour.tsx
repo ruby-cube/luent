@@ -1,4 +1,4 @@
-import { css, FromTag, Ion, RenderTag, Style } from 'luent'
+import { ComponentTag, css, FromTag, Ion, RenderTag, Style } from 'luent'
 import { Code } from './Code';
 
 export function CodeTour(setup: FromTag<{
@@ -41,16 +41,17 @@ export function CodeTour(setup: FromTag<{
 }
 
 export function TourSection(setup: FromTag<{
-  tab: Ion<"main" | "alt"> & { toggle: () => void },
+  tab?: Ion<"main" | "alt"> & { toggle: () => void },
   id?: string,
-  filename: string,
+  filename?: string,
   Slot: RenderTag,
   mainCode: { name: string, code: string, lang?: string },
   altCode: { name: string, code: string, lang?: string },
   highlightCode: (code: string, lang: string) => Promise<string>,
-  flow: 'code-right' | 'code-left'
+  flow: 'code-right' | 'code-left',
+  Note?: ComponentTag
 }>) {
-  const { filename, Slot, flow, mainCode, altCode, highlightCode, id, $tab } = setup
+  const { filename = 'example', Slot, flow, mainCode, altCode, highlightCode, id, $tab, Note } = setup
   return (
     <>
       <article id={id} class={`tour-row ${flow}`}>
@@ -66,6 +67,7 @@ export function TourSection(setup: FromTag<{
             highlight={highlightCode}
             tab={$tab}
           ></Code>
+          {Note && <Note class='tour-note'/>}
         </div>
       </article>
 
@@ -117,6 +119,16 @@ export function TourSection(setup: FromTag<{
         // .tour-copy .tour-note {
         //   font-size: clamp(0.9rem, 0.95vw, 0.96rem);
         // }
+
+        .tour-note {
+          background-color: var(--vp-c-bg-soft);
+          padding: 1rem;
+          padding-inline: 1.5rem;
+          border-radius: 12px;
+          font-size: clamp(0.9rem, 0.95vw, 0.96rem);
+          margin-block: 1.4rem; 
+          color: var(--vp-c-text-2);
+        }
 
         @media (min-width: 960px) {
           .tour-row {
