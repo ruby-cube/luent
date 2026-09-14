@@ -4,10 +4,11 @@ import { highlightCode } from './highlighter'
 import { twMerge } from 'tailwind-merge'
 import { FromTag } from 'packages/luent/dist'
 
-let direction = 'code-right'
+// let direction = 'code-right'
 function flowDirection() {
-  if (direction === 'code-right') return direction = 'code-left'
-  return direction = 'code-right'
+  return 'code-left' as const
+  // if (direction === 'code-right') return direction = 'code-left'
+  // return direction = 'code-right'
 }
 
 export function CodeGlimpses() {
@@ -90,6 +91,10 @@ export function CodeGlimpses() {
       </CodeTour>
 
       {Style(css`
+        .tour-row {
+          grid-template-columns: minmax(240px, 1fr) minmax(0, 1fr) !important;
+        }
+
         .tour-copy h3 {
           margin-top: 0;
           margin-bottom: 0.75rem;
@@ -360,11 +365,11 @@ const fragmentNSX =
 const fragmentTSX =
   `function Counter() {
   const $count = ion(0);
-  <:>
+  return <>
     <button on:click={() => $count.value++}>
       {$count}
     </button>
-  </:>
+  </>
 }
 `
 
