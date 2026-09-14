@@ -21,6 +21,7 @@ export function CodeGlimpses() {
           altCode={{ name: 'ts equivalent', code: accesorTS, lang: 'ts' }}
           highlightCode={highlightCode}
           Note={AccessorVariables.Note}
+          filename={AccessorVariables.filename}
         >
           {AccessorVariables()}
         </TourSection>
@@ -31,6 +32,7 @@ export function CodeGlimpses() {
           altCode={{ name: 'tsx equivalent', code: derivationTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
           Note={DerivationExpressions.Note}
+          filename={DerivationExpressions.filename}
         >
           {DerivationExpressions()}
         </TourSection>
@@ -40,6 +42,7 @@ export function CodeGlimpses() {
           mainCode={{ name: 'nsx', code: fragmentNSX }}
           altCode={{ name: 'tsx equivalent', code: fragmentTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
+          filename={JSXFragmentReturn.filename}
         >
           {JSXFragmentReturn()}
         </TourSection>
@@ -49,6 +52,7 @@ export function CodeGlimpses() {
           mainCode={{ name: 'nsx', code: flowNSX }}
           altCode={{ name: 'tsx equivalent', code: flowTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
+          filename={FlowExpressions.filename}
         >
           {FlowExpressions()}
         </TourSection>
@@ -58,6 +62,7 @@ export function CodeGlimpses() {
           mainCode={{ name: 'nsx', code: gatewayFnNSX }}
           altCode={{ name: 'tsx equivalent', code: gatewayFnTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
+          filename={GatewayFunction.filename}
         >
           {GatewayFunction()}
         </TourSection>
@@ -67,15 +72,17 @@ export function CodeGlimpses() {
           mainCode={{ name: 'nsx', code: styleNSX }}
           altCode={{ name: 'tsx equivalent', code: styleTSX, lang: 'tsx' }}
           highlightCode={highlightCode}
+          filename={TaggedTemplateStyles.filename}
         >
           {TaggedTemplateStyles()}
         </TourSection>
 
         <TourSection
           flow={flowDirection()}
-          mainCode={{ name: 'nsx', code: typeguardNSX }}
-          altCode={{ name: 'tsx equivalent', code: typeguardTSX, lang: 'tsx' }}
+          mainCode={{ name: 'ns', code: typeguardNSX }}
+          altCode={{ name: 'ts equivalent', code: typeguardTSX, lang: 'ts' }}
           highlightCode={highlightCode}
+          filename={TypeGuards.filename}
         >
           {TypeGuards()}
         </TourSection>
@@ -133,6 +140,8 @@ AccessorVariables.Note = (setup: FromTag<{ '...': 'p' }>) => {
   </>
 }
 
+AccessorVariables.filename = 'Total'
+
 const accessorNS =
   `get count = ion(initial)
 get qty = ion(0, {
@@ -170,6 +179,8 @@ DerivationExpressions.Note = (setup: FromTag<{ '...': 'p' }>) =>
     <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
   </p>
 
+DerivationExpressions.filename = 'Counter'
+
 const derivationNSX =
   `<button 
   on:click={() => count++} 
@@ -202,6 +213,8 @@ function FlowExpressions() {
     <a href='/guide/jsx-syntax#jsx-flow-expressions' class='medium brand'>Learn more</a>
   </>
 }
+
+FlowExpressions.filename = 'Product'
 
 const flowNSX =
   `<section>
@@ -243,6 +256,8 @@ function GatewayFunction() {
     <a href='/guide/jsx-syntax#jsx-gateway-function' class='medium brand'>Learn more</a>
   </>
 }
+
+GatewayFunction.filename = 'Article'
 
 const gatewayFnNSX =
   `<article>
@@ -327,6 +342,8 @@ function JSXFragmentReturn() {
     <a href='/guide/jsx-syntax#jsx-fragment-return' class='medium brand'>Learn more</a>
   </>
 }
+
+JSXFragmentReturn.filename = 'Counter'
 
 
 const fragmentNSX =
@@ -422,6 +439,8 @@ function TaggedTemplateStyles() {
   </>
 }
 
+TaggedTemplateStyles.filename = 'Draggable'
+
 const styleNSX =
   `<div style=\`
   z-index: \${(drag ? order(index) : 0)@};
@@ -462,6 +481,8 @@ function TypeGuards() {
     <a href='/guide/accessor-syntax#type-guards' class='medium brand'>Learn more</a>
   </>
 }
+
+TypeGuards.filename = 'profile'
 
 const typeguardNSX =
   `get user = ion(getUser())
