@@ -178,6 +178,12 @@ export function CodeGlimpses() {
           max-width: 40ch;
         }
 
+        @media (max-width:900px) {
+          .tour-copy p {
+            max-width: 100%;
+          }
+        }
+
         .tour-copy p:not(.tour-note) {
           margin-bottom: 1.4rem;
           margin-top: .75rem;

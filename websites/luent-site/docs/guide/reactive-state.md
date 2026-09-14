@@ -1,18 +1,20 @@
 # Reactive State
 TODO: writable derivations
+
 Reactivity refers to the ability of state changes to trigger reactions, such as view updates. In Luent, ions are the fundamental units of reactivity. They are the building blocks of ionic compounds, which may take the form of compound ions, ionic objects, ionic collections, and ionic tasks.
 
 ## Ions
-Ions are state accessor functions whose state may be tracked for changes. When an ion's state changes, it triggers all reactions that track the ion. 
+Ions are state accessor functions whose state may be tracked for changes. When an ion's state changes, it triggers all reactions linked to the ion. 
 
 There are two main types of ions: atomic ions and compound ions.
 
 
 ### Atomic Ions
-Atomic ions are irreducible sources of reactivity. All atomic ions are writable, exposing a `value` property that may be [set to a new value](#writing-ion-state) to change the ion's state.
+Atomic ions are irreducible sources of reactivity. All atomic ions are writable, exposing a `value` property that may be [set to a new value](#writing-ion-state).
 
 #### Creating an atomic ion
-To create an atomic ion, pass its initial state to `ion()`. Note that functions represent derivations rather than state and therefore cannot be used as atomic ion state.
+To create an atomic ion, pass its initial state to `ion()`. 
+<!-- Note that functions represent derivations rather than state and therefore cannot be used as atomic ion state. -->
 ```tsx
 const $count = ion(0) // type: MutableIon<number>
 ```
@@ -83,7 +85,7 @@ To create an unmemoized compound ion, declare it as a simple arrow function expr
 const $username = () => user.name
 ```
 
-If `ion()` features are needed (to create, for example, a [settable compound ion]()), memoization may be disabled through the option flag `{ '-memoize': false }`.
+If other `ion()` features are needed (to create, for example, a [settable compound ion]()), memoization may be disabled through the option flag `{ '-memoize': false }`.
 ```ts
 const $username = ion(() => user.name, { 
   '-memoize': false,
@@ -96,7 +98,7 @@ const $username = ion(() => user.name, {
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ### Inline Derivations
-Inline derivations are compound ions created directly within another expression. They are typically unmemoized, created in the form of an arrow function expression. 
+Inline derivations are compound ions created directly within another expression. They are typically unmemoized, created in the form of a function expression. 
 
 ```tsx
 <button 
@@ -118,9 +120,7 @@ Memoized derivations may also be created inline, though assigning them to variab
 ## Reading ion state
 To access an ion's state, call the ion:
 ```tsx
-const count = $count()
-                  |
-                 call
+const count = $count();
 ```
 An ion's state may also be accessed through its `value` property (for example, `$count.value`). This is primarily useful for operators that both read and write state, such as the increment operator,`++`.
 
@@ -182,7 +182,7 @@ $count.value = 5 // TypeError: Property 'value' does not exist on type '() => nu
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ## Tracking ion state
-Ions may be tracked for state changes by reactive effects--functions that will run whenever the tracked state changes.
+Ions may be tracked for state changes and linked to reactions--functions that will run whenever the tracked state changes.
 
 ```tsx
 /* runs reaction whenever $count's state changes */
@@ -198,7 +198,7 @@ track(() => $count() > limit, () => {
   console.log('over the limit!')
 })
 ```
-By default, reactive effects run asynchronously from the state mutation. For in-depth guide phases and options, see: [Tracking Ions]()
+By default, reactions run asynchronously to the state mutation. For in-depth guide phases and options, see: [Tracking Ions]()
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 

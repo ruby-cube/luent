@@ -52,6 +52,7 @@ import { TestIfElseDisplayView } from "./src/TestIfElseDisplayView"
 import { TestNameEditor } from "./src/TestNameEditor"
 import { TestColorSort } from "./src/TestColorSort"
 import { TestStyleComments } from "./src/TestStyleComments"
+import { TestDynamicTag } from "./src/TestDynamicTag"
 // import { DayView } from "./src/TimelineApp/Timeline"
 
 export function runDemo() {
@@ -64,7 +65,7 @@ export function runDemo() {
       {/* <BottomlessBlokkis></BottomlessBlokkis> */}
       {/* <DayView/> */}
       {/* <TestStyleComments/> */}
-      <TestColorSort></TestColorSort>
+      {/* <TestColorSort></TestColorSort> */}
     </>
     // return <TestInnerHTML/>
   }, '#root')

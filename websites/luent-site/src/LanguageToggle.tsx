@@ -1,5 +1,5 @@
 import { $CodeTab, CodeToggle } from "@luent/websites-shared"
-import { css, ion, listen, NodeRef, Style, track } from "luent"
+import { css, Style, track } from "luent"
 
 export function LanguageToggle() {
   const $tab = $CodeTab()
@@ -11,7 +11,7 @@ export function LanguageToggle() {
     else {
       body.classList.remove('lang-mode-tsx')
     }
-  })
+  }, {eager: true})
 
   return <>
     {/* <o--body class={() => `language-${$lang}`} /> */}

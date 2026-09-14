@@ -1,9 +1,9 @@
 # Reactivity in depth
 
-Reactivity in Luent emerges from linking **reactions** to **ions** through the process of **tracking**. A tracked ion's mutations will then **trigger** any linked reactions, creating the illusion of reactivity.
+Reactivity in Luent emerges from linking **reactions** to **ions** through the process of **tracking**. A tracked ion's mutators **trigger** its linked reactions.
 
 :::info NOTE
-The following document contains pseudo-implementations for explanatory purposes. Actual implementation details would obscure the concepts being illustrated.
+The following document contains pseudo-implementations for explanatory purposes.
 :::
 
 ## Ions
@@ -93,7 +93,7 @@ function ionic(target) {
 ```
 
 ## Reactions
-Reactions are functions that run in reaction to state changes of ions tracked by the function.
+Reactions are functions that run in reaction to the state changes of the ions being tracked.
 
 ```ts
 track($count, () => { // runs whenever count changes

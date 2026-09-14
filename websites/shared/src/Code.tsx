@@ -65,7 +65,7 @@ export function Code(setup: FromTag<{
     <div class='code-container'>
       <nav ref={$nav}>
         {filename ?
-          <span class='filename'>{filename}.{() => $tab() === 'main' ? main.name : alt.name}</span>
+          <span class='filename'>{filename}.{() => $tab() === 'main' ? main.lang ?? main.name : alt.lang ?? alt.name}</span>
           : <span></span>
         }
         <CodeToggle tab={$tab} main={main.name} alt={alt.name} />

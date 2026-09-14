@@ -155,7 +155,7 @@ export function TourNav(setup: FromTag<{
         background: color-mix(in srgb, var(--vp-c-black) 94%, transparent);
       }
 
-      @media (max-width: 960px) {
+      @media (max-width: 900px) {
         .tour-nav {
           display: none;
         }

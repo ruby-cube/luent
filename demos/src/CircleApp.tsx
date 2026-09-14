@@ -1,4 +1,4 @@
-import { component, template, For, If, Style, css, $of } from "luent"
+import { For, If, Style, css, $of } from "luent"
 import { ion, Ionic, ionic } from "@luent/quarky"
 
 // Modified Demo from Vue.js

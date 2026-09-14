@@ -1,59 +1,14 @@
-# Interactive islands
+# Components
 
-Luent provides APIs to build interactive islands and mount them onto static HTML.
-
-## Mounting an island
-
-There are three main steps to mounting an island to the DOM:
-
-- define the island with a render function (a function that returns [JSX]())
-- mount it to a designated HTML element or custom tag
-- load the entry script in the HTML document
+Components are [render functions](/guide/rendering-views#view-templates) that may be instantiated through JSX tag syntax. A render function is a valid component only if it is defined with a single [setup parameter](#the-setup-parameter) or no parameters.
 
 
-**Designate an island container and load the entry script**
-```html
-<!-- index.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Hello World</title>
-</head>
-<body>
-  <hello-world></hello-world>
-  <script type="module" src="/main.tsx"></script>
-</body>
-</html>
-```
+<!-- 
 
-**Define and mount the island**
+that create a view. They are essentially view templates and serve as the building blocks of an island.
 
-```nsx
-// main.nsx
-mountIsland(() => {
-  <:>
-    <button on:click={logHello}>Hello, World.</button>
-  </:>
-}, "hello-world");
-```
-
-```tsx
-// main.tsx
-mountIsland(() => {
-  return <>
-    <button on:click={logHello}>Hello, World.</button>
-  </>
-}, "hello-world");
-```
-
-Island containers may be any native element or a custom tag. Custom tag names must contain a dash. Mount to the island container by either passing in a css selector or the DOM node.
-
-## Components
-
-Components are functions that create a view. They are essentially view templates and serve as the building blocks of an island.
-
-To define a component, declare a function that returns a view written in [JSX](#jsx) or [NSX]()*.
-
+To define a component, declare a function that returns a view written in [JSX](#jsx) or [NSX]()*. -->
+**Defining a component:**
 ```nsx
 // HelloWorld.nsx
 function HelloWorld() {
@@ -71,20 +26,21 @@ function HelloWorld() {
   </>
 }
 ```
-
+<!-- 
 ### Tag Syntax
 
-Components are instantiated through JSX tag syntax:
+Components are instantiated through JSX tag syntax: -->
+**Instantiating a component:**
 ```nsx
 <HelloWorld />
 ```
 ```tsx
 <HelloWorld />
 ```
-While technically, components with no parameters or slots may simply be invoked, e.g. `HelloWorld()`, the JSX syntax offers a consistent, readable way to instantiate components.
+<!-- While technically, components with no parameters or slots may simply be invoked, e.g. `HelloWorld()`, the JSX syntax offers a consistent, readable way to instantiate components. -->
 
 
-### Nesting Components
+## Nesting Components
 Similar to function calls, component tags may be nested within components.
 
 ```nsx
@@ -114,37 +70,10 @@ Component must not be `async` functions or return promises.
 To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
 :::
 
-### Stateful views
 
-In Luent, components, much like class constructors and factory functions, run once per view creation rather than per view update.
+## The setup parameter
 
-Components may set up reactive state to pass to its view. The reactive portions of the view are then granularly updated through fine-grained reactivity.
-
-```nsx
-function Counter() {
-  get count = ion(0)
-  <:>
-    <button on:click={()=> count++}>
-      {count@}
-    </button>
-  </:>
-}
-```
-
-```tsx
-function Counter() {
-  const $count = ion(0)
-  return <>
-    <button on:click={()=> $count.value++}>
-      {$count}
-    </button>
-  </>
-}
-```
-
-### The setup parameter
-
-Components may be configured through a setup parameter, whose type is defined via the `FromTag` type helper. The setup parameter is an object containing all the bindings declared on an instantiation tag.
+Components may be configured through a setup parameter, whose type is defined via the `FromTag` type helper. The setup parameter is an object containing all the bindings declared on the JSX tag.
 
 
 **Component setup function**
@@ -208,6 +137,32 @@ function MessageDisplay(setup: { // ❌ ... may cause type discrepancies
 ```
 :::
 To learn more about bindings see [Component Bindings](), [Node Access](), and [Mutable Bindings]()
+
+
+## Dynamic Tags
+<span class='doc-tag'>Experimental</span>
+
+Tags may be rendered dynamically with the `asJSX()`, which essentially normalizes its input, whether a tag name or component, into a component.
+
+```tsx
+function Article(setup: FromTag<{
+  headingTag?: 'h1' | 'h2' | 'h3',
+  heading: string,
+  text: string
+}>) {
+  const { headingTag = 'h1', heading, text } = setup; 
+  const Heading = asJSX(headingTag);
+
+  return <>
+    <article>
+      <Heading>{heading}</Heading>
+      <p>{text}</p>
+    </article>
+  </>
+}
+```
+
+Note that dynamic tags are not reactive. To render dynamic tags reactively, use in conjunction with [`As()`](/guide/view-control-flow.html#as-case).
 
 <!-- Instantiating views as components through JSX tag syntax enables features such as:
 - input normalization
@@ -459,57 +414,3 @@ function Dialog(setup: { Slot: RenderTag }) {
 }
 ``` -->
 
-## JSX transpilation
-
-JSX describes a component's view through HTML-like tags, which are transpiled to JavaScript.
-
-Luent transpiles JSX into basic `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It additionally extends the base JSX transform with three minimal transforms:
-
-- JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants.
-- [JSX flow expressions](/guide/view-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead.
-- JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories.
-
-```tsx
-<Parent foo={foo} bar={bar()} on:click={logClick}>
-  <Child />
-  {If(active, 
-    <div>Hello world! - {name}</div>
-  )}
-  {Else(
-    <div>😴zzzzzz</div>
-  )}
-</Parent>
-```
-
-:::info Transpiled
-
-```jsx
-jsx(Parent, {
-  foo: foo,
-  bar: bar(),
-  "on:click": logClick,
-  Slot: () => [
-    jsx(Child),
-    IfSeries(
-      If(active, () => [
-        jsx("div", { Slot: () => ["Hello world! - ", name] })
-      ]),
-      Else(() => [
-        jsx("div", { Slot: () => ["😴zzzzzz"] })
-      ]),
-    ),
-  ],
-});
-```
-
-:::
-
-<!-- #### Hyperscript
-
-Those who prefer non-build workflows, render functions may technically be written using `jsx()` hyperscript, though a thin ergonomic wrapper around the function would probably make for better authoring experience and readability.
-
-```ts
-function HelloWorld() {
-  return m("p", { Slot: "Hello world" });
-}
-``` -->

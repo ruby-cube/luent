@@ -1,8 +1,11 @@
 import { TagName } from "../element/setUpElement"
 import { toValue } from "@luent/quarky"
-import { getActiveFlask, getFlask } from "@luent/flask"
-import { AnyObject, Glass } from "@luent/types"
+import { getActiveFlask } from "@luent/flask"
+import { AnyObject } from "@luent/types"
 import { ComponentTag } from "../component/Component"
+import { FromTag } from "packages/luent/dist"
+import { WithRef } from "../component/bindings-types"
+import { makeJSXNode } from "./makeJSXNode"
 
 
 /**
@@ -10,13 +13,18 @@ import { ComponentTag } from "../component/Component"
 * @param node 
 * @returns 
 */
-export function asJSX<T>(node: T): (setup: {}) => JSX.Element { // FIX: fix type
+export function asJSX<T extends TagName | HTMLElement | ComponentTag>(node: T): T extends ComponentTag ? T : (setup: FromTag<{}> & WithRef<T extends HTMLElement ? T['tagName'] : T>) => JSX.Element { // FIX: fix type
+  if (typeof node === 'string') {
+    return ((setup: FromTag<{}> & WithRef<TagName>) => {
+      return makeJSXNode(node, setup.Slot, { 'auto-bind': setup })
+    }) as any
+  }
   return node as any
 }
 
 export const INTERNAL = Symbol('internal')
 
-export type RefSource = TagName | ComponentTag
+export type RefSource = TagName | string | ComponentTag
 
 export type NodeReferent<
   T extends RefSource = RefSource

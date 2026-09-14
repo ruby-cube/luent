@@ -87,7 +87,8 @@ export default defineConfig({
         {
           text: 'Essentials',
           items: [
-            { text: 'Interactive islands', link: '/guide/interactive-islands' },
+            { text: 'Rendering Views', link: '/guide/rendering-views' },
+            { text: 'Components', link: '/guide/components' },
             {
               text: 'Reactive State', link: '/guide/reactive-state', items: [
                 // { text: 'Atomic Reactive State', link: '/guide/getter-syntax#accessor-variables' },
