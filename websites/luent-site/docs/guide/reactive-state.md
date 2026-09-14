@@ -1,24 +1,31 @@
 # Reactive State
-TODO: writable derivations
 
-Reactivity refers to the ability of state changes to trigger reactions, such as view updates. In Luent, ions are the fundamental units of reactivity. They are the building blocks of ionic compounds, which may take the form of compound ions, ionic objects, ionic collections, and ionic tasks.
+Reactivity refers to the ability of state changes to trigger reactions, such as re-rendering parts of the view. In Luent, ions are the fundamental units of reactivity. They are the building blocks of ionic compounds, which may take the form of compound ions, ionic objects, ionic collections, and ionic tasks.
 
 ## Ions
 Ions are state accessor functions whose state may be tracked for changes. When an ion's state changes, it triggers all reactions linked to the ion. 
 
-There are two main types of ions: atomic ions and compound ions.
+There are two main types of ions: **atomic ions** and **compound ions**.
 
 
 ### Atomic Ions
-Atomic ions are irreducible sources of reactivity. All atomic ions are writable, exposing a `value` property that may be [set to a new value](#writing-ion-state).
+Atomic ions are irreducible sources of reactivity. Atomic ions are mutable, exposing a [writable](#writing-ion-state) `value` property.
 
-#### Creating an atomic ion
 To create an atomic ion, pass its initial state to `ion()`. 
 <!-- Note that functions represent derivations rather than state and therefore cannot be used as atomic ion state. -->
+```nsx
+get count = ion(0) // type: MutableIon<number>
+```
 ```tsx
 const $count = ion(0) // type: MutableIon<number>
 ```
 ::: info Type definitions
+```nsx
+interface MutableIon<T> {
+  (): T
+  value: T
+}
+```
 ```tsx
 interface MutableIon<T> {
   (): T
@@ -32,20 +39,26 @@ interface MutableIon<T> {
 ### Compound Ions
 Compound ions derive their state and reactivity from ions accessed within their derivation.
 
-#### Creating a compound ion
 To create a compound ion, pass a derivation function to `ion()`.
+```nsx
+get maxed = ion(() => $count() >= limit) // type: Ion<boolean>
+```
 ```tsx
 const $maxed = ion(() => $count() >= limit) // type: Ion<boolean>
 ```
 ::: info Type definitions
+```nsx
+interface Ion<T> {
+  (): T
+}
+```
 ```tsx
 interface Ion<T> {
   (): T
 }
 ```
 :::
-
-<br></br>
+<br>
 
 #### A note on derivations
 
@@ -65,7 +78,7 @@ Keep in mind, derivations are:
   ```tsx
   // example?
   ```
-<br></br>
+<br>
 
 #### Deriving from previous state
 The `ion()` function passes the previous state to derivations, which can be used to derive the next state. 
@@ -118,19 +131,40 @@ Memoized derivations may also be created inline, though assigning them to variab
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ## Reading ion state
-To access an ion's state, call the ion:
-```tsx
-const count = $count();
+To access an ion's state:
+```nsx
+console.log('The count is', count);
 ```
-An ion's state may also be accessed through its `value` property (for example, `$count.value`). This is primarily useful for operators that both read and write state, such as the increment operator,`++`.
+```tsx
+console.log('The count is', $count()); // call the ion
+```
+An ion's state may also be accessed through its `value` property. This is primarily useful for operators that both read and write state, such as the increment operator,`++`.
 
-For pure reads, accessing state through `.value` is discouraged because it is more verbose. Additionally, reserving the syntax `$state.value` for writes makes mutations easier to identify when reading code.
+```nsx
+console.log(count@.value++)
+```
+```tsx
+console.log($count.value++)
+```
+
+For pure reads, accessing state through `.value` is discouraged because it is more verbose. Additionally, reserving the syntax `ion.value` for writes makes mutations easier to spot within the code.
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ## Writing ion state
 To update an ion's state, set its `value` property:
 
+```nsx
+/* assignment */
+count@.value = 5
+
+/* compound assignment */
+count@.value += 2
+count@.value++
+
+/* destructuring assignment */
+[count@.value] = array
+```
 ```tsx
 /* assignment */
 $count.value = 5
@@ -178,6 +212,16 @@ $count.value = 5 // TypeError: Property 'value' does not exist on type '() => nu
 ```tsx
 <button on:click={() => $count.increment()}>+</button>
 ```
+<p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
+
+
+### Mutable compound ions
+
+:::info UNDER CONSTRUCTION
+This portion of the docs is under construction
+:::
+
+
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
@@ -198,21 +242,30 @@ track(() => $count() > limit, () => {
   console.log('over the limit!')
 })
 ```
-By default, reactions run asynchronously to the state mutation. For in-depth guide phases and options, see: [Tracking Ions]()
+
+By default, reactions run asynchronously to the state mutation. For in-depth guide on render cycle phases, see: [The Render Cycle](/guide/the-render-cycle)
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ## Rendering reactively
+
+Ions may also be tracked by the view. When the ion’s state changes, Luent updates the affected portion of the view.
+
+```nsx
+<div>{count@}</div>
+        |
+       pass in the ion
+```
 ```tsx
 <div>{$count}</div>
         |
-       passes in the ion
+       pass in the ion
 ```
 ::: info Transpiled
 (simplified for demonstration purposes)
 ```ts
 jsx('div', {
-  Slot: () => [$count] // passes in the ion
+  Slot: () => [$count] // pass in the ion
 })
 ```
 :::
@@ -230,16 +283,24 @@ track(ion, () => {
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ## Rendering statically
+An ion may be rendered statically by passing in its value rather than the ion itself.
+
+```nsx
+<div>initial count: {count}</div>
+                        |
+                    pass in the value
+```
+
 ```tsx
 <div>initial count: {$count()}</div>
                         |
-                    passes in the value
+                    pass in the value
 ```
 ::: info Transpiled
 (simplified for demonstration purposes)
 ```ts
 jsx('div', {
-  Slot: () => [$count()] // passes in the value
+  Slot: () => [$count()] // pass in the value
 })
 ```
 :::

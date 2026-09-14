@@ -2,7 +2,7 @@
 
 The render cycle coordinates when reactions and scheduled tasks run during an update.
 
-Render cycle phases give you predictable timing for:
+Render cycle phases provide predictable timing for:
 
 - data synchronization
 - DOM writes
@@ -32,16 +32,12 @@ In a typical application, most tasks and reactions are post-update work.
 
 ## The Sync Phase
 
-The sync phase runs synchronously after a reactive mutation. It is for data synchronization that cannot be expressed as a derivation, such as external data.
+The sync phase runs synchronously after a reactive mutation. It is designed for data synchronization that cannot be expressed as a derivation, such as external data.
 
 ```tsx
-track(
-  $selection,
-  () => {
-    editor.setSelection($selection());
-  },
-  { phase: SYNC },
-);
+track($selection, () => {
+  editor.setSelection($selection());
+}, { phase: SYNC });
 ```
 
 :::warning Use mindfully

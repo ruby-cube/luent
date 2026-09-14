@@ -136,6 +136,11 @@
   --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
 }
 
+:root:not(.dark) {
+  --vp-code-block-bg: hsl(161.83deg 0.36% 97.37%);
+  --vp-input-switch-bg-color: hsl(161.83deg 0.36% 93.37%);
+}
+
 .dark {
   --iris-1: #a59efa;
   --iris-2: #665af3;
@@ -148,6 +153,10 @@
   border-radius: 3rem !important;
   padding: 0 1.5rem !important;
   font-size: 16px !important;
+}
+
+.VPLocalNav {
+  border: none !important;
 }
 
 /* Slightly larger than VitePress default without being oversized. */
@@ -173,8 +182,8 @@
   }
 }
 
-.VPNav .divider {
-  display: none;
+.VPNav .divider-line {
+  background-color: var(--vp-c-divider) !important;
 }
 
 /* Home hero: render a code panel in the right column. */
@@ -184,15 +193,15 @@
 }
 
 /* .VPHomeHero .image-bg { */
-  /* position: absolute; */
-  /* background-image: var(--vp-home-hero-image-background-image); */
-  /* filter: var(--vp-home-hero-image-filter); */
-  /* background-size: 100% 50%; */
-  /* background-repeat: no-repeat; */
-  /* background-position: center top; */
-  /* width: 60vw; */
-  /* max-width: 850px; */
-  /* transform: translate(max(-30vw, -450px), -200px) rotate(-5deg); */
+/* position: absolute; */
+/* background-image: var(--vp-home-hero-image-background-image); */
+/* filter: var(--vp-home-hero-image-filter); */
+/* background-size: 100% 50%; */
+/* background-repeat: no-repeat; */
+/* background-position: center top; */
+/* width: 60vw; */
+/* max-width: 850px; */
+/* transform: translate(max(-30vw, -450px), -200px) rotate(-5deg); */
 /* } */
 
 .VPHomeHero .image-container {
@@ -217,6 +226,10 @@ html:not(.dark) .VPHomeFeatures .VPFeature .title {
   color: #fff;
 } */
 
+.VPSkipLink {
+  display: none !important;
+}
+
 #hero-code-panel-root {
   position: relative;
   width: 100%;
@@ -230,7 +243,7 @@ html:not(.dark) .VPHomeFeatures .VPFeature .title {
   width: 100%;
   height: 19rem;
   max-width: none;
-  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 24%, transparent);
+  border: 1px solid var(--vp-c-divider);
   border-radius: 16px 16px 0 0;
   background: var(--vp-code-block-bg);
   overflow: hidden;
@@ -359,14 +372,13 @@ html:not(.dark) .ns-hero-code__body {
   z-index: var(--vp-z-index-footer);
   border-top: none !important;
   padding: 32px 24px;
-  background-color: #161618 !important;
 }
 
 .VPFooter .message {
   color: #98989f !important;
 }
 
-  @media (min-width: 960px) {
+@media (min-width: 960px) {
   .VPHomeHero .image-container {
     width: min(560px, 70%) !important;
   }

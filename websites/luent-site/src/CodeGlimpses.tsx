@@ -223,7 +223,7 @@ function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
     <p style='text-wrap: balance'>
       Write components as render functions that run once to create a view. Views are composed using JSX and updated through fine-grained reactivity.
     </p>
-    <a href='/guide/interactive-islands.html#components' class='medium brand'>Learn more</a>
+    <a href='/guide/rendering-views' class='medium brand'>Learn more</a>
     {/* <p>
       Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
     </p> */}

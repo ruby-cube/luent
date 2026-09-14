@@ -20,11 +20,11 @@ features:
     details: Cleanly address type-safety gaps of accessor functions and JSX.
 ---
 
-  <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
+  <!-- <div class='ns-hero-code__header code-glimpse-divider' style='border-bottom: none; width: 5rem; margin-inline: auto'>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
     <span class='ns-hero-code__dot'></span>
-  </div>
+  </div> -->
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2>Preview</h2>
     <p style='text-wrap: balance'><strong>NextScript is in early development.</strong> Here's a glimpse of what's taking shape.</p>
@@ -87,11 +87,12 @@ p.custom-block.status-notice {
 .home-glimpses-heading {
   width: 100%;
   max-width: 1120px;
-  margin: 2.4rem auto 0;
+  margin: 5rem auto 0;
   scroll-margin-top: calc(var(--vp-nav-height) + 20px);
   /* margin: clamp(2.4rem, 5vw, 5rem) auto 0; */
-  padding: 0 clamp(0rem, 2vw, 0.4rem) clamp(1rem, 2vw, 1.8rem);
+  padding: 5rem clamp(0rem, 2vw, 0.4rem) clamp(1rem, 2vw, 1.8rem);
   text-align: center;
+  outline-color: transparent;
 }
 
 .home-glimpses-heading h2 {

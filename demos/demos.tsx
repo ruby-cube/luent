@@ -66,6 +66,7 @@ export function runDemo() {
       {/* <DayView/> */}
       {/* <TestStyleComments/> */}
       {/* <TestColorSort></TestColorSort> */}
+      <TooltipDemo/>
     </>
     // return <TestInnerHTML/>
   }, '#root')

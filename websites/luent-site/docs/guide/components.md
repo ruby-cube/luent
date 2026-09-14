@@ -65,7 +65,7 @@ function Layout() {
 ```
 
 :::info Note
-Component must not be `async` functions or return promises. 
+Components must not be `async` functions or return promises. 
 
 To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
 :::
@@ -76,7 +76,7 @@ To learn about async rendering and scheduling async tasks, see [Async Rendering]
 Components may be configured through a setup parameter, whose type is defined via the `FromTag` type helper. The setup parameter is an object containing all the bindings declared on the JSX tag.
 
 
-**Component setup function**
+**Component with setup parameter**
 
 ```nsx
 import type { FromTag } from 'luent';
@@ -103,7 +103,7 @@ function MessageDisplay(setup: FromTag<{
 }
 ```
 
-**Tag with binding**
+**Component tag with binding**
 
 ```nsx
 <MessageDisplay message={msg@} />

@@ -1,4 +1,4 @@
-import { component, FromTag, NodeRef, RenderTag } from "luent"
+import { FromTag, NodeRef, RenderTag } from "luent"
 import { TooltipContent, TooltipRoot, IonicTooltip, Alignment, Placement } from "@luent/luent-ui"
 
 export { TooltipKit } from "@luent/luent-ui"

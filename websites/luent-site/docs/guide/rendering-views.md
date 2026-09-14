@@ -18,30 +18,39 @@ Views are created through JSX syntax, HTML-like syntax that can interpolate Java
 
 ## View templates
 
-View templates are defined through render functions, functions that return a view.
+View templates are defined through render functions, functions that return a view. [Components](/guide/components) are view templates that may be instantiated through JSX tag syntax.
 
 ```nsx
-const renderView = () => 
-  <>
+function HelloWorld() {
+  <:>
     <h1>Hello World</h1>  
     <p>It is {new Date().toLocaleString()}</p>
-  </>
+  </:>
+}
 ```
 
 ```tsx
-const renderView = () => 
-  <>
+function HelloWorld() {
+  return <>
     <h1>Hello World</h1>  
     <p>It is {new Date().toLocaleString()}</p>
   </>
+}
+```
+**Component instantiation**
+```nsx
+<HelloWorld />
 ```
 
+```tsx
+<HelloWorld />
+```
 
 ## Stateful views
 
 In Luent, render functions, much like class constructors and factory functions, run once per view creation rather than per view update.
 
-Render functions may set up reactive state to pass to its view. The reactive portions of the view are then granularly updated through fine-grained reactivity.
+Render functions may set up reactive state to pass to its view. The reactive portions of the view are granularly updated through fine-grained reactivity. In the example below, only the text node rendering the count is re-rendered with each button click.
 
 ```nsx
 function Counter() {
@@ -69,7 +78,8 @@ function Counter() {
 
 <!-- In order for a view to be rendered to the screen, it must be mounted  -->
 
-When a view is mounted onto static HTML, it is considered an island.
+When a view is rendered and mounted onto static HTML at runtime, it is considered an island. Islands typically contain interactivity and shared context. 
+<!-- Islands may also be pre-rendered as static html during builds to prevent layout shift. -->
 
 There are three main steps to mounting an island:
 

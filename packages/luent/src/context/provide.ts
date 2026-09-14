@@ -1,7 +1,6 @@
 import { ContextNode, getClosestContext } from "./context-stack";
 import { NodeContext, RootContext, toContextEntries } from "./Context";
 import { ContextEntryKey, isMuKey, toContextKey } from "./ContextKey";
-import { assertMutableIon } from "../component/bindings-types";
 import { Ion, toIon } from "@luent/quarky";
 import { isFunction } from "@luent/utils";
 

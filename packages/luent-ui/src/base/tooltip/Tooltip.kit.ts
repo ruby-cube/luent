@@ -123,7 +123,7 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
             }
          }
 
-         const config = fromContext(TOOLTIP_CONFIG, '?')
+         const config = fromContext(TOOLTIP_CONFIG)
          const delay = config?.delay ?? /* options?.delay */ 0
          const hideDelay = config?.hideDelay ?? /* options?.hideDelay */ 0
          let closeTimeout: NodeJS.Timeout

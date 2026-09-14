@@ -14,8 +14,8 @@ Reactive objects are useful when related values belong together.
 
 ```tsx
 const cart = ionic({
-	label: 'Fruit Cart',
-	note: 'Keep it tiny'
+  label: 'Fruit Cart',
+  note: 'Keep it tiny'
 })
 ```
 
