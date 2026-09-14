@@ -129,7 +129,7 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
          let closeTimeout: NodeJS.Timeout
          if (delay) {
             let timeout: NodeJS.Timeout;
-            listen(node, 'pointerenter', () => {
+            listen(node, 'mouseenter', () => {
                if (closeTimeout) clearTimeout(closeTimeout)
                timeout = setTimeout(() => {
                   showTooltip()
@@ -137,15 +137,15 @@ function TooltipKit<I extends { [key: string]: any }>(options?: {
                }, delay)
             })
 
-            listen(node, 'pointerleave', () => {
+            listen(node, 'mouseleave', () => {
                if (timeout) {
                   clearTimeout(timeout)
                }
             })
          }
          else {
-            listen(node, 'pointerenter', showTooltip)
-            listen(node, 'pointerleave', hideTooltip)
+            listen(node, 'mouseenter', showTooltip)
+            listen(node, 'mouseleave', hideTooltip)
          }
       }
    }

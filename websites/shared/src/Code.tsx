@@ -255,6 +255,7 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
                 setTooltipTrigger[key](node)
               }
               else {
+                // Timing is tricky on first load :(
                 awaiting($code, () => {
                   awaitTick(() => {
                     setTooltipTrigger[key](document.querySelector(`[data-hover-id="${key}"]`)!)
