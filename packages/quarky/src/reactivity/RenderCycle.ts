@@ -1,3 +1,4 @@
+import { $_run_with_, $_snap_context, $_wrap_with_context } from "@luent/flask";
 import { Reactions } from "./Atom";
 import { Reaction } from "./Reaction";
 import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, Update } from "./Update";
@@ -465,7 +466,8 @@ export function queueLayout(task: Task) {
 }
 
 export function awaitTick(task: Task) {
+  const _task = $_wrap_with_context(task)
   requestAnimationFrame(() => {
-    queueTask(task)
+    queueTask(_task)
   })
 }

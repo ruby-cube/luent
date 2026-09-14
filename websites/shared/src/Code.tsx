@@ -2,6 +2,7 @@ import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef,
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
+import { $_run_with_, $_snap_context } from "@luent/flask";
 
 // TODO: Fix hacky SSG solutions
 
@@ -248,13 +249,13 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
             container: $container
           })
           afterAttach(() => {
-            // requestAnimationFrame(() => {
+            awaitTick(() => {
               for (const key in hoverMap) {
                 const node = document.querySelector(`[data-hover-id="${key}"]`) as HTMLElement
                 if (node)
                   setTooltipTrigger[key](node)
               }
-            // })
+            })
           })
           return <>
             <HoverInfo tooltip={tooltip} place="above" align="start">
