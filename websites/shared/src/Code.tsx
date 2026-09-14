@@ -1,4 +1,4 @@
-import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, awaitTick } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, awaitTick, queueTask } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -248,11 +248,13 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
             container: $container
           })
           afterAttach(() => {
-            for (const key in hoverMap) {
-              const node = document.querySelector(`[data-hover-id="${key}"]`) as HTMLElement
-              if (node)
-                setTooltipTrigger[key](node)
-            }
+            // requestAnimationFrame(() => {
+              for (const key in hoverMap) {
+                const node = document.querySelector(`[data-hover-id="${key}"]`) as HTMLElement
+                if (node)
+                  setTooltipTrigger[key](node)
+              }
+            // })
           })
           return <>
             <HoverInfo tooltip={tooltip} place="above" align="start">
