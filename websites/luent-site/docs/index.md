@@ -57,17 +57,9 @@ features:
   </div> -->
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2 class='section-heading'>Code Tour</h2>
-    <!-- <p style='text-wrap: balance'>
-    <strong>Luent is in early development.</strong>
-    </p> -->
-    <!-- <p style='text-wrap: balance'><small>Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
-</small></p> -->
   </section>
   <p class='nextscript-note' style='text-wrap: balance'>
-  <!-- Luent applications are currently written in TypeScript + JSX (.tsx). An optional, experimental language extension, NextScript (.ns/.nsx) is in the works. Get a glimpse of its syntax through the language toggle in code examples.
-
-  <!-- NextScript (.ns/.nsx) is an optional language extension of TypeScript + JSX designed . It is currently in preview, not yet ready for use. -->
-  <strong>Note:</strong> NextScript (.ns/.nsx) is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
+    <strong>Note:</strong> NextScript (.ns/.nsx) is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
   </p>
 
 
