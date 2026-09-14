@@ -238,8 +238,10 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
   })
   const $container = NodeRef('div')
 
+  const delay = useDelay()
+
   return <>
-    <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
+    <o:context provide={TOOLTIP_CONFIG({ delay, hideDelay: delay })}>
       <div ref={$container} class='code'>{{ html: $code, trusted }}</div>
       {Await($code, <>
         {If(tab.hover, () => {
@@ -395,4 +397,28 @@ export function CodeToggle(setup: FromTag<{
       } 
     `)}
   </>
+}
+
+function detectTouchscreen() {
+  let hasTouch = false;
+
+  if (window.PointerEvent && ('maxTouchPoints' in navigator)) {
+    if (navigator.maxTouchPoints > 0) {
+      hasTouch = true;
+    }
+  } else {
+    if (window.matchMedia && window.matchMedia('(any-pointer: coarse)').matches) {
+      hasTouch = true;
+    } else if (window.TouchEvent || ('ontouchstart' in window)) {
+      hasTouch = true;
+    }
+  }
+
+  return hasTouch;
+}
+
+function useDelay() {
+  const touchscreen = detectTouchscreen();
+  if (touchscreen) return 0;
+  return 500
 }
