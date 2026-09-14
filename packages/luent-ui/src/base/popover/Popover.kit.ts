@@ -1,4 +1,4 @@
-import { autoUpdate, computePosition } from "@floating-ui/dom"
+import { autoUpdate, computePosition, offset, type Placement as FloatingPlacement } from "@floating-ui/dom"
 import { beforeUnmount, NodeRef, awaiting, toValue, queueLayout } from "luent"
 
 export type Placement = 'above' | 'below' | 'left' | 'right'
@@ -17,7 +17,7 @@ export class Popover {
     public configuredPlacement: Placement, // TODO: alignment
     public alignment: Alignment,
     public gap: number,
-    public container: (() => HTMLElement | undefined) | string | HTMLElement | undefined
+    public container: (() => HTMLElement) | string | HTMLElement
   ) {
   }
 
@@ -93,6 +93,62 @@ export function maybeFlip(node: HTMLElement, popover: Popover) {
 
 export const DATA_ATTRIBUTE_POPOVER = 'data-popover-anchor'
 
+const hasAnchorPositioningSupport =
+  typeof CSS !== 'undefined'
+  && CSS.supports('position-anchor: --popover-anchor')
+  && CSS.supports('top: anchor(bottom)')
+
+function toPopoverPlacement(popover: Popover): FloatingPlacement {
+  const sideByPlacement: Record<Placement, 'top' | 'bottom' | 'left' | 'right'> = {
+    above: 'top',
+    below: 'bottom',
+    left: 'left',
+    right: 'right',
+  }
+  const side = sideByPlacement[popover.placement]
+
+  return (popover.alignment === 'center' ? side : `${side}-${popover.alignment}`) as FloatingPlacement
+}
+
+function getGapInPixels(popover: Popover) {
+  const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+  return popover.gap * rootSize
+}
+
+function getAnchorNode(popover: Popover) {
+  return document.querySelector(`[${DATA_ATTRIBUTE_POPOVER}='${popover.anchorName}']`) as HTMLElement | null
+}
+
+/**
+ * Polyfills CSS anchor positioning in browsers (Safari) without `position-anchor` support.
+ */
+export function positionPopover(node: HTMLElement, popover: Popover) {
+  if (hasAnchorPositioningSupport) {
+    return;
+  }
+
+  const anchor = getAnchorNode(popover)
+  if (!anchor) {
+    return;
+  }
+
+  const placePopover = () => {
+    awaiting(
+      computePosition(anchor, node, {
+        placement: toPopoverPlacement(popover),
+        middleware: [offset(getGapInPixels(popover))],
+      }),
+      ({ x, y }) => {
+        node.style.left = `${x}px`
+        node.style.top = `${y}px`
+      }
+    )
+  }
+
+  const cleanup = autoUpdate(anchor, node, placePopover)
+  beforeUnmount(cleanup)
+}
+
 /**
  * centers tail with anchor
  * 
@@ -101,7 +157,7 @@ export const DATA_ATTRIBUTE_POPOVER = 'data-popover-anchor'
  * @returns 
  */
 export function positionTail(node: HTMLElement, popover: Popover, $popover: NodeRef<'div'>) {
-  const anchor = document.querySelector(`[${DATA_ATTRIBUTE_POPOVER}='${popover.anchorName}']`)
+  const anchor = getAnchorNode(popover)
   if (!anchor) return;
 
   let visibility: string | null = null

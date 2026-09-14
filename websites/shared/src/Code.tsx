@@ -240,25 +240,28 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
   return <>
     <o:context provide={TOOLTIP_CONFIG({ delay: 500, hideDelay: 500 })}>
       <div ref={$container} class='code'>{{ html: $code, trusted }}</div>
-      {If(tab.hover, () => {
-        const hoverMap = removeDollarSigns(tab.hover!)
-        const { tooltip, setTooltipTrigger } = TooltipKit({
-          info: hoverMap,
-          container: $container
-        })
-        afterAttach(() => {
-          for (const key in hoverMap) {
-            const node = document.querySelector(`[data-hover-id="${key}"]`) as HTMLElement
-            if (node)
-              setTooltipTrigger[key](node)
-          }
-        })
-        return <>
-          <HoverInfo tooltip={tooltip} place="above" align="start">
-            <span>{() => tooltip.info}</span>
-          </HoverInfo>
-        </>
-      })}
+      {Await($code, <>
+        {If(tab.hover, () => {
+          const hoverMap = removeDollarSigns(tab.hover!)
+          const { tooltip, setTooltipTrigger } = TooltipKit({
+            info: hoverMap,
+            container: $container
+          })
+          afterAttach(() => {
+            for (const key in hoverMap) {
+              const node = document.querySelector(`[data-hover-id="${key}"]`) as HTMLElement
+              if (node)
+                setTooltipTrigger[key](node)
+            }
+          })
+          return <>
+            <HoverInfo tooltip={tooltip} place="above" align="start">
+              <span>{() => tooltip.info}</span>
+            </HoverInfo>
+          </>
+        })}
+      </>
+      )}
     </o:context>
   </>
 }
