@@ -249,13 +249,13 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
             container: $container
           })
           afterAttach(() => {
-            awaitTick(() => {
+            // awaitTick(() => {
               for (const key in hoverMap) {
                 const node = document.querySelector(`[data-hover-id="${key}"]`) as HTMLElement
                 if (node)
                   setTooltipTrigger[key](node)
               }
-            })
+            // })
           })
           return <>
             <HoverInfo tooltip={tooltip} place="above" align="start">
