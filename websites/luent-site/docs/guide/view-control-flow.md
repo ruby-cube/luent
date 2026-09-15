@@ -69,7 +69,7 @@ There are two main ways of rendering static iterative views:
 
 **with `For` and `Thru`**
 
-When passed a non-reactive iterable, `For()` and `Thru()` render items statically, meaning the collection are rendered once and not updated when the collection changes.
+When passed a non-reactive iterable, `For()` and `Thru()` render items statically, meaning the list is rendered once and will not be updated when the iterable is mutated.
 
 ```tsx
 function FruitList() {
@@ -100,7 +100,7 @@ Static lists may also be rendered through a JavaScript array's `map` method.
 `For()` can also render collections reactively when passed either an ion or an ionic iterable.
 
 ### `For` unique items
-To render collections based on item identity, pass a identity accessor function as the second argument of `For()`. The identity accessor receives the item as its argument and can either return the item itself (if items are unique objects or strings) or a unique ID. 
+To render collections based on item identity, pass an identity accessor function as the second argument of `For()`. The identity accessor receives the item as its argument and can either return the item itself (if items are unique objects or strings) or a unique ID. 
 
 The third argument is a render function that receives an item and an index ion, meaning it will render a view where the item is stable and the index may change.
 
@@ -168,7 +168,7 @@ function Log() {
 ```
 
 ### `Thru` count
-Like, `For()` `Thru()` may be rendered reactively or statically based on the reactivity of its first argument.
+Like `For()`, `Thru()` may be rendered reactively or statically based on the reactivity of its first argument.
 
 When passed a number or number ion, `Thru()` renders a range from 1 up to a count.
 

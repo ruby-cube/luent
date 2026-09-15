@@ -243,7 +243,7 @@ track(() => $count() > limit, () => {
 })
 ```
 
-By default, reactions run asynchronously to the state mutation. For in-depth guide on render cycle phases, see: [The Render Cycle](/guide/the-render-cycle)
+By default, reactions run asynchronously to the state mutation. For the in-depth guide on render cycle phases, see: [The Render Cycle](/guide/the-render-cycle)
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 

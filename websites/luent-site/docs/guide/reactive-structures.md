@@ -43,7 +43,7 @@ These docs are still being written. To see an example of nested reactivity, see 
 
 
 ## Ionized Structures
-Ionic structures wrapped in an ion are referred to as ionized structures. `ionize(x)` is shorthand for ion(ionic(x)), while `Ionized<T>` is shorthand for `Ion<Ionic<T>>`
+Ionic structures wrapped in an ion are referred to as ionized structures. `ionize(x)` is shorthand for `ion(ionic(x))`, while `Ionized<T>` is shorthand for `Ion<Ionic<T>>`
 
 ```tsx
 get todos = ionize([] fulfils Todo[], {

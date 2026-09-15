@@ -1,6 +1,6 @@
 # Reactivity in depth
 
-Reactivity in Luent emerges from linking **reactions** to **ions** through the process of **tracking**. A tracked ion's mutators **trigger** its linked reactions.
+Reactivity in Luent emerges from linking **reactions** to **ions** through the process of **tracking**. A tracked ion's mutators will **trigger** its linked reactions.
 
 :::info NOTE
 The following document contains pseudo-implementations for explanatory purposes.
