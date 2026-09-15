@@ -1,6 +1,6 @@
 # Rendering views
 
-Views are created through JSX syntax, HTML-like syntax that can interpolate JavaScript.
+Views are created through [JSX syntax](#jsx-transpilation), HTML-like syntax that can interpolate JavaScript.
 
 ```nsx
 <>

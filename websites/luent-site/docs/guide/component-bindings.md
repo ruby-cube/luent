@@ -105,13 +105,14 @@ Auto-bind handles collisions according to binding type. Event handlers and lifec
 ```tsx
 function App() {
   get count = ion(0)
-  
-  <Counter 
-   count={count} 
-   increment={() => count++} 
-   style='color: red'
-   on:click={() => console.log('counter clicked')}
-  />
+  return <>
+    <Counter 
+    count={count} 
+    increment={() => count++} 
+    style='color: red'
+    on:click={() => console.log('counter clicked')}
+    />
+  </>
 }
 
 
@@ -121,10 +122,11 @@ function Counter(setup: FromTag<{
   '...': 'button'
 }>) {
   const { count@, increment, ...rest } = setup
-
-  <div class='counter'>
-   <button on:click={increment} auto-bind={rest}>+</button>
-  </div>
+  return <>
+    <div class='counter'>
+      <button on:click={increment} auto-bind={rest}>+</button>
+    </div>
+  </>
 }
 ```
 
@@ -136,11 +138,12 @@ function Counter(setup: FromTag<{
 To offer even more flexibility in bindings, a component may specify multiple nodes for a parent to bind additional data, methods, attributes or events to.
 ```tsx
 function App() {
-
-  <Counter 
-   xray:plus={x => <x.button on:click={logIncrement} />
-	  xray:minus={x => <x.button on:click={logDecrement} />
-  />
+  return <>
+    <Counter 
+      xray:plus={x => <x.button on:click={logIncrement} />
+      xray:minus={x => <x.button on:click={logDecrement} />
+    />
+  </>
 }
 
 
@@ -152,14 +155,16 @@ function Counter(setup: {
   const { xray, ...rest } = setup
 
   const count = ion(0, {
-   increment() { count++ },
-   decrement() { count-- }
+    increment() { count++ },
+    decrement() { count-- }
   })
 
-  <div class='counter' auto-bind={rest}>
-   <button on:click={count.increment} auto-bind={xray.plus}>+</button>
-   <button on:click={count.decrement} auto-bind={xray.minus}>-</button>
-  </div>
+  return <>
+    <div class='counter' auto-bind={rest}>
+      <button on:click={count.increment} auto-bind={xray.plus}>+</button>
+      <button on:click={count.decrement} auto-bind={xray.minus}>-</button>
+    </div>
+  </>
 }
 ```
 

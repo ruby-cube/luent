@@ -1,10 +1,15 @@
 # Mutation Safety
 <span class='doc-tag'>WIP</span><span class='doc-tag'>Experimental</span>
 
-By default, element and component bindings in the receiving scope are deeply read-only, enforced through compile-time mutation safety checks. This keeps mutation local to the state owner and prevents accidental non-local mutations which can cause unpredictable behavior that is difficult to debug.
 
-There is, however, good reason to mutate non-locally, given that direct mutation is the simplest, most ergonomic and performant way to synchronize state across component or element boundaries. For this, Luent provides explicit mutable bindings that are statically traceable so that non-local mutations may be performed in a safer manner.
 
+By default, element and component bindings in the receiving scope are deeply read-only, enforced through compile-time mutation safety checks†. This keeps mutation local to the state owner and prevents accidental non-local mutations which can cause unpredictable behavior that is difficult to debug.
+
+There is, however, good reason to mutate non-locally, given that direct mutation is the most ergonomic and performant way to synchronize state across component or element boundaries. For this, Luent provides explicit mutable bindings that are statically traceable so that non-local mutations may be performed in a safer manner.
+
+:::warning † NOT YET AVAILABLE
+Mutation safety checking is currently under development and not yet ready to use. This documentation serves as a preview of the feature and as a guide to using mutability annotations, which may be beneficial even without enforcement.
+:::
 
 ## Local mutation
 
@@ -13,7 +18,7 @@ Local mutation is encouraged as it preserves pure local reasoning of state chang
 // child
 function IncrementButton(setup: FromTag<{
   count: Ion<number>;
-  increment: () => void;
+  increment: () => void; // callback
 }>) {
   const { $count, increment } = setup;
 
@@ -24,10 +29,18 @@ function IncrementButton(setup: FromTag<{
 ```
 ```tsx
 // parent
-<IncrementButton 
-  count={$count}
-  increment={() => $count.increment()} 
-/>
+function Counter() {
+  const $count = ion(0, {
+    increment() { this.value++ }
+  })
+
+  return <>
+    <IncrementButton 
+      count={$count}
+      increment={() => $count.increment()}
+    />
+  </>
+}
 ```
 
 ...or through event bindings:
@@ -35,7 +48,7 @@ function IncrementButton(setup: FromTag<{
 // child
 function IncrementButton(setup: FromTag<{
   count: Ion<number>;
-  onClick: (e: MouseEvent) => void;
+  onClick: (e: MouseEvent) => void; // event
 }>) {
   const { $count, onClick } = setup;
 
@@ -47,28 +60,36 @@ function IncrementButton(setup: FromTag<{
 
 ```tsx
 // parent
-<IncrementButton 
-  count={$count}
-  onClick={() => $count.increment()} 
-/>
+function Counter() {
+  const $count = ion(0, {
+    increment() { this.value++ }
+  })
+
+  return <>
+    <IncrementButton 
+      count={$count}
+      onClick={() => $count.increment()} 
+    />
+  </>
+}
 ```
 
-This keeps mutations visible to the component who owns the state.
+This keeps mutations visible to the component who owns the state—`Counter` in the example above.
 
 
 ## Non-local mutation
 
-Indirect mutation can sometimes become unwieldy, especially when requests for mutations are deeply nested and iterative. When the complexity of indirect mutation outweighs the benefit of pure local reasoning, non-local mutation becomes the better choice.
+Indirect mutation can sometimes become unwieldy, especially when requests for mutations are deeply nested and iterative. When the complexity of indirect mutation outweighs the benefit of pure local reasoning, non-local mutation may be preferable.
 
-Mutability annotations at binding site tell the compiler to allow non-local mutation while making it explicit to the owner scope. This way, mutations are statically traceable and state changes can still be reasoned about despite non-local mutations.
+Mutability annotations at binding sites tell the compiler to allow non-local mutation while making it explicit to the owner scope. This way, mutations are statically traceable and state changes can still be reasoned about.
 
 ### Mutability annotations
 <!-- - `mu:` indicates that deep property assignments and method calls may be performed through the binding
 - `m:` indicates that deep method calls (but no property assignments) may be performed through the binding
 - no annotation indicates that no property assignments or method calls are performed through the binding -->
-- **`mu:`**: deep property assignments and method calls may be performed
-- **`m:`**: deep method calls (but no property assignments) may be performed
-- **no annotation**: no property assignments or method calls may be performed
+- **`mu:`**: deep property assignments and method calls allowed
+- **`m:`**: deep method calls (but no property assignments) allowed
+- **no annotation**: no property assignments or method calls allowed
 
 Mutability annotations may be used on select element bindings:
 ```tsx
@@ -93,7 +114,7 @@ This forms a two-way binding where the input element is permitted to mutate the 
 <input mu:value={$newTodo} />
 ```
 
-Compare with the one-way binding implementation:
+Compare with the more verbose one-way binding implementation:
 
 ```tsx
 <input value={$newTodo} on:input={e => $newTodo.value = e.target.value} />
@@ -114,7 +135,7 @@ Angular: `[(attribute)]`
 Components define mutable bindings through the type annotation of its setup parameter.
 
 
-Method-call enabled binding
+**Method-call enabled binding**
 ```tsx
 function Counter(setup: FromTag<{
   'm:count': Ion<number> & {
@@ -130,7 +151,7 @@ function Counter(setup: FromTag<{
 }
 ```
 
-Mutable binding
+**Mutable binding**
 ```tsx
 function Counter(setup: FromTag<{
   'mu:count': MutableIon<number>
@@ -143,12 +164,14 @@ function Counter(setup: FromTag<{
   </:>
 }
 ```
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-#### Capability, not guarantee
+## More on mutability annotations
+
+### Capability, not guarantee
 Note that in the providing scope, mutability annotations indicate the *possibility* of mutation, not guaranteed mutation. 
 
-
-#### Method calls
+### All methods are suspect
 The mutation safety compiler does not distinguish between accessor methods and mutator methods. All nested non-local methods are considered potential mutators and must be annotated with `m:` or `mu:` in order to be called.
 
 ```tsx
@@ -179,7 +202,7 @@ function Counter(setup: FromTag<{
 }
 ```
 
-#### Constrained permissions
+### Constrained permissions
 In the receiving scope, mutability annotations tell the mutation safety compiler to allow mutations and method calls for the annotated binding. They do not override TypeScript `readonly` modifiers or runtime mutation blockers, such as `Object.freeze()`.
 
 In this example, the TypeScript compiler prevents the mutation of count despite the mutability annotation.
@@ -219,10 +242,10 @@ function Counter(setup: FromTag<{
 
 
 
-#### Deep mutability
-- nested properties
+### Deep mutability
+<!-- - nested properties
 - nested through function calls
-- mutable callback bindings
+- mutable callback bindings -->
 
 Mutability annotations enable nested property assignments and method calls. Mutability is propagated across reassignments and destructuring in addition to normal property access.
 
@@ -248,7 +271,7 @@ function NameEditor(setup: FromTag<{
 }
 ```
 
-#### Local permissions
+### Local permissions
 
 Mutation capabilities enabled by mutability annotations are confined to local boundaries. In order to propagate mutation capabilities to a nested scope, mutability must be marked again at the nested boundary.
 
@@ -266,86 +289,12 @@ function Foo(setup: FromTag<{
 
 ```
 
-Conversely, if a nested component requires a mutability annotation on a non-local object, t
+<!-- Conversely, if a nested component requires a mutability annotation on a non-local object, t -->
 
 This creates a trail of mutability annotation breadcrumbs from the state-owner scope down to the mutating scope.
 
 
 
 
-
-
-
-
-
-//-------------
-
-In `Counter`, `count` may only be mutated if accessed as a property or nested property of the `mu` object.
-
-```tsx
-function App() {
-  get count = ion(0, {
-    increment() { count++ },
-    decrement() { count-- },
-  })
-
-  <:>
-    <Counter mu:count={count@} />
-  </:>
-}
-```
-
-```tsx
-function Counter(setup: FromTag<{
-  'mu:count': Ion<number> & {
-    increment: () => void;
-  };
-}>) {
-  const { mu, count@ } = setup;
-
-  <:>
-    {count@}
-    <button on:click={e=> mu(count@).value++}>+</button>
-  </:>
-}
-```
-
-
-
-<span class='doc-tag'>WIP</span><span class='doc-tag'>Experimental</span>
-
-The `mu` linter assumes methods passed to a component is a mutating method, or a write method, unless it is explicitly typed with a final `ƒ: read` parameter.
-
-The linter will disallow `count.isNegative()` here:
-
-```tsx
-function NegativeNotification(setup: FromTag<{
-  count: Ion<number> & {
-    isNegative: () => boolean; // assumed to be mutating
-  };
-}>) {
-  const { $count } = setup
-
-  <:>
-    <div>{count.isNegative() ? '😕' : '🙂'}</div>
-  <:>
-}
-```
-
-`count.isNegative()` is OK here:
-
-```tsx
-function NegativeNotification(setup: FromTag<{
-  count: Ion<number> & {
-    isNegative: () => boolean; // assumed to be mutating
-  };
-}>) {
-  const { $count } = setup
-
-  <:>
-    <div>{count.isNegative() ? '😕' : '🙂'}</div>
-  <:>
-}
-```
 
 

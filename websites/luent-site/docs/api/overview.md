@@ -90,7 +90,7 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 ## Node access
 - `expose()` to expose a component instance
 - `NodeRef()` to create a node accessor
-- `asJSX()` <span class='doc-tag'>Experimental</span> for declaring bindings on existing DOM nodes and/or rendering pre-created DOM nodes. Also used for rendering a dynamic tag.
+- `asJSX()` <span class='doc-tag'>Experimental</span> for declaring bindings on existing DOM nodes and/or rendering pre-created DOM nodes
 <!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering

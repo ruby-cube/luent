@@ -234,10 +234,9 @@ FunctionalComponents.$tab = $CodeTab()
 FunctionalComponents.filename = 'main'
 FunctionalComponents.tsx =
   `function EmojiCollection(setup: FromTag<{
-  limit: number;
-  getEmoji: () => string
+  limit?: number;
 }>) {
-  const { limit, getEmoji } = setup;
+  const { limit = 9 } = setup;
 
   const emojis = ionic(['🍀', '🍄', '✨'])
 
@@ -266,10 +265,9 @@ mountIsland(EmojiCollection, '#app')
 
 FunctionalComponents.nsx =
   `function EmojiCollection(setup: FromTag<{
-  limit: number;
-  getEmoji: () => string
+  limit?: number;
 }>) {
-  const { limit, getEmoji } = setup;
+  const { limit = 9 } = setup;
 
   const emojis = ionic(['🍀', '🍄', '✨'])
 
@@ -302,7 +300,7 @@ UnifiedReactivity.$tab = FunctionalComponents.$tab
 function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
-      Manage simple, derived, async, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
+      Manage simple, derived, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
     <p style='text-wrap: balance'>
       {If(() => $tab() === 'main',
@@ -334,7 +332,7 @@ get qty = ion(1, {
 get total = ion(() => count * qty);
 
 // async
-get posts = ion([], { '-fetch': fetchRecentPosts });
+get posts = ion(fetchRecentPosts);
 
 // structured
 const menu = ionic(['apples', 'peaches', 'pears']);
@@ -358,7 +356,7 @@ const $qty = ion(1, {
 const $total = ion(() => $count() * $qty());
 
 // async
-const $posts = ion([], { '-fetch': fetchRecentPosts });
+const $posts = ion(fetchRecentPosts);
 
 // structured
 const menu = ionic(['apples', 'peaches', 'pears']);

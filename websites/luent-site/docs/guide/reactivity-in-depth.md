@@ -47,14 +47,14 @@ function ion(initialState) {
   };
 
   const get = () => {
-    trackMe(_ion);
+    emitTrack(_ion);
     return _ion.state;
   };
 
   return Object.defineProperty(get, "value", {
     get,
     set: (value) => {
-      trigger(_ion);
+      emitTrigger(_ion);
       _ion.state = value;
     },
   });
@@ -80,12 +80,12 @@ position.x = 5; // set x
 function ionic(target) {
   return new Proxy(target, {
     get(target, key) {
-      trackMe(asIon(target, key));
+      emitTrack(asIon(target, key));
       return target[key];
     },
     set(target, key, value) {
       target[key] = value;
-      trigger(asIon(target, key));
+      emitTrigger(asIon(target, key));
       return true;
     },
   });
@@ -103,12 +103,7 @@ track($count, () => { // runs whenever count changes
 
 ### Tracking
 
-In order to track ions, 
-
-
-
-
-Linking ions to reactions may seem straightforward in the above example. However, consider 
+Reactions are able to track nested ions through implicit dependency tracking of trackable accessors.
 
 ```ts
 const $doubled = ion(() => $count() * 2)
@@ -117,8 +112,6 @@ track($doubled, () => {
   console.log("count x 2 is", $doubled());
 });
 ```
-
-Reactions are able to track nested ions through implicit dependency tracking.
 
 Trackable accessors are accessors that emit one or more "track me" signals originating from atomic ions when accessed. A compound ion will emit nested signals.
 
@@ -141,7 +134,7 @@ function trackSignals(target, reaction) {
   tracker = null;
 }
 
-function trackMe(ion) {
+function emitTrack(ion) {
   ion.reactions.push(tracker);
 }
 ```
@@ -151,10 +144,12 @@ function trackMe(ion) {
 Once tracked, any associated mutations will trigger the reaction.
 
 ```tsx
-function trigger(ion) {
+function emitTrigger(ion) {
   ion.reactions.forEach(react => react());
 }
 ```
+
+### Reactive bond
 
 The relationships created by tracking an ion may be visualized as follows:
 
@@ -184,7 +179,7 @@ track:
    └─ triggering mutator(s)
 ```
 
-### Terminology
+<!-- ### Terminology
 
 Because these concepts are closely linked, the terms "track" and "trigger" are often used across different parts of the reactive pipeline.
 
@@ -196,7 +191,7 @@ Reactions track ions and ionic compounds, but we could also say reactions track:
 Mutations trigger reactions, but we could also say mutations trigger:
 
 - ions
-- ionic compounds
+- ionic compounds -->
 
 ## Beyond getters and setters
 
@@ -220,13 +215,13 @@ Conceptually, this may be thought of as:
 class IonicSet extends Set {
   // ...
   has(item) {
-    trackMe(asIon(this, "has"));
+    emitTrack(asIon(this, "has"));
     return super.has(item);
   }
 
   add(item) {
-    trigger(asIon(this, "has"));
-    trigger(asIon(this, "[[get]] size"));
+    emitTrigger(asIon(this, "has"));
+    emitTrigger(asIon(this, "[[get]] size"));
     return super.add(item);
   }
   // ...

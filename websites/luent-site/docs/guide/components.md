@@ -1,6 +1,8 @@
 # Components
 
-Components are [render functions](/guide/rendering-views#view-templates) that may be instantiated through JSX tag syntax. A render function is a valid component only if it is defined with a single [setup parameter](#the-setup-parameter) or no parameters.
+Components are [render functions](/guide/rendering-views#view-templates) that may be instantiated through JSX tag syntax. A render function is a valid component only if it is:
+- defined with a single [setup parameter](#the-setup-parameter) or no parameters
+- Pascal-cased
 
 
 <!-- 
@@ -116,7 +118,8 @@ It is important to use the `FromTag` type helper to define the setup object as i
 
 :::danger Omitting `FromTag` ...
 ```nsx
-function MessageDisplay(setup: { // ❌ ... may cause type discrepancies
+// ❌ ... may cause type discrepancies
+function MessageDisplay(setup: {
   message: Ion<string>
 }) {
   const { message } = setup
@@ -126,7 +129,8 @@ function MessageDisplay(setup: { // ❌ ... may cause type discrepancies
 }
 ```
 ```tsx
-function MessageDisplay(setup: { // ❌ ... may cause type discrepancies
+// ❌ ... may cause type discrepancies
+function MessageDisplay(setup: {
   message: Ion<string>
 }) {
   const { message } = setup
@@ -139,19 +143,17 @@ function MessageDisplay(setup: { // ❌ ... may cause type discrepancies
 To learn more about bindings see [Component Bindings](), [Node Access](), and [Mutable Bindings]()
 
 
-## Dynamic Tags
-<span class='doc-tag'>Experimental</span>
+## Dynamic tags
 
-Tags may be rendered dynamically with the `asJSX()`, which essentially normalizes its input, whether a tag name or component, into a component.
+Similar to components, HTML elements may be rendered dynamically by binding the tag name to a Pascal-cased variable.
 
 ```tsx
 function Article(setup: FromTag<{
-  headingTag?: 'h1' | 'h2' | 'h3',
+  Heading?: 'h1' | 'h2' | 'h3' | ComponentTag,
   heading: string,
   text: string
 }>) {
-  const { headingTag = 'h1', heading, text } = setup; 
-  const Heading = asJSX(headingTag);
+  const { Heading = 'h1', heading, text } = setup; 
 
   return <>
     <article>
