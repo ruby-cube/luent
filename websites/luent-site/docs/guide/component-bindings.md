@@ -1,25 +1,21 @@
 # Component Bindings
 
-## Style Composition
-## Data
-## Scoped Styles
+Components may be configured by adding bindings to the component tag.
 
-## From Tag
+```tsx
+<Counter limit={100} />
+```
 
-These bindings include:
-
-- ions
+There are five main types of component bindings:
+- data
+- actions
 - events
-- styles
-- attributes
-- slots
-- lifecycle hooks
-- namespaced bindings
-- callbacks
+- views
+- forwarded
 
-#### Input Validation
-Defaults
+For information on type validation of bindings, optional bindings, and default values, see [The Setup Parameter](/guide/components#the-setup-parameter)
 
+<!-- 
 ### Data and Method Binding
 ```tsx
 function App() {
@@ -34,66 +30,293 @@ function App() {
 function Counter(setup: FromTag<{
    count: Ion<number>
    increment: () => void
+   getEmoji: () => string
 }>) {
-   const { count@, increment } = setup
+   const { count@, increment, getEmoji } = setup
 
    <:>
       <button on:click={increment}>+</button>
    </:>
 }
+``` -->
+
+## Data
+Data bindings provide a component with data. The bindings may be static or reactive.
+
+### Static bindings
+```tsx
+function Counter(setup: FromTag<{
+   limit: number
+}>) {
+   const { limit } = setup
+
+   const $count = ion(0)
+
+   return <>
+      <button 
+        on:click={() => $count.value++ } 
+        disabled={() => $count() === limit}
+      >
+        {$count}
+      </button>
+   </>
+}
 ```
 
+```tsx
+<Counter limit={100} />
+```
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 
+### Reactive bindings
 
-### Event Binding
-Note: Component events are auto-typed as optional.
+A setup binding is designated as potentially reactive by typing it with the `Ion` type helper. 
+
+Reactive bindings are merely potentially reactive because reactivity is ultimately determined by what the consumer of the component passes in. The component itself normalizes the binding to an accessor through the `$` (prefix or `@` postfix in NextScript) and treats it as potentially reactive. 
+
+Ion normalization allows flexibility for the consumer while preserving simplicity in the component.
+
+```tsx
+function Counter(setup: FromTag<{
+   limit: Ion<number>
+}>) {
+   const { $limit } = setup
+
+   const $count = ion(0)
+
+   return <>
+      <button 
+        on:click={() => $count.value++ }
+        disabled={() => $count() >= $limit()}
+      >
+        {$count}
+      </button>
+   </>
+}
+```
+
+**Passing in a reactive ion**
+```tsx
+<Counter limit={$limit} />
+```
+
+**Passing in a static value**
+```tsx
+<Counter limit={100} />
+```
+
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+### Nested reactivity
+Static and reactive bindings may contain nested reactivity through ionic structures.
+
 ```tsx
 function App() {
-   
-   <Counter 
-      limit={Math.floor(Math.random() * 50)} 
-      onLimitReached={e => console.log('limit reached:', e.limit)}
-   />
+  const list = ionic(['apple', 'peach', 'pear'])
+  return <>
+    <List items={list} />
+    <button on:click={() => list.push(randomFruit())}>
+      add
+    </button>
+  </>
 }
+```
+```tsx
+function List(setup: FromTag<{
+  items: Ionic<string[]>
+}>) {
+  const { items } = setup
+  return <>
+    <ul>
+      {For(items, $item => 
+        <li>{$item}</li>
+      )}
+    </ul>
+  </>
+}
+```
+<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
+### Mutable bindings
+By default, component bindings are deeply read-only, enforced at compile time*. However mutable bindings may be marked as mutable through mutability annotations. To learn more see [Mutation Safety](/guide/mutation-safety).
+
+:::warning * NOT YET AVAILABLE
+Mutation safety checking is currently under development and not yet ready to use. However, mutability annotations may be beneficial regardless of mutation safety enforcement.
+:::
+
+## Actions
+Action bindings provide components with a callback that implements an action.
+
+```tsx
+function Counter(setup: FromTag<{
+  count: Ion<number>
+  increment: () => void // action binding
+}>) {
+  const { $count, increment } = setup;
+  return <>
+    <button on:click={increment}>{$count}</button>
+  </>
+}
+```
+
+```tsx
+<Counter 
+  count={$count} 
+  increment={() => $count.value++}
+/>
+
+```
+
+## Events
+Event bindings allow components to emit events and allow consumers to register event handlers on the component. They must be named according to the pattern <code>on<i>[Event]</i></code>.
+
+Component event bindings are essentially action bindings that are auto-typed as optional, renamed from <code>on<i>[Event]</i></code> to <code>emit<i>[Event]</i></code>, and auto-default to a no-op function.
+
+```tsx
+function App() {
+  return <>
+    <Counter 
+        limit={Math.floor(Math.random() * 50)} 
+        onLimitReached={e => console.log('limit reached:', e.limit)}
+    />
+  </>
+}
 
 function Counter(setup: FromTag<{
-   start?: number
-   limit: number
-   onLimitReached: HandleEvent<{ limit: number }>
+  start?: number
+  limit: number
+  onLimitReached: HandleEvent<{ limit: number }>
 }>) {
-   const { start = 0, limit, onLimitReached } = setup
+  const { start = 0, limit, emitLimitReached } = setup
 
-   get count = ion(0, {
-      increment() { count++ }
-   })
+  get count = ion(0, {
+    increment() { count++ }
+  })
 
-   function increment() {
-      if (count > limit) return;
-      count@.increment();
-      if (count === limit) {
-         onLimitReached?.({ limit })
-      }
-   }
+  function increment() {
+    if (count > limit) return;
+    count@.increment();
+    if (count === limit) {
+        emitLimitReached({ limit })
+    }
+  }
    
-   <button on:click={increment}>+</button>
+  <:>
+    <button on:click={increment} disabled={() => count === limit}>+</button>
+  </:>
 }
 ```
-## Event Bubbling
 
 
-### Slots
+## Views
+
+View bindings are essentially components passed into a component.
+
+### The `Slot` component
+A component must explicitly declare a `Slot` component in order to allow slot contents.
+
 ```tsx
+function Card(setup: FromTag<{
+  Slot: Component
+}>) {
+  const { Slot } = setup;
+  return <>
+    <div class='card'>
+      <Slot/>
+    </div>
+  </>
+}
+```
+The JSX compiler transforms slot contents into the `Slot` component.
+```tsx
+<Card>
+  <h2>{heading}</h2>
+  <p>{description}</p>
+</Card>
+```
+:::info transpiled
+```tsx
+jsx(Card, {
+  Slot: () => [
+    jsx('h2', { Slot: () => [heading] }),
+    jsx('p', { Slot: () => [description] })
+  ]
+})
+```
+:::
+
+
+### Named views
+Slot components do not receive any parameters. To render a component that receives setup bindings or to render multiple components, declare named view bindings. 
+
+Named view bindings must be Pascale-cased in order to be instantiated through JSX syntax.
+
+```tsx
+function ClubsCard(setup: FromTag<{
+  Heading: Component<{ symbol: string }>
+  Description: Component
+}>) {
+  const { Heading, Description } = setup;
+  return <>
+    <div class='card'>
+      <Heading symbol='♣' />
+      <hr/>
+      <Description />
+    </div>
+  </>
+}
 ```
 
-### Slot Parameters
 ```tsx
+<ClubsCard
+  Heading={({ symbol }) =>
+    <h2>{symbol} {heading}</h2>}
+  Description={
+    <p>{description}</p>}
+></Card>
 ```
 
-### Named Slots
+The JSX compiler normalizes the value of view bindings to render functions.
+
+:::info transpiled
 ```tsx
+jsx(ClubsCard, {
+  Heading: ({ symbol }) => 
+    jsx('h2', { Slot: () => [symbol, heading] }),
+  Description: () => [
+    jsx('p', { Slot: () => [description] })
+  ]
+})
 ```
+:::
+
+:::details CODE SWITCH
+Vue: Named slots
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- These bindings include:
+
+- ions
+- events
+- styles
+- attributes
+- slots
+- lifecycle hooks
+- namespaced bindings
+- callbacks -->
 
 
 ## Forwarded Bindings

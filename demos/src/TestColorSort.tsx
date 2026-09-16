@@ -219,13 +219,13 @@ function ColorPalette(setup: FromTag<{
   </>
 }
 
-const Gap = (setup: FromTag) =>
+const Gap = (setup: FromTag<{ '...': 'button' }>) =>
   <>
     <button
       class='clickable gap'
       auto-bind={setup}
     >
-      {Arrow()}
+      <Arrow />
     </button>
 
     {Style(css`
@@ -253,7 +253,9 @@ const Gap = (setup: FromTag) =>
   </>
 
 
-const Endgap = (setup: FromTag<{ '...': 'button' }>) =>
+const Endgap = (setup: FromTag<{
+  '...': 'button'
+}>) =>
   <>
     <button
       class='clickable gap endgap'
@@ -397,7 +399,7 @@ function DraggableKit<T>(config: {
         $shiftY.value = 0;
         onDrop(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
-        queueTask(() => $dragging.value = false);
+        queueTask(() => { $dragging.value = false });
         target.removeEventListener('pointermove', drag)
       }
       target.removeEventListener('pointermove', rePointermove)

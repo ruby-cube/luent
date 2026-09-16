@@ -218,13 +218,9 @@ queueTask(() => {
 `track()` defaults to running reactions in the tick phase. To schedule the reaction for a different phase, pass in the phase option with one of the provided constants: `SYNC`, `PRELUDE`, `RENDER`, `LAYOUT`.
 
 ```tsx
-track(
-  $documents,
-  () => {
-    searchIndex.update($documents());
-  },
-  { phase: PRELUDE },
-);
+track($documents, () => {
+  searchIndex.update($documents())
+}, { phase: PRELUDE })
 ```
 
 ## Scheduling Ionic Tasks

@@ -242,8 +242,8 @@ FunctionalComponents.tsx =
 
   return <>
     <ul class='collection'>
-      {For(emojis, emoji =>
-        <Chip>{emoji}</Chip>
+      {For(emojis, $emoji =>
+        <Chip>{$emoji}</Chip>
       )}
     </ul>
     <button
@@ -273,8 +273,8 @@ FunctionalComponents.nsx =
 
   <:>
     <ul class='collection'>
-      {For(emojis, emoji :>
-        <Chip>{emoji}</Chip>
+      {For(emojis, emoji@ :>
+        <Chip>{emoji@}</Chip>
       )}
     </ul>
     <button
@@ -384,8 +384,8 @@ TypeExplicit.nsHover = {
   total_1: 'get total: Ion<number>',
   qty: 'get qty: Ion<number>',
   list: 'const list: Ionic<List>',
-  item: '(parameter) item: Item',
-  item_1: '(parameter) item: Item',
+  item: '(@ parameter) item: Ion<Item>',
+  item_1: '(@ parameter) item: Ion<Item>',
 }
 // [
 //   ['count', 'const count: number'],
@@ -403,8 +403,8 @@ TypeExplicit.tsHover = {
   '$total_1': 'const $total: Ion<number>',
   '$qty': 'const $qty: Ion<number>',
   list: 'const list: Ionic<List>',
-  item: '(parameter) item: Item',
-  item_1: '(parameter) item: Item',
+  item: '(parameter) $item: Ion<Item>',
+  item_1: '(parameter) $item: Ion<Item>',
 }
 TypeExplicit.filename = 'examples'
 TypeExplicit.nsx =
@@ -415,8 +415,8 @@ get total = ion(() => count * qty);
 // ---
 
 <:>
-  {For(list, item :> 
-    <li>{item}</li>
+  {For(list, item@ :> 
+    <li>{item@}</li>
   )}
   <div>{total@}</div>
 </:>
@@ -431,8 +431,8 @@ const $total = ion(() => count * $qty())
 // ---
 
 return <>
-  {For(list, item => 
-    <li>{item}</li>
+  {For(list, $item => 
+    <li>{$item}</li>
   )}
   <div>{$total}</div>
 </>
@@ -644,8 +644,9 @@ MutationSafety.heading = 'Mutation safety'
 function MutationSafety() {
   return <>
     <p>
-      Compile-time mutation checking prevent hidden nonlocal mutations, while explicit mutable bindings enable safe, statically traceable cross-boundary mutations.
+      Compile-time mutation checking* prevent hidden nonlocal mutations, while explicit mutable bindings enable safe, statically traceable cross-boundary mutations.
     </p>
+    <p><small>* currently in development, not yet available</small></p>
     <a href='/guide/mutation-safety' class='medium brand'>Learn more</a>
   </>
 }
@@ -795,26 +796,38 @@ ContextBindings.heading = 'Context bindings'
 function ContextBindings() {
   return <>
     <p>
-      Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Provide from the root of an application locally with <code>{'<o--root>'}</code> or from reusable kits with <code>provideRoot()</code>. Merge context keys to provide the same binding across multiple decoupled components.
+      Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Merge context keys to provide the same binding across multiple decoupled components.
     </p>
     <a href='/guide/contextual-bindings' class='medium brand'>Learn more</a>
   </>
 }
+// Provide from the root of an application locally with <code>{'<o--root>'}</code> or from reusable kits with <code>provideRoot()</code>. 
 
 ContextBindings.filename = 'App'
 
 ContextBindings.nsx =
-  `const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
+  `import { Sidebar, type Theme } from './Sidebar';
+import { Main } from './Main';
 
-<o:context provide={[THEME(theme@), SETTINGS(settings)]}>
-  <Main/>
-  <Sidebar/>
-</o:context>
+const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
+const SETTINGS = mergeKeys(Main.SETTINGS, Sidebar.SETTINGS)
 
-//--
+function App() {
+  get theme = ion('dark' as Theme);
+  const settings = new Settings();
+  <:>
+    <o:context provide={[THEME(theme@), SETTINGS(settings)]}>
+      <Main/>
+      <Sidebar/>
+    </o:context>
+  </:>
+}
 
-Sidebar.THEME = ContextKey<Ion<Theme>>('theme')
-Sidebar.SETTINGS = ContextKey<Settings>('settings')
+// --
+// Sidebar.tsx
+
+const THEME = Sidebar.THEME = ContextKey<Ion<Theme>>()
+const SETTINGS = Sidebar.SETTINGS = ContextKey<Settings>()
 
 export function Sidebar() {
   get theme = fromContext(THEME)@;
@@ -825,17 +838,28 @@ export function Sidebar() {
 `
 
 ContextBindings.tsx =
-  `const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
+  `import { Sidebar, type Theme } from './Sidebar';
+import { Main } from './Main';
 
-<o:context provide={[THEME($theme), SETTINGS(settings)]}>
-  <Main/>
-  <Sidebar/>
-</o:context>
+const THEME = mergeKeys(Main.THEME, Sidebar.THEME)
+const SETTINGS = mergeKeys(Main.SETTINGS, Sidebar.SETTINGS)
 
-//--
+function App() {
+  const $theme = ion('dark' as Theme);
+  const settings = new Settings();
+  return <>
+    <o:context provide={[THEME($theme), SETTINGS(settings)]}>
+      <Main/>
+      <Sidebar/>
+    </o:context>
+  </>
+}
 
-Sidebar.THEME = ContextKey<Ion<Theme>>('theme')
-Sidebar.SETTINGS = ContextKey<Settings>('settings')
+// --
+// Sidebar.tsx
+
+const THEME = Sidebar.THEME = ContextKey<Ion<Theme>>()
+const SETTINGS = Sidebar.SETTINGS = ContextKey<Settings>()
 
 export function Sidebar() {
   const $theme = $fromContext(THEME);

@@ -75,8 +75,7 @@ To learn about async rendering and scheduling async tasks, see [Async Rendering]
 
 ## The setup parameter
 
-Components may be configured through a setup parameter, whose type is defined via the `FromTag` type helper. The setup parameter is an object containing all the bindings declared on the JSX tag.
-
+Components may be configured through a setup parameter, whose type is annotated using the `FromTag` utility type. The setup parameter is an object containing all the bindings declared on the JSX tag.
 
 **Component with setup parameter**
 
@@ -140,10 +139,91 @@ function MessageDisplay(setup: {
 }
 ```
 :::
-To learn more about bindings see [Component Bindings](), [Node Access](), and [Mutable Bindings]()
+To learn more about bindings see [Component Bindings]().
 
 
-## Dynamic tags
+### Type Validation
+The `FromTag` type utility provides type validation for the component tag based on the object type passed into `FromTag`.
+
+```tsx
+// ❌ Type 'number' is not assignable to type 'string | Ion<string>'
+<MessageDisplay message={9} />
+```
+
+
+### Ion Normalization
+A binding typed with `Ion<T>` may receive an input that is either `T` or `Ion<T>`. This allows the component consumer to decide whether a binding should be reactive or not. The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NextScript) and treats it as potentially reactive.
+
+```tsx
+function MessageDisplay(setup: FromTag<{
+  message: Ion<string>
+}>) {
+  const { $message } = setup;
+
+  track($message, () => {
+    console.log('The message changed!')
+  })
+
+  return <>
+    <p>{$message}</p>
+  </>
+}
+```
+
+### Optional setup bindings
+Components can make a setup binding optional by typing it as optional in the `FromTag` object.
+
+```tsx
+function Counter(setup: FromTag<{
+   limit?: number
+}>) {
+   const { limit } = setup;
+
+   const $count = ion(0)
+
+   return <>
+      <button 
+        on:click={() => $count.value++ }
+        disabled={limit ? () => $count() === limit : undefined}
+      >
+        {$count}
+      </button>
+   </>
+}
+```
+```tsx
+<Counter />
+```
+
+
+### Setup defaults
+
+Components may provide a default value for a setup binding by typing it as optional and providing a default value during destructuring.
+
+```tsx
+function Counter(setup: FromTag<{
+   limit?: number
+}>) {
+   const { limit = 100 } = setup;
+
+   const $count = ion(0)
+
+   return <>
+      <button 
+        on:click={() => $count.value++ }
+        disabled={() => $count() === limit}
+      >
+        {$count}
+      </button>
+   </>
+}
+```
+```tsx
+<Counter />
+```
+
+
+### Dynamic tags
 
 Similar to components, HTML elements may be rendered dynamically by binding the tag name to a Pascal-cased variable.
 
@@ -165,6 +245,8 @@ function Article(setup: FromTag<{
 ```
 
 Note that dynamic tags are not reactive. To render dynamic tags reactively, use in conjunction with [`As()`](/guide/view-control-flow.html#as-case).
+
+
 
 <!-- Instantiating views as components through JSX tag syntax enables features such as:
 - input normalization

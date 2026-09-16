@@ -38,7 +38,7 @@ export type TagBindings<D> =
   & TagDOMEvents<D>
   & TagEvents<D>
   & TagSlot<D>
-  // & TagNamedSlots<D>
+// & TagNamedSlots<D>
 // TODO: MaybeMutable<D> mu?:x
 
 // PlainInput<D>
@@ -58,10 +58,14 @@ type Attributes<D> = {
   K extends 'Slot' | `on:${string}` | `mu:${string}` | `...` ? never
   : K extends `on${infer Head}${string}` ? Head extends Uppercase<Head> ? never : K
   : K]:
-  D[K] extends Ion<infer S>
+  IsIon<D[K]> extends true
+  ? D[K] extends Ion<infer S>
   ? S | D[K]
-  : D[K] extends Ion<infer S> | undefined
+  : IsIon<D[K]> extends true
+  ? D[K] extends Ion<infer S> | undefined
   ? S | D[K]
+  : D[K]
+  : D[K]
   : D[K]
 }
 
@@ -120,10 +124,10 @@ type Styles = {
 
 type WithMu<D> = HasMu<D> extends true ? {
   mu: {
-    [K in keyof D as K extends `mu:${infer N}` ? N : K extends `mu?:${infer M}` ? M : never]: D[K] extends Ion<infer V> ? V : D[K]
+    [K in keyof D as K extends `mu:${infer N}` ? N : K extends `mu?:${infer M}` ? M : never]: IsIon<D[K]> extends true ? D[K] extends Ion<infer V> ? V : D[K] : D[K]
   } & {
     // ion access
-    [K in keyof D as K extends `mu:${infer N}` ? D[K] extends Ion<any> ? `$${N}` : K extends `mu?:${infer M}` ? D[K] extends Ion<any> ? `$${M}` : never : never : never]: D[K] extends Ion<infer V> ? D[K] & { value: V } : never
+    [K in keyof D as K extends `mu:${infer N}` ? IsIon<D[K]> extends true ? D[K] extends Ion<any> ? `$${N}` : K extends `mu?:${infer M}` ? IsIon<D[K]> extends true ? D[K] extends Ion<any> ? `$${M}` : never : never : never : never : never]: IsIon<D[K]> extends true ? D[K] extends Ion<infer V> ? D[K] & { value: V } : never : never
   }
 } : {}
 
@@ -136,7 +140,10 @@ type PlainInput<D> = {
 
 export type RenderTag<T = undefined> = T extends undefined ? () => RawJSXNode : (setup: FromTag<T>) => RawJSXNode
 
-type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, Primitive> extends Ion ? true : false
+type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : IsIon<Exclude<T, Primitive>>
+
+
+type IsIon<T> = "~ion" extends keyof T ? true : false
 
 type ReadonlyIonInput<D> = {
   [K in keyof D

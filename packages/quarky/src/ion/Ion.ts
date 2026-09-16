@@ -10,7 +10,7 @@ import { Ionic, ionic } from "../ionic/Ionic";
 /* API */
 export interface Ion<T = unknown> {
    (): T
-   '~accessor'?: true
+   '~ion'?: true
 }
 
 // type MaybeInert<T = unknown> = IsIonic<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T

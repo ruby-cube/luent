@@ -3,9 +3,9 @@
 
 
 
-By default, element and component bindings in the receiving scope are deeply read-only, enforced through compile-time mutation safety checks†. This keeps mutation local to the state owner and prevents accidental non-local mutations which can cause unpredictable behavior that is difficult to debug.
+By default, element and component bindings in the receiving scope are deeply read-only, enforced through compile-time mutation safety checks†. This keeps mutation local to the state owner and prevents accidental nonlocal mutations which can cause unpredictable behavior that is difficult to debug.
 
-There is, however, good reason to mutate non-locally, given that direct mutation is the most ergonomic and performant way to synchronize state across component or element boundaries. For this, Luent provides explicit mutable bindings that are statically traceable so that non-local mutations may be performed in a safer manner.
+There is, however, good reason to mutate non-locally, given that direct mutation is the most ergonomic and performant way to synchronize state across component or element boundaries. For this, Luent provides explicit mutable bindings that are statically traceable so that nonlocal mutations may be performed in a safer manner.
 
 :::warning † NOT YET AVAILABLE
 Mutation safety checking is currently under development and not yet ready to use. This documentation serves as a preview of the feature and as a guide to using mutability annotations, which may be beneficial even without enforcement.
@@ -77,11 +77,11 @@ function Counter() {
 This keeps mutations visible to the component who owns the state—`Counter` in the example above.
 
 
-## Non-local mutation
+## Nonlocal mutation
 
-Indirect mutation can sometimes become unwieldy, especially when requests for mutations are deeply nested and iterative. When the complexity of indirect mutation outweighs the benefit of pure local reasoning, non-local mutation may be preferable.
+Indirect mutation can sometimes become unwieldy, especially when requests for mutations are deeply nested and iterative. When the complexity of indirect mutation outweighs the benefit of pure local reasoning, nonlocal mutation may be preferable.
 
-Mutability annotations at binding sites tell the compiler to allow non-local mutation while making it explicit to the owner scope. This way, mutations are statically traceable and state changes can still be reasoned about.
+Mutability annotations at binding sites tell the compiler to allow nonlocal mutation while making it explicit to the owner scope. This way, mutations are statically traceable and state changes can still be reasoned about.
 
 ### Mutability annotations
 <!-- - `mu:` indicates that deep property assignments and method calls may be performed through the binding
@@ -172,7 +172,7 @@ function Counter(setup: FromTag<{
 Note that in the providing scope, mutability annotations indicate the *possibility* of mutation, not guaranteed mutation. 
 
 ### All methods are suspect
-The mutation safety compiler does not distinguish between accessor methods and mutator methods. All nested non-local methods are considered potential mutators and must be annotated with `m:` or `mu:` in order to be called.
+The mutation safety compiler does not distinguish between accessor methods and mutator methods. All nested nonlocal methods are considered potential mutators and must be annotated with `m:` or `mu:` in order to be called.
 
 ```tsx
 function CountDisplay(setup: FromTag<{
@@ -289,7 +289,7 @@ function Foo(setup: FromTag<{
 
 ```
 
-<!-- Conversely, if a nested component requires a mutability annotation on a non-local object, t -->
+<!-- Conversely, if a nested component requires a mutability annotation on a nonlocal object, t -->
 
 This creates a trail of mutability annotation breadcrumbs from the state-owner scope down to the mutating scope.
 

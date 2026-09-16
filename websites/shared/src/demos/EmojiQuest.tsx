@@ -102,8 +102,8 @@ function Powerset(setup: FromTag<{
   return <>
     <div class={['powerset-panel', $class]}>
       <ul class='powerset-list'>
-        {For(powerset, power =>
-          <li class='power-chip'>{power}</li>
+        {For(powerset, $power =>
+          <li class='power-chip'>{$power}</li>
         )}
       </ul>
 
@@ -317,8 +317,8 @@ EmojiQuest.nsxPowerset = `function Powerset(setup: FromTag<{
   <:>
     <div class='powerset-panel'>
       <ul class='powerset-list'>
-        {For(powers, power =>
-          <li class='power-chip'>{power}</li>
+        {For(powers, power@ =>
+          <li class='power-chip'>{power@}</li>
         )}
       </ul>
 
@@ -362,8 +362,8 @@ EmojiQuest.tsxPowerset = `function Powerset(setup: FromTag<{
   return <>
     <div class='powerset-panel'>
       <ul class='powerset-list'>
-        {For(powers, power =>
-          <li class='power-chip'>{power}</li>
+        {For(powers, $power =>
+          <li class='power-chip'>{$power}</li>
         )}
       </ul>
 
