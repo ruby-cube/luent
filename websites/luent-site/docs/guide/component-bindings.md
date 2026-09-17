@@ -2,9 +2,42 @@
 
 Components may be configured by adding bindings to the component tag.
 
+## Accessing bindings
+Component bindings are declared and accessed through the setup parameter.
+
 ```tsx
-<Counter limit={100} />
+function Counter(setup: FromTag<{
+   limit: number
+   onClick: HandleClick<{ count: number }>
+}>) {
+   const { limit, emitClick } = setup
+
+   const $count = ion(0)
+
+   return <>
+      <button 
+        on:click={() => { 
+          $count.value++; 
+          emitClick({ count: $count() }) 
+        }} 
+        disabled={() => $count() === limit}
+      >
+        {$count}
+      </button>
+   </>
+}
 ```
+
+For information on type validation of bindings, optional bindings, and default values, see [The Setup Parameter](/guide/components#the-setup-parameter)
+
+## Providing bindings
+Bindings are provided at component instantiation through JSX tag and attribute syntax.
+
+```tsx
+<Counter limit={100} onClick={e => console.log('count:', e.count)} />
+```
+
+## Types of bindings
 
 There are five main types of component bindings:
 - data
@@ -13,7 +46,7 @@ There are five main types of component bindings:
 - views
 - forwarded
 
-For information on type validation of bindings, optional bindings, and default values, see [The Setup Parameter](/guide/components#the-setup-parameter)
+
 
 <!-- 
 ### Data and Method Binding
@@ -144,6 +177,7 @@ By default, component bindings are deeply read-only, enforced at compile time*. 
 :::warning * NOT YET AVAILABLE
 Mutation safety checking is currently under development and not yet ready to use. However, mutability annotations may be beneficial regardless of mutation safety enforcement.
 :::
+
 
 ## Actions
 Action bindings provide components with a callback that implements an action.
@@ -339,10 +373,9 @@ function App() {
 }
 
 
-function Counter(setup: FromTag<{
+function Counter(setup: FromTag<'button', {
   count: Ion<number>
   increment: () => void
-  '...': 'button'
 }>) {
   const { count@, increment, ...rest } = setup
   return <>
@@ -370,11 +403,10 @@ function App() {
 }
 
 
-function Counter(setup: {
+function Counter(setup: FromTag<'div', {
   'xray:plus': Xray<'button'>;
   'xray:minus': Xray<'button'>;
-  '...': 'div'
-}) {
+}>) {
   const { xray, ...rest } = setup
 
   const count = ion(0, {

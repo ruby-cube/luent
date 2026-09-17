@@ -1,21 +1,5 @@
-# Contextual Bindings
+# Centralized bindings
 
-## Context keys
-
-## Accessing entries from Context
-
-### From Context Tree
-
-Distant context, provide context
-ContextKey (parameters)
-fromContext
-
-```tsx
-
-get theme = fromContext(THEME)@
-const theme = $fromContext(THEME)
-
-```
 
 mergeKeys
 
@@ -74,8 +58,6 @@ function Foo() {
   /*...*/
 }
 ```
-
-<!-- ground context -->
 
 ### Dependency Injection
 

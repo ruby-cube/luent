@@ -99,7 +99,7 @@ export default defineConfig({
                 // { text: 'Debugging', link: '/guide/getter-syntax#the-postfix-operator' },
               ]
             },
-            { text: 'Reactive Structures', link: '/guide/reactive-structures' },
+            { text: 'Reactive Structures*', link: '/guide/reactive-structures' },
             {
               text: 'View Control Flow', link: '/guide/view-control-flow', items: [
                 // { text: 'Iterative Rendering', link: '/guide/' },
@@ -110,7 +110,7 @@ export default defineConfig({
               ]
             },
             {
-              text: 'Element Bindings', link: '/guide/element-bindings', items: [
+              text: 'Element Bindings*', link: '/guide/element-bindings', items: [
                 // { text: 'Events', link: '/guide/' },
                 // { text: 'Styles', link: '/guide/' },
                 // { text: 'Attributes', link: '/guide/' }
@@ -128,38 +128,40 @@ export default defineConfig({
               ]
             },
 
-            { text: 'Contextual Bindings', link: '/guide/contextual-bindings' },
+            { text: 'Context Bindings', link: '/guide/context-bindings' },
+            { text: 'Centralized Bindings*', link: '/guide/centralized-bindings' },
             { text: 'The Render Cycle', link: '/guide/the-render-cycle' },
             { text: 'Preserving Views', link: '/guide/preserving-views' },
             { text: 'Lifecycle Hooks', link: '/guide/lifecycle-hooks' },
-            { text: 'Effect Cleanup', link: '/guide/effect-cleanup' },
-            { text: 'Node Access', link: '/guide/node-access' },
+            { text: 'Effect Cleanup*', link: '/guide/effect-cleanup' },
+            { text: 'Node Access*', link: '/guide/node-access' },
             { text: 'Reusable Logic', link: '/guide/reusable-logic' }
           ]
         },
-        {
-          text: 'Extended Topics',
-          items: [
-            // { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
-            // { text: 'Reactions', link: '/guide/reactions' },
-            { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
-            // {
-            //   text: '[] More Reactivity', link: '/markdown-examples', items: [
-            //     // { text: 'Writable Derivations', link: '/guide/' },
-            //   ]
-            // }
-          ]
-        },
-        {
-          text: 'Special Topics',
-          items: [
+        // {
+        //   text: 'Extended Topics',
+        //   items: [
+          //     // { text: 'Reactions', link: '/guide/reactions' },
+          //     // {
+            //       //   text: '[] More Reactivity', link: '/markdown-examples', items: [
+              //         //     // { text: 'Writable Derivations', link: '/guide/' },
+              //         //   ]
+              //         // }
+              //       ]
+              //     },
+              {
+                text: 'Special Topics',
+                items: [
+                  { text: 'Reactivity in Depth', link: '/guide/reactivity-in-depth' },
+                  //     // { text: '~ Debugging Reactivity', link: '/guide/debugging-reactivity' },
             { text: 'Mutation Safety', link: '/guide/mutation-safety' },
+            // { text: 'Dependency Injection', link: '/guide/dependency-injection' },
             { text: 'Error Rendering', link: '/guide/error-rendering' },
             { text: 'Async Rendering', link: '/guide/async-rendering' },
             { text: 'Portals', link: '/guide/portals' },
             { text: 'Transitions', link: '/guide/transitions' },
-            // { text: '~ Finite States', link: '/guide/' },
-            // { text: '~ Custom Reactive Structures', link: '/guide/' },
+            // { text: 'Finite States', link: '/guide/' },
+            // { text: 'Custom Reactive Structures', link: '/guide/' },
             // { text: 'Client-side Routing [planned]' },
             // { text: 'Server Side [planned]' }
           ]

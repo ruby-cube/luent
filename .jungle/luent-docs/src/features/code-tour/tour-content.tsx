@@ -486,7 +486,7 @@ function Powerset(setup: FromTag<{
         on:click={() => powers.addRandomPower()}
       >+</button>
     </div>
-    <o--link href='/powerset.css' rel='stylesheet' />
+    <o-link href='/powerset.css' rel='stylesheet' />
   </:>
 }`
 
@@ -516,7 +516,7 @@ function Powerset(setup: FromTag<{
         on:click={() => powers.addRandomPower()}
       >+</button>
     </div>
-    <o--link href='/powerset.css' rel='stylesheet' />
+    <o-link href='/powerset.css' rel='stylesheet' />
   </>
 }`
 

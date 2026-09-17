@@ -54,7 +54,7 @@ const tds = NodeRef('td', [])
 ```
 
 
-<!-- #### Component Node Refss -->
+## Component Nodes
 <!-- - Absorbed ions?
 - Ref forwarding -->
 :::info Type definitions
@@ -71,5 +71,5 @@ type ComponentKit = {
 :::
 
 
-### Inline hooks
+## Inline hooks
 Nodes may also be accessed through [inline hooks](/guide/lifecycle-hooks#inline-hooks)

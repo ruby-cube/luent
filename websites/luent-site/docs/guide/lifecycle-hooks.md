@@ -1,7 +1,7 @@
 
 # Lifecycle Hooks
 
-In Luent, lifecycles are tied to dynamic view instances rather than components. Dynamic views are the views created by reactive [view control flow](/guide/view-control-flow).
+In Luent, lifecycles originate from dynamic view instances rather than components. Dynamic views are the views created by reactive [view control flow](/guide/view-control-flow).
 
 Lifecycle hooks provide a way to run tasks at specific points within a view’s lifecycle.
 
@@ -44,14 +44,15 @@ atDetach(/*...*/)
 | Transition | Description |
 |---|---|
 | `mount` | initial attach |
-| `remount` | restored attach |
-| `demount` | temporary detach |
+| `remount` | restored attach† |
+| `demount` | temporary detach† |
 | `unmount` | final detach |
 
+<small>† for [preserved views](/guide/preserving-views)</small>
 
 #### Attach and Detach
-- Use attach hooks to run tasks at both the initial mount and recurring remounts. Attach-hook tasks receive an `initial` argument that is `true` if it is the intial mount and `false` otherwise.
-- Use detach hooks to run tasks at both recurring demounts and the final unmount. Detach-hook tasks receive an `final` argument that is `true` if it is the final unmount and `false` otherwise.
+- Use attach hooks to run tasks at both the initial mount and recurring remounts of preserved views. Attach-hook tasks receive an `initial` argument that is `true` if it is the intial mount and `false` otherwise.
+- Use detach hooks to run tasks at both recurring demounts of preserved views and the final unmount. Detach-hook tasks receive an `final` argument that is `true` if it is the final unmount and `false` otherwise.
 
 ```txt
 attach

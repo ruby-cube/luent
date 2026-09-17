@@ -152,7 +152,9 @@ The `FromTag` type utility provides type validation for the component tag based 
 
 
 ### Ion Normalization
-A binding typed with `Ion<T>` may receive an input that is either `T` or `Ion<T>`. This allows the component consumer to decide whether a binding should be reactive or not. The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NextScript) and treats it as potentially reactive.
+A binding typed with `Ion<T>` may receive an input that is either `T` or `Ion<T>`. This allows the component consumer the flexibility to decide whether a binding should be reactive or not. 
+
+The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NextScript) and treats it as potentially reactive. This prevents cluttering the code with if `isIon()` checks.
 
 ```tsx
 function MessageDisplay(setup: FromTag<{

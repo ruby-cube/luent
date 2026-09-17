@@ -13,7 +13,7 @@ hero:
     #   text: Preview Luent
     #   link: /index#code-glimpses
     - theme: alt
-      text: Take a code tour
+      text: Get a glimpse
       link: /index#code-glimpses
 
 features:
@@ -56,7 +56,7 @@ features:
     <span class='ns-hero-code__dot'></span>
   </div> -->
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
-    <h2 class='section-heading'>Code Tour</h2>
+    <h2 class='section-heading'>A glimpse of Luent</h2>
   </section>
   <p class='nextscript-note' style='text-wrap: balance'>
     <strong>Note:</strong> NextScript (.ns/.nsx) is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.

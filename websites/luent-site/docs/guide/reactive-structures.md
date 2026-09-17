@@ -1,29 +1,69 @@
 
 # Reactive Structures
 
-Reactive structures let you keep ordinary objects and collections reactive without wrapping every property by hand.
+Often it makes more sense to model state through a data structure rather than a bunch of independent primitives. Reactive structures may be handled immutably with ions, mutably through ionic structures, or both immutably and mutably through ionized structures.
 
-Proxies
-
-
-<p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
-
-## Ionic Objects
-
-Reactive objects are useful when related values belong together.
+## Immutable structures
 
 ```tsx
-const cart = ionic({
-  label: 'Fruit Cart',
-  note: 'Keep it tiny'
-})
+function MovableBox() {
+  const $box = ion({ x: 0, y: 0 })
+
+  function moveRight() {
+    $box.value = { 
+      ...$box(), 
+      x: $box().x + 10 
+    }
+  }
+  return <>
+    <div class='box' 
+      style={css`transform: ${() => `translate(${$box().x}px, ${$box().y}px)`}`}
+    ></div>
+    <button on:click={moveRight}>▶</button>
+  </>
+}
+```
+:::danger Mutating will not trigger reactions!
+```tsx
+function moveRight() {
+   $box().x += 10 // ❌ This will not trigger updates:
+}
+```
+:::
+
+<p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
+
+## Mutable structures
+### Ionic objects
+
+```tsx
+function MovableBox() {
+  const box = ionic({ x: 0, y: 0 })
+
+  function moveRight() {
+    box.x += 10
+  }
+  return <>
+    <div class='box' 
+      style={{ transform: () => `translate(${box.x}px, ${box.y}px)` }}
+    ></div>
+    <button on:click={moveRight}>▶</button>
+  </>
+}
 ```
 
-Reading `cart.label` inside a view or derivation tracks that property. Writing `cart.note = 'Ready to ship'` updates only the places that depend on `note`.
+```jsx
+const box = ionic({ x: 0, y: 0 })
 
-<p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
+function moveRight() {
+   box.x += 10
+}
+```
 
-## Ionic Collections
+
+<p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
+
+### Ionic collections
 `ionic` 
 ```tsx
 const list = ionic(['🍎', '🍊', '🍐'])
@@ -31,22 +71,31 @@ const list = ionic(['🍎', '🍊', '🍐'])
 list.push('🍌')
 list.splice(1, 1)
 ```
+<p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
 
+### Ionic class instances
+Class instances may also be made reactive using `ionic()`. To learn more, see [Classes and Reactivity](/guide/reusable-logic#classes-and-reactivity)
 
-## Nested Reactivity
+### Tracking ions
+### Triggering ions
+
+### Nested Reactivity
+`ionic()` ionizes properties shallowly, meaning nested structures will not be made ionic.
 :::info Under Construction
 These docs are still being written. To see an example of nested reactivity, see [Folders demo]().
 :::
 
 
-<p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
+<p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
 
 
-## Ionized Structures
-Ionic structures wrapped in an ion are referred to as ionized structures. `ionize(x)` is shorthand for `ion(ionic(x))`, while `Ionized<T>` is shorthand for `Ion<Ionic<T>>`
+## Hybrid structures
+A reactive structure may be updated both immutably and mutably by wrapping an ionic structure in an ion. These are referred to as ionized structures and created using `ionize()`. 
+
+Essentially, `ionize(x)` is shorthand for `ion(ionic(x))`, while the type `Ionized<T>` is shorthand for `Ion<Ionic<T>>`
 
 ```tsx
-get todos = ionize([] fulfils Todo[], {
+get todos = ionize([] as Todo[], {
   addTodo(todo: Todo) {
     this.push(todo)
   }
@@ -57,4 +106,5 @@ function removeCompleted() {
 }
 ```
 
-## Proxy limitations
+<p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
+

@@ -162,10 +162,10 @@ Luent transpiles JSX tags into basic `jsx()` calls for straightforward mental ma
 <>
   <Parent 
     foo={foo} 
-    bar={bar()} 
+    bar={bar()}
     on:click={logClick}
   >
-    <Child />
+    <Child fooBar='true' />
     {If(active, 
       <div>Hello world! - {name}</div>
     )}
@@ -185,7 +185,7 @@ Luent transpiles JSX tags into basic `jsx()` calls for straightforward mental ma
     bar: bar(),
     "on:click": logClick,
     Slot: () => [
-      jsx(Child),
+      jsx(Child, { fooBar: 'true' }),
       IfSeries(
         If(active, () => [
           jsx("div", { Slot: () => ["Hello world! - ", name] })

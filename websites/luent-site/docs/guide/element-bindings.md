@@ -1,16 +1,67 @@
 # Element Binding
 
+
 ## Attributes
 
-JSX attributes in Luent align with HTML/SVG attribute names rather than DOM property names.
+JSX attributes may be written as either HTML/SVG attribute names or DOM property names.
 
-Internally, Luent applies each binding using the most appropriate DOM mechanism for that attribute. Most standard attributes are applied through property assignment, while `data-*` and ARIA attributes are applied through `Element.setAttribute()`.
+```jsx
+<div contenteditable="true">Write something...</div>
+```
+
+```jsx
+<div contentEditable="true">Write something...</div>
+```
+
+### Static bindings
+When a indings are static, meaning
+```jsx
+<div contenteditable={contentEditable}>Write something...</div>
+```
+
+### Reactive bindings
+To make a binding reactive, pass in a reactive ion.
+
+**Atomic ion**
+```jsx
+const $contentEditable = ion(false);
+const $text = ion('Write something...');
+```
+```jsx
+<div contenteditable={$contentEditable}>
+  {$text}
+</div>
+```
+
+**Compound ion**
+```jsx
+<div contenteditable={() => $isEditor() && $isActive()}>
+  {$text}
+</div>
+```
+
+:::warning Potentially inert ions
+Keep in mind that since component setup bindings are [normalized to ions](/guide/components.html#ion-normalization), ions derived from inputs are potentially inert. Passing in an externally derived ion therefore does not guarantee reactivity.
+
+```jsx
+function Text(setup: FromTag<{
+  isEditor: Ion<boolean>
+  isActive: Ion<boolean>
+}>) {
+  const { isEditor, isActive } = setup
+  const $text = ion('Write something...')
+  return <>
+    <div contenteditable={() => $isEditor() && $isActive()}>{$text}</div>
+  </>
+}
+```
+:::
+
+<!-- 
+Under the hood, Luent applies each binding using the appropriate DOM mechanism. Most standard attributes are applied through property assignment, while `data-*` and ARIA attributes are applied through `Element.setAttribute()`.
 
 ### Property assignment
 
-```jsx
-<div contenteditable="true"></div>
-```
 
 :::info under the hood
 
@@ -34,19 +85,11 @@ element[toDOMProperty(attribute)] = value;
 element.setAttribute(attribute, value);
 ```
 
-:::
-
-### Expression values
-
-Attribute values may also be provided as JavaScript expressions by wrapping the expression in curly braces.
-
-```jsx
-<div contenteditable={$editable}></div>
-```
+::: -->
 
 ## Events
 
-Event handlers may be registered with event binding syntax, which binds an event handler function to events prefixed with the `on` namespace. This differs from inline HTML events, which bind scripts rather than functions. Internally, Luent attaches the event handler to the element with `Element.addEventListener()` and registers cleanup for when the encompassing dynamic view is discarded.
+Event handlers may be registered with event binding syntax, which binds an event handler function to events prefixed with the `on` namespace. This differs from inline HTML events, which bind scripts rather than functions. Under the hood, Luent attaches the event handler to the element with `Element.addEventListener()` and registers cleanup for when the view is discarded.
 
 ```tsx
 <button on:click={submit}>submit</button>
@@ -105,31 +148,26 @@ To handle events on the window, document, html, head, or body, use the built-in 
 <o--body on:click={deselect} />
 ```
 
-### Temporary Listeners
+### Transient Listeners
 
-For temporary event listeners whose lifetime should not span the lifetime of its encompassing view, Luent provides `listen()`.
+For transient event listeners whose lifetime should not span the lifetime of its encompassing view, Luent provides `listen()`.
 It is recommended over `Element.addEventListener()` as it provides automatic cleanup and ensures that any reactions triggered during the event do not block rendering.
 
 `listen()` is useful for
 
 - one-time listeners
-- transient listeners
+- temporary listeners
 - abortable listeners
 
 **one-time listener**
 
 ```tsx
-listen(
-  window,
-  "keydown",
-  (e) => {
-    if (e.key === "Escape") close();
-  },
-  { once: true },
-);
+listen(window, "keydown", (e) => {
+  if (e.key === "Escape") close();
+}, { once: true });
 ```
 
-**transient listener**
+**temporary listener**
 
 ```tsx
 function initDrag() {
@@ -151,17 +189,11 @@ const controller = new AbortController();
 listen(window, "mousemove", animateMouseTail, {
   signal: controller.signal,
 });
-listen(
-  window,
-  "mousedown",
-  () => {
-    endMouseTail();
-    controller.abort();
-  },
-  {
-    signal: controller.signal,
-  },
-);
+
+listen(window, "mousedown", () => {
+  endMouseTail();
+  controller.abort();
+}, { signal: controller.signal });
 ```
 
 ## Styles
@@ -299,3 +331,47 @@ The `style` attribute may be written as a string or an object.
 ```
 
 For reactive styles, object notation is preferred for readability and fine-grained updates. Style property names should be written as CSS property names and wrapped in quotes.
+
+## Slot
+
+### Text nodes
+
+```tsx
+<div>count: {$count}</div>
+```
+:::info transpiled
+```tsx
+jsx('div', { Slot: () => ['count: ', $count] })
+```
+:::
+
+
+### Text content
+```tsx
+<div>
+  {{ text: $text }}
+</div>
+```
+
+```tsx
+<textarea>
+  {{ 'mu:text': $text }}
+</textarea>
+```
+
+### Inner HTML
+```tsx
+<div>
+  {{ HTML: $text }}
+</div>
+```
+```tsx
+<div>
+  {{ 'mu:HTML': $text }}
+</div>
+```
+```tsx
+<div>
+  {{ trustedHTML: $text }}
+</div>
+```

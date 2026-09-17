@@ -225,7 +225,7 @@ This portion of the docs is under construction
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
-## Tracking ion state
+## Tracking ions
 Ions may be tracked for state changes and linked to reactions--functions that will run whenever the tracked state changes.
 
 ```tsx

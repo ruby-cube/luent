@@ -16,7 +16,6 @@ Core features:
 - a unified system of fine-grained reactivity
 - state management through familiar native structures
 - control flow expressions to render dynamic views
-- dynamic view lifecycle hooks
 
 Experimental features:
 - type-explicit reactivity

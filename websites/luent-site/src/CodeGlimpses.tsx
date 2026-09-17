@@ -31,14 +31,14 @@ const sections: {
     UnifiedReactivity,
     TypeExplicit,
     SelectiveReactivity,
-    ReusableLogic,
     FlowExpressions,
+    ViewPreservation,
     DynamicViewSetup,
     MutationSafety,
-    LifecycleHooks,
-    Portals,
-    ContextBindings,
-    ViewPreservation
+    ReusableLogic,
+    // LifecycleHooks,
+    Portals
+    // ContextBindings,
   ]
 
 export function CodeGlimpses() {
@@ -296,7 +296,7 @@ mountIsland(EmojiCollection, '#app')
 
 UnifiedReactivity.heading = 'Unified reactivity'
 
-UnifiedReactivity.$tab = FunctionalComponents.$tab
+UnifiedReactivity.$tab = $CodeTab()
 function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
@@ -408,34 +408,28 @@ TypeExplicit.tsHover = {
 }
 TypeExplicit.filename = 'examples'
 TypeExplicit.nsx =
-  `/* excerpts from function body */
-
+  `
 get total = ion(() => count * qty);
 
 // ---
 
-<:>
-  {For(list, item@ :> 
-    <li>{item@}</li>
-  )}
-  <div>{total@}</div>
-</:>
+{For(list, item@ :> 
+  <li>{item@}</li>
+)}
+<div>{total@}</div>
 
 `
 
 TypeExplicit.tsx =
-  `/* excerpts from function body */
-
+  `
 const $total = ion(() => count * $qty())
 
 // ---
 
-return <>
-  {For(list, $item => 
-    <li>{$item}</li>
-  )}
-  <div>{$total}</div>
-</>
+{For(list, $item => 
+  <li>{$item}</li>
+)}
+<div>{$total}</div>
 
 `
 SelectiveReactivity.heading = 'Selective reactivity'
@@ -574,20 +568,15 @@ FlowExpressions.nsx =
   {Else(
     <span class="status">Offline</span>
   )}
-</section>
-
-
-`
+</section>`
 
 
 FlowExpressions.tsx =
   `<section>
-  {If($online,
-    <>
+  {If($online, <>
       <span class="status">Online</span>
       <button on:click={sendMessage}>Send message</button>
-    </>
-  )}
+  </>)}
   {Else(
     <span class="status">Offline</span>
   )}
@@ -678,7 +667,7 @@ function Powerset(setup: FromTag<{
         on:click={() => powers.addRandomPower()}
       >+</button>
     </div>
-    <o--link href='/powerset.css' rel='stylesheet' />
+    <o-link href='/powerset.css' rel='stylesheet' />
   </:>
 }`
 
@@ -708,7 +697,7 @@ function Powerset(setup: FromTag<{
         on:click={() => powers.addRandomPower()}
       >+</button>
     </div>
-    <o--link href='/powerset.css' rel='stylesheet' />
+    <o-link href='/powerset.css' rel='stylesheet' />
   </>
 }`
 

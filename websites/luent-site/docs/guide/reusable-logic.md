@@ -9,22 +9,22 @@ Kits expose their reactive state and methods through plain objects, making them 
 ### Defining a kit factory
 
 ```tsx
-export function CounterKit(startCount: number) {
-   get count = ion(startCount);
+function CounterKit(startCount: number) {
+  get count = ion(startCount);
 
-   function incrementCount() {
-      count++
-   }
+  function incrementCount() {
+    count++
+  }
 
-   function decrementCount() {
-      count--
-   }
+  function decrementCount() {
+    count--
+  }
 
-   return {
-      count@,
-      incrementCount,
-      decrementCount
-   }
+  return {
+    count@,
+    incrementCount,
+    decrementCount
+  }
 }
 ```
 
@@ -33,46 +33,50 @@ export function CounterKit(startCount: number) {
 import { CounterKit } from "./CounterKit"
 
 function App() {
-   const { count@, incrementCount, decrementCount } = CounterKit(0)
-   
-   <:>
-      <div>
-         <div>{count@}</div>
-         <button on:click={incrementCount}>+</button>
-         <button on:click={decrementCount}>-</button>
-      </div>
-   </:>
+  const { count@, incrementCount, decrementCount } = CounterKit(0)
+  
+  <:>
+    <div>
+        <div>{count@}</div>
+        <button on:click={incrementCount}>+</button>
+        <button on:click={decrementCount}>-</button>
+    </div>
+  </:>
 }
 ```
 
-## Classes and Reactivity
-Reusable stateful logic may also be defined through JavaScript classes and made reactive through Luent's `ionic()`, which implements reactivity through proxies.
+## Classes and reactivity
+Reusable stateful logic may also be defined through JavaScript classes and made reactive through Luent's `ionic()`.
+
+### Key-value reactivity
+
+As with object literals, `ionic()` will produce a reactive proxy of class instances that contain state in ordinary key-value pairs.
 
 ```tsx
-export class Box {
-   constructor(
-      public x: number,
-      public y: number
-   ) {
-      this.x = startPosition.x;
-      this.y = startPosition.y;
-   }
+class Box {
+  constructor(
+    public x: number,
+    public y: number
+  ) {
+    this.x = startPosition.x;
+    this.y = startPosition.y;
+  }
 
-   moveLeft() {
-      this.x--
-   }
+  moveLeft() {
+    this.x--
+  }
 
-   moveRight() {
-      this.x++
-   }
+  moveRight() {
+    this.x++
+  }
 
-   moveDown() {
-      this.y++
-   }
+  moveDown() {
+    this.y++
+  }
 }
 ```
 
-```tsx
+```nsx
 import { Box } from "./Box"
 
 function App() {
@@ -90,6 +94,24 @@ function App() {
 }
 ```
 
+```tsx
+import { Box } from "./Box"
+
+function App() {
+  const box = ionic(new Box(0, 100))
+
+  return <>
+    <div 
+      class="box" 
+      style={() => `transform: translate(${box.x}px, ${box.y}px)`}
+    ></div>
+    <button on:click={box.moveLeft}>◀</button>
+    <button on:click={box.moveRight}>▶</button>
+    <button on:click={box.moveDown}>▼</button>
+  </>
+}
+```
+<!-- 
 ### Classes with private state
 
 As with object literals, `ionic()` can make class instances with ordinary key-value object structure reactive out of the box. 
@@ -111,41 +133,61 @@ const map = ionic(new Map())
 const date = ionic(new Date())
 ```
 
-To configure reactivity for user-defined or third-party library classes with private state, see the [custom reactivity guide]().
+To configure reactivity for user-defined or third-party library classes with private state, see the **custom reactivity guide** (planned). -->
+
+### Proxy limitations
+Some classes require additional support to work with `ionic()` due to JavaScript `Proxy` limitations. These includes classes that:
+  - define private state
+    - use private fields
+    - rely on mutable state in closures
+  - involve identity checks that mix proxies and raw targets, causing incorrect control flow.
+  - prevent `this` from referring to the reactive proxy.
+
+These limitations are addressed through built-in support from Luent for native JavaScript structures and a manual reactivity API.
+
+### Built-in reactive support
+Luent provides built-in reactive support for the following native JavaScript structures: `Array`, `Set`, `Map`, and `Date`.
+
+```ts
+const numbers = ionic([1, 2, 3])
+const letters = ionic(new Set())
+const map = ionic(new Map())
+const date = ionic(new Date())
+```
+
 
 ### Manual reactivity
-While custom reactivity configuration addresses some proxy limitations, there are two main limitations that require a different approach. These are implementations that:
 
-- involve identity checks that mix proxies and raw targets, causing incorrect control flow.
-- prevent `this` from referring to the reactive proxy.
+User-defined classes that are incompatible with `Proxy` must either be:
+- reimplemented without `Proxy` pitfalls
+- reimplemented with manual reactivity
+- wrapped in a manual reactivity implementation
 
-Such classes must either be:
-- rewritten with an implementation that avoid these pitfalls
-- or wrapped in a manual non-proxy reactivity implementation
+Third-party library classes must be:
+- wrapped in a manual reactivity implementation
 
-For example, `Counter` below is problematic for proxy-based reactivity because `this` in `decrement` can never refer to the reactive proxy:
+##### Example
+`Counter` below is problematic for `Proxy`-based reactivity because `this` in `increment` and `decrement` can never be bound to the reactive proxy since the arrow function already binds it to the `Counter` instance.
 ```tsx
 class Counter {
   count = 0
 
   constructor() {
+    this.increment = () => {
+      this.count++
+    }
     this.decrement = () => {
       this.count--
     }
-  }
-
-  increment() {
-    this.count++
   }
 }
 
 const counter = ionic(new Counter())
 
-counter.increment() // reactivity works
-counter.decrement() // X reactivity fails--`this` is the raw target
+counter.increment() // X reactivity fails--`this` is the raw target
 ```
 
-**Solution A: Re-implement**
+**Solution A: Re-implement without problematic pattern**
 ```tsx
 class Counter {
   count = 0
@@ -162,35 +204,93 @@ class Counter {
 const counter = ionic(new Counter())
 
 counter.increment() // reactivity works
-counter.decrement() // reactivity works
 ```
 
-**Solution B: Wrap with manual reactivity**
+**Solution B: Re-implement with manual reactivity**
+
+In cases where the `Proxy`-incompatible pattern is necessary, reactivity can be implemented manually using `ReactiveCore()`, `emitTrack()` and `emitTrigger()`.
+
+```nsx
+class Counter {
+  private [ReactiveCore.key] = ReactiveCore()
+
+  get count = ion(0);
+
+  constructor() {
+    this.increment = () => {
+      this.count++
+    }
+    this.decrement = () => {
+      this.count--
+    }
+  }
+}
+
+const counter = ionic(new Counter());
+
+counter.increment() // reactivity works
+```
 
 ```tsx
-class IonicCounter {
-  private counter = new Counter()
-  private core = IonicCore()
+class Counter {
+  private [ReactiveCore.key] = ReactiveCore()
+
+  #count: number = 0
 
   get count() {
-    this.core.track('[[get]]', 'count');
+    emitTrack(this, '[[get]]', 'count');
+    return this.#count
+  }
+
+  set count(value: number) {
+    this.#count = value
+    emitTrigger(this, '[[get]]', 'count')
+    return value;
+  }
+
+  constructor() {
+    this.increment = () => {
+      this.count++
+    }
+    this.decrement = () => {
+      this.count--
+    }
+  }
+}
+
+const counter = ionic(new Counter());
+
+counter.increment() // reactivity works
+```
+
+
+
+**Solution C: Wrap with manual reactivity**
+
+In cases where the class cannot be re-implemented, it may be wrapped with manual reactivity in a new class.
+
+```tsx
+class Counter {
+  private counter = new ThirdParty.Counter()
+  private [ReactiveCore.key] = ReactiveCore()
+
+  get count() {
+    emitTrack(this, '[[get]]', 'count');
     return this.counter.count
   }
 
   decrement() {
-    this.core.trigger('[[get]]', 'count')
     this.counter.decrement()
+    emitTrigger(this, '[[get]]', 'count')
   }
 
   increment() {
-    this.core.trigger('[[get]]', 'count')
     this.counter.increment()
+    emitTrigger(this, '[[get]]', 'count')
   }
 }
 
-const counter = new IonicCounter();
+const counter = ionic(new Counter());
 
 counter.increment() // reactivity works
-counter.decrement() // reactivity works
 ```
-See the __custom reactivity guide__(planned).

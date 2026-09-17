@@ -838,3 +838,7 @@ body {
     display: none !important;
   }
 }
+
+.vp-doc ul {
+  margin-left: 1rem;
+}

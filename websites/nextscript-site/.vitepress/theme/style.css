@@ -406,3 +406,7 @@ html:not(.dark) .ns-hero-code__body {
   vertical-align: middle;
   white-space: nowrap;
 }
+
+.vp-doc ul {
+  margin-left: 1rem;
+}

@@ -26,35 +26,41 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 - `ionicTick()` to track an ionic task scheduled for the upcoming render cycle tick
 - `Finitron()` to create a finite reactive state machine
 
-## Context binding
+## Component bindings
 - `FromTag` to provide type validation and annotations for tag bindings
-- `fromContext()` to access a value from the nearest providing context node
-- `fromRoot()` to access a value from an island root
-- `fromGround()` to access a globally provided value
-- `provideRoot()` to provide a value from an island root
-- `provideGround()` to provide a global binding
-- `ContextKey()` to create a context key for context bindings
-- `mergeKeys()` to merge multiple keys into one
-- `RootService()` to define an island-wide value that exists only if in use
-- `GroundService()` to define a global value that exists only if in use
 
-#### Context tags
-- `<o:context>` to provide context bindings
-- `<o—-root>` to provide root bindings
-- `<o—-ground>` to provide global bindings
-
-## Binding annotations
+#### Binding annotations
 - `on:` for event handlers
 - `onv:` for event capture handlers
 - `mu:` for mutable bindings
 - `m:` for nested method bindings
 - `xray:` for nested bindings
 
-## Special tag bindings
+#### Special tag bindings
 - `microclass` for utility classes
 - `auto-bind` for forwarded bindings
 - `ref` for node access
 <!-- - `node` <span class='doc-tag'>Experimental</span> for pre-existing DOM nodes -->
+
+## Context bindings
+- `fromContext()` to access a value from the nearest providing context node
+- `fromContext$()` to access an ion from the nearest providing context node
+- `ContextKey()` to create a context key for context bindings
+- `mergeKeys()` to merge multiple keys into one
+- `<o:context>` to provide context bindings
+
+
+## Centralized bindings
+- `fromRoot()` to access a value from an island root
+- `fromGround()` to access a globally provided value
+- `<o—-root>` to provide root bindings
+- `<o—-ground>` to provide global bindings
+
+#### Convenience factories
+- `RootBinding()` to define an tree-wide value and create its accessor
+- `GroundBinding()` to define a global value and create its accessor
+<!-- - `RootService()` to define an tree-wide value that exists only if in use and create its accessor -->
+<!-- - `GroundService()` to define a global value that exists only if in use and create its accessor -->
 
 
 ## View control flow
@@ -73,6 +79,8 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `<o:preserve>`
 - `<o:transition>`
 - `<o--portal>`
+- `<o—-root>`
+- `<o—-ground>`
 
 ## Built-in portals
 - `<o—-window>`
@@ -80,6 +88,7 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `<o--html>`
 - `<o--head>`
 - `<o--body>`
+- `<o—-host>`
 - `<o—-root>`
 - `<o—-ground>`
 

@@ -1,7 +1,7 @@
 # Preserving Views
 By default, conditional views are recreated each time they are rendered. 
 
-In cases where state should persist when a conditional view is unmounted, a conditional series may be wrapped in a `<o:preserve>` node. This preserves a view's DOM nodes as well as any state created within the render function, avoiding the need to lift state higher in the application tree. 
+In cases where state should persist when a conditional view is unmounted, a conditional series may be wrapped in a `<o:preserve>` node. This preserves a view's DOM nodes as well as any state created within the render function, without having to lift state higher in the application tree. 
 
 When the view becomes active again, Luent will remount the preserved nodes rather than recreating the view.
 
