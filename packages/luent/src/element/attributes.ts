@@ -22,16 +22,17 @@ export function setAttribute(node: Element | null, key: string, value: any, flas
     if (__INTERNAL__) console.warn('Node is missing. Cannot setAttribute.')
     return;
   }
+  const attribute = key.toLowerCase()
   if (isGetter(value)) {
     trackForRender(value, ({ current, previous }) => {
       // if (current === previous) return;
       queueInternalRender(() => {
-        _setAttribute(node, key, toValue(value())) // normalize to value for mu getters
+        _setAttribute(node, attribute, toValue(value())) // normalize to value for mu getters
       })
     }, flask, RUN_EAGERLY)
   }
   else {
-    _setAttribute(node, key, value)
+    _setAttribute(node, attribute, value)
   }
 }
 

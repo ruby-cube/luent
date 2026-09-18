@@ -15,7 +15,7 @@ JSX attributes may be written as either HTML/SVG attribute names or DOM property
 
 ### Static bindings
 When a indings are static, meaning
-```jsx
+```tsx
 <div contenteditable={contentEditable}>Write something...</div>
 ```
 
@@ -23,21 +23,27 @@ When a indings are static, meaning
 To make a binding reactive, pass in a reactive ion.
 
 **Atomic ion**
-```jsx
-const $contentEditable = ion(false);
-const $text = ion('Write something...');
+```tsx
+const $disabled = ion(false);
 ```
-```jsx
-<div contenteditable={$contentEditable}>
-  {$text}
-</div>
+```tsx
+<button on:click={open} disabled={$disabled}>
+  open
+</button>
 ```
 
 **Compound ion**
-```jsx
-<div contenteditable={() => $isEditor() && $isActive()}>
-  {$text}
-</div>
+```nsx
+<button 
+  on:click={increment} 
+  disabled={(count === limit)@}
+>+</button>
+```
+```tsx
+<button 
+  on:click={increment} 
+  disabled={() => $count() === limit}
+>+</button>
 ```
 
 :::warning Potentially inert ions

@@ -91,9 +91,9 @@ export function CodeGlimpses() {
       </CodeTour>
 
       {Style(css`
-        .tour-row {
-          grid-template-columns: minmax(240px, 1fr) minmax(0, 1fr) !important;
-        }
+        // .tour-row {
+        //   grid-template-columns: minmax(240px, 1fr) minmax(0, 1fr) !important;
+        // }
 
         .tour-copy h3 {
           margin-top: 0;

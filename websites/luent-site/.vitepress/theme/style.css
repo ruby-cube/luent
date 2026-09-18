@@ -805,12 +805,11 @@ body {
   }
 }
 
-/* @media (min-width: 960px) { */
-/* .curtain {
-  background-color: transparent !important;
-} */
-
-/* } */
+@media (min-width: 960px) {
+  .curtain {
+    background-color: transparent !important;
+  }
+}
 
 /* Keep reduced-motion defaults, but allow the appearance switch to animate. */
 @layer __vitepress_base {
@@ -841,4 +840,50 @@ body {
 
 .vp-doc ul {
   margin-left: 1rem;
+}
+
+.VPNav {
+  position: fixed !important;
+}
+
+.VPNav .VPNavBar {
+  background-color: var(--vp-c-bg);
+}
+
+.VPNavBar:not(.home.top) .divider-line {
+    background-color: var(--vp-c-gutter);
+}
+
+/* Force navbar breakpoint: mobile menu at <= 959px, desktop menu at >= 960px. */
+@media (max-width: 819px) {
+
+  .VPNavBar .menu {
+    display: none !important;
+  }
+
+  .VPNavBar .hamburger {
+    display: inline-flex !important;
+  }
+
+  .VPNavBar .VPNavBarExtra {
+    display: none !important;
+  }
+
+  .VPNavScreen {
+    display: block !important;
+  }
+}
+
+@media (min-width: 820px) {
+  .VPNavBar .menu {
+    display: flex !important;
+  }
+
+  .VPNavBar .hamburger {
+    display: none !important;
+  }
+
+  .VPNavScreen {
+    display: none !important;
+  }
 }

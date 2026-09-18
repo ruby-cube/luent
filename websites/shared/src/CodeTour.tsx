@@ -41,6 +41,7 @@ export function CodeTour(setup: FromTag<{
 }
 
 export function TourSection(setup: FromTag<{
+  columnRatio?: [number, number];
   tab?: Ion<"main" | "alt"> & { toggle: () => void },
   id?: string,
   filename?: string,
@@ -51,7 +52,7 @@ export function TourSection(setup: FromTag<{
   flow: 'code-right' | 'code-left',
   Note?: ComponentTag
 }>) {
-  const { filename = 'example', Slot, flow, mainCode, altCode, highlightCode, id, $tab, Note } = setup
+  const { filename = 'example', Slot, flow, mainCode, altCode, highlightCode, id, $tab, Note, columnRatio=[1,1] } = setup
   return (
     <>
       <article id={id} class={`tour-row ${flow}`}>
@@ -132,7 +133,7 @@ export function TourSection(setup: FromTag<{
 
         @media (min-width: 960px) {
           .tour-row {
-            grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+            grid-template-columns: minmax(240px, ${columnRatio[0]}fr) minmax(0, ${columnRatio[1]}fr);
             gap: clamp(1.8rem, 3vw, 3rem);
           }
         

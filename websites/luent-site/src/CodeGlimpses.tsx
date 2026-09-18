@@ -55,6 +55,7 @@ export function CodeGlimpses() {
               const heading = render.heading
 
               return <TourSection
+                columnRatio={[0.9, 1.1]}
                 filename={render.filename}
                 id={toId(heading)}
                 flow={flowDirection()}

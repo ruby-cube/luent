@@ -208,11 +208,11 @@ counter.increment() // reactivity works
 
 **Solution B: Re-implement with manual reactivity**
 
-In cases where the `Proxy`-incompatible pattern is necessary, reactivity can be implemented manually using `ReactiveCore()`, `emitTrack()` and `emitTrigger()`.
+In cases where the `Proxy`-incompatible pattern is necessary, reactivity can be implemented manually using `Reactivity()`, `emitTrack()` and `emitTrigger()`.
 
 ```nsx
 class Counter {
-  private [ReactiveCore.key] = ReactiveCore()
+  private [Reactivity.key] = Reactivity()
 
   get count = ion(0);
 
@@ -233,7 +233,7 @@ counter.increment() // reactivity works
 
 ```tsx
 class Counter {
-  private [ReactiveCore.key] = ReactiveCore()
+  private [Reactivity.key] = Reactivity()
 
   #count: number = 0
 
@@ -272,7 +272,7 @@ In cases where the class cannot be re-implemented, it may be wrapped with manual
 ```tsx
 class Counter {
   private counter = new ThirdParty.Counter()
-  private [ReactiveCore.key] = ReactiveCore()
+  private [Reactivity.key] = Reactivity()
 
   get count() {
     emitTrack(this, '[[get]]', 'count');

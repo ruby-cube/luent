@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "NextScript"
   text: "A TypeScript + JSX Language Extension"
-  tagline: for writing clear, ergonomic, type-safe code
+  tagline: for clear, ergonomic, type-safe code
   actions:
     - theme: alt
       text: Preview NextScript
