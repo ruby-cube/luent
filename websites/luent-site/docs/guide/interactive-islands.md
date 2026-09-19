@@ -463,7 +463,7 @@ function Dialog(setup: { Slot: RenderTag }) {
 
 JSX describes a component's view through HTML-like tags, which are transpiled to JavaScript.
 
-Luent transpiles JSX into basic `jsx()` calls for straightforward mental mapping between JSX syntax and compiled output. It additionally extends the base JSX transform with three minimal transforms:
+Luent transpiles JSX into `jsx()` calls with straightforward mental mapping between JSX syntax and compiled output. It additionally extends the base JSX transform with three minimal transforms:
 
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants.
 - [JSX flow expressions](/guide/view-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead.

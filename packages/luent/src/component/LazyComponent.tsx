@@ -1,17 +1,17 @@
-import { ComponentTag } from "./Component";
+import { RenderView } from "./Component";
 import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@luent/utils";
 import { createAtomicIon, ion } from "@luent/quarky";
 import { AnyObject } from "@luent/types";
 
-const lazyComponents: Map<() => Promise<ComponentTag>, ComponentTag> = new Map()
+const lazyComponents: Map<() => Promise<RenderView>, RenderView> = new Map()
 
 export function lazyLoadComponent<P extends AnyObject>(config: {
-  load: () => Promise<ComponentTag<P>>,
+  load: () => Promise<RenderView<P>>,
   onIdle?: boolean
-  Placeholder?: ComponentTag,
+  Placeholder?: RenderView,
   timeout?: number,
-  Error?: ComponentTag<{ error: any }>,
+  Error?: RenderView<{ error: any }>,
 }) { // TODO: Idle load priorities
   const { load, Error, Placeholder, timeout, onIdle } = config;
   const $loading = createAtomicIon(true);
@@ -24,14 +24,14 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
       loadComponent()
     })
   }
-  let Component: ComponentTag
+  let Component: RenderView
   function loadComponent() {
     let timeoutID: any;
     if (idleID !== undefined) {
       cancelIdleCallback(idleID);
       idleID = undefined;
     }
-    Component = lazyComponents.get(load) || noop as ComponentTag // if already loaded on idle, get from lazyComponents map
+    Component = lazyComponents.get(load) || noop as RenderView // if already loaded on idle, get from lazyComponents map
     if (Component === noop) {
       const pendingComponent = load();
       if (timeout) {

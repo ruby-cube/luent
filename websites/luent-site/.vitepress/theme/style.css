@@ -80,6 +80,8 @@
 
   --vp-font-family-mono: 'SFMono-Regular', 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'JetBrains Mono', 'Cascadia Mono', 'IBM Plex Mono', 'Courier New', monospace;
 
+  --vp-sidebar-bg-color: rgb(239, 240, 243);
+
   .vp-skip-link {
     display: none !important;
   }
@@ -88,6 +90,7 @@
 .dark {
   --vp-c-brand-1: var(--kelp-3);
   --vp-c-brand-2: var(--kelp-2);
+  --vp-sidebar-bg-color: var(--vp-c-bg-alt);
 }
 
 /**
@@ -805,11 +808,11 @@ body {
   }
 }
 
-@media (min-width: 960px) {
+/* @media (min-width: 960px) {
   .curtain {
-    background-color: transparent !important;
+    background-color: var(--vp-sidebar-bg-color) !important;
   }
-}
+} */
 
 /* Keep reduced-motion defaults, but allow the appearance switch to animate. */
 @layer __vitepress_base {

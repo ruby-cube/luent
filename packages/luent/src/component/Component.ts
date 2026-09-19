@@ -12,11 +12,11 @@ import { $from } from "../utils/destructure";
 import { RawJSXNode } from "packages/luent/dist";
 
 
-export type ComponentTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => RawJSXNode : (setup?: P) => RawJSXNode
+export type RenderView<P extends never | AnyObject = never | AnyObject> = P extends never ? () => RawJSXNode : (setup?: P) => RawJSXNode
 
 export const component = JSXComponentAs;
 
-export type InferSlot<T extends ComponentTag = ComponentTag> =
+export type InferSlot<T extends RenderView = RenderView> =
   T extends (setup?: infer P) => any ?
   P extends { Slot: infer S } ?
   S
@@ -31,7 +31,7 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
   (setup?: P) => JSXNode
 
 export function makeComponent(
-  Component: ComponentTag,
+  Component: RenderView,
   fromTag: ComponentConfig,
 ): ComponentKit<unknown> {
 

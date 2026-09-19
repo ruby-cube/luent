@@ -1,6 +1,6 @@
 # Components
 
-Components are [render functions](/guide/rendering-views#view-templates) that may be instantiated through JSX tag syntax. A render function is a valid component only if it is:
+Components are typically [render functions](/guide/rendering-views#view-templates) that may be instantiated through JSX tag syntax. A render function is a valid component only if it is:
 - defined with a single [setup parameter](#the-setup-parameter) or no parameters
 - Pascal-cased
 
@@ -12,7 +12,6 @@ that create a view. They are essentially view templates and serve as the buildin
 To define a component, declare a function that returns a view written in [JSX](#jsx) or [NSX]()*. -->
 **Defining a component:**
 ```nsx
-// HelloWorld.nsx
 function HelloWorld() {
   <:>
     <p>Hello World.</p>
@@ -21,7 +20,6 @@ function HelloWorld() {
 ```
 
 ```tsx
-// HelloWorld.tsx
 function HelloWorld() {
   return <>
     <p>Hello World.</p>
@@ -46,7 +44,6 @@ Components are instantiated through JSX tag syntax: -->
 Similar to function calls, component tags may be nested within components.
 
 ```nsx
-// Layout.nsx
 function Layout() {
   <:>
     <NavBar />
@@ -56,7 +53,6 @@ function Layout() {
 }
 ```
 ```tsx
-// Layout.tsx
 function Layout() {
   return <>
     <NavBar />
@@ -139,7 +135,7 @@ function MessageDisplay(setup: {
 }
 ```
 :::
-To learn more about bindings see [Component Bindings]().
+To learn more about the different types of component bindings see [Component Bindings](/guide/component-bindings).
 
 
 ### Type Validation
@@ -152,9 +148,9 @@ The `FromTag` type utility provides type validation for the component tag based 
 
 
 ### Ion Normalization
-A binding typed with `Ion<T>` may receive an input that is either `T` or `Ion<T>`. This allows the component consumer the flexibility to decide whether a binding should be reactive or not. 
+A binding typed with `Ion<T>` validates the binding with `T | Ion<T>`. This allows the component consumer the flexibility to decide whether a binding should be reactive or not.
 
-The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NextScript) and treats it as potentially reactive. This prevents cluttering the code with if `isIon()` checks.
+The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NextScript) and treats it as potentially reactive. This prevents cluttering the code with `isIon()` checks.
 
 ```tsx
 function MessageDisplay(setup: FromTag<{
@@ -173,7 +169,7 @@ function MessageDisplay(setup: FromTag<{
 ```
 
 ### Optional setup bindings
-Components can make a setup binding optional by typing it as optional in the `FromTag` object.
+Components can make a setup binding optional by typing it as an optional property in the `FromTag` object type.
 
 ```tsx
 function Counter(setup: FromTag<{
@@ -225,13 +221,13 @@ function Counter(setup: FromTag<{
 ```
 
 
-### Dynamic tags
+## Dynamic tags
 
-Similar to components, HTML elements may be rendered dynamically by binding the tag name to a Pascal-cased variable.
+HTML elements may be rendered dynamically as components by binding the tag name to a Pascal-cased variable.
 
 ```tsx
 function Article(setup: FromTag<{
-  Heading?: 'h1' | 'h2' | 'h3' | ComponentTag,
+  Heading?: 'h1' | 'h2' | 'h3' | RenderView,
   heading: string,
   text: string
 }>) {
@@ -246,7 +242,19 @@ function Article(setup: FromTag<{
 }
 ```
 
-Note that dynamic tags are not reactive. To render dynamic tags reactively, use in conjunction with [`As()`](/guide/view-control-flow.html#as-case).
+### Reactive dynamic tags
+Note that dynamic tags are not inherently reactive. To render dynamic tags reactively, use them in conjunction with [`As()`](/guide/view-control-flow.html#as-case).
+
+```nsx
+{As(heading@, Heading =>
+  <Heading>{heading}</Heading>
+)}
+```
+```tsx
+{As($heading, Heading =>
+  <Heading>{heading}</Heading>
+)}
+```
 
 
 
@@ -477,7 +485,7 @@ For a list of non-static data bindings and to learn more about component binding
 
 ### Component kits
 
-A component kit may be written as a plain object, created using the `component()` helper function, or created through NSX's component syntax. To learn more about component kits and exposing/accessing component instances, see [Node Access](/guide/node-access#component-ref)
+A component kit may be written as a plain object, created using the `expose()` helper function, or created through NSX's component syntax. To learn more about component kits and exposing/accessing component instances, see [Node Access](/guide/node-access#component-ref)
 
 ```tsx
 function Dialog(setup: { Slot: RenderTag }) {

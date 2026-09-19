@@ -59,7 +59,7 @@ features:
     <h2 class='section-heading'>A glimpse of Luent</h2>
   </section>
   <p class='nextscript-note' style='text-wrap: balance'>
-    <strong>Note:</strong> NextScript (.ns/.nsx) is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
+    <strong>Note:</strong> <a href='https://github.com/ruby-cube/luent/tree/main/packages/nextscript'>NextScript (.ns/.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
   </p>
 
 

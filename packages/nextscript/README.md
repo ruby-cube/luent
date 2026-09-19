@@ -17,7 +17,7 @@ NextScript is an experimental TypeScript + JSX language extension designed to im
 
 ## Motivation
 
-Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple data bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What initially seems simple and elegant often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
+Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple view bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What initially seems simple and elegant often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
 
 Getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as opaqueness to TypeScript type guards, the visual clutter of accessor function calls, or confusion caused by functions with data variable names.
 

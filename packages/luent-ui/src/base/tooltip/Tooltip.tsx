@@ -133,7 +133,7 @@ function TooltipRoot(setup: FromTag<{
 
 
 // function TooltipTail(setup: FromTag<{
-//    as?: ComponentTag | string;
+//    as?: RenderView | string;
 //    offset?: Ion<number>
 //    'shape:class'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object
 //    'shape:style'?: Ion<string>

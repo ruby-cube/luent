@@ -301,7 +301,7 @@ UnifiedReactivity.$tab = $CodeTab()
 function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
-      Manage simple, derived, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
+      Manage atomic, derived, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
     <p style='text-wrap: balance'>
       {If(() => $tab() === 'main',
@@ -332,9 +332,6 @@ get qty = ion(1, {
 // derived
 get total = ion(() => count * qty);
 
-// async
-get posts = ion(fetchRecentPosts);
-
 // structured
 const menu = ionic(['apples', 'peaches', 'pears']);
 
@@ -343,6 +340,9 @@ const position = ionic({ x: 0, y: 0 })
 const user = ionic(new User())
 
 `
+
+// // async
+// get posts = ion(fetchRecentPosts);
 
 UnifiedReactivity.ts =
   `// atomic
@@ -355,9 +355,6 @@ const $qty = ion(1, {
 
 // derived
 const $total = ion(() => $count() * $qty());
-
-// async
-const $posts = ion(fetchRecentPosts);
 
 // structured
 const menu = ionic(['apples', 'peaches', 'pears']);
@@ -409,8 +406,7 @@ TypeExplicit.tsHover = {
 }
 TypeExplicit.filename = 'examples'
 TypeExplicit.nsx =
-  `
-get total = ion(() => count * qty);
+  `get total = ion(() => count * qty);
 
 // ---
 
@@ -422,8 +418,7 @@ get total = ion(() => count * qty);
 `
 
 TypeExplicit.tsx =
-  `
-const $total = ion(() => count * $qty())
+  `const $total = ion(() => count * $qty())
 
 // ---
 
@@ -629,17 +624,18 @@ DynamicViewSetup.tsx =
 
 `
 
+
 MutationSafety.heading = 'Mutation safety'
 
 function MutationSafety() {
-  return <>
-    <p>
-      Compile-time mutation checking* prevent hidden nonlocal mutations, while explicit mutable bindings enable safe, statically traceable cross-boundary mutations.
-    </p>
-    <p><small>* currently in development, not yet available</small></p>
-    <a href='/guide/mutation-safety' class='medium brand'>Learn more</a>
-  </>
-}
+    return <>
+      <p>
+        Compile-time mutation checking* prevent hidden nonlocal mutations, while explicit mutable bindings enable safer, statically traceable cross-boundary mutations.
+      </p>
+      <p><small>* currently in development, not yet available</small></p>
+      <a href='/guide/mutation-safety' class='medium brand'>Learn more</a>
+    </>
+  }
 
 MutationSafety.filename = 'EmojiQuest'
 MutationSafety.nsx =
@@ -649,7 +645,7 @@ MutationSafety.nsx =
       this.push(chooseRandom(powers))
     }
   })
-  <:>
+    <:>
     <EmojiBoard powers={powerset}/>
     <Powerset mu:powers={powerset} limit={10}/>
   </:>
@@ -670,7 +666,7 @@ function Powerset(setup: FromTag<{
     </div>
     <o-link href='/powerset.css' rel='stylesheet' />
   </:>
-}`
+} `
 
 MutationSafety.tsx =
   `function EmojiQuest({ powers }) {
@@ -680,8 +676,8 @@ MutationSafety.tsx =
     }
   })
   return <>
-    <EmojiBoard powers={powerset}/>
-    <Powerset mu:powers={powerset} limit={10}/>
+    <EmojiBoard powers={powerset} />
+    <Powerset mu:powers={powerset} limit={10} />
   </>
 }
 
@@ -693,67 +689,70 @@ function Powerset(setup: FromTag<{
   return <>
     <div class='powerset-panel'>
       <Powers powers={powers}>
-      <button
-        disabled={() => powers.length === limit}
-        on:click={() => powers.addRandomPower()}
-      >+</button>
+        <button
+          disabled={() => powers.length === limit}
+          on:click={() => powers.addRandomPower()}
+        >+</button>
     </div>
     <o-link href='/powerset.css' rel='stylesheet' />
   </>
-}`
+} `
 
 LifecycleHooks.heading = 'Inline lifecycle hooks'
 
 function LifecycleHooks() {
-  return <>
-    <p>
-      Lifecycle behavior specific to a view node may be declared inline through lifecycle bindings such as <code>at:mount</code> and <code>before:unmount</code>.
-    </p>
-    <a href='/guide/lifecycle-hooks' class='medium brand'>Learn more</a>
-  </>
-}
+    return <>
+      <p>
+        Lifecycle behavior specific to a view node may be declared inline through lifecycle bindings such as <code>at:mount</code> and <code>before:unmount</code>.
+      </p>
+      <a href='/guide/lifecycle-hooks' class='medium brand'>Learn more</a>
+    </>
+  }
 
 LifecycleHooks.filename = 'Editor'
 LifecycleHooks.nsx =
-  `{If(editing@,
-  <input
-    type="text"
-    at:mount={node => node.focus()}
-    mu:value={todo.title@}
-    on:blur={e => doneEdit(todo)}
+  `{
+  If(editing@,
+    <input
+      type="text"
+      at:mount={node => node.focus()}
+      mu:value={todo.title@}
+on: blur = { e => doneEdit(todo) }
   />
 )}
 
 `
 
 LifecycleHooks.tsx =
-  `{If($editing,
-  <input
-    type="text"
-    at:mount={node => node.focus()}
-    mu:value={$of(todo).title}
-    on:blur={e => doneEdit(todo)}
-  />
-)}
+  `{
+  If($editing,
+    <input
+      type="text"
+      at:mount={node => node.focus()}
+      mu:value={$of(todo).title}
+      on:blur={e => doneEdit(todo)}
+    />
+  )
+}
 
 `
 
 Portals.heading = 'Portals'
 
 function Portals() {
-  return <>
-    <p>
-      Visually distinctive portal tags make it clear which sections of the view are rendered elsewhere in the DOM. Declare metadata locally in components through head elements like <code>{'<o-link>'}</code> and <code>{'<o-style>'}</code>.
-    </p>
-    <a href='/guide/portals' class='medium brand'>Learn more</a>
-  </>
-}
+    return <>
+      <p>
+        Visually distinctive portal tags make it clear which sections of the view are rendered elsewhere in the DOM. Declare metadata locally in components through head elements like <code>{'<o-link>'}</code> and <code>{'<o-style>'}</code>.
+      </p>
+      <a href='/guide/portals' class='medium brand'>Learn more</a>
+    </>
+  }
 
 Portals.filename = 'portal-examples'
 Portals.nsx =
-  `<o--portal to='#sidebar'>
-  <Preview document={document}/>
-</o--portal>
+  `< o--portal to = '#sidebar' >
+  <Preview document={document} />
+</o--portal >
 
 <o--body>
   {If(show@, 
@@ -766,9 +765,9 @@ Portals.nsx =
 `
 
 Portals.tsx =
-  `<o--portal to='#sidebar'>
-  <Preview document={document}/>
-</o--portal>
+  `< o--portal to = '#sidebar' >
+  <Preview document={document} />
+</o--portal >
 
 <o--body>
   {If($show, 
@@ -784,13 +783,13 @@ Portals.tsx =
 ContextBindings.heading = 'Context bindings'
 
 function ContextBindings() {
-  return <>
-    <p>
-      Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Merge context keys to provide the same binding across multiple decoupled components.
-    </p>
-    <a href='/guide/contextual-bindings' class='medium brand'>Learn more</a>
-  </>
-}
+    return <>
+      <p>
+        Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Merge context keys to provide the same binding across multiple decoupled components.
+      </p>
+      <a href='/guide/contextual-bindings' class='medium brand'>Learn more</a>
+    </>
+  }
 // Provide from the root of an application locally with <code>{'<o--root>'}</code> or from reusable kits with <code>provideRoot()</code>. 
 
 ContextBindings.filename = 'App'
@@ -807,8 +806,8 @@ function App() {
   const settings = new Settings();
   <:>
     <o:context provide={[THEME(theme@), SETTINGS(settings)]}>
-      <Main/>
-      <Sidebar/>
+      <Main />
+      <Sidebar />
     </o:context>
   </:>
 }
@@ -839,8 +838,8 @@ function App() {
   const settings = new Settings();
   return <>
     <o:context provide={[THEME($theme), SETTINGS(settings)]}>
-      <Main/>
-      <Sidebar/>
+      <Main />
+      <Sidebar />
     </o:context>
   </>
 }
@@ -862,45 +861,48 @@ export function Sidebar() {
 ViewPreservation.heading = 'Preserved views'
 
 function ViewPreservation() {
-  return <>
-    <p>
-      Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>"preserve"</code> directive. Discard with <code>view.markDiscard()</code> when the view is no longer needed or state needs to be refreshed.
-    </p>
-    <a href='/guide/preserving-views' class='medium brand'>Learn more</a>
-  </>
-}
+    return <>
+      <p>
+        Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>"preserve"</code> directive. Discard with <code>view.markDiscard()</code> when the view is no longer needed or state needs to be refreshed.
+      </p>
+      <a href='/guide/preserving-views' class='medium brand'>Learn more</a>
+    </>
+  }
 
 ViewPreservation.filename = 'App'
 ViewPreservation.nsx =
   `<div>
-  {If(showSidebar@, 'preserve',
+{
+  If(showSidebar@, 'preserve',
     <Sidebar selected={tab@}/>
   )}
-  <o:preserve>
-    {As(tab@,
-      <Editor content={tabNames[tab]} />
-    )}
-    {Default(
-      <p>No tabs open</p>
-    )}
-  </o:preserve>
-</div>
+<o:preserve>
+  {As(tab@,
+    <Editor content={tabNames[tab]} />
+  )}
+  {Default(
+    <p>No tabs open</p>
+  )}
+</o:preserve>
+</div >
 
-`
+  `
 
 ViewPreservation.tsx =
   `<div>
-  {If($showSidebar, 'preserve',
-    <Sidebar selected={$tab}/>
+{
+  If($showSidebar, 'preserve',
+    <Sidebar selected={$tab} />
+  )
+}
+<o:preserve>
+  {As($tab,
+    <Editor content={tabNames[$tab()]} />
   )}
-  <o:preserve>
-    {As($tab,
-      <Editor content={tabNames[$tab()]} />
-    )}
-    {Default(
-      <p>No tabs open</p>
-    )}
-  </o:preserve>
-</div>
+  {Default(
+    <p>No tabs open</p>
+  )}
+</o:preserve>
+</div >
 
-`
+  `

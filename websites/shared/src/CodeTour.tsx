@@ -1,4 +1,4 @@
-import { ComponentTag, css, FromTag, Ion, RenderTag, Style } from 'luent'
+import { RenderView, css, FromTag, Ion, RenderTag, Style } from 'luent'
 import { Code } from './Code';
 
 export function CodeTour(setup: FromTag<{
@@ -50,7 +50,7 @@ export function TourSection(setup: FromTag<{
   altCode: { name: string, code: string, lang?: string },
   highlightCode: (code: string, lang: string) => Promise<string>,
   flow: 'code-right' | 'code-left',
-  Note?: ComponentTag
+  Note?: RenderView
 }>) {
   const { filename = 'example', Slot, flow, mainCode, altCode, highlightCode, id, $tab, Note, columnRatio=[1,1] } = setup
   return (

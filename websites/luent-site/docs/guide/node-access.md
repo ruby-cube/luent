@@ -55,20 +55,133 @@ const tds = NodeRef('td', [])
 
 
 ## Component Nodes
-<!-- - Absorbed ions?
-- Ref forwarding -->
-:::info Type definitions
+A component may expose data and methods to its consumer through the `expose()` method. In NextScript, a component instance may be exposed through the component return syntax, <code><:: as={<i>component</i>}></code>.
 
-```ts
-type RawJSXNode = any | any[];
 
-type ComponentKit = {
-  nodes: RawJSXNode;
-  component: object;
-};
+```nsx
+function Dialog(setup: FromTag<{ 
+  Slot: RenderView 
+}>) {
+  const { Slot } = setup;
+  get opened = ion(false)
+
+  <:: as={{
+    open() { opened = true },
+    close() { opened = false }
+  }}>  
+    {If(opened@, 
+      <o--body>
+        <div>
+          <Slot/>
+        </div>
+      </o--body>
+    )}
+  </::>
+}
+```
+```tsx
+function Dialog(setup: FromTag<{ 
+  Slot: RenderView 
+}>) {
+  const { Slot } = setup;
+  const opened = ion(false)
+
+  return expose({
+    open() { opened = true },
+    close() { opened = false }
+  }, <>
+    {If(opened, 
+      <o--body>
+        <div>
+          <Slot/>
+        </div>
+      </o--body>
+    )}
+  </>) 
+}
 ```
 
-:::
+The consumer can then accesses the component node using a node ref.
+
+```nsx
+function Parent() {
+  // node is typed based on `as` attribute of Dialog's `<::>`
+  get dialog = NodeRef(Dialog) 
+
+  <:>
+    <button on:click={() => dialog?.open()}>submit</button>
+    <Dialog ref={dialog}>
+      <DialogContent close={() => dialog?.close()}/>
+    </Dialog>
+  </:>
+}
+```
+```tsx
+function Parent() {
+  // node is typed based on the exposed object
+  const $dialog = NodeRef(Dialog) 
+
+  return <>
+    <button on:click={() => $dialog()?.open()}>submit</button>
+    <Dialog ref={$dialog}>
+      <DialogContent close={() => $dialog()?.close()}/>
+    </Dialog>
+  </>
+}
+```
+
+## Pre-created Elements
+<span class='doc-tag'>Experimental</span>
+
+Alternatively to node refs, pre-created elements may be rendered to the view using `asJSX()`. 
+
+```tsx
+function DrawingApp() {
+  const canvas = DOMNode('canvas');
+  const Canvas = asJSX(canvas)
+
+  function clearCanvas() {
+    const context = canvas.getContext("2d")
+    if (!context) return;
+    context.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
+  return (
+    <div class="canvas-app">
+      <button type="button" on:click={clearCanvas}>Clear</button>
+      <Canvas
+        width="900"
+        height="500"
+			  {...DrawingKit(canvas)}
+      ></Canvas>
+    </div>
+  )
+}
+```
+
+## Pre-existing Elements
+<span class='doc-tag'>Experimental</span>
+
+`asJSX()` nodes may also be used to create bindings on a pre-existing node
+
+```tsx
+function makeDraggable(node: HTMLElement, item: Item) {
+  const $dragged = ion(() => isSelected(item) && $dragging());
+  const $node = asJSX(node);
+
+  const $transform = ion(() => (
+    $dragged() 
+      ? `translate(${$shiftY()}px, ${$shiftX())}px)` 
+      : undefined
+  ))
+
+  <$node
+    on:pointerdown={e => maybeDrag(e, item)}
+    class={{ 'dragged': $dragged }}
+    style={{ 'transform': $transform }}
+  />
+}
+```
 
 
 ## Inline hooks

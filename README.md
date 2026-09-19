@@ -45,7 +45,7 @@ This project explores ways to make development of complex, evolving applications
 
 ## JSX Transpiler
 
-Luent transpiles JSX tags into `jsx()` call expressions with straightforward mental mapping between JSX syntax and compiled output. It extends the base JSX transform with the following:
+Luent transpiles JSX tags into `jsx()` calls with straightforward mental mapping between JSX syntax and compiled output. It extends the base JSX transform with the following:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants
 - [JSX flow expressions](http://luent.dev/guide/template-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories

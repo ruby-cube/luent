@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, NodeRef, template, ComponentTag, If, Else, For, teleportTo } from "luent";
+import { component, NodeRef, template, RenderView, If, Else, For, teleportTo } from "luent";
 import { useRandomColorGenerator } from "@luent/utils";
 import { __addDevName, Ion, ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packagesluent/src/component/LazyComponent";
@@ -21,7 +21,7 @@ function genId() {
 // const SideBlock = lazyLoadComponent({
 //     load: () => {
 //         const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
-//         return new Promise((resolve: (SideBlock: ComponentTag) => void, reject) => {
+//         return new Promise((resolve: (SideBlock: RenderView) => void, reject) => {
 //             setTimeout(() => {
 //                 promise.then((SideBlock) => {
 //                     resolve(SideBlock)
@@ -36,7 +36,7 @@ function genId() {
 // const TestBox = lazyLoadComponent({
 //     load: () => {
 //         const promise = import('./TestBox').then(({ TestBox }) => TestBox)
-//         return new Promise((resolve: (SideBlock: ComponentTag) => void, reject) => {
+//         return new Promise((resolve: (SideBlock: RenderView) => void, reject) => {
 //             setTimeout(() => {
 //                 promise.then((SideBlock) => {
 //                     resolve(SideBlock)

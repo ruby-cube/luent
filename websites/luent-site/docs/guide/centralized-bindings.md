@@ -1,6 +1,9 @@
 # Centralized bindings
 
-
+:::warning <span style='margin-right: .5rem'>🚧</span> UNDER CONSTRUCTION 
+The <u>Centralized bindings</u> docs are still being written. Thanks for your patience!
+:::
+<!-- 
 mergeKeys
 
 ## Root Context
@@ -72,4 +75,4 @@ or in one line:
 
 ```ts
 const foo = new fromRoot(CLASS_FOO)(bar);
-```
+``` -->

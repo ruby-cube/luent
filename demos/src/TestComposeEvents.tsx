@@ -84,7 +84,7 @@ function ChildB(setup: any) {
 // * may land in component or element .. depending on whether component exposes a public instance
 
 // Child
-// function makeComponent(Component: ComponentTag, fromTag: any) {
+// function makeComponent(Component: RenderView, fromTag: any) {
 //    const setup = toSetup(fromTag) // unless emit has been extracted and used for something else...
 
 //    const output = Component(setup)

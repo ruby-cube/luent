@@ -90,7 +90,7 @@ export default defineConfig({
             { text: 'Rendering Views', link: '/guide/rendering-views' },
             { text: 'Components', link: '/guide/components' },
             {
-              text: 'Reactive State', link: '/guide/reactive-state', items: [
+              text: 'Reactive State*', link: '/guide/reactive-state', items: [
                 // { text: 'Atomic Reactive State', link: '/guide/getter-syntax#accessor-variables' },
                 // { text: 'Derived Reactive State', link: '/guide/getter-syntax#accessor-variables' },
                 // { text: 'Inline Derivations', link: '/guide/getter-syntax#the-postfix-operator' },
@@ -129,12 +129,12 @@ export default defineConfig({
             },
 
             { text: 'Context Bindings', link: '/guide/context-bindings' },
-            { text: 'Centralized Bindings*', link: '/guide/centralized-bindings' },
+            { text: 'Centralized Bindings', link: '/guide/centralized-bindings' },
             { text: 'The Render Cycle', link: '/guide/the-render-cycle' },
             { text: 'Preserving Views', link: '/guide/preserving-views' },
             { text: 'Lifecycle Hooks', link: '/guide/lifecycle-hooks' },
-            { text: 'Effect Cleanup*', link: '/guide/effect-cleanup' },
-            { text: 'Node Access*', link: '/guide/node-access' },
+            { text: 'Effect Cleanup', link: '/guide/effect-cleanup' },
+            { text: 'Node Access', link: '/guide/node-access' },
             { text: 'Reusable Logic', link: '/guide/reusable-logic' }
           ]
         },

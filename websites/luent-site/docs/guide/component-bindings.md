@@ -77,6 +77,7 @@ function Counter(setup: FromTag<{
 Data bindings provide a component with data. The bindings may be static or reactive.
 
 ### Static bindings
+Static bindings provide a component with constant values.
 ```tsx
 function Counter(setup: FromTag<{
    limit: number
@@ -104,11 +105,11 @@ function Counter(setup: FromTag<{
 
 ### Reactive bindings
 
-A setup binding is designated as potentially reactive by typing it with the `Ion` type helper. 
+To specify a reactive binding, type it with the `Ion` type helper.
 
-Reactive bindings are merely potentially reactive because reactivity is ultimately determined by what the consumer of the component passes in. The component itself normalizes the binding to an accessor through the `$` (prefix or `@` postfix in NextScript) and treats it as potentially reactive. 
+Reactive bindings are merely *potentially* reactive because reactivity is ultimately determined by what the consumer of the component passes in. The component itself normalizes the binding to an accessor through the `$` prefix (or `@` postfix in NextScript) and treats it as reactive. 
 
-Ion normalization allows flexibility for the consumer while preserving simplicity in the component.
+[Ion normalization](/guide/components#ion-normalization) allows flexibility for the consumer while preserving simplicity in the component.
 
 ```tsx
 function Counter(setup: FromTag<{
@@ -134,7 +135,7 @@ function Counter(setup: FromTag<{
 <Counter limit={$limit} />
 ```
 
-**Passing in a static value**
+**Passing in a static value to a reactive binding**
 ```tsx
 <Counter limit={100} />
 ```
@@ -144,17 +145,6 @@ function Counter(setup: FromTag<{
 ### Nested reactivity
 Static and reactive bindings may contain nested reactivity through ionic structures.
 
-```tsx
-function App() {
-  const list = ionic(['apple', 'peach', 'pear'])
-  return <>
-    <List items={list} />
-    <button on:click={() => list.push(randomFruit())}>
-      add
-    </button>
-  </>
-}
-```
 ```tsx
 function List(setup: FromTag<{
   items: Ionic<string[]>
@@ -169,10 +159,23 @@ function List(setup: FromTag<{
   </>
 }
 ```
+
+**Providing an ionic structure**
+```tsx
+function App() {
+  const list = ionic(['apple', 'peach', 'pear'])
+  return <>
+    <List items={list} />
+    <button on:click={() => list.push(randomFruit())}>
+      add
+    </button>
+  </>
+}
+```
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Mutable bindings
-By default, component bindings are deeply read-only, enforced at compile time*. However mutable bindings may be marked as mutable through mutability annotations. To learn more see [Mutation Safety](/guide/mutation-safety).
+By default, component bindings are deeply read-only, enforced at compile time*. However, mutable bindings may be marked as mutable through mutability annotations. To learn more see [Mutation Safety](/guide/mutation-safety).
 
 :::warning * NOT YET AVAILABLE
 Mutation safety checking is currently under development and not yet ready to use. However, mutability annotations may be beneficial regardless of mutation safety enforcement.
@@ -203,7 +206,7 @@ function Counter(setup: FromTag<{
 ```
 
 ## Events
-Event bindings allow components to emit events and allow consumers to register event handlers on the component. They must be named according to the pattern <code>on<i>[Event]</i></code>.
+Components may emit events and consumers may register event handlers on the component through event bindings. The binding name must be camel-cased according to the pattern <code>on<i>[Event]</i></code>.
 
 Component event bindings are essentially action bindings that are auto-typed as optional, renamed from <code>on<i>[Event]</i></code> to <code>emit<i>[Event]</i></code>, and auto-default to a no-op function.
 
@@ -211,8 +214,8 @@ Component event bindings are essentially action bindings that are auto-typed as 
 function App() {
   return <>
     <Counter 
-        limit={Math.floor(Math.random() * 50)} 
-        onLimitReached={e => console.log('limit reached:', e.limit)}
+      limit={Math.floor(Math.random() * 50)} 
+      onLimitReached={e => console.log('limit reached:', e.limit)}
     />
   </>
 }
@@ -252,7 +255,7 @@ A component must explicitly declare a `Slot` component in order to allow slot co
 
 ```tsx
 function Card(setup: FromTag<{
-  Slot: Component
+  Slot: RenderView
 }>) {
   const { Slot } = setup;
   return <>
@@ -280,16 +283,21 @@ jsx(Card, {
 ```
 :::
 
+:::details CODE SWITCH
+**React:** the `children` prop
+
+**Vue:** slots
+:::
+
 
 ### Named views
 Slot components do not receive any parameters. To render a component that receives setup bindings or to render multiple components, declare named view bindings. 
 
 Named view bindings must be Pascale-cased in order to be instantiated through JSX syntax.
-
 ```tsx
 function ClubsCard(setup: FromTag<{
-  Heading: Component<{ symbol: string }>
-  Description: Component
+  Heading: RenderView<{ symbol: string }>
+  Description: RenderView
 }>) {
   const { Heading, Description } = setup;
   return <>
@@ -326,7 +334,9 @@ jsx(ClubsCard, {
 :::
 
 :::details CODE SWITCH
-Vue: Named slots
+**React**: JSX props
+
+**Vue:** Named slots
 :::
 
 
@@ -364,10 +374,10 @@ function App() {
   get count = ion(0)
   return <>
     <Counter 
-    count={count} 
-    increment={() => count++} 
-    style='color: red'
-    on:click={() => console.log('counter clicked')}
+      count={count} 
+      increment={() => count++} 
+      style='color: red'
+      on:click={() => console.log('counter clicked')}
     />
   </>
 }
@@ -386,12 +396,14 @@ function Counter(setup: FromTag<'button', {
 }
 ```
 
-> **Code-switch**
-> - **React:** (approx.) ref forwarding, rest props and spread attributes
-> - **Vue:** (approx.) inherited attributes, fallthrough attributes
+:::details CODE SWITCH
+**React:** (approx.) ref forwarding, rest props and spread attributes
+
+**Vue:** (approx.) inherited attributes, fallthrough attributes
+:::
 
 ### X-ray binding
-To offer even more flexibility in bindings, a component may specify multiple nodes for a parent to bind additional data, methods, attributes or events to.
+To offer even more flexibility in bindings, a component may specify multiple nodes for a parent to bind additional data, methods, attributes or events to through x-ray binding.
 ```tsx
 function App() {
   return <>

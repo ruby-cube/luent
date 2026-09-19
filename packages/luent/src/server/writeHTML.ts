@@ -1,6 +1,6 @@
 import { isFunction, isObject, isString, normalizeToArray } from "@luent/utils";
 import { composeBindings, toSetup } from "../component/bindings";
-import { ComponentTag } from "../component/Component";
+import { RenderView } from "../component/Component";
 import { RenderTag } from "../component/bindings-types";
 import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { $from } from "../utils/destructure";
@@ -201,7 +201,7 @@ export function processJSXOutput(jsxNodes: RawJSXNode[], flattened: string[] = [
 }
 
 export function writeComponent(
-  Component: ComponentTag,
+  Component: RenderView,
   fromTag: ComponentConfig,
 ) {
   const setup = toSetup(fromTag) // TODO: SSR version of toSetup?

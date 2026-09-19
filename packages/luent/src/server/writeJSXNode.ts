@@ -1,4 +1,4 @@
-import { ComponentTag, InferSlot } from "../component/Component";
+import { RenderView, InferSlot } from "../component/Component";
 import { TagName } from "../element/setUpElement";
 import { ComponentConfig, ElementConfig, makeView, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { writeComponent, writeElement, processJSXOutput } from "./writeHTML";
@@ -10,7 +10,7 @@ import { Context } from "../context/Context";
 
 
 export function writeJSXNode(
-  nodeType: SVGTag | TagName | ComponentTag | 'o-link' | 'o--body' | 'o--portal' | 'o:preserve' | 'shadow-root' | any,
+  nodeType: SVGTag | TagName | RenderView | 'o-link' | 'o--body' | 'o--portal' | 'o:preserve' | 'shadow-root' | any,
   Slot: undefined | (() => RawJSXNode[]) | InferSlot,
   config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {

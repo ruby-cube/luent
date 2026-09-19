@@ -1,23 +1,29 @@
-# Element Binding
+# Element Bindings
 
 
 ## Attributes
 
 JSX attributes may be written as either HTML/SVG attribute names or DOM property names.
 
+**HTML attribute name**
 ```jsx
 <div contenteditable="true">Write something...</div>
 ```
 
+**DOM property name**
 ```jsx
 <div contentEditable="true">Write something...</div>
 ```
 
+<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
+
 ### Static bindings
-When a indings are static, meaning
+Static bindings provide constant values.
 ```tsx
 <div contenteditable={contentEditable}>Write something...</div>
 ```
+
+<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 ### Reactive bindings
 To make a binding reactive, pass in a reactive ion.
@@ -62,6 +68,8 @@ function Text(setup: FromTag<{
 }
 ```
 :::
+
+<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 <!-- 
 Under the hood, Luent applies each binding using the appropriate DOM mechanism. Most standard attributes are applied through property assignment, while `data-*` and ARIA attributes are applied through `Element.setAttribute()`.
@@ -153,7 +161,7 @@ To handle events on the window, document, html, head, or body, use the built-in 
 ```tsx
 <o--body on:click={deselect} />
 ```
-
+<!-- 
 ### Transient Listeners
 
 For transient event listeners whose lifetime should not span the lifetime of its encompassing view, Luent provides `listen()`.
@@ -177,12 +185,12 @@ listen(window, "keydown", (e) => {
 
 ```tsx
 function initDrag() {
-  Scene((dragging) => {
-    listen(window, "mousemove", drag);
-    listen(window, "mouseup", () => {
-      endDrag();
-      dragging.end();
-    });
+  const dragging = $thisScene();
+
+  listen(window, "mousemove", drag);
+  listen(window, "mouseup", () => {
+    endDrag();
+    dragging.end();
   });
 }
 ```
@@ -200,7 +208,7 @@ listen(window, "mousedown", () => {
   endMouseTail();
   controller.abort();
 }, { signal: controller.signal });
-```
+``` -->
 
 ## Styles
 
@@ -270,7 +278,7 @@ Static and dynamic classes may be mixed with object or array notation.
 
 The `microclass` attribute is designed for utility-style class composition.
 
-Unlike the standard `class` attribute, microclasses participate in utility class merging, especially when composed across component boundaries through forwarded bindings. This allows conflicting utility classes to be resolved predictably through utility merge strategies such as `twMerge()`. See [Forwarded bindings]()
+Unlike the standard `class` attribute, microclasses participate in utility class merging, especially when composed across component boundaries through [forwarded bindings](/guide/component-bindings#forwarded-bindings). This allows conflicting utility classes to be resolved predictably through utility merge strategies such as `twMerge()`.
 
 #### Static microclasses
 
