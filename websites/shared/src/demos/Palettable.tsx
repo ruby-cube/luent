@@ -383,7 +383,7 @@ function DraggableKit<T>(config: {
   let dropZone: Element | null = null;
 
   const $dragging = ion(false)
-  const $taggingAlong = ion(false) // tag-along transition
+  const $stacked = ion(false) // whether tag-alongs should be offset from the lead swatch
   const $shiftX = ion(0)
   const $shiftY = ion(0)
 
@@ -399,28 +399,6 @@ function DraggableKit<T>(config: {
     target.addEventListener('pointermove', rePointermove)
     target.addEventListener('pointerup', rePointerUp)
 
-
-    function startTagAlongTransition() {
-      const row = target.closest('.row')
-      if (!row) {
-        $taggingAlong.value = true
-        return;
-      }
-
-      const nodes = [...row.querySelectorAll<HTMLElement>('.square')]
-      nodes.forEach(node => node.style.setProperty('transition', 'none'))
-      nodes.forEach(node => node.getBoundingClientRect())
-      
-      requestAnimationFrame(() => {
-        queueTask(() => {
-          nodes.forEach(node => node.style.removeProperty('transition'))
-          requestAnimationFrame(() => {
-            $taggingAlong.value = true
-          })
-        })
-      })
-    }
-
     function rePointermove(e: any) {
       if (Math.abs(e.clientX - originalX) < 5 && Math.abs(e.clientY - originalY) < 5)
         return;
@@ -431,8 +409,7 @@ function DraggableKit<T>(config: {
       onDrag(item);
 
       if ($selected().length > 1) {
-        startTagAlongTransition()
-        // $taggingAlong.value = true;
+          $stacked.value = true
       }
 
       x = e.clientX
@@ -450,7 +427,6 @@ function DraggableKit<T>(config: {
 
       // Find the element underneath the pointer
       const elementBelow = deepElementFromPoint(e.clientX, e.clientY);
-      // dropZone = composedClosest(elementBelow, '.drop-zone');
       dropZone = elementBelow?.closest('.drop-zone') ?? null;
 
       if (dropZone !== prevDropZone) {
@@ -476,7 +452,7 @@ function DraggableKit<T>(config: {
         target.releasePointerCapture(e.pointerId)
         $shiftX.value = 0;
         $shiftY.value = 0;
-        $taggingAlong.value = false;
+        $stacked.value = false
         onDrop(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
         queueTask(() => { $dragging.value = false });
@@ -486,8 +462,6 @@ function DraggableKit<T>(config: {
       target.removeEventListener('pointerup', rePointerUp)
     }
   }
-
-
 
   // Tag-along
   /**
@@ -513,24 +487,28 @@ function DraggableKit<T>(config: {
 
   function makeDraggable(node: HTMLElement, item: T, $index: Ion<number>) {
     const $dragged = ion(() => isSelected(item) && $dragging());
-    const $tagalong = ion(() => $taggingAlong() && $dragged() && $index() !== selectedIndex);
+    const $tagalong = ion(() => $dragged() && $index() !== selectedIndex);
+    const $stackOffset = ion(() => $stacked() && $tagalong() ? adjustX(0, item, $index()) : 0)
+    const $dragTransform = ion(() => axis === 'horizontal'
+      ? `translate3d(${$shiftX()}px, ${$shiftY()}px, 0px)`
+      : `translate3d(${$shiftY()}px, ${$shiftX()}px, 0px)`
+    )
+    const $translate = ion(() => {
+      const offset = $stackOffset()
+      return axis === 'horizontal' ? `${offset}px 0px` : `0px ${offset}px`
+    })
     const $node = asJSX(node);
-
-    const $transform = ion(() => axis === 'horizontal'
-      ? `translate3d(${$tagalong() ? adjustX($shiftX(), item, $index()):$shiftX()}px, ${$shiftY()}px, 0px)`
-      : `translate3d(${$shiftY()}px, ${$tagalong() ? adjustX($shiftX(), item, $index()) : $shiftX()}px, 0px)`
-    );
 
     <$node
       on:pointerdown={e => maybeDrag(e, item, $index())}
-      // on:transitionend={() => {console.log('transitionend'); $taggingAlong.value = false}}
       class={{
         'tag-along': $tagalong,
         'dragged': $dragged,
       }}
       style={{
         'z-index': () => $dragged() ? order($index()) : 0,
-        'transform': () => $dragged() ? $transform() : 'translate3d(0, 0, 0)'
+        'transform': () => $dragged() ? $dragTransform() : undefined,
+        'translate': () => $dragged() ? $translate() : undefined,
       }}
     />
   }
@@ -539,21 +517,10 @@ function DraggableKit<T>(config: {
     .dragged {
       cursor: grabbing !important;
       box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
-      transform: translate3d(0, 0, 0);
-      will-change: transform;
-
-      /* Prevent flickering/shaking during the active transition */
-      // -webkit-backface-visibility: hidden;
-      // backface-visibility: hidden;
-      // -webkit-perspective: 1000;
-      // perspective: 1000;
-
-      // -webkit-transform-style: preserve-3d;
-      // transform-style: preserve-3d;
     }
   
     .tag-along {
-      transition: transform 67ms ease;
+      transition: translate 125ms ease-out;
     }
   `)
 

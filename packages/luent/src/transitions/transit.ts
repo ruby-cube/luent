@@ -1,4 +1,4 @@
-import { getActiveUpdate, queueRender, queueTask, toValue } from "@luent/quarky";
+import { getActiveUpdate, queueLayout, queueRender, queueTask, toValue } from "@luent/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/bindings-types";
@@ -25,16 +25,19 @@ export function startTransitionItem(node: HTMLElement, first: DOMRect, last: DOM
 
   // Disable transitions while applying the inverted transform.
   node.style.setProperty('transition', 'none')
-
-  node.style.setProperty('transform', `translate(${deltaX}px, ${deltaY}px)`)
+  node.style.setProperty('transform', `translate3d(${deltaX}px, ${deltaY}px, 0px)`)
 
   // Force style flush before enabling transitions back. (required by Safari)
-  node.getBoundingClientRect()
-  node.style.removeProperty('transition')
+  queueLayout(() => {
+    node.getBoundingClientRect()
+    queueRender(() => {
+      node.style.removeProperty('transition')
+    })
+  })
   
   requestAnimationFrame(() => {
     queueTask(() => {
-      node.style.setProperty('transform', `translate(0px, 0px)`)
+      node.style.setProperty('transform', `translate3d(0px, 0px, 0px)`)
       node.addEventListener('transitionend', () => {
         classes.forEach(className => node.classList.remove(className))
         node.style.removeProperty('transform')
