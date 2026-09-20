@@ -333,15 +333,6 @@ const Arrow = () =>
         border-radius: 2px;
       }
 
-      @media (max-width: 479px) {
-        .chevron-arrow {
-          max-width: 16px;
-        }
-        .chevron-down {
-          max-width: 12px;
-        }
-      }
-
       .chevron-tic {
         right: 40%;
         transform-origin: right center;
@@ -352,6 +343,23 @@ const Arrow = () =>
         transform-origin: left center;
         transform: rotate(-45deg);
       }
+
+      @media (max-width: 479px) {
+        .chevron-arrow {
+          max-width: 16px;
+        }
+        .chevron-down {
+          width: 18px;
+        }
+        .chevron-tic {
+          right: 35%;
+        }
+        .chevron-tac {
+          left: 35%;
+        }
+      }
+
+
     `)}
   </>
 
@@ -382,6 +390,8 @@ function DraggableKit<T>(config: {
   let dropIndex: number | null = null;
   let dropZone: Element | null = null;
 
+   const phoneScreen = detectPhoneScreen()
+
   const $dragging = ion(false)
   const $stacked = ion(false) // whether tag-alongs should be offset from the lead swatch
   const $shiftX = ion(0)
@@ -409,7 +419,7 @@ function DraggableKit<T>(config: {
       onDrag(item);
 
       if ($selected().length > 1) {
-          $stacked.value = true
+        $stacked.value = true
       }
 
       x = e.clientX
@@ -462,6 +472,7 @@ function DraggableKit<T>(config: {
       target.removeEventListener('pointerup', rePointerUp)
     }
   }
+ 
 
   // Tag-along
   /**
@@ -470,7 +481,7 @@ function DraggableKit<T>(config: {
   function adjustX(x: number, item: T, index: number) {
     if (index === selectedIndex || selectedIndex === null) return x;
     const delta = Math.abs(index - selectedIndex);
-    const shift = delta * 24 + delta * 44
+    const shift = delta * 24 + delta * (phoneScreen ? 30 : 44)
     const selected = $selected()
     const nudge = (selected.indexOf(selectedItem!) - selected.indexOf(item)) * 8
     return index < selectedIndex ? x + shift - nudge : x - shift - nudge
@@ -580,7 +591,9 @@ function DraggableKit<T>(config: {
   }
 }
 
-
+function detectPhoneScreen() {
+  return typeof window !== 'undefined' ? window.matchMedia("(max-width: 479px)").matches : false;
+}
 
 
 export type Color = {
