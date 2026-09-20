@@ -58,6 +58,7 @@ export function Code(setup: FromTag<{
   const $stickyBtn = NodeRef('button')
   const $container = NodeRef('div')
   const $nav = NodeRef('nav')
+  const $showSticky = ion(false)
 
 
 
@@ -69,10 +70,9 @@ export function Code(setup: FromTag<{
           <span class='filename'>{filename}.{() => $tab() === 'main' ? main.lang ?? main.name : alt.lang ?? alt.name}</span>
           : <span></span>
         }
-        <CodeToggle tab={$tab} main={main.name} alt={alt.name} />
+        <CodeToggle display-if={() => !$showSticky()} tab={$tab} main={main.name} alt={alt.name} />
       </nav>
       {If(showSticky, () => {
-        const $show = ion(false)
 
         let containerInView = false;
         let navInView = false;
@@ -82,6 +82,8 @@ export function Code(setup: FromTag<{
           const stickyContainer = $container()
           const nav = $nav()
           if (!stickyButton || !stickyContainer || !nav) return;
+          const stickyContainerNode = stickyContainer as HTMLDivElement
+          const navNode = nav as HTMLElement
 
           function updateStickyPlacement() {
             if (!stickyButton || !stickyContainer) return
@@ -90,38 +92,65 @@ export function Code(setup: FromTag<{
             stickyButton.style.right = `${rightOffset}px`
           }
 
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-              if (entry.target === stickyContainer) containerInView = entry.isIntersecting;
-              if (entry.target === nav) navInView = entry.isIntersecting;
-            });
-            if (containerInView && !navInView) {
-              $show.value = true;
-              updateStickyPlacement()
-            } else {
-              $show.value = false;
-            }
-          }, {
-            threshold: 0,
-            root: null,
-            // This makes the 'out of view' trigger happen 100px before the nav hits the top
-            rootMargin: '-75px 0px 0px 0px'
-          });
+          function isLocalNavShown() {
+            const localNav = document.querySelector('.VPLocalNav')
+            if (!(localNav instanceof HTMLElement)) return false
+            const style = window.getComputedStyle(localNav)
+            if (style.display === 'none' || style.visibility === 'hidden') return false
+            const rect = localNav.getBoundingClientRect()
+            return rect.height > 0 && rect.width > 0
+          }
 
-          observer.observe(stickyContainer);
-          observer.observe(nav);
+          let localNavShown = isLocalNavShown()
+          let observer: IntersectionObserver | undefined
+
+          function attachObserver() {
+            observer?.disconnect()
+            observer = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.target === stickyContainerNode) containerInView = entry.isIntersecting;
+                if (entry.target === navNode) navInView = entry.isIntersecting;
+              });
+              if (containerInView && !navInView) {
+                $showSticky.value = true;
+                updateStickyPlacement()
+              } else {
+                $showSticky.value = false;
+              }
+            }, {
+              threshold: 0,
+              root: null,
+              // Trigger earlier when the mobile local nav is visible.
+              rootMargin: localNavShown ? '-160px 0px 0px 0px' : '-120px 0px 0px 0px'
+            })
+
+            observer.observe(stickyContainerNode)
+            observer.observe(navNode)
+          }
+
+          attachObserver()
+
+          function refreshObserverIfLocalNavChanged() {
+            const nextLocalNavShown = isLocalNavShown()
+            if (nextLocalNavShown === localNavShown) return
+            localNavShown = nextLocalNavShown
+            attachObserver()
+          }
 
           updateStickyPlacement()
-          listen(window, 'resize', updateStickyPlacement, { passive: true })
+          listen(window, 'resize', () => {
+            updateStickyPlacement()
+            refreshObserverIfLocalNavChanged()
+          }, { passive: true })
           listen(window, 'scroll', updateStickyPlacement, { passive: true })
 
           atUnmount(() => {
-            observer.disconnect()
+            observer?.disconnect()
           })
         })
         return <>
           <CodeToggle
-            display-if={$show}
+            display-if={$showSticky}
             tab={$tab}
             ref={$stickyBtn}
             class='sticky-btn'
@@ -283,6 +312,7 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
     </o:context>
   </>
 }
+
 
 function removeDollarSigns(map: { [key: string]: string }) {
   const safeMap = Object.create(null)

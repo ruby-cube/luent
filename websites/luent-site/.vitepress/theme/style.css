@@ -618,7 +618,7 @@ body {
   background: var(--vp-c-gray-soft);
 }
 
-@media(max-width:640px) {
+@media(max-width:440px) {
   .home-shell .btn.install {
     display: none;
   }
