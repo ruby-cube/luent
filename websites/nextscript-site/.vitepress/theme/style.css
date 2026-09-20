@@ -73,6 +73,7 @@
   --vp-c-danger-2: var(--vp-c-red-2);
   --vp-c-danger-3: var(--vp-c-red-3);
   --vp-c-danger-soft: var(--vp-c-red-soft);
+  --vp-c-bg-translucent: #ffffffd5;
 
   --vp-c-gutter: var(--vp-c-divider);
 
@@ -148,6 +149,7 @@
   --iris-2: #665af3;
   --iris-3: #4e3fe0;
   --iris-soft: rgba(100, 108, 255, 0.16);
+  --vp-c-bg-translucent: #1b1b1fd5;
 }
 
 .VPButton.medium {
@@ -159,6 +161,9 @@
 
 .VPLocalNav {
   border: none !important;
+  top: 64px !important;
+  margin-top: 64px;
+  background-color: var(--vp-c-bg-translucent) !important;
 }
 
 /* Slightly larger than VitePress default without being oversized. */

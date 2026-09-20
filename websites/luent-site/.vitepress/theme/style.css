@@ -565,12 +565,14 @@ body {
   display: none;
 }
 
+
+
 .home-shell .home-hero {
   position: relative;
   overflow: visible;
   -webkit-clip-path: inset(-100vh 0 0 0);
   clip-path: inset(-100vh 0 0 0);
-  padding: 128px 0 116px;
+  padding: 100px 0 116px;
 }
 
 .home-shell .home-hero-copy {
@@ -583,7 +585,7 @@ body {
   font-family: var(--vp-font-family-mono);
   font-size: 13px;
   color: var(--vp-c-brand-1);
-  margin-bottom: 26px;
+  margin-block: 26px;
   letter-spacing: 0.04em;
   text-transform: lowercase;
   text-wrap: balance;
@@ -754,7 +756,7 @@ body {
 
 @media (max-width: 959px) {
   .home-shell .home-hero {
-    padding: 76px 0 68px;
+    padding: 113px 0 68px;
   }
 
   .home-shell .hero-orb {

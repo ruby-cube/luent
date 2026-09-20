@@ -41,11 +41,11 @@ function iconSrc(icon: FeatureItem['icon']) {
   <section class="home-shell">
     <section class="home-hero">
       <div class="wrap home-hero-copy">
-        <div class="kicker">luent: an expressive framework for web applications</div>
         <h1>
           {{ heroLead }}
           <span class="accent">{{ heroAccent }}</span>
         </h1>
+        <div class="kicker">luent: an expressive framework for web applications</div>
         <div class="hero-actions">
           <a
             v-for="action in hero.actions"

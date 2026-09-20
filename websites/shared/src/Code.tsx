@@ -215,6 +215,12 @@ export function Code(setup: FromTag<{
           z-index: 1000 !important;
         }
 
+        @media (max-width: 959px) {
+          .sticky-btn {
+            top: calc(var(--vp-nav-height) + 47px + .5rem);
+          }
+        }
+
         .sticky-zone {
           position: absolute;
           inset: 0px;
