@@ -1,4 +1,4 @@
-import { Ion, queueTask, As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, track } from "luent";
+import { Ion, queueTask, As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, track, awaitTick } from "luent";
 import { moveUniqueItems } from "@luent/utils";
 
 export function Palettable() {
@@ -193,7 +193,7 @@ function ColorPalette(setup: FromTag<{
           disabled={$gapDisabled}
           on:click={() => moveSelected(colors.length)}
         />
-        <DropZones/>
+        <DropZones />
       </div>
     </div>
 
@@ -248,7 +248,7 @@ const Gap = (setup: FromTag<{ '...': 'button' }>) =>
       class='clickable gap'
       auto-bind={setup}
     >
-      <Arrow/>
+      <Arrow />
     </button>
 
     {Style(css`
@@ -386,7 +386,7 @@ function DraggableKit<T>(config: {
   const $taggingAlong = ion(false) // tag-along transition
   const $shiftX = ion(0)
   const $shiftY = ion(0)
-  const nodes: HTMLElement[] = []
+
   function maybeDrag(e: PointerEvent, item: T, index: number) {
     const target = e.currentTarget! as Element
     target.setPointerCapture(e.pointerId)
@@ -399,17 +399,18 @@ function DraggableKit<T>(config: {
     target.addEventListener('pointermove', rePointermove)
     target.addEventListener('pointerup', rePointerUp)
 
-    function startTagAlongTransition() {
-      // const row = target.closest('.row')
-      // if (!row) {
-      //   $taggingAlong.value = true
-      //   return;
-      // }
 
-      // const nodes = [...row.querySelectorAll<HTMLElement>('.square')]
+    function startTagAlongTransition() {
+      const row = target.closest('.row')
+      if (!row) {
+        $taggingAlong.value = true
+        return;
+      }
+
+      const nodes = [...row.querySelectorAll<HTMLElement>('.square')]
       nodes.forEach(node => node.style.setProperty('transition', 'none'))
       nodes.forEach(node => node.getBoundingClientRect())
-
+      
       requestAnimationFrame(() => {
         queueTask(() => {
           nodes.forEach(node => node.style.removeProperty('transition'))
@@ -431,6 +432,7 @@ function DraggableKit<T>(config: {
 
       if ($selected().length > 1) {
         startTagAlongTransition()
+        // $taggingAlong.value = true;
       }
 
       x = e.clientX
@@ -474,12 +476,10 @@ function DraggableKit<T>(config: {
         target.releasePointerCapture(e.pointerId)
         $shiftX.value = 0;
         $shiftY.value = 0;
-        $taggingAlong.value = false
+        $taggingAlong.value = false;
         onDrop(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
-        queueTask(() => {
-          $dragging.value = false
-        });
+        queueTask(() => { $dragging.value = false });
         target.removeEventListener('pointermove', drag)
       }
       target.removeEventListener('pointermove', rePointermove)
@@ -515,22 +515,22 @@ function DraggableKit<T>(config: {
     const $dragged = ion(() => isSelected(item) && $dragging());
     const $tagalong = ion(() => $taggingAlong() && $dragged() && $index() !== selectedIndex);
     const $node = asJSX(node);
-    nodes.push(node)
 
     const $transform = ion(() => axis === 'horizontal'
-      ? `translate3d(${($tagalong() ? adjustX($shiftX(), item, $index()) : $shiftX())}px, ${$shiftY()}px, 0px)`
-      : `translate3d(${$shiftY()}px, ${($tagalong() ? adjustX($shiftX(), item, $index()) : $shiftX())}px, 0px)`
+      ? `translate3d(${$tagalong() ? adjustX($shiftX(), item, $index()):$shiftX()}px, ${$shiftY()}px, 0px)`
+      : `translate3d(${$shiftY()}px, ${$tagalong() ? adjustX($shiftX(), item, $index()) : $shiftX()}px, 0px)`
     );
 
     <$node
       on:pointerdown={e => maybeDrag(e, item, $index())}
+      // on:transitionend={() => {console.log('transitionend'); $taggingAlong.value = false}}
       class={{
         'tag-along': $tagalong,
         'dragged': $dragged,
       }}
       style={{
         'z-index': () => $dragged() ? order($index()) : 0,
-        'transform': () => $dragged() ? $transform() : undefined
+        'transform': () => $dragged() ? $transform() : 'translate3d(0, 0, 0)'
       }}
     />
   }
@@ -539,7 +539,17 @@ function DraggableKit<T>(config: {
     .dragged {
       cursor: grabbing !important;
       box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
+      transform: translate3d(0, 0, 0);
       will-change: transform;
+
+      /* Prevent flickering/shaking during the active transition */
+      // -webkit-backface-visibility: hidden;
+      // backface-visibility: hidden;
+      // -webkit-perspective: 1000;
+      // perspective: 1000;
+
+      // -webkit-transform-style: preserve-3d;
+      // transform-style: preserve-3d;
     }
   
     .tag-along {
@@ -558,7 +568,7 @@ function DraggableKit<T>(config: {
             <div
               class='drop-zone'
               data-drop-index={count - 1}
-            ><Arrow/></div>
+            ><Arrow /></div>
           )}
           <div class='drop-zone' data-drop-index={n + 1}></div>
         </div>
