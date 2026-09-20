@@ -214,6 +214,12 @@
   }
 }
 
+@media (max-width: 639px) {
+  .VPHero {
+    margin-top: 0 !important;
+  }
+}
+
 @media (min-width: 960px) {
   .VPNavBar .menu {
     display: flex !important;
