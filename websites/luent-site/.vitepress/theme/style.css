@@ -109,7 +109,6 @@
   --vp-button-brand-active-bg: var(--vp-c-brand-1);
 }
 
-:root :not(.dark) {}
 
 /**
  * Component: Home

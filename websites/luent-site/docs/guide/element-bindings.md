@@ -5,12 +5,12 @@
 
 JSX attributes may be written as either HTML/SVG attribute names or DOM property names.
 
-**HTML attribute name**
+**With HTML attribute name**
 ```jsx
 <div contenteditable="true">Write something...</div>
 ```
 
-**DOM property name**
+**With DOM property name**
 ```jsx
 <div contentEditable="true">Write something...</div>
 ```
@@ -26,7 +26,7 @@ Static bindings provide constant values.
 <p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 ### Reactive bindings
-To make a binding reactive, pass in a reactive ion.
+To make a binding reactive, pass in an ion.
 
 **Atomic ion**
 ```tsx
@@ -60,16 +60,21 @@ function Text(setup: FromTag<{
   isEditor: Ion<boolean>
   isActive: Ion<boolean>
 }>) {
-  const { isEditor, isActive } = setup
-  const $text = ion('Write something...')
+  const { $isEditor, $isActive } = setup;
+  const $html = ion('Write something...')
   return <>
-    <div contenteditable={() => $isEditor() && $isActive()}>{$text}</div>
+    <div contenteditable={() => $isEditor() && $isActive()}>
+      {{ 'mu:HTML': $html }}
+    </div>
   </>
 }
 ```
 :::
 
 <p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
+
+### Mutable bindings
+See [Mutation safety: Element bindings](/guide/mutation-safety#element-bindings).
 
 <!-- 
 Under the hood, Luent applies each binding using the appropriate DOM mechanism. Most standard attributes are applied through property assignment, while `data-*` and ARIA attributes are applied through `Element.setAttribute()`.
@@ -359,33 +364,21 @@ jsx('div', { Slot: () => ['count: ', $count] })
 ```
 :::
 
-
-### Text content
+### Textarea
 ```tsx
-<div>
-  {{ text: $text }}
-</div>
-```
-
-```tsx
-<textarea>
-  {{ 'mu:text': $text }}
-</textarea>
+<textarea mu:text>{$text}</textarea>
 ```
 
 ### Inner HTML
+
 ```tsx
-<div>
-  {{ HTML: $text }}
-</div>
+<div trusted:innertml>{$html}</div>
 ```
+
 ```tsx
-<div>
-  {{ 'mu:HTML': $text }}
-</div>
+<div mu:html>{$html}</div>
 ```
+
 ```tsx
-<div>
-  {{ trustedHTML: $text }}
-</div>
+<div html>{$html}</div>
 ```

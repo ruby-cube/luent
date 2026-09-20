@@ -301,7 +301,7 @@ UnifiedReactivity.$tab = $CodeTab()
 function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
-      Manage atomic, derived, and structured reactive state under a unified reactivity model through the primitives <code>ion()</code> and <code>ionic()</code>.
+      Manage atomic, derived, and structured reactive state under a unified reactivity model using the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
     <p style='text-wrap: balance'>
       {If(() => $tab() === 'main',

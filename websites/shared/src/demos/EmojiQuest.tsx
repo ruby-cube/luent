@@ -317,7 +317,7 @@ EmojiQuest.nsxPowerset = `function Powerset(setup: FromTag<{
   <:>
     <div class='powerset-panel'>
       <ul class='powerset-list'>
-        {For(powers, power@ =>
+        {For(powers, power@ :>
           <li class='power-chip'>{power@}</li>
         )}
       </ul>

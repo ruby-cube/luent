@@ -257,6 +257,10 @@
   top: 2.5rem;
 }
 
+#code-glimpses {
+  outline: none !important;
+}
+
 /* html:not(.dark) .VPHomeFeatures .VPFeature {
   background-color: #32363f;
 }

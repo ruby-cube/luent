@@ -31,10 +31,12 @@ const name = assertGetter('Jim') // TypeError: Getter must be a function: 'Jim'
 :::
 
 ::: warning IMPORTANT
-Getters should avoid changing state that they read from as this breaks assumptions of referentially transparent reads, resulting in unpredictable or confusing behavior.
+Getters should avoid changing state that they read from as this can lead to unpredictable or confusing behavior.
 
 ```nsx
 get count = () => n += 10 // ❌
+
+//--
 
 console.log(count) // 10
 console.log(count) // 20 ⁉️
@@ -50,20 +52,22 @@ console.log(count) // 20 ⁉️
 <!-- `variable` -->
 <code><i>variable</i></code>
 
-Similar to native accessor properties, an accessor variable will absorb its getter function at declaration such that reading the variable will call the getter rather than access it.
+Similar to JavaScript accessor properties, an accessor variable will absorb its getter function such that reading the variable will call the getter rather than access it.
 
 ```nsx
 get count = ref(0)
 get double = () => count * 2
 
-console.log(count instanceof Function) // false
+console.log(count) // 0
+console.log(typeof count === 'function') // false
 ```
 ::: info transpiled
 ```ts
 const count = assertGetter(ref(0))
 const double = assertGetter(() => count() * 2)
 
-console.log(count() instanceof Function) // false
+console.log(count()) // 0
+console.log(typeof count() === 'function') // false
 ```
 :::
 
@@ -120,11 +124,34 @@ count // hover [ get count: number ]
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ## Accessor properties
-### …via colon notation
+
+<code>{ get <i>property</i>() { <i>...</i> } }</code>
+
+Accessor properties are a feature of JavaScript where getter and setter functions are absorbed into a property such that reads and writes call the getter and setter, respectively.
+
+```nsx
+const foo = {
+  total: 0,
+  _bar: true,
+  get bar() {
+    return this._bar
+  },
+  set bar(value) {
+    this._bar = value
+  }
+}
+
+console.log(foo.bar) // true
+```
+
+In NextScript, accessor properties may also be defined via colon notation and property definition.
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+### Colon notation
 <!-- `{ get property: getter }` -->
 <code>{ get <i>property</i>: <i>getter</i> }</code>
 
-In addition to native accessor property declarations, accessor properties may also be declared through colon notation.
+Accessor properties may be declared through colon notation.
 ```nsx
 const foo = {
   total: 0,
@@ -134,12 +161,11 @@ const foo = {
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
-
-### …via property definition
+### Property definition
 <!-- `class Obj { get property = getter }` -->
 <code>class <i>Obj</i> { get <i>property</i> = <i>getter</i> }</code>
 
-Accessor properties may also be defined through property definition in class declarations.
+Accessor properties may be defined through property definition in class declarations.
 ```nsx
 class Foo {
   total = 0
@@ -242,17 +268,25 @@ function foo(bar: { count: number | Ion<number> } {
 <!-- `(expression)@` | `{ statements; return statement }@` -->
 <code>(<i>expression</i>)@</code>  |  <code>{ <i>statements;</i> return <i>statement</i> }@</code>
 
-Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for inline derivations. They may be written as expressions with an implicit return...
+Derivation expressions are shorthand for arrow function expressions that have zero parameters and return a value. They are useful for inline derivations. 
+
+They may be written with parentheses to indicate an implicit return:
 ```nsx
-<p>{count@} x 2 = {(count * 2)@}</p>
+<button 
+  on:click={increment} 
+  disabled={(count === limit)@}
+>+</button>
 ```
 ::: info transpiled
 ```tsx
-<p>{count} x 2 = {() => count() * 2}</p>
+<button 
+  on:click={increment} 
+  disabled={() => count === limit}
+>+</button>
 ```
 :::
 
-...or as block-bodied expressions.
+...or with curly braces to create a block body:
 ```nsx
 <p>result: {{
   const num = getNum()
@@ -277,9 +311,6 @@ Derivation expressions are shorthand for arrow function expressions that have ze
 ```
 :::
 
-::: info NOTE
-If an accessor variable read happens only under certain conditions within a derivation expression, NextScript will hoist the call to the top of the function body. This allows getters with trackers to ...[UNFINISHED]
-:::
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
@@ -406,7 +437,6 @@ get { bar, count: num } = foo;
 
 
 
-<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ## Type guards
 

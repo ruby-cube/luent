@@ -386,7 +386,7 @@ function DraggableKit<T>(config: {
   const $taggingAlong = ion(false) // tag-along transition
   const $shiftX = ion(0)
   const $shiftY = ion(0)
-
+  const nodes: HTMLElement[] = []
   function maybeDrag(e: PointerEvent, item: T, index: number) {
     const target = e.currentTarget! as Element
     target.setPointerCapture(e.pointerId)
@@ -399,6 +399,27 @@ function DraggableKit<T>(config: {
     target.addEventListener('pointermove', rePointermove)
     target.addEventListener('pointerup', rePointerUp)
 
+    function startTagAlongTransition() {
+      // const row = target.closest('.row')
+      // if (!row) {
+      //   $taggingAlong.value = true
+      //   return;
+      // }
+
+      // const nodes = [...row.querySelectorAll<HTMLElement>('.square')]
+      nodes.forEach(node => node.style.setProperty('transition', 'none'))
+      nodes.forEach(node => node.getBoundingClientRect())
+
+      requestAnimationFrame(() => {
+        queueTask(() => {
+          nodes.forEach(node => node.style.removeProperty('transition'))
+          requestAnimationFrame(() => {
+            $taggingAlong.value = true
+          })
+        })
+      })
+    }
+
     function rePointermove(e: any) {
       if (Math.abs(e.clientX - originalX) < 5 && Math.abs(e.clientY - originalY) < 5)
         return;
@@ -409,7 +430,7 @@ function DraggableKit<T>(config: {
       onDrag(item);
 
       if ($selected().length > 1) {
-        $taggingAlong.value = true;
+        startTagAlongTransition()
       }
 
       x = e.clientX
@@ -453,9 +474,12 @@ function DraggableKit<T>(config: {
         target.releasePointerCapture(e.pointerId)
         $shiftX.value = 0;
         $shiftY.value = 0;
+        $taggingAlong.value = false
         onDrop(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
-        queueTask(() => $dragging.value = false);
+        queueTask(() => {
+          $dragging.value = false
+        });
         target.removeEventListener('pointermove', drag)
       }
       target.removeEventListener('pointermove', rePointermove)
@@ -491,15 +515,15 @@ function DraggableKit<T>(config: {
     const $dragged = ion(() => isSelected(item) && $dragging());
     const $tagalong = ion(() => $taggingAlong() && $dragged() && $index() !== selectedIndex);
     const $node = asJSX(node);
+    nodes.push(node)
 
     const $transform = ion(() => axis === 'horizontal'
-      ? `translate(${adjustX($shiftX(), item, $index())}px, ${$shiftY()}px)`
-      : `translate(${$shiftY()}px, ${adjustX($shiftX(), item, $index())}px)`
+      ? `translate3d(${($tagalong() ? adjustX($shiftX(), item, $index()) : $shiftX())}px, ${$shiftY()}px, 0px)`
+      : `translate3d(${$shiftY()}px, ${($tagalong() ? adjustX($shiftX(), item, $index()) : $shiftX())}px, 0px)`
     );
 
     <$node
       on:pointerdown={e => maybeDrag(e, item, $index())}
-      on:transitionend={() => $taggingAlong.value = false}
       class={{
         'tag-along': $tagalong,
         'dragged': $dragged,
@@ -515,6 +539,7 @@ function DraggableKit<T>(config: {
     .dragged {
       cursor: grabbing !important;
       box-shadow: -5px 0px 5px 0px rgba(0, 0, 0, 0.25);
+      will-change: transform;
     }
   
     .tag-along {
@@ -768,7 +793,7 @@ Palettable.nsx = `function Palettable() {
         <ColorPalette
           animate-in='slide-in'
           onMove={moves@.increment}
-          onComplete={() => solved = true}
+          onComplete={(){ $solved.value = true }}
         ></ColorPalette>
         {If(done@,
           <button transition-in on:click={round@.increment}>
@@ -895,29 +920,29 @@ Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<{
   const { makeMagnifyable } = CelebrationKit(sorted@, onComplete)
 
   <:>
-    <o--host on:click={e => e.from('.clickable') || selected.clear()} />
+    <o--host on:click={(e){ e.from('.clickable') || selected.clear() }} />
     <div class='container' auto-bind={rest}>
       <div class='row'>
         <Gap
           disabled={gapDisabled@}
-          on:click={() => moveSelected(0)}
+          on:click={(){ moveSelected(0) }}
         />
-        {For(colors, m => m, (color, index@) <//>
+        {For(colors, m => m, (color, index@) :>
           <div
             transition-item
-            before:mount={node => {
-              makeDraggable(node, color, index@);
-              makeMagnifyable(node, index@);
+            before:mount={(){
+              makeDraggable(this, color, index@);
+              makeMagnifyable(this, index@);
             }}
             class={['clickable', 'square', {
               'selected': (isSelected(color) && !dragging)@
             }]}
-            style={\`background-color: hsl(\${color.h}deg, \${color.s}%, \${color.l}%)\`}
-            on:click={() => dragging || toggleSelect(color)}
+            style=\`background-color: hsl(\${color.h}deg, \${color.s}%, \${color.l}%)\`
+            on:click={(){ dragging || toggleSelect(color) }}
           ></div>
           <Gap
             disabled={gapDisabled@}
-            on:click={() => moveSelected(index + 1)}
+            on:click={(){ moveSelected(index + 1) }}
           />
         )}
         <DropZones/>
@@ -1007,7 +1032,7 @@ Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<{
               class={['clickable', 'square', {
                 'selected': () => isSelected(color) && !$dragging()
               }]}
-              style={\`background-color: hsl(\${color.h}deg, \${color.s}%, \${color.l}%)\`}
+              style={css\`background-color: hsl(\${color.h}deg, \${color.s}%, \${color.l}%)\`}
               on:click={() => $dragging() || toggleSelect(color)}
             ></div>
             <Gap
@@ -1038,7 +1063,7 @@ Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<{
   </>
 }`
 
-Palettable.nsxGap = `function Gap(setup: FromTag) {
+Palettable.nsxGap = `function Gap(setup: FromTag<'button'>) {
   <:>
     <button
       class='clickable gap'
@@ -1065,17 +1090,18 @@ Palettable.nsxGap = `function Gap(setup: FromTag) {
 }
 
 
-const Arrow = () =>
-  <>
+function Arrow() {
+  <:>
     <div class='chevron-arrow'>
       <div class='chevron-down chevron-tic'></div>
       <div class='chevron-down chevron-tac'></div>
     </div>
 
     <o-link href='/assets/chevron.css' rel='stylesheet'/>
-  </>`
+  </:>
+}`
 
-Palettable.tsxGap = `function Gap(setup: FromTag) {
+Palettable.tsxGap = `function Gap(setup: FromTag<'button'>) {
   return <>
     <button
       class='clickable gap'
@@ -1110,7 +1136,9 @@ const Arrow = () =>
     </div>
 
     <o-link href='/assets/chevron.css' rel='stylesheet'/>
-  </>`
+  </>
+
+`
 
 
 Palettable.nsxDraggableKit = `function DraggableKit<T>(config: {
@@ -1227,16 +1255,16 @@ Palettable.nsxDraggableKit = `function DraggableKit<T>(config: {
     const $node = asJSX(node);
 
     <$node
-      on:pointerdown={e => maybeDrag(e, item, index)}
-      on:transitionend={() => taggingAlong = false}
+      on:pointerdown={(e){ maybeDrag(e, item, index) }}
+      on:transitionend={(){ taggingAlong = false }}
       class={{
         'tag-along': tagalong@,
         'dragged': dragged@,
       }}
-      style={{
-        'z-index': (dragged ? toZIndex(index) : 0)@,
-        'transform': (dragged ? \`translate(\${adjustX(shiftX, item, index)}px, \${shiftY}px)\` : undefined)@
-      }}
+      style=\`
+        z-index: \${(dragged ? toZIndex(index) : 0)@};
+        transform: \${(dragged ? \`translate(\${adjustX(shiftX, item, index)}px, \${shiftY}px)\` : undefined)@};
+      \`
     />
   }
 
@@ -1728,7 +1756,7 @@ function CelebrationKit(sorted@: Ion<boolean>, onComplete: () => void) {
 
       <$node
         class={{ 'magnifying': (magnifiedIndex !== undefined)@ }}
-        style={{ 'transform': (magnified(index) ? 'scale(1.25)' : 'scale(1)')@ }}
+        style=\`transform: \${(magnified(index) ? 'scale(1.25)' : 'scale(1)')@}\`
       ></$node>
 
       <o-style>

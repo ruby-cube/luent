@@ -118,7 +118,7 @@ A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-exp
 </section>
 
 <div>
-  {If(folder, <//>  // with JSX gateway function
+  {If(folder, :>  // with JSX gateway function
     {If(open,
       <ul>
         {For(folder.items, item =>  // with JSX factory
@@ -164,7 +164,7 @@ declare const If: {
 ```
 
 
-The brand is a compile-time signal. It tells the NextScript preprocessor that the function participates in JSX flow transformations. Certain JSX flow types such as `'if'` and `'else'` also participate in [type-guarding](#type-guarding) transforms across a if-else flow series.
+The brand is a compile-time signal. It tells the NextScript preprocessor that the function participates in JSX flow transformations. Certain JSX flow types such as `'if'` and `'else'` also participate in [type-guarding](#type-guarding) transforms across an if-else flow series.
 
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>

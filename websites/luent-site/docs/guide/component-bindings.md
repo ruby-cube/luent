@@ -130,12 +130,12 @@ function Counter(setup: FromTag<{
 }
 ```
 
-**Passing in a reactive ion**
+**Providing a reactive ion**
 ```tsx
 <Counter limit={$limit} />
 ```
 
-**Passing in a static value to a reactive binding**
+**Providing a static value to a reactive binding**
 ```tsx
 <Counter limit={100} />
 ```

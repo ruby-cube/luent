@@ -57,7 +57,7 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 - `<o—-ground>` to provide global bindings
 
 #### Convenience factories
-- `RootBinding()` to define an tree-wide value and create its accessor
+- `RootBinding()` to define a tree-wide value and create its accessor
 - `GroundBinding()` to define a global value and create its accessor
 <!-- - `RootService()` to define an tree-wide value that exists only if in use and create its accessor -->
 <!-- - `GroundService()` to define a global value that exists only if in use and create its accessor -->

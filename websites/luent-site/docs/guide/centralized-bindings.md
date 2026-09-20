@@ -64,7 +64,7 @@ function Foo() {
 
 ### Dependency Injection
 
-To decouple your app from implementation, inject class constructors or factories from the root.
+To decouple components from implementation, inject class constructors or factories from the root.
 
 ```ts
 const Foo = fromRoot(CLASS_FOO);
